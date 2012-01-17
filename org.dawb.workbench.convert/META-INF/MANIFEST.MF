@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Actions
+Bundle-SymbolicName: org.dawb.workbench.convert;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: org.edna.workbench.actions.Activator
+Bundle-Vendor: ESRF
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.core.resources,
+ uk.ac.gda.common.rcp,
+ uk.ac.diamond.scisoft.analysis
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ActivationPolicy: lazy
+Import-Package: org.dawb.common.ui.util,
+ org.slf4j

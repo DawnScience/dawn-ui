@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cheatsheet title="Getting to Grips with Monitor View">
+	<intro>
+		<description>
+		    This cheat sheet helps you to connect to hardware and monitor its value.
+		    This is useful for checking the values of motors and other hardware which can report value during combined data acquisition / analysis workflows.
+	    </description>
+	</intro>
+   <item
+         title="Workflow Perspective">
+      <description>
+         Please choose the workflow perspective if you do not already have it selected (nothing will happen if you do not).
+      </description>
+      <command
+            required="false"
+            serialization="org.eclipse.ui.perspectives.showPerspective(org.eclipse.ui.perspectives.showPerspective.perspectiveId=org.edna.workbench.application.perspective.WorkflowPerspective)"/>
+   </item>
+
+   <item
+         title="Open View">
+
+	  <description>
+			Use this link to open the 'Monitor' part if you do not already have it open. It may be shown at a too small size, if this happens, expand the scroll to its left, by clicking and dragging, until the part is big enough for your needs.
+      </description>
+      <command
+         required="true"
+         serialization="org.eclipse.ui.views.showView(org.eclipse.ui.views.showView.viewId=org.dawb.common.ui.views.dashboardView)"/>
+	</item>
+
+   <item
+         title="Configure Tango">
+
+	  <description>
+			We will now configure a Tango server to use, but do not worry if you do not have the details, you can use 'Mock' mode for now. The Tango server should have the extensions installed by your local contact to allow the workbench to connect to Tango motors.
+       </description>
+	</item>
+
+   <item
+         title="ESRF Test Tango Server">
+
+	   <description>
+	        Open the 'Tango Preferences...' by using the right click menu on the 'Monitor' part.
+			If you are at the ESRF site, we will use a test server available. Otherwise you can set the preferences to 'Mock' and skip the following items.
+       </description>
+    <subitem
+          label="1. For 'Database Name' enter the value 'margaux'">
+    </subitem>
+    <subitem
+          label="2. For 'Database Port' enter the value '20000'">
+    </subitem>
+    <subitem
+          label="3. For 'Beamline Name' enter the value 'id11'">
+    </subitem>
+    <subitem
+          label="4. For 'Spec Session Name' enter the value 'andy'">
+    </subitem>
+       
+	</item>
+	
+	<item
+         title="Add Something to Monitor">
+
+	   <description>
+			We will monitor three motors. In order to do this we will right click on the 'Monitor' part and choose 'Add Monitor' to do this. When you choose that an item is added to the monitor table and you can set its monitor URI.
+        </description>
+    <subitem
+          label="1. Add a monitor and for name type 'motors/phi'">
+    </subitem>
+    <subitem
+         label="2. Add a monitor and for name type 'motors/kap1'">
+    </subitem>
+    <subitem
+         label="3. Add a monitor and for name type 'motors/kap2'">
+   </subitem>
+       
+	</item>
+	
+	<item
+         title="Understanding Tango">
+
+	   <description>
+			We have added three motors. Their full Tango URI is constructed via the Tango Preferences and the 'Name' field of the monitor. This monitors the attribute 'Position' in Tango. If you have a Taco motor with a different attribute, the 'Name' may be appended with ":" and then the attribute name required, for instance: 'motors/taco:value'.
+        </description>
+        
+	</item>
+
+	<item
+         title="Moving Motors">
+
+	    <description>
+			Normally motors will be moved by actors, however for this example we will use a remote spec terminal. This terminal will connect to the spec session 'andy' if you are not in Mock mode or a mock spec session otherwise. If you are not familiar with spec, it is a command line system for interacting with beamline hardware.  
+        </description>
+     <subitem
+          label="1. Right click on 'Monitor' and choose 'Spec Console'">
+     </subitem>
+       <subitem
+          label="2. The 'Console' view will now show a spec prompt. You may need to make the 'Console' view larger to use it.">
+     </subitem>
+     <subitem
+          label="3. Type the command 'mv phi 10' into the Console view. Notice the phi monitor move to 10.">
+     </subitem>
+      <subitem
+          label="4. Type the command 'ascan phi 0 10 10 1' into the Console view. The motor kap1 will now be scanned. If you are using mock mode, there are not many other spec commands implemented.">
+     </subitem>
+      <subitem
+          label="5. Type the command 'config' into the Console view. Notice that the system does not allow you to configure spec.">
+     </subitem>
+        
+	</item>
+	
+	<item
+         title="Deleting Motors">
+
+	    <description>
+			There is also a delete and move position action on the toolbar and right click menu. The refresh will disconnect and reconnect all connections. If you change settings between Mock and Connected mode, the system will refresh.  
+        </description>
+         
+	</item>
+
+
+   <item title="Finished">
+	  <description>
+			Your motor settings will now be saved and now when you use the system, you will see your monitor values.
+      </description>
+    <onCompletion>
+      Congratulations, you can now monitor hardware inside the workbench. Try adding some of your own motors and monitoring real hardware.
+   </onCompletion>
+   </item>	
+	
+	
+</cheatsheet>

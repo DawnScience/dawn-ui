@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cheatsheet title="Opening and Viewing Images">
+
+	<intro>
+		<description>
+		    This cheat sheet helps you to open any image file,
+			shows you how to zoom and extract data from the image.
+			If you have just completed the previous cheat sheet, please close all your data file parts.
+	    </description>
+	</intro>
+
+   <item
+         title="Data Perspective">
+      <description>
+         Please choose the data perspective if you do not already have it selected (nothing will happen if you do not).
+      </description>
+      <command
+            required="false"
+            serialization="org.eclipse.ui.perspectives.showPerspective(org.eclipse.ui.perspectives.showPerspective.perspectiveId=org.edna.workbench.application.perspective.DataPerspective)"/>
+   </item>
+   <item
+         title="Open File">
+      <description>
+         Any file or directory of files, can be imported to a project in the Project Explorer and then opened. You can do this with click and drag or using the import wizard. Once done, the file can be double clicked to open in the workbench. Click to open an example image from the &apos;data&apos; project.
+      </description>
+      <command
+            required="false"
+            serialization="org.eclipse.ui.navigate.openResource(filePath=data/examples/ref-testscale_1_001.img)"/>
+   </item>
+   
+   <item
+         title="Setting Up">
+      <description>
+         Once the file is opened there are several steps to change how it appears. Complete the following sub-steps which choose your preference for image viewing. Note, these prefereces are saved for future use.
+      </description>
+      <subitem
+            label="1. Aspect Ratio. You can change the aspect ratio of the image by using the 'Keep aspect ratio when displaying image' action in the toolbar over the image. Try clicking it now to see the effects on the example image.">
+      </subitem>
+      <subitem
+            label="2. Change Intensity Scale. You can change how the image is filtered for intensity by clicking 'Scale the palette between maximum and minimum intenstiy in the data'. Click this action, the image goes black. Now set the range for intensity by using the min and max boxes under the image. Enter 0 and 1000 respectively. If the controls are not there they may be hidden, use the 'Set intensity controls visible or invisible' toolbar button to show them.">
+      </subitem>
+      <subitem
+            label="3. Coloring. You can change color by using the menu at the side of the toolbar, the white down arrow. Click it and choose another color from the 'Color' sub-menu.">
+      </subitem>
+   </item> 
+
+   <item
+         title="Zooming">
+      <description>
+         There are different zoom steps in the viewer. We will look at 'Zoom Area', 'Zoom line' and 'Zoom Profile'.
+      </description>
+      <subitem
+            label="1. Zoom Area. Click on the 'Zoom Area' option in the toolbar. Click and drag an area of the image. You will see an area zoomed in the 'Zoom' view. Note that this view also has the same setting up options and toolbar and you can zoom again in this view. (If you do that the 'Apply zoom again' option on the image toolbar will reset.) ">
+      </subitem>
+      <subitem
+            label="2. Zoom Line. Right click on the image and choose 'Zoom Line'. Click and drag a line in the image. This then shows a one-dimensional slice in the 'Line' view.">
+      </subitem>
+      <subitem
+            label="3. Zoom Profile. Right click on the image and choose 'Zoom Profile'. Click and drag a box in the image. This then shows the profiles in x (horizontal) and y (veritcal)">
+      </subitem>
+   </item>
+   
+    <item
+         title="Comparing">
+      <description>
+         You can compare images visually and by using workflow actors (there are various operations available and the processing can be done on entire folders). We will look at a simple compare between two images here.
+      </description>
+      <command
+            required="false"
+            serialization="org.eclipse.ui.navigate.openResource(filePath=data/examples/ref-testscale_1_002.img)"/>
+    </item>
+    <item
+         title="Move Image">
+      <description>
+         Now we will click and drag the second image to be alongside the first. Find the tab for the image 'ref-testscale_1_002.img'. Click and hold it with the left mouse button. Now drag the mouse over to the right. You will be given the opportunity to drop the image in a new location alongside. Now parts of the two images may be zoomed and the 'Apply zoom again' button used for comparing zooms.
+      </description>
+    <onCompletion>
+      Congratulations, you can now open images and complete basic operations. Try the system with your image files. Look at the 'Workflow' tutorials for more advanced mathematical operations.
+    </onCompletion>
+     </item>
+   	
+</cheatsheet>

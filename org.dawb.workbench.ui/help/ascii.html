@@ -1,0 +1,90 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<TITLE></TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 3.2  (Unix)">
+	<META NAME="CREATED" CONTENT="0;0">
+	<META NAME="CHANGEDBY" CONTENT="Matthew Gerring">
+	<META NAME="CHANGED" CONTENT="20110428;14095600">
+	<STYLE TYPE="text/css">
+	<!--
+		@page { margin: 0.79in }
+		P { margin-bottom: 0.08in }
+		H1 { margin-bottom: 0.08in }
+		H1.western { font-family: "Liberation Sans", sans-serif; font-size: 16pt }
+		H1.cjk { font-family: "DejaVu Sans"; font-size: 16pt }
+		H1.ctl { font-family: "DejaVu Sans"; font-size: 16pt }
+		H2 { margin-bottom: 0.08in }
+		H2.western { font-family: "Liberation Sans", sans-serif; font-size: 14pt; font-style: italic }
+		H2.cjk { font-size: 14pt; font-style: italic }
+		H2.ctl { font-size: 14pt; font-style: italic }
+		A:link { so-language: zxx }
+	-->
+	</STYLE>
+</HEAD>
+<BODY LANG="en-US" DIR="LTR">
+<H1 CLASS="western">Text Files</H1>
+<P>Text files are any text encoded file. Usually ASCII or UTF-8 as
+these are slightly more efficient on space than other text files.
+Text files are easily parsed and human readable but they loose
+accuracy as they do not record numerical values at their full
+precision. In addition there are many formats which are impossible to
+support completely automatically. 
+</P>
+<P><BR><BR>
+</P>
+<H2 CLASS="western">Dat Files</H2>
+<P>In the workbench 'dat' files are considered to be encoded as
+follows:</P>
+<OL>
+	<LI><P><FONT COLOR="#000000">  The file is </FONT><FONT COLOR="#000000"><U>ascii</U></FONT><FONT COLOR="#000000">/</FONT><FONT COLOR="#000000"><U>utf</U></FONT><FONT COLOR="#000000">-8</FONT></P>
+	<LI><P><FONT COLOR="#000000">  The header is a section at the start
+	and starting with a # or are blank</FONT></P>
+	<LI><P><FONT COLOR="#000000">   The footer is a section at the end
+	and starting with a #</FONT></P>
+	<LI><P><FONT COLOR="#000000">   The data lines consist only of
+	numbers separated by whitespace, 2 columns or more.</FONT></P>
+	<LI><P><FONT COLOR="#000000">   The names of the data sets are
+	defined in the last line of the header. They are separated by white
+	space but if commas are used as well these will be stripped from the
+	names. A single space without a comma is not included as data set
+	names may contain spaces.</FONT></P>
+</OL>
+<P><FONT COLOR="#000000">  Example:     </FONT>
+</P>
+<P><BR><BR>
+</P>
+<P><FONT COLOR="#000000"><FONT FACE="Courier 10 Pitch"><FONT SIZE=2>#
+Instrument: I20-XAS Date: Mon, 19 <U>Jul</U> 2010 13:54:16 BST</FONT></FONT></FONT></P>
+<P><FONT COLOR="#000000"><FONT FACE="Courier 10 Pitch"><FONT SIZE=2>#
+Ring energy: 56.66749 GeV</FONT></FONT></FONT></P>
+<P><FONT COLOR="#000000"><FONT FACE="Courier 10 Pitch"><FONT SIZE=2>#
+Initial ring current: 72.23874 mA</FONT></FONT></FONT></P>
+<P><FONT COLOR="#000000"><FONT FACE="Courier 10 Pitch"><FONT SIZE=2>#
+Filling mode: 50.05388</FONT></FONT></FONT></P>
+<P><FONT COLOR="#000000"><FONT FACE="Courier 10 Pitch"><FONT SIZE=2>#
+<U>Wiggler</U> gap selected: 0.00000 <U>mm</U></FONT></FONT></FONT></P>
+<P><FONT COLOR="#000000"><FONT FACE="Courier 10 Pitch"><FONT SIZE=2>#
+ </FONT></FONT></FONT>
+</P>
+<P><FONT COLOR="#000000"><FONT FACE="Courier 10 Pitch"><FONT SIZE=2>#
+<U>Other cmments here</U></FONT></FONT></FONT></P>
+<P><FONT COLOR="#000000"><FONT FACE="Courier 10 Pitch"><FONT SIZE=2>#
+Energy          I0                It              	<U>Iref</U>      
+<U>ln</U>(I0/It)      </FONT></FONT></FONT>
+</P>
+<P><FONT COLOR="#000000"><FONT FACE="Courier 10 Pitch"><FONT SIZE=2>6912.0000
+      	134878.0        	2040284.0       	295077.5        	-2.716</FONT></FONT></FONT></P>
+<P><FONT COLOR="#000000"><FONT FACE="Courier 10 Pitch"><FONT SIZE=2>6912.0000
+      	134878.0        	2040284.0       	295077.5        	-2.716</FONT></FONT></FONT></P>
+<P><FONT COLOR="#000000"><FONT FACE="Courier 10 Pitch"><FONT SIZE=2>6912.0000
+      	134878.0        	2040284.0       	295077.5        	-2.716</FONT></FONT></FONT></P>
+<P><FONT COLOR="#000000"><FONT FACE="Courier 10 Pitch"><FONT SIZE=2>#
+etc.</FONT></FONT></FONT></P>
+<P><BR><BR>
+</P>
+<H2 CLASS="western">SRS Files</H2>
+<P>This is clearer format and supported.</P>
+</BODY>
+</HTML>

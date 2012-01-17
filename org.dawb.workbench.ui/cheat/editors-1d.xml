@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cheatsheet title="Interacting with Ascii Files and X/Y plotting">
+
+	<intro>
+		<description>
+		    This cheat sheet helps you to open an ascii file,
+			and shows you how to plot different values against each other.
+			If you have just completed the previous cheat sheet, please close all your data file parts.
+	    </description>
+	</intro>
+
+   <item
+         title="Data Perspective">
+      <description>
+         Please choose the data perspective if you do not already have it selected (nothing will happen if you do not).
+      </description>
+      <command
+            required="false"
+            serialization="org.eclipse.ui.perspectives.showPerspective(org.eclipse.ui.perspectives.showPerspective.perspectiveId=org.edna.workbench.application.perspective.DataPerspective)"/>
+   </item>
+   <item
+         title="Open File">
+      <description>
+         Any file or directory of files, can be imported to a project in the Project Explorer and then opened. You can do this with click and drag or using the import wizard. Once done, the file can be double clicked to open in the workbench. Click to open an example file from the &apos;data&apos; project.
+      </description>
+      <command
+            required="false"
+            serialization="org.eclipse.ui.navigate.openResource(filePath=data/examples/MoKedge_1_15.dat)"/>
+   </item>
+    <item
+         title="Maximize File">
+      <description>
+         You can maximize any part by double clicking on it (and also minimize it afterwards). Next we will double click to maximize the plot file, since the tutorial will disappear after you do this, double click again on 'MoKedge_1_15.dat' to get back to the tutorial.
+      </description>
+    </item>
+     <item
+         title="Text Tab">
+      <description>
+         Select the 'Text' tab in the bottom left hand corner. This shows the original text file which we are plotting the data of. Afterwards go back to the plot tab.
+      </description>
+    </item>
+    <item
+         title="Plot One Data Set">
+      <description>
+         In the 'Data' column of the part, select the item labelled 'Energy'. The plot created has the values of energy in the y-axis and the indexes in the x-axis.
+      </description>
+    </item>
+    <item
+         title="Change Plotting mode">
+      <description>
+         Change the plotting mode to 'Plot using first data set selected as x-axis'. There is an action for this on the toolbar and on the right click menu.
+      </description>
+     
+    </item>
+    
+    <item
+         title="Plot More Data Sets">
+      <description>
+         In the 'Data' column of the part, select the item labelled 'ln(I0/It)'. The first selection has now been used for the x-axis and the new selection is the y-axis. The items in the 'Data' column have the same color as plotted.
+      </description>
+      <subitem
+            label="1. Select ln(It/Iref). This new plot is added to the graph keeping energy as the x-axis.">
+      </subitem>
+      <subitem
+            label="2. Select 'Integration Time'. This new plot is added to the graph keeping energy as the x-axis.">
+      </subitem>
+    </item>
+    
+    <item title="Zoom">
+      <description>
+         Now we will look at zooming functions.
+      </description>
+      <subitem
+            label="1. Select 'Rubberband Zoom' from the toolbar in the part. Click and drag a box which you would like to zoom to, around the blue curve - Exafs region for example. The graph will zoom to this value.">
+      </subitem>
+      <subitem
+            label="2. Select 'Zoom In'. Click the graph and it will zoom, centered on where you have clicked.">
+      </subitem>
+      <subitem
+            label="3. Select 'Zoom Out' to zoom out and click on the graph.">
+      </subitem>
+      <subitem
+            label="4. Select 'Panning' to move the plot window by clicking and dragging.">
+      </subitem>
+    </item>
+    
+    <item title="Annotation">
+      <description>
+         Now we will look at adding annotations to the plot.
+      </description>
+      <subitem
+            label="1. Select 'Add annotation' from the toolbar in the part. Enter a name for the annotation and add it to the ln(I0/It) plot.">
+      </subitem>
+      <subitem
+            label="2. Select the 'None' button on the toolbar to cancel the previous zooming tool.">
+      </subitem>
+      <subitem
+            label="3. Click on the cross where the annotation is on the curve and move it to another location, for instance the first peak.">
+      </subitem>
+      <subitem
+            label="4. Select the annotation box and drag it to another location.">
+      </subitem>
+    </item>
+    
+    <item title="Configure the Plot">
+      <description>
+         Now we will look at configuring the plot in more detail.
+      </description>
+      <subitem
+            label="1. Select 'Configure Settings..' from the toolbar in the part (the first button). A dialog will appear with options for changing the plot.">
+      </subitem>
+      <subitem
+            label="2. On the Graph tab change the title color.">
+      </subitem>
+      <subitem
+            label="3. Select the Axis tab. This deals with the axis definition. It is possible to have more than one axis in either x or y. You can change the titles, colors and other presentation things here.">
+      </subitem>
+      <subitem
+            label="4. Select the Traces tab. This deals with data plotted within the axes. You can change the color and axes which the data uses. You can configure error bars and show the data as points rather than a single line.">
+      </subitem>
+      <subitem
+            label="5. Select the Annotations tab and change the title of your annotation.">
+      </subitem>
+    </item>
+    
+    <item title="Undo">
+      <description>
+         Hit the undo action, the grey undo button in the toolbar. This will change back the annotation name to the previous value.
+      </description>
+    </item>
+    
+    <item title="Snap-shot">
+      <description>
+         Hit the snap-shot action, you will be provided with a file save dialog and you can save this plot as now configured to PNG.
+      </description>
+    </item>
+    
+    <item title="More Advanced Operations">
+      <description>
+         There are more advanced tutorials in the 'Workflows' area whereby data can be manipulated further.
+      </description>
+    <onCompletion>
+      Congratulations, you can now use basic X/Y plot operations. Try with your own ascii files or try some plotting using a hdf5 or nexus file with one dimensional data.
+    </onCompletion>
+    </item>
+   	
+</cheatsheet>

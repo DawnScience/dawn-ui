@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cheatsheet title="Using HDF5 and Nexus Files">
+	<intro>
+		<description>
+		    This cheat sheet helps you to open an example nexus file,
+			plot data from it and navigate the tree of data.
+	    </description>
+	</intro>
+	<item
+         href="/org.dawb.workbench.ui/help/editorSection.html"
+         title="Open File">
+
+	  <description>
+			Use this link to open the example data file we will be using. You can also double click on the file in the &apos;data&apos; project.
+      </description>
+      <command
+            required="true"
+            serialization="org.eclipse.ui.navigate.openResource(filePath=/data/examples/MoKedge_1_15.nxs)"/>
+	</item>
+ <item
+       title="Plot tab">
+    <description>
+The file opens with the plot tab selected. The items on the right are the datasets in the file. If these are one dimensional, you can compare them. We will select a couple of datasets now. You can also use the X/Y Plot tutorial to learn more about plotting.
+    </description>
+
+      <subitem
+            label="1. Select &apos;counterTimer01/Energy&apos;">
+      </subitem>
+      <subitem
+            label="2. Select &apos;counterTimer01/lnI0It&apos;">
+      </subitem>
+ </item>
+ <item
+       title="Tree Tab">
+    <description>
+       Now select the tree tab (in the bottom left hand area of the part). You will see the full nexus tree of data.
+    </description>
+    <subitem
+          label="1. Select the Item &apos;Energy&apos; under &apos;counterTimer01&apos;">
+    </subitem>
+    <subitem
+          label="2. View the column &apos;Class&apos; which shows it is data.">
+    </subitem>
+    <subitem
+          label="3. View the column &apos;Dims&apos; which shows the shape of the data set.">
+    </subitem>
+    <subitem
+          label="4. Look at the view part labelled &apos;Value&apos;, here the value may be viewed and this works outside nexus viewing for other things.">
+    </subitem>
+    
+ </item>
+   <item
+         title="Open Another File">
+      <description>
+         We will open another example this time with image data contained in it.
+      </description>
+      <command
+            required="true"
+            serialization="org.eclipse.ui.navigate.openResource(filePath=/data/examples/i22-4996.nxs)"/>
+   </item>
+
+   <item
+         title="Select Rapid2D">
+      <description>
+         Select the data set &apos;Rapid2D/data&apos;. This data has the shape [1,1,512,512]. An image is automatically extracted from the data and the slice user interface is shown. Here you can set up the slice you wish to view in 2D for any size data set.
+      </description>
+    <onCompletion>
+      Congratulations, you can now open and slice nexus/hdf5 data! Now try opening some of your own hdf5 and nexus files.
+   </onCompletion>
+   </item>	
+	
+	
+</cheatsheet>

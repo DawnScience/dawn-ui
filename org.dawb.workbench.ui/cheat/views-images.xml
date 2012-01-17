@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cheatsheet title="Monitoring Directories of Images">
+	<intro>
+		<description>
+		    This cheat sheet helps you to connect to a directory and monitor it as image thumbnails.
+	    </description>
+	</intro>
+   <item
+         title="Workflow Perspective">
+      <description>
+         Please choose the workflow perspective if you do not already have it selected (nothing will happen if you do not).
+      </description>
+      <command
+            required="false"
+            serialization="org.eclipse.ui.perspectives.showPerspective(org.eclipse.ui.perspectives.showPerspective.perspectiveId=org.edna.workbench.application.perspective.WorkflowPerspective)"/>
+   </item>
+
+   <item
+         title="Open View">
+
+	  <description>
+			Use this link to open the 'Image Monitor' part if you do not already have it open. It may be shown at a too small size, if this happens, expand the split pane to its left, by clicking and dragging, until the part is big enough for your needs.
+      </description>
+      <command
+         required="true"
+         serialization="org.eclipse.ui.views.showView(org.eclipse.ui.views.showView.viewId=org.dawb.workbench.views.imageMonitorView)"/>
+	</item>
+
+    <item title="Configure Monitor Directory" monitorPath="data/examples/results">
+
+	  <description>
+         If you need to monitor a directory, you can choose it using the directory action on the toolbar of the 'Image Monitor' part. There is also an actor which can do this from workflows. Click the button above to set the directory to the folder 'examples/results' in the 'data' project.			
+       </description>
+	</item>
+
+    <item title="Open Linked">
+
+	  <description>
+         We will now open a part which is updated when the selection in the Image Monitor changes. Simply double click on an image to do this. You can also right click and choose 'Open Linked' to do the same thing. Now when you select different images in the view, the selection will change and the part updated with the new image. If you are monitoring the directory, the last selection will be updated to this part while the directory is monitored. Try selecting different images before proceeding.
+       </description>
+	</item>
+	
+    <item title="Switch on Monitoring">
+
+	  <description>
+	    Click on the toolbar action 'Switch monitoring for new files on and off'. When this button is pressed, the directory will be monitored every 2 seconds for new images. This works even if the directory contents are huge. The part does not generate thumbnails for images unless they are currently displayed. Note that when using the file browser to switch to a monitored directory with many files, you can press 'Ok' before the file information is displayed. This saves quite a bit of time for directories with large numbers of images. Give it a try on some other directories after this tutorial.
+      </description>
+	</item>
+	
+	<item title="Copy files">
+
+	  <description>
+	    Now expand the 'data/examples' folder in the 'Project Explorer'. Click on 'ref-testscale_1_001.img' and 'ref-testscale_1_002.img' while holding the control key and then right click and choose 'Copy'. Paste these into the 'results' folder, do not move them as later examples assume their presence in the 'examples' folder. The Image Monitor will now update when the new images are copied in.    
+      </description>
+	</item>
+	
+	<item title="Monitor Properites">
+
+	  <description>
+	    Right click on the Image Monitor and choose 'Preferences...'. You may need to left click on the part first to gain focus. You will be shown a Preferences dialog. Here you can change the thumbnail size and the monitor frequency of the directory.   
+      </description>
+   <onCompletion>
+      Congratulations, you can now monitor image folders. Try this part with some directories containing a few more images!
+   </onCompletion>
+      
+	</item>
+	
+</cheatsheet>

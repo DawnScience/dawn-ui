@@ -1,0 +1,16 @@
+<toc label="Data">
+    <topic label="Data Viewing" href="help/editorSection.html">
+        <topic label="Ascii" href="help/ascii.html"/>
+        <topic label="HDF5 / Nexus" href="help/h5.html"/>
+    </topic>
+    <topic href="help/dataImport.html" label="Data Import">
+       <topic href="help/clickandDrag.html" label="Click and Drag">
+       </topic>
+       <topic href="help/importWizard.html" label="Import Wizard">
+       </topic>
+       <topic href="help/copyPaste.html" label="Copy and Paste">
+       </topic>
+       <topic href="help/newProject.html" label="New Project">
+       </topic>
+    </topic>
+</toc>
