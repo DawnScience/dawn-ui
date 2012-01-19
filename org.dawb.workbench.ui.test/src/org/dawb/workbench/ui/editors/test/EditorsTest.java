@@ -30,18 +30,18 @@ public class EditorsTest {
 	@Test
 	public void testOpeningSpecEditor1() throws Throwable {
 		
-		testSpec("inhouse_testfile_one_scan.dat", "Spec Scan 1", "L", "MA0", "MA1", "MA2", "MA3");
+		testSpec("inhouse_testfile_one_scan.dat", "Scan 1", "L", "MA0", "MA1", "MA2", "MA3");
 		
 	}
 	
 	@Test
 	public void testOpeningSpecEditor2() throws Throwable {
 		
-		testSpec("optics_april20110402.dat", "Spec Scan 3", "pico0",  "pico1",  "pico2",  "pico3",  "pico4");
+		testSpec("optics_april20110402.dat", "Scan 3", "pico0",  "pico1",  "pico2",  "pico3",  "pico4");
 		
-		testSpec("optics_april20110402.dat", "Spec Scan 150", "pico0",  "pico1",  "pico2",  "pico3",  "pico4");
+		testSpec("optics_april20110402.dat", "Scan 150", "pico0",  "pico1",  "pico2",  "pico3",  "pico4");
 		
-		testSpec("optics_april20110402.dat", "Spec Scan 300", "pico0",  "pico1",  "pico2",  "pico3",  "pico4");
+		testSpec("optics_april20110402.dat", "Scan 300", "pico0",  "pico1",  "pico2",  "pico3",  "pico4");
 	}
 	
 	private void testSpec(String fileName, String scanName, String... dataNames) throws Exception {

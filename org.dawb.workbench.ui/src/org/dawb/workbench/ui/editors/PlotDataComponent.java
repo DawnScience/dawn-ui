@@ -120,11 +120,11 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 	 * data is the objects for the table, either a String or an ExpressionObject
 	 * currently. Probably a better design possible with a single object type.
 	 */
-	protected List<CheckableObject>        data;
-	protected String              filePath;
-	protected String              fileName;
-	private   String              rootName;
-	private   boolean             staggerSupported = false;
+	protected List<CheckableObject> data;
+	protected String                filePath;
+	protected String                fileName;
+	private   String                rootName;
+	private   boolean               staggerSupported = false;
 
 	protected IMetaData           metaData;
 
