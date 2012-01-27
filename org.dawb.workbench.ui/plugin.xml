@@ -297,5 +297,26 @@
             class="org.dawb.workbench.ui.project.DataProjectCreator">
       </startup>
    </extension>
-
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <wizard
+            category="org.edna.common.ui.project.DataCategory"
+            class="org.dawb.hdf5.editor.H5Wizard"
+            icon="icons/h5_editor.png"
+            id="org.edna.common.ui.project.H5Wizard"
+            name="H5 File"
+            project="false">
+      </wizard>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="org.dawb.hdf5.editor.H5Editor"
+            default="false"
+            extensions="h5, hd5, hdf5, nxs, nexus, hdf"
+            icon="icons/h5_editor.png"
+            id="org.dawb.hdf5.editor.raw.tree"
+            name="HDF5 Tree Editor">
+      </editor>
+   </extension>
 </plugin>
