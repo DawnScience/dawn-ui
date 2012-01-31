@@ -78,14 +78,14 @@ public class SWTXYStressTest {
 				
 		final long start = System.currentTimeMillis();
 		
-		sys.createPlot(ys.get(0).getIndices(), ys, PlotType.PT1D, null);
+		sys.createPlot1D(ys.get(0).getIndices(), ys, null);
 		EclipseUtils.delay(10);
 		
 		final long end  = System.currentTimeMillis();
 		final long time = end-start-10;
 		
 		System.out.println("It took "+time+"ms to plot the sets.");
-		if (time>expectedTime) throw new Exception("It took too long to plot the data sets! It took "+expectedTime+"ms to plot the sets, it should be "+time+" or less.");
+		if (time>expectedTime) throw new Exception("It took too long to plot the data sets! It took "+time+"ms to plot the sets, it should be "+expectedTime+" or less.");
 			
  		EclipseUtils.delay(2000);
 		
