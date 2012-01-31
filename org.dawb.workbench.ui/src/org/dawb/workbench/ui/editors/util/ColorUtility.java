@@ -10,6 +10,7 @@
 package org.dawb.workbench.ui.editors.util;
 
 import java.awt.Color;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -109,6 +110,25 @@ public class ColorUtility {
 		if (nr < GRAPH_DEFAULT_LINEWIDTHS.length) {
 			GRAPH_DEFAULT_LINEWIDTHS[nr] = newLineWidth;
 		}
+	}
+
+	public static org.eclipse.swt.graphics.Color getSwtColour(final Collection<org.eclipse.swt.graphics.Color> taken, int iplot) {
+		
+		Color col = getDefaultColour(iplot);
+		org.eclipse.swt.graphics.Color swtColor =  new org.eclipse.swt.graphics.Color(Display.getCurrent(), col.getRed(), col.getGreen(), col.getBlue());
+
+		if (taken!=null) {
+			int loopCount=0;
+			while(taken.contains(swtColor)) {
+				iplot++;
+				col = getDefaultColour(iplot);
+				swtColor =  new org.eclipse.swt.graphics.Color(Display.getCurrent(), col.getRed(), col.getGreen(), col.getBlue());
+				loopCount++;
+				if (loopCount>GRAPH_DEFAULT_COLORS.length) break;
+			}
+		}
+		
+		return swtColor;
 	}
 
 	public static org.eclipse.swt.graphics.Color getSwtColour(int iplot) {

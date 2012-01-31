@@ -111,6 +111,13 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		
 	}
 	
+	@Override
+	public Composite getPlotComposite() {
+		if (xyCanvas!=null)       return xyCanvas;
+		if (imageComposite!=null) return imageComposite;
+		return null;
+	}
+	
 	private void create1DUI() {
 		
 		if (xyCanvas!=null) return;
@@ -483,12 +490,9 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 				colorMap = new IdentityHashMap<Object,Color>(ys.size());
 			}
 		}
-		if (colorMap!=null) colorMap.clear();
-		
 		if (traceMap==null) traceMap = new HashMap<String, Trace>(31);
-		
+	
 		if (xyGraph==null) return;
-		clearTraces();
 		
 		Axis xAxis = ((AxisWrapper)getSelectedXAxis()).getWrappedAxis();
 		Axis yAxis = ((AxisWrapper)getSelectedYAxis()).getWrappedAxis();
@@ -496,6 +500,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		xAxis.setVisible(true);
 		yAxis.setVisible(true);
 
+		// TODO Fix titles for multiple calls to create1DPlot(...)
 		xyGraph.setTitle(DatasetTitleUtils.getTitle(x, ys, true, rootName));
 		xAxis.setTitle(DatasetTitleUtils.getName(x,rootName));
 		
@@ -508,16 +513,16 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 
 			CircularBufferDataProvider traceDataProvider = new CircularBufferDataProvider(false);
 			if (y.getBuffer()!=null && y.getShape()!=null) {
-				traceDataProvider.setBufferSize(y.getSize());		
+				traceDataProvider.setBufferSize(y.getSize());	
 				traceDataProvider.setCurrentXDataArray(xArray);
 				traceDataProvider.setCurrentYDataArray(getDoubleArray(y));	
 			}
 			
 			//create the trace
 			final Trace trace = new Trace(DatasetTitleUtils.getName(y,rootName), 
-					                        xAxis, 
-					                        yAxis,
-											traceDataProvider);	
+					                      xAxis, 
+					                      yAxis,
+									      traceDataProvider);	
 			
 			if (y.getName()!=null && !"".equals(y.getName())) {
 				traceMap.put(y.getName(), trace);
@@ -525,7 +530,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 			
 			//set trace property
 			trace.setPointStyle(PointStyle.NONE);
-			final Color plotColor = ColorUtility.getSwtColour(iplot);
+			final Color plotColor = ColorUtility.getSwtColour(colorMap.values(), iplot);
 			if (colorMap!=null) {
 				if (getColorOption()==ColorOption.BY_NAME) {
 					colorMap.put(y.getName(),plotColor);
@@ -713,6 +718,18 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 
 	@Override
 	public void reset() {
+		if (part.getSite().getWorkbenchWindow().getShell().getDisplay().getThread()==Thread.currentThread()) {
+			resetInternal();
+		} else {
+			part.getSite().getWorkbenchWindow().getShell().getDisplay().syncExec(new Runnable() {
+				@Override
+				public void run() {
+					resetInternal();
+				}
+			});
+		}
+	}
+	private void resetInternal() {
 		
 		if (colorMap!=null) colorMap.clear();
 		if (xyGraph!=null) {
@@ -730,6 +747,32 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		}
 		
 	}
+	
+	@Override
+	public void clear() {
+		if (part.getSite().getWorkbenchWindow().getShell().getDisplay().getThread()==Thread.currentThread()) {
+			clearInternal();
+		} else {
+			part.getSite().getWorkbenchWindow().getShell().getDisplay().syncExec(new Runnable() {
+				@Override
+				public void run() {
+					clearInternal();
+				}
+			});
+		}
+	}
+	private void clearInternal() {		
+		if (xyGraph!=null) {
+			try {
+				clearTraces();
+				if (colorMap!=null) colorMap.clear();	
+	
+			} catch (Throwable e) {
+				logger.error("Cannot remove traces!", e);
+			}
+		}	
+	}
+
 
 
 	@Override
@@ -797,16 +840,33 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 
 	/**
 	 * Use this method to create axes other than the default y and x axes.
+	 * 
 	 * @param title
 	 * @param isYAxis, normally it is.
+	 * @param side - either SWT.LEFT, SWT.RIGHT, SWT.TOP, SWT.BOTTOM
 	 * @return
 	 */
-	public IAxis createAxis(final String title, final boolean isYAxis) {
+	public IAxis createAxis(final String title, final boolean isYAxis, int side) {
+		
+		if (xyGraph==null) switchPlotUI(true);
+			
 		Axis axis = new Axis(title, isYAxis);
-		if (isYAxis) axis.setOrientation(Orientation.VERTICAL);
-		axis.setTickLableSide(LabelSide.Secondary);
+		if (isYAxis) {
+			axis.setOrientation(Orientation.VERTICAL);
+		} else {
+			axis.setOrientation(Orientation.HORIZONTAL);
+		}
+		if (side==SWT.LEFT||side==SWT.BOTTOM) {
+		    axis.setTickLableSide(LabelSide.Primary);
+		} else {
+			axis.setTickLableSide(LabelSide.Secondary);
+		}
 		axis.setAutoScaleThreshold(0.1);
+		axis.setShowMajorGrid(true);
+		axis.setShowMinorGrid(true);		
+	
 		xyGraph.addAxis(axis);
+		
 		return new AxisWrapper(axis);
 	}
 	
@@ -815,7 +875,10 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 
 	@Override
 	public IAxis getSelectedXAxis() {
-		if (selectedXAxis==null) return new AxisWrapper(xyGraph.primaryXAxis);
+		if (selectedXAxis==null) {
+			if (xyGraph==null) switchPlotUI(true);
+			return new AxisWrapper(xyGraph.primaryXAxis);
+		}
 		return selectedXAxis;
 	}
 
@@ -826,7 +889,10 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 
 	@Override
 	public IAxis getSelectedYAxis() {
-		if (selectedYAxis==null) return new AxisWrapper(xyGraph.primaryYAxis);
+		if (selectedYAxis==null) {
+			if (xyGraph==null) switchPlotUI(true);
+			return new AxisWrapper(xyGraph.primaryYAxis);
+		}
 		return selectedYAxis;
 	}
 

@@ -306,6 +306,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 			}
 		}
 
+		plottingSystem.clear();
 		if (participant.getPlotMode()==PlotType.IMAGE) {
 		    plottingSystem.createPlot2D(x, ys, monitor);
 		} else {

@@ -50,6 +50,7 @@ public class JLPlottingSystem extends AbstractPlottingSystem {
 	private JLChart          chart;
 	private Frame            chartFrame;
 	private List<JLDataView> data;
+	private Composite swtAwtComponent;
 	
 	public JLPlottingSystem() {
 		data = new ArrayList<JLDataView>(7);
@@ -61,7 +62,7 @@ public class JLPlottingSystem extends AbstractPlottingSystem {
 							   final PlotType       hint,
 							   final IWorkbenchPart part) {
 		
-		Composite swtAwtComponent = new Composite(parent, SWT.EMBEDDED | SWT.NO_BACKGROUND);
+		this.swtAwtComponent = new Composite(parent, SWT.EMBEDDED | SWT.NO_BACKGROUND);
 		swtAwtComponent.setLayout(new GridLayout());
 		
 		chartFrame = SWT_AWT.new_Frame(swtAwtComponent);
@@ -167,5 +168,26 @@ public class JLPlottingSystem extends AbstractPlottingSystem {
 	public void dispose() {
 		chartFrame.dispose();	
  	}
+
+	@Override
+	public void clear() {
+		try {
+
+			data.clear();
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+                    chart.repaint();
+				}
+			});
+			
+		} catch (Throwable e) {
+			logger.error("Cannot remove plots!", e);
+		}		
+	}
+
+	@Override
+	public Composite getPlotComposite() {
+		return swtAwtComponent;
+	}
 
 }
