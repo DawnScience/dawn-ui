@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.csstudio.swt.xygraph.dataprovider.CircularBufferDataProvider.PlotMode;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.IPlottingSystem;
@@ -305,7 +306,11 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 			}
 		}
 
-		plottingSystem.createPlot(x, ys, participant.getPlotMode(), monitor);
+		if (participant.getPlotMode()==PlotType.IMAGE) {
+		    plottingSystem.createPlot2D(x, ys, monitor);
+		} else {
+			plottingSystem.createPlot1D(x, ys, monitor);
+		}
 		monitor.done();
 	}
 

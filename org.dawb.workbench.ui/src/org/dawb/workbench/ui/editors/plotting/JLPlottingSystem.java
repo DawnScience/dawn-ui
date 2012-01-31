@@ -70,11 +70,12 @@ public class JLPlottingSystem extends AbstractPlottingSystem {
 		chartFrame.add(chart);
 	}
 	
+
 	/**
 	 * 
 	 */
 	@Override
-	public void createPlot(final AbstractDataset       data, 
+	protected void createPlot(final AbstractDataset       data, 
 			               final List<AbstractDataset> axes,
 			               final PlotType              mode, 
 			               final IProgressMonitor      monitor) {

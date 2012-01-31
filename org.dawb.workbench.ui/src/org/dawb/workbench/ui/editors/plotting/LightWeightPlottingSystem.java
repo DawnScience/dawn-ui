@@ -17,12 +17,16 @@ import java.util.Map;
 
 import org.csstudio.swt.xygraph.dataprovider.CircularBufferDataProvider;
 import org.csstudio.swt.xygraph.dataprovider.Sample;
+import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.Trace;
 import org.csstudio.swt.xygraph.figures.Trace.PointStyle;
 import org.csstudio.swt.xygraph.figures.XYGraph;
+import org.csstudio.swt.xygraph.linearscale.AbstractScale.LabelSide;
+import org.csstudio.swt.xygraph.linearscale.LinearScale.Orientation;
 import org.csstudio.swt.xygraph.toolbar.XYGraphToolbar;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
+import org.dawb.common.ui.plot.IAxis;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlotUpdateEvent;
 import org.dawb.common.ui.util.GridUtils;
@@ -269,15 +273,14 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
         parent.layout();
 	}
 
-
 	/**
 	 * Does not have to be called in UI thread.
 	 */
 	@Override
-	public void createPlot(final AbstractDataset       data, 
-			               final List<AbstractDataset> axes,
-			               final PlotType              mode, 
-			               final IProgressMonitor      monitor) {
+	protected void createPlot(final AbstractDataset       data, 
+			                final List<AbstractDataset> axes,
+			                final PlotType              mode, 
+			                final IProgressMonitor      monitor) {
 		
 		if (monitor!=null) monitor.worked(1);
 		
@@ -765,7 +768,8 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	/**
 	 * Can throw exception, gives access to Trace objects for when custom Trace work is needed.
 	 * 
-	 * Maybe return null or throw exception if not 1D
+	 * Maybe return null or throw exception if not 1D. Access discouraged, just for emergencies!
+	 * To use cast your IPlottingSystem to LightWeightPlottingSystem
 	 * 
 	 * @param plotName
 	 * @return
@@ -775,7 +779,8 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	}
 	
 	/**
-	 * Access to the XYGraph, may return null.
+	 * Access to the XYGraph, may return null. Access discouraged, just for emergencies!
+	 * To use cast your IPlottingSystem to LightWeightPlottingSystem
 	 * 
 	 * @return
 	 */
@@ -783,4 +788,40 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		return xyGraph;
 	}
 
+	/**
+	 * Use this method to create axes other than the default y and x axes.
+	 * @param title
+	 * @param isYAxis, normally it is.
+	 * @return
+	 */
+	public IAxis createAxis(final String title, final boolean isYAxis) {
+		Axis axis = new Axis(title, isYAxis);
+		if (isYAxis) axis.setOrientation(Orientation.VERTICAL);
+		axis.setTickLableSide(LabelSide.Secondary);
+		axis.setAutoScaleThreshold(0.1);
+		xyGraph.addAxis(axis);
+		return new AxisWrapper(axis);
+	}
+	
+	private IAxis selectedXAxis;
+	private IAxis selectedYAxis;
+
+	public IAxis getSelectedXAxis() {
+		if (selectedXAxis==null) return new AxisWrapper(xyGraph.primaryXAxis);
+		return selectedXAxis;
+	}
+
+	public void setSelectedXAxis(IAxis selectedXAxis) {
+		this.selectedXAxis = selectedXAxis;
+	}
+
+	public IAxis setSelectedYAxis() {
+		if (selectedYAxis==null) return new AxisWrapper(xyGraph.primaryYAxis);
+		return selectedYAxis;
+	}
+
+	public void setSelectedYAxis(IAxis selectedYAxis) {
+		this.selectedYAxis = selectedYAxis;
+	}
+	
 }

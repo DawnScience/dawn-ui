@@ -211,7 +211,7 @@ public class PlotImageEditor extends EditorPart implements IReusableEditor {
 				axes.add(SliceUtils.createAxisDataset((set.getShape()[0])));
 				axes.add(SliceUtils.createAxisDataset((set.getShape()[1])));
 				
-				plottingSystem.createPlot(set, axes, PlotType.IMAGE, monitor);
+				plottingSystem.createPlot2D(set, axes, monitor);
 
 				return Status.OK_STATUS;
 			}
