@@ -130,4 +130,21 @@ class AxisWrapper implements IAxis {
 		wrappedAxis.setYAxis(isYAxis);
 	}
 
+	@Override
+	public void setVisible(boolean b) {
+		wrappedAxis.setVisible(b);
+	}
+
+	@Override
+	public boolean isVisible() {
+		return wrappedAxis.isVisible();
+	}
+
+	/**
+	 * We break encapsulation in this package only.
+	 * @return
+	 */
+	final Axis getWrappedAxis() {
+		return wrappedAxis;
+	}
 }

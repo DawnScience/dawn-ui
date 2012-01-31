@@ -489,11 +489,15 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		
 		if (xyGraph==null) return;
 		clearTraces();
-		xyGraph.primaryXAxis.setVisible(true);
-		xyGraph.primaryYAxis.setVisible(true);
+		
+		Axis xAxis = ((AxisWrapper)getSelectedXAxis()).getWrappedAxis();
+		Axis yAxis = ((AxisWrapper)getSelectedYAxis()).getWrappedAxis();
+
+		xAxis.setVisible(true);
+		yAxis.setVisible(true);
 
 		xyGraph.setTitle(DatasetTitleUtils.getTitle(x, ys, true, rootName));
-		xyGraph.primaryXAxis.setTitle(DatasetTitleUtils.getName(x,rootName));
+		xAxis.setTitle(DatasetTitleUtils.getName(x,rootName));
 		
 		processRescale(x,ys);
 
@@ -511,8 +515,8 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 			
 			//create the trace
 			final Trace trace = new Trace(DatasetTitleUtils.getName(y,rootName), 
-											xyGraph.primaryXAxis, 
-											xyGraph.primaryYAxis, 
+					                        xAxis, 
+					                        yAxis,
 											traceDataProvider);	
 			
 			if (y.getName()!=null && !"".equals(y.getName())) {
@@ -555,15 +559,17 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 
 		if (rescale) {
 			try {
-				if (xValue==null) xValue = xyGraph.primaryXAxis.getRange().getUpper()+1d;
-					
-				double min = Math.min(xyGraph.primaryXAxis.getRange().getLower(), xValue.doubleValue());
-				double max = Math.max(xyGraph.primaryXAxis.getRange().getUpper(), xValue.doubleValue());
-				xyGraph.primaryXAxis.setRange(min,max);
+				Axis xAxis = ((AxisWrapper)getSelectedXAxis()).getWrappedAxis();
+				
+				if (xValue==null) xValue = xAxis.getRange().getUpper()+1d;					
+				double min = Math.min(xAxis.getRange().getLower(), xValue.doubleValue());
+				double max = Math.max(xAxis.getRange().getUpper(), xValue.doubleValue());
+				xAxis.setRange(min,max);
 
-				min = Math.min(xyGraph.primaryYAxis.getRange().getLower(), yValue.doubleValue());
-				max = Math.max(xyGraph.primaryYAxis.getRange().getUpper(), yValue.doubleValue());
-				xyGraph.primaryYAxis.setRange(min,max);
+				Axis yAxis = ((AxisWrapper)getSelectedYAxis()).getWrappedAxis();
+				min = Math.min(yAxis.getRange().getLower(), yValue.doubleValue());
+				max = Math.max(yAxis.getRange().getUpper(), yValue.doubleValue());
+				yAxis.setRange(min,max);
 				
 			} catch (Throwable e) {
 				logger.error("Cannot rescale data, internal error.\nNormally this would be thrown back to the calling API but it happening in an update thread.", e);
@@ -590,12 +596,14 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 				double min = x.min().doubleValue();
 				double max = x.max().doubleValue();
 				if (min==max) max+=100;
-				xyGraph.primaryXAxis.setRange(min,max);
+				Axis xAxis = ((AxisWrapper)getSelectedXAxis()).getWrappedAxis();
+				xAxis.setRange(min,max);
 
 				min = getMin(ys);
 				max = getMax(ys);
 				if (min==max) max = max+1;
-				xyGraph.primaryYAxis.setRange(min,max);
+				Axis yAxis = ((AxisWrapper)getSelectedYAxis()).getWrappedAxis();
+				yAxis.setRange(min,max);
 			} catch (Throwable e) {
 				logger.error("Cannot rescale data, internal error.\nNormally this would be thrown back to the calling API but it happening in an update thread.", e);
 				return;
@@ -710,8 +718,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		if (xyGraph!=null) {
 			try {
 				clearTraces();
-				xyGraph.primaryXAxis.setRange(0,100);
-				xyGraph.primaryYAxis.setRange(0,100);
+				for (Axis axis : xyGraph.getAxisList()) axis.setRange(0,100);
 	
 			} catch (Throwable e) {
 				logger.error("Cannot remove plots!", e);
@@ -806,20 +813,24 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	private IAxis selectedXAxis;
 	private IAxis selectedYAxis;
 
+	@Override
 	public IAxis getSelectedXAxis() {
 		if (selectedXAxis==null) return new AxisWrapper(xyGraph.primaryXAxis);
 		return selectedXAxis;
 	}
 
+	@Override
 	public void setSelectedXAxis(IAxis selectedXAxis) {
 		this.selectedXAxis = selectedXAxis;
 	}
 
-	public IAxis setSelectedYAxis() {
+	@Override
+	public IAxis getSelectedYAxis() {
 		if (selectedYAxis==null) return new AxisWrapper(xyGraph.primaryYAxis);
 		return selectedYAxis;
 	}
 
+	@Override
 	public void setSelectedYAxis(IAxis selectedYAxis) {
 		this.selectedYAxis = selectedYAxis;
 	}
