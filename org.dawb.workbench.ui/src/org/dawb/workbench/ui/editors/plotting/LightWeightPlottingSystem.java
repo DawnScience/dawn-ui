@@ -33,6 +33,8 @@ import org.dawb.common.ui.util.GridUtils;
 import org.dawb.fable.extensions.FableImageWrapper;
 import org.dawb.gda.extensions.util.DatasetTitleUtils;
 import org.dawb.workbench.ui.Activator;
+import org.dawb.workbench.ui.editors.plotting.swtxy.XYRegionGraph;
+import org.dawb.workbench.ui.editors.plotting.swtxy.XYRegionToolbar;
 import org.dawb.workbench.ui.editors.preference.EditorConstants;
 import org.dawb.workbench.ui.editors.util.ColorUtility;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -82,8 +84,8 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	private IActionBars    bars;
 
 	// 1D Controls
-	private Canvas         xyCanvas;
-	private XYGraph        xyGraph;
+	private Canvas             xyCanvas;
+	private XYRegionGraph  xyGraph;
 	
 	// 2D Controls
 	private Composite       imageComposite;
@@ -126,13 +128,16 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		xyCanvas.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		final LightweightSystem lws = new LightweightSystem(xyCanvas);
 	
-		this.xyGraph = new XYGraph();
+		this.xyGraph = new XYRegionGraph();
 		
         if (bars!=null) if (bars.getMenuManager()!=null)    bars.getMenuManager().removeAll();
         if (bars!=null) if (bars.getToolBarManager()!=null) bars.getToolBarManager().removeAll();
 
         final MenuManager rightClick = new MenuManager();
-        if (bars!=null) XYGraphToolbar.createGraphActions(xyGraph, bars.getToolBarManager(), rightClick);
+        if (bars!=null) {
+        	final XYRegionToolbar toolbar = new XYRegionToolbar(xyGraph);
+        	toolbar.createGraphActions(bars.getToolBarManager(), rightClick);
+        }
 
         createAdditionalActions(rightClick);
 		
