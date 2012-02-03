@@ -76,23 +76,21 @@ public class BoxSelectionFigure extends FixedBoundsShape {
 	
 				try {
 					isCalculateCorners = false;
-					Rectangle sa=null;
+					SelectionRectangle a=null, b=null, c=null, d=null;
 					if (source == p1 || source == p4) {
-						final Point loc1   = Draw2DUtils.getCenter(p1);
-						final Point loc4   = Draw2DUtils.getCenter(p4);
-						sa = new Rectangle(loc1, loc4);
-						
-						boolean quad1Or4 = ((loc1.x<loc4.x && loc1.y<loc4.y) || (loc1.x>loc4.x&&loc1.y>loc4.y));
-						setCornerLocation(p2, p3, sa, quad1Or4);
-						
+						a   = p1; b   = p4; c   = p2; d   = p3;
+	
 					} else if (source == p2 || source == p3) {
-						final Point loc2   = Draw2DUtils.getCenter(p2);
-						final Point loc3   = Draw2DUtils.getCenter(p3);
-						sa = new Rectangle(loc2, loc3);
-						
-						boolean quad2Or3 = ((loc2.x>loc3.x && loc2.y<loc3.y) || (loc2.x<loc3.x&&loc2.y>loc3.y));
-						setCornerLocation(p1, p4, sa, !quad2Or3);
+						a   = p2; b   = p3; c   = p1; d   = p4;
 					}
+				
+					Point pa   = Draw2DUtils.getCenter(a);
+					Point pb   = Draw2DUtils.getCenter(b);
+					Rectangle sa = new Rectangle(pa, pb);
+					
+					boolean quad1Or4 = ((pa.x<pb.x && pa.y<pb.y) || (pa.x>pb.x&&pa.y>pb.y));
+					setCornerLocation(c, d, sa, quad1Or4);
+
 
 				} finally {
 					isCalculateCorners = true;
