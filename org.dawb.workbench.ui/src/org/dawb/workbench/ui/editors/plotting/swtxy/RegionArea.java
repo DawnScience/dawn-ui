@@ -1,5 +1,8 @@
 package org.dawb.workbench.ui.editors.plotting.swtxy;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.csstudio.swt.xygraph.figures.PlotArea;
 import org.eclipse.draw2d.geometry.Rectangle;
 
@@ -8,30 +11,40 @@ public class RegionArea extends PlotArea {
 	public RegionArea(XYRegionGraph xyGraph) {
 		super(xyGraph);
 	}
-	
-	protected FixedBoundsShape selectionFigure;
-	
+		
+	final private List<RegionShape> regionList = new ArrayList<RegionShape>();
 
 	@Override
 	protected void layout() {
-		if (selectionFigure!=null) {
-		    final Rectangle ca = getClientArea();
-		    selectionFigure.setFixedBounds(new Rectangle(ca.x, ca.y, ca.width+100, ca.height+50));
-		    if (!selectionFigure.isActive()) {
-		    	selectionFigure.createActiveListener(this);
-		    }
-		}
+	    final Rectangle clientArea = getClientArea();
+		for(RegionShape region : regionList){
+			if(region != null && region.isVisible())
+				region.setBounds(clientArea);			
+		}		
+
 		super.layout();
 	}
+	
 
-
-	public FixedBoundsShape getSelectionFigure() {
-		return selectionFigure;
+	public void addRegion(final RegionShape region){
+		regionList.add(region);
+		region.setxyGraph(xyGraph);
+		add(region);
+		revalidate();
 	}
 
 
-	public void setSelectionFigure(FixedBoundsShape selectionFigure) {
-		this.selectionFigure = selectionFigure;
+	public boolean removeRegion(final RegionShape region){
+	    final boolean result = regionList.remove(region);
+		//if(!region.isFree()) region.getTrace().getDataProvider().removeDataProviderListener(region);
+		if(result){
+			remove(region);
+			revalidate();
+		}
+		return result;
 	}
 	
+	public List<RegionShape> getRegionList() {
+		return regionList;
+	}
 }

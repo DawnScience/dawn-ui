@@ -1,21 +1,22 @@
 package org.dawb.workbench.ui.editors.plotting.swtxy;
 
+import org.csstudio.swt.xygraph.figures.Trace;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.FigureListener;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.MouseEvent;
 import org.eclipse.draw2d.Shape;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.graphics.Color;
 
-public class BoxSelectionFigure extends FixedBoundsShape {
+public class BoxSelectionFigure extends RegionShape {
 		
 	private static final int SIDE      = 8;
 	private static final int HALF_SIDE = SIDE/2;
 	
 	private SelectionRectangle p1,  p2, p3, p4;
+	
 	/**
 	 *     p1------------p2
 	 *     |              |
@@ -23,16 +24,18 @@ public class BoxSelectionFigure extends FixedBoundsShape {
 	 *     p3------------p4
 	 */
 
-	public BoxSelectionFigure() {
-				
+	public BoxSelectionFigure(String name, Trace trace) {
+		
+		super(name, trace);
+		
 		setRequestFocusEnabled(false);
 		setFocusTraversable(false);
         setOpaque(false);
         
-		this.p1  = createSelectionRectangle(ColorConstants.green,  new Rectangle(10,10,  SIDE, SIDE));
-		this.p2  = createSelectionRectangle(ColorConstants.green,  new Rectangle(100,100,SIDE, SIDE));
-		this.p3  = createSelectionRectangle(ColorConstants.green,  new Rectangle(100,10, SIDE, SIDE));
-		this.p4  = createSelectionRectangle(ColorConstants.green,  new Rectangle(10,100, SIDE, SIDE));
+		this.p1  = createSelectionRectangle(ColorConstants.green,  new Point(10,10), SIDE);
+		this.p2  = createSelectionRectangle(ColorConstants.green,  new Point(100,10), SIDE);
+		this.p3  = createSelectionRectangle(ColorConstants.green,  new Point(10,100), SIDE);
+		this.p4  = createSelectionRectangle(ColorConstants.green,  new Point(100,100), SIDE);
 				
 		final Shape connection = new Shape() {
 			protected void outlineShape(Graphics gc) {
@@ -49,9 +52,11 @@ public class BoxSelectionFigure extends FixedBoundsShape {
 		connection.setLineWidth(2);
 		connection.setAlpha(80);
 		connection.setBackgroundColor(ColorConstants.green);
-		connection.setBounds(new Rectangle(Draw2DUtils.getCenter(p4), Draw2DUtils.getCenter(p1)));
+		connection.setBounds(new Rectangle(p4.getSelectionPoint(), p1.getSelectionPoint()));
 		connection.setOpaque(false);
-		new FigureMover(connection, this);
+		connection.setRequestFocusEnabled(false);
+		connection.setFocusTraversable(false);
+     	new FigureMover(connection, this);
 		
         add(connection);
 		add(p1);
@@ -59,15 +64,22 @@ public class BoxSelectionFigure extends FixedBoundsShape {
 		add(p3);
 		add(p4);
 		
-		setVisible(false);
-		setActive(false);
+		setVisible(true);
 	}
- 	
+	
+	public void setShowPosition(boolean showPosition) {
+		p1.setShowPosition(showPosition);
+		p2.setShowPosition(showPosition);
+		p3.setShowPosition(showPosition);
+		p4.setShowPosition(showPosition);
+		super.setShowPosition(showPosition);
+	}
+	
 	private boolean isCalculateCorners = true;
 
-	private SelectionRectangle createSelectionRectangle(Color color, Rectangle rectangle) {
+	private SelectionRectangle createSelectionRectangle(Color color, Point location, int size) {
 		
-		SelectionRectangle rect = new SelectionRectangle(color,  rectangle);
+		SelectionRectangle rect = new SelectionRectangle(trace, color,  location, size);
 		
 		rect.addFigureListener(new FigureListener() {
 			@Override
@@ -78,14 +90,16 @@ public class BoxSelectionFigure extends FixedBoundsShape {
 					isCalculateCorners = false;
 					SelectionRectangle a=null, b=null, c=null, d=null;
 					if (source == p1 || source == p4) {
-						a   = p1; b   = p4; c   = p2; d   = p3;
+						a   = p1;   b   = p4;   c   = p2;   d   = p3;
 	
 					} else if (source == p2 || source == p3) {
-						a   = p2; b   = p3; c   = p1; d   = p4;
+						a   = p2;   b   = p3;   c   = p1;   d   = p4;
+					} else {
+						return;
 					}
 				
-					Point pa   = Draw2DUtils.getCenter(a);
-					Point pb   = Draw2DUtils.getCenter(b);
+					Point pa   = a.getSelectionPoint();
+					Point pb   = b.getSelectionPoint();
 					Rectangle sa = new Rectangle(pa, pb);
 					
 					boolean quad1Or4 = ((pa.x<pb.x && pa.y<pb.y) || (pa.x>pb.x&&pa.y>pb.y));
@@ -101,6 +115,19 @@ public class BoxSelectionFigure extends FixedBoundsShape {
 		return rect;
 	}
 	
+	private void setCornerLocation( SelectionRectangle c,
+									SelectionRectangle d, 
+									Rectangle sa, 
+									boolean quad1Or4) {
+		if (quad1Or4) {
+			c.setSelectionPoint(new Point(sa.x+sa.width, sa.y));
+			d.setSelectionPoint(new Point(sa.x, sa.y+sa.height));
+		} else {
+			c.setSelectionPoint(new Point(sa.x, sa.y));
+			d.setSelectionPoint(new Point(sa.x+sa.width, sa.y+sa.height));
+		}			
+	}
+
 	protected void primTranslate(int dx, int dy) {
 
 		try {
@@ -111,44 +138,12 @@ public class BoxSelectionFigure extends FixedBoundsShape {
 		}
 	}
 
-	private void setCornerLocation(SelectionRectangle pnt1,
-									SelectionRectangle pnt2, 
-									Rectangle sa, 
-									boolean quad1Or4) {
-		if (quad1Or4) {
-			pnt1.setLocation(new Point(sa.x+sa.width-HALF_SIDE-1, sa.y-HALF_SIDE));
-			pnt2.setLocation(new Point(sa.x-HALF_SIDE, sa.y+sa.height-HALF_SIDE-1));
-		} else {
-			pnt1.setLocation(new Point(sa.x-HALF_SIDE, sa.y-HALF_SIDE));
-			pnt2.setLocation(new Point(sa.x+sa.width-HALF_SIDE-1, sa.y+sa.height-HALF_SIDE-1));
-		}			
-	}
 
 	protected Rectangle getRectangleFromVertices() {
-		final Point loc1   = Draw2DUtils.getCenter(p1);
-		final Point loc2   = Draw2DUtils.getCenter(p2);
-		final Point loc3   = Draw2DUtils.getCenter(p3);
-		final Point loc4   = Draw2DUtils.getCenter(p4);
+		final Point loc1   = p1.getSelectionPoint();
+		final Point loc4   = p4.getSelectionPoint();
 		Rectangle size = new Rectangle(loc1, loc4);
-		size = size.getUnion(loc2);
-		size = size.getUnion(loc3);
 		return size;
-	}
-
-	protected void notifyStart(MouseEvent me) {
-		
-		try {
-			isCalculateCorners = false;
-			final Point loc = me.getLocation();
-			p1.setBounds(new Rectangle(loc.x-HALF_SIDE, loc.y-HALF_SIDE, SIDE, SIDE));
-			p2.setBounds(new Rectangle(loc.x-HALF_SIDE, loc.y-HALF_SIDE, SIDE, SIDE));
-			p3.setBounds(new Rectangle(loc.x-HALF_SIDE, loc.y-HALF_SIDE, SIDE, SIDE));
-			p4.setBounds(new Rectangle(loc.x-HALF_SIDE, loc.y-HALF_SIDE, SIDE, SIDE));
-			p4.setEnabled(true);
-			p4.startMoving(me);
-		} finally {
-			isCalculateCorners = true;
-		}
 	}
 
 }

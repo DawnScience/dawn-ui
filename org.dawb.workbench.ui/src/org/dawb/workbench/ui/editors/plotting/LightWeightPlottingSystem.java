@@ -23,7 +23,6 @@ import org.csstudio.swt.xygraph.figures.Trace.PointStyle;
 import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.swt.xygraph.linearscale.AbstractScale.LabelSide;
 import org.csstudio.swt.xygraph.linearscale.LinearScale.Orientation;
-import org.csstudio.swt.xygraph.toolbar.XYGraphToolbar;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.IAxis;
@@ -290,9 +289,9 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	 */
 	@Override
 	protected void createPlot(final AbstractDataset       data, 
-			                final List<AbstractDataset> axes,
-			                final PlotType              mode, 
-			                final IProgressMonitor      monitor) {
+			                  final List<AbstractDataset> axes,
+			                  final PlotType              mode, 
+			                  final IProgressMonitor      monitor) {
 		
 		if (monitor!=null) monitor.worked(1);
 		
