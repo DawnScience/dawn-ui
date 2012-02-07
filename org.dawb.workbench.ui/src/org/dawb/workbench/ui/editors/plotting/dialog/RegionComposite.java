@@ -22,7 +22,7 @@ public class RegionComposite extends Composite {
 	private CCombo traceCombo;
 	private Button showPoints;
 
-	public RegionComposite(final Composite parent, final int style, final XYRegionGraph xyGraph) {
+	public RegionComposite(final Composite parent, final int style, final XYRegionGraph xyGraph, final int defaultSelection) {
 		
 		super(parent, SWT.NONE);
 		this.xyGraph = xyGraph;
@@ -47,7 +47,7 @@ public class RegionComposite extends Composite {
 		regionType.setToolTipText("Region type");
 		regionType.setLayoutData(new GridData(SWT.FILL, 0, true, false));
 		regionType.setItems(new String[]{"Line", "Box"});
-		regionType.select(0);
+		regionType.select(defaultSelection);
 
 		final Label traceLabel = new Label(this, SWT.NONE);
 		traceLabel.setText("Trace");

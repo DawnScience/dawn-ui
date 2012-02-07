@@ -1,10 +1,8 @@
 package org.dawb.workbench.ui.editors.plotting.swtxy;
 
 
-import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.swt.xygraph.toolbar.XYGraphToolbar;
-import org.csstudio.swt.xygraph.undo.AddAnnotationCommand;
-import org.csstudio.swt.xygraph.undo.RemoveAnnotationCommand;
+import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.workbench.ui.Activator;
 import org.dawb.workbench.ui.editors.plotting.dialog.AddRegionCommand;
 import org.dawb.workbench.ui.editors.plotting.dialog.AddRegionDialog;
@@ -14,6 +12,8 @@ import org.eclipse.draw2d.ActionEvent;
 import org.eclipse.draw2d.ActionListener;
 import org.eclipse.draw2d.Button;
 import org.eclipse.draw2d.Label;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 
@@ -27,42 +27,43 @@ public class XYRegionToolbar extends XYGraphToolbar {
 	public XYRegionToolbar(XYRegionGraph xyGraph, int flags) {
 		super(xyGraph, flags);
 	}
+	
+	public void createGraphActions(final IContributionManager tool, final IContributionManager men) {
 
-	/**
-	 * We would like the region buttons here before the zoom buttons,
-	 * so we hack in creation of some line, profile, etc buttons.
-	 */
-	protected void createExtraActions() {
+        super.createGraphActions(tool, men);
         
-		final Button addRegion = new Button(Activator.getImage("icons/ProfileLine.png"));
-		addRegion.setToolTip(new Label("Add Region..."));		
-		addButton(addRegion);
-		addRegion.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent event) {
-				AddRegionDialog dialog = new AddRegionDialog(Display.getCurrent().getActiveShell(), (XYRegionGraph)xyGraph);
+        final MenuAction regionDropDown = new MenuAction("Add a selection region");
+ 
+		final Action addLine = new Action("Add Line Selection...", Activator.getImageDescriptor("icons/ProfileLine.png")) {
+			public void run() {
+				AddRegionDialog dialog = new AddRegionDialog(Display.getCurrent().getActiveShell(), (XYRegionGraph)xyGraph, 0);
 				if(dialog.open() == Window.OK){
 					((XYRegionGraph)xyGraph).addRegion(dialog.getRegion());
 					((XYRegionGraph)xyGraph).getOperationsManager().addCommand(
 							new AddRegionCommand((XYRegionGraph)xyGraph, dialog.getRegion()));
 				}
+				regionDropDown.setSelectedAction(this);
 			}
-		});
+		};
+		regionDropDown.add(addLine);
 		
-		final Button removeRegion = new Button(Activator.getImage("icons/ProfileBox.png"));
-		removeRegion.setToolTip(new Label("Remove Region..."));
-		addButton(removeRegion);
-		removeRegion.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent event) {
-				RemoveRegionDialog dialog = new RemoveRegionDialog(Display.getCurrent().getActiveShell(), (XYRegionGraph)xyGraph);
-				if(dialog.open() == Window.OK && dialog.getRegion() != null){
-					((XYRegionGraph)xyGraph).removeRegion(dialog.getRegion());
-					xyGraph.getOperationsManager().addCommand(
-							new RemoveRegionCommand((XYRegionGraph)xyGraph, dialog.getRegion()));					
+		final Action addBox = new Action("Add Box Selection...", Activator.getImageDescriptor("icons/ProfileBox.png")) {
+			public void run() {
+				AddRegionDialog dialog = new AddRegionDialog(Display.getCurrent().getActiveShell(), (XYRegionGraph)xyGraph, 1);
+				if(dialog.open() == Window.OK){
+					((XYRegionGraph)xyGraph).addRegion(dialog.getRegion());
+					((XYRegionGraph)xyGraph).getOperationsManager().addCommand(
+							new AddRegionCommand((XYRegionGraph)xyGraph, dialog.getRegion()));
 				}
+				regionDropDown.setSelectedAction(this);
 			}
-		});
+		};
+		regionDropDown.add(addBox);
+		regionDropDown.setSelectedAction(addLine);
 		
-		addSeparator();	
+		tool.insertBefore("org.csstudio.swt.xygraph.toolbar.extra", regionDropDown);
+		men.insertBefore("org.csstudio.swt.xygraph.toolbar.extra", regionDropDown);
+			
+		
 	}
-
 }

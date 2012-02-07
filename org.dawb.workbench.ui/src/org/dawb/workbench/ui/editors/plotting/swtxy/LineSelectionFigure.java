@@ -17,6 +17,8 @@ public class LineSelectionFigure extends RegionFigure {
 	
 	private SelectionRectangle endBox, startBox;
 
+	private Figure connection;
+
 	public LineSelectionFigure(final String name, final Trace trace) {
 				
 		super(name, trace);
@@ -25,7 +27,7 @@ public class LineSelectionFigure extends RegionFigure {
 		this.startBox = new SelectionRectangle(trace, ColorConstants.cyan, new Point(10,10),  SIDE);
 		this.endBox   = new SelectionRectangle(trace, ColorConstants.cyan, new Point(100,100),SIDE);
 				
-		final Figure connection = new Figure() {
+		this.connection = new Figure() {
 			@Override
 			public void paintFigure(Graphics gc) {
 				super.paintFigure(gc);
@@ -46,19 +48,7 @@ public class LineSelectionFigure extends RegionFigure {
         add(connection);
 	    add(startBox);
 		add(endBox);
-		
-		startBox.addFigureListener(new FigureListener() {
-			@Override
-			public void figureMoved(IFigure source) {
-				connection.repaint();
-			}
-		});
-		endBox.addFigureListener(new FigureListener() {
-			@Override
-			public void figureMoved(IFigure source) {
-				connection.repaint();
-			}
-		});
+	
 		
 		setVisible(true);
 		
@@ -79,7 +69,9 @@ public class LineSelectionFigure extends RegionFigure {
 		return new FigureListener() {		
 			@Override
 			public void figureMoved(IFigure source) {
-								
+				
+				connection.repaint();
+				
 				// For each trace, calculate the real world values of the selection
 				final double[] p1 = startBox.getRealValue();
 				final double[] p2 = endBox.getRealValue();

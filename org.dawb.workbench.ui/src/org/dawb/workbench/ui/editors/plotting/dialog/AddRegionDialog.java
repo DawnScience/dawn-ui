@@ -12,13 +12,15 @@ public class AddRegionDialog extends Dialog {
 	
 	private XYRegionGraph xyGraph;
 	private RegionComposite regionComposite;
+	private int defaultSelection;
 
-	public AddRegionDialog(final Shell parentShell, final XYRegionGraph xyGraph) {
+	public AddRegionDialog(final Shell parentShell, final XYRegionGraph xyGraph, int defaultSelection) {
 		super(parentShell);	
 		
         // Allow resize
         setShellStyle(getShellStyle() | SWT.RESIZE);
         this.xyGraph = xyGraph;
+        this.defaultSelection = defaultSelection;
 	}
 	
 	@Override
@@ -30,7 +32,7 @@ public class AddRegionDialog extends Dialog {
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		final Composite parent_composite = (Composite) super.createDialogArea(parent);
-        this.regionComposite = new RegionComposite(parent_composite, SWT.NONE, xyGraph);
+        this.regionComposite = new RegionComposite(parent_composite, SWT.NONE, xyGraph, defaultSelection);
          
 		return parent_composite;
 	}
