@@ -20,7 +20,6 @@ class SelectionRectangle extends Figure {
 	SelectionRectangle(Trace trace, Color colour, Point location, int side) {
 		
 		this.trace = trace;
-		//setLayoutManager(new GridLayout(1, false));
 		setOpaque(false);
 		
 		this.label = new Figure(){
@@ -33,6 +32,7 @@ class SelectionRectangle extends Figure {
 		};
 		label.setBounds(new Rectangle(0,side,200,20));
 		label.setLocation(new Point(0,0));
+		label.setVisible(false);
 		add(label);
 
 		this.point = new RectangleFigure();
@@ -48,8 +48,7 @@ class SelectionRectangle extends Figure {
 		
         setBounds(new Rectangle(location, new Point(location.x+200, location.y+20)));
 		
- 		//setBorder(new LineBorder());
-	}
+ 	}
 
 	public double[] getRealValue() {
 		final Point p = getSelectionPoint();

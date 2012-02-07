@@ -1,6 +1,8 @@
 package org.dawb.workbench.ui.editors.plotting.swtxy;
 
 
+import java.util.List;
+
 import org.csstudio.swt.xygraph.toolbar.XYGraphToolbar;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.workbench.ui.Activator;
@@ -8,12 +10,9 @@ import org.dawb.workbench.ui.editors.plotting.dialog.AddRegionCommand;
 import org.dawb.workbench.ui.editors.plotting.dialog.AddRegionDialog;
 import org.dawb.workbench.ui.editors.plotting.dialog.RemoveRegionCommand;
 import org.dawb.workbench.ui.editors.plotting.dialog.RemoveRegionDialog;
-import org.eclipse.draw2d.ActionEvent;
-import org.eclipse.draw2d.ActionListener;
-import org.eclipse.draw2d.Button;
-import org.eclipse.draw2d.Label;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IContributionManager;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 
@@ -33,14 +32,22 @@ public class XYRegionToolbar extends XYGraphToolbar {
         super.createGraphActions(tool, men);
         
         final MenuAction regionDropDown = new MenuAction("Add a selection region");
+        regionDropDown.setId("org.dawb.workbench.ui.editors.plotting.swtxy.addRegions");
  
 		final Action addLine = new Action("Add Line Selection...", Activator.getImageDescriptor("icons/ProfileLine.png")) {
 			public void run() {
-				AddRegionDialog dialog = new AddRegionDialog(Display.getCurrent().getActiveShell(), (XYRegionGraph)xyGraph, 0);
-				if(dialog.open() == Window.OK){
-					((XYRegionGraph)xyGraph).addRegion(dialog.getRegion());
-					((XYRegionGraph)xyGraph).getOperationsManager().addCommand(
-							new AddRegionCommand((XYRegionGraph)xyGraph, dialog.getRegion()));
+				
+				if (xyGraph.getPlotArea().getTraceList().size()==0) {
+					MessageDialog.openError(Display.getCurrent().getActiveShell(), "Selections must be added to plots", "Please plot something before selecting a region.");
+				} if (xyGraph.getPlotArea().getTraceList().size()==1) {
+					final RegionFigure region = new LineSelectionFigure(getUniqueName("Line"), xyGraph.getPlotArea().getTraceList().get(0));
+					addRegion(region);
+				} else {
+					AddRegionDialog dialog = new AddRegionDialog(Display.getCurrent().getActiveShell(), (XYRegionGraph)xyGraph, 0);
+					if(dialog.open() == Window.OK){
+						final RegionFigure region = dialog.getRegion();
+						addRegion(region);
+					}
 				}
 				regionDropDown.setSelectedAction(this);
 			}
@@ -49,11 +56,18 @@ public class XYRegionToolbar extends XYGraphToolbar {
 		
 		final Action addBox = new Action("Add Box Selection...", Activator.getImageDescriptor("icons/ProfileBox.png")) {
 			public void run() {
-				AddRegionDialog dialog = new AddRegionDialog(Display.getCurrent().getActiveShell(), (XYRegionGraph)xyGraph, 1);
-				if(dialog.open() == Window.OK){
-					((XYRegionGraph)xyGraph).addRegion(dialog.getRegion());
-					((XYRegionGraph)xyGraph).getOperationsManager().addCommand(
-							new AddRegionCommand((XYRegionGraph)xyGraph, dialog.getRegion()));
+				
+				if (xyGraph.getPlotArea().getTraceList().size()==0) {
+					MessageDialog.openError(Display.getCurrent().getActiveShell(), "Selections must be added to plots", "Please plot something before selecting a region.");
+				} if (xyGraph.getPlotArea().getTraceList().size()==1) {
+					final RegionFigure region = new BoxSelectionFigure(getUniqueName("Box"), xyGraph.getPlotArea().getTraceList().get(0));
+					addRegion(region);
+				} else {
+					AddRegionDialog dialog = new AddRegionDialog(Display.getCurrent().getActiveShell(), (XYRegionGraph)xyGraph, 1);
+					if(dialog.open() == Window.OK){
+						final RegionFigure region = dialog.getRegion();
+						addRegion(region);
+					}
 				}
 				regionDropDown.setSelectedAction(this);
 			}
@@ -64,6 +78,32 @@ public class XYRegionToolbar extends XYGraphToolbar {
 		tool.insertBefore("org.csstudio.swt.xygraph.toolbar.extra", regionDropDown);
 		men.insertBefore("org.csstudio.swt.xygraph.toolbar.extra", regionDropDown);
 			
+		final Action removeRegion = new Action("Remove Region...", Activator.getImageDescriptor("icons/RegionDelete.png")) {
+			public void run() {
+				RemoveRegionDialog dialog = new RemoveRegionDialog(Display.getCurrent().getActiveShell(), (XYRegionGraph)xyGraph);
+				if(dialog.open() == Window.OK && dialog.getRegion() != null){
+					((XYRegionGraph)xyGraph).removeRegion(dialog.getRegion());
+					xyGraph.getOperationsManager().addCommand(
+							new RemoveRegionCommand((XYRegionGraph)xyGraph, dialog.getRegion()));					
+				}
+			}
+		};
 		
+		tool.insertAfter("org.dawb.workbench.ui.editors.plotting.swtxy.addRegions", removeRegion);
+		men.insertAfter("org.dawb.workbench.ui.editors.plotting.swtxy.addRegions", removeRegion);
+	}
+
+	protected String getUniqueName(String base) {
+		int val = 1;
+		final List<String> regions = ((RegionArea)xyGraph.getPlotArea()).getRegionNames();
+		if (regions==null) return base+" "+val;
+		while(regions.contains(base+" "+val)) val++;
+		return base+" "+val;
+	}
+
+	protected void addRegion(RegionFigure region) {
+		((XYRegionGraph)xyGraph).addRegion(region);
+		((XYRegionGraph)xyGraph).getOperationsManager().addCommand(
+				new AddRegionCommand((XYRegionGraph)xyGraph, region));
 	}
 }

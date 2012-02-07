@@ -72,4 +72,12 @@ public class RegionArea extends PlotArea {
 		super.paintClientArea(graphics);
 
 	}
+
+
+	public List<String> getRegionNames() {
+		if (regionList==null|| regionList.isEmpty()) return null;
+		final List<String> names = new ArrayList<String>(regionList.size());
+		for (RegionFigure region : regionList) names.add(region.getName());
+		return names;
+	}
 }

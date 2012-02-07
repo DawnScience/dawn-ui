@@ -1,5 +1,10 @@
 package org.dawb.workbench.ui.editors.plotting.dialog;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.csstudio.swt.xygraph.figures.Trace;
 import org.dawb.workbench.ui.editors.plotting.swtxy.BoxSelectionFigure;
 import org.dawb.workbench.ui.editors.plotting.swtxy.LineSelectionFigure;
@@ -65,15 +70,38 @@ public class RegionComposite extends Composite {
 		showPoints.setText("Show vertex values");		
 		showPoints.setToolTipText("When on this will show the actual value of the point in the axes it was added.");
 		showPoints.setLayoutData(new GridData(0, 0, false, false, 2, 1));
+
+		nameText.setText(getDefaultName(defaultSelection));
+
 	}
 
-	
+	private static Map<Integer,Integer> countMap;
+	private String getDefaultName(int sel) {
+		if (countMap==null) countMap = new HashMap<Integer,Integer>(5);
+		if (!countMap.containsKey(sel)) {
+			countMap.put(sel, 0);
+		}
+		int count = countMap.get(sel);
+		count++;
+		return regionType.getItem(sel)+" "+count;
+	}
+
+
 	public RegionFigure createRegion() {
 		
 		final Trace trace = xyGraph.getPlotArea().getTraceList().get(traceCombo.getSelectionIndex());
 		RegionFigure region=null;
-		if (regionType.getSelectionIndex()==0) region = new LineSelectionFigure(nameText.getText(), trace);
-		if (regionType.getSelectionIndex()==1) region = new BoxSelectionFigure(nameText.getText(), trace);
+		
+		final String txt = nameText.getText();
+		final Pattern pattern = Pattern.compile(".* (\\d+)");
+		final Matcher matcher = pattern.matcher(txt);
+		if (matcher.matches()) {
+			final int count = Integer.parseInt(matcher.group(1));
+			countMap.put(regionType.getSelectionIndex(), count);
+		}
+		
+		if (regionType.getSelectionIndex()==0) region = new LineSelectionFigure(txt, trace);
+		if (regionType.getSelectionIndex()==1) region = new BoxSelectionFigure(txt, trace);
 		
 		region.setShowPosition(showPoints.getSelection());
 		
