@@ -13,7 +13,6 @@ import org.eclipse.swt.graphics.Color;
 public class BoxSelectionFigure extends RegionShape {
 		
 	private static final int SIDE      = 8;
-	private static final int HALF_SIDE = SIDE/2;
 	
 	private SelectionRectangle p1,  p2, p3, p4;
 	
@@ -32,9 +31,9 @@ public class BoxSelectionFigure extends RegionShape {
 		setFocusTraversable(false);
         setOpaque(false);
         
-		this.p1  = createSelectionRectangle(ColorConstants.green,  new Point(10,10), SIDE);
-		this.p2  = createSelectionRectangle(ColorConstants.green,  new Point(100,10), SIDE);
-		this.p3  = createSelectionRectangle(ColorConstants.green,  new Point(10,100), SIDE);
+		this.p1  = createSelectionRectangle(ColorConstants.green,  new Point(10,10),   SIDE);
+		this.p2  = createSelectionRectangle(ColorConstants.green,  new Point(100,10),  SIDE);
+		this.p3  = createSelectionRectangle(ColorConstants.green,  new Point(10,100),  SIDE);
 		this.p4  = createSelectionRectangle(ColorConstants.green,  new Point(100,100), SIDE);
 				
 		final Shape connection = new Shape() {
@@ -121,9 +120,9 @@ public class BoxSelectionFigure extends RegionShape {
 									boolean quad1Or4) {
 		if (quad1Or4) {
 			c.setSelectionPoint(new Point(sa.x+sa.width, sa.y));
-			d.setSelectionPoint(new Point(sa.x, sa.y+sa.height));
+			d.setSelectionPoint(new Point(sa.x,          sa.y+sa.height));
 		} else {
-			c.setSelectionPoint(new Point(sa.x, sa.y));
+			c.setSelectionPoint(new Point(sa.x,          sa.y));
 			d.setSelectionPoint(new Point(sa.x+sa.width, sa.y+sa.height));
 		}			
 	}

@@ -40,7 +40,7 @@ public class FigureMover implements MouseListener, MouseMotionListener {
 		location = newLocation;
 		UpdateManager updateMgr = figure.getUpdateManager();
 		LayoutManager layoutMgr = figure.getParent().getLayoutManager();
-		Rectangle bounds = figure.getParent().getBounds(); // was figure.getBounds()
+		Rectangle bounds = figure.getBounds();
 		updateMgr.addDirtyRegion(figure.getParent(), bounds);
 		bounds = bounds.getCopy().translate(offset.width, offset.height);
 		if (layoutMgr!=null) layoutMgr.setConstraint(figure, bounds);

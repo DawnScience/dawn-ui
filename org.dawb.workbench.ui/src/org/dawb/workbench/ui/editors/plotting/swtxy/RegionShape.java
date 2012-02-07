@@ -81,7 +81,6 @@ public abstract class RegionShape extends Shape {
 	}
   
 	private boolean showPosition = true;
-	private Rectangle fixedBounds;
 
 	public boolean isShowPosition() {
 		return showPosition;
@@ -90,15 +89,4 @@ public abstract class RegionShape extends Shape {
 	public void setShowPosition(boolean showPosition) {
 		this.showPosition = showPosition;
 	}
-
-	public void setBounds(final Rectangle bounds) {
-		super.setBounds(bounds);
-		this.fixedBounds = bounds;
-	}
-
-	protected void primTranslate(int dx, int dy) {
-        super.primTranslate(dx, dy);
-		this.bounds = this.bounds.getUnion(fixedBounds);
-	}
-
 }

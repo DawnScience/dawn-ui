@@ -79,13 +79,18 @@ class SelectionRectangle extends Figure {
 	}
 
 	public Point getSelectionPoint() {
-		return Draw2DUtils.getCenter(point);
+		final Point loc = getLocation();
+		final int pntWid = point.getBounds().width;
+		final int pntHgt = point.getBounds().height;
+		return new Point(loc.x+(pntWid/2), loc.y+(pntHgt/2));
 	}
 
 	protected void setSelectionPoint(Point p) {
 		final int pntWid = point.getBounds().width;
 		final int pntHgt = point.getBounds().height;
-		setLocation(new Point(p.x-(pntWid/2), p.y-(pntHgt/2)));
+		final Point loc = new Point(p.x-(pntWid/2), p.y-(pntHgt/2));
+		setLocation(loc);
+		point.setLocation(loc);
 		revalidate();
 	}
 
