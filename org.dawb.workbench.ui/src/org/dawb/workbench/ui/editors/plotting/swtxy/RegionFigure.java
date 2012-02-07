@@ -4,6 +4,7 @@ import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.Trace;
 import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.eclipse.draw2d.Figure;
+import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.graphics.Color;
 
 /**
@@ -77,4 +78,5 @@ public abstract class RegionFigure extends Figure {
 	public void setShowPosition(boolean showPosition) {
 		this.showPosition = showPosition;
 	}
+	
 }

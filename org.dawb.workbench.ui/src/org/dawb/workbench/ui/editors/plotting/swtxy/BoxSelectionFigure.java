@@ -15,6 +15,8 @@ public class BoxSelectionFigure extends RegionFigure {
 	private static final int SIDE      = 8;
 	
 	private SelectionRectangle p1,  p2, p3, p4;
+
+	private Figure connection;
 	
 	/**
 	 *     p1------------p2
@@ -36,7 +38,7 @@ public class BoxSelectionFigure extends RegionFigure {
 		this.p3  = createSelectionRectangle(ColorConstants.green,  new Point(10,100),  SIDE);
 		this.p4  = createSelectionRectangle(ColorConstants.green,  new Point(100,100), SIDE);
 				
-		final Figure connection = new Figure() {
+		this.connection = new Figure() {
 			@Override
 			public void paintFigure(Graphics gc) {
 				super.paintFigure(gc);
@@ -50,8 +52,7 @@ public class BoxSelectionFigure extends RegionFigure {
 		connection.setBackgroundColor(ColorConstants.green);
 		connection.setBounds(new Rectangle(p4.getSelectionPoint(), p1.getSelectionPoint()));
 		connection.setOpaque(false);
-     	new FigureMover(this);
-		
+  		
         add(connection);
 		add(p1);
 		add(p2);
@@ -59,6 +60,10 @@ public class BoxSelectionFigure extends RegionFigure {
 		add(p4);
 		
 		setVisible(true);
+
+		
+	   	new FigureMover(trace.getXYGraph(), this, connection, true);
+
 	}
 	
 	public void setShowPosition(boolean showPosition) {
@@ -74,6 +79,7 @@ public class BoxSelectionFigure extends RegionFigure {
 	private SelectionRectangle createSelectionRectangle(Color color, Point location, int size) {
 		
 		SelectionRectangle rect = new SelectionRectangle(trace, color,  location, size);
+		new FigureMover(trace.getXYGraph(), rect, false);	
 		
 		rect.addFigureListener(new FigureListener() {
 			@Override
@@ -119,19 +125,9 @@ public class BoxSelectionFigure extends RegionFigure {
 		} else {
 			c.setSelectionPoint(new Point(sa.x,          sa.y));
 			d.setSelectionPoint(new Point(sa.x+sa.width, sa.y+sa.height));
-		}			
-	}
-
-	protected void primTranslate(int dx, int dy) {
-
-		try {
-			isCalculateCorners = false;
-			super.primTranslate(dx, dy);
-		} finally {
-			isCalculateCorners = true;
 		}
+		connection.repaint();
 	}
-
 
 	protected Rectangle getRectangleFromVertices() {
 		final Point loc1   = p1.getSelectionPoint();

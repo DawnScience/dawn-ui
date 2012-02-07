@@ -42,7 +42,6 @@ class SelectionRectangle extends Figure {
 		point.setOpaque(false);
 		point.setBounds(new Rectangle(0,0,side,side));
 		point.setCursor(Draw2DUtils.getRoiControlPointCursor());
-		new FigureMover(this);	
 		add(point);
 		
 		

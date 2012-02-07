@@ -1,5 +1,8 @@
 package org.dawb.workbench.ui.editors.plotting.swtxy;
 
+import java.util.List;
+
+import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.LayoutManager;
 import org.eclipse.draw2d.MouseEvent;
@@ -18,29 +21,50 @@ import org.eclipse.draw2d.geometry.Rectangle;
 public class FigureMover implements MouseListener, MouseMotionListener {
 
 	private final IFigure figure;
-    
-	public FigureMover(IFigure figure) {
-		this.figure = figure;
-		figure.addMouseListener(this);
-		figure.addMouseMotionListener(this);
+	private Rectangle bounds;
+	private boolean translateChildren;
+	private XYGraph xyGraph;
+	private Dimension cumulativeOffset;
+	private Point startLocation;
+   
+	public FigureMover(XYGraph xyGraph, IFigure figure, boolean translateChildren) {
+		this(xyGraph, figure, figure, translateChildren);
 	}
 
+	public FigureMover(XYGraph xyGraph, IFigure figure, IFigure listener, boolean translateChildren) {
+		this.figure = figure;
+		listener.addMouseListener(this);
+		listener.addMouseMotionListener(this);
+		this.translateChildren = translateChildren;
+		this.xyGraph = xyGraph;
+	}
 
 	@Override
 	public void mouseDragged(MouseEvent event) {
 		if (location == null) return;
 		Point newLocation = event.getLocation();
 		if (newLocation == null) return;
+		
+		this.cumulativeOffset = newLocation.getDifference(startLocation);
+
 		Dimension offset = newLocation.getDifference(location);
 		if (offset.width == 0 && offset.height == 0) return;
 		location = newLocation;
 		UpdateManager updateMgr = figure.getUpdateManager();
 		LayoutManager layoutMgr = figure.getParent().getLayoutManager();
-		Rectangle bounds = figure.getBounds();
+		bounds = figure.getBounds();
 		updateMgr.addDirtyRegion(figure.getParent(), bounds);
-		bounds = bounds.getCopy().translate(offset.width, offset.height);
+		
+		this.bounds = bounds.getCopy().translate(offset.width, offset.height);
 		if (layoutMgr!=null) layoutMgr.setConstraint(figure, bounds);
-		figure.translate(offset.width, offset.height);
+		
+		if (translateChildren) {
+			final List<IFigure> children = figure.getChildren();
+			for (int i = 0; i < children.size(); i++)
+				((IFigure) children.get(i)).translate(offset.width, offset.height);
+		} else {
+		    figure.translate(offset.width, offset.height);
+		}
 	
 		updateMgr.addDirtyRegion(figure.getParent(), bounds);
 		
@@ -71,12 +95,15 @@ public class FigureMover implements MouseListener, MouseMotionListener {
 	@Override
 	public void mousePressed(MouseEvent event) {
 		location = event.getLocation();
+		startLocation = event.getLocation();
 		event.consume();
 	}
 	@Override
 	public void mouseReleased(MouseEvent event) {
 		if (location == null) return;
+		xyGraph.getOperationsManager().addCommand(new MoverCommand(figure, cumulativeOffset, translateChildren));
 		location = null;
+		
 		event.consume();
 	}
 	@Override

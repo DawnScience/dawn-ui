@@ -3,14 +3,10 @@ package org.dawb.workbench.ui.editors.plotting.swtxy;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.imageio.ImageIO;
-
 import org.csstudio.swt.xygraph.figures.PlotArea;
 import org.eclipse.draw2d.Graphics;
-import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Display;
 
 public class RegionArea extends PlotArea {
 

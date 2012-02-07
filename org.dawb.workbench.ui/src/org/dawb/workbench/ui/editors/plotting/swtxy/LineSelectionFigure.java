@@ -25,7 +25,10 @@ public class LineSelectionFigure extends RegionFigure {
         setOpaque(false);
         
 		this.startBox = new SelectionRectangle(trace, ColorConstants.cyan, new Point(10,10),  SIDE);
+		new FigureMover(trace.getXYGraph(), startBox, false);	
+
 		this.endBox   = new SelectionRectangle(trace, ColorConstants.cyan, new Point(100,100),SIDE);
+		new FigureMover(trace.getXYGraph(), endBox, false);	
 				
 		this.connection = new Figure() {
 			@Override
@@ -43,7 +46,6 @@ public class LineSelectionFigure extends RegionFigure {
 		connection.setForegroundColor(ColorConstants.cyan);
 		connection.setBounds(new Rectangle(startBox.getSelectionPoint(), endBox.getSelectionPoint()));
 		connection.setOpaque(false);
-		new FigureMover(this);
 		
         add(connection);
 	    add(startBox);
@@ -53,9 +55,11 @@ public class LineSelectionFigure extends RegionFigure {
 		setVisible(true);
 		
 		final FigureListener figListener = createFigureListener();
-		addFigureListener(figListener);
 		startBox.addFigureListener(figListener);
 		endBox.addFigureListener(figListener);
+		
+		new FigureMover(trace.getXYGraph(), this, connection, true);
+
 	}
 	
 	public void setShowPosition(boolean showPosition) {
