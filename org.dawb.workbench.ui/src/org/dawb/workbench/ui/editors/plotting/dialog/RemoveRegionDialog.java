@@ -1,7 +1,7 @@
 package org.dawb.workbench.ui.editors.plotting.dialog;
 
 import org.dawb.workbench.ui.editors.plotting.swtxy.RegionArea;
-import org.dawb.workbench.ui.editors.plotting.swtxy.RegionShape;
+import org.dawb.workbench.ui.editors.plotting.swtxy.RegionFigure;
 import org.dawb.workbench.ui.editors.plotting.swtxy.XYRegionGraph;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
@@ -21,7 +21,7 @@ public class RemoveRegionDialog extends Dialog {
 	
 	private XYRegionGraph xyGraph;
 	private Combo regionCombo;
-	private RegionShape removedRegion;
+	private RegionFigure removedRegion;
 	
 	public RemoveRegionDialog(Shell parentShell, XYRegionGraph xyGraph) {
 		super(parentShell);	
@@ -49,7 +49,7 @@ public class RemoveRegionDialog extends Dialog {
 	        removeLabel.setText("Select the region to be removed: ");        
 	        regionCombo = new Combo(composite, SWT.DROP_DOWN);
 	        regionCombo.setLayoutData(new GridData(SWT.FILL, 0, true, false));
-	        for(RegionShape region : ((RegionArea)xyGraph.getPlotArea()).getRegionList())
+	        for(RegionFigure region : ((RegionArea)xyGraph.getPlotArea()).getRegionList())
 	        	regionCombo.add(region.getName());
 	        regionCombo.select(0);
         }else{
@@ -70,7 +70,7 @@ public class RemoveRegionDialog extends Dialog {
 	/**
 	 * @return the annotation to be removed.
 	 */
-	public RegionShape getRegion() {
+	public RegionFigure getRegion() {
 		return removedRegion;
 	}
 }

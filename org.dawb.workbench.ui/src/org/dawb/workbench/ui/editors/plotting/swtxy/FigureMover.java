@@ -20,13 +20,9 @@ public class FigureMover implements MouseListener, MouseMotionListener {
 	private final IFigure figure;
     
 	public FigureMover(IFigure figure) {
-		this(figure, figure);
-	}
-	
-	public FigureMover(IFigure listen, IFigure move) {
-		this.figure = move;
-		listen.addMouseListener(this);
-		listen.addMouseMotionListener(this);
+		this.figure = figure;
+		figure.addMouseListener(this);
+		figure.addMouseMotionListener(this);
 	}
 
 
@@ -45,6 +41,7 @@ public class FigureMover implements MouseListener, MouseMotionListener {
 		bounds = bounds.getCopy().translate(offset.width, offset.height);
 		if (layoutMgr!=null) layoutMgr.setConstraint(figure, bounds);
 		figure.translate(offset.width, offset.height);
+	
 		updateMgr.addDirtyRegion(figure.getParent(), bounds);
 		
 		event.consume();

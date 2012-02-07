@@ -6,7 +6,6 @@ import java.text.NumberFormat;
 import org.csstudio.swt.xygraph.figures.Trace;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
-import org.eclipse.draw2d.MouseEvent;
 import org.eclipse.draw2d.RectangleFigure;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
@@ -14,7 +13,6 @@ import org.eclipse.swt.graphics.Color;
 
 class SelectionRectangle extends Figure {
 	
-	private FigureMover     mover;
 	private RectangleFigure point;
 	private Figure          label;
 	private Trace trace;
@@ -24,18 +22,15 @@ class SelectionRectangle extends Figure {
 		this.trace = trace;
 		//setLayoutManager(new GridLayout(1, false));
 		setOpaque(false);
-		setRequestFocusEnabled(false);
-		setFocusTraversable(false);
 		
 		this.label = new Figure(){
 			protected void paintFigure(Graphics graphics) {
+				if (!isVisible()) return;
                 final String text = getLabelPositionText(getRealValue());
                 graphics.drawString(text, getLocation());
                 super.paintFigure(graphics);
 			}
 		};
-		label.setRequestFocusEnabled(false);
-		label.setFocusTraversable(false);
 		label.setBounds(new Rectangle(0,side,200,20));
 		label.setLocation(new Point(0,0));
 		add(label);
@@ -47,7 +42,7 @@ class SelectionRectangle extends Figure {
 		point.setOpaque(false);
 		point.setBounds(new Rectangle(0,0,side,side));
 		point.setCursor(Draw2DUtils.getRoiControlPointCursor());
-		this.mover = new FigureMover(point, this);	
+		new FigureMover(this);	
 		add(point);
 		
 		
@@ -56,19 +51,20 @@ class SelectionRectangle extends Figure {
  		//setBorder(new LineBorder());
 	}
 
-	public void startMoving(MouseEvent me) {
-		mover.startMoving(me);
-	}
-
 	public double[] getRealValue() {
 		final Point p = getSelectionPoint();
-		return new double[]{trace.getXAxis().getPositionValue(p.x, false), trace.getYAxis().getPositionValue(p.y, false)};
+		try {
+		    return new double[]{trace.getXAxis().getPositionValue(p.x, false), trace.getYAxis().getPositionValue(p.y, false)};
+		} catch (NullPointerException ne) {
+			return new double[]{Double.NaN, Double.NaN};
+		}
 	}
 	
 	private NumberFormat format = new DecimalFormat("######0.00");
 	
 	protected String getLabelPositionText(double[] p) {
-		if (label==null) return "";
+		
+		if (Double.isNaN(p[0])||Double.isNaN(p[1])) return "";
 		final StringBuilder buf = new StringBuilder();
 		buf.append("(");
 		buf.append(format.format(p[0]));

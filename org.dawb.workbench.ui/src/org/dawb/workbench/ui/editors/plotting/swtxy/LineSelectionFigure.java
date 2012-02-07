@@ -2,17 +2,16 @@ package org.dawb.workbench.ui.editors.plotting.swtxy;
 
 import org.csstudio.swt.xygraph.figures.Trace;
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.FigureListener;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.MouseEvent;
-import org.eclipse.draw2d.Shape;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
 
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 
-public class LineSelectionFigure extends RegionShape {
+public class LineSelectionFigure extends RegionFigure {
 		
 	private static final int SIDE      = 8;
 	
@@ -21,37 +20,45 @@ public class LineSelectionFigure extends RegionShape {
 	public LineSelectionFigure(final String name, final Trace trace) {
 				
 		super(name, trace);
-		setRequestFocusEnabled(false);
-		setFocusTraversable(false);
         setOpaque(false);
         
-		this.startBox = new SelectionRectangle(trace, ColorConstants.cyan, new Point(10,10),SIDE);
+		this.startBox = new SelectionRectangle(trace, ColorConstants.cyan, new Point(10,10),  SIDE);
 		this.endBox   = new SelectionRectangle(trace, ColorConstants.cyan, new Point(100,100),SIDE);
 				
-		final Shape connection = new Shape() {
-			protected void outlineShape(Graphics gc) {
+		final Figure connection = new Figure() {
+			@Override
+			public void paintFigure(Graphics gc) {
+				super.paintFigure(gc);
 				final Point startCenter = startBox.getSelectionPoint();
 				final Point endCenter   = endBox.getSelectionPoint();
+				this.bounds = new Rectangle(startCenter, endCenter);
+				gc.setLineWidth(2);
+				gc.setAlpha(80);
 				gc.drawLine(startCenter, endCenter);
-				setBounds(new Rectangle(startCenter, endCenter));
-			}
-			@Override
-			protected void fillShape(Graphics graphics) {
-				// TODO Auto-generated method stub
-				
 			}
 		};
 		connection.setCursor(Draw2DUtils.getRoiMoveCursor());
-		connection.setLineWidth(2);
-		connection.setAlpha(80);
 		connection.setForegroundColor(ColorConstants.cyan);
-		connection.setBounds(new Rectangle(Draw2DUtils.getCenter(startBox), Draw2DUtils.getCenter(endBox)));
+		connection.setBounds(new Rectangle(startBox.getSelectionPoint(), endBox.getSelectionPoint()));
 		connection.setOpaque(false);
-		new FigureMover(connection, this);
+		new FigureMover(this);
 		
-		add(startBox);
-		add(endBox);
         add(connection);
+	    add(startBox);
+		add(endBox);
+		
+		startBox.addFigureListener(new FigureListener() {
+			@Override
+			public void figureMoved(IFigure source) {
+				connection.repaint();
+			}
+		});
+		endBox.addFigureListener(new FigureListener() {
+			@Override
+			public void figureMoved(IFigure source) {
+				connection.repaint();
+			}
+		});
 		
 		setVisible(true);
 		
@@ -72,7 +79,7 @@ public class LineSelectionFigure extends RegionShape {
 		return new FigureListener() {		
 			@Override
 			public void figureMoved(IFigure source) {
-				
+								
 				// For each trace, calculate the real world values of the selection
 				final double[] p1 = startBox.getRealValue();
 				final double[] p2 = endBox.getRealValue();

@@ -3,7 +3,7 @@ package org.dawb.workbench.ui.editors.plotting.dialog;
 import org.csstudio.swt.xygraph.figures.Trace;
 import org.dawb.workbench.ui.editors.plotting.swtxy.BoxSelectionFigure;
 import org.dawb.workbench.ui.editors.plotting.swtxy.LineSelectionFigure;
-import org.dawb.workbench.ui.editors.plotting.swtxy.RegionShape;
+import org.dawb.workbench.ui.editors.plotting.swtxy.RegionFigure;
 import org.dawb.workbench.ui.editors.plotting.swtxy.XYRegionGraph;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
@@ -68,10 +68,10 @@ public class RegionComposite extends Composite {
 	}
 
 	
-	public RegionShape createRegion() {
+	public RegionFigure createRegion() {
 		
 		final Trace trace = xyGraph.getPlotArea().getTraceList().get(traceCombo.getSelectionIndex());
-		RegionShape region=null;
+		RegionFigure region=null;
 		if (regionType.getSelectionIndex()==0) region = new LineSelectionFigure(nameText.getText(), trace);
 		if (regionType.getSelectionIndex()==1) region = new BoxSelectionFigure(nameText.getText(), trace);
 		
@@ -81,7 +81,7 @@ public class RegionComposite extends Composite {
 	}
 	
 	
-	public void editRegion(RegionShape region) {
+	public void editRegion(RegionFigure region) {
         throw new RuntimeException("Please implement editRegion!");
 	}
 }

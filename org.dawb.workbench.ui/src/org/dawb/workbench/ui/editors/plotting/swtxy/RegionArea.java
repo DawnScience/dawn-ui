@@ -3,8 +3,14 @@ package org.dawb.workbench.ui.editors.plotting.swtxy;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.imageio.ImageIO;
+
 import org.csstudio.swt.xygraph.figures.PlotArea;
+import org.eclipse.draw2d.Graphics;
+import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 
 public class RegionArea extends PlotArea {
 
@@ -12,12 +18,12 @@ public class RegionArea extends PlotArea {
 		super(xyGraph);
 	}
 		
-	final private List<RegionShape> regionList = new ArrayList<RegionShape>();
+	final private List<RegionFigure> regionList = new ArrayList<RegionFigure>();
 
 	@Override
 	protected void layout() {
 	    final Rectangle clientArea = getClientArea();
-		for(RegionShape region : regionList){
+		for(RegionFigure region : regionList){
 			if(region != null && region.isVisible())
 				region.setBounds(clientArea);			
 		}		
@@ -26,7 +32,7 @@ public class RegionArea extends PlotArea {
 	}
 	
 
-	public void addRegion(final RegionShape region){
+	public void addRegion(final RegionFigure region){
 		regionList.add(region);
 		region.setxyGraph(xyGraph);
 		add(region);
@@ -34,7 +40,7 @@ public class RegionArea extends PlotArea {
 	}
 
 
-	public boolean removeRegion(final RegionShape region){
+	public boolean removeRegion(final RegionFigure region){
 	    final boolean result = regionList.remove(region);
 		//if(!region.isFree()) region.getTrace().getDataProvider().removeDataProviderListener(region);
 		if(result){
@@ -44,7 +50,26 @@ public class RegionArea extends PlotArea {
 		return result;
 	}
 	
-	public List<RegionShape> getRegionList() {
+	public List<RegionFigure> getRegionList() {
 		return regionList;
+	}
+	
+	private Image rawImage;
+	
+	@Override
+	protected void paintClientArea(final Graphics graphics) {
+	
+// TODO
+//		if (rawImage==null) {
+//			rawImage = new Image(Display.getCurrent(), "C:/tmp/ESRF_Pilatus_Data.png");
+//		}
+//		
+//		final Rectangle bounds = getBounds();
+//		final Image scaled = new Image(Display.getCurrent(),
+//				rawImage.getImageData().scaledTo(bounds.width,bounds.height));
+//		graphics.drawImage(scaled, new Point(0,0));
+//
+		super.paintClientArea(graphics);
+
 	}
 }

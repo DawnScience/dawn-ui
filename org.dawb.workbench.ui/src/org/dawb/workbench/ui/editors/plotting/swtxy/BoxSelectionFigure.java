@@ -2,15 +2,15 @@ package org.dawb.workbench.ui.editors.plotting.swtxy;
 
 import org.csstudio.swt.xygraph.figures.Trace;
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.FigureListener;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.Shape;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.graphics.Color;
 
-public class BoxSelectionFigure extends RegionShape {
+public class BoxSelectionFigure extends RegionFigure {
 		
 	private static final int SIDE      = 8;
 	
@@ -36,26 +36,21 @@ public class BoxSelectionFigure extends RegionShape {
 		this.p3  = createSelectionRectangle(ColorConstants.green,  new Point(10,100),  SIDE);
 		this.p4  = createSelectionRectangle(ColorConstants.green,  new Point(100,100), SIDE);
 				
-		final Shape connection = new Shape() {
-			protected void outlineShape(Graphics gc) {
-			}
+		final Figure connection = new Figure() {
 			@Override
-			protected void fillShape(Graphics gc) {
-                final Rectangle size = getRectangleFromVertices();				
+			public void paintFigure(Graphics gc) {
+				super.paintFigure(gc);
+				final Rectangle size = getRectangleFromVertices();				
+				this.bounds = size;
+				gc.setAlpha(80);
 				gc.fillRectangle(size);
-				setBounds(size);
-				
 			}
 		};
 		connection.setCursor(Draw2DUtils.getRoiMoveCursor());
-		connection.setLineWidth(2);
-		connection.setAlpha(80);
 		connection.setBackgroundColor(ColorConstants.green);
 		connection.setBounds(new Rectangle(p4.getSelectionPoint(), p1.getSelectionPoint()));
 		connection.setOpaque(false);
-		connection.setRequestFocusEnabled(false);
-		connection.setFocusTraversable(false);
-     	new FigureMover(connection, this);
+     	new FigureMover(this);
 		
         add(connection);
 		add(p1);
