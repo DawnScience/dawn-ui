@@ -1,5 +1,7 @@
 package org.dawb.workbench.ui.editors.plotting.swtxy;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.csstudio.swt.xygraph.figures.XYGraph;
@@ -22,53 +24,54 @@ public class FigureMover implements MouseListener, MouseMotionListener {
 
 	private final IFigure figure;
 	private Rectangle bounds;
-	private boolean translateChildren;
 	private XYGraph xyGraph;
 	private Dimension cumulativeOffset;
 	private Point startLocation;
+	private List<IFigure> translations;
    
-	public FigureMover(XYGraph xyGraph, IFigure figure, boolean translateChildren) {
-		this(xyGraph, figure, figure, translateChildren);
+	public FigureMover(XYGraph xyGraph, IFigure figure) {
+		this(xyGraph, figure, figure, Arrays.asList(new IFigure[]{figure}));
 	}
 
-	public FigureMover(XYGraph xyGraph, IFigure figure, IFigure listener, boolean translateChildren) {
+	public FigureMover(XYGraph xyGraph, IFigure figure, IFigure listener, List<IFigure> translations) {
 		this.figure = figure;
 		listener.addMouseListener(this);
 		listener.addMouseMotionListener(this);
-		this.translateChildren = translateChildren;
+		this.translations = translations;
 		this.xyGraph = xyGraph;
 	}
 
 	@Override
 	public void mouseDragged(MouseEvent event) {
-		if (location == null) return;
-		Point newLocation = event.getLocation();
-		if (newLocation == null) return;
 		
-		this.cumulativeOffset = newLocation.getDifference(startLocation);
-
-		Dimension offset = newLocation.getDifference(location);
-		if (offset.width == 0 && offset.height == 0) return;
-		location = newLocation;
-		UpdateManager updateMgr = figure.getUpdateManager();
-		LayoutManager layoutMgr = figure.getParent().getLayoutManager();
-		bounds = figure.getBounds();
-		updateMgr.addDirtyRegion(figure.getParent(), bounds);
 		
-		this.bounds = bounds.getCopy().translate(offset.width, offset.height);
-		if (layoutMgr!=null) layoutMgr.setConstraint(figure, bounds);
-		
-		if (translateChildren) {
-			final List<IFigure> children = figure.getChildren();
-			for (int i = 0; i < children.size(); i++)
-				((IFigure) children.get(i)).translate(offset.width, offset.height);
-		} else {
-		    figure.translate(offset.width, offset.height);
-		}
+		try {
+			if (location == null) return;
+			Point newLocation = event.getLocation();
+			if (newLocation == null) return;
+			
+			fireBeforeTranslation(new TranslationEvent(this));
+			this.cumulativeOffset = newLocation.getDifference(startLocation);
 	
-		updateMgr.addDirtyRegion(figure.getParent(), bounds);
+			Dimension offset = newLocation.getDifference(location);
+			if (offset.width == 0 && offset.height == 0) return;
+			location = newLocation;
+			UpdateManager updateMgr = figure.getUpdateManager();
+			LayoutManager layoutMgr = figure.getParent().getLayoutManager();
+			bounds = figure.getBounds();
+			updateMgr.addDirtyRegion(figure.getParent(), bounds);
+			
+			this.bounds = bounds.getCopy().translate(offset.width, offset.height);
+			if (layoutMgr!=null) layoutMgr.setConstraint(figure, bounds);
+			
+			for (int i = 0; i < translations.size(); i++) ((IFigure) translations.get(i)).translate(offset.width, offset.height);
 		
-		event.consume();
+			updateMgr.addDirtyRegion(figure.getParent(), bounds);
+			
+		} finally {
+			fireAfterTranslation(new TranslationEvent(this));
+			event.consume();
+		}
 	}
 
 	@Override
@@ -101,7 +104,7 @@ public class FigureMover implements MouseListener, MouseMotionListener {
 	@Override
 	public void mouseReleased(MouseEvent event) {
 		if (location == null) return;
-		xyGraph.getOperationsManager().addCommand(new MoverCommand(figure, cumulativeOffset, translateChildren));
+		xyGraph.getOperationsManager().addCommand(new MoverCommand(figure, cumulativeOffset, translations));
 		location = null;
 		
 		event.consume();
@@ -114,6 +117,29 @@ public class FigureMover implements MouseListener, MouseMotionListener {
 
 	public void startMoving(MouseEvent me) {
 		location = me.getLocation();
+	}
+	
+	private List<TranslationListener> listeners;
+
+	public void addTranslationListener(TranslationListener translationListener) {
+		if (listeners==null) listeners = new ArrayList<TranslationListener>(7);
+		listeners.add(translationListener);
+	}
+	public void removeTranslationListener(TranslationListener translationListener) {
+		if (listeners==null) return;
+		listeners.remove(translationListener);
+	}
+	protected void fireBeforeTranslation(TranslationEvent evt) {
+		if (listeners==null) return;
+		for (TranslationListener l : listeners) {
+			l.translateBefore(evt);
+		}
+	}
+	protected void fireAfterTranslation(TranslationEvent evt) {
+		if (listeners==null) return;
+		for (TranslationListener l : listeners) {
+			l.translationAfter(evt);
+		}
 	}
 
 }

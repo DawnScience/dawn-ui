@@ -4,7 +4,7 @@ import org.csstudio.swt.xygraph.Messages;
 import org.csstudio.swt.xygraph.figures.Annotation;
 import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.swt.xygraph.undo.IUndoableCommand;
-import org.dawb.workbench.ui.editors.plotting.swtxy.RegionFigure;
+import org.dawb.workbench.ui.editors.plotting.swtxy.Region;
 import org.dawb.workbench.ui.editors.plotting.swtxy.XYRegionGraph;
 
 /**The undoable command to add an annotation.
@@ -14,9 +14,9 @@ import org.dawb.workbench.ui.editors.plotting.swtxy.XYRegionGraph;
 public class AddRegionCommand implements IUndoableCommand {
 	
 	private XYRegionGraph xyGraph;
-	private RegionFigure region;
+	private Region region;
 	
-	public AddRegionCommand(XYRegionGraph xyGraph, RegionFigure region) {
+	public AddRegionCommand(XYRegionGraph xyGraph, Region region) {
 		this.xyGraph = xyGraph;
 		this.region = region;
 	}

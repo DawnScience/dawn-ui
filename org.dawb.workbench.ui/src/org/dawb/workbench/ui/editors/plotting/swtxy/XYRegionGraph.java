@@ -14,10 +14,10 @@ public class XYRegionGraph extends XYGraph {
         return new RegionArea(this);
 	}
 
-	public void addRegion(final RegionFigure region) {
+	public void addRegion(final Region region) {
 		((RegionArea)getPlotArea()).addRegion(region);
 	}
-	public void removeRegion(final RegionFigure region) {
+	public void removeRegion(final Region region) {
 		((RegionArea)getPlotArea()).removeRegion(region);
 	}
 }

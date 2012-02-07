@@ -1,5 +1,7 @@
 package org.dawb.workbench.ui.editors.plotting.swtxy;
 
+import java.util.Arrays;
+
 import org.csstudio.swt.xygraph.figures.Trace;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
@@ -11,24 +13,30 @@ import org.eclipse.draw2d.geometry.Rectangle;
 
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 
-public class LineSelectionFigure extends RegionFigure {
+public class LineSelection extends Region {
 		
+
 	private static final int SIDE      = 8;
 	
 	private SelectionRectangle endBox, startBox;
 
 	private Figure connection;
 
-	public LineSelectionFigure(final String name, final Trace trace) {
-				
-		super(name, trace);
-        setOpaque(false);
-        
-		this.startBox = new SelectionRectangle(trace, ColorConstants.cyan, new Point(10,10),  SIDE);
-		new FigureMover(trace.getXYGraph(), startBox, false);	
+	private Figure parent;
 
-		this.endBox   = new SelectionRectangle(trace, ColorConstants.cyan, new Point(100,100),SIDE);
-		new FigureMover(trace.getXYGraph(), endBox, false);	
+	public LineSelection(String name, Trace trace) {
+		super(name, trace);
+	}
+
+
+	public void createContents(final Figure parent) {
+		
+		this.parent = parent;
+		this.startBox = new SelectionRectangle(trace, ColorConstants.cyan, new Point(100,100),  SIDE);
+		new FigureMover(trace.getXYGraph(), startBox);	
+
+		this.endBox   = new SelectionRectangle(trace, ColorConstants.cyan, new Point(200,200),SIDE);
+		new FigureMover(trace.getXYGraph(), endBox);	
 				
 		this.connection = new Figure() {
 			@Override
@@ -47,20 +55,25 @@ public class LineSelectionFigure extends RegionFigure {
 		connection.setBounds(new Rectangle(startBox.getSelectionPoint(), endBox.getSelectionPoint()));
 		connection.setOpaque(false);
 		
-        add(connection);
-	    add(startBox);
-		add(endBox);
+		parent.add(connection);
+		parent.add(startBox);
+		parent.add(endBox);
 	
-		
-		setVisible(true);
-		
+				
 		final FigureListener figListener = createFigureListener();
 		startBox.addFigureListener(figListener);
 		endBox.addFigureListener(figListener);
 		
-		new FigureMover(trace.getXYGraph(), this, connection, true);
+		new FigureMover(trace.getXYGraph(), parent, connection, Arrays.asList(new IFigure[]{startBox,endBox}));
 
 	}
+	
+	public void remove() {
+		parent.remove(connection);
+		parent.remove(startBox);
+		parent.remove(endBox);
+	}
+
 	
 	public void setShowPosition(boolean showPosition) {
 		startBox.setShowPosition(showPosition);

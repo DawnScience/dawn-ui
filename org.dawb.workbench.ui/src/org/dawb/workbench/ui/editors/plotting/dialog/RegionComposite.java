@@ -6,9 +6,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.csstudio.swt.xygraph.figures.Trace;
-import org.dawb.workbench.ui.editors.plotting.swtxy.BoxSelectionFigure;
-import org.dawb.workbench.ui.editors.plotting.swtxy.LineSelectionFigure;
-import org.dawb.workbench.ui.editors.plotting.swtxy.RegionFigure;
+import org.dawb.workbench.ui.editors.plotting.swtxy.BoxSelection;
+import org.dawb.workbench.ui.editors.plotting.swtxy.LineSelection;
+import org.dawb.workbench.ui.editors.plotting.swtxy.Region;
 import org.dawb.workbench.ui.editors.plotting.swtxy.XYRegionGraph;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
@@ -87,10 +87,10 @@ public class RegionComposite extends Composite {
 	}
 
 
-	public RegionFigure createRegion() {
+	public Region createRegion() {
 		
 		final Trace trace = xyGraph.getPlotArea().getTraceList().get(traceCombo.getSelectionIndex());
-		RegionFigure region=null;
+		Region region=null;
 		
 		final String txt = nameText.getText();
 		final Pattern pattern = Pattern.compile(".* (\\d+)");
@@ -100,8 +100,8 @@ public class RegionComposite extends Composite {
 			countMap.put(regionType.getSelectionIndex(), count);
 		}
 		
-		if (regionType.getSelectionIndex()==0) region = new LineSelectionFigure(txt, trace);
-		if (regionType.getSelectionIndex()==1) region = new BoxSelectionFigure(txt, trace);
+		if (regionType.getSelectionIndex()==0) region = new LineSelection(txt, trace);
+		if (regionType.getSelectionIndex()==1) region = new BoxSelection(txt, trace);
 		
 		region.setShowPosition(showPoints.getSelection());
 		
@@ -109,7 +109,7 @@ public class RegionComposite extends Composite {
 	}
 	
 	
-	public void editRegion(RegionFigure region) {
+	public void editRegion(Region region) {
         throw new RuntimeException("Please implement editRegion!");
 	}
 }

@@ -13,14 +13,14 @@ import org.eclipse.swt.graphics.Color;
  * @author fcp94556
  *
  */
-public abstract class RegionFigure extends Figure {
+public abstract class Region {
 	
 	protected String name;
 	protected Trace  trace;
 	protected XYGraph xyGraph;
 	protected boolean free = true;
 
-	public RegionFigure(String name, Trace trace) {
+	public Region(String name, Trace trace) {
 		super();
 		this.name  = name;
 		this.trace = trace;
@@ -78,5 +78,9 @@ public abstract class RegionFigure extends Figure {
 	public void setShowPosition(boolean showPosition) {
 		this.showPosition = showPosition;
 	}
+	
+	public abstract void createContents(final Figure parent);
+
+	public abstract void remove();
 	
 }

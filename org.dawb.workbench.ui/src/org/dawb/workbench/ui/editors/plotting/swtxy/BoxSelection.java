@@ -1,5 +1,7 @@
 package org.dawb.workbench.ui.editors.plotting.swtxy;
 
+import java.util.Arrays;
+
 import org.csstudio.swt.xygraph.figures.Trace;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
@@ -10,33 +12,34 @@ import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.graphics.Color;
 
-public class BoxSelectionFigure extends RegionFigure {
+
+/**
+ *     p1------------p2
+ *     |              |
+ *     |              |
+ *     p3------------p4
+ */
+public class BoxSelection extends Region {
 		
 	private static final int SIDE      = 8;
 	
 	private SelectionRectangle p1,  p2, p3, p4;
 
 	private Figure connection;
-	
-	/**
-	 *     p1------------p2
-	 *     |              |
-	 *     |              |
-	 *     p3------------p4
-	 */
 
-	public BoxSelectionFigure(String name, Trace trace) {
-		
+	private Figure parent;
+	
+	public BoxSelection(String name, Trace trace) {
 		super(name, trace);
+	}
+
+	public void createContents(final Figure parent) {
 		
-		setRequestFocusEnabled(false);
-		setFocusTraversable(false);
-        setOpaque(false);
-        
-		this.p1  = createSelectionRectangle(ColorConstants.green,  new Point(10,10),   SIDE);
-		this.p2  = createSelectionRectangle(ColorConstants.green,  new Point(100,10),  SIDE);
-		this.p3  = createSelectionRectangle(ColorConstants.green,  new Point(10,100),  SIDE);
-		this.p4  = createSelectionRectangle(ColorConstants.green,  new Point(100,100), SIDE);
+		this.parent = parent;
+    	this.p1  = createSelectionRectangle(ColorConstants.green,  new Point(100,100),  SIDE);
+		this.p2  = createSelectionRectangle(ColorConstants.green,  new Point(200,100),  SIDE);
+		this.p3  = createSelectionRectangle(ColorConstants.green,  new Point(100,200),  SIDE);
+		this.p4  = createSelectionRectangle(ColorConstants.green,  new Point(200,200),  SIDE);
 				
 		this.connection = new Figure() {
 			@Override
@@ -53,19 +56,37 @@ public class BoxSelectionFigure extends RegionFigure {
 		connection.setBounds(new Rectangle(p4.getSelectionPoint(), p1.getSelectionPoint()));
 		connection.setOpaque(false);
   		
-        add(connection);
-		add(p1);
-		add(p2);
-		add(p3);
-		add(p4);
-		
-		setVisible(true);
+		parent.add(connection);
+		parent.add(p1);
+		parent.add(p2);
+		parent.add(p3);
+		parent.add(p4);
+				
+		FigureMover mover = new FigureMover(trace.getXYGraph(), parent, connection, Arrays.asList(new IFigure[]{p1,p2,p3,p4}));
+		// Add a translation listener to be notified when the mover will translate so that
+		// we do not recompute point locations during the move.
+		mover.addTranslationListener(new TranslationListener() {
+			@Override
+			public void translateBefore(TranslationEvent evt) {
+				isCalculateCorners = false;
+			}
 
-		
-	   	new FigureMover(trace.getXYGraph(), this, connection, true);
-
+			@Override
+			public void translationAfter(TranslationEvent evt) {
+				isCalculateCorners = true;
+				connection.repaint();
+			}		
+		});
 	}
 	
+	public void remove() {
+		parent.remove(connection);
+		parent.remove(p1);
+		parent.remove(p2);
+		parent.remove(p3);
+		parent.remove(p4);
+	}
+
 	public void setShowPosition(boolean showPosition) {
 		p1.setShowPosition(showPosition);
 		p2.setShowPosition(showPosition);
@@ -79,7 +100,7 @@ public class BoxSelectionFigure extends RegionFigure {
 	private SelectionRectangle createSelectionRectangle(Color color, Point location, int size) {
 		
 		SelectionRectangle rect = new SelectionRectangle(trace, color,  location, size);
-		new FigureMover(trace.getXYGraph(), rect, false);	
+		new FigureMover(trace.getXYGraph(), rect);	
 		
 		rect.addFigureListener(new FigureListener() {
 			@Override

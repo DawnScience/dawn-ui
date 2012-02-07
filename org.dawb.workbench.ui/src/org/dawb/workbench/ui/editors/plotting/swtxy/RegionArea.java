@@ -14,39 +14,27 @@ public class RegionArea extends PlotArea {
 		super(xyGraph);
 	}
 		
-	final private List<RegionFigure> regionList = new ArrayList<RegionFigure>();
+	final private List<Region> regionList = new ArrayList<Region>();	
 
-	@Override
-	protected void layout() {
-	    final Rectangle clientArea = getClientArea();
-		for(RegionFigure region : regionList){
-			if(region != null && region.isVisible())
-				region.setBounds(clientArea);			
-		}		
-
-		super.layout();
-	}
-	
-
-	public void addRegion(final RegionFigure region){
+	public void addRegion(final Region region){
 		regionList.add(region);
 		region.setxyGraph(xyGraph);
-		add(region);
+		region.createContents(this);
 		revalidate();
 	}
 
 
-	public boolean removeRegion(final RegionFigure region){
+	public boolean removeRegion(final Region region){
 	    final boolean result = regionList.remove(region);
 		//if(!region.isFree()) region.getTrace().getDataProvider().removeDataProviderListener(region);
-		if(result){
-			remove(region);
+		if (result){
+			region.remove();
 			revalidate();
 		}
 		return result;
 	}
 	
-	public List<RegionFigure> getRegionList() {
+	public List<Region> getRegionList() {
 		return regionList;
 	}
 	
@@ -73,7 +61,7 @@ public class RegionArea extends PlotArea {
 	public List<String> getRegionNames() {
 		if (regionList==null|| regionList.isEmpty()) return null;
 		final List<String> names = new ArrayList<String>(regionList.size());
-		for (RegionFigure region : regionList) names.add(region.getName());
+		for (Region region : regionList) names.add(region.getName());
 		return names;
 	}
 }

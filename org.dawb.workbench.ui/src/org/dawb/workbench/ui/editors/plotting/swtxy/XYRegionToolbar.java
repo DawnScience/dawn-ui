@@ -40,12 +40,12 @@ public class XYRegionToolbar extends XYGraphToolbar {
 				if (xyGraph.getPlotArea().getTraceList().size()==0) {
 					MessageDialog.openError(Display.getCurrent().getActiveShell(), "Selections must be added to plots", "Please plot something before selecting a region.");
 				} if (xyGraph.getPlotArea().getTraceList().size()==1) {
-					final RegionFigure region = new LineSelectionFigure(getUniqueName("Line"), xyGraph.getPlotArea().getTraceList().get(0));
+					final Region region = new LineSelection(getUniqueName("Line"), xyGraph.getPlotArea().getTraceList().get(0));
 					addRegion(region);
 				} else {
 					AddRegionDialog dialog = new AddRegionDialog(Display.getCurrent().getActiveShell(), (XYRegionGraph)xyGraph, 0);
 					if(dialog.open() == Window.OK){
-						final RegionFigure region = dialog.getRegion();
+						final Region region = dialog.getRegion();
 						addRegion(region);
 					}
 				}
@@ -60,12 +60,12 @@ public class XYRegionToolbar extends XYGraphToolbar {
 				if (xyGraph.getPlotArea().getTraceList().size()==0) {
 					MessageDialog.openError(Display.getCurrent().getActiveShell(), "Selections must be added to plots", "Please plot something before selecting a region.");
 				} if (xyGraph.getPlotArea().getTraceList().size()==1) {
-					final RegionFigure region = new BoxSelectionFigure(getUniqueName("Box"), xyGraph.getPlotArea().getTraceList().get(0));
+					final Region region = new BoxSelection(getUniqueName("Box"), xyGraph.getPlotArea().getTraceList().get(0));
 					addRegion(region);
 				} else {
 					AddRegionDialog dialog = new AddRegionDialog(Display.getCurrent().getActiveShell(), (XYRegionGraph)xyGraph, 1);
 					if(dialog.open() == Window.OK){
-						final RegionFigure region = dialog.getRegion();
+						final Region region = dialog.getRegion();
 						addRegion(region);
 					}
 				}
@@ -101,7 +101,7 @@ public class XYRegionToolbar extends XYGraphToolbar {
 		return base+" "+val;
 	}
 
-	protected void addRegion(RegionFigure region) {
+	protected void addRegion(Region region) {
 		((XYRegionGraph)xyGraph).addRegion(region);
 		((XYRegionGraph)xyGraph).getOperationsManager().addCommand(
 				new AddRegionCommand((XYRegionGraph)xyGraph, region));

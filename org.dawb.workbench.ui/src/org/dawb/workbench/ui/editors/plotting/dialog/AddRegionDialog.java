@@ -1,6 +1,6 @@
 package org.dawb.workbench.ui.editors.plotting.dialog;
 
-import org.dawb.workbench.ui.editors.plotting.swtxy.RegionFigure;
+import org.dawb.workbench.ui.editors.plotting.swtxy.Region;
 import org.dawb.workbench.ui.editors.plotting.swtxy.XYRegionGraph;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
@@ -43,13 +43,13 @@ public class AddRegionDialog extends Dialog {
 		super.okPressed();
 	}
 
-	private RegionFigure region;
+	private Region region;
 	
 
 	/**
 	 * @return the annotation
 	 */
-	public RegionFigure getRegion() {
+	public Region getRegion() {
 		return region;
 	}
 }
