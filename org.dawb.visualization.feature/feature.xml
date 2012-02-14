@@ -134,9 +134,13 @@ This Agreement is governed by the laws of the State of New York and the intellec
       <import plugin="org.eclipse.ui.ide" version="3.6.1" match="greaterOrEqual"/>
       <import plugin="org.eclipse.core.resources" version="3.6.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.jface.text" version="3.7.1" match="greaterOrEqual"/>
+      <import plugin="uk.ac.gda.common" version="1.0.0" match="greaterOrEqual"/>
+      <import plugin="uk.ac.gda.common.rcp" version="1.0.0" match="greaterOrEqual"/>
+      <import plugin="org.dawb.common.util" version="1.0.0" match="greaterOrEqual"/>
       <import plugin="com.springsource.org.apache.commons.digester"/>
       <import plugin="org.apache.commons.math"/>
       <import plugin="org.apache.log4j"/>
+      <import plugin="org.dawb.fabio" version="1.0.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.ui.console"/>
       <import plugin="org.eclipse.ui.intro"/>
       <import plugin="org.eclipse.update.ui"/>
@@ -147,20 +151,24 @@ This Agreement is governed by the laws of the State of New York and the intellec
       <import plugin="org.eclipse.help.appserver"/>
       <import plugin="org.eclipse.ui.net"/>
       <import plugin="org.eclipse.update.core"/>
+      <import plugin="org.dawb.common.ui" version="1.0.0" match="greaterOrEqual"/>
+      <import plugin="org.dawb.fable.framework.toolbox" version="1.0.0" match="greaterOrEqual"/>
       <import plugin="uk.ac.diamond.scisoft.analysis.rcp"/>
       <import plugin="uk.ac.diamond.scisoft.python"/>
       <import plugin="uk.ac.gda.libs"/>
       <import plugin="org.eclipse.jface" version="3.6.1" match="greaterOrEqual"/>
       <import plugin="org.eclipse.ui" version="3.6.1" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.swt"/>
-      <import plugin="uk.ac.gda.common" version="1.0.0" match="greaterOrEqual"/>
-      <import plugin="uk.ac.gda.common.rcp" version="1.0.0" match="greaterOrEqual"/>
-      <import plugin="org.dawb.common.util" version="1.0.0" match="greaterOrEqual"/>
-      <import plugin="org.dawb.fabio" version="1.0.0" match="greaterOrEqual"/>
-      <import plugin="org.dawb.common.ui" version="1.0.0" match="greaterOrEqual"/>
-      <import plugin="org.dawb.fable.framework.toolbox" version="1.0.0" match="greaterOrEqual"/>
       <import plugin="org.dawb.jep" version="1.0.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.ui" version="3.7.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.swt"/>
+      <import plugin="org.dawb.org.csstudio.swt.xygraph" version="1.0.0" match="greaterOrEqual"/>
+      <import plugin="uk.ac.diamond.scisoft.deprecated"/>
+      <import plugin="org.dawb.fable.imageviewer" version="1.0.0" match="greaterOrEqual"/>
+      <import plugin="org.python.pydev" version="2.2.4" match="greaterOrEqual"/>
+      <import plugin="org.python.pydev.core" version="2.2.4" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.osgi"/>
+      <import plugin="com.springsource.net.sf.cglib"/>
+      <import plugin="com.springsource.org.jdom"/>
    </requires>
 
    <plugin
