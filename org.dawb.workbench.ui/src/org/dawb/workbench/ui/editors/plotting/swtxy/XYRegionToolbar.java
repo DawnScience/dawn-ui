@@ -3,6 +3,7 @@ package org.dawb.workbench.ui.editors.plotting.swtxy;
 
 import java.util.List;
 
+import org.csstudio.swt.xygraph.toolbar.XYGraphConfigDialog;
 import org.csstudio.swt.xygraph.toolbar.XYGraphToolbar;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.workbench.ui.Activator;
@@ -105,5 +106,11 @@ public class XYRegionToolbar extends XYGraphToolbar {
 		((XYRegionGraph)xyGraph).addRegion(region);
 		((XYRegionGraph)xyGraph).getOperationsManager().addCommand(
 				new AddRegionCommand((XYRegionGraph)xyGraph, region));
+	}
+	
+	
+	protected void openConfigurationDialog() {
+		XYGraphConfigDialog dialog = new XYRegionConfigDialog(Display.getCurrent().getActiveShell(), xyGraph);
+		dialog.open();
 	}
 }

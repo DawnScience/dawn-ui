@@ -5,13 +5,19 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.csstudio.swt.xygraph.Messages;
 import org.csstudio.swt.xygraph.figures.Trace;
 import org.dawb.workbench.ui.editors.plotting.swtxy.BoxSelection;
 import org.dawb.workbench.ui.editors.plotting.swtxy.LineSelection;
 import org.dawb.workbench.ui.editors.plotting.swtxy.Region;
 import org.dawb.workbench.ui.editors.plotting.swtxy.XYRegionGraph;
+import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.jface.preference.ColorSelector;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -26,6 +32,10 @@ public class RegionComposite extends Composite {
 	private CCombo regionType;
 	private CCombo traceCombo;
 	private Button showPoints;
+
+	private Region editingRegion;
+
+	private ColorSelector colorSelector;
 
 	public RegionComposite(final Composite parent, final int style, final XYRegionGraph xyGraph, final int defaultSelection) {
 		
@@ -70,6 +80,16 @@ public class RegionComposite extends Composite {
 		showPoints.setText("Show vertex values");		
 		showPoints.setToolTipText("When on this will show the actual value of the point in the axes it was added.");
 		showPoints.setLayoutData(new GridData(0, 0, false, false, 2, 1));
+		
+		
+		Label colorLabel = new Label(this, 0);
+		colorLabel.setText("Selection Color");		
+		colorLabel.setLayoutData(new GridData());
+		
+		colorSelector = new ColorSelector(this);
+		colorSelector.getButton().setLayoutData(new GridData());		
+		if (defaultSelection==0) colorSelector.setColorValue(ColorConstants.cyan.getRGB());
+		if (defaultSelection==1) colorSelector.setColorValue(ColorConstants.green.getRGB());
 
 		nameText.setText(getDefaultName(defaultSelection));
 
@@ -103,13 +123,42 @@ public class RegionComposite extends Composite {
 		if (regionType.getSelectionIndex()==0) region = new LineSelection(txt, trace);
 		if (regionType.getSelectionIndex()==1) region = new BoxSelection(txt, trace);
 		
-		region.setShowPosition(showPoints.getSelection());
+		this.editingRegion = region;
+		getEditingRegion();
 		
         return region;
 	}
 	
 	
-	public void editRegion(Region region) {
-        throw new RuntimeException("Please implement editRegion!");
+	public void setEditingRegion(Region region) {
+        this.editingRegion = region;
+        
+        nameText.setText(region.getName());
+		if (editingRegion instanceof LineSelection) regionType.select(0);
+		if (editingRegion instanceof BoxSelection)  regionType.select(1);
+		regionType.setEnabled(false);
+		regionType.setEditable(false);
+		
+		final int index = xyGraph.getPlotArea().getTraceList().indexOf(region.getTrace());
+		traceCombo.select(index);
+		
+		colorSelector.setColorValue(region.getRegionColor().getRGB());
+		
+		showPoints.setSelection(region.isShowPosition());
+	}
+	
+	public Region getEditingRegion() {
+		
+		final String txt = nameText.getText();
+		editingRegion.setName(txt);
+		editingRegion.setTrace(xyGraph.getPlotArea().getTraceList().get(traceCombo.getSelectionIndex()));
+		editingRegion.setShowPosition(showPoints.getSelection());
+		editingRegion.setRegionColor(new Color(getDisplay(), colorSelector.getColorValue()));
+        return editingRegion;
+	}
+
+
+	public void applyChanges() {
+		 getEditingRegion();
 	}
 }

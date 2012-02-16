@@ -3,7 +3,6 @@ package org.dawb.workbench.ui.editors.plotting.swtxy;
 import java.util.Arrays;
 
 import org.csstudio.swt.xygraph.figures.Trace;
-import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.FigureListener;
 import org.eclipse.draw2d.Graphics;
@@ -36,10 +35,10 @@ public class BoxSelection extends Region {
 	public void createContents(final Figure parent) {
 		
 		this.parent = parent;
-    	this.p1  = createSelectionRectangle(ColorConstants.green,  new Point(100,100),  SIDE);
-		this.p2  = createSelectionRectangle(ColorConstants.green,  new Point(200,100),  SIDE);
-		this.p3  = createSelectionRectangle(ColorConstants.green,  new Point(100,200),  SIDE);
-		this.p4  = createSelectionRectangle(ColorConstants.green,  new Point(200,200),  SIDE);
+    	this.p1  = createSelectionRectangle(getRegionColor(),  new Point(100,100),  SIDE);
+		this.p2  = createSelectionRectangle(getRegionColor(),  new Point(200,100),  SIDE);
+		this.p3  = createSelectionRectangle(getRegionColor(),  new Point(100,200),  SIDE);
+		this.p4  = createSelectionRectangle(getRegionColor(),  new Point(200,200),  SIDE);
 				
 		this.connection = new Figure() {
 			@Override
@@ -52,7 +51,7 @@ public class BoxSelection extends Region {
 			}
 		};
 		connection.setCursor(Draw2DUtils.getRoiMoveCursor());
-		connection.setBackgroundColor(ColorConstants.green);
+		connection.setBackgroundColor(getRegionColor());
 		connection.setBounds(new Rectangle(p4.getSelectionPoint(), p1.getSelectionPoint()));
 		connection.setOpaque(false);
   		
@@ -77,6 +76,12 @@ public class BoxSelection extends Region {
 				connection.repaint();
 			}		
 		});
+		
+		p1.setShowPosition(isShowPosition());
+		p2.setShowPosition(isShowPosition());
+		p3.setShowPosition(isShowPosition());
+		p4.setShowPosition(isShowPosition());
+
 	}
 	
 	public void remove() {
@@ -88,11 +93,28 @@ public class BoxSelection extends Region {
 	}
 
 	public void setShowPosition(boolean showPosition) {
-		p1.setShowPosition(showPosition);
-		p2.setShowPosition(showPosition);
-		p3.setShowPosition(showPosition);
-		p4.setShowPosition(showPosition);
+		if (p1!=null) p1.setShowPosition(showPosition);
+		if (p2!=null) p2.setShowPosition(showPosition);
+		if (p3!=null) p3.setShowPosition(showPosition);
+		if (p4!=null) p4.setShowPosition(showPosition);
 		super.setShowPosition(showPosition);
+	}
+	
+	public void setTrace(Trace trace) {
+		if (p1!=null) p1.setTrace(trace);
+		if (p2!=null) p2.setTrace(trace);
+		if (p3!=null) p3.setTrace(trace);
+		if (p4!=null) p4.setTrace(trace);
+		super.setTrace(trace);
+	}
+
+	public void setRegionColor(Color color) {
+		if (p1!=null) p1.setColor(color);
+		if (p2!=null) p2.setColor(color);
+		if (p3!=null) p3.setColor(color);
+		if (p4!=null) p4.setColor(color);
+		if (connection!=null) connection.setBackgroundColor(color);
+		super.setRegionColor(color);
 	}
 	
 	private boolean isCalculateCorners = true;

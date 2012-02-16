@@ -15,7 +15,7 @@ class SelectionRectangle extends Figure {
 	
 	private RectangleFigure point;
 	private Figure          label;
-	private Trace trace;
+	private Trace           trace;
 
 	SelectionRectangle(Trace trace, Color colour, Point location, int side) {
 		
@@ -90,6 +90,16 @@ class SelectionRectangle extends Figure {
 
 	public void setShowPosition(boolean showPosition) {
 		label.setVisible(showPosition);
+	}
+
+	public void setTrace(Trace trace2) {
+		this.trace = trace2;
+		repaint();
+	}
+
+	public void setColor(Color colour) {
+		point.setBackgroundColor(colour);
+		point.setForegroundColor(colour);
 	}
 
 }

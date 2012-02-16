@@ -3,13 +3,13 @@ package org.dawb.workbench.ui.editors.plotting.swtxy;
 import java.util.Arrays;
 
 import org.csstudio.swt.xygraph.figures.Trace;
-import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.FigureListener;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.swt.graphics.Color;
 
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 
@@ -32,10 +32,10 @@ public class LineSelection extends Region {
 	public void createContents(final Figure parent) {
 		
 		this.parent = parent;
-		this.startBox = new SelectionRectangle(trace, ColorConstants.cyan, new Point(100,100),  SIDE);
+		this.startBox = new SelectionRectangle(trace, getRegionColor(), new Point(100,100),  SIDE);
 		new FigureMover(trace.getXYGraph(), startBox);	
 
-		this.endBox   = new SelectionRectangle(trace, ColorConstants.cyan, new Point(200,200),SIDE);
+		this.endBox   = new SelectionRectangle(trace, getRegionColor(), new Point(200,200),SIDE);
 		new FigureMover(trace.getXYGraph(), endBox);	
 				
 		this.connection = new Figure() {
@@ -51,7 +51,7 @@ public class LineSelection extends Region {
 			}
 		};
 		connection.setCursor(Draw2DUtils.getRoiMoveCursor());
-		connection.setForegroundColor(ColorConstants.cyan);
+		connection.setForegroundColor(getRegionColor());
 		connection.setBounds(new Rectangle(startBox.getSelectionPoint(), endBox.getSelectionPoint()));
 		connection.setOpaque(false);
 		
@@ -66,6 +66,9 @@ public class LineSelection extends Region {
 		
 		new FigureMover(trace.getXYGraph(), parent, connection, Arrays.asList(new IFigure[]{startBox,endBox}));
 
+		startBox.setShowPosition(isShowPosition());
+		endBox.setShowPosition(isShowPosition());
+
 	}
 	
 	public void remove() {
@@ -76,11 +79,24 @@ public class LineSelection extends Region {
 
 	
 	public void setShowPosition(boolean showPosition) {
-		startBox.setShowPosition(showPosition);
-		endBox.setShowPosition(showPosition);
+		if (startBox!=null) startBox.setShowPosition(showPosition);
+		if (endBox!=null)   endBox.setShowPosition(showPosition);
 		super.setShowPosition(showPosition);
 	}
 
+	public void setTrace(Trace trace) {
+		if (startBox!=null) startBox.setTrace(trace);
+		if (endBox!=null) endBox.setTrace(trace);
+		super.setTrace(trace);
+	}
+
+	public void setRegionColor(Color color) {
+		if (startBox!=null) startBox.setColor(color);
+		if (endBox!=null) endBox.setColor(color);
+		if (connection!=null) connection.setBackgroundColor(color);
+		if (connection!=null) connection.setForegroundColor(color);
+		super.setRegionColor(color);
+	}
 	
 	protected FigureListener createFigureListener() {
 		return new FigureListener() {		

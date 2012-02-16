@@ -19,6 +19,7 @@ public abstract class Region {
 	protected Trace  trace;
 	protected XYGraph xyGraph;
 	protected boolean free = true;
+	protected Color  regionColour;
 
 	public Region(String name, Trace trace) {
 		super();
@@ -82,5 +83,13 @@ public abstract class Region {
 	public abstract void createContents(final Figure parent);
 
 	public abstract void remove();
+
+	public Color getRegionColour() {
+		return regionColour;
+	}
+
+	public void setRegionColour(Color regionColour) {
+		this.regionColour = regionColour;
+	}
 	
 }
