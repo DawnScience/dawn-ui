@@ -534,7 +534,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 			
 			//set trace property
 			trace.setPointStyle(PointStyle.NONE);
-			final Color plotColor = ColorUtility.getSwtColour(colorMap.values(), iplot);
+			final Color plotColor = ColorUtility.getSwtColour(colorMap!=null?colorMap.values():null, iplot);
 			if (colorMap!=null) {
 				if (getColorOption()==ColorOption.BY_NAME) {
 					colorMap.put(y.getName(),plotColor);
@@ -769,7 +769,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		if (xyGraph!=null) {
 			try {
 				clearTraces();
-				if (colorMap!=null) colorMap.clear();	
+				//if (colorMap!=null) colorMap.clear();	
 	
 			} catch (Throwable e) {
 				logger.error("Cannot remove traces!", e);
