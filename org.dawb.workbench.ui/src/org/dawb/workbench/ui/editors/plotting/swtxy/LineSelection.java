@@ -76,6 +76,7 @@ public class LineSelection extends Region {
 				final Point startCenter = startBox.getSelectionPoint();
 				final Point endCenter   = endBox.getSelectionPoint();
 				connection.setBounds(new Rectangle(startCenter, endCenter));
+				fireRoiSelection();
 			}
 
 		});
@@ -119,16 +120,20 @@ public class LineSelection extends Region {
 			public void figureMoved(IFigure source) {
 				
 				connection.repaint();
-				
-				// For each trace, calculate the real world values of the selection
-				final double[] p1 = startBox.getRealValue();
-				final double[] p2 = endBox.getRealValue();
-				LinearROI roi = new LinearROI(p1, p2);
-				if (getSelectionProvider()!=null) getSelectionProvider().setSelection(new StructuredSelection(roi));
-                
+                fireRoiSelection();
 			}
 
 		};
+	}
+	protected void fireRoiSelection() {
+		
+		// For each trace, calculate the real world values of the selection
+		final double[] p1 = startBox.getRealValue();
+		final double[] p2 = endBox.getRealValue();
+		LinearROI roi = new LinearROI(p1, p2);
+		if (getSelectionProvider()!=null) {
+			getSelectionProvider().setSelection(new StructuredSelection(roi));
+		}
 	}
 	
 }

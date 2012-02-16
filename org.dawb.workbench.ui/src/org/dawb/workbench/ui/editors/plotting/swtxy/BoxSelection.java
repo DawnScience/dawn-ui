@@ -78,6 +78,7 @@ public class BoxSelection extends Region {
 				isCalculateCorners = true;
 				final Rectangle size = getRectangleFromVertices();				
 				connection.setBounds(size);
+				fireRoiSelection();
 			}
 
 		});
@@ -152,14 +153,8 @@ public class BoxSelection extends Region {
 					
 					boolean quad1Or4 = ((pa.x<pb.x && pa.y<pb.y) || (pa.x>pb.x&&pa.y>pb.y));
 					setCornerLocation(c, d, sa, quad1Or4);
-
-					final double[] r1 = p1.getRealValue();
-					final double[] r2 = p2.getRealValue();
-					final double[] r4 = p4.getRealValue();
-					
-					// TODO Are we really going to rewrite all of the stuff that does not work?
-					final RectangularROI roi = new RectangularROI(r1[0], r1[1], r2[0]-r1[0], r4[1]-r1[1], 0);
-					if (getSelectionProvider()!=null) getSelectionProvider().setSelection(new StructuredSelection(roi));
+ 
+					fireRoiSelection();
 
 				} finally {
 					isCalculateCorners = true;
@@ -170,6 +165,16 @@ public class BoxSelection extends Region {
 		return rect;
 	}
 	
+	protected void fireRoiSelection() {
+		final double[] r1 = p1.getRealValue();
+		final double[] r2 = p2.getRealValue();
+		final double[] r4 = p4.getRealValue();
+		
+		// TODO Are we really going to rewrite all of the stuff that does not work?
+		final RectangularROI roi = new RectangularROI(r1[0], r1[1], r2[0]-r1[0], r4[1]-r1[1], 0);
+		if (getSelectionProvider()!=null) getSelectionProvider().setSelection(new StructuredSelection(roi));
+	}
+
 	private void setCornerLocation( SelectionRectangle c,
 									SelectionRectangle d, 
 									Rectangle sa, 

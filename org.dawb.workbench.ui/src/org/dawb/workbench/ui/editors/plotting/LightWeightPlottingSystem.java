@@ -83,7 +83,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	private IActionBars    bars;
 
 	// 1D Controls
-	private Canvas             xyCanvas;
+	private Canvas         xyCanvas;
 	private XYRegionGraph  xyGraph;
 	
 	// 2D Controls
@@ -128,6 +128,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		final LightweightSystem lws = new LightweightSystem(xyCanvas);
 	
 		this.xyGraph = new XYRegionGraph();
+		xyGraph.setSelectionProvider(getSelectionProvider());
 		
         if (bars!=null) if (bars.getMenuManager()!=null)    bars.getMenuManager().removeAll();
         if (bars!=null) if (bars.getToolBarManager()!=null) bars.getToolBarManager().removeAll();
