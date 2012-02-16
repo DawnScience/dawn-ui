@@ -104,7 +104,7 @@ public class FigureMover implements MouseListener, MouseMotionListener {
 	@Override
 	public void mouseReleased(MouseEvent event) {
 		if (location == null) return;
-		xyGraph.getOperationsManager().addCommand(new MoverCommand(figure, cumulativeOffset, translations));
+		xyGraph.getOperationsManager().addCommand(new MoverCommand(figure, cumulativeOffset, translations, this));
 		location = null;
 		
 		event.consume();

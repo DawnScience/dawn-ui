@@ -9,6 +9,7 @@ import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.graphics.Color;
 
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
@@ -32,11 +33,11 @@ public class LineSelection extends Region {
 	public void createContents(final Figure parent) {
 		
 		this.parent = parent;
-		this.startBox = new SelectionRectangle(trace, getRegionColor(), new Point(100,100),  SIDE);
-		new FigureMover(trace.getXYGraph(), startBox);	
+		this.startBox = new SelectionRectangle(getTrace(), getRegionColor(), new Point(100,100),  SIDE);
+		new FigureMover(getTrace().getXYGraph(), startBox);	
 
-		this.endBox   = new SelectionRectangle(trace, getRegionColor(), new Point(200,200),SIDE);
-		new FigureMover(trace.getXYGraph(), endBox);	
+		this.endBox   = new SelectionRectangle(getTrace(), getRegionColor(), new Point(200,200),SIDE);
+		new FigureMover(getTrace().getXYGraph(), endBox);	
 				
 		this.connection = new Figure() {
 			@Override
@@ -64,7 +65,21 @@ public class LineSelection extends Region {
 		startBox.addFigureListener(figListener);
 		endBox.addFigureListener(figListener);
 		
-		new FigureMover(trace.getXYGraph(), parent, connection, Arrays.asList(new IFigure[]{startBox,endBox}));
+		FigureMover mover = new FigureMover(getTrace().getXYGraph(), parent, connection, Arrays.asList(new IFigure[]{startBox,endBox}));
+		mover.addTranslationListener(new TranslationListener() {
+			@Override
+			public void translateBefore(TranslationEvent evt) {
+			}
+
+			@Override
+			public void translationAfter(TranslationEvent evt) {
+				final Point startCenter = startBox.getSelectionPoint();
+				final Point endCenter   = endBox.getSelectionPoint();
+				connection.setBounds(new Rectangle(startCenter, endCenter));
+			}
+
+		});
+		
 
 		startBox.setShowPosition(isShowPosition());
 		endBox.setShowPosition(isShowPosition());
@@ -108,9 +123,9 @@ public class LineSelection extends Region {
 				// For each trace, calculate the real world values of the selection
 				final double[] p1 = startBox.getRealValue();
 				final double[] p2 = endBox.getRealValue();
-				LinearROI selection = new LinearROI(p1, p2);
-
-				//TODO 
+				LinearROI roi = new LinearROI(p1, p2);
+				if (getSelectionProvider()!=null) getSelectionProvider().setSelection(new StructuredSelection(roi));
+                
 			}
 
 		};

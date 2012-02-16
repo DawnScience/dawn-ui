@@ -17,7 +17,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.csstudio.swt.xygraph.dataprovider.CircularBufferDataProvider.PlotMode;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.IPlottingSystem;
@@ -224,6 +223,8 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 				logger.error("Cannot open "+PlotDataView.ID);
 			}
 		}
+		
+		getEditorSite().setSelectionProvider(plottingSystem.getSelectionProvider());
 
  	}
 

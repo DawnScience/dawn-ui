@@ -12,11 +12,16 @@ public class MoverCommand implements IUndoableCommand {
 	private IFigure figure;
 	private Dimension undoOffset;
 	private List<IFigure> toTranslate;
+	private FigureMover notifier;
 
-	public MoverCommand(IFigure figure, Dimension offset, List<IFigure> toTranslate) {
-		this.figure = figure;
-		this.undoOffset = offset;
+	public MoverCommand(final IFigure       figure, 
+			            final Dimension     offset, 
+			            final List<IFigure> toTranslate,
+			            final FigureMover   notifier) {
+		this.figure      = figure;
+		this.undoOffset  = offset;
 		this.toTranslate = toTranslate;
+		this.notifier    = notifier;
 	}
 
 	@Override
@@ -33,13 +38,23 @@ public class MoverCommand implements IUndoableCommand {
 
 	    undoOffset = new Dimension(-1*undoOffset.width, -1*undoOffset.height);
 
-	    for (int i = 0; i < toTranslate.size(); i++)
-	    	((IFigure) toTranslate.get(i)).translate(undoOffset.width, undoOffset.height);
+	    try {
+	    	
+	    	notifier.fireBeforeTranslation(new TranslationEvent(this));
 
-        
-		UpdateManager updateMgr = figure.getUpdateManager();
-		updateMgr.addDirtyRegion(figure.getParent(), figure.getParent().getBounds());
-	
+	    	
+		    for (int i = 0; i < toTranslate.size(); i++)
+		    	((IFigure) toTranslate.get(i)).translate(undoOffset.width, undoOffset.height);
+		    
+			UpdateManager updateMgr = figure.getUpdateManager();
+			updateMgr.addDirtyRegion(figure.getParent(), figure.getParent().getBounds());
+		    
+	    } finally {
+	    	
+	    	notifier.fireAfterTranslation(new TranslationEvent(this));
+	    	
+	    }
+	    
 	}
 
 }

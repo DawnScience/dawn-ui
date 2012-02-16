@@ -182,6 +182,9 @@ public class PlotImageEditor extends EditorPart implements IReusableEditor {
 		if (rightMan!=null) rightMan.update(true);
 	    
 		createPlot();
+		
+		getEditorSite().setSelectionProvider(plottingSystem.getSelectionProvider());
+
  	}
 	private void createPlot() {
 		

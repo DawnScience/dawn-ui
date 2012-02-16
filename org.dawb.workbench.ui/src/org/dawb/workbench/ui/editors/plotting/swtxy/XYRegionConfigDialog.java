@@ -3,9 +3,7 @@ package org.dawb.workbench.ui.editors.plotting.swtxy;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.csstudio.swt.xygraph.figures.Annotation;
 import org.csstudio.swt.xygraph.figures.XYGraph;
-import org.csstudio.swt.xygraph.toolbar.AnnotationConfigPage;
 import org.csstudio.swt.xygraph.toolbar.XYGraphConfigDialog;
 import org.dawb.workbench.ui.editors.plotting.dialog.RegionComposite;
 import org.eclipse.swt.SWT;
@@ -31,6 +29,10 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
 		super(parentShell, xyGraph);
 		regionList = new ArrayList<RegionComposite>();
 		this.regionGraph = (XYRegionGraph)xyGraph;
+	
+		command = new XYRegionConfigCommand(xyGraph);
+		command.savePreviousStates();
+
 	}
 
 	@Override

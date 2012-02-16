@@ -2,6 +2,7 @@ package org.dawb.workbench.ui.editors.plotting.swtxy;
 
 import org.csstudio.swt.xygraph.figures.PlotArea;
 import org.csstudio.swt.xygraph.figures.XYGraph;
+import org.eclipse.jface.viewers.ISelectionProvider;
 
 /**
  * This is an XYGraph which supports regions of interest.
@@ -19,5 +20,8 @@ public class XYRegionGraph extends XYGraph {
 	}
 	public void removeRegion(final Region region) {
 		((RegionArea)getPlotArea()).removeRegion(region);
+	}
+	public void setSelectionProvider(final ISelectionProvider provider) {
+		((RegionArea)getPlotArea()).setSelectionProvider(provider);
 	}
 }

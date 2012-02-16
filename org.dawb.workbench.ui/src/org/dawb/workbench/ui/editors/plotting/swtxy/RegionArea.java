@@ -5,11 +5,13 @@ import java.util.List;
 
 import org.csstudio.swt.xygraph.figures.PlotArea;
 import org.eclipse.draw2d.Graphics;
-import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.graphics.Image;
 
 public class RegionArea extends PlotArea {
 
+	protected ISelectionProvider selectionProvider;
+	
 	public RegionArea(XYRegionGraph xyGraph) {
 		super(xyGraph);
 	}
@@ -18,8 +20,9 @@ public class RegionArea extends PlotArea {
 
 	public void addRegion(final Region region){
 		regionList.add(region);
-		region.setxyGraph(xyGraph);
+		region.setXyGraph(xyGraph);
 		region.createContents(this);
+		region.setSelectionProvider(selectionProvider);
 		revalidate();
 	}
 
@@ -63,5 +66,10 @@ public class RegionArea extends PlotArea {
 		final List<String> names = new ArrayList<String>(regionList.size());
 		for (Region region : regionList) names.add(region.getName());
 		return names;
+	}
+
+
+	public void setSelectionProvider(ISelectionProvider provider) {
+		this.selectionProvider = provider;
 	}
 }

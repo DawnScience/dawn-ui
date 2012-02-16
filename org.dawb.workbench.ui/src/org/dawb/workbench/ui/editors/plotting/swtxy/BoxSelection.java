@@ -9,7 +9,10 @@ import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.graphics.Color;
+
+import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 
 /**
@@ -61,7 +64,7 @@ public class BoxSelection extends Region {
 		parent.add(p3);
 		parent.add(p4);
 				
-		FigureMover mover = new FigureMover(trace.getXYGraph(), parent, connection, Arrays.asList(new IFigure[]{p1,p2,p3,p4}));
+		FigureMover mover = new FigureMover(getTrace().getXYGraph(), parent, connection, Arrays.asList(new IFigure[]{p1,p2,p3,p4}));
 		// Add a translation listener to be notified when the mover will translate so that
 		// we do not recompute point locations during the move.
 		mover.addTranslationListener(new TranslationListener() {
@@ -73,8 +76,10 @@ public class BoxSelection extends Region {
 			@Override
 			public void translationAfter(TranslationEvent evt) {
 				isCalculateCorners = true;
-				connection.repaint();
-			}		
+				final Rectangle size = getRectangleFromVertices();				
+				connection.setBounds(size);
+			}
+
 		});
 		
 		p1.setShowPosition(isShowPosition());
@@ -121,8 +126,8 @@ public class BoxSelection extends Region {
 
 	private SelectionRectangle createSelectionRectangle(Color color, Point location, int size) {
 		
-		SelectionRectangle rect = new SelectionRectangle(trace, color,  location, size);
-		new FigureMover(trace.getXYGraph(), rect);	
+		SelectionRectangle rect = new SelectionRectangle(getTrace(), color,  location, size);
+		new FigureMover(getTrace().getXYGraph(), rect);	
 		
 		rect.addFigureListener(new FigureListener() {
 			@Override
@@ -148,6 +153,13 @@ public class BoxSelection extends Region {
 					boolean quad1Or4 = ((pa.x<pb.x && pa.y<pb.y) || (pa.x>pb.x&&pa.y>pb.y));
 					setCornerLocation(c, d, sa, quad1Or4);
 
+					final double[] r1 = p1.getRealValue();
+					final double[] r2 = p2.getRealValue();
+					final double[] r4 = p4.getRealValue();
+					
+					// TODO Are we really going to rewrite all of the stuff that does not work?
+					final RectangularROI roi = new RectangularROI(r1[0], r1[1], r2[0]-r1[0], r4[1]-r1[1], 0);
+					if (getSelectionProvider()!=null) getSelectionProvider().setSelection(new StructuredSelection(roi));
 
 				} finally {
 					isCalculateCorners = true;
