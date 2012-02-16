@@ -769,7 +769,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		if (xyGraph!=null) {
 			try {
 				clearTraces();
-				//if (colorMap!=null) colorMap.clear();	
+				if (colorMap!=null) colorMap.clear();	
 	
 			} catch (Throwable e) {
 				logger.error("Cannot remove traces!", e);
