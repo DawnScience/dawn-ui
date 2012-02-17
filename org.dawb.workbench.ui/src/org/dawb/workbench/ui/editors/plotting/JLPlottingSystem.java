@@ -139,6 +139,12 @@ public class JLPlottingSystem extends AbstractPlottingSystem {
 		});
 
 	}
+	
+	@Override
+	public AbstractDataset getData(String name) {
+        // TODO Could probably make this work...
+		throw new RuntimeException("JLPLotter does not support getData!");
+	}
 
 	private double[] getDoubleArray(AbstractDataset x) {
 		return (double[])DatasetUtils.cast(x, AbstractDataset.FLOAT64).getBuffer();

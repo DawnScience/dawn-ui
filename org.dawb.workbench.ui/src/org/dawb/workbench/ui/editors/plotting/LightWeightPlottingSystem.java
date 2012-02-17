@@ -12,10 +12,12 @@ package org.dawb.workbench.ui.editors.plotting;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.csstudio.swt.xygraph.dataprovider.CircularBufferDataProvider;
+import org.csstudio.swt.xygraph.dataprovider.ISample;
 import org.csstudio.swt.xygraph.dataprovider.Sample;
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.Trace;
@@ -598,6 +600,32 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	    
 	    
 	}
+	
+	
+
+	@Override
+	public AbstractDataset getData(String name) {
+		
+		final Trace trace = traceMap.get(name);
+		if (trace==null) return null;
+		
+		CircularBufferDataProvider prov = (CircularBufferDataProvider)trace.getDataProvider();
+		if (prov==null) return null;
+		
+		final double[]          da = new double[prov.getSize()];
+		final Iterator<ISample> it = prov.iterator();
+		int i = 0;
+		while(it.hasNext()) {
+			da[i] = it.next().getYValue();
+			++i;
+		}
+		
+		final DoubleDataset set = new DoubleDataset(da, da.length);
+		set.setName(name);
+		
+		return set;
+	}
+
 
 	private void processRescale(final AbstractDataset       x,
 								final List<AbstractDataset> ys) {

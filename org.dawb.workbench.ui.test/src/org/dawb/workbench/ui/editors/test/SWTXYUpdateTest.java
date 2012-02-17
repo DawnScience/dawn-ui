@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
-import org.dawb.common.ui.plot.PlotType;
+import org.dawb.common.ui.plot.PlottingSelectionProvider;
 import org.dawb.workbench.ui.editors.AsciiEditor;
 import org.dawb.workbench.ui.editors.PlotDataEditor;
 import org.dawb.workbench.ui.editors.plotting.LightWeightPlottingSystem;
@@ -162,6 +162,19 @@ public class SWTXYUpdateTest {
 			
 			EclipseUtils.delay(10);
 		}	
+		
+		// Check sizes
+		for (AbstractDataset a : ys) {
+			final AbstractDataset set = sys.getData(a.getName());
+			if (set==null) throw new Exception("There must be a data set called "+set.getName());
+			try {
+				if (set.getSize()!=(updateAmount+a.getSize())) {
+					throw new Exception("The size must be the original size plus the update amount. Data set looks wrong: "+set);
+				}
+			} catch (NullPointerException ignored) {
+				continue; // Some of the tests send empty data on purpose.
+			}
+		}
 			
 		EclipseUtils.getPage().closeEditor(editor, false);
 		System.out.println("Closed: "+path);
