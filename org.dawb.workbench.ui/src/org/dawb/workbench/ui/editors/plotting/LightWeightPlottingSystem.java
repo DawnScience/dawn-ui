@@ -30,10 +30,14 @@ import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.IAxis;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlotUpdateEvent;
+import org.dawb.common.ui.plot.region.IRegion;
+import org.dawb.common.ui.plot.region.IRegion.RegionType;
+import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.fable.extensions.FableImageWrapper;
 import org.dawb.gda.extensions.util.DatasetTitleUtils;
 import org.dawb.workbench.ui.Activator;
+import org.dawb.workbench.ui.editors.plotting.swtxy.Region;
 import org.dawb.workbench.ui.editors.plotting.swtxy.XYRegionGraph;
 import org.dawb.workbench.ui.editors.plotting.swtxy.XYRegionToolbar;
 import org.dawb.workbench.ui.editors.preference.EditorConstants;
@@ -934,4 +938,39 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		this.selectedYAxis = selectedYAxis;
 	}
 	
+	public boolean addRegionListener(final IRegionListener l) {
+		return xyGraph.addRegionListener(l);
+	}
+	
+	public boolean removeRegionListener(final IRegionListener l) {
+		return xyGraph.removeRegionListener(l);
+	}
+	
+	public IRegion createRegion(final String name, final RegionType regionType)  {
+
+		final Axis xAxis = ((AxisWrapper)getSelectedXAxis()).getWrappedAxis();
+		final Axis yAxis = ((AxisWrapper)getSelectedYAxis()).getWrappedAxis();
+
+		return xyGraph.createRegion(name, xAxis, yAxis, regionType);
+	}
+	
+	
+	/**
+	 * Add a selection region to the graph.
+	 * @param region
+	 */
+	public void addRegion(final IRegion region) {		
+		final Region r = (Region)region;
+		xyGraph.addRegion(r);		
+ 	}
+	
+	/**
+	 * Remove a selection region to the graph.
+	 * @param region
+	 */
+	public void removeRegion(final IRegion region) {		
+		final Region r = (Region)region;
+		xyGraph.removeRegion(r);
+	}
+
 }

@@ -4,7 +4,6 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
 import org.csstudio.swt.xygraph.figures.Axis;
-import org.csstudio.swt.xygraph.figures.Trace;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;

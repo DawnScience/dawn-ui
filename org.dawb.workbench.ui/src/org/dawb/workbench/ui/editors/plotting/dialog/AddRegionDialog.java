@@ -1,5 +1,6 @@
 package org.dawb.workbench.ui.editors.plotting.dialog;
 
+import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.workbench.ui.editors.plotting.swtxy.Region;
 import org.dawb.workbench.ui.editors.plotting.swtxy.XYRegionGraph;
 import org.eclipse.jface.dialogs.Dialog;
@@ -12,15 +13,15 @@ public class AddRegionDialog extends Dialog {
 	
 	private XYRegionGraph xyGraph;
 	private RegionComposite regionComposite;
-	private int defaultSelection;
+	private RegionType type;
 
-	public AddRegionDialog(final Shell parentShell, final XYRegionGraph xyGraph, int defaultSelection) {
+	public AddRegionDialog(final Shell parentShell, final XYRegionGraph xyGraph, RegionType type) {
 		super(parentShell);	
 		
         // Allow resize
         setShellStyle(getShellStyle() | SWT.RESIZE);
         this.xyGraph = xyGraph;
-        this.defaultSelection = defaultSelection;
+        this.type = type;
 	}
 	
 	@Override
@@ -32,7 +33,7 @@ public class AddRegionDialog extends Dialog {
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		final Composite parent_composite = (Composite) super.createDialogArea(parent);
-        this.regionComposite = new RegionComposite(parent_composite, SWT.NONE, xyGraph, defaultSelection);
+        this.regionComposite = new RegionComposite(parent_composite, SWT.NONE, xyGraph, type);
          
 		return parent_composite;
 	}

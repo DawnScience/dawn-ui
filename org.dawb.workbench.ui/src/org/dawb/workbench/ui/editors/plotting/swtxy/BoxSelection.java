@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.dawb.common.ui.plot.region.RegionBounds;
+import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.FigureListener;
@@ -23,7 +24,7 @@ import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
  *     |              |
  *     p3------------p4
  */
-public class BoxSelection extends Region {
+class BoxSelection extends Region {
 		
 	private static final int SIDE      = 8;
 	
@@ -31,7 +32,7 @@ public class BoxSelection extends Region {
 
 	private Figure connection;
 	
-	public BoxSelection(String name, Axis xAxis, Axis yAxis) {
+	BoxSelection(String name, Axis xAxis, Axis yAxis) {
 		super(name, xAxis, yAxis);
 		setRegionColor(ColorConstants.green);
 	}
@@ -173,6 +174,11 @@ public class BoxSelection extends Region {
 		p1.setRealValue(bounds.getP1());
 		p4.setRealValue(bounds.getP2());
 		repaint();
+	}
+	
+	@Override
+	public RegionType getRegionType() {
+		return RegionType.BOX;
 	}
 
 }

@@ -1,7 +1,7 @@
 package org.dawb.workbench.ui.editors.plotting.dialog;
 
-import org.dawb.workbench.ui.editors.plotting.swtxy.RegionArea;
 import org.dawb.workbench.ui.editors.plotting.swtxy.Region;
+import org.dawb.workbench.ui.editors.plotting.swtxy.RegionArea;
 import org.dawb.workbench.ui.editors.plotting.swtxy.XYRegionGraph;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;

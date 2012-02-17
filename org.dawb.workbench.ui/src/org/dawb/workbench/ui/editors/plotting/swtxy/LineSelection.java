@@ -15,7 +15,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 
-public class LineSelection extends Region {
+class LineSelection extends Region {
 		
 
 	private static final int SIDE      = 8;
@@ -24,7 +24,7 @@ public class LineSelection extends Region {
 
 	private Figure connection;
 
-	public LineSelection(String name, Axis xAxis, Axis yAxis) {
+	LineSelection(String name, Axis xAxis, Axis yAxis) {
 		super(name, xAxis, yAxis);
 		setRegionColor(ColorConstants.cyan);
 	}
@@ -118,6 +118,12 @@ public class LineSelection extends Region {
 		startBox.setRealValue(bounds.getP1());
 		endBox.setRealValue(bounds.getP2());
 		repaint();
+	}
+
+
+	@Override
+	public RegionType getRegionType() {
+		return RegionType.LINE;
 	}
 
 }

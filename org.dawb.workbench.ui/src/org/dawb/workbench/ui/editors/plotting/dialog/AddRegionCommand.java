@@ -1,8 +1,5 @@
 package org.dawb.workbench.ui.editors.plotting.dialog;
 
-import org.csstudio.swt.xygraph.Messages;
-import org.csstudio.swt.xygraph.figures.Annotation;
-import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.swt.xygraph.undo.IUndoableCommand;
 import org.dawb.workbench.ui.editors.plotting.swtxy.Region;
 import org.dawb.workbench.ui.editors.plotting.swtxy.XYRegionGraph;

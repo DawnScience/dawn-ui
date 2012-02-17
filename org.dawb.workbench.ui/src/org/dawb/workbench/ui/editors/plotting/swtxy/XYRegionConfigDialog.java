@@ -71,7 +71,7 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
  	        
  	        for(Region region : ((RegionArea)regionGraph.getPlotArea()).getRegionList()){
 		        
-		        RegionComposite regionPage = new RegionComposite(regionConfigComposite, SWT.NONE, (XYRegionGraph)xyGraph, 0);
+		        RegionComposite regionPage = new RegionComposite(regionConfigComposite, SWT.NONE, (XYRegionGraph)xyGraph, region.getRegionType());
 		        regionList.add(regionPage);
 		        regionPage.setEditingRegion(region);   	        
  	        }

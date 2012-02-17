@@ -6,6 +6,7 @@ import java.util.List;
 import org.csstudio.swt.xygraph.toolbar.XYGraphConfigDialog;
 import org.csstudio.swt.xygraph.toolbar.XYGraphToolbar;
 import org.dawb.common.ui.menu.MenuAction;
+import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.workbench.ui.Activator;
 import org.dawb.workbench.ui.editors.plotting.dialog.AddRegionCommand;
 import org.dawb.workbench.ui.editors.plotting.dialog.AddRegionDialog;
@@ -20,12 +21,17 @@ import org.eclipse.swt.widgets.Display;
 public class XYRegionToolbar extends XYGraphToolbar {
 
 
+	private XYRegionGraph regionGraph;
+
+
 	public XYRegionToolbar(XYRegionGraph xyGraph) {
 		super(xyGraph);
+		this.regionGraph = xyGraph;
 	}
 
 	public XYRegionToolbar(XYRegionGraph xyGraph, int flags) {
 		super(xyGraph, flags);
+		this.regionGraph = xyGraph;
 	}
 	
 	public void createGraphActions(final IContributionManager tool, final IContributionManager men) {
@@ -36,41 +42,15 @@ public class XYRegionToolbar extends XYGraphToolbar {
         regionDropDown.setId("org.dawb.workbench.ui.editors.plotting.swtxy.addRegions");
  
 		final Action addLine = new Action("Add Line Selection...", Activator.getImageDescriptor("icons/ProfileLine.png")) {
-			public void run() {
-				
-				if (xyGraph.getPlotArea().getTraceList().size()==0) {
-					MessageDialog.openError(Display.getCurrent().getActiveShell(), "Selections must be added to plots", "Please plot something before selecting a region.");
-				} if (xyGraph.getXAxisList().size()==1 && xyGraph.getYAxisList().size()==1) {
-					final Region region = new LineSelection(getUniqueName("Line"), xyGraph.primaryXAxis, xyGraph.primaryYAxis);
-					addRegion(region);
-				} else {
-					AddRegionDialog dialog = new AddRegionDialog(Display.getCurrent().getActiveShell(), (XYRegionGraph)xyGraph, 0);
-					if(dialog.open() == Window.OK){
-						final Region region = dialog.getRegion();
-						addRegion(region);
-					}
-				}
-				regionDropDown.setSelectedAction(this);
+			public void run() {				
+				createRegion(regionDropDown, this, RegionType.LINE);
 			}
 		};
 		regionDropDown.add(addLine);
 		
 		final Action addBox = new Action("Add Box Selection...", Activator.getImageDescriptor("icons/ProfileBox.png")) {
-			public void run() {
-				
-				if (xyGraph.getPlotArea().getTraceList().size()==0) {
-					MessageDialog.openError(Display.getCurrent().getActiveShell(), "Selections must be added to plots", "Please plot something before selecting a region.");
-				} if (xyGraph.getXAxisList().size()==1 && xyGraph.getYAxisList().size()==1) {
-					final Region region = new BoxSelection(getUniqueName("Box"), xyGraph.primaryXAxis, xyGraph.primaryYAxis);
-					addRegion(region);
-				} else {
-					AddRegionDialog dialog = new AddRegionDialog(Display.getCurrent().getActiveShell(), (XYRegionGraph)xyGraph, 1);
-					if(dialog.open() == Window.OK){
-						final Region region = dialog.getRegion();
-						addRegion(region);
-					}
-				}
-				regionDropDown.setSelectedAction(this);
+			public void run() {				
+				createRegion(regionDropDown, this, RegionType.BOX);
 			}
 		};
 		regionDropDown.add(addBox);
@@ -92,6 +72,21 @@ public class XYRegionToolbar extends XYGraphToolbar {
 		
 		tool.insertAfter("org.dawb.workbench.ui.editors.plotting.swtxy.addRegions", removeRegion);
 		men.insertAfter("org.dawb.workbench.ui.editors.plotting.swtxy.addRegions", removeRegion);
+	}
+
+	protected void createRegion(MenuAction regionDropDown, Action action, RegionType type) {
+		
+		if (xyGraph.getXAxisList().size()==1 && xyGraph.getYAxisList().size()==1) {
+			final Region region = regionGraph.createRegion(getUniqueName(type.getName()), xyGraph.primaryXAxis, xyGraph.primaryYAxis, type);
+			addRegion(region);
+		} else {
+			AddRegionDialog dialog = new AddRegionDialog(Display.getCurrent().getActiveShell(), (XYRegionGraph)xyGraph, type);
+			if(dialog.open() == Window.OK){
+				final Region region = dialog.getRegion();
+				addRegion(region);
+			}
+		}
+		regionDropDown.setSelectedAction(action);		
 	}
 
 	protected String getUniqueName(String base) {

@@ -2,12 +2,13 @@ package org.dawb.workbench.ui.editors.plotting.swtxy;
 
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.XYGraph;
+import org.dawb.common.ui.plot.region.IRegion;
+import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Shape;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.graphics.Color;
-import org.dawb.common.ui.plot.region.IRegion;
 
 /**
  * Shape used for ROIs which has bounds fixed to the graph area.
@@ -32,6 +33,7 @@ public abstract class Region implements IRegion{
 
 	public abstract void createContents(final Figure parent);
 
+	public abstract RegionType getRegionType();
 
 	public void sync(RegionBean bean) {
 		setName(bean.getName());

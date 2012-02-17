@@ -7,9 +7,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.csstudio.swt.xygraph.figures.Axis;
-import org.csstudio.swt.xygraph.figures.Trace;
-import org.dawb.workbench.ui.editors.plotting.swtxy.BoxSelection;
-import org.dawb.workbench.ui.editors.plotting.swtxy.LineSelection;
+import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.workbench.ui.editors.plotting.swtxy.Region;
 import org.dawb.workbench.ui.editors.plotting.swtxy.XYRegionGraph;
 import org.eclipse.draw2d.ColorConstants;
@@ -38,7 +36,7 @@ public class RegionComposite extends Composite {
 	private Button motile;
 	private Button visible;
 
-	public RegionComposite(final Composite parent, final int style, final XYRegionGraph xyGraph, final int defaultSelection) {
+	public RegionComposite(final Composite parent, final int style, final XYRegionGraph xyGraph, final RegionType defaultRegion) {
 		
 		super(parent, SWT.NONE);
 		this.xyGraph = xyGraph;
@@ -65,8 +63,10 @@ public class RegionComposite extends Composite {
 		regionType.setEditable(false);
 		regionType.setToolTipText("Region type");
 		regionType.setLayoutData(new GridData(SWT.FILL, 0, true, false));
-		regionType.setItems(new String[]{"Line", "Box"});
-		regionType.select(defaultSelection);
+		for (RegionType type : RegionType.ALL_TYPES) {
+			regionType.add(type.getName());
+		}
+		regionType.select(defaultRegion.getIndex());
 
 		xCombo = createAxisChooser(this, "X Axis", xyGraph.getXAxisList());	
 		yCombo = createAxisChooser(this, "Y Axis", xyGraph.getYAxisList());	
@@ -77,8 +77,7 @@ public class RegionComposite extends Composite {
 		
 		colorSelector = new ColorSelector(this);
 		colorSelector.getButton().setLayoutData(new GridData());		
-		if (defaultSelection==0) colorSelector.setColorValue(ColorConstants.cyan.getRGB());
-		if (defaultSelection==1) colorSelector.setColorValue(ColorConstants.green.getRGB());
+		colorSelector.setColorValue(defaultRegion.getDefaultColor().getRGB());
 		
 		
 		final Label horiz2 = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
@@ -114,7 +113,7 @@ public class RegionComposite extends Composite {
 		visible.setSelection(true);
 		
 		// Should be last
-		nameText.setText(getDefaultName(defaultSelection));
+		nameText.setText(getDefaultName(defaultRegion.getIndex()));
 
 	}
 
@@ -164,8 +163,7 @@ public class RegionComposite extends Composite {
 			countMap.put(regionType.getSelectionIndex(), count);
 		}
 		
-		if (regionType.getSelectionIndex()==0) region = new LineSelection(txt, xAxis, yAxis);
-		if (regionType.getSelectionIndex()==1) region = new BoxSelection(txt,  xAxis, yAxis);
+		region = xyGraph.createRegion(txt, xAxis, yAxis, RegionType.getRegion(regionType.getSelectionIndex()));
 		
 		this.editingRegion = region;
 		getEditingRegion();
@@ -178,8 +176,7 @@ public class RegionComposite extends Composite {
         this.editingRegion = region;
         
         nameText.setText(region.getName());
-		if (editingRegion instanceof LineSelection) regionType.select(0);
-		if (editingRegion instanceof BoxSelection)  regionType.select(1);
+		regionType.select(region.getRegionType().getIndex());
 		regionType.setEnabled(false);
 		regionType.setEditable(false);
 		
