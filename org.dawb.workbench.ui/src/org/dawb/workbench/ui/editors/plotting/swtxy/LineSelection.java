@@ -2,7 +2,9 @@ package org.dawb.workbench.ui.editors.plotting.swtxy;
 
 import java.util.Arrays;
 
-import org.csstudio.swt.xygraph.figures.Trace;
+import org.csstudio.swt.xygraph.figures.Axis;
+import org.dawb.common.ui.plot.region.RegionBounds;
+import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.FigureListener;
 import org.eclipse.draw2d.Graphics;
@@ -10,7 +12,6 @@ import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.swt.graphics.Color;
 
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 
@@ -23,23 +24,21 @@ public class LineSelection extends Region {
 
 	private Figure connection;
 
-	private Figure parent;
-
-	public LineSelection(String name, Trace trace) {
-		super(name, trace);
+	public LineSelection(String name, Axis xAxis, Axis yAxis) {
+		super(name, xAxis, yAxis);
+		setRegionColor(ColorConstants.cyan);
 	}
 
 
 	public void createContents(final Figure parent) {
 		
-		this.parent = parent;
-		this.startBox = new SelectionRectangle(getTrace(), getRegionColor(), new Point(100,100),  SIDE);
-		new FigureMover(getTrace().getXYGraph(), startBox);	
+		this.startBox = new SelectionRectangle(getxAxis(), getyAxis(), getRegionColor(), new Point(100,100),  SIDE);
+		new FigureMover(getXyGraph(), startBox);	
 
-		this.endBox   = new SelectionRectangle(getTrace(), getRegionColor(), new Point(200,200),SIDE);
-		new FigureMover(getTrace().getXYGraph(), endBox);	
+		this.endBox   = new SelectionRectangle(getxAxis(), getyAxis(), getRegionColor(), new Point(200,200),SIDE);
+		new FigureMover(getXyGraph(), endBox);	
 				
-		this.connection = new Figure() {
+		this.connection = new RegionFillFigure() {
 			@Override
 			public void paintFigure(Graphics gc) {
 				super.paintFigure(gc);
@@ -47,7 +46,7 @@ public class LineSelection extends Region {
 				final Point endCenter   = endBox.getSelectionPoint();
 				this.bounds = new Rectangle(startCenter, endCenter);
 				gc.setLineWidth(2);
-				gc.setAlpha(80);
+				gc.setAlpha(getAlpha());
 				gc.drawLine(startCenter, endCenter);
 			}
 		};
@@ -65,7 +64,7 @@ public class LineSelection extends Region {
 		startBox.addFigureListener(figListener);
 		endBox.addFigureListener(figListener);
 		
-		FigureMover mover = new FigureMover(getTrace().getXYGraph(), parent, connection, Arrays.asList(new IFigure[]{startBox,endBox}));
+		FigureMover mover = new FigureMover(getXyGraph(), parent, connection, Arrays.asList(new IFigure[]{startBox,endBox}));
 		mover.addTranslationListener(new TranslationListener() {
 			@Override
 			public void translateBefore(TranslationEvent evt) {
@@ -80,38 +79,10 @@ public class LineSelection extends Region {
 			}
 
 		});
-		
 
-		startBox.setShowPosition(isShowPosition());
-		endBox.setShowPosition(isShowPosition());
+		setRegionObjects(connection, startBox, endBox);
+		sync(getBean());
 
-	}
-	
-	public void remove() {
-		parent.remove(connection);
-		parent.remove(startBox);
-		parent.remove(endBox);
-	}
-
-	
-	public void setShowPosition(boolean showPosition) {
-		if (startBox!=null) startBox.setShowPosition(showPosition);
-		if (endBox!=null)   endBox.setShowPosition(showPosition);
-		super.setShowPosition(showPosition);
-	}
-
-	public void setTrace(Trace trace) {
-		if (startBox!=null) startBox.setTrace(trace);
-		if (endBox!=null) endBox.setTrace(trace);
-		super.setTrace(trace);
-	}
-
-	public void setRegionColor(Color color) {
-		if (startBox!=null) startBox.setColor(color);
-		if (endBox!=null) endBox.setColor(color);
-		if (connection!=null) connection.setBackgroundColor(color);
-		if (connection!=null) connection.setForegroundColor(color);
-		super.setRegionColor(color);
 	}
 	
 	protected FigureListener createFigureListener() {
@@ -136,4 +107,17 @@ public class LineSelection extends Region {
 		}
 	}
 	
+	public RegionBounds getBounds() {
+		final double[] p1 = startBox.getRealValue();
+		final double[] p2 = endBox.getRealValue();
+		final RegionBounds bounds = new RegionBounds(p1, p2);
+		return bounds;
+	}
+	
+	public void setBounds(RegionBounds bounds) {
+		startBox.setRealValue(bounds.getP1());
+		endBox.setRealValue(bounds.getP2());
+		repaint();
+	}
+
 }

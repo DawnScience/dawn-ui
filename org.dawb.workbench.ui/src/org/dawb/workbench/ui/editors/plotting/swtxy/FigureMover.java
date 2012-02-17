@@ -28,7 +28,8 @@ public class FigureMover implements MouseListener, MouseMotionListener {
 	private Dimension cumulativeOffset;
 	private Point startLocation;
 	private List<IFigure> translations;
-   
+	private boolean active=true;
+ 
 	public FigureMover(XYGraph xyGraph, IFigure figure) {
 		this(xyGraph, figure, figure, Arrays.asList(new IFigure[]{figure}));
 	}
@@ -44,6 +45,7 @@ public class FigureMover implements MouseListener, MouseMotionListener {
 	@Override
 	public void mouseDragged(MouseEvent event) {
 		
+		if (!active) return;
 		
 		try {
 			if (location == null) return;
@@ -97,12 +99,16 @@ public class FigureMover implements MouseListener, MouseMotionListener {
 	private Point location;
 	@Override
 	public void mousePressed(MouseEvent event) {
+		if (!active) return;
+
 		location = event.getLocation();
 		startLocation = event.getLocation();
 		event.consume();
 	}
 	@Override
 	public void mouseReleased(MouseEvent event) {
+		if (!active) return;
+
 		if (location == null) return;
 		xyGraph.getOperationsManager().addCommand(new MoverCommand(figure, cumulativeOffset, translations, this));
 		location = null;
@@ -140,6 +146,14 @@ public class FigureMover implements MouseListener, MouseMotionListener {
 		for (TranslationListener l : listeners) {
 			l.translationAfter(evt);
 		}
+	}
+
+	public void setActive(boolean motile) {
+		this.active = motile;
+	}
+	
+	public boolean isActive() {
+		return active;
 	}
 
 }

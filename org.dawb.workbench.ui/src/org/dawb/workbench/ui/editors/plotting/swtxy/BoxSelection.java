@@ -2,7 +2,9 @@ package org.dawb.workbench.ui.editors.plotting.swtxy;
 
 import java.util.Arrays;
 
-import org.csstudio.swt.xygraph.figures.Trace;
+import org.csstudio.swt.xygraph.figures.Axis;
+import org.dawb.common.ui.plot.region.RegionBounds;
+import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.FigureListener;
 import org.eclipse.draw2d.Graphics;
@@ -28,28 +30,26 @@ public class BoxSelection extends Region {
 	private SelectionRectangle p1,  p2, p3, p4;
 
 	private Figure connection;
-
-	private Figure parent;
 	
-	public BoxSelection(String name, Trace trace) {
-		super(name, trace);
+	public BoxSelection(String name, Axis xAxis, Axis yAxis) {
+		super(name, xAxis, yAxis);
+		setRegionColor(ColorConstants.green);
 	}
 
 	public void createContents(final Figure parent) {
 		
-		this.parent = parent;
-    	this.p1  = createSelectionRectangle(getRegionColor(),  new Point(100,100),  SIDE);
+     	this.p1  = createSelectionRectangle(getRegionColor(),  new Point(100,100),  SIDE);
 		this.p2  = createSelectionRectangle(getRegionColor(),  new Point(200,100),  SIDE);
 		this.p3  = createSelectionRectangle(getRegionColor(),  new Point(100,200),  SIDE);
 		this.p4  = createSelectionRectangle(getRegionColor(),  new Point(200,200),  SIDE);
 				
-		this.connection = new Figure() {
+		this.connection = new RegionFillFigure() {
 			@Override
 			public void paintFigure(Graphics gc) {
 				super.paintFigure(gc);
 				final Rectangle size = getRectangleFromVertices();				
 				this.bounds = size;
-				gc.setAlpha(80);
+				gc.setAlpha(getAlpha());
 				gc.fillRectangle(size);
 			}
 		};
@@ -64,7 +64,7 @@ public class BoxSelection extends Region {
 		parent.add(p3);
 		parent.add(p4);
 				
-		FigureMover mover = new FigureMover(getTrace().getXYGraph(), parent, connection, Arrays.asList(new IFigure[]{p1,p2,p3,p4}));
+		FigureMover mover = new FigureMover(getXyGraph(), parent, connection, Arrays.asList(new IFigure[]{p1,p2,p3,p4}));
 		// Add a translation listener to be notified when the mover will translate so that
 		// we do not recompute point locations during the move.
 		mover.addTranslationListener(new TranslationListener() {
@@ -83,52 +83,17 @@ public class BoxSelection extends Region {
 
 		});
 		
-		p1.setShowPosition(isShowPosition());
-		p2.setShowPosition(isShowPosition());
-		p3.setShowPosition(isShowPosition());
-		p4.setShowPosition(isShowPosition());
+		setRegionObjects(connection, p1, p2, p3, p4);
+		sync(getBean());
 
-	}
-	
-	public void remove() {
-		parent.remove(connection);
-		parent.remove(p1);
-		parent.remove(p2);
-		parent.remove(p3);
-		parent.remove(p4);
-	}
-
-	public void setShowPosition(boolean showPosition) {
-		if (p1!=null) p1.setShowPosition(showPosition);
-		if (p2!=null) p2.setShowPosition(showPosition);
-		if (p3!=null) p3.setShowPosition(showPosition);
-		if (p4!=null) p4.setShowPosition(showPosition);
-		super.setShowPosition(showPosition);
-	}
-	
-	public void setTrace(Trace trace) {
-		if (p1!=null) p1.setTrace(trace);
-		if (p2!=null) p2.setTrace(trace);
-		if (p3!=null) p3.setTrace(trace);
-		if (p4!=null) p4.setTrace(trace);
-		super.setTrace(trace);
-	}
-
-	public void setRegionColor(Color color) {
-		if (p1!=null) p1.setColor(color);
-		if (p2!=null) p2.setColor(color);
-		if (p3!=null) p3.setColor(color);
-		if (p4!=null) p4.setColor(color);
-		if (connection!=null) connection.setBackgroundColor(color);
-		super.setRegionColor(color);
 	}
 	
 	private boolean isCalculateCorners = true;
 
 	private SelectionRectangle createSelectionRectangle(Color color, Point location, int size) {
 		
-		SelectionRectangle rect = new SelectionRectangle(getTrace(), color,  location, size);
-		new FigureMover(getTrace().getXYGraph(), rect);	
+		SelectionRectangle rect = new SelectionRectangle(getxAxis(), getyAxis(), color,  location, size);
+		new FigureMover(getXyGraph(), rect);	
 		
 		rect.addFigureListener(new FigureListener() {
 			@Override
@@ -194,6 +159,20 @@ public class BoxSelection extends Region {
 		final Point loc4   = p4.getSelectionPoint();
 		Rectangle size = new Rectangle(loc1, loc4);
 		return size;
+	}
+
+
+	public RegionBounds getBounds() {
+		final double[] a1 = p1.getRealValue();
+		final double[] a2 = p4.getRealValue();
+		final RegionBounds bounds = new RegionBounds(a1, a2);
+		return bounds;
+	}
+	
+	public void setBounds(RegionBounds bounds) {
+		p1.setRealValue(bounds.getP1());
+		p4.setRealValue(bounds.getP2());
+		repaint();
 	}
 
 }

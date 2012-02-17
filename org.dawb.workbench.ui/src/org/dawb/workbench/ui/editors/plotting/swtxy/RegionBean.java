@@ -2,7 +2,7 @@ package org.dawb.workbench.ui.editors.plotting.swtxy;
 
 import java.io.Serializable;
 
-import org.csstudio.swt.xygraph.figures.Trace;
+import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.eclipse.swt.graphics.Color;
 
@@ -12,13 +12,32 @@ public class RegionBean implements Serializable {
 	 */
 	private static final long serialVersionUID = 3501897005952664393L;
 	
-	
-	protected String name;
-	protected Trace  trace;
+	protected Axis    xAxis;
+	protected Axis    yAxis;
 	protected XYGraph xyGraph;
-	protected boolean free = true;
-	protected Color  regionColor;
-	protected boolean showPosition;
+	
+	/**
+	 * Similar IRegion
+	 */
+	protected String  name;
+	protected Color   regionColor;
+	protected boolean showPosition=false;
+	protected int     alpha=80;
+	protected boolean visible=true;
+	protected boolean motile=true;
+	
+	public void sync(RegionBean bean) {
+		setName(bean.getName());
+		setShowPosition(bean.isShowPosition());
+		setxAxis(bean.getxAxis());
+		setyAxis(bean.getyAxis());
+		setXyGraph(bean.getXyGraph());
+		setRegionColor(bean.getRegionColor());
+		setAlpha(bean.getAlpha());
+		setVisible(bean.isVisible());
+		setMotile(bean.isMotile());
+	}
+
 
 	public String getName() {
 		return name;
@@ -26,14 +45,6 @@ public class RegionBean implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public Trace getTrace() {
-		return trace;
-	}
-
-	public void setTrace(Trace trace) {
-		this.trace = trace;
 	}
 
 	public XYGraph getXyGraph() {
@@ -44,14 +55,6 @@ public class RegionBean implements Serializable {
 		this.xyGraph = xyGraph;
 	}
 
-	public boolean isFree() {
-		return free;
-	}
-
-	public void setFree(boolean free) {
-		this.free = free;
-	}
-
 	public Color getRegionColor() {
 		return regionColor;
 	}
@@ -60,17 +63,56 @@ public class RegionBean implements Serializable {
 		this.regionColor = regionColour;
 	}
 
+	public boolean isShowPosition() {
+		return showPosition;
+	}
+
+	public void setShowPosition(boolean showPosition) {
+		this.showPosition = showPosition;
+	}
+
+	public int getAlpha() {
+		return alpha;
+	}
+
+	/**
+	 * 0-255
+	 * @param alpha
+	 */
+	public void setAlpha(int alpha) {
+		this.alpha = alpha;
+	}
+
+	public boolean isVisible() {
+		return visible;
+	}
+
+	public void setVisible(boolean visible) {
+		this.visible = visible;
+	}
+
+	public boolean isMotile() {
+		return motile;
+	}
+
+	public void setMotile(boolean motile) {
+		this.motile = motile;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + (free ? 1231 : 1237);
+		result = prime * result + alpha;
+		result = prime * result + (motile ? 1231 : 1237);
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result
 				+ ((regionColor == null) ? 0 : regionColor.hashCode());
 		result = prime * result + (showPosition ? 1231 : 1237);
-		result = prime * result + ((trace == null) ? 0 : trace.hashCode());
+		result = prime * result + (visible ? 1231 : 1237);
+		result = prime * result + ((xAxis == null) ? 0 : xAxis.hashCode());
 		result = prime * result + ((xyGraph == null) ? 0 : xyGraph.hashCode());
+		result = prime * result + ((yAxis == null) ? 0 : yAxis.hashCode());
 		return result;
 	}
 
@@ -83,7 +125,9 @@ public class RegionBean implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		RegionBean other = (RegionBean) obj;
-		if (free != other.free)
+		if (alpha != other.alpha)
+			return false;
+		if (motile != other.motile)
 			return false;
 		if (name == null) {
 			if (other.name != null)
@@ -97,34 +141,44 @@ public class RegionBean implements Serializable {
 			return false;
 		if (showPosition != other.showPosition)
 			return false;
-		if (trace == null) {
-			if (other.trace != null)
+		if (visible != other.visible)
+			return false;
+		if (xAxis == null) {
+			if (other.xAxis != null)
 				return false;
-		} else if (!trace.equals(other.trace))
+		} else if (!xAxis.equals(other.xAxis))
 			return false;
 		if (xyGraph == null) {
 			if (other.xyGraph != null)
 				return false;
 		} else if (!xyGraph.equals(other.xyGraph))
 			return false;
+		if (yAxis == null) {
+			if (other.yAxis != null)
+				return false;
+		} else if (!yAxis.equals(other.yAxis))
+			return false;
 		return true;
 	}
 
-	public boolean isShowPosition() {
-		return showPosition;
+
+	public Axis getxAxis() {
+		return xAxis;
 	}
 
-	public void setShowPosition(boolean showPosition) {
-		this.showPosition = showPosition;
+
+	public void setxAxis(Axis xAxis) {
+		this.xAxis = xAxis;
 	}
 
-	public void sync(RegionBean bean) {
-		setName(bean.getName());
-		setShowPosition(bean.isShowPosition());
-		setFree(bean.isFree());
-		setTrace(bean.getTrace());
-		setXyGraph(bean.getXyGraph());
-		setRegionColor(bean.getRegionColor());
+
+	public Axis getyAxis() {
+		return yAxis;
+	}
+
+
+	public void setyAxis(Axis yAxis) {
+		this.yAxis = yAxis;
 	}
 	
 

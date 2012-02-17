@@ -40,8 +40,8 @@ public class XYRegionToolbar extends XYGraphToolbar {
 				
 				if (xyGraph.getPlotArea().getTraceList().size()==0) {
 					MessageDialog.openError(Display.getCurrent().getActiveShell(), "Selections must be added to plots", "Please plot something before selecting a region.");
-				} if (xyGraph.getPlotArea().getTraceList().size()==1) {
-					final Region region = new LineSelection(getUniqueName("Line"), xyGraph.getPlotArea().getTraceList().get(0));
+				} if (xyGraph.getXAxisList().size()==1 && xyGraph.getYAxisList().size()==1) {
+					final Region region = new LineSelection(getUniqueName("Line"), xyGraph.primaryXAxis, xyGraph.primaryYAxis);
 					addRegion(region);
 				} else {
 					AddRegionDialog dialog = new AddRegionDialog(Display.getCurrent().getActiveShell(), (XYRegionGraph)xyGraph, 0);
@@ -60,8 +60,8 @@ public class XYRegionToolbar extends XYGraphToolbar {
 				
 				if (xyGraph.getPlotArea().getTraceList().size()==0) {
 					MessageDialog.openError(Display.getCurrent().getActiveShell(), "Selections must be added to plots", "Please plot something before selecting a region.");
-				} if (xyGraph.getPlotArea().getTraceList().size()==1) {
-					final Region region = new BoxSelection(getUniqueName("Box"), xyGraph.getPlotArea().getTraceList().get(0));
+				} if (xyGraph.getXAxisList().size()==1 && xyGraph.getYAxisList().size()==1) {
+					final Region region = new BoxSelection(getUniqueName("Box"), xyGraph.primaryXAxis, xyGraph.primaryYAxis);
 					addRegion(region);
 				} else {
 					AddRegionDialog dialog = new AddRegionDialog(Display.getCurrent().getActiveShell(), (XYRegionGraph)xyGraph, 1);

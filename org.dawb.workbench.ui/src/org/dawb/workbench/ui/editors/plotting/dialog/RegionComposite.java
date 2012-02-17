@@ -1,11 +1,12 @@
 package org.dawb.workbench.ui.editors.plotting.dialog;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.csstudio.swt.xygraph.Messages;
+import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.Trace;
 import org.dawb.workbench.ui.editors.plotting.swtxy.BoxSelection;
 import org.dawb.workbench.ui.editors.plotting.swtxy.LineSelection;
@@ -15,13 +16,12 @@ import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.preference.ColorSelector;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
 
 public class RegionComposite extends Composite {
@@ -30,12 +30,13 @@ public class RegionComposite extends Composite {
 
 	private Text   nameText;
 	private CCombo regionType;
-	private CCombo traceCombo;
+	private CCombo xCombo, yCombo;
 	private Button showPoints;
-
 	private Region editingRegion;
-
 	private ColorSelector colorSelector;
+	private Spinner alpha;
+	private Button motile;
+	private Button visible;
 
 	public RegionComposite(final Composite parent, final int style, final XYRegionGraph xyGraph, final int defaultSelection) {
 		
@@ -52,6 +53,9 @@ public class RegionComposite extends Composite {
 		nameText = new Text(this, SWT.BORDER | SWT.SINGLE);
 		nameText.setToolTipText("Region name");
 		nameText.setLayoutData(new GridData(SWT.FILL, 0, true, false));
+		
+		final Label horiz = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
+		horiz.setLayoutData(new GridData(SWT.FILL, 0, true, false, 2, 1));
 
 		final Label typeLabel = new Label(this, SWT.NONE);
 		typeLabel.setText("Type");
@@ -64,23 +68,8 @@ public class RegionComposite extends Composite {
 		regionType.setItems(new String[]{"Line", "Box"});
 		regionType.select(defaultSelection);
 
-		final Label traceLabel = new Label(this, SWT.NONE);
-		traceLabel.setText("Trace");
-		traceLabel.setLayoutData(new GridData());
-
-		traceCombo = new CCombo(this, SWT.NONE);
-		traceCombo.setEditable(false);
-		traceCombo.setToolTipText("Existing plot on the graph ");
-		traceCombo.setLayoutData(new GridData(SWT.FILL, 0, true, false));
-
-		for(Trace trace : xyGraph.getPlotArea().getTraceList()) traceCombo.add(trace.getName());
-		traceCombo.select(0);
-		
-		this.showPoints = new Button(this, SWT.CHECK);
-		showPoints.setText("Show vertex values");		
-		showPoints.setToolTipText("When on this will show the actual value of the point in the axes it was added.");
-		showPoints.setLayoutData(new GridData(0, 0, false, false, 2, 1));
-		
+		xCombo = createAxisChooser(this, "X Axis", xyGraph.getXAxisList());	
+		yCombo = createAxisChooser(this, "Y Axis", xyGraph.getYAxisList());	
 		
 		Label colorLabel = new Label(this, 0);
 		colorLabel.setText("Selection Color");		
@@ -90,9 +79,62 @@ public class RegionComposite extends Composite {
 		colorSelector.getButton().setLayoutData(new GridData());		
 		if (defaultSelection==0) colorSelector.setColorValue(ColorConstants.cyan.getRGB());
 		if (defaultSelection==1) colorSelector.setColorValue(ColorConstants.green.getRGB());
+		
+		
+		final Label horiz2 = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
+		horiz2.setLayoutData(new GridData(SWT.FILL, 0, true, false, 2, 1));
 
+		Label alphaLabel = new Label(this, 0);
+		alphaLabel.setText("Alpha level");		
+		alphaLabel.setLayoutData(new GridData());
+		
+		alpha = new Spinner(this, SWT.NONE);
+		alpha.setToolTipText("Alpha transparency level of the shaded shape");
+		alpha.setLayoutData(new GridData());		
+		alpha.setMinimum(0);
+		alpha.setMaximum(255);
+		alpha.setSelection(80);
+
+		this.motile = new Button(this, SWT.CHECK);
+		motile.setText("   Motile   ");		
+		motile.setToolTipText("When true, this selection can be resized and moved around the graph.");
+		motile.setLayoutData(new GridData(0, 0, false, false, 2, 1));
+		motile.setSelection(true);
+		
+		
+		this.showPoints = new Button(this, SWT.CHECK);
+		showPoints.setText("   Show vertex values");		
+		showPoints.setToolTipText("When on this will show the actual value of the point in the axes it was added.");
+		showPoints.setLayoutData(new GridData(0, 0, false, false, 2, 1));
+
+		this.visible = new Button(this, SWT.CHECK);
+		visible.setText("   Show region");		
+		visible.setToolTipText("You may turn off the visibility of this region.");
+		visible.setLayoutData(new GridData(0, 0, false, false, 2, 1));
+		visible.setSelection(true);
+		
+		// Should be last
 		nameText.setText(getDefaultName(defaultSelection));
 
+	}
+
+	private CCombo createAxisChooser(RegionComposite parent,
+			                         String label, List<Axis> xAxisList) {
+		
+		final Label xAxisLabel = new Label(parent, SWT.NONE);
+		xAxisLabel.setText(label);
+		xAxisLabel.setLayoutData(new GridData());
+
+		CCombo combo = new CCombo(this, SWT.NONE);
+		combo.setEditable(false);
+		combo.setToolTipText("Existing axis on the graph ");
+		combo.setLayoutData(new GridData(SWT.FILL, 0, true, false));
+
+		for(Axis axis : xAxisList)  combo.add(axis.getTitle());
+		
+		combo.select(0);		
+		
+		return combo;
 	}
 
 	private static Map<Integer,Integer> countMap;
@@ -109,7 +151,9 @@ public class RegionComposite extends Composite {
 
 	public Region createRegion() {
 		
-		final Trace trace = xyGraph.getPlotArea().getTraceList().get(traceCombo.getSelectionIndex());
+		final Axis xAxis = xyGraph.getXAxisList().get(xCombo.getSelectionIndex());
+		final Axis yAxis = xyGraph.getYAxisList().get(yCombo.getSelectionIndex());
+		
 		Region region=null;
 		
 		final String txt = nameText.getText();
@@ -120,8 +164,8 @@ public class RegionComposite extends Composite {
 			countMap.put(regionType.getSelectionIndex(), count);
 		}
 		
-		if (regionType.getSelectionIndex()==0) region = new LineSelection(txt, trace);
-		if (regionType.getSelectionIndex()==1) region = new BoxSelection(txt, trace);
+		if (regionType.getSelectionIndex()==0) region = new LineSelection(txt, xAxis, yAxis);
+		if (regionType.getSelectionIndex()==1) region = new BoxSelection(txt,  xAxis, yAxis);
 		
 		this.editingRegion = region;
 		getEditingRegion();
@@ -139,26 +183,36 @@ public class RegionComposite extends Composite {
 		regionType.setEnabled(false);
 		regionType.setEditable(false);
 		
-		final int index = xyGraph.getPlotArea().getTraceList().indexOf(region.getTrace());
-		traceCombo.select(index);
+		int index = xyGraph.getXAxisList().indexOf(region.getxAxis());
+		xCombo.select(index);
+		
+		index = xyGraph.getYAxisList().indexOf(region.getyAxis());
+		yCombo.select(index);
 		
 		colorSelector.setColorValue(region.getRegionColor().getRGB());
-		
+		alpha.setSelection(region.getAlpha());
+		motile.setSelection(region.isMotile());
 		showPoints.setSelection(region.isShowPosition());
+		visible.setSelection(region.isVisible());
 	}
 	
 	public Region getEditingRegion() {
 		
 		final String txt = nameText.getText();
 		editingRegion.setName(txt);
-		editingRegion.setTrace(xyGraph.getPlotArea().getTraceList().get(traceCombo.getSelectionIndex()));
+		editingRegion.setxAxis(xyGraph.getXAxisList().get(xCombo.getSelectionIndex()));
+		editingRegion.setyAxis(xyGraph.getYAxisList().get(yCombo.getSelectionIndex()));
 		editingRegion.setShowPosition(showPoints.getSelection());
 		editingRegion.setRegionColor(new Color(getDisplay(), colorSelector.getColorValue()));
+		editingRegion.setAlpha(alpha.getSelection());
+		editingRegion.setMotile(motile.getSelection());
+		editingRegion.setVisible(visible.getSelection());
         return editingRegion;
 	}
 
 
 	public void applyChanges() {
-		 getEditingRegion();
+		Region region = getEditingRegion();
+		region.repaint();
 	}
 }
