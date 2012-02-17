@@ -110,6 +110,7 @@ public class FigureMover implements MouseListener, MouseMotionListener {
 		if (!active) return;
 
 		if (location == null) return;
+		fireCompletedTranslation(new TranslationEvent(this));
 		xyGraph.getOperationsManager().addCommand(new MoverCommand(figure, cumulativeOffset, translations, this));
 		location = null;
 		
@@ -145,6 +146,12 @@ public class FigureMover implements MouseListener, MouseMotionListener {
 		if (listeners==null) return;
 		for (TranslationListener l : listeners) {
 			l.translationAfter(evt);
+		}
+	}
+	protected void fireCompletedTranslation(TranslationEvent evt) {
+		if (listeners==null) return;
+		for (TranslationListener l : listeners) {
+			l.translationCompleted(evt);
 		}
 	}
 

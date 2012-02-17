@@ -2,8 +2,7 @@ package org.dawb.workbench.ui.editors.plotting.swtxy;
 
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.XYGraph;
-import org.dawb.common.ui.plot.region.IRegion;
-import org.dawb.common.ui.plot.region.IRegion.RegionType;
+import org.dawb.common.ui.plot.region.AbstractRegion;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Shape;
@@ -16,7 +15,7 @@ import org.eclipse.swt.graphics.Color;
  * @author fcp94556
  *
  */
-public abstract class Region implements IRegion{
+public abstract class Region extends AbstractRegion {
 
 
 	private RegionBean bean;
@@ -55,10 +54,14 @@ public abstract class Region implements IRegion{
 		return bean.getName();
 	}
 	
+	/**
+	 * Remove from graph and remove all RegionBoundsListeners.
+	 */
 	public void remove() {
 		if (regionObjects!=null)for (IFigure ob : regionObjects) {
 			if (ob.getParent()!=null) ob.getParent().remove(ob);
 		}
+		clearListeners();
 	}
 
 
@@ -195,6 +198,24 @@ public abstract class Region implements IRegion{
 		}
 
 		bean.setyAxis(yAxis);
+	}
+	
+	public TranslationListener createRegionNotifier() {
+		return new TranslationListener() {
+			@Override
+			public void translateBefore(TranslationEvent evt) {
+				
+			}
+			@Override
+			public void translationAfter(TranslationEvent evt) {
+				
+			}
+			@Override
+			public void translationCompleted(TranslationEvent evt) {
+				fireRegionBoundsChanged(getRegionBounds());
+			}
+			
+		};
 	}
 
 }

@@ -4,7 +4,6 @@ import java.util.Arrays;
 
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.dawb.common.ui.plot.region.RegionBounds;
-import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.FigureListener;
@@ -23,12 +22,14 @@ import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
  *     |              |
  *     |              |
  *     p3------------p4
+ *     
+ * @author fcp94556
  */
 class BoxSelection extends Region {
 		
 	private static final int SIDE      = 8;
 	
-	private SelectionRectangle p1,  p2, p3, p4;
+	private SelectionRectangle p1, p2, p3, p4;
 
 	private Figure connection;
 	
@@ -82,20 +83,29 @@ class BoxSelection extends Region {
 				fireRoiSelection();
 			}
 
+			@Override
+			public void translationCompleted(TranslationEvent evt) {
+				final double[] r1 = p1.getRealValue();
+				final double[] r4 = p4.getRealValue();
+				fireRegionBoundsChanged(new RegionBounds(r1, r4));
+			}
+
 		});
 		
 		setRegionObjects(connection, p1, p2, p3, p4);
 		sync(getBean());
+        updateRegionBounds();
 
 	}
-	
+
 	private boolean isCalculateCorners = true;
 
 	private SelectionRectangle createSelectionRectangle(Color color, Point location, int size) {
 		
 		SelectionRectangle rect = new SelectionRectangle(getxAxis(), getyAxis(), color,  location, size);
-		new FigureMover(getXyGraph(), rect);	
-		
+		FigureMover mover = new FigureMover(getXyGraph(), rect);	
+		mover.addTranslationListener(createRegionNotifier());
+
 		rect.addFigureListener(new FigureListener() {
 			@Override
 			public void figureMoved(IFigure source) {
@@ -139,6 +149,7 @@ class BoxSelection extends Region {
 		// TODO Are we really going to rewrite all of the stuff that does not work?
 		final RectangularROI roi = new RectangularROI(r1[0], r1[1], r2[0]-r1[0], r4[1]-r1[1], 0);
 		if (getSelectionProvider()!=null) getSelectionProvider().setSelection(new StructuredSelection(roi));
+		fireRegionBoundsDragged(new RegionBounds(r1, r4));
 	}
 
 	private void setCornerLocation( SelectionRectangle c,
@@ -163,16 +174,22 @@ class BoxSelection extends Region {
 	}
 
 
-	public RegionBounds getBounds() {
-		final double[] a1 = p1.getRealValue();
-		final double[] a2 = p4.getRealValue();
-		final RegionBounds bounds = new RegionBounds(a1, a2);
-		return bounds;
+	public RegionBounds getRegionBounds() {
+		if (p1!=null) {
+			final double[] a1 = p1.getRealValue();
+			final double[] a2 = p4.getRealValue();
+			final RegionBounds bounds = new RegionBounds(a1, a2);
+			return bounds;
+		}
+		return super.getRegionBounds();
 	}
 	
-	public void setBounds(RegionBounds bounds) {
-		p1.setRealValue(bounds.getP1());
-		p4.setRealValue(bounds.getP2());
+	public void setRegionBounds(RegionBounds bounds) {
+		
+		if (p1!=null) p1.setRealValue(bounds.getP1());
+		if (p4!=null) p4.setRealValue(bounds.getP2());
+		
+		super.setRegionBounds(bounds);
 		repaint();
 	}
 	

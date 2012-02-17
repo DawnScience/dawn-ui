@@ -15,6 +15,13 @@ import org.eclipse.jface.viewers.StructuredSelection;
 
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 
+/**
+ * 
+ *    startBox-----------------------endBox
+ * 
+ * @author fcp94556
+ *
+ */
 class LineSelection extends Region {
 		
 
@@ -32,11 +39,14 @@ class LineSelection extends Region {
 
 	public void createContents(final Figure parent) {
 		
+		
 		this.startBox = new SelectionRectangle(getxAxis(), getyAxis(), getRegionColor(), new Point(100,100),  SIDE);
-		new FigureMover(getXyGraph(), startBox);	
+		FigureMover mover = new FigureMover(getXyGraph(), startBox);
+		mover.addTranslationListener(createRegionNotifier());
 
 		this.endBox   = new SelectionRectangle(getxAxis(), getyAxis(), getRegionColor(), new Point(200,200),SIDE);
-		new FigureMover(getXyGraph(), endBox);	
+		mover = new FigureMover(getXyGraph(), endBox);	
+		mover.addTranslationListener(createRegionNotifier());
 				
 		this.connection = new RegionFillFigure() {
 			@Override
@@ -64,7 +74,7 @@ class LineSelection extends Region {
 		startBox.addFigureListener(figListener);
 		endBox.addFigureListener(figListener);
 		
-		FigureMover mover = new FigureMover(getXyGraph(), parent, connection, Arrays.asList(new IFigure[]{startBox,endBox}));
+		mover = new FigureMover(getXyGraph(), parent, connection, Arrays.asList(new IFigure[]{startBox,endBox}));
 		mover.addTranslationListener(new TranslationListener() {
 			@Override
 			public void translateBefore(TranslationEvent evt) {
@@ -78,11 +88,17 @@ class LineSelection extends Region {
 				fireRoiSelection();
 			}
 
+			@Override
+			public void translationCompleted(TranslationEvent evt) {
+				final double[] r1 = startBox.getRealValue();
+				final double[] r4 = endBox.getRealValue();
+				fireRegionBoundsChanged(new RegionBounds(r1, r4));
+			}
 		});
 
 		setRegionObjects(connection, startBox, endBox);
 		sync(getBean());
-
+        updateRegionBounds();
 	}
 	
 	protected FigureListener createFigureListener() {
@@ -105,18 +121,24 @@ class LineSelection extends Region {
 		if (getSelectionProvider()!=null) {
 			getSelectionProvider().setSelection(new StructuredSelection(roi));
 		}
+		fireRegionBoundsDragged(new RegionBounds(p1, p2));
 	}
 	
-	public RegionBounds getBounds() {
-		final double[] p1 = startBox.getRealValue();
-		final double[] p2 = endBox.getRealValue();
-		final RegionBounds bounds = new RegionBounds(p1, p2);
-		return bounds;
+	public RegionBounds getRegionBounds() {
+		if (startBox!=null) {
+			final double[] p1 = startBox.getRealValue();
+			final double[] p2 = endBox.getRealValue();
+			final RegionBounds bounds = new RegionBounds(p1, p2);
+			return bounds;
+		} 
+		return super.getRegionBounds();
 	}
 	
-	public void setBounds(RegionBounds bounds) {
-		startBox.setRealValue(bounds.getP1());
-		endBox.setRealValue(bounds.getP2());
+	public void setRegionBounds(RegionBounds bounds) {
+		
+		if (startBox!=null) startBox.setRealValue(bounds.getP1());
+		if (endBox!=null)   endBox.setRealValue(bounds.getP2());
+		super.setRegionBounds(bounds);
 		repaint();
 	}
 
