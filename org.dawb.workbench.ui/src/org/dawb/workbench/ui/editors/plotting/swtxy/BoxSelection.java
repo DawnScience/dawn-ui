@@ -176,8 +176,9 @@ class BoxSelection extends Region {
 
 	public RegionBounds getRegionBounds() {
 		if (p1!=null) {
-			final double[] a1 = p1.getRealValue();
-			final double[] a2 = p4.getRealValue();
+			final Rectangle rect = getRectangleFromVertices();
+			double[] a1 = new double[]{getxAxis().getPositionValue(rect.x, false), getyAxis().getPositionValue(rect.y, false)};
+			double[] a2 = new double[]{getxAxis().getPositionValue(rect.x+rect.width, false), getyAxis().getPositionValue(rect.y+rect.height, false)};
 			final RegionBounds bounds = new RegionBounds(a1, a2);
 			return bounds;
 		}

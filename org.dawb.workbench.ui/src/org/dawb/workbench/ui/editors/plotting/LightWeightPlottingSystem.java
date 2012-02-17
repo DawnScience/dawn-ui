@@ -913,7 +913,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	@Override
 	public IAxis getSelectedXAxis() {
 		if (selectedXAxis==null) {
-			if (xyGraph==null) switchPlotUI(true);
+			if (xyGraph==null) switchPlotUI(true); // TODO Regions can be 2D
 			return new AxisWrapper(xyGraph.primaryXAxis);
 		}
 		return selectedXAxis;
@@ -927,7 +927,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	@Override
 	public IAxis getSelectedYAxis() {
 		if (selectedYAxis==null) {
-			if (xyGraph==null) switchPlotUI(true);
+			if (xyGraph==null) switchPlotUI(true); // TODO Regions can be 2D
 			return new AxisWrapper(xyGraph.primaryYAxis);
 		}
 		return selectedYAxis;
@@ -939,15 +939,18 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	}
 	
 	public boolean addRegionListener(final IRegionListener l) {
+		if (xyGraph==null) switchPlotUI(true); // TODO Regions can be 2D
 		return xyGraph.addRegionListener(l);
 	}
 	
 	public boolean removeRegionListener(final IRegionListener l) {
+		if (xyGraph==null) switchPlotUI(true); // TODO Regions can be 2D
 		return xyGraph.removeRegionListener(l);
 	}
 	
 	public IRegion createRegion(final String name, final RegionType regionType)  {
 
+		if (xyGraph==null) switchPlotUI(true); // TODO Regions can be 2D
 		final Axis xAxis = ((AxisWrapper)getSelectedXAxis()).getWrappedAxis();
 		final Axis yAxis = ((AxisWrapper)getSelectedYAxis()).getWrappedAxis();
 
@@ -960,6 +963,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	 * @param region
 	 */
 	public void addRegion(final IRegion region) {		
+		if (xyGraph==null) switchPlotUI(true); // TODO Regions can be 2D
 		final Region r = (Region)region;
 		xyGraph.addRegion(r);		
  	}
@@ -969,6 +973,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	 * @param region
 	 */
 	public void removeRegion(final IRegion region) {		
+		if (xyGraph==null) switchPlotUI(true); // TODO Regions can be 2D
 		final Region r = (Region)region;
 		xyGraph.removeRegion(r);
 	}
