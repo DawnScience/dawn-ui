@@ -12,6 +12,7 @@ import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.swt.SWT;
 
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 
@@ -34,6 +35,7 @@ class LineSelection extends Region {
 	LineSelection(String name, Axis xAxis, Axis yAxis) {
 		super(name, xAxis, yAxis);
 		setRegionColor(ColorConstants.cyan);
+		setAlpha(80);
 	}
 
 
@@ -98,6 +100,18 @@ class LineSelection extends Region {
         if (regionBounds==null) createRegionBounds(true);
 	}
 	
+	public void paintBeforeAdded(final Graphics gc, Rectangle bounds) {
+		gc.setLineStyle(SWT.LINE_DOT);
+		gc.setLineWidth(2);
+		gc.setAlpha(getAlpha());
+		gc.drawLine(bounds.getLocation(), bounds.getBottomRight());
+	}
+
+	
+	protected String getCursorPath() {
+		return "icons/Cursor-line.png";
+	}
+
 	protected FigureListener createFigureListener() {
 		return new FigureListener() {		
 			@Override
@@ -144,6 +158,17 @@ class LineSelection extends Region {
 		final Point startCenter = startBox.getSelectionPoint();
 		final Point endCenter   = endBox.getSelectionPoint();
 		connection.setBounds(new Rectangle(startCenter, endCenter));
+	}
+	
+	/**
+	 * Sets the local in local coordinates
+	 * @param bounds
+	 */
+	public void setLocalBounds(final Rectangle bounds) {
+		if (startBox!=null)   startBox.setSelectionPoint(bounds.getLocation());
+		if (endBox!=null)     endBox.setSelectionPoint(bounds.getBottomRight());
+		updateConnectionBounds();
+		createRegionBounds(true);
 	}
 
 	@Override

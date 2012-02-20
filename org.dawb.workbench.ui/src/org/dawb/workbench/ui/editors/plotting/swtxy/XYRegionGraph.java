@@ -28,8 +28,11 @@ public class XYRegionGraph extends XYGraph {
 		((RegionArea)getPlotArea()).setSelectionProvider(provider);
 	}
 
-	public Region createRegion(String name, Axis xAxis, Axis yAxis, RegionType regionType) throws Exception {
-		return ((RegionArea)getPlotArea()).createRegion(name, xAxis, yAxis, regionType);
+	public Region createRegion(String name, Axis xAxis, Axis yAxis, RegionType regionType, boolean startingWithMouseEvent) throws Exception {
+		return ((RegionArea)getPlotArea()).createRegion(name, xAxis, yAxis, regionType, startingWithMouseEvent);
+	}
+	public void disposeRegion(final Region region) {
+		((RegionArea)getPlotArea()).disposeRegion(region);
 	}
 
 	public boolean addRegionListener(IRegionListener l) {

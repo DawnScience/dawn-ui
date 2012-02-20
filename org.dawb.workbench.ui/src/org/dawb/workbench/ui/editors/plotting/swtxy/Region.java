@@ -5,12 +5,18 @@ import org.csstudio.swt.xygraph.figures.IAxisListener;
 import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.swt.xygraph.linearscale.Range;
 import org.dawb.common.ui.plot.region.AbstractRegion;
-import org.dawb.common.ui.plot.region.RegionBounds;
+import org.dawb.workbench.ui.Activator;
 import org.eclipse.draw2d.Figure;
+import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Shape;
+import org.eclipse.draw2d.geometry.Point;
+import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 
 /**
  * Shape used for ROIs which has bounds fixed to the graph area.
@@ -35,12 +41,49 @@ public abstract class Region extends AbstractRegion implements IAxisListener{
 		yAxis.addListener(this);
 	}
 
+	/**
+	 * Creates the contents of the selection ie the figure(s)
+	 * which make up the selection.
+	 * 
+	 * @param parent
+	 */
 	public abstract void createContents(final Figure parent);
 
+	/**
+	 * Return the type of region which this provides UI for.
+	 * @return
+	 */
 	public abstract RegionType getRegionType();
 	
+	/**
+	 * If there is a fill figure, this method may be called to 
+	 * refill the fill.
+	 */
 	protected abstract void updateConnectionBounds();
+	
+	/**
+	 * Paint the regions before it is created during the first click
+	 * and drag of the user.
+	 * 
+	 * @param g
+	 * @param start
+	 * @param end
+	 */
+	public abstract void paintBeforeAdded(final Graphics g, Rectangle bounds);
 
+	/**
+	 * Sets the local of the region in local coordinates not axis ones.
+	 * @param bounds
+	 */
+	public abstract void setLocalBounds(Rectangle bounds);
+	
+	/**
+	 * This cursor is used after the region is created and
+	 * before the user has clicked to create it. This is the
+	 * path to the cursor, for instance "icons/Cursor-box.png"
+	 * @return
+	 */
+	protected abstract String getCursorPath();
 
 	public void sync(RegionBean bean) {
 		setName(bean.getName());
@@ -53,6 +96,19 @@ public abstract class Region extends AbstractRegion implements IAxisListener{
 		setVisible(bean.isVisible());
 		setMotile(bean.isMotile());
 	}
+	
+	private Cursor cursor;
+	/**
+	 * A new cursor is created on each call.
+	 */
+	public Cursor getCursor() {
+		if (cursor==null)  {
+			Image image = Activator.getImage(getCursorPath());
+			cursor = new Cursor(Display.getDefault(), image.getImageData(), 8, 8);
+		}
+		return cursor;
+	}
+
 	
 	public void axisRevalidated(Axis axis) {
 		updateRegionBounds();
@@ -76,6 +132,7 @@ public abstract class Region extends AbstractRegion implements IAxisListener{
 		if (regionObjects!=null)for (IFigure ob : regionObjects) {
 			if (ob.getParent()!=null) ob.getParent().remove(ob);
 		}
+		if (cursor!=null) cursor.dispose();
 		clearListeners();
 	}
 

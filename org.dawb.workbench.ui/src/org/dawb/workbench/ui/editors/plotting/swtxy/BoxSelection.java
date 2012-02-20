@@ -12,6 +12,7 @@ import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
@@ -35,7 +36,8 @@ class BoxSelection extends Region {
 	
 	BoxSelection(String name, Axis xAxis, Axis yAxis) {
 		super(name, xAxis, yAxis);
-		setRegionColor(ColorConstants.green);
+		setRegionColor(ColorConstants.green);	
+		setAlpha(80);
 	}
 
 	public void createContents(final Figure parent) {
@@ -95,7 +97,20 @@ class BoxSelection extends Region {
         if (regionBounds==null) createRegionBounds(true);
 
 	}
+	
+	public void paintBeforeAdded(final Graphics gc, Rectangle bounds) {
+		gc.setLineStyle(SWT.LINE_DOT);
+		gc.drawRectangle(bounds);
+		gc.setBackgroundColor(getRegionColor());
+		gc.setAlpha(getAlpha());
+		gc.fillRectangle(bounds);
+	}
 
+	
+	protected String getCursorPath() {
+		return "icons/Cursor-box.png";
+	}
+	
 	private boolean isCalculateCorners = true;
 
 	private SelectionRectangle createSelectionRectangle(Color color, Point location, int size) {
@@ -190,7 +205,17 @@ class BoxSelection extends Region {
 		if (p4!=null) p4.setRealValue(bounds.getP2());
 		updateConnectionBounds();
 	}
-	
+	/**
+	 * Sets the local in local coordinates
+	 * @param bounds
+	 */
+	public void setLocalBounds(final Rectangle bounds) {
+		if (p1!=null)   p1.setSelectionPoint(bounds.getLocation());
+		if (p4!=null)   p4.setSelectionPoint(bounds.getBottomRight());
+		updateConnectionBounds();
+		createRegionBounds(true);
+	}
+
 	protected void updateConnectionBounds() {
 		if (connection==null) return;
 		final Rectangle size = getRectangleFromVertices();				

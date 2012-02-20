@@ -12,7 +12,13 @@ import org.csstudio.swt.xygraph.figures.PlotArea;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.RegionEvent;
+import org.dawb.workbench.ui.editors.plotting.dialog.AddRegionCommand;
 import org.eclipse.draw2d.Graphics;
+import org.eclipse.draw2d.MouseEvent;
+import org.eclipse.draw2d.MouseListener;
+import org.eclipse.draw2d.MouseMotionListener;
+import org.eclipse.draw2d.geometry.Point;
+import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.graphics.Image;
 
@@ -48,9 +54,21 @@ public class RegionArea extends PlotArea {
 	}
 	
 	private Collection<IRegionListener> regionListeners;
-	
 
-	public Region createRegion(String name, Axis x, Axis y, RegionType regionType) throws Exception {
+	private Region regionBeingAdded;
+	private Point  regionStart;
+	private Point  regionEnd;
+	
+	@Override
+	protected void paintClientArea(final Graphics graphics) {
+		super.paintClientArea(graphics);
+
+		if (regionBeingAdded!=null && regionStart!=null && regionEnd!=null) {
+			regionBeingAdded.paintBeforeAdded(graphics, new Rectangle(regionStart, regionEnd));
+		}
+	}
+		
+	public Region createRegion(String name, Axis x, Axis y, RegionType regionType, boolean startingWithMouseEvent) throws Exception {
 
 		if (getRegionMap()!=null) {
 			if (getRegionMap().containsKey(name)) throw new Exception("The region '"+name+"' already exists.");
@@ -68,10 +86,25 @@ public class RegionArea extends PlotArea {
 			throw new NullPointerException("Cannot deal with "+regionType+" regions yet - sorry!");
 		}	
 		
+		if (startingWithMouseEvent) {
+		    setCursor(region.getCursor());
+		    regionBeingAdded = region;
+		    
+		    // Mouse listener for region bounds
+		    final RegionMouseListener rl = new RegionMouseListener();
+		    addMouseListener(rl);
+		    addMouseMotionListener(rl);
+		}
+		
 		fireRegionCreated(new RegionEvent(region));
         return region;
 	}
-	
+
+	public void disposeRegion(Region region) {
+		removeRegion(region);
+		setCursor(null);
+	}
+
 	protected void fireRegionCreated(RegionEvent evt) {
 		if (regionListeners==null) return;
 		for (IRegionListener l : regionListeners) l.regionCreated(evt);
@@ -116,8 +149,8 @@ public class RegionArea extends PlotArea {
 	
 	private Image rawImage;
 	
-	@Override
-	protected void paintClientArea(final Graphics graphics) {
+//	@Override
+//	protected void paintClientArea(final Graphics graphics) {
 	
 // TODO
 //		if (rawImage==null) {
@@ -129,9 +162,9 @@ public class RegionArea extends PlotArea {
 //				rawImage.getImageData().scaledTo(bounds.width,bounds.height));
 //		graphics.drawImage(scaled, new Point(0,0));
 //
-		super.paintClientArea(graphics);
-
-	}
+//		super.paintClientArea(graphics);
+//
+//	}
 
 
 	public Collection<String> getRegionNames() {
@@ -149,5 +182,47 @@ public class RegionArea extends PlotArea {
 		return regions.get(name);
 	}
 
+	class RegionMouseListener extends MouseMotionListener.Stub implements MouseListener {
 
+		@Override
+		public void mousePressed(MouseEvent me) {
+			regionStart = me.getLocation();
+			regionEnd   = me.getLocation();
+			me.consume();
+			repaint();
+		}
+
+		@Override
+		public void mouseReleased(MouseEvent me) {
+		    removeMouseListener(this);
+		    removeMouseMotionListener(this);
+		    
+		    setCursor(null);
+		    
+		    RegionArea.this.addRegion(regionBeingAdded);
+			((XYRegionGraph)xyGraph).getOperationsManager().addCommand(new AddRegionCommand((XYRegionGraph)xyGraph, regionBeingAdded));
+
+		    regionBeingAdded.setLocalBounds(new Rectangle(regionStart, regionEnd));
+			me.consume();
+			repaint();
+			
+		    RegionArea.this.regionBeingAdded = null;
+			regionStart = regionEnd = null;
+		}
+
+		@Override
+		public void mouseDoubleClicked(MouseEvent me) {
+			
+		}
+		public void mouseDragged(final MouseEvent me) {
+
+			regionEnd = me.getLocation();
+			me.consume();
+			repaint();
+	    }
+	
+	    public void mouseExited(final MouseEvent me) {
+	    	//mouseReleased(me);
+	    }
+	}
 }

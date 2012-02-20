@@ -45,6 +45,7 @@ public class AddRegionDialog extends Dialog {
 		    region = regionComposite.createRegion();
 		} catch (Exception ne) {
 			MessageDialog.openError(getShell(), "Name in use", "The region cannot be created. "+ne.getMessage()+"\n\nPlease correct this or press cancel.");
+			regionComposite.disposeRegion(region);
 			return;
 		}
 		super.okPressed();

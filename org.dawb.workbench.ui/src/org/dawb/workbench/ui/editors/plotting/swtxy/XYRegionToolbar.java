@@ -89,13 +89,11 @@ public class XYRegionToolbar extends XYGraphToolbar {
 	protected void createRegion(MenuAction regionDropDown, Action action, RegionType type) throws Exception {
 		
 		if (xyGraph.getXAxisList().size()==1 && xyGraph.getYAxisList().size()==1) {
-			final Region region = regionGraph.createRegion(getUniqueName(type.getName()), xyGraph.primaryXAxis, xyGraph.primaryYAxis, type);
-			addRegion(region);
+			regionGraph.createRegion(getUniqueName(type.getName()), xyGraph.primaryXAxis, xyGraph.primaryYAxis, type, true);
 		} else {
 			AddRegionDialog dialog = new AddRegionDialog(Display.getCurrent().getActiveShell(), (XYRegionGraph)xyGraph, type);
-			if(dialog.open() == Window.OK){
-				final Region region = dialog.getRegion();
-				addRegion(region);
+			if (dialog.open() != Window.OK){
+				return;
 			}
 		}
 		regionDropDown.setSelectedAction(action);		
@@ -109,13 +107,6 @@ public class XYRegionToolbar extends XYGraphToolbar {
 		return base+" "+val;
 	}
 
-	protected void addRegion(Region region) {
-		((XYRegionGraph)xyGraph).addRegion(region);
-		((XYRegionGraph)xyGraph).getOperationsManager().addCommand(
-				new AddRegionCommand((XYRegionGraph)xyGraph, region));
-	}
-	
-	
 	protected void openConfigurationDialog() {
 		XYGraphConfigDialog dialog = new XYRegionConfigDialog(Display.getCurrent().getActiveShell(), xyGraph);
 		dialog.open();

@@ -163,7 +163,7 @@ public class RegionComposite extends Composite {
 			countMap.put(regionType.getSelectionIndex(), count);
 		}
 		
-		region = xyGraph.createRegion(txt, xAxis, yAxis, RegionType.getRegion(regionType.getSelectionIndex()));
+		region = xyGraph.createRegion(txt, xAxis, yAxis, RegionType.getRegion(regionType.getSelectionIndex()), true);
 		
 		this.editingRegion = region;
 		getEditingRegion();
@@ -211,5 +211,9 @@ public class RegionComposite extends Composite {
 	public void applyChanges() {
 		Region region = getEditingRegion();
 		region.repaint();
+	}
+
+	public void disposeRegion(Region region) {
+		 xyGraph.disposeRegion(region);
 	}
 }
