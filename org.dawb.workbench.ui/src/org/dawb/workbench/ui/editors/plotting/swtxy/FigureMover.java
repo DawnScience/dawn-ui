@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.csstudio.swt.xygraph.figures.XYGraph;
+import org.dawb.workbench.ui.editors.plotting.swtxy.FigureMover.LockType;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.LayoutManager;
 import org.eclipse.draw2d.MouseEvent;
@@ -14,6 +15,7 @@ import org.eclipse.draw2d.UpdateManager;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.draw2d.geometry.Translatable;
 
 /**
  * Class from SWT examples which allows a draw2D figure to move.
@@ -22,6 +24,10 @@ import org.eclipse.draw2d.geometry.Rectangle;
  */
 public class FigureMover implements MouseListener, MouseMotionListener {
 
+	public enum LockType {
+		NONE, X, Y;
+	}
+	private LockType lockedDirection = LockType.NONE;
 	private final IFigure figure;
 	private Rectangle bounds;
 	private XYGraph xyGraph;
@@ -63,10 +69,12 @@ public class FigureMover implements MouseListener, MouseMotionListener {
 			bounds = figure.getBounds();
 			updateMgr.addDirtyRegion(figure.getParent(), bounds);
 			
-			this.bounds = bounds.getCopy().translate(offset.width, offset.height);
+			this.bounds = translate(bounds.getCopy(), offset.width, offset.height);
 			if (layoutMgr!=null) layoutMgr.setConstraint(figure, bounds);
 			
-			for (int i = 0; i < translations.size(); i++) ((IFigure) translations.get(i)).translate(offset.width, offset.height);
+			for (int i = 0; i < translations.size(); i++) {
+				translate(((IFigure) translations.get(i)), offset.width, offset.height);
+			}
 		
 			updateMgr.addDirtyRegion(figure.getParent(), bounds);
 			
@@ -74,6 +82,25 @@ public class FigureMover implements MouseListener, MouseMotionListener {
 			fireAfterTranslation(new TranslationEvent(this));
 			event.consume();
 		}
+	}
+
+	private Rectangle translate(Object trans, int raw_width, int raw_height) {
+		
+		int width = 0; int height = 0;
+		if (lockedDirection == LockType.NONE) {
+			width = raw_width; height = raw_height;
+		} else if (lockedDirection == LockType.X) {
+			width = raw_width;
+		} else if (lockedDirection == LockType.Y) {
+			height = raw_height;
+		}
+		if (trans instanceof Rectangle) {
+			return ((Rectangle)trans).translate(width, height);
+		}
+		if (trans instanceof IFigure)  {
+			((IFigure)trans).translate(width, height);
+		}
+		return null;
 	}
 
 	@Override
@@ -161,6 +188,10 @@ public class FigureMover implements MouseListener, MouseMotionListener {
 	
 	public boolean isActive() {
 		return active;
+	}
+
+	public void setLockedDirection(LockType d) {
+		lockedDirection = d;
 	}
 
 }

@@ -47,4 +47,8 @@ public class XYRegionGraph extends XYGraph {
 		return ((RegionArea)getPlotArea()).getRegion(name);
 	}
 
+	public void clearRegions() {
+		((RegionArea)getPlotArea()).clearRegions();
+	}
+
 }

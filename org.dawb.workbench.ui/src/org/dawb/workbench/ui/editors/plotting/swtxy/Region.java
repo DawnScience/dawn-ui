@@ -69,7 +69,7 @@ public abstract class Region extends AbstractRegion implements IAxisListener{
 	 * @param start
 	 * @param end
 	 */
-	public abstract void paintBeforeAdded(final Graphics g, Rectangle bounds);
+	public abstract void paintBeforeAdded(final Graphics g, Rectangle bounds, Rectangle parentBounds);
 
 	/**
 	 * Sets the local of the region in local coordinates not axis ones.

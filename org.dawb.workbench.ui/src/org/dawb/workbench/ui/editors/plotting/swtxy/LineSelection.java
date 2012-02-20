@@ -100,7 +100,7 @@ class LineSelection extends Region {
         if (regionBounds==null) createRegionBounds(true);
 	}
 	
-	public void paintBeforeAdded(final Graphics gc, Rectangle bounds) {
+	public void paintBeforeAdded(final Graphics gc, Rectangle bounds, Rectangle parentBounds) {
 		gc.setLineStyle(SWT.LINE_DOT);
 		gc.setLineWidth(2);
 		gc.setAlpha(getAlpha());

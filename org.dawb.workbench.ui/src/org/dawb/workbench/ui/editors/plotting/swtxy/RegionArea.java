@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.PlotArea;
+import org.csstudio.swt.xygraph.undo.ZoomType;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.RegionEvent;
@@ -26,6 +27,12 @@ public class RegionArea extends PlotArea {
 
 	protected ISelectionProvider selectionProvider;
 	private final Map<String,Region> regions;
+	
+	private Collection<IRegionListener> regionListeners;
+
+	private Region regionBeingAdded;
+	private Point  regionStart;
+	private Point  regionEnd;
 	
 	public RegionArea(XYRegionGraph xyGraph) {
 		super(xyGraph);
@@ -53,18 +60,19 @@ public class RegionArea extends PlotArea {
 		return gone!=null;
 	}
 	
-	private Collection<IRegionListener> regionListeners;
-
-	private Region regionBeingAdded;
-	private Point  regionStart;
-	private Point  regionEnd;
+	public void clearRegions() {
+		if (regions==null) return;
+		for (String name : regions.keySet()) {
+			removeRegion(regions.get(name));
+		}
+	}
 	
 	@Override
 	protected void paintClientArea(final Graphics graphics) {
 		super.paintClientArea(graphics);
 
 		if (regionBeingAdded!=null && regionStart!=null && regionEnd!=null) {
-			regionBeingAdded.paintBeforeAdded(graphics, new Rectangle(regionStart, regionEnd));
+			regionBeingAdded.paintBeforeAdded(graphics, new Rectangle(regionStart, regionEnd), getBounds());
 		}
 	}
 		
@@ -75,18 +83,21 @@ public class RegionArea extends PlotArea {
 		}
 		Region region = null;
 		if (regionType==RegionType.LINE) {
-
 			region = new LineSelection(name, x, y);
 
 		} else if (regionType==RegionType.BOX) {
-
 			region = new BoxSelection(name, x, y);
 
+		} else if (regionType==RegionType.XAXIS || regionType==RegionType.YAXIS) {
+			region = new AxisSelection(name, x, y, regionType);
+					
 		} else {
 			throw new NullPointerException("Cannot deal with "+regionType+" regions yet - sorry!");
 		}	
+
 		
 		if (startingWithMouseEvent) {
+			xyGraph.setZoomType(ZoomType.NONE);
 		    setCursor(region.getCursor());
 		    regionBeingAdded = region;
 		    
@@ -225,4 +236,5 @@ public class RegionArea extends PlotArea {
 	    	//mouseReleased(me);
 	    }
 	}
+
 }

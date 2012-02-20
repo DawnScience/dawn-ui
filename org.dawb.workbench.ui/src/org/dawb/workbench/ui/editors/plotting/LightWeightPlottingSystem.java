@@ -958,10 +958,14 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		final Axis xAxis = ((AxisWrapper)getSelectedXAxis()).getWrappedAxis();
 		final Axis yAxis = ((AxisWrapper)getSelectedYAxis()).getWrappedAxis();
 
-		return xyGraph.createRegion(name, xAxis, yAxis, regionType, false);
+		return xyGraph.createRegion(name, xAxis, yAxis, regionType, true);
 	}
 	
-	
+	public void clearRegions() {
+		if (xyGraph==null) return;
+		
+		xyGraph.clearRegions();
+	}
 	/**
 	 * Add a selection region to the graph.
 	 * @param region

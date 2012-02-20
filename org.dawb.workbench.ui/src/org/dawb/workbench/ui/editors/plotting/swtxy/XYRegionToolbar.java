@@ -66,6 +66,31 @@ public class XYRegionToolbar extends XYGraphToolbar {
 			}
 		};
 		regionDropDown.add(addBox);
+		
+		
+		final Action addXAxis = new Action("Add X-Axis Selection...", Activator.getImageDescriptor("icons/Cursor-horiz.png")) {
+			public void run() {				
+				try {
+					createRegion(regionDropDown, this, RegionType.XAXIS);
+				} catch (Exception e) {
+					logger.error("Cannot create region!", e);
+				}
+			}
+		};
+		regionDropDown.add(addXAxis);
+		
+		final Action addYAxis = new Action("Add Y-Axis Selection...", Activator.getImageDescriptor("icons/Cursor-vert.png")) {
+			public void run() {				
+				try {
+					createRegion(regionDropDown, this, RegionType.YAXIS);
+				} catch (Exception e) {
+					logger.error("Cannot create region!", e);
+				}
+			}
+		};
+		regionDropDown.add(addYAxis);
+
+		
 		regionDropDown.setSelectedAction(addLine);
 		
 		tool.insertBefore("org.csstudio.swt.xygraph.toolbar.extra", regionDropDown);

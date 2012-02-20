@@ -98,7 +98,7 @@ class BoxSelection extends Region {
 
 	}
 	
-	public void paintBeforeAdded(final Graphics gc, Rectangle bounds) {
+	public void paintBeforeAdded(final Graphics gc, Rectangle bounds, Rectangle parentBounds) {
 		gc.setLineStyle(SWT.LINE_DOT);
 		gc.drawRectangle(bounds);
 		gc.setBackgroundColor(getRegionColor());
