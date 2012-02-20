@@ -3,7 +3,9 @@ package org.dawb.workbench.ui.editors.plotting.swtxy;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.PlotArea;
@@ -17,15 +19,16 @@ import org.eclipse.swt.graphics.Image;
 public class RegionArea extends PlotArea {
 
 	protected ISelectionProvider selectionProvider;
+	private final Map<String,Region> regions;
 	
 	public RegionArea(XYRegionGraph xyGraph) {
 		super(xyGraph);
+		this.regions = new LinkedHashMap<String,Region>();	
 	}
 		
-	final private List<Region> regionList = new ArrayList<Region>();	
 
 	public void addRegion(final Region region){
-		regionList.add(region);
+		regions.put(region.getName(), region);
 		region.setXyGraph(xyGraph);
 		region.createContents(this);
 		region.setSelectionProvider(selectionProvider);
@@ -35,20 +38,23 @@ public class RegionArea extends PlotArea {
 
 
 	public boolean removeRegion(final Region region){
-	    final boolean result = regionList.remove(region);
-		if (result){
+	    final Region gone = regions.remove(region.getName());
+		if (gone!=null){
 			region.remove();
 			fireRegionRemoved(new RegionEvent(region));
 			revalidate();
 		}
-		return result;
+		return gone!=null;
 	}
 	
 	private Collection<IRegionListener> regionListeners;
 	
 
-	public Region createRegion(String name, Axis x, Axis y, RegionType regionType) {
+	public Region createRegion(String name, Axis x, Axis y, RegionType regionType) throws Exception {
 
+		if (getRegionMap()!=null) {
+			if (getRegionMap().containsKey(name)) throw new Exception("The region '"+name+"' already exists.");
+		}
 		Region region = null;
 		if (regionType==RegionType.LINE) {
 
@@ -100,8 +106,12 @@ public class RegionArea extends PlotArea {
 		return regionListeners.remove(l);
 	}
 	
-	public List<Region> getRegionList() {
-		return regionList;
+	public Map<String, Region> getRegionMap() {
+		return regions;
+	}
+	public List<Region> getRegions() {
+		final Collection<Region> vals = regions.values();
+		return new ArrayList<Region>(vals);
 	}
 	
 	private Image rawImage;
@@ -124,15 +134,20 @@ public class RegionArea extends PlotArea {
 	}
 
 
-	public List<String> getRegionNames() {
-		if (regionList==null|| regionList.isEmpty()) return null;
-		final List<String> names = new ArrayList<String>(regionList.size());
-		for (Region region : regionList) names.add(region.getName());
-		return names;
+	public Collection<String> getRegionNames() {
+		return regions.keySet();
 	}
 
 
 	public void setSelectionProvider(ISelectionProvider provider) {
 		this.selectionProvider = provider;
 	}
+
+
+	public Region getRegion(String name) {
+		if (regions==null) return null;
+		return regions.get(name);
+	}
+
+
 }

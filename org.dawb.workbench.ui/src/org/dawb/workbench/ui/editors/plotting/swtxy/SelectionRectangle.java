@@ -106,7 +106,6 @@ class SelectionRectangle extends Figure {
 		final Point loc = new Point(p.x-(pntWid/2), p.y-(pntHgt/2));
 		setLocation(loc);
 		point.setLocation(loc);
-		revalidate();
 	}
 
 	public void setShowPosition(boolean showPosition) {

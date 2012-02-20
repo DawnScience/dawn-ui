@@ -148,7 +148,7 @@ public class RegionComposite extends Composite {
 	}
 
 
-	public Region createRegion() {
+	public Region createRegion() throws Exception {
 		
 		final Axis xAxis = xyGraph.getXAxisList().get(xCombo.getSelectionIndex());
 		final Axis yAxis = xyGraph.getYAxisList().get(yCombo.getSelectionIndex());

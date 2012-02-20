@@ -1,6 +1,7 @@
 package org.dawb.workbench.ui.editors.plotting.swtxy;
 
 
+import java.util.Collection;
 import java.util.List;
 
 import org.csstudio.swt.xygraph.toolbar.XYGraphConfigDialog;
@@ -14,13 +15,16 @@ import org.dawb.workbench.ui.editors.plotting.dialog.RemoveRegionCommand;
 import org.dawb.workbench.ui.editors.plotting.dialog.RemoveRegionDialog;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IContributionManager;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class XYRegionToolbar extends XYGraphToolbar {
 
 
+	private static Logger logger = LoggerFactory.getLogger(XYRegionToolbar.class);
+	
 	private XYRegionGraph regionGraph;
 
 
@@ -43,14 +47,22 @@ public class XYRegionToolbar extends XYGraphToolbar {
  
 		final Action addLine = new Action("Add Line Selection...", Activator.getImageDescriptor("icons/ProfileLine.png")) {
 			public void run() {				
-				createRegion(regionDropDown, this, RegionType.LINE);
+				try {
+					createRegion(regionDropDown, this, RegionType.LINE);
+				} catch (Exception e) {
+					logger.error("Cannot create region!", e);
+				}
 			}
 		};
 		regionDropDown.add(addLine);
 		
 		final Action addBox = new Action("Add Box Selection...", Activator.getImageDescriptor("icons/ProfileBox.png")) {
 			public void run() {				
-				createRegion(regionDropDown, this, RegionType.BOX);
+				try {
+					createRegion(regionDropDown, this, RegionType.BOX);
+				} catch (Exception e) {
+					logger.error("Cannot create region!", e);
+				}
 			}
 		};
 		regionDropDown.add(addBox);
@@ -74,7 +86,7 @@ public class XYRegionToolbar extends XYGraphToolbar {
 		men.insertAfter("org.dawb.workbench.ui.editors.plotting.swtxy.addRegions", removeRegion);
 	}
 
-	protected void createRegion(MenuAction regionDropDown, Action action, RegionType type) {
+	protected void createRegion(MenuAction regionDropDown, Action action, RegionType type) throws Exception {
 		
 		if (xyGraph.getXAxisList().size()==1 && xyGraph.getYAxisList().size()==1) {
 			final Region region = regionGraph.createRegion(getUniqueName(type.getName()), xyGraph.primaryXAxis, xyGraph.primaryYAxis, type);
@@ -91,7 +103,7 @@ public class XYRegionToolbar extends XYGraphToolbar {
 
 	protected String getUniqueName(String base) {
 		int val = 1;
-		final List<String> regions = ((RegionArea)xyGraph.getPlotArea()).getRegionNames();
+		final Collection<String> regions = ((RegionArea)xyGraph.getPlotArea()).getRegionNames();
 		if (regions==null) return base+" "+val;
 		while(regions.contains(base+" "+val)) val++;
 		return base+" "+val;

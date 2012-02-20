@@ -1,6 +1,7 @@
 package org.dawb.workbench.ui.editors.plotting.swtxy;
 
 import java.util.List;
+import java.util.Map;
 
 import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.swt.xygraph.undo.XYGraphConfigCommand;
@@ -17,8 +18,8 @@ public class XYRegionConfigCommand extends XYGraphConfigCommand {
 		
 		createDefaultSettings();
 		
-		final List<Region> regionList     = ((RegionArea)xyGraph.getPlotArea()).getRegionList();
-		for(Region r : regionList){
+		final Map<String,Region> regionList     = ((RegionArea)xyGraph.getPlotArea()).getRegionMap();
+		for(String name : regionList.keySet()){
 			((XYRegionMemento)previousXYGraphMem).addRegionMemento(new RegionBean());
 			((XYRegionMemento)afterXYGraphMem).addRegionMemento(new RegionBean());
 		}	
@@ -30,7 +31,7 @@ public class XYRegionConfigCommand extends XYGraphConfigCommand {
 		super.saveXYGraphPropsToMemento(xyGraph, memento);
 		
 		int i=0;
-		final List<Region>     regionList     = ((RegionArea)xyGraph.getPlotArea()).getRegionList();
+		final List<Region>     regionList     = ((RegionArea)xyGraph.getPlotArea()).getRegions();
 		final List<RegionBean> regionBeanList = ((XYRegionMemento)memento).getRegionBeanList();
 		for(Region region : regionList) {
 			saveRegionPropsToMemento(region,regionBeanList.get(i));
@@ -43,7 +44,7 @@ public class XYRegionConfigCommand extends XYGraphConfigCommand {
 
 		int i=0;
 		for(RegionBean rb : ((XYRegionMemento)memento).getRegionBeanList()) {
-			restoreRegionPropsFromMemento(((RegionArea)xyGraph.getPlotArea()).getRegionList().get(i), rb);
+			restoreRegionPropsFromMemento(((RegionArea)xyGraph.getPlotArea()).getRegions().get(i), rb);
 			++i;
 		}
 

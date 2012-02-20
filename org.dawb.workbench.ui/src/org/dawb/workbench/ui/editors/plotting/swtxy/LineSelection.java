@@ -82,23 +82,20 @@ class LineSelection extends Region {
 
 			@Override
 			public void translationAfter(TranslationEvent evt) {
-				final Point startCenter = startBox.getSelectionPoint();
-				final Point endCenter   = endBox.getSelectionPoint();
-				connection.setBounds(new Rectangle(startCenter, endCenter));
+				updateConnectionBounds();
 				fireRoiSelection();
 			}
 
 			@Override
 			public void translationCompleted(TranslationEvent evt) {
-				final double[] r1 = startBox.getRealValue();
-				final double[] r4 = endBox.getRealValue();
-				fireRegionBoundsChanged(new RegionBounds(r1, r4));
+				fireRegionBoundsChanged(createRegionBounds(true));
 			}
 		});
 
 		setRegionObjects(connection, startBox, endBox);
 		sync(getBean());
         updateRegionBounds();
+        if (regionBounds==null) createRegionBounds(true);
 	}
 	
 	protected FigureListener createFigureListener() {
@@ -121,27 +118,33 @@ class LineSelection extends Region {
 		if (getSelectionProvider()!=null) {
 			getSelectionProvider().setSelection(new StructuredSelection(roi));
 		}
-		fireRegionBoundsDragged(new RegionBounds(p1, p2));
+		fireRegionBoundsDragged(createRegionBounds(false));
 	}
 	
-	public RegionBounds getRegionBounds() {
+	public RegionBounds createRegionBounds(boolean recordResult) {
 		if (startBox!=null) {
 			final double[] p1 = startBox.getRealValue();
 			final double[] p2 = endBox.getRealValue();
 			final RegionBounds bounds = new RegionBounds(p1, p2);
+			if (recordResult) this.regionBounds = bounds;
 			return bounds;
 		} 
 		return super.getRegionBounds();
 	}
 	
-	public void setRegionBounds(RegionBounds bounds) {
+	protected void updateRegionBounds(RegionBounds bounds) {
 		
-		if (startBox!=null) startBox.setRealValue(bounds.getP1());
-		if (endBox!=null)   endBox.setRealValue(bounds.getP2());
-		super.setRegionBounds(bounds);
-		repaint();
+		if (startBox!=null)   startBox.setRealValue(bounds.getP1());
+		if (endBox!=null)     endBox.setRealValue(bounds.getP2());
+		updateConnectionBounds();
 	}
-
+	
+	protected void updateConnectionBounds() {
+		if (connection==null) return;
+		final Point startCenter = startBox.getSelectionPoint();
+		final Point endCenter   = endBox.getSelectionPoint();
+		connection.setBounds(new Rectangle(startCenter, endCenter));
+	}
 
 	@Override
 	public RegionType getRegionType() {

@@ -28,7 +28,7 @@ public class XYRegionGraph extends XYGraph {
 		((RegionArea)getPlotArea()).setSelectionProvider(provider);
 	}
 
-	public Region createRegion(String name, Axis xAxis, Axis yAxis, RegionType regionType) {
+	public Region createRegion(String name, Axis xAxis, Axis yAxis, RegionType regionType) throws Exception {
 		return ((RegionArea)getPlotArea()).createRegion(name, xAxis, yAxis, regionType);
 	}
 
@@ -38,6 +38,10 @@ public class XYRegionGraph extends XYGraph {
 	
 	public boolean removeRegionListener(IRegionListener l) {
 		return ((RegionArea)getPlotArea()).removeRegionListener(l);
+	}
+
+	public Region getRegion(String name) {
+		return ((RegionArea)getPlotArea()).getRegion(name);
 	}
 
 }

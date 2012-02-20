@@ -78,16 +78,13 @@ class BoxSelection extends Region {
 			@Override
 			public void translationAfter(TranslationEvent evt) {
 				isCalculateCorners = true;
-				final Rectangle size = getRectangleFromVertices();				
-				connection.setBounds(size);
+				updateConnectionBounds();
 				fireRoiSelection();
 			}
 
 			@Override
 			public void translationCompleted(TranslationEvent evt) {
-				final double[] r1 = p1.getRealValue();
-				final double[] r4 = p4.getRealValue();
-				fireRegionBoundsChanged(new RegionBounds(r1, r4));
+				fireRegionBoundsChanged(createRegionBounds(true));
 			}
 
 		});
@@ -95,6 +92,7 @@ class BoxSelection extends Region {
 		setRegionObjects(connection, p1, p2, p3, p4);
 		sync(getBean());
         updateRegionBounds();
+        if (regionBounds==null) createRegionBounds(true);
 
 	}
 
@@ -149,7 +147,7 @@ class BoxSelection extends Region {
 		// TODO Are we really going to rewrite all of the stuff that does not work?
 		final RectangularROI roi = new RectangularROI(r1[0], r1[1], r2[0]-r1[0], r4[1]-r1[1], 0);
 		if (getSelectionProvider()!=null) getSelectionProvider().setSelection(new StructuredSelection(roi));
-		fireRegionBoundsDragged(new RegionBounds(r1, r4));
+		fireRegionBoundsDragged(createRegionBounds(false));
 	}
 
 	private void setCornerLocation( SelectionRectangle c,
@@ -174,24 +172,29 @@ class BoxSelection extends Region {
 	}
 
 
-	public RegionBounds getRegionBounds() {
+	public RegionBounds createRegionBounds(boolean recordResult) {
 		if (p1!=null) {
 			final Rectangle rect = getRectangleFromVertices();
 			double[] a1 = new double[]{getxAxis().getPositionValue(rect.x, false), getyAxis().getPositionValue(rect.y, false)};
 			double[] a2 = new double[]{getxAxis().getPositionValue(rect.x+rect.width, false), getyAxis().getPositionValue(rect.y+rect.height, false)};
 			final RegionBounds bounds = new RegionBounds(a1, a2);
+			if (recordResult) this.regionBounds = bounds;
 			return bounds;
 		}
 		return super.getRegionBounds();
 	}
 	
-	public void setRegionBounds(RegionBounds bounds) {
+	protected void updateRegionBounds(RegionBounds bounds) {
 		
 		if (p1!=null) p1.setRealValue(bounds.getP1());
 		if (p4!=null) p4.setRealValue(bounds.getP2());
-		
-		super.setRegionBounds(bounds);
-		repaint();
+		updateConnectionBounds();
+	}
+	
+	protected void updateConnectionBounds() {
+		if (connection==null) return;
+		final Rectangle size = getRectangleFromVertices();				
+		connection.setBounds(size);
 	}
 	
 	@Override

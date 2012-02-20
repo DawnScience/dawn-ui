@@ -4,6 +4,7 @@ import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.workbench.ui.editors.plotting.swtxy.Region;
 import org.dawb.workbench.ui.editors.plotting.swtxy.XYRegionGraph;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -40,7 +41,12 @@ public class AddRegionDialog extends Dialog {
 	
 	@Override
 	protected void okPressed() {	
-		region = regionComposite.createRegion();
+		try {
+		    region = regionComposite.createRegion();
+		} catch (Exception ne) {
+			MessageDialog.openError(getShell(), "Name in use", "The region cannot be created. "+ne.getMessage()+"\n\nPlease correct this or press cancel.");
+			return;
+		}
 		super.okPressed();
 	}
 

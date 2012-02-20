@@ -45,12 +45,12 @@ public class RemoveRegionDialog extends Dialog {
 		composite.setLayout(new GridLayout(1, false));
         final Label removeLabel = new Label(composite, SWT.None);
         removeLabel.setLayoutData(new GridData());
-        if(((RegionArea)xyGraph.getPlotArea()).getRegionList().size() > 0){        	
+        if(((RegionArea)xyGraph.getPlotArea()).getRegionMap().size() > 0){        	
 	        removeLabel.setText("Select the region to be removed: ");        
 	        regionCombo = new Combo(composite, SWT.DROP_DOWN);
 	        regionCombo.setLayoutData(new GridData(SWT.FILL, 0, true, false));
-	        for(Region region : ((RegionArea)xyGraph.getPlotArea()).getRegionList())
-	        	regionCombo.add(region.getName());
+	        for(String name : ((RegionArea)xyGraph.getPlotArea()).getRegionMap().keySet())
+	        	regionCombo.add(name);
 	        regionCombo.select(0);
         }else{
         	removeLabel.setText("There are no selection regions on the graph."); 
@@ -62,8 +62,7 @@ public class RemoveRegionDialog extends Dialog {
 	@Override
 	protected void okPressed() {
 		if(regionCombo != null)
-			removedRegion = ((RegionArea)xyGraph.getPlotArea()).getRegionList().get(
-				regionCombo.getSelectionIndex());
+			removedRegion = ((RegionArea)xyGraph.getPlotArea()).getRegions().get(regionCombo.getSelectionIndex());
 		super.okPressed();
 	}
 	 

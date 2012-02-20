@@ -1,8 +1,11 @@
 package org.dawb.workbench.ui.editors.plotting.swtxy;
 
 import org.csstudio.swt.xygraph.figures.Axis;
+import org.csstudio.swt.xygraph.figures.IAxisListener;
 import org.csstudio.swt.xygraph.figures.XYGraph;
+import org.csstudio.swt.xygraph.linearscale.Range;
 import org.dawb.common.ui.plot.region.AbstractRegion;
+import org.dawb.common.ui.plot.region.RegionBounds;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Shape;
@@ -15,7 +18,7 @@ import org.eclipse.swt.graphics.Color;
  * @author fcp94556
  *
  */
-public abstract class Region extends AbstractRegion {
+public abstract class Region extends AbstractRegion implements IAxisListener{
 
 
 	private RegionBean bean;
@@ -28,11 +31,16 @@ public abstract class Region extends AbstractRegion {
 		bean.setName(name);
 		bean.setxAxis(xAxis);
 		bean.setyAxis(yAxis);
+		xAxis.addListener(this);
+		yAxis.addListener(this);
 	}
 
 	public abstract void createContents(final Figure parent);
 
 	public abstract RegionType getRegionType();
+	
+	protected abstract void updateConnectionBounds();
+
 
 	public void sync(RegionBean bean) {
 		setName(bean.getName());
@@ -45,7 +53,14 @@ public abstract class Region extends AbstractRegion {
 		setVisible(bean.isVisible());
 		setMotile(bean.isMotile());
 	}
-
+	
+	public void axisRevalidated(Axis axis) {
+		updateRegionBounds();
+	}
+	public void axisRangeChanged(Axis axis, Range old_range, Range new_range) {
+		updateRegionBounds();
+	}
+			
 	protected void setRegionObjects(IFigure... objects) {
 		this.regionObjects = objects;
 	}
@@ -64,7 +79,12 @@ public abstract class Region extends AbstractRegion {
 		clearListeners();
 	}
 
-
+	protected void clearListeners() {
+        getxAxis().removeListenr(this);
+        getyAxis().removeListenr(this);
+		super.clearListeners();
+	}
+	
 	public void setName(String name) {
 		bean.setName(name);
 	}
@@ -183,6 +203,8 @@ public abstract class Region extends AbstractRegion {
 				((SelectionRectangle)ob).setxAxis(xAxis);
 			}
 		}
+		getxAxis().removeListenr(this);
+		xAxis.addListener(this);
 		bean.setxAxis(xAxis);
 	}
 
@@ -196,7 +218,8 @@ public abstract class Region extends AbstractRegion {
 				((SelectionRectangle)ob).setyAxis(yAxis);
 			}
 		}
-
+		getyAxis().removeListenr(this);
+		yAxis.addListener(this);
 		bean.setyAxis(yAxis);
 	}
 	
@@ -212,6 +235,7 @@ public abstract class Region extends AbstractRegion {
 			}
 			@Override
 			public void translationCompleted(TranslationEvent evt) {
+				createRegionBounds(true);
 				fireRegionBoundsChanged(getRegionBounds());
 			}
 			

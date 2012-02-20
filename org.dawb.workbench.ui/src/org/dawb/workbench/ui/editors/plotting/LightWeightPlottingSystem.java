@@ -948,7 +948,11 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		return xyGraph.removeRegionListener(l);
 	}
 	
-	public IRegion createRegion(final String name, final RegionType regionType)  {
+	/**
+	 * Throws exception if region exists already.
+	 * @throws Exception 
+	 */
+	public IRegion createRegion(final String name, final RegionType regionType) throws Exception  {
 
 		if (xyGraph==null) switchPlotUI(true); // TODO Regions can be 2D
 		final Axis xAxis = ((AxisWrapper)getSelectedXAxis()).getWrappedAxis();
@@ -978,4 +982,13 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		xyGraph.removeRegion(r);
 	}
 
+	/**
+	 * Get a region by name.
+	 * @param name
+	 * @return
+	 */
+	public IRegion getRegion(final String name) {
+		if (xyGraph==null)  return null;
+		return xyGraph.getRegion(name);
+	}
 }

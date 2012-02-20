@@ -42,7 +42,7 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
         final TabFolder tabFolder = (TabFolder)parent_composite.getChildren()[0];  
 
         //Annotation Configure Page
-        if ( ((RegionArea)regionGraph.getPlotArea()).getRegionList().size() > 0 ){
+        if ( ((RegionArea)regionGraph.getPlotArea()).getRegionMap().size() > 0 ){
         	
         	Composite regionComposite = new Composite(tabFolder, SWT.NONE);
         	regionComposite.setLayout(new GridLayout(1, false));        	
@@ -60,8 +60,8 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
         	regionCombo.setLayoutData(new GridData(SWT.FILL, 0, true, false));
         	
         	
- 	        for(Region region : ((RegionArea)regionGraph.getPlotArea()).getRegionList())
- 	        	regionCombo.add(region.getName());
+ 	        for(String name : ((RegionArea)regionGraph.getPlotArea()).getRegionNames())
+ 	        	regionCombo.add(name);
  	        regionCombo.select(0);
         	
  	        final Composite regionConfigComposite = new Composite(regionComposite, SWT.NONE);
@@ -69,7 +69,7 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
  	        final StackLayout stackLayout = new StackLayout();
  	        regionConfigComposite.setLayout(stackLayout);        
  	        
- 	        for(Region region : ((RegionArea)regionGraph.getPlotArea()).getRegionList()){
+ 	        for(Region region : ((RegionArea)regionGraph.getPlotArea()).getRegions()){
 		        
 		        RegionComposite regionPage = new RegionComposite(regionConfigComposite, SWT.NONE, (XYRegionGraph)xyGraph, region.getRegionType());
 		        regionList.add(regionPage);
