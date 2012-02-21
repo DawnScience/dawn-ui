@@ -62,9 +62,13 @@ public class RegionArea extends PlotArea {
 	
 	public void clearRegions() {
 		if (regions==null) return;
-		for (String name : regions.keySet()) {
-			removeRegion(regions.get(name));
+		for (Region region : regions.values()) {
+			region.remove();
+			fireRegionRemoved(new RegionEvent(region));
 		}
+		regions.clear();
+		revalidate();
+		
 	}
 	
 	@Override

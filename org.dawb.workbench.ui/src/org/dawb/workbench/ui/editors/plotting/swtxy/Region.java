@@ -78,6 +78,18 @@ public abstract class Region extends AbstractRegion implements IAxisListener{
 	public abstract void setLocalBounds(Rectangle bounds);
 	
 	/**
+	 * This method should be implemented to fire a StructuredSelection
+	 * whose first object is an object extending ROIBase. It will be called
+	 * when the user has finished clicking and dragging a selection.
+	 * 
+	 * To implement live updates the user should add an IRegionBoundsListener
+	 * which will be notified on drag.
+	 * 
+	 */
+	protected abstract void fireRoiSelection();
+
+	
+	/**
 	 * This cursor is used after the region is created and
 	 * before the user has clicked to create it. This is the
 	 * path to the cursor, for instance "icons/Cursor-box.png"
@@ -288,12 +300,12 @@ public abstract class Region extends AbstractRegion implements IAxisListener{
 			}
 			@Override
 			public void translationAfter(TranslationEvent evt) {
-				
+				fireRegionBoundsDragged(createRegionBounds(false));
 			}
 			@Override
 			public void translationCompleted(TranslationEvent evt) {
-				createRegionBounds(true);
-				fireRegionBoundsChanged(getRegionBounds());
+				fireRegionBoundsChanged(createRegionBounds(true));
+				fireRoiSelection();
 			}
 			
 		};

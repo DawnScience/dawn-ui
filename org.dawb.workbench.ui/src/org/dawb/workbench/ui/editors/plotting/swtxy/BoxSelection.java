@@ -81,12 +81,13 @@ class BoxSelection extends Region {
 			public void translationAfter(TranslationEvent evt) {
 				isCalculateCorners = true;
 				updateConnectionBounds();
-				fireRoiSelection();
+				fireRegionBoundsDragged(createRegionBounds(false));
 			}
 
 			@Override
 			public void translationCompleted(TranslationEvent evt) {
 				fireRegionBoundsChanged(createRegionBounds(true));
+				fireRoiSelection();
 			}
 
 		});
@@ -143,8 +144,6 @@ class BoxSelection extends Region {
 					boolean quad1Or4 = ((pa.x<pb.x && pa.y<pb.y) || (pa.x>pb.x&&pa.y>pb.y));
 					setCornerLocation(c, d, sa, quad1Or4);
  
-					fireRoiSelection();
-
 				} finally {
 					isCalculateCorners = true;
 				}
@@ -162,7 +161,6 @@ class BoxSelection extends Region {
 		// TODO Are we really going to rewrite all of the stuff that does not work?
 		final RectangularROI roi = new RectangularROI(r1[0], r1[1], r2[0]-r1[0], r4[1]-r1[1], 0);
 		if (getSelectionProvider()!=null) getSelectionProvider().setSelection(new StructuredSelection(roi));
-		fireRegionBoundsDragged(createRegionBounds(false));
 	}
 
 	private void setCornerLocation( SelectionRectangle c,

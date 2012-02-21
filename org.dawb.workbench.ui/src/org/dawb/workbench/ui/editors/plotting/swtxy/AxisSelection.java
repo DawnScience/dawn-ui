@@ -3,19 +3,16 @@ package org.dawb.workbench.ui.editors.plotting.swtxy;
 import java.util.Arrays;
 
 import org.csstudio.swt.xygraph.figures.Axis;
-import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.RegionBounds;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.FigureListener;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.LineBorder;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
 
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
@@ -91,12 +88,13 @@ class AxisSelection extends Region {
 			@Override
 			public void translationAfter(TranslationEvent evt) {
 				updateConnectionBounds();
-				fireRoiSelection();
+				fireRegionBoundsDragged(createRegionBounds(false));
 			}
 
 			@Override
 			public void translationCompleted(TranslationEvent evt) {
 				fireRegionBoundsChanged(createRegionBounds(true));
+				fireRoiSelection();
 			}
 
 		});
@@ -205,10 +203,8 @@ class AxisSelection extends Region {
 	protected FigureListener createFigureListener() {
 		return new FigureListener() {		
 			@Override
-			public void figureMoved(IFigure source) {
-				
+			public void figureMoved(IFigure source) {				
 				connection.repaint();
-                fireRoiSelection();
 			}
 
 		};
@@ -217,7 +213,6 @@ class AxisSelection extends Region {
 		final RegionBounds bounds = createRegionBounds(false);
 		final RectangularROI roi = new RectangularROI(bounds.getP1()[0], bounds.getP1()[1], bounds.getP1()[0]+bounds.getP2()[0], bounds.getP1()[1]+bounds.getP2()[1], 0);
 		if (getSelectionProvider()!=null) getSelectionProvider().setSelection(new StructuredSelection(roi));
-		fireRegionBoundsDragged(bounds);
 	}
 
 

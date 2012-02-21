@@ -85,12 +85,13 @@ class LineSelection extends Region {
 			@Override
 			public void translationAfter(TranslationEvent evt) {
 				updateConnectionBounds();
-				fireRoiSelection();
+				fireRegionBoundsDragged(createRegionBounds(false));
 			}
 
 			@Override
 			public void translationCompleted(TranslationEvent evt) {
 				fireRegionBoundsChanged(createRegionBounds(true));
+				fireRoiSelection();
 			}
 		});
 
@@ -115,11 +116,9 @@ class LineSelection extends Region {
 	protected FigureListener createFigureListener() {
 		return new FigureListener() {		
 			@Override
-			public void figureMoved(IFigure source) {
-				
+			public void figureMoved(IFigure source) {				
 				connection.repaint();
-                fireRoiSelection();
-			}
+ 			}
 
 		};
 	}
@@ -132,7 +131,6 @@ class LineSelection extends Region {
 		if (getSelectionProvider()!=null) {
 			getSelectionProvider().setSelection(new StructuredSelection(roi));
 		}
-		fireRegionBoundsDragged(createRegionBounds(false));
 	}
 	
 	public RegionBounds createRegionBounds(boolean recordResult) {

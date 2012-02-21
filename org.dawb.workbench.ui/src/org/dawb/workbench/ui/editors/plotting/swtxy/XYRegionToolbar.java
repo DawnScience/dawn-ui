@@ -15,6 +15,8 @@ import org.dawb.workbench.ui.editors.plotting.dialog.RemoveRegionCommand;
 import org.dawb.workbench.ui.editors.plotting.dialog.RemoveRegionDialog;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IContributionManager;
+import org.eclipse.jface.dialogs.DialogMessageArea;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
@@ -96,7 +98,10 @@ public class XYRegionToolbar extends XYGraphToolbar {
 		tool.insertBefore("org.csstudio.swt.xygraph.toolbar.extra", regionDropDown);
 		men.insertBefore("org.csstudio.swt.xygraph.toolbar.extra", regionDropDown);
 			
-		final Action removeRegion = new Action("Remove Region...", Activator.getImageDescriptor("icons/RegionDelete.png")) {
+        final MenuAction removeRegionDropDown = new MenuAction("Delete selection region(s)");
+        regionDropDown.setId("org.dawb.workbench.ui.editors.plotting.swtxy.removeRegions");
+
+        final Action removeRegion = new Action("Remove Region...", Activator.getImageDescriptor("icons/RegionDelete.png")) {
 			public void run() {
 				RemoveRegionDialog dialog = new RemoveRegionDialog(Display.getCurrent().getActiveShell(), (XYRegionGraph)xyGraph);
 				if(dialog.open() == Window.OK && dialog.getRegion() != null){
@@ -107,8 +112,29 @@ public class XYRegionToolbar extends XYGraphToolbar {
 			}
 		};
 		
-		tool.insertAfter("org.dawb.workbench.ui.editors.plotting.swtxy.addRegions", removeRegion);
-		men.insertAfter("org.dawb.workbench.ui.editors.plotting.swtxy.addRegions", removeRegion);
+		removeRegionDropDown.add(removeRegion);
+		removeRegionDropDown.setSelectedAction(removeRegion);
+		
+        final Action removeAllRegions = new Action("Remove all regions...", Activator.getImageDescriptor("icons/RegionDeleteAll.png")) {
+			public void run() {
+				
+				final boolean yes = MessageDialog.openConfirm(Display.getDefault().getActiveShell(), 
+						                  "Please Confirm Delete All",
+						                  "Are you sure you would like to delete all selection regions?");
+				
+				if (yes){
+					xyGraph.getOperationsManager().addCommand(
+							new RemoveRegionCommand((XYRegionGraph)xyGraph, ((XYRegionGraph)xyGraph).getRegions()));					
+					((XYRegionGraph)xyGraph).clearRegions();
+				}
+			}
+		};
+		
+		removeRegionDropDown.add(removeAllRegions);
+
+		
+		tool.insertAfter("org.dawb.workbench.ui.editors.plotting.swtxy.addRegions", removeRegionDropDown);
+		men.insertAfter("org.dawb.workbench.ui.editors.plotting.swtxy.addRegions", removeRegionDropDown);
 	}
 
 	protected void createRegion(MenuAction regionDropDown, Action action, RegionType type) throws Exception {
@@ -121,7 +147,8 @@ public class XYRegionToolbar extends XYGraphToolbar {
 				return;
 			}
 		}
-		regionDropDown.setSelectedAction(action);		
+		regionDropDown.setSelectedAction(action);	
+		regionDropDown.setChecked(true);
 	}
 
 	protected String getUniqueName(String base) {

@@ -1,5 +1,8 @@
 package org.dawb.workbench.ui.editors.plotting.dialog;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.csstudio.swt.xygraph.undo.IUndoableCommand;
 import org.dawb.workbench.ui.editors.plotting.swtxy.Region;
 import org.dawb.workbench.ui.editors.plotting.swtxy.XYRegionGraph;
@@ -11,24 +14,30 @@ import org.dawb.workbench.ui.editors.plotting.swtxy.XYRegionGraph;
 public class RemoveRegionCommand implements IUndoableCommand {
 	
 	private XYRegionGraph xyGraph;
-	private Region region;
+	private List<Region> regions;
 	
 	public RemoveRegionCommand(XYRegionGraph xyGraph, Region region) {
 		this.xyGraph = xyGraph;
-		this.region = region;
+		this.regions = new ArrayList<Region>();
+		regions.add(region);
+	}
+
+	public RemoveRegionCommand(XYRegionGraph xyGraph, List<Region> regions) {
+		this.xyGraph = xyGraph;
+		this.regions = regions;
 	}
 
 	public void redo() {
-		xyGraph.removeRegion(region);
+		for (Region region : regions)  xyGraph.removeRegion(region);
 	}
 
 	public void undo() {		
-		xyGraph.addRegion(region);
+		for (Region region : regions)  xyGraph.addRegion(region);
 	}
 	
 	@Override
 	public String toString() {
-		return "Remove Annotation";
+		return "Remove Region(s)";
 	}
 
 }

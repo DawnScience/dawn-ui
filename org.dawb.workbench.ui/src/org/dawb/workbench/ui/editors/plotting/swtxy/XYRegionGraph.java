@@ -1,5 +1,7 @@
 package org.dawb.workbench.ui.editors.plotting.swtxy;
 
+import java.util.List;
+
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.PlotArea;
 import org.csstudio.swt.xygraph.figures.XYGraph;
@@ -49,6 +51,9 @@ public class XYRegionGraph extends XYGraph {
 
 	public void clearRegions() {
 		((RegionArea)getPlotArea()).clearRegions();
+	}
+	public List<Region> getRegions() {
+		return ((RegionArea)getPlotArea()).getRegions();
 	}
 
 }
