@@ -36,7 +36,8 @@ Import-Package: fable.framework.logging,
  org.junit,
  org.junit.runner,
  org.nfunk.jep,
- org.slf4j
+ org.slf4j,
+ uk.ac.diamond.scisoft.analysis.rcp.editors
 Bundle-ClassPath: .
 Export-Package: org.dawb.workbench.ui.editors,
  org.dawb.workbench.ui.editors.preference,

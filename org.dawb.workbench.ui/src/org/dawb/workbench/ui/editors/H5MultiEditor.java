@@ -32,12 +32,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.rcp.editors.HDF5TreeEditor;
+
 
 public class H5MultiEditor extends MultiPageEditorPart  implements ISlicablePlottingPart, IReusableEditor, IPlottingSystemSelection, IH5Editor {
 
 	private static final Logger logger = LoggerFactory.getLogger(H5MultiEditor.class);
 	private PlotDataEditor dataSetEditor;
-	private H5Editor       treePage;
+	private IReusableEditor treePage;
 	
 	@Override
 	public void init(IEditorSite site, IEditorInput input) throws PartInitException{
@@ -71,7 +73,9 @@ public class H5MultiEditor extends MultiPageEditorPart  implements ISlicablePlot
 			addPage(0, dataSetEditor, getEditorInput());
 			setPageText(0, "Plot");
 
-			this.treePage = new H5Editor();
+			this.treePage = System.getProperty("org.dawb.editor.h5.use.default") !=null
+                          ? new H5Editor() 
+			              : new HDF5TreeEditor();
 			addPage(1, treePage,   getEditorInput());
 			setPageText(1, "Tree");
 			
