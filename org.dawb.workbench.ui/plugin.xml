@@ -160,14 +160,6 @@
        
    </extension>
    <extension
-         point="org.dawb.common.ui.plottingClass">
-      <plottingSystem
-            class="org.dawb.workbench.ui.editors.plotting.LightWeightPlottingSystem"
-            id="org.dawb.workbench.editors.plotting.lightWeightPlottingSystem"
-            visible_type="Lightweight">
-      </plottingSystem>
-   </extension>
-   <extension
          point="org.eclipse.help.toc">
       <toc
             file="toc.xml"

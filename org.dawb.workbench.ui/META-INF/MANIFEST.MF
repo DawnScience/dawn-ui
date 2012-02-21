@@ -12,21 +12,17 @@ Require-Bundle: org.eclipse.ui,
  uk.ac.gda.common,
  uk.ac.gda.common.rcp,
  uk.ac.diamond.scisoft.analysis,
- org.eclipse.draw2d,
  org.dawb.fable.python,
  org.dawb.hdf5,
  org.dawb.hdf5.editor,
  org.dawb.gda.extensions,
- org.dawb.fable.extensions,
  org.dawb.common.ui,
  org.dawb.common.util,
  org.junit,
  org.eclipse.help,
  org.eclipse.ui.cheatsheets,
  org.eclipse.ui.ide,
- org.eclipse.jface.text,
- org.dawb.fabio,
- org.dawb.org.csstudio.swt.xygraph;bundle-version="1.0.0"
+ org.eclipse.jface.text
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: fable.framework.logging,
@@ -43,7 +39,6 @@ Import-Package: fable.framework.logging,
  org.slf4j
 Bundle-ClassPath: .
 Export-Package: org.dawb.workbench.ui.editors,
- org.dawb.workbench.ui.editors.plotting,
  org.dawb.workbench.ui.editors.preference,
  org.dawb.workbench.ui.editors.slicing,
  org.dawb.workbench.ui.project,

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="org.dawb.workbench.plotting.preference.PlottingPreferenceInitializer">
+      </initializer>
+   </extension>
+   <extension
+         point="org.dawb.common.ui.plottingClass">
+      <plottingSystem
+            class="org.dawb.workbench.plotting.system.LightWeightPlottingSystem"
+            id="org.dawb.workbench.editors.plotting.lightWeightPlottingSystem"
+            visible_type="Lightweight">
+      </plottingSystem>
+   </extension>
+
+</plugin>

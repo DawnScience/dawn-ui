@@ -22,6 +22,10 @@ import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingFactory;
+import org.dawb.common.ui.plot.region.IRegionBoundsListener;
+import org.dawb.common.ui.plot.region.IRegionListener;
+import org.dawb.common.ui.plot.region.RegionBoundsEvent;
+import org.dawb.common.ui.plot.region.RegionEvent;
 import org.dawb.common.ui.slicing.SliceComponent;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.util.GridUtils;
@@ -230,6 +234,37 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		
 		getEditorSite().setSelectionProvider(plottingSystem.getSelectionProvider());
 
+		
+		plottingSystem.addRegionListener(new IRegionListener() {
+			
+			@Override
+			public void regionRemoved(RegionEvent evt) {
+				System.out.println("Removed "+evt.getRegion().getName());
+			}
+			
+			@Override
+			public void regionCreated(RegionEvent evt) {
+				System.out.println("Created "+evt.getRegion().getName());
+			}
+			
+			@Override
+			public void regionAdded(RegionEvent evt) {
+				System.out.println("Added "+evt.getRegion().getName());
+				
+				evt.getRegion().addRegionBoundsListener(new IRegionBoundsListener() {
+					
+					@Override
+					public void regionBoundsDragged(RegionBoundsEvent evt) {
+						System.out.println("Dragged "+evt.getRegionBounds());
+					}
+					
+					@Override
+					public void regionBoundsChanged(RegionBoundsEvent evt) {
+						System.out.println("Completed "+evt.getRegionBounds());
+					}
+				});
+			}
+		});
  	}
 
 	

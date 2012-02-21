@@ -32,10 +32,5 @@ public class EditorConstants {
 	 * highlighting to the actors or not.
 	 */
 	public static final String HIGHLIGHT_ACTORS_CHOICE = "org.dawb.actor.highlight.choice";
-	
-	/**
-	 * Used to record if user would like to plot as indices (false) or as x data set (true)
-	 */
-	public static final String PLOT_X_DATASET = "org.dawb.lightweight.plot.x.choice";
 
 }
