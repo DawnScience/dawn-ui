@@ -19,17 +19,21 @@ import java.util.Map;
 import org.csstudio.swt.xygraph.dataprovider.CircularBufferDataProvider;
 import org.csstudio.swt.xygraph.dataprovider.ISample;
 import org.csstudio.swt.xygraph.dataprovider.Sample;
+import org.csstudio.swt.xygraph.figures.Annotation;
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.Trace;
 import org.csstudio.swt.xygraph.figures.Trace.PointStyle;
 import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.swt.xygraph.linearscale.AbstractScale.LabelSide;
 import org.csstudio.swt.xygraph.linearscale.LinearScale.Orientation;
+import org.csstudio.swt.xygraph.undo.AddAnnotationCommand;
+import org.csstudio.swt.xygraph.undo.RemoveAnnotationCommand;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.IAxis;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlotUpdateEvent;
+import org.dawb.common.ui.plot.annotation.IAnnotation;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
@@ -994,5 +998,68 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	public IRegion getRegion(final String name) {
 		if (xyGraph==null)  return null;
 		return xyGraph.getRegion(name);
+	}
+	
+	public IAnnotation createAnnotation(final String name) throws Exception {
+		if (xyGraph==null) switchPlotUI(true); // TODO Regions can be 2D
+		
+		final List<Annotation>anns = xyGraph.getPlotArea().getAnnotationList();
+		for (Annotation annotation : anns) {
+			if (annotation.getName()!=null&&annotation.getName().equals(name)) {
+				throw new Exception("The annotation name '"+name+"' is already taken.");
+			}
+		}
+		
+		final Axis xAxis = ((AxisWrapper)getSelectedXAxis()).getWrappedAxis();
+		final Axis yAxis = ((AxisWrapper)getSelectedYAxis()).getWrappedAxis();
+		
+		return new AnnotationWrapper(name, xAxis, yAxis);
+	}
+	
+	/**
+	 * Add an annotation to the graph.
+	 * @param region
+	 */
+	public void addAnnotation(final IAnnotation annotation) {
+		
+        final AnnotationWrapper wrapper = (AnnotationWrapper)annotation;
+        xyGraph.addAnnotation(wrapper.getAnnotation());
+        xyGraph.getOperationsManager().addCommand(new AddAnnotationCommand(xyGraph, wrapper.getAnnotation()));
+	}
+	
+	
+	/**
+	 * Remove an annotation to the graph.
+	 * @param region
+	 */
+	public void removeAnnotation(final IAnnotation annotation) {
+        final AnnotationWrapper wrapper = (AnnotationWrapper)annotation;
+        xyGraph.removeAnnotation(wrapper.getAnnotation());
+        xyGraph.getOperationsManager().addCommand(new RemoveAnnotationCommand(xyGraph, wrapper.getAnnotation()));
+	}
+	
+	/**
+	 * Get an annotation by name.
+	 * @param name
+	 * @return
+	 */
+	public IAnnotation getAnnotation(final String name) {
+		final List<Annotation>anns = xyGraph.getPlotArea().getAnnotationList();
+		for (Annotation annotation : anns) {
+			if (annotation.getName()!=null&&annotation.getName().equals(name)) {
+				return new AnnotationWrapper(annotation);
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Remove all annotations
+	 */
+	public void clearAnnotations(){
+		final List<Annotation>anns = new ArrayList<Annotation>(xyGraph.getPlotArea().getAnnotationList());
+		for (Annotation annotation : anns) {
+			xyGraph.getPlotArea().removeAnnotation(annotation);
+		}
 	}
 }
