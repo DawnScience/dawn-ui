@@ -25,7 +25,7 @@ public class RegionBean implements Serializable {
 	protected int     alpha=80;
 	protected boolean visible=true;
 	protected boolean motile=true;
-	
+	protected boolean showLabel=false;	
 	public void sync(RegionBean bean) {
 		setName(bean.getName());
 		setShowPosition(bean.isShowPosition());
@@ -36,6 +36,7 @@ public class RegionBean implements Serializable {
 		setAlpha(bean.getAlpha());
 		setVisible(bean.isVisible());
 		setMotile(bean.isMotile());
+		setShowLabel(bean.isShowLabel());
 	}
 
 
@@ -108,6 +109,7 @@ public class RegionBean implements Serializable {
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result
 				+ ((regionColor == null) ? 0 : regionColor.hashCode());
+		result = prime * result + (showLabel ? 1231 : 1237);
 		result = prime * result + (showPosition ? 1231 : 1237);
 		result = prime * result + (visible ? 1231 : 1237);
 		result = prime * result + ((xAxis == null) ? 0 : xAxis.hashCode());
@@ -138,6 +140,8 @@ public class RegionBean implements Serializable {
 			if (other.regionColor != null)
 				return false;
 		} else if (!regionColor.equals(other.regionColor))
+			return false;
+		if (showLabel != other.showLabel)
 			return false;
 		if (showPosition != other.showPosition)
 			return false;
@@ -179,6 +183,16 @@ public class RegionBean implements Serializable {
 
 	public void setyAxis(Axis yAxis) {
 		this.yAxis = yAxis;
+	}
+
+
+	public boolean isShowLabel() {
+		return showLabel;
+	}
+
+
+	public void setShowLabel(boolean showLabel) {
+		this.showLabel = showLabel;
 	}
 	
 

@@ -35,6 +35,7 @@ public class RegionComposite extends Composite {
 	private Spinner alpha;
 	private Button motile;
 	private Button visible;
+	private Button showLabel;
 
 	public RegionComposite(final Composite parent, final int style, final XYRegionGraph xyGraph, final RegionType defaultRegion) {
 		
@@ -112,6 +113,14 @@ public class RegionComposite extends Composite {
 		visible.setLayoutData(new GridData(0, 0, false, false, 2, 1));
 		visible.setSelection(true);
 		
+		
+		this.showLabel = new Button(this, SWT.CHECK);
+		showLabel.setText("   Show name");		
+		showLabel.setToolTipText("Turn on to show the name of a selection region.");
+		showLabel.setLayoutData(new GridData(0, 0, false, false, 2, 1));
+		showLabel.setSelection(true);
+		
+
 		// Should be last
 		nameText.setText(getDefaultName(defaultRegion.getIndex()));
 
@@ -191,6 +200,7 @@ public class RegionComposite extends Composite {
 		motile.setSelection(region.isMotile());
 		showPoints.setSelection(region.isShowPosition());
 		visible.setSelection(region.isVisible());
+		showLabel.setSelection(region.isShowLabel());
 	}
 	
 	public Region getEditingRegion() {
@@ -204,6 +214,7 @@ public class RegionComposite extends Composite {
 		editingRegion.setAlpha(alpha.getSelection());
 		editingRegion.setMotile(motile.getSelection());
 		editingRegion.setVisible(visible.getSelection());
+		editingRegion.setShowLabel(showLabel.getSelection());
         return editingRegion;
 	}
 

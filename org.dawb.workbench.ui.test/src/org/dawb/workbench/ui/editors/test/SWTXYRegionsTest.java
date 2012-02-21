@@ -191,8 +191,11 @@ public class SWTXYRegionsTest {
 		final AbstractPlottingSystem sys = (AbstractPlottingSystem)oa[0];
 		final IEditorPart         editor = (IEditorPart)oa[1];
 		
-		// TODO - something with regions!
+		// We programmatically add a region, similar to if the user defined a region.
+		final IRegion region = sys.createRegion("Box random", RegionType.BOX);
 		
+		EclipseUtils.delay(2000);
+
 		EclipseUtils.getPage().closeEditor(editor, false);
 
 	}

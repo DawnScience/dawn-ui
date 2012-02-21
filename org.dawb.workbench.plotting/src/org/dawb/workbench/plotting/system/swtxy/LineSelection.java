@@ -60,6 +60,8 @@ class LineSelection extends Region {
 				gc.setLineWidth(2);
 				gc.setAlpha(getAlpha());
 				gc.drawLine(startCenter, endCenter);
+				
+				LineSelection.this.drawLabel(gc, bounds);
 			}
 		};
 		connection.setCursor(Draw2DUtils.getRoiMoveCursor());

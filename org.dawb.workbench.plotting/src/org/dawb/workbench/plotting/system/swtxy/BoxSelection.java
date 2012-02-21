@@ -55,6 +55,8 @@ class BoxSelection extends Region {
 				this.bounds = size;
 				gc.setAlpha(getAlpha());
 				gc.fillRectangle(size);
+				
+				BoxSelection.this.drawLabel(gc, size);
 			}
 		};
 		connection.setCursor(Draw2DUtils.getRoiMoveCursor());

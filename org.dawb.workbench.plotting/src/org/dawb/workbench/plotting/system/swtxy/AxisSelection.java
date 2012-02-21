@@ -61,6 +61,8 @@ class AxisSelection extends Region {
 				this.bounds = size;
 				gc.setAlpha(getAlpha());
 				gc.fillRectangle(size);
+				
+				AxisSelection.this.drawLabel(gc, size);
 			}
 		};
 		connection.setCursor(Draw2DUtils.getRoiMoveCursor());

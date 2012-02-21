@@ -79,7 +79,9 @@ public class RegionArea extends PlotArea {
 			regionBeingAdded.paintBeforeAdded(graphics, regionStart, regionEnd, getBounds());
 		}
 	}
-		
+
+    private RegionMouseListener regionListener;
+	
 	public Region createRegion(String name, Axis x, Axis y, RegionType regionType, boolean startingWithMouseEvent) throws Exception {
 
 		if (getRegionMap()!=null) {
@@ -106,9 +108,9 @@ public class RegionArea extends PlotArea {
 		    regionBeingAdded = region;
 		    
 		    // Mouse listener for region bounds
-		    final RegionMouseListener rl = new RegionMouseListener();
-		    addMouseListener(rl);
-		    addMouseMotionListener(rl);
+		    regionListener = new RegionMouseListener();
+		    addMouseListener(regionListener);
+		    addMouseMotionListener(regionListener);
 		}
 		
 		fireRegionCreated(new RegionEvent(region));
@@ -118,7 +120,23 @@ public class RegionArea extends PlotArea {
 	public void disposeRegion(Region region) {
 		removeRegion(region);
 		setCursor(null);
+		removeRegionMouseListener();
 	}
+	
+	public void setZoomType(final ZoomType zoomType) {
+		removeRegionMouseListener();
+        super.setZoomType(zoomType);
+	}
+	
+	private void removeRegionMouseListener() {
+		if (regionListener!=null) {
+		    removeMouseListener(regionListener);
+		    removeMouseMotionListener(regionListener);
+		    regionListener = null;
+		    setCursor(null);
+		}
+	}
+
 
 	protected void fireRegionCreated(RegionEvent evt) {
 		if (regionListeners==null) return;
@@ -211,7 +229,11 @@ public class RegionArea extends PlotArea {
 		public void mouseReleased(MouseEvent me) {
 		    removeMouseListener(this);
 		    removeMouseMotionListener(this);
-		    
+		    if (regionListener==this) {
+		    	regionListener = null;
+		    } else {
+		    	removeRegionMouseListener(); // Actually something has gone wrong if this happens.
+		    }
 		    setCursor(null);
 		    
 		    RegionArea.this.addRegion(regionBeingAdded);

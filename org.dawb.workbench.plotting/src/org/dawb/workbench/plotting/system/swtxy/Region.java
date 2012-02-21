@@ -6,6 +6,7 @@ import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.swt.xygraph.linearscale.Range;
 import org.dawb.common.ui.plot.region.AbstractRegion;
 import org.dawb.workbench.plotting.Activator;
+import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
@@ -107,6 +108,7 @@ public abstract class Region extends AbstractRegion implements IAxisListener{
 		setAlpha(bean.getAlpha());
 		setVisible(bean.isVisible());
 		setMotile(bean.isMotile());
+		setShowLabel(bean.isShowLabel());
 	}
 	
 	private Cursor cursor;
@@ -121,6 +123,13 @@ public abstract class Region extends AbstractRegion implements IAxisListener{
 		return cursor;
 	}
 
+	protected void drawLabel(Graphics gc, Rectangle size) {
+		if (isShowLabel()&&getName()!=null) {
+			gc.setAlpha(255);
+			gc.setForegroundColor(ColorConstants.black);
+			gc.drawText(getName(), size.getCenter());
+		}
+	}
 	
 	public void axisRevalidated(Axis axis) {
 		updateRegionBounds();
@@ -309,6 +318,14 @@ public abstract class Region extends AbstractRegion implements IAxisListener{
 			}
 			
 		};
+	}
+
+	public boolean isShowLabel() {
+		return bean.isShowLabel();
+	}
+
+	public void setShowLabel(boolean showLabel) {
+		bean.setShowLabel(showLabel);
 	}
 
 }
