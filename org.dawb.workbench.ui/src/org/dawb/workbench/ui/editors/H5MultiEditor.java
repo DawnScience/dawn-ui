@@ -96,6 +96,8 @@ public class H5MultiEditor extends MultiPageEditorPart  implements ISlicablePlot
 				if (getDataSetComponent()!=null && getDataSetComponent().getMetaData()!=null ) {
 					if (getDataSetComponent().getMetaData().getDataNames()==null || getDataSetComponent().getMetaData().getDataNames().size()<1) {
 						setActivePage(1);
+					} else if (EclipseUtils.getPage().findView("uk.ac.diamond.scisoft.analysis.rcp.views.DatasetInspectorView")!=null) {
+						setActivePage(1);
 					}
 				}
 			}
