@@ -21,6 +21,7 @@ import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.RegionBounds;
 import org.dawb.common.ui.plot.region.RegionEvent;
+import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.workbench.plotting.system.LightWeightPlottingSystem;
 import org.dawb.workbench.ui.editors.AsciiEditor;
 import org.dawb.workbench.ui.editors.PlotDataEditor;
@@ -48,11 +49,10 @@ import fable.framework.toolbox.EclipseUtils;
  */
 public class SWTXYRegionsTest {
 
-
 	@Test
 	public void regionPositionTest() throws Throwable {
 		
-		final Object[] oa = createSomethingPlotted(createTestArraysCoherant(2, 1000, "Long set "));
+		final Object[] oa = createSomethingPlotted(createTestArraysCoherant(2, 1000, "Long set "), true);
 		
 		final AbstractPlottingSystem sys = (AbstractPlottingSystem)oa[0];
 		final IEditorPart         editor = (IEditorPart)oa[1];
@@ -112,7 +112,7 @@ public class SWTXYRegionsTest {
 	@Test
 	public void regionListenerTest() throws Throwable {
 		
-		final Object[] oa = createSomethingPlotted(createTestArraysCoherant(2, 1000, "Long set "));
+		final Object[] oa = createSomethingPlotted(createTestArraysCoherant(2, 1000, "Long set "), true);
 		
 		final AbstractPlottingSystem sys = (AbstractPlottingSystem)oa[0];
 		final IEditorPart         editor = (IEditorPart)oa[1];
@@ -186,7 +186,7 @@ public class SWTXYRegionsTest {
 	@Test
 	public void testRandom1() throws Throwable {
 		
-		final Object[] oa = createSomethingPlotted(createTestArraysRandom(2, 1000));
+		final Object[] oa = createSomethingPlotted(createTestArraysRandom(2, 1000), true);
 		
 		final AbstractPlottingSystem sys = (AbstractPlottingSystem)oa[0];
 		final IEditorPart         editor = (IEditorPart)oa[1];
@@ -202,7 +202,7 @@ public class SWTXYRegionsTest {
 
 
 
-	private Object[] createSomethingPlotted(final List<AbstractDataset> ys) throws Throwable {
+	private Object[] createSomethingPlotted(final List<AbstractDataset> ys, boolean multipleAxes) throws Throwable {
 		
 		final Bundle bun  = Platform.getBundle("org.dawb.workbench.ui.test");
 
@@ -226,13 +226,14 @@ public class SWTXYRegionsTest {
 
 		
 		final IAxis primaryY       = sys.getSelectedYAxis();
-		final IAxis alternateYaxis = sys.createAxis("Alternate", true, SWT.LEFT);
+		final IAxis alternateYaxis = multipleAxes?sys.createAxis("Alternate", true, SWT.LEFT):primaryY;
 		alternateYaxis.setForegroundColor(sys.getPlotComposite().getDisplay().getSystemColor(SWT.COLOR_DARK_CYAN));
 		sys.setXfirst(true);
 
 		sys.setSelectedYAxis(alternateYaxis);
 		sys.setSelectedYAxis(primaryY);
 
+		List<ITrace> traces = new ArrayList<ITrace>();
 		for (int i = 0; i < ys.size(); i++) {
 
 			final AbstractDataset y = ys.get(i);
@@ -241,13 +242,13 @@ public class SWTXYRegionsTest {
 			} else {
 				sys.setSelectedYAxis(alternateYaxis);
 			}
-			sys.createPlot1D(indices, Arrays.asList(new AbstractDataset[]{y}), null);
+			traces.addAll(sys.createPlot1D(indices, Arrays.asList(new AbstractDataset[]{y}), null));
 
 		}
 		
 		sys.setSelectedYAxis(primaryY);
 
-		return new Object[]{sys,editor};
+		return new Object[]{sys,editor,traces};
 	}
 
 	
@@ -281,6 +282,8 @@ public class SWTXYRegionsTest {
 		
 		return ys;
 	}
+
+	
 
 	
 }

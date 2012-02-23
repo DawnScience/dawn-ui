@@ -17,6 +17,7 @@ import javax.swing.SwingUtilities;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.PlotType;
+import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.gda.extensions.util.DatasetTitleUtils;
 import org.dawb.workbench.plotting.util.ColorUtility;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -76,10 +77,10 @@ public class JLPlottingSystem extends AbstractPlottingSystem {
 	 * 
 	 */
 	@Override
-	protected void createPlot(final AbstractDataset       data, 
-			               final List<AbstractDataset> axes,
-			               final PlotType              mode, 
-			               final IProgressMonitor      monitor) {
+	protected List<ITrace> createPlot(final AbstractDataset       data, 
+						               final List<AbstractDataset> axes,
+						               final PlotType              mode, 
+						               final IProgressMonitor      monitor) {
 		
 		final AbstractDataset x;
 		final List<AbstractDataset> ys;
@@ -98,6 +99,7 @@ public class JLPlottingSystem extends AbstractPlottingSystem {
 		} else {
 
 		}
+		return null;
 	}
 
 	private void create1DPlot(final AbstractDataset       x, 

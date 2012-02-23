@@ -26,7 +26,9 @@ import org.junit.runners.Suite.SuiteClasses;
     SWTXYStressTest.class,
     SWTXYUpdateTest.class,
     SWTXYAxisTest.class,
-    SWTXYAxisUpdateTest.class
+    SWTXYAxisUpdateTest.class,
+    SWTXYRegionsTest.class,
+    SWTXYTraceTest.class
 })
 public class Suite {
 	// Run this as a junit plugin test and all the links will be satisfied.

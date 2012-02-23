@@ -10,6 +10,7 @@
 package org.dawb.workbench.plotting.system;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
@@ -37,6 +38,7 @@ import org.dawb.common.ui.plot.annotation.IAnnotation;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
+import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.fable.extensions.FableImageWrapper;
 import org.dawb.gda.extensions.util.DatasetTitleUtils;
@@ -299,10 +301,10 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	 * Does not have to be called in UI thread.
 	 */
 	@Override
-	protected void createPlot(final AbstractDataset       data, 
-			                  final List<AbstractDataset> axes,
-			                  final PlotType              mode, 
-			                  final IProgressMonitor      monitor) {
+	protected List<ITrace> createPlot(final AbstractDataset       data, 
+					                  final List<AbstractDataset> axes,
+					                  final PlotType              mode, 
+					                  final IProgressMonitor      monitor) {
 		
 		if (monitor!=null) monitor.worked(1);
 		
@@ -312,20 +314,24 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		final boolean createdIndices    = (Boolean)oa[2];
 		
 
+		final List<ITrace> traces = new ArrayList<ITrace>(7);
 		if (part!=null) {
 			if (part.getSite().getWorkbenchWindow().getShell().getDisplay().getThread()==Thread.currentThread()) {
-				createPlotInternal(mode, x, ys, createdIndices, monitor);
+				traces.addAll(createPlotInternal(mode, x, ys, createdIndices, monitor));
 			} else {
 				part.getSite().getWorkbenchWindow().getShell().getDisplay().syncExec(new Runnable() {
 					@Override
 					public void run() {
-						createPlotInternal(mode, x, ys, createdIndices, monitor);
+						traces.addAll(createPlotInternal(mode, x, ys, createdIndices, monitor));
 					}
 				});
 			}
 		} else {
-			createPlotInternal(mode, x, ys, createdIndices, monitor);
+			traces.addAll(createPlotInternal(mode, x, ys, createdIndices, monitor));
 		}
+		
+		if (monitor!=null) monitor.worked(1);
+		return traces;
 		
 	}
 	
@@ -384,20 +390,20 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	 * @param createdIndices
 	 * @param monitor
 	 */
-	private void createPlotInternal(final PlotType mode, 
-			                        final AbstractDataset x, 
-			                        final List<AbstractDataset> ys, 
-			                        final boolean createdIndices, 
-			                        final IProgressMonitor monitor) {
+	private List<ITrace> createPlotInternal(final PlotType mode, 
+					                        final AbstractDataset x, 
+					                        final List<AbstractDataset> ys, 
+					                        final boolean createdIndices, 
+					                        final IProgressMonitor monitor) {
 		
 		this.plottingMode = mode;
 		switchPlotUI(mode.is1D());
 		if (mode.is1D()) {
-			create1DPlot(x,ys,createdIndices,monitor);
+			return create1DPlot(x,ys,createdIndices,monitor);
 		} else {
-            createImagePlot(x,ys,monitor);
+            ITrace trace = createImagePlot(x,ys,monitor);
+            return Arrays.asList(new ITrace[]{trace});
 		}
-		if (monitor!=null) monitor.worked(1);
 	}
 	
     /**
@@ -443,10 +449,10 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	 * @param axes
 	 * @param monitor
 	 */
-	private void createImagePlot(final AbstractDataset       data, 
-								 final List<AbstractDataset> axes,
-								 final IProgressMonitor      monitor) {
-
+	private ITrace createImagePlot(final AbstractDataset       data, 
+								   final List<AbstractDataset> axes,
+								   final IProgressMonitor      monitor) {
+  
 		try {
 			if (colorMap != null) colorMap.clear();
 			final FableImageWrapper wrapper = new FableImageWrapper(data.getName(), data, axes, -1);
@@ -464,9 +470,10 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 			if ("".equals(name))name=null;
 			imageComponent.setPlotTitle(name);
 
-
+            return new ImageTrace(data); // TODO Add more methods here.
 		} catch (Throwable e) {
 			logger.error("Cannot load file "+data.getName(), e);
+			return null;
 		}
 	}
 
@@ -489,7 +496,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	private Map<String, Trace> traceMap; // Warning can be mem leak
 
 
-	private void create1DPlot(  final AbstractDataset       xIn, 
+	private List<ITrace> create1DPlot(  final AbstractDataset       xIn, 
 								final List<AbstractDataset> ysIn,
 								final boolean               createdIndices,
 								final IProgressMonitor      monitor) {
@@ -507,7 +514,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		}
 		if (traceMap==null) traceMap = new HashMap<String, Trace>(31);
 	
-		if (xyGraph==null) return;
+		if (xyGraph==null) return null;
 		
 		Axis xAxis = ((AxisWrapper)getSelectedXAxis()).getWrappedAxis();
 		Axis yAxis = ((AxisWrapper)getSelectedYAxis()).getWrappedAxis();
@@ -524,6 +531,8 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		//create a trace data provider, which will provide the data to the trace.
 		int iplot = 0;
 		final double[] xArray = getDoubleArray(x);
+		
+		final List<ITrace> traces = new ArrayList<ITrace>(ys.size());
 		for (AbstractDataset y : ys) {
 
 			CircularBufferDataProvider traceDataProvider = new CircularBufferDataProvider(false);
@@ -538,9 +547,11 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 					                      xAxis, 
 					                      yAxis,
 									      traceDataProvider);	
+			traces.add(new TraceWrapper(this, trace));
 			
 			if (y.getName()!=null && !"".equals(y.getName())) {
 				traceMap.put(y.getName(), trace);
+				trace.setInternalName(y.getName());
 			}
 			
 			//set trace property
@@ -562,7 +573,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		}
 		
 		xyCanvas.redraw();
-
+        return traces;
 	}
 
 	private void appendInternal(final String           name, 
@@ -615,6 +626,13 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	public AbstractDataset getData(String name) {
 		
 		final Trace trace = traceMap.get(name);
+		if (trace==null) return null;
+		
+		return getData(name, trace);
+	}
+	
+	protected AbstractDataset getData(String name, Trace trace) {
+
 		if (trace==null) return null;
 		
 		CircularBufferDataProvider prov = (CircularBufferDataProvider)trace.getDataProvider();
