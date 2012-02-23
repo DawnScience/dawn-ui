@@ -33,12 +33,12 @@ import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.IAxis;
 import org.dawb.common.ui.plot.PlotType;
-import org.dawb.common.ui.plot.PlotUpdateEvent;
 import org.dawb.common.ui.plot.annotation.IAnnotation;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.trace.ITrace;
+import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.fable.extensions.FableImageWrapper;
 import org.dawb.gda.extensions.util.DatasetTitleUtils;
@@ -211,7 +211,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 			    	Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.PLOT_X_DATASET, false);
 			    	setChecked(true);
 			    	xfirst = false;
-			    	firePlotListeners(new PlotUpdateEvent(xyGraph));
+			    	fireTracesAltered(new TraceEvent(xyGraph));
 			    }
 			};
 			plotIndex.setImageDescriptor(Activator.getImageDescriptor("icons/plotindex.png"));
@@ -222,7 +222,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 			    	Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.PLOT_X_DATASET, true);
 			    	setChecked(true);
 			    	xfirst = true;
-			    	firePlotListeners(new PlotUpdateEvent(xyGraph));
+			    	fireTracesAltered(new TraceEvent(xyGraph));
 			    }
 			};
 			plotX.setImageDescriptor(Activator.getImageDescriptor("icons/plotxaxis.png"));
@@ -470,7 +470,10 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 			if ("".equals(name))name=null;
 			imageComponent.setPlotTitle(name);
 
-            return new ImageTrace(data); // TODO Add more methods here.
+			ImageTrace trace = new ImageTrace(data); // TODO Add more methods here.
+            fireTracePlotted(new TraceEvent(trace));
+            return trace;
+            
 		} catch (Throwable e) {
 			logger.error("Cannot load file "+data.getName(), e);
 			return null;
@@ -497,9 +500,9 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 
 
 	private List<ITrace> create1DPlot(  final AbstractDataset       xIn, 
-								final List<AbstractDataset> ysIn,
-								final boolean               createdIndices,
-								final IProgressMonitor      monitor) {
+										final List<AbstractDataset> ysIn,
+										final boolean               createdIndices,
+										final IProgressMonitor      monitor) {
 		
 		Object[] oa = getOrderedDatasets(xIn, ysIn, createdIndices);
 		final AbstractDataset       x  = (AbstractDataset)oa[0];
@@ -547,7 +550,9 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 					                      xAxis, 
 					                      yAxis,
 									      traceDataProvider);	
-			traces.add(new TraceWrapper(this, trace));
+			
+			TraceWrapper wrapper = new TraceWrapper(this, trace);
+			traces.add(wrapper);
 			
 			if (y.getName()!=null && !"".equals(y.getName())) {
 				traceMap.put(y.getName(), trace);
@@ -568,6 +573,10 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 
 			//add the trace to xyGraph
 			xyGraph.addTrace(trace);
+			
+			fireTracePlotted(new TraceEvent(wrapper));
+
+			
 			if (monitor!=null) monitor.worked(1);
 			iplot++;
 		}
@@ -853,6 +862,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	private void clearTraces() {
 		if (xyGraph!=null)  xyGraph.clearTraces();
 		if (traceMap!=null) traceMap.clear();
+		fireTracesCleared(new TraceEvent(this));
 	}
 
 	public void repaint() {

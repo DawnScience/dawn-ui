@@ -25,11 +25,11 @@ import java.util.regex.Pattern;
 import org.dawb.common.ui.DawbUtils;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
-import org.dawb.common.ui.plot.IPlotUpdateListener;
 import org.dawb.common.ui.plot.IPlottingSystemData;
 import org.dawb.common.ui.plot.IPlottingSystemSelection;
 import org.dawb.common.ui.plot.PlotType;
-import org.dawb.common.ui.plot.PlotUpdateEvent;
+import org.dawb.common.ui.plot.trace.ITraceListener;
+import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.common.ui.widgets.DoubleClickModifier;
 import org.dawb.common.util.io.PropUtils;
 import org.dawb.common.util.io.SortingUtils;
@@ -260,9 +260,9 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 		/**
 		 * No need to remove this one, the listeners are cleared on a dispose
 		 */
-		getPlottingSystem().addPlotListener(new IPlotUpdateListener() {
+		getPlottingSystem().addTraceListener(new ITraceListener.Stub() {
 			@Override
-			public void plotRequested(PlotUpdateEvent evt) {
+			public void tracesAltered(TraceEvent evt) {
 				updateSelection();
 			}
 		});
