@@ -115,7 +115,7 @@ public class SWTXYUpdateTest {
 		if (ys.get(0).getBuffer()==null || ys.get(0).getSize()<1) {
 		    sys.createPlot1D(new IntegerDataset(), ys, null);
 		} else {
-		    sys.createPlot1D(ys.get(0).getIndices(), ys, null);
+		    sys.createPlot1D(AbstractDataset.arange(0, ys.get(0).getSize(), 1, AbstractDataset.INT32), ys, null);
 		}
 		EclipseUtils.delay(10);
 		
@@ -157,7 +157,7 @@ public class SWTXYUpdateTest {
 			}
 			
 			if (!APPEND) {
-			    sys.createPlot1D(ys.get(0).getIndices(), ys, null);
+			    sys.createPlot1D(AbstractDataset.arange(0, ys.get(0).getSize(), 1, AbstractDataset.INT32), ys, null);
 			}
 			
 			EclipseUtils.delay(10);

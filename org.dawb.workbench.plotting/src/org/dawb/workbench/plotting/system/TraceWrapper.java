@@ -279,4 +279,8 @@ public class TraceWrapper implements ILineTrace {
 		trace.setErrorBarCapWidth(errorBarCapWidth);
 	}
 
+	protected Trace getTrace() {
+		return trace;
+	}
+
 }

@@ -90,7 +90,7 @@ public class SWTXYAxisTest {
 			
 		sys.clear();
 		
-		AbstractDataset indices = ys.get(0).getIndices();
+		AbstractDataset indices = AbstractDataset.arange(0, ys.get(0).getSize(), 1, AbstractDataset.INT32);
 
 		
 		if (!multipleAxes) {

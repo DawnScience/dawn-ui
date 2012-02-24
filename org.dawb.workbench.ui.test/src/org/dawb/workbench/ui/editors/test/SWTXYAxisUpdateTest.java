@@ -118,7 +118,7 @@ public class SWTXYAxisUpdateTest {
 		if (ys.get(0).getBuffer()==null || ys.get(0).getSize()<1) {
 		    sys.createPlot1D(new IntegerDataset(), ys, null);
 		} else {
-		    sys.createPlot1D(ys.get(0).getIndices(), ys, null);
+		    sys.createPlot1D(AbstractDataset.arange(0, ys.get(0).getSize(), 1, AbstractDataset.INT32), ys, null);
 		}
 		final IAxis alternateYaxis = sys.createAxis("Alternate", true, SWT.RIGHT);
 		sys.setSelectedYAxis(alternateYaxis);
@@ -163,7 +163,7 @@ public class SWTXYAxisUpdateTest {
 			}
 			
 			if (!APPEND) {
-			    sys.createPlot1D(ys.get(0).getIndices(), ys, null);
+			    sys.createPlot1D(AbstractDataset.arange(0, ys.get(0).getSize(), 1, AbstractDataset.INT32), ys, null);
 			}
 			
 			EclipseUtils.delay(10);

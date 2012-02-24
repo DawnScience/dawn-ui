@@ -78,7 +78,7 @@ public class SWTXYStressTest {
 				
 		final long start = System.currentTimeMillis();
 		
-		sys.createPlot1D(ys.get(0).getIndices(), ys, null);
+		sys.createPlot1D(AbstractDataset.arange(0, ys.get(0).getSize(), 1, AbstractDataset.INT32), ys, null);
 		EclipseUtils.delay(10);
 		
 		final long end  = System.currentTimeMillis();

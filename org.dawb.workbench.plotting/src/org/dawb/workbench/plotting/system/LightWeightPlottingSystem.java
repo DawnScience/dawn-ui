@@ -11,9 +11,12 @@ package org.dawb.workbench.plotting.system;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -152,9 +155,11 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
         	
 			try {
 				Action tools = createToolActions();
-	        	bars.getToolBarManager().add(tools);
-	        	bars.getMenuManager().add(tools);
-	        	rightClick.add(tools);     
+				if (tools!=null) {
+		        	bars.getToolBarManager().add(tools);
+		        	bars.getMenuManager().add(tools);
+		        	rightClick.add(tools);     
+				}
 	        	
 			} catch (Exception e) {
 				logger.error("Reading extensions for plotting tools", e);
@@ -325,20 +330,18 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		
 
 		final List<ITrace> traces = new ArrayList<ITrace>(7);
-		if (part!=null) {
-			if (part.getSite().getWorkbenchWindow().getShell().getDisplay().getThread()==Thread.currentThread()) {
-				traces.addAll(createPlotInternal(mode, x, ys, createdIndices, monitor));
-			} else {
-				part.getSite().getWorkbenchWindow().getShell().getDisplay().syncExec(new Runnable() {
-					@Override
-					public void run() {
-						traces.addAll(createPlotInternal(mode, x, ys, createdIndices, monitor));
-					}
-				});
-			}
-		} else {
+		
+		if (parent.getDisplay().getThread()==Thread.currentThread()) {
 			traces.addAll(createPlotInternal(mode, x, ys, createdIndices, monitor));
+		} else {
+			parent.getDisplay().syncExec(new Runnable() {
+				@Override
+				public void run() {
+					traces.addAll(createPlotInternal(mode, x, ys, createdIndices, monitor));
+				}
+			});
 		}
+
 		
 		if (monitor!=null) monitor.worked(1);
 		return traces;
@@ -374,19 +377,15 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		if (!this.plottingMode.is1D()) throw new Exception("Can only add in 1D mode!");
 		if (name==null || "".equals(name)) throw new IllegalArgumentException("The dataset name must not be null or empty string!");
 		
-		if (part!=null) {
-			if (part.getSite().getWorkbenchWindow().getShell().getDisplay().getThread()==Thread.currentThread()) {
-				appendInternal(name, xValue, yValue, monitor);
-			} else {
-				part.getSite().getWorkbenchWindow().getShell().getDisplay().syncExec(new Runnable() {
-					@Override
-					public void run() {
-						appendInternal(name, xValue, yValue, monitor);
-					}
-				});
-			}
-		} else {
+		if (parent.getDisplay().getThread()==Thread.currentThread()) {
 			appendInternal(name, xValue, yValue, monitor);
+		} else {
+			parent.getDisplay().syncExec(new Runnable() {
+				@Override
+				public void run() {
+					appendInternal(name, xValue, yValue, monitor);
+				}
+			});
 		}
 
 	}
@@ -481,7 +480,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 			imageComponent.setPlotTitle(name);
 
 			ImageTrace trace = new ImageTrace(data); // TODO Add more methods here.
-            fireTracePlotted(new TraceEvent(trace));
+            fireTracesPlotted(new TraceEvent(trace));
             return trace;
             
 		} catch (Throwable e) {
@@ -506,7 +505,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	 * Uses a map of abstract data set name to Trace to retrieve Trace on the
 	 * update.
 	 */
-	private Map<String, Trace> traceMap; // Warning can be mem leak
+	private Map<String, ITrace> traceMap; // Warning can be mem leak
 
 
 	private List<ITrace> create1DPlot(  final AbstractDataset       xIn, 
@@ -525,7 +524,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 				colorMap = new IdentityHashMap<Object,Color>(ys.size());
 			}
 		}
-		if (traceMap==null) traceMap = new HashMap<String, Trace>(31);
+		if (traceMap==null) traceMap = new LinkedHashMap<String, ITrace>(31);
 	
 		if (xyGraph==null) return null;
 		
@@ -565,7 +564,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 			traces.add(wrapper);
 			
 			if (y.getName()!=null && !"".equals(y.getName())) {
-				traceMap.put(y.getName(), trace);
+				traceMap.put(y.getName(), wrapper);
 				trace.setInternalName(y.getName());
 			}
 			
@@ -584,15 +583,19 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 			//add the trace to xyGraph
 			xyGraph.addTrace(trace);
 			
-			fireTracePlotted(new TraceEvent(wrapper));
-
 			
 			if (monitor!=null) monitor.worked(1);
 			iplot++;
 		}
 		
 		xyCanvas.redraw();
+		fireTracesPlotted(new TraceEvent(traces));
         return traces;
+	}
+	
+	public Collection<ITrace> getTraces() {
+		if (traceMap==null) return Collections.emptyList();
+		return traceMap.values();
 	}
 
 	private void appendInternal(final String           name, 
@@ -601,8 +604,10 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 							    final IProgressMonitor monitor) {
 
 
-		final Trace trace = traceMap.get(name);
-		if (trace==null) return;
+		final ITrace wrapper = traceMap.get(name);
+		if (wrapper==null) return;
+		
+		final Trace trace = ((TraceWrapper)wrapper).getTrace();
 		
 		CircularBufferDataProvider prov = (CircularBufferDataProvider)trace.getDataProvider();
 		if (prov==null) return;
@@ -644,7 +649,10 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	@Override
 	public AbstractDataset getData(String name) {
 		
-		final Trace trace = traceMap.get(name);
+		final ITrace wrapper = traceMap.get(name);
+		if (wrapper==null) return null;
+		
+		final Trace trace = ((TraceWrapper)wrapper).getTrace();
 		if (trace==null) return null;
 		
 		return getData(name, trace);
@@ -796,10 +804,10 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 
 	@Override
 	public void reset() {
-		if (part.getSite().getWorkbenchWindow().getShell().getDisplay().getThread()==Thread.currentThread()) {
+		if (parent.getDisplay().getThread()==Thread.currentThread()) {
 			resetInternal();
 		} else {
-			part.getSite().getWorkbenchWindow().getShell().getDisplay().syncExec(new Runnable() {
+			parent.getDisplay().syncExec(new Runnable() {
 				@Override
 				public void run() {
 					resetInternal();
@@ -828,10 +836,10 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	
 	@Override
 	public void clear() {
-		if (part.getSite().getWorkbenchWindow().getShell().getDisplay().getThread()==Thread.currentThread()) {
+		if (parent.getDisplay().getThread()==Thread.currentThread()) {
 			clearInternal();
 		} else {
-			part.getSite().getWorkbenchWindow().getShell().getDisplay().syncExec(new Runnable() {
+			parent.getDisplay().syncExec(new Runnable() {
 				@Override
 				public void run() {
 					clearInternal();
@@ -876,7 +884,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	}
 
 	public void repaint() {
-		part.getSite().getWorkbenchWindow().getShell().getDisplay().syncExec(new Runnable() {
+		parent.getDisplay().syncExec(new Runnable() {
 			public void run() {
 				if (xyCanvas!=null) LightWeightPlottingSystem.this.xyCanvas.redraw();
 				if (imageComponent!=null) LightWeightPlottingSystem.this.imageComposite.redraw();
@@ -892,19 +900,6 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	@Override
 	public Image getImage(Rectangle size) {
 		return xyGraph.getImage(size);
-	}
-	
-	/**
-	 * Can throw exception, gives access to Trace objects for when custom Trace work is needed.
-	 * 
-	 * Maybe return null or throw exception if not 1D. Access discouraged, just for emergencies!
-	 * To use cast your IPlottingSystem to LightWeightPlottingSystem
-	 * 
-	 * @param plotName
-	 * @return
-	 */
-	public Trace getTrace(final String plotName) {
-		return traceMap.get(plotName);
 	}
 	
 	/**

@@ -12,7 +12,6 @@ package org.dawb.workbench.plotting.views;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.dawb.common.ui.plot.IPlottingSystem;
@@ -24,6 +23,7 @@ import org.dawb.common.ui.plot.tool.ToolChangeEvent;
 import org.dawb.common.util.text.StringUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
@@ -96,7 +96,7 @@ public class ToolPageView extends PageBookView implements IToolChangeListener {
 		recs.remove(part);
 		return null;
 	}
-
+	
 	private void recordPage(IWorkbenchPart part, IToolPage tool, PageRec rec) {
 		Map<IPage,PageRec> pages = recs.get(part);
 		if (pages==null) {
@@ -109,6 +109,14 @@ public class ToolPageView extends PageBookView implements IToolChangeListener {
 	@Override
 	public void toolChanged(ToolChangeEvent evt) {
 		partActivated(evt.getPart());
+	}
+	
+	public void partActivated(IWorkbenchPart part) {
+
+		IToolPageSystem sys = (IToolPageSystem)part.getAdapter(IToolPageSystem.class);
+        if (sys!=null && sys.getCurrentToolPage() == getCurrentPage()) return;
+        
+        super.partActivated(part);
 	}
 	
 	protected PageRec getPageRec(IWorkbenchPart part) {
@@ -149,6 +157,18 @@ public class ToolPageView extends PageBookView implements IToolChangeListener {
 	protected void doDestroyPage(IWorkbenchPart part, PageRec pageRecord) {
 		pageRecord.page.dispose();
 	}
+	
+	public void partClosed(IWorkbenchPart part) {
+
+		super.partClosed(part);
+		
+		final Map<IPage, PageRec> pages = recs.remove(part);
+		if (pages!=null) {
+			for (IPage page : pages.keySet()) {
+				if (page!=null) page.dispose();
+			}
+		}
+	}
 
 	@Override
 	protected IWorkbenchPart getBootstrapPart() {
@@ -173,23 +193,45 @@ public class ToolPageView extends PageBookView implements IToolChangeListener {
 			sys.removeToolChangeListener(this);
 		}
 		systems.clear();
+		
+		for(Map<IPage,PageRec> pages : recs.values()) {
+			for (IPage page : pages.keySet()) {
+				try {
+				    pages.get(page).dispose();
+				} catch (Throwable ignored) {
+					
+				}
+				try {
+					page.dispose();
+				} catch (Throwable ignored) {
+					
+				}
+			}
+		}
 		recs.clear();
 	}
 	
+	
 	public class BlankPage extends AbstractToolPage {
+		private Composite comp;
+
 		@Override
 		public void createControl(Composite parent) {
-			final Composite comp = new Composite(parent, SWT.NONE);
-			this.controlForPage = comp;
+			this.comp = new Composite(parent, SWT.NONE);
 		}
 
 		@Override
 		public void setFocus() {
-			controlForPage.setFocus();
+			
 		}
 		
 		public String toString() {
 			return "No tool page";
+		}
+
+		@Override
+		public Control getControl() {
+			return comp;
 		}
 	}
 	
