@@ -22,10 +22,7 @@ import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingFactory;
-import org.dawb.common.ui.plot.region.IRegionBoundsListener;
-import org.dawb.common.ui.plot.region.IRegionListener;
-import org.dawb.common.ui.plot.region.RegionBoundsEvent;
-import org.dawb.common.ui.plot.region.RegionEvent;
+import org.dawb.common.ui.plot.tool.IToolPageSystem;
 import org.dawb.common.ui.slicing.SliceComponent;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.util.GridUtils;
@@ -43,8 +40,6 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
@@ -59,9 +54,7 @@ import org.eclipse.ui.IActionBars2;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IReusableEditor;
-import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.EditorPart;
@@ -101,7 +94,6 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 	private IMetaData                   metaData;
 
 	public PlotDataEditor(boolean useCaching) {
-	
 		try {
 	        this.plottingSystem = PlottingFactory.getPlottingSystem();
 		} catch (Exception ne) {
@@ -546,6 +538,8 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		if (clazz == Page.class) {
 			final PlotDataEditor      ed  = getDataSetEditor();
 			return new PlotDataPage(ed);
+		} else if (clazz == IToolPageSystem.class) {
+			return getPlottingSystem();
 		}
 		
 		return super.getAdapter(clazz);
@@ -559,6 +553,11 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 	@Override
 	public void addExpression() {
 		getDataSetComponent().addExpression();
+	}
+
+	public String toString(){
+		if (getEditorInput()!=null) return getEditorInput().getName();
+		return super.toString();
 	}
 
 }

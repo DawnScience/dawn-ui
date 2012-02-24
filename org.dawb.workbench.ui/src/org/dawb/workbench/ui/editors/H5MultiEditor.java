@@ -11,6 +11,7 @@
 package org.dawb.workbench.ui.editors;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem.ColorOption;
+import org.dawb.common.ui.plot.tool.IToolPageSystem;
 import org.dawb.common.ui.plot.IPlottingSystemSelection;
 import org.dawb.common.ui.slicing.ISlicablePlottingPart;
 import org.dawb.common.ui.slicing.SliceComponent;
@@ -167,6 +168,8 @@ public class H5MultiEditor extends MultiPageEditorPart  implements ISlicablePlot
 			
 		} else if (clazz == IContentProvider.class) {
 			return new H5ValuePage();
+		} else if (clazz == IToolPageSystem.class) {
+			return dataSetEditor.getPlottingSystem();
 		}
 		
 		return super.getAdapter(clazz);

@@ -15,5 +15,33 @@
             visible_type="Lightweight">
       </plottingSystem>
    </extension>
+   <extension
+         point="org.dawb.common.ui.toolPage">
+      <plotting_tool_page
+            class="org.dawb.workbench.plotting.tools.FittingTool"
+            icon="icons/plot-tool-peak-fit.png"
+            id="org.dawb.workbench.plotting.tools.fittingTool"
+            label="Peak Fitting"
+            tooltip="A tool for fitting peaks on the data currently plotted.">
+      </plotting_tool_page>
+      <plotting_tool_page
+            class="org.dawb.workbench.plotting.tools.DerivativeTool"
+            icon="icons/plot-tool-derivative.png"
+            id="org.dawb.workbench.plotting.tools.derivative"
+            label="Derivative"
+            tooltip="A tool which shows the derivative next to what is currently plotted.">
+      </plotting_tool_page>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            category="org.dawb.workbench.application.data.analysis"
+            class="org.dawb.workbench.plotting.views.ToolPageView"
+            icon="icons/axis.png"
+            id="org.dawb.workbench.plotting.views.ToolPageView"
+            name="Tool"
+            restorable="true">
+      </view>
+   </extension>
 
 </plugin>

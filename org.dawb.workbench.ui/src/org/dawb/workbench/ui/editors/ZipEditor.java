@@ -15,6 +15,7 @@ import java.io.InputStream;
 
 import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.IPlottingSystemSelection;
+import org.dawb.common.ui.plot.tool.IToolPageSystem;
 import org.dawb.common.ui.slicing.ISlicablePlottingPart;
 import org.dawb.common.ui.slicing.SliceComponent;
 import org.dawb.common.ui.util.EclipseUtils;
@@ -204,6 +205,8 @@ public class ZipEditor extends MultiPageEditorPart implements ISlicablePlottingP
 		if (clazz == Page.class) {
 			final PlotDataEditor      ed  = getDataSetEditor();
 			return new PlotDataPage(ed);
+		} else if (clazz == IToolPageSystem.class) {
+			return dataSetEditor.getPlottingSystem();
 		}
 		
 		return super.getAdapter(clazz);

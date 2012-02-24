@@ -91,7 +91,6 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	private Logger logger = LoggerFactory.getLogger(LightWeightPlottingSystem.class);
 	
 	private Composite      parent;
-	private IWorkbenchPart part;
 	private IActionBars    bars;
 
 	// 1D Controls
@@ -111,8 +110,9 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 							   final PlotType       hint,
 							   final IWorkbenchPart part) {
 
+		super.createPlotPart(parent, plotName, bars, hint, part); // Does nothing other than assign part to a protected variable.
+		
 		this.parent  = parent;
-		this.part    = part;
 		this.bars    = bars;
 		
 		if (hint==PlotType.IMAGE) {
@@ -149,7 +149,17 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
         if (bars!=null) {
         	final XYRegionToolbar toolbar = new XYRegionToolbar(xyGraph);
         	toolbar.createGraphActions(bars.getToolBarManager(), rightClick);
-        }
+        	
+			try {
+				Action tools = createToolActions();
+	        	bars.getToolBarManager().add(tools);
+	        	bars.getMenuManager().add(tools);
+	        	rightClick.add(tools);     
+	        	
+			} catch (Exception e) {
+				logger.error("Reading extensions for plotting tools", e);
+			}
+       }
 
         createAdditionalActions(rightClick);
 		

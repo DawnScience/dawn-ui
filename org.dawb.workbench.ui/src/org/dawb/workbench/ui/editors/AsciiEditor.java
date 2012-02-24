@@ -12,8 +12,10 @@ package org.dawb.workbench.ui.editors;
 import org.dawb.common.ui.plot.AbstractPlottingSystem.ColorOption;
 import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.IPlottingSystemSelection;
+import org.dawb.common.ui.plot.tool.IToolPageSystem;
 import org.dawb.common.ui.slicing.ISlicablePlottingPart;
 import org.dawb.common.ui.slicing.SliceComponent;
+import org.dawb.common.util.text.StringUtils;
 import org.dawb.workbench.ui.views.PlotDataPage;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.ui.IEditorInput;
@@ -36,6 +38,7 @@ public class AsciiEditor extends MultiPageEditorPart implements ISlicablePlottin
 	private static final Logger logger = LoggerFactory.getLogger(AsciiEditor.class);
 
 	private PlotDataEditor dataSetEditor;
+
 	
 	@Override
 	public void init(IEditorSite site, IEditorInput input) throws PartInitException{
@@ -131,6 +134,8 @@ public class AsciiEditor extends MultiPageEditorPart implements ISlicablePlottin
 		if (clazz == Page.class) {
 			final PlotDataEditor      ed  = getDataSetEditor();
 			return new PlotDataPage(ed);
+		} else if (clazz == IToolPageSystem.class) {
+			return dataSetEditor.getPlottingSystem();
 		}
 		
 		return super.getAdapter(clazz);
@@ -146,4 +151,8 @@ public class AsciiEditor extends MultiPageEditorPart implements ISlicablePlottin
 		getDataSetComponent().setAll1DSelected(overide);
 	}
 
+	public String toString(){
+		if (getEditorInput()!=null) return getEditorInput().getName();
+		return super.toString();
+	}
 }
