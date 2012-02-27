@@ -9,6 +9,7 @@ import org.dawb.common.ui.plot.AbstractPlottingSystem.ColorOption;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingFactory;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
+import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
@@ -98,23 +99,41 @@ public class DerivativeTool extends AbstractToolPage implements ITraceListener {
 		updateDerviatives();
 	}
 	
+	/**
+	 * The user can optionally nominate an x. In this case, we would like to 
+	 * use it for the derviative instead of the indices of the data. Therefore
+	 * there is some checking here to see if there are x values to plot.
+	 * 
+	 * Normally everything will be ILineTraces even if the x is indices.
+	 */
 	private void updateDerviatives() {
+		
 		final Collection<ITrace>    traces= getPlottingSystem().getTraces();
 		final List<AbstractDataset> dervs = new ArrayList<AbstractDataset>(traces.size());
 
+		ITrace firstTrace = null;
         for (ITrace trace : traces) {
 			
-			final AbstractDataset plot = trace.getData();
-			final AbstractDataset derv = Maths.derivative(AbstractDataset.arange(0, plot.getSize(), 1, AbstractDataset.INT32), plot, 1);
+        	if (firstTrace==null) firstTrace = trace;
+ 			final AbstractDataset plot = trace.getData();
+			AbstractDataset x = (trace instanceof ILineTrace) 
+					          ? ((ILineTrace)trace).getXData() 
+					          : AbstractDataset.arange(0, plot.getSize(), 1, AbstractDataset.INT32);
+					        
+			final AbstractDataset derv = Maths.derivative(x, plot, 1);
 			
-			derv.setName("f"+getTicksFor(1)+" {" +plot.getName()+"}");
+			derv.setName("f"+getTicksFor(1)+"{" +plot.getName()+"}");
 			dervs.add(derv);
 		}
         plotter.clear();
-        if (dervs.size()>0) {
+        
+        if (dervs.size()>0 && firstTrace!=null) {
         	
-        	AbstractDataset x = AbstractDataset.arange(0, dervs.get(0).getSize(), 1, AbstractDataset.INT32);
-			x.setName("Indices");
+ 			AbstractDataset x = (firstTrace instanceof ILineTrace) 
+					          ? ((ILineTrace)firstTrace).getXData() 
+					          : AbstractDataset.arange(0, dervs.get(0).getSize(), 1, AbstractDataset.INT32);
+					        
+			if (x.getName()==null || "".equals(x.getName())) x.setName("Indices");
 
         	plotter.createPlot1D(x, dervs, null); 
         }

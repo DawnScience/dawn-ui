@@ -262,10 +262,21 @@ public class TraceWrapper implements ILineTrace {
 	public boolean isErrorBarEnabled() {
 		return trace.isErrorBarEnabled();
 	}
-
+	
+	
 	@Override
 	public AbstractDataset getData() {
-		return sys.getData(getName(), trace);
+		return getYData();
+	}
+
+	@Override
+	public AbstractDataset getYData() {
+		return sys.getData(getName(), trace, true);
+	}
+	
+	@Override
+	public AbstractDataset getXData() {
+		return sys.getData(getName(), trace, false);
 	}
 
 	public int getErrorBarWidth() {

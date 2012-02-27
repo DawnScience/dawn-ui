@@ -655,10 +655,10 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		final Trace trace = ((TraceWrapper)wrapper).getTrace();
 		if (trace==null) return null;
 		
-		return getData(name, trace);
+		return getData(name, trace, true);
 	}
 	
-	protected AbstractDataset getData(String name, Trace trace) {
+	protected AbstractDataset getData(String name, Trace trace, boolean isY) {
 
 		if (trace==null) return null;
 		
@@ -669,12 +669,12 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		final Iterator<ISample> it = prov.iterator();
 		int i = 0;
 		while(it.hasNext()) {
-			da[i] = it.next().getYValue();
+			da[i] = isY ? it.next().getYValue() : it.next().getXValue();
 			++i;
 		}
 		
 		final DoubleDataset set = new DoubleDataset(da, da.length);
-		set.setName(name);
+		if (isY) set.setName(name); else set.setName(getSelectedXAxis().getTitle());
 		
 		return set;
 	}
