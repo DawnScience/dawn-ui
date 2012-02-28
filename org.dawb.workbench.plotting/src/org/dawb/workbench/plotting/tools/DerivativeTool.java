@@ -15,8 +15,6 @@ import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.part.IPageSite;
@@ -26,19 +24,28 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Maths;
 
-public class DerivativeTool extends AbstractToolPage implements ITraceListener {
+public class DerivativeTool extends AbstractToolPage  {
 
 	private final static Logger logger = LoggerFactory.getLogger(DerivativeTool.class);
 	
 	protected AbstractPlottingSystem plotter;
-
+	private ITraceListener traceListener;
 	private Composite container;
+
 	
 	public DerivativeTool() {
 		try {
 			plotter = PlottingFactory.getPlottingSystem();
 			plotter.setColorOption(ColorOption.NONE);
 			plotter.setDatasetChoosingRequired(false);
+			this.traceListener = new ITraceListener.Stub() {
+				@Override
+				public void tracesPlotted(TraceEvent evt) {
+					
+					if (!(evt.getSource() instanceof List<?>)) return;
+					updateDerviatives();
+				}
+			};
 		} catch (Exception e) {
 			logger.error("Cannot get plotting system!", e);
 		}
@@ -60,7 +67,7 @@ public class DerivativeTool extends AbstractToolPage implements ITraceListener {
 		
 		updateDerviatives();
 		
-		getPlottingSystem().addTraceListener(this);
+		getPlottingSystem().addTraceListener(traceListener);
 	}
 
 	@Override
@@ -75,29 +82,14 @@ public class DerivativeTool extends AbstractToolPage implements ITraceListener {
 	
 	public void dispose() {
 		if (getPlottingSystem()!=null) {
-			getPlottingSystem().removeTraceListener(this);
+			getPlottingSystem().removeTraceListener(traceListener);
 		}
 		if (plotter!=null) plotter.dispose();
 		plotter = null;
 		super.dispose();
 	}
 
-	@Override
-	public void tracesAltered(TraceEvent evt) {
-		
-	}
 
-	@Override
-	public void tracesCleared(TraceEvent evet) {
-		plotter.clear();
-	}
-
-	@Override
-	public void tracesPlotted(TraceEvent evt) {
-		
-		if (!(evt.getSource() instanceof List<?>)) return;
-		updateDerviatives();
-	}
 	
 	/**
 	 * The user can optionally nominate an x. In this case, we would like to 

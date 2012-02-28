@@ -19,7 +19,6 @@ import org.eclipse.draw2d.MouseEvent;
 import org.eclipse.draw2d.MouseListener;
 import org.eclipse.draw2d.MouseMotionListener;
 import org.eclipse.draw2d.geometry.Point;
-import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.graphics.Image;
 
@@ -46,6 +45,7 @@ public class RegionArea extends PlotArea {
 		region.createContents(this);
 		region.setSelectionProvider(selectionProvider);
 		fireRegionAdded(new RegionEvent(region));
+		removeRegionMouseListener();
 		revalidate();
 	}
 
@@ -61,6 +61,7 @@ public class RegionArea extends PlotArea {
 	}
 	
 	public void clearRegions() {
+		removeRegionMouseListener();
 		if (regions==null) return;
 		for (Region region : regions.values()) {
 			region.remove();
@@ -94,7 +95,7 @@ public class RegionArea extends PlotArea {
 		} else if (regionType==RegionType.BOX) {
 			region = new BoxSelection(name, x, y);
 
-		} else if (regionType==RegionType.XAXIS || regionType==RegionType.YAXIS) {
+		} else if (regionType==RegionType.XAXIS || regionType==RegionType.YAXIS || regionType==RegionType.XAXIS_LINE || regionType==RegionType.YAXIS_LINE) {
 			region = new AxisSelection(name, x, y, regionType);
 					
 		} else {

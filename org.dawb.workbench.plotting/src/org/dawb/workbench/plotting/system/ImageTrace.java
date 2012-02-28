@@ -27,4 +27,15 @@ public class ImageTrace implements IImageTrace {
 		return data;
 	}
 
+	@Override
+	public boolean isVisible() {
+		return true;
+	}
+
+	@Override
+	public void setVisible(boolean isVisible) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

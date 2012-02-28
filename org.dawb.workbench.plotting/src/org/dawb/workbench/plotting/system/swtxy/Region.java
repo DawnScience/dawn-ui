@@ -31,6 +31,7 @@ public abstract class Region extends AbstractRegion implements IAxisListener{
 	private RegionBean bean;
     private ISelectionProvider selectionProvider;
     private IFigure[] regionObjects;
+    private int lineWidth=0;
 
 	public Region(String name, Axis xAxis, Axis yAxis) {
 		super();
@@ -240,8 +241,8 @@ public abstract class Region extends AbstractRegion implements IAxisListener{
 
 	public void setVisible(boolean visible) {
 		if (regionObjects!=null) for (IFigure ob : regionObjects) {
-			if (ob instanceof SelectionRectangle) {
-				((SelectionRectangle)ob).setVisible(visible&&isMotile());
+			if (ob instanceof IMotileFigure) {
+				((IMotileFigure)ob).setVisible(visible&&isMotile());
 			} else {
 			    if (ob!=null) ob.setVisible(visible);
 			}
@@ -255,8 +256,8 @@ public abstract class Region extends AbstractRegion implements IAxisListener{
 
 	public void setMotile(boolean motile) {
 		if (regionObjects!=null) for (IFigure ob : regionObjects) {
-			if (ob instanceof SelectionRectangle) {
-				((SelectionRectangle)ob).setVisible(motile);
+			if (ob instanceof IMotileFigure) {
+				((IMotileFigure)ob).setVisible(motile);
 			} else if (ob instanceof RegionFillFigure) {
 				((RegionFillFigure)ob).setMotile(motile);
 			}
@@ -326,6 +327,14 @@ public abstract class Region extends AbstractRegion implements IAxisListener{
 
 	public void setShowLabel(boolean showLabel) {
 		bean.setShowLabel(showLabel);
+	}
+
+	public int getLineWidth() {
+		return lineWidth;
+	}
+
+	public void setLineWidth(int lineWidth) {
+		this.lineWidth = lineWidth;
 	}
 
 }

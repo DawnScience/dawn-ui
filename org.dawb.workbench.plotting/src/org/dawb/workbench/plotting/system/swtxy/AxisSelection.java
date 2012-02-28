@@ -33,76 +33,84 @@ class AxisSelection extends Region {
 		
 	private static final int WIDTH = 8;
 	
-	private Figure line1, line2;
+	private LineFigure line1, line2;
 	private Figure connection;
 
 	private RegionType regionType;
 	
 	AxisSelection(String name, Axis xAxis, Axis yAxis, RegionType regionType) {
 		super(name, xAxis, yAxis);
-		if (regionType!=RegionType.XAXIS && regionType!=RegionType.YAXIS) {
+		if (regionType!=RegionType.XAXIS && regionType!=RegionType.YAXIS && regionType!=RegionType.XAXIS_LINE && regionType!=RegionType.YAXIS_LINE) {
 			throw new RuntimeException("The AxisSelection can only be XAXIS or YAXIS region type!");
 		}
 		setRegionColor(ColorConstants.blue);	
 		setAlpha(80);
+		setLineWidth(1);
 		this.regionType = regionType;
 	}
 
 	public void createContents(final Figure parent) {
 		
-     	this.line1  = createLineFigure(true,  parent.getBounds());
-    	this.line2  = createLineFigure(false, parent.getBounds());
- 				
-		this.connection = new RegionFillFigure() {
-			@Override
-			public void paintFigure(Graphics gc) {
-				super.paintFigure(gc);
-				final Rectangle size = getRectangleFromVertices();				
-				this.bounds = size;
-				gc.setAlpha(getAlpha());
-				gc.fillRectangle(size);
-				
-				AxisSelection.this.drawLabel(gc, size);
-			}
-		};
-		connection.setCursor(Draw2DUtils.getRoiMoveCursor());
-		connection.setBackgroundColor(getRegionColor());
-		connection.setBounds(new Rectangle(line1.getLocation(), line2.getBounds().getBottomRight()));
-		connection.setOpaque(false);
-  		
-		parent.add(connection);
+     	this.line1  = new LineFigure(true,  parent.getBounds());
+     	
+     	if (regionType==RegionType.XAXIS || regionType==RegionType.YAXIS) {
+    	    this.line2  = new LineFigure(false, parent.getBounds());
+    	    this.connection = new RegionFillFigure() {
+    	    	@Override
+    	    	public void paintFigure(Graphics gc) {
+    	    		super.paintFigure(gc);
+    	    		final Rectangle size = getRectangleFromVertices();				
+    	    		this.bounds = size;
+    	    		gc.setAlpha(getAlpha());
+    	    		gc.fillRectangle(size);
+
+    	    		AxisSelection.this.drawLabel(gc, size);
+    	    	}
+    	    };
+    	    connection.setCursor(Draw2DUtils.getRoiMoveCursor());
+    	    connection.setBackgroundColor(getRegionColor());
+    	    connection.setBounds(new Rectangle(line1.getLocation(), line2.getBounds().getBottomRight()));
+    	    connection.setOpaque(false);
+
+    		parent.add(connection);
+    		parent.add(line2);
+        }
+     	
 		parent.add(line1);
-		parent.add(line2);
 				
-		FigureMover mover = new FigureMover(getXyGraph(), parent, connection, Arrays.asList(new IFigure[]{line1, line2}));
-		if (regionType==RegionType.XAXIS) {
-			mover.setLockedDirection(FigureMover.LockType.X);
-		} else {
-			mover.setLockedDirection(FigureMover.LockType.Y);
-		}
-		// Add a translation listener to be notified when the mover will translate so that
-		// we do not recompute point locations during the move.
-		mover.addTranslationListener(new TranslationListener() {
-			@Override
-			public void translateBefore(TranslationEvent evt) {
-			}
 
-			@Override
-			public void translationAfter(TranslationEvent evt) {
-				updateConnectionBounds();
-				fireRegionBoundsDragged(createRegionBounds(false));
-			}
+     	if (regionType==RegionType.XAXIS || regionType==RegionType.YAXIS) {
+    		FigureMover mover = new FigureMover(getXyGraph(), parent, connection, Arrays.asList(new IFigure[]{line1, line2}));
+    		
+    		if (regionType==RegionType.XAXIS || regionType==RegionType.XAXIS_LINE) {
+    			mover.setLockedDirection(FigureMover.LockType.X);
+    		} else {
+    			mover.setLockedDirection(FigureMover.LockType.Y);
+    		}
+    		// Add a translation listener to be notified when the mover will translate so that
+    		// we do not recompute point locations during the move.
+    		mover.addTranslationListener(new TranslationListener() {
+    			@Override
+    			public void translateBefore(TranslationEvent evt) {
+    			}
 
-			@Override
-			public void translationCompleted(TranslationEvent evt) {
-				fireRegionBoundsChanged(createRegionBounds(true));
-				fireRoiSelection();
-			}
+    			@Override
+    			public void translationAfter(TranslationEvent evt) {
+    				updateConnectionBounds();
+    				fireRegionBoundsDragged(createRegionBounds(false));
+    			}
 
-		});
-		
+    			@Override
+    			public void translationCompleted(TranslationEvent evt) {
+    				fireRegionBoundsChanged(createRegionBounds(true));
+    				fireRoiSelection();
+    			}
 
-	   	setRegionObjects(connection, line1, line2);
+    		});
+	   	    setRegionObjects(connection, line1, line2);
+     	} else {
+     		setRegionObjects(line1);
+     	}
 		sync(getBean());
         updateRegionBounds();
         if (regionBounds==null) createRegionBounds(true);
@@ -117,14 +125,14 @@ class AxisSelection extends Region {
 		
 		
 		gc.setLineStyle(SWT.LINE_DOT);
-     	if (regionType==RegionType.XAXIS) {
-     		r.width+=2;
+     	if (regionType==RegionType.XAXIS || regionType==RegionType.XAXIS_LINE) {
+     		if (regionType==RegionType.XAXIS) r.width+=2;
 			gc.drawLine(r.getBottomRight(), r.getTopRight());
-			gc.drawLine(r.getBottomLeft(),  r.getTopLeft());
+			if (regionType==RegionType.XAXIS) gc.drawLine(r.getBottomLeft(),  r.getTopLeft());
 		} else {
-			r.height+=2;
+			if (regionType==RegionType.YAXIS) r.height+=2;
 			gc.drawLine(r.getTopLeft(),     r.getTopRight());
-			gc.drawLine(r.getBottomLeft(),  r.getBottomRight());
+			if (regionType==RegionType.YAXIS) gc.drawLine(r.getBottomLeft(),  r.getBottomRight());
 		}
 		gc.setBackgroundColor(getRegionColor());
 		gc.setAlpha(getAlpha());
@@ -136,7 +144,7 @@ class AxisSelection extends Region {
 			                             Rectangle parentBounds) {
 		
 		Rectangle r;
-		if (regionType==RegionType.XAXIS) { // Draw vertical lines
+		if (regionType==RegionType.XAXIS || regionType==RegionType.XAXIS_LINE) { // Draw vertical lines
 			r = new Rectangle(new Point(bounds.getLocation().x,    parentBounds.getLocation().y), 
 					          new Point(bounds.getBottomRight().x, parentBounds.getBottomRight().y));
 		
@@ -156,58 +164,77 @@ class AxisSelection extends Region {
 		}
 	}
 	
-
-	private Figure createLineFigure(final boolean first, Rectangle parent) {
+	protected final class LineFigure extends Figure implements IMotileFigure {
 		
-		Figure line = new Figure() {
-			protected void paintFigure(Graphics gc) {
-				
-				super.paintFigure(gc);
+		private boolean first;
+		private FigureMover mover;
+		
+		LineFigure(final boolean first, Rectangle parent) {
+			this.first = first;
+			
+			if (regionType==RegionType.XAXIS|| regionType==RegionType.XAXIS_LINE) {
+				setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_SIZEWE));
+				setBounds(new Rectangle(parent.x, parent.y, WIDTH, parent.height));
+			} else {
+				setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_SIZENS));
+				setBounds(new Rectangle(parent.x, parent.y, parent.width, WIDTH));
+			}
+			
+			this.mover = new FigureMover(getXyGraph(), this);
+			if (regionType==RegionType.XAXIS || regionType==RegionType.XAXIS_LINE) {
+				mover.setLockedDirection(FigureMover.LockType.X);
+			} else {
+				mover.setLockedDirection(FigureMover.LockType.Y);
+			}
+			mover.addTranslationListener(createRegionNotifier());
+			addFigureListener(createFigureListener());
+			mover.setActive(isMotile());
+		}
+		protected void paintFigure(Graphics gc) {
+			
+			super.paintFigure(gc);
+			
+			if (regionType==RegionType.XAXIS || regionType==RegionType.YAXIS) {
 				gc.setLineStyle(SWT.LINE_DOT);
-				final Rectangle b = getBounds();
-				if (regionType==RegionType.XAXIS) {
-					if (first) {
-					    gc.drawLine(b.getTopLeft(), b.getBottomLeft());
-					} else {
-						gc.drawLine(b.getTopRight().translate(-1, 0), b.getBottomRight().translate(-1, 0));
-					}
+			} else {
+				gc.setLineStyle(SWT.LINE_SOLID);
+			}
+			
+			gc.setLineWidth(getLineWidth());
+			final Rectangle b = getBounds();
+			if (regionType==RegionType.XAXIS || regionType==RegionType.XAXIS_LINE) {
+				if (first) {
+				    gc.drawLine(b.getTopLeft(), b.getBottomLeft());
 				} else {
-					if (first) {
-					    gc.drawLine(b.getTopLeft(), b.getTopRight());
-					} else {
-					    gc.drawLine(b.getBottomLeft().translate(0,1), b.getBottomRight().translate(0,1));
-					}
+					gc.drawLine(b.getTopRight().translate(-1, 0), b.getBottomRight().translate(-1, 0));
+				}
+			} else {
+				if (first) {
+				    gc.drawLine(b.getTopLeft(), b.getTopRight());
+				} else {
+				    gc.drawLine(b.getBottomLeft().translate(0,1), b.getBottomRight().translate(0,1));
 				}
 			}
-		};
-		
-		//line.setBorder(new LineBorder());
-		
-		if (regionType==RegionType.XAXIS) {
-			line.setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_SIZEWE));
-			line.setBounds(new Rectangle(parent.x, parent.y, WIDTH, parent.height));
-		} else {
-			line.setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_SIZENS));
-			line.setBounds(new Rectangle(parent.x, parent.y, parent.width, WIDTH));
+		}
+		public void setMotile(boolean motile) {
+			mover.setActive(motile);
+		}
+	}
+	
+	public void setMotile(boolean motile) {
+		if (regionType==RegionType.XAXIS || regionType==RegionType.YAXIS) {
+			super.setMotile(motile);
+			return;
 		}
 		
-		FigureMover mover = new FigureMover(getXyGraph(), line);
-		if (regionType==RegionType.XAXIS) {
-			mover.setLockedDirection(FigureMover.LockType.X);
-		} else {
-			mover.setLockedDirection(FigureMover.LockType.Y);
-		}
-		mover.addTranslationListener(createRegionNotifier());
-		line.addFigureListener(createFigureListener());
-		
-		return line;
+		if (line1!=null) line1.setMotile(motile);
 	}
 	
 	protected FigureListener createFigureListener() {
 		return new FigureListener() {		
 			@Override
 			public void figureMoved(IFigure source) {				
-				connection.repaint();
+				if (connection!=null) connection.repaint();
 			}
 
 		};
@@ -221,7 +248,9 @@ class AxisSelection extends Region {
 
 	protected Rectangle getRectangleFromVertices() {
 		final Point loc1   = line1.getLocation();
-		final Point loc4   = line2.getBounds().getBottomRight();
+		final Point loc4   = line2!=null 
+				           ? line2.getBounds().getBottomRight()
+				           : line1.getBounds().getBottomRight();
 		Rectangle size = new Rectangle(loc1, loc4);
 		return size;
 	}
@@ -241,7 +270,7 @@ class AxisSelection extends Region {
 	
 	protected void updateRegionBounds(RegionBounds bounds) {
 		
-		if (line1!=null && line2!=null) {
+		if (line1!=null) {
 			final Point     p1    = new Point(getxAxis().getValuePosition(bounds.getP1()[0], false),
 					                          getyAxis().getValuePosition(bounds.getP1()[1], false));
 			final Point     p2    = new Point(getxAxis().getValuePosition(bounds.getP2()[0], false),
@@ -264,15 +293,15 @@ class AxisSelection extends Region {
 	}
 
 	protected void setLocalBounds(Rectangle box, Rectangle parentBounds) {
-		if (line1!=null && line2!=null) {
+		if (line1!=null) {
 			final Rectangle bounds = getSelectionBounds(box, parentBounds);
-			
-			if (regionType==RegionType.XAXIS) {
+
+			if (regionType==RegionType.XAXIS || regionType==RegionType.XAXIS_LINE) {
 				line1.setLocation(bounds.getTopLeft());
-				line2.setLocation(new Point(bounds.getTopRight().x-WIDTH, bounds.getTopRight().y));
+				if (line2!=null) line2.setLocation(new Point(bounds.getTopRight().x-WIDTH, bounds.getTopRight().y));
 			} else {
 				line1.setLocation(bounds.getTopLeft());
-				line2.setLocation(new Point(bounds.getBottomLeft().x, bounds.getBottomLeft().y-WIDTH));
+				if (line2!=null) line2.setLocation(new Point(bounds.getBottomLeft().x, bounds.getBottomLeft().y-WIDTH));
 			}
 		}
 		updateConnectionBounds();

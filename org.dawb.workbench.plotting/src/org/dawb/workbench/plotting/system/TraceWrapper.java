@@ -1,10 +1,13 @@
 package org.dawb.workbench.plotting.system;
 
+import org.csstudio.swt.xygraph.dataprovider.CircularBufferDataProvider;
+import org.csstudio.swt.xygraph.dataprovider.IDataProvider;
 import org.csstudio.swt.xygraph.figures.Trace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.eclipse.swt.graphics.Color;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 
 public class TraceWrapper implements ILineTrace {
 
@@ -294,4 +297,26 @@ public class TraceWrapper implements ILineTrace {
 		return trace;
 	}
 
+	@Override
+	public void setData(AbstractDataset xData, AbstractDataset yData) {
+		CircularBufferDataProvider prov = (CircularBufferDataProvider)trace.getDataProvider();
+		prov.setBufferSize(xData.getSize());	
+		
+		final double[] x = (double[])DatasetUtils.cast(xData, AbstractDataset.FLOAT64).getBuffer();
+		final double[] y = (double[])DatasetUtils.cast(yData, AbstractDataset.FLOAT64).getBuffer();
+		prov.setCurrentXDataArray(x);
+		prov.setCurrentYDataArray(y);
+
+		trace.repaint();
+	}
+
+	@Override
+	public boolean isVisible() {
+		return trace.isVisible();
+	}
+
+	@Override
+	public void setVisible(boolean isVisible) {
+		trace.setVisible(isVisible);
+	}
 }

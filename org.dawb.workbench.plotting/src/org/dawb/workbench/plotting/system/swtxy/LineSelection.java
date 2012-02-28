@@ -36,6 +36,7 @@ class LineSelection extends Region {
 		super(name, xAxis, yAxis);
 		setRegionColor(ColorConstants.cyan);
 		setAlpha(80);
+		setLineWidth(2);
 	}
 
 
@@ -57,7 +58,7 @@ class LineSelection extends Region {
 				final Point startCenter = startBox.getSelectionPoint();
 				final Point endCenter   = endBox.getSelectionPoint();
 				this.bounds = new Rectangle(startCenter, endCenter);
-				gc.setLineWidth(2);
+				gc.setLineWidth(getLineWidth());
 				gc.setAlpha(getAlpha());
 				gc.drawLine(startCenter, endCenter);
 				

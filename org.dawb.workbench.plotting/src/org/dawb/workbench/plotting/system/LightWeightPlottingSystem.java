@@ -40,6 +40,7 @@ import org.dawb.common.ui.plot.annotation.IAnnotation;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
+import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.common.ui.util.GridUtils;
@@ -593,6 +594,40 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
         return traces;
 	}
 	
+	public ILineTrace createLineTrace(String traceName) {
+
+		Axis xAxis = ((AxisWrapper)getSelectedXAxis()).getWrappedAxis();
+		Axis yAxis = ((AxisWrapper)getSelectedYAxis()).getWrappedAxis();
+
+		CircularBufferDataProvider traceDataProvider = new CircularBufferDataProvider(false);
+		final Trace trace = new Trace(traceName, xAxis, yAxis, traceDataProvider);
+		final TraceWrapper wrapper = new TraceWrapper(this, trace);
+		fireTraceCreated(new TraceEvent(wrapper));
+		return wrapper;
+	}
+	
+	/**
+	 * Adds trace, makes visible
+	 * @param traceName
+	 * @return
+	 */
+	public void addTrace(ITrace trace) {
+		xyGraph.addTrace(((TraceWrapper)trace).getTrace());
+		xyCanvas.redraw();
+		fireTraceAdded(new TraceEvent(trace));
+	}
+	/**
+	 * Removes a trace.
+	 * @param traceName
+	 * @return
+	 */
+	public void removeTrace(ITrace trace) {
+		xyGraph.removeTrace(((TraceWrapper)trace).getTrace());
+		xyCanvas.redraw();
+		fireTraceRemoved(new TraceEvent(trace));
+	}
+
+	
 	public Collection<ITrace> getTraces() {
 		if (traceMap==null) return Collections.emptyList();
 		return traceMap.values();
@@ -645,7 +680,9 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	}
 	
 	
-
+    /**
+     * Thread safe method
+     */
 	@Override
 	public AbstractDataset getData(String name) {
 		
@@ -658,6 +695,13 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		return getData(name, trace, true);
 	}
 	
+	/**
+	 * Thread safe method
+	 * @param name
+	 * @param trace
+	 * @param isY
+	 * @return
+	 */
 	protected AbstractDataset getData(String name, Trace trace, boolean isY) {
 
 		if (trace==null) return null;
@@ -998,6 +1042,9 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		return xyGraph.createRegion(name, xAxis, yAxis, regionType, true);
 	}
 	
+	/**
+	 * Thread safe
+	 */
 	public void clearRegions() {
 		if (xyGraph==null) return;
 		
