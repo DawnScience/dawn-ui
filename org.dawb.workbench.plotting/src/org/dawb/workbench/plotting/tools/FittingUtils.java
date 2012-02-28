@@ -9,7 +9,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import uk.ac.diamond.scisoft.analysis.IAnalysisMonitor;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
-import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.APeak;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
@@ -48,7 +47,8 @@ public class FittingUtils {
 			                                     final AbstractDataset  y,
 			                                     final IProgressMonitor monitor) {
 				
-		final List<APeak> peaks =  Generic1DFitter.fitPeaks(x, y, getFunction(), getOptimizer(), getSmoothing(), getPeaksRequired(), 0.0, false, false, new IAnalysisMonitor() {
+		final IOptimizer optimizer = getOptimizer();
+		final List<APeak> peaks =  Generic1DFitter.fitPeaks(x, y, getFunction(), optimizer, getSmoothing(), getPeaksRequired(), 0.0, false, false, new IAnalysisMonitor() {
 			@Override
 			public boolean hasBeenCancelled() {
 				return monitor.isCanceled(); // We always use the monitor.isCancelled() the fitting can take a while
@@ -79,6 +79,7 @@ public class FittingUtils {
 		bean.setPeakBounds(regions);
 		bean.setPeakFunctions(peaks);
 		bean.setFunctionData(functions);
+		bean.setOptimizer(optimizer);
 		return bean;
 	}
 	

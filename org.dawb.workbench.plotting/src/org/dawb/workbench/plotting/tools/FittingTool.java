@@ -5,74 +5,167 @@ import java.util.Collection;
 import java.util.List;
 
 import org.dawb.common.ui.plot.region.IRegion;
+import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.RegionBounds;
 import org.dawb.common.ui.plot.region.RegionEvent;
-import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
+import org.dawb.workbench.plotting.Activator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
+import org.eclipse.jface.viewers.IContentProvider;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
-import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 
 public class FittingTool extends AbstractToolPage implements IRegionListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(FittingTool.class);
 	
 	private Composite     composite;
-	private TableViewer   table;
+	private TableViewer   viewer;
 	private IRegion       fitRegion;
 	private Job           fittingJob;
-	private List<IRegion> peakRegions;
-	private List<ITrace>  peakTraces;
+	private FittedPeaksBean bean;
 
 	public FittingTool() {
 		super();
-		this.peakRegions = new ArrayList<IRegion>(7);
-		this.peakTraces  = new ArrayList<ITrace>(7);
+		this.fittingJob = createFittingJob();
 	}
 
 	@Override
 	public void createControl(Composite parent) {
 		
-		// TODO Create a table for the regions.
-		composite = new Composite(parent, SWT.NONE);
+		this.composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new FillLayout());
 
-		Label label = new Label(composite, SWT.NONE);
-		label.setText("Fitting...");
+		viewer = new TableViewer(composite, SWT.FULL_SELECTION | SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+        createColumns(viewer);
+		viewer.getTable().setLinesVisible(true);
+		viewer.getTable().setHeaderVisible(true);
 		
-		getSite().getActionBars().getToolBarManager().add(new Action("Test") {});
-		
-		this.fittingJob = createFittingJob();
+		createActions();
+				
+		getSite().setSelectionProvider(viewer);
 		
 		activate();
+		
+		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				final StructuredSelection sel = (StructuredSelection)event.getSelection();
+				if (bean!=null) bean.setSelectedPeak((Integer)sel.getFirstElement());
+			}
+		});
 	}
+
+	private void createActions() {
+		
+		final Action clear = new Action("Clear", Activator.getImageDescriptor("icons/plot-tool-peak-fit-clear.png")) {
+			public void run() {
+				if (bean!=null) bean.removeSelections(getPlottingSystem());
+				bean.dispose();
+				bean = null;
+				viewer.setContentProvider(createActorContentProvider(0));
+				viewer.setInput(null);
+			}
+		};
+		clear.setToolTipText("Clear all regions found in the fitting");
+		
+		getSite().getActionBars().getToolBarManager().add(clear);
+	}
+
+	private void createColumns(final TableViewer viewer) {
+		
+		ColumnViewerToolTipSupport.enableFor(viewer,ToolTip.NO_RECREATE);
+
+        TableViewerColumn var   = new TableViewerColumn(viewer, SWT.LEFT, 0);
+		var.getColumn().setText("Name");
+		var.getColumn().setWidth(80);
+		var.setLabelProvider(new FittingLabelProvider(0));
+		
+        var   = new TableViewerColumn(viewer, SWT.CENTER, 1);
+		var.getColumn().setText("Position");
+		var.getColumn().setWidth(100);
+		var.setLabelProvider(new FittingLabelProvider(1));
+
+        var   = new TableViewerColumn(viewer, SWT.CENTER, 2);
+		var.getColumn().setText("FWHM");
+		var.getColumn().setWidth(100);
+		var.setLabelProvider(new FittingLabelProvider(2));
+		
+        var   = new TableViewerColumn(viewer, SWT.CENTER, 3);
+		var.getColumn().setText("Area");
+		var.getColumn().setWidth(100);
+		var.setLabelProvider(new FittingLabelProvider(3));
+
+        var   = new TableViewerColumn(viewer, SWT.CENTER, 4);
+		var.getColumn().setText("Type");
+		var.getColumn().setWidth(100);
+		var.setLabelProvider(new FittingLabelProvider(4));
+		
+        var   = new TableViewerColumn(viewer, SWT.CENTER, 5);
+		var.getColumn().setText("Algorithm");
+		var.getColumn().setWidth(100);
+		var.setLabelProvider(new FittingLabelProvider(5));
+
+	}
+	
+	private IContentProvider createActorContentProvider(final int numerOfPeaks) {
+		return new IStructuredContentProvider() {
+			@Override
+			public void dispose() {
+			}
+			@Override
+			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {}
+
+			@Override
+			public Object[] getElements(Object inputElement) {
+
+				if (numerOfPeaks<0) return new Integer[]{0};
+				
+				List<Integer> indices = new ArrayList<Integer>(numerOfPeaks);
+                for (int ipeak = 0; ipeak < numerOfPeaks; ipeak++) {
+                	indices.add(ipeak); // autoboxing
+				}
+				return indices.toArray(new Integer[indices.size()]);
+			}
+		};
+	}
+	
 
 	@Override
 	public void activate() {
+		super.activate();
 		try {
-			for (IRegion region : peakRegions) region.setVisible(true);
-			for (ITrace  trace  : peakTraces)  trace.setVisible(true);
+			if (bean!=null) bean.activate();
 			getPlottingSystem().addRegionListener(this);
 			this.fitRegion = getPlottingSystem().createRegion("Fit selection", IRegion.RegionType.XAXIS);
+			fitRegion.setRegionColor(ColorConstants.green);
+			
+			if (viewer!=null) {
+				viewer.refresh();
+			}
 			
 		} catch (Exception e) {
 			logger.error("Cannot put the selection into fitting region mode!", e);
@@ -80,10 +173,10 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 	}
 	@Override
 	public void deactivate() {
+		super.deactivate();
 		try {
 			getPlottingSystem().removeRegionListener(this);
-			for (IRegion region : peakRegions) region.setVisible(false);
-			for (ITrace  trace  : peakTraces)  trace.setVisible(false);
+			if (bean!=null) bean.deactivate();
 			
 		} catch (Exception e) {
 			logger.error("Cannot put the selection into fitting region mode!", e);
@@ -92,14 +185,19 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 
 	@Override
 	public void setFocus() {
-        if (table!=null) table.getControl().setFocus();
+        if (viewer!=null) viewer.getControl().setFocus();
 	}
 	
 	public void dispose() {
 		if (getPlottingSystem()!=null) {
 			getPlottingSystem().removeRegionListener(this);
 		}
-        if (table!=null) table.getControl().dispose();
+        if (viewer!=null) viewer.getControl().dispose();
+       
+        // Using clear and setting to null helps the garbage collector.
+        if (bean!=null) bean.dispose();
+        bean = null;
+        
 		super.dispose();
 	}
 
@@ -117,8 +215,13 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 
 	@Override
 	public void regionAdded(RegionEvent evt) {
-		
-		if (evt.getRegion()==fitRegion) fittingJob.schedule();
+		if (evt==null || evt.getRegion()==null) {
+			getPlottingSystem().clearRegions();
+			return;
+		}
+		if (evt.getRegion()==fitRegion) {
+			fittingJob.schedule();
+		}
 	}
 
 	@Override
@@ -135,17 +238,19 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 
+				if (composite==null)        return Status.CANCEL_STATUS;
 				if (composite.isDisposed()) return Status.CANCEL_STATUS;
 				
-				composite.getDisplay().syncExec(new Runnable() {
-					public void run() {
-						getPlottingSystem().clearRegions();
-						for (ITrace  trace  : peakTraces)  getPlottingSystem().removeTrace(trace);
-				    }
-				});
 				
 				final RegionBounds bounds = fitRegion.getRegionBounds();
 				getPlottingSystem().removeRegionListener(FittingTool.this);
+				
+				composite.getDisplay().syncExec(new Runnable() {
+					public void run() {
+						getPlottingSystem().removeRegion(fitRegion);
+						if (bean!=null) bean.removeSelections(getPlottingSystem());
+				    }
+				});
 				
 				final Collection<ITrace> traces = getPlottingSystem().getTraces();
 				if (traces==null || traces.size()<0) return Status.CANCEL_STATUS;
@@ -157,7 +262,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 				final double[] p2 = bounds.getP2();
 				
 				// We peak fit only the first of the data sets plotted for now.
-				final ILineTrace   line  = (ILineTrace)traces.iterator().next();
+				final ILineTrace   line  = (ILineTrace)traces.iterator().next(); //TODO What if more than one dataset?
 				AbstractDataset x  = line.getXData();
 				AbstractDataset y  = line.getYData();
 				
@@ -181,24 +286,28 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 	 * Thread safe
 	 * @param peaks
 	 */
-	protected void createFittedPeaks(final FittedPeaksBean bean) {
+	protected synchronized void createFittedPeaks(final FittedPeaksBean newBean) {
 		
+		if (newBean==null) {
+			bean = null;
+			logger.error("Cannot find peaks in the given selection.");
+			return;
+		}
 		composite.getDisplay().syncExec(new Runnable() {
 			
 		    public void run() {
 		    	try {
-		    		peakRegions.clear();
 		    		
 					int ipeak = 1;
 					// Draw the regions
-					for (RegionBounds rb : bean.getPeakBounds()) {
+					for (RegionBounds rb : newBean.getPeakBounds()) {
 						
-						final IRegion area = getPlottingSystem().createRegion("Peak "+ipeak, RegionType.XAXIS);
+						final IRegion area = getPlottingSystem().createRegion("Peak Area "+ipeak, RegionType.XAXIS);
 						area.setRegionColor(ColorConstants.orange);
 						area.setRegionBounds(rb);
 						area.setMotile(false);
 						getPlottingSystem().addRegion(area);
-						peakRegions.add(area);
+						newBean.addAreaRegion(area);
 						
 						
 						final IRegion line = getPlottingSystem().createRegion("Peak Line "+ipeak, RegionType.XAXIS_LINE);
@@ -207,29 +316,31 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 						line.setMotile(false);
 						line.setAlpha(150);
 						getPlottingSystem().addRegion(line);
-						peakRegions.add(line);
+						newBean.addLineRegion(line);
 					
 
 					    ++ipeak;
 					}
-					
-		    		peakTraces.clear();
 
 					ipeak = 1;
 					// Create some traces for the fitted function
-					for (AbstractDataset[] pair : bean.getFunctionData()) {
+					for (AbstractDataset[] pair : newBean.getFunctionData()) {
 						
-						final ILineTrace trace = getPlottingSystem().createLineTrace("Peak Function "+ipeak);
+						final ILineTrace trace = getPlottingSystem().createLineTrace("Peak "+ipeak);
 						trace.setData(pair[0], pair[1]);
 						trace.setLineWidth(1);
 						trace.setTraceColor(ColorConstants.black);
 						getPlottingSystem().addTrace(trace);
-						peakTraces.add(trace);
+						newBean.addTrace(trace);
 						
 					    ++ipeak;
   				    }
 					
-					
+					FittingTool.this.bean = newBean;
+					viewer.setContentProvider(createActorContentProvider(newBean.size()));
+					viewer.setInput(newBean);
+                    viewer.refresh();
+                    
 		    	} catch (Exception ne) {
 		    		logger.error("Cannot create fitted peaks!", ne);
 		    	}

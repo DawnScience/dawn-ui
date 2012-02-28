@@ -115,6 +115,15 @@ class AxisSelection extends Region {
         updateRegionBounds();
         if (regionBounds==null) createRegionBounds(true);
 
+        
+        parent.addFigureListener(new FigureListener() {
+			@Override
+			public void figureMoved(IFigure source) {
+				if (line1!=null) line1.updateBounds(source.getBounds());
+				if (line2!=null) line2.updateBounds(source.getBounds());
+				updateConnectionBounds();
+			}
+		});
 	}
 	
 	public void paintBeforeAdded(final Graphics gc, Point firstClick, Point dragLocation, Rectangle parentBounds) {
@@ -172,14 +181,7 @@ class AxisSelection extends Region {
 		LineFigure(final boolean first, Rectangle parent) {
 			this.first = first;
 			
-			if (regionType==RegionType.XAXIS|| regionType==RegionType.XAXIS_LINE) {
-				setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_SIZEWE));
-				setBounds(new Rectangle(parent.x, parent.y, WIDTH, parent.height));
-			} else {
-				setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_SIZENS));
-				setBounds(new Rectangle(parent.x, parent.y, parent.width, WIDTH));
-			}
-			
+            updateBounds(parent);			
 			this.mover = new FigureMover(getXyGraph(), this);
 			if (regionType==RegionType.XAXIS || regionType==RegionType.XAXIS_LINE) {
 				mover.setLockedDirection(FigureMover.LockType.X);
@@ -189,6 +191,15 @@ class AxisSelection extends Region {
 			mover.addTranslationListener(createRegionNotifier());
 			addFigureListener(createFigureListener());
 			mover.setActive(isMotile());
+		}
+		protected void updateBounds(Rectangle parentBounds) {
+			if (regionType==RegionType.XAXIS|| regionType==RegionType.XAXIS_LINE) {
+				setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_SIZEWE));
+				setBounds(new Rectangle(parentBounds.x, parentBounds.y, WIDTH, parentBounds.height));
+			} else {
+				setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_SIZENS));
+				setBounds(new Rectangle(parentBounds.x, parentBounds.y, parentBounds.width, WIDTH));
+			}
 		}
 		protected void paintFigure(Graphics gc) {
 			

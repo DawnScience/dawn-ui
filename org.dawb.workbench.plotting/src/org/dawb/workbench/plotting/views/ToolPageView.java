@@ -24,14 +24,17 @@ import org.dawb.common.util.text.StringUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IURIEditorInput;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.part.IPage;
 import org.eclipse.ui.part.MessagePage;
-import org.eclipse.ui.part.MultiPageEditorPart;
 import org.eclipse.ui.part.PageBook;
 import org.eclipse.ui.part.PageBookView;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This view can be shown at the side of a plotting part. The
@@ -43,20 +46,21 @@ import org.eclipse.ui.part.PageBookView;
  * @author fcp94556
  *
  */
-public class ToolPageView extends PageBookView implements IToolChangeListener {
+public class ToolPageView extends PageBookView implements IToolChangeListener { // Important: whole part must be IToolChangeListener
 
+	private static final Logger logger = LoggerFactory.getLogger(ToolPageView.class);
 
 	public static final String ID = "org.dawb.workbench.plotting.views.ToolPageView";
 	
 	private Collection<IToolPageSystem> systems;
-	private Map<IWorkbenchPart,Map<IPage,PageRec>> recs;
+	private Map<String,Map<IPage,PageRec>> recs;
 	private String unique_id;
 	
 	public ToolPageView() {
 		super();
-		systems = new HashSet<IToolPageSystem>(7);
+		systems        = new HashSet<IToolPageSystem>(7);
 		this.unique_id = StringUtils.getUniqueId(ToolPageView.class);
-		this.recs      = new HashMap<IWorkbenchPart,Map<IPage,PageRec>>(7);
+		this.recs      = new HashMap<String,Map<IPage,PageRec>>(7);
 	}
 
 	@Override
@@ -68,16 +72,23 @@ public class ToolPageView extends PageBookView implements IToolChangeListener {
 	}
 	
 	@Override
-	protected PageRec doCreatePage(IWorkbenchPart part) {
+	protected synchronized PageRec doCreatePage(IWorkbenchPart part) {
 		
-		IToolPageSystem sys = (IToolPageSystem)part.getAdapter(IToolPageSystem.class);
-		
+		final IToolPageSystem sys = (IToolPageSystem)part.getAdapter(IToolPageSystem.class);
+        
 		if (sys!=null) {
 			systems.add(sys);
-
 			sys.addToolChangeListener(this);
 
-			final IToolPage tool = sys.getCurrentToolPage();	
+			final IToolPage      tool = sys.getCurrentToolPage();	
+
+	        final PageRec existing = getPageRec(part);
+	        
+	        if (tool!=null && existing!=null&&existing.page!=null && existing.page.equals(tool)) {
+	        	if (!tool.isActive()) tool.activate();
+	        	return existing;
+	        }
+
 			if (tool == null) {
 				PageRec rec = getBlankPageRec(part, sys); // They did not make a selection yet or want no tool active.
 				recordPage(part, null, rec);
@@ -93,47 +104,76 @@ public class ToolPageView extends PageBookView implements IToolChangeListener {
             return rec;
 		}
 		
-		recs.remove(part);
 		return null;
 	}
 	
 	private void recordPage(IWorkbenchPart part, IToolPage tool, PageRec rec) {
-		Map<IPage,PageRec> pages = recs.get(part);
+		Map<IPage,PageRec> pages = recs.get(getString(part));
 		if (pages==null) {
 			pages = new HashMap<IPage, PageRec>(3);
-			recs.put(part, pages);
+			recs.put(getString(part), pages);
 		}
 		pages.put(tool, rec);
 	}
+	
+	private String getString(IWorkbenchPart part) {
+		if (!(part instanceof EditorPart)) return null;
+		final IEditorInput input = ((EditorPart)part).getEditorInput();
+		return input instanceof IURIEditorInput 
+			   ? ((IURIEditorInput)input).getURI().getRawPath()
+			   : input.getName(); // TODO Not very secure
+	}
+	
+	private boolean updatingActivated = false;
 
 	@Override
 	public void toolChanged(ToolChangeEvent evt) {
+		if (updatingActivated) return;
 		partActivated(evt.getPart());
 	}
 	
 	public void partActivated(IWorkbenchPart part) {
 
-		IToolPageSystem sys = (IToolPageSystem)part.getAdapter(IToolPageSystem.class);
-        if (sys!=null && sys.getCurrentToolPage() == getCurrentPage()) return;
+		if (!isImportant(part)) return;
+
+		if (updatingActivated) return;
+        try {
+            updatingActivated = true;
+        	IToolPageSystem sys = (IToolPageSystem)part.getAdapter(IToolPageSystem.class);
+            if (sys!=null && sys.getCurrentToolPage().equals(getCurrentPage())) {
+            	return;
+            }
         
-        super.partActivated(part);
+            super.partActivated(part);
+ 			setPartName(sys.getCurrentToolPage().getTitle());
+
+        } catch (Throwable ne) {
+        	logger.error("Problem updating activated state in "+getClass().getName()); // No stack required in log here.
+        } finally {
+        	updatingActivated = false;
+        }
 	}
 	
 	protected PageRec getPageRec(IWorkbenchPart part) {
 		
-        final Map<IPage, PageRec> pages = recs.get(part);
+        final Map<IPage, PageRec> pages = recs.get(getString(part));
         if (pages == null) return null;
         
 		IToolPageSystem sys = (IToolPageSystem)part.getAdapter(IToolPageSystem.class);
-        return pages.get(sys.getCurrentToolPage());
+        return sys!=null ? pages.get(sys.getCurrentToolPage()) : super.getPageRec(part);
 	}	
 	
 	protected PageRec getPageRec(IPage page) {
 		
-        final Map<IPage, PageRec> pages = recs.get(getCurrentPage());
-        if (pages == null) return null;
-        
-        return pages.get(page);
+		if (page instanceof IToolPage) {
+						
+	        final Map<IPage, PageRec> pages = recs.get(getString(((IToolPage)page).getPart()));
+	        if (pages == null) return null;
+	        
+	        return pages.get(page);
+		} else {
+			return super.getPageRec(page);
+		}
 	}
 
 
@@ -160,9 +200,11 @@ public class ToolPageView extends PageBookView implements IToolChangeListener {
 	
 	public void partClosed(IWorkbenchPart part) {
 
-		super.partClosed(part);
+		if (!isImportant(part)) return;
 		
-		final Map<IPage, PageRec> pages = recs.remove(part);
+		super.partClosed(part);
+				
+		final Map<IPage, PageRec> pages = recs.remove(getString(part));
 		if (pages!=null) {
 			for (IPage page : pages.keySet()) {
 				if (page!=null) page.dispose();
@@ -184,7 +226,7 @@ public class ToolPageView extends PageBookView implements IToolChangeListener {
 
 	@Override
 	protected boolean isImportant(IWorkbenchPart part) {
-		return part instanceof IEditorPart || part instanceof MultiPageEditorPart;
+		return part instanceof EditorPart;
 	}
 	
 	public void dispose() {
@@ -207,6 +249,7 @@ public class ToolPageView extends PageBookView implements IToolChangeListener {
 					
 				}
 			}
+			pages.clear();
 		}
 		recs.clear();
 	}

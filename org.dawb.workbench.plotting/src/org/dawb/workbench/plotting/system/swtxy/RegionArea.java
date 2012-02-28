@@ -40,15 +40,18 @@ public class RegionArea extends PlotArea {
 		
 
 	public void addRegion(final Region region){
+		addRegion(region, true);
+	}
+
+	private void addRegion(final Region region, boolean fireListeners){
 		regions.put(region.getName(), region);
 		region.setXyGraph(xyGraph);
 		region.createContents(this);
 		region.setSelectionProvider(selectionProvider);
-		fireRegionAdded(new RegionEvent(region));
-		removeRegionMouseListener();
+		if (fireListeners) fireRegionAdded(new RegionEvent(region));
+		clearRegionTool();
 		revalidate();
 	}
-
 
 	public boolean removeRegion(final Region region){
 	    final Region gone = regions.remove(region.getName());
@@ -61,7 +64,7 @@ public class RegionArea extends PlotArea {
 	}
 	
 	public void clearRegions() {
-		removeRegionMouseListener();
+		clearRegionTool();
 		if (regions==null) return;
 		for (Region region : regions.values()) {
 			region.remove();
@@ -121,15 +124,15 @@ public class RegionArea extends PlotArea {
 	public void disposeRegion(Region region) {
 		removeRegion(region);
 		setCursor(null);
-		removeRegionMouseListener();
+		clearRegionTool();
 	}
 	
 	public void setZoomType(final ZoomType zoomType) {
-		removeRegionMouseListener();
+		clearRegionTool();
         super.setZoomType(zoomType);
 	}
 	
-	private void removeRegionMouseListener() {
+	protected void clearRegionTool() {
 		if (regionListener!=null) {
 		    removeMouseListener(regionListener);
 		    removeMouseMotionListener(regionListener);
@@ -233,14 +236,17 @@ public class RegionArea extends PlotArea {
 		    if (regionListener==this) {
 		    	regionListener = null;
 		    } else {
-		    	removeRegionMouseListener(); // Actually something has gone wrong if this happens.
+		    	clearRegionTool(); // Actually something has gone wrong if this happens.
 		    }
 		    setCursor(null);
 		    
-		    RegionArea.this.addRegion(regionBeingAdded);
+		    RegionArea.this.addRegion(regionBeingAdded, false);
 			((XYRegionGraph)xyGraph).getOperationsManager().addCommand(new AddRegionCommand((XYRegionGraph)xyGraph, regionBeingAdded));
 
 		    regionBeingAdded.setLocalBounds(regionStart, regionEnd, getBounds());
+
+		    fireRegionAdded(new RegionEvent(regionBeingAdded));
+		    
 			me.consume();
 			repaint();
 			

@@ -114,7 +114,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 							   final PlotType       hint,
 							   final IWorkbenchPart part) {
 
-		super.createPlotPart(parent, plotName, bars, hint, part); // Does nothing other than assign part to a protected variable.
+		super.createPlotPart(parent, plotName, bars, hint, part);
 		
 		this.parent  = parent;
 		this.bars    = bars;
@@ -1050,6 +1050,13 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		
 		xyGraph.clearRegions();
 	}
+	
+	protected void clearRegionTool() {
+		if (xyGraph==null) return;
+		
+		xyGraph.clearRegionTool();
+	}
+
 	/**
 	 * Add a selection region to the graph.
 	 * @param region

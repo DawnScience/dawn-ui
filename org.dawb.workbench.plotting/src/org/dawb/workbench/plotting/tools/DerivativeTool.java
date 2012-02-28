@@ -29,8 +29,9 @@ public class DerivativeTool extends AbstractToolPage  {
 	private final static Logger logger = LoggerFactory.getLogger(DerivativeTool.class);
 	
 	protected AbstractPlottingSystem plotter;
-	private ITraceListener traceListener;
-	private Composite container;
+	private   ITraceListener         traceListener;
+	private   Composite              container;
+	private   Composite              plotComposite;
 
 	
 	public DerivativeTool() {
@@ -65,6 +66,8 @@ public class DerivativeTool extends AbstractToolPage  {
 								PlotType.PT1D,
 								null);
 		
+		this.plotComposite = plotter.getPlotComposite();
+		
 		updateDerviatives();
 		
 		getPlottingSystem().addTraceListener(traceListener);
@@ -73,6 +76,13 @@ public class DerivativeTool extends AbstractToolPage  {
 	@Override
 	public void setFocus() {
 		
+	}
+	
+	public void activate() {
+		super.activate();
+		if (container!=null&&!container.isDisposed()) {
+			container.layout(new Control[]{plotComposite});
+		}
 	}
 	
 	@Override

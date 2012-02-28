@@ -131,6 +131,9 @@ public class AsciiEditor extends MultiPageEditorPart implements ISlicablePlottin
 	
     public Object getAdapter(final Class clazz) {
 		
+    	// TODO FIXME for IContentProvider return a Page which shows the value
+    	// of plotted data. Bascially the same as the CSVPage.
+    	
 		if (clazz == Page.class) {
 			final PlotDataEditor      ed  = getDataSetEditor();
 			return new PlotDataPage(ed);

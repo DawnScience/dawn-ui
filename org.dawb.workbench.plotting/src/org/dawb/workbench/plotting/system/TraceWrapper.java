@@ -319,4 +319,9 @@ public class TraceWrapper implements ILineTrace {
 	public void setVisible(boolean isVisible) {
 		trace.setVisible(isVisible);
 	}
+
+	@Override
+	public void repaint() {
+		sys.repaint();
+	}
 }

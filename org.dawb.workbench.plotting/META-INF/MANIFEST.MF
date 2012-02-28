@@ -20,5 +20,6 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: org.dawb.workbench.plotting.system
 Import-Package: org.dawb.common.util.text,
+ org.eclipse.ui,
  org.slf4j;version="1.5.6",
  uk.ac.gda.monitor
