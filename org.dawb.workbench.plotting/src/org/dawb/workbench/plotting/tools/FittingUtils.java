@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dawb.common.ui.plot.region.RegionBounds;
+import org.dawb.workbench.plotting.Activator;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import uk.ac.diamond.scisoft.analysis.IAnalysisMonitor;
@@ -84,7 +85,7 @@ public class FittingUtils {
 	}
 	
 	private static int getPeaksRequired() {
-		return 4;
+		return Activator.getDefault().getPreferenceStore().getInt(FittingConstants.PEAK_NUMBER);
 	}
 
 	/**
@@ -117,7 +118,11 @@ public class FittingUtils {
 	}
 
 	private static IOptimizer getOptimizer() {
-		return new GeneticAlg(0.01d);
+		return new GeneticAlg(getQuality());
+	}
+
+	private static double getQuality() {
+		return 0.01d;
 	}
 
 	private static APeak getFunction() {

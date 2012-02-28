@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.dawb.common.ui.menu.CheckableActionGroup;
+import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
@@ -19,6 +21,10 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IContributionItem;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -81,6 +87,36 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 
 	private void createActions() {
 		
+		final MenuAction numberPeaks = new MenuAction("Number peaks to fit");
+		final CheckableActionGroup group = new CheckableActionGroup();
+		
+		final int npeak = Activator.getDefault().getPreferenceStore().getDefaultInt(FittingConstants.PEAK_NUMBER_CHOICES);
+		for (int ipeak = 1; ipeak <= npeak; ipeak++) {
+			
+			final Action action = new Action(String.valueOf(ipeak), IAction.AS_CHECK_BOX) {
+				public void run() {
+					Activator.getDefault().getPreferenceStore().setValue(FittingConstants.PEAK_NUMBER, Integer.valueOf(getText()));
+					numberPeaks.setSelectedAction(this);
+					setChecked(true);
+					fittingJob.schedule();
+				}
+			};
+			numberPeaks.add(action);
+			group.add(action);
+			action.setChecked(false);
+			action.setToolTipText("Fit "+ipeak+" peak(s)");
+			
+		}
+
+		final int ipeak = Activator.getDefault().getPreferenceStore().getInt(FittingConstants.PEAK_NUMBER);
+		numberPeaks.setSelectedAction(ipeak);
+		numberPeaks.setCheckedAction(ipeak, true);
+		
+
+		getSite().getActionBars().getToolBarManager().add(numberPeaks);
+		getSite().getActionBars().getMenuManager().add(numberPeaks);
+		
+		
 		final Action clear = new Action("Clear", Activator.getImageDescriptor("icons/plot-tool-peak-fit-clear.png")) {
 			public void run() {
 				if (bean!=null) bean.removeSelections(getPlottingSystem());
@@ -93,6 +129,15 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		clear.setToolTipText("Clear all regions found in the fitting");
 		
 		getSite().getActionBars().getToolBarManager().add(clear);
+		getSite().getActionBars().getMenuManager().add(clear);
+		
+		createRightClickMenu();
+	}
+	
+	private void createRightClickMenu() {	
+	    final MenuManager menuManager = new MenuManager();
+	    for (IContributionItem item : getSite().getActionBars().getMenuManager().getItems()) menuManager.add(item);
+	    viewer.getControl().setMenu(menuManager.createContextMenu(viewer.getControl()));
 	}
 
 	private void createColumns(final TableViewer viewer) {
@@ -157,6 +202,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 	@Override
 	public void activate() {
 		super.activate();
+		if (viewer!=null && viewer.getControl().isDisposed()) return;
 		try {
 			if (bean!=null) bean.activate();
 			getPlottingSystem().addRegionListener(this);
@@ -174,6 +220,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 	@Override
 	public void deactivate() {
 		super.deactivate();
+		if (viewer!=null && viewer.getControl().isDisposed()) return;
 		try {
 			getPlottingSystem().removeRegionListener(this);
 			if (bean!=null) bean.deactivate();
@@ -185,7 +232,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 
 	@Override
 	public void setFocus() {
-        if (viewer!=null) viewer.getControl().setFocus();
+        if (viewer!=null && !viewer.getControl().isDisposed()) viewer.getControl().setFocus();
 	}
 	
 	public void dispose() {
@@ -243,6 +290,8 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 				
 				
 				final RegionBounds bounds = fitRegion.getRegionBounds();
+				if (fitRegion==null || bounds==null) return Status.CANCEL_STATUS;
+				
 				getPlottingSystem().removeRegionListener(FittingTool.this);
 				
 				composite.getDisplay().syncExec(new Runnable() {
