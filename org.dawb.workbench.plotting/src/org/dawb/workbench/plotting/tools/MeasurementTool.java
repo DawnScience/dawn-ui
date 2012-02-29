@@ -7,6 +7,7 @@ import java.util.List;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegionBoundsListener;
 import org.dawb.common.ui.plot.region.IRegionListener;
+import org.dawb.common.ui.plot.region.RegionBounds;
 import org.dawb.common.ui.plot.region.RegionBoundsEvent;
 import org.dawb.common.ui.plot.region.RegionEvent;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
@@ -27,6 +28,9 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -122,6 +126,27 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 
 	private void createActions() {
 		
+		final Action copy = new Action("Copy region values to clipboard", Activator.getImageDescriptor("icons/plot-tool-measure-copy.png")) {
+			public void run() {
+				if (!isActive()) return;
+				final IStructuredSelection sel = (IStructuredSelection)viewer.getSelection();
+				if (sel!=null && sel.getFirstElement()!=null) {
+					final IRegion region = (IRegion)sel.getFirstElement();
+					if (region==null||region.getRegionBounds()==null) return;
+					final RegionBounds bounds = region.getRegionBounds();
+					if (bounds.getP1()==null) return;
+					
+					final Clipboard cb = new Clipboard(composite.getDisplay());
+					TextTransfer textTransfer = TextTransfer.getInstance();
+					cb.setContents(new Object[]{region.getName()+"  "+bounds}, new Transfer[]{textTransfer});
+				}
+			}
+		};
+		copy.setToolTipText("Copies the region values as text to clipboard which can then be pasted externally.");
+		
+		getSite().getActionBars().getToolBarManager().add(copy);
+		getSite().getActionBars().getMenuManager().add(copy);
+
 		final Action delete = new Action("Delete selected region", Activator.getImageDescriptor("icons/plot-tool-measure-delete.png")) {
 			public void run() {
 				if (!isActive()) return;
