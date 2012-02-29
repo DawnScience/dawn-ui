@@ -17,14 +17,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.dawb.common.ui.plot.EmptyTool;
-import org.dawb.common.ui.plot.IPlottingSystem;
-import org.dawb.common.ui.plot.tool.AbstractToolPage;
 import org.dawb.common.ui.plot.tool.IToolChangeListener;
 import org.dawb.common.ui.plot.tool.IToolPage;
 import org.dawb.common.ui.plot.tool.IToolPageSystem;
 import org.dawb.common.ui.plot.tool.ToolChangeEvent;
 import org.dawb.common.util.text.StringUtils;
-import org.dawb.workbench.plotting.Activator;
 import org.eclipse.core.commands.common.EventManager;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.action.IAction;
@@ -658,7 +655,10 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 			final PageRec rec = pageRecs.get(title);
 			
 			if (rec == defaultPageRec) continue;
-			if (rec == activeRec)      continue;
+			if (rec == activeRec)      {
+				activeRec.tool.deactivate();
+				continue;
+			}
 			
 			int newCount = ((Integer) mapToolToNumRecs.get(rec.tool)).intValue() - 1;
 	
@@ -991,7 +991,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
         try {
             updatingActivated = true;
         	IToolPageSystem sys = (IToolPageSystem)part.getAdapter(IToolPageSystem.class);
-            if (sys!=null && sys.getCurrentToolPage().equals(getCurrentPage())) {
+            if (sys.getCurrentToolPage().equals(getCurrentPage())) {
             	return;
             }
         
@@ -1068,7 +1068,10 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	protected boolean isImportant(IWorkbenchPart part) {
 		if (isDisposed) return false;
 		if (systems==null || recs==null) return false;
-		return part instanceof EditorPart;
+		if (!( part instanceof EditorPart)) return false;
+
+		IToolPageSystem sys = (IToolPageSystem)part.getAdapter(IToolPageSystem.class);
+        return sys != null;
 	}
 	
 	private boolean isDisposed = false;

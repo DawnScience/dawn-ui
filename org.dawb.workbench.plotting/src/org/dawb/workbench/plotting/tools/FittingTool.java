@@ -58,6 +58,8 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 	private Job           fittingJob;
 	private FittedPeaksBean bean;
 
+	private ISelectionChangedListener viewUpdateListener;
+
 	public FittingTool() {
 		super();
 		this.fittingJob = createFittingJob();
@@ -80,13 +82,14 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		
 		activate();
 		
-		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
+		this.viewUpdateListener = new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				final StructuredSelection sel = (StructuredSelection)event.getSelection();
 				if (bean!=null) bean.setSelectedPeak((Integer)sel.getFirstElement());
 			}
-		});
+		};
+		viewer.addSelectionChangedListener(viewUpdateListener);
 	}
 
 	private void createActions() {
@@ -102,7 +105,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 					Activator.getDefault().getPreferenceStore().setValue(FittingConstants.PEAK_NUMBER, Integer.valueOf(getText()));
 					numberPeaks.setSelectedAction(this);
 					setChecked(true);
-					fittingJob.schedule();
+					if (isActive()) fittingJob.schedule();
 				}
 			};
 			numberPeaks.add(action);
@@ -122,6 +125,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		
 		final Action clear = new Action("Clear", Activator.getImageDescriptor("icons/plot-tool-peak-fit-clear.png")) {
 			public void run() {
+				if (!isActive()) return;
 				if (bean!=null) bean.removeSelections(getPlottingSystem());
 				bean.dispose();
 				bean = null;
@@ -206,6 +210,9 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 	public void activate() {
 		super.activate();
 		if (viewer!=null && viewer.getControl().isDisposed()) return;
+		
+		if (viewUpdateListener!=null) viewer.addSelectionChangedListener(viewUpdateListener);
+
 		try {
 			if (bean!=null) bean.activate();
 			getPlottingSystem().addRegionListener(this);
@@ -224,6 +231,9 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 	public void deactivate() {
 		super.deactivate();
 		if (viewer!=null && viewer.getControl().isDisposed()) return;
+		
+		if (viewUpdateListener!=null) viewer.removeSelectionChangedListener(viewUpdateListener);
+
 		try {
 			getPlottingSystem().removeRegionListener(this);
 			if (bean!=null) bean.deactivate();
@@ -242,6 +252,9 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		if (getPlottingSystem()!=null) {
 			getPlottingSystem().removeRegionListener(this);
 		}
+		if (viewUpdateListener!=null) viewer.removeSelectionChangedListener(viewUpdateListener);
+		viewUpdateListener = null;
+		
         if (viewer!=null) viewer.getControl().dispose();
        
         // Using clear and setting to null helps the garbage collector.
