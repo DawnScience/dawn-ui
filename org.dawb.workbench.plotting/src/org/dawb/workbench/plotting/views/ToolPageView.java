@@ -95,7 +95,7 @@ public class ToolPageView extends PageBookView implements IToolChangeListener { 
 				return rec;
 			}
 
-			setPartName(tool.getTitle());
+			updatePartInfo(tool);
 			initPage(tool);
 			tool.createControl(getPageBook());	
 						
@@ -145,7 +145,7 @@ public class ToolPageView extends PageBookView implements IToolChangeListener { 
             }
         
             super.partActivated(part);
- 			setPartName(sys.getCurrentToolPage().getTitle());
+ 			updatePartInfo(sys.getCurrentToolPage());
 
         } catch (Throwable ne) {
         	logger.error("Problem updating activated state in "+getClass().getName()); // No stack required in log here.
@@ -154,6 +154,11 @@ public class ToolPageView extends PageBookView implements IToolChangeListener { 
         }
 	}
 	
+	private void updatePartInfo(IToolPage tool) {
+		setPartName(tool.getTitle());		
+		setTitleImage(tool.getImageDescriptor().createImage());
+	}
+
 	protected PageRec getPageRec(IWorkbenchPart part) {
 		
         final Map<IPage, PageRec> pages = recs.get(getString(part));

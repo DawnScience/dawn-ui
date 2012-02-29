@@ -25,7 +25,7 @@ import uk.ac.diamond.scisoft.analysis.optimize.IOptimizer;
 public class FittedPeaksBean {
 
 	private List<RegionBounds>       peakBounds;
-	private List<? extends IPeak>    peakFunctions;
+	private List<? extends IPeak>    peaks;
 	private List<IRegion>            peakAreaRegions;
 	private List<IRegion>            peakLineRegions;
 	private List<ITrace>             peakTraces;
@@ -41,8 +41,8 @@ public class FittedPeaksBean {
 		if (peakBounds!=null) peakBounds.clear();
 		peakBounds = null;
 		
-		if (peakFunctions!=null) peakFunctions.clear();
-		peakFunctions = null;
+		if (peaks!=null) peaks.clear();
+		peaks = null;
 		
 		if (peakAreaRegions!=null) peakAreaRegions.clear();
 		peakAreaRegions = null;
@@ -97,11 +97,11 @@ public class FittedPeaksBean {
 	public void setPeakBounds(List<RegionBounds> peakBounds) {
 		this.peakBounds = peakBounds;
 	}
-	public List<? extends IPeak> getPeakFunctions() {
-		return peakFunctions;
+	public List<? extends IPeak> getPeaks() {
+		return peaks;
 	}
-	public void setPeakFunctions(List<? extends IPeak> peakFunctions) {
-		this.peakFunctions = peakFunctions;
+	public void setPeaks(List<? extends IPeak> peakFunctions) {
+		this.peaks = peakFunctions;
 	}
 	@Override
 	public int hashCode() {
@@ -116,7 +116,7 @@ public class FittedPeaksBean {
 		result = prime * result
 				+ ((peakBounds == null) ? 0 : peakBounds.hashCode());
 		result = prime * result
-				+ ((peakFunctions == null) ? 0 : peakFunctions.hashCode());
+				+ ((peaks == null) ? 0 : peaks.hashCode());
 		result = prime * result
 				+ ((peakLineRegions == null) ? 0 : peakLineRegions.hashCode());
 		result = prime * result
@@ -152,10 +152,10 @@ public class FittedPeaksBean {
 				return false;
 		} else if (!peakBounds.equals(other.peakBounds))
 			return false;
-		if (peakFunctions == null) {
-			if (other.peakFunctions != null)
+		if (peaks == null) {
+			if (other.peaks != null)
 				return false;
-		} else if (!peakFunctions.equals(other.peakFunctions))
+		} else if (!peaks.equals(other.peaks))
 			return false;
 		if (peakLineRegions == null) {
 			if (other.peakLineRegions != null)
@@ -207,7 +207,7 @@ public class FittedPeaksBean {
 	}
 
 	public int size() {
-		return peakFunctions.size();
+		return peaks.size();
 	}
 
 	public String getPeakName(int peakNumber) {
@@ -220,7 +220,7 @@ public class FittedPeaksBean {
 
 	public double getPosition(Integer peakNumber) {
 		try {
-			return ((APeak)this.peakFunctions.get(peakNumber)).getPosition();
+			return ((APeak)this.peaks.get(peakNumber)).getPosition();
 		} catch (IndexOutOfBoundsException ne) {
 			return Double.NaN;
 		}
@@ -228,7 +228,7 @@ public class FittedPeaksBean {
 	
 	public double getFWHM(Integer peakNumber) {
 		try {
-			return ((APeak)this.peakFunctions.get(peakNumber)).getFWHM();
+			return ((APeak)this.peaks.get(peakNumber)).getFWHM();
 		} catch (IndexOutOfBoundsException ne) {
 			return Double.NaN;
 		}
@@ -236,7 +236,7 @@ public class FittedPeaksBean {
 	
 	public double getArea(Integer peakNumber) {
 		try {
-			return ((APeak)this.peakFunctions.get(peakNumber)).getArea();
+			return ((APeak)this.peaks.get(peakNumber)).getArea();
 		} catch (IndexOutOfBoundsException ne) {
 			return Double.NaN;
 		}
@@ -244,7 +244,7 @@ public class FittedPeaksBean {
 	
 	public String getPeakType(Integer peakNumber) {
 		try {
-		    IPeak peak =  peakFunctions.get(peakNumber);
+		    IPeak peak =  peaks.get(peakNumber);
 		    return peak.getClass().getSimpleName();
 		} catch (IndexOutOfBoundsException ne) {
 			return null;
@@ -256,8 +256,8 @@ public class FittedPeaksBean {
 	}
 
 	public boolean isEmpty() {
-		if (peakFunctions==null) return true;
-		return peakFunctions.isEmpty();
+		if (peaks==null) return true;
+		return peaks.isEmpty();
 	}
 
 	public IOptimizer getOptimizer() {

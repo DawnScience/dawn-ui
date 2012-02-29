@@ -1,5 +1,6 @@
 package org.dawb.workbench.plotting.tools;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -23,7 +24,6 @@ import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
-import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.IContentProvider;
@@ -39,9 +39,13 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.IEditorPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.plotserver.GuiParameters;
+import uk.ac.diamond.scisoft.analysis.rcp.views.PlotServerConnection;
+import uk.ac.diamond.scisoft.analysis.rcp.plotting.IGuiInfoManager;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 
 public class FittingTool extends AbstractToolPage implements IRegionListener {
@@ -109,8 +113,8 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		}
 
 		final int ipeak = Activator.getDefault().getPreferenceStore().getInt(FittingConstants.PEAK_NUMBER);
-		numberPeaks.setSelectedAction(ipeak);
-		numberPeaks.setCheckedAction(ipeak, true);
+		numberPeaks.setSelectedAction(ipeak-1);
+		numberPeaks.setCheckedAction(ipeak-1, true);
 		
 
 		getSite().getActionBars().getToolBarManager().add(numberPeaks);
@@ -390,10 +394,22 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 					viewer.setInput(newBean);
                     viewer.refresh();
                     
+                    updatePlotServerConnection(newBean);
+                    
 		    	} catch (Exception ne) {
 		    		logger.error("Cannot create fitted peaks!", ne);
 		    	}
 		    } 
 		});
+	}
+
+	private IGuiInfoManager plotServerConnection;
+	
+	protected void updatePlotServerConnection(FittedPeaksBean bean) {
+		if (plotServerConnection==null) this.plotServerConnection = new PlotServerConnection(((IEditorPart)getPart()).getEditorInput().getName());
+		
+		if (plotServerConnection!=null) {
+			plotServerConnection.putGUIInfo(GuiParameters.FITTEDPEAKS, (Serializable)bean.getPeaks());
+		}
 	}
 }

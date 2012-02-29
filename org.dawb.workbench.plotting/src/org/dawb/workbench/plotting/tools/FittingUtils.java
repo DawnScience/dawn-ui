@@ -78,7 +78,7 @@ public class FittingUtils {
 		
 		final FittedPeaksBean bean = new FittedPeaksBean();
 		bean.setPeakBounds(regions);
-		bean.setPeakFunctions(peaks);
+		bean.setPeaks(peaks);
 		bean.setFunctionData(functions);
 		bean.setOptimizer(optimizer);
 		return bean;
