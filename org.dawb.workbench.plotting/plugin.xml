@@ -31,6 +31,13 @@
             label="Derivative"
             tooltip="A tool which shows the derivative next to what is currently plotted.">
       </plotting_tool_page>
+      <plotting_tool_page
+            class="org.dawb.workbench.plotting.tools.MeasurementTool"
+            icon="icons/plot-tool-measure.png"
+            id="org.dawb.workbench.plotting.tools.measure"
+            label="Measurement"
+            tooltip="A tool which shows values of regions selected in the plotting.">
+      </plotting_tool_page>
    </extension>
    <extension
          point="org.eclipse.ui.views">

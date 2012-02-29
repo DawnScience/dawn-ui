@@ -1086,6 +1086,16 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		if (xyGraph==null)  return null;
 		return xyGraph.getRegion(name);
 	}
+	/**
+	 * Get regions
+	 * @param name
+	 * @return
+	 */
+	public Collection<IRegion> getRegions() {
+		if (xyGraph==null)  return null;
+		List<Region> regions = xyGraph.getRegions();
+		return new ArrayList<IRegion>(regions);
+	}
 	
 	public IAnnotation createAnnotation(final String name) throws Exception {
 		if (xyGraph==null) switchPlotUI(true); // TODO Regions can be 2D
