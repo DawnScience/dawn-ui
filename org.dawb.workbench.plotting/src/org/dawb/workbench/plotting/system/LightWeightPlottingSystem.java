@@ -1025,7 +1025,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	}
 	
 	public boolean removeRegionListener(final IRegionListener l) {
-		if (xyGraph==null) switchPlotUI(true); // TODO Regions can be 2D
+		if (xyGraph==null) return false;
 		return xyGraph.removeRegionListener(l);
 	}
 	

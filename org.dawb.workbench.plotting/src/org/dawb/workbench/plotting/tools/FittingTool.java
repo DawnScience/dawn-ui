@@ -116,7 +116,6 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		numberPeaks.setSelectedAction(ipeak-1);
 		numberPeaks.setCheckedAction(ipeak-1, true);
 		
-
 		getSite().getActionBars().getToolBarManager().add(numberPeaks);
 		getSite().getActionBars().getMenuManager().add(numberPeaks);
 		
@@ -406,10 +405,19 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 	private IGuiInfoManager plotServerConnection;
 	
 	protected void updatePlotServerConnection(FittedPeaksBean bean) {
+		
+		if (bean==null) return;
+		
 		if (plotServerConnection==null) this.plotServerConnection = new PlotServerConnection(((IEditorPart)getPart()).getEditorInput().getName());
 		
 		if (plotServerConnection!=null) {
-			plotServerConnection.putGUIInfo(GuiParameters.FITTEDPEAKS, (Serializable)bean.getPeaks());
+			final Serializable peaks = (Serializable)bean.getPeaks();
+			if (peaks!=null && !bean.isEmpty()) {
+				
+				// For some reason this causes npes if you create more than one for a given file.
+				
+				//plotServerConnection.putGUIInfo(GuiParameters.FITTEDPEAKS, peaks);
+			}
 		}
 	}
 }
