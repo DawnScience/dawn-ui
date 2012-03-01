@@ -297,6 +297,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		});
         imageComponent.setStatusLabel(pointControls);
         imageComponent.createPartControl(imageComposite);
+        imageComponent.setPlotTitle(null);
         
         // Add additional if required
         if (extraImageActions!=null&&!extraImageActions.isEmpty()){

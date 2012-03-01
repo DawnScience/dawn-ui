@@ -24,9 +24,7 @@ import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.views.HeaderTablePage;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
-import org.dawb.gda.extensions.loaders.LoaderService;
 import org.dawb.workbench.ui.Activator;
-import org.dawb.workbench.ui.views.PlotDataPage;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -43,6 +41,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
@@ -58,7 +57,6 @@ import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.part.Page;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 
@@ -215,6 +213,12 @@ public class PlotImageEditor extends EditorPart implements IReusableEditor {
 				axes.add(SliceUtils.createAxisDataset((set.getShape()[1])));
 				
 				plottingSystem.createPlot2D(set, axes, monitor);
+				
+				Display.getDefault().asyncExec(new Runnable() {
+					public void run() {
+						getPlottingSystem().setTitle(null);
+					}
+				});
 
 				return Status.OK_STATUS;
 			}
@@ -282,5 +286,9 @@ public class PlotImageEditor extends EditorPart implements IReusableEditor {
 		
 		return super.getAdapter(clazz);
 	}
+    
+    public AbstractPlottingSystem getPlottingSystem() {
+    	return this.plottingSystem;
+    }
 
 }

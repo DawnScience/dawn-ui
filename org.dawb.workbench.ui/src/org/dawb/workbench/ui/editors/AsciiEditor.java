@@ -82,11 +82,9 @@ public class AsciiEditor extends MultiPageEditorPart implements ISlicablePlottin
 			getSite().getShell().getDisplay().asyncExec(new Runnable() {
 				@Override
 				public void run() {
-					if (getDataSetComponent()!=null && getDataSetComponent().getMetaData()!=null ) {
-						if (EclipseUtils.getPage().findView("uk.ac.diamond.scisoft.analysis.rcp.views.DatasetInspectorView")!=null &&
+					if (EclipseUtils.getPage().findView("uk.ac.diamond.scisoft.analysis.rcp.views.DatasetInspectorView")!=null &&
 							getPageCount()>=4) {
-							setActivePage(3);
-						}
+						setActivePage(3);
 					}
 				}
 			});

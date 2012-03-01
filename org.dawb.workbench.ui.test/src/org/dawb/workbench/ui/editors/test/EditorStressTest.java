@@ -12,6 +12,7 @@ package org.dawb.workbench.ui.editors.test;
 import java.io.File;
 
 import org.dawb.common.util.eclipse.BundleUtils;
+import org.dawb.workbench.ui.editors.ImageEditor;
 import org.dawb.workbench.ui.editors.PlotImageEditor;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
@@ -81,7 +82,7 @@ public class EditorStressTest {
 		for (int i = 0; i < SIZE; i++) {
 			final IWorkbenchPage     page = EclipseUtils.getPage();		
 			final IFileStore externalFile = EFS.getLocalFileSystem().fromLocalFile(new File(path));
-	 		final IEditorPart      editor = page.openEditor(new FileStoreEditorInput(externalFile), PlotImageEditor.ID);
+	 		final IEditorPart      editor = page.openEditor(new FileStoreEditorInput(externalFile), ImageEditor.ID);
 			
 	 		page.activate(editor);
 	 		page.setPartState(page.getActivePartReference(), IWorkbenchPage.STATE_MAXIMIZED);

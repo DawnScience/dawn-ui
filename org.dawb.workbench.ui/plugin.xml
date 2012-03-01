@@ -46,11 +46,11 @@
       </editor>
 
       <editor
-            class="org.dawb.workbench.ui.editors.PlotImageEditor"
+            class="org.dawb.workbench.ui.editors.ImageEditor"
             default="true"
             extensions="tif, tiff, cbf, img, ciff, mccd, edf, pgm, cor, bruker"
             icon="icons/image_editor.png"
-            id="org.dawb.workbench.editors.plotImageEditor"
+            id="org.dawb.workbench.editors.ImageEditor"
             name="Image Editor">
       </editor>
 
