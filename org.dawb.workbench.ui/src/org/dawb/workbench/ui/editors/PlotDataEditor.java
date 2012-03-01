@@ -92,9 +92,11 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 	private Map<String,ILazyDataset>    dataCache;
 	private Composite                   tools;
 	private IMetaData                   metaData;
+	private PlotType                    defaultPlotType;
 
-	public PlotDataEditor(boolean useCaching) {
+	public PlotDataEditor(boolean useCaching, final PlotType defaultPlotType) {
 		try {
+			this.defaultPlotType= defaultPlotType;
 	        this.plottingSystem = PlottingFactory.getPlottingSystem();
 		} catch (Exception ne) {
 			logger.error("Cannot locate any plotting systems!", ne);
@@ -179,7 +181,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		final Composite plot  = new Composite(main, SWT.NONE);
 		plot.setLayout(new FillLayout());
 		plot.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-        plottingSystem.createPlotPart(plot, plotName, wrapper, PlotType.PT1D, this);
+        plottingSystem.createPlotPart(plot, plotName, wrapper, defaultPlotType, this);
 			
  		if (rightMan!=null) {
  		    Action menuAction = new Action("", Activator.getImageDescriptor("/icons/DropDown.png")) {
@@ -199,6 +201,24 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 	    createData(getEditorInput());	
 	    
 	    
+
+		// We ensure that the view for choosing data sets is visible
+		if (EclipseUtils.getActivePage()!=null) {
+			try {
+				EclipseUtils.getActivePage().showView(PlotDataView.ID, null, IWorkbenchPage.VIEW_ACTIVATE);
+			} catch (PartInitException e) {
+				logger.error("Cannot open "+PlotDataView.ID);
+			}
+		}
+		
+		getEditorSite().setSelectionProvider(plottingSystem.getSelectionProvider());
+
+ 	}
+	
+	/**
+	 * Call to change plot default by looking at data
+	 */
+	public void createPlotTypeDefaultFromData() {
 	    // If the data is only 2D we tell the PlottingSystem to switch to 2D mode.
 		boolean is1D = false;
 		
@@ -215,18 +235,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 			getPlottingSystem().setDefaultPlotType(PlotType.IMAGE);
 		}
 
-		// We ensure that the view for choosing data sets is visible
-		if (EclipseUtils.getActivePage()!=null) {
-			try {
-				EclipseUtils.getActivePage().showView(PlotDataView.ID, null, IWorkbenchPage.VIEW_ACTIVATE);
-			} catch (PartInitException e) {
-				logger.error("Cannot open "+PlotDataView.ID);
-			}
-		}
-		
-		getEditorSite().setSelectionProvider(plottingSystem.getSelectionProvider());
-
- 	}
+	}
 
 	
 	private boolean doingUpdate = false;

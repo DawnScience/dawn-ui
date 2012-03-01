@@ -12,9 +12,11 @@ package org.dawb.workbench.ui.editors;
 import org.dawb.common.ui.plot.AbstractPlottingSystem.ColorOption;
 import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.IPlottingSystemSelection;
+import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.tool.IToolPageSystem;
 import org.dawb.common.ui.slicing.ISlicablePlottingPart;
 import org.dawb.common.ui.slicing.SliceComponent;
+import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.util.text.StringUtils;
 import org.dawb.workbench.ui.views.PlotDataPage;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -29,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.rcp.editors.SRSEditor;
 
 
 public class AsciiEditor extends MultiPageEditorPart implements ISlicablePlottingPart, IPlottingSystemSelection {
@@ -54,7 +57,7 @@ public class AsciiEditor extends MultiPageEditorPart implements ISlicablePlottin
 	protected void createPages() {
 		try {
 
-			this.dataSetEditor = new PlotDataEditor(true);
+			this.dataSetEditor = new PlotDataEditor(true, PlotType.PT1D);
 			dataSetEditor.getPlottingSystem().setColorOption(ColorOption.BY_NAME);
 			addPage(0, dataSetEditor, getEditorInput());
 			setPageText(0, "Plot");
@@ -68,7 +71,25 @@ public class AsciiEditor extends MultiPageEditorPart implements ISlicablePlottin
 			addPage(2, dataEditor,   getEditorInput());
 			setPageText(2, "Data");
 			addPageChangedListener(dataEditor);
+			
+			if (System.getProperty("org.dawb.editor.ascii.hide.diamond.srs")==null) {
+				final SRSEditor srs = new SRSEditor();
+				addPage(3, srs,       getEditorInput());
+				setPageText(3, "Info");
+				
+			}
 
+			getSite().getShell().getDisplay().asyncExec(new Runnable() {
+				@Override
+				public void run() {
+					if (getDataSetComponent()!=null && getDataSetComponent().getMetaData()!=null ) {
+						if (EclipseUtils.getPage().findView("uk.ac.diamond.scisoft.analysis.rcp.views.DatasetInspectorView")!=null &&
+							getPageCount()>=4) {
+							setActivePage(3);
+						}
+					}
+				}
+			});
 
 		} catch (PartInitException e) {
 			logger.error("Cannot initiate "+getClass().getName()+"!", e);

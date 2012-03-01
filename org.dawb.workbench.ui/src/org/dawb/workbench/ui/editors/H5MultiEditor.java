@@ -11,8 +11,9 @@
 package org.dawb.workbench.ui.editors;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem.ColorOption;
-import org.dawb.common.ui.plot.tool.IToolPageSystem;
 import org.dawb.common.ui.plot.IPlottingSystemSelection;
+import org.dawb.common.ui.plot.PlotType;
+import org.dawb.common.ui.plot.tool.IToolPageSystem;
 import org.dawb.common.ui.slicing.ISlicablePlottingPart;
 import org.dawb.common.ui.slicing.SliceComponent;
 import org.dawb.common.ui.util.EclipseUtils;
@@ -69,11 +70,14 @@ public class H5MultiEditor extends MultiPageEditorPart  implements ISlicablePlot
 			 * for H5 and a new PlotDataEditor which does not extract meta data
 			 * at all but loads sets as it sees them.
 			 */
-			this.dataSetEditor = new PlotDataEditor(false);
+			this.dataSetEditor = new PlotDataEditor(false, PlotType.PT1D);
 			dataSetEditor.getPlottingSystem().setColorOption(ColorOption.BY_NAME);
 			addPage(0, dataSetEditor, getEditorInput());
 			setPageText(0, "Plot");
 
+			// The HDF5TreeEditor crashes a lot and is unreliable.
+			// The property org.dawb.editor.h5.use.default is set by default in dawb / dawn vanilla
+			// The property org.dawb.editor.h5.use.default is not set in SDA.
 			this.treePage = System.getProperty("org.dawb.editor.h5.use.default") !=null
                           ? new H5Editor() 
 			              : new HDF5TreeEditor();
