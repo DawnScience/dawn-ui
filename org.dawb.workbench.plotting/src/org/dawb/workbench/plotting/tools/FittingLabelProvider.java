@@ -2,9 +2,12 @@ package org.dawb.workbench.plotting.tools;
 
 import java.text.DecimalFormat;
 
+import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewer;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ViewerColumn;
+import org.eclipse.swt.graphics.Color;
 
 /**
  * A label provider with the ability to show:
@@ -56,5 +59,24 @@ public class FittingLabelProvider extends ColumnLabelProvider {
 		default:
 			return "Not found";
 		}
+	}
+	
+	/**
+	 * foreground
+	 * @param element
+	 * @return
+	 */
+	public Color getForeground(final Object element) {
+		
+		final FittedPeaksBean bean = (FittedPeaksBean)viewer.getInput();
+		if (bean==null)     return super.getForeground(element);
+		if (bean.isEmpty()) return super.getForeground(element);
+	
+		final IStructuredSelection sel = (IStructuredSelection)viewer.getSelection();
+		if (sel==null) return super.getForeground(element);
+		
+		if (sel.getFirstElement()==element) return ColorConstants.darkGreen;
+		
+		return super.getForeground(element);
 	}
 }

@@ -5,8 +5,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.dawb.common.ui.image.IconUtils;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
+import org.dawb.common.ui.plot.annotation.IAnnotation;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
@@ -25,6 +27,8 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -36,6 +40,8 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -47,6 +53,7 @@ import uk.ac.diamond.scisoft.analysis.plotserver.GuiParameters;
 import uk.ac.diamond.scisoft.analysis.rcp.views.PlotServerConnection;
 import uk.ac.diamond.scisoft.analysis.rcp.plotting.IGuiInfoManager;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
 
 public class FittingTool extends AbstractToolPage implements IRegionListener {
 
@@ -86,13 +93,71 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				final StructuredSelection sel = (StructuredSelection)event.getSelection();
-				if (bean!=null) bean.setSelectedPeak((Integer)sel.getFirstElement());
+				if (bean!=null) {
+					bean.setSelectedPeak((Integer)sel.getFirstElement());
+					viewer.refresh();
+				}
 			}
 		};
 		viewer.addSelectionChangedListener(viewUpdateListener);
 	}
 
 	private void createActions() {
+		
+		
+		final Action showAnns = new Action("Show annotations at the peak position.", IAction.AS_CHECK_BOX) {
+			public void run() {
+				final boolean isChecked = isChecked();
+				Activator.getDefault().getPreferenceStore().setValue(FittingConstants.SHOW_ANNOTATION_AT_PEAK, isChecked);
+				if (bean!=null) bean.setAnnotationsVisible(isChecked);
+			}
+		};
+		showAnns.setImageDescriptor(Activator.getImageDescriptor("icons/plot-tool-peak-fit-showAnnotation.png"));
+		getSite().getActionBars().getToolBarManager().add(showAnns);
+		//getSite().getActionBars().getMenuManager().add(showAnns);
+		showAnns.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(FittingConstants.SHOW_ANNOTATION_AT_PEAK));
+
+		final Action showTrace = new Action("Show fitting traces.", IAction.AS_CHECK_BOX) {
+			public void run() {
+				final boolean isChecked = isChecked();
+				Activator.getDefault().getPreferenceStore().setValue(FittingConstants.SHOW_FITTING_TRACE, isChecked);
+				if (bean!=null) bean.setTracesVisible(isChecked);
+			}
+		};
+		showTrace.setImageDescriptor(Activator.getImageDescriptor("icons/plot-tool-peak-fit-showFittingTrace.png"));
+		getSite().getActionBars().getToolBarManager().add(showTrace);
+		//getSite().getActionBars().getMenuManager().add(showTrace);
+		showTrace.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(FittingConstants.SHOW_FITTING_TRACE));
+
+		
+		final Action showPeak = new Action("Show peak lines.", IAction.AS_CHECK_BOX) {
+			public void run() {
+				final boolean isChecked = isChecked();
+				Activator.getDefault().getPreferenceStore().setValue(FittingConstants.SHOW_PEAK_SELECTIONS, isChecked);
+				if (bean!=null) bean.setPeaksVisible(isChecked);
+			}
+		};
+		showPeak.setImageDescriptor(Activator.getImageDescriptor("icons/plot-tool-peak-fit-showPeakLine.png"));
+		getSite().getActionBars().getToolBarManager().add(showPeak);
+		//getSite().getActionBars().getMenuManager().add(showPeak);
+		showPeak.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(FittingConstants.SHOW_PEAK_SELECTIONS));
+
+		final Action showFWHM = new Action("Show selection regions for full width, half max.", IAction.AS_CHECK_BOX) {
+			public void run() {
+				final boolean isChecked = isChecked();
+				Activator.getDefault().getPreferenceStore().setValue(FittingConstants.SHOW_FWHM_SELECTIONS, isChecked);
+				if (bean!=null) bean.setAreasVisible(isChecked);
+			}
+		};
+		showFWHM.setImageDescriptor(Activator.getImageDescriptor("icons/plot-tool-peak-fit-showFWHM.png"));
+		getSite().getActionBars().getToolBarManager().add(showFWHM);
+		//getSite().getActionBars().getMenuManager().add(showFWHM);
+		showFWHM.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(FittingConstants.SHOW_FWHM_SELECTIONS));
+		
+		final Separator sep = new Separator(getClass().getName()+".separator1");	
+		getSite().getActionBars().getToolBarManager().add(sep);
+		//getSite().getActionBars().getMenuManager().add(sep);
+
 		
 		final MenuAction numberPeaks = new MenuAction("Number peaks to fit");
 		final CheckableActionGroup group = new CheckableActionGroup();
@@ -108,6 +173,8 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 					if (isActive()) fittingJob.schedule();
 				}
 			};
+			
+			action.setImageDescriptor(IconUtils.createIconDescriptor(String.valueOf(ipeak)));
 			numberPeaks.add(action);
 			group.add(action);
 			action.setChecked(false);
@@ -363,6 +430,8 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		    public void run() {
 		    	try {
 		    		
+		    		boolean requireFWHMSelections = Activator.getDefault().getPreferenceStore().getBoolean(FittingConstants.SHOW_FWHM_SELECTIONS);
+		    		boolean requirePeakSelections = Activator.getDefault().getPreferenceStore().getBoolean(FittingConstants.SHOW_PEAK_SELECTIONS);
 					int ipeak = 1;
 					// Draw the regions
 					for (RegionBounds rb : newBean.getPeakBounds()) {
@@ -373,7 +442,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 						area.setMotile(false);
 						getPlottingSystem().addRegion(area);
 						newBean.addAreaRegion(area);
-						
+						if (!requireFWHMSelections) area.setVisible(false);
 						
 						final IRegion line = getPlottingSystem().createRegion("Peak Line "+ipeak, RegionType.XAXIS_LINE);
 						line.setRegionBounds(new RegionBounds(rb.getCentre(), rb.getCentre()));
@@ -382,12 +451,13 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 						line.setAlpha(150);
 						getPlottingSystem().addRegion(line);
 						newBean.addLineRegion(line);
-					
+						if (!requirePeakSelections) area.setVisible(false);
 
 					    ++ipeak;
 					}
 
 					ipeak = 1;
+		    		boolean requireTrace = Activator.getDefault().getPreferenceStore().getBoolean(FittingConstants.SHOW_FITTING_TRACE);
 					// Create some traces for the fitted function
 					for (AbstractDataset[] pair : newBean.getFunctionData()) {
 						
@@ -397,9 +467,27 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 						trace.setTraceColor(ColorConstants.black);
 						getPlottingSystem().addTrace(trace);
 						newBean.addTrace(trace);
+						if (!requireTrace) trace.setVisible(false);
 						
 					    ++ipeak;
   				    }
+					
+		    		boolean requireAnnot = Activator.getDefault().getPreferenceStore().getBoolean(FittingConstants.SHOW_ANNOTATION_AT_PEAK);
+                    final List<? extends IPeak> peaks = newBean.getPeaks();
+                    ipeak = 1;
+                    for (IPeak peak : peaks) {
+					
+                    	final IAnnotation ann = getPlottingSystem().createAnnotation("Peak "+ipeak);
+                    	ann.setLocation(peak.getPosition(), peak.val(peak.getPosition()));
+                    	
+                    	getPlottingSystem().addAnnotation(ann);
+                    	
+                    	newBean.addAnnotation(ann);
+                    	if (!requireAnnot) ann.setVisible(false);
+                    	
+                    	++ipeak;
+					}
+		    		
 					
 					FittingTool.this.bean = newBean;
 					viewer.setContentProvider(createActorContentProvider(newBean.size()));

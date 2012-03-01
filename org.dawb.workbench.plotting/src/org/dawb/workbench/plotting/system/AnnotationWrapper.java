@@ -110,4 +110,19 @@ class AnnotationWrapper implements IAnnotation {
 		return annotation;
 	}
 
+	@Override
+	public void setLocation(double x, double y) {
+		annotation.setLocation(x, y);
+	}
+
+	@Override
+	public boolean isVisible() {
+		return annotation.isVisible();
+	}
+
+	@Override
+	public void setVisible(boolean isVis) {
+		annotation.setVisible(isVis);
+	}
+
 }

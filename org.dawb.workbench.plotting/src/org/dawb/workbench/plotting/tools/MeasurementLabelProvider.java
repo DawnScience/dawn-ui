@@ -7,9 +7,11 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 
 	
 	private int column;
+	private MeasurementTool tool;
 
-	public MeasurementLabelProvider(int i) {
+	public MeasurementLabelProvider(MeasurementTool tool, int i) {
 		this.column = i;
+		this.tool   = tool;
 	}
 
 	@Override
@@ -24,7 +26,7 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 		case 1:
 			return region.getRegionType().getName();
 		case 2:
-			return region.getRegionBounds().toString();
+			return tool.getBounds(region).toString();
 		default:
 			return "Not found";
 		}

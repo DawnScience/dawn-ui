@@ -310,6 +310,7 @@ public abstract class Region extends AbstractRegion implements IAxisListener{
 			}
 			@Override
 			public void translationAfter(TranslationEvent evt) {
+				updateConnectionBounds();
 				fireRegionBoundsDragged(createRegionBounds(false));
 			}
 			@Override

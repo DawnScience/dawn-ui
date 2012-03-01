@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dawb.common.ui.plot.IPlottingSystem;
+import org.dawb.common.ui.plot.annotation.IAnnotation;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.RegionBounds;
 import org.dawb.common.ui.plot.trace.ILineTrace;
@@ -29,12 +30,14 @@ public class FittedPeaksBean {
 	private List<IRegion>            peakAreaRegions;
 	private List<IRegion>            peakLineRegions;
 	private List<ITrace>             peakTraces;
+	private List<IAnnotation>        peakAnnotations;
 	private IOptimizer               optimizer;
 	
 	public FittedPeaksBean() {
 		this.peakAreaRegions = new ArrayList<IRegion>(7);
 		this.peakLineRegions = new ArrayList<IRegion>(7);
 		this.peakTraces  = new ArrayList<ITrace>(7);
+		this.peakAnnotations  = new ArrayList<IAnnotation>(7);
 	}
 
 	public void dispose() {
@@ -53,6 +56,9 @@ public class FittedPeaksBean {
 		if (peakTraces!=null) peakTraces.clear();
 		peakTraces = null;
 		
+		if (peakAnnotations!=null) peakAnnotations.clear();
+		peakAnnotations = null;
+
 		optimizer = null;
 	}
 	
@@ -63,6 +69,7 @@ public class FittedPeaksBean {
 		for (IRegion region : peakAreaRegions) region.setVisible(true);
 		for (IRegion region : peakLineRegions) region.setVisible(true);
 		for (ITrace  trace  : peakTraces)  trace.setVisible(true);
+		for (IAnnotation  ann  : peakAnnotations)  ann.setVisible(true);
 	}
 	/**
 	 * Not thread safe, UI call.
@@ -71,16 +78,36 @@ public class FittedPeaksBean {
 		for (IRegion region : peakAreaRegions) region.setVisible(false);
 		for (IRegion region : peakLineRegions) region.setVisible(false);
 		for (ITrace  trace  : peakTraces)  trace.setVisible(false);
+		for (IAnnotation  ann  : peakAnnotations)  ann.setVisible(false);
 	}
 
+	public void setAreasVisible(boolean isVis) {
+		for (IRegion region : peakAreaRegions) region.setVisible(isVis);
+	}
+
+	public void setPeaksVisible(boolean isVis) {
+		for (IRegion region : peakLineRegions) region.setVisible(isVis);
+	}
+
+	public void setTracesVisible(boolean isVis) {
+		for (ITrace  trace  : peakTraces)  trace.setVisible(isVis);
+	}
+	public void setAnnotationsVisible(boolean isVis) {
+		for (IAnnotation  ann  : peakAnnotations)  ann.setVisible(isVis);
+	}
+	
 	public void setSelectedPeak(int ipeak) {
 		for (IRegion region : peakAreaRegions) region.setRegionColor(ColorConstants.orange);
 		peakAreaRegions.get(ipeak).setRegionColor(ColorConstants.red);
 		
 		for (ITrace trace : peakTraces) ((ILineTrace)trace).setTraceColor(ColorConstants.black);
 		
+		for (IAnnotation  ann  : peakAnnotations)  ann.setAnnotationColor(ColorConstants.black);
+		
 		final ILineTrace trace = ((ILineTrace)peakTraces.get(ipeak));
 		trace.setTraceColor(ColorConstants.darkGreen);
+		
+		peakAnnotations.get(ipeak).setAnnotationColor(ColorConstants.darkGreen);
 
 		trace.repaint();
 	}
@@ -190,9 +217,11 @@ public class FittedPeaksBean {
 		for (ITrace  trace   : peakTraces)   sys.removeTrace(trace);
 		for (IRegion region  : peakAreaRegions)  sys.removeRegion(region);
 		for (IRegion region  : peakLineRegions)  sys.removeRegion(region);
+		for (IAnnotation ann  : peakAnnotations)  sys.removeAnnotation(ann);
 		peakAreaRegions.clear();
 		peakLineRegions.clear();
 		peakTraces.clear();
+		peakAnnotations.clear();
 	}
 
 	public void addAreaRegion(IRegion region) {
@@ -204,6 +233,11 @@ public class FittedPeaksBean {
 
 	public void addTrace(ILineTrace trace) {
 		peakTraces.add(trace);
+	}
+
+
+	public void addAnnotation(IAnnotation ann) {
+		peakAnnotations.add(ann);
 	}
 
 	public int size() {
@@ -266,6 +300,14 @@ public class FittedPeaksBean {
 
 	public void setOptimizer(IOptimizer optimizer) {
 		this.optimizer = optimizer;
+	}
+
+	public List<IAnnotation> getPeakAnnotations() {
+		return peakAnnotations;
+	}
+
+	public void setPeakAnnotations(List<IAnnotation> peakAnnoations) {
+		this.peakAnnotations = peakAnnoations;
 	}
 
 

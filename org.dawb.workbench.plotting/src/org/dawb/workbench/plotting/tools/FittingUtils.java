@@ -96,17 +96,25 @@ public class FittingUtils {
 	 */
 	private static AbstractDataset[] getPeakFunction(AbstractDataset x, AbstractDataset y, APeak peak) {
 
-		double min = peak.getPosition() - (peak.getFWHM()/2d);
-		double max = peak.getPosition() + (peak.getFWHM()/2d);
-
-		final AbstractDataset[] a = xintersection(x,y,min,max);
-		x=a[0];
-		y=a[1];
+//		double min = peak.getPosition() - (peak.getFWHM()); // Quite wide
+//		double max = peak.getPosition() + (peak.getFWHM());
+//
+//		final AbstractDataset[] a = xintersection(x,y,min,max);
+//		x=a[0];
+//		y=a[1];
 		
 		CompositeFunction function = new CompositeFunction();
-		Offset os = new Offset(y.min().doubleValue(), y.max().doubleValue());
+//		Offset os = new Offset(y.min().doubleValue(), y.max().doubleValue());
 		function.addFunction(peak);
-		function.addFunction(os);
+//		function.addFunction(os);
+		
+		// We make an x dataset with n times the points of the real data to get a smooth
+		// fitting function
+		final int    factor = Activator.getDefault().getPreferenceStore().getInt(FittingConstants.FIT_SMOOTH_FACTOR);
+		final double xmin = x.min().doubleValue();
+		final double xmax = x.max().doubleValue();
+		final double step = (xmax-xmin)/(x.getSize()*factor);
+		x = AbstractDataset.arange(xmin, xmax, step, AbstractDataset.FLOAT64);
 
 		return new AbstractDataset[]{x,function.makeDataset(x)};
 		

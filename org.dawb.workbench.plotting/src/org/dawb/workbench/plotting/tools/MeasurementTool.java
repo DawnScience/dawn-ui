@@ -2,7 +2,9 @@ package org.dawb.workbench.plotting.tools;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegionBoundsListener;
@@ -77,9 +79,16 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 	private TableViewer   viewer;
 
 	private RegionColorListener viewUpdateListener;
+	
+	/**
+	 * A map to store dragBounds which are not the offical bounds
+	 * of the selection until the user lets go.
+	 */
+	private Map<String,RegionBounds> dragBounds;
 
 	public MeasurementTool() {
 		super();
+		dragBounds = new HashMap<String,RegionBounds>(7);
 	}
 
 	@Override
@@ -211,17 +220,17 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
         TableViewerColumn var   = new TableViewerColumn(viewer, SWT.LEFT, 0);
 		var.getColumn().setText("Name");
 		var.getColumn().setWidth(120);
-		var.setLabelProvider(new MeasurementLabelProvider(0));
+		var.setLabelProvider(new MeasurementLabelProvider(this, 0));
 		
         var   = new TableViewerColumn(viewer, SWT.CENTER, 1);
 		var.getColumn().setText("Region Type");
 		var.getColumn().setWidth(100);
-		var.setLabelProvider(new MeasurementLabelProvider(1));
+		var.setLabelProvider(new MeasurementLabelProvider(this, 1));
 
         var   = new TableViewerColumn(viewer, SWT.LEFT, 2);
 		var.getColumn().setText("Coordinates");
 		var.getColumn().setWidth(500);
-		var.setLabelProvider(new MeasurementLabelProvider(2));
+		var.setLabelProvider(new MeasurementLabelProvider(this, 2));
 		
 
 	}
@@ -264,7 +273,7 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 				for (IRegion iRegion : regions) iRegion.addRegionBoundsListener(this);
 				
 				int i=1;
-				while(true) {
+				while(true) { // Add with a unique name
 					try {
 						getPlottingSystem().createRegion("Measurement "+i, IRegion.RegionType.LINE);
 						break;
@@ -297,7 +306,7 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 			viewer.removeSelectionChangedListener(viewUpdateListener);
 			viewUpdateListener.resetSelectionColor();
 		}
-
+		dragBounds.clear();
 		try {
 			getPlottingSystem().removeRegionListener(this);
 			final Collection<IRegion> regions = getPlottingSystem().getRegions();
@@ -321,6 +330,9 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 		
         if (viewer!=null) viewer.getControl().dispose();
                
+		dragBounds.clear();
+		dragBounds = null;
+		
 		super.dispose();
 	}
 
@@ -357,13 +369,28 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 	@Override
 	public void regionBoundsDragged(RegionBoundsEvent evt) {
 		if (!isActive()) return;
-		if (viewer!=null) viewer.refresh(evt.getSource());
+		updateRegion(evt);
 	}
 
 	@Override
 	public void regionBoundsChanged(RegionBoundsEvent evt) {
 		if (!isActive()) return;
-		if (viewer!=null) viewer.refresh(evt.getSource());
+		updateRegion(evt);
 	}
 
+	private void updateRegion(RegionBoundsEvent evt) {
+		if (viewer!=null) {
+			IRegion  region = (IRegion)evt.getSource();
+			RegionBounds rb = evt.getRegionBounds();
+			
+			dragBounds.put(region.getName(), rb);
+			
+			viewer.refresh(region);
+		}
+	}
+
+	public RegionBounds getBounds(IRegion region) {
+		if (dragBounds!=null&&dragBounds.containsKey(region.getName())) return dragBounds.get(region.getName());
+		return region.getRegionBounds();
+	}
 }
