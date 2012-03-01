@@ -212,14 +212,9 @@ public class PlotImageEditor extends EditorPart implements IReusableEditor {
 				axes.add(SliceUtils.createAxisDataset((set.getShape()[0])));
 				axes.add(SliceUtils.createAxisDataset((set.getShape()[1])));
 				
+				set.setName(""); // Stack trace if null - stupid.
 				plottingSystem.createPlot2D(set, axes, monitor);
 				
-				Display.getDefault().asyncExec(new Runnable() {
-					public void run() {
-						getPlottingSystem().setTitle(null);
-					}
-				});
-
 				return Status.OK_STATUS;
 			}
 			
