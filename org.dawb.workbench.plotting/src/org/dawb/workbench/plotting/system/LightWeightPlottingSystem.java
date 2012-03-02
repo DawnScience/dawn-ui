@@ -61,6 +61,8 @@ import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseWheelListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
@@ -140,9 +142,18 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		
 		if (xyCanvas!=null) return;
 		
-		this.xyCanvas = new FigureCanvas(parent, SWT.DOUBLE_BUFFERED|SWT.NO_REDRAW_RESIZE|SWT.NO_BACKGROUND|SWT.V_SCROLL|SWT.H_SCROLL);
-		xyCanvas.setBackground(xyCanvas.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+		this.xyCanvas = new FigureCanvas(parent, SWT.DOUBLE_BUFFERED|SWT.NO_REDRAW_RESIZE|SWT.NO_BACKGROUND);
 		final LightweightSystem lws = new LightweightSystem(xyCanvas);
+		
+		// Stops a mouse wheel move corrupting the plotting area, but it wobbles a bit.
+		xyCanvas.addMouseWheelListener(new MouseWheelListener() {
+			@Override
+			public void mouseScrolled(MouseEvent e) {
+				if (xyGraph!=null) xyGraph.repaint();
+			}	
+		});
+		lws.setControl(xyCanvas);
+		xyCanvas.setBackground(xyCanvas.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 	
 		this.xyGraph = new XYRegionGraph();
 		xyGraph.setSelectionProvider(getSelectionProvider());
