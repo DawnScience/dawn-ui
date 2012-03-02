@@ -9,12 +9,15 @@ import org.dawb.common.ui.plot.AbstractPlottingSystem.ColorOption;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingFactory;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
+import org.dawb.common.ui.plot.tool.IToolPageSystem;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.part.IPageSite;
@@ -22,6 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
+import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Maths;
 
 public class DerivativeTool extends AbstractToolPage  {
@@ -30,8 +35,6 @@ public class DerivativeTool extends AbstractToolPage  {
 	
 	protected AbstractPlottingSystem plotter;
 	private   ITraceListener         traceListener;
-	private   Composite              container;
-	private   Composite              plotComposite;
 
 	
 	public DerivativeTool() {
@@ -43,7 +46,9 @@ public class DerivativeTool extends AbstractToolPage  {
 				@Override
 				public void tracesPlotted(TraceEvent evt) {
 					
-					if (!(evt.getSource() instanceof List<?>)) return;
+					if (!(evt.getSource() instanceof List<?>)) {
+						return;
+					}
 					updateDerviatives();
 				}
 			};
@@ -55,22 +60,32 @@ public class DerivativeTool extends AbstractToolPage  {
 	@Override
 	public void createControl(Composite parent) {
 
-		container = new Composite(parent, SWT.NONE);
-		container.setLayout(new FillLayout());
 
 		final IPageSite site = getSite();
 		
-		plotter.createPlotPart(container, 
+		plotter.createPlotPart(parent, 
 								getTitle(), 
 								site.getActionBars(), 
 								PlotType.PT1D,
-								null);
-		
-		this.plotComposite = plotter.getPlotComposite();
-		
-		updateDerviatives();
+								this.getPart());
+				
 		
 		getPlottingSystem().addTraceListener(traceListener);
+		
+		updateDerviatives();
+			
+	}
+
+	/**
+	 * Required if you want to make tools work.
+	 */
+	public Object getAdapter(final Class clazz) {
+
+		if (clazz == IToolPageSystem.class) {
+			return plotter;
+		}
+
+		return null;
 	}
 
 	@Override
@@ -80,14 +95,11 @@ public class DerivativeTool extends AbstractToolPage  {
 	
 	public void activate() {
 		super.activate();
-		if (container!=null&&!container.isDisposed()) {
-			container.layout(new Control[]{plotComposite});
-		}
 	}
 	
 	@Override
 	public Control getControl() {
-		return container;
+		return plotter.getPlotComposite();
 	}
 	
 	public void dispose() {
@@ -100,6 +112,7 @@ public class DerivativeTool extends AbstractToolPage  {
 	}
 
 
+	private Job updateDerivatives;
 	
 	/**
 	 * The user can optionally nominate an x. In this case, we would like to 
@@ -109,40 +122,59 @@ public class DerivativeTool extends AbstractToolPage  {
 	 * Normally everything will be ILineTraces even if the x is indices.
 	 */
 	private void updateDerviatives() {
-		
-		final Collection<ITrace>    traces= getPlottingSystem().getTraces();
-		final List<AbstractDataset> dervs = new ArrayList<AbstractDataset>(traces.size());
 
-		ITrace firstTrace = null;
-        for (ITrace trace : traces) {
-			
-        	if (firstTrace==null) firstTrace = trace;
- 			final AbstractDataset plot = trace.getData();
-			AbstractDataset x = (trace instanceof ILineTrace) 
-					          ? ((ILineTrace)trace).getXData() 
-					          : AbstractDataset.arange(0, plot.getSize(), 1, AbstractDataset.INT32);
-					        
-			final AbstractDataset derv = Maths.derivative(x, plot, 1);
-			
-			derv.setName("f"+getTicksFor(1)+"{" +plot.getName()+"}");
-			dervs.add(derv);
+		if (updateDerivatives==null) {
+			updateDerivatives = new Job("Derviative update") {
+
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					final Collection<ITrace>    traces= getPlottingSystem().getTraces();
+					final List<AbstractDataset> dervs = new ArrayList<AbstractDataset>(traces.size());
+
+					ITrace firstTrace = null;
+					for (ITrace trace : traces) {
+
+						if (firstTrace==null) firstTrace = trace;
+						final AbstractDataset plot = trace.getData();
+						AbstractDataset x = (trace instanceof ILineTrace) 
+								         ? ((ILineTrace)trace).getXData() 
+										: AbstractDataset.arange(0, plot.getSize(), 1, AbstractDataset.INT32);
+
+						final AbstractDataset derv = Maths.derivative(x, plot, 1);
+
+						derv.setName("f"+getTicksFor(1)+"{" +plot.getName()+"}");
+						dervs.add(derv);
+					}
+					plotter.clear();
+
+					if (dervs.size()>0 && firstTrace!=null) {
+
+						AbstractDataset x = (firstTrace instanceof ILineTrace) 
+								        ? ((ILineTrace)firstTrace).getXData() 
+										: AbstractDataset.arange(0, dervs.get(0).getSize(), 1, AbstractDataset.INT32);
+
+						if (x.getName()==null || "".equals(x.getName())) x.setName("Indices");
+
+						// Often people can have data plotted with infinities. We 
+						// replace them here just for convenience.
+						DatasetUtils.removeNansInfinites(dervs, new Double(0));
+						plotter.createPlot1D(x, dervs, monitor); 
+					}
+
+					return Status.OK_STATUS;
+				}	
+			};
+			updateDerivatives.setSystem(true);
+			updateDerivatives.setUser(false);
+			updateDerivatives.setPriority(Job.INTERACTIVE);
 		}
-        plotter.clear();
-        
-        if (dervs.size()>0 && firstTrace!=null) {
-        	
- 			AbstractDataset x = (firstTrace instanceof ILineTrace) 
-					          ? ((ILineTrace)firstTrace).getXData() 
-					          : AbstractDataset.arange(0, dervs.get(0).getSize(), 1, AbstractDataset.INT32);
-					        
-			if (x.getName()==null || "".equals(x.getName())) x.setName("Indices");
 
-        	plotter.createPlot1D(x, dervs, null); 
-        }
+
+		updateDerivatives.schedule();
 	}
 
 	private String getTicksFor(int size) {
-        final StringBuilder buf = new StringBuilder();
+		final StringBuilder buf = new StringBuilder();
         for (int i = 0; i < size; i++) buf.append("'");
         return buf.toString();
 	}

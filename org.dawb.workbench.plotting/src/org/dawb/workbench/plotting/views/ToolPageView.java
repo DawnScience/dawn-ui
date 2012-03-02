@@ -25,6 +25,7 @@ import org.dawb.common.util.text.StringUtils;
 import org.eclipse.core.commands.common.EventManager;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.util.SafeRunnable;
@@ -39,6 +40,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IURIEditorInput;
@@ -51,7 +53,6 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.SubActionBars;
 import org.eclipse.ui.internal.WorkbenchPlugin;
 import org.eclipse.ui.internal.util.Util;
-import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.part.IPage;
 import org.eclipse.ui.part.IPageBookViewPage;
 import org.eclipse.ui.part.IPageSite;
@@ -969,11 +970,15 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	}
 	
 	private String getString(IWorkbenchPart part) {
-		if (!(part instanceof EditorPart)) return null;
-		final IEditorInput input = ((EditorPart)part).getEditorInput();
-		return input instanceof IURIEditorInput 
-			   ? ((IURIEditorInput)input).getURI().getRawPath()
-			   : input.getName(); // TODO Not very secure
+		if (part instanceof IEditorPart) {
+			final IEditorInput input = ((IEditorPart)part).getEditorInput();
+			return input instanceof IURIEditorInput 
+				   ? ((IURIEditorInput)input).getURI().getRawPath()
+				   : input.getName(); // TODO Not very secure
+		} else {
+		    // Use the id of the part
+			return part.getSite().getId();
+		}
 	}
 	
 	private boolean updatingActivated = false;
@@ -1021,8 +1026,9 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	
 	private void updatePartInfo(IToolPage tool) {
 		if (isDisposed) return;
-		setPartName(tool.getTitle());		
-		setTitleImage(tool.getImageDescriptor().createImage());
+		setPartName(tool.getTitle());
+		final ImageDescriptor des = tool.getImageDescriptor();
+		if (des!=null) setTitleImage(des.createImage());
 	}
 	
 
@@ -1068,7 +1074,6 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	protected boolean isImportant(IWorkbenchPart part) {
 		if (isDisposed) return false;
 		if (systems==null || recs==null) return false;
-		if (!( part instanceof EditorPart)) return false;
 
 		IToolPageSystem sys = (IToolPageSystem)part.getAdapter(IToolPageSystem.class);
         return sys != null;

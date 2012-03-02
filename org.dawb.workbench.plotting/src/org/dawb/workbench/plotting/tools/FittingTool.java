@@ -509,7 +509,9 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		
 		if (bean==null) return;
 		
-		if (plotServerConnection==null) this.plotServerConnection = new PlotServerConnection(((IEditorPart)getPart()).getEditorInput().getName());
+		if (plotServerConnection==null && getPart() instanceof IEditorPart) {
+			this.plotServerConnection = new PlotServerConnection(((IEditorPart)getPart()).getEditorInput().getName());
+		}
 		
 		if (plotServerConnection!=null) {
 			final Serializable peaks = (Serializable)bean.getPeaks();

@@ -66,6 +66,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchPart;
@@ -140,7 +141,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		if (xyCanvas!=null) return;
 		
 		this.xyCanvas = new FigureCanvas(parent, SWT.DOUBLE_BUFFERED|SWT.NO_REDRAW_RESIZE|SWT.NO_BACKGROUND|SWT.V_SCROLL|SWT.H_SCROLL);
-		xyCanvas.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+		xyCanvas.setBackground(xyCanvas.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		final LightweightSystem lws = new LightweightSystem(xyCanvas);
 	
 		this.xyGraph = new XYRegionGraph();
@@ -333,13 +334,15 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 
 		final List<ITrace> traces = new ArrayList<ITrace>(7);
 		
-		if (parent.getDisplay().getThread()==Thread.currentThread()) {
-			traces.addAll(createPlotInternal(mode, x, ys, createdIndices, monitor));
+		if (getDisplay().getThread()==Thread.currentThread()) {
+			List<ITrace> ts = createPlotInternal(mode, x, ys, createdIndices, monitor);
+			if (ts!=null) traces.addAll(ts);
 		} else {
-			parent.getDisplay().syncExec(new Runnable() {
+			getDisplay().syncExec(new Runnable() {
 				@Override
 				public void run() {
-					traces.addAll(createPlotInternal(mode, x, ys, createdIndices, monitor));
+					List<ITrace> ts = createPlotInternal(mode, x, ys, createdIndices, monitor);
+					if (ts!=null) traces.addAll(ts);
 				}
 			});
 		}
@@ -350,6 +353,13 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		
 	}
 	
+	private Display getDisplay() {
+		if (part!=null) return part.getSite().getShell().getDisplay();
+		if (xyCanvas!=null) return xyCanvas.getDisplay();
+		if (imageComposite!=null) return imageComposite.getDisplay();
+		return parent.getDisplay();
+	}
+
 	private Object[] getIndexedDatasets(AbstractDataset data,
 			                            List<AbstractDataset> axes) {
 		
@@ -379,17 +389,16 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		if (!this.plottingMode.is1D()) throw new Exception("Can only add in 1D mode!");
 		if (name==null || "".equals(name)) throw new IllegalArgumentException("The dataset name must not be null or empty string!");
 		
-		if (parent.getDisplay().getThread()==Thread.currentThread()) {
+		if (getDisplay().getThread()==Thread.currentThread()) {
 			appendInternal(name, xValue, yValue, monitor);
 		} else {
-			parent.getDisplay().syncExec(new Runnable() {
+			getDisplay().syncExec(new Runnable() {
 				@Override
 				public void run() {
 					appendInternal(name, xValue, yValue, monitor);
 				}
 			});
 		}
-
 	}
 
 	/**
@@ -519,6 +528,11 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		final AbstractDataset       x  = (AbstractDataset)oa[0];
 		final List<AbstractDataset> ys = (List<AbstractDataset>)oa[1];
 		
+		if (DatasetUtils.containsInvalidNumbers(x)) throw new RuntimeException("The value of "+x.getName()+" is invalid. Cannot plot datasets with infinite values in it!");
+		for (AbstractDataset y : ys) {
+			if (DatasetUtils.containsInvalidNumbers(y)) throw new RuntimeException("The value of "+y.getName()+" is invalid. Cannot plot datasets with infinite values in it!");
+		}
+		
 		if (colorMap == null && getColorOption()!=ColorOption.NONE) {
 			if (getColorOption()==ColorOption.BY_NAME) {
 				colorMap = new HashMap<Object,Color>(ys.size());
@@ -544,7 +558,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 
 		//create a trace data provider, which will provide the data to the trace.
 		int iplot = 0;
-		final double[] xArray = getDoubleArray(x);
+		final double[] xArray = (double[])DatasetUtils.cast(x, AbstractDataset.FLOAT64).getBuffer();
 		
 		final List<ITrace> traces = new ArrayList<ITrace>(ys.size());
 		for (AbstractDataset y : ys) {
@@ -553,7 +567,8 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 			if (y.getBuffer()!=null && y.getShape()!=null) {
 				traceDataProvider.setBufferSize(y.getSize());	
 				traceDataProvider.setCurrentXDataArray(xArray);
-				traceDataProvider.setCurrentYDataArray(getDoubleArray(y));	
+				final double[] yArray = (double[])DatasetUtils.cast(y, AbstractDataset.FLOAT64).getBuffer();
+				traceDataProvider.setCurrentYDataArray(yArray);	
 			}
 			
 			//create the trace
@@ -843,22 +858,19 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	}
 	
 
-	private double[] getDoubleArray(AbstractDataset x) {
-		return (double[])DatasetUtils.cast(x, AbstractDataset.FLOAT64).getBuffer();
-	}
-
 	@Override
 	public void reset() {
-		if (parent.getDisplay().getThread()==Thread.currentThread()) {
+		if (getDisplay().getThread()==Thread.currentThread()) {
 			resetInternal();
 		} else {
-			parent.getDisplay().syncExec(new Runnable() {
+			getDisplay().syncExec(new Runnable() {
 				@Override
 				public void run() {
 					resetInternal();
 				}
 			});
 		}
+
 	}
 	private void resetInternal() {
 		
@@ -881,16 +893,18 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	
 	@Override
 	public void clear() {
-		if (parent.getDisplay().getThread()==Thread.currentThread()) {
+		
+		if (getDisplay().getThread()==Thread.currentThread()) {
 			clearInternal();
 		} else {
-			parent.getDisplay().syncExec(new Runnable() {
+			getDisplay().syncExec(new Runnable() {
 				@Override
 				public void run() {
 					clearInternal();
 				}
 			});
 		}
+
 	}
 	private void clearInternal() {		
 		if (xyGraph!=null) {
@@ -929,12 +943,17 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	}
 
 	public void repaint() {
-		parent.getDisplay().syncExec(new Runnable() {
-			public void run() {
-				if (xyCanvas!=null) LightWeightPlottingSystem.this.xyCanvas.redraw();
-				if (imageComponent!=null) LightWeightPlottingSystem.this.imageComposite.redraw();
-			}
-		});
+		if (getDisplay().getThread()==Thread.currentThread()) {
+			if (xyCanvas!=null) LightWeightPlottingSystem.this.xyCanvas.redraw();
+			if (imageComponent!=null) LightWeightPlottingSystem.this.imageComposite.redraw();
+		} else {
+			getDisplay().syncExec(new Runnable() {
+				public void run() {
+					if (xyCanvas!=null) LightWeightPlottingSystem.this.xyCanvas.redraw();
+					if (imageComponent!=null) LightWeightPlottingSystem.this.imageComposite.redraw();
+				}
+			});
+		}
 	}
 	
 	/**
