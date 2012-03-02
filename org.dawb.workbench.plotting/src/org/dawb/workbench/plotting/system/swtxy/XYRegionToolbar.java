@@ -2,7 +2,10 @@ package org.dawb.workbench.plotting.system.swtxy;
 
 
 import java.util.Collection;
+import java.util.List;
 
+import org.csstudio.swt.xygraph.toolbar.CheckableActionGroup;
+import org.csstudio.swt.xygraph.toolbar.GrayableButton;
 import org.csstudio.swt.xygraph.toolbar.XYGraphConfigDialog;
 import org.csstudio.swt.xygraph.toolbar.XYGraphToolbar;
 import org.dawb.common.ui.menu.MenuAction;
@@ -11,10 +14,24 @@ import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.system.dialog.AddRegionDialog;
 import org.dawb.workbench.plotting.system.dialog.RemoveRegionCommand;
 import org.dawb.workbench.plotting.system.dialog.RemoveRegionDialog;
+import org.eclipse.draw2d.ButtonModel;
+import org.eclipse.draw2d.ChangeEvent;
+import org.eclipse.draw2d.ChangeListener;
+import org.eclipse.draw2d.Clickable;
+import org.eclipse.draw2d.Figure;
+import org.eclipse.draw2d.ImageFigure;
+import org.eclipse.draw2d.Label;
+import org.eclipse.draw2d.ToggleButton;
+import org.eclipse.draw2d.ToggleModel;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.window.Window;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,8 +56,91 @@ public class XYRegionToolbar extends XYGraphToolbar {
 	
 	public void createGraphActions(final IContributionManager tool, final IContributionManager men) {
 
-        super.createGraphActions(tool, men);
+        final CheckableActionGroup zoomG = new CheckableActionGroup();
         
+        final MenuAction zoomDropDown = new MenuAction("Zoom tool");
+        zoomDropDown.setToolTipText("Zoom tool");
+        zoomDropDown.setId("org.dawb.workbench.ui.editors.plotting.swtxy.zoomTools");
+        
+        for (Object child : getChildren()) {
+			
+        	if (!(child instanceof Figure)) continue;
+        	final Figure c = (Figure)child;
+        	if (c instanceof Clickable) {
+        		
+        		final Clickable button = (Clickable)c;
+        		final int flag = button instanceof ToggleButton
+        		               ? IAction.AS_CHECK_BOX
+        		               : IAction.AS_PUSH_BUTTON;
+        		
+        		final String text  = ((Label)button.getToolTip()).getText();
+        		
+        		final Object cont  = button.getChildren().get(0);
+        		final Image  image = cont instanceof ImageFigure
+        		                   ? ((ImageFigure)cont).getImage()
+        		                   : ((Label)cont).getIcon();
+        		                   
+        		final Action action = new Action(text, flag) {
+        			public void run() {
+        				if (button.getModel() instanceof ToggleModel) {
+        					((ToggleModel)button.getModel()).fireActionPerformed();
+        				} else {
+        				    button.doClick();
+        				}  
+        				if (zoomGroup.getElements().contains(button.getModel())) {
+        					zoomDropDown.setSelectedAction(this);
+        				}
+        			}
+				};
+				 
+				if (flag == IAction.AS_CHECK_BOX) {
+					final boolean isSel = button.isSelected();
+					action.setChecked(isSel);
+				}
+
+				if (button instanceof GrayableButton) {
+					final GrayableButton gb = (GrayableButton)button;
+					gb.addChangeListener(new ChangeListener() {	
+						@Override
+						public void handleStateChanged(ChangeEvent event) {
+							if (event.getPropertyName().equals(ButtonModel.ENABLED_PROPERTY)) {
+                                action.setEnabled(gb.isEnabled());
+							}
+						};
+					});
+
+				};
+        				
+				action.setImageDescriptor(new ImageDescriptor() {			
+					@Override
+					public ImageData getImageData() {
+						return image.getImageData();
+					}
+				});
+				
+        	    final List models = zoomGroup.getElements();
+        	    if (models.contains(button.getModel())) {
+        	    	if (tool.find(zoomDropDown.getId())==null) {
+        				tool.add(zoomDropDown);
+        				men.add(zoomDropDown);
+        	    	}
+        	    	zoomDropDown.add(action);
+        	    	zoomG.add(action);
+        	    } else {
+    				tool.add(action);
+    				men.add(action);
+        	    }
+        	    
+        	} else if (c instanceof ToolbarSeparator) {
+        		
+           		tool.add(new Separator(((ToolbarSeparator)c).getId()));
+           		men.add(new Separator(((ToolbarSeparator)c).getId()));
+        	}
+        }
+        
+        zoomDropDown.setSelectedAction(0);
+        zoomDropDown.getAction(0).setChecked(true);
+       
         final MenuAction regionDropDown = new MenuAction("Add a selection region");
         regionDropDown.setId("org.dawb.workbench.ui.editors.plotting.swtxy.addRegions");
  

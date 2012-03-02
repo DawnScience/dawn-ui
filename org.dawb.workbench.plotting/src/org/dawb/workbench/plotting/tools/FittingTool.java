@@ -17,6 +17,8 @@ import org.dawb.common.ui.plot.region.RegionEvent;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
+import org.dawb.common.ui.plot.trace.ITraceListener;
+import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.workbench.plotting.Activator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -28,7 +30,6 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -40,8 +41,6 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -49,11 +48,10 @@ import org.eclipse.ui.IEditorPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.plotserver.GuiParameters;
-import uk.ac.diamond.scisoft.analysis.rcp.views.PlotServerConnection;
-import uk.ac.diamond.scisoft.analysis.rcp.plotting.IGuiInfoManager;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
+import uk.ac.diamond.scisoft.analysis.rcp.plotting.IGuiInfoManager;
+import uk.ac.diamond.scisoft.analysis.rcp.views.PlotServerConnection;
 
 public class FittingTool extends AbstractToolPage implements IRegionListener {
 
@@ -64,12 +62,32 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 	private IRegion       fitRegion;
 	private Job           fittingJob;
 	private FittedPeaksBean bean;
-
+	
 	private ISelectionChangedListener viewUpdateListener;
+	private MenuAction tracesMenu;
+	private ITraceListener traceListener;
+	protected ILineTrace selectedTrace;
 
 	public FittingTool() {
 		super();
 		this.fittingJob = createFittingJob();
+		
+		this.traceListener = new ITraceListener.Stub() {
+			
+			@Override
+			public void tracesPlotted(TraceEvent evt) {
+				
+				updateTracesChoice();
+			   
+			}
+			
+			@Override
+			public void tracesCleared(TraceEvent evet) {
+				tracesMenu.clear();
+				getSite().getActionBars().updateActionBars();
+			}
+		};
+
 	}
 
 	@Override
@@ -87,8 +105,6 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 				
 		getSite().setSelectionProvider(viewer);
 		
-		activate();
-		
 		this.viewUpdateListener = new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -100,6 +116,44 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 			}
 		};
 		viewer.addSelectionChangedListener(viewUpdateListener);
+		
+		activate();
+	}
+
+	protected void updateTracesChoice() {
+		
+		if (tracesMenu==null) return;
+		
+		tracesMenu.clear();
+		
+		final Collection<ITrace> traces = getPlottingSystem().getTraces();
+		if (traces==null || traces.size()<0) return;
+		if (bean!=null) traces.removeAll(bean.getPeakTraces());
+		
+		final CheckableActionGroup group = new CheckableActionGroup();
+		FittingTool.this.selectedTrace = null;
+		for (final ITrace iTrace : traces) {
+			
+			if (FittingTool.this.selectedTrace==null && iTrace instanceof ILineTrace) {
+				FittingTool.this.selectedTrace = (ILineTrace)iTrace;
+			}
+			
+			final Action action = new Action(iTrace.getName(), IAction.AS_CHECK_BOX) {
+				public void run() {
+					if (iTrace instanceof ILineTrace) FittingTool.this.selectedTrace = (ILineTrace)iTrace;
+					tracesMenu.setSelectedAction(this);
+					if (fittingJob!=null) fittingJob.schedule();
+					setChecked(true);
+				}
+			};
+			tracesMenu.add(action);
+			group.add(action);
+		}
+		
+		tracesMenu.setSelectedAction(0);
+		tracesMenu.getAction(0).setChecked(true);
+				
+		getSite().getActionBars().updateActionBars();
 	}
 
 	private void createActions() {
@@ -159,7 +213,20 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		//getSite().getActionBars().getMenuManager().add(sep);
 
 		
+		this.tracesMenu = new MenuAction("Traces");
+		tracesMenu.setToolTipText("Choice of trace to fit on.");
+		tracesMenu.setImageDescriptor(Activator.getImageDescriptor("icons/plot-tool-trace-choice.png"));
+		
+		getSite().getActionBars().getToolBarManager().add(tracesMenu);
+		getSite().getActionBars().getMenuManager().add(tracesMenu);
+		
+		final Separator sep2 = new Separator(getClass().getName()+".separator2");	
+		getSite().getActionBars().getToolBarManager().add(sep2);
+
+		
 		final MenuAction numberPeaks = new MenuAction("Number peaks to fit");
+		numberPeaks.setToolTipText("Number peaks to fit");
+				
 		final CheckableActionGroup group = new CheckableActionGroup();
 		
 		final int npeak = Activator.getDefault().getPreferenceStore().getDefaultInt(FittingConstants.PEAK_NUMBER_CHOICES);
@@ -279,7 +346,9 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		if (viewer!=null && viewer.getControl().isDisposed()) return;
 		
 		if (viewUpdateListener!=null) viewer.addSelectionChangedListener(viewUpdateListener);
-
+		if (this.traceListener!=null) getPlottingSystem().addTraceListener(traceListener);
+		updateTracesChoice();
+		
 		try {
 			if (bean!=null) bean.activate();
 			getPlottingSystem().addRegionListener(this);
@@ -300,6 +369,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		if (viewer!=null && viewer.getControl().isDisposed()) return;
 		
 		if (viewUpdateListener!=null) viewer.removeSelectionChangedListener(viewUpdateListener);
+		if (this.traceListener!=null) getPlottingSystem().removeTraceListener(traceListener);
 
 		try {
 			getPlottingSystem().removeRegionListener(this);
@@ -320,6 +390,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 			getPlottingSystem().removeRegionListener(this);
 		}
 		if (viewUpdateListener!=null) viewer.removeSelectionChangedListener(viewUpdateListener);
+		if (this.traceListener!=null) getPlottingSystem().removeTraceListener(traceListener);
 		viewUpdateListener = null;
 		
         if (viewer!=null) viewer.getControl().dispose();
@@ -384,9 +455,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 				    }
 				});
 				
-				final Collection<ITrace> traces = getPlottingSystem().getTraces();
-				if (traces==null || traces.size()<0) return Status.CANCEL_STATUS;
-
+				
 				// We chop x and y by the region bounds. We assume the
 				// plot is an XAXIS selection therefore the indices in
 				// y = indices chosen in x.
@@ -394,9 +463,8 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 				final double[] p2 = bounds.getP2();
 				
 				// We peak fit only the first of the data sets plotted for now.
-				final ILineTrace   line  = (ILineTrace)traces.iterator().next(); //TODO What if more than one dataset?
-				AbstractDataset x  = line.getXData();
-				AbstractDataset y  = line.getYData();
+				AbstractDataset x  = selectedTrace.getXData();
+				AbstractDataset y  = selectedTrace.getYData();
 				
 				AbstractDataset[] a= FittingUtils.xintersection(x,y,p1[0],p2[0]);
 				x = a[0]; y=a[1];
