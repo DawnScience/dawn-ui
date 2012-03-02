@@ -23,7 +23,7 @@ import uk.ac.diamond.scisoft.analysis.optimize.IOptimizer;
  * @author fcp94556
  *
  */
-public class FittedPeaksBean {
+public class FittedPeaks {
 
 	private List<RegionBounds>       peakBounds;
 	private List<? extends IPeak>    peaks;
@@ -33,7 +33,7 @@ public class FittedPeaksBean {
 	private List<IAnnotation>        peakAnnotations;
 	private IOptimizer               optimizer;
 	
-	public FittedPeaksBean() {
+	public FittedPeaks() {
 		this.peakAreaRegions = new ArrayList<IRegion>(7);
 		this.peakLineRegions = new ArrayList<IRegion>(7);
 		this.peakTraces  = new ArrayList<ITrace>(7);
@@ -158,7 +158,7 @@ public class FittedPeaksBean {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		FittedPeaksBean other = (FittedPeaksBean) obj;
+		FittedPeaks other = (FittedPeaks) obj;
 		if (functionData == null) {
 			if (other.functionData != null)
 				return false;

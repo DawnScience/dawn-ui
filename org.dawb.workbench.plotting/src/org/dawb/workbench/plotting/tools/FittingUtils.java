@@ -1,11 +1,15 @@
 package org.dawb.workbench.plotting.tools;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.dawb.common.ui.plot.region.RegionBounds;
 import org.dawb.workbench.plotting.Activator;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.IAnalysisMonitor;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
@@ -14,12 +18,16 @@ import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.APeak;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Gaussian;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.Offset;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.Lorentzian;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.PearsonVII;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.PseudoVoigt;
 import uk.ac.diamond.scisoft.analysis.optimize.GeneticAlg;
 import uk.ac.diamond.scisoft.analysis.optimize.IOptimizer;
 
 public class FittingUtils {
 
+	private static Logger logger = LoggerFactory.getLogger(FittingUtils.class);
 	
 	/**
 	 * This method runs a fit on data passed in. It reads preferences to 
@@ -44,12 +52,12 @@ public class FittingUtils {
 	 * @param monitor
 	 * @return
 	 */
-	public static FittedPeaksBean getFittedPeaks(final AbstractDataset  x, 
+	public static FittedPeaks getFittedPeaks(final AbstractDataset  x, 
 			                                     final AbstractDataset  y,
 			                                     final IProgressMonitor monitor) {
 				
 		final IOptimizer optimizer = getOptimizer();
-		final List<APeak> peaks =  Generic1DFitter.fitPeaks(x, y, getFunction(), optimizer, getSmoothing(), getPeaksRequired(), 0.0, false, false, new IAnalysisMonitor() {
+		final List<APeak> peaks =  Generic1DFitter.fitPeaks(x, y, getPeakType(), optimizer, getSmoothing(), getPeaksRequired(), 0.0, false, false, new IAnalysisMonitor() {
 			@Override
 			public boolean hasBeenCancelled() {
 				return monitor.isCanceled(); // We always use the monitor.isCancelled() the fitting can take a while
@@ -76,7 +84,7 @@ public class FittingUtils {
 			functions.add(pf);
 		}
 		
-		final FittedPeaksBean bean = new FittedPeaksBean();
+		final FittedPeaks bean = new FittedPeaks();
 		bean.setPeakBounds(regions);
 		bean.setPeaks(peaks);
 		bean.setFunctionData(functions);
@@ -133,8 +141,21 @@ public class FittingUtils {
 		return 0.01d;
 	}
 
-	private static APeak getFunction() {
-		return new Gaussian(1, 1, 1, 1);
+	private static APeak getPeakType() {
+		try {
+			
+			final String peakClass = Activator.getDefault().getPreferenceStore().getString(FittingConstants.PEAK_TYPE);
+			
+			/**
+			 * Could use reflection to save on objects, but there's only 4 of them.
+			 */
+			return getPeakOptions().get(peakClass);
+			
+		} catch (Exception ne) {
+			logger.error("Cannot determine peak type required!", ne);
+			Activator.getDefault().getPreferenceStore().setValue(FittingConstants.PEAK_TYPE, Gaussian.class.getName());
+		    return new Gaussian(1, 1, 1, 1);
+		}
 	}
 
 	/**
@@ -164,5 +185,15 @@ public class FittingUtils {
 		if (y!=null) y = y.getSlice(new int[] { start }, new int[] { stop }, null);		
 		
 		return (y!=null) ? new AbstractDataset[]{x,y} : new AbstractDataset[]{x};
+	}
+	
+	
+	public static Map<String, APeak> getPeakOptions() {
+		final Map<String, APeak> opts = new LinkedHashMap<String, APeak>(4);
+		opts.put(Gaussian.class.getName(),    new Gaussian(1, 1, 1, 1));
+		opts.put(Lorentzian.class.getName(),  new Lorentzian(1, 1, 1, 1));
+		opts.put(PearsonVII.class.getName(),  new PearsonVII(1, 1, 1, 1));
+		opts.put(PseudoVoigt.class.getName(), new PseudoVoigt(1, 1, 1, 1));
+		return opts;
 	}
 }

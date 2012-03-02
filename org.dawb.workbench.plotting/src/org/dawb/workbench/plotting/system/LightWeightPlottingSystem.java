@@ -539,9 +539,9 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		final AbstractDataset       x  = (AbstractDataset)oa[0];
 		final List<AbstractDataset> ys = (List<AbstractDataset>)oa[1];
 		
-		if (DatasetUtils.containsInvalidNumbers(x)) throw new RuntimeException("The value of "+x.getName()+" is invalid. Cannot plot datasets with infinite values in it!");
+		if (x.containsInvalidNumbers()) throw new RuntimeException("The value of "+x.getName()+" is invalid. Cannot plot datasets with infinite values in it!");
 		for (AbstractDataset y : ys) {
-			if (DatasetUtils.containsInvalidNumbers(y)) throw new RuntimeException("The value of "+y.getName()+" is invalid. Cannot plot datasets with infinite values in it!");
+			if (y.containsInvalidNumbers()) throw new RuntimeException("The value of "+y.getName()+" is invalid. Cannot plot datasets with infinite values in it!");
 		}
 		
 		if (colorMap == null && getColorOption()!=ColorOption.NONE) {

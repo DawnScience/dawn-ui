@@ -157,7 +157,7 @@ public class DerivativeTool extends AbstractToolPage  {
 
 						// Often people can have data plotted with infinities. We 
 						// replace them here just for convenience.
-						DatasetUtils.removeNansInfinites(dervs, new Double(0));
+						for (AbstractDataset a : dervs)  DatasetUtils.removeNansAndInfinities(a, new Double(0));
 						plotter.createPlot1D(x, dervs, monitor); 
 					}
 

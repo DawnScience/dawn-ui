@@ -39,7 +39,7 @@ public class FittingLabelProvider extends ColumnLabelProvider {
 	public String getText(Object element) {
 		
 		final Integer    peakNumber = (Integer)element;
-		final FittedPeaksBean bean = (FittedPeaksBean)viewer.getInput();
+		final FittedPeaks bean = (FittedPeaks)viewer.getInput();
 		if (bean==null)     return "";
 		if (bean.isEmpty()) return "";
 		
@@ -68,7 +68,7 @@ public class FittingLabelProvider extends ColumnLabelProvider {
 	 */
 	public Color getForeground(final Object element) {
 		
-		final FittedPeaksBean bean = (FittedPeaksBean)viewer.getInput();
+		final FittedPeaks bean = (FittedPeaks)viewer.getInput();
 		if (bean==null)     return super.getForeground(element);
 		if (bean.isEmpty()) return super.getForeground(element);
 	

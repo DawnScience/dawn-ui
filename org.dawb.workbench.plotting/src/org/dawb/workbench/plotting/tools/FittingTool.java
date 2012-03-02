@@ -61,7 +61,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 	private TableViewer   viewer;
 	private IRegion       fitRegion;
 	private Job           fittingJob;
-	private FittedPeaksBean bean;
+	private FittedPeaks bean;
 	
 	private ISelectionChangedListener viewUpdateListener;
 	private MenuAction tracesMenu;
@@ -109,7 +109,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				final StructuredSelection sel = (StructuredSelection)event.getSelection();
-				if (bean!=null) {
+				if (bean!=null && sel!=null && sel.getFirstElement()!=null) {
 					bean.setSelectedPeak((Integer)sel.getFirstElement());
 					viewer.refresh();
 				}
@@ -118,167 +118,6 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		viewer.addSelectionChangedListener(viewUpdateListener);
 		
 		activate();
-	}
-
-	protected void updateTracesChoice() {
-		
-		if (tracesMenu==null) return;
-		
-		tracesMenu.clear();
-		
-		final Collection<ITrace> traces = getPlottingSystem().getTraces();
-		if (traces==null || traces.size()<0) return;
-		if (bean!=null) traces.removeAll(bean.getPeakTraces());
-		
-		final CheckableActionGroup group = new CheckableActionGroup();
-		FittingTool.this.selectedTrace = null;
-		for (final ITrace iTrace : traces) {
-			
-			if (FittingTool.this.selectedTrace==null && iTrace instanceof ILineTrace) {
-				FittingTool.this.selectedTrace = (ILineTrace)iTrace;
-			}
-			
-			final Action action = new Action(iTrace.getName(), IAction.AS_CHECK_BOX) {
-				public void run() {
-					if (iTrace instanceof ILineTrace) FittingTool.this.selectedTrace = (ILineTrace)iTrace;
-					tracesMenu.setSelectedAction(this);
-					if (fittingJob!=null) fittingJob.schedule();
-					setChecked(true);
-				}
-			};
-			tracesMenu.add(action);
-			group.add(action);
-		}
-		
-		tracesMenu.setSelectedAction(0);
-		tracesMenu.getAction(0).setChecked(true);
-				
-		getSite().getActionBars().updateActionBars();
-	}
-
-	private void createActions() {
-		
-		
-		final Action showAnns = new Action("Show annotations at the peak position.", IAction.AS_CHECK_BOX) {
-			public void run() {
-				final boolean isChecked = isChecked();
-				Activator.getDefault().getPreferenceStore().setValue(FittingConstants.SHOW_ANNOTATION_AT_PEAK, isChecked);
-				if (bean!=null) bean.setAnnotationsVisible(isChecked);
-			}
-		};
-		showAnns.setImageDescriptor(Activator.getImageDescriptor("icons/plot-tool-peak-fit-showAnnotation.png"));
-		getSite().getActionBars().getToolBarManager().add(showAnns);
-		//getSite().getActionBars().getMenuManager().add(showAnns);
-		showAnns.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(FittingConstants.SHOW_ANNOTATION_AT_PEAK));
-
-		final Action showTrace = new Action("Show fitting traces.", IAction.AS_CHECK_BOX) {
-			public void run() {
-				final boolean isChecked = isChecked();
-				Activator.getDefault().getPreferenceStore().setValue(FittingConstants.SHOW_FITTING_TRACE, isChecked);
-				if (bean!=null) bean.setTracesVisible(isChecked);
-			}
-		};
-		showTrace.setImageDescriptor(Activator.getImageDescriptor("icons/plot-tool-peak-fit-showFittingTrace.png"));
-		getSite().getActionBars().getToolBarManager().add(showTrace);
-		//getSite().getActionBars().getMenuManager().add(showTrace);
-		showTrace.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(FittingConstants.SHOW_FITTING_TRACE));
-
-		
-		final Action showPeak = new Action("Show peak lines.", IAction.AS_CHECK_BOX) {
-			public void run() {
-				final boolean isChecked = isChecked();
-				Activator.getDefault().getPreferenceStore().setValue(FittingConstants.SHOW_PEAK_SELECTIONS, isChecked);
-				if (bean!=null) bean.setPeaksVisible(isChecked);
-			}
-		};
-		showPeak.setImageDescriptor(Activator.getImageDescriptor("icons/plot-tool-peak-fit-showPeakLine.png"));
-		getSite().getActionBars().getToolBarManager().add(showPeak);
-		//getSite().getActionBars().getMenuManager().add(showPeak);
-		showPeak.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(FittingConstants.SHOW_PEAK_SELECTIONS));
-
-		final Action showFWHM = new Action("Show selection regions for full width, half max.", IAction.AS_CHECK_BOX) {
-			public void run() {
-				final boolean isChecked = isChecked();
-				Activator.getDefault().getPreferenceStore().setValue(FittingConstants.SHOW_FWHM_SELECTIONS, isChecked);
-				if (bean!=null) bean.setAreasVisible(isChecked);
-			}
-		};
-		showFWHM.setImageDescriptor(Activator.getImageDescriptor("icons/plot-tool-peak-fit-showFWHM.png"));
-		getSite().getActionBars().getToolBarManager().add(showFWHM);
-		//getSite().getActionBars().getMenuManager().add(showFWHM);
-		showFWHM.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(FittingConstants.SHOW_FWHM_SELECTIONS));
-		
-		final Separator sep = new Separator(getClass().getName()+".separator1");	
-		getSite().getActionBars().getToolBarManager().add(sep);
-		//getSite().getActionBars().getMenuManager().add(sep);
-
-		
-		this.tracesMenu = new MenuAction("Traces");
-		tracesMenu.setToolTipText("Choice of trace to fit on.");
-		tracesMenu.setImageDescriptor(Activator.getImageDescriptor("icons/plot-tool-trace-choice.png"));
-		
-		getSite().getActionBars().getToolBarManager().add(tracesMenu);
-		getSite().getActionBars().getMenuManager().add(tracesMenu);
-		
-		final Separator sep2 = new Separator(getClass().getName()+".separator2");	
-		getSite().getActionBars().getToolBarManager().add(sep2);
-
-		
-		final MenuAction numberPeaks = new MenuAction("Number peaks to fit");
-		numberPeaks.setToolTipText("Number peaks to fit");
-				
-		final CheckableActionGroup group = new CheckableActionGroup();
-		
-		final int npeak = Activator.getDefault().getPreferenceStore().getDefaultInt(FittingConstants.PEAK_NUMBER_CHOICES);
-		for (int ipeak = 1; ipeak <= npeak; ipeak++) {
-			
-			final Action action = new Action(String.valueOf(ipeak), IAction.AS_CHECK_BOX) {
-				public void run() {
-					Activator.getDefault().getPreferenceStore().setValue(FittingConstants.PEAK_NUMBER, Integer.valueOf(getText()));
-					numberPeaks.setSelectedAction(this);
-					setChecked(true);
-					if (isActive()) fittingJob.schedule();
-				}
-			};
-			
-			action.setImageDescriptor(IconUtils.createIconDescriptor(String.valueOf(ipeak)));
-			numberPeaks.add(action);
-			group.add(action);
-			action.setChecked(false);
-			action.setToolTipText("Fit "+ipeak+" peak(s)");
-			
-		}
-
-		final int ipeak = Activator.getDefault().getPreferenceStore().getInt(FittingConstants.PEAK_NUMBER);
-		numberPeaks.setSelectedAction(ipeak-1);
-		numberPeaks.setCheckedAction(ipeak-1, true);
-		
-		getSite().getActionBars().getToolBarManager().add(numberPeaks);
-		getSite().getActionBars().getMenuManager().add(numberPeaks);
-		
-		
-		final Action clear = new Action("Clear", Activator.getImageDescriptor("icons/plot-tool-peak-fit-clear.png")) {
-			public void run() {
-				if (!isActive()) return;
-				if (bean!=null) bean.removeSelections(getPlottingSystem());
-				bean.dispose();
-				bean = null;
-				viewer.setContentProvider(createActorContentProvider(0));
-				viewer.setInput(null);
-			}
-		};
-		clear.setToolTipText("Clear all regions found in the fitting");
-		
-		getSite().getActionBars().getToolBarManager().add(clear);
-		getSite().getActionBars().getMenuManager().add(clear);
-		
-		createRightClickMenu();
-	}
-	
-	private void createRightClickMenu() {	
-	    final MenuManager menuManager = new MenuManager();
-	    for (IContributionItem item : getSite().getActionBars().getMenuManager().getItems()) menuManager.add(item);
-	    viewer.getControl().setMenu(menuManager.createContextMenu(viewer.getControl()));
 	}
 
 	private void createColumns(final TableViewer viewer) {
@@ -431,7 +270,6 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		
 	}
 
-
 	public Job createFittingJob() {
 		
 		final Job fit = new Job("Fit peaks") {
@@ -469,7 +307,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 				AbstractDataset[] a= FittingUtils.xintersection(x,y,p1[0],p2[0]);
 				x = a[0]; y=a[1];
 				
-				final FittedPeaksBean bean = FittingUtils.getFittedPeaks(x, y, monitor);
+				final FittedPeaks bean = FittingUtils.getFittedPeaks(x, y, monitor);
 				createFittedPeaks(bean);
 				
 				return Status.OK_STATUS;
@@ -486,7 +324,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 	 * Thread safe
 	 * @param peaks
 	 */
-	protected synchronized void createFittedPeaks(final FittedPeaksBean newBean) {
+	protected synchronized void createFittedPeaks(final FittedPeaks newBean) {
 		
 		if (newBean==null) {
 			bean = null;
@@ -573,7 +411,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 
 	private IGuiInfoManager plotServerConnection;
 	
-	protected void updatePlotServerConnection(FittedPeaksBean bean) {
+	protected void updatePlotServerConnection(FittedPeaks bean) {
 		
 		if (bean==null) return;
 		
@@ -591,4 +429,204 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 			}
 		}
 	}
+	
+
+	protected void updateTracesChoice() {
+		
+		if (tracesMenu==null) return;
+		
+		tracesMenu.clear();
+		
+		final Collection<ITrace> traces = getPlottingSystem().getTraces();
+		if (traces==null || traces.size()<0) return;
+		if (bean!=null) traces.removeAll(bean.getPeakTraces());
+		
+		final CheckableActionGroup group = new CheckableActionGroup();
+		FittingTool.this.selectedTrace = null;
+		for (final ITrace iTrace : traces) {
+			
+			if (FittingTool.this.selectedTrace==null && iTrace instanceof ILineTrace) {
+				FittingTool.this.selectedTrace = (ILineTrace)iTrace;
+			}
+			
+			final Action action = new Action(iTrace.getName(), IAction.AS_CHECK_BOX) {
+				public void run() {
+					if (iTrace instanceof ILineTrace) FittingTool.this.selectedTrace = (ILineTrace)iTrace;
+					tracesMenu.setSelectedAction(this);
+					if (fittingJob!=null&&isActive()) fittingJob.schedule();
+					setChecked(true);
+				}
+			};
+			tracesMenu.add(action);
+			group.add(action);
+		}
+		
+		tracesMenu.setSelectedAction(0);
+		tracesMenu.getAction(0).setChecked(true);
+				
+		getSite().getActionBars().updateActionBars();
+	}
+
+	
+	/**
+	 * We use the old actions here for simplicity of configuration.
+	 * 
+	 * TODO consider moving to commands.
+	 */
+	private void createActions() {
+		
+		
+		final Action showAnns = new Action("Show annotations at the peak position.", IAction.AS_CHECK_BOX) {
+			public void run() {
+				final boolean isChecked = isChecked();
+				Activator.getDefault().getPreferenceStore().setValue(FittingConstants.SHOW_ANNOTATION_AT_PEAK, isChecked);
+				if (bean!=null) bean.setAnnotationsVisible(isChecked);
+			}
+		};
+		showAnns.setImageDescriptor(Activator.getImageDescriptor("icons/plot-tool-peak-fit-showAnnotation.png"));
+		getSite().getActionBars().getToolBarManager().add(showAnns);
+		
+		showAnns.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(FittingConstants.SHOW_ANNOTATION_AT_PEAK));
+
+		final Action showTrace = new Action("Show fitting traces.", IAction.AS_CHECK_BOX) {
+			public void run() {
+				final boolean isChecked = isChecked();
+				Activator.getDefault().getPreferenceStore().setValue(FittingConstants.SHOW_FITTING_TRACE, isChecked);
+				if (bean!=null) bean.setTracesVisible(isChecked);
+			}
+		};
+		showTrace.setImageDescriptor(Activator.getImageDescriptor("icons/plot-tool-peak-fit-showFittingTrace.png"));
+		getSite().getActionBars().getToolBarManager().add(showTrace);
+
+		showTrace.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(FittingConstants.SHOW_FITTING_TRACE));
+
+		
+		final Action showPeak = new Action("Show peak lines.", IAction.AS_CHECK_BOX) {
+			public void run() {
+				final boolean isChecked = isChecked();
+				Activator.getDefault().getPreferenceStore().setValue(FittingConstants.SHOW_PEAK_SELECTIONS, isChecked);
+				if (bean!=null) bean.setPeaksVisible(isChecked);
+			}
+		};
+		showPeak.setImageDescriptor(Activator.getImageDescriptor("icons/plot-tool-peak-fit-showPeakLine.png"));
+		getSite().getActionBars().getToolBarManager().add(showPeak);
+		
+		showPeak.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(FittingConstants.SHOW_PEAK_SELECTIONS));
+
+		final Action showFWHM = new Action("Show selection regions for full width, half max.", IAction.AS_CHECK_BOX) {
+			public void run() {
+				final boolean isChecked = isChecked();
+				Activator.getDefault().getPreferenceStore().setValue(FittingConstants.SHOW_FWHM_SELECTIONS, isChecked);
+				if (bean!=null) bean.setAreasVisible(isChecked);
+			}
+		};
+		showFWHM.setImageDescriptor(Activator.getImageDescriptor("icons/plot-tool-peak-fit-showFWHM.png"));
+		getSite().getActionBars().getToolBarManager().add(showFWHM);
+		
+		showFWHM.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(FittingConstants.SHOW_FWHM_SELECTIONS));
+		
+		final Separator sep = new Separator(getClass().getName()+".separator1");	
+		getSite().getActionBars().getToolBarManager().add(sep);
+		
+
+		final MenuAction  peakType = new MenuAction("Peak type to fit");
+		peakType.setToolTipText("Peak type to fit");
+		peakType.setImageDescriptor(Activator.getImageDescriptor("icons/plot-tool-peak-fit-peak-type.png"));
+		
+		CheckableActionGroup group = new CheckableActionGroup();
+		
+		Action selectedPeakAction = null;
+		for (final IPeak peak : FittingUtils.getPeakOptions().values()) {
+			
+			final Action action = new Action(peak.getClass().getSimpleName(), IAction.AS_CHECK_BOX) {
+				public void run() {
+					Activator.getDefault().getPreferenceStore().setValue(FittingConstants.PEAK_TYPE, peak.getClass().getName());
+					setChecked(true);
+					if (fittingJob!=null&&isActive()) fittingJob.schedule();
+					peakType.setSelectedAction(this);
+				}
+			};
+			peakType.add(action);
+			group.add(action);
+			if (peak.getClass().getName().equals(Activator.getDefault().getPreferenceStore().getString(FittingConstants.PEAK_TYPE))) {
+				selectedPeakAction = action;
+			}
+		}
+		
+		if (selectedPeakAction!=null) {
+			peakType.setSelectedAction(selectedPeakAction);
+			selectedPeakAction.setChecked(true);
+		}
+		getSite().getActionBars().getToolBarManager().add(peakType);
+		getSite().getActionBars().getMenuManager().add(peakType);
+
+		
+		final Separator sep2 = new Separator(getClass().getName()+".separator2");	
+		getSite().getActionBars().getToolBarManager().add(sep2);
+
+		this.tracesMenu = new MenuAction("Traces");
+		tracesMenu.setToolTipText("Choice of trace to fit on.");
+		tracesMenu.setImageDescriptor(Activator.getImageDescriptor("icons/plot-tool-trace-choice.png"));
+		
+		getSite().getActionBars().getToolBarManager().add(tracesMenu);
+		getSite().getActionBars().getMenuManager().add(tracesMenu);
+				
+		final MenuAction numberPeaks = new MenuAction("Number peaks to fit");
+		numberPeaks.setToolTipText("Number peaks to fit");
+				
+		group = new CheckableActionGroup();
+		
+		final int npeak = Activator.getDefault().getPreferenceStore().getDefaultInt(FittingConstants.PEAK_NUMBER_CHOICES);
+		for (int ipeak = 1; ipeak <= npeak; ipeak++) {
+			
+			final int peak = ipeak;
+			final Action action = new Action("Fit "+String.valueOf(ipeak)+" Peaks", IAction.AS_CHECK_BOX) {
+				public void run() {
+					Activator.getDefault().getPreferenceStore().setValue(FittingConstants.PEAK_NUMBER, peak);
+					numberPeaks.setSelectedAction(this);
+					setChecked(true);
+					if (isActive()) fittingJob.schedule();
+				}
+			};
+			
+			action.setImageDescriptor(IconUtils.createIconDescriptor(String.valueOf(ipeak)));
+			numberPeaks.add(action);
+			group.add(action);
+			action.setChecked(false);
+			action.setToolTipText("Fit "+ipeak+" peak(s)");
+			
+		}
+
+		final int ipeak = Activator.getDefault().getPreferenceStore().getInt(FittingConstants.PEAK_NUMBER);
+		numberPeaks.setSelectedAction(ipeak-1);
+		numberPeaks.setCheckedAction(ipeak-1, true);
+		
+		getSite().getActionBars().getToolBarManager().add(numberPeaks);
+		getSite().getActionBars().getMenuManager().add(numberPeaks);
+		
+		
+		final Action clear = new Action("Clear", Activator.getImageDescriptor("icons/plot-tool-peak-fit-clear.png")) {
+			public void run() {
+				if (!isActive()) return;
+				if (bean!=null) bean.removeSelections(getPlottingSystem());
+				bean.dispose();
+				bean = null;
+				viewer.setContentProvider(createActorContentProvider(0));
+				viewer.setInput(null);
+			}
+		};
+		clear.setToolTipText("Clear all regions found in the fitting");
+		
+		getSite().getActionBars().getToolBarManager().add(clear);
+		getSite().getActionBars().getMenuManager().add(clear);
+		
+		createRightClickMenu();
+	}
+	
+	private void createRightClickMenu() {	
+	    final MenuManager menuManager = new MenuManager();
+	    for (IContributionItem item : getSite().getActionBars().getMenuManager().getItems()) menuManager.add(item);
+	    viewer.getControl().setMenu(menuManager.createContextMenu(viewer.getControl()));
+	}
+
 }
