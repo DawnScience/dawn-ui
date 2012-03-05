@@ -11,9 +11,14 @@ import org.csstudio.swt.xygraph.toolbar.XYGraphToolbar;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.workbench.plotting.Activator;
+import org.dawb.workbench.plotting.printing.PlotPrintPreviewDialog;
+import org.dawb.workbench.plotting.printing.PrintSettings;
 import org.dawb.workbench.plotting.system.dialog.AddRegionDialog;
 import org.dawb.workbench.plotting.system.dialog.RemoveRegionCommand;
 import org.dawb.workbench.plotting.system.dialog.RemoveRegionDialog;
+import org.eclipse.draw2d.ActionEvent;
+import org.eclipse.draw2d.ActionListener;
+import org.eclipse.draw2d.Button;
 import org.eclipse.draw2d.ButtonModel;
 import org.eclipse.draw2d.ChangeEvent;
 import org.eclipse.draw2d.ChangeListener;
@@ -269,5 +274,23 @@ public class XYRegionToolbar extends XYGraphToolbar {
 	protected void openConfigurationDialog() {
 		XYGraphConfigDialog dialog = new XYRegionConfigDialog(Display.getCurrent().getActiveShell(), xyGraph);
 		dialog.open();
+	}
+	
+	private PrintSettings settings;
+
+	@Override
+	public void addSnapshotButton() {
+		super.addSnapshotButton(); // TODO Remove old one later by not calling this
+		
+		Button printButton = new Button(createImage("icons/printer.png"));
+		printButton.setToolTip(new Label("Print the plotting"));
+		addButton(printButton);
+		printButton.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent event) {
+				if (settings==null) settings = new PrintSettings();
+				PlotPrintPreviewDialog dialog = new PlotPrintPreviewDialog(xyGraph, Display.getCurrent(), settings);
+				settings=dialog.open();
+			}
+		});
 	}
 }
