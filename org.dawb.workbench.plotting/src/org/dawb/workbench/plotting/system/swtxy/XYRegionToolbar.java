@@ -58,9 +58,14 @@ public class XYRegionToolbar extends XYGraphToolbar {
 
         final CheckableActionGroup zoomG = new CheckableActionGroup();
         
-        final MenuAction zoomDropDown = new MenuAction("Zoom tool");
-        zoomDropDown.setToolTipText("Zoom tool");
-        zoomDropDown.setId("org.dawb.workbench.ui.editors.plotting.swtxy.zoomTools");
+        MenuAction zoomMenuTmp =null;
+        if (System.getProperty("org.dawb.workbench.plotting.system.swtxy.zoomDropDown") !=null) {
+        	zoomMenuTmp = new MenuAction("Zoom tool");
+        	zoomMenuTmp.setToolTipText("Zoom tool");
+        	zoomMenuTmp.setId("org.dawb.workbench.ui.editors.plotting.swtxy.zoomTools");
+        }
+        
+        final MenuAction zoomDropDown = zoomMenuTmp;
         
         for (Object child : getChildren()) {
 			
@@ -87,7 +92,7 @@ public class XYRegionToolbar extends XYGraphToolbar {
         				} else {
         				    button.doClick();
         				}  
-        				if (zoomGroup.getElements().contains(button.getModel())) {
+        				if (zoomDropDown!=null && zoomGroup.getElements().contains(button.getModel())) {
         					zoomDropDown.setSelectedAction(this);
         				}
         			}
@@ -120,11 +125,16 @@ public class XYRegionToolbar extends XYGraphToolbar {
 				
         	    final List models = zoomGroup.getElements();
         	    if (models.contains(button.getModel())) {
-        	    	if (tool.find(zoomDropDown.getId())==null) {
+        	    	if (zoomDropDown!=null && tool.find(zoomDropDown.getId())==null) {
         				tool.add(zoomDropDown);
         				men.add(zoomDropDown);
         	    	}
-        	    	zoomDropDown.add(action);
+        	    	if (zoomDropDown!=null) {
+        	    		zoomDropDown.add(action);
+        	    	} else {
+        	    		tool.add(action);
+        	    		men.add(action);
+        	    	}
         	    	zoomG.add(action);
         	    } else {
     				tool.add(action);
@@ -138,8 +148,8 @@ public class XYRegionToolbar extends XYGraphToolbar {
         	}
         }
         
-        zoomDropDown.setSelectedAction(0);
-        zoomDropDown.getAction(0).setChecked(true);
+        if (zoomDropDown!=null) zoomDropDown.setSelectedAction(0);
+        if (zoomDropDown!=null) zoomDropDown.getAction(0).setChecked(true);
        
         final MenuAction regionDropDown = new MenuAction("Add a selection region");
         regionDropDown.setId("org.dawb.workbench.ui.editors.plotting.swtxy.addRegions");
