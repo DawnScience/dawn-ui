@@ -68,8 +68,8 @@ public class PlotPrintPreviewDialog extends Dialog {
 	protected String printPreviewText = "Print preview";
 	protected String orientationText = "Orientation";
 	protected String resolutionText = "Resolution";
-	public static String portraitText = "Portrait";
-	protected static String landscapeText = "Landscape";
+	protected String portraitText = "Portrait";
+	protected String landscapeText = "Landscape";
 	protected String defaultPrinterText = "Printer";
 	
 	private PrintSettings settings;
@@ -198,16 +198,16 @@ public class PlotPrintPreviewDialog extends Dialog {
 		comboResolution.addSelectionListener(resolutionSelection);
 
 		// TODO orientation button disabled: works for preview not for data sent to printer
-		Composite orientationComposite = new Composite(previewComposite, SWT.BORDER);
-		RowLayout orientationLayout=new RowLayout();
-		orientationLayout.center=true;
-		orientationComposite.setLayout(orientationLayout);
-		new Label(orientationComposite, SWT.NULL).setText(orientationText + ":");
-		comboOrientation = new Combo(orientationComposite, SWT.READ_ONLY);
-		comboOrientation.add(portraitText);
-		comboOrientation.add(landscapeText);
-		comboOrientation.select(getPreferencePrintOrientation());
-		comboOrientation.addSelectionListener(orientationSelection);
+//		Composite orientationComposite = new Composite(previewComposite, SWT.BORDER);
+//		RowLayout orientationLayout=new RowLayout();
+//		orientationLayout.center=true;
+//		orientationComposite.setLayout(orientationLayout);
+//		new Label(orientationComposite, SWT.NULL).setText(orientationText + ":");
+//		comboOrientation = new Combo(orientationComposite, SWT.READ_ONLY);
+//		comboOrientation.add(portraitText);
+//		comboOrientation.add(landscapeText);
+//		comboOrientation.select(getPreferencePrintOrientation());
+//		comboOrientation.addSelectionListener(orientationSelection);
 
 		canvas = new Canvas(shell, SWT.BORDER);
 
