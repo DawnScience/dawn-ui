@@ -282,7 +282,7 @@ public class XYRegionToolbar extends XYGraphToolbar {
 	public void addSnapshotButton() {
 		super.addSnapshotButton(); // TODO Remove old one later by not calling this
 		
-		Button printButton = new Button(createImage("icons/printer.png"));
+		Button printButton = new Button(Activator.getImageDescriptor("icons/printer.png").createImage());
 		printButton.setToolTip(new Label("Print the plotting"));
 		addButton(printButton);
 		printButton.addActionListener(new ActionListener(){
