@@ -9,7 +9,6 @@ import org.dawb.common.ui.plot.AbstractPlottingSystem.ColorOption;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingFactory;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
-import org.dawb.common.ui.plot.tool.IToolPageSystem;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
@@ -26,7 +25,6 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
-import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Maths;
 
 public class DerivativeTool extends AbstractToolPage  {
@@ -67,7 +65,7 @@ public class DerivativeTool extends AbstractToolPage  {
 								getTitle(), 
 								site.getActionBars(), 
 								PlotType.PT1D,
-								this.getPart());
+								null);
 				
 		
 		getPlottingSystem().addTraceListener(traceListener);
@@ -78,7 +76,8 @@ public class DerivativeTool extends AbstractToolPage  {
 
 	/**
 	 * Required if you want to make tools work.
-	 */
+	 * Currently we do not want 1D tools on the derivative page
+	 * 
 	public Object getAdapter(final Class clazz) {
 
 		if (clazz == IToolPageSystem.class) {
@@ -86,6 +85,12 @@ public class DerivativeTool extends AbstractToolPage  {
 		}
 
 		return null;
+	}
+	 */
+	
+	@Override
+	public ToolPageRole getToolPageRole() {
+		return ToolPageRole.ROLE_1D_AND_2D;
 	}
 
 	@Override
@@ -99,6 +104,7 @@ public class DerivativeTool extends AbstractToolPage  {
 	
 	@Override
 	public Control getControl() {
+		if (plotter==null) return null;
 		return plotter.getPlotComposite();
 	}
 	

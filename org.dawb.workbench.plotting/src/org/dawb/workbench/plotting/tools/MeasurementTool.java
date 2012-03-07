@@ -13,6 +13,9 @@ import org.dawb.common.ui.plot.region.RegionBounds;
 import org.dawb.common.ui.plot.region.RegionBoundsEvent;
 import org.dawb.common.ui.plot.region.RegionEvent;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
+import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
+import org.dawb.common.ui.plot.trace.IImageTrace;
+import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.workbench.plotting.Activator;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.action.Action;
@@ -39,6 +42,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 
 /**
  * This tool shows the measurements of selected regions.
@@ -131,6 +136,11 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 		this.viewUpdateListener = new RegionColorListener();
 		
 		activate();
+	}
+
+	@Override
+	public ToolPageRole getToolPageRole() {
+		return ToolPageRole.ROLE_1D_AND_2D;
 	}
 
 	private void createActions() {
@@ -226,13 +236,31 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 		var.getColumn().setText("Region Type");
 		var.getColumn().setWidth(100);
 		var.setLabelProvider(new MeasurementLabelProvider(this, 1));
-
+		
         var   = new TableViewerColumn(viewer, SWT.LEFT, 2);
+		var.getColumn().setText("dx");
+		var.getColumn().setWidth(80);
+		var.setLabelProvider(new MeasurementLabelProvider(this, 2));
+
+        var   = new TableViewerColumn(viewer, SWT.LEFT, 3);
+		var.getColumn().setText("dy");
+		var.getColumn().setWidth(80);
+		var.setLabelProvider(new MeasurementLabelProvider(this, 3));
+
+        var   = new TableViewerColumn(viewer, SWT.LEFT, 4);
+		var.getColumn().setText("length");
+		var.getColumn().setWidth(80);
+		var.setLabelProvider(new MeasurementLabelProvider(this, 4));
+		
+        var   = new TableViewerColumn(viewer, SWT.LEFT, 5);
+		var.getColumn().setText("max");
+		var.getColumn().setWidth(80);
+		var.setLabelProvider(new MeasurementLabelProvider(this, 5));
+
+        var   = new TableViewerColumn(viewer, SWT.LEFT, 6);
 		var.getColumn().setText("Coordinates");
 		var.getColumn().setWidth(500);
-		var.setLabelProvider(new MeasurementLabelProvider(this, 2));
-		
-
+		var.setLabelProvider(new MeasurementLabelProvider(this, 6));
 	}
 	
 	private IContentProvider createActorContentProvider(final int numerOfPeaks) {
@@ -392,5 +420,17 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 	public RegionBounds getBounds(IRegion region) {
 		if (dragBounds!=null&&dragBounds.containsKey(region.getName())) return dragBounds.get(region.getName());
 		return region.getRegionBounds();
+	}
+
+	public double getMax(IRegion region) {
+
+        final Collection<ITrace> traces = getPlottingSystem().getTraces();
+        if (traces!=null&&traces.size()==1&&traces.iterator().next() instanceof IImageTrace) {
+        	final IImageTrace     trace        = (IImageTrace)traces.iterator().next();
+        	final AbstractDataset intersection = trace.slice(getBounds(region));
+        	return intersection.max().doubleValue();
+        } else {
+        	return getBounds(region).getP2()[1];
+        }
 	}
 }

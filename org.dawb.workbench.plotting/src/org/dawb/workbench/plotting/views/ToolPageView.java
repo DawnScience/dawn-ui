@@ -67,6 +67,14 @@ import org.slf4j.LoggerFactory;
  * 
  * For instance fitting, derviatives etc.
  * 
+ * More than one instance of this view can be declared for different tool sets.
+ * Tools are differentiated from one another by calling getToolPageRole() on the 
+ * tool. Know ids of instances of this view are:
+ * 
+ * org.dawb.workbench.plotting.views.toolPageView.1D
+ * org.dawb.workbench.plotting.views.toolPageView.2D
+ * org.dawb.workbench.plotting.views.toolPageView.1D_and_2D
+ * 
  * 
  * @author fcp94556
  *

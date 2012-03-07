@@ -89,6 +89,11 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		};
 
 	}
+	
+	@Override
+	public ToolPageRole getToolPageRole() {
+		return ToolPageRole.ROLE_1D_AND_2D;
+	}
 
 	@Override
 	public void createControl(Composite parent) {
@@ -280,7 +285,6 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 				if (composite==null)        return Status.CANCEL_STATUS;
 				if (composite.isDisposed()) return Status.CANCEL_STATUS;
 				
-				
 				final RegionBounds bounds = fitRegion.getRegionBounds();
 				if (fitRegion==null || bounds==null) return Status.CANCEL_STATUS;
 				
@@ -292,7 +296,8 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 						if (bean!=null) bean.removeSelections(getPlottingSystem());
 				    }
 				});
-				
+				if (selectedTrace==null)    return Status.CANCEL_STATUS;
+			
 				
 				// We chop x and y by the region bounds. We assume the
 				// plot is an XAXIS selection therefore the indices in
@@ -353,7 +358,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 						final IRegion line = getPlottingSystem().createRegion("Peak Line "+ipeak, RegionType.XAXIS_LINE);
 						line.setRegionBounds(new RegionBounds(rb.getCentre(), rb.getCentre()));
 						line.setRegionColor(ColorConstants.black);
-						line.setMotile(false);
+						//line.setMotile(false);
 						line.setAlpha(150);
 						getPlottingSystem().addRegion(line);
 						newBean.addLineRegion(line);

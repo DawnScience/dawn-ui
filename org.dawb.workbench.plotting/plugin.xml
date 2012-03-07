@@ -45,7 +45,23 @@
             category="org.dawb.workbench.application.data.analysis"
             class="org.dawb.workbench.plotting.views.ToolPageView"
             icon="icons/axis.png"
-            id="org.dawb.workbench.plotting.views.ToolPageView"
+            id="org.dawb.workbench.plotting.views.toolPageView.1D"
+            name="1D Tools"
+            restorable="true">
+      </view>
+      <view
+            category="org.dawb.workbench.application.data.analysis"
+            class="org.dawb.workbench.plotting.views.ToolPageView"
+            icon="icons/axis.png"
+            id="org.dawb.workbench.plotting.views.toolPageView.2D"
+            name="Zoom Tools"
+            restorable="true">
+      </view>
+      <view
+            category="org.dawb.workbench.application.data.analysis"
+            class="org.dawb.workbench.plotting.views.ToolPageView"
+            icon="icons/axis.png"
+            id="org.dawb.workbench.plotting.views.toolPageView.1D_and_2D"
             name="Tool"
             restorable="true">
       </view>

@@ -40,15 +40,17 @@ import org.dawb.common.ui.plot.annotation.IAnnotation;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
+import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
+import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
-import org.dawb.common.ui.util.GridUtils;
-import org.dawb.fable.extensions.FableImageWrapper;
 import org.dawb.gda.extensions.util.DatasetTitleUtils;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
+import org.dawb.workbench.plotting.system.swtxy.ImageTrace;
 import org.dawb.workbench.plotting.system.swtxy.Region;
+import org.dawb.workbench.plotting.system.swtxy.RegionArea;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionToolbar;
 import org.dawb.workbench.plotting.util.ColorUtility;
@@ -72,18 +74,12 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchPart3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
-import fable.imageviewer.component.ActionsProvider;
-import fable.imageviewer.component.ImageComponent;
-import fable.imageviewer.component.ImagePlay;
-import fable.imageviewer.model.ImageModel;
-import fable.imageviewer.model.ImageModelFactory;
 
 
 /**
@@ -100,14 +96,10 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	private Composite      parent;
 	private IActionBars    bars;
 
-	// 1D Controls
+	// Controls
 	private Canvas         xyCanvas;
 	private XYRegionGraph  xyGraph;
-	
-	// 2D Controls
-	private Composite       imageComposite;
-	private ImageComponent  imageComponent;
-	
+		
 	// The plotting mode, used for updates to data
 	private PlotType plottingMode;
 	
@@ -122,23 +114,17 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		this.parent  = parent;
 		this.bars    = bars;
 		
-		if (hint==PlotType.IMAGE) {
-			createImageUI();
-		} else {
-			create1DUI();
-		}
-		
-		
+		createUI();
+
 	}
 	
 	@Override
 	public Composite getPlotComposite() {
 		if (xyCanvas!=null)       return xyCanvas;
-		if (imageComposite!=null) return imageComposite;
 		return null;
 	}
 	
-	private void create1DUI() {
+	private void createUI() {
 		
 		if (xyCanvas!=null) return;
 		
@@ -167,7 +153,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
         	toolbar.createGraphActions(bars.getToolBarManager(), rightClick);
         	
 			try {
-				Action tools = createToolActions();
+				Action tools = createToolActions(ToolPageRole.ROLE_1D_AND_2D, "org.dawb.workbench.plotting.views.toolPageView.1D_and_2D");
 				if (tools!=null) {
 		        	bars.getToolBarManager().add(tools);
 		        	bars.getMenuManager().add(tools);
@@ -293,37 +279,9 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		this.datasetChoosingRequired  = choosingRequired;
 	}	
 	
-	private void createImageUI() {
-		
-		if (imageComposite!=null) return;
-		
-        this.imageComposite = new Composite(parent, SWT.NONE);
-        if (bars.getMenuManager()!=null)    bars.getMenuManager().removeAll();
-        if (bars.getToolBarManager()!=null) bars.getToolBarManager().removeAll();
-        
-        this.imageComponent = new ImageComponent((IWorkbenchPart3)part, new ActionsProvider() {		
-			@Override
-			public IActionBars getActionBars() {
-				return bars;
-			}
-		});
-        imageComponent.setStatusLabel(pointControls);
-        imageComponent.createPartControl(imageComposite);
-        imageComponent.setPlotTitle(null);
-        
-        // Add additional if required
-        if (extraImageActions!=null&&!extraImageActions.isEmpty()){
-        	for (IAction action : extraImageActions) bars.getToolBarManager().add(action);
-        }
-        
-        ImagePlay.setView(imageComponent);
-         
-        GridUtils.removeMargins(imageComposite);
-        
-        bars.getToolBarManager().update(true);
-		bars.updateActionBars();
-        
-        parent.layout();
+	public void addTraceListener(final ITraceListener l) {
+		super.addTraceListener(l);
+		if (xyGraph!=null) ((RegionArea)xyGraph.getPlotArea()).addImageTraceListener(l);
 	}
 
 	/**
@@ -367,7 +325,6 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	private Display getDisplay() {
 		if (part!=null) return part.getSite().getShell().getDisplay();
 		if (xyCanvas!=null) return xyCanvas.getDisplay();
-		if (imageComposite!=null) return imageComposite.getDisplay();
 		return parent.getDisplay();
 	}
 
@@ -428,7 +385,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 					                        final IProgressMonitor monitor) {
 		
 		this.plottingMode = mode;
-		switchPlotUI(mode.is1D());
+		createUI();
 		if (mode.is1D()) {
 			return create1DPlot(x,ys,createdIndices,monitor);
 		} else {
@@ -441,40 +398,12 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
      * Do not call before createPlotPart(...)
      */
 	public void setDefaultPlotType(PlotType mode) {
-		switchPlotUI(mode.is1D());
-	}
-
-	/**
-	 * Must be called in UI thread
-	 * @param is1d
-	 */
-	private void switchPlotUI(final boolean is1d) {
-
-		if (is1d) {
-			if (imageComponent!=null) {
-				imageComposite.setVisible(false);
-				imageComposite.dispose();
-				imageComposite = null;
-				imageComponent.dispose();
-				imageComponent= null;
-			}
-			create1DUI();
-
-		} else {
-			clearTraces();
-			if (xyCanvas!=null) {
-				xyCanvas.setVisible(false);
-				xyCanvas.dispose();
-				xyCanvas=null;
-				xyGraph.removeAll();
-				xyGraph=null;
-			}
-			createImageUI();
-		}
+		createUI();
 	}
 
 	/**
 	 * Must be called in UI thread. Creates and updates image.
+	 * NOTE removes previous traces if any plotted.
 	 * 
 	 * @param data
 	 * @param axes
@@ -485,25 +414,21 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 								   final IProgressMonitor      monitor) {
   
 		try {
-			if (colorMap != null) colorMap.clear();
-			final FableImageWrapper wrapper = new FableImageWrapper(data.getName(), data, axes, -1);
-			if (monitor!=null) monitor.worked(1);
+			
+			final Axis xAxis = ((AxisWrapper)getSelectedXAxis()).getWrappedAxis();
+			final Axis yAxis = ((AxisWrapper)getSelectedYAxis()).getWrappedAxis();
 
-			final ImageModel model = ImageModelFactory.getImageModel(wrapper.getFileName(),
-					                                                 wrapper.getWidth(),
-					                                                 wrapper.getHeight(),
-					                                                 wrapper.getImage());
-			imageComponent.loadModel(model);
+			xyGraph.clearTraces();
+			xyGraph.clearImageTraces();
+			if (traceMap==null) traceMap = new LinkedHashMap<String, ITrace>(31);
+			traceMap.clear();
+			
+			final ImageTrace trace = xyGraph.createImageTrace(data.getName(), xAxis, yAxis, data);
+			traceMap.put(trace.getName(), trace);
 
-			if (monitor!=null) monitor.worked(1);
-
-			String name = data.getName();
-			if ("".equals(name))name=null;
-			imageComponent.setPlotTitle(name);
-
-			ImageTrace trace = new ImageTrace(data); // TODO Add more methods here.
-            fireTracesPlotted(new TraceEvent(trace));
-            return trace;
+			xyGraph.addImageTrace(trace);
+			
+			return trace;
             
 		} catch (Throwable e) {
 			logger.error("Cannot load file "+data.getName(), e);
@@ -804,8 +729,6 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		
 		if (xyGraph!=null) {
 			xyGraph.setTitle(title);
-		} else if (imageComponent!=null) {
-			imageComponent.setPlotTitle(title);
 		} else {
 			throw new RuntimeException("Cannot set the plot title when the plotting system is not created or plotting something!");
 		}
@@ -895,11 +818,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 				logger.error("Cannot remove plots!", e);
 			}
 		}
-		
-		if (imageComponent!=null) {
-			imageComponent.loadModel(ImageModelFactory.getImageModel("", 0, 0, new float[]{0,0}));
-		}
-		
+				
 	}
 	
 	@Override
@@ -956,12 +875,10 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	public void repaint() {
 		if (getDisplay().getThread()==Thread.currentThread()) {
 			if (xyCanvas!=null) LightWeightPlottingSystem.this.xyCanvas.redraw();
-			if (imageComponent!=null) LightWeightPlottingSystem.this.imageComposite.redraw();
 		} else {
 			getDisplay().syncExec(new Runnable() {
 				public void run() {
 					if (xyCanvas!=null) LightWeightPlottingSystem.this.xyCanvas.redraw();
-					if (imageComponent!=null) LightWeightPlottingSystem.this.imageComposite.redraw();
 				}
 			});
 		}
@@ -997,7 +914,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	 */
 	public IAxis createAxis(final String title, final boolean isYAxis, int side) {
 		
-		if (xyGraph==null) switchPlotUI(true);
+		if (xyGraph==null) createUI();
 			
 		Axis axis = new Axis(title, isYAxis);
 		if (isYAxis) {
@@ -1025,7 +942,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	@Override
 	public IAxis getSelectedXAxis() {
 		if (selectedXAxis==null) {
-			if (xyGraph==null) switchPlotUI(true); // TODO Regions can be 2D
+			if (xyGraph==null) createUI();
 			return new AxisWrapper(xyGraph.primaryXAxis);
 		}
 		return selectedXAxis;
@@ -1039,7 +956,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	@Override
 	public IAxis getSelectedYAxis() {
 		if (selectedYAxis==null) {
-			if (xyGraph==null) switchPlotUI(true); // TODO Regions can be 2D
+			if (xyGraph==null) createUI();
 			return new AxisWrapper(xyGraph.primaryYAxis);
 		}
 		return selectedYAxis;
@@ -1051,7 +968,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	}
 	
 	public boolean addRegionListener(final IRegionListener l) {
-		if (xyGraph==null) switchPlotUI(true); // TODO Regions can be 2D
+		if (xyGraph==null) createUI();
 		return xyGraph.addRegionListener(l);
 	}
 	
@@ -1066,7 +983,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	 */
 	public IRegion createRegion(final String name, final RegionType regionType) throws Exception  {
 
-		if (xyGraph==null) switchPlotUI(true); // TODO Regions can be 2D
+		if (xyGraph==null) createUI();
 		final Axis xAxis = ((AxisWrapper)getSelectedXAxis()).getWrappedAxis();
 		final Axis yAxis = ((AxisWrapper)getSelectedYAxis()).getWrappedAxis();
 
@@ -1093,7 +1010,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	 * @param region
 	 */
 	public void addRegion(final IRegion region) {		
-		if (xyGraph==null) switchPlotUI(true); // TODO Regions can be 2D
+		if (xyGraph==null) createUI();
 		final Region r = (Region)region;
 		xyGraph.addRegion(r);		
  	}
@@ -1103,7 +1020,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	 * @param region
 	 */
 	public void removeRegion(final IRegion region) {		
-		if (xyGraph==null) switchPlotUI(true); // TODO Regions can be 2D
+		if (xyGraph==null) createUI();
 		final Region r = (Region)region;
 		xyGraph.removeRegion(r);
 	}
@@ -1129,7 +1046,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	}
 	
 	public IAnnotation createAnnotation(final String name) throws Exception {
-		if (xyGraph==null) switchPlotUI(true); // TODO Regions can be 2D
+		if (xyGraph==null) createUI();
 		
 		final List<Annotation>anns = xyGraph.getPlotArea().getAnnotationList();
 		for (Annotation annotation : anns) {

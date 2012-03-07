@@ -19,6 +19,7 @@ import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.AbstractPlottingSystem.ColorOption;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingFactory;
+import org.dawb.common.ui.plot.tool.IToolPageSystem;
 import org.dawb.common.ui.slicing.SliceUtils;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.util.GridUtils;
@@ -41,7 +42,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
@@ -277,6 +277,8 @@ public class PlotImageEditor extends EditorPart implements IReusableEditor {
 		
 		if (clazz == Page.class) {
 			return new HeaderTablePage(EclipseUtils.getFilePath(getEditorInput()));
+		} else if (clazz == IToolPageSystem.class) {
+			return plottingSystem;
 		}
 		
 		return super.getAdapter(clazz);

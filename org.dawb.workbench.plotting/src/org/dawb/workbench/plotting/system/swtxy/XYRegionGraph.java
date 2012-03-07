@@ -9,6 +9,8 @@ import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 
+import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+
 /**
  * This is an XYGraph which supports regions of interest.
  * @author fcp94556
@@ -21,43 +23,77 @@ public class XYRegionGraph extends XYGraph {
 	}
 
 	public void addRegion(final Region region) {
-		((RegionArea)getPlotArea()).addRegion(region);
+		getRegionArea().addRegion(region);
 	}
 	public void removeRegion(final Region region) {
-		((RegionArea)getPlotArea()).removeRegion(region);
+		getRegionArea().removeRegion(region);
 	}
 	public void setSelectionProvider(final ISelectionProvider provider) {
-		((RegionArea)getPlotArea()).setSelectionProvider(provider);
+		getRegionArea().setSelectionProvider(provider);
 	}
 
 	public Region createRegion(String name, Axis xAxis, Axis yAxis, RegionType regionType, boolean startingWithMouseEvent) throws Exception {
-		return ((RegionArea)getPlotArea()).createRegion(name, xAxis, yAxis, regionType, startingWithMouseEvent);
+		return getRegionArea().createRegion(name, xAxis, yAxis, regionType, startingWithMouseEvent);
 	}
 	public void disposeRegion(final Region region) {
-		((RegionArea)getPlotArea()).disposeRegion(region);
+		getRegionArea().disposeRegion(region);
+	}
+
+
+	public ImageTrace createImageTrace(String name, Axis xAxis, Axis yAxis, AbstractDataset image) {
+		RegionArea ra = (RegionArea)getPlotArea();
+		return ra.createImageTrace(name, xAxis, yAxis, image);
+	}
+	public void addImageTrace(final ImageTrace trace) {
+		getRegionArea().addImageTrace(trace);
+	}
+	public void removeImageTrace(final ImageTrace trace) {
+		getRegionArea().removeImageTrace(trace);
 	}
 
 	public boolean addRegionListener(IRegionListener l) {
-		return ((RegionArea)getPlotArea()).addRegionListener(l);
+		return getRegionArea().addRegionListener(l);
 	}
 	
 	public boolean removeRegionListener(IRegionListener l) {
-		return ((RegionArea)getPlotArea()).removeRegionListener(l);
+		return getRegionArea().removeRegionListener(l);
 	}
 
 	public Region getRegion(String name) {
-		return ((RegionArea)getPlotArea()).getRegion(name);
+		return getRegionArea().getRegion(name);
 	}
 
 	public void clearRegions() {
-		((RegionArea)getPlotArea()).clearRegions();
+		getRegionArea().clearRegions();
 	}
 	public List<Region> getRegions() {
-		return ((RegionArea)getPlotArea()).getRegions();
+		return getRegionArea().getRegions();
 	}
 
 	public void clearRegionTool() {
-		((RegionArea)getPlotArea()).clearRegionTool();
+		getRegionArea().clearRegionTool();
 	}
 
+	public void clearImageTraces() {
+		getRegionArea().clearImageTraces();
+	}
+	
+	protected RegionArea getRegionArea() {
+		return (RegionArea)getPlotArea();
+	}
+
+	public void performAutoScale(){
+
+		if (getRegionArea().getImageTraces()!=null && getRegionArea().getImageTraces().size()>0) {
+			
+			for (ImageTrace trace : getRegionArea().getImageTraces().values()) {
+				trace.performAutoscale();
+			}
+			
+			
+		} else {
+			super.performAutoScale();
+		}
+		
+	}
 }

@@ -13,21 +13,27 @@ import org.csstudio.swt.xygraph.undo.ZoomType;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.RegionEvent;
+import org.dawb.common.ui.plot.trace.ITraceListener;
+import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.workbench.plotting.system.dialog.AddRegionCommand;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.MouseEvent;
 import org.eclipse.draw2d.MouseListener;
 import org.eclipse.draw2d.MouseMotionListener;
 import org.eclipse.draw2d.geometry.Point;
+import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.swt.graphics.Image;
+
+import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 
 public class RegionArea extends PlotArea {
 
 	protected ISelectionProvider selectionProvider;
-	private final Map<String,Region> regions;
+	private final Map<String,Region>     regions;
+	private final Map<String,ImageTrace> imageTraces;
 	
-	private Collection<IRegionListener> regionListeners;
+	private Collection<IRegionListener>     regionListeners;
+	private Collection<ITraceListener>      imageTraceListeners;
 
 	private Region regionBeingAdded;
 	private Point  regionStart;
@@ -35,7 +41,8 @@ public class RegionArea extends PlotArea {
 	
 	public RegionArea(XYRegionGraph xyGraph) {
 		super(xyGraph);
-		this.regions = new LinkedHashMap<String,Region>();	
+		this.regions     = new LinkedHashMap<String,Region>();
+		this.imageTraces = new LinkedHashMap<String,ImageTrace>();
 	}
 		
 
@@ -75,6 +82,61 @@ public class RegionArea extends PlotArea {
 		
 	}
 	
+
+	public ImageTrace createImageTrace(String name, Axis xAxis, Axis yAxis, AbstractDataset image) {
+
+        if (imageTraces.containsKey(name)) throw new RuntimeException("There is an image called '"+name+"' already plotted!");
+        
+		final ImageTrace trace = new ImageTrace(name, xAxis, yAxis, image);
+		
+		fireImageTraceRemoved(new TraceEvent(trace));
+		
+		return trace;
+	}
+
+	/**Add a trace to the plot area.
+	 * @param trace the trace to be added.
+	 */
+	public void addImageTrace(final ImageTrace trace){
+		imageTraces.put(trace.getName(), trace);
+		add(trace);
+		revalidate();
+	}
+	
+	public boolean removeImageTrace(final ImageTrace trace){
+	    final ImageTrace gone = imageTraces.get(trace.getName());
+		if (gone!=null){
+			trace.remove();
+			fireImageTraceRemoved(new TraceEvent(trace));
+			revalidate();
+		}
+		return gone!=null;
+	}
+
+	public void clearImageTraces() {
+		if (regions==null) return;
+		for (ImageTrace trace : imageTraces.values()) {
+			trace.remove();
+			fireImageTraceRemoved(new TraceEvent(trace));
+		}
+		imageTraces.clear();
+		revalidate();
+		
+	}
+
+	
+	@Override
+	protected void layout() {
+	    final Rectangle clientArea = getClientArea();
+		for(ImageTrace trace : imageTraces.values()){
+			if(trace != null && trace.isVisible())
+				//Shrink will make the trace has no intersection with axes,
+				//which will make it only repaints the trace area.
+				trace.setBounds(clientArea);//.getCopy().shrink(1, 1));				
+		}		
+        super.layout();
+	}
+		
 	@Override
 	protected void paintClientArea(final Graphics graphics) {
 		super.paintClientArea(graphics);
@@ -141,23 +203,6 @@ public class RegionArea extends PlotArea {
 		}
 	}
 
-
-	protected void fireRegionCreated(RegionEvent evt) {
-		if (regionListeners==null) return;
-		for (IRegionListener l : regionListeners) l.regionCreated(evt);
-	}
-	
-
-	protected void fireRegionAdded(RegionEvent evt) {
-		if (regionListeners==null) return;
-		for (IRegionListener l : regionListeners) l.regionAdded(evt);
-	}
-	
-	protected void fireRegionRemoved(RegionEvent evt) {
-		if (regionListeners==null) return;
-		for (IRegionListener l : regionListeners) l.regionRemoved(evt);
-	}
-
 	/**
 	 * 
 	 * @param l
@@ -175,6 +220,60 @@ public class RegionArea extends PlotArea {
 		if (regionListeners == null) return true;
 		return regionListeners.remove(l);
 	}
+
+	protected void fireRegionCreated(RegionEvent evt) {
+		if (regionListeners==null) return;
+		for (IRegionListener l : regionListeners) l.regionCreated(evt);
+	}
+	
+
+	protected void fireRegionAdded(RegionEvent evt) {
+		if (regionListeners==null) return;
+		for (IRegionListener l : regionListeners) l.regionAdded(evt);
+	}
+	
+	protected void fireRegionRemoved(RegionEvent evt) {
+		if (regionListeners==null) return;
+		for (IRegionListener l : regionListeners) l.regionRemoved(evt);
+	}
+	
+	
+
+	/**
+	 * 
+	 * @param l
+	 */
+	public boolean addImageTraceListener(final ITraceListener l) {
+		if (imageTraceListeners == null) imageTraceListeners = new HashSet<ITraceListener>(7);
+		return imageTraceListeners.add(l);
+	}
+	
+	/**
+	 * 
+	 * @param l
+	 */
+	public boolean removeImageTraceListener(final ITraceListener l) {
+		if (imageTraceListeners == null) return true;
+		return imageTraceListeners.remove(l);
+	}
+
+	
+	protected void fireImageTraceCreated(TraceEvent evt) {
+		if (imageTraceListeners==null) return;
+		for (ITraceListener l : imageTraceListeners) l.traceCreated(evt);
+	}
+	
+
+	protected void fireImageTraceAdded(TraceEvent evt) {
+		if (imageTraceListeners==null) return;
+		for (ITraceListener l : imageTraceListeners) l.traceAdded(evt);
+	}
+	
+	protected void fireImageTraceRemoved(TraceEvent evt) {
+		if (regionListeners==null) return;
+		for (ITraceListener l : imageTraceListeners) l.traceRemoved(evt);
+	}
+
 	
 	public Map<String, Region> getRegionMap() {
 		return regions;
@@ -184,7 +283,7 @@ public class RegionArea extends PlotArea {
 		return new ArrayList<Region>(vals);
 	}
 	
-	private Image rawImage;
+//	private Image rawImage;
 	
 //	@Override
 //	protected void paintClientArea(final Graphics graphics) {
@@ -268,6 +367,10 @@ public class RegionArea extends PlotArea {
 	    public void mouseExited(final MouseEvent me) {
 	    	//mouseReleased(me);
 	    }
+	}
+
+	protected Map<String,ImageTrace> getImageTraces() {
+		return this.imageTraces;
 	}
 
 }
