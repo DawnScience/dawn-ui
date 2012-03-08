@@ -1,5 +1,8 @@
 package org.dawb.workbench.plotting.system.swtxy;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.IAxisListener;
 import org.csstudio.swt.xygraph.linearscale.Range;
@@ -35,6 +38,16 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	private PaletteData paletteData;
 
 	private int xStart, yStart;
+	private ImageOrigin imageOrigin;
+	
+	private static Map<IImageTrace.ImageOrigin, IImageService.ImageOrigin> imageOriginaMap;
+	static {
+		imageOriginaMap = new HashMap<IImageTrace.ImageOrigin, IImageService.ImageOrigin>();
+		imageOriginaMap.put(IImageTrace.ImageOrigin.TOP_LEFT,     IImageService.ImageOrigin.TOP_LEFT);
+		imageOriginaMap.put(IImageTrace.ImageOrigin.TOP_RIGHT,    IImageService.ImageOrigin.TOP_RIGHT);
+		imageOriginaMap.put(IImageTrace.ImageOrigin.BOTTOM_LEFT,  IImageService.ImageOrigin.BOTTOM_LEFT);
+		imageOriginaMap.put(IImageTrace.ImageOrigin.BOTTOM_RIGHT, IImageService.ImageOrigin.BOTTOM_RIGHT);
+	}
 	
 	public ImageTrace(final String name, 
 			          final Axis xAxis, 
@@ -54,8 +67,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 
 		this.paletteData = PaletteFactory.getPalette();
 		
-		xAxis.setRange(0, unreflectedImage.getShape()[0]);
-		yAxis.setRange(0, unreflectedImage.getShape()[1]);
+		imageOrigin = IImageTrace.ImageOrigin.TOP_LEFT;
+		performAutoscale();
+		
 		xAxis.addListener(this);
 		yAxis.addListener(this);
 		
@@ -155,7 +169,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 			
 			final IImageService service = (IImageService)PlatformUI.getWorkbench().getService(IImageService.class);
 			try {
-				this.rawImage   = service.getImage(slice, getPaletteData());
+				this.rawImage   = service.getImage(slice, getPaletteData(), imageOriginaMap.get(getImageOrigin()));
 			} catch (Exception e) {
 				logger.error("Cannot create image from data!", e);
 			}
@@ -206,8 +220,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	
 		
 		int[] xRange = getRange(bounds, 0, false);
-		int[] yRange = getRange(bounds, 1, true);		
-		
+		int[] yRange = getRange(bounds, 1, false);		
 				
 		try {
 			return data.getSlice(new int[]{xRange[0],yRange[0]}, 
@@ -255,7 +268,38 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	}
 
 	public void performAutoscale() {
-		xAxis.setRange(0, image.getShape()[0]);
-		yAxis.setRange(0, image.getShape()[1]);		
+		switch(getImageOrigin()) {
+		case TOP_LEFT:
+			xAxis.setRange(0, image.getShape()[0]);
+			yAxis.setRange(image.getShape()[1], 0);	
+			break;
+			
+		case BOTTOM_LEFT:
+			xAxis.setRange(0, image.getShape()[0]);
+			yAxis.setRange(0, image.getShape()[1]);		
+			break;
+
+		case BOTTOM_RIGHT:
+			xAxis.setRange(image.getShape()[0], 0);
+			yAxis.setRange(0, image.getShape()[1]);		
+			break;
+
+		case TOP_RIGHT:
+			xAxis.setRange(image.getShape()[0], 0);
+			yAxis.setRange(image.getShape()[1], 0);		
+			break;
+		
+		}
+	}
+
+	public void setImageOrigin(ImageOrigin imageOrigin) {
+		this.imageOrigin = imageOrigin;
+		performAutoscale();
+		repaint();
+	}
+
+	@Override
+	public ImageOrigin getImageOrigin() {
+		return imageOrigin;
 	}
 }

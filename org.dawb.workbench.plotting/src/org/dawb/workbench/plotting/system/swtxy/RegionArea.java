@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.PlotArea;
+import org.csstudio.swt.xygraph.figures.Trace;
 import org.csstudio.swt.xygraph.undo.ZoomType;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
@@ -23,6 +24,7 @@ import org.eclipse.draw2d.MouseMotionListener;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.ui.PlatformUI;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 
@@ -104,7 +106,7 @@ public class RegionArea extends PlotArea {
 	}
 	
 	public boolean removeImageTrace(final ImageTrace trace){
-	    final ImageTrace gone = imageTraces.get(trace.getName());
+	    final ImageTrace gone = imageTraces.remove(trace.getName());
 		if (gone!=null){
 			trace.remove();
 			fireImageTraceRemoved(new TraceEvent(trace));
@@ -371,6 +373,37 @@ public class RegionArea extends PlotArea {
 
 	protected Map<String,ImageTrace> getImageTraces() {
 		return this.imageTraces;
+	}
+
+  
+	/**
+	 * Must call in UI thread safe way.
+	 */
+	public void clearTraces() {
+		
+		final List<Trace> traceList = getTraceList();
+		if (traceList!=null) {
+			for (Trace trace : traceList) {
+				remove(trace);
+				trace.dispose();
+			}
+			traceList.clear();
+	    }
+		
+		if (imageTraces!=null) {
+			final Collection<ImageTrace> its = new HashSet<ImageTrace>(imageTraces.values());
+			for (ImageTrace trace : its) {
+				final ImageTrace gone = imageTraces.remove(trace.getName());
+				if (gone!=null){
+					trace.remove();
+					fireImageTraceRemoved(new TraceEvent(trace));
+				}
+			}
+
+			imageTraces.clear();
+
+		}
+
 	}
 
 }

@@ -15,7 +15,7 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 	public MeasurementLabelProvider(MeasurementTool tool, int i) {
 		this.column = i;
 		this.tool   = tool;
-		this.format = new DecimalFormat("##0.#####E0");
+		this.format = new DecimalFormat("##0.00E0");
 	}
 
 	@Override

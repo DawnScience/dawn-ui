@@ -23,5 +23,6 @@ public class PlottingPreferenceInitializer extends AbstractPreferenceInitializer
 		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
 		//store.setDefault(PlottingConstants.PLOTTING_SYSTEM_CHOICE, "org.dawb.workbench.editors.plotting.lightWeightPlottingSystem");
         store.setDefault(PlottingConstants.PLOT_X_DATASET,          false);
+		store.setDefault(PlottingConstants.XY_SHOWLEGEND,  true);
 	}
 }

@@ -18,4 +18,10 @@ public class PlottingConstants {
 
 	public static final String PLOT_X_DATASET = "org.dawb.lightweight.plot.x.choice";
 
+	
+	/**
+	 * 
+	 */
+	public final static String XY_SHOWLEGEND = "org.csstudio.swt.xygraph.preferences.show.legend";
+
 }

@@ -4,10 +4,11 @@ package org.dawb.workbench.plotting.system.swtxy;
 import java.util.Collection;
 import java.util.List;
 
-import org.csstudio.swt.xygraph.toolbar.CheckableActionGroup;
+import org.csstudio.swt.xygraph.figures.XYGraphFlags;
 import org.csstudio.swt.xygraph.toolbar.GrayableButton;
 import org.csstudio.swt.xygraph.toolbar.XYGraphConfigDialog;
 import org.csstudio.swt.xygraph.toolbar.XYGraphToolbar;
+import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.workbench.plotting.Activator;
@@ -50,7 +51,7 @@ public class XYRegionToolbar extends XYGraphToolbar {
 
 
 	public XYRegionToolbar(XYRegionGraph xyGraph) {
-		super(xyGraph);
+		super(xyGraph,  XYGraphFlags.COMBINED_ZOOM);
 		this.regionGraph = xyGraph;
 	}
 

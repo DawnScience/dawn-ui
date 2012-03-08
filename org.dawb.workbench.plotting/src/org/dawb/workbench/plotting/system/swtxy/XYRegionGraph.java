@@ -1,12 +1,16 @@
 package org.dawb.workbench.plotting.system.swtxy;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.csstudio.swt.xygraph.figures.Axis;
+import org.csstudio.swt.xygraph.figures.Legend;
 import org.csstudio.swt.xygraph.figures.PlotArea;
 import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
+import org.dawb.workbench.plotting.Activator;
+import org.dawb.workbench.plotting.preference.PlottingConstants;
 import org.eclipse.jface.viewers.ISelectionProvider;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
@@ -18,7 +22,18 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
  */
 public class XYRegionGraph extends XYGraph {
 	
-	protected PlotArea createPlotArea() {
+	public XYRegionGraph() {
+		super();
+		
+		try {
+		    this.showLegend = Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.XY_SHOWLEGEND);
+		} catch (NullPointerException ne) {
+			this.showLegend = true;
+		}
+	}
+	
+	@Override
+	protected PlotArea createPlotArea(XYGraph xyGraph) {
         return new RegionArea(this);
 	}
 
@@ -95,5 +110,43 @@ public class XYRegionGraph extends XYGraph {
 			super.performAutoScale();
 		}
 		
+	}
+	
+	public void setDefaultShowLegend(boolean showLeg) {
+		this.showLegend = showLeg;
+	}
+	
+	public void setShowLegend(boolean showLeg) {
+		super.setShowLegend(showLeg);
+		Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.XY_SHOWLEGEND, showLeg);
+	}
+	
+	/**
+	 * @return the showLegend
+	 */
+	public boolean isShowLegend() {
+		return showLegend;
+	}
+
+
+	/**
+	 * Call from UI thread only!
+	 */
+	public void clearTraces() {
+		
+		if (super.getLegendMap()!=null) {
+			final Collection<Legend> legends = super.getLegendMap().values();
+			for (Legend legend : legends) {
+				legend.getTraceList().clear();
+			}
+			//super.getLegendMap().clear();
+		}
+		
+		primaryXAxis.clear();
+		primaryYAxis.clear();
+		getRegionArea().clearTraces();
+		
+		revalidate();
+
 	}
 }
