@@ -10,6 +10,8 @@ import org.dawb.common.services.IImageService;
 import org.dawb.common.ui.image.PaletteFactory;
 import org.dawb.common.ui.plot.region.RegionBounds;
 import org.dawb.common.ui.plot.trace.IImageTrace;
+import org.dawb.workbench.plotting.Activator;
+import org.dawb.workbench.plotting.preference.PlottingConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.swt.graphics.Image;
@@ -65,9 +67,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		
 		this.yAxis = yAxis;
 
-		this.paletteData = PaletteFactory.getPalette();
+		this.paletteData = PaletteFactory.getPalette(Activator.getDefault().getPreferenceStore().getInt(PlottingConstants.P_PALETTE));	
+		this.imageOrigin = IImageTrace.ImageOrigin.forLabel(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.ORIGIN_PREF));
 		
-		imageOrigin = IImageTrace.ImageOrigin.TOP_LEFT;
 		performAutoscale();
 		
 		xAxis.addListener(this);
@@ -131,7 +133,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 
 	public void setPaletteData(PaletteData paletteData) {
 		this.paletteData = paletteData;
-		createScaledImage();
+		createScaledImage(true);
 		repaint();
 	}
 
@@ -144,7 +146,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	 * Whenever this is called the SWT image is created
 	 * and saved in the swtImage field.
 	 */
-	private void createScaledImage() {
+	private void createScaledImage(boolean force) {
 		
 		
 		final Range xRange = xAxis.getRange();
@@ -162,7 +164,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		
 		final boolean isSameRange = (xRangeCached!=null && xRangeCached.equals(xRange) && yRangeCached!=null && yRangeCached.equals(yRange));
 		
-		if (!isSameRange || rawImage==null) {
+		if (!isSameRange || rawImage==null || force) {
 			final RegionBounds regionBounds = new RegionBounds(new double[]{xRange.getLower(), yRange.getLower()}, 
 	                                                           new double[]{xRange.getUpper(), yRange.getUpper()});
 			AbstractDataset slice = slice(regionBounds);
@@ -186,7 +188,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	@Override
 	protected void paintFigure(Graphics graphics) {
 		
-		if (scaledImage==null) createScaledImage();
+		if (scaledImage==null) createScaledImage(false);
 		
 		super.paintFigure(graphics);
 		graphics.pushState();	
@@ -214,9 +216,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		final AbstractDataset data = getData();
 		
 		// Check that a slice needed, this speeds up the initial show of the image.
-		if (imageBounds==null) imageBounds = new RegionBounds(new double[]{0d, 0d},
-				                                              new double[]{image.getShape()[0], image.getShape()[0]}); 
-		if (imageBounds.equals(bounds))  return image;
+		if (imageBounds==null) imageBounds = getImageBounds(); 
+		if (imageBounds!=null && imageBounds.equals(bounds))  {
+			return image;
+		}
 	
 		
 		int[] xRange = getRange(bounds, 0, false);
@@ -225,7 +228,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		try {
 			return data.getSlice(new int[]{xRange[0],yRange[0]}, 
 					             new int[]{xRange[1],yRange[1]}, 
-					             new int[]{1,        1});
+					             new int[]{1,     1});
 			
 		}catch (IllegalArgumentException iae) {
 			logger.error("Cannot slice image", iae);
@@ -259,12 +262,12 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 
 	@Override
 	public void axisRangeChanged(Axis axis, Range old_range, Range new_range) {
-		createScaledImage();
+		createScaledImage(false);
 	}
 
 	@Override
 	public void axisRevalidated(Axis axis) {
-		createScaledImage();
+		createScaledImage(false);
 	}
 
 	public void performAutoscale() {
@@ -291,8 +294,32 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		
 		}
 	}
+	
+	private RegionBounds getImageBounds() {
+		switch(getImageOrigin()) {
+		case TOP_LEFT:
+			return new RegionBounds(new double[]{0, image.getShape()[1]},
+					                new double[]{image.getShape()[0], 0});	
+						
+		case BOTTOM_LEFT:
+			return new RegionBounds(new double[]{0, 0},
+	                                new double[]{image.getShape()[0], image.getShape()[1]});	
+
+		case BOTTOM_RIGHT:
+			return new RegionBounds(new double[]{image.getShape()[0], 0},
+                                    new double[]{0, image.getShape()[1]});	
+
+		case TOP_RIGHT:
+			return new RegionBounds(new double[]{image.getShape()[0], image.getShape()[1]},
+                                    new double[]{0,0});	
+		
+		}
+		return null;
+	}
+
 
 	public void setImageOrigin(ImageOrigin imageOrigin) {
+		this.imageBounds = null;
 		this.imageOrigin = imageOrigin;
 		performAutoscale();
 		repaint();

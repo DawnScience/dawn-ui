@@ -14,6 +14,7 @@ import org.csstudio.swt.xygraph.undo.ZoomType;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.RegionEvent;
+import org.dawb.common.ui.plot.trace.IImageTrace.ImageOrigin;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.workbench.plotting.system.dialog.AddRegionCommand;
@@ -24,6 +25,7 @@ import org.eclipse.draw2d.MouseMotionListener;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.ui.PlatformUI;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
@@ -404,6 +406,20 @@ public class RegionArea extends PlotArea {
 
 		}
 
+	}
+
+
+	public void setPaletteData(PaletteData data) {
+		if (imageTraces!=null) for (ImageTrace trace : imageTraces.values()) {
+			trace.setPaletteData(data);
+		}
+	}
+
+
+	public void setImageOrigin(ImageOrigin origin) {
+		if (imageTraces!=null) for (ImageTrace trace : imageTraces.values()) {
+			trace.setImageOrigin(origin);
+		}
 	}
 
 }

@@ -10,6 +10,7 @@
 
 package org.dawb.workbench.plotting.preference;
 
+import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.workbench.plotting.Activator;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -22,7 +23,9 @@ public class PlottingPreferenceInitializer extends AbstractPreferenceInitializer
 	public void initializeDefaultPreferences() {
 		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
 		//store.setDefault(PlottingConstants.PLOTTING_SYSTEM_CHOICE, "org.dawb.workbench.editors.plotting.lightWeightPlottingSystem");
-        store.setDefault(PlottingConstants.PLOT_X_DATASET,          false);
+        store.setDefault(PlottingConstants.PLOT_X_DATASET, false);
 		store.setDefault(PlottingConstants.XY_SHOWLEGEND,  true);
+		store.setDefault(PlottingConstants.P_PALETTE,      1);
+		store.setDefault(PlottingConstants.ORIGIN_PREF,    IImageTrace.ImageOrigin.TOP_LEFT.getLabel());
 	}
 }

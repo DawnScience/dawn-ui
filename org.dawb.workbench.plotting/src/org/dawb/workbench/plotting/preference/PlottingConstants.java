@@ -24,4 +24,14 @@ public class PlottingConstants {
 	 */
 	public final static String XY_SHOWLEGEND = "org.csstudio.swt.xygraph.preferences.show.legend";
 
+	/**
+	 * Used to store palette preference
+	 */
+	public static final String P_PALETTE = "org.dawb.plotting.system.paletteChoice";
+
+	/**
+	 * Used to store origin preference
+	 */
+	public static final String ORIGIN_PREF = "org.dawb.plotting.system.originChoice";
+
 }

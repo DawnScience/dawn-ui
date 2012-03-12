@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -32,10 +33,13 @@ import org.csstudio.swt.xygraph.linearscale.AbstractScale.LabelSide;
 import org.csstudio.swt.xygraph.linearscale.LinearScale.Orientation;
 import org.csstudio.swt.xygraph.undo.AddAnnotationCommand;
 import org.csstudio.swt.xygraph.undo.RemoveAnnotationCommand;
+import org.dawb.common.ui.image.PaletteFactory;
 import org.dawb.common.ui.menu.CheckableActionGroup;
+import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.IAxis;
 import org.dawb.common.ui.plot.PlotType;
+import org.dawb.common.ui.plot.PlottingActionBarManager;
 import org.dawb.common.ui.plot.annotation.IAnnotation;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
@@ -67,6 +71,7 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseWheelListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
@@ -76,6 +81,7 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
@@ -102,6 +108,14 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		
 	// The plotting mode, used for updates to data
 	private PlotType plottingMode;
+
+	private LightWeightActionBarsManager lightWeightActionBarMan;
+	
+	public LightWeightPlottingSystem() {
+		super();
+		this.lightWeightActionBarMan = (LightWeightActionBarsManager)this.actionBarManager;
+	}
+	
 	
 	public void createPlotPart(final Composite      parent,
 							   final String         plotName,
@@ -119,14 +133,20 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	}
 	
 	@Override
+	protected PlottingActionBarManager createActionBarManager() {
+		return new LightWeightActionBarsManager(this);
+	}
+
+	
+	@Override
 	public Composite getPlotComposite() {
 		if (xyCanvas!=null)       return xyCanvas;
 		return null;
 	}
-	
+		
 	private void createUI() {
 		
-		if (xyCanvas!=null) return;
+		if (xyCanvas!=null) return;		
 		
 		this.xyCanvas = new FigureCanvas(parent, SWT.DOUBLE_BUFFERED|SWT.NO_REDRAW_RESIZE|SWT.NO_BACKGROUND);
 		final LightweightSystem lws = new LightweightSystem(xyCanvas);
@@ -148,24 +168,18 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
         if (bars!=null) if (bars.getToolBarManager()!=null) bars.getToolBarManager().removeAll();
 
         final MenuManager rightClick = new MenuManager();
-        if (bars!=null) {
-        	final XYRegionToolbar toolbar = new XYRegionToolbar(xyGraph);
+        
+		if (bars!=null) {
+    		final XYRegionToolbar toolbar = new XYRegionToolbar(xyGraph);
         	toolbar.createGraphActions(bars.getToolBarManager(), rightClick);
-        	
-			try {
-				Action tools = createToolActions(ToolPageRole.ROLE_1D_AND_2D, "org.dawb.workbench.plotting.views.toolPageView.1D_and_2D");
-				if (tools!=null) {
-		        	bars.getToolBarManager().add(tools);
-		        	bars.getMenuManager().add(tools);
-		        	rightClick.add(tools);     
-				}
-	        	
-			} catch (Exception e) {
-				logger.error("Reading extensions for plotting tools", e);
-			}
-       }
-
-        createAdditionalActions(rightClick);
+		}
+		
+		lightWeightActionBarMan.createToolDimensionalActions(ToolPageRole.ROLE_1D, "org.dawb.workbench.plotting.views.toolPageView.1D");
+		lightWeightActionBarMan.createToolDimensionalActions(ToolPageRole.ROLE_2D, "org.dawb.workbench.plotting.views.toolPageView.2D");
+		lightWeightActionBarMan.createToolDimensionalActions(ToolPageRole.ROLE_1D_AND_2D, "org.dawb.workbench.plotting.views.toolPageView.1D_and_2D");
+		lightWeightActionBarMan.createPalleteActions();
+		lightWeightActionBarMan.createOriginActions();
+		lightWeightActionBarMan.createAdditionalActions(rightClick);
 		
 		lws.setContents(xyGraph);
 		xyGraph.primaryXAxis.setShowMajorGrid(true);
@@ -180,105 +194,14 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
         final Menu rightClickMenu = rightClick.createContextMenu(xyCanvas);
         xyCanvas.setMenu(rightClickMenu);
  
+        if (defaultPlotType!=null) {
+		    this.lightWeightActionBarMan.switchActions(defaultPlotType.is1D(), !defaultPlotType.is1D());
+        }
+
         parent.layout();
 
 	}
-	
-	private Action plotIndex, plotX;
-
-	private boolean datasetChoosingRequired = true;
-
-	/**
-	 * Also uses 'bars' field to add the actions
-	 * @param rightClick
-	 */
-	private void createAdditionalActions(final IContributionManager rightClick) {
 		
-        // Add additional if required
-        if (extra1DActions!=null&&!extra1DActions.isEmpty()){
-        	bars.getToolBarManager().add(new Separator());
-        	for (IAction action : extra1DActions) bars.getToolBarManager().add(action);
-        }
-        
-        // Add more actions
-        // Rescale
-        if (bars!=null) bars.getToolBarManager().add(new Separator());
-		rightClick.add(new Separator());
-		
-		final Action rescaleAction = new Action("Rescale axis when plotted data changes", Activator.getImageDescriptor("icons/rescale.png")) {
-		    public void run() {
-				rescale = !rescale;
-		    }
-		};
-		if (bars!=null) bars.getToolBarManager().add(rescaleAction);
-		rightClick.add(rescaleAction);
-		rescaleAction.setChecked(this.rescale);
-
-		if (bars!=null) bars.getToolBarManager().add(new Separator());
-		rightClick.add(new Separator());
-		
-		if (datasetChoosingRequired) {
-			// By index or using x 
-			final CheckableActionGroup group = new CheckableActionGroup();
-			plotIndex = new Action("Plot using indices", IAction.AS_CHECK_BOX) {
-			    public void run() {
-			    	Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.PLOT_X_DATASET, false);
-			    	setChecked(true);
-			    	xfirst = false;
-			    	fireTracesAltered(new TraceEvent(xyGraph));
-			    }
-			};
-			plotIndex.setImageDescriptor(Activator.getImageDescriptor("icons/plotindex.png"));
-			group.add(plotIndex);
-			
-			plotX = new Action("Plot using first data set selected as x-axis", IAction.AS_CHECK_BOX) {
-			    public void run() {
-			    	Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.PLOT_X_DATASET, true);
-			    	setChecked(true);
-			    	xfirst = true;
-			    	fireTracesAltered(new TraceEvent(xyGraph));
-			    }
-			};
-			plotX.setImageDescriptor(Activator.getImageDescriptor("icons/plotxaxis.png"));
-			group.add(plotX);
-			
-			this.xfirst = Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.PLOT_X_DATASET);
-			if (xfirst) {
-				plotX.setChecked(true);
-			} else {
-				plotIndex.setChecked(true);
-			}
-			if (bars!=null) {
-				bars.getToolBarManager().add(new Separator());
-				bars.getToolBarManager().add(plotIndex);
-				bars.getToolBarManager().add(plotX);
-		        bars.getToolBarManager().add(new Separator());
-			}
-			
-			rightClick.add(new Separator());
-			rightClick.add(plotIndex);
-			rightClick.add(plotX);
-			rightClick.add(new Separator());
-		}
-		
-				
-	}
-	
-	public void setXfirst(boolean xfirst) {
-		super.setXfirst(xfirst);
-		if (xfirst) {
-			if (plotX!=null) plotX.setChecked(true);
-		} else {
-			if (plotIndex!=null) plotIndex.setChecked(true);
-		}
-	}
-	
-	public void setDatasetChoosingRequired(boolean choosingRequired) {
-		if (plotX!=null)     plotX.setEnabled(choosingRequired);
-		if (plotIndex!=null) plotIndex.setEnabled(choosingRequired);
-		this.datasetChoosingRequired  = choosingRequired;
-	}	
-	
 	public void addTraceListener(final ITraceListener l) {
 		super.addTraceListener(l);
 		if (xyGraph!=null) ((RegionArea)xyGraph.getPlotArea()).addImageTraceListener(l);
@@ -378,14 +301,15 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	 * @param createdIndices
 	 * @param monitor
 	 */
-	private List<ITrace> createPlotInternal(final PlotType mode, 
-					                        final AbstractDataset x, 
+	private List<ITrace> createPlotInternal(final PlotType              mode, 
+					                        final AbstractDataset       x, 
 					                        final List<AbstractDataset> ys, 
-					                        final boolean createdIndices, 
-					                        final IProgressMonitor monitor) {
+					                        final boolean               createdIndices, 
+					                        final IProgressMonitor      monitor) {
 		
 		this.plottingMode = mode;
 		createUI();
+		this.lightWeightActionBarMan.switchActions(mode.is1D(), !mode.is1D());
 		if (mode.is1D()) {
 			return create1DPlot(x,ys,createdIndices,monitor);
 		} else {
@@ -393,11 +317,12 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
             return Arrays.asList(new ITrace[]{trace});
 		}
 	}
-	
-    /**
+
+	/**
      * Do not call before createPlotPart(...)
      */
 	public void setDefaultPlotType(PlotType mode) {
+		this.defaultPlotType = mode;
 		createUI();
 	}
 
@@ -417,6 +342,8 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 			
 			final Axis xAxis = ((AxisWrapper)getSelectedXAxis()).getWrappedAxis();
 			final Axis yAxis = ((AxisWrapper)getSelectedYAxis()).getWrappedAxis();
+			yAxis.setTitle("");
+			xAxis.setTitle("");
 
 			xyGraph.clearTraces();
 			xyGraph.clearImageTraces();
@@ -427,6 +354,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 			traceMap.put(trace.getName(), trace);
 
 			xyGraph.addImageTrace(trace);
+			
 			
 			return trace;
             
@@ -862,9 +790,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 			xyGraph.removeAll();
 			xyGraph = null;
 		}
-	    plotIndex = null;
-	    plotX     = null;
- 	}
+	}
 
 	private void clearTraces() {
 		if (xyGraph!=null)  xyGraph.clearTraces();
@@ -900,7 +826,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	 * 
 	 * @return
 	 */
-	public XYGraph getGraph() {
+	public XYRegionGraph getGraph() {
 		return xyGraph;
 	}
 
@@ -1107,4 +1033,10 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 			xyGraph.getPlotArea().removeAnnotation(annotation);
 		}
 	}
+
+	protected IActionBars getActionBars() {
+	    return bars;
+	}
+
+
 }

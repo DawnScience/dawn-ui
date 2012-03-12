@@ -9,9 +9,11 @@ import org.csstudio.swt.xygraph.figures.PlotArea;
 import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
+import org.dawb.common.ui.plot.trace.IImageTrace.ImageOrigin;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.swt.graphics.PaletteData;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 
@@ -148,5 +150,13 @@ public class XYRegionGraph extends XYGraph {
 		
 		revalidate();
 
+	}
+
+	public void setPaletteData(PaletteData data) {
+		getRegionArea().setPaletteData(data);
+	}
+
+	public void setImageOrigin(ImageOrigin origin) {
+		getRegionArea().setImageOrigin(origin);
 	}
 }
