@@ -268,18 +268,18 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 			break;
 			
 		case BOTTOM_LEFT:
-			xAxis.setRange(0, image.getShape()[1]);
-			yAxis.setRange(0, image.getShape()[0]);		
-			break;
-
-		case BOTTOM_RIGHT:
-			xAxis.setRange(image.getShape()[0], 0);
+			xAxis.setRange(0, image.getShape()[0]);
 			yAxis.setRange(0, image.getShape()[1]);		
 			break;
 
-		case TOP_RIGHT:
+		case BOTTOM_RIGHT:
 			xAxis.setRange(image.getShape()[1], 0);
-			yAxis.setRange(image.getShape()[0], 0);		
+			yAxis.setRange(0, image.getShape()[0]);		
+			break;
+
+		case TOP_RIGHT:
+			xAxis.setRange(image.getShape()[0], 0);
+			yAxis.setRange(image.getShape()[1], 0);		
 			break;
 		
 		}
@@ -288,19 +288,19 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	private RegionBounds getImageBounds() {
 		switch(getImageOrigin()) {
 		case TOP_LEFT:
-			return new RegionBounds(new double[]{0, image.getShape()[1]},
-					                new double[]{image.getShape()[0], 1});	
+			return new RegionBounds(new double[]{0, image.getShape()[0]},
+					                new double[]{image.getShape()[1], 1});	
 						
 		case BOTTOM_LEFT:
 			return new RegionBounds(new double[]{0, 0},
-	                                new double[]{image.getShape()[1], image.getShape()[0]});	
+	                                new double[]{image.getShape()[0], image.getShape()[1]});	
 
 		case BOTTOM_RIGHT:
-			return new RegionBounds(new double[]{image.getShape()[0], 0},
-                                    new double[]{0, image.getShape()[1]});	
+			return new RegionBounds(new double[]{image.getShape()[1], 0},
+                                    new double[]{0, image.getShape()[0]});	
 
 		case TOP_RIGHT:
-			return new RegionBounds(new double[]{image.getShape()[1], image.getShape()[0]},
+			return new RegionBounds(new double[]{image.getShape()[0], image.getShape()[1]},
                                     new double[]{0,0});	
 		
 		}
