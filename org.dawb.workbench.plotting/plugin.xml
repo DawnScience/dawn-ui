@@ -38,6 +38,20 @@
             label="Measurement"
             tooltip="A tool which shows values of regions selected in the plotting.">
       </plotting_tool_page>
+      <plotting_tool_page
+            class="org.dawb.workbench.plotting.tools.LineProfileTool"
+            icon="icons/plot-tool-line-profile.png"
+            id="org.dawb.workbench.plotting.tools.lineProfileTool"
+            label="Line Profile"
+            tooltip="A tool for showing line profiles of images.">
+      </plotting_tool_page>
+      <plotting_tool_page
+            class="org.dawb.workbench.plotting.tools.BoxProfileTool"
+            icon="icons/plot-tool-box-profile.png"
+            id="org.dawb.workbench.plotting.tools.boxProfileTool"
+            label="Box Profile"
+            tooltip="A tool for showing box profiles of images.">
+      </plotting_tool_page>
    </extension>
    <extension
          point="org.eclipse.ui.views">

@@ -1,6 +1,7 @@
 package org.dawb.workbench.plotting.system.swtxy;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.csstudio.swt.xygraph.figures.Axis;
@@ -53,25 +54,15 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	
 	public ImageTrace(final String name, 
 			          final Axis xAxis, 
-			          final Axis yAxis,
-			          final AbstractDataset unreflectedImage) {
+			          final Axis yAxis) {
 		
 		this.name  = name;
-		this.xAxis = xAxis;
-		
-		// The image is drawn low y to the top left but the axes are low y to the bottom right
-		// We do not currently reflect it as it takes too long. Instead in the slice
-		// method, we allow for the fact that the dataset is in a different orientation to 
-		// what is plotted.
-		this.image = unreflectedImage;
-		
+		this.xAxis = xAxis;		
 		this.yAxis = yAxis;
 
 		this.paletteData = PaletteFactory.getPalette(Activator.getDefault().getPreferenceStore().getInt(PlottingConstants.P_PALETTE));	
 		this.imageOrigin = IImageTrace.ImageOrigin.forLabel(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.ORIGIN_PREF));
-		
-		performAutoscale();
-		
+				
 		xAxis.addListener(this);
 		yAxis.addListener(this);
 		
@@ -328,5 +319,16 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	@Override
 	public ImageOrigin getImageOrigin() {
 		return imageOrigin;
+	}
+	
+	@Override
+	public void setData(final AbstractDataset image, List<AbstractDataset> axes) {
+		// The image is drawn low y to the top left but the axes are low y to the bottom right
+		// We do not currently reflect it as it takes too long. Instead in the slice
+		// method, we allow for the fact that the dataset is in a different orientation to 
+		// what is plotted.
+		this.image = image;
+		performAutoscale();
+       
 	}
 }

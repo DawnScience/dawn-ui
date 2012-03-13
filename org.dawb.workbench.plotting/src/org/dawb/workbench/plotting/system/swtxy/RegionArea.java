@@ -26,7 +26,6 @@ import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.graphics.PaletteData;
-import org.eclipse.ui.PlatformUI;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 
@@ -87,13 +86,13 @@ public class RegionArea extends PlotArea {
 	}
 	
 
-	public ImageTrace createImageTrace(String name, Axis xAxis, Axis yAxis, AbstractDataset image) {
+	public ImageTrace createImageTrace(String name, Axis xAxis, Axis yAxis) {
 
         if (imageTraces.containsKey(name)) throw new RuntimeException("There is an image called '"+name+"' already plotted!");
         
-		final ImageTrace trace = new ImageTrace(name, xAxis, yAxis, image);
+		final ImageTrace trace = new ImageTrace(name, xAxis, yAxis);
 		
-		fireImageTraceRemoved(new TraceEvent(trace));
+		fireImageTraceCreated(new TraceEvent(trace));
 		
 		return trace;
 	}
@@ -105,6 +104,9 @@ public class RegionArea extends PlotArea {
 		imageTraces.put(trace.getName(), trace);
 		add(trace);
 		revalidate();
+		
+		fireImageTraceAdded(new TraceEvent(trace));
+
 	}
 	
 	public boolean removeImageTrace(final ImageTrace trace){

@@ -1,0 +1,93 @@
+package org.dawb.workbench.plotting.tools;
+
+import java.util.Arrays;
+import java.util.List;
+
+import org.dawb.common.ui.plot.AbstractPlottingSystem;
+import org.dawb.common.ui.plot.IAxis;
+import org.dawb.common.ui.plot.region.IRegion;
+import org.dawb.common.ui.plot.region.IRegion.RegionType;
+import org.dawb.common.ui.plot.region.RegionBounds;
+import org.dawb.common.ui.plot.trace.IImageTrace;
+import org.dawb.common.ui.plot.trace.ILineTrace;
+import org.dawb.common.ui.plot.trace.ITrace;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.swt.SWT;
+
+import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.rcp.plotting.roi.RectangularROIData;
+import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
+
+public class BoxProfileTool extends ProfileTool {
+
+	private IAxis xPixelAxis;
+	private IAxis yPixelAxis;
+
+	@Override
+	protected void createAxes(AbstractPlottingSystem plotter) {
+		if (xPixelAxis==null) {
+			this.xPixelAxis = plotter.getSelectedXAxis();
+			xPixelAxis.setTitle("X Pixel");
+		}
+		
+		if (yPixelAxis==null) {
+			this.yPixelAxis = plotter.createAxis("Y Pixel", false, SWT.TOP);		
+			plotter.getSelectedYAxis().setTitle("Intensity");
+		}
+	}
+
+	@Override
+	protected void createProfile(IImageTrace image, IRegion region, RegionBounds rbs, IProgressMonitor monitor) {
+        
+		if (monitor.isCanceled()) return;
+		if (image==null) return;
+		
+		if (region.getRegionType()!=RegionType.BOX) return;
+
+		final RegionBounds bounds = rbs==null ? region.getRegionBounds() : rbs;
+		if (bounds==null) return;
+		if (!region.isVisible()) return;
+
+		final double []      r1  = bounds.getP1();
+		final double []      r2  = bounds.getP2();
+		final RectangularROI roi = new RectangularROI(r1[0], r1[1], r2[0]-r1[0], r1[1]-r2[1], 0);
+		RectangularROIData rd = new RectangularROIData(roi, image.getData());
+
+		if (monitor.isCanceled()) return;
+		
+		final AbstractDataset x_intensity = rd.getProfileData(0);
+		x_intensity.setName("X "+region.getName());
+		final AbstractDataset x_indices = rd.getXAxes()[0].toDataset();
+		x_indices.setName("X Pixel");
+		
+		final AbstractDataset y_intensity = rd.getProfileData(1);
+		y_intensity.setName("Y "+region.getName());
+		final AbstractDataset y_indices = rd.getXAxes()[1].toDataset();
+		y_indices.setName("Y Pixel");
+
+		if (plotter.getTrace(region.getName())==null) {
+		
+			plotter.setSelectedXAxis(xPixelAxis);
+			final List<ITrace> traces = plotter.createPlot1D(x_indices, Arrays.asList(new AbstractDataset[]{x_intensity}), monitor);
+			((ILineTrace)traces.get(0)).setTraceColor(ColorConstants.red);
+			
+			plotter.setSelectedXAxis(yPixelAxis);
+			plotter.createPlot1D(y_indices, Arrays.asList(new AbstractDataset[]{y_intensity}), monitor);
+			
+		} else {
+			
+			final ILineTrace x_trace = (ILineTrace)plotter.getTrace("X "+region.getName());
+			final ILineTrace y_trace = (ILineTrace)plotter.getTrace("Y "+region.getName());
+			
+			getControl().getDisplay().syncExec(new Runnable() {
+				public void run() {
+					x_trace.setData(x_indices, x_intensity);
+					y_trace.setData(y_indices, y_intensity);
+				}
+			});
+		}
+		
+	}
+
+}

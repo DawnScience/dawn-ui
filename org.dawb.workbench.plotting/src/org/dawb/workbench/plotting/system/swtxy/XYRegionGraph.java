@@ -57,9 +57,9 @@ public class XYRegionGraph extends XYGraph {
 	}
 
 
-	public ImageTrace createImageTrace(String name, Axis xAxis, Axis yAxis, AbstractDataset image) {
+	public ImageTrace createImageTrace(String name, Axis xAxis, Axis yAxis) {
 		RegionArea ra = (RegionArea)getPlotArea();
-		return ra.createImageTrace(name, xAxis, yAxis, image);
+		return ra.createImageTrace(name, xAxis, yAxis);
 	}
 	public void addImageTrace(final ImageTrace trace) {
 		getRegionArea().addImageTrace(trace);

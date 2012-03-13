@@ -14,7 +14,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -28,14 +27,10 @@ import org.csstudio.swt.xygraph.figures.Annotation;
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.Trace;
 import org.csstudio.swt.xygraph.figures.Trace.PointStyle;
-import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.swt.xygraph.linearscale.AbstractScale.LabelSide;
 import org.csstudio.swt.xygraph.linearscale.LinearScale.Orientation;
 import org.csstudio.swt.xygraph.undo.AddAnnotationCommand;
 import org.csstudio.swt.xygraph.undo.RemoveAnnotationCommand;
-import org.dawb.common.ui.image.PaletteFactory;
-import org.dawb.common.ui.menu.CheckableActionGroup;
-import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.IAxis;
 import org.dawb.common.ui.plot.PlotType;
@@ -45,13 +40,12 @@ import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
+import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.gda.extensions.util.DatasetTitleUtils;
-import org.dawb.workbench.plotting.Activator;
-import org.dawb.workbench.plotting.preference.PlottingConstants;
 import org.dawb.workbench.plotting.system.swtxy.ImageTrace;
 import org.dawb.workbench.plotting.system.swtxy.Region;
 import org.dawb.workbench.plotting.system.swtxy.RegionArea;
@@ -61,17 +55,12 @@ import org.dawb.workbench.plotting.util.ColorUtility;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.draw2d.FigureCanvas;
 import org.eclipse.draw2d.LightweightSystem;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.action.Separator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseWheelListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
@@ -81,7 +70,6 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
@@ -206,6 +194,10 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		super.addTraceListener(l);
 		if (xyGraph!=null) ((RegionArea)xyGraph.getPlotArea()).addImageTraceListener(l);
 	}
+	public void removeTraceListener(final ITraceListener l) {
+		super.removeTraceListener(l);
+		if (xyGraph!=null) ((RegionArea)xyGraph.getPlotArea()).removeImageTraceListener(l);
+	}
 
 	/**
 	 * Does not have to be called in UI thread.
@@ -248,7 +240,8 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	private Display getDisplay() {
 		if (part!=null) return part.getSite().getShell().getDisplay();
 		if (xyCanvas!=null) return xyCanvas.getDisplay();
-		return parent.getDisplay();
+		if (parent!=null)  parent.getDisplay();
+		return Display.getDefault();
 	}
 
 	private Object[] getIndexedDatasets(AbstractDataset data,
@@ -350,7 +343,9 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 			if (traceMap==null) traceMap = new LinkedHashMap<String, ITrace>(31);
 			traceMap.clear();
 			
-			final ImageTrace trace = xyGraph.createImageTrace(data.getName(), xAxis, yAxis, data);
+			final ImageTrace trace = xyGraph.createImageTrace(data.getName(), xAxis, yAxis);
+			trace.setData(data, axes);
+			
 			traceMap.put(trace.getName(), trace);
 
 			xyGraph.addImageTrace(trace);
@@ -364,6 +359,17 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		}
 	}
 
+
+	@Override
+	public IImageTrace createImageTrace(String traceName) {
+		final Axis xAxis = ((AxisWrapper)getSelectedXAxis()).getWrappedAxis();
+		final Axis yAxis = ((AxisWrapper)getSelectedYAxis()).getWrappedAxis();
+		
+		final ImageTrace trace = xyGraph.createImageTrace(traceName, xAxis, yAxis);
+		fireTraceCreated(new TraceEvent(trace));
+		
+		return trace;
+	}
 	
 	/**
 	 * An IdentityHashMap used to map AbstractDataset to color used to plot it.
@@ -492,9 +498,14 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	 * @return
 	 */
 	public void addTrace(ITrace trace) {
-		xyGraph.addTrace(((TraceWrapper)trace).getTrace());
-		xyCanvas.redraw();
-		fireTraceAdded(new TraceEvent(trace));
+		
+		if (trace instanceof ImageTrace) {
+			xyGraph.addImageTrace((ImageTrace)trace);
+		} else {
+			xyGraph.addTrace(((TraceWrapper)trace).getTrace());
+			xyCanvas.redraw();
+			fireTraceAdded(new TraceEvent(trace));
+		}
 	}
 	/**
 	 * Removes a trace.
@@ -511,6 +522,12 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	public Collection<ITrace> getTraces() {
 		if (traceMap==null) return Collections.emptyList();
 		return traceMap.values();
+	}
+
+	@Override
+	public ITrace getTrace(String name) {
+		if (traceMap==null) return null;
+		return traceMap.get(name);
 	}
 
 	private void appendInternal(final String           name, 
@@ -800,11 +817,17 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 
 	public void repaint() {
 		if (getDisplay().getThread()==Thread.currentThread()) {
-			if (xyCanvas!=null) LightWeightPlottingSystem.this.xyCanvas.redraw();
+			if (xyCanvas!=null) {
+				LightWeightPlottingSystem.this.xyGraph.performAutoScale();
+				LightWeightPlottingSystem.this.xyCanvas.redraw();
+			}
 		} else {
 			getDisplay().syncExec(new Runnable() {
 				public void run() {
-					if (xyCanvas!=null) LightWeightPlottingSystem.this.xyCanvas.redraw();
+					if (xyCanvas!=null) {
+						LightWeightPlottingSystem.this.xyGraph.performAutoScale();
+						LightWeightPlottingSystem.this.xyCanvas.redraw();
+					}
 				}
 			});
 		}

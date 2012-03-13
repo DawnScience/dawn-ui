@@ -1081,6 +1081,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 
 	protected boolean isImportant(IWorkbenchPart part) {
 		if (isDisposed) return false;
+        if (part==null) return false;
 		if (systems==null || recs==null)  return false;
         if (part instanceof ToolPageView) return false;
 		IToolPageSystem sys = (IToolPageSystem)part.getAdapter(IToolPageSystem.class);
