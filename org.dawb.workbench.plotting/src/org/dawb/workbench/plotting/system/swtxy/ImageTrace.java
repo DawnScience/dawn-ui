@@ -142,6 +142,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		
 		final Axis  x      = isRotated ? yAxis : xAxis;
 		final Axis  y      = isRotated ? xAxis : yAxis;
+		
 		final Range xRange = x.getRange();
 		final Range yRange = y.getRange();
 				
@@ -151,8 +152,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		final boolean isSameRange = (xRangeCached!=null && xRangeCached.equals(xRange) && yRangeCached!=null && yRangeCached.equals(yRange));
 		
 		if (!isSameRange || rawImage==null || force) {
-			final RegionBounds regionBounds = new RegionBounds(new double[]{xRange.getLower(), yRange.getLower()}, 
-	                                                           new double[]{xRange.getUpper(), yRange.getUpper()});
+			final RegionBounds regionBounds = new RegionBounds(new double[]{yRange.getLower(), xRange.getLower()}, 
+	                                                           new double[]{yRange.getUpper(), xRange.getUpper()});
 			AbstractDataset slice = slice(regionBounds);
 			
 			final IImageService service = (IImageService)PlatformUI.getWorkbench().getService(IImageService.class);
@@ -203,10 +204,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		final AbstractDataset data = getData();
 		
 		// Check that a slice needed, this speeds up the initial show of the image.
-//		final RegionBounds imageBounds = getImageBounds(); 
-//		if (imageBounds!=null && imageBounds.equals(bounds))  {
-//			return image;
-//		}
+		final RegionBounds imageBounds = getImageBounds(); 
+		if (imageBounds!=null && imageBounds.equals(bounds))  {
+			return image;
+		}
 		
 		int[] xRange = getRange(bounds, 0, false);
 		int[] yRange = getRange(bounds, 1, false);		
@@ -239,10 +240,6 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 			if (inverted) stop = side-stop;
 		}
 		
-		if (start<0) start = 0;
-		if (stop>image.getShape()[index]) stop = image.getShape()[index];
-
-		
 		return new int[]{start, stop};
 	}
 
@@ -266,8 +263,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	public void performAutoscale() {
 		switch(getImageOrigin()) {
 		case TOP_LEFT:
-			xAxis.setRange(0, image.getShape()[0]);
-			yAxis.setRange(image.getShape()[1], 0);	
+			xAxis.setRange(0, image.getShape()[1]);
+			yAxis.setRange(image.getShape()[0], 0);	
 			break;
 			
 		case BOTTOM_LEFT:
