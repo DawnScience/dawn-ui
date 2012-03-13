@@ -15,6 +15,8 @@ import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
+import org.eclipse.draw2d.geometry.Point;
+import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.PaletteData;
@@ -39,8 +41,6 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	private Axis   yAxis;
 	private AbstractDataset  image;
 	private PaletteData paletteData;
-
-	private int xStart, yStart;
 	private ImageOrigin imageOrigin;
 	
 	private static Map<IImageTrace.ImageOrigin, IImageService.ImageOrigin> imageOriginaMap;
@@ -68,8 +68,6 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		
 		// TODO x-axis to be told to keep aspect ratio with y
 		
-		xStart = 0;
-		yStart = 0;
 	}
 	
 	private AbstractDataset getReflection(final AbstractDataset unreflectedImage) {
@@ -140,19 +138,16 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	private void createScaledImage(boolean force) {
 		
 		
-		final Range xRange = xAxis.getRange();
-		final Range yRange = yAxis.getRange();
+		boolean isRotated = getImageOrigin()==ImageOrigin.BOTTOM_LEFT||getImageOrigin()==ImageOrigin.TOP_RIGHT;
+		
+		final Axis  x      = isRotated ? yAxis : xAxis;
+		final Axis  y      = isRotated ? xAxis : yAxis;
+		final Range xRange = x.getRange();
+		final Range yRange = y.getRange();
 				
-		xStart     = xAxis.getValuePosition(xRange.getLower(), false);
-		int xEnd   = xAxis.getValuePosition(xRange.getUpper(), false);
-        
-		yStart     = yAxis.getValuePosition(yRange.getUpper(), false);
-		int yEnd   = yAxis.getValuePosition(yRange.getLower(), false);
-		
-		
-		int width   = xEnd-xStart;
-		int height  = yEnd-yStart;		
-		
+		final XYRegionGraph graph  = (XYRegionGraph)x.getParent();
+		final Rectangle     bounds = graph.getRegionArea().getBounds();
+				
 		final boolean isSameRange = (xRangeCached!=null && xRangeCached.equals(xRange) && yRangeCached!=null && yRangeCached.equals(yRange));
 		
 		if (!isSameRange || rawImage==null || force) {
@@ -169,7 +164,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		}
 		
 		
-		ImageData data = rawImage.getImageData().scaledTo(width, height);
+		ImageData data = rawImage.getImageData().scaledTo(bounds.width, bounds.height);
 		this.scaledImage = new Image(rawImage.getDevice(), data);
 		
 		xRangeCached = xRange;
@@ -183,7 +178,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		
 		super.paintFigure(graphics);
 		graphics.pushState();	
-		graphics.drawImage(scaledImage, xStart, yStart);
+		final XYRegionGraph graph  = (XYRegionGraph)xAxis.getParent();
+		final Point         loc    = graph.getRegionArea().getLocation();
+		graphics.drawImage(scaledImage, loc);
 		graphics.popState();
 	}
 
@@ -192,7 +189,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		getParent().remove(this);
 		xAxis.removeListenr(this);
 		yAxis.removeListenr(this);
-
+		axisRedrawActive = false;
 	}
 
 	@Override
@@ -200,18 +197,16 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		return image;
 	}
 
-	private RegionBounds imageBounds;
 	@Override
 	public AbstractDataset slice(RegionBounds bounds) {
 		
 		final AbstractDataset data = getData();
 		
 		// Check that a slice needed, this speeds up the initial show of the image.
-		if (imageBounds==null) imageBounds = getImageBounds(); 
-		if (imageBounds!=null && imageBounds.equals(bounds))  {
-			return image;
-		}
-	
+//		final RegionBounds imageBounds = getImageBounds(); 
+//		if (imageBounds!=null && imageBounds.equals(bounds))  {
+//			return image;
+//		}
 		
 		int[] xRange = getRange(bounds, 0, false);
 		int[] yRange = getRange(bounds, 1, false);		
@@ -251,15 +246,22 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		return new int[]{start, stop};
 	}
 
+	private boolean axisRedrawActive = true;
 	@Override
 	public void axisRangeChanged(Axis axis, Range old_range, Range new_range) {
+		if (!axisRedrawActive) return;
 		createScaledImage(false);
 	}
 
 	@Override
 	public void axisRevalidated(Axis axis) {
+		if (!axisRedrawActive) return;
 		createScaledImage(false);
 	}
+	private void setAxisRedrawActive(boolean b) {
+		this.axisRedrawActive = b;
+	}
+
 
 	public void performAutoscale() {
 		switch(getImageOrigin()) {
@@ -269,8 +271,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 			break;
 			
 		case BOTTOM_LEFT:
-			xAxis.setRange(0, image.getShape()[0]);
-			yAxis.setRange(0, image.getShape()[1]);		
+			xAxis.setRange(0, image.getShape()[1]);
+			yAxis.setRange(0, image.getShape()[0]);		
 			break;
 
 		case BOTTOM_RIGHT:
@@ -279,8 +281,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 			break;
 
 		case TOP_RIGHT:
-			xAxis.setRange(image.getShape()[0], 0);
-			yAxis.setRange(image.getShape()[1], 0);		
+			xAxis.setRange(image.getShape()[1], 0);
+			yAxis.setRange(image.getShape()[0], 0);		
 			break;
 		
 		}
@@ -290,27 +292,25 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		switch(getImageOrigin()) {
 		case TOP_LEFT:
 			return new RegionBounds(new double[]{0, image.getShape()[1]},
-					                new double[]{image.getShape()[0], 0});	
+					                new double[]{image.getShape()[0], 1});	
 						
 		case BOTTOM_LEFT:
 			return new RegionBounds(new double[]{0, 0},
-	                                new double[]{image.getShape()[0], image.getShape()[1]});	
+	                                new double[]{image.getShape()[1], image.getShape()[0]});	
 
 		case BOTTOM_RIGHT:
 			return new RegionBounds(new double[]{image.getShape()[0], 0},
                                     new double[]{0, image.getShape()[1]});	
 
 		case TOP_RIGHT:
-			return new RegionBounds(new double[]{image.getShape()[0], image.getShape()[1]},
+			return new RegionBounds(new double[]{image.getShape()[1], image.getShape()[0]},
                                     new double[]{0,0});	
 		
 		}
 		return null;
 	}
 
-
 	public void setImageOrigin(ImageOrigin imageOrigin) {
-		this.imageBounds = null;
 		this.imageOrigin = imageOrigin;
 		performAutoscale();
 		repaint();
@@ -328,7 +328,13 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		// method, we allow for the fact that the dataset is in a different orientation to 
 		// what is plotted.
 		this.image = image;
-		performAutoscale();
+		try {
+			setAxisRedrawActive(false);
+			performAutoscale();
+		} finally {
+			setAxisRedrawActive(true);
+		}
        
 	}
+
 }

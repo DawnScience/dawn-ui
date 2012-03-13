@@ -7,6 +7,8 @@ import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.Legend;
 import org.csstudio.swt.xygraph.figures.PlotArea;
 import org.csstudio.swt.xygraph.figures.XYGraph;
+import org.csstudio.swt.xygraph.linearscale.AbstractScale.LabelSide;
+import org.csstudio.swt.xygraph.linearscale.LinearScale.Orientation;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.trace.IImageTrace.ImageOrigin;
@@ -26,7 +28,20 @@ public class XYRegionGraph extends XYGraph {
 	
 	public XYRegionGraph() {
 		super();
+		removeAxis(primaryXAxis);
+		removeAxis(primaryYAxis);
 		
+		primaryYAxis = new AspectAxis("Y-Axis", true);
+		primaryYAxis.setOrientation(Orientation.VERTICAL);
+		primaryYAxis.setTickLableSide(LabelSide.Primary);
+		primaryYAxis.setAutoScaleThreshold(0.1);
+		addAxis(primaryYAxis);
+
+		primaryXAxis = new AspectAxis("X-Axis", false);
+		primaryXAxis.setOrientation(Orientation.HORIZONTAL);
+		primaryXAxis.setTickLableSide(LabelSide.Primary);
+		addAxis(primaryXAxis);
+
 		try {
 		    this.showLegend = Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.XY_SHOWLEGEND);
 		} catch (NullPointerException ne) {

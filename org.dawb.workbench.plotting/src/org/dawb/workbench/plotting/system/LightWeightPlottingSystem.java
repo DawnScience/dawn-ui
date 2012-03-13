@@ -46,6 +46,7 @@ import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.gda.extensions.util.DatasetTitleUtils;
+import org.dawb.workbench.plotting.system.swtxy.AspectAxis;
 import org.dawb.workbench.plotting.system.swtxy.ImageTrace;
 import org.dawb.workbench.plotting.system.swtxy.Region;
 import org.dawb.workbench.plotting.system.swtxy.RegionArea;
@@ -339,7 +340,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 			xAxis.setTitle("");
 
 			xyGraph.clearTraces();
-			xyGraph.clearImageTraces();
+			
 			if (traceMap==null) traceMap = new LinkedHashMap<String, ITrace>(31);
 			traceMap.clear();
 			
@@ -865,7 +866,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		
 		if (xyGraph==null) createUI();
 			
-		Axis axis = new Axis(title, isYAxis);
+		Axis axis = new AspectAxis(title, isYAxis);
 		if (isYAxis) {
 			axis.setOrientation(Orientation.VERTICAL);
 		} else {
