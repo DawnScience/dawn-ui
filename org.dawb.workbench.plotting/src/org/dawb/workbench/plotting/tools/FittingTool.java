@@ -196,7 +196,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		try {
 			if (bean!=null) bean.activate();
 			getPlottingSystem().addRegionListener(this);
-			this.fitRegion = getPlottingSystem().createRegion("Fit selection", IRegion.RegionType.XAXIS);
+			this.fitRegion = getPlottingSystem().createRegion("Fit selection", getPlottingSystem().is2D() ? IRegion.RegionType.BOX : IRegion.RegionType.XAXIS);
 			fitRegion.setRegionColor(ColorConstants.green);
 			
 			if (viewer!=null) {

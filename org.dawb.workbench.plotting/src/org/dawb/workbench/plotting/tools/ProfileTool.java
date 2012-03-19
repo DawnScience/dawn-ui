@@ -1,21 +1,26 @@
 package org.dawb.workbench.plotting.tools;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
-import org.dawb.common.ui.plot.AbstractPlottingSystem.ColorOption;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingFactory;
 import org.dawb.common.ui.plot.region.IRegion;
+import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionBoundsListener;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.RegionBounds;
 import org.dawb.common.ui.plot.region.RegionBoundsEvent;
 import org.dawb.common.ui.plot.region.RegionEvent;
+import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
 import org.dawb.common.ui.plot.tool.IToolPageSystem;
 import org.dawb.common.ui.plot.trace.IImageTrace;
+import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
@@ -39,13 +44,13 @@ public abstract class ProfileTool extends AbstractToolPage  implements IRegionBo
 	private   Job                    updateProfiles;
 	private   IRegion                currentRegion;
 	private   RegionBounds           currentBounds;
+	private   Map<String,Collection<ITrace>> registeredTraces;
 
 	public ProfileTool() {
+		
+		this.registeredTraces = new HashMap<String,Collection<ITrace>>(7);
 		try {
 			plotter = PlottingFactory.getPlottingSystem();
-			plotter.setColorOption(ColorOption.NONE);
-			plotter.setDatasetChoosingRequired(false);
-			
 			updateProfiles = createProfileJob();
 			
 			this.traceListener = new ITraceListener.Stub() {
@@ -55,30 +60,62 @@ public abstract class ProfileTool extends AbstractToolPage  implements IRegionBo
 					if (!(evt.getSource() instanceof List<?>)) {
 						return;
 					}
-					updateProfiles.schedule();
+					update(null, null);
 				}
 			};
 			
 			this.regionListener = new IRegionListener.Stub() {			
 				@Override
 				public void regionRemoved(RegionEvent evt) {
-					if (evt.getRegion()!=null) evt.getRegion().removeRegionBoundsListener(ProfileTool.this);
+					if (evt.getRegion()!=null) {
+						evt.getRegion().removeRegionBoundsListener(ProfileTool.this);
+						clearTraces(evt.getRegion());
+					}
 				}
 				@Override
 				public void regionAdded(RegionEvent evt) {
 					if (evt.getRegion()!=null) {
-						currentRegion = evt.getRegion();
-					    updateProfiles.schedule();
+						update(null, null);
 					}
 				}
 				
 				@Override
 				public void regionCreated(RegionEvent evt) {
-					if (evt.getRegion()!=null) evt.getRegion().addRegionBoundsListener(ProfileTool.this);
+					if (evt.getRegion()!=null) {
+						evt.getRegion().addRegionBoundsListener(ProfileTool.this);
+					}
 				}
 			};
 		} catch (Exception e) {
 			logger.error("Cannot get plotting system!", e);
+		}
+	}
+	
+	protected void registerTraces(final IRegion region, final Collection<ITrace> traces) {
+		
+		final String name = region.getName();
+		Collection<ITrace> registered = this.registeredTraces.get(name);
+		if (registered==null) {
+			registered = new HashSet<ITrace>(7);
+			registeredTraces.put(name, registered);
+		}
+		registered.addAll(traces);
+		
+		final ITrace first = traces.iterator().next();
+		if (getRegionType()==RegionType.LINE && first instanceof ILineTrace && region.getName().startsWith("Profile")) {
+			getControl().getDisplay().syncExec(new Runnable() {
+				public void run() {
+					region.setRegionColor(((ILineTrace)first).getTraceColor());
+				}
+			});
+		}
+	}
+	
+	protected void clearTraces(final IRegion region) {
+		final String name = region.getName();
+		Collection<ITrace> registered = this.registeredTraces.get(name);
+        if (registered!=null) for (ITrace iTrace : registered) {
+			plotter.removeTrace(iTrace);
 		}
 	}
 	
@@ -125,7 +162,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IRegionBo
 	
 	public void activate() {
 		super.activate();
-		updateProfiles.schedule();
+		update(null, null);
 		if (getPlottingSystem()!=null) {
 			getPlottingSystem().addTraceListener(traceListener);
 		}
@@ -134,8 +171,21 @@ public abstract class ProfileTool extends AbstractToolPage  implements IRegionBo
 		}		
 		final Collection<IRegion> regions = getPlottingSystem().getRegions();
 		if (regions!=null) for (IRegion iRegion : regions) iRegion.addRegionBoundsListener(this);
+		
+		// Start with a selection of the right type
+		try {
+			getPlottingSystem().createRegion(RegionUtils.getUniqueName("Profile", getPlottingSystem()), getRegionType());
+		} catch (Exception e) {
+			logger.error("Cannot create region for profile tool!");
+		}
 	}
 	
+	/**
+	 * 
+	 * @return
+	 */
+	protected abstract RegionType getRegionType();
+
 	public void deactivate() {
 		super.deactivate();
 		if (getPlottingSystem()!=null) {
@@ -157,6 +207,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IRegionBo
 	public void dispose() {
 		deactivate();
 		
+		registeredTraces.clear();
 		if (plotter!=null) plotter.dispose();
 		plotter = null;
 		super.dispose();
@@ -193,15 +244,21 @@ public abstract class ProfileTool extends AbstractToolPage  implements IRegionBo
 				// Get the profiles from the line and box regions.
 				if (currentRegion==null) {
 					plotter.clear();
+					registeredTraces.clear();
 					final Collection<IRegion> regions = getPlottingSystem().getRegions();
 					if (regions!=null) {
-						for (IRegion iRegion : regions) createProfile(image, iRegion, null, monitor);
+						for (IRegion iRegion : regions) {
+							createProfile(image, iRegion, null, false, monitor);
+						}
 					}
 				} else {
 
-					createProfile(image, currentRegion, currentBounds!=null?currentBounds:currentRegion.getRegionBounds(), monitor);
-					currentRegion = null;
-					currentBounds = null;
+					createProfile(image, 
+							      currentRegion, 
+							      currentBounds!=null?currentBounds:currentRegion.getRegionBounds(), 
+							      true, 
+							      monitor);
+					
 				}
 
 				if (monitor.isCanceled()) return Status.CANCEL_STATUS;
@@ -225,20 +282,25 @@ public abstract class ProfileTool extends AbstractToolPage  implements IRegionBo
 	 * @param bounds - may be null
 	 * @param monitor
 	 */
-	protected abstract void createProfile(IImageTrace image, IRegion region, final RegionBounds bounds, IProgressMonitor monitor);
+	protected abstract void createProfile(IImageTrace image, IRegion region, final RegionBounds bounds, boolean tryUpdate, IProgressMonitor monitor);
 
 	@Override
 	public void regionBoundsDragged(RegionBoundsEvent evt) {
-		currentRegion = (IRegion)evt.getSource();
-		currentBounds = evt.getRegionBounds();
-		updateProfiles.schedule();
+		update((IRegion)evt.getSource(), evt.getRegionBounds());
 	}
 
 	@Override
 	public void regionBoundsChanged(RegionBoundsEvent evt) {
-		updateProfiles.schedule();
+		final IRegion region = (IRegion)evt.getSource();
+		update(region, region.getRegionBounds());
 	}
 	
+	private synchronized void update(IRegion r, RegionBounds rb) {
+		this.currentRegion = r;
+		this.currentBounds = rb;
+		updateProfiles.schedule();
+	}
+
 	@Override
 	public Object getAdapter(Class clazz) {
 		if (clazz == IToolPageSystem.class) {

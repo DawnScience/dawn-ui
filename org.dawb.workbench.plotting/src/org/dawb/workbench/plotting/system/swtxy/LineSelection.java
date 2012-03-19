@@ -187,6 +187,7 @@ class LineSelection extends Region {
 		if (endBox!=null)     endBox.setSelectionPoint(dragLocation);
 		updateConnectionBounds();
 		createRegionBounds(true);
+		fireRegionBoundsChanged(getRegionBounds());
 	}
 
 	@Override

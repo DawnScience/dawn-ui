@@ -300,6 +300,7 @@ class AxisSelection extends Region {
 		if (line1!=null) {
 			setLocalBounds(new Rectangle(firstClick, dragLocation), parentBounds);
 			createRegionBounds(true);
+			fireRegionBoundsChanged(getRegionBounds());
 		}
 	}
 

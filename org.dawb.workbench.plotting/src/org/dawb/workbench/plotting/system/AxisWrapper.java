@@ -147,4 +147,18 @@ class AxisWrapper implements IAxis {
 	final Axis getWrappedAxis() {
 		return wrappedAxis;
 	}
+	
+	/**
+	 * returns the upper bound in the units of the axis (not pixels)
+	 */
+	public double getUpper() {
+		return wrappedAxis.getRange().getUpper();
+	}
+	
+	/**
+	 * returns the lower bound in the units of the axis (not pixels)
+	 */
+	public double getLower() {
+		return wrappedAxis.getRange().getLower();
+	}
 }

@@ -193,6 +193,7 @@ class BoxSelection extends Region {
 			final Rectangle rect = getRectangleFromVertices();
 			double[] a1 = new double[]{getxAxis().getPositionValue(rect.x, false), getyAxis().getPositionValue(rect.y, false)};
 			double[] a2 = new double[]{getxAxis().getPositionValue(rect.x+rect.width, false), getyAxis().getPositionValue(rect.y+rect.height, false)};
+			
 			final RegionBounds bounds = new RegionBounds(a1, a2);
 			if (recordResult) this.regionBounds = bounds;
 			return bounds;
@@ -215,6 +216,7 @@ class BoxSelection extends Region {
 		if (p4!=null)   p4.setSelectionPoint(dragLocation);
 		updateConnectionBounds();
 		createRegionBounds(true);
+		fireRegionBoundsChanged(getRegionBounds());
 	}
 
 	protected void updateConnectionBounds() {

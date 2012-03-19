@@ -9,6 +9,7 @@ import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.RegionBounds;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
+import org.dawb.common.ui.plot.trace.ITrace;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
@@ -24,7 +25,11 @@ public class LineProfileTool extends ProfileTool {
 	}
 
 	@Override
-	protected void createProfile(IImageTrace image, IRegion region, RegionBounds rbs, IProgressMonitor monitor) {
+	protected void createProfile(	IImageTrace  image, 
+						            IRegion      region, 
+						            RegionBounds rbs, 
+						            boolean      tryUpdate,
+						            IProgressMonitor monitor) {
         
 		if (monitor.isCanceled()) return;
 		if (image==null) return;
@@ -47,7 +52,8 @@ public class LineProfileTool extends ProfileTool {
 		
 		if (plotter.getTrace(region.getName())==null) {
 		
-			plotter.createPlot1D(indices, Arrays.asList(new AbstractDataset[]{intensity}), monitor);
+			Collection<ITrace> plotted = plotter.createPlot1D(indices, Arrays.asList(new AbstractDataset[]{intensity}), monitor);
+			registerTraces(region, plotted);
 			
 		} else {
 			
@@ -62,5 +68,8 @@ public class LineProfileTool extends ProfileTool {
 		
 	}
 
+	public RegionType getRegionType() {
+		return RegionType.LINE;
+	}
 
 }

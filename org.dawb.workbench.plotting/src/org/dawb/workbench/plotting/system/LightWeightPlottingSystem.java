@@ -459,7 +459,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 			
 			//set trace property
 			trace.setPointStyle(PointStyle.NONE);
-			final Color plotColor = ColorUtility.getSwtColour(colorMap!=null?colorMap.values():null, iplot);
+			final Color plotColor = ColorUtility.getSwtColour(colorMap!=null?colorMap.values():null, getTraces().size()+iplot-1);
 			if (colorMap!=null) {
 				if (getColorOption()==ColorOption.BY_NAME) {
 					colorMap.put(y.getName(),plotColor);

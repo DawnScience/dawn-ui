@@ -297,10 +297,14 @@ public class TraceWrapper implements ILineTrace {
 		return trace;
 	}
 
+	/**
+	 * You may need a repaint after calling this
+	 */
 	@Override
 	public void setData(AbstractDataset xData, AbstractDataset yData) {
 		
 		CircularBufferDataProvider prov = (CircularBufferDataProvider)trace.getDataProvider();
+		prov.removeDataProviderListener(trace);
 		prov.clearTrace();
 		
 		if (xData.containsInvalidNumbers()) throw new RuntimeException(xData.getName()+" contains infinities or nans!");
@@ -308,13 +312,12 @@ public class TraceWrapper implements ILineTrace {
 		
 		if (yData.containsInvalidNumbers()) throw new RuntimeException(yData.getName()+" contains infinities or nans!");
 		final double[] y = (double[])DatasetUtils.cast(yData, AbstractDataset.FLOAT64).getBuffer(); 
-
+		
 		prov = new CircularBufferDataProvider(false);
 		prov.setBufferSize(xData.getSize());	
 		prov.setCurrentXDataArray(x);
 		prov.setCurrentYDataArray(y);
 		trace.setDataProvider(prov);
-		trace.repaint();
 	}
 
 	@Override
