@@ -16,9 +16,10 @@ import org.eclipse.draw2d.geometry.Rectangle;
 public class AspectAxis extends Axis {
 
 	private AspectAxis relativeTo;
-
+    private boolean    keepAspect; // This is so that the user may have images with and without aspect in the same application.
 	public AspectAxis(String title, boolean yAxis) {
 		super(title, yAxis);
+		keepAspect = Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.ASPECT);
 	}
 
 	public void setKeepAspectWith(final AspectAxis axis) {
@@ -33,7 +34,7 @@ public class AspectAxis extends Axis {
 			return;
 		}
 		
-		if (!Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.ASPECT)) {
+		if (!keepAspect) {
 			super.setBounds(bounds);
 			return;
 		}
@@ -102,5 +103,13 @@ public class AspectAxis extends Axis {
 	 */
 	private double getInterval(Range range) {
 		return Math.max(range.getLower(), range.getUpper()) - Math.min(range.getLower(), range.getUpper());
+	}
+
+	public boolean isKeepAspect() {
+		return keepAspect;
+	}
+
+	public void setKeepAspect(boolean keepAspect) {
+		this.keepAspect = keepAspect;
 	}
 }

@@ -163,6 +163,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
         	toolbar.createGraphActions(bars.getToolBarManager(), rightClick);
 		}
 		
+		lightWeightActionBarMan.createAspectAction();
 		lightWeightActionBarMan.createToolDimensionalActions(ToolPageRole.ROLE_1D, "org.dawb.workbench.plotting.views.toolPageView.1D");
 		lightWeightActionBarMan.createToolDimensionalActions(ToolPageRole.ROLE_2D, "org.dawb.workbench.plotting.views.toolPageView.2D");
 		lightWeightActionBarMan.createToolDimensionalActions(ToolPageRole.ROLE_1D_AND_2D, "org.dawb.workbench.plotting.views.toolPageView.1D_and_2D");

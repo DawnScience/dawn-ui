@@ -37,6 +37,8 @@ class LightWeightActionBarsManager extends PlottingActionBarManager {
 	protected LightWeightActionBarsManager(LightWeightPlottingSystem system) {
 		super(system);
 		this.system = system;
+		oneDimensionalActions = new ArrayList<ActionContainer>();
+		twoDimensionalActions = new ArrayList<ActionContainer>();
 	}
 
 	protected void switchActions(boolean is1D, boolean is2D) {
@@ -69,8 +71,6 @@ class LightWeightActionBarsManager extends PlottingActionBarManager {
 
 		final IActionBars bars = system.getActionBars();
 		if (bars!=null) {
-    		if (oneDimensionalActions==null) oneDimensionalActions = new ArrayList<ActionContainer>();
-    		if (twoDimensionalActions==null) twoDimensionalActions = new ArrayList<ActionContainer>();
        	
 			try {
 				IAction toolSet = createToolActions(role, viewId);
@@ -86,6 +86,28 @@ class LightWeightActionBarsManager extends PlottingActionBarManager {
 				logger.error("Reading extensions for plotting tools", e);
 			}
        }	
+	}
+	
+	protected void createAspectAction() {
+
+		final Action action = new Action("Keep aspect ratio", IAction.AS_CHECK_BOX) {
+			
+		    public void run() {		    	
+		    	Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.ASPECT, isChecked());
+		    	system.getGraph().setKeepAspect(isChecked());
+		    	system.repaint();
+		    }
+		};
+        
+		action.setImageDescriptor(Activator.getImageDescriptor("icons/aspect.png"));
+		action.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.ASPECT));
+		
+		final IActionBars bars = system.getActionBars();
+		bars.getToolBarManager().add(new Separator("org.dawb.workbench.plotting.aspect.group"));
+		action.setId("org.dawb.workbench.plotting.aspect");
+		bars.getToolBarManager().insertAfter("org.dawb.workbench.plotting.aspect.group", action);
+ 
+		twoDimensionalActions.add(new ActionContainer(action, bars.getToolBarManager()));
 	}
 	
 	protected void createPalleteActions() {

@@ -198,4 +198,13 @@ public class XYRegionGraph extends XYGraph {
 
 		}
 	}
+
+	public void setKeepAspect(boolean checked) {
+		for (Axis axis : getXAxisList()) {
+			if (axis instanceof AspectAxis) ((AspectAxis)axis).setKeepAspect(checked);
+		}
+		for (Axis axis : getYAxisList()) {
+			if (axis instanceof AspectAxis) ((AspectAxis)axis).setKeepAspect(checked);
+		}
+	}
 }
