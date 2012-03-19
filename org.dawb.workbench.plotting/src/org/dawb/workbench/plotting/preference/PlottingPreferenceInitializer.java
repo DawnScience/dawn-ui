@@ -27,5 +27,6 @@ public class PlottingPreferenceInitializer extends AbstractPreferenceInitializer
 		store.setDefault(PlottingConstants.XY_SHOWLEGEND,  true);
 		store.setDefault(PlottingConstants.P_PALETTE,      1);
 		store.setDefault(PlottingConstants.ORIGIN_PREF,    IImageTrace.ImageOrigin.TOP_LEFT.getLabel());
+		store.setDefault(PlottingConstants.ASPECT,         true);
 	}
 }

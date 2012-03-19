@@ -14,6 +14,7 @@ import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.trace.IImageTrace.ImageOrigin;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
+import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.graphics.PaletteData;
 
@@ -173,5 +174,28 @@ public class XYRegionGraph extends XYGraph {
 
 	public void setImageOrigin(ImageOrigin origin) {
 		getRegionArea().setImageOrigin(origin);
+	}
+	
+	public void layout() {
+		super.layout();
+		
+		for (Axis axis : getXAxisList()) {
+			if (axis instanceof AspectAxis) ((AspectAxis)axis).checkBounds();
+		}
+		for (Axis axis : getYAxisList()) {
+			if (axis instanceof AspectAxis) ((AspectAxis)axis).checkBounds();
+		}
+		
+		if(getPlotArea() != null && getPlotArea().isVisible()){
+
+			Rectangle plotAreaBound = new Rectangle(
+					primaryXAxis.getBounds().x + primaryXAxis.getMargin(),
+					primaryYAxis.getBounds().y + primaryYAxis.getMargin(),
+					primaryXAxis.getBounds().width - 2*primaryXAxis.getMargin(),
+					primaryYAxis.getBounds().height - 2*primaryYAxis.getMargin()
+					);
+			getPlotArea().setBounds(plotAreaBound);
+
+		}
 	}
 }

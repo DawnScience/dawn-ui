@@ -34,4 +34,9 @@ public class PlottingConstants {
 	 */
 	public static final String ORIGIN_PREF = "org.dawb.plotting.system.originChoice";
 
+	/**
+	 * true when the image should keep aspect ratio, otherwise it will stretch to the available area.
+	 */
+	public static final String ASPECT = "org.dawb.plotting.system.aspectRatio";
+
 }

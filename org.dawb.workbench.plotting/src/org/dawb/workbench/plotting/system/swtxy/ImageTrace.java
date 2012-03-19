@@ -66,22 +66,13 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		xAxis.addListener(this);
 		yAxis.addListener(this);
 		
-		// TODO x-axis to be told to keep aspect ratio with y
-		
-	}
-	
-	private AbstractDataset getReflection(final AbstractDataset unreflectedImage) {
-		
-		final int[] shape = unreflectedImage.getShape();
-		AbstractDataset tdata = AbstractDataset.zeros(shape, AbstractDataset.getDType(unreflectedImage));		
-		for (int row = 0; row<shape[0]; ++row) {
-			int newRow = shape[0]-row-1;
-			for (int col = 0; col<shape[1]; ++col) {				
-				Object val = unreflectedImage.getObject(row, col);
-				tdata.set(val, newRow, col);
-			}
+		if (xAxis instanceof AspectAxis && yAxis instanceof AspectAxis) {
+			
+			AspectAxis x = (AspectAxis)xAxis;
+			AspectAxis y = (AspectAxis)yAxis;
+			x.setKeepAspectWith(y);
+			y.setKeepAspectWith(x);
 		}
-		return tdata;
 	}
 
 	public String getName() {
@@ -138,22 +129,19 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	private void createScaledImage(boolean force) {
 		
 		
-		boolean isRotated = getImageOrigin()==ImageOrigin.BOTTOM_LEFT||getImageOrigin()==ImageOrigin.TOP_RIGHT;
+		boolean isRotated = getImageOrigin()==ImageOrigin.TOP_LEFT||getImageOrigin()==ImageOrigin.BOTTOM_RIGHT;
 		
 		final Axis  x      = isRotated ? yAxis : xAxis;
 		final Axis  y      = isRotated ? xAxis : yAxis;
 		
 		final Range xRange = x.getRange();
 		final Range yRange = y.getRange();
-				
-		final XYRegionGraph graph  = (XYRegionGraph)x.getParent();
-		final Rectangle     bounds = graph.getRegionArea().getBounds();
-				
+								
 		final boolean isSameRange = (xRangeCached!=null && xRangeCached.equals(xRange) && yRangeCached!=null && yRangeCached.equals(yRange));
 		
 		if (!isSameRange || rawImage==null || force) {
-			final RegionBounds regionBounds = new RegionBounds(new double[]{yRange.getLower(), xRange.getLower()}, 
-	                                                           new double[]{yRange.getUpper(), xRange.getUpper()});
+			final RegionBounds regionBounds = new RegionBounds(new double[]{xRange.getLower(), yRange.getLower()}, 
+	                                                           new double[]{xRange.getUpper(), yRange.getUpper()});
 			AbstractDataset slice = slice(regionBounds);
 			
 			final IImageService service = (IImageService)PlatformUI.getWorkbench().getService(IImageService.class);
@@ -164,6 +152,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 			}
 		}
 		
+		final XYRegionGraph graph  = (XYRegionGraph)x.getParent();
+		final Rectangle     bounds = graph.getRegionArea().getBounds();
 		
 		ImageData data = rawImage.getImageData().scaledTo(bounds.width, bounds.height);
 		this.scaledImage = new Image(rawImage.getDevice(), data);
