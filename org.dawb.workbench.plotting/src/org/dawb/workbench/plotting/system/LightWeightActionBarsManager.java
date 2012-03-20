@@ -190,27 +190,33 @@ class LightWeightActionBarsManager extends PlottingActionBarManager {
 		
         // Add additional if required
 		final IActionBars bars = system.getActionBars();
+			
         if (extra1DActions!=null&&!extra1DActions.isEmpty()){
-        	bars.getToolBarManager().add(new Separator());
-        	for (IAction action : extra1DActions) bars.getToolBarManager().add(action);
+    		bars.getToolBarManager().add(new Separator("org.dawb.workbench.plotting.extra1D.group"));
+         	for (IAction action : extra1DActions) {
+        		bars.getToolBarManager().add(action);
+        		action.setId("org.dawb.workbench.plotting.extra1D");
+        		oneDimensionalActions.add(new ActionContainer(action, bars.getToolBarManager()));
+        	}
         }
         
         // Add more actions
-        // Rescale
-        if (bars!=null) bars.getToolBarManager().add(new Separator());
-		rightClick.add(new Separator());
-		
+        // Rescale		
 		final Action rescaleAction = new Action("Rescale axis when plotted data changes", Activator.getImageDescriptor("icons/rescale.png")) {
 		    public void run() {
 				system.setRescale(!system.isRescale());
 		    }
 		};
-		if (bars!=null) bars.getToolBarManager().add(rescaleAction);
-		rightClick.add(rescaleAction);
 		rescaleAction.setChecked(this.system.isRescale());
+		rescaleAction.setId("org.dawb.workbench.plotting.rescale");
+		oneDimensionalActions.add(new ActionContainer(rescaleAction, bars.getToolBarManager()));
 
-		if (bars!=null) bars.getToolBarManager().add(new Separator());
-		rightClick.add(new Separator());
+        if (bars!=null) bars.getToolBarManager().add(new Separator(rescaleAction.getId()+".group"));
+		rightClick.add(new Separator(rescaleAction.getId()+".group"));
+
+		if (bars!=null) bars.getToolBarManager().insertAfter(rescaleAction.getId()+".group", rescaleAction);
+		rightClick.insertAfter(rescaleAction.getId()+".group", rescaleAction);
+
 		
 		if (datasetChoosingRequired) {
 			// By index or using x 
@@ -225,6 +231,7 @@ class LightWeightActionBarsManager extends PlottingActionBarManager {
 			    }
 			};
 			plotIndex.setImageDescriptor(Activator.getImageDescriptor("icons/plotindex.png"));
+			plotIndex.setId("org.dawb.workbench.plotting.plotIndex");
 			group.add(plotIndex);
 			
 			plotX = new Action("Plot using first data set selected as x-axis", IAction.AS_CHECK_BOX) {
@@ -237,6 +244,7 @@ class LightWeightActionBarsManager extends PlottingActionBarManager {
 			    }
 			};
 			plotX.setImageDescriptor(Activator.getImageDescriptor("icons/plotxaxis.png"));
+			plotX.setId("org.dawb.workbench.plotting.plotX");
 			group.add(plotX);
 			
 			boolean xfirst = Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.PLOT_X_DATASET);
@@ -245,14 +253,21 @@ class LightWeightActionBarsManager extends PlottingActionBarManager {
 			} else {
 				plotIndex.setChecked(true);
 			}
+			
+			
 			if (bars!=null) {
-				bars.getToolBarManager().add(new Separator());
+			
+				bars.getToolBarManager().add(new Separator(plotIndex.getId()+".group"));
+		        bars.getToolBarManager().add(new Separator(plotX.getId()+".group"));
 				bars.getToolBarManager().add(plotIndex);
+	       		oneDimensionalActions.add(new ActionContainer(plotIndex, bars.getToolBarManager()));
 				bars.getToolBarManager().add(plotX);
+	       		oneDimensionalActions.add(new ActionContainer(plotX, bars.getToolBarManager()));
 		        bars.getToolBarManager().add(new Separator());
 			}
 			
-			rightClick.add(new Separator());
+			rightClick.add(new Separator(plotIndex.getId()+".group"));
+			rightClick.add(new Separator(plotX.getId()+".group"));
 			rightClick.add(plotIndex);
 			rightClick.add(plotX);
 			rightClick.add(new Separator());

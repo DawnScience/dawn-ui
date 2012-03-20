@@ -36,23 +36,20 @@ public class DataBrowsingPerspective implements IPerspectiveFactory {
 		addPerspectiveShortcuts(layout);
 		
 		String editorArea = layout.getEditorArea();
-		IFolderLayout navigatorFolder = layout.createFolder("navigator-folder", IPageLayout.LEFT, 0.22f, editorArea);
+		IFolderLayout navigatorFolder = layout.createFolder("navigator-folder", IPageLayout.LEFT, 0.2f, editorArea);
 		navigatorFolder.addView("org.eclipse.ui.navigator.ProjectExplorer");
 		navigatorFolder.addView("uk.ac.diamond.sda.navigator.views.FileView");
 		{
-			IFolderLayout folderLayout = layout.createFolder("folder", IPageLayout.RIGHT, 0.69f, IPageLayout.ID_EDITOR_AREA);
+			IFolderLayout folderLayout = layout.createFolder("folder", IPageLayout.RIGHT, 0.6f, IPageLayout.ID_EDITOR_AREA);
 			folderLayout.addView("org.dawb.workbench.views.dataSetView");
-//			folderLayout.addView("fable.imageviewer.views.ImageView:Zoom");
-//			folderLayout.addView("fable.imageviewer.views.LineView");
-//			folderLayout.addView("fable.imageviewer.views.ProfileView");
-		    //folderLayout.addView("fable.imageviewer.views.ReliefView");
-			//folderLayout.addView("fable.imageviewer.views.RockingCurveView");
+			folderLayout.addView("org.dawb.workbench.plotting.views.toolPageView.2D");
 		}
 		{
-			IFolderLayout folderLayout = layout.createFolder("folder_1", IPageLayout.BOTTOM, 0.81f, IPageLayout.ID_EDITOR_AREA);
+			IFolderLayout folderLayout = layout.createFolder("folder_1", IPageLayout.BOTTOM, 0.7f, IPageLayout.ID_EDITOR_AREA);
 			folderLayout.addView("org.dawb.passerelle.views.ValueView");
 			folderLayout.addView("org.eclipse.ui.console.ConsoleView");
 			folderLayout.addView("org.eclipse.ui.views.ProgressView");
+			folderLayout.addView("org.dawb.workbench.plotting.views.toolPageView.1D_and_2D");
 		}
 	}
 

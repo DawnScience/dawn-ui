@@ -57,14 +57,18 @@ public class BoxProfileTool extends ProfileTool {
 
 		if (monitor.isCanceled()) return;
 		
+		if (rd.getProfileData()==null) return;
+		
 		final AbstractDataset x_intensity = rd.getProfileData(0);
 		x_intensity.setName("X "+region.getName());
-		final AbstractDataset x_indices = rd.getXAxes()[0].toDataset();
+		AbstractDataset xi = rd.getXAxes()[0].toDataset();
+		final AbstractDataset x_indices = xi; // Maths.add(xi, bounds.getX()); // Real position
 		x_indices.setName("X Pixel");
 		
 		final AbstractDataset y_intensity = rd.getProfileData(1);
 		y_intensity.setName("Y "+region.getName());
-		final AbstractDataset y_indices = rd.getXAxes()[1].toDataset();
+		AbstractDataset yi = rd.getXAxes()[1].toDataset();
+		final AbstractDataset y_indices = yi; // Maths.add(yi, bounds.getY()); // Real position
 		y_indices.setName("Y Pixel");
 
 		if (tryUpdate) {

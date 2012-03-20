@@ -134,21 +134,17 @@ public abstract class ProfileTool extends AbstractToolPage  implements IRegionBo
 		createAxes(plotter);
 	}
 
-	protected abstract void createAxes(AbstractPlottingSystem plotter);
-
-	/**
-	 * Required if you want to make tools work.
-	 * Currently we do not want 1D tools on the derivative page
-	 * 
-	public Object getAdapter(final Class clazz) {
-
+	@Override
+	public Object getAdapter(Class clazz) {
 		if (clazz == IToolPageSystem.class) {
 			return plotter;
+		} else {
+			return super.getAdapter(clazz);
 		}
-
-		return null;
 	}
-	 */
+
+	protected abstract void createAxes(AbstractPlottingSystem plotter);
+	 
 	
 	@Override
 	public ToolPageRole getToolPageRole() {
@@ -263,7 +259,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IRegionBo
 
 				if (monitor.isCanceled()) return Status.CANCEL_STATUS;
                 plotter.repaint();
-                
+                                
 				return Status.OK_STATUS;
 
 			}	
@@ -293,6 +289,19 @@ public abstract class ProfileTool extends AbstractToolPage  implements IRegionBo
 	public void regionBoundsChanged(RegionBoundsEvent evt) {
 		final IRegion region = (IRegion)evt.getSource();
 		update(region, region.getRegionBounds());
+		
+		try {
+			updateProfiles.join();
+		} catch (InterruptedException e) {
+			logger.error("Update profiles job interrupted!", e);
+		}
+		
+        getControl().getDisplay().syncExec(new Runnable() {
+        	public void run() {
+        		plotter.autoscaleAxes();
+        	}
+        });
+
 	}
 	
 	private synchronized void update(IRegion r, RegionBounds rb) {
@@ -300,14 +309,4 @@ public abstract class ProfileTool extends AbstractToolPage  implements IRegionBo
 		this.currentBounds = rb;
 		updateProfiles.schedule();
 	}
-
-	@Override
-	public Object getAdapter(Class clazz) {
-		if (clazz == IToolPageSystem.class) {
-			return plotter;
-		} else {
-			return super.getAdapter(clazz);
-		}
-	}
-
 }

@@ -1063,5 +1063,9 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	    return bars;
 	}
 
-
+	@Override
+	public void autoscaleAxes() {
+		if (xyGraph==null) return;
+		xyGraph.performAutoScale();
+	}
 }

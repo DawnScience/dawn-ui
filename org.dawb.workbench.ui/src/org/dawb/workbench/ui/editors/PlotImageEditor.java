@@ -137,9 +137,9 @@ public class PlotImageEditor extends EditorPart implements IReusableEditor {
 
 		point.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		point.setEditable(false);
-		GridUtils.setVisible(point, true);
 		point.setBackground(tools.getBackground());
 		plottingSystem.setPointControls(point);
+		GridUtils.setVisible(point, false);
 
 		// We use a local toolbar to make it clear to the user the tools
 		// that they can use, also because the toolbar actions are 

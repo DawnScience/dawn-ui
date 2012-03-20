@@ -9,6 +9,7 @@ import org.dawb.common.ui.plot.AbstractPlottingSystem.ColorOption;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingFactory;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
+import org.dawb.common.ui.plot.tool.IToolPageSystem;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
@@ -127,14 +128,14 @@ public class DerivativeTool extends AbstractToolPage  {
 	 * 
 	 * Normally everything will be ILineTraces even if the x is indices.
 	 */
-	private void updateDerviatives() {
+	private synchronized void updateDerviatives() {
 
 		if (updateDerivatives==null) {
 			updateDerivatives = new Job("Derviative update") {
 
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
-					final Collection<ITrace>    traces= getPlottingSystem().getTraces();
+					final Collection<ITrace>    traces= new ArrayList<ITrace>(getPlottingSystem().getTraces());
 					final List<AbstractDataset> dervs = new ArrayList<AbstractDataset>(traces.size());
 
 					ITrace firstTrace = null;
@@ -146,10 +147,14 @@ public class DerivativeTool extends AbstractToolPage  {
 								         ? ((ILineTrace)trace).getXData() 
 										: AbstractDataset.arange(0, plot.getSize(), 1, AbstractDataset.INT32);
 
-						final AbstractDataset derv = Maths.derivative(x, plot, 1);
-
-						derv.setName("f"+getTicksFor(1)+"{" +plot.getName()+"}");
-						dervs.add(derv);
+					    try {
+							final AbstractDataset derv = Maths.derivative(x, plot, 1);
+							
+							derv.setName("f"+getTicksFor(1)+"{" +plot.getName()+"}");
+							dervs.add(derv);
+					    } catch (IllegalArgumentException e) { // dervs of data != 1D
+					    	logger.error(e.getMessage(), e);
+					    }
 					}
 					plotter.clear();
 

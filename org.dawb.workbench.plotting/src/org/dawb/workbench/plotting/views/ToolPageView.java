@@ -19,6 +19,7 @@ import java.util.Set;
 import org.dawb.common.ui.plot.EmptyTool;
 import org.dawb.common.ui.plot.tool.IToolChangeListener;
 import org.dawb.common.ui.plot.tool.IToolPage;
+import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
 import org.dawb.common.ui.plot.tool.IToolPageSystem;
 import org.dawb.common.ui.plot.tool.ToolChangeEvent;
 import org.dawb.common.util.text.StringUtils;
@@ -945,7 +946,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 			systems.add(sys);
 			sys.addToolChangeListener(this);
 
-			final IToolPage      tool = sys.getCurrentToolPage();	
+			final IToolPage      tool = sys.getCurrentToolPage(getViewRole());	
 
 	        final PageRec existing = getPageRec(part);
 	        
@@ -968,6 +969,12 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		return null;
 	}
 	
+	private ToolPageRole getViewRole() {
+		if (getSite().getId().endsWith(".1D")) return ToolPageRole.ROLE_1D;
+		if (getSite().getId().endsWith(".2D")) return ToolPageRole.ROLE_2D;
+		return ToolPageRole.ROLE_1D_AND_2D;
+	}
+
 	private void recordPage(IWorkbenchPart part, IToolPage tool, PageRec rec) {
 		Map<String,PageRec> pages = recs.get(getString(part));
 		if (pages==null) {
@@ -1004,7 +1011,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
         try {
             updatingActivated = true;
         	IToolPageSystem sys = (IToolPageSystem)part.getAdapter(IToolPageSystem.class);
-            if (sys.getCurrentToolPage().equals(getCurrentPage())) {
+            if (sys.getCurrentToolPage(getViewRole()).equals(getCurrentPage())) {
             	return;
             }
         
@@ -1023,7 +1030,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
     			showPageRec(defaultPageRec);
     		}
 
-    		updatePartInfo(sys.getCurrentToolPage());
+    		updatePartInfo(sys.getCurrentToolPage(getViewRole()));
 
         } catch (Throwable ne) {
         	logger.error("Problem updating activated state in "+getClass().getName(), ne); // No stack required in log here.
@@ -1046,7 +1053,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
         if (pages == null) return null;
         
 		IToolPageSystem sys = (IToolPageSystem)part.getAdapter(IToolPageSystem.class);
-        return sys!=null ? pages.get(sys.getCurrentToolPage().getTitle()) : null;
+        return sys!=null ? pages.get(sys.getCurrentToolPage(getViewRole()).getTitle()) : null;
 	}	
 	
 	protected PageRec getPageRec(IPage page) {
@@ -1083,8 +1090,13 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		if (isDisposed) return false;
         if (part==null) return false;
 		if (systems==null || recs==null)  return false;
-        if (part instanceof ToolPageView) return false;
-		IToolPageSystem sys = (IToolPageSystem)part.getAdapter(IToolPageSystem.class);
+		
+		// If same part - not important
+		final String partId = part.getSite().getId();
+		final String ourId  = getSite().getId();
+        if (partId.equals(ourId)) return false;
+                 
+ 		IToolPageSystem sys = (IToolPageSystem)part.getAdapter(IToolPageSystem.class);
         return sys != null;
 	}
 	
@@ -1151,4 +1163,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		return true;
 	}
 
+	public String toString() {
+		return ((IToolPage)getCurrentPage()).getTitle();
+	}
 }
