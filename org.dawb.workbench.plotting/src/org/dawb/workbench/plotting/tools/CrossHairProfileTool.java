@@ -74,7 +74,7 @@ public class CrossHairProfileTool extends AbstractToolPage  {
 				xHair.setVisible(false);
 				xHair.setTrackMouse(true);
 				xHair.setRegionColor(ColorConstants.red);
-				xHair.setUserRegion(false); // They cannot see or change it!
+				xHair.setUserRegion(false); // They cannot see preferences or change it!
 				getPlottingSystem().addRegion(xHair);
 			}
 			
@@ -83,7 +83,7 @@ public class CrossHairProfileTool extends AbstractToolPage  {
 				yHair.setVisible(false);
 				yHair.setTrackMouse(true);
 				yHair.setRegionColor(ColorConstants.red);
-				yHair.setUserRegion(false); // They cannot see or change it!
+				yHair.setUserRegion(false); // They cannot see preferences or change it!
 				getPlottingSystem().addRegion(yHair);
 			}
 			
