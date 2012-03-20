@@ -108,8 +108,6 @@ public class FittedPeaks {
 		trace.setTraceColor(ColorConstants.darkGreen);
 		
 		peakAnnotations.get(ipeak).setAnnotationColor(ColorConstants.darkGreen);
-
-		trace.repaint();
 	}
 
 	/**
