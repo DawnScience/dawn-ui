@@ -310,8 +310,10 @@ public class TraceWrapper implements ILineTrace {
 	public void setData(AbstractDataset xData, AbstractDataset yData) {
 		
 		CircularBufferDataProvider prov = (CircularBufferDataProvider)trace.getDataProvider();
-		prov.removeDataProviderListener(trace);
-		prov.clearTrace();
+		if (prov!=null) {
+			prov.removeDataProviderListener(trace);
+			prov.clearTrace();
+		}
 		
 		if (xData.containsInvalidNumbers()) throw new RuntimeException(xData.getName()+" contains infinities or nans!");
 		final double[] x = (double[])DatasetUtils.cast(xData, AbstractDataset.FLOAT64).getBuffer(); 		

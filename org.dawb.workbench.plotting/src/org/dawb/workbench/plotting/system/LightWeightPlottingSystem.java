@@ -501,6 +501,9 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	 */
 	public void addTrace(ITrace trace) {
 		
+		if (traceMap==null) this.traceMap = new HashMap<String, ITrace>(7);
+		traceMap.put(trace.getName(), trace);
+		
 		if (trace instanceof ImageTrace) {
 			xyGraph.addImageTrace((ImageTrace)trace);
 		} else {

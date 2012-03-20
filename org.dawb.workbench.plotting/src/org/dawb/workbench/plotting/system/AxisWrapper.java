@@ -161,4 +161,8 @@ class AxisWrapper implements IAxis {
 	public double getLower() {
 		return wrappedAxis.getRange().getLower();
 	}
+	
+	public void setRange(double start, double end) {
+		wrappedAxis.setRange(start, end);
+	}
 }

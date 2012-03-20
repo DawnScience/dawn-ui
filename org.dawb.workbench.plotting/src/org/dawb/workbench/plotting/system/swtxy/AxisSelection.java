@@ -144,6 +144,8 @@ class AxisSelection extends Region {
 	           			line1.getBounds().setY(loc.y);
 	    			}
 	    			line1.getParent().repaint();
+	    			
+	    			fireRegionBoundsDragged(createRegionBounds(false));
     			}
     		}
         };

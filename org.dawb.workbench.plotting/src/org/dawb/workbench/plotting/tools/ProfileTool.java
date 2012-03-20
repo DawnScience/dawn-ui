@@ -223,14 +223,8 @@ public abstract class ProfileTool extends AbstractToolPage  implements IRegionBo
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 
-				final Collection<ITrace>    traces= getPlottingSystem().getTraces();	
-				IImageTrace image = null;
-				for (ITrace trace : traces) {
-					if (trace instanceof IImageTrace) {
-						image = (IImageTrace)trace;
-						break;
-					}
-				}
+				final Collection<ITrace> traces= getPlottingSystem().getTraces(IImageTrace.class);	
+				IImageTrace image = traces!=null && traces.size()>0 ? (IImageTrace)traces.iterator().next() : null;
 
 				if (image==null) {
 					plotter.clear();
@@ -304,7 +298,13 @@ public abstract class ProfileTool extends AbstractToolPage  implements IRegionBo
 
 	}
 	
-	private synchronized void update(IRegion r, RegionBounds rb) {
+	private void update(IRegion r, RegionBounds rb) {
+		if (r.getRegionType()!=getRegionType()) return; // Nothing to do.
+		/**
+		 * TODO FIXME This does not quite work because currentRegion can change
+		 * before the job has finished. Join would not help because not much work
+		 * should be done on regionBoundsDragged(...)
+		 */
 		this.currentRegion = r;
 		this.currentBounds = rb;
 		updateProfiles.schedule();
