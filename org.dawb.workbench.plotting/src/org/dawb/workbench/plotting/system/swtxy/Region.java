@@ -151,11 +151,11 @@ public abstract class Region extends AbstractRegion implements IAxisListener{
 	 * Remove from graph and remove all RegionBoundsListeners.
 	 */
 	public void remove() {
+		clearListeners();
 		if (regionObjects!=null)for (IFigure ob : regionObjects) {
 			if (ob.getParent()!=null) ob.getParent().remove(ob);
 		}
 		if (cursor!=null) cursor.dispose();
-		clearListeners();
 	}
 
 	protected void clearListeners() {
@@ -242,7 +242,7 @@ public abstract class Region extends AbstractRegion implements IAxisListener{
 	public void setVisible(boolean visible) {
 		if (regionObjects!=null) for (IFigure ob : regionObjects) {
 			if (ob instanceof IMotileFigure) {
-				((IMotileFigure)ob).setVisible(visible&&isMotile());
+				((IMotileFigure)ob).setVisible(visible&&(isMotile()||isTrackMouse()));
 			} else {
 			    if (ob!=null) ob.setVisible(visible);
 			}

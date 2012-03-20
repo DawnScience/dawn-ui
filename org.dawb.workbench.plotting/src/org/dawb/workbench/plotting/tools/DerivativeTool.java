@@ -39,8 +39,6 @@ public class DerivativeTool extends AbstractToolPage  {
 	public DerivativeTool() {
 		try {
 			plotter = PlottingFactory.getPlottingSystem();
-			plotter.setColorOption(ColorOption.NONE);
-			plotter.setDatasetChoosingRequired(false);
 			this.traceListener = new ITraceListener.Stub() {
 				@Override
 				public void tracesPlotted(TraceEvent evt) {
@@ -66,13 +64,8 @@ public class DerivativeTool extends AbstractToolPage  {
 								getTitle(), 
 								site.getActionBars(), 
 								PlotType.PT1D,
-								null);
-				
-		
-		getPlottingSystem().addTraceListener(traceListener);
-		
-		updateDerviatives();
-			
+								null);	
+		activate();
 	}
 
 	/**
@@ -101,6 +94,15 @@ public class DerivativeTool extends AbstractToolPage  {
 	
 	public void activate() {
 		super.activate();
+		if (getPlottingSystem()!=null) {
+			getPlottingSystem().addTraceListener(traceListener);
+			updateDerviatives();
+		}
+	}
+	
+	public void deactivate() {
+		super.deactivate();
+		if (getPlottingSystem()!=null) getPlottingSystem().removeTraceListener(traceListener);
 	}
 	
 	@Override

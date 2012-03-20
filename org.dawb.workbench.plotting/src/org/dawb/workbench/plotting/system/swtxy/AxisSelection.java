@@ -5,10 +5,13 @@ import java.util.Arrays;
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.dawb.common.ui.plot.region.RegionBounds;
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.draw2d.Cursors;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.FigureListener;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.MouseEvent;
+import org.eclipse.draw2d.MouseMotionListener;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -37,6 +40,8 @@ class AxisSelection extends Region {
 	private Figure connection;
 
 	private RegionType regionType;
+
+	private MouseMotionListener mouseTrackListener;
 	
 	AxisSelection(String name, Axis xAxis, Axis yAxis, RegionType regionType) {
 		super(name, xAxis, yAxis);
@@ -124,6 +129,33 @@ class AxisSelection extends Region {
 				updateConnectionBounds();
 			}
 		});
+        
+        this.mouseTrackListener = new MouseMotionListener.Stub() {
+        	
+        	/**
+    		 * @see org.eclipse.draw2d.MouseMotionListener#mouseMoved(MouseEvent)
+    		 */
+    		public void mouseMoved(MouseEvent me) {
+    			Point loc = me.getLocation();
+    			if (line1!=null && line1.getParent()!=null) {
+	     			if (regionType==RegionType.XAXIS_LINE) {
+	        			line1.getBounds().setX(loc.x);
+	    			} else if (regionType==RegionType.YAXIS_LINE) {
+	           			line1.getBounds().setY(loc.y);
+	    			}
+	    			line1.getParent().repaint();
+    			}
+    		}
+        };
+        
+        setTrackMouse(isTrackMouse());
+	}
+	
+	protected void clearListeners() {
+        super.clearListeners();
+        if (line1!=null && line1.getParent()!=null && isTrackMouse()) {
+        	line1.getParent().removeMouseMotionListener(mouseTrackListener);
+        }
 	}
 	
 	public void paintBeforeAdded(final Graphics gc, Point firstClick, Point dragLocation, Rectangle parentBounds) {
@@ -180,7 +212,7 @@ class AxisSelection extends Region {
 		
 		LineFigure(final boolean first, Rectangle parent) {
 			this.first = first;
-			
+			setOpaque(false);
             updateBounds(parent);			
 			this.mover = new FigureMover(getXyGraph(), this);
 			if (regionType==RegionType.XAXIS || regionType==RegionType.XAXIS_LINE) {
@@ -194,11 +226,11 @@ class AxisSelection extends Region {
 		}
 		protected void updateBounds(Rectangle parentBounds) {
 			if (regionType==RegionType.XAXIS|| regionType==RegionType.XAXIS_LINE) {
-				setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_SIZEWE));
-				setBounds(new Rectangle(parentBounds.x, parentBounds.y, WIDTH, parentBounds.height));
+				if (!isTrackMouse()) setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_SIZEWE));
+				setBounds(new Rectangle(parentBounds.x, parentBounds.y, getLineAreaWidth(), parentBounds.height));
 			} else {
-				setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_SIZENS));
-				setBounds(new Rectangle(parentBounds.x, parentBounds.y, parentBounds.width, WIDTH));
+				if (!isTrackMouse()) setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_SIZENS));
+				setBounds(new Rectangle(parentBounds.x, parentBounds.y, parentBounds.width, getLineAreaWidth()));
 			}
 		}
 		protected void paintFigure(Graphics gc) {
@@ -310,10 +342,10 @@ class AxisSelection extends Region {
 
 			if (regionType==RegionType.XAXIS || regionType==RegionType.XAXIS_LINE) {
 				line1.setLocation(bounds.getTopLeft());
-				if (line2!=null) line2.setLocation(new Point(bounds.getTopRight().x-WIDTH, bounds.getTopRight().y));
+				if (line2!=null) line2.setLocation(new Point(bounds.getTopRight().x-getLineAreaWidth(), bounds.getTopRight().y));
 			} else {
 				line1.setLocation(bounds.getTopLeft());
-				if (line2!=null) line2.setLocation(new Point(bounds.getBottomLeft().x, bounds.getBottomLeft().y-WIDTH));
+				if (line2!=null) line2.setLocation(new Point(bounds.getBottomLeft().x, bounds.getBottomLeft().y-getLineAreaWidth()));
 			}
 		}
 		updateConnectionBounds();
@@ -331,4 +363,36 @@ class AxisSelection extends Region {
 		return regionType;
 	}
 
+	public void setTrackMouse(boolean track) {
+		super.setTrackMouse(track);
+       
+		if (line1!=null) {
+			if (isTrackMouse()) {
+				line1.setEnabled(false);// This stops the figure being part of mouse listeners
+				line1.getParent().addMouseMotionListener(mouseTrackListener);
+	        	line1.getParent().setCursor(Cursors.CROSS);
+	        	line1.setCursor(null);
+	        	if (connection!=null) connection.setCursor(null);
+	        	line1.setMotile(false); // Not moved by the user, moved by the mouse position.
+	        } else {
+				line1.setEnabled(true);// This makes the figure part of mouse listeners
+	        	line1.getParent().removeMouseMotionListener(mouseTrackListener);
+	        	line1.getParent().setCursor(null);
+	        	if (connection!=null) connection.setCursor(Draw2DUtils.getRoiMoveCursor());
+				if (regionType==RegionType.XAXIS|| regionType==RegionType.XAXIS_LINE) {
+					line1.setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_SIZEWE));
+				} else {
+					line1.setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_SIZENS));
+				}
+	        	line1.setMotile(true);
+	        }
+		}
+	}
+	
+	private int getLineAreaWidth() {
+		if (!isTrackMouse()) {
+			return WIDTH;
+		}
+		return 1;
+	}
 }

@@ -27,8 +27,6 @@ import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.graphics.PaletteData;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
-
 public class RegionArea extends PlotArea {
 
 	protected ISelectionProvider selectionProvider;
@@ -77,6 +75,7 @@ public class RegionArea extends PlotArea {
 		clearRegionTool();
 		if (regions==null) return;
 		for (Region region : regions.values()) {
+			if (!region.isUserRegion()) continue;
 			region.remove();
 			fireRegionRemoved(new RegionEvent(region));
 		}

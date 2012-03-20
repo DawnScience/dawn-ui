@@ -18,8 +18,6 @@ import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.graphics.PaletteData;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
-
 /**
  * This is an XYGraph which supports regions of interest.
  * @author fcp94556

@@ -52,6 +52,13 @@
             label="Box Profile"
             tooltip="A tool for showing box profiles of images.">
       </plotting_tool_page>
+      <plotting_tool_page
+            class="org.dawb.workbench.plotting.tools.CrossHairProfileTool"
+            icon="icons/plot-tool-cross-hairs.png"
+            id="org.dawb.workbench.plotting.tools.crossHairProfileTool"
+            label="Cross Hair Profile"
+            tooltip="A tool for showing a profile slice through x and y.">
+      </plotting_tool_page>
    </extension>
    <extension
          point="org.eclipse.ui.views">
