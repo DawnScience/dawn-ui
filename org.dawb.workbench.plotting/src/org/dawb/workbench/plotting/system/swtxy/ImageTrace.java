@@ -48,6 +48,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	private AbstractDataset  image;
 	private PaletteData paletteData;
 	private ImageOrigin imageOrigin;
+    private Number min, max;
+
 
 	private Job imageScaleJob; // Needed for large images on slow systems.
 	
@@ -171,6 +173,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 				bean.setOrigin(imageOriginaMap.get(getImageOrigin()));
 				bean.setPalette(getPaletteData());
 				bean.setMonitor(monitor);
+				if (getMin()!=null) bean.setMin(min);
+				if (getMax()!=null) bean.setMax(max);
 				if (monitor!=null && monitor.isCanceled()) return;
 				this.rawData   = service.getImageData(bean);
 			} catch (Exception e) {
@@ -359,6 +363,21 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 			setAxisRedrawActive(true);
 		}
        
+	}
+	public Number getMin() {
+		return min;
+	}
+
+	public void setMin(Number min) {
+		this.min = min;
+	}
+
+	public Number getMax() {
+		return max;
+	}
+
+	public void setMax(Number max) {
+		this.max = max;
 	}
 
 }
