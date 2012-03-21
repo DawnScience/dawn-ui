@@ -442,9 +442,10 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	 * @param page
 	 *            The page to initialize
 	 */
-	protected void initPage(IPageBookViewPage page) {
+	protected void initPage(IToolPage page) {
 		try {
 			page.init(new ToolPageSite(getViewSite()));
+			page.setViewPart(this);
 		} catch (PartInitException e) {
 			WorkbenchPlugin.log(getClass(), "initPage", e); //$NON-NLS-1$
 		}
@@ -784,6 +785,9 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 
 		// Hide old page.
 		if (activeRec != null) {
+			
+			activeRec.tool.deactivate();
+			
 			ToolPageSite pageSite = (ToolPageSite) mapToolToSite.get(activeRec.tool);
 	
 			activeRec.subActionBars.deactivate();

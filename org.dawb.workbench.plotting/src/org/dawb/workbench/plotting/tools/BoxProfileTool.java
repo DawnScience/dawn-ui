@@ -52,6 +52,8 @@ public class BoxProfileTool extends ProfileTool {
 		if (bounds==null) return;
 		if (!region.isVisible()) return;
 
+		if (monitor.isCanceled()) return;
+		
 		final RectangularROI roi = new RectangularROI(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(), 0);
 		RectangularROIData rd = new RectangularROIData(roi, image.getData());
 
@@ -71,11 +73,12 @@ public class BoxProfileTool extends ProfileTool {
 		final AbstractDataset y_indices = yi; // Maths.add(yi, bounds.getY()); // Real position
 		y_indices.setName("Y Pixel");
 
+		if (monitor.isCanceled()) return;
 		if (tryUpdate) {
 			final ILineTrace x_trace = (ILineTrace)plotter.getTrace("X "+region.getName());
 			final ILineTrace y_trace = (ILineTrace)plotter.getTrace("Y "+region.getName());
 			
-			if (x_trace!=null && y_trace!=null) {
+			if (x_trace!=null && y_trace!=null && !monitor.isCanceled()) {
 				getControl().getDisplay().syncExec(new Runnable() {
 					public void run() {
 						x_trace.setData(x_indices, x_intensity);
@@ -86,10 +89,12 @@ public class BoxProfileTool extends ProfileTool {
 			
 		} else {
 						
+			if (monitor.isCanceled()) return;
 			plotter.setSelectedXAxis(xPixelAxis);
 			Collection<ITrace> plotted = plotter.createPlot1D(x_indices, Arrays.asList(new AbstractDataset[]{x_intensity}), monitor);
 			registerTraces(region, plotted);
 			
+			if (monitor.isCanceled()) return;
 			plotter.setSelectedXAxis(yPixelAxis);
 			plotted = plotter.createPlot1D(y_indices, Arrays.asList(new AbstractDataset[]{y_intensity}), monitor);
 			registerTraces(region, plotted);

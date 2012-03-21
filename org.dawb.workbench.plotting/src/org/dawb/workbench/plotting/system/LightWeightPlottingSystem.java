@@ -426,7 +426,6 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		xyGraph.setTitle(DatasetTitleUtils.getTitle(x, ys, true, rootName));
 		xAxis.setTitle(DatasetTitleUtils.getName(x,rootName));
 		
-		processRescale(x,ys);
 
 		//create a trace data provider, which will provide the data to the trace.
 		int iplot = 0;
@@ -478,6 +477,12 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		}
 		
 		xyCanvas.redraw();
+		getDisplay().asyncExec(new Runnable() {
+			public void run() {
+				autoscaleAxes();
+				autoscaleAxes();
+			}
+		});
 		fireTracesPlotted(new TraceEvent(traces));
         return traces;
 	}
@@ -625,29 +630,6 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		return set;
 	}
 
-
-	private void processRescale(final AbstractDataset       x,
-								final List<AbstractDataset> ys) {
-		if (rescale) {
-			try {
-				double min = x.min().doubleValue();
-				double max = x.max().doubleValue();
-				if (min==max) max+=100;
-				Axis xAxis = ((AxisWrapper)getSelectedXAxis()).getWrappedAxis();
-				xAxis.setRange(min,max);
-
-				min = getMin(ys);
-				max = getMax(ys);
-				if (min==max) max = max+1;
-				Axis yAxis = ((AxisWrapper)getSelectedYAxis()).getWrappedAxis();
-				yAxis.setRange(min,max);
-			} catch (Throwable e) {
-				logger.error("Cannot rescale data, internal error.\nNormally this would be thrown back to the calling API but it happening in an update thread.", e);
-				return;
-			}
-		}		
-	}
-
 	private Object[] getOrderedDatasets(final AbstractDataset       xIn,
 										final List<AbstractDataset> ysIn,
 										final boolean               createdIndices) {
@@ -694,38 +676,6 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 			return colorMap.get((String)object);
 		}
 		return null;
-	}
-
-	private double getMin(List<AbstractDataset> sets) {
-		
-		boolean foundSomething = false;
-		double min = Double.MAX_VALUE;
-		for (AbstractDataset set : sets) {
-			try {
-				min = Math.min(min, set.min().doubleValue());
-			} catch (NullPointerException npe) {
-				continue;
-			}
-			foundSomething = true;
-		}
-		if (!foundSomething) return 0d;
-		return min-(Math.abs(min)*0.01);
-	}
-	
-	private double getMax(List<AbstractDataset> sets) {
-		
-		boolean foundSomething = false;
-		double max = -Double.MAX_VALUE;
-		for (AbstractDataset set : sets) {
-			try {
-				max = Math.max(max, set.max().doubleValue());
-			} catch (NullPointerException npe) {
-				continue;
-			}
-			foundSomething = true;
-		}
-		if (!foundSomething) return 100d;
-		return max+(Math.abs(max)*0.01);
 	}
 	
 	private int getMaxSize(List<AbstractDataset> sets) {

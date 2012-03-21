@@ -40,7 +40,9 @@ public class LineProfileTool extends ProfileTool {
 		if (bounds==null) return;
 		if (!region.isVisible()) return;
 
+		if (monitor.isCanceled()) return;
 		LinearROI    roi = new LinearROI(bounds.getP1(), bounds.getP2());
+		if (monitor.isCanceled()) return;
 		LinearROIData ld = new LinearROIData(roi, image.getData(), 1d);
 
 		if (monitor.isCanceled()) return;
@@ -54,13 +56,14 @@ public class LineProfileTool extends ProfileTool {
 		
 			final ILineTrace trace = (ILineTrace)plotter.getTrace(region.getName());
 			
-			if (trace!=null) getControl().getDisplay().syncExec(new Runnable() {
+			if (trace!=null && !monitor.isCanceled()) getControl().getDisplay().syncExec(new Runnable() {
 				public void run() {
 					trace.setData(indices, intensity);
 				}
 			});
 			
 		} else {
+			if (monitor.isCanceled()) return;
 			Collection<ITrace> plotted = plotter.createPlot1D(indices, Arrays.asList(new AbstractDataset[]{intensity}), monitor);
 			registerTraces(region, plotted);
 			

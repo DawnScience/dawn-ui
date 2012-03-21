@@ -3,6 +3,7 @@ package org.dawb.workbench.plotting.system;
 import org.csstudio.swt.xygraph.dataprovider.CircularBufferDataProvider;
 import org.csstudio.swt.xygraph.figures.Trace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
+import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.eclipse.swt.graphics.Color;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
@@ -326,6 +327,8 @@ public class TraceWrapper implements ILineTrace {
 		prov.setCurrentXDataArray(x);
 		prov.setCurrentYDataArray(y);
 		trace.setDataProvider(prov);
+		
+		sys.fireTracesPlotted(new TraceEvent(this));
 	}
 
 	@Override

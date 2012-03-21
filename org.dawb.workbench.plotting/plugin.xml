@@ -86,6 +86,15 @@
             name="Tool"
             restorable="true">
       </view>
+      <view
+            allowMultiple="true"
+            category="org.dawb.workbench.application.data.analysis"
+            class="org.dawb.workbench.plotting.views.ToolPageView"
+            icon="icons/plot-tool-any.png"
+            id="org.dawb.workbench.plotting.views.toolPageView.fixed"
+            name="Fixed Tool"
+            restorable="true">
+      </view>
    </extension>
    <extension
          point="org.eclipse.core.runtime.preferences">

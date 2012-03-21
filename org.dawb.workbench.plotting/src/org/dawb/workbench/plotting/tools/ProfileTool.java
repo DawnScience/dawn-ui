@@ -129,7 +129,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IRegionBo
 								getTitle(), 
 								site.getActionBars(), 
 								PlotType.PT1D,
-								this.getPart());		
+								this.getViewPart());		
 
 		createAxes(plotter);
 	}
@@ -209,6 +209,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IRegionBo
 		super.dispose();
 	}
 
+	private boolean isUpdateRunning = false;
 	/**
 	 * The user can optionally nominate an x. In this case, we would like to 
 	 * use it for the derviative instead of the indices of the data. Therefore
@@ -223,36 +224,48 @@ public abstract class ProfileTool extends AbstractToolPage  implements IRegionBo
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 
-				final Collection<ITrace> traces= getPlottingSystem().getTraces(IImageTrace.class);	
-				IImageTrace image = traces!=null && traces.size()>0 ? (IImageTrace)traces.iterator().next() : null;
-
-				if (image==null) {
-					plotter.clear();
-					return Status.OK_STATUS;
-				}
-
-				// Get the profiles from the line and box regions.
-				if (currentRegion==null) {
-					plotter.clear();
-					registeredTraces.clear();
-					final Collection<IRegion> regions = getPlottingSystem().getRegions();
-					if (regions!=null) {
-						for (IRegion iRegion : regions) {
-							createProfile(image, iRegion, null, false, monitor);
-						}
+				try {
+					isUpdateRunning = true;
+					if (!isActive()) return Status.CANCEL_STATUS;
+	
+					final Collection<ITrace> traces= getPlottingSystem().getTraces(IImageTrace.class);	
+					IImageTrace image = traces!=null && traces.size()>0 ? (IImageTrace)traces.iterator().next() : null;
+	
+					if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
+					if (image==null) {
+						plotter.clear();
+						return Status.OK_STATUS;
 					}
-				} else {
-
-					createProfile(image, 
-							      currentRegion, 
-							      currentBounds!=null?currentBounds:currentRegion.getRegionBounds(), 
-							      true, 
-							      monitor);
-					
+	
+					// Get the profiles from the line and box regions.
+					if (currentRegion==null) {
+						plotter.clear();
+						registeredTraces.clear();
+						final Collection<IRegion> regions = getPlottingSystem().getRegions();
+						if (regions!=null) {
+							for (IRegion iRegion : regions) {
+								if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
+								createProfile(image, iRegion, null, false, monitor);
+							}
+						}
+					} else {
+	
+						if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
+						createProfile(image, 
+								      currentRegion, 
+								      currentBounds!=null?currentBounds:currentRegion.getRegionBounds(), 
+								      true, 
+								      monitor);
+						
+					}
+	
+					if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+	                plotter.repaint();
+	                
+				} finally {
+					isUpdateRunning = false;
 				}
 
-				if (monitor.isCanceled()) return Status.CANCEL_STATUS;
-                plotter.repaint();
                                 
 				return Status.OK_STATUS;
 
@@ -272,7 +285,11 @@ public abstract class ProfileTool extends AbstractToolPage  implements IRegionBo
 	 * @param bounds - may be null
 	 * @param monitor
 	 */
-	protected abstract void createProfile(IImageTrace image, IRegion region, final RegionBounds bounds, boolean tryUpdate, IProgressMonitor monitor);
+	protected abstract void createProfile(IImageTrace image, 
+			                              IRegion region, 
+			                              RegionBounds bounds, 
+			                              boolean tryUpdate, 
+			                              IProgressMonitor monitor);
 
 	@Override
 	public void regionBoundsDragged(RegionBoundsEvent evt) {
@@ -299,12 +316,11 @@ public abstract class ProfileTool extends AbstractToolPage  implements IRegionBo
 	}
 	
 	private synchronized void update(IRegion r, RegionBounds rb) {
+	
 		if (r!=null && r.getRegionType()!=getRegionType()) return; // Nothing to do.
-		/**
-		 * TODO FIXME This does not quite work because currentRegion can change
-		 * before the job has finished. Join would not help because not much work
-		 * should be done on regionBoundsDragged(...)
-		 */
+
+        if (isUpdateRunning)  updateProfiles.cancel();
+         
 		this.currentRegion = r;
 		this.currentBounds = rb;
 		updateProfiles.schedule();

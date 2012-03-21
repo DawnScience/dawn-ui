@@ -5,11 +5,9 @@ import java.util.Collection;
 import java.util.List;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
-import org.dawb.common.ui.plot.AbstractPlottingSystem.ColorOption;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingFactory;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
-import org.dawb.common.ui.plot.tool.IToolPageSystem;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
@@ -43,7 +41,7 @@ public class DerivativeTool extends AbstractToolPage  {
 				@Override
 				public void tracesPlotted(TraceEvent evt) {
 					
-					if (!(evt.getSource() instanceof List<?>)) {
+					if (!(evt.getSource() instanceof List<?>) && !(evt.getSource() instanceof ITrace)) {
 						return;
 					}
 					updateDerviatives();
@@ -112,9 +110,7 @@ public class DerivativeTool extends AbstractToolPage  {
 	}
 	
 	public void dispose() {
-		if (getPlottingSystem()!=null) {
-			getPlottingSystem().removeTraceListener(traceListener);
-		}
+		deactivate();
 		if (plotter!=null) plotter.dispose();
 		plotter = null;
 		super.dispose();
@@ -122,7 +118,7 @@ public class DerivativeTool extends AbstractToolPage  {
 
 
 	private Job updateDerivatives;
-	
+	private boolean isUpdateRunning = false;
 	/**
 	 * The user can optionally nominate an x. In this case, we would like to 
 	 * use it for the derviative instead of the indices of the data. Therefore
@@ -137,44 +133,59 @@ public class DerivativeTool extends AbstractToolPage  {
 
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
-					final Collection<ITrace>    traces= new ArrayList<ITrace>(getPlottingSystem().getTraces());
-					final List<AbstractDataset> dervs = new ArrayList<AbstractDataset>(traces.size());
-
-					ITrace firstTrace = null;
-					for (ITrace trace : traces) {
-
-						if (firstTrace==null) firstTrace = trace;
-						final AbstractDataset plot = trace.getData();
-						AbstractDataset x = (trace instanceof ILineTrace) 
-								         ? ((ILineTrace)trace).getXData() 
-										: AbstractDataset.arange(0, plot.getSize(), 1, AbstractDataset.INT32);
-
-					    try {
-							final AbstractDataset derv = Maths.derivative(x, plot, 1);
-							
-							derv.setName("f"+getTicksFor(1)+"{" +plot.getName()+"}");
-							dervs.add(derv);
-					    } catch (IllegalArgumentException e) { // dervs of data != 1D
-					    	logger.error(e.getMessage(), e);
-					    }
+					
+					try {
+						isUpdateRunning = true;
+					
+						if (!isActive()) return Status.CANCEL_STATUS;
+						
+						final Collection<ITrace>    traces= new ArrayList<ITrace>(getPlottingSystem().getTraces());
+						final List<AbstractDataset> dervs = new ArrayList<AbstractDataset>(traces.size());
+	
+						if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
+						ITrace firstTrace = null;
+						for (ITrace trace : traces) {
+	
+							if (firstTrace==null) firstTrace = trace;
+							final AbstractDataset plot = trace.getData();
+							AbstractDataset x = (trace instanceof ILineTrace) 
+									         ? ((ILineTrace)trace).getXData() 
+											: AbstractDataset.arange(0, plot.getSize(), 1, AbstractDataset.INT32);
+	
+						    try {
+								if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
+								AbstractDataset derv = Maths.derivative(x, plot, 1);
+								derv = derv.flatten();
+								derv.setName("f"+getTicksFor(1)+"{" +plot.getName()+"}");
+								dervs.add(derv);
+						    } catch (IllegalArgumentException e) { // dervs of data != 1D
+						    	logger.error(e.getMessage());
+						    	return  Status.CANCEL_STATUS;
+						    }
+						}
+						if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
+						plotter.clear();
+	
+						if (dervs.size()>0 && firstTrace!=null) {
+	
+							AbstractDataset x = (firstTrace instanceof ILineTrace) 
+									        ? ((ILineTrace)firstTrace).getXData() 
+											: AbstractDataset.arange(0, dervs.get(0).getSize(), 1, AbstractDataset.INT32);
+	
+							if (x.getName()==null || "".equals(x.getName())) x.setName("Indices");
+	
+							// Often people can have data plotted with infinities. We 
+							// replace them here just for convenience.
+							if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
+							for (AbstractDataset a : dervs)  DatasetUtils.removeNansAndInfinities(a, new Double(0));
+							if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
+							plotter.createPlot1D(x, dervs, monitor); 
+						}
+	
+						return Status.OK_STATUS;
+					} finally {
+                        isUpdateRunning = false;
 					}
-					plotter.clear();
-
-					if (dervs.size()>0 && firstTrace!=null) {
-
-						AbstractDataset x = (firstTrace instanceof ILineTrace) 
-								        ? ((ILineTrace)firstTrace).getXData() 
-										: AbstractDataset.arange(0, dervs.get(0).getSize(), 1, AbstractDataset.INT32);
-
-						if (x.getName()==null || "".equals(x.getName())) x.setName("Indices");
-
-						// Often people can have data plotted with infinities. We 
-						// replace them here just for convenience.
-						for (AbstractDataset a : dervs)  DatasetUtils.removeNansAndInfinities(a, new Double(0));
-						plotter.createPlot1D(x, dervs, monitor); 
-					}
-
-					return Status.OK_STATUS;
 				}	
 			};
 			updateDerivatives.setSystem(true);
@@ -182,7 +193,7 @@ public class DerivativeTool extends AbstractToolPage  {
 			updateDerivatives.setPriority(Job.INTERACTIVE);
 		}
 
-
+        if (isUpdateRunning)  updateDerivatives.cancel();
 		updateDerivatives.schedule();
 	}
 
