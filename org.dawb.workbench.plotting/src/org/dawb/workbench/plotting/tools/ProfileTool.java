@@ -298,8 +298,8 @@ public abstract class ProfileTool extends AbstractToolPage  implements IRegionBo
 
 	}
 	
-	private void update(IRegion r, RegionBounds rb) {
-		if (r.getRegionType()!=getRegionType()) return; // Nothing to do.
+	private synchronized void update(IRegion r, RegionBounds rb) {
+		if (r!=null && r.getRegionType()!=getRegionType()) return; // Nothing to do.
 		/**
 		 * TODO FIXME This does not quite work because currentRegion can change
 		 * before the job has finished. Join would not help because not much work
