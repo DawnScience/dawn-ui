@@ -8,9 +8,11 @@ import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.IAxisListener;
 import org.csstudio.swt.xygraph.linearscale.Range;
 import org.dawb.common.services.IImageService;
+import org.dawb.common.services.IImageService.ImageServiceBean;
 import org.dawb.common.ui.image.PaletteFactory;
 import org.dawb.common.ui.plot.region.RegionBounds;
 import org.dawb.common.ui.plot.trace.IImageTrace;
+import org.dawb.gda.extensions.util.ImageService;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
 import org.eclipse.draw2d.Figure;
@@ -146,7 +148,11 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 			
 			final IImageService service = (IImageService)PlatformUI.getWorkbench().getService(IImageService.class);
 			try {
-				this.rawImage   = service.getImage(slice, getPaletteData(), imageOriginaMap.get(getImageOrigin()));
+				final ImageServiceBean bean =  new IImageService.ImageServiceBean();
+				bean.setImage(slice);
+				bean.setOrigin(imageOriginaMap.get(getImageOrigin()));
+				bean.setPalette(getPaletteData());
+				this.rawImage   = service.getImage(bean);
 			} catch (Exception e) {
 				logger.error("Cannot create image from data!", e);
 			}
