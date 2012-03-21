@@ -12,7 +12,6 @@ import org.dawb.common.services.IImageService.ImageServiceBean;
 import org.dawb.common.ui.image.PaletteFactory;
 import org.dawb.common.ui.plot.region.RegionBounds;
 import org.dawb.common.ui.plot.trace.IImageTrace;
-import org.dawb.gda.extensions.util.ImageService;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -26,6 +25,7 @@ import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.PaletteData;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +49,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	private PaletteData paletteData;
 	private ImageOrigin imageOrigin;
 
-	private Job imageScaleJob;
+	private Job imageScaleJob; // Needed for large images on slow systems.
 	
 	private static Map<IImageTrace.ImageOrigin, IImageService.ImageOrigin> imageOriginaMap;
 	static {
@@ -188,6 +188,12 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		
 		xRangeCached = xRange;
 		yRangeCached = yRange;
+		
+		if (monitor!=null && Display.getDefault()!=null) Display.getDefault().asyncExec(new Runnable() {
+			public void run() {
+				repaint();
+			}
+		});
 	}
 	
 	@Override
