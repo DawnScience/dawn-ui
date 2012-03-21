@@ -134,9 +134,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	}
 
 	
-	private Image scaledImage;
-	private Image rawImage;
-	private Range xRangeCached, yRangeCached;
+	private Image     scaledImage;
+	private ImageData rawData;
+	private Range     xRangeCached, yRangeCached;
 	
 	/**
 	 * Whenever this is called the SWT image is created
@@ -157,7 +157,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		
 		final boolean isSameRange = (xRangeCached!=null && xRangeCached.equals(xRange) && yRangeCached!=null && yRangeCached.equals(yRange));
 		
-		if (!isSameRange || rawImage==null || force) {
+		if (!isSameRange || rawData==null || force) {
 			if (monitor!=null && monitor.isCanceled()) return;
 			final RegionBounds regionBounds = new RegionBounds(new double[]{xRange.getLower(), yRange.getLower()}, 
 	                                                           new double[]{xRange.getUpper(), yRange.getUpper()});
@@ -172,7 +172,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 				bean.setPalette(getPaletteData());
 				bean.setMonitor(monitor);
 				if (monitor!=null && monitor.isCanceled()) return;
-				this.rawImage   = service.getImage(bean);
+				this.rawData   = service.getImageData(bean);
 			} catch (Exception e) {
 				logger.error("Cannot create image from data!", e);
 			}
@@ -182,9 +182,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		final Rectangle     bounds = graph.getRegionArea().getBounds();
 		
 		if (monitor!=null && monitor.isCanceled()) return;
-		ImageData data = rawImage.getImageData().scaledTo(bounds.width, bounds.height);
+		ImageData data = rawData.scaledTo(bounds.width, bounds.height);
 		if (monitor!=null && monitor.isCanceled()) return;
-		this.scaledImage = new Image(rawImage.getDevice(), data);
+		this.scaledImage = new Image(Display.getDefault(), data);
 		
 		xRangeCached = xRange;
 		yRangeCached = yRange;
