@@ -15,6 +15,10 @@ import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.gda.extensions.util.ImageService;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.geometry.Point;
@@ -44,6 +48,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	private AbstractDataset  image;
 	private PaletteData paletteData;
 	private ImageOrigin imageOrigin;
+
+	private Job imageScaleJob;
 	
 	private static Map<IImageTrace.ImageOrigin, IImageService.ImageOrigin> imageOriginaMap;
 	static {
@@ -75,6 +81,14 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 			x.setKeepAspectWith(y);
 			y.setKeepAspectWith(x);
 		}
+		
+		this.imageScaleJob = new Job("Create scaled image") {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				createScaledImage(false, monitor);
+				return Status.OK_STATUS;
+			}
+		};
 	}
 
 	public String getName() {
@@ -115,7 +129,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 
 	public void setPaletteData(PaletteData paletteData) {
 		this.paletteData = paletteData;
-		createScaledImage(true);
+		createScaledImage(true, null);
 		repaint();
 	}
 
@@ -128,7 +142,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	 * Whenever this is called the SWT image is created
 	 * and saved in the swtImage field.
 	 */
-	private void createScaledImage(boolean force) {
+	private void createScaledImage(boolean force, final IProgressMonitor monitor) {
 		
 		
 		boolean isRotated = getImageOrigin()==ImageOrigin.TOP_LEFT||getImageOrigin()==ImageOrigin.BOTTOM_RIGHT;
@@ -138,20 +152,26 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		
 		final Range xRange = x.getRange();
 		final Range yRange = y.getRange();
-								
+		
+		if (monitor!=null && monitor.isCanceled()) return;
+		
 		final boolean isSameRange = (xRangeCached!=null && xRangeCached.equals(xRange) && yRangeCached!=null && yRangeCached.equals(yRange));
 		
 		if (!isSameRange || rawImage==null || force) {
+			if (monitor!=null && monitor.isCanceled()) return;
 			final RegionBounds regionBounds = new RegionBounds(new double[]{xRange.getLower(), yRange.getLower()}, 
 	                                                           new double[]{xRange.getUpper(), yRange.getUpper()});
 			AbstractDataset slice = slice(regionBounds);
 			
 			final IImageService service = (IImageService)PlatformUI.getWorkbench().getService(IImageService.class);
+			if (monitor!=null && monitor.isCanceled()) return;
 			try {
 				final ImageServiceBean bean =  new IImageService.ImageServiceBean();
 				bean.setImage(slice);
 				bean.setOrigin(imageOriginaMap.get(getImageOrigin()));
 				bean.setPalette(getPaletteData());
+				bean.setMonitor(monitor);
+				if (monitor!=null && monitor.isCanceled()) return;
 				this.rawImage   = service.getImage(bean);
 			} catch (Exception e) {
 				logger.error("Cannot create image from data!", e);
@@ -161,7 +181,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		final XYRegionGraph graph  = (XYRegionGraph)x.getParent();
 		final Rectangle     bounds = graph.getRegionArea().getBounds();
 		
+		if (monitor!=null && monitor.isCanceled()) return;
 		ImageData data = rawImage.getImageData().scaledTo(bounds.width, bounds.height);
+		if (monitor!=null && monitor.isCanceled()) return;
 		this.scaledImage = new Image(rawImage.getDevice(), data);
 		
 		xRangeCached = xRange;
@@ -171,9 +193,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	@Override
 	protected void paintFigure(Graphics graphics) {
 		
-		if (scaledImage==null) createScaledImage(false);
+		if (scaledImage==null) createScaledImage(false, null);
 		
 		super.paintFigure(graphics);
+		
 		graphics.pushState();	
 		final XYRegionGraph graph  = (XYRegionGraph)xAxis.getParent();
 		final Point         loc    = graph.getRegionArea().getLocation();
@@ -243,13 +266,15 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	@Override
 	public void axisRangeChanged(Axis axis, Range old_range, Range new_range) {
 		if (!axisRedrawActive) return;
-		createScaledImage(false);
+		imageScaleJob.cancel();
+		imageScaleJob.schedule();
 	}
 
 	@Override
 	public void axisRevalidated(Axis axis) {
 		if (!axisRedrawActive) return;
-		createScaledImage(false);
+		imageScaleJob.cancel();
+		imageScaleJob.schedule();
 	}
 	private void setAxisRedrawActive(boolean b) {
 		this.axisRedrawActive = b;
