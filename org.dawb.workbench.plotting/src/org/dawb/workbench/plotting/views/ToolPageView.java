@@ -813,6 +813,9 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		activeRec = pageRec;
 		Control pageControl = activeRec.tool.getControl();
 		if (pageControl != null && !pageControl.isDisposed()) {
+			
+			activeRec.tool.activate();
+
 			ToolPageSite pageSite = (ToolPageSite) mapToolToSite.get(activeRec.tool);
 
 			// Verify that the page control is not disposed
