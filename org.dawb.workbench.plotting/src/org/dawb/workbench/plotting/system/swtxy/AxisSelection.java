@@ -11,6 +11,7 @@ import org.eclipse.draw2d.FigureListener;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.MouseEvent;
+import org.eclipse.draw2d.MouseListener;
 import org.eclipse.draw2d.MouseMotionListener;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
@@ -120,15 +121,15 @@ class AxisSelection extends Region {
         updateRegionBounds();
         if (regionBounds==null) createRegionBounds(true);
 
-        
-        parent.addFigureListener(new FigureListener() {
-			@Override
-			public void figureMoved(IFigure source) {
-				if (line1!=null) line1.updateBounds(source.getBounds());
-				if (line2!=null) line2.updateBounds(source.getBounds());
-				updateConnectionBounds();
-			}
-		});
+//        
+//        parent.addFigureListener(new FigureListener() {
+//			@Override
+//			public void figureMoved(IFigure source) {
+//				if (line1!=null) line1.updateBounds(source.getBounds());
+//				if (line2!=null) line2.updateBounds(source.getBounds());
+//				updateConnectionBounds();
+//			}
+//		});
         
         this.mouseTrackListener = new MouseMotionListener.Stub() {
         	
@@ -377,9 +378,9 @@ class AxisSelection extends Region {
 	        	if (connection!=null) connection.setCursor(null);
 	        	line1.setMotile(false); // Not moved by the user, moved by the mouse position.
 	        } else {
-				line1.setEnabled(true);// This makes the figure part of mouse listeners
 	        	line1.getParent().removeMouseMotionListener(mouseTrackListener);
 	        	line1.getParent().setCursor(null);
+	        	line1.setEnabled(true);// This starts the figure part of mouse listeners
 	        	if (connection!=null) connection.setCursor(Draw2DUtils.getRoiMoveCursor());
 				if (regionType==RegionType.XAXIS|| regionType==RegionType.XAXIS_LINE) {
 					line1.setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_SIZEWE));
@@ -396,5 +397,25 @@ class AxisSelection extends Region {
 			return WIDTH;
 		}
 		return 1;
+	}
+	
+	@Override
+	public void addMouseListener(MouseListener l) {
+		if (line1!=null) line1.getParent().addMouseListener(l);
+	}	
+	
+	@Override
+	public void removeMouseListener(MouseListener l){
+		if (line1!=null) line1.getParent().removeMouseListener(l);
+	}
+
+	
+	@Override
+	public void addMouseMotionListener(MouseMotionListener l){
+		if (line1!=null) line1.getParent().addMouseMotionListener(l);
+	}
+	@Override
+	public void removeMouseMotionListener(MouseMotionListener l){
+		if (line1!=null) line1.getParent().removeMouseMotionListener(l);
 	}
 }

@@ -18,6 +18,7 @@ import org.dawb.common.ui.plot.trace.IImageTrace.ImageOrigin;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.workbench.plotting.system.dialog.AddRegionCommand;
+import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.MouseEvent;
 import org.eclipse.draw2d.MouseListener;
@@ -119,7 +120,7 @@ public class RegionArea extends PlotArea {
 	}
 
 	public void clearImageTraces() {
-		if (regions==null) return;
+		if (imageTraces==null) return;
 		for (ImageTrace trace : imageTraces.values()) {
 			trace.remove();
 			fireImageTraceRemoved(new TraceEvent(trace));
@@ -421,6 +422,12 @@ public class RegionArea extends PlotArea {
 		if (imageTraces!=null) for (ImageTrace trace : imageTraces.values()) {
 			trace.setImageOrigin(origin);
 		}
+	}
+
+
+	public Figure getImageTrace() {
+		if (imageTraces!=null && imageTraces.size()>0) return imageTraces.values().iterator().next();
+		return null;
 	}
 
 }

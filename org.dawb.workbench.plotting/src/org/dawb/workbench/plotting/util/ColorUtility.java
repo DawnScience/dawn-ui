@@ -12,10 +12,11 @@ package org.dawb.workbench.plotting.util;
 import java.awt.Color;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
+import org.eclipse.osgi.internal.module.GroupingChecker;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.PlatformUI;
 
 /**
  * Class encapsulates generating unique colours for plots.
@@ -24,12 +25,21 @@ public class ColorUtility {
 	
 	// NOTE Color choice used to be 9, however 16 is a better choice for scan plots as there
 	// are regularly more than nine plots in a single scan.
-	private static Color[] GRAPH_DEFAULT_COLORS = { new Color(0, 0, 255),new Color(255, 0, 0),
+	public static final Color[] GRAPH_DEFAULT_COLORS = { new Color(0, 0, 255),new Color(255, 0, 0),
 		new Color(204, 0, 204), new Color(204, 0, 0), new Color(0, 153, 51), new Color(102, 0, 102),
 		new Color(255, 102, 255), new Color(255, 155, 0), new Color(204, 255, 0), new Color(51, 255, 51),
 		new Color(102, 255, 255), new Color(102, 102, 255), new Color(153, 153, 0),
 		new Color(204, 204, 205), new Color(255, 204, 204)};
 
+	
+	public static final Collection<org.eclipse.swt.graphics.Color> DEFAULT_SWT_COLORS;
+	static {
+		DEFAULT_SWT_COLORS = new HashSet<org.eclipse.swt.graphics.Color>(GRAPH_DEFAULT_COLORS.length);
+		for (Color col : GRAPH_DEFAULT_COLORS) {
+			DEFAULT_SWT_COLORS.add(new org.eclipse.swt.graphics.Color(Display.getCurrent(), col.getRed(), col.getGreen(), col.getBlue()));
+		}
+	}
+	
 	private static final  int[]           GRAPH_DEFAULT_LINEWIDTHS;
 	
 	static {

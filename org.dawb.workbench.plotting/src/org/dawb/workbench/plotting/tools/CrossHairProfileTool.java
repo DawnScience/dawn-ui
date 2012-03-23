@@ -1,6 +1,7 @@
 package org.dawb.workbench.plotting.tools;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 import org.dawb.common.ui.plot.IAxis;
@@ -8,9 +9,12 @@ import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingFactory;
 import org.dawb.common.ui.plot.region.IRegion;
+import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionBoundsListener;
+import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.RegionBounds;
 import org.dawb.common.ui.plot.region.RegionBoundsEvent;
+import org.dawb.common.ui.plot.region.RegionEvent;
 import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
 import org.dawb.common.ui.plot.tool.IToolPageSystem;
@@ -19,12 +23,18 @@ import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
+import org.dawb.common.ui.plot.trace.TraceUtils;
+import org.dawb.workbench.plotting.util.ColorUtility;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.draw2d.MouseEvent;
+import org.eclipse.draw2d.MouseListener;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.part.IPageSite;
@@ -33,7 +43,7 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 
-public class CrossHairProfileTool extends AbstractToolPage implements IRegionBoundsListener  {
+public class CrossHairProfileTool extends AbstractToolPage implements IRegionBoundsListener, MouseListener  {
 
 	private final static Logger logger = LoggerFactory.getLogger(CrossHairProfileTool.class);
 	
@@ -41,6 +51,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IRegionBou
 	private   ITraceListener         traceListener;
 	private   IRegion                xHair, yHair;
 	private   IAxis                  x1,x2;
+	private   Collection<IRegion>    staticRegions;
 	private   RunningJob             xUpdateJob, yUpdateJob;
 	private   RegionBounds           xBounds, yBounds;
 	
@@ -55,11 +66,12 @@ public class CrossHairProfileTool extends AbstractToolPage implements IRegionBou
 					if (!(evt.getSource() instanceof List<?>)) {
 						return;
 					}
-					if (xUpdateJob!=null) xUpdateJob.schedule();
-					if (yUpdateJob!=null) yUpdateJob.schedule();
+					
+					if (xUpdateJob!=null) xUpdateJob.scheduleIfNotSuspended();
+					if (yUpdateJob!=null) yUpdateJob.scheduleIfNotSuspended();
 				}
 			};
-			
+						
 		} catch (Exception e) {
 			logger.error("Cannot get plotting system!", e);
 		}
@@ -82,7 +94,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IRegionBou
 		x1.setTitle("X Slice");
 		
 		this.x2 = plotter.createAxis("Y Slice", false, SWT.TOP);
-		
+				
 		activate();
 	}
 	
@@ -101,24 +113,14 @@ public class CrossHairProfileTool extends AbstractToolPage implements IRegionBou
 		if (getPlottingSystem()==null) return;
 		try {
 			if (xHair==null || getPlottingSystem().getRegion(xHair.getName())==null) {
-				this.xHair = getPlottingSystem().createRegion(RegionUtils.getUniqueName("Y Profile", plotter), IRegion.RegionType.XAXIS_LINE);
-				xHair.setVisible(false);
-				xHair.setTrackMouse(true);
-				xHair.setRegionColor(ColorConstants.red);
-				xHair.setUserRegion(false); // They cannot see preferences or change it!
-				getPlottingSystem().addRegion(xHair);
-				this.xUpdateJob = new RunningJob("Updating x cross hair", xHair);
+				this.xHair = getPlottingSystem().createRegion(RegionUtils.getUniqueName("Y Profile", getPlottingSystem()), IRegion.RegionType.XAXIS_LINE);
+				this.xUpdateJob = addRegion("Updating x cross hair", xHair, true);
 
 			}
 			
 			if (yHair==null || getPlottingSystem().getRegion(yHair.getName())==null) {
-				this.yHair = getPlottingSystem().createRegion(RegionUtils.getUniqueName("X Profile", plotter), IRegion.RegionType.YAXIS_LINE);
-				yHair.setVisible(false);
-				yHair.setTrackMouse(true);
-				yHair.setRegionColor(ColorConstants.red);
-				yHair.setUserRegion(false); // They cannot see preferences or change it!
-				getPlottingSystem().addRegion(yHair);
-				this.yUpdateJob = new RunningJob("Updating x cross hair", yHair);
+				this.yHair = getPlottingSystem().createRegion(RegionUtils.getUniqueName("X Profile", getPlottingSystem()), IRegion.RegionType.YAXIS_LINE);
+				this.yUpdateJob = addRegion("Updating x cross hair", yHair, false);
 			}
 			
 		} catch (Exception ne) {
@@ -126,6 +128,16 @@ public class CrossHairProfileTool extends AbstractToolPage implements IRegionBou
 		}
 	}
 	
+	private RunningJob addRegion(String jobName, IRegion region, boolean addListener) {
+		region.setVisible(false);
+		region.setTrackMouse(true);
+		region.setRegionColor(ColorConstants.red);
+		region.setUserRegion(false); // They cannot see preferences or change it!
+		getPlottingSystem().addRegion(region);
+		if (addListener) region.addMouseListener(this);
+		return new RunningJob(jobName, region);
+	}
+
 	@Override
 	public ToolPageRole getToolPageRole() {
 		return ToolPageRole.ROLE_2D;
@@ -156,6 +168,8 @@ public class CrossHairProfileTool extends AbstractToolPage implements IRegionBou
 	
 	public void deactivate() {
 		super.deactivate();
+
+		plotter.clear();
 		if (xHair!=null) {
 			xHair.setVisible(false);
 			xHair.removeRegionBoundsListener(this);
@@ -163,6 +177,10 @@ public class CrossHairProfileTool extends AbstractToolPage implements IRegionBou
 		if (yHair!=null) {
 			yHair.setVisible(false);
 			yHair.removeRegionBoundsListener(this);
+		}
+		if (staticRegions!=null) {
+			for (IRegion reg : staticRegions) getPlottingSystem().removeRegion(reg); 
+			staticRegions.clear();
 		}
 
 		if (getPlottingSystem()!=null) getPlottingSystem().removeTraceListener(traceListener);
@@ -194,6 +212,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IRegionBou
 
 		private boolean isJobRunning = false;
 		private IRegion region;
+		private boolean suspend = false;
 		
 		RunningJob(String name, IRegion region) {
 			super(name);
@@ -205,101 +224,37 @@ public class CrossHairProfileTool extends AbstractToolPage implements IRegionBou
 
 			try {
 				isJobRunning = true;
-				if (!isActive()) return Status.CANCEL_STATUS;
+				if (!isActive()) return  Status.CANCEL_STATUS;
 	
 				if (x1==null | x2==null) return Status.OK_STATUS;
 	
 				RegionBounds bounds = region==xHair ? xBounds : yBounds;
-				if (bounds!=null) {
-	
-					if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
-					final Collection<ITrace> traces= getPlottingSystem().getTraces(IImageTrace.class);	
-					IImageTrace image = traces!=null && traces.size()>0 ? (IImageTrace)traces.iterator().next() : null;
-	
-					if (image==null) {
-						if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
-						plotter.clear();
-						return Status.OK_STATUS;
-					}
-	
-					if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
-					ILineTrace trace = (ILineTrace)plotter.getTrace(region.getName());
-					if (trace == null) {
-						synchronized (plotter) {  // Only one job at a time can choose axis and create plot.
-							if (region==xHair) {
-								plotter.setSelectedXAxis(x1);
-	
-							} else if (region==yHair) {
-								plotter.setSelectedXAxis(x2);
-							}
-							if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
-							trace = plotter.createLineTrace(region.getName());
-	
-							if (region==xHair) {
-								trace.setTraceColor(ColorConstants.blue);
-							} else if (region==yHair) {
-								trace.setTraceColor(ColorConstants.red);
-							}
-						}
-					}
-					trace.setName(region.getName());
-	
-					final AbstractDataset data = image.getData();
-					AbstractDataset slice=null, sliceIndex=null;
-					if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
-					if (region==xHair) {
-						int index = (int)Math.round(bounds.getX());
-						slice = data.getSlice(new int[]{0,index}, new int[]{data.getShape()[0], index+1}, new int[]{1,1});
-						if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
-						slice = slice.flatten();
-						if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
-						sliceIndex = AbstractDataset.arange(slice.getSize(), AbstractDataset.INT);
-	
-					} else if (region==yHair) {
-						int index = (int)Math.round(bounds.getY());
-						slice = data.getSlice(new int[]{index,0}, new int[]{index+1, data.getShape()[1]}, new int[]{1,1});
-						if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
-						slice = slice.flatten();
-						if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
-						sliceIndex = AbstractDataset.arange(slice.getSize(), AbstractDataset.INT);
-					}
-					slice.setName(region.getName());
-					trace.setData(sliceIndex, slice);
-	
-					final ILineTrace finalTrace = trace;
-	
-	
-					if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
-					getControl().getDisplay().syncExec(new Runnable() {
-						public void run() {
-	
-							if (monitor.isCanceled()) return;
-							if (plotter.getTrace(finalTrace.getName())==null) {							
-								plotter.addTrace(finalTrace);
-							}
-	
-							if (monitor.isCanceled()) return;
-							plotter.repaint();
-							if (region==xHair) {
-								x1.setRange(0, data.getShape()[0]);
-							} else if (region==yHair) {
-								x2.setRange(0, data.getShape()[1]);
-							}
-						}
-					});
-				}
+				
+				final boolean ok = profile(region, bounds, false, null, monitor);
 
-			    return Status.OK_STATUS;
+			    return ok ? Status.OK_STATUS : Status.CANCEL_STATUS;
+			    
 			} finally {
 				isJobRunning = false;
 			}
 		}	
 		
+
 		/**
 		 * Blocks until job has been stopped, does nothing if not running.
 		 */
 		public void stop() {
 			if (isJobRunning) cancel();
+		}
+
+		public void suspend(boolean suspend) {
+			this.suspend  = suspend;
+			cancel();	
+		}
+		
+		public void scheduleIfNotSuspended() {
+			if (suspend) return;
+			super.schedule();
 		}
 	}
 
@@ -319,13 +274,172 @@ public class CrossHairProfileTool extends AbstractToolPage implements IRegionBou
 		if (r == xHair) {
 			xUpdateJob.stop();
 			this.xBounds = rb;
-			xUpdateJob.schedule();
+			xUpdateJob.scheduleIfNotSuspended();
 		}
 		if (r == yHair) {
 			yUpdateJob.stop();
 			this.yBounds = rb;
-			yUpdateJob.schedule();
+			yUpdateJob.scheduleIfNotSuspended();
 		}
+	}
+
+	@Override
+	public void mousePressed(MouseEvent me) {
+		
+		try {
+			xUpdateJob.suspend(true);
+			yUpdateJob.suspend(true);
+	
+	        final Color   snapShotColor = RegionUtils.getUnqueColor(xHair.getRegionType(), getPlottingSystem(), ColorUtility.DEFAULT_SWT_COLORS);
+	        final IRegion x = createStaticRegion("Y Profile Static", xBounds, snapShotColor, xHair.getRegionType());
+	        profile(x, xBounds, true, snapShotColor, new NullProgressMonitor());
+	        
+	        final IRegion y = createStaticRegion("X Profile Static", yBounds, snapShotColor, yHair.getRegionType());
+	        profile(y, yBounds, true, snapShotColor, new NullProgressMonitor());
+
+			getPlottingSystem().repaint();
+		} catch (Exception ne) {
+			logger.error(ne.getMessage(), ne);
+			
+		} finally {
+			xUpdateJob.suspend(false);
+			yUpdateJob.suspend(false);
+		}
+	}
+
+	private IRegion createStaticRegion(String nameStub, final RegionBounds bounds, final Color snapShotColor, final RegionType regionType) throws Exception {
+		
+		if (staticRegions==null) staticRegions = new HashSet<IRegion>(7);
+
+		final IRegion region = getPlottingSystem().createRegion(RegionUtils.getUniqueName(nameStub, getPlottingSystem()), regionType);
+		region.setRegionColor(snapShotColor);
+		getPlottingSystem().addRegion(region);
+		region.setRegionBounds(bounds);
+        getPlottingSystem().addRegionListener(new IRegionListener.Stub() {
+    		@Override
+    		public void regionRemoved(RegionEvent evt) {
+    			if (plotter.getTrace(region.getName())!=null) {
+    				plotter.removeTrace(plotter.getTrace(region.getName()));
+    			}
+    		}
+        });
+        
+        region.addRegionBoundsListener(new IRegionBoundsListener.Stub() {
+        	@Override
+    		public void regionBoundsDragged(RegionBoundsEvent evt) {
+        		profile(region, evt.getRegionBounds(), false, snapShotColor, new NullProgressMonitor());
+    		}
+        });
+		
+		staticRegions.add(region);
+		
+		return region;
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent me) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseDoubleClicked(MouseEvent me) {
+		// When clicked adds new plot
+		System.out.println("Mouse double!");
+	}
+
+	
+	private boolean profile(final IRegion      region, 
+			                final RegionBounds bounds, 
+			                final boolean      snapshot,
+			                final Color        snapShotColor,
+			                final IProgressMonitor monitor) {
+		
+		if (bounds!=null) {
+			
+			if (monitor.isCanceled()) return  false;
+			final Collection<ITrace> traces= getPlottingSystem().getTraces(IImageTrace.class);	
+			IImageTrace image = traces!=null && traces.size()>0 ? (IImageTrace)traces.iterator().next() : null;
+
+			if (image==null) {
+				if (monitor.isCanceled()) return  false;
+				plotter.clear();
+				return true;
+			}
+
+			if (monitor.isCanceled()) return  false;
+			
+            		                  
+			ILineTrace trace = (ILineTrace)plotter.getTrace(region.getName());
+			if (trace == null || snapshot) {
+				synchronized (plotter) {  // Only one job at a time can choose axis and create plot.
+					if (region.getName().startsWith("Y Profile")) {
+						plotter.setSelectedXAxis(x1);
+
+					} else {
+						plotter.setSelectedXAxis(x2);
+					}
+					if (monitor.isCanceled()) return  false;
+					trace = plotter.createLineTrace(region.getName());
+
+				    if (snapShotColor!=null) {
+				    	trace.setTraceColor(snapShotColor);
+				    } else {
+						if (region.getName().startsWith("Y Profile")) {
+							trace.setTraceColor(ColorConstants.blue);
+						} else {
+							trace.setTraceColor(ColorConstants.red);
+						}	
+				    }
+				}
+			}
+
+			final AbstractDataset data = image.getData();
+			AbstractDataset slice=null, sliceIndex=null;
+			if (monitor.isCanceled())return  false;
+			if (region.getName().startsWith("Y Profile")) {
+				int index = (int)Math.round(bounds.getX());
+				slice = data.getSlice(new int[]{0,index}, new int[]{data.getShape()[0], index+1}, new int[]{1,1});
+				if (monitor.isCanceled()) return  false;
+				slice = slice.flatten();
+				if (monitor.isCanceled()) return  false;
+				sliceIndex = AbstractDataset.arange(slice.getSize(), AbstractDataset.INT);
+
+			} else {
+				int index = (int)Math.round(bounds.getY());
+				slice = data.getSlice(new int[]{index,0}, new int[]{index+1, data.getShape()[1]}, new int[]{1,1});
+				if (monitor.isCanceled()) return  false;
+				slice = slice.flatten();
+				if (monitor.isCanceled()) return  false;
+				sliceIndex = AbstractDataset.arange(slice.getSize(), AbstractDataset.INT);
+			}
+			slice.setName(trace.getName());
+			trace.setData(sliceIndex, slice);
+
+			final ILineTrace finalTrace = trace;
+
+
+			if (monitor.isCanceled()) return  false;
+			getControl().getDisplay().syncExec(new Runnable() {
+				public void run() {
+
+					if (monitor.isCanceled()) return;
+					if (plotter.getTrace(finalTrace.getName())==null) {							
+						plotter.addTrace(finalTrace);
+					}
+
+					if (monitor.isCanceled()) return;
+					plotter.autoscaleAxes();
+					plotter.repaint();
+					if (region.getName().startsWith("Y Profile")) {
+						x1.setRange(0, data.getShape()[0]);
+					} else {
+						x2.setRange(0, data.getShape()[1]);
+					}
+				}
+			});
+		}
+		return true;
 	}
 
 }
