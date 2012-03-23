@@ -664,7 +664,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 	public void mouseDown(MouseEvent e) {
 		if (e.button==1) {
 			final TableItem item = this.dataViewer.getTable().getItem(new Point(e.x, e.y));
-			selectionChanged((CheckableObject)item.getData());
+			if (item!=null) selectionChanged((CheckableObject)item.getData());
 		}
 	}
 

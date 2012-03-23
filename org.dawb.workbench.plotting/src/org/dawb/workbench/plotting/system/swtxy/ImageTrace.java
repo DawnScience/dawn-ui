@@ -215,11 +215,23 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	}
 
 	public void remove() {
-		if (scaledImage!=null) scaledImage.dispose();
+		if (scaledImage!=null)   scaledImage.dispose();
+		if (imageScaleJob!=null) imageScaleJob.cancel();
+		
+        clearAspect(xAxis);
+        clearAspect(yAxis);
+		imageScaleJob = null;
 		getParent().remove(this);
 		xAxis.removeListenr(this);
 		yAxis.removeListenr(this);
 		axisRedrawActive = false;
+	}
+
+	private void clearAspect(Axis axis) {
+        if (axis instanceof AspectAxis ) {			
+			AspectAxis aaxis = (AspectAxis)axis;
+			aaxis.setKeepAspectWith(null);
+		}
 	}
 
 	@Override
@@ -276,15 +288,15 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	@Override
 	public void axisRangeChanged(Axis axis, Range old_range, Range new_range) {
 		if (!axisRedrawActive) return;
-		imageScaleJob.cancel();
-		imageScaleJob.schedule();
 	}
 
 	@Override
 	public void axisRevalidated(Axis axis) {
 		if (!axisRedrawActive) return;
-		imageScaleJob.cancel();
-		imageScaleJob.schedule();
+		if (imageScaleJob!=null) {
+			imageScaleJob.cancel();
+			imageScaleJob.schedule();
+		}
 	}
 	private void setAxisRedrawActive(boolean b) {
 		this.axisRedrawActive = b;

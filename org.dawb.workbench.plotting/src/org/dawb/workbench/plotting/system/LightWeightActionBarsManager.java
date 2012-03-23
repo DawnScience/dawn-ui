@@ -7,6 +7,7 @@ import java.util.Map;
 import org.dawb.common.ui.image.PaletteFactory;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
+import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingActionBarManager;
 import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
 import org.dawb.common.ui.plot.trace.IImageTrace;
@@ -41,19 +42,20 @@ class LightWeightActionBarsManager extends PlottingActionBarManager {
 		twoDimensionalActions = new ArrayList<ActionContainer>();
 	}
 
-	protected void switchActions(boolean is1D, boolean is2D) {
+	protected void switchActions(final PlotType type) {
 		
 		final IActionBars bars = system.getActionBars();
     	if (bars==null) return;
     	 
     	if (oneDimensionalActions!=null) for (ActionContainer ac : oneDimensionalActions) {
-    		if (is1D && ac.getManager().find(ac.getId())==null) {
+    		if (type.is1D() && ac.getManager().find(ac.getId())==null) {
     			ac.getManager().insertAfter(ac.getId()+".group", ac.getAction());
-    		} else if (!is1D) {
+    		} else if (!type.is1D()) {
     			ac.getManager().remove(ac.getId());
     		}
 		}
     	
+    	final boolean is2D = !type.is1D();
     	if (twoDimensionalActions!=null) for (ActionContainer ac : twoDimensionalActions) {
     		if (is2D && ac.getManager().find(ac.getId())==null) {
     			ac.getManager().insertAfter(ac.getId()+".group", ac.getAction());
@@ -62,6 +64,9 @@ class LightWeightActionBarsManager extends PlottingActionBarManager {
       		}
 		}
     	
+    	if (bars.getToolBarManager()!=null)    bars.getToolBarManager().update(true);
+    	if (bars.getMenuManager()!=null)       bars.getMenuManager().update(true);
+    	if (bars.getStatusLineManager()!=null) bars.getStatusLineManager().update(true);
     	bars.updateActionBars();
 	}
 	
@@ -103,11 +108,13 @@ class LightWeightActionBarsManager extends PlottingActionBarManager {
 		action.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.ASPECT));
 		
 		final IActionBars bars = system.getActionBars();
-		bars.getToolBarManager().add(new Separator("org.dawb.workbench.plotting.aspect.group"));
-		action.setId("org.dawb.workbench.plotting.aspect");
-		bars.getToolBarManager().insertAfter("org.dawb.workbench.plotting.aspect.group", action);
- 
-		twoDimensionalActions.add(new ActionContainer(action, bars.getToolBarManager()));
+		if (bars!=null) {
+			bars.getToolBarManager().add(new Separator("org.dawb.workbench.plotting.aspect.group"));
+			action.setId("org.dawb.workbench.plotting.aspect");
+			bars.getToolBarManager().insertAfter("org.dawb.workbench.plotting.aspect.group", action);
+	 
+			twoDimensionalActions.add(new ActionContainer(action, bars.getToolBarManager()));
+		}
 	}
 	
 	protected void createPalleteActions() {
@@ -138,10 +145,12 @@ class LightWeightActionBarsManager extends PlottingActionBarManager {
 		lutCombo.setToolTipText("Histogram");
 
 		final IActionBars bars = system.getActionBars();
-		bars.getMenuManager().add(new Separator(lutCombo.getId()+".group"));
-		bars.getMenuManager().insertAfter(lutCombo.getId()+".group", lutCombo);
-		
-		twoDimensionalActions.add(new ActionContainer(lutCombo, bars.getMenuManager()));
+		if (bars!=null) {
+			bars.getMenuManager().add(new Separator(lutCombo.getId()+".group"));
+			bars.getMenuManager().insertAfter(lutCombo.getId()+".group", lutCombo);
+			
+			twoDimensionalActions.add(new ActionContainer(lutCombo, bars.getMenuManager()));
+		}
 	}
 	
 
@@ -209,7 +218,7 @@ class LightWeightActionBarsManager extends PlottingActionBarManager {
 		};
 		rescaleAction.setChecked(this.system.isRescale());
 		rescaleAction.setId("org.dawb.workbench.plotting.rescale");
-		oneDimensionalActions.add(new ActionContainer(rescaleAction, bars.getToolBarManager()));
+		if (bars!=null) oneDimensionalActions.add(new ActionContainer(rescaleAction, bars.getToolBarManager()));
 
         if (bars!=null) bars.getToolBarManager().add(new Separator(rescaleAction.getId()+".group"));
 		rightClick.add(new Separator(rescaleAction.getId()+".group"));

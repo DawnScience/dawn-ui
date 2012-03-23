@@ -75,6 +75,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 
 
 /**
@@ -163,12 +164,14 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
         	toolbar.createGraphActions(bars.getToolBarManager(), rightClick);
 		}
 		
-		lightWeightActionBarMan.createAspectAction();
-		lightWeightActionBarMan.createToolDimensionalActions(ToolPageRole.ROLE_1D, "org.dawb.workbench.plotting.views.toolPageView.1D");
-		lightWeightActionBarMan.createToolDimensionalActions(ToolPageRole.ROLE_2D, "org.dawb.workbench.plotting.views.toolPageView.2D");
-		lightWeightActionBarMan.createToolDimensionalActions(ToolPageRole.ROLE_1D_AND_2D, "org.dawb.workbench.plotting.views.toolPageView.1D_and_2D");
-		lightWeightActionBarMan.createPalleteActions();
-		lightWeightActionBarMan.createOriginActions();
+		if (bars!=null) {
+			lightWeightActionBarMan.createAspectAction();
+			lightWeightActionBarMan.createToolDimensionalActions(ToolPageRole.ROLE_1D, "org.dawb.workbench.plotting.views.toolPageView.1D");
+			lightWeightActionBarMan.createToolDimensionalActions(ToolPageRole.ROLE_2D, "org.dawb.workbench.plotting.views.toolPageView.2D");
+			lightWeightActionBarMan.createToolDimensionalActions(ToolPageRole.ROLE_1D_AND_2D, "org.dawb.workbench.plotting.views.toolPageView.1D_and_2D");
+			lightWeightActionBarMan.createPalleteActions();
+			lightWeightActionBarMan.createOriginActions();
+		}
 		lightWeightActionBarMan.createAdditionalActions(rightClick);
 		
 		lws.setContents(xyGraph);
@@ -185,7 +188,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
         xyCanvas.setMenu(rightClickMenu);
  
         if (defaultPlotType!=null) {
-		    this.lightWeightActionBarMan.switchActions(defaultPlotType.is1D(), !defaultPlotType.is1D());
+		    this.lightWeightActionBarMan.switchActions(defaultPlotType);
         }
 
         parent.layout();
@@ -255,7 +258,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		if (axes==null || axes.isEmpty()) {
 			ys = new ArrayList<AbstractDataset>(1);
 			ys.add(data);
-			x = DoubleDataset.arange(ys.get(0).getSize());
+			x = IntegerDataset.arange(ys.get(0).getSize());
 			x.setName("Index of "+data.getName());
 			createdIndices = true;
 		} else {
@@ -304,7 +307,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		
 		this.plottingMode = mode;
 		createUI();
-		this.lightWeightActionBarMan.switchActions(mode.is1D(), !mode.is1D());
+		this.lightWeightActionBarMan.switchActions(mode);
 		if (mode.is1D()) {
 			return create1DPlot(x,ys,createdIndices,monitor);
 		} else {
@@ -335,11 +338,13 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
   
 		try {
 			
+			clearTraces(); // Only one image at a time!
+					
 			final Axis xAxis = ((AxisWrapper)getSelectedXAxis()).getWrappedAxis();
 			final Axis yAxis = ((AxisWrapper)getSelectedYAxis()).getWrappedAxis();
 			yAxis.setTitle("");
 			xAxis.setTitle("");
-
+            if (data.getName()!=null) xyGraph.setTitle(data.getName());
 			xyGraph.clearTraces();
 			
 			if (traceMap==null) traceMap = new LinkedHashMap<String, ITrace>(31);
@@ -479,7 +484,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		}
 		
 		xyCanvas.redraw();
-		getDisplay().asyncExec(new Runnable() {
+		getDisplay().syncExec(new Runnable() {
 			public void run() {
 				autoscaleAxes();
 				autoscaleAxes();
@@ -513,6 +518,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		
 		if (trace instanceof ImageTrace) {
 			xyGraph.addImageTrace((ImageTrace)trace);
+			fireTraceAdded(new TraceEvent(trace));
 		} else {
 			xyGraph.addTrace(((TraceWrapper)trace).getTrace());
 			xyCanvas.redraw();
@@ -664,6 +670,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		
 		if (xyGraph!=null) {
 			xyGraph.setTitle(title);
+			xyGraph.repaint();
 		} else {
 			throw new RuntimeException("Cannot set the plot title when the plotting system is not created or plotting something!");
 		}
