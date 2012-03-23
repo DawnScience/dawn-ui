@@ -121,15 +121,15 @@ class AxisSelection extends Region {
         updateRegionBounds();
         if (regionBounds==null) createRegionBounds(true);
 
-//        
-//        parent.addFigureListener(new FigureListener() {
-//			@Override
-//			public void figureMoved(IFigure source) {
-//				if (line1!=null) line1.updateBounds(source.getBounds());
-//				if (line2!=null) line2.updateBounds(source.getBounds());
-//				updateConnectionBounds();
-//			}
-//		});
+        
+        parent.addFigureListener(new FigureListener() {
+			@Override
+			public void figureMoved(IFigure source) {
+				if (line1!=null) line1.updateBounds(source.getBounds());
+				if (line2!=null) line2.updateBounds(source.getBounds());
+				updateConnectionBounds();
+			}
+		});
         
         this.mouseTrackListener = new MouseMotionListener.Stub() {
         	
