@@ -12,7 +12,7 @@ import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.graphics.Color;
 
-class SelectionRectangle extends Figure implements IMotileFigure {
+class SelectionRectangle extends Figure implements IMobileFigure {
 	
 	private RectangleFigure point;
 	private Figure          label;

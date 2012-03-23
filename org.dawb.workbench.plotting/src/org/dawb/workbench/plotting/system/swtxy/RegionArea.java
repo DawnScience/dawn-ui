@@ -336,43 +336,45 @@ public class RegionArea extends PlotArea {
 
 		@Override
 		public void mouseReleased(MouseEvent me) {
-		    removeMouseListener(this);
-		    removeMouseMotionListener(this);
-		    if (regionListener==this) {
-		    	regionListener = null;
-		    } else {
-		    	clearRegionTool(); // Actually something has gone wrong if this happens.
-		    }
-		    setCursor(null);
-		    
-		    RegionArea.this.addRegion(regionBeingAdded, false);
-			((XYRegionGraph)xyGraph).getOperationsManager().addCommand(new AddRegionCommand((XYRegionGraph)xyGraph, regionBeingAdded));
+			removeMouseListener(this);
+			removeMouseMotionListener(this);
+			if (regionListener == this) {
+				regionListener = null;
+			} else {
+				clearRegionTool(); // Actually something has gone wrong if this happens.
+			}
+			setCursor(null);
 
-		    regionBeingAdded.setLocalBounds(regionStart, regionEnd, getBounds());
+			RegionArea.this.addRegion(regionBeingAdded, false);
+			((XYRegionGraph) xyGraph).getOperationsManager().addCommand(new AddRegionCommand((XYRegionGraph) xyGraph,
+							regionBeingAdded));
 
-		    fireRegionAdded(new RegionEvent(regionBeingAdded));
-		    
+			regionBeingAdded.setLocalBounds(regionStart, regionEnd, getBounds());
+
+			fireRegionAdded(new RegionEvent(regionBeingAdded));
+
 			me.consume();
 			repaint();
-			
-		    RegionArea.this.regionBeingAdded = null;
+
+			RegionArea.this.regionBeingAdded = null;
 			regionStart = regionEnd = null;
 		}
 
 		@Override
 		public void mouseDoubleClicked(MouseEvent me) {
-			
+
 		}
+
 		public void mouseDragged(final MouseEvent me) {
 
 			regionEnd = me.getLocation();
 			me.consume();
 			repaint();
-	    }
-	
-	    public void mouseExited(final MouseEvent me) {
-	    	//mouseReleased(me);
-	    }
+		}
+
+		public void mouseExited(final MouseEvent me) {
+			// mouseReleased(me);
+		}
 	}
 
 	protected Map<String,ImageTrace> getImageTraces() {

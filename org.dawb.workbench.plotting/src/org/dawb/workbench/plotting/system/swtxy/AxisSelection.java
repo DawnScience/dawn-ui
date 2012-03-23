@@ -208,7 +208,7 @@ class AxisSelection extends Region {
 		}
 	}
 	
-	protected final class LineFigure extends Figure implements IMotileFigure {
+	protected final class LineFigure extends Figure implements IMobileFigure {
 		
 		private boolean first;
 		private FigureMover mover;
@@ -225,7 +225,7 @@ class AxisSelection extends Region {
 			}
 			mover.addTranslationListener(createRegionNotifier());
 			addFigureListener(createFigureListener());
-			mover.setActive(isMotile());
+			mover.setActive(isMobile());
 		}
 		protected void updateBounds(Rectangle parentBounds) {
 			if (regionType==RegionType.XAXIS|| regionType==RegionType.XAXIS_LINE) {
@@ -267,9 +267,9 @@ class AxisSelection extends Region {
 		}
 	}
 	
-	public void setMotile(boolean motile) {
+	public void setMobile(boolean motile) {
 		if (regionType==RegionType.XAXIS || regionType==RegionType.YAXIS) {
-			super.setMotile(motile);
+			super.setMobile(motile);
 			return;
 		}
 		

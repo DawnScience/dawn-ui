@@ -9,7 +9,9 @@ import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.FigureListener;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.geometry.Geometry;
 import org.eclipse.draw2d.geometry.Point;
+import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
@@ -52,20 +54,32 @@ class LineSelection extends Region {
 		mover.addTranslationListener(createRegionNotifier());
 				
 		this.connection = new RegionFillFigure() {
+			PointList shape = new PointList(2);
+
 			@Override
 			public void paintFigure(Graphics gc) {
 				
 				super.paintFigure(gc);
-				
-				this.bounds = getConnectionBounds();
-				
-				gc.setLineWidth(getLineWidth());
-				gc.setAlpha(getAlpha());
 				final Point startCenter = startBox.getSelectionPoint();
 				final Point endCenter   = endBox.getSelectionPoint();
+				if (shape.size() == 0) {
+					shape.addPoint(startCenter);
+					shape.addPoint(endCenter);
+				} else {
+					shape.setPoint(startCenter, 0);
+					shape.setPoint(endCenter, 1);
+				}
+
+				this.bounds = getConnectionBounds();
+				gc.setLineWidth(getLineWidth());
+				gc.setAlpha(getAlpha());
 				gc.drawLine(startCenter, endCenter);
-				
 				LineSelection.this.drawLabel(gc, bounds);
+			}
+
+			@Override
+			public boolean containsPoint(int x, int y) {
+				return Geometry.polylineContainsPoint(shape, x, y, 2);
 			}
 		};
 		connection.setCursor(Draw2DUtils.getRoiMoveCursor());

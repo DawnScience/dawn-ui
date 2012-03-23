@@ -151,7 +151,7 @@ public class SWTXYRegionsTest {
 						RegionBounds r1 = new RegionBounds(new double[]{i*100,1},new double[]{(i*100)+50,0.1});
 						region.setRegionBounds(r1);
 						region.setRegionColor(Display.getDefault().getSystemColor(SWT.COLOR_BLUE));
-						region.setMotile(false);
+						region.setMobile(false);
 						region.setAlpha(50);
 						
 						// We now add the region.

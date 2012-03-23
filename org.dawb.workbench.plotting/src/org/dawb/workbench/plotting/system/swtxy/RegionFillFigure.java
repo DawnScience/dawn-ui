@@ -7,14 +7,14 @@ import org.eclipse.draw2d.MouseListener;
 
 public class RegionFillFigure extends Figure {
 
-	public void setMotile(final boolean motile) {
+	public void setMobile(final boolean mobile) {
 		
 		final FigureMover mover = getFigureMover();
 		if (mover==null) return;
 		
-		mover.setActive(motile);
+		mover.setActive(mobile);
 		
-		if (motile) {
+		if (mobile) {
 			setCursor(Draw2DUtils.getRoiMoveCursor());
 		} else {
 			setCursor(null);

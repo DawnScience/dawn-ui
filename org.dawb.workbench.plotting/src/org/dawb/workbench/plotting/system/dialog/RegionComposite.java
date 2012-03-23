@@ -196,7 +196,7 @@ public class RegionComposite extends Composite {
 		
 		colorSelector.setColorValue(region.getRegionColor().getRGB());
 		alpha.setSelection(region.getAlpha());
-		motile.setSelection(region.isMotile());
+		motile.setSelection(region.isMobile());
 		showPoints.setSelection(region.isShowPosition());
 		visible.setSelection(region.isVisible());
 		showLabel.setSelection(region.isShowLabel());
@@ -211,7 +211,7 @@ public class RegionComposite extends Composite {
 		editingRegion.setShowPosition(showPoints.getSelection());
 		editingRegion.setRegionColor(new Color(getDisplay(), colorSelector.getColorValue()));
 		editingRegion.setAlpha(alpha.getSelection());
-		editingRegion.setMotile(motile.getSelection());
+		editingRegion.setMobile(motile.getSelection());
 		editingRegion.setVisible(visible.getSelection());
 		editingRegion.setShowLabel(showLabel.getSelection());
         return editingRegion;

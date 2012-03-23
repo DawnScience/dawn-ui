@@ -25,7 +25,7 @@ import org.eclipse.swt.widgets.Display;
  * @author fcp94556
  *
  */
-public abstract class Region extends AbstractRegion implements IAxisListener{
+public abstract class Region extends AbstractRegion implements IAxisListener {
 
 
 	private RegionBean bean;
@@ -108,7 +108,7 @@ public abstract class Region extends AbstractRegion implements IAxisListener{
 		setRegionColor(bean.getRegionColor());
 		setAlpha(bean.getAlpha());
 		setVisible(bean.isVisible());
-		setMotile(bean.isMotile());
+		setMobile(bean.isMobile());
 		setShowLabel(bean.isShowLabel());
 	}
 	
@@ -241,8 +241,8 @@ public abstract class Region extends AbstractRegion implements IAxisListener{
 
 	public void setVisible(boolean visible) {
 		if (regionObjects!=null) for (IFigure ob : regionObjects) {
-			if (ob instanceof IMotileFigure) {
-				((IMotileFigure)ob).setVisible(visible&&(isMotile()||isTrackMouse()));
+			if (ob instanceof IMobileFigure) {
+				((IMobileFigure)ob).setVisible(visible&&(isMobile()||isTrackMouse()));
 			} else {
 			    if (ob!=null) ob.setVisible(visible);
 			}
@@ -250,19 +250,20 @@ public abstract class Region extends AbstractRegion implements IAxisListener{
 		bean.setVisible(visible);
 	}
 
-	public boolean isMotile() {
-		return bean.isMotile();
+	public boolean isMobile() {
+		return bean.isMobile();
 	}
 
-	public void setMotile(boolean motile) {
+	@Override
+	public void setMobile(boolean mobile) {
 		if (regionObjects!=null) for (IFigure ob : regionObjects) {
-			if (ob instanceof IMotileFigure) {
-				((IMotileFigure)ob).setVisible(motile);
+			if (ob instanceof IMobileFigure) {
+				((IMobileFigure)ob).setVisible(mobile);
 			} else if (ob instanceof RegionFillFigure) {
-				((RegionFillFigure)ob).setMotile(motile);
+				((RegionFillFigure)ob).setMobile(mobile);
 			}
 		}
-		bean.setMotile(motile);
+		bean.setMobile(mobile);
 	}
 
 

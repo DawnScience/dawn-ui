@@ -180,8 +180,8 @@ public class FigureMover implements MouseListener, MouseMotionListener {
 		}
 	}
 
-	public void setActive(boolean motile) {
-		this.active = motile;
+	public void setActive(boolean mobile) {
+		this.active = mobile;
 	}
 	
 	public boolean isActive() {

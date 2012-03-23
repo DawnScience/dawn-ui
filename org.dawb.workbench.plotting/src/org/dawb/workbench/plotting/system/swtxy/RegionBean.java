@@ -24,7 +24,7 @@ public class RegionBean implements Serializable {
 	protected boolean showPosition=false;
 	protected int     alpha=80;
 	protected boolean visible=true;
-	protected boolean motile=true;
+	protected boolean mobile=true;
 	protected boolean showLabel=false;	
 	public void sync(RegionBean bean) {
 		setName(bean.getName());
@@ -35,7 +35,7 @@ public class RegionBean implements Serializable {
 		setRegionColor(bean.getRegionColor());
 		setAlpha(bean.getAlpha());
 		setVisible(bean.isVisible());
-		setMotile(bean.isMotile());
+		setMobile(bean.isMobile());
 		setShowLabel(bean.isShowLabel());
 	}
 
@@ -92,12 +92,12 @@ public class RegionBean implements Serializable {
 		this.visible = visible;
 	}
 
-	public boolean isMotile() {
-		return motile;
+	public boolean isMobile() {
+		return mobile;
 	}
 
-	public void setMotile(boolean motile) {
-		this.motile = motile;
+	public void setMobile(boolean motile) {
+		this.mobile = motile;
 	}
 
 	@Override
@@ -105,7 +105,7 @@ public class RegionBean implements Serializable {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + alpha;
-		result = prime * result + (motile ? 1231 : 1237);
+		result = prime * result + (mobile ? 1231 : 1237);
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result
 				+ ((regionColor == null) ? 0 : regionColor.hashCode());
@@ -129,7 +129,7 @@ public class RegionBean implements Serializable {
 		RegionBean other = (RegionBean) obj;
 		if (alpha != other.alpha)
 			return false;
-		if (motile != other.motile)
+		if (mobile != other.mobile)
 			return false;
 		if (name == null) {
 			if (other.name != null)
