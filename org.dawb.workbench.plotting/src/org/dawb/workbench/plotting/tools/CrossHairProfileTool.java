@@ -148,11 +148,10 @@ public class CrossHairProfileTool extends AbstractToolPage implements IRegionBou
 	}
 	
 	public void activate() {
-		super.activate();	
 		
 		createRegions();
 		if (xHair!=null) {
-			xHair.addMouseListener(this);
+			if (!isActive()) xHair.addMouseListener(this);
 			xHair.setVisible(true);
 			xHair.addRegionBoundsListener(this);
 		}
@@ -164,6 +163,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IRegionBou
 		if (getPlottingSystem()!=null) {
 			getPlottingSystem().addTraceListener(traceListener);
 		}
+		super.activate();	
 	}
 	
 	public void deactivate() {
