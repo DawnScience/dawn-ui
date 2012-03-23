@@ -114,13 +114,13 @@ public class CrossHairProfileTool extends AbstractToolPage implements IRegionBou
 		try {
 			if (xHair==null || getPlottingSystem().getRegion(xHair.getName())==null) {
 				this.xHair = getPlottingSystem().createRegion(RegionUtils.getUniqueName("Y Profile", getPlottingSystem()), IRegion.RegionType.XAXIS_LINE);
-				this.xUpdateJob = addRegion("Updating x cross hair", xHair, true);
+				this.xUpdateJob = addRegion("Updating x cross hair", xHair);
 
 			}
 			
 			if (yHair==null || getPlottingSystem().getRegion(yHair.getName())==null) {
 				this.yHair = getPlottingSystem().createRegion(RegionUtils.getUniqueName("X Profile", getPlottingSystem()), IRegion.RegionType.YAXIS_LINE);
-				this.yUpdateJob = addRegion("Updating x cross hair", yHair, false);
+				this.yUpdateJob = addRegion("Updating x cross hair", yHair);
 			}
 			
 		} catch (Exception ne) {
@@ -128,13 +128,12 @@ public class CrossHairProfileTool extends AbstractToolPage implements IRegionBou
 		}
 	}
 	
-	private RunningJob addRegion(String jobName, IRegion region, boolean addListener) {
+	private RunningJob addRegion(String jobName, IRegion region) {
 		region.setVisible(false);
 		region.setTrackMouse(true);
 		region.setRegionColor(ColorConstants.red);
 		region.setUserRegion(false); // They cannot see preferences or change it!
 		getPlottingSystem().addRegion(region);
-		if (addListener) region.addMouseListener(this);
 		return new RunningJob(jobName, region);
 	}
 
@@ -153,6 +152,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IRegionBou
 		
 		createRegions();
 		if (xHair!=null) {
+			xHair.addMouseListener(this);
 			xHair.setVisible(true);
 			xHair.addRegionBoundsListener(this);
 		}
@@ -169,8 +169,8 @@ public class CrossHairProfileTool extends AbstractToolPage implements IRegionBou
 	public void deactivate() {
 		super.deactivate();
 
-		plotter.clear();
 		if (xHair!=null) {
+			xHair.removeMouseListener(this);
 			xHair.setVisible(false);
 			xHair.removeRegionBoundsListener(this);
 		}
@@ -182,6 +182,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IRegionBou
 			for (IRegion reg : staticRegions) getPlottingSystem().removeRegion(reg); 
 			staticRegions.clear();
 		}
+		plotter.clear();
 
 		if (getPlottingSystem()!=null) getPlottingSystem().removeTraceListener(traceListener);
 	}
@@ -286,6 +287,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IRegionBou
 	@Override
 	public void mousePressed(MouseEvent me) {
 		
+		if (!isActive()) return;
 		try {
 			xUpdateJob.suspend(true);
 			yUpdateJob.suspend(true);
@@ -327,6 +329,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IRegionBou
         region.addRegionBoundsListener(new IRegionBoundsListener.Stub() {
         	@Override
     		public void regionBoundsDragged(RegionBoundsEvent evt) {
+        		if (!isActive()) return;
         		profile(region, evt.getRegionBounds(), false, snapShotColor, new NullProgressMonitor());
     		}
         });
@@ -345,7 +348,6 @@ public class CrossHairProfileTool extends AbstractToolPage implements IRegionBou
 	@Override
 	public void mouseDoubleClicked(MouseEvent me) {
 		// When clicked adds new plot
-		System.out.println("Mouse double!");
 	}
 
 	
