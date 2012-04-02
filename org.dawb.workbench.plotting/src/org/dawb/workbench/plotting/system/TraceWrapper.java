@@ -4,6 +4,7 @@ import org.csstudio.swt.xygraph.dataprovider.CircularBufferDataProvider;
 import org.csstudio.swt.xygraph.figures.Trace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.TraceEvent;
+import org.dawb.workbench.plotting.system.swtxy.LineTrace;
 import org.eclipse.swt.graphics.Color;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
@@ -18,10 +19,10 @@ import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
  */
 public class TraceWrapper implements ILineTrace {
 
-	private Trace trace;
+	private LineTrace trace;
 	private LightWeightPlottingSystem sys;
 
-	TraceWrapper(LightWeightPlottingSystem sys, final Trace trace) {
+	TraceWrapper(LightWeightPlottingSystem sys, final LineTrace trace) {
 		this.sys   = sys;
 		this.trace = trace;
 	}
@@ -310,22 +311,15 @@ public class TraceWrapper implements ILineTrace {
 	@Override
 	public void setData(AbstractDataset xData, AbstractDataset yData) {
 		
-		CircularBufferDataProvider prov = (CircularBufferDataProvider)trace.getDataProvider();
+		LightWeightDataProvider prov = (LightWeightDataProvider)trace.getDataProvider();
 		if (prov!=null) {
 			prov.removeDataProviderListener(trace);
-			prov.clearTrace();
 		}
 		
 		if (xData.containsInvalidNumbers()) throw new RuntimeException(xData.getName()+" contains infinities or nans!");
-		final double[] x = (double[])DatasetUtils.cast(xData, AbstractDataset.FLOAT64).getBuffer(); 		
-		
 		if (yData.containsInvalidNumbers()) throw new RuntimeException(yData.getName()+" contains infinities or nans!");
-		final double[] y = (double[])DatasetUtils.cast(yData, AbstractDataset.FLOAT64).getBuffer(); 
 		
-		prov = new CircularBufferDataProvider(false);
-		prov.setBufferSize(xData.getSize());	
-		prov.setCurrentXDataArray(x);
-		prov.setCurrentYDataArray(y);
+		prov.setData(xData,yData);
 		trace.setDataProvider(prov);
 		
 		sys.fireTracesPlotted(new TraceEvent(this));

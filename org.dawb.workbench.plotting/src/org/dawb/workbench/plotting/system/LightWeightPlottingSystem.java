@@ -48,6 +48,7 @@ import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.gda.extensions.util.DatasetTitleUtils;
 import org.dawb.workbench.plotting.system.swtxy.AspectAxis;
 import org.dawb.workbench.plotting.system.swtxy.ImageTrace;
+import org.dawb.workbench.plotting.system.swtxy.LineTrace;
 import org.dawb.workbench.plotting.system.swtxy.Region;
 import org.dawb.workbench.plotting.system.swtxy.RegionArea;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
@@ -434,21 +435,14 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 
 		//create a trace data provider, which will provide the data to the trace.
 		int iplot = 0;
-		final double[] xArray = (double[])DatasetUtils.cast(x, AbstractDataset.FLOAT64).getBuffer();
 		
 		final List<ITrace> traces = new ArrayList<ITrace>(ys.size());
 		for (AbstractDataset y : ys) {
 
-			CircularBufferDataProvider traceDataProvider = new CircularBufferDataProvider(false);
-			if (y.getBuffer()!=null && y.getShape()!=null) {
-				traceDataProvider.setBufferSize(y.getSize());	
-				traceDataProvider.setCurrentXDataArray(xArray);
-				final double[] yArray = (double[])DatasetUtils.cast(y, AbstractDataset.FLOAT64).getBuffer();
-				traceDataProvider.setCurrentYDataArray(yArray);	
-			}
+			LightWeightDataProvider traceDataProvider = new LightWeightDataProvider(x, y);
 			
 			//create the trace
-			final Trace trace = new Trace(DatasetTitleUtils.getName(y,rootName), 
+			final LineTrace trace = new LineTrace(DatasetTitleUtils.getName(y,rootName), 
 					                      xAxis, 
 					                      yAxis,
 									      traceDataProvider);	
@@ -499,8 +493,8 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		Axis xAxis = ((AxisWrapper)getSelectedXAxis()).getWrappedAxis();
 		Axis yAxis = ((AxisWrapper)getSelectedYAxis()).getWrappedAxis();
 
-		CircularBufferDataProvider traceDataProvider = new CircularBufferDataProvider(false);
-		final Trace trace = new Trace(traceName, xAxis, yAxis, traceDataProvider);
+		LightWeightDataProvider traceDataProvider = new LightWeightDataProvider();
+		final LineTrace   trace    = new LineTrace(traceName, xAxis, yAxis, traceDataProvider);
 		final TraceWrapper wrapper = new TraceWrapper(this, trace);
 		fireTraceCreated(new TraceEvent(wrapper));
 		return wrapper;
@@ -560,39 +554,10 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		
 		final Trace trace = ((TraceWrapper)wrapper).getTrace();
 		
-		CircularBufferDataProvider prov = (CircularBufferDataProvider)trace.getDataProvider();
+		LightWeightDataProvider prov = (LightWeightDataProvider)trace.getDataProvider();
 		if (prov==null) return;
 
-		if (rescale) {
-			try {
-				Axis xAxis = ((AxisWrapper)getSelectedXAxis()).getWrappedAxis();
-				
-				if (xValue==null) xValue = xAxis.getRange().getUpper()+1d;					
-				double min = Math.min(xAxis.getRange().getLower(), xValue.doubleValue());
-				double max = Math.max(xAxis.getRange().getUpper(), xValue.doubleValue());
-				xAxis.setRange(min,max);
-
-				Axis yAxis = ((AxisWrapper)getSelectedYAxis()).getWrappedAxis();
-				min = Math.min(yAxis.getRange().getLower(), yValue.doubleValue());
-				max = Math.max(yAxis.getRange().getUpper(), yValue.doubleValue());
-				yAxis.setRange(min,max);
-				
-			} catch (Throwable e) {
-				logger.error("Cannot rescale data, internal error.\nNormally this would be thrown back to the calling API but it happening in an update thread.", e);
-				return;
-			}
-		}		
-
-	    
-	    // View all the data - not we can 
-	    // Also do tickers if the buffer size is not
-        // changed.
-	    prov.setBufferSize(prov.getSize()+1);  
-	    
-	    // Change data
-	    prov.addSample(new Sample(xValue.doubleValue(), yValue.doubleValue()));
-	    
-	    
+		prov.append(xValue, yValue);
 	}
 	
 	
@@ -622,21 +587,10 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 
 		if (trace==null) return null;
 		
-		CircularBufferDataProvider prov = (CircularBufferDataProvider)trace.getDataProvider();
+		LightWeightDataProvider prov = (LightWeightDataProvider)trace.getDataProvider();
 		if (prov==null) return null;
 		
-		final double[]          da = new double[prov.getSize()];
-		final Iterator<ISample> it = prov.iterator();
-		int i = 0;
-		while(it.hasNext()) {
-			da[i] = isY ? it.next().getYValue() : it.next().getXValue();
-			++i;
-		}
-		
-		final DoubleDataset set = new DoubleDataset(da, da.length);
-		if (isY) set.setName(name); else set.setName(getSelectedXAxis().getTitle());
-		
-		return set;
+		return isY ? prov.getY() : prov.getX();
 	}
 
 	private Object[] getOrderedDatasets(final AbstractDataset       xIn,

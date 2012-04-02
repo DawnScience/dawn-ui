@@ -391,7 +391,7 @@ public class RegionArea extends PlotArea {
 		if (traceList!=null) {
 			for (Trace trace : traceList) {
 				remove(trace);
-				trace.dispose();
+				if (trace instanceof LineTrace) ((LineTrace)trace).dispose();
 			}
 			traceList.clear();
 	    }
