@@ -49,10 +49,10 @@ import org.dawb.gda.extensions.util.DatasetTitleUtils;
 import org.dawb.workbench.plotting.system.swtxy.AspectAxis;
 import org.dawb.workbench.plotting.system.swtxy.ImageTrace;
 import org.dawb.workbench.plotting.system.swtxy.LineTrace;
-import org.dawb.workbench.plotting.system.swtxy.Region;
 import org.dawb.workbench.plotting.system.swtxy.RegionArea;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionToolbar;
+import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
 import org.dawb.workbench.plotting.util.ColorUtility;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.draw2d.FigureCanvas;
@@ -879,7 +879,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	 */
 	public void addRegion(final IRegion region) {		
 		if (xyGraph==null) createUI();
-		final Region r = (Region)region;
+		final AbstractSelectionRegion r = (AbstractSelectionRegion)region;
 		xyGraph.addRegion(r);		
  	}
 	
@@ -889,7 +889,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	 */
 	public void removeRegion(final IRegion region) {		
 		if (xyGraph==null) createUI();
-		final Region r = (Region)region;
+		final AbstractSelectionRegion r = (AbstractSelectionRegion)region;
 		xyGraph.removeRegion(r);
 	}
 
@@ -909,7 +909,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	 */
 	public Collection<IRegion> getRegions() {
 		if (xyGraph==null)  return null;
-		List<Region> regions = xyGraph.getRegions();
+		List<AbstractSelectionRegion> regions = xyGraph.getRegions();
 		return new ArrayList<IRegion>(regions);
 	}
 	

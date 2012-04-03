@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.csstudio.swt.xygraph.undo.IUndoableCommand;
-import org.dawb.workbench.plotting.system.swtxy.Region;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
+import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
 
 /**The undoable command to remove an annotation.
  * @author Xihui Chen
@@ -14,25 +14,25 @@ import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
 public class RemoveRegionCommand implements IUndoableCommand {
 	
 	private XYRegionGraph xyGraph;
-	private List<Region> regions;
+	private List<AbstractSelectionRegion> regions;
 	
-	public RemoveRegionCommand(XYRegionGraph xyGraph, Region region) {
+	public RemoveRegionCommand(XYRegionGraph xyGraph, AbstractSelectionRegion region) {
 		this.xyGraph = xyGraph;
-		this.regions = new ArrayList<Region>();
+		this.regions = new ArrayList<AbstractSelectionRegion>();
 		regions.add(region);
 	}
 
-	public RemoveRegionCommand(XYRegionGraph xyGraph, List<Region> regions) {
+	public RemoveRegionCommand(XYRegionGraph xyGraph, List<AbstractSelectionRegion> regions) {
 		this.xyGraph = xyGraph;
 		this.regions = regions;
 	}
 
 	public void redo() {
-		for (Region region : regions)  xyGraph.removeRegion(region);
+		for (AbstractSelectionRegion region : regions)  xyGraph.removeRegion(region);
 	}
 
 	public void undo() {		
-		for (Region region : regions)  xyGraph.addRegion(region);
+		for (AbstractSelectionRegion region : regions)  xyGraph.addRegion(region);
 	}
 	
 	@Override

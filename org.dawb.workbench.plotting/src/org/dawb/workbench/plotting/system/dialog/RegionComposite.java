@@ -8,8 +8,8 @@ import java.util.regex.Pattern;
 
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
-import org.dawb.workbench.plotting.system.swtxy.Region;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
+import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
 import org.eclipse.jface.preference.ColorSelector;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
@@ -29,7 +29,7 @@ public class RegionComposite extends Composite {
 	private CCombo regionType;
 	private CCombo xCombo, yCombo;
 	private Button showPoints;
-	private Region editingRegion;
+	private AbstractSelectionRegion editingRegion;
 	private ColorSelector colorSelector;
 	private Spinner alpha;
 	private Button motile;
@@ -156,12 +156,12 @@ public class RegionComposite extends Composite {
 	}
 
 
-	public Region createRegion() throws Exception {
+	public AbstractSelectionRegion createRegion() throws Exception {
 		
 		final Axis xAxis = xyGraph.getXAxisList().get(xCombo.getSelectionIndex());
 		final Axis yAxis = xyGraph.getYAxisList().get(yCombo.getSelectionIndex());
 		
-		Region region=null;
+		AbstractSelectionRegion region=null;
 		
 		final String txt = nameText.getText();
 		final Pattern pattern = Pattern.compile(".* (\\d+)");
@@ -180,7 +180,7 @@ public class RegionComposite extends Composite {
 	}
 	
 	
-	public void setEditingRegion(Region region) {
+	public void setEditingRegion(AbstractSelectionRegion region) {
         this.editingRegion = region;
         
         nameText.setText(region.getName());
@@ -202,7 +202,7 @@ public class RegionComposite extends Composite {
 		showLabel.setSelection(region.isShowLabel());
 	}
 	
-	public Region getEditingRegion() {
+	public AbstractSelectionRegion getEditingRegion() {
 		
 		final String txt = nameText.getText();
 		editingRegion.setName(txt);
@@ -219,11 +219,11 @@ public class RegionComposite extends Composite {
 
 
 	public void applyChanges() {
-		Region region = getEditingRegion();
+		AbstractSelectionRegion region = getEditingRegion();
 		region.repaint();
 	}
 
-	public void disposeRegion(Region region) {
+	public void disposeRegion(AbstractSelectionRegion region) {
 		 xyGraph.disposeRegion(region);
 	}
 }

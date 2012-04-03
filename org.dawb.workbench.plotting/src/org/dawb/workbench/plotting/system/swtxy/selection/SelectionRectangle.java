@@ -1,9 +1,11 @@
-package org.dawb.workbench.plotting.system.swtxy;
+package org.dawb.workbench.plotting.system.swtxy.selection;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
 import org.csstudio.swt.xygraph.figures.Axis;
+import org.dawb.workbench.plotting.system.swtxy.IMobileFigure;
+import org.dawb.workbench.plotting.system.swtxy.util.Draw2DUtils;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;

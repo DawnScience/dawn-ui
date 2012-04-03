@@ -1,9 +1,14 @@
-package org.dawb.workbench.plotting.system.swtxy;
+package org.dawb.workbench.plotting.system.swtxy.selection;
 
 import java.util.Arrays;
 
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.dawb.common.ui.plot.region.RegionBounds;
+import org.dawb.workbench.plotting.system.swtxy.IMobileFigure;
+import org.dawb.workbench.plotting.system.swtxy.translate.FigureTranslator;
+import org.dawb.workbench.plotting.system.swtxy.translate.TranslationEvent;
+import org.dawb.workbench.plotting.system.swtxy.translate.TranslationListener;
+import org.dawb.workbench.plotting.system.swtxy.util.Draw2DUtils;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Cursors;
 import org.eclipse.draw2d.Figure;
@@ -33,7 +38,7 @@ import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
  *     
  * @author fcp94556
  */
-class AxisSelection extends Region {
+class AxisSelection extends AbstractSelectionRegion {
 		
 	private static final int WIDTH = 8;
 	
@@ -86,12 +91,12 @@ class AxisSelection extends Region {
 				
 
      	if (regionType==RegionType.XAXIS || regionType==RegionType.YAXIS) {
-    		FigureMover mover = new FigureMover(getXyGraph(), parent, connection, Arrays.asList(new IFigure[]{line1, line2}));
+    		FigureTranslator mover = new FigureTranslator(getXyGraph(), parent, connection, Arrays.asList(new IFigure[]{line1, line2}));
     		
     		if (regionType==RegionType.XAXIS || regionType==RegionType.XAXIS_LINE) {
-    			mover.setLockedDirection(FigureMover.LockType.X);
+    			mover.setLockedDirection(FigureTranslator.LockType.X);
     		} else {
-    			mover.setLockedDirection(FigureMover.LockType.Y);
+    			mover.setLockedDirection(FigureTranslator.LockType.Y);
     		}
     		// Add a translation listener to be notified when the mover will translate so that
     		// we do not recompute point locations during the move.
@@ -211,17 +216,17 @@ class AxisSelection extends Region {
 	protected final class LineFigure extends Figure implements IMobileFigure {
 		
 		private boolean first;
-		private FigureMover mover;
+		private FigureTranslator mover;
 		
 		LineFigure(final boolean first, Rectangle parent) {
 			this.first = first;
 			setOpaque(false);
             updateBounds(parent);			
-			this.mover = new FigureMover(getXyGraph(), this);
+			this.mover = new FigureTranslator(getXyGraph(), this);
 			if (regionType==RegionType.XAXIS || regionType==RegionType.XAXIS_LINE) {
-				mover.setLockedDirection(FigureMover.LockType.X);
+				mover.setLockedDirection(FigureTranslator.LockType.X);
 			} else {
-				mover.setLockedDirection(FigureMover.LockType.Y);
+				mover.setLockedDirection(FigureTranslator.LockType.Y);
 			}
 			mover.addTranslationListener(createRegionNotifier());
 			addFigureListener(createFigureListener());

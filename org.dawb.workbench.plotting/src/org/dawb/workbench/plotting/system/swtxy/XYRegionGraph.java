@@ -14,6 +14,7 @@ import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.trace.IImageTrace.ImageOrigin;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
+import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.graphics.PaletteData;
@@ -53,20 +54,20 @@ public class XYRegionGraph extends XYGraph {
         return new RegionArea(this);
 	}
 
-	public void addRegion(final Region region) {
+	public void addRegion(final AbstractSelectionRegion region) {
 		getRegionArea().addRegion(region);
 	}
-	public void removeRegion(final Region region) {
+	public void removeRegion(final AbstractSelectionRegion region) {
 		getRegionArea().removeRegion(region);
 	}
 	public void setSelectionProvider(final ISelectionProvider provider) {
 		getRegionArea().setSelectionProvider(provider);
 	}
 
-	public Region createRegion(String name, Axis xAxis, Axis yAxis, RegionType regionType, boolean startingWithMouseEvent) throws Exception {
+	public AbstractSelectionRegion createRegion(String name, Axis xAxis, Axis yAxis, RegionType regionType, boolean startingWithMouseEvent) throws Exception {
 		return getRegionArea().createRegion(name, xAxis, yAxis, regionType, startingWithMouseEvent);
 	}
-	public void disposeRegion(final Region region) {
+	public void disposeRegion(final AbstractSelectionRegion region) {
 		getRegionArea().disposeRegion(region);
 	}
 
@@ -90,14 +91,14 @@ public class XYRegionGraph extends XYGraph {
 		return getRegionArea().removeRegionListener(l);
 	}
 
-	public Region getRegion(String name) {
+	public AbstractSelectionRegion getRegion(String name) {
 		return getRegionArea().getRegion(name);
 	}
 
 	public void clearRegions() {
 		getRegionArea().clearRegions();
 	}
-	public List<Region> getRegions() {
+	public List<AbstractSelectionRegion> getRegions() {
 		return getRegionArea().getRegions();
 	}
 

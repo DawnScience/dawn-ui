@@ -6,6 +6,7 @@ import java.util.List;
 import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.swt.xygraph.toolbar.XYGraphConfigDialog;
 import org.dawb.workbench.plotting.system.dialog.RegionComposite;
+import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -69,7 +70,7 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
  	        final StackLayout stackLayout = new StackLayout();
  	        regionConfigComposite.setLayout(stackLayout);        
  	        
- 	        for(Region region : ((RegionArea)regionGraph.getPlotArea()).getRegions()){
+ 	        for(AbstractSelectionRegion region : ((RegionArea)regionGraph.getPlotArea()).getRegions()){
 		        
  	        	if (!region.isUserRegion()) continue;
 		        RegionComposite regionPage = new RegionComposite(regionConfigComposite, SWT.NONE, (XYRegionGraph)xyGraph, region.getRegionType());

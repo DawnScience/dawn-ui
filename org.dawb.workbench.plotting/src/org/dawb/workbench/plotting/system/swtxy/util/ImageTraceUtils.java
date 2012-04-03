@@ -1,4 +1,4 @@
-package org.dawb.workbench.plotting.system.swtxy;
+package org.dawb.workbench.plotting.system.swtxy.util;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.ImageData;

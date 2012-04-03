@@ -1,8 +1,8 @@
 package org.dawb.workbench.plotting.system.dialog;
 
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
-import org.dawb.workbench.plotting.system.swtxy.Region;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
+import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
@@ -51,13 +51,13 @@ public class AddRegionDialog extends Dialog {
 		super.okPressed();
 	}
 
-	private Region region;
+	private AbstractSelectionRegion region;
 	
 
 	/**
 	 * @return the annotation
 	 */
-	public Region getRegion() {
+	public AbstractSelectionRegion getRegion() {
 		return region;
 	}
 }

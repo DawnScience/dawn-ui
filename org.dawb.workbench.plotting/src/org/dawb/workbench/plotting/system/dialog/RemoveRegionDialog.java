@@ -1,8 +1,8 @@
 package org.dawb.workbench.plotting.system.dialog;
 
-import org.dawb.workbench.plotting.system.swtxy.Region;
 import org.dawb.workbench.plotting.system.swtxy.RegionArea;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
+import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -21,7 +21,7 @@ public class RemoveRegionDialog extends Dialog {
 	
 	private XYRegionGraph xyGraph;
 	private Combo regionCombo;
-	private Region removedRegion;
+	private AbstractSelectionRegion removedRegion;
 	
 	public RemoveRegionDialog(Shell parentShell, XYRegionGraph xyGraph) {
 		super(parentShell);	
@@ -69,7 +69,7 @@ public class RemoveRegionDialog extends Dialog {
 	/**
 	 * @return the annotation to be removed.
 	 */
-	public Region getRegion() {
+	public AbstractSelectionRegion getRegion() {
 		return removedRegion;
 	}
 }

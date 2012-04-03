@@ -1,9 +1,13 @@
-package org.dawb.workbench.plotting.system.swtxy;
+package org.dawb.workbench.plotting.system.swtxy.selection;
 
 import java.util.Arrays;
 
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.dawb.common.ui.plot.region.RegionBounds;
+import org.dawb.workbench.plotting.system.swtxy.translate.FigureTranslator;
+import org.dawb.workbench.plotting.system.swtxy.translate.TranslationEvent;
+import org.dawb.workbench.plotting.system.swtxy.translate.TranslationListener;
+import org.dawb.workbench.plotting.system.swtxy.util.Draw2DUtils;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.FigureListener;
@@ -25,7 +29,7 @@ import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
  * @author fcp94556
  *
  */
-class LineSelection extends Region {
+class LineSelection extends AbstractSelectionRegion {
 		
 
 	private static final int SIDE      = 8;
@@ -46,11 +50,11 @@ class LineSelection extends Region {
 		
 		
 		this.startBox = new SelectionRectangle(getxAxis(), getyAxis(), getRegionColor(), new Point(100,100),  SIDE);
-		FigureMover mover = new FigureMover(getXyGraph(), startBox);
+		FigureTranslator mover = new FigureTranslator(getXyGraph(), startBox);
 		mover.addTranslationListener(createRegionNotifier());
 
 		this.endBox   = new SelectionRectangle(getxAxis(), getyAxis(), getRegionColor(), new Point(200,200),SIDE);
-		mover = new FigureMover(getXyGraph(), endBox);	
+		mover = new FigureTranslator(getXyGraph(), endBox);	
 		mover.addTranslationListener(createRegionNotifier());
 				
 		this.connection = new RegionFillFigure() {
@@ -96,7 +100,7 @@ class LineSelection extends Region {
 		startBox.addFigureListener(figListener);
 		endBox.addFigureListener(figListener);
 		
-		mover = new FigureMover(getXyGraph(), parent, connection, Arrays.asList(new IFigure[]{startBox,endBox}));
+		mover = new FigureTranslator(getXyGraph(), parent, connection, Arrays.asList(new IFigure[]{startBox,endBox}));
 		mover.addTranslationListener(new TranslationListener() {
 			@Override
 			public void translateBefore(TranslationEvent evt) {

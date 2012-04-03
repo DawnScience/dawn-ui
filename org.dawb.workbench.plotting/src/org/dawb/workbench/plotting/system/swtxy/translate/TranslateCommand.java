@@ -1,4 +1,4 @@
-package org.dawb.workbench.plotting.system.swtxy;
+package org.dawb.workbench.plotting.system.swtxy.translate;
 
 import java.util.List;
 
@@ -7,17 +7,17 @@ import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.UpdateManager;
 import org.eclipse.draw2d.geometry.Dimension;
 
-public class MoverCommand implements IUndoableCommand {
+public class TranslateCommand implements IUndoableCommand {
 
 	private IFigure figure;
 	private Dimension undoOffset;
 	private List<IFigure> toTranslate;
-	private FigureMover notifier;
+	private FigureTranslator notifier;
 
-	public MoverCommand(final IFigure       figure, 
+	public TranslateCommand(final IFigure       figure, 
 			            final Dimension     offset, 
 			            final List<IFigure> toTranslate,
-			            final FigureMover   notifier) {
+			            final FigureTranslator   notifier) {
 		this.figure      = figure;
 		this.undoOffset  = offset;
 		this.toTranslate = toTranslate;

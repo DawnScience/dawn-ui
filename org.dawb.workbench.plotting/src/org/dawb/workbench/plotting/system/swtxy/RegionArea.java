@@ -18,6 +18,8 @@ import org.dawb.common.ui.plot.trace.IImageTrace.ImageOrigin;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.workbench.plotting.system.dialog.AddRegionCommand;
+import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
+import org.dawb.workbench.plotting.system.swtxy.selection.SelectionRegionFactory;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.MouseEvent;
@@ -31,41 +33,46 @@ import org.eclipse.swt.graphics.PaletteData;
 public class RegionArea extends PlotArea {
 
 	protected ISelectionProvider selectionProvider;
-	private final Map<String,Region>     regions;
+	private final Map<String,AbstractSelectionRegion>     regions;
 	private final Map<String,ImageTrace> imageTraces;
 	
 	private Collection<IRegionListener>     regionListeners;
 	private Collection<ITraceListener>      imageTraceListeners;
 
-	private Region regionBeingAdded;
+	private AbstractSelectionRegion regionBeingAdded;
 	private Point  regionStart;
 	private Point  regionEnd;
 	
 	public RegionArea(XYRegionGraph xyGraph) {
 		super(xyGraph);
-		this.regions     = new LinkedHashMap<String,Region>();
+		this.regions     = new LinkedHashMap<String,AbstractSelectionRegion>();
 		this.imageTraces = new LinkedHashMap<String,ImageTrace>();
 	}
 		
 
-	public void addRegion(final Region region){
+	public void addRegion(final AbstractSelectionRegion region){
 		addRegion(region, true);
 	}
 
-	private void addRegion(final Region region, boolean fireListeners){
+	private void addRegion(final AbstractSelectionRegion region, boolean fireListeners){
 		regions.put(region.getName(), region);
 		region.setXyGraph(xyGraph);
 		region.createContents(this);
+		
+		final Rectangle rect = region.getBounds();
+		if (rect.width>0 && rect.height>0) add(region);
+
 		region.setSelectionProvider(selectionProvider);
 		if (fireListeners) fireRegionAdded(new RegionEvent(region));
 		clearRegionTool();
 		revalidate();
 	}
 
-	public boolean removeRegion(final Region region){
-	    final Region gone = regions.remove(region.getName());
+	public boolean removeRegion(final AbstractSelectionRegion region){
+	    final AbstractSelectionRegion gone = regions.remove(region.getName());
 		if (gone!=null){
-			region.remove();
+			region.remove(); // Clears up children (you can live without this
+			remove(region);
 			fireRegionRemoved(new RegionEvent(region));
 			revalidate();
 		}
@@ -75,7 +82,7 @@ public class RegionArea extends PlotArea {
 	public void clearRegions() {
 		clearRegionTool();
 		if (regions==null) return;
-		for (Region region : regions.values()) {
+		for (AbstractSelectionRegion region : regions.values()) {
 			if (!region.isUserRegion()) continue;
 			region.remove();
 			fireRegionRemoved(new RegionEvent(region));
@@ -154,29 +161,16 @@ public class RegionArea extends PlotArea {
 
     private RegionMouseListener regionListener;
 	
-	public Region createRegion(String name, Axis x, Axis y, RegionType regionType, boolean startingWithMouseEvent) throws Exception {
+	public AbstractSelectionRegion createRegion(String name, Axis x, Axis y, RegionType regionType, boolean startingWithMouseEvent) throws Exception {
 
 		if (getRegionMap()!=null) {
 			if (getRegionMap().containsKey(name)) throw new Exception("The region '"+name+"' already exists.");
 		}
-		Region region = null;
-		if (regionType==RegionType.LINE) {
-			region = new LineSelection(name, x, y);
-
-		} else if (regionType==RegionType.BOX) {
-			region = new BoxSelection(name, x, y);
-
-		} else if (regionType==RegionType.XAXIS || regionType==RegionType.YAXIS || regionType==RegionType.XAXIS_LINE || regionType==RegionType.YAXIS_LINE) {
-			region = new AxisSelection(name, x, y, regionType);
-					
-		} else {
-			throw new NullPointerException("Cannot deal with "+regionType+" regions yet - sorry!");
-		}	
-
 		
+		AbstractSelectionRegion region = SelectionRegionFactory.createSelectionRegion(name, x, y, regionType);
 		if (startingWithMouseEvent) {
 			xyGraph.setZoomType(ZoomType.NONE);
-		    setCursor(region.getCursor());
+		    setCursor(region.getRegionCursor());
 		    regionBeingAdded = region;
 		    
 		    // Mouse listener for region bounds
@@ -189,7 +183,7 @@ public class RegionArea extends PlotArea {
         return region;
 	}
 
-	public void disposeRegion(Region region) {
+	public void disposeRegion(AbstractSelectionRegion region) {
 		removeRegion(region);
 		setCursor(null);
 		clearRegionTool();
@@ -281,12 +275,12 @@ public class RegionArea extends PlotArea {
 	}
 
 	
-	public Map<String, Region> getRegionMap() {
+	public Map<String, AbstractSelectionRegion> getRegionMap() {
 		return regions;
 	}
-	public List<Region> getRegions() {
-		final Collection<Region> vals = regions.values();
-		return new ArrayList<Region>(vals);
+	public List<AbstractSelectionRegion> getRegions() {
+		final Collection<AbstractSelectionRegion> vals = regions.values();
+		return new ArrayList<AbstractSelectionRegion>(vals);
 	}
 	
 //	private Image rawImage;
@@ -319,7 +313,7 @@ public class RegionArea extends PlotArea {
 	}
 
 
-	public Region getRegion(String name) {
+	public AbstractSelectionRegion getRegion(String name) {
 		if (regions==null) return null;
 		return regions.get(name);
 	}

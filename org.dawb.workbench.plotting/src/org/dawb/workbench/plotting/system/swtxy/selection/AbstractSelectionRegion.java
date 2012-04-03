@@ -1,4 +1,4 @@
-package org.dawb.workbench.plotting.system.swtxy;
+package org.dawb.workbench.plotting.system.swtxy.selection;
 
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.IAxisListener;
@@ -6,6 +6,10 @@ import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.swt.xygraph.linearscale.Range;
 import org.dawb.common.ui.plot.region.AbstractRegion;
 import org.dawb.workbench.plotting.Activator;
+import org.dawb.workbench.plotting.system.swtxy.IMobileFigure;
+import org.dawb.workbench.plotting.system.swtxy.RegionBean;
+import org.dawb.workbench.plotting.system.swtxy.translate.TranslationEvent;
+import org.dawb.workbench.plotting.system.swtxy.translate.TranslationListener;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
@@ -21,11 +25,22 @@ import org.eclipse.swt.widgets.Display;
 
 /**
  * Shape used for ROIs which has bounds fixed to the graph area.
+ * Links regions to the specifics of the XY Plotting system.
+ * 
+ * NOTE you may implement this class two ways:
+ * 1. by creating contents in the createContents(...) method and adding them to the parent.
+ * 2. by adding contents to this figure.
+ * 
+ * After the createContents(...) method if the bounds are not null, the figure will be added to the
+ * graph (method 2.) if doing this the children can be drawn in the local coordinates for the figure.
+ * However note in that case when firing selection events in the axis coordinates parent figure location
+ * will also need to be used. If using 1. the contents of the figure are directly added to the graph figure
+ * and therefore their location can be used directly.
  * 
  * @author fcp94556
  *
  */
-public abstract class Region extends AbstractRegion implements IAxisListener {
+public abstract class AbstractSelectionRegion extends AbstractRegion implements IAxisListener {
 
 
 	private RegionBean bean;
@@ -33,8 +48,11 @@ public abstract class Region extends AbstractRegion implements IAxisListener {
     private IFigure[] regionObjects;
     private int lineWidth=0;
 
-	public Region(String name, Axis xAxis, Axis yAxis) {
+	public AbstractSelectionRegion(String name, Axis xAxis, Axis yAxis) {
 		super();
+		setEnabled(false); // No mouse events.
+		setOpaque(false);
+		setCursor(null);
 		this.bean = new RegionBean();
 		bean.setName(name);
 		bean.setxAxis(xAxis);
@@ -116,7 +134,7 @@ public abstract class Region extends AbstractRegion implements IAxisListener {
 	/**
 	 * A new cursor is created on each call.
 	 */
-	public Cursor getCursor() {
+	public Cursor getRegionCursor() {
 		if (cursor==null)  {
 			Image image = Activator.getImage(getCursorPath());
 			cursor = new Cursor(Display.getDefault(), image.getImageData(), 8, 8);
@@ -338,5 +356,4 @@ public abstract class Region extends AbstractRegion implements IAxisListener {
 	public void setLineWidth(int lineWidth) {
 		this.lineWidth = lineWidth;
 	}
-
 }

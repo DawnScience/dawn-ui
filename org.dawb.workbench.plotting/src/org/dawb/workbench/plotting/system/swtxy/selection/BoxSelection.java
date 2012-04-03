@@ -1,9 +1,13 @@
-package org.dawb.workbench.plotting.system.swtxy;
+package org.dawb.workbench.plotting.system.swtxy.selection;
 
 import java.util.Arrays;
 
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.dawb.common.ui.plot.region.RegionBounds;
+import org.dawb.workbench.plotting.system.swtxy.translate.FigureTranslator;
+import org.dawb.workbench.plotting.system.swtxy.translate.TranslationEvent;
+import org.dawb.workbench.plotting.system.swtxy.translate.TranslationListener;
+import org.dawb.workbench.plotting.system.swtxy.util.Draw2DUtils;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.FigureListener;
@@ -26,7 +30,7 @@ import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
  *     
  * @author fcp94556
  */
-class BoxSelection extends Region {
+class BoxSelection extends AbstractSelectionRegion {
 		
 	private static final int SIDE      = 8;
 	
@@ -70,7 +74,7 @@ class BoxSelection extends Region {
 		parent.add(p3);
 		parent.add(p4);
 				
-		FigureMover mover = new FigureMover(getXyGraph(), parent, connection, Arrays.asList(new IFigure[]{p1,p2,p3,p4}));
+		FigureTranslator mover = new FigureTranslator(getXyGraph(), parent, connection, Arrays.asList(new IFigure[]{p1,p2,p3,p4}));
 		// Add a translation listener to be notified when the mover will translate so that
 		// we do not recompute point locations during the move.
 		mover.addTranslationListener(new TranslationListener() {
@@ -120,7 +124,7 @@ class BoxSelection extends Region {
 	private SelectionRectangle createSelectionRectangle(Color color, Point location, int size) {
 		
 		SelectionRectangle rect = new SelectionRectangle(getxAxis(), getyAxis(), color,  location, size);
-		FigureMover mover = new FigureMover(getXyGraph(), rect);	
+		FigureTranslator mover = new FigureTranslator(getXyGraph(), rect);	
 		mover.addTranslationListener(createRegionNotifier());
 
 		rect.addFigureListener(new FigureListener() {

@@ -6,6 +6,7 @@ import java.util.Map;
 import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.swt.xygraph.undo.XYGraphConfigCommand;
 import org.csstudio.swt.xygraph.undo.XYGraphMemento;
+import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
 
 public class XYRegionConfigCommand extends XYGraphConfigCommand {
 
@@ -18,7 +19,7 @@ public class XYRegionConfigCommand extends XYGraphConfigCommand {
 		
 		createDefaultSettings();
 		
-		final Map<String,Region> regionList     = ((RegionArea)xyGraph.getPlotArea()).getRegionMap();
+		final Map<String,AbstractSelectionRegion> regionList     = ((RegionArea)xyGraph.getPlotArea()).getRegionMap();
 		for(String name : regionList.keySet()){
 			((XYRegionMemento)previousXYGraphMem).addRegionMemento(new RegionBean());
 			((XYRegionMemento)afterXYGraphMem).addRegionMemento(new RegionBean());
@@ -31,9 +32,9 @@ public class XYRegionConfigCommand extends XYGraphConfigCommand {
 		super.saveXYGraphPropsToMemento(xyGraph, memento);
 		
 		int i=0;
-		final List<Region>     regionList     = ((RegionArea)xyGraph.getPlotArea()).getRegions();
+		final List<AbstractSelectionRegion>     regionList     = ((RegionArea)xyGraph.getPlotArea()).getRegions();
 		final List<RegionBean> regionBeanList = ((XYRegionMemento)memento).getRegionBeanList();
-		for(Region region : regionList) {
+		for(AbstractSelectionRegion region : regionList) {
 			saveRegionPropsToMemento(region,regionBeanList.get(i));
 			++i;
 		}
@@ -51,11 +52,11 @@ public class XYRegionConfigCommand extends XYGraphConfigCommand {
 	}
 	
 	
-	private void saveRegionPropsToMemento(Region region, RegionBean memento){		
+	private void saveRegionPropsToMemento(AbstractSelectionRegion region, RegionBean memento){		
 		memento.sync(region.getBean());
 	}
 	
-	private void restoreRegionPropsFromMemento(Region region, RegionBean regionBean){		
+	private void restoreRegionPropsFromMemento(AbstractSelectionRegion region, RegionBean regionBean){		
 		region.sync(regionBean);	
 	}
 }

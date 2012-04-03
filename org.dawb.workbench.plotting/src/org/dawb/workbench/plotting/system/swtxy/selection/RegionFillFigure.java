@@ -1,7 +1,9 @@
-package org.dawb.workbench.plotting.system.swtxy;
+package org.dawb.workbench.plotting.system.swtxy.selection;
 
 import java.util.Iterator;
 
+import org.dawb.workbench.plotting.system.swtxy.translate.FigureTranslator;
+import org.dawb.workbench.plotting.system.swtxy.util.Draw2DUtils;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.MouseListener;
 
@@ -9,7 +11,7 @@ public class RegionFillFigure extends Figure {
 
 	public void setMobile(final boolean mobile) {
 		
-		final FigureMover mover = getFigureMover();
+		final FigureTranslator mover = getFigureMover();
 		if (mover==null) return;
 		
 		mover.setActive(mobile);
@@ -21,12 +23,12 @@ public class RegionFillFigure extends Figure {
 		}
 	}
 
-	private FigureMover getFigureMover() {
+	private FigureTranslator getFigureMover() {
 		final Iterator<?> it = getListeners(MouseListener.class);
 		if (it!=null && it.hasNext()) {
 			MouseListener l = null;
 			while((l=(MouseListener)it.next()) !=null ) {
-				if (l instanceof FigureMover) return (FigureMover)l;
+				if (l instanceof FigureTranslator) return (FigureTranslator)l;
 			}
 		}
 		return null;

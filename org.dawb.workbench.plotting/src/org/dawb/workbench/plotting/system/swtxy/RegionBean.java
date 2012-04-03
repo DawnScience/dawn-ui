@@ -15,10 +15,6 @@ public class RegionBean implements Serializable {
 	protected Axis    xAxis;
 	protected Axis    yAxis;
 	protected XYGraph xyGraph;
-	
-	/**
-	 * Similar IRegion
-	 */
 	protected String  name;
 	protected Color   regionColor;
 	protected boolean showPosition=false;

@@ -1,8 +1,8 @@
 package org.dawb.workbench.plotting.system.dialog;
 
 import org.csstudio.swt.xygraph.undo.IUndoableCommand;
-import org.dawb.workbench.plotting.system.swtxy.Region;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
+import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
 
 /**The undoable command to add an annotation.
  * @author Xihui Chen
@@ -11,9 +11,9 @@ import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
 public class AddRegionCommand implements IUndoableCommand {
 	
 	private XYRegionGraph xyGraph;
-	private Region region;
+	private AbstractSelectionRegion region;
 	
-	public AddRegionCommand(XYRegionGraph xyGraph, Region region) {
+	public AddRegionCommand(XYRegionGraph xyGraph, AbstractSelectionRegion region) {
 		this.xyGraph = xyGraph;
 		this.region = region;
 	}

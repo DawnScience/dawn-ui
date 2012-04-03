@@ -1,4 +1,4 @@
-package org.dawb.workbench.plotting.system.swtxy;
+package org.dawb.workbench.plotting.system.swtxy.translate;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,13 +20,14 @@ import org.eclipse.draw2d.geometry.Rectangle;
  * @author fcp94556
  *
  */
-public class FigureMover implements MouseListener, MouseMotionListener {
+public class FigureTranslator implements MouseListener, MouseMotionListener {
 
 	public enum LockType {
 		NONE, X, Y;
 	}
 	private LockType lockedDirection = LockType.NONE;
-	private final IFigure figure;
+	
+	private final IFigure redrawFigure;
 	private Rectangle bounds;
 	private XYGraph xyGraph;
 	private Dimension cumulativeOffset;
@@ -34,15 +35,15 @@ public class FigureMover implements MouseListener, MouseMotionListener {
 	private List<IFigure> translations;
 	private boolean active=true;
  
-	public FigureMover(XYGraph xyGraph, IFigure figure) {
+	public FigureTranslator(XYGraph xyGraph, IFigure figure) {
 		this(xyGraph, figure, figure, Arrays.asList(new IFigure[]{figure}));
 	}
 
-	public FigureMover(XYGraph xyGraph, IFigure figure, IFigure listener, List<IFigure> translations) {
-		this.figure = figure;
-		listener.addMouseListener(this);
-		listener.addMouseMotionListener(this);
-		this.translations = translations;
+	public FigureTranslator(XYGraph xyGraph, IFigure redrawFigure, IFigure listenerFigure, List<IFigure> moveFigures) {
+		this.redrawFigure = redrawFigure;
+		listenerFigure.addMouseListener(this);
+		listenerFigure.addMouseMotionListener(this);
+		this.translations = moveFigures;
 		this.xyGraph = xyGraph;
 	}
 
@@ -62,19 +63,19 @@ public class FigureMover implements MouseListener, MouseMotionListener {
 			Dimension offset = newLocation.getDifference(location);
 			if (offset.width == 0 && offset.height == 0) return;
 			location = newLocation;
-			UpdateManager updateMgr = figure.getUpdateManager();
-			LayoutManager layoutMgr = figure.getParent().getLayoutManager();
-			bounds = figure.getBounds();
-			updateMgr.addDirtyRegion(figure.getParent(), bounds);
+			UpdateManager updateMgr = redrawFigure.getUpdateManager();
+			LayoutManager layoutMgr = redrawFigure.getParent().getLayoutManager();
+			bounds = redrawFigure.getBounds();
+			updateMgr.addDirtyRegion(redrawFigure.getParent(), bounds);
 			
 			this.bounds = translate(bounds.getCopy(), offset.width, offset.height);
-			if (layoutMgr!=null) layoutMgr.setConstraint(figure, bounds);
+			if (layoutMgr!=null) layoutMgr.setConstraint(redrawFigure, bounds);
 			
 			for (int i = 0; i < translations.size(); i++) {
 				translate(((IFigure) translations.get(i)), offset.width, offset.height);
 			}
 		
-			updateMgr.addDirtyRegion(figure.getParent(), bounds);
+			updateMgr.addDirtyRegion(redrawFigure.getParent(), bounds);
 			
 		} finally {
 			fireAfterTranslation(new TranslationEvent(this));
@@ -136,7 +137,7 @@ public class FigureMover implements MouseListener, MouseMotionListener {
 
 		if (location == null) return;
 		fireCompletedTranslation(new TranslationEvent(this));
-		xyGraph.getOperationsManager().addCommand(new MoverCommand(figure, cumulativeOffset, translations, this));
+		xyGraph.getOperationsManager().addCommand(new TranslateCommand(redrawFigure, cumulativeOffset, translations, this));
 		location = null;
 		
 		event.consume();
