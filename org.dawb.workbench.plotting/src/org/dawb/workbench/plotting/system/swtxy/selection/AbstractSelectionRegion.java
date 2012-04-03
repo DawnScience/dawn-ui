@@ -31,11 +31,10 @@ import org.eclipse.swt.widgets.Display;
  * 1. by creating contents in the createContents(...) method and adding them to the parent.
  * 2. by adding contents to this figure.
  * 
- * After the createContents(...) method if the bounds are not null, the figure will be added to the
- * graph (method 2.) if doing this the children can be drawn in the local coordinates for the figure.
+ * If doing method 2. remember to add this figure to the parent. If doing this the children can be drawn in the local coordinates for the figure.
  * However note in that case when firing selection events in the axis coordinates parent figure location
  * will also need to be used. If using 1. the contents of the figure are directly added to the graph figure
- * and therefore their location can be used directly.
+ * and therefore their location can be used directly also there are no bounds of this figure to deal with.
  * 
  * @author fcp94556
  *
@@ -63,7 +62,9 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 
 	/**
 	 * Creates the contents of the selection ie the figure(s)
-	 * which make up the selection.
+	 * which make up the selection. You may add the children directly to the parent here.
+	 * Otherwise add children to this figure, set its bounds and add this figure to the
+	 * parent.
 	 * 
 	 * @param parent
 	 */
@@ -167,9 +168,11 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	
 	/**
 	 * Remove from graph and remove all RegionBoundsListeners.
+	 * 
 	 */
 	public void remove() {
 		clearListeners();
+		if (getParent()!=null) getParent().remove(this);
 		if (regionObjects!=null)for (IFigure ob : regionObjects) {
 			if (ob.getParent()!=null) ob.getParent().remove(ob);
 		}

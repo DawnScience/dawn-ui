@@ -58,10 +58,6 @@ public class RegionArea extends PlotArea {
 		regions.put(region.getName(), region);
 		region.setXyGraph(xyGraph);
 		region.createContents(this);
-		
-		final Rectangle rect = region.getBounds();
-		if (rect.width>0 && rect.height>0) add(region);
-
 		region.setSelectionProvider(selectionProvider);
 		if (fireListeners) fireRegionAdded(new RegionEvent(region));
 		clearRegionTool();
@@ -72,7 +68,6 @@ public class RegionArea extends PlotArea {
 	    final AbstractSelectionRegion gone = regions.remove(region.getName());
 		if (gone!=null){
 			region.remove(); // Clears up children (you can live without this
-			remove(region);
 			fireRegionRemoved(new RegionEvent(region));
 			revalidate();
 		}
