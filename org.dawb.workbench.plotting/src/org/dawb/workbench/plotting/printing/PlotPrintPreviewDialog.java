@@ -103,6 +103,8 @@ public class PlotPrintPreviewDialog extends Dialog {
 		}
 		this.printer = new Printer(this.settings.getPrinterData());
 		this.xyGraph = xyGraph;
+		Rectangle imageSize = new Rectangle(0, 0, printer.getBounds().width, printer.getBounds().height);
+		image = xyGraph.getImage(imageSize);
 	}
 
 	/**
@@ -259,6 +261,8 @@ public class PlotPrintPreviewDialog extends Dialog {
 		settings.setPrinterData(printerList[printerNameNum]);
 		setPrinter(printer, settings.getScale().getValue());
 		logger.info(printer.getPrinterData().name);
+		Rectangle imageSize = new Rectangle(0, 0, printer.getBounds().width, printer.getBounds().height);
+		image = xyGraph.getImage(imageSize);
 	}
 
 	private SelectionAdapter scaleSelection = new SelectionAdapter() {
@@ -520,8 +524,8 @@ public class PlotPrintPreviewDialog extends Dialog {
 //			 e.gc.drawRectangle(marginOffsetX, marginOffsetY, (int) (viewScaleFactor * (margin.right - margin.left)),
 //			 (int) (viewScaleFactor * (margin.bottom - margin.top)));
 		
-		Rectangle imageSize = new Rectangle(0, 0, printerBounds.width, printerBounds.height);
-		image = xyGraph.getImage(imageSize);
+//		Rectangle imageSize = new Rectangle(0, 0, printerBounds.width, printerBounds.height);
+//		image = xyGraph.getImage(imageSize);
 		
 		if (image != null) {
 			int imageWidth = image.getBounds().width;
