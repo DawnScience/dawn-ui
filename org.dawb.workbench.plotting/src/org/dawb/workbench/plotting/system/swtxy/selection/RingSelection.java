@@ -248,6 +248,8 @@ class RingSelection extends AbstractSelectionRegion {
 		final Point     cen = center.getSelectionPoint();
 		final int outerRad  = outerControl.getSelectionPoint().y;
 		final int innerRad  = innerControl.getSelectionPoint().y;
+		
+		// this maths looks wrong but it passes the unit test and human usage:
 		int diff      = Math.round(1.1f*((Math.max(outerRad, innerRad)-cen.y)));
 		Rectangle out = new Rectangle(new Point(cen.x-diff, cen.y-diff), new Point(cen.x+diff, cen.y+diff));
 		diff          = Math.round(1.1f*((Math.min(outerRad, innerRad)-cen.y)));
