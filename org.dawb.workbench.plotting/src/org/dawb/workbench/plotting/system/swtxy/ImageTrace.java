@@ -399,5 +399,14 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	public ImageServiceBean getImageServiceBean() {
 		return lastImageServiceBean;
 	}
+	
+	@Override
+	public Number getCalculatedMax() {
+		return getMax()!=null ? getMax() : getImageServiceBean().getMax();
+	}
+	@Override
+	public Number getCalculatedMin() {
+		return getMin()!=null ? getMin() : getImageServiceBean().getMin();
+	}
 
 }
