@@ -139,6 +139,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	private Image     scaledImage;
 	private ImageData rawData;
 	private Range     xRangeCached, yRangeCached;
+	private ImageServiceBean lastImageServiceBean;
 	
 	/**
 	 * Whenever this is called the SWT image is created
@@ -177,6 +178,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 				if (getMax()!=null) bean.setMax(max);
 				if (monitor!=null && monitor.isCanceled()) return;
 				this.rawData   = service.getImageData(bean);
+				this.lastImageServiceBean = bean;
 			} catch (Exception e) {
 				logger.error("Cannot create image from data!", e);
 			}
@@ -225,6 +227,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		xAxis.removeListenr(this);
 		yAxis.removeListenr(this);
 		axisRedrawActive = false;
+		lastImageServiceBean = null;
 	}
 
 	private void clearAspect(Axis axis) {
@@ -390,6 +393,11 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 
 	public void setMax(Number max) {
 		this.max = max;
+	}
+
+	@Override
+	public ImageServiceBean getImageServiceBean() {
+		return lastImageServiceBean;
 	}
 
 }
