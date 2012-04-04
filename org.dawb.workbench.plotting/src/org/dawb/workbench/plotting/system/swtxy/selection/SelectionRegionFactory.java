@@ -19,6 +19,7 @@ public class SelectionRegionFactory {
 		SUPPORTED_REGIONS= new HashSet<RegionType>();
 		SUPPORTED_REGIONS.add(RegionType.LINE);
 		SUPPORTED_REGIONS.add(RegionType.BOX);
+		SUPPORTED_REGIONS.add(RegionType.RING);
 		SUPPORTED_REGIONS.add(RegionType.XAXIS);
 		SUPPORTED_REGIONS.add(RegionType.YAXIS);
 		SUPPORTED_REGIONS.add(RegionType.XAXIS_LINE);
@@ -47,6 +48,9 @@ public class SelectionRegionFactory {
 
 		} else if (regionType==RegionType.BOX) {
 			region = new BoxSelection(name, x, y);
+			
+		} else if (regionType==RegionType.RING) {
+			region = new RingSelection(name, x, y);
 
 		} else if (regionType==RegionType.XAXIS || regionType==RegionType.YAXIS || regionType==RegionType.XAXIS_LINE || regionType==RegionType.YAXIS_LINE) {
 			region = new AxisSelection(name, x, y, regionType);

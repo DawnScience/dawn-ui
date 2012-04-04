@@ -256,11 +256,22 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 		var.getColumn().setText("max");
 		var.getColumn().setWidth(80);
 		var.setLabelProvider(new MeasurementLabelProvider(this, 5));
-
+		
         var   = new TableViewerColumn(viewer, SWT.LEFT, 6);
+		var.getColumn().setText("Inside radius");
+		var.getColumn().setWidth(80);
+		var.setLabelProvider(new MeasurementLabelProvider(this, 6));
+
+        var   = new TableViewerColumn(viewer, SWT.LEFT, 7);
+		var.getColumn().setText("Outside radius");
+		var.getColumn().setWidth(80);
+		var.setLabelProvider(new MeasurementLabelProvider(this, 7));
+
+
+        var   = new TableViewerColumn(viewer, SWT.LEFT, 8);
 		var.getColumn().setText("Coordinates");
 		var.getColumn().setWidth(500);
-		var.setLabelProvider(new MeasurementLabelProvider(this, 6));
+		var.setLabelProvider(new MeasurementLabelProvider(this, 8));
 	}
 	
 	private IContentProvider createActorContentProvider(final int numerOfPeaks) {
@@ -425,12 +436,15 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 	public double getMax(IRegion region) {
 
         final Collection<ITrace> traces = getPlottingSystem().getTraces();
+        final RegionBounds bounds = getBounds(region);
+        if (bounds==null) return Double.NaN;
+        
         if (traces!=null&&traces.size()==1&&traces.iterator().next() instanceof IImageTrace) {
         	final IImageTrace     trace        = (IImageTrace)traces.iterator().next();
-        	final AbstractDataset intersection = trace.slice(getBounds(region));
+        	final AbstractDataset intersection = trace.slice(bounds);
         	return intersection.max().doubleValue();
         } else {
-        	return getBounds(region).getP2()[1];
+        	return bounds.getP2()[1];
         }
 	}
 }

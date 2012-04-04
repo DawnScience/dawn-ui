@@ -77,7 +77,7 @@ public class FittingUtils {
 			RegionBounds bounds = new RegionBounds();
 			bounds.setP1(new double[]{peak.getPosition()-(peak.getFWHM()/2d), 0});
 			bounds.setP2(new double[]{peak.getPosition()+(peak.getFWHM()/2d), 0});
-			bounds.setCentre(new double[]{peak.getPosition(), 0});
+			bounds.setCenter(new double[]{peak.getPosition(), 0});
 			regions.add(bounds);
 			
 			final AbstractDataset[] pf = getPeakFunction(x, y, peak);
