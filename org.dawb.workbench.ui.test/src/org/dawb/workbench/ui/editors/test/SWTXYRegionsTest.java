@@ -315,7 +315,7 @@ public class SWTXYRegionsTest {
 	    	r1.setOuter((i*50)+50);
 	    	region.setRegionBounds(r1);
 	    	
-	    	EclipseUtils.delay(100);
+	    	EclipseUtils.delay(500);
 		}
 	    
 		// Try resizing the region
@@ -325,7 +325,7 @@ public class SWTXYRegionsTest {
 	    	r1.setOuter((i*50)+5);
 	    	region.setRegionBounds(r1);
 	    	
-	    	EclipseUtils.delay(100);
+	    	EclipseUtils.delay(500);
 		}
 
     	region.setRegionBounds(new RegionBounds(new double[]{500,0.5},0.1, 0.2));
@@ -344,9 +344,9 @@ public class SWTXYRegionsTest {
 			// We now add the region.
 			sys.addRegion(region);
 	    	
-	    	EclipseUtils.delay(100);
+	    	EclipseUtils.delay(500);
 		}
-   	    
+	    EclipseUtils.delay(2000);
 			
 		EclipseUtils.getPage().closeEditor(editor, false);
 

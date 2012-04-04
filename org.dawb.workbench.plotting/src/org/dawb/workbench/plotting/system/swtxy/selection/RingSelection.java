@@ -246,10 +246,13 @@ class RingSelection extends AbstractSelectionRegion {
 	protected void updateConnectionBounds() {
 		if (connection==null) return;
 		final Point     cen = center.getSelectionPoint();
-		final int outerRad  = outerControl.getSelectionPoint().y-cen.y;
-		final int innerRad  = innerControl.getSelectionPoint().y-cen.y;
-		final int diff      = Math.min(outerRad, innerRad);
-		final Rectangle out = new Rectangle(new Point(cen.x-diff, cen.y-diff), new Point(cen.x+diff, cen.y+diff));
+		final int outerRad  = outerControl.getSelectionPoint().y;
+		final int innerRad  = innerControl.getSelectionPoint().y;
+		int diff      = Math.round(1.1f*((Math.max(outerRad, innerRad)-cen.y)));
+		Rectangle out = new Rectangle(new Point(cen.x-diff, cen.y-diff), new Point(cen.x+diff, cen.y+diff));
+		diff          = Math.round(1.1f*((Math.min(outerRad, innerRad)-cen.y)));
+		out.union(new Rectangle(new Point(cen.x-diff, cen.y-diff), new Point(cen.x+diff, cen.y+diff)));
+		
 		connection.setBounds(out);
 		
 		UpdateManager updateMgr = connection.getParent().getUpdateManager();
