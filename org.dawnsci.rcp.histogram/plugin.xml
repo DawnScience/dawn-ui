@@ -25,6 +25,26 @@
             id="org.dawnsci.rcp.histogram.squared"
             name="Squared (y = x**2)">
       </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.rcp.functions.classes.ZeroTransferFunction"
+            id="org.dawnsci.rcp.histogram.zero"
+            name="Zero (y=0)">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.rcp.functions.classes.HalfTransferFunction"
+            id="org.dawnsci.rcp.histogram.half"
+            name="Half (y=0.5)">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.rcp.functions.classes.FullTransferFunction"
+            id="org.dawnsci.rcp.histogram.full"
+            name="Full (y=1)">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.rcp.functions.classes.SqrtTransferFunction"
+            id="org.dawnsci.rcp.histogram.sqrt"
+            name="Sqrt (y**2 = x)">
+      </transfer_function>
    </extension>
    <extension
          point="org.dawnsci.rcp.histogram.colourScheme">
@@ -43,6 +63,14 @@
             id="org.dawnsci.rcp.histogram.squared"
             name="Squared Scale"
             red_transfer_function="org.dawnsci.rcp.histogram.squared">
+      </colour_scheme>
+      <colour_scheme
+            alpha_transfer_function="org.dawnsci.rcp.histogram.sqrt"
+            blue_transfer_function="org.dawnsci.rcp.histogram.sqrt"
+            green_transfer_function="org.dawnsci.rcp.histogram.sqrt"
+            id="org.dawnsci.rcp.histogram.scale.sqrt"
+            name="Sqrt Scale"
+            red_transfer_function="org.dawnsci.rcp.histogram.sqrt">
       </colour_scheme>
    </extension>
 
