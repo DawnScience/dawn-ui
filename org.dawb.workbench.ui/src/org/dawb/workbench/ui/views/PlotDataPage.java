@@ -10,15 +10,12 @@
 package org.dawb.workbench.ui.views;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
-import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.slicing.SliceComponent;
 import org.dawb.common.ui.util.EclipseUtils;
-import org.dawb.workbench.ui.Activator;
 import org.dawb.workbench.ui.editors.CheckableObject;
 import org.dawb.workbench.ui.editors.IDatasetEditor;
 import org.dawb.workbench.ui.editors.IPlotUpdateParticipant;
@@ -32,7 +29,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -77,7 +73,6 @@ public class PlotDataPage extends Page implements IPlotUpdateParticipant, IAdapt
 		dataSetComponent.createPartControl(form);
 		
 		final List<IAction> extras = new ArrayList<IAction>(7);
-		extras.addAll(createPlotActions());
 		extras.addAll(dataSetComponent.getDimensionalActions());
 		for (IAction iAction : extras) {
 			getSite().getActionBars().getToolBarManager().add(iAction);
@@ -136,37 +131,6 @@ public class PlotDataPage extends Page implements IPlotUpdateParticipant, IAdapt
 		sliceComponent.setVisible(false);
 
 		form.setWeights(new int[] {40, 60});
-	}
-
-	private Collection<? extends IAction> createPlotActions() {
-
-
-		final Collection<IAction>   ret = new ArrayList<IAction>(3);
-		final CheckableActionGroup  grp = new CheckableActionGroup();
-		
-		final Action imageMode = new Action("Plot 2D data as images", IAction.AS_CHECK_BOX) {
-			public void run() {
-				sliceComponent.setImagePlotType(PlotType.IMAGE);
-				sliceComponent.slice(true);
-			}
-		};
-		imageMode.setImageDescriptor(Activator.getImageDescriptor("icons/image_editor.png"));
-		imageMode.setChecked(true);
-		ret.add(imageMode);
-		grp.add(imageMode);
-		
-		final Action oneDMode = new Action("Plot 2D data as multiple 1D plots", IAction.AS_CHECK_BOX) {
-			public void run() {
-				sliceComponent.setImagePlotType(PlotType.PT1D_MULTI);
-				sliceComponent.slice(true);
-			}
-		};
-		oneDMode.setImageDescriptor(Activator.getImageDescriptor("icons/ascii_editor.png"));
-		oneDMode.setChecked(false);
-		ret.add(oneDMode);
-		grp.add(oneDMode);
-		
-		return ret;
 	}
 
 	@Override

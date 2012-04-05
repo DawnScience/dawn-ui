@@ -599,12 +599,12 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 
 		final AbstractDataset       x;
 		final List<AbstractDataset> ys;
-		if (xfirst || createdIndices) {
+		if ((xfirst || createdIndices) && xIn!=null) {
 			x = xIn;
 			ys= ysIn;
 		} else {
 			ys = new ArrayList<AbstractDataset>(ysIn.size()+1);
-			ys.add(xIn);
+			if (xIn!=null) ys.add(xIn);
 			ys.addAll(ysIn);
 
 			final int max = getMaxSize(ys);
