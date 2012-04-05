@@ -1,0 +1,112 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Schema file written by PDE -->
+<schema targetNamespace="org.dawnsci.rcp.histogram" xmlns="http://www.w3.org/2001/XMLSchema">
+<annotation>
+      <appinfo>
+         <meta.schema plugin="org.dawnsci.rcp.histogram" id="channelColourScheme" name="Single Channel Colour Scheme"/>
+      </appinfo>
+      <documentation>
+         This extention point allows for new types of single channel mapping to be provided.
+      </documentation>
+   </annotation>
+
+   <element name="extension">
+      <annotation>
+         <appinfo>
+            <meta.element />
+         </appinfo>
+      </annotation>
+      <complexType>
+         <sequence minOccurs="1" maxOccurs="unbounded">
+            <element ref="transfer_function"/>
+         </sequence>
+         <attribute name="point" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="id" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="name" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appinfo>
+                  <meta.attribute translatable="true"/>
+               </appinfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="transfer_function">
+      <complexType>
+         <attribute name="id" type="string" use="required">
+            <annotation>
+               <documentation>
+                  The unique ID for the transfer function, this will be used by the colour scheme extention point for reference by colour
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="name" type="string" use="required">
+            <annotation>
+               <documentation>
+                  Name of the funtion, for example a simple squared function might be &apos;x**2&apos;
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="array_provider_class" type="string">
+            <annotation>
+               <documentation>
+                  The class provided here muct give the actual array associated with this channels colour cast.
+               </documentation>
+               <appinfo>
+                  <meta.attribute kind="java" basedOn=":org.dawnsci.rcp.histogram.ITransferFunctionArrayProvider"/>
+               </appinfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <annotation>
+      <appinfo>
+         <meta.section type="since"/>
+      </appinfo>
+      <documentation>
+         1.0.0
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appinfo>
+         <meta.section type="examples"/>
+      </appinfo>
+      <documentation>
+            &lt;extension
+         point=&quot;org.dawnsci.rcp.histogram.channelColourScheme&quot;&gt;
+      &lt;transfer_function
+            array_provider_class=&quot;org.dawnsci.rcp.functions.classes.LinearTransferFunction&quot;
+            id=&quot;org.dawnsci.rcp.histogram.linear&quot;
+            name=&quot;Linear (y=x)&quot;&gt;
+      &lt;/transfer_function&gt;
+      &lt;transfer_function
+            array_provider_class=&quot;org.dawnsci.rcp.functions.classes.SquaredTransferFunction&quot;
+            id=&quot;org.dawnsci.rcp.histogram.squared&quot;
+            name=&quot;Squared (y = x**2)&quot;&gt;
+      &lt;/transfer_function&gt;
+   &lt;/extension&gt;
+      </documentation>
+   </annotation>
+
+
+
+
+</schema>

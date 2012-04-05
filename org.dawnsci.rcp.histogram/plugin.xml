@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension-point id="org.dawnsci.rcp.histogram.channelColourScheme" name="Single Channel Colour Scheme" schema="schema/channelColourScheme.exsd"/>
+   <extension-point id="org.dawnsci.rcp.histogram.colourScheme" name="Colour Scheme" schema="schema/colourScheme.exsd"/>
+   <extension
+         point="org.dawb.common.ui.toolPage">
+      <plotting_tool_page
+            class="org.dawnsci.rcp.histogram.HistogramToolPage"
+            icon="icons/brightness_contrast.gif"
+            id="org.dawnsci.rcp.histogram.histogram_tool_page"
+            label="Histogram"
+            tooltip="Histogram tool for adjusting contrast brighnes and other image settings">
+      </plotting_tool_page>
+   </extension>
+   <extension
+         point="org.dawnsci.rcp.histogram.channelColourScheme">
+      <transfer_function
+            array_provider_class="org.dawnsci.rcp.functions.classes.LinearTransferFunction"
+            id="org.dawnsci.rcp.histogram.linear"
+            name="Linear (y=x)">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.rcp.functions.classes.SquaredTransferFunction"
+            id="org.dawnsci.rcp.histogram.squared"
+            name="Squared (y = x**2)">
+      </transfer_function>
+   </extension>
+   <extension
+         point="org.dawnsci.rcp.histogram.colourScheme">
+      <colour_scheme
+            alpha_transfer_function="org.dawnsci.rcp.histogram.linear"
+            blue_transfer_function="org.dawnsci.rcp.histogram.linear"
+            green_transfer_function="org.dawnsci.rcp.histogram.linear"
+            id="org.dawnsci.rcp.histogram.greyscale"
+            name="Gray Scale"
+            red_transfer_function="org.dawnsci.rcp.histogram.linear">
+      </colour_scheme>
+      <colour_scheme
+            alpha_transfer_function="org.dawnsci.rcp.histogram.squared"
+            blue_transfer_function="org.dawnsci.rcp.histogram.squared"
+            green_transfer_function="org.dawnsci.rcp.histogram.squared"
+            id="org.dawnsci.rcp.histogram.squared"
+            name="Squared Scale"
+            red_transfer_function="org.dawnsci.rcp.histogram.squared">
+      </colour_scheme>
+   </extension>
+
+</plugin>

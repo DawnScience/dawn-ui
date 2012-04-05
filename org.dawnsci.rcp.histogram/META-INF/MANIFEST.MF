@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Histogram
+Bundle-SymbolicName: org.dawnsci.rcp.histogram;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: org.dawnsci.rcp.histogram.Activator
+Bundle-Vendor: Diamond Light Source
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.dawb.common.ui;bundle-version="1.0.0",
+ uk.ac.diamond.scisoft.analysis;bundle-version="1.2.0",
+ uk.ac.diamond.scisoft.analysis.rcp
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ActivationPolicy: lazy
+Import-Package: org.slf4j
