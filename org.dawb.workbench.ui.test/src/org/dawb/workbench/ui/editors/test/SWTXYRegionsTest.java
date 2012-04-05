@@ -28,6 +28,7 @@ import org.dawb.workbench.ui.editors.PlotDataEditor;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
@@ -284,6 +285,72 @@ public class SWTXYRegionsTest {
 	}
 
 	
+	/**
+	 * TODO actually test some values...
+	 * @throws Throwable
+	 */
+	@Test
+	public void regionRingsTest() throws Throwable {
+		
+		final Object[] oa = createSomethingPlotted(createTestArraysCoherant(2, 1000, "Long set "), true);
+		
+		final AbstractPlottingSystem sys = (AbstractPlottingSystem)oa[0];
+		final IEditorPart         editor = (IEditorPart)oa[1];
+		
+		IRegion region = sys.createRegion("Ring 1", RegionType.RING);
+		
+		// Give the region a position
+		RegionBounds r1 = new RegionBounds(new double[]{500,0.5},0.1, 0.2);
+		region.setRegionBounds(r1);
+		region.setRegionColor(ColorConstants.blue);
+		region.setAlpha(100);
+		
+		// We now add the region.
+		sys.addRegion(region);
+		
+		// Try resizing the region
+	    for (int i = 1; i < 10; i++) {
+		
+	    	r1.setInner(i*50);
+	    	r1.setOuter((i*50)+50);
+	    	region.setRegionBounds(r1);
+	    	
+	    	EclipseUtils.delay(500);
+		}
+	    
+		// Try resizing the region
+	    for (int i = 1; i < 10; i++) {
+		
+	    	r1.setInner(i*50);
+	    	r1.setOuter((i*50)+5);
+	    	region.setRegionBounds(r1);
+	    	
+	    	EclipseUtils.delay(500);
+		}
+
+    	region.setRegionBounds(new RegionBounds(new double[]{500,0.5},0.1, 0.2));
+		
+    	// Multiple rings
+	    for (int i = 1; i < 10; i++) {
+			
+	    	region = sys.createRegion("Ring "+(i+1), RegionType.RING);
+	    	r1     = new RegionBounds(new double[]{500,0.5},0.1, 0.2);
+	    	r1.setInner(i*50);
+	    	r1.setOuter((i*50)+5);
+	    	region.setRegionBounds(r1);
+			region.setRegionColor(ColorConstants.blue);
+			region.setAlpha(100);
+			
+			// We now add the region.
+			sys.addRegion(region);
+	    	
+	    	EclipseUtils.delay(500);
+		}
+	    EclipseUtils.delay(2000);
+			
+		EclipseUtils.getPage().closeEditor(editor, false);
+
+	}
 
 	
 }

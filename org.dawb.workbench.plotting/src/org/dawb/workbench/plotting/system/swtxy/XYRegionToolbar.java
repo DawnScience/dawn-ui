@@ -160,53 +160,14 @@ public class XYRegionToolbar extends XYGraphToolbar {
         final MenuAction regionDropDown = new MenuAction("Add a selection region");
         regionDropDown.setId("org.dawb.workbench.ui.editors.plotting.swtxy.addRegions");
  
-		final Action addLine = new Action("Add Line Selection...", Activator.getImageDescriptor("icons/ProfileLine.png")) {
-			public void run() {				
-				try {
-					createRegion(regionDropDown, this, RegionType.LINE);
-				} catch (Exception e) {
-					logger.error("Cannot create region!", e);
-				}
-			}
-		};
-		regionDropDown.add(addLine);
 		
-		final Action addBox = new Action("Add Box Selection...", Activator.getImageDescriptor("icons/ProfileBox.png")) {
-			public void run() {				
-				try {
-					createRegion(regionDropDown, this, RegionType.BOX);
-				} catch (Exception e) {
-					logger.error("Cannot create region!", e);
-				}
-			}
-		};
-		regionDropDown.add(addBox);
+		regionDropDown.add(createRegionAction(RegionType.LINE,   regionDropDown, "Add Line Selection...",  Activator.getImageDescriptor("icons/ProfileLine.png")));
+		regionDropDown.add(createRegionAction(RegionType.BOX,    regionDropDown, "Add Box Selection...",   Activator.getImageDescriptor("icons/ProfileBox.png")));
+		regionDropDown.add(createRegionAction(RegionType.RING, regionDropDown, "Add Circle Selection...", Activator.getImageDescriptor("icons/ProfileCircle.png")));
+		regionDropDown.add(createRegionAction(RegionType.XAXIS,  regionDropDown, "Add X-Axis Selection...", Activator.getImageDescriptor("icons/Cursor-horiz.png")));
+		regionDropDown.add(createRegionAction(RegionType.YAXIS,  regionDropDown, "Add Y-Axis Selection...", Activator.getImageDescriptor("icons/Cursor-vert.png")));
 		
-		
-		final Action addXAxis = new Action("Add X-Axis Selection...", Activator.getImageDescriptor("icons/Cursor-horiz.png")) {
-			public void run() {				
-				try {
-					createRegion(regionDropDown, this, RegionType.XAXIS);
-				} catch (Exception e) {
-					logger.error("Cannot create region!", e);
-				}
-			}
-		};
-		regionDropDown.add(addXAxis);
-		
-		final Action addYAxis = new Action("Add Y-Axis Selection...", Activator.getImageDescriptor("icons/Cursor-vert.png")) {
-			public void run() {				
-				try {
-					createRegion(regionDropDown, this, RegionType.YAXIS);
-				} catch (Exception e) {
-					logger.error("Cannot create region!", e);
-				}
-			}
-		};
-		regionDropDown.add(addYAxis);
-
-		
-		regionDropDown.setSelectedAction(addLine);
+		regionDropDown.setSelectedAction(regionDropDown.getAction(0));
 		
 		tool.insertBefore("org.csstudio.swt.xygraph.toolbar.extra", regionDropDown);
 		men.insertBefore("org.csstudio.swt.xygraph.toolbar.extra", regionDropDown);
@@ -248,6 +209,19 @@ public class XYRegionToolbar extends XYGraphToolbar {
 		
 		tool.insertAfter("org.dawb.workbench.ui.editors.plotting.swtxy.addRegions", removeRegionDropDown);
 		men.insertAfter("org.dawb.workbench.ui.editors.plotting.swtxy.addRegions", removeRegionDropDown);
+	}
+
+	private IAction createRegionAction(final RegionType type, final MenuAction regionDropDown, final String label, final ImageDescriptor icon) {
+		final Action regionAction = new Action(label, icon) {
+			public void run() {				
+				try {
+					createRegion(regionDropDown, this, type);
+				} catch (Exception e) {
+					logger.error("Cannot create region!", e);
+				}
+			}
+		};
+		return regionAction;
 	}
 
 	protected void createRegion(MenuAction regionDropDown, Action action, RegionType type) throws Exception {

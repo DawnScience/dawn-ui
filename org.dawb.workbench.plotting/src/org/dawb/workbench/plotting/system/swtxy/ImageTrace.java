@@ -269,6 +269,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 
 	private int[] getRange(RegionBounds bounds, int index, boolean inverted) {
 		
+		if (bounds.isCircle()) bounds = bounds.getOuterRectangle();
 		final int side = image.getShape()[index];
 		int start = (int)Math.round(bounds.getP1()[index]);
 		if (inverted) start = side-start;

@@ -356,7 +356,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 						if (!requireFWHMSelections) area.setVisible(false);
 						
 						final IRegion line = getPlottingSystem().createRegion("Peak Line "+ipeak, RegionType.XAXIS_LINE);
-						line.setRegionBounds(new RegionBounds(rb.getCentre(), rb.getCentre()));
+						line.setRegionBounds(new RegionBounds(rb.getCenter(), rb.getCenter()));
 						line.setRegionColor(ColorConstants.black);
 						//line.setMotile(false);
 						line.setAlpha(150);

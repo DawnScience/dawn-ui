@@ -13,6 +13,7 @@ import org.eclipse.draw2d.RectangleFigure;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Cursor;
 
 class SelectionRectangle extends Figure implements IMobileFigure {
 	
@@ -93,6 +94,11 @@ class SelectionRectangle extends Figure implements IMobileFigure {
 		buf.append(format.format(p[1]));
 		buf.append(")");
 		return buf.toString();
+	}
+	
+	public void setCursor(final Cursor cursor) {
+		super.setCursor(cursor);
+		this.point.setCursor(cursor);
 	}
 
 	public Point getSelectionPoint() {
