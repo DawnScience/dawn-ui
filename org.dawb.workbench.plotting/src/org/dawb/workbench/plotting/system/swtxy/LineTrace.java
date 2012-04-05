@@ -22,6 +22,8 @@ import org.eclipse.swt.SWT;
  */
 public class LineTrace extends Trace {
 
+	private static final double EXTENDED_RANGE_SCALE_FACTOR = 1.0;
+	
 	protected String internalName; 
 	
 	public LineTrace(String name, Axis xAxis, Axis yAxis, IDataProvider dataProvider) {
@@ -113,7 +115,19 @@ public class LineTrace extends Trace {
 			}
 			if (use_advanced_graphics) graphics.setAlpha(getAreaAlpha());
 			graphics.setBackgroundColor(getTraceColor());
+			
+			// now sort out the Start and end of the plot, we need a point at the baseline for both
+			// these can both be added at the end to complete the polygon
+			int yValue = yAxis.getValuePosition(yAxis.getRange().getLower(), false);
+			
+			Point endBase = new Point(points.getLastPoint().x,yValue); 
+			Point startBase = new Point(points.getFirstPoint().x,yValue); 
+			
+			points.addPoint(endBase);
+			points.addPoint(startBase);
+			
 			graphics.fillPolygon(points);
+			System.out.println("Size of points list :" + points.size());
 			break;
 			
 		default:
@@ -185,10 +199,13 @@ public class LineTrace extends Trace {
     							Double.NaN, dp.getXMinusError(), dp.getInfo());
     					hotSampleist.add(nanSample);
     				}
-    				// Is data point in the plot area?
-                    boolean dpInRange = dpInXRange || yAxis.getRange().inRange(dp.getYValue());
-                    // NOTE Use || here not && as if a point is in either range, it should be
-                    // included or the plot will draw funny things when zoomed in.                  
+                    
+    				// Is data point in the plot area, also check to see if it is within a general area
+                    // to draw lines slightly outside the main range?                 
+                    boolean dpInRange = dpInXRange && yAxis.getRange().inRange(dp.getYValue());
+                    boolean dpInExtendedRange = xAxis.getRange().inExtendedRange(dp.getXValue(), EXTENDED_RANGE_SCALE_FACTOR) &&
+                    		yAxis.getRange().inExtendedRange(dp.getYValue(), EXTENDED_RANGE_SCALE_FACTOR);
+                    
                     
     				//draw point
     				if(dpInRange){
@@ -217,6 +234,8 @@ public class LineTrace extends Trace {
     					}
     					predpInRange = xAxis.getRange().inRange(predp.getXValue()) && yAxis.getRange().inRange(predp.getYValue());
     				}
+    				
+    				// deal with the first point of the plot, and then continue
     				if(predp == null)
     				{   // No previous data point from which to draw a line
     					predp = dp;
@@ -240,7 +259,7 @@ public class LineTrace extends Trace {
                     }
     				
     				if(traceType != Trace.TraceType.AREA) {
-    				    if(!predpInRange && !dpInRange){ //both are out of plot area
+    				    if(!predpInRange && !dpInExtendedRange){ //both are out of plot area
     						ISample[] dpTuple = getIntersection(predp, dp);
     						if(dpTuple[0] == null || dpTuple[1] == null){ // no intersection with plot area
     							predp = origin_dp;
@@ -250,7 +269,7 @@ public class LineTrace extends Trace {
     							predp = dpTuple[0];
     							dp = dpTuple[1];
     						}
-    					} else if(!predpInRange || !dpInRange){ // one in and one out
+    					} else if(!predpInRange || !dpInExtendedRange){ // one in and one out
     						//calculate the intersection point with the boundary of plot area.
     						if(!predpInRange){
     							predp = getIntersection(predp, dp)[0];
@@ -284,8 +303,8 @@ public class LineTrace extends Trace {
                             traceType == Trace.TraceType.BAR) {
                             drawLine(graphics, predpPos, dpPos);  	
                         } else {
-    					    pointList.addPoint(predpPos);
-    					    if (i==endIndex) pointList.addPoint(dpPos);
+                        	if(dpInExtendedRange) pointList.addPoint(predpPos);
+                        	if (i==endIndex && dpInExtendedRange) pointList.addPoint(dpPos);
                         }
     					
     				}
