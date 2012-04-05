@@ -193,6 +193,8 @@ class RingSelection extends AbstractSelectionRegion {
 			double cenY   = getyAxis().getPositionValue(cen.y, false);
 			double inRad  = getyAxis().getPositionValue(in.getTop().y,  false)-cenY;
 			double outRad = getyAxis().getPositionValue(out.getTop().y, false)-cenY;
+		    if (inRad<0)  inRad  = inRad*-1; // Scalar
+		    if (outRad<0) outRad = outRad*-1;// Scalar
 			final RegionBounds bounds = new RegionBounds(rcen, Math.min(inRad, outRad) , Math.max(inRad, outRad));
 			if (recordResult) this.regionBounds = bounds;
 			return bounds;

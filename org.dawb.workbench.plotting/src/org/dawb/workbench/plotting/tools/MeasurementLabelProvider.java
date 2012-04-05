@@ -40,7 +40,9 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 			if (region.getRegionType()==RegionType.RING) return "-";
 			return format.format(tool.getBounds(region).getLength());
 		case 5: // max
-			return format.format(tool.getMax(region));
+			final double max = tool.getMaxIntensity(region);
+		    if (Double.isNaN(max)) return "-";
+			return format.format(max);
 		case 6: // in rad
 			if (region.getRegionType()!=RegionType.RING) return "-";
 			return format.format(tool.getBounds(region).getInner());

@@ -12,11 +12,14 @@ import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.RegionBounds;
 import org.dawb.common.ui.plot.region.RegionBoundsEvent;
 import org.dawb.common.ui.plot.region.RegionEvent;
+import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
-import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.workbench.plotting.Activator;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IContributionItem;
@@ -40,10 +43,16 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.progress.UIJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.rcp.plotting.roi.LinearROIData;
+import uk.ac.diamond.scisoft.analysis.rcp.plotting.roi.ROIData;
+import uk.ac.diamond.scisoft.analysis.rcp.plotting.roi.RectangularROIData;
+import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
+import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 /**
  * This tool shows the measurements of selected regions.
@@ -253,7 +262,7 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 		var.setLabelProvider(new MeasurementLabelProvider(this, 4));
 		
         var   = new TableViewerColumn(viewer, SWT.LEFT, 5);
-		var.getColumn().setText("max");
+		var.getColumn().setText("Max Intensity");
 		var.getColumn().setWidth(80);
 		var.setLabelProvider(new MeasurementLabelProvider(this, 5));
 		
@@ -417,23 +426,64 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 		updateRegion(evt);
 	}
 
-	private void updateRegion(RegionBoundsEvent evt) {
-		if (viewer!=null) {
-			IRegion  region = (IRegion)evt.getSource();
-			RegionBounds rb = evt.getRegionBounds();
-			
-			dragBounds.put(region.getName(), rb);
-			
-			viewer.refresh(region);
+	private RegionBoundsUIJob updateJob;
+	/**
+	 * Uses cancellable UIJob
+	 * 
+	 * @param evt
+	 */
+	private void updateRegion(final RegionBoundsEvent evt) {
+		
+		if (updateJob==null) {
+			updateJob = new RegionBoundsUIJob();
+			updateJob.setPriority(UIJob.INTERACTIVE);
+			//updateJob.setUser(false);
 		}
+		updateJob.setEvent(evt);
+		updateJob.cancel();
+		updateJob.schedule();
 	}
+	
+	private final class RegionBoundsUIJob extends UIJob {
+		
+		private RegionBoundsEvent evt;
+		RegionBoundsUIJob() {
+			super("Measurement update");
+		}
+		
+		@Override
+		public IStatus runInUIThread(IProgressMonitor monitor) {
+			if (viewer!=null) {
+				if(monitor.isCanceled())	return Status.CANCEL_STATUS;
+
+				IRegion  region = (IRegion)evt.getSource();
+				RegionBounds rb = evt.getRegionBounds();
+				
+				if(monitor.isCanceled())	return Status.CANCEL_STATUS;
+				dragBounds.put(region.getName(), rb);
+				
+				if(monitor.isCanceled())	return Status.CANCEL_STATUS;
+				viewer.refresh(region);
+			}
+			return Status.OK_STATUS;
+		}
+		
+		void setEvent(RegionBoundsEvent evt) {
+			this.evt = evt;
+		}
+	};
 
 	public RegionBounds getBounds(IRegion region) {
 		if (dragBounds!=null&&dragBounds.containsKey(region.getName())) return dragBounds.get(region.getName());
 		return region.getRegionBounds();
 	}
 
-	public double getMax(IRegion region) {
+	/**
+	 * Gets intensity for images and lines.
+	 * @param region
+	 * @return
+	 */
+	public double getMaxIntensity(IRegion region) {
 
         final Collection<ITrace> traces = getPlottingSystem().getTraces();
         final RegionBounds bounds = getBounds(region);
@@ -441,10 +491,30 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
         
         if (traces!=null&&traces.size()==1&&traces.iterator().next() instanceof IImageTrace) {
         	final IImageTrace     trace        = (IImageTrace)traces.iterator().next();
-        	final AbstractDataset intersection = trace.slice(bounds);
-        	return intersection.max().doubleValue();
-        } else {
-        	return bounds.getP2()[1];
+        	
+        	ROIData rd = null;
+        	if (region.getRegionType() == RegionType.BOX) {
+	    		final RectangularROI    roi = new RectangularROI(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(), 0);
+	    		rd = new RectangularROIData(roi, trace.getData());
+        	} else if (region.getRegionType()==RegionType.LINE) {
+        		LinearROI    roi = new LinearROI(bounds.getP1(), bounds.getP2());
+        		rd = new LinearROIData(roi, trace.getData(), 1d);     
+        	}
+        	
+        	if (rd!=null) {
+	    		try {
+	    			double max2 = rd.getProfileData().length>1 && rd.getProfileData()[1]!=null
+	    					    ? rd.getProfileData()[1].max().doubleValue()
+	    					    : -Double.MAX_VALUE;
+	         	    return Math.max(rd.getProfileData()[0].max().doubleValue(), max2);
+	    		} catch (Throwable ne) {
+	    			return Double.NaN;
+	    		}
+        	}
+
         }
+        
+        return Double.NaN;
+      
 	}
 }
