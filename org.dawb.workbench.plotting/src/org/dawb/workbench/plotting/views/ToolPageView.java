@@ -1007,11 +1007,14 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 
 	public void toolChanged(ToolChangeEvent evt) {
 		if (updatingActivated) return;
-		partActivated(evt.getPart());
+		toolUpdate(evt.getPart(), true);
 	}
 	
 	public void partActivated(IWorkbenchPart part) {
+		toolUpdate(part, false);
+	}
 
+	protected void toolUpdate(IWorkbenchPart part, boolean isToolChange) {
 		if (!isImportant(part)) return;
 
 		if (updatingActivated) return;
@@ -1029,6 +1032,8 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
     		if (rec == null) {
     			rec = createPage(part);
     		}
+    		
+    		if (!isToolChange && rec.tool instanceof EmptyTool) return; // No point switching to empty tool
 
     		// Show the page.
     		if (rec != null) {

@@ -340,6 +340,9 @@ class LightWeightActionBarsManager extends PlottingActionBarManager {
 		public void setManager(IContributionManager manager) {
 			this.manager = manager;
 		}
+		public String toString() {
+			return action.toString();
+		}
 	}
 
 
