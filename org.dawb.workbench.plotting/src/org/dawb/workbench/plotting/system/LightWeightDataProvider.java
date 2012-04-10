@@ -13,6 +13,12 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 
+/**
+ * A IDataProvider which uses an AbstractDataset for its data.
+ * 
+ * @author fcp94556
+ *
+ */
 public class LightWeightDataProvider implements IDataProvider {
 	
 	private AbstractDataset x;

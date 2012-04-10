@@ -158,12 +158,12 @@ public class XYRegionToolbar extends XYGraphToolbar {
         if (zoomDropDown!=null) zoomDropDown.getAction(0).setChecked(true);
        
         final MenuAction regionDropDown = new MenuAction("Add a selection region");
-        regionDropDown.setId("org.dawb.workbench.ui.editors.plotting.swtxy.addRegions");
+        regionDropDown.setId("org.dawb.workbench.ui.editors.plotting.swtxy.addRegions"); // Id used elsewhere...
  
 		
 		regionDropDown.add(createRegionAction(RegionType.LINE,   regionDropDown, "Add Line Selection...",  Activator.getImageDescriptor("icons/ProfileLine.png")));
 		regionDropDown.add(createRegionAction(RegionType.BOX,    regionDropDown, "Add Box Selection...",   Activator.getImageDescriptor("icons/ProfileBox.png")));
-		regionDropDown.add(createRegionAction(RegionType.RING, regionDropDown, "Add Circle Selection...", Activator.getImageDescriptor("icons/ProfileCircle.png")));
+		regionDropDown.add(createRegionAction(RegionType.RING,   regionDropDown, "Add Circle Selection...", Activator.getImageDescriptor("icons/ProfileCircle.png")));
 		regionDropDown.add(createRegionAction(RegionType.XAXIS,  regionDropDown, "Add X-Axis Selection...", Activator.getImageDescriptor("icons/Cursor-horiz.png")));
 		regionDropDown.add(createRegionAction(RegionType.YAXIS,  regionDropDown, "Add Y-Axis Selection...", Activator.getImageDescriptor("icons/Cursor-vert.png")));
 		

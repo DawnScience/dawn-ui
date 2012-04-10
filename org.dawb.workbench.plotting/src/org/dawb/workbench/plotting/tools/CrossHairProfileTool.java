@@ -23,7 +23,6 @@ import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
-import org.dawb.common.ui.plot.trace.TraceUtils;
 import org.dawb.workbench.plotting.util.ColorUtility;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -37,6 +36,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.part.IPageSite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -163,11 +163,28 @@ public class CrossHairProfileTool extends AbstractToolPage implements IRegionBou
 		if (getPlottingSystem()!=null) {
 			getPlottingSystem().addTraceListener(traceListener);
 		}
+		
+		// We stop the adding of other regions because this tool does
+		// not like it when other regions are added.
+		setOtherRegionsEnabled(false);
+		
 		super.activate();	
 	}
 	
+	private static final String regionId = "org.dawb.workbench.ui.editors.plotting.swtxy.addRegions";
+	
+	private void setOtherRegionsEnabled(boolean isVisible) {
+
+        final IActionBars bars = getPlottingSystem().getActionBars();
+        if (bars.getToolBarManager().find(regionId)!=null) {
+        	bars.getToolBarManager().find(regionId).setVisible(isVisible);
+        	bars.getToolBarManager().update(true);
+        }
+	}
+
 	public void deactivate() {
 		super.deactivate();
+		setOtherRegionsEnabled(true);
 
 		if (xHair!=null) {
 			xHair.removeMouseListener(this);

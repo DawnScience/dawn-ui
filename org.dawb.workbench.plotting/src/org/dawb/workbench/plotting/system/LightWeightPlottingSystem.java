@@ -15,14 +15,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.csstudio.swt.xygraph.dataprovider.CircularBufferDataProvider;
-import org.csstudio.swt.xygraph.dataprovider.ISample;
-import org.csstudio.swt.xygraph.dataprovider.Sample;
 import org.csstudio.swt.xygraph.figures.Annotation;
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.Trace;
@@ -74,8 +70,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
-import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
-import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 
 
@@ -91,7 +85,6 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	private Logger logger = LoggerFactory.getLogger(LightWeightPlottingSystem.class);
 	
 	private Composite      parent;
-	private IActionBars    bars;
 
 	// Controls
 	private Canvas         xyCanvas;
@@ -117,7 +110,6 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		super.createPlotPart(parent, plotName, bars, hint, part);
 		
 		this.parent  = parent;
-		this.bars    = bars;
 		
 		createUI();
 
@@ -974,10 +966,6 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		for (Annotation annotation : anns) {
 			xyGraph.getPlotArea().removeAnnotation(annotation);
 		}
-	}
-
-	protected IActionBars getActionBars() {
-	    return bars;
 	}
 
 	@Override
