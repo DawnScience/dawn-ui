@@ -47,12 +47,13 @@ public class HistogramToolPage extends AbstractToolPage {
 
 	// LOGGER
 	private static final Logger logger = LoggerFactory.getLogger(HistogramToolPage.class);
-	
-	
+
+
 	// STATICS
 	private static final int SLIDER_STEPS = 1000;
 
-	
+
+
 	// MODES
 	private static final int FULL = 0;
 	private static final int AUTO = 1;
@@ -60,7 +61,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 	private int mode = FULL;
 
-	
+
 	// HISTOGRAM 
 	private double rangeMax = 100.0;
 	private double rangeMin = 0.0;
@@ -71,21 +72,21 @@ public class HistogramToolPage extends AbstractToolPage {
 
 	private AbstractDataset histogramX;
 	private AbstractDataset histogramY;
-	
+
 	private int num_bins = 2048;
-	
+
 	private boolean histogramDirty = true;
 
 
 	// GUI
 	private Composite composite;
-	
-	
+
+
 	// HISTOGRAM PLOT
 	private AbstractPlottingSystem histogramPlot;
 
 	private ITraceListener traceListener;
-	
+
 	private IImageTrace image;
 
 	private ILineTrace histoTrace;
@@ -93,13 +94,13 @@ public class HistogramToolPage extends AbstractToolPage {
 	private ILineTrace greenTrace;
 	private ILineTrace blueTrace;
 
-	
+
 	// COLOUR SCHEME GUI 
 	private Group colourSchemeGroup;
 	private CCombo cmbColourMap;	
 	private SelectionListener colourSchemeListener;
-	
-	
+
+
 	// PER CHANNEL SCHEME GUI
 	private Group perChannelGroup;
 	private CCombo cmbAlpha;	
@@ -110,22 +111,25 @@ public class HistogramToolPage extends AbstractToolPage {
 	private Button btnBlueInverse;
 	private Button btnAlphaInverse;
 	private Button btnRedInverse;
-	
+
 	private SelectionListener colourSelectionListener;
-	
-	
+
+
 	// BRIGHTNESS CONTRAST GUI
+	private static final String BRIGHTNESS_LABEL = "Brightness";
+	private static final String CONTRAST_LABEL = "Contrast";
 	private Group bcPanel;
-	private SpinnerSlider brightness;
-	private SpinnerSlider contrast;
+	private SpinnerSliderSet brightnessContrastValue;
 	private SelectionListener brightnessContrastListener;
-	
-	
+
+
 	// MIN MAX GUI	
+	private static final String MAX_LABEL = "Max";
+	private static final String MIN_LABEL = "Min";
 	private Group rangePanel;
-	private SpinnerSlider maxValue;
-	private SpinnerSlider minValue;
-	private SelectionListener minMaxListener;
+	private SpinnerSliderSet minMaxValue;
+	private SelectionListener minMaxValueListener;
+
 
 
 	// HELPERS
@@ -160,16 +164,16 @@ public class HistogramToolPage extends AbstractToolPage {
 		}
 
 		// Set up all the GUI element listeners
-		minMaxListener = new SelectionListener() {
+		minMaxValueListener = new SelectionListener() {
 
 			@Override
 			public void widgetSelected(SelectionEvent event) {
-				histoMax = maxValue.getValue();
-				histoMin = minValue.getValue();
+				histoMax = minMaxValue.getValue(MAX_LABEL);
+				histoMin = minMaxValue.getValue(MIN_LABEL);
 				if (histoMax < histoMin) {
 					histoMax = histoMin;
 				}
-				updateHistogramToolElements();
+				updateHistogramToolElements(event);
 			}
 
 			@Override
@@ -182,12 +186,14 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent event) {
-				histoMax = brightness.getValue()+contrast.getValue()/2.0;
-				histoMin = brightness.getValue()-contrast.getValue()/2.0;
+				histoMax = brightnessContrastValue.getValue(BRIGHTNESS_LABEL)+
+						brightnessContrastValue.getValue(CONTRAST_LABEL)/2.0;
+				histoMin = brightnessContrastValue.getValue(BRIGHTNESS_LABEL)-
+						brightnessContrastValue.getValue(CONTRAST_LABEL)/2.0;
 				if (histoMax < histoMin) {
 					histoMax = histoMin;
 				}
-				updateHistogramToolElements();
+				updateHistogramToolElements(event);
 			}
 
 			@Override
@@ -199,9 +205,9 @@ public class HistogramToolPage extends AbstractToolPage {
 		colourSelectionListener = new SelectionListener() {
 
 			@Override
-			public void widgetSelected(SelectionEvent arg0) {
+			public void widgetSelected(SelectionEvent event) {
 				buildPalleteData();
-				updateHistogramToolElements();
+				updateHistogramToolElements(event);
 			}
 
 			@Override
@@ -216,7 +222,7 @@ public class HistogramToolPage extends AbstractToolPage {
 			public void widgetSelected(SelectionEvent event) {
 				updateColourScheme();
 				buildPalleteData();
-				updateHistogramToolElements();
+				updateHistogramToolElements(event);
 
 			}
 
@@ -226,11 +232,11 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			}
 		};
-		
+
 		// Get all information from the extention points
 		extentionPointManager = new ExtentionPointManager();
 
-		
+
 		// Set up the repaint job
 		imagerepaintJob = new UIJob("Colour Scale Image Update") {			
 
@@ -238,15 +244,15 @@ public class HistogramToolPage extends AbstractToolPage {
 			public IStatus runInUIThread(IProgressMonitor mon) {
 				// update the colourscale
 				image.setMax(histoMax);
-	            if (mon.isCanceled()) return Status.CANCEL_STATUS;
-	            
+				if (mon.isCanceled()) return Status.CANCEL_STATUS;
+
 				image.setMin(histoMin);
-                if (mon.isCanceled()) return Status.CANCEL_STATUS;
-				
-                image.setPaletteData(palleteData);
-	            if (mon.isCanceled()) return Status.CANCEL_STATUS;
-				
-	            getPlottingSystem().repaint();
+				if (mon.isCanceled()) return Status.CANCEL_STATUS;
+
+				image.setPaletteData(palleteData);
+				if (mon.isCanceled()) return Status.CANCEL_STATUS;
+
+				getPlottingSystem().repaint();
 				return Status.OK_STATUS;
 			}
 		};
@@ -262,8 +268,8 @@ public class HistogramToolPage extends AbstractToolPage {
 	public void createControl(Composite parent) {
 		// Set up the composite to hold all the information
 		composite = new Composite(parent, SWT.NONE);
-		composite.setLayout(new GridLayout(1, false));
-
+		composite.setLayout(new GridLayout(1, false));		
+		
 		// Set up the Colour scheme part of the GUI
 		colourSchemeGroup = new Group(composite, SWT.NONE);
 		colourSchemeGroup.setText("Colour Scheme");
@@ -334,31 +340,25 @@ public class HistogramToolPage extends AbstractToolPage {
 		cmbBlueColour.select(0);
 		cmbAlpha.select(0);
 
-		
+
 		// Set up the Brightness and contrast part of the GUI
 		bcPanel = new Group(composite, SWT.NONE);
 		bcPanel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		bcPanel.setLayout(new GridLayout(1, false));
 		bcPanel.setText("Brightness and Contrast");
 
-		brightness = new SpinnerSlider("Brightness", bcPanel, SLIDER_STEPS);		
-		contrast = new SpinnerSlider("Contrast", bcPanel, SLIDER_STEPS);		
+		brightnessContrastValue = new SpinnerSliderSet(bcPanel, SLIDER_STEPS, BRIGHTNESS_LABEL, CONTRAST_LABEL);
+		brightnessContrastValue.addSelectionListener(brightnessContrastListener);
 
-		brightness.addSelectionListener(brightnessContrastListener);
-		contrast.addSelectionListener(brightnessContrastListener);
 
-		
 		// Set up the Min Max range part of the GUI
 		rangePanel = new Group(composite, SWT.NONE);
 		rangePanel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		rangePanel.setLayout(new GridLayout(1, false));
 		rangePanel.setText("Histogram Range");
 
-		maxValue = new SpinnerSlider("Max", rangePanel, SLIDER_STEPS);		
-		minValue = new SpinnerSlider("Min", rangePanel, SLIDER_STEPS);	
-
-		maxValue.addSelectionListener(minMaxListener);
-		minValue.addSelectionListener(minMaxListener);
+		minMaxValue = new SpinnerSliderSet(rangePanel, SLIDER_STEPS, MAX_LABEL, MIN_LABEL);
+		minMaxValue.addSelectionListener(minMaxValueListener);
 
 
 		// Set up the histogram plot part of the GUI
@@ -383,11 +383,11 @@ public class HistogramToolPage extends AbstractToolPage {
 		String red = extentionPointManager.getTransferFunctionFromID(colourScheme.getRedID()).getName();
 		String green = extentionPointManager.getTransferFunctionFromID(colourScheme.getGreenID()).getName();
 		String blue = extentionPointManager.getTransferFunctionFromID(colourScheme.getBlueID()).getName();
-		
+
 		setComboByName(cmbRedColour, red);
 		setComboByName(cmbGreenColour, green);
 		setComboByName(cmbBlueColour, blue);		
-		
+
 	}
 
 	/**
@@ -442,16 +442,17 @@ public class HistogramToolPage extends AbstractToolPage {
 			generateHistogram(imageDataset);
 
 			// update all based on slider positions
-			updateHistogramToolElements();
+			updateHistogramToolElements(null);
 		}				
 	}
 
 	/**
 	 * Update everything based on the new slider positions  
+	 * @param event 
 	 */
-	private void updateHistogramToolElements() {
+	private void updateHistogramToolElements(SelectionEvent event) {
 		// update the ranges
-		updateRanges();
+		updateRanges(event);
 
 		// plot the histogram
 		plotHistogram();
@@ -477,35 +478,35 @@ public class HistogramToolPage extends AbstractToolPage {
 		histogramY = histogram_values.get(0);
 		histogramY = Maths.log10((Maths.add(histogramY, 1.0)));
 		histogramY.setName("Histogram");
-		
+
 		histogramDirty = true;
 	}
 
 
 	/**
 	 * Update all the gui element ranges based on the internal values for them
+	 * @param event 
 	 */
-	private void updateRanges() {
+	private void updateRanges(SelectionEvent event) {
+		
+		// set the minmax values
+		minMaxValue.setMin(MIN_LABEL, rangeMin);
+		minMaxValue.setMax(MIN_LABEL, rangeMax);
+		minMaxValue.setValue(MIN_LABEL, histoMin);
 
-		// set the min Slider
-		minValue.setMin(rangeMin);
-		minValue.setMax(rangeMax);
-		minValue.setValue(histoMin);
-
-		// set max values
-		maxValue.setMin(rangeMin);
-		maxValue.setMax(rangeMax);
-		maxValue.setValue(histoMax);	
+		minMaxValue.setMin(MAX_LABEL, rangeMin);
+		minMaxValue.setMax(MAX_LABEL, rangeMax);
+		minMaxValue.setValue(MAX_LABEL, histoMax);
 
 		// Set the brightness
-		brightness.setMin(rangeMin);
-		brightness.setMax(rangeMax);
-		brightness.setValue((histoMax+histoMin)/2.0);
+		brightnessContrastValue.setMin(BRIGHTNESS_LABEL, rangeMin);
+		brightnessContrastValue.setMax(BRIGHTNESS_LABEL, rangeMax);
+		brightnessContrastValue.setValue(BRIGHTNESS_LABEL, (histoMax+histoMin)/2.0);
 
 		// Set the contrast
-		contrast.setMin(rangeMin);
-		contrast.setMax(rangeMax);
-		contrast.setValue(histoMax-histoMin);
+		brightnessContrastValue.setMin(CONTRAST_LABEL, rangeMin);
+		brightnessContrastValue.setMax(CONTRAST_LABEL, rangeMax);
+		brightnessContrastValue.setValue(CONTRAST_LABEL, histoMax-histoMin);
 	}
 
 
@@ -518,15 +519,15 @@ public class HistogramToolPage extends AbstractToolPage {
 		// Initialise the histogram Plot if required
 
 		if (histoTrace == null) {
-			
+
 			histogramPlot.clear();
-			
+
 			// Set up the histogram trace
 			histoTrace = histogramPlot.createLineTrace("Histogram");
 			histoTrace.setTraceType(TraceType.AREA);
 			histoTrace.setLineWidth(1);
 			histoTrace.setTraceColor(new Color(null, 0, 0, 0));
-			
+
 			// Set up the RGB traces
 			redTrace = histogramPlot.createLineTrace("Red");
 			greenTrace = histogramPlot.createLineTrace("Green");
@@ -542,7 +543,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			// Finally add everything in a threadsafe way.
 			getControl().getDisplay().syncExec(new Runnable() {
-				
+
 				@Override
 				public void run() {
 					histogramPlot.addTrace(histoTrace);
@@ -574,9 +575,9 @@ public class HistogramToolPage extends AbstractToolPage {
 
 		// Now update all the trace data in a threadsafe way
 		final double finalScale = scale;
-		
+
 		getControl().getDisplay().syncExec(new Runnable() {
-			
+
 			@Override
 			public void run() {
 				if (histogramDirty) {
