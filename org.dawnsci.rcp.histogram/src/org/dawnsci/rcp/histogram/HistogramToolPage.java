@@ -30,8 +30,10 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.ui.forms.events.ExpansionAdapter;
+import org.eclipse.ui.forms.events.ExpansionEvent;
+import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.part.IPageSite;
 import org.eclipse.ui.progress.UIJob;
 import org.slf4j.Logger;
@@ -80,29 +82,19 @@ public class HistogramToolPage extends AbstractToolPage {
 
 	// GUI
 	private Composite composite;
-
-
-	// HISTOGRAM PLOT
-	private AbstractPlottingSystem histogramPlot;
-
-	private ITraceListener traceListener;
-
-	private IImageTrace image;
-
-	private ILineTrace histoTrace;
-	private ILineTrace redTrace;
-	private ILineTrace greenTrace;
-	private ILineTrace blueTrace;
+	private ExpansionAdapter expansionAdapter;
 
 
 	// COLOUR SCHEME GUI 
-	private Group colourSchemeGroup;
+	private ExpandableComposite colourSchemeExpander;
+	private Composite colourSchemeComposite;
 	private CCombo cmbColourMap;	
 	private SelectionListener colourSchemeListener;
 
 
 	// PER CHANNEL SCHEME GUI
-	private Group perChannelGroup;
+	private ExpandableComposite perChannelExpander;
+	private Composite perChannelComposite;
 	private CCombo cmbAlpha;	
 	private CCombo cmbRedColour;
 	private CCombo cmbGreenColour;
@@ -118,7 +110,8 @@ public class HistogramToolPage extends AbstractToolPage {
 	// BRIGHTNESS CONTRAST GUI
 	private static final String BRIGHTNESS_LABEL = "Brightness";
 	private static final String CONTRAST_LABEL = "Contrast";
-	private Group bcPanel;
+	private ExpandableComposite bcExpander;
+	private Composite bcComposite;
 	private SpinnerSliderSet brightnessContrastValue;
 	private SelectionListener brightnessContrastListener;
 
@@ -126,10 +119,26 @@ public class HistogramToolPage extends AbstractToolPage {
 	// MIN MAX GUI	
 	private static final String MAX_LABEL = "Max";
 	private static final String MIN_LABEL = "Min";
-	private Group rangePanel;
+	private ExpandableComposite rangeExpander;
+	private Composite rangeComposite;
 	private SpinnerSliderSet minMaxValue;
 	private SelectionListener minMaxValueListener;
 
+	
+	// HISTOGRAM PLOT
+	private ExpandableComposite histogramExpander;
+	private Composite histogramComposite;
+	private AbstractPlottingSystem histogramPlot;
+
+	private ITraceListener traceListener;
+
+	private IImageTrace image;
+
+	private ILineTrace histoTrace;
+	private ILineTrace redTrace;
+	private ILineTrace greenTrace;
+	private ILineTrace blueTrace;
+	
 
 
 	// HELPERS
@@ -168,6 +177,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent event) {
+				System.out.println("minMaxValueListener");
 				histoMax = minMaxValue.getValue(MAX_LABEL);
 				histoMin = minMaxValue.getValue(MIN_LABEL);
 				if (histoMax < histoMin) {
@@ -186,6 +196,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent event) {
+				System.out.println("brightnessContrastListener");
 				histoMax = brightnessContrastValue.getValue(BRIGHTNESS_LABEL)+
 						brightnessContrastValue.getValue(CONTRAST_LABEL)/2.0;
 				histoMin = brightnessContrastValue.getValue(BRIGHTNESS_LABEL)-
@@ -206,6 +217,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent event) {
+				System.out.println("colourSelectionListener");
 				buildPalleteData();
 				updateHistogramToolElements(event);
 			}
@@ -220,6 +232,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent event) {
+				System.out.println("colourSchemeListener");
 				updateColourScheme();
 				buildPalleteData();
 				updateHistogramToolElements(event);
@@ -229,10 +242,19 @@ public class HistogramToolPage extends AbstractToolPage {
 			@Override
 			public void widgetDefaultSelected(SelectionEvent event) {
 				widgetSelected(event);
-
 			}
 		};
 
+		// Specify the expansion Adapter
+		expansionAdapter = new ExpansionAdapter() {
+			@Override
+			public void expansionStateChanged(ExpansionEvent e) {
+				System.out.println("perChannelExpander");
+				composite.layout();
+			}
+		};
+				
+		
 		// Get all information from the extention points
 		extentionPointManager = new ExtentionPointManager();
 
@@ -265,17 +287,22 @@ public class HistogramToolPage extends AbstractToolPage {
 	}
 
 	@Override
-	public void createControl(Composite parent) {
+	public void createControl(final Composite parent) {
 		// Set up the composite to hold all the information
-		composite = new Composite(parent, SWT.NONE);
+		composite = new Composite(parent, SWT.RESIZE);
 		composite.setLayout(new GridLayout(1, false));		
 		
 		// Set up the Colour scheme part of the GUI
-		colourSchemeGroup = new Group(composite, SWT.NONE);
-		colourSchemeGroup.setText("Colour Scheme");
-		colourSchemeGroup.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1));
-		colourSchemeGroup.setLayout(new GridLayout(1, false));
-		cmbColourMap = new CCombo(colourSchemeGroup, SWT.BORDER | SWT.READ_ONLY);
+		colourSchemeExpander = new ExpandableComposite(composite, SWT.NONE);
+		colourSchemeExpander.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1));
+		colourSchemeExpander.setLayout(new GridLayout(1, false));
+		colourSchemeExpander.setText("Colour Scheme");
+		
+		colourSchemeComposite = new Composite(colourSchemeExpander, SWT.NONE);
+		colourSchemeComposite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1));
+		colourSchemeComposite.setLayout(new GridLayout(1, false));
+		
+		cmbColourMap = new CCombo(colourSchemeComposite, SWT.BORDER | SWT.READ_ONLY);
 		cmbColourMap.setToolTipText("Change the color scheme.");
 		cmbColourMap.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		cmbColourMap.addSelectionListener(colourSchemeListener);
@@ -287,42 +314,49 @@ public class HistogramToolPage extends AbstractToolPage {
 
 		cmbColourMap.select(0);
 
+		colourSchemeExpander.setClient(colourSchemeComposite);
+		colourSchemeExpander.addExpansionListener(expansionAdapter);
+		
 
 		// Set up the per channel colour scheme part of the GUI		
-		perChannelGroup = new Group(composite, SWT.NONE);
-		perChannelGroup.setText("Colour Scheme per Channel");
-		perChannelGroup.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1));
-		perChannelGroup.setLayout(new GridLayout(3, false));
+		perChannelExpander = new ExpandableComposite(composite, SWT.NONE);
+		perChannelExpander.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1));
+		perChannelExpander.setLayout(new GridLayout(1, false));
+		perChannelExpander.setText("Colour Scheme per Channel");
+		
+		perChannelComposite = new Composite(perChannelExpander, SWT.NONE);
+		perChannelComposite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1));
+		perChannelComposite.setLayout(new GridLayout(3, false));
 		{
-			Label lblRed = new Label(perChannelGroup, SWT.NONE);
+			Label lblRed = new Label(perChannelComposite, SWT.NONE);
 			lblRed.setText("Red");
-			cmbRedColour = new CCombo(perChannelGroup, SWT.BORDER | SWT.READ_ONLY);
+			cmbRedColour = new CCombo(perChannelComposite, SWT.BORDER | SWT.READ_ONLY);
 			cmbRedColour.addSelectionListener(colourSelectionListener);
-			btnRedInverse = new Button(perChannelGroup, SWT.CHECK);
+			btnRedInverse = new Button(perChannelComposite, SWT.CHECK);
 			btnRedInverse.setText("Inverse");
 			btnRedInverse.addSelectionListener(colourSelectionListener);
 
-			Label lblGreen = new Label(perChannelGroup, SWT.NONE);
+			Label lblGreen = new Label(perChannelComposite, SWT.NONE);
 			lblGreen.setText("Green");
-			cmbGreenColour = new CCombo(perChannelGroup, SWT.BORDER | SWT.READ_ONLY);
+			cmbGreenColour = new CCombo(perChannelComposite, SWT.BORDER | SWT.READ_ONLY);
 			cmbGreenColour.addSelectionListener(colourSelectionListener);
-			btnGreenInverse = new Button(perChannelGroup, SWT.CHECK);
+			btnGreenInverse = new Button(perChannelComposite, SWT.CHECK);
 			btnGreenInverse.setText("Inverse");
 			btnGreenInverse.addSelectionListener(colourSelectionListener);
 
-			Label lblBlue = new Label(perChannelGroup, SWT.NONE);
+			Label lblBlue = new Label(perChannelComposite, SWT.NONE);
 			lblBlue.setText("Blue");
-			cmbBlueColour = new CCombo(perChannelGroup, SWT.BORDER | SWT.READ_ONLY);
+			cmbBlueColour = new CCombo(perChannelComposite, SWT.BORDER | SWT.READ_ONLY);
 			cmbBlueColour.addSelectionListener(colourSelectionListener);
-			btnBlueInverse = new Button(perChannelGroup, SWT.CHECK);
+			btnBlueInverse = new Button(perChannelComposite, SWT.CHECK);
 			btnBlueInverse.setText("Inverse");
 			btnBlueInverse.addSelectionListener(colourSelectionListener);
 
-			Label lblAlpha = new Label(perChannelGroup, SWT.NONE);
+			Label lblAlpha = new Label(perChannelComposite, SWT.NONE);
 			lblAlpha.setText("Alpha");
-			cmbAlpha = new CCombo(perChannelGroup, SWT.BORDER | SWT.READ_ONLY);
+			cmbAlpha = new CCombo(perChannelComposite, SWT.BORDER | SWT.READ_ONLY);
 			cmbAlpha.addSelectionListener(colourSelectionListener);
-			btnAlphaInverse = new Button(perChannelGroup, SWT.CHECK);
+			btnAlphaInverse = new Button(perChannelComposite, SWT.CHECK);
 			btnAlphaInverse.setText("Inverse");
 			btnAlphaInverse.addSelectionListener(colourSelectionListener);
 		}		
@@ -340,37 +374,67 @@ public class HistogramToolPage extends AbstractToolPage {
 		cmbBlueColour.select(0);
 		cmbAlpha.select(0);
 
-
+		perChannelExpander.setClient(perChannelComposite);
+		perChannelExpander.addExpansionListener(expansionAdapter);
+		
+		
 		// Set up the Brightness and contrast part of the GUI
-		bcPanel = new Group(composite, SWT.NONE);
-		bcPanel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		bcPanel.setLayout(new GridLayout(1, false));
-		bcPanel.setText("Brightness and Contrast");
+		bcExpander = new ExpandableComposite(composite, SWT.NONE);
+		bcExpander.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1));
+		bcExpander.setLayout(new GridLayout(1, false));
+		bcExpander.setText("Brightness and Contrast");
+		
+		bcComposite = new Composite(bcExpander, SWT.NONE);
+		bcComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		bcComposite.setLayout(new GridLayout(1, false));
 
-		brightnessContrastValue = new SpinnerSliderSet(bcPanel, SLIDER_STEPS, BRIGHTNESS_LABEL, CONTRAST_LABEL);
+		brightnessContrastValue = new SpinnerSliderSet(bcComposite, SLIDER_STEPS, BRIGHTNESS_LABEL, CONTRAST_LABEL);
 		brightnessContrastValue.addSelectionListener(brightnessContrastListener);
 
-
+		bcExpander.setClient(bcComposite);
+		bcExpander.addExpansionListener(expansionAdapter);
+		
+		
 		// Set up the Min Max range part of the GUI
-		rangePanel = new Group(composite, SWT.NONE);
-		rangePanel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		rangePanel.setLayout(new GridLayout(1, false));
-		rangePanel.setText("Histogram Range");
+		rangeExpander = new ExpandableComposite(composite, SWT.NONE);
+		rangeExpander.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1));
+		rangeExpander.setLayout(new GridLayout(1, false));
+		rangeExpander.setText("Histogram Range");
+		
+		rangeComposite = new Composite(rangeExpander, SWT.NONE);
+		rangeComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		rangeComposite.setLayout(new GridLayout(1, false));
 
-		minMaxValue = new SpinnerSliderSet(rangePanel, SLIDER_STEPS, MAX_LABEL, MIN_LABEL);
+		minMaxValue = new SpinnerSliderSet(rangeComposite, SLIDER_STEPS, MAX_LABEL, MIN_LABEL);
 		minMaxValue.addSelectionListener(minMaxValueListener);
 
-
+		rangeExpander.setClient(rangeComposite);
+		rangeExpander.addExpansionListener(expansionAdapter);
+		
+		
+		
 		// Set up the histogram plot part of the GUI
+		histogramExpander = new ExpandableComposite(composite, SWT.NONE);
+		histogramExpander.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+		histogramExpander.setLayout(new GridLayout(1, false));
+		histogramExpander.setText("Histogram Plot");
+		
+		histogramComposite = new Composite(histogramExpander, SWT.NONE);
+		histogramComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		histogramComposite.setLayout(new GridLayout(1, false));
+		
 		final IPageSite site = getSite();
 
-		histogramPlot.createPlotPart( composite, 
+		histogramPlot.createPlotPart( histogramComposite, 
 				getTitle(), 
 				site.getActionBars(), 
 				PlotType.PT1D,
 				null);
 		histogramPlot.getPlotComposite().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
+		histogramExpander.setClient(histogramComposite);
+		histogramExpander.addExpansionListener(expansionAdapter);
+		
 		// Activate this so the initial screen has content
 		activate();		
 	}
