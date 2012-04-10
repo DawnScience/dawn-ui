@@ -145,27 +145,18 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		GridUtils.removeMargins(main);
 		
 		this.tools = new Composite(main, SWT.RIGHT);
-		tools.setLayout(new GridLayout(4, false));
+		tools.setLayout(new GridLayout(2, false));
 		GridUtils.removeMargins(tools);
 		tools.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-
-		final Text point = new Text(tools, SWT.LEFT);
-		//EclipseUtils.setBold(point);
-
-		point.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		point.setEditable(false);
-		GridUtils.setVisible(point, true);
-		point.setBackground(tools.getBackground());
-		plottingSystem.setPointControls(point);
-
+		
 		// We use a local toolbar to make it clear to the user the tools
 		// that they can use, also because the toolbar actions are 
 		// hard coded.
-		ToolBarManager toolMan = new ToolBarManager(SWT.FLAT|SWT.RIGHT);
+		ToolBarManager toolMan = new ToolBarManager(SWT.FLAT|SWT.RIGHT|SWT.WRAP);
 		final ToolBar          toolBar = toolMan.createControl(tools);
 		toolBar.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
 
-		ToolBarManager rightMan = new ToolBarManager(SWT.FLAT|SWT.RIGHT);
+		ToolBarManager rightMan = new ToolBarManager(SWT.FLAT|SWT.RIGHT|SWT.WRAP);
 		final ToolBar          rightBar = rightMan.createControl(tools);
 		rightBar.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
