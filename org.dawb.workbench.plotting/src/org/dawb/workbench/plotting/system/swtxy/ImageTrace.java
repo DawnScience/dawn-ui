@@ -1,6 +1,8 @@
 package org.dawb.workbench.plotting.system.swtxy;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -12,6 +14,8 @@ import org.dawb.common.services.IImageService.ImageServiceBean;
 import org.dawb.common.ui.image.PaletteFactory;
 import org.dawb.common.ui.plot.region.RegionBounds;
 import org.dawb.common.ui.plot.trace.IImageTrace;
+import org.dawb.common.ui.plot.trace.PaletteEvent;
+import org.dawb.common.ui.plot.trace.PaletteListener;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -133,9 +137,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		this.paletteData = paletteData;
 		createScaledImage(true, null);
 		repaint();
+		firePaletteDataListeners(paletteData);
 	}
 
-	
+
 	private Image     scaledImage;
 	private ImageData rawData;
 	private Range     xRangeCached, yRangeCached;
@@ -144,8 +149,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	/**
 	 * Whenever this is called the SWT image is created
 	 * and saved in the swtImage field.
+	 * 
+	 * TODO Use Downsample to reduce large images?
 	 */
-	private void createScaledImage(boolean force, final IProgressMonitor monitor) {
+	private synchronized void createScaledImage(boolean force, final IProgressMonitor monitor) {
 		
 		
 		boolean isRotated = getImageOrigin()==ImageOrigin.TOP_LEFT||getImageOrigin()==ImageOrigin.BOTTOM_RIGHT;
@@ -205,10 +212,16 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	@Override
 	protected void paintFigure(Graphics graphics) {
 		
-		if (scaledImage==null) createScaledImage(false, null);
-		
 		super.paintFigure(graphics);
-		
+
+		/**
+		 * This is not actually needed except that when there
+		 * are a number of opens of an image, e.g. when moving
+		 * around an h5 gallery with arrow keys, it looks smooth 
+		 * with this in.
+		 */
+		if (scaledImage==null) createScaledImage(false, null);
+
 		graphics.pushState();	
 		final XYRegionGraph graph  = (XYRegionGraph)xAxis.getParent();
 		final Point         loc    = graph.getRegionArea().getLocation();
@@ -219,7 +232,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	public void remove() {
 		if (scaledImage!=null)   scaledImage.dispose();
 		if (imageScaleJob!=null) imageScaleJob.cancel();
-		
+		if (paletteListeners!=null) paletteListeners.clear();
+		paletteListeners = null;
         clearAspect(xAxis);
         clearAspect(yAxis);
 		imageScaleJob = null;
@@ -291,17 +305,28 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	private boolean axisRedrawActive = true;
 	@Override
 	public void axisRangeChanged(Axis axis, Range old_range, Range new_range) {
-		if (!axisRedrawActive) return;
+		//updateAxisRange(axis);
 	}
-
+	/**
+	 * We do quite a bit here to ensure that 
+	 * not too many calls to createScaledImage(...) are made.
+	 */
 	@Override
 	public void axisRevalidated(Axis axis) {
+		if (axis.isYAxis()) updateAxisRange(axis);
+	}
+	
+	private void updateAxisRange(Axis axis) {
 		if (!axisRedrawActive) return;
+
 		if (imageScaleJob!=null) {
 			imageScaleJob.cancel();
 			imageScaleJob.schedule();
 		}
 	}
+
+
+	
 	private void setAxisRedrawActive(boolean b) {
 		this.axisRedrawActive = b;
 	}
@@ -372,6 +397,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		// method, we allow for the fact that the dataset is in a different orientation to 
 		// what is plotted.
 		this.image = image;
+
 		try {
 			setAxisRedrawActive(false);
 			performAutoscale();
@@ -386,6 +412,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 
 	public void setMin(Number min) {
 		this.min = min;
+		fireMinDataListeners();
 	}
 
 	public Number getMax() {
@@ -394,6 +421,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 
 	public void setMax(Number max) {
 		this.max = max;
+		fireMaxDataListeners();
 	}
 
 	@Override
@@ -408,6 +436,36 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	@Override
 	public Number getCalculatedMin() {
 		return getMin()!=null ? getMin() : getImageServiceBean().getMin();
+	}
+
+	private Collection<PaletteListener> paletteListeners;
+	@Override
+	public void addPaletteListener(PaletteListener pl) {
+		if (paletteListeners==null) paletteListeners = new HashSet<PaletteListener>(11);
+		paletteListeners.add(pl);
+	}
+
+	@Override
+	public void removePaletteListener(PaletteListener pl) {
+		if (paletteListeners==null) return;
+		paletteListeners.remove(pl);
+	}
+	
+	
+	private void firePaletteDataListeners(PaletteData paletteData) {
+		if (paletteListeners==null) return;
+		final PaletteEvent evt = new PaletteEvent(this, paletteData);
+		for (PaletteListener pl : paletteListeners) pl.paletteChanged(evt);
+	}
+	private void fireMinDataListeners() {
+		if (paletteListeners==null) return;
+		final PaletteEvent evt = new PaletteEvent(this, getPaletteData());
+		for (PaletteListener pl : paletteListeners) pl.minChanged(evt);
+	}
+	private void fireMaxDataListeners() {
+		if (paletteListeners==null) return;
+		final PaletteEvent evt = new PaletteEvent(this, getPaletteData());
+		for (PaletteListener pl : paletteListeners) pl.maxChanged(evt);
 	}
 
 }
