@@ -34,7 +34,7 @@ public class LineProfileTool extends ProfileTool {
 		if (monitor.isCanceled()) return;
 		if (image==null) return;
 		
-		if (region.getRegionType()!=RegionType.LINE) return;
+		if (!isRegionTypeSupported(region.getRegionType())) return;
 
 		final RegionBounds bounds = rbs==null ? region.getRegionBounds() : rbs;
 		if (bounds==null) return;
@@ -71,7 +71,13 @@ public class LineProfileTool extends ProfileTool {
 		
 	}
 
-	public RegionType getRegionType() {
+	@Override
+	protected boolean isRegionTypeSupported(RegionType type) {
+		return type==RegionType.LINE || type==RegionType.XAXIS_LINE || type == RegionType.YAXIS_LINE;
+	}
+
+	@Override
+	protected RegionType getCreateRegionType() {
 		return RegionType.LINE;
 	}
 

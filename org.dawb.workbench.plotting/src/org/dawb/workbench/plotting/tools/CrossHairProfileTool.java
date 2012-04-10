@@ -51,7 +51,6 @@ public class CrossHairProfileTool extends AbstractToolPage implements IRegionBou
 	private   ITraceListener         traceListener;
 	private   IRegion                xHair, yHair;
 	private   IAxis                  x1,x2;
-	private   Collection<IRegion>    staticRegions;
 	private   RunningJob             xUpdateJob, yUpdateJob;
 	private   RegionBounds           xBounds, yBounds;
 	
@@ -180,6 +179,10 @@ public class CrossHairProfileTool extends AbstractToolPage implements IRegionBou
         	bars.getToolBarManager().find(regionId).setVisible(isVisible);
         	bars.getToolBarManager().update(true);
         }
+        if (bars.getMenuManager().find(regionId)!=null) {
+        	bars.getMenuManager().find(regionId).setVisible(isVisible);
+        	bars.getMenuManager().update(true);
+        }
 	}
 
 	public void deactivate() {
@@ -194,10 +197,6 @@ public class CrossHairProfileTool extends AbstractToolPage implements IRegionBou
 		if (yHair!=null) {
 			yHair.setVisible(false);
 			yHair.removeRegionBoundsListener(this);
-		}
-		if (staticRegions!=null) {
-			for (IRegion reg : staticRegions) getPlottingSystem().removeRegion(reg); 
-			staticRegions.clear();
 		}
 		plotter.clear();
 
@@ -328,7 +327,6 @@ public class CrossHairProfileTool extends AbstractToolPage implements IRegionBou
 
 	private IRegion createStaticRegion(String nameStub, final RegionBounds bounds, final Color snapShotColor, final RegionType regionType) throws Exception {
 		
-		if (staticRegions==null) staticRegions = new HashSet<IRegion>(7);
 
 		final IRegion region = getPlottingSystem().createRegion(RegionUtils.getUniqueName(nameStub, getPlottingSystem()), regionType);
 		region.setRegionColor(snapShotColor);
@@ -350,8 +348,6 @@ public class CrossHairProfileTool extends AbstractToolPage implements IRegionBou
         		profile(region, evt.getRegionBounds(), false, snapShotColor, new NullProgressMonitor());
     		}
         });
-		
-		staticRegions.add(region);
 		
 		return region;
 	}

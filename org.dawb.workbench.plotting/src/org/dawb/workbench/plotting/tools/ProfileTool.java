@@ -102,7 +102,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IRegionBo
 		registered.addAll(traces);
 		
 		final ITrace first = traces.iterator().next();
-		if (getRegionType()==RegionType.LINE && first instanceof ILineTrace && region.getName().startsWith("Profile")) {
+		if (isRegionTypeSupported(RegionType.LINE) && first instanceof ILineTrace && region.getName().startsWith("Profile")) {
 			getControl().getDisplay().syncExec(new Runnable() {
 				public void run() {
 					region.setRegionColor(((ILineTrace)first).getTraceColor());
@@ -170,7 +170,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IRegionBo
 		
 		// Start with a selection of the right type
 		try {
-			getPlottingSystem().createRegion(RegionUtils.getUniqueName("Profile", getPlottingSystem()), getRegionType());
+			getPlottingSystem().createRegion(RegionUtils.getUniqueName("Profile", getPlottingSystem()), getCreateRegionType());
 		} catch (Exception e) {
 			logger.error("Cannot create region for profile tool!");
 		}
@@ -180,8 +180,13 @@ public abstract class ProfileTool extends AbstractToolPage  implements IRegionBo
 	 * 
 	 * @return
 	 */
-	protected abstract RegionType getRegionType();
-
+	protected abstract boolean isRegionTypeSupported(RegionType type);
+	
+	/**
+	 * 
+	 */
+    protected abstract RegionType getCreateRegionType();
+    
 	public void deactivate() {
 		super.deactivate();
 		if (getPlottingSystem()!=null) {
@@ -317,7 +322,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IRegionBo
 	
 	private synchronized void update(IRegion r, RegionBounds rb) {
 	
-		if (r!=null && r.getRegionType()!=getRegionType()) return; // Nothing to do.
+		if (r!=null && !isRegionTypeSupported(r.getRegionType())) return; // Nothing to do.
 
         if (isUpdateRunning)  updateProfiles.cancel();
          

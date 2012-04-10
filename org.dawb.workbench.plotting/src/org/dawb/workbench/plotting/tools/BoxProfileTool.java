@@ -103,7 +103,13 @@ public class BoxProfileTool extends ProfileTool {
 			
 	}
 	
-	public RegionType getRegionType() {
+	@Override
+	protected boolean isRegionTypeSupported(RegionType type) {
+		return type==RegionType.BOX;
+	}
+
+	@Override
+	protected RegionType getCreateRegionType() {
 		return RegionType.BOX;
 	}
 
