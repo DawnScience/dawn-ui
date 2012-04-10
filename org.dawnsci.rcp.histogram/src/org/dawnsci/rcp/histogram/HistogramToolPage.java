@@ -12,6 +12,8 @@ import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace.TraceType;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
+import org.dawb.common.ui.plot.trace.PaletteEvent;
+import org.dawb.common.ui.plot.trace.PaletteListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawnsci.rcp.functions.ColourSchemeContribution;
 import org.dawnsci.rcp.functions.TransferFunctionContribution;
@@ -53,7 +55,6 @@ public class HistogramToolPage extends AbstractToolPage {
 
 	// STATICS
 	private static final int SLIDER_STEPS = 1000;
-
 
 
 	// MODES
@@ -124,7 +125,7 @@ public class HistogramToolPage extends AbstractToolPage {
 	private SpinnerSliderSet minMaxValue;
 	private SelectionListener minMaxValueListener;
 
-	
+
 	// HISTOGRAM PLOT
 	private ExpandableComposite histogramExpander;
 	private Composite histogramComposite;
@@ -138,13 +139,16 @@ public class HistogramToolPage extends AbstractToolPage {
 	private ILineTrace redTrace;
 	private ILineTrace greenTrace;
 	private ILineTrace blueTrace;
-	
+
 
 
 	// HELPERS
 	private ExtentionPointManager extentionPointManager;
 	private UIJob imagerepaintJob;
 	private PaletteData palleteData;
+
+
+	private PaletteListener paletteListener;
 
 
 	/**
@@ -155,22 +159,51 @@ public class HistogramToolPage extends AbstractToolPage {
 		try {
 			histogramPlot = PlottingFactory.getPlottingSystem();
 
-			// Connect to the trace listener to deal with new images comming in
-			traceListener = new ITraceListener.Stub() {
-				@Override
-				public void tracesPlotted(TraceEvent evt) {
-
-					if (!(evt.getSource() instanceof List<?>)) {
-						return;
-					}
-
-					updateImage();
-				}
-			};
 
 		} catch (Exception ne) {
 			logger.error("Cannot locate any plotting systems!", ne);
 		}
+
+
+		// Connect to the trace listener to deal with new images coming in
+		traceListener = new ITraceListener.Stub() {
+			@Override
+			public void tracesPlotted(TraceEvent evt) {
+
+				if (!(evt.getSource() instanceof List<?>)) {
+					return;
+				}
+
+				updateImage();
+			}
+		};
+		
+		
+		// get a palette update listener to deal with pallete updates
+		paletteListener = new PaletteListener(){
+
+			@Override
+			public void paletteChanged(PaletteEvent event) {
+				System.out.println("paletteChanged");
+				palleteData = event.getPaletteData();		
+				updateHistogramToolElements(null, false);
+			}
+
+			@Override
+			public void minChanged(PaletteEvent event) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void maxChanged(PaletteEvent event) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		};
+
+
 
 		// Set up all the GUI element listeners
 		minMaxValueListener = new SelectionListener() {
@@ -253,8 +286,8 @@ public class HistogramToolPage extends AbstractToolPage {
 				composite.layout();
 			}
 		};
-				
-		
+
+
 		// Get all information from the extention points
 		extentionPointManager = new ExtentionPointManager();
 
@@ -291,17 +324,17 @@ public class HistogramToolPage extends AbstractToolPage {
 		// Set up the composite to hold all the information
 		composite = new Composite(parent, SWT.RESIZE);
 		composite.setLayout(new GridLayout(1, false));		
-		
+
 		// Set up the Colour scheme part of the GUI
 		colourSchemeExpander = new ExpandableComposite(composite, SWT.NONE);
 		colourSchemeExpander.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1));
 		colourSchemeExpander.setLayout(new GridLayout(1, false));
 		colourSchemeExpander.setText("Colour Scheme");
-		
+
 		colourSchemeComposite = new Composite(colourSchemeExpander, SWT.NONE);
 		colourSchemeComposite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1));
 		colourSchemeComposite.setLayout(new GridLayout(1, false));
-		
+
 		cmbColourMap = new CCombo(colourSchemeComposite, SWT.BORDER | SWT.READ_ONLY);
 		cmbColourMap.setToolTipText("Change the color scheme.");
 		cmbColourMap.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -316,14 +349,14 @@ public class HistogramToolPage extends AbstractToolPage {
 
 		colourSchemeExpander.setClient(colourSchemeComposite);
 		colourSchemeExpander.addExpansionListener(expansionAdapter);
-		
+
 
 		// Set up the per channel colour scheme part of the GUI		
 		perChannelExpander = new ExpandableComposite(composite, SWT.NONE);
 		perChannelExpander.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1));
 		perChannelExpander.setLayout(new GridLayout(1, false));
 		perChannelExpander.setText("Colour Scheme per Channel");
-		
+
 		perChannelComposite = new Composite(perChannelExpander, SWT.NONE);
 		perChannelComposite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1));
 		perChannelComposite.setLayout(new GridLayout(3, false));
@@ -376,14 +409,14 @@ public class HistogramToolPage extends AbstractToolPage {
 
 		perChannelExpander.setClient(perChannelComposite);
 		perChannelExpander.addExpansionListener(expansionAdapter);
-		
-		
+
+
 		// Set up the Brightness and contrast part of the GUI
 		bcExpander = new ExpandableComposite(composite, SWT.NONE);
 		bcExpander.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1));
 		bcExpander.setLayout(new GridLayout(1, false));
 		bcExpander.setText("Brightness and Contrast");
-		
+
 		bcComposite = new Composite(bcExpander, SWT.NONE);
 		bcComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		bcComposite.setLayout(new GridLayout(1, false));
@@ -393,14 +426,14 @@ public class HistogramToolPage extends AbstractToolPage {
 
 		bcExpander.setClient(bcComposite);
 		bcExpander.addExpansionListener(expansionAdapter);
-		
-		
+
+
 		// Set up the Min Max range part of the GUI
 		rangeExpander = new ExpandableComposite(composite, SWT.NONE);
 		rangeExpander.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1));
 		rangeExpander.setLayout(new GridLayout(1, false));
 		rangeExpander.setText("Histogram Range");
-		
+
 		rangeComposite = new Composite(rangeExpander, SWT.NONE);
 		rangeComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		rangeComposite.setLayout(new GridLayout(1, false));
@@ -410,19 +443,19 @@ public class HistogramToolPage extends AbstractToolPage {
 
 		rangeExpander.setClient(rangeComposite);
 		rangeExpander.addExpansionListener(expansionAdapter);
-		
-		
-		
+
+
+
 		// Set up the histogram plot part of the GUI
 		histogramExpander = new ExpandableComposite(composite, SWT.NONE);
 		histogramExpander.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		histogramExpander.setLayout(new GridLayout(1, false));
 		histogramExpander.setText("Histogram Plot");
-		
+
 		histogramComposite = new Composite(histogramExpander, SWT.NONE);
 		histogramComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		histogramComposite.setLayout(new GridLayout(1, false));
-		
+
 		final IPageSite site = getSite();
 
 		histogramPlot.createPlotPart( histogramComposite, 
@@ -434,7 +467,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 		histogramExpander.setClient(histogramComposite);
 		histogramExpander.addExpansionListener(expansionAdapter);
-		
+
 		// Activate this so the initial screen has content
 		activate();		
 	}
@@ -498,7 +531,7 @@ public class HistogramToolPage extends AbstractToolPage {
 				histoMin = image.getCalculatedMin().doubleValue();
 				break;
 			}
-
+			
 			// Update the paletteData
 			palleteData = image.getPaletteData();
 
@@ -507,22 +540,42 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			// update all based on slider positions
 			updateHistogramToolElements(null);
+			
+			// fianlly tie in the listener to the paletedata changes
+			image.addPaletteListener(paletteListener);
+		}				
+	}
+	
+	private void removeImagePalleteListener() {
+		if (getControl()==null) return; // We cannot plot unless its been created.
+
+		Collection<ITrace> traces = getPlottingSystem().getTraces(IImageTrace.class);
+		image = traces!=null && traces.size()>0 ? (IImageTrace)traces.iterator().next():null;
+
+		if (image != null) {
+
+			image.removePaletteListener(paletteListener);
 		}				
 	}
 
+	
+	private void updateHistogramToolElements(SelectionEvent event) {
+		updateHistogramToolElements(event, true);
+	}
+	
 	/**
 	 * Update everything based on the new slider positions  
 	 * @param event 
 	 */
-	private void updateHistogramToolElements(SelectionEvent event) {
+	private void updateHistogramToolElements(SelectionEvent event, boolean repaintImage) {
 		// update the ranges
 		updateRanges(event);
 
 		// plot the histogram
 		plotHistogram();
 
-		// Schedule the image repaint to occur
-		imagerepaintJob.schedule();
+		// repaint the image if required
+		if(repaintImage) imagerepaintJob.schedule();
 	}
 
 
@@ -552,7 +605,7 @@ public class HistogramToolPage extends AbstractToolPage {
 	 * @param event 
 	 */
 	private void updateRanges(SelectionEvent event) {
-		
+
 		// set the minmax values
 		minMaxValue.setMin(MIN_LABEL, rangeMin);
 		minMaxValue.setMax(MIN_LABEL, rangeMax);
@@ -674,7 +727,11 @@ public class HistogramToolPage extends AbstractToolPage {
 	 */
 	public void deactivate() {
 		super.deactivate();
-		if (getPlottingSystem()!=null) getPlottingSystem().removeTraceListener(traceListener);
+		
+		if (getPlottingSystem()!=null) {
+			removeImagePalleteListener();
+			getPlottingSystem().removeTraceListener(traceListener);
+		}
 	}
 
 
