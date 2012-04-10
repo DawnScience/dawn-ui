@@ -176,13 +176,18 @@ public class XYRegionGraph extends XYGraph {
 	}
 	
 	public void layout() {
+		
 		super.layout();
 		
 		for (Axis axis : getXAxisList()) {
-			if (axis instanceof AspectAxis) ((AspectAxis)axis).checkBounds();
+			if (axis instanceof AspectAxis) {
+				((AspectAxis)axis).checkBounds();
+			}
 		}
 		for (Axis axis : getYAxisList()) {
-			if (axis instanceof AspectAxis) ((AspectAxis)axis).checkBounds();
+			if (axis instanceof AspectAxis) {
+				((AspectAxis)axis).checkBounds();
+			}
 		}
 		
 		if(getPlotArea() != null && getPlotArea().isVisible()){
@@ -196,6 +201,7 @@ public class XYRegionGraph extends XYGraph {
 			getPlotArea().setBounds(plotAreaBound);
 
 		}
+		
 	}
 
 	public void setKeepAspect(boolean checked) {

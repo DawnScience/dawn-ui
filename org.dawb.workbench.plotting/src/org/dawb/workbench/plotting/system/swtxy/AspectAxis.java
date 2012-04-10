@@ -3,10 +3,14 @@ package org.dawb.workbench.plotting.system.swtxy;
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.swt.xygraph.linearscale.Range;
+import org.csstudio.swt.xygraph.linearscale.AbstractScale.LabelSide;
 import org.dawb.common.util.text.NumberUtils;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
+import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.swt.widgets.Display;
 
 /**
  * An axis which can 
@@ -28,31 +32,39 @@ public class AspectAxis extends Axis {
 	
 	public void checkBounds() {
 		
-		final Rectangle bounds = getBounds();
-		if (relativeTo == null) {
-			super.setBounds(bounds);
-			return;
-		}
-		
-		if (!keepAspect) {
-			super.setBounds(bounds);
-			return;
-		}
+		Rectangle calcBounds = getBounds().getCopy();
+		if (relativeTo == null) return;
+		if (!keepAspect)        return;
 		
 		// We keep aspect if the other axis has a larger range than this axis.
-		final double  thisRange  = getInterval(getRange());
-		final double  relRange   = getInterval(relativeTo.getRange());
-		final boolean equal      = NumberUtils.equalsPercent(thisRange, relRange, 0.001);
-		final boolean isOtherReallyLonger = isLonger(bounds, getGraph().getPlotArea().getBounds());
-		final boolean isRelative  = equal && !isOtherReallyLonger; // The parent layouts ys second so x is the right size.
-		final boolean isOtherLarger= relRange>thisRange;
+		final double  thisRange     = getInterval(getRange());
+		final double  relRange      = getInterval(relativeTo.getRange());
+		final boolean equal         = NumberUtils.equalsPercent(thisRange, relRange, 0.001);
+		final boolean isOtherReallyLonger = isLonger(calcBounds, getGraph().getPlotArea().getBounds());
+		final boolean isRelative    = equal && !isOtherReallyLonger; // The parent layouts ys second so x is the right size.
+		final boolean isOtherLarger = relRange>thisRange;
 		
 		if (isRelative || isOtherLarger) {
-			setRelativeAxisBounds(bounds, thisRange, relRange);
-			return;
-		}
+			setRelativeAxisBounds(calcBounds, thisRange, relRange);
+			setBounds(calcBounds);
+		}		
 		
-		super.setBounds(bounds);
+		// y correction for companion axis
+		if (!isHorizontal() && getTickLablesSide() == LabelSide.Primary) { 
+			
+			// We have to ensure that our own ticks have been layed out
+			// because we use their size to set the location of the
+			// relative to field.
+			super.layoutTicks();
+			
+			// Make relativeTo appear near to bottom y axis
+			final Rectangle clientArea = getParent().getBounds();
+			Dimension yAxisSize = ((IFigure)getChildren().get(1)).getSize();
+			final Rectangle relBounds = relativeTo.getBounds().getCopy();
+			relBounds.y = clientArea.y + yAxisSize.height - 10;
+			relativeTo.setBounds(relBounds);
+		}
+
 	}
 
 	private XYGraph getGraph() {
@@ -72,15 +84,10 @@ public class AspectAxis extends Axis {
 		return len2>=len1;
 	}
 
-	private void setRelativeAxisBounds (final Rectangle sugBounds, 
+	private void setRelativeAxisBounds (final Rectangle origBounds, 
 										final double    thisRange, 
 										final double    relRange) {
-
-		/*
-		final int start  = relativeTo.getValuePosition(relativeTo.getRange().getLower(), false);
-		final int end    = relativeTo.getValuePosition(relativeTo.getRange().getUpper(), false);
-		final int span   = Math.max(start,  end)-Math.min(start, end); // pixels
-		 */
+		
 		final Rectangle relBounds = relativeTo.getBounds();
 		int      realPixels = relativeTo.isYAxis() ? relBounds.height : relBounds.width;
 		realPixels-= 2*relativeTo.getMargin();
@@ -89,11 +96,9 @@ public class AspectAxis extends Axis {
 		int       range     = (int)Math.round(thisRange*pixRatio);    // span for thisRange of them
 		range+=2*getMargin();
 		
-		Rectangle bounds = sugBounds.getCopy();
-		if (isYAxis()) bounds.height = range; 
-		else           bounds.width  = range;
-
-		super.setBounds(bounds);
+		if (isYAxis()) origBounds.height = range; 
+		else           origBounds.width  = range;
+		
 	}
 
 	/**

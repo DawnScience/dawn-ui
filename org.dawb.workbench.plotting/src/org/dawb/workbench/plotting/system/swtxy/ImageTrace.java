@@ -195,6 +195,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		final Rectangle     bounds = graph.getRegionArea().getBounds();
 		
 		if (monitor!=null && monitor.isCanceled()) return;
+		if (bounds.width<1 || bounds.height<1) return;
+		
 		ImageData data = rawData.scaledTo(bounds.width, bounds.height);
 		if (monitor!=null && monitor.isCanceled()) return;
 		this.scaledImage = new Image(Display.getDefault(), data);
