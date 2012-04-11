@@ -127,7 +127,6 @@ public class LineTrace extends Trace {
 			points.addPoint(startBase);
 			
 			graphics.fillPolygon(points);
-			System.out.println("Size of points list :" + points.size());
 			break;
 			
 		default:

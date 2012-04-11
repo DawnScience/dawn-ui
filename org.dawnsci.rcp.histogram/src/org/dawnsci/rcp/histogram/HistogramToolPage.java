@@ -184,7 +184,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			@Override
 			public void paletteChanged(PaletteEvent event) {
-				System.out.println("paletteChanged");
+				logger.debug("paletteChanged");
 				palleteData = event.getPaletteData();		
 				updateHistogramToolElements(null, false);
 			}
@@ -210,7 +210,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent event) {
-				System.out.println("minMaxValueListener");
+				logger.debug("minMaxValueListener");
 				histoMax = minMaxValue.getValue(MAX_LABEL);
 				histoMin = minMaxValue.getValue(MIN_LABEL);
 				if (histoMax < histoMin) {
@@ -229,7 +229,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent event) {
-				System.out.println("brightnessContrastListener");
+				logger.debug("brightnessContrastListener");
 				histoMax = brightnessContrastValue.getValue(BRIGHTNESS_LABEL)+
 						brightnessContrastValue.getValue(CONTRAST_LABEL)/2.0;
 				histoMin = brightnessContrastValue.getValue(BRIGHTNESS_LABEL)-
@@ -250,7 +250,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent event) {
-				System.out.println("colourSelectionListener");
+				logger.debug("colourSelectionListener");
 				buildPalleteData();
 				updateHistogramToolElements(event);
 			}
@@ -265,7 +265,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent event) {
-				System.out.println("colourSchemeListener");
+				logger.debug("colourSchemeListener");
 				updateColourScheme();
 				buildPalleteData();
 				updateHistogramToolElements(event);
@@ -282,7 +282,7 @@ public class HistogramToolPage extends AbstractToolPage {
 		expansionAdapter = new ExpansionAdapter() {
 			@Override
 			public void expansionStateChanged(ExpansionEvent e) {
-				System.out.println("perChannelExpander");
+				logger.debug("perChannelExpander");
 				composite.layout();
 			}
 		};
