@@ -56,7 +56,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	private PaletteData    paletteData;
 	private ImageOrigin    imageOrigin;
     private Number         min, max;
-	private DownsampleType downsampleType;
+	private DownsampleType downsampleType=DownsampleType.MEAN;
+	private int            currentDownSampleBin=-1;
+	private int[]          currentSliceDims;
 
 	private Job imageScaleJob; // Needed for large images on slow systems.
 	
@@ -94,7 +96,20 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		this.imageScaleJob = new Job("Create scaled image") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				createScaledImage(false, monitor);
+				
+				boolean force = false;
+				
+				// If we just changed downsample scale, we force the update.
+			    // This allows user resizes of the plot area to be picked up
+				// and the larger data size used if it fits.
+                if (currentDownSampleBin>0 && currentSliceDims!=null) {
+            		final XYRegionGraph graph  = (XYRegionGraph)getxAxis().getParent();
+            		final Rectangle     bounds = graph.getRegionArea().getBounds();
+                	int bin = getDownsampleBin(currentSliceDims, bounds);
+                	if (bin!=currentDownSampleBin) force = true;
+                }
+				
+				createScaledImage(force, monitor);
 				return Status.OK_STATUS;
 			}
 		};
@@ -128,10 +143,6 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		return image;
 	}
 
-	public void setImage(AbstractDataset image) {
-		this.image = image;
-	}
-
 	public PaletteData getPaletteData() {
 		return paletteData;
 	}
@@ -144,9 +155,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	}
 
 
-	private Image     scaledImage;
-	private ImageData rawData;
-	private Range     xRangeCached, yRangeCached;
+	
+	private Image            scaledImage;
+	private ImageData        imageData;
+	private Range            xRangeCached, yRangeCached;
 	private ImageServiceBean lastImageServiceBean;
 	
 	/**
@@ -174,13 +186,13 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		final Rectangle     bounds = graph.getRegionArea().getBounds();
 		if (bounds.width<1 || bounds.height<1) return;
 
-		if (!isSameRange || rawData==null || force) {
+		if (!isSameRange || imageData==null || force) {
 			if (monitor!=null && monitor.isCanceled()) return;
 			final RegionBounds regionBounds = new RegionBounds(new double[]{xRange.getLower(), yRange.getLower()}, 
 	                                                           new double[]{xRange.getUpper(), yRange.getUpper()});
 			AbstractDataset slice = slice(regionBounds);
-			//slice = getDownsampled(slice); // TODO
-			
+		    slice = getDownsampled(slice, bounds); // TODO
+		    
 			final IImageService service = (IImageService)PlatformUI.getWorkbench().getService(IImageService.class);
 			if (monitor!=null && monitor.isCanceled()) return;
 			try {
@@ -192,7 +204,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 				if (getMin()!=null) bean.setMin(min);
 				if (getMax()!=null) bean.setMax(max);
 				if (monitor!=null && monitor.isCanceled()) return;
-				this.rawData   = service.getImageData(bean);
+				this.imageData   = service.getImageData(bean);
 				this.lastImageServiceBean = bean;
 			} catch (Exception e) {
 				logger.error("Cannot create image from data!", e);
@@ -201,7 +213,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 				
 		if (monitor!=null && monitor.isCanceled()) return;
 		
-		ImageData data = rawData.scaledTo(bounds.width, bounds.height);
+		ImageData data = imageData.scaledTo(bounds.width, bounds.height);
 		if (monitor!=null && monitor.isCanceled()) return;
 		this.scaledImage = new Image(Display.getDefault(), data);
 		
@@ -215,6 +227,48 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		});
 	}
 	
+	private AbstractDataset getDownsampled(AbstractDataset slice, Rectangle bounds) {
+		
+		// Down sample, no point histogramming the whole thing
+        final int bin = getDownsampleBin(slice.getShape(), bounds);
+        this.currentDownSampleBin = bin;
+        this.currentSliceDims     = slice.getShape();
+        logger.info("Downsample bin used = "+bin);
+		if (bin==1) return slice; // nothing to downsample
+		
+		final Downsample downSampler = new Downsample(getDownsampleTypeDiamond(), new int[]{bin,bin});
+		List<AbstractDataset>   sets = downSampler.value(slice);
+		return sets.get(0);
+
+	}
+
+	/**
+	 * Returns the bin for downsampling, either 1,2,4 or 8 currently.
+	 * @param slice
+	 * @param bounds
+	 * @return
+	 */
+	private int getDownsampleBin(int[] sliceShape, Rectangle bounds) {
+		int rwidth  = sliceShape[1];
+		int rheight = sliceShape[0];
+ 
+		int iwidth  = bounds.width;
+		int iheight = bounds.height;
+
+		if (iwidth>(rwidth/2) || iheight>(rheight/2)) {
+			return 1;
+		}
+
+		if (iwidth>(rwidth/4) || iheight>(rheight/4)) {
+			return 2;
+		}
+
+		if (iwidth>(rwidth/8) || iheight>(rheight/8)) {
+			return 4;
+		}
+		return 8;
+	}
+
 	@Override
 	protected void paintFigure(Graphics graphics) {
 		
@@ -323,8 +377,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	}
 	
 	private void updateAxisRange(Axis axis) {
-		if (!axisRedrawActive) return;
-
+		if (!axisRedrawActive) return;		
+		
 		if (imageScaleJob!=null) {
 			imageScaleJob.cancel();
 			imageScaleJob.schedule();
@@ -403,8 +457,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		// method, we allow for the fact that the dataset is in a different orientation to 
 		// what is plotted.
 		this.image = image;
-
-		try {
+ 		try {
 			setAxisRedrawActive(false);
 			performAutoscale();
 		} finally {
@@ -412,6 +465,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		}
        
 	}
+
 	public Number getMin() {
 		return min;
 	}
@@ -485,6 +539,20 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		this.downsampleType = type;
 		createScaledImage(true, null);
 		repaint();
+	}
+
+	private DownsampleMode getDownsampleTypeDiamond() {
+		switch(getDownsampleType()) {
+		case MEAN:
+			return DownsampleMode.MEAN;
+		case MAXIMUM:
+			return DownsampleMode.MAXIMUM;
+		case MINIMUM:
+			return DownsampleMode.MINIMUM;
+		case POINT:
+			return DownsampleMode.POINT;
+		}
+		return DownsampleMode.MEAN;
 	}
 
 }

@@ -58,10 +58,10 @@ public class AspectAxis extends Axis {
 			super.layoutTicks();
 			
 			// Make relativeTo appear near to bottom y axis
-			final Rectangle clientArea = getParent().getBounds();
-			Dimension yAxisSize = ((IFigure)getChildren().get(1)).getSize();
+			IFigure yTicks = (IFigure)getChildren().get(1);
+			Dimension yAxisSize = yTicks.getSize();
 			final Rectangle relBounds = relativeTo.getBounds().getCopy();
-			relBounds.y = clientArea.y + yAxisSize.height - 10;
+			relBounds.y = getBounds().y + yAxisSize.height - 10;
 			relativeTo.setBounds(relBounds);
 		}
 
