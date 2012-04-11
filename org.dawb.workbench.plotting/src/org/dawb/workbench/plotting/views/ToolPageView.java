@@ -625,7 +625,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	 * @see org.eclipse.ui.IPartListener#partOpened(org.eclipse.ui.IWorkbenchPart)
 	 */
 	public void partOpened(IWorkbenchPart part) {
-		// Do nothing by default.
+		toolUpdate = true;
 	}
 
 	/**
@@ -991,6 +991,11 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		pages.put(tool.getTitle(), rec);
 	}
 	
+	private int getNumberCachedTools(IWorkbenchPart part) {
+		Map<String,PageRec> pages = recs.get(getString(part));
+		return pages.size();
+	}
+	
 	private String getString(IWorkbenchPart part) {
 		if (part instanceof IEditorPart) {
 			final IEditorInput input = ((IEditorPart)part).getEditorInput();
@@ -1004,17 +1009,18 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	}
 	
 	private boolean updatingActivated = false;
-
+    private boolean toolUpdate        = true;
 	public void toolChanged(ToolChangeEvent evt) {
 		if (updatingActivated) return;
-		toolUpdate(evt.getPart(), true);
+		toolUpdate = true;
+		toolUpdate(evt.getPart());
 	}
 	
 	public void partActivated(IWorkbenchPart part) {
-		toolUpdate(part, false);
+		toolUpdate(part);
 	}
 
-	protected void toolUpdate(IWorkbenchPart part, boolean isToolChange) {
+	protected void toolUpdate(IWorkbenchPart part) {
 		if (!isImportant(part)) return;
 
 		if (updatingActivated) return;
@@ -1033,7 +1039,10 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
     			rec = createPage(part);
     		}
     		
-    		if (!isToolChange && rec.tool instanceof EmptyTool) return; // No point switching to empty tool
+    		if (!toolUpdate && rec.tool instanceof EmptyTool) {
+    			return; // No point switching to empty tool if other tools are there.
+    		}
+			toolUpdate = false;
 
     		// Show the page.
     		if (rec != null) {
