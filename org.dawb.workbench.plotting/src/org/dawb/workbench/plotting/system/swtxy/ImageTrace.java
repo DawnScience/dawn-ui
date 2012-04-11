@@ -16,6 +16,7 @@ import org.dawb.common.ui.plot.region.RegionBounds;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.PaletteEvent;
 import org.dawb.common.ui.plot.trace.PaletteListener;
+import org.dawb.common.ui.plot.trace.IImageTrace.DownsampleType;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -35,6 +36,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.function.Downsample;
+import uk.ac.diamond.scisoft.analysis.dataset.function.DownsampleMode;
 
 /**
  * A trace which draws an image to the plot.
@@ -46,14 +49,14 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	
 	private static final Logger logger = LoggerFactory.getLogger(ImageTrace.class);
 
-	private String name;
-	private Axis   xAxis;
-	private Axis   yAxis;
+	private String         name;
+	private Axis           xAxis;
+	private Axis           yAxis;
 	private AbstractDataset  image;
-	private PaletteData paletteData;
-	private ImageOrigin imageOrigin;
-    private Number min, max;
-
+	private PaletteData    paletteData;
+	private ImageOrigin    imageOrigin;
+    private Number         min, max;
+	private DownsampleType downsampleType;
 
 	private Job imageScaleJob; // Needed for large images on slow systems.
 	
@@ -167,11 +170,16 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		
 		final boolean isSameRange = (xRangeCached!=null && xRangeCached.equals(xRange) && yRangeCached!=null && yRangeCached.equals(yRange));
 		
+		final XYRegionGraph graph  = (XYRegionGraph)x.getParent();
+		final Rectangle     bounds = graph.getRegionArea().getBounds();
+		if (bounds.width<1 || bounds.height<1) return;
+
 		if (!isSameRange || rawData==null || force) {
 			if (monitor!=null && monitor.isCanceled()) return;
 			final RegionBounds regionBounds = new RegionBounds(new double[]{xRange.getLower(), yRange.getLower()}, 
 	                                                           new double[]{xRange.getUpper(), yRange.getUpper()});
 			AbstractDataset slice = slice(regionBounds);
+			//slice = getDownsampled(slice); // TODO
 			
 			final IImageService service = (IImageService)PlatformUI.getWorkbench().getService(IImageService.class);
 			if (monitor!=null && monitor.isCanceled()) return;
@@ -190,12 +198,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 				logger.error("Cannot create image from data!", e);
 			}
 		}
-		
-		final XYRegionGraph graph  = (XYRegionGraph)x.getParent();
-		final Rectangle     bounds = graph.getRegionArea().getBounds();
-		
+				
 		if (monitor!=null && monitor.isCanceled()) return;
-		if (bounds.width<1 || bounds.height<1) return;
 		
 		ImageData data = rawData.scaledTo(bounds.width, bounds.height);
 		if (monitor!=null && monitor.isCanceled()) return;
@@ -441,6 +445,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	}
 
 	private Collection<PaletteListener> paletteListeners;
+
 	@Override
 	public void addPaletteListener(PaletteListener pl) {
 		if (paletteListeners==null) paletteListeners = new HashSet<PaletteListener>(11);
@@ -468,6 +473,18 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		if (paletteListeners==null) return;
 		final PaletteEvent evt = new PaletteEvent(this, getPaletteData());
 		for (PaletteListener pl : paletteListeners) pl.maxChanged(evt);
+	}
+
+	@Override
+	public DownsampleType getDownsampleType() {
+		return downsampleType;
+	}
+	
+	@Override
+	public void setDownsampleType(DownsampleType type) {
+		this.downsampleType = type;
+		createScaledImage(true, null);
+		repaint();
 	}
 
 }
