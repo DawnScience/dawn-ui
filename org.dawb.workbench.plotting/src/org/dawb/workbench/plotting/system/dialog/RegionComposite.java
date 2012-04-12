@@ -95,7 +95,7 @@ public class RegionComposite extends Composite {
 		alpha.setSelection(80);
 
 		this.motile = new Button(this, SWT.CHECK);
-		motile.setText("   Motile   ");		
+		motile.setText("   Mobile   ");		
 		motile.setToolTipText("When true, this selection can be resized and moved around the graph.");
 		motile.setLayoutData(new GridData(0, 0, false, false, 2, 1));
 		motile.setSelection(true);

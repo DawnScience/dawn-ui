@@ -39,6 +39,11 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 		updateConnectionBounds();
 	}
 	
+	@Override
+	public boolean isMobile() {
+		return false; // You cannot move this figure yet...
+	}
+	
 	public void setLineWidth(int width) {
 		super.setLineWidth(width);
 		updateConnectionBounds();
