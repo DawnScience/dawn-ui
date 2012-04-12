@@ -155,6 +155,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 				    if (action!=null && action.isVisible() && action instanceof ActionContributionItem) {
 				    	ActionContributionItem iaction = (ActionContributionItem)action;
 				    	iaction.getAction().setChecked(!iaction.getAction().isChecked());
+				    	iaction.getAction().run();
 				    }
  				}
 			}
