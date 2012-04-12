@@ -469,7 +469,9 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 
 	@Override
 	public void setFocus() {
-		
+		if (plottingSystem!=null) {
+			plottingSystem.setFocus();
+		}
 	}
 
 	@Override
