@@ -165,7 +165,6 @@ class RingSelection extends AbstractSelectionRegion {
 		gc.setForegroundColor(getRegionColor());
 		gc.setAlpha(getAlpha());
 		gc.drawOval(bounds);
-	
 	}
 
 	
@@ -175,7 +174,7 @@ class RingSelection extends AbstractSelectionRegion {
 	
 	protected void fireRoiSelection() {
 		final double[] r1 = center.getRealValue();
-		//TODO SectorROI I think...
+//FIXME TODO SectorROI I think...
 //		final RectangularROI roi = new RectangularROI(r1[0], r1[1], r2[0]-r1[0], r4[1]-r1[1], 0);
 //		if (getSelectionProvider()!=null) getSelectionProvider().setSelection(new StructuredSelection(roi));
 	}

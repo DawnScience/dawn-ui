@@ -7,6 +7,13 @@ import org.dawb.workbench.plotting.system.swtxy.util.Draw2DUtils;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.MouseListener;
 
+/**
+ * You do not have to use this class for the figure which fills the region and
+ * is not a control point, but it can be handy if you do.
+ * 
+ * @author fcp94556
+ *
+ */
 public class RegionFillFigure extends Figure {
 
 	public void setMobile(final boolean mobile) {

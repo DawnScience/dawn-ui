@@ -24,6 +24,7 @@ public class SelectionRegionFactory {
 		SUPPORTED_REGIONS.add(RegionType.YAXIS);
 		SUPPORTED_REGIONS.add(RegionType.XAXIS_LINE);
 		SUPPORTED_REGIONS.add(RegionType.YAXIS_LINE);
+		SUPPORTED_REGIONS.add(RegionType.FREE_DRAW);
 	}
 
 	/**
@@ -51,6 +52,9 @@ public class SelectionRegionFactory {
 			
 		} else if (regionType==RegionType.RING) {
 			region = new RingSelection(name, x, y);
+
+		} else if (regionType==RegionType.FREE_DRAW) {
+			region = new FreeDrawSelection(name, x, y);
 
 		} else if (regionType==RegionType.XAXIS || regionType==RegionType.YAXIS || regionType==RegionType.XAXIS_LINE || regionType==RegionType.YAXIS_LINE) {
 			region = new AxisSelection(name, x, y, regionType);
