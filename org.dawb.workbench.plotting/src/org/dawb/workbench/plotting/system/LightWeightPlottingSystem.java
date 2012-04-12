@@ -27,6 +27,7 @@ import org.csstudio.swt.xygraph.linearscale.AbstractScale.LabelSide;
 import org.csstudio.swt.xygraph.linearscale.LinearScale.Orientation;
 import org.csstudio.swt.xygraph.undo.AddAnnotationCommand;
 import org.csstudio.swt.xygraph.undo.RemoveAnnotationCommand;
+import org.csstudio.swt.xygraph.undo.ZoomType;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.IAxis;
 import org.dawb.common.ui.plot.PlotType;
@@ -142,7 +143,11 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		xyCanvas.addMouseWheelListener(new MouseWheelListener() {
 			@Override
 			public void mouseScrolled(MouseEvent e) {
-				if (xyGraph!=null) xyGraph.repaint();
+				if (xyGraph==null) return;
+				if (e.count==0)    return;
+				int direction = e.count > 0 ? 1 : -1;
+				xyGraph.setZoomLevel(e, direction*0.1d);
+				xyGraph.repaint();
 			}	
 		});
 		
