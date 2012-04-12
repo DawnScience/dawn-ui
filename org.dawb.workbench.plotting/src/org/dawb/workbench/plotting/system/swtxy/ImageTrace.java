@@ -110,6 +110,13 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
                 }
 				
 				createScaledImage(force, monitor);
+				
+				if (Display.getDefault()!=null) Display.getDefault().asyncExec(new Runnable() {
+					public void run() {
+						repaint();
+					}
+				});
+
 				return Status.OK_STATUS;
 			}
 		};
@@ -160,28 +167,31 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	private ImageData        imageData;
 	private Range            xRangeCached, yRangeCached;
 	private ImageServiceBean lastImageServiceBean;
-	
 	/**
 	 * Whenever this is called the SWT image is created
 	 * and saved in the swtImage field.
 	 * 
 	 * TODO Use Downsample to reduce large images?
+	 * 
+	 * Do not synchronized this method - it can cause a race condition on linux only.
 	 */
-	private synchronized void createScaledImage(boolean force, final IProgressMonitor monitor) {
+	private void createScaledImage(boolean force, final IProgressMonitor monitor) {
 		
-		
+		if (Thread.currentThread()==Display.getDefault().getThread()) {
+			this.imageScaleJob.cancel();
+		}
 		boolean isRotated = getImageOrigin()==ImageOrigin.TOP_LEFT||getImageOrigin()==ImageOrigin.BOTTOM_RIGHT;
-		
+
 		final Axis  x      = isRotated ? yAxis : xAxis;
 		final Axis  y      = isRotated ? xAxis : yAxis;
-		
+
 		final Range xRange = x.getRange();
 		final Range yRange = y.getRange();
-		
+
 		if (monitor!=null && monitor.isCanceled()) return;
-		
+
 		final boolean isSameRange = (xRangeCached!=null && xRangeCached.equals(xRange) && yRangeCached!=null && yRangeCached.equals(yRange));
-		
+
 		final XYRegionGraph graph  = (XYRegionGraph)x.getParent();
 		final Rectangle     bounds = graph.getRegionArea().getBounds();
 		if (bounds.width<1 || bounds.height<1) return;
@@ -189,10 +199,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		if (!isSameRange || imageData==null || force) {
 			if (monitor!=null && monitor.isCanceled()) return;
 			final RegionBounds regionBounds = new RegionBounds(new double[]{xRange.getLower(), yRange.getLower()}, 
-	                                                           new double[]{xRange.getUpper(), yRange.getUpper()});
+					                                           new double[]{xRange.getUpper(), yRange.getUpper()});
 			AbstractDataset slice = slice(regionBounds);
-		    slice = getDownsampled(slice, bounds); // TODO
-		    
+			slice = getDownsampled(slice, bounds); // TODO
+
 			final IImageService service = (IImageService)PlatformUI.getWorkbench().getService(IImageService.class);
 			if (monitor!=null && monitor.isCanceled()) return;
 			try {
@@ -210,21 +220,15 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 				logger.error("Cannot create image from data!", e);
 			}
 		}
-				
+
 		if (monitor!=null && monitor.isCanceled()) return;
-		
+
 		ImageData data = imageData.scaledTo(bounds.width, bounds.height);
 		if (monitor!=null && monitor.isCanceled()) return;
 		this.scaledImage = new Image(Display.getDefault(), data);
-		
+
 		xRangeCached = xRange;
-		yRangeCached = yRange;
-		
-		if (monitor!=null && Display.getDefault()!=null) Display.getDefault().asyncExec(new Runnable() {
-			public void run() {
-				repaint();
-			}
-		});
+		yRangeCached = yRange;		
 	}
 	
 	private AbstractDataset getDownsampled(AbstractDataset slice, Rectangle bounds) {
