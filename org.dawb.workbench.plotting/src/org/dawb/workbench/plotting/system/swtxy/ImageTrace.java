@@ -16,7 +16,6 @@ import org.dawb.common.ui.plot.region.RegionBounds;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.PaletteEvent;
 import org.dawb.common.ui.plot.trace.PaletteListener;
-import org.dawb.common.ui.plot.trace.IImageTrace.DownsampleType;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -59,6 +58,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	private DownsampleType downsampleType=DownsampleType.MEAN;
 	private int            currentDownSampleBin=-1;
 	private int[]          currentSliceDims;
+	private boolean        rehistogram;
 
 	private Job imageScaleJob; // Needed for large images on slow systems.
 	
@@ -81,7 +81,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 
 		this.paletteData = PaletteFactory.getPalette(Activator.getDefault().getPreferenceStore().getInt(PlottingConstants.P_PALETTE));	
 		this.imageOrigin = IImageTrace.ImageOrigin.forLabel(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.ORIGIN_PREF));
-				
+	    this.rehistogram = Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.HISTO);
+	    		
 		xAxis.addListener(this);
 		yAxis.addListener(this);
 		
@@ -211,8 +212,15 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 				bean.setOrigin(imageOriginaMap.get(getImageOrigin()));
 				bean.setPalette(getPaletteData());
 				bean.setMonitor(monitor);
-				if (getMin()!=null) bean.setMin(min);
-				if (getMax()!=null) bean.setMax(max);
+				if (getMin()!=null) bean.setMin(getMin());
+				if (getMax()!=null) bean.setMax(getMax());
+				
+				if (lastImageServiceBean!=null && !rehistogram) { // Avoids changing colouring to 
+					                                              // max and min of new selection.
+					if (bean.getMax()==null) bean.setMax(lastImageServiceBean.getMax());
+					if (bean.getMin()==null) bean.setMin(lastImageServiceBean.getMin());
+				}
+				
 				if (monitor!=null && monitor.isCanceled()) return;
 				this.imageData   = service.getImageData(bean);
 				this.lastImageServiceBean = bean;
@@ -461,6 +469,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		// method, we allow for the fact that the dataset is in a different orientation to 
 		// what is plotted.
 		this.image = image;
+		this.lastImageServiceBean = null;
  		try {
 			setAxisRedrawActive(false);
 			performAutoscale();
@@ -557,6 +566,26 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 			return DownsampleMode.POINT;
 		}
 		return DownsampleMode.MEAN;
+	}
+
+	@Override
+	public boolean isRehistorgram() {
+		return rehistogram;
+	}
+
+	@Override
+	public void setRehistorgram(boolean rehisto) {
+		boolean requireNewImage =  (!rehistogram && rehisto);
+		this.rehistogram = rehisto;
+		if (requireNewImage) {
+			setMax(null); // I think...
+			setMin(null);
+			createScaledImage(true, null);
+			// Max and min changed in all likely-hood
+			fireMaxDataListeners();
+			fireMinDataListeners();
+			repaint();
+		}
 	}
 
 }

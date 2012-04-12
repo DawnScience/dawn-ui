@@ -93,8 +93,30 @@ class LightWeightActionBarsManager extends PlottingActionBarManager {
        }	
 	}
 	
-	protected void createAspectAction() {
+	protected void createAspectHistoAction() {
 
+		final Action histo = new Action("Rehistogram on zoom", IAction.AS_CHECK_BOX) {
+			
+		    public void run() {		    	
+		    	Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.HISTO, isChecked());
+		    	final IImageTrace trace = (IImageTrace)system.getTraces(IImageTrace.class).iterator().next();
+		    	trace.setRehistorgram(isChecked());
+		    }
+		};
+        
+		histo.setImageDescriptor(Activator.getImageDescriptor("icons/histo.png"));
+		histo.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.HISTO));
+		
+		final IActionBars bars = system.getActionBars();
+		if (bars!=null) {
+			bars.getToolBarManager().add(new Separator("org.dawb.workbench.plotting.histo.group"));
+			histo.setId("org.dawb.workbench.plotting.histo");
+			bars.getToolBarManager().insertAfter("org.dawb.workbench.plotting.histo.group", histo);
+	 
+			twoDimensionalActions.add(new ActionContainer(histo, bars.getToolBarManager()));
+		}
+		
+		
 		final Action action = new Action("Keep aspect ratio", IAction.AS_CHECK_BOX) {
 			
 		    public void run() {		    	
@@ -107,7 +129,6 @@ class LightWeightActionBarsManager extends PlottingActionBarManager {
 		action.setImageDescriptor(Activator.getImageDescriptor("icons/aspect.png"));
 		action.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.ASPECT));
 		
-		final IActionBars bars = system.getActionBars();
 		if (bars!=null) {
 			bars.getToolBarManager().add(new Separator("org.dawb.workbench.plotting.aspect.group"));
 			action.setId("org.dawb.workbench.plotting.aspect");
@@ -115,6 +136,7 @@ class LightWeightActionBarsManager extends PlottingActionBarManager {
 	 
 			twoDimensionalActions.add(new ActionContainer(action, bars.getToolBarManager()));
 		}
+
 	}
 	
 	protected void createPalleteActions() {

@@ -39,4 +39,9 @@ public class PlottingConstants {
 	 */
 	public static final String ASPECT = "org.dawb.plotting.system.aspectRatio";
 
+	/**
+	 * true when zooming should rehistogram, also rehistograms when pressed.
+	 */
+	public static final String HISTO = "org.dawb.plotting.system.rehistogram";
+
 }
