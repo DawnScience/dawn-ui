@@ -1,5 +1,8 @@
 package org.dawb.workbench.plotting.system.swtxy.selection;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.dawb.common.ui.plot.region.RegionBounds;
 import org.eclipse.draw2d.ColorConstants;
@@ -26,7 +29,7 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 	public FreeDrawSelection(String name, Axis xAxis, Axis yAxis) {
 		super(name, xAxis, yAxis);
 		setRegionColor(ColorConstants.orange);
-		setLineWidth(25);
+		setLineWidth(10);
 		setAlpha(160);
 	}
 
@@ -84,7 +87,41 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 		g.setAlpha(getAlpha());
 		g.setLineWidth(getLineWidth());
 		g.drawPolyline(points);
+		
+		g.setAlpha(255);
+		g.setForegroundColor(ColorConstants.black);
+		if (isShowPosition()) {
+			drawPointText(g, points.getFirstPoint());
+			drawPointText(g, points.getLastPoint());
+		}
+		
+		if (isShowLabel()) {
+			g.drawText(getName(), points.getMidpoint());
+		}
 	}
+
+	private void drawPointText(Graphics g, Point pnt) {
+		
+		double[] loc = new double[]{getxAxis().getPositionValue(pnt.x, false), getyAxis().getPositionValue(pnt.y, false)};
+        final String text = getLabelPositionText(loc);
+        g.drawString(text, pnt);
+
+	}
+	
+	private NumberFormat format = new DecimalFormat("######0.00");
+	
+	protected String getLabelPositionText(double[] p) {
+		
+		if (Double.isNaN(p[0])||Double.isNaN(p[1])) return "";
+		final StringBuilder buf = new StringBuilder();
+		buf.append("(");
+		buf.append(format.format(p[0]));
+		buf.append(", ");
+		buf.append(format.format(p[1]));
+		buf.append(")");
+		return buf.toString();
+	}
+
 
 	@Override
 	public void setLocalBounds(Point firstClick, 
