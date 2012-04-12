@@ -19,6 +19,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.ui.IActionBars;
 import org.slf4j.Logger;
@@ -95,7 +96,7 @@ class LightWeightActionBarsManager extends PlottingActionBarManager {
 	
 	protected void createAspectHistoAction() {
 
-		final Action histo = new Action("Rehistogram on zoom", IAction.AS_CHECK_BOX) {
+		final Action histo = new Action("Rehistogram on zoom in or zoom out (F5)", IAction.AS_CHECK_BOX) {
 			
 		    public void run() {		    	
 		    	Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.HISTO, isChecked());
@@ -106,6 +107,7 @@ class LightWeightActionBarsManager extends PlottingActionBarManager {
         
 		histo.setImageDescriptor(Activator.getImageDescriptor("icons/histo.png"));
 		histo.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.HISTO));
+		histo.setAccelerator(SWT.F5);
 		
 		final IActionBars bars = system.getActionBars();
 		if (bars!=null) {

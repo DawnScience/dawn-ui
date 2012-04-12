@@ -107,7 +107,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
             		final XYRegionGraph graph  = (XYRegionGraph)getxAxis().getParent();
             		final Rectangle     bounds = graph.getRegionArea().getBounds();
                 	int bin = getDownsampleBin(currentSliceDims, bounds);
-                	if (bin!=currentDownSampleBin) force = true;
+                	if (bin<currentDownSampleBin) force = true;
                 }
 				
 				createScaledImage(force, monitor);
