@@ -1,7 +1,6 @@
 package org.dawb.workbench.plotting.tools;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 
 import org.dawb.common.ui.plot.IAxis;
@@ -99,7 +98,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IRegionBou
 	
 
 	@Override
-	public Object getAdapter(Class clazz) {
+	public Object getAdapter(@SuppressWarnings("rawtypes") Class clazz) {
 		if (clazz == IToolPageSystem.class) {
 			return plotter;
 		} else {

@@ -60,7 +60,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	private int[]          currentSliceDims;
 	private boolean        rehistogram;
 
-	private Job imageScaleJob; // Needed for large images on slow systems.
+	private ForcableJob imageScaleJob; // Needed for large images on slow systems.
 	
 	private static Map<IImageTrace.ImageOrigin, IImageService.ImageOrigin> imageOriginaMap;
 	static {
@@ -91,14 +91,14 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 			AspectAxis x = (AspectAxis)xAxis;
 			AspectAxis y = (AspectAxis)yAxis;
 			x.setKeepAspectWith(y);
-			y.setKeepAspectWith(x);
+			y.setKeepAspectWith(x);		
 		}
 		
-		this.imageScaleJob = new Job("Create scaled image") {
+		this.imageScaleJob = new ForcableJob("Create scaled image") {
 			@Override
 			protected IStatus run(final IProgressMonitor monitor) {
 				
-				boolean force = false;
+				force = false;
 				
 				// If we just changed downsample scale, we force the update.
 			    // This allows user resizes of the plot area to be picked up
@@ -317,8 +317,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
         clearAspect(yAxis);
 		imageScaleJob = null;
 		getParent().remove(this);
-		xAxis.removeListenr(this);
-		yAxis.removeListenr(this);
+		xAxis.removeListener(this);
+		yAxis.removeListener(this);
 		axisRedrawActive = false;
 		lastImageServiceBean = null;
 	}
@@ -387,7 +387,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		//updateAxisRange(axis);
 	}
 	/**
-	 * We do quite a bit here to ensure that 
+	 * We do a bit here to ensure that 
 	 * not too many calls to createScaledImage(...) are made.
 	 */
 	@Override
@@ -399,7 +399,13 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		if (!axisRedrawActive) return;		
 		
 		if (imageScaleJob!=null) {
-			imageScaleJob.cancel();
+			/**
+			 * Do not cancel a forced job, these are the
+			 * ones that generate the next mipmap image
+			 */
+			if (!imageScaleJob.isForced()) {
+				imageScaleJob.cancel();
+			}
 			imageScaleJob.schedule();
 		}
 	}
@@ -477,6 +483,13 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		// what is plotted.
 		this.image = image;
 		this.lastImageServiceBean = null;
+		
+		AspectAxis x = (AspectAxis)xAxis;
+		x.setMaximumRange(new Range(0,image.getShape()[1]));
+		
+		AspectAxis y = (AspectAxis)yAxis;
+		y.setMaximumRange(new Range(0,image.getShape()[0]));
+
  		try {
 			setAxisRedrawActive(false);
 			performAutoscale();
@@ -576,7 +589,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	}
 
 	@Override
-	public boolean isRehistorgram() {
+	public boolean isRehistogram() {
 		return rehistogram;
 	}
 
@@ -592,6 +605,16 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 			fireMaxDataListeners();
 			fireMinDataListeners();
 			repaint();
+		}
+	}
+	
+	private abstract class ForcableJob extends Job {
+		protected boolean force = false;
+		public ForcableJob(String name) {
+			super(name);
+		}
+		public boolean isForced() {
+			return force;
 		}
 	}
 

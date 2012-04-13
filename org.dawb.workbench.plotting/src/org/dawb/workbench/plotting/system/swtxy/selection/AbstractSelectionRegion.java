@@ -184,8 +184,8 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	}
 
 	protected void clearListeners() {
-        getxAxis().removeListenr(this);
-        getyAxis().removeListenr(this);
+        getxAxis().removeListener(this);
+        getyAxis().removeListener(this);
 		super.clearListeners();
 	}
 	
@@ -308,7 +308,7 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 				((SelectionRectangle)ob).setxAxis(xAxis);
 			}
 		}
-		getxAxis().removeListenr(this);
+		getxAxis().removeListener(this);
 		xAxis.addListener(this);
 		bean.setxAxis(xAxis);
 	}
@@ -323,7 +323,7 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 				((SelectionRectangle)ob).setyAxis(yAxis);
 			}
 		}
-		getyAxis().removeListenr(this);
+		getyAxis().removeListener(this);
 		yAxis.addListener(this);
 		bean.setyAxis(yAxis);
 	}

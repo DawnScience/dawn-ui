@@ -5,8 +5,6 @@ import java.util.Arrays;
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.dawb.common.ui.plot.region.RegionBounds;
 import org.dawb.workbench.plotting.system.swtxy.translate.FigureTranslator;
-import org.dawb.workbench.plotting.system.swtxy.translate.TranslationEvent;
-import org.dawb.workbench.plotting.system.swtxy.translate.TranslationListener;
 import org.dawb.workbench.plotting.system.swtxy.util.Draw2DUtils;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
@@ -101,23 +99,7 @@ class LineSelection extends AbstractSelectionRegion {
 		endBox.addFigureListener(figListener);
 		
 		mover = new FigureTranslator(getXyGraph(), parent, connection, Arrays.asList(new IFigure[]{startBox,endBox}));
-		mover.addTranslationListener(new TranslationListener() {
-			@Override
-			public void translateBefore(TranslationEvent evt) {
-			}
-
-			@Override
-			public void translationAfter(TranslationEvent evt) {
-				updateConnectionBounds();
-				fireRegionBoundsDragged(createRegionBounds(false));
-			}
-
-			@Override
-			public void translationCompleted(TranslationEvent evt) {
-				fireRegionBoundsChanged(createRegionBounds(true));
-				fireRoiSelection();
-			}
-		});
+		mover.addTranslationListener(createRegionNotifier());
 
 		setRegionObjects(connection, startBox, endBox);
 		sync(getBean());
