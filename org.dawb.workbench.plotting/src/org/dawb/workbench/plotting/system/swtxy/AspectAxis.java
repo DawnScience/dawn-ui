@@ -3,23 +3,24 @@ package org.dawb.workbench.plotting.system.swtxy;
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.swt.xygraph.linearscale.Range;
-import org.csstudio.swt.xygraph.linearscale.AbstractScale.LabelSide;
 import org.dawb.common.util.text.NumberUtils;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Rectangle;
-import org.eclipse.swt.widgets.Display;
 
 /**
- * An axis which can 
+ * An axis which can keep aspect with another and have a maximum possible extend which cannot
+ * be altered.
+ * 
  * @author fcp94556
  *
  */
 public class AspectAxis extends Axis {
 
 	private AspectAxis relativeTo;
+	private Range      maximumRange;
     private boolean    keepAspect; // This is so that the user may have images with and without aspect in the same application.
 	public AspectAxis(String title, boolean yAxis) {
 		super(title, yAxis);
@@ -117,4 +118,44 @@ public class AspectAxis extends Axis {
 	public void setKeepAspect(boolean keepAspect) {
 		this.keepAspect = keepAspect;
 	}
+
+	public Range getMaximumRange() {
+		return maximumRange;
+	}
+
+	/**
+	 * Set with lower<upper, the class will check for if the axis is in reversed mode.
+	 * @param maximumRange
+	 */
+	public void setMaximumRange(Range maximumRange) {
+		if (maximumRange.isMinBigger()) throw new RuntimeException("Maximum range must have lower less than upper. AspectAxis allows for reversed real axes in internally!");
+		this.maximumRange = maximumRange;
+	}
+	
+	@Override
+	public void setRange(double lower, double upper) {
+		final Range norm = normalize(new Range(lower, upper));
+		super.setRange(norm.getLower(), norm.getUpper());
+	}
+	@Override
+	public void setRange(Range range) {
+		normalize(range);
+		super.setRange(range);
+	}
+
+	/**
+	 * 
+	 * @param range
+	 * @return true if range not outside maximum.
+	 */
+	private Range normalize(Range range) {
+		if (maximumRange==null) return range;
+		//if (true) return new Range(range.getLower(), range.getUpper());
+		double lower=range.getLower(), upper=range.getUpper();
+		if (!maximumRange.inRange(lower, true)) lower = range.isMinBigger() ? maximumRange.getUpper() : maximumRange.getLower();
+		if (!maximumRange.inRange(upper, true)) upper = range.isMinBigger() ? maximumRange.getLower() : maximumRange.getUpper();
+		return new Range(lower, upper);
+	}
+
+
 }
