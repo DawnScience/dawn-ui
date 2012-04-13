@@ -200,8 +200,10 @@ public class LineTrace extends Trace {
     				}
                     
     				// Is data point in the plot area, also check to see if it is within a general area
-                    // to draw lines slightly outside the main range?                 
-                    boolean dpInRange = dpInXRange && yAxis.getRange().inRange(dp.getYValue());
+                    // to draw lines slightly outside the main range?     
+                    // TODO FIXME - Put back in || here so that line plots do not behave badly
+                    // Mark to review why the changes broke line plots...
+                    boolean dpInRange = dpInXRange || yAxis.getRange().inRange(dp.getYValue());
                     boolean dpInExtendedRange = xAxis.getRange().inExtendedRange(dp.getXValue(), EXTENDED_RANGE_SCALE_FACTOR) &&
                     		yAxis.getRange().inExtendedRange(dp.getYValue(), EXTENDED_RANGE_SCALE_FACTOR);
                     
