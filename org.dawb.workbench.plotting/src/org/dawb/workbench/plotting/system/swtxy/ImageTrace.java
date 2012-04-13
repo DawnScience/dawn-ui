@@ -317,8 +317,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
         clearAspect(yAxis);
 		imageScaleJob = null;
 		getParent().remove(this);
-		xAxis.removeListenr(this);
-		yAxis.removeListenr(this);
+		xAxis.removeListener(this);
+		yAxis.removeListener(this);
 		axisRedrawActive = false;
 		lastImageServiceBean = null;
 	}
@@ -589,7 +589,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	}
 
 	@Override
-	public boolean isRehistorgram() {
+	public boolean isRehistogram() {
 		return rehistogram;
 	}
 

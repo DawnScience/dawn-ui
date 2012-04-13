@@ -186,11 +186,11 @@ class RingSelection extends AbstractSelectionRegion {
 		
 		if (!bounds.isCircle()) throw new RuntimeException("Expected circular bounds for circle!");
 		if (center!=null) {
-			center.setRealValue(bounds.getCenter());
-			int cenY = getxAxis().getValuePosition(bounds.getCenter()[1], false);
+			center.setRealValue(bounds.getCentre());
+			int cenY = getxAxis().getValuePosition(bounds.getCentre()[1], false);
 			
-			int innerRad = getxAxis().getValuePosition(bounds.getCenter()[1]+bounds.getInner(), false)-cenY;
-			int outerRad = getxAxis().getValuePosition(bounds.getCenter()[1]+bounds.getOuter(), false)-cenY;
+			int innerRad = getxAxis().getValuePosition(bounds.getCentre()[1]+bounds.getInner(), false)-cenY;
+			int outerRad = getxAxis().getValuePosition(bounds.getCentre()[1]+bounds.getOuter(), false)-cenY;
 			setControlPositions(innerRad, outerRad);
 		}
 

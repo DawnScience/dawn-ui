@@ -135,7 +135,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IRegionBo
 	}
 
 	@Override
-	public Object getAdapter(Class clazz) {
+	public Object getAdapter(@SuppressWarnings("rawtypes") Class clazz) {
 		if (clazz == IToolPageSystem.class) {
 			return plotter;
 		} else {

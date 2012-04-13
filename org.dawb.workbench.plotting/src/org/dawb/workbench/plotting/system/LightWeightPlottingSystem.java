@@ -27,7 +27,6 @@ import org.csstudio.swt.xygraph.linearscale.AbstractScale.LabelSide;
 import org.csstudio.swt.xygraph.linearscale.LinearScale.Orientation;
 import org.csstudio.swt.xygraph.undo.AddAnnotationCommand;
 import org.csstudio.swt.xygraph.undo.RemoveAnnotationCommand;
-import org.csstudio.swt.xygraph.undo.ZoomType;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.IAxis;
 import org.dawb.common.ui.plot.PlotType;
@@ -240,6 +239,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		
 		final Object[] oa = getIndexedDatasets(data, axes);
 		final AbstractDataset       x   = (AbstractDataset)oa[0];
+		@SuppressWarnings("unchecked")
 		final List<AbstractDataset> ys  = (List<AbstractDataset>)oa[1];
 		final boolean createdIndices    = (Boolean)oa[2];
 		
@@ -426,6 +426,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		
 		Object[] oa = getOrderedDatasets(xIn, ysIn, createdIndices);
 		final AbstractDataset       x  = (AbstractDataset)oa[0];
+		@SuppressWarnings("unchecked")
 		final List<AbstractDataset> ys = (List<AbstractDataset>)oa[1];
 		
 		if (x.containsInvalidNumbers()) throw new RuntimeException("The value of "+x.getName()+" is invalid. Cannot plot datasets with infinite values in it!");

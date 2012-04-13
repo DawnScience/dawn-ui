@@ -7,12 +7,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.dawb.common.ui.plot.region.IRegion;
+import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionBoundsListener;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.RegionBounds;
 import org.dawb.common.ui.plot.region.RegionBoundsEvent;
 import org.dawb.common.ui.plot.region.RegionEvent;
-import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
@@ -47,7 +47,6 @@ import org.eclipse.ui.progress.UIJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.rcp.plotting.roi.LinearROIData;
 import uk.ac.diamond.scisoft.analysis.rcp.plotting.roi.ROIData;
 import uk.ac.diamond.scisoft.analysis.rcp.plotting.roi.RectangularROIData;
