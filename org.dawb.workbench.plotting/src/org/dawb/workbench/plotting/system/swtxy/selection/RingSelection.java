@@ -6,8 +6,6 @@ import org.csstudio.swt.xygraph.figures.Axis;
 import org.dawb.common.ui.plot.region.RegionBounds;
 import org.dawb.workbench.plotting.system.swtxy.translate.FigureTranslator;
 import org.dawb.workbench.plotting.system.swtxy.translate.FigureTranslator.LockType;
-import org.dawb.workbench.plotting.system.swtxy.translate.TranslationEvent;
-import org.dawb.workbench.plotting.system.swtxy.translate.TranslationListener;
 import org.dawb.workbench.plotting.system.swtxy.util.Draw2DUtils;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
@@ -113,24 +111,7 @@ class RingSelection extends AbstractSelectionRegion {
 		FigureTranslator mover = new FigureTranslator(getXyGraph(), parent, connection, Arrays.asList(new IFigure[]{center, connection, innerControl, outerControl}));
 		// Add a translation listener to be notified when the mover will translate so that
 		// we do not recompute point locations during the move.
-		mover.addTranslationListener(new TranslationListener() {
-			@Override
-			public void translateBefore(TranslationEvent evt) {
-			}
-
-			@Override
-			public void translationAfter(TranslationEvent evt) {
-				updateConnectionBounds();
-				fireRegionBoundsDragged(createRegionBounds(false));
-			}
-
-			@Override
-			public void translationCompleted(TranslationEvent evt) {
-				fireRegionBoundsChanged(createRegionBounds(true));
-				fireRoiSelection();
-			}
-
-		});
+		mover.addTranslationListener(createRegionNotifier());
 		
 		setRegionObjects(connection, center, innerControl, outerControl);
 		sync(getBean());
