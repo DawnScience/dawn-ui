@@ -21,8 +21,6 @@ import org.eclipse.swt.SWT;
  *
  */
 public class LineTrace extends Trace {
-
-	private static final double EXTENDED_RANGE_SCALE_FACTOR = 2.0;
 	
 	protected String internalName; 
 	
@@ -150,7 +148,6 @@ public class LineTrace extends Trace {
 		graphics.setLineWidth(getLineWidth());
 		ISample predp = null;
 		boolean predpInRange = false;
-		boolean predpInExtendedRange = false;
 		Point dpPos = null;
 		hotSampleist.clear();
 		if(traceDataProvider == null)
@@ -205,8 +202,6 @@ public class LineTrace extends Trace {
                     // TODO FIXME - Put back in || here so that line plots do not behave badly
                     // Mark to review why the changes broke line plots...
                     boolean dpInRange = dpInXRange && yAxis.getRange().inRange(dp.getYValue());
-                    boolean dpInExtendedRange = xAxis.getRange().inExtendedRange(dp.getXValue(), EXTENDED_RANGE_SCALE_FACTOR) &&
-                    		yAxis.getRange().inExtendedRange(dp.getYValue(), EXTENDED_RANGE_SCALE_FACTOR);
                     
                     
     				//draw point
@@ -242,7 +237,6 @@ public class LineTrace extends Trace {
     				{   // No previous data point from which to draw a line
     					predp = dp;
     					predpInRange = dpInRange;
-    					predpInExtendedRange = dpInExtendedRange;
     					continue;
     				}
     				
@@ -250,7 +244,6 @@ public class LineTrace extends Trace {
     				// axis intersections might patch it
     				final ISample origin_dp = dp; 
     				final boolean origin_dpInRange = dpInRange;
-    				final boolean origin_dpInExtendedRange = dpInExtendedRange;
 
     				// In 'STEP' modes, if there was a value, now there is none,
     				// continue that last value until the NaN location
@@ -260,42 +253,51 @@ public class LineTrace extends Trace {
                     {   // Patch 'y' of dp, re-compute dpInRange for new 'y'
     				    dp = new Sample(dp.getXValue(), predp.getYValue());
     				    dpInRange = yAxis.getRange().inRange(dp.getYValue());
-    				    dpInExtendedRange = yAxis.getRange().inExtendedRange(dp.getYValue(), EXTENDED_RANGE_SCALE_FACTOR);
                     }
     				
-//    				if(traceType != Trace.TraceType.AREA) {
-//    				    if(!predpInExtendedRange && !dpInExtendedRange){ //both are out of plot area
-//    						ISample[] dpTuple = getIntersection(predp, dp);
-//    						if(dpTuple[0] == null || dpTuple[1] == null){ // no intersection with plot area
-//    							predp = origin_dp;
-//    							predpInRange = origin_dpInRange;
-//    							predpInExtendedRange = origin_dpInExtendedRange;
-//    							continue;
-//    						}else{
-//    							predp = dpTuple[0];
-//    							dp = dpTuple[1];
-//    						}
-//    					} else if(!predpInExtendedRange || !dpInExtendedRange){ // one in and one out
-//    						//calculate the intersection point with the boundary of plot area.
-//    						if(!predpInExtendedRange){
-//    							predp = getIntersection(predp, dp)[0];
-//    							if(predp == null){ // no intersection
-//    								predp = origin_dp;
-//    								predpInRange = origin_dpInRange;
-//    								predpInExtendedRange = origin_dpInExtendedRange;
-//    								continue;
-//    							}
-//    						} else{
-//    							dp = getIntersection(predp, dp)[0];
-//    							if(dp == null){ // no intersection
-//    								predp = origin_dp;
-//    								predpInRange = origin_dpInRange;
-//    								predpInExtendedRange = origin_dpInExtendedRange;
-//    								continue;
-//    							}
-//    						}
-//    					}
-//    				}
+    				boolean plot_dp = false;
+    				
+    				if(traceType != Trace.TraceType.AREA) {
+    				    if(!predpInRange && !dpInRange){ //both are out of plot area
+    						ISample[] dpTuple = getIntersection(predp, dp);
+    						if(dpTuple[0] == null || dpTuple[1] == null){ // no intersection with plot area
+    							predp = origin_dp;
+    							predpInRange = origin_dpInRange;
+    							predpInRange = origin_dpInRange;
+    							continue;
+    						}else{
+    							predp = dpTuple[0];
+    							dp = dpTuple[1];
+    							predpInRange = true;
+    							predpInRange = true;
+    							dpInRange = true;
+    							dpInRange = true;
+    							plot_dp = true;
+    						}
+    					} else if(!predpInRange || !dpInRange){ // one in and one out
+    						//calculate the intersection point with the boundary of plot area.
+    						if(!predpInRange){
+    							predp = getIntersection(predp, dp)[0];
+    							if(predp == null){ // no intersection
+    								predp = origin_dp;
+    								predpInRange = origin_dpInRange;
+    								continue;
+    							} else {
+    								predpInRange = true;
+    							}
+    						} else{
+    							dp = getIntersection(predp, dp)[0];
+    							if(dp == null){ // no intersection
+    								predp = origin_dp;
+    								predpInRange = origin_dpInRange;
+    								continue;
+    							}else {
+    								dpInRange = true;
+    								plot_dp = true;
+    							}
+    						}
+    					}
+    				}
     				
     				final Point predpPos = new Point(xAxis.getValuePosition(predp.getXValue(), false),
     								                 yAxis.getValuePosition(predp.getYValue(), false));
@@ -311,15 +313,14 @@ public class LineTrace extends Trace {
                             traceType == Trace.TraceType.BAR) {
                             drawLine(graphics, predpPos, dpPos);  	
                         } else {
-                        	if(predpInExtendedRange) pointList.addPoint(predpPos);
-                        	if (i==endIndex && dpInExtendedRange) pointList.addPoint(dpPos);
+                        	if(predpInRange) pointList.addPoint(predpPos);
+                        	if (plot_dp || (i==endIndex && dpInRange)) pointList.addPoint(dpPos);
                         }
     					
     				}
     				
     				predp = origin_dp;
     				predpInRange = origin_dpInRange;
-    				predpInExtendedRange = origin_dpInExtendedRange;
     			}
     			
     			drawLine(graphics, pointList, false);
