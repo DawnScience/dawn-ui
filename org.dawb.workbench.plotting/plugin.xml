@@ -39,6 +39,13 @@
             tooltip="A tool which shows values of regions selected in the plotting.">
       </plotting_tool_page>
       <plotting_tool_page
+            class="org.dawb.workbench.plotting.tools.InfoBox"
+            icon="icons/info.png"
+            id="org.dawb.workbench.plotting.tools.InfoBox"
+            label="Information box"
+            tooltip="A tool for displaying information on the data currently plotted.">
+      </plotting_tool_page>
+      <plotting_tool_page
             class="org.dawb.workbench.plotting.tools.LineProfileTool"
             icon="icons/plot-tool-line-profile.png"
             id="org.dawb.workbench.plotting.tools.lineProfileTool"
