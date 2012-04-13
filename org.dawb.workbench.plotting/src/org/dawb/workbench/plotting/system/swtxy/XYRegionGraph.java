@@ -15,8 +15,10 @@ import org.dawb.common.ui.plot.trace.IImageTrace.ImageOrigin;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
 import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
+
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.PaletteData;
 
 /**
@@ -210,6 +212,21 @@ public class XYRegionGraph extends XYGraph {
 		}
 		for (Axis axis : getYAxisList()) {
 			if (axis instanceof AspectAxis) ((AspectAxis)axis).setKeepAspect(checked);
+		}
+	}
+	
+	/**
+	 * Zooms about the central point a factor (-ve for out) usually +-0.1
+	 */
+	public void setZoomLevel(MouseEvent evt, double delta) {
+		
+		for (Axis axis : getXAxisList()) {
+			final double cenX = axis.getPositionValue(evt.x, false);
+			axis.zoomInOut(cenX, delta);
+		}
+		for (Axis axis : getYAxisList()) {
+			final double cenY = axis.getPositionValue(evt.y, false);
+			axis.zoomInOut(cenY, delta);
 		}
 	}
 }

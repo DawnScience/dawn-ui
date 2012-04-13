@@ -96,7 +96,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		
 		this.imageScaleJob = new Job("Create scaled image") {
 			@Override
-			protected IStatus run(IProgressMonitor monitor) {
+			protected IStatus run(final IProgressMonitor monitor) {
 				
 				boolean force = false;
 				
@@ -114,6 +114,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 				
 				if (Display.getDefault()!=null) Display.getDefault().asyncExec(new Runnable() {
 					public void run() {
+						if (monitor.isCanceled()) return;
 						repaint();
 					}
 				});
@@ -121,6 +122,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 				return Status.OK_STATUS;
 			}
 		};
+		imageScaleJob.setPriority(Job.INTERACTIVE);
+		imageScaleJob.setSystem(true);
+		imageScaleJob.setUser(false);
+		
 	}
 
 	public String getName() {
@@ -201,7 +206,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 			if (monitor!=null && monitor.isCanceled()) return;
 			final RegionBounds regionBounds = new RegionBounds(new double[]{xRange.getLower(), yRange.getLower()}, 
 					                                           new double[]{xRange.getUpper(), yRange.getUpper()});
+
 			AbstractDataset slice = slice(regionBounds);
+			if (monitor!=null && monitor.isCanceled()) return;
 			slice = getDownsampled(slice, bounds); // TODO
 
 			final IImageService service = (IImageService)PlatformUI.getWorkbench().getService(IImageService.class);

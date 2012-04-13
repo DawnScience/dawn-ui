@@ -27,6 +27,7 @@ import org.csstudio.swt.xygraph.linearscale.AbstractScale.LabelSide;
 import org.csstudio.swt.xygraph.linearscale.LinearScale.Orientation;
 import org.csstudio.swt.xygraph.undo.AddAnnotationCommand;
 import org.csstudio.swt.xygraph.undo.RemoveAnnotationCommand;
+import org.csstudio.swt.xygraph.undo.ZoomType;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.IAxis;
 import org.dawb.common.ui.plot.PlotType;
@@ -53,8 +54,12 @@ import org.dawb.workbench.plotting.util.ColorUtility;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.draw2d.FigureCanvas;
 import org.eclipse.draw2d.LightweightSystem;
+import org.eclipse.jface.action.ActionContributionItem;
+import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseWheelListener;
 import org.eclipse.swt.graphics.Color;
@@ -138,9 +143,29 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		xyCanvas.addMouseWheelListener(new MouseWheelListener() {
 			@Override
 			public void mouseScrolled(MouseEvent e) {
-				if (xyGraph!=null) xyGraph.repaint();
+				if (xyGraph==null) return;
+				if (e.count==0)    return;
+				int direction = e.count > 0 ? 1 : -1;
+				xyGraph.setZoomLevel(e, direction*0.1d);
+				xyGraph.repaint();
 			}	
 		});
+		
+		
+		xyCanvas.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (e.keyCode==16777230 || e.character=='h') {
+					final IContributionItem action = bars.getToolBarManager().find("org.dawb.workbench.plotting.histo");
+				    if (action!=null && action.isVisible() && action instanceof ActionContributionItem) {
+				    	ActionContributionItem iaction = (ActionContributionItem)action;
+				    	iaction.getAction().setChecked(!iaction.getAction().isChecked());
+				    	iaction.getAction().run();
+				    }
+ 				}
+			}
+		});
+		
 		lws.setControl(xyCanvas);
 		xyCanvas.setBackground(xyCanvas.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 	
@@ -187,6 +212,11 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
         parent.layout();
 
 	}
+	
+	public void setFocus() {
+		if (xyCanvas!=null) xyCanvas.setFocus();
+	}
+
 		
 	public void addTraceListener(final ITraceListener l) {
 		super.addTraceListener(l);

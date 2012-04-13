@@ -24,6 +24,10 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
 /**
+ * An AbstractSelectionRegion has two purposes:
+ * 1. To draw the 2d shapes for selection in the diagram.
+ * 2. To return the selection for the region in the real world coordinates.
+ * 
  * Shape used for ROIs which has bounds fixed to the graph area.
  * Links regions to the specifics of the XY Plotting system.
  * 

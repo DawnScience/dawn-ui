@@ -240,7 +240,9 @@ public class PlotImageEditor extends EditorPart implements IReusableEditor {
 
 	@Override
 	public void setFocus() {
-		
+		if (plottingSystem!=null && plottingSystem.getPlotComposite()!=null) {
+			plottingSystem.setFocus();
+		}
 	}
 
 	@Override
