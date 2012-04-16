@@ -4,9 +4,10 @@ import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.geometry.PointList;
 
 /**
- * A Draw2D polyline shape that allows its orientation to be set
+ * A Draw2D polyline shape that allows its orientation to be set. Its location is the centre of
+ * rotation (not the top-left corner of its bounding box)
  */
-class RotatablePolylineShape extends RotatablePolygonShape {
+public class RotatablePolylineShape extends RotatablePolygonShape {
 	private int tolerance = 2;
 
 
