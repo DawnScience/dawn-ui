@@ -257,45 +257,43 @@ public class LineTrace extends Trace {
     				
     				boolean plot_dp = false;
     				
-    				//if(traceType != Trace.TraceType.AREA) {
-    				    if(!predpInRange && !dpInRange){ //both are out of plot area
-    						ISample[] dpTuple = getIntersection(predp, dp);
-    						if(dpTuple[0] == null || dpTuple[1] == null){ // no intersection with plot area
-    							predp = origin_dp;
-    							predpInRange = origin_dpInRange;
-    							predpInRange = origin_dpInRange;
-    							continue;
-    						}else{
-    							predp = dpTuple[0];
-    							dp = dpTuple[1];
-    							predpInRange = true;
-    							dpInRange = true;
-    							plot_dp = true;
-    						}
-    					} else if(!predpInRange || !dpInRange){ // one in and one out
-    						//calculate the intersection point with the boundary of plot area.
-    						if(!predpInRange){
-    							predp = getIntersection(predp, dp)[0];
-    							if(predp == null){ // no intersection
-    								predp = origin_dp;
-    								predpInRange = origin_dpInRange;
-    								continue;
-    							} else {
-    								predpInRange = true;
-    							}
-    						} else{
-    							dp = getIntersection(predp, dp)[0];
-    							if(dp == null){ // no intersection
-    								predp = origin_dp;
-    								predpInRange = origin_dpInRange;
-    								continue;
-    							}else {
-    								dpInRange = true;
-    								plot_dp = true;
-    							}
-    						}
-    					}
-    				//}
+				    if(!predpInRange && !dpInRange){ //both are out of plot area
+						ISample[] dpTuple = getIntersection(predp, dp);
+						if(dpTuple[0] == null || dpTuple[1] == null){ // no intersection with plot area
+							predp = origin_dp;
+							predpInRange = origin_dpInRange;
+							predpInRange = origin_dpInRange;
+							continue;
+						}else{
+							predp = dpTuple[0];
+							dp = dpTuple[1];
+							predpInRange = true;
+							dpInRange = true;
+							plot_dp = true;
+						}
+					} else if(!predpInRange || !dpInRange){ // one in and one out
+						//calculate the intersection point with the boundary of plot area.
+						if(!predpInRange){
+							predp = getIntersection(predp, dp)[0];
+							if(predp == null){ // no intersection
+								predp = origin_dp;
+								predpInRange = origin_dpInRange;
+								continue;
+							} else {
+								predpInRange = true;
+							}
+						} else{
+							dp = getIntersection(predp, dp)[0];
+							if(dp == null){ // no intersection
+								predp = origin_dp;
+								predpInRange = origin_dpInRange;
+								continue;
+							}else {
+								dpInRange = true;
+								plot_dp = true;
+							}
+						}
+					}
     				
     				final Point predpPos = new Point(xAxis.getValuePosition(predp.getXValue(), false),
     								                 yAxis.getValuePosition(predp.getYValue(), false));
