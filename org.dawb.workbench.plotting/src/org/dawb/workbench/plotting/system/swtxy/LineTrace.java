@@ -257,7 +257,7 @@ public class LineTrace extends Trace {
     				
     				boolean plot_dp = false;
     				
-    				if(traceType != Trace.TraceType.AREA) {
+    				//if(traceType != Trace.TraceType.AREA) {
     				    if(!predpInRange && !dpInRange){ //both are out of plot area
     						ISample[] dpTuple = getIntersection(predp, dp);
     						if(dpTuple[0] == null || dpTuple[1] == null){ // no intersection with plot area
@@ -295,7 +295,7 @@ public class LineTrace extends Trace {
     							}
     						}
     					}
-    				}
+    				//}
     				
     				final Point predpPos = new Point(xAxis.getValuePosition(predp.getXValue(), false),
     								                 yAxis.getValuePosition(predp.getYValue(), false));
