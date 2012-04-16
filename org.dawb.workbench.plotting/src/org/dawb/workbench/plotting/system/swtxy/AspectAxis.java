@@ -128,6 +128,10 @@ public class AspectAxis extends Axis {
 	 * @param maximumRange
 	 */
 	public void setMaximumRange(Range maximumRange) {
+		if (maximumRange==null) {
+			this.maximumRange = null;
+			return;
+		}
 		if (maximumRange.isMinBigger()) throw new RuntimeException("Maximum range must have lower less than upper. AspectAxis allows for reversed real axes in internally!");
 		this.maximumRange = maximumRange;
 	}

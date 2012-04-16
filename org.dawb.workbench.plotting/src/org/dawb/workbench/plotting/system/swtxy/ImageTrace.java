@@ -193,7 +193,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 				if (getMax()!=null) bean.setMax(getMax());
 				
 				if (rescaleType==ImageScaleType.REHISTOGRAM) { // Avoids changing colouring to 
-					               // max and min of new selection.
+					                                           // max and min of new selection.
 					AbstractDataset slice = slice(getAxisBounds());
 					if (bean.getMin()==null) {
 						bean.setMin(slice.min());
@@ -215,24 +215,15 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		
 		if (monitor!=null && monitor.isCanceled()) return false;
 		
-		final float xratio = getSpanRatio(true);
-		final float yratio = getSpanRatio(false);
-		float yScale = Float.valueOf(rbounds.height)*yratio;
-		float xScale = Float.valueOf(rbounds.width)*xratio;
-
-		float yScaleFactor = yScale  / imageData.height;
-		float xScaleFactor = xScale  / imageData.width;
-		float scaleFactor = Math.min(xScaleFactor, yScaleFactor);
-
 		try {
 			
-			if (NumberUtils.equalsTolerance(1d, scaleFactor, 0.5d)) { // No slice, faster
+			if (imageData.width==bounds.width && imageData.height==bounds.height) { // No slice, faster
 				                                                      // might make image 1.5x bigger
 				usingFullScaleImage = true;
 				
 				// scale image, keeping aspect ratio, to current available area.
-				int xside = Math.round(imageData.width*scaleFactor);
-				int yside = Math.round(imageData.height*scaleFactor);
+				int xside = Math.round(imageData.width);
+				int yside = Math.round(imageData.height);
 
 				ImageData data = imageData.scaledTo(xside, yside);
 				
@@ -243,21 +234,14 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 				// slice data to get current zoom area
 				usingFullScaleImage = false;
 				
-				/**
-				 *      x1,y1----------------------x2,y2
-				 *        |                          |
-				 *        |                          |
-				 *        |                          |
-				 *      x3,y3----------------------x4,y4
-				 */
-				final double x1Rat = getXRatio(true);
-				final double y1Rat = getYRatio(false);
+				final double x1Rat = getXRatio(getX1());
+				final double y1Rat = getYRatio(getY1());
 				
 				int x1 = (int)Math.round(imageData.width*x1Rat);
 				int y1 = (int)Math.round(imageData.height*y1Rat);
 				
-				final double x4Rat = getXRatio(false);
-				final double y4Rat = getYRatio(true);
+				final double x4Rat = getXRatio(getX4());
+				final double y4Rat = getYRatio(getY4());
 				
 				int x4 = (int)Math.round(imageData.width*x4Rat);
 				int y4 = (int)Math.round(imageData.height*y4Rat);
@@ -365,18 +349,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		final XYRegionGraph graph  = (XYRegionGraph)xAxis.getParent();
 		final Point         loc    = graph.getRegionArea().getLocation();
 		
-		if (usingFullScaleImage) {
-			final double x1Rat = getXRatio(true);
-			final double y1Rat = getYRatio(false);
-			
-			final org.eclipse.swt.graphics.Rectangle imageBounds = scaledImage.getBounds();
-			int xpix = (int)Math.round(imageBounds.width*x1Rat);
-			int ypix = (int)Math.round(imageBounds.height*y1Rat);
-	
-			graphics.drawImage(scaledImage, loc.x-xpix, loc.y-ypix);
-		} else {
-			graphics.drawImage(scaledImage, loc.x, loc.y);
-  	    } 
+		graphics.drawImage(scaledImage, loc.x, loc.y);
+  	    
 		graphics.popState();
 	}
 
@@ -399,6 +373,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
         if (axis instanceof AspectAxis ) {			
 			AspectAxis aaxis = (AspectAxis)axis;
 			aaxis.setKeepAspectWith(null);
+			aaxis.setMaximumRange(null);
 		}
 	}
 
@@ -479,27 +454,53 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	}
 
 
-	private double getYRatio(boolean lower) {
+	/**     
+	 *      x1,y1--------------x2,y2
+	 *        |                  |
+	 *        |                  |
+	 *        |                  |
+	 *      x3,y3--------------x4,y4
+	 */
+	private double getXRatio(double x) {
 		
-		double side = lower ? getyAxis().getRange().getLower() : getyAxis().getRange().getUpper();
 		if (getImageOrigin()==ImageOrigin.TOP_LEFT || getImageOrigin()==ImageOrigin.BOTTOM_RIGHT) {
-			return  side / image.getShape()[0];
+			return  x / image.getShape()[1];
 		} else {
-			return  side / image.getShape()[1];
+			return  x / image.getShape()[0];
+		}
+	}
+	private double getYRatio(double y) {
+		
+	    if (getImageOrigin()==ImageOrigin.TOP_LEFT || getImageOrigin()==ImageOrigin.BOTTOM_RIGHT) {
+			return  y / image.getShape()[0];
+		} else {
+			return  y / image.getShape()[1];
 		}
 	}
 	
-	private double getXRatio(boolean lower) {
-		
-		double side = lower ? getxAxis().getRange().getLower() : getxAxis().getRange().getUpper();
-		if (getImageOrigin()==ImageOrigin.TOP_LEFT || getImageOrigin()==ImageOrigin.BOTTOM_RIGHT) {
-			return  side / image.getShape()[1];
-		} else {
-			return  side / image.getShape()[0];
-		}
+	private double getX1() {
+	    return getImageOrigin()==ImageOrigin.TOP_LEFT || getImageOrigin()==ImageOrigin.BOTTOM_LEFT
+		       ? getxAxis().getRange().getLower()
+		       : getxAxis().getRange().getUpper();
 	}
-	
-	
+
+	private double getY1() {
+		return getImageOrigin()==ImageOrigin.TOP_LEFT || getImageOrigin()==ImageOrigin.TOP_RIGHT
+		       ? getyAxis().getRange().getUpper()
+		       : getyAxis().getRange().getLower();
+	}
+	private double getX4() {
+	    return getImageOrigin()==ImageOrigin.TOP_LEFT || getImageOrigin()==ImageOrigin.BOTTOM_LEFT
+		       ? getxAxis().getRange().getUpper()
+		       : getxAxis().getRange().getLower();
+	}
+
+	private double getY4() {
+		return getImageOrigin()==ImageOrigin.TOP_LEFT || getImageOrigin()==ImageOrigin.TOP_RIGHT
+		       ? getyAxis().getRange().getLower()
+		       : getyAxis().getRange().getUpper();
+	}
+
 	private float getSpanRatio(boolean isX) {
 		if (isX) {
 			if (getImageOrigin()==ImageOrigin.TOP_LEFT || getImageOrigin()==ImageOrigin.BOTTOM_RIGHT) {
