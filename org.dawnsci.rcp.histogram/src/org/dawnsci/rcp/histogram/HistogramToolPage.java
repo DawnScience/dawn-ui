@@ -480,10 +480,17 @@ public class HistogramToolPage extends AbstractToolPage {
 		String red = extentionPointManager.getTransferFunctionFromID(colourScheme.getRedID()).getName();
 		String green = extentionPointManager.getTransferFunctionFromID(colourScheme.getGreenID()).getName();
 		String blue = extentionPointManager.getTransferFunctionFromID(colourScheme.getBlueID()).getName();
+		String alpha = extentionPointManager.getTransferFunctionFromID(colourScheme.getAlphaID()).getName();
 
 		setComboByName(cmbRedColour, red);
 		setComboByName(cmbGreenColour, green);
-		setComboByName(cmbBlueColour, blue);		
+		setComboByName(cmbBlueColour, blue);
+		setComboByName(cmbAlpha, alpha);
+		
+		btnRedInverse.setSelection(colourScheme.getRedInverted());
+		btnGreenInverse.setSelection(colourScheme.getGreenInverted());
+		btnBlueInverse.setSelection(colourScheme.getBlueInverted());
+		btnAlphaInverse.setSelection(colourScheme.getAlphaInverted());
 
 	}
 

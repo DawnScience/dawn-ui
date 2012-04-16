@@ -49,27 +49,63 @@
    <extension
          point="org.dawnsci.rcp.histogram.colourScheme">
       <colour_scheme
+      		alpha_inverted="false"
             alpha_transfer_function="org.dawnsci.rcp.histogram.linear"
+            blue_inverted="false"
             blue_transfer_function="org.dawnsci.rcp.histogram.linear"
+            green_inverted="false"
             green_transfer_function="org.dawnsci.rcp.histogram.linear"
             id="org.dawnsci.rcp.histogram.greyscale"
             name="Gray Scale"
+            red_inverted="false"
             red_transfer_function="org.dawnsci.rcp.histogram.linear">
       </colour_scheme>
       <colour_scheme
+            alpha_inverted="true"
+            alpha_transfer_function="org.dawnsci.rcp.histogram.linear"
+            blue_inverted="true"
+            blue_transfer_function="org.dawnsci.rcp.histogram.linear"
+            green_inverted="true"
+            green_transfer_function="org.dawnsci.rcp.histogram.linear"
+            id="org.dawnsci.rcp.histogram.filmNegative"
+            name="Film Negative"
+            red_inverted="true"
+            red_transfer_function="org.dawnsci.rcp.histogram.linear">
+      </colour_scheme>
+      <colour_scheme
+     		alpha_inverted="false"
             alpha_transfer_function="org.dawnsci.rcp.histogram.squared"
+            blue_inverted="false"
             blue_transfer_function="org.dawnsci.rcp.histogram.squared"
+            green_inverted="false"
             green_transfer_function="org.dawnsci.rcp.histogram.squared"
             id="org.dawnsci.rcp.histogram.squared"
             name="Squared Scale"
+            red_inverted="false"
             red_transfer_function="org.dawnsci.rcp.histogram.squared">
       </colour_scheme>
       <colour_scheme
+      		alpha_inverted="false"
             alpha_transfer_function="org.dawnsci.rcp.histogram.sqrt"
+            blue_inverted="false"
             blue_transfer_function="org.dawnsci.rcp.histogram.sqrt"
+            green_inverted="false"
             green_transfer_function="org.dawnsci.rcp.histogram.sqrt"
             id="org.dawnsci.rcp.histogram.scale.sqrt"
             name="Sqrt Scale"
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.rcp.histogram.sqrt">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="true"
+            alpha_transfer_function="org.dawnsci.rcp.histogram.sqrt"
+            blue_inverted="true"
+            blue_transfer_function="org.dawnsci.rcp.histogram.sqrt"
+            green_inverted="true"
+            green_transfer_function="org.dawnsci.rcp.histogram.sqrt"
+            id="org.dawnsci.rcp.histogram.filmNegativeSqrt"
+            name="Film Negative Sqrt"
+            red_inverted="true"
             red_transfer_function="org.dawnsci.rcp.histogram.sqrt">
       </colour_scheme>
    </extension>
