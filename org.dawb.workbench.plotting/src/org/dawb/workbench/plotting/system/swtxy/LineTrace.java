@@ -269,8 +269,6 @@ public class LineTrace extends Trace {
     							predp = dpTuple[0];
     							dp = dpTuple[1];
     							predpInRange = true;
-    							predpInRange = true;
-    							dpInRange = true;
     							dpInRange = true;
     							plot_dp = true;
     						}
