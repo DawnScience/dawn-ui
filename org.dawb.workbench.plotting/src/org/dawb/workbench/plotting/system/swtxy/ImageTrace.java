@@ -389,8 +389,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
         clearAspect(xAxis);
         clearAspect(yAxis);
 		getParent().remove(this);
-		xAxis.removeListenr(this);
-		yAxis.removeListenr(this);
+		xAxis.removeListener(this);
+		yAxis.removeListener(this);
 		axisRedrawActive = false;
 		lastImageServiceBean = null;
 	}

@@ -1,6 +1,5 @@
 package org.dawb.workbench.plotting.system;
 
-import org.csstudio.swt.xygraph.dataprovider.CircularBufferDataProvider;
 import org.csstudio.swt.xygraph.figures.Trace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.TraceEvent;
@@ -8,12 +7,10 @@ import org.dawb.workbench.plotting.system.swtxy.LineTrace;
 import org.eclipse.swt.graphics.Color;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
-import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 
 /**
  * This class only wraps line traces, images have their own IImageTrace implementor.
- * See javadocs of ILineTrace.
- * 
+ * @see ILineTrace
  * @author fcp94556
  *
  */
