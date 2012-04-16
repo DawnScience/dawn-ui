@@ -103,6 +103,34 @@
                </appinfo>
             </annotation>
          </attribute>
+         <attribute name="red_inverted" type="boolean" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="blue_inverted" type="boolean" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="green_inverted" type="boolean" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="alpha_inverted" type="boolean" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
       </complexType>
    </element>
 
@@ -120,7 +148,7 @@
          <meta.section type="examples"/>
       </appinfo>
       <documentation>
-            &lt;extension
+         &lt;extension
          point=&quot;org.dawnsci.rcp.histogram.channelColourScheme&quot;&gt;
       &lt;transfer_function
             array_provider_class=&quot;org.dawnsci.rcp.functions.classes.LinearTransferFunction&quot;
