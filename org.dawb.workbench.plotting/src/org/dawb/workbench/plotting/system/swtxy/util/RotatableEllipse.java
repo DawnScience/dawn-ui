@@ -5,13 +5,13 @@ import org.eclipse.draw2d.Shape;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.PrecisionPoint;
-import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
 
 /**
- * A Draw2D ellipse that allows its orientation to be set
+ * A Draw2D ellipse that allows its orientation to be set. Its location is the centre of rotation
+ * (not the top-left corner of its bounding box)
  */
-class RotatableEllipse extends Shape {
+public class RotatableEllipse extends Shape {
 	private static PrecisionPoint centre = new PrecisionPoint(0.5, 0.5);
 	private AffineTransform affine; // transforms unit square (origin at top-left corner) to transformed rectangle
 	private PointList box; // bounding box of ellipse
@@ -26,7 +26,7 @@ class RotatableEllipse extends Shape {
 	 */
 	public RotatableEllipse(double cx, double cy, double major, double minor, double angle) {
 		affine = new AffineTransform();
-		affine.setTranslation(cx-0.5*major, cy-0.5*minor);
+		affine.setTranslation(cx - 0.5 * major, cy - 0.5 * minor);
 		affine.setScale(major, minor);
 		setAngle(angle);
 	}
@@ -55,6 +55,33 @@ class RotatableEllipse extends Shape {
 	}
 
 	/**
+	 * @return angle of rotation in degrees
+	 */
+	public double getAngleDegrees() {
+		return affine.getRotationDegrees();
+	}
+
+	/**
+	 * Get point on ellipse at given angle
+	 * @param degrees
+	 * @return
+	 */
+	public Point getPoint(double degrees) {
+		double angle = Math.toRadians(degrees);
+		double c = Math.cos(angle);
+		double s = Math.sin(angle);
+		PrecisionPoint p = new PrecisionPoint(0.5*(c+1), 0.5*(s+1));
+		return affine.getTransformed(p);
+	}
+
+	/**
+	 * @return affine transform (this is a copy)
+	 */
+	public AffineTransform getAffineTransform() {
+		return affine.clone();
+	}
+
+	/**
 	 * Set major and minor axes lengths
 	 * @param major
 	 * @param minor
@@ -70,6 +97,12 @@ class RotatableEllipse extends Shape {
 	private void calcBox() {
 		box = affine.getTransformedUnitSquare();
 		setBounds(box.getBounds());
+	}
+
+	@Override
+	public void setLocation(Point p) {
+		affine.setTranslation(p.preciseX(), p.preciseY());
+		calcBox();
 	}
 
 	@Override
@@ -101,9 +134,7 @@ class RotatableEllipse extends Shape {
 		graphics.translate((int) affine.getTranslationX(), (int) affine.getTranslationY());
 		graphics.rotate((float) affine.getRotationDegrees());
 		// NB do not use Graphics#scale and unit shape as there are precision problems
-		Rectangle b = new Rectangle();
-		b.union(new Point((int) affine.getScaleX(), (int) affine.getScaleY()));
-		graphics.drawArc(b, 0, 360);
+		graphics.drawOval(0, 0, (int) affine.getScaleX(), (int) affine.getScaleY());
 		graphics.popState();
 	}
 

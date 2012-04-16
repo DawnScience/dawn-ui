@@ -18,6 +18,17 @@ public class AffineTransform {
 	private double angle; // in radians (clockwise is positive)
 	private PointList box = new PointList(4);
 
+	@Override
+	protected AffineTransform clone() {
+		AffineTransform a = new AffineTransform();
+		a.scaleX = scaleX;
+		a.scaleY = scaleY;
+		a.dx = dx;
+		a.dy = dy;
+		a.setRotation(angle);
+		return a;
+	}
+
 	/**
 	 * Sets the value for the amount of scaling to be done along both axes.
 	 * 
