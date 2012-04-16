@@ -32,7 +32,7 @@ public class RegionComposite extends Composite {
 	private AbstractSelectionRegion editingRegion;
 	private ColorSelector colorSelector;
 	private Spinner alpha;
-	private Button motile;
+	private Button mobile;
 	private Button visible;
 	private Button showLabel;
 
@@ -94,11 +94,11 @@ public class RegionComposite extends Composite {
 		alpha.setMaximum(255);
 		alpha.setSelection(80);
 
-		this.motile = new Button(this, SWT.CHECK);
-		motile.setText("   Mobile   ");		
-		motile.setToolTipText("When true, this selection can be resized and moved around the graph.");
-		motile.setLayoutData(new GridData(0, 0, false, false, 2, 1));
-		motile.setSelection(true);
+		this.mobile = new Button(this, SWT.CHECK);
+		mobile.setText("   Mobile   ");		
+		mobile.setToolTipText("When true, this selection can be resized and moved around the graph.");
+		mobile.setLayoutData(new GridData(0, 0, false, false, 2, 1));
+		mobile.setSelection(true);
 		
 		
 		this.showPoints = new Button(this, SWT.CHECK);
@@ -196,7 +196,7 @@ public class RegionComposite extends Composite {
 		
 		colorSelector.setColorValue(region.getRegionColor().getRGB());
 		alpha.setSelection(region.getAlpha());
-		motile.setSelection(region.isMobile());
+		mobile.setSelection(region.isMobile());
 		showPoints.setSelection(region.isShowPosition());
 		visible.setSelection(region.isVisible());
 		showLabel.setSelection(region.isShowLabel());
@@ -211,7 +211,7 @@ public class RegionComposite extends Composite {
 		editingRegion.setShowPosition(showPoints.getSelection());
 		editingRegion.setRegionColor(new Color(getDisplay(), colorSelector.getColorValue()));
 		editingRegion.setAlpha(alpha.getSelection());
-		editingRegion.setMobile(motile.getSelection());
+		editingRegion.setMobile(mobile.getSelection());
 		editingRegion.setVisible(visible.getSelection());
 		editingRegion.setShowLabel(showLabel.getSelection());
         return editingRegion;
