@@ -96,12 +96,12 @@ class LightWeightActionBarsManager extends PlottingActionBarManager {
 	
 	protected void createAspectHistoAction() {
 
-		final Action histo = new Action("Rehistogram on zoom in or zoom out (F5)", IAction.AS_CHECK_BOX) {
+		final Action histo = new Action("Rehistogram on zoom in or zoom out (F5)", IAction.AS_PUSH_BUTTON) {
 			
 		    public void run() {		    	
 		    	Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.HISTO, isChecked());
 		    	final IImageTrace trace = (IImageTrace)system.getTraces(IImageTrace.class).iterator().next();
-		    	trace.setRehistorgram(isChecked());
+		    	trace.rehistogram();
 		    }
 		};
         

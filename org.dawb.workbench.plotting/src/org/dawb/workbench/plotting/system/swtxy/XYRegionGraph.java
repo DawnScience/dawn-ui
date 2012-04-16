@@ -220,13 +220,26 @@ public class XYRegionGraph extends XYGraph {
 	 */
 	public void setZoomLevel(MouseEvent evt, double delta) {
 		
+		// TODO This should not always zoom equally in x and y.
+		// If y << x scroll slower in y.
+		// If x << y scroll slower in x.
+		int primX = primaryXAxis.getLength() - primaryXAxis.getMargin();
+		int primY = primaryYAxis.getLength() - primaryYAxis.getMargin();
+		double xScale = delta;
+		double yScale = delta;
+		if (primX>(primY*1.333)) {
+			double ratio = (Double.valueOf(primX)/Double.valueOf(primY));
+			yScale = delta / ratio;
+		} else if (primY>(primX*1.333)) {
+			xScale = delta / (Double.valueOf(primY)/Double.valueOf(primX));
+		}
 		for (Axis axis : getXAxisList()) {
 			final double cenX = axis.getPositionValue(evt.x, false);
-			axis.zoomInOut(cenX, delta);
+			axis.zoomInOut(cenX, xScale);
 		}
 		for (Axis axis : getYAxisList()) {
 			final double cenY = axis.getPositionValue(evt.y, false);
-			axis.zoomInOut(cenY, delta);
+			axis.zoomInOut(cenY, yScale);
 		}
 	}
 }
