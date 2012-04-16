@@ -118,13 +118,15 @@ public class LineTrace extends Trace {
 			// these can both be added at the end to complete the polygon
 			int yValue = yAxis.getValuePosition(yAxis.getRange().getLower(), false);
 			
-			Point endBase = new Point(points.getLastPoint().x,yValue); 
-			Point startBase = new Point(points.getFirstPoint().x,yValue); 
-			
-			points.addPoint(endBase);
-			points.addPoint(startBase);
-			
-			graphics.fillPolygon(points);
+			if (points.size() > 0) {
+				Point endBase = new Point(points.getLastPoint().x,yValue); 
+				Point startBase = new Point(points.getFirstPoint().x,yValue); 
+				
+				points.addPoint(endBase);
+				points.addPoint(startBase);
+				
+				graphics.fillPolygon(points);
+			}
 			break;
 			
 		default:
