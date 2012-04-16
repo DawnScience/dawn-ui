@@ -755,6 +755,16 @@ public class HistogramToolPage extends AbstractToolPage {
 		int[] green = extentionPointManager.getTransferFunction(cmbGreenColour.getText()).getFunction().getArray();
 		int[] blue = extentionPointManager.getTransferFunction(cmbBlueColour.getText()).getFunction().getArray();
 
+		if (btnRedInverse.getSelection()) {
+			red = invert(red);
+		}
+		if (btnGreenInverse.getSelection()) {
+			green = invert(green);
+		}
+		if (btnBlueInverse.getSelection()) {
+			blue = invert(blue);
+		}
+		
 		if (palleteData.colors.length != 256)
 			palleteData.colors = new RGB[256];
 
@@ -763,5 +773,13 @@ public class HistogramToolPage extends AbstractToolPage {
 			palleteData.colors[i].green = green[i];
 			palleteData.colors[i].blue = blue[i];
 		}
+	}
+	
+	private int[] invert(int[] array) {
+		int[] result = new int[array.length];
+		for(int i = 0; i < array.length; i++) {
+			result[i] = array[array.length-1-i];
+		}
+		return result;
 	}
 }
