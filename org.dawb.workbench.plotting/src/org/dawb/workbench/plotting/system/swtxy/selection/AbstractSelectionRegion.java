@@ -96,9 +96,10 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 
 	/**
 	 * Sets the local of the region in local coordinates not axis ones.
-	 * @param bounds
+	 * @param clicks
+	 * @param parentBounds
 	 */
-	public abstract void setLocalBounds(Point firstClick, Point dragLocation, Rectangle parentBounds);
+	public abstract void setLocalBounds(PointList clicks, Rectangle parentBounds);
 
 	/**
 	 * This method should be implemented to fire a StructuredSelection

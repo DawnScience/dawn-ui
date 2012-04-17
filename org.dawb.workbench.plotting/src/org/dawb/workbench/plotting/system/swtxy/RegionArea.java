@@ -367,7 +367,7 @@ public class RegionArea extends PlotArea {
 			((XYRegionGraph) xyGraph).getOperationsManager().addCommand(new AddRegionCommand((XYRegionGraph) xyGraph,
 							regionBeingAdded));
 
-			regionBeingAdded.setLocalBounds(regionPoints.getFirstPoint(), regionPoints.getLastPoint(), getBounds());
+			regionBeingAdded.setLocalBounds(regionPoints, getBounds());
 
 			fireRegionAdded(new RegionEvent(regionBeingAdded));
 

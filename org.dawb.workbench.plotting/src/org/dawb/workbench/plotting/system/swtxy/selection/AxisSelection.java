@@ -325,9 +325,9 @@ class AxisSelection extends AbstractSelectionRegion {
 	 * @param bounds
 	 */
 	@Override
-	public void setLocalBounds(Point firstClick, Point dragLocation, Rectangle parentBounds) {
+	public void setLocalBounds(PointList clicks, Rectangle parentBounds) {
 		if (line1!=null) {
-			setLocalBounds(new Rectangle(firstClick, dragLocation), parentBounds);
+			setLocalBounds(new Rectangle(clicks.getFirstPoint(), clicks.getLastPoint()), parentBounds);
 			createRegionBounds(true);
 			fireRegionBoundsChanged(getRegionBounds());
 		}

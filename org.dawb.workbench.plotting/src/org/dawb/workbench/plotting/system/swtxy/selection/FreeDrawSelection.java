@@ -128,8 +128,7 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	public void setLocalBounds(Point firstClick, 
-			                   Point dragLocation,
+	public void setLocalBounds(PointList clicks, 
 			                   Rectangle parentBounds) {
 		
 		updateConnectionBounds();

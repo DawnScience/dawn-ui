@@ -186,9 +186,9 @@ class LineSelection extends AbstractSelectionRegion {
 	 * @param bounds
 	 */
 	@Override
-	public void setLocalBounds(Point firstClick, Point dragLocation, Rectangle parentBounds) {
-		if (startBox!=null)   startBox.setSelectionPoint(firstClick);
-		if (endBox!=null)     endBox.setSelectionPoint(dragLocation);
+	public void setLocalBounds(PointList clicks, Rectangle parentBounds) {
+		if (startBox!=null)   startBox.setSelectionPoint(clicks.getFirstPoint());
+		if (endBox!=null)     endBox.setSelectionPoint(clicks.getLastPoint());
 		updateConnectionBounds();
 		createRegionBounds(true);
 		fireRegionBoundsChanged(getRegionBounds());

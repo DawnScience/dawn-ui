@@ -221,9 +221,9 @@ class BoxSelection extends AbstractSelectionRegion {
 	 * @param bounds
 	 */
 	@Override
-	public void setLocalBounds(Point firstClick, Point dragLocation, Rectangle parentBounds) {
-		if (p1!=null)   p1.setSelectionPoint(firstClick);
-		if (p4!=null)   p4.setSelectionPoint(dragLocation);
+	public void setLocalBounds(PointList clicks, Rectangle parentBounds) {
+		if (p1!=null)   p1.setSelectionPoint(clicks.getFirstPoint());
+		if (p4!=null)   p4.setSelectionPoint(clicks.getLastPoint());
 		updateConnectionBounds();
 		createRegionBounds(true);
 		fireRegionBoundsChanged(getRegionBounds());
