@@ -10,7 +10,6 @@
 package org.dawb.workbench.plotting.system;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -356,6 +355,9 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 										final IProgressMonitor      monitor) {
 		try {
 			
+			this.plottingMode = PlotType.IMAGE;
+			this.lightWeightActionBarMan.switchActions(plottingMode);
+
 			clearTraces(); // Only one image at a time!
 
 			final Axis xAxis = ((AxisWrapper)getSelectedXAxis()).getWrappedAxis();
@@ -421,7 +423,6 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 										final IProgressMonitor      monitor) {
 		
 		this.plottingMode = PlotType.PT1D;
-		createUI();
 		this.lightWeightActionBarMan.switchActions(plottingMode);
 
 		Object[] oa = getOrderedDatasets(xIn, ysIn, createdIndices);
@@ -534,9 +535,13 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		traceMap.put(trace.getName(), trace);
 		
 		if (trace instanceof ImageTrace) {
+			this.plottingMode = PlotType.IMAGE;
+			this.lightWeightActionBarMan.switchActions(plottingMode);
 			xyGraph.addImageTrace((ImageTrace)trace);
 			fireTraceAdded(new TraceEvent(trace));
 		} else {
+			this.plottingMode = PlotType.PT1D;
+			this.lightWeightActionBarMan.switchActions(plottingMode);
 			xyGraph.addTrace(((TraceWrapper)trace).getTrace());
 			xyCanvas.redraw();
 			fireTraceAdded(new TraceEvent(trace));
