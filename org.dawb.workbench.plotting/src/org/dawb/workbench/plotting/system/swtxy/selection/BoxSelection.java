@@ -34,7 +34,7 @@ class BoxSelection extends AbstractSelectionRegion {
 		
 	private static final int SIDE      = 8;
 	
-	private SelectionRectangle p1, p2, p3, p4;
+	private SelectionHandle p1, p2, p3, p4;
 
 	private Figure connection;
 	
@@ -46,10 +46,10 @@ class BoxSelection extends AbstractSelectionRegion {
 
 	public void createContents(final Figure parent) {
 		
-     	this.p1  = createSelectionRectangle(getRegionColor(),  new Point(100,100),  SIDE);
-		this.p2  = createSelectionRectangle(getRegionColor(),  new Point(200,100),  SIDE);
-		this.p3  = createSelectionRectangle(getRegionColor(),  new Point(100,200),  SIDE);
-		this.p4  = createSelectionRectangle(getRegionColor(),  new Point(200,200),  SIDE);
+     	this.p1  = createSelectionRectangle(getRegionColor(), SIDE, 100, 100);
+		this.p2  = createSelectionRectangle(getRegionColor(), SIDE, 200, 100);
+		this.p3  = createSelectionRectangle(getRegionColor(), SIDE, 100, 200);
+		this.p4  = createSelectionRectangle(getRegionColor(), SIDE, 200, 200);
 				
 		this.connection = new RegionFillFigure() {
 			@Override
@@ -121,9 +121,9 @@ class BoxSelection extends AbstractSelectionRegion {
 	
 	private boolean isCalculateCorners = true;
 
-	private SelectionRectangle createSelectionRectangle(Color color, Point location, int size) {
+	private SelectionHandle createSelectionRectangle(Color color, int size, double... location) {
 		
-		SelectionRectangle rect = new SelectionRectangle(getxAxis(), getyAxis(), color,  location, size);
+		SelectionHandle rect = new RectangularHandle(getxAxis(), getyAxis(), color, connection, size, location);
 		FigureTranslator mover = new FigureTranslator(getXyGraph(), rect);	
 		mover.addTranslationListener(createRegionNotifier());
 
@@ -134,7 +134,7 @@ class BoxSelection extends AbstractSelectionRegion {
 	
 				try {
 					isCalculateCorners = false;
-					SelectionRectangle a=null, b=null, c=null, d=null;
+					SelectionHandle a=null, b=null, c=null, d=null;
 					if (source == p1 || source == p4) {
 						a   = p1;   b   = p4;   c   = p2;   d   = p3;
 	
@@ -170,8 +170,8 @@ class BoxSelection extends AbstractSelectionRegion {
 		if (getSelectionProvider()!=null) getSelectionProvider().setSelection(new StructuredSelection(roi));
 	}
 
-	private void setCornerLocation( SelectionRectangle c,
-									SelectionRectangle d, 
+	private void setCornerLocation( SelectionHandle c,
+			SelectionHandle d, 
 									Rectangle sa, 
 									boolean quad1Or4) {
 		if (quad1Or4) {

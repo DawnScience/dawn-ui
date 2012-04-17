@@ -55,10 +55,10 @@ class RingSelection extends AbstractSelectionRegion {
 		
 	private static final int SIDE      = 8;
 	
-	private SelectionRectangle center;
+	private SelectionHandle center;
 
 	private Figure             connection;
-	private SelectionRectangle innerControl, outerControl;
+	private SelectionHandle innerControl, outerControl;
 	
 	RingSelection(String name, Axis xAxis, Axis yAxis) {
 		super(name, xAxis, yAxis);
@@ -68,11 +68,11 @@ class RingSelection extends AbstractSelectionRegion {
 
 	public void createContents(final Figure parent) {
 		
-     	this.center = new SelectionRectangle(getxAxis(), getyAxis(), getRegionColor(), new Point(100,100),  SIDE);
+     	this.center = new RectangularHandle(getxAxis(), getyAxis(), getRegionColor(), connection, SIDE, 100, 100);
      	center.setCursor(null);
      	
-     	this.innerControl = createSelectionRectangle();	
-     	this.outerControl = createSelectionRectangle();
+     	this.innerControl = createSelectionHandle();	
+     	this.outerControl = createSelectionHandle();
   	
 		this.connection = new RegionFillFigure() {
 			@Override
@@ -122,9 +122,9 @@ class RingSelection extends AbstractSelectionRegion {
         innerControl.setForegroundColor(ColorConstants.red);
 	}
 	
-	private SelectionRectangle createSelectionRectangle() {
+	private RectangularHandle createSelectionHandle() {
 		
-		SelectionRectangle ret = new SelectionRectangle(getxAxis(), getyAxis(), getRegionColor(), new Point(100,100),  SIDE);
+		RectangularHandle ret = new RectangularHandle(getxAxis(), getyAxis(), getRegionColor(), connection, SIDE, 100, 100);
 		FigureTranslator trans = new FigureTranslator(getXyGraph(), ret);
      	trans.setLockedDirection(LockType.Y);
      	trans.addTranslationListener(createRegionNotifier());

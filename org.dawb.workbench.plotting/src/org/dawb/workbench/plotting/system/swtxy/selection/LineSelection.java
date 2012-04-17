@@ -32,7 +32,8 @@ class LineSelection extends AbstractSelectionRegion {
 
 	private static final int SIDE      = 8;
 	
-	private SelectionRectangle endBox, startBox;
+	private SelectionHandle endBox, startBox;
+//	private SelectionRectangle endBox, startBox;
 
 	private Figure connection;
 
@@ -47,11 +48,13 @@ class LineSelection extends AbstractSelectionRegion {
 	public void createContents(final Figure parent) {
 		
 		
-		this.startBox = new SelectionRectangle(getxAxis(), getyAxis(), getRegionColor(), new Point(100,100),  SIDE);
+		this.startBox = new RectangularHandle(getxAxis(), getyAxis(), getRegionColor(), connection, SIDE, 100, 100);
+//		this.startBox   = new SelectionRectangle(getxAxis(), getyAxis(), getRegionColor(), new Point(100,100),SIDE);
 		FigureTranslator mover = new FigureTranslator(getXyGraph(), startBox);
 		mover.addTranslationListener(createRegionNotifier());
 
-		this.endBox   = new SelectionRectangle(getxAxis(), getyAxis(), getRegionColor(), new Point(200,200),SIDE);
+		this.endBox = new RectangularHandle(getxAxis(), getyAxis(), getRegionColor(), connection, SIDE, 200, 200);
+//		this.endBox   = new SelectionRectangle(getxAxis(), getyAxis(), getRegionColor(), new Point(200,200),SIDE);
 		mover = new FigureTranslator(getXyGraph(), endBox);	
 		mover.addTranslationListener(createRegionNotifier());
 				

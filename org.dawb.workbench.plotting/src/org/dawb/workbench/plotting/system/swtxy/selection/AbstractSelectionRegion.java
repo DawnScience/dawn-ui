@@ -226,8 +226,8 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 
 	public void setShowPosition(boolean showPosition) {
 		if (regionObjects!=null) for (IFigure ob : regionObjects) {
-			if (ob instanceof SelectionRectangle) {
-				((SelectionRectangle)ob).setShowPosition(showPosition);
+			if (ob instanceof SelectionHandle) {
+				((SelectionHandle)ob).setShowPosition(showPosition);
 			}
 		}
 		bean.setShowPosition(showPosition);
@@ -235,8 +235,8 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 
 	public void setAlpha(int alpha) {
 		if (regionObjects!=null) for (IFigure ob : regionObjects) {
-			if (ob instanceof SelectionRectangle) {
-				((SelectionRectangle)ob).setAlpha(alpha);
+			if (ob instanceof SelectionHandle) {
+				((SelectionHandle)ob).setAlpha(alpha);
 			}
 			if (ob instanceof Shape) {
 				((Shape)ob).setAlpha(alpha);
@@ -304,8 +304,8 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 
 	public void setxAxis(Axis xAxis) {
 		if (regionObjects!=null) for (IFigure ob : regionObjects) {
-			if (ob instanceof SelectionRectangle) {
-				((SelectionRectangle)ob).setxAxis(xAxis);
+			if (ob instanceof SelectionHandle) {
+				((SelectionHandle)ob).setxAxis(xAxis);
 			}
 		}
 		getxAxis().removeListener(this);
@@ -319,8 +319,8 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 
 	public void setyAxis(Axis yAxis) {
 		if (regionObjects!=null) for (IFigure ob : regionObjects) {
-			if (ob instanceof SelectionRectangle) {
-				((SelectionRectangle)ob).setyAxis(yAxis);
+			if (ob instanceof SelectionHandle) {
+				((SelectionHandle)ob).setyAxis(yAxis);
 			}
 		}
 		getyAxis().removeListener(this);

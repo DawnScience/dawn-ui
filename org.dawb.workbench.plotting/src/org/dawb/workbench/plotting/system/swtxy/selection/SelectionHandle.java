@@ -9,27 +9,30 @@ import org.dawb.workbench.plotting.system.swtxy.util.Draw2DUtils;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
-import org.eclipse.draw2d.RectangleFigure;
+import org.eclipse.draw2d.Shape;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
 
-class SelectionRectangle extends Figure implements IMobileFigure {
+/**
+ * Abstract class for a GUI handle that allows a selection region to be manipulated
+ */
+public abstract class SelectionHandle extends Figure implements IMobileFigure {
 	
-	private RectangleFigure point;
+	private Shape shape;
 	private Figure          label;
 	protected Axis          xAxis;
 	protected Axis          yAxis;
 	private int             alpha=100;
+	protected Point location;
 
-	SelectionRectangle(Axis xAxis, Axis yAxis, Color colour, Point location, int side) {
-		
+	protected SelectionHandle(Axis xAxis, Axis yAxis, Color colour, Figure parent, int side, double... params) {
 		this.xAxis = xAxis;
 		this.yAxis = yAxis;
 		setOpaque(false);
 		
-		this.label = new Figure(){
+		this.label = new Figure() {
 			protected void paintFigure(Graphics graphics) {
 				if (!isVisible()) return;
                 final String text = getLabelPositionText(getRealValue());
@@ -43,19 +46,27 @@ class SelectionRectangle extends Figure implements IMobileFigure {
 		label.setVisible(false);
 		add(label);
 
-		this.point = new RectangleFigure();
-		point.setAlpha(alpha);
-		point.setBackgroundColor(colour);
-		point.setForegroundColor(colour);
-		point.setOpaque(false);
-		point.setBounds(new Rectangle(0,0,side,side));
-		point.setCursor(Draw2DUtils.getRoiControlPointCursor());
-		add(point);
-		
-		
-        setBounds(new Rectangle(location, new Point(location.x+200, location.y+20)));
-		
+		shape = createHandleShape(parent, side, params);
+		shape.setAlpha(alpha);
+		shape.setBackgroundColor(colour);
+		shape.setForegroundColor(colour);
+		shape.setOpaque(false);
+		shape.setCursor(Draw2DUtils.getRoiControlPointCursor());
+		add(shape);
+
+		Rectangle b = new Rectangle(location, new Point(location.x()+200, location.y()+20));
+		b.union(shape.getBounds());
+        setBounds(b);
  	}
+
+	/**
+	 * Create a handle shape (and set its own bounds and location)
+	 * @param parent shape
+	 * @param side
+	 * @param params
+	 * @return handle shape
+	 */
+	public abstract Shape createHandleShape(Figure parent, int side, double[] params);
 
 	/**
 	 * Gets the position in the scale of the axis.
@@ -72,12 +83,11 @@ class SelectionRectangle extends Figure implements IMobileFigure {
 	
 	/**
 	 * Sets the location in the scale of the axis. Transforms this point 
-	 * to the sceen value and then relocates the point.
+	 * to the screen value and then relocates the point.
 	 * 
 	 * @param point
 	 */
 	public void setRealValue(final double[] point) {
-		
 		final Point pnt = new Point(xAxis.getValuePosition(point[0], false), yAxis.getValuePosition(point[1], false));
 		setSelectionPoint(pnt);
 	}
@@ -85,7 +95,6 @@ class SelectionRectangle extends Figure implements IMobileFigure {
 	private NumberFormat format = new DecimalFormat("######0.00");
 	
 	protected String getLabelPositionText(double[] p) {
-		
 		if (Double.isNaN(p[0])||Double.isNaN(p[1])) return "";
 		final StringBuilder buf = new StringBuilder();
 		buf.append("(");
@@ -98,22 +107,27 @@ class SelectionRectangle extends Figure implements IMobileFigure {
 	
 	public void setCursor(final Cursor cursor) {
 		super.setCursor(cursor);
-		this.point.setCursor(cursor);
+		this.shape.setCursor(cursor);
 	}
 
 	public Point getSelectionPoint() {
 		final Point loc = getLocation();
-		final int pntWid = point.getBounds().width;
-		final int pntHgt = point.getBounds().height;
+		final int pntWid = shape.getBounds().width;
+		final int pntHgt = shape.getBounds().height;
 		return new Point(loc.x+(pntWid/2), loc.y+(pntHgt/2));
 	}
 
 	protected void setSelectionPoint(Point p) {
-		final int pntWid = point.getBounds().width;
-		final int pntHgt = point.getBounds().height;
+		final int pntWid = shape.getBounds().width;
+		final int pntHgt = shape.getBounds().height;
 		final Point loc = new Point(p.x-(pntWid/2), p.y-(pntHgt/2));
 		setLocation(loc);
-		point.setLocation(loc);
+	}
+
+	@Override
+	public void setLocation(Point loc) {
+		super.setLocation(loc);
+		shape.setLocation(loc);
 	}
 
 	public void setShowPosition(boolean showPosition) {
@@ -130,18 +144,18 @@ class SelectionRectangle extends Figure implements IMobileFigure {
 	}
 
 	public void setForegroundColor(Color fg) {
-		point.setForegroundColor(fg);
+		shape.setForegroundColor(fg);
 		super.setForegroundColor(fg);
 	}
 
 	public void setBackgroundColor(Color bg) {
-		point.setBackgroundColor(bg);
+		shape.setBackgroundColor(bg);
 		super.setBackgroundColor(bg);
 	}
 
 	public void setAlpha(int alpha) {
 		this.alpha = alpha;
-		point.setAlpha(alpha);
+		shape.setAlpha(alpha);
 	}
 
 }

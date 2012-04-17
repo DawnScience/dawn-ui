@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.csstudio.swt.xygraph.figures.XYGraph;
+import org.dawb.workbench.plotting.system.swtxy.selection.SelectionHandle;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.LayoutManager;
 import org.eclipse.draw2d.MouseEvent;
@@ -96,7 +97,12 @@ public class FigureTranslator implements MouseListener, MouseMotionListener {
 		if (trans instanceof Rectangle) {
 			return ((Rectangle)trans).translate(width, height);
 		}
-		if (trans instanceof IFigure)  {
+		if (trans instanceof SelectionHandle) {
+			Point l = ((SelectionHandle) trans).getLocation();
+			l.translate(width, height);
+			((SelectionHandle) trans).setLocation(l);
+			
+		} else if (trans instanceof IFigure)  {
 			((IFigure)trans).translate(width, height);
 		}
 		return null;
