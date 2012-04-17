@@ -165,6 +165,7 @@ public class AspectAxis extends Axis {
 	}
 
 	public void setLabelData(AbstractDataset labels) {
+		if (labels!=null && labels.getShape().length!=1) throw new RuntimeException("You must only label image data with one dimensional axes!");
 		this.labelData = labels;
 	}
 	
@@ -172,11 +173,15 @@ public class AspectAxis extends Axis {
 		
 		final Range realRange = getRange();
 		if (labelData==null) return realRange;
-//TODO something with ranges.		
-//		final double lower = labelData.getElementDoubleAbs((int)Math.round(realRange.getLower()));
-//		final double upper = labelData.getElementDoubleAbs((int)Math.round(realRange.getUpper()));
-//		return new Range(lower, upper);
-		return realRange;
+
+		final double lower = labelData.getSize()>(int)Math.round(realRange.getLower())
+				           ? labelData.getElementDoubleAbs((int)Math.round(realRange.getLower()))
+				           : labelData.getElementDoubleAbs(labelData.getSize()-1);
+				        			   
+		final double upper = labelData.getSize()>(int)Math.round(realRange.getUpper())
+				           ? labelData.getElementDoubleAbs((int)Math.round(realRange.getUpper()))
+				           : labelData.getElementDoubleAbs(labelData.getSize()-1);
+		return new Range(lower, upper);
 	}
 
 

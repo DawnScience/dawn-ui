@@ -357,19 +357,19 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		try {
 			
 			clearTraces(); // Only one image at a time!
-					
+
 			final Axis xAxis = ((AxisWrapper)getSelectedXAxis()).getWrappedAxis();
 			final Axis yAxis = ((AxisWrapper)getSelectedYAxis()).getWrappedAxis();
-			yAxis.setTitle("");
-			xAxis.setTitle("");
-            if (data.getName()!=null) xyGraph.setTitle(data.getName());
+			yAxis.setTitle(axes!=null&&axes.get(1).getName()!=null ? axes.get(1).getName() : "");
+			xAxis.setTitle(axes!=null&&axes.get(0).getName()!=null ? axes.get(0).getName() : "");
+            
+			if (data.getName()!=null) xyGraph.setTitle(data.getName());
 			xyGraph.clearTraces();
 			
 			if (traceMap==null) traceMap = new LinkedHashMap<String, ITrace>(31);
 			traceMap.clear();
 			
 			final ImageTrace trace = xyGraph.createImageTrace(data.getName(), xAxis, yAxis);
-					
 			trace.setData(data, axes);
 			
 			traceMap.put(trace.getName(), trace);
