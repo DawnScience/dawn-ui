@@ -535,9 +535,13 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		traceMap.put(trace.getName(), trace);
 		
 		if (trace instanceof ImageTrace) {
+			this.plottingMode = PlotType.IMAGE;
+			this.lightWeightActionBarMan.switchActions(plottingMode);
 			xyGraph.addImageTrace((ImageTrace)trace);
 			fireTraceAdded(new TraceEvent(trace));
 		} else {
+			this.plottingMode = PlotType.PT1D;
+			this.lightWeightActionBarMan.switchActions(plottingMode);
 			xyGraph.addTrace(((TraceWrapper)trace).getTrace());
 			xyCanvas.redraw();
 			fireTraceAdded(new TraceEvent(trace));
