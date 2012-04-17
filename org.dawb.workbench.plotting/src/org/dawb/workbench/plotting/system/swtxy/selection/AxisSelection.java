@@ -17,6 +17,7 @@ import org.eclipse.draw2d.MouseEvent;
 import org.eclipse.draw2d.MouseListener;
 import org.eclipse.draw2d.MouseMotionListener;
 import org.eclipse.draw2d.geometry.Point;
+import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
@@ -58,6 +59,7 @@ class AxisSelection extends AbstractSelectionRegion {
 		this.regionType = regionType;
 	}
 
+	@Override
 	public void createContents(final Figure parent) {
 		
      	this.line1  = new LineFigure(true,  parent.getBounds());
@@ -146,11 +148,11 @@ class AxisSelection extends AbstractSelectionRegion {
         	line1.getParent().removeMouseMotionListener(mouseTrackListener);
         }
 	}
-	
-	public void paintBeforeAdded(final Graphics gc, Point firstClick, Point dragLocation, Rectangle parentBounds) {
+
+	@Override
+	public void paintBeforeAdded(final Graphics gc, PointList clicks, Rectangle parentBounds) {
 		
-		
-		final Rectangle bounds = new Rectangle(firstClick, dragLocation);
+		final Rectangle bounds = new Rectangle(clicks.getFirstPoint(), clicks.getLastPoint());
 		Rectangle r  = getSelectionBounds(bounds, parentBounds);
 		
 		
@@ -186,6 +188,7 @@ class AxisSelection extends AbstractSelectionRegion {
 		return r;
 	}
 
+	@Override
 	protected String getCursorPath() {
 		if (regionType==RegionType.XAXIS) {
 			return "icons/Cursor-horiz.png";
@@ -252,7 +255,8 @@ class AxisSelection extends AbstractSelectionRegion {
 			mover.setActive(motile);
 		}
 	}
-	
+
+	@Override
 	public void setMobile(boolean motile) {
 		if (regionType==RegionType.XAXIS || regionType==RegionType.YAXIS) {
 			super.setMobile(motile);
@@ -271,6 +275,8 @@ class AxisSelection extends AbstractSelectionRegion {
 
 		};
 	}
+
+	@Override
 	protected void fireRoiSelection() {
 		final RegionBounds bounds = createRegionBounds(false);
 		final RectangularROI roi = new RectangularROI(bounds.getP1()[0], bounds.getP1()[1], bounds.getP1()[0]+bounds.getP2()[0], bounds.getP1()[1]+bounds.getP2()[1], 0);
@@ -287,7 +293,7 @@ class AxisSelection extends AbstractSelectionRegion {
 		return size;
 	}
 
-
+	@Override
 	public RegionBounds createRegionBounds(boolean recordResult) {
 		if (line1!=null) {
 			final Rectangle rect = getRectangleFromVertices();
@@ -313,10 +319,12 @@ class AxisSelection extends AbstractSelectionRegion {
 			updateConnectionBounds();
 		}
 	}
+
 	/**
 	 * Sets the local in local coordinates
 	 * @param bounds
 	 */
+	@Override
 	public void setLocalBounds(Point firstClick, Point dragLocation, Rectangle parentBounds) {
 		if (line1!=null) {
 			setLocalBounds(new Rectangle(firstClick, dragLocation), parentBounds);
@@ -341,6 +349,7 @@ class AxisSelection extends AbstractSelectionRegion {
 		
 	}
 
+	@Override
 	protected void updateConnectionBounds() {
 		if (connection==null) return;
 		final Rectangle size = getRectangleFromVertices();				
@@ -352,6 +361,7 @@ class AxisSelection extends AbstractSelectionRegion {
 		return regionType;
 	}
 
+	@Override
 	public void setTrackMouse(boolean track) {
 		super.setTrackMouse(track);
        
@@ -395,13 +405,18 @@ class AxisSelection extends AbstractSelectionRegion {
 		if (line1!=null) line1.getParent().removeMouseListener(l);
 	}
 
-	
 	@Override
 	public void addMouseMotionListener(MouseMotionListener l){
 		if (line1!=null) line1.getParent().addMouseMotionListener(l);
 	}
+
 	@Override
 	public void removeMouseMotionListener(MouseMotionListener l){
 		if (line1!=null) line1.getParent().removeMouseMotionListener(l);
+	}
+
+	@Override
+	public boolean useMultipleMousePresses() {
+		return false;
 	}
 }

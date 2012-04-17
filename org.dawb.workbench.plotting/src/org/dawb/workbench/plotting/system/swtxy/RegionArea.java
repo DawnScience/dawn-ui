@@ -25,7 +25,7 @@ import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.MouseEvent;
 import org.eclipse.draw2d.MouseListener;
 import org.eclipse.draw2d.MouseMotionListener;
-import org.eclipse.draw2d.geometry.Point;
+import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.graphics.PaletteData;
@@ -40,8 +40,7 @@ public class RegionArea extends PlotArea {
 	private Collection<ITraceListener>      imageTraceListeners;
 
 	private AbstractSelectionRegion regionBeingAdded;
-	private Point  regionStart;
-	private Point  regionEnd;
+	private PointList regionPoints;
 	
 	public RegionArea(XYRegionGraph xyGraph) {
 		super(xyGraph);
@@ -108,7 +107,6 @@ public class RegionArea extends PlotArea {
 		revalidate();
 		
 		fireImageTraceAdded(new TraceEvent(trace));
-
 	}
 	
 	public boolean removeImageTrace(final ImageTrace trace){
@@ -129,7 +127,6 @@ public class RegionArea extends PlotArea {
 		}
 		imageTraces.clear();
 		revalidate();
-		
 	}
 
 	
@@ -149,8 +146,8 @@ public class RegionArea extends PlotArea {
 	protected void paintClientArea(final Graphics graphics) {
 		super.paintClientArea(graphics);
 
-		if (regionBeingAdded!=null && regionStart!=null && regionEnd!=null) {
-			regionBeingAdded.paintBeforeAdded(graphics, regionStart, regionEnd, getBounds());
+		if (regionBeingAdded!=null && regionPoints!=null) {
+			regionBeingAdded.paintBeforeAdded(graphics, regionPoints, getBounds());
 		}
 	}
 
@@ -232,8 +229,6 @@ public class RegionArea extends PlotArea {
 		for (IRegionListener l : regionListeners) l.regionRemoved(evt);
 	}
 	
-	
-
 	/**
 	 * 
 	 * @param l
@@ -297,7 +292,6 @@ public class RegionArea extends PlotArea {
 //
 //	}
 
-
 	public Collection<String> getRegionNames() {
 		return regions.keySet();
 	}
@@ -314,17 +308,52 @@ public class RegionArea extends PlotArea {
 	}
 
 	class RegionMouseListener extends MouseMotionListener.Stub implements MouseListener {
+		private int drag;
+		public RegionMouseListener() {
+			regionPoints = new PointList(2);
+		}
 
 		@Override
 		public void mousePressed(MouseEvent me) {
-			regionStart = me.getLocation();
-			regionEnd   = me.getLocation();
+			if (me.button == 3) {
+				releaseMouse();
+			} else {
+				regionPoints.addPoint(me.getLocation());
+				regionPoints.addPoint(me.getLocation());
+				drag = regionPoints.size() - 1;
+			}
 			me.consume();
 			repaint();
 		}
 
 		@Override
 		public void mouseReleased(MouseEvent me) {
+			if (!regionBeingAdded.useMultipleMousePresses()) {
+				releaseMouse();
+			} else {
+				
+			}
+			me.consume();
+			repaint();
+		}
+
+		@Override
+		public void mouseDoubleClicked(MouseEvent me) {
+		}
+
+		@Override
+		public void mouseDragged(final MouseEvent me) {
+			regionPoints.setPoint(me.getLocation(), drag);
+			me.consume();
+			repaint();
+		}
+
+		@Override
+		public void mouseExited(final MouseEvent me) {
+			// mouseReleased(me);
+		}
+
+		private void releaseMouse() {
 			removeMouseListener(this);
 			removeMouseMotionListener(this);
 			if (regionListener == this) {
@@ -338,31 +367,12 @@ public class RegionArea extends PlotArea {
 			((XYRegionGraph) xyGraph).getOperationsManager().addCommand(new AddRegionCommand((XYRegionGraph) xyGraph,
 							regionBeingAdded));
 
-			regionBeingAdded.setLocalBounds(regionStart, regionEnd, getBounds());
+			regionBeingAdded.setLocalBounds(regionPoints.getFirstPoint(), regionPoints.getLastPoint(), getBounds());
 
 			fireRegionAdded(new RegionEvent(regionBeingAdded));
 
-			me.consume();
-			repaint();
-
 			RegionArea.this.regionBeingAdded = null;
-			regionStart = regionEnd = null;
-		}
-
-		@Override
-		public void mouseDoubleClicked(MouseEvent me) {
-
-		}
-
-		public void mouseDragged(final MouseEvent me) {
-
-			regionEnd = me.getLocation();
-			me.consume();
-			repaint();
-		}
-
-		public void mouseExited(final MouseEvent me) {
-			// mouseReleased(me);
+			regionPoints = null;
 		}
 	}
 

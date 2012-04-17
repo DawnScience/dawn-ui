@@ -43,7 +43,8 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 	public boolean isMobile() {
 		return false; // You cannot move this figure yet...
 	}
-	
+
+	@Override
 	public void setLineWidth(int width) {
 		super.setLineWidth(width);
 		updateConnectionBounds();
@@ -68,15 +69,14 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 
 	@Override
 	public void paintBeforeAdded(Graphics g, 
-			                     Point firstClick,
-			                     Point dragLocation, 
+			                     PointList clicks,
 			                     Rectangle parentBounds) {
 		
 		if (points==null) {
 			points = new PointList();
-			points.addPoint(firstClick);
+			points.addPoint(clicks.getFirstPoint());
 		}
-		points.addPoint(dragLocation);
+		points.addPoint(clicks.getLastPoint());
 		
 		g.setForegroundColor(getRegionColor());
 		g.setAlpha(getAlpha());
@@ -126,7 +126,6 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 		buf.append(")");
 		return buf.toString();
 	}
-
 
 	@Override
 	public void setLocalBounds(Point firstClick, 
@@ -188,4 +187,8 @@ class FreeDrawSelection extends AbstractSelectionRegion {
         updateConnectionBounds();
 	}
 
+	@Override
+	public boolean useMultipleMousePresses() {
+		return false;
+	}
 }
