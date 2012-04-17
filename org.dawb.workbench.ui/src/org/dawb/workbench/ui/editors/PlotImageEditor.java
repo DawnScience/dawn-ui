@@ -191,20 +191,9 @@ public class PlotImageEditor extends EditorPart implements IReusableEditor {
 					logger.error("Cannot load file "+filePath, e);
 					return Status.CANCEL_STATUS;
 				}
-
-				
-				//set.setName(getEditorInput().getName());
-				
-				final List<AbstractDataset> axes = new ArrayList<AbstractDataset>(2);
-				if (set==null || set.getShape()==null) {
-					logger.error("Cannot read file "+getEditorInput().getName());
-					return Status.CANCEL_STATUS;
-				}
-				axes.add(SliceUtils.createAxisDataset((set.getShape()[0])));
-				axes.add(SliceUtils.createAxisDataset((set.getShape()[1])));
-				
+								
 				set.setName(""); // Stack trace if null - stupid.
-				plottingSystem.createPlot2D(set, axes, monitor);
+				plottingSystem.createPlot2D(set, null, monitor);
 				
 				return Status.OK_STATUS;
 			}

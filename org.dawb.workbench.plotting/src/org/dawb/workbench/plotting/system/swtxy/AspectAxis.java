@@ -10,6 +10,8 @@ import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Rectangle;
 
+import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+
 /**
  * An axis which can keep aspect with another and have a maximum possible extend which cannot
  * be altered.
@@ -22,6 +24,7 @@ public class AspectAxis extends Axis {
 	private AspectAxis relativeTo;
 	private Range      maximumRange;
     private boolean    keepAspect; // This is so that the user may have images with and without aspect in the same application.
+	private AbstractDataset labelData;
 	public AspectAxis(String title, boolean yAxis) {
 		super(title, yAxis);
 		keepAspect = Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.ASPECT);
@@ -160,6 +163,22 @@ public class AspectAxis extends Axis {
 		if (!maximumRange.inRange(upper, true)) upper = range.isMinBigger() ? maximumRange.getLower() : maximumRange.getUpper();
 		return new Range(lower, upper);
 	}
+
+	public void setLabelData(AbstractDataset labels) {
+		this.labelData = labels;
+	}
+	
+	public Range getScaleRange() {
+		
+		final Range realRange = getRange();
+		if (labelData==null) return realRange;
+//TODO something with ranges.		
+//		final double lower = labelData.getElementDoubleAbs((int)Math.round(realRange.getLower()));
+//		final double upper = labelData.getElementDoubleAbs((int)Math.round(realRange.getUpper()));
+//		return new Range(lower, upper);
+		return realRange;
+	}
+
 
 
 }

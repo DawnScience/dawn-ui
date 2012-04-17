@@ -230,14 +230,13 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	 * Does not have to be called in UI thread.
 	 */
 	@Override
-	protected List<ITrace> createPlot(final AbstractDataset       data, 
-					                  final List<AbstractDataset> axes,
-					                  final PlotType              mode, 
-					                  final IProgressMonitor      monitor) {
+	public List<ITrace> createPlot1D(final AbstractDataset       xIn, 
+					                 final List<AbstractDataset> ysIn,
+					                 final IProgressMonitor      monitor) {
 		
 		if (monitor!=null) monitor.worked(1);
 		
-		final Object[] oa = getIndexedDatasets(data, axes);
+		final Object[] oa = getIndexedDatasets(xIn, ysIn);
 		final AbstractDataset       x   = (AbstractDataset)oa[0];
 		@SuppressWarnings("unchecked")
 		final List<AbstractDataset> ys  = (List<AbstractDataset>)oa[1];
@@ -247,13 +246,13 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		final List<ITrace> traces = new ArrayList<ITrace>(7);
 		
 		if (getDisplay().getThread()==Thread.currentThread()) {
-			List<ITrace> ts = createPlotInternal(mode, x, ys, createdIndices, monitor);
+			List<ITrace> ts = createPlot1DInternal(x, ys, createdIndices, monitor);
 			if (ts!=null) traces.addAll(ts);
 		} else {
 			getDisplay().syncExec(new Runnable() {
 				@Override
 				public void run() {
-					List<ITrace> ts = createPlotInternal(mode, x, ys, createdIndices, monitor);
+					List<ITrace> ts = createPlot1DInternal(x, ys, createdIndices, monitor);
 					if (ts!=null) traces.addAll(ts);
 				}
 			});
@@ -314,32 +313,6 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	}
 
 	/**
-	 * Must be called in UI thread.
-	 * 
-	 * @param mode
-	 * @param x
-	 * @param ys
-	 * @param createdIndices
-	 * @param monitor
-	 */
-	private List<ITrace> createPlotInternal(final PlotType              mode, 
-					                        final AbstractDataset       x, 
-					                        final List<AbstractDataset> ys, 
-					                        final boolean               createdIndices, 
-					                        final IProgressMonitor      monitor) {
-		
-		this.plottingMode = mode;
-		createUI();
-		this.lightWeightActionBarMan.switchActions(mode);
-		if (mode.is1D()) {
-			return create1DPlot(x,ys,createdIndices,monitor);
-		} else {
-            ITrace trace = createImagePlot(x,ys,monitor);
-            return Arrays.asList(new ITrace[]{trace});
-		}
-	}
-
-	/**
      * Do not call before createPlotPart(...)
      */
 	public void setDefaultPlotType(PlotType mode) {
@@ -352,13 +325,35 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	 * NOTE removes previous traces if any plotted.
 	 * 
 	 * @param data
-	 * @param axes
+	 * @param axes, x first.
 	 * @param monitor
 	 */
-	private ITrace createImagePlot(final AbstractDataset       data, 
-								   final List<AbstractDataset> axes,
-								   final IProgressMonitor      monitor) {
+	@Override
+	public ITrace createPlot2D(final AbstractDataset       data, 
+							   final List<AbstractDataset> axes,
+							   final IProgressMonitor      monitor) {
   
+		final List<ITrace> traces = new ArrayList<ITrace>(7);
+		
+		if (getDisplay().getThread()==Thread.currentThread()) {
+			ITrace ts = createPlot2DInternal(data, axes, monitor);
+			if (ts!=null) traces.add(ts);
+		} else {
+			getDisplay().syncExec(new Runnable() {
+				@Override
+				public void run() {
+					ITrace ts = createPlot2DInternal(data, axes, monitor);
+					if (ts!=null) traces.add(ts);
+				}
+			});
+		}
+		
+		return traces.size()>0 ? traces.get(0) : null;
+	}
+
+	public ITrace createPlot2DInternal(final AbstractDataset       data, 
+										List<AbstractDataset>       axes,
+										final IProgressMonitor      monitor) {
 		try {
 			
 			clearTraces(); // Only one image at a time!
@@ -374,6 +369,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 			traceMap.clear();
 			
 			final ImageTrace trace = xyGraph.createImageTrace(data.getName(), xAxis, yAxis);
+					
 			trace.setData(data, axes);
 			
 			traceMap.put(trace.getName(), trace);
@@ -419,11 +415,15 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	private Map<String, ITrace> traceMap; // Warning can be mem leak
 
 
-	private List<ITrace> create1DPlot(  final AbstractDataset       xIn, 
+	private List<ITrace> createPlot1DInternal(  final AbstractDataset       xIn, 
 										final List<AbstractDataset> ysIn,
 										final boolean               createdIndices,
 										final IProgressMonitor      monitor) {
 		
+		this.plottingMode = PlotType.PT1D;
+		createUI();
+		this.lightWeightActionBarMan.switchActions(plottingMode);
+
 		Object[] oa = getOrderedDatasets(xIn, ysIn, createdIndices);
 		final AbstractDataset       x  = (AbstractDataset)oa[0];
 		@SuppressWarnings("unchecked")

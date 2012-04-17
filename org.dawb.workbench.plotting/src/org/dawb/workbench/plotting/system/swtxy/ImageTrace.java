@@ -57,6 +57,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
     private Number         min, max;
 	private DownsampleType downsampleType=DownsampleType.MEAN;
 	private int            currentDownSampleBin=-1;
+	private List<AbstractDataset> axes;
 	
 	private static Map<IImageTrace.ImageOrigin, IImageService.ImageOrigin> imageOriginaMap;
 	static {
@@ -468,6 +469,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	}
 
 	private boolean axisRedrawActive = true;
+
 	@Override
 	public void axisRangeChanged(Axis axis, Range old_range, Range new_range) {
 		//createScaledImage(true, null);
@@ -573,14 +575,22 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		repaint();
 	}
 
+	/**
+	 * Creates new axis bounds, updates the label data set
+	 */
 	private void createAxisBounds() {
 		if (getImageOrigin()==ImageOrigin.TOP_LEFT || getImageOrigin()==ImageOrigin.BOTTOM_RIGHT) {
-			((AspectAxis)getxAxis()).setMaximumRange(new Range(0,image.getShape()[1]));
-			((AspectAxis)getyAxis()).setMaximumRange(new Range(0,image.getShape()[0]));
+			setupAxis(getxAxis(), new Range(0,image.getShape()[1]), axes!=null&&axes.size()>0 ? axes.get(0) : null);
+			setupAxis(getyAxis(), new Range(0,image.getShape()[0]), axes!=null&&axes.size()>1 ? axes.get(1) : null);
 		} else {
-			((AspectAxis)getxAxis()).setMaximumRange(new Range(0,image.getShape()[0]));
-			((AspectAxis)getyAxis()).setMaximumRange(new Range(0,image.getShape()[1]));
+			setupAxis(getxAxis(), new Range(0,image.getShape()[0]), axes!=null&&axes.size()>1 ? axes.get(1) : null);
+			setupAxis(getyAxis(), new Range(0,image.getShape()[1]), axes!=null&&axes.size()>0 ? axes.get(0) : null);
 		}
+	}
+	
+	private void setupAxis(Axis axis, Range bounds, AbstractDataset labels) {
+		((AspectAxis)axis).setMaximumRange(bounds);
+		((AspectAxis)axis).setLabelData(labels);
 	}
 
 	@Override
@@ -595,6 +605,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		// method, we allow for the fact that the dataset is in a different orientation to 
 		// what is plotted.
 		this.image = image;
+		this.axes  = axes;
 		this.lastImageServiceBean = null;
 		
 		createAxisBounds();
