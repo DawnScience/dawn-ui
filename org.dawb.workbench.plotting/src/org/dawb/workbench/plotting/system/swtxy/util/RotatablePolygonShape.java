@@ -13,9 +13,9 @@ import org.eclipse.draw2d.geometry.Rectangle;
 public class RotatablePolygonShape extends AbstractPointListShape {
 	protected final PointList opl; // original (unrotated) points
 	protected final PointList npl; // reference to rotated points
-	private final AffineTransform affine;
+	protected final AffineTransform affine;
 
-	private RotatablePolygonShape(int size) {
+	protected RotatablePolygonShape(int size) {
 		opl = new PointList(size);
 		npl = getPoints();
 		npl.setSize(size);
@@ -35,30 +35,11 @@ public class RotatablePolygonShape extends AbstractPointListShape {
 		setAngle(angle);
 	}
 
-	/**
-	 * Constructor for rectangle
-	 * @param x
-	 * @param y
-	 * @param width
-	 * @param height
-	 * @param angle in degrees
-	 */
-	public RotatablePolygonShape(int x, int y, int width, int height, double angle) {
-		this(4);
-		opl.addPoint(0, 0);
-		opl.addPoint(width, 0);
-		opl.addPoint(width, height);
-		opl.addPoint(0,   height);
-		npl.addAll(opl);
-		affine.setTranslation(x, y);
-		setAngle(angle);
-	}
-
 	@Override
 	public void addPoint(Point pt) {
 		opl.addPoint(pt);
 		super.addPoint(pt);
-		recalcPoints();
+		recalcPoints(opl, npl);
 	}
 
 	@Override
@@ -90,7 +71,7 @@ public class RotatablePolygonShape extends AbstractPointListShape {
 		opl.removeAllPoints();
 		opl.addAll(points);
 		super.setPoints(points);
-		recalcPoints();
+		recalcPoints(opl, npl);
 	}
 	
 	/**
@@ -99,7 +80,7 @@ public class RotatablePolygonShape extends AbstractPointListShape {
 	 */
 	public void setAngle(double degrees) {
 		affine.setRotationDegrees(degrees);
-		recalcPoints();
+		recalcPoints(opl, npl);
 	}
 
 	/**
@@ -112,15 +93,15 @@ public class RotatablePolygonShape extends AbstractPointListShape {
 	@Override
 	public void setLocation(Point p) {
 		affine.setTranslation(p.preciseX(), p.preciseY());
-		recalcPoints();
+		recalcPoints(opl, npl);
 	}
 
-	private void recalcPoints() {
-		final int n = npl.size();
+	protected void recalcPoints(PointList oldpl, PointList newpl) {
+		final int n = newpl.size();
 		for (int i = 0; i < n; i++) {
-			npl.setPoint(affine.getTransformed(opl.getPoint(i)), i);
+			newpl.setPoint(affine.getTransformed(oldpl.getPoint(i)), i);
 		}
-		Rectangle b = npl.getBounds();
+		Rectangle b = newpl.getBounds();
 		setBounds(b);
 	}
 
