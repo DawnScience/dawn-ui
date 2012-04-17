@@ -10,6 +10,9 @@
 
 package org.dawb.workbench.ui.editors;
 
+import java.util.Collection;
+
+import org.dawb.common.ui.editors.EditorExtensionFactory;
 import org.dawb.common.ui.plot.AbstractPlottingSystem.ColorOption;
 import org.dawb.common.ui.plot.IPlottingSystemSelection;
 import org.dawb.common.ui.plot.PlotType;
@@ -62,7 +65,23 @@ public class H5MultiEditor extends MultiPageEditorPart  implements ISlicablePlot
 	 */
 	@Override
 	protected void createPages() {
+		
+		int index = 0;
 		try {
+
+			
+			try {
+				Collection<IEditorPart> extensions = EditorExtensionFactory.getEditors(getEditorInput());
+				if (extensions!=null && extensions.size()>0) {
+					for (IEditorPart iEditorPart : extensions) {
+						addPage(index, iEditorPart,  getEditorInput());
+						setPageText(index, iEditorPart.getTitle());
+						index++;
+					}
+				}
+			} catch (Exception e) {
+				logger.error("Cannot read editor extensions!", e);
+			}
 
 			/**
 			 * TODO This list of data sets can be expensive to extract. Consider
@@ -72,8 +91,9 @@ public class H5MultiEditor extends MultiPageEditorPart  implements ISlicablePlot
 			 */
 			this.dataSetEditor = new PlotDataEditor(false, PlotType.PT1D);
 			dataSetEditor.getPlottingSystem().setColorOption(ColorOption.BY_NAME);
-			addPage(0, dataSetEditor, getEditorInput());
-			setPageText(0, "Plot");
+			addPage(index, dataSetEditor, getEditorInput());
+			setPageText(index, "Plot");
+			index++;
 
 			// The HDF5TreeEditor crashes a lot and is unreliable.
 			// The property org.dawb.editor.h5.use.default is set by default in dawb / dawn vanilla
@@ -81,8 +101,8 @@ public class H5MultiEditor extends MultiPageEditorPart  implements ISlicablePlot
 			this.treePage = System.getProperty("org.dawb.editor.h5.use.default") !=null
                           ? new H5Editor() 
 			              : new HDF5TreeEditor();
-			addPage(1, treePage,   getEditorInput());
-			setPageText(1, "Tree");
+			addPage(index, treePage,   getEditorInput());
+			setPageText(index, "Tree");
 			
 		} catch (PartInitException e) {
 			logger.error("Cannot initiate "+getClass().getName()+"!", e);
@@ -95,14 +115,15 @@ public class H5MultiEditor extends MultiPageEditorPart  implements ISlicablePlot
 			// Nowt
 		}
 		
+		final int lastIndex = index;
 		getSite().getShell().getDisplay().asyncExec(new Runnable() {
 			@Override
 			public void run() {
 				if (getDataSetComponent()!=null && getDataSetComponent().getMetaData()!=null ) {
 					if (getDataSetComponent().getMetaData().getDataNames()==null || getDataSetComponent().getMetaData().getDataNames().size()<1) {
-						setActivePage(1);
+						setActivePage(lastIndex);
 					} else if (EclipseUtils.getPage().findView("uk.ac.diamond.scisoft.analysis.rcp.views.DatasetInspectorView")!=null) {
-						setActivePage(1);
+						setActivePage(lastIndex);
 					}
 				}
 			}

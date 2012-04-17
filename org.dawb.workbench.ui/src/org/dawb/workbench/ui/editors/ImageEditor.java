@@ -9,11 +9,15 @@
  */ 
 package org.dawb.workbench.ui.editors;
 
+import java.util.Collection;
+
+import org.dawb.common.ui.editors.EditorExtensionFactory;
 import org.dawb.common.ui.plot.tool.IToolPageSystem;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.views.HeaderTablePage;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IReusableEditor;
 import org.eclipse.ui.PartInitException;
@@ -50,24 +54,40 @@ public class ImageEditor extends MultiPageEditorPart implements IReusableEditor 
 	@Override
 	protected void createPages() {
 		try {
+			
+			int index = 0;
+			
+			try {
+				Collection<IEditorPart> extensions = EditorExtensionFactory.getEditors(getEditorInput());
+				if (extensions!=null && extensions.size()>0) {
+					for (IEditorPart iEditorPart : extensions) {
+						addPage(index, iEditorPart,  getEditorInput());
+						setPageText(index, iEditorPart.getTitle());
+						index++;
+					}
+				}
+			} catch (Exception e) {
+				logger.error("Cannot read editor extensions!", e);
+			}
 
 			this.plotImageEditor = new PlotImageEditor();
-			addPage(0, plotImageEditor,       getEditorInput());
-			setPageText(0, "Image");
+			addPage(index, plotImageEditor,       getEditorInput());
+			setPageText(index, "Image");
+			index++;
 			
 			if (System.getProperty("org.dawb.editor.ascii.hide.diamond.image.editor")==null) {
 				final uk.ac.diamond.scisoft.analysis.rcp.editors.ImageEditor im = new uk.ac.diamond.scisoft.analysis.rcp.editors.ImageEditor();
-				addPage(1, im,       getEditorInput());
-				setPageText(1, "Info");
-				
+				addPage(index, im,       getEditorInput());
+				setPageText(index, "Info");
 			}
 
+			final int infoIndex = index;
 			getSite().getShell().getDisplay().asyncExec(new Runnable() {
 				@Override
 				public void run() {
 					if (EclipseUtils.getPage().findView("uk.ac.diamond.scisoft.analysis.rcp.views.DatasetInspectorView")!=null &&
 							getPageCount()>=2) {
-						setActivePage(1);
+						setActivePage(infoIndex);
 					}
 
 				}
