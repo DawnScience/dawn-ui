@@ -33,7 +33,6 @@ class LineSelection extends AbstractSelectionRegion {
 	private static final int SIDE      = 8;
 	
 	private SelectionHandle endBox, startBox;
-//	private SelectionRectangle endBox, startBox;
 
 	private Figure connection;
 
@@ -44,17 +43,13 @@ class LineSelection extends AbstractSelectionRegion {
 		setLineWidth(2);
 	}
 
-
+	@Override
 	public void createContents(final Figure parent) {
-		
-		
 		this.startBox = new RectangularHandle(getxAxis(), getyAxis(), getRegionColor(), connection, SIDE, 100, 100);
-//		this.startBox   = new SelectionRectangle(getxAxis(), getyAxis(), getRegionColor(), new Point(100,100),SIDE);
 		FigureTranslator mover = new FigureTranslator(getXyGraph(), startBox);
 		mover.addTranslationListener(createRegionNotifier());
 
 		this.endBox = new RectangularHandle(getxAxis(), getyAxis(), getRegionColor(), connection, SIDE, 200, 200);
-//		this.endBox   = new SelectionRectangle(getxAxis(), getyAxis(), getRegionColor(), new Point(200,200),SIDE);
 		mover = new FigureTranslator(getXyGraph(), endBox);	
 		mover.addTranslationListener(createRegionNotifier());
 				
@@ -109,15 +104,16 @@ class LineSelection extends AbstractSelectionRegion {
         updateRegionBounds();
         if (regionBounds==null) createRegionBounds(true);
 	}
-	
-	public void paintBeforeAdded(final Graphics gc, Point firstClick, Point dragLocation, Rectangle parentBounds) {
+
+	@Override
+	public void paintBeforeAdded(final Graphics gc, PointList clicks, Rectangle parentBounds) {
 		gc.setLineStyle(SWT.LINE_DOT);
 		gc.setLineWidth(2);
 		gc.setAlpha(getAlpha());
-		gc.drawLine(firstClick, dragLocation);
+		gc.drawLine(clicks.getFirstPoint(), clicks.getLastPoint());
 	}
 
-	
+	@Override
 	protected String getCursorPath() {
 		return "icons/Cursor-line.png";
 	}
@@ -131,6 +127,8 @@ class LineSelection extends AbstractSelectionRegion {
 
 		};
 	}
+
+	@Override
 	protected void fireRoiSelection() {
 		
 		// For each trace, calculate the real world values of the selection
@@ -141,7 +139,8 @@ class LineSelection extends AbstractSelectionRegion {
 			getSelectionProvider().setSelection(new StructuredSelection(roi));
 		}
 	}
-	
+
+	@Override
 	public RegionBounds createRegionBounds(boolean recordResult) {
 		if (startBox!=null) {
 			final double[] p1 = startBox.getRealValue();
@@ -153,6 +152,7 @@ class LineSelection extends AbstractSelectionRegion {
 		return super.getRegionBounds();
 	}
 	
+	@Override
 	protected void updateRegionBounds(RegionBounds bounds) {
 		
 		if (startBox!=null)   startBox.setRealValue(bounds.getP1());
@@ -160,6 +160,7 @@ class LineSelection extends AbstractSelectionRegion {
 		updateConnectionBounds();
 	}
 	
+	@Override
 	protected void updateConnectionBounds() {
 		if (connection==null) return;
 		final Rectangle bounds = getConnectionBounds();
@@ -180,11 +181,11 @@ class LineSelection extends AbstractSelectionRegion {
 		return bounds;
 	}
 
-
 	/**
 	 * Sets the local in local coordinates
 	 * @param bounds
 	 */
+	@Override
 	public void setLocalBounds(Point firstClick, Point dragLocation, Rectangle parentBounds) {
 		if (startBox!=null)   startBox.setSelectionPoint(firstClick);
 		if (endBox!=null)     endBox.setSelectionPoint(dragLocation);
@@ -198,4 +199,8 @@ class LineSelection extends AbstractSelectionRegion {
 		return RegionType.LINE;
 	}
 
+	@Override
+	public boolean useMultipleMousePresses() {
+		return false;
+	}
 }

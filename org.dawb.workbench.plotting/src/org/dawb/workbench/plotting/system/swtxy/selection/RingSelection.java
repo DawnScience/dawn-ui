@@ -13,6 +13,7 @@ import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.UpdateManager;
 import org.eclipse.draw2d.geometry.Point;
+import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
 
@@ -66,6 +67,7 @@ class RingSelection extends AbstractSelectionRegion {
 		setAlpha(80);
 	}
 
+	@Override
 	public void createContents(final Figure parent) {
 		
      	this.center = new RectangularHandle(getxAxis(), getyAxis(), getRegionColor(), connection, SIDE, 100, 100);
@@ -132,10 +134,12 @@ class RingSelection extends AbstractSelectionRegion {
      	return ret;
 	}
 
-	public void paintBeforeAdded(final Graphics gc, Point cen, Point dragLocation, Rectangle parentBounds) {
+	@Override
+	public void paintBeforeAdded(final Graphics gc, PointList clicks, Rectangle parentBounds) {
 		gc.setLineStyle(SWT.LINE_DOT);
 
-		int diff = (int)Math.round(cen.getDistance(dragLocation));
+		Point cen = clicks.getFirstPoint();
+		int diff = (int)Math.round(cen.getDistance(clicks.getLastPoint()));
 		Rectangle bounds = new Rectangle(new Point(cen.x-diff, cen.y-diff), new Point(cen.x+diff, cen.y+diff));
 		gc.drawOval(bounds);
 
@@ -148,11 +152,12 @@ class RingSelection extends AbstractSelectionRegion {
 		gc.drawOval(bounds);
 	}
 
-	
+	@Override
 	protected String getCursorPath() {
 		return "icons/Cursor-circle.png";
 	}
-	
+
+	@Override
 	protected void fireRoiSelection() {
 		final double[] r1 = center.getRealValue();
 //FIXME TODO SectorROI I think...
@@ -160,6 +165,7 @@ class RingSelection extends AbstractSelectionRegion {
 //		if (getSelectionProvider()!=null) getSelectionProvider().setSelection(new StructuredSelection(roi));
 	}
 
+	@Override
 	public RegionBounds createRegionBounds(boolean recordResult) {
 		if (center!=null) {
 			final Point     cen = center.getSelectionPoint();
@@ -181,7 +187,8 @@ class RingSelection extends AbstractSelectionRegion {
 		}
 		return super.getRegionBounds();
 	}
-	
+
+	@Override
 	protected void updateRegionBounds(RegionBounds bounds) {
 		
 		if (!bounds.isCircle()) throw new RuntimeException("Expected circular bounds for circle!");
@@ -196,7 +203,7 @@ class RingSelection extends AbstractSelectionRegion {
 
 		updateConnectionBounds();
 	}
-	
+
 	private void setControlPositions(int innerRad, int outerRad) {
 		final Point cen = center.getSelectionPoint();
 		innerControl.setSelectionPoint(new Point(cen.x, cen.y+innerRad));
@@ -207,6 +214,7 @@ class RingSelection extends AbstractSelectionRegion {
 	 * Sets the local in local coordinates
 	 * @param bounds
 	 */
+	@Override
 	public void setLocalBounds(Point cen, Point dragLocation, Rectangle parentBounds) {
 		
 		int diff = (int)Math.round(cen.getDistance(dragLocation));
@@ -223,6 +231,7 @@ class RingSelection extends AbstractSelectionRegion {
 		fireRegionBoundsChanged(getRegionBounds());
 	}
 
+	@Override
 	protected void updateConnectionBounds() {
 		if (connection==null) return;
 		final Point     cen = center.getSelectionPoint();
@@ -246,4 +255,8 @@ class RingSelection extends AbstractSelectionRegion {
 		return RegionType.RING;
 	}
 
+	@Override
+	public boolean useMultipleMousePresses() {
+		return false;
+	}
 }

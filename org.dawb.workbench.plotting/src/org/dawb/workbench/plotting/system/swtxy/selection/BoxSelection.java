@@ -14,6 +14,7 @@ import org.eclipse.draw2d.FigureListener;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Point;
+import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
@@ -44,6 +45,7 @@ class BoxSelection extends AbstractSelectionRegion {
 		setAlpha(80);
 	}
 
+	@Override
 	public void createContents(final Figure parent) {
 		
      	this.p1  = createSelectionRectangle(getRegionColor(), SIDE, 100, 100);
@@ -105,16 +107,17 @@ class BoxSelection extends AbstractSelectionRegion {
 
 	}
 	
-	public void paintBeforeAdded(final Graphics gc, Point firstClick, Point dragLocation, Rectangle parentBounds) {
+	@Override
+	public void paintBeforeAdded(final Graphics gc, PointList clicks, Rectangle parentBounds) {
 		gc.setLineStyle(SWT.LINE_DOT);
-		final Rectangle bounds = new Rectangle(firstClick, dragLocation);
+		final Rectangle bounds = new Rectangle(clicks.getFirstPoint(), clicks.getLastPoint());
 		gc.drawRectangle(bounds);
 		gc.setBackgroundColor(getRegionColor());
 		gc.setAlpha(getAlpha());
 		gc.fillRectangle(bounds);
 	}
 
-	
+	@Override
 	protected String getCursorPath() {
 		return "icons/Cursor-box.png";
 	}
@@ -159,7 +162,8 @@ class BoxSelection extends AbstractSelectionRegion {
 		});
 		return rect;
 	}
-	
+
+	@Override
 	protected void fireRoiSelection() {
 		final double[] r1 = p1.getRealValue();
 		final double[] r2 = p2.getRealValue();
@@ -191,7 +195,7 @@ class BoxSelection extends AbstractSelectionRegion {
 		return size;
 	}
 
-
+	@Override
 	public RegionBounds createRegionBounds(boolean recordResult) {
 		if (p1!=null) {
 			final Rectangle rect = getRectangleFromVertices();
@@ -211,10 +215,12 @@ class BoxSelection extends AbstractSelectionRegion {
 		if (p4!=null) p4.setRealValue(bounds.getP2());
 		updateConnectionBounds();
 	}
+
 	/**
 	 * Sets the local in local coordinates
 	 * @param bounds
 	 */
+	@Override
 	public void setLocalBounds(Point firstClick, Point dragLocation, Rectangle parentBounds) {
 		if (p1!=null)   p1.setSelectionPoint(firstClick);
 		if (p4!=null)   p4.setSelectionPoint(dragLocation);
@@ -223,6 +229,7 @@ class BoxSelection extends AbstractSelectionRegion {
 		fireRegionBoundsChanged(getRegionBounds());
 	}
 
+	@Override
 	protected void updateConnectionBounds() {
 		if (connection==null) return;
 		final Rectangle size = getRectangleFromVertices();				
@@ -234,4 +241,8 @@ class BoxSelection extends AbstractSelectionRegion {
 		return RegionType.BOX;
 	}
 
+	@Override
+	public boolean useMultipleMousePresses() {
+		return false;
+	}
 }

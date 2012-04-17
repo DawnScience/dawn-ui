@@ -16,6 +16,7 @@ import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Shape;
 import org.eclipse.draw2d.geometry.Point;
+import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.graphics.Color;
@@ -40,8 +41,6 @@ import org.eclipse.swt.widgets.Display;
  * will also need to be used. If using 1. the contents of the figure are directly added to the graph figure
  * and therefore their location can be used directly also there are no bounds of this figure to deal with.
  * 
- * @author fcp94556
- *
  */
 public abstract class AbstractSelectionRegion extends AbstractRegion implements IAxisListener {
 
@@ -79,29 +78,28 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	 * @return
 	 */
 	public abstract RegionType getRegionType();
-	
+
 	/**
 	 * If there is a fill figure, this method may be called to 
 	 * refill the fill.
 	 */
 	protected abstract void updateConnectionBounds();
-	
+
 	/**
-	 * Paint the regions before it is created during the first click
-	 * and drag of the user.
+	 * Paint the regions before it is finished during the clicks and drag of the user.
 	 * 
 	 * @param g
-	 * @param start
-	 * @param end
+	 * @param clicks
+	 * @param parentBounds
 	 */
-	public abstract void paintBeforeAdded(final Graphics g, Point firstClick, Point dragLocation, Rectangle parentBounds);
+	public abstract void paintBeforeAdded(final Graphics g, PointList clicks, Rectangle parentBounds);
 
 	/**
 	 * Sets the local of the region in local coordinates not axis ones.
 	 * @param bounds
 	 */
 	public abstract void setLocalBounds(Point firstClick, Point dragLocation, Rectangle parentBounds);
-	
+
 	/**
 	 * This method should be implemented to fire a StructuredSelection
 	 * whose first object is an object extending ROIBase. It will be called
@@ -113,7 +111,6 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	 */
 	protected abstract void fireRoiSelection();
 
-	
 	/**
 	 * This cursor is used after the region is created and
 	 * before the user has clicked to create it. This is the
@@ -121,6 +118,12 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	 * @return
 	 */
 	protected abstract String getCursorPath();
+
+	/**
+	 * An abstract selection region can operate with a single mouse button press or multiple presses
+	 * @return true if region uses multiple mouse presses 
+	 */
+	public abstract boolean useMultipleMousePresses();
 
 	public void sync(RegionBean bean) {
 		setName(bean.getName());
