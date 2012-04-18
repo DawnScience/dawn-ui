@@ -35,6 +35,9 @@ public class AspectAxis extends Axis {
 	}
 	
 	public void checkBounds() {
+	   checkBounds(false);	
+	}
+	protected void checkBounds(final boolean force) {
 		
 		Rectangle calcBounds = getBounds().getCopy();
 		if (relativeTo == null) return;
@@ -48,9 +51,12 @@ public class AspectAxis extends Axis {
 		final boolean isRelative    = equal && !isOtherReallyLonger; // The parent layouts ys second so x is the right size.
 		final boolean isOtherLarger = relRange>thisRange;
 		
-		if (isRelative || isOtherLarger) {
-			setRelativeAxisBounds(calcBounds, thisRange, relRange);
+		if (isRelative || isOtherLarger || force) {
+			boolean otherAxisInvalid = setRelativeAxisBounds(calcBounds, thisRange, relRange);
 			setBounds(calcBounds);
+			if (otherAxisInvalid&&!force) { // force is not recursive
+				relativeTo.checkBounds(true);
+			}
 		}		
 		
 		// y correction for companion axis
@@ -88,9 +94,9 @@ public class AspectAxis extends Axis {
 		return len2>=len1;
 	}
 
-	private void setRelativeAxisBounds (final Rectangle origBounds, 
-										final double    thisRange, 
-										final double    relRange) {
+	private boolean setRelativeAxisBounds (final Rectangle origBounds, 
+										   final double    thisRange, 
+										   final double    relRange) {
 		
 		final Rectangle relBounds = relativeTo.getBounds();
 		int      realPixels = relativeTo.isYAxis() ? relBounds.height : relBounds.width;
@@ -100,9 +106,14 @@ public class AspectAxis extends Axis {
 		int       range     = (int)Math.round(thisRange*pixRatio);    // span for thisRange of them
 		range+=2*getMargin();
 		
+		boolean otherAxisInvalid = false;
+		if (isYAxis()  && range>getGraph().getPlotArea().getBounds().height) otherAxisInvalid = true;
+		if (!isYAxis() && range>getGraph().getPlotArea().getBounds().width)  otherAxisInvalid = true;
+
 		if (isYAxis()) origBounds.height = Math.min(range, getGraph().getPlotArea().getBounds().height); 
 		else           origBounds.width  = Math.min(range, getGraph().getPlotArea().getBounds().width);
 		
+		return otherAxisInvalid;
 	}
 
 	/**
