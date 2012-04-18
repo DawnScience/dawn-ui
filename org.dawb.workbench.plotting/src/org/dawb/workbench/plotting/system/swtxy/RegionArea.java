@@ -30,6 +30,8 @@ import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.graphics.PaletteData;
 
+import persistence.antlr.debug.TraceListener;
+
 public class RegionArea extends PlotArea {
 
 	protected ISelectionProvider selectionProvider;
@@ -74,6 +76,11 @@ public class RegionArea extends PlotArea {
 	}
 	
 	public void clearRegions() {
+		clearRegionsInternal();
+		revalidate();
+	}
+	
+    protected void clearRegionsInternal() {
 		clearRegionTool();
 		if (regions==null) return;
 		for (AbstractSelectionRegion region : regions.values()) {
@@ -81,9 +88,7 @@ public class RegionArea extends PlotArea {
 			region.remove();
 			fireRegionRemoved(new RegionEvent(region));
 		}
-		regions.clear();
-		revalidate();
-		
+		regions.clear();		
 	}
 	
 
@@ -429,6 +434,17 @@ public class RegionArea extends PlotArea {
 	public Figure getImageTrace() {
 		if (imageTraces!=null && imageTraces.size()>0) return imageTraces.values().iterator().next();
 		return null;
+	}
+
+
+	public void dispose() {
+		
+		clearTraces();
+		clearRegionsInternal();
+		if (regionListeners!=null)     regionListeners.clear();
+		if (imageTraceListeners!=null) imageTraceListeners.clear();
+		if (regions!=null)             regions.clear();
+		if (imageTraces!=null)         imageTraces.clear();
 	}
 
 }

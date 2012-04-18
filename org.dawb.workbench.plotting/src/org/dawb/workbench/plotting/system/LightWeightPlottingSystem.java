@@ -373,7 +373,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 			traceMap.clear();
 			
 			final ImageTrace trace = xyGraph.createImageTrace(data.getName(), xAxis, yAxis);
-			trace.setData(data, axes);
+			trace.setData(data, axes, true);
 			
 			traceMap.put(trace.getName(), trace);
 
@@ -752,9 +752,10 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		}
 		clearTraces();
 		if (xyGraph!=null) {
-			xyGraph.removeAll();
+			xyGraph.dispose();
 			xyGraph = null;
 		}
+		if (xyCanvas!=null) xyCanvas.dispose();
 	}
 
 	private void clearTraces() {

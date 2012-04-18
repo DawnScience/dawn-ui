@@ -604,7 +604,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	}
 	
 	@Override
-	public void setData(final AbstractDataset image, List<AbstractDataset> axes) {
+	public void setData(final AbstractDataset image, List<AbstractDataset> axes, boolean performAuto) {
 		// The image is drawn low y to the top left but the axes are low y to the bottom right
 		// We do not currently reflect it as it takes too long. Instead in the slice
 		// method, we allow for the fact that the dataset is in a different orientation to 
@@ -619,11 +619,16 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		
 		createAxisBounds();
 
- 		try {
-			setAxisRedrawActive(false);
-			performAutoscale();
-		} finally {
-			setAxisRedrawActive(true);
+		if (performAuto) {
+	 		try {
+				setAxisRedrawActive(false);
+				performAutoscale();
+			} finally {
+				setAxisRedrawActive(true);
+			}
+		} else {
+			createScaledImage(ImageScaleType.FORCE_REIMAGE, null);
+			repaint();
 		}
        
 	}
@@ -758,6 +763,11 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		
 		return new float[]{retMin, retMax};
 
+	}
+
+	@Override
+	public List<AbstractDataset> getAxes() {
+		return axes;
 	}
 
 }

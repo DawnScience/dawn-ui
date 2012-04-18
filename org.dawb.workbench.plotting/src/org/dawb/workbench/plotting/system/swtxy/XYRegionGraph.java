@@ -242,4 +242,9 @@ public class XYRegionGraph extends XYGraph {
 			axis.zoomInOut(cenY, yScale);
 		}
 	}
+	
+	public void dispose() {
+		removeAll();
+		getRegionArea().dispose();
+	}
 }
