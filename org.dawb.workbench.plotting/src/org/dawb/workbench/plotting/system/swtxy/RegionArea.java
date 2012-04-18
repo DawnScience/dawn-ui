@@ -30,8 +30,6 @@ import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.graphics.PaletteData;
 
-import persistence.antlr.debug.TraceListener;
-
 public class RegionArea extends PlotArea {
 
 	protected ISelectionProvider selectionProvider;
@@ -151,7 +149,7 @@ public class RegionArea extends PlotArea {
 	protected void paintClientArea(final Graphics graphics) {
 		super.paintClientArea(graphics);
 
-		if (regionBeingAdded!=null && regionPoints!=null) {
+		if (regionBeingAdded!=null && regionPoints!=null && regionPoints.size() > 0) {
 			regionBeingAdded.paintBeforeAdded(graphics, regionPoints, getBounds());
 		}
 	}
@@ -313,7 +311,7 @@ public class RegionArea extends PlotArea {
 	}
 
 	class RegionMouseListener extends MouseMotionListener.Stub implements MouseListener {
-		private int drag;
+		private int drag = -1;
 		public RegionMouseListener() {
 			regionPoints = new PointList(2);
 		}
@@ -333,10 +331,9 @@ public class RegionArea extends PlotArea {
 
 		@Override
 		public void mouseReleased(MouseEvent me) {
-			if (!regionBeingAdded.useMultipleMousePresses()) {
-				releaseMouse();
+			if (regionBeingAdded.useMultipleMousePresses()) {
 			} else {
-				
+				releaseMouse();
 			}
 			me.consume();
 			repaint();
@@ -348,9 +345,21 @@ public class RegionArea extends PlotArea {
 
 		@Override
 		public void mouseDragged(final MouseEvent me) {
-			regionPoints.setPoint(me.getLocation(), drag);
+			if (regionBeingAdded.useMultipleMousePresses()) {
+			} else {
+				regionPoints.setPoint(me.getLocation(), drag);
+			}
 			me.consume();
 			repaint();
+		}
+
+		@Override
+		public void mouseMoved(final MouseEvent me) {
+			if (regionBeingAdded.useMultipleMousePresses() && drag >= 0) {
+				regionPoints.setPoint(me.getLocation(), drag);
+				me.consume();
+				repaint();
+			}
 		}
 
 		@Override
