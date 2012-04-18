@@ -744,7 +744,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 			if (val > max) max = val;
 			
 		}
-		float mean = sum / (image.getShape()[0] * image.getShape()[1]);
+		float mean = sum / size;
 	
 		float retMin = min;
 		float retMax = 3*mean;
