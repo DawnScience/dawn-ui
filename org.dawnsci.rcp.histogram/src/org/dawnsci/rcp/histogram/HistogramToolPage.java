@@ -184,7 +184,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			@Override
 			public void paletteChanged(PaletteEvent event) {
-				logger.debug("paletteChanged");
+				logger.trace("paletteChanged");
 				palleteData = event.getPaletteData();		
 				updateHistogramToolElements(null, false);
 			}
@@ -210,7 +210,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent event) {
-				logger.debug("minMaxValueListener");
+				logger.trace("minMaxValueListener");
 				histoMax = minMaxValue.getValue(MAX_LABEL);
 				histoMin = minMaxValue.getValue(MIN_LABEL);
 				if (histoMax < histoMin) {
@@ -229,7 +229,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent event) {
-				logger.debug("brightnessContrastListener");
+				logger.trace("brightnessContrastListener");
 				histoMax = brightnessContrastValue.getValue(BRIGHTNESS_LABEL)+
 						brightnessContrastValue.getValue(CONTRAST_LABEL)/2.0;
 				histoMin = brightnessContrastValue.getValue(BRIGHTNESS_LABEL)-
@@ -250,7 +250,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent event) {
-				logger.debug("colourSelectionListener");
+				logger.trace("colourSelectionListener");
 				buildPalleteData();
 				updateHistogramToolElements(event);
 			}
@@ -265,7 +265,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent event) {
-				logger.debug("colourSchemeListener");
+				logger.trace("colourSchemeListener");
 				updateColourScheme();
 				buildPalleteData();
 				updateHistogramToolElements(event);
@@ -282,7 +282,7 @@ public class HistogramToolPage extends AbstractToolPage {
 		expansionAdapter = new ExpansionAdapter() {
 			@Override
 			public void expansionStateChanged(ExpansionEvent e) {
-				logger.debug("perChannelExpander");
+				logger.trace("perChannelExpander");
 				composite.layout();
 			}
 		};

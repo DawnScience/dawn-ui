@@ -71,7 +71,7 @@ public class XYRegionToolbar extends XYGraphToolbar {
         	zoomMenuTmp.setId("org.dawb.workbench.ui.editors.plotting.swtxy.zoomTools");
         }
         
-        final MenuAction zoomDropDown = zoomMenuTmp;
+        final MenuAction zoomDropDown = zoomMenuTmp; // Normally there is no zoom drop down.
         
         for (Object child : getChildren()) {
 			

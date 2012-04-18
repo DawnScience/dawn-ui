@@ -189,22 +189,21 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 				bean.setOrigin(imageOriginaMap.get(getImageOrigin()));
 				bean.setPalette(getPaletteData());
 				bean.setMonitor(monitor);
+				
+				if (rescaleType==ImageScaleType.REHISTOGRAM) { // Avoids changing colouring to 
+					// max and min of new selection.
+					AbstractDataset slice = slice(getAxisBounds());
+					float[] fa = getFastStatistics(slice);
+					setMin(fa[0]);
+					setMax(fa[1]);
+				}
+
 				if (getMin()!=null) bean.setMin(getMin());
 				if (getMax()!=null) bean.setMax(getMax());
 				
-				if (rescaleType==ImageScaleType.REHISTOGRAM) { // Avoids changing colouring to 
-					                                           // max and min of new selection.
-					AbstractDataset slice = slice(getAxisBounds());
-					if (bean.getMin()==null) {
-						bean.setMin(slice.min());
-					}
-					if (bean.getMax()==null) {
-						bean.setMax(3*((Number)slice.mean()).doubleValue());
-					}
-				}
-				
 				this.imageData   = service.getImageData(bean);
 				this.lastImageServiceBean = bean;
+				
 			} catch (Exception e) {
 				logger.error("Cannot create image from data!", e);
 			} finally {
@@ -543,7 +542,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		switch(getImageOrigin()) {
 		case TOP_LEFT:
 			return new RegionBounds(new double[]{0, image.getShape()[0]},
-					                new double[]{image.getShape()[1], 1});	
+					                new double[]{image.getShape()[1], 0});	
 						
 		case BOTTOM_LEFT:
 			return new RegionBounds(new double[]{0, 0},
@@ -605,6 +604,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		// method, we allow for the fact that the dataset is in a different orientation to 
 		// what is plotted.
 		this.image = image;
+		
+		final float[] fa = getFastStatistics(image);
+		setMin(fa[0]);
+		setMax(fa[1]);
 		this.axes  = axes;
 		this.lastImageServiceBean = null;
 		
@@ -718,4 +721,37 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		fireMinDataListeners();
 		repaint();
 	}
+	
+	/**
+	 * Fast statistcs as a rough guide - this is faster than AbstractDataset.getMin()
+	 * and getMax() which may cache but slows the opening of images too much.
+	 * 
+	 * @param bean
+	 * @return [0] = min [1] = max
+	 */
+	private static float[] getFastStatistics(AbstractDataset image) {
+		
+		float min = Float.MAX_VALUE;
+		float max = -Float.MAX_VALUE;
+		float sum = 0.0f;
+		final int size = image.getSize();
+		
+		for (int index = 0; index<size; ++index) {
+				
+			final float val = (float)image.getElementDoubleAbs(index);
+			sum += val;
+			if (val < min) min = val;
+			if (val > max) max = val;
+			
+		}
+		float mean = sum / (image.getShape()[0] * image.getShape()[1]);
+	
+		float retMin = min;
+		float retMax = 3*mean;
+		if (retMax > max)	retMax = max;
+		
+		return new float[]{retMin, retMax};
+
+	}
+
 }
