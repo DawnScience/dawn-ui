@@ -58,13 +58,16 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseWheelListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IActionBars;
@@ -139,31 +142,8 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		final LightweightSystem lws = new LightweightSystem(xyCanvas);
 		
 		// Stops a mouse wheel move corrupting the plotting area, but it wobbles a bit.
-		xyCanvas.addMouseWheelListener(new MouseWheelListener() {
-			@Override
-			public void mouseScrolled(MouseEvent e) {
-				if (xyGraph==null) return;
-				if (e.count==0)    return;
-				int direction = e.count > 0 ? 1 : -1;
-				xyGraph.setZoomLevel(e, direction*0.1d);
-				xyGraph.repaint();
-			}	
-		});
-		
-		
-		xyCanvas.addKeyListener(new KeyAdapter() {
-			@Override
-			public void keyPressed(KeyEvent e) {
-				if (e.keyCode==16777230 || e.character=='h') {
-					final IContributionItem action = bars.getToolBarManager().find("org.dawb.workbench.plotting.histo");
-				    if (action!=null && action.isVisible() && action instanceof ActionContributionItem) {
-				    	ActionContributionItem iaction = (ActionContributionItem)action;
-				    	iaction.getAction().setChecked(!iaction.getAction().isChecked());
-				    	iaction.getAction().run();
-				    }
- 				}
-			}
-		});
+		xyCanvas.addMouseWheelListener(getMouseWheelListener());
+		xyCanvas.addKeyListener(getKeyListener());
 		
 		lws.setControl(xyCanvas);
 		xyCanvas.setBackground(xyCanvas.getDisplay().getSystemColor(SWT.COLOR_WHITE));
@@ -212,6 +192,60 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 
 	}
 	
+	private MouseWheelListener mouseWheelListener;
+	private MouseWheelListener getMouseWheelListener() {
+		if (mouseWheelListener == null) mouseWheelListener = new MouseWheelListener() {
+			@Override
+			public void mouseScrolled(MouseEvent e) {
+				if (xyGraph==null) return;
+				if (e.count==0)    return;
+				int direction = e.count > 0 ? 1 : -1;
+				xyGraph.setZoomLevel(e, direction*0.1d);
+				xyGraph.repaint();
+			}	
+		};
+		return mouseWheelListener;
+	}
+
+	private KeyListener keyListener;
+	private KeyListener getKeyListener() {
+		if (keyListener==null) keyListener = new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (e.keyCode==16777230 || e.character=='h') {
+					final IContributionItem action = bars.getToolBarManager().find("org.dawb.workbench.plotting.histo");
+				    if (action!=null && action.isVisible() && action instanceof ActionContributionItem) {
+				    	ActionContributionItem iaction = (ActionContributionItem)action;
+				    	iaction.getAction().setChecked(!iaction.getAction().isChecked());
+				    	iaction.getAction().run();
+				    }
+				} else if (e.keyCode==16777217) {//Up
+ 					Point point = Display.getDefault().getCursorLocation();
+ 					point.y-=1;
+ 					Display.getDefault().setCursorLocation(point);
+					
+ 				} else if (e.keyCode==16777218) {//Down
+ 					Point point = Display.getDefault().getCursorLocation();
+ 					point.y+=1;
+ 					Display.getDefault().setCursorLocation(point);
+ 					
+ 				} else if (e.keyCode==16777219) {//Left
+ 					Point point = Display.getDefault().getCursorLocation();
+ 					point.x-=1;
+ 					Display.getDefault().setCursorLocation(point);
+					
+ 				} if (e.keyCode==16777220) {//Right
+ 					Point point = Display.getDefault().getCursorLocation();
+ 					point.x+=1;
+ 					Display.getDefault().setCursorLocation(point);
+ 				}
+
+			}
+		};
+		return keyListener;
+	}
+
+
 	public void setFocus() {
 		if (xyCanvas!=null) xyCanvas.setFocus();
 	}
@@ -755,7 +789,11 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 			xyGraph.dispose();
 			xyGraph = null;
 		}
-		if (xyCanvas!=null) xyCanvas.dispose();
+		if (xyCanvas!=null) {
+			xyCanvas.removeMouseWheelListener(getMouseWheelListener());
+			xyCanvas.removeKeyListener(getKeyListener());
+			xyCanvas.dispose();
+		}
 	}
 
 	private void clearTraces() {
