@@ -44,4 +44,9 @@ public class PlottingConstants {
 	 */
 	public static final String HISTO = "org.dawb.plotting.system.rehistogram";
 
+	/**
+	 * Used to store origin preference
+	 */
+	public static final String HISTO_PREF = "org.dawb.plotting.system.histogram.type";
+
 }

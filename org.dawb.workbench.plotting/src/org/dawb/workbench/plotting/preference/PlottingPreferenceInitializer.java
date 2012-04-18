@@ -29,5 +29,6 @@ public class PlottingPreferenceInitializer extends AbstractPreferenceInitializer
 		store.setDefault(PlottingConstants.ORIGIN_PREF,    IImageTrace.ImageOrigin.TOP_LEFT.getLabel());
 		store.setDefault(PlottingConstants.ASPECT,         true);
 		store.setDefault(PlottingConstants.HISTO ,         false);
+		store.setDefault(PlottingConstants.HISTO_PREF ,    IImageTrace.HistoType.MEAN.getLabel());
 	}
 }

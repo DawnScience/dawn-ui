@@ -2,6 +2,7 @@ package org.dawb.workbench.plotting.system.swtxy;
 
 import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Stats;
 import uk.ac.diamond.scisoft.analysis.dataset.function.Downsample;
 import uk.ac.diamond.scisoft.analysis.dataset.function.DownsampleMode;
 
@@ -57,6 +59,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	private DownsampleType downsampleType=DownsampleType.MEAN;
 	private int            currentDownSampleBin=-1;
 	private List<AbstractDataset> axes;
+	private HistoType      histoType;
 	
 	private static Map<IImageTrace.ImageOrigin, IImageService.ImageOrigin> imageOriginaMap;
 	static {
@@ -77,7 +80,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 
 		this.paletteData = PaletteFactory.getPalette(Activator.getDefault().getPreferenceStore().getInt(PlottingConstants.P_PALETTE));	
 		this.imageOrigin = IImageTrace.ImageOrigin.forLabel(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.ORIGIN_PREF));
-	    		
+		this.histoType	 = IImageTrace.HistoType.forLabel(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.HISTO_PREF));
+				
 		xAxis.addListener(this);
 		yAxis.addListener(this);
 		
@@ -667,6 +671,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 
 	private Collection<PaletteListener> paletteListeners;
 
+
 	@Override
 	public void addPaletteListener(PaletteListener pl) {
 		if (paletteListeners==null) paletteListeners = new HashSet<PaletteListener>(11);
@@ -740,29 +745,57 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	 * @param bean
 	 * @return [0] = min [1] = max
 	 */
-	private static float[] getFastStatistics(AbstractDataset image) {
+	private float[] getFastStatistics(AbstractDataset image) {
 		
 		float min = Float.MAX_VALUE;
 		float max = -Float.MAX_VALUE;
 		float sum = 0.0f;
 		final int size = image.getSize();
-		
 		for (int index = 0; index<size; ++index) {
-				
+			
 			final float val = (float)image.getElementDoubleAbs(index);
 			sum += val;
 			if (val < min) min = val;
 			if (val > max) max = val;
 			
 		}
-		float mean = sum / size;
-	
+		
 		float retMin = min;
-		float retMax = 3*mean;
+		float retMax = Float.NaN;
+		
+		if (getHistoType()==HistoType.MEAN) {
+			float mean = sum / size;
+			retMax = ((float)Math.E)*mean; // Not statistical, E seems to be better than 3...
+			
+		} else if (getHistoType()==HistoType.MEDIAN) {
+			
+			float median = Float.NaN;
+			try {
+				median = ((Number)Stats.median(image)).floatValue();
+			} catch (Exception ne) {
+				median = ((Number)Stats.median(image.cast(AbstractDataset.INT16))).floatValue();
+			}
+			retMax = 2f*median;
+		}
+		
 		if (retMax > max)	retMax = max;
 		
 		return new float[]{retMin, retMax};
 
+	}
+	
+	private static float median(AbstractDataset image) {
+		
+		float[] a = (float[])image.cast(AbstractDataset.FLOAT32).getBuffer();
+		float[] b = new float[a.length];
+		System.arraycopy(a, 0, b, 0, b.length);
+		Arrays.sort(b);
+
+		if (a.length % 2 == 0) {
+			return (b[(b.length / 2) - 1] + b[b.length / 2]) / 2.0f;
+		} else {
+			return b[b.length / 2];
+		}
 	}
 
 	@Override
@@ -770,4 +803,23 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		return axes;
 	}
 
+	/**
+	 * return the HistoType being used
+	 * @return
+	 */
+	@Override
+	public HistoType getHistoType() {
+		return this.histoType;
+	}
+	
+	/**
+	 * Sets the histo type.
+	 */
+	@Override
+	public void setHistoType(HistoType type) {
+		this.histoType = type;
+		Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.HISTO_PREF, type.getLabel());
+		createScaledImage(ImageScaleType.REHISTOGRAM, null);
+		repaint();
+	}
 }
