@@ -100,8 +100,8 @@ public class AspectAxis extends Axis {
 		int       range     = (int)Math.round(thisRange*pixRatio);    // span for thisRange of them
 		range+=2*getMargin();
 		
-		if (isYAxis()) origBounds.height = range; 
-		else           origBounds.width  = range;
+		if (isYAxis()) origBounds.height = Math.min(range, getGraph().getPlotArea().getBounds().height); 
+		else           origBounds.width  = Math.min(range, getGraph().getPlotArea().getBounds().width);
 		
 	}
 
