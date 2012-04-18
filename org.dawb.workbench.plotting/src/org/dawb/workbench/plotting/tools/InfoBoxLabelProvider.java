@@ -16,10 +16,8 @@
  * with GDA. If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 package org.dawb.workbench.plotting.tools;
 
-import java.text.DecimalFormat;
 import java.util.Collection;
 
 import javax.vecmath.Vector3d;
@@ -44,15 +42,14 @@ public class InfoBoxLabelProvider extends ColumnLabelProvider {
 
 	private final int column;
 	private final InfoBox tool;
-	private final DecimalFormat format;
 	private final IPlottingSystem plotSystem;
 
 	private static final Logger logger = LoggerFactory.getLogger(InfoBoxLabelProvider.class);
 
 	public InfoBoxLabelProvider(InfoBox tool, int i) {
+
 		this.column = i;
 		this.tool   = tool;
-		this.format = new DecimalFormat("##0.00E0");
 		this.plotSystem = tool.getPlottingSystem();
 	}
 
@@ -62,14 +59,12 @@ public class InfoBoxLabelProvider extends ColumnLabelProvider {
 
 		double x = 0.0;
 		double y = 0.0;
-
+		
 		if (element instanceof IRegion){
-			logger.debug("got element of type IRegion");
-			final IRegion    region = (IRegion)element;
-			x = tool.getBounds(region).getX();
-			y = tool.getBounds(region).getY();
+			
+			x = tool.xValues[0];
+			y = tool.yValues[0];
 
-			//logger.debug("X= " + x + " Y= " + y);
 		}else {
 			return null;
 		}
@@ -82,7 +77,7 @@ public class InfoBoxLabelProvider extends ColumnLabelProvider {
 			set = trace.getData();
 			final IMetaData      meta = set.getMetadata();
 			if (meta instanceof IDiffractionMetadata) {
-				logger.debug("got element of type IDiffractionMetadata");
+
 				dmeta = (IDiffractionMetadata)meta;
 			}
 		}
@@ -90,7 +85,7 @@ public class InfoBoxLabelProvider extends ColumnLabelProvider {
 		QSpace qSpace  = null;
 		Vector3d q = null;
 		if (dmeta != null) {
-			logger.debug("dmeta not NULL - using X= " + x + " Y= " + y);
+
 			try {
 				DetectorProperties detector2dProperties = dmeta.getDetector2DProperties();
 				DiffractionCrystalEnvironment diffractionCrystalEnvironment = dmeta.getDiffractionCrystalEnvironment();
@@ -105,7 +100,6 @@ public class InfoBoxLabelProvider extends ColumnLabelProvider {
 				logger.error("Could not create a detector properties object from metadata", e);
 			}
 		}
-
 
 		switch(column) {
 		case 0: // "X position"
@@ -137,6 +131,7 @@ public class InfoBoxLabelProvider extends ColumnLabelProvider {
 		default:
 			return "Not found";
 		}
+		
 	}
 
 	@Override
