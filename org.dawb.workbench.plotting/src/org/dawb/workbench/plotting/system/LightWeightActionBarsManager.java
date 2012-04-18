@@ -124,7 +124,7 @@ class LightWeightActionBarsManager extends PlottingActionBarManager {
 		    public void run() {		    	
 		    	Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.ASPECT, isChecked());
 		    	system.getGraph().setKeepAspect(isChecked());
-		    	system.repaint();
+		    	system.repaint(false);
 		    }
 		};
         

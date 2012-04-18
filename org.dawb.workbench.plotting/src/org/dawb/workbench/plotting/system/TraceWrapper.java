@@ -334,6 +334,6 @@ public class TraceWrapper implements ILineTrace {
 
 	@Override
 	public void repaint() {
-		sys.repaint();
+		trace.repaint();
 	}
 }

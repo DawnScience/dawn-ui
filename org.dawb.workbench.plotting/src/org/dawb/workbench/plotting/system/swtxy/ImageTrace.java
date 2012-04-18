@@ -18,7 +18,6 @@ import org.dawb.common.ui.plot.region.RegionBounds;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.PaletteEvent;
 import org.dawb.common.ui.plot.trace.PaletteListener;
-import org.dawb.common.util.text.NumberUtils;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -100,16 +99,16 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		this.name = name;
 	}
 
-	public Axis getxAxis() {
-		return xAxis;
+	public AspectAxis getxAxis() {
+		return (AspectAxis)xAxis;
 	}
 
 	public void setxAxis(Axis xAxis) {
 		this.xAxis = xAxis;
 	}
 
-	public Axis getyAxis() {
-		return yAxis;
+	public AspectAxis getyAxis() {
+		return (AspectAxis)yAxis;
 	}
 
 	public void setyAxis(Axis yAxis) {
@@ -126,16 +125,17 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 
 	public void setPaletteData(PaletteData paletteData) {
 		this.paletteData = paletteData;
-		createScaledImage(ImageScaleType.FORCE_RESCALE, null);
+		createScaledImage(ImageScaleType.FORCE_REIMAGE, null);
 		repaint();
 		firePaletteDataListeners(paletteData);
 	}
 
 
 	private enum ImageScaleType {
-		NO_RESCALE,
-		RESCALE_ALLOWED,
-		FORCE_RESCALE, 
+		// Going up in order of work done
+		NO_REIMAGE,
+		REIMAGE_ALLOWED,
+		FORCE_REIMAGE, 
 		REHISTOGRAM;
 	}
 	private Image            scaledImage;
@@ -158,13 +158,13 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		if (generatingImage) return false;
 
 		boolean requireImageGeneration = imageData==null || 
-				                         rescaleType==ImageScaleType.FORCE_RESCALE || 
+				                         rescaleType==ImageScaleType.FORCE_REIMAGE || 
 				                         rescaleType==ImageScaleType.REHISTOGRAM; // We know that it is needed
 		
 		// If we just changed downsample scale, we force the update.
 	    // This allows user resizes of the plot area to be picked up
 		// and the larger data size used if it fits.
-        if (!requireImageGeneration && rescaleType==ImageScaleType.RESCALE_ALLOWED && currentDownSampleBin>0) {
+        if (!requireImageGeneration && rescaleType==ImageScaleType.REIMAGE_ALLOWED && currentDownSampleBin>0) {
         	if (getDownsampleBin()!=currentDownSampleBin) {
         		requireImageGeneration = true;
         	}
@@ -368,6 +368,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		return Math.max(range.getUpper(),range.getLower()) - Math.min(range.getUpper(), range.getLower());
 	}
 
+	private boolean lastAspectRatio = true;
 	@Override
 	protected void paintFigure(Graphics graphics) {
 		
@@ -379,9 +380,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		 * around an h5 gallery with arrow keys, it looks smooth 
 		 * with this in.
 		 */
-		if (scaledImage==null) {
-			boolean imageReady = createScaledImage(ImageScaleType.NO_RESCALE, null);
+		if (scaledImage==null || !isKeepAspectRatio() || lastAspectRatio!=isKeepAspectRatio()) {
+			boolean imageReady = createScaledImage(ImageScaleType.NO_REIMAGE, null);
 			if (!imageReady) return;
+			lastAspectRatio = isKeepAspectRatio();
 		}
 
 		graphics.pushState();	
@@ -391,6 +393,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		graphics.drawImage(scaledImage, loc.x, loc.y);
   	    
 		graphics.popState();
+	}
+
+	private boolean isKeepAspectRatio() {
+		return getxAxis().isKeepAspect() && getyAxis().isKeepAspect();
 	}
 
 	public void remove() {
@@ -484,7 +490,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	
 	private void updateAxisRange(Axis axis) {
 		if (!axisRedrawActive) return;				
-		createScaledImage(ImageScaleType.RESCALE_ALLOWED, null);
+		createScaledImage(ImageScaleType.REIMAGE_ALLOWED, null);
 	}
 
 
@@ -570,7 +576,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		this.imageOrigin = imageOrigin;
 		createAxisBounds();
 		performAutoscale();
-		createScaledImage(ImageScaleType.FORCE_RESCALE, null);
+		createScaledImage(ImageScaleType.FORCE_REIMAGE, null);
 		repaint();
 	}
 
@@ -693,7 +699,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	@Override
 	public void setDownsampleType(DownsampleType type) {
 		this.downsampleType = type;
-		createScaledImage(ImageScaleType.FORCE_RESCALE, null);
+		createScaledImage(ImageScaleType.FORCE_REIMAGE, null);
 		repaint();
 	}
 

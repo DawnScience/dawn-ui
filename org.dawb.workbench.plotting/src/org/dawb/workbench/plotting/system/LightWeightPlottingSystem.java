@@ -116,6 +116,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		
 		createUI();
 
+		// TODO Preselect PAN for IMAGE PlotType?
 	}
 	
 	@Override
@@ -763,17 +764,24 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	}
 
 	public void repaint() {
+		repaint(true);
+	}
+	public void repaint(final boolean autoScale) {
 		if (getDisplay().getThread()==Thread.currentThread()) {
 			if (xyCanvas!=null) {
-				LightWeightPlottingSystem.this.xyGraph.performAutoScale();
-				LightWeightPlottingSystem.this.xyCanvas.redraw();
+				if (autoScale) LightWeightPlottingSystem.this.xyGraph.performAutoScale();
+				LightWeightPlottingSystem.this.xyCanvas.layout(xyCanvas.getChildren());
+				LightWeightPlottingSystem.this.xyGraph.revalidate();
+				LightWeightPlottingSystem.this.xyGraph.repaint();
 			}
 		} else {
 			getDisplay().syncExec(new Runnable() {
 				public void run() {
 					if (xyCanvas!=null) {
-						LightWeightPlottingSystem.this.xyGraph.performAutoScale();
-						LightWeightPlottingSystem.this.xyCanvas.redraw();
+						if (autoScale)LightWeightPlottingSystem.this.xyGraph.performAutoScale();
+						LightWeightPlottingSystem.this.xyCanvas.layout(xyCanvas.getChildren());
+						LightWeightPlottingSystem.this.xyGraph.revalidate();
+						LightWeightPlottingSystem.this.xyGraph.repaint();
 					}
 				}
 			});
