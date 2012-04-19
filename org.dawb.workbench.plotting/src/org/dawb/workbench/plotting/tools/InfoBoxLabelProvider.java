@@ -57,81 +57,89 @@ public class InfoBoxLabelProvider extends ColumnLabelProvider {
 	@Override
 	public String getText(Object element) {
 
-		double x = 0.0;
-		double y = 0.0;
-		
-		if (element instanceof IRegion){
+		try {
+			double x = 0.0;
+			double y = 0.0;
 			
-			x = tool.xValues[0];
-			y = tool.yValues[0];
-
-		}else {
-			return null;
-		}
-
-		IDiffractionMetadata dmeta = null;
-		AbstractDataset set = null;
-		final Collection<ITrace> traces = plotSystem.getTraces(IImageTrace.class);
-		final IImageTrace trace = traces!=null && traces.size()>0 ? (IImageTrace)traces.iterator().next() : null;
-		if (trace!=null) {
-			set = trace.getData();
-			final IMetaData      meta = set.getMetadata();
-			if (meta instanceof IDiffractionMetadata) {
-
-				dmeta = (IDiffractionMetadata)meta;
+			if (element instanceof IRegion){
+				
+				x = tool.xValues[0];
+				y = tool.yValues[0];
+	
+			}else {
+				return null;
 			}
-		}
-
-		QSpace qSpace  = null;
-		Vector3d q = null;
-		if (dmeta != null) {
-
-			try {
-				DetectorProperties detector2dProperties = dmeta.getDetector2DProperties();
-				DiffractionCrystalEnvironment diffractionCrystalEnvironment = dmeta.getDiffractionCrystalEnvironment();
-				
-				if (!(detector2dProperties == null)){
-					qSpace = new QSpace(detector2dProperties,
-							diffractionCrystalEnvironment);
-				
-					q = qSpace.qFromPixelPosition(x, y);
+	
+			IDiffractionMetadata dmeta = null;
+			AbstractDataset set = null;
+			final Collection<ITrace> traces = plotSystem.getTraces(IImageTrace.class);
+			final IImageTrace trace = traces!=null && traces.size()>0 ? (IImageTrace)traces.iterator().next() : null;
+			if (trace!=null) {
+				set = trace.getData();
+				final IMetaData      meta = set.getMetadata();
+				if (meta instanceof IDiffractionMetadata) {
+	
+					dmeta = (IDiffractionMetadata)meta;
 				}
-			} catch (Exception e) {
-				logger.error("Could not create a detector properties object from metadata", e);
 			}
+	
+			QSpace qSpace  = null;
+			Vector3d q = null;
+			if (dmeta != null) {
+	
+				try {
+					DetectorProperties detector2dProperties = dmeta.getDetector2DProperties();
+					DiffractionCrystalEnvironment diffractionCrystalEnvironment = dmeta.getDiffractionCrystalEnvironment();
+					
+					if (!(detector2dProperties == null)){
+						qSpace = new QSpace(detector2dProperties,
+								diffractionCrystalEnvironment);
+					
+						q = qSpace.qFromPixelPosition(x, y);
+					}
+				} catch (Exception e) {
+					logger.error("Could not create a detector properties object from metadata", e);
+				}
+			}
+	
+			switch(column) {
+			case 0: // "X position"
+				return String.format("% 4.4f", x);
+			case 1: // "Y position"
+				return String.format("% 4.4f", y);
+			case 2: // "Data value"
+				if (set == null || q == null) return "-";
+				return String.format("% 4.4f", set.getDouble((int)x, (int) y));
+			case 3: // q X
+				if (q == null) return "-";
+				return String.format("% 4.4f", q.x);
+			case 4: // q Y
+				if (q == null) return "-";
+				return String.format("% 4.4f", q.y);
+			case 5: // q Z
+				if (q == null) return "-";
+				return String.format("% 4.4f", q.z);
+			case 6: // 20
+				if (qSpace == null) return "-";
+				return String.format("% 3.3f", Math.toDegrees(qSpace.scatteringAngle(q)));
+			case 7: // resolution
+				if (q == null) return "-";
+				return String.format("% 4.4f", (2*Math.PI)/q.length());
+			case 8: // Dataset name
+				if (set == null) return "-";
+				return set.getName();
+	
+			default:
+				return "Not found";
+			}
+		} catch (Throwable ne) {
+			// One must not throw RuntimeExceptions like null pointers from this
+			// methd becuase the user gets an eclipse dialog confusing them with 
+			// the error
+			logger.error("Cannot get value in info table", ne);
+			return "";
 		}
 
-		switch(column) {
-		case 0: // "X position"
-			return String.format("% 4.4f", x);
-		case 1: // "Y position"
-			return String.format("% 4.4f", y);
-		case 2: // "Data value"
-			if (set == null || q == null) return "-";
-			return String.format("% 4.4f", set.getDouble((int)x, (int) y));
-		case 3: // q X
-			if (q == null) return "-";
-			return String.format("% 4.4f", q.x);
-		case 4: // q Y
-			if (q == null) return "-";
-			return String.format("% 4.4f", q.y);
-		case 5: // q Z
-			if (q == null) return "-";
-			return String.format("% 4.4f", q.z);
-		case 6: // 20
-			if (qSpace == null) return "-";
-			return String.format("% 3.3f", Math.toDegrees(qSpace.scatteringAngle(q)));
-		case 7: // resolution
-			if (q == null) return "-";
-			return String.format("% 4.4f", (2*Math.PI)/q.length());
-		case 8: // Dataset name
-			if (set == null) return "-";
-			return set.getName();
-
-		default:
-			return "Not found";
-		}
-		
 	}
 
 	@Override
