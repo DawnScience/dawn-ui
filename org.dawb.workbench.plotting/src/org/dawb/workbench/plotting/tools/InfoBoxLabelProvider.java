@@ -41,12 +41,12 @@ public class InfoBoxLabelProvider extends ColumnLabelProvider {
 
 
 	private final int column;
-	private final InfoBox tool;
+	private final InfoBoxTool tool;
 	private final IPlottingSystem plotSystem;
 
 	private static final Logger logger = LoggerFactory.getLogger(InfoBoxLabelProvider.class);
 
-	public InfoBoxLabelProvider(InfoBox tool, int i) {
+	public InfoBoxLabelProvider(InfoBoxTool tool, int i) {
 
 		this.column = i;
 		this.tool   = tool;
@@ -63,6 +63,8 @@ public class InfoBoxLabelProvider extends ColumnLabelProvider {
 			
 			if (element instanceof IRegion){
 				
+				IRegion region = (IRegion)element;
+				//logger.debug("got region of type: " + region.getRegionType() + " x= " + region.getRegionBounds().getX() + "   y= " + region.getRegionBounds().getY());
 				x = tool.xValues[0];
 				y = tool.yValues[0];
 	
@@ -103,29 +105,31 @@ public class InfoBoxLabelProvider extends ColumnLabelProvider {
 			}
 	
 			switch(column) {
-			case 0: // "X position"
+			case 0: // "Point ID"
+				return ((IRegion)element).getName();
+			case 1: // "X position"
 				return String.format("% 4.4f", x);
-			case 1: // "Y position"
+			case 2: // "Y position"
 				return String.format("% 4.4f", y);
-			case 2: // "Data value"
+			case 3: // "Data value"
 				if (set == null || q == null) return "-";
 				return String.format("% 4.4f", set.getDouble((int)x, (int) y));
-			case 3: // q X
+			case 4: // q X
 				if (q == null) return "-";
 				return String.format("% 4.4f", q.x);
-			case 4: // q Y
+			case 5: // q Y
 				if (q == null) return "-";
 				return String.format("% 4.4f", q.y);
-			case 5: // q Z
+			case 6: // q Z
 				if (q == null) return "-";
 				return String.format("% 4.4f", q.z);
-			case 6: // 20
+			case 7: // 20
 				if (qSpace == null) return "-";
 				return String.format("% 3.3f", Math.toDegrees(qSpace.scatteringAngle(q)));
-			case 7: // resolution
+			case 8: // resolution
 				if (q == null) return "-";
 				return String.format("% 4.4f", (2*Math.PI)/q.length());
-			case 8: // Dataset name
+			case 9: // Dataset name
 				if (set == null) return "-";
 				return set.getName();
 	
@@ -134,7 +138,7 @@ public class InfoBoxLabelProvider extends ColumnLabelProvider {
 			}
 		} catch (Throwable ne) {
 			// One must not throw RuntimeExceptions like null pointers from this
-			// methd becuase the user gets an eclipse dialog confusing them with 
+			// method becuase the user gets an eclipse dialog confusing them with 
 			// the error
 			logger.error("Cannot get value in info table", ne);
 			return "";

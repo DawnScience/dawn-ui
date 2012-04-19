@@ -28,6 +28,7 @@ import org.dawb.common.ui.plot.IAxis;
 import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.PlottingFactory;
 import org.dawb.common.ui.plot.region.IRegion;
+import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionBoundsListener;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.RegionBounds;
@@ -35,7 +36,6 @@ import org.dawb.common.ui.plot.region.RegionBoundsEvent;
 import org.dawb.common.ui.plot.region.RegionEvent;
 import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
-import org.dawb.common.ui.plot.tool.IToolPageSystem;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
@@ -76,9 +76,9 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 
-public class InfoBox extends AbstractToolPage implements IRegionBoundsListener, IRegionListener, MouseListener  {
+public class InfoBoxTool extends AbstractToolPage implements IRegionBoundsListener, IRegionListener, MouseListener  {
 
-	private final static Logger logger = LoggerFactory.getLogger(InfoBox.class);
+	private final static Logger logger = LoggerFactory.getLogger(InfoBoxTool.class);
 	
 	protected IPlottingSystem        plotter;
 	private   ITraceListener         traceListener;
@@ -94,7 +94,7 @@ public class InfoBox extends AbstractToolPage implements IRegionBoundsListener, 
 	public double xValues [] = new double[1];	public double yValues [] = new double[1];
 
 		
-	public InfoBox() {
+	public InfoBoxTool() {
 		dragBounds = new HashMap<String,RegionBounds>(7);
 		
 		try {
@@ -150,45 +150,29 @@ public class InfoBox extends AbstractToolPage implements IRegionBoundsListener, 
 				if (regions==null || regions.isEmpty()) return new Object[]{"-"};
 								
 				final List<IRegion> visible = new ArrayList<IRegion>(regions.size()/2);
-				
+
 				if(regions.size() % 2 == 0){
 					// add the intersection region between the two line regions					
 					for (int i=0; i< regions.size(); i = i +2){
-						// add only one region
+
 						IRegion pointRegion = (IRegion)(regions.toArray())[0];
+						pointRegion.setName("---");
 						Rectangle rect = new Rectangle();
 						rect.setX((int) xValues[0]); rect.setY((int) yValues[0]);
 						pointRegion.setBounds(rect);
 						visible.add(pointRegion);
 					}
 				}
-				
+
 				return visible.toArray(new IRegion[visible.size()]);
 			}
 		});
 
 		viewer.setInput(new Object());
 		
-		// set input table
-		//TableItem item = viewer.getTable().getItem(0);
-		//Color blue = this.composite.getShell().getDisplay().getSystemColor(SWT.COLOR_BLUE);
-		//item.setForeground(blue);
-		
-		//this.viewUpdateListener = new RegionColorListener();
-
 		activate();
 	}
 	
-
-	@Override
-	public Object getAdapter(@SuppressWarnings("rawtypes") Class clazz) {
-		if (clazz == IToolPageSystem.class) {
-			return plotter;
-		} else {
-			return super.getAdapter(clazz);
-		}
-	}
-
 	private void createRegions() {
 		
 		if (getPlottingSystem()==null) return;
@@ -212,7 +196,7 @@ public class InfoBox extends AbstractToolPage implements IRegionBoundsListener, 
 	private RunningJob addRegion(String jobName, IRegion region) {
 		region.setVisible(false);
 		region.setTrackMouse(true);
-		region.setRegionColor(ColorConstants.red);
+		region.setRegionColor(ColorConstants.yellow);
 		region.setUserRegion(false); // They cannot see preferences or change it!
 		getPlottingSystem().addRegion(region);
 		return new RunningJob(jobName, region);
@@ -286,9 +270,7 @@ public class InfoBox extends AbstractToolPage implements IRegionBoundsListener, 
 	}
 	
 	public void dispose() {
-//		if (getPlottingSystem()!=null) {
-//			getPlottingSystem().removeRegionListener(this);
-//		}
+
 		if (viewUpdateListener!=null) viewer.removeSelectionChangedListener(viewUpdateListener);
 		viewUpdateListener = null;
 
@@ -417,13 +399,26 @@ public class InfoBox extends AbstractToolPage implements IRegionBoundsListener, 
 		if (!isActive()) return;
 		
 		final Collection<IRegion> regions = getPlottingSystem().getRegions();
-		if (regions==null || regions.isEmpty()) logger.debug("no region selected");//return new Object[]{"-"};
+		if (regions==null || regions.isEmpty()) logger.debug("no region selected");//return new Object[]{"-"};		
 		
-		// add the resulting point region which is the intersection between the 2 line regions
-		IRegion pointRegion = (IRegion)(regions.toArray())[0];
-			
-		viewer.refresh(pointRegion);
-		viewer.add(pointRegion);
+        try {
+    		// add a point region
+        	final IRegion point = getPlottingSystem().createRegion(RegionUtils.getUniqueName("Point", getPlottingSystem()), RegionType.POINT);
+            final RegionBounds regionBounds= new RegionBounds();
+            double x = getPlottingSystem().getSelectedXAxis().getPositionValue(evt.x);
+            double y = getPlottingSystem().getSelectedYAxis().getPositionValue(evt.y);
+            regionBounds.addPoint(new double[]{x,y});
+            point.setRegionBounds(regionBounds);
+            point.setMobile(true);
+            getPlottingSystem().addRegion(point);
+
+    		viewer.refresh(point);
+    		viewer.add(point);
+
+     } catch (Exception e) {
+            logger.error("Cannot create point!", e);
+     }
+
 
 	}
 
@@ -620,51 +615,56 @@ public class InfoBox extends AbstractToolPage implements IRegionBoundsListener, 
 	private void createColumns(final TableViewer viewer) {
 
 		ColumnViewerToolTipSupport.enableFor(viewer,ToolTip.NO_RECREATE);
-
+		
 		TableViewerColumn var   = new TableViewerColumn(viewer, SWT.CENTER, 0);
-		var.getColumn().setText("X position");
+		var.getColumn().setText("Point ID");
 		var.getColumn().setWidth(120);
 		var.setLabelProvider(new InfoBoxLabelProvider(this, 0));
-
+		
 		var   = new TableViewerColumn(viewer, SWT.CENTER, 1);
-		var.getColumn().setText("Y position");
-		var.getColumn().setWidth(100);
+		var.getColumn().setText("X position");
+		var.getColumn().setWidth(120);
 		var.setLabelProvider(new InfoBoxLabelProvider(this, 1));
 
 		var   = new TableViewerColumn(viewer, SWT.CENTER, 2);
-		var.getColumn().setText("Data value");
+		var.getColumn().setText("Y position");
 		var.getColumn().setWidth(100);
 		var.setLabelProvider(new InfoBoxLabelProvider(this, 2));
 
 		var   = new TableViewerColumn(viewer, SWT.CENTER, 3);
-		var.getColumn().setText("q X (1/\u00c5)");
+		var.getColumn().setText("Data value");
 		var.getColumn().setWidth(100);
 		var.setLabelProvider(new InfoBoxLabelProvider(this, 3));
 
 		var   = new TableViewerColumn(viewer, SWT.CENTER, 4);
-		var.getColumn().setText("q Y (1/\u00c5)");
+		var.getColumn().setText("q X (1/\u00c5)");
 		var.getColumn().setWidth(100);
 		var.setLabelProvider(new InfoBoxLabelProvider(this, 4));
 
 		var   = new TableViewerColumn(viewer, SWT.CENTER, 5);
-		var.getColumn().setText("q Z (1/\u00c5)");
+		var.getColumn().setText("q Y (1/\u00c5)");
 		var.getColumn().setWidth(100);
 		var.setLabelProvider(new InfoBoxLabelProvider(this, 5));
 
 		var   = new TableViewerColumn(viewer, SWT.CENTER, 6);
-		var.getColumn().setText("2\u03b8 (\u00b0)");
-		var.getColumn().setWidth(80);
+		var.getColumn().setText("q Z (1/\u00c5)");
+		var.getColumn().setWidth(100);
 		var.setLabelProvider(new InfoBoxLabelProvider(this, 6));
 
 		var   = new TableViewerColumn(viewer, SWT.CENTER, 7);
-		var.getColumn().setText("Resolution (\u00c5)");
-		var.getColumn().setWidth(120);
+		var.getColumn().setText("2\u03b8 (\u00b0)");
+		var.getColumn().setWidth(80);
 		var.setLabelProvider(new InfoBoxLabelProvider(this, 7));
 
 		var   = new TableViewerColumn(viewer, SWT.CENTER, 8);
-		var.getColumn().setText("Dataset name");
+		var.getColumn().setText("Resolution (\u00c5)");
 		var.getColumn().setWidth(120);
 		var.setLabelProvider(new InfoBoxLabelProvider(this, 8));
+
+		var   = new TableViewerColumn(viewer, SWT.CENTER, 9);
+		var.getColumn().setText("Dataset name");
+		var.getColumn().setWidth(120);
+		var.setLabelProvider(new InfoBoxLabelProvider(this, 9));
 		
 	}
 
@@ -687,18 +687,20 @@ public class InfoBox extends AbstractToolPage implements IRegionBoundsListener, 
 
 	
 	private void updateRegion(RegionBoundsEvent evt) {
-
+		
 		if (viewer!=null) {
 			IRegion  region = (IRegion)evt.getSource();
 
-			if (region.getRegionType().toString().contains("XAXIS_LINE")){
+			if (region.getRegionType().equals(IRegion.RegionType.XAXIS_LINE)){
 				this.xValues[0] = evt.getRegionBounds().getX();
 			}
-			if (region.getRegionType().toString().contains("YAXIS_LINE")){
+			if (region.getRegionType().equals(IRegion.RegionType.YAXIS_LINE)){
 				this.yValues[0] = evt.getRegionBounds().getY();
 			}
 			
 			RegionBounds rb = evt.getRegionBounds();
+			
+			//logger.debug("x= " + this.xValues[0] + "  y= "+ this.yValues[0]); 
 			
 			dragBounds.put(region.getName(), rb);
 			viewer.refresh(region);
