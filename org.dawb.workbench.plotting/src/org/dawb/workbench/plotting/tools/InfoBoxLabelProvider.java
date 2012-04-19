@@ -108,7 +108,7 @@ public class InfoBoxLabelProvider extends ColumnLabelProvider {
 			return String.format("% 4.4f", y);
 		case 2: // "Data value"
 			if (set == null || q == null) return "-";
-			return String.format("% 4.4f", set.getDouble((int)q.x, (int)q.y));
+			return String.format("% 4.4f", set.getDouble((int)x, (int) y));
 		case 3: // q X
 			if (q == null) return "-";
 			return String.format("% 4.4f", q.x);
