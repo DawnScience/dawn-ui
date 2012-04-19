@@ -138,7 +138,7 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	 * A new cursor is created on each call.
 	 */
 	public Cursor getRegionCursor() {
-		if (cursor==null)  {
+		if (cursor==null && getCursorPath()!=null)  {
 			Image image = Activator.getImage(getCursorPath());
 			cursor = new Cursor(Display.getDefault(), image.getImageData(), 8, 8);
 		}

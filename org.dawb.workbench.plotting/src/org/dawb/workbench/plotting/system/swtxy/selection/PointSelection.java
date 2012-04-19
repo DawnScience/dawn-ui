@@ -3,7 +3,6 @@ package org.dawb.workbench.plotting.system.swtxy.selection;
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.dawb.common.ui.plot.region.RegionBounds;
 import org.dawb.workbench.plotting.system.swtxy.translate.FigureTranslator;
-import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.geometry.Point;
@@ -16,18 +15,24 @@ import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 public class PointSelection extends AbstractSelectionRegion {
 
 	private SelectionHandle point;
-	private static final int SIZE = 5;
+	private static final int SIZE = 10;
 	
 	public PointSelection(String name, Axis xAxis, Axis yAxis) {
 		super(name, xAxis, yAxis);
-		setRegionColor(ColorConstants.yellow);
+		setRegionColor(RegionType.POINT.getDefaultColor());
 		setLineWidth(1);
-		setAlpha(100);
+		setAlpha(120);
 	}
 
 	@Override
 	public RegionType getRegionType() {
 		return RegionType.POINT;
+	}
+	
+	@Override
+	public void setBounds(Rectangle bounds) {
+		super.setBounds(bounds);
+		
 	}
 
 	@Override
@@ -63,6 +68,7 @@ public class PointSelection extends AbstractSelectionRegion {
 	public void setLocalBounds(PointList clicks, Rectangle parentBounds) {
 		final Point last = clicks.getLastPoint();
 		point.setLocation(last);
+		updateRegionBounds();
 	}
 
 	@Override
@@ -75,7 +81,8 @@ public class PointSelection extends AbstractSelectionRegion {
 
 	@Override
 	protected String getCursorPath() {
-		return "icons/Cursor-point.png";
+		return null;
+		//return "icons/Cursor-point.png";
 	}
 
 

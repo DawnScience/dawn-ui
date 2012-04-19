@@ -165,7 +165,7 @@ public class RegionArea extends PlotArea {
 		AbstractSelectionRegion region = SelectionRegionFactory.createSelectionRegion(name, x, y, regionType);
 		if (startingWithMouseEvent) {
 			xyGraph.setZoomType(ZoomType.NONE);
-		    setCursor(region.getRegionCursor());
+		    if (region.getRegionCursor()!=null) setCursor(region.getRegionCursor());
 		    regionBeingAdded = region;
 		    
 		    // Mouse listener for region bounds
