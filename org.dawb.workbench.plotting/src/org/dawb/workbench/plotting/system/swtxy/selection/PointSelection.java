@@ -15,7 +15,7 @@ import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 public class PointSelection extends AbstractSelectionRegion {
 
 	private SelectionHandle point;
-	private static final int SIZE = 10;
+	private static final int SIZE = 7;
 	
 	public PointSelection(String name, Axis xAxis, Axis yAxis) {
 		super(name, xAxis, yAxis);
@@ -38,9 +38,6 @@ public class PointSelection extends AbstractSelectionRegion {
 	@Override
 	protected void updateConnectionBounds() {
 		
-		final Point pnt    = point.getLocation();
-		final int   offset = SIZE/2; // int maths ok here
-        point.setBounds(new Rectangle(pnt.x-offset, pnt.y-offset, SIZE, SIZE));
 	}
 
 	@Override
