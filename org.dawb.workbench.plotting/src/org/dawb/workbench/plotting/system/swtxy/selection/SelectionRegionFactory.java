@@ -25,11 +25,12 @@ public class SelectionRegionFactory {
 		SUPPORTED_REGIONS.add(RegionType.XAXIS_LINE);
 		SUPPORTED_REGIONS.add(RegionType.YAXIS_LINE);
 		SUPPORTED_REGIONS.add(RegionType.FREE_DRAW);
+		SUPPORTED_REGIONS.add(RegionType.POINT);
 	}
 
 	/**
 	 * Call this method to create a selection region based on type.
-	 * 
+	 * TODO Use a map lookup one day? The numbers are small so list is acceptable.
 	 * This is a simple test on regionType at the moment.
      *
 	 * @param name
@@ -55,6 +56,9 @@ public class SelectionRegionFactory {
 
 		} else if (regionType==RegionType.FREE_DRAW) {
 			region = new FreeDrawSelection(name, x, y);
+			
+		} else if (regionType==RegionType.POINT) {
+			region = new PointSelection(name, x, y);
 
 		} else if (regionType==RegionType.XAXIS || regionType==RegionType.YAXIS || regionType==RegionType.XAXIS_LINE || regionType==RegionType.YAXIS_LINE) {
 			region = new AxisSelection(name, x, y, regionType);

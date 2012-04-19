@@ -120,12 +120,6 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	 */
 	protected abstract String getCursorPath();
 
-	/**
-	 * An abstract selection region can operate with a single mouse button press or multiple presses
-	 * @return true if region uses multiple mouse presses 
-	 */
-	public abstract boolean useMultipleMousePresses();
-
 	public void sync(RegionBean bean) {
 		setName(bean.getName());
 		setShowPosition(bean.isShowPosition());
@@ -367,4 +361,15 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	public void setLineWidth(int lineWidth) {
 		this.lineWidth = lineWidth;
 	}
+	
+	/**
+	 * An abstract selection region can operate with a single mouse button press or multiple presses.
+	 * Override this method to change the default to false.
+	 * 
+	 * @return true if region uses multiple mouse presses 
+	 */
+	public boolean useMultipleMousePresses() {
+		return false;
+	}
+
 }
