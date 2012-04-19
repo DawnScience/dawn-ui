@@ -2,10 +2,12 @@ package org.dawb.workbench.plotting.system.swtxy.selection;
 
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.dawb.common.ui.plot.region.RegionBounds;
+import org.dawb.workbench.plotting.system.swtxy.IMobileFigure;
 import org.dawb.workbench.plotting.system.swtxy.translate.FigureTranslator;
 import org.dawb.workbench.plotting.system.swtxy.util.Draw2DUtils;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
+import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
@@ -28,12 +30,6 @@ public class PointSelection extends AbstractSelectionRegion {
 	@Override
 	public RegionType getRegionType() {
 		return RegionType.POINT;
-	}
-	
-	@Override
-	public void setBounds(Rectangle bounds) {
-		super.setBounds(bounds);
-		
 	}
 
 	@Override
@@ -60,23 +56,31 @@ public class PointSelection extends AbstractSelectionRegion {
 		mover = new FigureTranslator(getXyGraph(), point);	
 		mover.addTranslationListener(createRegionNotifier());
 		setMobile(isMobile());
+		point.setShowPosition(false);
+		setRegionObjects(point);
 	}
 	
 	@Override
 	public void setMobile(final boolean mobile) {
-		super.setMobile(mobile);
+		getBean().setMobile(mobile);
 		if (mover!=null && point!=null) {
 			mover.setActive(mobile);
 			if (mobile) point.setCursor(Draw2DUtils.getRoiControlPointCursor()) ;
 			else 	    point.setCursor(null) ; 
 		}
 	}
+	
+	@Override
+	public void setVisible(boolean visible) {
+		if (point!=null) point.setVisible(visible);
+		getBean().setVisible(visible);
+	}
 
 	@Override
 	public void setLocalBounds(PointList clicks, Rectangle parentBounds) {
 		if (clicks.size()<1) return;
 		final Point last = clicks.getLastPoint();
-		point.setLocation(last);
+		point.setSelectionPoint(last);
 		updateRegionBounds();
 	}
 
@@ -90,8 +94,7 @@ public class PointSelection extends AbstractSelectionRegion {
 
 	@Override
 	protected String getCursorPath() {
-		return null;
-		//return "icons/Cursor-point.png";
+		return "icons/Cursor-point.png";
 	}
 
 

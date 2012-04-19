@@ -34,6 +34,7 @@ import org.dawb.common.ui.plot.annotation.IAnnotation;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
+import org.dawb.common.ui.plot.region.IRegionProvider;
 import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
@@ -48,12 +49,17 @@ import org.dawb.workbench.plotting.system.swtxy.RegionArea;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionToolbar;
 import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
+import org.dawb.workbench.plotting.system.swtxy.selection.RegionFillFigure;
+import org.dawb.workbench.plotting.system.swtxy.selection.SelectionRegionFactory;
 import org.dawb.workbench.plotting.util.ColorUtility;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.draw2d.FigureCanvas;
+import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.LightweightSystem;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IContributionItem;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
@@ -67,9 +73,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchPart;
 import org.slf4j.Logger;
@@ -134,12 +138,14 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		return null;
 	}
 		
+	private LightweightSystem lws;
+	
 	private void createUI() {
 		
 		if (xyCanvas!=null) return;		
 		
 		this.xyCanvas = new FigureCanvas(parent, SWT.DOUBLE_BUFFERED|SWT.NO_REDRAW_RESIZE|SWT.NO_BACKGROUND);
-		final LightweightSystem lws = new LightweightSystem(xyCanvas);
+		lws = new LightweightSystem(xyCanvas);
 		
 		// Stops a mouse wheel move corrupting the plotting area, but it wobbles a bit.
 		xyCanvas.addMouseWheelListener(getMouseWheelListener());
@@ -169,7 +175,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 			lightWeightActionBarMan.createPalleteActions();
 			lightWeightActionBarMan.createOriginActions();
 		}
-		lightWeightActionBarMan.createAdditionalActions(rightClick);
+		lightWeightActionBarMan.createAdditionalActions(null);
 		
 		lws.setContents(xyGraph);
 		xyGraph.primaryXAxis.setShowMajorGrid(true);
@@ -180,10 +186,12 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		
 		if (bars!=null) bars.updateActionBars();
 		if (bars!=null) bars.getToolBarManager().update(true);
-                 
-        final Menu rightClickMenu = rightClick.createContextMenu(xyCanvas);
-        xyCanvas.setMenu(rightClickMenu);
- 
+           
+		final MenuManager popupMenu = new MenuManager();
+		popupMenu.setRemoveAllWhenShown(true); // Remake menu each time
+        xyCanvas.setMenu(popupMenu.createContextMenu(xyCanvas));
+        popupMenu.addMenuListener(getIMenuListener(rightClick));
+        
         if (defaultPlotType!=null) {
 		    this.lightWeightActionBarMan.switchActions(defaultPlotType);
         }
@@ -191,7 +199,33 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
         parent.layout();
 
 	}
-	
+
+	private IMenuListener popupListener;
+	private IMenuListener getIMenuListener(final MenuManager defaultMenuItems) {
+		if (popupListener == null) {
+			popupListener = new IMenuListener() {			
+				@Override
+				public void menuAboutToShow(IMenuManager manager) {
+					Point   pnt       = Display.getDefault().getCursorLocation();
+					Point   par       = xyCanvas.toDisplay(new Point(0,0));
+					final int xOffset = par.x+xyGraph.getLocation().x;
+					final int yOffset = par.y+xyGraph.getLocation().y;
+					
+					final IFigure fig = xyGraph.findFigureAt(pnt.x-xOffset, pnt.y-yOffset);
+					if (fig!=null && fig instanceof IRegionProvider) {
+						final IRegion region = ((IRegionProvider)fig).getRegion();
+						SelectionRegionFactory.fillActions(manager, region, xyGraph);
+					}
+					for (IContributionItem item : defaultMenuItems.getItems()) {
+						manager.add(item);
+					}
+					manager.update();
+				}
+			};
+		}
+		return popupListener;
+	}
+
 	private MouseWheelListener mouseWheelListener;
 	private MouseWheelListener getMouseWheelListener() {
 		if (mouseWheelListener == null) mouseWheelListener = new MouseWheelListener() {
