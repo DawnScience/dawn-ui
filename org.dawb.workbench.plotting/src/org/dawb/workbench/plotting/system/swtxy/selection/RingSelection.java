@@ -76,7 +76,7 @@ class RingSelection extends AbstractSelectionRegion {
      	this.innerControl = createSelectionHandle();	
      	this.outerControl = createSelectionHandle();
   	
-		this.connection = new RegionFillFigure() {
+		this.connection = new RegionFillFigure(this) {
 			@Override
 			public void paintFigure(Graphics gc) {
 				super.paintFigure(gc);

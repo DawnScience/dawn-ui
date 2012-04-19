@@ -2,6 +2,8 @@ package org.dawb.workbench.plotting.system.swtxy.selection;
 
 import java.util.Iterator;
 
+import org.dawb.common.ui.plot.region.IRegion;
+import org.dawb.common.ui.plot.region.IRegionProvider;
 import org.dawb.workbench.plotting.system.swtxy.translate.FigureTranslator;
 import org.dawb.workbench.plotting.system.swtxy.util.Draw2DUtils;
 import org.eclipse.draw2d.Figure;
@@ -11,10 +13,19 @@ import org.eclipse.draw2d.MouseListener;
  * You do not have to use this class for the figure which fills the region and
  * is not a control point, but it can be handy if you do.
  * 
+ * It also has a right click menu which will appear when the user presses right click.
+ * This moves the region up or down in order and 
+ * 
  * @author fcp94556
  *
  */
-public class RegionFillFigure extends Figure {
+public class RegionFillFigure extends Figure implements IRegionProvider {
+	
+	private IRegion region;
+
+	public RegionFillFigure(AbstractSelectionRegion region) {
+		this.region = region;
+	}
 
 	public void setMobile(final boolean mobile) {
 		
@@ -39,5 +50,13 @@ public class RegionFillFigure extends Figure {
 			}
 		}
 		return null;
+	}
+
+	public IRegion getRegion() {
+		return region;
+	}
+
+	public void setRegion(IRegion region) {
+		this.region = region;
 	}
 }

@@ -53,7 +53,7 @@ class BoxSelection extends AbstractSelectionRegion {
 		this.p3  = createSelectionRectangle(getRegionColor(), SIDE, 100, 200);
 		this.p4  = createSelectionRectangle(getRegionColor(), SIDE, 200, 200);
 				
-		this.connection = new RegionFillFigure() {
+		this.connection = new RegionFillFigure(this) {
 			@Override
 			public void paintFigure(Graphics gc) {
 				super.paintFigure(gc);

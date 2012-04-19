@@ -4,7 +4,15 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import org.csstudio.swt.xygraph.figures.Axis;
+import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
+import org.dawb.workbench.plotting.Activator;
+import org.dawb.workbench.plotting.system.swtxy.XYRegionConfigDialog;
+import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IContributionManager;
+import org.eclipse.jface.action.Separator;
+import org.eclipse.swt.widgets.Display;
 
 /**
  * Class giving access to selection regions.
@@ -75,6 +83,47 @@ public class SelectionRegionFactory {
 	
 	public static boolean isSupportedType(RegionType type) {
 		return SUPPORTED_REGIONS.contains(type);
+	}
+
+	public static IContributionManager fillActions(final IContributionManager    manager, 
+			                                       final IRegion                 region,
+			                                       final XYRegionGraph           xyGraph) {
+		
+		manager.add(new Separator("org.dawb.workbench.plotting.system.region.start"));
+
+		final Action sendToBack = new Action("Send '"+region.getName()+"' to back", Activator.getImageDescriptor("icons/RegionToBack.png")) {
+			public void run() {
+				System.out.println("To back!");
+			}
+		};
+		manager.add(sendToBack);
+		
+		final Action bringToFront = new Action("Bring '"+region.getName()+"' to front", Activator.getImageDescriptor("icons/RegionToFront.png")) {
+			public void run() {
+				System.out.println("To front!");
+			}
+		};
+		manager.add(bringToFront);
+		
+		final Action delete = new Action("Delete '"+region.getName()+"'", Activator.getImageDescriptor("icons/RegionDelete.png")) {
+			public void run() {
+				xyGraph.removeRegion((AbstractSelectionRegion)region);
+			}
+		};
+		if (region instanceof AbstractSelectionRegion) manager.add(delete);
+
+		final Action configure = new Action("Configure '"+region.getName()+"'", Activator.getImageDescriptor("icons/RegionProperties.png")) {
+			public void run() {
+				final XYRegionConfigDialog dialog = new XYRegionConfigDialog(Display.getCurrent().getActiveShell(), xyGraph);
+				dialog.setSelectedRegion(region);
+				dialog.open();
+			}
+		};
+		manager.add(configure);
+		
+		manager.add(new Separator("org.dawb.workbench.plotting.system.region.end"));
+		
+		return manager;
 	}
 
 }

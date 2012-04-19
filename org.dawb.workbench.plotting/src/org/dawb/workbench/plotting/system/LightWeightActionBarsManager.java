@@ -245,10 +245,10 @@ class LightWeightActionBarsManager extends PlottingActionBarManager {
 		if (bars!=null) oneDimensionalActions.add(new ActionContainer(rescaleAction, bars.getToolBarManager()));
 
         if (bars!=null) bars.getToolBarManager().add(new Separator(rescaleAction.getId()+".group"));
-		rightClick.add(new Separator(rescaleAction.getId()+".group"));
+		if (rightClick!=null) rightClick.add(new Separator(rescaleAction.getId()+".group"));
 
 		if (bars!=null) bars.getToolBarManager().insertAfter(rescaleAction.getId()+".group", rescaleAction);
-		rightClick.insertAfter(rescaleAction.getId()+".group", rescaleAction);
+		if (rightClick!=null)rightClick.insertAfter(rescaleAction.getId()+".group", rescaleAction);
 
 		
 		if (datasetChoosingRequired) {
@@ -299,11 +299,13 @@ class LightWeightActionBarsManager extends PlottingActionBarManager {
 		        bars.getToolBarManager().add(new Separator());
 			}
 			
-			rightClick.add(new Separator(plotIndex.getId()+".group"));
-			rightClick.add(new Separator(plotX.getId()+".group"));
-			rightClick.add(plotIndex);
-			rightClick.add(plotX);
-			rightClick.add(new Separator());
+			if (rightClick!=null){
+				rightClick.add(new Separator(plotIndex.getId()+".group"));
+				rightClick.add(new Separator(plotX.getId()+".group"));
+				rightClick.add(plotIndex);
+				rightClick.add(plotX);
+				rightClick.add(new Separator());
+			}
 		}
 		
 				

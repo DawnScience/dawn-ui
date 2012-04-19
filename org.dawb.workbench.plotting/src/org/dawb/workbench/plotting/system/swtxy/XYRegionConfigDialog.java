@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.swt.xygraph.toolbar.XYGraphConfigDialog;
+import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.workbench.plotting.system.dialog.RegionComposite;
 import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
 import org.eclipse.swt.SWT;
@@ -86,7 +87,15 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
         			stackLayout.topControl = regionList.get(index);
         			regionConfigComposite.layout(true, true);
         		}
-        	}); 	       
+        	}); 	
+ 	        
+ 	       if (selectedRegion!=null) {
+ 	    	   tabFolder.setSelection(regionConfigTab);
+ 	    	   int index = ((RegionArea)regionGraph.getPlotArea()).getRegions().indexOf(selectedRegion);
+ 	   	       regionCombo.select(index);
+ 	   	   	   stackLayout.topControl = regionList.get(index);
+   			   regionConfigComposite.layout(true, true);
+	       }
         }
         
 		return parent_composite;
@@ -100,4 +109,15 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
 		}
 		
 	}
+
+	private IRegion selectedRegion;
+
+	public IRegion getSelectedRegion() {
+		return selectedRegion;
+	}
+
+	public void setSelectedRegion(IRegion selectedRegion) {
+		this.selectedRegion = selectedRegion;
+	}
+	
 }

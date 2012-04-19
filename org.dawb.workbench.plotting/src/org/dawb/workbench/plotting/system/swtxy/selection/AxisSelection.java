@@ -66,7 +66,7 @@ class AxisSelection extends AbstractSelectionRegion {
      	
      	if (regionType==RegionType.XAXIS || regionType==RegionType.YAXIS) {
     	    this.line2  = new LineFigure(false, parent.getBounds());
-    	    this.connection = new RegionFillFigure() {
+    	    this.connection = new RegionFillFigure(this) {
     	    	@Override
     	    	public void paintFigure(Graphics gc) {
     	    		super.paintFigure(gc);

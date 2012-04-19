@@ -130,7 +130,7 @@ public class XYRegionToolbar extends XYGraphToolbar {
 				});
 				
         	    final List models = zoomGroup.getElements();
-        	    if (models.contains(button.getModel())) {
+        	    if (models.contains(button.getModel())) { // Zoom!
         	    	if (zoomDropDown!=null && tool.find(zoomDropDown.getId())==null) {
         				tool.add(zoomDropDown);
         				men.add(zoomDropDown);
@@ -144,7 +144,6 @@ public class XYRegionToolbar extends XYGraphToolbar {
         	    	zoomG.add(action);
         	    } else {
     				tool.add(action);
-    				men.add(action);
         	    }
         	    
         	} else if (c instanceof ToolbarSeparator) {

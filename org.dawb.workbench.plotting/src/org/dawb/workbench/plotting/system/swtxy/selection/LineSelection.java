@@ -53,7 +53,7 @@ class LineSelection extends AbstractSelectionRegion {
 		mover = new FigureTranslator(getXyGraph(), endBox);	
 		mover.addTranslationListener(createRegionNotifier());
 				
-		this.connection = new RegionFillFigure() {
+		this.connection = new RegionFillFigure(this) {
 			PointList shape = new PointList(2);
 
 			@Override
