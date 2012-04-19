@@ -161,12 +161,14 @@ public class XYRegionToolbar extends XYGraphToolbar {
         regionDropDown.setId("org.dawb.workbench.ui.editors.plotting.swtxy.addRegions"); // Id used elsewhere...
  
 		
-		regionDropDown.add(createRegionAction(RegionType.LINE,   regionDropDown, "Add Line Selection",   Activator.getImageDescriptor("icons/ProfileLine.png")));
-		regionDropDown.add(createRegionAction(RegionType.BOX,    regionDropDown, "Add Box Selection",    Activator.getImageDescriptor("icons/ProfileBox.png")));
-		regionDropDown.add(createRegionAction(RegionType.RING,   regionDropDown, "Add Circle Selection", Activator.getImageDescriptor("icons/ProfileCircle.png")));
-		regionDropDown.add(createRegionAction(RegionType.XAXIS,  regionDropDown, "Add X-Axis Selection", Activator.getImageDescriptor("icons/Cursor-horiz.png")));
-		regionDropDown.add(createRegionAction(RegionType.YAXIS,  regionDropDown, "Add Y-Axis Selection",   Activator.getImageDescriptor("icons/Cursor-vert.png")));
-		regionDropDown.add(createRegionAction(RegionType.FREE_DRAW,  regionDropDown, "Free Drawn Selection", Activator.getImageDescriptor("icons/ProfileFree.png")));
+		regionDropDown.add(createRegionAction(RegionType.LINE,   regionDropDown, "Add line selection",   Activator.getImageDescriptor("icons/ProfileLine.png")));
+		regionDropDown.add(createRegionAction(RegionType.BOX,    regionDropDown, "Add box selection",    Activator.getImageDescriptor("icons/ProfileBox.png")));
+		regionDropDown.add(createRegionAction(RegionType.SECTOR, regionDropDown, "Add sector selection",    Activator.getImageDescriptor("icons/ProfileSector.png")));
+		regionDropDown.add(createRegionAction(RegionType.RING,   regionDropDown, "Add circle selection", Activator.getImageDescriptor("icons/ProfileCircle.png")));
+		regionDropDown.add(createRegionAction(RegionType.XAXIS,  regionDropDown, "Add X-axis selection", Activator.getImageDescriptor("icons/Cursor-horiz.png")));
+		regionDropDown.add(createRegionAction(RegionType.YAXIS,  regionDropDown, "Add Y-axis selection",   Activator.getImageDescriptor("icons/Cursor-vert.png")));
+		regionDropDown.add(createRegionAction(RegionType.FREE_DRAW,  regionDropDown, "Free drawn selection", Activator.getImageDescriptor("icons/ProfileFree.png")));
+		regionDropDown.add(createRegionAction(RegionType.POINT,  regionDropDown, "Single point selection",   Activator.getImageDescriptor("icons/ProfilePoint.png")));
 		
 		regionDropDown.setSelectedAction(regionDropDown.getAction(0));
 		

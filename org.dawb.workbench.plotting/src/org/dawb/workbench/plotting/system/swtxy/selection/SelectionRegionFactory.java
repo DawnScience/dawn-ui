@@ -51,6 +51,10 @@ public class SelectionRegionFactory {
 		} else if (regionType==RegionType.BOX) {
 			region = new BoxSelection(name, x, y);
 			
+		} else if (regionType==RegionType.SECTOR) {
+			// TODO FIXME 
+			//region = new SectorSelection(name, x, y);
+			
 		} else if (regionType==RegionType.RING) {
 			region = new RingSelection(name, x, y);
 

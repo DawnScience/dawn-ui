@@ -82,7 +82,8 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
  	        regionCombo.addSelectionListener(new SelectionAdapter(){
         		@Override
         		public void widgetSelected(SelectionEvent e) {
-        			stackLayout.topControl = regionList.get(regionCombo.getSelectionIndex());
+        			final int index = regionCombo.getSelectionIndex();
+        			stackLayout.topControl = regionList.get(index);
         			regionConfigComposite.layout(true, true);
         		}
         	}); 	       
