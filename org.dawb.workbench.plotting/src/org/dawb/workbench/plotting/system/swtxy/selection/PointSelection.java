@@ -3,6 +3,7 @@ package org.dawb.workbench.plotting.system.swtxy.selection;
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.dawb.common.ui.plot.region.RegionBounds;
 import org.dawb.workbench.plotting.system.swtxy.translate.FigureTranslator;
+import org.dawb.workbench.plotting.system.swtxy.util.Draw2DUtils;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.geometry.Point;
@@ -14,13 +15,13 @@ import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 
 public class PointSelection extends AbstractSelectionRegion {
 
-	private SelectionHandle point;
-	private static final int SIZE = 7;
+	private SelectionHandle  point;
+	private FigureTranslator mover;
 	
 	public PointSelection(String name, Axis xAxis, Axis yAxis) {
 		super(name, xAxis, yAxis);
 		setRegionColor(RegionType.POINT.getDefaultColor());
-		setLineWidth(1);
+		setLineWidth(7);
 		setAlpha(120);
 	}
 
@@ -45,24 +46,35 @@ public class PointSelection extends AbstractSelectionRegion {
 			                     PointList clicks,
 			                     Rectangle parentBounds) {
 		
+		if (clicks.size()<1) return;
 		final Point pnt    = clicks.getLastPoint();
-		final int   offset = SIZE/2; // int maths ok here
+		final int   offset = getLineWidth()/2; // int maths ok here
         g.setForegroundColor(getRegionColor());
-        g.fillRectangle(pnt.x-offset, pnt.y-offset, SIZE, SIZE);
+        g.fillRectangle(pnt.x-offset, pnt.y-offset, getLineWidth(), getLineWidth());
 	}
 
 	@Override
 	public void createContents(Figure parent) {
-		this.point = new RectangularHandle(getxAxis(), getyAxis(), getRegionColor(), parent, SIZE, 100d, 100d);
+		this.point = new RectangularHandle(getxAxis(), getyAxis(), getRegionColor(), parent, getLineWidth(), 100d, 100d);
 		parent.add(point);
-		FigureTranslator mover = new FigureTranslator(getXyGraph(), point);	
+		mover = new FigureTranslator(getXyGraph(), point);	
 		mover.addTranslationListener(createRegionNotifier());
-
-		setRegionObjects(point);
+		setMobile(isMobile());
+	}
+	
+	@Override
+	public void setMobile(final boolean mobile) {
+		super.setMobile(mobile);
+		if (mover!=null && point!=null) {
+			mover.setActive(mobile);
+			if (mobile) point.setCursor(Draw2DUtils.getRoiControlPointCursor()) ;
+			else 	    point.setCursor(null) ; 
+		}
 	}
 
 	@Override
 	public void setLocalBounds(PointList clicks, Rectangle parentBounds) {
+		if (clicks.size()<1) return;
 		final Point last = clicks.getLastPoint();
 		point.setLocation(last);
 		updateRegionBounds();
@@ -99,6 +111,9 @@ public class PointSelection extends AbstractSelectionRegion {
 	protected void updateRegionBounds(RegionBounds bounds) {
 		
 		if (!bounds.isPoints()) throw new RuntimeException("Expected points bounds for free draw!");
+		
+		if (point==null) return;
+		
         point.setRealValue(bounds.getPoints().iterator().next());
         
         updateConnectionBounds();
