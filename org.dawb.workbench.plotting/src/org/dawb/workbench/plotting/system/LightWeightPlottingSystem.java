@@ -823,7 +823,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 			xyGraph.dispose();
 			xyGraph = null;
 		}
-		if (xyCanvas!=null&&!xyCanvas.isDisposed()) {
+		if (xyCanvas!=null && !xyCanvas.isDisposed()) {
 			xyCanvas.removeMouseWheelListener(getMouseWheelListener());
 			xyCanvas.removeKeyListener(getKeyListener());
 			xyCanvas.dispose();

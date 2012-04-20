@@ -35,14 +35,13 @@ import org.eclipse.swt.widgets.Display;
  * 1. by creating contents in the createContents(...) method and adding them to the parent.
  * 2. by adding contents to this figure.
  * 
- * If doing method 2. remember to add this figure to the parent. If doing this the children can be drawn in the local coordinates for the figure.
- * However note in that case when firing selection events in the axis coordinates parent figure location
- * will also need to be used. If using 1. the contents of the figure are directly added to the graph figure
- * and therefore their location can be used directly also there are no bounds of this figure to deal with.
- * 
+ * If doing method 2. remember to add this figure to the parent. If doing this the children can be
+ * drawn in the local coordinates for the figure. However note in that case when firing selection
+ * events in the axis coordinates parent figure location will also need to be used. If using 1.,
+ * the contents of the figure are directly added to the graph figure and therefore their location
+ * can be used directly also there are no bounds of this figure to deal with.
  */
 public abstract class AbstractSelectionRegion extends AbstractRegion implements IAxisListener {
-
 
 	private RegionBean bean;
     private ISelectionProvider selectionProvider;
@@ -63,10 +62,10 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	}
 
 	/**
-	 * Creates the contents of the selection ie the figure(s)
-	 * which make up the selection. You may add the children directly to the parent here.
-	 * Otherwise add children to this figure, set its bounds and add this figure to the
-	 * parent.
+	 * Creates the contents of the selection, i.e. the figure(s) which make up the selection. You
+	 * may add the children directly to the parent here. Otherwise add children to this figure, set
+	 * its bounds and add this figure to the parent. Note this is called after the user interaction
+	 * to create the parameters for figure(s).
 	 * 
 	 * @param parent
 	 */
@@ -118,6 +117,12 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	 * @return
 	 */
 	protected abstract String getCursorPath();
+
+	/**
+	 * A selection region can operate with any number of mouse button presses
+	 * @return maximum number of presses, use 0 for "unlimited" presses
+	 */
+	public abstract int getMaximumMousePresses();
 
 	public void sync(RegionBean bean) {
 		setName(bean.getName());
@@ -360,15 +365,4 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	public void setLineWidth(int lineWidth) {
 		this.lineWidth = lineWidth;
 	}
-	
-	/**
-	 * An abstract selection region can operate with a single mouse button press or multiple presses.
-	 * Override this method to change the default to false.
-	 * 
-	 * @return true if region uses multiple mouse presses 
-	 */
-	public boolean useMultipleMousePresses() {
-		return false;
-	}
-
 }
