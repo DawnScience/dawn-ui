@@ -80,7 +80,6 @@ public class InfoBoxTool extends AbstractToolPage implements IRegionBoundsListen
 
 	private final static Logger logger = LoggerFactory.getLogger(InfoBoxTool.class);
 	
-	protected IPlottingSystem        plotter;
 	private   ITraceListener         traceListener;
 	private   IRegion                xHair, yHair;
 	private   IAxis                  x1,x2;
@@ -91,31 +90,12 @@ public class InfoBoxTool extends AbstractToolPage implements IRegionBoundsListen
 	private TableViewer   viewer;
 	private RegionColorListener viewUpdateListener;
 	private Map<String,RegionBounds> dragBounds;
-	public double xValues [] = new double[1];	public double yValues [] = new double[1];
+	protected double xValues [] = new double[1];	protected double yValues [] = new double[1];
 
 		
 	public InfoBoxTool() {
+		super();
 		dragBounds = new HashMap<String,RegionBounds>(7);
-		
-		try {
-			
-			plotter = PlottingFactory.getPlottingSystem();
-			this.traceListener = new ITraceListener.Stub() {
-				@Override
-				public void tracesPlotted(TraceEvent evt) {
-					
-					if (!(evt.getSource() instanceof List<?>)) {
-						return;
-					}
-					
-					if (xUpdateJob!=null) xUpdateJob.scheduleIfNotSuspended();
-					if (yUpdateJob!=null) yUpdateJob.scheduleIfNotSuspended();
-				}
-			};
-						
-		} catch (Exception e) {
-			logger.error("Cannot get plotting system!", e);
-		}
 	}
 	
 	@Override
@@ -264,7 +244,6 @@ public class InfoBoxTool extends AbstractToolPage implements IRegionBoundsListen
 			yHair.setVisible(false);
 			yHair.removeRegionBoundsListener(this);
 		}
-		plotter.clear();
 
 		if (getPlottingSystem()!=null) getPlottingSystem().removeTraceListener(traceListener);
 	}
@@ -378,7 +357,6 @@ public class InfoBoxTool extends AbstractToolPage implements IRegionBoundsListen
 	}
 	
 	private void update(IRegion r, RegionBounds rb) {
-		logger.debug("update");
 				
 		if (r == xHair) {
 			xUpdateJob.stop();
@@ -448,38 +426,12 @@ public class InfoBoxTool extends AbstractToolPage implements IRegionBoundsListen
 
 			if (image==null) {
 				if (monitor.isCanceled()) return  false;
-				plotter.clear();
+				//plotter.clear();
 				return true;
 			}
 
 			if (monitor.isCanceled()) return  false;
 			
-            		                  
-			ILineTrace trace = (ILineTrace)plotter.getTrace(region.getName());
-			if (trace == null || snapshot) {
-				synchronized (plotter) {  // Only one job at a time can choose axis and create plot.
-					if (region.getName().startsWith("Y Profile")) {
-						plotter.setSelectedXAxis(x1);
-
-					} else {
-						plotter.setSelectedXAxis(x2);
-					}
-					if (monitor.isCanceled()) return  false;
-					logger.debug("adding here row to table");
-					trace = plotter.createLineTrace(region.getName());
-
-				    if (snapShotColor!=null) {
-				    	trace.setTraceColor(snapShotColor);
-				    } else {
-						if (region.getName().startsWith("Y Profile")) {
-							trace.setTraceColor(ColorConstants.blue);
-						} else {
-							trace.setTraceColor(ColorConstants.red);
-						}	
-				    }
-				}
-			}
-
 			final AbstractDataset data = image.getData();
 			AbstractDataset slice=null, sliceIndex=null;
 			if (monitor.isCanceled())return  false;
@@ -499,31 +451,6 @@ public class InfoBoxTool extends AbstractToolPage implements IRegionBoundsListen
 				if (monitor.isCanceled()) return  false;
 				sliceIndex = AbstractDataset.arange(slice.getSize(), AbstractDataset.INT);
 			}
-			slice.setName(trace.getName());
-			trace.setData(sliceIndex, slice);
-
-			final ILineTrace finalTrace = trace;
-
-
-			if (monitor.isCanceled()) return  false;
-			getControl().getDisplay().syncExec(new Runnable() {
-				public void run() {
-
-					if (monitor.isCanceled()) return;
-					if (plotter.getTrace(finalTrace.getName())==null) {							
-						plotter.addTrace(finalTrace);
-					}
-
-					if (monitor.isCanceled()) return;
-					plotter.autoscaleAxes();
-					plotter.repaint();
-					if (region.getName().startsWith("Y Profile")) {
-						x1.setRange(0, data.getShape()[0]);
-					} else {
-						x2.setRange(0, data.getShape()[1]);
-					}
-				}
-			});
 		}
 		return true;
 	}
@@ -672,20 +599,7 @@ public class InfoBoxTool extends AbstractToolPage implements IRegionBoundsListen
 		if (dragBounds!=null&&dragBounds.containsKey(region.getName())) return dragBounds.get(region.getName());
 		return region.getRegionBounds();
 	}
-	
-	public double getMax(IRegion region) {
-
-		final Collection<ITrace> traces = getPlottingSystem().getTraces();
-		if (traces!=null&&traces.size()==1&&traces.iterator().next() instanceof IImageTrace) {
-			final IImageTrace     trace        = (IImageTrace)traces.iterator().next();
-			final AbstractDataset intersection = trace.slice(getBounds(region));
-			return intersection.max().doubleValue();
-		} else {
-			return getBounds(region).getP2()[1];
-		}
-	}
-
-	
+		
 	private void updateRegion(RegionBoundsEvent evt) {
 		
 		if (viewer!=null) {

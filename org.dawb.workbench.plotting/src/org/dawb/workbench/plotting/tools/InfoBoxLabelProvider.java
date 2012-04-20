@@ -63,8 +63,6 @@ public class InfoBoxLabelProvider extends ColumnLabelProvider {
 			
 			if (element instanceof IRegion){
 				
-				IRegion region = (IRegion)element;
-				//logger.debug("got region of type: " + region.getRegionType() + " x= " + region.getRegionBounds().getX() + "   y= " + region.getRegionBounds().getY());
 				x = tool.xValues[0];
 				y = tool.yValues[0];
 	
