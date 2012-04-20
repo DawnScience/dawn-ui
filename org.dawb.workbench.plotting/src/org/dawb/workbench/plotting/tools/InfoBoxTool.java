@@ -80,7 +80,6 @@ public class InfoBoxTool extends AbstractToolPage implements IRegionBoundsListen
 
 	private final static Logger logger = LoggerFactory.getLogger(InfoBoxTool.class);
 	
-	private   ITraceListener         traceListener;
 	private   IRegion                xHair, yHair;
 	private   IAxis                  x1,x2;
 	private   RunningJob             xUpdateJob, yUpdateJob;
@@ -204,10 +203,6 @@ public class InfoBoxTool extends AbstractToolPage implements IRegionBoundsListen
 			yHair.setVisible(true);
 			yHair.addRegionBoundsListener(this);
 		}
-
-		if (getPlottingSystem()!=null) {
-			getPlottingSystem().addTraceListener(traceListener);
-		}
 		
 		// We stop the adding of other regions because this tool does
 		// not like it when other regions are added.
@@ -245,7 +240,6 @@ public class InfoBoxTool extends AbstractToolPage implements IRegionBoundsListen
 			yHair.removeRegionBoundsListener(this);
 		}
 
-		if (getPlottingSystem()!=null) getPlottingSystem().removeTraceListener(traceListener);
 	}
 	
 	public void dispose() {
@@ -613,9 +607,7 @@ public class InfoBoxTool extends AbstractToolPage implements IRegionBoundsListen
 			}
 			
 			RegionBounds rb = evt.getRegionBounds();
-			
-			//logger.debug("x= " + this.xValues[0] + "  y= "+ this.yValues[0]); 
-			
+						
 			dragBounds.put(region.getName(), rb);
 			viewer.refresh(region);
 		}
