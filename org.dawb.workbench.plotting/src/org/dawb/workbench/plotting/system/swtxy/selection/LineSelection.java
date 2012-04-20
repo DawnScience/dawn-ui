@@ -28,7 +28,6 @@ import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
  *
  */
 class LineSelection extends AbstractSelectionRegion {
-		
 
 	private static final int SIDE      = 8;
 	
@@ -124,13 +123,11 @@ class LineSelection extends AbstractSelectionRegion {
 			public void figureMoved(IFigure source) {				
 				connection.repaint();
  			}
-
 		};
 	}
 
 	@Override
 	protected void fireRoiSelection() {
-		
 		// For each trace, calculate the real world values of the selection
 		final double[] p1 = startBox.getRealValue();
 		final double[] p2 = endBox.getRealValue();
@@ -154,7 +151,6 @@ class LineSelection extends AbstractSelectionRegion {
 	
 	@Override
 	protected void updateRegionBounds(RegionBounds bounds) {
-		
 		if (startBox!=null)   startBox.setRealValue(bounds.getP1());
 		if (endBox!=null)     endBox.setRealValue(bounds.getP2());
 		updateConnectionBounds();
@@ -200,7 +196,7 @@ class LineSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	public boolean useMultipleMousePresses() {
-		return false;
+	public int getMaximumMousePresses() {
+		return 2;
 	}
 }

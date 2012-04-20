@@ -35,7 +35,6 @@ public class RegionBean implements Serializable {
 		setShowLabel(bean.isShowLabel());
 	}
 
-
 	public String getName() {
 		return name;
 	}
@@ -161,35 +160,27 @@ public class RegionBean implements Serializable {
 		return true;
 	}
 
-
 	public Axis getxAxis() {
 		return xAxis;
 	}
-
 
 	public void setxAxis(Axis xAxis) {
 		this.xAxis = xAxis;
 	}
 
-
 	public Axis getyAxis() {
 		return yAxis;
 	}
-
 
 	public void setyAxis(Axis yAxis) {
 		this.yAxis = yAxis;
 	}
 
-
 	public boolean isShowLabel() {
 		return showLabel;
 	}
 
-
 	public void setShowLabel(boolean showLabel) {
 		this.showLabel = showLabel;
 	}
-	
-
 }

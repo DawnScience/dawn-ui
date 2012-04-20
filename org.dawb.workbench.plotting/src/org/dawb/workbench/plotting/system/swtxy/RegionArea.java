@@ -25,6 +25,7 @@ import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.MouseEvent;
 import org.eclipse.draw2d.MouseListener;
 import org.eclipse.draw2d.MouseMotionListener;
+import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -169,7 +170,7 @@ public class RegionArea extends PlotArea {
 		    regionBeingAdded = region;
 		    
 		    // Mouse listener for region bounds
-		    regionListener = new RegionMouseListener();
+		    regionListener = new RegionMouseListener(regionBeingAdded.getMaximumMousePresses());
 		    addMouseListener(regionListener);
 		    addMouseMotionListener(regionListener);
 		}
@@ -311,19 +312,34 @@ public class RegionArea extends PlotArea {
 	}
 
 	class RegionMouseListener extends MouseMotionListener.Stub implements MouseListener {
-		private int drag = -1;
-		public RegionMouseListener() {
+		private int last = -1; // index of point that is being dragged around
+		private final int maxPresses; // region allows multiple mouse button presses
+		private boolean isDragging;
+
+		public RegionMouseListener(final int presses) {
+			maxPresses = presses;
 			regionPoints = new PointList(2);
 		}
 
 		@Override
 		public void mousePressed(MouseEvent me) {
-			if (me.button == 3) {
-				releaseMouse();
+			final Point loc = me.getLocation();
+			if (last < 0) {
+				regionPoints.addPoint(loc);
+				last++;
+				isDragging = maxPresses == 1;
 			} else {
-				regionPoints.addPoint(me.getLocation());
-				regionPoints.addPoint(me.getLocation());
-				drag = regionPoints.size() - 1;
+				if (maxPresses == 0) {
+					if (!isDragging || loc.getDistance(regionPoints.getPoint(last-1)) < 2) {
+						releaseMouse();
+					} else {
+						regionPoints.addPoint(loc);
+						last++;
+						isDragging = false;
+					}
+				} else {
+					releaseMouse();
+				}
 			}
 			me.consume();
 			repaint();
@@ -331,12 +347,16 @@ public class RegionArea extends PlotArea {
 
 		@Override
 		public void mouseReleased(MouseEvent me) {
-			if (regionBeingAdded.useMultipleMousePresses()) {
-			} else {
-				releaseMouse();
+			if (isDragging) {
+				if (maxPresses == 0) {
+					regionPoints.addPoint(me.getLocation());
+					last++;
+				} else {
+					releaseMouse();
+				}
+				me.consume();
+				repaint();
 			}
-			me.consume();
-			repaint();
 		}
 
 		@Override
@@ -345,21 +365,24 @@ public class RegionArea extends PlotArea {
 
 		@Override
 		public void mouseDragged(final MouseEvent me) {
-			if (regionBeingAdded.useMultipleMousePresses()) {
-			} else {
-				regionPoints.setPoint(me.getLocation(), drag);
-			}
-			me.consume();
-			repaint();
+			mouseMoved(me);
 		}
 
 		@Override
 		public void mouseMoved(final MouseEvent me) {
-			if (regionBeingAdded.useMultipleMousePresses() && drag >= 0) {
-				regionPoints.setPoint(me.getLocation(), drag);
-				me.consume();
-				repaint();
+			if (last < 0)
+				return;
+
+			final Point loc = me.getLocation();
+			if (isDragging) {
+				regionPoints.setPoint(loc, last);
+			} else {
+				regionPoints.addPoint(loc);
+				last++;
+				isDragging = true;
 			}
+			me.consume();
+			repaint();
 		}
 
 		@Override
@@ -385,7 +408,7 @@ public class RegionArea extends PlotArea {
 
 			fireRegionAdded(new RegionEvent(regionBeingAdded));
 
-			RegionArea.this.regionBeingAdded = null;
+			regionBeingAdded = null;
 			regionPoints = null;
 		}
 	}

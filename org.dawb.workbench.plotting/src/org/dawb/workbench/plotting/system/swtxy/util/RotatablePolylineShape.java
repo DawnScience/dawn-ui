@@ -10,6 +10,9 @@ import org.eclipse.draw2d.geometry.PointList;
 public class RotatablePolylineShape extends RotatablePolygonShape {
 	private int tolerance = 2;
 
+	public RotatablePolylineShape() {
+		super();
+	}
 
 	public RotatablePolylineShape(PointList list, double angle) {
 		super(list, angle);

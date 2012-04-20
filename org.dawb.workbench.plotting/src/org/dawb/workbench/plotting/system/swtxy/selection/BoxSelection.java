@@ -242,7 +242,7 @@ class BoxSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	public boolean useMultipleMousePresses() {
-		return false;
+	public int getMaximumMousePresses() {
+		return 2;
 	}
 }

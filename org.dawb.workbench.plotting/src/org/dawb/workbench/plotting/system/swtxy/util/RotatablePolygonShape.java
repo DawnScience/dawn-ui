@@ -23,6 +23,15 @@ public class RotatablePolygonShape extends AbstractPointListShape {
 	}
 
 	/**
+	 * Null constructor
+	 */
+	public RotatablePolygonShape() {
+		this(0);
+		npl.removeAllPoints();
+		setAngle(0);
+	}
+
+	/**
 	 * Generic constructor
 	 * @param list
 	 * @param angle in degrees
@@ -73,7 +82,7 @@ public class RotatablePolygonShape extends AbstractPointListShape {
 		super.setPoints(points);
 		recalcPoints(opl, npl);
 	}
-	
+
 	/**
 	 * Set angle of rotated polyline to given degrees clockwise
 	 * @param degrees

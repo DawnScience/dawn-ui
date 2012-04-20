@@ -2,12 +2,10 @@ package org.dawb.workbench.plotting.system.swtxy.selection;
 
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.dawb.common.ui.plot.region.RegionBounds;
-import org.dawb.workbench.plotting.system.swtxy.IMobileFigure;
 import org.dawb.workbench.plotting.system.swtxy.translate.FigureTranslator;
 import org.dawb.workbench.plotting.system.swtxy.util.Draw2DUtils;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
-import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
@@ -97,7 +95,6 @@ public class PointSelection extends AbstractSelectionRegion {
 		return "icons/Cursor-point.png";
 	}
 
-
 	@Override
 	protected RegionBounds createRegionBounds(boolean recordResult) {
 		
@@ -122,5 +119,8 @@ public class PointSelection extends AbstractSelectionRegion {
         updateConnectionBounds();
     }
 
-
+	@Override
+	public int getMaximumMousePresses() {
+		return 1;
+	}
 }

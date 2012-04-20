@@ -94,7 +94,7 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 	private RegionColorListener viewUpdateListener;
 	
 	/**
-	 * A map to store dragBounds which are not the offical bounds
+	 * A map to store dragBounds which are not the official bounds
 	 * of the selection until the user lets go.
 	 */
 	private Map<String,RegionBounds> dragBounds;
@@ -111,7 +111,7 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 		composite.setLayout(new FillLayout());
 
 		viewer = new TableViewer(composite, SWT.FULL_SELECTION | SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
-        createColumns(viewer);
+		createColumns(viewer);
 		viewer.getTable().setLinesVisible(true);
 		viewer.getTable().setHeaderVisible(true);
 		
@@ -235,48 +235,47 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 		
 		ColumnViewerToolTipSupport.enableFor(viewer,ToolTip.NO_RECREATE);
 
-        TableViewerColumn var   = new TableViewerColumn(viewer, SWT.LEFT, 0);
+		TableViewerColumn var = new TableViewerColumn(viewer, SWT.LEFT, 0);
 		var.getColumn().setText("Name");
 		var.getColumn().setWidth(120);
 		var.setLabelProvider(new MeasurementLabelProvider(this, 0));
-		
-        var   = new TableViewerColumn(viewer, SWT.CENTER, 1);
+
+		var = new TableViewerColumn(viewer, SWT.CENTER, 1);
 		var.getColumn().setText("Region Type");
 		var.getColumn().setWidth(100);
 		var.setLabelProvider(new MeasurementLabelProvider(this, 1));
-		
-        var   = new TableViewerColumn(viewer, SWT.LEFT, 2);
+
+		var = new TableViewerColumn(viewer, SWT.LEFT, 2);
 		var.getColumn().setText("dx");
 		var.getColumn().setWidth(80);
 		var.setLabelProvider(new MeasurementLabelProvider(this, 2));
 
-        var   = new TableViewerColumn(viewer, SWT.LEFT, 3);
+		var = new TableViewerColumn(viewer, SWT.LEFT, 3);
 		var.getColumn().setText("dy");
 		var.getColumn().setWidth(80);
 		var.setLabelProvider(new MeasurementLabelProvider(this, 3));
 
-        var   = new TableViewerColumn(viewer, SWT.LEFT, 4);
+		var = new TableViewerColumn(viewer, SWT.LEFT, 4);
 		var.getColumn().setText("length");
 		var.getColumn().setWidth(80);
 		var.setLabelProvider(new MeasurementLabelProvider(this, 4));
-		
-        var   = new TableViewerColumn(viewer, SWT.LEFT, 5);
+
+		var = new TableViewerColumn(viewer, SWT.LEFT, 5);
 		var.getColumn().setText("Max Intensity");
 		var.getColumn().setWidth(80);
 		var.setLabelProvider(new MeasurementLabelProvider(this, 5));
-		
-        var   = new TableViewerColumn(viewer, SWT.LEFT, 6);
+
+		var = new TableViewerColumn(viewer, SWT.LEFT, 6);
 		var.getColumn().setText("Inside radius");
 		var.getColumn().setWidth(80);
 		var.setLabelProvider(new MeasurementLabelProvider(this, 6));
 
-        var   = new TableViewerColumn(viewer, SWT.LEFT, 7);
+		var = new TableViewerColumn(viewer, SWT.LEFT, 7);
 		var.getColumn().setText("Outside radius");
 		var.getColumn().setWidth(80);
 		var.setLabelProvider(new MeasurementLabelProvider(this, 7));
 
-
-        var   = new TableViewerColumn(viewer, SWT.LEFT, 8);
+		var = new TableViewerColumn(viewer, SWT.LEFT, 8);
 		var.getColumn().setText("Coordinates");
 		var.getColumn().setWidth(500);
 		var.setLabelProvider(new MeasurementLabelProvider(this, 8));
@@ -296,8 +295,8 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 				if (numerOfPeaks<0) return new Integer[]{0};
 				
 				List<Integer> indices = new ArrayList<Integer>(numerOfPeaks);
-                for (int ipeak = 0; ipeak < numerOfPeaks; ipeak++) {
-                	indices.add(ipeak); // autoboxing
+				for (int ipeak = 0; ipeak < numerOfPeaks; ipeak++) {
+					indices.add(ipeak); // autoboxing
 				}
 				return indices.toArray(new Integer[indices.size()]);
 			}

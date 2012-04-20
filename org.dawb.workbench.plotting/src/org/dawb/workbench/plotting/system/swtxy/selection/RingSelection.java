@@ -99,12 +99,24 @@ class RingSelection extends AbstractSelectionRegion {
 				gc.drawOval(mid); 
 				RingSelection.this.drawLabel(gc, mid);
 			}
+
+			@Override
+			public boolean containsPoint(int x, int y) {
+				if (!super.containsPoint(x, y))
+					return false;
+
+				final Point    cen = center.getSelectionPoint();
+				final int outerRad = outerControl.getSelectionPoint().y-cen.y;
+				final int innerRad = innerControl.getSelectionPoint().y-cen.y;
+				double rad = cen.getDistance(Point.SINGLETON.setLocation(x, y)); 
+				return rad <= outerRad && rad > innerRad;
+			}
 		};
 		connection.setCursor(Draw2DUtils.getRoiMoveCursor());
 		connection.setBackgroundColor(getRegionColor());
 		connection.setBounds(new Rectangle(0,0,100,100));
 		connection.setOpaque(false);
-  		
+
 		parent.add(connection);
 		parent.add(center);
 		parent.add(innerControl);
@@ -117,11 +129,12 @@ class RingSelection extends AbstractSelectionRegion {
 		
 		setRegionObjects(connection, center, innerControl, outerControl);
 		sync(getBean());
-        updateRegionBounds();
-        if (regionBounds==null) createRegionBounds(true);
-        
-        outerControl.setForegroundColor(ColorConstants.blue);
-        innerControl.setForegroundColor(ColorConstants.red);
+		updateRegionBounds();
+		if (regionBounds == null)
+			createRegionBounds(true);
+
+		outerControl.setForegroundColor(ColorConstants.blue);
+		innerControl.setForegroundColor(ColorConstants.red);
 	}
 	
 	private RectangularHandle createSelectionHandle() {
@@ -159,7 +172,7 @@ class RingSelection extends AbstractSelectionRegion {
 
 	@Override
 	protected void fireRoiSelection() {
-		final double[] r1 = center.getRealValue();
+//		final double[] r1 = center.getRealValue();
 //FIXME TODO SectorROI I think...
 //		final RectangularROI roi = new RectangularROI(r1[0], r1[1], r2[0]-r1[0], r4[1]-r1[1], 0);
 //		if (getSelectionProvider()!=null) getSelectionProvider().setSelection(new StructuredSelection(roi));
@@ -257,7 +270,7 @@ class RingSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	public boolean useMultipleMousePresses() {
-		return false;
+	public int getMaximumMousePresses() {
+		return 2;
 	}
 }
