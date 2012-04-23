@@ -42,9 +42,13 @@ public class LightWeightDataProvider implements IDataProvider {
 	@Override
 	public ISample getSample(int index) {
 		if (x==null||y==null) return null;
-		final double xDat = x.getElementDoubleAbs(index);
-		final double yDat = y.getElementDoubleAbs(index);
-		return new Sample(xDat, yDat);
+		try {
+			final double xDat = x.getElementDoubleAbs(index);
+			final double yDat = y.getElementDoubleAbs(index);
+			return new Sample(xDat, yDat);
+		} catch (Throwable ne) {
+			return null;
+		}
 	}
 
 	@Override

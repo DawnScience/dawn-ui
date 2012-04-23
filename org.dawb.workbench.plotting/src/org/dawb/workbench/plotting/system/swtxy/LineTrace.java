@@ -182,6 +182,7 @@ public class LineTrace extends Trace {
     			for (int i=startIndex; i<=endIndex; i++)
     			{
     			    ISample dp = traceDataProvider.getSample(i);
+    			    if (dp==null) continue;
                     final boolean dpInXRange = xAxis.getRange().inRange(dp.getXValue());
     				// Mark 'NaN' samples on X axis
     				final boolean valueIsNaN = Double.isNaN(dp.getYValue());
