@@ -17,6 +17,8 @@ import org.dawb.common.services.IImageService.ImageServiceBean;
 import org.dawb.common.ui.image.PaletteFactory;
 import org.dawb.common.ui.plot.region.RegionBounds;
 import org.dawb.common.ui.plot.trace.IImageTrace;
+import org.dawb.common.ui.plot.trace.ITrace;
+import org.dawb.common.ui.plot.trace.ITraceContainer;
 import org.dawb.common.ui.plot.trace.PaletteEvent;
 import org.dawb.common.ui.plot.trace.PaletteListener;
 import org.dawb.workbench.plotting.Activator;
@@ -45,7 +47,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.function.DownsampleMode;
  * @author fcp94556
  *
  */
-public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
+public class ImageTrace extends Figure implements IImageTrace, IAxisListener, ITraceContainer {
 	
 	private static final Logger logger = LoggerFactory.getLogger(ImageTrace.class);
 
@@ -145,7 +147,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	private Image            scaledImage;
 	private ImageData        imageData;
 	private ImageServiceBean lastImageServiceBean;
-	private boolean          generatingImage = false;
+	private boolean          imageCreationAllowed = true;
 	/**
 	 * When this is called the SWT image is created
 	 * and saved in the swtImage field. The image is downsampled. If rescaleAllowed
@@ -159,7 +161,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	private boolean createScaledImage(ImageScaleType rescaleType, final IProgressMonitor monitor) {
 			
 		
-		if (generatingImage) return false;
+		if (!imageCreationAllowed) return false;
 
 		boolean requireImageGeneration = imageData==null || 
 				                         rescaleType==ImageScaleType.FORCE_REIMAGE || 
@@ -178,12 +180,12 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		final Rectangle     rbounds = graph.getRegionArea().getBounds();
 		if (rbounds.width<1 || rbounds.height<1) return false;
 
-		if (generatingImage) return false;
+		if (!imageCreationAllowed) return false;
 		if (monitor!=null && monitor.isCanceled()) return false;
 
 		if (requireImageGeneration) {
 			try {
-				generatingImage = true;
+				imageCreationAllowed = false;
 				AbstractDataset reducedFullImage = getDownsampled(image);
 
 				final IImageService service = (IImageService)PlatformUI.getWorkbench().getService(IImageService.class);
@@ -211,7 +213,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 			} catch (Exception e) {
 				logger.error("Cannot create image from data!", e);
 			} finally {
-				generatingImage = false;
+				imageCreationAllowed = true;
 			}
 			
 		}
@@ -334,15 +336,23 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
       
 		return set;
 	}
+	
+	@Override
+	public AbstractDataset getDownsampled() {
+		return getDownsampled(getImage());
+	}
 
 	/**
 	 * Returns the bin for downsampling, either 1,2,4 or 8 currently.
-	 * This gives a pixel count of 1,4,16 or 64.
+	 * This gives a pixel count of 1,4,16 or 64 for the bin. If 1 no
+	 * binning at all is done and no downsampling is being done, getDownsampled()
+	 * will return the AbstractDataset ok even if bin is one (no downsampling).
+	 * 
 	 * @param slice
 	 * @param bounds
 	 * @return
 	 */
-	private int getDownsampleBin() {
+	public int getDownsampleBin() {
 		
 		final XYRegionGraph graph      = (XYRegionGraph)getxAxis().getParent();
 		final Rectangle     realBounds = graph.getRegionArea().getBounds();
@@ -636,6 +646,25 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		}
        
 	}
+	
+	@Override
+	public void setAxes(List<AbstractDataset> axes, boolean performAuto) {
+		this.axes  = axes;
+		createAxisBounds();
+		
+		if (performAuto) {
+	 		try {
+				setAxisRedrawActive(false);
+				performAutoscale();
+			} finally {
+				setAxisRedrawActive(true);
+			}
+		} else {
+			createScaledImage(ImageScaleType.FORCE_REIMAGE, null);
+			repaint();
+		}
+	}
+
 
 	public Number getMin() {
 		return min;
@@ -708,6 +737,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	
 	@Override
 	public void setDownsampleType(DownsampleType type) {
+		if (this.binCache!=null) binCache.clear();
 		this.downsampleType = type;
 		createScaledImage(ImageScaleType.FORCE_REIMAGE, null);
 		repaint();
@@ -821,5 +851,23 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.HISTO_PREF, type.getLabel());
 		createScaledImage(ImageScaleType.REHISTOGRAM, null);
 		repaint();
+	}
+
+	@Override
+	public ITrace getTrace() {
+		return this;
+	}
+
+	@Override
+	public void setTrace(ITrace trace) {
+		// Does nothing, you cannot change the trace, this is the trace.
+	}
+	
+	public void setImageUpdateActive(boolean active) {
+		this.imageCreationAllowed = active;
+		if (active) {
+			createScaledImage(ImageScaleType.FORCE_REIMAGE, null);
+			repaint();
+		}
 	}
 }

@@ -34,11 +34,12 @@ import org.dawb.common.ui.plot.annotation.IAnnotation;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
-import org.dawb.common.ui.plot.region.IRegionProvider;
+import org.dawb.common.ui.plot.region.IRegionContainer;
 import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
+import org.dawb.common.ui.plot.trace.ITraceContainer;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.gda.extensions.util.DatasetTitleUtils;
@@ -212,9 +213,15 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 					final int yOffset = par.y+xyGraph.getLocation().y;
 					
 					final IFigure fig = xyGraph.findFigureAt(pnt.x-xOffset, pnt.y-yOffset);
-					if (fig!=null && fig instanceof IRegionProvider) {
-						final IRegion region = ((IRegionProvider)fig).getRegion();
-						SelectionRegionFactory.fillActions(manager, region, xyGraph);
+					if (fig!=null) {
+					    if (fig instanceof IRegionContainer) {
+							final IRegion region = ((IRegionContainer)fig).getRegion();
+							SelectionRegionFactory.fillActions(manager, region, xyGraph);
+					    }
+					    if (fig instanceof ITraceContainer) {
+							final ITrace trace = ((ITraceContainer)fig).getTrace();
+							lightWeightActionBarMan.fillTraceActions(manager, trace, xyGraph);
+					    }
 					}
 					for (IContributionItem item : defaultMenuItems.getItems()) {
 						manager.add(item);
@@ -540,7 +547,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 					                      yAxis,
 									      traceDataProvider);	
 			
-			TraceWrapper wrapper = new TraceWrapper(this, trace);
+			LineTraceImpl wrapper = new LineTraceImpl(this, trace);
 			traces.add(wrapper);
 			
 			if (y.getName()!=null && !"".equals(y.getName())) {
@@ -588,7 +595,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 
 		LightWeightDataProvider traceDataProvider = new LightWeightDataProvider();
 		final LineTrace   trace    = new LineTrace(traceName, xAxis, yAxis, traceDataProvider);
-		final TraceWrapper wrapper = new TraceWrapper(this, trace);
+		final LineTraceImpl wrapper = new LineTraceImpl(this, trace);
 		fireTraceCreated(new TraceEvent(wrapper));
 		return wrapper;
 	}
@@ -611,7 +618,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		} else {
 			this.plottingMode = PlotType.PT1D;
 			this.lightWeightActionBarMan.switchActions(plottingMode);
-			xyGraph.addTrace(((TraceWrapper)trace).getTrace());
+			xyGraph.addTrace(((LineTraceImpl)trace).getTrace());
 			xyCanvas.redraw();
 			fireTraceAdded(new TraceEvent(trace));
 		}
@@ -623,7 +630,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	 */
 	public void removeTrace(ITrace trace) {
 		if (traceMap!=null) traceMap.remove(trace.getName());
-		xyGraph.removeTrace(((TraceWrapper)trace).getTrace());
+		xyGraph.removeTrace(((LineTraceImpl)trace).getTrace());
 		xyCanvas.redraw();
 		fireTraceRemoved(new TraceEvent(trace));
 	}
@@ -649,7 +656,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		final ITrace wrapper = traceMap.get(name);
 		if (wrapper==null) return;
 		
-		final Trace trace = ((TraceWrapper)wrapper).getTrace();
+		final Trace trace = ((LineTraceImpl)wrapper).getTrace();
 		
 		LightWeightDataProvider prov = (LightWeightDataProvider)trace.getDataProvider();
 		if (prov==null) return;
@@ -667,7 +674,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		final ITrace wrapper = traceMap.get(name);
 		if (wrapper==null) return null;
 		
-		final Trace trace = ((TraceWrapper)wrapper).getTrace();
+		final Trace trace = ((LineTraceImpl)wrapper).getTrace();
 		if (trace==null) return null;
 		
 		return getData(name, trace, true);

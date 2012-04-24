@@ -3,7 +3,7 @@ package org.dawb.workbench.plotting.system.swtxy.selection;
 import java.util.Iterator;
 
 import org.dawb.common.ui.plot.region.IRegion;
-import org.dawb.common.ui.plot.region.IRegionProvider;
+import org.dawb.common.ui.plot.region.IRegionContainer;
 import org.dawb.workbench.plotting.system.swtxy.translate.FigureTranslator;
 import org.dawb.workbench.plotting.system.swtxy.util.Draw2DUtils;
 import org.eclipse.draw2d.Figure;
@@ -19,7 +19,7 @@ import org.eclipse.draw2d.MouseListener;
  * @author fcp94556
  *
  */
-public class RegionFillFigure extends Figure implements IRegionProvider {
+public class RegionFillFigure extends Figure implements IRegionContainer {
 	
 	private IRegion region;
 

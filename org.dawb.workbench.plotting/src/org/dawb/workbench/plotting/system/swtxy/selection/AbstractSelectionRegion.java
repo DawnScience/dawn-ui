@@ -365,4 +365,34 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	public void setLineWidth(int lineWidth) {
 		this.lineWidth = lineWidth;
 	}
+	
+	@Override
+	public void toBack() {
+		// TODO Requires a fix to avoid sending behind images and other non-region figures.
+		if (regionObjects!=null) for (IFigure ob : regionObjects) {
+			final IFigure par = ob.getParent();
+			if (par!=null) {
+				par.remove(ob);
+				par.add(ob, 0);
+			}
+		}		
+	}
+
+	
+	@Override
+	public void toFront() {
+		// TODO Requires a fix to avoid images and other non-region figures.
+		if (regionObjects!=null) for (IFigure ob : regionObjects) {
+			final IFigure par = ob.getParent();
+			if (par!=null) {
+				par.remove(ob);
+				final int end = par.getChildren()!=null 
+						      ? par.getChildren().size()
+						      : 0;
+				par.add(ob, end);
+			}
+		}		
+		
+	}
+
 }
