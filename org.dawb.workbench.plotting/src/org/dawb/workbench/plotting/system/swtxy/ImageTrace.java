@@ -222,7 +222,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		
 		try {
 			
-			if (imageData.width==bounds.width && imageData.height==bounds.height) { 
+			if (imageData!=null && imageData.width==bounds.width && imageData.height==bounds.height) { 
 				// No slice, faster
 				if (monitor!=null && monitor.isCanceled()) return false;
 				this.scaledImage  = new Image(Display.getDefault(), imageData);
