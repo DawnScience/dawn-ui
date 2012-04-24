@@ -170,6 +170,8 @@ public class HistogramToolPage extends AbstractToolPage {
 			@Override
 			public void tracesPlotted(TraceEvent evt) {
 
+				logger.trace("tracelistener firing");
+				
 				if (!(evt.getSource() instanceof List<?>)) {
 					return;
 				}
@@ -191,13 +193,13 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			@Override
 			public void minChanged(PaletteEvent event) {
-				// TODO Auto-generated method stub
+				logger.trace("paletteListener minChanged firing");
 				
 			}
 
 			@Override
 			public void maxChanged(PaletteEvent event) {
-				// TODO Auto-generated method stub
+				logger.trace("paletteListener maxChanged firing");
 				
 			}
 			
@@ -297,6 +299,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			@Override
 			public IStatus runInUIThread(IProgressMonitor mon) {
+				logger.trace("imagerepaintJob running");
 				// update the colourscale
 				image.setMax(histoMax);
 				if (mon.isCanceled()) return Status.CANCEL_STATUS;
@@ -690,6 +693,8 @@ public class HistogramToolPage extends AbstractToolPage {
 		RGBX.setName("Axis");
 		double scale = ((histogramY.max().doubleValue())/256.0);
 		if(scale <= 0) scale = 1.0/256.0;
+		
+		//palleteData.colors = new RGB[256];
 		for (int i = 0; i < paletteData.colors.length; i++) {
 			R.set(paletteData.colors[i].red*scale, i);
 			G.set(paletteData.colors[i].green*scale, i);
@@ -772,13 +777,10 @@ public class HistogramToolPage extends AbstractToolPage {
 			blue = invert(blue);
 		}
 		
-		if (palleteData.colors.length != 256)
-			palleteData.colors = new RGB[256];
+		palleteData.colors = new RGB[256];
 
 		for (int i = 0; i < 256; i++) {
-			palleteData.colors[i].red = red[i];
-			palleteData.colors[i].green = green[i];
-			palleteData.colors[i].blue = blue[i];
+			palleteData.colors[i] = new RGB(red[i], green[i], blue[i]);
 		}
 	}
 	
