@@ -126,7 +126,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 
 	public PaletteData getPaletteData() {
-		return paletteData;
+		return paletteData!=null ? new PaletteData(paletteData.getRGBs()) : null;
 	}
 
 	public void setPaletteData(PaletteData paletteData) {
@@ -717,7 +717,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	
 	private void firePaletteDataListeners(PaletteData paletteData) {
 		if (paletteListeners==null) return;
-		final PaletteEvent evt = new PaletteEvent(this, paletteData);
+		final PaletteEvent evt = new PaletteEvent(this, getPaletteData()); // Important do not let Mark get at it :)
 		for (PaletteListener pl : paletteListeners) pl.paletteChanged(evt);
 	}
 	private void fireMinDataListeners() {
