@@ -253,21 +253,9 @@ public class XYRegionToolbar extends XYGraphToolbar {
 		dialog.open();
 	}
 	
-	private PrintSettings settings;
 
 	@Override
 	public void addSnapshotButton() {
-		super.addSnapshotButton(); // TODO Remove old one later by not calling this
-		
-		Button printButton = new Button(Activator.getImageDescriptor("icons/printer.png").createImage());
-		printButton.setToolTip(new Label("Print the plotting"));
-		addButton(printButton);
-		printButton.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent event) {
-				if (settings==null) settings = new PrintSettings();
-				PlotPrintPreviewDialog dialog = new PlotPrintPreviewDialog(xyGraph, Display.getCurrent(), settings);
-				settings=dialog.open();
-			}
-		});
+       // Moved from here to LightWeightActionBar
 	}
 }

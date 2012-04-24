@@ -21,6 +21,8 @@ import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
+import org.dawb.workbench.plotting.printing.PlotPrintPreviewDialog;
+import org.dawb.workbench.plotting.printing.PrintSettings;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionConfigDialog;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
 import org.eclipse.jface.action.Action;
@@ -459,6 +461,24 @@ class LightWeightActionBarsManager extends PlottingActionBarManager {
 		manager.add(configure);
 
 		manager.add(new Separator("org.dawb.workbench.plotting.system.trace.end"));
+	}
+
+
+	private PrintSettings settings;
+
+	public void createExportActions() {
+		// TODO Baha to add print actions similar to snapshot and existing print as well as png export etc.
+		
+		// TODO Maybe add action similar to XYGraphToolbar.addSnapshotButton() ?
+		
+		Action printButton = new Action("Print the plotting", Activator.getImageDescriptor("icons/printer.png")) {
+			public void run() {
+				if (settings==null) settings = new PrintSettings();
+				PlotPrintPreviewDialog dialog = new PlotPrintPreviewDialog(system.getGraph(), Display.getCurrent(), settings);
+				settings=dialog.open();
+			}
+		};
+		this.system.getActionBars().getToolBarManager().add(printButton);
 	}
 
 
