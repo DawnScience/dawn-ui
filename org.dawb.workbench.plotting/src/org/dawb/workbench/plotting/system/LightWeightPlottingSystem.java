@@ -10,6 +10,7 @@
 package org.dawb.workbench.plotting.system;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,8 +34,8 @@ import org.dawb.common.ui.plot.PlottingActionBarManager;
 import org.dawb.common.ui.plot.annotation.IAnnotation;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
-import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.IRegionContainer;
+import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
@@ -50,7 +51,6 @@ import org.dawb.workbench.plotting.system.swtxy.RegionArea;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionToolbar;
 import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
-import org.dawb.workbench.plotting.system.swtxy.selection.RegionFillFigure;
 import org.dawb.workbench.plotting.system.swtxy.selection.SelectionRegionFactory;
 import org.dawb.workbench.plotting.util.ColorUtility;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -393,6 +393,36 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	public void setDefaultPlotType(PlotType mode) {
 		this.defaultPlotType = mode;
 		createUI();
+	}
+	
+	@Override
+	public ITrace updatePlot2D(final AbstractDataset       data, 
+							   final List<AbstractDataset> axes,
+							   final IProgressMonitor      monitor) {
+		
+		final Collection<ITrace> traces = getTraces(IImageTrace.class);
+		if (traces!=null && traces.size()>0) {
+			final IImageTrace image = (IImageTrace)traces.iterator().next();
+			final int[]       shape = image.getData()!=null ? image.getData().getShape() : null;
+			if (shape!=null && Arrays.equals(shape, data.getShape())) {
+				if (getDisplay().getThread()==Thread.currentThread()) {
+					image.setData(data, image.getAxes(), false);
+				} else {
+					Display.getDefault().syncExec(new Runnable() {
+						public void run() {
+							// This will keep the previous zoom level if there was one
+							// and will be faster than createPlot2D(...) which autoscales.
+							image.setData(data, image.getAxes(), false);
+						}
+					});
+				}
+				return image;
+			} else {
+				return createPlot2D(data, null, monitor);
+			}
+		} else {
+		    return createPlot2D(data, null, monitor);
+		}
 	}
 
 	/**
