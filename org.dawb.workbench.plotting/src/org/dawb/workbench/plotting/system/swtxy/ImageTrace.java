@@ -784,7 +784,11 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		final int size = image.getSize();
 		for (int index = 0; index<size; ++index) {
 			
-			final float val = (float)image.getElementDoubleAbs(index);
+			final double dv = image.getElementDoubleAbs(index);
+			if (Double.isNaN(dv))      continue;
+			if (Double.isInfinite(dv)) continue;
+			
+			final float val = (float)dv;
 			sum += val;
 			if (val < min) min = val;
 			if (val > max) max = val;
@@ -813,20 +817,6 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		
 		return new float[]{retMin, retMax};
 
-	}
-	
-	private static float median(AbstractDataset image) {
-		
-		float[] a = (float[])image.cast(AbstractDataset.FLOAT32).getBuffer();
-		float[] b = new float[a.length];
-		System.arraycopy(a, 0, b, 0, b.length);
-		Arrays.sort(b);
-
-		if (a.length % 2 == 0) {
-			return (b[(b.length / 2) - 1] + b[b.length / 2]) / 2.0f;
-		} else {
-			return b[b.length / 2];
-		}
 	}
 
 	@Override

@@ -317,9 +317,6 @@ public class LineTraceImpl implements ILineTrace {
 			prov.removeDataProviderListener(trace);
 		}
 		
-		if (xData.containsInvalidNumbers()) throw new RuntimeException(xData.getName()+" contains infinities or nans!");
-		if (yData.containsInvalidNumbers()) throw new RuntimeException(yData.getName()+" contains infinities or nans!");
-		
 		prov.setData(xData,yData);
 		trace.setDataProvider(prov);
 		
