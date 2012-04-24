@@ -1,5 +1,7 @@
 package org.dawb.workbench.plotting.system.swtxy.selection;
 
+import java.util.List;
+
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.Grid;
 import org.csstudio.swt.xygraph.figures.IAxisListener;
@@ -172,6 +174,15 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 		this.regionObjects = objects;
 	}
 	
+	protected void setRegionObjects(IFigure first, List<IFigure> objects) {
+		regionObjects = new IFigure[objects.size() + 1];
+		int i = 0;
+		regionObjects[i++] = first;
+		for (IFigure f : objects) {
+			regionObjects[i++] = f;
+		}
+	}
+
 	public String getName() {
 		return bean.getName();
 	}

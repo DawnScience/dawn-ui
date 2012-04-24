@@ -66,6 +66,16 @@ public class XYRegionGraph extends XYGraph {
 		getRegionArea().setSelectionProvider(provider);
 	}
 
+	/**
+	 * Create region of interest
+	 * @param name
+	 * @param xAxis
+	 * @param yAxis
+	 * @param regionType
+	 * @param startingWithMouseEvent
+	 * @return region
+	 * @throws Exception
+	 */
 	public AbstractSelectionRegion createRegion(String name, Axis xAxis, Axis yAxis, RegionType regionType, boolean startingWithMouseEvent) throws Exception {
 		return getRegionArea().createRegion(name, xAxis, yAxis, regionType, startingWithMouseEvent);
 	}
