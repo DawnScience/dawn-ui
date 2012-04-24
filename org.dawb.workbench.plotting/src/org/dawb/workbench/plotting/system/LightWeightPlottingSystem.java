@@ -10,6 +10,7 @@
 package org.dawb.workbench.plotting.system;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,12 +34,13 @@ import org.dawb.common.ui.plot.PlottingActionBarManager;
 import org.dawb.common.ui.plot.annotation.IAnnotation;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
+import org.dawb.common.ui.plot.region.IRegionContainer;
 import org.dawb.common.ui.plot.region.IRegionListener;
-import org.dawb.common.ui.plot.region.IRegionProvider;
 import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
+import org.dawb.common.ui.plot.trace.ITraceContainer;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.gda.extensions.util.DatasetTitleUtils;
@@ -49,7 +51,6 @@ import org.dawb.workbench.plotting.system.swtxy.RegionArea;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionToolbar;
 import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
-import org.dawb.workbench.plotting.system.swtxy.selection.RegionFillFigure;
 import org.dawb.workbench.plotting.system.swtxy.selection.SelectionRegionFactory;
 import org.dawb.workbench.plotting.util.ColorUtility;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -212,9 +213,15 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 					final int yOffset = par.y+xyGraph.getLocation().y;
 					
 					final IFigure fig = xyGraph.findFigureAt(pnt.x-xOffset, pnt.y-yOffset);
-					if (fig!=null && fig instanceof IRegionProvider) {
-						final IRegion region = ((IRegionProvider)fig).getRegion();
-						SelectionRegionFactory.fillActions(manager, region, xyGraph);
+					if (fig!=null) {
+					    if (fig instanceof IRegionContainer) {
+							final IRegion region = ((IRegionContainer)fig).getRegion();
+							SelectionRegionFactory.fillActions(manager, region, xyGraph);
+					    }
+					    if (fig instanceof ITraceContainer) {
+							final ITrace trace = ((ITraceContainer)fig).getTrace();
+							lightWeightActionBarMan.fillTraceActions(manager, trace, xyGraph);
+					    }
 					}
 					for (IContributionItem item : defaultMenuItems.getItems()) {
 						manager.add(item);
@@ -387,6 +394,38 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		this.defaultPlotType = mode;
 		createUI();
 	}
+	
+	@Override
+	public ITrace updatePlot2D(final AbstractDataset       data, 
+							   final List<AbstractDataset> axes,
+							   final IProgressMonitor      monitor) {
+		
+		final Collection<ITrace> traces = getTraces(IImageTrace.class);
+		if (traces!=null && traces.size()>0) {
+			final IImageTrace image = (IImageTrace)traces.iterator().next();
+			final int[]       shape = image.getData()!=null ? image.getData().getShape() : null;
+			if (shape!=null && Arrays.equals(shape, data.getShape())) {
+				if (getDisplay().getThread()==Thread.currentThread()) {
+					if (data.getName()!=null) xyGraph.setTitle(data.getName());
+					image.setData(data, image.getAxes(), false);
+				} else {
+					Display.getDefault().syncExec(new Runnable() {
+						public void run() {
+							// This will keep the previous zoom level if there was one
+							// and will be faster than createPlot2D(...) which autoscales.
+							if (data.getName()!=null) xyGraph.setTitle(data.getName());
+							image.setData(data, image.getAxes(), false);
+						}
+					});
+				}
+				return image;
+			} else {
+				return createPlot2D(data, null, monitor);
+			}
+		} else {
+		    return createPlot2D(data, null, monitor);
+		}
+	}
 
 	/**
 	 * Must be called in UI thread. Creates and updates image.
@@ -499,11 +538,6 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		@SuppressWarnings("unchecked")
 		final List<AbstractDataset> ys = (List<AbstractDataset>)oa[1];
 		
-		if (x.containsInvalidNumbers()) throw new RuntimeException("The value of "+x.getName()+" is invalid. Cannot plot datasets with infinite values in it!");
-		for (AbstractDataset y : ys) {
-			if (y.containsInvalidNumbers()) throw new RuntimeException("The value of "+y.getName()+" is invalid. Cannot plot datasets with infinite values in it!");
-		}
-		
 		if (colorMap == null && getColorOption()!=ColorOption.NONE) {
 			if (getColorOption()==ColorOption.BY_NAME) {
 				colorMap = new HashMap<Object,Color>(ys.size());
@@ -540,7 +574,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 					                      yAxis,
 									      traceDataProvider);	
 			
-			TraceWrapper wrapper = new TraceWrapper(this, trace);
+			LineTraceImpl wrapper = new LineTraceImpl(this, trace);
 			traces.add(wrapper);
 			
 			if (y.getName()!=null && !"".equals(y.getName())) {
@@ -588,7 +622,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 
 		LightWeightDataProvider traceDataProvider = new LightWeightDataProvider();
 		final LineTrace   trace    = new LineTrace(traceName, xAxis, yAxis, traceDataProvider);
-		final TraceWrapper wrapper = new TraceWrapper(this, trace);
+		final LineTraceImpl wrapper = new LineTraceImpl(this, trace);
 		fireTraceCreated(new TraceEvent(wrapper));
 		return wrapper;
 	}
@@ -611,7 +645,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		} else {
 			this.plottingMode = PlotType.PT1D;
 			this.lightWeightActionBarMan.switchActions(plottingMode);
-			xyGraph.addTrace(((TraceWrapper)trace).getTrace());
+			xyGraph.addTrace(((LineTraceImpl)trace).getTrace());
 			xyCanvas.redraw();
 			fireTraceAdded(new TraceEvent(trace));
 		}
@@ -623,7 +657,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	 */
 	public void removeTrace(ITrace trace) {
 		if (traceMap!=null) traceMap.remove(trace.getName());
-		xyGraph.removeTrace(((TraceWrapper)trace).getTrace());
+		xyGraph.removeTrace(((LineTraceImpl)trace).getTrace());
 		xyCanvas.redraw();
 		fireTraceRemoved(new TraceEvent(trace));
 	}
@@ -649,7 +683,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		final ITrace wrapper = traceMap.get(name);
 		if (wrapper==null) return;
 		
-		final Trace trace = ((TraceWrapper)wrapper).getTrace();
+		final Trace trace = ((LineTraceImpl)wrapper).getTrace();
 		
 		LightWeightDataProvider prov = (LightWeightDataProvider)trace.getDataProvider();
 		if (prov==null) return;
@@ -667,7 +701,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		final ITrace wrapper = traceMap.get(name);
 		if (wrapper==null) return null;
 		
-		final Trace trace = ((TraceWrapper)wrapper).getTrace();
+		final Trace trace = ((LineTraceImpl)wrapper).getTrace();
 		if (trace==null) return null;
 		
 		return getData(name, trace, true);

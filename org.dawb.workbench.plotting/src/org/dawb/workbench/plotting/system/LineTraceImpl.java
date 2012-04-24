@@ -2,6 +2,7 @@ package org.dawb.workbench.plotting.system;
 
 import org.csstudio.swt.xygraph.figures.Trace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
+import org.dawb.common.ui.plot.trace.ITraceContainer;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.workbench.plotting.system.swtxy.LineTrace;
 import org.eclipse.swt.graphics.Color;
@@ -14,14 +15,17 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
  * @author fcp94556
  *
  */
-public class TraceWrapper implements ILineTrace {
+public class LineTraceImpl implements ILineTrace {
 
 	private LineTrace trace;
 	private LightWeightPlottingSystem sys;
 
-	TraceWrapper(LightWeightPlottingSystem sys, final LineTrace trace) {
+	LineTraceImpl(LightWeightPlottingSystem sys, final LineTrace trace) {
 		this.sys   = sys;
 		this.trace = trace;
+		if (trace instanceof ITraceContainer) {
+			((ITraceContainer)trace).setTrace(this);
+		}
 	}
 
 	public ILineTrace.TraceType getTraceType() {
@@ -298,7 +302,7 @@ public class TraceWrapper implements ILineTrace {
 		trace.setErrorBarCapWidth(errorBarCapWidth);
 	}
 
-	protected Trace getTrace() {
+	public Trace getTrace() {
 		return trace;
 	}
 
@@ -312,9 +316,6 @@ public class TraceWrapper implements ILineTrace {
 		if (prov!=null) {
 			prov.removeDataProviderListener(trace);
 		}
-		
-		if (xData.containsInvalidNumbers()) throw new RuntimeException(xData.getName()+" contains infinities or nans!");
-		if (yData.containsInvalidNumbers()) throw new RuntimeException(yData.getName()+" contains infinities or nans!");
 		
 		prov.setData(xData,yData);
 		trace.setDataProvider(prov);

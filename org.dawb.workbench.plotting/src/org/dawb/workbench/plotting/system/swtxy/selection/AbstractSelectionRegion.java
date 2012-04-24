@@ -1,12 +1,17 @@
 package org.dawb.workbench.plotting.system.swtxy.selection;
 
+import java.util.List;
+
 import org.csstudio.swt.xygraph.figures.Axis;
+import org.csstudio.swt.xygraph.figures.Grid;
 import org.csstudio.swt.xygraph.figures.IAxisListener;
+import org.csstudio.swt.xygraph.figures.Trace;
 import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.swt.xygraph.linearscale.Range;
 import org.dawb.common.ui.plot.region.AbstractRegion;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.system.swtxy.IMobileFigure;
+import org.dawb.workbench.plotting.system.swtxy.ImageTrace;
 import org.dawb.workbench.plotting.system.swtxy.RegionBean;
 import org.dawb.workbench.plotting.system.swtxy.translate.TranslationEvent;
 import org.dawb.workbench.plotting.system.swtxy.translate.TranslationListener;
@@ -32,8 +37,9 @@ import org.eclipse.swt.widgets.Display;
  * Links regions to the specifics of the XY Plotting system.
  * 
  * NOTE you may implement this class two ways:
- * 1. by creating contents in the createContents(...) method and adding them to the parent.
- * 2. by adding contents to this figure.
+ * WAY1. by creating contents in the createContents(...) method and adding them to the parent. 
+ *       This is the recommended and default method.
+ * WAY2. by adding contents to this figure.
  * 
  * If doing method 2. remember to add this figure to the parent. If doing this the children can be
  * drawn in the local coordinates for the figure. However note in that case when firing selection
@@ -168,6 +174,15 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 		this.regionObjects = objects;
 	}
 	
+	protected void setRegionObjects(IFigure first, List<IFigure> objects) {
+		regionObjects = new IFigure[objects.size() + 1];
+		int i = 0;
+		regionObjects[i++] = first;
+		for (IFigure f : objects) {
+			regionObjects[i++] = f;
+		}
+	}
+
 	public String getName() {
 		return bean.getName();
 	}
@@ -365,4 +380,59 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	public void setLineWidth(int lineWidth) {
 		this.lineWidth = lineWidth;
 	}
+	
+	/**
+	 * This will work for WAY1 only. If using WAY2 you will need to override.
+	 * See comment at top of this class.
+	 */
+	@Override
+	public void toBack() {
+		if (regionObjects!=null) for (IFigure ob : regionObjects) {
+			final IFigure par = ob.getParent();
+			if (par!=null) {
+				par.remove(ob);
+				final int index = getLowestPositionAboveTraces(par);
+				par.add(ob, index);
+			}
+		}		
+	}
+
+	/**
+	 * This will work for WAY1 only. If using WAY2 you will need to override.
+	 * @param par
+	 * @return
+	 */
+	protected int getLowestPositionAboveTraces(IFigure par) {
+		
+	    int index = 0;
+		for (Object ob : par.getChildren()) {
+			// Do not send regions below traces.
+			if (ob instanceof Trace || ob instanceof ImageTrace || ob instanceof Grid) {
+				index++;
+				continue;
+			}
+			break;
+		}
+		return index;
+	}
+
+	/**
+	 * This will work for WAY1 only. If using WAY2 you will need to override.
+	 * See comment at top of this class.
+	 */
+	@Override
+	public void toFront() {
+		if (regionObjects!=null) for (IFigure ob : regionObjects) {
+			final IFigure par = ob.getParent();
+			if (par!=null) {
+				par.remove(ob);
+				final int end = par.getChildren()!=null 
+						      ? par.getChildren().size()
+						      : 0;
+				par.add(ob, end);
+			}
+		}		
+		
+	}
+
 }

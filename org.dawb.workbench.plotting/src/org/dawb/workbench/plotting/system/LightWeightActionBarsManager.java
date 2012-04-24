@@ -4,23 +4,33 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.csstudio.swt.xygraph.figures.Annotation;
 import org.dawb.common.ui.image.PaletteFactory;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingActionBarManager;
+import org.dawb.common.ui.plot.annotation.AnnotationUtils;
 import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.IImageTrace.ImageOrigin;
+import org.dawb.common.ui.plot.trace.ILineTrace;
+import org.dawb.common.ui.plot.trace.ILineTrace.PointStyle;
+import org.dawb.common.ui.plot.trace.ILineTrace.TraceType;
+import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
+import org.dawb.workbench.plotting.system.swtxy.XYRegionConfigDialog;
+import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionManager;
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.PaletteData;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IActionBars;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +53,12 @@ class LightWeightActionBarsManager extends PlottingActionBarManager {
 		twoDimensionalActions = new ArrayList<ActionContainer>();
 	}
 
+	private PlotType lastPlotTypeUpdate = null;
+	
 	protected void switchActions(final PlotType type) {
+		
+		if (type == lastPlotTypeUpdate) return;
+		lastPlotTypeUpdate = type;
 		
 		final IActionBars bars = system.getActionBars();
     	if (bars==null) return;
@@ -369,6 +384,81 @@ class LightWeightActionBarsManager extends PlottingActionBarManager {
 		public String toString() {
 			return action.toString();
 		}
+	}
+
+    /**
+     * 
+     * Problems:
+     * 1. Line trace bounds extend over other line traces so the last line trace added, will
+     * always be the figure that the right click detects.
+     * 
+     * Useful things, visible, annotation, quick set to line or points, open configure page.
+     * 
+     * @param manager
+     * @param trace
+     * @param xyGraph
+     */
+	public void fillTraceActions(final IMenuManager manager, final ITrace trace, final XYRegionGraph xyGraph) {
+
+		manager.add(new Separator("org.dawb.workbench.plotting.system.trace.start"));
+
+		if (trace instanceof ILineTrace) { // Does actually work for images but may confuse people.
+			final Action visible = new Action("Hide '"+trace.getName()+"'", Activator.getImageDescriptor("icons/TraceVisible.png")) {
+				public void run() {
+					trace.setVisible(false);
+				}
+			};
+			manager.add(visible);
+		}
+		
+		final Action addAnnotation = new Action("Add annotation to '"+trace.getName()+"'", Activator.getImageDescriptor("icons/TraceAnnotation.png")) {
+			public void run() {
+				final String annotName = AnnotationUtils.getUniqueAnnotation(trace.getName()+" annotation ", system);
+				if (trace instanceof LineTraceImpl) {
+					final LineTraceImpl lt = (LineTraceImpl)trace;
+					xyGraph.addAnnotation(new Annotation(annotName, lt.getTrace()));
+				} else {
+					xyGraph.addAnnotation(new Annotation(annotName, xyGraph.primaryXAxis, xyGraph.primaryYAxis));
+				}
+			}
+		};
+		manager.add(addAnnotation);
+		
+		if (trace instanceof ILineTrace) {
+			final ILineTrace lt = (ILineTrace)trace;
+			if (lt.getTraceType()!=TraceType.POINT) { // Give them a quick change to points
+				final Action changeToPoints = new Action("Plot '"+trace.getName()+"' as scatter", Activator.getImageDescriptor("icons/TraceScatter.png")) {
+					public void run() {
+						lt.setTraceType(TraceType.POINT);
+						lt.setPointSize(8);
+						lt.setPointStyle(PointStyle.XCROSS);
+					}
+				};
+				manager.add(changeToPoints);
+			} else if (lt.getTraceType()!=TraceType.SOLID_LINE) {
+				final Action changeToLine = new Action("Plot '"+trace.getName()+"' as line", Activator.getImageDescriptor("icons/TraceLine.png")) {
+					public void run() {
+						lt.setTraceType(TraceType.SOLID_LINE);
+						lt.setLineWidth(1);
+						lt.setPointSize(1);
+						lt.setPointStyle(PointStyle.NONE);
+					}
+				};
+				manager.add(changeToLine);
+			}
+		}
+
+		final Action configure = new Action("Configure '"+trace.getName()+"'", Activator.getImageDescriptor("icons/TraceProperties.png")) {
+			public void run() {
+				final XYRegionConfigDialog dialog = new XYRegionConfigDialog(Display.getCurrent().getActiveShell(), xyGraph);
+				dialog.setPlottingSystem(system);
+				dialog.setSelectedTrace(trace);
+				dialog.open();
+			}
+		};
+		manager.add(configure);
+
+		manager.add(new Separator("org.dawb.workbench.plotting.system.trace.end"));
 	}
 
 

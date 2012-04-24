@@ -158,4 +158,8 @@ public abstract class SelectionHandle extends Figure implements IMobileFigure {
 		shape.setAlpha(alpha);
 	}
 
+	@Override
+	public boolean containsPoint(int x, int y) {
+		return shape.containsPoint(x, y);
+	}
 }

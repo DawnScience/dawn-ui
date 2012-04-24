@@ -156,7 +156,17 @@ public class RegionArea extends PlotArea {
 	}
 
     private RegionMouseListener regionListener;
-	
+
+	/**
+	 * Create region of interest
+	 * @param name
+	 * @param xAxis
+	 * @param yAxis
+	 * @param regionType
+	 * @param startingWithMouseEvent
+	 * @return region
+	 * @throws Exception
+	 */
 	public AbstractSelectionRegion createRegion(String name, Axis x, Axis y, RegionType regionType, boolean startingWithMouseEvent) throws Exception {
 
 		if (getRegionMap()!=null) {
@@ -174,7 +184,7 @@ public class RegionArea extends PlotArea {
 		    addMouseListener(regionListener);
 		    addMouseMotionListener(regionListener);
 		}
-		
+
 		fireRegionCreated(new RegionEvent(region));
         return region;
 	}
@@ -331,6 +341,7 @@ public class RegionArea extends PlotArea {
 			} else {
 				if (maxPresses == 0) {
 					if (!isDragging || loc.getDistance(regionPoints.getPoint(last-1)) < 2) {
+						regionPoints.removePoint(last);
 						releaseMouse();
 					} else {
 						regionPoints.addPoint(loc);
@@ -400,7 +411,7 @@ public class RegionArea extends PlotArea {
 			}
 			setCursor(null);
 
-			RegionArea.this.addRegion(regionBeingAdded, false);
+			addRegion(regionBeingAdded, false);
 			((XYRegionGraph) xyGraph).getOperationsManager().addCommand(new AddRegionCommand((XYRegionGraph) xyGraph,
 							regionBeingAdded));
 

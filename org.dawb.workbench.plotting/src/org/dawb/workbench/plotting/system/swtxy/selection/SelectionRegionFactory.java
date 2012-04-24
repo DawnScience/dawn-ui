@@ -93,14 +93,14 @@ public class SelectionRegionFactory {
 
 		final Action sendToBack = new Action("Send '"+region.getName()+"' to back", Activator.getImageDescriptor("icons/RegionToBack.png")) {
 			public void run() {
-				System.out.println("To back!"); //TODO FIXME just remove and readd I think...
+				region.toBack();
 			}
 		};
 		manager.add(sendToBack);
 		
 		final Action bringToFront = new Action("Bring '"+region.getName()+"' to front", Activator.getImageDescriptor("icons/RegionToFront.png")) {
 			public void run() {
-				System.out.println("To front!"); //TODO FIXME just remove and readd I think...
+				region.toFront();
 			}
 		};
 		manager.add(bringToFront);

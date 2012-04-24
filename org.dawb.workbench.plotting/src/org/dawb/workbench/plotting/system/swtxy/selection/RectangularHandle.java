@@ -25,11 +25,11 @@ public class RectangularHandle extends SelectionHandle {
 	@Override
 	public Shape createHandleShape(Figure parent, int side, double[] params) {
 		double angle;
-		if (!(parent instanceof RotatablePolygonShape)) {
-			angle = 0;
-		} else {
+		if (parent instanceof RotatablePolygonShape) {
 			RotatablePolygonShape pg = (RotatablePolygonShape) parent;
 			angle = pg.getAngleDegrees();
+		} else {
+			angle = 0;
 		}
 		location = new PrecisionPoint(params[0], params[1]);
 		return new RotatableRectangle(location.x(), location.y(), side, side, angle);
