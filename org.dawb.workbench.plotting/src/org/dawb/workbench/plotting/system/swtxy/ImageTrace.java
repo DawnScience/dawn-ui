@@ -309,7 +309,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		return 0d;
 	}
 
-	private Map<Integer, Reference<Object>> binCache;
+	private Map<Integer, Reference<Object>> mipMap;
 	
 	private AbstractDataset getDownsampled(AbstractDataset image) {
 		
@@ -321,17 +321,17 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			return image; // nothing to downsample
 		}
 		
-		if (binCache!=null && binCache.containsKey(bin) && binCache.get(bin).get()!=null) {
+		if (mipMap!=null && mipMap.containsKey(bin) && mipMap.get(bin).get()!=null) {
 	        logger.trace("Downsample bin used, "+bin);
-			return (AbstractDataset)binCache.get(bin).get();
+			return (AbstractDataset)mipMap.get(bin).get();
 		}
 		
 		final Downsample downSampler = new Downsample(getDownsampleTypeDiamond(), new int[]{bin,bin});
 		List<AbstractDataset>   sets = downSampler.value(image);
 		final AbstractDataset set = sets.get(0);
 		
-		if (binCache==null) binCache = new HashMap<Integer,Reference<Object>>(3);
-		binCache.put(bin, new SoftReference<Object>(set));
+		if (mipMap==null) mipMap = new HashMap<Integer,Reference<Object>>(3);
+		mipMap.put(bin, new SoftReference<Object>(set));
         logger.trace("Downsample bin created, "+bin);
       
 		return set;
@@ -415,7 +415,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 	public void remove() {
 		
-		if (binCache!=null)         binCache.clear();
+		if (mipMap!=null)         mipMap.clear();
 		if (scaledImage!=null)      scaledImage.dispose();
 		if (paletteListeners!=null) paletteListeners.clear();
 		paletteListeners = null;
@@ -624,6 +624,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		// method, we allow for the fact that the dataset is in a different orientation to 
 		// what is plotted.
 		this.image = image;
+		if (this.mipMap!=null) mipMap.clear();
 		
 		final float[] fa = getFastStatistics(image);
 		setMin(fa[0]);
@@ -737,7 +738,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	
 	@Override
 	public void setDownsampleType(DownsampleType type) {
-		if (this.binCache!=null) binCache.clear();
+		if (this.mipMap!=null) mipMap.clear();
 		this.downsampleType = type;
 		createScaledImage(ImageScaleType.FORCE_REIMAGE, null);
 		repaint();
