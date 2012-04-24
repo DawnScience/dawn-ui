@@ -406,12 +406,14 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 			final int[]       shape = image.getData()!=null ? image.getData().getShape() : null;
 			if (shape!=null && Arrays.equals(shape, data.getShape())) {
 				if (getDisplay().getThread()==Thread.currentThread()) {
+					if (data.getName()!=null) xyGraph.setTitle(data.getName());
 					image.setData(data, image.getAxes(), false);
 				} else {
 					Display.getDefault().syncExec(new Runnable() {
 						public void run() {
 							// This will keep the previous zoom level if there was one
 							// and will be faster than createPlot2D(...) which autoscales.
+							if (data.getName()!=null) xyGraph.setTitle(data.getName());
 							image.setData(data, image.getAxes(), false);
 						}
 					});
