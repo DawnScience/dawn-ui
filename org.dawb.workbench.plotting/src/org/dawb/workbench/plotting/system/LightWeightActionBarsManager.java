@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.csstudio.swt.xygraph.figures.Annotation;
+import org.dawb.common.services.ImageServiceBean.ImageOrigin;
 import org.dawb.common.ui.image.PaletteFactory;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
@@ -13,7 +14,6 @@ import org.dawb.common.ui.plot.PlottingActionBarManager;
 import org.dawb.common.ui.plot.annotation.AnnotationUtils;
 import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
 import org.dawb.common.ui.plot.trace.IImageTrace;
-import org.dawb.common.ui.plot.trace.IImageTrace.ImageOrigin;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace.PointStyle;
 import org.dawb.common.ui.plot.trace.ILineTrace.TraceType;
@@ -21,6 +21,8 @@ import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
+import org.dawb.workbench.plotting.printing.PlotPrintPreviewDialog;
+import org.dawb.workbench.plotting.printing.PrintSettings;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionConfigDialog;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
 import org.eclipse.jface.action.Action;
@@ -201,10 +203,10 @@ class LightWeightActionBarsManager extends PlottingActionBarManager {
 		origins.setImageDescriptor(Activator.getImageDescriptor("icons/origins.png"));
 		
 		CheckableActionGroup group      = new CheckableActionGroup();
-        ImageOrigin imageOrigin = IImageTrace.ImageOrigin.forLabel(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.ORIGIN_PREF));
+        ImageOrigin imageOrigin = ImageOrigin.forLabel(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.ORIGIN_PREF));
         IAction selectedAction  = null;
         
-        for (final ImageOrigin origin : IImageTrace.ImageOrigin.origins) {
+        for (final ImageOrigin origin : ImageOrigin.origins) {
 			
         	final IAction action = new Action(origin.getLabel(), IAction.AS_CHECK_BOX) {
         		public void run() {
@@ -459,6 +461,24 @@ class LightWeightActionBarsManager extends PlottingActionBarManager {
 		manager.add(configure);
 
 		manager.add(new Separator("org.dawb.workbench.plotting.system.trace.end"));
+	}
+
+
+	private PrintSettings settings;
+
+	public void createExportActions() {
+		// TODO Baha to add print actions similar to snapshot and existing print as well as png export etc.
+		
+		// TODO Maybe add action similar to XYGraphToolbar.addSnapshotButton() ?
+		
+		Action printButton = new Action("Print the plotting", Activator.getImageDescriptor("icons/printer.png")) {
+			public void run() {
+				if (settings==null) settings = new PrintSettings();
+				PlotPrintPreviewDialog dialog = new PlotPrintPreviewDialog(system.getGraph(), Display.getCurrent(), settings);
+				settings=dialog.open();
+			}
+		};
+		this.system.getActionBars().getToolBarManager().add(printButton);
 	}
 
 

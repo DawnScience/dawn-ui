@@ -6,7 +6,6 @@ import java.util.List;
 import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.annotation.IAnnotation;
 import org.dawb.common.ui.plot.region.IRegion;
-import org.dawb.common.ui.plot.region.RegionBounds;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.eclipse.draw2d.ColorConstants;
@@ -15,6 +14,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.APeak;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
 import uk.ac.diamond.scisoft.analysis.optimize.IOptimizer;
+import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 /**
  * Stores various information about the fit, including the IRegions
@@ -25,7 +25,7 @@ import uk.ac.diamond.scisoft.analysis.optimize.IOptimizer;
  */
 public class FittedPeaks {
 
-	private List<RegionBounds>       peakBounds;
+	private List<RectangularROI>       peakBounds;
 	private List<? extends IPeak>    peaks;
 	private List<IRegion>            peakAreaRegions;
 	private List<IRegion>            peakLineRegions;
@@ -116,10 +116,10 @@ public class FittedPeaks {
 	private List<AbstractDataset[]>  functionData;
 
 	
-	public List<RegionBounds> getPeakBounds() {
+	public List<RectangularROI> getPeakROIs() {
 		return peakBounds;
 	}
-	public void setPeakBounds(List<RegionBounds> peakBounds) {
+	public void setPeakROIs(List<RectangularROI> peakBounds) {
 		this.peakBounds = peakBounds;
 	}
 	public List<? extends IPeak> getPeaks() {

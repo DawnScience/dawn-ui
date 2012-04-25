@@ -5,7 +5,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.dawb.common.ui.plot.region.RegionBounds;
 import org.dawb.workbench.plotting.Activator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.slf4j.Logger;
@@ -23,6 +22,7 @@ import uk.ac.diamond.scisoft.analysis.fitting.functions.PearsonVII;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.PseudoVoigt;
 import uk.ac.diamond.scisoft.analysis.optimize.GeneticAlg;
 import uk.ac.diamond.scisoft.analysis.optimize.IOptimizer;
+import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 public class FittingUtils {
 
@@ -66,17 +66,14 @@ public class FittingUtils {
 		
 		if (peaks==null || peaks.isEmpty()) return null;
 		
-		final List<RegionBounds>      regions   = new ArrayList<RegionBounds>(peaks.size());
+		final List<RectangularROI>      regions   = new ArrayList<RectangularROI>(peaks.size());
 		final List<AbstractDataset[]> functions = new ArrayList<AbstractDataset[]>(peaks.size());
 		
 		for (APeak peak : peaks) {
 			
 			if (monitor.isCanceled()) return null;
-			
-			RegionBounds bounds = new RegionBounds();
-			bounds.setP1(new double[]{peak.getPosition()-(peak.getFWHM()/2d), 0});
-			bounds.setP2(new double[]{peak.getPosition()+(peak.getFWHM()/2d), 0});
-			bounds.setCentre(new double[]{peak.getPosition(), 0});
+			double w = peak.getFWHM();
+			RectangularROI bounds = new RectangularROI(peak.getPosition() - w/2, 0, w, 0, 0);
 			regions.add(bounds);
 			
 			final AbstractDataset[] pf = getPeakFunction(x, y, peak);
@@ -84,7 +81,7 @@ public class FittingUtils {
 		}
 		
 		final FittedPeaks bean = new FittedPeaks();
-		bean.setPeakBounds(regions);
+		bean.setPeakROIs(regions);
 		bean.setPeaks(peaks);
 		bean.setFunctionData(functions);
 		bean.setOptimizer(optimizer);

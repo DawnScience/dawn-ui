@@ -50,6 +50,46 @@ import fable.framework.toolbox.EclipseUtils;
  */
 public class SWTXYTraceTest {
 	
+	@Test
+	public void testImageNans() throws Throwable {
+		funnyImageTest(Double.NaN);
+	}
+	public void funnyImageTest(double value) throws Throwable {
+		
+		final Bundle bun  = Platform.getBundle("org.dawb.workbench.ui.test");
+
+		String path = (bun.getLocation()+"src/org/dawb/workbench/ui/editors/test/billeA.edf");
+		path = path.substring("reference:file:".length());
+		if (path.startsWith("/C:")) path = path.substring(1);
+
+		final IWorkbenchPage page      = EclipseUtils.getPage();		
+		final IFileStore  externalFile = EFS.getLocalFileSystem().fromLocalFile(new File(path));
+		final IEditorPart part         = page.openEditor(new FileStoreEditorInput(externalFile), ImageEditor.ID);
+		page.setPartState(EclipseUtils.getPage().getActivePartReference(), IWorkbenchPage.STATE_MAXIMIZED);
+
+		EclipseUtils.delay(2000);
+		
+		final ImageEditor editor       = (ImageEditor)part;
+		final AbstractPlottingSystem sys = editor.getPlotImageEditor().getPlottingSystem();
+
+		final Collection<ITrace>   traces= sys.getTraces(IImageTrace.class);
+		final IImageTrace            imt = (IImageTrace)traces.iterator().next();
+		AbstractDataset       data = imt.getData();
+		
+		// Create a short line of invalid values...
+		data = data.cast(AbstractDataset.FLOAT64);
+		for (int i = 0; i <20; i++) {
+			data.set(value, i*10,i*10);
+		}
+	
+		System.out.println("Setting image data...");
+		sys.clear();
+		EclipseUtils.delay(1000);
+		sys.createPlot2D(data, null, null);
+		
+		EclipseUtils.delay(10000);
+		
+	}
 
 	@Test
 	public void test1DNans() throws Throwable {
@@ -170,6 +210,7 @@ public class SWTXYTraceTest {
 
 		String path = (bun.getLocation()+"src/org/dawb/workbench/ui/editors/test/ascii.dat");
 		path = path.substring("reference:file:".length());
+		if (path.startsWith("/C:")) path = path.substring(1);
 		
 		final IWorkbenchPage page      = EclipseUtils.getPage();		
 		final IFileStore  externalFile = EFS.getLocalFileSystem().fromLocalFile(new File(path));

@@ -6,7 +6,6 @@ import java.util.Collection;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
-import org.dawb.common.ui.plot.region.RegionBounds;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
@@ -15,6 +14,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.rcp.plotting.roi.LinearROIData;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
+import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
 public class LineProfileTool extends ProfileTool {
 
@@ -27,7 +27,7 @@ public class LineProfileTool extends ProfileTool {
 	@Override
 	protected void createProfile(	IImageTrace  image, 
 						            IRegion      region, 
-						            RegionBounds rbs, 
+						            ROIBase      rbs, 
 						            boolean      tryUpdate,
 						            IProgressMonitor monitor) {
         
@@ -36,14 +36,12 @@ public class LineProfileTool extends ProfileTool {
 		
 		if (!isRegionTypeSupported(region.getRegionType())) return;
 
-		final RegionBounds bounds = rbs==null ? region.getRegionBounds() : rbs;
+		final LinearROI bounds = (LinearROI) (rbs==null ? region.getROI() : rbs);
 		if (bounds==null) return;
 		if (!region.isVisible()) return;
 
 		if (monitor.isCanceled()) return;
-		LinearROI    roi = new LinearROI(bounds.getP1(), bounds.getP2());
-		if (monitor.isCanceled()) return;
-		LinearROIData ld = new LinearROIData(roi, image.getData(), 1d);
+		LinearROIData ld = new LinearROIData(bounds, image.getData(), 1d);
 
 		if (monitor.isCanceled()) return;
 		

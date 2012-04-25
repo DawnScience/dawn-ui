@@ -3,7 +3,6 @@ package org.dawb.workbench.plotting.system.swtxy.selection;
 import java.util.Arrays;
 
 import org.csstudio.swt.xygraph.figures.Axis;
-import org.dawb.common.ui.plot.region.RegionBounds;
 import org.dawb.workbench.plotting.system.swtxy.translate.FigureTranslator;
 import org.dawb.workbench.plotting.system.swtxy.translate.FigureTranslator.LockType;
 import org.dawb.workbench.plotting.system.swtxy.util.Draw2DUtils;
@@ -16,6 +15,9 @@ import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
+
+import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
+import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 
 
 /**
@@ -129,9 +131,9 @@ class RingSelection extends AbstractSelectionRegion {
 		
 		setRegionObjects(connection, center, innerControl, outerControl);
 		sync(getBean());
-		updateRegionBounds();
-		if (regionBounds == null)
-			createRegionBounds(true);
+		updateROI();
+		if (roi == null)
+			createROI(true);
 
 		outerControl.setForegroundColor(ColorConstants.blue);
 		innerControl.setForegroundColor(ColorConstants.red);
@@ -171,15 +173,7 @@ class RingSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	protected void fireRoiSelection() {
-//		final double[] r1 = center.getRealValue();
-//FIXME TODO SectorROI I think...
-//		final RectangularROI roi = new RectangularROI(r1[0], r1[1], r2[0]-r1[0], r4[1]-r1[1], 0);
-//		if (getSelectionProvider()!=null) getSelectionProvider().setSelection(new StructuredSelection(roi));
-	}
-
-	@Override
-	public RegionBounds createRegionBounds(boolean recordResult) {
+	public ROIBase createROI(boolean recordResult) {
 		if (center!=null) {
 			final Point     cen = center.getSelectionPoint();
 			final int outerRad = outerControl.getSelectionPoint().y-cen.y;
@@ -192,29 +186,34 @@ class RingSelection extends AbstractSelectionRegion {
 			double cenY   = getyAxis().getPositionValue(cen.y, false);
 			double inRad  = getyAxis().getPositionValue(in.getTop().y,  false)-cenY;
 			double outRad = getyAxis().getPositionValue(out.getTop().y, false)-cenY;
-		    if (inRad<0)  inRad  = inRad*-1; // Scalar
-		    if (outRad<0) outRad = outRad*-1;// Scalar
-			final RegionBounds bounds = new RegionBounds(rcen, Math.min(inRad, outRad) , Math.max(inRad, outRad));
-			if (recordResult) this.regionBounds = bounds;
-			return bounds;
+		    if (inRad<0)  inRad  = -inRad;
+		    if (outRad<0) outRad = -outRad;
+
+		    final SectorROI sroi = new SectorROI(inRad, outRad);
+		    sroi.setPoint(rcen);
+
+			if (recordResult)
+				roi = sroi;
+			return sroi;
 		}
-		return super.getRegionBounds();
+		return super.getROI();
 	}
 
 	@Override
-	protected void updateRegionBounds(RegionBounds bounds) {
-		
-		if (!bounds.isCircle()) throw new RuntimeException("Expected circular bounds for circle!");
-		if (center!=null) {
-			center.setRealValue(bounds.getCentre());
-			int cenY = getxAxis().getValuePosition(bounds.getCentre()[1], false);
-			
-			int innerRad = getxAxis().getValuePosition(bounds.getCentre()[1]+bounds.getInner(), false)-cenY;
-			int outerRad = getxAxis().getValuePosition(bounds.getCentre()[1]+bounds.getOuter(), false)-cenY;
-			setControlPositions(innerRad, outerRad);
+	protected void updateROI(ROIBase bounds) {
+		if (bounds instanceof SectorROI) {
+			SectorROI sroi = (SectorROI) bounds;
+			if (center!=null) {
+				center.setPosition(sroi.getPoint());
+				double y = sroi.getPointY();
+				int cenY = getxAxis().getValuePosition(y, false);
+				
+				int innerRad = getxAxis().getValuePosition(y+sroi.getRadius(0), false)-cenY;
+				int outerRad = getxAxis().getValuePosition(y+sroi.getRadius(1), false)-cenY;
+				setControlPositions(innerRad, outerRad);
+				updateConnectionBounds();
+			}
 		}
-
-		updateConnectionBounds();
 	}
 
 	private void setControlPositions(int innerRad, int outerRad) {
@@ -241,8 +240,8 @@ class RingSelection extends AbstractSelectionRegion {
 		}
 		
 		updateConnectionBounds();
-		createRegionBounds(true);
-		fireRegionBoundsChanged(getRegionBounds());
+		createROI(true);
+		fireROIChanged(getROI());
 	}
 
 	@Override

@@ -8,10 +8,9 @@ import java.util.Map;
 
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
-import org.dawb.common.ui.plot.region.IRegionBoundsListener;
+import org.dawb.common.ui.plot.region.IROIListener;
 import org.dawb.common.ui.plot.region.IRegionListener;
-import org.dawb.common.ui.plot.region.RegionBounds;
-import org.dawb.common.ui.plot.region.RegionBoundsEvent;
+import org.dawb.common.ui.plot.region.ROIEvent;
 import org.dawb.common.ui.plot.region.RegionEvent;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
 import org.dawb.common.ui.plot.trace.IImageTrace;
@@ -51,6 +50,7 @@ import uk.ac.diamond.scisoft.analysis.rcp.plotting.roi.LinearROIData;
 import uk.ac.diamond.scisoft.analysis.rcp.plotting.roi.ROIData;
 import uk.ac.diamond.scisoft.analysis.rcp.plotting.roi.RectangularROIData;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
+import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 /**
@@ -59,7 +59,7 @@ import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
  * @author fcp94556
  *
  */
-public class MeasurementTool extends AbstractToolPage implements IRegionListener, IRegionBoundsListener {
+public class MeasurementTool extends AbstractToolPage implements IRegionListener, IROIListener {
 
 	public class RegionColorListener implements ISelectionChangedListener {
 
@@ -97,11 +97,11 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 	 * A map to store dragBounds which are not the official bounds
 	 * of the selection until the user lets go.
 	 */
-	private Map<String,RegionBounds> dragBounds;
+	private Map<String,ROIBase> dragBounds;
 
 	public MeasurementTool() {
 		super();
-		dragBounds = new HashMap<String,RegionBounds>(7);
+		dragBounds = new HashMap<String,ROIBase>(7);
 	}
 
 	@Override
@@ -159,9 +159,9 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 				final IStructuredSelection sel = (IStructuredSelection)viewer.getSelection();
 				if (sel!=null && sel.getFirstElement()!=null) {
 					final IRegion region = (IRegion)sel.getFirstElement();
-					if (region==null||region.getRegionBounds()==null) return;
-					final RegionBounds bounds = region.getRegionBounds();
-					if (bounds.getP1()==null) return;
+					if (region==null||region.getROI()==null) return;
+					final ROIBase bounds = region.getROI();
+					if (bounds.getPoint()==null) return;
 					
 					final Clipboard cb = new Clipboard(composite.getDisplay());
 					TextTransfer textTransfer = TextTransfer.getInstance();
@@ -316,7 +316,7 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 			try {
 				getPlottingSystem().addRegionListener(this);
 				final Collection<IRegion> regions = getPlottingSystem().getRegions();
-				for (IRegion iRegion : regions) iRegion.addRegionBoundsListener(this);
+				for (IRegion iRegion : regions) iRegion.addROIListener(this);
 				
 				int i=1;
 				while(true) { // Add with a unique name
@@ -356,7 +356,7 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 		try {
 			getPlottingSystem().removeRegionListener(this);
 			final Collection<IRegion> regions = getPlottingSystem().getRegions();
-			for (IRegion iRegion : regions) iRegion.removeRegionBoundsListener(this);
+			for (IRegion iRegion : regions) iRegion.removeROIListener(this);
 		} catch (Exception e) {
 			logger.error("Cannot remove region listeners!", e);
 		}		
@@ -399,7 +399,7 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 		if (!isActive()) return;
 		if (viewer!=null) viewer.refresh();
 		if (evt.getRegion()!=null) {
-			evt.getRegion().addRegionBoundsListener(this);
+			evt.getRegion().addROIListener(this);
 		}
 	}
 
@@ -408,18 +408,18 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 		if (!isActive()) return;
 		if (viewer!=null) viewer.refresh();
 		if (evt.getRegion()!=null) {
-			evt.getRegion().removeRegionBoundsListener(this);
+			evt.getRegion().removeROIListener(this);
 		}
 	}
 
 	@Override
-	public void regionBoundsDragged(RegionBoundsEvent evt) {
+	public void roiDragged(ROIEvent evt) {
 		if (!isActive()) return;
 		updateRegion(evt);
 	}
 
 	@Override
-	public void regionBoundsChanged(RegionBoundsEvent evt) {
+	public void roiChanged(ROIEvent evt) {
 		if (!isActive()) return;
 		updateRegion(evt);
 	}
@@ -430,7 +430,7 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 	 * 
 	 * @param evt
 	 */
-	private void updateRegion(final RegionBoundsEvent evt) {
+	private void updateRegion(final ROIEvent evt) {
 		
 		if (updateJob==null) {
 			updateJob = new RegionBoundsUIJob();
@@ -444,7 +444,7 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 	
 	private final class RegionBoundsUIJob extends UIJob {
 		
-		private RegionBoundsEvent evt;
+		private ROIEvent evt;
 		RegionBoundsUIJob() {
 			super("Measurement update");
 		}
@@ -455,7 +455,7 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 				if(monitor.isCanceled())	return Status.CANCEL_STATUS;
 
 				IRegion  region = (IRegion)evt.getSource();
-				RegionBounds rb = evt.getRegionBounds();
+				ROIBase rb = evt.getROI();
 				
 				if(monitor.isCanceled())	return Status.CANCEL_STATUS;
 				dragBounds.put(region.getName(), rb);
@@ -466,14 +466,14 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 			return Status.OK_STATUS;
 		}
 		
-		void setEvent(RegionBoundsEvent evt) {
+		void setEvent(ROIEvent evt) {
 			this.evt = evt;
 		}
 	};
 
-	public RegionBounds getBounds(IRegion region) {
+	public ROIBase getROI(IRegion region) {
 		if (dragBounds!=null&&dragBounds.containsKey(region.getName())) return dragBounds.get(region.getName());
-		return region.getRegionBounds();
+		return region.getROI();
 	}
 
 	/**
@@ -484,18 +484,18 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 	public double getMaxIntensity(IRegion region) {
 
         final Collection<ITrace> traces = getPlottingSystem().getTraces();
-        final RegionBounds bounds = getBounds(region);
+        final ROIBase bounds = getROI(region);
         if (bounds==null) return Double.NaN;
         
         if (traces!=null&&traces.size()==1&&traces.iterator().next() instanceof IImageTrace) {
         	final IImageTrace     trace        = (IImageTrace)traces.iterator().next();
         	
         	ROIData rd = null;
-        	if (region.getRegionType() == RegionType.BOX) {
-	    		final RectangularROI    roi = new RectangularROI(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(), 0);
+        	if (region.getRegionType() == RegionType.BOX && bounds instanceof RectangularROI) {
+	    		final RectangularROI roi = (RectangularROI) bounds;
 	    		rd = new RectangularROIData(roi, trace.getData());
-        	} else if (region.getRegionType()==RegionType.LINE) {
-        		LinearROI    roi = new LinearROI(bounds.getP1(), bounds.getP2());
+        	} else if (region.getRegionType()==RegionType.LINE && bounds instanceof LinearROI) {
+        		final LinearROI roi = (LinearROI) bounds;
         		rd = new LinearROIData(roi, trace.getData(), 1d);     
         	}
         	

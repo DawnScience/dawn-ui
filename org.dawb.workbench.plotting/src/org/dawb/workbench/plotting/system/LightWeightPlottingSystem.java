@@ -169,6 +169,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		}
 		
 		if (bars!=null) {
+			lightWeightActionBarMan.createExportActions();
 			lightWeightActionBarMan.createAspectHistoAction();
 			lightWeightActionBarMan.createToolDimensionalActions(ToolPageRole.ROLE_1D, "org.dawb.workbench.plotting.views.toolPageView.1D");
 			lightWeightActionBarMan.createToolDimensionalActions(ToolPageRole.ROLE_2D, "org.dawb.workbench.plotting.views.toolPageView.2D");
@@ -395,7 +396,6 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		createUI();
 	}
 	
-	@Override
 	public ITrace updatePlot2D(final AbstractDataset       data, 
 							   final List<AbstractDataset> axes,
 							   final IProgressMonitor      monitor) {
@@ -420,10 +420,10 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 				}
 				return image;
 			} else {
-				return createPlot2D(data, null, monitor);
+				return createPlot2D(data, axes, monitor);
 			}
 		} else {
-		    return createPlot2D(data, null, monitor);
+		    return createPlot2D(data, axes, monitor);
 		}
 	}
 
@@ -479,7 +479,11 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 			if (traceMap==null) traceMap = new LinkedHashMap<String, ITrace>(31);
 			traceMap.clear();
 			
-			final ImageTrace trace = xyGraph.createImageTrace(data.getName(), xAxis, yAxis);
+			String traceName = data.getName();
+			if (part!=null&&(traceName==null||"".equals(traceName))) {
+				traceName = part.getTitle();
+			}
+			final ImageTrace trace = xyGraph.createImageTrace(traceName, xAxis, yAxis);
 			trace.setData(data, axes, true);
 			
 			traceMap.put(trace.getName(), trace);

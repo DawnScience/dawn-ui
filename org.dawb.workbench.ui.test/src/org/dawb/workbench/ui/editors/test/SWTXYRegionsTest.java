@@ -19,9 +19,9 @@ import org.dawb.common.ui.plot.IAxis;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
-import org.dawb.common.ui.plot.region.RegionBounds;
 import org.dawb.common.ui.plot.region.RegionEvent;
 import org.dawb.common.ui.plot.trace.ITrace;
+import org.dawb.common.util.text.NumberUtils;
 import org.dawb.workbench.plotting.system.LightWeightPlottingSystem;
 import org.dawb.workbench.ui.editors.AsciiEditor;
 import org.dawb.workbench.ui.editors.PlotDataEditor;
@@ -39,6 +39,8 @@ import org.osgi.framework.Bundle;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.LongDataset;
+import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
+import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 import fable.framework.toolbox.EclipseUtils;
 
 /**
@@ -73,8 +75,9 @@ public class SWTXYRegionsTest {
 		final IRegion region = sys.createRegion("Box 1", RegionType.BOX);
 		
 		// Give the region a position
-		RegionBounds r1 = new RegionBounds(new double[]{10,1},new double[]{800,0.1});
-		region.setRegionBounds(r1);
+		RectangularROI r1 = new RectangularROI(10, 0.1, 790, 0.9, 0);
+//		RegionBounds r1 = new RegionBounds(new double[]{10,1},new double[]{800,0.1});
+		region.setROI(r1);
 		
 		// We now add the region.
 		sys.addRegion(region);
@@ -88,11 +91,11 @@ public class SWTXYRegionsTest {
 		if (!duplicatedName)  throw new Exception("Plotting system did not identify duplicated names!");
 		
 		for (int i = 1; i <8; i++) {
-			RegionBounds r2 = region.getRegionBounds();
-			if (!r2.equalsTolerance(r1, 1d, 0.01)) throw new Exception("Bounds changed after plotting - difference is "+r2.getDiff(r1));
-			
-		    r1 = new RegionBounds(new double[]{10+(i*10),1d-(i/10)},new double[]{800d-(100*i),0.1});
-		    region.setRegionBounds(r1);
+			RectangularROI r2 = (RectangularROI) region.getROI();
+			if (!equalsWithTolerance(r1, r2, 1d, 0.01))
+				throw new Exception("Bounds changed after plotting - difference is " + getDiff(r1, r2));
+			r1 = new RectangularROI(10+(i*10), 1d-(i/10), 800d-(100*i),0.1, 0);
+		    region.setROI(r1);
 		    EclipseUtils.delay(2000);
 		}
 				
@@ -103,7 +106,31 @@ public class SWTXYRegionsTest {
 		EclipseUtils.getPage().closeEditor(editor, false);
 
 	}
-	
+
+	private static boolean equalsWithTolerance(RectangularROI a, RectangularROI b, double dx, double dy) {
+		if (a == b) return true;
+		if (a == null || b == null) return false;
+		double[] a1 = a.getPoint();
+		double[] a2 = a.getEndPoint();
+		double[] b1 = b.getPoint();
+		double[] b2 = b.getEndPoint();
+		if (!NumberUtils.equalsTolerance(a1[0], b1[0], dx)) return false;
+		if (!NumberUtils.equalsTolerance(a2[0], b2[0], dx)) return false;
+		
+		if (!NumberUtils.equalsTolerance(a1[1], b1[1], dy)) return false;
+		if (!NumberUtils.equalsTolerance(a2[1], b2[1], dy)) return false;
+		
+		return true;
+	}
+
+	private static String getDiff(RectangularROI a, RectangularROI b) {
+		double[] a1 = a.getPoint();
+		double[] a2 = a.getEndPoint();
+		double[] b1 = b.getPoint();
+		double[] b2 = b.getEndPoint();
+		return "(" + (b1[0] - a1[0]) + ", " + (b1[1] - a1[1]) + ") to (" + (b2[0] - a2[0]) + ", " + (b2[1] - a2[1]) + ")";
+	}
+
 	/**
 	 * Attempts to listener to an initial region, then add other regions with different
 	 * colors. This is similar to the logic required for a fitting algorithm.
@@ -149,8 +176,8 @@ public class SWTXYRegionsTest {
 						}
 						
 						// Give the region a position
-						RegionBounds r1 = new RegionBounds(new double[]{i*100,1},new double[]{(i*100)+50,0.1});
-						region.setRegionBounds(r1);
+						RectangularROI r1 = new RectangularROI(i*100, 0.1, 50, 0.9, 0);
+						region.setROI(r1);
 						region.setRegionColor(Display.getDefault().getSystemColor(SWT.COLOR_BLUE));
 						region.setMobile(false);
 						region.setAlpha(50);
@@ -171,9 +198,9 @@ public class SWTXYRegionsTest {
 		final IRegion region = sys.createRegion("Box 1", RegionType.BOX);
 		
 		// Give the region a position
-		RegionBounds r1 = new RegionBounds(new double[]{10,1},new double[]{800,0.1});
-		region.setRegionBounds(r1);
-		
+		RectangularROI r1 = new RectangularROI(10, 0.1, 790, 0.9, 0);
+		region.setROI(r1);
+
 		// We now add the region.
 		sys.addRegion(region);
 
@@ -209,6 +236,7 @@ public class SWTXYRegionsTest {
 
 		String path = (bun.getLocation()+"src/org/dawb/workbench/ui/editors/test/ascii.dat");
 		path = path.substring("reference:file:".length());
+		if (path.startsWith("/C:")) path = path.substring(1);
 		
 		final IWorkbenchPage page      = EclipseUtils.getPage();		
 		final IFileStore  externalFile = EFS.getLocalFileSystem().fromLocalFile(new File(path));
@@ -300,8 +328,9 @@ public class SWTXYRegionsTest {
 		IRegion region = sys.createRegion("Ring 1", RegionType.RING);
 		
 		// Give the region a position
-		RegionBounds r1 = new RegionBounds(new double[]{500,0.5},0.1, 0.2);
-		region.setRegionBounds(r1);
+		SectorROI r1 = new SectorROI(0.1, 0.2);
+		r1.setPoint(500, 0.5);
+		region.setROI(r1);
 		region.setRegionColor(ColorConstants.blue);
 		region.setAlpha(100);
 		
@@ -311,9 +340,8 @@ public class SWTXYRegionsTest {
 		// Try resizing the region
 	    for (int i = 1; i < 10; i++) {
 		
-	    	r1.setInner(i*50);
-	    	r1.setOuter((i*50)+50);
-	    	region.setRegionBounds(r1);
+	    	r1.setRadii(i*50, i*50+50);
+	    	region.setROI(r1);
 	    	
 	    	EclipseUtils.delay(500);
 		}
@@ -321,23 +349,24 @@ public class SWTXYRegionsTest {
 		// Try resizing the region
 	    for (int i = 1; i < 10; i++) {
 		
-	    	r1.setInner(i*50);
-	    	r1.setOuter((i*50)+5);
-	    	region.setRegionBounds(r1);
+	    	r1.setRadii(i*50, i*50+5);
+	    	region.setROI(r1);
 	    	
 	    	EclipseUtils.delay(500);
 		}
 
-    	region.setRegionBounds(new RegionBounds(new double[]{500,0.5},0.1, 0.2));
+		r1 = new SectorROI(0.1, 0.2);
+		r1.setPoint(500, 0.5);
+    	region.setROI(r1);
 		
     	// Multiple rings
 	    for (int i = 1; i < 10; i++) {
 			
 	    	region = sys.createRegion("Ring "+(i+1), RegionType.RING);
-	    	r1     = new RegionBounds(new double[]{500,0.5},0.1, 0.2);
-	    	r1.setInner(i*50);
-	    	r1.setOuter((i*50)+5);
-	    	region.setRegionBounds(r1);
+			r1 = new SectorROI(i*50, i*50+5);
+			r1.setPoint(500, 0.5);
+	    	r1.setRadii(i*50, i*50+5);
+	    	region.setROI(r1);
 			region.setRegionColor(ColorConstants.blue);
 			region.setAlpha(100);
 			

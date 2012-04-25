@@ -1,7 +1,6 @@
 package org.dawb.workbench.plotting.system.swtxy.selection;
 
 import org.csstudio.swt.xygraph.figures.Axis;
-import org.dawb.common.ui.plot.region.RegionBounds;
 import org.dawb.workbench.plotting.system.swtxy.translate.FigureTranslator;
 import org.dawb.workbench.plotting.system.swtxy.util.Draw2DUtils;
 import org.eclipse.draw2d.Figure;
@@ -9,9 +8,9 @@ import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
-import org.eclipse.jface.viewers.StructuredSelection;
 
-import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
+import uk.ac.diamond.scisoft.analysis.roi.PointROI;
+import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
 public class PointSelection extends AbstractSelectionRegion {
 
@@ -79,15 +78,7 @@ public class PointSelection extends AbstractSelectionRegion {
 		if (clicks.size()<1) return;
 		final Point last = clicks.getLastPoint();
 		point.setSelectionPoint(last);
-		updateRegionBounds();
-	}
-
-	@Override
-	protected void fireRoiSelection() {
-		if (getSelectionProvider()!=null) {
-			final LinearROI roi = new LinearROI(point.getRealValue());
-			getSelectionProvider().setSelection(new StructuredSelection(roi));
-		}
+		updateROI();
 	}
 
 	@Override
@@ -96,27 +87,23 @@ public class PointSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	protected RegionBounds createRegionBounds(boolean recordResult) {
-		
-		if (point == null) return getRegionBounds();
-		
-		final RegionBounds bounds = new RegionBounds();
-		bounds.addPoint(point.getRealValue());
-		if (recordResult) this.regionBounds = bounds;
-		
-		return bounds;
+	protected ROIBase createROI(boolean recordResult) {
+		if (point == null) return getROI();
+		final PointROI proi = new PointROI(point.getPosition());
+		if (recordResult)
+			roi = proi;
+
+		return proi;
 	}
 
 	@Override
-	protected void updateRegionBounds(RegionBounds bounds) {
-		
-		if (!bounds.isPoints()) throw new RuntimeException("Expected points bounds for free draw!");
-		
-		if (point==null) return;
-		
-        point.setRealValue(bounds.getPoints().iterator().next());
-        
-        updateConnectionBounds();
+	protected void updateROI(ROIBase bounds) {
+		if (bounds instanceof PointROI) {
+			if (point==null) return;
+
+	        point.setPosition(bounds.getPoint());
+	        updateConnectionBounds();
+		}
     }
 
 	@Override
