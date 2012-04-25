@@ -1,5 +1,16 @@
+/*-
+ * Copyright (c) 2012 European Synchrotron Radiation Facility,
+ *                    Diamond Light Source Ltd.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
+
 package org.dawb.workbench.plotting.system;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +32,7 @@ import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
+import org.dawb.workbench.plotting.printing.PlotExportPrintUtil;
 import org.dawb.workbench.plotting.printing.PlotPrintPreviewDialog;
 import org.dawb.workbench.plotting.printing.PrintSettings;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionConfigDialog;
@@ -31,8 +43,16 @@ import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.PaletteData;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.printing.PrintDialog;
+import org.eclipse.swt.printing.Printer;
+import org.eclipse.swt.printing.PrinterData;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.ui.IActionBars;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -466,11 +486,92 @@ class LightWeightActionBarsManager extends PlottingActionBarManager {
 
 	private PrintSettings settings;
 
+	/**
+	 *  Create export and print buttons in tool bar 
+	 */
 	public void createExportActions() {
-		// TODO Baha to add print actions similar to snapshot and existing print as well as png export etc.
-		
-		// TODO Maybe add action similar to XYGraphToolbar.addSnapshotButton() ?
-		
+
+		Action exportSaveButton = new Action("Export/save the plotting", Activator.getImageDescriptor("icons/picture_save.png")){
+			// Cache file name otherwise they have to keep
+			// choosing the folder.
+			private String filename;
+			public void run(){
+				FileDialog dialog = new FileDialog (Display.getCurrent().getActiveShell(), SWT.SAVE);
+				String [] filterExtensions = new String [] {"*.jpg;*.JPG;*.jpeg;*.JPEG;*.png;*.PNG", "*.ps;*.eps"};
+				// TODO ,"*.svg;*.SVG"};
+				if (filename!=null) {
+					dialog.setFilterPath((new File(filename)).getParent());
+				} else {
+					String filterPath = "/";
+					String platform = SWT.getPlatform();
+					if (platform.equals("win32") || platform.equals("wpf")) {
+						filterPath = "c:\\";
+					}
+					dialog.setFilterPath (filterPath);
+				}
+				dialog.setFilterNames (PlotExportPrintUtil.FILE_TYPES);
+				dialog.setFilterExtensions (filterExtensions);
+				filename = dialog.open();
+				if (filename == null)
+					return;
+				try {
+					PlotExportPrintUtil.saveGraph(filename, PlotExportPrintUtil.FILE_TYPES[dialog.getFilterIndex()], system.getGraph().getImage());
+					logger.debug("Plotting saved");
+				} catch (Exception e) {
+					logger.error("Could not save the plotting", e);
+				}
+			}
+		};
+
+		Action copyToClipboardButton = new Action("Copy to clip-board", Activator.getImageDescriptor("icons/copy_edit_on.gif")) {
+			public void run() {
+				PlotExportPrintUtil.copyGraph(system.getGraph().getImage());
+			}
+		};
+
+		// TODO implement within the PrintPreviewDialog
+		Action snapShotButton = new Action("Print scaled image to printer", Activator.getImageDescriptor("icons/camera.gif")) {
+			public void run(){
+				// Show the Choose Printer dialog
+				PrintDialog dialog = new PrintDialog(Display.getCurrent().getActiveShell(), SWT.NULL);
+				PrinterData printerData = dialog.open();
+				if (printerData != null) {
+					// Create the printer object
+					printerData.orientation = PrinterData.LANDSCAPE; // force landscape
+					Printer printer = new Printer(printerData);
+					// Calculate the scale factor between the screen resolution and printer
+					// resolution in order to correctly size the image for the printer
+					Point screenDPI = Display.getCurrent().getDPI();
+					Point printerDPI = printer.getDPI();
+					int scaleFactorX = printerDPI.x / screenDPI.x;
+					// Determine the bounds of the entire area of the printer
+					Rectangle size = printer.getClientArea();
+					Rectangle trim = printer.computeTrim(0, 0, 0, 0);
+					Rectangle imageSize = new Rectangle(size.x/scaleFactorX, size.y/scaleFactorX, 
+								size.width/scaleFactorX, size.height/scaleFactorX);
+					if (printer.startJob("Print Plot")) {
+						if (printer.startPage()) {
+							GC gc = new GC(printer);
+							Image xyImage = system.getGraph().getImage(imageSize);
+							Image printerImage = new Image(printer, xyImage.getImageData());
+							xyImage.dispose();
+							// Draw the image
+							gc.drawImage(printerImage, imageSize.x, imageSize.y,
+									imageSize.width, imageSize.height, -trim.x, -trim.y,
+									size.width-trim.width, size.height-trim.height);
+							// Clean up
+							printerImage.dispose();
+							gc.dispose();
+							printer.endPage();
+						}
+					}
+					// End the job and dispose the printer
+					printer.endJob();
+					printer.dispose();
+				}
+			}
+		};
+
 		Action printButton = new Action("Print the plotting", Activator.getImageDescriptor("icons/printer.png")) {
 			public void run() {
 				if (settings==null) settings = new PrintSettings();
@@ -478,7 +579,17 @@ class LightWeightActionBarsManager extends PlottingActionBarManager {
 				settings=dialog.open();
 			}
 		};
-		this.system.getActionBars().getToolBarManager().add(printButton);
+
+		MenuAction exportActionsDropDown = new MenuAction("Export/Print");
+		exportActionsDropDown.setImageDescriptor(Activator.getImageDescriptor("icons/printer.png"));
+		exportActionsDropDown.setSelectedAction(printButton);
+		
+		exportActionsDropDown.add(exportSaveButton);
+		exportActionsDropDown.add(copyToClipboardButton);
+		exportActionsDropDown.add(snapShotButton);
+		exportActionsDropDown.add(printButton);
+
+		this.system.getActionBars().getToolBarManager().add(exportActionsDropDown);
 	}
 
 
