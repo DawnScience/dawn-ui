@@ -11,7 +11,7 @@ import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingFactory;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
-import org.dawb.common.ui.plot.region.IRegionBoundsListener;
+import org.dawb.common.ui.plot.region.IROIListener;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.ROIEvent;
 import org.dawb.common.ui.plot.region.RegionEvent;
@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
-public abstract class ProfileTool extends AbstractToolPage  implements IRegionBoundsListener {
+public abstract class ProfileTool extends AbstractToolPage  implements IROIListener {
 
 	private final static Logger logger = LoggerFactory.getLogger(ProfileTool.class);
 	
@@ -69,7 +69,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IRegionBo
 				@Override
 				public void regionRemoved(RegionEvent evt) {
 					if (evt.getRegion()!=null) {
-						evt.getRegion().removeRegionBoundsListener(ProfileTool.this);
+						evt.getRegion().removeROIListener(ProfileTool.this);
 						clearTraces(evt.getRegion());
 					}
 				}
@@ -83,7 +83,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IRegionBo
 				@Override
 				public void regionCreated(RegionEvent evt) {
 					if (evt.getRegion()!=null) {
-						evt.getRegion().addRegionBoundsListener(ProfileTool.this);
+						evt.getRegion().addROIListener(ProfileTool.this);
 					}
 				}
 			};
@@ -167,7 +167,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IRegionBo
 			getPlottingSystem().addRegionListener(regionListener);
 		}		
 		final Collection<IRegion> regions = getPlottingSystem().getRegions();
-		if (regions!=null) for (IRegion iRegion : regions) iRegion.addRegionBoundsListener(this);
+		if (regions!=null) for (IRegion iRegion : regions) iRegion.addROIListener(this);
 		
 		// Start with a selection of the right type
 		try {
@@ -197,7 +197,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IRegionBo
 			getPlottingSystem().removeRegionListener(regionListener);
 		}
 		final Collection<IRegion> regions = getPlottingSystem().getRegions();
-		if (regions!=null) for (IRegion iRegion : regions) iRegion.removeRegionBoundsListener(this);
+		if (regions!=null) for (IRegion iRegion : regions) iRegion.removeROIListener(this);
 	}
 	
 	@Override

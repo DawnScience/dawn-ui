@@ -27,7 +27,7 @@ import java.util.Map;
 import org.dawb.common.ui.plot.IAxis;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
-import org.dawb.common.ui.plot.region.IRegionBoundsListener;
+import org.dawb.common.ui.plot.region.IROIListener;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.ROIEvent;
 import org.dawb.common.ui.plot.region.RegionEvent;
@@ -72,7 +72,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.roi.PointROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
-public class InfoBoxTool extends AbstractToolPage implements IRegionBoundsListener, IRegionListener, MouseListener  {
+public class InfoBoxTool extends AbstractToolPage implements IROIListener, IRegionListener, MouseListener  {
 
 	private final static Logger logger = LoggerFactory.getLogger(InfoBoxTool.class);
 	
@@ -193,11 +193,11 @@ public class InfoBoxTool extends AbstractToolPage implements IRegionBoundsListen
 		if (xHair!=null) {
 			if (!isActive()) xHair.addMouseListener(this);
 			xHair.setVisible(true);
-			xHair.addRegionBoundsListener(this);
+			xHair.addROIListener(this);
 		}
 		if (yHair!=null) {
 			yHair.setVisible(true);
-			yHair.addRegionBoundsListener(this);
+			yHair.addROIListener(this);
 		}
 		
 		// We stop the adding of other regions because this tool does
@@ -229,11 +229,11 @@ public class InfoBoxTool extends AbstractToolPage implements IRegionBoundsListen
 		if (xHair!=null) {
 			xHair.removeMouseListener(this);
 			xHair.setVisible(false);
-			xHair.removeRegionBoundsListener(this);
+			xHair.removeROIListener(this);
 		}
 		if (yHair!=null) {
 			yHair.setVisible(false);
-			yHair.removeRegionBoundsListener(this);
+			yHair.removeROIListener(this);
 		}
 
 	}
@@ -319,7 +319,7 @@ public class InfoBoxTool extends AbstractToolPage implements IRegionBoundsListen
 		if (!isActive()) return;
 		if (viewer!=null) viewer.refresh();
 		if (evt.getRegion()!=null) {
-			evt.getRegion().addRegionBoundsListener(this);
+			evt.getRegion().addROIListener(this);
 		}
 	}
 
@@ -328,7 +328,7 @@ public class InfoBoxTool extends AbstractToolPage implements IRegionBoundsListen
 		if (!isActive()) return;
 		if (viewer!=null) viewer.refresh();
 		if (evt.getRegion()!=null) {
-			evt.getRegion().removeRegionBoundsListener(this);
+			evt.getRegion().removeROIListener(this);
 		}
 	}
 
