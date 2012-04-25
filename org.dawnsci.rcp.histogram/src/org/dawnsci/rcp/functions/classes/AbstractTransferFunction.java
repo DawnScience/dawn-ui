@@ -15,7 +15,7 @@ public abstract class AbstractTransferFunction implements ITransferFunctionArray
 	public int[] getArray() {
 		int[] result = new int[256];
 		for (int i = 0; i < result.length; i++) {
-			result[i] = (int) (getPoint((double)i/256)*256);
+			result[i] = (int) (getPoint((double)i/256)*255);
 		}
 		return result;
 	}
