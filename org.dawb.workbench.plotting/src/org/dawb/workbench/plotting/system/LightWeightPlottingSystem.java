@@ -421,10 +421,10 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 				}
 				return image;
 			} else {
-				return createPlot2D(data, null, monitor);
+				return createPlot2D(data, axes, monitor);
 			}
 		} else {
-		    return createPlot2D(data, null, monitor);
+		    return createPlot2D(data, axes, monitor);
 		}
 	}
 
