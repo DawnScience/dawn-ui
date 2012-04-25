@@ -240,6 +240,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 					
 	
 					// Pixel slice on downsampled data = fast!
+					// NOTE Assumes 8-bit images
 					final int size   = (x4-x1)*(y4-y1);
 					final byte[] pixels = new byte[size];
 					final int wid    = (x4-x1);
@@ -247,7 +248,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 						imageData.getPixels(x1, y1+y, wid, pixels, wid*y);
 					}
 					
-					data = new ImageData((x4-x1), (y4-y1), 8, getPaletteData(), 1, pixels);
+					data = new ImageData((x4-x1), (y4-y1), data.depth, getPaletteData(), 1, pixels);
 				}
 				data = data.scaledTo(rbounds.width, rbounds.height);
 				this.scaledImage = new Image(Display.getDefault(), data);
@@ -593,6 +594,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 
 	public void setImageOrigin(ImageOrigin imageOrigin) {
+		if (this.mipMap!=null) mipMap.clear();
 		imageServiceBean.setOrigin(imageOrigin);
 		createAxisBounds();
 		performAutoscale();
