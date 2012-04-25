@@ -23,6 +23,7 @@ import org.eclipse.draw2d.Shape;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Image;
@@ -114,7 +115,11 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	 * which will be notified on drag.
 	 * 
 	 */
-	protected abstract void fireRoiSelection();
+	protected void fireROISelection() {
+		if (getSelectionProvider() != null && roi != null)
+			getSelectionProvider().setSelection(new StructuredSelection(roi));
+	}
+
 
 	/**
 	 * This cursor is used after the region is created and
@@ -162,14 +167,15 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 			gc.drawText(getName(), size.getCenter());
 		}
 	}
-	
+
 	public void axisRevalidated(Axis axis) {
-		updateRegionBounds();
+		updateROI();
 	}
+
 	public void axisRangeChanged(Axis axis, Range old_range, Range new_range) {
-		updateRegionBounds();
+		updateROI();
 	}
-			
+
 	protected void setRegionObjects(IFigure... objects) {
 		this.regionObjects = objects;
 	}
@@ -344,24 +350,24 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 		yAxis.addListener(this);
 		bean.setyAxis(yAxis);
 	}
-	
+
 	public TranslationListener createRegionNotifier() {
 		return new TranslationListener() {
 			@Override
 			public void translateBefore(TranslationEvent evt) {
-				
 			}
+
 			@Override
 			public void translationAfter(TranslationEvent evt) {
 				updateConnectionBounds();
-				fireRegionBoundsDragged(createRegionBounds(false));
+				fireROIDragged(createROI(false));
 			}
+
 			@Override
 			public void translationCompleted(TranslationEvent evt) {
-				fireRegionBoundsChanged(createRegionBounds(true));
-				fireRoiSelection();
+				fireROIChanged(createROI(true));
+				fireROISelection();
 			}
-			
 		};
 	}
 
@@ -403,7 +409,6 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	 * @return
 	 */
 	protected int getLowestPositionAboveTraces(IFigure par) {
-		
 	    int index = 0;
 		for (Object ob : par.getChildren()) {
 			// Do not send regions below traces.
@@ -434,5 +439,4 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 		}		
 		
 	}
-
 }

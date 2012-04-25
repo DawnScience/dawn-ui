@@ -12,7 +12,7 @@ import org.eclipse.draw2d.geometry.Rectangle;
  */
 public class RotatablePolygonShape extends AbstractPointListShape {
 	protected final PointList opl; // original (unrotated) points
-	protected final PointList npl; // reference to rotated points
+	protected PointList npl; // reference to rotated points
 	protected final AffineTransform affine;
 
 	protected RotatablePolygonShape(int size) {
@@ -48,7 +48,7 @@ public class RotatablePolygonShape extends AbstractPointListShape {
 	public void addPoint(Point pt) {
 		opl.addPoint(pt);
 		super.addPoint(pt);
-		recalcPoints(opl, npl);
+		recalcPoints(opl, npl, true);
 	}
 
 	@Override
@@ -80,7 +80,8 @@ public class RotatablePolygonShape extends AbstractPointListShape {
 		opl.removeAllPoints();
 		opl.addAll(points);
 		super.setPoints(points);
-		recalcPoints(opl, npl);
+		npl = super.getPoints();
+		recalcPoints(opl, npl, true);
 	}
 
 	/**
@@ -89,7 +90,7 @@ public class RotatablePolygonShape extends AbstractPointListShape {
 	 */
 	public void setAngle(double degrees) {
 		affine.setRotationDegrees(degrees);
-		recalcPoints(opl, npl);
+		recalcPoints(opl, npl, true);
 	}
 
 	/**
@@ -102,16 +103,18 @@ public class RotatablePolygonShape extends AbstractPointListShape {
 	@Override
 	public void setLocation(Point p) {
 		affine.setTranslation(p.preciseX(), p.preciseY());
-		recalcPoints(opl, npl);
+		recalcPoints(opl, npl, true);
 	}
 
-	protected void recalcPoints(PointList oldpl, PointList newpl) {
+	protected void recalcPoints(PointList oldpl, PointList newpl, boolean setBounds) {
 		final int n = newpl.size();
 		for (int i = 0; i < n; i++) {
 			newpl.setPoint(affine.getTransformed(oldpl.getPoint(i)), i);
 		}
-		Rectangle b = newpl.getBounds();
-		setBounds(b);
+		if (setBounds) {
+			Rectangle b = newpl.getBounds();
+			setBounds(b);
+		}
 	}
 
 	@Override

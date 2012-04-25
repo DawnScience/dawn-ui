@@ -3,10 +3,14 @@ package org.dawb.workbench.plotting.tools;
 import java.text.DecimalFormat;
 
 import org.dawb.common.ui.plot.region.IRegion;
-import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
+import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
+import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
+import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 
 public class MeasurementLabelProvider extends ColumnLabelProvider {
 
@@ -22,39 +26,76 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 		this.format = new DecimalFormat("##0.00E0");
 	}
 
+	private static final String NA = "-";
+
 	@Override
 	public String getText(Object element) {
 		
 		if (!(element instanceof IRegion)) return null;
 		final IRegion    region = (IRegion)element;
-		
+
+		ROIBase roi = tool.getROI(region);
+
 		try {
+			Object fobj = null;
+
 			switch(column) {
 			case 0:
 				return region.getName();
 			case 1:
 				return region.getRegionType().getName();
 			case 2: // dx
-				if (region.getRegionType()==RegionType.RING) return "-";
-				return format.format(tool.getBounds(region).getDx());
+				if (roi instanceof LinearROI) {
+					LinearROI lroi = (LinearROI) roi;
+					fobj = lroi.getEndPoint()[0] - lroi.getPointX();
+				} else if (roi instanceof RectangularROI) {
+					RectangularROI rroi = (RectangularROI) roi;
+					fobj = rroi.getEndPoint()[0] - rroi.getPointX();
+				} else {
+					
+				}
+				return fobj == null ? NA : format.format(fobj);
 			case 3: // dy
-				if (region.getRegionType()==RegionType.RING) return "-";
-				return format.format(tool.getBounds(region).getDy());
+				if (roi instanceof LinearROI) {
+					LinearROI lroi = (LinearROI) roi;
+					fobj = lroi.getEndPoint()[1] - lroi.getPointY();
+				} else if (roi instanceof RectangularROI) {
+					RectangularROI rroi = (RectangularROI) roi;
+					fobj = rroi.getEndPoint()[1] - rroi.getPointY();
+				} else {
+					
+				}
+				return fobj == null ? NA : format.format(fobj);
 			case 4: // length
-				if (region.getRegionType()==RegionType.RING) return "-";
-				return format.format(tool.getBounds(region).getLength());
+				if (roi instanceof LinearROI) {
+					LinearROI lroi = (LinearROI) roi;
+					fobj = lroi.getLength();
+				} else if (roi instanceof RectangularROI) {
+					RectangularROI rroi = (RectangularROI) roi;
+					double[] lens = rroi.getLengths();
+					fobj = Math.hypot(lens[0], lens[1]);
+				} else {
+					
+				}
+				return fobj == null ? NA : format.format(fobj);
 			case 5: // max
 				final double max = tool.getMaxIntensity(region);
 			    if (Double.isNaN(max)) return "-";
 				return format.format(max);
 			case 6: // in rad
-				if (region.getRegionType()!=RegionType.RING) return "-";
-				return format.format(tool.getBounds(region).getInner());
+				if (roi instanceof SectorROI) {
+					SectorROI sroi = (SectorROI) roi;
+					fobj = sroi.getRadius(0);
+				}
+				return fobj == null ? NA : format.format(fobj);
 			case 7: // out rad
-				if (region.getRegionType()!=RegionType.RING) return "-";
-				return format.format(tool.getBounds(region).getOuter());
+				if (roi instanceof SectorROI) {
+					SectorROI sroi = (SectorROI) roi;
+					fobj = sroi.getRadius(1);
+				}
+				return fobj == null ? NA : format.format(fobj);
 			case 8: // region
-				return tool.getBounds(region).toString();
+				return tool.getROI(region).toString();
 	
 			default:
 				return "Not found";

@@ -12,6 +12,9 @@ import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
 
+import uk.ac.diamond.scisoft.analysis.roi.PolygonalROI;
+import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
+
 /**
  * Used for masking. This region can be transformed into the masking
  * dataset using MaskCreator (or code similar to).
@@ -132,14 +135,8 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 			                   Rectangle parentBounds) {
 		
 		updateConnectionBounds();
-		createRegionBounds(true);
-		fireRegionBoundsChanged(getRegionBounds());
-	}
-
-	@Override
-	protected void fireRoiSelection() {
-// TODO FIXME Is there a useful ROI one can fire here?
-
+		createROI(true);
+		fireROIChanged(getROI());
 	}
 
 	@Override
@@ -148,42 +145,43 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	protected RegionBounds createRegionBounds(boolean recordResult) {
-		if (points == null) return getRegionBounds();
+	protected ROIBase createROI(boolean recordResult) {
+		if (points == null) return getROI();
 		
 		final Rectangle rect = getBounds();
-		double[] a1 = new double[]{getxAxis().getPositionValue(rect.x, false), getyAxis().getPositionValue(rect.y, false)};
+		final double[] a1 = new double[]{getxAxis().getPositionValue(rect.x, false), getyAxis().getPositionValue(rect.y, false)};
 		double[] a2 = new double[]{getxAxis().getPositionValue(rect.x+rect.width, false), getyAxis().getPositionValue(rect.y+rect.height, false)};
-		
-		final RegionBounds bounds = new RegionBounds(a1, a2);
+
+		final PolygonalROI proi = new PolygonalROI(a1);
 		
 		for (int i = 0; i < points.size(); i++) {
 			final Point pnt = points.getPoint(i);
 			double[] pd = new double[]{getxAxis().getPositionValue(pnt.x, false), getyAxis().getPositionValue(pnt.y, false)};
-			bounds.addPoint(pd);
+			proi.insertPoint(pd);
 		}
 		
-		if (recordResult) this.regionBounds = bounds;
+		if (recordResult)
+			roi = proi;
 		
-		return bounds;
+		return proi;
 	}
 
 	@Override
-	protected void updateRegionBounds(RegionBounds bounds) {
-
-		if (!bounds.isPoints()) throw new RuntimeException("Expected points bounds for free draw!");
-
-		if (points==null) points = new PointList();
-        points.removeAllPoints();
-        
-        for (double[] pnt : bounds.getPoints()) {
-			
-           	final int x = getxAxis().getValuePosition(pnt[0], false);
-           	final int y = getyAxis().getValuePosition(pnt[1], false);
-           	points.addPoint(new Point(x,y));
+	protected void updateROI(ROIBase bounds) {
+		if (bounds instanceof PolygonalROI) {
+			final PolygonalROI proi = (PolygonalROI) bounds;
+			if (points==null) points = new PointList();
+	        points.removeAllPoints();
+	        
+	        for (ROIBase p : proi) {
+				
+	           	final int x = getxAxis().getValuePosition(p.getPointX(), false);
+	           	final int y = getyAxis().getValuePosition(p.getPointY(), false);
+	           	points.addPoint(new Point(x,y));
+			}
+	        updateConnectionBounds();
 		}
-        
-        updateConnectionBounds();
+
 	}
 
 	@Override

@@ -12,7 +12,6 @@ import org.dawb.common.ui.plot.annotation.IAnnotation;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
-import org.dawb.common.ui.plot.region.RegionBounds;
 import org.dawb.common.ui.plot.region.RegionEvent;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
 import org.dawb.common.ui.plot.trace.ILineTrace;
@@ -52,6 +51,8 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
 import uk.ac.diamond.scisoft.analysis.rcp.plotting.IGuiInfoManager;
 import uk.ac.diamond.scisoft.analysis.rcp.views.PlotServerConnection;
+import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
+import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 public class FittingTool extends AbstractToolPage implements IRegionListener {
 
@@ -285,7 +286,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 				if (composite==null)        return Status.CANCEL_STATUS;
 				if (composite.isDisposed()) return Status.CANCEL_STATUS;
 				
-				final RegionBounds bounds = fitRegion.getRegionBounds();
+				final RectangularROI bounds = (RectangularROI) fitRegion.getROI();
 				if (fitRegion==null || bounds==null) return Status.CANCEL_STATUS;
 				
 				getPlottingSystem().removeRegionListener(FittingTool.this);
@@ -302,8 +303,8 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 				// We chop x and y by the region bounds. We assume the
 				// plot is an XAXIS selection therefore the indices in
 				// y = indices chosen in x.
-				final double[] p1 = bounds.getP1();
-				final double[] p2 = bounds.getP2();
+				final double[] p1 = bounds.getPoint();
+				final double[] p2 = bounds.getEndPoint();
 				
 				// We peak fit only the first of the data sets plotted for now.
 				AbstractDataset x  = selectedTrace.getXData();
@@ -345,18 +346,18 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		    		boolean requirePeakSelections = Activator.getDefault().getPreferenceStore().getBoolean(FittingConstants.SHOW_PEAK_SELECTIONS);
 					int ipeak = 1;
 					// Draw the regions
-					for (RegionBounds rb : newBean.getPeakBounds()) {
+					for (RectangularROI rb : newBean.getPeakROIs()) {
 						
 						final IRegion area = getPlottingSystem().createRegion("Peak Area "+ipeak, RegionType.XAXIS);
 						area.setRegionColor(ColorConstants.orange);
-						area.setRegionBounds(rb);
+						area.setROI(rb);
 						area.setMobile(false);
 						getPlottingSystem().addRegion(area);
 						newBean.addAreaRegion(area);
 						if (!requireFWHMSelections) area.setVisible(false);
 						
 						final IRegion line = getPlottingSystem().createRegion("Peak Line "+ipeak, RegionType.XAXIS_LINE);
-						line.setRegionBounds(new RegionBounds(rb.getCentre(), rb.getCentre()));
+						line.setROI(new LinearROI(rb.getMidPoint(), rb.getMidPoint()));
 						line.setRegionColor(ColorConstants.black);
 						//line.setMotile(false);
 						line.setAlpha(150);
@@ -428,7 +429,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 			final Serializable peaks = (Serializable)bean.getPeaks();
 			if (peaks!=null && !bean.isEmpty()) {
 				
-				// For some reason this causes npes if you create more than one for a given file.
+				// For some reason this causes NPEs if you create more than one for a given file.
 				
 				//plotServerConnection.putGUIInfo(GuiParameters.FITTEDPEAKS, peaks);
 			}

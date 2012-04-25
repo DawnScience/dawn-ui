@@ -3,7 +3,6 @@ package org.dawb.workbench.plotting.system.swtxy.selection;
 import java.util.Arrays;
 
 import org.csstudio.swt.xygraph.figures.Axis;
-import org.dawb.common.ui.plot.region.RegionBounds;
 import org.dawb.workbench.plotting.system.swtxy.IMobileFigure;
 import org.dawb.workbench.plotting.system.swtxy.translate.FigureTranslator;
 import org.dawb.workbench.plotting.system.swtxy.util.Draw2DUtils;
@@ -19,10 +18,10 @@ import org.eclipse.draw2d.MouseMotionListener;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 
+import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 
@@ -106,8 +105,8 @@ class AxisSelection extends AbstractSelectionRegion {
      		setRegionObjects(line1);
      	}
 		sync(getBean());
-        updateRegionBounds();
-        if (regionBounds==null) createRegionBounds(true);
+        updateROI();
+        if (roi ==null) createROI(true);
 
         
         parent.addFigureListener(new FigureListener() {
@@ -134,7 +133,7 @@ class AxisSelection extends AbstractSelectionRegion {
 	    			}
 	    			line1.getParent().repaint();
 	    			
-	    			fireRegionBoundsDragged(createRegionBounds(false));
+	    			fireROIDragged(createROI(false));
     			}
     		}
         };
@@ -276,17 +275,9 @@ class AxisSelection extends AbstractSelectionRegion {
 		};
 	}
 
-	@Override
-	protected void fireRoiSelection() {
-		final RegionBounds bounds = createRegionBounds(false);
-		final RectangularROI roi = new RectangularROI(bounds.getP1()[0], bounds.getP1()[1], bounds.getP1()[0]+bounds.getP2()[0], bounds.getP1()[1]+bounds.getP2()[1], 0);
-		if (getSelectionProvider()!=null) getSelectionProvider().setSelection(new StructuredSelection(roi));
-	}
-
-
 	protected Rectangle getRectangleFromVertices() {
 		final Point loc1   = line1.getLocation();
-		final Point loc4   = line2!=null 
+		final Point loc4   = line2 != null 
 				           ? line2.getBounds().getBottomRight()
 				           : line1.getBounds().getBottomRight();
 		Rectangle size = new Rectangle(loc1, loc4);
@@ -294,29 +285,35 @@ class AxisSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	public RegionBounds createRegionBounds(boolean recordResult) {
+	public ROIBase createROI(boolean recordResult) {
 		if (line1!=null) {
 			final Rectangle rect = getRectangleFromVertices();
 			double[] a1 = new double[]{getxAxis().getPositionValue(rect.x, false), getyAxis().getPositionValue(rect.y, false)};
 			double[] a2 = new double[]{getxAxis().getPositionValue(rect.x+rect.width, false), getyAxis().getPositionValue(rect.y+rect.height, false)};
-			final RegionBounds bounds = new RegionBounds(a1, a2);
-			if (recordResult) this.regionBounds = bounds;
-			return bounds;
+			final RectangularROI rroi = new RectangularROI(a1[0], a1[1], a2[0] - a1[0], a2[1] - a1[1], 0);
+			if (recordResult)
+				roi = rroi;
+			return rroi;
 		}
-		return super.getRegionBounds();
+		return super.getROI();
 	}
 	
-	protected void updateRegionBounds(RegionBounds bounds) {
-		
-		if (line1!=null) {
-			final Point     p1    = new Point(getxAxis().getValuePosition(bounds.getP1()[0], false),
-					                          getyAxis().getValuePosition(bounds.getP1()[1], false));
-			final Point     p2    = new Point(getxAxis().getValuePosition(bounds.getP2()[0], false),
-                                              getyAxis().getValuePosition(bounds.getP2()[1], false));
-			
-			final Rectangle local = new Rectangle(p1, p2);
-			setLocalBounds(local, line1.getParent().getBounds());
-			updateConnectionBounds();
+	protected void updateROI(ROIBase bounds) {
+		if (bounds instanceof RectangularROI) {
+			RectangularROI rroi = (RectangularROI) bounds;
+
+			if (line1 != null) {
+				
+				final Point p1 = new Point(getxAxis().getValuePosition(rroi.getPointX(), false),
+						getyAxis().getValuePosition(rroi.getPointY(), false));
+				double[] ept = rroi.getEndPoint();
+				final Point p2 = new Point(getxAxis().getValuePosition(ept[0], false),
+						getyAxis().getValuePosition(ept[1], false));
+
+				final Rectangle local = new Rectangle(p1, p2);
+				setLocalBounds(local, line1.getParent().getBounds());
+				updateConnectionBounds();
+			}
 		}
 	}
 
@@ -328,8 +325,8 @@ class AxisSelection extends AbstractSelectionRegion {
 	public void setLocalBounds(PointList clicks, Rectangle parentBounds) {
 		if (line1!=null) {
 			setLocalBounds(new Rectangle(clicks.getFirstPoint(), clicks.getLastPoint()), parentBounds);
-			createRegionBounds(true);
-			fireRegionBoundsChanged(getRegionBounds());
+			createROI(true);
+			fireROIChanged(getROI());
 		}
 	}
 
