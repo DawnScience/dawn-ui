@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IReusableEditor;
+import org.eclipse.ui.IShowEditorInput;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.eclipse.ui.part.Page;
@@ -23,7 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class ImageEditor extends MultiPageEditorPart implements IReusableEditor  {
+public class ImageEditor extends MultiPageEditorPart implements IReusableEditor, IShowEditorInput  {
 
 	public static final String ID = "org.dawb.workbench.editors.ImageEditor"; //$NON-NLS-1$
 
@@ -123,5 +124,10 @@ public class ImageEditor extends MultiPageEditorPart implements IReusableEditor 
 	public String toString(){
 		if (getEditorInput()!=null) return getEditorInput().getName();
 		return super.toString();
+	}
+
+	@Override
+	public void showEditorInput(IEditorInput editorInput) {
+		this.setInput(editorInput);		
 	}
 }
