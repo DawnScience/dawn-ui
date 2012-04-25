@@ -9,7 +9,7 @@
             class="org.dawnsci.rcp.histogram.HistogramToolPage"
             icon="icons/brightness_contrast.gif"
             id="org.dawnsci.rcp.histogram.histogram_tool_page"
-            label="Histogram"
+            label="Colour Scheme"
             tooltip="Histogram tool for adjusting contrast brighnes and other image settings">
       </plotting_tool_page>
    </extension>
