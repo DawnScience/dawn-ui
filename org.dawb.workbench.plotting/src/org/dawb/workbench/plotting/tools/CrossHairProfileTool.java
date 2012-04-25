@@ -9,7 +9,7 @@ import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingFactory;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
-import org.dawb.common.ui.plot.region.IRegionBoundsListener;
+import org.dawb.common.ui.plot.region.IROIListener;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.ROIEvent;
 import org.dawb.common.ui.plot.region.RegionEvent;
@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
-public class CrossHairProfileTool extends AbstractToolPage implements IRegionBoundsListener, MouseListener  {
+public class CrossHairProfileTool extends AbstractToolPage implements IROIListener, MouseListener  {
 
 	private final static Logger logger = LoggerFactory.getLogger(CrossHairProfileTool.class);
 	
@@ -151,11 +151,11 @@ public class CrossHairProfileTool extends AbstractToolPage implements IRegionBou
 		if (xHair!=null) {
 			if (!isActive()) xHair.addMouseListener(this);
 			xHair.setVisible(true);
-			xHair.addRegionBoundsListener(this);
+			xHair.addROIListener(this);
 		}
 		if (yHair!=null) {
 			yHair.setVisible(true);
-			yHair.addRegionBoundsListener(this);
+			yHair.addROIListener(this);
 		}
 
 		if (getPlottingSystem()!=null) {
@@ -191,11 +191,11 @@ public class CrossHairProfileTool extends AbstractToolPage implements IRegionBou
 		if (xHair!=null) {
 			xHair.removeMouseListener(this);
 			xHair.setVisible(false);
-			xHair.removeRegionBoundsListener(this);
+			xHair.removeROIListener(this);
 		}
 		if (yHair!=null) {
 			yHair.setVisible(false);
-			yHair.removeRegionBoundsListener(this);
+			yHair.removeROIListener(this);
 		}
 		plotter.clear();
 
@@ -340,7 +340,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IRegionBou
     		}
         });
         
-        region.addRegionBoundsListener(new IRegionBoundsListener.Stub() {
+        region.addROIListener(new IROIListener.Stub() {
         	@Override
     		public void roiDragged(ROIEvent evt) {
         		if (!isActive()) return;

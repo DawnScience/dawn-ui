@@ -140,12 +140,11 @@ public class HistogramToolPage extends AbstractToolPage {
 	private ILineTrace greenTrace;
 	private ILineTrace blueTrace;
 
-
-
 	// HELPERS
 	private ExtentionPointManager extentionPointManager;
 	private UIJob imagerepaintJob;
 	private PaletteData palleteData;
+	private int internalEvent = 0;
 
 
 	private PaletteListener paletteListener;
@@ -181,11 +180,12 @@ public class HistogramToolPage extends AbstractToolPage {
 		};
 		
 		
-		// get a palette update listener to deal with pallete updates
+		// get a palette update listener to deal with palatte updates
 		paletteListener = new PaletteListener(){
 
 			@Override
 			public void paletteChanged(PaletteEvent event) {
+				if (internalEvent > 0) return;
 				logger.trace("paletteChanged");
 				palleteData = event.getPaletteData();		
 				updateHistogramToolElements(null, false);
@@ -193,14 +193,19 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			@Override
 			public void minChanged(PaletteEvent event) {
+				if (internalEvent > 0) return;
 				logger.trace("paletteListener minChanged firing");
+				histoMin = image.getMin().doubleValue();
+				updateHistogramToolElements(null, false);
 				
 			}
 
 			@Override
 			public void maxChanged(PaletteEvent event) {
+				if (internalEvent > 0) return;
 				logger.trace("paletteListener maxChanged firing");
-				
+				histoMax = image.getMax().doubleValue();
+				updateHistogramToolElements(null, false);
 			}
 			
 		};
@@ -270,8 +275,7 @@ public class HistogramToolPage extends AbstractToolPage {
 				logger.trace("colourSchemeListener");
 				updateColourScheme();
 				buildPalleteData();
-				updateHistogramToolElements(event);
-
+				updateHistogramToolElements(event);;
 			}
 
 			@Override
@@ -300,6 +304,7 @@ public class HistogramToolPage extends AbstractToolPage {
 			@Override
 			public IStatus runInUIThread(IProgressMonitor mon) {
 				logger.trace("imagerepaintJob running");
+				internalEvent++;
 				// update the colourscale
 				image.setMax(histoMax);
 				if (mon.isCanceled()) return Status.CANCEL_STATUS;
@@ -310,7 +315,7 @@ public class HistogramToolPage extends AbstractToolPage {
 				image.setPaletteData(palleteData);
 				if (mon.isCanceled()) return Status.CANCEL_STATUS;
 
-				getPlottingSystem().repaint();
+				internalEvent--;
 				return Status.OK_STATUS;
 			}
 		};

@@ -2,6 +2,7 @@ package org.dawb.workbench.plotting.system.swtxy;
 
 import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,7 +17,6 @@ import org.dawb.common.services.ImageServiceBean;
 import org.dawb.common.services.ImageServiceBean.HistoType;
 import org.dawb.common.services.ImageServiceBean.ImageOrigin;
 import org.dawb.common.ui.image.PaletteFactory;
-import org.dawb.common.ui.plot.region.RegionBounds;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceContainer;
@@ -40,10 +40,6 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.function.Downsample;
 import uk.ac.diamond.scisoft.analysis.dataset.function.DownsampleMode;
-import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
-import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
-import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 
 /**
  * A trace which draws an image to the plot.
@@ -187,7 +183,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				
 				if (rescaleType==ImageScaleType.REHISTOGRAM) { // Avoids changing colouring to 
 					// max and min of new selection.
-					AbstractDataset slice = slice(getAxisBounds());
+					AbstractDataset slice = slice(getXAxis().getRange(), getYAxis().getRange());
 					float[] fa = service.getFastStatistics(new ImageServiceBean(slice, getHistoType()));
 					setMin(fa[0]);
 					setMax(fa[1]);
@@ -222,12 +218,17 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				 *      x3,y3--------------x4,y4
 				 */
 				ImageData data = imageData;
-				RESCALE: if (!getAxisBounds().equals(getImageBounds())) {
-					final double x1Rat = getXRatio(getX(true));
-					final double y1Rat = getYRatio(getY(true));
-					final double x4Rat = getXRatio(getX(false));
-					final double y4Rat = getYRatio(getY(false));
-					
+				ImageOrigin origin = getImageOrigin();
+				int[] shape = image.getShape();
+				int[] imageRanges = getImageBounds(shape, origin);
+				int[] axisRanges = getAxisBounds(); 
+				RESCALE: if (!Arrays.equals(axisRanges, imageRanges)) {
+
+					final double x1Rat = getXRatio(true, shape, origin);
+					final double y1Rat = getYRatio(true, shape, origin);
+					final double x4Rat = getXRatio(false, shape, origin);
+					final double y4Rat = getYRatio(false, shape, origin);
+
 					// If scales are not requiring a slice, break
 					if (x1Rat==0d && y1Rat==0d && x4Rat==1d && y4Rat==1d) {
 						break RESCALE;
@@ -263,34 +264,43 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 	}
 
-	private double getX(boolean isTopLeft) {
-		
+	private int[] getAxisBounds() {
+		final Range xr = getXAxis().getRange();
+		final Range yr = getYAxis().getRange();
+		return getBounds(xr, yr);
+	}
+
+	private int[] getBounds(Range xr, Range yr) {
+		return new int[] {(int) Math.floor(xr.getLower()), (int) Math.floor(yr.getLower()),
+				(int) Math.ceil(xr.getUpper()), (int) Math.ceil(yr.getUpper())};
+	}
+
+	private double getXRatio(boolean isTopLeft, final int[] shape, ImageOrigin origin) {
 		double xCoord = isTopLeft ? getXAxis().getRange().getLower() : getXAxis().getRange().getUpper();
-		switch (getImageOrigin()) {
+		switch (origin) {
 		case TOP_LEFT:
-			return xCoord;
+			return xCoord/shape[1];
 		case TOP_RIGHT:
-			return image.getShape()[0]-xCoord;
+			return (shape[0]-xCoord)/shape[0];
 		case BOTTOM_RIGHT:
-			return image.getShape()[1]-xCoord;
+			return (shape[1]-xCoord)/shape[1];
 		case BOTTOM_LEFT:
-			return xCoord;
+			return xCoord/shape[0];
 		}
 		return 0d;
 	}
 
-	private double getY(boolean isTopLeft) {
-		
+	private double getYRatio(boolean isTopLeft, final int[] shape, ImageOrigin origin) {
 		double yCoord = isTopLeft ? getYAxis().getRange().getUpper() : getYAxis().getRange().getLower();
-		switch (getImageOrigin()) {
+		switch (origin) {
 		case TOP_LEFT:
-			return yCoord;
+			return yCoord/shape[0];
 		case TOP_RIGHT:
-			return yCoord;
+			return yCoord/shape[1];
 		case BOTTOM_RIGHT:
-			return image.getShape()[0]-yCoord;
+			return (shape[0]-yCoord)/shape[0];
 		case BOTTOM_LEFT:
-			return image.getShape()[1]-yCoord;
+			return (shape[1]-yCoord)/shape[1];
 		}
 		return 0d;
 	}
@@ -428,53 +438,46 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		return image;
 	}
 
-	@Override
-	public AbstractDataset slice(RegionBounds bounds) {
-		
+	/**
+	 * Create a slice of data from given ranges
+	 * @param xr
+	 * @param yr
+	 * @return
+	 */
+	public AbstractDataset slice(Range xr, Range yr) {
 		final AbstractDataset data = getData();
 		
 		// Check that a slice needed, this speeds up the initial show of the image.
-		final RegionBounds imageBounds = getImageBounds(); 
-		if (imageBounds!=null && imageBounds.equals(bounds))  {
+		final int[] shape = image.getShape();
+		final int[] imageRanges = getImageBounds(shape, getImageOrigin());
+		final int[] bounds = getBounds(xr, yr);
+		if (imageRanges!=null && Arrays.equals(imageRanges, bounds)) {
 			return image;
 		}
 		
-		int[] xRange = getRange(bounds, 0, false);
-		int[] yRange = getRange(bounds, 1, false);		
-				
+		int[] xRange = getRange(bounds, shape[0], 0, false);
+		int[] yRange = getRange(bounds, shape[1], 1, false);		
+
 		try {
-			return data.getSlice(new int[]{xRange[0],yRange[0]}, 
-					             new int[]{xRange[1],yRange[1]}, 
-					             new int[]{1,     1});
-			
+			return data.getSlice(new int[]{xRange[0],yRange[0]}, new int[]{xRange[1],yRange[1]}, null);
 		} catch (IllegalArgumentException iae) {
 			logger.error("Cannot slice image", iae);
 			return getData();
 		}
 	}
 
-	private int[] getRange(RegionBounds bounds, int index, boolean inverted) {
-//		private int[] getRange(ROIBase bounds, int index, boolean inverted) {
-		
-//		if (bounds instanceof EllipticalROI) {
-//			bounds = bounds.getOuterRectangle();
-//		} else if (bounds instanceof SectorROI) {
-//			
-//		}
-
-		if (bounds.isCircle()) bounds = bounds.getOuterRectangle();
-		final int side = image.getShape()[index];
-		int start = (int)Math.round(bounds.getP1()[index]);
+	private int[] getRange(int[] bounds, int side, int index, boolean inverted) {
+		int start = bounds[index];
 		if (inverted) start = side-start;
 		
-		int stop  = (int)Math.round(bounds.getP2()[index]);
+		int stop  = bounds[2+index];
 		if (inverted) stop = side-stop;
 
 		if (start>stop) {
-			start = (int)Math.round(bounds.getP2()[index]);
+			start = bounds[2+index];
 			if (inverted) start = side-start;
 			
-			stop  = (int)Math.round(bounds.getP1()[index]);
+			stop  = bounds[index];
 			if (inverted) stop = side-stop;
 		}
 		
@@ -487,6 +490,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	public void axisRangeChanged(Axis axis, Range old_range, Range new_range) {
 		//createScaledImage(true, null);
 	}
+
 	/**
 	 * We do a bit here to ensure that 
 	 * not too many calls to createScaledImage(...) are made.
@@ -508,89 +512,44 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 
 
-	private double getXRatio(double x) {
-		
-		if (getImageOrigin()==ImageOrigin.TOP_LEFT || getImageOrigin()==ImageOrigin.BOTTOM_RIGHT) {
-			return  x / image.getShape()[1];
-		} else {
-			return  x / image.getShape()[0];
-		}
-	}
-	private double getYRatio(double y) {
-		
-	    if (getImageOrigin()==ImageOrigin.TOP_LEFT || getImageOrigin()==ImageOrigin.BOTTOM_RIGHT) {
-			return  y / image.getShape()[0];
-		} else {
-			return  y / image.getShape()[1];
-		}
-	}
-	
-
-
 	public void performAutoscale() {
+		final int[] shape = image.getShape();
 		switch(getImageOrigin()) {
 		case TOP_LEFT:
-			xAxis.setRange(0, image.getShape()[1]);
-			yAxis.setRange(image.getShape()[0], 0);	
+			xAxis.setRange(0, shape[1]);
+			yAxis.setRange(shape[0], 0);	
 			break;
 			
 		case BOTTOM_LEFT:
-			xAxis.setRange(0, image.getShape()[0]);
-			yAxis.setRange(0, image.getShape()[1]);		
+			xAxis.setRange(0, shape[0]);
+			yAxis.setRange(0, shape[1]);		
 			break;
 
 		case BOTTOM_RIGHT:
-			xAxis.setRange(image.getShape()[1], 0);
-			yAxis.setRange(0, image.getShape()[0]);		
+			xAxis.setRange(shape[1], 0);
+			yAxis.setRange(0, shape[0]);		
 			break;
 
 		case TOP_RIGHT:
-			xAxis.setRange(image.getShape()[0], 0);
-			yAxis.setRange(image.getShape()[1], 0);		
+			xAxis.setRange(shape[0], 0);
+			yAxis.setRange(shape[1], 0);		
 			break;
 		
 		}
 	}
 	
-	private RegionBounds getImageBounds() {
-		int[] s = image.getShape();
-//		RectangularROI r = new RectangularROI(s[0], s[1], 0);
-
-		switch(getImageOrigin()) {
+	private int[] getImageBounds(int[] shape, ImageOrigin origin) {
+		switch (origin) {
 		case TOP_LEFT:
-			return new RegionBounds(new double[]{0, s[0]}, new double[]{s[1], 0});	
-						
+			return new int[] {0, shape[0], shape[1], 0};
 		case BOTTOM_LEFT:
-			return new RegionBounds(new double[]{0, 0}, new double[]{s[0], s[1]});	
-
+			return new int[] {0, 0, shape[0], shape[1]};
 		case BOTTOM_RIGHT:
-			return new RegionBounds(new double[]{s[1], 0}, new double[]{0, s[0]});	
-
+			return new int[] {shape[1], 0, 0, shape[0]};
 		case TOP_RIGHT:
-			return new RegionBounds(new double[]{s[0], s[1]}, new double[]{0,0});	
-//		case TOP_LEFT:
-//			r.setAngleDegrees(0);
-//			break;
-//		case BOTTOM_LEFT:
-//			r.setAngleDegrees(0);
-//			break;
-//		case BOTTOM_RIGHT:
-//			r.setAngleDegrees(0);
-//			break;
-//		case TOP_RIGHT:
-//			r.setAngleDegrees(0);
-//			break;
-		
+			return new int[] {shape[0], shape[1], 0, 0};
 		}
 		return null;
-	}
-	
-	private RegionBounds getAxisBounds() {
-		final Range xr = getXAxis().getRange();
-		final Range yr = getYAxis().getRange();
-		double [] p1 = new double[]{xr.getLower(), yr.getLower()};
-		double [] p2 = new double[]{xr.getUpper(), yr.getUpper()};
-		return new RegionBounds(p1, p2);
 	}
 
 	public void setImageOrigin(ImageOrigin imageOrigin) {
@@ -606,12 +565,13 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 * Creates new axis bounds, updates the label data set
 	 */
 	private void createAxisBounds() {
+		final int[] shape = image.getShape();
 		if (getImageOrigin()==ImageOrigin.TOP_LEFT || getImageOrigin()==ImageOrigin.BOTTOM_RIGHT) {
-			setupAxis(getXAxis(), new Range(0,image.getShape()[1]), axes!=null&&axes.size()>0 ? axes.get(0) : null);
-			setupAxis(getYAxis(), new Range(0,image.getShape()[0]), axes!=null&&axes.size()>1 ? axes.get(1) : null);
+			setupAxis(getXAxis(), new Range(0,shape[1]), axes!=null&&axes.size()>0 ? axes.get(0) : null);
+			setupAxis(getYAxis(), new Range(0,shape[0]), axes!=null&&axes.size()>1 ? axes.get(1) : null);
 		} else {
-			setupAxis(getXAxis(), new Range(0,image.getShape()[0]), axes!=null&&axes.size()>1 ? axes.get(1) : null);
-			setupAxis(getYAxis(), new Range(0,image.getShape()[1]), axes!=null&&axes.size()>0 ? axes.get(0) : null);
+			setupAxis(getXAxis(), new Range(0,shape[0]), axes!=null&&axes.size()>1 ? axes.get(1) : null);
+			setupAxis(getYAxis(), new Range(0,shape[1]), axes!=null&&axes.size()>0 ? axes.get(0) : null);
 		}
 	}
 	

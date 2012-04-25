@@ -8,7 +8,7 @@ import java.util.Map;
 
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
-import org.dawb.common.ui.plot.region.IRegionBoundsListener;
+import org.dawb.common.ui.plot.region.IROIListener;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.ROIEvent;
 import org.dawb.common.ui.plot.region.RegionEvent;
@@ -59,7 +59,7 @@ import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
  * @author fcp94556
  *
  */
-public class MeasurementTool extends AbstractToolPage implements IRegionListener, IRegionBoundsListener {
+public class MeasurementTool extends AbstractToolPage implements IRegionListener, IROIListener {
 
 	public class RegionColorListener implements ISelectionChangedListener {
 
@@ -316,7 +316,7 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 			try {
 				getPlottingSystem().addRegionListener(this);
 				final Collection<IRegion> regions = getPlottingSystem().getRegions();
-				for (IRegion iRegion : regions) iRegion.addRegionBoundsListener(this);
+				for (IRegion iRegion : regions) iRegion.addROIListener(this);
 				
 				int i=1;
 				while(true) { // Add with a unique name
@@ -356,7 +356,7 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 		try {
 			getPlottingSystem().removeRegionListener(this);
 			final Collection<IRegion> regions = getPlottingSystem().getRegions();
-			for (IRegion iRegion : regions) iRegion.removeRegionBoundsListener(this);
+			for (IRegion iRegion : regions) iRegion.removeROIListener(this);
 		} catch (Exception e) {
 			logger.error("Cannot remove region listeners!", e);
 		}		
@@ -399,7 +399,7 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 		if (!isActive()) return;
 		if (viewer!=null) viewer.refresh();
 		if (evt.getRegion()!=null) {
-			evt.getRegion().addRegionBoundsListener(this);
+			evt.getRegion().addROIListener(this);
 		}
 	}
 
@@ -408,7 +408,7 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 		if (!isActive()) return;
 		if (viewer!=null) viewer.refresh();
 		if (evt.getRegion()!=null) {
-			evt.getRegion().removeRegionBoundsListener(this);
+			evt.getRegion().removeROIListener(this);
 		}
 	}
 
