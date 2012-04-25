@@ -62,8 +62,8 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 		setCursor(null);
 		this.bean = new RegionBean();
 		bean.setName(name);
-		bean.setxAxis(xAxis);
-		bean.setyAxis(yAxis);
+		bean.setXAxis(xAxis);
+		bean.setYAxis(yAxis);
 		xAxis.addListener(this);
 		yAxis.addListener(this);
 	}
@@ -138,8 +138,8 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	public void sync(RegionBean bean) {
 		setName(bean.getName());
 		setShowPosition(bean.isShowPosition());
-		setxAxis(bean.getxAxis());
-		setyAxis(bean.getyAxis());
+		setXAxis(bean.getXAxis());
+		setYAxis(bean.getYAxis());
 		setXyGraph(bean.getXyGraph());
 		setRegionColor(bean.getRegionColor());
 		setAlpha(bean.getAlpha());
@@ -207,8 +207,8 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	}
 
 	protected void clearListeners() {
-        getxAxis().removeListener(this);
-        getyAxis().removeListener(this);
+        getXAxis().removeListener(this);
+        getYAxis().removeListener(this);
 		super.clearListeners();
 	}
 	
@@ -321,34 +321,34 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 		}
 	}
 
-	public Axis getxAxis() {
-		return bean.getxAxis();
+	public Axis getXAxis() {
+		return bean.getXAxis();
 	}
 
-	public void setxAxis(Axis xAxis) {
+	public void setXAxis(Axis xAxis) {
 		if (regionObjects!=null) for (IFigure ob : regionObjects) {
 			if (ob instanceof SelectionHandle) {
 				((SelectionHandle)ob).setxAxis(xAxis);
 			}
 		}
-		getxAxis().removeListener(this);
+		getXAxis().removeListener(this);
 		xAxis.addListener(this);
-		bean.setxAxis(xAxis);
+		bean.setXAxis(xAxis);
 	}
 
-	public Axis getyAxis() {
-		return bean.getyAxis();
+	public Axis getYAxis() {
+		return bean.getYAxis();
 	}
 
-	public void setyAxis(Axis yAxis) {
+	public void setYAxis(Axis yAxis) {
 		if (regionObjects!=null) for (IFigure ob : regionObjects) {
 			if (ob instanceof SelectionHandle) {
 				((SelectionHandle)ob).setyAxis(yAxis);
 			}
 		}
-		getyAxis().removeListener(this);
+		getYAxis().removeListener(this);
 		yAxis.addListener(this);
-		bean.setyAxis(yAxis);
+		bean.setYAxis(yAxis);
 	}
 
 	public TranslationListener createRegionNotifier() {

@@ -125,7 +125,7 @@ class BoxSelection extends AbstractSelectionRegion {
 
 	private SelectionHandle createSelectionRectangle(Color color, int size, double... location) {
 		
-		SelectionHandle rect = new RectangularHandle(getxAxis(), getyAxis(), color, connection, size, location);
+		SelectionHandle rect = new RectangularHandle(getXAxis(), getYAxis(), color, connection, size, location);
 		FigureTranslator mover = new FigureTranslator(getXyGraph(), rect);	
 		mover.addTranslationListener(createRegionNotifier());
 
@@ -187,8 +187,8 @@ class BoxSelection extends AbstractSelectionRegion {
 	public ROIBase createROI(boolean recordResult) {
 		if (p1!=null) {
 			final Rectangle rect = getRectangleFromVertices();
-			double[] a1 = new double[]{getxAxis().getPositionValue(rect.x, false), getyAxis().getPositionValue(rect.y, false)};
-			double[] a2 = new double[]{getxAxis().getPositionValue(rect.x+rect.width, false), getyAxis().getPositionValue(rect.y+rect.height, false)};
+			double[] a1 = new double[]{getXAxis().getPositionValue(rect.x, false), getYAxis().getPositionValue(rect.y, false)};
+			double[] a2 = new double[]{getXAxis().getPositionValue(rect.x+rect.width, false), getYAxis().getPositionValue(rect.y+rect.height, false)};
 			final RectangularROI rroi = new RectangularROI(a1[0], a1[1], a2[0] - a1[0], a2[1] - a1[1], 0);
 			if (recordResult)
 				roi = rroi;

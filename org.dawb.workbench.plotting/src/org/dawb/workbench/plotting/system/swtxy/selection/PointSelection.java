@@ -48,7 +48,7 @@ public class PointSelection extends AbstractSelectionRegion {
 
 	@Override
 	public void createContents(Figure parent) {
-		this.point = new RectangularHandle(getxAxis(), getyAxis(), getRegionColor(), parent, getLineWidth(), 100d, 100d);
+		this.point = new RectangularHandle(getXAxis(), getYAxis(), getRegionColor(), parent, getLineWidth(), 100d, 100d);
 		parent.add(point);
 		mover = new FigureTranslator(getXyGraph(), point);	
 		mover.addTranslationListener(createRegionNotifier());

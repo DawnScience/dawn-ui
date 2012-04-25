@@ -43,11 +43,11 @@ class LineSelection extends AbstractSelectionRegion {
 
 	@Override
 	public void createContents(final Figure parent) {
-		this.startBox = new RectangularHandle(getxAxis(), getyAxis(), getRegionColor(), connection, SIDE, 100, 100);
+		this.startBox = new RectangularHandle(getXAxis(), getYAxis(), getRegionColor(), connection, SIDE, 100, 100);
 		FigureTranslator mover = new FigureTranslator(getXyGraph(), startBox);
 		mover.addTranslationListener(createRegionNotifier());
 
-		this.endBox = new RectangularHandle(getxAxis(), getyAxis(), getRegionColor(), connection, SIDE, 200, 200);
+		this.endBox = new RectangularHandle(getXAxis(), getYAxis(), getRegionColor(), connection, SIDE, 200, 200);
 		mover = new FigureTranslator(getXyGraph(), endBox);	
 		mover.addTranslationListener(createRegionNotifier());
 				

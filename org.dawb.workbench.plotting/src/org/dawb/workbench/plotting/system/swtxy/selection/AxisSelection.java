@@ -288,8 +288,8 @@ class AxisSelection extends AbstractSelectionRegion {
 	public ROIBase createROI(boolean recordResult) {
 		if (line1!=null) {
 			final Rectangle rect = getRectangleFromVertices();
-			double[] a1 = new double[]{getxAxis().getPositionValue(rect.x, false), getyAxis().getPositionValue(rect.y, false)};
-			double[] a2 = new double[]{getxAxis().getPositionValue(rect.x+rect.width, false), getyAxis().getPositionValue(rect.y+rect.height, false)};
+			double[] a1 = new double[]{getXAxis().getPositionValue(rect.x, false), getYAxis().getPositionValue(rect.y, false)};
+			double[] a2 = new double[]{getXAxis().getPositionValue(rect.x+rect.width, false), getYAxis().getPositionValue(rect.y+rect.height, false)};
 			final RectangularROI rroi = new RectangularROI(a1[0], a1[1], a2[0] - a1[0], a2[1] - a1[1], 0);
 			if (recordResult)
 				roi = rroi;
@@ -304,11 +304,11 @@ class AxisSelection extends AbstractSelectionRegion {
 
 			if (line1 != null) {
 				
-				final Point p1 = new Point(getxAxis().getValuePosition(rroi.getPointX(), false),
-						getyAxis().getValuePosition(rroi.getPointY(), false));
+				final Point p1 = new Point(getXAxis().getValuePosition(rroi.getPointX(), false),
+						getYAxis().getValuePosition(rroi.getPointY(), false));
 				double[] ept = rroi.getEndPoint();
-				final Point p2 = new Point(getxAxis().getValuePosition(ept[0], false),
-						getyAxis().getValuePosition(ept[1], false));
+				final Point p2 = new Point(getXAxis().getValuePosition(ept[0], false),
+						getYAxis().getValuePosition(ept[1], false));
 
 				final Rectangle local = new Rectangle(p1, p2);
 				setLocalBounds(local, line1.getParent().getBounds());
