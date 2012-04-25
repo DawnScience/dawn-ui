@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.csstudio.swt.xygraph.figures.Annotation;
+import org.dawb.common.services.ImageServiceBean.ImageOrigin;
 import org.dawb.common.ui.image.PaletteFactory;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
@@ -13,7 +14,6 @@ import org.dawb.common.ui.plot.PlottingActionBarManager;
 import org.dawb.common.ui.plot.annotation.AnnotationUtils;
 import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
 import org.dawb.common.ui.plot.trace.IImageTrace;
-import org.dawb.common.ui.plot.trace.IImageTrace.ImageOrigin;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace.PointStyle;
 import org.dawb.common.ui.plot.trace.ILineTrace.TraceType;
@@ -203,10 +203,10 @@ class LightWeightActionBarsManager extends PlottingActionBarManager {
 		origins.setImageDescriptor(Activator.getImageDescriptor("icons/origins.png"));
 		
 		CheckableActionGroup group      = new CheckableActionGroup();
-        ImageOrigin imageOrigin = IImageTrace.ImageOrigin.forLabel(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.ORIGIN_PREF));
+        ImageOrigin imageOrigin = ImageOrigin.forLabel(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.ORIGIN_PREF));
         IAction selectedAction  = null;
         
-        for (final ImageOrigin origin : IImageTrace.ImageOrigin.origins) {
+        for (final ImageOrigin origin : ImageOrigin.origins) {
 			
         	final IAction action = new Action(origin.getLabel(), IAction.AS_CHECK_BOX) {
         		public void run() {

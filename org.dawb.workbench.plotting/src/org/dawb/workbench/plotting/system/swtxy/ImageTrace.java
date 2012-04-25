@@ -13,7 +13,9 @@ import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.IAxisListener;
 import org.csstudio.swt.xygraph.linearscale.Range;
 import org.dawb.common.services.IImageService;
-import org.dawb.common.services.IImageService.ImageServiceBean;
+import org.dawb.common.services.ImageServiceBean;
+import org.dawb.common.services.ImageServiceBean.HistoType;
+import org.dawb.common.services.ImageServiceBean.ImageOrigin;
 import org.dawb.common.ui.image.PaletteFactory;
 import org.dawb.common.ui.plot.region.RegionBounds;
 import org.dawb.common.ui.plot.trace.IImageTrace;
@@ -51,27 +53,15 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	
 	private static final Logger logger = LoggerFactory.getLogger(ImageTrace.class);
 
-	private String         name;
-	private Axis           xAxis;
-	private Axis           yAxis;
+	private String           name;
+	private Axis             xAxis;
+	private Axis             yAxis;
 	private AbstractDataset  image;
-	private PaletteData    paletteData;
-	private ImageOrigin    imageOrigin;
-    private Number         min, max;
-	private DownsampleType downsampleType=DownsampleType.MEAN;
-	private int            currentDownSampleBin=-1;
+	private DownsampleType   downsampleType=DownsampleType.MEAN;
+	private int              currentDownSampleBin=-1;
 	private List<AbstractDataset> axes;
-	private HistoType      histoType;
-	
-	private static Map<IImageTrace.ImageOrigin, IImageService.ImageOrigin> imageOriginaMap;
-	static {
-		imageOriginaMap = new HashMap<IImageTrace.ImageOrigin, IImageService.ImageOrigin>();
-		imageOriginaMap.put(IImageTrace.ImageOrigin.TOP_LEFT,     IImageService.ImageOrigin.TOP_LEFT);
-		imageOriginaMap.put(IImageTrace.ImageOrigin.TOP_RIGHT,    IImageService.ImageOrigin.TOP_RIGHT);
-		imageOriginaMap.put(IImageTrace.ImageOrigin.BOTTOM_LEFT,  IImageService.ImageOrigin.BOTTOM_LEFT);
-		imageOriginaMap.put(IImageTrace.ImageOrigin.BOTTOM_RIGHT, IImageService.ImageOrigin.BOTTOM_RIGHT);
-	}
-	
+	private ImageServiceBean imageServiceBean;
+		
 	public ImageTrace(final String name, 
 			          final Axis xAxis, 
 			          final Axis yAxis) {
@@ -80,9 +70,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		this.xAxis = xAxis;		
 		this.yAxis = yAxis;
 
-		this.paletteData = PaletteFactory.getPalette(Activator.getDefault().getPreferenceStore().getInt(PlottingConstants.P_PALETTE));	
-		this.imageOrigin = IImageTrace.ImageOrigin.forLabel(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.ORIGIN_PREF));
-		this.histoType	 = IImageTrace.HistoType.forLabel(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.HISTO_PREF));
+		this.imageServiceBean = new ImageServiceBean();
+		imageServiceBean.setPalette(PaletteFactory.getPalette(Activator.getDefault().getPreferenceStore().getInt(PlottingConstants.P_PALETTE)));	
+		imageServiceBean.setOrigin(ImageOrigin.forLabel(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.ORIGIN_PREF)));
+		imageServiceBean.setHistogramType(HistoType.forLabel(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.HISTO_PREF)));
 				
 		xAxis.addListener(this);
 		yAxis.addListener(this);
@@ -126,11 +117,11 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 
 	public PaletteData getPaletteData() {
-		return paletteData!=null ? new PaletteData(paletteData.getRGBs()) : null;
+		return imageServiceBean.getPalette();
 	}
 
 	public void setPaletteData(PaletteData paletteData) {
-		this.paletteData = paletteData;
+		imageServiceBean.setPalette(paletteData);
 		createScaledImage(ImageScaleType.FORCE_REIMAGE, null);
 		repaint();
 		firePaletteDataListeners(paletteData);
@@ -146,7 +137,6 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 	private Image            scaledImage;
 	private ImageData        imageData;
-	private ImageServiceBean lastImageServiceBean;
 	private boolean          imageCreationAllowed = true;
 	/**
 	 * When this is called the SWT image is created
@@ -190,25 +180,18 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 				final IImageService service = (IImageService)PlatformUI.getWorkbench().getService(IImageService.class);
 
-				final ImageServiceBean bean =  new IImageService.ImageServiceBean();
-				bean.setImage(reducedFullImage);
-				bean.setOrigin(imageOriginaMap.get(getImageOrigin()));
-				bean.setPalette(getPaletteData());
-				bean.setMonitor(monitor);
+				imageServiceBean.setImage(reducedFullImage);
+				imageServiceBean.setMonitor(monitor);
 				
 				if (rescaleType==ImageScaleType.REHISTOGRAM) { // Avoids changing colouring to 
 					// max and min of new selection.
 					AbstractDataset slice = slice(getAxisBounds());
-					float[] fa = getFastStatistics(slice);
+					float[] fa = service.getFastStatistics(new ImageServiceBean(slice, getHistoType()));
 					setMin(fa[0]);
 					setMax(fa[1]);
 				}
-
-				if (getMin()!=null) bean.setMin(getMin());
-				if (getMax()!=null) bean.setMax(getMax());
 				
-				this.imageData   = service.getImageData(bean);
-				this.lastImageServiceBean = bean;
+				this.imageData   = service.getImageData(imageServiceBean);
 				
 			} catch (Exception e) {
 				logger.error("Cannot create image from data!", e);
@@ -425,7 +408,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		xAxis.removeListener(this);
 		yAxis.removeListener(this);
 		axisRedrawActive = false;
-		lastImageServiceBean = null;
+		imageServiceBean.dispose();
+		imageServiceBean = null;
 	}
 
 	private void clearAspect(Axis axis) {
@@ -587,7 +571,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 
 	public void setImageOrigin(ImageOrigin imageOrigin) {
-		this.imageOrigin = imageOrigin;
+		imageServiceBean.setOrigin(imageOrigin);
 		createAxisBounds();
 		performAutoscale();
 		createScaledImage(ImageScaleType.FORCE_REIMAGE, null);
@@ -614,7 +598,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 	@Override
 	public ImageOrigin getImageOrigin() {
-		return imageOrigin;
+		return imageServiceBean.getOrigin();
 	}
 	
 	@Override
@@ -626,11 +610,13 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		this.image = image;
 		if (this.mipMap!=null) mipMap.clear();
 		
-		final float[] fa = getFastStatistics(image);
+		imageServiceBean.setImage(image);
+		
+		final IImageService service = (IImageService)PlatformUI.getWorkbench().getService(IImageService.class);
+		final float[] fa = service.getFastStatistics(imageServiceBean);
 		setMin(fa[0]);
 		setMax(fa[1]);
 		this.axes  = axes;
-		this.lastImageServiceBean = null;
 		
 		createAxisBounds();
 
@@ -668,35 +654,26 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 
 	public Number getMin() {
-		return min;
+		return imageServiceBean.getMin();
 	}
 
 	public void setMin(Number min) {
-		this.min = min;
+		imageServiceBean.setMin(min);
 		fireMinDataListeners();
 	}
 
 	public Number getMax() {
-		return max;
+		return imageServiceBean.getMax();
 	}
 
 	public void setMax(Number max) {
-		this.max = max;
+		imageServiceBean.setMax(max);
 		fireMaxDataListeners();
 	}
 
 	@Override
 	public ImageServiceBean getImageServiceBean() {
-		return lastImageServiceBean;
-	}
-	
-	@Override
-	public Number getCalculatedMax() {
-		return getMax()!=null ? getMax() : getImageServiceBean().getMax();
-	}
-	@Override
-	public Number getCalculatedMin() {
-		return getMin()!=null ? getMin() : getImageServiceBean().getMin();
+		return imageServiceBean;
 	}
 
 	private Collection<PaletteListener> paletteListeners;
@@ -769,55 +746,6 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		repaint();
 	}
 	
-	/**
-	 * Fast statistcs as a rough guide - this is faster than AbstractDataset.getMin()
-	 * and getMax() which may cache but slows the opening of images too much.
-	 * 
-	 * @param bean
-	 * @return [0] = min [1] = max
-	 */
-	private float[] getFastStatistics(AbstractDataset image) {
-		
-		float min = Float.MAX_VALUE;
-		float max = -Float.MAX_VALUE;
-		float sum = 0.0f;
-		final int size = image.getSize();
-		for (int index = 0; index<size; ++index) {
-			
-			final double dv = image.getElementDoubleAbs(index);
-			if (Double.isNaN(dv))      continue;
-			if (Double.isInfinite(dv)) continue;
-			
-			final float val = (float)dv;
-			sum += val;
-			if (val < min) min = val;
-			if (val > max) max = val;
-			
-		}
-		
-		float retMin = min;
-		float retMax = Float.NaN;
-		
-		if (getHistoType()==HistoType.MEAN) {
-			float mean = sum / size;
-			retMax = ((float)Math.E)*mean; // Not statistical, E seems to be better than 3...
-			
-		} else if (getHistoType()==HistoType.MEDIAN) {
-			
-			float median = Float.NaN;
-			try {
-				median = ((Number)Stats.median(image)).floatValue();
-			} catch (Exception ne) {
-				median = ((Number)Stats.median(image.cast(AbstractDataset.INT16))).floatValue();
-			}
-			retMax = 2f*median;
-		}
-		
-		if (retMax > max)	retMax = max;
-		
-		return new float[]{retMin, retMax};
-
-	}
 
 	@Override
 	public List<AbstractDataset> getAxes() {
@@ -830,7 +758,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 */
 	@Override
 	public HistoType getHistoType() {
-		return this.histoType;
+		return imageServiceBean.getHistogramType();
 	}
 	
 	/**
@@ -838,7 +766,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 */
 	@Override
 	public void setHistoType(HistoType type) {
-		this.histoType = type;
+		imageServiceBean.setHistogramType(type);
 		Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.HISTO_PREF, type.getLabel());
 		createScaledImage(ImageScaleType.REHISTOGRAM, null);
 		repaint();

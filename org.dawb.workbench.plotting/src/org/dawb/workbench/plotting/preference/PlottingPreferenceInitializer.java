@@ -10,7 +10,8 @@
 
 package org.dawb.workbench.plotting.preference;
 
-import org.dawb.common.ui.plot.trace.IImageTrace;
+import org.dawb.common.services.ImageServiceBean.HistoType;
+import org.dawb.common.services.ImageServiceBean.ImageOrigin;
 import org.dawb.workbench.plotting.Activator;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -26,9 +27,9 @@ public class PlottingPreferenceInitializer extends AbstractPreferenceInitializer
         store.setDefault(PlottingConstants.PLOT_X_DATASET, false);
 		store.setDefault(PlottingConstants.XY_SHOWLEGEND,  true);
 		store.setDefault(PlottingConstants.P_PALETTE,      1);
-		store.setDefault(PlottingConstants.ORIGIN_PREF,    IImageTrace.ImageOrigin.TOP_LEFT.getLabel());
+		store.setDefault(PlottingConstants.ORIGIN_PREF,    ImageOrigin.TOP_LEFT.getLabel());
 		store.setDefault(PlottingConstants.ASPECT,         true);
 		store.setDefault(PlottingConstants.HISTO ,         false);
-		store.setDefault(PlottingConstants.HISTO_PREF ,    IImageTrace.HistoType.MEAN.getLabel());
+		store.setDefault(PlottingConstants.HISTO_PREF ,    HistoType.MEAN.getLabel());
 	}
 }

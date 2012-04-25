@@ -537,8 +537,8 @@ public class HistogramToolPage extends AbstractToolPage {
 				// this is the FULL implementation (a good default)
 				rangeMax = imageDataset.max().doubleValue();
 				rangeMin = imageDataset.min().doubleValue();
-				histoMax = image.getCalculatedMax().doubleValue();
-				histoMin = image.getCalculatedMin().doubleValue();
+				histoMax = image.getMax().doubleValue();
+				histoMin = image.getMin().doubleValue();
 				break;
 			}
 			
