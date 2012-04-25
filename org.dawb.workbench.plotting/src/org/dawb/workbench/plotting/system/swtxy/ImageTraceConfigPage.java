@@ -175,7 +175,7 @@ public class ImageTraceConfigPage {
 		info.setLayout(new GridLayout(2, false));
 
 		label = new Label(info, SWT.NONE);
-		label.setText("Bbin size");
+		label.setText("Bin size");
 		label.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1));
 		
 		Label value = new Label(info, SWT.NONE);
