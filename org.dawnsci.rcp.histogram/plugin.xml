@@ -9,8 +9,8 @@
             class="org.dawnsci.rcp.histogram.HistogramToolPage"
             icon="icons/brightness_contrast.gif"
             id="org.dawnsci.rcp.histogram.histogram_tool_page"
-            label="Histogram"
-            tooltip="Histogram tool for adjusting contrast brighnes and other image settings">
+            label="Colour mapping"
+            tooltip="Colour mapping tool for adjusting contrast, brightness and other image colour settings">
       </plotting_tool_page>
    </extension>
    <extension
