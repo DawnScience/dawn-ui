@@ -315,7 +315,6 @@ public class HistogramToolPage extends AbstractToolPage {
 				image.setPaletteData(palleteData);
 				if (mon.isCanceled()) return Status.CANCEL_STATUS;
 
-				//getPlottingSystem().repaint();
 				internalEvent--;
 				return Status.OK_STATUS;
 			}
