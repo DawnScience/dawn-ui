@@ -480,7 +480,11 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 			if (traceMap==null) traceMap = new LinkedHashMap<String, ITrace>(31);
 			traceMap.clear();
 			
-			final ImageTrace trace = xyGraph.createImageTrace(data.getName(), xAxis, yAxis);
+			String traceName = data.getName();
+			if (part!=null&&(traceName==null||"".equals(traceName))) {
+				traceName = part.getTitle();
+			}
+			final ImageTrace trace = xyGraph.createImageTrace(traceName, xAxis, yAxis);
 			trace.setData(data, axes, true);
 			
 			traceMap.put(trace.getName(), trace);
