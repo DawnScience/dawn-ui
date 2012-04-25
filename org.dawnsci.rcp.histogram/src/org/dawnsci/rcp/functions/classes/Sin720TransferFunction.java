@@ -10,7 +10,7 @@ public class Sin720TransferFunction extends AbstractTransferFunction {
 
 	@Override
 	public double getPoint(double value) {
-		return Math.sin(value*Math.PI*4);
+		return Math.abs(Math.sin(value*Math.PI*4));
 	}
 
 }

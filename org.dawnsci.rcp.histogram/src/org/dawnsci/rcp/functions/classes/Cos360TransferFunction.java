@@ -10,7 +10,7 @@ public class Cos360TransferFunction extends AbstractTransferFunction {
 
 	@Override
 	public double getPoint(double value) {
-		return Math.cos(value*Math.PI*2);
+		return Math.abs(Math.cos(value*Math.PI*2));
 	}
 
 }

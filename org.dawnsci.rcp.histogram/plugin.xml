@@ -90,6 +90,21 @@
             id="org.dawnsci.rcp.histogram.cos180"
             name="cos180 (y = cos(x*180)) ">
       </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.rcp.functions.classes.NCDRedTransferFunction"
+            id="org.dawnsci.rcp.histogram.ncdred"
+            name="NCD Red ">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.rcp.functions.classes.NCDBlueTransferFunction"
+            id="org.dawnsci.rcp.histogram.ncdblue"
+            name="NCD Blue ">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.rcp.functions.classes.NCDGreenTransferFunction"
+            id="org.dawnsci.rcp.histogram.ncdgreen"
+            name="NCD Green">
+      </transfer_function>
    </extension>
    <extension
          point="org.dawnsci.rcp.histogram.colourScheme">
@@ -164,6 +179,18 @@
             name="Traditional pm3d (black-blue-red-yellow)"
             red_inverted="false"
             red_transfer_function="org.dawnsci.rcp.histogram.sqrt">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="false"
+            alpha_transfer_function="org.dawnsci.rcp.histogram.zero"
+            blue_inverted="false"
+            blue_transfer_function="org.dawnsci.rcp.histogram.ncdblue"
+            green_inverted="false"
+            green_transfer_function="org.dawnsci.rcp.histogram.ncdgreen"
+            id="org.dawnsci.rcp.histogram.ncd"
+            name="NCD"
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.rcp.histogram.ncdred">
       </colour_scheme>
    </extension>
 
