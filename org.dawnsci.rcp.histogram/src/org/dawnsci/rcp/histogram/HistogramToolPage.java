@@ -195,7 +195,7 @@ public class HistogramToolPage extends AbstractToolPage {
 			public void minChanged(PaletteEvent event) {
 				if (internalEvent > 0) return;
 				logger.trace("paletteListener minChanged firing");
-				histoMin = image.getCalculatedMin().doubleValue();
+				histoMin = image.getMin().doubleValue();
 				updateHistogramToolElements(null, false);
 				
 			}
@@ -204,7 +204,7 @@ public class HistogramToolPage extends AbstractToolPage {
 			public void maxChanged(PaletteEvent event) {
 				if (internalEvent > 0) return;
 				logger.trace("paletteListener maxChanged firing");
-				histoMax = image.getCalculatedMax().doubleValue();
+				histoMax = image.getMax().doubleValue();
 				updateHistogramToolElements(null, false);
 			}
 			
