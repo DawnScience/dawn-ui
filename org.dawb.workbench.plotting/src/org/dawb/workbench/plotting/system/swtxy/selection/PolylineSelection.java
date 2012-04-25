@@ -124,7 +124,7 @@ public class PolylineSelection extends AbstractSelectionRegion {
 			FigureTranslator mover;
 			for (int i = 0, imax = points.size(); i < imax; i++) {
 				Point p = points.getPoint(i);
-				RectangularHandle h = new RectangularHandle(getxAxis(), getyAxis(), getRegionColor(), this, SIDE, p.preciseX(), p.preciseY());
+				RectangularHandle h = new RectangularHandle(getXAxis(), getYAxis(), getRegionColor(), this, SIDE, p.preciseX(), p.preciseY());
 				add(h);
 				mover = new FigureTranslator(getXyGraph(), h);
 				mover.addTranslationListener(createRegionNotifier());
