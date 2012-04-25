@@ -40,6 +40,10 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Stats;
 import uk.ac.diamond.scisoft.analysis.dataset.function.Downsample;
 import uk.ac.diamond.scisoft.analysis.dataset.function.DownsampleMode;
+import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
+import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
+import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
+import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 
 /**
  * A trace which draws an image to the plot.
@@ -105,19 +109,19 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		this.name = name;
 	}
 
-	public AspectAxis getxAxis() {
+	public AspectAxis getXAxis() {
 		return (AspectAxis)xAxis;
 	}
 
-	public void setxAxis(Axis xAxis) {
+	public void setXAxis(Axis xAxis) {
 		this.xAxis = xAxis;
 	}
 
-	public AspectAxis getyAxis() {
+	public AspectAxis getYAxis() {
 		return (AspectAxis)yAxis;
 	}
 
-	public void setyAxis(Axis yAxis) {
+	public void setYAxis(Axis yAxis) {
 		this.yAxis = yAxis;
 	}
 
@@ -176,7 +180,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
         	}
         }
 
-		final XYRegionGraph graph  = (XYRegionGraph)getxAxis().getParent();
+		final XYRegionGraph graph  = (XYRegionGraph)getXAxis().getParent();
 		final Rectangle     rbounds = graph.getRegionArea().getBounds();
 		if (rbounds.width<1 || rbounds.height<1) return false;
 
@@ -279,7 +283,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 	private double getX(boolean isTopLeft) {
 		
-		double xCoord = isTopLeft ? getxAxis().getRange().getLower() : getxAxis().getRange().getUpper();
+		double xCoord = isTopLeft ? getXAxis().getRange().getLower() : getXAxis().getRange().getUpper();
 		switch (getImageOrigin()) {
 		case TOP_LEFT:
 			return xCoord;
@@ -295,7 +299,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 	private double getY(boolean isTopLeft) {
 		
-		double yCoord = isTopLeft ? getyAxis().getRange().getUpper() : getyAxis().getRange().getLower();
+		double yCoord = isTopLeft ? getYAxis().getRange().getUpper() : getYAxis().getRange().getLower();
 		switch (getImageOrigin()) {
 		case TOP_LEFT:
 			return yCoord;
@@ -354,11 +358,11 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 */
 	public int getDownsampleBin() {
 		
-		final XYRegionGraph graph      = (XYRegionGraph)getxAxis().getParent();
+		final XYRegionGraph graph      = (XYRegionGraph)getXAxis().getParent();
 		final Rectangle     realBounds = graph.getRegionArea().getBounds();
 		
-		double rwidth  = getSpan(getxAxis());
-		double rheight = getSpan(getyAxis());
+		double rwidth  = getSpan(getXAxis());
+		double rheight = getSpan(getYAxis());
  
 		int iwidth  = realBounds.width;
 		int iheight = realBounds.height;
@@ -410,7 +414,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 
 	private boolean isKeepAspectRatio() {
-		return getxAxis().isKeepAspect() && getyAxis().isKeepAspect();
+		return getXAxis().isKeepAspect() && getYAxis().isKeepAspect();
 	}
 
 	public void remove() {
@@ -460,14 +464,21 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 					             new int[]{xRange[1],yRange[1]}, 
 					             new int[]{1,     1});
 			
-		}catch (IllegalArgumentException iae) {
+		} catch (IllegalArgumentException iae) {
 			logger.error("Cannot slice image", iae);
 			return getData();
 		}
 	}
 
 	private int[] getRange(RegionBounds bounds, int index, boolean inverted) {
+//		private int[] getRange(ROIBase bounds, int index, boolean inverted) {
 		
+//		if (bounds instanceof EllipticalROI) {
+//			bounds = bounds.getOuterRectangle();
+//		} else if (bounds instanceof SectorROI) {
+//			
+//		}
+
 		if (bounds.isCircle()) bounds = bounds.getOuterRectangle();
 		final int side = image.getShape()[index];
 		int start = (int)Math.round(bounds.getP1()[index]);
@@ -559,30 +570,43 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 	
 	private RegionBounds getImageBounds() {
+		int[] s = image.getShape();
+//		RectangularROI r = new RectangularROI(s[0], s[1], 0);
+
 		switch(getImageOrigin()) {
 		case TOP_LEFT:
-			return new RegionBounds(new double[]{0, image.getShape()[0]},
-					                new double[]{image.getShape()[1], 0});	
+			return new RegionBounds(new double[]{0, s[0]}, new double[]{s[1], 0});	
 						
 		case BOTTOM_LEFT:
-			return new RegionBounds(new double[]{0, 0},
-	                                new double[]{image.getShape()[0], image.getShape()[1]});	
+			return new RegionBounds(new double[]{0, 0}, new double[]{s[0], s[1]});	
 
 		case BOTTOM_RIGHT:
-			return new RegionBounds(new double[]{image.getShape()[1], 0},
-                                    new double[]{0, image.getShape()[0]});	
+			return new RegionBounds(new double[]{s[1], 0}, new double[]{0, s[0]});	
 
 		case TOP_RIGHT:
-			return new RegionBounds(new double[]{image.getShape()[0], image.getShape()[1]},
-                                    new double[]{0,0});	
+			return new RegionBounds(new double[]{s[0], s[1]}, new double[]{0,0});	
+//		case TOP_LEFT:
+//			r.setAngleDegrees(0);
+//			break;
+//		case BOTTOM_LEFT:
+//			r.setAngleDegrees(0);
+//			break;
+//		case BOTTOM_RIGHT:
+//			r.setAngleDegrees(0);
+//			break;
+//		case TOP_RIGHT:
+//			r.setAngleDegrees(0);
+//			break;
 		
 		}
 		return null;
 	}
 	
 	private RegionBounds getAxisBounds() {
-		double [] p1 = new double[]{getxAxis().getRange().getLower(), getyAxis().getRange().getLower()};
-		double [] p2 = new double[]{getxAxis().getRange().getUpper(), getyAxis().getRange().getUpper()};
+		final Range xr = getXAxis().getRange();
+		final Range yr = getYAxis().getRange();
+		double [] p1 = new double[]{xr.getLower(), yr.getLower()};
+		double [] p2 = new double[]{xr.getUpper(), yr.getUpper()};
 		return new RegionBounds(p1, p2);
 	}
 
@@ -599,11 +623,11 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 */
 	private void createAxisBounds() {
 		if (getImageOrigin()==ImageOrigin.TOP_LEFT || getImageOrigin()==ImageOrigin.BOTTOM_RIGHT) {
-			setupAxis(getxAxis(), new Range(0,image.getShape()[1]), axes!=null&&axes.size()>0 ? axes.get(0) : null);
-			setupAxis(getyAxis(), new Range(0,image.getShape()[0]), axes!=null&&axes.size()>1 ? axes.get(1) : null);
+			setupAxis(getXAxis(), new Range(0,image.getShape()[1]), axes!=null&&axes.size()>0 ? axes.get(0) : null);
+			setupAxis(getYAxis(), new Range(0,image.getShape()[0]), axes!=null&&axes.size()>1 ? axes.get(1) : null);
 		} else {
-			setupAxis(getxAxis(), new Range(0,image.getShape()[0]), axes!=null&&axes.size()>1 ? axes.get(1) : null);
-			setupAxis(getyAxis(), new Range(0,image.getShape()[1]), axes!=null&&axes.size()>0 ? axes.get(0) : null);
+			setupAxis(getXAxis(), new Range(0,image.getShape()[0]), axes!=null&&axes.size()>1 ? axes.get(1) : null);
+			setupAxis(getYAxis(), new Range(0,image.getShape()[1]), axes!=null&&axes.size()>0 ? axes.get(0) : null);
 		}
 	}
 	

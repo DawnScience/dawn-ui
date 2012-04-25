@@ -7,7 +7,6 @@ import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.IAxis;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
-import org.dawb.common.ui.plot.region.RegionBounds;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
@@ -16,6 +15,7 @@ import org.eclipse.swt.SWT;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.rcp.plotting.roi.RectangularROIData;
+import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 public class BoxProfileTool extends ProfileTool {
@@ -39,7 +39,7 @@ public class BoxProfileTool extends ProfileTool {
 	@Override
 	protected void createProfile(IImageTrace  image, 
 			                     IRegion      region, 
-			                     RegionBounds rbs, 
+			                     ROIBase      rbs, 
 			                     boolean      tryUpdate,
 			                     IProgressMonitor monitor) {
         
@@ -48,14 +48,13 @@ public class BoxProfileTool extends ProfileTool {
 		
 		if (region.getRegionType()!=RegionType.BOX) return;
 
-		final RegionBounds bounds = rbs==null ? region.getRegionBounds() : rbs;
+		final RectangularROI bounds = (RectangularROI) (rbs==null ? region.getROI() : rbs);
 		if (bounds==null) return;
 		if (!region.isVisible()) return;
 
 		if (monitor.isCanceled()) return;
 		
-		final RectangularROI roi = new RectangularROI(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(), 0);
-		RectangularROIData rd = new RectangularROIData(roi, image.getData());
+		RectangularROIData rd = new RectangularROIData(bounds, image.getData());
 
 		if (monitor.isCanceled()) return;
 		

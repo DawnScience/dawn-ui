@@ -13,8 +13,7 @@ import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionBoundsListener;
 import org.dawb.common.ui.plot.region.IRegionListener;
-import org.dawb.common.ui.plot.region.RegionBounds;
-import org.dawb.common.ui.plot.region.RegionBoundsEvent;
+import org.dawb.common.ui.plot.region.ROIEvent;
 import org.dawb.common.ui.plot.region.RegionEvent;
 import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
@@ -34,6 +33,8 @@ import org.eclipse.ui.part.IPageSite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
+
 public abstract class ProfileTool extends AbstractToolPage  implements IRegionBoundsListener {
 
 	private final static Logger logger = LoggerFactory.getLogger(ProfileTool.class);
@@ -43,7 +44,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IRegionBo
 	private   IRegionListener        regionListener;
 	private   Job                    updateProfiles;
 	private   IRegion                currentRegion;
-	private   RegionBounds           currentBounds;
+	private   ROIBase                currentROI;
 	private   Map<String,Collection<ITrace>> registeredTraces;
 
 	public ProfileTool() {
@@ -217,7 +218,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IRegionBo
 	private boolean isUpdateRunning = false;
 	/**
 	 * The user can optionally nominate an x. In this case, we would like to 
-	 * use it for the derviative instead of the indices of the data. Therefore
+	 * use it for the derivative instead of the indices of the data. Therefore
 	 * there is some checking here to see if there are x values to plot.
 	 * 
 	 * Normally everything will be ILineTraces even if the x is indices.
@@ -258,7 +259,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IRegionBo
 						if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
 						createProfile(image, 
 								      currentRegion, 
-								      currentBounds!=null?currentBounds:currentRegion.getRegionBounds(), 
+								      currentROI!=null?currentROI:currentRegion.getROI(), 
 								      true, 
 								      monitor);
 						
@@ -287,24 +288,24 @@ public abstract class ProfileTool extends AbstractToolPage  implements IRegionBo
 	 * 
 	 * @param image
 	 * @param region
-	 * @param bounds - may be null
+	 * @param roi - may be null
 	 * @param monitor
 	 */
 	protected abstract void createProfile(IImageTrace image, 
 			                              IRegion region, 
-			                              RegionBounds bounds, 
+			                              ROIBase roi, 
 			                              boolean tryUpdate, 
 			                              IProgressMonitor monitor);
 
 	@Override
-	public void regionBoundsDragged(RegionBoundsEvent evt) {
-		update((IRegion)evt.getSource(), evt.getRegionBounds());
+	public void roiDragged(ROIEvent evt) {
+		update((IRegion)evt.getSource(), evt.getROI());
 	}
 
 	@Override
-	public void regionBoundsChanged(RegionBoundsEvent evt) {
+	public void roiChanged(ROIEvent evt) {
 		final IRegion region = (IRegion)evt.getSource();
-		update(region, region.getRegionBounds());
+		update(region, region.getROI());
 		
 		try {
 			updateProfiles.join();
@@ -320,14 +321,14 @@ public abstract class ProfileTool extends AbstractToolPage  implements IRegionBo
 
 	}
 	
-	private synchronized void update(IRegion r, RegionBounds rb) {
+	private synchronized void update(IRegion r, ROIBase rb) {
 	
 		if (r!=null && !isRegionTypeSupported(r.getRegionType())) return; // Nothing to do.
 
         if (isUpdateRunning)  updateProfiles.cancel();
          
 		this.currentRegion = r;
-		this.currentBounds = rb;
+		this.currentROI = rb;
 		updateProfiles.schedule();
 	}
 }

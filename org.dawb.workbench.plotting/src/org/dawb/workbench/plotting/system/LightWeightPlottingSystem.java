@@ -395,7 +395,6 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		createUI();
 	}
 	
-	@Override
 	public ITrace updatePlot2D(final AbstractDataset       data, 
 							   final List<AbstractDataset> axes,
 							   final IProgressMonitor      monitor) {

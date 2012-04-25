@@ -66,9 +66,9 @@ public class RotatableRectangle extends RotatablePolygonShape {
 	}
 
 	@Override
-	protected void recalcPoints(PointList oldpl, PointList newpl) {
-		super.recalcPoints(oldpl, newpl);
-		super.recalcPoints(ool, nol);
+	protected void recalcPoints(PointList oldpl, PointList newpl, boolean setBounds) {
+		super.recalcPoints(ool, nol, false);
+		super.recalcPoints(oldpl, newpl, true);
 	}
 
 	@Override

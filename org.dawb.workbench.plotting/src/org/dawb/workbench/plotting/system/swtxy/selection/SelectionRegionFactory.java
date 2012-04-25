@@ -34,6 +34,7 @@ public class SelectionRegionFactory {
 		SUPPORTED_REGIONS.add(RegionType.YAXIS_LINE);
 		SUPPORTED_REGIONS.add(RegionType.FREE_DRAW);
 		SUPPORTED_REGIONS.add(RegionType.POINT);
+		SUPPORTED_REGIONS.add(RegionType.POLYLINE);
 	}
 
 	/**
@@ -72,6 +73,8 @@ public class SelectionRegionFactory {
 		} else if (regionType==RegionType.POINT) {
 			region = new PointSelection(name, x, y);
 
+		} else if (regionType==RegionType.POLYLINE) {
+			region = new PolylineSelection(name, x, y);
 		} else if (regionType==RegionType.XAXIS || regionType==RegionType.YAXIS || regionType==RegionType.XAXIS_LINE || regionType==RegionType.YAXIS_LINE) {
 			region = new AxisSelection(name, x, y, regionType);
 					

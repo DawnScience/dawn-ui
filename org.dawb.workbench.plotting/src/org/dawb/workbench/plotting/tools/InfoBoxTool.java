@@ -25,22 +25,16 @@ import java.util.List;
 import java.util.Map;
 
 import org.dawb.common.ui.plot.IAxis;
-import org.dawb.common.ui.plot.IPlottingSystem;
-import org.dawb.common.ui.plot.PlottingFactory;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionBoundsListener;
 import org.dawb.common.ui.plot.region.IRegionListener;
-import org.dawb.common.ui.plot.region.RegionBounds;
-import org.dawb.common.ui.plot.region.RegionBoundsEvent;
+import org.dawb.common.ui.plot.region.ROIEvent;
 import org.dawb.common.ui.plot.region.RegionEvent;
 import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
 import org.dawb.common.ui.plot.trace.IImageTrace;
-import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
-import org.dawb.common.ui.plot.trace.ITraceListener;
-import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.tools.MeasurementTool.RegionColorListener;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -75,6 +69,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.roi.PointROI;
+import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
 public class InfoBoxTool extends AbstractToolPage implements IRegionBoundsListener, IRegionListener, MouseListener  {
 
@@ -83,18 +79,18 @@ public class InfoBoxTool extends AbstractToolPage implements IRegionBoundsListen
 	private   IRegion                xHair, yHair;
 	private   IAxis                  x1,x2;
 	private   RunningJob             xUpdateJob, yUpdateJob;
-	private   RegionBounds           xBounds, yBounds;
+	private   ROIBase           xBounds, yBounds;
 	
 	private Composite     composite;
 	private TableViewer   viewer;
 	private RegionColorListener viewUpdateListener;
-	private Map<String,RegionBounds> dragBounds;
+	private Map<String,ROIBase> dragBounds;
 	protected double xValues [] = new double[1];	protected double yValues [] = new double[1];
 
 		
 	public InfoBoxTool() {
 		super();
-		dragBounds = new HashMap<String,RegionBounds>(7);
+		dragBounds = new HashMap<String,ROIBase>(7);
 	}
 	
 	@Override
@@ -288,7 +284,7 @@ public class InfoBoxTool extends AbstractToolPage implements IRegionBoundsListen
 	
 				if (x1==null | x2==null) return Status.OK_STATUS;
 	
-				RegionBounds bounds = region==xHair ? xBounds : yBounds;
+				ROIBase bounds = region==xHair ? xBounds : yBounds;
 				
 				final boolean ok = profile(region, bounds, false, null, monitor);
 
@@ -337,20 +333,20 @@ public class InfoBoxTool extends AbstractToolPage implements IRegionBoundsListen
 	}
 
 	@Override
-	public void regionBoundsDragged(RegionBoundsEvent evt) {
+	public void roiDragged(ROIEvent evt) {
 
 		if (!isActive()) return;
 		updateRegion(evt);
 	}
 
 	@Override
-	public void regionBoundsChanged(RegionBoundsEvent evt) {
+	public void roiChanged(ROIEvent evt) {
 
 		final IRegion region = (IRegion)evt.getSource();
-		update(region, region.getRegionBounds());
+		update(region, region.getROI());
 	}
 	
-	private void update(IRegion r, RegionBounds rb) {
+	private void update(IRegion r, ROIBase rb) {
 				
 		if (r == xHair) {
 			xUpdateJob.stop();
@@ -376,11 +372,9 @@ public class InfoBoxTool extends AbstractToolPage implements IRegionBoundsListen
         try {
     		// add a point region
         	final IRegion point = getPlottingSystem().createRegion(RegionUtils.getUniqueName("Point", getPlottingSystem()), RegionType.POINT);
-            final RegionBounds regionBounds= new RegionBounds();
             double x = getPlottingSystem().getSelectedXAxis().getPositionValue(evt.x);
             double y = getPlottingSystem().getSelectedYAxis().getPositionValue(evt.y);
-            regionBounds.addPoint(new double[]{x,y});
-            point.setRegionBounds(regionBounds);
+            point.setROI(new PointROI(x, y));
             point.setMobile(true);
             getPlottingSystem().addRegion(point);
 
@@ -407,7 +401,7 @@ public class InfoBoxTool extends AbstractToolPage implements IRegionBoundsListen
 
 	
 	private boolean profile(final IRegion      region, 
-			                final RegionBounds bounds, 
+			                final ROIBase bounds, 
 			                final boolean      snapshot,
 			                final Color        snapShotColor,
 			                final IProgressMonitor monitor) {
@@ -430,7 +424,7 @@ public class InfoBoxTool extends AbstractToolPage implements IRegionBoundsListen
 			AbstractDataset slice=null, sliceIndex=null;
 			if (monitor.isCanceled())return  false;
 			if (region.getName().startsWith("Y Profile")) {
-				int index = (int)Math.round(bounds.getX());
+				int index = (int)Math.round(bounds.getPointX());
 				slice = data.getSlice(new int[]{0,index}, new int[]{data.getShape()[0], index+1}, new int[]{1,1});
 				if (monitor.isCanceled()) return  false;
 				slice = slice.flatten();
@@ -438,7 +432,7 @@ public class InfoBoxTool extends AbstractToolPage implements IRegionBoundsListen
 				sliceIndex = AbstractDataset.arange(slice.getSize(), AbstractDataset.INT);
 
 			} else {
-				int index = (int)Math.round(bounds.getY());
+				int index = (int)Math.round(bounds.getPointY());
 				slice = data.getSlice(new int[]{index,0}, new int[]{index+1, data.getShape()[1]}, new int[]{1,1});
 				if (monitor.isCanceled()) return  false;
 				slice = slice.flatten();
@@ -458,9 +452,9 @@ public class InfoBoxTool extends AbstractToolPage implements IRegionBoundsListen
 				final IStructuredSelection sel = (IStructuredSelection)viewer.getSelection();
 				if (sel!=null && sel.getFirstElement()!=null) {
 					final IRegion region = (IRegion)sel.getFirstElement();
-					if (region==null||region.getRegionBounds()==null) return;
-					final RegionBounds bounds = region.getRegionBounds();
-					if (bounds.getP1()==null) return;
+					if (region==null||region.getROI()==null) return;
+					final ROIBase bounds = region.getROI();
+					if (bounds.getPoint()==null) return;
 
 					final Clipboard cb = new Clipboard(composite.getDisplay());
 					TextTransfer textTransfer = TextTransfer.getInstance();
@@ -589,24 +583,24 @@ public class InfoBoxTool extends AbstractToolPage implements IRegionBoundsListen
 		
 	}
 
-	public RegionBounds getBounds(IRegion region) {
+	public ROIBase getBounds(IRegion region) {
 		if (dragBounds!=null&&dragBounds.containsKey(region.getName())) return dragBounds.get(region.getName());
-		return region.getRegionBounds();
+		return region.getROI();
 	}
 		
-	private void updateRegion(RegionBoundsEvent evt) {
+	private void updateRegion(ROIEvent evt) {
 		
 		if (viewer!=null) {
 			IRegion  region = (IRegion)evt.getSource();
 
 			if (region.getRegionType().equals(IRegion.RegionType.XAXIS_LINE)){
-				this.xValues[0] = evt.getRegionBounds().getX();
+				this.xValues[0] = evt.getROI().getPointX();
 			}
 			if (region.getRegionType().equals(IRegion.RegionType.YAXIS_LINE)){
-				this.yValues[0] = evt.getRegionBounds().getY();
+				this.yValues[0] = evt.getROI().getPointY();
 			}
 			
-			RegionBounds rb = evt.getRegionBounds();
+			ROIBase rb = evt.getROI();
 						
 			dragBounds.put(region.getName(), rb);
 			viewer.refresh(region);
