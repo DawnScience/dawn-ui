@@ -15,7 +15,6 @@ import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 
 import uk.ac.diamond.scisoft.analysis.roi.PointROI;
@@ -76,19 +75,6 @@ public class PolylineSelection extends AbstractSelectionRegion {
 			updateConnectionBounds();
 			createROI(true);
 			fireROIChanged(getROI());
-		}
-	}
-
-	@Override
-	protected void fireROISelection() {
-		PointList list = pline.getPoints();
-		PolygonalROI roi = new PolygonalROI();
-		for (int i = 0, imax = list.size(); i < imax; i++) {
-			Point p = list.getPoint(i);
-			roi.insertPoint(p.preciseX(), p.preciseY());
-		}
-		if (getSelectionProvider() != null) {
-			getSelectionProvider().setSelection(new StructuredSelection(roi));
 		}
 	}
 
