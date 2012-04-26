@@ -179,7 +179,7 @@ public class ImageTraceConfigPage {
 		label.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1));
 		
 		Label value = new Label(info, SWT.NONE);
-		value.setText(imageTrace.getDownsampleBin()+" pixels");
+		value.setText(imageTrace.getDownsampleBin()+"x"+imageTrace.getDownsampleBin()+" pixels");
 		value.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
 
 		label = new Label(info, SWT.NONE);
