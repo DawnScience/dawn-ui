@@ -10,6 +10,7 @@ import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.workbench.plotting.system.LineTraceImpl;
+import org.dawb.workbench.plotting.system.dialog.ImageTraceComposite;
 import org.dawb.workbench.plotting.system.dialog.RegionComposite;
 import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
 import org.eclipse.swt.SWT;
@@ -31,7 +32,7 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
 	private List<RegionComposite> regionList;
 	private XYRegionGraph         regionGraph;
 	protected Combo imageTraceCombo;
-	protected List<ImageTraceConfigPage> imageTraceConfigPageList;
+	protected List<ImageTraceComposite> imageTraceConfigPageList;
 	protected IPlottingSystem     plottingSystem;
 
 	public XYRegionConfigDialog(Shell parentShell, XYGraph xyGraph) {
@@ -81,20 +82,16 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
 			for(String traceName : regionGraph.getRegionArea().getImageTraces().keySet()){
 				
 				final ImageTrace imageTrace = regionGraph.getRegionArea().getImageTraces().get(traceName);
-				Group traceConfigGroup = new Group(traceConfigComposite, SWT.NONE); 	        	
-				//traceConfigGroup.setText("Change Settings");
-				traceConfigGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL,true, true));
-				ImageTraceConfigPage traceConfigPage = new ImageTraceConfigPage(this, plottingSystem, imageTrace);
-				if (imageTraceConfigPageList==null) imageTraceConfigPageList = new ArrayList<ImageTraceConfigPage>(3);
+				ImageTraceComposite traceConfigPage = new ImageTraceComposite(traceConfigComposite, this, plottingSystem, imageTrace);
+				if (imageTraceConfigPageList==null) imageTraceConfigPageList = new ArrayList<ImageTraceComposite>(3);
 				imageTraceConfigPageList.add(traceConfigPage);
-				traceConfigPage.createPage(traceConfigGroup);   	        
 			} 	        
-			traceStackLayout.topControl = imageTraceConfigPageList.get(0).getComposite();
+			traceStackLayout.topControl = imageTraceConfigPageList.get(0);
 			imageTraceCombo.addSelectionListener(new SelectionAdapter(){
 				@Override
 				public void widgetSelected(SelectionEvent e) {
 					traceStackLayout.topControl = imageTraceConfigPageList.get(
-							imageTraceCombo.getSelectionIndex()).getComposite();
+							imageTraceCombo.getSelectionIndex());
 					traceConfigComposite.layout(true, true);
 				}
 			}); 
@@ -170,7 +167,7 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
         		tabFolder.setSelection(imageTraceIndex);
            	   	int index = 0; // FIXME if there is ever more than one image allowed to be plotted.
            	   	if (index>0) {
-	         		Composite traceComp = imageTraceConfigPageList.get(index).getComposite(); 		
+	         		Composite traceComp = imageTraceConfigPageList.get(index); 		
 	        		setTraceTabSelected(index, tabFolder, imageTraceCombo, traceComp);
            	   	}
         	}
@@ -198,7 +195,7 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
 		if (regionList!=null) for (RegionComposite comp : regionList){
 			comp.applyChanges();
 		}
-		if (imageTraceConfigPageList!=null) for (ImageTraceConfigPage comp : imageTraceConfigPageList){
+		if (imageTraceConfigPageList!=null) for (ImageTraceComposite comp : imageTraceConfigPageList){
 			comp.applyChanges();
 		}
 		
