@@ -9,6 +9,7 @@
  */ 
 package org.dawb.workbench.plotting.system;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -44,6 +45,9 @@ import org.dawb.common.ui.plot.trace.ITraceContainer;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.gda.extensions.util.DatasetTitleUtils;
+import org.dawb.workbench.plotting.printing.PlotExportPrintUtil;
+import org.dawb.workbench.plotting.printing.PlotPrintPreviewDialog;
+import org.dawb.workbench.plotting.printing.PrintSettings;
 import org.dawb.workbench.plotting.system.swtxy.AspectAxis;
 import org.dawb.workbench.plotting.system.swtxy.ImageTrace;
 import org.dawb.workbench.plotting.system.swtxy.LineTrace;
@@ -69,12 +73,17 @@ import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseWheelListener;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.printing.PrintDialog;
+import org.eclipse.swt.printing.Printer;
+import org.eclipse.swt.printing.PrinterData;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchPart;
 import org.slf4j.Logger;
@@ -1127,5 +1136,92 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	public void autoscaleAxes() {
 		if (xyGraph==null) return;
 		xyGraph.performAutoScale();
+	}
+
+	// Print / Export methods
+	private PrintSettings settings;
+
+	@Override
+	public void printPlotting(){
+		if (settings==null) settings = new PrintSettings();
+		PlotPrintPreviewDialog dialog = new PlotPrintPreviewDialog(xyGraph, Display.getCurrent(), settings);
+		settings=dialog.open();
+	}
+
+	/**
+	 * Print scaled plotting to printer
+	 * TODO to be disable once this works in printPlotting
+	 */
+	public void printSnapshotPlotting(){
+		// Show the Choose Printer dialog
+		PrintDialog dialog = new PrintDialog(Display.getCurrent().getActiveShell(), SWT.NULL);
+		PrinterData printerData = dialog.open();
+		if (printerData != null) {
+			// Create the printer object
+			printerData.orientation = PrinterData.LANDSCAPE; // force landscape
+			Printer printer = new Printer(printerData);
+			// Calculate the scale factor between the screen resolution and printer
+			// resolution in order to correctly size the image for the printer
+			Point screenDPI = Display.getCurrent().getDPI();
+			Point printerDPI = printer.getDPI();
+			int scaleFactorX = printerDPI.x / screenDPI.x;
+			// Determine the bounds of the entire area of the printer
+			Rectangle size = printer.getClientArea();
+			Rectangle trim = printer.computeTrim(0, 0, 0, 0);
+			Rectangle imageSize = new Rectangle(size.x/scaleFactorX, size.y/scaleFactorX, 
+						size.width/scaleFactorX, size.height/scaleFactorX);
+			if (printer.startJob("Print Plot")) {
+				if (printer.startPage()) {
+					GC gc = new GC(printer);
+					Image xyImage = xyGraph.getImage(imageSize);
+					Image printerImage = new Image(printer, xyImage.getImageData());
+					xyImage.dispose();
+					// Draw the image
+					gc.drawImage(printerImage, imageSize.x, imageSize.y,
+							imageSize.width, imageSize.height, -trim.x, -trim.y,
+							size.width-trim.width, size.height-trim.height);
+					// Clean up
+					printerImage.dispose();
+					gc.dispose();
+					printer.endPage();
+				}
+			}
+			// End the job and dispose the printer
+			printer.endJob();
+			printer.dispose();
+		}
+	}
+
+	@Override
+	public void copyPlotting(){
+		PlotExportPrintUtil.copyGraph(xyGraph.getImage());
+	}
+
+	@Override
+	public void savePlotting(String filename){
+		FileDialog dialog = new FileDialog (Display.getCurrent().getActiveShell(), SWT.SAVE);
+		String [] filterExtensions = new String [] {"*.jpg;*.JPG;*.jpeg;*.JPEG;*.png;*.PNG", "*.ps;*.eps"};
+		// TODO ,"*.svg;*.SVG"};
+		if (filename!=null) {
+			dialog.setFilterPath((new File(filename)).getParent());
+		} else {
+			String filterPath = "/";
+			String platform = SWT.getPlatform();
+			if (platform.equals("win32") || platform.equals("wpf")) {
+				filterPath = "c:\\";
+			}
+			dialog.setFilterPath (filterPath);
+		}
+		dialog.setFilterNames (PlotExportPrintUtil.FILE_TYPES);
+		dialog.setFilterExtensions (filterExtensions);
+		filename = dialog.open();
+		if (filename == null)
+			return;
+		try {
+			PlotExportPrintUtil.saveGraph(filename, PlotExportPrintUtil.FILE_TYPES[dialog.getFilterIndex()], xyGraph.getImage());
+			logger.debug("Plotting saved");
+		} catch (Exception e) {
+			logger.error("Could not save the plotting", e);
+		}
 	}
 }

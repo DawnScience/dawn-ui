@@ -487,9 +487,6 @@ class LightWeightActionBarsManager extends PlottingActionBarManager {
 		manager.add(new Separator("org.dawb.workbench.plotting.system.trace.end"));
 	}
 
-
-	private PrintSettings settings;
-
 	/**
 	 *  Create export and print buttons in tool bar 
 	 */
@@ -500,101 +497,38 @@ class LightWeightActionBarsManager extends PlottingActionBarManager {
 			// choosing the folder.
 			private String filename;
 			public void run(){
-				FileDialog dialog = new FileDialog (Display.getCurrent().getActiveShell(), SWT.SAVE);
-				String [] filterExtensions = new String [] {"*.jpg;*.JPG;*.jpeg;*.JPEG;*.png;*.PNG", "*.ps;*.eps"};
-				// TODO ,"*.svg;*.SVG"};
-				if (filename!=null) {
-					dialog.setFilterPath((new File(filename)).getParent());
-				} else {
-					String filterPath = "/";
-					String platform = SWT.getPlatform();
-					if (platform.equals("win32") || platform.equals("wpf")) {
-						filterPath = "c:\\";
-					}
-					dialog.setFilterPath (filterPath);
-				}
-				dialog.setFilterNames (PlotExportPrintUtil.FILE_TYPES);
-				dialog.setFilterExtensions (filterExtensions);
-				filename = dialog.open();
-				if (filename == null)
-					return;
-				try {
-					PlotExportPrintUtil.saveGraph(filename, PlotExportPrintUtil.FILE_TYPES[dialog.getFilterIndex()], system.getGraph().getImage());
-					logger.debug("Plotting saved");
-				} catch (Exception e) {
-					logger.error("Could not save the plotting", e);
-				}
+				system.savePlotting(filename);
 			}
 		};
 
-		Action copyToClipboardButton = new Action("Copy to clip-board", Activator.getImageDescriptor("icons/copy_edit_on.gif")) {
+		Action copyToClipboardButton = new Action("Copy to clip-board       Ctrl+C", Activator.getImageDescriptor("icons/copy_edit_on.gif")) {
 			public void run() {
-				PlotExportPrintUtil.copyGraph(system.getGraph().getImage());
+				system.copyPlotting();
 			}
 		};
 
-		// TODO implement within the PrintPreviewDialog
+		// TODO implement within the Print Action
 		Action snapShotButton = new Action("Print scaled image to printer", Activator.getImageDescriptor("icons/camera.gif")) {
 			public void run(){
-				// Show the Choose Printer dialog
-				PrintDialog dialog = new PrintDialog(Display.getCurrent().getActiveShell(), SWT.NULL);
-				PrinterData printerData = dialog.open();
-				if (printerData != null) {
-					// Create the printer object
-					printerData.orientation = PrinterData.LANDSCAPE; // force landscape
-					Printer printer = new Printer(printerData);
-					// Calculate the scale factor between the screen resolution and printer
-					// resolution in order to correctly size the image for the printer
-					Point screenDPI = Display.getCurrent().getDPI();
-					Point printerDPI = printer.getDPI();
-					int scaleFactorX = printerDPI.x / screenDPI.x;
-					// Determine the bounds of the entire area of the printer
-					Rectangle size = printer.getClientArea();
-					Rectangle trim = printer.computeTrim(0, 0, 0, 0);
-					Rectangle imageSize = new Rectangle(size.x/scaleFactorX, size.y/scaleFactorX, 
-								size.width/scaleFactorX, size.height/scaleFactorX);
-					if (printer.startJob("Print Plot")) {
-						if (printer.startPage()) {
-							GC gc = new GC(printer);
-							Image xyImage = system.getGraph().getImage(imageSize);
-							Image printerImage = new Image(printer, xyImage.getImageData());
-							xyImage.dispose();
-							// Draw the image
-							gc.drawImage(printerImage, imageSize.x, imageSize.y,
-									imageSize.width, imageSize.height, -trim.x, -trim.y,
-									size.width-trim.width, size.height-trim.height);
-							// Clean up
-							printerImage.dispose();
-							gc.dispose();
-							printer.endPage();
-						}
-					}
-					// End the job and dispose the printer
-					printer.endJob();
-					printer.dispose();
-				}
+				system.printSnapshotPlotting();
 			}
 		};
 
-		Action printButton = new Action("Print the plotting", Activator.getImageDescriptor("icons/printer.png")) {
+		Action printButton = new Action("Print the plotting            Ctrl+P", Activator.getImageDescriptor("icons/printer.png")) {
 			public void run() {
-				if (settings==null) settings = new PrintSettings();
-				PlotPrintPreviewDialog dialog = new PlotPrintPreviewDialog(system.getGraph(), Display.getCurrent(), settings);
-				settings=dialog.open();
+				system.printPlotting();
 			}
 		};
 
 		MenuAction exportActionsDropDown = new MenuAction("Export/Print");
 		exportActionsDropDown.setImageDescriptor(Activator.getImageDescriptor("icons/printer.png"));
 		exportActionsDropDown.setSelectedAction(printButton);
-		
 		exportActionsDropDown.add(exportSaveButton);
 		exportActionsDropDown.add(copyToClipboardButton);
+		exportActionsDropDown.addSeparator();
 		exportActionsDropDown.add(snapShotButton);
 		exportActionsDropDown.add(printButton);
 
 		this.system.getActionBars().getToolBarManager().add(exportActionsDropDown);
 	}
-
-
 }
