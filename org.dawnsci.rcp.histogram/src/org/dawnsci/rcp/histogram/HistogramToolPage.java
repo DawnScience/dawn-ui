@@ -3,6 +3,7 @@ package org.dawnsci.rcp.histogram;
 import java.util.Collection;
 import java.util.List;
 
+import org.dawb.common.services.ImageServiceBean.HistogramBound;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingFactory;
@@ -224,19 +225,29 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			@Override
 			public void maxCutChanged(PaletteEvent evt) {
-				// TODO Auto-generated method stub
-				
+				if (internalEvent > 0) return;
+				logger.trace("paletteListener maxCutChanged firing");
+				imageMax = image.getMaxCut().getBound().doubleValue();
+				if(histoMax > imageMax) histoMax = imageMax;
+				generateHistogram(imageDataset);
+				updateHistogramToolElements(null, false);
 			}
 
 			@Override
 			public void minCutChanged(PaletteEvent evt) {
-				// TODO Auto-generated method stub
+				if (internalEvent > 0) return;
+				logger.trace("paletteListener minCutChanged firing");
+				imageMin = image.getMinCut().getBound().doubleValue();
+				if(histoMin < imageMin) histoMin = imageMin;
+				generateHistogram(imageDataset);
+				updateHistogramToolElements(null, false);
 				
 			}
 
 			@Override
 			public void nanBoundsChanged(PaletteEvent evt) {
-				// TODO Auto-generated method stub
+				if (internalEvent > 0) return;
+				return;
 				
 			}
 			
@@ -363,6 +374,10 @@ public class HistogramToolPage extends AbstractToolPage {
 				logger.trace("imagerepaintJob running");
 				internalEvent++;
 				// update the colourscale
+				image.setMaxCut(new HistogramBound(rangeMax, image.getMaxCut().getColor()));
+				
+				image.setMinCut(new HistogramBound(rangeMin, image.getMinCut().getColor()));
+				
 				image.setMax(histoMax);
 				if (mon.isCanceled()) return Status.CANCEL_STATUS;
 
