@@ -11,11 +11,11 @@ import org.eclipse.draw2d.geometry.PrecisionPoint;
  * (y')   ( sa   ca ) (  0  sy ) (y)   (ty)
  * </pre>
  * where sx, sy are scale factors, tx, ty are translations and
- * ca, sa are cosine and sine of rotation angle (clockwise is positive)
+ * ca, sa are cosine and sine of rotation angle (anti-clockwise is positive)
  */
 public class AffineTransform {
 	private double scaleX = 1.0, scaleY = 1.0, dx, dy, cos = 1.0, sin;
-	private double angle; // in radians (clockwise is positive)
+	private double angle; // in radians (anti-clockwise is positive)
 	private PointList box = new PointList(4);
 
 	@Override
@@ -54,7 +54,7 @@ public class AffineTransform {
 	}
 
 	/**
-	 * Sets the rotation angle (positive is clockwise).
+	 * Sets the rotation angle (positive is anti-clockwise).
 	 * 
 	 * @param angle
 	 *            Angle of rotation in radians
@@ -66,7 +66,7 @@ public class AffineTransform {
 	}
 
 	/**
-	 * Sets the rotation angle (positive is clockwise).
+	 * Sets the rotation angle (positive is anti-clockwise).
 	 * 
 	 * @param angle
 	 *            Angle of rotation in degrees
@@ -105,10 +105,16 @@ public class AffineTransform {
 		return dy;
 	}
 
+	/**
+	 * @return rotation angle (positive is anti-clockwise).
+	 */
 	public double getRotation() {
 		return angle;
 	}
 
+	/**
+	 * @return rotation angle in degrees (positive is anti-clockwise).
+	 */
 	public double getRotationDegrees() {
 		return Math.toDegrees(getRotation());
 	}
@@ -125,7 +131,7 @@ public class AffineTransform {
 		double x = p.preciseX() * scaleX;
 		double y = p.preciseY() * scaleY;
 		double temp = x * cos - y * sin;
-		y = x * sin + y * cos;
+		y = y * cos + x * sin;
 		x = temp;
 		if (p instanceof PrecisionPoint) {
 			return new PrecisionPoint(x + dx, y + dy);
@@ -147,7 +153,7 @@ public class AffineTransform {
 		double temp;
 
 		temp = x * cos + y * sin;
-		y = - x * sin + y * cos;
+		y = y * cos - x * sin;
 		x = temp;
 		x /= scaleX;
 		y /= scaleY;

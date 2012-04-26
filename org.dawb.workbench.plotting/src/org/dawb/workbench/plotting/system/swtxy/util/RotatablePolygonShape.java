@@ -34,7 +34,7 @@ public class RotatablePolygonShape extends AbstractPointListShape {
 	/**
 	 * Generic constructor
 	 * @param list
-	 * @param angle in degrees
+	 * @param angle in degrees (positive is anti-clockwise)
 	 */
 	public RotatablePolygonShape(PointList list, double angle) {
 		this(list.size());
@@ -85,19 +85,19 @@ public class RotatablePolygonShape extends AbstractPointListShape {
 	}
 
 	/**
-	 * Set angle of rotated polyline to given degrees clockwise
+	 * Set angle of rotated polyline to given degrees anti-clockwise
 	 * @param degrees
 	 */
 	public void setAngle(double degrees) {
-		affine.setRotationDegrees(degrees);
+		affine.setRotationDegrees(-degrees);
 		recalcPoints(opl, npl, true);
 	}
 
 	/**
-	 * @return angle of rotation in degrees
+	 * @return angle of rotation in degrees (positive anti-clockwise)
 	 */
 	public double getAngleDegrees() {
-		return affine.getRotationDegrees();
+		return -affine.getRotationDegrees();
 	}
 
 	@Override

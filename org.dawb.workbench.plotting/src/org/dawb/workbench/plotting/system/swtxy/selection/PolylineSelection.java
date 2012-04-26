@@ -61,6 +61,7 @@ public class PolylineSelection extends AbstractSelectionRegion {
 	public void paintBeforeAdded(Graphics g, PointList clicks, Rectangle parentBounds) {
 		g.setLineStyle(SWT.LINE_DOT);
 		g.setLineWidth(2);
+		g.setForegroundColor(getRegionColor());
 		g.setAlpha(getAlpha());
 		g.drawPolyline(clicks);
 	}

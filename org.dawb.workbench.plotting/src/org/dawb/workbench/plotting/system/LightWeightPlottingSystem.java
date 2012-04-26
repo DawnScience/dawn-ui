@@ -178,13 +178,14 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		}
 		
 		if (bars!=null) {
-			lightWeightActionBarMan.createExportActions();
+			lightWeightActionBarMan.createExportActionsToolBar();
 			lightWeightActionBarMan.createAspectHistoAction();
 			lightWeightActionBarMan.createToolDimensionalActions(ToolPageRole.ROLE_1D, "org.dawb.workbench.plotting.views.toolPageView.1D");
 			lightWeightActionBarMan.createToolDimensionalActions(ToolPageRole.ROLE_2D, "org.dawb.workbench.plotting.views.toolPageView.2D");
 			lightWeightActionBarMan.createToolDimensionalActions(ToolPageRole.ROLE_1D_AND_2D, "org.dawb.workbench.plotting.views.toolPageView.1D_and_2D");
 			lightWeightActionBarMan.createPalleteActions();
 			lightWeightActionBarMan.createOriginActions();
+			lightWeightActionBarMan.createExportActionsMenuBar();
 		}
 		lightWeightActionBarMan.createAdditionalActions(null);
 		

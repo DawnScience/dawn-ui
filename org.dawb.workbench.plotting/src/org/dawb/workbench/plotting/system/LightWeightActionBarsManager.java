@@ -490,7 +490,7 @@ class LightWeightActionBarsManager extends PlottingActionBarManager {
 	/**
 	 *  Create export and print buttons in tool bar 
 	 */
-	public void createExportActions() {
+	public void createExportActionsToolBar() {
 
 		Action exportSaveButton = new Action("Export/save the plotting", Activator.getImageDescriptor("icons/picture_save.png")){
 			// Cache file name otherwise they have to keep
@@ -531,4 +531,41 @@ class LightWeightActionBarsManager extends PlottingActionBarManager {
 
 		this.system.getActionBars().getToolBarManager().add(exportActionsDropDown);
 	}
+
+	/**
+	 * Create export and print buttons in menu bar
+	 */
+	public void createExportActionsMenuBar() {
+		Action exportSaveButton = new Action("Export/save the plotting", Activator.getImageDescriptor("icons/picture_save.png")){
+			// Cache file name otherwise they have to keep
+			// choosing the folder.
+			private String filename;
+			public void run(){
+				system.savePlotting(filename);
+			}
+		};
+		Action copyToClipboardButton = new Action("Copy to clip-board       Ctrl+C", Activator.getImageDescriptor("icons/copy_edit_on.gif")) {
+			public void run() {
+				system.copyPlotting();
+			}
+		};
+		// TODO implement within the Print Action
+		Action snapShotButton = new Action("Print scaled image to printer", Activator.getImageDescriptor("icons/camera.gif")) {
+			public void run(){
+				system.printSnapshotPlotting();
+			}
+		};
+		Action printButton = new Action("Print the plotting            Ctrl+P", Activator.getImageDescriptor("icons/printer.png")) {
+			public void run() {
+				system.printPlotting();
+			}
+		};
+		this.system.getActionBars().getMenuManager().add(new Separator(exportSaveButton.getId()+".group"));
+		this.system.getActionBars().getMenuManager().add(exportSaveButton);
+		this.system.getActionBars().getMenuManager().add(copyToClipboardButton);
+		this.system.getActionBars().getMenuManager().add(new Separator(snapShotButton.getId()+".group"));
+		this.system.getActionBars().getMenuManager().add(snapShotButton);
+		this.system.getActionBars().getMenuManager().add(printButton);
+	}
+
 }
