@@ -22,7 +22,7 @@ public class RotatableEllipse extends Shape {
 	 * @param cy centre
 	 * @param major axis length
 	 * @param minor axis length
-	 * @param angle of major axis from horizontal (in degrees, positive for clockwise)
+	 * @param angle of major axis from horizontal (in degrees, positive for anti-clockwise)
 	 */
 	public RotatableEllipse(double cx, double cy, double major, double minor, double angle) {
 		affine = new AffineTransform();
@@ -43,31 +43,31 @@ public class RotatableEllipse extends Shape {
 	}
 
 	/**
-	 * Set angle of rotated ellipse to given degrees (positive for clockwise)
+	 * Set angle of rotated ellipse to given degrees (positive for anti-clockwise)
 	 * @param degrees
 	 */
 	public void setAngle(double degrees) {
 		Point oc = affine.getTransformed(centre);
-		affine.setRotationDegrees(degrees);
+		affine.setRotationDegrees(-degrees);
 		Point nc = affine.getTransformed(centre);
 		affine.setTranslation(affine.getTranslationX() + oc.preciseX() - nc.preciseX(), affine.getTranslationY() + oc.preciseY() - nc.preciseY());
 		calcBox();
 	}
 
 	/**
-	 * @return angle of rotation in degrees
+	 * @return angle of rotation in degrees (positive for anti-clockwise)
 	 */
 	public double getAngleDegrees() {
-		return affine.getRotationDegrees();
+		return -affine.getRotationDegrees();
 	}
 
 	/**
 	 * Get point on ellipse at given angle
-	 * @param degrees
+	 * @param degrees (positive for anti-clockwise)
 	 * @return
 	 */
 	public Point getPoint(double degrees) {
-		double angle = Math.toRadians(degrees);
+		double angle = -Math.toRadians(degrees);
 		double c = Math.cos(angle);
 		double s = Math.sin(angle);
 		PrecisionPoint p = new PrecisionPoint(0.5*(c+1), 0.5*(s+1));
