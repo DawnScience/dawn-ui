@@ -222,6 +222,24 @@ public class HistogramToolPage extends AbstractToolPage {
 				updateHistogramToolElements(null, false);
 			}
 
+			@Override
+			public void maxCutChanged(PaletteEvent evt) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void minCutChanged(PaletteEvent evt) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void nanBoundsChanged(PaletteEvent evt) {
+				// TODO Auto-generated method stub
+				
+			}
+			
 		};
 
 
