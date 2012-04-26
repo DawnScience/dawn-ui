@@ -1,4 +1,4 @@
-package org.dawb.workbench.plotting.system.swtxy;
+package org.dawb.workbench.plotting.system.dialog;
 
 import java.util.Arrays;
 
@@ -28,17 +28,14 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.gda.richbeans.components.scalebox.NumberBox;
 import uk.ac.gda.richbeans.components.scalebox.ScaleBox;
 
-public class ImageTraceConfigPage {
+public class ImageTraceComposite extends Composite {
 	
-	private static final Logger logger = LoggerFactory.getLogger(ImageTraceConfigPage.class);
+	private static final Logger logger = LoggerFactory.getLogger(ImageTraceComposite.class);
 
-	private IPlottingSystem plottingSystem;
 	private IImageTrace   imageTrace;
-	private Composite     composite;
 	private NumberBox     maximum, minimum;
 	private CCombo        downsampleChoice, histoChoice;
 	private Text          nameText;
-	private Dialog        dialog;
 
 	/**
 	 * 
@@ -46,24 +43,20 @@ public class ImageTraceConfigPage {
 	 * @param plottingSystem - may be null!
 	 * @param imageTrace
 	 */
-	public ImageTraceConfigPage(Dialog          dialog, 
-			                    IPlottingSystem plottingSystem, 
-			                    IImageTrace     imageTrace) {
-		this.plottingSystem = plottingSystem;
+	public ImageTraceComposite(final Composite       parent,
+			                   final Dialog          dialog, 
+			                   final IPlottingSystem plottingSystem, 
+			                   final IImageTrace     imageTrace) {
+		
+		super(parent, SWT.NONE);
 		this.imageTrace  = imageTrace;
-		this.dialog      = dialog;
-	}
 
-	public void createPage(final Composite composite) {
-
-
-		this.composite = composite;
-		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		composite.setLayout(new GridLayout(1, false));
+		setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		setLayout(new GridLayout(1, false));
 		
 		Label label;
 		
-		final Composite top = new Composite(composite, SWT.NONE);
+		final Composite top = new Composite(this, SWT.NONE);
 		top.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
 		top.setLayout(new GridLayout(2, false));
 		
@@ -75,7 +68,7 @@ public class ImageTraceConfigPage {
 		nameText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));		
         nameText.setText(imageTrace.getName());
 		
-		final Group group = new Group(composite, SWT.NONE);
+		final Group group = new Group(this, SWT.NONE);
 		group.setText("Histogramming");
 		group.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
 		group.setLayout(new GridLayout(2, false));
@@ -169,7 +162,7 @@ public class ImageTraceConfigPage {
 			});
 		}
 		
-		final Group info = new Group(composite, SWT.NONE);
+		final Group info = new Group(this, SWT.NONE);
 		info.setText("Current downsample");
 		info.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
 		info.setLayout(new GridLayout(2, false));
@@ -190,10 +183,6 @@ public class ImageTraceConfigPage {
 		value.setText(Arrays.toString(imageTrace.getDownsampled().getShape()));
 		value.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 
-	}
-
-	public Composite getComposite() {
-		return composite;
 	}
 
 	public void applyChanges() {
