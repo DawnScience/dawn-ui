@@ -1,6 +1,5 @@
 package org.dawb.workbench.plotting.system.swtxy;
 
-
 import java.util.Collection;
 import java.util.List;
 
@@ -12,14 +11,9 @@ import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.workbench.plotting.Activator;
-import org.dawb.workbench.plotting.printing.PlotPrintPreviewDialog;
-import org.dawb.workbench.plotting.printing.PrintSettings;
 import org.dawb.workbench.plotting.system.dialog.AddRegionDialog;
 import org.dawb.workbench.plotting.system.dialog.RemoveRegionCommand;
 import org.dawb.workbench.plotting.system.dialog.RemoveRegionDialog;
-import org.eclipse.draw2d.ActionEvent;
-import org.eclipse.draw2d.ActionListener;
-import org.eclipse.draw2d.Button;
 import org.eclipse.draw2d.ButtonModel;
 import org.eclipse.draw2d.ChangeEvent;
 import org.eclipse.draw2d.ChangeListener;
@@ -129,7 +123,8 @@ public class XYRegionToolbar extends XYGraphToolbar {
 					}
 				});
 				
-        	    final List models = zoomGroup.getElements();
+        	    @SuppressWarnings("unchecked")
+				final List<ButtonModel> models = zoomGroup.getElements();
         	    if (models.contains(button.getModel())) { // Zoom!
         	    	if (zoomDropDown!=null && tool.find(zoomDropDown.getId())==null) {
         				tool.add(zoomDropDown);
@@ -168,7 +163,8 @@ public class XYRegionToolbar extends XYGraphToolbar {
 		regionDropDown.add(createRegionAction(RegionType.YAXIS,  regionDropDown, "Add Y-axis selection",   Activator.getImageDescriptor("icons/Cursor-vert.png")));
 		regionDropDown.add(createRegionAction(RegionType.FREE_DRAW,  regionDropDown, "Free drawn selection", Activator.getImageDescriptor("icons/ProfileFree.png")));
 		regionDropDown.add(createRegionAction(RegionType.POINT,  regionDropDown, "Single point selection",   Activator.getImageDescriptor("icons/ProfilePoint.png")));
-		
+		regionDropDown.add(createRegionAction(RegionType.POLYLINE,  regionDropDown, "Add polyline selection",   Activator.getImageDescriptor("icons/ProfilePolyline.png")));
+
 		regionDropDown.setSelectedAction(regionDropDown.getAction(0));
 		
 		tool.insertBefore("org.csstudio.swt.xygraph.toolbar.extra", regionDropDown);
