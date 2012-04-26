@@ -83,16 +83,16 @@ import org.eclipse.ui.internal.WorkbenchPage;
 import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.Page;
-import org.embl.cca.holo.DALSA.MemoryImageEditorInput;
+import org.embl.cca.utils.imageviewer.MemoryImageEditorInput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 //import fable.framework.logging.FableLogger;
-import fable.imageviewer.psf.ExecutableManager;
-import fable.imageviewer.psf.FilenameCaseInsensitiveComparator;
-import fable.imageviewer.psf.TrackableJob;
-import fable.imageviewer.psf.TrackableRunnable;
-import fable.imageviewer.psf.WildCardFileFilter;
+import org.embl.cca.utils.imageviewer.ExecutableManager;
+import org.embl.cca.utils.imageviewer.FilenameCaseInsensitiveComparator;
+import org.embl.cca.utils.imageviewer.TrackableJob;
+import org.embl.cca.utils.imageviewer.TrackableRunnable;
+import org.embl.cca.utils.imageviewer.WildCardFileFilter;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.ByteDataset;
