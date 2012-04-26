@@ -15,6 +15,7 @@ import org.csstudio.swt.xygraph.linearscale.Range;
 import org.dawb.common.services.IImageService;
 import org.dawb.common.services.ImageServiceBean;
 import org.dawb.common.services.ImageServiceBean.HistoType;
+import org.dawb.common.services.ImageServiceBean.HistogramBound;
 import org.dawb.common.services.ImageServiceBean.ImageOrigin;
 import org.dawb.common.ui.image.PaletteFactory;
 import org.dawb.common.ui.plot.trace.IImageTrace;
@@ -695,6 +696,21 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		final PaletteEvent evt = new PaletteEvent(this, getPaletteData());
 		for (PaletteListener pl : paletteListeners) pl.maxChanged(evt);
 	}
+	private void fireMaxCutListeners() {
+		if (paletteListeners==null) return;
+		final PaletteEvent evt = new PaletteEvent(this, getPaletteData());
+		for (PaletteListener pl : paletteListeners) pl.maxCutChanged(evt);
+	}
+	private void fireMinCutListeners() {
+		if (paletteListeners==null) return;
+		final PaletteEvent evt = new PaletteEvent(this, getPaletteData());
+		for (PaletteListener pl : paletteListeners) pl.minCutChanged(evt);
+	}
+	private void fireNanBoundsListeners() {
+		if (paletteListeners==null) return;
+		final PaletteEvent evt = new PaletteEvent(this, getPaletteData());
+		for (PaletteListener pl : paletteListeners) pl.nanBoundsChanged(evt);
+	}
 
 	@Override
 	public DownsampleType getDownsampleType() {
@@ -725,8 +741,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 	@Override
 	public void rehistogram() {
-		setMax(null); // I think...
-		setMin(null);
+		imageServiceBean.setMax(null);
+		imageServiceBean.setMin(null);
 		createScaledImage(ImageScaleType.REHISTOGRAM, null);
 		// Max and min changed in all likely-hood
 		fireMaxDataListeners();
@@ -776,5 +792,38 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			createScaledImage(ImageScaleType.FORCE_REIMAGE, null);
 			repaint();
 		}
+	}
+
+	@Override
+	public HistogramBound getMinCut() {
+		return imageServiceBean.getMinimumCutBound();
+	}
+
+	@Override
+	public void setMinCut(HistogramBound bound) {
+		imageServiceBean.setMinimumCutBound(bound);
+		fireMinCutListeners();
+	}
+
+	@Override
+	public HistogramBound getMaxCut() {
+		return imageServiceBean.getMinimumCutBound();
+	}
+
+	@Override
+	public void setMaxCut(HistogramBound bound) {
+		imageServiceBean.setMaximumCutBound(bound);
+		fireMaxCutListeners();
+	}
+
+	@Override
+	public HistogramBound getNanBound() {
+		return imageServiceBean.getNanBound();
+	}
+
+	@Override
+	public void setNanBound(HistogramBound bound) {
+		imageServiceBean.setNanBound(bound);
+		fireNanBoundsListeners();
 	}
 }
