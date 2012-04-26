@@ -688,26 +688,31 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 	private void fireMinDataListeners() {
 		if (paletteListeners==null) return;
+		if (!imageCreationAllowed)  return;
 		final PaletteEvent evt = new PaletteEvent(this, getPaletteData());
 		for (PaletteListener pl : paletteListeners) pl.minChanged(evt);
 	}
 	private void fireMaxDataListeners() {
 		if (paletteListeners==null) return;
+		if (!imageCreationAllowed)  return;
 		final PaletteEvent evt = new PaletteEvent(this, getPaletteData());
 		for (PaletteListener pl : paletteListeners) pl.maxChanged(evt);
 	}
 	private void fireMaxCutListeners() {
 		if (paletteListeners==null) return;
+		if (!imageCreationAllowed)  return;
 		final PaletteEvent evt = new PaletteEvent(this, getPaletteData());
 		for (PaletteListener pl : paletteListeners) pl.maxCutChanged(evt);
 	}
 	private void fireMinCutListeners() {
 		if (paletteListeners==null) return;
+		if (!imageCreationAllowed)  return;
 		final PaletteEvent evt = new PaletteEvent(this, getPaletteData());
 		for (PaletteListener pl : paletteListeners) pl.minCutChanged(evt);
 	}
 	private void fireNanBoundsListeners() {
 		if (paletteListeners==null) return;
+		if (!imageCreationAllowed)  return;
 		final PaletteEvent evt = new PaletteEvent(this, getPaletteData());
 		for (PaletteListener pl : paletteListeners) pl.nanBoundsChanged(evt);
 	}
@@ -807,7 +812,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 	@Override
 	public HistogramBound getMaxCut() {
-		return imageServiceBean.getMinimumCutBound();
+		return imageServiceBean.getMaximumCutBound();
 	}
 
 	@Override

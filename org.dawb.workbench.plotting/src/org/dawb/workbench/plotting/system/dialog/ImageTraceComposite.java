@@ -2,22 +2,27 @@ package org.dawb.workbench.plotting.system.dialog;
 
 import java.util.Arrays;
 
+import org.dawb.common.services.ImageServiceBean;
 import org.dawb.common.services.ImageServiceBean.HistoType;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.IImageTrace.DownsampleType;
+import org.dawb.common.services.ImageServiceBean.HistogramBound;
 import org.dawb.workbench.plotting.Activator;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.preference.ColorSelector;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -33,10 +38,10 @@ public class ImageTraceComposite extends Composite {
 	private static final Logger logger = LoggerFactory.getLogger(ImageTraceComposite.class);
 
 	private IImageTrace   imageTrace;
-	private NumberBox     maximum, minimum;
+	private NumberBox     maximum, minimum, minCut, maxCut;
 	private CCombo        downsampleChoice, histoChoice;
 	private Text          nameText;
-
+    private ColorSelector minCutColor, maxCutColor, nanColor;
 	/**
 	 * 
 	 * @param dialog
@@ -162,6 +167,76 @@ public class ImageTraceComposite extends Composite {
 			});
 		}
 		
+		final Group cuts = new Group(this, SWT.NONE);
+		cuts.setText("Invalid Bounds");
+		cuts.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
+		cuts.setLayout(new GridLayout(3, false));
+
+		label = new Label(cuts, SWT.NONE);
+		label.setText("Lower cut");
+		label.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1));
+		
+		this.minCut = new ScaleBox(cuts, SWT.NONE);
+		minCut.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		if (imageTrace.getMinCut()!=null) minCut.setNumericValue(imageTrace.getMinCut().getBound().doubleValue());
+		minCut.setActive(true);
+		minCut.setIntegerBox(isInt);
+		minCut.setMaximum(minimum);
+		
+		minCutColor = new ColorSelector(cuts);
+		minCutColor.getButton().setLayoutData(new GridData());		
+		if (imageTrace.getMinCut()!=null) minCutColor.setColorValue(imageTrace.getMinCut().getColor());
+
+		label = new Label(cuts, SWT.NONE);
+		label.setText("Upper cut");
+		label.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1));
+		
+		this.maxCut = new ScaleBox(cuts, SWT.NONE);
+		maxCut.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		if (imageTrace.getMaxCut()!=null) {
+			
+			final double max = imageTrace.getMaxCut().getBound().doubleValue();
+			if(max==Double.POSITIVE_INFINITY){
+			    ((StyledText)maxCut.getControl()).setText("Infinity");
+			} else {
+			    maxCut.setNumericValue(max);
+			}
+		}
+		maxCut.setActive(true);
+		maxCut.setIntegerBox(isInt);
+		maxCut.setMinimum(maximum);
+		
+		maxCutColor = new ColorSelector(cuts);
+		maxCutColor.getButton().setLayoutData(new GridData());		
+		if (imageTrace.getMaxCut()!=null) maxCutColor.setColorValue(imageTrace.getMaxCut().getColor());
+	
+		label = new Label(cuts, SWT.NONE);
+		label.setText("Invalid number color");
+		label.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1));
+
+		nanColor = new ColorSelector(cuts);
+		nanColor.getButton().setLayoutData(new GridData());		
+		if (imageTrace.getNanBound()!=null) nanColor.setColorValue(imageTrace.getNanBound().getColor());
+		
+		final Button reset = new Button(cuts, SWT.NONE);
+		reset.setLayoutData(new GridData());		
+		reset.setImage(Activator.getImage("icons/reset.gif"));
+		reset.setText("Reset");
+		reset.setToolTipText("Reset cut bounds");
+		reset.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				imageTrace.setMinCut(ImageServiceBean.DEFAULT_MINIMUM);
+				imageTrace.setMaxCut(ImageServiceBean.DEFAULT_MAXIMUM);
+				imageTrace.setNanBound(ImageServiceBean.DEFAULT_NAN);
+				minCut.setNumericValue(Double.NEGATIVE_INFINITY);
+				minCutColor.setColorValue(ImageServiceBean.DEFAULT_MINIMUM.getColor());
+				maxCut.setNumericValue(Double.POSITIVE_INFINITY);
+				maxCutColor.setColorValue(ImageServiceBean.DEFAULT_MAXIMUM.getColor());
+				((StyledText)maxCut.getControl()).setText("Infinity");
+				nanColor.setColorValue(ImageServiceBean.DEFAULT_NAN.getColor());
+			}
+		});
+		
 		final Group info = new Group(this, SWT.NONE);
 		info.setText("Current downsample");
 		info.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
@@ -183,6 +258,11 @@ public class ImageTraceComposite extends Composite {
 		value.setText(Arrays.toString(imageTrace.getDownsampled().getShape()));
 		value.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 
+		minimum.checkBounds();
+		maximum.checkBounds();
+		minCut.checkBounds();
+		maxCut.checkBounds();
+		minimum.getControl().setForeground(Display.getDefault().getSystemColor(SWT.COLOR_BLACK));
 	}
 
 	public void applyChanges() {
@@ -191,8 +271,16 @@ public class ImageTraceComposite extends Composite {
 			imageTrace.setImageUpdateActive(false);
 			imageTrace.setHistoType(HistoType.values()[histoChoice.getSelectionIndex()]); // Do first because overrides max and min
 			imageTrace.setName(nameText.getText());
-			imageTrace.setMin(minimum.getNumericValue());
-			imageTrace.setMax(maximum.getNumericValue());
+			if (!Double.isNaN(minimum.getNumericValue())) imageTrace.setMin(minimum.getNumericValue());
+			if (!Double.isNaN(maximum.getNumericValue())) imageTrace.setMax(maximum.getNumericValue());
+			
+			final double min = !Double.isNaN(minCut.getNumericValue()) ? minCut.getNumericValue() : imageTrace.getMinCut().getBound().doubleValue();
+			imageTrace.setMinCut(new HistogramBound(min, minCutColor.getColorValue()));
+			
+			final double max = !Double.isNaN(maxCut.getNumericValue()) ? maxCut.getNumericValue() : imageTrace.getMaxCut().getBound().doubleValue();
+			imageTrace.setMaxCut(new HistogramBound(max, maxCutColor.getColorValue()));
+			
+			imageTrace.setNanBound(new HistogramBound(Double.NaN, nanColor.getColorValue()));
 			imageTrace.setDownsampleType(DownsampleType.values()[downsampleChoice.getSelectionIndex()]);
 		} finally {
 			imageTrace.setImageUpdateActive(true);
