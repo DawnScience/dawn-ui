@@ -147,16 +147,13 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 	protected ROIBase createROI(boolean recordResult) {
 		if (points == null) return getROI();
 		
-		final Rectangle rect = getBounds();
-		final double[] a1 = new double[]{getXAxis().getPositionValue(rect.x, false), getYAxis().getPositionValue(rect.y, false)};
-		double[] a2 = new double[]{getXAxis().getPositionValue(rect.x+rect.width, false), getYAxis().getPositionValue(rect.y+rect.height, false)};
-
-		final PolygonalROI proi = new PolygonalROI(a1);
+		final Axis xa = getXAxis();
+		final Axis ya = getYAxis();
+		final PolygonalROI proi = new PolygonalROI();
 		
 		for (int i = 0; i < points.size(); i++) {
 			final Point pnt = points.getPoint(i);
-			double[] pd = new double[]{getXAxis().getPositionValue(pnt.x, false), getYAxis().getPositionValue(pnt.y, false)};
-			proi.insertPoint(pd);
+			proi.insertPoint(i, xa.getPositionValue(pnt.x(), false), ya.getPositionValue(pnt.y(), false));
 		}
 		
 		if (recordResult)
