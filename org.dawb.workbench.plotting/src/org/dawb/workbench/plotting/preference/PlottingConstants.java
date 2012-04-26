@@ -48,5 +48,12 @@ public class PlottingConstants {
 	 * Used to store origin preference
 	 */
 	public static final String HISTO_PREF = "org.dawb.plotting.system.histogram.type";
+	
+	/**
+	 * Used for cut pixels
+	 */
+	public static final String MIN_CUT = "org.dawb.plotting.system.histogram.min.cut";
+	public static final String MAX_CUT = "org.dawb.plotting.system.histogram.max.cut";
+	public static final String NAN_CUT = "org.dawb.plotting.system.histogram.nan.cut";
 
 }
