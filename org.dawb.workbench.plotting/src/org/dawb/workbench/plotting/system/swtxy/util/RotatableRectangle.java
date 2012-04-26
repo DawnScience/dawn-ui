@@ -19,7 +19,7 @@ public class RotatableRectangle extends RotatablePolygonShape {
 	 * @param y
 	 * @param width
 	 * @param height
-	 * @param angle in degrees
+	 * @param angle in degrees (positive is anti-clockwise)
 	 */
 	public RotatableRectangle(int x, int y, int width, int height, double angle) {
 		super(4);
