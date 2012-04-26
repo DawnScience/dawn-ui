@@ -69,7 +69,11 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		this.yAxis = yAxis;
 
 		this.imageServiceBean = new ImageServiceBean();
-		imageServiceBean.setPalette(PaletteFactory.getPalette(Activator.getDefault().getPreferenceStore().getInt(PlottingConstants.P_PALETTE)));	
+		try {
+			imageServiceBean.setPalette(PaletteFactory.getPalette(Activator.getDefault().getPreferenceStore().getInt(PlottingConstants.P_PALETTE), true));
+		} catch (Exception e) {
+			logger.error("Cannot create palette!", e);
+		}	
 		imageServiceBean.setOrigin(ImageOrigin.forLabel(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.ORIGIN_PREF)));
 		imageServiceBean.setHistogramType(HistoType.forLabel(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.HISTO_PREF)));
 				

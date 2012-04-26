@@ -195,8 +195,12 @@ class LightWeightActionBarsManager extends PlottingActionBarManager {
 				public void run() {
 					int paletteIndex = PaletteFactory.PALETTES.get(paletteName);
 					Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.P_PALETTE, paletteIndex);
-					final PaletteData data = PaletteFactory.getPalette(paletteIndex);
-					system.getGraph().setPaletteData(data);
+					try {
+						final PaletteData data = PaletteFactory.getPalette(paletteIndex, true);
+						system.getGraph().setPaletteData(data);
+					} catch (Exception ne) {
+						logger.error("Cannot create palette data!", ne);
+					}
 				}
 			};
 			group.add(action);
