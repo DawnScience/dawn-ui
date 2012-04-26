@@ -721,8 +721,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 	@Override
 	public void rehistogram() {
-		setMax(null); // I think...
-		setMin(null);
+		imageServiceBean.setMax(null); // I think...
+		imageServiceBean.setMin(null);
 		createScaledImage(ImageScaleType.REHISTOGRAM, null);
 		// Max and min changed in all likely-hood
 		fireMaxDataListeners();
