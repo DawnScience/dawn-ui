@@ -56,23 +56,16 @@ public class SelectionRegionFactory {
 		AbstractSelectionRegion region = null;
 		if (regionType==RegionType.LINE) {
 			region = new LineSelection(name, x, y);
-
 		} else if (regionType==RegionType.BOX) {
 			region = new BoxSelection(name, x, y);
-			
 		} else if (regionType==RegionType.SECTOR) {
-			// TODO FIXME 
-			//region = new SectorSelection(name, x, y);
-			
+			region = new SectorSelection(name, x, y);
 		} else if (regionType==RegionType.RING) {
 			region = new RingSelection(name, x, y);
-
 		} else if (regionType==RegionType.FREE_DRAW) {
 			region = new FreeDrawSelection(name, x, y);
-			
 		} else if (regionType==RegionType.POINT) {
 			region = new PointSelection(name, x, y);
-
 		} else if (regionType==RegionType.POLYLINE) {
 			region = new PolylineSelection(name, x, y);
 		} else if (regionType==RegionType.XAXIS || regionType==RegionType.YAXIS || regionType==RegionType.XAXIS_LINE || regionType==RegionType.YAXIS_LINE) {
