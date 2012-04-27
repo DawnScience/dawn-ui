@@ -464,6 +464,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 		colourSchemeExpander.setClient(colourSchemeComposite);
 		colourSchemeExpander.addExpansionListener(expansionAdapter);
+		colourSchemeExpander.setExpanded(true);
 
 
 		// Set up the per channel colour scheme part of the GUI		
@@ -609,6 +610,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 		histogramExpander.setClient(histogramComposite);
 		histogramExpander.addExpansionListener(expansionAdapter);
+		histogramExpander.setExpanded(true);
 
 		// Activate this so the initial screen has content
 		activate();		
@@ -835,12 +837,12 @@ public class HistogramToolPage extends AbstractToolPage {
 			});
 		}
 
-		// now build the RGB Lines
+		// now build the RGB Lines  ( All the -3's here are to avoid the min/max/NAN colours)
 		PaletteData paletteData = image.getPaletteData();
-		final DoubleDataset R = new DoubleDataset(paletteData.colors.length);
-		final DoubleDataset G = new DoubleDataset(paletteData.colors.length);
-		final DoubleDataset B = new DoubleDataset(paletteData.colors.length);
-		final DoubleDataset RGBX = new DoubleDataset(paletteData.colors.length);
+		final DoubleDataset R = new DoubleDataset(paletteData.colors.length-3);
+		final DoubleDataset G = new DoubleDataset(paletteData.colors.length-3);
+		final DoubleDataset B = new DoubleDataset(paletteData.colors.length-3);
+		final DoubleDataset RGBX = new DoubleDataset(paletteData.colors.length-3);
 		R.setName("red");
 		G.setName("green");
 		B.setName("blue");
@@ -849,7 +851,7 @@ public class HistogramToolPage extends AbstractToolPage {
 		if(scale <= 0) scale = 1.0/256.0;
 
 		//palleteData.colors = new RGB[256];
-		for (int i = 0; i < paletteData.colors.length; i++) {
+		for (int i = 0; i < paletteData.colors.length-3; i++) {
 			R.set(paletteData.colors[i].red*scale, i);
 			G.set(paletteData.colors[i].green*scale, i);
 			B.set(paletteData.colors[i].blue*scale, i);
