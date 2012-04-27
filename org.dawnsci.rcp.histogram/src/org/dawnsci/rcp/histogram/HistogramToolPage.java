@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
@@ -73,8 +74,6 @@ public class HistogramToolPage extends AbstractToolPage {
 
 
 	// HISTOGRAM 
-	private double imageMax = 200.0;
-	private double imageMin = 0.0;
 	private double rangeMax = 100.0;
 	private double rangeMin = 0.0;
 	private double histoMax = 50.0;
@@ -136,8 +135,14 @@ public class HistogramToolPage extends AbstractToolPage {
 	// DEAD ZINGER GUI
 	private ExpandableComposite deadZingerExpander;
 	private Composite deadZingerComposite;
-	private SpinnerSliderSet deadZingerValue;
 	private SelectionListener deadZingerValueListener;
+	private Label deadPixelLabel;
+	private Text deadPixelText;
+	private Label zingerLabel;
+	private Text zingerText;
+
+	private Button resetButton;
+	private SelectionListener resetListener;
 	
 	
 	// HISTOGRAM PLOT
@@ -162,7 +167,6 @@ public class HistogramToolPage extends AbstractToolPage {
 
 
 	private PaletteListener paletteListener;
-
 
 
 	/**
@@ -227,8 +231,9 @@ public class HistogramToolPage extends AbstractToolPage {
 			public void maxCutChanged(PaletteEvent evt) {
 				if (internalEvent > 0) return;
 				logger.trace("paletteListener maxCutChanged firing");
-				imageMax = image.getMaxCut().getBound().doubleValue();
-				if(histoMax > imageMax) histoMax = imageMax;
+				rangeMax = image.getMaxCut().getBound().doubleValue();
+				zingerText.setText(Double.toString(rangeMax));
+				if(histoMax > rangeMax) histoMax = rangeMax;
 				generateHistogram(imageDataset);
 				updateHistogramToolElements(null, false);
 			}
@@ -237,8 +242,9 @@ public class HistogramToolPage extends AbstractToolPage {
 			public void minCutChanged(PaletteEvent evt) {
 				if (internalEvent > 0) return;
 				logger.trace("paletteListener minCutChanged firing");
-				imageMin = image.getMinCut().getBound().doubleValue();
-				if(histoMin < imageMin) histoMin = imageMin;
+				rangeMin = image.getMinCut().getBound().doubleValue();
+				deadPixelText.setText(Double.toString(rangeMin));
+				if(histoMin < rangeMin) histoMin = rangeMin;
 				generateHistogram(imageDataset);
 				updateHistogramToolElements(null, false);
 				
@@ -253,8 +259,7 @@ public class HistogramToolPage extends AbstractToolPage {
 			
 		};
 
-
-
+		
 		// Set up all the GUI element listeners
 		minMaxValueListener = new SelectionListener() {
 
@@ -302,16 +307,24 @@ public class HistogramToolPage extends AbstractToolPage {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
 				logger.trace("deadZingerValueListener");
-				rangeMax = deadZingerValue.getValue(ZINGER_LABEL);
-				rangeMin = deadZingerValue.getValue(DEAD_PIXEL_LABEL);
-				if (rangeMax < rangeMin) rangeMax = rangeMin;
-				if (histoMax > rangeMax) histoMax = rangeMax;
-				if (histoMin < rangeMin) histoMin = rangeMin;
+				try {
+					rangeMax = Double.parseDouble(zingerText.getText());
+					rangeMin = Double.parseDouble(deadPixelText.getText());
+					if (rangeMax < rangeMin) rangeMax = rangeMin;
+					if (histoMax > rangeMax) histoMax = rangeMax;
+					if (histoMin < rangeMin) histoMin = rangeMin;
+					
+					image.setMaxCut(new HistogramBound(rangeMax, image.getMaxCut().getColor()));		
+					image.setMinCut(new HistogramBound(rangeMin, image.getMinCut().getColor()));
 				
-				// calculate the histogram
-				generateHistogram(imageDataset);
-				
-				updateHistogramToolElements(event);
+					// calculate the histogram
+					generateHistogram(imageDataset);
+					
+					updateHistogramToolElements(event);
+					
+				} catch (Exception e) {
+					// ignore this for now, might need to be a popup to the user
+				}
 			}
 
 			@Override
@@ -320,6 +333,32 @@ public class HistogramToolPage extends AbstractToolPage {
 			}
 		};
 		
+		// Set up all the GUI element listeners
+		resetListener = new SelectionListener() {
+
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				rangeMax = Double.POSITIVE_INFINITY;
+				rangeMin = Double.NEGATIVE_INFINITY;
+				
+				image.setMaxCut(new HistogramBound(rangeMax, image.getMaxCut().getColor()));		
+				image.setMinCut(new HistogramBound(rangeMin, image.getMinCut().getColor()));
+				
+				zingerText.setText(Double.toString(rangeMax));
+				deadPixelText.setText(Double.toString(rangeMin));
+				
+				// calculate the histogram
+				generateHistogram(imageDataset);
+				
+				updateHistogramToolElements(event);
+				
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent event) {
+				widgetSelected(event);
+			}
+		};
 		
 		colourSelectionListener = new SelectionListener() {
 
@@ -373,10 +412,6 @@ public class HistogramToolPage extends AbstractToolPage {
 			public IStatus runInUIThread(IProgressMonitor mon) {
 				logger.trace("imagerepaintJob running");
 				internalEvent++;
-				// update the colourscale
-				image.setMaxCut(new HistogramBound(rangeMax, image.getMaxCut().getColor()));
-				
-				image.setMinCut(new HistogramBound(rangeMin, image.getMinCut().getColor()));
 				
 				image.setMax(histoMax);
 				if (mon.isCanceled()) return Status.CANCEL_STATUS;
@@ -532,10 +567,21 @@ public class HistogramToolPage extends AbstractToolPage {
 
 		deadZingerComposite = new Composite(deadZingerExpander, SWT.NONE);
 		deadZingerComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		deadZingerComposite.setLayout(new GridLayout(1, false));
+		deadZingerComposite.setLayout(new GridLayout(5, false));
 
-		deadZingerValue = new SpinnerSliderSet(deadZingerComposite, SLIDER_STEPS, DEAD_PIXEL_LABEL, ZINGER_LABEL);
-		deadZingerValue.addSelectionListener(deadZingerValueListener);
+		deadPixelLabel = new Label(deadZingerComposite, SWT.NONE);
+		deadPixelLabel.setText(DEAD_PIXEL_LABEL);
+		deadPixelText = new Text(deadZingerComposite, SWT.NONE);
+		deadPixelText.addSelectionListener(deadZingerValueListener);
+		
+		zingerLabel = new Label(deadZingerComposite, SWT.NONE);
+		zingerLabel.setText(ZINGER_LABEL);
+		zingerText = new Text(deadZingerComposite, SWT.NONE);
+		zingerText.addSelectionListener(deadZingerValueListener);
+		
+		resetButton = new Button(deadZingerComposite, SWT.NONE);
+		resetButton.setText("Reset");
+		resetButton.addSelectionListener(resetListener);
 
 		deadZingerExpander.setClient(deadZingerComposite);
 		deadZingerExpander.addExpansionListener(expansionAdapter);
@@ -620,7 +666,7 @@ public class HistogramToolPage extends AbstractToolPage {
 			imageDataset = image.getData();
 
 			logger.trace("Image Data is of type :" + imageDataset.getDtype());
-			Class clazz = imageDataset.elementClass();
+			Class<?> clazz = imageDataset.elementClass();
 			if (clazz.equals(Double.class) || clazz.equals(Float.class)) {
 				num_bins = MAX_BINS;
 			} else {
@@ -639,15 +685,16 @@ public class HistogramToolPage extends AbstractToolPage {
 				break;
 			default:
 				// this is the FULL implementation (a good default)
-				imageMax = imageDataset.max().doubleValue();
-				imageMin = imageDataset.min().doubleValue();
-				rangeMax = imageDataset.max().doubleValue();
-				rangeMin = imageDataset.min().doubleValue();
+				rangeMax = image.getMaxCut().getBound().doubleValue();
+				rangeMin = image.getMinCut().getBound().doubleValue();
 				histoMax = image.getMax().doubleValue();
 				histoMin = image.getMin().doubleValue();
 				break;
 			}
 
+			zingerText.setText(Double.toString(image.getMaxCut().getBound().doubleValue()));
+			deadPixelText.setText(Double.toString(image.getMinCut().getBound().doubleValue()));
+			
 			// Update the paletteData
 			palleteData = image.getPaletteData();
 
@@ -741,14 +788,6 @@ public class HistogramToolPage extends AbstractToolPage {
 		brightnessContrastValue.setMax(CONTRAST_LABEL, rangeMax);
 		brightnessContrastValue.setValue(CONTRAST_LABEL, histoMax-histoMin);
 		
-		// set the Dead Zinger values
-		deadZingerValue.setMin(DEAD_PIXEL_LABEL, imageMin);
-		deadZingerValue.setMax(DEAD_PIXEL_LABEL, imageMax);
-		deadZingerValue.setValue(DEAD_PIXEL_LABEL, rangeMin);
-
-		deadZingerValue.setMin(ZINGER_LABEL, imageMin);
-		deadZingerValue.setMax(ZINGER_LABEL, imageMax);
-		deadZingerValue.setValue(ZINGER_LABEL, rangeMax);
 	}
 
 
