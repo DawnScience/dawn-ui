@@ -41,7 +41,6 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.function.Downsample;
 import uk.ac.diamond.scisoft.analysis.dataset.function.DownsampleMode;
-import uk.ac.diamond.scisoft.analysis.rcp.preference.PreferenceConstants;
 
 /**
  * A trace which draws an image to the plot.
@@ -189,11 +188,18 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 				imageServiceBean.setImage(reducedFullImage);
 				imageServiceBean.setMonitor(monitor);
+				if (fullMask!=null) {
+					imageServiceBean.setMask(getDownsampled(fullMask));
+				} else {
+					imageServiceBean.setMask(null); // Ensure we loose the mask!
+				}
 				
 				if (rescaleType==ImageScaleType.REHISTOGRAM) { // Avoids changing colouring to 
 					// max and min of new selection.
-					AbstractDataset slice = slice(getXAxis().getRange(), getYAxis().getRange());
-					float[] fa = service.getFastStatistics(new ImageServiceBean(slice, getHistoType()));
+					AbstractDataset  slice     = slice(getXAxis().getRange(), getYAxis().getRange(), getData());
+					ImageServiceBean histoBean = new ImageServiceBean(slice, getHistoType());
+					if (fullMask!=null) histoBean.setMask(slice(getXAxis().getRange(), getYAxis().getRange(), fullMask));
+					float[] fa = service.getFastStatistics(histoBean);
 					setMin(fa[0]);
 					setMax(fa[1]);
 				}
@@ -279,7 +285,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		return getBounds(xr, yr);
 	}
 
-	private int[] getBounds(Range xr, Range yr) {
+	private static final int[] getBounds(Range xr, Range yr) {
 		return new int[] {(int) Math.floor(xr.getLower()), (int) Math.floor(yr.getLower()),
 				(int) Math.ceil(xr.getUpper()), (int) Math.ceil(yr.getUpper())};
 	}
@@ -315,6 +321,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 
 	private Map<Integer, Reference<Object>> mipMap;
+	private Map<Integer, Reference<Object>> maskMap;
 	
 	private AbstractDataset getDownsampled(AbstractDataset image) {
 		
@@ -326,18 +333,31 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			return image; // nothing to downsample
 		}
 		
-		if (mipMap!=null && mipMap.containsKey(bin) && mipMap.get(bin).get()!=null) {
-	        logger.trace("Downsample bin used, "+bin);
-			return (AbstractDataset)mipMap.get(bin).get();
+		if (image.getDtype()!=AbstractDataset.BOOL) {
+			if (mipMap!=null && mipMap.containsKey(bin) && mipMap.get(bin).get()!=null) {
+		        logger.trace("Downsample bin used, "+bin);
+				return (AbstractDataset)mipMap.get(bin).get();
+			}
+		} else {
+			if (maskMap!=null && maskMap.containsKey(bin) && maskMap.get(bin).get()!=null) {
+		        logger.trace("Downsample mask bin used, "+bin);
+				return (AbstractDataset)maskMap.get(bin).get();
+			}
 		}
 		
 		final Downsample downSampler = new Downsample(getDownsampleTypeDiamond(), new int[]{bin,bin});
 		List<AbstractDataset>   sets = downSampler.value(image);
 		final AbstractDataset set = sets.get(0);
 		
-		if (mipMap==null) mipMap = new HashMap<Integer,Reference<Object>>(3);
-		mipMap.put(bin, new SoftReference<Object>(set));
-        logger.trace("Downsample bin created, "+bin);
+		if (image.getDtype()!=AbstractDataset.BOOL) {
+			if (mipMap==null) mipMap = new HashMap<Integer,Reference<Object>>(3);
+			mipMap.put(bin, new SoftReference<Object>(set));
+	        logger.trace("Downsample bin created, "+bin);
+		} else {
+			if (maskMap==null) maskMap = new HashMap<Integer,Reference<Object>>(3);
+			maskMap.put(bin, new SoftReference<Object>(set));
+	        logger.trace("Downsample mask bin created, "+bin);
+		}
       
 		return set;
 	}
@@ -420,7 +440,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 	public void remove() {
 		
-		if (mipMap!=null)         mipMap.clear();
+		if (mipMap!=null)           mipMap.clear();
+		if (maskMap!=null)          maskMap.clear();
 		if (scaledImage!=null)      scaledImage.dispose();
 		if (paletteListeners!=null) paletteListeners.clear();
 		paletteListeners = null;
@@ -453,15 +474,14 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 * @param yr
 	 * @return
 	 */
-	public AbstractDataset slice(Range xr, Range yr) {
-		final AbstractDataset data = getData();
+	private final AbstractDataset slice(Range xr, Range yr, final AbstractDataset data) {
 		
 		// Check that a slice needed, this speeds up the initial show of the image.
-		final int[] shape = image.getShape();
+		final int[] shape = data.getShape();
 		final int[] imageRanges = getImageBounds(shape, getImageOrigin());
 		final int[] bounds = getBounds(xr, yr);
 		if (imageRanges!=null && Arrays.equals(imageRanges, bounds)) {
-			return image;
+			return data;
 		}
 		
 		int[] xRange = getRange(bounds, shape[0], 0, false);
@@ -469,13 +489,14 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 		try {
 			return data.getSlice(new int[]{xRange[0],yRange[0]}, new int[]{xRange[1],yRange[1]}, null);
+			
 		} catch (IllegalArgumentException iae) {
 			logger.error("Cannot slice image", iae);
-			return getData();
+			return data;
 		}
 	}
 
-	private int[] getRange(int[] bounds, int side, int index, boolean inverted) {
+	private static final int[] getRange(int[] bounds, int side, int index, boolean inverted) {
 		int start = bounds[index];
 		if (inverted) start = side-start;
 		
@@ -547,7 +568,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		}
 	}
 	
-	private int[] getImageBounds(int[] shape, ImageOrigin origin) {
+	private static final int[] getImageBounds(int[] shape, ImageOrigin origin) {
 		switch (origin) {
 		case TOP_LEFT:
 			return new int[] {0, shape[0], shape[1], 0};
@@ -846,5 +867,24 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		storeBound(bound, PlottingConstants.NAN_CUT);
 		imageServiceBean.setNanBound(bound);
 		fireNanBoundsListeners();
+	}
+	
+    private AbstractDataset fullMask;
+	/**
+	 * The masking dataset of there is one, normally null.
+	 * @return
+	 */
+	public AbstractDataset getMask() {
+		return fullMask;
+	}
+	
+	/**
+	 * 
+	 * @param bd
+	 */
+	public void setMask(AbstractDataset bd) {
+		if (maskMap!=null) maskMap.clear();
+		fullMask = bd;
+		rehistogram();
 	}
 }
