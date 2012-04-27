@@ -54,7 +54,7 @@ public class BoxProfileTool extends ProfileTool {
 
 		if (monitor.isCanceled()) return;
 		
-		RectangularROIData rd = new RectangularROIData(bounds, image.getData());
+		RectangularROIData rd = new RectangularROIData(bounds, image.getData(), image.getMask());
 
 		if (monitor.isCanceled()) return;
 		

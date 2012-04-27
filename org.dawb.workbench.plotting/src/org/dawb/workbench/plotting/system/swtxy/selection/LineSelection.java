@@ -138,9 +138,9 @@ class LineSelection extends AbstractSelectionRegion {
 	}
 	
 	@Override
-	protected void updateROI(ROIBase bounds) {
-		if (bounds instanceof LinearROI) {
-			LinearROI lroi = (LinearROI) bounds;
+	protected void updateROI(ROIBase roi) {
+		if (roi instanceof LinearROI) {
+			LinearROI lroi = (LinearROI) roi;
 			if (startBox != null)
 				startBox.setPosition(lroi.getPoint());
 			if (endBox != null)

@@ -134,7 +134,7 @@ public class InfoBoxTool extends AbstractToolPage implements IROIListener, IRegi
 						pointRegion.setName("---");
 						Rectangle rect = new Rectangle();
 						rect.setX((int) xValues[0]); rect.setY((int) yValues[0]);
-						pointRegion.setBounds(rect);
+						//pointRegion.setBounds(rect);
 						visible.add(pointRegion);
 					}
 				}

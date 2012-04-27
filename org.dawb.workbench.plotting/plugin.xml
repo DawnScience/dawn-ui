@@ -66,6 +66,13 @@
             label="Cross Hair Profile"
             tooltip="A tool for showing a profile slice through x and y.">
       </plotting_tool_page>
+      <plotting_tool_page
+            class="org.dawb.workbench.plotting.tools.MaskingTool"
+            icon="icons/plot-tool-masking.png"
+            id="org.dawb.workbench.plotting.tools.maskingTool"
+            label="Masking"
+            tooltip="Masking the image and leaving data modified.">
+      </plotting_tool_page>
    </extension>
    <extension
          point="org.eclipse.ui.views">

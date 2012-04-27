@@ -500,6 +500,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 
 			xyGraph.addImageTrace(trace);
 			
+			fireTraceAdded(new TraceEvent(trace));
 			
 			return trace;
             
