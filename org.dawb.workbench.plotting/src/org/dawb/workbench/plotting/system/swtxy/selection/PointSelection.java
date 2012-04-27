@@ -97,11 +97,11 @@ public class PointSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	protected void updateROI(ROIBase bounds) {
-		if (bounds instanceof PointROI) {
+	protected void updateROI(ROIBase roi) {
+		if (roi instanceof PointROI) {
 			if (point==null) return;
 
-	        point.setPosition(bounds.getPoint());
+	        point.setPosition(roi.getPoint());
 	        updateConnectionBounds();
 		}
     }

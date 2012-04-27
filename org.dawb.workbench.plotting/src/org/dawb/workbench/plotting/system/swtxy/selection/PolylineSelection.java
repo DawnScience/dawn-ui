@@ -101,12 +101,12 @@ public class PolylineSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	protected void updateROI(ROIBase bounds) {
-		if (bounds instanceof PolygonalROI) {
+	protected void updateROI(ROIBase roi) {
+		if (roi instanceof PolygonalROI) {
 			if (pline == null)
 				return;
 
-			pline.updateROI((PolygonalROI) bounds);
+			pline.updateROI((PolygonalROI) roi);
 
 			updateConnectionBounds();
 		}

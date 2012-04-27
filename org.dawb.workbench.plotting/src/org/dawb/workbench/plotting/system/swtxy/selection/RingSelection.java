@@ -200,9 +200,9 @@ class RingSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	protected void updateROI(ROIBase bounds) {
-		if (bounds instanceof SectorROI) {
-			SectorROI sroi = (SectorROI) bounds;
+	protected void updateROI(ROIBase roi) {
+		if (roi instanceof SectorROI) {
+			SectorROI sroi = (SectorROI) roi;
 			if (center!=null) {
 				center.setPosition(sroi.getPoint());
 				double y = sroi.getPointY();

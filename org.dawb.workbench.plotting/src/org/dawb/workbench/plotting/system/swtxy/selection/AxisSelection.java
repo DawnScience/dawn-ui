@@ -298,9 +298,9 @@ class AxisSelection extends AbstractSelectionRegion {
 		return super.getROI();
 	}
 	
-	protected void updateROI(ROIBase bounds) {
-		if (bounds instanceof RectangularROI) {
-			RectangularROI rroi = (RectangularROI) bounds;
+	protected void updateROI(ROIBase roi) {
+		if (roi instanceof RectangularROI) {
+			RectangularROI rroi = (RectangularROI) roi;
 
 			if (line1 != null) {
 				
