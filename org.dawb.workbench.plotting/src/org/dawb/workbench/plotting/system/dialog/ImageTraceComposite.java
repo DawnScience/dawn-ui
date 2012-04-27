@@ -225,15 +225,15 @@ public class ImageTraceComposite extends Composite {
 		reset.setToolTipText("Reset cut bounds");
 		reset.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				imageTrace.setMinCut(ImageServiceBean.DEFAULT_MINIMUM);
-				imageTrace.setMaxCut(ImageServiceBean.DEFAULT_MAXIMUM);
-				imageTrace.setNanBound(ImageServiceBean.DEFAULT_NAN);
+				imageTrace.setMinCut(ImageServiceBean.HistogramBound.DEFAULT_MINIMUM);
+				imageTrace.setMaxCut(ImageServiceBean.HistogramBound.DEFAULT_MAXIMUM);
+				imageTrace.setNanBound(ImageServiceBean.HistogramBound.DEFAULT_NAN);
 				minCut.setNumericValue(Double.NEGATIVE_INFINITY);
-				minCutColor.setColorValue(ImageServiceBean.DEFAULT_MINIMUM.getColor());
+				minCutColor.setColorValue(ImageServiceBean.HistogramBound.DEFAULT_MINIMUM.getColor());
 				maxCut.setNumericValue(Double.POSITIVE_INFINITY);
-				maxCutColor.setColorValue(ImageServiceBean.DEFAULT_MAXIMUM.getColor());
+				maxCutColor.setColorValue(ImageServiceBean.HistogramBound.DEFAULT_MAXIMUM.getColor());
 				((StyledText)maxCut.getControl()).setText("Infinity");
-				nanColor.setColorValue(ImageServiceBean.DEFAULT_NAN.getColor());
+				nanColor.setColorValue(ImageServiceBean.HistogramBound.DEFAULT_NAN.getColor());
 			}
 		});
 		

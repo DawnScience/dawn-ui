@@ -12,6 +12,7 @@ package org.dawb.workbench.plotting.system;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -54,8 +55,14 @@ import org.eclipse.swt.printing.PrinterData;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.menus.CommandContributionItem;
+import org.eclipse.ui.menus.CommandContributionItemParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import uk.ac.diamond.scisoft.analysis.rcp.AnalysisRCPActivator;
+import uk.ac.diamond.scisoft.analysis.rcp.plotting.actions.InjectPyDevConsoleHandler;
 
 class LightWeightActionBarsManager extends PlottingActionBarManager {
 
@@ -566,6 +573,7 @@ class LightWeightActionBarsManager extends PlottingActionBarManager {
 		this.system.getActionBars().getMenuManager().add(new Separator(snapShotButton.getId()+".group"));
 		this.system.getActionBars().getMenuManager().add(snapShotButton);
 		this.system.getActionBars().getMenuManager().add(printButton);
+		this.system.getActionBars().getMenuManager().add(new Separator(printButton.getId()+".group"));
 	}
 
 }

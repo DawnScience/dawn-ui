@@ -11,6 +11,7 @@
 package org.dawb.workbench.plotting.preference;
 
 import org.dawb.common.services.ImageServiceBean.HistoType;
+import org.dawb.common.services.ImageServiceBean.HistogramBound;
 import org.dawb.common.services.ImageServiceBean.ImageOrigin;
 import org.dawb.workbench.plotting.Activator;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
@@ -31,5 +32,8 @@ public class PlottingPreferenceInitializer extends AbstractPreferenceInitializer
 		store.setDefault(PlottingConstants.ASPECT,         true);
 		store.setDefault(PlottingConstants.HISTO ,         false);
 		store.setDefault(PlottingConstants.HISTO_PREF ,    HistoType.MEAN.getLabel());
+		store.setDefault(PlottingConstants.MIN_CUT,        HistogramBound.DEFAULT_MINIMUM.toString());
+		store.setDefault(PlottingConstants.MAX_CUT,        HistogramBound.DEFAULT_MAXIMUM.toString());
+		store.setDefault(PlottingConstants.NAN_CUT,        HistogramBound.DEFAULT_NAN.toString());
 	}
 }

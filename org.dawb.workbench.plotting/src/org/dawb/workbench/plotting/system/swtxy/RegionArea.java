@@ -323,35 +323,37 @@ public class RegionArea extends PlotArea {
 
 	class RegionMouseListener extends MouseMotionListener.Stub implements MouseListener {
 		private int last = -1; // index of point that is being dragged around
-		private final int maxPresses; // region allows multiple mouse button presses
+		private final int maxLast; // region allows multiple mouse button presses
 		private boolean isDragging;
 
+		private static final int MIN_DIST = 2;
 		public RegionMouseListener(final int presses) {
-			maxPresses = presses;
+			maxLast = presses - 1;
 			regionPoints = new PointList(2);
+			isDragging = false;
 		}
 
 		@Override
 		public void mousePressed(MouseEvent me) {
 			final Point loc = me.getLocation();
-			if (last < 0) {
-				regionPoints.addPoint(loc);
-				last++;
-				isDragging = maxPresses == 1;
-			} else {
-				if (maxPresses == 0) {
-					if (!isDragging || loc.getDistance(regionPoints.getPoint(last-1)) < 2) {
-						regionPoints.removePoint(last);
-						releaseMouse();
-					} else {
-						regionPoints.addPoint(loc);
-						last++;
-						isDragging = false;
-					}
-				} else {
+			if (isDragging) {
+				isDragging = false;
+				if (maxLast > 0 && last >= maxLast) {
+//					System.err.println("End with last = " + last + " / " + maxLast);
 					releaseMouse();
 				}
+			} else {
+				if (last > 0 && loc.getDistance(regionPoints.getPoint(last)) <= MIN_DIST) {
+//					System.err.println("Cancel with last = " + last + " / " + maxLast);
+					releaseMouse();
+				} else {
+					regionPoints.addPoint(loc);
+					last++;
+//					System.err.println("Added on press (from non-drag), now last = " + last);
+					isDragging = maxLast == 0;
+				}
 			}
+
 			me.consume();
 			repaint();
 		}
@@ -359,10 +361,9 @@ public class RegionArea extends PlotArea {
 		@Override
 		public void mouseReleased(MouseEvent me) {
 			if (isDragging) {
-				if (maxPresses == 0) {
-					regionPoints.addPoint(me.getLocation());
-					last++;
-				} else {
+				isDragging = false;
+				if (maxLast >= 0 && last >= maxLast) {
+//					System.err.println("Release with last = " + last + " / " + maxLast);
 					releaseMouse();
 				}
 				me.consume();
@@ -387,13 +388,16 @@ public class RegionArea extends PlotArea {
 			final Point loc = me.getLocation();
 			if (isDragging) {
 				regionPoints.setPoint(loc, last);
-			} else {
+				me.consume();
+				repaint();
+			} else if (loc.getDistance(regionPoints.getPoint(last)) > MIN_DIST) {
 				regionPoints.addPoint(loc);
 				last++;
 				isDragging = true;
+				me.consume();
+				repaint();
+//				System.err.println("Added on move, last = " + last);
 			}
-			me.consume();
-			repaint();
 		}
 
 		@Override

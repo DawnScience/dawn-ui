@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.function.Downsample;
 import uk.ac.diamond.scisoft.analysis.dataset.function.DownsampleMode;
+import uk.ac.diamond.scisoft.analysis.rcp.preference.PreferenceConstants;
 
 /**
  * A trace which draws an image to the plot.
@@ -77,7 +78,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		}	
 		imageServiceBean.setOrigin(ImageOrigin.forLabel(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.ORIGIN_PREF)));
 		imageServiceBean.setHistogramType(HistoType.forLabel(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.HISTO_PREF)));
-				
+		imageServiceBean.setMinimumCutBound(HistogramBound.fromString(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.MIN_CUT)));
+		imageServiceBean.setMaximumCutBound(HistogramBound.fromString(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.MAX_CUT)));
+		imageServiceBean.setNanBound(HistogramBound.fromString(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.NAN_CUT)));
+		
 		xAxis.addListener(this);
 		yAxis.addListener(this);
 		
@@ -806,8 +810,18 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 	@Override
 	public void setMinCut(HistogramBound bound) {
+		
+		storeBound(bound, PlottingConstants.MIN_CUT);
 		imageServiceBean.setMinimumCutBound(bound);
 		fireMinCutListeners();
+	}
+
+	private void storeBound(HistogramBound bound, String prop) {
+		if (bound!=null) {
+			Activator.getDefault().getPreferenceStore().setValue(prop, bound.toString());
+		} else {
+			Activator.getDefault().getPreferenceStore().setValue(prop, "");
+		}
 	}
 
 	@Override
@@ -817,6 +831,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 	@Override
 	public void setMaxCut(HistogramBound bound) {
+		storeBound(bound, PlottingConstants.MAX_CUT);
 		imageServiceBean.setMaximumCutBound(bound);
 		fireMaxCutListeners();
 	}
@@ -828,6 +843,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 	@Override
 	public void setNanBound(HistogramBound bound) {
+		storeBound(bound, PlottingConstants.NAN_CUT);
 		imageServiceBean.setNanBound(bound);
 		fireNanBoundsListeners();
 	}
