@@ -18,6 +18,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.preference.ColorSelector;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
@@ -114,7 +117,7 @@ public class MaskingTool extends AbstractToolPage {
 		lowerEnabled.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				minimum.setEnabled(lowerEnabled.getSelection());
-				processMask(lowerEnabled.getSelection());
+				processMask(true);
 			}
 		});
 		
@@ -146,7 +149,7 @@ public class MaskingTool extends AbstractToolPage {
 		upperEnabled.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				maximum.setEnabled(upperEnabled.getSelection());
-				processMask(upperEnabled.getSelection());
+				processMask(true);
 			}
 		});
 		
@@ -169,7 +172,22 @@ public class MaskingTool extends AbstractToolPage {
 				}
 			}
 		});
-
+		
+		
+		label = new Label(masking, SWT.NONE);
+		label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1,1));
+		label.setText("Mask Color");
+		
+		final ColorSelector selector = new ColorSelector(masking);
+		selector.getButton().setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1,1));
+		selector.setColorValue(image.getNanBound().getColor());
+		selector.addListener(new IPropertyChangeListener() {			
+			@Override
+			public void propertyChange(PropertyChangeEvent event) {
+				getImageTrace().setNanBound(new HistogramBound(Double.NaN, selector.getColorValue()));
+				processMask(true);
+			}
+		});
 		
 		final Composite buttons = new Composite(composite, SWT.NONE);
 		buttons.setLayout(new GridLayout(2, false));
