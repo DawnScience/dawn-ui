@@ -331,6 +331,11 @@ public class InfoBoxTool extends AbstractToolPage implements IROIListener, IRegi
 			evt.getRegion().removeROIListener(this);
 		}
 	}
+	@Override
+	public void regionsRemoved(RegionEvent evt) {
+		if (!isActive()) return;
+		if (viewer!=null) viewer.refresh();
+	}
 
 	@Override
 	public void roiDragged(ROIEvent evt) {

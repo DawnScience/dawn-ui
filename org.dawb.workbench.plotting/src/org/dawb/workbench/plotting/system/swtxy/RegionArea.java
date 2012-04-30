@@ -85,9 +85,10 @@ public class RegionArea extends PlotArea {
 		for (AbstractSelectionRegion region : regions.values()) {
 			if (!region.isUserRegion()) continue;
 			region.remove();
-			fireRegionRemoved(new RegionEvent(region));
 		}
-		regions.clear();		
+		regions.clear();	
+		fireRegionsRemoved(new RegionEvent(this));
+
 	}
 	
 
@@ -241,6 +242,10 @@ public class RegionArea extends PlotArea {
 	protected void fireRegionRemoved(RegionEvent evt) {
 		if (regionListeners==null) return;
 		for (IRegionListener l : regionListeners) l.regionRemoved(evt);
+	}
+	protected void fireRegionsRemoved(RegionEvent evt) {
+		if (regionListeners==null) return;
+		for (IRegionListener l : regionListeners) l.regionsRemoved(evt);
 	}
 	
 	/**

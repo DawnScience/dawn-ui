@@ -411,7 +411,12 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 			evt.getRegion().removeROIListener(this);
 		}
 	}
-
+	@Override
+	public void regionsRemoved(RegionEvent evt) {
+		if (!isActive()) return;
+		if (viewer!=null) viewer.refresh();
+	}
+	
 	@Override
 	public void roiDragged(ROIEvent evt) {
 		if (!isActive()) return;

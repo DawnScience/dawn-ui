@@ -276,6 +276,11 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		
 	}
 
+	@Override
+	public void regionsRemoved(RegionEvent evt) {
+		
+	}
+
 	public Job createFittingJob() {
 		
 		final Job fit = new Job("Fit peaks") {

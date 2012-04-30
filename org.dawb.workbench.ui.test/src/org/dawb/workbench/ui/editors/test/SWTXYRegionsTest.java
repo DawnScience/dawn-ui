@@ -61,11 +61,7 @@ public class SWTXYRegionsTest {
 		final IEditorPart         editor = (IEditorPart)oa[1];
 		
 		final List<String> addedRegionNames = new ArrayList<String>();
-		sys.addRegionListener(new IRegionListener() {		
-			@Override
-			public void regionRemoved(RegionEvent evt) {}
-			@Override
-			public void regionCreated(RegionEvent evt) {}
+		sys.addRegionListener(new IRegionListener.Stub() {		
 			@Override
 			public void regionAdded(RegionEvent evt) {
 				addedRegionNames.add(evt.getRegion().getName());
@@ -147,11 +143,7 @@ public class SWTXYRegionsTest {
 
 		final List<String> addedNames = new ArrayList<String>();
 
-		sys.addRegionListener(new IRegionListener() {		
-			@Override
-			public void regionRemoved(RegionEvent evt) {}
-			@Override
-			public void regionCreated(RegionEvent evt) {}
+		sys.addRegionListener(new IRegionListener.Stub() {		
 			
 			private boolean processingRegions = false;
 			@Override

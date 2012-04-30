@@ -1,11 +1,17 @@
 package org.dawb.workbench.plotting.tools;
 
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.dawb.common.services.ImageServiceBean.HistogramBound;
+import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.region.IROIListener;
 import org.dawb.common.ui.plot.region.IRegion;
+import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.ROIEvent;
 import org.dawb.common.ui.plot.region.RegionEvent;
@@ -18,9 +24,25 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.action.ActionContributionItem;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.preference.ColorSelector;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.CheckboxCellEditor;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnViewer;
+import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
+import org.eclipse.jface.viewers.EditingSupport;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerCell;
+import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
@@ -45,7 +67,7 @@ public class MaskingTool extends AbstractToolPage {
 
 	private static final Logger logger = LoggerFactory.getLogger(MaskingTool.class);
 	
-	private Composite       composite;
+	private Group           composite;
 	private Spinner         minimum, maximum;
 	private Button          autoApply;
 	private MaskCreator     maskCreator;
@@ -53,6 +75,8 @@ public class MaskingTool extends AbstractToolPage {
 	private IRegionListener regionListener;
 	private IROIListener    regionBoundsListener;
 	private MaskJob         maskJob;
+
+	private TableViewer regionTable;
 	
 	public MaskingTool() {
 		
@@ -71,7 +95,19 @@ public class MaskingTool extends AbstractToolPage {
 			public void regionAdded(RegionEvent evt) {
 				evt.getRegion().addROIListener(regionBoundsListener);
 				processMask(false, evt.getRegion());
+				regionTable.refresh();
 			}			
+			@Override
+			public void regionRemoved(RegionEvent evt) {
+				evt.getRegion().removeROIListener(regionBoundsListener);
+				processMask(false);
+				regionTable.refresh();
+			}			
+			@Override
+			public void regionsRemoved(RegionEvent evt) {
+				processMask(false);
+				regionTable.refresh();
+			}
 		};
 		
 		this.regionBoundsListener = new IROIListener.Stub() {
@@ -95,37 +131,39 @@ public class MaskingTool extends AbstractToolPage {
 	@Override
 	public void createControl(Composite parent) {
 		
-		this.composite = new Composite(parent, SWT.NONE);
+		this.composite = new Group(parent, SWT.NONE);
 		composite.setLayout(new GridLayout(1, false));
-		
 		final IImageTrace image = getImageTrace();
-
-		final Group masking = new Group(composite, SWT.NONE);
-		masking.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		masking.setLayout(new GridLayout(2, false));
 		if (image!=null) {
-			masking.setText("Masking '"+image.getName()+"'");
+			composite.setText("Masking '"+image.getName()+"'");
 		} else {
-			masking.setText("Masking ");
+			composite.setText("Masking ");
 		}
 		
-		Label label = new Label(masking, SWT.WRAP);
+
+		final Composite minMaxComp = new Composite(composite, SWT.NONE);
+		minMaxComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		minMaxComp.setLayout(new GridLayout(2, false));
+		
+		Label label = new Label(minMaxComp, SWT.WRAP);
 		label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2,1));
 		label.setText("Apply a mask to the original data. "+
-		              "The mask changes the data of the image permanently (the mask may be reset).");	
+		              "The mask is saved and available in other tools.");	
 		
-		final Button lowerEnabled =  new Button(masking, SWT.CHECK);
-		lowerEnabled.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1,1));
-		lowerEnabled.setText("Enable lower mask    ");
-		lowerEnabled.setToolTipText("Enable the lower bound mask, removing pixels with lower intensity.");
-		lowerEnabled.addSelectionListener(new SelectionAdapter() {
+		// Max and min
+		
+		final Button minEnabled =  new Button(minMaxComp, SWT.CHECK);
+		minEnabled.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1,1));
+		minEnabled.setText("Enable lower mask    ");
+		minEnabled.setToolTipText("Enable the lower bound mask, removing pixels with lower intensity.");
+		minEnabled.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				minimum.setEnabled(lowerEnabled.getSelection());
+				minimum.setEnabled(minEnabled.getSelection());
 				processMask(true);
 			}
 		});
 		
-		this.minimum = new Spinner(masking, SWT.NONE);
+		this.minimum = new Spinner(minMaxComp, SWT.NONE);
 		minimum.setEnabled(false);
 		minimum.setMinimum(Integer.MIN_VALUE);
 		minimum.setMaximum(Integer.MAX_VALUE);
@@ -146,18 +184,18 @@ public class MaskingTool extends AbstractToolPage {
 		});
 	
 		
-		final Button upperEnabled =  new Button(masking, SWT.CHECK);
-		upperEnabled.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1,1));
-		upperEnabled.setText("Enable upper mask    ");
-		upperEnabled.setToolTipText("Enable the upper bound mask, removing pixels with higher intensity.");
-		upperEnabled.addSelectionListener(new SelectionAdapter() {
+		final Button maxEnabled =  new Button(minMaxComp, SWT.CHECK);
+		maxEnabled.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1,1));
+		maxEnabled.setText("Enable upper mask    ");
+		maxEnabled.setToolTipText("Enable the upper bound mask, removing pixels with higher intensity.");
+		maxEnabled.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				maximum.setEnabled(upperEnabled.getSelection());
+				maximum.setEnabled(maxEnabled.getSelection());
 				processMask(true);
 			}
 		});
 		
-		this.maximum = new Spinner(masking, SWT.NONE);
+		this.maximum = new Spinner(minMaxComp, SWT.NONE);
 		maximum.setEnabled(false);
 		maximum.setMinimum(Integer.MIN_VALUE);
 		maximum.setMaximum(Integer.MAX_VALUE);
@@ -178,11 +216,11 @@ public class MaskingTool extends AbstractToolPage {
 		});
 		
 		
-		label = new Label(masking, SWT.NONE);
+		label = new Label(minMaxComp, SWT.NONE);
 		label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1,1));
 		label.setText("Mask Color");
 		
-		final ColorSelector selector = new ColorSelector(masking);
+		final ColorSelector selector = new ColorSelector(minMaxComp);
 		selector.getButton().setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1,1));
 		if (image!=null) selector.setColorValue(image.getNanBound().getColor());
 		selector.addListener(new IPropertyChangeListener() {			
@@ -192,6 +230,51 @@ public class MaskingTool extends AbstractToolPage {
 				processMask(true);
 			}
 		});
+		
+		
+		// Regions
+		final Composite        regionComp = new Composite(composite, SWT.NONE);
+		regionComp.setLayout(new GridLayout(1, false));
+		regionComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		label = new Label(regionComp, SWT.HORIZONTAL|SWT.SEPARATOR);
+		label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		
+		final ToolBarManager   man        = new ToolBarManager(SWT.FLAT|SWT.RIGHT);
+		fillMaskingRegionActions(man);
+		final Control          tb         = man.createControl(regionComp);
+		tb.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, false));
+		
+		this.regionTable = new TableViewer(regionComp, SWT.FULL_SELECTION | SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+		regionTable.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		createColumns(regionTable);
+		regionTable.getTable().setLinesVisible(true);
+		regionTable.getTable().setHeaderVisible(true);
+		
+		getSite().setSelectionProvider(regionTable);
+		regionTable.setContentProvider(new IStructuredContentProvider() {			
+			@Override
+			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+				// TODO Auto-generated method stub
+				
+			}			
+			@Override
+			public void dispose() {
+				// TODO Auto-generated method stub
+				
+			}		
+			@Override
+			public Object[] getElements(Object inputElement) {
+				final Collection<IRegion> regions = getPlottingSystem().getRegions();
+				if (regions==null || regions.isEmpty()) return new Object[]{"-"};
+				final List<IRegion> supported = new ArrayList<IRegion>(regions.size());
+				for (IRegion iRegion : regions) if (maskCreator.isSupportedRegion(iRegion)) {
+					supported.add(iRegion);
+				}
+				return supported.toArray(new IRegion[supported.size()]);
+			}
+		});
+		regionTable.setInput(new Object());
 		
 		final Composite buttons = new Composite(composite, SWT.NONE);
 		buttons.setLayout(new GridLayout(2, false));
@@ -230,6 +313,97 @@ public class MaskingTool extends AbstractToolPage {
 			}
 		});
 		
+	}
+
+	private void createColumns(TableViewer viewer) {
+		
+		ColumnViewerToolTipSupport.enableFor(viewer,ToolTip.NO_RECREATE);
+
+		TableViewerColumn var = new TableViewerColumn(viewer, SWT.LEFT, 0);
+		var.getColumn().setText("Region Name");
+		var.getColumn().setWidth(120);
+		var.setLabelProvider(new MaskingLabelProvider());
+
+		var = new TableViewerColumn(viewer, SWT.CENTER, 1);
+		var.getColumn().setText("Include in mask");
+		var.getColumn().setWidth(200);
+		var.setLabelProvider(new MaskingLabelProvider());
+		var.setEditingSupport(new MaskingEditingSupport(viewer));
+		
+	}
+	
+	private Map<String,Boolean> maskedRegions = new HashMap<String,Boolean>(7);
+	
+	private class MaskingEditingSupport extends EditingSupport {
+
+		public MaskingEditingSupport(ColumnViewer viewer) {
+			super(viewer);
+		}
+
+		@Override
+		protected CellEditor getCellEditor(Object element) {
+			return new CheckboxCellEditor(composite);
+		}
+
+		@Override
+		protected boolean canEdit(Object element) {
+			return element instanceof IRegion;
+		}
+
+		@Override
+		protected Object getValue(Object element) {
+			if (!(element instanceof IRegion)) return null;
+			final IRegion region = (IRegion)element;
+			if (maskedRegions.containsKey(region.getName())) {
+				return maskedRegions.get(region.getName());
+			} else {
+			    return Boolean.TRUE;
+			}
+		}
+
+		@Override
+		protected void setValue(Object element, Object value) {
+			if (!(element instanceof IRegion)) return;
+			final IRegion region = (IRegion)element;
+			maskedRegions.put(region.getName(), (Boolean)value);
+		}
+
+	}
+	
+	private class MaskingLabelProvider extends ColumnLabelProvider {
+	
+		private int col;
+		public void update(ViewerCell cell) {
+			col = cell.getColumnIndex();
+			super.update(cell);
+		}
+		
+		public String getText(Object element) {
+			
+			if (element instanceof String) return "";
+			
+			final IRegion region = (IRegion)element;
+			switch(col) {
+			case 0:
+			return region.getName();
+			case 1:
+			return "true";
+			}
+			return "";
+		}
+
+	}
+
+	private void fillMaskingRegionActions(IToolBarManager man) {
+		
+		final ActionContributionItem menu  = (ActionContributionItem)getPlottingSystem().getActionBars().getToolBarManager().find("org.dawb.workbench.ui.editors.plotting.swtxy.addRegions");
+		final MenuAction        menuAction = (MenuAction)menu.getAction();
+		
+		final RegionType[] regions = new RegionType[]{RegionType.LINE, RegionType.BOX, RegionType.POLYLINE, RegionType.FREE_DRAW, RegionType.XAXIS, RegionType.YAXIS};
+		for (RegionType type : regions) {
+			final IAction action = menuAction.findAction(type.getId());
+			man.add(action);
+		}
 	}
 
 	private int getValue(Number bound, HistogramBound hb, int defaultInt) {

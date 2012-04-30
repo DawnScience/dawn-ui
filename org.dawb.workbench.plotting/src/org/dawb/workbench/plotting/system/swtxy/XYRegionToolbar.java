@@ -219,6 +219,7 @@ public class XYRegionToolbar extends XYGraphToolbar {
 				}
 			}
 		};
+		regionAction.setId(type.getId());
 		return regionAction;
 	}
 
