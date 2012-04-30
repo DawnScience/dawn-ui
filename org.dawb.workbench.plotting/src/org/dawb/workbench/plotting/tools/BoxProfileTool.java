@@ -57,7 +57,7 @@ public class BoxProfileTool extends ProfileTool {
 		if (monitor.isCanceled()) return;
 		
 		AbstractDataset[] box = ROIProfile.box(image.getData(), image.getMask(), bounds, true);
-
+        if (box==null) return;
 		if (monitor.isCanceled()) return;
 				
 		final AbstractDataset x_intensity = box[0];
@@ -83,7 +83,7 @@ public class BoxProfileTool extends ProfileTool {
 						plotter.setSelectedXAxis(xPixelAxis);
 						x_trace.setData(x_indices, x_intensity);
 						plotter.setSelectedXAxis(yPixelAxis);
-						y_trace.setData(y_indices, y_intensity);
+						y_trace.setData(y_indices, y_intensity);						
 					}
 				});
 			}		
