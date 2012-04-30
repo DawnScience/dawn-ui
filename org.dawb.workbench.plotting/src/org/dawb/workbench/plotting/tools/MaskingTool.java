@@ -103,7 +103,11 @@ public class MaskingTool extends AbstractToolPage {
 		final Group masking = new Group(composite, SWT.NONE);
 		masking.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		masking.setLayout(new GridLayout(2, false));
-		masking.setText("Masking");
+		if (image!=null) {
+			masking.setText("Masking '"+image.getName()+"'");
+		} else {
+			masking.setText("Masking ");
+		}
 		
 		Label label = new Label(masking, SWT.WRAP);
 		label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2,1));
@@ -126,7 +130,7 @@ public class MaskingTool extends AbstractToolPage {
 		minimum.setMinimum(Integer.MIN_VALUE);
 		minimum.setMaximum(Integer.MAX_VALUE);
 		minimum.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		minimum.setSelection(getValue(image.getMin(), image.getMinCut(), 0));
+		if (image!=null) minimum.setSelection(getValue(image.getMin(), image.getMinCut(), 0));
 		minimum.setToolTipText("Press enter to apply a full update of the mask.");
 		minimum.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -158,7 +162,7 @@ public class MaskingTool extends AbstractToolPage {
 		maximum.setMinimum(Integer.MIN_VALUE);
 		maximum.setMaximum(Integer.MAX_VALUE);
 		maximum.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		maximum.setSelection(getValue(image.getMax(), image.getMaxCut(), Integer.MAX_VALUE));
+		if (image!=null) maximum.setSelection(getValue(image.getMax(), image.getMaxCut(), Integer.MAX_VALUE));
 		maximum.setToolTipText("Press enter to apply a full update of the mask.");
 		maximum.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -180,7 +184,7 @@ public class MaskingTool extends AbstractToolPage {
 		
 		final ColorSelector selector = new ColorSelector(masking);
 		selector.getButton().setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1,1));
-		selector.setColorValue(image.getNanBound().getColor());
+		if (image!=null) selector.setColorValue(image.getNanBound().getColor());
 		selector.addListener(new IPropertyChangeListener() {			
 			@Override
 			public void propertyChange(PropertyChangeEvent event) {
@@ -287,7 +291,7 @@ public class MaskingTool extends AbstractToolPage {
 			
 			// For all supported regions, add listener for rois
 			final Collection<IRegion> regions = getPlottingSystem().getRegions();
-			for (IRegion region : regions) {
+			if (regions!=null) for (IRegion region : regions) {
 				if (!maskCreator.isSupportedRegion(region)) continue;
 				region.addROIListener(this.regionBoundsListener);
 			}
@@ -305,7 +309,7 @@ public class MaskingTool extends AbstractToolPage {
 			
 			// For all supported regions, add listener
 			final Collection<IRegion> regions = getPlottingSystem().getRegions();
-			for (IRegion region : regions)  region.removeROIListener(this.regionBoundsListener);
+			if (regions!=null) for (IRegion region : regions)  region.removeROIListener(this.regionBoundsListener);
 		}
 	}
 	
