@@ -80,7 +80,9 @@ public class BoxProfileTool extends ProfileTool {
 			if (x_trace!=null && y_trace!=null && !monitor.isCanceled()) {
 				getControl().getDisplay().syncExec(new Runnable() {
 					public void run() {
+						plotter.setSelectedXAxis(xPixelAxis);
 						x_trace.setData(x_indices, x_intensity);
+						plotter.setSelectedXAxis(yPixelAxis);
 						y_trace.setData(y_indices, y_intensity);
 					}
 				});
