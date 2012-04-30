@@ -14,8 +14,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.SWT;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 import uk.ac.diamond.scisoft.analysis.rcp.plotting.roi.RectangularROIData;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
+import uk.ac.diamond.scisoft.analysis.roi.ROIProfile;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 public class BoxProfileTool extends ProfileTool {
@@ -54,21 +56,19 @@ public class BoxProfileTool extends ProfileTool {
 
 		if (monitor.isCanceled()) return;
 		
-		RectangularROIData rd = new RectangularROIData(bounds, image.getData(), image.getMask());
+		AbstractDataset[] box = ROIProfile.box(image.getData(), image.getMask(), bounds, true);
 
 		if (monitor.isCanceled()) return;
-		
-		if (rd.getProfileData()==null) return;
-		
-		final AbstractDataset x_intensity = rd.getProfileData(0);
+				
+		final AbstractDataset x_intensity = box[0];
 		x_intensity.setName("X "+region.getName());
-		AbstractDataset xi = rd.getXAxes()[0].toDataset();
+		AbstractDataset xi = IntegerDataset.arange(x_intensity.getSize());
 		final AbstractDataset x_indices = xi; // Maths.add(xi, bounds.getX()); // Real position
 		x_indices.setName("X Pixel");
 		
-		final AbstractDataset y_intensity = rd.getProfileData(1);
+		final AbstractDataset y_intensity = box[1];
 		y_intensity.setName("Y "+region.getName());
-		AbstractDataset yi = rd.getXAxes()[1].toDataset();
+		AbstractDataset yi = IntegerDataset.arange(y_intensity.getSize());
 		final AbstractDataset y_indices = yi; // Maths.add(yi, bounds.getY()); // Real position
 		y_indices.setName("Y Pixel");
 
