@@ -163,9 +163,9 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	protected void updateROI(ROIBase bounds) {
-		if (bounds instanceof PolygonalROI) {
-			final PolygonalROI proi = (PolygonalROI) bounds;
+	protected void updateROI(ROIBase roi) {
+		if (roi instanceof PolygonalROI) {
+			final PolygonalROI proi = (PolygonalROI) roi;
 			if (points==null) points = new PointList();
 	        points.removeAllPoints();
 	        

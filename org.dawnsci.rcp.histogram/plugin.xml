@@ -135,6 +135,26 @@
             id="org.dawnsci.rcp.histogram.threexminus1over2"
             name="|3X-1|/2 ( y = |3x-1|/2 )">
       </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.rcp.functions.classes.TwoXTransferFunction"
+            id="org.dawnsci.rcp.histogram.twox"
+            name="2x ( y = 2x )">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.rcp.functions.classes.TwoXMinusHalfTransferFunction"
+            id="org.dawnsci.rcp.histogram.twoxminushalf"
+            name="2x-0.5 ( y = 2x - 0.5 )">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.rcp.functions.classes.TwoXMinusOneTransferFunction"
+            id="org.dawnsci.rcp.histogram.twoxminus1"
+            name="2x-1 ( y = 2x - 1 )">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.rcp.functions.classes.AbsTwoXMinusHalfTransferFunction"
+            id="org.dawnsci.rcp.histogram.abstwoxminushalf"
+            name="|2x-0.5| ( y = |2x - 0.5| )">
+      </transfer_function>
    </extension>
    <extension
          point="org.dawnsci.rcp.histogram.colourScheme">
@@ -257,6 +277,30 @@
             name="Hot (black-red-yellow-white)"
             red_inverted="false"
             red_transfer_function="org.dawnsci.rcp.histogram.threex">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="false"
+            alpha_transfer_function="org.dawnsci.rcp.histogram.zero"
+            blue_inverted="false"
+            blue_transfer_function="org.dawnsci.rcp.histogram.cos90"
+            green_inverted="false"
+            green_transfer_function="org.dawnsci.rcp.histogram.sin180"
+            id="org.dawnsci.rcp.histogram.rainbow"
+            name="Rainbow (blue-green-yellow-red)"
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.rcp.histogram.abstwoxminushalf">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="false"
+            alpha_transfer_function="org.dawnsci.rcp.histogram.zero"
+            blue_inverted="false"
+            blue_transfer_function="org.dawnsci.rcp.histogram.twoxminus1"
+            green_inverted="false"
+            green_transfer_function="org.dawnsci.rcp.histogram.twoxminushalf"
+            id="org.dawnsci.rcp.histogram.afmhot"
+            name="AFM hot (black-red-yellow-white)"
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.rcp.histogram.twox">
       </colour_scheme>
    </extension>
 
