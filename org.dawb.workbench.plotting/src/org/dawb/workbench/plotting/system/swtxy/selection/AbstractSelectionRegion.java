@@ -20,6 +20,7 @@ import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Shape;
+import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -165,6 +166,22 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 			gc.setAlpha(255);
 			gc.setForegroundColor(ColorConstants.black);
 			gc.drawText(getName(), size.getCenter());
+		}
+	}
+
+	protected void drawLabel(Graphics gc, Point p) {
+		if (isShowLabel()&&getName()!=null) {
+			gc.setAlpha(255);
+			gc.setForegroundColor(ColorConstants.black);
+			gc.drawText(getName(), p);
+		}
+	}
+
+	protected void drawLabel(Graphics gc, Point p, Color colour) {
+		if (isShowLabel()&&getName()!=null) {
+			gc.setAlpha(255);
+			gc.setForegroundColor(colour!= null ? colour : ColorConstants.black);
+			gc.drawText(getName(), p);
 		}
 	}
 
