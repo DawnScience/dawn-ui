@@ -98,6 +98,8 @@ public class LineTraceImpl implements ILineTrace {
 			return ILineTrace.PointStyle.POINT;
 		case CIRCLE:
 			return ILineTrace.PointStyle.CIRCLE;
+		case FILLED_CIRCLE:
+			return ILineTrace.PointStyle.FILLED_CIRCLE;
 		case TRIANGLE:
 			return ILineTrace.PointStyle.TRIANGLE;
 		case FILLED_TRIANGLE:
@@ -133,6 +135,9 @@ public class LineTraceImpl implements ILineTrace {
 			return;
 		case CIRCLE:
 			trace.setPointStyle(org.csstudio.swt.xygraph.figures.Trace.PointStyle.CIRCLE);
+			return;
+		case FILLED_CIRCLE:
+			trace.setPointStyle(org.csstudio.swt.xygraph.figures.Trace.PointStyle.FILLED_CIRCLE);
 			return;
 		case TRIANGLE:
 			trace.setPointStyle(org.csstudio.swt.xygraph.figures.Trace.PointStyle.TRIANGLE);
