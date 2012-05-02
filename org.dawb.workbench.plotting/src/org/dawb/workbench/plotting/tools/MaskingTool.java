@@ -69,6 +69,7 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.BooleanDataset;
+import uk.ac.diamond.scisoft.analysis.rcp.plotting.sideplot.MaskCreator;
 
 public class MaskingTool extends AbstractToolPage implements MouseListener{
 
@@ -361,21 +362,26 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	}
 
 	private static BooleanDataset savedMask;
+	private Action loadMask;
 	
 	private void createSaveActions(IActionBars actionBars) {
-		final Action loadMask  = new Action("Recall the previously saved mask from buffer", Activator.getImageDescriptor("icons/import_wiz.gif")) {
+		
+	    loadMask  = new Action("Merge the previously saved mask from buffer with this mask (if any)", Activator.getImageDescriptor("icons/import_wiz.gif")) {
 			public void run() {
-				maskObject.setMaskDataset(savedMask, false);
-				processMask(false, true, null);
+				if (maskObject.getImageDataset()==null){
+					maskObject.setImageDataset(getImageTrace().getData());
+				}
+				maskObject.process(savedMask);
+				getImageTrace().setMask(maskObject.getMaskDataset());
 			}
 		};
 		loadMask.setEnabled(savedMask!=null);
 		actionBars.getToolBarManager().add(loadMask);
 
-		final Action saveMask  = new Action("Save the mask into a buffer", Activator.getImageDescriptor("icons/export_wiz.gif")) {
+		Action saveMask  = new Action("Save the mask into a buffer", Activator.getImageDescriptor("icons/export_wiz.gif")) {
 			public void run() {
 				savedMask = maskObject.getMaskDataset();
-				loadMask.setEnabled(true);
+				loadMask.setEnabled(savedMask!=null);
 			}
 		};
 		actionBars.getToolBarManager().add(saveMask);
@@ -585,6 +591,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			regionTable.refresh();
 		}
 
+		if (loadMask!=null) loadMask.setEnabled(savedMask!=null);
 	}
 	
 	@Override

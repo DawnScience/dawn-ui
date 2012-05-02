@@ -52,6 +52,30 @@ public class MaskObject {
     private BooleanDataset  maskDataset;
     private AbstractDataset imageDataset;
     
+
+    /**
+     * Designed to copy data in an incoming mask onto this one as best as possible.
+     * @param savedMask
+     */
+	public void process(BooleanDataset savedMask) {
+		createMaskIfNeeded();
+		
+		final int[] shape = savedMask.getShape();
+		for (int y = 0; y<shape[0]; ++y) {
+			for (int x = 0; x<shape[1]; ++x) {
+		        try {
+		        	// We only add the falses
+		        	// 
+		        	if (!savedMask.getBoolean(y,x)) {
+		        		this.maskDataset.set(Boolean.FALSE, y,x);
+		        	}
+		        } catch (Throwable ignored) {
+		        	continue;
+		        }
+			}
+		}
+	}
+
 	/**
 	 * Designed to be called after processBounds(...) has been called at least once.
 	 * Deals with fact that that may leave us with no mask and will create one if needed.
@@ -194,5 +218,4 @@ public class MaskObject {
 	public void reset() {
 		this.maskDataset = null;
 	}
-
 }
