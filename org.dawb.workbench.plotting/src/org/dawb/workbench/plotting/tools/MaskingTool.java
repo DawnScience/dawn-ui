@@ -363,7 +363,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	private static BooleanDataset savedMask;
 	
 	private void createSaveActions(IActionBars actionBars) {
-		final Action loadMask  = new Action("Recall the previously saved mask", Activator.getImageDescriptor("icons/import_wiz.gif")) {
+		final Action loadMask  = new Action("Recall the previously saved mask from buffer", Activator.getImageDescriptor("icons/import_wiz.gif")) {
 			public void run() {
 				maskObject.setMaskDataset(savedMask, false);
 				processMask(false, true, null);
