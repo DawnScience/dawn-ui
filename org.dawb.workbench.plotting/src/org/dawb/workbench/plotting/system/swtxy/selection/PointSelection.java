@@ -33,7 +33,16 @@ public class PointSelection extends AbstractSelectionRegion {
 	protected void updateConnectionBounds() {
 		
 	}
-
+	@Override
+	public boolean containsPoint(double x, double y) {
+		
+		final int xpix = getXAxis().getValuePosition(x, false);
+		final int ypix = getYAxis().getValuePosition(y, false);
+		if (point.getBounds().contains(xpix, ypix)) return false;
+		final Point pnt = point.getSelectionPoint();
+		return pnt.x == xpix && pnt.y == ypix;
+	}
+	
 	@Override
 	public void paintBeforeAdded(Graphics g, 
 			                     PointList clicks,

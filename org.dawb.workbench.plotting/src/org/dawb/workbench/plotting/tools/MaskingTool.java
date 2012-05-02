@@ -63,6 +63,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.ui.IActionBars;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -356,6 +357,29 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			}
 		});
 		
+		createSaveActions(getSite().getActionBars());
+	}
+
+	private static BooleanDataset savedMask;
+	
+	private void createSaveActions(IActionBars actionBars) {
+		final Action loadMask  = new Action("Recall the previously saved mask", Activator.getImageDescriptor("icons/import_wiz.gif")) {
+			public void run() {
+				maskObject.setMaskDataset(savedMask, false);
+				processMask(false, true, null);
+			}
+		};
+		loadMask.setEnabled(savedMask!=null);
+		actionBars.getToolBarManager().add(loadMask);
+
+		final Action saveMask  = new Action("Save the mask into a buffer", Activator.getImageDescriptor("icons/export_wiz.gif")) {
+			public void run() {
+				savedMask = maskObject.getMaskDataset();
+				loadMask.setEnabled(true);
+			}
+		};
+		actionBars.getToolBarManager().add(saveMask);
+		
 	}
 
 	private void createColumns(TableViewer viewer) {
@@ -428,7 +452,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 
 	}
 
-	private void createMaskingRegionActions(IToolBarManager man) {
+	private void createMaskingRegionActions(IToolBarManager man) {		
 		
 		final Action multipleRegion  = new Action("Continuously add the same region", IAction.AS_CHECK_BOX) {
 			public void run() {
@@ -614,13 +638,13 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			
 			if (region!=null && !isRegionsEnabled) return Status.CANCEL_STATUS;
 			
-			if (resetMask)  maskObject.setMaskDataset(null);
+			if (resetMask)  maskObject.setMaskDataset(null, false);
 			
 			if (maskObject.getMaskDataset()==null) {
 				// The mask must be maintained as a BooleanDataset so that there is the option
 				// of applying the same mask to many images.
 				final AbstractDataset unmasked = image.getData();
-				maskObject.setMaskDataset(new BooleanDataset(unmasked.getShape()));
+				maskObject.setMaskDataset(new BooleanDataset(unmasked.getShape()), true);
 				maskObject.setImageDataset(unmasked);
 			}
 			

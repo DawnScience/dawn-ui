@@ -178,9 +178,9 @@ public class MaskObject {
 	 * The booleans get filled true when this is set.
 	 * @param maskDataset
 	 */
-	public void setMaskDataset(BooleanDataset maskDataset) {
+	public void setMaskDataset(BooleanDataset maskDataset, boolean requireFill) {
 		this.maskDataset = maskDataset;
-		if (maskDataset!=null) maskDataset.fill(true);
+		if (maskDataset!=null && requireFill) maskDataset.fill(true);
 	}
 
 	public AbstractDataset getImageDataset() {
