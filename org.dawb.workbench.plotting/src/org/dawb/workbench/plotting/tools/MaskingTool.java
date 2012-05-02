@@ -125,12 +125,12 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			@Override
 			public void regionRemoved(RegionEvent evt) {
 				evt.getRegion().removeROIListener(regionBoundsListener);
-				processMask();
+				processMask(true, false, null);
 				regionTable.refresh();
 			}			
 			@Override
 			public void regionsRemoved(RegionEvent evt) {
-				processMask();
+				processMask(true, false, null);
 				regionTable.refresh();
 			}
 		};

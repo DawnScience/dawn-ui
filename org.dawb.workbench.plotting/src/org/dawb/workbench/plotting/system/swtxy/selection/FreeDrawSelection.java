@@ -47,7 +47,7 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 		final int xpix = getXAxis().getValuePosition(x, false);
 		final int ypix = getYAxis().getValuePosition(y, false);
 		if (!getBounds().contains(xpix,ypix)) return false;
-		return Geometry.polylineContainsPoint(points, xpix, ypix, getLineWidth());
+		return Geometry.polylineContainsPoint(points, xpix, ypix, getLineWidth()-1);
 	}
 	
 	@Override
@@ -148,13 +148,14 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 		fireROIChanged(getROI());
 	}
 
-	private PointList removeContiguousDuplicates(PointList clicks) {
+	private PointList removeContiguousDuplicates(PointList pnts) {
 		
 		PointList ret = new PointList();
-		ret.addPoint(clicks.getPoint(0));
-		for (int i = 1; i < clicks.size(); i++) {
-			final Point point = clicks.getPoint(i);
-			if (!point.equals(clicks.getPoint(i-1))) {
+		if (pnts==null || pnts.size()<1) return pnts;
+		ret.addPoint(pnts.getPoint(0));
+		for (int i = 1; i < pnts.size(); i++) {
+			final Point point = pnts.getPoint(i);
+			if (!point.equals(pnts.getPoint(i-1))) {
 				ret.addPoint(point);
 			}
 		}
