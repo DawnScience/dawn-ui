@@ -20,7 +20,8 @@ Require-Bundle: org.eclipse.ui,
  uk.ac.gda.common.rcp;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
-Export-Package: org.dawb.workbench.plotting.system
+Export-Package: org.dawb.workbench.plotting.system,
+ org.dawb.workbench.plotting.system.swtxy.selection
 Import-Package: javax.vecmath,
  org.dawb.common.services,
  org.dawb.common.util.text,

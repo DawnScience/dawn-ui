@@ -99,7 +99,7 @@ class RingSelection extends AbstractSelectionRegion {
 				final Point     br  = (new Rectangle(out.getBottomRight(), in.getBottomRight())).getCenter();
 				final Rectangle mid = new Rectangle(tl, br);
 				gc.drawOval(mid); 
-				RingSelection.this.drawLabel(gc, mid);
+				RingSelection.this.drawLabel(gc, new Point(mid.getCenter().x, mid.getCenter().y-innerRad));
 			}
 
 			@Override
