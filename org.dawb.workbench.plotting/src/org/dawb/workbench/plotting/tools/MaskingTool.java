@@ -16,6 +16,7 @@ import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.ROIEvent;
 import org.dawb.common.ui.plot.region.RegionEvent;
+import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
@@ -80,7 +81,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	private IRegionListener regionListener;
 	private IROIListener    regionBoundsListener;
 	private MaskJob         maskJob;
-
+    private boolean         multipleRegionMode=false;
 	private TableViewer regionTable;
 	
 	public MaskingTool() {
@@ -99,19 +100,27 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			public void regionCreated(RegionEvent evt) {
 				// Those created while the tool is active are mask regions			
                 evt.getRegion().setMaskRegion(true);
-                if (evt.getRegion().getRegionType()==RegionType.FREE_DRAW ||
-                		evt.getRegion().getRegionType()==RegionType.LINE  ||
-                		evt.getRegion().getRegionType()==RegionType.POLYLINE) {
-                	
-                	int wid = Activator.getDefault().getPreferenceStore().getInt(PlottingConstants.FREE_DRAW_WIDTH);
-                	evt.getRegion().setLineWidth(wid);
-                }
+                int wid = Activator.getDefault().getPreferenceStore().getInt(PlottingConstants.FREE_DRAW_WIDTH);
+                evt.getRegion().setLineWidth(wid);
 			}
 			@Override
-			public void regionAdded(RegionEvent evt) {
+			public void regionAdded(final RegionEvent evt) {
 				evt.getRegion().addROIListener(regionBoundsListener);
 				processMask(evt.getRegion());
 				regionTable.refresh();
+
+				if (multipleRegionMode) {
+					Display.getDefault().asyncExec(new Runnable(){
+						public void run() {
+							try {
+								getPlottingSystem().createRegion(RegionUtils.getUniqueName(evt.getRegion().getRegionType().getName(), getPlottingSystem()),
+										evt.getRegion().getRegionType());
+							} catch (Exception e) {
+								logger.error("Cannot add multple regions.", e);
+							}
+						}
+					});
+				}
 			}			
 			@Override
 			public void regionRemoved(RegionEvent evt) {
@@ -165,8 +174,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		
 		Label label = new Label(minMaxComp, SWT.WRAP);
 		label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2,1));
-		label.setText("Apply a mask to the original data. "+
-		              "The mask is saved and available in other tools.");	
+		label.setText("Create a mask, the mask is saved and available in other tools.");	
 		
 		// Max and min
 		
@@ -256,7 +264,9 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		regionComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		label = new Label(regionComp, SWT.HORIZONTAL|SWT.SEPARATOR);
-		label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		final GridData data = new GridData(SWT.FILL, SWT.FILL, false, false);
+		data.verticalIndent =20;
+		label.setLayoutData(data);
 		
 		final ToolBarManager   toolbar        = new ToolBarManager(SWT.FLAT|SWT.RIGHT);
 
@@ -419,6 +429,16 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	}
 
 	private void createMaskingRegionActions(IToolBarManager man) {
+		
+		final Action multipleRegion  = new Action("Continuously add the same region", IAction.AS_CHECK_BOX) {
+			public void run() {
+				multipleRegionMode = isChecked();
+			}
+		};
+		multipleRegion.setImageDescriptor(Activator.getImageDescriptor("icons/RegionMultiple.png"));
+		multipleRegion.setChecked(multipleRegionMode);
+		man.add(multipleRegion);
+		
 		
 		final MenuAction widthChoice = new MenuAction("Line With");
 		widthChoice.setToolTipText("Line width for free draw and line regions");

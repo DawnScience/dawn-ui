@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.dawb.common.ui.plot.region.IRegion;
+import org.eclipse.draw2d.geometry.Point;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,9 +101,14 @@ public class MaskObject {
 			    }
 			    
 			    if (validRegions!=null) for (IRegion region : validRegions) {
-					if (region.containsPoint(x, y)) {
-						maskDataset.set(Boolean.FALSE, y, x);
-					}
+			    	try {
+						if (region.containsPoint(x, y)) {
+							maskDataset.set(Boolean.FALSE, y, x);
+						}
+			    	} catch (Throwable ne) {
+			    		logger.trace("Cannot process point "+(new Point(x,y)), ne);
+			    		continue;
+			    	}
 			    }
 
 			}
