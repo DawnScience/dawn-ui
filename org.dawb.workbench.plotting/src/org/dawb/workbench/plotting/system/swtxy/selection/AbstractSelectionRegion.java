@@ -177,6 +177,14 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 		}
 	}
 
+	protected void drawLabel(Graphics gc, Point p, Color colour) {
+		if (isShowLabel()&&getName()!=null) {
+			gc.setAlpha(255);
+			gc.setForegroundColor(colour!= null ? colour : ColorConstants.black);
+			gc.drawText(getName(), p);
+		}
+	}
+
 	public void axisRevalidated(Axis axis) {
 		updateROI();
 	}
