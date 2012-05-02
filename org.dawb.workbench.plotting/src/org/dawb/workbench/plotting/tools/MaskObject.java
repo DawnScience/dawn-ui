@@ -121,7 +121,8 @@ public class MaskObject {
 			for (int x = 0; x<shape[1]; ++x) {
 			    if (requireMinMax) {
 				    final float val = imageDataset.getFloat(y, x);
-			    	maskDataset.set(isValid(val,min,max), y, x); // false = masked
+				    boolean isValid = isValid(val,min,max);
+			    	if (!isValid) maskDataset.set(Boolean.FALSE, y, x); // false = masked
 			    }
 			    
 			    if (validRegions!=null) for (IRegion region : validRegions) {

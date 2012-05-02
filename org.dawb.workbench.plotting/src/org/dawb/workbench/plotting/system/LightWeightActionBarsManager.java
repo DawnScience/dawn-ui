@@ -10,9 +10,7 @@
 
 package org.dawb.workbench.plotting.system;
 
-import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +19,8 @@ import org.dawb.common.services.ImageServiceBean.ImageOrigin;
 import org.dawb.common.ui.image.PaletteFactory;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
+import org.dawb.common.ui.plot.AbstractPlottingSystem;
+import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingActionBarManager;
 import org.dawb.common.ui.plot.annotation.AnnotationUtils;
@@ -33,38 +33,20 @@ import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
-import org.dawb.workbench.plotting.printing.PlotExportPrintUtil;
-import org.dawb.workbench.plotting.printing.PlotPrintPreviewDialog;
-import org.dawb.workbench.plotting.printing.PrintSettings;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionConfigDialog;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionManager;
-import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.PaletteData;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.printing.PrintDialog;
-import org.eclipse.swt.printing.Printer;
-import org.eclipse.swt.printing.PrinterData;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.menus.CommandContributionItem;
-import org.eclipse.ui.menus.CommandContributionItemParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.rcp.AnalysisRCPActivator;
-import uk.ac.diamond.scisoft.analysis.rcp.plotting.actions.InjectPyDevConsoleHandler;
-
-class LightWeightActionBarsManager extends PlottingActionBarManager {
+public class LightWeightActionBarsManager extends PlottingActionBarManager {
 
 
 	private static final Logger logger = LoggerFactory.getLogger(LightWeightActionBarsManager.class);
@@ -431,7 +413,7 @@ class LightWeightActionBarsManager extends PlottingActionBarManager {
      * @param trace
      * @param xyGraph
      */
-	public void fillTraceActions(final IMenuManager manager, final ITrace trace, final XYRegionGraph xyGraph) {
+	public static void fillTraceActions(final IContributionManager manager, final ITrace trace, final IPlottingSystem sys) {
 
 		manager.add(new Separator("org.dawb.workbench.plotting.system.trace.start"));
 
@@ -444,18 +426,24 @@ class LightWeightActionBarsManager extends PlottingActionBarManager {
 			manager.add(visible);
 		}
 		
-		final Action addAnnotation = new Action("Add annotation to '"+trace.getName()+"'", Activator.getImageDescriptor("icons/TraceAnnotation.png")) {
-			public void run() {
-				final String annotName = AnnotationUtils.getUniqueAnnotation(trace.getName()+" annotation ", system);
-				if (trace instanceof LineTraceImpl) {
-					final LineTraceImpl lt = (LineTraceImpl)trace;
-					xyGraph.addAnnotation(new Annotation(annotName, lt.getTrace()));
-				} else {
-					xyGraph.addAnnotation(new Annotation(annotName, xyGraph.primaryXAxis, xyGraph.primaryYAxis));
+		final XYRegionGraph xyGraph = sys instanceof LightWeightPlottingSystem 
+				                  ? ((LightWeightPlottingSystem)sys).getGraph()
+				                  : null;
+		
+		if (xyGraph!=null) {
+			final Action addAnnotation = new Action("Add annotation to '"+trace.getName()+"'", Activator.getImageDescriptor("icons/TraceAnnotation.png")) {
+				public void run() {
+					final String annotName = AnnotationUtils.getUniqueAnnotation(trace.getName()+" annotation ", sys);
+					if (trace instanceof LineTraceImpl) {
+						final LineTraceImpl lt = (LineTraceImpl)trace;
+						xyGraph.addAnnotation(new Annotation(annotName, lt.getTrace()));
+					} else {
+						xyGraph.addAnnotation(new Annotation(annotName, xyGraph.primaryXAxis, xyGraph.primaryYAxis));
+					}
 				}
-			}
-		};
-		manager.add(addAnnotation);
+			};
+			manager.add(addAnnotation);
+		}
 		
 		if (trace instanceof ILineTrace) {
 			final ILineTrace lt = (ILineTrace)trace;
@@ -481,16 +469,17 @@ class LightWeightActionBarsManager extends PlottingActionBarManager {
 			}
 		}
 
-		final Action configure = new Action("Configure '"+trace.getName()+"'", Activator.getImageDescriptor("icons/TraceProperties.png")) {
-			public void run() {
-				final XYRegionConfigDialog dialog = new XYRegionConfigDialog(Display.getCurrent().getActiveShell(), xyGraph);
-				dialog.setPlottingSystem(system);
-				dialog.setSelectedTrace(trace);
-				dialog.open();
-			}
-		};
-		manager.add(configure);
-
+		if (xyGraph!=null) {
+			final Action configure = new Action("Configure '"+trace.getName()+"'", Activator.getImageDescriptor("icons/TraceProperties.png")) {
+				public void run() {
+					final XYRegionConfigDialog dialog = new XYRegionConfigDialog(Display.getCurrent().getActiveShell(), xyGraph);
+					dialog.setPlottingSystem(sys);
+					dialog.setSelectedTrace(trace);
+					dialog.open();
+				}
+			};
+			manager.add(configure);
+		}
 		manager.add(new Separator("org.dawb.workbench.plotting.system.trace.end"));
 	}
 

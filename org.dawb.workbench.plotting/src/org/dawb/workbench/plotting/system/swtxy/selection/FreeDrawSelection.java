@@ -47,7 +47,7 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 		final int xpix = getXAxis().getValuePosition(x, false);
 		final int ypix = getYAxis().getValuePosition(y, false);
 		if (!getBounds().contains(xpix,ypix)) return false;
-		return Geometry.polylineContainsPoint(points, xpix, ypix, getLineWidth()-1);
+		return Geometry.polylineContainsPoint(points, xpix, ypix, (int)Math.round(getLineWidth()/2d));
 	}
 	
 	@Override

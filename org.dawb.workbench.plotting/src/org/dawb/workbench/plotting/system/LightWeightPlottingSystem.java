@@ -231,7 +231,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 					    }
 					    if (fig instanceof ITraceContainer) {
 							final ITrace trace = ((ITraceContainer)fig).getTrace();
-							lightWeightActionBarMan.fillTraceActions(manager, trace, xyGraph);
+							LightWeightActionBarsManager.fillTraceActions(manager, trace, LightWeightPlottingSystem.this);
 					    }
 					}
 					for (IContributionItem item : defaultMenuItems.getItems()) {

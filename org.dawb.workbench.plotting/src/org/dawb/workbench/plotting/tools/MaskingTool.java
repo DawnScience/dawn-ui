@@ -23,6 +23,7 @@ import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
+import org.dawb.workbench.plotting.system.LightWeightActionBarsManager;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -31,6 +32,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.preference.ColorSelector;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -187,7 +189,11 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		minEnabled.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				minimum.setEnabled(minEnabled.getSelection());
-				processMask(true, true, null);
+				if (!minEnabled.getSelection()) {
+					processMask(true, true, null);
+				} else {
+				    processMask(false, true, null);
+				}
 			}
 		});
 		
@@ -219,7 +225,11 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		maxEnabled.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				maximum.setEnabled(maxEnabled.getSelection());
-				processMask(true, true, null);
+				if (!maxEnabled.getSelection()) {
+					processMask(true, true, null);
+				} else {
+				    processMask(false, true, null);
+				}
 			}
 		});
 		
@@ -259,6 +269,8 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			}
 		});
 		
+		label = new Label(minMaxComp, SWT.WRAP);
+		label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2,1));
 		
 		// Regions
 		final Composite        regionComp = new Composite(composite, SWT.NONE);
@@ -358,15 +370,23 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			}
 		});
 		
-		createSaveActions(getSite().getActionBars());
+		createActions(getSite().getActionBars());
 	}
 
 	private static BooleanDataset savedMask;
 	private Action loadMask;
 	
-	private void createSaveActions(IActionBars actionBars) {
+	private void createActions(IActionBars actionBars) {
 		
-	    loadMask  = new Action("Merge the previously saved mask from buffer with this mask (if any)", Activator.getImageDescriptor("icons/import_wiz.gif")) {
+		Action saveMask  = new Action("Save the mask into a buffer", Activator.getImageDescriptor("icons/import_wiz.gif")) {
+			public void run() {
+				savedMask = maskObject.getMaskDataset();
+				loadMask.setEnabled(savedMask!=null);
+			}
+		};
+		actionBars.getToolBarManager().add(saveMask);
+		
+	    loadMask  = new Action("Merge the previously saved mask from buffer with this mask (if any)", Activator.getImageDescriptor("icons/export_wiz.gif")) {
 			public void run() {
 				if (maskObject.getImageDataset()==null){
 					maskObject.setImageDataset(getImageTrace().getData());
@@ -378,14 +398,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		loadMask.setEnabled(savedMask!=null);
 		actionBars.getToolBarManager().add(loadMask);
 
-		Action saveMask  = new Action("Save the mask into a buffer", Activator.getImageDescriptor("icons/export_wiz.gif")) {
-			public void run() {
-				savedMask = maskObject.getMaskDataset();
-				loadMask.setEnabled(savedMask!=null);
-			}
-		};
-		actionBars.getToolBarManager().add(saveMask);
-		
+		LightWeightActionBarsManager.fillTraceActions(actionBars.getToolBarManager(), getImageTrace(), getPlottingSystem());	
 	}
 
 	private void createColumns(TableViewer viewer) {
