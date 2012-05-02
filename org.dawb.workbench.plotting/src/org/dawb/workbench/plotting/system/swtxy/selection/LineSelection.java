@@ -76,6 +76,7 @@ class LineSelection extends AbstractSelectionRegion {
 
 			@Override
 			public boolean containsPoint(int x, int y) {
+				if (!super.containsPoint(x, y)) return false;
 				return Geometry.polylineContainsPoint(shape, x, y, 2);
 			}
 		};
@@ -101,6 +102,15 @@ class LineSelection extends AbstractSelectionRegion {
         updateROI();
         if (roi == null) createROI(true);
 	}
+	
+	@Override
+	public boolean containsPoint(double x, double y) {
+		
+		final int xpix = getXAxis().getValuePosition(x, false);
+		final int ypix = getYAxis().getValuePosition(y, false);
+		return connection.containsPoint(xpix, ypix);
+	}
+
 
 	@Override
 	public void paintBeforeAdded(final Graphics gc, PointList clicks, Rectangle parentBounds) {

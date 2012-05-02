@@ -439,4 +439,26 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 		}		
 		
 	}
+	
+	/**
+	 * It is a good idea to override this, the default simply checks that the real world
+	 * value is in the selections bounds.
+	 */
+	@Override
+	public boolean containsPoint(double x, double y) {
+		
+		final int xpix = getXAxis().getValuePosition(x, false);
+		final int ypix = getYAxis().getValuePosition(y, false);
+		
+		if (regionObjects!=null) {
+			for (IFigure ob : regionObjects) {
+				if (ob.containsPoint(xpix, ypix)) return true;
+		    }
+			return false;
+
+		} else {
+			return containsPoint(xpix, ypix);
+		}
+		
+	}
 }

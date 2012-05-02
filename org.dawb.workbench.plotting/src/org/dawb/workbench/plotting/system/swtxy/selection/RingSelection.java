@@ -104,8 +104,7 @@ class RingSelection extends AbstractSelectionRegion {
 
 			@Override
 			public boolean containsPoint(int x, int y) {
-				if (!super.containsPoint(x, y))
-					return false;
+				if (!super.containsPoint(x, y)) return false;
 
 				final Point    cen = center.getSelectionPoint();
 				final int outerRad = outerControl.getSelectionPoint().y-cen.y;
@@ -137,6 +136,14 @@ class RingSelection extends AbstractSelectionRegion {
 
 		outerControl.setForegroundColor(ColorConstants.blue);
 		innerControl.setForegroundColor(ColorConstants.red);
+	}
+	
+	@Override
+	public boolean containsPoint(double x, double y) {
+		
+		final int xpix = getXAxis().getValuePosition(x, false);
+		final int ypix = getYAxis().getValuePosition(y, false);
+		return connection.containsPoint(xpix, ypix);
 	}
 	
 	private RectangularHandle createSelectionHandle() {

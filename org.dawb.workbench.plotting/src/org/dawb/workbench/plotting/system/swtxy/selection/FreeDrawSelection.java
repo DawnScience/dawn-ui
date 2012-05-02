@@ -7,6 +7,7 @@ import org.csstudio.swt.xygraph.figures.Axis;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
+import org.eclipse.draw2d.geometry.Geometry;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
@@ -39,6 +40,14 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 	public void createContents(Figure parent) {
 		parent.add(this);
 		updateConnectionBounds();
+	}
+	@Override
+	public boolean containsPoint(double x, double y) {
+		
+		final int xpix = getXAxis().getValuePosition(x, false);
+		final int ypix = getYAxis().getValuePosition(y, false);
+		if (!getBounds().contains(xpix,ypix)) return false;
+		return Geometry.polylineContainsPoint(points, xpix, ypix, getLineWidth());
 	}
 	
 	@Override
@@ -133,9 +142,23 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 	public void setLocalBounds(PointList clicks, 
 			                   Rectangle parentBounds) {
 		
+		points = removeContiguousDuplicates(points);
 		updateConnectionBounds();
 		createROI(true);
 		fireROIChanged(getROI());
+	}
+
+	private PointList removeContiguousDuplicates(PointList clicks) {
+		
+		PointList ret = new PointList();
+		ret.addPoint(clicks.getPoint(0));
+		for (int i = 1; i < clicks.size(); i++) {
+			final Point point = clicks.getPoint(i);
+			if (!point.equals(clicks.getPoint(i-1))) {
+				ret.addPoint(point);
+			}
+		}
+		return ret;
 	}
 
 	@Override

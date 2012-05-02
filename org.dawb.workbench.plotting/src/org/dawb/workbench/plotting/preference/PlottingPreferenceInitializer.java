@@ -25,15 +25,16 @@ public class PlottingPreferenceInitializer extends AbstractPreferenceInitializer
 	public void initializeDefaultPreferences() {
 		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
 		//store.setDefault(PlottingConstants.PLOTTING_SYSTEM_CHOICE, "org.dawb.workbench.editors.plotting.lightWeightPlottingSystem");
-        store.setDefault(PlottingConstants.PLOT_X_DATASET, false);
-		store.setDefault(PlottingConstants.XY_SHOWLEGEND,  true);
-		store.setDefault(PlottingConstants.P_PALETTE,      1);
-		store.setDefault(PlottingConstants.ORIGIN_PREF,    ImageOrigin.TOP_LEFT.getLabel());
-		store.setDefault(PlottingConstants.ASPECT,         true);
-		store.setDefault(PlottingConstants.HISTO ,         false);
-		store.setDefault(PlottingConstants.HISTO_PREF ,    HistoType.MEAN.getLabel());
-		store.setDefault(PlottingConstants.MIN_CUT,        HistogramBound.DEFAULT_MINIMUM.toString());
-		store.setDefault(PlottingConstants.MAX_CUT,        HistogramBound.DEFAULT_MAXIMUM.toString());
-		store.setDefault(PlottingConstants.NAN_CUT,        HistogramBound.DEFAULT_NAN.toString());
+        store.setDefault(PlottingConstants.PLOT_X_DATASET,  false);
+		store.setDefault(PlottingConstants.XY_SHOWLEGEND,   true);
+		store.setDefault(PlottingConstants.P_PALETTE,       1);
+		store.setDefault(PlottingConstants.ORIGIN_PREF,     ImageOrigin.TOP_LEFT.getLabel());
+		store.setDefault(PlottingConstants.ASPECT,          true);
+		store.setDefault(PlottingConstants.HISTO ,          false);
+		store.setDefault(PlottingConstants.HISTO_PREF ,     HistoType.MEAN.getLabel());
+		store.setDefault(PlottingConstants.MIN_CUT,         HistogramBound.DEFAULT_MINIMUM.toString());
+		store.setDefault(PlottingConstants.MAX_CUT,         HistogramBound.DEFAULT_MAXIMUM.toString());
+		store.setDefault(PlottingConstants.NAN_CUT,         HistogramBound.DEFAULT_NAN.toString());
+		store.setDefault(PlottingConstants.FREE_DRAW_WIDTH, 4);
 	}
 }

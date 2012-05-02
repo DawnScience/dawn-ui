@@ -56,4 +56,9 @@ public class PlottingConstants {
 	public static final String MAX_CUT = "org.dawb.plotting.system.histogram.max.cut";
 	public static final String NAN_CUT = "org.dawb.plotting.system.histogram.nan.cut";
 
+	/**
+	 * Used to store the users preference for free draw.
+	 */
+	public static final String FREE_DRAW_WIDTH = "org.dawb.plotting.system.region.freedraw.width";
+
 }

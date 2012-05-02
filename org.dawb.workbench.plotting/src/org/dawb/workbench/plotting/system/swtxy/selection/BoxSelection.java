@@ -105,6 +105,13 @@ class BoxSelection extends AbstractSelectionRegion {
         if (roi ==null) createROI(true);
 
 	}
+	@Override
+	public boolean containsPoint(double x, double y) {
+		
+		final int xpix = getXAxis().getValuePosition(x, false);
+		final int ypix = getYAxis().getValuePosition(y, false);
+		return connection.containsPoint(xpix, ypix);
+	}
 	
 	@Override
 	public void paintBeforeAdded(final Graphics gc, PointList clicks, Rectangle parentBounds) {

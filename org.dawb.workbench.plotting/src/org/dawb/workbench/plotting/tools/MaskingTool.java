@@ -3,12 +3,13 @@ package org.dawb.workbench.plotting.tools;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.dawb.common.services.ImageServiceBean.HistogramBound;
+import org.dawb.common.ui.image.IconUtils;
+import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
+import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.region.IROIListener;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
@@ -20,23 +21,22 @@ import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.workbench.plotting.Activator;
+import org.dawb.workbench.plotting.preference.PlottingConstants;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.preference.ColorSelector;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.viewers.CellEditor;
-import org.eclipse.jface.viewers.CheckboxCellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
-import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -46,8 +46,12 @@ import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -57,20 +61,21 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
+import org.eclipse.swt.widgets.TableItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.BooleanDataset;
 
-public class MaskingTool extends AbstractToolPage {
+public class MaskingTool extends AbstractToolPage implements MouseListener{
 
 	private static final Logger logger = LoggerFactory.getLogger(MaskingTool.class);
 	
 	private Group           composite;
 	private Spinner         minimum, maximum;
 	private Button          autoApply;
-	private MaskCreator     maskCreator;
+	private MaskObject      maskObject;
 	private ITraceListener  traceListener;
 	private IRegionListener regionListener;
 	private IROIListener    regionBoundsListener;
@@ -80,32 +85,43 @@ public class MaskingTool extends AbstractToolPage {
 	
 	public MaskingTool() {
 		
-		this.maskCreator   = new MaskCreator();
 		this.traceListener = new ITraceListener.Stub() {
 			@Override
 			public void traceAdded(TraceEvent evt) {
 				if (evt.getSource() instanceof IImageTrace) {
-					processMask(true); // New image new process.
+					getImageTrace().setMask(maskObject.getMaskDataset());
 				}
 			}
 		};
 		
 		this.regionListener = new IRegionListener.Stub() {
 			@Override
+			public void regionCreated(RegionEvent evt) {
+				// Those created while the tool is active are mask regions			
+                evt.getRegion().setMaskRegion(true);
+                if (evt.getRegion().getRegionType()==RegionType.FREE_DRAW ||
+                		evt.getRegion().getRegionType()==RegionType.LINE  ||
+                		evt.getRegion().getRegionType()==RegionType.POLYLINE) {
+                	
+                	int wid = Activator.getDefault().getPreferenceStore().getInt(PlottingConstants.FREE_DRAW_WIDTH);
+                	evt.getRegion().setLineWidth(wid);
+                }
+			}
+			@Override
 			public void regionAdded(RegionEvent evt) {
 				evt.getRegion().addROIListener(regionBoundsListener);
-				processMask(false, evt.getRegion());
+				processMask(evt.getRegion());
 				regionTable.refresh();
 			}			
 			@Override
 			public void regionRemoved(RegionEvent evt) {
 				evt.getRegion().removeROIListener(regionBoundsListener);
-				processMask(false);
+				processMask();
 				regionTable.refresh();
 			}			
 			@Override
 			public void regionsRemoved(RegionEvent evt) {
-				processMask(false);
+				processMask();
 				regionTable.refresh();
 			}
 		};
@@ -113,14 +129,16 @@ public class MaskingTool extends AbstractToolPage {
 		this.regionBoundsListener = new IROIListener.Stub() {
 			@Override
 			public void roiChanged(ROIEvent evt) {
-				processMask(false, (IRegion)evt.getSource());
+				processMask((IRegion)evt.getSource());
 			}
 		};
-		
 		this.maskJob = new MaskJob();
-		maskJob.setSystem(true);
-		maskJob.setUser(false);
 		maskJob.setPriority(Job.INTERACTIVE);
+	}
+	
+	public void setPlottingSystem(IPlottingSystem system) {
+		super.setPlottingSystem(system);
+		this.maskObject   = new MaskObject(); //TODO maybe make maskCreator by only processing visible regions.
 	}
 
 	@Override
@@ -159,7 +177,7 @@ public class MaskingTool extends AbstractToolPage {
 		minEnabled.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				minimum.setEnabled(minEnabled.getSelection());
-				processMask(true);
+				processMask(true, true, null);
 			}
 		});
 		
@@ -172,13 +190,13 @@ public class MaskingTool extends AbstractToolPage {
 		minimum.setToolTipText("Press enter to apply a full update of the mask.");
 		minimum.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				processMask(false);
+				processMask();
 			}
 		});
 		minimum.addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
 				if (e.character=='\n' || e.character=='\r') {
-					processMask(true);
+					processMask(false, true, null);
 				}
 			}
 		});
@@ -191,7 +209,7 @@ public class MaskingTool extends AbstractToolPage {
 		maxEnabled.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				maximum.setEnabled(maxEnabled.getSelection());
-				processMask(true);
+				processMask(true, true, null);
 			}
 		});
 		
@@ -204,13 +222,13 @@ public class MaskingTool extends AbstractToolPage {
 		maximum.setToolTipText("Press enter to apply a full update of the mask.");
 		maximum.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				processMask(false);
+				processMask();
 			}
 		});
 		maximum.addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
 				if (e.character=='\n' || e.character=='\r') {
-					processMask(true);
+					processMask(false, true, null);
 				}
 			}
 		});
@@ -227,7 +245,7 @@ public class MaskingTool extends AbstractToolPage {
 			@Override
 			public void propertyChange(PropertyChangeEvent event) {
 				getImageTrace().setNanBound(new HistogramBound(Double.NaN, selector.getColorValue()));
-				processMask(true);
+				getImageTrace().rehistogram();
 			}
 		});
 		
@@ -240,16 +258,30 @@ public class MaskingTool extends AbstractToolPage {
 		label = new Label(regionComp, SWT.HORIZONTAL|SWT.SEPARATOR);
 		label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
-		final ToolBarManager   man        = new ToolBarManager(SWT.FLAT|SWT.RIGHT);
-		fillMaskingRegionActions(man);
-		final Control          tb         = man.createControl(regionComp);
+		final ToolBarManager   toolbar        = new ToolBarManager(SWT.FLAT|SWT.RIGHT);
+
+		final Button enableRegion = new Button(regionComp, SWT.CHECK);
+		enableRegion.setText("Enable masking using regions");
+		enableRegion.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				regionTable.getTable().setEnabled(enableRegion.getSelection());
+				toolbar.getControl().setEnabled(enableRegion.getSelection());
+				regionTable.refresh();
+			}
+		});
+		
+		createMaskingRegionActions(toolbar);
+		final Control          tb         = toolbar.createControl(regionComp);
 		tb.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, false));
+		toolbar.getControl().setEnabled(enableRegion.getSelection());
 		
 		this.regionTable = new TableViewer(regionComp, SWT.FULL_SELECTION | SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
 		regionTable.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		createColumns(regionTable);
 		regionTable.getTable().setLinesVisible(true);
 		regionTable.getTable().setHeaderVisible(true);
+		regionTable.getTable().addMouseListener(this);
+		regionTable.getTable().setEnabled(enableRegion.getSelection());
 		
 		getSite().setSelectionProvider(regionTable);
 		regionTable.setContentProvider(new IStructuredContentProvider() {			
@@ -268,7 +300,8 @@ public class MaskingTool extends AbstractToolPage {
 				final Collection<IRegion> regions = getPlottingSystem().getRegions();
 				if (regions==null || regions.isEmpty()) return new Object[]{"-"};
 				final List<IRegion> supported = new ArrayList<IRegion>(regions.size());
-				for (IRegion iRegion : regions) if (maskCreator.isSupportedRegion(iRegion)) {
+				for (IRegion iRegion : regions) if (maskObject.isSupportedRegion(iRegion) &&
+						                            iRegion.isUserRegion()) {
 					supported.add(iRegion);
 				}
 				return supported.toArray(new IRegion[supported.size()]);
@@ -291,7 +324,7 @@ public class MaskingTool extends AbstractToolPage {
 		apply.setText("Apply");
 		apply.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				processMask(true);
+				processMask(false, true, null);
 			}
 		});
 		apply.setEnabled(true);
@@ -299,7 +332,7 @@ public class MaskingTool extends AbstractToolPage {
 		autoApply.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				apply.setEnabled(!autoApply.getSelection()); 
-				processMask(false);
+				processMask();
 			}
 		});
 		
@@ -318,64 +351,49 @@ public class MaskingTool extends AbstractToolPage {
 	private void createColumns(TableViewer viewer) {
 		
 		ColumnViewerToolTipSupport.enableFor(viewer,ToolTip.NO_RECREATE);
+		viewer.setColumnProperties(new String[] { "Mask", "Name" });
 
 		TableViewerColumn var = new TableViewerColumn(viewer, SWT.LEFT, 0);
-		var.getColumn().setText("Region Name");
-		var.getColumn().setWidth(120);
+		var.getColumn().setText("Mask");
+		var.getColumn().setWidth(50);
 		var.setLabelProvider(new MaskingLabelProvider());
 
 		var = new TableViewerColumn(viewer, SWT.CENTER, 1);
-		var.getColumn().setText("Include in mask");
+		var.getColumn().setText("Name");
 		var.getColumn().setWidth(200);
 		var.setLabelProvider(new MaskingLabelProvider());
-		var.setEditingSupport(new MaskingEditingSupport(viewer));
 		
+		var = new TableViewerColumn(viewer, SWT.CENTER, 2);
+		var.getColumn().setText("Type");
+		var.getColumn().setWidth(120);
+		var.setLabelProvider(new MaskingLabelProvider());
 	}
-	
-	private Map<String,Boolean> maskedRegions = new HashMap<String,Boolean>(7);
-	
-	private class MaskingEditingSupport extends EditingSupport {
-
-		public MaskingEditingSupport(ColumnViewer viewer) {
-			super(viewer);
-		}
-
-		@Override
-		protected CellEditor getCellEditor(Object element) {
-			return new CheckboxCellEditor(composite);
-		}
-
-		@Override
-		protected boolean canEdit(Object element) {
-			return element instanceof IRegion;
-		}
-
-		@Override
-		protected Object getValue(Object element) {
-			if (!(element instanceof IRegion)) return null;
-			final IRegion region = (IRegion)element;
-			if (maskedRegions.containsKey(region.getName())) {
-				return maskedRegions.get(region.getName());
-			} else {
-			    return Boolean.TRUE;
-			}
-		}
-
-		@Override
-		protected void setValue(Object element, Object value) {
-			if (!(element instanceof IRegion)) return;
-			final IRegion region = (IRegion)element;
-			maskedRegions.put(region.getName(), (Boolean)value);
-		}
-
-	}
-	
+		
 	private class MaskingLabelProvider extends ColumnLabelProvider {
 	
-		private int col;
+		private Image checkedIcon;
+		private Image uncheckedIcon;
+		
+		public MaskingLabelProvider() {
+			
+			ImageDescriptor id = Activator.getImageDescriptor("icons/ticked.png");
+			checkedIcon   = id.createImage();
+			id = Activator.getImageDescriptor("icons/unticked.gif");
+			uncheckedIcon =  id.createImage();
+		}
+		
+		private int columnIndex;
 		public void update(ViewerCell cell) {
-			col = cell.getColumnIndex();
+			columnIndex = cell.getColumnIndex();
 			super.update(cell);
+		}
+		
+		public Image getImage(Object element) {
+			
+			if (columnIndex!=0) return null;
+			if (!(element instanceof IRegion)) return null;
+			final IRegion region = (IRegion)element;
+			return region.isMaskRegion() && regionTable.getTable().isEnabled() ? checkedIcon : uncheckedIcon;
 		}
 		
 		public String getText(Object element) {
@@ -383,26 +401,73 @@ public class MaskingTool extends AbstractToolPage {
 			if (element instanceof String) return "";
 			
 			final IRegion region = (IRegion)element;
-			switch(col) {
-			case 0:
-			return region.getName();
+			switch(columnIndex) {
 			case 1:
-			return "true";
+			return region.getName();
+			case 2:
+			return region.getRegionType().getName();
 			}
 			return "";
+		}
+		
+		public void dispose() {
+			super.dispose();
+			checkedIcon.dispose();
+			uncheckedIcon.dispose();
 		}
 
 	}
 
-	private void fillMaskingRegionActions(IToolBarManager man) {
+	private void createMaskingRegionActions(IToolBarManager man) {
 		
-		final ActionContributionItem menu  = (ActionContributionItem)getPlottingSystem().getActionBars().getToolBarManager().find("org.dawb.workbench.ui.editors.plotting.swtxy.addRegions");
-		final MenuAction        menuAction = (MenuAction)menu.getAction();
+		final MenuAction widthChoice = new MenuAction("Line With");
+		widthChoice.setToolTipText("Line width for free draw and line regions");
+		man.add(widthChoice);
 		
-		final RegionType[] regions = new RegionType[]{RegionType.LINE, RegionType.BOX, RegionType.POLYLINE, RegionType.FREE_DRAW, RegionType.XAXIS, RegionType.YAXIS};
-		for (RegionType type : regions) {
+		// Region actions supported
+		ActionContributionItem menu  = (ActionContributionItem)getPlottingSystem().getActionBars().getToolBarManager().find("org.dawb.workbench.ui.editors.plotting.swtxy.addRegions");
+		MenuAction        menuAction = (MenuAction)menu.getAction();	
+		IAction fd = null;
+		for (RegionType type : RegionType.ALL_TYPES) {
 			final IAction action = menuAction.findAction(type.getId());
+			if (action==null) continue;
 			man.add(action);
+			
+			if (type==RegionType.FREE_DRAW) {
+				fd = action;
+			}
+		}
+		
+		CheckableActionGroup group = new CheckableActionGroup();
+		final IAction freeDraw = fd;
+		
+		final int maxWidth = 10;
+		for (int iwidth = 1; iwidth <= maxWidth; iwidth++) {
+			
+			final int width = iwidth;
+			final Action action = new Action("Draw width of "+String.valueOf(width), IAction.AS_CHECK_BOX) {
+				public void run() {
+					Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.FREE_DRAW_WIDTH, width);
+					widthChoice.setSelectedAction(this);
+					freeDraw.run();
+				}
+			};
+			
+			action.setImageDescriptor(IconUtils.createIconDescriptor(String.valueOf(iwidth)));
+			widthChoice.add(action);
+			group.add(action);
+			action.setChecked(false);
+			action.setToolTipText("Set line width to "+iwidth);
+			
+		}
+       	int wid = Activator.getDefault().getPreferenceStore().getInt(PlottingConstants.FREE_DRAW_WIDTH);
+        widthChoice.setSelectedAction(wid-1);
+		widthChoice.setCheckedAction(wid-1, true);
+
+		menu  = (ActionContributionItem)getPlottingSystem().getActionBars().getToolBarManager().find("org.dawb.workbench.ui.editors.plotting.swtxy.removeRegions");
+		if (menu!=null) {
+			menuAction = (MenuAction)menu.getAction();	
+			man.add(menuAction);
 		}
 	}
 
@@ -415,32 +480,34 @@ public class MaskingTool extends AbstractToolPage {
         }
         return defaultInt;
 	}
-
-	private void processMask(boolean forceProcess) {
-        processMask(forceProcess, null);
-	}
 	
+	private void processMask() {
+		processMask(false, false, null);
+	}
+	private void processMask(final IRegion region) {
+		processMask(false, false, region);
+	}
 	/**
 	 * Either adds a new region directly or 
 	 * @param forceProcess
 	 * @param roi
 	 * @return true if did some masking
 	 */
-	private void processMask(final boolean forceProcess, final IRegion region) {
+	private void processMask(final boolean resetMask, boolean ignoreAuto, final IRegion region) {
 		
-		if (!forceProcess && !autoApply.getSelection()) return;
+		if (!ignoreAuto && !autoApply.getSelection()) return;
 		
 		final IImageTrace image = getImageTrace();
 		if (image == null) return;
 		
-		maskJob.schedule(forceProcess, region);
+		maskJob.schedule(resetMask, region);
 	}
 	
 	protected void resetMask() { // Reread the file from disk or cached one if this is a view
 		
 		final IImageTrace image = getImageTrace();
 		if (image==null) return;
-		
+		maskObject.reset();
 	    image.setMask(null);
 	}
 		
@@ -466,10 +533,14 @@ public class MaskingTool extends AbstractToolPage {
 			// For all supported regions, add listener for rois
 			final Collection<IRegion> regions = getPlottingSystem().getRegions();
 			if (regions!=null) for (IRegion region : regions) {
-				if (!maskCreator.isSupportedRegion(region)) continue;
+				if (!maskObject.isSupportedRegion(region)) continue;
 				region.addROIListener(this.regionBoundsListener);
 			}
 		}
+		if (this.regionTable!=null && !regionTable.getControl().isDisposed()) {
+			regionTable.refresh();
+		}
+
 	}
 	
 	@Override
@@ -496,6 +567,9 @@ public class MaskingTool extends AbstractToolPage {
 		traceListener  = null;
 		regionListener = null;
 		regionBoundsListener = null;
+		if (this.regionTable!=null && !regionTable.getControl().isDisposed()) {
+			regionTable.getTable().removeMouseListener(this);
+		}
 	}
 
 	
@@ -505,9 +579,10 @@ public class MaskingTool extends AbstractToolPage {
 			super("Masking image");
 		}
 
-		private boolean forceProcess = false;
-		private IRegion region       = null;
-		private Integer min=null,max=null;
+		private boolean resetMask         = false;
+		private boolean isRegionsEnabled  = false;
+		private IRegion region            = null;
+		private Integer min=null, max=null;
 		
 		@Override
 		protected IStatus run(final IProgressMonitor monitor) {
@@ -517,55 +592,75 @@ public class MaskingTool extends AbstractToolPage {
 			
 			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 			
-			if (maskCreator.getMaskDataset()==null || region==null || forceProcess) {
+			if (region!=null && !isRegionsEnabled) return Status.CANCEL_STATUS;
+			
+			if (resetMask)  maskObject.setMaskDataset(null);
+			
+			if (maskObject.getMaskDataset()==null) {
 				// The mask must be maintained as a BooleanDataset so that there is the option
 				// of applying the same mask to many images.
 				final AbstractDataset unmasked = image.getData();
-				maskCreator.setMaskDataset(new BooleanDataset(unmasked.getShape()));
-				maskCreator.setImageDataset(unmasked);
+				maskObject.setMaskDataset(new BooleanDataset(unmasked.getShape()));
+				maskObject.setImageDataset(unmasked);
 			}
 			
-			if (maskCreator.getImageDataset()==null) {
+			if (maskObject.getImageDataset()==null) {
 				final AbstractDataset unmasked = image.getData();
-				maskCreator.setImageDataset(unmasked);
+				maskObject.setImageDataset(unmasked);
 			}
 			
 			// Just process a changing region
-			if (region!=null && !forceProcess) {
-				if (!maskCreator.isSupportedRegion(region)) return Status.CANCEL_STATUS;
-				maskCreator.processRegion(region);
+			if (region!=null) {
+				if (!maskObject.isSupportedRegion(region)) return Status.CANCEL_STATUS;
+				maskObject.process(region);
 				
 				
 			} else { // process everything
 				
-				maskCreator.processBounds(min, max);
+				maskObject.process(min, max, isRegionsEnabled?getPlottingSystem().getRegions():null);
 				
-				final Collection<IRegion> regions = getPlottingSystem().getRegions();
-				for (IRegion r : regions) {
-					if (!maskCreator.isSupportedRegion(r)) continue;
-					maskCreator.processRegion(r);
-				}
 			}
 			
 			Display.getDefault().syncExec(new Runnable() {
 				public void run() {
 					// NOTE the mask will have a reference kept and
 					// will downsample with the data.
-					image.setMask(maskCreator.getMaskDataset()); 
+					image.setMask(maskObject.getMaskDataset()); 
 				}
 			});
 			
 			return Status.OK_STATUS;
 		}
 
-		public void schedule(boolean force, IRegion region) {
+		public void schedule(boolean resetMask, IRegion region) {
 			cancel(); // should stop the queue getting too large.
-			this.forceProcess = force;
+			this.isRegionsEnabled = regionTable.getTable().isEnabled();
+			this.resetMask    = resetMask;
 			this.region       = region;
 			min = (minimum.isEnabled()) ? minimum.getSelection() : null;
 		    max = (maximum.isEnabled()) ? maximum.getSelection() : null;
 			super.schedule(5);
 		}
+	}
+
+	@Override
+	public void mouseDoubleClick(MouseEvent e) {
+		
+	}
+
+	@Override
+	public void mouseDown(MouseEvent e) {
+		final TableItem item = this.regionTable.getTable().getItem(new Point(e.x, e.y));
+		if (item!=null) {
+			IRegion region = (IRegion)item.getData();
+			region.setMaskRegion(!region.isMaskRegion());
+			regionTable.refresh(region);
+		}
+	}
+
+	@Override
+	public void mouseUp(MouseEvent e) {
+		
 	}
 
 }
