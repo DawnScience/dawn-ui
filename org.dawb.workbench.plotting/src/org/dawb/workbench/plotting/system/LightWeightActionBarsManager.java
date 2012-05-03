@@ -41,6 +41,7 @@ import org.dawb.common.ui.plot.trace.ILineTrace.TraceType;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
+import org.dawb.common.ui.widgets.EmptyActionBars;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
 import org.dawb.workbench.plotting.system.dialog.AddRegionDialog;
@@ -903,7 +904,7 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 
 
 	public IActionBars createEmptyActionBars() {
-		return new ActionBarWrapper(new ToolBarManager(), new MenuManager(), new StatusLineManager(), null);
+		return new EmptyActionBars(new ToolBarManager(), new MenuManager(), new StatusLineManager());
 	}
 
 }
