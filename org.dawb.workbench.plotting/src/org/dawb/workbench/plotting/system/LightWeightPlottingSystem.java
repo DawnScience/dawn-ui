@@ -24,6 +24,7 @@ import org.csstudio.swt.xygraph.figures.Annotation;
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.Trace;
 import org.csstudio.swt.xygraph.figures.Trace.PointStyle;
+import org.csstudio.swt.xygraph.figures.XYGraphFlags;
 import org.csstudio.swt.xygraph.linearscale.AbstractScale.LabelSide;
 import org.csstudio.swt.xygraph.linearscale.LinearScale.Orientation;
 import org.csstudio.swt.xygraph.undo.AddAnnotationCommand;
@@ -53,7 +54,6 @@ import org.dawb.workbench.plotting.system.swtxy.ImageTrace;
 import org.dawb.workbench.plotting.system.swtxy.LineTrace;
 import org.dawb.workbench.plotting.system.swtxy.RegionArea;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
-import org.dawb.workbench.plotting.system.swtxy.XYRegionToolbar;
 import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
 import org.dawb.workbench.plotting.system.swtxy.selection.SelectionRegionFactory;
 import org.dawb.workbench.plotting.util.ColorUtility;
@@ -167,28 +167,30 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		this.xyGraph = new XYRegionGraph();
 		xyGraph.setSelectionProvider(getSelectionProvider());
 		
-        if (bars!=null) if (bars.getMenuManager()!=null)    bars.getMenuManager().removeAll();
-        if (bars!=null) if (bars.getToolBarManager()!=null) bars.getToolBarManager().removeAll();
+		// We contain the action bars in an internal object
+		// if the API user said they were null. This allows the API
+		// user to say null for action bars and then use:
+		// getPlotActionSystem().fillXXX() to add their own actions.
+ 		if (bars==null) bars = lightWeightActionBarMan.createEmptyActionBars(); 
+ 				
+ 		bars.getMenuManager().removeAll();
+ 		bars.getToolBarManager().removeAll();
 
-        final MenuManager rightClick = new MenuManager();
-        
-		if (bars!=null) {
-    		final XYRegionToolbar toolbar = new XYRegionToolbar(xyGraph);
-        	toolbar.createGraphActions(bars.getToolBarManager(), rightClick);
-		}
-		
-		if (bars!=null) {
-			lightWeightActionBarMan.createExportActionsToolBar();
-			lightWeightActionBarMan.createAspectHistoAction();
-			lightWeightActionBarMan.createToolDimensionalActions(ToolPageRole.ROLE_1D, "org.dawb.workbench.plotting.views.toolPageView.1D");
-			lightWeightActionBarMan.createToolDimensionalActions(ToolPageRole.ROLE_2D, "org.dawb.workbench.plotting.views.toolPageView.2D");
-			lightWeightActionBarMan.createToolDimensionalActions(ToolPageRole.ROLE_1D_AND_2D, "org.dawb.workbench.plotting.views.toolPageView.1D_and_2D");
-			lightWeightActionBarMan.createPalleteActions();
-			lightWeightActionBarMan.createOriginActions();
-			lightWeightActionBarMan.createExportActionsMenuBar();
-		}
-		lightWeightActionBarMan.createAdditionalActions(null);
-		
+ 		lightWeightActionBarMan.createConfigActions();
+ 		lightWeightActionBarMan.createAnnotationActions();
+ 		lightWeightActionBarMan.createRegionActions();
+ 		lightWeightActionBarMan.createZoomActions(XYGraphFlags.COMBINED_ZOOM);
+ 		lightWeightActionBarMan.createUndoRedoActions();
+ 		lightWeightActionBarMan.createExportActionsToolBar();
+ 		lightWeightActionBarMan.createAspectHistoAction();
+ 		lightWeightActionBarMan.createToolDimensionalActions(ToolPageRole.ROLE_1D, "org.dawb.workbench.plotting.views.toolPageView.1D");
+ 		lightWeightActionBarMan.createToolDimensionalActions(ToolPageRole.ROLE_2D, "org.dawb.workbench.plotting.views.toolPageView.2D");
+ 		lightWeightActionBarMan.createToolDimensionalActions(ToolPageRole.ROLE_1D_AND_2D, "org.dawb.workbench.plotting.views.toolPageView.1D_and_2D");
+ 		lightWeightActionBarMan.createPalleteActions();
+ 		lightWeightActionBarMan.createOriginActions();
+ 		lightWeightActionBarMan.createExportActionsMenuBar();
+ 		lightWeightActionBarMan.createAdditionalActions(null);
+		 		
 		lws.setContents(xyGraph);
 		xyGraph.primaryXAxis.setShowMajorGrid(true);
 		xyGraph.primaryXAxis.setShowMinorGrid(true);		
@@ -199,10 +201,10 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		if (bars!=null) bars.updateActionBars();
 		if (bars!=null) bars.getToolBarManager().update(true);
            
-		final MenuManager popupMenu = new MenuManager();
+ 		final MenuManager popupMenu = new MenuManager();
 		popupMenu.setRemoveAllWhenShown(true); // Remake menu each time
         xyCanvas.setMenu(popupMenu.createContextMenu(xyCanvas));
-        popupMenu.addMenuListener(getIMenuListener(rightClick));
+        popupMenu.addMenuListener(getIMenuListener());
         
         if (defaultPlotType!=null) {
 		    this.lightWeightActionBarMan.switchActions(defaultPlotType);
@@ -213,7 +215,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	}
 
 	private IMenuListener popupListener;
-	private IMenuListener getIMenuListener(final MenuManager defaultMenuItems) {
+	private IMenuListener getIMenuListener() {
 		if (popupListener == null) {
 			popupListener = new IMenuListener() {			
 				@Override
@@ -234,9 +236,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 							LightWeightActionBarsManager.fillTraceActions(manager, trace, LightWeightPlottingSystem.this);
 					    }
 					}
-					for (IContributionItem item : defaultMenuItems.getItems()) {
-						manager.add(item);
-					}
+					lightWeightActionBarMan.fillZoomActions(manager);
 					manager.update();
 				}
 			};

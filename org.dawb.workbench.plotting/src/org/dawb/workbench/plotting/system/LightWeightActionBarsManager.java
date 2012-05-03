@@ -15,15 +15,24 @@ import java.util.List;
 import java.util.Map;
 
 import org.csstudio.swt.xygraph.figures.Annotation;
+import org.csstudio.swt.xygraph.toolbar.AddAnnotationDialog;
+import org.csstudio.swt.xygraph.toolbar.RemoveAnnotationDialog;
+import org.csstudio.swt.xygraph.toolbar.XYGraphConfigDialog;
+import org.csstudio.swt.xygraph.undo.AddAnnotationCommand;
+import org.csstudio.swt.xygraph.undo.IOperationsManagerListener;
+import org.csstudio.swt.xygraph.undo.OperationsManager;
+import org.csstudio.swt.xygraph.undo.RemoveAnnotationCommand;
+import org.csstudio.swt.xygraph.undo.ZoomType;
 import org.dawb.common.services.ImageServiceBean.ImageOrigin;
 import org.dawb.common.ui.image.PaletteFactory;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
-import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingActionBarManager;
 import org.dawb.common.ui.plot.annotation.AnnotationUtils;
+import org.dawb.common.ui.plot.region.IRegion.RegionType;
+import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
@@ -31,15 +40,29 @@ import org.dawb.common.ui.plot.trace.ILineTrace.PointStyle;
 import org.dawb.common.ui.plot.trace.ILineTrace.TraceType;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.TraceEvent;
+import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
+import org.dawb.workbench.plotting.system.dialog.AddRegionDialog;
+import org.dawb.workbench.plotting.system.dialog.RemoveRegionCommand;
+import org.dawb.workbench.plotting.system.dialog.RemoveRegionDialog;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionConfigDialog;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IContributionManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.action.StatusLineManager;
+import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.window.Window;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IActionBars;
@@ -98,6 +121,260 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 	}
 	
 	
+	public void createConfigActions() {
+		
+		addToolbarSeparator("org.csstudio.swt.xygraph.toolbar.configure");	
+		
+		final Action configButton = new Action("Configure Settings...", Activator.getImageDescriptor("icons/Configure.png")) {
+			public void run() {
+				final XYRegionGraph xyGraph     = system.getGraph();
+				XYGraphConfigDialog dialog = new XYRegionConfigDialog(Display.getCurrent().getActiveShell(), xyGraph);
+				dialog.open();
+			}
+		};
+		if (system.getActionBars()!=null) system.getActionBars().getToolBarManager().add(configButton);
+		
+		final Action showLegend = new Action("Show Legend", IAction.AS_CHECK_BOX) {
+			public void run() {
+				final XYRegionGraph xyGraph     = system.getGraph();
+				xyGraph.setShowLegend(!xyGraph.isShowLegend());
+			}
+		};
+		showLegend.setImageDescriptor(Activator.getImageDescriptor("icons/ShowLegend.png"));
+		if (system.getActionBars()!=null) system.getActionBars().getToolBarManager().add(showLegend);
+		
+		showLegend.setChecked(system.getGraph().isShowLegend());
+		
+		
+	}
+	
+	protected void createAnnotationActions() {
+		
+		addToolbarSeparator("org.csstudio.swt.xygraph.toolbar.annotation");	
+		
+		final Action addAnnotation = new Action("Add Annotation...", Activator.getImageDescriptor("icons/Add_Annotation.png")) {
+			public void run() {
+				final XYRegionGraph xyGraph     = system.getGraph();
+				AddAnnotationDialog dialog = new AddAnnotationDialog(Display.getCurrent().getActiveShell(), xyGraph);
+				if(dialog.open() == Window.OK){
+					xyGraph.addAnnotation(dialog.getAnnotation());
+					xyGraph.getOperationsManager().addCommand(
+							new AddAnnotationCommand(xyGraph, dialog.getAnnotation()));
+				}
+				
+			}
+		};
+		if (system.getActionBars()!=null) system.getActionBars().getToolBarManager().add(addAnnotation);
+	
+		
+		final Action delAnnotation = new Action("Remove Annotation...", Activator.getImageDescriptor("icons/Del_Annotation.png")) {
+			public void run() {
+				final XYRegionGraph xyGraph     = system.getGraph();
+				RemoveAnnotationDialog dialog = new RemoveAnnotationDialog(Display.getCurrent().getActiveShell(), xyGraph);
+				if(dialog.open() == Window.OK && dialog.getAnnotation() != null){
+					xyGraph.removeAnnotation(dialog.getAnnotation());
+					xyGraph.getOperationsManager().addCommand(
+							new RemoveAnnotationCommand(xyGraph, dialog.getAnnotation()));					
+				}
+				
+			}
+		};
+		if (system.getActionBars()!=null) system.getActionBars().getToolBarManager().add(delAnnotation);
+		
+		addToolbarSeparator("org.csstudio.swt.xygraph.toolbar.extra");	
+	}
+	
+	protected void createRegionActions() {
+		
+		final XYRegionGraph xyGraph     = system.getGraph();
+		
+        final MenuAction regionDropDown = new MenuAction("Add a selection region");
+        regionDropDown.setId("org.dawb.workbench.ui.editors.plotting.swtxy.addRegions"); // Id used elsewhere...
+ 
+		regionDropDown.add(createRegionAction(RegionType.LINE,      regionDropDown, "Add line selection",   Activator.getImageDescriptor("icons/ProfileLine.png")));
+		regionDropDown.add(createRegionAction(RegionType.POLYLINE,  regionDropDown, "Add polyline selection",   Activator.getImageDescriptor("icons/ProfilePolyline.png")));
+		regionDropDown.add(createRegionAction(RegionType.BOX,       regionDropDown, "Add box selection",    Activator.getImageDescriptor("icons/ProfileBox.png")));
+		regionDropDown.add(createRegionAction(RegionType.SECTOR,    regionDropDown, "Add sector selection",    Activator.getImageDescriptor("icons/ProfileSector.png")));
+		regionDropDown.add(createRegionAction(RegionType.RING,      regionDropDown, "Add circle selection", Activator.getImageDescriptor("icons/ProfileCircle.png")));
+		regionDropDown.add(createRegionAction(RegionType.XAXIS,     regionDropDown, "Add X-axis selection", Activator.getImageDescriptor("icons/Cursor-horiz.png")));
+		regionDropDown.add(createRegionAction(RegionType.YAXIS,     regionDropDown, "Add Y-axis selection",   Activator.getImageDescriptor("icons/Cursor-vert.png")));
+		regionDropDown.add(createRegionAction(RegionType.FREE_DRAW, regionDropDown, "Free drawn selection", Activator.getImageDescriptor("icons/ProfileFree.png")));
+		regionDropDown.add(createRegionAction(RegionType.POINT,     regionDropDown, "Single point selection",   Activator.getImageDescriptor("icons/ProfilePoint.png")));
+
+		regionDropDown.setSelectedAction(regionDropDown.getAction(0));
+		
+		if (system.getActionBars()!=null) system.getActionBars().getToolBarManager().add(regionDropDown);
+		//if (system.getActionBars()!=null) system.getActionBars().getMenuManager().add(regionDropDown);
+			
+        final MenuAction removeRegionDropDown = new MenuAction("Delete selection region(s)");
+        removeRegionDropDown.setId("org.dawb.workbench.ui.editors.plotting.swtxy.removeRegions");
+
+        final Action removeRegion = new Action("Remove Region...", Activator.getImageDescriptor("icons/RegionDelete.png")) {
+			public void run() {
+				RemoveRegionDialog dialog = new RemoveRegionDialog(Display.getCurrent().getActiveShell(), (XYRegionGraph)xyGraph);
+				if(dialog.open() == Window.OK && dialog.getRegion() != null){
+					((XYRegionGraph)xyGraph).removeRegion(dialog.getRegion());
+					xyGraph.getOperationsManager().addCommand(
+							new RemoveRegionCommand((XYRegionGraph)xyGraph, dialog.getRegion()));					
+				}
+			}
+		};
+		
+		removeRegionDropDown.add(removeRegion);
+		removeRegionDropDown.setSelectedAction(removeRegion);
+		
+        final Action removeAllRegions = new Action("Remove all regions...", Activator.getImageDescriptor("icons/RegionDeleteAll.png")) {
+			public void run() {
+				
+				final boolean yes = MessageDialog.openConfirm(Display.getDefault().getActiveShell(), 
+						                  "Please Confirm Delete All",
+						                  "Are you sure you would like to delete all selection regions?");
+				
+				if (yes){
+					xyGraph.getOperationsManager().addCommand(
+							new RemoveRegionCommand((XYRegionGraph)xyGraph, ((XYRegionGraph)xyGraph).getRegions()));					
+					((XYRegionGraph)xyGraph).clearRegions();
+				}
+			}
+		};
+		
+		removeRegionDropDown.add(removeAllRegions);
+
+		
+		if (system.getActionBars()!=null) system.getActionBars().getToolBarManager().add(removeRegionDropDown);
+		//if (system.getActionBars()!=null) system.getActionBars().getMenuManager().add(removeRegionDropDown);
+		
+	}
+	
+	protected void createRegion(MenuAction regionDropDown, Action action, RegionType type) throws Exception {
+		
+		final XYRegionGraph xyGraph     = system.getGraph();
+		if (xyGraph.getXAxisList().size()==1 && xyGraph.getYAxisList().size()==1) {
+			xyGraph.createRegion(RegionUtils.getUniqueName(type.getName(), system), xyGraph.primaryXAxis, xyGraph.primaryYAxis, type, true);
+		} else {
+			AddRegionDialog dialog = new AddRegionDialog(Display.getCurrent().getActiveShell(), (XYRegionGraph)xyGraph, type);
+			if (dialog.open() != Window.OK){
+				return;
+			}
+		}
+		regionDropDown.setSelectedAction(action);	
+		regionDropDown.setChecked(true);
+	}
+	
+	private IAction createRegionAction(final RegionType type, final MenuAction regionDropDown, final String label, final ImageDescriptor icon) {
+		final Action regionAction = new Action(label, icon) {
+			public void run() {				
+				try {
+					createRegion(regionDropDown, this, type);
+				} catch (Exception e) {
+					logger.error("Cannot create region!", e);
+				}
+			}
+		};
+		regionAction.setId(type.getId());
+		return regionAction;
+	}
+
+	
+	private void addToolbarSeparator(String id) {
+		if (system.getActionBars()!=null) system.getActionBars().getToolBarManager().add(new Separator(	id ));	
+	}
+
+	public void createZoomActions(final int flags) {
+		
+		addToolbarSeparator("org.csstudio.swt.xygraph.toolbar.zoom");		
+
+        final Action autoScale = new Action("Perform Auto Scale", Activator.getImageDescriptor("icons/AutoScale.png")) {
+        	public void run() {
+				final XYRegionGraph xyGraph     = system.getGraph();
+	            xyGraph.performAutoScale();
+        	}
+        };
+        autoScale.setId("org.csstudio.swt.xygraph.autoscale");
+        if (system.getActionBars()!=null) system.getActionBars().getToolBarManager().add(autoScale);
+        
+        final CheckableActionGroup zoomG = new CheckableActionGroup();
+        Action zoomNone = null;
+		for(final ZoomType zoomType : ZoomType.values()){
+		    if (! zoomType.useWithFlags(flags)) continue;
+		 		
+			final ImageDescriptor icon = new ImageDescriptor() {				
+				@Override
+				public ImageData getImageData() {
+					return zoomType.getIconImage().getImageData();
+				}
+			};
+			final Action zoomAction = new Action(zoomType.getDescription(), IAction.AS_CHECK_BOX) {
+				public void run() {
+					final XYRegionGraph xyGraph     = system.getGraph();
+					xyGraph.setZoomType(zoomType);
+				}
+			};
+			zoomAction.setImageDescriptor(icon);
+			zoomAction.setId(zoomType.getId());
+			zoomG.add(zoomAction);	
+			
+			if (zoomType == ZoomType.NONE) zoomNone = zoomAction;
+			
+			if (system.getActionBars()!=null) system.getActionBars().getToolBarManager().add(zoomAction);
+		}
+		
+		zoomNone.setChecked(true);
+	}
+
+	public void createUndoRedoActions() {
+		
+		addToolbarSeparator("org.csstudio.swt.xygraph.toolbar.undoredo");		
+
+		final XYRegionGraph xyGraph     = system.getGraph();
+
+		//undo button		
+		final Action undoButton = new Action("Undo", Activator.getImageDescriptor("icons/Undo.png")) {
+			public void run() {
+				xyGraph.getOperationsManager().undo();
+			}
+		};
+		undoButton.setEnabled(false);
+		if (system.getActionBars()!=null) system.getActionBars().getToolBarManager().add(undoButton);		
+	
+		xyGraph.getOperationsManager().addListener(new IOperationsManagerListener(){
+			public void operationsHistoryChanged(OperationsManager manager) {
+				if(manager.getUndoCommandsSize() > 0){
+					undoButton.setEnabled(true);
+					final String cmd_name = manager.getUndoCommands()[
+					           manager.getUndoCommandsSize() -1].toString();
+                    undoButton.setText(NLS.bind("Undo {0}", cmd_name));
+				}else{
+					undoButton.setEnabled(false);
+					undoButton.setText("Undo");
+				}			
+			}
+		});
+		
+		// redo button
+		final Action redoButton = new Action("Redo", Activator.getImageDescriptor("icons/Redo.png")) {
+			public void run() {
+				xyGraph.getOperationsManager().redo();
+			}
+		};
+		redoButton.setEnabled(false);
+		if (system.getActionBars()!=null) system.getActionBars().getToolBarManager().add(redoButton);		
+
+		xyGraph.getOperationsManager().addListener(new IOperationsManagerListener(){
+			public void operationsHistoryChanged(OperationsManager manager) {
+				if(manager.getRedoCommandsSize() > 0){
+					redoButton.setEnabled(true);
+					final String cmd_name = manager.getRedoCommands()[
+					           manager.getRedoCommandsSize() -1].toString();
+                    redoButton.setText(NLS.bind("Redo {0}", cmd_name));
+				}else{
+					redoButton.setEnabled(false);
+					redoButton.setText("Redo");
+				}					
+			}
+		});
+	}
+
 	protected void createToolDimensionalActions(final ToolPageRole role,
 			                                    final String       viewId) {
 
@@ -525,13 +802,16 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 		exportActionsDropDown.add(snapShotButton);
 		exportActionsDropDown.add(printButton);
 
-		this.system.getActionBars().getToolBarManager().add(exportActionsDropDown);
+		if (this.system.getActionBars()!=null) {
+		    this.system.getActionBars().getToolBarManager().add(exportActionsDropDown);
+		}
 	}
 
 	/**
 	 * Create export and print buttons in menu bar
 	 */
 	public void createExportActionsMenuBar() {
+		
 		Action exportSaveButton = new Action("Export/save the plotting", Activator.getImageDescriptor("icons/picture_save.png")){
 			// Cache file name otherwise they have to keep
 			// choosing the folder.
@@ -556,13 +836,74 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 				system.printPlotting();
 			}
 		};
-		this.system.getActionBars().getMenuManager().add(new Separator(exportSaveButton.getId()+".group"));
-		this.system.getActionBars().getMenuManager().add(exportSaveButton);
-		this.system.getActionBars().getMenuManager().add(copyToClipboardButton);
-		this.system.getActionBars().getMenuManager().add(new Separator(snapShotButton.getId()+".group"));
-		this.system.getActionBars().getMenuManager().add(snapShotButton);
-		this.system.getActionBars().getMenuManager().add(printButton);
-		this.system.getActionBars().getMenuManager().add(new Separator(printButton.getId()+".group"));
+		if (this.system.getActionBars()!=null) {
+			this.system.getActionBars().getMenuManager().add(new Separator(exportSaveButton.getId()+".group"));
+			this.system.getActionBars().getMenuManager().add(exportSaveButton);
+			this.system.getActionBars().getMenuManager().add(copyToClipboardButton);
+			this.system.getActionBars().getMenuManager().add(new Separator(snapShotButton.getId()+".group"));
+			this.system.getActionBars().getMenuManager().add(snapShotButton);
+			this.system.getActionBars().getMenuManager().add(printButton);
+			this.system.getActionBars().getMenuManager().add(new Separator(printButton.getId()+".group"));
+		}
+	}
+
+	
+
+	@Override
+	public void fillZoomActions(IContributionManager man) {
+
+		IContributionItem action = system.getActionBars().getToolBarManager().find("org.csstudio.swt.xygraph.autoscale");
+		if (action!=null) man.add(((ActionContributionItem)action).getAction());
+
+		for(final ZoomType zoomType : ZoomType.values()) {
+			action = system.getActionBars().getToolBarManager().find(zoomType.getId());
+			if (action!=null) man.add(((ActionContributionItem)action).getAction());
+		}
+	}
+
+
+	@Override
+	public void fillRegionActions(IContributionManager man) {
+			
+		IContributionItem action = system.getActionBars().getToolBarManager().find("org.dawb.workbench.ui.editors.plotting.swtxy.addRegions");
+		if (action!=null) man.add(((ActionContributionItem)action).getAction());
+		
+		action = system.getActionBars().getToolBarManager().find("org.dawb.workbench.ui.editors.plotting.swtxy.removeRegions");
+		if (action!=null) man.add(((ActionContributionItem)action).getAction());
+	}
+
+	@Override
+	public void fillUndoActions(IContributionManager man) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void fillPrintActions(IContributionManager man) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void fillAnnotationActions(IContributionManager man) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void fillToolActions(IContributionManager man, ToolPageRole role) {
+
+        // Find the drop down action for the role.
+		final IContributionItem action = system.getActionBars().getToolBarManager().find(role.getId());
+		if (action!=null) man.add(((ActionContributionItem)action).getAction());
+	}
+
+
+	public IActionBars createEmptyActionBars() {
+		return new ActionBarWrapper(new ToolBarManager(), new MenuManager(), new StatusLineManager(), null);
 	}
 
 }

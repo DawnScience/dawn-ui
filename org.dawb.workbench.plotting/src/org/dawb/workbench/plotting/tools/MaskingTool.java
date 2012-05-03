@@ -206,13 +206,13 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		minimum.setToolTipText("Press enter to apply a full update of the mask.");
 		minimum.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				processMask();
+				processMask(true, false, null);
 			}
 		});
 		minimum.addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
 				if (e.character=='\n' || e.character=='\r') {
-					processMask(false, true, null);
+					processMask(true, true, null);
 				}
 			}
 		});
@@ -242,13 +242,13 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		maximum.setToolTipText("Press enter to apply a full update of the mask.");
 		maximum.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				processMask();
+				processMask(true, false, null);
 			}
 		});
 		maximum.addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
 				if (e.character=='\n' || e.character=='\r') {
-					processMask(false, true, null);
+					processMask(true, true, null);
 				}
 			}
 		});
