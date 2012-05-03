@@ -750,7 +750,12 @@ public class HistogramToolPage extends AbstractToolPage {
 	 */
 	private void generateHistogram(AbstractDataset image) {
 		// calculate the histogram for the whole image
-		Histogram hist = new Histogram(num_bins, rangeMin, rangeMax, true);
+		double rMax = rangeMax;
+		double rMin = rangeMin;
+		if (Double.isInfinite(rMax)) rMax = imageDataset.max().doubleValue();
+		if (Double.isInfinite(rMin)) rMin = imageDataset.min().doubleValue();
+		
+		Histogram hist = new Histogram(num_bins, rMin, rMax, true);
 		List<AbstractDataset> histogram_values = hist.value(image);
 		histogramX = histogram_values.get(1).getSlice(
 				new int[] {0},
@@ -771,23 +776,28 @@ public class HistogramToolPage extends AbstractToolPage {
 	 */
 	private void updateRanges(SelectionEvent event) {
 
+		double rMax = rangeMax;
+		double rMin = rangeMin;
+		if (Double.isInfinite(rMax)) rMax = imageDataset.max().doubleValue();
+		if (Double.isInfinite(rMin)) rMin = imageDataset.min().doubleValue();
+		
 		// set the minmax values
-		minMaxValue.setMin(MIN_LABEL, rangeMin);
-		minMaxValue.setMax(MIN_LABEL, rangeMax);
+		minMaxValue.setMin(MIN_LABEL, rMin);
+		minMaxValue.setMax(MIN_LABEL, rMax);
 		minMaxValue.setValue(MIN_LABEL, histoMin);
 
-		minMaxValue.setMin(MAX_LABEL, rangeMin);
-		minMaxValue.setMax(MAX_LABEL, rangeMax);
+		minMaxValue.setMin(MAX_LABEL, rMin);
+		minMaxValue.setMax(MAX_LABEL, rMax);
 		minMaxValue.setValue(MAX_LABEL, histoMax);
 
 		// Set the brightness
-		brightnessContrastValue.setMin(BRIGHTNESS_LABEL, rangeMin);
-		brightnessContrastValue.setMax(BRIGHTNESS_LABEL, rangeMax);
+		brightnessContrastValue.setMin(BRIGHTNESS_LABEL, rMin);
+		brightnessContrastValue.setMax(BRIGHTNESS_LABEL, rMax);
 		brightnessContrastValue.setValue(BRIGHTNESS_LABEL, (histoMax+histoMin)/2.0);
 
 		// Set the contrast
-		brightnessContrastValue.setMin(CONTRAST_LABEL, rangeMin);
-		brightnessContrastValue.setMax(CONTRAST_LABEL, rangeMax);
+		brightnessContrastValue.setMin(CONTRAST_LABEL, rMin);
+		brightnessContrastValue.setMax(CONTRAST_LABEL, rMax);
 		brightnessContrastValue.setValue(CONTRAST_LABEL, histoMax-histoMin);
 		
 	}
