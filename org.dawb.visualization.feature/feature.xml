@@ -123,8 +123,6 @@ This Agreement is governed by the laws of the State of New York and the intellec
       <import plugin="org.eclipse.ui.cheatsheets"/>
       <import plugin="org.eclipse.ui.ide"/>
       <import plugin="org.eclipse.jface.text"/>
-      <import plugin="org.embl.cca.expsim" version="1.0.0" match="greaterOrEqual"/>
-      <import plugin="org.embl.cca.holo" version="1.0.0" match="greaterOrEqual"/>
       <import plugin="com.springsource.org.apache.commons.beanutils"/>
       <import plugin="org.eclipse.core.filesystem"/>
       <import plugin="org.eclipse.draw2d"/>
@@ -177,8 +175,11 @@ This Agreement is governed by the laws of the State of New York and the intellec
       <import plugin="org.dawb.gda.extensions" version="1.0.0" match="greaterOrEqual"/>
       <import plugin="uk.ac.diamond.scisoft.analysis" version="1.1.0" match="greaterOrEqual"/>
       <import plugin="org.dawb.jlchart" version="1.0.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.core.runtime" version="3.7.0" match="greaterOrEqual"/>
       <import plugin="org.dawb.tango.extensions" version="1.0.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.core.runtime" version="3.7.0" match="greaterOrEqual"/>
+      <import plugin="org.embl.cca.utils" version="1.0.0" match="greaterOrEqual"/>
+      <import plugin="org.embl.cca.utils.loaders" version="1.0.0" match="greaterOrEqual"/>
+      <import plugin="uk.ac.diamond.scisoft.analysis.rcp" version="1.1.0" match="greaterOrEqual"/>
    </requires>
 
    <plugin

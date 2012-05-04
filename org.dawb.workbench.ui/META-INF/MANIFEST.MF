@@ -22,7 +22,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.cheatsheets,
  org.eclipse.ui.ide,
  org.eclipse.jface.text,
- org.embl.cca.utils;bundle-version="1.0.0"
+ org.embl.cca.utils;bundle-version="1.0.0",
+ org.dawb.fable.imageviewer;bundle-version="1.0.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: fable.framework.logging,
@@ -49,10 +50,10 @@ Export-Package: org.dawb.workbench.ui.editors;
    uk.ac.diamond.scisoft.analysis.io,
    org.eclipse.ui.part,
    org.dawb.common.ui.slicing,
+   org.embl.cca.utils.imageviewer,
    org.eclipse.jface.action,
    org.dawb.workbench.ui.editors.slicing,
    org.dawb.hdf5.editor,
-   fable.imageviewer.psf,
    org.eclipse.jface.viewers,
    org.eclipse.swt.widgets,
    org.eclipse.jface.dialogs",
