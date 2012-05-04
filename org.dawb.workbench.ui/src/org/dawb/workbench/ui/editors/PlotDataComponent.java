@@ -257,27 +257,31 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 		setColumnVisible(4, 180, Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_SHAPE));
 		setColumnVisible(5, 150, Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_VARNAME));
 	
-		/**
-		 * No need to remove this one, the listeners are cleared on a dispose
-		 */
-		getPlottingSystem().addTraceListener(new ITraceListener.Stub() {
-			@Override
-			public void tracesAltered(TraceEvent evt) {
-				updateSelection();
-			}
-		});
-		
-		
-		this.dataFilter = new DataFilter();
-		dataViewer.addFilter(dataFilter);
-		searchText.addModifyListener(new ModifyListener() {		
-			@Override
-			public void modifyText(ModifyEvent e) {
-				if (parent.isDisposed()) return;
-				dataFilter.setSearchText(searchText.getText());
-				dataViewer.refresh();
-			}
-		});
+		try {
+			/**
+			 * No need to remove this one, the listeners are cleared on a dispose
+			 */
+			getPlottingSystem().addTraceListener(new ITraceListener.Stub() {
+				@Override
+				public void tracesAltered(TraceEvent evt) {
+					updateSelection();
+				}
+			});
+			
+			
+			this.dataFilter = new DataFilter();
+			dataViewer.addFilter(dataFilter);
+			searchText.addModifyListener(new ModifyListener() {		
+				@Override
+				public void modifyText(ModifyEvent e) {
+					if (parent.isDisposed()) return;
+					dataFilter.setSearchText(searchText.getText());
+					dataViewer.refresh();
+				}
+			});
+		}catch (Exception ne) {
+			logger.error("Cannot add trace listener!", ne);
+		}
 	}
 	
 

@@ -54,6 +54,7 @@ import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IContributionManager;
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.StatusLineManager;
@@ -905,6 +906,24 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 
 	public IActionBars createEmptyActionBars() {
 		return new EmptyActionBars(new ToolBarManager(), new MenuManager(), new StatusLineManager());
+	}
+
+
+	protected static void fillAnnotationConfigure(IMenuManager manager,
+			                                      final Annotation annotation,
+			                                      final IPlottingSystem system) {
+
+		final Action configure = new Action("Configure '"+annotation.getName()+"'", Activator.getImageDescriptor("icons/Configure.png")) {
+			public void run() {
+				final XYRegionConfigDialog dialog = new XYRegionConfigDialog(Display.getCurrent().getActiveShell(), ((LightWeightPlottingSystem)system).getGraph());
+				dialog.setPlottingSystem(system);
+				dialog.setSelectedAnnotation(annotation);
+				dialog.open();
+			}
+		};
+		manager.add(configure);	
+
+		manager.add(new Separator("org.dawb.workbench.plotting.system.configure.group"));
 	}
 
 }

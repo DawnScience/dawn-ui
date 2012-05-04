@@ -31,6 +31,7 @@ import org.csstudio.swt.xygraph.undo.AddAnnotationCommand;
 import org.csstudio.swt.xygraph.undo.RemoveAnnotationCommand;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.IAxis;
+import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingActionBarManager;
 import org.dawb.common.ui.plot.annotation.IAnnotation;
@@ -46,6 +47,7 @@ import org.dawb.common.ui.plot.trace.ITraceContainer;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.gda.extensions.util.DatasetTitleUtils;
+import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.printing.PlotExportPrintUtil;
 import org.dawb.workbench.plotting.printing.PlotPrintPreviewDialog;
 import org.dawb.workbench.plotting.printing.PrintSettings;
@@ -53,6 +55,7 @@ import org.dawb.workbench.plotting.system.swtxy.AspectAxis;
 import org.dawb.workbench.plotting.system.swtxy.ImageTrace;
 import org.dawb.workbench.plotting.system.swtxy.LineTrace;
 import org.dawb.workbench.plotting.system.swtxy.RegionArea;
+import org.dawb.workbench.plotting.system.swtxy.XYRegionConfigDialog;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
 import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
 import org.dawb.workbench.plotting.system.swtxy.selection.SelectionRegionFactory;
@@ -60,7 +63,9 @@ import org.dawb.workbench.plotting.util.ColorUtility;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.draw2d.FigureCanvas;
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.LightweightSystem;
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IMenuListener;
@@ -235,6 +240,11 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 							final ITrace trace = ((ITraceContainer)fig).getTrace();
 							LightWeightActionBarsManager.fillTraceActions(manager, trace, LightWeightPlottingSystem.this);
 					    }
+					    
+					    if (fig instanceof Label && fig.getParent() instanceof Annotation) {
+					    	
+					    	LightWeightActionBarsManager.fillAnnotationConfigure(manager, (Annotation)fig.getParent(), LightWeightPlottingSystem.this);
+					    }
 					}
 					lightWeightActionBarMan.fillZoomActions(manager);
 					manager.update();
@@ -243,6 +253,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		}
 		return popupListener;
 	}
+
 
 	private MouseWheelListener mouseWheelListener;
 	private MouseWheelListener getMouseWheelListener() {

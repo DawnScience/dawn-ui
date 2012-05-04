@@ -3,6 +3,7 @@ package org.dawb.workbench.plotting.system.swtxy;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.csstudio.swt.xygraph.figures.Annotation;
 import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.swt.xygraph.toolbar.XYGraphConfigDialog;
 import org.dawb.common.ui.plot.IPlottingSystem;
@@ -154,6 +155,23 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
 
         }
         
+        if (selectedAnnotation!=null) {
+        	final int index = xyGraph.getPlotArea().getAnnotationList().indexOf(selectedAnnotation);
+        	final TabItem[] items = tabFolder.getItems();
+         	for (int i = 0; i < items.length; i++) {
+				if ("Annotations".equalsIgnoreCase(items[i].getText())) {
+					tabFolder.setSelection(i);
+					annotationsCombo.select(index);
+					Composite annoTabComposite = (Composite)items[i].getControl();
+					Composite annoConfigComposite = (Composite)annoTabComposite.getChildren()[1];
+					final StackLayout stackLayout = (StackLayout)annoConfigComposite.getLayout();
+					stackLayout.topControl = annotationConfigPageList.get(index).getComposite();
+        			annoConfigComposite.layout(true, true);
+        			break;
+				}
+			}
+         }
+        
         if (selectedTrace!=null) {
         	if (selectedTrace instanceof ILineTrace) {
         		tabFolder.setSelection(2);
@@ -213,6 +231,7 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
 	
 	private Object selectedTrace;
 	private String selectedTraceName;
+	private Annotation selectedAnnotation;
 
 	public void setSelectedTrace(ITrace trace) {
 		selectedTraceName = trace.getName();
@@ -229,6 +248,10 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
 
 	public void setPlottingSystem(IPlottingSystem plottingSystem) {
 		this.plottingSystem = plottingSystem;
+	}
+
+	public void setSelectedAnnotation(Annotation annotation) {
+		this.selectedAnnotation = annotation;
 	}
 	
 }

@@ -483,7 +483,7 @@ public class RegionArea extends PlotArea {
 	}
 
 
-	public Figure getImageTrace() {
+	public ImageTrace getImageTrace() {
 		if (imageTraces!=null && imageTraces.size()>0) return imageTraces.values().iterator().next();
 		return null;
 	}

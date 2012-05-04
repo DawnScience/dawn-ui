@@ -1,9 +1,12 @@
 package org.dawb.workbench.plotting.system.swtxy;
 
+import java.text.NumberFormat;
 import java.util.Collection;
 import java.util.List;
 
+import org.csstudio.swt.xygraph.figures.Annotation;
 import org.csstudio.swt.xygraph.figures.Axis;
+import org.csstudio.swt.xygraph.figures.IAnnotationLabelProvider;
 import org.csstudio.swt.xygraph.figures.Legend;
 import org.csstudio.swt.xygraph.figures.PlotArea;
 import org.csstudio.swt.xygraph.figures.XYGraph;
@@ -256,4 +259,42 @@ public class XYRegionGraph extends XYGraph {
 		removeAll();
 		getRegionArea().dispose();
 	}
+	
+	private final NumberFormat integerFormat   = NumberFormat.getIntegerInstance();
+	private final NumberFormat intensityFormat = NumberFormat.getNumberInstance();
+	
+	public void addAnnotation(final Annotation annotation){
+		
+		annotation.setLabelProvder(new IAnnotationLabelProvider() {		
+			@Override
+			public String getInfoText(double xValue, double yValue) {
+				if (getRegionArea().getImageTrace()==null) return null;
+				if (annotation.getTrace()!=null) return null;
+				
+				final ImageTrace im = getRegionArea().getImageTrace();
+				final StringBuilder buf = new StringBuilder();
+				buf.append(annotation.getName());
+				try {
+					if (annotation.getXAxis().getRange().inRange(xValue) &&
+						annotation.getYAxis().getRange().inRange(yValue)) {
+						
+						final float value = im.getData().getFloat((int)yValue, (int)xValue);
+						buf.append("\nIntensity ");
+						buf.append(intensityFormat.format(value));
+					}
+				} catch (Exception ignored) {
+					// We carry on if the pixel locations are invalid.
+				}
+				buf.append("\nLocation ");
+				buf.append("(");
+				buf.append(integerFormat.format(xValue));
+				buf.append(" : ");
+				buf.append(integerFormat.format(yValue));
+				buf.append(")");
+				return buf.toString();
+			}
+		});
+		super.addAnnotation(annotation);
+	}
+
 }
