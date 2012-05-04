@@ -36,5 +36,8 @@ public class PlottingPreferenceInitializer extends AbstractPreferenceInitializer
 		store.setDefault(PlottingConstants.MAX_CUT,         HistogramBound.DEFAULT_MAXIMUM.toString());
 		store.setDefault(PlottingConstants.NAN_CUT,         HistogramBound.DEFAULT_NAN.toString());
 		store.setDefault(PlottingConstants.FREE_DRAW_WIDTH, 4);
+		store.setDefault(PlottingConstants.MASK_DRAW_MULTIPLE,   false);
+		store.setDefault(PlottingConstants.MASK_AUTO_APPLY,      false);
+		store.setDefault(PlottingConstants.MASK_REGIONS_ENABLED, false);
 	}
 }

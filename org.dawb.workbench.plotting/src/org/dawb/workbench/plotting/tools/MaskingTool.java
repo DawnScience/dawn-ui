@@ -32,7 +32,6 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IToolBarManager;
-import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.preference.ColorSelector;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -71,7 +70,6 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.BooleanDataset;
-import uk.ac.diamond.scisoft.analysis.rcp.plotting.sideplot.MaskCreator;
 
 public class MaskingTool extends AbstractToolPage implements MouseListener{
 
@@ -85,7 +83,6 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	private IRegionListener regionListener;
 	private IROIListener    regionBoundsListener;
 	private MaskJob         maskJob;
-    private boolean         multipleRegionMode=false;
 	private TableViewer regionTable;
 	
 	public MaskingTool() {
@@ -113,7 +110,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 				processMask(evt.getRegion());
 				regionTable.refresh();
 
-				if (multipleRegionMode) {
+				if (Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.MASK_DRAW_MULTIPLE)) {
 					Display.getDefault().asyncExec(new Runnable(){
 						public void run() {
 							try {
@@ -288,11 +285,14 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		enableRegion.setText("Enable masking using regions");
 		enableRegion.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
+				Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.MASK_REGIONS_ENABLED, enableRegion.getSelection());
+
 				regionTable.getTable().setEnabled(enableRegion.getSelection());
 				toolbar.getControl().setEnabled(enableRegion.getSelection());
 				regionTable.refresh();
 			}
 		});
+		enableRegion.setSelection(Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.MASK_REGIONS_ENABLED));
 		
 		createMaskingRegionActions(toolbar);
 		final Control          tb         = toolbar.createControl(regionComp);
@@ -340,7 +340,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		this.autoApply     = new Button(buttons, SWT.CHECK);
 		autoApply.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, true, 2, 1));
 		autoApply.setText("Automatically apply mask when something changes.");
-		autoApply.setSelection(false);
+		autoApply.setSelection(Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.MASK_AUTO_APPLY));
 		
 		final Button apply = new Button(buttons, SWT.PUSH);
 		apply.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
@@ -348,13 +348,14 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		apply.setText("Apply");
 		apply.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				processMask(false, true, null);
+				processMask(true, true, null);
 			}
 		});
 		apply.setEnabled(true);
 		
 		autoApply.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
+				Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.MASK_AUTO_APPLY, autoApply.getSelection());
 				apply.setEnabled(!autoApply.getSelection()); 
 				processMask();
 			}
@@ -475,13 +476,12 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		
 		final Action multipleRegion  = new Action("Continuously add the same region", IAction.AS_CHECK_BOX) {
 			public void run() {
-				multipleRegionMode = isChecked();
+				Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.MASK_DRAW_MULTIPLE, isChecked());
 			}
 		};
 		multipleRegion.setImageDescriptor(Activator.getImageDescriptor("icons/RegionMultiple.png"));
-		multipleRegion.setChecked(multipleRegionMode);
+		multipleRegion.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.MASK_DRAW_MULTIPLE));
 		man.add(multipleRegion);
-		
 		
 		final MenuAction widthChoice = new MenuAction("Line With");
 		widthChoice.setToolTipText("Line width for free draw and line regions");
@@ -719,6 +719,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			IRegion region = (IRegion)item.getData();
 			region.setMaskRegion(!region.isMaskRegion());
 			regionTable.refresh(region);
+			processMask(true, false, null);
 		}
 	}
 
