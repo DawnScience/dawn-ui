@@ -95,42 +95,47 @@ public class PlotDataPage extends Page implements IPlotUpdateParticipant, IAdapt
 
 			}
 		});
-		dataSetComponent.setFileName(editor.getEditorInput().getName());
 		
-		
-		IWorkspace workspace = ResourcesPlugin.getWorkspace();
-		this.resourceListener = new IResourceChangeListener() {
-			public void resourceChanged(IResourceChangeEvent event) {
-				
-				if (event==null || event.getDelta()==null) return;
-				
-				final IFile content = EclipseUtils.getIFile(editor.getEditorInput());
-				if (content==null) return;
-				
-				if (event.getDelta().findMember(content.getFullPath())!=null) {
-					getSite().getShell().getDisplay().asyncExec(new Runnable() {
-						@Override
-						public void run() {
-							try {
-								content.refreshLocal(IResource.DEPTH_ZERO, new NullProgressMonitor());
-							} catch (CoreException e) {
-								logger.error("Cannot refresh "+content, e);
+		try {
+			dataSetComponent.setFileName(editor.getEditorInput().getName());
+			
+			
+			IWorkspace workspace = ResourcesPlugin.getWorkspace();
+			this.resourceListener = new IResourceChangeListener() {
+				public void resourceChanged(IResourceChangeEvent event) {
+					
+					if (event==null || event.getDelta()==null) return;
+					
+					final IFile content = EclipseUtils.getIFile(editor.getEditorInput());
+					if (content==null) return;
+					
+					if (event.getDelta().findMember(content.getFullPath())!=null) {
+						getSite().getShell().getDisplay().asyncExec(new Runnable() {
+							@Override
+							public void run() {
+								try {
+									content.refreshLocal(IResource.DEPTH_ZERO, new NullProgressMonitor());
+								} catch (CoreException e) {
+									logger.error("Cannot refresh "+content, e);
+								}
+								editor.setInput(new FileEditorInput(content));
+								final List<CheckableObject> sels = dataSetComponent.getSelections();
+								if (sels!=null) editor.updatePlot(sels.toArray(new CheckableObject[sels.size()]), PlotDataPage.this, false);
 							}
-							editor.setInput(new FileEditorInput(content));
-							final List<CheckableObject> sels = dataSetComponent.getSelections();
-							if (sels!=null) editor.updatePlot(sels.toArray(new CheckableObject[sels.size()]), PlotDataPage.this, false);
-						}
-					});
+						});
+					}
 				}
-			}
-		};
-		workspace.addResourceChangeListener(resourceListener);
-		
-		this.sliceComponent = new SliceComponent("org.dawb.workbench.views.h5GalleryView");
-		sliceComponent.createPartControl(form);
-		sliceComponent.setVisible(false);
-
-		form.setWeights(new int[] {40, 60});
+			};
+			workspace.addResourceChangeListener(resourceListener);
+			
+			this.sliceComponent = new SliceComponent("org.dawb.workbench.views.h5GalleryView");
+			sliceComponent.createPartControl(form);
+			sliceComponent.setVisible(false);
+	
+			form.setWeights(new int[] {40, 60});
+		} catch (Exception ne) {
+			logger.error("Cannot create "+getClass().getName(), ne);
+		}
 	}
 
 	@Override

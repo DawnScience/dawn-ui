@@ -61,4 +61,19 @@ public class PlottingConstants {
 	 */
 	public static final String FREE_DRAW_WIDTH = "org.dawb.plotting.system.region.freedraw.width";
 
+	/**
+	 * 
+	 */
+	public static final String MASK_DRAW_MULTIPLE = "org.dawb.plotting.system.region.multi.draw.mode";
+
+	/**
+	 * 
+	 */
+	public static final String MASK_AUTO_APPLY = "org.dawb.plotting.system.masking.auto.apply";
+
+	/**
+	 * 
+	 */
+	public static final String MASK_REGIONS_ENABLED = "org.dawb.plotting.system.masking.regions.enabled";
+
 }
