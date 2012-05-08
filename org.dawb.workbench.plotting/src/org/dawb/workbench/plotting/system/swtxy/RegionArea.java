@@ -11,10 +11,10 @@ import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.PlotArea;
 import org.csstudio.swt.xygraph.figures.Trace;
 import org.csstudio.swt.xygraph.undo.ZoomType;
+import org.dawb.common.services.ImageServiceBean.ImageOrigin;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.RegionEvent;
-import org.dawb.common.ui.plot.trace.IImageTrace.ImageOrigin;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.workbench.plotting.system.dialog.AddRegionCommand;
@@ -25,6 +25,7 @@ import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.MouseEvent;
 import org.eclipse.draw2d.MouseListener;
 import org.eclipse.draw2d.MouseMotionListener;
+import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -84,9 +85,10 @@ public class RegionArea extends PlotArea {
 		for (AbstractSelectionRegion region : regions.values()) {
 			if (!region.isUserRegion()) continue;
 			region.remove();
-			fireRegionRemoved(new RegionEvent(region));
 		}
-		regions.clear();		
+		regions.clear();	
+		fireRegionsRemoved(new RegionEvent(this));
+
 	}
 	
 
@@ -155,7 +157,17 @@ public class RegionArea extends PlotArea {
 	}
 
     private RegionMouseListener regionListener;
-	
+
+	/**
+	 * Create region of interest
+	 * @param name
+	 * @param xAxis
+	 * @param yAxis
+	 * @param regionType
+	 * @param startingWithMouseEvent
+	 * @return region
+	 * @throws Exception
+	 */
 	public AbstractSelectionRegion createRegion(String name, Axis x, Axis y, RegionType regionType, boolean startingWithMouseEvent) throws Exception {
 
 		if (getRegionMap()!=null) {
@@ -165,15 +177,15 @@ public class RegionArea extends PlotArea {
 		AbstractSelectionRegion region = SelectionRegionFactory.createSelectionRegion(name, x, y, regionType);
 		if (startingWithMouseEvent) {
 			xyGraph.setZoomType(ZoomType.NONE);
-		    setCursor(region.getRegionCursor());
+		    if (region.getRegionCursor()!=null) setCursor(region.getRegionCursor());
 		    regionBeingAdded = region;
 		    
 		    // Mouse listener for region bounds
-		    regionListener = new RegionMouseListener();
+		    regionListener = new RegionMouseListener(regionBeingAdded.getMaximumMousePresses());
 		    addMouseListener(regionListener);
 		    addMouseMotionListener(regionListener);
 		}
-		
+
 		fireRegionCreated(new RegionEvent(region));
         return region;
 	}
@@ -230,6 +242,10 @@ public class RegionArea extends PlotArea {
 	protected void fireRegionRemoved(RegionEvent evt) {
 		if (regionListeners==null) return;
 		for (IRegionListener l : regionListeners) l.regionRemoved(evt);
+	}
+	protected void fireRegionsRemoved(RegionEvent evt) {
+		if (regionListeners==null) return;
+		for (IRegionListener l : regionListeners) l.regionsRemoved(evt);
 	}
 	
 	/**
@@ -311,32 +327,53 @@ public class RegionArea extends PlotArea {
 	}
 
 	class RegionMouseListener extends MouseMotionListener.Stub implements MouseListener {
-		private int drag = -1;
-		public RegionMouseListener() {
+		private int last = -1; // index of point that is being dragged around
+		private final int maxLast; // region allows multiple mouse button presses
+		private boolean isDragging;
+
+		private static final int MIN_DIST = 2;
+		public RegionMouseListener(final int presses) {
+			maxLast = presses - 1;
 			regionPoints = new PointList(2);
+			isDragging = false;
 		}
 
 		@Override
 		public void mousePressed(MouseEvent me) {
-			if (me.button == 3) {
-				releaseMouse();
+			final Point loc = me.getLocation();
+			if (isDragging) {
+				isDragging = false;
+				if (maxLast > 0 && last >= maxLast) {
+//					System.err.println("End with last = " + last + " / " + maxLast);
+					releaseMouse();
+				}
 			} else {
-				regionPoints.addPoint(me.getLocation());
-				regionPoints.addPoint(me.getLocation());
-				drag = regionPoints.size() - 1;
+				if (last > 0 && loc.getDistance(regionPoints.getPoint(last)) <= MIN_DIST) {
+//					System.err.println("Cancel with last = " + last + " / " + maxLast);
+					releaseMouse();
+				} else {
+					regionPoints.addPoint(loc);
+					last++;
+//					System.err.println("Added on press (from non-drag), now last = " + last);
+					isDragging = maxLast == 0;
+				}
 			}
+
 			me.consume();
 			repaint();
 		}
 
 		@Override
 		public void mouseReleased(MouseEvent me) {
-			if (regionBeingAdded.useMultipleMousePresses()) {
-			} else {
-				releaseMouse();
+			if (isDragging) {
+				isDragging = false;
+				if (maxLast >= 0 && last >= maxLast) {
+//					System.err.println("Release with last = " + last + " / " + maxLast);
+					releaseMouse();
+				}
+				me.consume();
+				repaint();
 			}
-			me.consume();
-			repaint();
 		}
 
 		@Override
@@ -345,20 +382,26 @@ public class RegionArea extends PlotArea {
 
 		@Override
 		public void mouseDragged(final MouseEvent me) {
-			if (regionBeingAdded.useMultipleMousePresses()) {
-			} else {
-				regionPoints.setPoint(me.getLocation(), drag);
-			}
-			me.consume();
-			repaint();
+			mouseMoved(me);
 		}
 
 		@Override
 		public void mouseMoved(final MouseEvent me) {
-			if (regionBeingAdded.useMultipleMousePresses() && drag >= 0) {
-				regionPoints.setPoint(me.getLocation(), drag);
+			if (last < 0)
+				return;
+
+			final Point loc = me.getLocation();
+			if (isDragging) {
+				regionPoints.setPoint(loc, last);
 				me.consume();
 				repaint();
+			} else if (loc.getDistance(regionPoints.getPoint(last)) > MIN_DIST) {
+				regionPoints.addPoint(loc);
+				last++;
+				isDragging = true;
+				me.consume();
+				repaint();
+//				System.err.println("Added on move, last = " + last);
 			}
 		}
 
@@ -377,7 +420,7 @@ public class RegionArea extends PlotArea {
 			}
 			setCursor(null);
 
-			RegionArea.this.addRegion(regionBeingAdded, false);
+			addRegion(regionBeingAdded, false);
 			((XYRegionGraph) xyGraph).getOperationsManager().addCommand(new AddRegionCommand((XYRegionGraph) xyGraph,
 							regionBeingAdded));
 
@@ -385,7 +428,7 @@ public class RegionArea extends PlotArea {
 
 			fireRegionAdded(new RegionEvent(regionBeingAdded));
 
-			RegionArea.this.regionBeingAdded = null;
+			regionBeingAdded = null;
 			regionPoints = null;
 		}
 	}
@@ -440,7 +483,7 @@ public class RegionArea extends PlotArea {
 	}
 
 
-	public Figure getImageTrace() {
+	public ImageTrace getImageTrace() {
 		if (imageTraces!=null && imageTraces.size()>0) return imageTraces.values().iterator().next();
 		return null;
 	}

@@ -3,7 +3,6 @@ package org.dawb.workbench.plotting.system.swtxy.selection;
 import java.util.Arrays;
 
 import org.csstudio.swt.xygraph.figures.Axis;
-import org.dawb.common.ui.plot.region.RegionBounds;
 import org.dawb.workbench.plotting.system.swtxy.translate.FigureTranslator;
 import org.dawb.workbench.plotting.system.swtxy.translate.TranslationEvent;
 import org.dawb.workbench.plotting.system.swtxy.translate.TranslationListener;
@@ -16,10 +15,10 @@ import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 
+import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 
@@ -53,7 +52,7 @@ class BoxSelection extends AbstractSelectionRegion {
 		this.p3  = createSelectionRectangle(getRegionColor(), SIDE, 100, 200);
 		this.p4  = createSelectionRectangle(getRegionColor(), SIDE, 200, 200);
 				
-		this.connection = new RegionFillFigure() {
+		this.connection = new RegionFillFigure(this) {
 			@Override
 			public void paintFigure(Graphics gc) {
 				super.paintFigure(gc);
@@ -89,22 +88,29 @@ class BoxSelection extends AbstractSelectionRegion {
 			public void translationAfter(TranslationEvent evt) {
 				isCalculateCorners = true;
 				updateConnectionBounds();
-				fireRegionBoundsDragged(createRegionBounds(false));
+				fireROIDragged(createROI(false));
 			}
 
 			@Override
 			public void translationCompleted(TranslationEvent evt) {
-				fireRegionBoundsChanged(createRegionBounds(true));
-				fireRoiSelection();
+				fireROIChanged(createROI(true));
+				fireROISelection();
 			}
 
 		});
 		
 		setRegionObjects(connection, p1, p2, p3, p4);
 		sync(getBean());
-        updateRegionBounds();
-        if (regionBounds==null) createRegionBounds(true);
+        updateROI();
+        if (roi ==null) createROI(true);
 
+	}
+	@Override
+	public boolean containsPoint(double x, double y) {
+		
+		final int xpix = getXAxis().getValuePosition(x, false);
+		final int ypix = getYAxis().getValuePosition(y, false);
+		return connection.containsPoint(xpix, ypix);
 	}
 	
 	@Override
@@ -126,7 +132,7 @@ class BoxSelection extends AbstractSelectionRegion {
 
 	private SelectionHandle createSelectionRectangle(Color color, int size, double... location) {
 		
-		SelectionHandle rect = new RectangularHandle(getxAxis(), getyAxis(), color, connection, size, location);
+		SelectionHandle rect = new RectangularHandle(getXAxis(), getYAxis(), color, connection, size, location);
 		FigureTranslator mover = new FigureTranslator(getXyGraph(), rect);	
 		mover.addTranslationListener(createRegionNotifier());
 
@@ -163,17 +169,6 @@ class BoxSelection extends AbstractSelectionRegion {
 		return rect;
 	}
 
-	@Override
-	protected void fireRoiSelection() {
-		final double[] r1 = p1.getRealValue();
-		final double[] r2 = p2.getRealValue();
-		final double[] r4 = p4.getRealValue();
-		
-		// TODO Are we really going to rewrite all of the stuff that does not work?
-		final RectangularROI roi = new RectangularROI(r1[0], r1[1], r2[0]-r1[0], r4[1]-r1[1], 0);
-		if (getSelectionProvider()!=null) getSelectionProvider().setSelection(new StructuredSelection(roi));
-	}
-
 	private void setCornerLocation( SelectionHandle c,
 			SelectionHandle d, 
 									Rectangle sa, 
@@ -196,24 +191,26 @@ class BoxSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	public RegionBounds createRegionBounds(boolean recordResult) {
+	public ROIBase createROI(boolean recordResult) {
 		if (p1!=null) {
 			final Rectangle rect = getRectangleFromVertices();
-			double[] a1 = new double[]{getxAxis().getPositionValue(rect.x, false), getyAxis().getPositionValue(rect.y, false)};
-			double[] a2 = new double[]{getxAxis().getPositionValue(rect.x+rect.width, false), getyAxis().getPositionValue(rect.y+rect.height, false)};
-			
-			final RegionBounds bounds = new RegionBounds(a1, a2);
-			if (recordResult) this.regionBounds = bounds;
-			return bounds;
+			double[] a1 = new double[]{getXAxis().getPositionValue(rect.x, false), getYAxis().getPositionValue(rect.y, false)};
+			double[] a2 = new double[]{getXAxis().getPositionValue(rect.x+rect.width, false), getYAxis().getPositionValue(rect.y+rect.height, false)};
+			final RectangularROI rroi = new RectangularROI(a1[0], a1[1], a2[0] - a1[0], a2[1] - a1[1], 0);
+			if (recordResult)
+				roi = rroi;
+			return rroi;
 		}
-		return super.getRegionBounds();
+		return super.getROI();
 	}
 	
-	protected void updateRegionBounds(RegionBounds bounds) {
-		
-		if (p1!=null) p1.setRealValue(bounds.getP1());
-		if (p4!=null) p4.setRealValue(bounds.getP2());
-		updateConnectionBounds();
+	protected void updateROI(ROIBase roi) {
+		if (roi instanceof RectangularROI) {
+			RectangularROI rroi = (RectangularROI) roi;
+			if (p1!=null) p1.setPosition(rroi.getPoint());
+			if (p4!=null) p4.setPosition(rroi.getEndPoint());
+			updateConnectionBounds();
+		}
 	}
 
 	/**
@@ -225,8 +222,8 @@ class BoxSelection extends AbstractSelectionRegion {
 		if (p1!=null)   p1.setSelectionPoint(clicks.getFirstPoint());
 		if (p4!=null)   p4.setSelectionPoint(clicks.getLastPoint());
 		updateConnectionBounds();
-		createRegionBounds(true);
-		fireRegionBoundsChanged(getRegionBounds());
+		createROI(true);
+		fireROIChanged(getROI());
 	}
 
 	@Override
@@ -242,7 +239,7 @@ class BoxSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	public boolean useMultipleMousePresses() {
-		return false;
+	public int getMaximumMousePresses() {
+		return 2;
 	}
 }

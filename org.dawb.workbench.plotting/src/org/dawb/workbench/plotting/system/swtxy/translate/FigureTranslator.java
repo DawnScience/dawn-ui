@@ -101,7 +101,6 @@ public class FigureTranslator implements MouseListener, MouseMotionListener {
 			Point l = ((SelectionHandle) trans).getLocation();
 			l.translate(width, height);
 			((SelectionHandle) trans).setLocation(l);
-			
 		} else if (trans instanceof IFigure)  {
 			((IFigure)trans).translate(width, height);
 		}

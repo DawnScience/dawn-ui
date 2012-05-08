@@ -11,18 +11,25 @@ package org.dawb.workbench.ui.editors.test;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
+import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
+import org.dawb.common.ui.plot.trace.ILineTrace.PointStyle;
+import org.dawb.common.ui.plot.trace.ILineTrace.TraceType;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.workbench.plotting.system.LightWeightPlottingSystem;
 import org.dawb.workbench.ui.editors.AsciiEditor;
+import org.dawb.workbench.ui.editors.ImageEditor;
 import org.dawb.workbench.ui.editors.PlotDataEditor;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.ide.FileStoreEditorInput;
@@ -30,6 +37,7 @@ import org.junit.Test;
 import org.osgi.framework.Bundle;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.LongDataset;
 import fable.framework.toolbox.EclipseUtils;
 
@@ -41,6 +49,82 @@ import fable.framework.toolbox.EclipseUtils;
  *
  */
 public class SWTXYTraceTest {
+	
+	@Test
+	public void testImageNans() throws Throwable {
+		funnyImageTest(Double.NaN);
+	}
+	public void funnyImageTest(double value) throws Throwable {
+		
+		final Bundle bun  = Platform.getBundle("org.dawb.workbench.ui.test");
+
+		String path = (bun.getLocation()+"src/org/dawb/workbench/ui/editors/test/billeA.edf");
+		path = path.substring("reference:file:".length());
+		if (path.startsWith("/C:")) path = path.substring(1);
+
+		final IWorkbenchPage page      = EclipseUtils.getPage();		
+		final IFileStore  externalFile = EFS.getLocalFileSystem().fromLocalFile(new File(path));
+		final IEditorPart part         = page.openEditor(new FileStoreEditorInput(externalFile), ImageEditor.ID);
+		page.setPartState(EclipseUtils.getPage().getActivePartReference(), IWorkbenchPage.STATE_MAXIMIZED);
+
+		EclipseUtils.delay(2000);
+		
+		final ImageEditor editor       = (ImageEditor)part;
+		final AbstractPlottingSystem sys = editor.getPlotImageEditor().getPlottingSystem();
+
+		final Collection<ITrace>   traces= sys.getTraces(IImageTrace.class);
+		final IImageTrace            imt = (IImageTrace)traces.iterator().next();
+		AbstractDataset       data = imt.getData();
+		
+		// Create a short line of invalid values...
+		data = data.cast(AbstractDataset.FLOAT64);
+		for (int i = 0; i <20; i++) {
+			data.set(value, i*10,i*10);
+		}
+	
+		System.out.println("Setting image data...");
+		sys.clear();
+		EclipseUtils.delay(1000);
+		sys.createPlot2D(data, null, null);
+		
+		EclipseUtils.delay(10000);
+		
+	}
+
+	@Test
+	public void test1DNans() throws Throwable {
+
+		funnyNumberTest(Double.NaN, "Nan 1");
+	}
+	@Test
+	public void test1DPositiveInfinity() throws Throwable {
+        funnyNumberTest(Double.POSITIVE_INFINITY, "Pos Infinite");
+	}
+	@Test
+	public void test1DNegativeInfinity() throws Throwable {
+        funnyNumberTest(Double.NEGATIVE_INFINITY, "Neg Infinite");
+	}
+	
+	
+	private void funnyNumberTest(double funny, String name) throws Throwable {
+		final DoubleDataset da1 = DoubleDataset.arange(0, 100, 1);
+		da1.set(funny, 0);
+		
+		da1.set(funny, 50);
+
+		da1.setName(name);
+		final Object[] oa = createSomethingPlotted(Arrays.asList(new AbstractDataset[]{da1}));
+
+		final List<ITrace>        traces = (List<ITrace>)oa[2];
+		
+		final ILineTrace lineTrace = (ILineTrace)traces.get(0);
+		EclipseUtils.delay(2000);
+		lineTrace.setPointStyle(PointStyle.XCROSS);
+		lineTrace.setPointSize(10);
+		lineTrace.setTraceType(TraceType.POINT);
+		
+		EclipseUtils.delay(2000);
+	}
 
 	
 	@Test
@@ -126,6 +210,7 @@ public class SWTXYTraceTest {
 
 		String path = (bun.getLocation()+"src/org/dawb/workbench/ui/editors/test/ascii.dat");
 		path = path.substring("reference:file:".length());
+		if (path.startsWith("/C:")) path = path.substring(1);
 		
 		final IWorkbenchPage page      = EclipseUtils.getPage();		
 		final IFileStore  externalFile = EFS.getLocalFileSystem().fromLocalFile(new File(path));
@@ -156,7 +241,7 @@ public class SWTXYTraceTest {
 			double rand = Math.random();
 			
 			final long[] buffer = new long[size];
-			for (int j = 0; j < size; j++) buffer[j] = (long)Math.pow(j+rand, 2d)*i;
+			for (int j = 0; j < size; j++) buffer[j] = (long)Math.pow(j+rand, 2d)*(i+1);
 
 			final LongDataset ls = (size>0) ? new LongDataset(buffer,size) : new LongDataset();
 			if (name!=null) ls.setName(name+i);

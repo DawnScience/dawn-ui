@@ -17,15 +17,18 @@ Require-Bundle: org.eclipse.ui,
  org.dawb.jlchart;bundle-version="1.0.0",
  org.dawb.fabio;bundle-version="1.0.0",
  uk.ac.diamond.scisoft.analysis.rcp;bundle-version="1.1.0",
- uk.ac.gda.libs;bundle-version="1.0.0"
+ uk.ac.gda.common.rcp;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
-Export-Package: org.dawb.workbench.plotting.system
-Import-Package: org.dawb.common.services,
+Export-Package: org.dawb.workbench.plotting.system,
+ org.dawb.workbench.plotting.system.swtxy.selection
+Import-Package: javax.vecmath,
+ org.dawb.common.services,
  org.dawb.common.util.text,
  org.eclipse.ui,
  org.slf4j;version="1.5.6",
  uk.ac.diamond.scisoft.analysis.rcp.plotting,
  uk.ac.diamond.scisoft.analysis.rcp.plotting.roi,
  uk.ac.diamond.scisoft.analysis.rcp.views,
- uk.ac.gda.monitor
+ uk.ac.gda.monitor,
+ uk.ac.gda.richbeans.components.scalebox

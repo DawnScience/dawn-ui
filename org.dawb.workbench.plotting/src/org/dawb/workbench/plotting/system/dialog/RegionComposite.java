@@ -188,10 +188,10 @@ public class RegionComposite extends Composite {
 		regionType.setEnabled(false);
 		regionType.setEditable(false);
 		
-		int index = xyGraph.getXAxisList().indexOf(region.getxAxis());
+		int index = xyGraph.getXAxisList().indexOf(region.getXAxis());
 		xCombo.select(index);
 		
-		index = xyGraph.getYAxisList().indexOf(region.getyAxis());
+		index = xyGraph.getYAxisList().indexOf(region.getYAxis());
 		yCombo.select(index);
 		
 		colorSelector.setColorValue(region.getRegionColor().getRGB());
@@ -206,8 +206,8 @@ public class RegionComposite extends Composite {
 		
 		final String txt = nameText.getText();
 		editingRegion.setName(txt);
-		editingRegion.setxAxis(xyGraph.getXAxisList().get(xCombo.getSelectionIndex()));
-		editingRegion.setyAxis(xyGraph.getYAxisList().get(yCombo.getSelectionIndex()));
+		editingRegion.setXAxis(xyGraph.getXAxisList().get(xCombo.getSelectionIndex()));
+		editingRegion.setYAxis(xyGraph.getYAxisList().get(yCombo.getSelectionIndex()));
 		editingRegion.setShowPosition(showPoints.getSelection());
 		editingRegion.setRegionColor(new Color(getDisplay(), colorSelector.getColorValue()));
 		editingRegion.setAlpha(alpha.getSelection());

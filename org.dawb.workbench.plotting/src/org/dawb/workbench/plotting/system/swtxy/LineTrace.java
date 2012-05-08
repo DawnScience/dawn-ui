@@ -8,6 +8,8 @@ import org.csstudio.swt.xygraph.figures.Trace;
 import org.csstudio.swt.xygraph.linearscale.AbstractScale.LabelSide;
 import org.csstudio.swt.xygraph.linearscale.Range;
 import org.csstudio.swt.xygraph.util.SWTConstants;
+import org.dawb.common.ui.plot.trace.ITrace;
+import org.dawb.common.ui.plot.trace.ITraceContainer;
 import org.eclipse.draw2d.AbstractBackground;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.geometry.Point;
@@ -20,7 +22,7 @@ import org.eclipse.swt.SWT;
  * @author fcp94556
  *
  */
-public class LineTrace extends Trace {
+public class LineTrace extends Trace implements ITraceContainer {
 	
 	protected String internalName; 
 	
@@ -182,6 +184,7 @@ public class LineTrace extends Trace {
     			for (int i=startIndex; i<=endIndex; i++)
     			{
     			    ISample dp = traceDataProvider.getSample(i);
+    			    if (dp==null) continue;
                     final boolean dpInXRange = xAxis.getRange().inRange(dp.getXValue());
     				// Mark 'NaN' samples on X axis
     				final boolean valueIsNaN = Double.isNaN(dp.getYValue());
@@ -358,6 +361,19 @@ public class LineTrace extends Trace {
 
 	public void setInternalName(String internalName) {
 		this.internalName = internalName;
+	}
+
+	private ITrace trace;
+
+	@Override
+	public ITrace getTrace() {
+		return trace;
+	}
+
+
+	@Override
+	public void setTrace(ITrace trace) {
+		this.trace = trace;
 	}
 
 }

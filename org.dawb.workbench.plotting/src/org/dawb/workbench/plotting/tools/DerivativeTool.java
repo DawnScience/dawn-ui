@@ -177,6 +177,7 @@ public class DerivativeTool extends AbstractToolPage  {
 							// Often people can have data plotted with infinities. We 
 							// replace them here just for convenience.
 							if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
+							// TODO Maybe does not need removal of NaNs?
 							for (AbstractDataset a : dervs)  DatasetUtils.removeNansAndInfinities(a, new Double(0));
 							if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
 							plotter.createPlot1D(x, dervs, monitor); 

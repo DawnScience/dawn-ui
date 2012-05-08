@@ -4,13 +4,16 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
 import org.csstudio.swt.xygraph.figures.Axis;
-import org.dawb.common.ui.plot.region.RegionBounds;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
+import org.eclipse.draw2d.geometry.Geometry;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
+
+import uk.ac.diamond.scisoft.analysis.roi.PolygonalROI;
+import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
 /**
  * Used for masking. This region can be transformed into the masking
@@ -37,6 +40,14 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 	public void createContents(Figure parent) {
 		parent.add(this);
 		updateConnectionBounds();
+	}
+	@Override
+	public boolean containsPoint(double x, double y) {
+		
+		final int xpix = getXAxis().getValuePosition(x, false);
+		final int ypix = getYAxis().getValuePosition(y, false);
+		if (!getBounds().contains(xpix,ypix)) return false;
+		return Geometry.polylineContainsPoint(points, xpix, ypix, (int)Math.round(getLineWidth()/2d));
 	}
 	
 	@Override
@@ -107,7 +118,7 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 
 	private void drawPointText(Graphics g, Point pnt) {
 		
-		double[] loc = new double[]{getxAxis().getPositionValue(pnt.x, false), getyAxis().getPositionValue(pnt.y, false)};
+		double[] loc = new double[]{getXAxis().getPositionValue(pnt.x, false), getYAxis().getPositionValue(pnt.y, false)};
         final String text = getLabelPositionText(loc);
         g.drawString(text, pnt);
 
@@ -131,15 +142,24 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 	public void setLocalBounds(PointList clicks, 
 			                   Rectangle parentBounds) {
 		
+		points = removeContiguousDuplicates(points);
 		updateConnectionBounds();
-		createRegionBounds(true);
-		fireRegionBoundsChanged(getRegionBounds());
+		createROI(true);
+		fireROIChanged(getROI());
 	}
 
-	@Override
-	protected void fireRoiSelection() {
-// TODO FIXME Is there a useful ROI one can fire here?
-
+	private PointList removeContiguousDuplicates(PointList pnts) {
+		
+		PointList ret = new PointList();
+		if (pnts==null || pnts.size()<1) return pnts;
+		ret.addPoint(pnts.getPoint(0));
+		for (int i = 1; i < pnts.size(); i++) {
+			final Point point = pnts.getPoint(i);
+			if (!point.equals(pnts.getPoint(i-1))) {
+				ret.addPoint(point);
+			}
+		}
+		return ret;
 	}
 
 	@Override
@@ -148,46 +168,44 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	protected RegionBounds createRegionBounds(boolean recordResult) {
-		if (points == null) return getRegionBounds();
+	protected ROIBase createROI(boolean recordResult) {
+		if (points == null) return getROI();
 		
-		final Rectangle rect = getBounds();
-		double[] a1 = new double[]{getxAxis().getPositionValue(rect.x, false), getyAxis().getPositionValue(rect.y, false)};
-		double[] a2 = new double[]{getxAxis().getPositionValue(rect.x+rect.width, false), getyAxis().getPositionValue(rect.y+rect.height, false)};
-		
-		final RegionBounds bounds = new RegionBounds(a1, a2);
+		final Axis xa = getXAxis();
+		final Axis ya = getYAxis();
+		final PolygonalROI proi = new PolygonalROI();
 		
 		for (int i = 0; i < points.size(); i++) {
 			final Point pnt = points.getPoint(i);
-			double[] pd = new double[]{getxAxis().getPositionValue(pnt.x, false), getyAxis().getPositionValue(pnt.y, false)};
-			bounds.addPoint(pd);
+			proi.insertPoint(i, xa.getPositionValue(pnt.x(), false), ya.getPositionValue(pnt.y(), false));
 		}
 		
-		if (recordResult) this.regionBounds = bounds;
+		if (recordResult)
+			roi = proi;
 		
-		return bounds;
+		return proi;
 	}
 
 	@Override
-	protected void updateRegionBounds(RegionBounds bounds) {
-
-		if (!bounds.isPoints()) throw new RuntimeException("Expected points bounds for free draw!");
-
-		if (points==null) points = new PointList();
-        points.removeAllPoints();
-        
-        for (double[] pnt : bounds.getPoints()) {
-			
-           	final int x = getxAxis().getValuePosition(pnt[0], false);
-           	final int y = getyAxis().getValuePosition(pnt[1], false);
-           	points.addPoint(new Point(x,y));
+	protected void updateROI(ROIBase roi) {
+		if (roi instanceof PolygonalROI) {
+			final PolygonalROI proi = (PolygonalROI) roi;
+			if (points==null) points = new PointList();
+	        points.removeAllPoints();
+	        
+	        for (ROIBase p : proi) {
+				
+	           	final int x = getXAxis().getValuePosition(p.getPointX(), false);
+	           	final int y = getYAxis().getValuePosition(p.getPointY(), false);
+	           	points.addPoint(new Point(x,y));
+			}
+	        updateConnectionBounds();
 		}
-        
-        updateConnectionBounds();
+
 	}
 
 	@Override
-	public boolean useMultipleMousePresses() {
-		return false;
+	public int getMaximumMousePresses() {
+		return 1;
 	}
 }

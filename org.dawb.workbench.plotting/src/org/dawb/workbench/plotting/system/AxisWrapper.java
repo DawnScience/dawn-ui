@@ -165,4 +165,24 @@ class AxisWrapper implements IAxis {
 	public void setRange(double start, double end) {
 		wrappedAxis.setRange(start, end);
 	}
+	
+	/**
+	 * The position in pixels of a given value.
+	 * @param value
+	 * @return
+	 */
+	public int getValuePosition(double value) {
+		return wrappedAxis.getValuePosition(value, false);
+	}
+	
+	/**
+	 * The value for a position in pixels.
+	 * @param value
+	 * @return
+	 */
+	public double getPositionValue(int position) {
+		return wrappedAxis.getPositionValue(position, false);
+	}
+
+
 }

@@ -45,6 +45,7 @@ public class EditorStressTest {
 		final Bundle bun  = Platform.getBundle("org.dawb.workbench.ui.test");
 		String path = (bun.getLocation()+"/src/org/dawb/workbench/ui/editors/test/billeA.edf");
 		path = path.substring("reference:file:".length());
+		if (path.startsWith("/C:")) path = path.substring(1);
 		
 		openManyTimes(path, 500);
 	}

@@ -1,21 +1,23 @@
 package org.dawb.workbench.plotting.system.swtxy;
 
+import java.text.NumberFormat;
 import java.util.Collection;
 import java.util.List;
 
+import org.csstudio.swt.xygraph.figures.Annotation;
 import org.csstudio.swt.xygraph.figures.Axis;
+import org.csstudio.swt.xygraph.figures.IAnnotationLabelProvider;
 import org.csstudio.swt.xygraph.figures.Legend;
 import org.csstudio.swt.xygraph.figures.PlotArea;
 import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.swt.xygraph.linearscale.AbstractScale.LabelSide;
 import org.csstudio.swt.xygraph.linearscale.LinearScale.Orientation;
+import org.dawb.common.services.ImageServiceBean.ImageOrigin;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
-import org.dawb.common.ui.plot.trace.IImageTrace.ImageOrigin;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
 import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
-
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.events.MouseEvent;
@@ -66,6 +68,16 @@ public class XYRegionGraph extends XYGraph {
 		getRegionArea().setSelectionProvider(provider);
 	}
 
+	/**
+	 * Create region of interest
+	 * @param name
+	 * @param xAxis
+	 * @param yAxis
+	 * @param regionType
+	 * @param startingWithMouseEvent
+	 * @return region
+	 * @throws Exception
+	 */
 	public AbstractSelectionRegion createRegion(String name, Axis xAxis, Axis yAxis, RegionType regionType, boolean startingWithMouseEvent) throws Exception {
 		return getRegionArea().createRegion(name, xAxis, yAxis, regionType, startingWithMouseEvent);
 	}
@@ -247,4 +259,42 @@ public class XYRegionGraph extends XYGraph {
 		removeAll();
 		getRegionArea().dispose();
 	}
+	
+	private final NumberFormat integerFormat   = NumberFormat.getIntegerInstance();
+	private final NumberFormat intensityFormat = NumberFormat.getNumberInstance();
+	
+	public void addAnnotation(final Annotation annotation){
+		
+		annotation.setLabelProvder(new IAnnotationLabelProvider() {		
+			@Override
+			public String getInfoText(double xValue, double yValue) {
+				if (getRegionArea().getImageTrace()==null) return null;
+				if (annotation.getTrace()!=null) return null;
+				
+				final ImageTrace im = getRegionArea().getImageTrace();
+				final StringBuilder buf = new StringBuilder();
+				buf.append(annotation.getName());
+				try {
+					if (annotation.getXAxis().getRange().inRange(xValue) &&
+						annotation.getYAxis().getRange().inRange(yValue)) {
+						
+						final float value = im.getData().getFloat((int)yValue, (int)xValue);
+						buf.append("\nIntensity ");
+						buf.append(intensityFormat.format(value));
+					}
+				} catch (Exception ignored) {
+					// We carry on if the pixel locations are invalid.
+				}
+				buf.append("\nLocation ");
+				buf.append("(");
+				buf.append(integerFormat.format(xValue));
+				buf.append(" : ");
+				buf.append(integerFormat.format(yValue));
+				buf.append(")");
+				return buf.toString();
+			}
+		});
+		super.addAnnotation(annotation);
+	}
+
 }

@@ -19,7 +19,7 @@ public class RotatableRectangle extends RotatablePolygonShape {
 	 * @param y
 	 * @param width
 	 * @param height
-	 * @param angle in degrees
+	 * @param angle in degrees (positive is anti-clockwise)
 	 */
 	public RotatableRectangle(int x, int y, int width, int height, double angle) {
 		super(4);
@@ -66,9 +66,9 @@ public class RotatableRectangle extends RotatablePolygonShape {
 	}
 
 	@Override
-	protected void recalcPoints(PointList oldpl, PointList newpl) {
-		super.recalcPoints(oldpl, newpl);
-		super.recalcPoints(ool, nol);
+	protected void recalcPoints(PointList oldpl, PointList newpl, boolean setBounds) {
+		super.recalcPoints(ool, nol, false);
+		super.recalcPoints(oldpl, newpl, true);
 	}
 
 	@Override

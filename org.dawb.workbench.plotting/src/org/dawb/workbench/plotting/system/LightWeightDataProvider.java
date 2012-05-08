@@ -23,6 +23,7 @@ public class LightWeightDataProvider implements IDataProvider {
 	
 	private AbstractDataset x;
 	private AbstractDataset y;
+	private Range cachedXRange, cachedYRange;
 
 	public LightWeightDataProvider() {
 		
@@ -42,16 +43,22 @@ public class LightWeightDataProvider implements IDataProvider {
 	@Override
 	public ISample getSample(int index) {
 		if (x==null||y==null) return null;
-		final double xDat = x.getElementDoubleAbs(index);
-		final double yDat = y.getElementDoubleAbs(index);
-		return new Sample(xDat, yDat);
+		try {
+			final double xDat = x.getElementDoubleAbs(index);
+			final double yDat = y.getElementDoubleAbs(index);
+			return new Sample(xDat, yDat);
+		} catch (Throwable ne) {
+			return null;
+		}
 	}
 
 	@Override
 	public Range getXDataMinMax() {
 		if (x==null) return new Range(0,100);
+		if (cachedXRange!=null) return cachedXRange;
 		try {
-		    return new Range(x.min().doubleValue(), x.max().doubleValue());
+			cachedXRange= new Range(getMin(x), getMax(x));
+			return cachedXRange;
 		} catch (Throwable ne) {
 			return new Range(0,100);
 		}
@@ -60,13 +67,33 @@ public class LightWeightDataProvider implements IDataProvider {
 	@Override
 	public Range getYDataMinMax() {
 		if (y==null) return new Range(0,100);
+		if (cachedYRange!=null) return cachedYRange;
 		try {
-			return new Range(y.min().doubleValue(), y.max().doubleValue());
+			cachedYRange = new Range(getMin(y), getMax(y));
+			return cachedYRange;
 		} catch (Throwable ne) {
 			return new Range(0,100);
 		}
 	}
+	
+	private double getMin(AbstractDataset a) {
+		double min = Double.MAX_VALUE;
+		for (int i = 0; i < a.getSize(); i++) {
+			if (Double.isNaN(a.getElementDoubleAbs(i))) continue;
+			min = Math.min(min, a.getElementDoubleAbs(i));
+		}
+		return min;
+	}
 
+	private double getMax(AbstractDataset a) {
+		double max = -Double.MAX_VALUE;
+		for (int i = 0; i < a.getSize(); i++) {
+			if (Double.isNaN(a.getElementDoubleAbs(i))) continue;
+			max = Math.max(max, a.getElementDoubleAbs(i));
+		}
+		return max;
+	}
+	
 	@Override
 	public boolean isChronological() {
 		return false;
@@ -95,6 +122,9 @@ public class LightWeightDataProvider implements IDataProvider {
 	public void setData(AbstractDataset xData, AbstractDataset yData) {
 		this.x = xData;
 		this.y = yData;
+		this.cachedXRange = null;
+		this.cachedYRange = null;
+		
 		fireDataProviderListeners();
 	}
 

@@ -35,7 +35,7 @@ public abstract class SelectionHandle extends Figure implements IMobileFigure {
 		this.label = new Figure() {
 			protected void paintFigure(Graphics graphics) {
 				if (!isVisible()) return;
-                final String text = getLabelPositionText(getRealValue());
+                final String text = getLabelPositionText(getPosition());
                 graphics.setForegroundColor(ColorConstants.black);
                 graphics.drawString(text, getLocation());
                 super.paintFigure(graphics);
@@ -72,7 +72,7 @@ public abstract class SelectionHandle extends Figure implements IMobileFigure {
 	 * Gets the position in the scale of the axis.
 	 * @return
 	 */
-	public double[] getRealValue() {
+	public double[] getPosition() {
 		final Point p = getSelectionPoint();
 		try {
 		    return new double[]{xAxis.getPositionValue(p.x, false), yAxis.getPositionValue(p.y, false)};
@@ -87,13 +87,13 @@ public abstract class SelectionHandle extends Figure implements IMobileFigure {
 	 * 
 	 * @param point
 	 */
-	public void setRealValue(final double[] point) {
+	public void setPosition(final double[] point) {
 		final Point pnt = new Point(xAxis.getValuePosition(point[0], false), yAxis.getValuePosition(point[1], false));
 		setSelectionPoint(pnt);
 	}
-	
+
 	private NumberFormat format = new DecimalFormat("######0.00");
-	
+
 	protected String getLabelPositionText(double[] p) {
 		if (Double.isNaN(p[0])||Double.isNaN(p[1])) return "";
 		final StringBuilder buf = new StringBuilder();
@@ -158,4 +158,8 @@ public abstract class SelectionHandle extends Figure implements IMobileFigure {
 		shape.setAlpha(alpha);
 	}
 
+	@Override
+	public boolean containsPoint(int x, int y) {
+		return shape.containsPoint(x, y);
+	}
 }

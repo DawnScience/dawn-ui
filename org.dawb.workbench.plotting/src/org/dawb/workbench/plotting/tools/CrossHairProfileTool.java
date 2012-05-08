@@ -9,10 +9,9 @@ import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingFactory;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
-import org.dawb.common.ui.plot.region.IRegionBoundsListener;
+import org.dawb.common.ui.plot.region.IROIListener;
 import org.dawb.common.ui.plot.region.IRegionListener;
-import org.dawb.common.ui.plot.region.RegionBounds;
-import org.dawb.common.ui.plot.region.RegionBoundsEvent;
+import org.dawb.common.ui.plot.region.ROIEvent;
 import org.dawb.common.ui.plot.region.RegionEvent;
 import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
@@ -41,8 +40,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
-public class CrossHairProfileTool extends AbstractToolPage implements IRegionBoundsListener, MouseListener  {
+public class CrossHairProfileTool extends AbstractToolPage implements IROIListener, MouseListener  {
 
 	private final static Logger logger = LoggerFactory.getLogger(CrossHairProfileTool.class);
 	
@@ -51,7 +51,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IRegionBou
 	private   IRegion                xHair, yHair;
 	private   IAxis                  x1,x2;
 	private   RunningJob             xUpdateJob, yUpdateJob;
-	private   RegionBounds           xBounds, yBounds;
+	private   ROIBase           xBounds, yBounds;
 	
 	public CrossHairProfileTool() {
 		try {
@@ -151,11 +151,11 @@ public class CrossHairProfileTool extends AbstractToolPage implements IRegionBou
 		if (xHair!=null) {
 			if (!isActive()) xHair.addMouseListener(this);
 			xHair.setVisible(true);
-			xHair.addRegionBoundsListener(this);
+			xHair.addROIListener(this);
 		}
 		if (yHair!=null) {
 			yHair.setVisible(true);
-			yHair.addRegionBoundsListener(this);
+			yHair.addROIListener(this);
 		}
 
 		if (getPlottingSystem()!=null) {
@@ -191,11 +191,11 @@ public class CrossHairProfileTool extends AbstractToolPage implements IRegionBou
 		if (xHair!=null) {
 			xHair.removeMouseListener(this);
 			xHair.setVisible(false);
-			xHair.removeRegionBoundsListener(this);
+			xHair.removeROIListener(this);
 		}
 		if (yHair!=null) {
 			yHair.setVisible(false);
-			yHair.removeRegionBoundsListener(this);
+			yHair.removeROIListener(this);
 		}
 		plotter.clear();
 
@@ -244,7 +244,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IRegionBou
 	
 				if (x1==null | x2==null) return Status.OK_STATUS;
 	
-				RegionBounds bounds = region==xHair ? xBounds : yBounds;
+				ROIBase bounds = region==xHair ? xBounds : yBounds;
 				
 				final boolean ok = profile(region, bounds, false, null, monitor);
 
@@ -276,17 +276,17 @@ public class CrossHairProfileTool extends AbstractToolPage implements IRegionBou
 
 
 	@Override
-	public void regionBoundsDragged(RegionBoundsEvent evt) {
-		update((IRegion)evt.getSource(), evt.getRegionBounds());
+	public void roiDragged(ROIEvent evt) {
+		update((IRegion)evt.getSource(), evt.getROI());
 	}
 
 	@Override
-	public void regionBoundsChanged(RegionBoundsEvent evt) {
+	public void roiChanged(ROIEvent evt) {
 		final IRegion region = (IRegion)evt.getSource();
-		update(region, region.getRegionBounds());
+		update(region, region.getROI());
 	}
 	
-	private void update(IRegion r, RegionBounds rb) {
+	private void update(IRegion r, ROIBase rb) {
 		if (r == xHair) {
 			xUpdateJob.stop();
 			this.xBounds = rb;
@@ -324,13 +324,13 @@ public class CrossHairProfileTool extends AbstractToolPage implements IRegionBou
 		}
 	}
 
-	private IRegion createStaticRegion(String nameStub, final RegionBounds bounds, final Color snapShotColor, final RegionType regionType) throws Exception {
+	private IRegion createStaticRegion(String nameStub, final ROIBase bounds, final Color snapShotColor, final RegionType regionType) throws Exception {
 		
 
 		final IRegion region = getPlottingSystem().createRegion(RegionUtils.getUniqueName(nameStub, getPlottingSystem()), regionType);
 		region.setRegionColor(snapShotColor);
 		getPlottingSystem().addRegion(region);
-		region.setRegionBounds(bounds);
+		region.setROI(bounds);
         getPlottingSystem().addRegionListener(new IRegionListener.Stub() {
     		@Override
     		public void regionRemoved(RegionEvent evt) {
@@ -340,11 +340,11 @@ public class CrossHairProfileTool extends AbstractToolPage implements IRegionBou
     		}
         });
         
-        region.addRegionBoundsListener(new IRegionBoundsListener.Stub() {
+        region.addROIListener(new IROIListener.Stub() {
         	@Override
-    		public void regionBoundsDragged(RegionBoundsEvent evt) {
+    		public void roiDragged(ROIEvent evt) {
         		if (!isActive()) return;
-        		profile(region, evt.getRegionBounds(), false, snapShotColor, new NullProgressMonitor());
+        		profile(region, evt.getROI(), false, snapShotColor, new NullProgressMonitor());
     		}
         });
 		
@@ -364,7 +364,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IRegionBou
 
 	
 	private boolean profile(final IRegion      region, 
-			                final RegionBounds bounds, 
+			                final ROIBase bounds, 
 			                final boolean      snapshot,
 			                final Color        snapShotColor,
 			                final IProgressMonitor monitor) {
@@ -412,7 +412,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IRegionBou
 			AbstractDataset slice=null, sliceIndex=null;
 			if (monitor.isCanceled())return  false;
 			if (region.getName().startsWith("Y Profile")) {
-				int index = (int)Math.round(bounds.getX());
+				int index = (int)Math.round(bounds.getPointX());
 				slice = data.getSlice(new int[]{0,index}, new int[]{data.getShape()[0], index+1}, new int[]{1,1});
 				if (monitor.isCanceled()) return  false;
 				slice = slice.flatten();
@@ -420,7 +420,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IRegionBou
 				sliceIndex = AbstractDataset.arange(slice.getSize(), AbstractDataset.INT);
 
 			} else {
-				int index = (int)Math.round(bounds.getY());
+				int index = (int)Math.round(bounds.getPointY());
 				slice = data.getSlice(new int[]{index,0}, new int[]{index+1, data.getShape()[1]}, new int[]{1,1});
 				if (monitor.isCanceled()) return  false;
 				slice = slice.flatten();

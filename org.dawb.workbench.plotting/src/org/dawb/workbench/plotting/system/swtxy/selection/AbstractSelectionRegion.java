@@ -1,12 +1,17 @@
 package org.dawb.workbench.plotting.system.swtxy.selection;
 
+import java.util.List;
+
 import org.csstudio.swt.xygraph.figures.Axis;
+import org.csstudio.swt.xygraph.figures.Grid;
 import org.csstudio.swt.xygraph.figures.IAxisListener;
+import org.csstudio.swt.xygraph.figures.Trace;
 import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.swt.xygraph.linearscale.Range;
 import org.dawb.common.ui.plot.region.AbstractRegion;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.system.swtxy.IMobileFigure;
+import org.dawb.workbench.plotting.system.swtxy.ImageTrace;
 import org.dawb.workbench.plotting.system.swtxy.RegionBean;
 import org.dawb.workbench.plotting.system.swtxy.translate.TranslationEvent;
 import org.dawb.workbench.plotting.system.swtxy.translate.TranslationListener;
@@ -19,6 +24,7 @@ import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Image;
@@ -33,17 +39,17 @@ import org.eclipse.swt.widgets.Display;
  * Links regions to the specifics of the XY Plotting system.
  * 
  * NOTE you may implement this class two ways:
- * 1. by creating contents in the createContents(...) method and adding them to the parent.
- * 2. by adding contents to this figure.
+ * WAY1. by creating contents in the createContents(...) method and adding them to the parent. 
+ *       This is the recommended and default method.
+ * WAY2. by adding contents to this figure.
  * 
- * If doing method 2. remember to add this figure to the parent. If doing this the children can be drawn in the local coordinates for the figure.
- * However note in that case when firing selection events in the axis coordinates parent figure location
- * will also need to be used. If using 1. the contents of the figure are directly added to the graph figure
- * and therefore their location can be used directly also there are no bounds of this figure to deal with.
- * 
+ * If doing method 2. remember to add this figure to the parent. If doing this the children can be
+ * drawn in the local coordinates for the figure. However note in that case when firing selection
+ * events in the axis coordinates parent figure location will also need to be used. If using 1.,
+ * the contents of the figure are directly added to the graph figure and therefore their location
+ * can be used directly also there are no bounds of this figure to deal with.
  */
 public abstract class AbstractSelectionRegion extends AbstractRegion implements IAxisListener {
-
 
 	private RegionBean bean;
     private ISelectionProvider selectionProvider;
@@ -57,17 +63,17 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 		setCursor(null);
 		this.bean = new RegionBean();
 		bean.setName(name);
-		bean.setxAxis(xAxis);
-		bean.setyAxis(yAxis);
+		bean.setXAxis(xAxis);
+		bean.setYAxis(yAxis);
 		xAxis.addListener(this);
 		yAxis.addListener(this);
 	}
 
 	/**
-	 * Creates the contents of the selection ie the figure(s)
-	 * which make up the selection. You may add the children directly to the parent here.
-	 * Otherwise add children to this figure, set its bounds and add this figure to the
-	 * parent.
+	 * Creates the contents of the selection, i.e. the figure(s) which make up the selection. You
+	 * may add the children directly to the parent here. Otherwise add children to this figure, set
+	 * its bounds and add this figure to the parent. Note this is called after the user interaction
+	 * to create the parameters for figure(s).
 	 * 
 	 * @param parent
 	 */
@@ -110,7 +116,11 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	 * which will be notified on drag.
 	 * 
 	 */
-	protected abstract void fireRoiSelection();
+	protected void fireROISelection() {
+		if (getSelectionProvider() != null && roi != null)
+			getSelectionProvider().setSelection(new StructuredSelection(roi));
+	}
+
 
 	/**
 	 * This cursor is used after the region is created and
@@ -121,16 +131,16 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	protected abstract String getCursorPath();
 
 	/**
-	 * An abstract selection region can operate with a single mouse button press or multiple presses
-	 * @return true if region uses multiple mouse presses 
+	 * A selection region can operate with any number of mouse button presses
+	 * @return maximum number of presses, use 0 for "unlimited" presses
 	 */
-	public abstract boolean useMultipleMousePresses();
+	public abstract int getMaximumMousePresses();
 
 	public void sync(RegionBean bean) {
 		setName(bean.getName());
 		setShowPosition(bean.isShowPosition());
-		setxAxis(bean.getxAxis());
-		setyAxis(bean.getyAxis());
+		setXAxis(bean.getXAxis());
+		setYAxis(bean.getYAxis());
 		setXyGraph(bean.getXyGraph());
 		setRegionColor(bean.getRegionColor());
 		setAlpha(bean.getAlpha());
@@ -144,7 +154,7 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	 * A new cursor is created on each call.
 	 */
 	public Cursor getRegionCursor() {
-		if (cursor==null)  {
+		if (cursor==null && getCursorPath()!=null)  {
 			Image image = Activator.getImage(getCursorPath());
 			cursor = new Cursor(Display.getDefault(), image.getImageData(), 8, 8);
 		}
@@ -158,18 +168,44 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 			gc.drawText(getName(), size.getCenter());
 		}
 	}
-	
+
+	protected void drawLabel(Graphics gc, Point p) {
+		if (isShowLabel()&&getName()!=null) {
+			gc.setAlpha(255);
+			gc.setForegroundColor(ColorConstants.black);
+			gc.drawText(getName(), p);
+		}
+	}
+
+	protected void drawLabel(Graphics gc, Point p, Color colour) {
+		if (isShowLabel()&&getName()!=null) {
+			gc.setAlpha(255);
+			gc.setForegroundColor(colour!= null ? colour : ColorConstants.black);
+			gc.drawText(getName(), p);
+		}
+	}
+
 	public void axisRevalidated(Axis axis) {
-		updateRegionBounds();
+		updateROI();
 	}
+
 	public void axisRangeChanged(Axis axis, Range old_range, Range new_range) {
-		updateRegionBounds();
+		updateROI();
 	}
-			
+
 	protected void setRegionObjects(IFigure... objects) {
 		this.regionObjects = objects;
 	}
 	
+	protected void setRegionObjects(IFigure first, List<IFigure> objects) {
+		regionObjects = new IFigure[objects.size() + 1];
+		int i = 0;
+		regionObjects[i++] = first;
+		for (IFigure f : objects) {
+			regionObjects[i++] = f;
+		}
+	}
+
 	public String getName() {
 		return bean.getName();
 	}
@@ -188,8 +224,8 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	}
 
 	protected void clearListeners() {
-        getxAxis().removeListener(this);
-        getyAxis().removeListener(this);
+        getXAxis().removeListener(this);
+        getYAxis().removeListener(this);
 		super.clearListeners();
 	}
 	
@@ -302,53 +338,53 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 		}
 	}
 
-	public Axis getxAxis() {
-		return bean.getxAxis();
+	public Axis getXAxis() {
+		return bean.getXAxis();
 	}
 
-	public void setxAxis(Axis xAxis) {
+	public void setXAxis(Axis xAxis) {
 		if (regionObjects!=null) for (IFigure ob : regionObjects) {
 			if (ob instanceof SelectionHandle) {
 				((SelectionHandle)ob).setxAxis(xAxis);
 			}
 		}
-		getxAxis().removeListener(this);
+		getXAxis().removeListener(this);
 		xAxis.addListener(this);
-		bean.setxAxis(xAxis);
+		bean.setXAxis(xAxis);
 	}
 
-	public Axis getyAxis() {
-		return bean.getyAxis();
+	public Axis getYAxis() {
+		return bean.getYAxis();
 	}
 
-	public void setyAxis(Axis yAxis) {
+	public void setYAxis(Axis yAxis) {
 		if (regionObjects!=null) for (IFigure ob : regionObjects) {
 			if (ob instanceof SelectionHandle) {
 				((SelectionHandle)ob).setyAxis(yAxis);
 			}
 		}
-		getyAxis().removeListener(this);
+		getYAxis().removeListener(this);
 		yAxis.addListener(this);
-		bean.setyAxis(yAxis);
+		bean.setYAxis(yAxis);
 	}
-	
+
 	public TranslationListener createRegionNotifier() {
 		return new TranslationListener() {
 			@Override
 			public void translateBefore(TranslationEvent evt) {
-				
 			}
+
 			@Override
 			public void translationAfter(TranslationEvent evt) {
 				updateConnectionBounds();
-				fireRegionBoundsDragged(createRegionBounds(false));
+				fireROIDragged(createROI(false));
 			}
+
 			@Override
 			public void translationCompleted(TranslationEvent evt) {
-				fireRegionBoundsChanged(createRegionBounds(true));
-				fireRoiSelection();
+				fireROIChanged(createROI(true));
+				fireROISelection();
 			}
-			
 		};
 	}
 
@@ -366,5 +402,80 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 
 	public void setLineWidth(int lineWidth) {
 		this.lineWidth = lineWidth;
+	}
+	
+	/**
+	 * This will work for WAY1 only. If using WAY2 you will need to override.
+	 * See comment at top of this class.
+	 */
+	@Override
+	public void toBack() {
+		if (regionObjects!=null) for (IFigure ob : regionObjects) {
+			final IFigure par = ob.getParent();
+			if (par!=null) {
+				par.remove(ob);
+				final int index = getLowestPositionAboveTraces(par);
+				par.add(ob, index);
+			}
+		}		
+	}
+
+	/**
+	 * This will work for WAY1 only. If using WAY2 you will need to override.
+	 * @param par
+	 * @return
+	 */
+	protected int getLowestPositionAboveTraces(IFigure par) {
+	    int index = 0;
+		for (Object ob : par.getChildren()) {
+			// Do not send regions below traces.
+			if (ob instanceof Trace || ob instanceof ImageTrace || ob instanceof Grid) {
+				index++;
+				continue;
+			}
+			break;
+		}
+		return index;
+	}
+
+	/**
+	 * This will work for WAY1 only. If using WAY2 you will need to override.
+	 * See comment at top of this class.
+	 */
+	@Override
+	public void toFront() {
+		if (regionObjects!=null) for (IFigure ob : regionObjects) {
+			final IFigure par = ob.getParent();
+			if (par!=null) {
+				par.remove(ob);
+				final int end = par.getChildren()!=null 
+						      ? par.getChildren().size()
+						      : 0;
+				par.add(ob, end);
+			}
+		}		
+		
+	}
+	
+	/**
+	 * It is a good idea to override this, the default simply checks that the real world
+	 * value is in the selections bounds.
+	 */
+	@Override
+	public boolean containsPoint(double x, double y) {
+		
+		final int xpix = getXAxis().getValuePosition(x, false);
+		final int ypix = getYAxis().getValuePosition(y, false);
+		
+		if (regionObjects!=null) {
+			for (IFigure ob : regionObjects) {
+				if (ob.containsPoint(xpix, ypix)) return true;
+		    }
+			return false;
+
+		} else {
+			return containsPoint(xpix, ypix);
+		}
+		
 	}
 }

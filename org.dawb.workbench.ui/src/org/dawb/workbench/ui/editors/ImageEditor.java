@@ -58,7 +58,7 @@ public class ImageEditor extends MultiPageEditorPart implements IReusableEditor 
 			int index = 0;
 			
 			try {
-				Collection<IEditorPart> extensions = EditorExtensionFactory.getEditors(getEditorInput());
+				Collection<IEditorPart> extensions = EditorExtensionFactory.getEditors(this);
 				if (extensions!=null && extensions.size()>0) {
 					for (IEditorPart iEditorPart : extensions) {
 						addPage(index, iEditorPart,  getEditorInput());
@@ -143,5 +143,9 @@ public class ImageEditor extends MultiPageEditorPart implements IReusableEditor 
 	public String toString(){
 		if (getEditorInput()!=null) return getEditorInput().getName();
 		return super.toString();
+	}
+
+	public PlotImageEditor getPlotImageEditor() {
+		return plotImageEditor;
 	}
 }

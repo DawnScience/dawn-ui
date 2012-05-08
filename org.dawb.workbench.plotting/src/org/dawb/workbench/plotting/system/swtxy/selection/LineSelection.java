@@ -3,7 +3,6 @@ package org.dawb.workbench.plotting.system.swtxy.selection;
 import java.util.Arrays;
 
 import org.csstudio.swt.xygraph.figures.Axis;
-import org.dawb.common.ui.plot.region.RegionBounds;
 import org.dawb.workbench.plotting.system.swtxy.translate.FigureTranslator;
 import org.dawb.workbench.plotting.system.swtxy.util.Draw2DUtils;
 import org.eclipse.draw2d.ColorConstants;
@@ -15,10 +14,10 @@ import org.eclipse.draw2d.geometry.Geometry;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
+import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
 /**
  * 
@@ -28,7 +27,6 @@ import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
  *
  */
 class LineSelection extends AbstractSelectionRegion {
-		
 
 	private static final int SIDE      = 8;
 	
@@ -45,20 +43,19 @@ class LineSelection extends AbstractSelectionRegion {
 
 	@Override
 	public void createContents(final Figure parent) {
-		this.startBox = new RectangularHandle(getxAxis(), getyAxis(), getRegionColor(), connection, SIDE, 100, 100);
+		this.startBox = new RectangularHandle(getXAxis(), getYAxis(), getRegionColor(), connection, SIDE, 100, 100);
 		FigureTranslator mover = new FigureTranslator(getXyGraph(), startBox);
 		mover.addTranslationListener(createRegionNotifier());
 
-		this.endBox = new RectangularHandle(getxAxis(), getyAxis(), getRegionColor(), connection, SIDE, 200, 200);
+		this.endBox = new RectangularHandle(getXAxis(), getYAxis(), getRegionColor(), connection, SIDE, 200, 200);
 		mover = new FigureTranslator(getXyGraph(), endBox);	
 		mover.addTranslationListener(createRegionNotifier());
 				
-		this.connection = new RegionFillFigure() {
+		this.connection = new RegionFillFigure(this) {
 			PointList shape = new PointList(2);
 
 			@Override
 			public void paintFigure(Graphics gc) {
-				
 				super.paintFigure(gc);
 				final Point startCenter = startBox.getSelectionPoint();
 				final Point endCenter   = endBox.getSelectionPoint();
@@ -79,6 +76,7 @@ class LineSelection extends AbstractSelectionRegion {
 
 			@Override
 			public boolean containsPoint(int x, int y) {
+				if (!super.containsPoint(x, y)) return false;
 				return Geometry.polylineContainsPoint(shape, x, y, 2);
 			}
 		};
@@ -101,9 +99,18 @@ class LineSelection extends AbstractSelectionRegion {
 
 		setRegionObjects(connection, startBox, endBox);
 		sync(getBean());
-        updateRegionBounds();
-        if (regionBounds==null) createRegionBounds(true);
+        updateROI();
+        if (roi == null) createROI(true);
 	}
+	
+	@Override
+	public boolean containsPoint(double x, double y) {
+		
+		final int xpix = getXAxis().getValuePosition(x, false);
+		final int ypix = getYAxis().getValuePosition(y, false);
+		return connection.containsPoint(xpix, ypix);
+	}
+
 
 	@Override
 	public void paintBeforeAdded(final Graphics gc, PointList clicks, Rectangle parentBounds) {
@@ -124,40 +131,32 @@ class LineSelection extends AbstractSelectionRegion {
 			public void figureMoved(IFigure source) {				
 				connection.repaint();
  			}
-
 		};
 	}
 
 	@Override
-	protected void fireRoiSelection() {
-		
-		// For each trace, calculate the real world values of the selection
-		final double[] p1 = startBox.getRealValue();
-		final double[] p2 = endBox.getRealValue();
-		LinearROI roi = new LinearROI(p1, p2);
-		if (getSelectionProvider()!=null) {
-			getSelectionProvider().setSelection(new StructuredSelection(roi));
+	public ROIBase createROI(boolean recordResult) {
+		if (startBox != null) {
+			final double[] p1 = startBox.getPosition();
+			final double[] p2 = endBox.getPosition();
+			final LinearROI lroi = new LinearROI(p1, p2);
+			if (recordResult)
+				roi = lroi;
+			return lroi;
 		}
-	}
-
-	@Override
-	public RegionBounds createRegionBounds(boolean recordResult) {
-		if (startBox!=null) {
-			final double[] p1 = startBox.getRealValue();
-			final double[] p2 = endBox.getRealValue();
-			final RegionBounds bounds = new RegionBounds(p1, p2);
-			if (recordResult) this.regionBounds = bounds;
-			return bounds;
-		} 
-		return super.getRegionBounds();
+		return super.getROI();
 	}
 	
 	@Override
-	protected void updateRegionBounds(RegionBounds bounds) {
-		
-		if (startBox!=null)   startBox.setRealValue(bounds.getP1());
-		if (endBox!=null)     endBox.setRealValue(bounds.getP2());
-		updateConnectionBounds();
+	protected void updateROI(ROIBase roi) {
+		if (roi instanceof LinearROI) {
+			LinearROI lroi = (LinearROI) roi;
+			if (startBox != null)
+				startBox.setPosition(lroi.getPoint());
+			if (endBox != null)
+				endBox.setPosition(lroi.getEndPoint());
+			updateConnectionBounds();
+		}
 	}
 	
 	@Override
@@ -190,8 +189,8 @@ class LineSelection extends AbstractSelectionRegion {
 		if (startBox!=null)   startBox.setSelectionPoint(clicks.getFirstPoint());
 		if (endBox!=null)     endBox.setSelectionPoint(clicks.getLastPoint());
 		updateConnectionBounds();
-		createRegionBounds(true);
-		fireRegionBoundsChanged(getRegionBounds());
+		createROI(true);
+		fireROIChanged(getROI());
 	}
 
 	@Override
@@ -200,7 +199,7 @@ class LineSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	public boolean useMultipleMousePresses() {
-		return false;
+	public int getMaximumMousePresses() {
+		return 2;
 	}
 }

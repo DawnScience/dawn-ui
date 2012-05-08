@@ -12,7 +12,7 @@ import org.eclipse.draw2d.geometry.Rectangle;
  */
 public class RotatablePolygonShape extends AbstractPointListShape {
 	protected final PointList opl; // original (unrotated) points
-	protected final PointList npl; // reference to rotated points
+	protected PointList npl; // reference to rotated points
 	protected final AffineTransform affine;
 
 	protected RotatablePolygonShape(int size) {
@@ -23,9 +23,18 @@ public class RotatablePolygonShape extends AbstractPointListShape {
 	}
 
 	/**
+	 * Null constructor
+	 */
+	public RotatablePolygonShape() {
+		this(0);
+		npl.removeAllPoints();
+		setAngle(0);
+	}
+
+	/**
 	 * Generic constructor
 	 * @param list
-	 * @param angle in degrees
+	 * @param angle in degrees (positive is anti-clockwise)
 	 */
 	public RotatablePolygonShape(PointList list, double angle) {
 		this(list.size());
@@ -39,7 +48,7 @@ public class RotatablePolygonShape extends AbstractPointListShape {
 	public void addPoint(Point pt) {
 		opl.addPoint(pt);
 		super.addPoint(pt);
-		recalcPoints(opl, npl);
+		recalcPoints(opl, npl, true);
 	}
 
 	@Override
@@ -71,38 +80,41 @@ public class RotatablePolygonShape extends AbstractPointListShape {
 		opl.removeAllPoints();
 		opl.addAll(points);
 		super.setPoints(points);
-		recalcPoints(opl, npl);
-	}
-	
-	/**
-	 * Set angle of rotated polyline to given degrees clockwise
-	 * @param degrees
-	 */
-	public void setAngle(double degrees) {
-		affine.setRotationDegrees(degrees);
-		recalcPoints(opl, npl);
+		npl = super.getPoints();
+		recalcPoints(opl, npl, true);
 	}
 
 	/**
-	 * @return angle of rotation in degrees
+	 * Set angle of rotated polyline to given degrees anti-clockwise
+	 * @param degrees
+	 */
+	public void setAngle(double degrees) {
+		affine.setRotationDegrees(-degrees);
+		recalcPoints(opl, npl, true);
+	}
+
+	/**
+	 * @return angle of rotation in degrees (positive anti-clockwise)
 	 */
 	public double getAngleDegrees() {
-		return affine.getRotationDegrees();
+		return -affine.getRotationDegrees();
 	}
 
 	@Override
 	public void setLocation(Point p) {
 		affine.setTranslation(p.preciseX(), p.preciseY());
-		recalcPoints(opl, npl);
+		recalcPoints(opl, npl, true);
 	}
 
-	protected void recalcPoints(PointList oldpl, PointList newpl) {
+	protected void recalcPoints(PointList oldpl, PointList newpl, boolean setBounds) {
 		final int n = newpl.size();
 		for (int i = 0; i < n; i++) {
 			newpl.setPoint(affine.getTransformed(oldpl.getPoint(i)), i);
 		}
-		Rectangle b = newpl.getBounds();
-		setBounds(b);
+		if (setBounds) {
+			Rectangle b = newpl.getBounds();
+			setBounds(b);
+		}
 	}
 
 	@Override

@@ -13,10 +13,14 @@ import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.IAxisListener;
 import org.csstudio.swt.xygraph.linearscale.Range;
 import org.dawb.common.services.IImageService;
-import org.dawb.common.services.IImageService.ImageServiceBean;
+import org.dawb.common.services.ImageServiceBean;
+import org.dawb.common.services.ImageServiceBean.HistoType;
+import org.dawb.common.services.ImageServiceBean.HistogramBound;
+import org.dawb.common.services.ImageServiceBean.ImageOrigin;
 import org.dawb.common.ui.image.PaletteFactory;
-import org.dawb.common.ui.plot.region.RegionBounds;
 import org.dawb.common.ui.plot.trace.IImageTrace;
+import org.dawb.common.ui.plot.trace.ITrace;
+import org.dawb.common.ui.plot.trace.ITraceContainer;
 import org.dawb.common.ui.plot.trace.PaletteEvent;
 import org.dawb.common.ui.plot.trace.PaletteListener;
 import org.dawb.workbench.plotting.Activator;
@@ -35,7 +39,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
-import uk.ac.diamond.scisoft.analysis.dataset.Stats;
 import uk.ac.diamond.scisoft.analysis.dataset.function.Downsample;
 import uk.ac.diamond.scisoft.analysis.dataset.function.DownsampleMode;
 
@@ -45,31 +48,19 @@ import uk.ac.diamond.scisoft.analysis.dataset.function.DownsampleMode;
  * @author fcp94556
  *
  */
-public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
+public class ImageTrace extends Figure implements IImageTrace, IAxisListener, ITraceContainer {
 	
 	private static final Logger logger = LoggerFactory.getLogger(ImageTrace.class);
 
-	private String         name;
-	private Axis           xAxis;
-	private Axis           yAxis;
+	private String           name;
+	private Axis             xAxis;
+	private Axis             yAxis;
 	private AbstractDataset  image;
-	private PaletteData    paletteData;
-	private ImageOrigin    imageOrigin;
-    private Number         min, max;
-	private DownsampleType downsampleType=DownsampleType.MEAN;
-	private int            currentDownSampleBin=-1;
+	private DownsampleType   downsampleType=DownsampleType.MEAN;
+	private int              currentDownSampleBin=-1;
 	private List<AbstractDataset> axes;
-	private HistoType      histoType;
-	
-	private static Map<IImageTrace.ImageOrigin, IImageService.ImageOrigin> imageOriginaMap;
-	static {
-		imageOriginaMap = new HashMap<IImageTrace.ImageOrigin, IImageService.ImageOrigin>();
-		imageOriginaMap.put(IImageTrace.ImageOrigin.TOP_LEFT,     IImageService.ImageOrigin.TOP_LEFT);
-		imageOriginaMap.put(IImageTrace.ImageOrigin.TOP_RIGHT,    IImageService.ImageOrigin.TOP_RIGHT);
-		imageOriginaMap.put(IImageTrace.ImageOrigin.BOTTOM_LEFT,  IImageService.ImageOrigin.BOTTOM_LEFT);
-		imageOriginaMap.put(IImageTrace.ImageOrigin.BOTTOM_RIGHT, IImageService.ImageOrigin.BOTTOM_RIGHT);
-	}
-	
+	private ImageServiceBean imageServiceBean;
+		
 	public ImageTrace(final String name, 
 			          final Axis xAxis, 
 			          final Axis yAxis) {
@@ -78,10 +69,18 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		this.xAxis = xAxis;		
 		this.yAxis = yAxis;
 
-		this.paletteData = PaletteFactory.getPalette(Activator.getDefault().getPreferenceStore().getInt(PlottingConstants.P_PALETTE));	
-		this.imageOrigin = IImageTrace.ImageOrigin.forLabel(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.ORIGIN_PREF));
-		this.histoType	 = IImageTrace.HistoType.forLabel(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.HISTO_PREF));
-				
+		this.imageServiceBean = new ImageServiceBean();
+		try {
+			imageServiceBean.setPalette(PaletteFactory.getPalette(Activator.getDefault().getPreferenceStore().getInt(PlottingConstants.P_PALETTE), true));
+		} catch (Exception e) {
+			logger.error("Cannot create palette!", e);
+		}	
+		imageServiceBean.setOrigin(ImageOrigin.forLabel(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.ORIGIN_PREF)));
+		imageServiceBean.setHistogramType(HistoType.forLabel(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.HISTO_PREF)));
+		imageServiceBean.setMinimumCutBound(HistogramBound.fromString(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.MIN_CUT)));
+		imageServiceBean.setMaximumCutBound(HistogramBound.fromString(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.MAX_CUT)));
+		imageServiceBean.setNanBound(HistogramBound.fromString(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.NAN_CUT)));
+		
 		xAxis.addListener(this);
 		yAxis.addListener(this);
 		
@@ -103,19 +102,19 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		this.name = name;
 	}
 
-	public AspectAxis getxAxis() {
+	public AspectAxis getXAxis() {
 		return (AspectAxis)xAxis;
 	}
 
-	public void setxAxis(Axis xAxis) {
+	public void setXAxis(Axis xAxis) {
 		this.xAxis = xAxis;
 	}
 
-	public AspectAxis getyAxis() {
+	public AspectAxis getYAxis() {
 		return (AspectAxis)yAxis;
 	}
 
-	public void setyAxis(Axis yAxis) {
+	public void setYAxis(Axis yAxis) {
 		this.yAxis = yAxis;
 	}
 
@@ -124,11 +123,11 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	}
 
 	public PaletteData getPaletteData() {
-		return paletteData;
+		return imageServiceBean.getPalette();
 	}
 
 	public void setPaletteData(PaletteData paletteData) {
-		this.paletteData = paletteData;
+		imageServiceBean.setPalette(paletteData);
 		createScaledImage(ImageScaleType.FORCE_REIMAGE, null);
 		repaint();
 		firePaletteDataListeners(paletteData);
@@ -144,8 +143,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	}
 	private Image            scaledImage;
 	private ImageData        imageData;
-	private ImageServiceBean lastImageServiceBean;
-	private boolean          generatingImage = false;
+	private boolean          imageCreationAllowed = true;
 	/**
 	 * When this is called the SWT image is created
 	 * and saved in the swtImage field. The image is downsampled. If rescaleAllowed
@@ -159,7 +157,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	private boolean createScaledImage(ImageScaleType rescaleType, final IProgressMonitor monitor) {
 			
 		
-		if (generatingImage) return false;
+		if (!imageCreationAllowed) return false;
 
 		boolean requireImageGeneration = imageData==null || 
 				                         rescaleType==ImageScaleType.FORCE_REIMAGE || 
@@ -174,44 +172,44 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
         	}
         }
 
-		final XYRegionGraph graph  = (XYRegionGraph)getxAxis().getParent();
+		final XYRegionGraph graph  = (XYRegionGraph)getXAxis().getParent();
 		final Rectangle     rbounds = graph.getRegionArea().getBounds();
 		if (rbounds.width<1 || rbounds.height<1) return false;
 
-		if (generatingImage) return false;
+		if (!imageCreationAllowed) return false;
 		if (monitor!=null && monitor.isCanceled()) return false;
 
 		if (requireImageGeneration) {
 			try {
-				generatingImage = true;
+				imageCreationAllowed = false;
 				AbstractDataset reducedFullImage = getDownsampled(image);
 
 				final IImageService service = (IImageService)PlatformUI.getWorkbench().getService(IImageService.class);
 
-				final ImageServiceBean bean =  new IImageService.ImageServiceBean();
-				bean.setImage(reducedFullImage);
-				bean.setOrigin(imageOriginaMap.get(getImageOrigin()));
-				bean.setPalette(getPaletteData());
-				bean.setMonitor(monitor);
+				imageServiceBean.setImage(reducedFullImage);
+				imageServiceBean.setMonitor(monitor);
+				if (fullMask!=null) {
+					imageServiceBean.setMask(getDownsampled(fullMask));
+				} else {
+					imageServiceBean.setMask(null); // Ensure we loose the mask!
+				}
 				
 				if (rescaleType==ImageScaleType.REHISTOGRAM) { // Avoids changing colouring to 
 					// max and min of new selection.
-					AbstractDataset slice = slice(getAxisBounds());
-					float[] fa = getFastStatistics(slice);
+					AbstractDataset  slice     = slice(getXAxis().getRange(), getYAxis().getRange(), getData());
+					ImageServiceBean histoBean = new ImageServiceBean(slice, getHistoType());
+					if (fullMask!=null) histoBean.setMask(slice(getXAxis().getRange(), getYAxis().getRange(), fullMask));
+					float[] fa = service.getFastStatistics(histoBean);
 					setMin(fa[0]);
 					setMax(fa[1]);
 				}
-
-				if (getMin()!=null) bean.setMin(getMin());
-				if (getMax()!=null) bean.setMax(getMax());
 				
-				this.imageData   = service.getImageData(bean);
-				this.lastImageServiceBean = bean;
+				this.imageData   = service.getImageData(imageServiceBean);
 				
 			} catch (Exception e) {
 				logger.error("Cannot create image from data!", e);
 			} finally {
-				generatingImage = false;
+				imageCreationAllowed = true;
 			}
 			
 		}
@@ -220,7 +218,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		
 		try {
 			
-			if (imageData.width==bounds.width && imageData.height==bounds.height) { 
+			if (imageData!=null && imageData.width==bounds.width && imageData.height==bounds.height) { 
 				// No slice, faster
 				if (monitor!=null && monitor.isCanceled()) return false;
 				this.scaledImage  = new Image(Display.getDefault(), imageData);
@@ -235,12 +233,17 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 				 *      x3,y3--------------x4,y4
 				 */
 				ImageData data = imageData;
-				RESCALE: if (!getAxisBounds().equals(getImageBounds())) {
-					final double x1Rat = getXRatio(getX(true));
-					final double y1Rat = getYRatio(getY(true));
-					final double x4Rat = getXRatio(getX(false));
-					final double y4Rat = getYRatio(getY(false));
-					
+				ImageOrigin origin = getImageOrigin();
+				int[] shape = image.getShape();
+				int[] imageRanges = getImageBounds(shape, origin);
+				int[] axisRanges = getAxisBounds(); 
+				RESCALE: if (!Arrays.equals(axisRanges, imageRanges)) {
+
+					final double x1Rat = getXRatio(true, shape, origin);
+					final double y1Rat = getYRatio(true, shape, origin);
+					final double x4Rat = getXRatio(false, shape, origin);
+					final double y4Rat = getYRatio(false, shape, origin);
+
 					// If scales are not requiring a slice, break
 					if (x1Rat==0d && y1Rat==0d && x4Rat==1d && y4Rat==1d) {
 						break RESCALE;
@@ -253,6 +256,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 					
 	
 					// Pixel slice on downsampled data = fast!
+					// NOTE Assumes 8-bit images
 					final int size   = (x4-x1)*(y4-y1);
 					final byte[] pixels = new byte[size];
 					final int wid    = (x4-x1);
@@ -260,7 +264,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 						imageData.getPixels(x1, y1+y, wid, pixels, wid*y);
 					}
 					
-					data = new ImageData((x4-x1), (y4-y1), 8, getPaletteData(), 1, pixels);
+					data = new ImageData((x4-x1), (y4-y1), data.depth, getPaletteData(), 1, pixels);
 				}
 				data = data.scaledTo(rbounds.width, rbounds.height);
 				this.scaledImage = new Image(Display.getDefault(), data);
@@ -275,39 +279,49 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 
 	}
 
-	private double getX(boolean isTopLeft) {
-		
-		double xCoord = isTopLeft ? getxAxis().getRange().getLower() : getxAxis().getRange().getUpper();
-		switch (getImageOrigin()) {
+	private int[] getAxisBounds() {
+		final Range xr = getXAxis().getRange();
+		final Range yr = getYAxis().getRange();
+		return getBounds(xr, yr);
+	}
+
+	private static final int[] getBounds(Range xr, Range yr) {
+		return new int[] {(int) Math.floor(xr.getLower()), (int) Math.floor(yr.getLower()),
+				(int) Math.ceil(xr.getUpper()), (int) Math.ceil(yr.getUpper())};
+	}
+
+	private double getXRatio(boolean isTopLeft, final int[] shape, ImageOrigin origin) {
+		double xCoord = isTopLeft ? getXAxis().getRange().getLower() : getXAxis().getRange().getUpper();
+		switch (origin) {
 		case TOP_LEFT:
-			return xCoord;
+			return xCoord/shape[1];
 		case TOP_RIGHT:
-			return image.getShape()[0]-xCoord;
+			return (shape[0]-xCoord)/shape[0];
 		case BOTTOM_RIGHT:
-			return image.getShape()[1]-xCoord;
+			return (shape[1]-xCoord)/shape[1];
 		case BOTTOM_LEFT:
-			return xCoord;
+			return xCoord/shape[0];
 		}
 		return 0d;
 	}
 
-	private double getY(boolean isTopLeft) {
-		
-		double yCoord = isTopLeft ? getyAxis().getRange().getUpper() : getyAxis().getRange().getLower();
-		switch (getImageOrigin()) {
+	private double getYRatio(boolean isTopLeft, final int[] shape, ImageOrigin origin) {
+		double yCoord = isTopLeft ? getYAxis().getRange().getUpper() : getYAxis().getRange().getLower();
+		switch (origin) {
 		case TOP_LEFT:
-			return yCoord;
+			return yCoord/shape[0];
 		case TOP_RIGHT:
-			return yCoord;
+			return yCoord/shape[1];
 		case BOTTOM_RIGHT:
-			return image.getShape()[0]-yCoord;
+			return (shape[0]-yCoord)/shape[0];
 		case BOTTOM_LEFT:
-			return image.getShape()[1]-yCoord;
+			return (shape[1]-yCoord)/shape[1];
 		}
 		return 0d;
 	}
 
-	private Map<Integer, Reference<Object>> binCache;
+	private Map<Integer, Reference<Object>> mipMap;
+	private Map<Integer, Reference<Object>> maskMap;
 	
 	private AbstractDataset getDownsampled(AbstractDataset image) {
 		
@@ -319,36 +333,57 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 			return image; // nothing to downsample
 		}
 		
-		if (binCache!=null && binCache.containsKey(bin) && binCache.get(bin).get()!=null) {
-	        logger.trace("Downsample bin used, "+bin);
-			return (AbstractDataset)binCache.get(bin).get();
+		if (image.getDtype()!=AbstractDataset.BOOL) {
+			if (mipMap!=null && mipMap.containsKey(bin) && mipMap.get(bin).get()!=null) {
+		        logger.trace("Downsample bin used, "+bin);
+				return (AbstractDataset)mipMap.get(bin).get();
+			}
+		} else {
+			if (maskMap!=null && maskMap.containsKey(bin) && maskMap.get(bin).get()!=null) {
+		        logger.trace("Downsample mask bin used, "+bin);
+				return (AbstractDataset)maskMap.get(bin).get();
+			}
 		}
 		
 		final Downsample downSampler = new Downsample(getDownsampleTypeDiamond(), new int[]{bin,bin});
 		List<AbstractDataset>   sets = downSampler.value(image);
 		final AbstractDataset set = sets.get(0);
 		
-		if (binCache==null) binCache = new HashMap<Integer,Reference<Object>>(3);
-		binCache.put(bin, new SoftReference<Object>(set));
-        logger.trace("Downsample bin created, "+bin);
+		if (image.getDtype()!=AbstractDataset.BOOL) {
+			if (mipMap==null) mipMap = new HashMap<Integer,Reference<Object>>(3);
+			mipMap.put(bin, new SoftReference<Object>(set));
+	        logger.trace("Downsample bin created, "+bin);
+		} else {
+			if (maskMap==null) maskMap = new HashMap<Integer,Reference<Object>>(3);
+			maskMap.put(bin, new SoftReference<Object>(set));
+	        logger.trace("Downsample mask bin created, "+bin);
+		}
       
 		return set;
+	}
+	
+	@Override
+	public AbstractDataset getDownsampled() {
+		return getDownsampled(getImage());
 	}
 
 	/**
 	 * Returns the bin for downsampling, either 1,2,4 or 8 currently.
-	 * This gives a pixel count of 1,4,16 or 64.
+	 * This gives a pixel count of 1,4,16 or 64 for the bin. If 1 no
+	 * binning at all is done and no downsampling is being done, getDownsampled()
+	 * will return the AbstractDataset ok even if bin is one (no downsampling).
+	 * 
 	 * @param slice
 	 * @param bounds
 	 * @return
 	 */
-	private int getDownsampleBin() {
+	public int getDownsampleBin() {
 		
-		final XYRegionGraph graph      = (XYRegionGraph)getxAxis().getParent();
+		final XYRegionGraph graph      = (XYRegionGraph)getXAxis().getParent();
 		final Rectangle     realBounds = graph.getRegionArea().getBounds();
 		
-		double rwidth  = getSpan(getxAxis());
-		double rheight = getSpan(getyAxis());
+		double rwidth  = getSpan(getXAxis());
+		double rheight = getSpan(getYAxis());
  
 		int iwidth  = realBounds.width;
 		int iheight = realBounds.height;
@@ -400,12 +435,13 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	}
 
 	private boolean isKeepAspectRatio() {
-		return getxAxis().isKeepAspect() && getyAxis().isKeepAspect();
+		return getXAxis().isKeepAspect() && getYAxis().isKeepAspect();
 	}
 
 	public void remove() {
 		
-		if (binCache!=null)         binCache.clear();
+		if (mipMap!=null)           mipMap.clear();
+		if (maskMap!=null)          maskMap.clear();
 		if (scaledImage!=null)      scaledImage.dispose();
 		if (paletteListeners!=null) paletteListeners.clear();
 		paletteListeners = null;
@@ -415,7 +451,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		xAxis.removeListener(this);
 		yAxis.removeListener(this);
 		axisRedrawActive = false;
-		lastImageServiceBean = null;
+		imageServiceBean.dispose();
+		imageServiceBean = null;
 	}
 
 	private void clearAspect(Axis axis) {
@@ -431,46 +468,46 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		return image;
 	}
 
-	@Override
-	public AbstractDataset slice(RegionBounds bounds) {
-		
-		final AbstractDataset data = getData();
+	/**
+	 * Create a slice of data from given ranges
+	 * @param xr
+	 * @param yr
+	 * @return
+	 */
+	private final AbstractDataset slice(Range xr, Range yr, final AbstractDataset data) {
 		
 		// Check that a slice needed, this speeds up the initial show of the image.
-		final RegionBounds imageBounds = getImageBounds(); 
-		if (imageBounds!=null && imageBounds.equals(bounds))  {
-			return image;
+		final int[] shape = data.getShape();
+		final int[] imageRanges = getImageBounds(shape, getImageOrigin());
+		final int[] bounds = getBounds(xr, yr);
+		if (imageRanges!=null && Arrays.equals(imageRanges, bounds)) {
+			return data;
 		}
 		
-		int[] xRange = getRange(bounds, 0, false);
-		int[] yRange = getRange(bounds, 1, false);		
-				
+		int[] xRange = getRange(bounds, shape[0], 0, false);
+		int[] yRange = getRange(bounds, shape[1], 1, false);		
+
 		try {
-			return data.getSlice(new int[]{xRange[0],yRange[0]}, 
-					             new int[]{xRange[1],yRange[1]}, 
-					             new int[]{1,     1});
+			return data.getSlice(new int[]{xRange[0],yRange[0]}, new int[]{xRange[1],yRange[1]}, null);
 			
-		}catch (IllegalArgumentException iae) {
+		} catch (IllegalArgumentException iae) {
 			logger.error("Cannot slice image", iae);
-			return getData();
+			return data;
 		}
 	}
 
-	private int[] getRange(RegionBounds bounds, int index, boolean inverted) {
-		
-		if (bounds.isCircle()) bounds = bounds.getOuterRectangle();
-		final int side = image.getShape()[index];
-		int start = (int)Math.round(bounds.getP1()[index]);
+	private static final int[] getRange(int[] bounds, int side, int index, boolean inverted) {
+		int start = bounds[index];
 		if (inverted) start = side-start;
 		
-		int stop  = (int)Math.round(bounds.getP2()[index]);
+		int stop  = bounds[2+index];
 		if (inverted) stop = side-stop;
 
 		if (start>stop) {
-			start = (int)Math.round(bounds.getP2()[index]);
+			start = bounds[2+index];
 			if (inverted) start = side-start;
 			
-			stop  = (int)Math.round(bounds.getP1()[index]);
+			stop  = bounds[index];
 			if (inverted) stop = side-stop;
 		}
 		
@@ -483,6 +520,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	public void axisRangeChanged(Axis axis, Range old_range, Range new_range) {
 		//createScaledImage(true, null);
 	}
+
 	/**
 	 * We do a bit here to ensure that 
 	 * not too many calls to createScaledImage(...) are made.
@@ -504,80 +542,49 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	}
 
 
-	private double getXRatio(double x) {
-		
-		if (getImageOrigin()==ImageOrigin.TOP_LEFT || getImageOrigin()==ImageOrigin.BOTTOM_RIGHT) {
-			return  x / image.getShape()[1];
-		} else {
-			return  x / image.getShape()[0];
-		}
-	}
-	private double getYRatio(double y) {
-		
-	    if (getImageOrigin()==ImageOrigin.TOP_LEFT || getImageOrigin()==ImageOrigin.BOTTOM_RIGHT) {
-			return  y / image.getShape()[0];
-		} else {
-			return  y / image.getShape()[1];
-		}
-	}
-	
-
-
 	public void performAutoscale() {
+		final int[] shape = image.getShape();
 		switch(getImageOrigin()) {
 		case TOP_LEFT:
-			xAxis.setRange(0, image.getShape()[1]);
-			yAxis.setRange(image.getShape()[0], 0);	
+			xAxis.setRange(0, shape[1]);
+			yAxis.setRange(shape[0], 0);	
 			break;
 			
 		case BOTTOM_LEFT:
-			xAxis.setRange(0, image.getShape()[0]);
-			yAxis.setRange(0, image.getShape()[1]);		
+			xAxis.setRange(0, shape[0]);
+			yAxis.setRange(0, shape[1]);		
 			break;
 
 		case BOTTOM_RIGHT:
-			xAxis.setRange(image.getShape()[1], 0);
-			yAxis.setRange(0, image.getShape()[0]);		
+			xAxis.setRange(shape[1], 0);
+			yAxis.setRange(0, shape[0]);		
 			break;
 
 		case TOP_RIGHT:
-			xAxis.setRange(image.getShape()[0], 0);
-			yAxis.setRange(image.getShape()[1], 0);		
+			xAxis.setRange(shape[0], 0);
+			yAxis.setRange(shape[1], 0);		
 			break;
 		
 		}
 	}
 	
-	private RegionBounds getImageBounds() {
-		switch(getImageOrigin()) {
+	private static final int[] getImageBounds(int[] shape, ImageOrigin origin) {
+		switch (origin) {
 		case TOP_LEFT:
-			return new RegionBounds(new double[]{0, image.getShape()[0]},
-					                new double[]{image.getShape()[1], 0});	
-						
+			return new int[] {0, shape[0], shape[1], 0};
 		case BOTTOM_LEFT:
-			return new RegionBounds(new double[]{0, 0},
-	                                new double[]{image.getShape()[0], image.getShape()[1]});	
-
+			return new int[] {0, 0, shape[0], shape[1]};
 		case BOTTOM_RIGHT:
-			return new RegionBounds(new double[]{image.getShape()[1], 0},
-                                    new double[]{0, image.getShape()[0]});	
-
+			return new int[] {shape[1], 0, 0, shape[0]};
 		case TOP_RIGHT:
-			return new RegionBounds(new double[]{image.getShape()[0], image.getShape()[1]},
-                                    new double[]{0,0});	
-		
+			return new int[] {shape[0], shape[1], 0, 0};
 		}
 		return null;
 	}
-	
-	private RegionBounds getAxisBounds() {
-		double [] p1 = new double[]{getxAxis().getRange().getLower(), getyAxis().getRange().getLower()};
-		double [] p2 = new double[]{getxAxis().getRange().getUpper(), getyAxis().getRange().getUpper()};
-		return new RegionBounds(p1, p2);
-	}
 
 	public void setImageOrigin(ImageOrigin imageOrigin) {
-		this.imageOrigin = imageOrigin;
+		if (this.mipMap!=null) mipMap.clear();
+		imageServiceBean.setOrigin(imageOrigin);
 		createAxisBounds();
 		performAutoscale();
 		createScaledImage(ImageScaleType.FORCE_REIMAGE, null);
@@ -588,12 +595,13 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	 * Creates new axis bounds, updates the label data set
 	 */
 	private void createAxisBounds() {
+		final int[] shape = image.getShape();
 		if (getImageOrigin()==ImageOrigin.TOP_LEFT || getImageOrigin()==ImageOrigin.BOTTOM_RIGHT) {
-			setupAxis(getxAxis(), new Range(0,image.getShape()[1]), axes!=null&&axes.size()>0 ? axes.get(0) : null);
-			setupAxis(getyAxis(), new Range(0,image.getShape()[0]), axes!=null&&axes.size()>1 ? axes.get(1) : null);
+			setupAxis(getXAxis(), new Range(0,shape[1]), axes!=null&&axes.size()>0 ? axes.get(0) : null);
+			setupAxis(getYAxis(), new Range(0,shape[0]), axes!=null&&axes.size()>1 ? axes.get(1) : null);
 		} else {
-			setupAxis(getxAxis(), new Range(0,image.getShape()[0]), axes!=null&&axes.size()>1 ? axes.get(1) : null);
-			setupAxis(getyAxis(), new Range(0,image.getShape()[1]), axes!=null&&axes.size()>0 ? axes.get(0) : null);
+			setupAxis(getXAxis(), new Range(0,shape[0]), axes!=null&&axes.size()>1 ? axes.get(1) : null);
+			setupAxis(getYAxis(), new Range(0,shape[1]), axes!=null&&axes.size()>0 ? axes.get(0) : null);
 		}
 	}
 	
@@ -604,7 +612,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 
 	@Override
 	public ImageOrigin getImageOrigin() {
-		return imageOrigin;
+		return imageServiceBean.getOrigin();
 	}
 	
 	@Override
@@ -614,12 +622,15 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		// method, we allow for the fact that the dataset is in a different orientation to 
 		// what is plotted.
 		this.image = image;
+		if (this.mipMap!=null) mipMap.clear();
 		
-		final float[] fa = getFastStatistics(image);
+		imageServiceBean.setImage(image);
+		
+		final IImageService service = (IImageService)PlatformUI.getWorkbench().getService(IImageService.class);
+		final float[] fa = service.getFastStatistics(imageServiceBean);
 		setMin(fa[0]);
 		setMax(fa[1]);
 		this.axes  = axes;
-		this.lastImageServiceBean = null;
 		
 		createAxisBounds();
 
@@ -636,37 +647,47 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		}
        
 	}
+	
+	@Override
+	public void setAxes(List<AbstractDataset> axes, boolean performAuto) {
+		this.axes  = axes;
+		createAxisBounds();
+		
+		if (performAuto) {
+	 		try {
+				setAxisRedrawActive(false);
+				performAutoscale();
+			} finally {
+				setAxisRedrawActive(true);
+			}
+		} else {
+			createScaledImage(ImageScaleType.FORCE_REIMAGE, null);
+			repaint();
+		}
+	}
+
 
 	public Number getMin() {
-		return min;
+		return imageServiceBean.getMin();
 	}
 
 	public void setMin(Number min) {
-		this.min = min;
+		imageServiceBean.setMin(min);
 		fireMinDataListeners();
 	}
 
 	public Number getMax() {
-		return max;
+		return imageServiceBean.getMax();
 	}
 
 	public void setMax(Number max) {
-		this.max = max;
+		imageServiceBean.setMax(max);
 		fireMaxDataListeners();
 	}
 
 	@Override
 	public ImageServiceBean getImageServiceBean() {
-		return lastImageServiceBean;
-	}
-	
-	@Override
-	public Number getCalculatedMax() {
-		return getMax()!=null ? getMax() : getImageServiceBean().getMax();
-	}
-	@Override
-	public Number getCalculatedMin() {
-		return getMin()!=null ? getMin() : getImageServiceBean().getMin();
+		return imageServiceBean;
 	}
 
 	private Collection<PaletteListener> paletteListeners;
@@ -687,18 +708,38 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	
 	private void firePaletteDataListeners(PaletteData paletteData) {
 		if (paletteListeners==null) return;
-		final PaletteEvent evt = new PaletteEvent(this, paletteData);
+		final PaletteEvent evt = new PaletteEvent(this, getPaletteData()); // Important do not let Mark get at it :)
 		for (PaletteListener pl : paletteListeners) pl.paletteChanged(evt);
 	}
 	private void fireMinDataListeners() {
 		if (paletteListeners==null) return;
+		if (!imageCreationAllowed)  return;
 		final PaletteEvent evt = new PaletteEvent(this, getPaletteData());
 		for (PaletteListener pl : paletteListeners) pl.minChanged(evt);
 	}
 	private void fireMaxDataListeners() {
 		if (paletteListeners==null) return;
+		if (!imageCreationAllowed)  return;
 		final PaletteEvent evt = new PaletteEvent(this, getPaletteData());
 		for (PaletteListener pl : paletteListeners) pl.maxChanged(evt);
+	}
+	private void fireMaxCutListeners() {
+		if (paletteListeners==null) return;
+		if (!imageCreationAllowed)  return;
+		final PaletteEvent evt = new PaletteEvent(this, getPaletteData());
+		for (PaletteListener pl : paletteListeners) pl.maxCutChanged(evt);
+	}
+	private void fireMinCutListeners() {
+		if (paletteListeners==null) return;
+		if (!imageCreationAllowed)  return;
+		final PaletteEvent evt = new PaletteEvent(this, getPaletteData());
+		for (PaletteListener pl : paletteListeners) pl.minCutChanged(evt);
+	}
+	private void fireNanBoundsListeners() {
+		if (paletteListeners==null) return;
+		if (!imageCreationAllowed)  return;
+		final PaletteEvent evt = new PaletteEvent(this, getPaletteData());
+		for (PaletteListener pl : paletteListeners) pl.nanBoundsChanged(evt);
 	}
 
 	@Override
@@ -708,6 +749,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	
 	@Override
 	public void setDownsampleType(DownsampleType type) {
+		if (this.mipMap!=null) mipMap.clear();
 		this.downsampleType = type;
 		createScaledImage(ImageScaleType.FORCE_REIMAGE, null);
 		repaint();
@@ -729,8 +771,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 
 	@Override
 	public void rehistogram() {
-		setMax(null); // I think...
-		setMin(null);
+		imageServiceBean.setMax(null);
+		imageServiceBean.setMin(null);
 		createScaledImage(ImageScaleType.REHISTOGRAM, null);
 		// Max and min changed in all likely-hood
 		fireMaxDataListeners();
@@ -738,65 +780,6 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 		repaint();
 	}
 	
-	/**
-	 * Fast statistcs as a rough guide - this is faster than AbstractDataset.getMin()
-	 * and getMax() which may cache but slows the opening of images too much.
-	 * 
-	 * @param bean
-	 * @return [0] = min [1] = max
-	 */
-	private float[] getFastStatistics(AbstractDataset image) {
-		
-		float min = Float.MAX_VALUE;
-		float max = -Float.MAX_VALUE;
-		float sum = 0.0f;
-		final int size = image.getSize();
-		for (int index = 0; index<size; ++index) {
-			
-			final float val = (float)image.getElementDoubleAbs(index);
-			sum += val;
-			if (val < min) min = val;
-			if (val > max) max = val;
-			
-		}
-		
-		float retMin = min;
-		float retMax = Float.NaN;
-		
-		if (getHistoType()==HistoType.MEAN) {
-			float mean = sum / size;
-			retMax = ((float)Math.E)*mean; // Not statistical, E seems to be better than 3...
-			
-		} else if (getHistoType()==HistoType.MEDIAN) {
-			
-			float median = Float.NaN;
-			try {
-				median = ((Number)Stats.median(image)).floatValue();
-			} catch (Exception ne) {
-				median = ((Number)Stats.median(image.cast(AbstractDataset.INT16))).floatValue();
-			}
-			retMax = 2f*median;
-		}
-		
-		if (retMax > max)	retMax = max;
-		
-		return new float[]{retMin, retMax};
-
-	}
-	
-	private static float median(AbstractDataset image) {
-		
-		float[] a = (float[])image.cast(AbstractDataset.FLOAT32).getBuffer();
-		float[] b = new float[a.length];
-		System.arraycopy(a, 0, b, 0, b.length);
-		Arrays.sort(b);
-
-		if (a.length % 2 == 0) {
-			return (b[(b.length / 2) - 1] + b[b.length / 2]) / 2.0f;
-		} else {
-			return b[b.length / 2];
-		}
-	}
 
 	@Override
 	public List<AbstractDataset> getAxes() {
@@ -809,7 +792,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	 */
 	@Override
 	public HistoType getHistoType() {
-		return this.histoType;
+		return imageServiceBean.getHistogramType();
 	}
 	
 	/**
@@ -817,9 +800,91 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener {
 	 */
 	@Override
 	public void setHistoType(HistoType type) {
-		this.histoType = type;
+		imageServiceBean.setHistogramType(type);
 		Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.HISTO_PREF, type.getLabel());
 		createScaledImage(ImageScaleType.REHISTOGRAM, null);
 		repaint();
+	}
+
+	@Override
+	public ITrace getTrace() {
+		return this;
+	}
+
+	@Override
+	public void setTrace(ITrace trace) {
+		// Does nothing, you cannot change the trace, this is the trace.
+	}
+	
+	public void setImageUpdateActive(boolean active) {
+		this.imageCreationAllowed = active;
+		if (active) {
+			createScaledImage(ImageScaleType.FORCE_REIMAGE, null);
+			repaint();
+		}
+	}
+
+	@Override
+	public HistogramBound getMinCut() {
+		return imageServiceBean.getMinimumCutBound();
+	}
+
+	@Override
+	public void setMinCut(HistogramBound bound) {
+		
+		storeBound(bound, PlottingConstants.MIN_CUT);
+		imageServiceBean.setMinimumCutBound(bound);
+		fireMinCutListeners();
+	}
+
+	private void storeBound(HistogramBound bound, String prop) {
+		if (bound!=null) {
+			Activator.getDefault().getPreferenceStore().setValue(prop, bound.toString());
+		} else {
+			Activator.getDefault().getPreferenceStore().setValue(prop, "");
+		}
+	}
+
+	@Override
+	public HistogramBound getMaxCut() {
+		return imageServiceBean.getMaximumCutBound();
+	}
+
+	@Override
+	public void setMaxCut(HistogramBound bound) {
+		storeBound(bound, PlottingConstants.MAX_CUT);
+		imageServiceBean.setMaximumCutBound(bound);
+		fireMaxCutListeners();
+	}
+
+	@Override
+	public HistogramBound getNanBound() {
+		return imageServiceBean.getNanBound();
+	}
+
+	@Override
+	public void setNanBound(HistogramBound bound) {
+		storeBound(bound, PlottingConstants.NAN_CUT);
+		imageServiceBean.setNanBound(bound);
+		fireNanBoundsListeners();
+	}
+	
+    private AbstractDataset fullMask;
+	/**
+	 * The masking dataset of there is one, normally null.
+	 * @return
+	 */
+	public AbstractDataset getMask() {
+		return fullMask;
+	}
+	
+	/**
+	 * 
+	 * @param bd
+	 */
+	public void setMask(AbstractDataset bd) {
+		if (maskMap!=null) maskMap.clear();
+		fullMask = bd;
+		rehistogram();
 	}
 }

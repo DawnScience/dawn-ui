@@ -25,8 +25,8 @@ public class RegionBean implements Serializable {
 	public void sync(RegionBean bean) {
 		setName(bean.getName());
 		setShowPosition(bean.isShowPosition());
-		setxAxis(bean.getxAxis());
-		setyAxis(bean.getyAxis());
+		setXAxis(bean.getXAxis());
+		setYAxis(bean.getYAxis());
 		setXyGraph(bean.getXyGraph());
 		setRegionColor(bean.getRegionColor());
 		setAlpha(bean.getAlpha());
@@ -34,7 +34,6 @@ public class RegionBean implements Serializable {
 		setMobile(bean.isMobile());
 		setShowLabel(bean.isShowLabel());
 	}
-
 
 	public String getName() {
 		return name;
@@ -161,35 +160,27 @@ public class RegionBean implements Serializable {
 		return true;
 	}
 
-
-	public Axis getxAxis() {
+	public Axis getXAxis() {
 		return xAxis;
 	}
 
-
-	public void setxAxis(Axis xAxis) {
+	public void setXAxis(Axis xAxis) {
 		this.xAxis = xAxis;
 	}
 
-
-	public Axis getyAxis() {
+	public Axis getYAxis() {
 		return yAxis;
 	}
 
-
-	public void setyAxis(Axis yAxis) {
+	public void setYAxis(Axis yAxis) {
 		this.yAxis = yAxis;
 	}
-
 
 	public boolean isShowLabel() {
 		return showLabel;
 	}
 
-
 	public void setShowLabel(boolean showLabel) {
 		this.showLabel = showLabel;
 	}
-	
-
 }
