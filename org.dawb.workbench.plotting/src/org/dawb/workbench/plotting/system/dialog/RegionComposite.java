@@ -15,8 +15,11 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
@@ -35,6 +38,8 @@ public class RegionComposite extends Composite {
 	private Button mobile;
 	private Button visible;
 	private Button showLabel;
+
+	private ROIViewer roiViewer;
 
 	public RegionComposite(final Composite parent, final int style, final XYRegionGraph xyGraph, final RegionType defaultRegion) {
 		
@@ -119,6 +124,17 @@ public class RegionComposite extends Composite {
 		showLabel.setLayoutData(new GridData(0, 0, false, false, 2, 1));
 		showLabel.setSelection(true);
 		
+		final Label spacer = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
+		spacer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		
+		// We add a composite for setting the region location programmatically.
+		final Label location = new Label(this, SWT.NONE);
+		location.setText("Region Location");
+		location.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		
+		this.roiViewer = new ROIViewer();
+		Control regionTable = roiViewer.createPartControl(this);
+		regionTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 
 		// Should be last
 		nameText.setText(getDefaultName(defaultRegion.getIndex()));
@@ -181,7 +197,9 @@ public class RegionComposite extends Composite {
 	
 	
 	public void setEditingRegion(AbstractSelectionRegion region) {
+		
         this.editingRegion = region;
+        this.roiViewer.setRegion(region, xyGraph);
         
         nameText.setText(region.getName());
 		regionType.select(region.getRegionType().getIndex());
@@ -219,6 +237,7 @@ public class RegionComposite extends Composite {
 
 
 	public void applyChanges() {
+//		this.roiViewer.cancelEditing();
 		AbstractSelectionRegion region = getEditingRegion();
 		region.repaint();
 	}
