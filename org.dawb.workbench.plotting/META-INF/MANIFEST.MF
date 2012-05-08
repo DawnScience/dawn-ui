@@ -30,5 +30,6 @@ Import-Package: javax.vecmath,
  uk.ac.diamond.scisoft.analysis.rcp.plotting,
  uk.ac.diamond.scisoft.analysis.rcp.plotting.roi,
  uk.ac.diamond.scisoft.analysis.rcp.views,
+ org.dawb.common.ui.plot.region,
  uk.ac.gda.monitor,
  uk.ac.gda.richbeans.components.scalebox

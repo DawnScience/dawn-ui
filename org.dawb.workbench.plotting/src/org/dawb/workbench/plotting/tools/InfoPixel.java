@@ -27,11 +27,10 @@ import java.util.Map;
 import org.dawb.common.ui.plot.IAxis;
 import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.PlottingFactory;
+import org.dawb.common.ui.plot.region.IROIListener;
 import org.dawb.common.ui.plot.region.IRegion;
-import org.dawb.common.ui.plot.region.IRegionBoundsListener;
 import org.dawb.common.ui.plot.region.IRegionListener;
-import org.dawb.common.ui.plot.region.RegionBounds;
-import org.dawb.common.ui.plot.region.RegionBoundsEvent;
+import org.dawb.common.ui.plot.region.ROIEvent;
 import org.dawb.common.ui.plot.region.RegionEvent;
 import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
@@ -75,8 +74,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
-public class InfoPixel extends AbstractToolPage implements IRegionBoundsListener, IRegionListener, MouseListener  {
+public class InfoPixel extends AbstractToolPage implements IROIListener, IRegionListener, MouseListener  {
 
 	private final static Logger logger = LoggerFactory.getLogger(InfoPixel.class);
 	
@@ -85,17 +85,17 @@ public class InfoPixel extends AbstractToolPage implements IRegionBoundsListener
 	private   IRegion                xHair, yHair;
 	private   IAxis                  x1,x2;
 	private   RunningJob             xUpdateJob, yUpdateJob;
-	private   RegionBounds           xBounds, yBounds;
+	private   ROIBase           xBounds, yBounds;
 	
 	private Composite     composite;
 	private TableViewer   viewer;
 	private RegionColorListener viewUpdateListener;
-	private Map<String,RegionBounds> dragBounds;
+	private Map<String,ROIBase> dragBounds;
 	public double xValues [] = new double[1];	public double yValues [] = new double[1];
 
 		
 	public InfoPixel() {
-		dragBounds = new HashMap<String,RegionBounds>(7);
+		dragBounds = new HashMap<String,ROIBase>(7);
 		
 		try {
 			
@@ -158,7 +158,7 @@ public class InfoPixel extends AbstractToolPage implements IRegionBoundsListener
 						IRegion pointRegion = (IRegion)(regions.toArray())[0];
 						Rectangle rect = new Rectangle();
 						rect.setX((int) xValues[0]); rect.setY((int) yValues[0]);
-						pointRegion.setBounds(rect);
+						((Rectangle) pointRegion).setBounds(rect);
 						visible.add(pointRegion);
 					}
 				}
@@ -230,11 +230,11 @@ public class InfoPixel extends AbstractToolPage implements IRegionBoundsListener
 		if (xHair!=null) {
 			if (!isActive()) xHair.addMouseListener(this);
 			xHair.setVisible(true);
-			xHair.addRegionBoundsListener(this);
+			xHair.addROIListener(this);
 		}
 		if (yHair!=null) {
 			yHair.setVisible(true);
-			yHair.addRegionBoundsListener(this);
+			yHair.addROIListener(this);
 		}
 
 		if (getPlottingSystem()!=null) {
@@ -270,11 +270,11 @@ public class InfoPixel extends AbstractToolPage implements IRegionBoundsListener
 		if (xHair!=null) {
 			xHair.removeMouseListener(this);
 			xHair.setVisible(false);
-			xHair.removeRegionBoundsListener(this);
+			xHair.removeROIListener(this);
 		}
 		if (yHair!=null) {
 			yHair.setVisible(false);
-			yHair.removeRegionBoundsListener(this);
+			yHair.removeROIListener(this);
 		}
 		plotter.clear();
 
@@ -329,7 +329,7 @@ public class InfoPixel extends AbstractToolPage implements IRegionBoundsListener
 	
 				if (x1==null | x2==null) return Status.OK_STATUS;
 	
-				RegionBounds bounds = region==xHair ? xBounds : yBounds;
+				ROIBase bounds = region==xHair ? xBounds : yBounds;
 				
 				final boolean ok = profile(region, bounds, false, null, monitor);
 
@@ -364,7 +364,7 @@ public class InfoPixel extends AbstractToolPage implements IRegionBoundsListener
 		if (!isActive()) return;
 		if (viewer!=null) viewer.refresh();
 		if (evt.getRegion()!=null) {
-			evt.getRegion().addRegionBoundsListener(this);
+			evt.getRegion().addROIListener(this);
 		}
 	}
 
@@ -373,39 +373,39 @@ public class InfoPixel extends AbstractToolPage implements IRegionBoundsListener
 		if (!isActive()) return;
 		if (viewer!=null) viewer.refresh();
 		if (evt.getRegion()!=null) {
-			evt.getRegion().removeRegionBoundsListener(this);
+			evt.getRegion().removeROIListener(this);
 		}
 	}
 
-	@Override
-	public void regionBoundsDragged(RegionBoundsEvent evt) {
-
-		if (!isActive()) return;
-		updateRegion(evt);
-	}
-
-	@Override
-	public void regionBoundsChanged(RegionBoundsEvent evt) {
-
-		final IRegion region = (IRegion)evt.getSource();
-		update(region, region.getRegionBounds());
-	}
+//	@Override
+//	public void ROIBaseDragged(ROIBaseEvent evt) {
+//
+//		if (!isActive()) return;
+//		updateRegion(evt);
+//	}
+//
+//	@Override
+//	public void ROIBaseChanged(ROIBaseEvent evt) {
+//
+//		final IRegion region = (IRegion)evt.getSource();
+//		update(region, region.getROIBase());
+//	}
 	
-	private void update(IRegion r, RegionBounds rb) {
-		logger.debug("update");
-				
-		if (r == xHair) {
-			xUpdateJob.stop();
-			this.xBounds = rb;
-			xUpdateJob.scheduleIfNotSuspended();
-		}
-		if (r == yHair) {
-			yUpdateJob.stop();
-			this.yBounds = rb;
-			yUpdateJob.scheduleIfNotSuspended();
-		}
-		
-	}
+//	private void update(IRegion r, ROIBase rb) {
+//		logger.debug("update");
+//				
+//		if (r == xHair) {
+//			xUpdateJob.stop();
+//			this.xBounds = rb;
+//			xUpdateJob.scheduleIfNotSuspended();
+//		}
+//		if (r == yHair) {
+//			yUpdateJob.stop();
+//			this.yBounds = rb;
+//			yUpdateJob.scheduleIfNotSuspended();
+//		}
+//		
+//	}
 
 	@Override
 	public void mousePressed(MouseEvent evt) {
@@ -436,7 +436,7 @@ public class InfoPixel extends AbstractToolPage implements IRegionBoundsListener
 
 	
 	private boolean profile(final IRegion      region, 
-			                final RegionBounds bounds, 
+			                final ROIBase bounds, 
 			                final boolean      snapshot,
 			                final Color        snapShotColor,
 			                final IProgressMonitor monitor) {
@@ -485,7 +485,7 @@ public class InfoPixel extends AbstractToolPage implements IRegionBoundsListener
 			AbstractDataset slice=null, sliceIndex=null;
 			if (monitor.isCanceled())return  false;
 			if (region.getName().startsWith("Y Profile")) {
-				int index = (int)Math.round(bounds.getX());
+				int index = (int)Math.round(bounds.getPointX());
 				slice = data.getSlice(new int[]{0,index}, new int[]{data.getShape()[0], index+1}, new int[]{1,1});
 				if (monitor.isCanceled()) return  false;
 				slice = slice.flatten();
@@ -493,7 +493,7 @@ public class InfoPixel extends AbstractToolPage implements IRegionBoundsListener
 				sliceIndex = AbstractDataset.arange(slice.getSize(), AbstractDataset.INT);
 
 			} else {
-				int index = (int)Math.round(bounds.getY());
+				int index = (int)Math.round(bounds.getPointY());
 				slice = data.getSlice(new int[]{index,0}, new int[]{index+1, data.getShape()[1]}, new int[]{1,1});
 				if (monitor.isCanceled()) return  false;
 				slice = slice.flatten();
@@ -538,9 +538,9 @@ public class InfoPixel extends AbstractToolPage implements IRegionBoundsListener
 				final IStructuredSelection sel = (IStructuredSelection)viewer.getSelection();
 				if (sel!=null && sel.getFirstElement()!=null) {
 					final IRegion region = (IRegion)sel.getFirstElement();
-					if (region==null||region.getRegionBounds()==null) return;
-					final RegionBounds bounds = region.getRegionBounds();
-					if (bounds.getP1()==null) return;
+					if (region==null||region.getROI()==null) return;
+					final ROIBase bounds = region.getROI();
+					if (bounds.getPoint()==null) return;
 
 					final Clipboard cb = new Clipboard(composite.getDisplay());
 					TextTransfer textTransfer = TextTransfer.getInstance();
@@ -664,46 +664,64 @@ public class InfoPixel extends AbstractToolPage implements IRegionBoundsListener
 		
 	}
 
-	public RegionBounds getBounds(IRegion region) {
+	public ROIBase getBounds(IRegion region) {
 		if (dragBounds!=null&&dragBounds.containsKey(region.getName())) return dragBounds.get(region.getName());
-		return region.getRegionBounds();
+		return region.getROI();
 	}
 	
-	public double getMax(IRegion region) {
-
-		final Collection<ITrace> traces = getPlottingSystem().getTraces();
-		if (traces!=null&&traces.size()==1&&traces.iterator().next() instanceof IImageTrace) {
-			final IImageTrace     trace        = (IImageTrace)traces.iterator().next();
-			final AbstractDataset intersection = trace.slice(getBounds(region));
-			return intersection.max().doubleValue();
-		} else {
-			return getBounds(region).getP2()[1];
-		}
-	}
+//	public double getMax(IRegion region) {
+//
+//		final Collection<ITrace> traces = getPlottingSystem().getTraces();
+//		if (traces!=null&&traces.size()==1&&traces.iterator().next() instanceof IImageTrace) {
+//			final IImageTrace     trace        = (IImageTrace)traces.iterator().next();
+//			final AbstractDataset intersection = ((Object) trace).slice(getBounds(region));
+//			return intersection.max().doubleValue();
+//		} else {
+//			return getBounds(region).getPoint()[1];
+//		}
+//	}
 
 	
-	private void updateRegion(RegionBoundsEvent evt) {
-
-		if (viewer!=null) {
-			IRegion  region = (IRegion)evt.getSource();
-
-			if (region.getRegionType().toString().contains("XAXIS_LINE")){
-				this.xValues[0] = evt.getRegionBounds().getX();
-			}
-			if (region.getRegionType().toString().contains("YAXIS_LINE")){
-				this.yValues[0] = evt.getRegionBounds().getY();
-			}
-			
-			RegionBounds rb = evt.getRegionBounds();
-			
-			dragBounds.put(region.getName(), rb);
-			viewer.refresh(region);
-		}
-	}
+//	private void updateRegion(ROIEvent evt) {
+//
+//		if (viewer!=null) {
+//			IRegion  region = (IRegion)evt.getSource();
+//
+//			if (region.getRegionType().toString().contains("XAXIS_LINE")){
+//				this.xValues[0] = evt.getROI().getPointX();
+//			}
+//			if (region.getRegionType().toString().contains("YAXIS_LINE")){
+//				this.yValues[0] = evt.getROI().getPointY();
+//			}
+//			
+//			ROIBase rb = evt.getROI();
+//			
+//			dragBounds.put(region.getName(), rb);
+//			viewer.refresh(region);
+//		}
+//	}
 
 	@Override
 	public void regionCreated(RegionEvent evt) {
 		// TODO Auto-generated method stub		
+	}
+
+	@Override
+	public void regionsRemoved(RegionEvent evt) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void roiDragged(ROIEvent evt) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void roiChanged(ROIEvent evt) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 	
