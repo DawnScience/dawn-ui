@@ -41,12 +41,12 @@ public class InfoPixelLabelProvider extends ColumnLabelProvider {
 
 
 	private final int column;
-	private final InfoPixel tool;
+	private final InfoPixelTool tool;
 	private final IPlottingSystem plotSystem;
 
 	private static final Logger logger = LoggerFactory.getLogger(InfoPixelLabelProvider.class);
 
-	public InfoPixelLabelProvider(InfoPixel tool, int i) {
+	public InfoPixelLabelProvider(InfoPixelTool tool, int i) {
 
 		this.column = i;
 		this.tool   = tool;

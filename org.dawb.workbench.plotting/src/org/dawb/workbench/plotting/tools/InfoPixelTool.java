@@ -76,9 +76,9 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
-public class InfoPixel extends AbstractToolPage implements IROIListener, IRegionListener, MouseListener  {
+public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRegionListener, MouseListener  {
 
-	private final static Logger logger = LoggerFactory.getLogger(InfoPixel.class);
+	private final static Logger logger = LoggerFactory.getLogger(InfoPixelTool.class);
 	
 	protected IPlottingSystem        plotter;
 	private   ITraceListener         traceListener;
@@ -94,7 +94,7 @@ public class InfoPixel extends AbstractToolPage implements IROIListener, IRegion
 	public double xValues [] = new double[1];	public double yValues [] = new double[1];
 
 		
-	public InfoPixel() {
+	public InfoPixelTool() {
 		dragBounds = new HashMap<String,ROIBase>(7);
 		
 		try {
