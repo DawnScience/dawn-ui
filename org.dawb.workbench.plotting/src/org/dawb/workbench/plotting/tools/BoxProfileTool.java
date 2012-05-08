@@ -15,7 +15,6 @@ import org.eclipse.swt.SWT;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
-import uk.ac.diamond.scisoft.analysis.rcp.plotting.roi.RectangularROIData;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.ROIProfile;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
@@ -58,7 +57,7 @@ public class BoxProfileTool extends ProfileTool {
 		
 		AbstractDataset[] box = ROIProfile.box(image.getData(), image.getMask(), bounds, true);
         if (box==null) return;
-		if (monitor.isCanceled()) return;
+		//if (monitor.isCanceled()) return;
 				
 		final AbstractDataset x_intensity = box[0];
 		x_intensity.setName("X "+region.getName());
@@ -72,12 +71,12 @@ public class BoxProfileTool extends ProfileTool {
 		final AbstractDataset y_indices = yi; // Maths.add(yi, bounds.getY()); // Real position
 		y_indices.setName("Y Pixel");
 
-		if (monitor.isCanceled()) return;
+		//if (monitor.isCanceled()) return;
 		if (tryUpdate) {
 			final ILineTrace x_trace = (ILineTrace)plotter.getTrace("X "+region.getName());
 			final ILineTrace y_trace = (ILineTrace)plotter.getTrace("Y "+region.getName());
 			
-			if (x_trace!=null && y_trace!=null && !monitor.isCanceled()) {
+			if (x_trace!=null && y_trace!=null) {
 				getControl().getDisplay().syncExec(new Runnable() {
 					public void run() {
 						plotter.setSelectedXAxis(xPixelAxis);
@@ -90,12 +89,10 @@ public class BoxProfileTool extends ProfileTool {
 			
 		} else {
 						
-			if (monitor.isCanceled()) return;
 			plotter.setSelectedXAxis(xPixelAxis);
 			Collection<ITrace> plotted = plotter.createPlot1D(x_indices, Arrays.asList(new AbstractDataset[]{x_intensity}), monitor);
 			registerTraces(region, plotted);
 			
-			if (monitor.isCanceled()) return;
 			plotter.setSelectedXAxis(yPixelAxis);
 			plotted = plotter.createPlot1D(y_indices, Arrays.asList(new AbstractDataset[]{y_intensity}), monitor);
 			registerTraces(region, plotted);
