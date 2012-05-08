@@ -216,7 +216,7 @@ public class InfoPixel extends AbstractToolPage implements IROIListener, IRegion
 
 	@Override
 	public ToolPageRole getToolPageRole() {
-		return ToolPageRole.ROLE_1D_AND_2D;
+		return ToolPageRole.ROLE_2D;
 	}
 
 	@Override

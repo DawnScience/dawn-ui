@@ -108,7 +108,7 @@ public class InfoPixelLabelProvider extends ColumnLabelProvider {
 			return String.format("% 4.4f", y);
 		case 2: // "Data value"
 			if (set == null || q == null) return "-";
-			return String.format("% 4.4f", set.getDouble((int)x, (int) y));
+			return String.format("% 4.4f", set.getDouble((int)y, (int) x));
 		case 3: // q X
 			if (q == null) return "-";
 			return String.format("% 4.4f", q.x);
