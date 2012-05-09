@@ -87,7 +87,7 @@ public class PointSelection extends AbstractSelectionRegion {
 		if (clicks.size()<1) return;
 		final Point last = clicks.getLastPoint();
 		point.setSelectionPoint(last);
-		updateROI();
+		roi = new PointROI(point.getPosition());
 	}
 
 	@Override
@@ -99,8 +99,7 @@ public class PointSelection extends AbstractSelectionRegion {
 	protected ROIBase createROI(boolean recordResult) {
 		if (point == null) return getROI();
 		final PointROI proi = new PointROI(point.getPosition());
-		if (recordResult)
-			roi = proi;
+		if (recordResult) roi = proi;
 
 		return proi;
 	}

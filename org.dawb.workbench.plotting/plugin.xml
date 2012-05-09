@@ -39,9 +39,9 @@
             tooltip="A tool which shows values of regions selected in the plotting.">
       </plotting_tool_page>
       <plotting_tool_page
-            class="org.dawb.workbench.plotting.tools.InfoBoxTool"
+            class="org.dawb.workbench.plotting.tools.InfoPixelTool"
             icon="icons/info.png"
-            id="org.dawb.workbench.plotting.tools.InfoBoxTool"
+            id="org.dawb.workbench.plotting.tools.InfoPixel"
             label="Information box"
             tooltip="A tool for displaying information on the data currently plotted.">
       </plotting_tool_page>
@@ -58,6 +58,20 @@
             id="org.dawb.workbench.plotting.tools.boxProfileTool"
             label="Box Profile"
             tooltip="A tool for showing box profiles of images.">
+      </plotting_tool_page>
+      <plotting_tool_page
+            class="org.dawb.workbench.plotting.tools.RadialProfileTool"
+            icon="icons/plot-tool-radial-integral.png"
+            id="org.dawb.workbench.plotting.tools.radialProfileTool"
+            label="Radial Integration"
+            tooltip="Masking the image and leaving data modified.">
+      </plotting_tool_page>
+      <plotting_tool_page
+            class="org.dawb.workbench.plotting.tools.AzimuthalProfileTool"
+            icon="icons/plot-tool-azimuthal-integral.png"
+            id="org.dawb.workbench.plotting.tools.azimuthalProfileTool"
+            label="Azimuthal Integration"
+            tooltip="Masking the image and leaving data modified.">
       </plotting_tool_page>
       <plotting_tool_page
             class="org.dawb.workbench.plotting.tools.CrossHairProfileTool"
