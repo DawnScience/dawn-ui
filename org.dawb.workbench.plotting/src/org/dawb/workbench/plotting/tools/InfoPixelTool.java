@@ -33,17 +33,10 @@ import org.dawb.common.ui.plot.region.RegionEvent;
 import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
 import org.dawb.common.ui.plot.tool.IToolPageSystem;
-import org.dawb.common.ui.plot.trace.IImageTrace;
-import org.dawb.common.ui.plot.trace.ILineTrace;
-import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.tools.MeasurementTool.RegionColorListener;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.MouseEvent;
 import org.eclipse.draw2d.MouseListener;
@@ -63,7 +56,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -71,7 +63,6 @@ import org.eclipse.ui.IActionBars;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
 public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRegionListener, MouseListener  {
@@ -81,9 +72,6 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 	protected IPlottingSystem        plotter;
 	private   ITraceListener         traceListener;
 	private   IRegion                xHair, yHair;
-	private   IAxis                  x1,x2;
-	private   RunningJob             xUpdateJob, yUpdateJob;
-	private   ROIBase           xBounds, yBounds;
 	
 	private Composite     composite;
 	private TableViewer   viewer;
@@ -106,8 +94,6 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 						return;
 					}
 					
-					if (xUpdateJob!=null) xUpdateJob.scheduleIfNotSuspended();
-					if (yUpdateJob!=null) yUpdateJob.scheduleIfNotSuspended();
 				}
 			};
 						
@@ -154,11 +140,7 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 					for (int i=0; i< regions.size(); i = i +2){
 						// add only one region
 						IRegion pointRegion = (IRegion)(regions.toArray())[0];
-						Rectangle rect = new Rectangle();
-						rect.setX((int) xValues[0]); rect.setY((int) yValues[0]);
-						// This is wrong:
-						//((Rectangle) pointRegion).setBounds(rect);
-						// A point region is not a Rectangle!
+						// TODO Rita test that this is a point region, others may exist.
 						visible.add(pointRegion);
 					}
 				}
@@ -191,13 +173,13 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 		try {
 			if (xHair==null || getPlottingSystem().getRegion(xHair.getName())==null) {
 				this.xHair = getPlottingSystem().createRegion(RegionUtils.getUniqueName("Y Profile", getPlottingSystem()), IRegion.RegionType.XAXIS_LINE);
-				this.xUpdateJob = addRegion("Updating x cross hair", xHair);
+				addRegion("Updating x cross hair", xHair);
 
 			}
 			
 			if (yHair==null || getPlottingSystem().getRegion(yHair.getName())==null) {
 				this.yHair = getPlottingSystem().createRegion(RegionUtils.getUniqueName("X Profile", getPlottingSystem()), IRegion.RegionType.YAXIS_LINE);
-				this.yUpdateJob = addRegion("Updating x cross hair", yHair);
+				addRegion("Updating x cross hair", yHair);
 			}
 			
 		} catch (Exception ne) {
@@ -205,13 +187,12 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 		}
 	}
 	
-	private RunningJob addRegion(String jobName, IRegion region) {
+	private void addRegion(String jobName, IRegion region) {
 		region.setVisible(false);
 		region.setTrackMouse(true);
 		region.setRegionColor(ColorConstants.red);
 		region.setUserRegion(false); // They cannot see preferences or change it!
 		getPlottingSystem().addRegion(region);
-		return new RunningJob(jobName, region);
 	}
 
 	@Override
@@ -301,63 +282,6 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 		return composite;
 	}
 
-
-	/**
-	 * The user can optionally nominate an x. In this case, we would like to 
-	 * use it for the derivative instead of the indices of the data. Therefore
-	 * there is some checking here to see if there are x values to plot.
-	 * 
-	 * Normally everything will be ILineTraces even if the x is indices.
-	 */
-	private class RunningJob extends Job {
-
-		private boolean isJobRunning = false;
-		private IRegion region;
-		private boolean suspend = false;
-		
-		RunningJob(String name, IRegion region) {
-			super(name);
-			this.region = region;
-		}
-
-		@Override
-		protected IStatus run(final IProgressMonitor monitor) {
-
-			try {
-				isJobRunning = true;
-				if (!isActive()) return  Status.CANCEL_STATUS;
-	
-				if (x1==null | x2==null) return Status.OK_STATUS;
-	
-				ROIBase bounds = region==xHair ? xBounds : yBounds;
-				
-				final boolean ok = profile(region, bounds, false, null, monitor);
-
-			    return ok ? Status.OK_STATUS : Status.CANCEL_STATUS;
-			    
-			} finally {
-				isJobRunning = false;
-			}
-		}	
-		
-
-		/**
-		 * Blocks until job has been stopped, does nothing if not running.
-		 */
-		public void stop() {
-			if (isJobRunning) cancel();
-		}
-
-		public void suspend(boolean suspend) {
-			this.suspend  = suspend;
-			cancel();	
-		}
-		
-		public void scheduleIfNotSuspended() {
-			if (suspend) return;
-			super.schedule();
-		}
-	}
 	
 	@Override
 	public void regionAdded(RegionEvent evt) {
@@ -375,36 +299,6 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 		if (evt.getRegion()!=null) {
 			evt.getRegion().removeROIListener(this);
 		}
-	}
-
-//	@Override
-//	public void ROIBaseDragged(ROIBaseEvent evt) {
-//
-//		if (!isActive()) return;
-//		updateRegion(evt);
-//	}
-//
-//	@Override
-//	public void ROIBaseChanged(ROIBaseEvent evt) {
-//
-//		final IRegion region = (IRegion)evt.getSource();
-//		update(region, region.getROIBase());
-//	}
-	
-	private void update(IRegion r, ROIBase rb) {
-		logger.debug("update");
-				
-		if (r == xHair) {
-			xUpdateJob.stop();
-			this.xBounds = rb;
-			xUpdateJob.scheduleIfNotSuspended();
-		}
-		if (r == yHair) {
-			yUpdateJob.stop();
-			this.yBounds = rb;
-			yUpdateJob.scheduleIfNotSuspended();
-		}
-		
 	}
 
 	@Override
@@ -434,103 +328,10 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 		// TODO Auto-generated method stub
 	}
 
-	
-	private boolean profile(final IRegion      region, 
-			                final ROIBase bounds, 
-			                final boolean      snapshot,
-			                final Color        snapShotColor,
-			                final IProgressMonitor monitor) {
-		
-		if (bounds!=null) {
-			
-			if (monitor.isCanceled()) return  false;
-			final Collection<ITrace> traces= getPlottingSystem().getTraces(IImageTrace.class);	
-			IImageTrace image = traces!=null && traces.size()>0 ? (IImageTrace)traces.iterator().next() : null;
-
-			if (image==null) {
-				if (monitor.isCanceled()) return  false;
-				plotter.clear();
-				return true;
-			}
-
-			if (monitor.isCanceled()) return  false;
-			
-            		                  
-			ILineTrace trace = (ILineTrace)plotter.getTrace(region.getName());
-			if (trace == null || snapshot) {
-				synchronized (plotter) {  // Only one job at a time can choose axis and create plot.
-					if (region.getName().startsWith("Y Profile")) {
-						plotter.setSelectedXAxis(x1);
-
-					} else {
-						plotter.setSelectedXAxis(x2);
-					}
-					if (monitor.isCanceled()) return  false;
-					logger.debug("adding here row to table");
-					trace = plotter.createLineTrace(region.getName());
-
-				    if (snapShotColor!=null) {
-				    	trace.setTraceColor(snapShotColor);
-				    } else {
-						if (region.getName().startsWith("Y Profile")) {
-							trace.setTraceColor(ColorConstants.blue);
-						} else {
-							trace.setTraceColor(ColorConstants.red);
-						}	
-				    }
-				}
-			}
-
-			final AbstractDataset data = image.getData();
-			AbstractDataset slice=null, sliceIndex=null;
-			if (monitor.isCanceled())return  false;
-			if (region.getName().startsWith("Y Profile")) {
-				int index = (int)Math.round(bounds.getPointX());
-				slice = data.getSlice(new int[]{0,index}, new int[]{data.getShape()[0], index+1}, new int[]{1,1});
-				if (monitor.isCanceled()) return  false;
-				slice = slice.flatten();
-				if (monitor.isCanceled()) return  false;
-				sliceIndex = AbstractDataset.arange(slice.getSize(), AbstractDataset.INT);
-
-			} else {
-				int index = (int)Math.round(bounds.getPointY());
-				slice = data.getSlice(new int[]{index,0}, new int[]{index+1, data.getShape()[1]}, new int[]{1,1});
-				if (monitor.isCanceled()) return  false;
-				slice = slice.flatten();
-				if (monitor.isCanceled()) return  false;
-				sliceIndex = AbstractDataset.arange(slice.getSize(), AbstractDataset.INT);
-			}
-			slice.setName(trace.getName());
-			trace.setData(sliceIndex, slice);
-
-			final ILineTrace finalTrace = trace;
-
-
-			if (monitor.isCanceled()) return  false;
-			getControl().getDisplay().syncExec(new Runnable() {
-				public void run() {
-
-					if (monitor.isCanceled()) return;
-					if (plotter.getTrace(finalTrace.getName())==null) {							
-						plotter.addTrace(finalTrace);
-					}
-
-					if (monitor.isCanceled()) return;
-					plotter.autoscaleAxes();
-					plotter.repaint();
-					if (region.getName().startsWith("Y Profile")) {
-						x1.setRange(0, data.getShape()[0]);
-					} else {
-						x2.setRange(0, data.getShape()[1]);
-					}
-				}
-			});
-		}
-		return true;
-	}
-	
 	private void createActions() {
 
+		//TODO When I test actions, they are not working.
+		//Is it the same for you?
 		final Action copy = new Action("Copy region values to clipboard", Activator.getImageDescriptor("icons/plot-tool-measure-copy.png")) {
 			@Override
 			public void run() {
@@ -703,13 +504,11 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 	@Override
 	public void roiDragged(ROIEvent evt) {
 		updateRegion(evt);
-		update((IRegion)evt.getSource(), evt.getROI());
 	}
 
 	@Override
 	public void roiChanged(ROIEvent evt) {
-		final IRegion region = (IRegion)evt.getSource();
-		update(region, region.getROI());
+
 	}
 	
 }
