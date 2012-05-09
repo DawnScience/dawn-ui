@@ -668,8 +668,7 @@ public class HistogramToolPage extends AbstractToolPage {
 			imageDataset = image.getData();
 
 			logger.trace("Image Data is of type :" + imageDataset.getDtype());
-			Class<?> clazz = imageDataset.elementClass();
-			if (clazz.equals(Double.class) || clazz.equals(Float.class)) {
+			if (imageDataset.hasFloatingPointElements()) {
 				num_bins = MAX_BINS;
 			} else {
 				// set the number of points to the range

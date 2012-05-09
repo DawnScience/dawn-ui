@@ -1,19 +1,17 @@
 /*
- * Copyright © 2011 Diamond Light Source Ltd.
- *
- * This file is part of GDA.
- *
- * GDA is free software: you can redistribute it and/or modify it under the
- * terms of the GNU General Public License version 3 as published by the Free
- * Software Foundation.
- *
- * GDA is distributed in the hope that it will be useful, but WITHOUT ANY
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
- *
- * You should have received a copy of the GNU General Public License along
- * with GDA. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright 2012 Diamond Light Source Ltd.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.dawb.workbench.plotting.tools;
@@ -393,21 +391,21 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 //		update(region, region.getROIBase());
 //	}
 	
-//	private void update(IRegion r, ROIBase rb) {
-//		logger.debug("update");
-//				
-//		if (r == xHair) {
-//			xUpdateJob.stop();
-//			this.xBounds = rb;
-//			xUpdateJob.scheduleIfNotSuspended();
-//		}
-//		if (r == yHair) {
-//			yUpdateJob.stop();
-//			this.yBounds = rb;
-//			yUpdateJob.scheduleIfNotSuspended();
-//		}
-//		
-//	}
+	private void update(IRegion r, ROIBase rb) {
+		logger.debug("update");
+				
+		if (r == xHair) {
+			xUpdateJob.stop();
+			this.xBounds = rb;
+			xUpdateJob.scheduleIfNotSuspended();
+		}
+		if (r == yHair) {
+			yUpdateJob.stop();
+			this.yBounds = rb;
+			yUpdateJob.scheduleIfNotSuspended();
+		}
+		
+	}
 
 	@Override
 	public void mousePressed(MouseEvent evt) {
@@ -671,37 +669,25 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 		return region.getROI();
 	}
 	
-//	public double getMax(IRegion region) {
-//
-//		final Collection<ITrace> traces = getPlottingSystem().getTraces();
-//		if (traces!=null&&traces.size()==1&&traces.iterator().next() instanceof IImageTrace) {
-//			final IImageTrace     trace        = (IImageTrace)traces.iterator().next();
-//			final AbstractDataset intersection = ((Object) trace).slice(getBounds(region));
-//			return intersection.max().doubleValue();
-//		} else {
-//			return getBounds(region).getPoint()[1];
-//		}
-//	}
+	private void updateRegion(ROIEvent evt) {
 
+		if (viewer!=null) {
+			IRegion  region = (IRegion)evt.getSource();
+
+			if (region.getRegionType().toString().contains("XAXIS_LINE")){
+				this.xValues[0] = evt.getROI().getPointX();
+			}
+			if (region.getRegionType().toString().contains("YAXIS_LINE")){
+				this.yValues[0] = evt.getROI().getPointY();
+			}
+			
+			ROIBase rb = evt.getROI();
+			
+			dragBounds.put(region.getName(), rb);
+			viewer.refresh(region);
+		}
+	}
 	
-//	private void updateRegion(ROIEvent evt) {
-//
-//		if (viewer!=null) {
-//			IRegion  region = (IRegion)evt.getSource();
-//
-//			if (region.getRegionType().toString().contains("XAXIS_LINE")){
-//				this.xValues[0] = evt.getROI().getPointX();
-//			}
-//			if (region.getRegionType().toString().contains("YAXIS_LINE")){
-//				this.yValues[0] = evt.getROI().getPointY();
-//			}
-//			
-//			ROIBase rb = evt.getROI();
-//			
-//			dragBounds.put(region.getName(), rb);
-//			viewer.refresh(region);
-//		}
-//	}
 
 	@Override
 	public void regionCreated(RegionEvent evt) {
@@ -716,15 +702,14 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 
 	@Override
 	public void roiDragged(ROIEvent evt) {
-		// TODO Auto-generated method stub
-		
+		updateRegion(evt);
+		update((IRegion)evt.getSource(), evt.getROI());
 	}
 
 	@Override
 	public void roiChanged(ROIEvent evt) {
-		// TODO Auto-generated method stub
-		
+		final IRegion region = (IRegion)evt.getSource();
+		update(region, region.getROI());
 	}
-	
 	
 }
