@@ -103,8 +103,13 @@ public class Sector extends Shape {
 		if (r < radius[0] || r > radius[1])
 			return false;
 		double a = Math.toDegrees(Math.atan2(py, px));
-		if (a < 0)
-			a += 360;
+		if (angle[0] > 0) {
+			if (a < 0)
+				a += 360;
+		} else {
+			if (a < angle[0])
+				a += 360;
+		}
 
 		return a >= angle[0] && a <= angle[1];
 	}
@@ -122,8 +127,10 @@ public class Sector extends Shape {
 		final double as = Math.toRadians(angle[0]), ae = Math.toRadians(angle[1]);
 		final double cx = centre.preciseX(), cy = centre.preciseY();
 
-		graphics.drawArc((int) (cx - ri), (int) (cy - ri), din, din, (int) angle[0], (int) (angle[1]-angle[0]));
-		graphics.drawArc((int) (cx - ro), (int) (cy - ro), dout, dout, (int) Math.round(angle[0]), (int) Math.floor(angle[1]-angle[0]));
+		final int ab = (int) Math.round(angle[0]);
+		final int al = (int) (angle[1] - angle[0]);
+		graphics.drawArc((int) (cx - ri), (int) (cy - ri), din, din, ab, al);
+		graphics.drawArc((int) (cx - ro), (int) (cy - ro), dout, dout, ab, al);
 		graphics.drawLine((int) (cx + ri*Math.cos(as)), (int) (cy - ri*Math.sin(as)),
 				(int) (cx + ro*Math.cos(as)), (int) (cy - ro*Math.sin(as)));
 		graphics.drawLine((int) (cx + ri*Math.cos(ae)), (int) (cy - ri*Math.sin(ae)),
