@@ -131,7 +131,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	}
 
 	protected IToolPage createDefaultPage(PageBook book) {
-		EmptyTool emptyTool = new EmptyTool() {
+		EmptyTool emptyTool = new EmptyTool(getViewRole()) {
 			public String toString() {
 				return "Default page";
 			}
@@ -385,10 +385,12 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	 * 
 	 * @param part
 	 *            The part we are making a page for.
+	 * @param tool
+	 *            May be null
 	 * @return IWorkbenchPart
 	 */
-	private PageRec createPage(IWorkbenchPart part) {
-		PageRec rec = doCreatePage(part);
+	private PageRec createPage(IWorkbenchPart part, IToolPage tool) {
+		PageRec rec = doCreatePage(part, tool);
 		if (rec != null) {
 			preparePage(rec);
 		}
@@ -625,7 +627,6 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	 * @see org.eclipse.ui.IPartListener#partOpened(org.eclipse.ui.IWorkbenchPart)
 	 */
 	public void partOpened(IWorkbenchPart part) {
-		toolUpdate = true;
 	}
 
 	/**
@@ -944,7 +945,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		partActivated(part);
 	}
 	
-	protected synchronized PageRec doCreatePage(IWorkbenchPart part) {
+	protected synchronized PageRec doCreatePage(IWorkbenchPart part, IToolPage tool) {
 		
 		final IToolPageSystem sys = (IToolPageSystem)part.getAdapter(IToolPageSystem.class);
         if (systems==null||recs==null) return null;
@@ -953,15 +954,18 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 			systems.add(sys);
 			sys.addToolChangeListener(this);
 
-			final IToolPage      tool = sys.getCurrentToolPage(getViewRole());	
+			if (tool==null) { // We find the tool and check it is not a repeat.
+				tool = sys.getCurrentToolPage(getViewRole());	
+				
+		        final PageRec existing = getPageRec(part);
+		        
+		        if (tool!=null && existing!=null&&existing.tool!=null && existing.tool.equals(tool)) {
+		        	if (!tool.isActive()) tool.activate();
+		        	return existing;
+		        }
 
-	        final PageRec existing = getPageRec(part);
-	        
-	        if (tool!=null && existing!=null&&existing.tool!=null && existing.tool.equals(tool)) {
-	        	if (!tool.isActive()) tool.activate();
-	        	return existing;
-	        }
-
+		    }
+			
 			if (tool == null) return null;
 
 			updatePartInfo(tool);
@@ -1009,18 +1013,29 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	}
 	
 	private boolean updatingActivated = false;
-    private boolean toolUpdate        = true;
 	public void toolChanged(ToolChangeEvent evt) {
+		
 		if (updatingActivated) return;
-		toolUpdate = true;
-		toolUpdate(evt.getPart());
+		
+		try {
+			IToolPage tool = evt.getNewPage();
+			if (tool==null || getViewRole()!=tool.getToolPageRole()) return;
+			
+			PageRec rec = getPageRec(tool);
+			if (rec == null || tool.getControl()==null || rec.tool!=tool) {
+				rec = createPage(tool.getPart(), tool);
+			}
+		
+			showPageRec(rec);
+			updatePartInfo(rec.tool);
+			
+		} catch (Exception ne) {
+			logger.error("Unexpected and serious problem trying to switch tool to "+evt.getNewPage(), ne);
+		}
 	}
 	
 	public void partActivated(IWorkbenchPart part) {
-		toolUpdate(part);
-	}
 
-	protected void toolUpdate(IWorkbenchPart part) {
 		if (!isImportant(part)) return;
 
 		if (updatingActivated) return;
@@ -1036,13 +1051,12 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
     		// Create a page for the part.
     		PageRec rec = getPageRec(part);
     		if (rec == null) {
-    			rec = createPage(part);
+    			rec = createPage(part, null);
     		}
     		
-    		if (!toolUpdate && rec.tool instanceof EmptyTool) {
+    		if (rec.tool instanceof EmptyTool) {
     			return; // No point switching to empty tool if other tools are there.
     		}
-			toolUpdate = false;
 
     		// Show the page.
     		if (rec != null) {
