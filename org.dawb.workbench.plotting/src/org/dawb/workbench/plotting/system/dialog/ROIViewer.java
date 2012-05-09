@@ -8,7 +8,6 @@ import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.swt.xygraph.linearscale.Range;
 import org.dawb.common.ui.plot.region.AbstractRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
-import org.dawb.workbench.plotting.system.dialog.ROIViewer.ROIEditingSupport;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewer;
@@ -23,13 +22,6 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.FocusAdapter;
-import org.eclipse.swt.events.FocusEvent;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Composite;
@@ -40,14 +32,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
+import uk.ac.diamond.scisoft.analysis.roi.PointROI;
 import uk.ac.diamond.scisoft.analysis.roi.PolygonalROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 import uk.ac.gda.richbeans.components.cell.FieldComponentCellEditor;
 import uk.ac.gda.richbeans.components.wrappers.SpinnerWrapper;
-import uk.ac.gda.richbeans.event.ValueAdapter;
-import uk.ac.gda.richbeans.event.ValueEvent;
 
 public class ROIViewer  {
 
@@ -273,6 +264,10 @@ public class ROIViewer  {
 				ret.add(new RegionRow("Point "+(i+1)+"  (x,y)", "pixel", pr.getPointX(i),    pr.getPointY(i)));
 			}
 			
+		} else if (roi instanceof PointROI) {
+			final PointROI pr = (PointROI)roi;
+			ret.add(new RegionRow("Point (x,y)", "pixel", pr.getPointX(),    pr.getPointY()));
+			
 		} else if (roi instanceof RectangularROI) {
 			final RectangularROI rr = (RectangularROI)roi;
 			ret.add(new RegionRow("Start Point (x,y)", "pixel", rr.getPoint()[0],    rr.getPoint()[1]));
@@ -308,6 +303,10 @@ public class ROIViewer  {
 			for (RegionRow regionRow : rows) {
 				pr.insertPoint(regionRow.getPoint());
 			}
+			ret = pr;
+			
+		} else if (roi instanceof PointROI) {
+			PointROI pr = new PointROI(rows.get(0).getPoint());
 			ret = pr;
 			
 		} else if (roi instanceof RectangularROI) {
