@@ -158,7 +158,9 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 						IRegion pointRegion = (IRegion)(regions.toArray())[0];
 						Rectangle rect = new Rectangle();
 						rect.setX((int) xValues[0]); rect.setY((int) yValues[0]);
-						((Rectangle) pointRegion).setBounds(rect);
+						// This is wrong:
+						//((Rectangle) pointRegion).setBounds(rect);
+						// A point region is not a Rectangle!
 						visible.add(pointRegion);
 					}
 				}
