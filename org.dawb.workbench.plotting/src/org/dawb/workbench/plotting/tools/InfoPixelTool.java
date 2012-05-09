@@ -72,8 +72,6 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 	protected IPlottingSystem        plotter;
 	private   ITraceListener         traceListener;
 	private   IRegion                xHair, yHair;
-	private   IAxis                  x1,x2;
-	private   ROIBase           xBounds, yBounds;
 	
 	private Composite     composite;
 	private TableViewer   viewer;
@@ -142,11 +140,7 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 					for (int i=0; i< regions.size(); i = i +2){
 						// add only one region
 						IRegion pointRegion = (IRegion)(regions.toArray())[0];
-						Rectangle rect = new Rectangle();
-						rect.setX((int) xValues[0]); rect.setY((int) yValues[0]);
-						// This is wrong:
-						//((Rectangle) pointRegion).setBounds(rect);
-						// A point region is not a Rectangle!
+						// TODO Rita test that this is a point region, others may exist.
 						visible.add(pointRegion);
 					}
 				}
@@ -306,18 +300,6 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 			evt.getRegion().removeROIListener(this);
 		}
 	}
-	
-	private void update(IRegion r, ROIBase rb) {
-		logger.debug("update");
-				
-		if (r == xHair) {
-			this.xBounds = rb;
-		}
-		if (r == yHair) {
-			this.yBounds = rb;
-		}
-		
-	}
 
 	@Override
 	public void mousePressed(MouseEvent evt) {
@@ -348,6 +330,8 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 
 	private void createActions() {
 
+		//TODO When I test actions, they are not working.
+		//Is it the same for you?
 		final Action copy = new Action("Copy region values to clipboard", Activator.getImageDescriptor("icons/plot-tool-measure-copy.png")) {
 			@Override
 			public void run() {
@@ -520,13 +504,11 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 	@Override
 	public void roiDragged(ROIEvent evt) {
 		updateRegion(evt);
-		update((IRegion)evt.getSource(), evt.getROI());
 	}
 
 	@Override
 	public void roiChanged(ROIEvent evt) {
-		final IRegion region = (IRegion)evt.getSource();
-		update(region, region.getROI());
+
 	}
 	
 }
