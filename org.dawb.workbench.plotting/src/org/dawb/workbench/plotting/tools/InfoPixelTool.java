@@ -391,21 +391,21 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 //		update(region, region.getROIBase());
 //	}
 	
-//	private void update(IRegion r, ROIBase rb) {
-//		logger.debug("update");
-//				
-//		if (r == xHair) {
-//			xUpdateJob.stop();
-//			this.xBounds = rb;
-//			xUpdateJob.scheduleIfNotSuspended();
-//		}
-//		if (r == yHair) {
-//			yUpdateJob.stop();
-//			this.yBounds = rb;
-//			yUpdateJob.scheduleIfNotSuspended();
-//		}
-//		
-//	}
+	private void update(IRegion r, ROIBase rb) {
+		logger.debug("update");
+				
+		if (r == xHair) {
+			xUpdateJob.stop();
+			this.xBounds = rb;
+			xUpdateJob.scheduleIfNotSuspended();
+		}
+		if (r == yHair) {
+			yUpdateJob.stop();
+			this.yBounds = rb;
+			yUpdateJob.scheduleIfNotSuspended();
+		}
+		
+	}
 
 	@Override
 	public void mousePressed(MouseEvent evt) {
@@ -669,37 +669,25 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 		return region.getROI();
 	}
 	
-//	public double getMax(IRegion region) {
-//
-//		final Collection<ITrace> traces = getPlottingSystem().getTraces();
-//		if (traces!=null&&traces.size()==1&&traces.iterator().next() instanceof IImageTrace) {
-//			final IImageTrace     trace        = (IImageTrace)traces.iterator().next();
-//			final AbstractDataset intersection = ((Object) trace).slice(getBounds(region));
-//			return intersection.max().doubleValue();
-//		} else {
-//			return getBounds(region).getPoint()[1];
-//		}
-//	}
+	private void updateRegion(ROIEvent evt) {
 
+		if (viewer!=null) {
+			IRegion  region = (IRegion)evt.getSource();
+
+			if (region.getRegionType().toString().contains("XAXIS_LINE")){
+				this.xValues[0] = evt.getROI().getPointX();
+			}
+			if (region.getRegionType().toString().contains("YAXIS_LINE")){
+				this.yValues[0] = evt.getROI().getPointY();
+			}
+			
+			ROIBase rb = evt.getROI();
+			
+			dragBounds.put(region.getName(), rb);
+			viewer.refresh(region);
+		}
+	}
 	
-//	private void updateRegion(ROIEvent evt) {
-//
-//		if (viewer!=null) {
-//			IRegion  region = (IRegion)evt.getSource();
-//
-//			if (region.getRegionType().toString().contains("XAXIS_LINE")){
-//				this.xValues[0] = evt.getROI().getPointX();
-//			}
-//			if (region.getRegionType().toString().contains("YAXIS_LINE")){
-//				this.yValues[0] = evt.getROI().getPointY();
-//			}
-//			
-//			ROIBase rb = evt.getROI();
-//			
-//			dragBounds.put(region.getName(), rb);
-//			viewer.refresh(region);
-//		}
-//	}
 
 	@Override
 	public void regionCreated(RegionEvent evt) {
@@ -714,15 +702,14 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 
 	@Override
 	public void roiDragged(ROIEvent evt) {
-		// TODO Auto-generated method stub
-		
+		updateRegion(evt);
+		update((IRegion)evt.getSource(), evt.getROI());
 	}
 
 	@Override
 	public void roiChanged(ROIEvent evt) {
-		// TODO Auto-generated method stub
-		
+		final IRegion region = (IRegion)evt.getSource();
+		update(region, region.getROI());
 	}
-	
 	
 }
