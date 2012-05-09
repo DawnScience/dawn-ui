@@ -13,6 +13,7 @@ import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.RegionEvent;
+import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
@@ -61,8 +62,8 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 	private Composite     composite;
 	private TableViewer   viewer;
 	private IRegion       fitRegion;
-	private Job           fittingJob;
-	private FittedPeaks bean;
+	private FittingJob    fittingJob;
+	private FittedPeaks   bean;
 	
 	private ISelectionChangedListener viewUpdateListener;
 	private MenuAction tracesMenu;
@@ -71,21 +72,29 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 
 	public FittingTool() {
 		super();
-		this.fittingJob = createFittingJob();
+		this.fittingJob = new FittingJob();
 		
 		this.traceListener = new ITraceListener.Stub() {
 			
 			@Override
 			public void tracesPlotted(TraceEvent evt) {
 				
-				updateTracesChoice();
+				final List<ITrace> traces = evt.getSource() instanceof List
+				                          ? (List<ITrace>)evt.getSource()
+				                          : null;
+				if (traces!=null && bean!=null && bean.getPeakTraces()!=null) {
+					traces.removeAll(bean.getPeakTraces());
+				}
+				if (traces!=null && !traces.isEmpty()) {
+					updateTracesChoice();
+				}
 			   
 			}
 			
 			@Override
 			public void tracesCleared(TraceEvent evet) {
-				tracesMenu.clear();
-				getSite().getActionBars().updateActionBars();
+				if (tracesMenu!=null) tracesMenu.clear();
+				if (getSite()!=null) getSite().getActionBars().updateActionBars();
 			}
 		};
 
@@ -197,7 +206,8 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		try {
 			if (bean!=null) bean.activate();
 			getPlottingSystem().addRegionListener(this);
-			this.fitRegion = getPlottingSystem().createRegion("Fit selection", getPlottingSystem().is2D() ? IRegion.RegionType.BOX : IRegion.RegionType.XAXIS);
+			this.fitRegion = getPlottingSystem().createRegion(RegionUtils.getUniqueName("Fit selection", getPlottingSystem()), 
+					                                          getPlottingSystem().is2D() ? IRegion.RegionType.BOX : IRegion.RegionType.XAXIS);
 			fitRegion.setRegionColor(ColorConstants.green);
 			
 			if (viewer!=null) {
@@ -266,7 +276,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 			return;
 		}
 		if (evt.getRegion()==fitRegion) {
-			fittingJob.schedule();
+			fittingJob.fit();
 		}
 	}
 
@@ -281,55 +291,57 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		
 	}
 
-	public Job createFittingJob() {
+	private final class FittingJob extends Job {
 		
-		final Job fit = new Job("Fit peaks") {
-			
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
+		public FittingJob() {
+			super("Fit peaks");
+			setPriority(Job.INTERACTIVE);
+		}
 
-				if (composite==null)        return Status.CANCEL_STATUS;
-				if (composite.isDisposed()) return Status.CANCEL_STATUS;
-				
-				final RectangularROI bounds = (RectangularROI) fitRegion.getROI();
-				if (fitRegion==null || bounds==null) return Status.CANCEL_STATUS;
-				
-				getPlottingSystem().removeRegionListener(FittingTool.this);
-				
-				composite.getDisplay().syncExec(new Runnable() {
-					public void run() {
-						getPlottingSystem().removeRegion(fitRegion);
-						if (bean!=null) bean.removeSelections(getPlottingSystem());
-				    }
-				});
-				if (selectedTrace==null)    return Status.CANCEL_STATUS;
-			
-				
-				// We chop x and y by the region bounds. We assume the
-				// plot is an XAXIS selection therefore the indices in
-				// y = indices chosen in x.
-				final double[] p1 = bounds.getPoint();
-				final double[] p2 = bounds.getEndPoint();
-				
-				// We peak fit only the first of the data sets plotted for now.
-				AbstractDataset x  = selectedTrace.getXData();
-				AbstractDataset y  = selectedTrace.getYData();
-				
-				AbstractDataset[] a= FittingUtils.xintersection(x,y,p1[0],p2[0]);
-				x = a[0]; y=a[1];
-				
-				final FittedPeaks bean = FittingUtils.getFittedPeaks(x, y, monitor);
-				createFittedPeaks(bean);
-				
-				return Status.OK_STATUS;
-			}
-		};
-		
-		fit.setSystem(true);
-		fit.setUser(true);
-		fit.setPriority(Job.INTERACTIVE);
-		return fit;
-	}
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+
+			if (composite==null)        return Status.CANCEL_STATUS;
+			if (composite.isDisposed()) return Status.CANCEL_STATUS;
+
+			final RectangularROI bounds = (RectangularROI) fitRegion.getROI();
+			if (fitRegion==null || bounds==null) return Status.CANCEL_STATUS;
+
+			getPlottingSystem().removeRegionListener(FittingTool.this);
+
+			composite.getDisplay().syncExec(new Runnable() {
+				public void run() {
+					getPlottingSystem().removeRegion(fitRegion);
+					if (bean!=null) bean.removeSelections(getPlottingSystem());
+				}
+			});
+			if (selectedTrace==null)    return Status.CANCEL_STATUS;
+
+
+			// We chop x and y by the region bounds. We assume the
+			// plot is an XAXIS selection therefore the indices in
+			// y = indices chosen in x.
+			final double[] p1 = bounds.getPoint();
+			final double[] p2 = bounds.getEndPoint();
+
+			// We peak fit only the first of the data sets plotted for now.
+			AbstractDataset x  = selectedTrace.getXData();
+			AbstractDataset y  = selectedTrace.getYData();
+
+			AbstractDataset[] a= FittingUtils.xintersection(x,y,p1[0],p2[0]);
+			x = a[0]; y=a[1];
+
+			final FittedPeaks bean = FittingUtils.getFittedPeaks(x, y, monitor);
+			createFittedPeaks(bean);
+
+			return Status.OK_STATUS;
+		}
+
+		public void fit() {
+			cancel();
+			schedule();
+		}
+	};
 
 	/**
 	 * Thread safe
@@ -464,7 +476,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 				public void run() {
 					if (iTrace instanceof ILineTrace) FittingTool.this.selectedTrace = (ILineTrace)iTrace;
 					tracesMenu.setSelectedAction(this);
-					if (fittingJob!=null&&isActive()) fittingJob.schedule();
+					if (fittingJob!=null&&isActive()) fittingJob.fit();
 					setChecked(true);
 				}
 			};
@@ -472,8 +484,10 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 			group.add(action);
 		}
 		
-		tracesMenu.setSelectedAction(0);
-		tracesMenu.getAction(0).setChecked(true);
+		if (tracesMenu!=null && !tracesMenu.isEmpty()) {
+			tracesMenu.setSelectedAction(0);
+			tracesMenu.getAction(0).setChecked(true);
+		}
 				
 		getSite().getActionBars().updateActionBars();
 	}
@@ -553,7 +567,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 				public void run() {
 					Activator.getDefault().getPreferenceStore().setValue(FittingConstants.PEAK_TYPE, peak.getClass().getName());
 					setChecked(true);
-					if (fittingJob!=null&&isActive()) fittingJob.schedule();
+					if (fittingJob!=null&&isActive()) fittingJob.fit();
 					peakType.setSelectedAction(this);
 				}
 			};
@@ -596,7 +610,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 					Activator.getDefault().getPreferenceStore().setValue(FittingConstants.PEAK_NUMBER, peak);
 					numberPeaks.setSelectedAction(this);
 					setChecked(true);
-					if (isActive()) fittingJob.schedule();
+					if (isActive()) fittingJob.fit();
 				}
 			};
 			
