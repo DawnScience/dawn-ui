@@ -71,7 +71,7 @@ public class LineProfileTool extends ProfileTool {
 
 	@Override
 	protected boolean isRegionTypeSupported(RegionType type) {
-		return type==RegionType.LINE || type==RegionType.XAXIS_LINE || type == RegionType.YAXIS_LINE;
+		return type==RegionType.LINE;
 	}
 
 	@Override
