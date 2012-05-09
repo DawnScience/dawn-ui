@@ -63,7 +63,7 @@ public class PolylineSelection extends AbstractSelectionRegion {
 	@Override
 	protected void updateConnectionBounds() {
 		if (pline != null) {
-			Rectangle b = pline.getUpdatedBounds();
+			Rectangle b = pline.updateFromHandles();
 			pline.setBounds(b);
 		}
 	}
@@ -117,7 +117,7 @@ public class PolylineSelection extends AbstractSelectionRegion {
 			if (pline == null)
 				return;
 
-			pline.updateROI((PolygonalROI) roi);
+			pline.updateFromROI((PolygonalROI) roi);
 
 			updateConnectionBounds();
 		}
@@ -166,7 +166,7 @@ public class PolylineSelection extends AbstractSelectionRegion {
 			setRegionObjects(this, handles);
 		}
 
-		private Rectangle getUpdatedBounds() {
+		private Rectangle updateFromHandles() {
 			int i = 0;
 			Rectangle b = null;
 			for (IFigure f : handles) { // this is called first so update points
@@ -183,7 +183,11 @@ public class PolylineSelection extends AbstractSelectionRegion {
 			return b;
 		}
 
-		public void updateROI(PolygonalROI proi) {
+		/**
+		 * Update according to ROI
+		 * @param sroi
+		 */
+		public void updateFromROI(PolygonalROI proi) {
 			final PointList pl = getPoints();
 			final int imax = handles.size();
 			if (imax != proi.getSides())

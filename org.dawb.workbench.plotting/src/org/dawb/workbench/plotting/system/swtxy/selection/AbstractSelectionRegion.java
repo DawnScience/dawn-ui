@@ -87,7 +87,7 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 
 	/**
 	 * If there is a fill figure, this method may be called to 
-	 * refill the fill.
+	 * refill the fill - typically, this occurs after a translation event
 	 */
 	protected abstract void updateConnectionBounds();
 
@@ -185,10 +185,12 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 		}
 	}
 
+	@Override
 	public void axisRevalidated(Axis axis) {
 		updateROI();
 	}
 
+	@Override
 	public void axisRangeChanged(Axis axis, Range old_range, Range new_range) {
 		updateROI();
 	}
@@ -277,8 +279,7 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 		if (regionObjects!=null) for (IFigure ob : regionObjects) {
 			if (ob instanceof SelectionHandle) {
 				((SelectionHandle)ob).setAlpha(alpha);
-			}
-			if (ob instanceof Shape) {
+			} else if (ob instanceof Shape) {
 				((Shape)ob).setAlpha(alpha);
 			}
 		}
