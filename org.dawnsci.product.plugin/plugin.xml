@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         id="DAWN"
+         point="org.eclipse.core.runtime.products">
+      <product
+            application="org.eclipse.ui.ide.workbench"
+            name="DAWN Science">
+         <property
+               name="appName"
+               value="DAWN Science">
+         </property>
+         <property
+               name="startupForegroundColor"
+               value="0000FF">
+         </property>
+         <property
+               name="startupMessageRect"
+               value="0,20,200,20">
+         </property>
+         <property
+               name="startupProgressRect"
+               value="0,0,200,15">
+         </property>
+         <property
+               name="preferenceCustomization"
+               value="plugin_customization.ini">
+         </property>
+         <property
+               name="aboutImage"
+               value="icons/Temp-3Col-Splash.png">
+         </property>
+         <property
+               name="windowImages"
+               value="icons/Temp-16x16-icon.png,icons/Temp-48x48-icon.png">
+         </property>
+      </product>
+   </extension>
+
+</plugin>
