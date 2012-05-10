@@ -352,9 +352,12 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 			public void run() {
 				if (!isActive()) return;
 				final IStructuredSelection sel = (IStructuredSelection)viewer.getSelection();
-				if (sel!=null && sel.getFirstElement()!=null) {
+				
+				// ignore table item at index 0 as needed
+				if (sel!=null && sel.getFirstElement()!=null && viewer.getTable().getSelectionIndex() != 0) {
 					final IRegion region = (IRegion)sel.getFirstElement();
 					getPlottingSystem().removeRegion(region);
+					viewer.refresh();
 				}
 			}
 		};
