@@ -29,7 +29,6 @@ import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 public class SectorSelection extends AbstractSelectionRegion {
 
 	DecoratedSector sector;
-	SectorROIHandler roiHandler;
 
 	public SectorSelection(String name, Axis xAxis, Axis yAxis) {
 		super(name, xAxis, yAxis);
@@ -47,7 +46,6 @@ public class SectorSelection extends AbstractSelectionRegion {
 		sync(getBean());
 		sector.setLineWidth(getLineWidth());
 		updateROI();
-		roiHandler = new SectorROIHandler((SectorROI) roi);
 		if (roi == null)
 			createROI(true);
 	}
@@ -182,7 +180,6 @@ public class SectorSelection extends AbstractSelectionRegion {
 				Math.toRadians(360 - a[1]), Math.toRadians(360 - a[0]));
 		if (recordResult) {
 			roi = sroi;
-			roiHandler.setROI(sroi);
 		}
 
 		return sroi;
@@ -194,9 +191,7 @@ public class SectorSelection extends AbstractSelectionRegion {
 			if (sector == null)
 				return;
 
-			sector.updateFromROI((SectorROI) roi, null);
-			if (roiHandler != null)
-				roiHandler.setROI(roi);
+			sector.updateFromROI((SectorROI) roi);
 			updateConnectionBounds();
 		}
 	}
@@ -210,11 +205,13 @@ public class SectorSelection extends AbstractSelectionRegion {
 		List<IFigure> handles;
 		private Figure parent;
 		private static final int SIDE = 8;
+		SectorROIHandler roiHandler;
 
 		public DecoratedSector(Figure parent) {
 			super();
 			handles = new ArrayList<IFigure>();
 			this.parent = parent;
+			roiHandler = new SectorROIHandler((SectorROI) roi);
 		}
 
 		/**
@@ -239,7 +236,7 @@ public class SectorSelection extends AbstractSelectionRegion {
 			else
 				setRadii(ro,  ri);
 			setAnglesDegrees(a[0], a[1]);
-			createROI(true);
+			roiHandler.setROI(createROI(true));
 
 			FigureListener listener = new FigureListener() {
 				@Override
@@ -331,10 +328,8 @@ public class SectorSelection extends AbstractSelectionRegion {
 						SectorROI croi = roiHandler.interpretMouseDragging(spt,
 								new int[] { (int) xa.getPositionValue(end.x(), false), (int) ya.getPositionValue(end.y(), false) });
 
-						updateFromROI(croi, null);
-
+						updateFromROI(croi);
 						roiHandler.unconfigureDragging();
-						roiHandler.setROI(croi);
 						roi = croi;
 
 						fireROIChanged(croi);
@@ -348,7 +343,6 @@ public class SectorSelection extends AbstractSelectionRegion {
 		 * Update selection according to centre handle
 		 */
 		private void updateFromHandles() {
-//			int i = 0;
 			if (handles.size() > 0) {
 				IFigure f = handles.get(roiHandler.size() - 1);
 				if (f instanceof SelectionHandle) {
@@ -357,7 +351,6 @@ public class SectorSelection extends AbstractSelectionRegion {
 					setCentre(p.preciseX(), p.preciseY());
 				}
 			}
-			// TODO deal with rest of handles (or do we?)
 		}
 
 		@Override
@@ -376,9 +369,18 @@ public class SectorSelection extends AbstractSelectionRegion {
 		/**
 		 * Update according to ROI
 		 * @param sroi
+		 */
+		public void updateFromROI(SectorROI sroi) {
+			updateFromROI(sroi, null);
+			roiHandler.setROI(sroi);
+		}
+
+		/**
+		 * Update according to ROI
+		 * @param sroi
 		 * @param omit selection handle to not move
 		 */
-		public void updateFromROI(SectorROI sroi, SelectionHandle omit) {
+		private void updateFromROI(SectorROI sroi, SelectionHandle omit) {
 			final double x = sroi.getPointX();
 			final double y = sroi.getPointY();
 			final double[] r = sroi.getRadii();
