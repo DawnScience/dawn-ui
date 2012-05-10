@@ -366,6 +366,11 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	public AbstractDataset getDownsampled() {
 		return getDownsampled(getImage());
 	}
+	
+	public AbstractDataset getDownsampledMask() {
+		if (getMask()==null) return null;
+		return getDownsampled(getMask());
+	}
 
 	/**
 	 * Returns the bin for downsampling, either 1,2,4 or 8 currently.
