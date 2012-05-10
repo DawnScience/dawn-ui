@@ -317,12 +317,16 @@ public class ROIViewer  {
 			ret = rr;
 			
 		} else if (roi instanceof SectorROI) {
+			SectorROI orig = (SectorROI)roi;
 			SectorROI sr = new SectorROI(rows.get(0).getxLikeVal(),
 					                     rows.get(0).getyLikeVal(),
 					                     rows.get(1).getxLikeVal(),
 					                     rows.get(1).getyLikeVal(),
-					                     rows.get(2).getxLikeVal(),
-					                     rows.get(2).getxLikeVal());
+					                     Math.toRadians(rows.get(2).getxLikeVal()),
+					                     Math.toRadians(rows.get(2).getyLikeVal()),
+					                     orig.getDpp(),
+					                     orig.isClippingCompensation(),
+					                     orig.getSymmetry());
 			ret = sr;
 		}
 		
