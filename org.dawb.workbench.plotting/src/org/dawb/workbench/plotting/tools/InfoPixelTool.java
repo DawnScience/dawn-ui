@@ -26,6 +26,7 @@ import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.PlottingFactory;
 import org.dawb.common.ui.plot.region.IROIListener;
 import org.dawb.common.ui.plot.region.IRegion;
+import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.ROIEvent;
 import org.dawb.common.ui.plot.region.RegionEvent;
@@ -61,9 +62,10 @@ import org.eclipse.ui.IActionBars;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.roi.PointROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
-public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRegionListener, MouseListener  {
+public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRegionListener, MouseListener {
 
 	private final static Logger logger = LoggerFactory.getLogger(InfoPixelTool.class);
 	
@@ -130,19 +132,18 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 			public Object[] getElements(Object inputElement) {
 				final Collection<IRegion> regions = getPlottingSystem().getRegions();
 				if (regions==null || regions.isEmpty()) return new Object[]{"-"};
-								
-				final List<IRegion> visible = new ArrayList<IRegion>(regions.size()/2);
 				
-				if(regions.size() % 2 == 0){
-					// add the intersection region between the two line regions					
-					for (int i=0; i< regions.size(); i = i +2){
-						// add only one region
-						IRegion pointRegion = (IRegion)(regions.toArray())[0];
-						// TODO Rita test that this is a point region, others may exist.
-						visible.add(pointRegion);
-					}
+			final List<IRegion> visible = new ArrayList<IRegion>();
+			
+				for (int i=0; i< regions.size(); i++){
+					IRegion pointRegion = (IRegion)(regions.toArray())[i];
+
+					if (pointRegion.getRegionType() == RegionType.XAXIS_LINE || pointRegion.getRegionType() == RegionType.POINT ){
+						
+						visible.add(pointRegion);										
+					}				
 				}
-				
+							
 				return visible.toArray(new IRegion[visible.size()]);
 			}
 		});
@@ -179,9 +180,9 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 				this.yHair = getPlottingSystem().createRegion(RegionUtils.getUniqueName("X Profile", getPlottingSystem()), IRegion.RegionType.YAXIS_LINE);
 				addRegion("Updating x cross hair", yHair);
 			}
-			
+
 		} catch (Exception ne) {
-			logger.error("Cannot create information box cross-hairs!", ne);
+			logger.error("Cannot create initial regions in pixel info tool!", ne);
 		}
 	}
 	
@@ -255,6 +256,7 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 			yHair.setVisible(false);
 			yHair.removeROIListener(this);
 		}
+		
 		plotter.clear();
 
 		if (getPlottingSystem()!=null) getPlottingSystem().removeTraceListener(traceListener);
@@ -280,39 +282,33 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 		return composite;
 	}
 
-	
-	@Override
-	public void regionAdded(RegionEvent evt) {
-		if (!isActive()) return;
-		if (viewer!=null) viewer.refresh();
-		if (evt.getRegion()!=null) {
-			evt.getRegion().addROIListener(this);
-		}
-	}
-
-	@Override
-	public void regionRemoved(RegionEvent evt) {
-		if (!isActive()) return;
-		if (viewer!=null) viewer.refresh();
-		if (evt.getRegion()!=null) {
-			evt.getRegion().removeROIListener(this);
-		}
-	}
-
 	@Override
 	public void mousePressed(MouseEvent evt) {
 		
 		if (!isActive()) return;
-		
-		final Collection<IRegion> regions = getPlottingSystem().getRegions();
-		if (regions==null || regions.isEmpty()) logger.debug("no region selected");//return new Object[]{"-"};
-		
-		// add the resulting point region which is the intersection between the 2 line regions
-		IRegion pointRegion = (IRegion)(regions.toArray())[0];
-			
-		viewer.refresh(pointRegion);
-		viewer.add(pointRegion);
 
+		final Collection<IRegion> regions = getPlottingSystem().getRegions();
+		if (regions==null || regions.isEmpty()) logger.debug("no region selected");		
+
+        try {
+    		// add a point region
+        	final IRegion point = getPlottingSystem().createRegion(RegionUtils.getUniqueName("Point", getPlottingSystem()), RegionType.POINT);
+        	final PointROI regionBounds= new PointROI();
+            double x = getPlottingSystem().getSelectedXAxis().getPositionValue(evt.x);
+            double y = getPlottingSystem().getSelectedYAxis().getPositionValue(evt.y);
+            regionBounds.setPoint(new double[]{x,y});
+            point.setROI(regionBounds);//.setRegionBounds(regionBounds);
+            point.setMobile(true);
+            point.setTrackMouse(true);
+            
+            getPlottingSystem().addRegion(point);
+
+    		viewer.refresh(point);
+    		viewer.add(point);
+
+     } catch (Exception e) {
+            logger.error("Cannot create point!", e);
+     }
 	}
 
 	@Override
@@ -321,6 +317,7 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 		
 	}
 
+	
 	@Override
 	public void mouseDoubleClicked(MouseEvent me) {
 		// TODO Auto-generated method stub
@@ -328,8 +325,6 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 
 	private void createActions() {
 
-		//TODO When I test actions, they are not working.
-		//Is it the same for you?
 		final Action copy = new Action("Copy region values to clipboard", Activator.getImageDescriptor("icons/plot-tool-measure-copy.png")) {
 			@Override
 			public void run() {
@@ -417,52 +412,57 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 		ColumnViewerToolTipSupport.enableFor(viewer,ToolTip.NO_RECREATE);
 
 		TableViewerColumn var   = new TableViewerColumn(viewer, SWT.CENTER, 0);
-		var.getColumn().setText("X position");
+		var.getColumn().setText("Point ID");
 		var.getColumn().setWidth(120);
 		var.setLabelProvider(new InfoPixelLabelProvider(this, 0));
 
 		var   = new TableViewerColumn(viewer, SWT.CENTER, 1);
-		var.getColumn().setText("Y position");
-		var.getColumn().setWidth(100);
+		var.getColumn().setText("X position");
+		var.getColumn().setWidth(120);
 		var.setLabelProvider(new InfoPixelLabelProvider(this, 1));
 
 		var   = new TableViewerColumn(viewer, SWT.CENTER, 2);
-		var.getColumn().setText("Data value");
+		var.getColumn().setText("Y position");
 		var.getColumn().setWidth(100);
 		var.setLabelProvider(new InfoPixelLabelProvider(this, 2));
 
 		var   = new TableViewerColumn(viewer, SWT.CENTER, 3);
-		var.getColumn().setText("q X (1/\u00c5)");
+		var.getColumn().setText("Data value");
 		var.getColumn().setWidth(100);
 		var.setLabelProvider(new InfoPixelLabelProvider(this, 3));
 
 		var   = new TableViewerColumn(viewer, SWT.CENTER, 4);
-		var.getColumn().setText("q Y (1/\u00c5)");
+		var.getColumn().setText("q X (1/\u00c5)");
 		var.getColumn().setWidth(100);
 		var.setLabelProvider(new InfoPixelLabelProvider(this, 4));
 
 		var   = new TableViewerColumn(viewer, SWT.CENTER, 5);
-		var.getColumn().setText("q Z (1/\u00c5)");
+		var.getColumn().setText("q Y (1/\u00c5)");
 		var.getColumn().setWidth(100);
 		var.setLabelProvider(new InfoPixelLabelProvider(this, 5));
 
 		var   = new TableViewerColumn(viewer, SWT.CENTER, 6);
-		var.getColumn().setText("2\u03b8 (\u00b0)");
-		var.getColumn().setWidth(80);
+		var.getColumn().setText("q Z (1/\u00c5)");
+		var.getColumn().setWidth(100);
 		var.setLabelProvider(new InfoPixelLabelProvider(this, 6));
 
 		var   = new TableViewerColumn(viewer, SWT.CENTER, 7);
-		var.getColumn().setText("Resolution (\u00c5)");
-		var.getColumn().setWidth(120);
+		var.getColumn().setText("2\u03b8 (\u00b0)");
+		var.getColumn().setWidth(80);
 		var.setLabelProvider(new InfoPixelLabelProvider(this, 7));
 
 		var   = new TableViewerColumn(viewer, SWT.CENTER, 8);
-		var.getColumn().setText("Dataset name");
+		var.getColumn().setText("Resolution (\u00c5)");
 		var.getColumn().setWidth(120);
 		var.setLabelProvider(new InfoPixelLabelProvider(this, 8));
-		
-	}
 
+		var   = new TableViewerColumn(viewer, SWT.CENTER, 9);
+		var.getColumn().setText("Dataset name");
+		var.getColumn().setWidth(120);
+		var.setLabelProvider(new InfoPixelLabelProvider(this, 9));
+
+	}
+	
 	public ROIBase getBounds(IRegion region) {
 		if (dragBounds!=null&&dragBounds.containsKey(region.getName())) return dragBounds.get(region.getName());
 		return region.getROI();
@@ -471,33 +471,58 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 	private void updateRegion(ROIEvent evt) {
 
 		if (viewer!=null) {
-			IRegion  region = (IRegion)evt.getSource();
-
-			if (region.getRegionType().toString().contains("XAXIS_LINE")){
+			IRegion region = null;
+			try {
+				region = (IRegion)evt.getSource();
+			
+				if (region.getRegionType() == RegionType.XAXIS_LINE){
 				this.xValues[0] = evt.getROI().getPointX();
-			}
-			if (region.getRegionType().toString().contains("YAXIS_LINE")){
+			  }
+			    if (region.getRegionType() == RegionType.YAXIS_LINE){
 				this.yValues[0] = evt.getROI().getPointY();
-			}
-			
-			ROIBase rb = evt.getROI();
-			
-			dragBounds.put(region.getName(), rb);
-			viewer.refresh(region);
+			  }
+							    
+				ROIBase rb = evt.getROI();
+							
+				dragBounds.put(region.getName(), rb);
+				viewer.refresh(region);
+				
+			} catch (Exception e) {
+				logger.error("problem creating point region:", e);
+			} 
 		}
 	}
 	
+	@Override
+	public void regionAdded(RegionEvent evt) {
+		if (!isActive()) return;
+		if (viewer!=null) viewer.refresh();
+		if (evt.getRegion()!=null) {
+			evt.getRegion().addROIListener(this);
+		}
+	}
 
+	@Override
+	public void regionRemoved(RegionEvent evt) {
+		if (!isActive()) return;
+		if (viewer!=null) viewer.refresh();
+		if (evt.getRegion()!=null) {
+			evt.getRegion().removeROIListener(this);
+		}
+	}
+
+	@Override
+	public void regionsRemoved(RegionEvent evt) {
+		if (!isActive()) return;
+		if (viewer!=null) viewer.refresh();
+		
+	}
+	
 	@Override
 	public void regionCreated(RegionEvent evt) {
 		// TODO Auto-generated method stub		
 	}
 
-	@Override
-	public void regionsRemoved(RegionEvent evt) {
-		// TODO Auto-generated method stub
-		
-	}
 
 	@Override
 	public void roiDragged(ROIEvent evt) {
@@ -506,7 +531,6 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 
 	@Override
 	public void roiChanged(ROIEvent evt) {
-
 	}
 	
 }

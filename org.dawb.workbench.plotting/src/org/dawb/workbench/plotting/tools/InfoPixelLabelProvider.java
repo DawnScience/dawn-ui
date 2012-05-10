@@ -18,8 +18,10 @@ package org.dawb.workbench.plotting.tools;
 
 import java.util.Collection;
 
+import uk.ac.diamond.scisoft.analysis.rcp.pixelinfoutils.Vector3dutil;
 import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.region.IRegion;
+import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -32,7 +34,6 @@ import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
 import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
-import uk.ac.diamond.scisoft.analysis.rcp.pixelinfoutils.Vector3dutil;
 
 public class InfoPixelLabelProvider extends ColumnLabelProvider {
 
@@ -99,29 +100,31 @@ public class InfoPixelLabelProvider extends ColumnLabelProvider {
 		}
 
 		switch(column) {
-		case 0: // "X position"
+		case 0: // "Point Id"
+			return ( ( (IRegion)element).getRegionType() == RegionType.POINT) ? ((IRegion)element).getName(): "";
+		case 1: // "X position"
 			return String.format("% 4.4f", x);
-		case 1: // "Y position"
+		case 2: // "Y position"
 			return String.format("% 4.4f", y);
-		case 2: // "Data value"
+		case 3: // "Data value"
 			if (set == null || vectorUtil.getQMask(qSpace, x, y) == null) return "-";
 			return String.format("% 4.4f", set.getDouble((int)y, (int) x));
-		case 3: // q X
+		case 4: // q X
 			if (vectorUtil.getQMask(qSpace, x, y) == null) return "-";
 			return String.format("% 4.4f", vectorUtil.getQx());
-		case 4: // q Y
+		case 5: // q Y
 			if (vectorUtil.getQMask(qSpace, x, y) == null) return "-";
 			return String.format("% 4.4f", vectorUtil.getQy());
-		case 5: // q Z
+		case 6: // q Z
 			if (vectorUtil.getQMask(qSpace, x, y) == null) return "-";
 			return String.format("% 4.4f", vectorUtil.getQz());
-		case 6: // 20
+		case 7: // 20
 			if (qSpace == null) return "-";
 			return String.format("% 3.3f", Math.toDegrees(vectorUtil.getQScaterringAngle(qSpace)));
-		case 7: // resolution
+		case 8: // resolution
 			if (vectorUtil.getQMask(qSpace, x, y) == null) return "-";
 			return String.format("% 4.4f", (2*Math.PI)/vectorUtil.getQlength());
-		case 8: // Dataset name
+		case 9: // Dataset name
 			if (set == null) return "-";
 			return set.getName();
 
