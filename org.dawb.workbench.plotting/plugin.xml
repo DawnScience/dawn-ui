@@ -120,7 +120,7 @@
             class="org.dawb.workbench.plotting.views.ToolPageView"
             icon="icons/plot-tool-any.png"
             id="org.dawb.workbench.plotting.views.toolPageView.fixed"
-            name="Fixed Tool"
+            name=" "
             restorable="true">
       </view>
    </extension>

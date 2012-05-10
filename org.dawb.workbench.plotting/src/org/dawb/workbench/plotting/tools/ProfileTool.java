@@ -197,8 +197,10 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		if (getPlottingSystem()!=null) {
 			getPlottingSystem().removeRegionListener(regionListener);
 		}
-		final Collection<IRegion> regions = getPlottingSystem().getRegions();
-		if (regions!=null) for (IRegion iRegion : regions) iRegion.removeROIListener(this);
+		if (getPlottingSystem()!=null) {
+			final Collection<IRegion> regions = getPlottingSystem().getRegions();
+			if (regions!=null) for (IRegion iRegion : regions) iRegion.removeROIListener(this);
+		}
 	}
 	
 	@Override
