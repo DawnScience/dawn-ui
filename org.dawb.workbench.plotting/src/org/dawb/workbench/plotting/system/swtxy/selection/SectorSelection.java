@@ -32,7 +32,7 @@ public class SectorSelection extends AbstractSelectionRegion {
 
 	public SectorSelection(String name, Axis xAxis, Axis yAxis) {
 		super(name, xAxis, yAxis);
-		setRegionColor(ColorConstants.cyan);
+		setRegionColor(ColorConstants.red);
 		setAlpha(80);
 		setLineWidth(2);
 	}
