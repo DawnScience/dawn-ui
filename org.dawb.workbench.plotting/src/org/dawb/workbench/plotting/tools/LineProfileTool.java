@@ -29,6 +29,7 @@ public class LineProfileTool extends ProfileTool {
 						            IRegion      region, 
 						            ROIBase      rbs, 
 						            boolean      tryUpdate,
+				                     boolean      isDrag,
 						            IProgressMonitor monitor) {
         
 		if (monitor.isCanceled()) return;
