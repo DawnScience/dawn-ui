@@ -48,7 +48,7 @@ public class RadialProfileTool extends ProfileTool {
 		// to run this algorithm (radial and azimuthal separately?) 
 		// NOTE image.getDownsampled() is also possible as they will not normally be
 		// viewing at full resolution anyway but this means they may see a wrong integration.
-		AbstractDataset[] profile = ROIProfile.sector(image.getData(), image.getMask(), sroi);
+		AbstractDataset[] profile = ROIProfile.sector(image.getData(), image.getMask(), sroi, true, false, true);
 		
         if (profile==null) return;
 				

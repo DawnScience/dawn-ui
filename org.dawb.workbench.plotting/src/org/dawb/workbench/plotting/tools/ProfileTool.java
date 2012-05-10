@@ -328,7 +328,10 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 	
 		if (r!=null && !isRegionTypeSupported(r.getRegionType())) return; // Nothing to do.
 
-        if (isUpdateRunning)  updateProfiles.cancel();
+        if (isUpdateRunning)
+        	for (Job job : Job.getJobManager().find(null))
+        		if (job.getName().equals("Profile Update") && job.getState() != Job.RUNNING)
+        			job.cancel();
          
 		this.currentRegion = r;
 		this.currentROI = rb;

@@ -50,9 +50,10 @@ public class SectorSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	protected void updateConnectionBounds() {
+	protected void updateConnectionBounds() { // called after a handle translation
 		if (sector != null) {
-			Rectangle b = sector.getUpdatedBounds();
+			sector.updateFromHandles();
+			Rectangle b = sector.getBounds();
 			if (b != null)
 				sector.setBounds(b);
 		}
@@ -137,13 +138,14 @@ public class SectorSelection extends AbstractSelectionRegion {
 				}
 			}
 		}
-		return new double[] {anglea, (anglea + l)};
+
+		return l < 0 ? new double[] {anglea + l, anglea} : new double[] {anglea, anglea + l};
 	}
 
 	@Override
 	public void setLocalBounds(PointList clicks, Rectangle parentBounds) {
 		if (sector != null) {
-			sector.setPoints(clicks);
+			sector.setup(clicks);
 			setRegionColor(getRegionColor());
 			setOpaque(false);
 			setAlpha(getAlpha());
@@ -182,7 +184,7 @@ public class SectorSelection extends AbstractSelectionRegion {
 			if (sector == null)
 				return;
 
-			sector.updateROI((SectorROI) roi);
+			sector.updateFromROI((SectorROI) roi);
 
 			updateConnectionBounds();
 		}
@@ -190,7 +192,7 @@ public class SectorSelection extends AbstractSelectionRegion {
 
 	@Override
 	public int getMaximumMousePresses() {
-		return 3; // signifies unlimited presses
+		return 3;
 	}
 
 	class DecoratedSector extends Sector {
@@ -204,7 +206,11 @@ public class SectorSelection extends AbstractSelectionRegion {
 			this.parent = parent;
 		}
 
-		public void setPoints(PointList points) {
+		/**
+		 * Set up sector according to clicks
+		 * @param points
+		 */
+		public void setup(PointList points) {
 			final Point cen = points.getFirstPoint();
 			Point inn = points.getPoint(1);
 			Dimension rd = inn.getDifference(cen);
@@ -237,23 +243,16 @@ public class SectorSelection extends AbstractSelectionRegion {
 			h.addFigureListener(listener);
 			handles.add(h);
 
-//			for (int i = 0, imax = points.size(); i < imax; i++) {
-//				Point p = points.getPoint(i);
-//				RectangularHandle h = new RectangularHandle(getXAxis(), getYAxis(), getRegionColor(), this, SIDE, p.preciseX(), p.preciseY());
-//				parent.add(h);
-//				mover = new FigureTranslator(getXyGraph(), h);
-//				mover.addTranslationListener(createRegionNotifier());
-//				h.addFigureListener(listener);
-//				handles.add(h);
-//			}
-//
 			addFigureListener(listener);
 			mover = new FigureTranslator(getXyGraph(), parent, this, handles);
 			mover.addTranslationListener(createRegionNotifier());
 			setRegionObjects(this, handles);
 		}
 
-		private Rectangle getUpdatedBounds() {
+		/**
+		 * Update selection according to handles
+		 */
+		private void updateFromHandles() {
 //			int i = 0;
 			Rectangle b = null;
 			if (handles.size() > 0) {
@@ -264,23 +263,27 @@ public class SectorSelection extends AbstractSelectionRegion {
 					setCentre(p.preciseX(), p.preciseY());
 				}
 			}
-//			for (IFigure f : handles) { // this is called first so update points
-//				if (f instanceof SelectionHandle) {
-//					SelectionHandle h = (SelectionHandle) f;
-//					setPoint(h.getSelectionPoint(), i++);
-//					if (b == null) {
-//						b = new Rectangle(h.getBounds());
-//					} else {
-//						b.union(h.getBounds());
-//					}
-//				}
-//			}
-			b = getBounds();
-			
+			// TODO deal with rest of handles
+		}
+
+		@Override
+		public Rectangle getBounds() {
+			Rectangle b = super.getBounds();
+			if (handles != null)
+			for (IFigure f : handles) {
+				if (f instanceof SelectionHandle) {
+					SelectionHandle h = (SelectionHandle) f;
+					b.union(h.getBounds());
+				}
+			}
 			return b;
 		}
 
-		public void updateROI(SectorROI sroi) {
+		/**
+		 * Update according to ROI
+		 * @param sroi
+		 */
+		public void updateFromROI(SectorROI sroi) {
 			final double x = sroi.getPointX();
 			final double y = sroi.getPointY();
 			final double[] r = sroi.getRadii();
@@ -302,20 +305,6 @@ public class SectorSelection extends AbstractSelectionRegion {
 				}
 			}
 
-//			final PointList pl = getPoints();
-//			final int imax = handles.size();
-//			if (imax != proi.getSides())
-//				return;
-//
-//			final Axis xa = getXAxis();
-//			final Axis ya = getYAxis();
-//			for (int i = 0; i < imax; i++) {
-//				PointROI p = proi.getPoint(i);
-//				Point np = new Point(xa.getValuePosition(p.getPointX(), false), ya.getValuePosition(p.getPointY(), false));
-//				pl.setPoint(np, i);
-//				SelectionHandle h = (SelectionHandle) handles.get(i);
-//				h.setSelectionPoint(np);
-//			}
 		}
 
 		@Override
