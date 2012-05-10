@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import org.eclipse.osgi.internal.module.GroupingChecker;
 import org.eclipse.swt.widgets.Display;
 
 /**

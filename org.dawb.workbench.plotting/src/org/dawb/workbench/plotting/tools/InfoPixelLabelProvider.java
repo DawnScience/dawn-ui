@@ -18,7 +18,6 @@ package org.dawb.workbench.plotting.tools;
 
 import java.util.Collection;
 
-import uk.ac.diamond.scisoft.analysis.rcp.pixelinfoutils.Vector3dutil;
 import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.trace.IImageTrace;
@@ -33,6 +32,7 @@ import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
 import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
+import uk.ac.diamond.scisoft.analysis.rcp.pixelinfoutils.Vector3dutil;
 
 public class InfoPixelLabelProvider extends ColumnLabelProvider {
 
