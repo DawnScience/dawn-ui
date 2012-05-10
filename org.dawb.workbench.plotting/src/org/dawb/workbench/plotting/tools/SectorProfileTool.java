@@ -166,9 +166,14 @@ public abstract class SectorProfileTool extends ProfileTool {
 		
 		final AbstractDataset data = isDrag ? image.getDownsampled()     : image.getData();
 		final AbstractDataset mask = isDrag ? image.getDownsampledMask() : image.getMask();
-		if (isDrag) sroi.downsample(image.getDownsampleBin());
 		
-		final AbstractDataset integral = getIntegral(data, mask, sroi, region, isDrag);	
+		SectorROI downsroi = null;
+		if (isDrag) {
+			downsroi = sroi.copy();
+			downsroi.downsample(image.getDownsampleBin());
+		}
+			
+		final AbstractDataset integral = getIntegral(data, mask, isDrag ? downsroi : sroi, region, isDrag);	
         if (integral==null) return;
 				
 		final AbstractDataset xi = getXAxis(sroi, integral);
