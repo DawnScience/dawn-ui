@@ -386,6 +386,10 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 				fireROIChanged(createROI(true));
 				fireROISelection();
 			}
+
+			@Override
+			public void onActivate(TranslationEvent evt) {
+			}
 		};
 	}
 
