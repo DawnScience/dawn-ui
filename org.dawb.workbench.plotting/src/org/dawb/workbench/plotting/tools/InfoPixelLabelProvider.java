@@ -18,7 +18,6 @@ package org.dawb.workbench.plotting.tools;
 
 import java.util.Collection;
 
-import uk.ac.diamond.scisoft.analysis.rcp.pixelinfoutils.Vector3dutil;
 import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
@@ -34,6 +33,8 @@ import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
 import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
+import uk.ac.diamond.scisoft.analysis.rcp.pixelinfoutils.Vector3dutil;
+import uk.ac.diamond.scisoft.analysis.roi.PointROI;
 
 public class InfoPixelLabelProvider extends ColumnLabelProvider {
 
@@ -60,8 +61,15 @@ public class InfoPixelLabelProvider extends ColumnLabelProvider {
 		
 		if (element instanceof IRegion){
 			
-			x = tool.xValues[0];
-			y = tool.yValues[0];
+			final IRegion region = (IRegion)element;
+			if (region.getRegionType()==RegionType.POINT) {
+				PointROI pr = (PointROI)tool.getBounds(region);
+				x = pr.getPointX();
+				y = pr.getPointY();
+			} else {
+				x = tool.xValues[0];
+				y = tool.yValues[0];
+			}
 
 		}else {
 			return null;
