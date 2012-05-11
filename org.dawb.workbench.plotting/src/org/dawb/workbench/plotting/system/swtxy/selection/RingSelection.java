@@ -10,11 +10,15 @@ import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.UpdateManager;
+import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.widgets.Display;
 
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
@@ -63,10 +67,25 @@ class RingSelection extends AbstractSelectionRegion {
 	private Figure             connection;
 	private SelectionHandle innerControl, outerControl;
 	
-	RingSelection(String name, Axis xAxis, Axis yAxis) {
+	protected Label label = null;
+	protected Dimension labeldim;
+	
+	public RingSelection(String name, Axis xAxis, Axis yAxis) {
 		super(name, xAxis, yAxis);
 		setRegionColor(ColorConstants.yellow);	
 		setAlpha(80);
+		
+		label = new Label();
+		label.setForegroundColor(getLabelColour()!= null ? getLabelColour() : ColorConstants.black);
+		label.setText(getName());
+		label.setFont(new Font(Display.getCurrent(), "Dialog", 10, SWT.NORMAL));
+		labeldim = label.getTextUtilities().getTextExtents(getName(), label.getFont());
+	}
+	
+	@Override
+	public void setShowLabel(boolean showLabel) {
+		super.setShowLabel(showLabel);
+		label.setVisible(showLabel);
 	}
 
 	@Override
@@ -79,6 +98,7 @@ class RingSelection extends AbstractSelectionRegion {
      	this.outerControl = createSelectionHandle();
   	
 		this.connection = new RegionFillFigure(this) {
+
 			@Override
 			public void paintFigure(Graphics gc) {
 				super.paintFigure(gc);
@@ -99,7 +119,8 @@ class RingSelection extends AbstractSelectionRegion {
 				final Point     br  = (new Rectangle(out.getBottomRight(), in.getBottomRight())).getCenter();
 				final Rectangle mid = new Rectangle(tl, br);
 				gc.drawOval(mid); 
-				RingSelection.this.drawLabel(gc, new Point(mid.getCenter().x, mid.getCenter().y-innerRad), getLabelColour());
+				
+				label.setLocation(new Point(mid.getCenter().x, mid.getCenter().y-innerRad));
 			}
 
 			@Override
@@ -113,6 +134,8 @@ class RingSelection extends AbstractSelectionRegion {
 				return rad <= outerRad && rad > innerRad;
 			}
 		};
+
+		
 		connection.setCursor(Draw2DUtils.getRoiMoveCursor());
 		connection.setBackgroundColor(getRegionColor());
 		connection.setBounds(new Rectangle(0,0,100,100));
@@ -122,13 +145,14 @@ class RingSelection extends AbstractSelectionRegion {
 		parent.add(center);
 		parent.add(innerControl);
 		parent.add(outerControl);
-				
+		parent.add(label);
+		
 		FigureTranslator mover = new FigureTranslator(getXyGraph(), parent, connection, Arrays.asList(new IFigure[]{center, connection, innerControl, outerControl}));
 		// Add a translation listener to be notified when the mover will translate so that
 		// we do not recompute point locations during the move.
 		mover.addTranslationListener(createRegionNotifier());
 		
-		setRegionObjects(connection, center, innerControl, outerControl);
+		setRegionObjects(connection, center, innerControl, outerControl, label);
 		sync(getBean());
 		updateROI();
 		if (roi == null)
@@ -263,10 +287,17 @@ class RingSelection extends AbstractSelectionRegion {
 		Rectangle out = new Rectangle(new Point(cen.x-diff, cen.y-diff), new Point(cen.x+diff, cen.y+diff));
 		diff          = Math.round(1.1f*((Math.min(outerRad, innerRad)-cen.y)));
 		out.union(new Rectangle(new Point(cen.x-diff, cen.y-diff), new Point(cen.x+diff, cen.y+diff)));
-		
-		connection.setBounds(out);
-		
+
 		UpdateManager updateMgr = connection.getParent().getUpdateManager();
+
+		if (label != null && labeldim != null) {
+			Point pos1 = label.getLocation();
+			Point pos2 = new Point(pos1.x + labeldim.width + 10, pos1.y + labeldim.height + 10);
+			Rectangle r = new Rectangle(pos1, pos2);
+			label.setBounds(r);
+			updateMgr.addDirtyRegion(label, r);
+		}
+		connection.setBounds(out);
 		updateMgr.addDirtyRegion(connection, out);
 	}
 	
