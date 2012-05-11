@@ -20,8 +20,10 @@ import org.dawb.common.ui.plot.tool.AbstractToolPage;
 import org.dawb.common.ui.plot.tool.IToolPageSystem;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
+import org.dawb.common.ui.plot.trace.IPaletteListener;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
+import org.dawb.common.ui.plot.trace.PaletteEvent;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -46,6 +48,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 	protected AbstractPlottingSystem profilePlottingSystem;
 	private   ITraceListener         traceListener;
 	private   IRegionListener        regionListener;
+	private   IPaletteListener       paletteListener;
 	private   ProfileJob             updateProfiles;
 	private   Map<String,Collection<ITrace>> registeredTraces;
 
@@ -56,6 +59,13 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 			profilePlottingSystem = PlottingFactory.getPlottingSystem();
 			updateProfiles = new ProfileJob();
 			
+			this.paletteListener = new IPaletteListener.Stub() {
+				@Override
+				public void maskChanged(PaletteEvent evt) {
+					update(null, null, false);
+				}
+			};
+			
 			this.traceListener = new ITraceListener.Stub() {
 				@Override
 				public void tracesPlotted(TraceEvent evt) {
@@ -63,6 +73,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 					if (!(evt.getSource() instanceof List<?>)) {
 						return;
 					}
+					if (getImageTrace()!=null) getImageTrace().addPaletteListener(paletteListener);
 					update(null, null, false);
 				}
 			};
@@ -168,9 +179,17 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		}
 		if (getPlottingSystem()!=null) {
 			getPlottingSystem().addRegionListener(regionListener);
-		}		
-		final Collection<IRegion> regions = getPlottingSystem().getRegions();
-		if (regions!=null) for (IRegion iRegion : regions) iRegion.addROIListener(this);
+		}	
+		
+		if (getPlottingSystem()!=null) {
+			final Collection<IRegion> regions = getPlottingSystem().getRegions();
+			if (regions!=null) for (IRegion iRegion : regions) iRegion.addROIListener(this);
+		}
+		
+		// We try to listen to the image mask changing and reprofile if it does.
+		if (getPlottingSystem()!=null) {
+			if (getImageTrace()!=null) getImageTrace().addPaletteListener(paletteListener);
+		}
 		
 		// Start with a selection of the right type
 		try {
@@ -203,6 +222,10 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 			final Collection<IRegion> regions = getPlottingSystem().getRegions();
 			if (regions!=null) for (IRegion iRegion : regions) iRegion.removeROIListener(this);
 		}
+		if (getPlottingSystem()!=null) {
+			if (getImageTrace()!=null) getImageTrace().removePaletteListener(paletteListener);
+		}
+
 	}
 	
 	@Override
