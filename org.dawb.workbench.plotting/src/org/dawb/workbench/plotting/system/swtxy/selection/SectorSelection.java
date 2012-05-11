@@ -51,6 +51,14 @@ public class SectorSelection extends AbstractSelectionRegion {
 		if (roi == null)
 			createROI(true);
 	}
+	
+	@Override
+	public boolean containsPoint(double x, double y) {
+		
+		final int xpix = getXAxis().getValuePosition(x, false);
+		final int ypix = getYAxis().getValuePosition(y, false);
+        return sector.containsPoint(xpix, ypix);
+	}
 
 	@Override
 	public RegionType getRegionType() {
