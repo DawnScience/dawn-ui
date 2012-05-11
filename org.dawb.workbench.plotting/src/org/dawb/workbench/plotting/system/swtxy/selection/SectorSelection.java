@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.csstudio.swt.xygraph.figures.Axis;
+import org.dawb.common.ui.plot.region.IRegion;
+import org.dawb.common.ui.plot.region.IRegionContainer;
 import org.dawb.workbench.plotting.system.swtxy.translate.FigureTranslator;
 import org.dawb.workbench.plotting.system.swtxy.translate.TranslationEvent;
 import org.dawb.workbench.plotting.system.swtxy.translate.TranslationListener;
@@ -201,7 +203,7 @@ public class SectorSelection extends AbstractSelectionRegion {
 		return 3;
 	}
 
-	class DecoratedSector extends Sector {
+	class DecoratedSector extends Sector implements IRegionContainer{
 		List<IFigure> handles;
 		private Figure parent;
 		private static final int SIDE = 8;
@@ -416,6 +418,16 @@ public class SectorSelection extends AbstractSelectionRegion {
 			for (IFigure f : handles) {
 				f.paint(graphics);
 			}
+		}
+
+		@Override
+		public IRegion getRegion() {
+			return SectorSelection.this;
+		}
+
+		@Override
+		public void setRegion(IRegion region) {
+			// Not possible to change the region.
 		}
 	}
 }
