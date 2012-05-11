@@ -1,10 +1,13 @@
 package org.dawb.workbench.plotting.system.swtxy.util;
 
+import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.Shape;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 
 /**
  * A Draw2D annular sector. Its location is the centre (not the top-left corner of its bounding box)
@@ -103,16 +106,36 @@ public class Sector extends Shape {
 		if (r < radius[0] || r > radius[1])
 			return false;
 		double a = Math.toDegrees(Math.atan2(py, px));
-		if (a < 0)
-			a += 360;
+		if (angle[0] > 0) {
+			if (a < 0)
+				a += 360;
+		} else {
+			if (a < angle[0])
+				a += 360;
+		}
 
 		return a >= angle[0] && a <= angle[1];
 	}
 
 	@Override
 	protected void fillShape(Graphics graphics) {
-//		if (box != null)
-//			graphics.fillOval(box);
+		final double ri = radius[0], ro = radius[1];
+		final int din = (int) (2*ri), dout = (int) (2*ro);
+		final double as = Math.toRadians(angle[0]), ae = Math.toRadians(angle[1]);
+		final double cx = centre.preciseX(), cy = centre.preciseY();
+
+		final int ab = (int) Math.round(angle[0]);
+		final int al = (int) (angle[1] - angle[0]);
+
+		Color orig = graphics.getBackgroundColor();
+		graphics.setBackgroundColor(ColorConstants.red);
+		graphics.fillArc((int) (cx - ro), (int) (cy - ro), dout, dout, ab, al);
+		int alpha = graphics.getAlpha();
+		graphics.setAlpha(40);
+		graphics.setBackgroundColor(ColorConstants.black);
+		graphics.fillArc((int) (cx - ri), (int) (cy - ri), din, din, ab, al);
+		graphics.setAlpha(alpha);
+		graphics.setBackgroundColor(orig);
 	}
 
 	@Override
@@ -122,8 +145,10 @@ public class Sector extends Shape {
 		final double as = Math.toRadians(angle[0]), ae = Math.toRadians(angle[1]);
 		final double cx = centre.preciseX(), cy = centre.preciseY();
 
-		graphics.drawArc((int) (cx - ri), (int) (cy - ri), din, din, (int) angle[0], (int) (angle[1]-angle[0]));
-		graphics.drawArc((int) (cx - ro), (int) (cy - ro), dout, dout, (int) Math.round(angle[0]), (int) Math.floor(angle[1]-angle[0]));
+		final int ab = (int) Math.round(angle[0]);
+		final int al = (int) (angle[1] - angle[0]);
+		graphics.drawArc((int) (cx - ri), (int) (cy - ri), din, din, ab, al);
+		graphics.drawArc((int) (cx - ro), (int) (cy - ro), dout, dout, ab, al);
 		graphics.drawLine((int) (cx + ri*Math.cos(as)), (int) (cy - ri*Math.sin(as)),
 				(int) (cx + ro*Math.cos(as)), (int) (cy - ro*Math.sin(as)));
 		graphics.drawLine((int) (cx + ri*Math.cos(ae)), (int) (cy - ri*Math.sin(ae)),

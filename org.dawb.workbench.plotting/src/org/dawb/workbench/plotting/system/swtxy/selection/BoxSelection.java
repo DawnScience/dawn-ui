@@ -97,6 +97,10 @@ class BoxSelection extends AbstractSelectionRegion {
 				fireROISelection();
 			}
 
+			@Override
+			public void onActivate(TranslationEvent evt) {
+			}
+
 		});
 		
 		setRegionObjects(connection, p1, p2, p3, p4);

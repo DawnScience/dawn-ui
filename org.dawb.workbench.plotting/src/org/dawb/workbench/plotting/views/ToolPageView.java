@@ -22,9 +22,13 @@ import org.dawb.common.ui.plot.tool.IToolPage;
 import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
 import org.dawb.common.ui.plot.tool.IToolPageSystem;
 import org.dawb.common.ui.plot.tool.ToolChangeEvent;
+import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.util.text.StringUtils;
+import org.dawb.workbench.plotting.Activator;
 import org.eclipse.core.commands.common.EventManager;
+import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -37,6 +41,7 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IActionBars;
@@ -114,7 +119,6 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	 */
 	private IWorkbenchPart hiddenPart = null;
 	
-
 	private static final Logger logger = LoggerFactory.getLogger(ToolPageView.class);
 
 	public static final String ID = "org.dawb.workbench.plotting.views.ToolPageView";
@@ -131,7 +135,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	}
 
 	protected IToolPage createDefaultPage(PageBook book) {
-		EmptyTool emptyTool = new EmptyTool() {
+		EmptyTool emptyTool = new EmptyTool(getViewRole()) {
 			public String toString() {
 				return "Default page";
 			}
@@ -185,6 +189,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	 */
 	protected static class PageRec {
 
+		boolean isDisposed = false;
 		/**
 		 * The part.
 		 */
@@ -217,12 +222,17 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		public void dispose() {
 			part = null;
 			tool = null;
+			isDisposed= true;
 		}
 		
 	    public String toString() {
 	    	if (tool!=null) return tool.toString();
 	    	return super.toString();
 	    }
+
+		public boolean isDisposed() {
+			return isDisposed;
+		}
 
 	}
 
@@ -385,14 +395,22 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	 * 
 	 * @param part
 	 *            The part we are making a page for.
+	 * @param tool
+	 *            May be null
 	 * @return IWorkbenchPart
 	 */
-	private PageRec createPage(IWorkbenchPart part) {
-		PageRec rec = doCreatePage(part);
-		if (rec != null) {
-			preparePage(rec);
+	private PageRec createPage(IWorkbenchPart part, IToolPage tool) {
+
+		try {
+			PageRec rec = doCreatePage(part, tool);
+			if (rec != null) {
+				preparePage(rec);
+			}
+			return rec;
+		} catch (Exception ne) {
+			logger.error("Error creating tool page "+tool, ne);
+			return null;
 		}
-		return rec;
 	}
 
 	/**
@@ -581,7 +599,48 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		super.init(site);
 	}
 
+	public String getPartName() {
+		if (getViewSite()!=null && getViewSite().getSecondaryId()!=null) {
+			return getTitleForToolPage(getViewSite().getSecondaryId());
+		}
+		return super.getPartName();
+	}
 
+	public Image getTitleImage() {
+		if (getViewSite()!=null && getViewSite().getSecondaryId()!=null) {
+			return getImageForToolPage(getViewSite().getSecondaryId());
+		}
+		return super.getTitleImage();
+	}
+
+	private String toolTitleOverride = null;
+	private String getTitleForToolPage(String toolId) {
+		
+		if (toolTitleOverride!=null) return toolTitleOverride;
+		final IConfigurationElement[] configs = Platform.getExtensionRegistry().getConfigurationElementsFor("org.dawb.common.ui.toolPage");
+	    for (IConfigurationElement e : configs) {
+			
+	    	if (!toolId.equals(e.getAttribute("id"))) continue;
+	    	toolTitleOverride = e.getAttribute("label");
+	    }
+	    toolTitleOverride = getPartName();
+	    return toolTitleOverride;
+	}
+
+	private Image toolImageOverride = null;
+	private Image getImageForToolPage(String toolId) {
+		
+		if (toolImageOverride!=null) return toolImageOverride;
+		final IConfigurationElement[] configs = Platform.getExtensionRegistry().getConfigurationElementsFor("org.dawb.common.ui.toolPage");
+	    for (IConfigurationElement e : configs) {
+			
+	    	if (!toolId.equals(e.getAttribute("id"))) continue;
+	    	final String icon =  e.getAttribute("icon");
+	    	toolImageOverride = Activator.getImage(icon);
+	    }
+	    toolImageOverride = getTitleImage();
+	    return toolImageOverride;
+	}
 	/**
 	 * The <code>PageBookView</code> implementation of this
 	 * <code>IPartListener</code> method does nothing. Subclasses may extend.
@@ -625,7 +684,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	 * @see org.eclipse.ui.IPartListener#partOpened(org.eclipse.ui.IWorkbenchPart)
 	 */
 	public void partOpened(IWorkbenchPart part) {
-		toolUpdate = true;
+
 	}
 
 	/**
@@ -944,29 +1003,47 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		partActivated(part);
 	}
 	
-	protected synchronized PageRec doCreatePage(IWorkbenchPart part) {
+	protected synchronized PageRec doCreatePage(IWorkbenchPart part, IToolPage tool) {
 		
+		// If static tool is not null we can only show that tool on this page.		
 		final IToolPageSystem sys = (IToolPageSystem)part.getAdapter(IToolPageSystem.class);
         if (systems==null||recs==null) return null;
         
 		if (sys!=null) {
-			systems.add(sys);
-			sys.addToolChangeListener(this);
+			
+			if (getViewSite().getSecondaryId()==null) {
+				systems.add(sys);
+				sys.addToolChangeListener(this);
+			} else {
+				try {
+					tool = sys.createToolPage(getViewSite().getSecondaryId());
+				} catch (Exception e) {
+					logger.error("Cannot clone tool "+getViewSite().getSecondaryId(), e);
+					return null;
+				}
+			}
 
-			final IToolPage      tool = sys.getCurrentToolPage(getViewRole());	
+			if (tool==null) { // We find the tool and check it is not a repeat.
+				tool = sys.getCurrentToolPage(getViewRole());	
+				if (!isToolAllowed(tool)) return null;
+			
+		        final PageRec existing = getPageRec(part);
+		        
+		        if (tool!=null && existing!=null&&existing.tool!=null && existing.tool.equals(tool)) {
+		        	if (!tool.isActive()) tool.activate();
+		        	return existing;
+		        }
 
-	        final PageRec existing = getPageRec(part);
-	        
-	        if (tool!=null && existing!=null&&existing.tool!=null && existing.tool.equals(tool)) {
-	        	if (!tool.isActive()) tool.activate();
-	        	return existing;
-	        }
-
-			if (tool == null) return null;
-
+		    }
+			
+			if (tool == null)         return null;
+			if (!isToolAllowed(tool)) return null;
+			
 			updatePartInfo(tool);
 			initPage(tool);
-			tool.createControl(getPageBook());	
+			tool.createControl(getPageBook());
+			addCloneAction(tool);
+			if (!tool.isActive()) tool.activate();
 						
 			PageRec rec = new PageRec(part, tool);
 			recordPage(part, tool, rec);
@@ -976,6 +1053,49 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		return null;
 	}
 	
+	private void addCloneAction(final IToolPage tool) {
+		
+		if (tool.getSite()==null)                 return;
+		if (tool.getSite().getActionBars()==null) return;
+		if (tool.getSite().getActionBars().getMenuManager()==null) return;
+		
+		final Action cloneAction = new Action("Open '"+tool.getTitle()+"' in dedicated view") {
+			public void run() {
+				try {
+					
+					if (activeRec!=null) {
+						if (recs.get(getString(tool.getPart()))!=null) {
+							recs.get(getString(tool.getPart())).remove(tool.getToolId());
+						}
+						if (mapToolToNumRecs.get(activeRec.tool)!=null) {
+							mapToolToNumRecs.put(activeRec.tool, mapToolToNumRecs.get(activeRec.tool).intValue()-1);
+						}
+						if (activeRec.subActionBars!=null) activeRec.subActionBars.dispose();
+						activeRec = null;
+					}
+					updatePartInfo(defaultPageRec.tool);
+					showPageRec(defaultPageRec);
+					
+					final ToolPageView view = (ToolPageView)EclipseUtils.getPage().showView("org.dawb.workbench.plotting.views.toolPageView.fixed",
+																							tool.getToolId(),
+																							IWorkbenchPage.VIEW_ACTIVATE);
+					
+					view.update();
+
+				} catch (Exception e) {
+					logger.error("Cannot open tool on its own page!", e);
+				}
+			}
+		};
+		
+		tool.getSite().getActionBars().getMenuManager().add(cloneAction);
+	}
+
+	protected void update() {
+		// TODO Does this work ok?
+		partActivated(EclipseUtils.getActiveEditor());
+	}
+
 	private ToolPageRole getViewRole() {
 		if (getSite().getId().endsWith(".1D")) return ToolPageRole.ROLE_1D;
 		if (getSite().getId().endsWith(".2D")) return ToolPageRole.ROLE_2D;
@@ -988,14 +1108,9 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 			pages = new HashMap<String, PageRec>(3);
 			recs.put(getString(part), pages);
 		}
-		pages.put(tool.getTitle(), rec);
+		pages.put(tool.getToolId(), rec);
 	}
-	
-	private int getNumberCachedTools(IWorkbenchPart part) {
-		Map<String,PageRec> pages = recs.get(getString(part));
-		return pages.size();
-	}
-	
+		
 	private String getString(IWorkbenchPart part) {
 		if (part instanceof IEditorPart) {
 			final IEditorInput input = ((IEditorPart)part).getEditorInput();
@@ -1009,25 +1124,57 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	}
 	
 	private boolean updatingActivated = false;
-    private boolean toolUpdate        = true;
 	public void toolChanged(ToolChangeEvent evt) {
-		if (updatingActivated) return;
-		toolUpdate = true;
-		toolUpdate(evt.getPart());
+		
+		if (updatingActivated)                    return;
+		if (getViewSite().getSecondaryId()!=null) return;
+		
+		// If there is a dedicated view for this tool then we do not accept the change.
+		if (!isToolAllowed(evt.getNewPage())) return;
+		
+		try {
+			IToolPage tool = evt.getNewPage();
+			if (tool==null || getViewRole()!=tool.getToolPageRole()) return;
+			
+			PageRec rec = getPageRec(tool);
+			if (rec == null || tool.getControl()==null || rec.tool!=tool) {
+				rec = createPage(tool.getPart(), tool);
+			}
+		
+			showPageRec(rec);
+			updatePartInfo(rec.tool);
+			
+		} catch (Exception ne) {
+			logger.error("Unexpected and serious problem trying to switch tool to "+evt.getNewPage(), ne);
+		}
 	}
 	
-	public void partActivated(IWorkbenchPart part) {
-		toolUpdate(part);
+	private boolean isToolAllowed(IToolPage newPage) {
+		
+		String toolId  = newPage!=null ? newPage.getToolId() : null;
+		if (toolId!=null) {
+			if (toolId.equals(getViewSite().getSecondaryId())) return true;
+		    if (EclipseUtils.getPage().findViewReference("org.dawb.workbench.plotting.views.toolPageView.fixed", toolId)!=null) {
+		    	return false;
+		    }
+		}
+		return true;
 	}
 
-	protected void toolUpdate(IWorkbenchPart part) {
+	public void partActivated(IWorkbenchPart part) {
+
 		if (!isImportant(part)) return;
 
 		if (updatingActivated) return;
         try {
             updatingActivated = true;
-        	IToolPageSystem sys = (IToolPageSystem)part.getAdapter(IToolPageSystem.class);
-            if (sys.getCurrentToolPage(getViewRole()).equals(getCurrentPage())) {
+                       
+        	IToolPageSystem sys  = (IToolPageSystem)part.getAdapter(IToolPageSystem.class);
+    		final IToolPage tool = getViewSite().getSecondaryId()==null
+					             ? sys.getCurrentToolPage(getViewRole())
+					             : sys.getToolPage(getViewSite().getSecondaryId());
+					            
+            if (tool.equals(getCurrentPage())) {
             	return;
             }
         
@@ -1035,24 +1182,20 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 
     		// Create a page for the part.
     		PageRec rec = getPageRec(part);
-    		if (rec == null) {
-    			rec = createPage(part);
+    		if (rec == null || rec.tool==null) {
+    			rec = createPage(part, null);
     		}
     		
-    		if (!toolUpdate && rec.tool instanceof EmptyTool) {
-    			return; // No point switching to empty tool if other tools are there.
-    		}
-			toolUpdate = false;
-
     		// Show the page.
-    		if (rec != null) {
+    		if (rec != null && isToolAllowed(rec.tool)) {
     			showPageRec(rec);
+    	   		updatePartInfo(rec.tool);
     		} else {
     			showPageRec(defaultPageRec);
-    		}
+    	   		updatePartInfo(defaultPageRec.tool);
+   		    }
 
-    		updatePartInfo(sys.getCurrentToolPage(getViewRole()));
-
+ 
         } catch (Throwable ne) {
         	logger.error("Problem updating activated state in "+getClass().getName(), ne); // No stack required in log here.
         } finally {
@@ -1062,6 +1205,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	
 	private void updatePartInfo(IToolPage tool) {
 		if (isDisposed) return;
+		if (getViewSite().getSecondaryId()!=null) return; // It is fixed
 		setPartName(tool.getTitle());
 		final ImageDescriptor des = tool.getImageDescriptor();
 		if (des!=null) setTitleImage(des.createImage());
@@ -1074,7 +1218,12 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
         if (pages == null) return null;
         
 		IToolPageSystem sys = (IToolPageSystem)part.getAdapter(IToolPageSystem.class);
-        return sys!=null ? pages.get(sys.getCurrentToolPage(getViewRole()).getTitle()) : null;
+		final IToolPage tool= getViewSite().getSecondaryId()==null
+				            ? sys.getCurrentToolPage(getViewRole())
+				            : sys.getToolPage(getViewSite().getSecondaryId());
+		PageRec rec =  sys!=null ? pages.get(tool.getToolId()) : null;
+		if (rec.isDisposed()) return null;
+		return rec;
 	}	
 	
 	protected PageRec getPageRec(IPage page) {
@@ -1084,7 +1233,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	        final Map<String, PageRec> pages = recs.get(getString(((IToolPage)page).getPart()));
 	        if (pages == null) return null;
 	        
-	        return pages.get(((IToolPage)page).getTitle());
+	        return pages.get(((IToolPage)page).getToolId());
 		} else {
 			return null;
 		}

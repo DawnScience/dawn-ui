@@ -33,6 +33,8 @@ public class FigureTranslator implements MouseListener, MouseMotionListener {
 	private XYGraph xyGraph;
 	private Dimension cumulativeOffset;
 	private Point startLocation;
+	private Point location;
+
 	private List<IFigure> translations;
 	private boolean active=true;
  
@@ -109,33 +111,31 @@ public class FigureTranslator implements MouseListener, MouseMotionListener {
 
 	@Override
 	public void mouseEntered(MouseEvent me) {
-		// TODO Auto-generated method stub
-
 	}
+
 	@Override
 	public void mouseExited(MouseEvent me) {
-		// TODO Auto-generated method stub
-
 	}
+
 	@Override
 	public void mouseHover(MouseEvent me) {
-		// TODO Auto-generated method stub
-
 	}
+
 	@Override
 	public void mouseMoved(MouseEvent me) {
-		// TODO Auto-generated method stub
-
 	}
-	private Point location;
+
 	@Override
 	public void mousePressed(MouseEvent event) {
 		if (!active) return;
 
 		location = event.getLocation();
 		startLocation = event.getLocation();
+		fireOnActivate(new TranslationEvent(this));
+
 		event.consume();
 	}
+
 	@Override
 	public void mouseReleased(MouseEvent event) {
 		if (!active) return;
@@ -149,38 +149,74 @@ public class FigureTranslator implements MouseListener, MouseMotionListener {
 	}
 	@Override
 	public void mouseDoubleClicked(MouseEvent me) {
-		// TODO Auto-generated method stub
-
 	}
 
 	public void startMoving(MouseEvent me) {
 		location = me.getLocation();
 	}
-	
+
+	/**
+	 * @return point where mouse was pressed
+	 */
+	public Point getStartLocation() {
+		return startLocation;
+	}
+
+	/**
+	 * @return point where mouse is (or was released)
+	 */
+	public Point getEndLocation() {
+		return location;
+	}
+
+	/**
+	 * @return figure that is to be redrawn
+	 */
+	public IFigure getRedrawFigure() {
+		return redrawFigure;
+	}
+
 	private List<TranslationListener> listeners;
 
 	public void addTranslationListener(TranslationListener translationListener) {
-		if (listeners==null) listeners = new ArrayList<TranslationListener>(7);
+		if (listeners == null)
+			listeners = new ArrayList<TranslationListener>(7);
 		listeners.add(translationListener);
 	}
+
 	public void removeTranslationListener(TranslationListener translationListener) {
-		if (listeners==null) return;
+		if (listeners == null)
+			return;
 		listeners.remove(translationListener);
 	}
+
 	protected void fireBeforeTranslation(TranslationEvent evt) {
-		if (listeners==null) return;
+		if (listeners == null)
+			return;
 		for (TranslationListener l : listeners) {
 			l.translateBefore(evt);
 		}
 	}
+
+	protected void fireOnActivate(TranslationEvent evt) {
+		if (listeners == null)
+			return;
+		for (TranslationListener l : listeners) {
+			l.onActivate(evt);
+		}
+	}
+
 	protected void fireAfterTranslation(TranslationEvent evt) {
-		if (listeners==null) return;
+		if (listeners == null)
+			return;
 		for (TranslationListener l : listeners) {
 			l.translationAfter(evt);
 		}
 	}
+
 	protected void fireCompletedTranslation(TranslationEvent evt) {
-		if (listeners==null) return;
+		if (listeners == null)
+			return;
 		for (TranslationListener l : listeners) {
 			l.translationCompleted(evt);
 		}
