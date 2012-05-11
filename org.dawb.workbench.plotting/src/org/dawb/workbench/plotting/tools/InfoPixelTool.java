@@ -137,7 +137,7 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 			
 				for (int i=0; i< regions.size(); i++){
 					IRegion pointRegion = (IRegion)(regions.toArray())[i];
-
+										
 					if (pointRegion.getRegionType() == RegionType.XAXIS_LINE || pointRegion.getRegionType() == RegionType.POINT ){
 						
 						visible.add(pointRegion);										
@@ -149,10 +149,7 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 		});
 
 		viewer.setInput(new Object());
-		
-		
-		//this.viewUpdateListener = new RegionColorListener();
-
+			
 		activate();
 	}
 	
@@ -171,14 +168,14 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 		if (getPlottingSystem()==null) return;
 		try {
 			if (xHair==null || getPlottingSystem().getRegion(xHair.getName())==null) {
-				this.xHair = getPlottingSystem().createRegion(RegionUtils.getUniqueName("Y Profile", getPlottingSystem()), IRegion.RegionType.XAXIS_LINE);
+				this.xHair = getPlottingSystem().createRegion(RegionUtils.getUniqueName("X Driver", getPlottingSystem()), IRegion.RegionType.XAXIS_LINE);
 				addRegion("Updating x cross hair", xHair);
 
 			}
 			
 			if (yHair==null || getPlottingSystem().getRegion(yHair.getName())==null) {
-				this.yHair = getPlottingSystem().createRegion(RegionUtils.getUniqueName("X Profile", getPlottingSystem()), IRegion.RegionType.YAXIS_LINE);
-				addRegion("Updating x cross hair", yHair);
+				this.yHair = getPlottingSystem().createRegion(RegionUtils.getUniqueName("Y Driver", getPlottingSystem()), IRegion.RegionType.YAXIS_LINE);
+				addRegion("Updating y cross hair", yHair);
 			}
 
 		} catch (Exception ne) {
@@ -219,6 +216,7 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 
 		if (getPlottingSystem()!=null) {
 			getPlottingSystem().addTraceListener(traceListener);
+			getPlottingSystem().addRegionListener(this);
 		}
 		
 		// We stop the adding of other regions because this tool does
@@ -259,13 +257,13 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 		
 		plotter.clear();
 
-		if (getPlottingSystem()!=null) getPlottingSystem().removeTraceListener(traceListener);
+		if (getPlottingSystem()!=null) {
+			getPlottingSystem().removeTraceListener(traceListener);
+			getPlottingSystem().removeRegionListener(this);
+		}
 	}
 	
 	public void dispose() {
-//		if (getPlottingSystem()!=null) {
-//			getPlottingSystem().removeRegionListener(this);
-//		}
 		if (viewUpdateListener!=null) viewer.removeSelectionChangedListener(viewUpdateListener);
 		viewUpdateListener = null;
 
@@ -297,14 +295,12 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
             double x = getPlottingSystem().getSelectedXAxis().getPositionValue(evt.x);
             double y = getPlottingSystem().getSelectedYAxis().getPositionValue(evt.y);
             regionBounds.setPoint(new double[]{x,y});
-            point.setROI(regionBounds);//.setRegionBounds(regionBounds);
+            point.setROI(regionBounds);
             point.setMobile(true);
             point.setTrackMouse(true);
             
             getPlottingSystem().addRegion(point);
-
-    		viewer.refresh(point);
-    		viewer.add(point);
+            
 
      } catch (Exception e) {
             logger.error("Cannot create point!", e);
@@ -353,7 +349,7 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 				if (!isActive()) return;
 				final IStructuredSelection sel = (IStructuredSelection)viewer.getSelection();
 				
-				// ignore table item at index 0 as needed
+				// ignore table item at index 0 as represents current point
 				if (sel!=null && sel.getFirstElement()!=null && viewer.getTable().getSelectionIndex() != 0) {
 					final IRegion region = (IRegion)sel.getFirstElement();
 					getPlottingSystem().removeRegion(region);
@@ -523,13 +519,24 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 	
 	@Override
 	public void regionCreated(RegionEvent evt) {
-		// TODO Auto-generated method stub		
 	}
 
 
 	@Override
 	public void roiDragged(ROIEvent evt) {
-		updateRegion(evt);
+
+		if (viewer != null) {
+			IRegion region = (IRegion) evt.getSource();
+			if (region.getRegionType() == RegionType.POINT) {
+				// update table for current point region
+				ROIBase rb = evt.getROI();
+				
+				dragBounds.put(region.getName(), rb);
+				viewer.refresh(region);
+			} else {
+				updateRegion(evt);
+			}
+		}
 	}
 
 	@Override
