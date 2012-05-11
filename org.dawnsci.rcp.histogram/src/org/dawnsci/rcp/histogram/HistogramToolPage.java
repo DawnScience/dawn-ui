@@ -14,7 +14,7 @@ import org.dawb.common.ui.plot.trace.ILineTrace.TraceType;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.PaletteEvent;
-import org.dawb.common.ui.plot.trace.PaletteListener;
+import org.dawb.common.ui.plot.trace.IPaletteListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawnsci.rcp.functions.ColourSchemeContribution;
 import org.dawnsci.rcp.functions.TransferFunctionContribution;
@@ -166,7 +166,7 @@ public class HistogramToolPage extends AbstractToolPage {
 	private int internalEvent = 0;
 
 
-	private PaletteListener paletteListener;
+	private IPaletteListener paletteListener;
 
 
 	/**
@@ -200,7 +200,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 
 		// get a palette update listener to deal with palatte updates
-		paletteListener = new PaletteListener(){
+		paletteListener = new IPaletteListener(){
 
 			@Override
 			public void paletteChanged(PaletteEvent event) {
@@ -255,6 +255,13 @@ public class HistogramToolPage extends AbstractToolPage {
 				if (internalEvent > 0) return;
 				return;
 				
+			}
+
+			@Override
+			public void maskChanged(PaletteEvent evt) {
+				// TODO Mark does the histo potentially need updating when the mask changes?
+				// Normally if the mask changes max and min will change so this will be dealt
+				// with in the above methods, so maybe we are ok.
 			}
 			
 		};

@@ -22,7 +22,7 @@ import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceContainer;
 import org.dawb.common.ui.plot.trace.PaletteEvent;
-import org.dawb.common.ui.plot.trace.PaletteListener;
+import org.dawb.common.ui.plot.trace.IPaletteListener;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -695,17 +695,17 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		return imageServiceBean;
 	}
 
-	private Collection<PaletteListener> paletteListeners;
+	private Collection<IPaletteListener> paletteListeners;
 
 
 	@Override
-	public void addPaletteListener(PaletteListener pl) {
-		if (paletteListeners==null) paletteListeners = new HashSet<PaletteListener>(11);
+	public void addPaletteListener(IPaletteListener pl) {
+		if (paletteListeners==null) paletteListeners = new HashSet<IPaletteListener>(11);
 		paletteListeners.add(pl);
 	}
 
 	@Override
-	public void removePaletteListener(PaletteListener pl) {
+	public void removePaletteListener(IPaletteListener pl) {
 		if (paletteListeners==null) return;
 		paletteListeners.remove(pl);
 	}
@@ -714,37 +714,43 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	private void firePaletteDataListeners(PaletteData paletteData) {
 		if (paletteListeners==null) return;
 		final PaletteEvent evt = new PaletteEvent(this, getPaletteData()); // Important do not let Mark get at it :)
-		for (PaletteListener pl : paletteListeners) pl.paletteChanged(evt);
+		for (IPaletteListener pl : paletteListeners) pl.paletteChanged(evt);
 	}
 	private void fireMinDataListeners() {
 		if (paletteListeners==null) return;
 		if (!imageCreationAllowed)  return;
 		final PaletteEvent evt = new PaletteEvent(this, getPaletteData());
-		for (PaletteListener pl : paletteListeners) pl.minChanged(evt);
+		for (IPaletteListener pl : paletteListeners) pl.minChanged(evt);
 	}
 	private void fireMaxDataListeners() {
 		if (paletteListeners==null) return;
 		if (!imageCreationAllowed)  return;
 		final PaletteEvent evt = new PaletteEvent(this, getPaletteData());
-		for (PaletteListener pl : paletteListeners) pl.maxChanged(evt);
+		for (IPaletteListener pl : paletteListeners) pl.maxChanged(evt);
 	}
 	private void fireMaxCutListeners() {
 		if (paletteListeners==null) return;
 		if (!imageCreationAllowed)  return;
 		final PaletteEvent evt = new PaletteEvent(this, getPaletteData());
-		for (PaletteListener pl : paletteListeners) pl.maxCutChanged(evt);
+		for (IPaletteListener pl : paletteListeners) pl.maxCutChanged(evt);
 	}
 	private void fireMinCutListeners() {
 		if (paletteListeners==null) return;
 		if (!imageCreationAllowed)  return;
 		final PaletteEvent evt = new PaletteEvent(this, getPaletteData());
-		for (PaletteListener pl : paletteListeners) pl.minCutChanged(evt);
+		for (IPaletteListener pl : paletteListeners) pl.minCutChanged(evt);
 	}
 	private void fireNanBoundsListeners() {
 		if (paletteListeners==null) return;
 		if (!imageCreationAllowed)  return;
 		final PaletteEvent evt = new PaletteEvent(this, getPaletteData());
-		for (PaletteListener pl : paletteListeners) pl.nanBoundsChanged(evt);
+		for (IPaletteListener pl : paletteListeners) pl.nanBoundsChanged(evt);
+	}
+	private void fireMaskListeners() {
+		if (paletteListeners==null) return;
+		if (!imageCreationAllowed)  return;
+		final PaletteEvent evt = new PaletteEvent(this, getPaletteData());
+		for (IPaletteListener pl : paletteListeners) pl.maskChanged(evt);
 	}
 
 	@Override
@@ -891,5 +897,6 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		if (maskMap!=null) maskMap.clear();
 		fullMask = bd;
 		rehistogram();
+		fireMaskListeners();
 	}
 }

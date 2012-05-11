@@ -295,7 +295,7 @@ public class ROIViewer  {
 		ROIBase ret = null; 
 		if (roi instanceof LinearROI) {
 			LinearROI lr = new LinearROI(rows.get(0).getPoint(), rows.get(1).getPoint());
-			lr.setAngle(rows.get(2).getxLikeVal());
+			lr.setAngle(Math.toRadians(rows.get(2).getxLikeVal()));
 			ret = lr;
 			
 		} else if (roi instanceof PolygonalROI) {
@@ -313,7 +313,7 @@ public class ROIViewer  {
 			RectangularROI rr = new RectangularROI(rows.get(0).getxLikeVal(), rows.get(0).getyLikeVal(),
 					                                rows.get(1).getxLikeVal()-rows.get(0).getxLikeVal(),
 					                                rows.get(1).getyLikeVal()-rows.get(0).getyLikeVal(), 
-					                                rows.get(2).getxLikeVal());
+					                                Math.toRadians(rows.get(2).getxLikeVal()));
 			ret = rr;
 			
 		} else if (roi instanceof SectorROI) {
@@ -348,10 +348,6 @@ public class ROIViewer  {
 			this.unit     = unit;
 			this.xLikeVal = xLikeVal;
 			this.yLikeVal = yLikeVal;
-		}
-		
-		public int[] getIntPoint() {
-			return new int[]{(int)xLikeVal, (int)yLikeVal};
 		}
 		public double[] getPoint() {
 			return new double[]{xLikeVal, yLikeVal};
