@@ -278,7 +278,7 @@ public class RegionArea extends PlotArea {
 	}
 	
 	protected void fireImageTraceRemoved(TraceEvent evt) {
-		if (regionListeners==null) return;
+		if (imageTraceListeners==null) return;
 		for (ITraceListener l : imageTraceListeners) l.traceRemoved(evt);
 	}
 

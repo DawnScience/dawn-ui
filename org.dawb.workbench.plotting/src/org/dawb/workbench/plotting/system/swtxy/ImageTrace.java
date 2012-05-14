@@ -266,8 +266,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 					
 					data = new ImageData((x4-x1), (y4-y1), data.depth, getPaletteData(), 1, pixels);
 				}
-				data = data.scaledTo(rbounds.width, rbounds.height);
-				this.scaledImage = new Image(Display.getDefault(), data);
+				data = data!=null ? data.scaledTo(rbounds.width, rbounds.height) : null;
+				this.scaledImage = data!=null ? new Image(Display.getDefault(), data) : null;
 			}
 			
 			return true;
@@ -574,6 +574,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 	
 	private static final int[] getImageBounds(int[] shape, ImageOrigin origin) {
+		if (origin==null) origin = ImageOrigin.TOP_LEFT; 
 		switch (origin) {
 		case TOP_LEFT:
 			return new int[] {0, shape[0], shape[1], 0};
@@ -629,6 +630,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		this.image = image;
 		if (this.mipMap!=null) mipMap.clear();
 		
+		if (imageServiceBean==null) imageServiceBean = new ImageServiceBean();
 		imageServiceBean.setImage(image);
 		
 		final IImageService service = (IImageService)PlatformUI.getWorkbench().getService(IImageService.class);
