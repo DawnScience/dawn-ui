@@ -11,14 +11,12 @@ import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
+import org.eclipse.draw2d.PositionConstants;
 import org.eclipse.draw2d.UpdateManager;
-import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.widgets.Display;
 
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
@@ -67,25 +65,10 @@ class RingSelection extends AbstractSelectionRegion {
 	private Figure             connection;
 	private SelectionHandle innerControl, outerControl;
 	
-	protected Label label = null;
-	protected Dimension labeldim;
-	
 	public RingSelection(String name, Axis xAxis, Axis yAxis) {
 		super(name, xAxis, yAxis);
 		setRegionColor(ColorConstants.yellow);	
 		setAlpha(80);
-		
-		label = new Label();
-		label.setForegroundColor(getLabelColour()!= null ? getLabelColour() : ColorConstants.black);
-		label.setText(getName());
-		label.setFont(new Font(Display.getCurrent(), "Dialog", 10, SWT.NORMAL));
-		labeldim = label.getTextUtilities().getTextExtents(getName(), label.getFont());
-	}
-	
-	@Override
-	public void setShowLabel(boolean showLabel) {
-		super.setShowLabel(showLabel);
-		label.setVisible(showLabel);
 	}
 
 	@Override
@@ -101,7 +84,7 @@ class RingSelection extends AbstractSelectionRegion {
 
 			@Override
 			public void paintFigure(Graphics gc) {
-				super.paintFigure(gc);
+				//super.paintFigure(gc);
 
 				// We get a bound half the size of the 
 				// two rectangles and then draw a ring
@@ -110,6 +93,7 @@ class RingSelection extends AbstractSelectionRegion {
 				final Point    cen = center.getSelectionPoint();
 				final int outerRad = outerControl.getSelectionPoint().y-cen.y;
 				final int innerRad = innerControl.getSelectionPoint().y-cen.y;
+
 				gc.setLineWidth(outerRad-innerRad);
 				gc.setForegroundColor(getRegionColor());
 				
@@ -119,8 +103,9 @@ class RingSelection extends AbstractSelectionRegion {
 				final Point     br  = (new Rectangle(out.getBottomRight(), in.getBottomRight())).getCenter();
 				final Rectangle mid = new Rectangle(tl, br);
 				gc.drawOval(mid); 
-				
-				label.setLocation(new Point(mid.getCenter().x, mid.getCenter().y-innerRad));
+				if (label != null) {
+					label.setLocation(new Point(cen.x, cen.y-outerRad));
+				}
 			}
 
 			@Override
@@ -145,14 +130,18 @@ class RingSelection extends AbstractSelectionRegion {
 		parent.add(center);
 		parent.add(innerControl);
 		parent.add(outerControl);
-		parent.add(label);
+		if (label != null)
+			parent.add(label);
 		
 		FigureTranslator mover = new FigureTranslator(getXyGraph(), parent, connection, Arrays.asList(new IFigure[]{center, connection, innerControl, outerControl}));
 		// Add a translation listener to be notified when the mover will translate so that
 		// we do not recompute point locations during the move.
 		mover.addTranslationListener(createRegionNotifier());
 		
-		setRegionObjects(connection, center, innerControl, outerControl, label);
+		if (label != null)
+			setRegionObjects(connection, center, innerControl, outerControl, label);
+		else
+			setRegionObjects(connection, center, innerControl, outerControl);
 		sync(getBean());
 		updateROI();
 		if (roi == null)
@@ -309,5 +298,12 @@ class RingSelection extends AbstractSelectionRegion {
 	@Override
 	public int getMaximumMousePresses() {
 		return 2;
+	}
+	
+	@Override
+	public void setLabel(Label label) {
+		super.setLabel(label);
+		label.setLabelAlignment(PositionConstants.LEFT);
+		label.setTextAlignment(PositionConstants.LEFT);
 	}
 }
