@@ -1,18 +1,72 @@
 package org.dawb.workbench.plotting.system.swtxy.selection;
 
 import org.csstudio.swt.xygraph.figures.Axis;
+import org.dawb.common.ui.plot.region.IRegion;
+import org.dawb.common.ui.plot.region.IRegionContainer;
 import org.dawb.workbench.plotting.system.swtxy.translate.FigureTranslator;
 import org.dawb.workbench.plotting.system.swtxy.util.Draw2DUtils;
+import org.dawb.workbench.plotting.system.swtxy.util.RotatablePolygonShape;
+import org.dawb.workbench.plotting.system.swtxy.util.RotatableRectangle;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
+import org.eclipse.draw2d.Shape;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
+import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.swt.graphics.Color;
 
 import uk.ac.diamond.scisoft.analysis.roi.PointROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
 public class PointSelection extends AbstractSelectionRegion {
+
+	private final class RegionContainerRectangularHandle extends RectangularHandle  {
+
+		public RegionContainerRectangularHandle(Axis xAxis, 
+				                                Axis yAxis,
+												Color regionColor, 
+												Figure parent, 
+												int lineWidth, 
+												double d,
+												double e) {
+			
+			super(xAxis, yAxis, regionColor, parent, lineWidth, d, e);
+		}
+
+		@Override
+		public Shape createHandleShape(Figure parent, int side, double[] params) {
+			double angle;
+			if (parent instanceof RotatablePolygonShape) {
+				RotatablePolygonShape pg = (RotatablePolygonShape) parent;
+				angle = pg.getAngleDegrees();
+			} else {
+				angle = 0;
+			}
+			location = new PrecisionPoint(params[0], params[1]);
+			return new RegionContainerRotatableRectangle(location.x(), location.y(), side, side, angle);
+		}
+
+	}
+	
+	private class RegionContainerRotatableRectangle extends RotatableRectangle implements IRegionContainer {
+
+		public RegionContainerRotatableRectangle(int x, int y, int width,
+				int height, double angle) {
+			super(x, y, width, height, angle);
+		}
+
+		@Override
+		public IRegion getRegion() {
+			return PointSelection.this;
+		}
+
+		@Override
+		public void setRegion(IRegion region) {
+			// Cannot change this selection.
+		}
+		
+	}
 
 	private SelectionHandle  point;
 	private FigureTranslator mover;
@@ -38,7 +92,6 @@ public class PointSelection extends AbstractSelectionRegion {
 		
 		final int xpix = getXAxis().getValuePosition(x, false);
 		final int ypix = getYAxis().getValuePosition(y, false);
-		if (point.getBounds().contains(xpix, ypix)) return false;
 		final Point pnt = point.getSelectionPoint();
 		return pnt.x == xpix && pnt.y == ypix;
 	}
@@ -57,7 +110,7 @@ public class PointSelection extends AbstractSelectionRegion {
 
 	@Override
 	public void createContents(Figure parent) {
-		this.point = new RectangularHandle(getXAxis(), getYAxis(), getRegionColor(), parent, getLineWidth(), 100d, 100d);
+		this.point = new RegionContainerRectangularHandle(getXAxis(), getYAxis(), getRegionColor(), parent, getLineWidth(), 100d, 100d);
 		parent.add(point);
 		mover = new FigureTranslator(getXyGraph(), point);	
 		mover.addTranslationListener(createRegionNotifier());
@@ -87,7 +140,7 @@ public class PointSelection extends AbstractSelectionRegion {
 		if (clicks.size()<1) return;
 		final Point last = clicks.getLastPoint();
 		point.setSelectionPoint(last);
-		updateROI();
+		roi = new PointROI(point.getPosition());
 	}
 
 	@Override
@@ -99,8 +152,7 @@ public class PointSelection extends AbstractSelectionRegion {
 	protected ROIBase createROI(boolean recordResult) {
 		if (point == null) return getROI();
 		final PointROI proi = new PointROI(point.getPosition());
-		if (recordResult)
-			roi = proi;
+		if (recordResult) roi = proi;
 
 		return proi;
 	}

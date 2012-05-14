@@ -39,9 +39,9 @@
             tooltip="A tool which shows values of regions selected in the plotting.">
       </plotting_tool_page>
       <plotting_tool_page
-            class="org.dawb.workbench.plotting.tools.InfoBoxTool"
+            class="org.dawb.workbench.plotting.tools.InfoPixelTool"
             icon="icons/info.png"
-            id="org.dawb.workbench.plotting.tools.InfoBoxTool"
+            id="org.dawb.workbench.plotting.tools.InfoPixel"
             label="Information box"
             tooltip="A tool for displaying information on the data currently plotted.">
       </plotting_tool_page>
@@ -120,7 +120,7 @@
             class="org.dawb.workbench.plotting.views.ToolPageView"
             icon="icons/plot-tool-any.png"
             id="org.dawb.workbench.plotting.views.toolPageView.fixed"
-            name="Fixed Tool"
+            name=" "
             restorable="true">
       </view>
    </extension>

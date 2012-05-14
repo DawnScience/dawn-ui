@@ -40,7 +40,6 @@ import org.dawb.common.ui.plot.trace.ILineTrace.PointStyle;
 import org.dawb.common.ui.plot.trace.ILineTrace.TraceType;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.TraceEvent;
-import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawb.common.ui.widgets.EmptyActionBars;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
@@ -710,7 +709,7 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 				                  : null;
 		
 		if (xyGraph!=null) {
-			final Action addAnnotation = new Action("Add annotation to '"+trace.getName()+"'", Activator.getImageDescriptor("icons/TraceAnnotation.png")) {
+			final Action addAnnotation = new Action("Add annotation to '"+(trace.getName()!=null?trace.getName():"")+"'", Activator.getImageDescriptor("icons/TraceAnnotation.png")) {
 				public void run() {
 					final String annotName = AnnotationUtils.getUniqueAnnotation(trace.getName()+" annotation ", sys);
 					if (trace instanceof LineTraceImpl) {

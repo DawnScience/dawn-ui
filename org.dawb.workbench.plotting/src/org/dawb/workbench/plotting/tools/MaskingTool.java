@@ -405,7 +405,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	private void createColumns(TableViewer viewer) {
 		
 		ColumnViewerToolTipSupport.enableFor(viewer,ToolTip.NO_RECREATE);
-		viewer.setColumnProperties(new String[] { "Mask", "Name" });
+		viewer.setColumnProperties(new String[] { "Mask", "Name", "Type" });
 
 		TableViewerColumn var = new TableViewerColumn(viewer, SWT.LEFT, 0);
 		var.getColumn().setText("Mask");

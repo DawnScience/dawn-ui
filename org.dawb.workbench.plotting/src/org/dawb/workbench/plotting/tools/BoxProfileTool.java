@@ -25,7 +25,7 @@ public class BoxProfileTool extends ProfileTool {
 	private IAxis yPixelAxis;
 
 	@Override
-	protected void createAxes(AbstractPlottingSystem plotter) {
+	protected void configurePlottingSystem(AbstractPlottingSystem plotter) {
 		if (xPixelAxis==null) {
 			this.xPixelAxis = plotter.getSelectedXAxis();
 			xPixelAxis.setTitle("X Pixel");
@@ -42,6 +42,7 @@ public class BoxProfileTool extends ProfileTool {
 			                     IRegion      region, 
 			                     ROIBase      rbs, 
 			                     boolean      tryUpdate,
+			                     boolean      isDrag,
 			                     IProgressMonitor monitor) {
         
 		if (monitor.isCanceled()) return;
@@ -73,15 +74,15 @@ public class BoxProfileTool extends ProfileTool {
 
 		//if (monitor.isCanceled()) return;
 		if (tryUpdate) {
-			final ILineTrace x_trace = (ILineTrace)plotter.getTrace("X "+region.getName());
-			final ILineTrace y_trace = (ILineTrace)plotter.getTrace("Y "+region.getName());
+			final ILineTrace x_trace = (ILineTrace)profilePlottingSystem.getTrace("X "+region.getName());
+			final ILineTrace y_trace = (ILineTrace)profilePlottingSystem.getTrace("Y "+region.getName());
 			
 			if (x_trace!=null && y_trace!=null) {
 				getControl().getDisplay().syncExec(new Runnable() {
 					public void run() {
-						plotter.setSelectedXAxis(xPixelAxis);
+						profilePlottingSystem.setSelectedXAxis(xPixelAxis);
 						x_trace.setData(x_indices, x_intensity);
-						plotter.setSelectedXAxis(yPixelAxis);
+						profilePlottingSystem.setSelectedXAxis(yPixelAxis);
 						y_trace.setData(y_indices, y_intensity);						
 					}
 				});
@@ -89,12 +90,12 @@ public class BoxProfileTool extends ProfileTool {
 			
 		} else {
 						
-			plotter.setSelectedXAxis(xPixelAxis);
-			Collection<ITrace> plotted = plotter.createPlot1D(x_indices, Arrays.asList(new AbstractDataset[]{x_intensity}), monitor);
+			profilePlottingSystem.setSelectedXAxis(xPixelAxis);
+			Collection<ITrace> plotted = profilePlottingSystem.createPlot1D(x_indices, Arrays.asList(new AbstractDataset[]{x_intensity}), monitor);
 			registerTraces(region, plotted);
 			
-			plotter.setSelectedXAxis(yPixelAxis);
-			plotted = plotter.createPlot1D(y_indices, Arrays.asList(new AbstractDataset[]{y_intensity}), monitor);
+			profilePlottingSystem.setSelectedXAxis(yPixelAxis);
+			plotted = profilePlottingSystem.createPlot1D(y_indices, Arrays.asList(new AbstractDataset[]{y_intensity}), monitor);
 			registerTraces(region, plotted);
 			
 		}

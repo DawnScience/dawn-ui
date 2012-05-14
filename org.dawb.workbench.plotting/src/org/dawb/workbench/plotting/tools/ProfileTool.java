@@ -9,9 +9,9 @@ import java.util.Map;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingFactory;
+import org.dawb.common.ui.plot.region.IROIListener;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
-import org.dawb.common.ui.plot.region.IROIListener;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.ROIEvent;
 import org.dawb.common.ui.plot.region.RegionEvent;
@@ -20,39 +20,51 @@ import org.dawb.common.ui.plot.tool.AbstractToolPage;
 import org.dawb.common.ui.plot.tool.IToolPageSystem;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
+import org.dawb.common.ui.plot.trace.IPaletteListener;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
+import org.dawb.common.ui.plot.trace.PaletteEvent;
 import org.dawb.common.ui.plot.trace.TraceEvent;
+import org.dawb.common.ui.util.EclipseUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.part.IPageSite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.io.IMetaData;
+import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
 public abstract class ProfileTool extends AbstractToolPage  implements IROIListener {
 
 	private final static Logger logger = LoggerFactory.getLogger(ProfileTool.class);
 	
-	protected AbstractPlottingSystem plotter;
+	protected AbstractPlottingSystem profilePlottingSystem;
 	private   ITraceListener         traceListener;
 	private   IRegionListener        regionListener;
-	private   Job                    updateProfiles;
-	private   IRegion                currentRegion;
-	private   ROIBase                currentROI;
+	private   IPaletteListener       paletteListener;
+	private   ProfileJob             updateProfiles;
 	private   Map<String,Collection<ITrace>> registeredTraces;
 
 	public ProfileTool() {
 		
 		this.registeredTraces = new HashMap<String,Collection<ITrace>>(7);
 		try {
-			plotter = PlottingFactory.getPlottingSystem();
-			updateProfiles = createProfileJob();
+			profilePlottingSystem = PlottingFactory.getPlottingSystem();
+			updateProfiles = new ProfileJob();
+			
+			this.paletteListener = new IPaletteListener.Stub() {
+				@Override
+				public void maskChanged(PaletteEvent evt) {
+					update(null, null, false);
+				}
+			};
 			
 			this.traceListener = new ITraceListener.Stub() {
 				@Override
@@ -61,7 +73,8 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 					if (!(evt.getSource() instanceof List<?>)) {
 						return;
 					}
-					update(null, null);
+					if (getImageTrace()!=null) getImageTrace().addPaletteListener(paletteListener);
+					update(null, null, false);
 				}
 			};
 			
@@ -76,7 +89,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 				@Override
 				public void regionAdded(RegionEvent evt) {
 					if (evt.getRegion()!=null) {
-						update(null, null);
+						update(null, null, false);
 					}
 				}
 				
@@ -117,7 +130,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		final String name = region.getName();
 		Collection<ITrace> registered = this.registeredTraces.get(name);
         if (registered!=null) for (ITrace iTrace : registered) {
-			plotter.removeTrace(iTrace);
+			profilePlottingSystem.removeTrace(iTrace);
 		}
 	}
 	
@@ -127,25 +140,25 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 
 		final IPageSite site = getSite();
 		
-		plotter.createPlotPart(parent, 
+		profilePlottingSystem.createPlotPart(parent, 
 								getTitle(), 
 								site.getActionBars(), 
 								PlotType.PT1D,
 								this.getViewPart());		
 
-		createAxes(plotter);
+		configurePlottingSystem(profilePlottingSystem);
 	}
 
 	@Override
 	public Object getAdapter(@SuppressWarnings("rawtypes") Class clazz) {
 		if (clazz == IToolPageSystem.class) {
-			return plotter;
+			return profilePlottingSystem;
 		} else {
 			return super.getAdapter(clazz);
 		}
 	}
 
-	protected abstract void createAxes(AbstractPlottingSystem plotter);
+	protected abstract void configurePlottingSystem(AbstractPlottingSystem plotter);
 	 
 	
 	@Override
@@ -160,15 +173,23 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 	
 	public void activate() {
 		super.activate();
-		update(null, null);
+		update(null, null, false);
 		if (getPlottingSystem()!=null) {
 			getPlottingSystem().addTraceListener(traceListener);
 		}
 		if (getPlottingSystem()!=null) {
 			getPlottingSystem().addRegionListener(regionListener);
-		}		
-		final Collection<IRegion> regions = getPlottingSystem().getRegions();
-		if (regions!=null) for (IRegion iRegion : regions) iRegion.addROIListener(this);
+		}	
+		
+		if (getPlottingSystem()!=null) {
+			final Collection<IRegion> regions = getPlottingSystem().getRegions();
+			if (regions!=null) for (IRegion iRegion : regions) iRegion.addROIListener(this);
+		}
+		
+		// We try to listen to the image mask changing and reprofile if it does.
+		if (getPlottingSystem()!=null) {
+			if (getImageTrace()!=null) getImageTrace().addPaletteListener(paletteListener);
+		}
 		
 		// Start with a selection of the right type
 		try {
@@ -197,92 +218,29 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		if (getPlottingSystem()!=null) {
 			getPlottingSystem().removeRegionListener(regionListener);
 		}
-		final Collection<IRegion> regions = getPlottingSystem().getRegions();
-		if (regions!=null) for (IRegion iRegion : regions) iRegion.removeROIListener(this);
+		if (getPlottingSystem()!=null) {
+			final Collection<IRegion> regions = getPlottingSystem().getRegions();
+			if (regions!=null) for (IRegion iRegion : regions) iRegion.removeROIListener(this);
+		}
+		if (getPlottingSystem()!=null) {
+			if (getImageTrace()!=null) getImageTrace().removePaletteListener(paletteListener);
+		}
+
 	}
 	
 	@Override
 	public Control getControl() {
-		if (plotter==null) return null;
-		return plotter.getPlotComposite();
+		if (profilePlottingSystem==null) return null;
+		return profilePlottingSystem.getPlotComposite();
 	}
 	
 	public void dispose() {
 		deactivate();
 		
 		registeredTraces.clear();
-		if (plotter!=null) plotter.dispose();
-		plotter = null;
+		if (profilePlottingSystem!=null) profilePlottingSystem.dispose();
+		profilePlottingSystem = null;
 		super.dispose();
-	}
-
-	private boolean isUpdateRunning = false;
-	/**
-	 * The user can optionally nominate an x. In this case, we would like to 
-	 * use it for the derivative instead of the indices of the data. Therefore
-	 * there is some checking here to see if there are x values to plot.
-	 * 
-	 * Normally everything will be ILineTraces even if the x is indices.
-	 */
-	private Job createProfileJob() {
-
-		Job job = new Job("Profile update") {
-
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-
-				try {
-					isUpdateRunning = true;
-					if (!isActive()) return Status.CANCEL_STATUS;
-	
-					final Collection<ITrace> traces= getPlottingSystem().getTraces(IImageTrace.class);	
-					IImageTrace image = traces!=null && traces.size()>0 ? (IImageTrace)traces.iterator().next() : null;
-	
-					if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
-					if (image==null) {
-						plotter.clear();
-						return Status.OK_STATUS;
-					}
-	
-					// Get the profiles from the line and box regions.
-					if (currentRegion==null) {
-						plotter.clear();
-						registeredTraces.clear();
-						final Collection<IRegion> regions = getPlottingSystem().getRegions();
-						if (regions!=null) {
-							for (IRegion iRegion : regions) {
-								if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
-								createProfile(image, iRegion, null, false, monitor);
-							}
-						}
-					} else {
-	
-						if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
-						createProfile(image, 
-								      currentRegion, 
-								      currentROI!=null?currentROI:currentRegion.getROI(), 
-								      true, 
-								      monitor);
-						
-					}
-	
-					if (monitor.isCanceled()) return Status.CANCEL_STATUS;
-	                plotter.repaint();
-	                
-				} finally {
-					isUpdateRunning = false;
-				}
-
-                                
-				return Status.OK_STATUS;
-
-			}	
-		};
-		job.setSystem(true);
-		job.setUser(false);
-		job.setPriority(Job.INTERACTIVE);
-
-		return job;
 	}
 
 	/**
@@ -296,17 +254,18 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 			                              IRegion region, 
 			                              ROIBase roi, 
 			                              boolean tryUpdate, 
+			                              boolean isDrag,
 			                              IProgressMonitor monitor);
 
 	@Override
 	public void roiDragged(ROIEvent evt) {
-		update((IRegion)evt.getSource(), evt.getROI());
+		update((IRegion)evt.getSource(), evt.getROI(), true);
 	}
 
 	@Override
 	public void roiChanged(ROIEvent evt) {
 		final IRegion region = (IRegion)evt.getSource();
-		update(region, region.getROI());
+		update(region, region.getROI(), false);
 		
 		try {
 			updateProfiles.join();
@@ -316,20 +275,105 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		
         getControl().getDisplay().syncExec(new Runnable() {
         	public void run() {
-        		plotter.autoscaleAxes();
+        		profilePlottingSystem.autoscaleAxes();
         	}
         });
 
 	}
 	
-	private synchronized void update(IRegion r, ROIBase rb) {
+	private synchronized void update(IRegion r, ROIBase rb, boolean isDrag) {
 	
 		if (r!=null && !isRegionTypeSupported(r.getRegionType())) return; // Nothing to do.
-
-        if (isUpdateRunning)  updateProfiles.cancel();
          
-		this.currentRegion = r;
-		this.currentROI = rb;
-		updateProfiles.schedule();
+		updateProfiles.profile(r, rb, isDrag);
+	}
+	
+	private final class ProfileJob extends Job {
+		
+		private   IRegion                currentRegion;
+		private   ROIBase                currentROI;
+		private   boolean                isDrag;
+
+		ProfileJob() {
+			super("Profile update");
+			setSystem(true);
+			setUser(false);
+			setPriority(Job.INTERACTIVE);
+		}
+
+		public void profile(IRegion r, ROIBase rb, boolean isDrag) {
+			this.currentRegion = r;
+			this.currentROI    = rb;
+			this.isDrag        = isDrag;
+	        for (Job job : Job.getJobManager().find(null))
+	            if (job.getClass()==getClass() && job.getState() != Job.RUNNING)
+	        	    job.cancel();
+	        
+          	schedule();		
+		}
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+
+			if (!isActive()) return Status.CANCEL_STATUS;
+
+			final Collection<ITrace> traces= getPlottingSystem().getTraces(IImageTrace.class);	
+			IImageTrace image = traces!=null && traces.size()>0 ? (IImageTrace)traces.iterator().next() : null;
+
+			if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
+			if (image==null) {
+				profilePlottingSystem.clear();
+				return Status.OK_STATUS;
+			}
+
+			// Get the profiles from the line and box regions.
+			if (currentRegion==null) {
+				profilePlottingSystem.clear();
+				registeredTraces.clear();
+				final Collection<IRegion> regions = getPlottingSystem().getRegions();
+				if (regions!=null) {
+					for (IRegion iRegion : regions) {
+						if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
+						createProfile(image, iRegion, null, false, isDrag, monitor);
+					}
+				}
+			} else {
+
+				if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
+				createProfile(image, 
+						currentRegion, 
+						currentROI!=null?currentROI:currentRegion.getROI(), 
+								true, 
+								isDrag,
+								monitor);
+
+			}
+
+			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+			profilePlottingSystem.repaint();
+
+			return Status.OK_STATUS;
+
+		}	
+		
+		
+	}
+	
+	/**
+	 * Tries to get the meta from the editor part or uses the one in AbtractDataset of the image
+	 * @return IMetaData, may be null
+	 */
+	protected IMetaData getMetaData() {
+		
+		if (getPart() instanceof IEditorPart) {
+			IEditorPart editor = (IEditorPart)getPart();
+	    	try {
+				return LoaderFactory.getMetaData(EclipseUtils.getFilePath(editor.getEditorInput()), null);
+			} catch (Exception e) {
+				logger.error("Cannot get meta data for "+EclipseUtils.getFilePath(editor.getEditorInput()), e);
+			}
+		}
+		
+		return getImageTrace().getData().getMetadata();
 	}
 }

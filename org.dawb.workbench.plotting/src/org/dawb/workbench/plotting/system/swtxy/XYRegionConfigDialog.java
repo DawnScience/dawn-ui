@@ -117,8 +117,10 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
         	regionCombo.setLayoutData(new GridData(SWT.FILL, 0, true, false));
         	
         	
- 	        for(String name : ((RegionArea)regionGraph.getPlotArea()).getRegionNames())
- 	        	regionCombo.add(name);
+ 	        for(String name : ((RegionArea)regionGraph.getPlotArea()).getRegionNames()) {
+	        	if (!regionGraph.getRegion(name).isUserRegion()) continue;
+	        	regionCombo.add(name);
+ 	        }
  	        regionCombo.select(0);
         	
  	        final Composite regionConfigComposite = new Composite(regionComposite, SWT.NONE);

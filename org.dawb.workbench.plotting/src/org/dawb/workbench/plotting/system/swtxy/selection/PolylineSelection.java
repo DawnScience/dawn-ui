@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.csstudio.swt.xygraph.figures.Axis;
+import org.dawb.common.ui.plot.region.IRegion;
+import org.dawb.common.ui.plot.region.IRegionContainer;
 import org.dawb.workbench.plotting.system.swtxy.translate.FigureTranslator;
 import org.dawb.workbench.plotting.system.swtxy.util.Draw2DUtils;
 import org.dawb.workbench.plotting.system.swtxy.util.RotatablePolylineShape;
@@ -61,7 +63,7 @@ public class PolylineSelection extends AbstractSelectionRegion {
 	@Override
 	protected void updateConnectionBounds() {
 		if (pline != null) {
-			Rectangle b = pline.getUpdatedBounds();
+			Rectangle b = pline.updateFromHandles();
 			pline.setBounds(b);
 		}
 	}
@@ -115,7 +117,7 @@ public class PolylineSelection extends AbstractSelectionRegion {
 			if (pline == null)
 				return;
 
-			pline.updateROI((PolygonalROI) roi);
+			pline.updateFromROI((PolygonalROI) roi);
 
 			updateConnectionBounds();
 		}
@@ -126,7 +128,7 @@ public class PolylineSelection extends AbstractSelectionRegion {
 		return 0; // signifies unlimited presses
 	}
 
-	class DecoratedPolyline extends RotatablePolylineShape {
+	class DecoratedPolyline extends RotatablePolylineShape implements IRegionContainer {
 		List<IFigure> handles;
 		private Figure parent;
 		private static final int SIDE = 8;
@@ -164,7 +166,7 @@ public class PolylineSelection extends AbstractSelectionRegion {
 			setRegionObjects(this, handles);
 		}
 
-		private Rectangle getUpdatedBounds() {
+		private Rectangle updateFromHandles() {
 			int i = 0;
 			Rectangle b = null;
 			for (IFigure f : handles) { // this is called first so update points
@@ -181,7 +183,11 @@ public class PolylineSelection extends AbstractSelectionRegion {
 			return b;
 		}
 
-		public void updateROI(PolygonalROI proi) {
+		/**
+		 * Update according to ROI
+		 * @param sroi
+		 */
+		public void updateFromROI(PolygonalROI proi) {
 			final PointList pl = getPoints();
 			final int imax = handles.size();
 			if (imax != proi.getSides())
@@ -209,6 +215,16 @@ public class PolylineSelection extends AbstractSelectionRegion {
 			for (IFigure f : handles) {
 				f.paint(graphics);
 			}
+		}
+
+		@Override
+		public IRegion getRegion() {
+			return PolylineSelection.this;
+		}
+
+		@Override
+		public void setRegion(IRegion region) {
+			// Not possible
 		}
 	}
 }

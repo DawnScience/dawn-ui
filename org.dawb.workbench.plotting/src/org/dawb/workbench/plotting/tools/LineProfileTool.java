@@ -19,7 +19,7 @@ import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 public class LineProfileTool extends ProfileTool {
 
 	@Override
-	protected void createAxes(AbstractPlottingSystem plotter) {
+	protected void configurePlottingSystem(AbstractPlottingSystem plotter) {
 		plotter.getSelectedXAxis().setTitle("Pixel");
 		plotter.getSelectedYAxis().setTitle("Intensity");
 	}
@@ -29,6 +29,7 @@ public class LineProfileTool extends ProfileTool {
 						            IRegion      region, 
 						            ROIBase      rbs, 
 						            boolean      tryUpdate,
+				                     boolean      isDrag,
 						            IProgressMonitor monitor) {
         
 		if (monitor.isCanceled()) return;
@@ -52,7 +53,7 @@ public class LineProfileTool extends ProfileTool {
 		
 		if (tryUpdate) {
 		
-			final ILineTrace trace = (ILineTrace)plotter.getTrace(region.getName());
+			final ILineTrace trace = (ILineTrace)profilePlottingSystem.getTrace(region.getName());
 			
 			if (trace!=null && !monitor.isCanceled()) getControl().getDisplay().syncExec(new Runnable() {
 				public void run() {
@@ -62,7 +63,7 @@ public class LineProfileTool extends ProfileTool {
 			
 		} else {
 			if (monitor.isCanceled()) return;
-			Collection<ITrace> plotted = plotter.createPlot1D(indices, Arrays.asList(new AbstractDataset[]{intensity}), monitor);
+			Collection<ITrace> plotted = profilePlottingSystem.createPlot1D(indices, Arrays.asList(new AbstractDataset[]{intensity}), monitor);
 			registerTraces(region, plotted);
 			
 		}
@@ -71,7 +72,7 @@ public class LineProfileTool extends ProfileTool {
 
 	@Override
 	protected boolean isRegionTypeSupported(RegionType type) {
-		return type==RegionType.LINE || type==RegionType.XAXIS_LINE || type == RegionType.YAXIS_LINE;
+		return type==RegionType.LINE;
 	}
 
 	@Override
