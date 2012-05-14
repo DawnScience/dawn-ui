@@ -22,7 +22,6 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.cheatsheets,
  org.eclipse.ui.ide,
  org.eclipse.jface.text,
- org.embl.cca.utils;bundle-version="1.0.0",
  org.dawb.fable.imageviewer;bundle-version="1.0.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
