@@ -175,7 +175,7 @@ public class HistogramToolPage extends AbstractToolPage {
 	public HistogramToolPage() {
 		super();
 		try {
-			histogramPlot = PlottingFactory.getPlottingSystem();
+			histogramPlot = PlottingFactory.createPlottingSystem();
 
 
 		} catch (Exception ne) {

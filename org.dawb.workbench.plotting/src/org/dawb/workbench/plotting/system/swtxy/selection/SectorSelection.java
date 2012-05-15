@@ -48,8 +48,7 @@ public class SectorSelection extends AbstractSelectionRegion {
 		sync(getBean());
 		sector.setLineWidth(getLineWidth());
 		updateROI();
-		if (roi == null)
-			createROI(true);
+		if (roi == null) createROI(true);
 	}
 	
 	@Override
@@ -185,9 +184,16 @@ public class SectorSelection extends AbstractSelectionRegion {
 		final double[] a = sector.getAnglesDegrees();
 		final double x = xa.getPositionValue(c.x(), false);
 		final double y = ya.getPositionValue(c.y(), false);
+		
+		final int symmetry = roi!=null ? ((SectorROI)roi).getSymmetry() : 0;
+		final boolean combine = roi!=null ? ((SectorROI)roi).isCombineSymmetry() : false;
+		
 		final SectorROI sroi = new SectorROI(x, y, xa.getPositionValue((int) (c.preciseX() + r[0]), false) - x,
-				ya.getPositionValue((int) (c.preciseY() + r[1]), false) - y,
-				Math.toRadians(360 - a[1]), Math.toRadians(360 - a[0]));
+				                             ya.getPositionValue((int) (c.preciseY() + r[1]), false) - y,
+				                             Math.toRadians(360 - a[1]), Math.toRadians(360 - a[0]));
+		sroi.setSymmetry(symmetry);
+		sroi.setCombineSymmetry(combine);
+		
 		if (recordResult) {
 			roi = sroi;
 		}
@@ -403,6 +409,14 @@ public class SectorSelection extends AbstractSelectionRegion {
 			setCentre(cx, cy);
 			setRadii(xa.getValuePosition(x + r[0], false) - cx, ya.getValuePosition(y + r[1], false) - cy);
 			setAnglesDegrees(360-a[1], 360-a[0]);
+			
+			if (sroi.getSymmetry() == SectorROI.NONE) {
+				setDrawSymmetry(false);
+			} else {
+				setDrawSymmetry(true);
+				double[] nang = sroi.getSymmetryAngles();
+				setSymmetryAnglesDegrees(-Math.toDegrees(nang[1]), -Math.toDegrees(nang[0]));
+			}
 
 			final int imax = handles.size();
 			SectorROIHandler handler = new SectorROIHandler(sroi);

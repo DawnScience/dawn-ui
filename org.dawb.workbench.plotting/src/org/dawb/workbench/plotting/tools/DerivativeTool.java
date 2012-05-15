@@ -60,7 +60,7 @@ public class DerivativeTool extends AbstractToolPage  {
 
 	public DerivativeTool() {
 		try {
-			plotter = PlottingFactory.getPlottingSystem();
+			plotter = PlottingFactory.createPlottingSystem();
 			this.traceListener = new ITraceListener.Stub() {
 				@Override
 				public void tracesPlotted(TraceEvent evt) {

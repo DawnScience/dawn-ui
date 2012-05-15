@@ -11,6 +11,7 @@
 package org.dawb.workbench.plotting.system;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -925,4 +926,28 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 		manager.add(new Separator("org.dawb.workbench.plotting.system.configure.group"));
 	}
 
+	
+	@Override
+	public void remove(String id) {
+        super.remove(id);
+		if (oneDimensionalActions!=null) for (Iterator<ActionContainer> it= this.oneDimensionalActions.iterator(); it.hasNext(); ) {
+			ActionContainer ac = it.next();
+			if (ac.getAction().getId()!=null && ac.getAction().getId().equals(id)) {
+				it.remove();
+				break;
+			}
+		}
+		if (twoDimensionalActions!=null) for (Iterator<ActionContainer> it= this.twoDimensionalActions.iterator(); it.hasNext(); ) {
+			ActionContainer ac = it.next();
+			if (ac.getAction().getId()!=null && ac.getAction().getId().equals(id)) {
+				it.remove();
+				break;
+			}
+		}
+		if (system.getActionBars()!=null) {
+			system.getActionBars().getToolBarManager().remove(id);
+			system.getActionBars().getMenuManager().remove(id);
+			system.getActionBars().getStatusLineManager().remove(id);
+		}
+	}       
 }

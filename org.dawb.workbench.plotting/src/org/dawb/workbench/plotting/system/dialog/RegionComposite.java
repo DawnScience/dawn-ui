@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
+import org.dawb.common.ui.util.GridUtils;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
 import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
 import org.eclipse.jface.preference.ColorSelector;
@@ -21,6 +22,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
+
+import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 
 public class RegionComposite extends Composite {
 
@@ -38,6 +41,10 @@ public class RegionComposite extends Composite {
 	private Button showLabel;
 
 	private ROIViewer roiViewer;
+
+	private Label symmetryLabel;
+
+	private CCombo symmetry;
 
 	public RegionComposite(final Composite parent, final int style, final XYRegionGraph xyGraph, final RegionType defaultRegion) {
 		
@@ -122,6 +129,17 @@ public class RegionComposite extends Composite {
 		showLabel.setLayoutData(new GridData(0, 0, false, false, 2, 1));
 		showLabel.setSelection(true);
 		
+		this.symmetryLabel = new Label(this, SWT.NONE);
+		symmetryLabel.setText("Symmetry");		
+		symmetryLabel.setToolTipText("Set the symmetry of the region.");
+		symmetryLabel.setLayoutData(new GridData(0, 0, false, false, 1, 1));
+		
+		this.symmetry = new CCombo(this, SWT.NONE);
+		for (int index : SectorROI.getSymmetriesPossible().keySet()) {
+			symmetry.add(SectorROI.getSymmetryText(index));
+		}
+		symmetry.setLayoutData(new GridData(SWT.FILL, 0, true, false));
+	
 		final Label spacer = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
 		spacer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		
@@ -149,7 +167,7 @@ public class RegionComposite extends Composite {
 		CCombo combo = new CCombo(this, SWT.NONE);
 		combo.setEditable(false);
 		combo.setToolTipText("Existing axis on the graph ");
-		combo.setLayoutData(new GridData(SWT.FILL, 0, true, false));
+		combo.setLayoutData(new GridData(SWT.LEFT, 0, false, false));
 
 		for(Axis axis : xAxisList)  combo.add(axis.getTitle());
 		
@@ -216,6 +234,17 @@ public class RegionComposite extends Composite {
 		showPoints.setSelection(region.isShowPosition());
 		visible.setSelection(region.isVisible());
 		showLabel.setSelection(region.isShowLabel());
+		
+		if (region.getRegionType()!=RegionType.SECTOR) {
+			GridUtils.setVisible(this.symmetryLabel, false);
+			GridUtils.setVisible(this.symmetry,      false);
+		} else {
+			SectorROI sroi = (SectorROI)editingRegion.getROI();
+			if (sroi!=null) {
+				int sym = sroi.getSymmetry();
+				symmetry.select(sym);
+			}
+		}
 	}
 	
 	public AbstractSelectionRegion getEditingRegion() {
@@ -230,6 +259,16 @@ public class RegionComposite extends Composite {
 		editingRegion.setMobile(mobile.getSelection());
 		editingRegion.setVisible(visible.getSelection());
 		editingRegion.setShowLabel(showLabel.getSelection());
+		
+		if (editingRegion.getRegionType()==RegionType.SECTOR) {
+			SectorROI sroi = (SectorROI)editingRegion.getROI();
+			if (sroi!=null) {
+				sroi = sroi.copy();
+				sroi.setSymmetry(symmetry.getSelectionIndex());
+				editingRegion.setROI(sroi);
+			}
+		}
+		
         return editingRegion;
 	}
 

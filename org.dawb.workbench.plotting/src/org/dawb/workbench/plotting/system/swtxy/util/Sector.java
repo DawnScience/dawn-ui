@@ -6,17 +6,19 @@ import org.eclipse.draw2d.Shape;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.draw2d.geometry.Rectangle;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 
 /**
  * A Draw2D annular sector. Its location is the centre (not the top-left corner of its bounding box)
  */
 public class Sector extends Shape {
+	
+	private boolean drawSymmetry = false;
 	private Rectangle box; // bounding box of sector
 	private PrecisionPoint centre;
 	private double[] radius;
 	private double[] angle; // degrees
+	private double[] symAngle; // degrees
 
 	public Sector() {
 		this(0, 0, 100, 200, 0, 360);
@@ -77,6 +79,18 @@ public class Sector extends Shape {
 		angle[1] = end;
 		calcBox();
 	}
+	
+	/**
+	 * Set angles
+	 * @param start
+	 * @param end
+	 */
+	public void setSymmetryAnglesDegrees(double start, double end) {
+		if (symAngle==null) symAngle = new double[2];
+		symAngle[0] = start;
+		symAngle[1] = end;
+		calcBox();
+	}
 
 	public PrecisionPoint getCentre() {
 		return centre;
@@ -119,13 +133,19 @@ public class Sector extends Shape {
 
 	@Override
 	protected void fillShape(Graphics graphics) {
-		final double ri = radius[0], ro = radius[1];
+		fillSector(graphics, radius, angle);
+		
+		if (isDrawSymmetry() && symAngle!=null) fillSector(graphics, radius, symAngle);
+	}
+
+	private void fillSector(Graphics graphics, double[] rad, double[] ang) {
+		
+		final double ri = rad[0], ro = rad[1];
 		final int din = (int) (2*ri), dout = (int) (2*ro);
-		final double as = Math.toRadians(angle[0]), ae = Math.toRadians(angle[1]);
 		final double cx = centre.preciseX(), cy = centre.preciseY();
 
-		final int ab = (int) Math.round(angle[0]);
-		final int al = (int) (angle[1] - angle[0]);
+		final int ab = (int) Math.round(ang[0]);
+		final int al = (int) (ang[1] - ang[0]);
 
 		Color orig = graphics.getBackgroundColor();
 		graphics.setBackgroundColor(ColorConstants.red);
@@ -135,7 +155,7 @@ public class Sector extends Shape {
 		graphics.setBackgroundColor(ColorConstants.black);
 		graphics.fillArc((int) (cx - ri), (int) (cy - ri), din, din, ab, al);
 		graphics.setAlpha(alpha);
-		graphics.setBackgroundColor(orig);
+		graphics.setBackgroundColor(orig);	
 	}
 
 	@Override
@@ -153,5 +173,13 @@ public class Sector extends Shape {
 				(int) (cx + ro*Math.cos(as)), (int) (cy - ro*Math.sin(as)));
 		graphics.drawLine((int) (cx + ri*Math.cos(ae)), (int) (cy - ri*Math.sin(ae)),
 				(int) (cx + ro*Math.cos(ae)), (int) (cy - ro*Math.sin(ae)));
+	}
+
+	public boolean isDrawSymmetry() {
+		return drawSymmetry;
+	}
+
+	public void setDrawSymmetry(boolean drawSymmetry) {
+		this.drawSymmetry = drawSymmetry;
 	}
 }

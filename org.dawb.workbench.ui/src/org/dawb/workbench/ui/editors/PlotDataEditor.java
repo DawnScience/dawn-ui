@@ -97,7 +97,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 	public PlotDataEditor(boolean useCaching, final PlotType defaultPlotType) {
 		try {
 			this.defaultPlotType= defaultPlotType;
-	        this.plottingSystem = PlottingFactory.getPlottingSystem();
+	        this.plottingSystem = PlottingFactory.createPlottingSystem();
 		} catch (Exception ne) {
 			logger.error("Cannot locate any plotting systems!", ne);
 		}

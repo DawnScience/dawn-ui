@@ -82,7 +82,7 @@ public class PlotImageEditor extends EditorPart implements IReusableEditor {
 	public PlotImageEditor() {
 	
 		try {
-	        this.plottingSystem = PlottingFactory.getPlottingSystem();
+	        this.plottingSystem = PlottingFactory.createPlottingSystem();
 	        plottingSystem.setColorOption(ColorOption.NONE);
 		} catch (Exception ne) {
 			logger.error("Cannot locate any plotting systems!", ne);
