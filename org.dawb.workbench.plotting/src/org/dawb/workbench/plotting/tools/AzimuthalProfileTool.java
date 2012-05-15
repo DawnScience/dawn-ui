@@ -35,7 +35,7 @@ public class AzimuthalProfileTool extends SectorProfileTool {
 		if (profile==null) return null;
 		
 		AbstractDataset integral = profile[1];
-		integral.setName("Azimuthal Integration "+region.getName());
+		integral.setName("Azimuthal Profile "+region.getName());
 	
 		return integral;
 	}

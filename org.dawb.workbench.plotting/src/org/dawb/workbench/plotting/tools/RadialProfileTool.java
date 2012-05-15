@@ -32,7 +32,7 @@ public class RadialProfileTool extends SectorProfileTool {
         if (profile==null) return null;
 				
 		final AbstractDataset integral = profile[0];
-		integral.setName("Radial Integration "+region.getName());
+		integral.setName("Radial Profile "+region.getName());
 	
 		return integral;
 	}

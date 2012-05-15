@@ -63,15 +63,15 @@
             class="org.dawb.workbench.plotting.tools.RadialProfileTool"
             icon="icons/plot-tool-radial-integral.png"
             id="org.dawb.workbench.plotting.tools.radialProfileTool"
-            label="Radial Integration"
-            tooltip="Masking the image and leaving data modified.">
+            label="Radial Profile"
+            tooltip="A tool for showing radial profiles in sectors of images.">
       </plotting_tool_page>
       <plotting_tool_page
             class="org.dawb.workbench.plotting.tools.AzimuthalProfileTool"
             icon="icons/plot-tool-azimuthal-integral.png"
             id="org.dawb.workbench.plotting.tools.azimuthalProfileTool"
-            label="Azimuthal Integration"
-            tooltip="Masking the image and leaving data modified.">
+            label="Azimuthal Profile"
+            tooltip="A tool for showing azimuthal profiles in sectors of images.">
       </plotting_tool_page>
       <plotting_tool_page
             class="org.dawb.workbench.plotting.tools.CrossHairProfileTool"
