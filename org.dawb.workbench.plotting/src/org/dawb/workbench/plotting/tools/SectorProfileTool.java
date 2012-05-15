@@ -1,8 +1,10 @@
 package org.dawb.workbench.plotting.tools;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.region.IRegion;
@@ -15,6 +17,9 @@ import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.workbench.plotting.Activator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
@@ -53,10 +58,90 @@ public abstract class SectorProfileTool extends ProfileTool {
 			@Override
 			public void regionAdded(RegionEvent evt) {
 				updateSectors();
+				if (evt.getRegion()!=null && evt.getRegion().getRegionType()==RegionType.SECTOR) {
+					SectorROI sroi = (SectorROI)evt.getRegion().getROI().copy();
+					sroi.setSymmetry(preferredSymmetry);
+					sroi.setCombineSymmetry(preferredCombine);
+					evt.getRegion().setROI(sroi);
+				}
 			}
 		};
+		
+		final MenuAction symmetry = new MenuAction("Symmetry setting");
+		symmetry.setImageDescriptor(Activator.getImageDescriptor("icons/sector-symmetry-menu.png"));
+		getSite().getActionBars().getToolBarManager().add(symmetry);
+		
+		addSymetryActions(symmetry);
+		
 	}
 	
+	private int     preferredSymmetry = SectorROI.NONE;
+	private boolean preferredCombine  = false;
+	
+	private void addSymetryActions(final MenuAction symmetry) {
+		
+		final CheckableActionGroup group = new CheckableActionGroup();
+		for (int isymetry = 0; isymetry < 7; isymetry++) {
+
+			final int finalSym = isymetry;
+			
+			final Action action = new Action(SectorROI.getSymmetryText(isymetry), IAction.AS_CHECK_BOX) {
+				@Override
+				public void run() {
+					
+					preferredSymmetry = finalSym;
+					final Collection<IRegion> regions = getPlottingSystem().getRegions(RegionType.SECTOR);
+					
+					Collection<IRegion> notPossible = new ArrayList<IRegion>(3);
+					if (regions!=null) for (IRegion iRegion : regions) {
+						SectorROI roi = (SectorROI)iRegion.getROI();
+						
+						//if (roi.checkSymmetry(finalSym)) {
+							roi = roi.copy();
+							roi.setSymmetry(finalSym);
+							iRegion.setROI(roi);
+						//} else {						
+						//	notPossible.add(iRegion);
+						//}
+					}
+					
+					update(null, null, false);
+
+					if (notPossible.size()>0) {
+						MessageDialog.openError(Display.getDefault().getActiveShell(), "Cannot use symmetry",
+								                "The region"+(notPossible.size()==1?": '":"s: '")+notPossible.toString().substring(1,notPossible.toString().length()-2)+"'\n"+
+								                "cannot have "+(notPossible.size()==1?"its":"their")+" symmetry set to "+SectorROI.getSymmetryText(finalSym)+
+								                "\n\nPlease try a different symmetry for "+(notPossible.size()==1?"it.":"them."));
+					}
+				}
+			};	
+            group.add(action);
+			symmetry.add(action);
+		}
+	
+		symmetry.getAction(0).setChecked(true);
+		
+		final Action combine = new Action("Combine symmetry", IAction.AS_CHECK_BOX) {
+			@Override
+			public void run() {
+				preferredCombine = isChecked();
+				
+				final Collection<IRegion> regions = getPlottingSystem().getRegions(RegionType.SECTOR);
+				if (regions!=null) for (IRegion iRegion : regions) {
+					SectorROI roi = (SectorROI)iRegion.getROI();
+					roi = roi.copy();
+					roi.setCombineSymmetry(isChecked());
+					iRegion.setROI(roi);
+				}
+				
+				update(null, null, false);
+			    
+			}
+		};
+		combine.setImageDescriptor(Activator.getImageDescriptor("icons/sector-symmetry-combine.png"));
+		getSite().getActionBars().getToolBarManager().add(combine);
+	}
+
 	public void activate() {
 		super.activate();
 		
@@ -126,7 +211,7 @@ public abstract class SectorProfileTool extends ProfileTool {
     	return new double[]{image.getShape()[1]/2d, image.getShape()[0]/2d};
 	}
 
-	protected abstract AbstractDataset getXAxis(final SectorROI sroi, final AbstractDataset integral);
+	protected abstract AbstractDataset[] getXAxis(final SectorROI sroi, final AbstractDataset[] integrals);
 	
 	/**
 	 * Please name the integral the same as the name you would like to plot.
@@ -136,13 +221,13 @@ public abstract class SectorProfileTool extends ProfileTool {
 	 * @param sroi
 	 * @param region
 	 * @param isDrag
-	 * @return
+	 * @return either array size 1 or 2. If 2, 2 plots are created on the profile
 	 */
-	protected abstract AbstractDataset getIntegral( final AbstractDataset data,
-										            final AbstractDataset mask, 
-										            final SectorROI       sroi, 
-						                            final IRegion         region,
-										            final boolean         isDrag);
+	protected abstract AbstractDataset[] getIntegral( final AbstractDataset data,
+										              final AbstractDataset mask, 
+										              final SectorROI       sroi, 
+						                              final IRegion         region,
+										              final boolean         isDrag);
 
 
 	@Override
@@ -173,28 +258,30 @@ public abstract class SectorProfileTool extends ProfileTool {
 			downsroi.downsample(image.getDownsampleBin());
 		}
 			
-		final AbstractDataset integral = getIntegral(data, mask, isDrag ? downsroi : sroi, region, isDrag);	
-        if (integral==null) return;
+		final AbstractDataset[] integrals = getIntegral(data, mask, isDrag ? downsroi : sroi, region, isDrag);	
+        if (integrals==null) return;
 				
-		final AbstractDataset xi = getXAxis(sroi, integral);
-		
-		if (tryUpdate) {
-			final ILineTrace x_trace = (ILineTrace)profilePlottingSystem.getTrace(integral.getName());
+		final AbstractDataset[] xis = getXAxis(sroi, integrals);
+
+		for (int i = 0; i < integrals.length; i++) {
+			final AbstractDataset integral = integrals[i];
+			final AbstractDataset xi       = xis[i];
 			
-			if (x_trace!=null) {
+			final ILineTrace x_trace = (ILineTrace)profilePlottingSystem.getTrace(integral.getName());
+			if (tryUpdate && x_trace!=null) {
 				getControl().getDisplay().syncExec(new Runnable() {
 					public void run() {
 						x_trace.setData(xi, integral);
 					}
 				});
-			}		
-			
-		} else {
-						
-			Collection<ITrace> plotted = profilePlottingSystem.createPlot1D(xi, Arrays.asList(new AbstractDataset[]{integral}), monitor);
-			registerTraces(region, plotted);			
+
+			} else {
+
+				Collection<ITrace> plotted = profilePlottingSystem.createPlot1D(xi, Arrays.asList(new AbstractDataset[]{integral}), monitor);
+				registerTraces(region, plotted);			
+			}
 		}
-			
+
 	}
 	
 	@Override

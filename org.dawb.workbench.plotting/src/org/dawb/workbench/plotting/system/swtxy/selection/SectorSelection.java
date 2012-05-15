@@ -48,8 +48,7 @@ public class SectorSelection extends AbstractSelectionRegion {
 		sync(getBean());
 		sector.setLineWidth(getLineWidth());
 		updateROI();
-		if (roi == null)
-			createROI(true);
+		if (roi == null) createROI(true);
 	}
 	
 	@Override
@@ -403,6 +402,14 @@ public class SectorSelection extends AbstractSelectionRegion {
 			setCentre(cx, cy);
 			setRadii(xa.getValuePosition(x + r[0], false) - cx, ya.getValuePosition(y + r[1], false) - cy);
 			setAnglesDegrees(360-a[1], 360-a[0]);
+			
+			if (sroi.getSymmetry() == SectorROI.NONE) {
+				setDrawSymmetry(false);
+			} else {
+				setDrawSymmetry(true);
+				double[] nang = sroi.getSymmetryAngles();
+				setSymmetryAnglesDegrees(-Math.toDegrees(nang[1]), -Math.toDegrees(nang[0]));
+			}
 
 			final int imax = handles.size();
 			SectorROIHandler handler = new SectorROIHandler(sroi);

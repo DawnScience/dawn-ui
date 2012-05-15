@@ -11,16 +11,21 @@ public class RadialProfileTool extends SectorProfileTool {
 
 
 	@Override
-	protected AbstractDataset getXAxis(final SectorROI sroi, AbstractDataset integral) {
+	protected AbstractDataset[] getXAxis(final SectorROI sroi, AbstractDataset[] integrals) {
 		
-		final AbstractDataset xi = DatasetUtils.linSpace(sroi.getRadius(0), sroi.getRadius(1), integral.getSize(), AbstractDataset.FLOAT32);
+		final AbstractDataset xi = DatasetUtils.linSpace(sroi.getRadius(0), sroi.getRadius(1), integrals[0].getSize(), AbstractDataset.FLOAT64);
 		xi.setName("Radius (pixel)");
 		
-		return xi;
+		if (!sroi.hasSeparateRegions())  return new AbstractDataset[]{xi};
+		
+		final AbstractDataset xii = DatasetUtils.linSpace(sroi.getRadius(0), sroi.getRadius(1), integrals[1].getSize(), AbstractDataset.FLOAT64);
+		xii.setName("Radius (pixel)");
+		
+		return new AbstractDataset[]{xi, xii};
 	}
 
 	@Override
-	protected AbstractDataset getIntegral(AbstractDataset data,
+	protected AbstractDataset[] getIntegral(AbstractDataset data,
 			                              AbstractDataset mask, 
 			                              SectorROI       sroi, 
 			                              IRegion         region,
@@ -33,7 +38,17 @@ public class RadialProfileTool extends SectorProfileTool {
 				
 		final AbstractDataset integral = profile[0];
 		integral.setName("Radial Profile "+region.getName());
-	
-		return integral;
+		
+		// If not symmetry profile[2] is null, otherwise plot it.
+	    if (profile.length>=3 && profile[2]!=null && sroi.hasSeparateRegions()) {
+	    	
+			final AbstractDataset reflection = profile[2];
+			reflection.setName("Reflection "+region.getName());
+
+			return new AbstractDataset[]{integral, reflection};
+	    	
+	    } else {
+	    	return new AbstractDataset[]{integral};
+	    }
 	}
 }

@@ -147,6 +147,12 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 								this.getViewPart());		
 
 		configurePlottingSystem(profilePlottingSystem);
+		
+		// Unused actions removed for tool
+		profilePlottingSystem.getPlotActionSystem().remove("org.dawb.workbench.plotting.rescale");
+		profilePlottingSystem.getPlotActionSystem().remove("org.dawb.workbench.plotting.plotIndex");
+		profilePlottingSystem.getPlotActionSystem().remove("org.dawb.workbench.plotting.plotX");
+
 	}
 
 	@Override
@@ -281,7 +287,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 
 	}
 	
-	private synchronized void update(IRegion r, ROIBase rb, boolean isDrag) {
+	protected synchronized void update(IRegion r, ROIBase rb, boolean isDrag) {
 	
 		if (r!=null && !isRegionTypeSupported(r.getRegionType())) return; // Nothing to do.
          
