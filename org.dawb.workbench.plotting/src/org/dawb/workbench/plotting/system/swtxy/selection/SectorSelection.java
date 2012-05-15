@@ -184,9 +184,16 @@ public class SectorSelection extends AbstractSelectionRegion {
 		final double[] a = sector.getAnglesDegrees();
 		final double x = xa.getPositionValue(c.x(), false);
 		final double y = ya.getPositionValue(c.y(), false);
+		
+		final int symmetry = roi!=null ? ((SectorROI)roi).getSymmetry() : 0;
+		final boolean combine = roi!=null ? ((SectorROI)roi).isCombineSymmetry() : false;
+		
 		final SectorROI sroi = new SectorROI(x, y, xa.getPositionValue((int) (c.preciseX() + r[0]), false) - x,
-				ya.getPositionValue((int) (c.preciseY() + r[1]), false) - y,
-				Math.toRadians(360 - a[1]), Math.toRadians(360 - a[0]));
+				                             ya.getPositionValue((int) (c.preciseY() + r[1]), false) - y,
+				                             Math.toRadians(360 - a[1]), Math.toRadians(360 - a[0]));
+		sroi.setSymmetry(symmetry);
+		sroi.setCombineSymmetry(combine);
+		
 		if (recordResult) {
 			roi = sroi;
 		}
