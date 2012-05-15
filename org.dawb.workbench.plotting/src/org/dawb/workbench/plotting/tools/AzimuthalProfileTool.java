@@ -47,7 +47,7 @@ public class AzimuthalProfileTool extends SectorProfileTool {
 	    if (profile.length>=4 && profile[3]!=null && sroi.hasSeparateRegions()) {
 	    	
 			final AbstractDataset reflection = profile[3];
-			reflection.setName("Reflection "+region.getName());
+			reflection.setName("Symmetry "+region.getName());
 
 			return new AbstractDataset[]{integral, reflection};
 	    	

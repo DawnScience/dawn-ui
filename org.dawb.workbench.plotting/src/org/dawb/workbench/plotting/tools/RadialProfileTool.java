@@ -43,7 +43,7 @@ public class RadialProfileTool extends SectorProfileTool {
 	    if (profile.length>=3 && profile[2]!=null && sroi.hasSeparateRegions()) {
 	    	
 			final AbstractDataset reflection = profile[2];
-			reflection.setName("Reflection "+region.getName());
+			reflection.setName("Symmetry "+region.getName());
 
 			return new AbstractDataset[]{integral, reflection};
 	    	
