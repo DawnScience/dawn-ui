@@ -63,7 +63,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 	private TableViewer   viewer;
 	private IRegion       fitRegion;
 	private FittingJob    fittingJob;
-	private FittedPeaks   bean;
+	private FittedPeaks   fittedPeaks;
 	
 	private ISelectionChangedListener viewUpdateListener;
 	private MenuAction tracesMenu;
@@ -82,8 +82,8 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 				final List<ITrace> traces = evt.getSource() instanceof List
 				                          ? (List<ITrace>)evt.getSource()
 				                          : null;
-				if (traces!=null && bean!=null && bean.getPeakTraces()!=null) {
-					traces.removeAll(bean.getPeakTraces());
+				if (traces!=null && fittedPeaks!=null && fittedPeaks.getPeakTraces()!=null) {
+					traces.removeAll(fittedPeaks.getPeakTraces());
 				}
 				if (traces!=null && !traces.isEmpty()) {
 					updateTracesChoice();
@@ -124,8 +124,8 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				final StructuredSelection sel = (StructuredSelection)event.getSelection();
-				if (bean!=null && sel!=null && sel.getFirstElement()!=null) {
-					bean.setSelectedPeak((Integer)sel.getFirstElement());
+				if (fittedPeaks!=null && sel!=null && sel.getFirstElement()!=null) {
+					fittedPeaks.setSelectedPeak((Integer)sel.getFirstElement());
 					viewer.refresh();
 				}
 			}
@@ -204,7 +204,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		updateTracesChoice();
 		
 		try {
-			if (bean!=null) bean.activate();
+			if (fittedPeaks!=null) fittedPeaks.activate();
 			getPlottingSystem().addRegionListener(this);
 			this.fitRegion = getPlottingSystem().createRegion(RegionUtils.getUniqueName("Fit selection", getPlottingSystem()), 
 					                                          getPlottingSystem().is2D() ? IRegion.RegionType.BOX : IRegion.RegionType.XAXIS);
@@ -228,7 +228,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 
 		try {
 			getPlottingSystem().removeRegionListener(this);
-			if (bean!=null) bean.deactivate();
+			if (fittedPeaks!=null) fittedPeaks.deactivate();
 			
 		} catch (Exception e) {
 			logger.error("Cannot put the selection into fitting region mode!", e);
@@ -251,8 +251,8 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
         if (viewer!=null) viewer.getControl().dispose();
        
         // Using clear and setting to null helps the garbage collector.
-        if (bean!=null) bean.dispose();
-        bean = null;
+        if (fittedPeaks!=null) fittedPeaks.dispose();
+        fittedPeaks = null;
         
 		super.dispose();
 	}
@@ -312,7 +312,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 			composite.getDisplay().syncExec(new Runnable() {
 				public void run() {
 					getPlottingSystem().removeRegion(fitRegion);
-					if (bean!=null) bean.removeSelections(getPlottingSystem());
+					if (fittedPeaks!=null) fittedPeaks.removeSelections(getPlottingSystem());
 				}
 			});
 			if (selectedTrace==null)    return Status.CANCEL_STATUS;
@@ -350,7 +350,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 	protected synchronized void createFittedPeaks(final FittedPeaks newBean) {
 		
 		if (newBean==null) {
-			bean = null;
+			fittedPeaks = null;
 			logger.error("Cannot find peaks in the given selection.");
 			return;
 		}
@@ -418,7 +418,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 					}
 		    		
 					
-					FittingTool.this.bean = newBean;
+					FittingTool.this.fittedPeaks = newBean;
 					viewer.setContentProvider(createActorContentProvider(newBean.size()));
 					viewer.setInput(newBean);
                     viewer.refresh();
@@ -462,7 +462,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		
 		final Collection<ITrace> traces = getPlottingSystem().getTraces();
 		if (traces==null || traces.size()<0) return;
-		if (bean!=null) traces.removeAll(bean.getPeakTraces());
+		if (fittedPeaks!=null) traces.removeAll(fittedPeaks.getPeakTraces());
 		
 		final CheckableActionGroup group = new CheckableActionGroup();
 		FittingTool.this.selectedTrace = null;
@@ -505,7 +505,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 			public void run() {
 				final boolean isChecked = isChecked();
 				Activator.getDefault().getPreferenceStore().setValue(FittingConstants.SHOW_ANNOTATION_AT_PEAK, isChecked);
-				if (bean!=null) bean.setAnnotationsVisible(isChecked);
+				if (fittedPeaks!=null) fittedPeaks.setAnnotationsVisible(isChecked);
 			}
 		};
 		showAnns.setImageDescriptor(Activator.getImageDescriptor("icons/plot-tool-peak-fit-showAnnotation.png"));
@@ -517,7 +517,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 			public void run() {
 				final boolean isChecked = isChecked();
 				Activator.getDefault().getPreferenceStore().setValue(FittingConstants.SHOW_FITTING_TRACE, isChecked);
-				if (bean!=null) bean.setTracesVisible(isChecked);
+				if (fittedPeaks!=null) fittedPeaks.setTracesVisible(isChecked);
 			}
 		};
 		showTrace.setImageDescriptor(Activator.getImageDescriptor("icons/plot-tool-peak-fit-showFittingTrace.png"));
@@ -530,7 +530,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 			public void run() {
 				final boolean isChecked = isChecked();
 				Activator.getDefault().getPreferenceStore().setValue(FittingConstants.SHOW_PEAK_SELECTIONS, isChecked);
-				if (bean!=null) bean.setPeaksVisible(isChecked);
+				if (fittedPeaks!=null) fittedPeaks.setPeaksVisible(isChecked);
 			}
 		};
 		showPeak.setImageDescriptor(Activator.getImageDescriptor("icons/plot-tool-peak-fit-showPeakLine.png"));
@@ -542,7 +542,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 			public void run() {
 				final boolean isChecked = isChecked();
 				Activator.getDefault().getPreferenceStore().setValue(FittingConstants.SHOW_FWHM_SELECTIONS, isChecked);
-				if (bean!=null) bean.setAreasVisible(isChecked);
+				if (fittedPeaks!=null) fittedPeaks.setAreasVisible(isChecked);
 			}
 		};
 		showFWHM.setImageDescriptor(Activator.getImageDescriptor("icons/plot-tool-peak-fit-showFWHM.png"));
@@ -633,9 +633,9 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		final Action clear = new Action("Clear", Activator.getImageDescriptor("icons/plot-tool-peak-fit-clear.png")) {
 			public void run() {
 				if (!isActive()) return;
-				if (bean!=null) bean.removeSelections(getPlottingSystem());
-				bean.dispose();
-				bean = null;
+				if (fittedPeaks!=null) fittedPeaks.removeSelections(getPlottingSystem());
+				fittedPeaks.dispose();
+				fittedPeaks = null;
 				viewer.setContentProvider(createActorContentProvider(0));
 				viewer.setInput(null);
 			}
@@ -652,6 +652,14 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 	    final MenuManager menuManager = new MenuManager();
 	    for (IContributionItem item : getSite().getActionBars().getMenuManager().getItems()) menuManager.add(item);
 	    viewer.getControl().setMenu(menuManager.createContextMenu(viewer.getControl()));
+	}
+
+	public FittedPeaks getFittedPeaks() {
+		return fittedPeaks;
+	}
+
+	public void setFittedPeaks(FittedPeaks fittedPeaks) {
+		this.fittedPeaks = fittedPeaks;
 	}
 
 }
