@@ -85,7 +85,7 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 		
 		try {
 			
-			plotter = PlottingFactory.getPlottingSystem();
+			plotter = PlottingFactory.createPlottingSystem();
 			this.traceListener = new ITraceListener.Stub() {
 				@Override
 				public void tracesPlotted(TraceEvent evt) {

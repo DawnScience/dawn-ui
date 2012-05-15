@@ -56,7 +56,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 	public CrossHairProfileTool() {
 		try {
 			
-			plotter = PlottingFactory.getPlottingSystem();
+			plotter = PlottingFactory.createPlottingSystem();
 			this.traceListener = new ITraceListener.Stub() {
 				@Override
 				public void tracesPlotted(TraceEvent evt) {

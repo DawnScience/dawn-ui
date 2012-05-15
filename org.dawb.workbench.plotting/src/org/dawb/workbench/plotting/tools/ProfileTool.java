@@ -56,7 +56,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		
 		this.registeredTraces = new HashMap<String,Collection<ITrace>>(7);
 		try {
-			profilePlottingSystem = PlottingFactory.getPlottingSystem();
+			profilePlottingSystem = PlottingFactory.createPlottingSystem();
 			updateProfiles = new ProfileJob();
 			
 			this.paletteListener = new IPaletteListener.Stub() {
