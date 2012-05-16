@@ -145,6 +145,15 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	 */
 	public abstract int getMaximumMousePresses();
 
+	/**
+	 * A selection region can operate with any number of mouse button presses. Override this if
+	 * minimum needs to be different from maximum
+	 * @return minimum number of presses
+	 */
+	public int getMinimumMousePresses() {
+		return getMaximumMousePresses();
+	}
+
 	public void sync(RegionBean bean) {
 		setName(bean.getName());
 		setShowPosition(bean.isShowPosition());
