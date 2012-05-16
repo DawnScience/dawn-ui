@@ -16,7 +16,6 @@ import org.eclipse.draw2d.UpdateManager;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
-import org.eclipse.swt.SWT;
 
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
@@ -171,7 +170,7 @@ class RingSelection extends AbstractSelectionRegion {
 
 	@Override
 	public void paintBeforeAdded(final Graphics gc, PointList clicks, Rectangle parentBounds) {
-		gc.setLineStyle(SWT.LINE_DOT);
+		gc.setLineStyle(Graphics.LINE_DOT);
 
 		Point cen = clicks.getFirstPoint();
 		int diff = (int)Math.round(cen.getDistance(clicks.getLastPoint()));
@@ -181,7 +180,7 @@ class RingSelection extends AbstractSelectionRegion {
 		gc.setLineWidth(diff/4);
 		diff = Math.round(0.875f*diff);
 		bounds = new Rectangle(new Point(cen.x-diff, cen.y-diff), new Point(cen.x+diff, cen.y+diff));
-		gc.setLineStyle(SWT.LINE_SOLID);
+		gc.setLineStyle(Graphics.LINE_SOLID);
 		gc.setForegroundColor(getRegionColor());
 		gc.setAlpha(getAlpha());
 		gc.drawOval(bounds);

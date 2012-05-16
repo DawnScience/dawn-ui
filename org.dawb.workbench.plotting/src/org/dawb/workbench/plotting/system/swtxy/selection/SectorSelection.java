@@ -21,7 +21,6 @@ import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.draw2d.geometry.Rectangle;
-import org.eclipse.swt.SWT;
 
 import uk.ac.diamond.scisoft.analysis.rcp.plotting.roi.HandleStatus;
 import uk.ac.diamond.scisoft.analysis.rcp.plotting.roi.SectorROIHandler;
@@ -79,7 +78,7 @@ public class SectorSelection extends AbstractSelectionRegion {
 		if (clicks.size() < 2)
 			return;
 
-		g.setLineStyle(SWT.LINE_DOT);
+		g.setLineStyle(Graphics.LINE_DOT);
 		g.setForegroundColor(getRegionColor());
 		g.setAlpha(getAlpha());
 
@@ -98,7 +97,7 @@ public class SectorSelection extends AbstractSelectionRegion {
 			double ae = Math.toDegrees(Math.atan2(-rd.preciseHeight(), rd.preciseWidth()));
 			double[] a = calcAngles(as, ae);
 			Sector s = new Sector(cen.preciseX(), cen.preciseY(), ri,  ro, a[0], a[1]);
-			s.setLineStyle(SWT.LINE_DOT);
+			s.setLineStyle(Graphics.LINE_DOT);
 			s.setLineWidth(getLineWidth());
 			s.paintFigure(g);
 		}

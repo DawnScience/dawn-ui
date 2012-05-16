@@ -18,8 +18,6 @@ import org.eclipse.draw2d.MouseMotionListener;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Display;
 
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
@@ -155,7 +153,7 @@ class AxisSelection extends AbstractSelectionRegion {
 		Rectangle r  = getSelectionBounds(bounds, parentBounds);
 		
 		
-		gc.setLineStyle(SWT.LINE_DOT);
+		gc.setLineStyle(Graphics.LINE_DOT);
      	if (regionType==RegionType.XAXIS || regionType==RegionType.XAXIS_LINE) {
      		if (regionType==RegionType.XAXIS) r.width+=2;
 			gc.drawLine(r.getBottomRight(), r.getTopRight());
@@ -217,10 +215,10 @@ class AxisSelection extends AbstractSelectionRegion {
 		}
 		protected void updateBounds(Rectangle parentBounds) {
 			if (regionType==RegionType.XAXIS|| regionType==RegionType.XAXIS_LINE) {
-				if (!isTrackMouse()) setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_SIZEWE));
+				if (!isTrackMouse()) setCursor(Cursors.SIZEWE);
 				setBounds(new Rectangle(parentBounds.x, parentBounds.y, getLineAreaWidth(), parentBounds.height));
 			} else {
-				if (!isTrackMouse()) setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_SIZENS));
+				if (!isTrackMouse()) setCursor(Cursors.SIZENS);
 				setBounds(new Rectangle(parentBounds.x, parentBounds.y, parentBounds.width, getLineAreaWidth()));
 			}
 		}
@@ -229,9 +227,9 @@ class AxisSelection extends AbstractSelectionRegion {
 			super.paintFigure(gc);
 			
 			if (regionType==RegionType.XAXIS || regionType==RegionType.YAXIS) {
-				gc.setLineStyle(SWT.LINE_DOT);
+				gc.setLineStyle(Graphics.LINE_DOT);
 			} else {
-				gc.setLineStyle(SWT.LINE_SOLID);
+				gc.setLineStyle(Graphics.LINE_SOLID);
 			}
 			
 			gc.setLineWidth(getLineWidth());
@@ -376,9 +374,9 @@ class AxisSelection extends AbstractSelectionRegion {
 	        	line1.setEnabled(true);// This starts the figure part of mouse listeners
 	        	if (connection!=null) connection.setCursor(Draw2DUtils.getRoiMoveCursor());
 				if (regionType==RegionType.XAXIS|| regionType==RegionType.XAXIS_LINE) {
-					line1.setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_SIZEWE));
+					line1.setCursor(Cursors.SIZEWE);
 				} else {
-					line1.setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_SIZENS));
+					line1.setCursor(Cursors.SIZENS);
 				}
 	        	line1.setMotile(true);
 	        }

@@ -15,7 +15,6 @@ import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
@@ -119,7 +118,7 @@ class BoxSelection extends AbstractSelectionRegion {
 	
 	@Override
 	public void paintBeforeAdded(final Graphics gc, PointList clicks, Rectangle parentBounds) {
-		gc.setLineStyle(SWT.LINE_DOT);
+		gc.setLineStyle(Graphics.LINE_DOT);
 		final Rectangle bounds = new Rectangle(clicks.getFirstPoint(), clicks.getLastPoint());
 		gc.drawRectangle(bounds);
 		gc.setBackgroundColor(getRegionColor());

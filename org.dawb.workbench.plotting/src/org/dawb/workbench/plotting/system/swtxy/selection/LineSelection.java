@@ -14,7 +14,6 @@ import org.eclipse.draw2d.geometry.Geometry;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
-import org.eclipse.swt.SWT;
 
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
@@ -114,7 +113,7 @@ class LineSelection extends AbstractSelectionRegion {
 
 	@Override
 	public void paintBeforeAdded(final Graphics gc, PointList clicks, Rectangle parentBounds) {
-		gc.setLineStyle(SWT.LINE_DOT);
+		gc.setLineStyle(Graphics.LINE_DOT);
 		gc.setLineWidth(2);
 		gc.setAlpha(getAlpha());
 		gc.drawLine(clicks.getFirstPoint(), clicks.getLastPoint());
