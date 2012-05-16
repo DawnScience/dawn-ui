@@ -20,7 +20,6 @@ import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Shape;
-import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -55,6 +54,14 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
     private ISelectionProvider selectionProvider;
     private IFigure[] regionObjects;
     private int lineWidth=0;
+    /**
+     * X axis mapping
+     */
+    protected Axis xAxis;
+    /**
+     * Y axis mapping
+     */
+    protected Axis yAxis;
 
 	public AbstractSelectionRegion(String name, Axis xAxis, Axis yAxis) {
 		super();
@@ -63,10 +70,12 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 		setCursor(null);
 		this.bean = new RegionBean();
 		bean.setName(name);
-		bean.setXAxis(xAxis);
-		bean.setYAxis(yAxis);
 		xAxis.addListener(this);
+		bean.setXAxis(xAxis);
+		this.xAxis = xAxis;
 		yAxis.addListener(this);
+		bean.setYAxis(yAxis);
+		this.yAxis = yAxis;
 	}
 
 	/**
@@ -210,8 +219,8 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	}
 
 	protected void clearListeners() {
-        getXAxis().removeListener(this);
-        getYAxis().removeListener(this);
+        xAxis.removeListener(this);
+        yAxis.removeListener(this);
 		super.clearListeners();
 	}
 	
@@ -324,7 +333,7 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	}
 
 	public Axis getXAxis() {
-		return bean.getXAxis();
+		return xAxis;
 	}
 
 	public void setXAxis(Axis xAxis) {
@@ -333,13 +342,14 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 				((SelectionHandle)ob).setxAxis(xAxis);
 			}
 		}
-		getXAxis().removeListener(this);
+		this.xAxis.removeListener(this);
 		xAxis.addListener(this);
+		this.xAxis = xAxis;
 		bean.setXAxis(xAxis);
 	}
 
 	public Axis getYAxis() {
-		return bean.getYAxis();
+		return yAxis;
 	}
 
 	public void setYAxis(Axis yAxis) {
@@ -348,8 +358,9 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 				((SelectionHandle)ob).setyAxis(yAxis);
 			}
 		}
-		getYAxis().removeListener(this);
+		this.yAxis.removeListener(this);
 		yAxis.addListener(this);
+		this.yAxis = yAxis;
 		bean.setYAxis(yAxis);
 	}
 
@@ -453,8 +464,8 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	@Override
 	public boolean containsPoint(double x, double y) {
 		
-		final int xpix = getXAxis().getValuePosition(x, false);
-		final int ypix = getYAxis().getValuePosition(y, false);
+		final int xpix = xAxis.getValuePosition(x, false);
+		final int ypix = yAxis.getValuePosition(y, false);
 		
 		if (regionObjects!=null) {
 			for (IFigure ob : regionObjects) {
