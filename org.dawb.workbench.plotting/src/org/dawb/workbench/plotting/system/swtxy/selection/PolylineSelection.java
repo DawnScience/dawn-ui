@@ -49,8 +49,8 @@ public class PolylineSelection extends AbstractSelectionRegion {
 	@Override
 	public boolean containsPoint(double x, double y) {
 		
-		final int xpix = getXAxis().getValuePosition(x, false);
-		final int ypix = getYAxis().getValuePosition(y, false);
+		final int xpix = xAxis.getValuePosition(x, false);
+		final int ypix = yAxis.getValuePosition(y, false);
 		return pline.containsPoint(xpix, ypix);
 	}
 
@@ -97,13 +97,11 @@ public class PolylineSelection extends AbstractSelectionRegion {
 
 	@Override
 	protected ROIBase createROI(boolean recordResult) {
-		final Axis xa = getXAxis();
-		final Axis ya = getYAxis();
 		final PointList pl = pline.getPoints();
 		final PolygonalROI proi = new PolygonalROI();
 		for (int i = 0, imax = pl.size(); i < imax; i++) {
 			Point p = pl.getPoint(i);
-			proi.insertPoint(i, xa.getPositionValue(p.x(), false), ya.getPositionValue(p.y(), false));
+			proi.insertPoint(i, xAxis.getPositionValue(p.x(), false), yAxis.getPositionValue(p.y(), false));
 		}
 		if (recordResult)
 			roi = proi;
@@ -152,7 +150,7 @@ public class PolylineSelection extends AbstractSelectionRegion {
 			FigureTranslator mover;
 			for (int i = 0, imax = points.size(); i < imax; i++) {
 				Point p = points.getPoint(i);
-				RectangularHandle h = new RectangularHandle(getXAxis(), getYAxis(), getRegionColor(), this, SIDE, p.preciseX(), p.preciseY());
+				RectangularHandle h = new RectangularHandle(xAxis, yAxis, getRegionColor(), this, SIDE, p.preciseX(), p.preciseY());
 				parent.add(h);
 				mover = new FigureTranslator(getXyGraph(), h);
 				mover.addTranslationListener(createRegionNotifier());
@@ -193,11 +191,9 @@ public class PolylineSelection extends AbstractSelectionRegion {
 			if (imax != proi.getSides())
 				return;
 
-			final Axis xa = getXAxis();
-			final Axis ya = getYAxis();
 			for (int i = 0; i < imax; i++) {
 				PointROI p = proi.getPoint(i);
-				Point np = new Point(xa.getValuePosition(p.getPointX(), false), ya.getValuePosition(p.getPointY(), false));
+				Point np = new Point(xAxis.getValuePosition(p.getPointX(), false), yAxis.getValuePosition(p.getPointY(), false));
 				pl.setPoint(np, i);
 				SelectionHandle h = (SelectionHandle) handles.get(i);
 				h.setSelectionPoint(np);

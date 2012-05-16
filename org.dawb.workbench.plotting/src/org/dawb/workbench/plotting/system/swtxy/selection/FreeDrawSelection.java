@@ -44,8 +44,8 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 	@Override
 	public boolean containsPoint(double x, double y) {
 		
-		final int xpix = getXAxis().getValuePosition(x, false);
-		final int ypix = getYAxis().getValuePosition(y, false);
+		final int xpix = xAxis.getValuePosition(x, false);
+		final int ypix = yAxis.getValuePosition(y, false);
 		if (!getBounds().contains(xpix,ypix)) return false;
 		return Geometry.polylineContainsPoint(points, xpix, ypix, (int)Math.round(getLineWidth()/2d));
 	}
@@ -118,7 +118,7 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 
 	private void drawPointText(Graphics g, Point pnt) {
 		
-		double[] loc = new double[]{getXAxis().getPositionValue(pnt.x, false), getYAxis().getPositionValue(pnt.y, false)};
+		double[] loc = new double[]{xAxis.getPositionValue(pnt.x, false), yAxis.getPositionValue(pnt.y, false)};
         final String text = getLabelPositionText(loc);
         g.drawString(text, pnt);
 
@@ -171,13 +171,11 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 	protected ROIBase createROI(boolean recordResult) {
 		if (points == null) return getROI();
 		
-		final Axis xa = getXAxis();
-		final Axis ya = getYAxis();
 		final PolygonalROI proi = new PolygonalROI();
 		
 		for (int i = 0; i < points.size(); i++) {
 			final Point pnt = points.getPoint(i);
-			proi.insertPoint(i, xa.getPositionValue(pnt.x(), false), ya.getPositionValue(pnt.y(), false));
+			proi.insertPoint(i, xAxis.getPositionValue(pnt.x(), false), yAxis.getPositionValue(pnt.y(), false));
 		}
 		
 		if (recordResult)
@@ -195,8 +193,8 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 	        
 	        for (ROIBase p : proi) {
 				
-	           	final int x = getXAxis().getValuePosition(p.getPointX(), false);
-	           	final int y = getYAxis().getValuePosition(p.getPointY(), false);
+	           	final int x = xAxis.getValuePosition(p.getPointX(), false);
+	           	final int y = yAxis.getValuePosition(p.getPointY(), false);
 	           	points.addPoint(new Point(x,y));
 			}
 	        updateConnectionBounds();

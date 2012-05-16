@@ -90,8 +90,8 @@ public class PointSelection extends AbstractSelectionRegion {
 	@Override
 	public boolean containsPoint(double x, double y) {
 		
-		final int xpix = getXAxis().getValuePosition(x, false);
-		final int ypix = getYAxis().getValuePosition(y, false);
+		final int xpix = xAxis.getValuePosition(x, false);
+		final int ypix = yAxis.getValuePosition(y, false);
 		final Point pnt = point.getSelectionPoint();
 		return pnt.x == xpix && pnt.y == ypix;
 	}
@@ -110,7 +110,7 @@ public class PointSelection extends AbstractSelectionRegion {
 
 	@Override
 	public void createContents(Figure parent) {
-		this.point = new RegionContainerRectangularHandle(getXAxis(), getYAxis(), getRegionColor(), parent, getLineWidth(), 100d, 100d);
+		this.point = new RegionContainerRectangularHandle(xAxis, yAxis, getRegionColor(), parent, getLineWidth(), 100d, 100d);
 		parent.add(point);
 		mover = new FigureTranslator(getXyGraph(), point);	
 		mover.addTranslationListener(createRegionNotifier());

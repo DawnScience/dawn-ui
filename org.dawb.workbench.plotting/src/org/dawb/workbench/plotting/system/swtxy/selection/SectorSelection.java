@@ -53,8 +53,8 @@ public class SectorSelection extends AbstractSelectionRegion {
 	@Override
 	public boolean containsPoint(double x, double y) {
 		
-		final int xpix = getXAxis().getValuePosition(x, false);
-		final int ypix = getYAxis().getValuePosition(y, false);
+		final int xpix = xAxis.getValuePosition(x, false);
+		final int ypix = yAxis.getValuePosition(y, false);
         return sector.containsPoint(xpix, ypix);
 	}
 
@@ -176,19 +176,17 @@ public class SectorSelection extends AbstractSelectionRegion {
 
 	@Override
 	protected ROIBase createROI(boolean recordResult) {
-		final Axis xa = getXAxis();
-		final Axis ya = getYAxis();
 		final Point c = sector.getCentre();
 		final double[] r = sector.getRadii();
 		final double[] a = sector.getAnglesDegrees();
-		final double x = xa.getPositionValue(c.x(), false);
-		final double y = ya.getPositionValue(c.y(), false);
+		final double x = xAxis.getPositionValue(c.x(), false);
+		final double y = yAxis.getPositionValue(c.y(), false);
 		
 		final int symmetry = roi!=null ? ((SectorROI)roi).getSymmetry() : 0;
 		final boolean combine = roi!=null ? ((SectorROI)roi).isCombineSymmetry() : false;
 		
-		final SectorROI sroi = new SectorROI(x, y, xa.getPositionValue((int) (c.preciseX() + r[0]), false) - x,
-				                             ya.getPositionValue((int) (c.preciseY() + r[1]), false) - y,
+		final SectorROI sroi = new SectorROI(x, y, xAxis.getPositionValue((int) (c.preciseX() + r[0]), false) - x,
+				                             yAxis.getPositionValue((int) (c.preciseY() + r[1]), false) - y,
 				                             Math.toRadians(360 - a[1]), Math.toRadians(360 - a[0]));
 		sroi.setSymmetry(symmetry);
 		sroi.setCombineSymmetry(combine);
@@ -262,15 +260,13 @@ public class SectorSelection extends AbstractSelectionRegion {
 
 			final TranslationListener hListener = createHandleNotifier();
 			// handles
-			final Axis xa = getXAxis();
-			final Axis ya = getYAxis();
 			FigureTranslator mover;
 			final int imax = roiHandler.size();
 			for (int i = 0; i < imax; i++) {
 				double[] hpt = roiHandler.getAnchorPoint(i, SIDE);
 				roiHandler.set(i, i);
-				RectangularHandle h = new RectangularHandle(xa, ya, getRegionColor(), this, SIDE,
-						xa.getValuePosition(hpt[0], false), ya.getValuePosition(hpt[1], false));
+				RectangularHandle h = new RectangularHandle(xAxis, yAxis, getRegionColor(), this, SIDE,
+						xAxis.getValuePosition(hpt[0], false), yAxis.getValuePosition(hpt[1], false));
 				parent.add(h);
 				mover = new FigureTranslator(getXyGraph(), h);
 				mover.addTranslationListener(hListener);
@@ -283,7 +279,6 @@ public class SectorSelection extends AbstractSelectionRegion {
 			mover.addTranslationListener(createRegionNotifier());
 			setRegionObjects(this, handles);
 			Rectangle b = getBounds();
-//			System.err.println("HB = " + b);
 			if (b != null)
 				setBounds(b);
 		}
@@ -291,8 +286,6 @@ public class SectorSelection extends AbstractSelectionRegion {
 		public TranslationListener createHandleNotifier() {
 			return new TranslationListener() {
 				private int[] spt;
-				final Axis xa = getXAxis();
-				final Axis ya = getYAxis();
 
 				@Override
 				public void onActivate(TranslationEvent evt) {
@@ -300,7 +293,7 @@ public class SectorSelection extends AbstractSelectionRegion {
 					if (src instanceof FigureTranslator) {
 						final FigureTranslator translator = (FigureTranslator) src;
 						Point start = translator.getStartLocation();
-						spt = new int[] { (int) xa.getPositionValue(start.x(), false), (int) ya.getPositionValue(start.y(), false) };
+						spt = new int[] { (int) xAxis.getPositionValue(start.x(), false), (int) yAxis.getPositionValue(start.y(), false) };
 						final IFigure handle = translator.getRedrawFigure();
 						final int h = handles.indexOf(handle);
 						HandleStatus status = HandleStatus.RESIZE;
@@ -325,7 +318,7 @@ public class SectorSelection extends AbstractSelectionRegion {
 						Point end = translator.getEndLocation();
 						
 						SectorROI croi = roiHandler.interpretMouseDragging(spt,
-								new int[] { (int) xa.getPositionValue(end.x(), false), (int) ya.getPositionValue(end.y(), false) });
+								new int[] { (int) xAxis.getPositionValue(end.x(), false), (int) yAxis.getPositionValue(end.y(), false) });
 
 						final SelectionHandle handle = (SelectionHandle) translator.getRedrawFigure();
 						updateFromROI(croi, handle);
@@ -341,7 +334,7 @@ public class SectorSelection extends AbstractSelectionRegion {
 						Point end = translator.getEndLocation();
 
 						SectorROI croi = roiHandler.interpretMouseDragging(spt,
-								new int[] { (int) xa.getPositionValue(end.x(), false), (int) ya.getPositionValue(end.y(), false) });
+								new int[] { (int) xAxis.getPositionValue(end.x(), false), (int) yAxis.getPositionValue(end.y(), false) });
 
 						updateFromROI(croi);
 						roiHandler.unconfigureDragging();
@@ -371,7 +364,6 @@ public class SectorSelection extends AbstractSelectionRegion {
 		@Override
 		public Rectangle getBounds() {
 			Rectangle b = super.getBounds();
-			if (handles != null)
 			for (IFigure f : handles) {
 				if (f instanceof SelectionHandle) {
 					SelectionHandle h = (SelectionHandle) f;
@@ -400,13 +392,11 @@ public class SectorSelection extends AbstractSelectionRegion {
 			final double y = sroi.getPointY();
 			final double[] r = sroi.getRadii();
 			final double[] a = sroi.getAnglesDegrees();
-			final Axis xa = getXAxis();
-			final Axis ya = getYAxis();
 
-			final double cx = xa.getValuePosition(x, false);
-			final double cy = ya.getValuePosition(y, false);
+			final double cx = xAxis.getValuePosition(x, false);
+			final double cy = yAxis.getValuePosition(y, false);
 			setCentre(cx, cy);
-			setRadii(xa.getValuePosition(x + r[0], false) - cx, ya.getValuePosition(y + r[1], false) - cy);
+			setRadii(xAxis.getValuePosition(x + r[0], false) - cx, yAxis.getValuePosition(y + r[1], false) - cy);
 			setAnglesDegrees(360-a[1], 360-a[0]);
 			
 			if (sroi.getSymmetry() == SectorROI.NONE) {
@@ -423,7 +413,7 @@ public class SectorSelection extends AbstractSelectionRegion {
 				double[] hpt = handler.getAnchorPoint(i, SIDE);
 				SelectionHandle handle = (SelectionHandle) handles.get(i);
 				if (handle != omit) {
-					handle.setSelectionPoint(new PrecisionPoint(xa.getValuePosition(hpt[0], false), ya.getValuePosition(hpt[1], false)));
+					handle.setSelectionPoint(new PrecisionPoint(xAxis.getValuePosition(hpt[0], false), yAxis.getValuePosition(hpt[1], false)));
 				}
 			}
 		}

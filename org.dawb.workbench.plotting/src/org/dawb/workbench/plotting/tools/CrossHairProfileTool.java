@@ -219,7 +219,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 
 	/**
 	 * The user can optionally nominate an x. In this case, we would like to 
-	 * use it for the derviative instead of the indices of the data. Therefore
+	 * use it for the derivative instead of the indices of the data. Therefore
 	 * there is some checking here to see if there are x values to plot.
 	 * 
 	 * Normally everything will be ILineTraces even if the x is indices.
