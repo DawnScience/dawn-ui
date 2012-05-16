@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="product builder" basedir=".">
+   <description>
+Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blog/eclipsercp/rcp_builds/.
+Includes steps that are specific to the SDA product build.
+Note that every .site project has a verion of this file, so if you change this, you might also need to make a matching change in other projects.
+   </description>
+
+    <pathconvert property="equinox.launcher.jar">
+      <first count="1">
+        <sort>
+        <fileset dir="${eclipse.home}/plugins" includes="**/org.eclipse.equinox.launcher_*.jar"/>
+          <reverse xmlns="antlib:org.apache.tools.ant.types.resources.comparators">
+            <date/>
+          </reverse>
+        </sort>
+      </first>
+    </pathconvert>
+
+   <target name="create.product">
+      <property name="destination" location="${sp:destination}"/>
+      <delete dir="${destination}"/>
+      <makeurl property="repository" file="${sp:repository}"/>
+      <mkdir dir="${destination}"/>
+      <echo message="buildfile   = ${ant.file}" />
+      <echo message="launcher    = ${equinox.launcher.jar}" />
+      <echo message="repository  = ${repository}" />
+      <echo message="installIU   = ${iu}" />
+      <echo message="destination = ${destination}" />
+      <echo message="building for: product.os=${product.os} product.ws=${product.ws} product.arch=${product.arch}" />
+
+      <java jar="${equinox.launcher.jar}" fork="true" failonerror="true" >
+         <arg value="-application"/>
+         <arg value="org.eclipse.equinox.p2.director"/>
+         <arg value="-repository"/>
+         <arg value="${repository}"/>
+         <arg value="-destination"/>
+         <arg value="${destination}"/>
+         <arg value="-profile"/>
+         <arg value="${profile}"/>
+         <arg value="-profileProperties" />
+         <arg value="org.eclipse.update.install.features=true" />
+         <arg value="-installIU"/>
+         <arg value="${iu}"/>
+         <arg value="-p2.os" />
+         <arg value="${product.os}" />
+         <arg value="-p2.ws" />
+         <arg value="${product.ws}" />
+         <arg value="-p2.arch" />
+         <arg value="${product.arch}" />
+         <arg value="-roaming"/>
+         <arg value="-consoleLog"/>
+         <!-- jvmarg value="-agentlib:jdwp=transport=dt_socket,address=8000,server=y,suspend=y"/ -->
+      </java>
+
+      <!-- SDA - copy the platform-specific lib directory for Jython -->
+      <property name="SDA_lib_extra" value="${destination}/lib" />
+      <echo message="SDA specific action: copying selected libs to ${SDA_lib_extra}" />
+      <mkdir dir="${SDA_lib_extra}" />
+      <unjar dest="${SDA_lib_extra}">
+         <fileset dir="${sp:repository}">
+            <include name="plugins/uk.ac.diamond.CBFlib_*.jar"/>
+            <include name="plugins/uk.ac.gda.nexus_*.jar"/>
+            <include name="plugins/org.dawb.hdf5_*.jar"/>
+         </fileset>
+         <patternset>
+            <include name="lib/${product.os}-${product.arch}/**"/>
+         </patternset>
+         <mapper type="glob" from="lib/${product.os}-${product.arch}/*" to="*"/>
+      </unjar>
+
+   </target>
+</project>

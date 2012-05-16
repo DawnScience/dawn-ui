@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?pde version="3.5"?>
+
+<product name="dawn" uid="org.dawnsci.base.product" id="org.dawnsci.base.product" application="org.eclipse.ui.ide.workbench" version="1.0.0" useFeatures="true" includeLaunchers="true">
+
+   <aboutInfo>
+      <text>
+         Copyright 2012 Diamond Light Source Ltd.
+
+Contact: ScientificSoftware@diamond.ac.uk
+      </text>
+   </aboutInfo>
+
+   <configIni use="default">
+   </configIni>
+
+   <launcherArgs>
+      <vmArgs>-Xms512m
+-XX:PermSize=128m
+-XX:MaxPermSize=256m
+-Djava.library.path=${project_loc:uk.ac.gda.libs}/lib/${target.os}-${target.arch}
+-Ddbconnect=config/dbconnect.ispyb.properties
+-Dentry=MyVisitsEntryPoint
+-DidaEmbedded=yes
+-Dcolour=on
+-Dosgi.locking=none
+-Dcom.isencia.require.file.source=true</vmArgs>
+      <vmArgsLin>-Xmx2048m</vmArgsLin>
+      <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts
+-Xmx2048m</vmArgsMac>
+      <vmArgsSol>-Xmx2048m</vmArgsSol>
+   </launcherArgs>
+
+   <windowImages i16="/uk.ac.diamond.scisoft/icons/sda_icon_16x16.png" i32="/uk.ac.diamond.scisoft/icons/sda_icon_32x32.png"/>
+
+   <splash
+      location="org.dawnsci.product.plugin"
+      startupProgressRect="5,275,445,15"
+      startupMessageRect="7,252,445,20"
+      startupForegroundColor="000000" />
+   <launcher name="sda">
+      <solaris/>
+      <win useIco="false">
+         <bmp/>
+      </win>
+   </launcher>
+
+
+   <vm>
+   </vm>
+
+   <license>
+        <url>http://www.apache.org/licenses/</url>
+        <text>
+   Copyright 2012 Diamond Light Source Ltd.
+
+Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you may not use this file except in compliance with the License.
+
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+
+See the License for the specific language governing permissions and limitations under the License.
+         </text>
+   </license>
+
+   <plugins>
+   </plugins>
+
+   <features>
+      <feature id="org.dawnsci.base.product.feature" version="1.0.0.qualifier"/>
+   </features>
+
+
+</product>
