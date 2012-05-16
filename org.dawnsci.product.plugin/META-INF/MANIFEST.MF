@@ -4,7 +4,7 @@ Bundle-Name: DAWN Product Plugin
 Bundle-SymbolicName: org.dawnsci.product.plugin;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.dawnsci.product.plugin.Activator
-Bundle-Vendor: DAWN Colaboration
+Bundle-Vendor: DAWN Collaboration
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
