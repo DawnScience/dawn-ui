@@ -908,4 +908,15 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		rehistogram();
 		fireMaskListeners();
 	}
+
+	private boolean userTrace = true;
+	@Override
+	public boolean isUserTrace() {
+		return userTrace;
+	}
+
+	@Override
+	public void setUserTrace(boolean isUserTrace) {
+		this.userTrace = isUserTrace;
+	}
 }

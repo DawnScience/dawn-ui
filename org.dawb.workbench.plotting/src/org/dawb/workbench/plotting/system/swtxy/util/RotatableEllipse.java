@@ -15,6 +15,14 @@ public class RotatableEllipse extends Shape {
 	private static PrecisionPoint centre = new PrecisionPoint(0.5, 0.5);
 	private AffineTransform affine; // transforms unit square (origin at top-left corner) to transformed rectangle
 	private PointList box; // bounding box of ellipse
+	private boolean outlineOnly = false;
+
+	/**
+	 * Unit circle centred on origin
+	 */
+	public RotatableEllipse() {
+		affine = new AffineTransform();
+	}
 
 	/**
 	 * 
@@ -59,6 +67,13 @@ public class RotatableEllipse extends Shape {
 	 */
 	public double getAngleDegrees() {
 		return -affine.getRotationDegrees();
+	}
+
+	/**
+	 * @return centre of ellipse
+	 */
+	public Point getCentre() {
+		return affine.getTransformed(centre);
 	}
 
 	/**
@@ -107,11 +122,22 @@ public class RotatableEllipse extends Shape {
 
 	@Override
 	public boolean containsPoint(int x, int y) {
+		if (outlineOnly) {
+			double d = affine.getInverseTransformed(new PrecisionPoint(x, y)).getDistance(centre);
+			return Math.abs(d - 0.5) < 2./Math.max(affine.getScaleX(), affine.getScaleY());
+		}
+
 		if (!super.containsPoint(x, y) || !box.polygonContainsPoint(x, y))
 			return false;
 
 		Point p = affine.getInverseTransformed(new PrecisionPoint(x, y));
 		return p.getDistance(centre) <= 0.5;
+	}
+
+	@Override
+	public void setFill(boolean b) {
+		super.setFill(b);
+		outlineOnly  = !b;
 	}
 
 	@Override

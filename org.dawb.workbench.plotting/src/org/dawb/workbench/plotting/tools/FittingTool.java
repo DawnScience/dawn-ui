@@ -1,7 +1,6 @@
 package org.dawb.workbench.plotting.tools;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -20,6 +19,8 @@ import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.workbench.plotting.Activator;
+import org.dawb.workbench.plotting.preference.FittingConstants;
+import org.dawb.workbench.plotting.preference.FittingPreferencePage;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -30,6 +31,7 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -45,6 +47,8 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -115,7 +119,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
         createColumns(viewer);
 		viewer.getTable().setLinesVisible(true);
 		viewer.getTable().setHeaderVisible(true);
-		
+		viewer.setContentProvider(createContentProvider());
 		createActions();
 				
 		getSite().setSelectionProvider(viewer);
@@ -125,7 +129,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 			public void selectionChanged(SelectionChangedEvent event) {
 				final StructuredSelection sel = (StructuredSelection)event.getSelection();
 				if (fittedPeaks!=null && sel!=null && sel.getFirstElement()!=null) {
-					fittedPeaks.setSelectedPeak((Integer)sel.getFirstElement());
+					fittedPeaks.setSelectedPeak((IPeak)sel.getFirstElement());
 					viewer.refresh();
 				}
 			}
@@ -171,7 +175,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 
 	}
 	
-	private IContentProvider createActorContentProvider(final int numerOfPeaks) {
+	private IContentProvider createContentProvider() {
 		return new IStructuredContentProvider() {
 			@Override
 			public void dispose() {
@@ -182,13 +186,10 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 			@Override
 			public Object[] getElements(Object inputElement) {
 
-				if (numerOfPeaks<0) return new Integer[]{0};
+				if (fittedPeaks==null)    return new IPeak[]{new NullPeak()};
+				if (fittedPeaks.size()<1) return new IPeak[]{new NullPeak()};
 				
-				List<Integer> indices = new ArrayList<Integer>(numerOfPeaks);
-                for (int ipeak = 0; ipeak < numerOfPeaks; ipeak++) {
-                	indices.add(ipeak); // autoboxing
-				}
-				return indices.toArray(new Integer[indices.size()]);
+				return fittedPeaks.getPeaks().toArray();
 			}
 		};
 	}
@@ -394,6 +395,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 						trace.setData(pair[0], pair[1]);
 						trace.setLineWidth(1);
 						trace.setTraceColor(ColorConstants.black);
+						trace.setUserTrace(false);
 						getPlottingSystem().addTrace(trace);
 						newBean.addTrace(trace);
 						if (!requireTrace) trace.setVisible(false);
@@ -419,7 +421,6 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		    		
 					
 					FittingTool.this.fittedPeaks = newBean;
-					viewer.setContentProvider(createActorContentProvider(newBean.size()));
 					viewer.setInput(newBean);
                     viewer.refresh();
                     
@@ -627,17 +628,18 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		numberPeaks.setCheckedAction(ipeak-1, true);
 		
 		getSite().getActionBars().getToolBarManager().add(numberPeaks);
-		getSite().getActionBars().getMenuManager().add(numberPeaks);
+		//getSite().getActionBars().getMenuManager().add(numberPeaks);
 		
 		
-		final Action clear = new Action("Clear", Activator.getImageDescriptor("icons/plot-tool-peak-fit-clear.png")) {
+		final Action clear = new Action("Clear all", Activator.getImageDescriptor("icons/plot-tool-peak-fit-clear.png")) {
 			public void run() {
 				if (!isActive()) return;
-				if (fittedPeaks!=null) fittedPeaks.removeSelections(getPlottingSystem());
-				fittedPeaks.dispose();
-				fittedPeaks = null;
-				viewer.setContentProvider(createActorContentProvider(0));
-				viewer.setInput(null);
+				if (fittedPeaks!=null) {
+					fittedPeaks.removeSelections(getPlottingSystem());
+					fittedPeaks.dispose();
+					fittedPeaks = null;
+				}
+				viewer.refresh();
 			}
 		};
 		clear.setToolTipText("Clear all regions found in the fitting");
@@ -645,14 +647,40 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		getSite().getActionBars().getToolBarManager().add(clear);
 		getSite().getActionBars().getMenuManager().add(clear);
 		
-		createRightClickMenu();
+		final Action delete = new Action("Delete peak selected", Activator.getImageDescriptor("icons/delete.gif")) {
+			public void run() {
+				if (!isActive()) return;
+				if (fittedPeaks!=null) fittedPeaks.deleteSelectedPeak(getPlottingSystem());
+				viewer.refresh();
+			}
+		};
+		delete.setToolTipText("Delete peak selected, if any");
+		
+		getSite().getActionBars().getToolBarManager().add(delete);
+
+		final Action preferences = new Action("Preferences...") {
+			public void run() {
+				if (!isActive()) return;
+				PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), FittingPreferencePage.ID, null, null);
+				if (pref != null) pref.open();
+			}
+		};
+
+		getSite().getActionBars().getMenuManager().add(preferences);
+
+	    final MenuManager menuManager = new MenuManager();
+	    menuManager.add(clear);
+	    menuManager.add(delete);
+	    menuManager.add(new Separator());
+	    menuManager.add(showAnns);
+	    menuManager.add(showTrace);
+	    menuManager.add(showPeak);
+	    menuManager.add(showFWHM);
+		
+	    viewer.getControl().setMenu(menuManager.createContextMenu(viewer.getControl()));
+
 	}
 	
-	private void createRightClickMenu() {	
-	    final MenuManager menuManager = new MenuManager();
-	    for (IContributionItem item : getSite().getActionBars().getMenuManager().getItems()) menuManager.add(item);
-	    viewer.getControl().setMenu(menuManager.createContextMenu(viewer.getControl()));
-	}
 
 	public FittedPeaks getFittedPeaks() {
 		return fittedPeaks;

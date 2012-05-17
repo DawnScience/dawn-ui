@@ -1,4 +1,4 @@
-package org.dawb.workbench.plotting.tools;
+package org.dawb.workbench.plotting.preference;
 
 public class FittingConstants {
 
@@ -10,4 +10,6 @@ public class FittingConstants {
 	public static final String SHOW_FITTING_TRACE      = "org.dawb.workbench.plotting.tools.showFittingTrace";
 	public static final String SHOW_ANNOTATION_AT_PEAK = "org.dawb.workbench.plotting.tools.showAnnoationsAtPeak";
 	public static final String PEAK_TYPE               = "org.dawb.workbench.plotting.tools.peakType";
+	public static final String SMOOTHING               = "org.dawb.workbench.plotting.tools.smoothing";
+	public static final String QUALITY                 = "org.dawb.workbench.plotting.tools.quality";
 }

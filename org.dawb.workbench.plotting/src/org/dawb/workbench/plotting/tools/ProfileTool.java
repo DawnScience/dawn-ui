@@ -273,13 +273,8 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		final IRegion region = (IRegion)evt.getSource();
 		update(region, region.getROI(), false);
 		
-		try {
-			updateProfiles.join();
-		} catch (InterruptedException e) {
-			logger.error("Update profiles job interrupted!", e);
-		}
 		
-        getControl().getDisplay().syncExec(new Runnable() {
+        getControl().getDisplay().asyncExec(new Runnable() {
         	public void run() {
         		profilePlottingSystem.autoscaleAxes();
         	}
@@ -308,12 +303,14 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		}
 
 		public void profile(IRegion r, ROIBase rb, boolean isDrag) {
-			this.currentRegion = r;
-			this.currentROI    = rb;
-			this.isDrag        = isDrag;
+			
 	        for (Job job : Job.getJobManager().find(null))
 	            if (job.getClass()==getClass() && job.getState() != Job.RUNNING)
 	        	    job.cancel();
+
+			this.currentRegion = r;
+			this.currentROI    = rb;
+			this.isDrag        = isDrag;
 	        
           	schedule();		
 		}

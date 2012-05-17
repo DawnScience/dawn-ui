@@ -9,6 +9,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ViewerColumn;
 import org.eclipse.swt.graphics.Color;
 
+import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
+
 /**
  * A label provider with the ability to show:
  * 1. Name
@@ -38,10 +40,13 @@ public class FittingLabelProvider extends ColumnLabelProvider {
 	@Override
 	public String getText(Object element) {
 		
-		final Integer    peakNumber = (Integer)element;
+		final IPeak    peak  = (IPeak)element;
 		final FittedPeaks bean = (FittedPeaks)viewer.getInput();
 		if (bean==null)     return "";
 		if (bean.isEmpty()) return "";
+		if (peak instanceof NullPeak) return "";
+		
+		final int peakNumber = bean.getPeaks().indexOf(peak);
 		
 		switch(column) {
 		case 0:

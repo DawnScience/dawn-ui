@@ -318,7 +318,47 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		super.removeTraceListener(l);
 		if (xyGraph!=null) ((RegionArea)xyGraph.getPlotArea()).removeImageTraceListener(l);
 	}
+	
+	
+	public List<ITrace> updatePlot1D(AbstractDataset             x, 
+						             final List<AbstractDataset> ys,
+						             final IProgressMonitor      monitor) {
 
+		final List<ITrace> updatedAndCreated = new ArrayList<ITrace>(3);		
+		final List<AbstractDataset> unfoundYs = new ArrayList<AbstractDataset>(ys.size());
+		
+		for (final AbstractDataset y : ys) {
+			
+			final ITrace trace = getTrace(y.getName());
+			if (trace!=null && trace instanceof ILineTrace) {
+				
+				if (x==null) x = IntegerDataset.arange(y.getSize(), IntegerDataset.INT32);
+				final AbstractDataset finalX = x;
+				final ILineTrace lineTrace = (ILineTrace)trace;
+				updatedAndCreated.add(lineTrace);
+				
+				if (getDisplay().getThread()==Thread.currentThread()) {
+					lineTrace.setData(finalX, y);
+				} else {
+					getDisplay().syncExec(new Runnable() {
+						public void run() {
+							lineTrace.setData(finalX, y);
+						}
+					});
+				}
+				continue;
+			}
+			unfoundYs.add(y);
+		}
+		
+		if (!unfoundYs.isEmpty()) {
+			if (x==null) x = IntegerDataset.arange(unfoundYs.get(0).getSize(), IntegerDataset.INT32);
+			final Collection<ITrace> news = createPlot1D(x, unfoundYs, monitor);
+			updatedAndCreated.addAll(news);
+		}
+		
+		return updatedAndCreated;
+	}
 	/**
 	 * Does not have to be called in UI thread.
 	 */

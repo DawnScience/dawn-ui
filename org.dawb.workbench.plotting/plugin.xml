@@ -87,6 +87,13 @@
             label="Masking"
             tooltip="Masking the image and leaving data modified.">
       </plotting_tool_page>
+      <plotting_tool_page
+            class="org.dawb.workbench.plotting.tools.EllipseFittingTool"
+            icon="icons/plot-tool-masking.png"
+            id="org.dawb.workbench.plotting.tools.ellipseFittingTool"
+            label="Ellipse Fitting"
+            tooltip="A tool which shows the fitted ellipse parameters.">
+      </plotting_tool_page>
    </extension>
    <extension
          point="org.eclipse.ui.views">
@@ -127,8 +134,17 @@
    <extension
          point="org.eclipse.core.runtime.preferences">
       <initializer
-            class="org.dawb.workbench.plotting.tools.FittingPreferenceInitializer">
+            class="org.dawb.workbench.plotting.preference.FittingPreferenceInitializer">
       </initializer>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            category="org.edna.workbench.preferences.root"
+            class="org.dawb.workbench.plotting.preference.FittingPreferencePage"
+            id="org.dawb.workbench.plotting.fittingPreferencePage"
+            name="Fitting Preferences">
+      </page>
    </extension>
 
 </plugin>

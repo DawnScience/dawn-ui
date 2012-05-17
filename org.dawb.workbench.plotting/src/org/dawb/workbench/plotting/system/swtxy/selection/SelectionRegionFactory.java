@@ -34,6 +34,7 @@ public class SelectionRegionFactory {
 		SUPPORTED_REGIONS.add(RegionType.YAXIS_LINE);
 		SUPPORTED_REGIONS.add(RegionType.FREE_DRAW);
 		SUPPORTED_REGIONS.add(RegionType.POINT);
+		SUPPORTED_REGIONS.add(RegionType.ELLIPSE);
 		SUPPORTED_REGIONS.add(RegionType.POLYLINE);
 	}
 
@@ -66,11 +67,12 @@ public class SelectionRegionFactory {
 			region = new FreeDrawSelection(name, x, y);
 		} else if (regionType==RegionType.POINT) {
 			region = new PointSelection(name, x, y);
+		} else if (regionType==RegionType.ELLIPSE) {
+			region = new EllipseFitSelection(name, x, y);
 		} else if (regionType==RegionType.POLYLINE) {
 			region = new PolylineSelection(name, x, y);
 		} else if (regionType==RegionType.XAXIS || regionType==RegionType.YAXIS || regionType==RegionType.XAXIS_LINE || regionType==RegionType.YAXIS_LINE) {
 			region = new AxisSelection(name, x, y, regionType);
-					
 		} else {
 			throw new NullPointerException("Cannot deal with "+regionType+" regions yet - sorry!");
 		}	

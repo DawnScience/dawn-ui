@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.dawb.workbench.plotting.Activator;
+import org.dawb.workbench.plotting.preference.FittingConstants;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -124,17 +125,24 @@ public class FittingUtils {
 		
 	}
 
-
+    /**
+     * TODO
+     * @return
+     */
 	private static int getSmoothing() {
-		return 1;
+		return Activator.getDefault().getPreferenceStore().getInt(FittingConstants.SMOOTHING);
 	}
 
 	private static IOptimizer getOptimizer() {
 		return new GeneticAlg(getQuality());
 	}
 
+	/**
+	 * TODO
+	 * @return
+	 */
 	private static double getQuality() {
-		return 0.01d;
+		return Activator.getDefault().getPreferenceStore().getDouble(FittingConstants.QUALITY);
 	}
 
 	private static APeak getPeakType() {

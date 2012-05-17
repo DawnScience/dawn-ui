@@ -73,29 +73,29 @@ public class BoxProfileTool extends ProfileTool {
 		y_indices.setName("Y Pixel");
 
 		//if (monitor.isCanceled()) return;
-		if (tryUpdate) {
-			final ILineTrace x_trace = (ILineTrace)profilePlottingSystem.getTrace("X "+region.getName());
-			final ILineTrace y_trace = (ILineTrace)profilePlottingSystem.getTrace("Y "+region.getName());
+		final ILineTrace x_trace = (ILineTrace)profilePlottingSystem.getTrace("X "+region.getName());
+		final ILineTrace y_trace = (ILineTrace)profilePlottingSystem.getTrace("Y "+region.getName());
+		
+		if (tryUpdate && x_trace!=null && y_trace!=null) {
 			
-			if (x_trace!=null && y_trace!=null) {
-				getControl().getDisplay().syncExec(new Runnable() {
-					public void run() {
-						profilePlottingSystem.setSelectedXAxis(xPixelAxis);
-						x_trace.setData(x_indices, x_intensity);
-						profilePlottingSystem.setSelectedXAxis(yPixelAxis);
-						y_trace.setData(y_indices, y_intensity);						
-					}
-				});
-			}		
+			getControl().getDisplay().syncExec(new Runnable() {
+				public void run() {
+					profilePlottingSystem.setSelectedXAxis(xPixelAxis);
+					x_trace.setData(x_indices, x_intensity);
+					profilePlottingSystem.setSelectedXAxis(yPixelAxis);
+					y_trace.setData(y_indices, y_intensity);						
+				}
+			});
+
 			
 		} else {
 						
 			profilePlottingSystem.setSelectedXAxis(xPixelAxis);
-			Collection<ITrace> plotted = profilePlottingSystem.createPlot1D(x_indices, Arrays.asList(new AbstractDataset[]{x_intensity}), monitor);
+			Collection<ITrace> plotted = profilePlottingSystem.updatePlot1D(x_indices, Arrays.asList(new AbstractDataset[]{x_intensity}), monitor);
 			registerTraces(region, plotted);
 			
 			profilePlottingSystem.setSelectedXAxis(yPixelAxis);
-			plotted = profilePlottingSystem.createPlot1D(y_indices, Arrays.asList(new AbstractDataset[]{y_intensity}), monitor);
+			plotted = profilePlottingSystem.updatePlot1D(y_indices, Arrays.asList(new AbstractDataset[]{y_intensity}), monitor);
 			registerTraces(region, plotted);
 			
 		}

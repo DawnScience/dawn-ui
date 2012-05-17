@@ -30,6 +30,7 @@ Import-Package: org.dawb.common.services,
  uk.ac.diamond.scisoft.analysis.rcp.pixelinfoutils,
  uk.ac.diamond.scisoft.analysis.rcp.plotting,
  uk.ac.diamond.scisoft.analysis.rcp.plotting.roi,
+ uk.ac.diamond.scisoft.analysis.rcp.util,
  uk.ac.diamond.scisoft.analysis.rcp.views,
  uk.ac.gda.monitor,
  uk.ac.gda.richbeans.components.scalebox

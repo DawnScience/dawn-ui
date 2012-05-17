@@ -39,5 +39,6 @@ public class PlottingPreferenceInitializer extends AbstractPreferenceInitializer
 		store.setDefault(PlottingConstants.MASK_DRAW_MULTIPLE,   false);
 		store.setDefault(PlottingConstants.MASK_AUTO_APPLY,      false);
 		store.setDefault(PlottingConstants.MASK_REGIONS_ENABLED, false);
+		store.setDefault(PlottingConstants.RESET_ON_DEACTIVATE,  true);
 	}
 }

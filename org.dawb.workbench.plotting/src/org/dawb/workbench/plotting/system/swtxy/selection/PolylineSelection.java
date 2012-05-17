@@ -148,8 +148,9 @@ public class PolylineSelection extends AbstractSelectionRegion {
 			};
 
 			FigureTranslator mover;
+			final Point p = new Point();
 			for (int i = 0, imax = points.size(); i < imax; i++) {
-				Point p = points.getPoint(i);
+				points.getPoint(p, i);
 				RectangularHandle h = new RectangularHandle(xAxis, yAxis, getRegionColor(), this, SIDE, p.preciseX(), p.preciseY());
 				parent.add(h);
 				mover = new FigureTranslator(getXyGraph(), h);
@@ -201,26 +202,12 @@ public class PolylineSelection extends AbstractSelectionRegion {
 		}
 
 		@Override
-		protected void fillShape(Graphics graphics) {
-			super.fillShape(graphics);
-		}
-
-		@Override
-		protected void outlineShape(Graphics graphics) {
-			super.outlineShape(graphics);
-			for (IFigure f : handles) {
-				f.paint(graphics);
-			}
-		}
-
-		@Override
 		public IRegion getRegion() {
 			return PolylineSelection.this;
 		}
 
 		@Override
 		public void setRegion(IRegion region) {
-			// Not possible
 		}
 	}
 }

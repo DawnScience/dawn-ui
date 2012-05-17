@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Spinner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.PointROI;
 import uk.ac.diamond.scisoft.analysis.roi.PolygonalROI;
@@ -38,6 +39,7 @@ import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 import uk.ac.gda.richbeans.components.cell.FieldComponentCellEditor;
+import uk.ac.gda.richbeans.components.wrappers.FloatSpinnerWrapper;
 import uk.ac.gda.richbeans.components.wrappers.SpinnerWrapper;
 
 public class ROIViewer  {
@@ -47,6 +49,8 @@ public class ROIViewer  {
 	private TableViewer regionTable;
 	private AbstractRegion region;
 	private XYGraph        graph;
+
+	private ROIBase originalRoi;
 
 	public Control createPartControl(Composite parent) {
 		
@@ -60,6 +64,7 @@ public class ROIViewer  {
 	public void setRegion(final AbstractRegion region, final XYGraph graph) {
 		
 		this.region = region;
+		this.originalRoi = region.getROI()!=null ? region.getROI().copy() : null;
 		this.graph  = graph;
 		
 		if (regionTable.getColumnProperties()!=null) return;
@@ -135,20 +140,20 @@ public class ROIViewer  {
 			FieldComponentCellEditor ed = null;
 			try {
 				ed = new FieldComponentCellEditor(((TableViewer)getViewer()).getTable(), 
-						                     SpinnerWrapper.class.getName(), SWT.RIGHT);
+						                     FloatSpinnerWrapper.class.getName(), SWT.RIGHT);
 			} catch (ClassNotFoundException e) {
 				logger.error("Cannot get FieldComponentCellEditor for "+SpinnerWrapper.class.getName(), e);
 				return null;
 			}
-			final SpinnerWrapper   rb = (SpinnerWrapper)ed.getFieldWidget();
+			final FloatSpinnerWrapper   rb = (FloatSpinnerWrapper)ed.getFieldWidget();
 			Range range;
             if (column==1) {
             	range = graph.primaryXAxis.getRange();
 			} else {
 				range = graph.primaryYAxis.getRange();
 			}
-            rb.setMaximum((int)Math.max(range.getUpper(), range.getLower()));
-            rb.setMinimum((int)Math.min(range.getUpper(), range.getLower()));
+            rb.setMaximum(Math.max(range.getUpper(), range.getLower()));
+            rb.setMinimum(Math.min(range.getUpper(), range.getLower()));
             rb.setButtonVisible(false);
             rb.setActive(true);
             ((Spinner)rb.getControl()).addSelectionListener(new SelectionAdapter() {
@@ -254,35 +259,42 @@ public class ROIViewer  {
 		
 		if (roi instanceof LinearROI) {
 			final LinearROI lr = (LinearROI)roi;
-			ret.add(new RegionRow("Start Point (x,y)", "pixel", lr.getPoint()[0],    lr.getPoint()[1]));
-			ret.add(new RegionRow("End Point (x,y)",   "pixel", lr.getEndPoint()[0], lr.getEndPoint()[1]));
+			ret.add(new RegionRow("Start Point (x,y)", "pixel", lr.getPointX(),       lr.getPointY()));
+			final double[] ept = lr.getEndPoint();
+			ret.add(new RegionRow("End Point (x,y)",   "pixel", ept[0],               ept[1]));
 			ret.add(new RegionRow("Rotation (°)",      "°",     lr.getAngleDegrees(), Double.NaN));
 			
 		} else if (roi instanceof PolygonalROI) {
 			final PolygonalROI pr = (PolygonalROI)roi;
 			for (int i = 0; i < pr.getSides(); i++) {
-				ret.add(new RegionRow("Point "+(i+1)+"  (x,y)", "pixel", pr.getPointX(i),    pr.getPointY(i)));
+				ret.add(new RegionRow("Point "+(i+1)+"  (x,y)", "pixel", pr.getPointX(i), pr.getPointY(i)));
 			}
 			
 		} else if (roi instanceof PointROI) {
 			final PointROI pr = (PointROI)roi;
-			ret.add(new RegionRow("Point (x,y)", "pixel", pr.getPointX(),    pr.getPointY()));
+			ret.add(new RegionRow("Point (x,y)", "pixel", pr.getPointX(), pr.getPointY()));
 			
 		} else if (roi instanceof RectangularROI) {
 			final RectangularROI rr = (RectangularROI)roi;
-			ret.add(new RegionRow("Start Point (x,y)", "pixel", rr.getPoint()[0],    rr.getPoint()[1]));
-			ret.add(new RegionRow("End Point (x,y)",   "pixel", rr.getEndPoint()[0], rr.getEndPoint()[1]));
+			ret.add(new RegionRow("Start Point (x,y)", "pixel", rr.getPointX(),       rr.getPointY()));
+			final double[] ept = rr.getEndPoint();
+			ret.add(new RegionRow("End Point (x,y)",   "pixel", ept[0],               ept[1]));
 			ret.add(new RegionRow("Rotation (°)",      "°",     rr.getAngleDegrees(), Double.NaN));
 			
 		} else if (roi instanceof SectorROI) {
 			final SectorROI sr = (SectorROI)roi;
-			ret.add(new RegionRow("Center (x,y)",         "pixel", sr.getPointX(),    sr.getPointY()));
-			ret.add(new RegionRow("Radii (inner, outer)", "pixel", sr.getRadius(0),   sr.getRadius(1)));
-			ret.add(new RegionRow("Angles (°)",           "°",  sr.getAngleDegrees(0),    sr.getAngleDegrees(1)));
+			ret.add(new RegionRow("Center (x,y)",         "pixel", sr.getPointX(),        sr.getPointY()));
+			ret.add(new RegionRow("Radii (inner, outer)", "pixel", sr.getRadius(0),       sr.getRadius(1)));
+			ret.add(new RegionRow("Angles (°)",           "°",     sr.getAngleDegrees(0), sr.getAngleDegrees(1)));
 			
 			if (region.getRegionType()==RegionType.RING) {
 				ret.get(2).setEnabled(false);
 			}
+		} else if (roi instanceof EllipticalROI) {
+			final EllipticalROI er = (EllipticalROI) roi;
+			ret.add(new RegionRow("Center (x,y)",             "pixel", er.getPointX(),       er.getPointY()));
+			ret.add(new RegionRow("Semi-axes (major, minor)", "pixel", er.getSemiAxis(0),    er.getSemiAxis(1)));
+			ret.add(new RegionRow("Rotation (°)",             "°",     er.getAngleDegrees(), Double.NaN));
 		}
 		
 		return ret;
@@ -328,6 +340,10 @@ public class ROIViewer  {
 					                     orig.isClippingCompensation(),
 					                     orig.getSymmetry());
 			ret = sr;
+		} else if (roi instanceof EllipticalROI) {
+			EllipticalROI er = new EllipticalROI(rows.get(1).getxLikeVal(), rows.get(1).getyLikeVal(),
+					rows.get(2).getxLikeVal(), rows.get(0).getxLikeVal(), rows.get(0).getyLikeVal());
+			ret = er;
 		}
 		
 		return ret;
@@ -422,4 +438,8 @@ public class ROIViewer  {
 			this.enabled = enabled;
 		}
     }
+
+	public void revertChanges() {
+		if (originalRoi!=null) region.setROI(originalRoi);
+	}
 }

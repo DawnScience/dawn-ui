@@ -10,6 +10,7 @@ import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
+import org.dawb.common.ui.plot.region.ROIEvent;
 import org.dawb.common.ui.plot.region.RegionEvent;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
@@ -73,6 +74,21 @@ public abstract class SectorProfileTool extends ProfileTool {
 		
 		addSymetryActions(symmetry);
 		
+	}
+	
+	private int lastSymmetry = 0;
+	@Override
+	public void roiChanged(ROIEvent evt) {
+		
+		if (evt.getROI()!=null && evt.getROI() instanceof SectorROI) {
+			SectorROI sroi = (SectorROI)evt.getROI();
+			if (sroi.getSymmetry()!=lastSymmetry) { // New plots required
+				profilePlottingSystem.clear();
+			}
+			lastSymmetry = sroi.getSymmetry();
+		}
+
+        super.roiChanged(evt);
 	}
 	
 	private int     preferredSymmetry = SectorROI.NONE;
