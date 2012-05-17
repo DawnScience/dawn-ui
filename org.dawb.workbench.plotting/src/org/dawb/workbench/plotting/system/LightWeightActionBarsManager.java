@@ -202,6 +202,7 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 		regionDropDown.add(createRegionAction(RegionType.YAXIS,     regionDropDown, "Add Y-axis selection",   Activator.getImageDescriptor("icons/Cursor-vert.png")));
 		regionDropDown.add(createRegionAction(RegionType.FREE_DRAW, regionDropDown, "Free drawn selection", Activator.getImageDescriptor("icons/ProfileFree.png")));
 		regionDropDown.add(createRegionAction(RegionType.POINT,     regionDropDown, "Single point selection",   Activator.getImageDescriptor("icons/ProfilePoint.png")));
+		regionDropDown.add(createRegionAction(RegionType.ELLIPSE,   regionDropDown, "Ellipse fit selection",   Activator.getImageDescriptor("icons/ProfileCircle.png")));
 
 		regionDropDown.setSelectedAction(regionDropDown.getAction(0));
 		
