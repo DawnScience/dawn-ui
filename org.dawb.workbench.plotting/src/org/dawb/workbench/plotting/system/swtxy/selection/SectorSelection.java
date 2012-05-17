@@ -364,12 +364,13 @@ public class SectorSelection extends AbstractSelectionRegion {
 		@Override
 		public Rectangle getBounds() {
 			Rectangle b = super.getBounds();
-			for (IFigure f : handles) {
-				if (f instanceof SelectionHandle) {
-					SelectionHandle h = (SelectionHandle) f;
-					b.union(h.getBounds());
+			if (handles != null)
+				for (IFigure f : handles) {
+					if (f instanceof SelectionHandle) {
+						SelectionHandle h = (SelectionHandle) f;
+						b.union(h.getBounds());
+					}
 				}
-			}
 			return b;
 		}
 
