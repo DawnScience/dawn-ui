@@ -315,6 +315,8 @@ public class DerivativeTool extends AbstractToolPage  {
 
 							//if (firstTrace==null) firstTrace = trace;
 
+							if (!trace.isUserTrace()) continue;
+							
 							final AbstractDataset plot = trace.getData();
 							data.add(plot);
 

@@ -395,6 +395,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 						trace.setData(pair[0], pair[1]);
 						trace.setLineWidth(1);
 						trace.setTraceColor(ColorConstants.black);
+						trace.setUserTrace(false);
 						getPlottingSystem().addTrace(trace);
 						newBean.addTrace(trace);
 						if (!requireTrace) trace.setVisible(false);
