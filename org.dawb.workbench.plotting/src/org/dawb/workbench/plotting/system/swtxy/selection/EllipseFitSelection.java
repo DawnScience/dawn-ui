@@ -190,7 +190,6 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 
 		public void setup(PointList points) {
 			fitPoints(points, this);
-			createROI(true);
 
 			FigureListener listener = new FigureListener() {
 				@Override
@@ -222,6 +221,8 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 			mover.addTranslationListener(createRegionNotifier());
 			h.addFigureListener(listener);
 			handles.add(h);
+
+			createROI(true);
 
 			addFigureListener(listener);
 			mover = new FigureTranslator(getXyGraph(), parent, this, handles);
