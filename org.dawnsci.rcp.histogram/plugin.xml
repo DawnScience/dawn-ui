@@ -200,11 +200,11 @@
             blue_inverted="false"
             blue_transfer_function="org.dawnsci.rcp.histogram.sqrt"
             green_inverted="false"
-            green_transfer_function="org.dawnsci.rcp.histogram.threexminus1"
+            green_transfer_function="org.dawnsci.rcp.histogram.sqrt"
             id="org.dawnsci.rcp.histogram.scale.sqrt"
             name="Sqrt Scale"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.rcp.histogram.threex">
+            red_transfer_function="org.dawnsci.rcp.histogram.sqrt">
       </colour_scheme>
       <colour_scheme
             alpha_inverted="true"
