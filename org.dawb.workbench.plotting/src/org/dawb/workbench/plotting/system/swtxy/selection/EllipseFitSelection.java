@@ -36,7 +36,7 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 
 	public EllipseFitSelection(String name, Axis xAxis, Axis yAxis) {
 		super(name, xAxis, yAxis);
-		setRegionColor(ColorConstants.red);
+		setRegionColor(ColorConstants.lightGreen);
 		setAlpha(80);
 		setLineWidth(2);
 		fitter = new EllipseFitter();
