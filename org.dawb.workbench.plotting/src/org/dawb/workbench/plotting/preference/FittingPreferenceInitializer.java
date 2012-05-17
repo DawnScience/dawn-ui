@@ -1,4 +1,4 @@
-package org.dawb.workbench.plotting.tools;
+package org.dawb.workbench.plotting.preference;
 
 import org.dawb.workbench.plotting.Activator;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
@@ -20,7 +20,8 @@ public class FittingPreferenceInitializer extends AbstractPreferenceInitializer 
 		store.setDefault(FittingConstants.SHOW_FITTING_TRACE,  true);
 		store.setDefault(FittingConstants.SHOW_ANNOTATION_AT_PEAK,  true);
 		store.setDefault(FittingConstants.PEAK_TYPE,  Gaussian.class.getName());
-
+		store.setDefault(FittingConstants.SMOOTHING, 1);
+		store.setDefault(FittingConstants.QUALITY,   0.01);
 	}
 
 }
