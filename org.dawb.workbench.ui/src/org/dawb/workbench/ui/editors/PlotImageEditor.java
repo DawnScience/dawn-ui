@@ -10,9 +10,6 @@
 
 package org.dawb.workbench.ui.editors;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.dawb.common.services.ILoaderService;
 import org.dawb.common.services.ServiceManager;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
@@ -20,7 +17,6 @@ import org.dawb.common.ui.plot.AbstractPlottingSystem.ColorOption;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingFactory;
 import org.dawb.common.ui.plot.tool.IToolPageSystem;
-import org.dawb.common.ui.slicing.SliceUtils;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.views.HeaderTablePage;
@@ -43,7 +39,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IActionBars2;

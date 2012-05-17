@@ -115,7 +115,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
         createColumns(viewer);
 		viewer.getTable().setLinesVisible(true);
 		viewer.getTable().setHeaderVisible(true);
-		
+		viewer.setContentProvider(createContentProvider());
 		createActions();
 				
 		getSite().setSelectionProvider(viewer);
@@ -125,7 +125,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 			public void selectionChanged(SelectionChangedEvent event) {
 				final StructuredSelection sel = (StructuredSelection)event.getSelection();
 				if (fittedPeaks!=null && sel!=null && sel.getFirstElement()!=null) {
-					fittedPeaks.setSelectedPeak((Integer)sel.getFirstElement());
+					fittedPeaks.setSelectedPeak((IPeak)sel.getFirstElement());
 					viewer.refresh();
 				}
 			}
@@ -171,7 +171,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 
 	}
 	
-	private IContentProvider createActorContentProvider(final int numerOfPeaks) {
+	private IContentProvider createContentProvider() {
 		return new IStructuredContentProvider() {
 			@Override
 			public void dispose() {
@@ -182,13 +182,10 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 			@Override
 			public Object[] getElements(Object inputElement) {
 
-				if (numerOfPeaks<0) return new Integer[]{0};
+				if (fittedPeaks==null)    return new IPeak[]{null};
+				if (fittedPeaks.size()<1) return new IPeak[]{null};
 				
-				List<Integer> indices = new ArrayList<Integer>(numerOfPeaks);
-                for (int ipeak = 0; ipeak < numerOfPeaks; ipeak++) {
-                	indices.add(ipeak); // autoboxing
-				}
-				return indices.toArray(new Integer[indices.size()]);
+				return fittedPeaks.getPeaks().toArray();
 			}
 		};
 	}
@@ -419,7 +416,6 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		    		
 					
 					FittingTool.this.fittedPeaks = newBean;
-					viewer.setContentProvider(createActorContentProvider(newBean.size()));
 					viewer.setInput(newBean);
                     viewer.refresh();
                     
@@ -630,20 +626,32 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		getSite().getActionBars().getMenuManager().add(numberPeaks);
 		
 		
-		final Action clear = new Action("Clear", Activator.getImageDescriptor("icons/plot-tool-peak-fit-clear.png")) {
+		final Action clear = new Action("Clear all", Activator.getImageDescriptor("icons/plot-tool-peak-fit-clear.png")) {
 			public void run() {
 				if (!isActive()) return;
 				if (fittedPeaks!=null) fittedPeaks.removeSelections(getPlottingSystem());
 				fittedPeaks.dispose();
 				fittedPeaks = null;
-				viewer.setContentProvider(createActorContentProvider(0));
-				viewer.setInput(null);
+				viewer.refresh();
 			}
 		};
 		clear.setToolTipText("Clear all regions found in the fitting");
 		
 		getSite().getActionBars().getToolBarManager().add(clear);
 		getSite().getActionBars().getMenuManager().add(clear);
+		
+		final Action delete = new Action("Delete peak selected", Activator.getImageDescriptor("icons/delete.gif")) {
+			public void run() {
+				if (!isActive()) return;
+				if (fittedPeaks!=null) fittedPeaks.deleteSelectedPeak(getPlottingSystem());
+				viewer.refresh();
+			}
+		};
+		delete.setToolTipText("Delete peak selected, if any");
+		
+		getSite().getActionBars().getToolBarManager().add(delete);
+		getSite().getActionBars().getMenuManager().add(delete);
+
 		
 		createRightClickMenu();
 	}

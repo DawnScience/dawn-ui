@@ -41,6 +41,8 @@ public class FittedPeaks {
 	}
 
 	public void dispose() {
+		
+		selectedPeak = null;
 		if (peakBounds!=null) peakBounds.clear();
 		peakBounds = null;
 		
@@ -96,7 +98,13 @@ public class FittedPeaks {
 		for (IAnnotation  ann  : peakAnnotations)  ann.setVisible(isVis);
 	}
 	
-	public void setSelectedPeak(int ipeak) {
+	private IPeak selectedPeak;
+	
+	public void setSelectedPeak(IPeak peak) {
+		
+		final int ipeak = getPeaks().indexOf(peak);
+		if (ipeak<0) return;
+		
 		for (IRegion region : peakAreaRegions) region.setRegionColor(ColorConstants.orange);
 		peakAreaRegions.get(ipeak).setRegionColor(ColorConstants.red);
 		
@@ -108,7 +116,33 @@ public class FittedPeaks {
 		trace.setTraceColor(ColorConstants.darkGreen);
 		
 		peakAnnotations.get(ipeak).setAnnotationColor(ColorConstants.darkGreen);
+		
+		this.selectedPeak = peak;
 	}
+	
+	public void deleteSelectedPeak(IPlottingSystem sys) {
+		
+		if (selectedPeak==null) return;
+		final int ipeak = getPeaks().indexOf(selectedPeak);
+		if (ipeak<0) return;
+		
+		sys.removeRegion(peakAreaRegions.get(ipeak));
+		peakAreaRegions.remove(ipeak);
+
+		sys.removeTrace(peakTraces.get(ipeak));
+		peakTraces.remove(ipeak);
+
+		sys.removeRegion(peakLineRegions.get(ipeak));
+		peakLineRegions.remove(ipeak);
+
+		sys.removeAnnotation(peakAnnotations.get(ipeak));
+		peakAnnotations.remove(ipeak);
+
+		peaks.remove(ipeak);
+		
+	}
+
+
 
 	/**
 	 * x and y pairs for the fitted functions.
