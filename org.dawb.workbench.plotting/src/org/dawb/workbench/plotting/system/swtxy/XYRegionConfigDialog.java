@@ -220,6 +220,13 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
 		}
 		
 	}
+	@Override
+	protected void cancelPressed() {
+		if (regionList!=null) for (RegionComposite comp : regionList){
+			comp.cancelChanges();
+		}
+		super.cancelPressed();
+	}
 
 	private IRegion selectedRegion;
 

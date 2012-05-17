@@ -278,6 +278,11 @@ public class RegionComposite extends Composite {
 		AbstractSelectionRegion region = getEditingRegion();
 		region.repaint();
 	}
+	
+	public void cancelChanges() {
+		this.roiViewer.revertChanges();
+	}
+
 
 	public void disposeRegion(AbstractSelectionRegion region) {
 		 xyGraph.disposeRegion(region);

@@ -50,6 +50,8 @@ public class ROIViewer  {
 	private AbstractRegion region;
 	private XYGraph        graph;
 
+	private ROIBase originalRoi;
+
 	public Control createPartControl(Composite parent) {
 		
 		this.regionTable = new TableViewer(parent, SWT.FULL_SELECTION | SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
@@ -62,6 +64,7 @@ public class ROIViewer  {
 	public void setRegion(final AbstractRegion region, final XYGraph graph) {
 		
 		this.region = region;
+		this.originalRoi = region.getROI()!=null ? region.getROI().copy() : null;
 		this.graph  = graph;
 		
 		if (regionTable.getColumnProperties()!=null) return;
@@ -435,4 +438,8 @@ public class ROIViewer  {
 			this.enabled = enabled;
 		}
     }
+
+	public void revertChanges() {
+		if (originalRoi!=null) region.setROI(originalRoi);
+	}
 }
