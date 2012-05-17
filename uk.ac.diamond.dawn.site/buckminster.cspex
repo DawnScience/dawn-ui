@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cspecExtension
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:bc="http://www.eclipse.org/buckminster/Common-1.0"
+	xmlns="http://www.eclipse.org/buckminster/CSpec-1.0">
+    <dependencies>
+        <dependency name="org.eclipse.equinox.executable" componentType="eclipse.feature"/>
+        <dependency name="builder" componentType="buckminster"/>
+    </dependencies>
+	<generators>
+		<!-- Place your Generators here -->
+	</generators>
+	<artifacts>
+		<!-- Place your Artifacts here -->
+	</artifacts>
+	<actions>
+        <public name="create.product-linux.gtk.x86" actor="ant">
+            <actorProperties>
+                <property key="buildFile" value="product.ant" />
+                <property key="targets" value="create.product" />
+            </actorProperties>
+            <properties>
+                <property key="product.os" value="linux"/>
+                <property key="product.ws" value="gtk"/>
+                <property key="product.arch" value="x86"/>
+                <property key="profile" value="Dawn" />
+                <property key="iu" value="uk.ac.diamond.dawn.product" />
+            </properties>
+            <prerequisites alias="repository">
+                <attribute name="site.p2" />
+            </prerequisites>
+            <products alias="destination" base="${buckminster.output}">
+                <path path="dawn.${product.ws}.${product.os}.${product.arch}/" />
+            </products>
+        </public>
+        <public name="create.product-linux.gtk.x86_64" actor="ant">
+            <actorProperties>
+                <property key="buildFile" value="product.ant" />
+                <property key="targets" value="create.product" />
+            </actorProperties>
+            <properties>
+                <property key="product.os" value="linux"/>
+                <property key="product.ws" value="gtk"/>
+                <property key="product.arch" value="x86_64"/>
+                <property key="profile" value="Dawn" />
+                <property key="iu" value="uk.ac.diamond.dawn.product" />
+            </properties>
+            <prerequisites alias="repository">
+                <attribute name="site.p2" />
+            </prerequisites>
+            <products alias="destination" base="${buckminster.output}">
+                <path path="dawn.${product.ws}.${product.os}.${product.arch}/" />
+            </products>
+        </public>
+        <public name="create.product-win32.win32.x86" actor="ant">
+            <actorProperties>
+                <property key="buildFile" value="product.ant" />
+                <property key="targets" value="create.product" />
+            </actorProperties>
+            <properties>
+                <property key="product.os" value="win32"/>
+                <property key="product.ws" value="win32"/>
+                <property key="product.arch" value="x86"/>
+                <property key="profile" value="Dawn" />
+                <property key="iu" value="uk.ac.diamond.dawn.product" />
+            </properties>
+            <prerequisites alias="repository">
+                <attribute name="site.p2" />
+            </prerequisites>
+            <products alias="destination" base="${buckminster.output}">
+                <path path="dawn.${product.ws}.${product.os}.${product.arch}/" />
+            </products>
+        </public>
+        <public name="create.product-win32.win32.x86_64" actor="ant">
+            <actorProperties>
+                <property key="buildFile" value="product.ant" />
+                <property key="targets" value="create.product" />
+            </actorProperties>
+            <properties>
+                <property key="product.os" value="win32"/>
+                <property key="product.ws" value="win32"/>
+                <property key="product.arch" value="x86_64"/>
+                <property key="profile" value="Dawn" />
+                <property key="iu" value="uk.ac.diamond.dawn.product" />
+            </properties>
+            <prerequisites alias="repository">
+                <attribute name="site.p2" />
+            </prerequisites>
+            <products alias="destination" base="${buckminster.output}">
+                <path path="dawn.${product.ws}.${product.os}.${product.arch}/" />
+            </products>
+        </public>
+        <public name="create.product-macosx.cocoa.x86_64" actor="ant">
+            <actorProperties>
+                <property key="buildFile" value="product.ant" />
+                <property key="targets" value="create.product" />
+            </actorProperties>
+            <properties>
+                <property key="product.os" value="macosx"/>
+                <property key="product.ws" value="cocoa"/>
+                <property key="product.arch" value="x86_64"/>
+                <property key="profile" value="Dawn" />
+                <property key="iu" value="uk.ac.diamond.dawn.product" />
+            </properties>
+            <prerequisites alias="repository">
+                <attribute name="site.p2" />
+            </prerequisites>
+            <products alias="destination" base="${buckminster.output}">
+                <path path="dawn.${product.ws}.${product.os}.${product.arch}/" />
+            </products>
+        </public>
+        <public name="create.product-macosx.cocoa.x86" actor="ant">
+            <actorProperties>
+                <property key="buildFile" value="product.ant" />
+                <property key="targets" value="create.product" />
+            </actorProperties>
+            <properties>
+                <property key="product.os" value="macosx"/>
+                <property key="product.ws" value="cocoa"/>
+                <property key="product.arch" value="x86"/>
+                <property key="profile" value="Dawn" />
+                <property key="iu" value="uk.ac.diamond.dawn.product" />
+            </properties>
+            <prerequisites alias="repository">
+                <attribute name="site.p2" />
+            </prerequisites>
+            <products alias="destination" base="${buckminster.output}">
+                <path path="dawn.${product.ws}.${product.os}.${product.arch}/" />
+            </products>
+        </public>
+	</actions>
+	<groups>
+		<!-- Place your Groups here -->
+	</groups>
+	<alterDependencies>
+		<!-- Place your Dependency alterations here -->
+	</alterDependencies>
+	<alterArtifacts>
+		<!-- Place your Artifact alterations here -->
+	</alterArtifacts>
+	<alterActions>
+		<!-- Place your Action alterations here -->
+	</alterActions>
+	<alterGroups>
+		<!-- Place your Group alterations here -->
+	</alterGroups>
+</cspecExtension>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?pde version="3.5"?>
+
+<product name="DAWN Science" uid="uk.ac.diamond.dawn.product" id="ouk.ac.diamond.dawn.product" application="org.eclipse.ui.ide.workbench" version="1.0" useFeatures="true" includeLaunchers="true">
+
+   <aboutInfo>
+      <image path="/org.dawnsci.product.plugin/icons/Temp-3Col-Splash.png"/>
+   </aboutInfo>
+
+   <configIni use="default">
+   </configIni>
+
+   <launcherArgs>
+      <programArgsLin>-vm
+jre/bin/java</programArgsLin>
+      <vmArgs>-Xms512m
+-XX:PermSize=128m
+-XX:MaxPermSize=256m
+-Djava.library.path=${project_loc:uk.ac.gda.libs}/lib/${target.os}-${target.arch}
+-Ddbconnect=config/dbconnect.ispyb.properties
+-Dentry=MyVisitsEntryPoint
+-DidaEmbedded=yes
+-Dcolour=on
+-Dosgi.locking=none
+-Dcom.isencia.require.file.source=true</vmArgs>
+      <vmArgsLin>-Xmx2048m</vmArgsLin>
+      <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts
+-Xmx2048m</vmArgsMac>
+      <vmArgsSol>-Xmx2048m</vmArgsSol>
+   </launcherArgs>
+
+   <windowImages i16="/org.dawnsci.product.plugin/icons/Temp-16x16-icon.png" i48="/org.dawnsci.product.plugin/icons/Temp-48x48-icon.png"/>
+
+   <splash
+      location="org.dawnsci.product.plugin"
+      startupProgressRect="0,0,200,15"
+      startupMessageRect="0,20,200,20"
+      startupForegroundColor="0000FF" />
+   <launcher name="dawn">
+      <solaris/>
+      <win useIco="false">
+         <bmp/>
+      </win>
+   </launcher>
+
+   <vm>
+   </vm>
+
+   <plugins>
+   </plugins>
+
+   <features>
+      <feature id="uk.ac.diamond.dawn.product.feature" version="1.0.0.qualifier"/>
+   </features>
+
+
+</product>
