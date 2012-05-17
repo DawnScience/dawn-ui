@@ -1,6 +1,7 @@
 package org.dawb.workbench.plotting.tools;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
@@ -38,6 +39,7 @@ public class DerivativeTool extends AbstractToolPage  {
 
 	protected AbstractPlottingSystem plotter;
 	private   ITraceListener         traceListener;
+	private boolean isUpdatingDerivatives = false;
 
 	private Composite composite;
 
@@ -66,6 +68,7 @@ public class DerivativeTool extends AbstractToolPage  {
 				@Override
 				public void tracesPlotted(TraceEvent evt) {
 
+					if (isUpdatingDerivatives) return; // Avoids looping of listeners!
 					if (!(evt.getSource() instanceof List<?>) && !(evt.getSource() instanceof ITrace)) {
 						return;
 					}
@@ -268,7 +271,11 @@ public class DerivativeTool extends AbstractToolPage  {
 		if (dervs.size() != data.size()) {
 			dervs.clear();
 			for (int i = 0; i < data.size(); i++) {
-				//TODO should make the smoothing a parameter
+				//TODO 2D dervs!
+				if (xs.get(i).getRank() != 1 || data.get(i).getRank() != 1) {
+					logger.trace("Cannot process 2D derviatives as yet!");
+					continue;
+				}
 				dervs.add(Maths.derivative(xs.get(i), data.get(i), 1));
 			}
 		}
@@ -281,6 +288,11 @@ public class DerivativeTool extends AbstractToolPage  {
 			dervs2.clear();
 			for (int i = 0; i < derivatives.size(); i++) {
 				//TODO should make the smoothing a parameter
+				//TODO 2D dervs!
+				if (xs.get(i).getRank() != 1 || data.get(i).getRank() != 1) {
+					logger.trace("Cannot process 2D derviatives as yet!");
+					continue;
+				}
 				dervs2.add(Maths.derivative(xs.get(i), derivatives.get(i), 1));
 			}
 		}
@@ -293,6 +305,11 @@ public class DerivativeTool extends AbstractToolPage  {
 			dervs3.clear();
 			for (int i = 0; i < derivatives.size(); i++) {
 				//TODO should make the smoothing a parameter
+				//TODO 2D dervs!
+				if (xs.get(i).getRank() != 1 || data.get(i).getRank() != 1) {
+					logger.trace("Cannot process 2D derviatives as yet!");
+					continue;
+				}
 				dervs3.add(Maths.derivative(xs.get(i), derivatives.get(i), 1));
 			}
 		}
@@ -341,8 +358,8 @@ public class DerivativeTool extends AbstractToolPage  {
 							data.add(plot);
 
 							final AbstractDataset x = (trace instanceof ILineTrace) 
-									? ((ILineTrace)trace).getXData() 
-											: AbstractDataset.arange(0, plot.getSize(), 1, AbstractDataset.INT32);
+									              ? ((ILineTrace)trace).getXData() 
+									              : AbstractDataset.arange(0, plot.getSize(), 1, AbstractDataset.INT32);
 							xs.add(x);			
 						}
 
@@ -402,8 +419,18 @@ public class DerivativeTool extends AbstractToolPage  {
 		private boolean isDerv3;
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
+			
+			if (getPlottingSystem()==null)    return Status.CANCEL_STATUS;
+			if (data==null || data.isEmpty()) return Status.CANCEL_STATUS;
+			if (isUpdatingDerivatives)        return Status.CANCEL_STATUS;
 			try {
 				updateRunning++;
+				isUpdatingDerivatives = true;
+				
+				// Should only deal with 1D data!
+				final Collection<ITrace> lines = getPlottingSystem().getTraces(ILineTrace.class);
+				if (lines==null || lines.isEmpty()) return Status.CANCEL_STATUS;
+				
 				getPlottingSystem().clear();
 				
 				if (isData) {
@@ -413,23 +440,23 @@ public class DerivativeTool extends AbstractToolPage  {
 				}
 				
 				if (isDerv) {
-					
-					for (int i = 0; i < data.size(); i++) {
-						getPlottingSystem().updatePlot1D(xs.get(i), getDervs().subList(i, i+1), monitor);
+					final List<AbstractDataset> dervs = getDervs();
+					if (dervs!=null && !dervs.isEmpty()) for (int i = 0; i < data.size(); i++) {
+						getPlottingSystem().updatePlot1D(xs.get(i), dervs.subList(i, i+1), monitor);
 					}
 				}
 				
 				if (isDerv2) {
-					
-					for (int i = 0; i < data.size(); i++) {
-						getPlottingSystem().updatePlot1D(xs.get(i), getDervs2().subList(i, i+1), monitor);
+					final List<AbstractDataset> dervs = getDervs2();
+					if (dervs!=null && !dervs.isEmpty()) for (int i = 0; i < data.size(); i++) {
+						getPlottingSystem().updatePlot1D(xs.get(i), dervs.subList(i, i+1), monitor);
 					}
 				}
 				
 				if (isDerv3) {
-					
-					for (int i = 0; i < data.size(); i++) {
-						getPlottingSystem().updatePlot1D(xs.get(i), getDervs3().subList(i, i+1), monitor);
+					final List<AbstractDataset> dervs = getDervs3();
+					if (dervs!=null && !dervs.isEmpty()) for (int i = 0; i < data.size(); i++) {
+						getPlottingSystem().updatePlot1D(xs.get(i), dervs.subList(i, i+1), monitor);
 					}
 				}
 				
@@ -437,6 +464,7 @@ public class DerivativeTool extends AbstractToolPage  {
 				logger.error("Failed to display the Diferential", e);
 			} finally {
 				updateRunning--;
+				isUpdatingDerivatives = false;
 			}
 			
 			return Status.OK_STATUS;
@@ -446,6 +474,8 @@ public class DerivativeTool extends AbstractToolPage  {
 			                final boolean isDerv, 
 			                final boolean isDerv2, 
 			                final boolean isDerv3) {
+			
+			if (getPlottingSystem()==null) return;
 			
 	        for (Job job : Job.getJobManager().find(null))
 	            if (job.getClass()==getClass() && job.getState() != Job.RUNNING)
