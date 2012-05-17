@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.csstudio.swt.xygraph.figures.Axis;
+import org.dawb.common.ui.plot.region.IRegion;
+import org.dawb.common.ui.plot.region.IRegionContainer;
 import org.dawb.workbench.plotting.system.swtxy.translate.FigureTranslator;
 import org.dawb.workbench.plotting.system.swtxy.util.Draw2DUtils;
 import org.dawb.workbench.plotting.system.swtxy.util.RotatablePolylineShape;
@@ -124,7 +126,7 @@ public class PolylineSelection extends AbstractSelectionRegion {
 		return 0; // signifies unlimited presses
 	}
 
-	class DecoratedPolyline extends RotatablePolylineShape {
+	class DecoratedPolyline extends RotatablePolylineShape implements IRegionContainer {
 		List<IFigure> handles;
 		private Figure parent;
 		private static final int SIDE = 8;
@@ -197,6 +199,15 @@ public class PolylineSelection extends AbstractSelectionRegion {
 				SelectionHandle h = (SelectionHandle) handles.get(i);
 				h.setSelectionPoint(np);
 			}
+		}
+
+		@Override
+		public IRegion getRegion() {
+			return PolylineSelection.this;
+		}
+
+		@Override
+		public void setRegion(IRegion region) {
 		}
 	}
 }
