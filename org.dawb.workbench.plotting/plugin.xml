@@ -87,6 +87,13 @@
             label="Masking"
             tooltip="Masking the image and leaving data modified.">
       </plotting_tool_page>
+      <plotting_tool_page
+            class="org.dawb.workbench.plotting.tools.EllipseFittingTool"
+            icon="icons/plot-tool-masking.png"
+            id="org.dawb.workbench.plotting.tools.ellipseFittingTool"
+            label="Ellipse Fitting"
+            tooltip="A tool which shows the fitted ellipse parameters.">
+      </plotting_tool_page>
    </extension>
    <extension
          point="org.eclipse.ui.views">
