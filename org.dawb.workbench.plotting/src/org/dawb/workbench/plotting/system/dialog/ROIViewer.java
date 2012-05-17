@@ -38,6 +38,7 @@ import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 import uk.ac.gda.richbeans.components.cell.FieldComponentCellEditor;
+import uk.ac.gda.richbeans.components.wrappers.FloatSpinnerWrapper;
 import uk.ac.gda.richbeans.components.wrappers.SpinnerWrapper;
 
 public class ROIViewer  {
@@ -135,20 +136,20 @@ public class ROIViewer  {
 			FieldComponentCellEditor ed = null;
 			try {
 				ed = new FieldComponentCellEditor(((TableViewer)getViewer()).getTable(), 
-						                     SpinnerWrapper.class.getName(), SWT.RIGHT);
+						                     FloatSpinnerWrapper.class.getName(), SWT.RIGHT);
 			} catch (ClassNotFoundException e) {
 				logger.error("Cannot get FieldComponentCellEditor for "+SpinnerWrapper.class.getName(), e);
 				return null;
 			}
-			final SpinnerWrapper   rb = (SpinnerWrapper)ed.getFieldWidget();
+			final FloatSpinnerWrapper   rb = (FloatSpinnerWrapper)ed.getFieldWidget();
 			Range range;
             if (column==1) {
             	range = graph.primaryXAxis.getRange();
 			} else {
 				range = graph.primaryYAxis.getRange();
 			}
-            rb.setMaximum((int)Math.max(range.getUpper(), range.getLower()));
-            rb.setMinimum((int)Math.min(range.getUpper(), range.getLower()));
+            rb.setMaximum(Math.max(range.getUpper(), range.getLower()));
+            rb.setMinimum(Math.min(range.getUpper(), range.getLower()));
             rb.setButtonVisible(false);
             rb.setActive(true);
             ((Spinner)rb.getControl()).addSelectionListener(new SelectionAdapter() {
