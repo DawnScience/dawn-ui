@@ -169,6 +169,12 @@ public class HistogramToolPage extends AbstractToolPage {
 	private IPaletteListener paletteListener;
 
 
+	private Button btnColourMapLog;
+
+
+	private SelectionListener colourSchemeLogListener;
+
+
 	/**
 	 * Basic Constructor
 	 */
@@ -214,7 +220,7 @@ public class HistogramToolPage extends AbstractToolPage {
 			public void minChanged(PaletteEvent event) {
 				if (internalEvent > 0) return;
 				logger.trace("paletteListener minChanged firing");
-				histoMin = image.getMin().doubleValue();
+				histoMin = image.getImageServiceBean().getMin().doubleValue();
 				updateHistogramToolElements(null, false);
 
 			}
@@ -223,7 +229,7 @@ public class HistogramToolPage extends AbstractToolPage {
 			public void maxChanged(PaletteEvent event) {
 				if (internalEvent > 0) return;
 				logger.trace("paletteListener maxChanged firing");
-				histoMax = image.getMax().doubleValue();
+				histoMax = image.getImageServiceBean().getMax().doubleValue();
 				updateHistogramToolElements(null, false);
 			}
 
@@ -231,7 +237,7 @@ public class HistogramToolPage extends AbstractToolPage {
 			public void maxCutChanged(PaletteEvent evt) {
 				if (internalEvent > 0) return;
 				logger.trace("paletteListener maxCutChanged firing");
-				rangeMax = image.getMaxCut().getBound().doubleValue();
+				rangeMax = image.getImageServiceBean().getMaximumCutBound().getBound().doubleValue();
 				zingerText.setText(Double.toString(rangeMax));
 				if(histoMax > rangeMax) histoMax = rangeMax;
 				generateHistogram(imageDataset);
@@ -242,7 +248,7 @@ public class HistogramToolPage extends AbstractToolPage {
 			public void minCutChanged(PaletteEvent evt) {
 				if (internalEvent > 0) return;
 				logger.trace("paletteListener minCutChanged firing");
-				rangeMin = image.getMinCut().getBound().doubleValue();
+				rangeMin = image.getImageServiceBean().getMinimumCutBound().getBound().doubleValue();
 				deadPixelText.setText(Double.toString(rangeMin));
 				if(histoMin < rangeMin) histoMin = rangeMin;
 				generateHistogram(imageDataset);
@@ -387,6 +393,7 @@ public class HistogramToolPage extends AbstractToolPage {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
 				logger.trace("colourSchemeListener");
+				
 				updateColourScheme();
 				buildPalleteData();
 				updateHistogramToolElements(event);;
@@ -395,6 +402,22 @@ public class HistogramToolPage extends AbstractToolPage {
 			@Override
 			public void widgetDefaultSelected(SelectionEvent event) {
 				widgetSelected(event);
+			}
+		};
+		
+		colourSchemeLogListener = new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				image.getImageServiceBean().setLogColorScale(btnColourMapLog.getSelection());
+				updateImage();
+				
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+				// TODO Auto-generated method stub
+				
 			}
 		};
 
@@ -455,7 +478,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 		colourSchemeComposite = new Composite(colourSchemeExpander, SWT.NONE);
 		colourSchemeComposite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1));
-		colourSchemeComposite.setLayout(new GridLayout(1, false));
+		colourSchemeComposite.setLayout(new GridLayout(2, false));
 
 		cmbColourMap = new CCombo(colourSchemeComposite, SWT.BORDER | SWT.READ_ONLY);
 		cmbColourMap.setToolTipText("Change the color scheme.");
@@ -469,6 +492,10 @@ public class HistogramToolPage extends AbstractToolPage {
 
 		cmbColourMap.select(0);
 
+		btnColourMapLog = new Button(colourSchemeComposite, SWT.CHECK);
+		btnColourMapLog.setText("Log Scale");
+		btnColourMapLog.addSelectionListener(colourSchemeLogListener);
+		
 		colourSchemeExpander.setClient(colourSchemeComposite);
 		colourSchemeExpander.addExpansionListener(expansionAdapter);
 		colourSchemeExpander.setExpanded(true);
@@ -672,7 +699,7 @@ public class HistogramToolPage extends AbstractToolPage {
 		if (image != null) {
 
 			// get the image data
-			imageDataset = image.getData();
+			imageDataset = image.getImageServiceBean().getImage();//image.getData();
 
 			logger.trace("Image Data is of type :" + imageDataset.getDtype());
 			if (imageDataset.hasFloatingPointElements()) {
