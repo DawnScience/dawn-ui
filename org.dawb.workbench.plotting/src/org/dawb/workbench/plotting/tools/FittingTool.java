@@ -1,7 +1,6 @@
 package org.dawb.workbench.plotting.tools;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -21,6 +20,7 @@ import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.FittingConstants;
+import org.dawb.workbench.plotting.preference.FittingPreferencePage;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -31,6 +31,7 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -46,6 +47,8 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -624,7 +627,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		numberPeaks.setCheckedAction(ipeak-1, true);
 		
 		getSite().getActionBars().getToolBarManager().add(numberPeaks);
-		getSite().getActionBars().getMenuManager().add(numberPeaks);
+		//getSite().getActionBars().getMenuManager().add(numberPeaks);
 		
 		
 		final Action clear = new Action("Clear all", Activator.getImageDescriptor("icons/plot-tool-peak-fit-clear.png")) {
@@ -651,17 +654,30 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		delete.setToolTipText("Delete peak selected, if any");
 		
 		getSite().getActionBars().getToolBarManager().add(delete);
-		getSite().getActionBars().getMenuManager().add(delete);
 
+		final Action preferences = new Action("Preferences...") {
+			public void run() {
+				if (!isActive()) return;
+				PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), FittingPreferencePage.ID, null, null);
+				if (pref != null) pref.open();
+			}
+		};
+
+		getSite().getActionBars().getMenuManager().add(preferences);
+
+	    final MenuManager menuManager = new MenuManager();
+	    menuManager.add(clear);
+	    menuManager.add(delete);
+	    menuManager.add(new Separator());
+	    menuManager.add(showAnns);
+	    menuManager.add(showTrace);
+	    menuManager.add(showPeak);
+	    menuManager.add(showFWHM);
 		
-		createRightClickMenu();
+	    viewer.getControl().setMenu(menuManager.createContextMenu(viewer.getControl()));
+
 	}
 	
-	private void createRightClickMenu() {	
-	    final MenuManager menuManager = new MenuManager();
-	    for (IContributionItem item : getSite().getActionBars().getMenuManager().getItems()) menuManager.add(item);
-	    viewer.getControl().setMenu(menuManager.createContextMenu(viewer.getControl()));
-	}
 
 	public FittedPeaks getFittedPeaks() {
 		return fittedPeaks;
