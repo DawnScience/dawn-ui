@@ -91,11 +91,11 @@ public class BoxProfileTool extends ProfileTool {
 		} else {
 						
 			profilePlottingSystem.setSelectedXAxis(xPixelAxis);
-			Collection<ITrace> plotted = profilePlottingSystem.createPlot1D(x_indices, Arrays.asList(new AbstractDataset[]{x_intensity}), monitor);
+			Collection<ITrace> plotted = profilePlottingSystem.updatePlot1D(x_indices, Arrays.asList(new AbstractDataset[]{x_intensity}), monitor);
 			registerTraces(region, plotted);
 			
 			profilePlottingSystem.setSelectedXAxis(yPixelAxis);
-			plotted = profilePlottingSystem.createPlot1D(y_indices, Arrays.asList(new AbstractDataset[]{y_intensity}), monitor);
+			plotted = profilePlottingSystem.updatePlot1D(y_indices, Arrays.asList(new AbstractDataset[]{y_intensity}), monitor);
 			registerTraces(region, plotted);
 			
 		}

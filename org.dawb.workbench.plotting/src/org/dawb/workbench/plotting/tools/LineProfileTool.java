@@ -51,10 +51,8 @@ public class LineProfileTool extends ProfileTool {
 		final AbstractDataset indices = ld.getXAxes()[0].toDataset();
 		indices.setName("Pixel");
 		
-		if (tryUpdate) {
-		
-			final ILineTrace trace = (ILineTrace)profilePlottingSystem.getTrace(region.getName());
-			
+		final ILineTrace trace = (ILineTrace)profilePlottingSystem.getTrace(region.getName());
+		if (tryUpdate && trace!=null) {
 			if (trace!=null && !monitor.isCanceled()) getControl().getDisplay().syncExec(new Runnable() {
 				public void run() {
 					trace.setData(indices, intensity);
@@ -63,7 +61,7 @@ public class LineProfileTool extends ProfileTool {
 			
 		} else {
 			if (monitor.isCanceled()) return;
-			Collection<ITrace> plotted = profilePlottingSystem.createPlot1D(indices, Arrays.asList(new AbstractDataset[]{intensity}), monitor);
+			Collection<ITrace> plotted = profilePlottingSystem.updatePlot1D(indices, Arrays.asList(new AbstractDataset[]{intensity}), monitor);
 			registerTraces(region, plotted);
 			
 		}
