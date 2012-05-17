@@ -76,4 +76,9 @@ public class PlottingConstants {
 	 */
 	public static final String MASK_REGIONS_ENABLED = "org.dawb.plotting.system.masking.regions.enabled";
 
+	/**
+	 * 
+	 */
+	public static final String RESET_ON_DEACTIVATE = "org.dawb.plotting.system.derivative.reset.when.deactivate";
+
 }

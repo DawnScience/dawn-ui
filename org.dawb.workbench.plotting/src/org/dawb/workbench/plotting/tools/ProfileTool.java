@@ -303,12 +303,14 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		}
 
 		public void profile(IRegion r, ROIBase rb, boolean isDrag) {
-			this.currentRegion = r;
-			this.currentROI    = rb;
-			this.isDrag        = isDrag;
+			
 	        for (Job job : Job.getJobManager().find(null))
 	            if (job.getClass()==getClass() && job.getState() != Job.RUNNING)
 	        	    job.cancel();
+
+			this.currentRegion = r;
+			this.currentROI    = rb;
+			this.isDrag        = isDrag;
 	        
           	schedule();		
 		}
