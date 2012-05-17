@@ -369,28 +369,28 @@ public class DerivativeTool extends AbstractToolPage  {
 						
 						if (dataCheck.getSelection()) {
 							for (int i = 0; i < data.size(); i++) {
-								getPlottingSystem().createPlot1D(xs.get(i), data.subList(i, i+1), monitor);
+								getPlottingSystem().updatePlot1D(xs.get(i), data.subList(i, i+1), monitor);
 							}
 						}
 						
 						if (derivCheck.getSelection()) {
 							
 							for (int i = 0; i < data.size(); i++) {
-								getPlottingSystem().createPlot1D(xs.get(i), getDervs().subList(i, i+1), monitor);
+								getPlottingSystem().updatePlot1D(xs.get(i), getDervs().subList(i, i+1), monitor);
 							}
 						}
 						
 						if (deriv2Check.getSelection()) {
 							
 							for (int i = 0; i < data.size(); i++) {
-								getPlottingSystem().createPlot1D(xs.get(i), getDervs2().subList(i, i+1), monitor);
+								getPlottingSystem().updatePlot1D(xs.get(i), getDervs2().subList(i, i+1), monitor);
 							}
 						}
 						
 						if (deriv3Check.getSelection()) {
 							
 							for (int i = 0; i < data.size(); i++) {
-								getPlottingSystem().createPlot1D(xs.get(i), getDervs3().subList(i, i+1), monitor);
+								getPlottingSystem().updatePlot1D(xs.get(i), getDervs3().subList(i, i+1), monitor);
 							}
 						}
 						
