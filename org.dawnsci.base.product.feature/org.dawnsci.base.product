@@ -38,13 +38,12 @@ Contact: ScientificSoftware@diamond.ac.uk
       startupProgressRect="5,275,445,15"
       startupMessageRect="7,252,445,20"
       startupForegroundColor="000000" />
-   <launcher name="sda">
+   <launcher name="dawn">
       <solaris/>
       <win useIco="false">
          <bmp/>
       </win>
    </launcher>
-
 
    <vm>
    </vm>
