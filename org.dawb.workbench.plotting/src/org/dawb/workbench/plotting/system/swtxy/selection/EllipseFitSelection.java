@@ -133,7 +133,7 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 
 	@Override
 	protected String getCursorPath() {
-		return "icons/Cursor-circle.png";
+		return "icons/Cursor-ellipse.png";
 	}
 
 	@Override
