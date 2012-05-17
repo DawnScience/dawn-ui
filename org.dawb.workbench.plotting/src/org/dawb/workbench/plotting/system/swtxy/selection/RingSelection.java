@@ -16,7 +16,6 @@ import org.eclipse.draw2d.UpdateManager;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
-import org.eclipse.swt.SWT;
 
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
@@ -74,12 +73,12 @@ class RingSelection extends AbstractSelectionRegion {
 	@Override
 	public void createContents(final Figure parent) {
 		
-     	this.center = new RectangularHandle(getXAxis(), getYAxis(), getRegionColor(), connection, SIDE, 100, 100);
-     	center.setCursor(null);
-     	
-     	this.innerControl = createSelectionHandle();	
-     	this.outerControl = createSelectionHandle();
-  	
+		this.center = new RectangularHandle(xAxis, yAxis, getRegionColor(), connection, SIDE, 100, 100);
+		center.setCursor(null);
+
+		this.innerControl = createSelectionHandle();
+		this.outerControl = createSelectionHandle();
+
 		this.connection = new RegionFillFigure(this) {
 
 			@Override
@@ -154,24 +153,24 @@ class RingSelection extends AbstractSelectionRegion {
 	@Override
 	public boolean containsPoint(double x, double y) {
 		
-		final int xpix = getXAxis().getValuePosition(x, false);
-		final int ypix = getYAxis().getValuePosition(y, false);
+		final int xpix = xAxis.getValuePosition(x, false);
+		final int ypix = yAxis.getValuePosition(y, false);
 		return connection.containsPoint(xpix, ypix);
 	}
 	
 	private RectangularHandle createSelectionHandle() {
 		
-		RectangularHandle ret = new RectangularHandle(getXAxis(), getYAxis(), getRegionColor(), connection, SIDE, 100, 100);
+		RectangularHandle ret = new RectangularHandle(xAxis, yAxis, getRegionColor(), connection, SIDE, 100, 100);
 		FigureTranslator trans = new FigureTranslator(getXyGraph(), ret);
-     	trans.setLockedDirection(LockType.Y);
-     	trans.addTranslationListener(createRegionNotifier());
-     	
-     	return ret;
+		trans.setLockedDirection(LockType.Y);
+		trans.addTranslationListener(createRegionNotifier());
+
+		return ret;
 	}
 
 	@Override
 	public void paintBeforeAdded(final Graphics gc, PointList clicks, Rectangle parentBounds) {
-		gc.setLineStyle(SWT.LINE_DOT);
+		gc.setLineStyle(Graphics.LINE_DOT);
 
 		Point cen = clicks.getFirstPoint();
 		int diff = (int)Math.round(cen.getDistance(clicks.getLastPoint()));
@@ -181,7 +180,7 @@ class RingSelection extends AbstractSelectionRegion {
 		gc.setLineWidth(diff/4);
 		diff = Math.round(0.875f*diff);
 		bounds = new Rectangle(new Point(cen.x-diff, cen.y-diff), new Point(cen.x+diff, cen.y+diff));
-		gc.setLineStyle(SWT.LINE_SOLID);
+		gc.setLineStyle(Graphics.LINE_SOLID);
 		gc.setForegroundColor(getRegionColor());
 		gc.setAlpha(getAlpha());
 		gc.drawOval(bounds);
@@ -202,15 +201,17 @@ class RingSelection extends AbstractSelectionRegion {
 			final Rectangle out = new Rectangle(new Point(cen.x+outerRad, cen.y+outerRad), new Point(cen.x-outerRad, cen.y-outerRad));
 			final Rectangle in  = new Rectangle(new Point(cen.x+innerRad, cen.y+innerRad), new Point(cen.x-innerRad, cen.y-innerRad));
 			
-			double[] rcen = new double[]{getXAxis().getPositionValue(cen.x, false), getYAxis().getPositionValue(cen.y, false)};
-			double cenY   = getYAxis().getPositionValue(cen.y, false);
-			double inRad  = getYAxis().getPositionValue(in.getTop().y,  false)-cenY;
-			double outRad = getYAxis().getPositionValue(out.getTop().y, false)-cenY;
-		    if (inRad<0)  inRad  = -inRad;
-		    if (outRad<0) outRad = -outRad;
+			double[] rcen = new double[]{xAxis.getPositionValue(cen.x, false), yAxis.getPositionValue(cen.y, false)};
+			double cenY   = yAxis.getPositionValue(cen.y, false);
+			double inRad  = yAxis.getPositionValue(in.getTop().y,  false)-cenY;
+			double outRad = yAxis.getPositionValue(out.getTop().y, false)-cenY;
+			if (inRad < 0)
+				inRad = -inRad;
+			if (outRad < 0)
+				outRad = -outRad;
 
-		    final SectorROI sroi = new SectorROI(inRad, outRad);
-		    sroi.setPoint(rcen);
+			final SectorROI sroi = new SectorROI(inRad, outRad);
+			sroi.setPoint(rcen);
 
 			if (recordResult)
 				roi = sroi;
@@ -255,8 +256,8 @@ class RingSelection extends AbstractSelectionRegion {
 			center.setSelectionPoint(cen);
 			
 			int outerRad = diff;
-            int innerRad = Math.round(0.75f*diff);
-            setControlPositions(innerRad, outerRad);
+			int innerRad = Math.round(0.75f * diff);
+			setControlPositions(innerRad, outerRad);
 		}
 		
 		updateConnectionBounds();

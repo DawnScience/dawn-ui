@@ -180,7 +180,7 @@ public class RegionArea extends PlotArea {
 		    regionBeingAdded = region;
 		    
 		    // Mouse listener for region bounds
-		    regionListener = new RegionMouseListener(regionBeingAdded.getMaximumMousePresses());
+		    regionListener = new RegionMouseListener(regionBeingAdded.getMinimumMousePresses(), regionBeingAdded.getMaximumMousePresses());
 		    addMouseListener(regionListener);
 		    addMouseMotionListener(regionListener);
 		}
@@ -328,11 +328,14 @@ public class RegionArea extends PlotArea {
 	class RegionMouseListener extends MouseMotionListener.Stub implements MouseListener {
 		private int last = -1; // index of point that is being dragged around
 		private final int maxLast; // region allows multiple mouse button presses
+		private final int minLast;
 		private boolean isDragging;
 
 		private static final int MIN_DIST = 2;
-		public RegionMouseListener(final int presses) {
-			maxLast = presses - 1;
+
+		public RegionMouseListener(final int minPresses, final int maxPresses) {
+			minLast = minPresses - 1;
+			maxLast = maxPresses - 1;
 			regionPoints = new PointList(2);
 			isDragging = false;
 		}
@@ -345,11 +348,19 @@ public class RegionArea extends PlotArea {
 				if (maxLast > 0 && last >= maxLast) {
 //					System.err.println("End with last = " + last + " / " + maxLast);
 					releaseMouse();
+				} else if (me.button == 2) {
+					regionPoints.removePoint(last--);
+//					System.err.println("End with last-- = " + last + " / " + maxLast);
+					releaseMouse();
 				}
 			} else {
 				if (last > 0 && loc.getDistance(regionPoints.getPoint(last)) <= MIN_DIST) {
 //					System.err.println("Cancel with last = " + last + " / " + maxLast);
-					releaseMouse();
+					if (maxLast >= 0 || last >= minLast) {
+						releaseMouse();
+					} else {
+						System.err.println("Not enough points!");
+					}
 				} else {
 					regionPoints.addPoint(loc);
 					last++;
@@ -420,8 +431,8 @@ public class RegionArea extends PlotArea {
 			setCursor(null);
 
 			addRegion(regionBeingAdded, false);
-			((XYRegionGraph) xyGraph).getOperationsManager().addCommand(new AddRegionCommand((XYRegionGraph) xyGraph,
-							regionBeingAdded));
+			((XYRegionGraph) xyGraph).getOperationsManager().addCommand(
+					new AddRegionCommand((XYRegionGraph) xyGraph, regionBeingAdded));
 
 			regionBeingAdded.setLocalBounds(regionPoints, getBounds());
 

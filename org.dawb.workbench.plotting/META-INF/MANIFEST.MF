@@ -4,7 +4,7 @@ Bundle-Name: Plotting
 Bundle-SymbolicName: org.dawb.workbench.plotting;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.dawb.workbench.plotting.Activator
-Bundle-Vendor: DLS Ltd.
+Bundle-Vendor: Diamond Light Source
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.dawb.org.csstudio.swt.xygraph;bundle-version="1.0.0",

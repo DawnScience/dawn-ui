@@ -14,7 +14,6 @@ import org.eclipse.draw2d.geometry.Geometry;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
-import org.eclipse.swt.SWT;
 
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
@@ -43,11 +42,11 @@ class LineSelection extends AbstractSelectionRegion {
 
 	@Override
 	public void createContents(final Figure parent) {
-		this.startBox = new RectangularHandle(getXAxis(), getYAxis(), getRegionColor(), connection, SIDE, 100, 100);
+		this.startBox = new RectangularHandle(xAxis, yAxis, getRegionColor(), connection, SIDE, 100, 100);
 		FigureTranslator mover = new FigureTranslator(getXyGraph(), startBox);
 		mover.addTranslationListener(createRegionNotifier());
 
-		this.endBox = new RectangularHandle(getXAxis(), getYAxis(), getRegionColor(), connection, SIDE, 200, 200);
+		this.endBox = new RectangularHandle(xAxis, yAxis, getRegionColor(), connection, SIDE, 200, 200);
 		mover = new FigureTranslator(getXyGraph(), endBox);	
 		mover.addTranslationListener(createRegionNotifier());
 				
@@ -106,15 +105,15 @@ class LineSelection extends AbstractSelectionRegion {
 	@Override
 	public boolean containsPoint(double x, double y) {
 		
-		final int xpix = getXAxis().getValuePosition(x, false);
-		final int ypix = getYAxis().getValuePosition(y, false);
+		final int xpix = xAxis.getValuePosition(x, false);
+		final int ypix = yAxis.getValuePosition(y, false);
 		return connection.containsPoint(xpix, ypix);
 	}
 
 
 	@Override
 	public void paintBeforeAdded(final Graphics gc, PointList clicks, Rectangle parentBounds) {
-		gc.setLineStyle(SWT.LINE_DOT);
+		gc.setLineStyle(Graphics.LINE_DOT);
 		gc.setLineWidth(2);
 		gc.setAlpha(getAlpha());
 		gc.drawLine(clicks.getFirstPoint(), clicks.getLastPoint());

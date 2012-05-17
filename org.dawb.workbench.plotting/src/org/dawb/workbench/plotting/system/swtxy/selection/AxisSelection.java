@@ -18,8 +18,6 @@ import org.eclipse.draw2d.MouseMotionListener;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Display;
 
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
@@ -155,7 +153,7 @@ class AxisSelection extends AbstractSelectionRegion {
 		Rectangle r  = getSelectionBounds(bounds, parentBounds);
 		
 		
-		gc.setLineStyle(SWT.LINE_DOT);
+		gc.setLineStyle(Graphics.LINE_DOT);
      	if (regionType==RegionType.XAXIS || regionType==RegionType.XAXIS_LINE) {
      		if (regionType==RegionType.XAXIS) r.width+=2;
 			gc.drawLine(r.getBottomRight(), r.getTopRight());
@@ -217,10 +215,10 @@ class AxisSelection extends AbstractSelectionRegion {
 		}
 		protected void updateBounds(Rectangle parentBounds) {
 			if (regionType==RegionType.XAXIS|| regionType==RegionType.XAXIS_LINE) {
-				if (!isTrackMouse()) setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_SIZEWE));
+				if (!isTrackMouse()) setCursor(Cursors.SIZEWE);
 				setBounds(new Rectangle(parentBounds.x, parentBounds.y, getLineAreaWidth(), parentBounds.height));
 			} else {
-				if (!isTrackMouse()) setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_SIZENS));
+				if (!isTrackMouse()) setCursor(Cursors.SIZENS);
 				setBounds(new Rectangle(parentBounds.x, parentBounds.y, parentBounds.width, getLineAreaWidth()));
 			}
 		}
@@ -229,9 +227,9 @@ class AxisSelection extends AbstractSelectionRegion {
 			super.paintFigure(gc);
 			
 			if (regionType==RegionType.XAXIS || regionType==RegionType.YAXIS) {
-				gc.setLineStyle(SWT.LINE_DOT);
+				gc.setLineStyle(Graphics.LINE_DOT);
 			} else {
-				gc.setLineStyle(SWT.LINE_SOLID);
+				gc.setLineStyle(Graphics.LINE_SOLID);
 			}
 			
 			gc.setLineWidth(getLineWidth());
@@ -288,8 +286,8 @@ class AxisSelection extends AbstractSelectionRegion {
 	public ROIBase createROI(boolean recordResult) {
 		if (line1!=null) {
 			final Rectangle rect = getRectangleFromVertices();
-			double[] a1 = new double[]{getXAxis().getPositionValue(rect.x, false), getYAxis().getPositionValue(rect.y, false)};
-			double[] a2 = new double[]{getXAxis().getPositionValue(rect.x+rect.width, false), getYAxis().getPositionValue(rect.y+rect.height, false)};
+			double[] a1 = new double[]{xAxis.getPositionValue(rect.x, false), yAxis.getPositionValue(rect.y, false)};
+			double[] a2 = new double[]{xAxis.getPositionValue(rect.x+rect.width, false), yAxis.getPositionValue(rect.y+rect.height, false)};
 			final RectangularROI rroi = new RectangularROI(a1[0], a1[1], a2[0] - a1[0], a2[1] - a1[1], 0);
 			if (recordResult)
 				roi = rroi;
@@ -304,11 +302,11 @@ class AxisSelection extends AbstractSelectionRegion {
 
 			if (line1 != null) {
 				
-				final Point p1 = new Point(getXAxis().getValuePosition(rroi.getPointX(), false),
-						getYAxis().getValuePosition(rroi.getPointY(), false));
+				final Point p1 = new Point(xAxis.getValuePosition(rroi.getPointX(), false),
+						yAxis.getValuePosition(rroi.getPointY(), false));
 				double[] ept = rroi.getEndPoint();
-				final Point p2 = new Point(getXAxis().getValuePosition(ept[0], false),
-						getYAxis().getValuePosition(ept[1], false));
+				final Point p2 = new Point(xAxis.getValuePosition(ept[0], false),
+						yAxis.getValuePosition(ept[1], false));
 
 				final Rectangle local = new Rectangle(p1, p2);
 				setLocalBounds(local, line1.getParent().getBounds());
@@ -376,9 +374,9 @@ class AxisSelection extends AbstractSelectionRegion {
 	        	line1.setEnabled(true);// This starts the figure part of mouse listeners
 	        	if (connection!=null) connection.setCursor(Draw2DUtils.getRoiMoveCursor());
 				if (regionType==RegionType.XAXIS|| regionType==RegionType.XAXIS_LINE) {
-					line1.setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_SIZEWE));
+					line1.setCursor(Cursors.SIZEWE);
 				} else {
-					line1.setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_SIZENS));
+					line1.setCursor(Cursors.SIZENS);
 				}
 	        	line1.setMotile(true);
 	        }
