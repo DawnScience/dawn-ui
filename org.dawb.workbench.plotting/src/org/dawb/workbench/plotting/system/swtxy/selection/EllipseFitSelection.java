@@ -248,6 +248,13 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 					Object src = evt.getSource();
 					if (src instanceof FigureTranslator) {
 						fitPoints(getPoints(false), DecoratedEllipse.this);
+						if (handles.size() > 0) {
+							IFigure f = handles.get(handles.size() - 1);
+							if (f instanceof SelectionHandle) {
+								SelectionHandle h = (SelectionHandle) f;
+								h.setSelectionPoint(getCentre());
+							}
+						}
 						EllipticalROI eroi = (EllipticalROI) createROI(false);
 						fireROIDragged(eroi);
 					}
@@ -257,9 +264,8 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 				public void translationCompleted(TranslationEvent evt) {
 					Object src = evt.getSource();
 					if (src instanceof FigureTranslator) {
-						fitPoints(getPoints(false), DecoratedEllipse.this);
 						EllipticalROI eroi = (EllipticalROI) createROI(true);
-						fireROIDragged(eroi);
+						fireROIChanged(eroi);
 						fireROISelection();
 					}
 				}
@@ -296,6 +302,9 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 					SelectionHandle h = (SelectionHandle) f;
 					Point p = h.getSelectionPoint();
 					setCentre(p.preciseX(), p.preciseY());
+					double[] parameters = fitter.getParameters();
+					parameters[3] = xAxis.getPositionValue(p.x(), false);
+					parameters[4] = yAxis.getPositionValue(p.y(), false);
 				}
 			}
 		}
