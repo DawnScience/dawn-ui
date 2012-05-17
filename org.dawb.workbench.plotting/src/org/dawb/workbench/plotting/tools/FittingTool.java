@@ -186,8 +186,8 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 			@Override
 			public Object[] getElements(Object inputElement) {
 
-				if (fittedPeaks==null)    return new IPeak[]{null};
-				if (fittedPeaks.size()<1) return new IPeak[]{null};
+				if (fittedPeaks==null)    return new IPeak[]{new NullPeak()};
+				if (fittedPeaks.size()<1) return new IPeak[]{new NullPeak()};
 				
 				return fittedPeaks.getPeaks().toArray();
 			}
@@ -633,9 +633,11 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		final Action clear = new Action("Clear all", Activator.getImageDescriptor("icons/plot-tool-peak-fit-clear.png")) {
 			public void run() {
 				if (!isActive()) return;
-				if (fittedPeaks!=null) fittedPeaks.removeSelections(getPlottingSystem());
-				fittedPeaks.dispose();
-				fittedPeaks = null;
+				if (fittedPeaks!=null) {
+					fittedPeaks.removeSelections(getPlottingSystem());
+					fittedPeaks.dispose();
+					fittedPeaks = null;
+				}
 				viewer.refresh();
 			}
 		};

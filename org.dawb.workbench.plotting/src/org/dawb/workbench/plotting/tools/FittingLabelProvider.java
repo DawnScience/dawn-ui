@@ -44,6 +44,7 @@ public class FittingLabelProvider extends ColumnLabelProvider {
 		final FittedPeaks bean = (FittedPeaks)viewer.getInput();
 		if (bean==null)     return "";
 		if (bean.isEmpty()) return "";
+		if (peak instanceof NullPeak) return "";
 		
 		final int peakNumber = bean.getPeaks().indexOf(peak);
 		
