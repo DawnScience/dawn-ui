@@ -108,6 +108,16 @@ public class RegionArea extends PlotArea {
 	public void addImageTrace(final ImageTrace trace){
 		imageTraces.put(trace.getName(), trace);
 		add(trace);
+		
+		// Move all regions to front again
+		if (getRegionMap()!=null) for (String name : getRegionMap().keySet()) {
+			try {
+				getRegionMap().get(name).toFront();
+			} catch (Exception ne) {
+				continue;
+			}
+		}
+		
 		revalidate();
 		
 		fireImageTraceAdded(new TraceEvent(trace));
