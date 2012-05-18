@@ -24,7 +24,9 @@ Contact: ScientificSoftware@diamond.ac.uk
 -DidaEmbedded=yes
 -Dcolour=on
 -Dosgi.locking=none
--Dcom.isencia.require.file.source=true</vmArgs>
+-Dcom.isencia.require.file.source=true
+-Dorg.dawb.editor.h5.use.default=true
+-Dpasserelle.workbench.version=1.0.0</vmArgs>
       <vmArgsLin>-Xmx2048m</vmArgsLin>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts
 -Xmx2048m</vmArgsMac>
@@ -44,7 +46,6 @@ Contact: ScientificSoftware@diamond.ac.uk
          <bmp/>
       </win>
    </launcher>
-
 
    <vm>
    </vm>
