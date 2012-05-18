@@ -21,4 +21,20 @@
          id="org.dawnsci.base.product.feature"
          version="0.0.0"/>
 
+   <includes
+         id="uk.ac.diamond.scisoft.peema.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="uk.ac.diamond.scisoft.ncd.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="uk.ac.diamond.scisoft.spectroscopy.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="uk.ac.diamond.sda.bioclipse.jmol.feature"
+         version="0.0.0"/>
+
 </feature>
