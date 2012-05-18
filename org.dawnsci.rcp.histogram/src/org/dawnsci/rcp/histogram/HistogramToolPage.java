@@ -265,9 +265,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			@Override
 			public void maskChanged(PaletteEvent evt) {
-				// TODO Mark does the histo potentially need updating when the mask changes?
-				// Normally if the mask changes max and min will change so this will be dealt
-				// with in the above methods, so maybe we are ok.
+				// No action needed.
 			}
 			
 		};
@@ -829,8 +827,8 @@ public class HistogramToolPage extends AbstractToolPage {
 		brightnessContrastValue.setValue(BRIGHTNESS_LABEL, (histoMax+histoMin)/2.0);
 
 		// Set the contrast
-		brightnessContrastValue.setMin(CONTRAST_LABEL, rMin);
-		brightnessContrastValue.setMax(CONTRAST_LABEL, rMax);
+		brightnessContrastValue.setMin(CONTRAST_LABEL, 0.0);
+		brightnessContrastValue.setMax(CONTRAST_LABEL, rMax-rMin);
 		brightnessContrastValue.setValue(CONTRAST_LABEL, histoMax-histoMin);
 		
 	}
