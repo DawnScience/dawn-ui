@@ -440,6 +440,10 @@ public class ROIViewer  {
     }
 
 	public void revertChanges() {
-		if (originalRoi!=null) region.setROI(originalRoi);
+		try {
+		    if (originalRoi!=null) region.setROI(originalRoi);
+		} catch (Exception ne) {
+			logger.error("Cannot revert region "+region.getName(), ne);
+		}
 	}
 }
