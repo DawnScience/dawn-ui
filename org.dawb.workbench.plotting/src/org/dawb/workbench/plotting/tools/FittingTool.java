@@ -251,11 +251,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 	}
 	
 	public void dispose() {
-		if (getPlottingSystem()!=null) {
-			getPlottingSystem().removeRegionListener(this);
-		}
-		if (viewUpdateListener!=null) viewer.removeSelectionChangedListener(viewUpdateListener);
-		if (this.traceListener!=null) getPlottingSystem().removeTraceListener(traceListener);
+		deactivate();
 		viewUpdateListener = null;
 		
         if (viewer!=null) viewer.getControl().dispose();
