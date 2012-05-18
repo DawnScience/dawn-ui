@@ -527,8 +527,10 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 
 			final Axis xAxis = ((AxisWrapper)getSelectedXAxis()).getWrappedAxis();
 			final Axis yAxis = ((AxisWrapper)getSelectedYAxis()).getWrappedAxis();
-			yAxis.setTitle(axes!=null&&axes.get(1).getName()!=null ? axes.get(1).getName() : "");
 			xAxis.setTitle(axes!=null&&axes.get(0).getName()!=null ? axes.get(0).getName() : "");
+			xAxis.setLogScale(false);
+			yAxis.setTitle(axes!=null&&axes.get(1).getName()!=null ? axes.get(1).getName() : "");
+			yAxis.setLogScale(false);
             
 			if (data.getName()!=null) xyGraph.setTitle(data.getName());
 			xyGraph.clearTraces();
