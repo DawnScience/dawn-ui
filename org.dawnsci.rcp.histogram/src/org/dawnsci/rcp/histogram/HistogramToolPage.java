@@ -3,7 +3,7 @@ package org.dawnsci.rcp.histogram;
 import java.util.Collection;
 import java.util.List;
 
-import org.dawb.common.services.ImageServiceBean.HistogramBound;
+import org.dawb.common.services.HistogramBound;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingFactory;

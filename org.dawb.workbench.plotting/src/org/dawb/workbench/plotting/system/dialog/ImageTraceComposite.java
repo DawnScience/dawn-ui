@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 import org.dawb.common.services.ImageServiceBean;
 import org.dawb.common.services.ImageServiceBean.HistoType;
-import org.dawb.common.services.ImageServiceBean.HistogramBound;
+import org.dawb.common.services.HistogramBound;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
@@ -225,15 +225,15 @@ public class ImageTraceComposite extends Composite {
 		reset.setToolTipText("Reset cut bounds");
 		reset.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				imageTrace.setMinCut(ImageServiceBean.HistogramBound.DEFAULT_MINIMUM);
-				imageTrace.setMaxCut(ImageServiceBean.HistogramBound.DEFAULT_MAXIMUM);
-				imageTrace.setNanBound(ImageServiceBean.HistogramBound.DEFAULT_NAN);
+				imageTrace.setMinCut(HistogramBound.DEFAULT_MINIMUM);
+				imageTrace.setMaxCut(HistogramBound.DEFAULT_MAXIMUM);
+				imageTrace.setNanBound(HistogramBound.DEFAULT_NAN);
 				minCut.setNumericValue(Double.NEGATIVE_INFINITY);
-				minCutColor.setColorValue(ImageServiceBean.HistogramBound.DEFAULT_MINIMUM.getColor());
+				minCutColor.setColorValue(HistogramBound.DEFAULT_MINIMUM.getColor());
 				maxCut.setNumericValue(Double.POSITIVE_INFINITY);
-				maxCutColor.setColorValue(ImageServiceBean.HistogramBound.DEFAULT_MAXIMUM.getColor());
+				maxCutColor.setColorValue(HistogramBound.DEFAULT_MAXIMUM.getColor());
 				((StyledText)maxCut.getControl()).setText("Infinity");
-				nanColor.setColorValue(ImageServiceBean.HistogramBound.DEFAULT_NAN.getColor());
+				nanColor.setColorValue(HistogramBound.DEFAULT_NAN.getColor());
 			}
 		});
 		

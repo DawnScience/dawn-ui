@@ -15,7 +15,7 @@ import org.csstudio.swt.xygraph.linearscale.Range;
 import org.dawb.common.services.IImageService;
 import org.dawb.common.services.ImageServiceBean;
 import org.dawb.common.services.ImageServiceBean.HistoType;
-import org.dawb.common.services.ImageServiceBean.HistogramBound;
+import org.dawb.common.services.HistogramBound;
 import org.dawb.common.services.ImageServiceBean.ImageOrigin;
 import org.dawb.common.ui.image.PaletteFactory;
 import org.dawb.common.ui.plot.trace.IImageTrace;

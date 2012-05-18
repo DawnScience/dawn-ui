@@ -11,7 +11,7 @@
 package org.dawb.workbench.plotting.preference;
 
 import org.dawb.common.services.ImageServiceBean.HistoType;
-import org.dawb.common.services.ImageServiceBean.HistogramBound;
+import org.dawb.common.services.HistogramBound;
 import org.dawb.common.services.ImageServiceBean.ImageOrigin;
 import org.dawb.workbench.plotting.Activator;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
