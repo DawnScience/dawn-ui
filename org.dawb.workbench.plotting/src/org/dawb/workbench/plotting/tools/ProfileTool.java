@@ -137,7 +137,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 	@Override
 	public void createControl(Composite parent) {
 
-
+        
 		final IPageSite site = getSite();
 		
 		profilePlottingSystem.createPlotPart(parent, 

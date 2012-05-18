@@ -7,6 +7,7 @@ import java.util.List;
 import org.dawb.common.ui.image.IconUtils;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
+import org.dawb.common.ui.plot.annotation.AnnotationUtils;
 import org.dawb.common.ui.plot.annotation.IAnnotation;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
@@ -18,6 +19,7 @@ import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
+import org.dawb.common.ui.plot.trace.TraceUtils;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.FittingConstants;
 import org.dawb.workbench.plotting.preference.FittingPreferencePage;
@@ -197,6 +199,10 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 
 	@Override
 	public void activate() {
+		
+		if (getPlottingSystem()==null) return;
+		if (isDisposed()) return;
+		
 		super.activate();
 		if (viewer!=null && viewer.getControl().isDisposed()) return;
 		
@@ -208,16 +214,16 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 			if (fittedPeaks!=null) fittedPeaks.activate();
 			getPlottingSystem().addRegionListener(this);
 			this.fitRegion = getPlottingSystem().createRegion(RegionUtils.getUniqueName("Fit selection", getPlottingSystem()), 
-					                                          getPlottingSystem().is2D() ? IRegion.RegionType.BOX : IRegion.RegionType.XAXIS);
+					getPlottingSystem().is2D() ? IRegion.RegionType.BOX : IRegion.RegionType.XAXIS);
 			fitRegion.setRegionColor(ColorConstants.green);
-			
+
 			if (viewer!=null) {
 				viewer.refresh();
 			}
-			
+
 		} catch (Exception e) {
 			logger.error("Cannot put the selection into fitting region mode!", e);
-		}		
+		}
 	}
 	@Override
 	public void deactivate() {
@@ -225,15 +231,18 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		if (viewer!=null && viewer.getControl().isDisposed()) return;
 		
 		if (viewUpdateListener!=null) viewer.removeSelectionChangedListener(viewUpdateListener);
-		if (this.traceListener!=null) getPlottingSystem().removeTraceListener(traceListener);
-
-		try {
-			getPlottingSystem().removeRegionListener(this);
-			if (fittedPeaks!=null) fittedPeaks.deactivate();
-			
-		} catch (Exception e) {
-			logger.error("Cannot put the selection into fitting region mode!", e);
-		}		
+		
+		if (getPlottingSystem()!=null) {
+			if (this.traceListener!=null) getPlottingSystem().removeTraceListener(traceListener);
+	
+			try {
+				getPlottingSystem().removeRegionListener(this);
+				if (fittedPeaks!=null) fittedPeaks.deactivate();
+				
+			} catch (Exception e) {
+				logger.error("Cannot put the selection into fitting region mode!", e);
+			}		
+		}
 	}
 
 	@Override
@@ -366,7 +375,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 					// Draw the regions
 					for (RectangularROI rb : newBean.getPeakROIs()) {
 						
-						final IRegion area = getPlottingSystem().createRegion("Peak Area "+ipeak, RegionType.XAXIS);
+						final IRegion area = RegionUtils.replaceCreateRegion(getPlottingSystem(), "Peak Area "+ipeak, RegionType.XAXIS);
 						area.setRegionColor(ColorConstants.orange);
 						area.setROI(rb);
 						area.setMobile(false);
@@ -374,7 +383,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 						newBean.addAreaRegion(area);
 						if (!requireFWHMSelections) area.setVisible(false);
 						
-						final IRegion line = getPlottingSystem().createRegion("Peak Line "+ipeak, RegionType.XAXIS_LINE);
+						final IRegion line = RegionUtils.replaceCreateRegion(getPlottingSystem(), "Peak Line "+ipeak, RegionType.XAXIS_LINE);
 						line.setROI(new LinearROI(rb.getMidPoint(), rb.getMidPoint()));
 						line.setRegionColor(ColorConstants.black);
 						//line.setMotile(false);
@@ -391,7 +400,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 					// Create some traces for the fitted function
 					for (AbstractDataset[] pair : newBean.getFunctionData()) {
 						
-						final ILineTrace trace = getPlottingSystem().createLineTrace("Peak "+ipeak);
+						final ILineTrace trace = TraceUtils.replaceCreateLineTrace(getPlottingSystem(), "Peak "+ipeak);
 						trace.setData(pair[0], pair[1]);
 						trace.setLineWidth(1);
 						trace.setTraceColor(ColorConstants.black);
@@ -408,7 +417,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
                     ipeak = 1;
                     for (IPeak peak : peaks) {
 					
-                    	final IAnnotation ann = getPlottingSystem().createAnnotation("Peak "+ipeak);
+                    	final IAnnotation ann = AnnotationUtils.replaceCreateAnnotation(getPlottingSystem(), "Peak "+ipeak);
                     	ann.setLocation(peak.getPosition(), peak.val(peak.getPosition()));
                     	
                     	getPlottingSystem().addAnnotation(ann);

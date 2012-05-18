@@ -870,7 +870,9 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 
 		// Show new page.
 		activeRec = pageRec;
-		Control pageControl = activeRec.tool.getControl();
+		Control pageControl = activeRec!=null && activeRec.tool!=null
+				            ? activeRec.tool.getControl()
+				            : null;
 		if (pageControl != null && !pageControl.isDisposed()) {
 			
 			activeRec.tool.activate();
@@ -1023,7 +1025,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 				}
 			}
 
-			if (tool==null) { // We find the tool and check it is not a repeat.
+			if (tool==null || tool.isDisposed()) { // We find the tool and check it is not a repeat.
 				tool = sys.getCurrentToolPage(getViewRole());	
 				if (!isToolAllowed(tool)) return null;
 			
@@ -1112,8 +1114,13 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	}
 		
 	private String getString(IWorkbenchPart part) {
+		
+		if (part         ==null)  return null;
+		if (part.getSite()==null) return null;
+		
 		if (part instanceof IEditorPart) {
 			final IEditorInput input = ((IEditorPart)part).getEditorInput();
+			if (input==null) return null;
 			return input instanceof IURIEditorInput 
 				   ? ((IURIEditorInput)input).getURI().getRawPath()
 				   : input.getName(); // TODO Not very secure
@@ -1214,7 +1221,10 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 
 	protected PageRec getPageRec(IWorkbenchPart part) {
 		
-        final Map<String, PageRec> pages = recs.get(getString(part));
+		final String path = getString(part);
+		if (path==null) return null;
+		
+        final Map<String, PageRec> pages = recs.get(path);
         if (pages == null) return null;
         
 		IToolPageSystem sys = (IToolPageSystem)part.getAdapter(IToolPageSystem.class);
@@ -1229,8 +1239,9 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	protected PageRec getPageRec(IPage page) {
 		
 		if (page instanceof IToolPage) {
-						
-	        final Map<String, PageRec> pages = recs.get(getString(((IToolPage)page).getPart()));
+			final String path = getString(((IToolPage)page).getPart());
+			if (path==null) return null;
+	        final Map<String, PageRec> pages = recs.get(path);
 	        if (pages == null) return null;
 	        
 	        return pages.get(((IToolPage)page).getToolId());
@@ -1290,6 +1301,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 
 		for (IToolPageSystem sys : systems) {
 			sys.removeToolChangeListener(this);
+			sys.clearCachedTools();
 		}
 		systems.clear();
 		systems = null;
