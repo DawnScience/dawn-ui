@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Test UI
 Bundle-SymbolicName: org.dawb.workbench.ui.test
-Bundle-Version: 0.8.2.qualifier
+Bundle-Version: 1.1.0.qualifier
 Bundle-Vendor: ESRF
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: fable.framework.toolbox,
