@@ -2,6 +2,7 @@ package org.dawb.workbench.plotting.system.swtxy.selection;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.Iterator;
 
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.dawb.workbench.plotting.system.swtxy.IMobileFigure;
@@ -9,6 +10,8 @@ import org.dawb.workbench.plotting.system.swtxy.util.Draw2DUtils;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
+import org.eclipse.draw2d.MouseListener;
+import org.eclipse.draw2d.MouseMotionListener;
 import org.eclipse.draw2d.Shape;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
@@ -161,5 +164,20 @@ public abstract class SelectionHandle extends Figure implements IMobileFigure {
 	@Override
 	public boolean containsPoint(int x, int y) {
 		return shape.containsPoint(x, y);
+	}
+
+	/**
+	 * Remove all mouse listeners
+	 */
+	public void removeMouseListeners() {
+		Iterator<?> it = getListeners(MouseListener.class);
+		while (it.hasNext()) {
+			removeListener(MouseListener.class, it.next());
+		}
+
+		it = getListeners(MouseMotionListener.class);
+		while (it.hasNext()) {
+			removeListener(MouseMotionListener.class, it.next());
+		}
 	}
 }
