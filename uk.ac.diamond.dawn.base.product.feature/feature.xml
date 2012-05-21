@@ -44,4 +44,19 @@
          version="0.0.0"
          unpack="false"/>
 
+   <plugin
+         id="uk.ac.diamond.scisoft.mx.rcp"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="uk.ac.diamond.scisoft.mxv1.rcp"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+    
+
 </feature>
