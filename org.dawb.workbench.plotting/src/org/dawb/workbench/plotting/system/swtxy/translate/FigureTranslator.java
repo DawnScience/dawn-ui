@@ -178,6 +178,12 @@ public class FigureTranslator implements MouseListener, MouseMotionListener {
 
 	private List<TranslationListener> listeners;
 
+	public void removeTranslationListeners() {
+		if (listeners != null) {
+			listeners.clear();
+		}
+	}
+
 	public void addTranslationListener(TranslationListener translationListener) {
 		if (listeners == null)
 			listeners = new ArrayList<TranslationListener>(7);
