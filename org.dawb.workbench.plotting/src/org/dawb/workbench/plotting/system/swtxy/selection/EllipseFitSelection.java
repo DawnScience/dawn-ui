@@ -64,7 +64,7 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 
 	@Override
 	public RegionType getRegionType() {
-		return RegionType.ELLIPSE;
+		return RegionType.ELLIPSEFIT;
 	}
 
 	@Override
