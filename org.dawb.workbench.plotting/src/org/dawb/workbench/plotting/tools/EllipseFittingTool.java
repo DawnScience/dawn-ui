@@ -52,7 +52,7 @@ public class EllipseFittingTool extends AbstractToolPage {
 			@Override
 			public void regionAdded(RegionEvent evt) {
 				updateEllipse(evt.getRegion());
-//				if (evt.getRegion() != null && evt.getRegion().getRegionType() == RegionType.ELLIPSE) {
+//				if (evt.getRegion() != null && evt.getRegion().getRegionType() == RegionType.ELLIPSEFIT) {
 //					// EllipticalROI eroi = (EllipticalROI)
 //					// evt.getRegion().getROI().copy();
 //					// evt.getRegion().setROI(eroi);
@@ -106,7 +106,7 @@ public class EllipseFittingTool extends AbstractToolPage {
 		IPlottingSystem plotter = getPlottingSystem();
 		if (plotter == null) return;
 
-		Collection<IRegion> regions = plotter.getRegions(RegionType.ELLIPSE);
+		Collection<IRegion> regions = plotter.getRegions(RegionType.ELLIPSEFIT);
 		if (regions != null && regions.size() > 0) {
 			IRegion r = null;
 			Iterator<IRegion> it = regions.iterator();
@@ -152,7 +152,7 @@ public class EllipseFittingTool extends AbstractToolPage {
 
 		// Start with a selection of the right type
 		try {
-			plotter.createRegion(RegionUtils.getUniqueName("Ellipse", plotter), RegionType.ELLIPSE);
+			plotter.createRegion(RegionUtils.getUniqueName("Ellipse", plotter), RegionType.ELLIPSEFIT);
 		} catch (Exception e) {
 			logger.error("Cannot create region for ellipse fitting tool!");
 		}
