@@ -43,6 +43,8 @@ jre/bin/java</programArgsLin>
       </win>
    </launcher>
 
+   <intro introId="org.dawnsci.intro.intro"/>
+
    <vm>
    </vm>
 
