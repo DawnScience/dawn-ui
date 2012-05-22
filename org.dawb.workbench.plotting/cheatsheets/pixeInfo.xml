@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cheatsheet
+      title="Title">
+   <intro>
+      <description>
+         <b>Body</b>
+      </description>
+   </intro>
+   <item
+         title="opening the Pixel information box tool">
+      <description>
+         <b></b>
+      </description>
+   </item>
+</cheatsheet>
