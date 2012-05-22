@@ -41,6 +41,7 @@
       </win>
    </launcher>
 
+   <intro introId="org.dawnsci.intro"/>
 
    <vm>
    </vm>
