@@ -54,5 +54,8 @@
       <feature id="uk.ac.diamond.dawn.base.product.feature" version="1.0.0.qualifier"/>
    </features>
 
+   <configurations>
+      <property name="uk.ac.diamond.scisoft.analysis.rcp/plotView.plottingsystem" value="1" />
+   </configurations>
 
 </product>
