@@ -4,11 +4,7 @@
 <product name="dawn" uid="org.dawnsci.base.product" id="org.dawnsci.product.plugin.DAWN" application="org.eclipse.ui.ide.workbench" version="1.0.0" useFeatures="true" includeLaunchers="true">
 
    <aboutInfo>
-      <text>
-         Copyright 2012 Diamond Light Source Ltd.
-
-Contact: ScientificSoftware@diamond.ac.uk
-      </text>
+      <image path="/org.dawnsci.product.plugin/icons/Temp-3Col-Splash.png"/>
    </aboutInfo>
 
    <configIni use="default">
@@ -37,8 +33,8 @@ Contact: ScientificSoftware@diamond.ac.uk
 
    <splash
       location="org.dawnsci.product.plugin"
-      startupProgressRect="5,275,445,15"
-      startupMessageRect="7,252,445,20"
+      startupProgressRect="0,0,200,15"
+      startupMessageRect="0,20,200,20"
       startupForegroundColor="000000" />
    <launcher name="dawn">
       <solaris/>
@@ -47,15 +43,14 @@ Contact: ScientificSoftware@diamond.ac.uk
       </win>
    </launcher>
 
+
    <vm>
    </vm>
 
    <license>
         <url>http://www.apache.org/licenses/</url>
         <text>
-   Copyright 2012 Diamond Light Source Ltd.
-
-Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you may not use this file except in compliance with the License.
+   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you may not use this file except in compliance with the License.
 
 You may obtain a copy of the License at
 
@@ -74,5 +69,8 @@ See the License for the specific language governing permissions and limitations 
       <feature id="org.dawnsci.base.product.feature" version="1.0.0.qualifier"/>
    </features>
 
+   <configurations>
+      <plugin id="uk.ac.diamond.scisoft" autoStart="true" startLevel="0" />
+   </configurations>
 
 </product>

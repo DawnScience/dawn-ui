@@ -7,14 +7,14 @@
          point="org.eclipse.core.runtime.products">
       <product
             application="org.eclipse.ui.ide.workbench"
-            name="DAWN Science">
+            name="dawn">
          <property
                name="appName"
-               value="DAWN Science">
+               value="dawn">
          </property>
          <property
                name="startupForegroundColor"
-               value="0000FF">
+               value="000000">
          </property>
          <property
                name="startupMessageRect"
