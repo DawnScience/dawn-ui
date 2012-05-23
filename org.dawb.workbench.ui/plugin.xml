@@ -231,7 +231,16 @@
             name="Data Browsing">
       </perspective>
    </extension>
-
+   <extension
+         point="uk.ac.diamond.scisoft.introRegister">
+      <introPageRegister
+            description="Opens the Data Browsing perspective"
+            icon="icons/data_browsing_intro.png"
+            id="org.edna.workbench.application.perspective.intro.DataPerspective"
+            class="org.dawb.workbench.ui.perspective.DataBrowsingPerspectiveLaunch"
+            name="Data Browsing">
+      </introPageRegister>
+   </extension>
    <extension
          id="org.dawb.common.ui.DataNature"
          name="Data Project"
