@@ -7,22 +7,22 @@
          point="org.eclipse.core.runtime.products">
       <product
             application="org.eclipse.ui.ide.workbench"
-            name="dawn">
+            name="DAWN Science">
          <property
                name="appName"
-               value="dawn">
+               value="DAWN Science">
          </property>
          <property
                name="startupForegroundColor"
-               value="000000">
+               value="0000FF">
          </property>
          <property
                name="startupMessageRect"
-               value="7,252,445,20">
+               value="0,20,200,20">
          </property>
          <property
                name="startupProgressRect"
-               value="5,275,445,15">
+               value="0,0,200,15">
          </property>
          <property
                name="preferenceCustomization"
@@ -33,8 +33,8 @@
                value="icons/Temp-16x16-icon.png,icons/Temp-48x48-icon.png">
          </property>
          <property
-               name="aboutText"
-               value="Copyright 2012 Diamond Light Source Ltd.&#x0A;&#x0A;Contact: ScientificSoftware@diamond.ac.uk">
+               name="aboutImage"
+               value="icons/Temp-3Col-Splash.png">
          </property>
       </product>
    </extension>
