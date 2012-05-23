@@ -1275,4 +1275,16 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 			logger.error("Could not save the plotting", e);
 		}
 	}
+
+	@Override
+	public void savePlotting(String filename, String filetype){
+		if (filename == null)
+			return;
+		try {
+			PlotExportPrintUtil.saveGraph(filename, filetype, xyGraph.getImage());
+			logger.debug("Plotting saved");
+		} catch (Exception e) {
+			logger.error("Could not save the plotting", e);
+		}
+	}
 }
