@@ -46,7 +46,6 @@
    <vm>
    </vm>
 
-
    <plugins>
    </plugins>
 
@@ -55,6 +54,7 @@
    </features>
 
    <configurations>
+      <plugin id="uk.ac.diamond.scisoft" autoStart="true" startLevel="0" />
       <property name="uk.ac.diamond.scisoft.analysis.rcp/plotView.plottingsystem" value="1" />
    </configurations>
 
