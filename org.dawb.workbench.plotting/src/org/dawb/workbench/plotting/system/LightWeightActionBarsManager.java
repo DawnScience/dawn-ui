@@ -193,16 +193,16 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
         final MenuAction regionDropDown = new MenuAction("Add a selection region");
         regionDropDown.setId("org.dawb.workbench.ui.editors.plotting.swtxy.addRegions"); // Id used elsewhere...
  
-		regionDropDown.add(createRegionAction(RegionType.LINE,      regionDropDown, "Add line selection",   Activator.getImageDescriptor("icons/ProfileLine.png")));
-		regionDropDown.add(createRegionAction(RegionType.POLYLINE,  regionDropDown, "Add polyline selection",   Activator.getImageDescriptor("icons/ProfilePolyline.png")));
-		regionDropDown.add(createRegionAction(RegionType.BOX,       regionDropDown, "Add box selection",    Activator.getImageDescriptor("icons/ProfileBox.png")));
-		regionDropDown.add(createRegionAction(RegionType.SECTOR,    regionDropDown, "Add sector selection",    Activator.getImageDescriptor("icons/ProfileSector.png")));
-		regionDropDown.add(createRegionAction(RegionType.RING,      regionDropDown, "Add circle selection", Activator.getImageDescriptor("icons/ProfileCircle.png")));
-		regionDropDown.add(createRegionAction(RegionType.XAXIS,     regionDropDown, "Add X-axis selection", Activator.getImageDescriptor("icons/Cursor-horiz.png")));
-		regionDropDown.add(createRegionAction(RegionType.YAXIS,     regionDropDown, "Add Y-axis selection",   Activator.getImageDescriptor("icons/Cursor-vert.png")));
-		regionDropDown.add(createRegionAction(RegionType.FREE_DRAW, regionDropDown, "Free drawn selection", Activator.getImageDescriptor("icons/ProfileFree.png")));
-		regionDropDown.add(createRegionAction(RegionType.POINT,     regionDropDown, "Single point selection",   Activator.getImageDescriptor("icons/ProfilePoint.png")));
-		regionDropDown.add(createRegionAction(RegionType.ELLIPSE,   regionDropDown, "Ellipse fit selection",   Activator.getImageDescriptor("icons/ProfileEllipse.png")));
+		regionDropDown.add(createRegionAction(RegionType.LINE,       regionDropDown, "Add line selection",     Activator.getImageDescriptor("icons/ProfileLine.png")));
+		regionDropDown.add(createRegionAction(RegionType.POLYLINE,   regionDropDown, "Add polyline selection", Activator.getImageDescriptor("icons/ProfilePolyline.png")));
+		regionDropDown.add(createRegionAction(RegionType.BOX,        regionDropDown, "Add box selection",      Activator.getImageDescriptor("icons/ProfileBox.png")));
+		regionDropDown.add(createRegionAction(RegionType.SECTOR,     regionDropDown, "Add sector selection",   Activator.getImageDescriptor("icons/ProfileSector.png")));
+		regionDropDown.add(createRegionAction(RegionType.RING,       regionDropDown, "Add circle selection",   Activator.getImageDescriptor("icons/ProfileCircle.png")));
+		regionDropDown.add(createRegionAction(RegionType.XAXIS,      regionDropDown, "Add X-axis selection",   Activator.getImageDescriptor("icons/Cursor-horiz.png")));
+		regionDropDown.add(createRegionAction(RegionType.YAXIS,      regionDropDown, "Add Y-axis selection",   Activator.getImageDescriptor("icons/Cursor-vert.png")));
+		regionDropDown.add(createRegionAction(RegionType.FREE_DRAW,  regionDropDown, "Free drawn selection",   Activator.getImageDescriptor("icons/ProfileFree.png")));
+		regionDropDown.add(createRegionAction(RegionType.POINT,      regionDropDown, "Single point selection", Activator.getImageDescriptor("icons/ProfilePoint.png")));
+		regionDropDown.add(createRegionAction(RegionType.ELLIPSEFIT, regionDropDown, "Ellipse fit selection",  Activator.getImageDescriptor("icons/ProfileEllipse.png")));
 
 		regionDropDown.setSelectedAction(regionDropDown.getAction(0));
 		
@@ -667,15 +667,21 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 		public IAction getAction() {
 			return action;
 		}
+
+		@SuppressWarnings("unused")
 		public void setAction(IAction action) {
 			this.action = action;
 		}
+
 		public IContributionManager getManager() {
 			return manager;
 		}
+
+		@SuppressWarnings("unused")
 		public void setManager(IContributionManager manager) {
 			this.manager = manager;
 		}
+
 		public String toString() {
 			return action.toString();
 		}
