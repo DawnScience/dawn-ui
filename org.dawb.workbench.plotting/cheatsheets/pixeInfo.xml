@@ -1,15 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <cheatsheet
-      title="Title">
+      title="Pixel information tool">
    <intro>
       <description>
-         <b>Body</b>
+         This tool is intended to display information about the pixel pointed by the mouse. This information include: x and y positions, pixel intensity, resolution, etc.
       </description>
    </intro>
-   <item
-         title="opening the Pixel information box tool">
+   <item 
+   	  title="Using the Pixel information box tool">
       <description>
-         <b></b>
+         The pixel information tool is available from the image tools palette.</br>
+          When the tool is opened, a cross hair is displayed as a driver to the mouse. The mouse movement updates 
+         the tool table with information about the pixel pointed to. </br>
+         A click on the plot creates a point region.</br>
+         Created point regions can be moved or deleted.
       </description>
    </item>
 </cheatsheet>
