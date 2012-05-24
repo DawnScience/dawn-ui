@@ -11,5 +11,7 @@ Require-Bundle: org.eclipse.ui,
  uk.ac.diamond.scisoft.analysis
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
-Import-Package: org.dawb.common.ui.util,
- org.slf4j
+Import-Package: org.dawb.common.ui.monitor,
+ org.dawb.common.ui.util,
+ org.slf4j,
+ uk.ac.gda.monitor

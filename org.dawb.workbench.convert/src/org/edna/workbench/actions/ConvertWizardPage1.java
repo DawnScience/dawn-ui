@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.io.DataHolder;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
-import uk.ac.gda.monitor.ProgressMonitorWrapper;
+import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 
 /**
  *   ConvertWizardPage1
