@@ -281,6 +281,7 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 		var.setLabelProvider(new MeasurementLabelProvider(this, 8));
 	}
 	
+	@SuppressWarnings("unused")
 	private IContentProvider createActorContentProvider(final int numerOfPeaks) {
 		return new IStructuredContentProvider() {
 			@Override
