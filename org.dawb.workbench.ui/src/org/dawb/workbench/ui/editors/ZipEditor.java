@@ -20,6 +20,7 @@ import org.dawb.common.ui.plot.tool.IToolPageSystem;
 import org.dawb.common.ui.slicing.ISlicablePlottingPart;
 import org.dawb.common.ui.slicing.SliceComponent;
 import org.dawb.common.ui.util.EclipseUtils;
+import org.dawb.common.util.io.FileUtils;
 import org.dawb.workbench.ui.editors.slicing.ZipUtils;
 import org.dawb.workbench.ui.views.PlotDataPage;
 import org.eclipse.core.filesystem.EFS;
@@ -28,7 +29,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
-import org.eclipse.ui.IReusableEditor;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.ide.FileStoreEditorInput;
@@ -38,7 +38,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
-import uk.ac.gda.util.io.FileUtils;
 
 
 public class ZipEditor extends MultiPageEditorPart implements ISlicablePlottingPart /**, IReusableEditor TODO Fix this **/, IPlottingSystemSelection {
@@ -199,7 +198,7 @@ public class ZipEditor extends MultiPageEditorPart implements ISlicablePlottingP
 	public PlotDataEditor getDataSetEditor() {
 		return dataSetEditor;
 	}
-    public Object getAdapter(final Class clazz) {
+    public Object getAdapter(@SuppressWarnings("rawtypes") final Class clazz) {
 		
 		if (clazz == Page.class) {
 			final PlotDataEditor      ed  = getDataSetEditor();
