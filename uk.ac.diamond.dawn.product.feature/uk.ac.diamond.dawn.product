@@ -48,12 +48,11 @@ jre/bin/java</programArgsLin>
    <vm>
    </vm>
 
-
    <plugins>
    </plugins>
 
    <features>
-      <feature id="uk.ac.diamond.dawn.product.feature" version="1.0.0.qualifier"/>
+      <feature id="uk.ac.diamond.dawn.product.feature"/>
    </features>
 
 
