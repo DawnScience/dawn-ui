@@ -1,5 +1,6 @@
 package org.dawb.workbench.plotting.tools;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -16,15 +17,25 @@ import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.roi.EllipticalFitROI;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
+import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
 public class EllipseFittingTool extends AbstractToolPage {
 	private final static Logger logger = LoggerFactory.getLogger(EllipseFittingTool.class);
@@ -34,11 +45,13 @@ public class EllipseFittingTool extends AbstractToolPage {
 	private ITraceListener traceListener;
 	private IROIListener ellipseROIListener;
 
-	private Text text;
+	private TableViewer viewer;
+	private List<IRegion> ellipses;
 
 	public EllipseFittingTool() {
-		ellipseRegionListener = new IRegionListener.Stub() {
+		ellipses = new ArrayList<IRegion>(5);
 
+		ellipseRegionListener = new IRegionListener.Stub() {
 			@Override
 			public void regionsRemoved(RegionEvent evt) {
 				updateEllipses();
@@ -52,11 +65,6 @@ public class EllipseFittingTool extends AbstractToolPage {
 			@Override
 			public void regionAdded(RegionEvent evt) {
 				updateEllipse(evt.getRegion());
-//				if (evt.getRegion() != null && evt.getRegion().getRegionType() == RegionType.ELLIPSEFIT) {
-//					// EllipticalROI eroi = (EllipticalROI)
-//					// evt.getRegion().getROI().copy();
-//					// evt.getRegion().setROI(eroi);
-//				}
 			}
 		};
 
@@ -89,22 +97,39 @@ public class EllipseFittingTool extends AbstractToolPage {
 		if (region == null)
 			return;
 
+		if (ellipses.contains(region))
+			return;
+
+		if (region.getRegionType() != RegionType.ELLIPSEFIT)
+			return;
+
 		region.addROIListener(ellipseROIListener);
-		EllipticalROI eroi = (EllipticalROI) region.getROI();
-		text.setText(eroi.toString());
+		ellipses.add(region);
+		viewer.refresh();
 	}
 
 	protected void removeEllipse(IRegion region) {
 		if (region == null)
 			return;
 
+		if (region.getRegionType() != RegionType.ELLIPSEFIT)
+			return;
+
+		if (ellipses.contains(region))
+			ellipses.remove(region);
+
 		region.removeROIListener(ellipseROIListener);
-		text.setText("Ellipse geometry: --");
+		viewer.refresh();
 	}
 
 	protected void updateEllipses() {
 		IPlottingSystem plotter = getPlottingSystem();
 		if (plotter == null) return;
+
+		for (IRegion r : ellipses) {
+			r.removeROIListener(ellipseROIListener);
+		}
+		ellipses.clear();
 
 		Collection<IRegion> regions = plotter.getRegions(RegionType.ELLIPSEFIT);
 		if (regions != null && regions.size() > 0) {
@@ -112,16 +137,11 @@ public class EllipseFittingTool extends AbstractToolPage {
 			Iterator<IRegion> it = regions.iterator();
 			while (it.hasNext()) {
 				r = it.next();
+				ellipses.add(r);
 				r.addROIListener(ellipseROIListener);
 			}
-			EllipticalROI eroi = (EllipticalROI) r.getROI();
-			text.setText("Ellipse geometry: " + eroi.toString());
-//			for (IRegion r : regions) {
-//				
-//			}
-		} else {
-			text.setText("Ellipse geometry: --");
 		}
+		viewer.refresh();
 	}
 
 	@Override
@@ -134,14 +154,126 @@ public class EllipseFittingTool extends AbstractToolPage {
 		composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new FillLayout());
 
-		text = new Text(composite, SWT.NONE);
-		text.setText("Ellipse geometry: --");
+		viewer = new TableViewer(composite, SWT.FULL_SELECTION | SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+
+		createColumns(viewer);
+		Table t = viewer.getTable();
+		t.setLinesVisible(true);
+		t.setHeaderVisible(true);
+
+		viewer.setContentProvider(new IStructuredContentProvider() {
+			@Override
+			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+			}
+			
+			@Override
+			public void dispose() {
+			}
+			
+			@Override
+			public Object[] getElements(Object inputElement) {
+				return ellipses.toArray();
+			}
+		});
+
+		viewer.setInput(ellipses);
+		parent.layout();
+	}
+
+	private void createColumns(final TableViewer viewer) {
+		ColumnViewerToolTipSupport.enableFor(viewer,ToolTip.NO_RECREATE);
+	
+		int i = 0;
+		TableViewerColumn col;
+		TableColumn c;
+	
+		col = new TableViewerColumn(viewer, SWT.CENTER, i);
+		col.setLabelProvider(new EllipseROILabelProvider(i++));
+		c = col.getColumn();
+		c.setText("ID");
+		c.setWidth(100);
+	
+		col = new TableViewerColumn(viewer, SWT.CENTER, i);
+		col.setLabelProvider(new EllipseROILabelProvider(i++));
+		c = col.getColumn();
+		c.setText("Major semi-axis");
+		c.setWidth(120);
+	
+		col = new TableViewerColumn(viewer, SWT.CENTER, i);
+		col.setLabelProvider(new EllipseROILabelProvider(i++));
+		c = col.getColumn();
+		c.setText("Minor semi-axis");
+		c.setWidth(120);
+	
+		col = new TableViewerColumn(viewer, SWT.CENTER, i);
+		col.setLabelProvider(new EllipseROILabelProvider(i++));
+		c = col.getColumn();
+		c.setText("Angle");
+		c.setWidth(75);
+	
+		col = new TableViewerColumn(viewer, SWT.CENTER, i);
+		col.setLabelProvider(new EllipseROILabelProvider(i++));
+		c = col.getColumn();
+		c.setText("Centre x");
+		c.setWidth(75);
+	
+		col = new TableViewerColumn(viewer, SWT.CENTER, i);
+		col.setLabelProvider(new EllipseROILabelProvider(i++));
+		c = col.getColumn();
+		c.setText("Centre y");
+		c.setWidth(75);
+	
+		col = new TableViewerColumn(viewer, SWT.CENTER, i);
+		col.setLabelProvider(new EllipseROILabelProvider(i++));
+		c = col.getColumn();
+		c.setText("Points");
+		c.setWidth(20);
+	}
+
+	class EllipseROILabelProvider extends ColumnLabelProvider {
+		private final int column;
+
+		public EllipseROILabelProvider(int i) {
+			column = i;
+		}
+
+		@Override
+		public String getText(Object element) {
+
+			ROIBase rb = ((IRegion) element).getROI();
+
+			if (!(rb instanceof EllipticalROI)) {
+				return null;
+			}
+			EllipticalROI eroi = (EllipticalROI) rb;
+
+			switch (column) {
+			case 0:
+				return ((IRegion) element).getName();
+			case 1:
+				return String.format("%.2f", eroi.getSemiAxis(0));
+			case 2:
+				return String.format("%.2f", eroi.getSemiAxis(1));
+			case 3:
+				return String.format("%.2f", eroi.getAngleDegrees());
+			case 4:
+				return String.format("%.2f", eroi.getPointX());
+			case 5:
+				return String.format("%.2f", eroi.getPointY());
+			case 6:
+				if (eroi instanceof EllipticalFitROI) {
+					EllipticalFitROI froi = (EllipticalFitROI) eroi;
+					return Integer.toString(froi.getPoints().getSides());
+				}
+				return "--";
+			}
+			return null;
+		}
 	}
 
 	@Override
 	public void activate() {
 		super.activate();
-		createRegion();
 		IPlottingSystem plotter = getPlottingSystem();
 		if (plotter == null) return;
 
@@ -152,7 +284,7 @@ public class EllipseFittingTool extends AbstractToolPage {
 
 		// Start with a selection of the right type
 		try {
-			plotter.createRegion(RegionUtils.getUniqueName("Ellipse", plotter), RegionType.ELLIPSEFIT);
+			plotter.createRegion(RegionUtils.getUniqueName("Ellipse fit", plotter), RegionType.ELLIPSEFIT);
 		} catch (Exception e) {
 			logger.error("Cannot create region for ellipse fitting tool!");
 		}
@@ -169,10 +301,6 @@ public class EllipseFittingTool extends AbstractToolPage {
 		super.deactivate();
 	}
 
-	private void createRegion() {
-		
-	}
-
 	@Override
 	public Control getControl() {
 		return composite;
@@ -181,5 +309,4 @@ public class EllipseFittingTool extends AbstractToolPage {
 	@Override
 	public void setFocus() {
 	}
-
 }
