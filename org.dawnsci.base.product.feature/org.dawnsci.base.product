@@ -43,7 +43,6 @@
       </win>
    </launcher>
 
-
    <vm>
    </vm>
 
@@ -66,7 +65,7 @@ See the License for the specific language governing permissions and limitations 
    </plugins>
 
    <features>
-      <feature id="org.dawnsci.base.product.feature" version="1.0.0.qualifier"/>
+      <feature id="org.dawnsci.base.product.feature"/>
    </features>
 
    <configurations>
