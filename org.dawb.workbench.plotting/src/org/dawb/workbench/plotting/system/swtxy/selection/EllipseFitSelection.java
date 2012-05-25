@@ -201,6 +201,7 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 				}
 			};
 
+			showMajorAxis(true);
 		}
 
 		public void setup(PointList points) {
