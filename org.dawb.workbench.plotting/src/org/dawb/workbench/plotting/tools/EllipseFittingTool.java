@@ -141,7 +141,8 @@ public class EllipseFittingTool extends AbstractToolPage {
 				r.addROIListener(ellipseROIListener);
 			}
 		}
-		viewer.refresh();
+		if (viewer != null) // can be null during activation
+			viewer.refresh();
 	}
 
 	@Override
@@ -281,6 +282,8 @@ public class EllipseFittingTool extends AbstractToolPage {
 			plotter.addTraceListener(traceListener);
 		if (ellipseRegionListener != null)
 			plotter.addRegionListener(ellipseRegionListener);
+
+		updateEllipses();
 
 		// Start with a selection of the right type
 		try {
