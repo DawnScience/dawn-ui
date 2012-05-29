@@ -297,7 +297,7 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
         if (system.getActionBars()!=null) system.getActionBars().getToolBarManager().add(autoScale);
         
         final CheckableActionGroup zoomG = new CheckableActionGroup();
-        Action zoomNone = null;
+        Action panning = null;
 		for(final ZoomType zoomType : ZoomType.values()){
 		    if (! zoomType.useWithFlags(flags)) continue;
 		 		
@@ -317,12 +317,11 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 			zoomAction.setId(zoomType.getId());
 			zoomG.add(zoomAction);	
 			
-			if (zoomType == ZoomType.NONE) zoomNone = zoomAction;
+			if (zoomType == ZoomType.PANNING) panning = zoomAction;
 			
 			if (system.getActionBars()!=null) system.getActionBars().getToolBarManager().add(zoomAction);
 		}
-		
-		zoomNone.setChecked(true);
+		panning.setChecked(true);
 	}
 
 	public void createUndoRedoActions() {
