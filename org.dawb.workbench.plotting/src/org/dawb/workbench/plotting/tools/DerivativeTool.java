@@ -492,6 +492,7 @@ public class DerivativeTool extends AbstractToolPage  {
 	};
 	
 
+	@SuppressWarnings("unused")
 	private String getTicksFor(int size) {
 		final StringBuilder buf = new StringBuilder();
 		for (int i = 0; i < size; i++) buf.append("'");

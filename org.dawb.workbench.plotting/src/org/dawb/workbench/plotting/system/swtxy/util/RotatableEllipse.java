@@ -16,6 +16,7 @@ public class RotatableEllipse extends Shape {
 	private AffineTransform affine; // transforms unit square (origin at top-left corner) to transformed rectangle
 	private PointList box; // bounding box of ellipse
 	private boolean outlineOnly = false;
+	private boolean showMajorAxis = false;
 
 	/**
 	 * Unit circle centred on origin
@@ -90,6 +91,13 @@ public class RotatableEllipse extends Shape {
 	}
 
 	/**
+	 * @param show if true, show major axis
+	 */
+	public void showMajorAxis(boolean show) {
+		showMajorAxis = show;
+	}
+
+	/**
 	 * @return affine transform (this is a copy)
 	 */
 	public AffineTransform getAffineTransform() {
@@ -160,7 +168,13 @@ public class RotatableEllipse extends Shape {
 		graphics.translate((int) affine.getTranslationX(), (int) affine.getTranslationY());
 		graphics.rotate((float) affine.getRotationDegrees());
 		// NB do not use Graphics#scale and unit shape as there are precision problems
-		graphics.drawOval(0, 0, (int) affine.getScaleX(), (int) affine.getScaleY());
+		double ax = affine.getScaleX();
+		double ay = affine.getScaleY();
+		graphics.drawOval(0, 0, (int) ax, (int) ay);
+		if (showMajorAxis) {
+			ay *= 0.5;
+			graphics.drawLine(0, (int) ay, (int) ax, (int) ay);
+		}
 		graphics.popState();
 	}
 

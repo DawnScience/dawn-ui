@@ -129,7 +129,7 @@ public class InfoPixelLabelProvider extends ColumnLabelProvider {
 				return String.format("% 4.4f", vectorUtil.getQz());
 			case 7: // 20
 				if (qSpace == null) return "-";
-				return String.format("% 3.3f", Math.toDegrees(vectorUtil.getQScaterringAngle(qSpace)));
+				return String.format("% 3.3f", Math.toDegrees(vectorUtil.getQScatteringAngle(qSpace)));
 			case 8: // resolution
 				if (vectorUtil==null ||vectorUtil.getQMask(qSpace, x, y) == null) return "-";
 				return String.format("% 4.4f", (2*Math.PI)/vectorUtil.getQlength());
