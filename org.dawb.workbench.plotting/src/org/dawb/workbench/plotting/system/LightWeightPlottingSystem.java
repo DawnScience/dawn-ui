@@ -1189,6 +1189,22 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		xyGraph.performAutoScale();
 	}
 
+	/**
+	 * Override this method to provide an implementation of axis visibility.
+	 * @param isVisible
+	 * @param title
+	 */
+	public void setAxisAndTitleVisibility(boolean isVisible, String title) {
+		if (xyGraph!=null) {
+			xyGraph.primaryXAxis.setVisible(isVisible);
+			xyGraph.primaryYAxis.setVisible(isVisible);
+			xyGraph.setTitle(title);
+			xyGraph.repaint();
+		} else {
+			throw new RuntimeException("Cannot set the axis visibility when the plotting system is not created or plotting something!");
+		}
+	}
+
 	// Print / Export methods
 	private PrintSettings settings;
 
