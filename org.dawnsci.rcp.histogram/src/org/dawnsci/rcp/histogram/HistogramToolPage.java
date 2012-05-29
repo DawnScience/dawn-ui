@@ -120,7 +120,8 @@ public class HistogramToolPage extends AbstractToolPage {
 	private static final String CONTRAST_LABEL = "Contrast";
 	private ExpandableComposite bcExpander;
 	private Composite bcComposite;
-	private SpinnerSliderSet brightnessContrastValue;
+	//private SpinnerSliderSet brightnessContrastValue;
+	private SpinnerScaleSet brightnessContrastValue;
 	private SelectionListener brightnessContrastListener;
 
 
@@ -129,7 +130,8 @@ public class HistogramToolPage extends AbstractToolPage {
 	private static final String MIN_LABEL = "Min";
 	private ExpandableComposite rangeExpander;
 	private Composite rangeComposite;
-	private SpinnerSliderSet minMaxValue;
+	//private SpinnerSliderSet minMaxValue;
+	private SpinnerScaleSet minMaxValue;
 	private SelectionListener minMaxValueListener;
 
 	// DEAD ZINGER GUI
@@ -569,7 +571,8 @@ public class HistogramToolPage extends AbstractToolPage {
 		bcComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		bcComposite.setLayout(new GridLayout(1, false));
 
-		brightnessContrastValue = new SpinnerSliderSet(bcComposite, SLIDER_STEPS, BRIGHTNESS_LABEL, CONTRAST_LABEL);
+		//brightnessContrastValue = new SpinnerSliderSet(bcComposite, SLIDER_STEPS, BRIGHTNESS_LABEL, CONTRAST_LABEL);
+		brightnessContrastValue = new SpinnerScaleSet(bcComposite, SLIDER_STEPS, BRIGHTNESS_LABEL, CONTRAST_LABEL);
 		brightnessContrastValue.addSelectionListener(brightnessContrastListener);
 
 		bcExpander.setClient(bcComposite);
@@ -586,7 +589,8 @@ public class HistogramToolPage extends AbstractToolPage {
 		rangeComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		rangeComposite.setLayout(new GridLayout(1, false));
 
-		minMaxValue = new SpinnerSliderSet(rangeComposite, SLIDER_STEPS, MAX_LABEL, MIN_LABEL);
+		//minMaxValue = new SpinnerSliderSet(rangeComposite, SLIDER_STEPS, MAX_LABEL, MIN_LABEL);
+		minMaxValue = new SpinnerScaleSet(rangeComposite, SLIDER_STEPS, MAX_LABEL, MIN_LABEL);
 		minMaxValue.addSelectionListener(minMaxValueListener);
 
 		rangeExpander.setClient(rangeComposite);
@@ -809,6 +813,11 @@ public class HistogramToolPage extends AbstractToolPage {
 
 		double rMax = rangeMax;
 		double rMin = rangeMin;
+		
+		Collection<ITrace> traces = getPlottingSystem().getTraces(IImageTrace.class);
+		image = traces!=null && traces.size()>0 ? (IImageTrace)traces.iterator().next():null;
+		imageDataset = image.getData();
+		
 		if (Double.isInfinite(rMax)) rMax = imageDataset.max().doubleValue();
 		if (Double.isInfinite(rMin)) rMin = imageDataset.min().doubleValue();
 		
