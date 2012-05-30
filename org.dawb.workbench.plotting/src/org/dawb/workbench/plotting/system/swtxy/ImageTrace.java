@@ -255,23 +255,30 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 					if (x1Rat==0d && y1Rat==0d && x4Rat==1d && y4Rat==1d) {
 						break RESCALE;
 					}
-				
+					
 					int x1 = (int)Math.round(imageData.width*x1Rat);
 					int y1 = (int)Math.round(imageData.height*y1Rat);
 					int x4 = (int)Math.round(imageData.width*x4Rat);
 					int y4 = (int)Math.round(imageData.height*y4Rat);
 					
-	
-					// Pixel slice on downsampled data = fast!
-					// NOTE Assumes 8-bit images
-					final int size   = (x4-x1)*(y4-y1);
-					final byte[] pixels = new byte[size];
-					final int wid    = (x4-x1);
-					for (int y = 0; y < (y4-y1); y++) {
-						imageData.getPixels(x1, y1+y, wid, pixels, wid*y);
+					if((x4-x1)>=2 && (y4-y1)>=2){
+						// Pixel slice on downsampled data = fast!
+						// NOTE Assumes 8-bit images
+						final int size   = (x4-x1)*(y4-y1);
+						final byte[] pixels = new byte[size];
+						final int wid    = (x4-x1);
+						for (int y = 0; y < (y4-y1); y++) {
+							imageData.getPixels(x1, y1+y, wid, pixels, wid*y);
+						}
+						data = new ImageData((x4-x1), (y4-y1), data.depth, getPaletteData(), 1, pixels);
+					} else {
+						// minimum zoomed-in image is 4 pixels, TODO: block axis rescaling
+						final byte[] pixels = new byte[4];
+						for (int y = 0; y < 2; y++) {
+							imageData.getPixels(x1, y1+y, 2, pixels, 2*y);
+						}
+						data = new ImageData(2, 2, data.depth, getPaletteData(), 1, pixels);
 					}
-					
-					data = new ImageData((x4-x1), (y4-y1), data.depth, getPaletteData(), 1, pixels);
 				}
 				data = data!=null ? data.scaledTo(rbounds.width, rbounds.height) : null;
 				this.scaledImage = data!=null ? new Image(Display.getDefault(), data) : null;
