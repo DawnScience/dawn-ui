@@ -54,7 +54,7 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 		if (roi == null)
 			createROI(true);
 	}
-	
+
 	@Override
 	public boolean containsPoint(double x, double y) {
 		final int xpix = xAxis.getValuePosition(x, false);
@@ -328,6 +328,11 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 					parameters[4] = yAxis.getPositionValue(p.y(), false);
 				}
 			}
+		}
+
+		@Override
+		public boolean containsPoint(int x, int y) {
+			return false;
 		}
 
 		@Override
