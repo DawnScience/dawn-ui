@@ -17,9 +17,12 @@ import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
+import org.dawb.workbench.plotting.Activator;
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
@@ -162,6 +165,10 @@ public class EllipseFittingTool extends AbstractToolPage {
 		t.setLinesVisible(true);
 		t.setHeaderVisible(true);
 
+		createActions();
+
+		getSite().setSelectionProvider(viewer);
+
 		viewer.setContentProvider(new IStructuredContentProvider() {
 			@Override
 			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
@@ -229,6 +236,26 @@ public class EllipseFittingTool extends AbstractToolPage {
 		c = col.getColumn();
 		c.setText("Points");
 		c.setWidth(20);
+	}
+
+	private void createActions() {
+		final Action delete = new Action("Delete selected region", Activator.getImageDescriptor("icons/plot-tool-measure-delete.png")) {
+			@Override
+			public void run() {
+				if (!isActive()) return;
+				final IStructuredSelection sel = (IStructuredSelection)viewer.getSelection();
+
+				if (sel != null && sel.getFirstElement() != null) {
+					final IRegion region = (IRegion) sel.getFirstElement();
+					getPlottingSystem().removeRegion(region);
+					viewer.refresh();
+				}
+			}
+		};
+		delete.setToolTipText("Delete selected region, if there is one.");
+
+		getSite().getActionBars().getToolBarManager().add(delete);
+		getSite().getActionBars().getMenuManager().add(delete);
 	}
 
 	class EllipseROILabelProvider extends ColumnLabelProvider {
