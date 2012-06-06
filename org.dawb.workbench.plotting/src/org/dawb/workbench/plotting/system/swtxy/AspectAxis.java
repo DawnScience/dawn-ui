@@ -9,6 +9,7 @@ import org.csstudio.swt.xygraph.linearscale.Range;
 import org.dawb.common.ui.plot.axis.AxisEvent;
 import org.dawb.common.ui.plot.axis.IAxis;
 import org.dawb.common.ui.plot.axis.IAxisListener;
+import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.util.text.NumberUtils;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
@@ -263,6 +264,18 @@ public class AspectAxis extends Axis implements IAxis {
 	public void removeAxisListener(IAxisListener listener) {
 		if (axisListeners==null) return;
 		axisListeners.remove(listener);
+	}
+
+	
+	@Override
+	public void zoomInOut(final double center, final double factor) {
+		
+		// If we are image and it is fully zoomed, do not allow zoom in.
+		final XYRegionGraph xyGraph = (XYRegionGraph)getGraph();
+		final ImageTrace trace = xyGraph.getRegionArea().getImageTrace();
+		if (trace!=null && trace.isMaximumZoom() && factor>0) return; // We cannot zoom in more.
+		
+		super.zoomInOut(center, factor);
 	}
 
 }
