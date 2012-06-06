@@ -14,8 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
-import org.dawb.common.ui.plot.IAxis;
 import org.dawb.common.ui.plot.PlotType;
+import org.dawb.common.ui.plot.axis.IAxis;
 import org.dawb.workbench.plotting.system.LightWeightPlottingSystem;
 import org.dawb.workbench.ui.editors.AsciiEditor;
 import org.dawb.workbench.ui.editors.PlotDataEditor;

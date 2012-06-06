@@ -1,9 +1,14 @@
 package org.dawb.workbench.plotting.system.swtxy;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.swt.xygraph.linearscale.Range;
-import org.dawb.common.ui.plot.IAxis;
+import org.dawb.common.ui.plot.axis.AxisEvent;
+import org.dawb.common.ui.plot.axis.IAxis;
+import org.dawb.common.ui.plot.axis.IAxisListener;
 import org.dawb.common.util.text.NumberUtils;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
@@ -226,6 +231,37 @@ public class AspectAxis extends Axis implements IAxis {
 		return getPositionValue(position, false);
 	}
 
+	protected Collection<IAxisListener> axisListeners;
 
+	@Override
+	protected void fireRevalidated(){
+		super.fireRevalidated();
+		
+		final AxisEvent evt = new AxisEvent(this);
+		if (axisListeners!=null) for(IAxisListener listener : axisListeners)
+			listener.revalidated(evt);
+	}
+
+	@Override
+	protected void fireAxisRangeChanged(final Range old_range, final Range new_range){
+		super.fireAxisRangeChanged(old_range, new_range);
+		
+		final AxisEvent evt = new AxisEvent(this, old_range.getLower(), old_range.getUpper(),
+				                                  new_range.getLower(), new_range.getUpper());
+		if (axisListeners!=null)  for(IAxisListener listener : axisListeners)
+			listener.rangeChanged(evt);
+
+	}
+
+	@Override
+	public void addAxisListener(IAxisListener listener) {
+		if (axisListeners==null) axisListeners = new ArrayList<IAxisListener>(3);
+	}
+
+	@Override
+	public void removeAxisListener(IAxisListener listener) {
+		if (axisListeners==null) return;
+		axisListeners.remove(listener);
+	}
 
 }

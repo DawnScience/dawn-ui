@@ -3,10 +3,10 @@ package org.dawb.workbench.plotting.tools;
 import java.util.Collection;
 import java.util.List;
 
-import org.dawb.common.ui.plot.IAxis;
 import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingFactory;
+import org.dawb.common.ui.plot.axis.IAxis;
 import org.dawb.common.ui.plot.region.IROIListener;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
