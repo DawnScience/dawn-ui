@@ -3,6 +3,7 @@ package org.dawb.workbench.plotting.system.swtxy;
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.swt.xygraph.linearscale.Range;
+import org.dawb.common.ui.plot.IAxis;
 import org.dawb.common.util.text.NumberUtils;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
@@ -19,7 +20,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
  * @author fcp94556
  *
  */
-public class AspectAxis extends Axis {
+public class AspectAxis extends Axis implements IAxis {
 
 	private AspectAxis relativeTo;
 	private Range      maximumRange;
@@ -193,6 +194,36 @@ public class AspectAxis extends Axis {
 				           ? labelData.getElementDoubleAbs((int)Math.round(realRange.getUpper()))
 				           : labelData.getElementDoubleAbs(labelData.getSize()-1);
 		return new Range(lower, upper);
+	}
+
+	@Override
+	public boolean isLog10() {
+		return super.isLogScaleEnabled();
+	}
+
+	@Override
+	public void setLog10(boolean isLog10) {
+		super.setLogScale(isLog10);
+	}
+
+	@Override
+	public double getUpper() {
+		return getRange().getUpper();
+	}
+
+	@Override
+	public double getLower() {
+		return getRange().getLower();
+	}
+
+	@Override
+	public int getValuePosition(double value) {
+		return getValuePosition(value, false);
+	}
+
+	@Override
+	public double getPositionValue(int position) {
+		return getPositionValue(position, false);
 	}
 
 

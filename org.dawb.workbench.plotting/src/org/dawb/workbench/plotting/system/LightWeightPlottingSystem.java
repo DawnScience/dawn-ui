@@ -525,8 +525,8 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 
 			clearTraces(); // Only one image at a time!
 
-			final Axis xAxis = ((AxisWrapper)getSelectedXAxis()).getWrappedAxis();
-			final Axis yAxis = ((AxisWrapper)getSelectedYAxis()).getWrappedAxis();
+			final Axis xAxis = ((AspectAxis)getSelectedXAxis());
+			final Axis yAxis = ((AspectAxis)getSelectedYAxis());
 			xAxis.setTitle(axes!=null&&axes.get(0).getName()!=null ? axes.get(0).getName() : "");
 			xAxis.setLogScale(false);
 			yAxis.setTitle(axes!=null&&axes.get(1).getName()!=null ? axes.get(1).getName() : "");
@@ -562,8 +562,8 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 
 	@Override
 	public IImageTrace createImageTrace(String traceName) {
-		final Axis xAxis = ((AxisWrapper)getSelectedXAxis()).getWrappedAxis();
-		final Axis yAxis = ((AxisWrapper)getSelectedYAxis()).getWrappedAxis();
+		final Axis xAxis = (Axis)getSelectedXAxis();
+		final Axis yAxis = (Axis)getSelectedYAxis();
 		
 		final ImageTrace trace = xyGraph.createImageTrace(traceName, xAxis, yAxis);
 		fireTraceCreated(new TraceEvent(trace));
@@ -613,8 +613,8 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	
 		if (xyGraph==null) return null;
 		
-		Axis xAxis = ((AxisWrapper)getSelectedXAxis()).getWrappedAxis();
-		Axis yAxis = ((AxisWrapper)getSelectedYAxis()).getWrappedAxis();
+		final Axis xAxis = (Axis)getSelectedXAxis();
+		final Axis yAxis = (Axis)getSelectedYAxis();
 
 		xAxis.setVisible(true);
 		yAxis.setVisible(true);
@@ -681,8 +681,8 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	
 	public ILineTrace createLineTrace(String traceName) {
 
-		Axis xAxis = ((AxisWrapper)getSelectedXAxis()).getWrappedAxis();
-		Axis yAxis = ((AxisWrapper)getSelectedYAxis()).getWrappedAxis();
+		final Axis xAxis = (Axis)getSelectedXAxis();
+		final Axis yAxis = (Axis)getSelectedYAxis();
 
 		LightWeightDataProvider traceDataProvider = new LightWeightDataProvider();
 		final LineTrace   trace    = new LineTrace(traceName, xAxis, yAxis, traceDataProvider);
@@ -991,7 +991,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		
 		if (xyGraph==null) createUI();
 			
-		Axis axis = new AspectAxis(title, isYAxis);
+		AspectAxis axis = new AspectAxis(title, isYAxis);
 		if (isYAxis) {
 			axis.setOrientation(Orientation.VERTICAL);
 		} else {
@@ -1008,7 +1008,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	
 		xyGraph.addAxis(axis);
 		
-		return new AxisWrapper(axis);
+		return axis;
 	}
 	
 	private IAxis selectedXAxis;
@@ -1018,7 +1018,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	public IAxis getSelectedXAxis() {
 		if (selectedXAxis==null) {
 			if (xyGraph==null) createUI();
-			return new AxisWrapper(xyGraph.primaryXAxis);
+			return (AspectAxis)xyGraph.primaryXAxis;
 		}
 		return selectedXAxis;
 	}
@@ -1032,7 +1032,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	public IAxis getSelectedYAxis() {
 		if (selectedYAxis==null) {
 			if (xyGraph==null) createUI();
-			return new AxisWrapper(xyGraph.primaryYAxis);
+			return (AspectAxis)xyGraph.primaryYAxis;
 		}
 		return selectedYAxis;
 	}
@@ -1059,8 +1059,8 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	public IRegion createRegion(final String name, final RegionType regionType) throws Exception  {
 
 		if (xyGraph==null) createUI();
-		final Axis xAxis = ((AxisWrapper)getSelectedXAxis()).getWrappedAxis();
-		final Axis yAxis = ((AxisWrapper)getSelectedYAxis()).getWrappedAxis();
+		final Axis xAxis = (Axis)getSelectedXAxis();
+		final Axis yAxis = (Axis)getSelectedYAxis();
 
 		return xyGraph.createRegion(name, xAxis, yAxis, regionType, true);
 	}
@@ -1130,8 +1130,8 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 			}
 		}
 		
-		final Axis xAxis = ((AxisWrapper)getSelectedXAxis()).getWrappedAxis();
-		final Axis yAxis = ((AxisWrapper)getSelectedYAxis()).getWrappedAxis();
+		final Axis xAxis = (Axis)getSelectedXAxis();
+		final Axis yAxis = (Axis)getSelectedYAxis();
 		
 		return new AnnotationWrapper(name, xAxis, yAxis);
 	}
