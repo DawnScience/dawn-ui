@@ -9,7 +9,6 @@ import org.csstudio.swt.xygraph.linearscale.Range;
 import org.dawb.common.ui.plot.axis.AxisEvent;
 import org.dawb.common.ui.plot.axis.IAxis;
 import org.dawb.common.ui.plot.axis.IAxisListener;
-import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.util.text.NumberUtils;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
