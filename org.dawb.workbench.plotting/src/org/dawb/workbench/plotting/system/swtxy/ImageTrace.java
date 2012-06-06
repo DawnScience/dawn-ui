@@ -60,6 +60,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	private int              currentDownSampleBin=-1;
 	private List<AbstractDataset> axes;
 	private ImageServiceBean imageServiceBean;
+	private boolean          isMaximumZoom;
 		
 	public ImageTrace(final String name, 
 			          final Axis xAxis, 
@@ -225,6 +226,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		
 		try {
 			
+			isMaximumZoom = false;
 			if (imageData!=null && imageData.width==bounds.width && imageData.height==bounds.height) { 
 				// No slice, faster
 				if (monitor!=null && monitor.isCanceled()) return false;
@@ -272,6 +274,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 						}
 						data = new ImageData((x4-x1), (y4-y1), data.depth, getPaletteData(), 1, pixels);
 					} else {
+						isMaximumZoom = true;
 						// minimum zoomed-in image is 4 pixels, TODO: block axis rescaling
 						final byte[] pixels = new byte[4];
 						for (int y = 0; y < 2; y++) {
@@ -925,5 +928,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	@Override
 	public void setUserTrace(boolean isUserTrace) {
 		this.userTrace = isUserTrace;
+	}
+
+	@Override
+	public boolean isMaximumZoom() {
+		return isMaximumZoom;
 	}
 }

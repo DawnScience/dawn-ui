@@ -197,4 +197,16 @@ public class AspectAxis extends Axis {
 
 
 
+	
+	@Override
+	public void zoomInOut(final double center, final double factor) {
+		
+		// If we are image and it is fully zoomed, do not allow zoom in.
+		final XYRegionGraph xyGraph = (XYRegionGraph)getGraph();
+		final ImageTrace trace = xyGraph.getRegionArea().getImageTrace();
+		if (trace!=null && trace.isMaximumZoom() && factor>0) return; // We cannot zoom in more.
+		
+		super.zoomInOut(center, factor);
+	}
+
 }
