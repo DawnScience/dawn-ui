@@ -278,17 +278,24 @@ class RingSelection extends AbstractSelectionRegion {
 		diff          = Math.round(1.1f*((Math.min(outerRad, innerRad)-cen.y)));
 		out.union(new Rectangle(new Point(cen.x-diff, cen.y-diff), new Point(cen.x+diff, cen.y+diff)));
 
-		UpdateManager updateMgr = connection.getParent().getUpdateManager();
+		UpdateManager updateMgr = null;
+		try {
+			updateMgr = connection.getParent()!=null
+	                  ? connection.getParent().getUpdateManager()
+	                  : connection.getUpdateManager();
+		} catch (Throwable ignored) {
+			// We intentionally allow the code to continue without the UpdateManager
+		}
 
 		if (label != null && labeldim != null) {
 			Point pos1 = label.getLocation();
 			Point pos2 = new Point(pos1.x + labeldim.width + 10, pos1.y + labeldim.height + 10);
 			Rectangle r = new Rectangle(pos1, pos2);
 			label.setBounds(r);
-			updateMgr.addDirtyRegion(label, r);
+			if (updateMgr!=null) updateMgr.addDirtyRegion(label, r);
 		}
 		connection.setBounds(out);
-		updateMgr.addDirtyRegion(connection, out);
+		if (updateMgr!=null) updateMgr.addDirtyRegion(connection, out);
 	}
 	
 	@Override
