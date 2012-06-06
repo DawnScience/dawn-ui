@@ -223,6 +223,14 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 		// not like it when other regions are added.
 		setOtherRegionsEnabled(false);
 		
+		// Needed to refresh the table when activated as other tools may create points
+		// which should be in the table.
+		try {
+			this.viewer.refresh();
+		} catch (Throwable ignored) {
+			// Not a failure if we cannot refresh.
+		}
+		
 		super.activate();	
 	}
 	
