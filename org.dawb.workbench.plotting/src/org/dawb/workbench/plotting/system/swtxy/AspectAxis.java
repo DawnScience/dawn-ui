@@ -256,6 +256,7 @@ public class AspectAxis extends Axis implements IAxis {
 	@Override
 	public void addAxisListener(IAxisListener listener) {
 		if (axisListeners==null) axisListeners = new ArrayList<IAxisListener>(3);
+		axisListeners.add(listener);
 	}
 
 	@Override
