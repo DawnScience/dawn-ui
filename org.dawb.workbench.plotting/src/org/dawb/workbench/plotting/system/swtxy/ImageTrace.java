@@ -930,7 +930,6 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		this.userTrace = isUserTrace;
 	}
 
-	@Override
 	public boolean isMaximumZoom() {
 		return isMaximumZoom;
 	}
