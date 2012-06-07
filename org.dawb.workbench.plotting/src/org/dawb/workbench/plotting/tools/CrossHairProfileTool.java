@@ -3,7 +3,7 @@ package org.dawb.workbench.plotting.tools;
 import java.util.Collection;
 import java.util.List;
 
-import org.dawb.common.ui.plot.IAxis;
+import org.dawb.common.ui.IAxis;
 import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingFactory;
