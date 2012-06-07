@@ -139,6 +139,12 @@ public class ImageEditor extends MultiPageEditorPart implements IReusableEditor 
 		if (clazz == Page.class) {
 			return new HeaderTablePage(EclipseUtils.getFilePath(getEditorInput()));
 		} else if (clazz == IToolPageSystem.class) {
+			try {
+				Object toolSystem = getActiveEditor().getAdapter(clazz);
+				return toolSystem;
+			} catch (Throwable ne) {
+				logger.error("Cannot get tool system for "+getActiveEditor(), ne);
+			}
 			return plotImageEditor.getPlottingSystem();
 		}
 		
