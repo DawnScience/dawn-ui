@@ -19,6 +19,8 @@ import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
@@ -29,6 +31,7 @@ import uk.ac.diamond.scisoft.analysis.roi.PolygonalROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
 public class EllipseFitSelection extends AbstractSelectionRegion {
+	private final static Logger logger = LoggerFactory.getLogger(EllipseFitSelection.class);
 
 	private static final int MIN_POINTS = 5; // minimum number of points to define ellipse
 	DecoratedEllipse ellipse;
@@ -54,7 +57,7 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 		if (roi == null)
 			createROI(true);
 	}
-	
+
 	@Override
 	public boolean containsPoint(double x, double y) {
 		final int xpix = xAxis.getValuePosition(x, false);
@@ -92,13 +95,16 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 		}
 		AbstractDataset xds = new DoubleDataset(x, n); 
 		AbstractDataset yds = new DoubleDataset(y, n);
-		fitter.geometricFit(xds, yds, null);
-		final double[] parameters = fitter.getParameters();
-//		System.err.println("Fit: " + Arrays.toString(parameters));
-		ellipse.setAxes(xAxis.getValuePosition(2*parameters[0] + parameters[3], false) - xAxis.getValuePosition(parameters[3], false),
-				yAxis.getValuePosition(2*parameters[1] + parameters[4], false) - yAxis.getValuePosition(parameters[4], false));
-		ellipse.setCentre(xAxis.getValuePosition(parameters[3], false), yAxis.getValuePosition(parameters[4], false));
-		ellipse.setAngle(Math.toDegrees(parameters[2]));
+		try {
+			fitter.geometricFit(xds, yds, null);
+			final double[] parameters = fitter.getParameters();
+			ellipse.setAxes(xAxis.getValuePosition(2 * parameters[0] + parameters[3], false) - xAxis.getValuePosition(parameters[3], false),
+					yAxis.getValuePosition(2 * parameters[1] + parameters[4], false) - yAxis.getValuePosition(parameters[4], false));
+			ellipse.setCentre(xAxis.getValuePosition(parameters[3], false),	yAxis.getValuePosition(parameters[4], false));
+			ellipse.setAngle(Math.toDegrees(parameters[2]));
+		} catch (IllegalArgumentException e) {
+			logger.info("Can not fit current selection");
+		}
 	}
 
 	private RotatableEllipse tempEllipse;
@@ -328,6 +334,11 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 					parameters[4] = yAxis.getPositionValue(p.y(), false);
 				}
 			}
+		}
+
+		@Override
+		public boolean containsPoint(int x, int y) {
+			return false;
 		}
 
 		@Override

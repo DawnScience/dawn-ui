@@ -1,8 +1,14 @@
 package org.dawb.workbench.plotting.system.swtxy;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.swt.xygraph.linearscale.Range;
+import org.dawb.common.ui.plot.axis.AxisEvent;
+import org.dawb.common.ui.plot.axis.IAxis;
+import org.dawb.common.ui.plot.axis.IAxisListener;
 import org.dawb.common.util.text.NumberUtils;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
@@ -19,7 +25,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
  * @author fcp94556
  *
  */
-public class AspectAxis extends Axis {
+public class AspectAxis extends Axis implements IAxis {
 
 	private AspectAxis relativeTo;
 	private Range      maximumRange;
@@ -195,6 +201,80 @@ public class AspectAxis extends Axis {
 		return new Range(lower, upper);
 	}
 
+	@Override
+	public boolean isLog10() {
+		return super.isLogScaleEnabled();
+	}
 
+	@Override
+	public void setLog10(boolean isLog10) {
+		super.setLogScale(isLog10);
+	}
+
+	@Override
+	public double getUpper() {
+		return getRange().getUpper();
+	}
+
+	@Override
+	public double getLower() {
+		return getRange().getLower();
+	}
+
+	@Override
+	public int getValuePosition(double value) {
+		return getValuePosition(value, false);
+	}
+
+	@Override
+	public double getPositionValue(int position) {
+		return getPositionValue(position, false);
+	}
+
+	protected Collection<IAxisListener> axisListeners;
+
+	@Override
+	protected void fireRevalidated(){
+		super.fireRevalidated();
+		
+		final AxisEvent evt = new AxisEvent(this);
+		if (axisListeners!=null) for(IAxisListener listener : axisListeners)
+			listener.revalidated(evt);
+	}
+
+	@Override
+	protected void fireAxisRangeChanged(final Range old_range, final Range new_range){
+		super.fireAxisRangeChanged(old_range, new_range);
+		
+		final AxisEvent evt = new AxisEvent(this, old_range.getLower(), old_range.getUpper(),
+				                                  new_range.getLower(), new_range.getUpper());
+		if (axisListeners!=null)  for(IAxisListener listener : axisListeners)
+			listener.rangeChanged(evt);
+
+	}
+
+	@Override
+	public void addAxisListener(IAxisListener listener) {
+		if (axisListeners==null) axisListeners = new ArrayList<IAxisListener>(3);
+		axisListeners.add(listener);
+	}
+
+	@Override
+	public void removeAxisListener(IAxisListener listener) {
+		if (axisListeners==null) return;
+		axisListeners.remove(listener);
+	}
+
+	
+	@Override
+	public void zoomInOut(final double center, final double factor) {
+		
+		// If we are image and it is fully zoomed, do not allow zoom in.
+		final XYRegionGraph xyGraph = (XYRegionGraph)getGraph();
+		final ImageTrace trace = xyGraph.getRegionArea().getImageTrace();
+		if (trace!=null && trace.isMaximumZoom() && factor>0) return; // We cannot zoom in more.
+		
+		super.zoomInOut(center, factor);
+	}
 
 }

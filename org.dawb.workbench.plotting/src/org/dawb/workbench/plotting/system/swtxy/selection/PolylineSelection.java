@@ -45,15 +45,13 @@ public class PolylineSelection extends AbstractSelectionRegion {
 		if (roi == null)
 			createROI(true);
 	}
-	
+
 	@Override
 	public boolean containsPoint(double x, double y) {
-		
 		final int xpix = xAxis.getValuePosition(x, false);
 		final int ypix = yAxis.getValuePosition(y, false);
 		return pline.containsPoint(xpix, ypix);
 	}
-
 
 	@Override
 	public RegionType getRegionType() {

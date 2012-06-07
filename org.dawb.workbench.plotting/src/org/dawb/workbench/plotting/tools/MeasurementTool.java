@@ -135,7 +135,9 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 				final Collection<IRegion> regions = getPlottingSystem().getRegions();
 				if (regions==null || regions.isEmpty()) return new Object[]{"-"};
 				final List<IRegion> visible = new ArrayList<IRegion>(regions.size());
-				for (IRegion iRegion : regions) if (iRegion.isVisible()) visible.add(iRegion);
+				for (IRegion iRegion : regions) {
+					if (iRegion.isVisible() && iRegion.isUserRegion()) visible.add(iRegion);
+				}
 				return visible.toArray(new IRegion[visible.size()]);
 			}
 		});
