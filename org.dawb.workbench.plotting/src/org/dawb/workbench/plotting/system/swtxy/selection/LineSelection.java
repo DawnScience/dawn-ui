@@ -18,9 +18,19 @@ import org.eclipse.draw2d.geometry.Rectangle;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
-/**
- * 
+/**                 startBox2 (if isCrossHair()) 
+ *                      |
+ *                      |
+ *                      |
+ *                      |
+ *                      |
  *    startBox-----------------------endBox
+ *                      |
+ *                      |
+ *                      |
+ *                      |
+ *                      |
+ *                   endBox2 (if isCrossHair())
  * 
  * @author fcp94556
  *
@@ -30,7 +40,7 @@ class LineSelection extends AbstractSelectionRegion {
 	private static final int SIDE      = 8;
 	
 	private SelectionHandle endBox, startBox;
-
+	private SelectionHandle endBox2 = null, startBox2 = null;
 	private Figure connection;
 
 	LineSelection(String name, Axis xAxis, Axis yAxis) {
@@ -42,34 +52,51 @@ class LineSelection extends AbstractSelectionRegion {
 
 	@Override
 	public void createContents(final Figure parent) {
-		this.startBox = new RectangularHandle(xAxis, yAxis, getRegionColor(), connection, SIDE, 100, 100);
+				
+		startBox = new RectangularHandle(xAxis, yAxis, getRegionColor(), parent, SIDE, 100, 100);
 		FigureTranslator mover = new FigureTranslator(getXyGraph(), startBox);
 		mover.addTranslationListener(createRegionNotifier());
 
-		this.endBox = new RectangularHandle(xAxis, yAxis, getRegionColor(), connection, SIDE, 200, 200);
+		endBox = new RectangularHandle(xAxis, yAxis, getRegionColor(), parent, SIDE, 200, 200);
 		mover = new FigureTranslator(getXyGraph(), endBox);	
 		mover.addTranslationListener(createRegionNotifier());
-				
+
 		this.connection = new RegionFillFigure(this) {
-			PointList shape = new PointList(2);
+			PointList shape = new PointList(4);
 
 			@Override
 			public void paintFigure(Graphics gc) {
 				super.paintFigure(gc);
 				final Point startCenter = startBox.getSelectionPoint();
 				final Point endCenter   = endBox.getSelectionPoint();
+				Point start2=null, end2=null;
+				if (startBox2 != null) {
+					start2 = startBox2.getSelectionPoint();
+					end2 = endBox2.getSelectionPoint();
+				}
+				
 				if (shape.size() == 0) {
 					shape.addPoint(startCenter);
 					shape.addPoint(endCenter);
+					if (startBox2 != null) {
+						shape.addPoint(start2);
+						shape.addPoint(end2);
+					}
 				} else {
 					shape.setPoint(startCenter, 0);
 					shape.setPoint(endCenter, 1);
+					if (startBox2 != null) {
+						shape.setPoint(start2, 2);
+						shape.setPoint(end2, 3);
+					}
 				}
 
 				this.bounds = getConnectionBounds();
 				gc.setLineWidth(getLineWidth());
 				gc.setAlpha(getAlpha());
 				gc.drawLine(startCenter, endCenter);
+				if (start2!= null && end2 != null)
+					gc.drawLine(start2, end2);
 				LineSelection.this.drawLabel(gc, bounds);
 			}
 
@@ -79,15 +106,16 @@ class LineSelection extends AbstractSelectionRegion {
 				return Geometry.polylineContainsPoint(shape, x, y, 2);
 			}
 		};
+
+
 		connection.setCursor(Draw2DUtils.getRoiMoveCursor());
 		connection.setForegroundColor(getRegionColor());
-		connection.setBounds(new Rectangle(startBox.getSelectionPoint(), endBox.getSelectionPoint()));
+		connection.setBounds(getConnectionBounds()); 
 		connection.setOpaque(false);
 		
 		parent.add(connection);
 		parent.add(startBox);
 		parent.add(endBox);
-	
 				
 		final FigureListener figListener = createFigureListener();
 		startBox.addFigureListener(figListener);
@@ -117,6 +145,8 @@ class LineSelection extends AbstractSelectionRegion {
 		gc.setLineWidth(2);
 		gc.setAlpha(getAlpha());
 		gc.drawLine(clicks.getFirstPoint(), clicks.getLastPoint());
+		if (startBox2!= null && endBox2 != null)
+			gc.drawLine(startBox2.getSelectionPoint(), endBox2.getSelectionPoint());
 	}
 
 	@Override
@@ -154,6 +184,35 @@ class LineSelection extends AbstractSelectionRegion {
 				startBox.setPosition(lroi.getPoint());
 			if (endBox != null)
 				endBox.setPosition(lroi.getEndPoint());
+			
+			if (startBox != null && lroi.isCrossHair() && (startBox2 == null || endBox2 == null) ) {
+				startBox2 = new RectangularHandle(xAxis, yAxis, getRegionColor(), (Figure)connection.getParent(), SIDE, 100, 100); //start2x, start2y);
+				endBox2 = new RectangularHandle(xAxis, yAxis, getRegionColor(), (Figure)connection, SIDE, 200, 200); // end2x, end2y);
+				
+				if (!connection.getParent().getChildren().contains(startBox2)) {
+					connection.getParent().add(startBox2);
+				}
+				if (!connection.getParent().getChildren().contains(endBox2)) {
+					connection.getParent().add(endBox2);
+				}
+				setRegionObjects(connection, startBox, endBox, startBox2, endBox2);
+				
+				FigureTranslator mover = new FigureTranslator(getXyGraph(), startBox2);
+				mover.addTranslationListener(createRegionNotifier());
+
+				mover = new FigureTranslator(getXyGraph(), endBox2);
+				mover.addTranslationListener(createRegionNotifier());
+			}
+			if (!lroi.isCrossHair()) {
+				startBox2 = null;
+				endBox2 = null;
+			}
+
+			if (startBox2 != null)
+				startBox2.setPosition(lroi.getPerpendicularBisectorPoint(0.0));
+			if (endBox2 != null)
+				endBox2.setPosition(lroi.getPerpendicularBisectorPoint(1.0));
+			
 			updateConnectionBounds();
 		}
 	}
@@ -171,9 +230,28 @@ class LineSelection extends AbstractSelectionRegion {
 	 * @return
 	 */
 	private Rectangle getConnectionBounds() {
-		final Point startCenter = startBox.getSelectionPoint();
-		final Point endCenter   = endBox.getSelectionPoint();
-		final Rectangle bounds  = new Rectangle(startCenter, endCenter);
+		Rectangle bounds  = null;
+		if (startBox2 == null || endBox2 == null) {
+			final Point startCenter = startBox.getSelectionPoint();
+			final Point endCenter   = endBox.getSelectionPoint();
+			bounds  = new Rectangle(startCenter, endCenter);
+		}
+		else {
+			final int startx = Math.min(Math.min(startBox.getSelectionPoint().x, startBox2.getSelectionPoint().x),
+					Math.min(endBox.getSelectionPoint().x, endBox2.getSelectionPoint().x));
+
+			final int starty = Math.min(Math.min(startBox.getSelectionPoint().y, startBox2.getSelectionPoint().y),
+					Math.min(endBox.getSelectionPoint().y, endBox2.getSelectionPoint().y));
+
+			final int endx = Math.max(Math.max(startBox.getSelectionPoint().x, startBox2.getSelectionPoint().x),
+					Math.max(endBox.getSelectionPoint().x, endBox2.getSelectionPoint().x));
+
+			final int endy = Math.max(Math.max(startBox.getSelectionPoint().y, startBox2.getSelectionPoint().y),
+					Math.max(endBox.getSelectionPoint().y, endBox2.getSelectionPoint().y));
+
+			bounds  = new Rectangle(new Point(startx, starty), new Point(endx, endy));
+		}
+			
 		if (bounds.height<MIN_BOUNDS) bounds.height=MIN_BOUNDS;
 		if (bounds.width <MIN_BOUNDS) bounds.width=MIN_BOUNDS;
 		return bounds;
