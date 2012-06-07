@@ -21,6 +21,7 @@ import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
+import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.util.ColorUtility;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -30,6 +31,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.MouseEvent;
 import org.eclipse.draw2d.MouseListener;
+import org.eclipse.jface.action.Action;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Composite;
@@ -46,7 +48,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 
 	private final static Logger logger = LoggerFactory.getLogger(CrossHairProfileTool.class);
 	
-	protected IPlottingSystem        plotter;
+	protected IPlottingSystem        profilePlotter;
 	private   ITraceListener         traceListener;
 	private   IRegion                xHair, yHair;
 	private   IAxis                  x1,x2;
@@ -56,7 +58,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 	public CrossHairProfileTool() {
 		try {
 			
-			plotter = PlottingFactory.createPlottingSystem();
+			profilePlotter = PlottingFactory.createPlottingSystem();
 			this.traceListener = new ITraceListener.Stub() {
 				@Override
 				public void tracesPlotted(TraceEvent evt) {
@@ -81,18 +83,26 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 
 		final IPageSite site = getSite();
 		
-		plotter.createPlotPart(parent, 
+		profilePlotter.createPlotPart(parent, 
 								getTitle(), 
 								site.getActionBars(), 
 								PlotType.PT1D,
 								this.getViewPart());		
 		
-		plotter.getSelectedYAxis().setTitle("Intensity");
-		this.x1 = plotter.getSelectedXAxis();
+		profilePlotter.getSelectedYAxis().setTitle("Intensity");
+		this.x1 = profilePlotter.getSelectedXAxis();
 		x1.setTitle("X Slice");
 		
-		this.x2 = plotter.createAxis("Y Slice", false, SWT.TOP);
-				
+		this.x2 = profilePlotter.createAxis("Y Slice", false, SWT.TOP);
+			
+		final Action reset = new Action("Clear cross hair profiles", Activator.getImageDescriptor("icons/axis.png")) {
+			public void run() {
+				profilePlotter.reset();
+				getPlottingSystem().clearRegions();
+			}
+		};
+		getSite().getActionBars().getToolBarManager().add(reset);
+		
 		activate();
 	}
 	
@@ -100,7 +110,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 	@Override
 	public Object getAdapter(@SuppressWarnings("rawtypes") Class clazz) {
 		if (clazz == IToolPageSystem.class) {
-			return plotter;
+			return profilePlotter;
 		} else {
 			return super.getAdapter(clazz);
 		}
@@ -197,7 +207,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 			yHair.setVisible(false);
 			yHair.removeROIListener(this);
 		}
-		plotter.clear();
+		profilePlotter.clear();
 
 		if (getPlottingSystem()!=null) getPlottingSystem().removeTraceListener(traceListener);
 	}
@@ -205,15 +215,15 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 	public void dispose() {
 		
 	    deactivate();
-		if (plotter!=null) plotter.dispose();
-		plotter = null;
+		if (profilePlotter!=null) profilePlotter.dispose();
+		profilePlotter = null;
 		super.dispose();
 	}
 	
 	@Override
 	public Control getControl() {
-		if (plotter==null) return null;
-		return plotter.getPlotComposite();
+		if (profilePlotter==null) return null;
+		return profilePlotter.getPlotComposite();
 	}
 
 
@@ -334,8 +344,8 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
         getPlottingSystem().addRegionListener(new IRegionListener.Stub() {
     		@Override
     		public void regionRemoved(RegionEvent evt) {
-    			if (plotter.getTrace(region.getName())!=null) {
-    				plotter.removeTrace(plotter.getTrace(region.getName()));
+    			if (profilePlotter.getTrace(region.getName())!=null) {
+    				profilePlotter.removeTrace(profilePlotter.getTrace(region.getName()));
     			}
     		}
         });
@@ -377,24 +387,24 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 
 			if (image==null) {
 				if (monitor.isCanceled()) return  false;
-				plotter.clear();
+				profilePlotter.clear();
 				return true;
 			}
 
 			if (monitor.isCanceled()) return  false;
 			
             		                  
-			ILineTrace trace = (ILineTrace)plotter.getTrace(region.getName());
+			ILineTrace trace = (ILineTrace)profilePlotter.getTrace(region.getName());
 			if (trace == null || snapshot) {
-				synchronized (plotter) {  // Only one job at a time can choose axis and create plot.
+				synchronized (profilePlotter) {  // Only one job at a time can choose axis and create plot.
 					if (region.getName().startsWith("Y Profile")) {
-						plotter.setSelectedXAxis(x1);
+						profilePlotter.setSelectedXAxis(x1);
 
 					} else {
-						plotter.setSelectedXAxis(x2);
+						profilePlotter.setSelectedXAxis(x2);
 					}
 					if (monitor.isCanceled()) return  false;
-					trace = plotter.createLineTrace(region.getName());
+					trace = profilePlotter.createLineTrace(region.getName());
 
 				    if (snapShotColor!=null) {
 				    	trace.setTraceColor(snapShotColor);
@@ -438,13 +448,13 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 				public void run() {
 
 					if (monitor.isCanceled()) return;
-					if (plotter.getTrace(finalTrace.getName())==null) {							
-						plotter.addTrace(finalTrace);
+					if (profilePlotter.getTrace(finalTrace.getName())==null) {							
+						profilePlotter.addTrace(finalTrace);
 					}
 
 					if (monitor.isCanceled()) return;
-					plotter.autoscaleAxes();
-					plotter.repaint();
+					profilePlotter.autoscaleAxes();
+					profilePlotter.repaint();
 					if (region.getName().startsWith("Y Profile")) {
 						x1.setRange(0, data.getShape()[0]);
 					} else {
