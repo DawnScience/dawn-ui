@@ -314,7 +314,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 	        final IRegion y = createStaticRegion("X Profile Static", yBounds, snapShotColor, yHair.getRegionType());
 	        profile(y, yBounds, true, snapShotColor, new NullProgressMonitor());
 
-			getPlottingSystem().repaint();
+			//getPlottingSystem().repaint();
 		} catch (Exception ne) {
 			logger.error(ne.getMessage(), ne);
 			
