@@ -10,6 +10,9 @@ import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.FigureListener;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.Label;
+import org.eclipse.draw2d.PositionConstants;
+import org.eclipse.draw2d.UpdateManager;
 import org.eclipse.draw2d.geometry.Geometry;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
@@ -98,6 +101,9 @@ class LineSelection extends AbstractSelectionRegion {
 				if (start2!= null && end2 != null)
 					gc.drawLine(start2, end2);
 				LineSelection.this.drawLabel(gc, bounds);
+				if (label != null) {
+					label.setLocation(new Point(startCenter));
+				}
 			}
 
 			@Override
@@ -116,6 +122,8 @@ class LineSelection extends AbstractSelectionRegion {
 		parent.add(connection);
 		parent.add(startBox);
 		parent.add(endBox);
+		if (label != null)
+			parent.add(label);
 				
 		final FigureListener figListener = createFigureListener();
 		startBox.addFigureListener(figListener);
@@ -123,8 +131,10 @@ class LineSelection extends AbstractSelectionRegion {
 		
 		mover = new FigureTranslator(getXyGraph(), parent, connection, Arrays.asList(new IFigure[]{startBox,endBox}));
 		mover.addTranslationListener(createRegionNotifier());
-
-		setRegionObjects(connection, startBox, endBox);
+		if (label != null)
+			setRegionObjects(connection, startBox, endBox, label);
+		else
+			setRegionObjects(connection, startBox, endBox);
 		sync(getBean());
         updateROI();
         if (roi == null) createROI(true);
@@ -195,7 +205,10 @@ class LineSelection extends AbstractSelectionRegion {
 				if (!connection.getParent().getChildren().contains(endBox2)) {
 					connection.getParent().add(endBox2);
 				}
-				setRegionObjects(connection, startBox, endBox, startBox2, endBox2);
+				if (label != null)
+					setRegionObjects(connection, startBox, endBox, startBox2, endBox2, label);
+				else
+					setRegionObjects(connection, startBox, endBox, startBox2, endBox2);
 				
 				FigureTranslator mover = new FigureTranslator(getXyGraph(), startBox2);
 				mover.addTranslationListener(createRegionNotifier());
@@ -221,7 +234,26 @@ class LineSelection extends AbstractSelectionRegion {
 	protected void updateConnectionBounds() {
 		if (connection==null) return;
 		final Rectangle bounds = getConnectionBounds();
+		
+		UpdateManager updateMgr = null;
+		try {
+			updateMgr = connection.getParent()!=null
+	                  ? connection.getParent().getUpdateManager()
+	                  : connection.getUpdateManager();
+		} catch (Throwable ignored) {
+			// We intentionally allow the code to continue without the UpdateManager
+		}
+
+		if (label != null && labeldim != null) {
+			Point pos1 = label.getLocation();
+			Point pos2 = new Point(pos1.x + labeldim.width + 10, pos1.y + labeldim.height + 10);
+			Rectangle r = new Rectangle(pos1, pos2);
+			label.setBounds(r);
+			if (updateMgr!=null) updateMgr.addDirtyRegion(label, r);
+		}
+		
 		connection.setBounds(bounds);
+		if (updateMgr!=null) updateMgr.addDirtyRegion(connection, bounds);
 	}
 	
 	private static final int MIN_BOUNDS = 5;
@@ -278,5 +310,24 @@ class LineSelection extends AbstractSelectionRegion {
 	@Override
 	public int getMaximumMousePresses() {
 		return 2;
+	}
+	
+	@Override
+	public void setLabel(Label label) {
+		if (connection != null) {
+			if (connection.getParent() != null) {
+				if (this.label != null)
+					connection.getParent().remove(this.label);
+				connection.getParent().add(label);
+			}
+		}
+		super.setLabel(label);
+		label.setLabelAlignment(PositionConstants.LEFT);
+		label.setTextAlignment(PositionConstants.LEFT);
+
+		if (startBox2 != null && endBox2 != null)
+			setRegionObjects(connection, startBox, endBox, startBox2, endBox2, label);
+		else
+			setRegionObjects(connection, startBox, endBox, label);
 	}
 }
