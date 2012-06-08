@@ -322,6 +322,7 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 			if (system.getActionBars()!=null) system.getActionBars().getToolBarManager().add(zoomAction);
 		}
 		panning.setChecked(true);
+		panning.run(); 
 	}
 
 	public void createUndoRedoActions() {
