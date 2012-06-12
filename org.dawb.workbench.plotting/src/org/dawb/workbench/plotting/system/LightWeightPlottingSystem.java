@@ -339,10 +339,12 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 				
 				if (getDisplay().getThread()==Thread.currentThread()) {
 					lineTrace.setData(finalX, y);
+					fireTraceUpdated(new TraceEvent(lineTrace));
 				} else {
 					getDisplay().syncExec(new Runnable() {
 						public void run() {
 							lineTrace.setData(finalX, y);
+							fireTraceUpdated(new TraceEvent(lineTrace));
 						}
 					});
 				}
@@ -465,6 +467,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 				if (getDisplay().getThread()==Thread.currentThread()) {
 					if (data.getName()!=null) xyGraph.setTitle(data.getName());
 					image.setData(data, image.getAxes(), false);
+					fireTraceUpdated(new TraceEvent(image));
 				} else {
 					Display.getDefault().syncExec(new Runnable() {
 						public void run() {
@@ -472,6 +475,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 							// and will be faster than createPlot2D(...) which autoscales.
 							if (data.getName()!=null) xyGraph.setTitle(data.getName());
 							image.setData(data, image.getAxes(), false);
+							fireTraceUpdated(new TraceEvent(image));
 						}
 					});
 				}
