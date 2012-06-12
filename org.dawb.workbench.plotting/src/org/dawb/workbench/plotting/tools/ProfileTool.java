@@ -74,11 +74,11 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 						return;
 					}
 					if (getImageTrace()!=null) getImageTrace().addPaletteListener(paletteListener);
-					update(null, null, false);
+					ProfileTool.this.update(null, null, false);
 				}
 				@Override
-				public void traceUpdated(TraceEvent evt) {
-					update(null, null, false);
+				protected void update(TraceEvent evt) {
+					ProfileTool.this.update(null, null, false);
 				}
 
 			};
@@ -94,7 +94,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 				@Override
 				public void regionAdded(RegionEvent evt) {
 					if (evt.getRegion()!=null) {
-						update(null, null, false);
+						ProfileTool.this.update(null, null, false);
 					}
 				}
 				
@@ -103,6 +103,10 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 					if (evt.getRegion()!=null) {
 						evt.getRegion().addROIListener(ProfileTool.this);
 					}
+				}
+				
+				protected void update(RegionEvent evt) {
+					ProfileTool.this.update(null, null, false);
 				}
 			};
 		} catch (Exception e) {
