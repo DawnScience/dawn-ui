@@ -12,6 +12,7 @@ package org.dawb.workbench.ui.editors.test;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
@@ -20,11 +21,15 @@ import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.RegionEvent;
+import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.util.text.NumberUtils;
 import org.dawb.workbench.plotting.system.LightWeightPlottingSystem;
 import org.dawb.workbench.ui.editors.AsciiEditor;
+import org.dawb.workbench.ui.editors.ImageEditor;
 import org.dawb.workbench.ui.editors.PlotDataEditor;
+import org.dawb.workbench.ui.editors.PlotImageEditor;
+import org.dawb.common.ui.image.PaletteFactory;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.runtime.Platform;
@@ -36,9 +41,13 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.ide.FileStoreEditorInput;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
+import org.dawb.common.ui.plot.tool.IToolPage;
+import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.LongDataset;
+import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
+import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 import fable.framework.toolbox.EclipseUtils;
@@ -52,6 +61,68 @@ import fable.framework.toolbox.EclipseUtils;
  */
 public class SWTXYRegionsTest {
 
+	/**
+	 * Looks for a large directory of images and plots them to the same plot.
+	 * If directory cannot be found, test fails.
+	 */
+	@Test
+	public void testRegionsDuringImageUpdate() throws Exception {
+		
+		// Get some kind of image directory for testing different images. 
+		String imagesDirPath = System.getProperty("org.dawb.workbench.ui.editors.test.images.directory");
+		if (imagesDirPath==null) imagesDirPath = "C:/Work/results/ID22-ODA";
+		File dir = new File(imagesDirPath);
+		if (!dir.exists()) {
+			// TODO check on linux
+			dir = new File("/dls/sci-scratch/i12/27_nir_tomo15/sinograms");
+		}
+		if (!dir.exists()||!dir.isDirectory()) throw new Exception("Cannot find test folder for test!");
+		
+		final Bundle bun  = Platform.getBundle("org.dawb.workbench.ui.test");
+
+		String path = (bun.getLocation()+"src/org/dawb/workbench/ui/editors/test/billeA.edf");
+		path = path.substring("reference:file:".length());
+		if (path.startsWith("/C:")) path = path.substring(1);
+		
+		final IWorkbenchPage page      = EclipseUtils.getPage();		
+		final IFileStore  externalFile = EFS.getLocalFileSystem().fromLocalFile(new File(path));
+		final ImageEditor editor       = (ImageEditor)page.openEditor(new FileStoreEditorInput(externalFile), ImageEditor.ID);
+		page.setPartState(EclipseUtils.getPage().getActivePartReference(), IWorkbenchPage.STATE_MAXIMIZED);		
+		
+		final PlotImageEditor ed = editor.getPlotImageEditor();
+		final AbstractPlottingSystem system = ed.getPlottingSystem();
+		
+ 		EclipseUtils.delay(2000); // Wait for image to be plotted...
+		
+		final Collection<ITrace> images = system.getTraces(IImageTrace.class);
+		final IImageTrace        image  = (IImageTrace)images.iterator().next();
+		image.setPaletteData(PaletteFactory.makeGrayScalePalette());
+		image.repaint();
+		
+		final IRegion lineRegion = system.createRegion("Line Profile Test", IRegion.RegionType.LINE);
+		lineRegion.setROI(new LinearROI(new double[]{50,50}, new double[]{1200,1200}));
+		
+		system.addRegion(lineRegion);
+		
+		// We show the line profile tool
+		system.setToolVisible("org.dawb.workbench.plotting.tools.lineProfileTool",
+				              ToolPageRole.ROLE_2D, 
+				              "org.dawb.workbench.plotting.views.toolPageView.2D");
+		
+		// We update all the images in the directory.
+		final File[] fa = dir.listFiles();
+		for (File file : fa) {
+			if (!file.isFile()) continue;
+			
+			final AbstractDataset set = LoaderFactory.getData(file.getAbsolutePath(), null).getDataset(0);
+			system.updatePlot2D(set, null, null);
+			
+			EclipseUtils.delay(100);
+		}
+		
+	}
+
+	
 	@Test
 	public void regionPositionTest() throws Throwable {
 		
