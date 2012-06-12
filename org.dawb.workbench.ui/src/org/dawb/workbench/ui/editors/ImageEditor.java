@@ -46,6 +46,11 @@ public class ImageEditor extends MultiPageEditorPart implements IReusableEditor 
 	public void setInput(IEditorInput input) {
 		super.setInput(input);
 		if (plotImageEditor!=null) plotImageEditor.setInput(input);
+		try{ 
+		    setPartName(input.getName());
+		} catch (Exception ignored) {
+			// Input maybe invalid but we do not treat this as a failure if the above methods already worked.
+		}
 	}
 	/**
 	 * It might be necessary to show the tree editor on the first page.
