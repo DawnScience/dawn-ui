@@ -70,21 +70,19 @@ public class FittingUtils {
 		final List<RectangularROI>      regions   = new ArrayList<RectangularROI>(peaks.size());
 		final List<AbstractDataset[]> functions = new ArrayList<AbstractDataset[]>(peaks.size());
 		
+		final FittedPeaks bean = new FittedPeaks();
 		for (APeak peak : peaks) {
 			
 			if (monitor.isCanceled()) return null;
 			double w = peak.getFWHM();
 			RectangularROI bounds = new RectangularROI(peak.getPosition() - w/2, 0, w, 0, 0);
-			regions.add(bounds);
 			
 			final AbstractDataset[] pf = getPeakFunction(x, y, peak);
-			functions.add(pf);
+			
+			bean.addFittedPeak(new FittedPeak(peak, bounds, pf));
+
 		}
 		
-		final FittedPeaks bean = new FittedPeaks();
-		bean.setPeakROIs(regions);
-		bean.setPeaks(peaks);
-		bean.setFunctionData(functions);
 		bean.setOptimizer(optimizer);
 		return bean;
 	}
