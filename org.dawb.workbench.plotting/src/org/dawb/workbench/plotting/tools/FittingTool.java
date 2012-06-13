@@ -88,8 +88,8 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 				final List<ITrace> traces = evt.getSource() instanceof List
 				                          ? (List<ITrace>)evt.getSource()
 				                          : null;
-				if (traces!=null && fittedPeaks!=null && fittedPeaks.getPeakTraces()!=null) {
-					traces.removeAll(fittedPeaks.getPeakTraces());
+				if (traces!=null && fittedPeaks!=null && !fittedPeaks.isEmpty()) {
+					traces.removeAll(fittedPeaks.getFittedPeakTraces());
 				}
 				if (traces!=null && !traces.isEmpty()) {
 					updateTracesChoice();
@@ -131,7 +131,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 			public void selectionChanged(SelectionChangedEvent event) {
 				final StructuredSelection sel = (StructuredSelection)event.getSelection();
 				if (fittedPeaks!=null && sel!=null && sel.getFirstElement()!=null) {
-					fittedPeaks.setSelectedPeak((IPeak)sel.getFirstElement());
+					fittedPeaks.setSelectedPeak((FittedPeak)sel.getFirstElement());
 					viewer.refresh();
 				}
 			}
@@ -191,7 +191,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 				if (fittedPeaks==null)    return new IPeak[]{new NullPeak()};
 				if (fittedPeaks.size()<1) return new IPeak[]{new NullPeak()};
 				
-				return fittedPeaks.getPeaks().toArray();
+				return fittedPeaks.toArray();
 			}
 		};
 	}
@@ -367,64 +367,53 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		    		
 		    		boolean requireFWHMSelections = Activator.getDefault().getPreferenceStore().getBoolean(FittingConstants.SHOW_FWHM_SELECTIONS);
 		    		boolean requirePeakSelections = Activator.getDefault().getPreferenceStore().getBoolean(FittingConstants.SHOW_PEAK_SELECTIONS);
-					int ipeak = 1;
+		    		boolean requireTrace = Activator.getDefault().getPreferenceStore().getBoolean(FittingConstants.SHOW_FITTING_TRACE);
+		    		boolean requireAnnot = Activator.getDefault().getPreferenceStore().getBoolean(FittingConstants.SHOW_ANNOTATION_AT_PEAK);
+
+		    		int ipeak = 1;
 					// Draw the regions
-					for (RectangularROI rb : newBean.getPeakROIs()) {
+					for (FittedPeak fp : newBean.getPeakList()) {
 						
+						RectangularROI rb = fp.getRoi();
 						final IRegion area = RegionUtils.replaceCreateRegion(getPlottingSystem(), "Peak Area "+ipeak, RegionType.XAXIS);
 						area.setRegionColor(ColorConstants.orange);
 						area.setROI(rb);
 						area.setMobile(false);
 						getPlottingSystem().addRegion(area);
-						newBean.addAreaRegion(area);
+						fp.setFwhm(area);
 						if (!requireFWHMSelections) area.setVisible(false);
-						
-						final IRegion line = RegionUtils.replaceCreateRegion(getPlottingSystem(), "Peak Line "+ipeak, RegionType.XAXIS_LINE);
-						line.setROI(new LinearROI(rb.getMidPoint(), rb.getMidPoint()));
-						line.setRegionColor(ColorConstants.black);
-						//line.setMotile(false);
-						line.setAlpha(150);
-						getPlottingSystem().addRegion(line);
-						newBean.addLineRegion(line);
-						if (!requirePeakSelections) area.setVisible(false);
-
-					    ++ipeak;
-					}
-
-					ipeak = 1;
-		    		boolean requireTrace = Activator.getDefault().getPreferenceStore().getBoolean(FittingConstants.SHOW_FITTING_TRACE);
-					// Create some traces for the fitted function
-					for (AbstractDataset[] pair : newBean.getFunctionData()) {
-						
+												
+						final AbstractDataset[] pair = fp.getPeakFunctions();
 						final ILineTrace trace = TraceUtils.replaceCreateLineTrace(getPlottingSystem(), "Peak "+ipeak);
 						trace.setData(pair[0], pair[1]);
 						trace.setLineWidth(1);
 						trace.setTraceColor(ColorConstants.black);
 						trace.setUserTrace(false);
 						getPlottingSystem().addTrace(trace);
-						newBean.addTrace(trace);
+						fp.setTrace(trace);
 						if (!requireTrace) trace.setVisible(false);
-						
-					    ++ipeak;
-  				    }
-					
-		    		boolean requireAnnot = Activator.getDefault().getPreferenceStore().getBoolean(FittingConstants.SHOW_ANNOTATION_AT_PEAK);
-                    final List<? extends IPeak> peaks = newBean.getPeaks();
-                    ipeak = 1;
-                    for (IPeak peak : peaks) {
-					
-                    	final IAnnotation ann = AnnotationUtils.replaceCreateAnnotation(getPlottingSystem(), "Peak "+ipeak);
-                    	ann.setLocation(peak.getPosition(), peak.val(peak.getPosition()));
-                    	
-                    	getPlottingSystem().addAnnotation(ann);
-                    	
-                    	newBean.addAnnotation(ann);
+
+	                   	final IAnnotation ann = AnnotationUtils.replaceCreateAnnotation(getPlottingSystem(), "Peak "+ipeak);
+                    	ann.setLocation(fp.getPosition(), fp.getPeak().val(fp.getPosition()));                  	
+                    	getPlottingSystem().addAnnotation(ann);                   	
+                    	fp.setAnnotation(ann);
                     	if (!requireAnnot) ann.setVisible(false);
                     	
-                    	++ipeak;
+						final IRegion line = RegionUtils.replaceCreateRegion(getPlottingSystem(), "Peak Line "+ipeak, RegionType.XAXIS_LINE);
+						line.setRegionColor(ColorConstants.black);
+						line.setAlpha(150);
+						line.setLineWidth(1);
+						getPlottingSystem().addRegion(line);
+						line.setROI(new LinearROI(rb.getMidPoint(), rb.getMidPoint()));
+						line.setMobile(false);
+						fp.setCenter(line);
+						if (!requirePeakSelections) line.setVisible(false);
+
+
+					    ++ipeak;
 					}
-		    		
-					
+
+				
 					FittingTool.this.fittedPeaks = newBean;
 					viewer.setInput(newBean);
                     viewer.refresh();
@@ -449,7 +438,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		}
 		
 		if (plotServerConnection!=null) {
-			final Serializable peaks = (Serializable)bean.getPeaks();
+			final Serializable peaks = (Serializable)bean.getPeakFunctions();
 			if (peaks!=null && !bean.isEmpty()) {
 				
 				// For some reason this causes NPEs if you create more than one for a given file.
@@ -468,7 +457,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		
 		final Collection<ITrace> traces = getPlottingSystem().getTraces();
 		if (traces==null || traces.size()<0) return;
-		if (fittedPeaks!=null) traces.removeAll(fittedPeaks.getPeakTraces());
+		if (fittedPeaks!=null) traces.removeAll(fittedPeaks.getFittedPeakTraces());
 		
 		final CheckableActionGroup group = new CheckableActionGroup();
 		FittingTool.this.selectedTrace = null;

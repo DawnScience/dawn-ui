@@ -40,27 +40,26 @@ public class FittingLabelProvider extends ColumnLabelProvider {
 	@Override
 	public String getText(Object element) {
 		
-		final IPeak    peak  = (IPeak)element;
+		if (!(element instanceof FittedPeak)) return "";
+		final FittedPeak  peak  = (FittedPeak)element;
+		if (peak==null)     return "";
+		if (peak.getPeak() instanceof NullPeak) return "";
 		final FittedPeaks bean = (FittedPeaks)viewer.getInput();
-		if (bean==null)     return "";
-		if (bean.isEmpty()) return "";
-		if (peak instanceof NullPeak) return "";
 		
-		final int peakNumber = bean.getPeaks().indexOf(peak);
 		
 		switch(column) {
 		case 0:
-			return bean.getPeakName(peakNumber);
+			return peak.getPeakName();
 		case 1:
-			return format.format(bean.getPosition(peakNumber));
+			return format.format(peak.getPosition());
 		case 2:
-			return format.format(bean.getFWHM(peakNumber));
+			return format.format(peak.getFWHM());
 		case 3:
-			return format.format(bean.getArea(peakNumber));
+			return format.format(peak.getArea());
 		case 4:
-			return bean.getPeakType(peakNumber);
+			return peak.getPeakType();
 		case 5:
-			return bean.getAlgorithmType(peakNumber);
+			return bean.getAlgorithmType();
 		default:
 			return "Not found";
 		}

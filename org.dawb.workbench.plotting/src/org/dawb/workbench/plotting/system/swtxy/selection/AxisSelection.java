@@ -19,6 +19,7 @@ import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
 
+import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
@@ -250,6 +251,15 @@ class AxisSelection extends AbstractSelectionRegion {
 		}
 		public void setMotile(boolean motile) {
 			mover.setActive(motile);
+			if (!motile) {
+				setCursor(null);
+			} else {
+				if (regionType==RegionType.XAXIS|| regionType==RegionType.XAXIS_LINE) {
+					if (!isTrackMouse()) setCursor(Cursors.SIZEWE);
+				} else {
+					if (!isTrackMouse()) setCursor(Cursors.SIZENS);
+				}			
+			}
 		}
 	}
 
@@ -297,22 +307,33 @@ class AxisSelection extends AbstractSelectionRegion {
 	}
 	
 	protected void updateROI(ROIBase roi) {
+		
+		if (line1 == null) return;
+		
+		double[] spt = null;
+		double[] ept = null;
+
 		if (roi instanceof RectangularROI) {
 			RectangularROI rroi = (RectangularROI) roi;
+			spt = rroi.getPoint();
+			ept = rroi.getEndPoint();
 
-			if (line1 != null) {
-				
-				final Point p1 = new Point(xAxis.getValuePosition(rroi.getPointX(), false),
-						yAxis.getValuePosition(rroi.getPointY(), false));
-				double[] ept = rroi.getEndPoint();
-				final Point p2 = new Point(xAxis.getValuePosition(ept[0], false),
-						yAxis.getValuePosition(ept[1], false));
-
-				final Rectangle local = new Rectangle(p1, p2);
-				setLocalBounds(local, line1.getParent().getBounds());
-				updateConnectionBounds();
-			}
+		} else if (roi instanceof LinearROI) {
+			LinearROI lroi = (LinearROI) roi;
+			spt = lroi.getPoint();
+			ept = lroi.getEndPoint();			
+			
 		}
+		
+		final Point p1 = new Point(xAxis.getValuePosition(spt[0], false),
+				                   yAxis.getValuePosition(spt[1], false));
+		final Point p2 = new Point(xAxis.getValuePosition(ept[0], false),
+				                   yAxis.getValuePosition(ept[1], false));
+
+		final Rectangle local = new Rectangle(p1, p2);
+		setLocalBounds(local, line1.getParent().getBounds());
+		updateConnectionBounds();
+
 	}
 
 	/**
