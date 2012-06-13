@@ -1,9 +1,14 @@
 package org.dawb.workbench.plotting.tools;
 
+import java.util.Arrays;
+
 import org.dawb.common.ui.plot.IPlottingSystem;
+import org.dawb.common.ui.plot.annotation.AnnotationUtils;
 import org.dawb.common.ui.plot.annotation.IAnnotation;
 import org.dawb.common.ui.plot.region.IRegion;
+import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.trace.ITrace;
+import org.dawb.common.ui.plot.trace.TraceUtils;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
@@ -18,7 +23,31 @@ class FittedPeak {
 	private ITrace         trace;
 	private IAnnotation    annotation;
 	private AbstractDataset[] peakFunctions;
+	private boolean        saved=false;
 	
+	public boolean isSaved() {
+		return saved;
+	}
+
+	public void setSaved(IPlottingSystem sys, boolean saved) {
+		this.saved = saved;
+		
+		sys.removeRegion(fwhm);
+		sys.removeTrace(trace);
+		sys.removeRegion(center);
+		sys.removeAnnotation(annotation);	
+		
+		fwhm.setName(RegionUtils.getUniqueName("Saved Area", sys));
+		trace.setName(TraceUtils.getUniqueTrace("Saved Peak", sys));
+		center.setName(RegionUtils.getUniqueName("Saved Line", sys));
+		annotation.setName(AnnotationUtils.getUniqueAnnotation("Saved Peak", sys));
+		
+		sys.addRegion(fwhm);
+		sys.addTrace(trace);
+		sys.addRegion(center);
+		sys.addAnnotation(annotation);	
+	}
+
 	public FittedPeak(IPeak peak, RectangularROI bounds, AbstractDataset[] pf) {
 		this.peak = peak;
 		this.roi  = bounds;
@@ -142,7 +171,9 @@ class FittedPeak {
 		result = prime * result + ((center == null) ? 0 : center.hashCode());
 		result = prime * result + ((fwhm == null) ? 0 : fwhm.hashCode());
 		result = prime * result + ((peak == null) ? 0 : peak.hashCode());
+		result = prime * result + Arrays.hashCode(peakFunctions);
 		result = prime * result + ((roi == null) ? 0 : roi.hashCode());
+		result = prime * result + (saved ? 1231 : 1237);
 		result = prime * result + ((trace == null) ? 0 : trace.hashCode());
 		return result;
 	}
@@ -175,10 +206,14 @@ class FittedPeak {
 				return false;
 		} else if (!peak.equals(other.peak))
 			return false;
+		if (!Arrays.equals(peakFunctions, other.peakFunctions))
+			return false;
 		if (roi == null) {
 			if (other.roi != null)
 				return false;
 		} else if (!roi.equals(other.roi))
+			return false;
+		if (saved != other.saved)
 			return false;
 		if (trace == null) {
 			if (other.trace != null)

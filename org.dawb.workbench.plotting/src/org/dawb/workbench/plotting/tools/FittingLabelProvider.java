@@ -2,14 +2,14 @@ package org.dawb.workbench.plotting.tools;
 
 import java.text.DecimalFormat;
 
+import org.dawb.workbench.plotting.Activator;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ViewerColumn;
 import org.eclipse.swt.graphics.Color;
-
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
+import org.eclipse.swt.graphics.Image;
 
 /**
  * A label provider with the ability to show:
@@ -24,13 +24,20 @@ import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
  */
 public class FittingLabelProvider extends ColumnLabelProvider {
 
-	private int column;
-	private ColumnViewer viewer;
+	private int           column;
+	private ColumnViewer  viewer;
 	private DecimalFormat format;
+	private Image         savedIcon;
 
 	public FittingLabelProvider(int i) {
 		this.column = i;
 		this.format = new DecimalFormat("##0.#####E0");
+		this.savedIcon = Activator.getImage("icons/plot-tool-peak-fit-savePeak.png");
+	}
+	
+	public void dispsose() {
+		super.dispose();
+		savedIcon.dispose();
 	}
 
 	protected void initialize(ColumnViewer viewer, ViewerColumn column) {
@@ -40,9 +47,9 @@ public class FittingLabelProvider extends ColumnLabelProvider {
 	@Override
 	public String getText(Object element) {
 		
+		if (element==null) return "";
 		if (!(element instanceof FittedPeak)) return "";
 		final FittedPeak  peak  = (FittedPeak)element;
-		if (peak==null)     return "";
 		if (peak.getPeak() instanceof NullPeak) return "";
 		final FittedPeaks bean = (FittedPeaks)viewer.getInput();
 		
@@ -82,5 +89,14 @@ public class FittingLabelProvider extends ColumnLabelProvider {
 		if (sel.getFirstElement()==element) return ColorConstants.darkGreen;
 		
 		return super.getForeground(element);
+	}
+	
+	public Image getImage(Object element) {
+		
+		if (element==null) return null;
+		if (!(element instanceof FittedPeak)) return null;
+		final FittedPeak  peak  = (FittedPeak)element;
+		if (peak.isSaved() && column==0) return savedIcon;
+		return null;
 	}
 }

@@ -147,7 +147,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 
         TableViewerColumn var   = new TableViewerColumn(viewer, SWT.LEFT, 0);
 		var.getColumn().setText("Name");
-		var.getColumn().setWidth(80);
+		var.getColumn().setWidth(150);
 		var.setLabelProvider(new FittingLabelProvider(0));
 		
         var   = new TableViewerColumn(viewer, SWT.CENTER, 1);
@@ -318,7 +318,9 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 			composite.getDisplay().syncExec(new Runnable() {
 				public void run() {
 					getPlottingSystem().removeRegion(fitRegion);
-					if (fittedPeaks!=null) fittedPeaks.removeSelections(getPlottingSystem());
+					if (fittedPeaks!=null) {
+						fittedPeaks.removeSelections(getPlottingSystem(), false);
+					}
 				}
 			});
 			if (selectedTrace==null)    return Status.CANCEL_STATUS;
@@ -364,6 +366,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 			
 		    public void run() {
 		    	try {
+		    		
 		    		
 		    		boolean requireFWHMSelections = Activator.getDefault().getPreferenceStore().getBoolean(FittingConstants.SHOW_FWHM_SELECTIONS);
 		    		boolean requirePeakSelections = Activator.getDefault().getPreferenceStore().getBoolean(FittingConstants.SHOW_PEAK_SELECTIONS);
@@ -413,6 +416,10 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 					    ++ipeak;
 					}
 
+		    		// Add saved peaks if any.
+		    		if (fittedPeaks!=null && !fittedPeaks.isEmpty()) {
+		    			newBean.addFittedPeaks(fittedPeaks.getPeakList());
+		    		}
 				
 					FittingTool.this.fittedPeaks = newBean;
 					viewer.setInput(newBean);
@@ -548,6 +555,17 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		final Separator sep = new Separator(getClass().getName()+".separator1");	
 		getSite().getActionBars().getToolBarManager().add(sep);
 		
+		final Action savePeak = new Action("Save peak.", IAction.AS_PUSH_BUTTON) {
+			public void run() {
+				fittedPeaks.saveSelectedPeak(getPlottingSystem());
+				viewer.refresh();
+			}
+		};
+		savePeak.setImageDescriptor(Activator.getImageDescriptor("icons/plot-tool-peak-fit-savePeak.png"));
+		getSite().getActionBars().getToolBarManager().add(savePeak);
+		
+		final Separator sep3 = new Separator(getClass().getName()+".separator3");	
+		getSite().getActionBars().getToolBarManager().add(sep3);
 
 		final MenuAction  peakType = new MenuAction("Peak type to fit");
 		peakType.setToolTipText("Peak type to fit");
@@ -629,7 +647,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 			public void run() {
 				if (!isActive()) return;
 				if (fittedPeaks!=null) {
-					fittedPeaks.removeSelections(getPlottingSystem());
+					fittedPeaks.removeSelections(getPlottingSystem(), true);
 					fittedPeaks.dispose();
 					fittedPeaks = null;
 				}
@@ -665,6 +683,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 	    final MenuManager menuManager = new MenuManager();
 	    menuManager.add(clear);
 	    menuManager.add(delete);
+	    menuManager.add(savePeak);
 	    menuManager.add(new Separator());
 	    menuManager.add(showAnns);
 	    menuManager.add(showTrace);

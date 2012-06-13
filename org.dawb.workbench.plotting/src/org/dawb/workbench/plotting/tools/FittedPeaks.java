@@ -1,6 +1,5 @@
 package org.dawb.workbench.plotting.tools;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -12,7 +11,6 @@ import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.eclipse.draw2d.ColorConstants;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
 import uk.ac.diamond.scisoft.analysis.optimize.IOptimizer;
 
@@ -23,7 +21,7 @@ import uk.ac.diamond.scisoft.analysis.optimize.IOptimizer;
  * @author fcp94556
  *
  */
-class FittedPeaks {
+public class FittedPeaks {
 
 	private List<FittedPeak>         fittedPeaks;
 	private IOptimizer               optimizer;
@@ -132,13 +130,16 @@ class FittedPeaks {
 	 * Remove stored traces from a plotting system.
 	 * @param sys
 	 */
-	public void removeSelections(IPlottingSystem sys) {
+	public void removeSelections(IPlottingSystem sys, boolean removeSaved) {
 		
 		if (fittedPeaks!=null) {
+			Collection<FittedPeak> removed = new HashSet<FittedPeak>(3);
 			for (FittedPeak fp : fittedPeaks) {
+				if (!removeSaved && fp.isSaved()) continue;
 				fp.delete(sys);
+				removed.add(fp);
 			}
-			fittedPeaks.clear();
+			fittedPeaks.removeAll(removed);
 		}
 	}
 
@@ -200,6 +201,16 @@ class FittedPeaks {
 		}
 		
 		return peaks;
+	}
+
+	public void saveSelectedPeak(IPlottingSystem sys) {
+		if (selectedPeak!=null) {
+			selectedPeak.setSaved(sys, true);
+		}
+	}
+
+	public void addFittedPeaks(List<FittedPeak> peakList) {
+		this.fittedPeaks.addAll(peakList);
 	}
 
 
