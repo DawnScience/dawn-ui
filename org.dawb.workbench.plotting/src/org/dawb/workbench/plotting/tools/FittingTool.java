@@ -675,13 +675,17 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 
 	}
 	
-
-	public FittedPeaks getFittedPeaks() {
-		return fittedPeaks;
-	}
-
 	public void setFittedPeaks(FittedPeaks fittedPeaks) {
 		this.fittedPeaks = fittedPeaks;
+	}
+
+	
+	@Override
+	public Object getAdapter(@SuppressWarnings("rawtypes") Class key) {
+		if (key == IPeak.class) {
+			return fittedPeaks!=null && !fittedPeaks.isEmpty() ? fittedPeaks.getPeakFunctions() : null;
+		}
+		return super.getAdapter(key);
 	}
 
 }
