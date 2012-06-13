@@ -1,6 +1,5 @@
 package org.dawb.workbench.plotting.tools;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +17,7 @@ import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.APeak;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Gaussian;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Lorentzian;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.PearsonVII;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.PseudoVoigt;
@@ -57,7 +57,7 @@ public class FittingUtils {
 			                                     final IProgressMonitor monitor) {
 				
 		final IOptimizer optimizer = getOptimizer();
-		final List<APeak> peaks =  Generic1DFitter.fitPeaks(x, y, getPeakType(), optimizer, getSmoothing(), getPeaksRequired(), 0.0, false, false, new IAnalysisMonitor() {
+		final List<CompositeFunction> composites =  Generic1DFitter.fitPeaks(x, y, getPeakType(), optimizer, getSmoothing(), getPeaksRequired(), 0.0, false, false, new IAnalysisMonitor() {
 			@Override
 			public boolean hasBeenCancelled() {
 				return monitor.isCanceled(); // We always use the monitor.isCancelled() the fitting can take a while
@@ -65,19 +65,17 @@ public class FittingUtils {
 			}
 		});
 		
-		if (peaks==null || peaks.isEmpty()) return null;
-		
-		final List<RectangularROI>      regions   = new ArrayList<RectangularROI>(peaks.size());
-		final List<AbstractDataset[]> functions = new ArrayList<AbstractDataset[]>(peaks.size());
-		
+		if (composites==null || composites.isEmpty()) return null;
+				
 		final FittedPeaks bean = new FittedPeaks();
-		for (APeak peak : peaks) {
+		for (CompositeFunction function : composites) {
 			
+			final IPeak peak = function.getPeak(0);
 			if (monitor.isCanceled()) return null;
 			double w = peak.getFWHM();
 			RectangularROI bounds = new RectangularROI(peak.getPosition() - w/2, 0, w, 0, 0);
 			
-			final AbstractDataset[] pf = getPeakFunction(x, y, peak);
+			final AbstractDataset[] pf = getPeakFunction(x, y, function);
 			
 			bean.addFittedPeak(new FittedPeak(peak, bounds, pf));
 
@@ -97,7 +95,7 @@ public class FittingUtils {
 	 * @param peak
 	 * @return
 	 */
-	private static AbstractDataset[] getPeakFunction(AbstractDataset x, AbstractDataset y, APeak peak) {
+	private static AbstractDataset[] getPeakFunction(AbstractDataset x, final AbstractDataset y, CompositeFunction peak) {
 
 //		double min = peak.getPosition() - (peak.getFWHM()); // Quite wide
 //		double max = peak.getPosition() + (peak.getFWHM());
@@ -106,9 +104,9 @@ public class FittingUtils {
 //		x=a[0];
 //		y=a[1];
 		
-		CompositeFunction function = new CompositeFunction();
+//		CompositeFunction function = new CompositeFunction();
 //		Offset os = new Offset(y.min().doubleValue(), y.max().doubleValue());
-		function.addFunction(peak);
+//		function.addFunction(peak);
 //		function.addFunction(os);
 		
 		// We make an x dataset with n times the points of the real data to get a smooth
@@ -119,7 +117,7 @@ public class FittingUtils {
 		final double step = (xmax-xmin)/(x.getSize()*factor);
 		x = AbstractDataset.arange(xmin, xmax, step, AbstractDataset.FLOAT64);
 
-		return new AbstractDataset[]{x,function.makeDataset(x)};
+		return new AbstractDataset[]{x,peak.makeDataset(x)};
 		
 	}
 
