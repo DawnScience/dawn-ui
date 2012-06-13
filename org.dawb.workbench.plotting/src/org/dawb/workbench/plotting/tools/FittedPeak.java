@@ -1,6 +1,7 @@
 package org.dawb.workbench.plotting.tools;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.annotation.AnnotationUtils;
@@ -24,27 +25,30 @@ class FittedPeak {
 	private IAnnotation    annotation;
 	private AbstractDataset[] peakFunctions;
 	private boolean        saved=false;
+	private String         peakName;
 	
 	public boolean isSaved() {
 		return saved;
 	}
 
-	public void setSaved(IPlottingSystem sys, boolean saved) {
+	public void setSaved(IPlottingSystem sys, boolean saved, String... usedNames) {
 		this.saved = saved;
 		
 		sys.removeRegion(fwhm);
-		sys.removeTrace(trace);
 		sys.removeRegion(center);
+		sys.removeTrace(trace);
 		sys.removeAnnotation(annotation);	
 		
-		fwhm.setName(RegionUtils.getUniqueName("Saved Area", sys));
-		trace.setName(TraceUtils.getUniqueTrace("Saved Peak", sys));
-		center.setName(RegionUtils.getUniqueName("Saved Line", sys));
-		annotation.setName(AnnotationUtils.getUniqueAnnotation("Saved Peak", sys));
+		fwhm.setName(RegionUtils.getUniqueName("Saved Area", sys, usedNames));
+		center.setName(RegionUtils.getUniqueName("Saved Line", sys, usedNames));
+		
+		this.peakName = TraceUtils.getUniqueTrace("Saved Peak", sys, usedNames);
+		trace.setName(peakName);
+		annotation.setName(AnnotationUtils.getUniqueAnnotation("Saved Peak", sys, usedNames));
 		
 		sys.addRegion(fwhm);
-		sys.addTrace(trace);
 		sys.addRegion(center);
+		sys.addTrace(trace);
 		sys.addAnnotation(annotation);	
 	}
 
@@ -63,11 +67,11 @@ class FittedPeak {
 	}
 
 	public void dispose() {
-		roi = null;
-		peak = null;
-		fwhm = null;
+		roi    = null;
+		peak   = null;
+		fwhm   = null;
 		center = null;
-		trace = null;
+		trace  = null;
 		annotation = null;		
 	}
 
@@ -88,7 +92,7 @@ class FittedPeak {
 	
 	public String getPeakName() {
 		try {
-		    return trace.getName();
+		    return peakName;
 		} catch (IndexOutOfBoundsException ne) {
 			return null;
 		}
@@ -154,6 +158,7 @@ class FittedPeak {
 		return trace;
 	}
 	public void setTrace(ITrace trace) {
+		this.peakName= trace.getName();
 		this.trace = trace;
 	}
 	public IAnnotation getAnnotation() {
@@ -241,6 +246,13 @@ class FittedPeak {
 		sys.removeTrace(trace);
 		sys.removeRegion(center);
 		sys.removeAnnotation(annotation);		
+	}
+
+	public void getUsedNames(List<String> names) {
+		names.add(fwhm.getName());
+		names.add(center.getName());
+		names.add(trace.getName());
+		names.add(annotation.getName());
 	}
 	
 	
