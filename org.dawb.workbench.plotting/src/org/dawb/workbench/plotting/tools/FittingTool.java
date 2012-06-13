@@ -340,6 +340,10 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 			x = a[0]; y=a[1];
 
 			final FittedPeaks bean = FittingUtils.getFittedPeaks(x, y, monitor);
+    		// Add saved peaks if any.
+    		if (fittedPeaks!=null && !fittedPeaks.isEmpty()) {
+    			bean.addFittedPeaks(fittedPeaks.getPeakList());
+    		}
 			createFittedPeaks(bean);
 
 			return Status.OK_STATUS;
@@ -376,6 +380,8 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		    		int ipeak = 1;
 					// Draw the regions
 					for (FittedPeak fp : newBean.getPeakList()) {
+						
+						if (fp.isSaved()) continue;
 						
 						RectangularROI rb = fp.getRoi();
 						final IRegion area = RegionUtils.replaceCreateRegion(getPlottingSystem(), "Peak Area "+ipeak, RegionType.XAXIS);
@@ -415,11 +421,6 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 
 					    ++ipeak;
 					}
-
-		    		// Add saved peaks if any.
-		    		if (fittedPeaks!=null && !fittedPeaks.isEmpty()) {
-		    			newBean.addFittedPeaks(fittedPeaks.getPeakList());
-		    		}
 				
 					FittingTool.this.fittedPeaks = newBean;
 					viewer.setInput(newBean);
@@ -603,7 +604,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		getSite().getActionBars().getToolBarManager().add(sep2);
 
 		this.tracesMenu = new MenuAction("Traces");
-		tracesMenu.setToolTipText("Choice of trace to fit on.");
+		tracesMenu.setToolTipText("Choose trace for fit.");
 		tracesMenu.setImageDescriptor(Activator.getImageDescriptor("icons/plot-tool-trace-choice.png"));
 		
 		getSite().getActionBars().getToolBarManager().add(tracesMenu);

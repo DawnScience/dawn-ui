@@ -725,7 +725,11 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	 */
 	public void removeTrace(ITrace trace) {
 		if (traceMap!=null) traceMap.remove(trace.getName());
-		xyGraph.removeTrace(((LineTraceImpl)trace).getTrace());
+		if (trace instanceof LineTraceImpl) {
+			xyGraph.removeTrace(((LineTraceImpl)trace).getTrace());
+		} else if (trace instanceof ImageTrace) {
+			xyGraph.removeImageTrace((ImageTrace)trace);
+		}
 		xyCanvas.redraw();
 		fireTraceRemoved(new TraceEvent(trace));
 	}

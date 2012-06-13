@@ -205,7 +205,7 @@ public class FittedPeaks {
 
 	public void saveSelectedPeak(IPlottingSystem sys) {
 		if (selectedPeak!=null) {
-			selectedPeak.setSaved(sys, true);
+			selectedPeak.setSaved(sys, true, getAllNames());
 		}
 	}
 
@@ -213,5 +213,16 @@ public class FittedPeaks {
 		this.fittedPeaks.addAll(peakList);
 	}
 
-
+    /**
+     * Gets all the active region and plot names
+     * @return
+     */
+	private String[] getAllNames() {
+		
+		List<String> names = new ArrayList<String>(7);
+		for (FittedPeak fp : fittedPeaks) {
+			fp.getUsedNames(names);
+		}
+		return names.toArray(new String[names.size()]);
+	}
 }
