@@ -57,7 +57,7 @@ public class FittingUtils {
 			                                     final IProgressMonitor monitor) {
 				
 		final IOptimizer optimizer = getOptimizer();
-		final List<CompositeFunction> composites =  Generic1DFitter.fitPeaks(x, y, getPeakType(), optimizer, getSmoothing(), getPeaksRequired(), 0.0, false, false, new IAnalysisMonitor() {
+		final List<CompositeFunction> composites =  Generic1DFitter.fitPeakFunctions(x, y, getPeakType(), optimizer, getSmoothing(), getPeaksRequired(), 0.0, false, false, new IAnalysisMonitor() {
 			@Override
 			public boolean hasBeenCancelled() {
 				return monitor.isCanceled(); // We always use the monitor.isCancelled() the fitting can take a while
