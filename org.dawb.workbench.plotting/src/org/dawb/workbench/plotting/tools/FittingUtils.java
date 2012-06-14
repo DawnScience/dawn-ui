@@ -77,7 +77,7 @@ public class FittingUtils {
 			
 			final AbstractDataset[] pf = getPeakFunction(x, y, function);
 			
-			bean.addFittedPeak(new FittedPeak(peak, bounds, pf));
+			bean.addFittedPeak(new FittedPeak(function, bounds, pf));
 
 		}
 		
