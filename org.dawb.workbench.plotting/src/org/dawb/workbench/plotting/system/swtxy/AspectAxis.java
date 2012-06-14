@@ -168,6 +168,7 @@ public class AspectAxis extends Axis {
 	 */
 	private Range normalize(Range range) {
 		if (maximumRange==null) return range;
+		if (relativeTo==null)   return range;
 		//if (true) return new Range(range.getLower(), range.getUpper());
 		double lower=range.getLower(), upper=range.getUpper();
 		if (!maximumRange.inRange(lower, true)) lower = range.isMinBigger() ? maximumRange.getUpper() : maximumRange.getLower();

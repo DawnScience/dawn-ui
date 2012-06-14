@@ -593,8 +593,10 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 			boolean xfirst = Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.PLOT_X_DATASET);
 			if (xfirst) {
 				plotX.setChecked(true);
+				system.setXfirst(true);
 			} else {
 				plotIndex.setChecked(true);
+				system.setXfirst(false);
 			}
 			
 			
