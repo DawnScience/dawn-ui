@@ -403,7 +403,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 						if (!requireTrace) trace.setVisible(false);
 
 	                   	final IAnnotation ann = AnnotationUtils.replaceCreateAnnotation(getPlottingSystem(), "Peak "+ipeak);
-                    	ann.setLocation(fp.getPosition(), fp.getPeak().val(fp.getPosition()));                  	
+                    	ann.setLocation(fp.getPosition(), fp.getPeakValue());                  	
                     	getPlottingSystem().addAnnotation(ann);                   	
                     	fp.setAnnotation(ann);
                     	if (!requireAnnot) ann.setVisible(false);

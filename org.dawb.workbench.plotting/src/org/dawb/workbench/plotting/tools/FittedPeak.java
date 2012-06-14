@@ -12,20 +12,21 @@ import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.TraceUtils;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 class FittedPeak {
 
-	private RectangularROI roi;
-	private IPeak          peak;
-	private IRegion        fwhm;
-	private IRegion        center;
-	private ITrace         trace;
-	private IAnnotation    annotation;
+	private RectangularROI    roi;
+	private CompositeFunction function;
+	private IRegion           fwhm;
+	private IRegion           center;
+	private ITrace            trace;
+	private IAnnotation       annotation;
 	private AbstractDataset[] peakFunctions;
-	private boolean        saved=false;
-	private String         peakName;
+	private boolean           saved=false;
+	private String            peakName;
 	
 	public boolean isSaved() {
 		return saved;
@@ -52,8 +53,8 @@ class FittedPeak {
 		sys.addAnnotation(annotation);	
 	}
 
-	public FittedPeak(IPeak peak, RectangularROI bounds, AbstractDataset[] pf) {
-		this.peak = peak;
+	public FittedPeak(CompositeFunction peak, RectangularROI bounds, AbstractDataset[] pf) {
+		this.function = peak;
 		this.roi  = bounds;
 		this.peakFunctions = pf;
 	}
@@ -68,7 +69,7 @@ class FittedPeak {
 
 	public void dispose() {
 		roi    = null;
-		peak   = null;
+		function   = null;
 		fwhm   = null;
 		center = null;
 		trace  = null;
@@ -100,15 +101,18 @@ class FittedPeak {
 
 	public double getPosition() {
 		try {
-			return peak.getPosition();
+			return getPeak().getPosition();
 		} catch (IndexOutOfBoundsException ne) {
 			return Double.NaN;
 		}
 	}
+	public double getPeakValue() {
+		return function.val(getPosition());
+	}
 	
 	public double getFWHM() {
 		try {
-			return peak.getFWHM();
+			return getPeak().getFWHM();
 		} catch (IndexOutOfBoundsException ne) {
 			return Double.NaN;
 		}
@@ -116,7 +120,7 @@ class FittedPeak {
 	
 	public double getArea() {
 		try {
-			return peak.getArea();
+			return getPeak().getArea();
 		} catch (IndexOutOfBoundsException ne) {
 			return Double.NaN;
 		}
@@ -124,7 +128,7 @@ class FittedPeak {
 	
 	public String getPeakType() {
 		try {
-		    return peak.getClass().getSimpleName();
+		    return getPeak().getClass().getSimpleName();
 		} catch (IndexOutOfBoundsException ne) {
 			return null;
 		}
@@ -137,10 +141,7 @@ class FittedPeak {
 		this.roi = roi;
 	}
 	public IPeak getPeak() {
-		return peak;
-	}
-	public void setPeak(IPeak peak) {
-		this.peak = peak;
+		return function.getPeak(0);
 	}
 	public IRegion getFwhm() {
 		return fwhm;
@@ -174,9 +175,12 @@ class FittedPeak {
 		result = prime * result
 				+ ((annotation == null) ? 0 : annotation.hashCode());
 		result = prime * result + ((center == null) ? 0 : center.hashCode());
+		result = prime * result
+				+ ((function == null) ? 0 : function.hashCode());
 		result = prime * result + ((fwhm == null) ? 0 : fwhm.hashCode());
-		result = prime * result + ((peak == null) ? 0 : peak.hashCode());
 		result = prime * result + Arrays.hashCode(peakFunctions);
+		result = prime * result
+				+ ((peakName == null) ? 0 : peakName.hashCode());
 		result = prime * result + ((roi == null) ? 0 : roi.hashCode());
 		result = prime * result + (saved ? 1231 : 1237);
 		result = prime * result + ((trace == null) ? 0 : trace.hashCode());
@@ -201,17 +205,22 @@ class FittedPeak {
 				return false;
 		} else if (!center.equals(other.center))
 			return false;
+		if (function == null) {
+			if (other.function != null)
+				return false;
+		} else if (!function.equals(other.function))
+			return false;
 		if (fwhm == null) {
 			if (other.fwhm != null)
 				return false;
 		} else if (!fwhm.equals(other.fwhm))
 			return false;
-		if (peak == null) {
-			if (other.peak != null)
-				return false;
-		} else if (!peak.equals(other.peak))
-			return false;
 		if (!Arrays.equals(peakFunctions, other.peakFunctions))
+			return false;
+		if (peakName == null) {
+			if (other.peakName != null)
+				return false;
+		} else if (!peakName.equals(other.peakName))
 			return false;
 		if (roi == null) {
 			if (other.roi != null)
@@ -254,6 +263,7 @@ class FittedPeak {
 		names.add(trace.getName());
 		names.add(annotation.getName());
 	}
+
 	
 	
 }
