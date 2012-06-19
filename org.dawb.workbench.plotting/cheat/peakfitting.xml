@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cheatsheet title="Peak Fitting">
+
+	<intro>
+		<description>
+		    This cheat sheet helps you to open an ascii file,
+			and shows you how to fit peaks with the file.
+			If you have just completed the previous cheat sheet, please close all your data file parts.
+	    </description>
+	</intro>
+
+   <item
+         title="Data Browsing Perspective">
+      <description>
+         Please choose the data browsing perspective if you do not already have it selected (nothing will happen if you do not).
+      </description>
+      <command
+            required="false"
+            serialization="org.eclipse.ui.perspectives.showPerspective(org.eclipse.ui.perspectives.showPerspective.perspectiveId=org.edna.workbench.application.perspective.DataPerspective)"/>
+   </item>
+   <item
+         title="Open File">
+      <description>
+         Click to open an example file from the &apos;data&apos; project containing multi-channel analyser data.
+      </description>
+      <command
+            required="false"
+            serialization="org.eclipse.ui.navigate.openResource(filePath=data/examples/metalmix.mca)"/>
+   </item>
+   <item
+         title="Plot One Data Set">
+      <description>
+         In the 'Data' column of the part, select the item labelled 'Column 1'. This will plot the values of 'Column 1' vs. indices.
+      </description>
+   </item>
+   <item
+         title="Select 'Peak fitting' tool">
+      <description>
+         Now on the toolbar above this plot, there will be a drop down of available tools. These tools may be obsured on Linux if the window containing the plot is too small. On the drop down action labelled 'Plotting tools (used for images and X/Y plots)' select the 'Peak fitting' tool. You will see the tool become available under the plot.
+      </description>
+   </item>
+     <item
+         title="Fit some peaks">
+      <description>
+         Now click and drag over the plot area within which you would like to fit peaks, selecting the plot which you have just made. Afterwards, one or more peaks will appear in the area which you searched. The fitting function is plotted as a black curve, the peak as a black line, the full-width-half-max value is a yellow region and there is an annotation added.
+      </description>
+   </item>
+     <item
+         title="Options">
+      <description>
+         You can turn on and off the peak markers, like the full-width-half-max area using tool bar buttons in the 'Peak Fitting' tool. Experiment with making different selections visible, these preferences are remembered for the next time you use the tool.
+      </description>
+   </item>
+   <item
+         title="Selecting peak number">
+      <description>
+         In the 'Peak Fitting' tool there is another button for choosing the number of peaks to find. Experiment with different values for this. If you select many peaks and that number cannot be found, the algorithm will generally find a lower number of peaks.
+      </description>
+   </item>
+    <item
+         title="Fitting other data">
+      <description>
+         Now we will look at fitting when there is more than one plots.        
+      </description>
+      <subitem 
+          label="In the 'Data' view, add 'Column 2' to the data plotted. This will plot more data in the plot.">
+      </subitem>
+      <subitem 
+          label="Now right click on 'Peak 1' in 'Peak fitting' tool and select 'Save peak.'. This keeps the peak so that subsequent fits do not remove it.">
+      </subitem>
+      <subitem 
+          label="Now click on the peak fitting tool again above the main plot, this starts a new fit and requires you to drag out a new area. Drag the area and do another fit.">
+      </subitem>
+      <subitem 
+          label="Now from the 'Peak Fitting' toolbar change the trace to 'Column 2', there is a drop down here for the trace to fit. Now you can compare fit on one data again fit on another.">
+      </subitem>
+   </item>
+    <item
+         title="Algorithm changes">
+      <description>
+         By default the system fits Gaussians. In order to experiment with different peak types try the 'Peak type to fit' action in the 'Peak Fitting' tool. There are further algorithm preferences under the 'Preferences...' section available from the 'Peak Fitting' tools menu (to the far right of the toolbar).      
+      </description>
+    <onCompletion>
+      Congratulations, you can now use fitting in X/Y plots. Try with your own ascii files or try some plotting using a hdf5 or nexus file with one dimensional data.
+    </onCompletion>
+    </item>
+       	
+</cheatsheet>

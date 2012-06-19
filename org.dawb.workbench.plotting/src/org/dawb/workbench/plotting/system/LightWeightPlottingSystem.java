@@ -734,6 +734,13 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		fireTraceRemoved(new TraceEvent(trace));
 	}
 
+	@Override
+	public void renameTrace(final ITrace trace, String name) {
+		if (traceMap!=null) traceMap.remove(trace.getName());
+		trace.setName(name);
+		if (traceMap==null) traceMap = new LinkedHashMap<String, ITrace>(3);
+		traceMap.put(name, trace);
+	}
 	
 	public Collection<ITrace> getTraces() {
 		if (traceMap==null) return Collections.emptyList();
@@ -1107,6 +1114,12 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		final AbstractSelectionRegion r = (AbstractSelectionRegion)region;
 		xyGraph.removeRegion(r);
 	}
+	
+	@Override
+	public void renameRegion(final IRegion region, String name) {
+		if (xyGraph==null) return;
+		xyGraph.renameRegion((AbstractSelectionRegion)region, name);
+	}
 
 	/**
 	 * Get a region by name.
@@ -1165,7 +1178,11 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
         xyGraph.removeAnnotation(wrapper.getAnnotation());
         xyGraph.getOperationsManager().addCommand(new RemoveAnnotationCommand(xyGraph, wrapper.getAnnotation()));
 	}
-	
+	@Override
+	public void renameAnnotation(final IAnnotation annotation, String name) {
+        final AnnotationWrapper wrapper = (AnnotationWrapper)annotation;
+        wrapper.getAnnotation().setName(name);
+	}
 	/**
 	 * Get an annotation by name.
 	 * @param name
