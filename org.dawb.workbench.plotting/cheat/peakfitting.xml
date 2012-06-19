@@ -36,7 +36,7 @@
    <item
          title="Select 'Peak fitting' tool">
       <description>
-         Now on the toolbar above this plot, there will be a drop down of available tools. These tools may be obsured on Linux if the window containing the plot is too small. On the drop down action labelled 'Plotting tools (used for images and X/Y plots)' select the 'Peak fitting' tool. You will see the tool become available under the plot.
+         Now on the toolbar above this plot, there will be a drop down of available tools. These tools may be obscured on Linux if the window containing the plot is too small. On the drop down action labelled 'Plotting tools (used for images and X/Y plots)' select the 'Peak fitting' tool. You will see the tool become available under the plot.
       </description>
    </item>
      <item
