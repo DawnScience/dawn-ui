@@ -92,9 +92,9 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 					traces.removeAll(fittedPeaks.getFittedPeakTraces());
 				}
 				if (traces!=null && !traces.isEmpty()) {
-					updateTracesChoice();
+					updateTracesChoice(traces.get(traces.size()-1));
 				}
-			   
+				
 			}
 			
 			@Override
@@ -208,7 +208,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		
 		if (viewUpdateListener!=null) viewer.addSelectionChangedListener(viewUpdateListener);
 		if (this.traceListener!=null) getPlottingSystem().addTraceListener(traceListener);
-		updateTracesChoice();
+		updateTracesChoice(null);
 		
 		try {
 			if (fittedPeaks!=null) fittedPeaks.activate();
@@ -227,10 +227,11 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 	}
 	@Override
 	public void deactivate() {
-		super.deactivate();
-		if (viewer!=null && viewer.getControl().isDisposed()) return;
 		
-		if (viewUpdateListener!=null) viewer.removeSelectionChangedListener(viewUpdateListener);
+		super.deactivate();
+		if (viewer!=null && !viewer.getControl().isDisposed()) {		
+		    if (viewUpdateListener!=null) viewer.removeSelectionChangedListener(viewUpdateListener);
+		}
 		
 		if (getPlottingSystem()!=null) {
 			if (this.traceListener!=null) getPlottingSystem().removeTraceListener(traceListener);
@@ -457,7 +458,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 	}
 	
 
-	protected void updateTracesChoice() {
+	protected void updateTracesChoice(ITrace selected) {
 		
 		if (tracesMenu==null) return;
 		
@@ -469,7 +470,11 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		
 		final CheckableActionGroup group = new CheckableActionGroup();
 		FittingTool.this.selectedTrace = null;
+		int index = 0;
+		int selectionIndex=0;
 		for (final ITrace iTrace : traces) {
+			
+			if (iTrace==selected) selectionIndex= index;
 			
 			if (FittingTool.this.selectedTrace==null && iTrace instanceof ILineTrace) {
 				FittingTool.this.selectedTrace = (ILineTrace)iTrace;
@@ -485,11 +490,13 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 			};
 			tracesMenu.add(action);
 			group.add(action);
+			
+			index++;
 		}
 		
 		if (tracesMenu!=null && !tracesMenu.isEmpty()) {
-			tracesMenu.setSelectedAction(0);
-			tracesMenu.getAction(0).setChecked(true);
+			tracesMenu.setSelectedAction(selectionIndex);
+			tracesMenu.getAction(selectionIndex).setChecked(true);
 		}
 				
 		getSite().getActionBars().updateActionBars();
@@ -558,7 +565,11 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		
 		final Action savePeak = new Action("Save peak.", IAction.AS_PUSH_BUTTON) {
 			public void run() {
-				fittedPeaks.saveSelectedPeak(getPlottingSystem());
+				try {
+					fittedPeaks.saveSelectedPeak(getPlottingSystem());
+				} catch (Exception e) {
+					logger.error("Cannot rename saved peak ", e);
+				}
 				viewer.refresh();
 			}
 		};

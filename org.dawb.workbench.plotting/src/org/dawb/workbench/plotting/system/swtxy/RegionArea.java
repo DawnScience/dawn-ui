@@ -73,6 +73,12 @@ public class RegionArea extends PlotArea {
 		return gone!=null;
 	}
 	
+	public void renameRegion(final AbstractSelectionRegion region, String name) {
+	    regions.remove(region.getName());
+	    region.setName(name);
+	    regions.put(name, region);
+	}
+	
 	public void clearRegions() {
 		clearRegionsInternal();
 		revalidate();

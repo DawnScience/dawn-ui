@@ -64,6 +64,9 @@ public class XYRegionGraph extends XYGraph {
 	public void removeRegion(final AbstractSelectionRegion region) {
 		getRegionArea().removeRegion(region);
 	}
+	public void renameRegion(final AbstractSelectionRegion region, String name) {
+		getRegionArea().renameRegion(region, name);
+	}
 	public void setSelectionProvider(final ISelectionProvider provider) {
 		getRegionArea().setSelectionProvider(provider);
 	}
