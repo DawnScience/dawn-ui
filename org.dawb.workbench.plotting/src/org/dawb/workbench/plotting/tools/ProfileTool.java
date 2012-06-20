@@ -125,13 +125,15 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		registered.addAll(traces);
 		
 		// Used to set the line on the image to the same color as the plot for line profiles only.
-		final ITrace first = traces.iterator().next();
-		if (isRegionTypeSupported(RegionType.LINE) && first instanceof ILineTrace && region.getName().startsWith("Profile")) {
-			getControl().getDisplay().syncExec(new Runnable() {
-				public void run() {
-					region.setRegionColor(((ILineTrace)first).getTraceColor());
-				}
-			});
+		if (!traces.isEmpty()) {
+			final ITrace first = traces.iterator().next();
+			if (isRegionTypeSupported(RegionType.LINE) && first instanceof ILineTrace && region.getName().startsWith("Profile")) {
+				getControl().getDisplay().syncExec(new Runnable() {
+					public void run() {
+						region.setRegionColor(((ILineTrace)first).getTraceColor());
+					}
+				});
+			}
 		}
 	}
 	
