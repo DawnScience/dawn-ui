@@ -180,6 +180,27 @@
             id="org.dawb.workbench.plotting.cheatsheet.lineprofile"
             name="Line Profile">
       </cheatsheet>
+      <cheatsheet
+            category="org.dawb.workbench.plotting.tools.category"
+            composite="false"
+            contentFile="cheat/box_profile.xml"
+            id="org.dawb.workbench.plotting.cheatsheet.boxprofile"
+            name="Box Profile">
+      </cheatsheet>
+      <cheatsheet
+            category="org.dawb.workbench.plotting.tools.category"
+            composite="false"
+            contentFile="cheat/radial_profile.xml"
+            id="org.dawb.workbench.plotting.cheatsheet.radialprofile"
+            name="Radial Profile">
+      </cheatsheet>
+      <cheatsheet
+            category="org.dawb.workbench.plotting.tools.category"
+            composite="false"
+            contentFile="cheat/azimuthal_profile.xml"
+            id="org.dawb.workbench.plotting.cheatsheet.aziprofile"
+            name="Azimuthal Profile">
+      </cheatsheet>
    </extension>
 
 </plugin>
