@@ -30,26 +30,26 @@
    <item
          title="Select 'Cross Hair Profile' tool">
       <description>
-         Select the 'Box Profile' tool from the toolbar above the plot, tools labelled 'Image tools used to profile and inspect images'. These tools may be obscured on Linux if the window containing the plot is too small.
+         Select the 'Cross Hair Profile' tool from the toolbar above the plot, tools labelled 'Image tools used to profile and inspect images'. These tools may be obscured on Linux if the window containing the plot is too small.
       </description>
    </item>
    
     <item
-         title="Add a box">
+         title="Move cursor around">
       <description>
-         Find a small group of spots and click and drag your box profile over them. Note you can move your box after it is added by using the control points or by translating it, again by clicking and dragging it. You can also add more than one box to view the profile.
+         Move the cursor around over the image. In the 'Cross Hair Profile' view you will see the vertical and horizontal profile (intensity values in x and y).
       </description>
    </item>
  
    <item
-         title="View Profile">
+         title="Click and clear">
       <description>
-         Look at the 'Box Profile' tool view on the right hand side of the image. Here you will see the intensity values of the area which you have created. The plots are the sum of x intensities and the sum of y intensities.
+         Now click a few locations in the image. Each time you click the profile is saved. In the toolbar of the 'Cross Hair Profile' tool there is an action which looks like two graph axes labelled 'Clear cross hair profiles'. Click this to remove the save profiles.
       </description>
     <onCompletion>
-      Congratulations, you can now use box profiles with images. Try with your images and with multiple boxes. NOTE: If you use the masking tool, you can mask out pixels with unwanted intensity values and this profile tool will use the mask.
+      Congratulations, you can now use cross hair profiles with images. Try with your images. NOTE: If you use the masking tool, you can mask out pixels with unwanted intensity values and this profile tool will use the mask.
     </onCompletion>
    </item>
- 
+   
        	
 </cheatsheet>

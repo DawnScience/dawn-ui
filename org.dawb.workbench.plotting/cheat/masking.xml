@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cheatsheet title="Masking">
+
+	<intro>
+		<description>
+		    This cheat sheet helps you to open an image,
+			and shows you how to use the masking tool with the file.
+			If you have just completed the previous cheat sheet, please close all your data file parts.
+	    </description>
+	</intro>
+
+   <item
+         title="Data Browsing Perspective">
+      <description>
+         Please choose the data browsing perspective if you do not already have it selected (nothing will happen if you do not).
+      </description>
+      <command
+            required="false"
+            serialization="org.eclipse.ui.perspectives.showPerspective(org.eclipse.ui.perspectives.showPerspective.perspectiveId=org.edna.workbench.application.perspective.DataPerspective)"/>
+   </item>
+   <item
+         title="Open File">
+      <description>
+         Click to open an example file from the &apos;data&apos; project containing a test image.
+      </description>
+      <command
+            required="false"
+            serialization="org.eclipse.ui.navigate.openResource(filePath=data/examples/ref-testscale_1_001.img)"/>
+   </item>
+   <item
+         title="Select 'Masking' tool">
+      <description>
+         Select the 'Masking' tool from the toolbar above the plot, tools labelled 'Image tools used to profile and inspect images'. These tools may be obscured on Linux if the window containing the plot is too small.
+      </description>
+   </item>
+   
+    <item
+         title="Upper and lower mask">
+      <description>
+         Go to the 'Masking' tool view to the right of the image and click on 'Enable lower mask' and 'Enable upper mask'. No go down to the bottom of the tool and press the 'Apply' button. You will see intensity values higher or lower than the upper and lower values will be coloured green. There is a 'Mask colour' button for changing this colour.
+      </description>
+   </item>
+ 
+    <item
+         title="Mask using regions">
+      <description>
+      Now we will mask using the mouse to select the mask.
+      </description>
+         <subitem 
+          label="Untick the upper and lower mask and press apply. Now tick 'Automatically apply mask when something changes' to apply changes automatically."/>
+          
+         <subitem 
+          label="Click 'Enable masking using regions' a toolbar becomes active, from this toolbar select 'Continuously add the same region'."/>
+          
+          <subitem 
+          label="Now we will use free draw to mask out custom areas. Select the 'Free drawn selection' region and draw in the image."/>
+          
+           <subitem 
+          label="You will see that where you draw is masked out when you click and drag on the image. You can also change the line size of this free draw."/>
+            
+           <subitem 
+           label="Experiment masking using a ring selection to take out a section of intensity by using the 'Add circle selection' action and clicking and dragging in the image. Notice how the image rehistograms (changes colour) when a ring of intensity is removed."/>
+   </item>
+
+    <item
+         title="Save mask">
+       <description>
+      We can save the mask to a buffer and re-apply it to other images. In the 'Masking' view selection there is a toolbar at the top with the action 'Save the mask into a buffer'. Select this then open the file below, choose the masking tool and select 'Merge the previously saved mask from buffer'. You will see your mask applied to the new image.
+      </description>
+      <command
+            required="true"
+            serialization="org.eclipse.ui.navigate.openResource(filePath=data/examples/ref-testscale_1_002.img)"/>
+    <onCompletion>
+      Congratulations, you can now use masking to remove certain pixels from your images. NOTE: Most other tools take into account a mask after it is created. The mask will influence the profile tools for instance once it is applied.
+    </onCompletion>
+     </item>
+         	
+</cheatsheet>
