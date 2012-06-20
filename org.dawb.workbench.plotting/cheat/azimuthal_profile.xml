@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cheatsheet title="Azimuthal Profile">
+
+	<intro>
+		<description>
+		    This cheat sheet helps you to open an image,
+			and shows you how to use the azimuthal profile tool with the file.
+			If you have just completed the previous cheat sheet, please close all your data file parts.
+	    </description>
+	</intro>
+
+   <item
+         title="Data Browsing Perspective">
+      <description>
+         Please choose the data browsing perspective if you do not already have it selected (nothing will happen if you do not).
+      </description>
+      <command
+            required="false"
+            serialization="org.eclipse.ui.perspectives.showPerspective(org.eclipse.ui.perspectives.showPerspective.perspectiveId=org.edna.workbench.application.perspective.DataPerspective)"/>
+   </item>
+   <item
+         title="Open File">
+      <description>
+         Click to open an example file from the &apos;data&apos; project containing a test image.
+      </description>
+      <command
+            required="false"
+            serialization="org.eclipse.ui.navigate.openResource(filePath=data/examples/ref-testscale_1_001.img)"/>
+   </item>
+   <item
+         title="Select 'Azimuthal Profile' tool">
+      <description>
+         Select the 'Azimuthal Profile' tool from the toolbar above the plot, tools labelled 'Image tools used to profile and inspect images'. These tools may be obscured on Linux if the window containing the plot is too small.
+      </description>
+   </item>
+   
+    <item
+         title="Add a sector">
+      <description>
+         Find approximate center of the image and click and drag your sector from the center outwards a little way, now let go and click again further out - you have now created a sector. Note that you can move your sector after it is added by using the control points or by translating it, again by clicking and dragging it. You can also add more than one sector.
+      </description>
+   </item>
+ 
+   <item
+         title="View Profile">
+      <description>
+         Look at the 'Azimuthal Profile' tool view on the right hand side of the image. Here you will see the intensity values of the sector which you have created. The plots are the sum of curves in sector or the 'azimuthal integration'. Try moving the sector around and resizing it to see the changes in the azimuthal integration.
+      </description>
+   </item>
+ 
+   <item
+         title="Center">
+      <description>
+         Now try the action on the 'Azimuthal Profile' toolbar labelled 'Center sector Profile 1'. This action attempts to center the sector by using values in the meta data (it uses the geometric center otherwise).
+      </description>
+   </item>
+
+   <item
+         title="Symmetry Setting">
+      <description>
+         Now try the action on the 'Azimuthal Profile' tools labelled 'Symmetry Setting'. This action adds a symmetry sector to the profile. Experiment with different symmetry settings. NOTE there is also a button for combining symmetry here, this adds the two integrations instead of plotting them separately.
+      </description>
+    <onCompletion>
+      Congratulations, you can now use sector profiles with images. Try with your images. NOTE: If you use the masking tool, you can mask out pixels with unwanted intensity values and this profile tool will use the mask.
+    </onCompletion>
+   </item>
+
+       	
+</cheatsheet>
