@@ -203,7 +203,7 @@ public class FittedPeaks {
 		return peaks;
 	}
 
-	public void saveSelectedPeak(IPlottingSystem sys) {
+	public void saveSelectedPeak(IPlottingSystem sys) throws Exception {
 		if (selectedPeak!=null) {
 			selectedPeak.setSaved(sys, true, getAllNames());
 		}

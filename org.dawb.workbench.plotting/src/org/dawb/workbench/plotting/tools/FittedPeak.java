@@ -32,25 +32,15 @@ class FittedPeak {
 		return saved;
 	}
 
-	public void setSaved(IPlottingSystem sys, boolean saved, String... usedNames) {
+	public void setSaved(IPlottingSystem sys, boolean saved, String... usedNames) throws Exception {
 		this.saved = saved;
 		
-		sys.removeRegion(fwhm);
-		sys.removeRegion(center);
-		sys.removeTrace(trace);
-		sys.removeAnnotation(annotation);	
 		
-		fwhm.setName(RegionUtils.getUniqueName("Saved Area", sys, usedNames));
-		center.setName(RegionUtils.getUniqueName("Saved Line", sys, usedNames));
-		
-		this.peakName = TraceUtils.getUniqueTrace("Saved Peak", sys, usedNames);
-		trace.setName(peakName);
-		annotation.setName(AnnotationUtils.getUniqueAnnotation("Saved Peak", sys, usedNames));
-		
-		sys.addRegion(fwhm);
-		sys.addRegion(center);
-		sys.addTrace(trace);
-		sys.addAnnotation(annotation);	
+		sys.renameRegion(fwhm, RegionUtils.getUniqueName("Saved Area", sys, usedNames));
+		sys.renameRegion(center, RegionUtils.getUniqueName("Saved Line", sys, usedNames));	
+	    sys.renameTrace(trace, TraceUtils.getUniqueTrace("Saved Peak", sys, usedNames));
+	    sys.renameAnnotation(annotation, AnnotationUtils.getUniqueAnnotation("Saved Peak", sys, usedNames));
+	    peakName = trace.getName();
 	}
 
 	public FittedPeak(CompositeFunction peak, RectangularROI bounds, AbstractDataset[] pf) {

@@ -146,5 +146,40 @@
             name="Fitting Preferences">
       </page>
    </extension>
+   <extension
+         point="org.eclipse.ui.cheatsheets.cheatSheetContent">
+      <category
+            id="org.dawb.workbench.plotting.tools.category"
+            name="Plotting tools">
+      </category>
+      <cheatsheet
+            category="org.dawb.workbench.plotting.tools.category"
+            composite="false"
+            contentFile="cheat/pixeInfo.xml"
+            id="org.dawb.workbench.plotting.cheatsheet.pixel"
+            name="Pixel information tool">
+      </cheatsheet>
+      <cheatsheet
+            category="org.dawb.workbench.plotting.tools.category"
+            composite="false"
+            contentFile="cheat/peakfitting.xml"
+            id="org.dawb.workbench.plotting.cheatsheet.peak"
+            name="Peak fitting">
+      </cheatsheet>
+      <cheatsheet
+            category="org.dawb.workbench.plotting.tools.category"
+            composite="false"
+            contentFile="cheat/measurement.xml"
+            id="org.dawb.workbench.plotting.cheatsheet.measurement"
+            name="Measurement">
+      </cheatsheet>
+      <cheatsheet
+            category="org.dawb.workbench.plotting.tools.category"
+            composite="false"
+            contentFile="cheat/line_profile.xml"
+            id="org.dawb.workbench.plotting.cheatsheet.lineprofile"
+            name="Line Profile">
+      </cheatsheet>
+   </extension>
 
 </plugin>
