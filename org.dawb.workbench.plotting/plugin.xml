@@ -201,6 +201,20 @@
             id="org.dawb.workbench.plotting.cheatsheet.aziprofile"
             name="Azimuthal Profile">
       </cheatsheet>
+      <cheatsheet
+            category="org.dawb.workbench.plotting.tools.category"
+            composite="false"
+            contentFile="cheat/crosshair_profile.xml"
+            id="org.dawb.workbench.plotting.cheatsheet.crosshairprofile"
+            name="Cross Hair Profile">
+      </cheatsheet>
+      <cheatsheet
+            category="org.dawb.workbench.plotting.tools.category"
+            composite="false"
+            contentFile="cheat/masking.xml"
+            id="org.dawb.workbench.plotting.cheatsheet.masking"
+            name="Masking">
+      </cheatsheet>
    </extension>
 
 </plugin>
