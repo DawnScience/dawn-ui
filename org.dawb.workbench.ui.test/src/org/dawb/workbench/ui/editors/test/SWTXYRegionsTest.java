@@ -68,31 +68,12 @@ public class SWTXYRegionsTest {
 	@Test
 	public void testRegionsDuringImageUpdate() throws Exception {
 		
-		// Get some kind of image directory for testing different images. 
-		String imagesDirPath = System.getProperty("org.dawb.workbench.ui.editors.test.images.directory");
-		if (imagesDirPath==null) imagesDirPath = "C:/Work/results/ID22-ODA";
-		File dir = new File(imagesDirPath);
-		if (!dir.exists()) {
-			// TODO check on linux
-			dir = new File("/dls/sci-scratch/i12/27_nir_tomo15/sinograms");
-		}
-		if (!dir.exists()||!dir.isDirectory()) throw new Exception("Cannot find test folder for test!");
+		final Object[] oa = createImagePlot();
 		
-		final Bundle bun  = Platform.getBundle("org.dawb.workbench.ui.test");
-
-		String path = (bun.getLocation()+"src/org/dawb/workbench/ui/editors/test/billeA.edf");
-		path = path.substring("reference:file:".length());
-		if (path.startsWith("/C:")) path = path.substring(1);
+		final AbstractPlottingSystem system = (AbstractPlottingSystem)oa[0];
+		final File dir = (File)oa[2];
 		
-		final IWorkbenchPage page      = EclipseUtils.getPage();		
-		final IFileStore  externalFile = EFS.getLocalFileSystem().fromLocalFile(new File(path));
-		final ImageEditor editor       = (ImageEditor)page.openEditor(new FileStoreEditorInput(externalFile), ImageEditor.ID);
-		page.setPartState(EclipseUtils.getPage().getActivePartReference(), IWorkbenchPage.STATE_MAXIMIZED);		
-		
-		final PlotImageEditor ed = editor.getPlotImageEditor();
-		final AbstractPlottingSystem system = ed.getPlottingSystem();
-		
- 		EclipseUtils.delay(2000); // Wait for image to be plotted...
+ 		createImagePlot();
 		
 		final Collection<ITrace> images = system.getTraces(IImageTrace.class);
 		final IImageTrace        image  = (IImageTrace)images.iterator().next();
@@ -293,6 +274,37 @@ public class SWTXYRegionsTest {
 
 
 
+	private Object[] createImagePlot() throws Exception {
+		
+		// Get some kind of image directory for testing different images. 
+		String imagesDirPath = System.getProperty("org.dawb.workbench.ui.editors.test.images.directory");
+		if (imagesDirPath==null) imagesDirPath = "C:/Work/results/ID22-ODA";
+		File dir = new File(imagesDirPath);
+		if (!dir.exists()) {
+			// TODO check on linux
+			dir = new File("/dls/sci-scratch/i12/27_nir_tomo15/sinograms");
+		}
+		if (!dir.exists()||!dir.isDirectory()) throw new Exception("Cannot find test folder for test!");
+		
+		final Bundle bun  = Platform.getBundle("org.dawb.workbench.ui.test");
+
+		String path = (bun.getLocation()+"src/org/dawb/workbench/ui/editors/test/billeA.edf");
+		path = path.substring("reference:file:".length());
+		if (path.startsWith("/C:")) path = path.substring(1);
+		
+		final IWorkbenchPage page      = EclipseUtils.getPage();		
+		final IFileStore  externalFile = EFS.getLocalFileSystem().fromLocalFile(new File(path));
+		final ImageEditor editor       = (ImageEditor)page.openEditor(new FileStoreEditorInput(externalFile), ImageEditor.ID);
+		page.setPartState(EclipseUtils.getPage().getActivePartReference(), IWorkbenchPage.STATE_MAXIMIZED);		
+		
+		final PlotImageEditor ed = editor.getPlotImageEditor();
+		final AbstractPlottingSystem sys = ed.getPlottingSystem();
+		
+ 		EclipseUtils.delay(2000); // Wait for image to be plotted...
+ 		
+		return new Object[]{sys,editor,dir};
+	}
+	
 	private Object[] createSomethingPlotted(final List<AbstractDataset> ys, boolean multipleAxes) throws Throwable {
 		
 		final Bundle bun  = Platform.getBundle("org.dawb.workbench.ui.test");
@@ -444,5 +456,53 @@ public class SWTXYRegionsTest {
 
 	}
 
-	
+	@Test
+	public void regionSectorTest() throws Throwable {
+		
+		final Object[] oa = createImagePlot();
+		
+		final AbstractPlottingSystem sys = (AbstractPlottingSystem)oa[0];
+		final IEditorPart         editor = (IEditorPart)oa[1];
+		
+		IRegion region = sys.createRegion("Sector 1", RegionType.SECTOR);
+		
+		// Give the region a position
+		SectorROI r1 = new SectorROI(0.1, 0.2, 0.0, Math.PI);
+		r1.setPoint(500, 0.5);
+		region.setROI(r1);
+		
+		// We now add the region.
+		sys.addRegion(region);
+		
+		// Try resizing the region
+	    for (int i = 1; i < 10; i++) {
+		
+	    	r1.setRadii(i*50, i*50+250);
+	    	region.setROI(r1);
+	    	
+	    	EclipseUtils.delay(500);
+		}
+	    
+		r1 = new SectorROI(0.1, 0.2, 0.0, Math.PI);
+		r1.setPoint(500, 0.5);
+    	region.setROI(r1);
+		
+    	// Multiple sectors
+	    for (int i = 1; i < 10; i++) {
+			
+	    	region = sys.createRegion("Sector "+(i+1), RegionType.SECTOR);
+			r1 = new SectorROI(50, 250, 0.0, Math.PI);
+			r1.setPoint(i*150, i*150+250);
+	    	region.setROI(r1);
+			
+			// We now add the region.
+			sys.addRegion(region);
+	    	
+	    	EclipseUtils.delay(500);
+		}
+	    EclipseUtils.delay(2000);
+			
+		EclipseUtils.getPage().closeEditor(editor, false);
+
+	}
 }
