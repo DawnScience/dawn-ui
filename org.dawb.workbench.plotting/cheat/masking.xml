@@ -71,7 +71,7 @@
             required="true"
             serialization="org.eclipse.ui.navigate.openResource(filePath=data/examples/ref-testscale_1_002.img)"/>
     <onCompletion>
-      Congratulations, you can now use masking to remove certain pixels from your images. NOTE: Most other tools take into account a mask after it is created. The mask will influence the profile tools for instance once it is applied.
+      Congratulations, you can now use masking to remove certain pixels from your images. NOTE: Most other tools take into account a mask after it is created. The mask will influence the profile tools for instance.
     </onCompletion>
      </item>
          	
