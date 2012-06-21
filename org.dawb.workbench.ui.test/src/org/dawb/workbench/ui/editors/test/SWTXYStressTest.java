@@ -11,16 +11,20 @@ package org.dawb.workbench.ui.editors.test;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
-import org.dawb.common.ui.plot.PlotType;
+import org.dawb.common.ui.plot.trace.IImageTrace;
+import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.workbench.plotting.system.LightWeightPlottingSystem;
 import org.dawb.workbench.ui.editors.AsciiEditor;
+import org.dawb.workbench.ui.editors.ImageEditor;
 import org.dawb.workbench.ui.editors.PlotDataEditor;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.ide.FileStoreEditorInput;
@@ -29,6 +33,7 @@ import org.osgi.framework.Bundle;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.LongDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Random;
 import fable.framework.toolbox.EclipseUtils;
 
 /**
@@ -39,6 +44,48 @@ import fable.framework.toolbox.EclipseUtils;
  *
  */
 public class SWTXYStressTest {
+	
+	@Test
+	public void testIfMemoryLeak() throws Throwable {
+		
+		final Bundle bun  = Platform.getBundle("org.dawb.workbench.ui.test");
+
+		String path = (bun.getLocation()+"src/org/dawb/workbench/ui/editors/test/billeA.edf");
+		path = path.substring("reference:file:".length());
+		if (path.startsWith("/C:")) path = path.substring(1);
+
+		final IWorkbenchPage page      = EclipseUtils.getPage();		
+		final IFileStore  externalFile = EFS.getLocalFileSystem().fromLocalFile(new File(path));
+		final IEditorPart part         = page.openEditor(new FileStoreEditorInput(externalFile), ImageEditor.ID);
+		page.setPartState(EclipseUtils.getPage().getActivePartReference(), IWorkbenchPage.STATE_MAXIMIZED);
+
+		EclipseUtils.delay(2000);
+		
+		final ImageEditor editor       = (ImageEditor)part;
+		final AbstractPlottingSystem sys = editor.getPlotImageEditor().getPlottingSystem();
+
+		final Collection<ITrace>   traces= sys.getTraces(IImageTrace.class);
+		final IImageTrace          imt = (IImageTrace)traces.iterator().next();
+
+        for (int i = 0; i < Integer.MAX_VALUE; i++) {
+			
+        	final AbstractDataset data = Random.rand(new int[]{2048, 2048});
+        	
+        	Display.getDefault().syncExec(new Runnable() {
+        		public void run() {
+                	imt.setData(data, null, false);
+        		}
+        	});
+        	
+    		EclipseUtils.delay(5);
+      	
+		}
+	
+		
+		EclipseUtils.delay(1000);
+		
+	}
+
 	
 	@Test
 	public void testRandomNumbers() throws Throwable {
