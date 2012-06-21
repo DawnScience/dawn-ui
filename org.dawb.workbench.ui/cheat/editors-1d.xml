@@ -12,7 +12,7 @@
    <item
          title="Data Browsing Perspective">
       <description>
-         Please choose the data perspective if you do not already have it selected (nothing will happen if you do not).
+         Please choose the data browsing perspective if you do not already have it selected (nothing will happen if you do not).
       </description>
       <command
             required="false"
