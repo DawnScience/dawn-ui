@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.trace.IImageTrace;
+import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.workbench.plotting.system.LightWeightPlottingSystem;
 import org.dawb.workbench.ui.editors.AsciiEditor;
@@ -32,6 +33,8 @@ import org.junit.Test;
 import org.osgi.framework.Bundle;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.LongDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Random;
 import fable.framework.toolbox.EclipseUtils;
@@ -46,7 +49,51 @@ import fable.framework.toolbox.EclipseUtils;
 public class SWTXYStressTest {
 	
 	@Test
-	public void testIfMemoryLeak() throws Throwable {
+	public void testIfMemoryLeak1D() throws Throwable {
+		
+		final Bundle bun  = Platform.getBundle("org.dawb.workbench.ui.test");
+
+		String path = (bun.getLocation()+"src/org/dawb/workbench/ui/editors/test/ascii.dat");
+		path = path.substring("reference:file:".length());
+		if (path.startsWith("/C:")) path = path.substring(1);
+		
+		final IWorkbenchPage page      = EclipseUtils.getPage();		
+		final IFileStore  externalFile = EFS.getLocalFileSystem().fromLocalFile(new File(path));
+		final IEditorPart part         = page.openEditor(new FileStoreEditorInput(externalFile), AsciiEditor.ID);
+		
+		final AsciiEditor editor       = (AsciiEditor)part;
+		final PlotDataEditor plotter   = (PlotDataEditor)editor.getActiveEditor();
+		final AbstractPlottingSystem sys = plotter.getPlottingSystem();
+		
+    	AbstractDataset data = Random.rand(new int[]{2048});
+		final ILineTrace trace = sys.createLineTrace("Test line plot");
+		trace.setData(IntegerDataset.arange(2048, AbstractDataset.INT32), data);
+		sys.addTrace(trace);
+
+        for (int i = 0; i < 1000000; i++) {
+			
+        	data = Random.rand(new int[]{2048});
+        	
+        	Display.getDefault().syncExec(new Runnable() {
+        		public void run() {
+        			AbstractDataset data = Random.rand(new int[]{2048});
+        			trace.setData(IntegerDataset.arange(2048, AbstractDataset.INT32), data);
+        			sys.repaint();
+        			
+        		}
+        	});
+        	
+    		EclipseUtils.delay(20);
+      	
+		}
+	
+		
+		EclipseUtils.delay(1000);
+		
+	}
+
+	@Test
+	public void testIfMemoryLeak2D() throws Throwable {
 		
 		final Bundle bun  = Platform.getBundle("org.dawb.workbench.ui.test");
 
@@ -67,9 +114,13 @@ public class SWTXYStressTest {
 		final Collection<ITrace>   traces= sys.getTraces(IImageTrace.class);
 		final IImageTrace          imt = (IImageTrace)traces.iterator().next();
 
-        for (int i = 0; i < Integer.MAX_VALUE; i++) {
+		// TODO Longer term tests may do while(true) here...
+        for (int i = 0; i < 1000000; i++) {
 			
-        	final AbstractDataset data = Random.rand(new int[]{2048, 2048});
+        	final DoubleDataset data = new DoubleDataset(new int[]{2048, 2048});
+        	for (int j = 0; j < 2048*2048; j++) {
+        		data.getData()[j] =  Math.random();
+			}
         	
         	Display.getDefault().syncExec(new Runnable() {
         		public void run() {
