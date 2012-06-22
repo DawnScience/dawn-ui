@@ -157,7 +157,6 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 */
 	private boolean createScaledImage(ImageScaleType rescaleType, final IProgressMonitor monitor) {
 			
-		
 		if (!imageCreationAllowed) return false;
 
 		boolean requireImageGeneration = imageData==null || 
@@ -230,6 +229,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			if (imageData!=null && imageData.width==bounds.width && imageData.height==bounds.height) { 
 				// No slice, faster
 				if (monitor!=null && monitor.isCanceled()) return false;
+				if (this.scaledImage!=null &&!scaledImage.isDisposed()) this.scaledImage.dispose(); // IMPORTANT
 				this.scaledImage  = new Image(Display.getDefault(), imageData);
 
 			} else {
@@ -284,6 +284,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 					}
 				}
 				data = data!=null ? data.scaledTo(rbounds.width, rbounds.height) : null;
+				if (this.scaledImage!=null &&!scaledImage.isDisposed()) this.scaledImage.dispose(); // IMPORTANT
 				this.scaledImage = data!=null ? new Image(Display.getDefault(), data) : null;
 			}
 			
@@ -474,6 +475,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		yAxis.removeListener(this);
 		axisRedrawActive = false;
 		imageServiceBean.dispose();
+		if (this.scaledImage!=null && !scaledImage.isDisposed()) scaledImage.dispose();
 		imageServiceBean = null;
 	}
 
