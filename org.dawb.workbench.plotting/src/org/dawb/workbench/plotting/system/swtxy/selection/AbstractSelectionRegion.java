@@ -9,6 +9,7 @@ import org.csstudio.swt.xygraph.figures.Trace;
 import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.swt.xygraph.linearscale.Range;
 import org.dawb.common.ui.plot.region.AbstractRegion;
+import org.dawb.common.ui.plot.region.ROIEvent;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.system.swtxy.IMobileFigure;
 import org.dawb.workbench.plotting.system.swtxy.ImageTrace;
@@ -382,7 +383,7 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 			@Override
 			public void translationAfter(TranslationEvent evt) {
 				updateConnectionBounds();
-				fireROIDragged(createROI(false));
+				fireROIDragged(createROI(false), ROIEvent.DRAG_TYPE.RESIZE);
 			}
 
 			@Override
