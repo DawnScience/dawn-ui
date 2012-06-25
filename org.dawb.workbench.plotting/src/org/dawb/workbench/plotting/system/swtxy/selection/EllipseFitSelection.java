@@ -6,6 +6,7 @@ import java.util.List;
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegionContainer;
+import org.dawb.common.ui.plot.region.ROIEvent;
 import org.dawb.workbench.plotting.system.swtxy.translate.FigureTranslator;
 import org.dawb.workbench.plotting.system.swtxy.translate.TranslationEvent;
 import org.dawb.workbench.plotting.system.swtxy.translate.TranslationListener;
@@ -284,7 +285,7 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 							}
 						}
 						EllipticalFitROI eroi = (EllipticalFitROI) createROI(false);
-						fireROIDragged(eroi);
+						fireROIDragged(eroi, ROIEvent.DRAG_TYPE.RESIZE);
 					}
 				}
 

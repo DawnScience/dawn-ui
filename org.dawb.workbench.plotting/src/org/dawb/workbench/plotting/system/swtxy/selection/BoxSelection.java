@@ -3,6 +3,7 @@ package org.dawb.workbench.plotting.system.swtxy.selection;
 import java.util.Arrays;
 
 import org.csstudio.swt.xygraph.figures.Axis;
+import org.dawb.common.ui.plot.region.ROIEvent;
 import org.dawb.workbench.plotting.system.swtxy.translate.FigureTranslator;
 import org.dawb.workbench.plotting.system.swtxy.translate.TranslationEvent;
 import org.dawb.workbench.plotting.system.swtxy.translate.TranslationListener;
@@ -87,7 +88,7 @@ class BoxSelection extends AbstractSelectionRegion {
 			public void translationAfter(TranslationEvent evt) {
 				isCalculateCorners = true;
 				updateConnectionBounds();
-				fireROIDragged(createROI(false));
+				fireROIDragged(createROI(false), ROIEvent.DRAG_TYPE.TRANSLATE);
 			}
 
 			@Override

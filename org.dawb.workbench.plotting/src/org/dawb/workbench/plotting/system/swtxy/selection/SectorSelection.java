@@ -6,6 +6,7 @@ import java.util.List;
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegionContainer;
+import org.dawb.common.ui.plot.region.ROIEvent;
 import org.dawb.workbench.plotting.system.swtxy.translate.FigureTranslator;
 import org.dawb.workbench.plotting.system.swtxy.translate.TranslationEvent;
 import org.dawb.workbench.plotting.system.swtxy.translate.TranslationListener;
@@ -322,7 +323,7 @@ public class SectorSelection extends AbstractSelectionRegion {
 
 						final SelectionHandle handle = (SelectionHandle) translator.getRedrawFigure();
 						updateFromROI(croi, handle);
-						fireROIDragged(croi);
+						fireROIDragged(croi, ROIEvent.DRAG_TYPE.RESIZE);
 					}
 				}
 

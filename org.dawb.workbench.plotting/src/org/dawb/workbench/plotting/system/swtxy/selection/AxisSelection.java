@@ -3,6 +3,7 @@ package org.dawb.workbench.plotting.system.swtxy.selection;
 import java.util.Arrays;
 
 import org.csstudio.swt.xygraph.figures.Axis;
+import org.dawb.common.ui.plot.region.ROIEvent;
 import org.dawb.workbench.plotting.system.swtxy.IMobileFigure;
 import org.dawb.workbench.plotting.system.swtxy.translate.FigureTranslator;
 import org.dawb.workbench.plotting.system.swtxy.util.Draw2DUtils;
@@ -132,7 +133,7 @@ class AxisSelection extends AbstractSelectionRegion {
 	    			}
 	    			line1.getParent().repaint();
 	    			
-	    			fireROIDragged(createROI(false));
+	    			fireROIDragged(createROI(false), ROIEvent.DRAG_TYPE.TRANSLATE);
     			}
     		}
         };
