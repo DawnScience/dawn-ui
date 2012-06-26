@@ -216,16 +216,25 @@ public class SectorSelection extends AbstractSelectionRegion {
 	}
 
 	class DecoratedSector extends Sector implements IRegionContainer {
-		List<IFigure> handles;
+		private List<IFigure> handles;
 		private Figure parent;
 		private static final int SIDE = 8;
-		SectorROIHandler roiHandler;
+		private SectorROIHandler roiHandler;
+		private TranslationListener handleListener;
+		private FigureListener moveListener;
 
 		public DecoratedSector(Figure parent) {
 			super();
 			handles = new ArrayList<IFigure>();
 			this.parent = parent;
 			roiHandler = new SectorROIHandler((SectorROI) roi);
+			handleListener = createHandleNotifier();
+			moveListener = new FigureListener() {
+				@Override
+				public void figureMoved(IFigure source) {
+					DecoratedSector.this.parent.repaint();
+				}
+			};
 		}
 
 		/**
@@ -250,16 +259,12 @@ public class SectorSelection extends AbstractSelectionRegion {
 			else
 				setRadii(ro,  ri);
 			setAnglesDegrees(a[0], a[1]);
+
 			roiHandler.setROI(createROI(true));
+			configureHandles();
+		}
 
-			FigureListener listener = new FigureListener() {
-				@Override
-				public void figureMoved(IFigure source) {
-					parent.repaint();
-				}
-			};
-
-			final TranslationListener hListener = createHandleNotifier();
+		private void configureHandles() {
 			// handles
 			FigureTranslator mover;
 			final int imax = roiHandler.size();
@@ -270,12 +275,12 @@ public class SectorSelection extends AbstractSelectionRegion {
 						xAxis.getValuePosition(hpt[0], false), yAxis.getValuePosition(hpt[1], false));
 				parent.add(h);
 				mover = new FigureTranslator(getXyGraph(), h);
-				mover.addTranslationListener(hListener);
-				h.addFigureListener(listener);
+				mover.addTranslationListener(handleListener);
+				h.addFigureListener(moveListener);
 				handles.add(h);
 			}
 
-			addFigureListener(listener);
+			addFigureListener(moveListener);
 			mover = new FigureTranslator(getXyGraph(), parent, this, handles);
 			mover.addTranslationListener(createRegionNotifier());
 			setRegionObjects(this, handles);
@@ -284,7 +289,7 @@ public class SectorSelection extends AbstractSelectionRegion {
 				setBounds(b);
 		}
 
-		public TranslationListener createHandleNotifier() {
+		private TranslationListener createHandleNotifier() {
 			return new TranslationListener() {
 				private int[] spt;
 
@@ -409,13 +414,17 @@ public class SectorSelection extends AbstractSelectionRegion {
 				setSymmetryAnglesDegrees(-Math.toDegrees(nang[1]), -Math.toDegrees(nang[0]));
 			}
 
-			final int imax = handles.size();
-			SectorROIHandler handler = new SectorROIHandler(sroi);
-			for (int i = 0; i < imax; i++) {
-				double[] hpt = handler.getAnchorPoint(i, SIDE);
-				SelectionHandle handle = (SelectionHandle) handles.get(i);
-				if (handle != omit) {
-					handle.setSelectionPoint(new PrecisionPoint(xAxis.getValuePosition(hpt[0], false), yAxis.getValuePosition(hpt[1], false)));
+			int imax = handles.size();
+			if (imax != roiHandler.size()) {
+				configureHandles();
+			} else {
+				SectorROIHandler handler = new SectorROIHandler(sroi);
+				for (int i = 0; i < imax; i++) {
+					double[] hpt = handler.getAnchorPoint(i, SIDE);
+					SelectionHandle handle = (SelectionHandle) handles.get(i);
+					if (handle != omit) {
+						handle.setSelectionPoint(new PrecisionPoint(xAxis.getValuePosition(hpt[0], false), yAxis.getValuePosition(hpt[1], false)));
+					}
 				}
 			}
 		}
