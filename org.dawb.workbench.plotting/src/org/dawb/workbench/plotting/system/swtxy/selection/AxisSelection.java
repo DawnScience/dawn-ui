@@ -316,14 +316,12 @@ class AxisSelection extends AbstractSelectionRegion {
 
 		if (roi instanceof RectangularROI) {
 			RectangularROI rroi = (RectangularROI) roi;
-			spt = rroi.getPoint();
+			spt = rroi.getPointRef();
 			ept = rroi.getEndPoint();
-
 		} else if (roi instanceof LinearROI) {
 			LinearROI lroi = (LinearROI) roi;
-			spt = lroi.getPoint();
+			spt = lroi.getPointRef();
 			ept = lroi.getEndPoint();			
-			
 		}
 		
 		final Point p1 = new Point(xAxis.getValuePosition(spt[0], false),

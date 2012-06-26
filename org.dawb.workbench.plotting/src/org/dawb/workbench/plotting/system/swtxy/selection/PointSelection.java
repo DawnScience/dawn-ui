@@ -162,7 +162,7 @@ public class PointSelection extends AbstractSelectionRegion {
 		if (roi instanceof PointROI) {
 			if (point==null) return;
 
-	        point.setPosition(roi.getPoint());
+	        point.setPosition(roi.getPointRef());
 	        updateConnectionBounds();
 		}
     }

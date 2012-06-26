@@ -211,7 +211,7 @@ class BoxSelection extends AbstractSelectionRegion {
 	protected void updateROI(ROIBase roi) {
 		if (roi instanceof RectangularROI) {
 			RectangularROI rroi = (RectangularROI) roi;
-			if (p1!=null) p1.setPosition(rroi.getPoint());
+			if (p1!=null) p1.setPosition(rroi.getPointRef());
 			if (p4!=null) p4.setPosition(rroi.getEndPoint());
 			updateConnectionBounds();
 		}

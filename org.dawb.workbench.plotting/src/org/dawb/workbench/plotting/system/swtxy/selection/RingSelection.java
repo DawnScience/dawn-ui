@@ -225,7 +225,7 @@ class RingSelection extends AbstractSelectionRegion {
 		if (roi instanceof SectorROI) {
 			SectorROI sroi = (SectorROI) roi;
 			if (center!=null) {
-				center.setPosition(sroi.getPoint());
+				center.setPosition(sroi.getPointRef());
 				double y = sroi.getPointY();
 				int cenY = getXAxis().getValuePosition(y, false);
 				

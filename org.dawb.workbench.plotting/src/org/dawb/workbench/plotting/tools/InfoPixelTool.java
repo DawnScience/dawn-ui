@@ -338,7 +338,7 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 					final IRegion region = (IRegion)sel.getFirstElement();
 					if (region==null||region.getROI()==null) return;
 					final ROIBase bounds = region.getROI();
-					if (bounds.getPoint()==null) return;
+					if (bounds.getPointRef()==null) return;
 
 					final Clipboard cb = new Clipboard(composite.getDisplay());
 					TextTransfer textTransfer = TextTransfer.getInstance();

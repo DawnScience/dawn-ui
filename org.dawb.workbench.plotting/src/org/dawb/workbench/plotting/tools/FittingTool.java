@@ -330,7 +330,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 			// We chop x and y by the region bounds. We assume the
 			// plot is an XAXIS selection therefore the indices in
 			// y = indices chosen in x.
-			final double[] p1 = bounds.getPoint();
+			final double[] p1 = bounds.getPointRef();
 			final double[] p2 = bounds.getEndPoint();
 
 			// We peak fit only the first of the data sets plotted for now.

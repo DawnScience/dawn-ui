@@ -157,9 +157,9 @@ public class SWTXYRegionsTest {
 	private static boolean equalsWithTolerance(RectangularROI a, RectangularROI b, double dx, double dy) {
 		if (a == b) return true;
 		if (a == null || b == null) return false;
-		double[] a1 = a.getPoint();
+		double[] a1 = a.getPointRef();
 		double[] a2 = a.getEndPoint();
-		double[] b1 = b.getPoint();
+		double[] b1 = b.getPointRef();
 		double[] b2 = b.getEndPoint();
 		if (!NumberUtils.equalsTolerance(a1[0], b1[0], dx)) return false;
 		if (!NumberUtils.equalsTolerance(a2[0], b2[0], dx)) return false;
@@ -171,9 +171,9 @@ public class SWTXYRegionsTest {
 	}
 
 	private static String getDiff(RectangularROI a, RectangularROI b) {
-		double[] a1 = a.getPoint();
+		double[] a1 = a.getPointRef();
 		double[] a2 = a.getEndPoint();
-		double[] b1 = b.getPoint();
+		double[] b1 = b.getPointRef();
 		double[] b2 = b.getEndPoint();
 		return "(" + (b1[0] - a1[0]) + ", " + (b1[1] - a1[1]) + ") to (" + (b2[0] - a2[0]) + ", " + (b2[1] - a2[1]) + ")";
 	}

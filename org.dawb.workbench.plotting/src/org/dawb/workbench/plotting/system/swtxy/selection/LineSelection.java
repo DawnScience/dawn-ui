@@ -191,7 +191,7 @@ class LineSelection extends AbstractSelectionRegion {
 		if (roi instanceof LinearROI) {
 			LinearROI lroi = (LinearROI) roi;
 			if (startBox != null)
-				startBox.setPosition(lroi.getPoint());
+				startBox.setPosition(lroi.getPointRef());
 			if (endBox != null)
 				endBox.setPosition(lroi.getEndPoint());
 			
