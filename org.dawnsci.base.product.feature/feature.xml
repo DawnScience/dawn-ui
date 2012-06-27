@@ -66,11 +66,11 @@
          version="0.0.0"/>
 
    <includes
-         id="uk.ac.diamond.scisoft.customprojects.feature"
+         id="uk.ac.diamond.scisoft.icat.feature"
          version="0.0.0"/>
 
    <includes
-         id="uk.ac.diamond.scisoft.icat.feature"
+         id="uk.ac.diamond.scisoft.customprojects.feature"
          version="0.0.0"/>
 
    <plugin
