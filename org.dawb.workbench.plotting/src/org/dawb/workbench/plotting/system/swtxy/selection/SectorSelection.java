@@ -46,9 +46,11 @@ public class SectorSelection extends AbstractSelectionRegion {
 
 		parent.add(sector);
 		sync(getBean());
+		sector.setForegroundColor(getRegionColor());
+		sector.setAlpha(getAlpha());
 		sector.setLineWidth(getLineWidth());
 		updateROI();
-		if (roi == null)
+		if (roi != null)
 			createROI(true);
 	}
 
@@ -386,7 +388,6 @@ public class SectorSelection extends AbstractSelectionRegion {
 		 */
 		public void updateFromROI(SectorROI sroi) {
 			updateFromROI(sroi, null);
-			roiHandler.setROI(sroi);
 		}
 
 		/**
@@ -416,6 +417,7 @@ public class SectorSelection extends AbstractSelectionRegion {
 
 			int imax = handles.size();
 			if (imax != roiHandler.size()) {
+				roiHandler.setROI(sroi);
 				configureHandles();
 			} else {
 				SectorROIHandler handler = new SectorROIHandler(sroi);
