@@ -1099,26 +1099,29 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	 * Add a selection region to the graph.
 	 * @param region
 	 */
-	public void addRegion(final IRegion region) {		
-		if (xyGraph==null) createUI();
-		final AbstractSelectionRegion r = (AbstractSelectionRegion)region;
-		xyGraph.addRegion(r);		
- 	}
-	
+	public void addRegion(final IRegion region) {
+		if (xyGraph == null)
+			createUI();
+		final AbstractSelectionRegion r = (AbstractSelectionRegion) region;
+		xyGraph.addRegion(r);
+	}
+
 	/**
 	 * Remove a selection region to the graph.
 	 * @param region
 	 */
-	public void removeRegion(final IRegion region) {		
-		if (xyGraph==null) createUI();
-		final AbstractSelectionRegion r = (AbstractSelectionRegion)region;
+	public void removeRegion(final IRegion region) {
+		if (xyGraph == null)
+			createUI();
+		final AbstractSelectionRegion r = (AbstractSelectionRegion) region;
 		xyGraph.removeRegion(r);
 	}
-	
+
 	@Override
 	public void renameRegion(final IRegion region, String name) {
-		if (xyGraph==null) return;
-		xyGraph.renameRegion((AbstractSelectionRegion)region, name);
+		if (xyGraph == null)
+			return;
+		xyGraph.renameRegion((AbstractSelectionRegion) region, name);
 	}
 
 	/**
@@ -1127,80 +1130,73 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	 * @return
 	 */
 	public IRegion getRegion(final String name) {
-		if (xyGraph==null)  return null;
+		if (xyGraph == null)
+			return null;
 		return xyGraph.getRegion(name);
 	}
+
 	/**
 	 * Get regions
 	 * @param name
 	 * @return
 	 */
 	public Collection<IRegion> getRegions() {
-		if (xyGraph==null)  return null;
+		if (xyGraph == null)
+			return null;
 		List<AbstractSelectionRegion> regions = xyGraph.getRegions();
 		return new ArrayList<IRegion>(regions);
 	}
-	
+
+	@Override
 	public IAnnotation createAnnotation(final String name) throws Exception {
-		if (xyGraph==null) createUI();
-		
-		final List<Annotation>anns = xyGraph.getPlotArea().getAnnotationList();
+		if (xyGraph == null)
+			createUI();
+
+		final List<Annotation> anns = xyGraph.getPlotArea().getAnnotationList();
 		for (Annotation annotation : anns) {
-			if (annotation.getName()!=null&&annotation.getName().equals(name)) {
-				throw new Exception("The annotation name '"+name+"' is already taken.");
+			if (annotation.getName() != null && annotation.getName().equals(name)) {
+				throw new Exception("The annotation name '" + name + "' is already taken.");
 			}
 		}
-		
-		final Axis xAxis = (Axis)getSelectedXAxis();
-		final Axis yAxis = (Axis)getSelectedYAxis();
-		
+
+		final Axis xAxis = (Axis) getSelectedXAxis();
+		final Axis yAxis = (Axis) getSelectedYAxis();
+
 		return new AnnotationWrapper(name, xAxis, yAxis);
 	}
-	
-	/**
-	 * Add an annotation to the graph.
-	 * @param region
-	 */
+
+	@Override
 	public void addAnnotation(final IAnnotation annotation) {
-		
-        final AnnotationWrapper wrapper = (AnnotationWrapper)annotation;
-        xyGraph.addAnnotation(wrapper.getAnnotation());
-        xyGraph.getOperationsManager().addCommand(new AddAnnotationCommand(xyGraph, wrapper.getAnnotation()));
+		final AnnotationWrapper wrapper = (AnnotationWrapper) annotation;
+		xyGraph.addAnnotation(wrapper.getAnnotation());
+		xyGraph.getOperationsManager().addCommand(new AddAnnotationCommand(xyGraph, wrapper.getAnnotation()));
 	}
-	
-	
-	/**
-	 * Remove an annotation to the graph.
-	 * @param region
-	 */
+
+	@Override
 	public void removeAnnotation(final IAnnotation annotation) {
-        final AnnotationWrapper wrapper = (AnnotationWrapper)annotation;
-        xyGraph.removeAnnotation(wrapper.getAnnotation());
-        xyGraph.getOperationsManager().addCommand(new RemoveAnnotationCommand(xyGraph, wrapper.getAnnotation()));
+		final AnnotationWrapper wrapper = (AnnotationWrapper) annotation;
+		xyGraph.removeAnnotation(wrapper.getAnnotation());
+		xyGraph.getOperationsManager().addCommand(new RemoveAnnotationCommand(xyGraph, wrapper.getAnnotation()));
 	}
+
 	@Override
 	public void renameAnnotation(final IAnnotation annotation, String name) {
-        final AnnotationWrapper wrapper = (AnnotationWrapper)annotation;
-        wrapper.getAnnotation().setName(name);
+		final AnnotationWrapper wrapper = (AnnotationWrapper) annotation;
+		wrapper.getAnnotation().setName(name);
 	}
-	/**
-	 * Get an annotation by name.
-	 * @param name
-	 * @return
-	 */
+
+	@Override
 	public IAnnotation getAnnotation(final String name) {
-		final List<Annotation>anns = xyGraph.getPlotArea().getAnnotationList();
+		final List<Annotation> anns = xyGraph.getPlotArea().getAnnotationList();
 		for (Annotation annotation : anns) {
-			if (annotation.getName()!=null&&annotation.getName().equals(name)) {
+			if (annotation.getName() != null && annotation.getName().equals(name)) {
 				return new AnnotationWrapper(annotation);
 			}
 		}
 		return null;
 	}
 
-	/**
-	 * Remove all annotations
-	 */
+	@Override
 	public void clearAnnotations(){
 		final List<Annotation>anns = new ArrayList<Annotation>(xyGraph.getPlotArea().getAnnotationList());
 		for (Annotation annotation : anns) {

@@ -47,13 +47,12 @@ public class RegionArea extends PlotArea {
 		this.regions     = new LinkedHashMap<String,AbstractSelectionRegion>();
 		this.imageTraces = new LinkedHashMap<String,ImageTrace>();
 	}
-		
 
-	public void addRegion(final AbstractSelectionRegion region){
+	public void addRegion(final AbstractSelectionRegion region) {
 		addRegion(region, true);
 	}
 
-	private void addRegion(final AbstractSelectionRegion region, boolean fireListeners){
+	private void addRegion(final AbstractSelectionRegion region, boolean fireListeners) {
 		regions.put(region.getName(), region);
 		region.setXyGraph(xyGraph);
 		region.createContents(this);
@@ -63,7 +62,7 @@ public class RegionArea extends PlotArea {
 		revalidate();
 	}
 
-	public boolean removeRegion(final AbstractSelectionRegion region){
+	public boolean removeRegion(final AbstractSelectionRegion region) {
 	    final AbstractSelectionRegion gone = regions.remove(region.getName());
 		if (gone!=null){
 			region.remove(); // Clears up children (you can live without this
