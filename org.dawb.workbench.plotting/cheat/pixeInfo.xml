@@ -6,7 +6,7 @@
 		This cheat sheet helps you to open an image, and shows you how to use the pixel information tool with the file.
 		
 		The pixel information tool allows you to display information about the pixel pointed by the mouse. 
-		This information include: x and y positions, pixel intensity, resolution, etc.
+		This information includes: x and y positions, pixel intensity, resolution, etc.
 
 	    </description>
 	</intro>
@@ -23,6 +23,10 @@ Please choose the data browsing perspective if you do not already have it select
       <description>
 	Click to open an example file from the 'data' project containing a test image.
        </description>
+       <command
+            required="false"
+            serialization="org.eclipse.ui.navigate.openResource(filePath=data/examples/ref-screentest-crystal1_1_001.mccd)"/>
+       
    </item> 
    
      <item
