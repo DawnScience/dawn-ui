@@ -57,7 +57,7 @@ public class EllipseFittingTool extends AbstractToolPage {
 		ellipseRegionListener = new IRegionListener.Stub() {
 			@Override
 			public void regionsRemoved(RegionEvent evt) {
-				updateEllipses();
+				updateEllipses(true);
 			}
 
 			@Override
@@ -74,7 +74,7 @@ public class EllipseFittingTool extends AbstractToolPage {
 		ellipseROIListener = new IROIListener.Stub() {
 			@Override
 			public void roiChanged(ROIEvent evt) {
-				updateEllipses();
+				updateEllipses(false);
 			}
 		};
 
@@ -125,12 +125,14 @@ public class EllipseFittingTool extends AbstractToolPage {
 		viewer.refresh();
 	}
 
-	protected void updateEllipses() {
+	protected void updateEllipses(boolean removeROIListener) {
 		IPlottingSystem plotter = getPlottingSystem();
 		if (plotter == null) return;
 
-		for (IRegion r : ellipses) {
-			r.removeROIListener(ellipseROIListener);
+		if (removeROIListener) {
+			for (IRegion r : ellipses) {
+				r.removeROIListener(ellipseROIListener);
+			}
 		}
 		ellipses.clear();
 
@@ -141,7 +143,9 @@ public class EllipseFittingTool extends AbstractToolPage {
 			while (it.hasNext()) {
 				r = it.next();
 				ellipses.add(r);
-				r.addROIListener(ellipseROIListener);
+				if (removeROIListener) {
+					r.addROIListener(ellipseROIListener);
+				}
 			}
 		}
 		if (viewer != null) // can be null during activation
@@ -310,7 +314,7 @@ public class EllipseFittingTool extends AbstractToolPage {
 		if (ellipseRegionListener != null)
 			plotter.addRegionListener(ellipseRegionListener);
 
-		updateEllipses();
+		updateEllipses(true);
 
 		// Start with a selection of the right type
 		try {
