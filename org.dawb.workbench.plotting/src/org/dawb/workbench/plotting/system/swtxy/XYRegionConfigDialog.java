@@ -126,14 +126,14 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
  	        final Composite regionConfigComposite = new Composite(regionComposite, SWT.NONE);
  	        regionConfigComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
  	        final StackLayout stackLayout = new StackLayout();
- 	        regionConfigComposite.setLayout(stackLayout);        
+ 	        regionConfigComposite.setLayout(stackLayout);
  	        
  	        for(AbstractSelectionRegion region : ((RegionArea)regionGraph.getPlotArea()).getRegions()){
 		        
  	        	if (!region.isUserRegion()) continue;
 		        RegionComposite regionPage = new RegionComposite(regionConfigComposite, SWT.NONE, (XYRegionGraph)xyGraph, region.getRegionType());
 		        regionList.add(regionPage);
-		        regionPage.setEditingRegion(region);   	        
+		        regionPage.setEditingRegion(region);
  	        }
  	        
  	        stackLayout.topControl = regionList.get(0);
