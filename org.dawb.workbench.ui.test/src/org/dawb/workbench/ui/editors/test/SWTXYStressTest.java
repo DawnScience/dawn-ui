@@ -15,6 +15,8 @@ import java.util.Collection;
 import java.util.List;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
+import org.dawb.common.ui.plot.region.IRegion;
+import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
@@ -25,6 +27,7 @@ import org.dawb.workbench.ui.editors.PlotDataEditor;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
@@ -37,6 +40,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.LongDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Random;
+import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import fable.framework.toolbox.EclipseUtils;
 
 /**
@@ -66,6 +70,13 @@ public class SWTXYStressTest {
 		final AbstractPlottingSystem sys = plotter.getPlottingSystem();
 		
     	AbstractDataset data = Random.rand(new int[]{2048});
+    	
+    	final IRegion region = sys.createRegion(RegionUtils.getUniqueName("Y Profile", sys), IRegion.RegionType.XAXIS_LINE);
+		region.setTrackMouse(true);
+		region.setRegionColor(ColorConstants.red);
+		region.setUserRegion(false); // They cannot see preferences or change it!
+		sys.addRegion(region);
+		
 		final ILineTrace trace = sys.createLineTrace("Test line plot");
 		trace.setData(IntegerDataset.arange(2048, AbstractDataset.INT32), data);
 		sys.addTrace(trace);
@@ -77,9 +88,10 @@ public class SWTXYStressTest {
         	Display.getDefault().syncExec(new Runnable() {
         		public void run() {
         			AbstractDataset data = Random.rand(new int[]{2048});
-        			trace.setData(IntegerDataset.arange(2048, AbstractDataset.INT32), data);
+         			trace.setData(IntegerDataset.arange(2048, AbstractDataset.INT32), data);
         			sys.repaint();
         			
+      			    EclipseUtils.delay(200);
         		}
         	});
         	
