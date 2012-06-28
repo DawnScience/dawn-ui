@@ -73,6 +73,10 @@
          id="uk.ac.diamond.scisoft.icat.feature"
          version="0.0.0"/>
 
+   <includes
+         id="org.dawnsci.mx.feature"
+         version="0.0.0"/>
+
    <plugin
          id="uk.ac.diamond.scisoft.analysis.rcp.contributions"
          download-size="0"
