@@ -291,6 +291,31 @@ public class SectorSelection extends AbstractSelectionRegion {
 				setBounds(b);
 		}
 
+		public TranslationListener createRegionNotifier() {
+			return new TranslationListener() {
+				@Override
+				public void translateBefore(TranslationEvent evt) {
+				}
+
+				@Override
+				public void translationAfter(TranslationEvent evt) {
+					updateConnectionBounds();
+					fireROIDragged(createROI(false), ROIEvent.DRAG_TYPE.RESIZE);
+				}
+
+				@Override
+				public void translationCompleted(TranslationEvent evt) {
+					fireROIChanged(createROI(true));
+					roiHandler.setROI(roi);
+					fireROISelection();
+				}
+
+				@Override
+				public void onActivate(TranslationEvent evt) {
+				}
+			};
+		}
+
 		private TranslationListener createHandleNotifier() {
 			return new TranslationListener() {
 				private int[] spt;
@@ -387,6 +412,7 @@ public class SectorSelection extends AbstractSelectionRegion {
 		 * @param sroi
 		 */
 		public void updateFromROI(SectorROI sroi) {
+			roiHandler.setROI(sroi);
 			updateFromROI(sroi, null);
 		}
 
@@ -417,7 +443,6 @@ public class SectorSelection extends AbstractSelectionRegion {
 
 			int imax = handles.size();
 			if (imax != roiHandler.size()) {
-				roiHandler.setROI(sroi);
 				configureHandles();
 			} else {
 				SectorROIHandler handler = new SectorROIHandler(sroi);
