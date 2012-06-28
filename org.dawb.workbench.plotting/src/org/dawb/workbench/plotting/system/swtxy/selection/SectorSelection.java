@@ -50,7 +50,7 @@ public class SectorSelection extends AbstractSelectionRegion {
 		sector.setAlpha(getAlpha());
 		sector.setLineWidth(getLineWidth());
 		updateROI();
-		if (roi != null)
+		if (roi == null)
 			createROI(true);
 	}
 
