@@ -22,7 +22,7 @@
 </listAttribute>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -consoleLog"/>
 <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xms512m&#13;&#10;-XX:PermSize=128m&#13;&#10;-XX:MaxPermSize=256m&#13;&#10;-Djava.library.path=${project_loc:uk.ac.gda.libs}/lib/${target.os}-${target.arch}&#13;&#10;-Ddbconnect=config/dbconnect.ispyb.properties&#13;&#10;-Dentry=MyVisitsEntryPoint&#13;&#10;-DidaEmbedded=yes&#13;&#10;-Dcolour=on&#13;&#10;-Dosgi.locking=none&#13;&#10;-Dcom.isencia.require.file.source=true &#13;&#10;-Dpasserelle.workbench.version=1.0.0&#13;&#10;-Declipse.debug.session=true"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xms512m&#13;&#10;-XX:PermSize=128m&#13;&#10;-XX:MaxPermSize=256m&#13;&#10;-Djava.library.path=${project_loc:uk.ac.gda.libs}/lib/${target.os}-${target.arch}&#13;&#10;-Ddbconnect=config/dbconnect.ispyb.properties&#13;&#10;-Dentry=MyVisitsEntryPoint&#13;&#10;-DidaEmbedded=yes&#13;&#10;-Dcolour=on&#13;&#10;-Dosgi.locking=none&#13;&#10;-Dcom.isencia.require.file.source=true &#13;&#10;-Dpasserelle.workbench.version=1.0.0&#13;&#10;-Declipse.debug.session=true&#13;&#10;-Dorg.dawb.editor.h5.use.default=true"/>
 <stringAttribute key="pde.version" value="3.3"/>
 <stringAttribute key="product" value="org.dawnsci.product.plugin.DAWN"/>
 <stringAttribute key="productFile" value="\org.dawnsci.base.product.feature\org.dawnsci.base.product"/>
