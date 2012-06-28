@@ -133,7 +133,7 @@ class AxisSelection extends AbstractSelectionRegion {
 	    			}
 	    			line1.getParent().repaint();
 	    			
-	    			fireROIDragged(createROI(false), ROIEvent.DRAG_TYPE.TRANSLATE);
+	    			fireROIDragged(createROI(true), ROIEvent.DRAG_TYPE.TRANSLATE);
     			}
     		}
         };
