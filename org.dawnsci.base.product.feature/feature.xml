@@ -66,11 +66,11 @@
          version="0.0.0"/>
 
    <includes
-         id="uk.ac.diamond.scisoft.icat.feature"
+         id="uk.ac.diamond.scisoft.customprojects.feature"
          version="0.0.0"/>
 
    <includes
-         id="uk.ac.diamond.scisoft.customprojects.feature"
+         id="uk.ac.diamond.scisoft.icat.feature"
          version="0.0.0"/>
 
    <plugin
@@ -123,6 +123,12 @@
 
    <plugin
          id="uk.ac.diamond.scisoft"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.dawb.workbench.application"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
