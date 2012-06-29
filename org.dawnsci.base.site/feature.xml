@@ -21,4 +21,12 @@
          id="org.dawnsci.base.product.feature"
          version="0.0.0"/>
 
+   <includes
+         id="uk.ac.diamond.scisoft.icat.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="uk.ac.diamond.scisoft.customprojects.feature"
+         version="0.0.0"/>
+
 </feature>
