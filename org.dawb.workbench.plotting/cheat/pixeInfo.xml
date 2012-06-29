@@ -1,54 +1,107 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <cheatsheet title="Pixel Information">
 
-	<intro>
-		<description>
-		This cheat sheet helps you to open an image, and shows you how to use the pixel information tool with the file.
-		
-		The pixel information tool allows you to display information about the pixel pointed by the mouse. 
-		This information includes: x and y positions, pixel intensity, resolution, etc.
+      <intro>
 
-	    </description>
-	</intro>
-	
-	 <item
+            <description>
+
+            This cheat sheet helps you to open an image, and shows you how to use the pixel information tool with the file.
+
+           
+
+            The pixel information tool allows you to display information about the pixel pointed by the mouse.
+
+            This information includes: x and y positions, pixel intensity, resolution, etc.
+
+ 
+
+          </description>
+
+      </intro>
+
+     
+
+      <item
+
          title="Data Browsing Perspective">
+
       <description>
+
 Please choose the data browsing perspective if you do not already have it selected.
+
        </description>
-   </item>   
+
+   </item>  
+
    
-   	 <item
+
+       <item
+
          title="Open File">
+
       <description>
-	Click to open an example file from the 'data' project containing a test image.
+
+      Click to open an example file from the 'data' project containing a test image.
+
        </description>
+
        <command
+
             required="false"
+
             serialization="org.eclipse.ui.navigate.openResource(filePath=data/examples/ref-screentest-crystal1_1_001.mccd)"/>
-       
-   </item> 
+
+      
+
+   </item>
+
    
+
      <item
+
          title="Select 'Pixel Information' tool">
+
       <description>
+
 Select the 'Pixel Information' tool from the toolbar above the plot, tools labelled 'Image tools used to profile and inspect images'. These tools may be obscured on Linux if the window containing the plot is too small.
+
        </description>
-   </item> 
+
+   </item>
+
    
+
    <item
+
          title="Move cursor around to display information">
+
       <description>
+
       When the tool is opened, a cross hair is displayed as a driver to the mouse. <br/>
+
                Move the cursor around over the image. In the 'Pixel Information' table view you will see information about the pixel pointed to.
+
                A click on the plot creates a point region and its corresponding information (x, y positions, intensity, etc) is recorded in the table.<br/>
+
          Created point regions can be moved or deleted using the mouse .<br/>
+
          In each of the above operations the table view values are updated accordingly.
+
       </description>
-    
+
+   
+
     <onCompletion>
+
       Congratulations, you can now use the pixel information tool.
+
     </onCompletion>
-   </item> 
-	   	
+
+   </item>
+
+           
+
 </cheatsheet>
+
+ 
