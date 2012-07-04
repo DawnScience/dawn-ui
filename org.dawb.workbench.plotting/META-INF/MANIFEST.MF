@@ -10,12 +10,9 @@ Require-Bundle: org.eclipse.ui,
  org.dawb.org.csstudio.swt.xygraph;bundle-version="1.0.0",
  org.eclipse.draw2d;bundle-version="3.7.1",
  org.dawb.common.ui;bundle-version="1.0.0",
- org.dawb.fable.extensions;bundle-version="1.0.0",
  org.dawb.gda.extensions;bundle-version="1.0.0",
  uk.ac.diamond.scisoft.analysis;bundle-version="1.1.0",
- org.dawb.fable.imageviewer;bundle-version="1.0.0",
  org.dawb.jlchart;bundle-version="1.0.0",
- org.dawb.fabio;bundle-version="1.0.0",
  uk.ac.gda.common.rcp;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy

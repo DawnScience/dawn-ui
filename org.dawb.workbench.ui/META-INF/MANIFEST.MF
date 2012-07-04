@@ -11,7 +11,6 @@ Require-Bundle: org.eclipse.ui,
  uk.ac.gda.common,
  uk.ac.gda.common.rcp,
  uk.ac.diamond.scisoft.analysis,
- org.dawb.fable.python,
  org.dawb.hdf5,
  org.dawb.hdf5.editor,
  org.dawb.gda.extensions,
@@ -21,8 +20,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.help,
  org.eclipse.ui.cheatsheets,
  org.eclipse.ui.ide,
- org.eclipse.jface.text,
- org.dawb.fable.imageviewer;bundle-version="1.0.0"
+ org.eclipse.jface.text
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: fable.framework.logging,
