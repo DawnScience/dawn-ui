@@ -42,7 +42,7 @@
             class="org.dawb.workbench.plotting.tools.InfoPixelTool"
             icon="icons/info.png"
             id="org.dawb.workbench.plotting.tools.InfoPixel"
-            label="Pixel information"
+            label="Pixel Information"
             tooltip="A tool for displaying information on the data currently plotted.">
       </plotting_tool_page>
       <plotting_tool_page
@@ -214,6 +214,13 @@
             contentFile="cheat/masking.xml"
             id="org.dawb.workbench.plotting.cheatsheet.masking"
             name="Masking">
+      </cheatsheet>
+      <cheatsheet
+            category="org.dawb.workbench.plotting.tools.category"
+            composite="false"
+            contentFile="cheat/ellipse_fitting.xml"
+            id="org.dawb.workbench.plotting.cheatsheet.ellipsefitting"
+            name="Ellipse Fitting">
       </cheatsheet>
    </extension>
 

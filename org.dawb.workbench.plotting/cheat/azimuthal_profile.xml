@@ -37,21 +37,21 @@
     <item
          title="Add a sector">
       <description>
-         Find approximate center of the image and click and drag your sector from the center outwards a little way, now let go and click again further out - you have now created a sector. Note that you can move your sector after it is added by using the control points or by translating it, again by clicking and dragging it. You can also add more than one sector.
+         Find approximate centre of the image and click and drag your sector from the centre outwards a little way, now let go and click again further out - you have now created a sector. Note that you can move your sector after it is added by using the control points or by translating it, again by clicking and dragging it. You can also add more than one sector.
       </description>
    </item>
  
    <item
          title="View Profile">
       <description>
-         Look at the 'Azimuthal Profile' tool view on the right hand side of the image. Here you will see the intensity values of the sector which you have created. The plots are the sum of curves in sector or the 'azimuthal integration'. Try moving the sector around and resizing it to see the changes in the azimuthal integration.
+         Look at the 'Azimuthal Profile' tool view on the right hand side of the image. Here you will see the intensity values of the sector which you have created. The plots are the sum of pixel values over arcs in the sector or the 'radial integration'. Try moving the sector around and resizing it to see the changes in the azimuthal profile.
       </description>
    </item>
  
    <item
-         title="Center">
+         title="Centre">
       <description>
-         Now try the action on the 'Azimuthal Profile' toolbar labelled 'Center sector Profile 1'. This action attempts to center the sector by using values in the meta data (it uses the geometric center otherwise).
+         Now try the action on the 'Azimuthal Profile' toolbar labelled 'Centre sector Profile 1'. This action attempts to centre the sector by using values in the meta data (it uses the geometric centre otherwise).
       </description>
    </item>
 

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cheatsheet title="Ellipse fitting tool">
+
+	<intro>
+		<description>
+		    This cheat sheet helps you to open an image, and shows you how to use the ellipse
+		    fitting tool with the file. If you have just completed the previous cheat sheet, please
+		    close all your data file parts.
+	    </description>
+	</intro>
+
+   <item title="Data Browsing Perspective">
+      <description>
+         Please choose the data browsing perspective if you do not already have it selected (nothing
+         will happen if you do not).
+      </description>
+      <command
+            required="false"
+            serialization="org.eclipse.ui.perspectives.showPerspective(org.eclipse.ui.perspectives.showPerspective.perspectiveId=org.edna.workbench.application.perspective.DataPerspective)"/>
+   </item>
+   <item
+         title="Open File">
+      <description>
+         Click to open an example file from the &apos;data&apos; project containing a test image.
+      </description>
+      <command
+            required="false"
+            serialization="org.eclipse.ui.navigate.openResource(filePath=data/examples/results/billeA_4201_EF_XRD_5998.edf)"/>
+   </item>
+   <item
+         title="Select 'Ellipse Fitting' tool">
+      <description>
+         Select the 'Ellipse Fitting' tool from the toolbar above the plot, tools labelled 'Image
+         tools used to profile and inspect images'. These tools may be obscured on Linux if the
+         window containing the plot is too small.
+      </description>
+   </item>
+   <item
+         title="Fit an ellipse">
+      <description>
+         Select a elliptical or circular feature in the image to fit. Click on at least 5 points of
+         the selected feature spreading points over broad curves and concentrating points on tighter
+         sections. A dashed segmented line is shown that joins the selected points together. After
+         the fifth point is clicked, the fitted ellipse is shown and more points can be added. To
+         finish adding points, click on the last point again without moving the mouse.
+         <p>The fitting ellipse is display with handle boxes on the clicked points and a centre
+         handle box on its major axis.</p>
+      </description>
+   </item>
+   <item
+         title="Fitted ellipse parameters">
+      <description>
+         Look at the 'Ellipse Fitting' tool view on the right hand side of the image. Here you will
+         see a table of geometric parameters of the fitted ellipses. The columns include major and
+         minor semi-axes lengths (equivalent to radius of a circle), angle of the major axis and
+         centre coordinates.
+      </description>
+   </item>
+   <item
+         title="Adjusting a fitted ellipse">
+      <description>
+         Any of the handles can be clicked and dragged to adjust its position and influence the
+         fitting of the ellipse. The centre handle solely translates the whole ellipse and its
+         points.
+      </description>
+      <onCompletion>
+         Congratulations, you can now fit ellipses to features in images. Try with your own images.
+      </onCompletion>
+   </item>
+
+       	
+</cheatsheet>

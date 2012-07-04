@@ -53,6 +53,8 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 
 		parent.add(ellipse);
 		sync(getBean());
+		ellipse.setForegroundColor(getRegionColor());
+		ellipse.setAlpha(getAlpha());
 		ellipse.setLineWidth(getLineWidth());
 		updateROI();
 		if (roi == null)
@@ -159,11 +161,16 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 			hroi.insertPoint(i, xAxis.getPositionValue(p.x(), false), yAxis.getPositionValue(p.y(), false));
 		}
 
-		final EllipticalFitROI eroi = new EllipticalFitROI(hroi);
-		if (recordResult) {
-			roi = eroi;
+		try {
+			final EllipticalFitROI eroi = new EllipticalFitROI(hroi);
+			if (recordResult) {
+				roi = eroi;
+			}
+			return eroi;
+		} catch (IllegalArgumentException e) {
+			// do nothing
 		}
-		return eroi;
+		return roi;
 	}
 
 	@Override
@@ -191,8 +198,8 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 		List<IFigure> handles;
 		List<FigureTranslator> fTranslators;
 		private Figure parent;
-		private TranslationListener hListener;
-		private FigureListener fListener;
+		private TranslationListener handleListener;
+		private FigureListener moveListener;
 		private static final int SIDE = 8;
 		public DecoratedEllipse(Figure parent) {
 			super();
@@ -200,8 +207,8 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 			fTranslators = new ArrayList<FigureTranslator>();
 			this.parent = parent;
 			setFill(false);
-			hListener = createHandleNotifier();
-			fListener = new FigureListener() {
+			handleListener = createHandleNotifier();
+			moveListener = new FigureListener() {
 				@Override
 				public void figureMoved(IFigure source) {
 					DecoratedEllipse.this.parent.repaint();
@@ -213,7 +220,10 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 
 		public void setup(PointList points) {
 			fitPoints(points, this);
+			configureHandles(points);
+		}
 
+		private void configureHandles(PointList points) {
 			// handles
 			final Point p = new Point();
 			for (int i = 0, imax = points.size(); i < imax; i++) {
@@ -224,9 +234,6 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 
 			createROI(true);
 
-			addFigureListener(fListener);
-			FigureTranslator mover = new FigureTranslator(getXyGraph(), parent, this, handles);
-			mover.addTranslationListener(createRegionNotifier());
 			setRegionObjects(this, handles);
 			Rectangle b = getBounds();
 			if (b != null)
@@ -234,14 +241,13 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 		}
 
 		private void addHandle(Point p) {
-//			System.err.println("Pt " + i + ": " + p);
 			RectangularHandle h = new RectangularHandle(xAxis, yAxis, getRegionColor(), this, SIDE,
 					p.preciseX(), p.preciseY());
 			parent.add(h);
 			FigureTranslator mover = new FigureTranslator(getXyGraph(), h);
-			mover.addTranslationListener(hListener);
+			mover.addTranslationListener(handleListener);
 			fTranslators.add(mover);
-			h.addFigureListener(fListener);
+			h.addFigureListener(moveListener);
 			handles.add(h);
 		}
 
@@ -252,17 +258,17 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 			FigureTranslator mover = new FigureTranslator(getXyGraph(), h, h, handles);
 			mover.addTranslationListener(createRegionNotifier());
 			fTranslators.add(mover);
-			h.addFigureListener(fListener);
+			h.addFigureListener(moveListener);
 			handles.add(h);
 		}
 
 		private void removeHandle(SelectionHandle h) {
 			parent.remove(h);
-			h.removeFigureListener(fListener);
+			h.removeFigureListener(moveListener);
 			h.removeMouseListeners();
 		}
 
-		public TranslationListener createHandleNotifier() {
+		private TranslationListener createHandleNotifier() {
 			return new TranslationListener() {
 				@Override
 				public void onActivate(TranslationEvent evt) {
@@ -284,8 +290,7 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 								h.setSelectionPoint(getCentre());
 							}
 						}
-						EllipticalFitROI eroi = (EllipticalFitROI) createROI(false);
-						fireROIDragged(eroi, ROIEvent.DRAG_TYPE.RESIZE);
+						fireROIDragged(createROI(false), ROIEvent.DRAG_TYPE.RESIZE);
 					}
 				}
 
@@ -293,8 +298,7 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 				public void translationCompleted(TranslationEvent evt) {
 					Object src = evt.getSource();
 					if (src instanceof FigureTranslator) {
-						EllipticalFitROI eroi = (EllipticalFitROI) createROI(true);
-						fireROIChanged(eroi);
+						fireROIChanged(createROI(true));
 						fireROISelection();
 					}
 				}
@@ -338,11 +342,6 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 		}
 
 		@Override
-		public boolean containsPoint(int x, int y) {
-			return false;
-		}
-
-		@Override
 		public Rectangle getBounds() {
 			Rectangle b = super.getBounds();
 			if (handles != null)
@@ -360,11 +359,14 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 		 * @param sroi
 		 */
 		public void updateFromROI(EllipticalFitROI eroi) {
-			ellipse.setAxes(xAxis.getValuePosition(2*eroi.getSemiAxis(0) + eroi.getPointX(), false) - xAxis.getValuePosition(eroi.getPointX(), false),
-					yAxis.getValuePosition(2*eroi.getSemiAxis(1) + eroi.getPointY(), false) - yAxis.getValuePosition(eroi.getPointY(), false));
+			final double[] xy = eroi.getPointRef();
+			double x = xAxis.getValuePosition(xy[0], false);
+			double y = yAxis.getValuePosition(xy[1], false);
+			setAxes(xAxis.getValuePosition(2*eroi.getSemiAxis(0) + xy[0], false) - x,
+					yAxis.getValuePosition(2*eroi.getSemiAxis(1) + xy[1], false) - y);
 
-			ellipse.setCentre(xAxis.getValuePosition(eroi.getPointX(), false), yAxis.getValuePosition(eroi.getPointY(), false));
-			ellipse.setAngle(eroi.getAngleDegrees());
+			setCentre(x, y);
+			setAngle(eroi.getAngleDegrees());
 
 			int imax = handles.size() - 1;
 			PolygonalROI proi = eroi.getPoints();
@@ -381,6 +383,7 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 					addHandle(np);
 				}
 				addCentreHandle();
+				setRegionObjects(this, handles);
 			} else {
 				for (int i = 0; i < imax; i++) {
 					PointROI p = proi.getPoint(i);

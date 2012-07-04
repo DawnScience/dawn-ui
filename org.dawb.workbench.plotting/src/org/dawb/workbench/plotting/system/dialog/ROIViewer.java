@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Spinner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.roi.EllipticalFitROI;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.PointROI;
@@ -283,7 +284,7 @@ public class ROIViewer  {
 			
 		} else if (roi instanceof SectorROI) {
 			final SectorROI sr = (SectorROI)roi;
-			ret.add(new RegionRow("Center (x,y)",         "pixel", sr.getPointX(),        sr.getPointY()));
+			ret.add(new RegionRow("Centre (x,y)",         "pixel", sr.getPointX(),        sr.getPointY()));
 			ret.add(new RegionRow("Radii (inner, outer)", "pixel", sr.getRadius(0),       sr.getRadius(1)));
 			ret.add(new RegionRow("Angles (°)",           "°",     sr.getAngleDegrees(0), sr.getAngleDegrees(1)));
 			
@@ -292,9 +293,17 @@ public class ROIViewer  {
 			}
 		} else if (roi instanceof EllipticalROI) {
 			final EllipticalROI er = (EllipticalROI) roi;
-			ret.add(new RegionRow("Center (x,y)",             "pixel", er.getPointX(),       er.getPointY()));
+			ret.add(new RegionRow("Centre (x,y)",             "pixel", er.getPointX(),       er.getPointY()));
 			ret.add(new RegionRow("Semi-axes (major, minor)", "pixel", er.getSemiAxis(0),    er.getSemiAxis(1)));
 			ret.add(new RegionRow("Rotation (°)",             "°",     er.getAngleDegrees(), Double.NaN));
+			if (er instanceof EllipticalFitROI) {
+				final PolygonalROI pr = ((EllipticalFitROI) er).getPoints();
+				for (int i = 0; i < pr.getSides(); i++) {
+					ret.add(new RegionRow("Point "+(i+1)+"  (x,y)", "pixel", pr.getPointX(i), pr.getPointY(i)));
+				}
+			}
+		} else {
+			ret.add(new RegionRow("Unknown type (x,y)", "pixel", roi.getPointX(), roi.getPointY()));
 		}
 		
 		return ret;
@@ -423,9 +432,11 @@ public class ROIViewer  {
 				return false;
 			return true;
 		}
+		@SuppressWarnings("unused")
 		public String getUnit() {
 			return unit;
 		}
+		@SuppressWarnings("unused")
 		public void setUnit(String unit) {
 			this.unit = unit;
 		}

@@ -116,22 +116,27 @@ public class InfoPixelLabelProvider extends ColumnLabelProvider {
 			case 2: // "Y position"
 				return String.format("% 4.4f", y);
 			case 3: // "Data value"
-				if (set == null || vectorUtil==null || vectorUtil.getQMask(qSpace, x, y) == null) return "-";
+				//if (set == null || vectorUtil==null || vectorUtil.getQMask(qSpace, x, y) == null) return "-";
+				if (set == null) return "-";
 				return String.format("% 4.4f", set.getDouble((int)y, (int) x));
 			case 4: // q X
-				if (vectorUtil==null || vectorUtil.getQMask(qSpace, x, y) == null) return "-";
+				//if (vectorUtil==null || vectorUtil.getQMask(qSpace, x, y) == null) return "-";
+				if (vectorUtil==null ) return "-";
 				return String.format("% 4.4f", vectorUtil.getQx());
 			case 5: // q Y
-				if (vectorUtil==null ||vectorUtil.getQMask(qSpace, x, y) == null) return "-";
+				//if (vectorUtil==null ||vectorUtil.getQMask(qSpace, x, y) == null) return "-";
+				if (vectorUtil==null) return "-";
 				return String.format("% 4.4f", vectorUtil.getQy());
 			case 6: // q Z
-				if (vectorUtil==null ||vectorUtil.getQMask(qSpace, x, y) == null) return "-";
+				//if (vectorUtil==null ||vectorUtil.getQMask(qSpace, x, y) == null) return "-";
+				if (vectorUtil==null) return "-";
 				return String.format("% 4.4f", vectorUtil.getQz());
 			case 7: // 20
-				if (qSpace == null) return "-";
+				if (vectorUtil==null || qSpace == null) return "-";
 				return String.format("% 3.3f", Math.toDegrees(vectorUtil.getQScatteringAngle(qSpace)));
 			case 8: // resolution
-				if (vectorUtil==null ||vectorUtil.getQMask(qSpace, x, y) == null) return "-";
+				//if (vectorUtil==null ||vectorUtil.getQMask(qSpace, x, y) == null) return "-";
+				if (vectorUtil==null ) return "-";
 				return String.format("% 4.4f", (2*Math.PI)/vectorUtil.getQlength());
 			case 9: // Dataset name
 				if (set == null) return "-";
