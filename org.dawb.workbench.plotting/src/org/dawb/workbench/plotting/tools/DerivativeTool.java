@@ -7,6 +7,7 @@ import java.util.List;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.PlottingFactory;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
+import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
@@ -213,7 +214,7 @@ public class DerivativeTool extends AbstractToolPage  {
 
 	@Override
 	public ToolPageRole getToolPageRole() {
-		return ToolPageRole.ROLE_1D_AND_2D;
+		return ToolPageRole.ROLE_1D;
 	}
 
 	@Override
