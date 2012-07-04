@@ -108,7 +108,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 	
 	@Override
 	public ToolPageRole getToolPageRole() {
-		return ToolPageRole.ROLE_1D_AND_2D;
+		return ToolPageRole.ROLE_1D;
 	}
 
 	@Override
