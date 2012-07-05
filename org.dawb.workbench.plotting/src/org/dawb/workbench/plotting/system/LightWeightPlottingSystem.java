@@ -362,12 +362,20 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		
 		return updatedAndCreated;
 	}
+	
+	@Override
+	public List<ITrace> createPlot1D(final AbstractDataset       xIn, 
+					                 final List<AbstractDataset> ysIn,
+					                 final IProgressMonitor      monitor) {
+        return this.createPlot1D(xIn, ysIn, null, monitor);
+	}
 	/**
 	 * Does not have to be called in UI thread.
 	 */
 	@Override
 	public List<ITrace> createPlot1D(final AbstractDataset       xIn, 
 					                 final List<AbstractDataset> ysIn,
+					                 final String                title,
 					                 final IProgressMonitor      monitor) {
 		
 		if (monitor!=null) monitor.worked(1);
@@ -382,13 +390,13 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		final List<ITrace> traces = new ArrayList<ITrace>(7);
 		
 		if (getDisplay().getThread()==Thread.currentThread()) {
-			List<ITrace> ts = createPlot1DInternal(x, ys, createdIndices, monitor);
+			List<ITrace> ts = createPlot1DInternal(x, ys, title, createdIndices, monitor);
 			if (ts!=null) traces.addAll(ts);
 		} else {
 			getDisplay().syncExec(new Runnable() {
 				@Override
 				public void run() {
-					List<ITrace> ts = createPlot1DInternal(x, ys, createdIndices, monitor);
+					List<ITrace> ts = createPlot1DInternal(x, ys, title, createdIndices, monitor);
 					if (ts!=null) traces.addAll(ts);
 				}
 			});
@@ -596,6 +604,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 
 	private List<ITrace> createPlot1DInternal(  final AbstractDataset       xIn, 
 										final List<AbstractDataset> ysIn,
+										final String title,
 										final boolean               createdIndices,
 										final IProgressMonitor      monitor) {
 		
@@ -624,8 +633,12 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		xAxis.setVisible(true);
 		yAxis.setVisible(true);
 
-		// TODO Fix titles for multiple calls to create1DPlot(...)
-		xyGraph.setTitle(DatasetTitleUtils.getTitle(x, ys, true, rootName));
+		if (title==null) {
+			// TODO Fix titles for multiple calls to create1DPlot(...)
+		    xyGraph.setTitle(DatasetTitleUtils.getTitle(x, ys, true, rootName));
+		} else {
+			xyGraph.setTitle(title);
+		}
 		xAxis.setTitle(DatasetTitleUtils.getName(x,rootName));
 		
 
