@@ -100,7 +100,7 @@ public class SpinnerScaleSet {
 			spinners.put(name, spinner);
 
 			GridData gridDataScale = new GridData(SWT.FILL, SWT.CENTER, true, false);
-			Scale scale = new Scale(comp, SWT.BORDER);
+			Scale scale = new Scale(comp, SWT.NONE);
 			scale.setLayoutData(gridDataScale);
 			scale.addSelectionListener(listener);
 			scale.setMinimum(0);
