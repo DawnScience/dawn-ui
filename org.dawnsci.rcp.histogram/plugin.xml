@@ -303,5 +303,19 @@
             red_transfer_function="org.dawnsci.rcp.histogram.twox">
       </colour_scheme>
    </extension>
+   <extension
+         point="org.eclipse.ui.cheatsheets.cheatSheetContent">
+      <category
+            id="org.dawnsci.rcp.histogram.cheatsheet.catagory"
+            name="Colour mapping">
+      </category>
+      <cheatsheet
+            category="org.dawnsci.rcp.histogram.cheatsheet.catagory"
+            composite="false"
+            contentFile="cheat/ColourMappingExample.xml"
+            id="org.dawnsci.rcp.histogram.cheatsheet.colourmapping"
+            name="Colour Mapping Example">
+      </cheatsheet>
+   </extension>
 
 </plugin>
