@@ -177,6 +177,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
  		bars.getMenuManager().removeAll();
  		bars.getToolBarManager().removeAll();
 
+ 		lightWeightActionBarMan.init();
  		lightWeightActionBarMan.createConfigActions();
  		lightWeightActionBarMan.createAnnotationActions();
  		lightWeightActionBarMan.createRegionActions();

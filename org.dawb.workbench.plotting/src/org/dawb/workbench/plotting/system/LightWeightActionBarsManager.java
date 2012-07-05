@@ -81,6 +81,8 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 	private boolean                   datasetChoosingRequired = true;
 	private List<ActionContainer>     oneDimensionalActions;
 	private List<ActionContainer>     twoDimensionalActions;
+	private MenuAction                imageMenu;
+	private MenuAction                xyMenu;
 
 	protected LightWeightActionBarsManager(LightWeightPlottingSystem system) {
 		super(system);
@@ -88,6 +90,19 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 		oneDimensionalActions = new ArrayList<ActionContainer>();
 		twoDimensionalActions = new ArrayList<ActionContainer>();
 	}
+
+
+	public void init() {
+		
+		xyMenu =  new MenuAction("X/Y Plot");
+		system.getActionBars().getMenuManager().add(xyMenu);
+		system.getActionBars().getMenuManager().add(new Separator());
+
+		imageMenu = new MenuAction("Image");
+		system.getActionBars().getMenuManager().add(imageMenu);
+		system.getActionBars().getMenuManager().add(new Separator());
+		
+	}       
 
 	private PlotType lastPlotTypeUpdate = null;
 	
@@ -98,7 +113,10 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 		
 		final IActionBars bars = system.getActionBars();
     	if (bars==null) return;
-    	 
+    	
+    	imageMenu.setEnabled(type==PlotType.IMAGE);
+    	xyMenu.setEnabled(type.is1D());
+    	
     	if (oneDimensionalActions!=null) for (ActionContainer ac : oneDimensionalActions) {
     		if (type.is1D() && ac.getManager().find(ac.getId())==null) {
     			ac.getManager().insertAfter(ac.getId()+".group", ac.getAction());
@@ -385,7 +403,7 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 		if (bars!=null) {
        	
 			try {
-				IAction toolSet = createToolActions(role, viewId);
+				MenuAction toolSet = createToolActions(role, viewId);
 				if (toolSet==null) return;
 
 				bars.getToolBarManager().add(new Separator(role.getId()+".group"));
@@ -393,6 +411,14 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 				if (role.is1D()&&!role.is2D()) oneDimensionalActions.add(new ActionContainer(toolSet, bars.getToolBarManager()));
 				if (role.is2D()&&!role.is1D()) twoDimensionalActions.add(new ActionContainer(toolSet, bars.getToolBarManager()));
 
+				if (role.is2D()) {
+					toolSet.addActionsTo(imageMenu);
+					this.imageMenu.addSeparator();
+				}
+				if (role.is1D()) {
+					toolSet.addActionsTo(xyMenu);
+					this.xyMenu.addSeparator();
+				}
 	        	
 			} catch (Exception e) {
 				logger.error("Reading extensions for plotting tools", e);
@@ -419,9 +445,10 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 		if (bars!=null) {
 			bars.getToolBarManager().add(new Separator("org.dawb.workbench.plotting.histo.group"));
 			histo.setId("org.dawb.workbench.plotting.histo");
-			bars.getToolBarManager().insertAfter("org.dawb.workbench.plotting.histo.group", histo);
-	 
+			bars.getToolBarManager().insertAfter("org.dawb.workbench.plotting.histo.group", histo);	 
 			twoDimensionalActions.add(new ActionContainer(histo, bars.getToolBarManager()));
+			
+			this.imageMenu.add(histo);
 		}
 		
 		
@@ -443,6 +470,10 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 			bars.getToolBarManager().insertAfter("org.dawb.workbench.plotting.aspect.group", action);
 	 
 			twoDimensionalActions.add(new ActionContainer(action, bars.getToolBarManager()));
+			
+			this.imageMenu.add(action);
+			this.imageMenu.addSeparator();
+
 		}
 
 	}
@@ -552,6 +583,8 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 		};
 		rescaleAction.setChecked(this.system.isRescale());
 		rescaleAction.setId("org.dawb.workbench.plotting.rescale");
+		xyMenu.add(rescaleAction);
+		
 		if (bars!=null) oneDimensionalActions.add(new ActionContainer(rescaleAction, bars.getToolBarManager()));
 
         if (bars!=null) bars.getToolBarManager().add(new Separator(rescaleAction.getId()+".group"));
@@ -600,6 +633,10 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 			}
 			
 			
+			xyMenu.addSeparator();
+			xyMenu.add(plotX);
+			xyMenu.add(plotIndex);
+			xyMenu.addSeparator();
 			if (bars!=null) {
 			
 				bars.getToolBarManager().add(new Separator(plotIndex.getId()+".group"));
@@ -958,5 +995,6 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 			system.getActionBars().getMenuManager().remove(id);
 			system.getActionBars().getStatusLineManager().remove(id);
 		}
-	}       
+	}
+
 }
