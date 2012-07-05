@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cheatsheet title="Simple Image Polling Example">
+	<intro>
+		<description>
+			This example will show you how to midify the colour mapping on an image to get the best out of your data.
+		</description>
+	</intro>
+	<item title="Go to the data browsing perspective">
+		<description>
+			This example will use the data browsing perspective, however the functionality is available in any perspective where there is an image displayed.
+		</description>
+		<command required="true"
+			serialization="org.eclipse.ui.perspectives.showPerspective(org.eclipse.ui.perspectives.showPerspective.perspectiveId=org.edna.workbench.application.perspective.DataPerspective)" />
+	</item>
+	<item title="Open some data">
+		<description>
+			The first thing to do is to open some image data, in this case in the project explorer select the data project, go into the examples folder and then double click on the pilatus300k.edf file to open it.
+		</description>
+		<command
+            required="false"
+            serialization="org.eclipse.ui.navigate.openResource(filePath=data/examples/pilatus300k.edf)"/>
+	</item>
+	<item title="Open the colour mapping tool">
+		<description>
+			At the top of the area where the image is now displated is a toolbar, in this you need to select the dropdown associated with the "Image tools" icon which is to the far right of the toolbar.  
+			<br/><br/>In this dropdown select the <b>Colour Mapping</b> tool, this should open the colour mapping tool page.
+			<br/><br/>This tool page has many elements which we will deal with shortly, but the main point of interest is the <b>Histogram Plot</b> at the bottom which shows the histogram information of the plot which is currently showing.
+			
+		</description>
+	</item>
+	<item title="Change the General Colour Scheme">
+		<description>
+			The first thing to do is to change the colour scheme, and that is done through the dropdown box at the top of the colour mapping tool page, for now select the <b>Hot</b> scheme.
+			<br/><br/>There is a check-box next to the scheme which enables the log scale, press this now and look at the changes to the main image, then un-check it again. 
+		</description>
+	</item>
+	<item title="Customise the colour scheme">
+		<description>
+			if there is not a colour scheme to your liking, you may customise the scheme.
+			<br/><br/>To do this, expand the <b>Colour Scheme per Channel</b> section, and this shows the equations which are being used for each channel to produce the colour scheme.
+			<br/><br/>First change the main colour scheme back to <b>Gray scale</b>.  You will see all the equations switch to the <b>linear</b> equation.  You can now change the schemes as you like, including using the inverse check-boxes to customise almost any colour scheme.
+			<br/><br/>As you are doing this you will see the coloured lines on the plot at the bottom of the tool change, this is a graphical representation of the equations you are choosing, and may be useful for experimenting.
+			<br/><br/>if you want to go back to one of the presets, simply choose this from the <b>colour scheme</b> dropdown ant the top and everything will be set to that.  For now go back to <b>Hot</b> 
+		</description>
+	</item>
+	<item title="Brightness and Contrast">
+		<description>
+			These controls are useful especially when trying to view high bit depth data. 
+			<br/><br/>To access these tools, expand the <b>Brightness and Contrast</b> section.  This provides 2 sliders, one controls the brightness of the image, the other the contrast.
+			<br/><br/>By dragging these sliders backwards and forwards(or by using the spinners or typing in the number directly) you can adjust the area of the histogram which is being colour mapped.  This is shown in the <b>Histogram Plot</b> part of the tool whenever you change the settings.  
+			<br/><br/>To get back to the initial settings, click in the image window and press <b>h</b> which re-histograms the image automatically.
+		</description>
+	</item>
+	
+	<item title="Histogram Range">
+		<description>
+			This does exactly what the brightness and contrast do, but in a different way, by specifying the maximuma nd minimum values of the histogram plot, and colour mapping.
+			<br/><br/>Expand the <b>Histogram Range</b> section which shows similar sliders to the Brightness Contrast page.
+			<br/><br/>When you move these sliders you will see the <b>Histogram Plot</b> and the <b>Brightness and Contrast Sliders</b> update, and the image change appropriately.
+			<br/><br/>Select the image window and press <b>h</b> again to reset the values 
+		</description>
+	</item>
+	
+	<item title="Dead Pixels and Zingers">
+		<description>
+			This tool sets teh maximum and minimum values you wisth the image to display, and entering values in here will effect all the other sliders and plots.
+			<br/><br/>Expand the <b>Dead pixel and Zinger Cutoffs</b> section to acess this tool, and it simply shows 2 boxes which specify these cutoffs, By default (and if you press the reset button) these are set to positive and negative infinity.
+			<br/><br/>For now set the <b>Dead Pixel Max Cuttof</b> to 100 and the <b>Zinger Min Value cutoff</b> to 500, pressing enter after typing in each value.
+			<br/><br/>Looking back at the image you should see latge parts of it are now blue(showing dead pixels) or red (showing zingers), you will also notice that the sliders now only have a range from 100-500.
+			<br/><br/>Press the reset button to go back to positiva and negative infinity.
+		</description>
+
+		<onCompletion>
+      		Congratulations, you can now modify the colour mapping of an image to get the most out of your image data.
+    	</onCompletion>
+
+	</item>
+
+
+
+</cheatsheet>
