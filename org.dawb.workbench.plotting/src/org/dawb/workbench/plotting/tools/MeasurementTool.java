@@ -73,6 +73,7 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 			resetSelectionColor();
 
 			final IStructuredSelection sel = (IStructuredSelection)event.getSelection();
+			if (!(sel.getFirstElement() instanceof IRegion)) return;
 			final IRegion          region = (IRegion)sel.getFirstElement();
 			previousRegion = region;
 			previousColor  = region!=null ? region.getRegionColor() : null;
@@ -160,6 +161,7 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 			public void run() {
 				if (!isActive()) return;
 				final IStructuredSelection sel = (IStructuredSelection)viewer.getSelection();
+				if (!(sel.getFirstElement() instanceof IRegion)) return;
 				if (sel!=null && sel.getFirstElement()!=null) {
 					final IRegion region = (IRegion)sel.getFirstElement();
 					if (region==null||region.getROI()==null) return;
@@ -181,6 +183,7 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 			public void run() {
 				if (!isActive()) return;
 				final IStructuredSelection sel = (IStructuredSelection)viewer.getSelection();
+				if (!(sel.getFirstElement() instanceof IRegion)) return;
 				if (sel!=null && sel.getFirstElement()!=null) {
 					final IRegion region = (IRegion)sel.getFirstElement();
 					getPlottingSystem().removeRegion(region);
