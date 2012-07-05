@@ -42,7 +42,7 @@ public abstract class SectorProfileTool extends ProfileTool {
 		center.setImageDescriptor(Activator.getImageDescriptor("icons/sector-center-menu.png"));
 		
 		getSite().getActionBars().getToolBarManager().add(center);
-		
+		getSite().getActionBars().getMenuManager().add(center);
 		updateSectors();
 		
 		this.sectorRegionListener  = new IRegionListener.Stub() {
@@ -71,6 +71,7 @@ public abstract class SectorProfileTool extends ProfileTool {
 		final MenuAction symmetry = new MenuAction("Symmetry setting");
 		symmetry.setImageDescriptor(Activator.getImageDescriptor("icons/sector-symmetry-menu.png"));
 		getSite().getActionBars().getToolBarManager().add(symmetry);
+		getSite().getActionBars().getMenuManager().add(symmetry);
 		
 		addSymetryActions(symmetry);
 		
@@ -156,6 +157,7 @@ public abstract class SectorProfileTool extends ProfileTool {
 		};
 		combine.setImageDescriptor(Activator.getImageDescriptor("icons/sector-symmetry-combine.png"));
 		getSite().getActionBars().getToolBarManager().add(combine);
+		getSite().getActionBars().getMenuManager().add(combine);
 	}
 
 	public void activate() {
@@ -206,6 +208,7 @@ public abstract class SectorProfileTool extends ProfileTool {
 			
 		// TODO likely to cause flicker
 		getSite().getActionBars().getToolBarManager().update(true);
+		getSite().getActionBars().getMenuManager().update(true);
 	}
 
 	protected double[] getBeamCenter() {
