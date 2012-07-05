@@ -102,6 +102,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 			}
 		};
 		getSite().getActionBars().getToolBarManager().add(reset);
+		getSite().getActionBars().getMenuManager().add(reset);
 		
 		activate();
 	}
