@@ -146,15 +146,23 @@ public class ROIViewer  {
 				logger.error("Cannot get FieldComponentCellEditor for "+SpinnerWrapper.class.getName(), e);
 				return null;
 			}
+			
 			final FloatSpinnerWrapper   rb = (FloatSpinnerWrapper)ed.getFieldWidget();
-			Range range;
-            if (column==1) {
-            	range = graph.primaryXAxis.getRange();
+			if (element instanceof LinearROI || element instanceof PointROI || element instanceof PolygonalROI
+			   || element instanceof RectangularROI) {
+				Range range;
+	            if (column==1) {
+	            	range = graph.primaryXAxis.getRange();
+				} else {
+					range = graph.primaryYAxis.getRange();
+				}
+	            rb.setMaximum(Math.max(range.getUpper(), range.getLower()));
+	            rb.setMinimum(Math.min(range.getUpper(), range.getLower()));
 			} else {
-				range = graph.primaryYAxis.getRange();
+	            rb.setMaximum(Double.MAX_VALUE);
+	            rb.setMinimum(-Double.MAX_VALUE);
 			}
-            rb.setMaximum(Math.max(range.getUpper(), range.getLower()));
-            rb.setMinimum(Math.min(range.getUpper(), range.getLower()));
+			
             rb.setButtonVisible(false);
             rb.setActive(true);
             ((Spinner)rb.getControl()).addSelectionListener(new SelectionAdapter() {
