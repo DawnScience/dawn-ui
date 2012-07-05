@@ -54,14 +54,6 @@
             name="Image Editor">
       </editor>
 
-      <editor
-            class="fable.imageviewer.editor.ImageEditor"
-            default="false"
-            extensions="tif, tiff, cbf, img, ciff, mccd, edf, pgm, cor, bruker"
-            icon="icons/image_editor.png"
-            id="fable.imageviewer.editor.ImageEditor"
-            name="Fable Image">
-      </editor>
 
       <editor
             class="org.dawb.workbench.ui.editors.ZipEditor"
