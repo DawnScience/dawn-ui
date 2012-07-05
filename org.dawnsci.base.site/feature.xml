@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.dawnsci.base.site"
-      label="SDA p2 site and product"
+      label="Dawn p2 site and product"
       version="1.0.0.qualifier"
       provider-name="Dawn Collaboration">
 

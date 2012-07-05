@@ -1,10 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="dawn" uid="org.dawnsci.base.product" id="org.dawnsci.product.plugin.DAWN" application="org.eclipse.ui.ide.workbench" version="1.1.0" useFeatures="true" includeLaunchers="true">
+<product name="Dawn" uid="org.dawnsci.base.product" id="org.dawnsci.product.plugin.DAWN" application="org.eclipse.ui.ide.workbench" version="1.1.0" useFeatures="true" includeLaunchers="true">
 
    <aboutInfo>
-      <image path="/org.dawnsci.product.plugin/icons/Temp-3Col-Splash.png"/>
+      <image path="/org.dawnsci.product.plugin/icons/Temp-48x48-icon.png"/>
+      <text>
+         Welcome to Data Analysis Workbench the tools set for online data analysis
+Copyright, 2010 - 2012 Diamond Light Source and ESRF
+
+Version 1.1 Pre-release
+
+This version of Data Analysis Workbench is licensed under
+the Eclipse Public License version 1.0.
+
+Please see the license file in the installation directory and 
+contact us if you cannot locate it. More details can be found at
+http://www.dawnsci.org
+
+Based on Eclipse, www.eclipse.org 
+Uses: Java, GEF, Log4J, Passerelle
+
+Diamond Light Source and ESRF are registered trade marks 
+All other trademarks are the property of their respective owners.
+      </text>
    </aboutInfo>
 
    <configIni use="default">
@@ -42,6 +61,7 @@
          <bmp/>
       </win>
    </launcher>
+
 
    <vm>
    </vm>
