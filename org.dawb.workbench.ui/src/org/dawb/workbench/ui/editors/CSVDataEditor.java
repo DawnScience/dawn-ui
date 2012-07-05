@@ -140,6 +140,17 @@ public class CSVDataEditor extends EditorPart implements IReusableEditor, IPageC
 	
 	private void createActions(final ContributionManager toolMan) {
 		
+		final Action refresh = new Action("Refresh", IAction.AS_PUSH_BUTTON) {
+			@Override
+			public void run() {
+				update();
+			}
+		};
+		refresh.setImageDescriptor(Activator.getImageDescriptor("icons/reset.gif"));
+		toolMan.add(refresh);
+		
+		toolMan.add(new Separator(getClass().getName()+"Sep1"));
+
 		final Action exportCsv = new Action("Export current plotted data to csv file", IAction.AS_PUSH_BUTTON) {
 			@Override
 			public void run() {
@@ -173,8 +184,10 @@ public class CSVDataEditor extends EditorPart implements IReusableEditor, IPageC
 	private void update() {
 		
 		if (tableViewer!=null) {
-			GridUtils.setVisible(tableViewer.getTable(), false);
-			tableViewer.getTable().dispose();
+			if (!tableViewer.getControl().isDisposed()) {
+				GridUtils.setVisible(tableViewer.getTable(), false);
+				tableViewer.getTable().dispose();
+			}
 		}
 		
 		this.data = dataProvider.getSelected();
@@ -348,7 +361,13 @@ public class CSVDataEditor extends EditorPart implements IReusableEditor, IPageC
 
 	@Override
 	public void setFocus() {
-		if (tableViewer!=null) tableViewer.getControl().setFocus();	
+		try {
+			if (tableViewer==null) return;
+			if (tableViewer.getControl().isDisposed()) return;
+			if (tableViewer!=null) tableViewer.getControl().setFocus();	
+		} catch (Throwable ne) {
+			return; // Intentionally ignored.
+		}
 	}
 
 	@Override
