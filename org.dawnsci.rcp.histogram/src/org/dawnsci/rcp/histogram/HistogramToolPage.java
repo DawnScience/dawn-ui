@@ -814,6 +814,7 @@ public class HistogramToolPage extends AbstractToolPage {
 		double rMax = rangeMax;
 		double rMin = rangeMin;
 		
+		if (getPlottingSystem()==null) return; // Nothing to update
 		Collection<ITrace> traces = getPlottingSystem().getTraces(IImageTrace.class);
 		image = traces!=null && traces.size()>0 ? (IImageTrace)traces.iterator().next():null;
 		imageDataset = image.getData();
