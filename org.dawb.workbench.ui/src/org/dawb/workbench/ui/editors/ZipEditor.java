@@ -70,6 +70,8 @@ public class ZipEditor extends MultiPageEditorPart implements ISlicablePlottingP
 	 */
 	@Override
 	protected void createPages() {
+		
+		if (getContainer()==null) return;
 		try {
 
 			// For 1D we are like an ascii editor and for 2D we are like an
@@ -90,10 +92,26 @@ public class ZipEditor extends MultiPageEditorPart implements ISlicablePlottingP
 				
 			} else {
 				final IEditorInput[] images = getImageEditorInput();
-				for (int i = 0; i < images.length; i++) {
-					addPage(i, new ImageEditor(), images[i]);
-					setPageText(i, "Image "+(i+1));				
+				if (images!=null) {
+					if (images.length>1) {
+						for (int i = 0; i < images.length; i++) {
+							if (images[i]==null) continue;
+							addPage(i, new ImageEditor(), images[i]);
+							setPageText(i, "Image "+(i+1));				
+						}
+					} else {
+						PlotImageEditor plotImageEditor = new PlotImageEditor();
+						addPage(0, plotImageEditor,  images[0]);
+						setPageText(0, "Image");
+						
+						if (System.getProperty("org.dawb.editor.ascii.hide.diamond.image.editor")==null) {
+							final uk.ac.diamond.scisoft.analysis.rcp.editors.ImageEditor im = new uk.ac.diamond.scisoft.analysis.rcp.editors.ImageEditor();
+							addPage(1, im,       images[0]);
+							setPageText(1, "Info");
+						}
+					}
 				}
+					
 			}
  
 
