@@ -765,7 +765,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 	/**
 	 * Update everything based on the new slider positions  
-	 * @param event 
+	 * @param event  MAY BE NULL
 	 */
 	private void updateHistogramToolElements(SelectionEvent event, boolean repaintImage) {
 		// update the ranges
@@ -824,21 +824,21 @@ public class HistogramToolPage extends AbstractToolPage {
 		// set the minmax values
 		minMaxValue.setMin(MIN_LABEL, rMin);
 		minMaxValue.setMax(MIN_LABEL, rMax);
-		minMaxValue.setValue(MIN_LABEL, histoMin);
+		if (!minMaxValue.isSpinner(MIN_LABEL, event)) minMaxValue.setValue(MIN_LABEL, histoMin);
 
 		minMaxValue.setMin(MAX_LABEL, rMin);
 		minMaxValue.setMax(MAX_LABEL, rMax);
-		minMaxValue.setValue(MAX_LABEL, histoMax);
+		if (!minMaxValue.isSpinner(MAX_LABEL, event)) minMaxValue.setValue(MAX_LABEL, histoMax);
 
 		// Set the brightness
 		brightnessContrastValue.setMin(BRIGHTNESS_LABEL, rMin);
 		brightnessContrastValue.setMax(BRIGHTNESS_LABEL, rMax);
-		brightnessContrastValue.setValue(BRIGHTNESS_LABEL, (histoMax+histoMin)/2.0);
+		if (!brightnessContrastValue.isSpinner(BRIGHTNESS_LABEL, event)) brightnessContrastValue.setValue(BRIGHTNESS_LABEL, (histoMax+histoMin)/2.0);
 
 		// Set the contrast
 		brightnessContrastValue.setMin(CONTRAST_LABEL, 0.0);
 		brightnessContrastValue.setMax(CONTRAST_LABEL, rMax-rMin);
-		brightnessContrastValue.setValue(CONTRAST_LABEL, histoMax-histoMin);
+		if (!brightnessContrastValue.isSpinner(CONTRAST_LABEL, event)) brightnessContrastValue.setValue(CONTRAST_LABEL, histoMax-histoMin);
 		
 	}
 
