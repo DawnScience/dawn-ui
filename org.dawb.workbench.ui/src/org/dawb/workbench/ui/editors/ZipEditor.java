@@ -204,7 +204,11 @@ public class ZipEditor extends MultiPageEditorPart implements ISlicablePlottingP
 			final PlotDataEditor      ed  = getDataSetEditor();
 			return new PlotDataPage(ed);
 		} else if (clazz == IToolPageSystem.class) {
-			return dataSetEditor.getPlottingSystem();
+			if (dataSetEditor!=null) return dataSetEditor.getPlottingSystem();
+			for (int i = 0; i < getPageCount(); i++) {
+				final Object ret = getEditor(i).getAdapter(clazz);
+				if (ret!=null && ret instanceof IToolPageSystem) return ret;
+			}
 		}
 		
 		return super.getAdapter(clazz);
