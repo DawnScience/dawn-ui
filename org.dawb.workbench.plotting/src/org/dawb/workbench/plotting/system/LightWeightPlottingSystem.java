@@ -174,8 +174,8 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		// getPlotActionSystem().fillXXX() to add their own actions.
  		if (bars==null) bars = lightWeightActionBarMan.createEmptyActionBars(); 
  				
- 		bars.getMenuManager().removeAll();
- 		bars.getToolBarManager().removeAll();
+// 		bars.getMenuManager().removeAll();
+// 		bars.getToolBarManager().removeAll();
 
  		lightWeightActionBarMan.init();
  		lightWeightActionBarMan.createConfigActions();
