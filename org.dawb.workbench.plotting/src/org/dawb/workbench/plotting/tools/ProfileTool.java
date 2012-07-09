@@ -315,10 +315,14 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		}
 
 		public void profile(IRegion r, ROIBase rb, boolean isDrag) {
-			
-	        for (Job job : Job.getJobManager().find(null))
-	            if (job.getClass()==getClass() && job.getState() != Job.RUNNING)
-	        	    job.cancel();
+
+	        // This in principle is not needed and appears to make no difference wether in or out.
+		    // However Irakli has advised that it is needed in some circumstances.
+			// This causes the defect reported here however: http://jira.diamond.ac.uk/browse/DAWNSCI-214
+			// therefore we are currently not using the extra cancelling.
+	        //for (Job job : Job.getJobManager().find(null))
+	        //    if (job.getClass()==getClass() && job.getState() != Job.RUNNING)
+	        //	    job.cancel();
 
 			this.currentRegion = r;
 			this.currentROI    = rb;
