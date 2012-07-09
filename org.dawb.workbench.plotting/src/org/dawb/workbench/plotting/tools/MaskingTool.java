@@ -697,13 +697,12 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		}
 
 		public void schedule(boolean resetMask, IRegion region) {
-			cancel(); // should stop the queue getting too large.
 			this.isRegionsEnabled = regionTable.getTable().isEnabled();
 			this.resetMask    = resetMask;
 			this.region       = region;
 			min = (minimum.isEnabled()) ? minimum.getSelection() : null;
 		    max = (maximum.isEnabled()) ? maximum.getSelection() : null;
-			super.schedule(5);
+			super.schedule();
 		}
 	}
 

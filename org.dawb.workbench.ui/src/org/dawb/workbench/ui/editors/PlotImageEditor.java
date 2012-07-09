@@ -188,7 +188,7 @@ public class PlotImageEditor extends EditorPart implements IReusableEditor {
 				}
 								
 				set.setName(""); // Stack trace if null - stupid.
-				plottingSystem.createPlot2D(set, null, monitor);
+				plottingSystem.updatePlot2D(set, null, monitor);
 				
 				return Status.OK_STATUS;
 			}
