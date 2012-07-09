@@ -210,6 +210,13 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		if (this.traceListener!=null) getPlottingSystem().addTraceListener(traceListener);
 		updateTracesChoice(null);
 		
+		createNewFit();
+	}
+	
+	/**
+	 * Method to start new selection area for fitting.
+	 */
+	private void createNewFit() {
 		try {
 			if (fittedPeaks!=null) fittedPeaks.activate();
 			getPlottingSystem().addRegionListener(this);
@@ -224,7 +231,9 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		} catch (Exception e) {
 			logger.error("Cannot put the selection into fitting region mode!", e);
 		}
+		
 	}
+
 	@Override
 	public void deactivate() {
 		
@@ -510,6 +519,14 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 	 */
 	private void createActions() {
 		
+		final Action createNewSelection = new Action("New fit selection.", IAction.AS_PUSH_BUTTON) {
+			public void run() {
+				createNewFit();
+			}
+		};
+		createNewSelection.setImageDescriptor(Activator.getImageDescriptor("icons/plot-tool-peak-fit.png"));
+		getSite().getActionBars().getToolBarManager().add(createNewSelection);
+		getSite().getActionBars().getToolBarManager().add(new Separator());
 		
 		final Action showAnns = new Action("Show annotations at the peak position.", IAction.AS_CHECK_BOX) {
 			public void run() {
