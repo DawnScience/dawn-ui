@@ -45,7 +45,11 @@ public class ImageEditor extends MultiPageEditorPart implements IReusableEditor 
 	
 	public void setInput(IEditorInput input) {
 		super.setInput(input);
-		if (plotImageEditor!=null) plotImageEditor.setInput(input);
+		for(int ied = 0; ied<getPageCount(); ++ied) {
+			if (getEditor(ied) instanceof IReusableEditor) {
+				((IReusableEditor)getEditor(ied)).setInput(input);
+			}
+		}
 		try{ 
 		    setPartName(input.getName());
 		} catch (Exception ignored) {
