@@ -49,7 +49,7 @@ public class DataBrowsingPerspective implements IPerspectiveFactory {
 			folderLayout.addView("org.dawb.passerelle.views.ValueView");
 			folderLayout.addView("org.eclipse.ui.console.ConsoleView");
 			folderLayout.addView("org.eclipse.ui.views.ProgressView");
-			folderLayout.addView("org.dawb.workbench.plotting.views.toolPageView.1D_and_2D");
+			folderLayout.addView("org.dawb.workbench.plotting.views.toolPageView.1D");
 		}
 	}
 
