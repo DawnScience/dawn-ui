@@ -342,7 +342,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 
 			final FittedPeaks bean = FittingUtils.getFittedPeaks(x, y, monitor);
     		// Add saved peaks if any.
-    		if (fittedPeaks!=null && !fittedPeaks.isEmpty()) {
+    		if (fittedPeaks!=null && !fittedPeaks.isEmpty() && bean!=null) {
     			bean.addFittedPeaks(fittedPeaks.getPeakList());
     		}
 			createFittedPeaks(bean);
