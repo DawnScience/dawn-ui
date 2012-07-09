@@ -26,10 +26,14 @@ import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.PaletteEvent;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.common.ui.util.EclipseUtils;
+import org.dawb.workbench.plotting.Activator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IEditorPart;
@@ -151,12 +155,21 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
         
 		final IPageSite site = getSite();
 		
+		final Action reselect = new Action("Create new profile.", getImageDescriptor()) {
+			public void run() {
+				createNewRegion();
+			}
+		};
+		site.getActionBars().getToolBarManager().add(reselect);
+		site.getActionBars().getToolBarManager().add(new Separator());
+
 		profilePlottingSystem.createPlotPart(parent, 
 								getTitle(), 
 								site.getActionBars(), 
 								PlotType.PT1D,
-								this.getViewPart());		
-
+								this.getViewPart());				
+		
+		
 		configurePlottingSystem(profilePlottingSystem);
 		
 		// Unused actions removed for tool
@@ -209,6 +222,10 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 			if (getImageTrace()!=null) getImageTrace().addPaletteListener(paletteListener);
 		}
 		
+		createNewRegion();
+	}
+	
+	private void createNewRegion() {
 		// Start with a selection of the right type
 		try {
 			getPlottingSystem().createRegion(RegionUtils.getUniqueName("Profile", getPlottingSystem()), getCreateRegionType());
@@ -216,7 +233,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 			logger.error("Cannot create region for profile tool!");
 		}
 	}
-	
+
 	/**
 	 * 
 	 * @return
