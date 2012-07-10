@@ -56,7 +56,7 @@
           label="Now we will use free draw to mask out custom areas. Select the 'Free drawn selection' region and draw in the image."/>
           
            <subitem 
-          label="You will see that where you draw is masked out when you click and drag on the image. You can also change the line size of this free draw."/>
+          label="You will see that where you draw is masked out when you click and drag on the image. You can also change the line size of this free draw, there is an action on the toolbar for choosing the width. (This is the width in screen pixels, not camera pixels.)"/>
             
            <subitem 
            label="Experiment masking using a ring selection to take out a section of intensity by using the 'Add circle selection' action and clicking and dragging in the image. Notice how the image rehistograms (changes colour) when a ring of intensity is removed."/>
