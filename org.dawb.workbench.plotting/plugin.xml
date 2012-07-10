@@ -155,9 +155,9 @@
       <cheatsheet
             category="org.dawb.workbench.plotting.tools.category"
             composite="false"
-            contentFile="cheat/pixeInfo.xml"
+            contentFile="cheat/pixelInfo.xml"
             id="org.dawb.workbench.plotting.cheatsheet.pixel"
-            name="Pixel information tool">
+            name="Pixel information">
       </cheatsheet>
       <cheatsheet
             category="org.dawb.workbench.plotting.tools.category"
