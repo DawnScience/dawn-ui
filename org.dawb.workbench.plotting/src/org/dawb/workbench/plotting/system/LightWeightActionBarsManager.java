@@ -742,8 +742,10 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 
 		manager.add(new Separator("org.dawb.workbench.plotting.system.trace.start"));
 
+		final String name = trace!=null&&trace.getName()!=null?trace.getName():"";
+
 		if (trace instanceof ILineTrace) { // Does actually work for images but may confuse people.
-			final Action visible = new Action("Hide '"+trace.getName()+"'", Activator.getImageDescriptor("icons/TraceVisible.png")) {
+			final Action visible = new Action("Hide '"+name+"'", Activator.getImageDescriptor("icons/TraceVisible.png")) {
 				public void run() {
 					trace.setVisible(false);
 				}
@@ -755,10 +757,11 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 				                  ? ((LightWeightPlottingSystem)sys).getGraph()
 				                  : null;
 		
+
 		if (xyGraph!=null) {
-			final Action addAnnotation = new Action("Add annotation to '"+(trace.getName()!=null?trace.getName():"")+"'", Activator.getImageDescriptor("icons/TraceAnnotation.png")) {
+			final Action addAnnotation = new Action("Add annotation to '"+name+"'", Activator.getImageDescriptor("icons/TraceAnnotation.png")) {
 				public void run() {
-					final String annotName = AnnotationUtils.getUniqueAnnotation(trace.getName()+" annotation ", sys);
+					final String annotName = AnnotationUtils.getUniqueAnnotation(name+" annotation ", sys);
 					if (trace instanceof LineTraceImpl) {
 						final LineTraceImpl lt = (LineTraceImpl)trace;
 						xyGraph.addAnnotation(new Annotation(annotName, lt.getTrace()));
@@ -773,7 +776,7 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 		if (trace instanceof ILineTrace) {
 			final ILineTrace lt = (ILineTrace)trace;
 			if (lt.getTraceType()!=TraceType.POINT) { // Give them a quick change to points
-				final Action changeToPoints = new Action("Plot '"+trace.getName()+"' as scatter", Activator.getImageDescriptor("icons/TraceScatter.png")) {
+				final Action changeToPoints = new Action("Plot '"+name+"' as scatter", Activator.getImageDescriptor("icons/TraceScatter.png")) {
 					public void run() {
 						lt.setTraceType(TraceType.POINT);
 						lt.setPointSize(8);
@@ -782,7 +785,7 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 				};
 				manager.add(changeToPoints);
 			} else if (lt.getTraceType()!=TraceType.SOLID_LINE) {
-				final Action changeToLine = new Action("Plot '"+trace.getName()+"' as line", Activator.getImageDescriptor("icons/TraceLine.png")) {
+				final Action changeToLine = new Action("Plot '"+name+"' as line", Activator.getImageDescriptor("icons/TraceLine.png")) {
 					public void run() {
 						lt.setTraceType(TraceType.SOLID_LINE);
 						lt.setLineWidth(1);
@@ -795,7 +798,7 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 		}
 
 		if (xyGraph!=null) {
-			final Action configure = new Action("Configure '"+trace.getName()+"'", Activator.getImageDescriptor("icons/TraceProperties.png")) {
+			final Action configure = new Action("Configure '"+name+"'", Activator.getImageDescriptor("icons/TraceProperties.png")) {
 				public void run() {
 					final XYRegionConfigDialog dialog = new XYRegionConfigDialog(Display.getCurrent().getActiveShell(), xyGraph);
 					dialog.setPlottingSystem(sys);

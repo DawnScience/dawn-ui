@@ -17,11 +17,14 @@ import java.util.Map;
 import java.util.Set;
 
 import org.dawb.common.ui.plot.EmptyTool;
+import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.tool.IToolChangeListener;
 import org.dawb.common.ui.plot.tool.IToolPage;
 import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
 import org.dawb.common.ui.plot.tool.IToolPageSystem;
 import org.dawb.common.ui.plot.tool.ToolChangeEvent;
+import org.dawb.common.ui.plot.trace.IImageTrace;
+import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.util.text.StringUtils;
 import org.dawb.workbench.plotting.Activator;
@@ -1184,6 +1187,20 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
             if (tool.equals(getCurrentPage())) {
             	return;
             }
+            
+            // If we are a IToolPageSystem and required tool is no tool and 
+            // if we have plotted data inconsistent with the existing tool, 
+            // leave the existing tool where it is. Likely it is an image tool
+            // and sys is a 1D plot in a dedicated view.
+            if (sys instanceof IPlottingSystem && tool instanceof EmptyTool) {
+            	final Collection<ITrace> images = ((IPlottingSystem)sys).getTraces(IImageTrace.class);
+            	if (images==null|| images.isEmpty()) { // 1D in this part
+            		if (activeRec.tool.getToolPageRole()==ToolPageRole.ROLE_2D) return; // 2D original tool
+            	} else { // 2D in this part
+            		if (activeRec.tool.getToolPageRole()==ToolPageRole.ROLE_1D) return; // 1D original tool
+            	}
+            }
+            
         
     		hiddenPart = null;
 
