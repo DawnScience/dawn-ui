@@ -1347,4 +1347,10 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 			logger.error("Could not save the plotting", e);
 		}
 	}
+	
+	public void setXfirst(boolean xfirst) {
+		super.setXfirst(xfirst);
+		this.lightWeightActionBarMan.setXfirst(xfirst);
+	}
+
 }
