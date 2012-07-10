@@ -641,6 +641,11 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		}
 		xAxis.setTitle(DatasetTitleUtils.getName(x,rootName));
 		
+		if (!isXfirst() || createdIndices) { // Index mode, indices are integers!
+ 		    xAxis.setFormatPattern("############");
+		} else {
+			xAxis.setFormatPattern("############.##");
+		}
 
 		//create a trace data provider, which will provide the data to the trace.
 		int iplot = 0;
