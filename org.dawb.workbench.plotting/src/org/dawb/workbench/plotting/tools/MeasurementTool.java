@@ -12,6 +12,7 @@ import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.ROIEvent;
 import org.dawb.common.ui.plot.region.RegionEvent;
+import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
 import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
 import org.dawb.common.ui.plot.trace.IImageTrace;
@@ -157,6 +158,14 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 
 	private void createActions() {
 		
+		final Action reselect = new Action("Create new measurement.", getImageDescriptor()) {
+			public void run() {
+				createNewRegion();
+			}
+		};
+		getSite().getActionBars().getToolBarManager().add(reselect);
+		getSite().getActionBars().getToolBarManager().add(new Separator());
+
 		final Action copy = new Action("Copy region values to clipboard", Activator.getImageDescriptor("icons/plot-tool-measure-copy.png")) {
 			public void run() {
 				if (!isActive()) return;
@@ -325,17 +334,7 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 				final Collection<IRegion> regions = getPlottingSystem().getRegions();
 				for (IRegion iRegion : regions) iRegion.addROIListener(this);
 				
-				int i=1;
-				while(true) { // Add with a unique name
-					try {
-						getPlottingSystem().createRegion("Measurement "+i, IRegion.RegionType.LINE);
-						break;
-					} catch (Exception ne) {
-						++i;
-						if (i>500) break;
-						continue;
-					}
-				}
+				createNewRegion();
 				
 			} catch (Exception e) {
 				logger.error("Cannot add region listeners!", e);
@@ -350,6 +349,14 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 		}		
 	}
 	
+	private void createNewRegion() {
+		try {
+			getPlottingSystem().createRegion(RegionUtils.getUniqueName("Measurement", getPlottingSystem()), IRegion.RegionType.LINE);
+		} catch (Exception e) {
+			logger.error("Cannot create line region for selecting in measurement tool!", e);
+		}
+	}
+
 	@Override
 	public void deactivate() {
 		super.deactivate();
