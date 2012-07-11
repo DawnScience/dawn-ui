@@ -681,13 +681,14 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		// Do nothing.
 	}
 
+	private boolean newPartFound = false;
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see org.eclipse.ui.IPartListener#partOpened(org.eclipse.ui.IWorkbenchPart)
 	 */
 	public void partOpened(IWorkbenchPart part) {
-
+        newPartFound = true;
 	}
 
 	/**
@@ -1192,7 +1193,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
             // if we have plotted data inconsistent with the existing tool, 
             // leave the existing tool where it is. Likely it is an image tool
             // and sys is a 1D plot in a dedicated view.
-            if (sys instanceof IPlottingSystem && tool instanceof EmptyTool) {
+            if (!newPartFound && sys instanceof IPlottingSystem && tool instanceof EmptyTool) {
             	final Collection<ITrace> images = ((IPlottingSystem)sys).getTraces(IImageTrace.class);
             	if (images==null|| images.isEmpty()) { // 1D in this part
             		if (activeRec.tool.getToolPageRole()==ToolPageRole.ROLE_2D) return; // 2D original tool
@@ -1224,6 +1225,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
         	logger.error("Problem updating activated state in "+getClass().getName(), ne); // No stack required in log here.
         } finally {
         	updatingActivated = false;
+        	newPartFound      = false;
         }
 	}
 	
