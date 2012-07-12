@@ -353,4 +353,15 @@ public class LineTraceImpl implements ILineTrace {
 	public void setUserTrace(boolean isUserTrace) {
 		this.userTrace = isUserTrace;
 	}
+	
+	private Object userObject;
+
+	public Object getUserObject() {
+		return userObject;
+	}
+
+	public void setUserObject(Object userObject) {
+		this.userObject = userObject;
+	}
+
 }

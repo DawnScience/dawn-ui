@@ -14,14 +14,20 @@ import org.dawb.workbench.plotting.Activator;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
+import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.window.ToolTip;
@@ -92,13 +98,11 @@ public class XYHistoryTool extends AbstractToolPage implements MouseListener {
 		viewer.setContentProvider(new IStructuredContentProvider() {			
 			@Override
 			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-				// TODO Auto-generated method stub
-				
+				// TODO Auto-generated method stub				
 			}			
 			@Override
 			public void dispose() {
-				// TODO Auto-generated method stub
-				
+				// TODO Auto-generated method stub				
 			}		
 			@Override
 			public Object[] getElements(Object inputElement) {
@@ -129,6 +133,7 @@ public class XYHistoryTool extends AbstractToolPage implements MouseListener {
 		var.getColumn().setText("Name");
 		var.getColumn().setWidth(200);
 		var.setLabelProvider(new HistoryLabelProvider());
+		var.setEditingSupport(new HistoryEditingSupport(viewer));
 		
 		var = new TableViewerColumn(viewer, SWT.CENTER, 2);
 		var.getColumn().setText("Original Plot");
@@ -147,18 +152,27 @@ public class XYHistoryTool extends AbstractToolPage implements MouseListener {
 		
 	}
 	
-
+    private enum HistoryType {
+    	HISTORY_PLOT;
+    }
+    
+	
+	// Record, delete, clear, refresh, rename
 	private void createActions() {
 		
 		final MenuManager rightClick = new MenuManager();
 		
-		// Record, plot (tick in hisotry), delete, clear, refresh, rename
-		final Action addPlot = new Action("Add plot(s) to history", Activator.getImageDescriptor("icons/add.png")) {
+		
+
+		final Action addPlot = new Action("Add currently plotted plot(s) to history", Activator.getImageDescriptor("icons/add.png")) {
 			public void run() {
 				final Collection<ITrace> traces = getPlottingSystem().getTraces(ILineTrace.class);
 				if (traces==null||traces.isEmpty()) return;
 				
+				// TODO Check if one of our history traces.
 				for (ITrace iTrace : traces) {
+					
+					if (iTrace.getUserObject()==HistoryType.HISTORY_PLOT) continue;
 					final ILineTrace lineTrace = (ILineTrace)iTrace;
 					final HistoryBean bean = new HistoryBean();
 					bean.setXdata(lineTrace.getXData());
@@ -186,6 +200,31 @@ public class XYHistoryTool extends AbstractToolPage implements MouseListener {
 		};
 		getSite().getActionBars().getToolBarManager().add(deletePlot);
 		rightClick.add(deletePlot);
+		
+		final Action clearPlots = new Action("Clear history", Activator.getImageDescriptor("icons/plot-tool-history-clear.png")) {
+			public void run() {
+				for (HistoryBean bean : history.values()) {
+					bean.setSelected(false);
+				}
+				updatePlots();
+				history.clear();
+			    refresh();
+			}
+		};
+		getSite().getActionBars().getToolBarManager().add(clearPlots);
+		rightClick.add(clearPlots);
+
+		getSite().getActionBars().getToolBarManager().add(new Separator());
+		rightClick.add(new Separator());
+
+		final Action editAction = new Action("Rename selected plot", IAction.AS_PUSH_BUTTON) {
+			public void run() {
+				viewer.editElement(getSelectedPlot(), 1);
+			}
+		};
+		editAction.setImageDescriptor(Activator.getImageDescriptor("icons/rename_plot.png"));
+		getSite().getActionBars().getToolBarManager().add(editAction);
+		rightClick.add(editAction);
 		
 		final Menu menu = rightClick.createContextMenu(viewer.getControl());
 		viewer.getControl().setMenu(menu);
@@ -318,6 +357,7 @@ public class XYHistoryTool extends AbstractToolPage implements MouseListener {
 					return;
 				} else {
 					final ILineTrace trace = getPlottingSystem().createLineTrace(traceName);
+					trace.setUserObject(HistoryType.HISTORY_PLOT);
 					trace.setData(bean.getXdata(), bean.getYdata());
 					getPlottingSystem().addTrace(trace);
 					bean.setPlotColour(trace.getTraceColor().getRGB());
@@ -404,5 +444,36 @@ public class XYHistoryTool extends AbstractToolPage implements MouseListener {
 		}
 
 	}
+	
+	public class HistoryEditingSupport extends EditingSupport {
+
+		public HistoryEditingSupport(ColumnViewer viewer) {
+			super(viewer);
+		}
+
+		@Override
+		protected CellEditor getCellEditor(Object element) {
+			return new TextCellEditor((Composite)getViewer().getControl());
+		}
+
+		@Override
+		protected boolean canEdit(Object element) {
+			return true;
+		}
+
+		@Override
+		protected Object getValue(Object element) {
+			return ((HistoryBean)element).getTraceName();
+		}
+
+		@Override
+		protected void setValue(Object element, Object value) {
+			((HistoryBean)element).setTraceName((String)value);
+			viewer.refresh(element);
+		}
+
+	}
+
+
 
 }
