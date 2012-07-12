@@ -904,8 +904,8 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		if (colorMap!=null) colorMap.clear();
 		if (xyGraph!=null) {
 			try {
-				clearTraces();
 				for (Axis axis : xyGraph.getAxisList()) axis.setRange(0,100);
+				clearTraces();
 	
 			} catch (Throwable e) {
 				logger.error("Cannot remove plots!", e);
