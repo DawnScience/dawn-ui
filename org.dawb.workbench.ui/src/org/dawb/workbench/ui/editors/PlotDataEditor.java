@@ -78,8 +78,6 @@ import uk.ac.gda.monitor.IMonitor;
 /**
  * An editor which combines a plot with a graph of data sets.
  * 
- * Currently this is for 1D analyses only so if the data does not contain 1D, this
- * editor will not show.
  * 
  */
 public class PlotDataEditor extends EditorPart implements IReusableEditor, IDatasetEditor {

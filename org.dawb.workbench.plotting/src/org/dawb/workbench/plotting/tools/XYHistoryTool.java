@@ -8,6 +8,8 @@ import java.util.Map;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
+import org.dawb.common.ui.plot.trace.ITraceListener;
+import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.workbench.plotting.Activator;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -17,7 +19,6 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -48,8 +49,24 @@ public class XYHistoryTool extends AbstractToolPage implements MouseListener {
     	if (history==null) history = new LinkedHashMap<String, HistoryBean>(17);
     }
 	
-	private Composite     composite;
-	private TableViewer   viewer;
+	private Composite      composite;
+	private TableViewer    viewer;
+	private ITraceListener traceListener;
+	
+	public XYHistoryTool() {
+		this.traceListener = new ITraceListener.Stub() {
+			
+			@Override
+			public void tracesPlotted(TraceEvent evt) {
+				updatePlots();
+			}
+			
+			@Override
+			public void tracesCleared(TraceEvent evet) {
+				updatePlots();
+			}
+		};
+	}
 	
 	@Override
 	public ToolPageRole getToolPageRole() {
@@ -184,10 +201,33 @@ public class XYHistoryTool extends AbstractToolPage implements MouseListener {
         if (viewer!=null && !viewer.getControl().isDisposed()) viewer.getControl().setFocus();
 	}
 	
+	
+	@Override
+	public void activate() {
+		
+        updatePlots();
+        refresh();
+        
+        if (getPlottingSystem()!=null) {
+        	getPlottingSystem().addTraceListener(this.traceListener);
+        }
+        super.activate();
+	}
+	
+	@Override
+	public void deactivate() {
+        if (getPlottingSystem()!=null) {
+        	getPlottingSystem().removeTraceListener(this.traceListener);
+        }
+		super.deactivate();
+	}
+
+	@Override
 	public void dispose() {
 	    if (viewer!=null&&!viewer.getControl().isDisposed()) {
 	    	viewer.getControl().removeMouseListener(this);
 	    }
+	    deactivate();
 		super.dispose();
 	}
 
@@ -225,18 +265,20 @@ public class XYHistoryTool extends AbstractToolPage implements MouseListener {
 		return null;
 	}
 
-	
-	@Override
-	public void activate() {
-        super.activate();
-        updatePlots();
-        refresh();
-	}
-	
+	private boolean updatingAPlotAlready = false;
+    private boolean updatingPlotsAlready = false;
+    
 	private void updatePlots() {
-		// Loop over history and reprocess it all.
-		for (String key : history.keySet()) {
-			updatePlot(history.get(key));
+		
+		if (updatingPlotsAlready) return;
+		try {
+			updatingPlotsAlready = true;
+			// Loop over history and reprocess it all.
+			for (String key : history.keySet()) {
+				updatePlot(history.get(key));
+			}
+		} finally {
+			updatingPlotsAlready = false;
 		}
 	}
 	
@@ -245,41 +287,47 @@ public class XYHistoryTool extends AbstractToolPage implements MouseListener {
 	 */
 	private void updatePlot(HistoryBean bean) {
 		
-		final boolean isSamePlot = getPlottingSystem().getPlotName()!=null && getPlottingSystem().getPlotName().equals(bean.getPlotName());		
-		if (isSamePlot) {
-			final String message = "Cannot update "+bean.getTraceName()+" from memory to plot in "+bean.getPlotName()+" as it comes from this plot originally!";
-			logger.trace(message);
-		    
-			// User may be interested in this fact.
-			Activator.getDefault().getLog().log(new Status(IStatus.WARNING, "org.dawb.workbench.plotting", message));
-			final ITrace trace = getPlottingSystem().getTrace(bean.getTraceName());
-			if (trace!=null) {
-				bean.setPlotColour(((ILineTrace)trace).getTraceColor().getRGB());
-				if (viewer!=null) viewer.refresh(bean);
-				return;
+		if (updatingAPlotAlready) return;
+		try {
+			updatingAPlotAlready = true;
+			
+			final boolean isSamePlot = getPlottingSystem().getPlotName()!=null && getPlottingSystem().getPlotName().equals(bean.getPlotName());		
+			if (isSamePlot) {
+				final String message = "Cannot update "+bean.getTraceName()+" from memory to plot in "+bean.getPlotName()+" as it comes from this plot originally!";
+				logger.trace(message);
+			    
+				// User may be interested in this fact.
+				Activator.getDefault().getLog().log(new Status(IStatus.WARNING, "org.dawb.workbench.plotting", message));
+				final ITrace trace = getPlottingSystem().getTrace(bean.getTraceName());
+				if (trace!=null) {
+					bean.setPlotColour(((ILineTrace)trace).getTraceColor().getRGB());
+					if (viewer!=null) viewer.refresh(bean);
+					return;
+				}
 			}
-		}
-		
-		final String traceName = bean.createTraceName();
 			
-		if (!bean.isSelected()) {
-			final ITrace trace = getPlottingSystem().getTrace(traceName);
-			if (trace!=null) getPlottingSystem().removeTrace(trace);
-		} else {
-			
-			if (getPlottingSystem().getTrace(traceName)!=null) {
-				logger.warn("Cannot bring "+traceName+" from memory to plot in "+bean.getPlotName()+" as it already exists there!");
-				return;
+			final String traceName = bean.createTraceName();
+				
+			if (!bean.isSelected()) {
+				final ITrace trace = getPlottingSystem().getTrace(traceName);
+				if (trace!=null) getPlottingSystem().removeTrace(trace);
 			} else {
-				final ILineTrace trace = getPlottingSystem().createLineTrace(traceName);
-				trace.setData(bean.getXdata(), bean.getYdata());
-				getPlottingSystem().addTrace(trace);
-				bean.setPlotColour(trace.getTraceColor().getRGB());
-				if (viewer!=null) viewer.refresh(bean);
+				
+				if (getPlottingSystem().getTrace(traceName)!=null) {
+					logger.warn("Cannot bring "+traceName+" from memory to plot in "+bean.getPlotName()+" as it already exists there!");
+					return;
+				} else {
+					final ILineTrace trace = getPlottingSystem().createLineTrace(traceName);
+					trace.setData(bean.getXdata(), bean.getYdata());
+					getPlottingSystem().addTrace(trace);
+					bean.setPlotColour(trace.getTraceColor().getRGB());
+					if (viewer!=null) viewer.refresh(bean);
+				}
 			}
+			getPlottingSystem().repaint();
+		} finally {
+			updatingAPlotAlready = false;
 		}
-		
-		getPlottingSystem().repaint();
 	}
 
 	private class HistoryLabelProvider extends ColumnLabelProvider {
