@@ -320,6 +320,8 @@ public class LineTraceImpl implements ILineTrace {
 		LightWeightDataProvider prov = (LightWeightDataProvider)trace.getDataProvider();
 		if (prov!=null) {
 			prov.removeDataProviderListener(trace);
+		} else {
+			prov = new LightWeightDataProvider();
 		}
 		
 		prov.setData(xData,yData);
