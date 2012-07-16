@@ -26,13 +26,11 @@ import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.PaletteEvent;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.common.ui.util.EclipseUtils;
-import org.dawb.workbench.plotting.Activator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -176,6 +174,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		profilePlottingSystem.getPlotActionSystem().remove("org.dawb.workbench.plotting.rescale");
 		profilePlottingSystem.getPlotActionSystem().remove("org.dawb.workbench.plotting.plotIndex");
 		profilePlottingSystem.getPlotActionSystem().remove("org.dawb.workbench.plotting.plotX");
+		profilePlottingSystem.getSelectedXAxis().setFormatPattern("############");
 
 		profilePlottingSystem.setXfirst(true);
 	}
