@@ -222,6 +222,13 @@
             id="org.dawb.workbench.plotting.cheatsheet.ellipsefitting"
             name="Ellipse Fitting">
       </cheatsheet>
+      <cheatsheet
+            category="org.dawb.workbench.plotting.tools.category"
+            composite="false"
+            contentFile="cheat/derivativetool.xml"
+            id="org.dawb.workbench.plotting.cheatsheet.derivative"
+            name="Derivative Tool">
+      </cheatsheet>
    </extension>
 
 </plugin>
