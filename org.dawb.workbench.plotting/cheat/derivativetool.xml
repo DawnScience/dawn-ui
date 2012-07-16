@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cheatsheet title="Derivative tool">
+
+	<intro>
+		<description>
+		    This cheat sheet helps you to open an ascii file,
+			and shows you how to show the derivative of this data
+			If you have just completed the previous cheat sheet, please close all your data file parts.
+	    </description>
+	</intro>
+
+   <item title="Data Browsing Perspective">
+      <description>
+         Please choose the data browsing perspective if you do not already have it selected (nothing will happen if you do not).
+      </description>
+      <command
+            required="false"
+            serialization="org.eclipse.ui.perspectives.showPerspective(org.eclipse.ui.perspectives.showPerspective.perspectiveId=org.edna.workbench.application.perspective.DataPerspective)"/>
+   </item>
+   <item title="Open File">
+      <description>
+         Click to open an example file from the &apos;data&apos; project containing multi-channel analyser data.<br/><br/>
+         This file is found in 'data->examples->96356.dat'
+      </description>
+      <command
+            required="false"
+            serialization="org.eclipse.ui.navigate.openResource(filePath=data/examples/96356.dat)"/>
+   </item>
+   <item title="Plot One Data Set">
+      <description>
+         In the 'Data' column of the part, select the item labelled 'FileNum' and then the 'sum' item. This will plot the values of 'sum' vs. 'FileNum'.
+      </description>
+   </item>
+   <item title="Select 'Derivative' tool">
+      <description>
+         Now on the toolbar above this plot, there will be a drop down of available tools. These tools may be obscured on Linux if the window containing the plot is too small. On the drop down action labelled 'Plotting tools (used for images and X/Y plots)' select the 'Derivative' tool. You will see the tool become available under the plot, and the plot become the derivative of what was being observed.
+      </description>
+   </item>
+   <item title="View the other derivatives or the raw data">
+      <description>
+      	In the Derivative tool, there are several checkboxes which toggle the display of the various derivatives, check them all on to see all the data and derivatives overlaid.<br/><br/>
+      	You can also un-select them in the same way, just keep the derivative selected( f'(Data) ) 
+      </description>
+   </item>
+   <item title="Derivatives of other traces">
+      <description>
+         If you select another trace to plot whilst the derivative tool is open, this will also be displayed appropriately<br/><br/>
+         Select the item labelled 'sum' in the data window, you will see the derivative appear.  The checkboxes now effect all the plots. 
+      </description>
+   </item>
+   <item title="Clearing the derivatives">
+      <description>
+         To clear all the derivatives from the plot, select the <b>Clear Tool</b> from the tool menu.  This will then get you back to the raw data.
+      </description>
+   </item>
+    <item title="Processing the derivatives">
+      <description>
+         If you wish to form some further operation on the derivatives, simply select the tool you wish to use, without going to the <b>Clear Tool</b> between the other tools.<br/><br/>
+         For example, select 'sum' only from the data table, and then select the Derivative tool.<br/><br/>
+         Now select the <b>Measurement Tool</b> and you will notice that the Derivative tool disappears, but the plot stays of the derivative.<br/><br/>
+         You can now use the measurement tool to measure the distance between the positive and negative peak.
+      </description>
+   </item>
+
+       	
+</cheatsheet>
