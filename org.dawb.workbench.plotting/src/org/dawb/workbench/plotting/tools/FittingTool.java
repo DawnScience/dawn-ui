@@ -15,6 +15,7 @@ import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.RegionEvent;
 import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
+import org.dawb.common.ui.plot.tool.IToolPage;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
@@ -104,6 +105,15 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 			}
 		};
 
+	}
+	
+	public void sync(IToolPage with) {
+		if (!with.getClass().equals(getClass())) return;
+		final FittingTool other = (FittingTool)with;
+		this.fittedPeaks = other.fittedPeaks.clone();
+		this.fitRegion   = other.fitRegion;
+		viewer.setInput(fittedPeaks);
+        viewer.refresh();
 	}
 	
 	@Override

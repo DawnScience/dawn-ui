@@ -23,24 +23,34 @@ import uk.ac.diamond.scisoft.analysis.optimize.IOptimizer;
  */
 public class FittedPeaks {
 
-	private List<FittedPeak>         fittedPeaks;
+	private List<FittedPeak>         fittedPeakList;
 	private IOptimizer               optimizer;
 	private FittedPeak               selectedPeak; // Should be FittedPeak
 	
 	public FittedPeaks() {
-		this.fittedPeaks = new ArrayList<FittedPeak>(7);
+		this.fittedPeakList = new ArrayList<FittedPeak>(7);
+	}
+	
+	public FittedPeaks clone() {
+		final FittedPeaks ret  = new FittedPeaks();
+		if (selectedPeak!=null) ret.selectedPeak = selectedPeak.clone();
+		for (FittedPeak fp : fittedPeakList) {
+			ret.fittedPeakList.add(fp.clone());
+		}
+		ret.optimizer = optimizer;
+		return ret;
 	}
 
 	public void dispose() {
 		
 		selectedPeak = null;
 		
-		if (fittedPeaks!=null) {
-			for (FittedPeak fp : fittedPeaks) {
+		if (fittedPeakList!=null) {
+			for (FittedPeak fp : fittedPeakList) {
 				fp.dispose();
 			}
-			fittedPeaks.clear();
-			fittedPeaks = null;
+			fittedPeakList.clear();
+			fittedPeakList = null;
 		}
 
 		optimizer = null;
@@ -51,8 +61,8 @@ public class FittedPeaks {
 	 */
 	public void activate() {
 		
-		if (fittedPeaks!=null) {
-			for (FittedPeak fp : fittedPeaks) {
+		if (fittedPeakList!=null) {
+			for (FittedPeak fp : fittedPeakList) {
 				fp.activate();
 			}
 		}
@@ -62,39 +72,39 @@ public class FittedPeaks {
 	 * Not thread safe, UI call.
 	 */
 	public void deactivate() {
-		if (fittedPeaks!=null) {
-			for (FittedPeak fp : fittedPeaks) {
+		if (fittedPeakList!=null) {
+			for (FittedPeak fp : fittedPeakList) {
 				fp.deactivate();
 			}
 		}
 	}
 
 	public void setAreasVisible(boolean isVis) {
-		if (fittedPeaks!=null) {
-			for (FittedPeak fp : fittedPeaks) {
+		if (fittedPeakList!=null) {
+			for (FittedPeak fp : fittedPeakList) {
 				fp.setFWHMVisible(isVis);
 			}
 		}
 	}
 
 	public void setPeaksVisible(boolean isVis) {
-		if (fittedPeaks!=null) {
-			for (FittedPeak fp : fittedPeaks) {
+		if (fittedPeakList!=null) {
+			for (FittedPeak fp : fittedPeakList) {
 				fp.setCenterVisible(isVis);
 			}
 		}
 	}
 
 	public void setTracesVisible(boolean isVis) {
-		if (fittedPeaks!=null) {
-			for (FittedPeak fp : fittedPeaks) {
+		if (fittedPeakList!=null) {
+			for (FittedPeak fp : fittedPeakList) {
 				fp.setTraceVisible(isVis);
 			}
 		}
 	}
 	public void setAnnotationsVisible(boolean isVis) {
-		if (fittedPeaks!=null) {
-			for (FittedPeak fp : fittedPeaks) {
+		if (fittedPeakList!=null) {
+			for (FittedPeak fp : fittedPeakList) {
 				fp.setAnnotationVisible(isVis);
 			}
 		}
@@ -104,7 +114,7 @@ public class FittedPeaks {
 		
 		this.selectedPeak = peak;
 		
-		for (FittedPeak fp : fittedPeaks) {
+		for (FittedPeak fp : fittedPeakList) {
 			fp.getFwhm().setRegionColor(ColorConstants.orange);
 			((ILineTrace)fp.getTrace()).setTraceColor(ColorConstants.black);
 			fp.getAnnotation().setAnnotationColor(ColorConstants.black);
@@ -122,7 +132,7 @@ public class FittedPeaks {
 		if (selectedPeak==null) return;
 				
 		selectedPeak.delete(sys);	
-		fittedPeaks.remove(selectedPeak);
+		fittedPeakList.remove(selectedPeak);
 		selectedPeak = null;
 	}
 
@@ -132,19 +142,19 @@ public class FittedPeaks {
 	 */
 	public void removeSelections(IPlottingSystem sys, boolean removeSaved) {
 		
-		if (fittedPeaks!=null) {
+		if (fittedPeakList!=null) {
 			Collection<FittedPeak> removed = new HashSet<FittedPeak>(3);
-			for (FittedPeak fp : fittedPeaks) {
+			for (FittedPeak fp : fittedPeakList) {
 				if (!removeSaved && fp.isSaved()) continue;
 				fp.delete(sys);
 				removed.add(fp);
 			}
-			fittedPeaks.removeAll(removed);
+			fittedPeakList.removeAll(removed);
 		}
 	}
 
 	public int size() {
-		return fittedPeaks.size();
+		return fittedPeakList.size();
 	}
 	
 	public String getAlgorithmType() {
@@ -152,8 +162,8 @@ public class FittedPeaks {
 	}
 
 	public boolean isEmpty() {
-		if (fittedPeaks==null) return true;
-		return fittedPeaks.isEmpty();
+		if (fittedPeakList==null) return true;
+		return fittedPeakList.isEmpty();
 	}
 
 	public IOptimizer getOptimizer() {
@@ -165,7 +175,7 @@ public class FittedPeaks {
 	}
 
 	public List<FittedPeak> getPeakList() {
-		return fittedPeaks;
+		return fittedPeakList;
 	}
 
 	/**
@@ -174,9 +184,9 @@ public class FittedPeaks {
 	 */
 	public Collection<ITrace> getFittedPeakTraces() {
 		
-		if (fittedPeaks==null || fittedPeaks.isEmpty()) return Collections.EMPTY_SET;
+		if (fittedPeakList==null || fittedPeakList.isEmpty()) return Collections.EMPTY_SET;
 		final Collection<ITrace> traces = new HashSet<ITrace>(5);
-		for (FittedPeak fp : fittedPeaks) {
+		for (FittedPeak fp : fittedPeakList) {
 			traces.add(fp.getTrace());
 		}
 		
@@ -184,19 +194,19 @@ public class FittedPeaks {
 	}
 
 	public FittedPeak[] toArray() {
-		return fittedPeaks.toArray(new FittedPeak[fittedPeaks.size()]);
+		return fittedPeakList.toArray(new FittedPeak[fittedPeakList.size()]);
 	}
 
 	public void addFittedPeak(FittedPeak fittedPeak) {
-		if (fittedPeaks==null) return;
-		fittedPeaks.add(fittedPeak);
+		if (fittedPeakList==null) return;
+		fittedPeakList.add(fittedPeak);
 	}
 
 	public List<IPeak> getPeakFunctions() {
 		
-		if (fittedPeaks==null || fittedPeaks.isEmpty()) return Collections.emptyList();
+		if (fittedPeakList==null || fittedPeakList.isEmpty()) return Collections.emptyList();
 		final List<IPeak> peaks = new ArrayList<IPeak>(5);
-		for (FittedPeak fp : fittedPeaks) {
+		for (FittedPeak fp : fittedPeakList) {
 			peaks.add(fp.getPeak());
 		}
 		
@@ -210,7 +220,7 @@ public class FittedPeaks {
 	}
 
 	public void addFittedPeaks(List<FittedPeak> peakList) {
-		this.fittedPeaks.addAll(peakList);
+		this.fittedPeakList.addAll(peakList);
 	}
 
     /**
@@ -220,7 +230,7 @@ public class FittedPeaks {
 	private String[] getAllNames() {
 		
 		List<String> names = new ArrayList<String>(7);
-		for (FittedPeak fp : fittedPeaks) {
+		for (FittedPeak fp : fittedPeakList) {
 			fp.getUsedNames(names);
 		}
 		return names.toArray(new String[names.size()]);
