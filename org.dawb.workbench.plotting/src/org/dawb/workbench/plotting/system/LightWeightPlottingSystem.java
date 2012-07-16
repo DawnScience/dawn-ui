@@ -641,10 +641,12 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		}
 		xAxis.setTitle(DatasetTitleUtils.getName(x,rootName));
 		
-		if (!isXfirst() || createdIndices) { // Index mode, indices are integers!
- 		    xAxis.setFormatPattern("############");
-		} else {
-			xAxis.setFormatPattern("############.##");
+		if (!xAxis.hasUserDefinedFormat()) {// We can change it.
+			if (!isXfirst() || createdIndices || isAllInts(ysIn)) { // Index mode, indices are integers!
+	 		    xAxis.setDefaultFormatPattern("############");
+			} else {
+				xAxis.setDefaultFormatPattern("############.##");
+			}
 		}
 
 		//create a trace data provider, which will provide the data to the trace.
@@ -702,6 +704,18 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
         return traces;
 	}
 	
+	private boolean isAllInts(List<AbstractDataset> ysIn) {
+		for (AbstractDataset a : ysIn) {
+			if (a.getDtype()!=AbstractDataset.INT16 &&
+				a.getDtype()!=AbstractDataset.INT32 &&
+				a.getDtype()!=AbstractDataset.INT64) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+
 	public ILineTrace createLineTrace(String traceName) {
 
 		final Axis xAxis = (Axis)getSelectedXAxis();
