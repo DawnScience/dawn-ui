@@ -65,6 +65,19 @@ class FittedPeak {
 		trace  = null;
 		annotation = null;		
 	}
+	
+	public FittedPeak clone() {
+		FittedPeak ret = new FittedPeak(function, roi, peakFunctions);
+		ret.roi        = roi;
+		ret.function   = function;
+		ret.fwhm       = fwhm;
+		ret.center     = center;
+		ret.trace      = trace;
+		ret.annotation = annotation;
+		ret.peakName   = peakName;
+		ret.saved      = saved;
+		return ret;
+	}
 
 	public void activate() {
 		fwhm.setVisible(true);

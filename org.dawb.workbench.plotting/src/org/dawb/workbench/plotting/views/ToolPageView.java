@@ -1069,7 +1069,9 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 			public void run() {
 				try {
 					
+					IToolPage orig = null;
 					if (activeRec!=null) {
+						orig = activeRec.tool; 
 						if (recs.get(getString(tool.getPart()))!=null) {
 							recs.get(getString(tool.getPart())).remove(tool.getToolId());
 						}
@@ -1085,8 +1087,10 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 					final ToolPageView view = (ToolPageView)EclipseUtils.getPage().showView("org.dawb.workbench.plotting.views.toolPageView.fixed",
 																							tool.getToolId(),
 																							IWorkbenchPage.VIEW_ACTIVATE);
-					
 					view.update();
+					if (orig!=null && view.activeRec!=null && view.activeRec.tool!=null) {
+						view.activeRec.tool.sync(orig);
+					}
 
 				} catch (Exception e) {
 					logger.error("Cannot open tool on its own page!", e);
