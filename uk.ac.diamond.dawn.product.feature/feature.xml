@@ -24,13 +24,7 @@
    <includes
          id="uk.ac.diamond.sda.enthought.feature"
          version="0.0.0"
-         os="linux"
+         os="linux,win32"
          arch="x86,x86_64"/>
-
-   <includes
-         id="uk.ac.diamond.sda.enthought.feature"
-         version="0.0.0"
-         os="win32"
-         arch="x86"/>
 
 </feature>
