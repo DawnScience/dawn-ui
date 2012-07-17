@@ -6,6 +6,7 @@ import java.util.Collection;
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.swt.xygraph.linearscale.Range;
+import org.dawb.common.services.ImageServiceBean.ImageOrigin;
 import org.dawb.common.ui.plot.axis.AxisEvent;
 import org.dawb.common.ui.plot.axis.IAxis;
 import org.dawb.common.ui.plot.axis.IAxisListener;
@@ -86,7 +87,88 @@ public class AspectAxis extends Axis implements IAxis {
 	private XYGraph getGraph() {
 		return (XYGraph)getParent();
 	}
+	
+	protected void pan(Range temp, double t1, double t2) {
+		
+		final ImageTrace trace = ((XYRegionGraph)getGraph()).getRegionArea().getImageTrace();
+		
+		// Code to stop pan outside image bounds.
+		if (trace!=null) {
+		    
+		    final double d1 = t1-t2;
+		    final double d2 = t2-t1;
+		    
+		    final Range  cur  = getRange();
+    		final double ran  = Math.max(cur.getUpper(), cur.getLower()) - Math.min(cur.getUpper(), cur.getLower());
+    		  			
+    		int yIndex = trace.getImageOrigin()==ImageOrigin.TOP_LEFT ||
+    				     trace.getImageOrigin()==ImageOrigin.BOTTOM_RIGHT
+    				   ? 0 : 1;
+    		
+    		int xIndex = trace.getImageOrigin()==ImageOrigin.TOP_LEFT ||
+				         trace.getImageOrigin()==ImageOrigin.BOTTOM_RIGHT
+				        ? 1 : 0;
+    		
+    		
+    		if (isYAxis()) {
+    			
+    			double lower = trace.getImageOrigin()==ImageOrigin.TOP_LEFT ||
+			                   trace.getImageOrigin()==ImageOrigin.TOP_RIGHT
+			                 ? temp.getUpper() : temp.getLower();
+			             
+			   double upper = trace.getImageOrigin()==ImageOrigin.TOP_LEFT ||
+		                      trace.getImageOrigin()==ImageOrigin.TOP_RIGHT
+		                     ? temp.getLower() : temp.getUpper();
 
+    			if ((lower-d2)<=0) {
+    				if (trace.getImageOrigin()==ImageOrigin.TOP_LEFT || trace.getImageOrigin()==ImageOrigin.TOP_RIGHT) {
+        				setRange(ran, 0);
+    				} else {
+        				setRange(0, ran);
+    				}
+    				return;
+
+    			} else if ((upper+d1)>trace.getData().getShape()[yIndex]) {
+    				if (trace.getImageOrigin()==ImageOrigin.TOP_LEFT || trace.getImageOrigin()==ImageOrigin.TOP_RIGHT) {
+   				        setRange(trace.getData().getShape()[yIndex], trace.getData().getShape()[yIndex]-ran);	    
+    				} else {
+    					setRange(trace.getData().getShape()[yIndex]-ran, trace.getData().getShape()[yIndex]);	   
+    				}
+    				return;
+    			}
+
+    		} else {
+    			double lower = trace.getImageOrigin()==ImageOrigin.TOP_LEFT ||
+   				               trace.getImageOrigin()==ImageOrigin.BOTTOM_LEFT
+   				             ? temp.getLower() : temp.getUpper();
+   				             
+        		double upper = trace.getImageOrigin()==ImageOrigin.TOP_LEFT ||
+			                   trace.getImageOrigin()==ImageOrigin.BOTTOM_LEFT
+			                  ? temp.getUpper() : temp.getLower();
+
+    			if ((lower-d2)<=0) {
+    				if (trace.getImageOrigin()==ImageOrigin.TOP_LEFT || trace.getImageOrigin()==ImageOrigin.BOTTOM_LEFT) {
+        				setRange(0, ran);   					
+    				} else {
+    					setRange(ran, 0);   	
+    				}
+    				return;
+
+    			} else if ((upper+d1)>trace.getData().getShape()[xIndex]) {
+    				if (trace.getImageOrigin()==ImageOrigin.TOP_LEFT || trace.getImageOrigin()==ImageOrigin.BOTTOM_LEFT) {
+   				        setRange(trace.getData().getShape()[xIndex]-ran, trace.getData().getShape()[xIndex]);
+    				} else {
+    					setRange(trace.getData().getShape()[xIndex], trace.getData().getShape()[xIndex]-ran);
+    				}
+    				return;
+
+    			}
+    		}
+ 		}
+		// End code to stop pan outside image bounds.
+		
+		super.pan(temp, t1, t2);
+	}
 	/**
 	 * true if with is longer in its direction in pixels than this axis. 
 	 * @param aspectAxis
