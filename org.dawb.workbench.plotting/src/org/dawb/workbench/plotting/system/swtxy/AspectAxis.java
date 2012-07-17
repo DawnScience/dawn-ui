@@ -1,8 +1,15 @@
 package org.dawb.workbench.plotting.system.swtxy;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.swt.xygraph.linearscale.Range;
+import org.dawb.common.ui.plot.axis.AxisEvent;
+import org.dawb.common.ui.plot.axis.IAxis;
+import org.dawb.common.ui.plot.axis.IAxisListener;
+import org.dawb.common.services.ImageServiceBean.ImageOrigin;
 import org.dawb.common.util.text.NumberUtils;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
@@ -19,7 +26,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
  * @author fcp94556
  *
  */
-public class AspectAxis extends Axis {
+public class AspectAxis extends Axis implements IAxis {
 
 	private AspectAxis relativeTo;
 	private Range      maximumRange;
@@ -136,6 +143,89 @@ public class AspectAxis extends Axis {
 	public Range getMaximumRange() {
 		return maximumRange;
 	}
+	
+	protected void pan(Range temp, double t1, double t2) {
+		
+		final ImageTrace trace = ((XYRegionGraph)getGraph()).getRegionArea().getImageTrace();
+		
+		// Code to stop pan outside image bounds.
+		if (trace!=null) {
+		    
+		    final double d1 = t1-t2;
+		    final double d2 = t2-t1;
+		    
+		    final Range  cur  = getRange();
+    		final double ran  = Math.max(cur.getUpper(), cur.getLower()) - Math.min(cur.getUpper(), cur.getLower());
+    		  			
+    		int yIndex = trace.getImageOrigin()==ImageOrigin.TOP_LEFT ||
+    				     trace.getImageOrigin()==ImageOrigin.BOTTOM_RIGHT
+    				   ? 0 : 1;
+    		
+    		int xIndex = trace.getImageOrigin()==ImageOrigin.TOP_LEFT ||
+				         trace.getImageOrigin()==ImageOrigin.BOTTOM_RIGHT
+				        ? 1 : 0;
+    		
+    		
+    		if (isYAxis()) {
+    			
+    			double lower = trace.getImageOrigin()==ImageOrigin.TOP_LEFT ||
+			                   trace.getImageOrigin()==ImageOrigin.TOP_RIGHT
+			                 ? temp.getUpper() : temp.getLower();
+			             
+			   double upper = trace.getImageOrigin()==ImageOrigin.TOP_LEFT ||
+		                      trace.getImageOrigin()==ImageOrigin.TOP_RIGHT
+		                     ? temp.getLower() : temp.getUpper();
+
+    			if ((lower-d2)<=0) {
+    				if (trace.getImageOrigin()==ImageOrigin.TOP_LEFT || trace.getImageOrigin()==ImageOrigin.TOP_RIGHT) {
+        				setRange(ran, 0);
+    				} else {
+        				setRange(0, ran);
+    				}
+    				return;
+
+    			} else if ((upper+d1)>trace.getData().getShape()[yIndex]) {
+    				if (trace.getImageOrigin()==ImageOrigin.TOP_LEFT || trace.getImageOrigin()==ImageOrigin.TOP_RIGHT) {
+   				        setRange(trace.getData().getShape()[yIndex], trace.getData().getShape()[yIndex]-ran);	    
+    				} else {
+    					setRange(trace.getData().getShape()[yIndex]-ran, trace.getData().getShape()[yIndex]);	   
+    				}
+    				return;
+    			}
+
+    		} else {
+    			double lower = trace.getImageOrigin()==ImageOrigin.TOP_LEFT ||
+   				               trace.getImageOrigin()==ImageOrigin.BOTTOM_LEFT
+   				             ? temp.getLower() : temp.getUpper();
+   				             
+        		double upper = trace.getImageOrigin()==ImageOrigin.TOP_LEFT ||
+			                   trace.getImageOrigin()==ImageOrigin.BOTTOM_LEFT
+			                  ? temp.getUpper() : temp.getLower();
+
+    			if ((lower-d2)<=0) {
+    				if (trace.getImageOrigin()==ImageOrigin.TOP_LEFT || trace.getImageOrigin()==ImageOrigin.BOTTOM_LEFT) {
+        				setRange(0, ran);   					
+    				} else {
+    					setRange(ran, 0);   	
+    				}
+    				return;
+
+    			} else if ((upper+d1)>trace.getData().getShape()[xIndex]) {
+    				if (trace.getImageOrigin()==ImageOrigin.TOP_LEFT || trace.getImageOrigin()==ImageOrigin.BOTTOM_LEFT) {
+   				        setRange(trace.getData().getShape()[xIndex]-ran, trace.getData().getShape()[xIndex]);
+    				} else {
+    					setRange(trace.getData().getShape()[xIndex], trace.getData().getShape()[xIndex]-ran);
+    				}
+    				return;
+
+    			}
+    		}
+ 		}
+		// End code to stop pan outside image bounds.
+		
+		super.pan(temp, t1, t2);
+	}
+
 
 	/**
 	 * Set with lower<upper, the class will check for if the axis is in reversed mode.
@@ -196,7 +286,69 @@ public class AspectAxis extends Axis {
 		return new Range(lower, upper);
 	}
 
+	@Override
+	public boolean isLog10() {
+		return super.isLogScaleEnabled();
+	}
 
+	@Override
+	public void setLog10(boolean isLog10) {
+		super.setLogScale(isLog10);
+	}
+
+	@Override
+	public double getUpper() {
+		return getRange().getUpper();
+	}
+
+	@Override
+	public double getLower() {
+		return getRange().getLower();
+	}
+
+	@Override
+	public int getValuePosition(double value) {
+		return getValuePosition(value, false);
+	}
+
+	@Override
+	public double getPositionValue(int position) {
+		return getPositionValue(position, false);
+	}
+
+	protected Collection<IAxisListener> axisListeners;
+
+	@Override
+	protected void fireRevalidated(){
+		super.fireRevalidated();
+		
+		final AxisEvent evt = new AxisEvent(this);
+		if (axisListeners!=null) for(IAxisListener listener : axisListeners)
+			listener.revalidated(evt);
+	}
+
+	@Override
+	protected void fireAxisRangeChanged(final Range old_range, final Range new_range){
+		super.fireAxisRangeChanged(old_range, new_range);
+		
+		final AxisEvent evt = new AxisEvent(this, old_range.getLower(), old_range.getUpper(),
+				                                  new_range.getLower(), new_range.getUpper());
+		if (axisListeners!=null)  for(IAxisListener listener : axisListeners)
+			listener.rangeChanged(evt);
+
+	}
+
+	@Override
+	public void addAxisListener(IAxisListener listener) {
+		if (axisListeners==null) axisListeners = new ArrayList<IAxisListener>(3);
+		axisListeners.add(listener);
+	}
+
+	@Override
+	public void removeAxisListener(IAxisListener listener) {
+		if (axisListeners==null) return;
+		axisListeners.remove(listener);
+	}
 
 	
 	@Override
