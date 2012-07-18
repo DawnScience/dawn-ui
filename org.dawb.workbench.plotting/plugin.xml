@@ -101,6 +101,13 @@
             label="History"
             tooltip="A tool to compare plots between data files.">
       </plotting_tool_page>
+      <plotting_tool_page
+            class="org.dawb.workbench.plotting.tools.ZoomTool"
+            icon="icons/zoom_box.png"
+            id="org.dawb.workbench.plotting.tools.zoomTool"
+            label="Zoom Profile"
+            tooltip="A tool to zoom areas in a separate view.">
+      </plotting_tool_page>
    </extension>
    <extension
          point="org.eclipse.ui.views">
