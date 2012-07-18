@@ -1090,6 +1090,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 					view.update();
 					if (orig!=null && view.activeRec!=null && view.activeRec.tool!=null) {
 						view.activeRec.tool.sync(orig);
+						orig.deactivate();
 					}
 
 				} catch (Exception e) {
