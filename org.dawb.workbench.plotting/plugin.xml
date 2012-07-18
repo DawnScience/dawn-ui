@@ -95,7 +95,7 @@
             tooltip="A tool which shows the fitted ellipse parameters.">
       </plotting_tool_page>
       <plotting_tool_page
-            class="org.dawb.workbench.plotting.tools.XYHistoryTool"
+            class="org.dawb.workbench.plotting.tools.HistoryTool"
             icon="icons/plot-tool-history.png"
             id="org.dawb.workbench.plotting.tools.xyHistoryTool"
             label="History"

@@ -43,9 +43,9 @@ import org.eclipse.swt.widgets.Menu;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class XYHistoryTool extends AbstractToolPage implements MouseListener {
+public class HistoryTool extends AbstractToolPage implements MouseListener {
 
-	private Logger logger = LoggerFactory.getLogger(XYHistoryTool.class);
+	private Logger logger = LoggerFactory.getLogger(HistoryTool.class);
 	
 	/**
 	 * We simply keep the history in a static map of traces.
@@ -59,7 +59,7 @@ public class XYHistoryTool extends AbstractToolPage implements MouseListener {
 	private TableViewer    viewer;
 	private ITraceListener traceListener;
 	
-	public XYHistoryTool() {
+	public HistoryTool() {
 		this.traceListener = new ITraceListener.Stub() {
 			
 			@Override
