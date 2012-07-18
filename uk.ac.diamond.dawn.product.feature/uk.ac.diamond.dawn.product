@@ -22,7 +22,8 @@ jre/bin/java</programArgsLin>
 -DidaEmbedded=yes
 -Dcolour=on
 -Dosgi.locking=none
--Dcom.isencia.require.file.source=true</vmArgs>
+-Dcom.isencia.require.file.source=true
+-Dorg.dawb.editor.h5.use.default=true</vmArgs>
       <vmArgsLin>-Xmx2048m</vmArgsLin>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts
 -Xmx2048m</vmArgsMac>
