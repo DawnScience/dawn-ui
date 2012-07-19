@@ -108,6 +108,13 @@
             label="Zoom Profile"
             tooltip="A tool to zoom areas in a separate view.">
       </plotting_tool_page>
+      <plotting_tool_page
+            class="org.dawb.workbench.plotting.tools.ImageTableTool"
+            icon="icons/zoom_table.png"
+            id="org.dawb.workbench.plotting.tools.tableTool"
+            label="Zoom Table"
+            tooltip="A tool to zoom areas and view values in a table.">
+      </plotting_tool_page>
    </extension>
    <extension
          point="org.eclipse.ui.views">
