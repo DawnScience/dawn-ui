@@ -1,7 +1,6 @@
 package org.dawb.workbench.plotting.tools;
 
 import java.util.Arrays;
-import java.util.Collection;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.region.IRegion;
@@ -24,6 +23,11 @@ public class ZoomTool extends ProfileTool {
 	protected void configurePlottingSystem(AbstractPlottingSystem plotter) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	@Override
+	protected String getRegionName() {
+		return "Zoom";
 	}
 
 	@Override
