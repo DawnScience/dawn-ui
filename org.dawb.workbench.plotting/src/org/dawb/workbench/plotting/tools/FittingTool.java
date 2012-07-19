@@ -359,12 +359,17 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 			AbstractDataset[] a= FittingUtils.xintersection(x,y,p1[0],p2[0]);
 			x = a[0]; y=a[1];
 
-			final FittedPeaks bean = FittingUtils.getFittedPeaks(x, y, monitor);
-    		// Add saved peaks if any.
-    		if (fittedPeaks!=null && !fittedPeaks.isEmpty() && bean!=null) {
-    			bean.addFittedPeaks(fittedPeaks.getPeakList());
-    		}
-			createFittedPeaks(bean);
+			try {
+				final FittedPeaks bean = FittingUtils.getFittedPeaks(x, y, monitor);
+	    		// Add saved peaks if any.
+	    		if (fittedPeaks!=null && !fittedPeaks.isEmpty() && bean!=null) {
+	    			bean.addFittedPeaks(fittedPeaks.getPeakList());
+	    		}
+				createFittedPeaks(bean);
+			} catch (Exception ne) {
+				logger.error("Cannot fit peaks!", ne);
+				return Status.CANCEL_STATUS;
+			}
 
 			return Status.OK_STATUS;
 		}
