@@ -100,7 +100,7 @@ public class H5MultiEditor extends MultiPageEditorPart  implements ISlicablePlot
 			// The property org.dawb.editor.h5.use.default is set by default in dawb / dawn vanilla
 			// The property org.dawb.editor.h5.use.default is not set in SDA.
 			this.treePage = System.getProperty("org.dawb.editor.h5.use.default") ==null
-					        || "true".equals("org.dawb.editor.h5.use.default")
+					        || "true".equals(System.getProperty("org.dawb.editor.h5.use.default"))
                           ? new H5Editor() 
 			              : new HDF5TreeEditor();
 			addPage(index, treePage,   getEditorInput());
