@@ -29,9 +29,13 @@ import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.graphics.PaletteData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RegionArea extends PlotArea {
 
+	private static final Logger logger = LoggerFactory.getLogger(RegionArea.class);
+	
 	protected ISelectionProvider selectionProvider;
 	private final Map<String,AbstractSelectionRegion>     regions;
 	private final Map<String,ImageTrace> imageTraces;
@@ -245,22 +249,50 @@ public class RegionArea extends PlotArea {
 
 	protected void fireRegionCreated(RegionEvent evt) {
 		if (regionListeners==null) return;
-		for (IRegionListener l : regionListeners) l.regionCreated(evt);
+		for (IRegionListener l : regionListeners) {
+			try {
+				l.regionCreated(evt);
+			} catch (Throwable ne) {
+				logger.error("Notifying of region creation", ne);
+				continue;
+			}
+		}
 	}
 	
 
 	protected void fireRegionAdded(RegionEvent evt) {
 		if (regionListeners==null) return;
-		for (IRegionListener l : regionListeners) l.regionAdded(evt);
+		for (IRegionListener l : regionListeners) {
+			try {
+				l.regionAdded(evt);
+			} catch (Throwable ne) {
+				logger.error("Notifying of region add", ne);
+				continue;
+			}
+		}
 	}
 	
 	protected void fireRegionRemoved(RegionEvent evt) {
 		if (regionListeners==null) return;
-		for (IRegionListener l : regionListeners) l.regionRemoved(evt);
+		for (IRegionListener l : regionListeners) {
+			try {
+				l.regionRemoved(evt);
+			} catch (Throwable ne) {
+				logger.error("Notifying of region removal", ne);
+				continue;
+			}
+		}
 	}
 	protected void fireRegionsRemoved(RegionEvent evt) {
 		if (regionListeners==null) return;
-		for (IRegionListener l : regionListeners) l.regionsRemoved(evt);
+		for (IRegionListener l : regionListeners) {
+			try {
+			    l.regionsRemoved(evt);
+			} catch (Throwable ne) {
+				logger.error("Notifying of region removal", ne);
+				continue;
+			}
+		}
 	}
 	
 	/**
