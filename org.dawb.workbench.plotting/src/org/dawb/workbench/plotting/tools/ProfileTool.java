@@ -129,7 +129,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		// Used to set the line on the image to the same color as the plot for line profiles only.
 		if (!traces.isEmpty()) {
 			final ITrace first = traces.iterator().next();
-			if (isRegionTypeSupported(RegionType.LINE) && first instanceof ILineTrace && region.getName().startsWith("Profile")) {
+			if (isRegionTypeSupported(RegionType.LINE) && first instanceof ILineTrace && region.getName().startsWith(getRegionName())) {
 				getControl().getDisplay().syncExec(new Runnable() {
 					public void run() {
 						region.setRegionColor(((ILineTrace)first).getTraceColor());
@@ -227,7 +227,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 	private void createNewRegion() {
 		// Start with a selection of the right type
 		try {
-			getPlottingSystem().createRegion(RegionUtils.getUniqueName("Profile", getPlottingSystem()), getCreateRegionType());
+			getPlottingSystem().createRegion(RegionUtils.getUniqueName(getRegionName(), getPlottingSystem()), getCreateRegionType());
 		} catch (Exception e) {
 			logger.error("Cannot create region for profile tool!");
 		}
@@ -317,6 +317,10 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		updateProfiles.profile(r, rb, isDrag);
 	}
 	
+	protected String getRegionName() {
+		return "Profile";
+	}
+	
 	private final class ProfileJob extends Job {
 		
 		private   IRegion                currentRegion;
@@ -324,7 +328,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		private   boolean                isDrag;
 
 		ProfileJob() {
-			super("Profile update");
+			super(getRegionName()+" update");
 			setSystem(true);
 			setUser(false);
 			setPriority(Job.INTERACTIVE);
