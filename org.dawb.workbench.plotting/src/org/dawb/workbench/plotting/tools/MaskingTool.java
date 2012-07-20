@@ -394,6 +394,10 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		autoApplySavedMask = autoApply;
 	}
 	
+	public static BooleanDataset getSavedMask() {
+		return savedMask;
+	}
+	
 	private void createActions(IActionBars actionBars) {
 		
 		Action saveMask  = new Action("Save the mask into a buffer", Activator.getImageDescriptor("icons/import_wiz.gif")) {
