@@ -416,6 +416,8 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	}
 
 	protected void mergeSavedMask() {
+		
+		if (savedMask==null) return;
 		if (maskObject.getImageDataset()==null){
 			maskObject.setImageDataset(getImageTrace().getData());
 		}
@@ -595,9 +597,12 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	    image.setMask(null);
 	    
 	    if (autoApplySavedMask) { // If it is auto-apply then it needs to be reset when you reset.
-	    	final boolean ok = MessageDialog.openConfirm(Display.getDefault().getActiveShell(), "Confirm Removal of Saved Mask", 
+	    	final boolean ok = MessageDialog.openQuestion(Display.getDefault().getActiveShell(), "Confirm Removal of Saved Mask", 
 	    			                  "You have a saved mask which can be cleared as well.\n\nWould you like to remove the saved mask?");
-	    	if (ok) savedMask = null;
+	    	if (ok) {
+	    		savedMask = null;
+	    		autoApplySavedMask = false;
+	    	}
 	    	loadMask.setEnabled(savedMask!=null);
 	    }
 	}
@@ -708,6 +713,9 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 				final AbstractDataset unmasked = image.getData();
 				maskObject.setImageDataset(unmasked);
 			}
+			
+			// Keep the saved mask
+			if (autoApplySavedMask && savedMask!=null) maskObject.process(savedMask);
 			
 			// Just process a changing region
 			if (region!=null) {
