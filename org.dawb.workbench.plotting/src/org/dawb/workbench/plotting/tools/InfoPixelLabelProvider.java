@@ -65,6 +65,12 @@ public class InfoPixelLabelProvider extends ColumnLabelProvider {
 				final IRegion region = (IRegion)element;
 				if (region.getRegionType()==RegionType.POINT) {
 					PointROI pr = (PointROI)tool.getBounds(region);
+					
+					// Sometimes the image can have axes set. In this case we need the point
+					// ROI in the axes coordinates
+					IImageTrace trace = tool.getImageTrace();
+					if (trace!=null) pr = (PointROI)trace.getRegionInAxisCoordinates(pr);
+					
 					x = pr.getPointX();
 					y = pr.getPointY();
 				} else {

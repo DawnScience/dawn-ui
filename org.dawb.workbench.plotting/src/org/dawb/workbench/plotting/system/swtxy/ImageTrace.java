@@ -1010,7 +1010,19 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 		return roi;
 	}
-
+	
+	@Override
+	public double[] getPointInAxisCoordinates(final double[] point) throws Exception {
+		if (axes==null)     return point;
+		if (axes.isEmpty()) return point;
+		
+		final AbstractDataset xl = axes.get(0); // May be null
+		final AbstractDataset yl = axes.get(1); // May be null
+		transform(xl,0,point);
+		transform(yl,1,point);
+        return point;
+	}
+	
 	private void transform(AbstractDataset label, int index, double[]... points) {
 		if (label!=null) {
 			for (double[] ds : points) {
