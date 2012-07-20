@@ -174,7 +174,6 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		profilePlottingSystem.getPlotActionSystem().remove("org.dawb.workbench.plotting.rescale");
 		profilePlottingSystem.getPlotActionSystem().remove("org.dawb.workbench.plotting.plotIndex");
 		profilePlottingSystem.getPlotActionSystem().remove("org.dawb.workbench.plotting.plotX");
-		profilePlottingSystem.getSelectedXAxis().setFormatPattern("############");
 
 		profilePlottingSystem.setXfirst(true);
 	}

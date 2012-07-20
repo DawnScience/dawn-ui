@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
@@ -69,8 +70,23 @@ public class ZoomTool extends ProfileTool {
 			
 	
 			slice.setName(region.getName());
-			IImageTrace zoom_trace = (IImageTrace)profilePlottingSystem.updatePlot2D(slice, null, monitor);
+			
+			// Calculate axes to have real values not size
+			AbstractDataset yLabels = null;
+			AbstractDataset xLabels = null;
+			if (image.getAxes()!=null) {
+				AbstractDataset xl = image.getAxes().get(0);
+				if (xl!=null) xLabels = getLabelsFromLabels(xl, bounds, 0);
+				AbstractDataset yl = image.getAxes().get(1);
+				if (yl!=null) yLabels = getLabelsFromLabels(yl, bounds, 1);
+			}
+			
+			if (yLabels==null) yLabels = IntegerDataset.arange(bounds.getPoint()[1], bounds.getEndPoint()[1], yInc);
+			if (xLabels==null) xLabels = IntegerDataset.arange(bounds.getPoint()[0], bounds.getEndPoint()[0], xInc);
+			
+			IImageTrace zoom_trace = (IImageTrace)profilePlottingSystem.updatePlot2D(slice, Arrays.asList(new AbstractDataset[]{xLabels, yLabels}), monitor);
 			registerTraces(region, Arrays.asList(new ITrace[]{zoom_trace}));
+			zoom_trace.setPaletteData(image.getPaletteData());
 			
 		} catch (IllegalArgumentException ne) {
 			// Occurs when slice outside
@@ -79,5 +95,17 @@ public class ZoomTool extends ProfileTool {
 			logger.warn("Problem slicing image in "+getClass().getSimpleName(), ne);
 		}
 
+	}
+
+	private AbstractDataset getLabelsFromLabels(AbstractDataset xl, RectangularROI bounds, int axisIndex) {
+		try {
+			int fromIndex = (int)bounds.getPoint()[axisIndex];
+			int toIndex   = (int)bounds.getEndPoint()[axisIndex];
+			int step      = toIndex>fromIndex ? 1 : -1;
+			final AbstractDataset slice = xl.getSlice(new int[]{fromIndex}, new int[]{toIndex}, new int[]{step});
+			return slice;
+		} catch (Exception ne) {
+			return null;
+		}
 	}
 }
