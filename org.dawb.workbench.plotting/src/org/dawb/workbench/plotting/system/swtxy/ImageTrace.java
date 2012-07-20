@@ -12,17 +12,17 @@ import java.util.Map;
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.IAxisListener;
 import org.csstudio.swt.xygraph.linearscale.Range;
+import org.dawb.common.services.HistogramBound;
 import org.dawb.common.services.IImageService;
 import org.dawb.common.services.ImageServiceBean;
 import org.dawb.common.services.ImageServiceBean.HistoType;
-import org.dawb.common.services.HistogramBound;
 import org.dawb.common.services.ImageServiceBean.ImageOrigin;
 import org.dawb.common.ui.image.PaletteFactory;
 import org.dawb.common.ui.plot.trace.IImageTrace;
+import org.dawb.common.ui.plot.trace.IPaletteListener;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceContainer;
 import org.dawb.common.ui.plot.trace.PaletteEvent;
-import org.dawb.common.ui.plot.trace.IPaletteListener;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -41,6 +41,13 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.function.Downsample;
 import uk.ac.diamond.scisoft.analysis.dataset.function.DownsampleMode;
+import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
+import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
+import uk.ac.diamond.scisoft.analysis.roi.PointROI;
+import uk.ac.diamond.scisoft.analysis.roi.PolygonalROI;
+import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
+import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
+import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 
 /**
  * A trace which draws an image to the plot.
@@ -935,4 +942,57 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	public boolean isMaximumZoom() {
 		return isMaximumZoom;
 	}
+
+	
+	/**
+	 * If the axis data set has been set, this method will return 
+	 * a selection region in the coordinates of the axes labels rather
+	 * than the indices.
+	 * 
+	 * @return ROI in label coordinates. This roi is not that useful after it
+	 *         is created. The data processing needs rois with indices.
+	 */
+	@Override
+	public ROIBase getRegionInAxisCoordinates(final ROIBase roi) throws Exception {
+		
+		if (axes==null)     return roi;
+		if (axes.isEmpty()) return roi;
+		
+		final AbstractDataset xl = axes.get(0); // May be null
+		final AbstractDataset yl = axes.get(1); // May be null
+		
+		if (roi instanceof LinearROI) {
+			
+		} else if (roi instanceof PolygonalROI) {
+			
+		} else if (roi instanceof PointROI) {
+			
+		} else if (roi instanceof RectangularROI) {
+			double[] sp=roi.getPoint();
+			double[] ep=((RectangularROI) roi).getEndPoint();
+			transform(xl,sp,ep,0);
+			transform(yl,sp,ep,1);
+				
+			return new RectangularROI(sp[0], sp[1], ep[0]-sp[0], sp[1]-ep[1], ((RectangularROI) roi).getAngle());
+			
+		} else if (roi instanceof SectorROI) {
+			
+		} else if (roi instanceof EllipticalROI) {
+			
+		} else {
+			throw new Exception("Unsupport roi "+roi.getClass());
+		}
+
+		return roi;
+	}
+
+	private void transform(AbstractDataset label, double[] sp, double[] ep, int index) {
+		if (label!=null) {
+			int fromIndex = (int)sp[index];
+			int toIndex   = (int)ep[index];
+            sp[index] = label.getDouble(fromIndex);
+            ep[index] = label.getDouble(toIndex);
+		}		
+	}
+
 }
