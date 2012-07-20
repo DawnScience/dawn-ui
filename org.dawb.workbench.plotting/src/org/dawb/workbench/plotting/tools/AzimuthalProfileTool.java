@@ -1,6 +1,5 @@
 package org.dawb.workbench.plotting.tools;
 
-import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.region.IRegion;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
@@ -9,12 +8,6 @@ import uk.ac.diamond.scisoft.analysis.roi.ROIProfile;
 import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 
 public class AzimuthalProfileTool extends SectorProfileTool {
-
-	@Override
-	protected void configurePlottingSystem(AbstractPlottingSystem plotter) {
-        super.configurePlottingSystem(plotter);
-        plotter.getSelectedXAxis().setFormatPattern("############.##");
-	}
 	
 	@Override
 	protected AbstractDataset[] getXAxis(final SectorROI sroi, AbstractDataset[] integral) {

@@ -29,13 +29,11 @@ public class BoxProfileTool extends ProfileTool {
 		if (xPixelAxis==null) {
 			this.xPixelAxis = plotter.getSelectedXAxis();
 			xPixelAxis.setTitle("X Pixel");
-			xPixelAxis.setFormatPattern("############");
 		}
 		
 		if (yPixelAxis==null) {
 			this.yPixelAxis = plotter.createAxis("Y Pixel", false, SWT.TOP);		
 			plotter.getSelectedYAxis().setTitle("Intensity");
-			yPixelAxis.setFormatPattern("############");
 		}
 	}
 
