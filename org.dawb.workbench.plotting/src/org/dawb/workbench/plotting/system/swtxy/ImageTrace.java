@@ -958,6 +958,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 * a selection region in the coordinates of the axes labels rather
 	 * than the indices.
 	 * 
+	 * Ellipse and Sector rois are not currently supported.
+	 * 
 	 * @return ROI in label coordinates. This roi is not that useful after it
 	 *         is created. The data processing needs rois with indices.
 	 */
@@ -971,36 +973,50 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		final AbstractDataset yl = axes.get(1); // May be null
 		
 		if (roi instanceof LinearROI) {
+			double[] sp = ((LinearROI)roi).getPoint();
+			double[] ep = ((LinearROI)roi).getEndPoint();
+			transform(xl,0,sp,ep);
+			transform(yl,1,sp,ep);
+			return new LinearROI(sp, ep);
 			
 		} else if (roi instanceof PolygonalROI) {
+			PolygonalROI proi = (PolygonalROI)roi;
+			final PolygonalROI ret = new PolygonalROI();
+			for (PointROI pointROI : proi) {
+				double[] dp = pointROI.getPoint();
+				transform(xl,0,dp);
+				transform(yl,1,dp);
+				ret.insertPoint(dp);
+			}
 			
 		} else if (roi instanceof PointROI) {
+			double[] dp = ((PointROI)roi).getPoint();
+			transform(xl,0,dp);
+			transform(yl,1,dp);
+			return new PointROI(dp);
 			
 		} else if (roi instanceof RectangularROI) {
+			RectangularROI rroi = (RectangularROI)roi;
 			double[] sp=roi.getPoint();
-			double[] ep=((RectangularROI) roi).getEndPoint();
-			transform(xl,sp,ep,0);
-			transform(yl,sp,ep,1);
+			double[] ep=rroi.getEndPoint();
+			transform(xl,0,sp,ep);
+			transform(yl,1,sp,ep);
 				
-			return new RectangularROI(sp[0], sp[1], ep[0]-sp[0], sp[1]-ep[1], ((RectangularROI) roi).getAngle());
-			
-		} else if (roi instanceof SectorROI) {
-			
-		} else if (roi instanceof EllipticalROI) {
-			
+			return new RectangularROI(sp[0], sp[1], ep[0]-sp[0], sp[1]-ep[1], rroi.getAngle());
+						
 		} else {
-			throw new Exception("Unsupport roi "+roi.getClass());
+			throw new Exception("Unsupported roi "+roi.getClass());
 		}
 
 		return roi;
 	}
 
-	private void transform(AbstractDataset label, double[] sp, double[] ep, int index) {
+	private void transform(AbstractDataset label, int index, double[]... points) {
 		if (label!=null) {
-			int fromIndex = (int)sp[index];
-			int toIndex   = (int)ep[index];
-            sp[index] = label.getDouble(fromIndex);
-            ep[index] = label.getDouble(toIndex);
+			for (double[] ds : points) {
+				int dataIndex = (int)ds[index];
+				ds[index] = label.getDouble(dataIndex);
+			}
 		}		
 	}
 }
