@@ -56,31 +56,45 @@ public class InfoPixelLabelProvider extends ColumnLabelProvider {
 	@Override
 	public String getText(Object element) {
 
-		double x = 0.0;
-		double y = 0.0;
+		double xIndex = 0.0;
+		double yIndex = 0.0;
+		double xLabel = Double.NaN;
+		double yLabel = Double.NaN;
 		
 		try {
 			if (element instanceof IRegion){
 				
 				final IRegion region = (IRegion)element;
+				IImageTrace trace = tool.getImageTrace();
+				
 				if (region.getRegionType()==RegionType.POINT) {
 					PointROI pr = (PointROI)tool.getBounds(region);
+					xIndex = pr.getPointX();
+					yIndex = pr.getPointY();
 					
 					// Sometimes the image can have axes set. In this case we need the point
 					// ROI in the axes coordinates
-					IImageTrace trace = tool.getImageTrace();
-					if (trace!=null) pr = (PointROI)trace.getRegionInAxisCoordinates(pr);
+					if (trace!=null) {
+						pr = (PointROI)trace.getRegionInAxisCoordinates(pr);
+						xLabel = pr.getPointX();
+						yLabel = pr.getPointY();
+					}
 					
-					x = pr.getPointX();
-					y = pr.getPointY();
 				} else {
-					x = tool.xValues[0];
-					y = tool.yValues[0];
+					xIndex = tool.xValues[0];
+					yIndex = tool.yValues[0];
+					final double[] dp = new double[]{tool.xValues[0], tool.yValues[0]};
+					if (trace!=null) trace.getPointInAxisCoordinates(dp);
+					xLabel = dp[0];
+					yLabel = dp[1];
 				}
 	
 			}else {
 				return null;
 			}
+			
+			if (Double.isNaN(xLabel)) xLabel = xIndex;
+			if (Double.isNaN(yLabel)) yLabel = yIndex;
 	
 			IDiffractionMetadata dmeta = null;
 			AbstractDataset set = null;
@@ -107,7 +121,7 @@ public class InfoPixelLabelProvider extends ColumnLabelProvider {
 						qSpace = new QSpace(detector2dProperties,
 								diffractionCrystalEnvironment);
 										
-						vectorUtil = new Vector3dutil(qSpace, x, y);
+						vectorUtil = new Vector3dutil(qSpace, xIndex, yIndex);
 					}
 				} catch (Exception e) {
 					logger.error("Could not create a detector properties object from metadata", e);
@@ -118,13 +132,13 @@ public class InfoPixelLabelProvider extends ColumnLabelProvider {
 			case 0: // "Point Id"
 				return ( ( (IRegion)element).getRegionType() == RegionType.POINT) ? ((IRegion)element).getName(): "";
 			case 1: // "X position"
-				return String.format("% 4.4f", x);
+				return String.format("% 4.4f", xLabel);
 			case 2: // "Y position"
-				return String.format("% 4.4f", y);
+				return String.format("% 4.4f", yLabel);
 			case 3: // "Data value"
 				//if (set == null || vectorUtil==null || vectorUtil.getQMask(qSpace, x, y) == null) return "-";
 				if (set == null) return "-";
-				return String.format("% 4.4f", set.getDouble((int)y, (int) x));
+				return String.format("% 4.4f", set.getDouble((int)yIndex, (int) xIndex));
 			case 4: // q X
 				//if (vectorUtil==null || vectorUtil.getQMask(qSpace, x, y) == null) return "-";
 				if (vectorUtil==null ) return "-";
