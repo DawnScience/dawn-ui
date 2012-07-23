@@ -731,6 +731,19 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 
 		if (selections==null) return;
 
+		// Record selections
+		try {
+			StringBuilder buf = new StringBuilder();
+			for (CheckableObject ob : selections) {
+				buf.append(ob.getName());
+				buf.append(",");
+			}
+			
+			Activator.getDefault().getPreferenceStore().setValue(DATA_SEL, buf.toString());
+		} catch (Throwable ne) {
+			logger.error("Cannot save last selections!", ne);
+		}
+		
 		fireSelectionListeners(selections);
 	}
 
@@ -1079,6 +1092,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 		return patterns;
 	}
 	
+	private static final String DATA_SEL = "org.dawb.workbench.ui.editors.plotdata.selected";
 	/**
 	 * Used when the view is being controlled from a Dialog.
 	 * @param meta
@@ -1104,6 +1118,30 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 		    readExpressions();
 		} catch (Exception ne ) {
 			logger.error("Cannot read expressions for file.", ne);
+		}
+		
+		// Some of the meta data
+		try {
+			final String prop = Activator.getDefault().getPreferenceStore().getString(DATA_SEL);
+			if (prop!=null) {
+				final Collection<String> saveSelections = Arrays.asList(prop.split(","));
+				if (data!=null && !data.isEmpty()) {
+					boolean foundData = false;
+					for (CheckableObject checker : data) {
+						if (saveSelections.contains(checker.getName())) {
+							checker.setChecked(true);
+							this.selections.add(checker);
+							foundData = true;
+						}
+					}
+					
+					if (foundData) {
+						fireSelectionListeners(selections);
+					}
+				}
+			}
+		} catch (Throwable ne) {
+			logger.error("Cannot save data previously selected!", ne);
 		}
 	}
 
