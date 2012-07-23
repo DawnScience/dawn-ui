@@ -137,6 +137,8 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 			
 				for (int i=0; i< regions.size(); i++){
 					IRegion pointRegion = (IRegion)(regions.toArray())[i];
+					
+					System.out.println("pointRegion.getRegionType(): " + pointRegion.getRegionType());
 										
 					if (pointRegion.getRegionType() == RegionType.XAXIS_LINE || pointRegion.getRegionType() == RegionType.POINT ){
 						
@@ -535,6 +537,7 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 
 		if (viewer != null) {
 			IRegion region = (IRegion) evt.getSource();
+			System.out.println("roiDragged - region.getRegionType(): " +region.getRegionType());
 			if (region.getRegionType() == RegionType.POINT) {
 				// update table for current point region
 				ROIBase rb = evt.getROI();
