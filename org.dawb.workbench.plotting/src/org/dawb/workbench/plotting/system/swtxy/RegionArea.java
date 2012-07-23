@@ -556,4 +556,16 @@ public class RegionArea extends PlotArea {
 		if (imageTraces!=null)         imageTraces.clear();
 	}
 
+	/**
+	 * Call to find out of any of the current regions are user editable.
+	 * @return
+	 */
+	public boolean hasUserRegions() {
+		if (getRegionMap()==null || getRegionMap().isEmpty()) return false;
+		for (String regionName : getRegionMap().keySet()) {
+			if (getRegionMap().get(regionName).isUserRegion()) return true;
+		}
+		return false;
+	}
+
 }

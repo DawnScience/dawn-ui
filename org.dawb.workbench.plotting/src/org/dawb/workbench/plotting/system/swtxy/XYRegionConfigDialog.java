@@ -99,7 +99,7 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
 		}
 
         //Region Configure Page
-        if ( ((RegionArea)regionGraph.getPlotArea()).getRegionMap().size() > 0 ){
+        if ( ((RegionArea)regionGraph.getPlotArea()).hasUserRegions()){
         	
         	Composite regionComposite = new Composite(tabFolder, SWT.NONE);
         	regionComposite.setLayout(new GridLayout(1, false));        	
