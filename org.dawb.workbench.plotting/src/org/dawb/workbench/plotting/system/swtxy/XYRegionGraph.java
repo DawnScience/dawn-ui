@@ -2,6 +2,7 @@ package org.dawb.workbench.plotting.system.swtxy;
 
 import java.text.NumberFormat;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 import org.csstudio.swt.xygraph.figures.Annotation;
@@ -19,6 +20,8 @@ import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
 import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
 import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.PaletteData;
@@ -261,6 +264,7 @@ public class XYRegionGraph extends XYGraph {
 	public void dispose() {
 		removeAll();
 		getRegionArea().dispose();
+		clearPropertyListeners();
 	}
 	
 	private final NumberFormat integerFormat   = NumberFormat.getIntegerInstance();
@@ -299,5 +303,42 @@ public class XYRegionGraph extends XYGraph {
 		});
 		super.addAnnotation(annotation);
 	}
+
+	private Collection<IPropertyChangeListener> propertyListeners;
+	
+	/**
+	 * NOTE This listener is *not* notified once for each configuration setting made on 
+	 * the configuration but once whenever the form is applied by the user (and many things
+	 * are changed) 
+	 * 
+	 * You then have to read the property you require from the object (for instance the axis
+	 * format) in case it has changed. This is not ideal, later there may be more events fired and
+	 * it will be possible to check property name, for now it is always set to "Graph Configuration".
+	 * 
+	 * @param listener
+	 */
+	public void addPropertyChangeListener(IPropertyChangeListener listener) {
+		if (propertyListeners==null) propertyListeners = new HashSet<IPropertyChangeListener>(3);
+		propertyListeners.add(listener);
+	}
+	
+	public void removePropertyChangeListener(IPropertyChangeListener listener) {
+		if (propertyListeners==null) return;
+		propertyListeners.remove(listener);
+	}
+	
+	protected void clearPropertyListeners() {
+		if (propertyListeners!=null) propertyListeners.clear();
+	}
+	
+	protected void fireConfigurationPropertyChangeListeners() {
+		if (propertyListeners==null) return;
+		final PropertyChangeEvent evt = new PropertyChangeEvent(this, "Graph Configuration", "Various", "Various (some new)");
+		for (IPropertyChangeListener l : propertyListeners) {
+			l.propertyChange(evt);
+		}
+	}
+	
+	
 
 }

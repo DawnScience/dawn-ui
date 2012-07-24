@@ -67,6 +67,7 @@ import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
@@ -1355,6 +1356,25 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	public void setXfirst(boolean xfirst) {
 		super.setXfirst(xfirst);
 		this.lightWeightActionBarMan.setXfirst(xfirst);
+	}
+	
+	/**
+	 * NOTE This listener is *not* notified once for each configuration setting made on 
+	 * the configuration but once whenever the form is applied by the user (and many things
+	 * are changed) 
+	 * 
+	 * You then have to read the property you require from the object (for instance the axis
+	 * format) in case it has changed. This is not ideal, later there may be more events fired and
+	 * it will be possible to check property name, for now it is always set to "Graph Configuration".
+	 * 
+	 * @param listener
+	 */
+	public void addPropertyChangeListener(IPropertyChangeListener listener) {
+		xyGraph.addPropertyChangeListener(listener);
+	}
+	
+	public void removePropertyChangeListener(IPropertyChangeListener listener) {
+		xyGraph.removePropertyChangeListener(listener);
 	}
 
 }

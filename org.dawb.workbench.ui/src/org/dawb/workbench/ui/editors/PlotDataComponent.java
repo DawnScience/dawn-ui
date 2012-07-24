@@ -28,9 +28,11 @@ import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.IPlottingSystemData;
 import org.dawb.common.ui.plot.IPlottingSystemSelection;
 import org.dawb.common.ui.plot.PlotType;
+import org.dawb.common.ui.plot.axis.IAxis;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.common.ui.widgets.DoubleClickModifier;
+import org.dawb.common.util.io.FileUtils;
 import org.dawb.common.util.io.PropUtils;
 import org.dawb.common.util.io.SortingUtils;
 import org.dawb.common.util.list.SortNatural;
@@ -52,6 +54,7 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -87,6 +90,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
@@ -126,17 +130,12 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 	private   String                rootName;
 	private   boolean               staggerSupported = false;
 
-	protected IMetaData           metaData;
-
+	protected IMetaData             metaData;
 	protected final IPlottingSystemData providerDeligate;
-
 	private IPropertyChangeListener propListener;
-
-	private ArrayList<IAction> dataComponentActions;
-
-	private Composite container;
-
-	private DataFilter dataFilter;
+	private ArrayList<IAction>      dataComponentActions;
+	private Composite               container;
+	private DataFilter              dataFilter;
 	
 	public PlotDataComponent(final IPlottingSystemData providerDeligate) {
 				
@@ -268,6 +267,20 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 				}
 			});
 			
+			getPlottingSystem().addPropertyChangeListener(new IPropertyChangeListener() {				
+				@Override
+				public void propertyChange(PropertyChangeEvent event) {
+					try {
+						saveAxisSettings(".xAxis", getPlottingSystem().getSelectedXAxis());
+						saveAxisSettings(".yAxis", getPlottingSystem().getSelectedYAxis());
+					} catch (Throwable ne) {
+						logger.error("Cannot save settings for plotting configuration!", ne);
+					}
+				}
+			});	
+			
+			readAxisSettings(".xAxis", getPlottingSystem().getSelectedXAxis());
+			readAxisSettings(".yAxis", getPlottingSystem().getSelectedYAxis());
 			
 			this.dataFilter = new DataFilter();
 			dataViewer.addFilter(dataFilter);
@@ -284,6 +297,47 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 		}
 	}
 	
+	private static final String LOG_PREF   = "org.dawb.workbench.ui.editors.log.axis-";
+	private static final String TIME_PREF  = "org.dawb.workbench.ui.editors.time.axis-";
+	private static final String FORMAT_PREF= "org.dawb.workbench.ui.editors.format.axis-";
+	
+	private void saveAxisSettings(String key, IAxis selectedAxis) {
+		
+		final IPreferenceStore store = Activator.getDefault().getPreferenceStore();
+		
+		if (store.getBoolean(EditorConstants.SAVE_LOG_FORMAT))    store.setValue(LOG_PREF+getExtension()+key,    selectedAxis.isLog10());
+		if (store.getBoolean(EditorConstants.SAVE_TIME_FORMAT))   store.setValue(TIME_PREF+getExtension()+key,   selectedAxis.isDateFormatEnabled());
+		if (store.getBoolean(EditorConstants.SAVE_FORMAT_STRING)) store.setValue(FORMAT_PREF+getExtension()+key, selectedAxis.getFormatPattern());	
+	}
+	
+	private void readAxisSettings(String key, IAxis selectedAxis) {
+		
+		final IPreferenceStore store = Activator.getDefault().getPreferenceStore();
+		if (store.getBoolean(EditorConstants.SAVE_LOG_FORMAT)) if (store.contains(LOG_PREF+getExtension()+key)) {
+			selectedAxis.setLog10(store.getBoolean(LOG_PREF+getExtension()+key));
+		}
+		if (store.getBoolean(EditorConstants.SAVE_TIME_FORMAT)) if (store.contains(TIME_PREF+getExtension()+key)) {
+		    selectedAxis.setDateFormatEnabled(store.getBoolean(TIME_PREF+getExtension()+key));
+		}
+		if (store.getBoolean(EditorConstants.SAVE_FORMAT_STRING)) if (store.contains(FORMAT_PREF+getExtension()+key)) {
+		    selectedAxis.setFormatPattern(store.getString(FORMAT_PREF+getExtension()+key));	
+		}
+	}
+
+	private final String getExtension() {
+		try {
+			if (filePath==null) {
+				if (this.providerDeligate  instanceof IEditorPart) {
+					return FileUtils.getFileExtension(((IEditorPart)providerDeligate).getEditorInput().getName());
+				}
+			}
+
+			return FileUtils.getFileExtension(filePath);
+			
+		} catch (Throwable ne) {
+			return "";
+		}
+	}
 
 	public void setFocus() {
 		if (dataViewer!=null && !dataViewer.getControl().isDisposed()) {
@@ -732,7 +786,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 		if (selections==null) return;
 
 		// Record selections
-		try {
+		if (Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SAVE_SEL_DATA)) try {
 			StringBuilder buf = new StringBuilder();
 			for (CheckableObject ob : selections) {
 				buf.append(ob.getName());
@@ -1121,7 +1175,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 		}
 		
 		// Some of the meta data
-		try {
+		if (Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SAVE_SEL_DATA)) try {
 			final String prop = Activator.getDefault().getPreferenceStore().getString(DATA_SEL);
 			if (prop!=null) {
 				final Collection<String> saveSelections = Arrays.asList(prop.split(","));
@@ -1129,6 +1183,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 					boolean foundData = false;
 					for (CheckableObject checker : data) {
 						if (saveSelections.contains(checker.getName())) {
+							if (!foundData) selections.clear();
 							checker.setChecked(true);
 							this.selections.add(checker);
 							foundData = true;

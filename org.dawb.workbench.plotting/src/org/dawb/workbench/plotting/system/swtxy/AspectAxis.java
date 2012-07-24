@@ -360,4 +360,14 @@ public class AspectAxis extends Axis implements IAxis {
 		super.zoomInOut(center, factor);
 	}
 
+	@Override
+	public void setDateFormatEnabled(boolean dateEnabled) {
+		super.setDateEnabled(dateEnabled);
+	}
+
+	@Override
+	public boolean isDateFormatEnabled() {
+		return super.isDateEnabled();
+	}
+
 }

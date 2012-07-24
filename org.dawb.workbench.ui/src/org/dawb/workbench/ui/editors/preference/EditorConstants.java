@@ -32,5 +32,11 @@ public class EditorConstants {
 	 * highlighting to the actors or not.
 	 */
 	public static final String HIGHLIGHT_ACTORS_CHOICE = "org.dawb.actor.highlight.choice";
+	
+	// Properties for saving
+	public static final String SAVE_SEL_DATA         = "data.selected.save";
+	public static final String SAVE_LOG_FORMAT       = "data.format.save.log.format";
+	public static final String SAVE_TIME_FORMAT      = "data.format.save.time.format";
+	public static final String SAVE_FORMAT_STRING    = "data.format.save.time.format";
 
 }
