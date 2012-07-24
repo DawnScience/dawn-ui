@@ -1129,6 +1129,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 					boolean foundData = false;
 					for (CheckableObject checker : data) {
 						if (saveSelections.contains(checker.getName())) {
+							if (!foundData) selections.clear();
 							checker.setChecked(true);
 							this.selections.add(checker);
 							foundData = true;
