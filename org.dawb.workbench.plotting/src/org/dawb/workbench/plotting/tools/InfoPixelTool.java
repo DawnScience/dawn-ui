@@ -523,6 +523,7 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 	@Override
 	public void regionsRemoved(RegionEvent evt) {
 		if (!isActive()) return;
+		createRegions();
 		if (viewer!=null) viewer.refresh();
 		
 	}
@@ -537,7 +538,7 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 
 		if (viewer != null) {
 			IRegion region = (IRegion) evt.getSource();
-			System.out.println("roiDragged - region.getRegionType(): " +region.getRegionType());
+
 			if (region.getRegionType() == RegionType.POINT) {
 				// update table for current point region
 				ROIBase rb = evt.getROI();
