@@ -32,6 +32,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.ColorSelector;
@@ -377,6 +378,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 
 	private static BooleanDataset savedMask=null;
 	private static boolean        autoApplySavedMask=false;
+	private static final String   AUTO_SAVE_PROP="org.dawb.workbench.plotting.tools.auto.save.mask";
 	private Action loadMask;
 	
 	/**
@@ -400,10 +402,10 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	
 	private void createActions(IActionBars actionBars) {
 		
-		Action saveMask  = new Action("Save the mask into a buffer", Activator.getImageDescriptor("icons/import_wiz.gif")) {
+
+		final Action saveMask  = new Action("Save the mask into a buffer", Activator.getImageDescriptor("icons/import_wiz.gif")) {
 			public void run() {
-				savedMask = maskObject.getMaskDataset();
-				loadMask.setEnabled(savedMask!=null);
+				saveMaskBuffer();
 			}
 		};
 		actionBars.getToolBarManager().add(saveMask);
@@ -415,8 +417,24 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		};
 		loadMask.setEnabled(savedMask!=null);
 		actionBars.getToolBarManager().add(loadMask);
+		
+		actionBars.getToolBarManager().add(new Separator());
+		Action alwaysSave  = new Action("Auto-save the mask to the buffer when it changes", IAction.AS_CHECK_BOX) {
+			public void run() {
+				Activator.getDefault().getPreferenceStore().setValue(AUTO_SAVE_PROP, isChecked());
+			}
+		};
+		alwaysSave.setImageDescriptor(Activator.getImageDescriptor("icons/plot-tool-masking-autosave.png"));
+		alwaysSave.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(AUTO_SAVE_PROP));
+		actionBars.getToolBarManager().add(alwaysSave);
+
 
 		LightWeightActionBarsManager.fillTraceActions(actionBars.getToolBarManager(), getImageTrace(), getPlottingSystem());	
+	}
+
+	protected void saveMaskBuffer() {
+		savedMask = maskObject.getMaskDataset();
+		loadMask.setEnabled(savedMask!=null);
 	}
 
 	protected void mergeSavedMask() {
@@ -731,6 +749,10 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 				
 				maskObject.process(min, max, isRegionsEnabled?getPlottingSystem().getRegions():null);
 				
+			}
+			
+			if (Activator.getDefault().getPreferenceStore().getBoolean(AUTO_SAVE_PROP)) {
+				saveMaskBuffer();
 			}
 			
 			Display.getDefault().syncExec(new Runnable() {
