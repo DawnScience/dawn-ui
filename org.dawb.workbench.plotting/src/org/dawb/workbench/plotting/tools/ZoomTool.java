@@ -8,6 +8,7 @@ import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +43,7 @@ public class ZoomTool extends ProfileTool {
 	}
 
 	@Override
-	protected void createProfile(IImageTrace  image, 
+	protected void createProfile(final IImageTrace  image, 
 			                     IRegion      region,
 			                     ROIBase      rbs, 
 			                     boolean      tryUpdate, 
@@ -84,9 +85,13 @@ public class ZoomTool extends ProfileTool {
 			if (yLabels==null) yLabels = IntegerDataset.arange(bounds.getPoint()[1], bounds.getEndPoint()[1], yInc);
 			if (xLabels==null) xLabels = IntegerDataset.arange(bounds.getPoint()[0], bounds.getEndPoint()[0], xInc);
 			
-			IImageTrace zoom_trace = (IImageTrace)profilePlottingSystem.updatePlot2D(slice, Arrays.asList(new AbstractDataset[]{xLabels, yLabels}), monitor);
+			final IImageTrace zoom_trace = (IImageTrace)profilePlottingSystem.updatePlot2D(slice, Arrays.asList(new AbstractDataset[]{xLabels, yLabels}), monitor);
 			registerTraces(region, Arrays.asList(new ITrace[]{zoom_trace}));
-			zoom_trace.setPaletteData(image.getPaletteData());
+			Display.getDefault().syncExec(new Runnable()  {
+				public void run() {
+				     zoom_trace.setPaletteData(image.getPaletteData());
+				}
+			});
 			
 		} catch (IllegalArgumentException ne) {
 			// Occurs when slice outside
