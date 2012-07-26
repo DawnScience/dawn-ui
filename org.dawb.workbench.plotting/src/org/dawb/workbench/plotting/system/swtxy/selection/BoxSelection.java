@@ -2,7 +2,7 @@ package org.dawb.workbench.plotting.system.swtxy.selection;
 
 import java.util.Arrays;
 
-import org.csstudio.swt.xygraph.figures.Axis;
+import org.dawb.common.ui.plot.axis.ICoordinateSystem;
 import org.dawb.common.ui.plot.region.ROIEvent;
 import org.dawb.workbench.plotting.system.swtxy.translate.FigureTranslator;
 import org.dawb.workbench.plotting.system.swtxy.translate.TranslationEvent;
@@ -38,7 +38,7 @@ class BoxSelection extends AbstractSelectionRegion {
 
 	private Figure connection;
 	
-	BoxSelection(String name, Axis xAxis, Axis yAxis) {
+	BoxSelection(String name, ICoordinateSystem xAxis, ICoordinateSystem yAxis) {
 		super(name, xAxis, yAxis);
 		setRegionColor(ColorConstants.green);	
 		setAlpha(80);
@@ -112,8 +112,8 @@ class BoxSelection extends AbstractSelectionRegion {
 	@Override
 	public boolean containsPoint(double x, double y) {
 		
-		final int xpix = xAxis.getValuePosition(x, false);
-		final int ypix = yAxis.getValuePosition(y, false);
+		final int xpix = xAxis.getValuePosition(x);
+		final int ypix = yAxis.getValuePosition(y);
 		return connection.containsPoint(xpix, ypix);
 	}
 	
@@ -198,8 +198,8 @@ class BoxSelection extends AbstractSelectionRegion {
 	public ROIBase createROI(boolean recordResult) {
 		if (p1!=null) {
 			final Rectangle rect = getRectangleFromVertices();
-			double[] a1 = new double[]{xAxis.getPositionValue(rect.x, false), yAxis.getPositionValue(rect.y, false)};
-			double[] a2 = new double[]{xAxis.getPositionValue(rect.x+rect.width, false), yAxis.getPositionValue(rect.y+rect.height, false)};
+			double[] a1 = new double[]{xAxis.getPositionValue(rect.x), yAxis.getPositionValue(rect.y)};
+			double[] a2 = new double[]{xAxis.getPositionValue(rect.x+rect.width), yAxis.getPositionValue(rect.y+rect.height)};
 			final RectangularROI rroi = new RectangularROI(a1[0], a1[1], a2[0] - a1[0], a2[1] - a1[1], 0);
 			if (recordResult)
 				roi = rroi;
