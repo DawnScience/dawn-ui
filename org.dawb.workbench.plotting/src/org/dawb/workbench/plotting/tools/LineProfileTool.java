@@ -12,9 +12,11 @@ import org.dawb.common.ui.plot.trace.ITrace;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 import uk.ac.diamond.scisoft.analysis.rcp.plotting.roi.LinearROIData;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
+import uk.ac.diamond.scisoft.analysis.roi.ROIProfile;
 
 public class LineProfileTool extends ProfileTool {
 
@@ -42,13 +44,14 @@ public class LineProfileTool extends ProfileTool {
 		if (!region.isVisible()) return;
 
 		if (monitor.isCanceled()) return;
-		LinearROIData ld = new LinearROIData(bounds, image.getData(), 1d);
+		AbstractDataset[] profileData = ROIProfile.line(image.getData(), image.getMask(), bounds, 1d, true);
+        if (profileData==null) return;
 
 		if (monitor.isCanceled()) return;
 		
-		final AbstractDataset intensity = ld.getProfileData(0);
+		final AbstractDataset intensity = profileData[0];
 		intensity.setName(region.getName());
-		final AbstractDataset indices = ld.getXAxes()[0].toDataset();
+		final AbstractDataset indices = IntegerDataset.arange(0, intensity.getSize(), 1d);
 		indices.setName("Pixel");
 		
 		final ILineTrace trace = (ILineTrace)profilePlottingSystem.getTrace(region.getName());
