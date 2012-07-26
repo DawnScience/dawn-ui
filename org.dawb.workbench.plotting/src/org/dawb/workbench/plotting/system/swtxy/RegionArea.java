@@ -12,6 +12,7 @@ import org.csstudio.swt.xygraph.figures.PlotArea;
 import org.csstudio.swt.xygraph.figures.Trace;
 import org.csstudio.swt.xygraph.undo.ZoomType;
 import org.dawb.common.services.ImageServiceBean.ImageOrigin;
+import org.dawb.common.ui.plot.IAxis;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.RegionEvent;
@@ -187,7 +188,7 @@ public class RegionArea extends PlotArea {
 	 * @return region
 	 * @throws Exception
 	 */
-	public AbstractSelectionRegion createRegion(String name, Axis x, Axis y, RegionType regionType, boolean startingWithMouseEvent) throws Exception {
+	public AbstractSelectionRegion createRegion(String name, IAxis x, IAxis y, RegionType regionType, boolean startingWithMouseEvent) throws Exception {
 
 		if (getRegionMap()!=null) {
 			if (getRegionMap().containsKey(name)) throw new Exception("The region '"+name+"' already exists.");

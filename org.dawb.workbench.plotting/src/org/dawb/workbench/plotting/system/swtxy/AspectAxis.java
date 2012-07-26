@@ -1,10 +1,16 @@
 package org.dawb.workbench.plotting.system.swtxy;
 
+import java.util.Collection;
+import java.util.HashSet;
+
 import org.csstudio.swt.xygraph.figures.Axis;
+import org.csstudio.swt.xygraph.figures.IAxisListener;
 import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.swt.xygraph.linearscale.Range;
 import org.dawb.common.services.ImageServiceBean.ImageOrigin;
 import org.dawb.common.ui.plot.IAxis;
+import org.dawb.common.ui.plot.axis.CoordinateSystemEvent;
+import org.dawb.common.ui.plot.axis.ICoordinateSystemListener;
 import org.dawb.common.util.text.NumberUtils;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
@@ -320,6 +326,36 @@ public class AspectAxis extends Axis implements IAxis {
 		if (trace!=null && trace.isMaximumZoom() && factor>0) return; // We cannot zoom in more.
 		
 		super.zoomInOut(center, factor);
+	}
+
+	private Collection<ICoordinateSystemListener> coordinateListeners;
+	@Override
+	public void addCoordinateSystemListener(ICoordinateSystemListener l) {
+		if (coordinateListeners==null) coordinateListeners = new HashSet<ICoordinateSystemListener>();
+		coordinateListeners.add(l);
+	}
+
+	@Override
+	public void removeCoordinateSystemListener(ICoordinateSystemListener l) {
+		if (coordinateListeners==null) return;
+		coordinateListeners.remove(l);
+	}
+
+	protected void fireRevalidated(){
+		super.fireRevalidated();
+		fireCoordinateSystemListeners();
+	}
+	protected void fireAxisRangeChanged(final Range old_range, final Range new_range){
+		super.fireAxisRangeChanged(old_range, new_range);
+		fireCoordinateSystemListeners();
+	}
+
+	private void fireCoordinateSystemListeners() {
+		if (coordinateListeners==null) return;
+		final CoordinateSystemEvent evt = new CoordinateSystemEvent(this);
+		for (ICoordinateSystemListener l : coordinateListeners) {
+			l.coordinatesChanged(evt);
+		}
 	}
 
 }

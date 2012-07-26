@@ -1101,8 +1101,8 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	public IRegion createRegion(final String name, final RegionType regionType) throws Exception  {
 
 		if (xyGraph==null) createUI();
-		final Axis xAxis = ((AxisWrapper)getSelectedXAxis()).getWrappedAxis();
-		final Axis yAxis = ((AxisWrapper)getSelectedYAxis()).getWrappedAxis();
+		final AxisWrapper xAxis = (AxisWrapper)getSelectedXAxis();
+		final AxisWrapper yAxis = (AxisWrapper)getSelectedYAxis();
 
 		return xyGraph.createRegion(name, xAxis, yAxis, regionType, true);
 	}

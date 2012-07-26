@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.util.GridUtils;
+import org.dawb.workbench.plotting.system.swtxy.AspectAxis;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
 import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
 import org.eclipse.jface.preference.ColorSelector;
@@ -190,8 +191,8 @@ public class RegionComposite extends Composite {
 
 	public AbstractSelectionRegion createRegion() throws Exception {
 		
-		final Axis xAxis = xyGraph.getXAxisList().get(xCombo.getSelectionIndex());
-		final Axis yAxis = xyGraph.getYAxisList().get(yCombo.getSelectionIndex());
+		final AspectAxis xAxis = (AspectAxis)xyGraph.getXAxisList().get(xCombo.getSelectionIndex());
+		final AspectAxis yAxis = (AspectAxis)xyGraph.getYAxisList().get(yCombo.getSelectionIndex());
 		
 		AbstractSelectionRegion region=null;
 		
@@ -251,8 +252,8 @@ public class RegionComposite extends Composite {
 		
 		final String txt = nameText.getText();
 		editingRegion.setName(txt);
-		editingRegion.setXAxis(xyGraph.getXAxisList().get(xCombo.getSelectionIndex()));
-		editingRegion.setYAxis(xyGraph.getYAxisList().get(yCombo.getSelectionIndex()));
+		editingRegion.setXAxis((AspectAxis)xyGraph.getXAxisList().get(xCombo.getSelectionIndex()));
+		editingRegion.setYAxis((AspectAxis)xyGraph.getYAxisList().get(yCombo.getSelectionIndex()));
 		editingRegion.setShowPosition(showPoints.getSelection());
 		editingRegion.setRegionColor(new Color(getDisplay(), colorSelector.getColorValue()));
 		editingRegion.setAlpha(alpha.getSelection());

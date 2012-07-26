@@ -271,7 +271,7 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 		
 		final XYRegionGraph xyGraph     = system.getGraph();
 		if (xyGraph.getXAxisList().size()==1 && xyGraph.getYAxisList().size()==1) {
-			xyGraph.createRegion(RegionUtils.getUniqueName(type.getName(), system), xyGraph.primaryXAxis, xyGraph.primaryYAxis, type, true);
+			xyGraph.createRegion(RegionUtils.getUniqueName(type.getName(), system), system.getSelectedXAxis(), system.getSelectedXAxis(), type, true);
 		} else {
 			AddRegionDialog dialog = new AddRegionDialog(Display.getCurrent().getActiveShell(), (XYRegionGraph)xyGraph, type);
 			if (dialog.open() != Window.OK){

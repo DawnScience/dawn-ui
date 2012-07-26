@@ -13,6 +13,7 @@ import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.swt.xygraph.linearscale.AbstractScale.LabelSide;
 import org.csstudio.swt.xygraph.linearscale.LinearScale.Orientation;
 import org.dawb.common.services.ImageServiceBean.ImageOrigin;
+import org.dawb.common.ui.plot.IAxis;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.workbench.plotting.Activator;
@@ -81,7 +82,7 @@ public class XYRegionGraph extends XYGraph {
 	 * @return region
 	 * @throws Exception
 	 */
-	public AbstractSelectionRegion createRegion(String name, Axis xAxis, Axis yAxis, RegionType regionType, boolean startingWithMouseEvent) throws Exception {
+	public AbstractSelectionRegion createRegion(String name, IAxis xAxis, IAxis yAxis, RegionType regionType, boolean startingWithMouseEvent) throws Exception {
 		return getRegionArea().createRegion(name, xAxis, yAxis, regionType, startingWithMouseEvent);
 	}
 	public void disposeRegion(final AbstractSelectionRegion region) {
