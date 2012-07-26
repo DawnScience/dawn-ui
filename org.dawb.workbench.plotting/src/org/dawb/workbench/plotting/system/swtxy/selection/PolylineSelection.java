@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.csstudio.swt.xygraph.figures.Axis;
+import org.dawb.common.ui.plot.axis.ICoordinateSystem;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegionContainer;
 import org.dawb.workbench.plotting.system.swtxy.translate.FigureTranslator;
@@ -27,7 +28,7 @@ public class PolylineSelection extends AbstractSelectionRegion {
 
 	DecoratedPolyline pline;
 
-	public PolylineSelection(String name, Axis xAxis, Axis yAxis) {
+	public PolylineSelection(String name, ICoordinateSystem xAxis, ICoordinateSystem yAxis) {
 		super(name, xAxis, yAxis);
 		setRegionColor(ColorConstants.cyan);
 		setAlpha(80);
@@ -48,8 +49,8 @@ public class PolylineSelection extends AbstractSelectionRegion {
 
 	@Override
 	public boolean containsPoint(double x, double y) {
-		final int xpix = xAxis.getValuePosition(x, false);
-		final int ypix = yAxis.getValuePosition(y, false);
+		final int xpix = xAxis.getValuePosition(x);
+		final int ypix = yAxis.getValuePosition(y);
 		return pline.containsPoint(xpix, ypix);
 	}
 
@@ -99,7 +100,7 @@ public class PolylineSelection extends AbstractSelectionRegion {
 		final PolygonalROI proi = new PolygonalROI();
 		for (int i = 0, imax = pl.size(); i < imax; i++) {
 			Point p = pl.getPoint(i);
-			proi.insertPoint(i, xAxis.getPositionValue(p.x(), false), yAxis.getPositionValue(p.y(), false));
+			proi.insertPoint(i, xAxis.getPositionValue(p.x()), yAxis.getPositionValue(p.y()));
 		}
 		if (recordResult)
 			roi = proi;
@@ -192,7 +193,7 @@ public class PolylineSelection extends AbstractSelectionRegion {
 
 			for (int i = 0; i < imax; i++) {
 				PointROI p = proi.getPoint(i);
-				Point np = new Point(xAxis.getValuePosition(p.getPointX(), false), yAxis.getValuePosition(p.getPointY(), false));
+				Point np = new Point(xAxis.getValuePosition(p.getPointX()), yAxis.getValuePosition(p.getPointY()));
 				pl.setPoint(np, i);
 				SelectionHandle h = (SelectionHandle) handles.get(i);
 				h.setSelectionPoint(np);

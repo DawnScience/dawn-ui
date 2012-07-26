@@ -2,8 +2,8 @@ package org.dawb.workbench.plotting.system.swtxy;
 
 import java.io.Serializable;
 
-import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.XYGraph;
+import org.dawb.common.ui.plot.axis.ICoordinateSystem;
 import org.eclipse.swt.graphics.Color;
 
 public class RegionBean implements Serializable {
@@ -12,8 +12,8 @@ public class RegionBean implements Serializable {
 	 */
 	private static final long serialVersionUID = 3501897005952664393L;
 	
-	protected Axis    xAxis;
-	protected Axis    yAxis;
+	protected ICoordinateSystem    xAxis;
+	protected ICoordinateSystem    yAxis;
 	protected XYGraph xyGraph;
 	protected String  name;
 	protected Color   regionColor;
@@ -160,19 +160,19 @@ public class RegionBean implements Serializable {
 		return true;
 	}
 
-	public Axis getXAxis() {
+	public ICoordinateSystem getXAxis() {
 		return xAxis;
 	}
 
-	public void setXAxis(Axis xAxis) {
+	public void setXAxis(ICoordinateSystem xAxis) {
 		this.xAxis = xAxis;
 	}
 
-	public Axis getYAxis() {
+	public ICoordinateSystem getYAxis() {
 		return yAxis;
 	}
 
-	public void setYAxis(Axis yAxis) {
+	public void setYAxis(ICoordinateSystem yAxis) {
 		this.yAxis = yAxis;
 	}
 

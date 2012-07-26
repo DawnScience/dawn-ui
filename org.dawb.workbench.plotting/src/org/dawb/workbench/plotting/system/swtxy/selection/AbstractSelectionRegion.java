@@ -2,12 +2,12 @@ package org.dawb.workbench.plotting.system.swtxy.selection;
 
 import java.util.List;
 
-import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.Grid;
-import org.csstudio.swt.xygraph.figures.IAxisListener;
 import org.csstudio.swt.xygraph.figures.Trace;
 import org.csstudio.swt.xygraph.figures.XYGraph;
-import org.csstudio.swt.xygraph.linearscale.Range;
+import org.dawb.common.ui.plot.axis.CoordinateSystemEvent;
+import org.dawb.common.ui.plot.axis.ICoordinateSystem;
+import org.dawb.common.ui.plot.axis.ICoordinateSystemListener;
 import org.dawb.common.ui.plot.region.AbstractRegion;
 import org.dawb.common.ui.plot.region.ROIEvent;
 import org.dawb.workbench.plotting.Activator;
@@ -49,7 +49,7 @@ import org.eclipse.swt.widgets.Display;
  * the contents of the figure are directly added to the graph figure and therefore their location
  * can be used directly also there are no bounds of this figure to deal with.
  */
-public abstract class AbstractSelectionRegion extends AbstractRegion implements IAxisListener {
+public abstract class AbstractSelectionRegion extends AbstractRegion implements ICoordinateSystemListener {
 
 	private RegionBean bean;
     private ISelectionProvider selectionProvider;
@@ -58,23 +58,23 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
     /**
      * X axis mapping
      */
-    protected Axis xAxis;
+    protected ICoordinateSystem xAxis;
     /**
      * Y axis mapping
      */
-    protected Axis yAxis;
+    protected ICoordinateSystem yAxis;
 
-	public AbstractSelectionRegion(String name, Axis xAxis, Axis yAxis) {
+	public AbstractSelectionRegion(String name, ICoordinateSystem xAxis, ICoordinateSystem yAxis) {
 		super();
 		setEnabled(false); // No mouse events.
 		setOpaque(false);
 		setCursor(null);
 		this.bean = new RegionBean();
 		bean.setName(name);
-		xAxis.addListener(this);
+		xAxis.addCoordinateSystemListener(this);
 		bean.setXAxis(xAxis);
 		this.xAxis = xAxis;
-		yAxis.addListener(this);
+		yAxis.addCoordinateSystemListener(this);
 		bean.setYAxis(yAxis);
 		this.yAxis = yAxis;
 	}
@@ -189,12 +189,7 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	}
 
 	@Override
-	public void axisRevalidated(Axis axis) {
-		updateROI();
-	}
-
-	@Override
-	public void axisRangeChanged(Axis axis, Range old_range, Range new_range) {
+	public void coordinatesChanged(CoordinateSystemEvent evt) {
 		updateROI();
 	}
 
@@ -229,8 +224,8 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	}
 
 	protected void clearListeners() {
-        xAxis.removeListener(this);
-        yAxis.removeListener(this);
+        xAxis.removeCoordinateSystemListener(this);
+        yAxis.removeCoordinateSystemListener(this);
 		super.clearListeners();
 	}
 	
@@ -342,34 +337,34 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 		}
 	}
 
-	public Axis getXAxis() {
+	public ICoordinateSystem getXAxis() {
 		return xAxis;
 	}
 
-	public void setXAxis(Axis xAxis) {
+	public void setXAxis(ICoordinateSystem xAxis) {
 		if (regionObjects!=null) for (IFigure ob : regionObjects) {
 			if (ob instanceof SelectionHandle) {
 				((SelectionHandle)ob).setxAxis(xAxis);
 			}
 		}
-		this.xAxis.removeListener(this);
-		xAxis.addListener(this);
+		this.xAxis.removeCoordinateSystemListener(this);
+		xAxis.addCoordinateSystemListener(this);
 		this.xAxis = xAxis;
 		bean.setXAxis(xAxis);
 	}
 
-	public Axis getYAxis() {
+	public ICoordinateSystem getYAxis() {
 		return yAxis;
 	}
 
-	public void setYAxis(Axis yAxis) {
+	public void setYAxis(ICoordinateSystem yAxis) {
 		if (regionObjects!=null) for (IFigure ob : regionObjects) {
 			if (ob instanceof SelectionHandle) {
 				((SelectionHandle)ob).setyAxis(yAxis);
 			}
 		}
-		this.yAxis.removeListener(this);
-		yAxis.addListener(this);
+		this.yAxis.removeCoordinateSystemListener(this);
+		yAxis.addCoordinateSystemListener(this);
 		this.yAxis = yAxis;
 		bean.setYAxis(yAxis);
 	}
@@ -474,8 +469,8 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	@Override
 	public boolean containsPoint(double x, double y) {
 		
-		final int xpix = xAxis.getValuePosition(x, false);
-		final int ypix = yAxis.getValuePosition(y, false);
+		final int xpix = xAxis.getValuePosition(x);
+		final int ypix = yAxis.getValuePosition(y);
 		
 		if (regionObjects!=null) {
 			for (IFigure ob : regionObjects) {

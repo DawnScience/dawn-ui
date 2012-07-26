@@ -1,6 +1,6 @@
 package org.dawb.workbench.plotting.system.swtxy.selection;
 
-import org.csstudio.swt.xygraph.figures.Axis;
+import org.dawb.common.ui.plot.axis.ICoordinateSystem;
 import org.dawb.workbench.plotting.system.swtxy.util.RotatablePolygonShape;
 import org.dawb.workbench.plotting.system.swtxy.util.RotatableRectangle;
 import org.eclipse.draw2d.Figure;
@@ -18,7 +18,7 @@ public class RectangularHandle extends SelectionHandle {
 	 * @param side
 	 * @param params (first corner's x and y, also centre of rotation)
 	 */
-	public RectangularHandle(Axis xAxis, Axis yAxis, Color colour, Figure parent, int side, double... params) {
+	public RectangularHandle(ICoordinateSystem xAxis, ICoordinateSystem yAxis, Color colour, Figure parent, int side, double... params) {
 		super(xAxis, yAxis, colour, parent, side, params);
 	}
 

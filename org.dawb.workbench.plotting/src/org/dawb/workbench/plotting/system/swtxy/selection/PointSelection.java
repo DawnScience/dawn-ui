@@ -1,6 +1,7 @@
 package org.dawb.workbench.plotting.system.swtxy.selection;
 
 import org.csstudio.swt.xygraph.figures.Axis;
+import org.dawb.common.ui.plot.axis.ICoordinateSystem;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegionContainer;
 import org.dawb.workbench.plotting.system.swtxy.translate.FigureTranslator;
@@ -23,8 +24,8 @@ public class PointSelection extends AbstractSelectionRegion {
 
 	private final class RegionContainerRectangularHandle extends RectangularHandle  {
 
-		public RegionContainerRectangularHandle(Axis xAxis, 
-				                                Axis yAxis,
+		public RegionContainerRectangularHandle(ICoordinateSystem xAxis, 
+				                                ICoordinateSystem yAxis,
 												Color regionColor, 
 												Figure parent, 
 												int lineWidth, 
@@ -71,7 +72,7 @@ public class PointSelection extends AbstractSelectionRegion {
 	private SelectionHandle  point;
 	private FigureTranslator mover;
 	
-	public PointSelection(String name, Axis xAxis, Axis yAxis) {
+	public PointSelection(String name, ICoordinateSystem xAxis, ICoordinateSystem yAxis) {
 		super(name, xAxis, yAxis);
 		setRegionColor(RegionType.POINT.getDefaultColor());
 		setLineWidth(7);
@@ -90,8 +91,8 @@ public class PointSelection extends AbstractSelectionRegion {
 	@Override
 	public boolean containsPoint(double x, double y) {
 		
-		final int xpix = xAxis.getValuePosition(x, false);
-		final int ypix = yAxis.getValuePosition(y, false);
+		final int xpix = xAxis.getValuePosition(x);
+		final int ypix = yAxis.getValuePosition(y);
 		final Point pnt = point.getSelectionPoint();
 		return pnt.x == xpix && pnt.y == ypix;
 	}

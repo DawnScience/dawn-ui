@@ -3,7 +3,7 @@ package org.dawb.workbench.plotting.system.swtxy.selection;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.csstudio.swt.xygraph.figures.Axis;
+import org.dawb.common.ui.plot.axis.ICoordinateSystem;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegionContainer;
 import org.dawb.common.ui.plot.region.ROIEvent;
@@ -32,7 +32,7 @@ public class SectorSelection extends AbstractSelectionRegion {
 
 	DecoratedSector sector;
 
-	public SectorSelection(String name, Axis xAxis, Axis yAxis) {
+	public SectorSelection(String name, ICoordinateSystem xAxis, ICoordinateSystem yAxis) {
 		super(name, xAxis, yAxis);
 		setRegionColor(ColorConstants.red);
 		setAlpha(80);
@@ -56,8 +56,8 @@ public class SectorSelection extends AbstractSelectionRegion {
 
 	@Override
 	public boolean containsPoint(double x, double y) {
-		final int xpix = xAxis.getValuePosition(x, false);
-		final int ypix = yAxis.getValuePosition(y, false);
+		final int xpix = xAxis.getValuePosition(x);
+		final int ypix = yAxis.getValuePosition(y);
 		return sector.containsPoint(xpix, ypix);
 	}
 
@@ -182,14 +182,14 @@ public class SectorSelection extends AbstractSelectionRegion {
 		final Point c = sector.getCentre();
 		final double[] r = sector.getRadii();
 		final double[] a = sector.getAnglesDegrees();
-		final double x = xAxis.getPositionValue(c.x(), false);
-		final double y = yAxis.getPositionValue(c.y(), false);
+		final double x = xAxis.getPositionValue(c.x());
+		final double y = yAxis.getPositionValue(c.y());
 		
 		final int symmetry = roi!=null ? ((SectorROI)roi).getSymmetry() : 0;
 		final boolean combine = roi!=null ? ((SectorROI)roi).isCombineSymmetry() : false;
 		
-		final SectorROI sroi = new SectorROI(x, y, xAxis.getPositionValue((int) (c.preciseX() + r[0]), false) - x,
-				                             yAxis.getPositionValue((int) (c.preciseY() + r[1]), false) - y,
+		final SectorROI sroi = new SectorROI(x, y, xAxis.getPositionValue((int) (c.preciseX() + r[0])) - x,
+				                             yAxis.getPositionValue((int) (c.preciseY() + r[1])) - y,
 				                             Math.toRadians(360 - a[1]), Math.toRadians(360 - a[0]));
 		sroi.setSymmetry(symmetry);
 		sroi.setCombineSymmetry(combine);
@@ -274,7 +274,7 @@ public class SectorSelection extends AbstractSelectionRegion {
 				double[] hpt = roiHandler.getAnchorPoint(i, SIDE);
 				roiHandler.set(i, i);
 				RectangularHandle h = new RectangularHandle(xAxis, yAxis, getRegionColor(), this, SIDE,
-						xAxis.getValuePosition(hpt[0], false), yAxis.getValuePosition(hpt[1], false));
+						xAxis.getValuePosition(hpt[0]), yAxis.getValuePosition(hpt[1]));
 				parent.add(h);
 				mover = new FigureTranslator(getXyGraph(), h);
 				mover.addTranslationListener(handleListener);
@@ -326,7 +326,7 @@ public class SectorSelection extends AbstractSelectionRegion {
 					if (src instanceof FigureTranslator) {
 						final FigureTranslator translator = (FigureTranslator) src;
 						Point start = translator.getStartLocation();
-						spt = new int[] { (int) xAxis.getPositionValue(start.x(), false), (int) yAxis.getPositionValue(start.y(), false) };
+						spt = new int[] { (int) xAxis.getPositionValue(start.x()), (int) yAxis.getPositionValue(start.y()) };
 						final IFigure handle = translator.getRedrawFigure();
 						final int h = handles.indexOf(handle);
 						HandleStatus status = HandleStatus.RESIZE;
@@ -351,7 +351,7 @@ public class SectorSelection extends AbstractSelectionRegion {
 						Point end = translator.getEndLocation();
 						
 						SectorROI croi = roiHandler.interpretMouseDragging(spt,
-								new int[] { (int) xAxis.getPositionValue(end.x(), false), (int) yAxis.getPositionValue(end.y(), false) });
+								new int[] { (int) xAxis.getPositionValue(end.x()), (int) yAxis.getPositionValue(end.y()) });
 
 						final SelectionHandle handle = (SelectionHandle) translator.getRedrawFigure();
 						updateFromROI(croi, handle);
@@ -367,7 +367,7 @@ public class SectorSelection extends AbstractSelectionRegion {
 						Point end = translator.getEndLocation();
 
 						SectorROI croi = roiHandler.interpretMouseDragging(spt,
-								new int[] { (int) xAxis.getPositionValue(end.x(), false), (int) yAxis.getPositionValue(end.y(), false) });
+								new int[] { (int) xAxis.getPositionValue(end.x()), (int) yAxis.getPositionValue(end.y()) });
 
 						updateFromROI(croi);
 						roiHandler.unconfigureDragging();
@@ -427,10 +427,10 @@ public class SectorSelection extends AbstractSelectionRegion {
 			final double[] r = sroi.getRadii();
 			final double[] a = sroi.getAnglesDegrees();
 
-			final double cx = xAxis.getValuePosition(x, false);
-			final double cy = yAxis.getValuePosition(y, false);
+			final double cx = xAxis.getValuePosition(x);
+			final double cy = yAxis.getValuePosition(y);
 			setCentre(cx, cy);
-			setRadii(xAxis.getValuePosition(x + r[0], false) - cx, yAxis.getValuePosition(y + r[1], false) - cy);
+			setRadii(xAxis.getValuePosition(x + r[0]) - cx, yAxis.getValuePosition(y + r[1]) - cy);
 			setAnglesDegrees(360-a[1], 360-a[0]);
 			
 			if (sroi.getSymmetry() == SectorROI.NONE) {
@@ -450,7 +450,7 @@ public class SectorSelection extends AbstractSelectionRegion {
 					double[] hpt = handler.getAnchorPoint(i, SIDE);
 					SelectionHandle handle = (SelectionHandle) handles.get(i);
 					if (handle != omit) {
-						handle.setSelectionPoint(new PrecisionPoint(xAxis.getValuePosition(hpt[0], false), yAxis.getValuePosition(hpt[1], false)));
+						handle.setSelectionPoint(new PrecisionPoint(xAxis.getValuePosition(hpt[0]), yAxis.getValuePosition(hpt[1])));
 					}
 				}
 			}
