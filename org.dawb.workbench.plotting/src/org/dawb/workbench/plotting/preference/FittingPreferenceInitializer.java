@@ -20,7 +20,7 @@ public class FittingPreferenceInitializer extends AbstractPreferenceInitializer 
 		store.setDefault(FittingConstants.SHOW_FITTING_TRACE,  true);
 		store.setDefault(FittingConstants.SHOW_ANNOTATION_AT_PEAK,  true);
 		store.setDefault(FittingConstants.PEAK_TYPE,  Gaussian.class.getName());
-		store.setDefault(FittingConstants.SMOOTHING, 1);
+		store.setDefault(FittingConstants.SMOOTHING, 20); // Slower but better
 		store.setDefault(FittingConstants.QUALITY,   0.01);
 	}
 
