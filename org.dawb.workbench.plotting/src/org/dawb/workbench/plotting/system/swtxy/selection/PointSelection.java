@@ -24,15 +24,14 @@ public class PointSelection extends AbstractSelectionRegion {
 
 	private final class RegionContainerRectangularHandle extends RectangularHandle  {
 
-		public RegionContainerRectangularHandle(ICoordinateSystem xAxis, 
-				                                ICoordinateSystem yAxis,
+		public RegionContainerRectangularHandle(ICoordinateSystem coords,
 												Color regionColor, 
 												Figure parent, 
 												int lineWidth, 
 												double d,
 												double e) {
 			
-			super(xAxis, yAxis, regionColor, parent, lineWidth, d, e);
+			super(coords, regionColor, parent, lineWidth, d, e);
 		}
 
 		@Override
@@ -72,8 +71,8 @@ public class PointSelection extends AbstractSelectionRegion {
 	private SelectionHandle  point;
 	private FigureTranslator mover;
 	
-	public PointSelection(String name, ICoordinateSystem xAxis, ICoordinateSystem yAxis) {
-		super(name, xAxis, yAxis);
+	public PointSelection(String name, ICoordinateSystem coords) {
+		super(name, coords);
 		setRegionColor(RegionType.POINT.getDefaultColor());
 		setLineWidth(7);
 		setAlpha(120);
@@ -91,10 +90,9 @@ public class PointSelection extends AbstractSelectionRegion {
 	@Override
 	public boolean containsPoint(double x, double y) {
 		
-		final int xpix = xAxis.getValuePosition(x);
-		final int ypix = yAxis.getValuePosition(y);
+		final int[] pix = coords.getValuePosition(x,y);
 		final Point pnt = point.getSelectionPoint();
-		return pnt.x == xpix && pnt.y == ypix;
+		return pnt.x == pix[0] && pnt.y == pix[1];
 	}
 	
 	@Override
@@ -111,7 +109,7 @@ public class PointSelection extends AbstractSelectionRegion {
 
 	@Override
 	public void createContents(Figure parent) {
-		this.point = new RegionContainerRectangularHandle(xAxis, yAxis, getRegionColor(), parent, getLineWidth(), 100d, 100d);
+		this.point = new RegionContainerRectangularHandle(coords, getRegionColor(), parent, getLineWidth(), 100d, 100d);
 		parent.add(point);
 		mover = new FigureTranslator(getXyGraph(), point);	
 		mover.addTranslationListener(createRegionNotifier());

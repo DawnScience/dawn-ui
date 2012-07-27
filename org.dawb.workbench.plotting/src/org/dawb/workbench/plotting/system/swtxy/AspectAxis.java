@@ -2,17 +2,14 @@ package org.dawb.workbench.plotting.system.swtxy;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.swt.xygraph.linearscale.Range;
 import org.dawb.common.services.ImageServiceBean.ImageOrigin;
 import org.dawb.common.ui.plot.axis.AxisEvent;
-import org.dawb.common.ui.plot.axis.CoordinateSystemEvent;
 import org.dawb.common.ui.plot.axis.IAxis;
 import org.dawb.common.ui.plot.axis.IAxisListener;
-import org.dawb.common.ui.plot.axis.ICoordinateSystemListener;
 import org.dawb.common.util.text.NumberUtils;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
@@ -326,7 +323,6 @@ public class AspectAxis extends Axis implements IAxis {
 		final AxisEvent evt = new AxisEvent(this);
 		if (axisListeners!=null) for(IAxisListener listener : axisListeners)
 			listener.revalidated(evt);
-		fireCoordinateSystemListeners();
 	}
 
 	@Override
@@ -337,7 +333,6 @@ public class AspectAxis extends Axis implements IAxis {
 				                                  new_range.getLower(), new_range.getUpper());
 		if (axisListeners!=null)  for(IAxisListener listener : axisListeners)
 			listener.rangeChanged(evt);
-		fireCoordinateSystemListeners();
 	}
 
 	@Override
@@ -372,28 +367,6 @@ public class AspectAxis extends Axis implements IAxis {
 	@Override
 	public boolean isDateFormatEnabled() {
 		return super.isDateEnabled();
-	}
-
-	private Collection<ICoordinateSystemListener> coordinateListeners;
-	@Override
-	public void addCoordinateSystemListener(ICoordinateSystemListener l) {
-		if (coordinateListeners==null) coordinateListeners = new HashSet<ICoordinateSystemListener>();
-		coordinateListeners.add(l);
-	}
-
-	@Override
-	public void removeCoordinateSystemListener(ICoordinateSystemListener l) {
-		if (coordinateListeners==null) return;
-		coordinateListeners.remove(l);
-	}
-
-
-	private void fireCoordinateSystemListeners() {
-		if (coordinateListeners==null) return;
-		final CoordinateSystemEvent evt = new CoordinateSystemEvent(this);
-		for (ICoordinateSystemListener l : coordinateListeners) {
-			l.coordinatesChanged(evt);
-		}
 	}
 
 	public String toString() {

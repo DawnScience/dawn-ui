@@ -25,14 +25,12 @@ public abstract class SelectionHandle extends Figure implements IMobileFigure {
 	
 	private Shape shape;
 	private Figure          label;
-	protected ICoordinateSystem   xAxis;
-	protected ICoordinateSystem   yAxis;
+	protected ICoordinateSystem   coords;
 	private int             alpha=100;
 	protected Point location;
 
-	protected SelectionHandle(ICoordinateSystem xAxis, ICoordinateSystem yAxis, Color colour, Figure parent, int side, double... params) {
-		this.xAxis = xAxis;
-		this.yAxis = yAxis;
+	protected SelectionHandle(ICoordinateSystem coords, Color colour, Figure parent, int side, double... params) {
+		this.coords = coords;
 		setOpaque(false);
 
 		this.label = new Figure() {
@@ -78,7 +76,7 @@ public abstract class SelectionHandle extends Figure implements IMobileFigure {
 	public double[] getPosition() {
 		final Point p = getSelectionPoint();
 		try {
-		    double[] point = new double[]{xAxis.getPositionValue(p.x), yAxis.getPositionValue(p.y)};
+		    double[] point = coords.getPositionValue(new int[]{p.x, p.y});
 		    return point;
 		} catch (NullPointerException ne) {
 			return new double[]{Double.NaN, Double.NaN};
@@ -92,7 +90,8 @@ public abstract class SelectionHandle extends Figure implements IMobileFigure {
 	 * @param point
 	 */
 	public void setPosition(final double[] point) {
-		final Point pnt = new Point(xAxis.getValuePosition(point[0]), yAxis.getValuePosition(point[1]));
+		final int[] val = coords.getValuePosition(point);
+		final Point pnt = new Point(val[0], val[1]);
 		setSelectionPoint(pnt);
 	}
 
@@ -138,12 +137,8 @@ public abstract class SelectionHandle extends Figure implements IMobileFigure {
 		label.setVisible(showPosition);
 	}
 
-	public void setxAxis(ICoordinateSystem axis) {
-		this.xAxis = axis;
-		repaint();
-	}
-	public void setyAxis(ICoordinateSystem axis) {
-		this.yAxis = axis;
+	public void setCoordinateSystem(ICoordinateSystem axes) {
+		this.coords = axes;
 		repaint();
 	}
 

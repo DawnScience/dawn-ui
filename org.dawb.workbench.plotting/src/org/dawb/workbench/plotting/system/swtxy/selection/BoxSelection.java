@@ -38,8 +38,8 @@ class BoxSelection extends AbstractSelectionRegion {
 
 	private Figure connection;
 	
-	BoxSelection(String name, ICoordinateSystem xAxis, ICoordinateSystem yAxis) {
-		super(name, xAxis, yAxis);
+	BoxSelection(String name, ICoordinateSystem coords) {
+		super(name, coords);
 		setRegionColor(ColorConstants.green);	
 		setAlpha(80);
 	}
@@ -112,9 +112,8 @@ class BoxSelection extends AbstractSelectionRegion {
 	@Override
 	public boolean containsPoint(double x, double y) {
 		
-		final int xpix = xAxis.getValuePosition(x);
-		final int ypix = yAxis.getValuePosition(y);
-		return connection.containsPoint(xpix, ypix);
+		final int[] pix = coords.getValuePosition(x,y);
+		return connection.containsPoint(pix[0], pix[1]);
 	}
 	
 	@Override
@@ -136,7 +135,7 @@ class BoxSelection extends AbstractSelectionRegion {
 
 	private SelectionHandle createSelectionRectangle(Color color, int size, double... location) {
 		
-		SelectionHandle rect = new RectangularHandle(xAxis, yAxis, color, connection, size, location);
+		SelectionHandle rect = new RectangularHandle(coords, color, connection, size, location);
 		FigureTranslator mover = new FigureTranslator(getXyGraph(), rect);	
 		mover.addTranslationListener(createRegionNotifier());
 
@@ -198,8 +197,8 @@ class BoxSelection extends AbstractSelectionRegion {
 	public ROIBase createROI(boolean recordResult) {
 		if (p1!=null) {
 			final Rectangle rect = getRectangleFromVertices();
-			double[] a1 = new double[]{xAxis.getPositionValue(rect.x), yAxis.getPositionValue(rect.y)};
-			double[] a2 = new double[]{xAxis.getPositionValue(rect.x+rect.width), yAxis.getPositionValue(rect.y+rect.height)};
+			double[] a1 = coords.getPositionValue(rect.x, rect.y);
+			double[] a2 = coords.getPositionValue(rect.x+rect.width, rect.y+rect.height);
 			final RectangularROI rroi = new RectangularROI(a1[0], a1[1], a2[0] - a1[0], a2[1] - a1[1], 0);
 			if (recordResult)
 				roi = rroi;

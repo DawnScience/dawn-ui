@@ -18,8 +18,8 @@ public class RectangularHandle extends SelectionHandle {
 	 * @param side
 	 * @param params (first corner's x and y, also centre of rotation)
 	 */
-	public RectangularHandle(ICoordinateSystem xAxis, ICoordinateSystem yAxis, Color colour, Figure parent, int side, double... params) {
-		super(xAxis, yAxis, colour, parent, side, params);
+	public RectangularHandle(ICoordinateSystem coords, Color colour, Figure parent, int side, double... params) {
+		super(coords, colour, parent, side, params);
 	}
 
 	@Override

@@ -194,9 +194,8 @@ public class RegionArea extends PlotArea {
 			if (getRegionMap().containsKey(name)) throw new Exception("The region '"+name+"' already exists.");
 		}
 		
-		ICoordinateSystem       pseudoX = new RegionCoordinateSystem(getImageTrace(), x, y);
-		ICoordinateSystem       pseudoY = new RegionCoordinateSystem(getImageTrace(), y, x);
-		AbstractSelectionRegion region  = SelectionRegionFactory.createSelectionRegion(name, pseudoX, pseudoY, regionType);
+		ICoordinateSystem       coords  = new RegionCoordinateSystem(getImageTrace(), x, y);
+		AbstractSelectionRegion region  = SelectionRegionFactory.createSelectionRegion(name, coords, regionType);
 		if (startingWithMouseEvent) {
 			xyGraph.setZoomType(ZoomType.NONE);
 		    if (region.getRegionCursor()!=null) setCursor(region.getRegionCursor());

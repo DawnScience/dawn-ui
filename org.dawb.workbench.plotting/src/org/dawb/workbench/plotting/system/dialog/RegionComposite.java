@@ -8,8 +8,11 @@ import java.util.regex.Pattern;
 
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
+import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.workbench.plotting.system.swtxy.AspectAxis;
+import org.dawb.workbench.plotting.system.swtxy.RegionArea;
+import org.dawb.workbench.plotting.system.swtxy.RegionCoordinateSystem;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
 import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
 import org.eclipse.jface.preference.ColorSelector;
@@ -223,10 +226,10 @@ public class RegionComposite extends Composite {
 		regionType.setEnabled(false);
 		regionType.setEditable(false);
 		
-		int index = xyGraph.getXAxisList().indexOf(region.getXAxis());
+		int index = xyGraph.getXAxisList().indexOf(region.getCoordinateSystem().getX());
 		xCombo.select(index);
 		
-		index = xyGraph.getYAxisList().indexOf(region.getYAxis());
+		index = xyGraph.getYAxisList().indexOf(region.getCoordinateSystem().getY());
 		yCombo.select(index);
 		
 		colorSelector.setColorValue(region.getRegionColor().getRGB());
@@ -252,8 +255,11 @@ public class RegionComposite extends Composite {
 		
 		final String txt = nameText.getText();
 		editingRegion.setName(txt);
-		editingRegion.setXAxis(getAxis(xyGraph.getXAxisList(), xCombo.getSelectionIndex()));
-		editingRegion.setYAxis(getAxis(xyGraph.getYAxisList(), yCombo.getSelectionIndex()));
+		
+		final AspectAxis x = getAxis(xyGraph.getXAxisList(), xCombo.getSelectionIndex());
+		final AspectAxis y = getAxis(xyGraph.getYAxisList(), yCombo.getSelectionIndex());
+		RegionCoordinateSystem sys = new RegionCoordinateSystem(getImageTrace(), x, y);
+		editingRegion.setCoordinateSystem(sys);
 		editingRegion.setShowPosition(showPoints.getSelection());
 		editingRegion.setRegionColor(new Color(getDisplay(), colorSelector.getColorValue()));
 		editingRegion.setAlpha(alpha.getSelection());
@@ -279,7 +285,9 @@ public class RegionComposite extends Composite {
 		return (AspectAxis)xAxisList.get(selectionIndex);
 	}
 
-
+    public IImageTrace getImageTrace() {
+    	return ((RegionArea)xyGraph.getPlotArea()).getImageTrace();
+    }
 
 	public void applyChanges() {
 //		this.roiViewer.cancelEditing();

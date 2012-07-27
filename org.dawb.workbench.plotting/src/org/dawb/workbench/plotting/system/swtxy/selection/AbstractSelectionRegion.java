@@ -55,28 +55,19 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
     private ISelectionProvider selectionProvider;
     private IFigure[] regionObjects;
     private int lineWidth=0;
-    /**
-     * X axis mapping
-     */
-    protected ICoordinateSystem xAxis;
-    /**
-     * Y axis mapping
-     */
-    protected ICoordinateSystem yAxis;
 
-	public AbstractSelectionRegion(String name, ICoordinateSystem xAxis, ICoordinateSystem yAxis) {
+    protected ICoordinateSystem coords;
+
+	public AbstractSelectionRegion(String name, ICoordinateSystem co) {
 		super();
 		setEnabled(false); // No mouse events.
 		setOpaque(false);
 		setCursor(null);
 		this.bean = new RegionBean();
 		bean.setName(name);
-		xAxis.addCoordinateSystemListener(this);
-		bean.setXAxis(xAxis);
-		this.xAxis = xAxis;
-		yAxis.addCoordinateSystemListener(this);
-		bean.setYAxis(yAxis);
-		this.yAxis = yAxis;
+		co.addCoordinateSystemListener(this);
+		bean.setCoordinateSystem(co);
+		this.coords = co;
 	}
 
 	/**
@@ -158,8 +149,7 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	public void sync(RegionBean bean) {
 		setName(bean.getName());
 		setShowPosition(bean.isShowPosition());
-		setXAxis(bean.getXAxis());
-		setYAxis(bean.getYAxis());
+		setCoordinateSystem(bean.getCoordinateSystem());
 		setXyGraph(bean.getXyGraph());
 		setRegionColor(bean.getRegionColor());
 		setAlpha(bean.getAlpha());
@@ -224,9 +214,8 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	}
 
 	protected void clearListeners() {
-        xAxis.removeCoordinateSystemListener(this);
-        yAxis.removeCoordinateSystemListener(this);
-		super.clearListeners();
+        coords.removeCoordinateSystemListener(this);
+ 		super.clearListeners();
 	}
 	
 	public void setName(String name) {
@@ -337,36 +326,20 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 		}
 	}
 
-	public ICoordinateSystem getXAxis() {
-		return xAxis;
+	public ICoordinateSystem getCoordinateSystem() {
+		return coords;
 	}
 
-	public void setXAxis(ICoordinateSystem xAxis) {
+	public void setCoordinateSystem(ICoordinateSystem co) {
 		if (regionObjects!=null) for (IFigure ob : regionObjects) {
 			if (ob instanceof SelectionHandle) {
-				((SelectionHandle)ob).setxAxis(xAxis);
+				((SelectionHandle)ob).setCoordinateSystem(co);
 			}
 		}
-		this.xAxis.removeCoordinateSystemListener(this);
-		xAxis.addCoordinateSystemListener(this);
-		this.xAxis = xAxis;
-		bean.setXAxis(xAxis);
-	}
-
-	public ICoordinateSystem getYAxis() {
-		return yAxis;
-	}
-
-	public void setYAxis(ICoordinateSystem yAxis) {
-		if (regionObjects!=null) for (IFigure ob : regionObjects) {
-			if (ob instanceof SelectionHandle) {
-				((SelectionHandle)ob).setyAxis(yAxis);
-			}
-		}
-		this.yAxis.removeCoordinateSystemListener(this);
-		yAxis.addCoordinateSystemListener(this);
-		this.yAxis = yAxis;
-		bean.setYAxis(yAxis);
+		this.coords.removeCoordinateSystemListener(this);
+		co.addCoordinateSystemListener(this);
+		this.coords = co;
+		bean.setCoordinateSystem(co);
 	}
 
 	public TranslationListener createRegionNotifier() {
@@ -469,17 +442,16 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	@Override
 	public boolean containsPoint(double x, double y) {
 		
-		final int xpix = xAxis.getValuePosition(x);
-		final int ypix = yAxis.getValuePosition(y);
+		final int[] pix = coords.getValuePosition(new double[]{x,y});
 		
 		if (regionObjects!=null) {
 			for (IFigure ob : regionObjects) {
-				if (ob.containsPoint(xpix, ypix)) return true;
+				if (ob.containsPoint(pix[0], pix[1])) return true;
 		    }
 			return false;
 
 		} else {
-			return containsPoint(xpix, ypix);
+			return containsPoint(pix[0], pix[1]);
 		}
 		
 	}

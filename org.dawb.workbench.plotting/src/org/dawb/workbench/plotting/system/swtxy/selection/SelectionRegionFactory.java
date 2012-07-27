@@ -50,30 +50,29 @@ public class SelectionRegionFactory {
 	 * @param regionType
 	 * @return
 	 */
-	public static AbstractSelectionRegion createSelectionRegion(final String name,
-			                                                    final ICoordinateSystem   x,
-			                                                    final ICoordinateSystem   y,
-			                                                    final RegionType regionType) {
+	public static AbstractSelectionRegion createSelectionRegion(final String            name,
+			                                                    final ICoordinateSystem coords,
+			                                                    final RegionType        regionType) {
 
 		AbstractSelectionRegion region = null;
 		if (regionType==RegionType.LINE) {
-			region = new LineSelection(name, x, y);
+			region = new LineSelection(name, coords);
 		} else if (regionType==RegionType.BOX) {
-			region = new BoxSelection(name, x, y);
+			region = new BoxSelection(name, coords);
 		} else if (regionType==RegionType.SECTOR) {
-			region = new SectorSelection(name, x, y);
+			region = new SectorSelection(name, coords);
 		} else if (regionType==RegionType.RING) {
-			region = new RingSelection(name, x, y);
+			region = new RingSelection(name, coords);
 		} else if (regionType==RegionType.FREE_DRAW) {
-			region = new FreeDrawSelection(name, x, y);
+			region = new FreeDrawSelection(name, coords);
 		} else if (regionType==RegionType.POINT) {
-			region = new PointSelection(name, x, y);
+			region = new PointSelection(name, coords);
 		} else if (regionType==RegionType.ELLIPSEFIT) {
-			region = new EllipseFitSelection(name, x, y);
+			region = new EllipseFitSelection(name, coords);
 		} else if (regionType==RegionType.POLYLINE) {
-			region = new PolylineSelection(name, x, y);
+			region = new PolylineSelection(name, coords);
 		} else if (regionType==RegionType.XAXIS || regionType==RegionType.YAXIS || regionType==RegionType.XAXIS_LINE || regionType==RegionType.YAXIS_LINE) {
-			region = new AxisSelection(name, x, y, regionType);
+			region = new AxisSelection(name, coords, regionType);
 		} else {
 			throw new NullPointerException("Cannot deal with "+regionType+" regions yet - sorry!");
 		}	

@@ -65,8 +65,8 @@ class RingSelection extends AbstractSelectionRegion {
 	private Figure             connection;
 	private SelectionHandle innerControl, outerControl;
 	
-	public RingSelection(String name, ICoordinateSystem xAxis, ICoordinateSystem yAxis) {
-		super(name, xAxis, yAxis);
+	public RingSelection(String name, ICoordinateSystem coords) {
+		super(name, coords);
 		setRegionColor(ColorConstants.yellow);	
 		setAlpha(80);
 	}
@@ -74,7 +74,7 @@ class RingSelection extends AbstractSelectionRegion {
 	@Override
 	public void createContents(final Figure parent) {
 		
-		this.center = new RectangularHandle(xAxis, yAxis, getRegionColor(), connection, SIDE, 100, 100);
+		this.center = new RectangularHandle(coords, getRegionColor(), connection, SIDE, 100, 100);
 		center.setCursor(null);
 
 		this.innerControl = createSelectionHandle();
@@ -154,14 +154,13 @@ class RingSelection extends AbstractSelectionRegion {
 	@Override
 	public boolean containsPoint(double x, double y) {
 		
-		final int xpix = xAxis.getValuePosition(x);
-		final int ypix = yAxis.getValuePosition(y);
-		return connection.containsPoint(xpix, ypix);
+		final int[] pix = coords.getValuePosition(x,y);
+		return connection.containsPoint(pix[0], pix[1]);
 	}
 	
 	private RectangularHandle createSelectionHandle() {
 		
-		RectangularHandle ret = new RectangularHandle(xAxis, yAxis, getRegionColor(), connection, SIDE, 100, 100);
+		RectangularHandle ret = new RectangularHandle(coords, getRegionColor(), connection, SIDE, 100, 100);
 		FigureTranslator trans = new FigureTranslator(getXyGraph(), ret);
 		trans.setLockedDirection(LockType.Y);
 		trans.addTranslationListener(createRegionNotifier());
@@ -202,10 +201,10 @@ class RingSelection extends AbstractSelectionRegion {
 			final Rectangle out = new Rectangle(new Point(cen.x+outerRad, cen.y+outerRad), new Point(cen.x-outerRad, cen.y-outerRad));
 			final Rectangle in  = new Rectangle(new Point(cen.x+innerRad, cen.y+innerRad), new Point(cen.x-innerRad, cen.y-innerRad));
 			
-			double[] rcen = new double[]{xAxis.getPositionValue(cen.x), yAxis.getPositionValue(cen.y)};
-			double cenY   = yAxis.getPositionValue(cen.y);
-			double inRad  = yAxis.getPositionValue(in.getTop().y)-cenY;
-			double outRad = yAxis.getPositionValue(out.getTop().y)-cenY;
+			double[] rcen = coords.getPositionValue(cen.x,cen.y);
+			double cenY   = rcen[0];
+			double inRad  = coords.getPositionValue(0,in.getTop().y)[1]-cenY;
+			double outRad = coords.getPositionValue(0,out.getTop().y)[1]-cenY;
 			if (inRad < 0)
 				inRad = -inRad;
 			if (outRad < 0)
@@ -228,10 +227,10 @@ class RingSelection extends AbstractSelectionRegion {
 			if (center!=null) {
 				center.setPosition(sroi.getPointRef());
 				double y = sroi.getPointY();
-				int cenY = getXAxis().getValuePosition(y);
+				int[] cen = coords.getValuePosition(sroi.getPoint());
 				
-				int innerRad = getXAxis().getValuePosition(y+sroi.getRadius(0))-cenY;
-				int outerRad = getXAxis().getValuePosition(y+sroi.getRadius(1))-cenY;
+				int innerRad = coords.getValuePosition(0,y+sroi.getRadius(0))[1]-cen[1];
+				int outerRad = coords.getValuePosition(0,y+sroi.getRadius(1))[1]-cen[1];
 				setControlPositions(innerRad, outerRad);
 				updateConnectionBounds();
 			}
