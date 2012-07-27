@@ -323,12 +323,13 @@ public class ROIViewer  {
 		
 		ROIBase ret = null; 
 		if (roi instanceof LinearROI) {
-			if ("Rotation (°)".equals(changed.getName())) {
+			if (changed==rows.get(2)) {
 				LinearROI lr = new LinearROI(rows.get(0).getPoint(), rows.get(1).getPoint());
 				lr.setAngle(Math.toRadians(rows.get(2).getxLikeVal()));
 				ret = lr;
 			} else {
 				LinearROI lr = new LinearROI(rows.get(0).getPoint(), rows.get(1).getPoint());
+				if (changed==rows.get(1)) rows.get(2).setxLikeVal(0d);
 				ret = lr;
 			}
 			
