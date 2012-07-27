@@ -396,4 +396,7 @@ public class AspectAxis extends Axis implements IAxis {
 		}
 	}
 
+	public String toString() {
+		return getTitle()+", "+getOrientation();
+	}
 }

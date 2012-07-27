@@ -78,7 +78,8 @@ public abstract class SelectionHandle extends Figure implements IMobileFigure {
 	public double[] getPosition() {
 		final Point p = getSelectionPoint();
 		try {
-		    return new double[]{xAxis.getPositionValue(p.x), yAxis.getPositionValue(p.y)};
+		    double[] point = new double[]{xAxis.getPositionValue(p.x), yAxis.getPositionValue(p.y)};
+		    return point;
 		} catch (NullPointerException ne) {
 			return new double[]{Double.NaN, Double.NaN};
 		}

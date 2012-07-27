@@ -2,7 +2,6 @@ package org.dawb.workbench.plotting.system.swtxy.selection;
 
 import java.util.Arrays;
 
-import org.csstudio.swt.xygraph.figures.Axis;
 import org.dawb.common.ui.plot.axis.ICoordinateSystem;
 import org.dawb.workbench.plotting.system.swtxy.translate.FigureTranslator;
 import org.dawb.workbench.plotting.system.swtxy.util.Draw2DUtils;

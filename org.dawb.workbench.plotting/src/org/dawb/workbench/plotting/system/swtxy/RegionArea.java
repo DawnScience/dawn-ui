@@ -13,6 +13,7 @@ import org.csstudio.swt.xygraph.figures.Trace;
 import org.csstudio.swt.xygraph.undo.ZoomType;
 import org.dawb.common.services.ImageServiceBean.ImageOrigin;
 import org.dawb.common.ui.plot.axis.IAxis;
+import org.dawb.common.ui.plot.axis.ICoordinateSystem;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.RegionEvent;
@@ -193,7 +194,9 @@ public class RegionArea extends PlotArea {
 			if (getRegionMap().containsKey(name)) throw new Exception("The region '"+name+"' already exists.");
 		}
 		
-		AbstractSelectionRegion region = SelectionRegionFactory.createSelectionRegion(name, x, y, regionType);
+		ICoordinateSystem       pseudoX = new RegionCoordinateSystem(getImageTrace(), x, y);
+		ICoordinateSystem       pseudoY = new RegionCoordinateSystem(getImageTrace(), y, x);
+		AbstractSelectionRegion region  = SelectionRegionFactory.createSelectionRegion(name, pseudoX, pseudoY, regionType);
 		if (startingWithMouseEvent) {
 			xyGraph.setZoomType(ZoomType.NONE);
 		    if (region.getRegionCursor()!=null) setCursor(region.getRegionCursor());
