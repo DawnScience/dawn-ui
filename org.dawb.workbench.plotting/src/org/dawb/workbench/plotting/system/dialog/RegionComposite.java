@@ -191,8 +191,8 @@ public class RegionComposite extends Composite {
 
 	public AbstractSelectionRegion createRegion() throws Exception {
 		
-		final AspectAxis xAxis = (AspectAxis)xyGraph.getXAxisList().get(xCombo.getSelectionIndex());
-		final AspectAxis yAxis = (AspectAxis)xyGraph.getYAxisList().get(yCombo.getSelectionIndex());
+		final AspectAxis xAxis = getAxis(xyGraph.getXAxisList(), xCombo.getSelectionIndex());
+		final AspectAxis yAxis = getAxis(xyGraph.getYAxisList(), yCombo.getSelectionIndex());
 		
 		AbstractSelectionRegion region=null;
 		
@@ -252,8 +252,8 @@ public class RegionComposite extends Composite {
 		
 		final String txt = nameText.getText();
 		editingRegion.setName(txt);
-		editingRegion.setXAxis((AspectAxis)xyGraph.getXAxisList().get(xCombo.getSelectionIndex()));
-		editingRegion.setYAxis((AspectAxis)xyGraph.getYAxisList().get(yCombo.getSelectionIndex()));
+		editingRegion.setXAxis(getAxis(xyGraph.getXAxisList(), xCombo.getSelectionIndex()));
+		editingRegion.setYAxis(getAxis(xyGraph.getYAxisList(), yCombo.getSelectionIndex()));
 		editingRegion.setShowPosition(showPoints.getSelection());
 		editingRegion.setRegionColor(new Color(getDisplay(), colorSelector.getColorValue()));
 		editingRegion.setAlpha(alpha.getSelection());
@@ -273,6 +273,11 @@ public class RegionComposite extends Composite {
         return editingRegion;
 	}
 
+
+	private AspectAxis getAxis(List<Axis> xAxisList, int selectionIndex) {
+		if (selectionIndex<0) selectionIndex=0;
+		return (AspectAxis)xAxisList.get(selectionIndex);
+	}
 
 	public void applyChanges() {
 //		this.roiViewer.cancelEditing();
