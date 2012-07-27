@@ -215,7 +215,7 @@ public class ROIViewer  {
             	getViewer().refresh();
             }
             
-            final ROIBase roi = createRoi(rows);
+            final ROIBase roi = createRoi(rows, row);
             if (roi!=null) region.setROI(roi);
 		}
 
@@ -317,15 +317,20 @@ public class ROIViewer  {
 		return ret;
 	}
 
-	public ROIBase createRoi(List<RegionRow> rows) {
+	public ROIBase createRoi(List<RegionRow> rows, RegionRow changed) {
 		
 		final ROIBase roi = region.getROI();
 		
 		ROIBase ret = null; 
 		if (roi instanceof LinearROI) {
-			LinearROI lr = new LinearROI(rows.get(0).getPoint(), rows.get(1).getPoint());
-			lr.setAngle(Math.toRadians(rows.get(2).getxLikeVal()));
-			ret = lr;
+			if ("Rotation (°)".equals(changed.getName())) {
+				LinearROI lr = new LinearROI(rows.get(0).getPoint(), rows.get(1).getPoint());
+				lr.setAngle(Math.toRadians(rows.get(2).getxLikeVal()));
+				ret = lr;
+			} else {
+				LinearROI lr = new LinearROI(rows.get(0).getPoint(), rows.get(1).getPoint());
+				ret = lr;
+			}
 			
 		} else if (roi instanceof PolygonalROI) {
 			PolygonalROI pr = new PolygonalROI();
