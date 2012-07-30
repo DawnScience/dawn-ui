@@ -30,6 +30,9 @@ import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
+import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
+import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
+
 /**
  * An AbstractSelectionRegion has two purposes:
  * 1. To draw the 2d shapes for selection in the diagram.
@@ -456,4 +459,36 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 		}
 		
 	}
+
+
+	protected RectangularROI getRoiFromRectangle(final Rectangle rect) {
+
+		double[] a1 = coords.getPositionValue(rect.x, rect.y);
+		double[] a2 = coords.getPositionValue(rect.x+rect.width, rect.y+rect.height);
+		if (coords.isXReversed()) reverse(a1,a2,0);
+		if (coords.isYReversed()) reverse(a1,a2,1);
+
+		double x = a1[0]; double y = a1[1];
+		double w = a2[0] - a1[0]; double h = a2[1] - a1[1];
+
+		if (w<0) {
+			w = Math.abs(w);
+			x-= w;
+		}
+		if (h<0) {
+			h = Math.abs(h);
+			y-= h;
+		}
+
+		final RectangularROI rroi = new RectangularROI(x, y, w, h, 0);
+
+		return rroi;
+	}
+	
+	private void reverse(double[] a1, double[] a2, int i) {
+		double tmp = a1[i];
+		a1[i] = a2[i];
+		a2[i] = tmp;
+	}
+
 }

@@ -196,37 +196,14 @@ class BoxSelection extends AbstractSelectionRegion {
 	@Override
 	public ROIBase createROI(boolean recordResult) {
 		if (p1!=null) {
-			final Rectangle rect = getRectangleFromVertices();
-			double[] a1 = coords.getPositionValue(rect.x, rect.y);
-			double[] a2 = coords.getPositionValue(rect.x+rect.width, rect.y+rect.height);
-			if (coords.isXReversed()) reverse(a1,a2,0);
-			if (coords.isYReversed()) reverse(a1,a2,1);
-			
-			double x = a1[0]; double y = a1[1];
-			double w = a2[0] - a1[0]; double h = a2[1] - a1[1];
-			
-			if (w<0) {
-				w = Math.abs(w);
-				x-= w;
-			}
-			if (h<0) {
-				h = Math.abs(h);
-				y-= h;
-			}
-			
-			final RectangularROI rroi = new RectangularROI(x, y, w, h, 0);
+			final Rectangle rect = getRectangleFromVertices();			
+			final RectangularROI rroi = getRoiFromRectangle(rect);
 						
 			if (recordResult)
 				roi = rroi;
 			return rroi;
 		}
 		return super.getROI();
-	}
-	
-	private void reverse(double[] a1, double[] a2, int i) {
-		double tmp = a1[i];
-		a1[i] = a2[i];
-		a2[i] = tmp;
 	}
 
 	protected void updateROI(ROIBase roi) {

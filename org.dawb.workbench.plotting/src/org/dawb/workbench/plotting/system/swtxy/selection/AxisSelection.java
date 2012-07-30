@@ -298,9 +298,7 @@ class AxisSelection extends AbstractSelectionRegion {
 	public ROIBase createROI(boolean recordResult) {
 		if (line1!=null) {
 			final Rectangle rect = getRectangleFromVertices();
-			double[] a1 = coords.getPositionValue(rect.x, rect.y);
-			double[] a2 = coords.getPositionValue(rect.x+rect.width, rect.y+rect.height);
-			final RectangularROI rroi = new RectangularROI(a1[0], a1[1], a2[0] - a1[0], a2[1] - a1[1], 0);
+			final RectangularROI rroi = getRoiFromRectangle(rect);
 			if (recordResult)
 				roi = rroi;
 			return rroi;
