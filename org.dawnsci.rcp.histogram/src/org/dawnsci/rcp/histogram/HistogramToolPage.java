@@ -208,7 +208,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 
 		// get a palette update listener to deal with palatte updates
-		paletteListener = new IPaletteListener(){
+		paletteListener = new IPaletteListener.Stub(){
 
 			@Override
 			public void paletteChanged(PaletteEvent event) {

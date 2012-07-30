@@ -621,7 +621,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		performAutoscale();
 		createScaledImage(ImageScaleType.FORCE_REIMAGE, null);
 		repaint();
+		fireImageOriginListeners();
 	}
+
 
 	/**
 	 * Creates new axis bounds, updates the label data set
@@ -780,7 +782,13 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		final PaletteEvent evt = new PaletteEvent(this, getPaletteData());
 		for (IPaletteListener pl : paletteListeners) pl.maskChanged(evt);
 	}
-
+	private void fireImageOriginListeners() {
+		if (paletteListeners==null) return;
+		if (!imageCreationAllowed)  return;
+		final PaletteEvent evt = new PaletteEvent(this, getPaletteData());
+		for (IPaletteListener pl : paletteListeners) pl.imageOriginChanged(evt);
+	}
+	
 	@Override
 	public DownsampleType getDownsampleType() {
 		return downsampleType;

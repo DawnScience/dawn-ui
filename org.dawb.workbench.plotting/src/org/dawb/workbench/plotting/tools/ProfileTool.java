@@ -66,6 +66,10 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 				public void maskChanged(PaletteEvent evt) {
 					update(null, null, false);
 				}
+				@Override
+				public void imageOriginChanged(PaletteEvent evt) {
+					update(null, null, false);
+				}
 			};
 			
 			this.traceListener = new ITraceListener.Stub() {
