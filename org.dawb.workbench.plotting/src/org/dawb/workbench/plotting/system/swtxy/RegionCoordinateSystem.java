@@ -16,6 +16,7 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 
 	private IImageTrace imageTrace;
 	private IAxis x,y;
+	private boolean isDisposed=false;
 
 	public RegionCoordinateSystem(IImageTrace imageTrace, IAxis x, IAxis y) {
 		this.imageTrace = imageTrace;
@@ -32,11 +33,17 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 	}
 
 	public void dispose() {
+		isDisposed = true;
 		if (x!=null) x.removeAxisListener(this);
+		if (this.coordinateListeners!=null) {
+			coordinateListeners.clear();
+			coordinateListeners = null;
+		}
 	}
 
 	@Override
 	public int[] getValuePosition(double... value) {
+		if (isDisposed) throw new RuntimeException(getClass().getName()+" is disposed!");
 		if (isReversed()) {
 			return new int[]{x.getValuePosition(value[1]), y.getValuePosition(value[0])};
 		} else {
@@ -46,6 +53,7 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 
 	@Override
 	public double[] getPositionValue(int... position) {
+		if (isDisposed) throw new RuntimeException(getClass().getName()+" is disposed!");
 		if (isReversed()) {
 			return new double[]{x.getPositionValue(position[1]), y.getPositionValue(position[0])};
 		} else {
@@ -56,6 +64,7 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 	private Collection<ICoordinateSystemListener> coordinateListeners;
 	@Override
 	public void addCoordinateSystemListener(ICoordinateSystemListener l) {
+		if (isDisposed) throw new RuntimeException(getClass().getName()+" is disposed!");
 		if (coordinateListeners==null) {
 			coordinateListeners = new HashSet<ICoordinateSystemListener>();
 			x.addAxisListener(this);
@@ -65,10 +74,12 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 
 	@Override
 	public void removeCoordinateSystemListener(ICoordinateSystemListener l) {
+		if (isDisposed) throw new RuntimeException(getClass().getName()+" is disposed!");
 		if (coordinateListeners==null) return;
 		coordinateListeners.remove(l);
 		if (coordinateListeners.isEmpty()) {
 			x.removeAxisListener(this);
+			coordinateListeners = null;
 		}
 	}
 
