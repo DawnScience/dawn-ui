@@ -204,11 +204,12 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 		addToolbarSeparator("org.csstudio.swt.xygraph.toolbar.extra");	
 	}
 	
-	protected void createRegionActions() {
+	private MenuAction regionDropDown;
+	protected void createRegionActions(PlotType defaultPlotType) {
 		
 		final XYRegionGraph xyGraph     = system.getGraph();
 		
-        final MenuAction regionDropDown = new MenuAction("Add a selection region");
+        this.regionDropDown = new MenuAction("Add a selection region");
         regionDropDown.setId("org.dawb.workbench.ui.editors.plotting.swtxy.addRegions"); // Id used elsewhere...
  
 		regionDropDown.add(createRegionAction(RegionType.LINE,       regionDropDown, "Add line selection",     Activator.getImageDescriptor("icons/ProfileLine.png")));
@@ -225,8 +226,13 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 		regionDropDown.setSelectedAction(regionDropDown.getAction(0));
 		
 		if (system.getActionBars()!=null) system.getActionBars().getToolBarManager().add(regionDropDown);
-		//if (system.getActionBars()!=null) system.getActionBars().getMenuManager().add(regionDropDown);
-			
+		//if (system.getActionBars()!=null) system.getActionBars().getMenuManager().add(regionDropDown);	
+		
+		if (!defaultPlotType.is1D()) {
+	       regionDropDown.setEnabled(ImageOrigin.TOP_LEFT.getLabel().equals(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.ORIGIN_PREF)));
+		}
+
+		
         final MenuAction removeRegionDropDown = new MenuAction("Delete selection region(s)");
         removeRegionDropDown.setId("org.dawb.workbench.ui.editors.plotting.swtxy.removeRegions");
 
@@ -396,6 +402,7 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 		});
 	}
 
+	private MenuAction twoDToolSet;
 	protected void createToolDimensionalActions(final ToolPageRole role,
 			                                    final String       viewId) {
 
@@ -412,8 +419,10 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 				if (role.is2D()&&!role.is1D()) twoDimensionalActions.add(new ActionContainer(toolSet, bars.getToolBarManager()));
 
 				if (role.is2D()) {
+					twoDToolSet = toolSet;
 					toolSet.addActionsTo(imageMenu);
 					this.imageMenu.addSeparator();
+					toolSet.setEnabled(ImageOrigin.TOP_LEFT.getLabel().equals(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.ORIGIN_PREF)));
 				}
 				if (role.is1D()) {
 					toolSet.addActionsTo(xyMenu);
@@ -534,9 +543,28 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 			
         	final IAction action = new Action(origin.getLabel(), IAction.AS_CHECK_BOX) {
         		public void run() {
+        			
+        			if (!ImageOrigin.TOP_LEFT.getLabel().equals(origin.getLabel())) {
+	        			boolean ok = MessageDialog.openQuestion(Display.getDefault().getActiveShell(), 
+	        					                                "Confirm Image Orientation",
+	        					                                "Would you really like to change image origin?\n\n"+
+	        					                                "In Dawn 1.0, tools and regions do not work unless the image\n"+
+	        					                                "is in the same orientation as the data (the 'top left' setting).");
+	        			
+	        			if (!ok) {
+	        				origins.getAction(0).setChecked(true);
+	        				return;
+	        			}
+        			}
+        			
         			Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.ORIGIN_PREF, origin.getLabel());
        			    system.getGraph().setImageOrigin(origin);
        			    setChecked(true);
+       			    
+      
+       				if (regionDropDown!=null) regionDropDown.setEnabled(origin.getLabel().equals(ImageOrigin.TOP_LEFT.getLabel()));
+       				if (twoDToolSet!=null)    twoDToolSet.setEnabled(ImageOrigin.TOP_LEFT.getLabel().equals(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.ORIGIN_PREF)));                         		
+ 
         		}
         	};
         	origins.add(action);
