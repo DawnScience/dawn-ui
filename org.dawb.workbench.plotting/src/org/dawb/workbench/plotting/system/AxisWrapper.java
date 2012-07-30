@@ -1,14 +1,7 @@
 package org.dawb.workbench.plotting.system;
 
-import java.util.Collection;
-import java.util.HashSet;
-
 import org.csstudio.swt.xygraph.figures.Axis;
-import org.csstudio.swt.xygraph.figures.IAxisListener;
-import org.csstudio.swt.xygraph.linearscale.Range;
 import org.dawb.common.ui.plot.IAxis;
-import org.dawb.common.ui.plot.axis.CoordinateSystemEvent;
-import org.dawb.common.ui.plot.axis.ICoordinateSystemListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 
@@ -19,17 +12,16 @@ import org.eclipse.swt.graphics.Font;
  * @author fcp94556
  *
  */
-class AxisWrapper implements IAxis, IAxisListener{
+class AxisWrapper implements IAxis {
 
 	private Axis wrappedAxis;
 
 	public AxisWrapper(Axis axis) {
 		this.wrappedAxis = axis;
-		wrappedAxis.addListener(this);
 	}
 	
 	public void dispose() {
-		wrappedAxis.removeListener(this);
+		//wrappedAxis.removeListener(this);
 	}
 
 	@Override
@@ -196,36 +188,6 @@ class AxisWrapper implements IAxis, IAxisListener{
 		return wrappedAxis.getPositionValue(position, false);
 	}
 
-	private Collection<ICoordinateSystemListener> coordinateListeners;
-	@Override
-	public void addCoordinateSystemListener(ICoordinateSystemListener l) {
-		if (coordinateListeners==null) coordinateListeners = new HashSet<ICoordinateSystemListener>();
-		coordinateListeners.add(l);
-	}
-
-	@Override
-	public void removeCoordinateSystemListener(ICoordinateSystemListener l) {
-		if (coordinateListeners==null) return;
-		coordinateListeners.remove(l);
-	}
-
-	@Override
-	public void axisRangeChanged(Axis axis, Range old_range, Range new_range) {
-		fireCoordinateSystemListeners();
-	}
-
-	@Override
-	public void axisRevalidated(Axis axis) {
-		fireCoordinateSystemListeners();
-	}
-
-	private void fireCoordinateSystemListeners() {
-		if (coordinateListeners==null) return;
-		final CoordinateSystemEvent evt = new CoordinateSystemEvent(this);
-		for (ICoordinateSystemListener l : coordinateListeners) {
-			l.coordinatesChanged(evt);
-		}
-	}
 
 
 }

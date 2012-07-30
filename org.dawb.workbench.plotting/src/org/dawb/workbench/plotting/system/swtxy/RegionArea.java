@@ -188,7 +188,7 @@ public class RegionArea extends PlotArea {
 	 * @return region
 	 * @throws Exception
 	 */
-	public AbstractSelectionRegion createRegion(String name, IAxis x, IAxis y, RegionType regionType, boolean startingWithMouseEvent) throws Exception {
+	public AbstractSelectionRegion createRegion(String name, Axis x, Axis y, RegionType regionType, boolean startingWithMouseEvent) throws Exception {
 
 		if (getRegionMap()!=null) {
 			if (getRegionMap().containsKey(name)) throw new Exception("The region '"+name+"' already exists.");
