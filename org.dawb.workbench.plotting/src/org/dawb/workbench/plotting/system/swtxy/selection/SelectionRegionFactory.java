@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import org.csstudio.swt.xygraph.figures.Axis;
-import org.dawb.common.ui.plot.axis.ICoordinateSystem;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.workbench.plotting.Activator;
@@ -51,8 +50,8 @@ public class SelectionRegionFactory {
 	 * @return
 	 */
 	public static AbstractSelectionRegion createSelectionRegion(final String name,
-			                                                    final ICoordinateSystem   x,
-			                                                    final ICoordinateSystem   y,
+			                                                    final Axis   x,
+			                                                    final Axis   y,
 			                                                    final RegionType regionType) {
 
 		AbstractSelectionRegion region = null;

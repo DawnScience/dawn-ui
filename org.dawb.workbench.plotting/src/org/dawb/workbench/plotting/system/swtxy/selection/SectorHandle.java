@@ -1,6 +1,6 @@
 package org.dawb.workbench.plotting.system.swtxy.selection;
 
-import org.dawb.common.ui.plot.axis.ICoordinateSystem;
+import org.csstudio.swt.xygraph.figures.Axis;
 import org.dawb.workbench.plotting.system.swtxy.util.AffineTransform;
 import org.dawb.workbench.plotting.system.swtxy.util.RotatableEllipse;
 import org.dawb.workbench.plotting.system.swtxy.util.RotatablePolygonShape;
@@ -27,7 +27,7 @@ public class SectorHandle extends SelectionHandle {
 	 * @param start angle in degrees
 	 * @param end angle in degrees
 	 */
-	public SectorHandle(ICoordinateSystem xAxis, ICoordinateSystem yAxis, Color colour, RotatableEllipse parent, int side, double start, double end) {
+	public SectorHandle(Axis xAxis, Axis yAxis, Color colour, RotatableEllipse parent, int side, double start, double end) {
 		super(xAxis, yAxis, colour, parent, side, start, end);
 	}
 

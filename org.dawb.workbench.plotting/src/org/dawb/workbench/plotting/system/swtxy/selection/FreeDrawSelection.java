@@ -4,7 +4,6 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
 import org.csstudio.swt.xygraph.figures.Axis;
-import org.dawb.common.ui.plot.axis.ICoordinateSystem;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
@@ -30,7 +29,7 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 
 	private PointList points;
 
-	public FreeDrawSelection(String name, ICoordinateSystem xAxis, ICoordinateSystem yAxis) {
+	public FreeDrawSelection(String name, Axis xAxis, Axis yAxis) {
 		super(name, xAxis, yAxis);
 		setRegionColor(ColorConstants.orange);
 		setLineWidth(10);
@@ -45,8 +44,8 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 	@Override
 	public boolean containsPoint(double x, double y) {
 		
-		final int xpix = xAxis.getValuePosition(x);
-		final int ypix = yAxis.getValuePosition(y);
+		final int xpix = xAxis.getValuePosition(x, false);
+		final int ypix = yAxis.getValuePosition(y, false);
 		if (!getBounds().contains(xpix,ypix)) return false;
 		return Geometry.polylineContainsPoint(points, xpix, ypix, (int)Math.round(getLineWidth()/2d));
 	}
@@ -119,7 +118,7 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 
 	private void drawPointText(Graphics g, Point pnt) {
 		
-		double[] loc = new double[]{xAxis.getPositionValue(pnt.x), yAxis.getPositionValue(pnt.y)};
+		double[] loc = new double[]{xAxis.getPositionValue(pnt.x, false), yAxis.getPositionValue(pnt.y, false)};
         final String text = getLabelPositionText(loc);
         g.drawString(text, pnt);
 
@@ -176,7 +175,7 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 		
 		for (int i = 0; i < points.size(); i++) {
 			final Point pnt = points.getPoint(i);
-			proi.insertPoint(i, xAxis.getPositionValue(pnt.x()), yAxis.getPositionValue(pnt.y()));
+			proi.insertPoint(i, xAxis.getPositionValue(pnt.x(), false), yAxis.getPositionValue(pnt.y(), false));
 		}
 		
 		if (recordResult)
@@ -194,8 +193,8 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 	        
 	        for (ROIBase p : proi) {
 				
-	           	final int x = xAxis.getValuePosition(p.getPointX());
-	           	final int y = yAxis.getValuePosition(p.getPointY());
+	           	final int x = xAxis.getValuePosition(p.getPointX(), false);
+	           	final int y = yAxis.getValuePosition(p.getPointY(), false);
 	           	points.addPoint(new Point(x,y));
 			}
 	        updateConnectionBounds();

@@ -3,7 +3,6 @@ package org.dawb.workbench.plotting.system.swtxy.selection;
 import java.util.Arrays;
 
 import org.csstudio.swt.xygraph.figures.Axis;
-import org.dawb.common.ui.plot.axis.ICoordinateSystem;
 import org.dawb.workbench.plotting.system.swtxy.translate.FigureTranslator;
 import org.dawb.workbench.plotting.system.swtxy.util.Draw2DUtils;
 import org.eclipse.draw2d.ColorConstants;
@@ -47,7 +46,7 @@ class LineSelection extends AbstractSelectionRegion {
 	private SelectionHandle endBox2 = null, startBox2 = null;
 	private Figure connection;
 
-	LineSelection(String name, ICoordinateSystem xAxis, ICoordinateSystem yAxis) {
+	LineSelection(String name, Axis xAxis, Axis yAxis) {
 		super(name, xAxis, yAxis);
 		setRegionColor(ColorConstants.cyan);
 		setAlpha(80);
@@ -144,8 +143,8 @@ class LineSelection extends AbstractSelectionRegion {
 	@Override
 	public boolean containsPoint(double x, double y) {
 		
-		final int xpix = xAxis.getValuePosition(x);
-		final int ypix = yAxis.getValuePosition(y);
+		final int xpix = xAxis.getValuePosition(x, false);
+		final int ypix = yAxis.getValuePosition(y, false);
 		return connection.containsPoint(xpix, ypix);
 	}
 

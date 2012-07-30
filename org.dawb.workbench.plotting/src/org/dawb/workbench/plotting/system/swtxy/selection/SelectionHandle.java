@@ -4,7 +4,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Iterator;
 
-import org.dawb.common.ui.plot.axis.ICoordinateSystem;
+import org.csstudio.swt.xygraph.figures.Axis;
 import org.dawb.workbench.plotting.system.swtxy.IMobileFigure;
 import org.dawb.workbench.plotting.system.swtxy.util.Draw2DUtils;
 import org.eclipse.draw2d.ColorConstants;
@@ -25,16 +25,16 @@ public abstract class SelectionHandle extends Figure implements IMobileFigure {
 	
 	private Shape shape;
 	private Figure          label;
-	protected ICoordinateSystem   xAxis;
-	protected ICoordinateSystem   yAxis;
+	protected Axis          xAxis;
+	protected Axis          yAxis;
 	private int             alpha=100;
 	protected Point location;
 
-	protected SelectionHandle(ICoordinateSystem xAxis, ICoordinateSystem yAxis, Color colour, Figure parent, int side, double... params) {
+	protected SelectionHandle(Axis xAxis, Axis yAxis, Color colour, Figure parent, int side, double... params) {
 		this.xAxis = xAxis;
 		this.yAxis = yAxis;
 		setOpaque(false);
-
+		
 		this.label = new Figure() {
 			protected void paintFigure(Graphics graphics) {
 				if (!isVisible()) return;
@@ -78,7 +78,7 @@ public abstract class SelectionHandle extends Figure implements IMobileFigure {
 	public double[] getPosition() {
 		final Point p = getSelectionPoint();
 		try {
-		    return new double[]{xAxis.getPositionValue(p.x), yAxis.getPositionValue(p.y)};
+		    return new double[]{xAxis.getPositionValue(p.x, false), yAxis.getPositionValue(p.y, false)};
 		} catch (NullPointerException ne) {
 			return new double[]{Double.NaN, Double.NaN};
 		}
@@ -91,7 +91,7 @@ public abstract class SelectionHandle extends Figure implements IMobileFigure {
 	 * @param point
 	 */
 	public void setPosition(final double[] point) {
-		final Point pnt = new Point(xAxis.getValuePosition(point[0]), yAxis.getValuePosition(point[1]));
+		final Point pnt = new Point(xAxis.getValuePosition(point[0], false), yAxis.getValuePosition(point[1], false));
 		setSelectionPoint(pnt);
 	}
 
@@ -137,11 +137,11 @@ public abstract class SelectionHandle extends Figure implements IMobileFigure {
 		label.setVisible(showPosition);
 	}
 
-	public void setxAxis(ICoordinateSystem axis) {
+	public void setxAxis(Axis axis) {
 		this.xAxis = axis;
 		repaint();
 	}
-	public void setyAxis(ICoordinateSystem axis) {
+	public void setyAxis(Axis axis) {
 		this.yAxis = axis;
 		repaint();
 	}
