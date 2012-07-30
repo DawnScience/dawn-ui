@@ -113,4 +113,16 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 	public void revalidated(AxisEvent evt) {
 		fireCoordinateSystemListeners();
 	}
+
+	@Override
+	public boolean isXReversed() {
+		return imageTrace.getImageOrigin()!=ImageOrigin.TOP_LEFT &&
+			   imageTrace.getImageOrigin()!=ImageOrigin.BOTTOM_LEFT;
+	}
+
+	@Override
+	public boolean isYReversed() {
+		return imageTrace.getImageOrigin()!=ImageOrigin.TOP_LEFT &&
+			   imageTrace.getImageOrigin()!=ImageOrigin.TOP_RIGHT;
+	}
 }

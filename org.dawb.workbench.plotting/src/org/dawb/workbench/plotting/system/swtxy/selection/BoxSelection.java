@@ -199,7 +199,23 @@ class BoxSelection extends AbstractSelectionRegion {
 			final Rectangle rect = getRectangleFromVertices();
 			double[] a1 = coords.getPositionValue(rect.x, rect.y);
 			double[] a2 = coords.getPositionValue(rect.x+rect.width, rect.y+rect.height);
-			final RectangularROI rroi = new RectangularROI(a1[0], a1[1], a2[0] - a1[0], a2[1] - a1[1], 0);
+			if (coords.isXReversed()) reverse(a1,a2,0);
+			if (coords.isYReversed()) reverse(a1,a2,1);
+			
+			double x = a1[0]; double y = a1[1];
+			double w = a2[0] - a1[0]; double h = a2[1] - a1[1];
+			
+			if (w<0) {
+				w = Math.abs(w);
+				x-= w;
+			}
+			if (h<0) {
+				h = Math.abs(h);
+				y-= h;
+			}
+			
+			final RectangularROI rroi = new RectangularROI(x, y, w, h, 0);
+						
 			if (recordResult)
 				roi = rroi;
 			return rroi;
@@ -207,6 +223,12 @@ class BoxSelection extends AbstractSelectionRegion {
 		return super.getROI();
 	}
 	
+	private void reverse(double[] a1, double[] a2, int i) {
+		double tmp = a1[i];
+		a1[i] = a2[i];
+		a2[i] = tmp;
+	}
+
 	protected void updateROI(ROIBase roi) {
 		if (roi instanceof RectangularROI) {
 			RectangularROI rroi = (RectangularROI) roi;
