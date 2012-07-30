@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.dawb.common.ui.plot.region.IRegion;
 import org.eclipse.draw2d.geometry.Point;
+import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,12 +98,13 @@ public class MaskObject {
 	 * @param max
 	 * @return
 	 */
-	public boolean process(Number min, Number max, Collection<IRegion> regions) {
+	public boolean process(final Number min, final Number max, Collection<IRegion> regions) {
 
-		boolean requireMinMax = true;
+		boolean tmp = true;
 		if (max == null && min == null) {
-			requireMinMax = false;
+			tmp = false;
 		}
+		final boolean requireMinMax = tmp;
 		
 		createMaskIfNeeded();
 		
@@ -115,28 +117,44 @@ public class MaskObject {
 			validRegions.add(region);
 		}
 		
-		// Slightly wrong AbstractDataset loop, but it is fast...
+		// Slightly wrong AbstractDataset loop, but it is faster...
 		final int[] shape = imageDataset.getShape();
-		for (int y = 0; y<shape[0]; ++y) {
-			for (int x = 0; x<shape[1]; ++x) {
-			    if (requireMinMax) {
-				    final float val = imageDataset.getFloat(y, x);
-				    boolean isValid = isValid(val,min,max);
-			    	if (!isValid) maskDataset.set(Boolean.FALSE, y, x); // false = masked
-			    }
-			    
-			    if (validRegions!=null) for (IRegion region : validRegions) {
-			    	try {
-						if (region.containsPoint(x, y)) {
-							maskDataset.set(Boolean.FALSE, y, x);
-						}
-			    	} catch (Throwable ne) {
-			    		logger.trace("Cannot process point "+(new Point(x,y)), ne);
-			    		continue;
-			    	}
-			    }
-
+		if (validRegions==null && requireMinMax) {
+			for (int y = 0; y<shape[0]; ++y) {
+				for (int x = 0; x<shape[1]; ++x) {
+					if (requireMinMax) {
+						final float val = imageDataset.getFloat(y, x);
+						boolean isValid = isValid(val,min,max);
+						if (!isValid) maskDataset.set(Boolean.FALSE, y, x); // false = masked
+					}
+				}
 			}
+		} else if (validRegions!=null){
+			Display.getDefault().asyncExec(new Runnable() {
+				public void run() {
+					for (int y = 0; y<shape[0]; ++y) {
+						for (int x = 0; x<shape[1]; ++x) {
+							if (requireMinMax) {
+								final float val = imageDataset.getFloat(y, x);
+								boolean isValid = isValid(val,min,max);
+								if (!isValid) maskDataset.set(Boolean.FALSE, y, x); // false = masked
+							}
+							if (validRegions!=null) for (IRegion region : validRegions) {
+								try {
+									if (region.containsPoint(x, y)) {
+										maskDataset.set(Boolean.FALSE, y, x);
+									}
+								} catch (Throwable ne) {
+									logger.trace("Cannot process point "+(new Point(x,y)), ne);
+									continue;
+								}
+							}
+						}
+					}
+
+				}
+			});
+			    
 		}
 		
 		return true;
