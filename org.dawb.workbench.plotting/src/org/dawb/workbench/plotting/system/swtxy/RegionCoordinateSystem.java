@@ -54,10 +54,12 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 	@Override
 	public double[] getPositionValue(int... position) {
 		if (isDisposed) throw new RuntimeException(getClass().getName()+" is disposed!");
+		
+		double[] value = new double[]{x.getPositionValue(position[0]), y.getPositionValue(position[1])};
 		if (isReversed()) {
-			return new double[]{x.getPositionValue(position[1]), y.getPositionValue(position[0])};
+			return new double[]{value[1], value[0]};
 		} else {
-			return new double[]{x.getPositionValue(position[0]), y.getPositionValue(position[1])};
+			return value;
 		}
 	}
 
