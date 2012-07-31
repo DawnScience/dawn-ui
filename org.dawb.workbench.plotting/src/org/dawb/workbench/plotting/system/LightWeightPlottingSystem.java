@@ -649,6 +649,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		final List<ITrace> traces = new ArrayList<ITrace>(ys.size());
 		for (AbstractDataset y : ys) {
 
+			if (y==null) continue;
 			LightWeightDataProvider traceDataProvider = new LightWeightDataProvider(x, y);
 			
 			//create the trace
