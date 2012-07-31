@@ -237,5 +237,14 @@
             name="Derivative Tool">
       </cheatsheet>
    </extension>
+   <extension
+         point="org.eclipse.ui.exportWizards">
+      <wizard
+            class="org.dawb.workbench.plotting.tools.FittedPeaksExportWizard"
+            icon="icons/plot-tool-peak-fit.png"
+            id="org.dawb.workbench.plotting.fittedPeaksExportWizard"
+            name="Fitted Peaks">
+      </wizard>
+   </extension>
 
 </plugin>
