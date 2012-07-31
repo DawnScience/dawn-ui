@@ -1,5 +1,6 @@
 package org.dawb.workbench.plotting.tools;
 
+import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.List;
 
@@ -267,6 +268,30 @@ class FittedPeak {
 		names.add(annotation.getName());
 	}
 
-	
+	public String getCSVString() {
+		
+		DecimalFormat format = new DecimalFormat("##0.#####E0");
+		final StringBuilder buf = new StringBuilder();
+		buf.append(getPeakName());
+		buf.append(",");
+		buf.append(format.format(getPosition()));
+		buf.append(",");
+		buf.append(format.format(getFWHM()));
+		buf.append(",");
+		buf.append(format.format(getArea()));
+		buf.append(",");
+		buf.append(getPeakType());
+		return buf.toString();
+	}
+
+	public static String getCVSTitle() {
+		final StringBuilder buf = new StringBuilder();
+		buf.append("Peak Name, ");
+		buf.append("Position, ");
+		buf.append("FWHM, ");
+		buf.append("Area, ");
+		buf.append("Peak Type");
+		return buf.toString();
+	}
 	
 }
