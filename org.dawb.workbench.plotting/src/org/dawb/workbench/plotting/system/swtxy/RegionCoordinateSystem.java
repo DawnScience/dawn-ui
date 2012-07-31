@@ -18,6 +18,12 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 	private IAxis x,y;
 	private boolean isDisposed=false;
 
+	/**
+	 * 
+	 * @param imageTrace (may be null) 
+	 * @param x
+	 * @param y
+	 */
 	public RegionCoordinateSystem(IImageTrace imageTrace, IAxis x, IAxis y) {
 		this.imageTrace = imageTrace;
 		this.x          = x;
@@ -116,12 +122,14 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 
 	@Override
 	public boolean isXReversed() {
+		if (imageTrace==null) return false;
 		return imageTrace.getImageOrigin()!=ImageOrigin.TOP_LEFT &&
 			   imageTrace.getImageOrigin()!=ImageOrigin.BOTTOM_LEFT;
 	}
 
 	@Override
 	public boolean isYReversed() {
+		if (imageTrace==null) return false;
 		return imageTrace.getImageOrigin()!=ImageOrigin.TOP_LEFT &&
 			   imageTrace.getImageOrigin()!=ImageOrigin.TOP_RIGHT;
 	}
