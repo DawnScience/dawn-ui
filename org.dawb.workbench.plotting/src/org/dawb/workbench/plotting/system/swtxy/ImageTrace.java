@@ -41,13 +41,11 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.function.Downsample;
 import uk.ac.diamond.scisoft.analysis.dataset.function.DownsampleMode;
-import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.PointROI;
 import uk.ac.diamond.scisoft.analysis.roi.PolygonalROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
-import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 
 /**
  * A trace which draws an image to the plot.
@@ -646,6 +644,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 	@Override
 	public ImageOrigin getImageOrigin() {
+		if (imageServiceBean==null) return ImageOrigin.TOP_LEFT;
 		return imageServiceBean.getOrigin();
 	}
 	
