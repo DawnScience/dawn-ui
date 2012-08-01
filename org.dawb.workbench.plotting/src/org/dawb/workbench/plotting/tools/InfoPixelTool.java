@@ -300,8 +300,9 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
     		// add a point region
         	final IRegion point = getPlottingSystem().createRegion(RegionUtils.getUniqueName("Point", getPlottingSystem()), RegionType.POINT);
         	final PointROI regionBounds= new PointROI();
-            double[] values = point.getCoordinateSystem().getPositionValue(evt.x, evt.y);
-            regionBounds.setPoint(values);
+            double x = getPlottingSystem().getSelectedXAxis().getPositionValue(evt.x);
+            double y = getPlottingSystem().getSelectedYAxis().getPositionValue(evt.y);
+            regionBounds.setPoint(new double[]{x,y});
             point.setROI(regionBounds);
             point.setMobile(true);
             point.setTrackMouse(true);
