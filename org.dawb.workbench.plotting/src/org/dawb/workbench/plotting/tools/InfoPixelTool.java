@@ -137,7 +137,7 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 			
 				for (int i=0; i< regions.size(); i++){
 					IRegion pointRegion = (IRegion)(regions.toArray())[i];
-										
+															
 					if (pointRegion.getRegionType() == RegionType.XAXIS_LINE || pointRegion.getRegionType() == RegionType.POINT ){
 						
 						visible.add(pointRegion);										
@@ -300,9 +300,8 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
     		// add a point region
         	final IRegion point = getPlottingSystem().createRegion(RegionUtils.getUniqueName("Point", getPlottingSystem()), RegionType.POINT);
         	final PointROI regionBounds= new PointROI();
-            double x = getPlottingSystem().getSelectedXAxis().getPositionValue(evt.x);
-            double y = getPlottingSystem().getSelectedYAxis().getPositionValue(evt.y);
-            regionBounds.setPoint(new double[]{x,y});
+            double[] values = point.getCoordinateSystem().getPositionValue(evt.x, evt.y);
+            regionBounds.setPoint(values);
             point.setROI(regionBounds);
             point.setMobile(true);
             point.setTrackMouse(true);
@@ -338,7 +337,7 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 					final IRegion region = (IRegion)sel.getFirstElement();
 					if (region==null||region.getROI()==null) return;
 					final ROIBase bounds = region.getROI();
-					if (bounds.getPoint()==null) return;
+					if (bounds.getPointRef()==null) return;
 
 					final Clipboard cb = new Clipboard(composite.getDisplay());
 					TextTransfer textTransfer = TextTransfer.getInstance();
@@ -521,8 +520,8 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 	@Override
 	public void regionsRemoved(RegionEvent evt) {
 		if (!isActive()) return;
-		if (viewer!=null) viewer.refresh();
-		
+		createRegions();
+		if (viewer!=null) viewer.refresh();		
 	}
 	
 	@Override
@@ -535,6 +534,7 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 
 		if (viewer != null) {
 			IRegion region = (IRegion) evt.getSource();
+
 			if (region.getRegionType() == RegionType.POINT) {
 				// update table for current point region
 				ROIBase rb = evt.getROI();
