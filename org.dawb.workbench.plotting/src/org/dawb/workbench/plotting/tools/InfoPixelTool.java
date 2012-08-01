@@ -137,9 +137,7 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 			
 				for (int i=0; i< regions.size(); i++){
 					IRegion pointRegion = (IRegion)(regions.toArray())[i];
-					
-					System.out.println("pointRegion.getRegionType(): " + pointRegion.getRegionType());
-										
+															
 					if (pointRegion.getRegionType() == RegionType.XAXIS_LINE || pointRegion.getRegionType() == RegionType.POINT ){
 						
 						visible.add(pointRegion);										
@@ -523,8 +521,7 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 	public void regionsRemoved(RegionEvent evt) {
 		if (!isActive()) return;
 		createRegions();
-		if (viewer!=null) viewer.refresh();
-		
+		if (viewer!=null) viewer.refresh();		
 	}
 	
 	@Override
