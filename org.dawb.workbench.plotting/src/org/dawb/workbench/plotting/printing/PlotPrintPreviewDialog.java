@@ -12,7 +12,6 @@ package org.dawb.workbench.plotting.printing;
 
 import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.dawb.workbench.plotting.printing.PrintSettings.Orientation;
-import org.dawb.workbench.plotting.printing.PrintSettings.Resolution;
 import org.dawb.workbench.plotting.printing.PrintSettings.Scale;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -27,7 +26,6 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
-import org.eclipse.swt.printing.PrintDialog;
 import org.eclipse.swt.printing.Printer;
 import org.eclipse.swt.printing.PrinterData;
 import org.eclipse.swt.widgets.Button;
@@ -58,8 +56,8 @@ public class PlotPrintPreviewDialog extends Dialog {
 	private PrintMargin margin;
 	private Combo comboPrinterName;
 	private Combo comboScale;
-	private Combo comboOrientation;
-	private Combo comboResolution;
+//	private Combo comboOrientation;
+	private Button buttonAspectRatio;
 
 	protected String printScaleText = "Scale";
 	protected String printButtonText = "Print";
@@ -103,8 +101,25 @@ public class PlotPrintPreviewDialog extends Dialog {
 		}
 		this.printer = new Printer(this.settings.getPrinterData());
 		this.xyGraph = xyGraph;
-		Rectangle imageSize = new Rectangle(0, 0, printer.getBounds().width, printer.getBounds().height);
-		image = xyGraph.getImage(imageSize);
+		Rectangle imageSize = getImageSizeRect(xyGraph);
+		Rectangle printerSize = new Rectangle(0, 0, printer.getBounds().width, printer.getBounds().height);
+		if(getPreferenceAspectRatio())
+			image = xyGraph.getImage(imageSize);
+		else
+			image = xyGraph.getImage(printerSize);
+	}
+
+	// Resize the image to the printer size
+	private Rectangle getImageSizeRect(XYGraph xyGraph){
+		int imageWidth = xyGraph.getBounds().width;
+		int imageHeight = xyGraph.getBounds().height;
+		int printWidth = printer.getBounds().width;
+		
+		imageHeight = Math.round((printWidth*imageHeight)/imageWidth);
+		imageWidth = printWidth;
+		
+		Rectangle rect = new Rectangle(0, 0, imageWidth, imageHeight);
+		return rect;
 	}
 
 	/**
@@ -128,24 +143,24 @@ public class PlotPrintPreviewDialog extends Dialog {
 		previewComposite.setLayout(previewLayout);
 
 
-		final Button buttonSelectPrinter = new Button(previewComposite, SWT.PUSH);
-		buttonSelectPrinter.setText(printerSelectText);
-		buttonSelectPrinter.addListener(SWT.Selection, new Listener() {
-			@Override
-			public void handleEvent(Event event) {
-				PrintDialog dialog = new PrintDialog(shell);
-				// Prompts the printer dialog to let the user select a printer.
-				PrinterData printerData = dialog.open();
-				if (printerData == null) // the user cancels the dialog
-					return;
-				settings.setPrinterData(printerData);
-				// Loads the printer.
-				setPrinter(printer, settings.getScale().getValue());
-				// print the plot
-				print(printer, margin, settings);
-				shell.dispose();
-			}
-		});
+//		final Button buttonSelectPrinter = new Button(previewComposite, SWT.PUSH);
+//		buttonSelectPrinter.setText(printerSelectText);
+//		buttonSelectPrinter.addListener(SWT.Selection, new Listener() {
+//			@Override
+//			public void handleEvent(Event event) {
+//				PrintDialog dialog = new PrintDialog(shell);
+//				// Prompts the printer dialog to let the user select a printer.
+//				PrinterData printerData = dialog.open();
+//				if (printerData == null) // the user cancels the dialog
+//					return;
+//				settings.setPrinterData(printerData);
+//				// Loads the printer.
+//				setPrinter(printer, settings.getScale().getValue());
+//				// print the plot
+//				print(printer, margin, settings);
+//				shell.dispose();
+//			}
+//		});
 		
 		final Button buttonPrint = new Button(previewComposite, SWT.PUSH);
 		buttonPrint.setText(printButtonText);
@@ -185,19 +200,14 @@ public class PlotPrintPreviewDialog extends Dialog {
 		comboScale.select(getPreferencePrintScale());
 		comboScale.addSelectionListener(scaleSelection);
 
-		Composite resolutionComposite = new Composite(previewComposite, SWT.BORDER);
-		RowLayout resolutionLayout = new RowLayout();
-		resolutionLayout.center=true;
-		resolutionComposite.setLayout(resolutionLayout);
-		Label resolutionLabel = new Label(resolutionComposite, SWT.SINGLE);
-		resolutionLabel.setText(resolutionText + ":");
-		comboResolution = new Combo(resolutionComposite, SWT.READ_ONLY);
-		Resolution[] resolutionList = Resolution.values();
-		for (int i = 0; i < resolutionList.length; i++) {
-			comboResolution.add(resolutionList[i].getName());
-		}
-		comboResolution.select(getPreferencePrintResolution());
-		comboResolution.addSelectionListener(resolutionSelection);
+		Composite aspectRatioComposite = new Composite(previewComposite, SWT.BORDER);
+		RowLayout aspectRatioLayout = new RowLayout();
+		aspectRatioLayout.center=true;
+		aspectRatioComposite.setLayout(aspectRatioLayout);
+		buttonAspectRatio = new Button(aspectRatioComposite, SWT.CHECK);
+		buttonAspectRatio.setText("Keep Aspect Ratio");
+		buttonAspectRatio.setSelection(getPreferenceAspectRatio());
+		buttonAspectRatio.addSelectionListener(aspectRatioListener);
 
 		// TODO orientation button disabled: works for preview not for data sent to printer
 //		Composite orientationComposite = new Composite(previewComposite, SWT.BORDER);
@@ -261,8 +271,8 @@ public class PlotPrintPreviewDialog extends Dialog {
 		settings.setPrinterData(printerList[printerNameNum]);
 		setPrinter(printer, settings.getScale().getValue());
 		logger.info(printer.getPrinterData().name);
-		Rectangle imageSize = new Rectangle(0, 0, printer.getBounds().width, printer.getBounds().height);
-		image = xyGraph.getImage(imageSize);
+//		Rectangle imageSize = new Rectangle(0, 0, printer.getBounds().width, printer.getBounds().height);
+//		image = xyGraph.getImage(imageSize);
 	}
 
 	private SelectionAdapter scaleSelection = new SelectionAdapter() {
@@ -301,56 +311,46 @@ public class PlotPrintPreviewDialog extends Dialog {
 		setPrinter(printer, settings.getScale().getValue());
 	}
 
-	private SelectionAdapter resolutionSelection = new SelectionAdapter() {
+	private SelectionAdapter aspectRatioListener = new SelectionAdapter(){
 		@Override
 		public void widgetSelected(SelectionEvent e) {
-			selectResolution(comboResolution.getSelectionIndex());
-			setResolutionPreference(comboResolution.getSelectionIndex());
+			settings.setKeepAspectRatio(buttonAspectRatio.getSelection());
+			setAspectRatioPreference(buttonAspectRatio.getSelection());
+			// set aspect ratio
+			Rectangle imageRect = getImageSizeRect(xyGraph);
+			Rectangle printRect = new Rectangle(0, 0, printer.getBounds().width, printer.getBounds().height);
+			if(buttonAspectRatio.getSelection()){
+				image = xyGraph.getImage(imageRect);
+			}else {
+				image = xyGraph.getImage(printRect);
+			}
+			canvas.redraw();
 		}
 	};
 
-	private void selectResolution(int resolutionNum) {
-		// ("Low", 1), ("Medium", 2), ("Medium High", 3), ("High", 4) 	
-		switch (resolutionNum){
-		case 0:
-			settings.setResolution(Resolution.LOW);
-			break;
-		case 1:
-			settings.setResolution(Resolution.MEDIUM);
-			break;
-		case 2:
-			settings.setResolution(Resolution.MEDIUMHIGH);
-			break;
-		case 3:
-			settings.setResolution(Resolution.HIGH);
-			break;
-		}
-		setPrinter(printer, settings.getScale().getValue());
-	}
+//	private SelectionAdapter orientationSelection = new SelectionAdapter() {
+//		@Override
+//		public void widgetSelected(SelectionEvent e) {
+//			selectOrientation(comboOrientation.getSelectionIndex());
+//			setOrientationPreference(comboOrientation.getSelectionIndex());
+//			
+//		}
+//	};
 
-	private SelectionAdapter orientationSelection = new SelectionAdapter() {
-		@Override
-		public void widgetSelected(SelectionEvent e) {
-			selectOrientation(comboOrientation.getSelectionIndex());
-			setOrientationPreference(comboOrientation.getSelectionIndex());
-			
-		}
-	};
-
-	private void selectOrientation(int orientationNum) {
-		// "Portrait", "Landscape"
-		switch (orientationNum){
-		case 0:
-			settings.setOrientation(Orientation.PORTRAIT);
-			settings.getPrinterData().orientation = Orientation.PORTRAIT.getValue();
-			break;
-		case 1:
-			settings.setOrientation(Orientation.LANDSCAPE);
-			settings.getPrinterData().orientation = Orientation.LANDSCAPE.getValue();
-			break;
-		}
-		canvas.redraw();
-	}
+//	private void selectOrientation(int orientationNum) {
+//		// "Portrait", "Landscape"
+//		switch (orientationNum){
+//		case 0:
+//			settings.setOrientation(Orientation.PORTRAIT);
+//			settings.getPrinterData().orientation = Orientation.PORTRAIT.getValue();
+//			break;
+//		case 1:
+//			settings.setOrientation(Orientation.LANDSCAPE);
+//			settings.getPrinterData().orientation = Orientation.LANDSCAPE.getValue();
+//			break;
+//		}
+//		canvas.redraw();
+//	}
 	
 	/**
 	 * PlotPrintPreviewDialog is listening to eventual property changes done through the Preference Page
@@ -371,7 +371,8 @@ public class PlotPrintPreviewDialog extends Dialog {
 				if (property.equals(PrintingPrefValues.PRINTSETTINGS_PRINTER_NAME)
 						|| property.equals(PrintingPrefValues.PRINTSETTINGS_SCALE)
 						|| property.equals(PrintingPrefValues.PRINTSETTINGS_RESOLUTION)
-						|| property.equals(PrintingPrefValues.PRINTSETTINGS_ORIENTATION)) {
+						|| property.equals(PrintingPrefValues.PRINTSETTINGS_ORIENTATION)
+						|| property.equals(PrintingPrefValues.PRINTSETTINGS_ASPECTRATIO)) {
 
 					int printerName;
 					if (preferenceStore.isDefault(PrintingPrefValues.PRINTSETTINGS_PRINTER_NAME)) {
@@ -401,19 +402,13 @@ public class PlotPrintPreviewDialog extends Dialog {
 						}
 					}
 
-					int resolution;
-					if (preferenceStore.isDefault(PrintingPrefValues.PRINTSETTINGS_RESOLUTION)) {
-						resolution = preferenceStore.getDefaultInt(PrintingPrefValues.PRINTSETTINGS_RESOLUTION);
+					boolean keepAspectRatio;
+					if (preferenceStore.isDefault(PrintingPrefValues.PRINTSETTINGS_ASPECTRATIO)) {
+						keepAspectRatio = preferenceStore.getDefaultBoolean(PrintingPrefValues.PRINTSETTINGS_ASPECTRATIO);
 					} else {
-						resolution = preferenceStore.getInt(PrintingPrefValues.PRINTSETTINGS_RESOLUTION);
+						keepAspectRatio = preferenceStore.getBoolean(PrintingPrefValues.PRINTSETTINGS_ASPECTRATIO);
 					}
-					Resolution[] resolutions = Resolution.values();
-					for (int i = 0; i < resolutions.length; i++) {
-						if(i==resolution){
-							settings.setResolution(resolutions[i]);
-							break;
-						}
-					}
+					settings.setKeepAspectRatio(keepAspectRatio);
 
 					int orientation;
 					if (preferenceStore.isDefault(PrintingPrefValues.PRINTSETTINGS_ORIENTATION)) {
@@ -435,7 +430,6 @@ public class PlotPrintPreviewDialog extends Dialog {
 	
 	private int getPreferencePrinterName() {
 		final ScopedPreferenceStore preferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, "uk.ac.diamond.scisoft.analysis.rcp");
-		//IPreferenceStore preferenceStore = AnalysisRCPActivator.getDefault().getPreferenceStore();
 		return preferenceStore.isDefault(PrintingPrefValues.PRINTSETTINGS_PRINTER_NAME)
 				? preferenceStore.getDefaultInt(PrintingPrefValues.PRINTSETTINGS_PRINTER_NAME)
 				: preferenceStore.getInt(PrintingPrefValues.PRINTSETTINGS_PRINTER_NAME);
@@ -443,55 +437,48 @@ public class PlotPrintPreviewDialog extends Dialog {
 	
 	private int getPreferencePrintScale() {
 		final ScopedPreferenceStore preferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, "uk.ac.diamond.scisoft.analysis.rcp");
-		//IPreferenceStore preferenceStore = AnalysisRCPActivator.getDefault().getPreferenceStore();
 		return preferenceStore.isDefault(PrintingPrefValues.PRINTSETTINGS_SCALE)
 				? preferenceStore.getDefaultInt(PrintingPrefValues.PRINTSETTINGS_SCALE)
 				: preferenceStore.getInt(PrintingPrefValues.PRINTSETTINGS_SCALE);
 	}
 	
-	private int getPreferencePrintResolution() {
+	private boolean getPreferenceAspectRatio() {
 		final ScopedPreferenceStore preferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, "uk.ac.diamond.scisoft.analysis.rcp");
-		//IPreferenceStore preferenceStore = AnalysisRCPActivator.getDefault().getPreferenceStore();
-		return preferenceStore.isDefault(PrintingPrefValues.PRINTSETTINGS_RESOLUTION)
-				? preferenceStore.getDefaultInt(PrintingPrefValues.PRINTSETTINGS_RESOLUTION)
-				: preferenceStore.getInt(PrintingPrefValues.PRINTSETTINGS_RESOLUTION);
+		return preferenceStore.isDefault(PrintingPrefValues.PRINTSETTINGS_ASPECTRATIO)
+				? preferenceStore.getDefaultBoolean(PrintingPrefValues.PRINTSETTINGS_ASPECTRATIO)
+				: preferenceStore.getBoolean(PrintingPrefValues.PRINTSETTINGS_ASPECTRATIO);
 	}
-	
-	private int getPreferencePrintOrientation() {
-		final ScopedPreferenceStore preferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, "uk.ac.diamond.scisoft.analysis.rcp");
-		//IPreferenceStore preferenceStore = AnalysisRCPActivator.getDefault().getPreferenceStore();
-		return preferenceStore.isDefault(PrintingPrefValues.PRINTSETTINGS_ORIENTATION)
-				? preferenceStore.getDefaultInt(PrintingPrefValues.PRINTSETTINGS_ORIENTATION)
-				: preferenceStore.getInt(PrintingPrefValues.PRINTSETTINGS_ORIENTATION);
-	}
+
+//	private int getPreferencePrintOrientation() {
+//		final ScopedPreferenceStore preferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, "uk.ac.diamond.scisoft.analysis.rcp");
+//		return preferenceStore.isDefault(PrintingPrefValues.PRINTSETTINGS_ORIENTATION)
+//				? preferenceStore.getDefaultInt(PrintingPrefValues.PRINTSETTINGS_ORIENTATION)
+//				: preferenceStore.getInt(PrintingPrefValues.PRINTSETTINGS_ORIENTATION);
+//	}
 
 	private void setPrinterNamePreference(int value) {
 		final ScopedPreferenceStore preferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, "uk.ac.diamond.scisoft.analysis.rcp");
-		//IPreferenceStore preferenceStore = AnalysisRCPActivator.getDefault().getPreferenceStore();
 		settings.setPrinterData(Printer.getPrinterList()[value]);
 		preferenceStore.setValue(PrintingPrefValues.PRINTSETTINGS_PRINTER_NAME, value);
 	}
 	
 	private void setScalePreference(int value) {
 		final ScopedPreferenceStore preferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, "uk.ac.diamond.scisoft.analysis.rcp");
-		//IPreferenceStore preferenceStore = AnalysisRCPActivator.getDefault().getPreferenceStore();
 		settings.setScale(Scale.values()[value]);
 		preferenceStore.setValue(PrintingPrefValues.PRINTSETTINGS_SCALE, value);
 	}
-	
-	private void setResolutionPreference(int value) {
+
+	private void setAspectRatioPreference(boolean value) {
 		final ScopedPreferenceStore preferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, "uk.ac.diamond.scisoft.analysis.rcp");
-		//IPreferenceStore preferenceStore = AnalysisRCPActivator.getDefault().getPreferenceStore();
-		settings.setResolution(Resolution.values()[value]);
-		preferenceStore.setValue(PrintingPrefValues.PRINTSETTINGS_RESOLUTION, value);
+		settings.setKeepAspectRatio(value);
+		preferenceStore.setValue(PrintingPrefValues.PRINTSETTINGS_ASPECTRATIO, value);
 	}
 	
-	private void setOrientationPreference(int value) {
-		final ScopedPreferenceStore preferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, "uk.ac.diamond.scisoft.analysis.rcp");
-		//IPreferenceStore preferenceStore = AnalysisRCPActivator.getDefault().getPreferenceStore();
-		settings.setOrientation(Orientation.values()[value]);
-		preferenceStore.setValue(PrintingPrefValues.PRINTSETTINGS_ORIENTATION, value);
-	}
+//	private void setOrientationPreference(int value) {
+//		final ScopedPreferenceStore preferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, "uk.ac.diamond.scisoft.analysis.rcp");
+//		settings.setOrientation(Orientation.values()[value]);
+//		preferenceStore.setValue(PrintingPrefValues.PRINTSETTINGS_ORIENTATION, value);
+//	}
 	
 	private void paint(Event e, Orientation orientation) {
 	
@@ -558,20 +545,20 @@ public class PlotPrintPreviewDialog extends Dialog {
 			canvas.redraw();
 	}
 
-	/**
-	 * Lets the user to select a printer and prints the image on it.
-	 */
-	private void print() {
-		PrintDialog dialog = new PrintDialog(shell);
-		// Prompts the printer dialog to let the user select a printer.
-		PrinterData printerData = dialog.open();
-
-		if (printerData == null) // the user cancels the dialog
-			return;
-		// Loads the printer.
-		Printer printer = new Printer(printerData);
-		print(printer, null, settings);
-	}
+//	/**
+//	 * Lets the user to select a printer and prints the image on it.
+//	 */
+//	private void print() {
+//		PrintDialog dialog = new PrintDialog(shell);
+//		// Prompts the printer dialog to let the user select a printer.
+//		PrinterData printerData = dialog.open();
+//
+//		if (printerData == null) // the user cancels the dialog
+//			return;
+//		// Loads the printer.
+//		Printer printer = new Printer(printerData);
+//		print(printer, null, settings);
+//	}
 
 	/**
 	 * Prints the image current displayed to the specified printer.
