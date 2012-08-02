@@ -101,12 +101,11 @@ public class PlotPrintPreviewDialog extends Dialog {
 		}
 		this.printer = new Printer(this.settings.getPrinterData());
 		this.xyGraph = xyGraph;
-		Rectangle imageSize = getImageSizeRect(xyGraph);
-		Rectangle printerSize = new Rectangle(0, 0, printer.getBounds().width, printer.getBounds().height);
+
 		if(getPreferenceAspectRatio())
-			image = xyGraph.getImage(imageSize);
+			image = xyGraph.getImage(getImageSizeRect(xyGraph));
 		else
-			image = xyGraph.getImage(printerSize);
+			image = xyGraph.getImage(getPrinterSizeRect(printer));
 	}
 
 	// Resize the image to the printer size
@@ -114,11 +113,45 @@ public class PlotPrintPreviewDialog extends Dialog {
 		int imageWidth = xyGraph.getBounds().width;
 		int imageHeight = xyGraph.getBounds().height;
 		int printWidth = printer.getBounds().width;
-		
+		Point screenDPI = Display.getCurrent().getDPI();
+		Point printerDPI = printer.getDPI();
+		float scaleFactorX = printerDPI.x / screenDPI.x;
+
 		imageHeight = Math.round((printWidth*imageHeight)/imageWidth);
 		imageWidth = printWidth;
 		
+		if(scaleFactorX==0){
+			scaleFactorX = screenDPI.x/printerDPI.x;
+			imageWidth = Math.round(imageWidth*scaleFactorX);
+			imageHeight = Math.round(imageHeight*scaleFactorX);
+		}
+		else{
+			imageWidth = Math.round(imageWidth/scaleFactorX);
+			imageHeight = Math.round(imageHeight/scaleFactorX);
+		}
 		Rectangle rect = new Rectangle(0, 0, imageWidth, imageHeight);
+		return rect;
+	}
+
+	// Resize the printer size if too big
+	private Rectangle getPrinterSizeRect(Printer printer){
+		int printWidth = printer.getBounds().width;
+		int printHeight = printer.getBounds().width;
+		Point screenDPI = Display.getCurrent().getDPI();
+		Point printerDPI = printer.getDPI();
+		float scaleFactorX = printerDPI.x / screenDPI.x;
+		
+		if(scaleFactorX==0){
+			scaleFactorX = screenDPI.x/printerDPI.x;
+			printWidth = Math.round(printWidth*scaleFactorX);
+			printHeight = Math.round(printHeight*scaleFactorX);
+		}
+		else{
+			printWidth = Math.round(printWidth/scaleFactorX);
+			printHeight = Math.round(printHeight/scaleFactorX);
+		}
+
+		Rectangle rect = new Rectangle(0, 0, printWidth, printHeight);
 		return rect;
 	}
 
@@ -317,12 +350,10 @@ public class PlotPrintPreviewDialog extends Dialog {
 			settings.setKeepAspectRatio(buttonAspectRatio.getSelection());
 			setAspectRatioPreference(buttonAspectRatio.getSelection());
 			// set aspect ratio
-			Rectangle imageRect = getImageSizeRect(xyGraph);
-			Rectangle printRect = new Rectangle(0, 0, printer.getBounds().width, printer.getBounds().height);
 			if(buttonAspectRatio.getSelection()){
-				image = xyGraph.getImage(imageRect);
+				image = xyGraph.getImage(getImageSizeRect(xyGraph));
 			}else {
-				image = xyGraph.getImage(printRect);
+				image = xyGraph.getImage(getPrinterSizeRect(printer));
 			}
 			canvas.redraw();
 		}
