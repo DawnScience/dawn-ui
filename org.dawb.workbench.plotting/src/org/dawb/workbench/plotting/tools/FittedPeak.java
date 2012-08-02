@@ -28,6 +28,7 @@ class FittedPeak {
 	private AbstractDataset[] peakFunctions;
 	private boolean           saved=false;
 	private String            peakName;
+	private AbstractDataset   y;
 	
 	public boolean isSaved() {
 		return saved;
@@ -77,7 +78,16 @@ class FittedPeak {
 		ret.annotation = annotation;
 		ret.peakName   = peakName;
 		ret.saved      = saved;
+		ret.y          = y;
 		return ret;
+	}
+
+	public AbstractDataset getY() {
+		return y;
+	}
+
+	public void setY(AbstractDataset y) {
+		this.y = y;
 	}
 
 	public void activate() {
@@ -292,6 +302,15 @@ class FittedPeak {
 		buf.append("Area, ");
 		buf.append("Peak Type");
 		return buf.toString();
+	}
+
+	public double getDataValue() {
+		try {
+		    final int pos = (int)Math.round(getPosition());
+		    return y.getDouble(pos);
+		} catch (Throwable ne) {
+			return Double.NaN;
+		}
 	}
 	
 }

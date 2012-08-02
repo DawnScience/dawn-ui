@@ -166,29 +166,41 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		var.setLabelProvider(new FittingLabelProvider(0));
 		
         var   = new TableViewerColumn(viewer, SWT.CENTER, 1);
-		var.getColumn().setText("Position");
+		var.getColumn().setText("Index");
 		var.getColumn().setWidth(100);
 		var.setLabelProvider(new FittingLabelProvider(1));
-
+		
         var   = new TableViewerColumn(viewer, SWT.CENTER, 2);
-		var.getColumn().setText("FWHM");
+		var.getColumn().setText("Data");
+		var.getColumn().setToolTipText("The nearest data value of the fitted peak.");
 		var.getColumn().setWidth(100);
 		var.setLabelProvider(new FittingLabelProvider(2));
-		
+
         var   = new TableViewerColumn(viewer, SWT.CENTER, 3);
-		var.getColumn().setText("Area");
+		var.getColumn().setText("Fit");
+		var.getColumn().setToolTipText("The value of the fitted peak.");
 		var.getColumn().setWidth(100);
 		var.setLabelProvider(new FittingLabelProvider(3));
 
-        var   = new TableViewerColumn(viewer, SWT.CENTER, 4);
-		var.getColumn().setText("Type");
+		var   = new TableViewerColumn(viewer, SWT.CENTER, 4);
+		var.getColumn().setText("FWHM");
 		var.getColumn().setWidth(100);
 		var.setLabelProvider(new FittingLabelProvider(4));
 		
         var   = new TableViewerColumn(viewer, SWT.CENTER, 5);
-		var.getColumn().setText("Algorithm");
+		var.getColumn().setText("Area");
 		var.getColumn().setWidth(100);
 		var.setLabelProvider(new FittingLabelProvider(5));
+
+        var   = new TableViewerColumn(viewer, SWT.CENTER, 6);
+		var.getColumn().setText("Type");
+		var.getColumn().setWidth(100);
+		var.setLabelProvider(new FittingLabelProvider(6));
+		
+        var   = new TableViewerColumn(viewer, SWT.CENTER, 7);
+		var.getColumn().setText("Algorithm");
+		var.getColumn().setWidth(100);
+		var.setLabelProvider(new FittingLabelProvider(7));
 
 	}
 	
@@ -364,12 +376,20 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 			AbstractDataset[] a= FittingUtils.xintersection(x,y,p1[0],p2[0]);
 			x = a[0]; y=a[1];
 
-			final FittedPeaks bean = FittingUtils.getFittedPeaks(x, y, monitor);
-    		// Add saved peaks if any.
-    		if (fittedPeaks!=null && !fittedPeaks.isEmpty() && bean!=null) {
-    			bean.addFittedPeaks(fittedPeaks.getPeakList());
-    		}
-			createFittedPeaks(bean);
+			try {
+				final FittedPeaks bean = FittingUtils.getFittedPeaks(x, y, monitor);
+	    		if (bean!=null) for (FittedPeak p : bean.getPeakList()) {
+	    			p.setY(selectedTrace.getYData());
+				}
+	    		// Add saved peaks if any.
+	    		if (fittedPeaks!=null && !fittedPeaks.isEmpty() && bean!=null) {
+	    			bean.addFittedPeaks(fittedPeaks.getPeakList());
+	    		}
+				createFittedPeaks(bean);
+			} catch (Exception ne) {
+				logger.error("Cannot fit peaks!", ne);
+				return Status.CANCEL_STATUS;
+			}
 
 			return Status.OK_STATUS;
 		}
