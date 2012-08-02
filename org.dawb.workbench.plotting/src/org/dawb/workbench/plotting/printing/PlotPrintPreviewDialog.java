@@ -370,7 +370,6 @@ public class PlotPrintPreviewDialog extends Dialog {
 				ScopedPreferenceStore preferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, "uk.ac.diamond.scisoft.analysis.rcp");
 				if (property.equals(PrintingPrefValues.PRINTSETTINGS_PRINTER_NAME)
 						|| property.equals(PrintingPrefValues.PRINTSETTINGS_SCALE)
-						|| property.equals(PrintingPrefValues.PRINTSETTINGS_RESOLUTION)
 						|| property.equals(PrintingPrefValues.PRINTSETTINGS_ORIENTATION)
 						|| property.equals(PrintingPrefValues.PRINTSETTINGS_ASPECTRATIO)) {
 
