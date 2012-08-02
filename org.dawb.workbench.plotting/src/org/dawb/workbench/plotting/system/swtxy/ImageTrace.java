@@ -477,7 +477,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		paletteListeners = null;
         clearAspect(xAxis);
         clearAspect(yAxis);
-		getParent().remove(this);
+		if (getParent()!=null) getParent().remove(this);
 		xAxis.removeListener(this);
 		yAxis.removeListener(this);
 		axisRedrawActive = false;
