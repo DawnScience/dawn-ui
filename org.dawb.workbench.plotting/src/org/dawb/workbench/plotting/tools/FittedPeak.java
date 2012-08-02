@@ -13,6 +13,7 @@ import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.TraceUtils;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
@@ -28,8 +29,16 @@ class FittedPeak {
 	private AbstractDataset[] peakFunctions;
 	private boolean           saved=false;
 	private String            peakName;
-	private AbstractDataset   y;
+	private AbstractDataset   x,y;
 	
+	public AbstractDataset getX() {
+		return x;
+	}
+
+	public void setX(AbstractDataset x) {
+		this.x = x;
+	}
+
 	public boolean isSaved() {
 		return saved;
 	}
@@ -305,9 +314,12 @@ class FittedPeak {
 	}
 
 	public double getDataValue() {
+		if (x==null || y==null) return Double.NaN;
 		try {
-		    final int pos = (int)Math.round(getPosition());
-		    return y.getDouble(pos);
+		    final double xValue = getPosition();
+		    List<Double>  cross = DatasetUtils.crossings(x, xValue);
+		    final int index     = (int)Math.round(cross.get(0));
+		    return y.getDouble(index);
 		} catch (Throwable ne) {
 			return Double.NaN;
 		}
