@@ -166,7 +166,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		var.setLabelProvider(new FittingLabelProvider(0));
 		
         var   = new TableViewerColumn(viewer, SWT.CENTER, 1);
-		var.getColumn().setText("Index");
+		var.getColumn().setText("Position");
 		var.getColumn().setWidth(100);
 		var.setLabelProvider(new FittingLabelProvider(1));
 		
@@ -379,6 +379,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 			try {
 				final FittedPeaks bean = FittingUtils.getFittedPeaks(x, y, monitor);
 	    		if (bean!=null) for (FittedPeak p : bean.getPeakList()) {
+	    			p.setX(selectedTrace.getXData());
 	    			p.setY(selectedTrace.getYData());
 				}
 	    		// Add saved peaks if any.
