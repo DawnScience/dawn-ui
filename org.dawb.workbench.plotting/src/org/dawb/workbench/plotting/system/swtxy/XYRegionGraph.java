@@ -239,19 +239,38 @@ public class XYRegionGraph extends XYGraph {
 	 */
 	public void setZoomLevel(MouseEvent evt, double delta) {
 		
-		// TODO This should not always zoom equally in x and y.
-		// If y << x scroll slower in y.
-		// If x << y scroll slower in x.
 		int primX = primaryXAxis.getLength() - primaryXAxis.getMargin();
 		int primY = primaryYAxis.getLength() - primaryYAxis.getMargin();
 		double xScale = delta;
-		double yScale = delta;
+		double yScale = delta;	
+
+		// Allow for axis size
 		if (primX>(primY*1.333)) {
 			double ratio = (Double.valueOf(primX)/Double.valueOf(primY));
 			yScale = delta / ratio;
 		} else if (primY>(primX*1.333)) {
 			xScale = delta / (Double.valueOf(primY)/Double.valueOf(primX));
 		}
+		
+		// Allow for available size
+		if (getRegionArea().getImageTrace()!=null) {
+			
+			// Fudged scaling algorithm
+			// TODO make a less jerky one
+			Rectangle fullSize  = getBounds();
+			int w  = fullSize.width; 
+			int h  = fullSize.height;
+			int xg = w-primX; 
+			int yg = h-primY; 
+			if ((xg-yg)>100) {
+				double scale = 2d;
+				yScale = delta>0 ? yScale*scale : yScale/scale;
+			} else if ((yg-xg)>10) {
+				double scale = 6d;
+				yScale = delta>0 ? yScale/scale : yScale*scale;
+			}
+		}
+		
 		for (Axis axis : getXAxisList()) {
 			final double cenX = axis.getPositionValue(evt.x, false);
 			axis.zoomInOut(cenX, xScale);
