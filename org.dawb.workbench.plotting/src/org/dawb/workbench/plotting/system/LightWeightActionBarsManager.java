@@ -473,6 +473,16 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 		action.setImageDescriptor(Activator.getImageDescriptor("icons/aspect.png"));
 		action.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.ASPECT));
 		
+		final Action hideAxes = new Action("Show image axes", IAction.AS_CHECK_BOX) {
+			
+		    public void run() {		    	
+		    	Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.SHOW_AXES, isChecked());
+		    	system.getGraph().setShowAxes(isChecked());
+		    	system.repaint(false);
+		    }
+		};
+		hideAxes.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.SHOW_AXES));
+		
 		if (bars!=null) {
 			bars.getToolBarManager().add(new Separator("org.dawb.workbench.plotting.aspect.group"));
 			action.setId("org.dawb.workbench.plotting.aspect");
@@ -481,6 +491,8 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 			twoDimensionalActions.add(new ActionContainer(action, bars.getToolBarManager()));
 			
 			this.imageMenu.add(action);
+			this.imageMenu.addSeparator();
+			this.imageMenu.add(hideAxes);
 			this.imageMenu.addSeparator();
 
 		}

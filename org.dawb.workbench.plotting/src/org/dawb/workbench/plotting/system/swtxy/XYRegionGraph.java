@@ -319,4 +319,10 @@ public class XYRegionGraph extends XYGraph {
 		super.addAnnotation(annotation);
 	}
 
+	public void setShowAxes(final boolean checked) {
+		this.primaryXAxis.setVisible(checked);
+		this.primaryYAxis.setVisible(checked);
+	}
+
+
 }

@@ -46,6 +46,8 @@ import org.dawb.common.ui.plot.trace.ITraceContainer;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.gda.extensions.util.DatasetTitleUtils;
+import org.dawb.workbench.plotting.Activator;
+import org.dawb.workbench.plotting.preference.PlottingConstants;
 import org.dawb.workbench.plotting.printing.PlotExportPrintUtil;
 import org.dawb.workbench.plotting.printing.PlotPrintPreviewDialog;
 import org.dawb.workbench.plotting.printing.PrintSettings;
@@ -200,6 +202,12 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		xyGraph.primaryYAxis.setShowMinorGrid(true);
 		xyGraph.primaryYAxis.setTitle("");
 		
+		if (defaultPlotType!=null) {
+			if (!Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.SHOW_AXES) && !defaultPlotType.is1D()) {
+				xyGraph.primaryXAxis.setVisible(false);
+				xyGraph.primaryYAxis.setVisible(false);
+			}
+		}
 		if (bars!=null) bars.updateActionBars();
 		if (bars!=null) bars.getToolBarManager().update(true);
            
