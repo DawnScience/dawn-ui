@@ -358,6 +358,11 @@ public class XYRegionGraph extends XYGraph {
 			l.propertyChange(evt);
 		}
 	}
+
+	public void setShowAxes(final boolean checked) {
+		this.primaryXAxis.setVisible(checked);
+		this.primaryYAxis.setVisible(checked);
+	}
 	
 	
 

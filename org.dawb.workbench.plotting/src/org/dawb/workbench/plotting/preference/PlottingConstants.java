@@ -81,4 +81,9 @@ public class PlottingConstants {
 	 */
 	public static final String RESET_ON_DEACTIVATE = "org.dawb.plotting.system.derivative.reset.when.deactivate";
 
+	/**
+	 * Property to store if axes should be shown.
+	 */
+	public static final String SHOW_AXES           = "org.dawb.workbench.plotting.preference.showAxes";
+
 }
