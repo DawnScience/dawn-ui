@@ -268,7 +268,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 				if (xyGraph==null) return;
 				if (e.count==0)    return;
 				int direction = e.count > 0 ? 1 : -1;
-				xyGraph.setZoomLevel(e, direction*0.1d);
+				xyGraph.setZoomLevel(e, direction*0.05d);
 				xyGraph.repaint();
 			}	
 		};

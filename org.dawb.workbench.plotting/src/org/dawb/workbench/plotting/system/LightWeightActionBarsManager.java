@@ -32,6 +32,7 @@ import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingActionBarManager;
 import org.dawb.common.ui.plot.annotation.AnnotationUtils;
+import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
@@ -49,6 +50,8 @@ import org.dawb.workbench.plotting.system.dialog.RemoveRegionCommand;
 import org.dawb.workbench.plotting.system.dialog.RemoveRegionDialog;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionConfigDialog;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
+import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
+import org.dawb.workbench.plotting.system.swtxy.selection.SelectionRegionFactory;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
@@ -799,6 +802,27 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 		
 
 		if (xyGraph!=null) {
+			
+			if (SelectionRegionFactory.getStaticBuffer()!=null) {
+				final Action pasteRegion = new Action("Paste '"+SelectionRegionFactory.getStaticBuffer().getName()+"'", Activator.getImageDescriptor("icons/RegionPaste.png")) {
+					public void run() {
+						AbstractSelectionRegion region = null;
+						try {
+							region = (AbstractSelectionRegion)sys.createRegion(SelectionRegionFactory.getStaticBuffer().getName(), SelectionRegionFactory.getStaticBuffer().getRegionType());
+						} catch (Exception ne) {
+							MessageDialog.openError(Display.getDefault().getActiveShell(), "Cannot paste '"+SelectionRegionFactory.getStaticBuffer().getName()+"'",
+									                   "A region with the name '"+SelectionRegionFactory.getStaticBuffer().getName()+"' already exists.");
+							return;
+						}
+						
+						region.sync(SelectionRegionFactory.getStaticBuffer().getBean());
+						region.setROI(SelectionRegionFactory.getStaticBuffer().getROI());
+						sys.addRegion(region);
+					}
+				};
+				manager.add(pasteRegion);
+			}
+			
 			final Action addAnnotation = new Action("Add annotation to '"+name+"'", Activator.getImageDescriptor("icons/TraceAnnotation.png")) {
 				public void run() {
 					final String annotName = AnnotationUtils.getUniqueAnnotation(name+" annotation ", sys);
