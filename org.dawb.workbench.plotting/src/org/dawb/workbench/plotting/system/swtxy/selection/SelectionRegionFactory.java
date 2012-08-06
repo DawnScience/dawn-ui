@@ -3,7 +3,6 @@ package org.dawb.workbench.plotting.system.swtxy.selection;
 import java.util.Collection;
 import java.util.HashSet;
 
-import org.csstudio.swt.xygraph.figures.Axis;
 import org.dawb.common.ui.plot.axis.ICoordinateSystem;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
@@ -83,6 +82,11 @@ public class SelectionRegionFactory {
 		return SUPPORTED_REGIONS.contains(type);
 	}
 
+	private static AbstractSelectionRegion staticBuffer;
+	public static AbstractSelectionRegion getStaticBuffer() {
+		return staticBuffer;
+	}
+	
 	public static IContributionManager fillActions(final IContributionManager    manager, 
 			                                       final IRegion                 region,
 			                                       final XYRegionGraph           xyGraph) {
@@ -109,6 +113,13 @@ public class SelectionRegionFactory {
 			}
 		};
 		if (region instanceof AbstractSelectionRegion) manager.add(delete);
+		
+		final Action copy = new Action("Copy '"+region.getName()+"'", Activator.getImageDescriptor("icons/RegionCopy.png")) {
+			public void run() {
+				staticBuffer = (AbstractSelectionRegion)region;
+			}
+		};
+		if (region instanceof AbstractSelectionRegion) manager.add(copy);
 
 		final Action configure = new Action("Configure '"+region.getName()+"'", Activator.getImageDescriptor("icons/RegionProperties.png")) {
 			public void run() {
