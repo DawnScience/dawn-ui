@@ -32,7 +32,6 @@ import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingActionBarManager;
 import org.dawb.common.ui.plot.annotation.AnnotationUtils;
-import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
@@ -875,17 +874,17 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 		manager.add(new Separator("org.dawb.workbench.plotting.system.trace.end"));
 	}
 
+	private static String lastscreeshot_filename;
 	/**
 	 *  Create export and print buttons in tool bar 
 	 */
 	public void createExportActionsToolBar() {
 
-		Action exportSaveButton = new Action("Export/save the plotting", Activator.getImageDescriptor("icons/picture_save.png")){
+		Action exportSaveButton = new Action("Screenshot of the plot", Activator.getImageDescriptor("icons/picture_save.png")){
 			// Cache file name otherwise they have to keep
 			// choosing the folder.
-			private String filename;
 			public void run(){
-				system.savePlotting(filename);
+				lastscreeshot_filename = system.savePlotting(lastscreeshot_filename);
 			}
 		};
 
@@ -895,14 +894,7 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 			}
 		};
 
-		// TODO implement within the Print Action
-		Action snapShotButton = new Action("Print scaled image to printer", Activator.getImageDescriptor("icons/camera.gif")) {
-			public void run(){
-				system.printSnapshotPlotting();
-			}
-		};
-
-		Action printButton = new Action("Print the plotting            Ctrl+P", Activator.getImageDescriptor("icons/printer.png")) {
+		Action printButton = new Action("Print the plot            Ctrl+P", Activator.getImageDescriptor("icons/printer.png")) {
 			public void run() {
 				system.printPlotting();
 			}
@@ -914,7 +906,6 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 		exportActionsDropDown.add(exportSaveButton);
 		exportActionsDropDown.add(copyToClipboardButton);
 		exportActionsDropDown.addSeparator();
-		exportActionsDropDown.add(snapShotButton);
 		exportActionsDropDown.add(printButton);
 
 		if (this.system.getActionBars()!=null) {
@@ -927,12 +918,11 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 	 */
 	public void createExportActionsMenuBar() {
 		
-		Action exportSaveButton = new Action("Export/save the plotting", Activator.getImageDescriptor("icons/picture_save.png")){
+		Action exportSaveButton = new Action("Screenshot of the plot", Activator.getImageDescriptor("icons/picture_save.png")){
 			// Cache file name otherwise they have to keep
 			// choosing the folder.
-			private String filename;
 			public void run(){
-				system.savePlotting(filename);
+				lastscreeshot_filename = system.savePlotting(lastscreeshot_filename);
 			}
 		};
 		Action copyToClipboardButton = new Action("Copy to clip-board       Ctrl+C", Activator.getImageDescriptor("icons/copy_edit_on.gif")) {
@@ -940,13 +930,7 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 				system.copyPlotting();
 			}
 		};
-		// TODO implement within the Print Action
-		Action snapShotButton = new Action("Print scaled image to printer", Activator.getImageDescriptor("icons/camera.gif")) {
-			public void run(){
-				system.printSnapshotPlotting();
-			}
-		};
-		Action printButton = new Action("Print the plotting            Ctrl+P", Activator.getImageDescriptor("icons/printer.png")) {
+		Action printButton = new Action("Print the plot            Ctrl+P", Activator.getImageDescriptor("icons/printer.png")) {
 			public void run() {
 				system.printPlotting();
 			}
@@ -955,8 +939,6 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 			this.system.getActionBars().getMenuManager().add(new Separator(exportSaveButton.getId()+".group"));
 			this.system.getActionBars().getMenuManager().add(exportSaveButton);
 			this.system.getActionBars().getMenuManager().add(copyToClipboardButton);
-			this.system.getActionBars().getMenuManager().add(new Separator(snapShotButton.getId()+".group"));
-			this.system.getActionBars().getMenuManager().add(snapShotButton);
 			this.system.getActionBars().getMenuManager().add(printButton);
 			this.system.getActionBars().getMenuManager().add(new Separator(printButton.getId()+".group"));
 		}
