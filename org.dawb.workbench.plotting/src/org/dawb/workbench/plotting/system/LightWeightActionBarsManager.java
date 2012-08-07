@@ -898,13 +898,13 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 			}
 		};
 
-		Action snapShotButton = new Action("Print scaled image to printer", Activator.getImageDescriptor("icons/camera.gif")) {
+		Action snapShotButton = new Action("Print plot", Activator.getImageDescriptor("icons/camera.gif")) {
 			public void run(){
 				system.printScaledPlotting();
 				exportActionsDropDown.setSelectedAction(this);
 			}
 		};
-		Action printButton = new Action("Print Preview            Ctrl+P", Activator.getImageDescriptor("icons/printer.png")) {
+		Action printButton = new Action("Print scaled plot         Ctrl+P", Activator.getImageDescriptor("icons/printer.png")) {
 			public void run() {
 				system.printPlotting();
 				exportActionsDropDown.setSelectedAction(this);
@@ -941,12 +941,12 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 				system.copyPlotting();
 			}
 		};
-		Action snapShotButton = new Action("Print scaled image to printer", Activator.getImageDescriptor("icons/camera.gif")) {
+		Action snapShotButton = new Action("Print plot", Activator.getImageDescriptor("icons/camera.gif")) {
 			public void run(){
 				system.printScaledPlotting();
 			}
 		};
-		Action printButton = new Action("Print Preview            Ctrl+P", Activator.getImageDescriptor("icons/printer.png")) {
+		Action printButton = new Action("Print scaled plot            Ctrl+P", Activator.getImageDescriptor("icons/printer.png")) {
 			public void run() {
 				system.printPlotting();
 			}
