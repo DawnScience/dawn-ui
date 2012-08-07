@@ -599,12 +599,17 @@ public class PlotPrintPreviewDialog extends Dialog {
 		if (image == null) // If no image is loaded, do not print.
 			return;
 
+		// TODO Should it really have a PrintDialog here instead of a choice list
+		// (Maybe overule Aluns design here because the PrintDialog is a special OS thing)
+		
 		final Point printerDPI = printer.getDPI();
 		final Point displayDPI = display.getDPI();
 		logger.info(getClass()+":"+ displayDPI + " " + printerDPI);
 
 		final PrintMargin margin = (printMargin == null ? PrintMargin.getPrintMargin(printer, 1.0) : printMargin);
 
+		// TODO Although SWT example does this with a thread
+		// maybe consider without - does PrintFigureOperation use it? :)
 		Thread printThread = new Thread() {
 			@Override
 			public void run() {
@@ -615,7 +620,10 @@ public class PlotPrintPreviewDialog extends Dialog {
 				}
 
 				GC gc = new GC(printer);
-
+				
+				// TODO PrintFigureOperation deals with graphics without using GC
+				//printerGraphics = new PrinterGraphics(g, printer);
+				
 				if (!printer.startPage()) {
 					logger.info(getClass()+":"+ "Failed to start a new page");
 					gc.dispose();
