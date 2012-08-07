@@ -69,6 +69,7 @@ import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
@@ -1323,7 +1324,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	}
 
 	@Override
-	public void savePlotting(String filename){
+	public String savePlotting(String filename){
 		FileDialog dialog = new FileDialog (Display.getCurrent().getActiveShell(), SWT.SAVE);
 		String [] filterExtensions = new String [] {"*.jpg;*.JPG;*.jpeg;*.JPEG;*.png;*.PNG", "*.ps;*.eps"};
 		// TODO ,"*.svg;*.SVG"};
@@ -1341,13 +1342,19 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		dialog.setFilterExtensions (filterExtensions);
 		filename = dialog.open();
 		if (filename == null)
-			return;
+			return null;
 		try {
+			final File file = new File(filename);
+			if (file.exists()) {
+				boolean yes = MessageDialog.openQuestion(Display.getDefault().getActiveShell(), "Confirm Overwrite", "The file '"+file.getName()+"' exists.\n\nWould you like to overwrite it?");
+			    if (!yes) return filename;
+			}
 			PlotExportPrintUtil.saveGraph(filename, PlotExportPrintUtil.FILE_TYPES[dialog.getFilterIndex()], xyGraph.getImage());
 			logger.debug("Plotting saved");
 		} catch (Exception e) {
 			logger.error("Could not save the plotting", e);
 		}
+		return filename;
 	}
 
 	@Override
