@@ -64,6 +64,7 @@ import org.eclipse.draw2d.FigureCanvas;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.LightweightSystem;
+import org.eclipse.draw2d.PrintFigureOperation;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IMenuListener;
@@ -1276,45 +1277,15 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 
 	/**
 	 * Print scaled plotting to printer
-	 * TODO to be disable once this works in printPlotting
 	 */
-	public void printSnapshotPlotting(){
-		// Show the Choose Printer dialog
-		PrintDialog dialog = new PrintDialog(Display.getCurrent().getActiveShell(), SWT.NULL);
+	public void printScaledPlotting(){
+		
+		PrintDialog dialog      = new PrintDialog(Display.getCurrent().getActiveShell(), SWT.NULL);
 		PrinterData printerData = dialog.open();
+		// TODO There are options on PrintFigureOperation
 		if (printerData != null) {
-			// Create the printer object
-			printerData.orientation = PrinterData.LANDSCAPE; // force landscape
-			Printer printer = new Printer(printerData);
-			// Calculate the scale factor between the screen resolution and printer
-			// resolution in order to correctly size the image for the printer
-			Point screenDPI = Display.getCurrent().getDPI();
-			Point printerDPI = printer.getDPI();
-			int scaleFactorX = printerDPI.x / screenDPI.x;
-			// Determine the bounds of the entire area of the printer
-			Rectangle size = printer.getClientArea();
-			Rectangle trim = printer.computeTrim(0, 0, 0, 0);
-			Rectangle imageSize = new Rectangle(size.x/scaleFactorX, size.y/scaleFactorX, 
-						size.width/scaleFactorX, size.height/scaleFactorX);
-			if (printer.startJob("Print Plot")) {
-				if (printer.startPage()) {
-					GC gc = new GC(printer);
-					Image xyImage = xyGraph.getImage(imageSize);
-					Image printerImage = new Image(printer, xyImage.getImageData());
-					xyImage.dispose();
-					// Draw the image
-					gc.drawImage(printerImage, imageSize.x, imageSize.y,
-							imageSize.width, imageSize.height, -trim.x, -trim.y,
-							size.width-trim.width, size.height-trim.height);
-					// Clean up
-					printerImage.dispose();
-					gc.dispose();
-					printer.endPage();
-				}
-			}
-			// End the job and dispose the printer
-			printer.endJob();
-			printer.dispose();
+            final PrintFigureOperation op = new PrintFigureOperation(new Printer(printerData), xyGraph);
+            op.run("Print "+xyGraph.getTitle());
 		}
 	}
 
