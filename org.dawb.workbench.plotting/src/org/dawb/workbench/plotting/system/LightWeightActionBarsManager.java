@@ -880,32 +880,43 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 	 */
 	public void createExportActionsToolBar() {
 
+		final MenuAction exportActionsDropDown = new MenuAction("Export/Print");
+
 		Action exportSaveButton = new Action("Screenshot of the plot", Activator.getImageDescriptor("icons/picture_save.png")){
 			// Cache file name otherwise they have to keep
 			// choosing the folder.
 			public void run(){
 				lastscreeshot_filename = system.savePlotting(lastscreeshot_filename);
+				exportActionsDropDown.setSelectedAction(this);
 			}
 		};
 
 		Action copyToClipboardButton = new Action("Copy to clip-board       Ctrl+C", Activator.getImageDescriptor("icons/copy_edit_on.gif")) {
 			public void run() {
 				system.copyPlotting();
+				exportActionsDropDown.setSelectedAction(this);
 			}
 		};
 
-		Action printButton = new Action("Print the plot            Ctrl+P", Activator.getImageDescriptor("icons/printer.png")) {
+		Action snapShotButton = new Action("Print scaled image to printer", Activator.getImageDescriptor("icons/camera.gif")) {
+			public void run(){
+				system.printScaledPlotting();
+				exportActionsDropDown.setSelectedAction(this);
+			}
+		};
+		Action printButton = new Action("Print Preview            Ctrl+P", Activator.getImageDescriptor("icons/printer.png")) {
 			public void run() {
 				system.printPlotting();
+				exportActionsDropDown.setSelectedAction(this);
 			}
 		};
 
-		MenuAction exportActionsDropDown = new MenuAction("Export/Print");
 		exportActionsDropDown.setImageDescriptor(Activator.getImageDescriptor("icons/printer.png"));
 		exportActionsDropDown.setSelectedAction(printButton);
 		exportActionsDropDown.add(exportSaveButton);
 		exportActionsDropDown.add(copyToClipboardButton);
 		exportActionsDropDown.addSeparator();
+		exportActionsDropDown.add(snapShotButton);
 		exportActionsDropDown.add(printButton);
 
 		if (this.system.getActionBars()!=null) {
@@ -930,7 +941,12 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 				system.copyPlotting();
 			}
 		};
-		Action printButton = new Action("Print the plot            Ctrl+P", Activator.getImageDescriptor("icons/printer.png")) {
+		Action snapShotButton = new Action("Print scaled image to printer", Activator.getImageDescriptor("icons/camera.gif")) {
+			public void run(){
+				system.printScaledPlotting();
+			}
+		};
+		Action printButton = new Action("Print Preview            Ctrl+P", Activator.getImageDescriptor("icons/printer.png")) {
 			public void run() {
 				system.printPlotting();
 			}
@@ -939,6 +955,7 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 			this.system.getActionBars().getMenuManager().add(new Separator(exportSaveButton.getId()+".group"));
 			this.system.getActionBars().getMenuManager().add(exportSaveButton);
 			this.system.getActionBars().getMenuManager().add(copyToClipboardButton);
+			this.system.getActionBars().getMenuManager().add(snapShotButton);
 			this.system.getActionBars().getMenuManager().add(printButton);
 			this.system.getActionBars().getMenuManager().add(new Separator(printButton.getId()+".group"));
 		}
