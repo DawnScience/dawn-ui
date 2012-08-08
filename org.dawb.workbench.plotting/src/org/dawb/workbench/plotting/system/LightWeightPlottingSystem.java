@@ -79,7 +79,6 @@ import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseWheelListener;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
@@ -710,6 +709,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
         return traces;
 	}
 	
+	@SuppressWarnings("unused")
 	private boolean isAllInts(List<AbstractDataset> ysIn) {
 		for (AbstractDataset a : ysIn) {
 			if (a.getDtype()!=AbstractDataset.INT16 &&
@@ -1297,7 +1297,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	@Override
 	public String savePlotting(String filename){
 		FileDialog dialog = new FileDialog (Display.getCurrent().getActiveShell(), SWT.SAVE);
-		String [] filterExtensions = new String [] {"*.jpg;*.JPG;*.jpeg;*.JPEG;*.png;*.PNG", "*.ps;*.eps"};
+		String [] filterExtensions = new String [] {"*.png;*.PNG;*.jpg;*.JPG;*.jpeg;*.JPEG", "*.ps;*.eps"};
 		// TODO ,"*.svg;*.SVG"};
 		if (filename!=null) {
 			dialog.setFilterPath((new File(filename)).getParent());
@@ -1321,9 +1321,9 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 			    if (!yes) return filename;
 			}
 			PlotExportPrintUtil.saveGraph(filename, PlotExportPrintUtil.FILE_TYPES[dialog.getFilterIndex()], xyGraph.getImage());
-			logger.debug("Plotting saved");
+			logger.debug("Plot saved");
 		} catch (Exception e) {
-			logger.error("Could not save the plotting", e);
+			logger.error("Could not save the plot", e);
 		}
 		return filename;
 	}
