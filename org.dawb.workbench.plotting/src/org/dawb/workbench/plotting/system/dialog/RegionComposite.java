@@ -254,6 +254,7 @@ public class RegionComposite extends Composite {
 	public AbstractSelectionRegion getEditingRegion() {
 		
 		final String txt = nameText.getText();
+		xyGraph.renameRegion(editingRegion, txt);
 		editingRegion.setName(txt);
 		
 		final AspectAxis x = getAxis(xyGraph.getXAxisList(), xCombo.getSelectionIndex());

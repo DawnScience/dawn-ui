@@ -216,7 +216,11 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	}
 
 	protected void clearListeners() {
-        coords.removeCoordinateSystemListener(this);
+		try {
+            coords.removeCoordinateSystemListener(this);
+		} catch (Exception ignored) {
+			// Do nothing
+		}
  		super.clearListeners();
 	}
 	

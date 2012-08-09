@@ -1,5 +1,6 @@
 package org.dawb.workbench.plotting.system.dialog;
 
+import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.workbench.plotting.system.swtxy.RegionArea;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
 import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
@@ -49,8 +50,12 @@ public class RemoveRegionDialog extends Dialog {
 	        removeLabel.setText("Select the region to be removed: ");        
 	        regionCombo = new Combo(composite, SWT.DROP_DOWN);
 	        regionCombo.setLayoutData(new GridData(SWT.FILL, 0, true, false));
-	        for(String name : ((RegionArea)xyGraph.getPlotArea()).getRegionMap().keySet())
-	        	regionCombo.add(name);
+	        
+	        final RegionArea regArea = (RegionArea)xyGraph.getPlotArea();
+	        for (String name : regArea.getRegionMap().keySet()) {
+	        	final AbstractSelectionRegion region = regArea.getRegion(name);
+	        	regionCombo.add(region.getName());
+	        }
 	        regionCombo.select(0);
         }else{
         	removeLabel.setText("There are no selection regions on the graph."); 
@@ -61,8 +66,10 @@ public class RemoveRegionDialog extends Dialog {
 	 
 	@Override
 	protected void okPressed() {
-		if(regionCombo != null)
-			removedRegion = ((RegionArea)xyGraph.getPlotArea()).getRegions().get(regionCombo.getSelectionIndex());
+		if(regionCombo != null) {
+			final int index = regionCombo.getSelectionIndex();
+			removedRegion = ((RegionArea)xyGraph.getPlotArea()).getRegions().get(index);
+		}
 		super.okPressed();
 	}
 	 
