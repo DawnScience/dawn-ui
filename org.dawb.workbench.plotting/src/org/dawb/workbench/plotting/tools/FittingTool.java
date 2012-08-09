@@ -175,7 +175,13 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		var.getColumn().setToolTipText("The nearest data value of the fitted peak.");
 		var.getColumn().setWidth(100);
 		var.setLabelProvider(new FittingLabelProvider(2));
-
+		
+		// Data Column not that useful, do not show unless property set.
+		if (!Boolean.getBoolean("org.dawb.workbench.plotting.tools.fitting.tool.data.column.required")) {
+			var.getColumn().setWidth(0);
+			var.getColumn().setResizable(false);
+		}
+		
         var   = new TableViewerColumn(viewer, SWT.CENTER, 3);
 		var.getColumn().setText("Fit");
 		var.getColumn().setToolTipText("The value of the fitted peak.");
