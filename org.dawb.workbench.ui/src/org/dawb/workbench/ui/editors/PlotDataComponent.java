@@ -264,7 +264,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 			getPlottingSystem().addTraceListener(new ITraceListener.Stub() {
 				@Override
 				public void tracesAltered(TraceEvent evt) {
-					updateSelection();
+					updateSelection(true);
 				}
 			});
 			
@@ -486,7 +486,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 				@Override
 				public void plotChangePerformed(PlotType plotMode) {
 					updatePlotDimenionsSelected(xyAction, staggeredAction, xyzAction, plotMode);
-					updateSelection();
+					updateSelection(true);
 				}
 			});
 			
@@ -526,7 +526,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 				if (selections.contains(sel)) selections.remove(sel);
 			    selections.add(0, sel);
 				getPlottingSystem().setXfirst(true);
-				updateSelection();
+				updateSelection(true);
 				dataViewer.refresh(sel);
 			}
 		};
@@ -648,7 +648,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 	
 	public void keyPressed(KeyEvent e) {
 		if (e.keyCode==13) {
-			selectionChanged((CheckableObject)((IStructuredSelection)dataViewer.getSelection()).getFirstElement());
+			selectionChanged((CheckableObject)((IStructuredSelection)dataViewer.getSelection()).getFirstElement(), true);
 		}
 	}
 
@@ -667,8 +667,31 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 	 */
 	public void mouseDown(MouseEvent e) {
 		if (e.button==1) {
-			final TableItem item = this.dataViewer.getTable().getItem(new Point(e.x, e.y));
-			if (item!=null) selectionChanged((CheckableObject)item.getData());
+			
+		
+			final TableItem       item    = this.dataViewer.getTable().getItem(new Point(e.x, e.y));
+			if (item==null) return;
+			
+			final CheckableObject clicked = (CheckableObject)item.getData();
+			
+			if (e.stateMask==131072) { // Shift is pressed
+				try {
+				    final CheckableObject from = selections.get(selections.size()-1);
+				    final int fromIndex = data.indexOf(from);
+				    final int toIndex   = data.indexOf(clicked);
+				    final int inc       = (fromIndex<toIndex) ? 1 : -1;
+				    
+				    for (int i = fromIndex+inc; inc==1?i<toIndex:i>toIndex; i+=inc) {
+				    	selectionChanged(data.get(i), false);
+					}
+			    	selectionChanged(clicked, true);
+			    	
+				} catch (Throwable t) {
+					selectionChanged(clicked, true);
+				}
+			} else{
+ 			    selectionChanged(clicked, true);
+			}
 		}
 	}
 
@@ -681,7 +704,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 		
 	}
 	
-	protected void selectionChanged(final CheckableObject check) {
+	protected void selectionChanged(final CheckableObject check, boolean fireListeners) {
 		
 		if (selections==null) selections = new ArrayList<CheckableObject>(7);
 
@@ -723,11 +746,11 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 			selections.clear();
 		}
 
-		updateSelection();
+		updateSelection(fireListeners);
 		this.dataViewer.refresh();
 	}
 
-	private synchronized void updateSelection() {
+	private synchronized void updateSelection(boolean fireListeners) {
 
 		if (selections==null) return;
 
@@ -744,7 +767,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 			logger.error("Cannot save last selections!", ne);
 		}
 		
-		fireSelectionListeners(selections);
+		if (fireListeners) fireSelectionListeners(selections);
 	}
 
     @Override
@@ -761,7 +784,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 				sel.setChecked(true);
 			}
 		}
-		updateSelection();
+		updateSelection(true);
 		dataViewer.refresh();
 	}
 
@@ -1188,12 +1211,12 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 			public void run() {
 				if (clearOthers) {
 					PlotDataComponent.this.setAllChecked(false);
-					PlotDataComponent.this.selectionChanged(null);
+					PlotDataComponent.this.selectionChanged(null, true);
 				}
 				
 				final CheckableObject check = PlotDataComponent.this.getObjectByName(name);
 				check.setChecked(false);
-				PlotDataComponent.this.selectionChanged(check);
+				PlotDataComponent.this.selectionChanged(check, true);
 				datasetSelection = PlotDataComponent.this.getDataSet(name, (IMonitor)null);
 			}
 		});
