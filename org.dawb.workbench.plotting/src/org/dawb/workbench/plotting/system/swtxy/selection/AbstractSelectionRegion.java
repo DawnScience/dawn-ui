@@ -30,7 +30,6 @@ import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 /**
@@ -152,7 +151,6 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	public void sync(RegionBean bean) {
 		setName(bean.getName());
 		setShowPosition(bean.isShowPosition());
-		setCoordinateSystem(bean.getCoordinateSystem());
 		setXyGraph(bean.getXyGraph());
 		setRegionColor(bean.getRegionColor());
 		setAlpha(bean.getAlpha());

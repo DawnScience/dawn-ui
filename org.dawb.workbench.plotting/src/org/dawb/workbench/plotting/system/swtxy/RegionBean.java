@@ -24,7 +24,6 @@ public class RegionBean implements Serializable {
 	public void sync(RegionBean bean) {
 		setName(bean.getName());
 		setShowPosition(bean.isShowPosition());
-		setCoordinateSystem(bean.getCoordinateSystem());
 		setXyGraph(bean.getXyGraph());
 		setRegionColor(bean.getRegionColor());
 		setAlpha(bean.getAlpha());
