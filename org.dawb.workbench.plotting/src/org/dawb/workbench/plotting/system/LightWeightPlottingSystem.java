@@ -924,6 +924,8 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		if (colorMap!=null) colorMap.clear();
 		if (xyGraph!=null) {
 			try {
+				clearAnnotations();
+				clearRegions();
 				for (Axis axis : xyGraph.getAxisList()) axis.setRange(0,100);
 				clearTraces();
 	
@@ -1239,6 +1241,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	public void clearAnnotations(){
 		final List<Annotation>anns = new ArrayList<Annotation>(xyGraph.getPlotArea().getAnnotationList());
 		for (Annotation annotation : anns) {
+			if (annotation==null) continue;
 			xyGraph.getPlotArea().removeAnnotation(annotation);
 		}
 	}
