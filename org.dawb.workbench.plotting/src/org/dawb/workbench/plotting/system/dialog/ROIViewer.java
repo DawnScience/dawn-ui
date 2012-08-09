@@ -24,6 +24,7 @@ import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
@@ -55,10 +56,15 @@ public class ROIViewer  {
 
 	public Control createPartControl(Composite parent) {
 		
-		this.regionTable = new TableViewer(parent, SWT.FULL_SELECTION | SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+		this.regionTable = new TableViewer(parent, SWT.FULL_SELECTION | SWT.SINGLE | SWT.V_SCROLL | SWT.BORDER);
+		GridData tableData = new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1);
+		tableData.heightHint=100;
+		regionTable.getTable().setLayoutData(tableData);
 		
 		final Label clickToEdit = new Label(parent, SWT.WRAP);
 		clickToEdit.setText("* Click to change");
+		clickToEdit.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false, 2, 1));
+		
 		return regionTable.getTable();
 	}
 

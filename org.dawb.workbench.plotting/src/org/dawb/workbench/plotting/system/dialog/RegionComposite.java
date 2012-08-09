@@ -52,7 +52,7 @@ public class RegionComposite extends Composite {
 		super(parent, SWT.NONE);
 		this.xyGraph = xyGraph;
 		
-		setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		setLayout(new org.eclipse.swt.layout.GridLayout(2, false));
 
 		final Label nameLabel = new Label(this, SWT.NONE);
@@ -150,8 +150,7 @@ public class RegionComposite extends Composite {
 		location.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		
 		this.roiViewer = new ROIViewer();
-		Control regionTable = roiViewer.createPartControl(this);
-		regionTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+		roiViewer.createPartControl(this);
 
 		// Should be last
 		nameText.setText(getDefaultName(defaultRegion.getIndex()));
