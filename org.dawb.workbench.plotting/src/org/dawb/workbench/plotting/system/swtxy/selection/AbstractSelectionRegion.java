@@ -229,9 +229,13 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	}
 
 	protected void clearListeners() {
-        xAxis.removeListener(this);
-        yAxis.removeListener(this);
 		super.clearListeners();
+		try {
+	        xAxis.removeListener(this);
+	        yAxis.removeListener(this);
+		} catch (Exception ignored) {
+			// Do nothing
+		}
 	}
 	
 	public void setName(String name) {
