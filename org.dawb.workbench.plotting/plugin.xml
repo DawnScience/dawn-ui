@@ -18,7 +18,7 @@
    <extension
          point="org.dawb.common.ui.toolPage">
       <plotting_tool_page
-            class="org.dawb.workbench.plotting.tools.FittingTool"
+            class="org.dawb.workbench.plotting.tools.fitting.FittingTool"
             icon="icons/plot-tool-peak-fit.png"
             id="org.dawb.workbench.plotting.tools.fittingTool"
             label="Peak Fitting"
@@ -46,35 +46,35 @@
             tooltip="A tool for displaying information on the data currently plotted.">
       </plotting_tool_page>
       <plotting_tool_page
-            class="org.dawb.workbench.plotting.tools.LineProfileTool"
+            class="org.dawb.workbench.plotting.tools.profile.LineProfileTool"
             icon="icons/plot-tool-line-profile.png"
             id="org.dawb.workbench.plotting.tools.lineProfileTool"
             label="Line Profile"
             tooltip="A tool for showing line profiles of images.">
       </plotting_tool_page>
       <plotting_tool_page
-            class="org.dawb.workbench.plotting.tools.BoxProfileTool"
+            class="org.dawb.workbench.plotting.tools.profile.BoxProfileTool"
             icon="icons/plot-tool-box-profile.png"
             id="org.dawb.workbench.plotting.tools.boxProfileTool"
             label="Box Profile"
             tooltip="A tool for showing box profiles of images.">
       </plotting_tool_page>
       <plotting_tool_page
-            class="org.dawb.workbench.plotting.tools.RadialProfileTool"
+            class="org.dawb.workbench.plotting.tools.profile.RadialProfileTool"
             icon="icons/plot-tool-radial-integral.png"
             id="org.dawb.workbench.plotting.tools.radialProfileTool"
             label="Radial Profile"
             tooltip="A tool for showing radial profiles in sectors of images.">
       </plotting_tool_page>
       <plotting_tool_page
-            class="org.dawb.workbench.plotting.tools.AzimuthalProfileTool"
+            class="org.dawb.workbench.plotting.tools.profile.AzimuthalProfileTool"
             icon="icons/plot-tool-azimuthal-integral.png"
             id="org.dawb.workbench.plotting.tools.azimuthalProfileTool"
             label="Azimuthal Profile"
             tooltip="A tool for showing azimuthal profiles in sectors of images.">
       </plotting_tool_page>
       <plotting_tool_page
-            class="org.dawb.workbench.plotting.tools.CrossHairProfileTool"
+            class="org.dawb.workbench.plotting.tools.profile.CrossHairProfileTool"
             icon="icons/plot-tool-cross-hairs.png"
             id="org.dawb.workbench.plotting.tools.crossHairProfileTool"
             label="Cross Hair Profile"
@@ -95,25 +95,32 @@
             tooltip="A tool which shows the fitted ellipse parameters.">
       </plotting_tool_page>
       <plotting_tool_page
-            class="org.dawb.workbench.plotting.tools.HistoryTool"
+            class="org.dawb.workbench.plotting.tools.history.HistoryTool"
             icon="icons/plot-tool-history.png"
             id="org.dawb.workbench.plotting.tools.xyHistoryTool"
             label="History"
             tooltip="A tool to compare plots between data files.">
       </plotting_tool_page>
       <plotting_tool_page
-            class="org.dawb.workbench.plotting.tools.ZoomTool"
+            class="org.dawb.workbench.plotting.tools.profile.ZoomTool"
             icon="icons/zoom_box.png"
             id="org.dawb.workbench.plotting.tools.zoomTool"
             label="Zoom Profile"
             tooltip="A tool to zoom areas in a separate view.">
       </plotting_tool_page>
       <plotting_tool_page
-            class="org.dawb.workbench.plotting.tools.ImageTableTool"
+            class="org.dawb.workbench.plotting.tools.profile.ImageTableTool"
             icon="icons/zoom_table.png"
             id="org.dawb.workbench.plotting.tools.tableTool"
             label="Zoom Table"
             tooltip="A tool to zoom areas and view values in a table.">
+      </plotting_tool_page>
+      <plotting_tool_page
+            class="org.dawb.workbench.plotting.tools.history.ImageHistoryTool"
+            icon="icons/plot-tool-image-compare.png"
+            id="org.dawb.workbench.plotting.tools.imageCompareTool"
+            label="Image History"
+            tooltip="A tool to compare images between files by building up a history.">
       </plotting_tool_page>
    </extension>
    <extension
@@ -254,7 +261,7 @@
    <extension
          point="org.eclipse.ui.exportWizards">
       <wizard
-            class="org.dawb.workbench.plotting.tools.FittedPeaksExportWizard"
+            class="org.dawb.workbench.plotting.tools.fitting.FittedPeaksExportWizard"
             icon="icons/plot-tool-peak-fit.png"
             id="org.dawb.workbench.plotting.fittedPeaksExportWizard"
             name="Fitted Peaks">
