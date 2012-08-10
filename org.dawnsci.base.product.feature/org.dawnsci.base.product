@@ -52,7 +52,7 @@ All other trademarks are the property of their respective owners.
 
    <splash
       location="org.dawnsci.product.plugin"
-      startupProgressRect="0,0,200,15"
+      startupProgressRect="0,245,600,15"
       startupMessageRect="0,20,200,20"
       startupForegroundColor="000000" />
    <launcher name="dawn">
