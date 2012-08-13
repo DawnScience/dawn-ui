@@ -133,6 +133,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 
 	public void setPaletteData(PaletteData paletteData) {
+		if (imageServiceBean==null) return;
 		imageServiceBean.setPalette(paletteData);
 		createScaledImage(ImageScaleType.FORCE_REIMAGE, null);
 		repaint();
@@ -706,6 +707,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 
 	public void setMin(Number min) {
+		if (imageServiceBean==null) return;
 		imageServiceBean.setMin(min);
 		fireMinDataListeners();
 	}
@@ -715,6 +717,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 
 	public void setMax(Number max) {
+		if (imageServiceBean==null) return;
 		imageServiceBean.setMax(max);
 		fireMaxDataListeners();
 	}
@@ -817,6 +820,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 	@Override
 	public void rehistogram() {
+		if (imageServiceBean==null) return;
 		imageServiceBean.setMax(null);
 		imageServiceBean.setMin(null);
 		createScaledImage(ImageScaleType.REHISTOGRAM, null);
@@ -838,6 +842,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 */
 	@Override
 	public HistoType getHistoType() {
+		if (imageServiceBean==null) return null;
 		return imageServiceBean.getHistogramType();
 	}
 	
@@ -846,6 +851,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 */
 	@Override
 	public void setHistoType(HistoType type) {
+		if (imageServiceBean==null) return;
 		imageServiceBean.setHistogramType(type);
 		Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.HISTO_PREF, type.getLabel());
 		createScaledImage(ImageScaleType.REHISTOGRAM, null);
@@ -879,6 +885,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	public void setMinCut(HistogramBound bound) {
 		
 		storeBound(bound, PlottingConstants.MIN_CUT);
+		if (imageServiceBean==null) return;
 		imageServiceBean.setMinimumCutBound(bound);
 		fireMinCutListeners();
 	}
@@ -899,6 +906,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	@Override
 	public void setMaxCut(HistogramBound bound) {
 		storeBound(bound, PlottingConstants.MAX_CUT);
+		if (imageServiceBean==null) return;
 		imageServiceBean.setMaximumCutBound(bound);
 		fireMaxCutListeners();
 	}
@@ -911,6 +919,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	@Override
 	public void setNanBound(HistogramBound bound) {
 		storeBound(bound, PlottingConstants.NAN_CUT);
+		if (imageServiceBean==null) return;
 		imageServiceBean.setNanBound(bound);
 		fireNanBoundsListeners();
 	}
