@@ -107,7 +107,7 @@ abstract class AbstractHistoryTool extends AbstractToolPage implements MouseList
 		viewer.getTable().setLinesVisible(true);
 		viewer.getTable().setHeaderVisible(true);
 		
-		createActions();
+		createActions(new MenuManager());
 				
 		getSite().setSelectionProvider(viewer);
 		
@@ -134,10 +134,8 @@ abstract class AbstractHistoryTool extends AbstractToolPage implements MouseList
 	/**
 	 * May be overridden to provide additional actions.
 	 */
-	protected MenuManager createActions() {
+	protected MenuManager createActions(final MenuManager rightClick) {
 		
-		final MenuManager rightClick = new MenuManager();
-
 		final IAction addPlot = createAddAction();
 		getSite().getActionBars().getToolBarManager().add(addPlot);
 		rightClick.add(addPlot);
@@ -217,12 +215,12 @@ abstract class AbstractHistoryTool extends AbstractToolPage implements MouseList
 	public void activate() {
 		
         updatePlots();
-        refresh();
         
         if (getPlottingSystem()!=null) {
         	getPlottingSystem().addTraceListener(this.traceListener);
         }
         super.activate();
+        refresh();
 	}
 	
 	@Override
