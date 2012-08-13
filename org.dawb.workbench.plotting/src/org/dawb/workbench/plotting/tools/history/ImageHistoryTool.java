@@ -128,7 +128,6 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 		};	
 	}
 	
-	// TODO Move up/down in list
 	protected MenuManager createActions(MenuManager manager) {
 		
 
@@ -143,23 +142,13 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 		
 		final IAction revert = new Action("Revert plot", Activator.getImageDescriptor("icons/reset.gif")) {
 			public void run() {
-				AbstractDataset plot = originalData;
-				if (plot==null && getPart() instanceof IEditorPart) {
-					IFile file = (IFile)((IEditorPart)getPart()).getEditorInput().getAdapter(IFile.class);
-					if (file!=null)
-						try {
-							plot = LoaderFactory.getData(file.getLocation().toOSString()).getDataset(0);
-						} catch (Exception e) {
-							logger.error("Cannot load "+file, e);
-							plot = null;
-						}
-				}
+				AbstractDataset plot = getOriginalData();
 				if (plot==null) return;
 				
 				for (String key : imageHistory.keySet()) {
 					imageHistory.get(key).setSelected(false);
 				}
-				setPlotImage(originalData);
+				setPlotImage(plot);
 				ImageHistoryTool.this.includeCurrentPlot = true;
 				include.setChecked(true);
 				refresh();
@@ -198,6 +187,21 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 		return manager;
 	}
 
+	protected AbstractDataset getOriginalData() {
+		AbstractDataset plot = originalData;
+		if (plot==null && getPart() instanceof IEditorPart) {
+			IFile file = (IFile)((IEditorPart)getPart()).getEditorInput().getAdapter(IFile.class);
+			if (file!=null)
+				try {
+					plot = LoaderFactory.getData(file.getLocation().toOSString()).getDataset(0);
+				} catch (Exception e) {
+					logger.error("Cannot load "+file, e);
+					plot = null;
+				}
+		}
+		return plot;
+	}
+
 	protected void moveBean(int i) {
 		
 		final HistoryBean  bean   = getSelectedPlot();
@@ -223,6 +227,8 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 
 	@Override
 	protected void updatePlots() {
+		if (updatingPlotsAlready) return;
+		updatingPlotsAlready = true;
 		updateJob.cancel();
 		updateJob.schedule();
 	}
@@ -237,47 +243,52 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 		
 		public IStatus run(IProgressMonitor monitor) {
 
-			// Loop over history and reprocess maths.
-			AbstractDataset a = originalData!=null&&includeCurrentPlot
-					          ? createCopy(originalData) 
-					          : null;
-					          
-			for (String key : imageHistory.keySet()) {
-				
-				if (monitor.isCanceled()) return Status.CANCEL_STATUS;
-				
-				final HistoryBean bean = imageHistory.get(key);
-				if (bean==null) continue;
-				if (a==null && bean.isSelected()) { 
-					if (bean.getData()==null) continue;
-					a = createCopy(bean.getData());
-					continue;
-				}
-				if (bean.isSelected()) {
-					if (!a.isCompatibleWith(bean.getData())) {
-						bean.setSelected(false);
-						Display.getDefault().syncExec(new Runnable() {
-							public void run() {
-								viewer.refresh(bean);
-							}
-						});
+			try {
+				// Loop over history and reprocess maths.
+				AbstractDataset a = originalData!=null&&includeCurrentPlot
+						          ? createCopy(originalData) 
+						          : null;
+						          
+				for (String key : imageHistory.keySet()) {
+					
+					if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+					
+					final HistoryBean bean = imageHistory.get(key);
+					if (bean==null) continue;
+					if (a==null && bean.isSelected()) { 
+						if (bean.getData()==null) continue;
+						a = createCopy(bean.getData());
 						continue;
 					}
-					bean.getOperator().process(a, bean.getData());
-				}
-			}
-
-			if (a!=null) { // We plot it.
-				setPlotImage(a);
-			} else if (!includeCurrentPlot) { // We clear it
-				Display.getDefault().syncExec(new Runnable() {
-					public void run () {
-						getPlottingSystem().clear();
+					if (bean.isSelected()) {
+						if (!a.isCompatibleWith(bean.getData())) {
+							bean.setSelected(false);
+							Display.getDefault().syncExec(new Runnable() {
+								public void run() {
+									viewer.refresh(bean);
+								}
+							});
+							continue;
+						}
+						bean.getOperator().process(a, bean.getData());
 					}
-				});
+				}
+	
+				if (a!=null) { // We plot it.
+					setPlotImage(a);
+				} else if (!includeCurrentPlot) { // We clear it
+					Display.getDefault().syncExec(new Runnable() {
+						public void run () {
+							getPlottingSystem().clear();
+						}
+					});
+				}
+	
+				return Status.OK_STATUS;
+				
+			} finally {
+				updatingPlotsAlready = false;
 			}
-
-			return Status.OK_STATUS;
 		}
 		
 	}
@@ -427,10 +438,11 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 		}
 
 		private boolean isShapeCompatible(Object element) {
-			if (originalData==null) return true;
+			final AbstractDataset od = getOriginalData();
+			if (od==null) return true;
 			if (!(element instanceof HistoryBean)) return true;
 			HistoryBean bean = (HistoryBean)element;
-			return originalData.isCompatibleWith(bean.getData());
+			return od.isCompatibleWith(bean.getData());
 		}
 
 		public void dispose() {
