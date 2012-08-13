@@ -18,6 +18,7 @@
    <extension
          point="org.dawb.common.ui.toolPage">
       <plotting_tool_page
+            cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.peak"
             class="org.dawb.workbench.plotting.tools.fitting.FittingTool"
             icon="icons/plot-tool-peak-fit.png"
             id="org.dawb.workbench.plotting.tools.fittingTool"
@@ -25,6 +26,7 @@
             tooltip="A tool for fitting peaks on the data currently plotted.">
       </plotting_tool_page>
       <plotting_tool_page
+            cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.derivative"
             class="org.dawb.workbench.plotting.tools.DerivativeTool"
             icon="icons/plot-tool-derivative.png"
             id="org.dawb.workbench.plotting.tools.derivative"
@@ -32,6 +34,7 @@
             tooltip="A tool which shows the derivative next to what is currently plotted.">
       </plotting_tool_page>
       <plotting_tool_page
+            cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.measurement"
             class="org.dawb.workbench.plotting.tools.MeasurementTool"
             icon="icons/plot-tool-measure.png"
             id="org.dawb.workbench.plotting.tools.measure"
@@ -39,6 +42,7 @@
             tooltip="A tool which shows values of regions selected in the plotting.">
       </plotting_tool_page>
       <plotting_tool_page
+            cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.pixel"
             class="org.dawb.workbench.plotting.tools.InfoPixelTool"
             icon="icons/info.png"
             id="org.dawb.workbench.plotting.tools.InfoPixel"
@@ -46,6 +50,7 @@
             tooltip="A tool for displaying information on the data currently plotted.">
       </plotting_tool_page>
       <plotting_tool_page
+            cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.lineprofile"
             class="org.dawb.workbench.plotting.tools.profile.LineProfileTool"
             icon="icons/plot-tool-line-profile.png"
             id="org.dawb.workbench.plotting.tools.lineProfileTool"
@@ -53,6 +58,7 @@
             tooltip="A tool for showing line profiles of images.">
       </plotting_tool_page>
       <plotting_tool_page
+            cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.boxprofile"
             class="org.dawb.workbench.plotting.tools.profile.BoxProfileTool"
             icon="icons/plot-tool-box-profile.png"
             id="org.dawb.workbench.plotting.tools.boxProfileTool"
@@ -60,6 +66,7 @@
             tooltip="A tool for showing box profiles of images.">
       </plotting_tool_page>
       <plotting_tool_page
+            cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.radialprofile"
             class="org.dawb.workbench.plotting.tools.profile.RadialProfileTool"
             icon="icons/plot-tool-radial-integral.png"
             id="org.dawb.workbench.plotting.tools.radialProfileTool"
@@ -67,6 +74,7 @@
             tooltip="A tool for showing radial profiles in sectors of images.">
       </plotting_tool_page>
       <plotting_tool_page
+            cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.aziprofile"
             class="org.dawb.workbench.plotting.tools.profile.AzimuthalProfileTool"
             icon="icons/plot-tool-azimuthal-integral.png"
             id="org.dawb.workbench.plotting.tools.azimuthalProfileTool"
@@ -74,6 +82,7 @@
             tooltip="A tool for showing azimuthal profiles in sectors of images.">
       </plotting_tool_page>
       <plotting_tool_page
+            cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.crosshairprofile"
             class="org.dawb.workbench.plotting.tools.profile.CrossHairProfileTool"
             icon="icons/plot-tool-cross-hairs.png"
             id="org.dawb.workbench.plotting.tools.crossHairProfileTool"
@@ -81,6 +90,7 @@
             tooltip="A tool for showing a profile slice through x and y.">
       </plotting_tool_page>
       <plotting_tool_page
+            cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.masking"
             class="org.dawb.workbench.plotting.tools.MaskingTool"
             icon="icons/plot-tool-masking.png"
             id="org.dawb.workbench.plotting.tools.maskingTool"
@@ -88,6 +98,7 @@
             tooltip="Masking the image and leaving data modified.">
       </plotting_tool_page>
       <plotting_tool_page
+            cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.ellipsefitting"
             class="org.dawb.workbench.plotting.tools.EllipseFittingTool"
             icon="icons/plot-tool-ellipse.png"
             id="org.dawb.workbench.plotting.tools.ellipseFittingTool"

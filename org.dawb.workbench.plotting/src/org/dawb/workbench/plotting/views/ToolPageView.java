@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -69,7 +70,7 @@ import org.eclipse.ui.part.PageBook;
 import org.eclipse.ui.part.ViewPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.eclipse.ui.cheatsheets.OpenCheatSheetAction ;
 /**
  * This view can be shown at the side of a plotting part. The
  * plotting part contributes a tool page which is shown by the view.
@@ -1048,7 +1049,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 			updatePartInfo(tool);
 			initPage(tool);
 			tool.createControl(getPageBook());
-			addCloneAction(tool);
+			createCommonActions(tool);
 			if (!tool.isActive()) tool.activate();
 						
 			PageRec rec = new PageRec(part, tool);
@@ -1059,12 +1060,25 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		return null;
 	}
 	
-	private void addCloneAction(final IToolPage tool) {
+	private void createCommonActions(final IToolPage tool) {
 		
 		if (tool.getSite()==null)                 return;
 		if (tool.getSite().getActionBars()==null) return;
 		if (tool.getSite().getActionBars().getMenuManager()==null) return;
 		
+		if (tool.getCheatSheetId()!=null) {
+			final Action cheatAction = new Action("Open cheat sheet for '"+tool.getTitle()+"'") {
+				public void run() {
+					final String id = tool.getCheatSheetId();
+					final OpenCheatSheetAction oa = new OpenCheatSheetAction(id);
+					oa.run();
+				}
+			};
+			cheatAction.setImageDescriptor(Activator.getImageDescriptor("icons/help_view.gif"));
+			tool.getSite().getActionBars().getMenuManager().add(cheatAction);
+			tool.getSite().getActionBars().getMenuManager().add(new Separator());
+		}
+
 		final Action cloneAction = new Action("Open '"+tool.getTitle()+"' in dedicated view") {
 			public void run() {
 				try {
@@ -1100,8 +1114,9 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		};
 		
 		tool.getSite().getActionBars().getMenuManager().add(cloneAction);
+		
 	}
-
+	
 	protected void update() {
 		// TODO Does this work ok?
 		partActivated(EclipseUtils.getActiveEditor());
