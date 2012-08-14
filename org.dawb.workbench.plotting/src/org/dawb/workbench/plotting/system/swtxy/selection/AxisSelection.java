@@ -3,6 +3,7 @@ package org.dawb.workbench.plotting.system.swtxy.selection;
 import java.util.Arrays;
 
 import org.csstudio.swt.xygraph.figures.Axis;
+import org.dawb.common.ui.plot.axis.ICoordinateSystem;
 import org.dawb.common.ui.plot.region.ROIEvent;
 import org.dawb.workbench.plotting.system.swtxy.IMobileFigure;
 import org.dawb.workbench.plotting.system.swtxy.translate.FigureTranslator;
@@ -47,8 +48,8 @@ class AxisSelection extends AbstractSelectionRegion {
 
 	private MouseMotionListener mouseTrackListener;
 	
-	AxisSelection(String name, Axis xAxis, Axis yAxis, RegionType regionType) {
-		super(name, xAxis, yAxis);
+	AxisSelection(String name, ICoordinateSystem coords, RegionType regionType) {
+		super(name, coords);
 		if (regionType!=RegionType.XAXIS && regionType!=RegionType.YAXIS && regionType!=RegionType.XAXIS_LINE && regionType!=RegionType.YAXIS_LINE) {
 			throw new RuntimeException("The AxisSelection can only be XAXIS or YAXIS region type!");
 		}
@@ -297,9 +298,7 @@ class AxisSelection extends AbstractSelectionRegion {
 	public ROIBase createROI(boolean recordResult) {
 		if (line1!=null) {
 			final Rectangle rect = getRectangleFromVertices();
-			double[] a1 = new double[]{xAxis.getPositionValue(rect.x, false), yAxis.getPositionValue(rect.y, false)};
-			double[] a2 = new double[]{xAxis.getPositionValue(rect.x+rect.width, false), yAxis.getPositionValue(rect.y+rect.height, false)};
-			final RectangularROI rroi = new RectangularROI(a1[0], a1[1], a2[0] - a1[0], a2[1] - a1[1], 0);
+			final RectangularROI rroi = getRoiFromRectangle(rect);
 			if (recordResult)
 				roi = rroi;
 			return rroi;
@@ -324,12 +323,10 @@ class AxisSelection extends AbstractSelectionRegion {
 			ept = lroi.getEndPoint();			
 		}
 		
-		final Point p1 = new Point(xAxis.getValuePosition(spt[0], false),
-				                   yAxis.getValuePosition(spt[1], false));
-		final Point p2 = new Point(xAxis.getValuePosition(ept[0], false),
-				                   yAxis.getValuePosition(ept[1], false));
+		final int[] p1 = coords.getValuePosition(spt);
+		final int[] p2 = coords.getValuePosition(ept);
 
-		final Rectangle local = new Rectangle(p1, p2);
+		final Rectangle local = new Rectangle(new Point(p1[0], p1[1]), new Point(p2[0], p2[1]));
 		setLocalBounds(local, line1.getParent().getBounds());
 		updateConnectionBounds();
 

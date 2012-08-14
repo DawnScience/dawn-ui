@@ -1,5 +1,6 @@
-package org.dawb.workbench.plotting.tools;
+package org.dawb.workbench.plotting.tools.fitting;
 
+import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.List;
 
@@ -12,6 +13,7 @@ import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.TraceUtils;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
@@ -27,7 +29,16 @@ class FittedPeak {
 	private AbstractDataset[] peakFunctions;
 	private boolean           saved=false;
 	private String            peakName;
+	private AbstractDataset   x,y;
 	
+	public AbstractDataset getX() {
+		return x;
+	}
+
+	public void setX(AbstractDataset x) {
+		this.x = x;
+	}
+
 	public boolean isSaved() {
 		return saved;
 	}
@@ -64,6 +75,28 @@ class FittedPeak {
 		center = null;
 		trace  = null;
 		annotation = null;		
+	}
+	
+	public FittedPeak clone() {
+		FittedPeak ret = new FittedPeak(function, roi, peakFunctions);
+		ret.roi        = roi;
+		ret.function   = function;
+		ret.fwhm       = fwhm;
+		ret.center     = center;
+		ret.trace      = trace;
+		ret.annotation = annotation;
+		ret.peakName   = peakName;
+		ret.saved      = saved;
+		ret.y          = y;
+		return ret;
+	}
+
+	public AbstractDataset getY() {
+		return y;
+	}
+
+	public void setY(AbstractDataset y) {
+		this.y = y;
 	}
 
 	public void activate() {
@@ -254,6 +287,42 @@ class FittedPeak {
 		names.add(annotation.getName());
 	}
 
-	
+	public String getCSVString() {
+		
+		DecimalFormat format = new DecimalFormat("##0.#####E0");
+		final StringBuilder buf = new StringBuilder();
+		buf.append(getPeakName());
+		buf.append(",");
+		buf.append(format.format(getPosition()));
+		buf.append(",");
+		buf.append(format.format(getFWHM()));
+		buf.append(",");
+		buf.append(format.format(getArea()));
+		buf.append(",");
+		buf.append(getPeakType());
+		return buf.toString();
+	}
+
+	public static String getCVSTitle() {
+		final StringBuilder buf = new StringBuilder();
+		buf.append("Peak Name, ");
+		buf.append("Position, ");
+		buf.append("FWHM, ");
+		buf.append("Area, ");
+		buf.append("Peak Type");
+		return buf.toString();
+	}
+
+	public double getDataValue() {
+		if (x==null || y==null) return Double.NaN;
+		try {
+		    final double xValue = getPosition();
+		    List<Double>  cross = DatasetUtils.crossings(x, xValue);
+		    final int index     = (int)Math.round(cross.get(0));
+		    return y.getDouble(index);
+		} catch (Throwable ne) {
+			return Double.NaN;
+		}
+	}
 	
 }

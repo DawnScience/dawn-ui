@@ -30,6 +30,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IReusableEditor;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.eclipse.ui.part.Page;
@@ -98,7 +99,8 @@ public class H5MultiEditor extends MultiPageEditorPart  implements ISlicablePlot
 			// The HDF5TreeEditor crashes a lot and is unreliable.
 			// The property org.dawb.editor.h5.use.default is set by default in dawb / dawn vanilla
 			// The property org.dawb.editor.h5.use.default is not set in SDA.
-			this.treePage = System.getProperty("org.dawb.editor.h5.use.default") !=null
+			this.treePage = System.getProperty("org.dawb.editor.h5.use.default") ==null
+					        || "true".equals(System.getProperty("org.dawb.editor.h5.use.default"))
                           ? new H5Editor() 
 			              : new HDF5TreeEditor();
 			addPage(index, treePage,   getEditorInput());
@@ -108,11 +110,13 @@ public class H5MultiEditor extends MultiPageEditorPart  implements ISlicablePlot
 			logger.error("Cannot initiate "+getClass().getName()+"!", e);
 		}
 		
-		try {
-			EclipseUtils.getActivePage().showView("org.dawb.passerelle.views.ValueView");
-
-		} catch (Throwable ignored) {
-			// Nowt
+		IWorkbenchPage page = EclipseUtils.getActivePage();
+		if (page != null) {
+			try {
+				page.showView("org.dawb.passerelle.views.ValueView");
+			} catch (PartInitException e) {
+				// do nothing
+			}
 		}
 		
 		final int lastIndex = index;

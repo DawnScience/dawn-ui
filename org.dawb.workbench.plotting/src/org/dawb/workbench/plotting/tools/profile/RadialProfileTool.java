@@ -1,4 +1,4 @@
-package org.dawb.workbench.plotting.tools;
+package org.dawb.workbench.plotting.tools.profile;
 
 import org.dawb.common.ui.plot.region.IRegion;
 

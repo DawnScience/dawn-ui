@@ -12,17 +12,17 @@ import java.util.Map;
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.IAxisListener;
 import org.csstudio.swt.xygraph.linearscale.Range;
+import org.dawb.common.services.HistogramBound;
 import org.dawb.common.services.IImageService;
 import org.dawb.common.services.ImageServiceBean;
 import org.dawb.common.services.ImageServiceBean.HistoType;
-import org.dawb.common.services.HistogramBound;
 import org.dawb.common.services.ImageServiceBean.ImageOrigin;
 import org.dawb.common.ui.image.PaletteFactory;
 import org.dawb.common.ui.plot.trace.IImageTrace;
+import org.dawb.common.ui.plot.trace.IPaletteListener;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceContainer;
 import org.dawb.common.ui.plot.trace.PaletteEvent;
-import org.dawb.common.ui.plot.trace.IPaletteListener;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -41,6 +41,11 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.function.Downsample;
 import uk.ac.diamond.scisoft.analysis.dataset.function.DownsampleMode;
+import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
+import uk.ac.diamond.scisoft.analysis.roi.PointROI;
+import uk.ac.diamond.scisoft.analysis.roi.PolygonalROI;
+import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
+import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 /**
  * A trace which draws an image to the plot.
@@ -128,6 +133,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 
 	public void setPaletteData(PaletteData paletteData) {
+		if (imageServiceBean==null) return;
 		imageServiceBean.setPalette(paletteData);
 		createScaledImage(ImageScaleType.FORCE_REIMAGE, null);
 		repaint();
@@ -470,7 +476,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		paletteListeners = null;
         clearAspect(xAxis);
         clearAspect(yAxis);
-		getParent().remove(this);
+		if (getParent()!=null) getParent().remove(this);
 		xAxis.removeListener(this);
 		yAxis.removeListener(this);
 		axisRedrawActive = false;
@@ -614,7 +620,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		performAutoscale();
 		createScaledImage(ImageScaleType.FORCE_REIMAGE, null);
 		repaint();
+		fireImageOriginListeners();
 	}
+
 
 	/**
 	 * Creates new axis bounds, updates the label data set
@@ -637,6 +645,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 	@Override
 	public ImageOrigin getImageOrigin() {
+		if (imageServiceBean==null) return ImageOrigin.TOP_LEFT;
 		return imageServiceBean.getOrigin();
 	}
 	
@@ -698,6 +707,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 
 	public void setMin(Number min) {
+		if (imageServiceBean==null) return;
 		imageServiceBean.setMin(min);
 		fireMinDataListeners();
 	}
@@ -707,6 +717,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 
 	public void setMax(Number max) {
+		if (imageServiceBean==null) return;
 		imageServiceBean.setMax(max);
 		fireMaxDataListeners();
 	}
@@ -773,7 +784,13 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		final PaletteEvent evt = new PaletteEvent(this, getPaletteData());
 		for (IPaletteListener pl : paletteListeners) pl.maskChanged(evt);
 	}
-
+	private void fireImageOriginListeners() {
+		if (paletteListeners==null) return;
+		if (!imageCreationAllowed)  return;
+		final PaletteEvent evt = new PaletteEvent(this, getPaletteData());
+		for (IPaletteListener pl : paletteListeners) pl.imageOriginChanged(evt);
+	}
+	
 	@Override
 	public DownsampleType getDownsampleType() {
 		return downsampleType;
@@ -803,6 +820,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 	@Override
 	public void rehistogram() {
+		if (imageServiceBean==null) return;
 		imageServiceBean.setMax(null);
 		imageServiceBean.setMin(null);
 		createScaledImage(ImageScaleType.REHISTOGRAM, null);
@@ -824,6 +842,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 */
 	@Override
 	public HistoType getHistoType() {
+		if (imageServiceBean==null) return null;
 		return imageServiceBean.getHistogramType();
 	}
 	
@@ -832,6 +851,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 */
 	@Override
 	public void setHistoType(HistoType type) {
+		if (imageServiceBean==null) return;
 		imageServiceBean.setHistogramType(type);
 		Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.HISTO_PREF, type.getLabel());
 		createScaledImage(ImageScaleType.REHISTOGRAM, null);
@@ -865,6 +885,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	public void setMinCut(HistogramBound bound) {
 		
 		storeBound(bound, PlottingConstants.MIN_CUT);
+		if (imageServiceBean==null) return;
 		imageServiceBean.setMinimumCutBound(bound);
 		fireMinCutListeners();
 	}
@@ -885,6 +906,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	@Override
 	public void setMaxCut(HistogramBound bound) {
 		storeBound(bound, PlottingConstants.MAX_CUT);
+		if (imageServiceBean==null) return;
 		imageServiceBean.setMaximumCutBound(bound);
 		fireMaxCutListeners();
 	}
@@ -897,6 +919,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	@Override
 	public void setNanBound(HistogramBound bound) {
 		storeBound(bound, PlottingConstants.NAN_CUT);
+		if (imageServiceBean==null) return;
 		imageServiceBean.setNanBound(bound);
 		fireNanBoundsListeners();
 	}
@@ -934,5 +957,94 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 	public boolean isMaximumZoom() {
 		return isMaximumZoom;
+	}
+	
+	private Object userObject;
+
+	public Object getUserObject() {
+		return userObject;
+	}
+
+	public void setUserObject(Object userObject) {
+		this.userObject = userObject;
+	}
+	
+	/**
+	 * If the axis data set has been set, this method will return 
+	 * a selection region in the coordinates of the axes labels rather
+	 * than the indices.
+	 * 
+	 * Ellipse and Sector rois are not currently supported.
+	 * 
+	 * @return ROI in label coordinates. This roi is not that useful after it
+	 *         is created. The data processing needs rois with indices.
+	 */
+	@Override
+	public ROIBase getRegionInAxisCoordinates(final ROIBase roi) throws Exception {
+		
+		if (axes==null)     return roi;
+		if (axes.isEmpty()) return roi;
+		
+		final AbstractDataset xl = axes.get(0); // May be null
+		final AbstractDataset yl = axes.get(1); // May be null
+		
+		if (roi instanceof LinearROI) {
+			double[] sp = ((LinearROI)roi).getPoint();
+			double[] ep = ((LinearROI)roi).getEndPoint();
+			transform(xl,0,sp,ep);
+			transform(yl,1,sp,ep);
+			return new LinearROI(sp, ep);
+			
+		} else if (roi instanceof PolygonalROI) {
+			PolygonalROI proi = (PolygonalROI)roi;
+			final PolygonalROI ret = new PolygonalROI();
+			for (PointROI pointROI : proi) {
+				double[] dp = pointROI.getPoint();
+				transform(xl,0,dp);
+				transform(yl,1,dp);
+				ret.insertPoint(dp);
+			}
+			
+		} else if (roi instanceof PointROI) {
+			double[] dp = ((PointROI)roi).getPoint();
+			transform(xl,0,dp);
+			transform(yl,1,dp);
+			return new PointROI(dp);
+			
+		} else if (roi instanceof RectangularROI) {
+			RectangularROI rroi = (RectangularROI)roi;
+			double[] sp=roi.getPoint();
+			double[] ep=rroi.getEndPoint();
+			transform(xl,0,sp,ep);
+			transform(yl,1,sp,ep);
+				
+			return new RectangularROI(sp[0], sp[1], ep[0]-sp[0], sp[1]-ep[1], rroi.getAngle());
+						
+		} else {
+			throw new Exception("Unsupported roi "+roi.getClass());
+		}
+
+		return roi;
+	}
+	
+	@Override
+	public double[] getPointInAxisCoordinates(final double[] point) throws Exception {
+		if (axes==null)     return point;
+		if (axes.isEmpty()) return point;
+		
+		final AbstractDataset xl = axes.get(0); // May be null
+		final AbstractDataset yl = axes.get(1); // May be null
+		transform(xl,0,point);
+		transform(yl,1,point);
+        return point;
+	}
+	
+	private void transform(AbstractDataset label, int index, double[]... points) {
+		if (label!=null) {
+			for (double[] ds : points) {
+				int dataIndex = (int)ds[index];
+				ds[index] = label.getDouble(dataIndex);
+			}
+		}		
 	}
 }

@@ -2,6 +2,7 @@ package org.dawb.workbench.plotting.system.swtxy;
 
 import java.text.NumberFormat;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 import org.csstudio.swt.xygraph.figures.Annotation;
@@ -13,12 +14,15 @@ import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.swt.xygraph.linearscale.AbstractScale.LabelSide;
 import org.csstudio.swt.xygraph.linearscale.LinearScale.Orientation;
 import org.dawb.common.services.ImageServiceBean.ImageOrigin;
+import org.dawb.common.ui.plot.axis.IAxis;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
 import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
 import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.PaletteData;
@@ -81,7 +85,7 @@ public class XYRegionGraph extends XYGraph {
 	 * @return region
 	 * @throws Exception
 	 */
-	public AbstractSelectionRegion createRegion(String name, Axis xAxis, Axis yAxis, RegionType regionType, boolean startingWithMouseEvent) throws Exception {
+	public AbstractSelectionRegion createRegion(String name, IAxis xAxis, IAxis yAxis, RegionType regionType, boolean startingWithMouseEvent) throws Exception {
 		return getRegionArea().createRegion(name, xAxis, yAxis, regionType, startingWithMouseEvent);
 	}
 	public void disposeRegion(final AbstractSelectionRegion region) {
@@ -235,19 +239,38 @@ public class XYRegionGraph extends XYGraph {
 	 */
 	public void setZoomLevel(MouseEvent evt, double delta) {
 		
-		// TODO This should not always zoom equally in x and y.
-		// If y << x scroll slower in y.
-		// If x << y scroll slower in x.
 		int primX = primaryXAxis.getLength() - primaryXAxis.getMargin();
 		int primY = primaryYAxis.getLength() - primaryYAxis.getMargin();
 		double xScale = delta;
-		double yScale = delta;
+		double yScale = delta;	
+
+		// Allow for axis size
 		if (primX>(primY*1.333)) {
 			double ratio = (Double.valueOf(primX)/Double.valueOf(primY));
 			yScale = delta / ratio;
 		} else if (primY>(primX*1.333)) {
 			xScale = delta / (Double.valueOf(primY)/Double.valueOf(primX));
 		}
+		
+		// Allow for available size
+		if (getRegionArea().getImageTrace()!=null) {
+			
+			// Fudged scaling algorithm
+			// TODO make a less jerky one
+			Rectangle fullSize  = getBounds();
+			int w  = fullSize.width; 
+			int h  = fullSize.height;
+			int xg = w-primX; 
+			int yg = h-primY; 
+			if ((xg-yg)>100) {
+				double scale = 2d;
+				yScale = delta>0 ? yScale*scale : yScale/scale;
+			} else if ((yg-xg)>10) {
+				double scale = 6d;
+				yScale = delta>0 ? yScale/scale : yScale*scale;
+			}
+		}
+		
 		for (Axis axis : getXAxisList()) {
 			final double cenX = axis.getPositionValue(evt.x, false);
 			axis.zoomInOut(cenX, xScale);
@@ -261,6 +284,7 @@ public class XYRegionGraph extends XYGraph {
 	public void dispose() {
 		removeAll();
 		getRegionArea().dispose();
+		clearPropertyListeners();
 	}
 	
 	private final NumberFormat integerFormat   = NumberFormat.getIntegerInstance();
@@ -299,5 +323,47 @@ public class XYRegionGraph extends XYGraph {
 		});
 		super.addAnnotation(annotation);
 	}
+
+	private Collection<IPropertyChangeListener> propertyListeners;
+	
+	/**
+	 * NOTE This listener is *not* notified once for each configuration setting made on 
+	 * the configuration but once whenever the form is applied by the user (and many things
+	 * are changed) 
+	 * 
+	 * You then have to read the property you require from the object (for instance the axis
+	 * format) in case it has changed. This is not ideal, later there may be more events fired and
+	 * it will be possible to check property name, for now it is always set to "Graph Configuration".
+	 * 
+	 * @param listener
+	 */
+	public void addPropertyChangeListener(IPropertyChangeListener listener) {
+		if (propertyListeners==null) propertyListeners = new HashSet<IPropertyChangeListener>(3);
+		propertyListeners.add(listener);
+	}
+	
+	public void removePropertyChangeListener(IPropertyChangeListener listener) {
+		if (propertyListeners==null) return;
+		propertyListeners.remove(listener);
+	}
+	
+	protected void clearPropertyListeners() {
+		if (propertyListeners!=null) propertyListeners.clear();
+	}
+	
+	protected void fireConfigurationPropertyChangeListeners() {
+		if (propertyListeners==null) return;
+		final PropertyChangeEvent evt = new PropertyChangeEvent(this, "Graph Configuration", "Various", "Various (some new)");
+		for (IPropertyChangeListener l : propertyListeners) {
+			l.propertyChange(evt);
+		}
+	}
+
+	public void setShowAxes(final boolean checked) {
+		this.primaryXAxis.setVisible(checked);
+		this.primaryYAxis.setVisible(checked);
+	}
+	
+	
 
 }

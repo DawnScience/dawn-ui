@@ -1,17 +1,15 @@
 package org.dawb.workbench.plotting.tools;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
-import org.dawb.common.ui.plot.AbstractPlottingSystem;
-import org.dawb.common.ui.plot.PlottingFactory;
+import org.dawb.common.ui.plot.EmptyTool;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
-import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
+import org.dawb.common.ui.plot.trace.TraceUtils;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -28,6 +26,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.ui.progress.UIJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,40 +36,51 @@ import uk.ac.diamond.scisoft.analysis.dataset.Maths;
 
 public class DerivativeTool extends AbstractToolPage  {
 
+	// Statics
+	private static final int SMOOTHING = 1;
+
+	// Logger
 	private final static Logger logger = LoggerFactory.getLogger(DerivativeTool.class);
 
-	protected AbstractPlottingSystem plotter;
-	private   ITraceListener         traceListener;
-	private boolean isUpdatingDerivatives = false;
 
+	// GUI Elements
 	private Composite composite;
-
 	protected Button dataCheck;
-
 	protected Button derivCheck;
-
 	protected Button deriv2Check;
+	private Label infoLabel;
 
-	protected Button deriv3Check;
+	// Listeners
+	private ITraceListener traceListener;
+	private SelectionListener updateChecksSelection;
 
-	private SelectionListener updateDataSelection;
 
-	private SelectionListener updateDerivSelection;
-
-	private SelectionListener updateDeriv2Selection;
-
-	private SelectionListener updateDeriv3Selection;
-
+	// Actions
 	private IAction resetOnDeactivate;
+
+	// Jobs
+	private Job updatePlotData;
+
+	// Internal Items
+	private boolean isUpdateRunning = false;
+
+	protected ArrayList<AbstractDataset> dervs  = new ArrayList<AbstractDataset>();
+	protected ArrayList<AbstractDataset> dervs2 = new ArrayList<AbstractDataset>();
+	protected ArrayList<AbstractDataset> data   = new ArrayList<AbstractDataset>();
+	protected ArrayList<AbstractDataset> xs     = new ArrayList<AbstractDataset>();
+
+	public List<ITrace> dataTraces = new ArrayList<ITrace>();
+	public List<ITrace> dervTraces = new ArrayList<ITrace>();
+	public List<ITrace> derv2Traces = new ArrayList<ITrace>();
+
 
 	public DerivativeTool() {
 		try {
-			plotter = PlottingFactory.createPlottingSystem();
+			// Set up the listener for new traces
 			this.traceListener = new ITraceListener.Stub() {
 				@Override
 				public void tracesPlotted(TraceEvent evt) {
 
-					if (isUpdatingDerivatives) return; // Avoids looping of listeners!
 					if (!(evt.getSource() instanceof List<?>) && !(evt.getSource() instanceof ITrace)) {
 						return;
 					}
@@ -78,113 +89,65 @@ public class DerivativeTool extends AbstractToolPage  {
 					}
 				}
 			};
+
 		} catch (Exception e) {
 			logger.error("Cannot get plotting system!", e);
 		}
 
-		updateDataSelection = new SelectionListener() {
+		// Set up the listener for the gui elements		
+		updateChecksSelection = new SelectionListener() {
 
 			@Override
 			public void widgetSelected(SelectionEvent event) {
-				//derivCheck.setSelection(false);
-				//deriv2Check.setSelection(false);
-				//deriv3Check.setSelection(false);
-				updateDerivatives();
+				logger.debug("Widget Selected Event");
+				UIJob job = new UIJob("Update Derivatives") {
 
+					@Override
+					public IStatus runInUIThread(IProgressMonitor monitor) {
+						try {
+							isUpdateRunning = true;
+							logger.debug("Widget Update Running");
+							updateDerivatives(dataCheck.getSelection(),derivCheck.getSelection(),deriv2Check.getSelection());
+						} finally {
+							logger.debug("Widget Update Finished");
+							isUpdateRunning = false;
+						}
+						return Status.OK_STATUS;
+					}
+				};
+
+				job.schedule();
 			}
 
 			@Override
 			public void widgetDefaultSelected(SelectionEvent event) {
 				widgetSelected(event);
-
-			}
-		};
-
-		updateDerivSelection = new SelectionListener() {
-
-			@Override
-			public void widgetSelected(SelectionEvent event) {
-				//dataCheck.setSelection(false);
-				//deriv2Check.setSelection(false);
-				//deriv3Check.setSelection(false);
-				updateDerivatives();
-
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent event) {
-				widgetSelected(event);
-
-			}
-		};
-
-		updateDeriv2Selection = new SelectionListener() {
-
-			@Override
-			public void widgetSelected(SelectionEvent event) {
-				//derivCheck.setSelection(false);
-				//dataCheck.setSelection(false);
-				//deriv3Check.setSelection(false);
-				updateDerivatives();
-
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent event) {
-				widgetSelected(event);
-
-			}
-		};
-
-		updateDeriv3Selection = new SelectionListener() {
-
-			@Override
-			public void widgetSelected(SelectionEvent event) {
-				//derivCheck.setSelection(false);
-				//deriv2Check.setSelection(false);
-				//dataCheck.setSelection(false);
-				updateDerivatives();
-
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent event) {
-				widgetSelected(event);
-
 			}
 		};
 	}
 
+
 	@Override
 	public void createControl(Composite parent) {
-
-
-		// final IPageSite site = getSite();
-
-		//		plotter.createPlotPart(parent, 
-		//								getTitle(), 
-		//								site.getActionBars(), 
-		//								PlotType.PT1D,
-		//								null);	
 
 		composite = new Composite(parent, SWT.RESIZE);
 		composite.setLayout(new GridLayout(1, false));	
 
+		infoLabel = new Label(composite, SWT.NONE);
+		infoLabel.setText("The derivative tool will leave the derivative traces active unless the clear tool is selected");
+
 		dataCheck = new Button(composite, SWT.CHECK);
 		dataCheck.setText("Display Data");
 		dataCheck.setSelection(false);
-		dataCheck.addSelectionListener(updateDataSelection);
+		dataCheck.addSelectionListener(updateChecksSelection);
 		derivCheck = new Button(composite, SWT.CHECK);
 		derivCheck.setSelection(true);
 		derivCheck.setText("Display f'(Data)");
-		derivCheck.addSelectionListener(updateDerivSelection);
+		derivCheck.addSelectionListener(updateChecksSelection);
 		deriv2Check = new Button(composite, SWT.CHECK);
 		deriv2Check.setText("Display f''(Data)");
-		deriv2Check.addSelectionListener(updateDeriv2Selection);
-		deriv3Check = new Button(composite, SWT.CHECK);
-		deriv3Check.setText("Display f'''(Data)");
-		deriv3Check.addSelectionListener(updateDeriv3Selection);
-		
+		deriv2Check.addSelectionListener(updateChecksSelection);
+
 		resetOnDeactivate= new Action("Reset plot(s) when tool deactivates", IAction.AS_CHECK_BOX) {
 			@Override
 			public void run() {
@@ -197,6 +160,7 @@ public class DerivativeTool extends AbstractToolPage  {
 
 		activate();
 	}
+
 
 	/**
 	 * Required if you want to make tools work.
@@ -212,16 +176,20 @@ public class DerivativeTool extends AbstractToolPage  {
 	}
 	 */
 
+
 	@Override
 	public ToolPageRole getToolPageRole() {
 		return ToolPageRole.ROLE_1D;
 	}
 
+
 	@Override
 	public void setFocus() {
-
+		composite.setFocus();
 	}
 
+
+	@Override
 	public void activate() {
 		super.activate();
 		if (getPlottingSystem()!=null) {
@@ -230,18 +198,23 @@ public class DerivativeTool extends AbstractToolPage  {
 		}
 	}
 
+
+	@Override
 	public void deactivate() {
 		super.deactivate();
-		
-		if (Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.RESET_ON_DEACTIVATE)) {
-			
-			if (updateDerivatives==null) updateDerivatives = new DerivativeJob();
-			updateDerivatives.update(true, false, false, false);
 
+		Object tool = getToolSystem().getCurrentToolPage(getToolPageRole());
+		boolean isEmpty = tool!=null && tool.getClass()==EmptyTool.class;
+		boolean deactivateOnExit = Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.RESET_ON_DEACTIVATE);
+
+		// if this is the empty tool, clear the plots
+		if (isEmpty || deactivateOnExit) {
+			updateDerivatives(true,false,false);
 		}
-		
+
 		if (getPlottingSystem()!=null) getPlottingSystem().removeTraceListener(traceListener);
 	}
+
 
 	@Override
 	public Control getControl() {
@@ -249,79 +222,25 @@ public class DerivativeTool extends AbstractToolPage  {
 		return composite;
 	}
 
+
+	@Override
 	public void dispose() {
 		deactivate();
-		if (plotter!=null) plotter.dispose();
-		plotter = null;
+		// clear all lists
+		if (dervs!=null) dervs.clear();
+		if (dervs2!=null) dervs2.clear();
+		if (data!=null) data.clear();
+		if (xs!=null) xs.clear();
+		if (dataTraces!=null) dataTraces.clear();
+		if (dervTraces!=null) dervTraces.clear();
+		if (derv2Traces!=null) derv2Traces.clear();
 		super.dispose();
 	}
 
 
-	private Job updatePlotData;
-	private boolean isUpdateRunning = false;
-
-	protected ArrayList<ITrace> traces          = new ArrayList<ITrace>();
-	protected ArrayList<AbstractDataset> dervs  = new ArrayList<AbstractDataset>();
-	protected ArrayList<AbstractDataset> dervs2 = new ArrayList<AbstractDataset>();
-	protected ArrayList<AbstractDataset> dervs3 = new ArrayList<AbstractDataset>();
-	protected ArrayList<AbstractDataset> data   = new ArrayList<AbstractDataset>();
-	protected ArrayList<AbstractDataset> xs     = new ArrayList<AbstractDataset>();
-
-	
-	protected ArrayList<AbstractDataset> getDervs() {
-		if (dervs.size() != data.size()) {
-			dervs.clear();
-			for (int i = 0; i < data.size(); i++) {
-				//TODO 2D dervs!
-				if (xs.get(i).getRank() != 1 || data.get(i).getRank() != 1) {
-					logger.trace("Cannot process 2D derviatives as yet!");
-					continue;
-				}
-				dervs.add(Maths.derivative(xs.get(i), data.get(i), 1));
-			}
-		}
-		return dervs;
-	}
-	
-	protected ArrayList<AbstractDataset> getDervs2() {
-		ArrayList<AbstractDataset> derivatives = getDervs();
-		if (dervs2.size() != derivatives.size()) {
-			dervs2.clear();
-			for (int i = 0; i < derivatives.size(); i++) {
-				//TODO should make the smoothing a parameter
-				//TODO 2D dervs!
-				if (xs.get(i).getRank() != 1 || data.get(i).getRank() != 1) {
-					logger.trace("Cannot process 2D derviatives as yet!");
-					continue;
-				}
-				dervs2.add(Maths.derivative(xs.get(i), derivatives.get(i), 1));
-			}
-		}
-		return dervs2;
-	}
-	
-	protected ArrayList<AbstractDataset> getDervs3() {
-		ArrayList<AbstractDataset> derivatives = getDervs2();
-		if (dervs3.size() != derivatives.size()) {
-			dervs3.clear();
-			for (int i = 0; i < derivatives.size(); i++) {
-				//TODO should make the smoothing a parameter
-				//TODO 2D dervs!
-				if (xs.get(i).getRank() != 1 || data.get(i).getRank() != 1) {
-					logger.trace("Cannot process 2D derviatives as yet!");
-					continue;
-				}
-				dervs3.add(Maths.derivative(xs.get(i), derivatives.get(i), 1));
-			}
-		}
-		return dervs3;
-	}
-	
-	
-
 	/**
 	 * The user can optionally nominate an x. In this case, we would like to 
-	 * use it for the derviative instead of the indices of the data. Therefore
+	 * use it for the derivative instead of the indices of the data. Therefore
 	 * there is some checking here to see if there are x values to plot.
 	 * 
 	 * Normally everything will be ILineTraces even if the x is indices.
@@ -335,43 +254,66 @@ public class DerivativeTool extends AbstractToolPage  {
 				protected IStatus run(IProgressMonitor monitor) {
 
 					try {
-						isUpdateRunning = true;
 
+						isUpdateRunning = true;
+						logger.debug("Update Running");
 						if (!isActive()) return Status.CANCEL_STATUS;
 
-						traces.clear();
-						traces.addAll(getPlottingSystem().getTraces());
-						data.clear();
-						dervs.clear();
-						dervs2.clear();
-						dervs3.clear();
-						xs.clear();
-
-						if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
-						
-						for (ITrace trace : traces) {
-
-							//if (firstTrace==null) firstTrace = trace;
-
-							if (!trace.isUserTrace()) continue;
-							
-							final AbstractDataset plot = trace.getData();
-							data.add(plot);
-
-							final AbstractDataset x = (trace instanceof ILineTrace) 
-									              ? ((ILineTrace)trace).getXData() 
-									              : AbstractDataset.arange(0, plot.getSize(), 1, AbstractDataset.INT32);
-							xs.add(x);			
+						// First get all the traces which have been plotted which are user traces
+						dataTraces.clear();
+						for (ITrace trace : getPlottingSystem().getTraces(ILineTrace.class)) {
+							if (trace.isUserTrace()) {
+								dataTraces.add(trace);
+							}
 						}
 
-						Display.getDefault().asyncExec(new Runnable() {
+						// now remove any traces which are derivative ones
+						for (ITrace trace : dervTraces) {
+							dataTraces.remove(trace);
+						}
+
+						for (ITrace trace : derv2Traces) {
+							dataTraces.remove(trace);
+						}
+
+						// quick check for cancel.
+						if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
+
+						// Now we have a list which only contains user defined and derivatable plots, calculate the derivatives
+
+						// Clear all the dataset lists
+						data.clear();
+						xs.clear();
+						dervs.clear();
+						dervs2.clear();
+
+						for (ITrace trace : dataTraces) {
+
+							// get the datasets out of the plotting
+							final AbstractDataset traceData = trace.getData();
+							data.add(traceData);
+
+							final AbstractDataset x = (trace instanceof ILineTrace) 
+									? ((ILineTrace)trace).getXData() 
+											: AbstractDataset.arange(0, traceData.getSize(), 1, AbstractDataset.INT32);
+									xs.add(x);	
+
+									// now calculate the derivatives
+									AbstractDataset derv = Maths.derivative(x, traceData, SMOOTHING);
+									dervs.add(derv);
+									dervs2.add(Maths.derivative(x, derv, SMOOTHING));
+
+						}
+
+						Display.getDefault().syncExec(new Runnable() {
 							public void run() {
-								updateDerivatives();						
+								updateDerivatives(dataCheck.getSelection(),derivCheck.getSelection(),deriv2Check.getSelection());						
 							}
 						});
-						
+
 						return Status.OK_STATUS;
 					} finally {
+						logger.debug("Update Finished");
 						isUpdateRunning = false;
 					}
 				}	
@@ -381,123 +323,62 @@ public class DerivativeTool extends AbstractToolPage  {
 			updatePlotData.setPriority(Job.INTERACTIVE);
 		}
 
-		if (isUpdateRunning)  updatePlotData.cancel();
-		if (updateRunning <= 0) {
-			updatePlotData.schedule();
-		}
+		updatePlotData.schedule();
 	}
 
-	
-	private DerivativeJob updateDerivatives;
-	private int updateRunning = 0;
 
 	/**
 	 * The user can optionally nominate an x. In this case, we would like to 
-	 * use it for the derviative instead of the indices of the data. Therefore
+	 * use it for the derivative instead of the indices of the data. Therefore
 	 * there is some checking here to see if there are x values to plot.
 	 * 
 	 * Normally everything will be ILineTraces even if the x is indices.
 	 * 
 	 * Must call in UI thread
 	 */
-	private synchronized void updateDerivatives() {
-		if (updateDerivatives==null) updateDerivatives = new DerivativeJob();
-		updateDerivatives.update(dataCheck.getSelection(),
-							     derivCheck.getSelection(),
-							     deriv2Check.getSelection(),
-							     deriv3Check.getSelection());
-	}
-	
-	private class DerivativeJob extends Job {
+	private synchronized void updateDerivatives(boolean dataVisible, boolean derivVisible, boolean deriv2Visible) {
+		// Have a look to see which pieces of data should be plotted
+		logger.debug("Updating Derivatives");
+		// check for plotting the data first
+		for(ITrace trace : dataTraces) {
+			trace.setVisible(dataVisible);
+		} 
 
-		public DerivativeJob() {
-			super("Update Derivatives");
-		}
-
-		private boolean isData;
-		private boolean isDerv; 
-		private boolean isDerv2;
-		private boolean isDerv3;
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			
-			if (getPlottingSystem()==null)    return Status.CANCEL_STATUS;
-			if (data==null || data.isEmpty()) return Status.CANCEL_STATUS;
-			if (isUpdatingDerivatives)        return Status.CANCEL_STATUS;
-			try {
-				updateRunning++;
-				isUpdatingDerivatives = true;
-				
-				// Should only deal with 1D data!
-				final Collection<ITrace> lines = getPlottingSystem().getTraces(ILineTrace.class);
-				if (lines==null || lines.isEmpty()) return Status.CANCEL_STATUS;
-				
-				getPlottingSystem().clear();
-				
-				if (isData) {
-					for (int i = 0; i < data.size(); i++) {
-						getPlottingSystem().updatePlot1D(xs.get(i), data.subList(i, i+1), monitor);
-					}
-				}
-				
-				if (isDerv) {
-					final List<AbstractDataset> dervs = getDervs();
-					if (dervs!=null && !dervs.isEmpty()) for (int i = 0; i < data.size(); i++) {
-						getPlottingSystem().updatePlot1D(xs.get(i), dervs.subList(i, i+1), monitor);
-					}
-				}
-				
-				if (isDerv2) {
-					final List<AbstractDataset> dervs = getDervs2();
-					if (dervs!=null && !dervs.isEmpty()) for (int i = 0; i < data.size(); i++) {
-						getPlottingSystem().updatePlot1D(xs.get(i), dervs.subList(i, i+1), monitor);
-					}
-				}
-				
-				if (isDerv3) {
-					final List<AbstractDataset> dervs = getDervs3();
-					if (dervs!=null && !dervs.isEmpty()) for (int i = 0; i < data.size(); i++) {
-						getPlottingSystem().updatePlot1D(xs.get(i), dervs.subList(i, i+1), monitor);
-					}
-				}
-				
-			} catch (Exception e) {
-				logger.error("Failed to display the Diferential", e);
-			} finally {
-				updateRunning--;
-				isUpdatingDerivatives = false;
+		// now check the derivatives
+		if (derivVisible) {
+			dervTraces.clear();
+			for(int i = 0; i < dervs.size(); i++) {
+				ILineTrace trace = TraceUtils.replaceCreateLineTrace(getPlottingSystem(), dervs.get(i).getName());
+				trace.setData(xs.get(i), dervs.get(i));
+				trace.setUserTrace(true);
+				getPlottingSystem().addTrace(trace);
+				dervTraces.add(trace);			
 			}
-			
-			return Status.OK_STATUS;
+		} else {
+			// the derivatives are not needed, so delete them
+			for (ITrace trace : dervTraces) {
+				getPlottingSystem().removeTrace(trace);
+			}
 		}
-		
-		public void update(final boolean isData, 
-			                final boolean isDerv, 
-			                final boolean isDerv2, 
-			                final boolean isDerv3) {
-			
-			if (getPlottingSystem()==null) return;
-			
-	        for (Job job : Job.getJobManager().find(null))
-	            if (job.getClass()==getClass() && job.getState() != Job.RUNNING)
-	        	    job.cancel();
 
-			
-			this.isData = isData;
-			this.isDerv = isDerv;
-			this.isDerv2= isDerv2;
-			this.isDerv3= isDerv3;
-			
-			schedule();
+		// now check the second derivatives
+		if (deriv2Visible) {
+			derv2Traces.clear();
+			for(int i = 0; i < dervs2.size(); i++) {
+				ILineTrace trace = TraceUtils.replaceCreateLineTrace(getPlottingSystem(), dervs2.get(i).getName());
+				trace.setData(xs.get(i), dervs2.get(i));
+				trace.setUserTrace(true);
+				getPlottingSystem().addTrace(trace);
+				derv2Traces.add(trace);		
+			}
+		} else {
+			// the derivatives are not needed, so delete them
+			for (ITrace trace : derv2Traces) {
+				getPlottingSystem().removeTrace(trace);
+			}
 		}
-	};
-	
 
-	@SuppressWarnings("unused")
-	private String getTicksFor(int size) {
-		final StringBuilder buf = new StringBuilder();
-		for (int i = 0; i < size; i++) buf.append("'");
-		return buf.toString();
+		getPlottingSystem().autoscaleAxes();
 	}
 
 }

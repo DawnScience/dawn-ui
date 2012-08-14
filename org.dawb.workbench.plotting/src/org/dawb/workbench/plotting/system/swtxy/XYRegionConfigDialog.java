@@ -55,7 +55,7 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
 		int imageTraceIndex = -1;
 		
 		//Image Trace Configure Page     
-		if(regionGraph.getRegionArea().getImageTraces().size()>0){
+		if (regionGraph.getRegionArea().getImageTraces().size()>0){
 			
 			Composite traceTabComposite = new Composite(tabFolder, SWT.NONE);
 			traceTabComposite.setLayout(new GridLayout(1, false));        	
@@ -99,7 +99,7 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
 		}
 
         //Region Configure Page
-        if ( ((RegionArea)regionGraph.getPlotArea()).getRegionMap().size() > 0 ){
+        if ( ((RegionArea)regionGraph.getPlotArea()).hasUserRegions()){
         	
         	Composite regionComposite = new Composite(tabFolder, SWT.NONE);
         	regionComposite.setLayout(new GridLayout(1, false));        	
@@ -218,7 +218,7 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
 		if (imageTraceConfigPageList!=null) for (ImageTraceComposite comp : imageTraceConfigPageList){
 			comp.applyChanges();
 		}
-		
+		regionGraph.fireConfigurationPropertyChangeListeners();
 	}
 	@Override
 	protected void cancelPressed() {

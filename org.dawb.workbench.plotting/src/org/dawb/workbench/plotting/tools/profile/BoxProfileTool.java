@@ -1,4 +1,4 @@
-package org.dawb.workbench.plotting.tools;
+package org.dawb.workbench.plotting.tools.profile;
 
 import java.util.Arrays;
 import java.util.Collection;

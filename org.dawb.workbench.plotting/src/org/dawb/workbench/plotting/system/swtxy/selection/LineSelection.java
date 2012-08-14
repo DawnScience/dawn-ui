@@ -2,7 +2,7 @@ package org.dawb.workbench.plotting.system.swtxy.selection;
 
 import java.util.Arrays;
 
-import org.csstudio.swt.xygraph.figures.Axis;
+import org.dawb.common.ui.plot.axis.ICoordinateSystem;
 import org.dawb.workbench.plotting.system.swtxy.translate.FigureTranslator;
 import org.dawb.workbench.plotting.system.swtxy.util.Draw2DUtils;
 import org.eclipse.draw2d.ColorConstants;
@@ -46,8 +46,8 @@ class LineSelection extends AbstractSelectionRegion {
 	private SelectionHandle endBox2 = null, startBox2 = null;
 	private Figure connection;
 
-	LineSelection(String name, Axis xAxis, Axis yAxis) {
-		super(name, xAxis, yAxis);
+	LineSelection(String name, ICoordinateSystem coords) {
+		super(name, coords);
 		setRegionColor(ColorConstants.cyan);
 		setAlpha(80);
 		setLineWidth(2);
@@ -56,11 +56,11 @@ class LineSelection extends AbstractSelectionRegion {
 	@Override
 	public void createContents(final Figure parent) {
 				
-		startBox = new RectangularHandle(xAxis, yAxis, getRegionColor(), parent, SIDE, 100, 100);
+		startBox = new RectangularHandle(coords, getRegionColor(), parent, SIDE, 100, 100);
 		FigureTranslator mover = new FigureTranslator(getXyGraph(), startBox);
 		mover.addTranslationListener(createRegionNotifier());
 
-		endBox = new RectangularHandle(xAxis, yAxis, getRegionColor(), parent, SIDE, 200, 200);
+		endBox = new RectangularHandle(coords, getRegionColor(), parent, SIDE, 200, 200);
 		mover = new FigureTranslator(getXyGraph(), endBox);	
 		mover.addTranslationListener(createRegionNotifier());
 
@@ -143,9 +143,8 @@ class LineSelection extends AbstractSelectionRegion {
 	@Override
 	public boolean containsPoint(double x, double y) {
 		
-		final int xpix = xAxis.getValuePosition(x, false);
-		final int ypix = yAxis.getValuePosition(y, false);
-		return connection.containsPoint(xpix, ypix);
+		final int[] pix = coords.getValuePosition(new double[]{x,y});
+		return connection.containsPoint(pix[0], pix[1]);
 	}
 
 
@@ -196,8 +195,8 @@ class LineSelection extends AbstractSelectionRegion {
 				endBox.setPosition(lroi.getEndPoint());
 			
 			if (startBox != null && lroi.isCrossHair() && (startBox2 == null || endBox2 == null) ) {
-				startBox2 = new RectangularHandle(xAxis, yAxis, getRegionColor(), (Figure)connection.getParent(), SIDE, 100, 100); //start2x, start2y);
-				endBox2 = new RectangularHandle(xAxis, yAxis, getRegionColor(), (Figure)connection, SIDE, 200, 200); // end2x, end2y);
+				startBox2 = new RectangularHandle(coords, getRegionColor(), (Figure)connection.getParent(), SIDE, 100, 100); //start2x, start2y);
+				endBox2 = new RectangularHandle(coords, getRegionColor(), (Figure)connection, SIDE, 200, 200); // end2x, end2y);
 				
 				if (!connection.getParent().getChildren().contains(startBox2)) {
 					connection.getParent().add(startBox2);

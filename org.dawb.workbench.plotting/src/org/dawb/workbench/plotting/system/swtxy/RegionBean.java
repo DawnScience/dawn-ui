@@ -2,8 +2,8 @@ package org.dawb.workbench.plotting.system.swtxy;
 
 import java.io.Serializable;
 
-import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.XYGraph;
+import org.dawb.common.ui.plot.axis.ICoordinateSystem;
 import org.eclipse.swt.graphics.Color;
 
 public class RegionBean implements Serializable {
@@ -12,8 +12,7 @@ public class RegionBean implements Serializable {
 	 */
 	private static final long serialVersionUID = 3501897005952664393L;
 	
-	protected Axis    xAxis;
-	protected Axis    yAxis;
+	protected ICoordinateSystem    coordinateSystem;
 	protected XYGraph xyGraph;
 	protected String  name;
 	protected Color   regionColor;
@@ -25,14 +24,20 @@ public class RegionBean implements Serializable {
 	public void sync(RegionBean bean) {
 		setName(bean.getName());
 		setShowPosition(bean.isShowPosition());
-		setXAxis(bean.getXAxis());
-		setYAxis(bean.getYAxis());
 		setXyGraph(bean.getXyGraph());
 		setRegionColor(bean.getRegionColor());
 		setAlpha(bean.getAlpha());
 		setVisible(bean.isVisible());
 		setMobile(bean.isMobile());
 		setShowLabel(bean.isShowLabel());
+	}
+
+	public ICoordinateSystem getCoordinateSystem() {
+		return coordinateSystem;
+	}
+
+	public void setCoordinateSystem(ICoordinateSystem coordinateSystem) {
+		this.coordinateSystem = coordinateSystem;
 	}
 
 	public String getName() {
@@ -100,6 +105,9 @@ public class RegionBean implements Serializable {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + alpha;
+		result = prime
+				* result
+				+ ((coordinateSystem == null) ? 0 : coordinateSystem.hashCode());
 		result = prime * result + (mobile ? 1231 : 1237);
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result
@@ -107,9 +115,7 @@ public class RegionBean implements Serializable {
 		result = prime * result + (showLabel ? 1231 : 1237);
 		result = prime * result + (showPosition ? 1231 : 1237);
 		result = prime * result + (visible ? 1231 : 1237);
-		result = prime * result + ((xAxis == null) ? 0 : xAxis.hashCode());
 		result = prime * result + ((xyGraph == null) ? 0 : xyGraph.hashCode());
-		result = prime * result + ((yAxis == null) ? 0 : yAxis.hashCode());
 		return result;
 	}
 
@@ -123,6 +129,11 @@ public class RegionBean implements Serializable {
 			return false;
 		RegionBean other = (RegionBean) obj;
 		if (alpha != other.alpha)
+			return false;
+		if (coordinateSystem == null) {
+			if (other.coordinateSystem != null)
+				return false;
+		} else if (!coordinateSystem.equals(other.coordinateSystem))
 			return false;
 		if (mobile != other.mobile)
 			return false;
@@ -142,39 +153,14 @@ public class RegionBean implements Serializable {
 			return false;
 		if (visible != other.visible)
 			return false;
-		if (xAxis == null) {
-			if (other.xAxis != null)
-				return false;
-		} else if (!xAxis.equals(other.xAxis))
-			return false;
 		if (xyGraph == null) {
 			if (other.xyGraph != null)
 				return false;
 		} else if (!xyGraph.equals(other.xyGraph))
 			return false;
-		if (yAxis == null) {
-			if (other.yAxis != null)
-				return false;
-		} else if (!yAxis.equals(other.yAxis))
-			return false;
 		return true;
 	}
 
-	public Axis getXAxis() {
-		return xAxis;
-	}
-
-	public void setXAxis(Axis xAxis) {
-		this.xAxis = xAxis;
-	}
-
-	public Axis getYAxis() {
-		return yAxis;
-	}
-
-	public void setYAxis(Axis yAxis) {
-		this.yAxis = yAxis;
-	}
 
 	public boolean isShowLabel() {
 		return showLabel;

@@ -12,6 +12,8 @@ import org.csstudio.swt.xygraph.figures.PlotArea;
 import org.csstudio.swt.xygraph.figures.Trace;
 import org.csstudio.swt.xygraph.undo.ZoomType;
 import org.dawb.common.services.ImageServiceBean.ImageOrigin;
+import org.dawb.common.ui.plot.axis.IAxis;
+import org.dawb.common.ui.plot.axis.ICoordinateSystem;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.RegionEvent;
@@ -29,9 +31,13 @@ import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.graphics.PaletteData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RegionArea extends PlotArea {
 
+	private static final Logger logger = LoggerFactory.getLogger(RegionArea.class);
+	
 	protected ISelectionProvider selectionProvider;
 	private final Map<String,AbstractSelectionRegion>     regions;
 	private final Map<String,ImageTrace> imageTraces;
@@ -86,11 +92,14 @@ public class RegionArea extends PlotArea {
     protected void clearRegionsInternal() {
 		clearRegionTool();
 		if (regions==null) return;
+		
+		final Collection<String> deleted = new HashSet<String>(5);
 		for (AbstractSelectionRegion region : regions.values()) {
 			if (!region.isUserRegion()) continue;
+			deleted.add(region.getName());
 			region.remove();
 		}
-		regions.clear();	
+		regions.keySet().removeAll(deleted);
 		fireRegionsRemoved(new RegionEvent(this));
 
 	}
@@ -182,13 +191,14 @@ public class RegionArea extends PlotArea {
 	 * @return region
 	 * @throws Exception
 	 */
-	public AbstractSelectionRegion createRegion(String name, Axis x, Axis y, RegionType regionType, boolean startingWithMouseEvent) throws Exception {
+	public AbstractSelectionRegion createRegion(String name, IAxis x, IAxis y, RegionType regionType, boolean startingWithMouseEvent) throws Exception {
 
 		if (getRegionMap()!=null) {
 			if (getRegionMap().containsKey(name)) throw new Exception("The region '"+name+"' already exists.");
 		}
 		
-		AbstractSelectionRegion region = SelectionRegionFactory.createSelectionRegion(name, x, y, regionType);
+		ICoordinateSystem       coords  = new RegionCoordinateSystem(getImageTrace(), x, y);
+		AbstractSelectionRegion region  = SelectionRegionFactory.createSelectionRegion(name, coords, regionType);
 		if (startingWithMouseEvent) {
 			xyGraph.setZoomType(ZoomType.NONE);
 		    if (region.getRegionCursor()!=null) setCursor(region.getRegionCursor());
@@ -244,22 +254,50 @@ public class RegionArea extends PlotArea {
 
 	protected void fireRegionCreated(RegionEvent evt) {
 		if (regionListeners==null) return;
-		for (IRegionListener l : regionListeners) l.regionCreated(evt);
+		for (IRegionListener l : regionListeners) {
+			try {
+				l.regionCreated(evt);
+			} catch (Throwable ne) {
+				logger.error("Notifying of region creation", ne);
+				continue;
+			}
+		}
 	}
 	
 
 	protected void fireRegionAdded(RegionEvent evt) {
 		if (regionListeners==null) return;
-		for (IRegionListener l : regionListeners) l.regionAdded(evt);
+		for (IRegionListener l : regionListeners) {
+			try {
+				l.regionAdded(evt);
+			} catch (Throwable ne) {
+				logger.error("Notifying of region add", ne);
+				continue;
+			}
+		}
 	}
 	
 	protected void fireRegionRemoved(RegionEvent evt) {
 		if (regionListeners==null) return;
-		for (IRegionListener l : regionListeners) l.regionRemoved(evt);
+		for (IRegionListener l : regionListeners) {
+			try {
+				l.regionRemoved(evt);
+			} catch (Throwable ne) {
+				logger.error("Notifying of region removal", ne);
+				continue;
+			}
+		}
 	}
 	protected void fireRegionsRemoved(RegionEvent evt) {
 		if (regionListeners==null) return;
-		for (IRegionListener l : regionListeners) l.regionsRemoved(evt);
+		for (IRegionListener l : regionListeners) {
+			try {
+			    l.regionsRemoved(evt);
+			} catch (Throwable ne) {
+				logger.error("Notifying of region removal", ne);
+				continue;
+			}
+		}
 	}
 	
 	/**
@@ -522,6 +560,18 @@ public class RegionArea extends PlotArea {
 		if (imageTraceListeners!=null) imageTraceListeners.clear();
 		if (regions!=null)             regions.clear();
 		if (imageTraces!=null)         imageTraces.clear();
+	}
+
+	/**
+	 * Call to find out of any of the current regions are user editable.
+	 * @return
+	 */
+	public boolean hasUserRegions() {
+		if (getRegionMap()==null || getRegionMap().isEmpty()) return false;
+		for (String regionName : getRegionMap().keySet()) {
+			if (getRegionMap().get(regionName).isUserRegion()) return true;
+		}
+		return false;
 	}
 
 }

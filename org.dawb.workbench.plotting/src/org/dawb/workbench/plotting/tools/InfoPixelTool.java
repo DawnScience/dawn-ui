@@ -137,7 +137,7 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 			
 				for (int i=0; i< regions.size(); i++){
 					IRegion pointRegion = (IRegion)(regions.toArray())[i];
-										
+															
 					if (pointRegion.getRegionType() == RegionType.XAXIS_LINE || pointRegion.getRegionType() == RegionType.POINT ){
 						
 						visible.add(pointRegion);										
@@ -290,29 +290,32 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 
 	@Override
 	public void mousePressed(MouseEvent evt) {
+		logger.info("button clicked: " + evt.button);
 		
-		if (!isActive()) return;
+		if(evt.button == 1){// left click
+			if (!isActive()) return;
 
-		final Collection<IRegion> regions = getPlottingSystem().getRegions();
-		if (regions==null || regions.isEmpty()) logger.debug("no region selected");		
+			final Collection<IRegion> regions = getPlottingSystem().getRegions();
+			if (regions==null || regions.isEmpty()) logger.debug("no region selected");		
 
-        try {
-    		// add a point region
-        	final IRegion point = getPlottingSystem().createRegion(RegionUtils.getUniqueName("Point", getPlottingSystem()), RegionType.POINT);
-        	final PointROI regionBounds= new PointROI();
-            double x = getPlottingSystem().getSelectedXAxis().getPositionValue(evt.x);
-            double y = getPlottingSystem().getSelectedYAxis().getPositionValue(evt.y);
-            regionBounds.setPoint(new double[]{x,y});
-            point.setROI(regionBounds);
-            point.setMobile(true);
-            point.setTrackMouse(true);
-            
-            getPlottingSystem().addRegion(point);
-            
+			try {
+				// add a point region
+				final IRegion point = getPlottingSystem().createRegion(RegionUtils.getUniqueName("Point", getPlottingSystem()), RegionType.POINT);
+				final PointROI regionBounds= new PointROI();
+				double x = getPlottingSystem().getSelectedXAxis().getPositionValue(evt.x);
+				double y = getPlottingSystem().getSelectedYAxis().getPositionValue(evt.y);
+				regionBounds.setPoint(new double[]{x,y});
+				point.setROI(regionBounds);
+				point.setMobile(true);
+				point.setTrackMouse(true);
 
-     } catch (Exception e) {
-            logger.error("Cannot create point!", e);
-     }
+				getPlottingSystem().addRegion(point);
+
+
+			} catch (Exception e) {
+				logger.error("Cannot create point!", e);
+			}
+		}//end if
 	}
 
 	@Override
@@ -521,8 +524,8 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 	@Override
 	public void regionsRemoved(RegionEvent evt) {
 		if (!isActive()) return;
-		if (viewer!=null) viewer.refresh();
-		
+		createRegions();
+		if (viewer!=null) viewer.refresh();		
 	}
 	
 	@Override
@@ -535,6 +538,7 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 
 		if (viewer != null) {
 			IRegion region = (IRegion) evt.getSource();
+
 			if (region.getRegionType() == RegionType.POINT) {
 				// update table for current point region
 				ROIBase rb = evt.getROI();

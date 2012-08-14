@@ -1,8 +1,9 @@
-package org.dawb.workbench.plotting.tools;
+package org.dawb.workbench.plotting.tools.profile;
 
 import java.util.Collection;
 import java.util.List;
 
+import org.dawb.common.services.ImageServiceBean.ImageOrigin;
 import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingFactory;
@@ -398,7 +399,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 			ILineTrace trace = (ILineTrace)profilePlotter.getTrace(region.getName());
 			if (trace == null || snapshot) {
 				synchronized (profilePlotter) {  // Only one job at a time can choose axis and create plot.
-					if (region.getName().startsWith("Y Profile")) {
+					if (isXAxis(region)) {
 						profilePlotter.setSelectedXAxis(x1);
 
 					} else {
@@ -410,7 +411,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 				    if (snapShotColor!=null) {
 				    	trace.setTraceColor(snapShotColor);
 				    } else {
-						if (region.getName().startsWith("Y Profile")) {
+						if (isXAxis(region)) {
 							trace.setTraceColor(ColorConstants.blue);
 						} else {
 							trace.setTraceColor(ColorConstants.red);
@@ -422,21 +423,27 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 			final AbstractDataset data = image.getData();
 			AbstractDataset slice=null, sliceIndex=null;
 			if (monitor.isCanceled())return  false;
-			if (region.getName().startsWith("Y Profile")) {
-				int index = (int)Math.round(bounds.getPointX());
-				slice = data.getSlice(new int[]{0,index}, new int[]{data.getShape()[0], index+1}, new int[]{1,1});
-				if (monitor.isCanceled()) return  false;
-				slice = slice.flatten();
-				if (monitor.isCanceled()) return  false;
-				sliceIndex = AbstractDataset.arange(slice.getSize(), AbstractDataset.INT);
-
-			} else {
-				int index = (int)Math.round(bounds.getPointY());
-				slice = data.getSlice(new int[]{index,0}, new int[]{index+1, data.getShape()[1]}, new int[]{1,1});
-				if (monitor.isCanceled()) return  false;
-				slice = slice.flatten();
-				if (monitor.isCanceled()) return  false;
-				sliceIndex = AbstractDataset.arange(slice.getSize(), AbstractDataset.INT);
+			
+			try {
+				if (isXAxis(region)) {
+					int index = (int)Math.round(bounds.getPointX());
+					slice = data.getSlice(new int[]{0,index}, new int[]{data.getShape()[0], index+1}, new int[]{1,1});
+					if (monitor.isCanceled()) return  false;
+					slice = slice.flatten();
+					if (monitor.isCanceled()) return  false;
+					sliceIndex = AbstractDataset.arange(slice.getSize(), AbstractDataset.INT);
+	
+				} else {
+					int index = (int)Math.round(bounds.getPointY());
+					slice = data.getSlice(new int[]{index,0}, new int[]{index+1, data.getShape()[1]}, new int[]{1,1});
+					if (monitor.isCanceled()) return  false;
+					slice = slice.flatten();
+					if (monitor.isCanceled()) return  false;
+					sliceIndex = AbstractDataset.arange(slice.getSize(), AbstractDataset.INT);
+				}
+			} catch (Throwable ne) {
+				logger.error("Cannot slice using "+bounds, ne);
+				return false;
 			}
 			slice.setName(trace.getName());
 			trace.setData(sliceIndex, slice);
@@ -456,7 +463,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 					if (monitor.isCanceled()) return;
 					profilePlotter.autoscaleAxes();
 					profilePlotter.repaint();
-					if (region.getName().startsWith("Y Profile")) {
+					if (isXAxis(region)) {
 						x1.setRange(0, data.getShape()[0]);
 					} else {
 						x2.setRange(0, data.getShape()[1]);
@@ -465,6 +472,16 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 			});
 		}
 		return true;
+	}
+
+	private boolean isXAxis(IRegion region) {
+		boolean isXAxis  = region.getName().startsWith("Y Profile"); // Y profile is x-axis
+		boolean isYAxis  = region.getName().startsWith("X Profile"); // X profile is y-axis
+		ImageOrigin orig = getImageTrace().getImageOrigin();
+		return ( isXAxis && orig==ImageOrigin.TOP_LEFT )   ||
+			   ( isXAxis && orig==ImageOrigin.BOTTOM_RIGHT) ||
+			   ( isYAxis && orig==ImageOrigin.TOP_RIGHT)   ||
+			   ( isYAxis && orig==ImageOrigin.BOTTOM_LEFT);
 	}
 
 }

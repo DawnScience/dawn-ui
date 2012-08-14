@@ -24,6 +24,7 @@ import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
@@ -55,10 +56,15 @@ public class ROIViewer  {
 
 	public Control createPartControl(Composite parent) {
 		
-		this.regionTable = new TableViewer(parent, SWT.FULL_SELECTION | SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+		this.regionTable = new TableViewer(parent, SWT.FULL_SELECTION | SWT.SINGLE | SWT.V_SCROLL | SWT.BORDER);
+		GridData tableData = new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1);
+		tableData.heightHint=100;
+		regionTable.getTable().setLayoutData(tableData);
 		
 		final Label clickToEdit = new Label(parent, SWT.WRAP);
 		clickToEdit.setText("* Click to change");
+		clickToEdit.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false, 2, 1));
+		
 		return regionTable.getTable();
 	}
 
@@ -215,7 +221,7 @@ public class ROIViewer  {
             	getViewer().refresh();
             }
             
-            final ROIBase roi = createRoi(rows);
+            final ROIBase roi = createRoi(rows, row);
             if (roi!=null) region.setROI(roi);
 		}
 
@@ -317,15 +323,21 @@ public class ROIViewer  {
 		return ret;
 	}
 
-	public ROIBase createRoi(List<RegionRow> rows) {
+	public ROIBase createRoi(List<RegionRow> rows, RegionRow changed) {
 		
 		final ROIBase roi = region.getROI();
 		
 		ROIBase ret = null; 
 		if (roi instanceof LinearROI) {
-			LinearROI lr = new LinearROI(rows.get(0).getPoint(), rows.get(1).getPoint());
-			lr.setAngle(Math.toRadians(rows.get(2).getxLikeVal()));
-			ret = lr;
+			if (changed==rows.get(2)) {
+				LinearROI lr = new LinearROI(rows.get(0).getPoint(), rows.get(1).getPoint());
+				lr.setAngle(Math.toRadians(rows.get(2).getxLikeVal()));
+				ret = lr;
+			} else {
+				LinearROI lr = new LinearROI(rows.get(0).getPoint(), rows.get(1).getPoint());
+				if (changed==rows.get(1)) rows.get(2).setxLikeVal(0d);
+				ret = lr;
+			}
 			
 		} else if (roi instanceof PolygonalROI) {
 			PolygonalROI pr = new PolygonalROI();

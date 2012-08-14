@@ -8,7 +8,11 @@ import java.util.regex.Pattern;
 
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
+import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.util.GridUtils;
+import org.dawb.workbench.plotting.system.swtxy.AspectAxis;
+import org.dawb.workbench.plotting.system.swtxy.RegionArea;
+import org.dawb.workbench.plotting.system.swtxy.RegionCoordinateSystem;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
 import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
 import org.eclipse.jface.preference.ColorSelector;
@@ -51,7 +55,7 @@ public class RegionComposite extends Composite {
 		super(parent, SWT.NONE);
 		this.xyGraph = xyGraph;
 		
-		setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		setLayout(new org.eclipse.swt.layout.GridLayout(2, false));
 
 		final Label nameLabel = new Label(this, SWT.NONE);
@@ -149,8 +153,7 @@ public class RegionComposite extends Composite {
 		location.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		
 		this.roiViewer = new ROIViewer();
-		Control regionTable = roiViewer.createPartControl(this);
-		regionTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+		roiViewer.createPartControl(this);
 
 		// Should be last
 		nameText.setText(getDefaultName(defaultRegion.getIndex()));
@@ -190,8 +193,8 @@ public class RegionComposite extends Composite {
 
 	public AbstractSelectionRegion createRegion() throws Exception {
 		
-		final Axis xAxis = xyGraph.getXAxisList().get(xCombo.getSelectionIndex());
-		final Axis yAxis = xyGraph.getYAxisList().get(yCombo.getSelectionIndex());
+		final AspectAxis xAxis = getAxis(xyGraph.getXAxisList(), xCombo.getSelectionIndex());
+		final AspectAxis yAxis = getAxis(xyGraph.getYAxisList(), yCombo.getSelectionIndex());
 		
 		AbstractSelectionRegion region=null;
 		
@@ -222,10 +225,10 @@ public class RegionComposite extends Composite {
 		regionType.setEnabled(false);
 		regionType.setEditable(false);
 		
-		int index = xyGraph.getXAxisList().indexOf(region.getXAxis());
+		int index = xyGraph.getXAxisList().indexOf(region.getCoordinateSystem().getX());
 		xCombo.select(index);
 		
-		index = xyGraph.getYAxisList().indexOf(region.getYAxis());
+		index = xyGraph.getYAxisList().indexOf(region.getCoordinateSystem().getY());
 		yCombo.select(index);
 		
 		colorSelector.setColorValue(region.getRegionColor().getRGB());
@@ -250,9 +253,13 @@ public class RegionComposite extends Composite {
 	public AbstractSelectionRegion getEditingRegion() {
 		
 		final String txt = nameText.getText();
+		xyGraph.renameRegion(editingRegion, txt);
 		editingRegion.setName(txt);
-		editingRegion.setXAxis(xyGraph.getXAxisList().get(xCombo.getSelectionIndex()));
-		editingRegion.setYAxis(xyGraph.getYAxisList().get(yCombo.getSelectionIndex()));
+		
+		final AspectAxis x = getAxis(xyGraph.getXAxisList(), xCombo.getSelectionIndex());
+		final AspectAxis y = getAxis(xyGraph.getYAxisList(), yCombo.getSelectionIndex());
+		RegionCoordinateSystem sys = new RegionCoordinateSystem(getImageTrace(), x, y);
+		editingRegion.setCoordinateSystem(sys);
 		editingRegion.setShowPosition(showPoints.getSelection());
 		editingRegion.setRegionColor(new Color(getDisplay(), colorSelector.getColorValue()));
 		editingRegion.setAlpha(alpha.getSelection());
@@ -272,6 +279,15 @@ public class RegionComposite extends Composite {
         return editingRegion;
 	}
 
+
+	private AspectAxis getAxis(List<Axis> xAxisList, int selectionIndex) {
+		if (selectionIndex<0) selectionIndex=0;
+		return (AspectAxis)xAxisList.get(selectionIndex);
+	}
+
+    public IImageTrace getImageTrace() {
+    	return ((RegionArea)xyGraph.getPlotArea()).getImageTrace();
+    }
 
 	public void applyChanges() {
 //		this.roiViewer.cancelEditing();

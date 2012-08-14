@@ -17,11 +17,14 @@ import java.util.Map;
 import java.util.Set;
 
 import org.dawb.common.ui.plot.EmptyTool;
+import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.tool.IToolChangeListener;
 import org.dawb.common.ui.plot.tool.IToolPage;
 import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
 import org.dawb.common.ui.plot.tool.IToolPageSystem;
 import org.dawb.common.ui.plot.tool.ToolChangeEvent;
+import org.dawb.common.ui.plot.trace.IImageTrace;
+import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.util.text.StringUtils;
 import org.dawb.workbench.plotting.Activator;
@@ -30,6 +33,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -66,7 +70,7 @@ import org.eclipse.ui.part.PageBook;
 import org.eclipse.ui.part.ViewPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.eclipse.ui.cheatsheets.OpenCheatSheetAction ;
 /**
  * This view can be shown at the side of a plotting part. The
  * plotting part contributes a tool page which is shown by the view.
@@ -678,13 +682,14 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		// Do nothing.
 	}
 
+	private boolean newPartFound = false;
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see org.eclipse.ui.IPartListener#partOpened(org.eclipse.ui.IWorkbenchPart)
 	 */
 	public void partOpened(IWorkbenchPart part) {
-
+        newPartFound = true;
 	}
 
 	/**
@@ -1044,7 +1049,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 			updatePartInfo(tool);
 			initPage(tool);
 			tool.createControl(getPageBook());
-			addCloneAction(tool);
+			createCommonActions(tool);
 			if (!tool.isActive()) tool.activate();
 						
 			PageRec rec = new PageRec(part, tool);
@@ -1055,17 +1060,32 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		return null;
 	}
 	
-	private void addCloneAction(final IToolPage tool) {
+	private void createCommonActions(final IToolPage tool) {
 		
 		if (tool.getSite()==null)                 return;
 		if (tool.getSite().getActionBars()==null) return;
 		if (tool.getSite().getActionBars().getMenuManager()==null) return;
 		
+		if (tool.getCheatSheetId()!=null) {
+			final Action cheatAction = new Action("Open cheat sheet for '"+tool.getTitle()+"'") {
+				public void run() {
+					final String id = tool.getCheatSheetId();
+					final OpenCheatSheetAction oa = new OpenCheatSheetAction(id);
+					oa.run();
+				}
+			};
+			cheatAction.setImageDescriptor(Activator.getImageDescriptor("icons/help_view.gif"));
+			tool.getSite().getActionBars().getMenuManager().add(cheatAction);
+			tool.getSite().getActionBars().getMenuManager().add(new Separator());
+		}
+
 		final Action cloneAction = new Action("Open '"+tool.getTitle()+"' in dedicated view") {
 			public void run() {
 				try {
 					
+					IToolPage orig = null;
 					if (activeRec!=null) {
+						orig = activeRec.tool; 
 						if (recs.get(getString(tool.getPart()))!=null) {
 							recs.get(getString(tool.getPart())).remove(tool.getToolId());
 						}
@@ -1081,8 +1101,11 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 					final ToolPageView view = (ToolPageView)EclipseUtils.getPage().showView("org.dawb.workbench.plotting.views.toolPageView.fixed",
 																							tool.getToolId(),
 																							IWorkbenchPage.VIEW_ACTIVATE);
-					
 					view.update();
+					if (orig!=null && view.activeRec!=null && view.activeRec.tool!=null) {
+						view.activeRec.tool.sync(orig);
+						orig.deactivate();
+					}
 
 				} catch (Exception e) {
 					logger.error("Cannot open tool on its own page!", e);
@@ -1091,8 +1114,9 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		};
 		
 		tool.getSite().getActionBars().getMenuManager().add(cloneAction);
+		
 	}
-
+	
 	protected void update() {
 		// TODO Does this work ok?
 		partActivated(EclipseUtils.getActiveEditor());
@@ -1184,6 +1208,20 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
             if (tool.equals(getCurrentPage())) {
             	return;
             }
+            
+            // If we are a IToolPageSystem and required tool is no tool and 
+            // if we have plotted data inconsistent with the existing tool, 
+            // leave the existing tool where it is. Likely it is an image tool
+            // and sys is a 1D plot in a dedicated view.
+            if (!newPartFound && sys instanceof IPlottingSystem && tool instanceof EmptyTool) {
+            	final Collection<ITrace> images = ((IPlottingSystem)sys).getTraces(IImageTrace.class);
+            	if (images==null|| images.isEmpty()) { // 1D in this part
+            		if (activeRec.tool.getToolPageRole()==ToolPageRole.ROLE_2D) return; // 2D original tool
+            	} else { // 2D in this part
+            		if (activeRec.tool.getToolPageRole()==ToolPageRole.ROLE_1D) return; // 1D original tool
+            	}
+            }
+            
         
     		hiddenPart = null;
 
@@ -1207,6 +1245,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
         	logger.error("Problem updating activated state in "+getClass().getName(), ne); // No stack required in log here.
         } finally {
         	updatingActivated = false;
+        	newPartFound      = false;
         }
 	}
 	

@@ -1,6 +1,6 @@
 package org.dawb.workbench.plotting.system.swtxy.selection;
 
-import org.csstudio.swt.xygraph.figures.Axis;
+import org.dawb.common.ui.plot.axis.ICoordinateSystem;
 import org.dawb.workbench.plotting.system.swtxy.util.AffineTransform;
 import org.dawb.workbench.plotting.system.swtxy.util.RotatableEllipse;
 import org.dawb.workbench.plotting.system.swtxy.util.RotatablePolygonShape;
@@ -27,8 +27,8 @@ public class SectorHandle extends SelectionHandle {
 	 * @param start angle in degrees
 	 * @param end angle in degrees
 	 */
-	public SectorHandle(Axis xAxis, Axis yAxis, Color colour, RotatableEllipse parent, int side, double start, double end) {
-		super(xAxis, yAxis, colour, parent, side, start, end);
+	public SectorHandle(ICoordinateSystem coords, Color colour, RotatableEllipse parent, int side, double start, double end) {
+		super(coords, colour, parent, side, start, end);
 	}
 
 	static private final int ARC_POINTS = 5; // number of points on arc

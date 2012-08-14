@@ -320,6 +320,8 @@ public class LineTraceImpl implements ILineTrace {
 		LightWeightDataProvider prov = (LightWeightDataProvider)trace.getDataProvider();
 		if (prov!=null) {
 			prov.removeDataProviderListener(trace);
+		} else {
+			prov = new LightWeightDataProvider();
 		}
 		
 		prov.setData(xData,yData);
@@ -353,4 +355,15 @@ public class LineTraceImpl implements ILineTrace {
 	public void setUserTrace(boolean isUserTrace) {
 		this.userTrace = isUserTrace;
 	}
+	
+	private Object userObject;
+
+	public Object getUserObject() {
+		return userObject;
+	}
+
+	public void setUserObject(Object userObject) {
+		this.userObject = userObject;
+	}
+
 }

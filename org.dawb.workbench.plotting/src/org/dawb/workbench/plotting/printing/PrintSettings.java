@@ -41,6 +41,7 @@ public class PrintSettings {
 	private PrinterData printerData = null;
 	private Scale scale = Scale.DEFAULT;
 	private Resolution resolution = Resolution.MEDIUM;
+	private boolean keepAspectRatio = true;
 
 	// If new fields are added be sure to adjust clone()
 
@@ -284,6 +285,7 @@ public class PrintSettings {
 		newSettings.setHorizontalAlign(horizontalAlign);
 		newSettings.setOrientation(orientation);
 		newSettings.setResolution(resolution);
+		newSettings.setKeepAspectRatio(keepAspectRatio);
 		newSettings.setScale(scale);
 		newSettings.setPrinterData(getPrinterData());
 
@@ -644,4 +646,18 @@ public class PrintSettings {
 		this.resolution = resolution;
 	}
 
+	/**
+	 * @return the keep aspect ratio
+	 */
+	public boolean isAspectRatioKept() {
+		return keepAspectRatio;
+	}
+
+	/**
+	 * @param aspect ratio
+	 *            aspect ratio of the image
+	 */
+	public void setKeepAspectRatio(boolean keepAspectRatio) {
+		this.keepAspectRatio = keepAspectRatio;
+	}
 }

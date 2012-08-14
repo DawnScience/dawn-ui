@@ -1,5 +1,9 @@
-package org.dawb.workbench.plotting.tools;
+package org.dawb.workbench.plotting.tools.fitting;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
@@ -15,11 +19,13 @@ import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.RegionEvent;
 import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
+import org.dawb.common.ui.plot.tool.IToolPage;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.common.ui.plot.trace.TraceUtils;
+import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.FittingConstants;
 import org.dawb.workbench.plotting.preference.FittingPreferencePage;
@@ -106,6 +112,15 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 
 	}
 	
+	public void sync(IToolPage with) {
+		if (!with.getClass().equals(getClass())) return;
+		final FittingTool other = (FittingTool)with;
+		this.fittedPeaks = other.fittedPeaks.clone();
+		this.fitRegion   = other.fitRegion;
+		viewer.setInput(fittedPeaks);
+        viewer.refresh();
+	}
+	
 	@Override
 	public ToolPageRole getToolPageRole() {
 		return ToolPageRole.ROLE_1D;
@@ -154,26 +169,44 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		var.getColumn().setText("Position");
 		var.getColumn().setWidth(100);
 		var.setLabelProvider(new FittingLabelProvider(1));
-
+		
         var   = new TableViewerColumn(viewer, SWT.CENTER, 2);
-		var.getColumn().setText("FWHM");
+		var.getColumn().setText("Data");
+		var.getColumn().setToolTipText("The nearest data value of the fitted peak.");
 		var.getColumn().setWidth(100);
 		var.setLabelProvider(new FittingLabelProvider(2));
 		
+		// Data Column not that useful, do not show unless property set.
+		if (!Boolean.getBoolean("org.dawb.workbench.plotting.tools.fitting.tool.data.column.required")) {
+			var.getColumn().setWidth(0);
+			var.getColumn().setResizable(false);
+		}
+		
         var   = new TableViewerColumn(viewer, SWT.CENTER, 3);
-		var.getColumn().setText("Area");
+		var.getColumn().setText("Fit");
+		var.getColumn().setToolTipText("The value of the fitted peak.");
 		var.getColumn().setWidth(100);
 		var.setLabelProvider(new FittingLabelProvider(3));
 
-        var   = new TableViewerColumn(viewer, SWT.CENTER, 4);
-		var.getColumn().setText("Type");
+		var   = new TableViewerColumn(viewer, SWT.CENTER, 4);
+		var.getColumn().setText("FWHM");
 		var.getColumn().setWidth(100);
 		var.setLabelProvider(new FittingLabelProvider(4));
 		
         var   = new TableViewerColumn(viewer, SWT.CENTER, 5);
-		var.getColumn().setText("Algorithm");
+		var.getColumn().setText("Area");
 		var.getColumn().setWidth(100);
 		var.setLabelProvider(new FittingLabelProvider(5));
+
+        var   = new TableViewerColumn(viewer, SWT.CENTER, 6);
+		var.getColumn().setText("Type");
+		var.getColumn().setWidth(100);
+		var.setLabelProvider(new FittingLabelProvider(6));
+		
+        var   = new TableViewerColumn(viewer, SWT.CENTER, 7);
+		var.getColumn().setText("Algorithm");
+		var.getColumn().setWidth(100);
+		var.setLabelProvider(new FittingLabelProvider(7));
 
 	}
 	
@@ -349,12 +382,21 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 			AbstractDataset[] a= FittingUtils.xintersection(x,y,p1[0],p2[0]);
 			x = a[0]; y=a[1];
 
-			final FittedPeaks bean = FittingUtils.getFittedPeaks(x, y, monitor);
-    		// Add saved peaks if any.
-    		if (fittedPeaks!=null && !fittedPeaks.isEmpty() && bean!=null) {
-    			bean.addFittedPeaks(fittedPeaks.getPeakList());
-    		}
-			createFittedPeaks(bean);
+			try {
+				final FittedPeaks bean = FittingUtils.getFittedPeaks(x, y, monitor);
+	    		if (bean!=null) for (FittedPeak p : bean.getPeakList()) {
+	    			p.setX(selectedTrace.getXData());
+	    			p.setY(selectedTrace.getYData());
+				}
+	    		// Add saved peaks if any.
+	    		if (fittedPeaks!=null && !fittedPeaks.isEmpty() && bean!=null) {
+	    			bean.addFittedPeaks(fittedPeaks.getPeakList());
+	    		}
+				createFittedPeaks(bean);
+			} catch (Exception ne) {
+				logger.error("Cannot fit peaks!", ne);
+				return Status.CANCEL_STATUS;
+			}
 
 			return Status.OK_STATUS;
 		}
@@ -708,6 +750,17 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		};
 
 		getSite().getActionBars().getMenuManager().add(preferences);
+		
+		final Action export = new Action("Export...", IAction.AS_PUSH_BUTTON) {
+			public void run() {
+				try {
+					EclipseUtils.openWizard(FittedPeaksExportWizard.ID, true);
+				} catch (Exception e) {
+					logger.error("Cannot open wizard "+FittedPeaksExportWizard.ID, e);
+				}
+			}
+		};
+
 
 	    final MenuManager menuManager = new MenuManager();
 	    menuManager.add(clear);
@@ -718,11 +771,12 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 	    menuManager.add(showTrace);
 	    menuManager.add(showPeak);
 	    menuManager.add(showFWHM);
+	    menuManager.add(new Separator());
+	    menuManager.add(export);
 		
 	    viewer.getControl().setMenu(menuManager.createContextMenu(viewer.getControl()));
 
 	}
-	
 	public void setFittedPeaks(FittedPeaks fittedPeaks) {
 		this.fittedPeaks = fittedPeaks;
 	}
@@ -735,5 +789,31 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		}
 		return super.getAdapter(key);
 	}
+
+	/**
+	 * Will export to file and overwrite.
+	 * Will append ".csv" if it is not already there.
+	 * 
+	 * @param path
+	 */
+	void exportFittedPeaks(final String path) throws Exception {
+		
+		File file = new File(path);
+		if (!file.getName().toLowerCase().endsWith(".csv")) file = new File(path+".csv");
+		if (file.exists()) file.delete();
+		
+		final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF-8"));
+		try {
+			writer.write(FittedPeak.getCVSTitle());
+			writer.newLine();
+			for (FittedPeak peak : this.fittedPeaks.getPeakList()) {
+				writer.write(peak.getCSVString());
+				writer.newLine();
+			}
+			
+		} finally {
+			writer.close();
+		}
+    }
 
 }

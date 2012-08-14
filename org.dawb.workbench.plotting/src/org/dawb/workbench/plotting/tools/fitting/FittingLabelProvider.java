@@ -1,4 +1,4 @@
-package org.dawb.workbench.plotting.tools;
+package org.dawb.workbench.plotting.tools.fitting;
 
 import java.text.DecimalFormat;
 
@@ -26,12 +26,13 @@ public class FittingLabelProvider extends ColumnLabelProvider {
 
 	private int           column;
 	private ColumnViewer  viewer;
-	private DecimalFormat format;
+	private DecimalFormat intFormat, format;
 	private Image         savedIcon;
 
 	public FittingLabelProvider(int i) {
 		this.column = i;
-		this.format = new DecimalFormat("##0.#####E0");
+		this.intFormat = new DecimalFormat("###0");
+		this.format = new DecimalFormat("##0.#####");
 		this.savedIcon = Activator.getImage("icons/plot-tool-peak-fit-savePeak.png");
 	}
 	
@@ -58,14 +59,18 @@ public class FittingLabelProvider extends ColumnLabelProvider {
 		case 0:
 			return peak.getPeakName();
 		case 1:
-			return format.format(peak.getPosition());
+			return intFormat.format(peak.getPosition());
 		case 2:
-			return format.format(peak.getFWHM());
+			return format.format(peak.getDataValue());
 		case 3:
-			return format.format(peak.getArea());
+			return format.format(peak.getPeakValue());
 		case 4:
-			return peak.getPeakType();
+			return format.format(peak.getFWHM());
 		case 5:
+			return format.format(peak.getArea());
+		case 6:
+			return peak.getPeakType();
+		case 7:
 			return bean.getAlgorithmType();
 		default:
 			return "Not found";

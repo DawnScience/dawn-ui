@@ -2,12 +2,12 @@ package org.dawb.workbench.plotting.system.swtxy.selection;
 
 import java.util.List;
 
-import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.Grid;
-import org.csstudio.swt.xygraph.figures.IAxisListener;
 import org.csstudio.swt.xygraph.figures.Trace;
 import org.csstudio.swt.xygraph.figures.XYGraph;
-import org.csstudio.swt.xygraph.linearscale.Range;
+import org.dawb.common.ui.plot.axis.CoordinateSystemEvent;
+import org.dawb.common.ui.plot.axis.ICoordinateSystem;
+import org.dawb.common.ui.plot.axis.ICoordinateSystemListener;
 import org.dawb.common.ui.plot.region.AbstractRegion;
 import org.dawb.common.ui.plot.region.ROIEvent;
 import org.dawb.workbench.plotting.Activator;
@@ -30,6 +30,8 @@ import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
+import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
+
 /**
  * An AbstractSelectionRegion has two purposes:
  * 1. To draw the 2d shapes for selection in the diagram.
@@ -49,34 +51,25 @@ import org.eclipse.swt.widgets.Display;
  * the contents of the figure are directly added to the graph figure and therefore their location
  * can be used directly also there are no bounds of this figure to deal with.
  */
-public abstract class AbstractSelectionRegion extends AbstractRegion implements IAxisListener {
+public abstract class AbstractSelectionRegion extends AbstractRegion implements ICoordinateSystemListener {
 
 	private RegionBean bean;
     private ISelectionProvider selectionProvider;
     private IFigure[] regionObjects;
     private int lineWidth=0;
-    /**
-     * X axis mapping
-     */
-    protected Axis xAxis;
-    /**
-     * Y axis mapping
-     */
-    protected Axis yAxis;
 
-	public AbstractSelectionRegion(String name, Axis xAxis, Axis yAxis) {
+    protected ICoordinateSystem coords;
+
+	public AbstractSelectionRegion(String name, ICoordinateSystem co) {
 		super();
 		setEnabled(false); // No mouse events.
 		setOpaque(false);
 		setCursor(null);
 		this.bean = new RegionBean();
 		bean.setName(name);
-		xAxis.addListener(this);
-		bean.setXAxis(xAxis);
-		this.xAxis = xAxis;
-		yAxis.addListener(this);
-		bean.setYAxis(yAxis);
-		this.yAxis = yAxis;
+		co.addCoordinateSystemListener(this);
+		bean.setCoordinateSystem(co);
+		this.coords = co;
 	}
 
 	/**
@@ -158,8 +151,6 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	public void sync(RegionBean bean) {
 		setName(bean.getName());
 		setShowPosition(bean.isShowPosition());
-		setXAxis(bean.getXAxis());
-		setYAxis(bean.getYAxis());
 		setXyGraph(bean.getXyGraph());
 		setRegionColor(bean.getRegionColor());
 		setAlpha(bean.getAlpha());
@@ -189,12 +180,7 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	}
 
 	@Override
-	public void axisRevalidated(Axis axis) {
-		updateROI();
-	}
-
-	@Override
-	public void axisRangeChanged(Axis axis, Range old_range, Range new_range) {
+	public void coordinatesChanged(CoordinateSystemEvent evt) {
 		updateROI();
 	}
 
@@ -221,6 +207,7 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	 */
 	public void remove() {
 		clearListeners();
+		if (coords!=null) coords.dispose();
 		if (getParent()!=null) getParent().remove(this);
 		if (regionObjects!=null)for (IFigure ob : regionObjects) {
 			if (ob.getParent()!=null) ob.getParent().remove(ob);
@@ -229,9 +216,12 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	}
 
 	protected void clearListeners() {
-        xAxis.removeListener(this);
-        yAxis.removeListener(this);
-		super.clearListeners();
+		try {
+            coords.removeCoordinateSystemListener(this);
+		} catch (Exception ignored) {
+			// Do nothing
+		}
+ 		super.clearListeners();
 	}
 	
 	public void setName(String name) {
@@ -342,36 +332,20 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 		}
 	}
 
-	public Axis getXAxis() {
-		return xAxis;
+	public ICoordinateSystem getCoordinateSystem() {
+		return coords;
 	}
 
-	public void setXAxis(Axis xAxis) {
+	public void setCoordinateSystem(ICoordinateSystem co) {
 		if (regionObjects!=null) for (IFigure ob : regionObjects) {
 			if (ob instanceof SelectionHandle) {
-				((SelectionHandle)ob).setxAxis(xAxis);
+				((SelectionHandle)ob).setCoordinateSystem(co);
 			}
 		}
-		this.xAxis.removeListener(this);
-		xAxis.addListener(this);
-		this.xAxis = xAxis;
-		bean.setXAxis(xAxis);
-	}
-
-	public Axis getYAxis() {
-		return yAxis;
-	}
-
-	public void setYAxis(Axis yAxis) {
-		if (regionObjects!=null) for (IFigure ob : regionObjects) {
-			if (ob instanceof SelectionHandle) {
-				((SelectionHandle)ob).setyAxis(yAxis);
-			}
-		}
-		this.yAxis.removeListener(this);
-		yAxis.addListener(this);
-		this.yAxis = yAxis;
-		bean.setYAxis(yAxis);
+		this.coords.removeCoordinateSystemListener(this);
+		co.addCoordinateSystemListener(this);
+		this.coords = co;
+		bean.setCoordinateSystem(co);
 	}
 
 	public TranslationListener createRegionNotifier() {
@@ -474,18 +448,49 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	@Override
 	public boolean containsPoint(double x, double y) {
 		
-		final int xpix = xAxis.getValuePosition(x, false);
-		final int ypix = yAxis.getValuePosition(y, false);
+		final int[] pix = coords.getValuePosition(new double[]{x,y});
 		
 		if (regionObjects!=null) {
 			for (IFigure ob : regionObjects) {
-				if (ob.containsPoint(xpix, ypix)) return true;
+				if (ob.containsPoint(pix[0], pix[1])) return true;
 		    }
 			return false;
 
 		} else {
-			return containsPoint(xpix, ypix);
+			return containsPoint(pix[0], pix[1]);
 		}
 		
 	}
+
+
+	protected RectangularROI getRoiFromRectangle(final Rectangle rect) {
+
+		double[] a1 = coords.getPositionValue(rect.x, rect.y);
+		double[] a2 = coords.getPositionValue(rect.x+rect.width, rect.y+rect.height);
+		if (coords.isXReversed()) reverse(a1,a2,0);
+		if (coords.isYReversed()) reverse(a1,a2,1);
+
+		double x = a1[0]; double y = a1[1];
+		double w = a2[0] - a1[0]; double h = a2[1] - a1[1];
+
+		if (w<0) {
+			w = Math.abs(w);
+			x-= w;
+		}
+		if (h<0) {
+			h = Math.abs(h);
+			y-= h;
+		}
+
+		final RectangularROI rroi = new RectangularROI(x, y, w, h, 0);
+
+		return rroi;
+	}
+	
+	private void reverse(double[] a1, double[] a2, int i) {
+		double tmp = a1[i];
+		a1[i] = a2[i];
+		a2[i] = tmp;
+	}
+
 }

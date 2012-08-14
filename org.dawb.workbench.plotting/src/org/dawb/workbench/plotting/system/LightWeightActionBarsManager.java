@@ -49,6 +49,8 @@ import org.dawb.workbench.plotting.system.dialog.RemoveRegionCommand;
 import org.dawb.workbench.plotting.system.dialog.RemoveRegionDialog;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionConfigDialog;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
+import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
+import org.dawb.workbench.plotting.system.swtxy.selection.SelectionRegionFactory;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
@@ -271,7 +273,7 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 		
 		final XYRegionGraph xyGraph     = system.getGraph();
 		if (xyGraph.getXAxisList().size()==1 && xyGraph.getYAxisList().size()==1) {
-			xyGraph.createRegion(RegionUtils.getUniqueName(type.getName(), system), xyGraph.primaryXAxis, xyGraph.primaryYAxis, type, true);
+			xyGraph.createRegion(RegionUtils.getUniqueName(type.getName(), system), system.getSelectedXAxis(), system.getSelectedYAxis(), type, true);
 		} else {
 			AddRegionDialog dialog = new AddRegionDialog(Display.getCurrent().getActiveShell(), (XYRegionGraph)xyGraph, type);
 			if (dialog.open() != Window.OK){
@@ -464,6 +466,16 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 		action.setImageDescriptor(Activator.getImageDescriptor("icons/aspect.png"));
 		action.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.ASPECT));
 		
+		final Action hideAxes = new Action("Show image axes", IAction.AS_CHECK_BOX) {
+			
+		    public void run() {		    	
+		    	Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.SHOW_AXES, isChecked());
+		    	system.getGraph().setShowAxes(isChecked());
+		    	system.repaint(false);
+		    }
+		};
+		hideAxes.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.SHOW_AXES));
+		
 		if (bars!=null) {
 			bars.getToolBarManager().add(new Separator("org.dawb.workbench.plotting.aspect.group"));
 			action.setId("org.dawb.workbench.plotting.aspect");
@@ -472,6 +484,8 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 			twoDimensionalActions.add(new ActionContainer(action, bars.getToolBarManager()));
 			
 			this.imageMenu.add(action);
+			this.imageMenu.addSeparator();
+			this.imageMenu.add(hideAxes);
 			this.imageMenu.addSeparator();
 
 		}
@@ -742,8 +756,10 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 
 		manager.add(new Separator("org.dawb.workbench.plotting.system.trace.start"));
 
+		final String name = trace!=null&&trace.getName()!=null?trace.getName():"";
+
 		if (trace instanceof ILineTrace) { // Does actually work for images but may confuse people.
-			final Action visible = new Action("Hide '"+trace.getName()+"'", Activator.getImageDescriptor("icons/TraceVisible.png")) {
+			final Action visible = new Action("Hide '"+name+"'", Activator.getImageDescriptor("icons/TraceVisible.png")) {
 				public void run() {
 					trace.setVisible(false);
 				}
@@ -755,10 +771,32 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 				                  ? ((LightWeightPlottingSystem)sys).getGraph()
 				                  : null;
 		
+
 		if (xyGraph!=null) {
-			final Action addAnnotation = new Action("Add annotation to '"+(trace.getName()!=null?trace.getName():"")+"'", Activator.getImageDescriptor("icons/TraceAnnotation.png")) {
+			
+			if (SelectionRegionFactory.getStaticBuffer()!=null) {
+				final Action pasteRegion = new Action("Paste '"+SelectionRegionFactory.getStaticBuffer().getName()+"'", Activator.getImageDescriptor("icons/RegionPaste.png")) {
+					public void run() {
+						AbstractSelectionRegion region = null;
+						try {
+							region = (AbstractSelectionRegion)sys.createRegion(SelectionRegionFactory.getStaticBuffer().getName(), SelectionRegionFactory.getStaticBuffer().getRegionType());
+						} catch (Exception ne) {
+							MessageDialog.openError(Display.getDefault().getActiveShell(), "Cannot paste '"+SelectionRegionFactory.getStaticBuffer().getName()+"'",
+									                   "A region with the name '"+SelectionRegionFactory.getStaticBuffer().getName()+"' already exists.");
+							return;
+						}
+						
+						region.sync(SelectionRegionFactory.getStaticBuffer().getBean());
+						region.setROI(SelectionRegionFactory.getStaticBuffer().getROI());
+						sys.addRegion(region);
+					}
+				};
+				manager.add(pasteRegion);
+			}
+			
+			final Action addAnnotation = new Action("Add annotation to '"+name+"'", Activator.getImageDescriptor("icons/TraceAnnotation.png")) {
 				public void run() {
-					final String annotName = AnnotationUtils.getUniqueAnnotation(trace.getName()+" annotation ", sys);
+					final String annotName = AnnotationUtils.getUniqueAnnotation(name+" annotation ", sys);
 					if (trace instanceof LineTraceImpl) {
 						final LineTraceImpl lt = (LineTraceImpl)trace;
 						xyGraph.addAnnotation(new Annotation(annotName, lt.getTrace()));
@@ -773,7 +811,7 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 		if (trace instanceof ILineTrace) {
 			final ILineTrace lt = (ILineTrace)trace;
 			if (lt.getTraceType()!=TraceType.POINT) { // Give them a quick change to points
-				final Action changeToPoints = new Action("Plot '"+trace.getName()+"' as scatter", Activator.getImageDescriptor("icons/TraceScatter.png")) {
+				final Action changeToPoints = new Action("Plot '"+name+"' as scatter", Activator.getImageDescriptor("icons/TraceScatter.png")) {
 					public void run() {
 						lt.setTraceType(TraceType.POINT);
 						lt.setPointSize(8);
@@ -782,7 +820,7 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 				};
 				manager.add(changeToPoints);
 			} else if (lt.getTraceType()!=TraceType.SOLID_LINE) {
-				final Action changeToLine = new Action("Plot '"+trace.getName()+"' as line", Activator.getImageDescriptor("icons/TraceLine.png")) {
+				final Action changeToLine = new Action("Plot '"+name+"' as line", Activator.getImageDescriptor("icons/TraceLine.png")) {
 					public void run() {
 						lt.setTraceType(TraceType.SOLID_LINE);
 						lt.setLineWidth(1);
@@ -795,7 +833,7 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 		}
 
 		if (xyGraph!=null) {
-			final Action configure = new Action("Configure '"+trace.getName()+"'", Activator.getImageDescriptor("icons/TraceProperties.png")) {
+			final Action configure = new Action("Configure '"+name+"'", Activator.getImageDescriptor("icons/TraceProperties.png")) {
 				public void run() {
 					final XYRegionConfigDialog dialog = new XYRegionConfigDialog(Display.getCurrent().getActiveShell(), xyGraph);
 					dialog.setPlottingSystem(sys);
@@ -808,40 +846,43 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 		manager.add(new Separator("org.dawb.workbench.plotting.system.trace.end"));
 	}
 
+	private static String lastscreeshot_filename;
 	/**
 	 *  Create export and print buttons in tool bar 
 	 */
 	public void createExportActionsToolBar() {
 
-		Action exportSaveButton = new Action("Export/save the plotting", Activator.getImageDescriptor("icons/picture_save.png")){
+		final MenuAction exportActionsDropDown = new MenuAction("Export/Print");
+
+		Action exportSaveButton = new Action("Save plot screenshot as...", Activator.getImageDescriptor("icons/picture_save.png")){
 			// Cache file name otherwise they have to keep
 			// choosing the folder.
-			private String filename;
 			public void run(){
-				system.savePlotting(filename);
+				lastscreeshot_filename = system.savePlotting(lastscreeshot_filename);
+				exportActionsDropDown.setSelectedAction(this);
 			}
 		};
 
 		Action copyToClipboardButton = new Action("Copy to clip-board       Ctrl+C", Activator.getImageDescriptor("icons/copy_edit_on.gif")) {
 			public void run() {
 				system.copyPlotting();
+				exportActionsDropDown.setSelectedAction(this);
 			}
 		};
 
-		// TODO implement within the Print Action
-		Action snapShotButton = new Action("Print scaled image to printer", Activator.getImageDescriptor("icons/camera.gif")) {
+		Action snapShotButton = new Action("Print plot", Activator.getImageDescriptor("icons/camera.gif")) {
 			public void run(){
-				system.printSnapshotPlotting();
+				system.printScaledPlotting();
+				exportActionsDropDown.setSelectedAction(this);
 			}
 		};
-
-		Action printButton = new Action("Print the plotting            Ctrl+P", Activator.getImageDescriptor("icons/printer.png")) {
+		Action printButton = new Action("Print scaled plot         Ctrl+P", Activator.getImageDescriptor("icons/printer.png")) {
 			public void run() {
 				system.printPlotting();
+				exportActionsDropDown.setSelectedAction(this);
 			}
 		};
 
-		MenuAction exportActionsDropDown = new MenuAction("Export/Print");
 		exportActionsDropDown.setImageDescriptor(Activator.getImageDescriptor("icons/printer.png"));
 		exportActionsDropDown.setSelectedAction(printButton);
 		exportActionsDropDown.add(exportSaveButton);
@@ -860,12 +901,11 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 	 */
 	public void createExportActionsMenuBar() {
 		
-		Action exportSaveButton = new Action("Export/save the plotting", Activator.getImageDescriptor("icons/picture_save.png")){
+		Action exportSaveButton = new Action("Screenshot of the plot", Activator.getImageDescriptor("icons/picture_save.png")){
 			// Cache file name otherwise they have to keep
 			// choosing the folder.
-			private String filename;
 			public void run(){
-				system.savePlotting(filename);
+				lastscreeshot_filename = system.savePlotting(lastscreeshot_filename);
 			}
 		};
 		Action copyToClipboardButton = new Action("Copy to clip-board       Ctrl+C", Activator.getImageDescriptor("icons/copy_edit_on.gif")) {
@@ -873,13 +913,12 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 				system.copyPlotting();
 			}
 		};
-		// TODO implement within the Print Action
-		Action snapShotButton = new Action("Print scaled image to printer", Activator.getImageDescriptor("icons/camera.gif")) {
+		Action snapShotButton = new Action("Print plot", Activator.getImageDescriptor("icons/camera.gif")) {
 			public void run(){
-				system.printSnapshotPlotting();
+				system.printScaledPlotting();
 			}
 		};
-		Action printButton = new Action("Print the plotting            Ctrl+P", Activator.getImageDescriptor("icons/printer.png")) {
+		Action printButton = new Action("Print scaled plot            Ctrl+P", Activator.getImageDescriptor("icons/printer.png")) {
 			public void run() {
 				system.printPlotting();
 			}
@@ -888,7 +927,6 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 			this.system.getActionBars().getMenuManager().add(new Separator(exportSaveButton.getId()+".group"));
 			this.system.getActionBars().getMenuManager().add(exportSaveButton);
 			this.system.getActionBars().getMenuManager().add(copyToClipboardButton);
-			this.system.getActionBars().getMenuManager().add(new Separator(snapShotButton.getId()+".group"));
 			this.system.getActionBars().getMenuManager().add(snapShotButton);
 			this.system.getActionBars().getMenuManager().add(printButton);
 			this.system.getActionBars().getMenuManager().add(new Separator(printButton.getId()+".group"));

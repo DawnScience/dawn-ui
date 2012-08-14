@@ -2,7 +2,7 @@ package org.dawb.workbench.plotting.system.swtxy.selection;
 
 import java.util.Arrays;
 
-import org.csstudio.swt.xygraph.figures.Axis;
+import org.dawb.common.ui.plot.axis.ICoordinateSystem;
 import org.dawb.common.ui.plot.region.ROIEvent;
 import org.dawb.workbench.plotting.system.swtxy.translate.FigureTranslator;
 import org.dawb.workbench.plotting.system.swtxy.translate.TranslationEvent;
@@ -38,8 +38,8 @@ class BoxSelection extends AbstractSelectionRegion {
 
 	private Figure connection;
 	
-	BoxSelection(String name, Axis xAxis, Axis yAxis) {
-		super(name, xAxis, yAxis);
+	BoxSelection(String name, ICoordinateSystem coords) {
+		super(name, coords);
 		setRegionColor(ColorConstants.green);	
 		setAlpha(80);
 	}
@@ -112,9 +112,8 @@ class BoxSelection extends AbstractSelectionRegion {
 	@Override
 	public boolean containsPoint(double x, double y) {
 		
-		final int xpix = xAxis.getValuePosition(x, false);
-		final int ypix = yAxis.getValuePosition(y, false);
-		return connection.containsPoint(xpix, ypix);
+		final int[] pix = coords.getValuePosition(x,y);
+		return connection.containsPoint(pix[0], pix[1]);
 	}
 	
 	@Override
@@ -136,7 +135,7 @@ class BoxSelection extends AbstractSelectionRegion {
 
 	private SelectionHandle createSelectionRectangle(Color color, int size, double... location) {
 		
-		SelectionHandle rect = new RectangularHandle(xAxis, yAxis, color, connection, size, location);
+		SelectionHandle rect = new RectangularHandle(coords, color, connection, size, location);
 		FigureTranslator mover = new FigureTranslator(getXyGraph(), rect);	
 		mover.addTranslationListener(createRegionNotifier());
 
@@ -197,17 +196,16 @@ class BoxSelection extends AbstractSelectionRegion {
 	@Override
 	public ROIBase createROI(boolean recordResult) {
 		if (p1!=null) {
-			final Rectangle rect = getRectangleFromVertices();
-			double[] a1 = new double[]{xAxis.getPositionValue(rect.x, false), yAxis.getPositionValue(rect.y, false)};
-			double[] a2 = new double[]{xAxis.getPositionValue(rect.x+rect.width, false), yAxis.getPositionValue(rect.y+rect.height, false)};
-			final RectangularROI rroi = new RectangularROI(a1[0], a1[1], a2[0] - a1[0], a2[1] - a1[1], 0);
+			final Rectangle rect = getRectangleFromVertices();			
+			final RectangularROI rroi = getRoiFromRectangle(rect);
+						
 			if (recordResult)
 				roi = rroi;
 			return rroi;
 		}
 		return super.getROI();
 	}
-	
+
 	protected void updateROI(ROIBase roi) {
 		if (roi instanceof RectangularROI) {
 			RectangularROI rroi = (RectangularROI) roi;

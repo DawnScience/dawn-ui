@@ -208,7 +208,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 
 		// get a palette update listener to deal with palatte updates
-		paletteListener = new IPaletteListener(){
+		paletteListener = new IPaletteListener.Stub(){
 
 			@Override
 			public void paletteChanged(PaletteEvent event) {
@@ -703,6 +703,10 @@ public class HistogramToolPage extends AbstractToolPage {
 			// get the image data
 			imageDataset = image.getImageServiceBean().getImage();//image.getData();
 
+			if (imageDataset.containsInvalidNumbers() ) {
+				logger.debug("imageDataset contains invalid numbers");
+			}
+			
 			logger.trace("Image Data is of type :" + imageDataset.getDtype());
 			if (imageDataset.hasFloatingPointElements()) {
 				num_bins = MAX_BINS;
@@ -722,10 +726,10 @@ public class HistogramToolPage extends AbstractToolPage {
 				break;
 			default:
 				// this is the FULL implementation (a good default)
-				rangeMax = image.getMaxCut().getBound().doubleValue();
-				rangeMin = image.getMinCut().getBound().doubleValue();
-				histoMax = image.getMax().doubleValue();
-				histoMin = image.getMin().doubleValue();
+				rangeMax = image.getImageServiceBean().getMaximumCutBound().getBound().doubleValue();
+				rangeMin = image.getImageServiceBean().getMinimumCutBound().getBound().doubleValue();
+				histoMax = image.getImageServiceBean().getMax().doubleValue();
+				histoMin = image.getImageServiceBean().getMin().doubleValue();
 				break;
 			}
 
@@ -817,7 +821,7 @@ public class HistogramToolPage extends AbstractToolPage {
 		if (getPlottingSystem()==null) return; // Nothing to update
 		Collection<ITrace> traces = getPlottingSystem().getTraces(IImageTrace.class);
 		image = traces!=null && traces.size()>0 ? (IImageTrace)traces.iterator().next():null;
-		imageDataset = image.getData();
+		imageDataset = image.getImageServiceBean().getImage();
 		
 		if (Double.isInfinite(rMax)) rMax = imageDataset.max().doubleValue();
 		if (Double.isInfinite(rMin)) rMin = imageDataset.min().doubleValue();

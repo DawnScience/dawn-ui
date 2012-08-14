@@ -1,5 +1,8 @@
-package org.dawb.workbench.plotting.tools;
+package org.dawb.workbench.plotting.tools.fitting;
 
+import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +21,9 @@ import uk.ac.diamond.scisoft.analysis.fitting.functions.APeak;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Gaussian;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Lorentzian;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.Offset;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.PearsonVII;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.PseudoVoigt;
 import uk.ac.diamond.scisoft.analysis.optimize.GeneticAlg;
@@ -54,16 +59,37 @@ public class FittingUtils {
 	 */
 	public static FittedPeaks getFittedPeaks(final AbstractDataset  x, 
 			                                     final AbstractDataset  y,
-			                                     final IProgressMonitor monitor) {
-				
+			                                     final IProgressMonitor monitor) throws Exception {
+		
+		List<CompositeFunction> composites=null;
 		final IOptimizer optimizer = getOptimizer();
-		final List<CompositeFunction> composites =  Generic1DFitter.fitPeakFunctions(x, y, getPeakType(), optimizer, getSmoothing(), getPeaksRequired(), 0.0, false, false, new IAnalysisMonitor() {
-			@Override
-			public boolean hasBeenCancelled() {
-				return monitor.isCanceled(); // We always use the monitor.isCancelled() the fitting can take a while
-				                             // and should always allow stopping.
-			}
-		});
+		if (getPeaksRequired()==1) {
+			double lowOffset = y.min().doubleValue();
+			double highOffset = (Double) y.mean();
+			Offset offset = new Offset(lowOffset, highOffset);
+			double fwhmApprox = x.peakToPeak().doubleValue()/2.0;
+			IdentifiedPeak iniPeak = new IdentifiedPeak(((Number)x.mean()).doubleValue(), x.min().doubleValue(), x.max().doubleValue(), x.peakToPeak().doubleValue()*y.max().doubleValue(), y.max().doubleValue(), 0, x.getSize()-1, Arrays.asList(new Double[] {x.min().doubleValue()+fwhmApprox, x.max().doubleValue()-fwhmApprox}));
+			iniPeak.setFWHM(fwhmApprox);
+			
+			Constructor<? extends APeak> ctor = getPeakType().getClass().getConstructor(IdentifiedPeak.class);
+			APeak localPeak = ctor.newInstance(iniPeak);
+			CompositeFunction comp = new CompositeFunction();
+			comp.addFunction(localPeak);
+			comp.addFunction(offset);
+			optimizer.optimize(new AbstractDataset[] { x }, y, comp);
+
+			composites = new ArrayList<CompositeFunction>(1);
+			composites.add(comp);
+		
+		} else {
+			composites =  Generic1DFitter.fitPeakFunctions(x, y, getPeakType(), optimizer, getSmoothing(), getPeaksRequired(), 0.0, false, false, new IAnalysisMonitor() {
+				@Override
+				public boolean hasBeenCancelled() {
+					return monitor.isCanceled(); // We always use the monitor.isCancelled() the fitting can take a while
+					                             // and should always allow stopping.
+				}
+			});
+		}
 		
 		if (composites==null || composites.isEmpty()) return null;
 				
@@ -73,7 +99,8 @@ public class FittingUtils {
 			final IPeak peak = function.getPeak(0);
 			if (monitor.isCanceled()) return null;
 			double w = peak.getFWHM();
-			RectangularROI bounds = new RectangularROI(peak.getPosition() - w/2, 0, w, 0, 0);
+			final double position = peak.getPosition();
+			RectangularROI bounds = new RectangularROI(position - w/2, 0, w, 0, 0);
 			
 			final AbstractDataset[] pf = getPeakFunction(x, y, function);
 			

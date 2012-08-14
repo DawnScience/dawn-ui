@@ -110,6 +110,17 @@ public class EditorPreferencePage extends FieldEditorPreferencePage implements I
 		};
 		addField(playSpeed);
 		
+		new LabelFieldEditor("\n", getFieldEditorParent());
+		new LabelFieldEditor("\n", getFieldEditorParent());
+		BooleanFieldEditor saveDataSelected = new BooleanFieldEditor(EditorConstants.SAVE_SEL_DATA, "Save the last selected data by name.",getFieldEditorParent());
+      	addField(saveDataSelected);
+		BooleanFieldEditor saveLogFormat = new BooleanFieldEditor(EditorConstants.SAVE_LOG_FORMAT, "Save the last axis log format by file extension.",getFieldEditorParent());
+      	addField(saveLogFormat);
+		BooleanFieldEditor saveTimeFormat = new BooleanFieldEditor(EditorConstants.SAVE_TIME_FORMAT, "Save the last axis time format by file extension.",getFieldEditorParent());
+      	addField(saveTimeFormat);
+		BooleanFieldEditor saveFormatString = new BooleanFieldEditor(EditorConstants.SAVE_FORMAT_STRING, "Save the last axis format string by file extension.",getFieldEditorParent());
+      	addField(saveFormatString);
+
 	}
 
 	@Override

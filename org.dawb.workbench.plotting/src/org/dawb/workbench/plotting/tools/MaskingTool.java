@@ -32,7 +32,9 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.ColorSelector;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -374,32 +376,75 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		createActions(getSite().getActionBars());
 	}
 
-	private static BooleanDataset savedMask;
+	private static BooleanDataset savedMask=null;
+	private static boolean        autoApplySavedMask=false;
+	private static final String   AUTO_SAVE_PROP="org.dawb.workbench.plotting.tools.auto.save.mask";
 	private Action loadMask;
+	
+	/**
+	 * You can programmatically set the last saved mask by calling this method.
+	 * 
+	 * NOTE: In future a mask saving and retrieving methodology will exist.
+	 *       This method is used for an NCD workaround and is not intended
+	 *       as a long term solution for mask saving/loading
+	 * 
+	 * @param sm          - static dataset to use as the mask
+	 * @param autoApply   - if true the mask will be applied when the tool is activated
+	 */
+	public static void setSavedMask(final BooleanDataset sm, final boolean autoApply) {
+		savedMask          = sm;
+		autoApplySavedMask = autoApply;
+	}
+	
+	public static BooleanDataset getSavedMask() {
+		return savedMask;
+	}
 	
 	private void createActions(IActionBars actionBars) {
 		
-		Action saveMask  = new Action("Save the mask into a buffer", Activator.getImageDescriptor("icons/import_wiz.gif")) {
+
+		final Action saveMask  = new Action("Save the mask into a buffer", Activator.getImageDescriptor("icons/import_wiz.gif")) {
 			public void run() {
-				savedMask = maskObject.getMaskDataset();
-				loadMask.setEnabled(savedMask!=null);
+				saveMaskBuffer();
 			}
 		};
 		actionBars.getToolBarManager().add(saveMask);
 		
 	    loadMask  = new Action("Merge the previously saved mask from buffer with this mask (if any)", Activator.getImageDescriptor("icons/export_wiz.gif")) {
 			public void run() {
-				if (maskObject.getImageDataset()==null){
-					maskObject.setImageDataset(getImageTrace().getData());
-				}
-				maskObject.process(savedMask);
-				getImageTrace().setMask(maskObject.getMaskDataset());
+				mergeSavedMask();
 			}
 		};
 		loadMask.setEnabled(savedMask!=null);
 		actionBars.getToolBarManager().add(loadMask);
+		
+		actionBars.getToolBarManager().add(new Separator());
+		Action alwaysSave  = new Action("Auto-save the mask to the buffer when it changes", IAction.AS_CHECK_BOX) {
+			public void run() {
+				Activator.getDefault().getPreferenceStore().setValue(AUTO_SAVE_PROP, isChecked());
+			}
+		};
+		alwaysSave.setImageDescriptor(Activator.getImageDescriptor("icons/plot-tool-masking-autosave.png"));
+		alwaysSave.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(AUTO_SAVE_PROP));
+		actionBars.getToolBarManager().add(alwaysSave);
+
 
 		LightWeightActionBarsManager.fillTraceActions(actionBars.getToolBarManager(), getImageTrace(), getPlottingSystem());	
+	}
+
+	protected void saveMaskBuffer() {
+		savedMask = maskObject.getMaskDataset();
+		loadMask.setEnabled(savedMask!=null);
+	}
+
+	protected void mergeSavedMask() {
+		
+		if (savedMask==null) return;
+		if (maskObject.getImageDataset()==null){
+			maskObject.setImageDataset(getImageTrace().getData());
+		}
+		maskObject.process(savedMask);
+		getImageTrace().setMask(maskObject.getMaskDataset());
 	}
 
 	private void createColumns(TableViewer viewer) {
@@ -572,6 +617,16 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		if (image==null) return;
 		maskObject.reset();
 	    image.setMask(null);
+	    
+	    if (autoApplySavedMask) { // If it is auto-apply then it needs to be reset when you reset.
+	    	final boolean ok = MessageDialog.openQuestion(Display.getDefault().getActiveShell(), "Confirm Removal of Saved Mask", 
+	    			                  "You have a saved mask which can be cleared as well.\n\nWould you like to remove the saved mask?");
+	    	if (ok) {
+	    		savedMask = null;
+	    		autoApplySavedMask = false;
+	    	}
+	    	loadMask.setEnabled(savedMask!=null);
+	    }
 	}
 		
 	@Override
@@ -605,6 +660,14 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		}
 
 		if (loadMask!=null) loadMask.setEnabled(savedMask!=null);
+		
+		if (autoApplySavedMask && savedMask!=null) {
+			try {
+			    mergeSavedMask();
+			} catch (Throwable ne) {
+				logger.error("Problem loading saved mask!", ne);
+			}
+		}
 	}
 	
 	@Override
@@ -673,6 +736,9 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 				maskObject.setImageDataset(unmasked);
 			}
 			
+			// Keep the saved mask
+			if (autoApplySavedMask && savedMask!=null) maskObject.process(savedMask);
+			
 			// Just process a changing region
 			if (region!=null) {
 				if (!maskObject.isSupportedRegion(region)) return Status.CANCEL_STATUS;
@@ -683,6 +749,10 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 				
 				maskObject.process(min, max, isRegionsEnabled?getPlottingSystem().getRegions():null);
 				
+			}
+			
+			if (Activator.getDefault().getPreferenceStore().getBoolean(AUTO_SAVE_PROP)) {
+				saveMaskBuffer();
 			}
 			
 			Display.getDefault().syncExec(new Runnable() {

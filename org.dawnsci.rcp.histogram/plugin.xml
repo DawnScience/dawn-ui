@@ -305,12 +305,8 @@
    </extension>
    <extension
          point="org.eclipse.ui.cheatsheets.cheatSheetContent">
-      <category
-            id="org.dawnsci.rcp.histogram.cheatsheet.catagory"
-            name="Colour mapping">
-      </category>
       <cheatsheet
-            category="org.dawnsci.rcp.histogram.cheatsheet.catagory"
+            category="org.dawb.workbench.plotting.tools.category"
             composite="false"
             contentFile="cheat/ColourMappingExample.xml"
             id="org.dawnsci.rcp.histogram.cheatsheet.colourmapping"
