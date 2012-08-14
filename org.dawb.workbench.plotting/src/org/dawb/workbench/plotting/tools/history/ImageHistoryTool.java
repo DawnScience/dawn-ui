@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.dawb.common.ui.components.cell.ScaleCellEditor;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.workbench.plotting.Activator;
@@ -35,17 +36,23 @@ import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Scale;
 import org.eclipse.ui.IEditorPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
+import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Maths;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 /**
@@ -188,7 +195,9 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 	}
 
 	protected AbstractDataset getOriginalData() {
-		AbstractDataset plot = originalData;
+		
+		// Try and read the original data from the editor.
+		AbstractDataset plot = null;
 		if (plot==null && getPart() instanceof IEditorPart) {
 			IFile file = (IFile)((IEditorPart)getPart()).getEditorInput().getAdapter(IFile.class);
 			if (file!=null)
@@ -199,6 +208,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 					plot = null;
 				}
 		}
+		if (plot==null) plot = originalData; // We attempt to cache it otherwise.
 		return plot;
 	}
 
@@ -245,33 +255,41 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 
 			try {
 				// Loop over history and reprocess maths.
-				AbstractDataset a = originalData!=null&&includeCurrentPlot
-						          ? createCopy(originalData) 
-						          : null;
+				AbstractDataset od = getOriginalData();
+				AbstractDataset a  = od!=null&&includeCurrentPlot
+						           ? createCopy(od) 
+						           : null;
 						          
 				for (String key : imageHistory.keySet()) {
 					
 					if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 					
 					final HistoryBean bean = imageHistory.get(key);
-					if (bean==null) continue;
-					if (a==null && bean.isSelected()) { 
+					if (bean==null)         continue;
+					if (!bean.isSelected()) continue;
+					if (bean.getWeighting()<1) continue;
+					
+					if (a==null) { 
 						if (bean.getData()==null) continue;
 						a = createCopy(bean.getData());
 						continue;
 					}
-					if (bean.isSelected()) {
-						if (!a.isCompatibleWith(bean.getData())) {
-							bean.setSelected(false);
-							Display.getDefault().syncExec(new Runnable() {
-								public void run() {
-									viewer.refresh(bean);
-								}
-							});
-							continue;
-						}
-						bean.getOperator().process(a, bean.getData());
+					
+					if (!a.isCompatibleWith(bean.getData())) {
+						bean.setSelected(false);
+						Display.getDefault().syncExec(new Runnable() {
+							public void run() {
+								viewer.refresh(bean);
+							}
+						});
+						continue;
 					}
+					
+					AbstractDataset data = bean.getData();
+					if (bean.getWeighting()<100) { // Reduce its intensity
+						data = Maths.multiply(data, bean.getWeighting()/100d);
+					}
+					bean.getOperator().process(a, data);
 				}
 	
 				if (a!=null) { // We plot it.
@@ -326,6 +344,12 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 	@Override
 	protected void createColumns(TableViewer viewer) {
 		
+		viewer.getTable().addListener(SWT.MeasureItem, new Listener() {
+			public void handleEvent(Event event) {
+				// height cannot be per row so simply set
+				event.height = 40;
+			}
+		});
 		ColumnViewerToolTipSupport.enableFor(viewer,ToolTip.NO_RECREATE);
 		viewer.setColumnProperties(new String[] { "Selected", "Name", "Original Plot", "Operator" });
 		
@@ -342,7 +366,9 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 		
 		var = new TableViewerColumn(viewer, SWT.CENTER, 2);
 		var.getColumn().setText("Original File");
-		var.getColumn().setWidth(200);
+		var.getColumn().setWidth(0);
+		var.getColumn().setMoveable(false);
+		var.getColumn().setResizable(false);		
 		var.setLabelProvider(new ImageCompareLabelProvider());
 		
 		var = new TableViewerColumn(viewer, SWT.CENTER, 3);
@@ -356,6 +382,11 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 		var.getColumn().setWidth(150);
 		var.setLabelProvider(new ImageCompareLabelProvider());
 
+		var = new TableViewerColumn(viewer, SWT.CENTER, 5);
+		var.getColumn().setText("Weight");
+		var.getColumn().setWidth(150);
+		var.setLabelProvider(new ImageCompareLabelProvider());
+		var.setEditingSupport(new ImageWeightingEditingSupport(viewer));
 	}
 	
 	private class ImageCompareLabelProvider extends ColumnLabelProvider {
@@ -410,6 +441,9 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 				} catch (Throwable ne) {
 					return "";
 				}
+			}
+			if (columnIndex==5) {
+				return bean.getWeighting()+" %";
 			}
 			return "";
 		}
@@ -491,15 +525,10 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 		protected CellEditor getCellEditor(final Object element) {
 			ComboBoxCellEditor ed = new ComboBoxCellEditor((Composite)getViewer().getControl(), ImageOperator.getOperators(), SWT.READ_ONLY);
 		
-			((CCombo)ed.getControl()).addSelectionListener(new SelectionListener() {			
+			((CCombo)ed.getControl()).addSelectionListener(new SelectionAdapter() {			
 				@Override
 				public void widgetSelected(SelectionEvent e) {
 					ImageOperatorEditingSupport.this.setValue(element, ((CCombo)e.getSource()).getSelectionIndex());
-				}
-				
-				@Override
-				public void widgetDefaultSelected(SelectionEvent e) {
-					
 				}
 			});
 			return ed;
@@ -525,5 +554,56 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 
 	}
 
+	private class ImageWeightingEditingSupport extends EditingSupport {
+
+		public ImageWeightingEditingSupport(ColumnViewer viewer) {
+			super(viewer);
+		}
+
+		@Override
+		protected CellEditor getCellEditor(final Object element) {
+			ScaleCellEditor ed = new ScaleCellEditor((Composite)getViewer().getControl());
+			ed.setMinimum(0);
+			ed.setMaximum(100);
+			ed.addSelectionListener(new SelectionAdapter() {		
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					int value = ((Scale)e.getSource()).getSelection();
+					HistoryBean bean = (HistoryBean)element;
+					if (value==0) {
+						bean.setWeighting(0);
+						bean.setSelected(false);
+					} else if (value>100) {
+						bean.setWeighting(100);
+						bean.setSelected(true);
+					} else {
+						bean.setWeighting(value);
+						bean.setSelected(true);
+					}
+					updateJob.cancel();
+					updateJob.schedule();
+				}
+			});
+			return ed;
+		}
+
+		@Override
+		protected boolean canEdit(Object element) {
+			return true;
+		}
+
+		@Override
+		protected Object getValue(Object element) {
+			return ((HistoryBean)element).getWeighting();
+		}
+
+		@Override
+		protected void setValue(Object element, Object value) {
+			((HistoryBean)element).setWeighting((Integer)value);
+			viewer.refresh(element);
+			updatePlots();
+		}
+
+	}
 
 }

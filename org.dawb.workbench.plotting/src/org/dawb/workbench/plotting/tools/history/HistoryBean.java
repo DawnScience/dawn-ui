@@ -12,6 +12,7 @@ class HistoryBean {
 	private AbstractDataset       data;
 	private List<AbstractDataset> axes;
 	private ImageOperator    operator;
+	private int              weighting=100;
 	
 	// 1D history
 	private AbstractDataset xdata;
@@ -101,6 +102,8 @@ class HistoryBean {
 		int result = 1;
 		result = prime * result + ((axes == null) ? 0 : axes.hashCode());
 		result = prime * result + ((data == null) ? 0 : data.hashCode());
+		result = prime * result
+				+ ((fixedImageKey == null) ? 0 : fixedImageKey.hashCode());
 		result = prime * result + (modifiable ? 1231 : 1237);
 		result = prime * result
 				+ ((operator == null) ? 0 : operator.hashCode());
@@ -111,6 +114,7 @@ class HistoryBean {
 		result = prime * result + (selected ? 1231 : 1237);
 		result = prime * result
 				+ ((traceName == null) ? 0 : traceName.hashCode());
+		result = prime * result + weighting;
 		result = prime * result + ((xdata == null) ? 0 : xdata.hashCode());
 		result = prime * result + ((ydata == null) ? 0 : ydata.hashCode());
 		return result;
@@ -134,6 +138,11 @@ class HistoryBean {
 				return false;
 		} else if (!data.equals(other.data))
 			return false;
+		if (fixedImageKey == null) {
+			if (other.fixedImageKey != null)
+				return false;
+		} else if (!fixedImageKey.equals(other.fixedImageKey))
+			return false;
 		if (modifiable != other.modifiable)
 			return false;
 		if (operator != other.operator)
@@ -154,6 +163,8 @@ class HistoryBean {
 			if (other.traceName != null)
 				return false;
 		} else if (!traceName.equals(other.traceName))
+			return false;
+		if (weighting != other.weighting)
 			return false;
 		if (xdata == null) {
 			if (other.xdata != null)
@@ -184,6 +195,12 @@ class HistoryBean {
 	}
 	public void setModifiable(boolean modifiable) {
 		this.modifiable = modifiable;
+	}
+	public int getWeighting() {
+		return weighting;
+	}
+	public void setWeighting(int weighting) {
+		this.weighting = weighting;
 	}
 
 
