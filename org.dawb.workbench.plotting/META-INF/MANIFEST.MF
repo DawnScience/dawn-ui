@@ -19,7 +19,8 @@ Bundle-ActivationPolicy: lazy
 Export-Package: org.dawb.workbench.plotting.system,
  org.dawb.workbench.plotting.system.swtxy.selection,
  org.dawb.workbench.plotting.tools
-Import-Package: org.dawb.common.services,
+Import-Package: com.amd.aparapi;version="1.0.0",
+ org.dawb.common.services,
  org.dawb.common.ui.plot.region,
  org.dawb.common.util.text,
  org.eclipse.core.resources,

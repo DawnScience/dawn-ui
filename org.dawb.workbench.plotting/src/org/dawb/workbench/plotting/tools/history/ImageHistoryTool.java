@@ -257,7 +257,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 				// Loop over history and reprocess maths.
 				AbstractDataset od = getOriginalData();
 				AbstractDataset a  = od!=null&&includeCurrentPlot
-						           ? createCopy(od) 
+						           ? od 
 						           : null;
 						          
 				for (String key : imageHistory.keySet()) {
@@ -271,7 +271,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 					
 					if (a==null) { 
 						if (bean.getData()==null) continue;
-						a = createCopy(bean.getData());
+						a = bean.getData();
 						continue;
 					}
 					
@@ -287,9 +287,9 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 					
 					AbstractDataset data = bean.getData();
 					if (bean.getWeighting()<100) { // Reduce its intensity
-						data = Maths.multiply(data, bean.getWeighting()/100d);
+						data = ImageOperator.multiply(data, bean.getWeighting()/100d);
 					}
-					bean.getOperator().process(a, data);
+					a = ImageOperator.process(a, data, bean.getOperator());
 				}
 	
 				if (a!=null) { // We plot it.

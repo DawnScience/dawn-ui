@@ -1,6 +1,17 @@
 package org.dawb.workbench.plotting.tools.history;
 
+import java.lang.reflect.Array;
+
+import org.eclipse.ui.PlatformUI;
+
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
+import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Maths;
+
+import com.amd.aparapi.Kernel;
+import com.amd.aparapi.Range;
 
 public enum ImageOperator {
 
@@ -45,6 +56,7 @@ public enum ImageOperator {
 		return ops[index];
 	}
 	
+	private static OperatorKernel operatorKernel;
 	/**
 	 * Does an in-place operation on 'a'. Hence ensure that start has been copied
 	 * if you don't want to change it.
@@ -53,28 +65,123 @@ public enum ImageOperator {
 	 * @param b
 	 * @return
 	 */
-	public void process(AbstractDataset a, AbstractDataset b) {
+	public static synchronized AbstractDataset process(AbstractDataset a, AbstractDataset b, ImageOperator operation) {
 
-		switch (this) {
+		final double[]  da = ((DoubleDataset)DatasetUtils.cast(a, AbstractDataset.FLOAT)).getData();
+		final double[]  db = ((DoubleDataset)DatasetUtils.cast(b, AbstractDataset.FLOAT)).getData();
+		final int opIndex     = operation.getIndex();
+        
+        if (operatorKernel==null) {
+        	operatorKernel = new OperatorKernel();
+        	Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+        		public void run() {
+        			operatorKernel.dispose();
+        		}
+        	}));
+        }
 
-//		case NO_OPERATOR:
-//			return;
+        operatorKernel.setDa(da);
+        operatorKernel.setDb(db);
+        operatorKernel.setOperation(opIndex);
+        
+		Range range = Range.create(a.getSize()); 
+		operatorKernel.execute(range);
 
-		case ADD:
-			a.iadd(b);
-			return;
+        return new DoubleDataset(operatorKernel.getResult(), a.getShape());
+	}
+	
+	static class OperatorKernel extends Kernel {
+		private double[]  da, db;
+		private double[]  result;
+		private int operation;
+		public double[] getResult() {
+			return result;
+		}
+		public void setDa(double[] da) {
+			this.da = da;
+		}
+		public void setDb(double[] db) {
+			this.db = db;
+		}
+		public void setOperation(int operation) {
+			this.operation = operation;
+		}
+		
+		public Kernel execute(Range range) {
+			result = new double[da.length];
+			return super.execute(range);
+		}
+		
+		@Override 
+		public void run(){
 
-		case SUBTRACT:
-			a.isubtract(b);
-			return;
+			int i       = getGlobalId();
+			double aVal = da[i];
+			double bVal = db[i];
+			
+			if (operation==0) {
+				result[i] = aVal + bVal;
 
-		case MULTIPLY:
-			a.imultiply(b);
-			return;
+			} else if (operation==1) {
+				result[i] = aVal - bVal;
 
-		case DIVIDE:
-			a.idivide(b);
-			return;
+			} else if (operation==2) {
+				result[i] = aVal * bVal;
+
+			} else if (operation==3) {
+				result[i] = aVal / bVal;
+				return;
+			}
 		}
 	}
-}
+
+	private static MultiplyKernel multiplyKernel;
+
+	public static synchronized AbstractDataset multiply(AbstractDataset data, final double b) {
+		
+		final double[]  da = ((DoubleDataset)DatasetUtils.cast(data, AbstractDataset.FLOAT)).getData();
+			
+		
+        if (multiplyKernel==null) {
+        	multiplyKernel = new MultiplyKernel();
+        	Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+        		public void run() {
+        			multiplyKernel.dispose();
+        		}
+        	}));
+        }
+
+        multiplyKernel.setDa(da);
+        multiplyKernel.setB(b);
+        
+		Range range = Range.create(data.getSize()); 
+		multiplyKernel.execute(range);
+
+        return new DoubleDataset(multiplyKernel.getResult(), data.getShape());
+	}
+	
+	static class MultiplyKernel extends Kernel {
+		private double[]  da;
+		private double    b;
+		private double[]  result;
+		public double[] getResult() {
+			return result;
+		}
+		public void setDa(double[] da) {
+			this.da = da;
+		}
+		public void setB(double b) {
+			this.b = b;
+		}
+		
+		public Kernel execute(Range range) {
+			result = new double[da.length];
+			return super.execute(range);
+		}
+		
+		@Override 
+		public void run(){
+			int i     = getGlobalId();
+			result[i] = da[i]*b;
+		}
+	}}
