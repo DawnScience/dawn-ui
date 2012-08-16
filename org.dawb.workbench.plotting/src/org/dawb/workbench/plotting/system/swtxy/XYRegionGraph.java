@@ -9,6 +9,7 @@ import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.IAnnotationLabelProvider;
 import org.csstudio.swt.xygraph.figures.Legend;
 import org.csstudio.swt.xygraph.figures.PlotArea;
+import org.csstudio.swt.xygraph.figures.Trace;
 import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.swt.xygraph.linearscale.AbstractScale.LabelSide;
 import org.csstudio.swt.xygraph.linearscale.LinearScale.Orientation;
@@ -323,6 +324,17 @@ public class XYRegionGraph extends XYGraph {
 		this.primaryXAxis.setVisible(checked);
 		this.primaryYAxis.setVisible(checked);
 	}
+
+	/**
+	 * 
+	 * @param trace
+	 * @param toFront - if true, move regions to front
+	 */
+	public void addTrace(Trace trace, boolean toFront) {
+		super.addTrace(trace);
+		getRegionArea().toFront();
+	}
+	
 
 
 }
