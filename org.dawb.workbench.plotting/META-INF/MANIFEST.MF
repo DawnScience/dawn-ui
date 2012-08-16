@@ -20,6 +20,7 @@ Export-Package: org.dawb.workbench.plotting.system,
  org.dawb.workbench.plotting.system.swtxy.selection,
  org.dawb.workbench.plotting.tools
 Import-Package: com.amd.aparapi;version="1.0.0",
+ org.dawb.common.gpu,
  org.dawb.common.services,
  org.dawb.common.ui.plot.region,
  org.dawb.common.util.text,

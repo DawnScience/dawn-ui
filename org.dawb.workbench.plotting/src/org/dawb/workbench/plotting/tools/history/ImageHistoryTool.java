@@ -8,6 +8,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.dawb.common.gpu.IOperation;
+import org.dawb.common.gpu.Operator;
+import org.dawb.common.gpu.OperationFactory;
 import org.dawb.common.ui.components.cell.ScaleCellEditor;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
@@ -87,10 +90,13 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
     private AbstractDataset originalData;
 	private MathsJob        updateJob;
 	private boolean         includeCurrentPlot = true;
+
+	private IOperation operation;
     
     public ImageHistoryTool() {
     	super();
     	this.updateJob = new MathsJob();
+    	this.operation = OperationFactory.getBasicOperation();
     }
 	
 	@Override
@@ -127,7 +133,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 					bean.setAxes(imageTrace.getAxes());
 					bean.setTraceName(iTrace.getName());
 					bean.setPlotName(getPlottingSystem().getPlotName());
-					bean.setOperator(ImageOperator.MULTIPLY);
+					bean.setOperator(Operator.ADD);
 					imageHistory.put(bean.getTraceKey(), bean);
 				}
 				refresh();
@@ -287,9 +293,9 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 					
 					AbstractDataset data = bean.getData();
 					if (bean.getWeighting()<100) { // Reduce its intensity
-						data = ImageOperator.multiply(data, bean.getWeighting()/100d);
+						data = operation.process(data, bean.getWeighting()/100d, Operator.MULTIPLY);
 					}
-					a = ImageOperator.process(a, data, bean.getOperator());
+					a = operation.process(a, data, bean.getOperator());
 				}
 	
 				if (a!=null) { // We plot it.
@@ -310,12 +316,6 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 		}
 		
 	}
-	
-	private static AbstractDataset createCopy(final AbstractDataset a) {
-		final int ia = a.getElementsPerItem();
-		return a.clone().cast(false, a.getDtype(), ia);
-	}
-
 	
 	public void setPlotImage(final AbstractDataset plot) {
 		
@@ -339,6 +339,11 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 	@Override
 	protected void updatePlot(HistoryBean bean) {
 		updatePlots(); // We update everything when one changes.
+	}
+	
+	public void deactivate() {
+		super.deactivate();
+		operation.deactivate(); // It can still be used
 	}
 
 	@Override
@@ -523,7 +528,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 
 		@Override
 		protected CellEditor getCellEditor(final Object element) {
-			ComboBoxCellEditor ed = new ComboBoxCellEditor((Composite)getViewer().getControl(), ImageOperator.getOperators(), SWT.READ_ONLY);
+			ComboBoxCellEditor ed = new ComboBoxCellEditor((Composite)getViewer().getControl(), Operator.getOperators(), SWT.READ_ONLY);
 		
 			((CCombo)ed.getControl()).addSelectionListener(new SelectionAdapter() {			
 				@Override
@@ -546,7 +551,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 
 		@Override
 		protected void setValue(Object element, Object value) {
-			((HistoryBean)element).setOperator(ImageOperator.getOperator((Integer)value));
+			((HistoryBean)element).setOperator(Operator.getOperator((Integer)value));
 			((HistoryBean)element).setSelected(true);
 			viewer.refresh(element);
 			updatePlots();

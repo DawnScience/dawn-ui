@@ -2,6 +2,7 @@ package org.dawb.workbench.plotting.tools.history;
 
 import java.util.List;
 
+import org.dawb.common.gpu.Operator;
 import org.eclipse.swt.graphics.RGB;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
@@ -11,7 +12,7 @@ class HistoryBean {
 	// Image compare
 	private AbstractDataset       data;
 	private List<AbstractDataset> axes;
-	private ImageOperator    operator;
+	private Operator    operator;
 	private int              weighting=100;
 	
 	// 1D history
@@ -184,10 +185,10 @@ class HistoryBean {
 	public void setAxes(List<AbstractDataset> axes) {
 		this.axes = axes;
 	}
-	public ImageOperator getOperator() {
+	public Operator getOperator() {
 		return operator;
 	}
-	public void setOperator(ImageOperator operator) {
+	public void setOperator(Operator operator) {
 		this.operator = operator;
 	}
 	public boolean isModifiable() {

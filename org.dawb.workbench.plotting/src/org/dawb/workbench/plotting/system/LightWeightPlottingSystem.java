@@ -419,9 +419,6 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	}
 	
 	private Display getDisplay() {
-		if (part!=null) return part.getSite().getShell().getDisplay();
-		if (xyCanvas!=null) return xyCanvas.getDisplay();
-		if (parent!=null)  parent.getDisplay();
 		return Display.getDefault();
 	}
 
