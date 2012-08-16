@@ -688,7 +688,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 			trace.setTraceColor(plotColor);
 
 			//add the trace to xyGraph
-			xyGraph.addTrace(trace);
+			xyGraph.addTrace(trace, false);
 			
 			
 			if (monitor!=null) monitor.worked(1);
@@ -749,7 +749,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		} else {
 			this.plottingMode = PlotType.PT1D;
 			this.lightWeightActionBarMan.switchActions(plottingMode);
-			xyGraph.addTrace(((LineTraceImpl)trace).getTrace());
+			xyGraph.addTrace(((LineTraceImpl)trace).getTrace(), true);
 			xyCanvas.redraw();
 			fireTraceAdded(new TraceEvent(trace));
 		}

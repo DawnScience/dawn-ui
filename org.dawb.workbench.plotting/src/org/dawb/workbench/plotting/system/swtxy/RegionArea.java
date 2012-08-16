@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.csstudio.swt.xygraph.figures.Annotation;
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.PlotArea;
 import org.csstudio.swt.xygraph.figures.Trace;
@@ -123,6 +124,16 @@ public class RegionArea extends PlotArea {
 		imageTraces.put(trace.getName(), trace);
 		add(trace);
 		
+        toFront();		
+		revalidate();
+		
+		fireImageTraceAdded(new TraceEvent(trace));
+	}
+	
+	void toFront() {
+		for (Annotation a : getAnnotationList()) {
+			a.toFront();
+		}
 		// Move all regions to front again
 		if (getRegionMap()!=null) for (String name : getRegionMap().keySet()) {
 			try {
@@ -131,10 +142,6 @@ public class RegionArea extends PlotArea {
 				continue;
 			}
 		}
-		
-		revalidate();
-		
-		fireImageTraceAdded(new TraceEvent(trace));
 	}
 	
 	public boolean removeImageTrace(final ImageTrace trace){
