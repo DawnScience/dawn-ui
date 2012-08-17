@@ -190,7 +190,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
  		lightWeightActionBarMan.createToolDimensionalActions(ToolPageRole.ROLE_1D_AND_2D, "org.dawb.workbench.plotting.views.toolPageView.1D_and_2D");
  		lightWeightActionBarMan.createZoomActions(XYGraphFlags.COMBINED_ZOOM);
  		lightWeightActionBarMan.createUndoRedoActions();
- 		lightWeightActionBarMan.createExportActionsToolBar();
+ 		lightWeightActionBarMan.createExportActionsToolBar(bars!=null?getActionBars().getToolBarManager():null);
  		lightWeightActionBarMan.createAspectHistoAction();
  		lightWeightActionBarMan.createPalleteActions();
  		lightWeightActionBarMan.createOriginActions();
