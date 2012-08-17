@@ -628,7 +628,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	    	toolTitleOverride = e.getAttribute("label");
 	    	return toolTitleOverride;
 	    }
-	    toolTitleOverride = getPartName();
+	    toolTitleOverride = super.getPartName();
 	    return toolTitleOverride;
 	}
 
@@ -649,7 +649,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	    		return null;
 	    	}
 	    }
-	    toolImageOverride = getTitleImage();
+	    toolImageOverride = super.getTitleImage();
 	    return toolImageOverride;
 	}
 	/**
