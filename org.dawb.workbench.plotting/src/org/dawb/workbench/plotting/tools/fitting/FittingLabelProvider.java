@@ -59,7 +59,7 @@ public class FittingLabelProvider extends ColumnLabelProvider {
 		case 0:
 			return peak.getPeakName();
 		case 1:
-			return intFormat.format(peak.getPosition());
+			return format.format(peak.getPosition());
 		case 2:
 			return format.format(peak.getDataValue());
 		case 3:
