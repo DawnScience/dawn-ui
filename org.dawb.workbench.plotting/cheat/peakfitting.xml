@@ -5,6 +5,7 @@
 		<description>
 		    This cheat sheet helps you to open an ascii file,
 			and shows you how to fit peaks with the file.
+			The fitting tool is a tool which requires configuration of the fitting algorithm in order to get a good fit.
 			If you have just completed the previous cheat sheet, please close all your data file parts.
 	    </description>
 	</intro>
