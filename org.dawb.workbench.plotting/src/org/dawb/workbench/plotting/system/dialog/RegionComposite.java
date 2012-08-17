@@ -7,9 +7,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.csstudio.swt.xygraph.figures.Axis;
+import org.csstudio.swt.xygraph.linearscale.Range;
+import org.dawb.common.ui.plot.AbstractPlottingSystem;
+import org.dawb.common.ui.plot.region.IROIListener;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
+import org.dawb.common.ui.plot.region.ROIEvent;
+import org.dawb.common.ui.plot.roi.ROIEditTable;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.util.GridUtils;
+import org.dawb.workbench.plotting.system.LightWeightPlottingSystem;
 import org.dawb.workbench.plotting.system.swtxy.AspectAxis;
 import org.dawb.workbench.plotting.system.swtxy.RegionArea;
 import org.dawb.workbench.plotting.system.swtxy.RegionCoordinateSystem;
@@ -22,10 +28,11 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 
@@ -44,12 +51,34 @@ public class RegionComposite extends Composite {
 	private Button visible;
 	private Button showLabel;
 
-	private ROIViewer roiViewer;
+	private ROIEditTable roiViewer;
 
 	private Label symmetryLabel;
 
 	private CCombo symmetry;
 
+	/**
+	 * Throws exception if not LightWeightPlottingSystem
+	 * 
+	 * Can be used to edit regions from outside if required.
+	 * 
+	 * @param parent
+	 * @param style
+	 * @param sys
+	 * @param defaultRegion
+	 */
+	public RegionComposite(final Composite parent, final int style, final AbstractPlottingSystem sys, final RegionType defaultRegion) {
+     
+		this(parent,style, ((LightWeightPlottingSystem)sys).getGraph(), defaultRegion);
+	}
+	
+	/**
+	 * Used internally
+	 * @param parent
+	 * @param style
+	 * @param xyGraph
+	 * @param defaultRegion
+	 */
 	public RegionComposite(final Composite parent, final int style, final XYRegionGraph xyGraph, final RegionType defaultRegion) {
 		
 		super(parent, SWT.NONE);
@@ -152,7 +181,7 @@ public class RegionComposite extends Composite {
 		location.setText("Region Location");
 		location.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		
-		this.roiViewer = new ROIViewer();
+		this.roiViewer = new ROIEditTable();
 		roiViewer.createPartControl(this);
 
 		// Should be last
@@ -214,12 +243,28 @@ public class RegionComposite extends Composite {
         return region;
 	}
 	
+	private IROIListener roiListener;
 	
-	public void setEditingRegion(AbstractSelectionRegion region) {
+	public void setEditingRegion(final AbstractSelectionRegion region) {
 		
         this.editingRegion = region;
-        this.roiViewer.setRegion(region, xyGraph);
-        
+        this.roiViewer.setRegion(region.getROI(), region.getRegionType());
+        this.roiListener = new IROIListener.Stub() {			
+			@Override
+			public void roiChanged(ROIEvent evt) {
+				region.setROI(evt.getROI());
+			}
+		};
+        roiViewer.addROIListener(roiListener);
+       
+        Range range = xyGraph.primaryXAxis.getRange();
+        roiViewer.setXLowerBound(Math.min(range.getUpper(), range.getLower()));
+        roiViewer.setXUpperBound(Math.max(range.getUpper(), range.getLower()));
+		
+        range = xyGraph.primaryYAxis.getRange();
+        roiViewer.setYLowerBound(Math.min(range.getUpper(), range.getLower()));
+        roiViewer.setYUpperBound(Math.max(range.getUpper(), range.getLower()));
+
         nameText.setText(region.getName());
 		regionType.select(region.getRegionType().getIndex());
 		regionType.setEnabled(false);
@@ -248,6 +293,17 @@ public class RegionComposite extends Composite {
 				symmetry.select(sym);
 			}
 		}
+	}
+	
+	public void dispose() {
+		if (roiListener!=null) {
+			try {
+				roiViewer.removeROIListener(roiListener);
+			} catch (Exception ne) {
+				logger.error("Cannot remove roi listener", ne);
+			}
+		}
+		super.dispose();
 	}
 	
 	public AbstractSelectionRegion getEditingRegion() {
@@ -294,9 +350,13 @@ public class RegionComposite extends Composite {
 		AbstractSelectionRegion region = getEditingRegion();
 		region.repaint();
 	}
-	
+	private static final Logger logger = LoggerFactory.getLogger(RegionComposite.class);
 	public void cancelChanges() {
-		this.roiViewer.revertChanges();
+		try {
+		    editingRegion.setROI(roiViewer.getOriginalRoi());
+		} catch (Throwable ne) {
+			logger.error("Problem reverting region  "+editingRegion.getName(), ne);
+		}
 	}
 
 
