@@ -50,9 +50,14 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
@@ -75,6 +80,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 	private IRegion       fitRegion;
 	private FittingJob    fittingJob;
 	private FittedPeaks   fittedPeaks;
+	private Link          algorithmMessage;
 	
 	private ISelectionChangedListener viewUpdateListener;
 	private MenuAction tracesMenu;
@@ -130,12 +136,13 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 	public void createControl(Composite parent) {
 		
 		this.composite = new Composite(parent, SWT.NONE);
-		composite.setLayout(new FillLayout());
+		composite.setLayout(new GridLayout(1, false));
 
 		viewer = new TableViewer(composite, SWT.FULL_SELECTION | SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
         createColumns(viewer);
 		viewer.getTable().setLinesVisible(true);
 		viewer.getTable().setHeaderVisible(true);
+		viewer.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
 		viewer.setContentProvider(createContentProvider());
 		createActions();
 				
@@ -153,6 +160,20 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		};
 		viewer.addSelectionChangedListener(viewUpdateListener);
 		
+		algorithmMessage = new Link(composite, SWT.NONE);
+		algorithmMessage.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+		algorithmMessage.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				
+				if (e.text!=null && e.text.startsWith("configure")) {
+					if (!isActive()) return;
+					PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), FittingPreferencePage.ID, null, null);
+					if (pref != null) pref.open();
+				} else {
+					
+				}
+			}
+		});
 		activate();
 	}
 
@@ -478,6 +499,8 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 					viewer.setInput(newBean);
                     viewer.refresh();
                     
+                    algorithmMessage.setText(getAlgorithmSummary());
+                    algorithmMessage.getParent().layout();
                     updatePlotServerConnection(newBean);
                     
 		    	} catch (Exception ne) {
@@ -485,6 +508,19 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		    	}
 		    } 
 		});
+	}
+
+	protected String getAlgorithmSummary() {
+		StringBuilder buf = new StringBuilder("Fit attempted: '");
+		buf.append(FittingUtils.getPeaksRequired());
+		buf.append("' ");
+		buf.append(FittingUtils.getPeakType().getClass().getSimpleName());
+		buf.append("'s using ");
+		buf.append(FittingUtils.getOptimizer().getClass().getSimpleName());
+		buf.append(" with smoothing of '");
+		buf.append(FittingUtils.getSmoothing());
+		buf.append("' (<a>configure smoothing</a>)");
+		return buf.toString();
 	}
 
 	private IGuiInfoManager plotServerConnection;

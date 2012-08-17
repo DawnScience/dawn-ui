@@ -112,7 +112,7 @@ public class FittingUtils {
 		return bean;
 	}
 	
-	private static int getPeaksRequired() {
+	public static int getPeaksRequired() {
 		return Activator.getDefault().getPreferenceStore().getInt(FittingConstants.PEAK_NUMBER);
 	}
 
@@ -152,11 +152,11 @@ public class FittingUtils {
      * TODO
      * @return
      */
-	private static int getSmoothing() {
+	public static int getSmoothing() {
 		return Activator.getDefault().getPreferenceStore().getInt(FittingConstants.SMOOTHING);
 	}
 
-	private static IOptimizer getOptimizer() {
+	public static IOptimizer getOptimizer() {
 		return new GeneticAlg(getQuality());
 	}
 
@@ -168,7 +168,7 @@ public class FittingUtils {
 		return Activator.getDefault().getPreferenceStore().getDouble(FittingConstants.QUALITY);
 	}
 
-	private static APeak getPeakType() {
+	public static APeak getPeakType() {
 		try {
 			
 			final String peakClass = Activator.getDefault().getPreferenceStore().getString(FittingConstants.PEAK_TYPE);
