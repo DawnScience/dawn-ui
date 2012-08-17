@@ -96,7 +96,10 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
     public ImageHistoryTool() {
     	super();
     	this.updateJob = new MathsJob();
-    	this.operation = OperationFactory.getBasicOperation();
+    	
+    	// Use CPU it is *not* slower for the maths this tool does
+    	// To try GPU change to getBasicGpuOperation()
+    	this.operation = OperationFactory.getBasicCpuOperation();
     }
 	
 	@Override
@@ -265,7 +268,8 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 				AbstractDataset a  = od!=null&&includeCurrentPlot
 						           ? od 
 						           : null;
-						          
+				
+				final long start = System.currentTimeMillis();
 				for (String key : imageHistory.keySet()) {
 					
 					if (monitor.isCanceled()) return Status.CANCEL_STATUS;
@@ -297,7 +301,9 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 					}
 					a = operation.process(a, data, bean.getOperator());
 				}
-	
+				final long end = System.currentTimeMillis();
+				logger.trace("Processed image maths in "+(end-start));
+
 				if (a!=null) { // We plot it.
 					setPlotImage(a);
 				} else if (!includeCurrentPlot) { // We clear it
