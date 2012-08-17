@@ -57,6 +57,7 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.StatusLineManager;
@@ -878,8 +879,9 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 	/**
 	 *  Create export and print buttons in tool bar 
 	 */
-	public void createExportActionsToolBar() {
+	public void createExportActionsToolBar(IContributionManager toolbarManager) {
 
+		if (toolbarManager==null) return;
 		final MenuAction exportActionsDropDown = new MenuAction("Export/Print");
 
 		Action exportSaveButton = new Action("Save plot screenshot as...", Activator.getImageDescriptor("icons/picture_save.png")){
@@ -920,7 +922,7 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 		exportActionsDropDown.add(printButton);
 
 		if (this.system.getActionBars()!=null) {
-		    this.system.getActionBars().getToolBarManager().add(exportActionsDropDown);
+		    toolbarManager.add(exportActionsDropDown);
 		}
 	}
 
@@ -995,8 +997,7 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 
 	@Override
 	public void fillPrintActions(IContributionManager man) {
-		// TODO Auto-generated method stub
-		
+		createExportActionsToolBar(man);
 	}
 
 

@@ -625,6 +625,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 			
 	    	if (!toolId.equals(e.getAttribute("id"))) continue;
 	    	toolTitleOverride = e.getAttribute("label");
+	    	return toolTitleOverride;
 	    }
 	    toolTitleOverride = getPartName();
 	    return toolTitleOverride;
@@ -639,7 +640,13 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 			
 	    	if (!toolId.equals(e.getAttribute("id"))) continue;
 	    	final String icon =  e.getAttribute("icon");
-	    	toolImageOverride = Activator.getImage(icon);
+	    	try {
+	    		toolImageOverride = Activator.imageDescriptorFromPlugin(e.getContributor().getName(), icon).createImage();
+	    		return toolImageOverride;
+	    	} catch (Throwable be) {
+	    		toolImageOverride = null;
+	    		return null;
+	    	}
 	    }
 	    toolImageOverride = getTitleImage();
 	    return toolImageOverride;
