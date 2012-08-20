@@ -1,7 +1,9 @@
 package org.dawb.workbench.plotting.system.swtxy.selection;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 
 import org.dawb.common.ui.plot.axis.ICoordinateSystem;
 import org.dawb.common.ui.plot.region.IRegion;
@@ -9,10 +11,15 @@ import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionConfigDialog;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
+import org.eclipse.gef.ui.actions.Clipboard;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.swt.widgets.Display;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.dawb.passerelle.actors.data.ROISource;
+import ptolemy.kernel.CompositeEntity;
 
 /**
  * Class giving access to selection regions.
@@ -22,6 +29,8 @@ import org.eclipse.swt.widgets.Display;
  */
 public class SelectionRegionFactory {
 	
+	private static Logger logger = LoggerFactory.getLogger(SelectionRegionFactory.class);
+
 	private static final Collection<RegionType> SUPPORTED_REGIONS;
 	static {
 		SUPPORTED_REGIONS= new HashSet<RegionType>();
@@ -117,6 +126,10 @@ public class SelectionRegionFactory {
 		final Action copy = new Action("Copy '"+region.getName()+"'", Activator.getImageDescriptor("icons/RegionCopy.png")) {
 			public void run() {
 				staticBuffer = (AbstractSelectionRegion)region;
+				
+				// We also copy the region as a pastable into workflows.
+				final Object transferable = createPasserelleRegionContents(region);
+				if (transferable!=null) Clipboard.getDefault().setContents(transferable);
 			}
 		};
 		if (region instanceof AbstractSelectionRegion) manager.add(copy);
@@ -133,6 +146,19 @@ public class SelectionRegionFactory {
 		manager.add(new Separator("org.dawb.workbench.plotting.system.region.end"));
 		
 		return manager;
+	}
+
+	protected static Object createPasserelleRegionContents(IRegion region) {
+
+		try {
+	        final  List<ROISource> list = new ArrayList<ROISource>(1);// They force an ArrayList
+	        final ROISource source = ROISource.createSource(region.getName(), region.getROI());
+	        list.add(source);
+			return list;
+		} catch (Throwable ne) {
+			logger.error("Cannot create ROISource for region "+region.getName(), ne);
+			return null;
+		}
 	}
 
 }
