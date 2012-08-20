@@ -18,7 +18,8 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.dawb.passerelle.actors.data.ROISource;
+import org.dawb.passerelle.actors.roi.ROISource;
+
 import ptolemy.kernel.CompositeEntity;
 
 /**
