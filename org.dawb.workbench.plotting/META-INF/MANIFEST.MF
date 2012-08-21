@@ -14,19 +14,17 @@ Require-Bundle: org.eclipse.ui,
  uk.ac.diamond.scisoft.analysis;bundle-version="1.1.0",
  org.dawb.jlchart;bundle-version="1.0.0",
  uk.ac.gda.common.rcp;bundle-version="1.0.0",
- ptolemy.core;bundle-version="7.0.1"
+ ptolemy.core;bundle-version="7.0.1",
+ org.dawb.passerelle.actors;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: org.dawb.workbench.plotting.system,
  org.dawb.workbench.plotting.system.swtxy.selection,
  org.dawb.workbench.plotting.tools
-Import-Package: com.amd.aparapi;version="1.0.0",
- org.dawb.common.gpu,
+Import-Package: org.dawb.common.gpu,
  org.dawb.common.services,
  org.dawb.common.ui.plot.region,
  org.dawb.common.util.text,
- org.dawb.passerelle.actors.data,
- org.dawb.passerelle.actors.roi,
  org.eclipse.core.resources,
  org.eclipse.gef.ui.actions,
  org.eclipse.ui,

@@ -20,8 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.dawb.passerelle.actors.roi.ROISource;
 
-import ptolemy.kernel.CompositeEntity;
-
 /**
  * Class giving access to selection regions.
  * 
