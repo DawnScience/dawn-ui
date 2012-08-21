@@ -191,8 +191,6 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		if (rightMan!=null) rightMan.update(true);
 	    createData(getEditorInput());	
 	    
-	    
-
 		// We ensure that the view for choosing data sets is visible
 		if (EclipseUtils.getActivePage()!=null) {
 			try {
@@ -446,7 +444,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 						Thread.sleep(100);
 						waited+=100;
 						if (waited>=240000) { // 4 mins
-							System.out.println("Cannot extract meta data from "+EclipseUtils.getFilePath(getEditorInput()));
+							logger.error("Cannot extract meta data from "+EclipseUtils.getFilePath(getEditorInput()));
 						    return Status.CANCEL_STATUS;
 						}
 					}
@@ -469,9 +467,20 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 
 	@Override
 	public void setFocus() {
+		
 		if (plottingSystem!=null) {
 			plottingSystem.setFocus();
 		}
+		
+		Display.getDefault().asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				PlotDataComponent pc = getDataSetComponent();
+				if (pc!=null && (pc.getData()==null || pc.getData().isEmpty())) {
+					createData(getEditorInput());
+				}			
+			}
+		});
 	}
 
 	@Override
