@@ -1024,5 +1024,16 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			}
 		}		
 	}
+	private Object userObject;
+
+	@Override
+	public Object getUserObject() {
+		return userObject;
+	}
+
+	@Override
+	public void setUserObject(Object userObject) {
+		this.userObject = userObject;
+	}
 
 }
