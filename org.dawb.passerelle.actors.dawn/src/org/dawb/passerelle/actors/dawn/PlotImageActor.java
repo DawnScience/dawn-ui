@@ -27,6 +27,8 @@ import ptolemy.kernel.util.NameDuplicationException;
 import uk.ac.diamond.scisoft.analysis.SDAPlotter;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+import uk.ac.diamond.scisoft.analysis.plotserver.AxisMapBean;
+import uk.ac.diamond.scisoft.analysis.rcp.plotting.AxisValues;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalFitROI;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
@@ -95,6 +97,14 @@ public class PlotImageActor	extends AbstractDataMessageTransformer{
 			ROIBase myROI = new RectangularROI(width, height/2, 0);
 			
 			// We plot the data to the image plot
+//			IDataset   xAxis = getXAxis(cache);
+//			IDataset[] yAxes = getYAxes(cache);
+//			if (yAxes==null) {
+//				yAxes = new IDataset[]{xAxis};
+//				xAxis = AbstractDataset.arange(xAxis.getSize(), AbstractDataset.INT32);
+//				SDAPlotter.imagePlot(plotName, xAxis, yAxes[0], data.get(0));
+//			}
+		
 			SDAPlotter.imagePlot(plotName, data.get(0));
 			//GuiBean bean = SDAPlotter.getGuiBean(plotName);
 			//if(bean!=null)
@@ -122,6 +132,20 @@ public class PlotImageActor	extends AbstractDataMessageTransformer{
 		} catch (Exception e) {
 			throw createDataMessageException("Displaying data sets", e);
 		}
+	}
+
+	private IDataset getXAxis(final List<DataMessageComponent> data) {
+		final List<IDataset> sets = MessageUtils.getDatasets(data);
+		return sets.get(0);
+	}
+
+	private IDataset[] getYAxes(final List<DataMessageComponent> data) {
+		
+		final List<IDataset> sets = MessageUtils.getDatasets(data);
+		if (sets.size()<2) return null;
+		
+		sets.remove(0);
+		return sets.toArray(new IDataset[sets.size()]);
 	}
 
 	private void createRegion(final AbstractPlottingSystem plottingSystem, final ROIBase roi, final String roiName){
