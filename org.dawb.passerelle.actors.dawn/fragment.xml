@@ -4,6 +4,7 @@
    <extension
          point="com.isencia.passerelle.engine.actorGroups">
       <actorgroup
+            icon="icons/folder_chart.png"
             id="org.dawb.passerelle.actors.dawn.plottinggroup"
             name="Plotting Actors">
       </actorgroup>
@@ -13,6 +14,7 @@
       <actor
             class="org.dawb.passerelle.actors.dawn.PlotImageActor"
             group="org.dawb.passerelle.actors.dawn.plottinggroup"
+            icon="icons/chart_curve_edit.png"
             id="org.dawb.passerelle.actors.dawn.plotimage"
             name="Plot Image">
       </actor>

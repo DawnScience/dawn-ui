@@ -6,4 +6,6 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: Diamond Light Source Ltd.
 Fragment-Host: org.dawb.passerelle.actors;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: org.eclipse.core.variables
+Import-Package: org.eclipse.core.variables,
+ uk.ac.diamond.scisoft.analysis.rcp.plotting,
+ uk.ac.diamond.scisoft.analysis.rcp.views
