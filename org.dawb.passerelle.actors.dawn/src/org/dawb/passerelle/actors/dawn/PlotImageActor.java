@@ -1,5 +1,6 @@
 package org.dawb.passerelle.actors.dawn;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -56,6 +57,11 @@ public class PlotImageActor	extends AbstractDataMessageTransformer{
 		BOX_ROI_TYPE.add("X-Axis Selection Region Of Interest");
 		BOX_ROI_TYPE.add("Y-Axis Selection Region Of Interest");
 	}
+
+	private Parameter dataNameParam;
+	private Parameter xaxisNameParam;
+	private Parameter yaxisNameParam;
+
 	Logger logger = LoggerFactory.getLogger(PlotImageActor.class);
 
 
@@ -69,6 +75,20 @@ public class PlotImageActor	extends AbstractDataMessageTransformer{
 		plotViewName.setDisplayName("Plot View Name");
 		registerConfigurableParameter(plotViewName);
 
+		// data name parameter
+		dataNameParam = new StringParameter(this, "Data Name");
+		dataNameParam.setDisplayName("Data Name");
+		registerConfigurableParameter(plotViewName);
+
+		// xaxis/yaxis data name parameter
+		xaxisNameParam = new StringParameter(this, "X-Axis Data Name");
+		xaxisNameParam.setDisplayName("X-Axis Data Name");
+		registerConfigurableParameter(xaxisNameParam);
+		yaxisNameParam = new StringParameter(this, "Y-Axis Data Name");
+		yaxisNameParam.setDisplayName("Y-Axis Data Name");
+		registerConfigurableParameter(yaxisNameParam);
+
+		// ROI option parameter
 		hasROIParam = new StringParameter(this,"Region Of Interest") {
 			private static final long serialVersionUID = 2815254879307619914L;
 			public String[] getChoices() {
@@ -97,22 +117,36 @@ public class PlotImageActor	extends AbstractDataMessageTransformer{
 			List<DataMessageComponent> cache) throws ProcessingException {
 		
 		final String plotName = plotViewName.getExpression();
+		final String dataName = dataNameParam.getExpression();
+		final String xaxisName = xaxisNameParam.getExpression();
+		final String yaxisName = yaxisNameParam.getExpression();
 		final String hasROISelection = hasROIParam.getExpression();
 		final String boxTypeROI = boxROITypeParam.getExpression();
-		final List<IDataset>  data = MessageUtils.getDatasets(cache);
+//		final List<IDataset>  data = MessageUtils.getDatasets(cache);
+		final Map<String, Serializable>  data = MessageUtils.getList(cache);
 		final DataMessageComponent mc = new DataMessageComponent();
-		mc.addList(data.get(0).getName(), (AbstractDataset)data.get(0));
+		
+		//add datasets to mc
+		Set<String> dataKeys = data.keySet();
+		for (String key : dataKeys) {
+			AbstractDataset myData = ((AbstractDataset)data.get(key));
+			mc.addList(myData.getName(), myData);
+		}
+		//mc.addList(data.get(0).getName(), (AbstractDataset)data.get(0));
 		try {
 			
 			// open the plot view
 			AbstractPlottingSystem plottingSystem = PlottingFactory.getPlottingSystem(plotName);
-			int[] maxPos = data.get(0).maxPos();
+			
+			int[] maxPos = ((AbstractDataset)data.get(dataName)).maxPos();
 			double width = maxPos[0];
 			double height = maxPos[1];
 			ROIBase myROI = new RectangularROI(width, height/2, 0);
 			
+			SDAPlotter.imagePlot(plotName, ((AbstractDataset)data.get(xaxisName)), ((AbstractDataset)data.get(yaxisName)), ((AbstractDataset)data.get(dataName)));
+			
 			// We plot the data to the image plot
-			SDAPlotter.imagePlot(plotName, data.get(0));
+	//		SDAPlotter.imagePlot(plotName, data.get(0));
 			//GuiBean bean = SDAPlotter.getGuiBean(plotName);
 			//if(bean!=null)
 			//	System.out.println("BEAN:"+bean.toString());
