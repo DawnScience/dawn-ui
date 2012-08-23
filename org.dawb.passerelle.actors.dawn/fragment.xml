@@ -4,6 +4,7 @@
    <extension
          point="com.isencia.passerelle.engine.actorGroups">
       <actorgroup
+            icon="icons/folder_chart.png"
             id="org.dawb.passerelle.actors.dawn.plottinggroup"
             name="Plotting Actors">
       </actorgroup>
@@ -13,8 +14,15 @@
       <actor
             class="org.dawb.passerelle.actors.dawn.PlotImageActor"
             group="org.dawb.passerelle.actors.dawn.plottinggroup"
+            icon="icons/chart_curve_edit.png"
             id="org.dawb.passerelle.actors.dawn.plotimage"
             name="Plot Image">
+      </actor>
+      <actor
+            class="org.dawb.passerelle.actors.dawn.RegionNormaliseActor"
+            group="org.dawb.passerelle.actors.dawn.plottinggroup"
+            id="org.dawb.passerelle.actors.dawn.regionNormalise"
+            name="Region Normalise">
       </actor>
    </extension>
 

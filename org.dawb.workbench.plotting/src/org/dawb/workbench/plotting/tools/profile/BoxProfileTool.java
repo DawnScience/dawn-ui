@@ -48,7 +48,7 @@ public class BoxProfileTool extends ProfileTool {
 		if (monitor.isCanceled()) return;
 		if (image==null) return;
 		
-		if (region.getRegionType()!=RegionType.BOX) return;
+		if (!isRegionTypeSupported(region.getRegionType())) return;
 
 		final RectangularROI bounds = (RectangularROI) (rbs==null ? region.getROI() : rbs);
 		if (bounds==null) return;
@@ -104,7 +104,7 @@ public class BoxProfileTool extends ProfileTool {
 	
 	@Override
 	protected boolean isRegionTypeSupported(RegionType type) {
-		return type==RegionType.BOX;
+		return (type==RegionType.BOX)||(type==RegionType.XAXIS)||(type==RegionType.YAXIS);
 	}
 
 	@Override
