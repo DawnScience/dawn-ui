@@ -335,6 +335,18 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 	    dataViewer.getControl().setMenu (menuManager.createContextMenu(dataViewer.getControl()));
 		createDimensionalActions(menuManager, false);
 		menuManager.add(new Separator(getClass().getName()+"sep1"));
+		menuManager.add(new Action("Clear") {
+			@Override
+			public void run() {
+				for (CheckableObject co : data) {
+					co.setChecked(false);
+				}
+				selections.clear();
+				dataViewer.refresh();
+				fireSelectionListeners(Collections.EMPTY_LIST);
+			}
+		});
+		menuManager.add(new Separator(getClass().getName()+"sep2"));
 		menuManager.add(new Action("Preferences...") {
 			@Override
 			public void run() {
