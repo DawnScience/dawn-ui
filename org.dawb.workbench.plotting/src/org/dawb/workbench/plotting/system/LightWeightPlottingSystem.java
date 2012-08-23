@@ -696,12 +696,15 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		}
 		
 		xyCanvas.redraw();
-		getDisplay().syncExec(new Runnable() {
-			public void run() {
-				autoscaleAxes();
-				autoscaleAxes();
-			}
-		});
+		
+		if (isRescale()) {
+			getDisplay().syncExec(new Runnable() {
+				public void run() {
+					autoscaleAxes();
+					autoscaleAxes();
+				}
+			});
+		}
 		fireTracesPlotted(new TraceEvent(traces));
         return traces;
 	}

@@ -52,7 +52,6 @@ import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -104,9 +103,9 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 					traces.removeAll(fittedPeaks.getFittedPeakTraces());
 				}
 				if (traces!=null && !traces.isEmpty()) {
-					updateTracesChoice(traces.get(traces.size()-1));
+					final int size = updateTracesChoice(traces.get(traces.size()-1));	
+					if (size>0) fittingJob.schedule();
 				}
-				
 			}
 			
 			@Override
@@ -545,14 +544,14 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 	}
 	
 
-	protected void updateTracesChoice(ITrace selected) {
+	protected int updateTracesChoice(ITrace selected) {
 		
-		if (tracesMenu==null) return;
+		if (tracesMenu==null) return 0;
 		
 		tracesMenu.clear();
 		
 		final Collection<ITrace> traces = getPlottingSystem().getTraces();
-		if (traces==null || traces.size()<0) return;
+		if (traces==null || traces.size()<0) return 0;
 		if (fittedPeaks!=null) traces.removeAll(fittedPeaks.getFittedPeakTraces());
 		
 		final CheckableActionGroup group = new CheckableActionGroup();
@@ -587,6 +586,8 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		}
 				
 		getSite().getActionBars().updateActionBars();
+		
+		return index;
 	}
 
 	
