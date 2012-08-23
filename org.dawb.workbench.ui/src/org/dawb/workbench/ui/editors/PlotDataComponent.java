@@ -392,6 +392,9 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 		menuManager.add(new Action("Clear") {
 			@Override
 			public void run() {
+				for (CheckableObject co : data) {
+					co.setChecked(false);
+				}
 				selections.clear();
 				dataViewer.refresh();
 				fireSelectionListeners(Collections.EMPTY_LIST);
@@ -740,6 +743,8 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 			if (e.stateMask==131072) { // Shift is pressed
 				try {
 				    final CheckableObject from = selections.get(selections.size()-1);
+				    // TODO Table may be filtered - then we cannot loop over the data
+				    // only the visible data.
 				    final int fromIndex = data.indexOf(from);
 				    final int toIndex   = data.indexOf(clicked);
 				    final int inc       = (fromIndex<toIndex) ? 1 : -1;
