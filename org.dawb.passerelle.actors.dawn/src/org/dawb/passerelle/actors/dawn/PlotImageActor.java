@@ -48,7 +48,14 @@ public class PlotImageActor	extends AbstractDataMessageTransformer{
 		HAS_ROI.add("Plot the image with ROI(s)");
 		HAS_ROI.add("Plot the image without ROI(s)");
 	}
-
+	private Parameter boxROITypeParam;
+	protected static final List<String> BOX_ROI_TYPE;
+	static {
+		BOX_ROI_TYPE = new ArrayList<String>(3);
+		BOX_ROI_TYPE.add("Box Region Of Interest");
+		BOX_ROI_TYPE.add("X-Axis Selection Region Of Interest");
+		BOX_ROI_TYPE.add("Y-Axis Selection Region Of Interest");
+	}
 	Logger logger = LoggerFactory.getLogger(PlotImageActor.class);
 
 
@@ -70,6 +77,15 @@ public class PlotImageActor	extends AbstractDataMessageTransformer{
 		};
 		registerConfigurableParameter(hasROIParam);
 		hasROIParam.setExpression(HAS_ROI.get(0));
+
+		boxROITypeParam = new StringParameter(this,"Type of Rectangular ROI") {
+			private static final long serialVersionUID = -380964888849739100L;
+			public String[] getChoices() {
+				return BOX_ROI_TYPE.toArray(new String[BOX_ROI_TYPE.size()]);
+			}
+		};
+		registerConfigurableParameter(boxROITypeParam);
+		boxROITypeParam.setExpression(BOX_ROI_TYPE.get(0));
 		
 		//set the expression mode parameter to Evaluate after all data received
 		passModeParameter.setExpression(EXPRESSION_MODE.get(1));
@@ -82,6 +98,7 @@ public class PlotImageActor	extends AbstractDataMessageTransformer{
 		
 		final String plotName = plotViewName.getExpression();
 		final String hasROISelection = hasROIParam.getExpression();
+		final String boxTypeROI = boxROITypeParam.getExpression();
 		final List<IDataset>  data = MessageUtils.getDatasets(cache);
 		final DataMessageComponent mc = new DataMessageComponent();
 		mc.addList(data.get(0).getName(), (AbstractDataset)data.get(0));
@@ -110,11 +127,11 @@ public class PlotImageActor	extends AbstractDataMessageTransformer{
 						Entry<String,ROIBase> entry = it.next();
 						String roiname = entry.getKey();
 						myROI = entry.getValue();
-						createRegion(plottingSystem, myROI, roiname);
+						createRegion(plottingSystem, myROI, roiname, boxTypeROI);
 						mc.addROI(roiname, myROI);
 					}
 				} else {
-					createRegion(plottingSystem, myROI, "Default ROI");
+					createRegion(plottingSystem, myROI, "Default ROI", boxTypeROI);
 					mc.addROI( "Default ROI", myROI);
 				}
 			}
@@ -124,7 +141,7 @@ public class PlotImageActor	extends AbstractDataMessageTransformer{
 		}
 	}
 
-	private void createRegion(final AbstractPlottingSystem plottingSystem, final ROIBase roi, final String roiName){
+	private void createRegion(final AbstractPlottingSystem plottingSystem, final ROIBase roi, final String roiName, final String boxType){
 		Display.getDefault().asyncExec(new Runnable() {
 			
 			@Override
@@ -155,9 +172,21 @@ public class PlotImageActor	extends AbstractDataMessageTransformer{
 //							else
 							region.setROI(rroi);
 						}else {
-							IRegion newRegion = plottingSystem.createRegion(roiName, RegionType.BOX);
-							newRegion.setROI(rroi);
-							plottingSystem.addRegion(newRegion);
+							if(boxType.equals(BOX_ROI_TYPE.get(0))){
+								IRegion newRegion = plottingSystem.createRegion(roiName, RegionType.BOX);
+								newRegion.setROI(rroi);
+								plottingSystem.addRegion(newRegion);
+							}
+							if(boxType.equals(BOX_ROI_TYPE.get(1))){
+								IRegion newRegion = plottingSystem.createRegion(roiName, RegionType.XAXIS);
+								newRegion.setROI(rroi);
+								plottingSystem.addRegion(newRegion);
+							}
+							if(boxType.equals(BOX_ROI_TYPE.get(2))){
+								IRegion newRegion = plottingSystem.createRegion(roiName, RegionType.YAXIS);
+								newRegion.setROI(rroi);
+								plottingSystem.addRegion(newRegion);
+							}
 							plottingSystem.setToolVisible("org.dawb.workbench.plotting.tools.boxProfileTool",
 									ToolPageRole.ROLE_2D, "org.dawb.workbench.plotting.views.toolPageView.2D");
 						}
