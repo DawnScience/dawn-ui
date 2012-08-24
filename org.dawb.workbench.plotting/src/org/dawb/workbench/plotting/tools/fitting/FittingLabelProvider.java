@@ -57,20 +57,22 @@ public class FittingLabelProvider extends ColumnLabelProvider {
 		
 		switch(column) {
 		case 0:
-			return peak.getPeakName();
+			return peak.getDataTrace().getName();
 		case 1:
-			return format.format(peak.getPosition());
+			return peak.getPeakName();
 		case 2:
-			return format.format(peak.getDataValue());
+			return format.format(peak.getPosition());
 		case 3:
-			return format.format(peak.getPeakValue());
+			return format.format(peak.getDataValue());
 		case 4:
-			return format.format(peak.getFWHM());
+			return format.format(peak.getPeakValue());
 		case 5:
-			return format.format(peak.getArea());
+			return format.format(peak.getFWHM());
 		case 6:
-			return peak.getPeakType();
+			return format.format(peak.getArea());
 		case 7:
+			return peak.getPeakType();
+		case 8:
 			return bean.getAlgorithmType();
 		default:
 			return "Not found";

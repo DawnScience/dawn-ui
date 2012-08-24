@@ -24,6 +24,7 @@ class FittedPeak {
 	private CompositeFunction function;
 	private IRegion           fwhm;
 	private IRegion           center;
+	private ITrace            dataTrace;
 	private ITrace            trace;
 	private IAnnotation       annotation;
 	private AbstractDataset[] peakFunctions;
@@ -287,29 +288,29 @@ class FittedPeak {
 		names.add(annotation.getName());
 	}
 
-	public String getCSVString() {
+	public String getTabString() {
 		
 		DecimalFormat format = new DecimalFormat("##0.#####E0");
 		final StringBuilder buf = new StringBuilder();
-		buf.append(getPeakName());
-		buf.append(",");
+		//buf.append(getPeakName().replace(' ', '_'));
+		//buf.append("\t");
 		buf.append(format.format(getPosition()));
-		buf.append(",");
+		buf.append("\t");
 		buf.append(format.format(getFWHM()));
-		buf.append(",");
+		buf.append("\t");
 		buf.append(format.format(getArea()));
-		buf.append(",");
-		buf.append(getPeakType());
+		//buf.append("\t");
+		//buf.append(getPeakType().replace(' ', '_'));
 		return buf.toString();
 	}
 
 	public static String getCVSTitle() {
 		final StringBuilder buf = new StringBuilder();
-		buf.append("Peak Name, ");
-		buf.append("Position, ");
-		buf.append("FWHM, ");
-		buf.append("Area, ");
-		buf.append("Peak Type");
+		//buf.append("Peak_Name\t");
+		buf.append("# Position\t");
+		buf.append("FWHM\t");
+		buf.append("Area\t");
+		//buf.append("Peak_Type\t");
 		return buf.toString();
 	}
 
@@ -323,6 +324,14 @@ class FittedPeak {
 		} catch (Throwable ne) {
 			return Double.NaN;
 		}
+	}
+
+	public ITrace getDataTrace() {
+		return dataTrace;
+	}
+
+	public void setDataTrace(ITrace dataTrace) {
+		this.dataTrace = dataTrace;
 	}
 	
 }
