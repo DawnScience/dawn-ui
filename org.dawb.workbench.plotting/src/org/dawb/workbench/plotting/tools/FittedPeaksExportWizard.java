@@ -35,7 +35,7 @@ public class FittedPeaksExportWizard extends Wizard implements IExportWizard {
 	public FittedPeaksExportWizard() {
 		super();
 		addPage(new ExportPage("Fitted Peaks"));
-		setWindowTitle("Export fitted peaks to CSV");
+		setWindowTitle("Export fitted peaks");
 	}
 
 	@Override
@@ -56,7 +56,12 @@ public class FittedPeaksExportWizard extends Wizard implements IExportWizard {
 		
 		final ExportPage ep = (ExportPage)getPages()[0];
 		try {
-			((FittingTool)view.getCurrentPage()).exportFittedPeaks(ep.getPath());
+			final String exportPath = ((FittingTool)view.getCurrentPage()).exportFittedPeaks(ep.getPath());
+			
+			if (ep.isOpen()) {
+				EclipseUtils.openExternalEditor(exportPath);
+			}
+			
 		} catch (Exception e) {
 			logger.error("Cannot export peaks", e);
 		}
@@ -68,6 +73,7 @@ public class FittedPeaksExportWizard extends Wizard implements IExportWizard {
 
 		private Text    txtPath;
 		private boolean overwrite = false;
+		private boolean open      = true;
 		private String  path;
 
 		protected ExportPage(String pageName) {
@@ -115,6 +121,20 @@ public class FittedPeaksExportWizard extends Wizard implements IExportWizard {
 					pathChanged();
 				}
 			});
+			over.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 3, 1));
+			
+			final Button open = new Button(container, SWT.CHECK);
+			open.setText("Open file after export.");
+			open.setSelection(true);
+			open.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					ExportPage.this.open = open.getSelection();
+					pathChanged();
+				}
+			});
+			open.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 3, 1));
+
 
 			pathChanged();
 			setControl(container);
@@ -130,7 +150,7 @@ public class FittedPeaksExportWizard extends Wizard implements IExportWizard {
 		 */
 
 		private void handleBrowse() {
-			FileDialog dirDialog = new FileDialog(getShell(), SWT.OPEN);
+			FileDialog dirDialog = new FileDialog(getShell(), SWT.SAVE);
 			dirDialog.setText("Export file (CSV)");
 			if (getPath()!=null) {
 				try {
@@ -139,7 +159,7 @@ public class FittedPeaksExportWizard extends Wizard implements IExportWizard {
 					logger.error("Cannot set path in file filter!", ne);
 				}
 			}
-			dirDialog.setFilterExtensions(new String[]{"*.csv"});
+			dirDialog.setFilterExtensions(new String[]{"*.dat"});
 			final String filepath = dirDialog.open();
 			if (filepath != null) {
 				txtPath.setText(filepath);
@@ -158,7 +178,7 @@ public class FittedPeaksExportWizard extends Wizard implements IExportWizard {
 				updateStatus("Please select a file to export to.");
 				return;
 			}
-			if (((new File(p)).exists() || (!p.toLowerCase().endsWith(".csv") && (new File(p+".csv")).exists())) 
+			if (((new File(p)).exists() || (!p.toLowerCase().endsWith(".dat") && (new File(p+".dat")).exists())) 
 					&& !overwrite) {
 				updateStatus("Please confirm overwrite of the file.");
 				return;
@@ -170,6 +190,14 @@ public class FittedPeaksExportWizard extends Wizard implements IExportWizard {
 		private void updateStatus(String message) {
 			setErrorMessage(message);
 			setPageComplete(message == null);
+		}
+
+		public boolean isOpen() {
+			return open;
+		}
+
+		public void setOpen(boolean open) {
+			this.open = open;
 		}
 
 	}

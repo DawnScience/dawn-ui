@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -84,11 +85,13 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 	private ISelectionChangedListener viewUpdateListener;
 	private MenuAction tracesMenu;
 	private ITraceListener traceListener;
-	protected ILineTrace selectedTrace;
+	protected List<ILineTrace> selectedTraces;
 
 	public FittingTool() {
 		super();
 		this.fittingJob = new FittingJob();
+		
+		this.selectedTraces = new ArrayList<ILineTrace>(31);
 		
 		this.traceListener = new ITraceListener.Stub() {
 			
@@ -181,20 +184,25 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		ColumnViewerToolTipSupport.enableFor(viewer,ToolTip.NO_RECREATE);
 
         TableViewerColumn var   = new TableViewerColumn(viewer, SWT.LEFT, 0);
+		var.getColumn().setText("Trace");
+		var.getColumn().setWidth(80);
+		var.setLabelProvider(new FittingLabelProvider(0));
+
+		var   = new TableViewerColumn(viewer, SWT.LEFT, 1);
 		var.getColumn().setText("Name");
 		var.getColumn().setWidth(150);
-		var.setLabelProvider(new FittingLabelProvider(0));
-		
-        var   = new TableViewerColumn(viewer, SWT.CENTER, 1);
-		var.getColumn().setText("Position");
-		var.getColumn().setWidth(100);
 		var.setLabelProvider(new FittingLabelProvider(1));
 		
         var   = new TableViewerColumn(viewer, SWT.CENTER, 2);
+		var.getColumn().setText("Position");
+		var.getColumn().setWidth(100);
+		var.setLabelProvider(new FittingLabelProvider(2));
+		
+        var   = new TableViewerColumn(viewer, SWT.CENTER, 3);
 		var.getColumn().setText("Data");
 		var.getColumn().setToolTipText("The nearest data value of the fitted peak.");
 		var.getColumn().setWidth(100);
-		var.setLabelProvider(new FittingLabelProvider(2));
+		var.setLabelProvider(new FittingLabelProvider(3));
 		
 		// Data Column not that useful, do not show unless property set.
 		if (!Boolean.getBoolean("org.dawb.workbench.plotting.tools.fitting.tool.data.column.required")) {
@@ -202,31 +210,31 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 			var.getColumn().setResizable(false);
 		}
 		
-        var   = new TableViewerColumn(viewer, SWT.CENTER, 3);
+        var   = new TableViewerColumn(viewer, SWT.CENTER, 4);
 		var.getColumn().setText("Fit");
 		var.getColumn().setToolTipText("The value of the fitted peak.");
 		var.getColumn().setWidth(100);
-		var.setLabelProvider(new FittingLabelProvider(3));
+		var.setLabelProvider(new FittingLabelProvider(4));
 
-		var   = new TableViewerColumn(viewer, SWT.CENTER, 4);
+		var   = new TableViewerColumn(viewer, SWT.CENTER, 5);
 		var.getColumn().setText("FWHM");
 		var.getColumn().setWidth(100);
-		var.setLabelProvider(new FittingLabelProvider(4));
+		var.setLabelProvider(new FittingLabelProvider(5));
 		
-        var   = new TableViewerColumn(viewer, SWT.CENTER, 5);
+        var   = new TableViewerColumn(viewer, SWT.CENTER, 6);
 		var.getColumn().setText("Area");
 		var.getColumn().setWidth(100);
-		var.setLabelProvider(new FittingLabelProvider(5));
+		var.setLabelProvider(new FittingLabelProvider(6));
 
-        var   = new TableViewerColumn(viewer, SWT.CENTER, 6);
+        var   = new TableViewerColumn(viewer, SWT.CENTER, 7);
 		var.getColumn().setText("Type");
 		var.getColumn().setWidth(100);
-		var.setLabelProvider(new FittingLabelProvider(6));
+		var.setLabelProvider(new FittingLabelProvider(7));
 		
-        var   = new TableViewerColumn(viewer, SWT.CENTER, 7);
+        var   = new TableViewerColumn(viewer, SWT.CENTER, 8);
 		var.getColumn().setText("Algorithm");
 		var.getColumn().setWidth(100);
-		var.setLabelProvider(new FittingLabelProvider(7));
+		var.setLabelProvider(new FittingLabelProvider(8));
 
 	}
 	
@@ -316,7 +324,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 	public void dispose() {
 		deactivate();
 		viewUpdateListener = null;
-		
+		selectedTraces.clear();
         if (viewer!=null) viewer.getControl().dispose();
        
         // Using clear and setting to null helps the garbage collector.
@@ -386,38 +394,41 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 					}
 				}
 			});
-			if (selectedTrace==null)    return Status.CANCEL_STATUS;
+			if (selectedTraces.isEmpty())    return Status.CANCEL_STATUS;
 
 
-			// We chop x and y by the region bounds. We assume the
-			// plot is an XAXIS selection therefore the indices in
-			// y = indices chosen in x.
-			final double[] p1 = bounds.getPointRef();
-			final double[] p2 = bounds.getEndPoint();
-
-			// We peak fit only the first of the data sets plotted for now.
-			AbstractDataset x  = selectedTrace.getXData();
-			AbstractDataset y  = selectedTrace.getYData();
-
-			AbstractDataset[] a= FittingUtils.xintersection(x,y,p1[0],p2[0]);
-			x = a[0]; y=a[1];
-
-			try {
-				final FittedPeaks bean = FittingUtils.getFittedPeaks(x, y, monitor);
-	    		if (bean!=null) for (FittedPeak p : bean.getPeakList()) {
-	    			p.setX(selectedTrace.getXData());
-	    			p.setY(selectedTrace.getYData());
+			for (ILineTrace selectedTrace : selectedTraces) {
+				
+				// We chop x and y by the region bounds. We assume the
+				// plot is an XAXIS selection therefore the indices in
+				// y = indices chosen in x.
+				final double[] p1 = bounds.getPointRef();
+				final double[] p2 = bounds.getEndPoint();
+	
+				// We peak fit only the first of the data sets plotted for now.
+				AbstractDataset x  = selectedTrace.getXData();
+				AbstractDataset y  = selectedTrace.getYData();
+	
+				AbstractDataset[] a= FittingUtils.xintersection(x,y,p1[0],p2[0]);
+				x = a[0]; y=a[1];
+	
+				try {
+					final FittedPeaks bean = FittingUtils.getFittedPeaks(x, y, monitor);
+		    		if (bean!=null) for (FittedPeak p : bean.getPeakList()) {
+		    			p.setX(selectedTrace.getXData());
+		    			p.setY(selectedTrace.getYData());
+		    			p.setDataTrace(selectedTrace);
+					}
+		    		// Add saved peaks if any.
+		    		if (fittedPeaks!=null && !fittedPeaks.isEmpty() && bean!=null) {
+		    			bean.addFittedPeaks(fittedPeaks.getPeakList());
+		    		}
+					createFittedPeaks(bean);
+				} catch (Exception ne) {
+					logger.error("Cannot fit peaks!", ne);
+					return Status.CANCEL_STATUS;
 				}
-	    		// Add saved peaks if any.
-	    		if (fittedPeaks!=null && !fittedPeaks.isEmpty() && bean!=null) {
-	    			bean.addFittedPeaks(fittedPeaks.getPeakList());
-	    		}
-				createFittedPeaks(bean);
-			} catch (Exception ne) {
-				logger.error("Cannot fit peaks!", ne);
-				return Status.CANCEL_STATUS;
 			}
-
 			return Status.OK_STATUS;
 		}
 
@@ -554,28 +565,51 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		if (traces==null || traces.size()<0) return 0;
 		if (fittedPeaks!=null) traces.removeAll(fittedPeaks.getFittedPeakTraces());
 		
-		final CheckableActionGroup group = new CheckableActionGroup();
-		FittingTool.this.selectedTrace = null;
+		selectedTraces.clear();
 		int index = 0;
 		int selectionIndex=0;
+		
+		if (traces.size()>3) {
+			final Action selectAll = new Action("Select all", IAction.AS_PUSH_BUTTON) {
+				public void run() {
+					selectedTraces.clear();
+					for (int i = 2; i < tracesMenu.size(); i++) {
+						TraceSelectAction ta = (TraceSelectAction)tracesMenu.getAction(i);
+						ta.setChecked(true);
+						selectedTraces.add(ta.iTrace);
+					}
+					if (fittingJob!=null&&isActive()) {
+						fittingJob.fit();
+					}
+				}
+			};
+			tracesMenu.add(selectAll);			
+			final Action selectNone = new Action("Select none", IAction.AS_PUSH_BUTTON) {
+				public void run() {
+					clearAll();
+					selectedTraces.clear();
+					for (int i = 2; i < tracesMenu.size(); i++) {
+						TraceSelectAction ta = (TraceSelectAction)tracesMenu.getAction(i);
+						ta.setChecked(false);
+					}
+					if (fittingJob!=null&&isActive()) {
+						fittingJob.fit();
+					}
+				}
+			};
+			tracesMenu.add(selectNone);			
+		}
+		
 		for (final ITrace iTrace : traces) {
 			
 			if (iTrace==selected) selectionIndex= index;
 			
-			if (FittingTool.this.selectedTrace==null && iTrace instanceof ILineTrace) {
-				FittingTool.this.selectedTrace = (ILineTrace)iTrace;
-			}
+			if (selectedTraces.isEmpty() && iTrace instanceof ILineTrace) {
+				selectedTraces.add((ILineTrace)iTrace);
+			}		
 			
-			final Action action = new Action(iTrace.getName(), IAction.AS_CHECK_BOX) {
-				public void run() {
-					if (iTrace instanceof ILineTrace) FittingTool.this.selectedTrace = (ILineTrace)iTrace;
-					tracesMenu.setSelectedAction(this);
-					if (fittingJob!=null&&isActive()) fittingJob.fit();
-					setChecked(true);
-				}
-			};
+			final Action action = new TraceSelectAction((ILineTrace)iTrace);
 			tracesMenu.add(action);
-			group.add(action);
 			
 			index++;
 		}
@@ -590,7 +624,29 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		return index;
 	}
 
+	private class TraceSelectAction extends Action {
+		ILineTrace iTrace;
+		TraceSelectAction(ILineTrace iTrace) {
+			super(iTrace.getName(), IAction.AS_CHECK_BOX);
+			this.iTrace = iTrace;
+		}
 	
+		public void run() {
+			if (iTrace instanceof ILineTrace) {
+				ILineTrace lt = (ILineTrace)iTrace;
+				if (isChecked()) {
+					selectedTraces.add(lt);
+				} else {
+					selectedTraces.remove(lt);
+				}
+			}
+			tracesMenu.setSelectedAction(this);
+			if (fittingJob!=null&&isActive()) {
+				fittingJob.fit();
+			}
+		}
+	};
+
 	/**
 	 * We use the old actions here for simplicity of configuration.
 	 * 
@@ -753,13 +809,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		
 		final Action clear = new Action("Clear all", Activator.getImageDescriptor("icons/plot-tool-peak-fit-clear.png")) {
 			public void run() {
-				if (!isActive()) return;
-				if (fittedPeaks!=null) {
-					fittedPeaks.removeSelections(getPlottingSystem(), true);
-					fittedPeaks.dispose();
-					fittedPeaks = null;
-				}
-				viewer.refresh();
+				clearAll();
 			}
 		};
 		clear.setToolTipText("Clear all regions found in the fitting");
@@ -814,6 +864,16 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 	    viewer.getControl().setMenu(menuManager.createContextMenu(viewer.getControl()));
 
 	}
+	protected void clearAll() {
+		if (!isActive()) return;
+		if (fittedPeaks!=null) {
+			fittedPeaks.removeSelections(getPlottingSystem(), true);
+			fittedPeaks.dispose();
+			fittedPeaks = null;
+		}
+		viewer.refresh();
+	}
+
 	public void setFittedPeaks(FittedPeaks fittedPeaks) {
 		this.fittedPeaks = fittedPeaks;
 	}
@@ -833,10 +893,10 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 	 * 
 	 * @param path
 	 */
-	void exportFittedPeaks(final String path) throws Exception {
+	String exportFittedPeaks(final String path) throws Exception {
 		
 		File file = new File(path);
-		if (!file.getName().toLowerCase().endsWith(".csv")) file = new File(path+".csv");
+		if (!file.getName().toLowerCase().endsWith(".dat")) file = new File(path+".dat");
 		if (file.exists()) file.delete();
 		
 		final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF-8"));
@@ -844,13 +904,15 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 			writer.write(FittedPeak.getCVSTitle());
 			writer.newLine();
 			for (FittedPeak peak : this.fittedPeaks.getPeakList()) {
-				writer.write(peak.getCSVString());
+				writer.write(peak.getTabString());
 				writer.newLine();
 			}
 			
 		} finally {
 			writer.close();
 		}
+		
+		return file.getAbsolutePath();
     }
 
 }
