@@ -5,13 +5,18 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
+import org.dawb.common.ui.plot.trace.ITraceListener;
+import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.workbench.plotting.Activator;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -58,27 +63,62 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 	protected IAction createAddAction() {
 		return new Action("Add currently plotted plot(s) to history", Activator.getImageDescriptor("icons/add.png")) {
 			public void run() {
-				final Collection<ITrace> traces = getPlottingSystem().getTraces(ILineTrace.class);
-				if (traces==null||traces.isEmpty()) return;
-				
-				// TODO Check if one of our history traces.
-				for (ITrace iTrace : traces) {
-					
-					if (iTrace.getUserObject()==HistoryType.HISTORY_PLOT) continue;
-					final ILineTrace lineTrace = (ILineTrace)iTrace;
-					final HistoryBean bean = new HistoryBean();
-					bean.setXdata(lineTrace.getXData());
-					bean.setYdata(lineTrace.getYData());
-					bean.setTraceName(iTrace.getName());
-					bean.setPlotColour(lineTrace.getTraceColor().getRGB());
-					bean.setPlotName(getPlottingSystem().getPlotName());
-					history.put(bean.getTraceKey(), bean);
-				}
-				refresh();
+				addTraces();
 			}
 		};
 	}
 
+	protected void addTraces() {
+		final Collection<ITrace> traces = getPlottingSystem().getTraces(ILineTrace.class);
+		if (traces==null||traces.isEmpty()) return;
+		
+		// TODO Check if one of our history traces.
+		for (ITrace iTrace : traces) {
+			
+			if (iTrace.getUserObject()==HistoryType.HISTORY_PLOT) continue;
+			final ILineTrace lineTrace = (ILineTrace)iTrace;
+			final HistoryBean bean = new HistoryBean();
+			bean.setXdata(lineTrace.getXData());
+			bean.setYdata(lineTrace.getYData());
+			bean.setTraceName(iTrace.getName());
+			bean.setPlotColour(lineTrace.getTraceColor().getRGB());
+			bean.setPlotName(getPlottingSystem().getPlotName());
+			history.put(bean.getTraceKey(), bean);
+		}
+		refresh();
+	}
+
+	private ITraceListener autoAddTraceListener;
+	
+	/**
+	 * May be overridden to provide additional actions.
+	 */
+	protected MenuManager createActions(final MenuManager rightClick) {
+		
+		this.autoAddTraceListener = new ITraceListener.Stub() {
+			@Override
+			public void tracesPlotted(TraceEvent evt) {
+				addTraces(); // Adds anything it can.
+			}
+		};
+		final Action autoAdd = new Action("Automatically add any new plots to history", IAction.AS_CHECK_BOX) {
+			public void run() {
+				if (isChecked()) {
+					getPlottingSystem().addTraceListener(autoAddTraceListener);
+					addTraces();
+				} else {
+					getPlottingSystem().removeTraceListener(autoAddTraceListener);
+				}
+			}
+		};
+		getSite().getActionBars().getToolBarManager().add(autoAdd);
+		
+		autoAdd.setImageDescriptor(Activator.getImageDescriptor("icons/autoadd.png"));
+		getSite().getActionBars().getToolBarManager().add(autoAdd);
+		getSite().getActionBars().getToolBarManager().add(new Separator());
+		
+		return super.createActions(rightClick);
+	}
 	protected void createColumns(TableViewer viewer) {
 		
 		ColumnViewerToolTipSupport.enableFor(viewer,ToolTip.NO_RECREATE);
@@ -155,7 +195,7 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 					if (viewer!=null) viewer.refresh(bean);
 				}
 			}
-			getPlottingSystem().repaint();
+			((AbstractPlottingSystem)getPlottingSystem()).repaint(false);
 		} finally {
 			updatingAPlotAlready = false;
 		}
