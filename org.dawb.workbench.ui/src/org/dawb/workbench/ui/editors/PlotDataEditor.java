@@ -89,7 +89,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 	// This view is a composite of two other views.
 	private AbstractPlottingSystem      plottingSystem;	
 	private Collection<String>          dataNames;
-	private Map<String,ILazyDataset>    dataCache;
+	private Map<String,ILazyDataset>    dataCache; // TODO FIXME Do not need dataCache anymore, LoaderFactory does it!
 	private Composite                   tools;
 	private IMetaData                   metaData;
 	private PlotType                    defaultPlotType;
@@ -214,7 +214,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		final PlotDataComponent dataSetComponent = getDataSetComponent();
  		if (dataSetComponent!=null) {
 			for (CheckableObject set : dataSetComponent.getData()) {
-				if (dataSetComponent.getDimensionCount(set)==1)	{
+				if (dataSetComponent.getActiveDimensions(set, true)==1)	{
 					is1D=true;
 					break;
 				}
@@ -319,7 +319,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		try {
 			if (dataCache!=null&&dataCache.containsKey(name)) return (AbstractDataset)dataCache.get(name);
 			
-			final AbstractDataset set;
+			AbstractDataset set;
 			if (dataCache!=null) {
 				if (dataCache.isEmpty()) {
 					final DataHolder dh = LoaderFactory.getData(EclipseUtils.getFilePath(getEditorInput()), monitor);
@@ -329,6 +329,11 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 				
 			} else {
 				set = LoaderFactory.getDataSet(EclipseUtils.getFilePath(getEditorInput()), name, monitor);
+			}
+			try {
+			    set = set.squeeze();
+			} catch (Throwable ignored) {
+				// Leave set assigned as read
 			}
 
 			if (set!=null) set.setName(name);

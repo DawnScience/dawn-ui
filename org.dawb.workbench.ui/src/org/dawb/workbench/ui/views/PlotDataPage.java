@@ -169,7 +169,7 @@ public class PlotDataPage extends Page implements IPlotUpdateParticipant, IAdapt
 
 	@Override
 	public int getDimensionCount(CheckableObject checkableObject) {
-		return dataSetComponent.getDimensionCount(checkableObject);
+		return dataSetComponent.getActiveDimensions(checkableObject, true);
 	}
 
 	@Override

@@ -532,7 +532,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 				final CheckableObject sel = (CheckableObject)((IStructuredSelection)dataViewer.getSelection()).getFirstElement();
 				if (sel==null) return;
 				
-				if (getDimensionCount(sel)!=1) return; 
+				if (getActiveDimensions(sel, true)!=1) return; 
 				sel.setChecked(true);
 				
 				if (selections.contains(sel)) selections.remove(sel);
@@ -728,7 +728,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 				selections.remove(check);
 			} else {
 				// We only allow selection of one set not 1D
-				final int    dims = getDimensionCount(check);
+				final int    dims = getActiveDimensions(check, true);
 				if (dims!=1) { // Nothing else gets selected
 					PlotDataComponent.this.setAllChecked(false);
 					check.setChecked(true);
@@ -743,12 +743,12 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 			// 1D takes precidence
 			boolean is1D = false;
 			// We check selections to ensure that only n*1D or 1*2D+ are selected
-			for (CheckableObject set : selections) if (getDimensionCount(set)==1)	is1D=true;
+			for (CheckableObject set : selections) if (getActiveDimensions(set, true)==1)	is1D=true;
 
 			if (is1D) for (Iterator<CheckableObject> it = selections.iterator(); it.hasNext();) {
 				CheckableObject set = it.next();
 
-				if (getDimensionCount(set)!=1) {
+				if (getActiveDimensions(set, true)!=1) {
 					set.setChecked(false);
 					it.remove();
 				}
@@ -791,7 +791,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 		
 		selections.clear();
 		for (CheckableObject sel : data) {
-			if (getDimensionCount(sel)==1) {
+			if (getActiveDimensions(sel, true)==1) {
 				selections.add(sel);
 				sel.setChecked(true);
 			}
@@ -888,7 +888,13 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 			}
 			if (this.filePath==null) return null;
 			
-			return LoaderFactory.getDataSet(this.filePath, name, monitor);
+			AbstractDataset set = LoaderFactory.getDataSet(this.filePath, name, monitor);
+			try {
+			    set = set.squeeze();
+			} catch (Throwable ignored) {
+				// Leave set assigned as read
+			}
+			return set;
 			
 		} catch (IllegalArgumentException ie) {
 			return null;
@@ -998,7 +1004,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 				} 
 				return element.getExpression().getSize(new NullProgressMonitor())+"";
 			case 3:
-				return getDimensionCount(element)+"";
+				return getActiveDimensions(element, false)+"";
 			case 4:
 				if (!element.isExpression()) {
 					final String name = element.toString();
@@ -1065,12 +1071,13 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 		}
 	}
 
-	public int getDimensionCount(CheckableObject element) {
+	public int getActiveDimensions(CheckableObject element, boolean squeeze) {
 		
 		if (!element.isExpression()) {
 			final String name = element.getName();
 			if (metaData.getDataShapes()==null) {
 				final IDataset set = getDataSet(name, (IMonitor)null);
+				// Assuming it has been squeezed already
 				if (set!=null) {
 					return set.getShape().length;
 				}
@@ -1078,7 +1085,15 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 				
 			}
 			if (metaData.getDataShapes().get(name)!=null) {
-			    return metaData.getDataShapes().get(name).length;
+				final int[] shape = metaData.getDataShapes().get(name);
+				if (squeeze) {
+					int count = 0;
+					for (int i : shape) if (i>1) ++count;
+					if (count<1) count=1;
+				    return count;
+				} else {
+					return shape.length;
+				}
 			}
 		} 
 		return 1;
