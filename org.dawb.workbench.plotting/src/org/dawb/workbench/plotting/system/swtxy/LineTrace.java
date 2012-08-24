@@ -191,11 +191,11 @@ public class LineTrace extends Trace implements ITraceContainer {
                     if (dpInXRange  &&  valueIsNaN)
                     {
     					Point markPos = new Point(xAxis.getValuePosition(dp.getXValue(), false),
-    							yAxis.getValuePosition(xAxis.getTickLablesSide() == LabelSide.Primary?
+    							yAxis.getValuePosition(xAxis.getTickLabelSide() == LabelSide.Primary?
     									yAxis.getRange().getLower() : yAxis.getRange().getUpper(), false));
     					graphics.setBackgroundColor(traceColor);
     					graphics.fillRectangle(markPos.x -MARKER_SIZE/2, markPos.y - MARKER_SIZE/2, MARKER_SIZE, MARKER_SIZE);
-    					Sample nanSample = new Sample(dp.getXValue(),xAxis.getTickLablesSide() == LabelSide.Primary?
+    					Sample nanSample = new Sample(dp.getXValue(),xAxis.getTickLabelSide() == LabelSide.Primary?
     							yAxis.getRange().getLower() : yAxis.getRange().getUpper(),
     							dp.getYPlusError(), dp.getYMinusError(),
     							Double.NaN, dp.getXMinusError(), dp.getInfo());

@@ -67,7 +67,7 @@ public class AspectAxis extends Axis implements IAxis {
 		}		
 		
 		// y correction for companion axis
-		if (!isHorizontal() && getTickLablesSide() == LabelSide.Primary) { 
+		if (!isHorizontal() && getTickLabelSide() == LabelSide.Primary) { 
 			
 			// We have to ensure that our own ticks have been layed out
 			// because we use their size to set the location of the
