@@ -20,6 +20,10 @@ Export-Package: org.dawb.workbench.plotting.system,
  org.dawb.workbench.plotting.system.swtxy.selection,
  org.dawb.workbench.plotting.tools
 Import-Package: org.dawb.common.services,
+ org.dawb.workbench.plotting.tools,
+ org.dawb.workbench.plotting.util
+Import-Package: org.dawb.common.gpu,
+ org.dawb.common.services,
  org.dawb.common.ui.plot.region,
  org.dawb.common.util.text,
  org.eclipse.ui,
