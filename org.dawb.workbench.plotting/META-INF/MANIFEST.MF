@@ -24,7 +24,8 @@ Export-Package: org.dawb.workbench.plotting.system,
  org.dawb.workbench.plotting.system.dialog,
  org.dawb.workbench.plotting.system.swtxy,
  org.dawb.workbench.plotting.system.swtxy.selection,
- org.dawb.workbench.plotting.tools
+ org.dawb.workbench.plotting.tools,
+ org.dawb.workbench.plotting.util
 Import-Package: org.dawb.common.gpu,
  org.dawb.common.services,
  org.dawb.common.ui.plot.region,
