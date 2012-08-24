@@ -77,21 +77,11 @@ public class LightWeightDataProvider implements IDataProvider {
 	}
 	
 	private double getMin(AbstractDataset a) {
-		double min = Double.MAX_VALUE;
-		for (int i = 0; i < a.getSize(); i++) {
-			if (Double.isNaN(a.getElementDoubleAbs(i))) continue;
-			min = Math.min(min, a.getElementDoubleAbs(i));
-		}
-		return min;
+		return a.min(true).doubleValue();
 	}
 
 	private double getMax(AbstractDataset a) {
-		double max = -Double.MAX_VALUE;
-		for (int i = 0; i < a.getSize(); i++) {
-			if (Double.isNaN(a.getElementDoubleAbs(i))) continue;
-			max = Math.max(max, a.getElementDoubleAbs(i));
-		}
-		return max;
+		return a.max(true).doubleValue();
 	}
 	
 	@Override
