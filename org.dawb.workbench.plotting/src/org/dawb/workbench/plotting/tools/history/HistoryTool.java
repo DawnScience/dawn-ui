@@ -76,6 +76,7 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 		for (ITrace iTrace : traces) {
 			
 			if (iTrace.getUserObject()==HistoryType.HISTORY_PLOT) continue;
+			if (!iTrace.isUserTrace()) continue;
 			final ILineTrace lineTrace = (ILineTrace)iTrace;
 			final HistoryBean bean = new HistoryBean();
 			bean.setXdata(lineTrace.getXData());
