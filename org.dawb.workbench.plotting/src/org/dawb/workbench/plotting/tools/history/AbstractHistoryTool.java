@@ -16,14 +16,19 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.TableItem;
 
-abstract class AbstractHistoryTool extends AbstractToolPage implements MouseListener {
+abstract class AbstractHistoryTool extends AbstractToolPage implements MouseListener, KeyListener {
 
 	
 	protected enum HistoryType {
@@ -128,8 +133,19 @@ abstract class AbstractHistoryTool extends AbstractToolPage implements MouseList
 		viewer.setInput(new Object());
 
 		viewer.getTable().addMouseListener(this);
+		viewer.getTable().addKeyListener(this);
 	}
 	
+	public void keyPressed(KeyEvent e) {
+		if (e.character==SWT.DEL) {
+			deleteSelectedBean();
+		}
+	}
+	
+	public void keyReleased(KeyEvent e) {
+		
+	}
+
 	
 	/**
 	 * May be overridden to provide additional actions.
@@ -142,13 +158,7 @@ abstract class AbstractHistoryTool extends AbstractToolPage implements MouseList
 		
 		final Action deletePlot = new Action("Delete selected", Activator.getImageDescriptor("icons/delete.gif")) {
 			public void run() {
-				final HistoryBean bean = getSelectedPlot();
-				if (bean==null) return;
-				if (!bean.isModifiable()) return;
-				bean.setSelected(false);
-				updatePlot(bean);
-				getHistoryCache().remove(bean.getTraceKey());
-			    refresh();
+				deleteSelectedBean();
 			}
 		};
 		getSite().getActionBars().getToolBarManager().add(deletePlot);
@@ -168,6 +178,19 @@ abstract class AbstractHistoryTool extends AbstractToolPage implements MouseList
 		getSite().getActionBars().getToolBarManager().add(clearPlots);
 		rightClick.add(clearPlots);
 
+		rightClick.add(new Separator());
+		final Action checkAll = new Action("Select all") {
+			public void run() {
+				setAllChecked(true);
+			}
+		};
+		rightClick.add(checkAll);
+		final Action checkNone = new Action("Select none") {
+			public void run() {
+				setAllChecked(false);
+			}
+		};
+		rightClick.add(checkNone);
 		getSite().getActionBars().getToolBarManager().add(new Separator());
 		rightClick.add(new Separator());
 
@@ -184,6 +207,25 @@ abstract class AbstractHistoryTool extends AbstractToolPage implements MouseList
 		viewer.getControl().setMenu(menu);
 		
 		return rightClick;
+	}
+
+	protected void deleteSelectedBean() {
+		final HistoryBean bean = getSelectedPlot();
+		if (bean==null) return;
+		if (!bean.isModifiable()) return;
+		bean.setSelected(false);
+		updatePlot(bean);
+		getHistoryCache().remove(bean.getTraceKey());
+	    refresh();
+	}
+
+	protected void setAllChecked(boolean checked) {
+		for (HistoryBean bean : getHistoryCache().values()) {
+			if (!bean.isModifiable()) continue;
+			bean.setSelected(checked);
+		}
+		updatePlots();
+	    refresh();		
 	}
 
 	protected void clearCache() {
@@ -235,6 +277,7 @@ abstract class AbstractHistoryTool extends AbstractToolPage implements MouseList
 	public void dispose() {
 	    if (viewer!=null&&!viewer.getControl().isDisposed()) {
 	    	viewer.getControl().removeMouseListener(this);
+	    	viewer.getControl().removeKeyListener(this);
 	    }
 	    deactivate();
 		super.dispose();
@@ -250,7 +293,14 @@ abstract class AbstractHistoryTool extends AbstractToolPage implements MouseList
 	@Override
 	public void mouseDown(MouseEvent e) {
 		if (e.button==1) {
-			if (!viewer.isCellEditorActive() ) {
+			if (viewer.isCellEditorActive() ) return;
+			
+			// Toggle if first column clicked.
+			Point     pnt  = new Point(e.x, e.y);
+			TableItem item = viewer.getTable().getItem(pnt);
+	        if (item == null) return;
+            Rectangle rect = item.getBounds(0);
+            if (rect.contains(pnt)) {
 				toggleSelection();
 	        } 	          
 		}
