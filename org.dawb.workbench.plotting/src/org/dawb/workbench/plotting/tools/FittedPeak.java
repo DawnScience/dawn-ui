@@ -11,6 +11,8 @@ import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.TraceUtils;
+import org.dawb.workbench.plotting.Activator;
+import org.dawb.workbench.plotting.preference.FittingConstants;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
@@ -101,10 +103,10 @@ class FittedPeak {
 	}
 
 	public void activate() {
-		fwhm.setVisible(true);
-		center.setVisible(true);
-		trace.setVisible(true);
-		annotation.setVisible(true);
+		fwhm.setVisible(Activator.getDefault().getPreferenceStore().getBoolean(FittingConstants.SHOW_FWHM_SELECTIONS));
+		center.setVisible(Activator.getDefault().getPreferenceStore().getBoolean(FittingConstants.SHOW_PEAK_SELECTIONS));
+		trace.setVisible(Activator.getDefault().getPreferenceStore().getBoolean(FittingConstants.SHOW_FITTING_TRACE));
+		annotation.setVisible(Activator.getDefault().getPreferenceStore().getBoolean(FittingConstants.SHOW_ANNOTATION_AT_PEAK));
 	}
 	
 	public void deactivate() {
