@@ -2,6 +2,10 @@ package org.dawb.workbench.plotting.tools.profile;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
+
+import ncsa.hdf.object.Dataset;
+import ncsa.hdf.object.Group;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.axis.IAxis;
@@ -10,6 +14,9 @@ import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
+import org.dawb.gda.extensions.loaders.H5Utils;
+import org.dawb.hdf5.IHierarchicalDataFile;
+import org.dawb.hdf5.Nexus;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.SWT;
 
@@ -110,6 +117,40 @@ public class BoxProfileTool extends ProfileTool {
 	@Override
 	protected RegionType getCreateRegionType() {
 		return RegionType.BOX;
+	}
+
+	/**
+	 * Same tool called recursively from the DataReductionWizard
+	 */
+	@Override
+	public void export(IHierarchicalDataFile file, Group parent, AbstractDataset data) throws Exception {
+
+		final IImageTrace   image   = getImageTrace();
+		final Collection<IRegion> regions = getPlottingSystem().getRegions();
+		
+		for (IRegion region : regions) {
+			if (!isRegionTypeSupported(region.getRegionType())) continue;
+			
+			AbstractDataset[] box = ROIProfile.box(data, image.getMask(), (RectangularROI)region.getROI(), false);
+			
+			final AbstractDataset x_intensity = box[0];
+			x_intensity.setName("X_"+region.getName().replace(' ', '_'));
+		    appendDataset(file, parent, x_intensity);
+			
+			final AbstractDataset y_intensity = box[1];
+			y_intensity.setName("Y_"+region.getName().replace(' ', '_'));
+		    appendDataset(file, parent, y_intensity);
+		}
+		 
+
+	}
+
+	private void appendDataset(IHierarchicalDataFile file, Group parent,
+			                   AbstractDataset a) throws Exception {
+		
+		long[] shape = H5Utils.getLong(a.getShape());
+		Dataset s = file.appendDataset(a.getName(),  H5Utils.getDatatype(a), shape, a.getBuffer(), parent);
+		file.setNexusAttribute(s, Nexus.SDS);			
 	}
 
 }

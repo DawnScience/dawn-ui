@@ -29,19 +29,28 @@ import org.dawb.common.ui.plot.IPlottingSystemData;
 import org.dawb.common.ui.plot.IPlottingSystemSelection;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.axis.IAxis;
+import org.dawb.common.ui.plot.tool.IDataReductionToolPage;
+import org.dawb.common.ui.plot.tool.IToolPage;
+import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
+import org.dawb.common.ui.slicing.DimsDataList;
+import org.dawb.common.ui.slicing.ISlicablePlottingPart;
+import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.widgets.DoubleClickModifier;
 import org.dawb.common.util.io.FileUtils;
 import org.dawb.common.util.io.PropUtils;
 import org.dawb.common.util.io.SortingUtils;
 import org.dawb.common.util.list.SortNatural;
+import org.dawb.gda.extensions.loaders.H5Loader;
 import org.dawb.gda.extensions.util.DatasetTitleUtils;
+import org.dawb.workbench.plotting.tools.reduction.DataReductionWizard;
 import org.dawb.workbench.ui.Activator;
 import org.dawb.workbench.ui.editors.preference.EditorConstants;
 import org.dawb.workbench.ui.editors.preference.EditorPreferencePage;
 import org.dawb.workbench.ui.editors.slicing.ExpressionObject;
 import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -74,6 +83,7 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.ToolTip;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
@@ -401,6 +411,28 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 			}
 		});
 		menuManager.add(new Separator(getClass().getName()+"sep2"));
+		
+		final Action toolSliceWizard = new Action("Data reduction...") {
+			@Override
+			public void run() {
+				DataReductionWizard wiz=null;
+				try {
+					wiz = (DataReductionWizard)EclipseUtils.openWizard(DataReductionWizard.ID, false);
+				} catch (Exception e) {
+					logger.error("Cannot open wizard "+DataReductionWizard.ID, e);
+				}
+				wiz.setSource(getIFile());
+				wiz.setSelections(getSelectionNames());
+				wiz.setTool((IDataReductionToolPage)getTool());
+				wiz.setSliceData(getSliceData());
+				
+				WizardDialog wd = new  WizardDialog(Display.getCurrent().getActiveShell(), wiz);
+				wd.setTitle(wiz.getWindowTitle());
+				wd.open();
+			}
+		};
+		menuManager.add(toolSliceWizard);
+		menuManager.add(new Separator(getClass().getName()+"sep3"));
 		menuManager.add(new Action("Preferences...") {
 			@Override
 			public void run() {
@@ -408,8 +440,61 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 				if (pref != null) pref.open();
 			}
 		});
+		
+		menuManager.addMenuListener(new IMenuListener() {			
+			@Override
+			public void menuAboutToShow(IMenuManager manager) {
+				toolSliceWizard.setEnabled(isProfileToolActive());
+			}
+		});
 	}
 	
+	protected DimsDataList getSliceData() {
+		if (providerDeligate instanceof ISlicablePlottingPart) {
+			return ((ISlicablePlottingPart)providerDeligate).getSliceComponent().getDimsDataList();
+		}
+		return null;
+	}
+
+	protected IFile getIFile() {
+		if (providerDeligate instanceof IEditorPart) {
+			return (IFile)((IEditorPart)providerDeligate).getEditorInput().getAdapter(IFile.class);
+		}
+		return null;
+	}
+
+	protected List<String> getSelectionNames() {
+		final List<String> names = new ArrayList<String>(3);
+		for (CheckableObject ob : getSelections()) {
+			if (!ob.isExpression()) names.add(ob.getPath());
+		}
+		return names;
+	}
+
+	protected boolean isProfileToolActive() {
+		
+		if (H5Loader.isH5(getFileName())) {
+			IToolPage tool = getTool();
+			return tool!=null && tool instanceof IDataReductionToolPage;
+		}
+		return false;
+	}
+	
+	protected IToolPage getTool() {
+		AbstractPlottingSystem aps = getPlottingSystem();
+		if (aps!=null) {
+			IToolPage page=null;			
+			// TODO FIXME 3D ??
+			if (aps.is2D()) {
+				page = aps.getCurrentToolPage(ToolPageRole.ROLE_2D);
+			} else {
+				page = aps.getCurrentToolPage(ToolPageRole.ROLE_1D);
+			}
+			return page;
+		}
+		return null;
+	}
+
 	private void createColumns() {
 		
 		ColumnViewerToolTipSupport.enableFor(dataViewer,ToolTip.NO_RECREATE);

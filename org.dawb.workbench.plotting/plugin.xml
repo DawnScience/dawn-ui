@@ -277,6 +277,12 @@
             id="org.dawb.workbench.plotting.fittedPeaksExportWizard"
             name="Fitted Peaks">
       </wizard>
+      <wizard
+            class="org.dawb.workbench.plotting.tools.reduction.DataReductionWizard"
+            icon="icons/data-reduction.png"
+            id="org.dawb.workbench.plotting.dataReductionExportWizard"
+            name="Data Reduction">
+      </wizard>
    </extension>
 
 </plugin>

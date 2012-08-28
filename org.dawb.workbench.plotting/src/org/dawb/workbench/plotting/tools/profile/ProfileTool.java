@@ -17,6 +17,7 @@ import org.dawb.common.ui.plot.region.ROIEvent;
 import org.dawb.common.ui.plot.region.RegionEvent;
 import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
+import org.dawb.common.ui.plot.tool.IDataReductionToolPage;
 import org.dawb.common.ui.plot.tool.IToolPageSystem;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
@@ -43,7 +44,7 @@ import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
-public abstract class ProfileTool extends AbstractToolPage  implements IROIListener {
+public abstract class ProfileTool extends AbstractToolPage  implements IROIListener, IDataReductionToolPage {
 
 	private final static Logger logger = LoggerFactory.getLogger(ProfileTool.class);
 	
@@ -417,5 +418,12 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		}
 		
 		return getImageTrace().getData().getMetadata();
+	}
+	
+	/**
+	 * Used to tell if tool can be used with multiple slice 'Data Reduction' tool.
+	 */
+	public boolean isProfileTool() {
+		return true;
 	}
 }

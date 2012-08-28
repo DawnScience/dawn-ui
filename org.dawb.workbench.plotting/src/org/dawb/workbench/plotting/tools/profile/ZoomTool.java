@@ -2,11 +2,14 @@ package org.dawb.workbench.plotting.tools.profile;
 
 import java.util.Arrays;
 
+import ncsa.hdf.object.Group;
+
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
+import org.dawb.hdf5.IHierarchicalDataFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
@@ -112,5 +115,10 @@ public class ZoomTool extends ProfileTool {
 		} catch (Exception ne) {
 			return null;
 		}
+	}
+	
+	@Override
+	public void export(IHierarchicalDataFile file, Group parent, AbstractDataset data) throws Exception {
+        throw new Exception("Not implemented as yet!");
 	}
 }

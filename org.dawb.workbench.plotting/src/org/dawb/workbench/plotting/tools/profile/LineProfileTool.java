@@ -3,12 +3,15 @@ package org.dawb.workbench.plotting.tools.profile;
 import java.util.Arrays;
 import java.util.Collection;
 
+import ncsa.hdf.object.Group;
+
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
+import org.dawb.hdf5.IHierarchicalDataFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
@@ -80,4 +83,9 @@ public class LineProfileTool extends ProfileTool {
 		return RegionType.LINE;
 	}
 
+	
+	@Override
+	public void export(IHierarchicalDataFile file, Group parent, AbstractDataset data) throws Exception {
+        throw new Exception("Not implemented as yet!");
+	}
 }
