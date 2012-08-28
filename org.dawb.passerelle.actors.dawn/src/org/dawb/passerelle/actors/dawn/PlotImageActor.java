@@ -143,7 +143,10 @@ public class PlotImageActor	extends AbstractDataMessageTransformer{
 			double height = maxPos[1];
 			ROIBase myROI = new RectangularROI(width, height/2, 0);
 			
-			SDAPlotter.imagePlot(plotName, ((AbstractDataset)data.get(xaxisName)), ((AbstractDataset)data.get(yaxisName)), ((AbstractDataset)data.get(dataName)));
+			if(xaxisName.equals("")||(yaxisName.equals("")))
+				SDAPlotter.imagePlot(plotName, (AbstractDataset)data.get(dataName));
+			else
+				SDAPlotter.imagePlot(plotName, ((AbstractDataset)data.get(xaxisName)), ((AbstractDataset)data.get(yaxisName)), ((AbstractDataset)data.get(dataName)));
 			
 			// We plot the data to the image plot
 	//		SDAPlotter.imagePlot(plotName, data.get(0));
