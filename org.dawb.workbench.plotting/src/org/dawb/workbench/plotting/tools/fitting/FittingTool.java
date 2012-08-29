@@ -33,6 +33,7 @@ import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.common.ui.plot.trace.TraceUtils;
 import org.dawb.common.ui.util.EclipseUtils;
+import org.dawb.gda.extensions.loaders.H5Utils;
 import org.dawb.hdf5.IHierarchicalDataFile;
 import org.dawb.hdf5.Nexus;
 import org.dawb.workbench.plotting.Activator;
@@ -87,6 +88,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener, ID
 	
 	private Composite     composite;
 	private TableViewer   viewer;
+	private RectangularROI fitBounds;
 	private IRegion       fitRegion;
 	private FittingJob    fittingJob;
 	private FittedPeaks   fittedPeaks;
@@ -394,6 +396,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener, ID
 			final RectangularROI bounds = (RectangularROI) fitRegion.getROI();
 			if (fitRegion==null || bounds==null) return Status.CANCEL_STATUS;
 
+			setFitBounds(bounds);
 			getPlottingSystem().removeRegionListener(FittingTool.this);
 
 			composite.getDisplay().syncExec(new Runnable() {
@@ -452,10 +455,9 @@ public class FittingTool extends AbstractToolPage implements IRegionListener, ID
 	@Override
 	public IStatus export(IHierarchicalDataFile file, Group parent, AbstractDataset y, IProgressMonitor monitor) throws Exception {
 				
-		final ROIBase bounds = fitRegion.getROI();
-		if (!(bounds instanceof RectangularROI)) return Status.CANCEL_STATUS;
+		final RectangularROI roi = getFitBounds();
+		if (roi==null) return Status.CANCEL_STATUS;
 
-		final RectangularROI roi = (RectangularROI)bounds;
 		final double[] p1 = roi.getPointRef();
 		final double[] p2 = roi.getEndPoint();
 
@@ -472,11 +474,23 @@ public class FittingTool extends AbstractToolPage implements IRegionListener, ID
 				H5Datatype dType = new H5Datatype(Datatype.CLASS_FLOAT, 64/8, Datatype.NATIVE, Datatype.NATIVE);
 
 				final String peakName = "Peak"+index;
-				Dataset s = file.appendDataset(peakName,  dType,  new long[]{1},new double[]{fp.getPeakValue()}, parent);
+				Dataset s = file.appendDataset(peakName+"_fit",  dType,  new long[]{1},new double[]{fp.getPeakValue()}, parent);
 				file.setNexusAttribute(s, Nexus.SDS);			
 
-				s = file.appendDataset(peakName+"_position",  dType,  new long[]{1}, new double[]{fp.getPosition()}, parent);
+				s = file.appendDataset(peakName+"_xposition",  dType,  new long[]{1}, new double[]{fp.getPosition()}, parent);
 				file.setNexusAttribute(s, Nexus.SDS);
+				
+				s = file.appendDataset(peakName+"_fwhm",  dType,  new long[]{1}, new double[]{fp.getFWHM()}, parent);
+				file.setNexusAttribute(s, Nexus.SDS);
+				
+				s = file.appendDataset(peakName+"_area",  dType,  new long[]{1}, new double[]{fp.getArea()}, parent);
+				file.setNexusAttribute(s, Nexus.SDS);
+
+				final AbstractDataset[] pair = fp.getPeakFunctions();
+				AbstractDataset     function = pair[1];
+				s = file.appendDataset(peakName+"_function",  dType,  H5Utils.getLong(function.getShape()), function.getBuffer(), parent);
+				file.setNexusAttribute(s, Nexus.SDS);
+
 
 				++index;
 			}
@@ -966,5 +980,13 @@ public class FittingTool extends AbstractToolPage implements IRegionListener, ID
 		
 		return file.getAbsolutePath();
     }
+
+	public RectangularROI getFitBounds() {
+		return fitBounds;
+	}
+
+	public void setFitBounds(RectangularROI fitBounds) {
+		this.fitBounds = fitBounds;
+	}
 
 }
