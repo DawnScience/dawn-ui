@@ -102,7 +102,7 @@ public class DataReductionWizard extends Wizard implements IExportWizard {
 						 if (export.exists()) {
 							 export.delete(true, monitor);
 						 }
-						 monitor.beginTask("Running '"+getTool().getTitle()+"'", slices.size());
+						 monitor.beginTask("Running '"+getTool().getTitle()+"'", slices.size()*2);
 
 						 final IHierarchicalDataFile hf = HierarchicalDataFactory.getWriter(export.getLocation().toOSString());
 						 
