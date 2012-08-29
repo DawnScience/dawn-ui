@@ -129,6 +129,8 @@ public class BoxProfileTool extends ProfileTool {
 		
 		for (IRegion region : regions) {
 			if (!isRegionTypeSupported(region.getRegionType())) continue;
+			if (!region.isVisible())    continue;
+			if (!region.isUserRegion()) continue;
 			
 			AbstractDataset[] box = ROIProfile.box(data, image.getMask(), (RectangularROI)region.getROI(), false);
 			
