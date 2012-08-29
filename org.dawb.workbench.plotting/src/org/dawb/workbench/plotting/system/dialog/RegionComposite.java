@@ -22,8 +22,12 @@ import org.dawb.workbench.plotting.system.swtxy.RegionCoordinateSystem;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
 import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
 import org.eclipse.jface.preference.ColorSelector;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
@@ -57,6 +61,8 @@ public class RegionComposite extends Composite {
 
 	private CCombo symmetry;
 
+	private boolean isImplicit;
+
 	/**
 	 * Throws exception if not LightWeightPlottingSystem
 	 * 
@@ -66,10 +72,11 @@ public class RegionComposite extends Composite {
 	 * @param style
 	 * @param sys
 	 * @param defaultRegion
+	 * @param isImplicit
 	 */
-	public RegionComposite(final Composite parent, final int style, final AbstractPlottingSystem sys, final RegionType defaultRegion) {
+	public RegionComposite(final Composite parent, final int style, final AbstractPlottingSystem sys, final RegionType defaultRegion, final boolean isImplicit) {
      
-		this(parent,style, ((LightWeightPlottingSystem)sys).getGraph(), defaultRegion);
+		this(parent,style, ((LightWeightPlottingSystem)sys).getGraph(), defaultRegion, isImplicit);
 	}
 	
 	/**
@@ -78,10 +85,14 @@ public class RegionComposite extends Composite {
 	 * @param style
 	 * @param xyGraph
 	 * @param defaultRegion
+	 * @param isImplicit Flag to tell whether the RegionComposite is used in a specific window with an apply button or part of a view where the changes are implicit
 	 */
-	public RegionComposite(final Composite parent, final int style, final XYRegionGraph xyGraph, final RegionType defaultRegion) {
+	public RegionComposite(final Composite parent, final int style, final XYRegionGraph xyGraph, final RegionType defaultRegion, final boolean isImplicit) {
 		
 		super(parent, SWT.NONE);
+		
+		this.setImplicit(isImplicit);
+
 		this.xyGraph = xyGraph;
 		
 		setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -94,6 +105,15 @@ public class RegionComposite extends Composite {
 		nameText = new Text(this, SWT.BORDER | SWT.SINGLE);
 		nameText.setToolTipText("Region name");
 		nameText.setLayoutData(new GridData(SWT.FILL, 0, true, false));
+		if(isImplicit()){
+			nameText.addSelectionListener(new SelectionAdapter(){
+				@Override
+				public void widgetDefaultSelected(SelectionEvent e) {
+					AbstractSelectionRegion region = getEditingRegion();
+					region.repaint();
+				}
+			});
+		}
 		
 		final Label horiz = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
 		horiz.setLayoutData(new GridData(SWT.FILL, 0, true, false, 2, 1));
@@ -121,7 +141,15 @@ public class RegionComposite extends Composite {
 		colorSelector = new ColorSelector(this);
 		colorSelector.getButton().setLayoutData(new GridData());		
 		colorSelector.setColorValue(defaultRegion.getDefaultColor().getRGB());
-		
+		if(isImplicit()){
+			colorSelector.addListener(new IPropertyChangeListener() {
+				@Override
+				public void propertyChange(PropertyChangeEvent event) {
+					AbstractSelectionRegion region = getEditingRegion();
+					region.repaint();
+				}
+			});
+		}
 		
 		final Label horiz2 = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
 		horiz2.setLayoutData(new GridData(SWT.FILL, 0, true, false, 2, 1));
@@ -136,24 +164,59 @@ public class RegionComposite extends Composite {
 		alpha.setMinimum(0);
 		alpha.setMaximum(255);
 		alpha.setSelection(80);
+		if(isImplicit()){
+			alpha.addSelectionListener(new SelectionAdapter(){
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					AbstractSelectionRegion region = getEditingRegion();
+					region.repaint();
+				}
+			});
+		}
 
 		this.mobile = new Button(this, SWT.CHECK);
 		mobile.setText("   Mobile   ");		
 		mobile.setToolTipText("When true, this selection can be resized and moved around the graph.");
 		mobile.setLayoutData(new GridData(0, 0, false, false, 2, 1));
 		mobile.setSelection(true);
-		
+		if(isImplicit()){
+			mobile.addSelectionListener(new SelectionAdapter(){
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					AbstractSelectionRegion region = getEditingRegion();
+					region.repaint();
+				}
+			});
+		}
 		
 		this.showPoints = new Button(this, SWT.CHECK);
 		showPoints.setText("   Show vertex values");		
 		showPoints.setToolTipText("When on this will show the actual value of the point in the axes it was added.");
 		showPoints.setLayoutData(new GridData(0, 0, false, false, 2, 1));
+		if(isImplicit()){
+			showPoints.addSelectionListener(new SelectionAdapter(){
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					AbstractSelectionRegion region = getEditingRegion();
+					region.repaint();
+				}
+			});
+		}
 
 		this.visible = new Button(this, SWT.CHECK);
 		visible.setText("   Show region");		
 		visible.setToolTipText("You may turn off the visibility of this region.");
 		visible.setLayoutData(new GridData(0, 0, false, false, 2, 1));
 		visible.setSelection(true);
+		if(isImplicit()){
+			visible.addSelectionListener(new SelectionAdapter(){
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					AbstractSelectionRegion region = getEditingRegion();
+					region.repaint();
+				}
+			});
+		}
 		
 		
 		this.showLabel = new Button(this, SWT.CHECK);
@@ -161,6 +224,15 @@ public class RegionComposite extends Composite {
 		showLabel.setToolTipText("Turn on to show the name of a selection region.");
 		showLabel.setLayoutData(new GridData(0, 0, false, false, 2, 1));
 		showLabel.setSelection(true);
+		if(isImplicit()){
+			showLabel.addSelectionListener(new SelectionAdapter(){
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					AbstractSelectionRegion region = getEditingRegion();
+					region.repaint();
+				}
+			});
+		}
 		
 		this.symmetryLabel = new Label(this, SWT.NONE);
 		symmetryLabel.setText("Symmetry");		
@@ -362,5 +434,13 @@ public class RegionComposite extends Composite {
 
 	public void disposeRegion(AbstractSelectionRegion region) {
 		 xyGraph.disposeRegion(region);
+	}
+
+	public boolean isImplicit() {
+		return isImplicit;
+	}
+
+	public void setImplicit(boolean isImplicit) {
+		this.isImplicit = isImplicit;
 	}
 }
