@@ -11,9 +11,11 @@ import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
+import org.dawb.gda.extensions.loaders.H5Utils;
 import org.dawb.hdf5.IHierarchicalDataFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
@@ -87,6 +89,19 @@ public class LineProfileTool extends ProfileTool {
 	
 	@Override
 	public IStatus export(IHierarchicalDataFile file, Group parent, AbstractDataset data, IProgressMonitor monitor) throws Exception {
-        throw new Exception("Not implemented as yet!");
+		
+		final IImageTrace   image   = getImageTrace();
+		final Collection<IRegion> regions = getPlottingSystem().getRegions();
+		
+		for (IRegion region : regions) {
+			if (!isRegionTypeSupported(region.getRegionType())) continue;
+			
+			AbstractDataset[] profileData = ROIProfile.line(data, image.getMask(), (LinearROI)region.getROI(), 1d, false);
+			final AbstractDataset intensity = profileData[0];
+			intensity.setName(region.getName().replace(' ', '_'));
+			
+			H5Utils.appendDataset(file, parent, intensity);
+		}
+        return Status.OK_STATUS;
 	}
 }

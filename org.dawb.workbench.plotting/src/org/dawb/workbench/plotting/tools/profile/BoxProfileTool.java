@@ -3,7 +3,6 @@ package org.dawb.workbench.plotting.tools.profile;
 import java.util.Arrays;
 import java.util.Collection;
 
-import ncsa.hdf.object.Dataset;
 import ncsa.hdf.object.Group;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
@@ -15,7 +14,6 @@ import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.gda.extensions.loaders.H5Utils;
 import org.dawb.hdf5.IHierarchicalDataFile;
-import org.dawb.hdf5.Nexus;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
