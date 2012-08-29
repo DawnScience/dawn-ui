@@ -1,11 +1,18 @@
 package org.dawb.workbench.plotting.tools.profile;
 
+import java.util.Collection;
+
+import ncsa.hdf.object.Dataset;
 import ncsa.hdf.object.Group;
 
 import org.dawb.common.ui.plot.region.IRegion;
+import org.dawb.common.ui.plot.trace.IImageTrace;
+import org.dawb.gda.extensions.loaders.H5Utils;
 import org.dawb.hdf5.IHierarchicalDataFile;
+import org.dawb.hdf5.Nexus;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
@@ -63,6 +70,28 @@ public class AzimuthalProfileTool extends SectorProfileTool {
 
 	@Override
 	public IStatus export(IHierarchicalDataFile file, Group parent, AbstractDataset data, IProgressMonitor monitor) throws Exception {
-        throw new Exception("Not implemented as yet!");
+		
+		final IImageTrace   image   = getImageTrace();
+		final Collection<IRegion> regions = getPlottingSystem().getRegions();
+		
+		for (IRegion region : regions) {
+			if (!isRegionTypeSupported(region.getRegionType())) continue;
+			
+			final SectorROI sroi = (SectorROI)region.getROI();
+			final AbstractDataset[] profile = ROIProfile.sector(data, image.getMask(), sroi, false, true, false);
+		
+			AbstractDataset integral = profile[1];
+			integral.setName("azimuthal_"+region.getName().replace(' ', '_'));     
+			H5Utils.appendDataset(file, parent, integral);
+			
+		    if (profile.length>=4 && profile[3]!=null && sroi.hasSeparateRegions()) {
+				final AbstractDataset reflection = profile[3];
+				reflection.setName("azimuthal_sym_"+region.getName().replace(' ', '_'));     
+				H5Utils.appendDataset(file, parent, reflection);
+		    }
+		}
+		return Status.OK_STATUS;
 	}
+	
+
 }

@@ -136,22 +136,14 @@ public class BoxProfileTool extends ProfileTool {
 			
 			final AbstractDataset x_intensity = box[0];
 			x_intensity.setName("X_"+region.getName().replace(' ', '_'));
-		    appendDataset(file, parent, x_intensity);
+			H5Utils.appendDataset(file, parent, x_intensity);
 			
 			final AbstractDataset y_intensity = box[1];
 			y_intensity.setName("Y_"+region.getName().replace(' ', '_'));
-		    appendDataset(file, parent, y_intensity);
+			H5Utils.appendDataset(file, parent, y_intensity);
 		}
 		 
         return Status.OK_STATUS;
-	}
-
-	private void appendDataset(IHierarchicalDataFile file, Group parent,
-			                   AbstractDataset a) throws Exception {
-		
-		long[] shape = H5Utils.getLong(a.getShape());
-		Dataset s = file.appendDataset(a.getName(),  H5Utils.getDatatype(a), shape, a.getBuffer(), parent);
-		file.setNexusAttribute(s, Nexus.SDS);			
 	}
 
 }
