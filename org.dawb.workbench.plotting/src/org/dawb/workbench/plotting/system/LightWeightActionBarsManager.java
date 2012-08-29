@@ -209,9 +209,13 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 	
 	protected void createRegionActions() {
 		
+		
+		if (system.getActionBars()!=null && system.getActionBars().getToolBarManager()!=null)  {
+			system.getActionBars().getToolBarManager().add(new Separator("lightweight.graph.region.actions"));
+		}
 		final XYRegionGraph xyGraph     = system.getGraph();
 		
-        final MenuAction regionDropDown = new MenuAction("Add a selection region");
+        final MenuAction regionDropDown = new MenuAction("Selection region");
         regionDropDown.setId("org.dawb.workbench.ui.editors.plotting.swtxy.addRegions"); // Id used elsewhere...
  
 		regionDropDown.add(createRegionAction(RegionType.LINE,       regionDropDown, "Add line selection",     Activator.getImageDescriptor("icons/ProfileLine.png")));
@@ -224,11 +228,10 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 		regionDropDown.add(createRegionAction(RegionType.FREE_DRAW,  regionDropDown, "Free drawn selection",   Activator.getImageDescriptor("icons/ProfileFree.png")));
 		regionDropDown.add(createRegionAction(RegionType.POINT,      regionDropDown, "Single point selection", Activator.getImageDescriptor("icons/ProfilePoint.png")));
 		regionDropDown.add(createRegionAction(RegionType.ELLIPSEFIT, regionDropDown, "Ellipse fit selection",  Activator.getImageDescriptor("icons/ProfileEllipse.png")));
-
-		regionDropDown.setSelectedAction(regionDropDown.getAction(0));
 		
-		if (system.getActionBars()!=null) system.getActionBars().getToolBarManager().add(regionDropDown);
-		//if (system.getActionBars()!=null) system.getActionBars().getMenuManager().add(regionDropDown);
+		if (system.getActionBars()!=null && system.getActionBars().getMenuManager()!=null)  {
+			system.getActionBars().getMenuManager().add(regionDropDown);
+		}
 			
         final MenuAction removeRegionDropDown = new MenuAction("Delete selection region(s)");
         removeRegionDropDown.setId("org.dawb.workbench.ui.editors.plotting.swtxy.removeRegions");
@@ -281,8 +284,8 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 				return;
 			}
 		}
-		regionDropDown.setSelectedAction(action);	
-		regionDropDown.setChecked(true);
+		//regionDropDown.setSelectedAction(action);	
+		//regionDropDown.setChecked(true);
 	}
 	
 	private IAction createRegionAction(final RegionType type, final MenuAction regionDropDown, final String label, final ImageDescriptor icon) {
