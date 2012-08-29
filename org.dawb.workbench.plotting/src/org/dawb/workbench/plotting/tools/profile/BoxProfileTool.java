@@ -2,7 +2,6 @@ package org.dawb.workbench.plotting.tools.profile;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 
 import ncsa.hdf.object.Dataset;
 import ncsa.hdf.object.Group;
@@ -18,6 +17,8 @@ import org.dawb.gda.extensions.loaders.H5Utils;
 import org.dawb.hdf5.IHierarchicalDataFile;
 import org.dawb.hdf5.Nexus;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.SWT;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
@@ -123,7 +124,7 @@ public class BoxProfileTool extends ProfileTool {
 	 * Same tool called recursively from the DataReductionWizard
 	 */
 	@Override
-	public void export(IHierarchicalDataFile file, Group parent, AbstractDataset data) throws Exception {
+	public IStatus export(IHierarchicalDataFile file, Group parent, AbstractDataset data, IProgressMonitor monitor) throws Exception {
 
 		final IImageTrace   image   = getImageTrace();
 		final Collection<IRegion> regions = getPlottingSystem().getRegions();
@@ -142,7 +143,7 @@ public class BoxProfileTool extends ProfileTool {
 		    appendDataset(file, parent, y_intensity);
 		}
 		 
-
+        return Status.OK_STATUS;
 	}
 
 	private void appendDataset(IHierarchicalDataFile file, Group parent,

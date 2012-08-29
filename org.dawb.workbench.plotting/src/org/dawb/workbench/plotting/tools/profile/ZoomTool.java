@@ -11,6 +11,7 @@ import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.hdf5.IHierarchicalDataFile;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,7 +119,7 @@ public class ZoomTool extends ProfileTool {
 	}
 	
 	@Override
-	public void export(IHierarchicalDataFile file, Group parent, AbstractDataset data) throws Exception {
-        throw new Exception("Not implemented as yet!");
+	public IStatus export(IHierarchicalDataFile file, Group parent, AbstractDataset data, IProgressMonitor monitor) throws Exception {
+       throw new Exception("Not implemented as yet!");
 	}
 }

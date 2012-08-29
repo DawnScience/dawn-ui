@@ -9,6 +9,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import ncsa.hdf.object.Dataset;
+import ncsa.hdf.object.Datatype;
+import ncsa.hdf.object.Group;
+import ncsa.hdf.object.h5.H5Datatype;
+
 import org.dawb.common.ui.image.IconUtils;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
@@ -20,6 +25,7 @@ import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.RegionEvent;
 import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
+import org.dawb.common.ui.plot.tool.IDataReductionToolPage;
 import org.dawb.common.ui.plot.tool.IToolPage;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
@@ -27,6 +33,8 @@ import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.common.ui.plot.trace.TraceUtils;
 import org.dawb.common.ui.util.EclipseUtils;
+import org.dawb.hdf5.IHierarchicalDataFile;
+import org.dawb.hdf5.Nexus;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.FittingConstants;
 import org.dawb.workbench.plotting.preference.FittingPreferencePage;
@@ -65,13 +73,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
 import uk.ac.diamond.scisoft.analysis.rcp.plotting.IGuiInfoManager;
 import uk.ac.diamond.scisoft.analysis.rcp.views.PlotServerConnection;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
+import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
-public class FittingTool extends AbstractToolPage implements IRegionListener {
+public class FittingTool extends AbstractToolPage implements IRegionListener, IDataReductionToolPage {
 
 	private static final Logger logger = LoggerFactory.getLogger(FittingTool.class);
 	
@@ -437,6 +447,48 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 			schedule();
 		}
 	};
+	
+
+	@Override
+	public IStatus export(IHierarchicalDataFile file, Group parent, AbstractDataset y, IProgressMonitor monitor) throws Exception {
+				
+		final ROIBase bounds = fitRegion.getROI();
+		if (!(bounds instanceof RectangularROI)) return Status.CANCEL_STATUS;
+
+		final RectangularROI roi = (RectangularROI)bounds;
+		final double[] p1 = roi.getPointRef();
+		final double[] p2 = roi.getEndPoint();
+
+		AbstractDataset x  = IntegerDataset.arange(y.getSize(), AbstractDataset.INT32);
+
+		AbstractDataset[] a= FittingUtils.xintersection(x,y,p1[0],p2[0]);
+		x = a[0]; y=a[1];
+
+		try {
+			final FittedPeaks bean = FittingUtils.getFittedPeaks(x, y, monitor);
+			int index = 1;
+			for (FittedPeak fp : bean.getPeakList()) {
+
+				H5Datatype dType = new H5Datatype(Datatype.CLASS_FLOAT, 64/8, Datatype.NATIVE, Datatype.NATIVE);
+
+				final String peakName = "Peak"+index;
+				Dataset s = file.appendDataset(peakName,  dType,  new long[]{1},new double[]{fp.getPeakValue()}, parent);
+				file.setNexusAttribute(s, Nexus.SDS);			
+
+				s = file.appendDataset(peakName+"_position",  dType,  new long[]{1}, new double[]{fp.getPosition()}, parent);
+				file.setNexusAttribute(s, Nexus.SDS);
+
+				++index;
+			}
+
+		} catch (Exception ne) {
+			logger.error("Cannot fit peaks!", ne);
+			return Status.CANCEL_STATUS;
+		}
+		
+		return Status.OK_STATUS;
+	}
+
 
 	/**
 	 * Thread safe

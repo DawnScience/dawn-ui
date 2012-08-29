@@ -125,6 +125,10 @@ class FittedPeak {
 		}
 	}
 
+	public String getPositionName() {
+		return getPeakName().replace(' ', '_')+"_position";
+	}
+
 	public double getPosition() {
 		try {
 			return getPeak().getPosition();

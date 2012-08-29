@@ -13,6 +13,7 @@ import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.hdf5.IHierarchicalDataFile;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
@@ -85,7 +86,7 @@ public class LineProfileTool extends ProfileTool {
 
 	
 	@Override
-	public void export(IHierarchicalDataFile file, Group parent, AbstractDataset data) throws Exception {
+	public IStatus export(IHierarchicalDataFile file, Group parent, AbstractDataset data, IProgressMonitor monitor) throws Exception {
         throw new Exception("Not implemented as yet!");
 	}
 }

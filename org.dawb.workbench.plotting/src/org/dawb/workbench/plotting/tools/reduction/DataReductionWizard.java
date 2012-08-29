@@ -119,7 +119,7 @@ public class DataReductionWizard extends Wizard implements IExportWizard {
 								 slice.setName(path);
 
 								 final AbstractDataset set = SliceUtils.getSlice(slice, monitor);
-								 getTool().export(hf, group, set);
+								 getTool().export(hf, group, set, monitor);
 								 monitor.worked(1);
 								 
 								 if (monitor.isCanceled()) break;
