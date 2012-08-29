@@ -34,7 +34,7 @@ public class AddRegionDialog extends Dialog {
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		final Composite parent_composite = (Composite) super.createDialogArea(parent);
-        this.regionComposite = new RegionComposite(parent_composite, SWT.NONE, xyGraph, type);
+        this.regionComposite = new RegionComposite(parent_composite, SWT.NONE, xyGraph, type, false);
          
 		return parent_composite;
 	}

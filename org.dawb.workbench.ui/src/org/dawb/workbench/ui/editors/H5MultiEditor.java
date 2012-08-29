@@ -169,7 +169,9 @@ public class H5MultiEditor extends MultiPageEditorPart  implements ISlicablePlot
 	
 	@Override
 	public PlotDataComponent getDataSetComponent() {
-		return ((PlotDataEditor)getEditor(0)).getDataSetComponent();
+		if(getEditor(0) instanceof PlotDataEditor)
+			return ((PlotDataEditor)getEditor(0)).getDataSetComponent();
+		return null;
 	}
 	@Override
 	public SliceComponent getSliceComponent() {
