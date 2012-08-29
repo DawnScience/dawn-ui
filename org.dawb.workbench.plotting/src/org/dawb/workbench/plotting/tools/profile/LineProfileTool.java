@@ -95,6 +95,8 @@ public class LineProfileTool extends ProfileTool {
 		
 		for (IRegion region : regions) {
 			if (!isRegionTypeSupported(region.getRegionType())) continue;
+			if (!region.isVisible())    continue;
+			if (!region.isUserRegion()) continue;
 			
 			AbstractDataset[] profileData = ROIProfile.line(data, image.getMask(), (LinearROI)region.getROI(), 1d, false);
 			final AbstractDataset intensity = profileData[0];

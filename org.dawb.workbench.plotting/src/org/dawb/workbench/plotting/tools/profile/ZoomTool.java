@@ -1,6 +1,7 @@
 package org.dawb.workbench.plotting.tools.profile;
 
 import java.util.Arrays;
+import java.util.Collection;
 
 import ncsa.hdf.object.Group;
 
@@ -9,9 +10,11 @@ import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
+import org.dawb.gda.extensions.loaders.H5Utils;
 import org.dawb.hdf5.IHierarchicalDataFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -120,6 +123,27 @@ public class ZoomTool extends ProfileTool {
 	
 	@Override
 	public IStatus export(IHierarchicalDataFile file, Group parent, AbstractDataset data, IProgressMonitor monitor) throws Exception {
-       throw new Exception("Not implemented as yet!");
+
+		final Collection<IRegion> regions = getPlottingSystem().getRegions();
+		
+		for (IRegion region : regions) {
+			if (!isRegionTypeSupported(region.getRegionType())) continue;
+			
+			final RectangularROI bounds = (RectangularROI)region.getROI();
+			if (bounds==null)        continue;
+			if (!region.isVisible()) continue;
+
+			final int yInc = bounds.getPoint()[1]<bounds.getEndPoint()[1] ? 1 : -1;
+			final int xInc = bounds.getPoint()[0]<bounds.getEndPoint()[0] ? 1 : -1;
+			
+			final AbstractDataset slice = data.getSlice(new int[] { (int) bounds.getPoint()[1],   (int) bounds.getPoint()[0]    },
+											                       new int[] { (int) bounds.getEndPoint()[1],(int) bounds.getEndPoint()[0] },
+											                       new int[] {yInc, xInc});
+			slice.setName(region.getName().replace(' ','_'));
+			
+			H5Utils.appendDataset(file, parent, slice);
+		}
+        return Status.OK_STATUS;
+
 	}
 }

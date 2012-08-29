@@ -76,6 +76,8 @@ public class AzimuthalProfileTool extends SectorProfileTool {
 		
 		for (IRegion region : regions) {
 			if (!isRegionTypeSupported(region.getRegionType())) continue;
+			if (!region.isVisible())    continue;
+			if (!region.isUserRegion()) continue;
 			
 			final SectorROI sroi = (SectorROI)region.getROI();
 			final AbstractDataset[] profile = ROIProfile.sector(data, image.getMask(), sroi, false, true, false);

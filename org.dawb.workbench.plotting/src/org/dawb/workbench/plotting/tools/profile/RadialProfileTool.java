@@ -70,6 +70,8 @@ public class RadialProfileTool extends SectorProfileTool {
 		
 		for (IRegion region : regions) {
 			if (!isRegionTypeSupported(region.getRegionType())) continue;
+			if (!region.isVisible())    continue;
+			if (!region.isUserRegion()) continue;
 			
 			final SectorROI sroi = (SectorROI)region.getROI();
 			AbstractDataset[] profile = ROIProfile.sector(data, image.getMask(), sroi, true, false, false);
