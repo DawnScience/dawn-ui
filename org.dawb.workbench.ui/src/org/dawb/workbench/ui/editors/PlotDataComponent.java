@@ -30,9 +30,12 @@ import org.dawb.common.ui.plot.IPlottingSystemSelection;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.axis.IAxis;
 import org.dawb.common.ui.plot.tool.IDataReductionToolPage;
+import org.dawb.common.ui.plot.tool.IToolChangeListener;
 import org.dawb.common.ui.plot.tool.IToolPage;
 import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
+import org.dawb.common.ui.plot.tool.ToolChangeEvent;
 import org.dawb.common.ui.plot.trace.ITraceListener;
+import org.dawb.common.ui.plot.trace.ITraceListener.Stub;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.common.ui.slicing.DimsDataList;
 import org.dawb.common.ui.slicing.ISlicablePlottingPart;
@@ -146,6 +149,12 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 	private ArrayList<IAction>      dataComponentActions;
 	private Composite               container;
 	private DataFilter              dataFilter;
+
+	private IAction dataReduction;
+
+	private Stub traceListener;
+
+	private IToolChangeListener toolListener;
 	
 	public PlotDataComponent(final IPlottingSystemData providerDeligate) {
 				
@@ -267,15 +276,27 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 		setColumnVisible(5, 150, Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_VARNAME));
 	
 		try {
-			/**
-			 * No need to remove this one, the listeners are cleared on a dispose
-			 */
-			getPlottingSystem().addTraceListener(new ITraceListener.Stub() {
+
+			this.traceListener = new ITraceListener.Stub() {
 				@Override
 				public void tracesAltered(TraceEvent evt) {
 					updateSelection(true);
 				}
-			});
+			};
+			getPlottingSystem().addTraceListener(traceListener);
+			
+			if (dataReduction!=null) {
+				this.toolListener = new IToolChangeListener() {
+
+					@Override
+					public void toolChanged(ToolChangeEvent evt) {
+						if (dataReduction!=null) {
+							dataReduction.setEnabled(isDataReductionToolActive());
+						}
+					}
+				};
+				getPlottingSystem().addToolChangeListener(toolListener);
+			}
 			
 			getPlottingSystem().addPropertyChangeListener(new IPropertyChangeListener() {				
 				@Override
@@ -352,6 +373,11 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 	public void setFocus() {
 		if (dataViewer!=null && !dataViewer.getControl().isDisposed()) {
 			dataViewer.getControl().setFocus();
+			
+			if (dataReduction!=null) {
+				dataReduction.setEnabled(isDataReductionToolActive());
+			}
+
 		}
 	}
 
@@ -410,28 +436,33 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 				fireSelectionListeners(Collections.EMPTY_LIST);
 			}
 		});
-		menuManager.add(new Separator(getClass().getName()+"sep2"));
 		
-		final Action toolSliceWizard = new Action("Data reduction...") {
-			@Override
-			public void run() {
-				DataReductionWizard wiz=null;
-				try {
-					wiz = (DataReductionWizard)EclipseUtils.openWizard(DataReductionWizard.ID, false);
-				} catch (Exception e) {
-					logger.error("Cannot open wizard "+DataReductionWizard.ID, e);
+		if (H5Loader.isH5(getFileName())) {
+			menuManager.add(new Separator(getClass().getName()+"sep2"));
+			
+			this.dataReduction = new Action("Data reduction...", Activator.getImageDescriptor("icons/data-reduction.png")) {
+				@Override
+				public void run() {
+					DataReductionWizard wiz=null;
+					try {
+						wiz = (DataReductionWizard)EclipseUtils.openWizard(DataReductionWizard.ID, false);
+					} catch (Exception e) {
+						logger.error("Cannot open wizard "+DataReductionWizard.ID, e);
+					}
+					wiz.setSource(getIFile());
+					wiz.setSelections(getSelectionNames());
+					wiz.setTool((IDataReductionToolPage)getTool());
+					wiz.setSliceData(getSliceData());
+					
+					WizardDialog wd = new  WizardDialog(Display.getCurrent().getActiveShell(), wiz);
+					wd.setTitle(wiz.getWindowTitle());
+					wd.open();
 				}
-				wiz.setSource(getIFile());
-				wiz.setSelections(getSelectionNames());
-				wiz.setTool((IDataReductionToolPage)getTool());
-				wiz.setSliceData(getSliceData());
-				
-				WizardDialog wd = new  WizardDialog(Display.getCurrent().getActiveShell(), wiz);
-				wd.setTitle(wiz.getWindowTitle());
-				wd.open();
-			}
-		};
-		menuManager.add(toolSliceWizard);
+			};
+			dataReduction.setEnabled(false);
+			menuManager.add(dataReduction);
+		}
+		
 		menuManager.add(new Separator(getClass().getName()+"sep3"));
 		menuManager.add(new Action("Preferences...") {
 			@Override
@@ -444,9 +475,13 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 		menuManager.addMenuListener(new IMenuListener() {			
 			@Override
 			public void menuAboutToShow(IMenuManager manager) {
-				toolSliceWizard.setEnabled(isProfileToolActive());
+				dataReduction.setEnabled(isDataReductionToolActive());
 			}
 		});
+	}
+	
+	public IAction getDataReductionAction() {
+		return dataReduction;
 	}
 	
 	protected DimsDataList getSliceData() {
@@ -471,7 +506,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 		return names;
 	}
 
-	protected boolean isProfileToolActive() {
+	protected boolean isDataReductionToolActive() {
 		
 		if (H5Loader.isH5(getFileName())) {
 			IToolPage tool = getTool();
@@ -1206,6 +1241,12 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 		if (listeners!=null) listeners.clear();
 		if (data != null)       this.data.clear();
 		if (plotModeListeners!=null) plotModeListeners.clear();
+		if (getPlottingSystem()!=null&&traceListener!=null) {
+			getPlottingSystem().removeTraceListener(this.traceListener);
+		}
+		if (getPlottingSystem()!=null&&toolListener!=null) {
+			getPlottingSystem().removeToolChangeListener(this.toolListener);
+		}
 		if (dataViewer!=null && !dataViewer.getControl().isDisposed()) {
 			dataViewer.getTable().removeMouseListener(this);
 			dataViewer.getTable().removeKeyListener(this);

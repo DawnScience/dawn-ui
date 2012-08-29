@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -70,8 +71,14 @@ public class PlotDataPage extends Page implements IPlotUpdateParticipant, IAdapt
 		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		this.dataSetComponent = new PlotDataComponent(editor);		
+		dataSetComponent.setFileName(editor.getEditorInput().getName());
 		dataSetComponent.createPartControl(form);
 		
+		if (dataSetComponent.getDataReductionAction()!=null) {
+			getSite().getActionBars().getToolBarManager().add(dataSetComponent.getDataReductionAction());
+			getSite().getActionBars().getToolBarManager().add(new Separator("data.reduction.separator"));
+		}
+
 		final List<IAction> extras = new ArrayList<IAction>(7);
 		extras.addAll(dataSetComponent.getDimensionalActions());
 		for (IAction iAction : extras) {
@@ -84,7 +91,7 @@ public class PlotDataPage extends Page implements IPlotUpdateParticipant, IAdapt
 			}
 		}
 		getSite().setSelectionProvider(dataSetComponent.getViewer());
-		
+				
 		dataSetComponent.addSelectionListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(final SelectionChangedEvent event) {
@@ -97,7 +104,6 @@ public class PlotDataPage extends Page implements IPlotUpdateParticipant, IAdapt
 		});
 		
 		try {
-			dataSetComponent.setFileName(editor.getEditorInput().getName());
 			
 			
 			IWorkspace workspace = ResourcesPlugin.getWorkspace();
