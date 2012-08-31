@@ -66,7 +66,7 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 		setOpaque(false);
 		setCursor(null);
 		this.bean = new RegionBean();
-		bean.setName(name);
+		setName(name);
 		co.addCoordinateSystemListener(this);
 		bean.setCoordinateSystem(co);
 		this.coords = co;
@@ -172,10 +172,10 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	}
 
 	protected void drawLabel(Graphics gc, Rectangle size) {
-		if (isShowLabel()&&getName()!=null) {
+		if (isShowLabel() && label!=null) {
 			gc.setAlpha(255);
 			gc.setForegroundColor(ColorConstants.black);
-			gc.drawText(getName(), size.getCenter());
+			gc.drawText(label, size.getCenter());
 		}
 	}
 
@@ -226,6 +226,8 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	
 	public void setName(String name) {
 		bean.setName(name);
+		if (label==null)
+			setLabel(name);
 	}
 
 

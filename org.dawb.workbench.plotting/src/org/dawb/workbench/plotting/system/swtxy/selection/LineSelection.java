@@ -10,8 +10,6 @@ import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.FigureListener;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.Label;
-import org.eclipse.draw2d.PositionConstants;
 import org.eclipse.draw2d.UpdateManager;
 import org.eclipse.draw2d.geometry.Geometry;
 import org.eclipse.draw2d.geometry.Point;
@@ -51,6 +49,7 @@ class LineSelection extends AbstractSelectionRegion {
 		setRegionColor(ColorConstants.cyan);
 		setAlpha(80);
 		setLineWidth(2);
+		labelColour = ColorConstants.black;
 	}
 
 	@Override
@@ -100,10 +99,15 @@ class LineSelection extends AbstractSelectionRegion {
 				gc.drawLine(startCenter, endCenter);
 				if (start2!= null && end2 != null)
 					gc.drawLine(start2, end2);
-				LineSelection.this.drawLabel(gc, bounds);
-				if (label != null) {
-					label.setLocation(new Point(startCenter));
+
+				// Draw the label
+				if (isShowLabel() && label!=null) {
+					gc.setAlpha(255);
+					gc.setForegroundColor(ColorConstants.black);
+					gc.setFont(labelFont);
+					gc.drawText(label, startCenter);
 				}
+
 			}
 
 			@Override
@@ -122,8 +126,6 @@ class LineSelection extends AbstractSelectionRegion {
 		parent.add(connection);
 		parent.add(startBox);
 		parent.add(endBox);
-		if (label != null)
-			parent.add(label);
 				
 		final FigureListener figListener = createFigureListener();
 		startBox.addFigureListener(figListener);
@@ -131,10 +133,7 @@ class LineSelection extends AbstractSelectionRegion {
 		
 		mover = new FigureTranslator(getXyGraph(), parent, connection, Arrays.asList(new IFigure[]{startBox,endBox}));
 		mover.addTranslationListener(createRegionNotifier());
-		if (label != null)
-			setRegionObjects(connection, startBox, endBox, label);
-		else
-			setRegionObjects(connection, startBox, endBox);
+		setRegionObjects(connection, startBox, endBox);
 		sync(getBean());
         updateROI();
         if (roi == null) createROI(true);
@@ -204,11 +203,8 @@ class LineSelection extends AbstractSelectionRegion {
 				if (!connection.getParent().getChildren().contains(endBox2)) {
 					connection.getParent().add(endBox2);
 				}
-				if (label != null)
-					setRegionObjects(connection, startBox, endBox, startBox2, endBox2, label);
-				else
-					setRegionObjects(connection, startBox, endBox, startBox2, endBox2);
-				
+				setRegionObjects(connection, startBox, endBox, startBox2, endBox2);
+
 				FigureTranslator mover = new FigureTranslator(getXyGraph(), startBox2);
 				mover.addTranslationListener(createRegionNotifier());
 
@@ -243,14 +239,6 @@ class LineSelection extends AbstractSelectionRegion {
 			// We intentionally allow the code to continue without the UpdateManager
 		}
 
-		if (label != null && labeldim != null) {
-			Point pos1 = label.getLocation();
-			Point pos2 = new Point(pos1.x + labeldim.width + 10, pos1.y + labeldim.height + 10);
-			Rectangle r = new Rectangle(pos1, pos2);
-			label.setBounds(r);
-			if (updateMgr!=null) updateMgr.addDirtyRegion(label, r);
-		}
-		
 		connection.setBounds(bounds);
 		if (updateMgr!=null) updateMgr.addDirtyRegion(connection, bounds);
 	}
@@ -283,6 +271,12 @@ class LineSelection extends AbstractSelectionRegion {
 			bounds  = new Rectangle(new Point(startx, starty), new Point(endx, endy));
 		}
 			
+		// Union with the label bounds
+		Point pos1 = startBox.getSelectionPoint();
+		Point pos2 = new Point(pos1.x + labeldim.width + 10, pos1.y + labeldim.height + 10);
+		Rectangle r = new Rectangle(pos1, pos2);
+		bounds = bounds.union(r);
+		
 		if (bounds.height<MIN_BOUNDS) bounds.height=MIN_BOUNDS;
 		if (bounds.width <MIN_BOUNDS) bounds.width=MIN_BOUNDS;
 		return bounds;
@@ -309,24 +303,5 @@ class LineSelection extends AbstractSelectionRegion {
 	@Override
 	public int getMaximumMousePresses() {
 		return 2;
-	}
-	
-	@Override
-	public void setLabel(Label label) {
-		if (connection != null) {
-			if (connection.getParent() != null) {
-				if (this.label != null)
-					connection.getParent().remove(this.label);
-				connection.getParent().add(label);
-			}
-		}
-		super.setLabel(label);
-		label.setLabelAlignment(PositionConstants.LEFT);
-		label.setTextAlignment(PositionConstants.LEFT);
-
-		if (startBox2 != null && endBox2 != null)
-			setRegionObjects(connection, startBox, endBox, startBox2, endBox2, label);
-		else
-			setRegionObjects(connection, startBox, endBox, label);
 	}
 }
