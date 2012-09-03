@@ -1054,9 +1054,9 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 			axis.setOrientation(Orientation.HORIZONTAL);
 		}
 		if (side==SWT.LEFT||side==SWT.BOTTOM) {
-		    axis.setTickLableSide(LabelSide.Primary);
+		    axis.setTickLabelSide(LabelSide.Primary);
 		} else {
-			axis.setTickLableSide(LabelSide.Secondary);
+			axis.setTickLabelSide(LabelSide.Secondary);
 		}
 		axis.setAutoScaleThreshold(0.1);
 		axis.setShowMajorGrid(true);
