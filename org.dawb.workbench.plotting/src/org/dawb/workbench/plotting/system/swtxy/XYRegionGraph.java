@@ -288,7 +288,7 @@ public class XYRegionGraph extends XYGraph {
 	
 	public void addAnnotation(final Annotation annotation){
 		
-		annotation.setLabelProvder(new IAnnotationLabelProvider() {		
+		annotation.setLabelProvider(new IAnnotationLabelProvider() {		
 			@Override
 			public String getInfoText(double xValue, double yValue) {
 				if (getRegionArea().getImageTrace()==null) return null;
