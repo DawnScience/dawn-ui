@@ -1,24 +1,30 @@
+/*
+ * Copyright (c) 2012 European Synchrotron Radiation Facility,
+ *                    Diamond Light Source Ltd.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */ 
+
 package org.dawb.passerelle.actors.dawn;
 
-import java.beans.XMLEncoder;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
 import org.dawb.passerelle.common.actors.AbstractDataMessageTransformer;
-import org.dawb.passerelle.common.actors.ActorUtils;
 import org.dawb.passerelle.common.message.DataMessageComponent;
 import org.dawb.passerelle.common.message.MessageUtils;
 import org.dawb.passerelle.common.parameter.roi.ROIParameter;
 
-import ptolemy.data.expr.Parameter;
 import ptolemy.data.expr.StringParameter;
 import ptolemy.kernel.CompositeEntity;
 import ptolemy.kernel.util.IllegalActionException;
 import ptolemy.kernel.util.NameDuplicationException;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
-import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.ROIProfile;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
@@ -27,6 +33,10 @@ import com.isencia.passerelle.actor.ProcessingException;
 
 public class RegionNormaliseActor extends AbstractDataMessageTransformer {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 813882139346261410L;
 	public ROIParameter normalisationROI;
 	public StringParameter roiName;
 	public StringParameter datasetName;
