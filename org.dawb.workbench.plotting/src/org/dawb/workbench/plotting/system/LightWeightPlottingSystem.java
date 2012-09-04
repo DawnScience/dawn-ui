@@ -26,7 +26,6 @@ import org.csstudio.swt.xygraph.figures.Trace;
 import org.csstudio.swt.xygraph.figures.Trace.PointStyle;
 import org.csstudio.swt.xygraph.figures.XYGraphFlags;
 import org.csstudio.swt.xygraph.linearscale.AbstractScale.LabelSide;
-import org.csstudio.swt.xygraph.linearscale.LinearScale.Orientation;
 import org.csstudio.swt.xygraph.undo.AddAnnotationCommand;
 import org.csstudio.swt.xygraph.undo.RemoveAnnotationCommand;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
@@ -1048,11 +1047,6 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		if (xyGraph==null) createUI();
 			
 		AspectAxis axis = new AspectAxis(title, isYAxis);
-		if (isYAxis) {
-			axis.setOrientation(Orientation.VERTICAL);
-		} else {
-			axis.setOrientation(Orientation.HORIZONTAL);
-		}
 		if (side==SWT.LEFT||side==SWT.BOTTOM) {
 		    axis.setTickLabelSide(LabelSide.Primary);
 		} else {

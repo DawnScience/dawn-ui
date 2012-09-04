@@ -13,7 +13,6 @@ import org.csstudio.swt.xygraph.figures.PlotArea;
 import org.csstudio.swt.xygraph.figures.Trace;
 import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.swt.xygraph.linearscale.AbstractScale.LabelSide;
-import org.csstudio.swt.xygraph.linearscale.LinearScale.Orientation;
 import org.dawb.common.services.ImageServiceBean.ImageOrigin;
 import org.dawb.common.ui.plot.axis.IAxis;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
@@ -41,13 +40,11 @@ public class XYRegionGraph extends XYGraph {
 		removeAxis(primaryYAxis);
 		
 		primaryYAxis = new AspectAxis("Y-Axis", true);
-		primaryYAxis.setOrientation(Orientation.VERTICAL);
 		primaryYAxis.setTickLabelSide(LabelSide.Primary);
 		primaryYAxis.setAutoScaleThreshold(0.1);
 		addAxis(primaryYAxis);
 
 		primaryXAxis = new AspectAxis("X-Axis", false);
-		primaryXAxis.setOrientation(Orientation.HORIZONTAL);
 		primaryXAxis.setTickLabelSide(LabelSide.Primary);
 		addAxis(primaryXAxis);
 
