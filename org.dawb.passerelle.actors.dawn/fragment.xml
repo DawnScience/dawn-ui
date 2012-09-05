@@ -32,6 +32,12 @@
             id="org.dawb.passerelle.actors.dawn.customscalar"
             name="Custom Scalar">
       </actor>
+      <actor
+            class="org.dawb.passerelle.actors.dawn.RegionSelectAndScale"
+            group="org.dawb.passerelle.actors.dawn.plottinggroup"
+            id="org.dawb.passerelle.actors.dawn.regionSelectandScale"
+            name="Region Select and Scale">
+      </actor>
    </extension>
 
 </fragment>
