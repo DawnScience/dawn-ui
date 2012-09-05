@@ -20,10 +20,13 @@ import org.dawb.passerelle.common.message.IVariable.VARIABLE_TYPE;
 import org.dawb.passerelle.common.message.MessageUtils;
 import org.dawb.passerelle.common.message.Variable;
 
+import ptolemy.data.DoubleToken;
+import ptolemy.data.FloatToken;
 import ptolemy.data.IntToken;
 import ptolemy.data.StringToken;
 import ptolemy.data.expr.Parameter;
 import ptolemy.data.expr.StringParameter;
+import ptolemy.data.Token;
 import ptolemy.kernel.CompositeEntity;
 import ptolemy.kernel.util.Attribute;
 import ptolemy.kernel.util.IllegalActionException;
@@ -79,7 +82,7 @@ public class ScalarActor extends AbstractDataMessageSource {
 		registerConfigurableParameter(nameParam);
 
 		valueParam = new Parameter(this, "Value");
-		valueParam.setExpression("1");
+		valueParam.setExpression("1.0");
 		valueParam.setDisplayName("Scalar Value");
 		registerConfigurableParameter(valueParam);
 
@@ -165,7 +168,15 @@ public class ScalarActor extends AbstractDataMessageSource {
 	public List<IVariable> getOutputVariables() {
 		try {
 			final String strName  = ((StringToken) nameParam.getToken()).stringValue();
-			final String strValue = ((IntToken)valueParam.getToken()).toString();//;..stringValue();
+			String strValue = "";
+			Token tok = valueParam.getToken();
+			if(tok instanceof IntToken){
+				strValue = ((IntToken)valueParam.getToken()).toString();
+			}else if(tok instanceof DoubleToken){
+				strValue = ((DoubleToken)valueParam.getToken()).toString();
+			}else if(tok instanceof FloatToken){
+				strValue = ((FloatToken)valueParam.getToken()).toString();
+			}
 		    final List<IVariable> ret = new ArrayList<IVariable>(1);
 		    ret.add(new Variable(strName, VARIABLE_TYPE.SCALAR, strValue, String.class));
 		    return ret;
