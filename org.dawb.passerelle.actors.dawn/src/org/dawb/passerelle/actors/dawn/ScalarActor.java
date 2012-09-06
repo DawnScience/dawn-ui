@@ -36,9 +36,6 @@ import com.isencia.passerelle.actor.InitializationException;
 import com.isencia.passerelle.actor.ProcessingException;
 import com.isencia.passerelle.message.ManagedMessage;
 
-//////////////////////////////////////////////////////////////////////////
-//// Scalar
-
 /**
  * Sends a scalar message once on each output port.
  */
@@ -47,17 +44,14 @@ public class ScalarActor extends AbstractDataMessageSource {
 	
 	private static org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ScalarActor.class);
 
-    /**
-	 * 
-	 */
 	private static final long serialVersionUID = 6530803848861756427L;
 	
 	/** The value produced by this constant source.
 	 *  By default, it contains an StringToken with an empty string.  
 	 */
-	public  Parameter        valueParam,nameParam,minParam, maxParam;
+	public  Parameter        valueParam,nameParam,minParam, maxParam, decimalParam;
 	@SuppressWarnings("unused")
-	private String           strName, strValue, strMin, strMax;
+	private String           strName, strValue, strMin, strMax, strDecimal;
 	private List<Float> valueQueue;
 	
 	protected boolean firedStringValueAlready;
@@ -96,6 +90,10 @@ public class ScalarActor extends AbstractDataMessageSource {
 		maxParam.setDisplayName("Max Value");
 		registerConfigurableParameter(maxParam);
 
+		decimalParam = new Parameter(this, "Decimal");
+		decimalParam.setExpression("3");
+		decimalParam.setDisplayName("Number of decimal digits");
+		registerConfigurableParameter(decimalParam);
 	}
 
 	/**
@@ -111,6 +109,8 @@ public class ScalarActor extends AbstractDataMessageSource {
 			strMin = minParam.getExpression();
 		}else if (attribute == maxParam) {
 			strMax = maxParam.getExpression();
+		}else if (attribute == decimalParam) {
+			strDecimal = decimalParam.getExpression();
 		}
 		super.attributeChanged(attribute);
 	}
@@ -173,7 +173,9 @@ public class ScalarActor extends AbstractDataMessageSource {
 			if(tok instanceof IntToken){
 				strValue = ((IntToken)valueParam.getToken()).toString();
 			}else if(tok instanceof DoubleToken){
-				strValue = ((DoubleToken)valueParam.getToken()).toString();
+				//strValue = ((DoubleToken)valueParam.getToken()).toString();
+				strValue = setDecimal(tok, Integer.valueOf(decimalParam.getExpression()));
+				valueParam.setExpression(strValue);
 			}else if(tok instanceof FloatToken){
 				strValue = ((FloatToken)valueParam.getToken()).toString();
 			}
@@ -196,4 +198,27 @@ public class ScalarActor extends AbstractDataMessageSource {
 		return false;
 	}
 
+	private String setDecimal(Token token, int decimal) throws IllegalActionException{
+		String result = null;
+	
+		if(token instanceof DoubleToken){
+			double flt = ((DoubleToken)valueParam.getToken()).doubleValue();
+			String strDouble = String.valueOf(flt);
+			String str[] = strDouble.split("\\.");
+			
+			String integer = str[0];
+			String dec = str[1];
+			if(dec.length()<decimal){
+				for(int i=0;i<decimal-dec.length()+1;i++){
+					dec = dec.concat("0");
+				}
+			}
+			dec = dec.substring(0, decimal);
+			
+			result = integer+"."+dec;
+			
+		}
+		
+		return result;
+	}
 }
