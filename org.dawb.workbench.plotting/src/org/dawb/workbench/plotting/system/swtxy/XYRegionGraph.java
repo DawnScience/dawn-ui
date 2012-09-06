@@ -237,8 +237,8 @@ public class XYRegionGraph extends XYGraph {
 	 */
 	public void setZoomLevel(MouseEvent evt, double delta) {
 		
-		int primX = primaryXAxis.getLength() - primaryXAxis.getMargin();
-		int primY = primaryYAxis.getLength() - primaryYAxis.getMargin();
+		int primX = primaryXAxis.getTickLength();
+		int primY = primaryYAxis.getTickLength();
 		double xScale = delta;
 		double yScale = delta;	
 
