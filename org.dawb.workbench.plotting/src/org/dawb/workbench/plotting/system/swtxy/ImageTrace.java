@@ -89,7 +89,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		
 		xAxis.addListener(this);
 		yAxis.addListener(this);
-		
+
+		xAxis.setTicksAtEnds(false);
+		yAxis.setTicksAtEnds(false);
+
 		if (xAxis instanceof AspectAxis && yAxis instanceof AspectAxis) {
 			
 			AspectAxis x = (AspectAxis)xAxis;
@@ -479,6 +482,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		if (getParent()!=null) getParent().remove(this);
 		xAxis.removeListener(this);
 		yAxis.removeListener(this);
+		xAxis.setTicksAtEnds(true);
+		yAxis.setTicksAtEnds(true);
 		axisRedrawActive = false;
 		imageServiceBean.dispose();
 		if (this.scaledImage!=null && !scaledImage.isDisposed()) scaledImage.dispose();
