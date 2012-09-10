@@ -116,4 +116,28 @@ public class NullPeak implements IPeak {
 		return 0;
 	}
 
+	@Override
+	public String getDescription() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setDescription(String newDescription) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public String getParameterName(int index) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setParameterName(String name, int index) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
