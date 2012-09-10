@@ -73,7 +73,7 @@ public class FunctionActor extends AbstractDataMessageSource {
 		registerConfigurableParameter(nameParam);
 
 		functionParam = new FunctionParameter(this, "Function");
-		functionParam.setFunction(new Fermi(0,0,0,0));// We default it so that something runs.
+		//functionParam.setFunction(new Fermi(0,0,0,0));// We default it so that something runs.
 		registerConfigurableParameter(functionParam);
 		
 	}
