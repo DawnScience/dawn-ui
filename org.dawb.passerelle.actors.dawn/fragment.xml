@@ -38,6 +38,14 @@
             id="org.dawb.passerelle.actors.dawn.regionSelectandScale"
             name="Region Select and Scale">
       </actor>
+      <actor
+            class="org.dawb.passerelle.actors.dawn.FunctionActor"
+            figureCustomizer="org.dawb.passerelle.actors.data.MathCustomizer"
+            group="org.dawb.passerelle.actors.actorgroup.maths"
+            icon="icons/fx16x16.png"
+            id="org.dawb.passerelle.actors.dawn.function"
+            name="Function">
+      </actor>
    </extension>
 
 </fragment>
