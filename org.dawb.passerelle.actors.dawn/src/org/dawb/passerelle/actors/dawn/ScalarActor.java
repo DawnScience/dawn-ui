@@ -80,15 +80,15 @@ public class ScalarActor extends AbstractDataMessageSource {
 		valueParam.setDisplayName("Scalar Value");
 		registerConfigurableParameter(valueParam);
 
-		minParam = new Parameter(this, "Min");
-		minParam.setExpression("0");
-		minParam.setDisplayName("Min Value");
-		registerConfigurableParameter(minParam);
-
-		maxParam = new Parameter(this, "Max");
-		maxParam.setExpression("1000");
-		maxParam.setDisplayName("Max Value");
-		registerConfigurableParameter(maxParam);
+//		minParam = new Parameter(this, "Min");
+//		minParam.setExpression("0");
+//		minParam.setDisplayName("Min Value");
+//		registerConfigurableParameter(minParam);
+//
+//		maxParam = new Parameter(this, "Max");
+//		maxParam.setExpression("1000");
+//		maxParam.setDisplayName("Max Value");
+//		registerConfigurableParameter(maxParam);
 
 		decimalParam = new Parameter(this, "Decimal");
 		decimalParam.setExpression("3");
@@ -105,10 +105,10 @@ public class ScalarActor extends AbstractDataMessageSource {
 			strName = nameParam.getExpression();
 		}else if (attribute == valueParam) {
 			strValue = valueParam.getExpression();
-		}else if (attribute == minParam) {
-			strMin = minParam.getExpression();
-		}else if (attribute == maxParam) {
-			strMax = maxParam.getExpression();
+//		}else if (attribute == minParam) {
+//			strMin = minParam.getExpression();
+//		}else if (attribute == maxParam) {
+//			strMax = maxParam.getExpression();
 		}else if (attribute == decimalParam) {
 			strDecimal = decimalParam.getExpression();
 		}
