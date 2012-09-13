@@ -27,6 +27,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Maths;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.ROIProfile;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
@@ -42,6 +43,7 @@ public class RegionSelectAndScale extends AbstractDataMessageTransformer {
 	public StringParameter energies;
 	public StringParameter photonEnergyNameParam;
 	public StringParameter workFunctionNameParam;
+	public StringParameter correctionFunctionNameParam;
 
 
 	public RegionSelectAndScale(CompositeEntity container, String name)
@@ -54,9 +56,9 @@ public class RegionSelectAndScale extends AbstractDataMessageTransformer {
 		registerConfigurableParameter(roiName);
 		datasetName = new StringParameter(this, "datasetName");
 		registerConfigurableParameter(datasetName);
-		anglesAxisAdjustName = new StringParameter(this, "xAxisAdjustName");
+		anglesAxisAdjustName = new StringParameter(this, "anglesAxisAdjustName");
 		registerConfigurableParameter(anglesAxisAdjustName);
-		energyAxisAdjustName = new StringParameter(this, "yAxisAdjustName");
+		energyAxisAdjustName = new StringParameter(this, "energyAxisAdjustName");
 		registerConfigurableParameter(energyAxisAdjustName);
 		angles = new StringParameter(this, "angles");
 		registerConfigurableParameter(angles);
@@ -66,6 +68,8 @@ public class RegionSelectAndScale extends AbstractDataMessageTransformer {
 		registerConfigurableParameter(photonEnergyNameParam);
 		workFunctionNameParam = new StringParameter(this, "workFunctionNameParam");
 		registerConfigurableParameter(workFunctionNameParam);
+		correctionFunctionNameParam = new StringParameter(this, "correctionFunctionNameParam");
+		registerConfigurableParameter(correctionFunctionNameParam);
 	}
 	
 	@Override
@@ -74,6 +78,13 @@ public class RegionSelectAndScale extends AbstractDataMessageTransformer {
 		// get the data out of the message, name of the item should be specified
 		final Map<String, Serializable>  data = MessageUtils.getList(cache);
 		final Map<String, String> scalar = MessageUtils.getScalar(cache);
+		Map<String, AFunction> functions = null;
+		try {
+			functions = MessageUtils.getFunctions(cache);
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		
 		// get the roi out of the message, name of the roi should be specified
 		RectangularROI roi = (RectangularROI) selectionROI.getRoi();
@@ -126,12 +137,8 @@ public class RegionSelectAndScale extends AbstractDataMessageTransformer {
 		
 		angleOffset = Double.parseDouble(scalar.get(angleAdjustName));
 		energyOffset = Double.parseDouble(scalar.get(energyAdjustName));
-		photonEnergy = Double.parseDouble(scalar.get(photonEnergyName));
+		//photonEnergy = Double.parseDouble(scalar.get(photonEnergyName));
 		workFunction = Double.parseDouble(scalar.get(workFunctionName));
-		
-		// Apply the corrections to the datasets
-		energiesDS.isubtract(energyOffset);
-		anglesDS.isubtract(angleOffset);
 		
 		// then get the region
 		final int yInc = roi.getPoint()[1]<roi.getEndPoint()[1] ? 1 : -1;
@@ -141,22 +148,24 @@ public class RegionSelectAndScale extends AbstractDataMessageTransformer {
 		AbstractDataset angleRegion = anglesDS;
 		AbstractDataset energyRegion = energiesDS;
 		
-		dataRegion = dataRegion.getSlice(new int[] { (int) roi.getPoint()[1], (int) roi.getPoint()[0] },
-				new int[] { (int) roi.getEndPoint()[1], (int) roi.getEndPoint()[0] },
+		dataRegion = dataRegion.getSlice(new int[] { (int) roi.getPoint()[0], (int) roi.getPoint()[1] },
+				new int[] { (int) roi.getEndPoint()[0], (int) roi.getEndPoint()[1] },
 				new int[] {yInc, xInc});
 		
-		angleRegion = angleRegion.getSlice(new int[] { (int) roi.getPoint()[1] },
-				new int[] { (int) roi.getEndPoint()[1] },
+		angleRegion = angleRegion.getSlice(new int[] { (int) roi.getPoint()[0] },
+				new int[] { (int) roi.getEndPoint()[0] },
 				new int[] {yInc});
 		angleRegion = angleRegion.reshape(angleRegion.getShape()[0],1);
-		angleRegion = DatasetUtils.tile(angleRegion, dataRegion.getShape()[0]);
+		angleRegion = DatasetUtils.tile(angleRegion, dataRegion.getShape()[1]);
 		
-		energyRegion = energyRegion.getSlice(new int[] {(int) roi.getPoint()[0] },
-				new int[] {(int) roi.getEndPoint()[0] },
+		
+		energyRegion = energyRegion.getSlice(new int[] {(int) roi.getPoint()[1] },
+				new int[] {(int) roi.getEndPoint()[1] },
 				new int[] {xInc});
 		energyRegion = energyRegion.reshape(energyRegion.getShape()[0],1);
-		energyRegion = DatasetUtils.tile(energyRegion, dataRegion.getShape()[1]);
+		energyRegion = DatasetUtils.tile(energyRegion, dataRegion.getShape()[0]);
 		energyRegion = DatasetUtils.transpose(energyRegion);
+		
 		
 		// Correct for initial offsets
 		angleRegion.isubtract(angleOffset);
