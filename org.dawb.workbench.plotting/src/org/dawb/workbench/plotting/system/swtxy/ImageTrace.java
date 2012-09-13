@@ -66,6 +66,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	private List<AbstractDataset> axes;
 	private ImageServiceBean imageServiceBean;
 	private boolean          isMaximumZoom;
+	
 		
 	public ImageTrace(final String name, 
 			          final Axis xAxis, 
@@ -654,6 +655,17 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		return imageServiceBean.getOrigin();
 	}
 	
+	
+	private boolean rescaleHistogram = true;
+	
+	public boolean isRescaleHistogram() {
+		return rescaleHistogram;
+	}
+
+	public void setRescaleHistogram(boolean rescaleHistogram) {
+		this.rescaleHistogram = rescaleHistogram;
+	}
+
 	@Override
 	public void setData(final AbstractDataset image, List<AbstractDataset> axes, boolean performAuto) {
 		// The image is drawn low y to the top left but the axes are low y to the bottom right
@@ -667,9 +679,13 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		imageServiceBean.setImage(image);
 		
 		final IImageService service = (IImageService)PlatformUI.getWorkbench().getService(IImageService.class);
-		final float[] fa = service.getFastStatistics(imageServiceBean);
-		setMin(fa[0]);
-		setMax(fa[1]);
+
+		if (rescaleHistogram) {
+			final float[] fa = service.getFastStatistics(imageServiceBean);
+			setMin(fa[0]);
+			setMax(fa[1]);
+		}
+		
 		this.axes  = axes;
 		
 		createAxisBounds();
@@ -1052,4 +1068,5 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			}
 		}		
 	}
+	
 }

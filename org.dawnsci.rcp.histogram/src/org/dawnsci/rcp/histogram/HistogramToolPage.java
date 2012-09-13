@@ -11,16 +11,18 @@ import org.dawb.common.ui.plot.tool.AbstractToolPage;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace.TraceType;
+import org.dawb.common.ui.plot.trace.IPaletteListener;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.PaletteEvent;
-import org.dawb.common.ui.plot.trace.IPaletteListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawnsci.rcp.functions.ColourSchemeContribution;
 import org.dawnsci.rcp.functions.TransferFunctionContribution;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.SelectionEvent;
@@ -86,8 +88,7 @@ public class HistogramToolPage extends AbstractToolPage {
 	private int num_bins = MAX_BINS;
 
 	private boolean histogramDirty = true;
-
-
+	
 	// GUI
 	private Composite composite;
 	private ExpansionAdapter expansionAdapter;
@@ -145,8 +146,8 @@ public class HistogramToolPage extends AbstractToolPage {
 
 	private Button resetButton;
 	private SelectionListener resetListener;
-	
-	
+
+
 	// HISTOGRAM PLOT
 	private ExpandableComposite histogramExpander;
 	private Composite histogramComposite;
@@ -198,9 +199,20 @@ public class HistogramToolPage extends AbstractToolPage {
 
 				logger.trace("tracelistener firing");
 
-				if (!(evt.getSource() instanceof List<?>)) {
-					return;
-				}
+				//				if (!(evt.getSource() instanceof List<?>)) {
+				//					return;
+				//				}
+
+				updateImage();
+			}
+
+			@Override
+			public void traceUpdated(TraceEvent evt) {
+				logger.trace("tracelistener firing");
+
+				//				if (!(evt.getSource() instanceof List<?>)) {
+				//					return;
+				//				}
 
 				updateImage();
 			}
@@ -220,7 +232,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			@Override
 			public void minChanged(PaletteEvent event) {
-				if (internalEvent > 0) return;
+				if (internalEvent > 0 || mode == FIXED) return;
 				logger.trace("paletteListener minChanged firing");
 				histoMin = image.getImageServiceBean().getMin().doubleValue();
 				updateHistogramToolElements(null, false);
@@ -229,7 +241,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			@Override
 			public void maxChanged(PaletteEvent event) {
-				if (internalEvent > 0) return;
+				if (internalEvent > 0 || mode == FIXED) return;
 				logger.trace("paletteListener maxChanged firing");
 				histoMax = image.getImageServiceBean().getMax().doubleValue();
 				updateHistogramToolElements(null, false);
@@ -237,7 +249,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			@Override
 			public void maxCutChanged(PaletteEvent evt) {
-				if (internalEvent > 0) return;
+				if (internalEvent > 0 || mode == FIXED) return;
 				logger.trace("paletteListener maxCutChanged firing");
 				rangeMax = image.getImageServiceBean().getMaximumCutBound().getBound().doubleValue();
 				zingerText.setText(Double.toString(rangeMax));
@@ -248,31 +260,31 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			@Override
 			public void minCutChanged(PaletteEvent evt) {
-				if (internalEvent > 0) return;
+				if (internalEvent > 0 || mode == FIXED) return;
 				logger.trace("paletteListener minCutChanged firing");
 				rangeMin = image.getImageServiceBean().getMinimumCutBound().getBound().doubleValue();
 				deadPixelText.setText(Double.toString(rangeMin));
 				if(histoMin < rangeMin) histoMin = rangeMin;
 				generateHistogram(imageDataset);
 				updateHistogramToolElements(null, false);
-				
+
 			}
 
 			@Override
 			public void nanBoundsChanged(PaletteEvent evt) {
 				if (internalEvent > 0) return;
 				return;
-				
+
 			}
 
 			@Override
 			public void maskChanged(PaletteEvent evt) {
 				// No action needed.
 			}
-			
+
 		};
 
-		
+
 		// Set up all the GUI element listeners
 		minMaxValueListener = new SelectionListener() {
 
@@ -314,7 +326,7 @@ public class HistogramToolPage extends AbstractToolPage {
 			}
 		};
 
-		
+
 		deadZingerValueListener = new SelectionListener() {
 
 			@Override
@@ -326,15 +338,15 @@ public class HistogramToolPage extends AbstractToolPage {
 					if (rangeMax < rangeMin) rangeMax = rangeMin;
 					if (histoMax > rangeMax) histoMax = rangeMax;
 					if (histoMin < rangeMin) histoMin = rangeMin;
-					
+
 					image.setMaxCut(new HistogramBound(rangeMax, image.getMaxCut().getColor()));		
 					image.setMinCut(new HistogramBound(rangeMin, image.getMinCut().getColor()));
-				
+
 					// calculate the histogram
 					generateHistogram(imageDataset);
-					
+
 					updateHistogramToolElements(event);
-					
+
 				} catch (Exception e) {
 					// ignore this for now, might need to be a popup to the user
 				}
@@ -345,7 +357,7 @@ public class HistogramToolPage extends AbstractToolPage {
 				widgetSelected(event);
 			}
 		};
-		
+
 		// Set up all the GUI element listeners
 		resetListener = new SelectionListener() {
 
@@ -353,18 +365,18 @@ public class HistogramToolPage extends AbstractToolPage {
 			public void widgetSelected(SelectionEvent event) {
 				rangeMax = Double.POSITIVE_INFINITY;
 				rangeMin = Double.NEGATIVE_INFINITY;
-				
+
 				image.setMaxCut(new HistogramBound(rangeMax, image.getMaxCut().getColor()));		
 				image.setMinCut(new HistogramBound(rangeMin, image.getMinCut().getColor()));
-				
+
 				zingerText.setText(Double.toString(rangeMax));
 				deadPixelText.setText(Double.toString(rangeMin));
-				
+
 				// calculate the histogram
 				generateHistogram(imageDataset);
-				
+
 				updateHistogramToolElements(event);
-				
+
 			}
 
 			@Override
@@ -372,7 +384,7 @@ public class HistogramToolPage extends AbstractToolPage {
 				widgetSelected(event);
 			}
 		};
-		
+
 		colourSelectionListener = new SelectionListener() {
 
 			@Override
@@ -393,7 +405,7 @@ public class HistogramToolPage extends AbstractToolPage {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
 				logger.trace("colourSchemeListener");
-				
+
 				updateColourScheme();
 				buildPalleteData();
 				updateHistogramToolElements(event);;
@@ -404,20 +416,20 @@ public class HistogramToolPage extends AbstractToolPage {
 				widgetSelected(event);
 			}
 		};
-		
+
 		colourSchemeLogListener = new SelectionListener() {
-			
+
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
 				image.getImageServiceBean().setLogColorScale(btnColourMapLog.getSelection());
 				updateImage();
-				
+
 			}
-			
+
 			@Override
 			public void widgetDefaultSelected(SelectionEvent arg0) {
 				// TODO Auto-generated method stub
-				
+
 			}
 		};
 
@@ -442,7 +454,7 @@ public class HistogramToolPage extends AbstractToolPage {
 			public IStatus runInUIThread(IProgressMonitor mon) {
 				logger.trace("imagerepaintJob running");
 				internalEvent++;
-				
+
 				image.setMax(histoMax);
 				if (mon.isCanceled()) return Status.CANCEL_STATUS;
 
@@ -495,7 +507,7 @@ public class HistogramToolPage extends AbstractToolPage {
 		btnColourMapLog = new Button(colourSchemeComposite, SWT.CHECK);
 		btnColourMapLog.setText("Log Scale");
 		btnColourMapLog.addSelectionListener(colourSchemeLogListener);
-		
+
 		colourSchemeExpander.setClient(colourSchemeComposite);
 		colourSchemeExpander.addExpansionListener(expansionAdapter);
 		colourSchemeExpander.setExpanded(true);
@@ -610,12 +622,12 @@ public class HistogramToolPage extends AbstractToolPage {
 		deadPixelLabel.setText(DEAD_PIXEL_LABEL);
 		deadPixelText = new Text(deadZingerComposite, SWT.NONE);
 		deadPixelText.addSelectionListener(deadZingerValueListener);
-		
+
 		zingerLabel = new Label(deadZingerComposite, SWT.NONE);
 		zingerLabel.setText(ZINGER_LABEL);
 		zingerText = new Text(deadZingerComposite, SWT.NONE);
 		zingerText.addSelectionListener(deadZingerValueListener);
-		
+
 		resetButton = new Button(deadZingerComposite, SWT.NONE);
 		resetButton.setText("Reset");
 		resetButton.addSelectionListener(resetListener);
@@ -647,6 +659,21 @@ public class HistogramToolPage extends AbstractToolPage {
 		histogramExpander.setClient(histogramComposite);
 		histogramExpander.addExpansionListener(expansionAdapter);
 		histogramExpander.setExpanded(true);
+
+
+		site.getActionBars().getMenuManager().add(new Action("Histogram Locked", IAction.AS_CHECK_BOX) {
+			public void run() {
+				if (mode == FIXED) {
+					setChecked(false);
+					mode=AUTO;
+					image.setRescaleHistogram(true);
+				} else {
+					setChecked(true);
+					mode=FIXED;
+					image.setRescaleHistogram(false);
+				}
+			}
+		});
 
 		// Activate this so the initial screen has content
 		activate();		
@@ -706,7 +733,7 @@ public class HistogramToolPage extends AbstractToolPage {
 			if (imageDataset.containsInvalidNumbers() ) {
 				logger.debug("imageDataset contains invalid numbers");
 			}
-			
+
 			logger.trace("Image Data is of type :" + imageDataset.getDtype());
 			if (imageDataset.hasFloatingPointElements()) {
 				num_bins = MAX_BINS;
@@ -719,10 +746,13 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			switch (mode) {
 			case AUTO:
-				// TODO implement AUTO functionality
+				rangeMax = image.getImageServiceBean().getMaximumCutBound().getBound().doubleValue();
+				rangeMin = image.getImageServiceBean().getMinimumCutBound().getBound().doubleValue();
+				histoMax = image.getImageServiceBean().getMax().doubleValue();
+				histoMin = image.getImageServiceBean().getMin().doubleValue();
 				break;
 			case FIXED:
-				// TODO implement FIXED functionality 
+				// Do nothing?
 				break;
 			default:
 				// this is the FULL implementation (a good default)
@@ -735,7 +765,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			zingerText.setText(Double.toString(image.getMaxCut().getBound().doubleValue()));
 			deadPixelText.setText(Double.toString(image.getMinCut().getBound().doubleValue()));
-			
+
 			// Update the paletteData
 			palleteData = image.getPaletteData();
 
@@ -793,7 +823,7 @@ public class HistogramToolPage extends AbstractToolPage {
 		double rMin = rangeMin;
 		if (Double.isInfinite(rMax)) rMax = imageDataset.max().doubleValue();
 		if (Double.isInfinite(rMin)) rMin = imageDataset.min().doubleValue();
-		
+
 		Histogram hist = new Histogram(num_bins, rMin, rMax, true);
 		List<AbstractDataset> histogram_values = hist.value(image);
 		histogramX = histogram_values.get(1).getSlice(
@@ -817,15 +847,15 @@ public class HistogramToolPage extends AbstractToolPage {
 
 		double rMax = rangeMax;
 		double rMin = rangeMin;
-		
+
 		if (getPlottingSystem()==null) return; // Nothing to update
 		Collection<ITrace> traces = getPlottingSystem().getTraces(IImageTrace.class);
 		image = traces!=null && traces.size()>0 ? (IImageTrace)traces.iterator().next():null;
 		imageDataset = image.getImageServiceBean().getImage();
-		
+
 		if (Double.isInfinite(rMax)) rMax = imageDataset.max().doubleValue();
 		if (Double.isInfinite(rMin)) rMin = imageDataset.min().doubleValue();
-		
+
 		// set the minmax values
 		minMaxValue.setMin(MIN_LABEL, rMin);
 		minMaxValue.setMax(MIN_LABEL, rMax);
@@ -844,7 +874,7 @@ public class HistogramToolPage extends AbstractToolPage {
 		brightnessContrastValue.setMin(CONTRAST_LABEL, 0.0);
 		brightnessContrastValue.setMax(CONTRAST_LABEL, rMax-rMin);
 		if (!brightnessContrastValue.isSpinner(CONTRAST_LABEL, event)) brightnessContrastValue.setValue(CONTRAST_LABEL, histoMax-histoMin);
-		
+
 	}
 
 
@@ -1002,4 +1032,5 @@ public class HistogramToolPage extends AbstractToolPage {
 		}
 		return result;
 	}
+
 }
