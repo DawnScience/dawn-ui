@@ -7,7 +7,14 @@ import org.dawb.common.services.HistogramBound;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingFactory;
+import org.dawb.common.ui.plot.region.IROIListener;
+import org.dawb.common.ui.plot.region.IRegion;
+import org.dawb.common.ui.plot.region.ROIEvent;
+import org.dawb.common.ui.plot.region.RegionEvent;
+import org.dawb.common.ui.plot.region.IRegion.RegionType;
+import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
+import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace.TraceType;
@@ -49,6 +56,9 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Maths;
 import uk.ac.diamond.scisoft.analysis.dataset.function.Histogram;
+import uk.ac.diamond.scisoft.analysis.rcp.inspector.AxisSelection;
+import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
+import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 
 public class HistogramToolPage extends AbstractToolPage {
@@ -88,7 +98,7 @@ public class HistogramToolPage extends AbstractToolPage {
 	private int num_bins = MAX_BINS;
 
 	private boolean histogramDirty = true;
-	
+
 	// GUI
 	private Composite composite;
 	private ExpansionAdapter expansionAdapter;
@@ -176,6 +186,19 @@ public class HistogramToolPage extends AbstractToolPage {
 
 
 	private SelectionListener colourSchemeLogListener;
+
+
+	private double scaleMax = 1;
+
+
+	private double scaleMin = 0;
+
+
+
+	protected boolean regionDragging = false;
+
+
+	private IROIListener histogramRegionListener;
 
 
 	/**
@@ -447,6 +470,40 @@ public class HistogramToolPage extends AbstractToolPage {
 		extentionPointManager = new ExtentionPointManager();
 
 
+		histogramRegionListener = new IROIListener() {
+
+			@Override
+			public void roiDragged(ROIEvent evt) {
+//				if (evt.getROI() instanceof RectangularROI) {
+//					regionDragging = true;
+//					IRegion region = histogramPlot.getRegion("Histogram Region");
+//					RectangularROI roi = (RectangularROI) region.getROI();
+//					histoMin = roi.getPoint()[0];
+//					histoMax = roi.getEndPoint()[0];
+//					updateRanges(null);
+//					plotHistogram();
+//					regionDragging=false;
+//				}
+
+			}
+
+			@Override
+			public void roiChanged(ROIEvent evt) {
+				if (evt.getROI() instanceof RectangularROI) {
+//					RectangularROI roi = (RectangularROI) evt.getROI();
+//					System.out.println(roi);
+//					regionDragging = true;
+//					IRegion region = histogramPlot.getRegion("Histogram Region");
+//					RectangularROI roi = (RectangularROI) region.getROI();
+//					histoMin = roi.getPoint()[0];
+//					histoMax = roi.getEndPoint()[0];
+//					updateRanges(null);
+//					plotHistogram();
+//					regionDragging=false;
+				}
+			}
+		};
+
 		// Set up the repaint job
 		imagerepaintJob = new UIJob("Colour Scale Image Update") {			
 
@@ -651,16 +708,20 @@ public class HistogramToolPage extends AbstractToolPage {
 
 		histogramPlot.createPlotPart( histogramComposite, 
 				getTitle(), 
-				site.getActionBars(), 
+				null, 
 				PlotType.PT1D,
 				null);
 		histogramPlot.getPlotComposite().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
 
 		histogramExpander.setClient(histogramComposite);
 		histogramExpander.addExpansionListener(expansionAdapter);
 		histogramExpander.setExpanded(true);
 
+		createRegion();
 
+
+		// Add the histogram locked tool
 		site.getActionBars().getMenuManager().add(new Action("Histogram Locked", IAction.AS_CHECK_BOX) {
 			public void run() {
 				if (mode == FIXED) {
@@ -726,6 +787,13 @@ public class HistogramToolPage extends AbstractToolPage {
 		image = traces!=null && traces.size()>0 ? (IImageTrace)traces.iterator().next():null;
 
 		if (image != null) {
+
+			// make sure that auto update is dissabled if needed
+			if (mode == FIXED) {
+				image.setRescaleHistogram(false);
+			} else {
+				image.setRescaleHistogram(true);
+			}
 
 			// get the image data
 			imageDataset = image.getImageServiceBean().getImage();//image.getData();
@@ -845,34 +913,43 @@ public class HistogramToolPage extends AbstractToolPage {
 	 */
 	private void updateRanges(SelectionEvent event) {
 
-		double rMax = rangeMax;
-		double rMin = rangeMin;
+		
+		
+		
+		double scaleMaxTemp = rangeMax;
+		double scaleMinTemp = rangeMin;
 
 		if (getPlottingSystem()==null) return; // Nothing to update
 		Collection<ITrace> traces = getPlottingSystem().getTraces(IImageTrace.class);
 		image = traces!=null && traces.size()>0 ? (IImageTrace)traces.iterator().next():null;
 		imageDataset = image.getImageServiceBean().getImage();
-
-		if (Double.isInfinite(rMax)) rMax = imageDataset.max().doubleValue();
-		if (Double.isInfinite(rMin)) rMin = imageDataset.min().doubleValue();
-
+		
+		if (Double.isInfinite(scaleMaxTemp)) scaleMaxTemp = imageDataset.max().doubleValue();
+		if (Double.isInfinite(scaleMinTemp)) scaleMinTemp = imageDataset.min().doubleValue();
+		
+		if (mode == FIXED) {
+			if (scaleMaxTemp > scaleMax) scaleMax = scaleMaxTemp;
+			if (scaleMinTemp < scaleMin) scaleMin = scaleMinTemp;
+		}
+		
+		
 		// set the minmax values
-		minMaxValue.setMin(MIN_LABEL, rMin);
-		minMaxValue.setMax(MIN_LABEL, rMax);
+		minMaxValue.setMin(MIN_LABEL, scaleMin);
+		minMaxValue.setMax(MIN_LABEL, scaleMax);
 		if (!minMaxValue.isSpinner(MIN_LABEL, event)) minMaxValue.setValue(MIN_LABEL, histoMin);
 
-		minMaxValue.setMin(MAX_LABEL, rMin);
-		minMaxValue.setMax(MAX_LABEL, rMax);
+		minMaxValue.setMin(MAX_LABEL, scaleMin);
+		minMaxValue.setMax(MAX_LABEL, scaleMax);
 		if (!minMaxValue.isSpinner(MAX_LABEL, event)) minMaxValue.setValue(MAX_LABEL, histoMax);
 
 		// Set the brightness
-		brightnessContrastValue.setMin(BRIGHTNESS_LABEL, rMin);
-		brightnessContrastValue.setMax(BRIGHTNESS_LABEL, rMax);
+		brightnessContrastValue.setMin(BRIGHTNESS_LABEL, scaleMin);
+		brightnessContrastValue.setMax(BRIGHTNESS_LABEL, scaleMax);
 		if (!brightnessContrastValue.isSpinner(BRIGHTNESS_LABEL, event)) brightnessContrastValue.setValue(BRIGHTNESS_LABEL, (histoMax+histoMin)/2.0);
 
 		// Set the contrast
 		brightnessContrastValue.setMin(CONTRAST_LABEL, 0.0);
-		brightnessContrastValue.setMax(CONTRAST_LABEL, rMax-rMin);
+		brightnessContrastValue.setMax(CONTRAST_LABEL, scaleMax-scaleMin);
 		if (!brightnessContrastValue.isSpinner(CONTRAST_LABEL, event)) brightnessContrastValue.setValue(CONTRAST_LABEL, histoMax-histoMin);
 
 	}
@@ -954,11 +1031,15 @@ public class HistogramToolPage extends AbstractToolPage {
 					histoTrace.setData(histogramX, histogramY);
 					histogramDirty = false;
 				}
+				if(!regionDragging ) {
+					createRegion();
+				}
 				redTrace.setData(RGBX, R);
 				greenTrace.setData(RGBX, G);
 				blueTrace.setData(RGBX, B);
-				histogramPlot.getSelectedXAxis().setRange(histoMin, histoMax);
+				histogramPlot.getSelectedXAxis().setRange(scaleMin, scaleMax);
 				histogramPlot.getSelectedYAxis().setRange(0, finalScale*256);
+				histogramPlot.repaint();
 			}
 		});
 	}
@@ -1033,4 +1114,28 @@ public class HistogramToolPage extends AbstractToolPage {
 		return result;
 	}
 
+
+	private void createRegion(){
+		try {
+			IRegion region = histogramPlot.getRegion("Histogram Region");
+			
+			
+			RectangularROI rroi = new RectangularROI(histoMin, 0, histoMax-histoMin, 1, 0);
+
+			//Test if the region is already there and update the currentRegion
+			if(region!=null&&region.isVisible()){
+				region.setROI(rroi);
+			}else {
+				IRegion newRegion = histogramPlot.createRegion("Histogram Region", RegionType.XAXIS);
+				newRegion.setROI(rroi);
+				histogramPlot.addRegion(newRegion);
+			}
+
+			region.addROIListener(histogramRegionListener);
+			region.setMobile(false);
+
+		} catch (Exception e) {
+			logger.error("Couldn't open histogram view and create ROI", e);
+		}
+	}
 }
