@@ -135,10 +135,15 @@ public class RegionSelectAndScale extends AbstractDataMessageTransformer {
 		double photonEnergy = 0.0;
 		double workFunction = 0.0;
 		
-		angleOffset = Double.parseDouble(scalar.get(angleAdjustName));
-		energyOffset = Double.parseDouble(scalar.get(energyAdjustName));
-		//photonEnergy = Double.parseDouble(scalar.get(photonEnergyName));
-		workFunction = Double.parseDouble(scalar.get(workFunctionName));
+		String angleOffsetString = scalar.get(angleAdjustName);
+		String energyOffsetString = scalar.get(energyAdjustName);
+		String photonEnergyString = scalar.get(photonEnergyName);
+		String workFunctionString = scalar.get(workFunctionName);
+		
+		angleOffset = Double.parseDouble(angleOffsetString);
+		energyOffset = Double.parseDouble(energyOffsetString);
+		photonEnergy = Double.parseDouble(photonEnergyString);
+		workFunction = Double.parseDouble(workFunctionString);
 		
 		// then get the region
 		final int yInc = roi.getPoint()[1]<roi.getEndPoint()[1] ? 1 : -1;
@@ -148,19 +153,24 @@ public class RegionSelectAndScale extends AbstractDataMessageTransformer {
 		AbstractDataset angleRegion = anglesDS;
 		AbstractDataset energyRegion = energiesDS;
 		
-		dataRegion = dataRegion.getSlice(new int[] { (int) roi.getPoint()[0], (int) roi.getPoint()[1] },
-				new int[] { (int) roi.getEndPoint()[0], (int) roi.getEndPoint()[1] },
+		int angleStart = (int) roi.getPoint()[1];
+		int energyStart = (int) roi.getPoint()[0];
+		int angleStop = (int) roi.getEndPoint()[1];
+		int energyStop = (int) roi.getEndPoint()[0];
+		
+		dataRegion = dataRegion.getSlice(new int[] { angleStart, energyStart },
+				new int[] { angleStop, energyStop },
 				new int[] {yInc, xInc});
 		
-		angleRegion = angleRegion.getSlice(new int[] { (int) roi.getPoint()[0] },
-				new int[] { (int) roi.getEndPoint()[0] },
+		angleRegion = angleRegion.getSlice(new int[] { angleStart },
+				new int[] { angleStop },
 				new int[] {yInc});
 		angleRegion = angleRegion.reshape(angleRegion.getShape()[0],1);
 		angleRegion = DatasetUtils.tile(angleRegion, dataRegion.getShape()[1]);
 		
 		
-		energyRegion = energyRegion.getSlice(new int[] {(int) roi.getPoint()[1] },
-				new int[] {(int) roi.getEndPoint()[1] },
+		energyRegion = energyRegion.getSlice(new int[] {energyStart },
+				new int[] {energyStop },
 				new int[] {xInc});
 		energyRegion = energyRegion.reshape(energyRegion.getShape()[0],1);
 		energyRegion = DatasetUtils.tile(energyRegion, dataRegion.getShape()[0]);
