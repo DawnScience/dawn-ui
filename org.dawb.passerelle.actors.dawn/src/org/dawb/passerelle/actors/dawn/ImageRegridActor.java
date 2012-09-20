@@ -17,17 +17,13 @@ import java.util.Map;
 import org.dawb.passerelle.common.actors.AbstractDataMessageTransformer;
 import org.dawb.passerelle.common.message.DataMessageComponent;
 import org.dawb.passerelle.common.message.MessageUtils;
-import org.dawb.passerelle.common.parameter.roi.ROIParameter;
 
 import ptolemy.data.expr.StringParameter;
 import ptolemy.kernel.CompositeEntity;
 import ptolemy.kernel.util.IllegalActionException;
 import ptolemy.kernel.util.NameDuplicationException;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
-import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
-import uk.ac.diamond.scisoft.analysis.roi.ROIProfile;
-import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
+import uk.ac.diamond.scisoft.analysis.dataset.Image;
 
 import com.isencia.passerelle.actor.ProcessingException;
 
@@ -74,13 +70,22 @@ public class ImageRegridActor extends AbstractDataMessageTransformer {
 			result.addList(key, (AbstractDataset) data.get(key));
 		}
 		
-		// remap the appropriate dataset
-		String name = datasetName.getExpression();
-		if (data.containsKey(name)) {
-			
-			//result.addList(ds.getName()+"_norm", ds.idivide(correction));
-			//result.addList(ds.getName()+"_correction_map", correction);
-		}
+		// get the required datasets
+		String dataset = datasetName.getExpression();
+		String xAxisPositions = xAxisPositionsName.getExpression();
+		String yAxisPositions = yAxisPositionsName.getExpression();
+		String linearXAxis = linearXAxisName.getExpression();
+		String linearYAxis = linearYAxisName.getExpression();
+
+		AbstractDataset dataDS = ((AbstractDataset)data.get(dataset)).clone();
+		AbstractDataset xAxisGrid = ((AbstractDataset)data.get(xAxisPositions)).clone();
+		AbstractDataset yAxisGrid = ((AbstractDataset)data.get(yAxisPositions)).clone();
+		AbstractDataset xAxisLinear = ((AbstractDataset)data.get(linearXAxis)).clone();
+		AbstractDataset yAxisLinear = ((AbstractDataset)data.get(linearYAxis)).clone();
+		
+		AbstractDataset regrid = Image.regrid(dataDS, xAxisGrid, yAxisGrid, xAxisLinear, xAxisLinear);
+		
+		result.addList(dataset+"_regrid", regrid);
 		
 		// do the correction and put that into the pipeline., with a name that should be specified.
 		return result;
