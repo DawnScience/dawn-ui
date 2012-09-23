@@ -912,9 +912,6 @@ public class HistogramToolPage extends AbstractToolPage {
 	 * @param event 
 	 */
 	private void updateRanges(SelectionEvent event) {
-
-		
-		
 		
 		double scaleMaxTemp = rangeMax;
 		double scaleMinTemp = rangeMin;
@@ -930,8 +927,10 @@ public class HistogramToolPage extends AbstractToolPage {
 		if (mode == FIXED) {
 			if (scaleMaxTemp > scaleMax) scaleMax = scaleMaxTemp;
 			if (scaleMinTemp < scaleMin) scaleMin = scaleMinTemp;
+		} else {
+			scaleMax = scaleMaxTemp;
+			scaleMin = scaleMinTemp;
 		}
-		
 		
 		// set the minmax values
 		minMaxValue.setMin(MIN_LABEL, scaleMin);
