@@ -195,12 +195,19 @@ public class RegionSelectAndScale extends AbstractDataMessageTransformer {
 		AbstractDataset k = Maths.sqrt(bindingEnergy).imultiply(0.51168);
 		
 		// Finally calculate k paralell
-		AbstractDataset kParallel = Maths.multiply(k, Maths.sin(angleRegion));
+		AbstractDataset kParallel = Maths.multiply(k, Maths.sin(Maths.toRadians(angleRegion)));
 		
 		// Return the calculated values
 		result.addList("region", dataRegion);
 		result.addList("k", k);
 		result.addList("k_parallel", kParallel);
+		
+		double kStep = k.peakToPeak().doubleValue()/(dataRegion.getShape()[1]/2);
+		AbstractDataset kAxis = AbstractDataset.arange(k.min().doubleValue()-(kStep/2.0), k.max().doubleValue()+(3.0*kStep/2.0), kStep, AbstractDataset.FLOAT32);
+		result.addList("k_axis", kAxis);
+		double KPStep = kParallel.peakToPeak().doubleValue()/(dataRegion.getShape()[0]/2);
+		AbstractDataset kParaAxis = AbstractDataset.arange(kParallel.min().doubleValue()-(KPStep/2.0), kParallel.max().doubleValue()+(3.0*KPStep/2.0), KPStep, AbstractDataset.FLOAT32);
+		result.addList("k_parallel_axis", kParaAxis);
 		
 		// do the correction and put that into the pipeline., with a name that should be specified.
 		return result;

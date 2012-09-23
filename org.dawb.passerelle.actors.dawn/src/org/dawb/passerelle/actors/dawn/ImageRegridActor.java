@@ -83,7 +83,7 @@ public class ImageRegridActor extends AbstractDataMessageTransformer {
 		AbstractDataset xAxisLinear = ((AbstractDataset)data.get(linearXAxis)).clone();
 		AbstractDataset yAxisLinear = ((AbstractDataset)data.get(linearYAxis)).clone();
 		
-		AbstractDataset regrid = Image.regrid(dataDS, xAxisGrid, yAxisGrid, xAxisLinear, xAxisLinear);
+		AbstractDataset regrid = Image.regrid(dataDS, xAxisGrid, yAxisGrid, xAxisLinear, yAxisLinear);
 		
 		result.addList(dataset+"_regrid", regrid);
 		
