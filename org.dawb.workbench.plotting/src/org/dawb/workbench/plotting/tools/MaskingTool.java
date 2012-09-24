@@ -533,7 +533,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		man.add(widthChoice);
 		
 		// Region actions supported
-		ActionContributionItem menu  = (ActionContributionItem)getPlottingSystem().getActionBars().getToolBarManager().find("org.dawb.workbench.ui.editors.plotting.swtxy.addRegions");
+		ActionContributionItem menu  = (ActionContributionItem)getPlottingSystem().getActionBars().getMenuManager().find("org.dawb.workbench.ui.editors.plotting.swtxy.addRegions");
 		MenuAction        menuAction = (MenuAction)menu.getAction();	
 		IAction fd = null;
 		for (RegionType type : RegionType.ALL_TYPES) {
