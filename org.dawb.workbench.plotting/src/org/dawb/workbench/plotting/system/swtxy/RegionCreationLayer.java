@@ -16,14 +16,14 @@ import org.eclipse.draw2d.geometry.PointList;
  * @author fcp94556
  *
  */
-public class RegionSelectionLayer extends Layer {
+public class RegionCreationLayer extends Layer {
 	
 	private Figure              regionOverlayArea;
 	private RegionArea          regionArea;
 	private RegionMouseListener regionListener;
 	private LayeredPane         layeredPane;
 	
-	public RegionSelectionLayer(LayeredPane layeredPane, RegionArea regionArea) {
+	public RegionCreationLayer(LayeredPane layeredPane, RegionArea regionArea) {
 		
 		this.layeredPane= layeredPane;
 		this.regionArea = regionArea;

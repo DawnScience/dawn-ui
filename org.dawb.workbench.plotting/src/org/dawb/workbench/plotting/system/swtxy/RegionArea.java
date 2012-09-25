@@ -176,7 +176,7 @@ public class RegionArea extends PlotArea {
     /**
      * Has to be set when plotting system is created.
      */
-	RegionSelectionLayer               regionLayer;
+	RegionCreationLayer               regionLayer;
 
 	/**
 	 * Create region of interest
@@ -208,7 +208,7 @@ public class RegionArea extends PlotArea {
         return region;
 	}
 
-	public void setRegionLayer(RegionSelectionLayer regionLayer) {
+	public void setRegionLayer(RegionCreationLayer regionLayer) {
 		this.regionLayer = regionLayer;
 	}
 

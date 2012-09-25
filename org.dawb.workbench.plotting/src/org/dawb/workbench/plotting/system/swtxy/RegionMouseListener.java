@@ -24,9 +24,9 @@ class RegionMouseListener extends MouseMotionListener.Stub implements MouseListe
 	private final RegionArea          regionArea;
 	private PointList                 regionPoints;
 	private AbstractSelectionRegion   regionBeingAdded;
-	private RegionSelectionLayer      regionLayer;
+	private RegionCreationLayer      regionLayer;
 
-	public RegionMouseListener(RegionSelectionLayer    regionLayer,
+	public RegionMouseListener(RegionCreationLayer    regionLayer,
 			                   RegionArea              regionArea, 
 			                   AbstractSelectionRegion regionBeingAdded, 
 			                   final int minPresses, final int maxPresses) {

@@ -54,7 +54,7 @@ import org.dawb.workbench.plotting.system.swtxy.AspectAxis;
 import org.dawb.workbench.plotting.system.swtxy.ImageTrace;
 import org.dawb.workbench.plotting.system.swtxy.LineTrace;
 import org.dawb.workbench.plotting.system.swtxy.RegionArea;
-import org.dawb.workbench.plotting.system.swtxy.RegionSelectionLayer;
+import org.dawb.workbench.plotting.system.swtxy.RegionCreationLayer;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
 import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
 import org.dawb.workbench.plotting.system.swtxy.selection.SelectionRegionFactory;
@@ -205,7 +205,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
  		lightWeightActionBarMan.createAdditionalActions(null);
 		 
  		final LayeredPane layers      = new LayeredPane();
-        new RegionSelectionLayer(layers, xyGraph.getRegionArea());  
+        new RegionCreationLayer(layers, xyGraph.getRegionArea());  
   		layers.add(xyGraph,     0);
 		lws.setContents(layers);
 		
