@@ -20,6 +20,7 @@ import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
 import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
+import org.eclipse.draw2d.Layer;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -129,7 +130,7 @@ public class XYRegionGraph extends XYGraph {
 		getRegionArea().clearImageTraces();
 	}
 	
-	protected RegionArea getRegionArea() {
+	public RegionArea getRegionArea() {
 		return (RegionArea)getPlotArea();
 	}
 
@@ -371,7 +372,5 @@ public class XYRegionGraph extends XYGraph {
 		super.addTrace(trace);
 		getRegionArea().toFront();
 	}
-	
-	
 
 }

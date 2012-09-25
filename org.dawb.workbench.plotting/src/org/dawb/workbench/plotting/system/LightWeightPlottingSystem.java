@@ -54,16 +54,24 @@ import org.dawb.workbench.plotting.system.swtxy.AspectAxis;
 import org.dawb.workbench.plotting.system.swtxy.ImageTrace;
 import org.dawb.workbench.plotting.system.swtxy.LineTrace;
 import org.dawb.workbench.plotting.system.swtxy.RegionArea;
+import org.dawb.workbench.plotting.system.swtxy.RegionSelectionLayer;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
 import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
 import org.dawb.workbench.plotting.system.swtxy.selection.SelectionRegionFactory;
 import org.dawb.workbench.plotting.util.ColorUtility;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.FigureCanvas;
+import org.eclipse.draw2d.GridData;
+import org.eclipse.draw2d.GridLayout;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
+import org.eclipse.draw2d.Layer;
+import org.eclipse.draw2d.LayeredPane;
 import org.eclipse.draw2d.LightweightSystem;
 import org.eclipse.draw2d.PrintFigureOperation;
+import org.eclipse.draw2d.StackLayout;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IMenuListener;
@@ -195,8 +203,12 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
  		lightWeightActionBarMan.createOriginActions();
  		lightWeightActionBarMan.createExportActionsMenuBar();
  		lightWeightActionBarMan.createAdditionalActions(null);
-		 		
-		lws.setContents(xyGraph);
+		 
+ 		final LayeredPane layers      = new LayeredPane();
+        new RegionSelectionLayer(layers, xyGraph.getRegionArea());  
+  		layers.add(xyGraph,     0);
+		lws.setContents(layers);
+		
 		xyGraph.primaryXAxis.setShowMajorGrid(true);
 		xyGraph.primaryXAxis.setShowMinorGrid(true);		
 		xyGraph.primaryYAxis.setShowMajorGrid(true);
