@@ -76,6 +76,7 @@ import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -97,6 +98,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -204,11 +207,29 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
  		lightWeightActionBarMan.createExportActionsMenuBar();
  		lightWeightActionBarMan.createAdditionalActions(null);
 		 
+ 		// Create the layers (currently everything apart from the temporary 
+ 		// region draw layer is on 0)
  		final LayeredPane layers      = new LayeredPane();
         new RegionCreationLayer(layers, xyGraph.getRegionArea());  
   		layers.add(xyGraph,     0);
 		lws.setContents(layers);
 		
+		// Create status contribution for position
+		if (part!=null) {
+			IStatusLineManager statusLine = null;
+		    if (part instanceof IViewPart) {
+		    	IActionBars bars = ((IViewPart)part).getViewSite().getActionBars();
+		    	statusLine = bars.getStatusLineManager();
+			} else if (part instanceof IEditorPart) {
+				IActionBars bars = ((IEditorPart)part).getEditorSite().getActionBars();
+		    	statusLine = bars.getStatusLineManager();
+			}
+		    if (statusLine!=null) {
+		    	xyGraph.getRegionArea().setStatusLineManager(statusLine);
+		    }
+		}
+		
+		// Configure axes
 		xyGraph.primaryXAxis.setShowMajorGrid(true);
 		xyGraph.primaryXAxis.setShowMinorGrid(true);		
 		xyGraph.primaryYAxis.setShowMajorGrid(true);

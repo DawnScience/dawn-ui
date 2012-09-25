@@ -1,5 +1,7 @@
 package org.dawb.workbench.plotting.system.swtxy;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -11,7 +13,6 @@ import org.csstudio.swt.xygraph.figures.Annotation;
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.PlotArea;
 import org.csstudio.swt.xygraph.figures.Trace;
-import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.swt.xygraph.undo.ZoomType;
 import org.dawb.common.services.ImageServiceBean.ImageOrigin;
 import org.dawb.common.ui.plot.axis.IAxis;
@@ -23,12 +24,14 @@ import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
 import org.dawb.workbench.plotting.system.swtxy.selection.SelectionRegionFactory;
-import org.eclipse.draw2d.Graphics;
-import org.eclipse.draw2d.Layer;
-import org.eclipse.draw2d.geometry.PointList;
+import org.eclipse.draw2d.MouseEvent;
+import org.eclipse.draw2d.MouseMotionListener;
+import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.graphics.PaletteData;
+import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,8 +49,24 @@ public class RegionArea extends PlotArea {
 	public RegionArea(XYRegionGraph xyGraph) {
 		super(xyGraph);
 		this.regions     = new LinkedHashMap<String,AbstractSelectionRegion>();
-		this.imageTraces = new LinkedHashMap<String,ImageTrace>();
+		this.imageTraces = new LinkedHashMap<String,ImageTrace>();	
 	}
+
+	public void setStatusLineManager(final IStatusLineManager statusLine) {
+		
+		if (statusLine==null) return;
+		
+		final NumberFormat format = new DecimalFormat("#0.0000#");
+		addMouseMotionListener(new MouseMotionListener.Stub() {
+			@Override
+			public void mouseMoved(MouseEvent me) {
+				double x = getRegionGraph().primaryXAxis.getPositionValue(me.x, false);
+				double y = getRegionGraph().primaryYAxis.getPositionValue(me.y, false);
+				statusLine.setMessage(format.format(x)+", "+format.format(y));
+			}
+		});
+	}
+
 
 	public void addRegion(final AbstractSelectionRegion region) {
 		addRegion(region, true);
