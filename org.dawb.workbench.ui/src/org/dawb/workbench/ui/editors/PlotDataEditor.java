@@ -120,6 +120,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
         final List<CheckableObject> selectedNames = dataSetComponent.getSelections();
         for (Object object : selectedNames) {
         	final AbstractDataset set = getDataSet(object, null);
+        	if (set==null) continue;
          	ret.put(set.getName(), set);
         }
 		return ret;
