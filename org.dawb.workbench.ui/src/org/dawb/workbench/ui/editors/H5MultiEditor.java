@@ -113,7 +113,9 @@ public class H5MultiEditor extends MultiPageEditorPart  implements ISlicablePlot
 		IWorkbenchPage page = EclipseUtils.getActivePage();
 		if (page != null) {
 			try {
-				page.showView("org.dawb.passerelle.views.ValueView");
+				if (page.findView("org.dawb.passerelle.views.ValueView")==null) {
+					page.showView("org.dawb.passerelle.views.ValueView");
+				}
 			} catch (PartInitException e) {
 				// do nothing
 			}
