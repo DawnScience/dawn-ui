@@ -602,13 +602,19 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		
 		for (final ITrace iTrace : traces) {
 			
+			if (!(iTrace instanceof ILineTrace)) continue;
+			
+			final ILineTrace lineTrace = (ILineTrace)iTrace;
+			
+			if (!lineTrace.isUserTrace()) continue;
+			
 			if (iTrace==selected) selectionIndex= index;
 			
-			if (selectedTraces.isEmpty() && iTrace instanceof ILineTrace) {
-				selectedTraces.add((ILineTrace)iTrace);
+			if (selectedTraces.isEmpty()) {
+				selectedTraces.add(lineTrace);
 			}		
 			
-			final Action action = new TraceSelectAction((ILineTrace)iTrace);
+			final Action action = new TraceSelectAction(lineTrace);
 			tracesMenu.add(action);
 			
 			index++;
