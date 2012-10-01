@@ -329,4 +329,12 @@ abstract class AbstractHistoryTool extends AbstractToolPage implements MouseList
 		return null;
 	}
 
+	/**
+	 * Override to return true if the tool, when opened should always be
+	 * in a popped out view
+	 * @return
+	 */
+	public boolean isAlwaysSeparateView() {
+		return true;
+	}
 }
