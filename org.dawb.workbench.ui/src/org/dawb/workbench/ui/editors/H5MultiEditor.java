@@ -30,6 +30,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IReusableEditor;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.eclipse.ui.part.Page;
@@ -109,11 +110,17 @@ public class H5MultiEditor extends MultiPageEditorPart  implements ISlicablePlot
 			logger.error("Cannot initiate "+getClass().getName()+"!", e);
 		}
 		
-		try {
-			EclipseUtils.getActivePage().showView("org.dawb.passerelle.views.ValueView");
 
-		} catch (Throwable ignored) {
-			// Nowt
+		IWorkbenchPage page = EclipseUtils.getActivePage();
+		if (page != null) {
+			try {
+				if (page.findView("org.dawb.passerelle.views.ValueView")==null) {
+					page.showView("org.dawb.passerelle.views.ValueView");
+				}
+			} catch (PartInitException e) {
+				// do nothing
+			}
+
 		}
 		
 		final int lastIndex = index;
