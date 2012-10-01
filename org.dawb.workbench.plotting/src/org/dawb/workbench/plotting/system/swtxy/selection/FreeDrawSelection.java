@@ -3,7 +3,6 @@ package org.dawb.workbench.plotting.system.swtxy.selection;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
-import org.csstudio.swt.xygraph.figures.Axis;
 import org.dawb.common.ui.plot.axis.ICoordinateSystem;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
