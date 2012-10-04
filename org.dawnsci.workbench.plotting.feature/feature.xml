@@ -36,7 +36,7 @@
          unpack="false"/>
 
    <plugin
-         id="org.dawb.org.csstudio.swt.xygraph"
+         id="org.csstudio.swt.xygraph"
          download-size="0"
          install-size="0"
          version="0.0.0"

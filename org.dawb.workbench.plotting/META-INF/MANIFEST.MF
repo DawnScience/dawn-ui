@@ -7,7 +7,6 @@ Bundle-Activator: org.dawb.workbench.plotting.Activator
 Bundle-Vendor: Diamond Light Source
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.dawb.org.csstudio.swt.xygraph;bundle-version="1.0.0",
  org.eclipse.draw2d;bundle-version="3.7.1",
  org.dawb.common.ui;bundle-version="1.0.0",
  org.dawb.gda.extensions;bundle-version="1.0.0",
@@ -18,7 +17,8 @@ Require-Bundle: org.eclipse.ui,
  com.isencia.passerelle.engine;bundle-version="7.0.0",
  org.dawb.passerelle.common;bundle-version="1.0.0",
  org.dawb.passerelle.actors;bundle-version="1.0.0",
- org.dawb.hdf5;bundle-version="1.2.0"
+ org.dawb.hdf5;bundle-version="1.2.0",
+ org.csstudio.swt.xygraph;bundle-version="1.1.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: org.dawb.workbench.plotting.system,
