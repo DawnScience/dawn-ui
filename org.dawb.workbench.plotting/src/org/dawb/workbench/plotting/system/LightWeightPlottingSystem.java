@@ -1023,7 +1023,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	}
 
 	public void repaint() {
-		repaint(true);
+		repaint(isRescale());
 	}
 	public void repaint(final boolean autoScale) {
 		if (getDisplay().getThread()==Thread.currentThread()) {

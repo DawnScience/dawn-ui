@@ -196,7 +196,7 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 					if (viewer!=null) viewer.refresh(bean);
 				}
 			}
-			((AbstractPlottingSystem)getPlottingSystem()).repaint(false);
+			((AbstractPlottingSystem)getPlottingSystem()).repaint();
 		} finally {
 			updatingAPlotAlready = false;
 		}
