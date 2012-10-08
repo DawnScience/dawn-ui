@@ -325,7 +325,9 @@ public class DerivativeTool extends AbstractToolPage  {
 		dataTraces.clear();
 		dervsPair.clear();
 		dervs2Pair.clear();
-		getPlottingSystem().autoscaleAxes();
+		//Call repaint so the plotting system obeys button for whether rescale
+		//should happen or not
+		getPlottingSystem().repaint();
 		getPlottingSystem().addTraceListener(traceListener);
 		return;
 	}
