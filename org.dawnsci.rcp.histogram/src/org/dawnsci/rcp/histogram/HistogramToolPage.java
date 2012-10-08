@@ -9,12 +9,9 @@ import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingFactory;
 import org.dawb.common.ui.plot.region.IROIListener;
 import org.dawb.common.ui.plot.region.IRegion;
-import org.dawb.common.ui.plot.region.ROIEvent;
-import org.dawb.common.ui.plot.region.RegionEvent;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
-import org.dawb.common.ui.plot.region.IRegionListener;
+import org.dawb.common.ui.plot.region.ROIEvent;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
-import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace.TraceType;
@@ -56,8 +53,6 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Maths;
 import uk.ac.diamond.scisoft.analysis.dataset.function.Histogram;
-import uk.ac.diamond.scisoft.analysis.rcp.inspector.AxisSelection;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 
@@ -1117,22 +1112,16 @@ public class HistogramToolPage extends AbstractToolPage {
 	private void createRegion(){
 		try {
 			IRegion region = histogramPlot.getRegion("Histogram Region");
-			
-			
-			RectangularROI rroi = new RectangularROI(histoMin, 0, histoMax-histoMin, 1, 0);
-
 			//Test if the region is already there and update the currentRegion
-			if(region!=null&&region.isVisible()){
-				region.setROI(rroi);
-			}else {
-				IRegion newRegion = histogramPlot.createRegion("Histogram Region", RegionType.XAXIS);
-				newRegion.setROI(rroi);
-				histogramPlot.addRegion(newRegion);
+			if (region == null || !region.isVisible()) {
+				region = histogramPlot.createRegion("Histogram Region", RegionType.XAXIS);
+				histogramPlot.addRegion(region);
 			}
 
+			RectangularROI rroi = new RectangularROI(histoMin, 0, histoMax-histoMin, 1, 0);
+			region.setROI(rroi);
 			region.addROIListener(histogramRegionListener);
 			region.setMobile(false);
-
 		} catch (Exception e) {
 			logger.error("Couldn't open histogram view and create ROI", e);
 		}

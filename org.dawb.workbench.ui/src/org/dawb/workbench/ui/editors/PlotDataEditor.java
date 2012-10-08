@@ -548,7 +548,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		return this;
 	}
 
-    public Object getAdapter(final Class clazz) {
+    public Object getAdapter(@SuppressWarnings("rawtypes") final Class clazz) {
 		
 		if (clazz == Page.class) {
 			final PlotDataEditor      ed  = getDataSetEditor();
