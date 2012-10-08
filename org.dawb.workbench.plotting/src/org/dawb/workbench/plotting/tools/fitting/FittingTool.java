@@ -79,7 +79,6 @@ import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
 import uk.ac.diamond.scisoft.analysis.rcp.plotting.IGuiInfoManager;
 import uk.ac.diamond.scisoft.analysis.rcp.views.PlotServerConnection;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 public class FittingTool extends AbstractToolPage implements IRegionListener, IDataReductionToolPage {
