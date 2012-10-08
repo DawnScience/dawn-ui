@@ -87,6 +87,7 @@ class FittedPeak {
 		ret.fwhm       = fwhm;
 		ret.center     = center;
 		ret.trace      = trace;
+		ret.dataTrace  = dataTrace;
 		ret.annotation = annotation;
 		ret.peakName   = peakName;
 		ret.saved      = saved;
@@ -123,6 +124,10 @@ class FittedPeak {
 		} catch (IndexOutOfBoundsException ne) {
 			return null;
 		}
+	}
+
+	public String getPositionName() {
+		return getPeakName().replace(' ', '_')+"_position";
 	}
 
 	public double getPosition() {

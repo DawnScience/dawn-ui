@@ -77,6 +77,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 	
 	private Composite     composite;
 	private TableViewer   viewer;
+	private RectangularROI fitBounds;
 	private IRegion       fitRegion;
 	private FittingJob    fittingJob;
 	private FittedPeaks   fittedPeaks;
@@ -384,6 +385,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 			final RectangularROI bounds = (RectangularROI) fitRegion.getROI();
 			if (fitRegion==null || bounds==null) return Status.CANCEL_STATUS;
 
+			setFitBounds(bounds);
 			getPlottingSystem().removeRegionListener(FittingTool.this);
 
 			composite.getDisplay().syncExec(new Runnable() {
@@ -437,6 +439,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 			schedule();
 		}
 	};
+	
 
 	/**
 	 * Thread safe
@@ -602,20 +605,16 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		
 		for (final ITrace iTrace : traces) {
 			
-			if (!(iTrace instanceof ILineTrace)) continue;
-			
-			final ILineTrace lineTrace = (ILineTrace)iTrace;
-			
-			if (!lineTrace.isUserTrace()) continue;
-			
 			if (iTrace==selected) selectionIndex= index;
 			
-			if (selectedTraces.isEmpty()) {
-				selectedTraces.add(lineTrace);
+			if (selectedTraces.isEmpty() && iTrace instanceof ILineTrace) {
+				selectedTraces.add((ILineTrace)iTrace);
 			}		
-			
-			final Action action = new TraceSelectAction(lineTrace);
-			tracesMenu.add(action);
+			//Should test if user trace == true, peaks shouldn't reach this menu
+			if (iTrace.isUserTrace()) {
+				final Action action = new TraceSelectAction((ILineTrace)iTrace);
+				tracesMenu.add(action);
+			}
 			
 			index++;
 		}
@@ -920,5 +919,13 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		
 		return file.getAbsolutePath();
     }
+
+	public RectangularROI getFitBounds() {
+		return fitBounds;
+	}
+
+	public void setFitBounds(RectangularROI fitBounds) {
+		this.fitBounds = fitBounds;
+	}
 
 }
