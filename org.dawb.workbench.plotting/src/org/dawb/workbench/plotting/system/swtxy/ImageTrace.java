@@ -686,21 +686,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			setMax(fa[1]);
 		}
 		
-		this.axes  = axes;
-		
-		createAxisBounds();
-
-		if (performAuto) {
-	 		try {
-				setAxisRedrawActive(false);
-				performAutoscale();
-			} finally {
-				setAxisRedrawActive(true);
-			}
-		} else {
-			createScaledImage(ImageScaleType.FORCE_REIMAGE, null);
-			repaint();
-		}
+		setAxes(axes, performAuto);
        
 	}
 	

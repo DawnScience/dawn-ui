@@ -79,7 +79,6 @@ import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
 import uk.ac.diamond.scisoft.analysis.rcp.plotting.IGuiInfoManager;
 import uk.ac.diamond.scisoft.analysis.rcp.views.PlotServerConnection;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 public class FittingTool extends AbstractToolPage implements IRegionListener, IDataReductionToolPage {
@@ -667,14 +666,19 @@ public class FittingTool extends AbstractToolPage implements IRegionListener, ID
 		}
 		
 		for (final ITrace iTrace : traces) {
+			if (!(iTrace instanceof ILineTrace)) continue;
+			
+			final ILineTrace lineTrace = (ILineTrace)iTrace;
+			
+			if (!lineTrace.isUserTrace()) continue;
 			
 			if (iTrace==selected) selectionIndex= index;
 			
-			if (selectedTraces.isEmpty() && iTrace instanceof ILineTrace) {
-				selectedTraces.add((ILineTrace)iTrace);
+			if (selectedTraces.isEmpty()) {
+				selectedTraces.add(lineTrace);
 			}		
 			
-			final Action action = new TraceSelectAction((ILineTrace)iTrace);
+			final Action action = new TraceSelectAction(lineTrace);
 			tracesMenu.add(action);
 			
 			index++;

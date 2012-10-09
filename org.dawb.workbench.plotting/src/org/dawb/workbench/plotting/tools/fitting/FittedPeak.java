@@ -87,6 +87,7 @@ class FittedPeak {
 		ret.fwhm       = fwhm;
 		ret.center     = center;
 		ret.trace      = trace;
+		ret.dataTrace  = dataTrace;
 		ret.annotation = annotation;
 		ret.peakName   = peakName;
 		ret.saved      = saved;
