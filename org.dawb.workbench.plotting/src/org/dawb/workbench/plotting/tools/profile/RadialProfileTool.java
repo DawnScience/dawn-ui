@@ -5,6 +5,8 @@ import java.util.Collection;
 import ncsa.hdf.object.Group;
 
 import org.dawb.common.ui.plot.region.IRegion;
+import org.dawb.common.ui.plot.tool.IDataReductionToolPage.DataReductionInfo;
+import org.dawb.common.ui.plot.tool.IDataReductionToolPage.DataReductionSlice;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.gda.extensions.loaders.H5Utils;
 import org.dawb.hdf5.IHierarchicalDataFile;
@@ -63,7 +65,7 @@ public class RadialProfileTool extends SectorProfileTool {
 	}
 
 	@Override
-	public IStatus export(IHierarchicalDataFile file, Group parent, AbstractDataset data, IProgressMonitor monitor) throws Exception {
+	public DataReductionInfo export(DataReductionSlice slice) throws Exception {
 		
 		final IImageTrace   image   = getImageTrace();
 		final Collection<IRegion> regions = getPlottingSystem().getRegions();
@@ -74,18 +76,18 @@ public class RadialProfileTool extends SectorProfileTool {
 			if (!region.isUserRegion()) continue;
 			
 			final SectorROI sroi = (SectorROI)region.getROI();
-			AbstractDataset[] profile = ROIProfile.sector(data, image.getMask(), sroi, true, false, false);
+			AbstractDataset[] profile = ROIProfile.sector(slice.getData(), image.getMask(), sroi, true, false, false);
 		
 			AbstractDataset integral = profile[0];
 			integral.setName("radial_"+region.getName().replace(' ', '_'));     
-			H5Utils.appendDataset(file, parent, integral);
+			H5Utils.appendDataset(slice.getFile(), slice.getParent(), integral);
 			
 		    if (profile.length>=3 && profile[2]!=null && sroi.hasSeparateRegions()) {
 				final AbstractDataset reflection = profile[2];
 				reflection.setName("radial_sym_"+region.getName().replace(' ', '_'));     
-				H5Utils.appendDataset(file, parent, reflection);
+				H5Utils.appendDataset(slice.getFile(), slice.getParent(), reflection);
 		    }
 		}
-		return Status.OK_STATUS;
+		return new DataReductionInfo(Status.OK_STATUS);
 	}
 }

@@ -135,6 +135,7 @@ public class PlotDataPage extends Page implements IPlotUpdateParticipant, IAdapt
 			workspace.addResourceChangeListener(resourceListener);
 			
 			this.sliceComponent = new SliceComponent("org.dawb.workbench.views.h5GalleryView");
+			sliceComponent.setPlottingSystem(this.dataSetComponent.getPlottingSystem());
 			sliceComponent.createPartControl(form);
 			sliceComponent.setVisible(false);
 	
@@ -186,7 +187,7 @@ public class PlotDataPage extends Page implements IPlotUpdateParticipant, IAdapt
 	@Override
 	public void setSlicerData(String name, String filePath, int[] dims,
 			                  AbstractPlottingSystem plottingSystem) {
-		sliceComponent.setData(name, filePath, dims, plottingSystem);
+		sliceComponent.setData(name, filePath, dims);
 	}
 
 	@Override

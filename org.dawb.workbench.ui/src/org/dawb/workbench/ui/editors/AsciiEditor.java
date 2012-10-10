@@ -16,8 +16,6 @@ import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.tool.IToolPageSystem;
 import org.dawb.common.ui.slicing.ISlicablePlottingPart;
 import org.dawb.common.ui.slicing.SliceComponent;
-import org.dawb.common.ui.util.EclipseUtils;
-import org.dawb.common.util.text.StringUtils;
 import org.dawb.workbench.ui.views.PlotDataPage;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.ui.IEditorInput;
@@ -56,38 +54,44 @@ public class AsciiEditor extends MultiPageEditorPart implements ISlicablePlottin
 	@Override
 	protected void createPages() {
 		try {
+			
+			boolean dataFirst = false;
+			if (getEditorSite().getPage().findViewReference("uk.ac.diamond.scisoft.analysis.rcp.views.DatasetInspectorView")!=null) {
+				dataFirst = true;
+			}
+
+			int index = 0;
+			if (dataFirst && System.getProperty("org.dawb.editor.ascii.hide.diamond.srs")==null) {
+				final SRSEditor srs = new SRSEditor();
+				addPage(index, srs,       getEditorInput());
+				setPageText(index, "Info");
+				index++;
+			}
 
 			this.dataSetEditor = new PlotDataEditor(true, PlotType.PT1D);
 			dataSetEditor.getPlottingSystem().setColorOption(ColorOption.BY_NAME);
-			addPage(0, dataSetEditor, getEditorInput());
-			setPageText(0, "Plot");
+			addPage(index, dataSetEditor, getEditorInput());
+			setPageText(index, "Plot");
+			index++;
 
 			final TextEditor textEditor = new TextEditor();
-			addPage(1, textEditor,       getEditorInput());
-			setPageText(1, "Text");
+			addPage(index, textEditor,       getEditorInput());
+			setPageText(index, "Text");
+			index++;
 
 			final CSVDataEditor dataEditor = new CSVDataEditor();
 			dataEditor.setDataProvider(dataSetEditor);
-			addPage(2, dataEditor,   getEditorInput());
-			setPageText(2, "Data");
+			addPage(index, dataEditor,   getEditorInput());
+			setPageText(index, "Data");
 			addPageChangedListener(dataEditor);
+			index++;
 			
-			if (System.getProperty("org.dawb.editor.ascii.hide.diamond.srs")==null) {
+			if (!dataFirst && System.getProperty("org.dawb.editor.ascii.hide.diamond.srs")==null) {
 				final SRSEditor srs = new SRSEditor();
 				addPage(3, srs,       getEditorInput());
 				setPageText(3, "Info");
 				
 			}
-
-			getSite().getShell().getDisplay().asyncExec(new Runnable() {
-				@Override
-				public void run() {
-					if (EclipseUtils.getPage().findView("uk.ac.diamond.scisoft.analysis.rcp.views.DatasetInspectorView")!=null &&
-							getPageCount()>=4) {
-						setActivePage(3);
-					}
-				}
-			});
 
 		} catch (PartInitException e) {
 			logger.error("Cannot initiate "+getClass().getName()+"!", e);
@@ -124,11 +128,11 @@ public class AsciiEditor extends MultiPageEditorPart implements ISlicablePlottin
 
 	@Override
 	public PlotDataComponent getDataSetComponent() {
-		return ((PlotDataEditor)getEditor(0)).getDataSetComponent();
+		return dataSetEditor.getDataSetComponent();
 	}
 	@Override
 	public SliceComponent getSliceComponent() {
-		return  ((PlotDataEditor)getEditor(0)).getSliceComponent();
+		return  dataSetEditor.getSliceComponent();
 	}
 	
 	@Override
@@ -142,7 +146,7 @@ public class AsciiEditor extends MultiPageEditorPart implements ISlicablePlottin
 	}
 
 	public IPlottingSystem getPlotWindow() {
-		return ((PlotDataEditor)getEditor(0)).getPlotWindow();
+		return dataSetEditor.getPlotWindow();
 	}
 	public PlotDataEditor getDataSetEditor() {
 		return dataSetEditor;

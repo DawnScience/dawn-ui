@@ -1,12 +1,16 @@
 package org.dawb.workbench.plotting.tools.reduction;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import ncsa.hdf.object.Group;
 
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.plot.tool.IDataReductionToolPage;
+import org.dawb.common.ui.plot.tool.IDataReductionToolPage.DataReductionInfo;
+import org.dawb.common.ui.plot.tool.IDataReductionToolPage.DataReductionSlice;
 import org.dawb.common.ui.slicing.DimsDataList;
 import org.dawb.common.ui.slicing.SliceUtils;
 import org.dawb.common.ui.util.EclipseUtils;
@@ -58,6 +62,8 @@ public class DataReductionWizard extends Wizard implements IExportWizard {
 	private String                 h5Path;
 	private IDataReductionToolPage dataReductionPage;
 	private DimsDataList           sliceData;
+
+	private Map<Integer, String> nexusAxes;
 	
 	public DataReductionWizard() {
 		super();
@@ -106,6 +112,12 @@ public class DataReductionWizard extends Wizard implements IExportWizard {
 
 						 final IHierarchicalDataFile hf = HierarchicalDataFactory.getWriter(export.getLocation().toOSString());
 						 
+						 // The axes the user extracted the data in (null, just x or x and y)
+						 final SliceObject so = slices.get(0);
+						 so.setPath(source.getLocation().toOSString());
+						 so.setName(path);
+						 final List<AbstractDataset> axes = getAxes(so, monitor);
+
 						 Group entry=null, group=null;
 						 try {
 							 entry = hf.group("entry");
@@ -114,13 +126,20 @@ public class DataReductionWizard extends Wizard implements IExportWizard {
 							 hf.setNexusAttribute(group, Nexus.DATA);	
 							 
 							 // Iterate slice data
+							 Object userData = null;
 							 for (SliceObject slice : slices) {
 								 slice.setPath(source.getLocation().toOSString());
 								 slice.setName(path);
 
+								 // y Data, in indices
 								 final AbstractDataset set = SliceUtils.getSlice(slice, monitor);
-								 getTool().export(hf, group, set, monitor);
+								 
+								 DataReductionSlice sliceInfo = new DataReductionSlice(hf, group, set, userData, monitor);
+								 sliceInfo.setAxes(axes);
+								 
+								 DataReductionInfo info = getTool().export(sliceInfo);
 								 monitor.worked(1);
+								 if (info.getStatus().isOK()) userData = info.getUserData();
 								 
 								 if (monitor.isCanceled()) break;
 							 }
@@ -157,6 +176,23 @@ public class DataReductionWizard extends Wizard implements IExportWizard {
 		 return true;
 	}
 	
+	protected final List<AbstractDataset> getAxes(SliceObject slice, IProgressMonitor monitor) throws Exception {
+		
+		slice.setNexusAxes(nexusAxes);
+		if (slice.getNexusAxes()==null || slice.getNexusAxes().isEmpty()) return null;
+		int[] shape = slice.getSlicedShape();
+		if (shape.length==1) {
+			final AbstractDataset x = SliceUtils.getNexusAxis(slice, shape[0], 3, false, monitor);
+			if (x==null) return null;
+			return Arrays.asList(x);
+		} else if (shape.length==2) {
+			final AbstractDataset x = SliceUtils.getNexusAxis(slice, shape[1], 3, false, monitor);
+			final AbstractDataset y = SliceUtils.getNexusAxis(slice, shape[0], 1, false, monitor);
+			return Arrays.asList(x,y);
+		}
+		return null;
+	}
+
 	public boolean needsProgressMonitor() {
 		return true;
 	}
@@ -387,6 +423,10 @@ public class DataReductionWizard extends Wizard implements IExportWizard {
 
 	public void setSliceData(DimsDataList sliceData) {
 		this.sliceData = sliceData;
+	}
+
+	public void setNexusAxes(Map<Integer, String> nexusAxes) {
+		this.nexusAxes = nexusAxes;
 	}
 
 }

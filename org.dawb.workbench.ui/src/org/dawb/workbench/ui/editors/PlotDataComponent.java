@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.EventListener;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
@@ -453,6 +454,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 					wiz.setSelections(getSelectionNames());
 					wiz.setTool((IDataReductionToolPage)getTool());
 					wiz.setSliceData(getSliceData());
+					wiz.setNexusAxes(getNexusAxes());
 					
 					WizardDialog wd = new  WizardDialog(Display.getCurrent().getActiveShell(), wiz);
 					wd.setTitle(wiz.getWindowTitle());
@@ -490,6 +492,14 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 		}
 		return null;
 	}
+	
+	protected Map<Integer,String> getNexusAxes() {
+		if (providerDeligate instanceof ISlicablePlottingPart) {
+			return ((ISlicablePlottingPart)providerDeligate).getSliceComponent().getNexusAxes();
+		}
+		return null;
+	}
+
 
 	protected IFile getIFile() {
 		if (providerDeligate instanceof IEditorPart) {

@@ -28,7 +28,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.fitting.EllipseFitter;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalFitROI;
 import uk.ac.diamond.scisoft.analysis.roi.PointROI;
-import uk.ac.diamond.scisoft.analysis.roi.PolygonalROI;
+import uk.ac.diamond.scisoft.analysis.roi.PolylineROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
 public class EllipseFitSelection extends AbstractSelectionRegion {
@@ -158,7 +158,7 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 			return null;
 		}
 
-		final PolygonalROI hroi = new PolygonalROI();
+		final PolylineROI hroi = new PolylineROI();
 		final Point p = new Point();
 		for (int i = 0, imax = pl.size(); i < imax; i++) {
 			pl.getPoint(p, i);
@@ -374,7 +374,7 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 			setAngle(eroi.getAngleDegrees());
 
 			int imax = handles.size() - 1;
-			PolygonalROI proi = eroi.getPoints();
+			PolylineROI proi = eroi.getPoints();
 
 			if (imax != proi.getSides()) {
 				for (int i = imax; i >= 0; i--) {
