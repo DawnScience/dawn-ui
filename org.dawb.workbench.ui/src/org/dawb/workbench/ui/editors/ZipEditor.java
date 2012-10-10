@@ -193,11 +193,11 @@ public class ZipEditor extends MultiPageEditorPart implements ISlicablePlottingP
 
 	@Override
 	public PlotDataComponent getDataSetComponent() {
-		return ((PlotDataEditor)getEditor(0)).getDataSetComponent();
+		return dataSetEditor.getDataSetComponent();
 	}
 	@Override
 	public SliceComponent getSliceComponent() {
-		return  ((PlotDataEditor)getEditor(0)).getSliceComponent();
+		return  dataSetEditor.getSliceComponent();
 	}
 	
 	@Override
@@ -211,7 +211,7 @@ public class ZipEditor extends MultiPageEditorPart implements ISlicablePlottingP
 	}
 
 	public IPlottingSystem getPlotWindow() {
-		return ((PlotDataEditor)getEditor(0)).getPlotWindow();
+		return dataSetEditor.getPlotWindow();
 	}
 	public PlotDataEditor getDataSetEditor() {
 		return dataSetEditor;
