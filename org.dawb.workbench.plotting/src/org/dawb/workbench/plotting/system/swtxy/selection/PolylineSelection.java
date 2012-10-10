@@ -20,7 +20,7 @@ import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
 
 import uk.ac.diamond.scisoft.analysis.roi.PointROI;
-import uk.ac.diamond.scisoft.analysis.roi.PolygonalROI;
+import uk.ac.diamond.scisoft.analysis.roi.PolylineROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
 public class PolylineSelection extends AbstractSelectionRegion {
@@ -95,7 +95,7 @@ public class PolylineSelection extends AbstractSelectionRegion {
 	@Override
 	protected ROIBase createROI(boolean recordResult) {
 		final PointList pl = pline.getPoints();
-		final PolygonalROI proi = new PolygonalROI();
+		final PolylineROI proi = new PolylineROI();
 		for (int i = 0, imax = pl.size(); i < imax; i++) {
 			Point p = pl.getPoint(i);
 			proi.insertPoint(i, coords.getPositionValue(p.x(),p.y()));
@@ -108,11 +108,11 @@ public class PolylineSelection extends AbstractSelectionRegion {
 
 	@Override
 	protected void updateROI(ROIBase roi) {
-		if (roi instanceof PolygonalROI) {
+		if (roi instanceof PolylineROI) {
 			if (pline == null)
 				return;
 
-			pline.updateFromROI((PolygonalROI) roi);
+			pline.updateFromROI((PolylineROI) roi);
 
 			updateConnectionBounds();
 		}
@@ -183,7 +183,7 @@ public class PolylineSelection extends AbstractSelectionRegion {
 		 * Update according to ROI
 		 * @param sroi
 		 */
-		public void updateFromROI(PolygonalROI proi) {
+		public void updateFromROI(PolylineROI proi) {
 			final PointList pl = getPoints();
 			final int imax = handles.size();
 			if (imax != proi.getSides())

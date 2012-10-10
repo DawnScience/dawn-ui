@@ -44,6 +44,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.function.DownsampleMode;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.PointROI;
 import uk.ac.diamond.scisoft.analysis.roi.PolygonalROI;
+import uk.ac.diamond.scisoft.analysis.roi.PolylineROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
@@ -201,7 +202,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				if (fullMask!=null) {
 					imageServiceBean.setMask(getDownsampled(fullMask));
 				} else {
-					imageServiceBean.setMask(null); // Ensure we loose the mask!
+					imageServiceBean.setMask(null); // Ensure we lose the mask!
 				}
 				
 				if (rescaleType==ImageScaleType.REHISTOGRAM) { // Avoids changing colouring to 
@@ -239,8 +240,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			if (imageData!=null && imageData.width==bounds.width && imageData.height==bounds.height) { 
 				// No slice, faster
 				if (monitor!=null && monitor.isCanceled()) return false;
-				if (this.scaledImage!=null &&!scaledImage.isDisposed()) this.scaledImage.dispose(); // IMPORTANT
-				this.scaledImage  = new Image(Display.getDefault(), imageData);
+				if (scaledImage!=null &&!scaledImage.isDisposed()) scaledImage.dispose(); // IMPORTANT
+				scaledImage  = new Image(Display.getDefault(), imageData);
 
 			} else {
 				// slice data to get current zoom area
@@ -294,8 +295,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 					}
 				}
 				data = data!=null ? data.scaledTo(rbounds.width, rbounds.height) : null;
-				if (this.scaledImage!=null &&!scaledImage.isDisposed()) this.scaledImage.dispose(); // IMPORTANT
-				this.scaledImage = data!=null ? new Image(Display.getDefault(), data) : null;
+				if (scaledImage!=null &&!scaledImage.isDisposed()) scaledImage.dispose(); // IMPORTANT
+				scaledImage = data!=null ? new Image(Display.getDefault(), data) : null;
 			}
 			
 			return true;
@@ -1002,9 +1003,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			transform(yl,1,sp,ep);
 			return new LinearROI(sp, ep);
 			
-		} else if (roi instanceof PolygonalROI) {
-			PolygonalROI proi = (PolygonalROI)roi;
-			final PolygonalROI ret = new PolygonalROI();
+		} else if (roi instanceof PolylineROI) {
+			PolylineROI proi = (PolylineROI)roi;
+			final PolylineROI ret = (proi instanceof PolygonalROI) ? new PolygonalROI() : new PolylineROI();
 			for (PointROI pointROI : proi) {
 				double[] dp = pointROI.getPoint();
 				transform(xl,0,dp);
