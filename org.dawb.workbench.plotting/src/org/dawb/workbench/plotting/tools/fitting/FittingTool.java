@@ -127,6 +127,24 @@ public class FittingTool extends AbstractToolPage implements IRegionListener, ID
 				if (tracesMenu!=null) tracesMenu.clear();
 				if (getSite()!=null) getSite().getActionBars().updateActionBars();
 			}
+			
+			@Override
+			public void traceAdded(TraceEvent evt) {
+				//Get trace from event
+				final ITrace trace = evt.getSource() instanceof ITrace ? ((ITrace)evt.getSource()): null;
+				//Ignore event if null
+				if (trace == null) return;
+				//Ignore if not user trace
+				if (!trace.isUserTrace()) return;
+				
+				if (fittedPeaks!=null && !fittedPeaks.isEmpty()) {
+					if (fittedPeaks.getFittedPeakTraces().contains(trace)) return;
+				}
+
+				final int size = updateTracesChoice(trace);	
+				if (size>0) fittingJob.schedule();
+
+			}
 		};
 
 	}
@@ -542,10 +560,11 @@ public class FittingTool extends AbstractToolPage implements IRegionListener, ID
 												
 						final AbstractDataset[] pair = fp.getPeakFunctions();
 						final ILineTrace trace = TraceUtils.replaceCreateLineTrace(getPlottingSystem(), "Peak "+ipeak);
+						//set user trace false before setting data otherwise the trace sent to events will be a true by default
+						trace.setUserTrace(false);
 						trace.setData(pair[0], pair[1]);
 						trace.setLineWidth(1);
 						trace.setTraceColor(ColorConstants.black);
-						trace.setUserTrace(false);
 						getPlottingSystem().addTrace(trace);
 						fp.setTrace(trace);
 						if (!requireTrace) trace.setVisible(false);
