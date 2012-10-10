@@ -182,12 +182,12 @@ public class DataReductionWizard extends Wizard implements IExportWizard {
 		if (slice.getNexusAxes()==null || slice.getNexusAxes().isEmpty()) return null;
 		int[] shape = slice.getSlicedShape();
 		if (shape.length==1) {
-			final AbstractDataset x = SliceUtils.getNexusAxis(slice, shape[0], 3, false, monitor);
+			final AbstractDataset x = SliceUtils.getNexusAxis(slice, shape[0], slice.getX()+1, false, monitor);
 			if (x==null) return null;
 			return Arrays.asList(x);
 		} else if (shape.length==2) {
-			final AbstractDataset x = SliceUtils.getNexusAxis(slice, shape[1], 3, false, monitor);
-			final AbstractDataset y = SliceUtils.getNexusAxis(slice, shape[0], 1, false, monitor);
+			final AbstractDataset x = SliceUtils.getNexusAxis(slice, shape[1], slice.getX()+1, false, monitor);
+			final AbstractDataset y = SliceUtils.getNexusAxis(slice, shape[0], slice.getY()+1, false, monitor);
 			return Arrays.asList(x,y);
 		}
 		return null;
