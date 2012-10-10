@@ -508,11 +508,6 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 
 		if (data.getName()!=null) xyGraph.setTitle(data.getName());
 
-		final Axis xAxis = ((AspectAxis)getSelectedXAxis());
-		final Axis yAxis = ((AspectAxis)getSelectedYAxis());
-		xAxis.setTitle(axes!=null&&axes.get(0).getName()!=null ? axes.get(0).getName() : "");
-		yAxis.setTitle(axes!=null&&axes.get(1).getName()!=null ? axes.get(1).getName() : "");
-
 		image.setData(data, axes, false);
 		fireTraceUpdated(new TraceEvent(image));		
 	}
@@ -560,9 +555,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 
 			final Axis xAxis = ((AxisWrapper)getSelectedXAxis()).getWrappedAxis();
 			final Axis yAxis = ((AxisWrapper)getSelectedYAxis()).getWrappedAxis();
-			xAxis.setTitle(axes!=null&&axes.get(0).getName()!=null ? axes.get(0).getName() : "");
 			xAxis.setLogScale(false);
-			yAxis.setTitle(axes!=null&&axes.get(1).getName()!=null ? axes.get(1).getName() : "");
 			yAxis.setLogScale(false);
             
 			if (data.getName()!=null) xyGraph.setTitle(data.getName());
