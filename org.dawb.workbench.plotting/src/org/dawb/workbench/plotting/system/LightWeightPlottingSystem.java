@@ -471,28 +471,24 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		this.defaultPlotType = mode;
 		createUI();
 	}
-	
+
 	public ITrace updatePlot2D(final AbstractDataset       data, 
 							   final List<AbstractDataset> axes,
 							   final IProgressMonitor      monitor) {
-		
+
 		final Collection<ITrace> traces = getTraces(IImageTrace.class);
 		if (traces!=null && traces.size()>0) {
 			final IImageTrace image = (IImageTrace)traces.iterator().next();
 			final int[]       shape = image.getData()!=null ? image.getData().getShape() : null;
 			if (shape!=null && Arrays.equals(shape, data.getShape())) {
 				if (getDisplay().getThread()==Thread.currentThread()) {
-					if (data.getName()!=null) xyGraph.setTitle(data.getName());
-					image.setData(data, axes, false);
-					fireTraceUpdated(new TraceEvent(image));
+					updatePlot2DInternal(image, data, axes, monitor);
 				} else {
 					Display.getDefault().syncExec(new Runnable() {
 						public void run() {
 							// This will keep the previous zoom level if there was one
 							// and will be faster than createPlot2D(...) which autoscales.
-							if (data.getName()!=null) xyGraph.setTitle(data.getName());
-							image.setData(data, axes, false);
-							fireTraceUpdated(new TraceEvent(image));
+							updatePlot2DInternal(image, data, axes, monitor);
 						}
 					});
 				}
@@ -501,8 +497,24 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 				return createPlot2D(data, axes, monitor);
 			}
 		} else {
-		    return createPlot2D(data, axes, monitor);
+			return createPlot2D(data, axes, monitor);
 		}
+	}
+
+	private void updatePlot2DInternal(final IImageTrace image,
+									  final AbstractDataset       data, 
+									  final List<AbstractDataset> axes,
+									  final IProgressMonitor      monitor) {
+
+		if (data.getName()!=null) xyGraph.setTitle(data.getName());
+
+		final Axis xAxis = ((AspectAxis)getSelectedXAxis());
+		final Axis yAxis = ((AspectAxis)getSelectedYAxis());
+		xAxis.setTitle(axes!=null&&axes.get(0).getName()!=null ? axes.get(0).getName() : "");
+		yAxis.setTitle(axes!=null&&axes.get(1).getName()!=null ? axes.get(1).getName() : "");
+
+		image.setData(data, axes, false);
+		fireTraceUpdated(new TraceEvent(image));		
 	}
 
 	/**
