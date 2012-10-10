@@ -931,7 +931,10 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 			try {
 				clearAnnotations();
 				clearRegions();
-				for (Axis axis : xyGraph.getAxisList()) axis.setRange(0,100);
+				for (Axis axis : xyGraph.getAxisList()) {
+					axis.setTitle("");
+					axis.setRange(0,100);
+				}
 				clearTraces();
 	
 			} catch (Throwable e) {
