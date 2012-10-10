@@ -54,6 +54,7 @@ public class RemoveRegionDialog extends Dialog {
 	        final RegionArea regArea = (RegionArea)xyGraph.getPlotArea();
 	        for (String name : regArea.getRegionMap().keySet()) {
 	        	final AbstractSelectionRegion region = regArea.getRegion(name);
+	        	if (!region.isUserRegion()) continue;
 	        	regionCombo.add(region.getName());
 	        }
 	        regionCombo.select(0);
