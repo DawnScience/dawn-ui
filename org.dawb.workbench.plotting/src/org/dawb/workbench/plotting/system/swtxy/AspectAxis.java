@@ -274,14 +274,18 @@ public class AspectAxis extends Axis implements IAxis {
 		final Range realRange = getRange();
 		if (labelData==null) return realRange;
 
-		final double lower = labelData.getSize()>(int)Math.round(realRange.getLower())
-				           ? labelData.getElementDoubleAbs((int)Math.round(realRange.getLower()))
-				           : labelData.getElementDoubleAbs(labelData.getSize()-1);
-				        			   
-		final double upper = labelData.getSize()>(int)Math.round(realRange.getUpper())
-				           ? labelData.getElementDoubleAbs((int)Math.round(realRange.getUpper()))
-				           : labelData.getElementDoubleAbs(labelData.getSize()-1);
-		return new Range(lower, upper);
+		try {
+			final double lower = labelData.getSize()>(int)Math.round(realRange.getLower())
+					           ? labelData.getElementDoubleAbs((int)Math.round(realRange.getLower()))
+					           : labelData.getElementDoubleAbs(labelData.getSize()-1);
+					        			   
+			final double upper = labelData.getSize()>(int)Math.round(realRange.getUpper())
+					           ? labelData.getElementDoubleAbs((int)Math.round(realRange.getUpper()))
+					           : labelData.getElementDoubleAbs(labelData.getSize()-1);
+			return new Range(lower, upper);
+		} catch (Throwable ne) {
+			return realRange;
+		}
 	}
 
 	@Override

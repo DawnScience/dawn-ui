@@ -513,17 +513,13 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 			final int[]       shape = image.getData()!=null ? image.getData().getShape() : null;
 			if (shape!=null && Arrays.equals(shape, data.getShape())) {
 				if (getDisplay().getThread()==Thread.currentThread()) {
-					if (data.getName()!=null) xyGraph.setTitle(data.getName());
-					image.setData(data, axes, false);
-					fireTraceUpdated(new TraceEvent(image));
+                    updatePlot2DInternal(image, data, axes, monitor);
 				} else {
 					Display.getDefault().syncExec(new Runnable() {
 						public void run() {
 							// This will keep the previous zoom level if there was one
 							// and will be faster than createPlot2D(...) which autoscales.
-							if (data.getName()!=null) xyGraph.setTitle(data.getName());
-							image.setData(data, axes, false);
-							fireTraceUpdated(new TraceEvent(image));
+			                   updatePlot2DInternal(image, data, axes, monitor);
 						}
 					});
 				}
@@ -535,6 +531,18 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		    return createPlot2D(data, axes, monitor);
 		}
 	}
+
+	private void updatePlot2DInternal(final IImageTrace image,
+			                          final AbstractDataset       data, 
+								      final List<AbstractDataset> axes,
+								      final IProgressMonitor      monitor) {
+		
+		if (data.getName()!=null) xyGraph.setTitle(data.getName());
+		
+		image.setData(data, axes, false);
+		fireTraceUpdated(new TraceEvent(image));		
+	}
+
 
 	/**
 	 * Must be called in UI thread. Creates and updates image.
@@ -579,9 +587,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 
 			final Axis xAxis = ((AspectAxis)getSelectedXAxis());
 			final Axis yAxis = ((AspectAxis)getSelectedYAxis());
-			xAxis.setTitle(axes!=null&&axes.get(0).getName()!=null ? axes.get(0).getName() : "");
 			xAxis.setLogScale(false);
-			yAxis.setTitle(axes!=null&&axes.get(1).getName()!=null ? axes.get(1).getName() : "");
 			yAxis.setLogScale(false);
             
 			if (data.getName()!=null) xyGraph.setTitle(data.getName());
@@ -958,7 +964,10 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 			try {
 				clearAnnotations();
 				clearRegions();
-				for (Axis axis : xyGraph.getAxisList()) axis.setRange(0,100);
+				for (Axis axis : xyGraph.getAxisList()) {
+					axis.setRange(0,100);
+					axis.setTitle("");
+				}
 				clearTraces();
 	
 			} catch (Throwable e) {
