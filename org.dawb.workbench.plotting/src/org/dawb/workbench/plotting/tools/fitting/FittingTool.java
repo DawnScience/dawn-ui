@@ -11,7 +11,6 @@ import java.util.List;
 
 import ncsa.hdf.object.Dataset;
 import ncsa.hdf.object.Datatype;
-import ncsa.hdf.object.Group;
 import ncsa.hdf.object.h5.H5Datatype;
 
 import org.dawb.common.ui.image.IconUtils;
@@ -74,8 +73,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
+import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
 import uk.ac.diamond.scisoft.analysis.rcp.plotting.IGuiInfoManager;
 import uk.ac.diamond.scisoft.analysis.rcp.views.PlotServerConnection;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
@@ -425,7 +427,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener, ID
 				x = a[0]; y=a[1];
 	
 				try {
-					final FittedPeaks bean = FittingUtils.getFittedPeaks(x, y, monitor);
+					final FittedPeaks bean = FittingUtils.getFittedPeaks(new FittedPeaksInfo(x, y, monitor));
 		    		if (bean!=null) for (FittedPeak p : bean.getPeakList()) {
 		    			p.setX(selectedTrace.getXData());
 		    			p.setY(selectedTrace.getYData());
@@ -452,42 +454,56 @@ public class FittingTool extends AbstractToolPage implements IRegionListener, ID
 	
 
 	@Override
-	public IStatus export(IHierarchicalDataFile file, Group parent, AbstractDataset y, IProgressMonitor monitor) throws Exception {
+	public DataReductionInfo export(DataReductionSlice slice) throws Exception {
 				
 		final RectangularROI roi = getFitBounds();
-		if (roi==null) return Status.CANCEL_STATUS;
+		if (roi==null) return new DataReductionInfo(Status.CANCEL_STATUS, null);
 
 		final double[] p1 = roi.getPointRef();
 		final double[] p2 = roi.getEndPoint();
 
-		AbstractDataset x  = IntegerDataset.arange(y.getSize(), AbstractDataset.INT32);
+		AbstractDataset x  = slice.getAxes()!=null && !slice.getAxes().isEmpty()
+				           ? slice.getAxes().get(0)
+				           : IntegerDataset.arange(slice.getData().getSize(), AbstractDataset.INT32);
 
-		AbstractDataset[] a= FittingUtils.xintersection(x,y,p1[0],p2[0]);
-		x = a[0]; y=a[1];
+		AbstractDataset[] a= FittingUtils.xintersection(x,slice.getData(),p1[0],p2[0]);
+		x = a[0]; AbstractDataset y=a[1];
+		
+		// If the IdentifiedPeaks are null, we make them.
+		List<IdentifiedPeak> identifiedPeaks = (List<IdentifiedPeak>)slice.getUserData();
+		if (slice.getUserData()==null) {
+			identifiedPeaks = Generic1DFitter.parseDataDerivative(x, y, FittingUtils.getSmoothing());
+		}
+		DataReductionInfo status = new DataReductionInfo(Status.OK_STATUS, identifiedPeaks);
 
 		try {
-			final FittedPeaks bean = FittingUtils.getFittedPeaks(x, y, monitor);
+			final FittedPeaksInfo info = new FittedPeaksInfo(x, y, slice.getMonitor());
+			info.setIdentifiedPeaks(identifiedPeaks);
+			
+			FittedPeaks bean = FittingUtils.getFittedPeaks(info);
+			
 			int index = 1;
 			for (FittedPeak fp : bean.getPeakList()) {
 
 				H5Datatype dType = new H5Datatype(Datatype.CLASS_FLOAT, 64/8, Datatype.NATIVE, Datatype.NATIVE);
 
+				IHierarchicalDataFile file = slice.getFile();
 				final String peakName = "Peak"+index;
-				Dataset s = file.appendDataset(peakName+"_fit",  dType,  new long[]{1},new double[]{fp.getPeakValue()}, parent);
+				Dataset s = file.appendDataset(peakName+"_fit",  dType,  new long[]{1},new double[]{fp.getPeakValue()}, slice.getParent());
 				file.setNexusAttribute(s, Nexus.SDS);			
 
-				s = file.appendDataset(peakName+"_xposition",  dType,  new long[]{1}, new double[]{fp.getPosition()}, parent);
+				s = file.appendDataset(peakName+"_xposition",  dType,  new long[]{1}, new double[]{fp.getPosition()}, slice.getParent());
 				file.setNexusAttribute(s, Nexus.SDS);
 				
-				s = file.appendDataset(peakName+"_fwhm",  dType,  new long[]{1}, new double[]{fp.getFWHM()}, parent);
+				s = file.appendDataset(peakName+"_fwhm",  dType,  new long[]{1}, new double[]{fp.getFWHM()}, slice.getParent());
 				file.setNexusAttribute(s, Nexus.SDS);
 				
-				s = file.appendDataset(peakName+"_area",  dType,  new long[]{1}, new double[]{fp.getArea()}, parent);
+				s = file.appendDataset(peakName+"_area",  dType,  new long[]{1}, new double[]{fp.getArea()}, slice.getParent());
 				file.setNexusAttribute(s, Nexus.SDS);
 
 				final AbstractDataset[] pair = fp.getPeakFunctions();
 				AbstractDataset     function = pair[1];
-				s = file.appendDataset(peakName+"_function",  dType,  H5Utils.getLong(function.getShape()), function.getBuffer(), parent);
+				s = file.appendDataset(peakName+"_function",  dType,  H5Utils.getLong(function.getShape()), function.getBuffer(), slice.getParent());
 				file.setNexusAttribute(s, Nexus.SDS);
 
 
@@ -496,12 +512,11 @@ public class FittingTool extends AbstractToolPage implements IRegionListener, ID
 
 		} catch (Exception ne) {
 			logger.error("Cannot fit peaks!", ne);
-			return Status.CANCEL_STATUS;
+			return new DataReductionInfo(Status.CANCEL_STATUS, null);
 		}
 		
-		return Status.OK_STATUS;
+		return status;
 	}
-
 
 	/**
 	 * Thread safe

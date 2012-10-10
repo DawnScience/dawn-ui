@@ -6,6 +6,8 @@ import ncsa.hdf.object.Dataset;
 import ncsa.hdf.object.Group;
 
 import org.dawb.common.ui.plot.region.IRegion;
+import org.dawb.common.ui.plot.tool.IDataReductionToolPage.DataReductionInfo;
+import org.dawb.common.ui.plot.tool.IDataReductionToolPage.DataReductionSlice;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.gda.extensions.loaders.H5Utils;
 import org.dawb.hdf5.IHierarchicalDataFile;
@@ -69,7 +71,7 @@ public class AzimuthalProfileTool extends SectorProfileTool {
 	}
 
 	@Override
-	public IStatus export(IHierarchicalDataFile file, Group parent, AbstractDataset data, IProgressMonitor monitor) throws Exception {
+	public DataReductionInfo export(DataReductionSlice slice) throws Exception {
 		
 		final IImageTrace   image   = getImageTrace();
 		final Collection<IRegion> regions = getPlottingSystem().getRegions();
@@ -80,19 +82,19 @@ public class AzimuthalProfileTool extends SectorProfileTool {
 			if (!region.isUserRegion()) continue;
 			
 			final SectorROI sroi = (SectorROI)region.getROI();
-			final AbstractDataset[] profile = ROIProfile.sector(data, image.getMask(), sroi, false, true, false);
+			final AbstractDataset[] profile = ROIProfile.sector(slice.getData(), image.getMask(), sroi, false, true, false);
 		
 			AbstractDataset integral = profile[1];
 			integral.setName("azimuthal_"+region.getName().replace(' ', '_'));     
-			H5Utils.appendDataset(file, parent, integral);
+			H5Utils.appendDataset(slice.getFile(), slice.getParent(), integral);
 			
 		    if (profile.length>=4 && profile[3]!=null && sroi.hasSeparateRegions()) {
 				final AbstractDataset reflection = profile[3];
 				reflection.setName("azimuthal_sym_"+region.getName().replace(' ', '_'));     
-				H5Utils.appendDataset(file, parent, reflection);
+				H5Utils.appendDataset(slice.getFile(), slice.getParent(), reflection);
 		    }
 		}
-		return Status.OK_STATUS;
+		return new DataReductionInfo(Status.OK_STATUS);
 	}
 	
 

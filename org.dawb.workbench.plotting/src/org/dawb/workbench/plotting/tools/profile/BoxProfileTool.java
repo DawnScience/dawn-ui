@@ -3,8 +3,6 @@ package org.dawb.workbench.plotting.tools.profile;
 import java.util.Arrays;
 import java.util.Collection;
 
-import ncsa.hdf.object.Group;
-
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.axis.IAxis;
 import org.dawb.common.ui.plot.region.IRegion;
@@ -13,9 +11,7 @@ import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.gda.extensions.loaders.H5Utils;
-import org.dawb.hdf5.IHierarchicalDataFile;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.SWT;
 
@@ -122,7 +118,7 @@ public class BoxProfileTool extends ProfileTool {
 	 * Same tool called recursively from the DataReductionWizard
 	 */
 	@Override
-	public IStatus export(IHierarchicalDataFile file, Group parent, AbstractDataset data, IProgressMonitor monitor) throws Exception {
+	public DataReductionInfo export(DataReductionSlice slice) throws Exception {
 
 		final IImageTrace   image   = getImageTrace();
 		final Collection<IRegion> regions = getPlottingSystem().getRegions();
@@ -132,18 +128,18 @@ public class BoxProfileTool extends ProfileTool {
 			if (!region.isVisible())    continue;
 			if (!region.isUserRegion()) continue;
 			
-			AbstractDataset[] box = ROIProfile.box(data, image.getMask(), (RectangularROI)region.getROI(), false);
+			AbstractDataset[] box = ROIProfile.box(slice.getData(), image.getMask(), (RectangularROI)region.getROI(), false);
 			
 			final AbstractDataset x_intensity = box[0];
 			x_intensity.setName("X_"+region.getName().replace(' ', '_'));
-			H5Utils.appendDataset(file, parent, x_intensity);
+			H5Utils.appendDataset(slice.getFile(), slice.getParent(), x_intensity);
 			
 			final AbstractDataset y_intensity = box[1];
 			y_intensity.setName("Y_"+region.getName().replace(' ', '_'));
-			H5Utils.appendDataset(file, parent, y_intensity);
+			H5Utils.appendDataset(slice.getFile(), slice.getParent(), y_intensity);
 		}
 		 
-        return Status.OK_STATUS;
+        return new DataReductionInfo(Status.OK_STATUS);
 	}
 
 }

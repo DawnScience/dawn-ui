@@ -8,6 +8,8 @@ import ncsa.hdf.object.Group;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
+import org.dawb.common.ui.plot.tool.IDataReductionToolPage.DataReductionInfo;
+import org.dawb.common.ui.plot.tool.IDataReductionToolPage.DataReductionSlice;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
@@ -88,7 +90,7 @@ public class LineProfileTool extends ProfileTool {
 
 	
 	@Override
-	public IStatus export(IHierarchicalDataFile file, Group parent, AbstractDataset data, IProgressMonitor monitor) throws Exception {
+	public DataReductionInfo export(DataReductionSlice slice) throws Exception {
 		
 		final IImageTrace   image   = getImageTrace();
 		final Collection<IRegion> regions = getPlottingSystem().getRegions();
@@ -98,12 +100,12 @@ public class LineProfileTool extends ProfileTool {
 			if (!region.isVisible())    continue;
 			if (!region.isUserRegion()) continue;
 			
-			AbstractDataset[] profileData = ROIProfile.line(data, image.getMask(), (LinearROI)region.getROI(), 1d, false);
+			AbstractDataset[] profileData = ROIProfile.line(slice.getData(), image.getMask(), (LinearROI)region.getROI(), 1d, false);
 			final AbstractDataset intensity = profileData[0];
 			intensity.setName(region.getName().replace(' ', '_'));
 			
-			H5Utils.appendDataset(file, parent, intensity);
+			H5Utils.appendDataset(slice.getFile(), slice.getParent(), intensity);
 		}
-        return Status.OK_STATUS;
+        return new DataReductionInfo(Status.OK_STATUS);
 	}
 }

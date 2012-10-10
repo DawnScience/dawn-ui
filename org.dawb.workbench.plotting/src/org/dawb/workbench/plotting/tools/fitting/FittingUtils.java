@@ -52,23 +52,18 @@ public class FittingUtils {
 	 * function plotted over the peak region. These can be plotted to show the user the
 	 * fitted function, which they may wish to adjust.
 	 * 
-	 * @param x
-	 * @param y
-	 * @param monitor
 	 * @return
 	 */
-	public static FittedPeaks getFittedPeaks(final AbstractDataset  x, 
-			                                     final AbstractDataset  y,
-			                                     final IProgressMonitor monitor) throws Exception {
+	public static FittedPeaks getFittedPeaks(final FittedPeaksInfo info) throws Exception {
 		
 		List<CompositeFunction> composites=null;
 		final IOptimizer optimizer = getOptimizer();
 		if (getPeaksRequired()==1) {
-			double lowOffset = y.min().doubleValue();
-			double highOffset = (Double) y.mean();
+			double lowOffset = info.getY().min().doubleValue();
+			double highOffset = (Double) info.getY().mean();
 			Offset offset = new Offset(lowOffset, highOffset);
-			double fwhmApprox = x.peakToPeak().doubleValue()/2.0;
-			IdentifiedPeak iniPeak = new IdentifiedPeak(((Number)x.mean()).doubleValue(), x.min().doubleValue(), x.max().doubleValue(), x.peakToPeak().doubleValue()*y.max().doubleValue(), y.max().doubleValue(), 0, x.getSize()-1, Arrays.asList(new Double[] {x.min().doubleValue()+fwhmApprox, x.max().doubleValue()-fwhmApprox}));
+			double fwhmApprox = info.getX().peakToPeak().doubleValue()/2.0;
+			IdentifiedPeak iniPeak = new IdentifiedPeak(((Number)info.getX().mean()).doubleValue(), info.getX().min().doubleValue(), info.getX().max().doubleValue(), info.getX().peakToPeak().doubleValue()*info.getY().max().doubleValue(), info.getY().max().doubleValue(), 0, info.getX().getSize()-1, Arrays.asList(new Double[] {info.getX().min().doubleValue()+fwhmApprox, info.getX().max().doubleValue()-fwhmApprox}));
 			iniPeak.setFWHM(fwhmApprox);
 			
 			Constructor<? extends APeak> ctor = getPeakType().getClass().getConstructor(IdentifiedPeak.class);
@@ -76,16 +71,16 @@ public class FittingUtils {
 			CompositeFunction comp = new CompositeFunction();
 			comp.addFunction(localPeak);
 			comp.addFunction(offset);
-			optimizer.optimize(new AbstractDataset[] { x }, y, comp);
+			optimizer.optimize(new AbstractDataset[] { info.getX() }, info.getY(), comp);
 
 			composites = new ArrayList<CompositeFunction>(1);
 			composites.add(comp);
 		
 		} else {
-			composites =  Generic1DFitter.fitPeakFunctions(x, y, getPeakType(), optimizer, getSmoothing(), getPeaksRequired(), 0.0, false, false, new IAnalysisMonitor() {
+			composites =  Generic1DFitter.fitPeakFunctions(info.getIdentifiedPeaks(), info.getX(), info.getY(), getPeakType(), optimizer, getSmoothing(), getPeaksRequired(), 0.0, false, false, new IAnalysisMonitor() {
 				@Override
 				public boolean hasBeenCancelled() {
-					return monitor.isCanceled(); // We always use the monitor.isCancelled() the fitting can take a while
+					return info.getMonitor().isCanceled(); // We always use the monitor.isCancelled() the fitting can take a while
 					                             // and should always allow stopping.
 				}
 			});
@@ -97,12 +92,12 @@ public class FittingUtils {
 		for (CompositeFunction function : composites) {
 			
 			final IPeak peak = function.getPeak(0);
-			if (monitor.isCanceled()) return null;
+			if (info.getMonitor().isCanceled()) return null;
 			double w = peak.getFWHM();
 			final double position = peak.getPosition();
 			RectangularROI bounds = new RectangularROI(position - w/2, 0, w, 0, 0);
 			
-			final AbstractDataset[] pf = getPeakFunction(x, y, function);
+			final AbstractDataset[] pf = getPeakFunction(info.getX(), info.getY(), function);
 			
 			bean.addFittedPeak(new FittedPeak(function, bounds, pf));
 
@@ -110,6 +105,31 @@ public class FittingUtils {
 		
 		bean.setOptimizer(optimizer);
 		return bean;
+	}
+	
+	public static List<IdentifiedPeak> getIdentifiedPeaks(final FittedPeaks      fittedPeaks,
+			                                              final AbstractDataset  x,
+								                          final IProgressMonitor monitor) throws Exception {
+		
+		if (fittedPeaks==null) return null;
+		
+		final List<IdentifiedPeak> idpeaks = new ArrayList<IdentifiedPeak>(fittedPeaks.size());
+		for (FittedPeak peak : fittedPeaks.getPeakList()) {
+			
+			final IPeak       apeak = peak.getPeak();
+			
+			IdentifiedPeak idp = new IdentifiedPeak( apeak.getPosition(), 
+					                                 apeak.getParameter(1).getLowerLimit(), 
+					                                 apeak.getParameter(1).getUpperLimit(), 
+					                                 apeak.getArea(), 
+					                                 apeak.getHeight(), 
+					                                 0, 
+					                                 x.getSize()-1, 
+					                                 null);
+			idp.setFWHM(apeak.getFWHM());
+			idpeaks.add(idp);
+		}
+		return idpeaks;
 	}
 	
 	public static int getPeaksRequired() {
@@ -132,7 +152,7 @@ public class FittingUtils {
 //		y=a[1];
 		
 //		CompositeFunction function = new CompositeFunction();
-//		Offset os = new Offset(y.min().doubleValue(), y.max().doubleValue());
+//		Offset os = new Offset(info.getY().min().doubleValue(), info.getY().max().doubleValue());
 //		function.addFunction(peak);
 //		function.addFunction(os);
 		

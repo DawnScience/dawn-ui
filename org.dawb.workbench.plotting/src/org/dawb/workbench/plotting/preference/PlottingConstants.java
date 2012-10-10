@@ -30,7 +30,7 @@ public class PlottingConstants {
 	public static final String P_PALETTE = "org.dawb.plotting.system.paletteChoice";
 
 	/**
-	 * Used to store origin preference
+	 * Used to store origin preference, do not change string
 	 */
 	public static final String ORIGIN_PREF = "org.dawb.plotting.system.originChoice";
 

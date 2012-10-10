@@ -38,6 +38,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.io.IMetaData;
+import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.rcp.editors.HDF5TreeEditor;
 
 
@@ -67,9 +69,38 @@ public class H5MultiEditor extends MultiPageEditorPart  implements ISlicablePlot
 	@Override
 	protected void createPages() {
 		
+        IMetaData metaData = null;
+		try {
+			metaData = LoaderFactory.getMetaData(EclipseUtils.getFilePath(getEditorInput()), null);
+		} catch (Exception e1) {
+			// Allowed to have no meta data at this point.
+		}
+		
+		boolean treeOnTop = false;
+		if (metaData!=null) {
+			if (metaData.getDataNames()==null || metaData.getDataNames().size()<1) {
+				treeOnTop = true;
+			} else {
+				if (getEditorSite().getPage().findViewReference("uk.ac.diamond.scisoft.analysis.rcp.views.DatasetInspectorView")!=null) {
+					treeOnTop = true;
+				}
+			}
+		}
+
 		int index = 0;
 		try {
 
+			if (treeOnTop) {
+				// The property org.dawb.editor.h5.use.default is set by default in dawb / dawn vanilla
+				// The property org.dawb.editor.h5.use.default is not set in SDA.
+				this.treePage = System.getProperty("org.dawb.editor.h5.use.default") ==null
+						        || "true".equals(System.getProperty("org.dawb.editor.h5.use.default"))
+	                          ? new H5Editor() 
+				              : new HDF5TreeEditor();
+				addPage(index, treePage,   getEditorInput());
+				setPageText(index, "Tree");
+				index++;
+			}
 			
 			try {
 				Collection<IEditorPart> extensions = EditorExtensionFactory.getEditors(this);
@@ -91,21 +122,22 @@ public class H5MultiEditor extends MultiPageEditorPart  implements ISlicablePlot
 			 * at all but loads sets as it sees them.
 			 */
 			this.dataSetEditor = new PlotDataEditor(false, PlotType.PT1D);
-			dataSetEditor.getPlottingSystem().setColorOption(ColorOption.BY_NAME);
+			dataSetEditor.getPlottingSystem().setColorOption(ColorOption.BY_NAME);	
 			addPage(index, dataSetEditor, getEditorInput());
 			setPageText(index, "Plot");
 			index++;
 
-			// The HDF5TreeEditor crashes a lot and is unreliable.
-			// The property org.dawb.editor.h5.use.default is set by default in dawb / dawn vanilla
-			// The property org.dawb.editor.h5.use.default is not set in SDA.
-			this.treePage = System.getProperty("org.dawb.editor.h5.use.default") ==null
-					        || "true".equals(System.getProperty("org.dawb.editor.h5.use.default"))
-                          ? new H5Editor() 
-			              : new HDF5TreeEditor();
-			addPage(index, treePage,   getEditorInput());
-			setPageText(index, "Tree");
-			
+			if (!treeOnTop) {
+				// The property org.dawb.editor.h5.use.default is set by default in dawb / dawn vanilla
+				// The property org.dawb.editor.h5.use.default is not set in SDA.
+				this.treePage = System.getProperty("org.dawb.editor.h5.use.default") ==null
+						        || "true".equals(System.getProperty("org.dawb.editor.h5.use.default"))
+	                          ? new H5Editor() 
+				              : new HDF5TreeEditor();
+				addPage(index, treePage,   getEditorInput());
+				setPageText(index, "Tree");
+				index++;
+			}
 		} catch (PartInitException e) {
 			logger.error("Cannot initiate "+getClass().getName()+"!", e);
 		}
@@ -121,19 +153,6 @@ public class H5MultiEditor extends MultiPageEditorPart  implements ISlicablePlot
 			}
 		}
 		
-		final int lastIndex = index;
-		getSite().getShell().getDisplay().asyncExec(new Runnable() {
-			@Override
-			public void run() {
-				if (getDataSetComponent()!=null && getDataSetComponent().getMetaData()!=null ) {
-					if (getDataSetComponent().getMetaData().getDataNames()==null || getDataSetComponent().getMetaData().getDataNames().size()<1) {
-						setActivePage(lastIndex);
-					} else if (EclipseUtils.getPage().findView("uk.ac.diamond.scisoft.analysis.rcp.views.DatasetInspectorView")!=null) {
-						setActivePage(lastIndex);
-					}
-				}
-			}
-		});
  	}
 	
 	
@@ -171,13 +190,17 @@ public class H5MultiEditor extends MultiPageEditorPart  implements ISlicablePlot
 	
 	@Override
 	public PlotDataComponent getDataSetComponent() {
+<<<<<<< OURS
 		if(getEditor(0) instanceof PlotDataEditor)
 			return ((PlotDataEditor)getEditor(0)).getDataSetComponent();
 		return null;
+=======
+		return dataSetEditor.getDataSetComponent();
+>>>>>>> THEIRS
 	}
 	@Override
 	public SliceComponent getSliceComponent() {
-		return  ((PlotDataEditor)getEditor(0)).getSliceComponent();
+		return  dataSetEditor.getSliceComponent();
 	}	
 	@Override
 	public void setActivePage(final int ipage) {
