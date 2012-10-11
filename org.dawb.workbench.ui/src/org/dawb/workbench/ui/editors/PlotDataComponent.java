@@ -231,7 +231,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 
 		final Text searchText = new Text(container, SWT.SINGLE | SWT.BORDER | SWT.SEARCH | SWT.ICON_CANCEL);
 		searchText.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
-		searchText.setToolTipText("Search on data set name or expression value." );
+		searchText.setToolTipText("Search on data set name or shape\nFor instance '132, 4096' to find all of that shape." );
 				
 		this.dataViewer = new TableViewer(container, SWT.FULL_SELECTION | SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER | SWT.VIRTUAL);
 		
