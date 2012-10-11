@@ -12,7 +12,7 @@ import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
 
-import uk.ac.diamond.scisoft.analysis.roi.PolygonalROI;
+import uk.ac.diamond.scisoft.analysis.roi.PolylineROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
 /**
@@ -170,9 +170,9 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 	protected ROIBase createROI(boolean recordResult) {
 		if (points == null) return getROI();
 		
-		final PolygonalROI proi = new PolygonalROI();
+		final PolylineROI proi = new PolylineROI();
 		
-		for (int i = 0; i < points.size(); i++) {
+		for (int i = 0, imax = points.size(); i < imax; i++) {
 			final Point pnt = points.getPoint(i);
 			proi.insertPoint(i, coords.getPositionValue(pnt.x(),pnt.y()));
 		}
@@ -185,13 +185,12 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 
 	@Override
 	protected void updateROI(ROIBase roi) {
-		if (roi instanceof PolygonalROI) {
-			final PolygonalROI proi = (PolygonalROI) roi;
+		if (roi instanceof PolylineROI) {
+			final PolylineROI proi = (PolylineROI) roi;
 			if (points==null) points = new PointList();
 	        points.removeAllPoints();
 	        
 	        for (ROIBase p : proi) {
-				
 	           	final int[] pix = coords.getValuePosition(p.getPoint());
 	           	points.addPoint(new Point(pix[0],pix[1]));
 			}
