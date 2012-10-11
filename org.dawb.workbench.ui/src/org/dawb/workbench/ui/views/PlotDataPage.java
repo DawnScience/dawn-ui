@@ -136,6 +136,7 @@ public class PlotDataPage extends Page implements IPlotUpdateParticipant, IAdapt
 			
 			this.sliceComponent = new SliceComponent("org.dawb.workbench.views.h5GalleryView");
 			sliceComponent.setPlottingSystem(this.dataSetComponent.getPlottingSystem());
+			sliceComponent.setDataReductionAction(dataSetComponent.getDataReductionAction());
 			sliceComponent.createPartControl(form);
 			sliceComponent.setVisible(false);
 	
