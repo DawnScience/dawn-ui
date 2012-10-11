@@ -186,7 +186,7 @@ public class PolylineSelection extends AbstractSelectionRegion {
 		public void updateFromROI(PolylineROI proi) {
 			final PointList pl = getPoints();
 			final int imax = handles.size();
-			if (imax != proi.getSides())
+			if (imax != proi.getNumberOfPoints())
 				return;
 
 			for (int i = 0; i < imax; i++) {
