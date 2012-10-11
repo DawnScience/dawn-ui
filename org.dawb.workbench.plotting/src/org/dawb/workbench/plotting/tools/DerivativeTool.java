@@ -11,6 +11,7 @@ import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.workbench.plotting.tools.history.AbstractHistoryTool;
+import org.dawb.workbench.plotting.util.ColorUtility;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -136,6 +137,13 @@ public class DerivativeTool extends AbstractToolPage  {
 						updatePlot();
 					}
 				}
+				
+				@Override
+				public void tracesCleared(TraceEvent evt) {
+					eventTraceList.clear();
+				}
+				
+				
 			};
 
 		} catch (Exception e) {
@@ -317,6 +325,7 @@ public class DerivativeTool extends AbstractToolPage  {
 						dataTraces.clear();
 						dervsPair.clear();
 						dervs2Pair.clear();
+						if (eventTraceList.isEmpty()) return Status.OK_STATUS;
 						for (ITrace trace : eventTraceList) {
 								if (!trace.isUserTrace() || trace.getUserObject() == AbstractHistoryTool.HistoryType.HISTORY_PLOT)
 									continue;
@@ -371,29 +380,39 @@ public class DerivativeTool extends AbstractToolPage  {
 		
 		//plot all required data, original data from traces
 		// derivative data from AbstractDataset pairs
-		if (data)
+		if (data) {
 			for (ITrace trace : dataTraces) {
 				if (!isActive()){
 					trace.setUserObject(DerivativeTool.class);
 				}
 				getPlottingSystem().addTrace(trace);
 			}
-		if (deriv)
+		}
+		if (deriv) {
+			int ic = dataTraces.size();
 			for (AbstractDatasetPair dataset : dervsPair) {
 				ILineTrace traceNew = getPlottingSystem().createLineTrace(dataset.y.getName());
 				traceNew.setUserObject(DerivativeTool.class);
-				traceNew.setData(dataset.x, dataset.y);
 				traceNew.setUserTrace(true);
+				traceNew.setData(dataset.x, dataset.y);
+				traceNew.setTraceColor(ColorUtility.getSwtColour(ic));
+				ic++;
 				getPlottingSystem().addTrace(traceNew);
 			}
-		if (deriv2)
+		}
+		if (deriv2) {
+			int ic = dataTraces.size()*2;
 			for (AbstractDatasetPair dataset : dervs2Pair) {
 				ILineTrace traceNew = getPlottingSystem().createLineTrace(dataset.y.getName());
 				traceNew.setUserObject(DerivativeTool.class);
-				traceNew.setData(dataset.x, dataset.y);
 				traceNew.setUserTrace(true);
+				traceNew.setTraceColor(ColorUtility.getSwtColour(ic));
+				ic++;
+				traceNew.setData(dataset.x, dataset.y);
+				
 				getPlottingSystem().addTrace(traceNew);
 			}
+		}
 		
 
 		//Call repaint so the plotting system obeys button for whether rescale
