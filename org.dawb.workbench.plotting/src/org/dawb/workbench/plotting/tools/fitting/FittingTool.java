@@ -35,6 +35,7 @@ import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.gda.extensions.loaders.H5Utils;
 import org.dawb.hdf5.IHierarchicalDataFile;
 import org.dawb.hdf5.Nexus;
+import org.dawb.hdf5.nexus.NexusUtils;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.FittingConstants;
 import org.dawb.workbench.plotting.preference.FittingPreferencePage;
@@ -508,21 +509,26 @@ public class FittingTool extends AbstractToolPage implements IRegionListener, ID
 				IHierarchicalDataFile file = slice.getFile();
 				final String peakName = "Peak"+index;
 				Dataset s = file.appendDataset(peakName+"_fit",  dType,  new long[]{1},new double[]{fp.getPeakValue()}, slice.getParent());
-				file.setNexusAttribute(s, Nexus.SDS);			
-
+				file.setNexusAttribute(s, Nexus.SDS);
+				file.setIntAttribute(s, NexusUtils.SIGNAL, 1);
+				
 				s = file.appendDataset(peakName+"_xposition",  dType,  new long[]{1}, new double[]{fp.getPosition()}, slice.getParent());
 				file.setNexusAttribute(s, Nexus.SDS);
+				file.setIntAttribute(s, NexusUtils.SIGNAL, 1);
 				
 				s = file.appendDataset(peakName+"_fwhm",  dType,  new long[]{1}, new double[]{fp.getFWHM()}, slice.getParent());
 				file.setNexusAttribute(s, Nexus.SDS);
+				file.setIntAttribute(s, NexusUtils.SIGNAL, 1);
 				
 				s = file.appendDataset(peakName+"_area",  dType,  new long[]{1}, new double[]{fp.getArea()}, slice.getParent());
 				file.setNexusAttribute(s, Nexus.SDS);
+				file.setIntAttribute(s, NexusUtils.SIGNAL, 1);
 
 				final AbstractDataset[] pair = fp.getPeakFunctions();
 				AbstractDataset     function = pair[1];
 				s = file.appendDataset(peakName+"_function",  dType,  H5Utils.getLong(function.getShape()), function.getBuffer(), slice.getParent());
 				file.setNexusAttribute(s, Nexus.SDS);
+				file.setIntAttribute(s, NexusUtils.SIGNAL, 1);
 
 
 				++index;

@@ -376,12 +376,12 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 			int imax = handles.size() - 1;
 			PolylineROI proi = eroi.getPoints();
 
-			if (imax != proi.getSides()) {
+			if (imax != proi.getNumberOfPoints()) {
 				for (int i = imax; i >= 0; i--) {
 					removeHandle((SelectionHandle) handles.remove(i));
 					fTranslators.remove(i).removeTranslationListeners();
 				}
-				imax = proi.getSides();
+				imax = proi.getNumberOfPoints();
 				for (int i = 0; i < imax; i++) {
 					PointROI p = proi.getPoint(i);
 					int[] pos = coords.getValuePosition(p.getPoint());

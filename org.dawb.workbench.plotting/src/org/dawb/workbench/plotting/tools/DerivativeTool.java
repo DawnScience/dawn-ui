@@ -253,7 +253,7 @@ public class DerivativeTool extends AbstractToolPage  {
 		}
 
 	}
-	
+
 	public void sync(IToolPage with) {
 		if (!with.getClass().equals(getClass())) return;
 		//Update dedicated window tool from old tool
