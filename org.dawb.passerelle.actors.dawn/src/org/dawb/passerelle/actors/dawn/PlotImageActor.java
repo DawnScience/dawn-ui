@@ -256,7 +256,7 @@ public class PlotImageActor	extends AbstractDataMessageTransformer{
 						if(region!=null&&region.isVisible()){
 							region.setROI(eroi);
 						}else {
-							IRegion newRegion = plottingSystem.createRegion(roiName, RegionType.RING);
+							IRegion newRegion = plottingSystem.createRegion(roiName, RegionType.ELLIPSE);
 							newRegion.setROI(eroi);
 							plottingSystem.addRegion(newRegion);
 							plottingSystem.setToolVisible("org.dawb.workbench.plotting.tools.boxProfileTool",

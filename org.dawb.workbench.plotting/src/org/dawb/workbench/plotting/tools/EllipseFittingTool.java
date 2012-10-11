@@ -295,7 +295,7 @@ public class EllipseFittingTool extends AbstractToolPage {
 			case 6:
 				if (eroi instanceof EllipticalFitROI) {
 					EllipticalFitROI froi = (EllipticalFitROI) eroi;
-					return Integer.toString(froi.getPoints().getSides());
+					return Integer.toString(froi.getPoints().getNumberOfPoints());
 				}
 				return "--";
 			}

@@ -78,6 +78,13 @@ public class RotatableEllipse extends Shape {
 	}
 
 	/**
+	 * @return major and minor axis lengths
+	 */
+	public double[] getAxes() {
+		return new double[] { affine.getScaleX(), affine.getScaleY()};
+	}
+
+	/**
 	 * Get point on ellipse at given angle
 	 * @param degrees (positive for anti-clockwise)
 	 * @return
