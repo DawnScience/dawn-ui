@@ -157,8 +157,11 @@ public class FittingTool extends AbstractToolPage implements IRegionListener, ID
 		final FittingTool other = (FittingTool)with;
 		this.fittedPeaks = other.fittedPeaks.clone();
 		this.fitRegion   = other.fitRegion;
+		this.tracesMenu = other.tracesMenu;
+		this.selectedTraces = other.selectedTraces; 
 		viewer.setInput(fittedPeaks);
         viewer.refresh();
+        fittingJob.schedule();
 	}
 	
 	@Override
@@ -712,23 +715,24 @@ public class FittingTool extends AbstractToolPage implements IRegionListener, ID
 			
 			if (!lineTrace.isUserTrace()) continue;
 			
-			if (iTrace==selected) selectionIndex= index;
+			//if no trace selected, use first valid trace
+			if (selected == null) selected = lineTrace;
 			
-			if (selectedTraces.isEmpty()) {
+			//Make the selected trace the fitted trace
+			if (iTrace==selected) {
 				selectedTraces.add(lineTrace);
 			}		
 			
 			final Action action = new TraceSelectAction(lineTrace);
+			
+			if (iTrace==selected) {
+				action.setChecked(true);
+			}	
 			tracesMenu.add(action);
 			
 			index++;
 		}
-		
-		if (tracesMenu!=null && !tracesMenu.isEmpty()) {
-			tracesMenu.setSelectedAction(selectionIndex);
-			tracesMenu.getAction(selectionIndex).setChecked(true);
-		}
-				
+
 		getSite().getActionBars().updateActionBars();
 		
 		return index;
