@@ -17,6 +17,7 @@ import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.hdf5.HierarchicalDataFactory;
 import org.dawb.hdf5.IHierarchicalDataFile;
 import org.dawb.hdf5.Nexus;
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -197,6 +198,7 @@ public class DataReductionWizard extends Wizard implements IExportWizard {
 		return true;
 	}
 		
+	private static IContainer exportFolder = null;
 	private final class ReductionPage extends WizardPage {
 
 		private Text    txtPath;
@@ -257,7 +259,7 @@ public class DataReductionWizard extends Wizard implements IExportWizard {
 			label.setText("Export &File  ");
 			txtPath = new Text(container, SWT.BORDER);
 			txtPath.setEditable(false);
-			txtPath.setEnabled(false);
+			//txtPath.setEnabled(false);
 			txtPath.setText(getPath().getFullPath().toOSString());
 			GridData gd = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
 			txtPath.setLayoutData(gd);
@@ -312,7 +314,12 @@ public class DataReductionWizard extends Wizard implements IExportWizard {
 				IFile source = getSource();
 				final String strPath = source.getName().substring(0, source.getName().indexOf("."))+
 						               "_"+getShortToolName()+"_reduction.h5";
-				this.path = source.getParent().getFile(new Path(strPath));
+				if (exportFolder == null) {
+				    this.path = source.getParent().getFile(new Path(strPath));
+				} else {
+				    this.path = exportFolder.getFile(new Path(strPath));
+					
+				}
 			}
 			return path;
 		}
@@ -328,7 +335,9 @@ public class DataReductionWizard extends Wizard implements IExportWizard {
 			if (p!=null) {
 				this.path = p;
 			    txtPath.setText(this.path.getFullPath().toOSString());
+			    exportFolder = p.getParent();
 			}
+			pathChanged();
 		}
 
 		/**
@@ -338,8 +347,14 @@ public class DataReductionWizard extends Wizard implements IExportWizard {
 		private void pathChanged() {
 
             final String p = txtPath.getText();
+			txtPath.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_BLACK));
 			if (p==null || p.length() == 0) {
 				updateStatus("Please select a file to export to.");
+				return;
+			}
+			if (getPath().exists() && (!getPath().isAccessible() || getPath().isReadOnly())) {
+				updateStatus("Please choose another location to export to; this one is read only.");
+				txtPath.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_RED));
 				return;
 			}
 			if (getPath().exists() && !overwrite) {
