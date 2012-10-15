@@ -229,13 +229,16 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
  
 		regionDropDown.add(createRegionAction(RegionType.LINE,       regionDropDown, "Add line selection",     Activator.getImageDescriptor("icons/ProfileLine.png")));
 		regionDropDown.add(createRegionAction(RegionType.POLYLINE,   regionDropDown, "Add polyline selection", Activator.getImageDescriptor("icons/ProfilePolyline.png")));
+		regionDropDown.add(createRegionAction(RegionType.POLYGON,    regionDropDown, "Add polygon selection",  Activator.getImageDescriptor("icons/ProfilePolyline.png")));
 		regionDropDown.add(createRegionAction(RegionType.BOX,        regionDropDown, "Add box selection",      Activator.getImageDescriptor("icons/ProfileBox.png")));
 		regionDropDown.add(createRegionAction(RegionType.SECTOR,     regionDropDown, "Add sector selection",   Activator.getImageDescriptor("icons/ProfileSector.png")));
-		regionDropDown.add(createRegionAction(RegionType.RING,       regionDropDown, "Add circle selection",   Activator.getImageDescriptor("icons/ProfileCircle.png")));
+		regionDropDown.add(createRegionAction(RegionType.RING,       regionDropDown, "Add ring selection",     Activator.getImageDescriptor("icons/ProfileCircle.png")));
 		regionDropDown.add(createRegionAction(RegionType.XAXIS,      regionDropDown, "Add X-axis selection",   Activator.getImageDescriptor("icons/Cursor-horiz.png")));
 		regionDropDown.add(createRegionAction(RegionType.YAXIS,      regionDropDown, "Add Y-axis selection",   Activator.getImageDescriptor("icons/Cursor-vert.png")));
 		regionDropDown.add(createRegionAction(RegionType.FREE_DRAW,  regionDropDown, "Free drawn selection",   Activator.getImageDescriptor("icons/ProfileFree.png")));
 		regionDropDown.add(createRegionAction(RegionType.POINT,      regionDropDown, "Single point selection", Activator.getImageDescriptor("icons/ProfilePoint.png")));
+		regionDropDown.add(createRegionAction(RegionType.CIRCLE,     regionDropDown, "Add circle selection",   Activator.getImageDescriptor("icons/ProfileCircle.png")));
+		regionDropDown.add(createRegionAction(RegionType.ELLIPSE,    regionDropDown, "Add ellipse selection",  Activator.getImageDescriptor("icons/ProfileEllipse.png")));
 		regionDropDown.add(createRegionAction(RegionType.ELLIPSEFIT, regionDropDown, "Ellipse fit selection",  Activator.getImageDescriptor("icons/ProfileEllipse.png")));
 		
 		if (system.getActionBars()!=null && system.getActionBars().getMenuManager()!=null)  {
