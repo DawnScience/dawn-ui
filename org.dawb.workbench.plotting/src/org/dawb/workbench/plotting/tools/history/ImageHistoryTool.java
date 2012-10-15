@@ -246,6 +246,10 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 
 	@Override
 	protected void updatePlots() {
+		if (!getPlottingSystem().is2D()) {
+			logger.error("Plotting system is not plotting 2D data, image history should not be active.");
+			return;
+		}
 		if (updatingPlotsAlready) return;
 		updatingPlotsAlready = true;
 		updateJob.cancel();
