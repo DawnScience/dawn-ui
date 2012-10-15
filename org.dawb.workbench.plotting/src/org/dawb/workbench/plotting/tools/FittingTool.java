@@ -130,8 +130,11 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		final FittingTool other = (FittingTool)with;
 		this.fittedPeaks = other.fittedPeaks.clone();
 		this.fitRegion   = other.fitRegion;
+		this.tracesMenu = other.tracesMenu;
+		this.selectedTraces = other.selectedTraces; 
 		viewer.setInput(fittedPeaks);
         viewer.refresh();
+        fittingJob.schedule();
 	}
 	
 	@Override
@@ -489,10 +492,11 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 												
 						final AbstractDataset[] pair = fp.getPeakFunctions();
 						final ILineTrace trace = TraceUtils.replaceCreateLineTrace(getPlottingSystem(), "Peak "+ipeak);
+						//set user trace false before setting data otherwise the trace sent to events will be a true by default
+						trace.setUserTrace(false);
 						trace.setData(pair[0], pair[1]);
 						trace.setLineWidth(1);
 						trace.setTraceColor(ColorConstants.black);
-						trace.setUserTrace(false);
 						getPlottingSystem().addTrace(trace);
 						fp.setTrace(trace);
 						if (!requireTrace) trace.setVisible(false);
@@ -613,31 +617,30 @@ public class FittingTool extends AbstractToolPage implements IRegionListener {
 		}
 		
 		for (final ITrace iTrace : traces) {
-			
 			if (!(iTrace instanceof ILineTrace)) continue;
 			
 			final ILineTrace lineTrace = (ILineTrace)iTrace;
 			
 			if (!lineTrace.isUserTrace()) continue;
 			
-			if (iTrace==selected) selectionIndex= index;
+			//if no trace selected, use first valid trace
+			if (selected == null) selected = lineTrace;
 			
-			if (selectedTraces.isEmpty()) {
+			//Make the selected trace the fitted trace
+			if (iTrace==selected) {
 				selectedTraces.add(lineTrace);
 			}		
 			
 			final Action action = new TraceSelectAction(lineTrace);
+			
+			if (iTrace==selected) {
+				action.setChecked(true);
+			}	
 			tracesMenu.add(action);
 			
 			index++;
+		}
 
-		}
-		
-		if (tracesMenu!=null && !tracesMenu.isEmpty()) {
-			tracesMenu.setSelectedAction(selectionIndex);
-			tracesMenu.getAction(selectionIndex).setChecked(true);
-		}
-				
 		getSite().getActionBars().updateActionBars();
 		
 		return index;
