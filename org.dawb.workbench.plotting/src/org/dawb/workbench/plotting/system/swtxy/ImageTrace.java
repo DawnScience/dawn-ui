@@ -131,6 +131,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 
 	public PaletteData getPaletteData() {
+		if (imageServiceBean==null) return null;
 		return imageServiceBean.getPalette();
 	}
 
