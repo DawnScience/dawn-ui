@@ -648,10 +648,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	
 	private void setupAxis(Axis axis, Range bounds, AbstractDataset labels) {
 		((AspectAxis)axis).setMaximumRange(bounds);
-		((AspectAxis)axis).setLabelData(labels);
-		if (labels!=null) {
-			((AspectAxis)axis).setTitle(labels.getName());
-		}
+		((AspectAxis)axis).setLabelDataAndTitle(labels);
 	}
 
 	@Override
