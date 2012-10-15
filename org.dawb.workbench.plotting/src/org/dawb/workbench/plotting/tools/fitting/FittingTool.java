@@ -107,7 +107,8 @@ public class FittingTool extends AbstractToolPage implements IRegionListener, ID
 		this.fittingJob = new FittingJob();
 		
 		/**
-		 * Changed 
+		 * Use Vector here intentionally. It is slower but
+		 * synchronized which is required in this instance. 
 		 */
 		this.selectedTraces = new Vector<ILineTrace>(31);
 		
