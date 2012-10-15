@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.dawb.common.gpu.IOperation;
-import org.dawb.common.gpu.Operator;
 import org.dawb.common.gpu.OperationFactory;
+import org.dawb.common.gpu.Operator;
 import org.dawb.common.ui.components.cell.ScaleCellEditor;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
@@ -53,9 +53,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
-import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
-import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
-import uk.ac.diamond.scisoft.analysis.dataset.Maths;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 /**
