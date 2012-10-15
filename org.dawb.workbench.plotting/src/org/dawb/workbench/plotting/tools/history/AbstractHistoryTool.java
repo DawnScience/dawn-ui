@@ -28,10 +28,10 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.TableItem;
 
-abstract class AbstractHistoryTool extends AbstractToolPage implements MouseListener, KeyListener {
+public abstract class AbstractHistoryTool extends AbstractToolPage implements MouseListener, KeyListener {
 
 	
-	protected enum HistoryType {
+	public enum HistoryType {
     	HISTORY_PLOT;
     }
 

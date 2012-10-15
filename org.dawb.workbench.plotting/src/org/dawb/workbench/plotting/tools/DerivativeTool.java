@@ -3,21 +3,19 @@ package org.dawb.workbench.plotting.tools;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.dawb.common.ui.plot.AbstractPlottingSystem;
-import org.dawb.common.ui.plot.EmptyTool;
+import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
+import org.dawb.common.ui.plot.tool.IToolPage;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
-import org.dawb.workbench.plotting.Activator;
-import org.dawb.workbench.plotting.preference.PlottingConstants;
+import org.dawb.workbench.plotting.tools.history.AbstractHistoryTool;
+import org.dawb.workbench.plotting.util.ColorUtility;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IAction;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -59,6 +57,9 @@ public class DerivativeTool extends AbstractToolPage  {
 	private List<ITrace> dataTraces = new ArrayList<ITrace>();
 	private ArrayList<AbstractDatasetPair> dervsPair  = new ArrayList<AbstractDatasetPair>();
 	private ArrayList<AbstractDatasetPair> dervs2Pair  = new ArrayList<AbstractDatasetPair>();
+	boolean data = false;
+	boolean deriv = true;
+	boolean deriv2 = false;
 
 	// Logger
 	private final static Logger logger = LoggerFactory.getLogger(DerivativeTool.class);
@@ -69,13 +70,12 @@ public class DerivativeTool extends AbstractToolPage  {
 	protected Button derivCheck;
 	protected Button deriv2Check;
 	private Label infoLabel;
+	private boolean duringSync = false;
+	private boolean duringDispose = false;
 
 	// Listeners
 	private ITraceListener traceListener;
 	private SelectionListener updateChecksSelection;
-
-	// Actions
-	private IAction resetOnDeactivate;
 
 	// Jobs
 	private Job updatePlotData;
@@ -87,51 +87,78 @@ public class DerivativeTool extends AbstractToolPage  {
 		try {
 			// Set up the listener for new traces
 			this.traceListener = new ITraceListener.Stub() {
-				// Determines whether tracesPlotted event returns a trace or list of traces
-				// Stashes event traces, and clears user traces from plot
-				// Then updates the plot
+				// Response to traces plotted event, a bit complicated, has to deal with a
+				// few cases
 				@Override
 				public void tracesPlotted(TraceEvent evt) {
-
+					//First, if the event source is not a list or ITrace ignore event
 					if (!(evt.getSource() instanceof List<?>) && !(evt.getSource() instanceof ITrace)) {
 						return;
 					}
+					
+					//If we are already running, ignore event
 					if (!isUpdateRunning) {
+						
+						//Make a new list for the ITraces in,
+						// deal with lists and single traces
+						List<ITrace> eventSource = new ArrayList<ITrace>();
 						if (evt.getSource() instanceof List<?>)
-							eventTraceList = (List<ITrace>)evt.getSource();
+							eventSource = (List<ITrace>)evt.getSource();
 						if (evt.getSource() instanceof ITrace) {
-							eventTraceList.clear();
-							eventTraceList.add((ITrace)evt.getSource());
+							eventSource.clear();
+							eventSource.add((ITrace)evt.getSource());
 						}
-						for (ITrace trace : getPlottingSystem().getTraces(ILineTrace.class)) {
-							if (trace.isUserTrace()) {
+						
+						if (getPlottingSystem() == null) return;
+						
+						//Cherry pick non history traces and user editable
+						// and remove from the plot
+						// Done here to minimise the "Jump" between the just plotted data
+						// and the derivatives. Would be nicer to have an event before the data
+						// is plotted
+						List<ITrace> processableTraces = new ArrayList<ITrace>();
+						for (ITrace trace: eventSource) {
+							if (trace.isUserTrace() && 
+									trace.getUserObject() != AbstractHistoryTool.HistoryType.HISTORY_PLOT &&
+									trace.getUserObject() != DerivativeTool.class) {
+								
+								processableTraces.add(trace);
 								getPlottingSystem().removeTrace(trace);
+								
 							}
 						}
+							
+						//If there is none, return
+						if (processableTraces.isEmpty()) return;
+						
+						//We can now overwrite the eventTraceList with our new one
+						eventTraceList = processableTraces;
 						
 						updatePlot();
 					}
 				}
+				
+				@Override
+				public void tracesCleared(TraceEvent evt) {
+					eventTraceList.clear();
+				}
+				
+				
 			};
 
 		} catch (Exception e) {
 			logger.error("Cannot get plotting system!", e);
 		}
-		// Set up the listener for the gui elements		
+		
+		// Set up the listener for the gui elements	
 		updateChecksSelection = new SelectionListener() {
 			
-			// Again clears user traces from plot
-			// Then updates the plot
 			@Override
 			public void widgetSelected(SelectionEvent event) {
-				if (!isUpdateRunning)
-				for (ITrace trace : getPlottingSystem().getTraces(ILineTrace.class)) {
-					if (trace.isUserTrace()) {
-						getPlottingSystem().removeTrace(trace);
-					}
+				if (!isUpdateRunning) {
+					logger.debug("Update plot called from widget");
+					updatePlot(dataCheck.getSelection(),derivCheck.getSelection(),deriv2Check.getSelection());
 				}
-					updatePlot();
-				
 			}
 
 			@Override
@@ -149,31 +176,20 @@ public class DerivativeTool extends AbstractToolPage  {
 		composite.setLayout(new GridLayout(1, false));	
 
 		infoLabel = new Label(composite, SWT.NONE);
-		infoLabel.setText("The derivative tool will leave the derivative traces active unless the clear tool is selected");
+		infoLabel.setText("Open in a dedicated view to use with other tools.");
 
 		dataCheck = new Button(composite, SWT.CHECK);
 		dataCheck.setText("Display Data");
-		dataCheck.setSelection(false);
+		dataCheck.setSelection(data);
 		dataCheck.addSelectionListener(updateChecksSelection);
 		derivCheck = new Button(composite, SWT.CHECK);
-		derivCheck.setSelection(true);
+		derivCheck.setSelection(deriv);
 		derivCheck.setText("Display f'(Data)");
 		derivCheck.addSelectionListener(updateChecksSelection);
 		deriv2Check = new Button(composite, SWT.CHECK);
+		deriv2Check.setSelection(deriv2);
 		deriv2Check.setText("Display f''(Data)");
 		deriv2Check.addSelectionListener(updateChecksSelection);
-
-		resetOnDeactivate= new Action("Reset plot(s) when tool deactivates", IAction.AS_CHECK_BOX) {
-			@Override
-			public void run() {
-				Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.RESET_ON_DEACTIVATE, isChecked());
-			}
-		};
-		resetOnDeactivate.setImageDescriptor(Activator.getImageDescriptor("icons/reset.gif"));
-		resetOnDeactivate.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.RESET_ON_DEACTIVATE));
-		getSite().getActionBars().getToolBarManager().add(resetOnDeactivate);
-		
-		activate();
 		
 	}
 
@@ -190,47 +206,76 @@ public class DerivativeTool extends AbstractToolPage  {
 
 	public void activate() {
 		super.activate();
-		if (getPlottingSystem()!=null) {
-			
-			getPlottingSystem().addTraceListener(traceListener);
-			
-			//This is probably going to lead to the first call to Update Plot
-			//We need to get the user traces from the plot and store them for processing,
-			// and remove them from the plot
-			if (eventTraceList.isEmpty()) {
-				for (ITrace trace : getPlottingSystem().getTraces(ILineTrace.class)) {
-					if (trace.isUserTrace()) {
-						eventTraceList.add(trace);
-						getPlottingSystem().removeTrace(trace);
-					}
+		
+		// Return if toolpage not set up
+		if (getViewPart() == null) return;
+		if (getPlottingSystem() == null) return;
+		if (isDisposed()) return;
+		getPlottingSystem().addTraceListener(traceListener);
+
+		//This is probably going to lead to the first call to Update Plot
+		//We need to get the user traces from the plot and store them for processing,
+		// and remove them from the plot
+		if (eventTraceList.isEmpty()) {
+			for (ITrace trace : getPlottingSystem().getTraces(ILineTrace.class)) {
+				if (trace.isUserTrace() && trace.getUserObject() != AbstractHistoryTool.HistoryType.HISTORY_PLOT
+						&& trace.getUserObject() != DerivativeTool.class) {
+					eventTraceList.add(trace);
+					getPlottingSystem().removeTrace(trace);
 				}
 			}
-			if (!isUpdateRunning) 
-				updatePlot();
 		}
+		
+		if (eventTraceList.isEmpty()) return;
+
+		if (!isUpdateRunning) {
+			Display.getDefault().syncExec(new Runnable() {
+				public void run() {
+					logger.debug("Update plot called from activate");
+					//Run the plot update on the GUI thread so we can check what needs to be plotted
+					updatePlot(dataCheck.getSelection(),derivCheck.getSelection(),deriv2Check.getSelection());					
+				}
+			});
+			
+		}
+
 	}
 
 
 	@Override
 	public void deactivate() {
+		//Check not already deactivated to prevent double calls
+		if (!isActive()) return;
+		if (!isDisposed()) return;
 		super.deactivate();
-
-		Object tool = getToolSystem().getCurrentToolPage(getToolPageRole());
-		boolean isEmpty = tool!=null && tool.getClass()==EmptyTool.class;
-		boolean deactivateOnExit = Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.RESET_ON_DEACTIVATE);
-
-		if (getPlottingSystem()!=null) getPlottingSystem().removeTraceListener(traceListener);
+		//If this is being synced to a dedicated view we dont
+		//want to Update the plot
+		if (duringSync) {
+			duringSync = false;
+			return;
+		}
 		
-		// if deactivate fire the TracesAltered event to get the plotting system to redraw
-		// the traces
-		if (isEmpty || deactivateOnExit) {
-			((AbstractPlottingSystem)getPlottingSystem()).fireTracesAltered(null);
-			//updateDerivatives(true,false,false);
-
+		if (!isUpdateRunning && !duringDispose) {
+			logger.debug("Update plot called from deactivate");
+			updatePlot(true,false,false);
 		}
 
 	}
 
+	public void sync(IToolPage with) {
+		if (!with.getClass().equals(getClass())) return;
+		//Update dedicated window tool from old tool
+		final DerivativeTool other = (DerivativeTool)with;
+		//To prevent the old tool updating on deactivate
+		other.duringSync = true;
+		this.eventTraceList = other.eventTraceList;
+		this.dataCheck.setSelection(other.dataCheck.getSelection());
+		this.derivCheck.setSelection(other.derivCheck.getSelection());
+		this.deriv2Check.setSelection(other.deriv2Check.getSelection());
+		logger.debug("Update plot called from sync");
+		updatePlot(dataCheck.getSelection(),derivCheck.getSelection(),deriv2Check.getSelection());
+		
+	}
 
 	@Override
 	public Control getControl() {
@@ -238,16 +283,30 @@ public class DerivativeTool extends AbstractToolPage  {
 		return composite;
 	}
 
-
 	@Override
 	public void dispose() {
+		duringDispose = true;
 		deactivate();
+		
+		//Important to call updateDerivates here over updatePlot
+		// If we don't block this thread the plottingSystem become null
+		// before we have finished.
+		updateDerivatives(true,false,false);
+		
 		// clear all lists
 		if (dataTraces!=null) dataTraces.clear();
 		if (eventTraceList!=null) eventTraceList.clear();
-		if (dervsPair!=null) eventTraceList.clear();
-		if (dervs2Pair!=null) eventTraceList.clear();
+		if (dervsPair!=null) dervsPair.clear();
+		if (dervs2Pair!=null) dervsPair.clear();
+
 		super.dispose();
+	}
+	
+	private synchronized void updatePlot(boolean dataPlot, boolean derivPlot, boolean deriv2Plot) {
+		data = dataPlot;
+		deriv = derivPlot;
+		deriv2 = deriv2Plot;
+		updatePlot();
 	}
 
 	private synchronized void updatePlot() {
@@ -258,15 +317,18 @@ public class DerivativeTool extends AbstractToolPage  {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
-						//remove TraceListerners so updating the plot doesnt cause the DerivativeTool to respond
-						getPlottingSystem().removeTraceListener(traceListener);
 						isUpdateRunning = true;
 						logger.debug("Update Running");
-						if (!isActive()) return Status.CANCEL_STATUS;
 						
 						//Calculate all derivatives whether required or not
-						// (Cannot tell if needed until we check the GUI which we cant do here)
+						// Ignore any non-user traces in the event
+						dataTraces.clear();
+						dervsPair.clear();
+						dervs2Pair.clear();
+						if (eventTraceList.isEmpty()) return Status.OK_STATUS;
 						for (ITrace trace : eventTraceList) {
+								if (!trace.isUserTrace() || trace.getUserObject() == AbstractHistoryTool.HistoryType.HISTORY_PLOT)
+									continue;
 								dataTraces.add(trace);
 								dervsPair.add(processTrace(trace, Derivative.FIRST));
 								dervs2Pair.add(processTrace(trace, Derivative.SECOND));
@@ -274,15 +336,15 @@ public class DerivativeTool extends AbstractToolPage  {
 
 						Display.getDefault().syncExec(new Runnable() {
 							public void run() {
-								//Run the plot update on the GUI thread so we can check what needs to be plotted
-								updateDerivatives(dataCheck.getSelection(),derivCheck.getSelection(),deriv2Check.getSelection());						
+								//Run the plot update on the GUI thread
+								updateDerivatives();						
 							}
 						});
-						
+						if (!isActive()) return Status.CANCEL_STATUS;
 						return Status.OK_STATUS;
 						
 					}finally {
-						logger.debug("Update Finished");
+						logger.debug("Update Finished In Finally");
 						isUpdateRunning = false;
 					}
 				}
@@ -298,38 +360,70 @@ public class DerivativeTool extends AbstractToolPage  {
 
 	}
 	
-	private synchronized void updateDerivatives(boolean data, boolean deriv, boolean deriv2) {
+	private synchronized void updateDerivatives(boolean dataPlot, boolean derivPlot, boolean deriv2Plot) {
+		data = dataPlot;
+		deriv = derivPlot;
+		deriv2 = deriv2Plot;
+		updateDerivatives();
+	}
+	
+	private synchronized void updateDerivatives() {
 		logger.debug("Updating Derivatives");
+		
+		if (getPlottingSystem() == null) return;
+		
+		for (ITrace trace : getPlottingSystem().getTraces(ILineTrace.class)) {
+			if (trace.isUserTrace() && trace.getUserObject() != AbstractHistoryTool.HistoryType.HISTORY_PLOT) {
+				getPlottingSystem().removeTrace(trace);
+			}
+		}
 		
 		//plot all required data, original data from traces
 		// derivative data from AbstractDataset pairs
-		if (data)
+		if (data) {
 			for (ITrace trace : dataTraces) {
+				if (!isActive()){
+					trace.setUserObject(DerivativeTool.class);
+				}
 				getPlottingSystem().addTrace(trace);
 			}
-		if (deriv)
+		}
+		if (deriv) {
+			int ic = dataTraces.size();
 			for (AbstractDatasetPair dataset : dervsPair) {
 				ILineTrace traceNew = getPlottingSystem().createLineTrace(dataset.y.getName());
-				traceNew.setData(dataset.x, dataset.y);
+				traceNew.setUserObject(DerivativeTool.class);
 				traceNew.setUserTrace(true);
+				traceNew.setData(dataset.x, dataset.y);
+				traceNew.setTraceColor(ColorUtility.getSwtColour(ic));
+				ic++;
 				getPlottingSystem().addTrace(traceNew);
 			}
-		if (deriv2)
+		}
+		if (deriv2) {
+			int ic = dataTraces.size()*2;
 			for (AbstractDatasetPair dataset : dervs2Pair) {
 				ILineTrace traceNew = getPlottingSystem().createLineTrace(dataset.y.getName());
-				traceNew.setData(dataset.x, dataset.y);
+				traceNew.setUserObject(DerivativeTool.class);
 				traceNew.setUserTrace(true);
+				traceNew.setTraceColor(ColorUtility.getSwtColour(ic));
+				ic++;
+				traceNew.setData(dataset.x, dataset.y);
+				
 				getPlottingSystem().addTrace(traceNew);
 			}
+		}
 		
-		dataTraces.clear();
-		dervsPair.clear();
-		dervs2Pair.clear();
-		getPlottingSystem().autoscaleAxes();
-		getPlottingSystem().addTraceListener(traceListener);
+
+		//Call repaint so the plotting system obeys button for whether rescale
+		//should happen or not
+		getPlottingSystem().repaint();
+		if (isActive())
+			getPlottingSystem().addTraceListener(traceListener);
+		
+		logger.debug("Update Finished In updateDerivatives");
 		return;
 	}
-	
 	
 	private AbstractDatasetPair processTrace(ITrace trace, Derivative type){
 		
@@ -353,4 +447,7 @@ public class DerivativeTool extends AbstractToolPage  {
 		return new AbstractDatasetPair(x,derv);
 	}
 }
+	
+	
+
 
