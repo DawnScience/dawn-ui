@@ -213,7 +213,7 @@ public class HistogramToolPage extends AbstractToolPage {
 		// Connect to the trace listener to deal with new images coming in
 		traceListener = new ITraceListener.Stub() {
 			@Override
-			public void tracesPlotted(TraceEvent evt) {
+			public void tracesAdded(TraceEvent evt) {
 
 				logger.trace("tracelistener firing");
 

@@ -79,7 +79,7 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 			
 			this.traceListener = new ITraceListener.Stub() {
 				@Override
-				public void tracesPlotted(TraceEvent evt) {
+				public void tracesAdded(TraceEvent evt) {
 					
 					if (!(evt.getSource() instanceof List<?>)) {
 						return;

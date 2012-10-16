@@ -43,7 +43,7 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 		this.traceListener = new ITraceListener.Stub() {
 			
 			@Override
-			public void tracesPlotted(TraceEvent evt) {
+			public void tracesAdded(TraceEvent evt) {
 				updatePlots();
 			}
 			

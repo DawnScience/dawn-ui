@@ -90,7 +90,7 @@ public class DerivativeTool extends AbstractToolPage  {
 				// Response to traces plotted event, a bit complicated, has to deal with a
 				// few cases
 				@Override
-				public void tracesPlotted(TraceEvent evt) {
+				public void tracesAdded(TraceEvent evt) {
 					//First, if the event source is not a list or ITrace ignore event
 					if (!(evt.getSource() instanceof List<?>) && !(evt.getSource() instanceof ITrace)) {
 						return;

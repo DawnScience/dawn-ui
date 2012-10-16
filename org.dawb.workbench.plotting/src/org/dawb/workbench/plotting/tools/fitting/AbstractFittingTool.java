@@ -79,7 +79,7 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 		this.traceListener = new ITraceListener.Stub() {
 			
 			@Override
-			public void tracesPlotted(TraceEvent evt) {
+			public void tracesAdded(TraceEvent evt) {
 				
 				@SuppressWarnings("unchecked")
 				final List<ITrace> traces = evt.getSource() instanceof List

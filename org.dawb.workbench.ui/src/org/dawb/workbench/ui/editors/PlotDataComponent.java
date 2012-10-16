@@ -280,7 +280,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 
 			this.traceListener = new ITraceListener.Stub() {
 				@Override
-				public void tracesAltered(TraceEvent evt) {
+				public void tracesUpdated(TraceEvent evt) {
 					updateSelection(true);
 				}
 			};
