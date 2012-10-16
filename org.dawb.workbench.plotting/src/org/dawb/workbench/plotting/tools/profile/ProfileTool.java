@@ -35,6 +35,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.part.IPageSite;
 import org.slf4j.Logger;
@@ -151,24 +152,28 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 			profilePlottingSystem.removeTrace(iTrace);
 		}
 	}
-	
+
 	@Override
 	public void createControl(Composite parent) {
-
-        
 		final IPageSite site = getSite();
+		createControl(parent, site!=null?site.getActionBars():null);
+	}
+
+	public void createControl(Composite parent, IActionBars actionbars) {
 		
 		final Action reselect = new Action("Create new profile.", getImageDescriptor()) {
 			public void run() {
 				createNewRegion();
 			}
 		};
-		site.getActionBars().getToolBarManager().add(reselect);
-		site.getActionBars().getToolBarManager().add(new Separator());
+		if (actionbars != null){
+			actionbars.getToolBarManager().add(reselect);
+			actionbars.getToolBarManager().add(new Separator());
+		}
 
 		profilePlottingSystem.createPlotPart(parent, 
 								getTitle(), 
-								site.getActionBars(), 
+								actionbars, 
 								PlotType.PT1D,
 								this.getViewPart());				
 		
