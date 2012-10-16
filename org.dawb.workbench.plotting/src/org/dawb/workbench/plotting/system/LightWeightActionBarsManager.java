@@ -356,6 +356,21 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 		}
 		panning.setChecked(true);
 		panning.run(); 
+		
+	       
+        // Add more actions
+        // Rescale		
+		final Action rescaleAction = new Action("Rescale axis when plotted data changes", Activator.getImageDescriptor("icons/rescale.png")) {
+		    public void run() {
+				system.setRescale(!system.isRescale());
+		    }
+		};
+		rescaleAction.setChecked(this.system.isRescale());
+		rescaleAction.setId("org.dawb.workbench.plotting.rescale");
+		xyMenu.add(rescaleAction);
+		imageMenu.add(rescaleAction);
+		
+		if (system.getActionBars()!=null) system.getActionBars().getToolBarManager().add(rescaleAction);
 	}
 
 	public void createUndoRedoActions() {
@@ -600,26 +615,6 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
         		oneDimensionalActions.add(new ActionContainer(action, bars.getToolBarManager()));
         	}
         }
-        
-        // Add more actions
-        // Rescale		
-		final Action rescaleAction = new Action("Rescale axis when plotted data changes", Activator.getImageDescriptor("icons/rescale.png")) {
-		    public void run() {
-				system.setRescale(!system.isRescale());
-		    }
-		};
-		rescaleAction.setChecked(this.system.isRescale());
-		rescaleAction.setId("org.dawb.workbench.plotting.rescale");
-		xyMenu.add(rescaleAction);
-		
-		if (bars!=null) oneDimensionalActions.add(new ActionContainer(rescaleAction, bars.getToolBarManager()));
-
-        if (bars!=null) bars.getToolBarManager().add(new Separator(rescaleAction.getId()+".group"));
-		if (rightClick!=null) rightClick.add(new Separator(rescaleAction.getId()+".group"));
-
-		if (bars!=null) bars.getToolBarManager().insertAfter(rescaleAction.getId()+".group", rescaleAction);
-		if (rightClick!=null)rightClick.insertAfter(rescaleAction.getId()+".group", rescaleAction);
-
 		
 		if (datasetChoosingRequired) {
 			// By index or using x 
