@@ -246,7 +246,7 @@ public class DerivativeTool extends AbstractToolPage  {
 	public void deactivate() {
 		//Check not already deactivated to prevent double calls
 		if (!isActive()) return;
-		if (!isDisposed()) return;
+		if (isDisposed()) return;
 		super.deactivate();
 		//If this is being synced to a dedicated view we dont
 		//want to Update the plot
@@ -382,9 +382,6 @@ public class DerivativeTool extends AbstractToolPage  {
 		// derivative data from AbstractDataset pairs
 		if (data) {
 			for (ITrace trace : dataTraces) {
-				if (!isActive()){
-					trace.setUserObject(DerivativeTool.class);
-				}
 				getPlottingSystem().addTrace(trace);
 			}
 		}

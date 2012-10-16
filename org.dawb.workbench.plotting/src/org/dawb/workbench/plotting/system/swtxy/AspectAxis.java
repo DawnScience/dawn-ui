@@ -264,9 +264,11 @@ public class AspectAxis extends Axis implements IAxis {
 		return new Range(lower, upper);
 	}
 
-	public void setLabelData(AbstractDataset labels) {
-		if (labels!=null && labels.getShape().length!=1) throw new RuntimeException("You must only label image data with one dimensional axes!");
+	public void setLabelDataAndTitle(AbstractDataset labels) {
+		if (labels!=null && labels.getRank()!=1) throw new RuntimeException("You must only label image data with one dimensional axes!");
 		this.labelData = labels;
+		if (labels != null)
+			setTitle(labels.getName());
 	}
 	
 	public Range getScaleRange() {
