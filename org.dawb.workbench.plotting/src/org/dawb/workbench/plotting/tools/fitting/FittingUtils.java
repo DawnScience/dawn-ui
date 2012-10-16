@@ -54,7 +54,7 @@ public class FittingUtils {
 	 * 
 	 * @return
 	 */
-	public static FittedPeaks getFittedPeaks(final FittedPeaksInfo info) throws Exception {
+	public static FittedFunctions getFittedPeaks(final FittedPeaksInfo info) throws Exception {
 		
 		List<CompositeFunction> composites=null;
 		final IOptimizer optimizer = getOptimizer();
@@ -88,7 +88,7 @@ public class FittingUtils {
 		
 		if (composites==null || composites.isEmpty()) return null;
 				
-		final FittedPeaks bean = new FittedPeaks();
+		final FittedFunctions bean = new FittedFunctions();
 		for (CompositeFunction function : composites) {
 			
 			final IPeak peak = function.getPeak(0);
@@ -99,7 +99,7 @@ public class FittingUtils {
 			
 			final AbstractDataset[] pf = getPeakFunction(info.getX(), info.getY(), function);
 			
-			bean.addFittedPeak(new FittedPeak(function, bounds, pf));
+			bean.addFittedPeak(new FittedFunction(function, bounds, pf));
 
 		}
 		
@@ -107,14 +107,14 @@ public class FittingUtils {
 		return bean;
 	}
 	
-	public static List<IdentifiedPeak> getIdentifiedPeaks(final FittedPeaks      fittedPeaks,
+	public static List<IdentifiedPeak> getIdentifiedPeaks(final FittedFunctions      fittedPeaks,
 			                                              final AbstractDataset  x,
 								                          final IProgressMonitor monitor) throws Exception {
 		
 		if (fittedPeaks==null) return null;
 		
 		final List<IdentifiedPeak> idpeaks = new ArrayList<IdentifiedPeak>(fittedPeaks.size());
-		for (FittedPeak peak : fittedPeaks.getPeakList()) {
+		for (FittedFunction peak : fittedPeaks.getFunctionList()) {
 			
 			final IPeak       apeak = peak.getPeak();
 			

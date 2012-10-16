@@ -6,7 +6,7 @@ import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IParameter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
 
-public class NullPeak implements IPeak {
+public class NullFunction implements IPeak {
 
 	@Override
 	public String getName() {

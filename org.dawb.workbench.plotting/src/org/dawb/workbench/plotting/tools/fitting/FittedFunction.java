@@ -20,7 +20,7 @@ import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
-class FittedPeak {
+class FittedFunction {
 
 	private RectangularROI    roi;
 	private CompositeFunction function;
@@ -57,7 +57,7 @@ class FittedPeak {
 	    peakName = trace.getName();
 	}
 
-	public FittedPeak(CompositeFunction peak, RectangularROI bounds, AbstractDataset[] pf) {
+	public FittedFunction(CompositeFunction peak, RectangularROI bounds, AbstractDataset[] pf) {
 		this.function = peak;
 		this.roi  = bounds;
 		this.peakFunctions = pf;
@@ -80,8 +80,8 @@ class FittedPeak {
 		annotation = null;		
 	}
 	
-	public FittedPeak clone() {
-		FittedPeak ret = new FittedPeak(function, roi, peakFunctions);
+	public FittedFunction clone() {
+		FittedFunction ret = new FittedFunction(function, roi, peakFunctions);
 		ret.roi        = roi;
 		ret.function   = function;
 		ret.fwhm       = fwhm;
@@ -171,6 +171,11 @@ class FittedPeak {
 	public void setRoi(RectangularROI roi) {
 		this.roi = roi;
 	}
+	/**
+	 * Might throw cast exceptions if function
+	 * is not IPeak.
+	 * @return
+	 */
 	public IPeak getPeak() {
 		return function.getPeak(0);
 	}
@@ -225,7 +230,7 @@ class FittedPeak {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		FittedPeak other = (FittedPeak) obj;
+		FittedFunction other = (FittedFunction) obj;
 		if (annotation == null) {
 			if (other.annotation != null)
 				return false;
