@@ -45,19 +45,21 @@
    <item title="Derivatives of other traces">
       <description>
          If you select another trace to plot whilst the derivative tool is open, this will also be displayed appropriately<br/><br/>
-         Select the item labelled 'sum' in the data window, you will see the derivative appear.  The checkboxes now effect all the plots. 
+         Deselect the item labelled &apos;sum&apos; and select &apos;max&apos; in the data window, you will see the derivative appear.  The checkboxes now effect all the plots. 
       </description>
    </item>
    <item title="Clearing the derivatives">
       <description>
-         To clear all the derivatives from the plot, select the <b>Clear Tool</b> from the tool menu.  This will then get you back to the raw data.
+         To clear all the derivatives from the plot, either select the <b>Clear Tool</b> from the tool menu or close the tool tab.  This will then get you back to the raw data.  The derivatives are also returned to the raw data when another tool is selected (e.g. the peak fitting tool)
       </description>
    </item>
     <item title="Processing the derivatives">
       <description>
-         If you wish to form some further operation on the derivatives, simply select the tool you wish to use, without going to the <b>Clear Tool</b> between the other tools.<br/><br/>
-         For example, select 'sum' only from the data table, and then select the Derivative tool.<br/><br/>
-         Now select the <b>Measurement Tool</b> and you will notice that the Derivative tool disappears, but the plot stays of the derivative.<br/><br/>
+         If you wish to form some further operation on the derivatives, the tool must be opened in a dedicated window to prevent the new tool replacing the derivatives with the raw data.<br/><br/>
+	To do this, open the derivative tool as normal, then in the <b>View Menu</b> (next to the derivative tab minimise button) select <b>open &apos;derivative&apos; in dedicated window</b>. The tool will close and open in a new tab. Opening a new tool will no longer make the plot display the raw data. <br/><br/>
+	When the derivative tool is opened in a dedicated window, all new trace data, even from new files, will be processed before plotting. The raw data can be returned to the plot by simply closing the derivative tab.<br/><br/>
+         For example, select &apos;sum&apos; only from the data table, and then select the Derivative tool and open in a dedicated window.<br/><br/>
+         Now select the <b>Measurement Tool</b> and you will notice that the Derivative tool is still open and the plot stays as the derivative.<br/><br/>
          You can now use the measurement tool to measure the distance between the positive and negative peak.
       </description>
    </item>
