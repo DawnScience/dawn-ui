@@ -95,7 +95,7 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 			}
 			
 			@Override
-			public void tracesCleared(TraceEvent evet) {
+			public void tracesRemoved(TraceEvent evet) {
 				if (tracesMenu!=null) tracesMenu.clear();
 				if (getSite()!=null) getSite().getActionBars().updateActionBars();
 			}

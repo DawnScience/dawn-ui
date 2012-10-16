@@ -139,7 +139,7 @@ public class DerivativeTool extends AbstractToolPage  {
 				}
 				
 				@Override
-				public void tracesCleared(TraceEvent evt) {
+				public void tracesRemoved(TraceEvent evt) {
 					eventTraceList.clear();
 				}
 				

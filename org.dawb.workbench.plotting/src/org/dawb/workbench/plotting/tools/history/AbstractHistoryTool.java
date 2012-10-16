@@ -48,7 +48,7 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 			}
 			
 			@Override
-			public void tracesCleared(TraceEvent evet) {
+			public void tracesRemoved(TraceEvent evet) {
 				updatePlots();
 			}
 		};
