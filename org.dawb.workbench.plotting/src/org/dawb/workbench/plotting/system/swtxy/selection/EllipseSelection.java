@@ -1,6 +1,7 @@
 package org.dawb.workbench.plotting.system.swtxy.selection;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.dawb.common.ui.plot.axis.ICoordinateSystem;
@@ -17,33 +18,25 @@ import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.FigureListener;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
+import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.draw2d.geometry.Rectangle;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.eclipse.swt.SWT;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
-import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
-import uk.ac.diamond.scisoft.analysis.fitting.EllipseFitter;
-import uk.ac.diamond.scisoft.analysis.roi.EllipticalFitROI;
-import uk.ac.diamond.scisoft.analysis.roi.PointROI;
-import uk.ac.diamond.scisoft.analysis.roi.PolylineROI;
+import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
-public class EllipseFitSelection extends AbstractSelectionRegion {
-	private final static Logger logger = LoggerFactory.getLogger(EllipseFitSelection.class);
+public class EllipseSelection extends AbstractSelectionRegion {
 
-	private static final int MIN_POINTS = 5; // minimum number of points to define ellipse
 	DecoratedEllipse ellipse;
-	private EllipseFitter fitter;
 
-	public EllipseFitSelection(String name, ICoordinateSystem coords) {
+	public EllipseSelection(String name, ICoordinateSystem coords) {
 		super(name, coords);
 		setRegionColor(ColorConstants.lightGreen);
 		setAlpha(80);
 		setLineWidth(2);
-		fitter = new EllipseFitter();
 	}
 
 	@Override
@@ -69,7 +62,7 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 
 	@Override
 	public RegionType getRegionType() {
-		return RegionType.ELLIPSEFIT;
+		return RegionType.ELLIPSE;
 	}
 
 	@Override
@@ -82,56 +75,16 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 		}
 	}
 
-	private void fitPoints(PointList pts, RotatableEllipse ellipse) {
-		if (pts == null)
-			return;
-
-		final int n = pts.size();
-		final double[] x = new double[n];
-		final double[] y = new double[n];
-		final Point p = new Point();
-		for (int i = 0; i < n; i++) {
-			pts.getPoint(p, i);
-			double[] c = coords.getPositionValue(p.x(), p.y());
-			x[i] = c[0];
-			y[i] = c[1];
-		}
-		AbstractDataset xds = new DoubleDataset(x, n); 
-		AbstractDataset yds = new DoubleDataset(y, n);
-		try {
-			fitter.geometricFit(xds, yds, null);
-			final double[] parameters = fitter.getParameters();
-			
-			int[] pnt1 = coords.getValuePosition(2 * parameters[0] + parameters[3], 2 * parameters[1] + parameters[4]);
-			int[] pnt2 = coords.getValuePosition(parameters[3], parameters[4]);
-			
-			ellipse.setAxes(pnt1[0]- pnt2[0],pnt1[1]- pnt2[1]);
-			
-			ellipse.setCentre(pnt2[0], pnt2[1]);
-			ellipse.setAngle(Math.toDegrees(parameters[2]));
-		} catch (IllegalArgumentException e) {
-			logger.info("Can not fit current selection");
-		}
-	}
-
-	private RotatableEllipse tempEllipse;
-
 	@Override
 	public void paintBeforeAdded(Graphics g, PointList clicks, Rectangle parentBounds) {
+		if (clicks.size() <= 1)
+			return;
+
+		g.setLineStyle(SWT.LINE_DOT);
 		g.setLineWidth(2);
 		g.setForegroundColor(getRegionColor());
 		g.setAlpha(getAlpha());
-		g.setLineStyle(Graphics.LINE_DOT);
-		g.drawPolyline(clicks);
-		if (clicks.size() >= MIN_POINTS) {
-			if (tempEllipse == null) {
-				tempEllipse = new RotatableEllipse();
-				tempEllipse.setOutline(true);
-				tempEllipse.setFill(false);
-			}
-			fitPoints(clicks, tempEllipse);
-			tempEllipse.paintFigure(g);
-		}
+		g.drawOval(new Rectangle(clicks.getFirstPoint(), clicks.getLastPoint()));
 	}
 
 	@Override
@@ -153,28 +106,21 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 
 	@Override
 	protected ROIBase createROI(boolean recordResult) {
-		final PointList pl = ellipse.getPoints();
-		if (pl == null) {
-			return null;
-		}
+		final EllipticalROI eroi = new EllipticalROI();
+		Point p = ellipse.getCentre();
+		eroi.setPoint(coords.getPositionValue(p.x(), p.y()));
+		eroi.setAngleDegrees(ellipse.getAngleDegrees());
+		double[] axes = ellipse.getAxes();
+		double[] v = coords.getPositionValue((int) (p.preciseX() + axes[0]), (int) (p.preciseY() + axes[1]));
+		v[0] -= eroi.getPointX(); v[0] *= 0.5;
+		v[1] -= eroi.getPointY(); v[1] *= 0.5;
+		eroi.setSemiAxes(v);
 
-		final PolylineROI hroi = new PolylineROI();
-		final Point p = new Point();
-		for (int i = 0, imax = pl.size(); i < imax; i++) {
-			pl.getPoint(p, i);
-			hroi.insertPoint(i, coords.getPositionValue(p.x(), p.y()));
+//		System.err.println("To roi, " + eroi.toString());
+		if (recordResult) {
+			roi = eroi;
 		}
-
-		try {
-			final EllipticalFitROI eroi = new EllipticalFitROI(hroi);
-			if (recordResult) {
-				roi = eroi;
-			}
-			return eroi;
-		} catch (IllegalArgumentException e) {
-			// do nothing
-		}
-		return roi;
+		return eroi;
 	}
 
 	@Override
@@ -182,20 +128,15 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 		if (ellipse == null)
 			return;
 
-		if (roi instanceof EllipticalFitROI) {
-			ellipse.updateFromROI((EllipticalFitROI) roi);
+		if (roi instanceof EllipticalROI) {
+			ellipse.updateFromROI((EllipticalROI) roi);
 			updateConnectionBounds();
 		}
 	}
 
 	@Override
 	public int getMaximumMousePresses() {
-		return 0; // signifies unlimited presses
-	}
-
-	@Override
-	public int getMinimumMousePresses() {
-		return MIN_POINTS;
+		return 2;
 	}
 
 	class DecoratedEllipse extends RotatableEllipse implements IRegionContainer {
@@ -212,34 +153,37 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 			this.parent = parent;
 			setFill(false);
 			handleListener = createHandleNotifier();
-			moveListener = new FigureListener() {
-				@Override
-				public void figureMoved(IFigure source) {
-					DecoratedEllipse.this.parent.repaint();
-				}
-			};
-
 			showMajorAxis(true);
 		}
 
-		public void setup(PointList points) {
-			fitPoints(points, this);
-			configureHandles(points);
-		}
+		public void setup(PointList corners) {
+			moveListener = new FigureListener() {
+				@Override
+				public void figureMoved(IFigure source) {
+					parent.repaint();
+				}
+			};
 
-		private void configureHandles(PointList points) {
+			Rectangle r = new Rectangle(corners.getFirstPoint(), corners.getLastPoint());
+			if (r.preciseWidth() < r.preciseHeight()) {
+				setAxes(r.preciseHeight(), r.preciseWidth());
+				setAngle(90);
+			} else {
+				setAxes(r.preciseWidth(), r.preciseHeight());
+			}
+			Point c = r.getCenter();
+			setCentre(c.preciseX(), c.preciseY());
+
 			// handles
-			final Point p = new Point();
-			for (int i = 0, imax = points.size(); i < imax; i++) {
-				points.getPoint(p, i);
-				addHandle(p);
+			for (int i = 0; i < 4; i++) {
+				addHandle(getPoint(i*90));
 			}
 			addCentreHandle();
 
-			// figure move (commented out for usability when tweaking handles)
-//			addFigureListener(moveListener);
-//			FigureTranslator mover = new FigureTranslator(getXyGraph(), parent, this, handles);
-//			mover.addTranslationListener(createRegionNotifier());
+			// figure move
+			addFigureListener(moveListener);
+			FigureTranslator mover = new FigureTranslator(getXyGraph(), parent, this, handles);
+			mover.addTranslationListener(createRegionNotifier());
 
 			createROI(true);
 
@@ -271,16 +215,37 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 			handles.add(h);
 		}
 
-		private void removeHandle(SelectionHandle h) {
-			parent.remove(h);
-			h.removeFigureListener(moveListener);
-			h.removeMouseListeners();
+		@Override
+		public String toString() {
+			return "EllSel: cen=" + getCentre() + ", axes=" + Arrays.toString(getAxes()) + ", ang=" + getAngleDegrees();
 		}
 
 		private TranslationListener createHandleNotifier() {
 			return new TranslationListener() {
+				SelectionHandle ha;
+				private boolean major;
+				private Point centre;
+
 				@Override
 				public void onActivate(TranslationEvent evt) {
+					Object src = evt.getSource();
+					if (src instanceof FigureTranslator) {
+						ha = (SelectionHandle) ((FigureTranslator) src).getRedrawFigure();
+						centre = getCentre();
+						int current = handles.indexOf(ha);
+						switch (current) {
+						case 0: case 2:
+							major = true;
+							break;
+						case 1: case 3:
+							major = false;
+							break;
+						default:
+							ha = null;
+							centre = null;
+							break;
+						}
+					}
 				}
 
 				@Override
@@ -291,13 +256,18 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 				public void translationAfter(TranslationEvent evt) {
 					Object src = evt.getSource();
 					if (src instanceof FigureTranslator) {
-						fitPoints(getPoints(), DecoratedEllipse.this);
-						if (handles.size() > 0) {
-							IFigure f = handles.get(handles.size() - 1);
-							if (f instanceof SelectionHandle) {
-								SelectionHandle h = (SelectionHandle) f;
-								h.setSelectionPoint(getCentre());
+						if (ha != null) {
+							double[] axes = getAxes();
+							Point pa = getInverseTransformedPoint(new PrecisionPoint(ha.getSelectionPoint()));
+							Point pb = getInverseTransformedPoint(centre);
+							Dimension d = pa.getDifference(pb);
+							if (major) {
+								axes[0] *= 2. * Math.abs(d.preciseWidth());
+							} else {
+								axes[1] *= 2. * Math.abs(d.preciseHeight());
 							}
+							setAxes(axes[0], axes[1]);
+							updateHandlePositions();
 						}
 						fireROIDragged(createROI(false), ROIEvent.DRAG_TYPE.RESIZE);
 					}
@@ -310,6 +280,8 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 						fireROIChanged(createROI(true));
 						fireROISelection();
 					}
+					ha = null;
+					centre = null;
 				}
 			};
 		}
@@ -343,10 +315,6 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 					SelectionHandle h = (SelectionHandle) f;
 					Point p = h.getSelectionPoint();
 					setCentre(p.preciseX(), p.preciseY());
-					double[] parameters = fitter.getParameters();
-					double[] ps   = coords.getPositionValue(p.x(), p.y());
-					parameters[3] = ps[0];
-					parameters[4] = ps[1];
 				}
 			}
 		}
@@ -368,49 +336,33 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 		 * Update according to ROI
 		 * @param sroi
 		 */
-		public void updateFromROI(EllipticalFitROI eroi) {
+		public void updateFromROI(EllipticalROI eroi) {
 			final double[] xy = eroi.getPointRef();
 			int[] p1 = coords.getValuePosition(xy[0], xy[1]);
 			int[] p2 = coords.getValuePosition(2*eroi.getSemiAxis(0) + xy[0], 2*eroi.getSemiAxis(1) + xy[1]);
-						
-			setAxes(p2[0] - p1[0], p2[1] - p2[0]);
+
+			setAxes(p2[0] - p1[0], p2[1] - p1[1]);
 
 			setCentre(p1[0], p1[1]);
 			setAngle(eroi.getAngleDegrees());
 
-			int imax = handles.size() - 1;
-			PolylineROI proi = eroi.getPoints();
+			updateHandlePositions();
+		}
 
-			if (imax != proi.getNumberOfPoints()) {
-				for (int i = imax; i >= 0; i--) {
-					removeHandle((SelectionHandle) handles.remove(i));
-					fTranslators.remove(i).removeTranslationListeners();
-				}
-				imax = proi.getNumberOfPoints();
-				for (int i = 0; i < imax; i++) {
-					PointROI p = proi.getPoint(i);
-					int[] pos = coords.getValuePosition(p.getPoint());
-					Point np = new Point(pos[0], pos[1]);
-					addHandle(np);
-				}
-				addCentreHandle();
-				setRegionObjects(this, handles);
-			} else {
-				for (int i = 0; i < imax; i++) {
-					PointROI p = proi.getPoint(i);
-					int[] pos = coords.getValuePosition(p.getPoint());
-					Point np = new Point(pos[0], pos[1]);
-					SelectionHandle h = (SelectionHandle) handles.get(i);
-					h.setSelectionPoint(np);
-				}
-				SelectionHandle h = (SelectionHandle) handles.get(imax);
-				h.setSelectionPoint(getCentre());
+		private void updateHandlePositions() {
+			final int imax = handles.size() - 1;
+			for (int i = 0; i < imax; i++) {
+				Point np = getPoint(90*i);
+				SelectionHandle h = (SelectionHandle) handles.get(i);
+				h.setSelectionPoint(np);
 			}
+			SelectionHandle h = (SelectionHandle) handles.get(imax);
+			h.setSelectionPoint(getCentre());
 		}
 
 		@Override
 		public IRegion getRegion() {
-			return EllipseFitSelection.this;
+			return EllipseSelection.this;
 		}
 
 		@Override

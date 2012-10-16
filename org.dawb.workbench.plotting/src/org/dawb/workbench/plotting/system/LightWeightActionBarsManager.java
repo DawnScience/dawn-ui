@@ -28,12 +28,14 @@ import org.dawb.common.services.ImageServiceBean.ImageOrigin;
 import org.dawb.common.ui.image.PaletteFactory;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
+import org.dawb.common.ui.plot.EmptyTool;
 import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingActionBarManager;
 import org.dawb.common.ui.plot.annotation.AnnotationUtils;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.RegionUtils;
+import org.dawb.common.ui.plot.tool.IToolPage;
 import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
@@ -57,7 +59,6 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.StatusLineManager;
@@ -141,7 +142,15 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
     	if (bars.getMenuManager()!=null)       bars.getMenuManager().update(true);
     	if (bars.getStatusLineManager()!=null) bars.getStatusLineManager().update(true);
     	bars.updateActionBars();
-	}
+    	
+    	// If we are 1D we must deactivate 2D tools. If we are 
+    	// 2D we must deactivate 1D tools.
+    	if (type.is1D()) {
+    		clearTool(ToolPageRole.ROLE_2D);
+    	} else if (is2D) {
+    		clearTool(ToolPageRole.ROLE_1D);
+    	}
+  	}
 	
 	
 	public void createConfigActions() {
@@ -220,13 +229,16 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
  
 		regionDropDown.add(createRegionAction(RegionType.LINE,       regionDropDown, "Add line selection",     Activator.getImageDescriptor("icons/ProfileLine.png")));
 		regionDropDown.add(createRegionAction(RegionType.POLYLINE,   regionDropDown, "Add polyline selection", Activator.getImageDescriptor("icons/ProfilePolyline.png")));
+		regionDropDown.add(createRegionAction(RegionType.POLYGON,    regionDropDown, "Add polygon selection",  Activator.getImageDescriptor("icons/ProfilePolyline.png")));
 		regionDropDown.add(createRegionAction(RegionType.BOX,        regionDropDown, "Add box selection",      Activator.getImageDescriptor("icons/ProfileBox.png")));
 		regionDropDown.add(createRegionAction(RegionType.SECTOR,     regionDropDown, "Add sector selection",   Activator.getImageDescriptor("icons/ProfileSector.png")));
-		regionDropDown.add(createRegionAction(RegionType.RING,       regionDropDown, "Add circle selection",   Activator.getImageDescriptor("icons/ProfileCircle.png")));
+		regionDropDown.add(createRegionAction(RegionType.RING,       regionDropDown, "Add ring selection",     Activator.getImageDescriptor("icons/ProfileCircle.png")));
 		regionDropDown.add(createRegionAction(RegionType.XAXIS,      regionDropDown, "Add X-axis selection",   Activator.getImageDescriptor("icons/Cursor-horiz.png")));
 		regionDropDown.add(createRegionAction(RegionType.YAXIS,      regionDropDown, "Add Y-axis selection",   Activator.getImageDescriptor("icons/Cursor-vert.png")));
 		regionDropDown.add(createRegionAction(RegionType.FREE_DRAW,  regionDropDown, "Free drawn selection",   Activator.getImageDescriptor("icons/ProfileFree.png")));
 		regionDropDown.add(createRegionAction(RegionType.POINT,      regionDropDown, "Single point selection", Activator.getImageDescriptor("icons/ProfilePoint.png")));
+		regionDropDown.add(createRegionAction(RegionType.CIRCLE,     regionDropDown, "Add circle selection",   Activator.getImageDescriptor("icons/ProfileCircle.png")));
+		regionDropDown.add(createRegionAction(RegionType.ELLIPSE,    regionDropDown, "Add ellipse selection",  Activator.getImageDescriptor("icons/ProfileEllipse.png")));
 		regionDropDown.add(createRegionAction(RegionType.ELLIPSEFIT, regionDropDown, "Ellipse fit selection",  Activator.getImageDescriptor("icons/ProfileEllipse.png")));
 		
 		if (system.getActionBars()!=null && system.getActionBars().getMenuManager()!=null)  {

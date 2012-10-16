@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Vector;
 
 import ncsa.hdf.object.Dataset;
 import ncsa.hdf.object.Datatype;
@@ -105,7 +106,11 @@ public class FittingTool extends AbstractToolPage implements IRegionListener, ID
 		super();
 		this.fittingJob = new FittingJob();
 		
-		this.selectedTraces = new ArrayList<ILineTrace>(31);
+		/**
+		 * Use Vector here intentionally. It is slower but
+		 * synchronized which is required in this instance. 
+		 */
+		this.selectedTraces = new Vector<ILineTrace>(31);
 		
 		this.traceListener = new ITraceListener.Stub() {
 			
@@ -432,7 +437,7 @@ public class FittingTool extends AbstractToolPage implements IRegionListener, ID
 			});
 			if (selectedTraces.isEmpty())    return Status.CANCEL_STATUS;
 
-
+			if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
 			for (ILineTrace selectedTrace : selectedTraces) {
 				
 				// We chop x and y by the region bounds. We assume the
@@ -445,8 +450,12 @@ public class FittingTool extends AbstractToolPage implements IRegionListener, ID
 				AbstractDataset x  = selectedTrace.getXData();
 				AbstractDataset y  = selectedTrace.getYData();
 	
-				AbstractDataset[] a= FittingUtils.xintersection(x,y,p1[0],p2[0]);
-				x = a[0]; y=a[1];
+				try {
+					AbstractDataset[] a= FittingUtils.xintersection(x,y,p1[0],p2[0]);
+					x = a[0]; y=a[1];
+				} catch (Throwable npe) {
+					continue;
+				}
 	
 				try {
 					final FittedPeaks bean = FittingUtils.getFittedPeaks(new FittedPeaksInfo(x, y, monitor));

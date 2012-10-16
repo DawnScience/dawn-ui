@@ -112,6 +112,22 @@ public class RotatableEllipse extends Shape {
 	}
 
 	/**
+	 * @param point
+	 * @return transformed point
+	 */
+	public Point getTransformedPoint(Point point) {
+		return affine.getTransformed(point);
+	}
+
+	/**
+	 * @param point
+	 * @return inverse-transformed point
+	 */
+	public Point getInverseTransformedPoint(Point point) {
+		return affine.getInverseTransformed(point);
+	}
+
+	/**
 	 * Set major and minor axes lengths
 	 * @param major
 	 * @param minor

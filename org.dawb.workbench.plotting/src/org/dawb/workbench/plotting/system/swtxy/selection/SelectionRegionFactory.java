@@ -42,8 +42,11 @@ public class SelectionRegionFactory {
 		SUPPORTED_REGIONS.add(RegionType.YAXIS_LINE);
 		SUPPORTED_REGIONS.add(RegionType.FREE_DRAW);
 		SUPPORTED_REGIONS.add(RegionType.POINT);
+		SUPPORTED_REGIONS.add(RegionType.CIRCLE);
+		SUPPORTED_REGIONS.add(RegionType.ELLIPSE);
 		SUPPORTED_REGIONS.add(RegionType.ELLIPSEFIT);
 		SUPPORTED_REGIONS.add(RegionType.POLYLINE);
+		SUPPORTED_REGIONS.add(RegionType.POLYGON);
 	}
 
 	/**
@@ -74,8 +77,14 @@ public class SelectionRegionFactory {
 			region = new FreeDrawSelection(name, coords);
 		} else if (regionType==RegionType.POINT) {
 			region = new PointSelection(name, coords);
+		} else if (regionType==RegionType.CIRCLE) {
+			region = new CircleSelection(name, coords);
+		} else if (regionType==RegionType.ELLIPSE) {
+			region = new EllipseSelection(name, coords);
 		} else if (regionType==RegionType.ELLIPSEFIT) {
 			region = new EllipseFitSelection(name, coords);
+		} else if (regionType==RegionType.POLYGON) {
+			region = new PolygonSelection(name, coords);
 		} else if (regionType==RegionType.POLYLINE) {
 			region = new PolylineSelection(name, coords);
 		} else if (regionType==RegionType.XAXIS || regionType==RegionType.YAXIS || regionType==RegionType.XAXIS_LINE || regionType==RegionType.YAXIS_LINE) {

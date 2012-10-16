@@ -58,10 +58,10 @@ import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 public class HistogramToolPage extends AbstractToolPage {
 
-	private static final String ZINGER_LABEL = "Zinger Min value cuttoff";
+	private static final String ZINGER_LABEL = "Zinger Min value cutoff";
 
 
-	private static final String DEAD_PIXEL_LABEL = "Dead Pixel Max Cuttoff";
+	private static final String DEAD_PIXEL_LABEL = "Dead Pixel Max cutoff";
 
 
 	// LOGGER
@@ -170,7 +170,7 @@ public class HistogramToolPage extends AbstractToolPage {
 	// HELPERS
 	private ExtentionPointManager extentionPointManager;
 	private UIJob imagerepaintJob;
-	private PaletteData palleteData;
+	private PaletteData paletteData;
 	private int internalEvent = 0;
 
 
@@ -244,7 +244,7 @@ public class HistogramToolPage extends AbstractToolPage {
 			public void paletteChanged(PaletteEvent event) {
 				if (internalEvent > 0) return;
 				logger.trace("paletteChanged");
-				palleteData = event.getPaletteData();		
+				paletteData = event.getPaletteData();
 				updateHistogramToolElements(null, false);
 			}
 
@@ -408,7 +408,7 @@ public class HistogramToolPage extends AbstractToolPage {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
 				logger.trace("colourSelectionListener");
-				buildPalleteData();
+				buildPaletteData();
 				updateHistogramToolElements(event);
 			}
 
@@ -425,7 +425,7 @@ public class HistogramToolPage extends AbstractToolPage {
 				logger.trace("colourSchemeListener");
 
 				updateColourScheme();
-				buildPalleteData();
+				buildPaletteData();
 				updateHistogramToolElements(event);;
 			}
 
@@ -479,7 +479,6 @@ public class HistogramToolPage extends AbstractToolPage {
 //					plotHistogram();
 //					regionDragging=false;
 //				}
-
 			}
 
 			@Override
@@ -513,7 +512,7 @@ public class HistogramToolPage extends AbstractToolPage {
 				image.setMin(histoMin);
 				if (mon.isCanceled()) return Status.CANCEL_STATUS;
 
-				image.setPaletteData(palleteData);
+				image.setPaletteData(paletteData);
 				if (mon.isCanceled()) return Status.CANCEL_STATUS;
 
 				internalEvent--;
@@ -660,11 +659,11 @@ public class HistogramToolPage extends AbstractToolPage {
 		rangeExpander.setClient(rangeComposite);
 		rangeExpander.addExpansionListener(expansionAdapter);
 
-		// Set up the Dead and Zingers range part of the GUI
+		// Set up the dead and zingers range part of the GUI
 		deadZingerExpander = new ExpandableComposite(composite, SWT.NONE);
 		deadZingerExpander.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1));
 		deadZingerExpander.setLayout(new GridLayout(1, false));
-		deadZingerExpander.setText("Dead pixel and Zinger cuttoffs");
+		deadZingerExpander.setText("Dead pixel and zinger cutoffs");
 
 		deadZingerComposite = new Composite(deadZingerExpander, SWT.NONE);
 		deadZingerComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -830,7 +829,7 @@ public class HistogramToolPage extends AbstractToolPage {
 			deadPixelText.setText(Double.toString(image.getMinCut().getBound().doubleValue()));
 
 			// Update the paletteData
-			palleteData = image.getPaletteData();
+			paletteData = image.getPaletteData();
 
 			// calculate the histogram
 			generateHistogram(imageDataset);
@@ -843,7 +842,7 @@ public class HistogramToolPage extends AbstractToolPage {
 		}				
 	}
 
-	private void removeImagePalleteListener() {
+	private void removeImagePaletteListener() {
 		if (getControl()==null) return; // We cannot plot unless its been created.
 
 		Collection<ITrace> traces = getPlottingSystem().getTraces(IImageTrace.class);
@@ -1014,7 +1013,7 @@ public class HistogramToolPage extends AbstractToolPage {
 			RGBX.set(histoMin+(i*((histoMax-histoMin)/paletteData.colors.length)), i);
 		}
 
-		// Now update all the trace data in a threadsafe way
+		// Now update all the trace data in a thread-safe way
 		final double finalScale = scale;
 
 		getControl().getDisplay().syncExec(new Runnable() {
@@ -1057,7 +1056,7 @@ public class HistogramToolPage extends AbstractToolPage {
 		super.deactivate();
 
 		if (getPlottingSystem()!=null) {
-			removeImagePalleteListener();
+			removeImagePaletteListener();
 			getPlottingSystem().removeTraceListener(traceListener);
 		}
 	}
@@ -1074,9 +1073,9 @@ public class HistogramToolPage extends AbstractToolPage {
 	}
 
 	/**
-	 * Build a pallete data from the RGB values which have been set in the GUI
+	 * Build a palette data from the RGB values which have been set in the GUI
 	 */
-	private void buildPalleteData() {
+	private void buildPaletteData() {
 
 		// first get the appropriate bits from the extension points
 		int[] red = extentionPointManager.getTransferFunction(cmbRedColour.getText()).getFunction().getArray();
@@ -1093,10 +1092,10 @@ public class HistogramToolPage extends AbstractToolPage {
 			blue = invert(blue);
 		}
 
-		palleteData.colors = new RGB[256];
+		paletteData.colors = new RGB[256];
 
 		for (int i = 0; i < 256; i++) {
-			palleteData.colors[i] = new RGB(red[i], green[i], blue[i]);
+			paletteData.colors[i] = new RGB(red[i], green[i], blue[i]);
 		}
 	}
 

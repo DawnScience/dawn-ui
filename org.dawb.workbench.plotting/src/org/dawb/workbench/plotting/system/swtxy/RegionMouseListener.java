@@ -1,6 +1,5 @@
 package org.dawb.workbench.plotting.system.swtxy;
 
-import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.RegionEvent;
 import org.dawb.workbench.plotting.system.dialog.AddRegionCommand;
 import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
@@ -9,8 +8,12 @@ import org.eclipse.draw2d.MouseListener;
 import org.eclipse.draw2d.MouseMotionListener;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class RegionMouseListener extends MouseMotionListener.Stub implements MouseListener {
+	private static final Logger logger = LoggerFactory.getLogger(RegionMouseListener.class);
+
 	/**
 	 * 
 	 */
@@ -47,25 +50,25 @@ class RegionMouseListener extends MouseMotionListener.Stub implements MouseListe
 		if (isDragging) {
 			isDragging = false;
 			if (maxLast > 0 && last >= maxLast) {
-				//					System.err.println("End with last = " + last + " / " + maxLast);
+//				System.err.println("End with last = " + last + " / " + maxLast);
 				releaseMouse();
 			} else if (me.button == 2) {
 				this.regionPoints.removePoint(last--);
-				//					System.err.println("End with last-- = " + last + " / " + maxLast);
+//				System.err.println("End with last-- = " + last + " / " + maxLast);
 				releaseMouse();
 			}
 		} else {
 			if (last > 0 && loc.getDistance(this.regionPoints.getPoint(last)) <= MIN_DIST) {
-				//					System.err.println("Cancel with last = " + last + " / " + maxLast);
+//				System.err.println("Cancel with last = " + last + " / " + maxLast);
 				if (maxLast >= 0 || last >= minLast) {
 					releaseMouse();
 				} else {
-					System.err.println("Not enough points!");
+					logger.warn("Not enough points!");
 				}
 			} else {
 				this.regionPoints.addPoint(loc);
 				last++;
-				//					System.err.println("Added on press (from non-drag), now last = " + last);
+//				System.err.println("Added on press (from non-drag), now last = " + last);
 				isDragging = maxLast == 0;
 			}
 		}
@@ -79,7 +82,7 @@ class RegionMouseListener extends MouseMotionListener.Stub implements MouseListe
 		if (isDragging) {
 			isDragging = false;
 			if (maxLast >= 0 && last >= maxLast) {
-				//					System.err.println("Release with last = " + last + " / " + maxLast);
+//				System.err.println("Release with last = " + last + " / " + maxLast);
 				releaseMouse();
 			}
 			me.consume();
@@ -112,7 +115,7 @@ class RegionMouseListener extends MouseMotionListener.Stub implements MouseListe
 			isDragging = true;
 			me.consume();
 			this.regionArea.repaint();
-			//				System.err.println("Added on move, last = " + last);
+//			System.err.println("Added on move, last = " + last);
 		}
 	}
 
