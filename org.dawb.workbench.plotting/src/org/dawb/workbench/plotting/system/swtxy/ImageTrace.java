@@ -23,8 +23,11 @@ import org.dawb.common.ui.plot.trace.IPaletteListener;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceContainer;
 import org.dawb.common.ui.plot.trace.PaletteEvent;
+import org.dawb.common.ui.plot.trace.TraceEvent;
+import org.dawb.common.ui.plot.trace.TraceWillPlotEvent;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
+import org.dawb.workbench.plotting.system.LightWeightPlottingSystem;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
@@ -67,7 +70,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	private List<AbstractDataset> axes;
 	private ImageServiceBean imageServiceBean;
 	private boolean          isMaximumZoom;
-	
+	private LightWeightPlottingSystem plottingSystem;
 		
 	public ImageTrace(final String name, 
 			          final Axis xAxis, 
@@ -669,7 +672,22 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 
 	@Override
-	public void setData(final AbstractDataset image, List<AbstractDataset> axes, boolean performAuto) {
+	public void setData(AbstractDataset image, List<AbstractDataset> axes, boolean performAuto) {
+		
+		
+		if (plottingSystem!=null) try {
+			if (plottingSystem.getTraces().contains(this)) {
+				final TraceWillPlotEvent evt = new TraceWillPlotEvent(this, false);
+				plottingSystem.fireWillPlot(evt);
+				if (evt.isNewImageDataSet()) {
+					image = evt.getImage();
+					axes  = evt.getAxes();
+				}
+			}
+		} catch (Throwable ignored) {
+			// We allow things to proceed without a warning.
+		}
+
 		// The image is drawn low y to the top left but the axes are low y to the bottom right
 		// We do not currently reflect it as it takes too long. Instead in the slice
 		// method, we allow for the fact that the dataset is in a different orientation to 
@@ -690,6 +708,14 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		
 		setAxes(axes, performAuto);
        
+		if (plottingSystem!=null) try {
+			if (plottingSystem.getTraces().contains(this)) {
+				plottingSystem.fireTraceUpdated(new TraceEvent(this));
+			}
+		} catch (Throwable ignored) {
+			// We allow things to proceed without a warning.
+		}
+
 	}
 	
 	@Override
@@ -1055,6 +1081,14 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				ds[index] = label.getDouble(dataIndex);
 			}
 		}		
+	}
+
+	public LightWeightPlottingSystem getPlottingSystem() {
+		return plottingSystem;
+	}
+
+	public void setPlottingSystem(LightWeightPlottingSystem plottingSystem) {
+		this.plottingSystem = plottingSystem;
 	}
 	
 }

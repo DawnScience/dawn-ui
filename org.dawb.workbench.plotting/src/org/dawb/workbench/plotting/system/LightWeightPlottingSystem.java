@@ -44,6 +44,7 @@ import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceContainer;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
+import org.dawb.common.ui.plot.trace.TraceWillPlotEvent;
 import org.dawb.gda.extensions.util.DatasetTitleUtils;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
@@ -376,12 +377,10 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 				
 				if (getDisplay().getThread()==Thread.currentThread()) {
 					lineTrace.setData(finalX, y);
-					fireTraceUpdated(new TraceEvent(lineTrace));
 				} else {
 					getDisplay().syncExec(new Runnable() {
 						public void run() {
 							lineTrace.setData(finalX, y);
-							fireTraceUpdated(new TraceEvent(lineTrace));
 						}
 					});
 				}
@@ -534,7 +533,6 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		if (data.getName()!=null) xyGraph.setTitle(data.getName());
 		
 		image.setData(data, axes, false);
-		fireTraceUpdated(new TraceEvent(image));		
 	}
 
 
@@ -599,6 +597,9 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 			
 			traceMap.put(trace.getName(), trace);
 
+			fireWillPlot(new TraceWillPlotEvent(trace, true));
+			trace.setPlottingSystem(this);
+
 			xyGraph.addImageTrace(trace);
 			
 			fireTraceAdded(new TraceEvent(trace));
@@ -618,6 +619,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		final Axis yAxis = (Axis)getSelectedYAxis();
 		
 		final ImageTrace trace = xyGraph.createImageTrace(traceName, xAxis, yAxis);
+		trace.setPlottingSystem(this);
 		fireTraceCreated(new TraceEvent(trace));
 		
 		return trace;
@@ -779,11 +781,13 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		if (trace instanceof ImageTrace) {
 			this.plottingMode = PlotType.IMAGE;
 			this.lightWeightActionBarMan.switchActions(plottingMode);
+			fireWillPlot(new TraceWillPlotEvent(trace, true));
 			xyGraph.addImageTrace((ImageTrace)trace);
 			fireTraceAdded(new TraceEvent(trace));
 		} else {
 			this.plottingMode = PlotType.PT1D;
 			this.lightWeightActionBarMan.switchActions(plottingMode);
+			fireWillPlot(new TraceWillPlotEvent(trace, true));
 			xyGraph.addTrace(((LineTraceImpl)trace).getTrace(), true);
 			xyCanvas.redraw();
 			fireTraceAdded(new TraceEvent(trace));

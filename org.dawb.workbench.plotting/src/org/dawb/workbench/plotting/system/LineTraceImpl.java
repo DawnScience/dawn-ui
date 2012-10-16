@@ -4,6 +4,7 @@ import org.csstudio.swt.xygraph.figures.Trace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITraceContainer;
 import org.dawb.common.ui.plot.trace.TraceEvent;
+import org.dawb.common.ui.plot.trace.TraceWillPlotEvent;
 import org.dawb.workbench.plotting.system.swtxy.LineTrace;
 import org.eclipse.swt.graphics.Color;
 
@@ -324,10 +325,29 @@ public class LineTraceImpl implements ILineTrace {
 			prov = new LightWeightDataProvider();
 		}
 		
+		if (sys!=null) try {
+			if (sys.getTraces().contains(this)) {
+				final TraceWillPlotEvent evt = new TraceWillPlotEvent(this, false);
+				sys.fireWillPlot(evt);
+				if (evt.isNewLineDataSet()) {
+					xData = evt.getXData();
+					yData = evt.getYData();
+				}
+			}
+		} catch (Throwable ignored) {
+			// We allow things to proceed without a warning.
+		}
+		
 		prov.setData(xData,yData);
 		trace.setDataProvider(prov);
 		
-		sys.fireTracesPlotted(new TraceEvent(this));
+		if (sys!=null) try {
+			if (sys.getTraces().contains(this)) {
+				sys.fireTraceUpdated(new TraceEvent(this));
+			}
+		} catch (Throwable ignored) {
+			// We allow things to proceed without a warning.
+		}
 	}
 
 	@Override
