@@ -914,7 +914,21 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 			throw new RuntimeException("Cannot set the plot title when the plotting system is not created or plotting something!");
 		}
 	}
-	
+
+	/**
+	 * Override this method to provide an implementation of show legend setting.
+	 * @param b
+	 */
+	@Override
+	public void setShowLegend(boolean b) {
+		if (xyGraph!=null) {
+			xyGraph.setShowLegend(b);
+			xyGraph.repaint();
+		} else {
+			throw new RuntimeException("Cannot set 'Show Legend' when the plotting system is not created or plotting something!");
+		}
+	}
+
 	public Color get1DPlotColor(Object object) {
 		if (getColorOption()==ColorOption.NONE) return null;
 		if (colorMap==null) return null;
