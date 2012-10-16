@@ -22,14 +22,14 @@ import org.eclipse.swt.graphics.Image;
  * @author fcp94556
  *
  */
-public class FittingLabelProvider extends ColumnLabelProvider {
+public class PeakLabelProvider extends ColumnLabelProvider {
 
 	private int           column;
 	private ColumnViewer  viewer;
 	private DecimalFormat intFormat, format;
 	private Image         savedIcon;
 
-	public FittingLabelProvider(int i) {
+	public PeakLabelProvider(int i) {
 		this.column = i;
 		this.intFormat = new DecimalFormat("###0");
 		this.format = new DecimalFormat("##0.#####");
@@ -49,10 +49,10 @@ public class FittingLabelProvider extends ColumnLabelProvider {
 	public String getText(Object element) {
 		
 		if (element==null) return "";
-		if (!(element instanceof FittedPeak)) return "";
-		final FittedPeak  peak  = (FittedPeak)element;
-		if (peak.getPeak() instanceof NullPeak) return "";
-		final FittedPeaks bean = (FittedPeaks)viewer.getInput();
+		if (!(element instanceof FittedFunction)) return "";
+		final FittedFunction  peak  = (FittedFunction)element;
+		if (peak.getPeak() instanceof NullFunction) return "";
+		final FittedFunctions bean = (FittedFunctions)viewer.getInput();
 		
 		
 		switch(column) {
@@ -86,7 +86,7 @@ public class FittingLabelProvider extends ColumnLabelProvider {
 	 */
 	public Color getForeground(final Object element) {
 		
-		final FittedPeaks bean = (FittedPeaks)viewer.getInput();
+		final FittedFunctions bean = (FittedFunctions)viewer.getInput();
 		if (bean==null)     return super.getForeground(element);
 		if (bean.isEmpty()) return super.getForeground(element);
 	
@@ -101,8 +101,8 @@ public class FittingLabelProvider extends ColumnLabelProvider {
 	public Image getImage(Object element) {
 		
 		if (element==null) return null;
-		if (!(element instanceof FittedPeak)) return null;
-		final FittedPeak  peak  = (FittedPeak)element;
+		if (!(element instanceof FittedFunction)) return null;
+		final FittedFunction  peak  = (FittedFunction)element;
 		if (peak.isSaved() && column==0) return savedIcon;
 		return null;
 	}

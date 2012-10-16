@@ -46,7 +46,7 @@ public class FittedPeaksExportWizard extends Wizard implements IExportWizard {
 	public boolean performFinish() {
 		
 		final ToolPageView view = (ToolPageView)EclipseUtils.getPage().findView("org.dawb.workbench.plotting.views.toolPageView.1D");
-		if (view == null || view.getCurrentPage()==null || !(view.getCurrentPage() instanceof FittingTool)) {
+		if (view == null || view.getCurrentPage()==null || !(view.getCurrentPage() instanceof PeakFittingTool)) {
 			MessageDialog.openError(Display.getDefault().getActiveShell(), "Cannot find active Fit Tool",
 					                "Cannot find a fitting tool to export the fitted peaks from.\n\n"+
 			                        "Please ensure that there is a fitting tool active with some\n"+
@@ -56,7 +56,7 @@ public class FittedPeaksExportWizard extends Wizard implements IExportWizard {
 		
 		final ExportPage ep = (ExportPage)getPages()[0];
 		try {
-			final String exportPath = ((FittingTool)view.getCurrentPage()).exportFittedPeaks(ep.getPath());
+			final String exportPath = ((PeakFittingTool)view.getCurrentPage()).exportFittedPeaks(ep.getPath());
 			
 			if (ep.isOpen()) {
 				EclipseUtils.openExternalEditor(exportPath);
