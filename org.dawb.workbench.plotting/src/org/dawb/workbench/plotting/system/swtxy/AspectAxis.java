@@ -226,6 +226,14 @@ public class AspectAxis extends Axis implements IAxis {
 	}
 
 	/**
+	 * 
+	 */
+	@Override
+	public void setMaximumRange(double lower, double upper) {
+		setMaximumRange(new Range(lower, upper));
+	}
+	
+	/**
 	 * Set with lower<upper, the class will check for if the axis is in reversed mode.
 	 * @param maximumRange
 	 */
