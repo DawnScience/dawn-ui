@@ -18,7 +18,8 @@ Require-Bundle: org.eclipse.ui,
  org.dawb.passerelle.common;bundle-version="1.0.0",
  org.dawb.passerelle.actors;bundle-version="1.0.0",
  org.dawb.hdf5;bundle-version="1.2.0",
- org.csstudio.swt.xygraph;bundle-version="1.1.0"
+ org.csstudio.swt.xygraph;bundle-version="1.1.0",
+ org.dawb.common.gpu;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: org.dawb.workbench.plotting.system,
@@ -30,7 +31,6 @@ Export-Package: org.dawb.workbench.plotting.system,
  org.dawb.workbench.plotting.tools.reduction,
  org.dawb.workbench.plotting.util
 Import-Package: ncsa.hdf.object,
- org.dawb.common.gpu,
  org.dawb.common.services,
  org.dawb.common.ui.plot.region,
  org.dawb.common.util.io,
