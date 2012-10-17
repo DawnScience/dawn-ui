@@ -22,7 +22,9 @@ package org.dawnsci.plotting.jreality.util;
 
 import java.nio.IntBuffer;
 
-import javax.media.opengl.*;
+import javax.media.opengl.GL;
+import javax.media.opengl.GLContext;
+import javax.media.opengl.GLDrawableFactory;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.opengl.GLCanvas;
@@ -31,10 +33,17 @@ import org.eclipse.swt.widgets.Composite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.jreality.ui.viewerapp.AbstractViewerApp;
+import de.jreality.ui.viewerapp.ViewerAppSwt;
+import de.jreality.util.Secure;
+import de.jreality.util.SystemProperties;
+
 public class JOGLChecker {
 
-	private static final Logger logger = LoggerFactory
-	.getLogger(JOGLChecker.class);
+	private static final String RENDER_SOFTWARE_PROPERTY_STRING = "uk.ac.diamond.analysis.rcp.plotting.useSoftware";
+	private static final String RENDER_HYBRID_PROPERTY_STRING = "uk.ac.diamond.analysis.rcp.plotting.useGL13";
+
+	private static final Logger logger = LoggerFactory.getLogger(JOGLChecker.class);
 
 	private static int maxXdim = 8192;
 	private static int maxYdim = 8192;
@@ -105,6 +114,37 @@ public class JOGLChecker {
 	
 	static public String getVendorName() {
 		return glVendorStr;
+	}
+	
+	/**
+	 * 
+	 * @return true if hardware enabled
+	 */
+	public static boolean isHardwareEnabled(final Composite parent) {
+		boolean hasJOGL = true;
+		String propString = System.getProperty(RENDER_SOFTWARE_PROPERTY_STRING);
+		if (propString != null && propString.toLowerCase().equals("true")) {
+			logger.warn("Force software render");
+			hasJOGL = false;
+		} else {
+			String viewer = Secure.getProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_JOGL);
+			hasJOGL = JOGLChecker.canUseJOGL_OpenGL(viewer, parent);
+		}
+		return hasJOGL;
+	}
+
+	/**
+	 * 
+	 * @param viewerApp
+	 * @return
+	 * @throws ClassCastException if viewerApp is not a ViewerAppSwt
+	 */
+	public static boolean isShadingSupported(AbstractViewerApp viewerApp) {
+		boolean hasJOGLshaders = ((ViewerAppSwt) viewerApp).supportsShaders();
+		if (Boolean.getBoolean(RENDER_HYBRID_PROPERTY_STRING)) {
+			hasJOGLshaders = false;
+		}
+		return hasJOGLshaders;
 	}
 	
 }
