@@ -224,7 +224,7 @@
       </perspective>
    </extension>
    <extension
-         point="uk.ac.diamond.scisoft.introRegister">
+         point="org.dawnsci.introRegister">
       <introPageRegister
             description="Opens the Data Browsing perspective"
             icon="icons/data_browsing_intro.png"
