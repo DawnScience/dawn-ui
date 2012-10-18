@@ -3,6 +3,7 @@ package org.dawnsci.plotting.jreality;
 import java.awt.Component;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,6 +13,7 @@ import javax.swing.JApplet;
 import javax.swing.JPanel;
 
 import org.dawnsci.plotting.jreality.compositing.CompositeEntry;
+import org.dawnsci.plotting.jreality.core.AxisMode;
 import org.dawnsci.plotting.jreality.core.IDataSet3DCorePlot;
 import org.dawnsci.plotting.jreality.impl.DataSet3DPlot1D;
 import org.dawnsci.plotting.jreality.impl.DataSet3DPlot1DStack;
@@ -21,11 +23,13 @@ import org.dawnsci.plotting.jreality.impl.DataSet3DPlot3D;
 import org.dawnsci.plotting.jreality.impl.DataSetScatterPlot2D;
 import org.dawnsci.plotting.jreality.impl.DataSetScatterPlot3D;
 import org.dawnsci.plotting.jreality.impl.HistogramChartPlot1D;
+import org.dawnsci.plotting.jreality.impl.Plot1DAppearance;
 import org.dawnsci.plotting.jreality.impl.Plot1DGraphTable;
 import org.dawnsci.plotting.jreality.legend.LegendChangeEvent;
 import org.dawnsci.plotting.jreality.legend.LegendChangeEventListener;
 import org.dawnsci.plotting.jreality.legend.LegendComponent;
 import org.dawnsci.plotting.jreality.legend.LegendTable;
+import org.dawnsci.plotting.jreality.tick.TickFormatting;
 import org.dawnsci.plotting.jreality.tool.CameraRotationTool;
 import org.dawnsci.plotting.jreality.tool.ClickWheelZoomTool;
 import org.dawnsci.plotting.jreality.tool.ClickWheelZoomToolWithScrollBar;
@@ -33,6 +37,7 @@ import org.dawnsci.plotting.jreality.tool.PanActionListener;
 import org.dawnsci.plotting.jreality.tool.PanningTool;
 import org.dawnsci.plotting.jreality.tool.SceneDragTool;
 import org.dawnsci.plotting.jreality.util.JOGLChecker;
+import org.dawnsci.plotting.jreality.util.PlotColorUtility;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.awt.SWT_AWT;
 import org.eclipse.swt.custom.SashForm;
@@ -52,6 +57,8 @@ import org.eclipse.swt.widgets.ScrollBar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
+import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.SceneGraphComponent;
@@ -119,24 +126,92 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 	/**
 	 * Call to create plotting
 	 * @param parent
+	 * @param initialMode may be null
 	 */
 	public void createControl(final Composite parent, PlottingMode initialMode) {
 		
 		init(parent);
 		createUI(parent);
-		setInitPlotMode(initialMode);
+		if (initialMode!=null) setPlotMode(initialMode);
 	}
 	
 	/**
 	 * 
 	 * @param data
-	 * @param axes
+	 * @param axes AxesValues for each axis required, for 3D there should be three for instance.
+	 * @param mode
+	 * @return true if something plotted
 	 */
-//	public void plot(final AbstractDataset data, final List<AxisValues> axes, final ) {
-//		
-//	}
+	public boolean plot(final AbstractDataset data, final List<AxisValues> axes, final PlottingMode mode) {
+		
+		switch(mode) {
+		
+		case SURF2D:
+			final AxisValues xAxis = axes.get(0);
+			final AxisValues yAxis = axes.get(1);
+			final AxisValues zAxis = axes.get(2);
+			
+			setAxisModes((xAxis == null ? AxisMode.LINEAR : AxisMode.CUSTOM),
+	                     (yAxis == null ? AxisMode.LINEAR : AxisMode.CUSTOM),
+	                     (zAxis == null ? AxisMode.LINEAR : AxisMode.CUSTOM));
+
+			setXAxisValues(xAxis, 1);
+			setYAxisValues(yAxis);
+			setZAxisValues(zAxis);
+			
+			setYTickLabelFormat(TickFormatting.roundAndChopMode);
+			setXTickLabelFormat(TickFormatting.roundAndChopMode);
+			
+			return true;
+		default:
+			return false;
+		}
+	}
 	
-	private void setInitPlotMode(PlottingMode mode) {
+	
+	private void checkAndAddLegend(Collection<? extends IDataset> dataSets) {
+		if (currentMode == PlottingMode.ONED || currentMode == PlottingMode.SCATTER2D) {
+			if (dataSets != null && dataSets.size() > graphColourTable.getLegendSize()) {
+				logger.info("# graphs > # of entries in the legend will auto add entries");
+				for (int i = graphColourTable.getLegendSize(); i < dataSets.size(); i++) {
+					graphColourTable.addEntryOnLegend(new Plot1DAppearance(PlotColorUtility.getDefaultColour(i),
+							PlotColorUtility.getDefaultStyle(i), ""));
+				}
+			}
+		}
+	}
+
+	
+	private void setXAxisValues(AxisValues xAxis, int numOfDataSets) {
+		if (plotter != null) {
+			if (xAxis.getName()!=null) plotter.setXAxisLabel(xAxis.getName());
+			plotter.setXAxisValues(xAxis, numOfDataSets);
+		}
+	}
+	private void setYAxisValues(AxisValues yAxis) {
+		if (plotter != null) {
+			if (yAxis.getName()!=null) plotter.setYAxisLabel(yAxis.getName());
+			plotter.setYAxisValues(yAxis);
+		}
+	}
+	private void setZAxisValues(AxisValues zAxis) {
+		if (plotter != null) {
+			if (zAxis.getName()!=null) plotter.setZAxisLabel(zAxis.getName());
+			plotter.setZAxisValues(zAxis);
+		}
+	}
+	private void setXTickLabelFormat(TickFormatting newFormat) {
+		if (plotter != null) plotter.setXAxisLabelMode(newFormat);
+	}
+	private void setYTickLabelFormat(TickFormatting newFormat) {
+		if (plotter != null) plotter.setYAxisLabelMode(newFormat);
+	}
+	private void setZTickLabelFormat(TickFormatting newFormat) {
+		if (plotter != null) plotter.setZAxisLabelMode(newFormat);
+	}
+
+	
+	private void setPlotMode(PlottingMode mode) {
 		switch (currentMode) {
 		case ONED:
 			plotter = new DataSet3DPlot1D(viewerApp, plotArea, defaultCursor, graphColourTable, hasJOGL);
@@ -352,7 +427,6 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 	 * 
 	 * @param async
 	 */
-
 	public synchronized void refresh(boolean async) {
 		if (!isInExporting) {
 			if (viewerApp != null) {
@@ -504,7 +578,7 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 	}
 
 	
-	public void setEnableImageScrollBars(boolean enable) {
+	private void setEnableImageScrollBars(boolean enable) {
 		if (!enable) {
 			if (hBar != null && hBar.isVisible())
 				hBar.setVisible(enable);
@@ -518,5 +592,10 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 		}
 		showScrollBars = enable;
 	}
+	
+	private void setAxisModes(AxisMode xAxis, AxisMode yAxis, AxisMode zAxis) {
+		plotter.setAxisModes(xAxis, yAxis, zAxis);
+	}
+
 
 }
