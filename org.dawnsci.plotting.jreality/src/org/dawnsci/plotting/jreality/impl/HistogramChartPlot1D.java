@@ -24,7 +24,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.dawnsci.plotting.jreality.core.AxisValues;
 import org.dawnsci.plotting.jreality.core.ScaleType;
 import org.dawnsci.plotting.jreality.data.ColourImageData;
 import org.dawnsci.plotting.jreality.tick.Tick;
@@ -34,6 +33,7 @@ import org.dawnsci.plotting.jreality.tool.SelectedWindow;
 import org.dawnsci.plotting.jreality.util.ArrayPoolUtility;
 import org.dawnsci.plotting.jreality.util.ScalingUtility;
 
+import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import de.jreality.geometry.IndexedLineSetFactory;
 import de.jreality.geometry.PointSetFactory;

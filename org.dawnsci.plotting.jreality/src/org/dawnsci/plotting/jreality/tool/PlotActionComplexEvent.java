@@ -16,8 +16,7 @@
 
 package org.dawnsci.plotting.jreality.tool;
 
-import org.dawnsci.plotting.jreality.core.AxisValues;
-
+import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 /**

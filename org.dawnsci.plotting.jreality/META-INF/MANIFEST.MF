@@ -23,5 +23,4 @@ Bundle-ClassPath: gluegen-rt.jar,
  jogl.jar,
  jReality_modified.jar,
  .
-Import-Package: org.slf4j,
- uk.ac.diamond.scisoft.analysis.rcp.plotting.roi
+Import-Package: org.slf4j

@@ -21,6 +21,7 @@ import java.util.List;
 import org.dawnsci.plotting.jreality.data.ColourImageData;
 import org.dawnsci.plotting.jreality.tick.TickFormatting;
 
+import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import de.jreality.scene.SceneGraphComponent;
 

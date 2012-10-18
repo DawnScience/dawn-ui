@@ -21,7 +21,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.dawnsci.plotting.jreality.core.AxisMode;
-import org.dawnsci.plotting.jreality.core.AxisValues;
 import org.dawnsci.plotting.jreality.core.IDataSet3DCorePlot;
 import org.dawnsci.plotting.jreality.core.ScaleType;
 import org.dawnsci.plotting.jreality.data.ColourImageData;
@@ -33,6 +32,7 @@ import org.dawnsci.plotting.jreality.util.ScalingUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.function.Downsample;
 import uk.ac.diamond.scisoft.analysis.dataset.function.DownsampleMode;
