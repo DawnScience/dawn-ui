@@ -80,12 +80,12 @@ public class RegionSelectActor extends AbstractDataMessageTransformer {
 
 				AbstractDataset dataRegion = dataset.clone();
 
-				dataRegion.setName(dataRegion.getName()+"_region");
-
 				dataRegion = dataRegion.getSlice(new int[] { yStart, xStart },
 						new int[] { yStop, xStop },
 						new int[] {yInc, xInc});
 
+				dataRegion.setName(dataset.getName()+"_region");
+				
 				// Return the calculated values
 				result.addList(dataRegion.getName(), dataRegion);
 			}
