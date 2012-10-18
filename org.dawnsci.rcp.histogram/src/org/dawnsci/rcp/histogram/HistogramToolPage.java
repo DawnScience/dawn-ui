@@ -484,16 +484,13 @@ public class HistogramToolPage extends AbstractToolPage {
 			@Override
 			public void roiChanged(ROIEvent evt) {
 				if (evt.getROI() instanceof RectangularROI) {
-//					RectangularROI roi = (RectangularROI) evt.getROI();
-//					System.out.println(roi);
-//					regionDragging = true;
-//					IRegion region = histogramPlot.getRegion("Histogram Region");
-//					RectangularROI roi = (RectangularROI) region.getROI();
-//					histoMin = roi.getPoint()[0];
-//					histoMax = roi.getEndPoint()[0];
-//					updateRanges(null);
-//					plotHistogram();
-//					regionDragging=false;
+					regionDragging = true;
+					IRegion region = histogramPlot.getRegion("Histogram Region");
+					RectangularROI roi = (RectangularROI) region.getROI();
+					histoMin = roi.getPoint()[0];
+					histoMax = roi.getEndPoint()[0];
+					updateHistogramToolElements(null);
+					regionDragging=false;
 				}
 			}
 		};
@@ -1039,7 +1036,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 
 	/**
-	 * Add the trace listener and plot intial data
+	 * Add the trace listener and plot initial data
 	 */
 	public void activate() {
 		super.activate();
@@ -1120,7 +1117,6 @@ public class HistogramToolPage extends AbstractToolPage {
 			RectangularROI rroi = new RectangularROI(histoMin, 0, histoMax-histoMin, 1, 0);
 			region.setROI(rroi);
 			region.addROIListener(histogramRegionListener);
-			region.setMobile(false);
 		} catch (Exception e) {
 			logger.error("Couldn't open histogram view and create ROI", e);
 		}
