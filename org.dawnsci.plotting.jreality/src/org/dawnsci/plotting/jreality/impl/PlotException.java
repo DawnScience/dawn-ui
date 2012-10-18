@@ -21,7 +21,7 @@ package org.dawnsci.plotting.jreality.impl;
  */
 public class PlotException extends Exception {
 
-	PlotException(String failureMessage) {
+	public PlotException(String failureMessage) {
 		super(failureMessage);
 	}
 }

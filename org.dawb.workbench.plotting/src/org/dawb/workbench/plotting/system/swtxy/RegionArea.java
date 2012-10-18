@@ -81,6 +81,7 @@ public class RegionArea extends PlotArea {
 	}
 
 	public boolean removeRegion(final AbstractSelectionRegion region) {
+		if (region==null) return false;
 	    final AbstractSelectionRegion gone = regions.remove(region.getName());
 		if (gone!=null){
 			region.remove(); // Clears up children (you can live without this

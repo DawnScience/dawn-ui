@@ -327,6 +327,12 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 					}
 				}
 			}
+
+			@Override
+			public void legendUpdated(LegendChangeEvent evt) {
+				// TODO Auto-generated method stub
+				
+			}
 		});
 	}
 

@@ -22,6 +22,11 @@ package org.dawnsci.plotting.jreality.legend;
 public interface LegendChangeEventListener {
 
 	/**
+	 * Called on lengend update
+	 * @param evt
+	 */
+	public void legendUpdated(LegendChangeEvent evt);
+	/**
 	 * An entry has been deleted out of the legend
 	 * @param evt LegendChangeEvent object that contains all relevant information
 	 */

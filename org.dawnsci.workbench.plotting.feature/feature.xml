@@ -96,6 +96,7 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
+
    <plugin
          id="org.dom4j"
          download-size="0"
@@ -105,6 +106,13 @@
 
    <plugin
          id="com.springsource.org.jdom"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.dawnsci.plotting.jreality"
          download-size="0"
          install-size="0"
          version="0.0.0"
