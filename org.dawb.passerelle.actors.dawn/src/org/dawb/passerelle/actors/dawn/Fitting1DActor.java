@@ -16,6 +16,7 @@ import java.util.Map;
 
 import org.dawb.passerelle.common.actors.AbstractDataMessageTransformer;
 import org.dawb.passerelle.common.message.DataMessageComponent;
+import org.dawb.passerelle.common.message.DataMessageException;
 import org.dawb.passerelle.common.message.MessageUtils;
 
 import ptolemy.data.expr.StringParameter;
@@ -24,22 +25,14 @@ import ptolemy.kernel.util.IllegalActionException;
 import ptolemy.kernel.util.NameDuplicationException;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
-import uk.ac.diamond.scisoft.analysis.dataset.Image;
 import uk.ac.diamond.scisoft.analysis.fitting.Fitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
-import uk.ac.diamond.scisoft.analysis.optimize.ApacheConjugateGradient;
 import uk.ac.diamond.scisoft.analysis.optimize.ApacheNelderMead;
 import uk.ac.diamond.scisoft.analysis.optimize.GeneticAlg;
-import uk.ac.diamond.scisoft.analysis.optimize.NelderMead;
-
-import com.isencia.passerelle.actor.ProcessingException;
 
 public class Fitting1DActor extends AbstractDataMessageTransformer {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 813882139346261410L;
 	public StringParameter datasetName;
 	public StringParameter functionName;
@@ -55,13 +48,14 @@ public class Fitting1DActor extends AbstractDataMessageTransformer {
 		registerConfigurableParameter(functionName);
 		xAxisName = new StringParameter(this, "xAxisName");
 		registerConfigurableParameter(xAxisName);
-
-
 	}
 
 	@Override
 	protected DataMessageComponent getTransformedMessage(
-			List<DataMessageComponent> cache) {
+			List<DataMessageComponent> cache) throws DataMessageException {
+		
+		//TODO Should be made more generic to deal with multidimentional data not just 2D
+		
 		// get the data out of the message, name of the item should be specified
 		final Map<String, Serializable>  data = MessageUtils.getList(cache);
 		
@@ -77,8 +71,7 @@ public class Fitting1DActor extends AbstractDataMessageTransformer {
 		try {
 			functions = MessageUtils.getFunctions(cache);
 		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			throw createDataMessageException("Failed to get the list of functions from the incomming message", e1);
 		}
 		
 		// get the required datasets
@@ -101,11 +94,8 @@ public class Fitting1DActor extends AbstractDataMessageTransformer {
 		try {
 			Fitter.fit(xAxisDS, summed, new GeneticAlg(0.0001), fitFunction);
 		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			throw createDataMessageException("Failed to fit the data profile using the Genetic Algorithm", e1);
 		}
-		
-		//fitted = fitFunction.
 			
 		AbstractDataset parametersDS = new DoubleDataset(dataDS.getShape()[0], fitFunction.getNoOfParameters());
 		AbstractDataset functionsDS = new DoubleDataset(dataDS.getShape()[0], dataDS.getShape()[1]);
@@ -123,8 +113,7 @@ public class Fitting1DActor extends AbstractDataMessageTransformer {
 				functionsDS.setSlice(resultFunctionDS, new int[] {i,0}, new int[] {i+1,dataDS.getShape()[1]}, new int[] {1,1});
 				
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				throw createDataMessageException("Failed to fit row "+i+" of the data", e);
 			}
 			
 		}
@@ -132,13 +121,12 @@ public class Fitting1DActor extends AbstractDataMessageTransformer {
 		result.addList("fit_image", functionsDS);
 		result.addList("fit_result", parametersDS);
 
-
 		return result;
 	}
 
 	@Override
 	protected String getOperationName() {
-		return "Normalise by region";
+		return "Fit 1D data in 2D image";
 	}
 
 }
