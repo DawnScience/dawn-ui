@@ -11,6 +11,7 @@
 package org.dawb.passerelle.actors.dawn;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -54,8 +55,6 @@ public class Fitting1DActor extends AbstractDataMessageTransformer {
 	protected DataMessageComponent getTransformedMessage(
 			List<DataMessageComponent> cache) throws DataMessageException {
 		
-		//TODO Should be made more generic to deal with multidimentional data not just 2D
-		
 		// get the data out of the message, name of the item should be specified
 		final Map<String, Serializable>  data = MessageUtils.getList(cache);
 		
@@ -97,8 +96,12 @@ public class Fitting1DActor extends AbstractDataMessageTransformer {
 			throw createDataMessageException("Failed to fit the data profile using the Genetic Algorithm", e1);
 		}
 			
-		AbstractDataset parametersDS = new DoubleDataset(dataDS.getShape()[0], fitFunction.getNoOfParameters());
-		AbstractDataset functionsDS = new DoubleDataset(dataDS.getShape()[0], dataDS.getShape()[1]);
+		ArrayList<AbstractDataset> parametersDS = new ArrayList<AbstractDataset>(fitFunction.getNoOfParameters()); 
+		for(int i = 0; i < fitFunction.getNoOfParameters(); i++) {
+			parametersDS.add(new DoubleDataset(dataDS.getShape()[0]));
+		}
+		
+		AbstractDataset functionsDS = new DoubleDataset(dataDS.getShape());
 		
 		for(int i = 0; i < dataDS.getShape()[0]; i++) {
 			AbstractDataset slice = dataDS.getSlice(new int[] {i,0}, new int[] {i+1,dataDS.getShape()[1]}, new int[] {1,1});
@@ -106,7 +109,7 @@ public class Fitting1DActor extends AbstractDataMessageTransformer {
 			try {
 				CompositeFunction fitResult = Fitter.fit(xAxisDS, slice, new ApacheNelderMead(), fitFunction);
 				for(int p = 0; p < fitResult.getNoOfParameters(); p++) {
-					parametersDS.set(fitResult.getParameter(p).getValue(), i, p);
+					parametersDS.get(p).set(fitResult.getParameter(p).getValue(), i);
 				}
 				
 				DoubleDataset resultFunctionDS = fitResult.makeDataset(xAxisDS);
@@ -119,7 +122,9 @@ public class Fitting1DActor extends AbstractDataMessageTransformer {
 		}
 		
 		result.addList("fit_image", functionsDS);
-		result.addList("fit_result", parametersDS);
+		for(int i = 0; i < fitFunction.getNoOfParameters(); i++) {
+			result.addList("fit_parameter_"+i, parametersDS.get(i));
+		}
 
 		return result;
 	}
