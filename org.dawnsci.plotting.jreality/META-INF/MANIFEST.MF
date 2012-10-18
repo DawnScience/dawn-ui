@@ -23,7 +23,8 @@ Bundle-ClassPath: gluegen-rt.jar,
  jogl.jar,
  jReality_modified.jar,
  .
-Import-Package: org.slf4j
+Import-Package: javax.vecmath,
+ org.slf4j
 Export-Package: de.jreality.backends.label,
  de.jreality.backends.texture,
  de.jreality.geometry,
@@ -90,6 +91,7 @@ Export-Package: de.jreality.backends.label,
  org.dawnsci.plotting.jreality.overlay.events,
  org.dawnsci.plotting.jreality.overlay.objects,
  org.dawnsci.plotting.jreality.overlay.primitives,
+ org.dawnsci.plotting.jreality.swt,
  org.dawnsci.plotting.jreality.tick,
  org.dawnsci.plotting.jreality.tool,
  org.dawnsci.plotting.jreality.util

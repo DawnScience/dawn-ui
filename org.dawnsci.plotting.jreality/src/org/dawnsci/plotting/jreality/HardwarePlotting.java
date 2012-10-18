@@ -3,9 +3,8 @@ package org.dawnsci.plotting.jreality;
 import java.awt.Component;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.BoxLayout;
@@ -13,6 +12,7 @@ import javax.swing.JApplet;
 import javax.swing.JPanel;
 
 import org.dawnsci.plotting.jreality.compositing.CompositeEntry;
+import org.dawnsci.plotting.jreality.compositing.CompositingControl;
 import org.dawnsci.plotting.jreality.core.AxisMode;
 import org.dawnsci.plotting.jreality.core.IDataSet3DCorePlot;
 import org.dawnsci.plotting.jreality.impl.DataSet3DPlot1D;
@@ -29,6 +29,7 @@ import org.dawnsci.plotting.jreality.legend.LegendChangeEvent;
 import org.dawnsci.plotting.jreality.legend.LegendChangeEventListener;
 import org.dawnsci.plotting.jreality.legend.LegendComponent;
 import org.dawnsci.plotting.jreality.legend.LegendTable;
+import org.dawnsci.plotting.jreality.swt.InfoBoxComponent;
 import org.dawnsci.plotting.jreality.tick.TickFormatting;
 import org.dawnsci.plotting.jreality.tool.CameraRotationTool;
 import org.dawnsci.plotting.jreality.tool.ClickWheelZoomTool;
@@ -51,6 +52,7 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.ScrollBar;
@@ -61,12 +63,14 @@ import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.tool.Tool;
 import de.jreality.tools.ClickWheelCameraZoomTool;
 import de.jreality.ui.viewerapp.AbstractViewerApp;
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.ui.viewerapp.ViewerAppSwt;
+import de.jreality.util.CameraUtility;
 import de.jreality.util.SceneGraphUtility;
 import de.jreality.util.Secure;
 import de.jreality.util.SystemProperties;
@@ -94,10 +98,13 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 	private SceneGraphComponent coordXLabels;
 	private SceneGraphComponent coordYLabels;
 	private SceneGraphComponent coordZLabels;
+	private SceneGraphComponent coordGrid = null;
 	private SceneGraphComponent coordTicks = null;
 	private SceneGraphComponent toolNode = null;
 	private SceneGraphComponent cameraNode = null;
+	private SceneGraphComponent bbox = null;
 	private CameraRotationTool cameraRotateTool = null;
+	private InfoBoxComponent infoBox = null;
 	private SceneDragTool dragTool = null;
 	private ClickWheelZoomTool zoomTool = null;
 	private boolean hasJOGL;
@@ -116,12 +123,8 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 	private PanningTool panTool = null;
 	private PlottingMode currentMode;
 	private boolean useLegend = true;
+	private CompositingControl cmpControl = null;
 
-	private List<IDataset> currentDataSets;
-
-	public HardwarePlotting() {
-		this.currentDataSets = Collections.synchronizedList(new LinkedList<IDataset>());
-	}
 	
 	/**
 	 * Call to create plotting
@@ -132,7 +135,7 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 		
 		init(parent);
 		createUI(parent);
-		if (initialMode!=null) setPlotMode(initialMode);
+		if (initialMode!=null) setInitMode(initialMode);
 	}
 	
 	/**
@@ -144,6 +147,8 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 	 */
 	public boolean plot(final AbstractDataset data, final List<AxisValues> axes, final PlottingMode mode) {
 		
+		setMode(mode);
+		
 		switch(mode) {
 		
 		case SURF2D:
@@ -151,6 +156,7 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 			final AxisValues yAxis = axes.get(1);
 			final AxisValues zAxis = axes.get(2);
 			
+			setMode(mode); // Does nothing if mode not supported
 			setAxisModes((xAxis == null ? AxisMode.LINEAR : AxisMode.CUSTOM),
 	                     (yAxis == null ? AxisMode.LINEAR : AxisMode.CUSTOM),
 	                     (zAxis == null ? AxisMode.LINEAR : AxisMode.CUSTOM));
@@ -162,12 +168,29 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 			setYTickLabelFormat(TickFormatting.roundAndChopMode);
 			setXTickLabelFormat(TickFormatting.roundAndChopMode);
 			
+			update(data);
+			setTitle(data.getName());
+			refresh(true);
+			
 			return true;
 		default:
 			return false;
 		}
+		
+		
 	}
 	
+	
+	private void update(AbstractDataset data) {
+		final List<IDataset> sets = Arrays.asList((IDataset)data);
+		checkAndAddLegend(sets);
+		
+		if (graph==null) {
+			graph = plotter.buildGraph(sets, graph);
+		} else {
+			plotter.updateGraph(sets);
+		}
+	}
 	
 	private void checkAndAddLegend(Collection<? extends IDataset> dataSets) {
 		if (currentMode == PlottingMode.ONED || currentMode == PlottingMode.SCATTER2D) {
@@ -211,7 +234,7 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 	}
 
 	
-	private void setPlotMode(PlottingMode mode) {
+	private void setInitMode(PlottingMode mode) {
 		switch (currentMode) {
 		case ONED:
 			plotter = new DataSet3DPlot1D(viewerApp, plotArea, defaultCursor, graphColourTable, hasJOGL);
@@ -402,15 +425,9 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 			public void legendDeleted(LegendChangeEvent evt) {
 				if (currentMode == PlottingMode.ONED) {
 					int index = evt.getEntryNr();
-					if (index < currentDataSets.size()) {
-						((DataSet3DPlot1D) plotter).removeGraphNode(index);
-						currentDataSets.remove(index);
-						graphColourTable.deleteLegendEntry(index);
-						//historyCounter--;
-						if (useLegend)
-							legendTable.updateTable(graphColourTable);
-						refresh(false);
-					}
+					// TODO... We do not usually use HardwarePlotting for 1D
+					// use DataSetPlotter if this is needed.
+					
 				}
 			}
 
@@ -423,11 +440,25 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 	}
 
 	/**
-	 * Force the render to refresh
+	 * Force the render to refresh. Thread safe.
 	 * 
 	 * @param async
 	 */
-	public synchronized void refresh(boolean async) {
+	public void refresh(final boolean async) {
+		
+		if (Thread.currentThread()==Display.getDefault().getThread()) {
+			refreshInternal(async);
+		} else {
+			Display.getDefault().syncExec(new Runnable() {
+				public void run() {
+					refreshInternal(async);
+				}
+			});
+		}
+		
+	}
+
+	private void refreshInternal(boolean async) {
 		if (!isInExporting) {
 			if (viewerApp != null) {
 				if (!async)
@@ -595,6 +626,273 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 	
 	private void setAxisModes(AxisMode xAxis, AxisMode yAxis, AxisMode zAxis) {
 		plotter.setAxisModes(xAxis, yAxis, zAxis);
+	}
+
+	public void setTitle(final String titleStr) {
+		if(plotter != null) {
+			plotter.setTitle(titleStr);
+			if (infoBox != null) {
+				infoBox.getDisplay().asyncExec(new Runnable() {
+					@Override
+					public void run() {
+						infoBox.setName(titleStr);
+					}
+				});
+			}
+		}
+	}
+	
+	/**
+	 * Set the plotter to a new plotting mode
+	 * 
+	 * @param newPlotMode
+	 *            the new plotting mode
+	 */
+	private void setMode(PlottingMode newPlotMode) {
+		
+		if (newPlotMode==currentMode) return;
+		clearPlot();
+		currentMode = newPlotMode;
+		if (hasJOGL) plotArea.setFocus();
+
+		// this might be a bit strange but to make sure
+		// the tool doesn't get added twice first remove
+		// it if it isn't attached it will simply do nothing
+
+		toolNode.removeTool(panTool);
+		toolNode.removeTool(dragTool);
+		cameraNode.removeTool(cameraRotateTool);
+		viewerApp.getSceneRoot().removeTool(zoomTool);
+		viewerApp.getSceneRoot().removeTool(cameraZoomTool);
+
+		switch (currentMode) {
+		case ONED:
+			MatrixBuilder.euclidean().translate(0.0, 0.0, 0.0).assignTo(toolNode);
+			MatrixBuilder.euclidean().translate(0.0, 0.0, 0.0).assignTo(root);
+			plotter = new DataSet3DPlot1D(viewerApp, plotArea, defaultCursor, graphColourTable, hasJOGL);
+			plotter.buildXCoordLabeling(coordXLabels);
+			plotter.buildYCoordLabeling(coordYLabels);
+			buildLegendTable();
+			container.layout();
+			setPerspectiveCamera(true,false);
+			hBar.setVisible(false);
+			vBar.setVisible(false);			
+			break;
+		case ONED_THREED:
+			// this might be a bit strange but to make sure
+			// the tool doesn't get added twice first remove
+			// it if it isn't attached it will simply do nothing
+			plotter = new DataSet3DPlot1DStack(viewerApp, plotArea, defaultCursor, graphColourTable, hasJOGL);
+			plotter.buildXCoordLabeling(coordXLabels);
+			plotter.buildYCoordLabeling(coordYLabels);
+			plotter.buildZCoordLabeling(coordZLabels);
+			buildLegendTable();
+			container.layout();
+			toolNode.addTool(dragTool);
+			cameraNode.addTool(cameraRotateTool);
+			viewerApp.getSceneRoot().addTool(cameraZoomTool);
+			hBar.setVisible(false);
+			vBar.setVisible(false);			
+			break;
+		case SCATTER2D:
+			MatrixBuilder.euclidean().translate(0.0, 0.0, 0.0).assignTo(toolNode);
+			MatrixBuilder.euclidean().translate(0.0, 0.0, 0.0).assignTo(root);
+			plotter = new DataSetScatterPlot2D(viewerApp, plotArea, defaultCursor, graphColourTable, hasJOGL);
+			plotter.buildXCoordLabeling(coordXLabels);
+			plotter.buildYCoordLabeling(coordYLabels);
+			buildLegendTable();
+			container.layout();
+			setPerspectiveCamera(true,false);
+			hBar.setVisible(false);
+			vBar.setVisible(false);						
+			break;
+		case TWOD:
+		{	
+			root.removeChild(coordTicks);
+			plotter = new DataSet3DPlot2D(viewerApp, plotArea, defaultCursor, panTool, hasJOGL, hasJOGLshaders);
+			coordTicks = plotter.buildCoordAxesTicks();
+			root.addChild(coordTicks);
+			plotter.buildXCoordLabeling(coordXLabels);
+			plotter.buildYCoordLabeling(coordYLabels);
+			plotter.buildZCoordLabeling(coordZLabels);
+			MatrixBuilder.euclidean().translate(0.0, 0.0, 0.0).assignTo(toolNode);
+			MatrixBuilder.euclidean().translate(0.0, 0.0, 0.0).assignTo(root);
+			toolNode.addTool(panTool);
+			viewerApp.getSceneRoot().addTool(zoomTool);
+			if (useLegend)
+				buildInfoBox();
+			container.layout();
+			root.getTransformation().addTransformationListener((DataSet3DPlot2D) plotter);
+			setPerspectiveCamera(true,false);			
+			break;
+		}
+		case MULTI2D:
+			root.removeChild(coordTicks);
+			plotter = new DataSet3DPlot2DMulti(viewerApp, plotArea, defaultCursor, panTool, hasJOGL, hasJOGLshaders);
+			coordTicks = plotter.buildCoordAxesTicks();
+			root.addChild(coordTicks);
+			plotter.buildXCoordLabeling(coordXLabels);
+			plotter.buildYCoordLabeling(coordYLabels);
+			plotter.buildZCoordLabeling(coordZLabels);
+			MatrixBuilder.euclidean().translate(0.0, 0.0, 0.0).assignTo(toolNode);
+			MatrixBuilder.euclidean().translate(0.0, 0.0, 0.0).assignTo(root);
+			toolNode.addTool(panTool);
+			viewerApp.getSceneRoot().addTool(zoomTool);
+			buildCompositingControl();
+			container.layout();
+			root.getTransformation().addTransformationListener((DataSet3DPlot2D) plotter);
+			setPerspectiveCamera(true,false);			
+			break;
+		case SURF2D:
+			MatrixBuilder.euclidean().translate(0.0, 0.0, 0.0).assignTo(toolNode);
+			MatrixBuilder.euclidean().translate(0.0, 0.0, 0.0).assignTo(root);
+			plotter = new DataSet3DPlot3D(viewerApp, hasJOGL, false);
+			plotter.buildXCoordLabeling(coordXLabels);
+			plotter.buildYCoordLabeling(coordYLabels);
+			plotter.buildZCoordLabeling(coordZLabels);
+			coordTicks = plotter.buildCoordAxesTicks();
+			root.addChild(coordTicks);
+			plotter.buildCoordAxis(coordAxes);
+			container.layout();
+			toolNode.addTool(dragTool);
+			cameraNode.addTool(cameraRotateTool);
+			viewerApp.getSceneRoot().addTool(cameraZoomTool);
+			setPerspectiveCamera(true,false);
+			hBar.setVisible(false);
+			vBar.setVisible(false);						
+			break;
+		case SCATTER3D:
+			MatrixBuilder.euclidean().translate(0.0, 0.0, 0.0).assignTo(toolNode);
+			MatrixBuilder.euclidean().translate(0.0, 0.0, 0.0).assignTo(root);
+			plotter = new DataSetScatterPlot3D(viewerApp, hasJOGL, false);
+			plotter.buildXCoordLabeling(coordXLabels);
+			plotter.buildYCoordLabeling(coordYLabels);
+			plotter.buildZCoordLabeling(coordZLabels);
+			coordTicks = plotter.buildCoordAxesTicks();
+			root.addChild(coordTicks);
+			plotter.buildCoordAxis(coordAxes);
+			container.layout();
+			toolNode.addTool(dragTool);
+			cameraNode.addTool(cameraRotateTool);
+			viewerApp.getSceneRoot().addTool(cameraZoomTool);
+			setPerspectiveCamera(true,false);
+			hBar.setVisible(false);
+			vBar.setVisible(false);						
+			break;
+		case BARCHART:
+			plotter = new HistogramChartPlot1D(viewerApp, graphColourTable, hasJOGL);
+			MatrixBuilder.euclidean().translate(0.0, 0.0, 0.0).assignTo(toolNode);
+			MatrixBuilder.euclidean().translate(0.0, 0.0, 0.0).assignTo(root);
+			setPerspectiveCamera(true,false);
+			hBar.setVisible(false);
+			vBar.setVisible(false);						
+			break;
+		case EMPTY:
+			Camera sceneCamera = CameraUtility.getCamera(viewerApp.getCurrentViewer());
+			sceneCamera.setPerspective(true);			
+			break;
+		}
+		coordXLabels.setVisible(true);
+		coordYLabels.setVisible(true);	
+		coordZLabels.setVisible(true);
+		coordAxes.setVisible(true);
+	}
+
+	private void buildInfoBox() {
+		if (infoBox == null || infoBox.isDisposed()) {
+			GridData gridData = new GridData();
+			gridData.horizontalAlignment = GridData.FILL;
+			gridData.grabExcessHorizontalSpace = true;
+			gridData.heightHint = 55;
+			infoBox = new InfoBoxComponent(container, SWT.DOUBLE_BUFFERED);
+			infoBox.setLayoutData(gridData);
+			container.setWeights(new int[] {90, 10});		
+		}
+	}
+	private void buildCompositingControl() {
+		if (cmpControl == null || cmpControl.isDisposed()) {
+			GridData gridData = new GridData();
+			gridData.horizontalAlignment = GridData.FILL;
+			gridData.grabExcessHorizontalSpace = true;
+			gridData.heightHint = 95;
+			cmpControl = new CompositingControl(container, SWT.DOUBLE_BUFFERED);
+			cmpControl.setLayoutData(gridData);		
+			cmpControl.addSelectionListener(this);
+			container.setWeights(new int[] {90, 10});					
+		}
+	}
+
+	private double perspFOV = 56.5;
+	private double orthoFOV = 140.0;
+	/**
+	 * Switch between perspective and orthographic camera
+	 * 
+	 * @param persp
+	 *            should this be a perspective camera (true) otherwise false
+	 */
+	private void setPerspectiveCamera(boolean persp, boolean needToRender) {
+		Camera sceneCamera = CameraUtility.getCamera(viewerApp.getCurrentViewer());
+		if (sceneCamera.isPerspective())
+			perspFOV = sceneCamera.getFieldOfView();
+		else
+			orthoFOV = sceneCamera.getFieldOfView();
+
+		sceneCamera.setPerspective(persp);
+		if (persp)
+			sceneCamera.setFieldOfView(perspFOV);
+		else
+			sceneCamera.setFieldOfView(orthoFOV);
+		if (needToRender) viewerApp.getCurrentViewer().render();
+	}
+
+	private void clearPlot() {
+		removeOldSceneNodes();
+		if (legendTable != null) {
+			legendTable.removeAllLegendChangeEventListener();
+			legendTable.dispose();
+			legendTable = null;
+		}
+		if (infoBox != null) {
+			infoBox.dispose();
+			infoBox = null;
+		}
+		if (cmpControl != null) {
+			cmpControl.removeSelectionListener(this);
+			cmpControl.dispose();
+			cmpControl = null;
+		}
+
+	}
+	
+	private void removeOldSceneNodes() {
+		if (bbox != null) {
+			root.removeChild(bbox);
+			bbox = null;
+		}
+		if (coordTicks != null) {
+			root.removeChild(coordTicks);
+			coordTicks = null;
+		}
+		if (coordGrid != null) {
+			root.removeChild(coordGrid);
+			coordGrid = null;
+		}
+		if (currentMode == PlottingMode.TWOD) {
+			if (root != null && root.getTransformation() != null)
+				root.getTransformation().removeTransformationListener((DataSet3DPlot2D) plotter);
+		}
+		if (graph != null) {
+			graph.setGeometry(null);
+		}
+		// remove all hanged on children on the graph node
+		if (plotter != null)
+			plotter.cleanUpGraphNode();
+
+		// since we removed all the previous
+		// scene nodes now might be a good time
+		// to call garbage collector to make sure
+
+		// System.gc();
 	}
 
 
