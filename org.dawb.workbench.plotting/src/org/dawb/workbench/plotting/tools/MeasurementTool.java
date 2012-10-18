@@ -47,12 +47,12 @@ import org.eclipse.ui.progress.UIJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.rcp.plotting.roi.LinearROIData;
-import uk.ac.diamond.scisoft.analysis.rcp.plotting.roi.ROIData;
-import uk.ac.diamond.scisoft.analysis.rcp.plotting.roi.RectangularROIData;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
+import uk.ac.diamond.scisoft.analysis.roi.data.LinearROIData;
+import uk.ac.diamond.scisoft.analysis.roi.data.ROIData;
+import uk.ac.diamond.scisoft.analysis.roi.data.RectangularROIData;
 
 /**
  * This tool shows the measurements of selected regions.
