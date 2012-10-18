@@ -23,8 +23,15 @@ import ptolemy.kernel.CompositeEntity;
 import ptolemy.kernel.util.IllegalActionException;
 import ptolemy.kernel.util.NameDuplicationException;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Image;
+import uk.ac.diamond.scisoft.analysis.fitting.Fitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
+import uk.ac.diamond.scisoft.analysis.optimize.ApacheConjugateGradient;
+import uk.ac.diamond.scisoft.analysis.optimize.ApacheNelderMead;
+import uk.ac.diamond.scisoft.analysis.optimize.GeneticAlg;
+import uk.ac.diamond.scisoft.analysis.optimize.NelderMead;
 
 import com.isencia.passerelle.actor.ProcessingException;
 
@@ -54,7 +61,7 @@ public class Fitting1DActor extends AbstractDataMessageTransformer {
 
 	@Override
 	protected DataMessageComponent getTransformedMessage(
-			List<DataMessageComponent> cache) throws ProcessingException {
+			List<DataMessageComponent> cache) {
 		// get the data out of the message, name of the item should be specified
 		final Map<String, Serializable>  data = MessageUtils.getList(cache);
 		
@@ -81,8 +88,49 @@ public class Fitting1DActor extends AbstractDataMessageTransformer {
 		
 		AbstractDataset dataDS = ((AbstractDataset)data.get(dataset)).clone();
 		AFunction fitFunction = functions.get(function);
-		AbstractDataset xAxisDS = ((AbstractDataset)data.get(xAxis)).clone();
+		AbstractDataset xAxisDS = null;
+		if (data.containsKey(xAxis)) {
+			xAxisDS = ((AbstractDataset)data.get(xAxis)).clone();
+		} else {
+			xAxisDS = DoubleDataset.arange(dataDS.getShape()[1],0,-1);
+		}
 		
+		// get the general parameters from the average fit.
+		AbstractDataset summed = dataDS.sum(0);
+		summed.idivide(dataDS.getShape()[1]);
+		try {
+			Fitter.fit(xAxisDS, summed, new GeneticAlg(0.0001), fitFunction);
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		//fitted = fitFunction.
+			
+		AbstractDataset parametersDS = new DoubleDataset(dataDS.getShape()[0], fitFunction.getNoOfParameters());
+		AbstractDataset functionsDS = new DoubleDataset(dataDS.getShape()[0], dataDS.getShape()[1]);
+		
+		for(int i = 0; i < dataDS.getShape()[0]; i++) {
+			AbstractDataset slice = dataDS.getSlice(new int[] {i,0}, new int[] {i+1,dataDS.getShape()[1]}, new int[] {1,1});
+			slice.squeeze();
+			try {
+				CompositeFunction fitResult = Fitter.fit(xAxisDS, slice, new ApacheNelderMead(), fitFunction);
+				for(int p = 0; p < fitResult.getNoOfParameters(); p++) {
+					parametersDS.set(fitResult.getParameter(p).getValue(), i, p);
+				}
+				
+				DoubleDataset resultFunctionDS = fitResult.makeDataset(xAxisDS);
+				functionsDS.setSlice(resultFunctionDS, new int[] {i,0}, new int[] {i+1,dataDS.getShape()[1]}, new int[] {1,1});
+				
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+		
+		result.addList("fit_image", functionsDS);
+		result.addList("fit_result", parametersDS);
 
 
 		return result;
