@@ -68,6 +68,8 @@ import de.jreality.util.SystemProperties;
  * A class allowing plotting to be done to a hardware accelerated 
  * component sitting in an SWT Composite.
  * 
+ * Code lifted out of DataSetPlotter. Could refactor at some point.
+ * 
  * @author fcp94556
  *
  */
@@ -118,12 +120,21 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 	 * Call to create plotting
 	 * @param parent
 	 */
-	public void createControl(final Composite parent, PlottingMode mode) {
+	public void createControl(final Composite parent, PlottingMode initialMode) {
 		
 		init(parent);
 		createUI(parent);
-		setInitPlotMode(mode);
+		setInitPlotMode(initialMode);
 	}
+	
+	/**
+	 * 
+	 * @param data
+	 * @param axes
+	 */
+//	public void plot(final AbstractDataset data, final List<AxisValues> axes, final ) {
+//		
+//	}
 	
 	private void setInitPlotMode(PlottingMode mode) {
 		switch (currentMode) {
