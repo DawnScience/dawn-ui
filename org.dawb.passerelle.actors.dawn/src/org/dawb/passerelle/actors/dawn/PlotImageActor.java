@@ -147,15 +147,31 @@ public class PlotImageActor	extends AbstractDataMessageTransformer{
 			// open the plot view
 			AbstractPlottingSystem plottingSystem = PlottingFactory.getPlottingSystem(plotName);
 			
-			int[] maxPos = ((AbstractDataset)data.get(dataName)).maxPos();
-			double width = maxPos[0];
-			double height = maxPos[1];
+			//int[] maxPos = ((AbstractDataset)data.get(dataName)).maxPos();
+			double width = 10;
+			double height = 10;
 			ROIBase myROI = new RectangularROI(width, height/2, 0);
 			
-			if(xaxisName.equals("")||(yaxisName.equals("")))
-				SDAPlotter.imagePlot(plotName, (AbstractDataset)data.get(dataName));
-			else
-				SDAPlotter.imagePlot(plotName, ((AbstractDataset)data.get(xaxisName)), ((AbstractDataset)data.get(yaxisName)), ((AbstractDataset)data.get(dataName)));
+			
+			AbstractDataset plotDataset = (AbstractDataset)data.get(dataName);
+			if(plotDataset.getShape().length == 1) {
+				if (xaxisName.equals("")) {
+					SDAPlotter.plot(plotName, plotDataset);
+				} else {
+					AbstractDataset xAxisDS = (AbstractDataset)data.get(xaxisName);
+					SDAPlotter.plot(plotName, xAxisDS, plotDataset);
+				}
+				SDAPlotter.plot(plotName, plotDataset);
+			}
+			if(plotDataset.getShape().length == 2) {
+				if (xaxisName.equals("")||(yaxisName.equals(""))) {
+					SDAPlotter.imagePlot(plotName, plotDataset);
+				} else {
+					AbstractDataset xAxisDS = (AbstractDataset)data.get(xaxisName);
+					AbstractDataset yAxisDS = (AbstractDataset)data.get(yaxisName);
+					SDAPlotter.imagePlot(plotName, xAxisDS, yAxisDS, plotDataset);
+				}
+			}
 			
 			// We plot the data to the image plot
 	//		SDAPlotter.imagePlot(plotName, data.get(0));
