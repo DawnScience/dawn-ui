@@ -17,7 +17,7 @@ Bundle-NativeCode: lib/win32-x86/jogl_awt.dll;  lib/win32-x86/jogl_cg.dll; lib/w
  lib/linux-x86_64/libgluegen-rt.so; lib/linux-x86_64/libjogl_awt.so; lib/linux-x86_64/libjogl_cg.so; lib/linux-x86_64/libjogl.so;
  osname=Linux; processor=x86_64,
  *
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: gluegen-rt.jar,
  jogl.jar,
