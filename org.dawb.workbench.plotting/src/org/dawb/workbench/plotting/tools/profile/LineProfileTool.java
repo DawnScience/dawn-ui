@@ -10,7 +10,6 @@ import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.tool.IDataReductionToolPage.DataReductionInfo;
 import org.dawb.common.ui.plot.tool.IDataReductionToolPage.DataReductionSlice;
-import org.dawb.common.ui.plot.tool.ProfileTool;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;

@@ -1,9 +1,14 @@
 package org.dawb.workbench.plotting.tools.profile;
 
-import java.text.DecimalFormat;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
+import org.dawb.common.ui.plot.AbstractPlottingSystem;
+import org.dawb.common.ui.plot.PlotType;
+import org.dawb.common.ui.plot.PlottingFactory;
 import org.dawb.common.ui.plot.region.IROIListener;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
@@ -12,67 +17,61 @@ import org.dawb.common.ui.plot.region.ROIEvent;
 import org.dawb.common.ui.plot.region.RegionEvent;
 import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
+import org.dawb.common.ui.plot.tool.IDataReductionToolPage;
+import org.dawb.common.ui.plot.tool.IToolPage;
+import org.dawb.common.ui.plot.tool.IToolPageSystem;
+import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
 import org.dawb.common.ui.plot.trace.IImageTrace;
+import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.IPaletteListener;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.PaletteEvent;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.common.ui.util.EclipseUtils;
-import org.dawb.common.ui.util.GridUtils;
-import org.dawb.common.ui.views.ImageItem;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.viewers.IContentProvider;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.nebula.widgets.gallery.GalleryItem;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.part.IPageSite;
-import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
-import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
-public class ImageTableTool extends AbstractToolPage  implements IROIListener {
+public abstract class ProfileTool extends AbstractToolPage  implements IROIListener, IDataReductionToolPage {
 
 	private final static Logger logger = LoggerFactory.getLogger(ProfileTool.class);
 	
-	private   Table                  table;
-	private   Composite              main;
+	protected AbstractPlottingSystem profilePlottingSystem;
 	private   ITraceListener         traceListener;
 	private   IRegionListener        regionListener;
 	private   IPaletteListener       paletteListener;
-	private   ProfileTableJob             updateProfiles;
+	private   ProfileJob             updateProfiles;
+	private   Map<String,Collection<ITrace>> registeredTraces;
 
-	public ImageTableTool() {
+	public ProfileTool() {
 		
+		this.registeredTraces = new HashMap<String,Collection<ITrace>>(7);
 		try {
-			updateProfiles = new ProfileTableJob();
+			profilePlottingSystem = PlottingFactory.createPlottingSystem();
+			updateProfiles = new ProfileJob();
 			
 			this.paletteListener = new IPaletteListener.Stub() {
 				@Override
 				public void maskChanged(PaletteEvent evt) {
+					update(null, null, false);
+				}
+				@Override
+				public void imageOriginChanged(PaletteEvent evt) {
 					update(null, null, false);
 				}
 			};
@@ -85,11 +84,11 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 						return;
 					}
 					if (getImageTrace()!=null) getImageTrace().addPaletteListener(paletteListener);
-					ImageTableTool.this.update(null, null, false);
+					ProfileTool.this.update(null, null, false);
 				}
 				@Override
 				protected void update(TraceEvent evt) {
-					ImageTableTool.this.update(null, null, false);
+					ProfileTool.this.update(null, null, false);
 				}
 
 			};
@@ -98,25 +97,26 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 				@Override
 				public void regionRemoved(RegionEvent evt) {
 					if (evt.getRegion()!=null) {
-						evt.getRegion().removeROIListener(ImageTableTool.this);
+						evt.getRegion().removeROIListener(ProfileTool.this);
+						clearTraces(evt.getRegion());
 					}
 				}
 				@Override
 				public void regionAdded(RegionEvent evt) {
 					if (evt.getRegion()!=null) {
-						ImageTableTool.this.update(null, null, false);
+						ProfileTool.this.update(null, null, false);
 					}
 				}
 				
 				@Override
 				public void regionCreated(RegionEvent evt) {
 					if (evt.getRegion()!=null) {
-						evt.getRegion().addROIListener(ImageTableTool.this);
+						evt.getRegion().addROIListener(ProfileTool.this);
 					}
 				}
 				
 				protected void update(RegionEvent evt) {
-					ImageTableTool.this.update(null, null, false);
+					ProfileTool.this.update(null, null, false);
 				}
 			};
 		} catch (Exception e) {
@@ -124,31 +124,83 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 		}
 	}
 	
+	protected void registerTraces(final IRegion region, final Collection<ITrace> traces) {
+		
+		final String name = region.getName();
+		Collection<ITrace> registered = this.registeredTraces.get(name);
+		if (registered==null) {
+			registered = new HashSet<ITrace>(7);
+			registeredTraces.put(name, registered);
+		}
+		registered.addAll(traces);
+		
+		// Used to set the line on the image to the same color as the plot for line profiles only.
+		if (!traces.isEmpty()) {
+			final ITrace first = traces.iterator().next();
+			if (isRegionTypeSupported(RegionType.LINE) && first instanceof ILineTrace && region.getName().startsWith(getRegionName())) {
+				getControl().getDisplay().syncExec(new Runnable() {
+					public void run() {
+						region.setRegionColor(((ILineTrace)first).getTraceColor());
+					}
+				});
+			}
+		}
+	}
 	
+	protected void clearTraces(final IRegion region) {
+		final String name = region.getName();
+		Collection<ITrace> registered = this.registeredTraces.get(name);
+        if (registered!=null) for (ITrace iTrace : registered) {
+			profilePlottingSystem.removeTrace(iTrace);
+		}
+	}
+
 	@Override
 	public void createControl(Composite parent) {
-
-        
 		final IPageSite site = getSite();
+		createControl(parent, site!=null?site.getActionBars():null);
+	}
+
+	public void createControl(Composite parent, IActionBars actionbars) {
 		
 		final Action reselect = new Action("Create new profile.", getImageDescriptor()) {
 			public void run() {
 				createNewRegion();
 			}
 		};
-		site.getActionBars().getToolBarManager().add(reselect);
-		site.getActionBars().getToolBarManager().add(new Separator());
+		if (actionbars != null){
+			actionbars.getToolBarManager().add(reselect);
+			actionbars.getToolBarManager().add(new Separator());
+		}
 
-		this.main = new Composite(parent, SWT.NONE);
-		final GridLayout gridLayout = new GridLayout(1, false);
-		gridLayout.verticalSpacing = 0;
-		gridLayout.marginWidth = 0;
-		gridLayout.marginHeight = 0;
-		gridLayout.horizontalSpacing = 0;
-		main.setLayout(gridLayout);
+		profilePlottingSystem.createPlotPart(parent, 
+								getTitle(), 
+								actionbars, 
+								PlotType.PT1D,
+								this.getViewPart());				
+		
+		
+		configurePlottingSystem(profilePlottingSystem);
+		
+		// Unused actions removed for tool
+		profilePlottingSystem.getPlotActionSystem().remove("org.dawb.workbench.plotting.rescale");
+		profilePlottingSystem.getPlotActionSystem().remove("org.dawb.workbench.plotting.plotIndex");
+		profilePlottingSystem.getPlotActionSystem().remove("org.dawb.workbench.plotting.plotX");
 
+		profilePlottingSystem.setXfirst(true);
 	}
 
+	@Override
+	public Object getAdapter(@SuppressWarnings("rawtypes") Class clazz) {
+		if (clazz == IToolPageSystem.class) {
+			return profilePlottingSystem;
+		} else {
+			return super.getAdapter(clazz);
+		}
+	}
+
+	protected abstract void configurePlottingSystem(AbstractPlottingSystem plotter);
+	 
 	
 	@Override
 	public ToolPageRole getToolPageRole() {
@@ -157,7 +209,7 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 
 	@Override
 	public void setFocus() {
-		if (table!=null && !table.isDisposed()) table.setFocus();
+		
 	}
 	
 	public void activate() {
@@ -186,7 +238,7 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 	private void createNewRegion() {
 		// Start with a selection of the right type
 		try {
-			getPlottingSystem().createRegion(RegionUtils.getUniqueName("Profile", getPlottingSystem()), getCreateRegionType());
+			getPlottingSystem().createRegion(RegionUtils.getUniqueName(getRegionName(), getPlottingSystem()), getCreateRegionType());
 		} catch (Exception e) {
 			logger.error("Cannot create region for profile tool!");
 		}
@@ -196,16 +248,12 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 	 * 
 	 * @return
 	 */
-	protected boolean isRegionTypeSupported(RegionType type) {
-		return type==RegionType.BOX;
-	}
+	protected abstract boolean isRegionTypeSupported(RegionType type);
 	
 	/**
 	 * 
 	 */
-    protected RegionType getCreateRegionType() {
-    	return RegionType.BOX;
-    }
+    protected abstract RegionType getCreateRegionType();
     
 	public void deactivate() {
 		super.deactivate();
@@ -227,14 +275,16 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 	
 	@Override
 	public Control getControl() {
-		if (main==null || main.isDisposed()) return null;
-		return main;
+		if (profilePlottingSystem==null) return null;
+		return profilePlottingSystem.getPlotComposite();
 	}
 	
 	public void dispose() {
 		deactivate();
 		
-		if (table!=null) table.dispose();
+		registeredTraces.clear();
+		if (profilePlottingSystem!=null) profilePlottingSystem.dispose();
+		profilePlottingSystem = null;
 		super.dispose();
 	}
 
@@ -245,119 +295,12 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 	 * @param roi - may be null
 	 * @param monitor
 	 */
-	protected void createProfile(IImageTrace image, 
-								IRegion region, 
-								ROIBase rbs, 
-								boolean tryUpdate, 
-								boolean isDrag,
-								IProgressMonitor monitor) {
-		
-		if (isDrag) return; // Table tool slow to be that live.
-		if (monitor.isCanceled()) return;
-		if (image==null) return;
-		
-		if (region.getRegionType()!=RegionType.BOX) return;
-
-		final RectangularROI bounds = (RectangularROI) (rbs==null ? region.getROI() : rbs);
-		if (bounds==null) return;
-		if (!region.isVisible()) return;
-
-		if (monitor.isCanceled()) return;
-
-		final int yInc = bounds.getPoint()[1]<bounds.getEndPoint()[1] ? 1 : -1;
-		final int xInc = bounds.getPoint()[0]<bounds.getEndPoint()[0] ? 1 : -1;
-		
-		try {
-			final AbstractDataset slice = image.getData().getSlice(new int[] { (int) bounds.getPoint()[1],    (int) bounds.getPoint()[0] },
-					                                               new int[] { (int) bounds.getEndPoint()[1], (int) bounds.getEndPoint()[0] },
-					                                               new int[] {yInc, xInc});
-		
-			removeTable();
-			Display.getDefault().syncExec(new Runnable() {
-				public void run() {
-					updateTable(slice);
-				}
-			});
-
-		} catch (IllegalArgumentException ne) {
-			// Occurs when slice outside
-			logger.trace("Slice outside bounds of image!", ne);
-		} catch (Throwable ne) {
-			logger.warn("Problem slicing image in "+getClass().getSimpleName(), ne);
-		}
-
-	}
-
-	protected void updateTable(final AbstractDataset slice) {
-		
-
-		this.table = new Table(main, SWT.FULL_SELECTION | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER| SWT.VIRTUAL);
-		table.setLayoutData(new GridData(GridData.FILL_BOTH));
-		
-		table.setLinesVisible(true);
-		table.setHeaderVisible(true);
-		
-		final int xSize = slice.getShape()[1];
-		final int ySize = slice.getShape()[0];
-		for (int i = 0; i < xSize; i++) {
-			TableColumn col = new TableColumn(table, SWT.NONE, i);
-			col.setWidth(80);
-			col.setText(String.valueOf(i));
-		}
-		
-		table.addListener(SWT.SetData, new Listener() {
-			public void handleEvent(Event event) {
-				
-				TableItem line = (TableItem) event.item;
-				int yIndex = table.indexOf(line);
-				
-				for (int x = 0; x < xSize; x++) {
-				    final double    val  = slice.getDouble(yIndex, x);
-				    line.setText(x, formatValue(val));
-				}
-				
-			}
-		});
-
-		table.setItemCount(ySize);
-		
-		main.layout();
-	}
-	
-	/**
-	 * Thread safe
-	 */
-	private void removeTable() {
-		if (table!=null) {
-			Display.getDefault().syncExec(new Runnable() {
-				public void run() {
-					if (!table.isDisposed()) {
-						GridUtils.setVisible(table, false);
-						table.dispose();
-						main.layout();
-					}
-				}
-			});
-		}
-	}
-
-	private DecimalFormat format;
-	
-	private String formatValue(final double val) {
-	    try {
-	    	if (format==null) {
-				final ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawb.workbench.ui");
-				String formatString = store.getString("data.format.editor.view");
-				if (formatString==null) formatString = "#0.00";
-		    	format = new DecimalFormat(formatString);
-	    	}
-			return format.format(val);
-	    } catch (Exception ne) {
-	    	logger.debug("Format does not work!", ne);
-	    	return String.valueOf(val);
-	    }
-	}
-
+	protected abstract void createProfile(IImageTrace image, 
+			                              IRegion region, 
+			                              ROIBase roi, 
+			                              boolean tryUpdate, 
+			                              boolean isDrag,
+			                              IProgressMonitor monitor);
 
 	@Override
 	public void roiDragged(ROIEvent evt) {
@@ -368,6 +311,14 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 	public void roiChanged(ROIEvent evt) {
 		final IRegion region = (IRegion)evt.getSource();
 		update(region, region.getROI(), false);
+		
+		
+        getControl().getDisplay().asyncExec(new Runnable() {
+        	public void run() {
+        		profilePlottingSystem.autoscaleAxes();
+        	}
+        });
+
 	}
 	
 	protected synchronized void update(IRegion r, ROIBase rb, boolean isDrag) {
@@ -377,14 +328,18 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 		updateProfiles.profile(r, rb, isDrag);
 	}
 	
-	private final class ProfileTableJob extends Job {
+	protected String getRegionName() {
+		return "Profile";
+	}
+	
+	private final class ProfileJob extends Job {
 		
 		private   IRegion                currentRegion;
 		private   ROIBase                currentROI;
 		private   boolean                isDrag;
 
-		ProfileTableJob() {
-			super("Profile update");
+		ProfileJob() {
+			super(getRegionName()+" update");
 			setSystem(true);
 			setUser(false);
 			setPriority(Job.INTERACTIVE);
@@ -417,12 +372,14 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 
 			if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
 			if (image==null) {
-				removeTable();
+				profilePlottingSystem.clear();
 				return Status.OK_STATUS;
 			}
 
 			// Get the profiles from the line and box regions.
 			if (currentRegion==null) {
+				profilePlottingSystem.clear();
+				registeredTraces.clear();
 				final Collection<IRegion> regions = getPlottingSystem().getRegions();
 				if (regions!=null) {
 					for (IRegion iRegion : regions) {
@@ -443,6 +400,7 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 			}
 
 			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+			profilePlottingSystem.repaint();
 
 			return Status.OK_STATUS;
 
@@ -451,18 +409,6 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 		
 	}
 	
-	public class NoContentProvider implements IContentProvider {
-		@Override
-		public void dispose() {
-
-		}
-
-		@Override
-		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-
-		}
-	}
-
 	/**
 	 * Tries to get the meta from the editor part or uses the one in AbtractDataset of the image
 	 * @return IMetaData, may be null
@@ -479,5 +425,12 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 		}
 		
 		return getImageTrace().getData().getMetadata();
+	}
+	
+	/**
+	 * Used to tell if tool can be used with multiple slice 'Data Reduction' tool.
+	 */
+	public boolean isProfileTool() {
+		return true;
 	}
 }

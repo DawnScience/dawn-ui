@@ -66,6 +66,14 @@
             tooltip="A tool for showing box profiles of images.">
       </plotting_tool_page>
       <plotting_tool_page
+            cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.boxprofile"
+            class="org.dawb.workbench.plotting.tools.profile.BoxLineProfileTool"
+            icon="icons/plot-tool-box-profile.png"
+            id="org.dawb.workbench.plotting.tools.boxLineProfile"
+            label="Box Line Profile"
+            tooltip="A tool for showing box profiles of images.">
+      </plotting_tool_page>
+      <plotting_tool_page
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.radialprofile"
             class="org.dawb.workbench.plotting.tools.profile.RadialProfileTool"
             icon="icons/plot-tool-radial-integral.png"
