@@ -12,4 +12,8 @@ public class FittingConstants {
 	public static final String PEAK_TYPE               = "org.dawb.workbench.plotting.tools.peakType";
 	public static final String SMOOTHING               = "org.dawb.workbench.plotting.tools.smoothing";
 	public static final String QUALITY                 = "org.dawb.workbench.plotting.tools.quality";
+	public static final String POLY_ORDER              = "org.dawb.workbench.plotting.tools.polyOrder";
+	public static final String POLY_CHOICES            = "org.dawb.workbench.plotting.tools.polyChoices";
+	public static final String SHOW_POLY_TRACE         = "org.dawb.workbench.plotting.tools.showPolyTrace";
+	public static final String SHOW_POLY_RANGE    	   = "org.dawb.workbench.plotting.tools.showPolyRange";
 }
