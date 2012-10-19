@@ -69,7 +69,7 @@
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.boxprofile"
             class="org.dawb.workbench.plotting.tools.profile.BoxLineProfileTool"
             icon="icons/plot-tool-box-profile.png"
-            id="org.dawb.workbench.plotting.tools.boxLineProfile"
+            id="org.dawb.workbench.plotting.tools.boxLineProfileTool"
             label="Box Line Profile"
             tooltip="A tool for showing box profiles of images.">
       </plotting_tool_page>

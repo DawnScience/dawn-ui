@@ -29,7 +29,6 @@ import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.swt.SWT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,14 +68,11 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 //			xPixelAxis.setTitle(xPixelAxis.getTitle());
 		}
 		if (yPixelAxis == null) {
-			if(type == BoxLineType.HORIZONTAL_TYPE){
-//				profilePlottingSystem.setAxisAndTitleVisibility(false, "");
-				this.yPixelAxis = plottingSystem.createAxis(plottingSystem.getSelectedYAxis().getTitle(), false, SWT.TOP);
+//			profilePlottingSystem.setAxisAndTitleVisibility(false, "");
+//				this.yPixelAxis = plottingSystem.createAxis(plottingSystem.getSelectedYAxis().getTitle(), false, SWT.TOP);
 
-			}
 //			plottingSystem.getSelectedYAxis().setTitle("Intensity");
-			if(type == BoxLineType.VERTICAL_TYPE)
-				this.yPixelAxis = plottingSystem.getSelectedYAxis();
+			this.yPixelAxis = plottingSystem.getSelectedYAxis();
 		}
 		profilePlottingSystem.setShowLegend(false);
 		profilePlottingSystem.setTitle("");
@@ -139,8 +135,6 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 							AbstractDataset xAxis = axes.get(0);
 //							xAxis.reverse(null);
 //							AbstractDataset yAxis = axes.get(1);
-							System.out.println("SIZEX:"+y_trace.getXData().getSize());
-							System.out.println("SIZEY:"+y_trace.getYData().getSize());
 //							xPixelAxis.setMaximumRange(0, y_trace.getXData().getSize());
 //							yPixelAxis.setMaximumRange(0, y_trace.getYData().getSize());
 //							xPixelAxis.setLabelDataAndTitle(xAxis);
@@ -159,8 +153,6 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 						if(axes != null){
 							AbstractDataset xAxis = axes.get(0);
 //							AbstractDataset yAxis = axes.get(1);
-							System.out.println("SIZEX:"+y_trace.getXData().getSize());
-							System.out.println("SIZEY:"+y_trace.getYData().getSize());
 //							xPixelAxis.setMaximumRange(0, y_trace.getXData().getSize());
 //							yPixelAxis.setMaximumRange(0, y_trace.getYData().getSize());
 //							xPixelAxis.setLabelDataAndTitle(xAxis);
