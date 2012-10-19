@@ -3,6 +3,9 @@ package org.dawnsci.plotting.jreality;
 import java.util.Arrays;
 import java.util.List;
 
+import org.dawb.common.ui.plot.AbstractPlottingSystem;
+import org.dawb.common.ui.plot.trace.ISurfaceTrace;
+import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawnsci.plotting.jreality.data.ColourImageData;
 import org.eclipse.swt.graphics.PaletteData;
 
@@ -17,17 +20,18 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
  * @author fcp94556
  *
  */
-public class SurfaceTrace {
+public class SurfaceTrace implements ISurfaceTrace{
 
-	private final String          name;
+	private String                name;
 	private AbstractDataset       data;
 	private List<AbstractDataset> axes;
 	private List<String>          axesNames;
-	private HardwarePlotting      plotter;
+	private JRealityPlotViewer    plotter;
 	private boolean               active;
 	private PaletteData           palette;
+	private AbstractPlottingSystem plottingSystem;
 	
-	public SurfaceTrace(HardwarePlotting plotter, String name) {
+	public SurfaceTrace(JRealityPlotViewer plotter, String name) {
 		this.plotter = plotter;
 		this.name    = name;
 	}
@@ -60,6 +64,10 @@ public class SurfaceTrace {
 		if (isActive()) {
 			plotter.plot(getData(), createAxisValues(), PlottingMode.SURF2D);
 			if (palette!=null) setPalette(palette);
+			
+			if (plottingSystem!=null) {
+				plottingSystem.fireTraceUpdated(new TraceEvent(this));
+			}
 		}
 	}
 
@@ -81,7 +89,10 @@ public class SurfaceTrace {
 
 	protected final void setActive(boolean active) {
 		this.active = active;
-		if (active&&palette!=null) setPalette(palette);	
+		if (active) {
+			if (palette!=null) setPalette(palette);	
+			if (plottingSystem!=null) plottingSystem.fireTraceAdded(new TraceEvent(this));
+		}
 	}
 
 	protected List<AxisValues> createAxisValues() {
@@ -106,4 +117,53 @@ public class SurfaceTrace {
 		this.axesNames = axesNames;
 	}
 
+	private Object userObject;
+
+	public Object getUserObject() {
+		return userObject;
+	}
+
+	public void setUserObject(Object userObject) {
+		this.userObject = userObject;
+	}
+
+	/**
+	 * True if visible
+	 * @return
+	 */
+	public boolean isVisible() {
+		return isActive();
+	}
+
+	/**
+	 * True if visible
+	 * @return
+	 */
+	public void setVisible(boolean isVisible) {
+		// TODO FIXME What to do to make plots visible/invisible?
+	}
+
+	private boolean isUserTrace=true;
+
+	public boolean isUserTrace() {
+		return isUserTrace;
+	}
+
+	public void setUserTrace(boolean isUserTrace) {
+		this.isUserTrace = isUserTrace;
+	}
+
+	@Override
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public AbstractPlottingSystem getPlottingSystem() {
+		return plottingSystem;
+	}
+
+	public void setPlottingSystem(AbstractPlottingSystem plottingSystem) {
+		this.plottingSystem = plottingSystem;
+	}
+	
 }

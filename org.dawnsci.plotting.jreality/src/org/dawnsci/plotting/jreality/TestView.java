@@ -29,7 +29,7 @@ public class TestView extends ViewPart {
 	public void createPartControl(Composite parent) {
 		Composite container = new Composite(parent, SWT.NONE);
 
-		final HardwarePlotting plotting = new HardwarePlotting();
+		final JRealityPlotViewer plotting = new JRealityPlotViewer();
 		plotting.createControl(container);
 		
 		final SurfaceTrace trace = plotting.createSurfaceTrace("Test Trace");

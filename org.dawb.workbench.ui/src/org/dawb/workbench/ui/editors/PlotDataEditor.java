@@ -220,7 +220,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 			}
  		}
 		if (!is1D) {
-			getPlottingSystem().setDefaultPlotType(PlotType.IMAGE);
+			getPlottingSystem().setPlotType(PlotType.IMAGE);
 		}
 
 	}

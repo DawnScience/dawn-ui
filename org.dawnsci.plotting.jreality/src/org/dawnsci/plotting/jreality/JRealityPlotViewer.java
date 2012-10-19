@@ -12,6 +12,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JApplet;
 import javax.swing.JPanel;
 
+import org.dawb.common.ui.plot.trace.ISurfaceTrace;
 import org.dawnsci.plotting.jreality.compositing.CompositeEntry;
 import org.dawnsci.plotting.jreality.compositing.CompositingControl;
 import org.dawnsci.plotting.jreality.core.AxisMode;
@@ -50,12 +51,12 @@ import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Cursor;
-import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
@@ -88,10 +89,10 @@ import de.jreality.util.SystemProperties;
  * @author fcp94556
  *
  */
-public class HardwarePlotting implements SelectionListener, PaintListener, Listener {
+public class JRealityPlotViewer implements SelectionListener, PaintListener, Listener {
 
 	
-	private static Logger logger = LoggerFactory.getLogger(HardwarePlotting.class);
+	private static Logger logger = LoggerFactory.getLogger(JRealityPlotViewer.class);
 	
 	protected IDataSet3DCorePlot plotter = null;
 
@@ -128,7 +129,6 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 	private PlottingMode currentMode;
 	private boolean useLegend = true;
 	private CompositingControl cmpControl = null;
-
 	
 	/**
 	 * Call to create plotting
@@ -140,6 +140,11 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 		parent.setLayout(new GridLayout(1, false));
 		init(parent);
 		createUI(parent);
+	}
+	
+
+	public Control getControl() {
+		return container;
 	}
 	
 	/**
@@ -163,7 +168,8 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 	 * @return
 	 * @throws Exception 
 	 */
-	public void addSurfaceTrace(final SurfaceTrace surface) throws Exception {	
+	public void addSurfaceTrace(final ISurfaceTrace trace) {	
+		SurfaceTrace surface = (SurfaceTrace)trace;
 		plot(surface.getData(), surface.createAxisValues(), PlottingMode.SURF2D);
 		surface.setActive(true);
 	}
@@ -177,7 +183,7 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 	 * @return
 	 * @throws Exception 
 	 */
-	public void removeSurfaceTrace(final SurfaceTrace surface) throws Exception {
+	public void removeSurfaceTrace(final SurfaceTrace surface) {
 		clearPlot();
 		surface.setActive(false);
 	}
@@ -189,7 +195,7 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 	 * @param mode
 	 * @return true if something plotted
 	 */
-	protected final boolean plot(final AbstractDataset data, final List<AxisValues> axes, final PlottingMode mode) throws Exception {
+	protected final boolean plot(final AbstractDataset data, final List<AxisValues> axes, final PlottingMode mode) {
 		
 		setMode(mode);
 		
@@ -212,7 +218,11 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 			setYTickLabelFormat(TickFormatting.roundAndChopMode);
 			setXTickLabelFormat(TickFormatting.roundAndChopMode);
 
-			update(data);
+			try {
+				update(data);
+			} catch (Throwable e) {
+				throw new RuntimeException(e);
+			}
 			setTitle(data.getName());
 			
 			refresh(true);
@@ -584,22 +594,6 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 		}
 		legendTable.getParent().layout();
 	}
-
-	
-	private void setEnableImageScrollBars(boolean enable) {
-		if (!enable) {
-			if (hBar != null && hBar.isVisible())
-				hBar.setVisible(enable);
-			if (vBar != null && vBar.isVisible())
-				vBar.setVisible(enable);
-		}
-		if (zoomTool != null) {
-			if (zoomTool instanceof ClickWheelZoomToolWithScrollBar)
-				((ClickWheelZoomToolWithScrollBar)zoomTool).setScrollBars((enable?vBar:null), 
-																		  (enable?hBar:null));
-		}
-		showScrollBars = enable;
-	}
 	
 	private void setAxisModes(AxisMode xAxis, AxisMode yAxis, AxisMode zAxis) {
 		plotter.setAxisModes(xAxis, yAxis, zAxis);
@@ -908,4 +902,5 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 	protected void handleColourCast(ColourImageData imageData, double minValue, double maxValue) {
 		plotter.handleColourCast(imageData, graph, minValue, maxValue);
 	}
+
 }

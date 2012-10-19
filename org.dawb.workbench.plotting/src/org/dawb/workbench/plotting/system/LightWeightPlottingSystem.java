@@ -40,6 +40,7 @@ import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
+import org.dawb.common.ui.plot.trace.ISurfaceTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceContainer;
 import org.dawb.common.ui.plot.trace.ITraceListener;
@@ -60,6 +61,7 @@ import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
 import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
 import org.dawb.workbench.plotting.system.swtxy.selection.SelectionRegionFactory;
 import org.dawb.workbench.plotting.util.ColorUtility;
+import org.dawnsci.plotting.jreality.JRealityPlotViewer;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.draw2d.FigureCanvas;
 import org.eclipse.draw2d.IFigure;
@@ -120,14 +122,13 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	private Canvas         xyCanvas;
 	private XYRegionGraph  xyGraph;
 		
-	// The plotting mode, used for updates to data
-	private PlotType plottingMode;
-
 	private LightWeightActionBarsManager lightWeightActionBarMan;
+	private JRealityPlotViewer           jrealityViewer;
 	
 	public LightWeightPlottingSystem() {
 		super();
 		this.lightWeightActionBarMan = (LightWeightActionBarsManager)this.actionBarManager;
+		this.jrealityViewer          = new JRealityPlotViewer();
 	}
 	
 	
@@ -139,11 +140,11 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 
 		super.createPlotPart(parent, plotName, bars, hint, part);
 		
-		this.parent  = parent;
+		this.parent       = parent;
 		
-		createUI();
-
-		// TODO Preselect PAN for IMAGE PlotType?
+		// We ignore hint, we create a light weight plot as default because
+		// it looks nice. We swap this for a 3D one if required.
+		createLightWeightUI();
 	}
 	
 	@Override
@@ -160,7 +161,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		
 	private LightweightSystem lws;
 	
-	private void createUI() {
+	private void createLightWeightUI() {
 		
 		if (xyCanvas!=null) return;		
 		
@@ -231,8 +232,8 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		xyGraph.primaryYAxis.setShowMinorGrid(true);
 		xyGraph.primaryYAxis.setTitle("");
 		
-		if (defaultPlotType!=null) {
-			if (!Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.SHOW_AXES) && !defaultPlotType.is1D()) {
+		if (plottingMode!=null) {
+			if (!Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.SHOW_AXES) && !plottingMode.is1D()) {
 				xyGraph.primaryXAxis.setVisible(false);
 				xyGraph.primaryYAxis.setVisible(false);
 			}
@@ -245,12 +246,20 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
         xyCanvas.setMenu(popupMenu.createContextMenu(xyCanvas));
         popupMenu.addMenuListener(getIMenuListener());
         
-        if (defaultPlotType!=null) {
-		    this.lightWeightActionBarMan.switchActions(defaultPlotType);
+        if (plottingMode!=null) {
+		    this.lightWeightActionBarMan.switchActions(plottingMode);
         }
 
         parent.layout();
 
+	}
+	
+	private void createJRealityUI() {
+
+		if (jrealityViewer.getControl()!=null) return;
+		
+		jrealityViewer.createControl(parent);
+		parent.layout();
 	}
 
 	private IMenuListener popupListener;
@@ -491,9 +500,9 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	/**
      * Do not call before createPlotPart(...)
      */
-	public void setDefaultPlotType(PlotType mode) {
-		this.defaultPlotType = mode;
-		createUI();
+	public void setPlotType(PlotType mode) {
+		super.setPlotType(mode);
+		switchPlottingType(mode);
 	}
 	
 	public ITrace updatePlot2D(final AbstractDataset       data, 
@@ -573,7 +582,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		try {
 			
 			this.plottingMode = PlotType.IMAGE;
-			this.lightWeightActionBarMan.switchActions(plottingMode);
+			switchPlottingType(plottingMode);
 
 			clearTraces(); // Only one image at a time!
 
@@ -650,7 +659,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 										final IProgressMonitor      monitor) {
 		
 		this.plottingMode = PlotType.PT1D;
-		this.lightWeightActionBarMan.switchActions(plottingMode);
+		switchPlottingType(plottingMode);
 
 		Object[] oa = getOrderedDatasets(xIn, ysIn, createdIndices);
 		final AbstractDataset       x  = (AbstractDataset)oa[0];
@@ -768,6 +777,28 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		return wrapper;
 	}
 	
+
+	@Override
+	public ISurfaceTrace createSurfaceTrace(String traceName) {
+		
+        return jrealityViewer.createSurfaceTrace(traceName);
+	}
+
+	private void switchPlottingType( PlotType type ) {
+		
+		this.lightWeightActionBarMan.switchActions(plottingMode);
+		if (type.is3D()) { 
+			createJRealityUI();
+			if (xyGraph!=null) xyGraph.setVisible(false);
+			jrealityViewer.getControl().setVisible(true);
+		} else {
+			createLightWeightUI();
+			xyGraph.setVisible(true);
+			if (jrealityViewer.getControl()!=null) jrealityViewer.getControl().setVisible(false);
+		}
+		parent.layout();
+	}
+	
 	/**
 	 * Adds trace, makes visible
 	 * @param traceName
@@ -779,14 +810,21 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		traceMap.put(trace.getName(), trace);
 		
 		if (trace instanceof ImageTrace) {
-			this.plottingMode = PlotType.IMAGE;
-			this.lightWeightActionBarMan.switchActions(plottingMode);
+			this.plottingMode = PlotType.IMAGE; // Only one image allowed at a time
+			switchPlottingType(plottingMode);
 			fireWillPlot(new TraceWillPlotEvent(trace, true));
 			xyGraph.addImageTrace((ImageTrace)trace);
 			fireTraceAdded(new TraceEvent(trace));
+			
+		} else if (trace instanceof ISurfaceTrace) {
+			this.plottingMode = PlotType.SURFACE; // Only one surface allowed at a time
+			switchPlottingType(plottingMode);
+			fireWillPlot(new TraceWillPlotEvent(trace, true));
+			jrealityViewer.addSurfaceTrace((ISurfaceTrace)trace);
+			
 		} else {
 			this.plottingMode = PlotType.PT1D;
-			this.lightWeightActionBarMan.switchActions(plottingMode);
+			switchPlottingType(plottingMode);
 			fireWillPlot(new TraceWillPlotEvent(trace, true));
 			xyGraph.addTrace(((LineTraceImpl)trace).getTrace(), true);
 			xyCanvas.redraw();
@@ -1098,7 +1136,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	 */
 	public IAxis createAxis(final String title, final boolean isYAxis, int side) {
 		
-		if (xyGraph==null) createUI();
+		if (xyGraph==null) createLightWeightUI();
 			
 		AspectAxis axis = new AspectAxis(title, isYAxis);
 		if (side==SWT.LEFT||side==SWT.BOTTOM) {
@@ -1121,7 +1159,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	@Override
 	public IAxis getSelectedXAxis() {
 		if (selectedXAxis==null) {
-			if (xyGraph==null) createUI();
+			if (xyGraph==null) createLightWeightUI();
 			return (AspectAxis)xyGraph.primaryXAxis;
 		}
 		return selectedXAxis;
@@ -1135,7 +1173,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	@Override
 	public IAxis getSelectedYAxis() {
 		if (selectedYAxis==null) {
-			if (xyGraph==null) createUI();
+			if (xyGraph==null) createLightWeightUI();
 			return (AspectAxis)xyGraph.primaryYAxis;
 		}
 		return selectedYAxis;
@@ -1147,7 +1185,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	}
 	
 	public boolean addRegionListener(final IRegionListener l) {
-		if (xyGraph==null) createUI();
+		if (xyGraph==null) createLightWeightUI();
 		return xyGraph.addRegionListener(l);
 	}
 	
@@ -1162,7 +1200,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	 */
 	public IRegion createRegion(final String name, final RegionType regionType) throws Exception  {
 
-		if (xyGraph==null) createUI();
+		if (xyGraph==null) createLightWeightUI();
 		final IAxis xAxis = getSelectedXAxis();
 		final IAxis yAxis = getSelectedYAxis();
 
@@ -1189,8 +1227,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	 * @param region
 	 */
 	public void addRegion(final IRegion region) {
-		if (xyGraph == null)
-			createUI();
+		if (xyGraph == null) createLightWeightUI();
 		final AbstractSelectionRegion r = (AbstractSelectionRegion) region;
 		xyGraph.addRegion(r);
 	}
@@ -1200,8 +1237,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	 * @param region
 	 */
 	public void removeRegion(final IRegion region) {
-		if (xyGraph == null)
-			createUI();
+		if (xyGraph == null) createLightWeightUI();
 		final AbstractSelectionRegion r = (AbstractSelectionRegion) region;
 		xyGraph.removeRegion(r);
 	}
@@ -1238,8 +1274,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 
 	@Override
 	public IAnnotation createAnnotation(final String name) throws Exception {
-		if (xyGraph == null)
-			createUI();
+		if (xyGraph == null) createLightWeightUI();
 
 		final List<Annotation> anns = xyGraph.getPlotArea().getAnnotationList();
 		for (Annotation annotation : anns) {

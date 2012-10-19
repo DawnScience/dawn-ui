@@ -15,7 +15,8 @@ Require-Bundle: org.eclipse.ui,
  uk.ac.gda.common.rcp;bundle-version="1.0.0",
  org.dawb.hdf5;bundle-version="1.2.0",
  org.csstudio.swt.xygraph;bundle-version="1.1.0",
- org.dawb.common.gpu;bundle-version="1.0.0"
+ org.dawb.common.gpu;bundle-version="1.0.0",
+ org.dawnsci.plotting.jreality;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: org.dawb.workbench.plotting.system,
