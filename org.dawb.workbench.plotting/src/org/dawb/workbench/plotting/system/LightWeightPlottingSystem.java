@@ -28,6 +28,7 @@ import org.csstudio.swt.xygraph.figures.XYGraphFlags;
 import org.csstudio.swt.xygraph.linearscale.AbstractScale.LabelSide;
 import org.csstudio.swt.xygraph.undo.AddAnnotationCommand;
 import org.csstudio.swt.xygraph.undo.RemoveAnnotationCommand;
+import org.dawb.common.ui.image.PaletteFactory;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingActionBarManager;
@@ -78,6 +79,7 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
@@ -85,6 +87,7 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseWheelListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.printing.PrintDialog;
@@ -92,6 +95,7 @@ import org.eclipse.swt.printing.Printer;
 import org.eclipse.swt.printing.PrinterData;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.ui.IActionBars;
@@ -132,19 +136,23 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	}
 	
 	
-	public void createPlotPart(final Composite      parent,
+	public void createPlotPart(final Composite      container,
 							   final String         plotName,
 							   final IActionBars    bars,
 							   final PlotType       hint,
 							   final IWorkbenchPart part) {
 
-		super.createPlotPart(parent, plotName, bars, hint, part);
+		super.createPlotPart(container, plotName, bars, hint, part);
 		
-		this.parent       = parent;
+		this.parent       = new Composite(container, SWT.NONE);
+		final StackLayout layout = new StackLayout();
+		this.parent.setLayout(layout);
+		parent.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		
 		// We ignore hint, we create a light weight plot as default because
 		// it looks nice. We swap this for a 3D one if required.
 		createLightWeightUI();
+		layout.topControl = xyCanvas;
 	}
 	
 	@Override
@@ -500,18 +508,33 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	/**
      * Do not call before createPlotPart(...)
      */
-	public void setPlotType(PlotType mode) {
+	public void setPlotType(final PlotType mode) {
 		super.setPlotType(mode);
-		switchPlottingType(mode);
+		if (Thread.currentThread()==Display.getDefault().getThread()) {
+		    switchPlottingType(mode);
+		} else {
+			Display.getDefault().syncExec(new Runnable() {
+				public void run() {
+				    switchPlottingType(mode);
+				}
+			});
+		}
 	}
 	
 	public ITrace updatePlot2D(final AbstractDataset       data, 
 							   final List<AbstractDataset> axes,
 							   final IProgressMonitor      monitor) {
 		
-		final Collection<ITrace> traces = getTraces(IImageTrace.class);
+		if (plottingMode.is1D()) {
+			switchPlottingType(PlotType.IMAGE);
+		}
+		
+		final Collection<ITrace> traces = plottingMode.is3D() 
+				                        ? getTraces(ISurfaceTrace.class)
+				                        : getTraces(IImageTrace.class);
 		if (traces!=null && traces.size()>0) {
-			final IImageTrace image = (IImageTrace)traces.iterator().next();
+			
+			final ITrace image = traces.iterator().next();
 			final int[]       shape = image.getData()!=null ? image.getData().getShape() : null;
 			if (shape!=null && Arrays.equals(shape, data.getShape())) {
 				if (getDisplay().getThread()==Thread.currentThread()) {
@@ -521,7 +544,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 						public void run() {
 							// This will keep the previous zoom level if there was one
 							// and will be faster than createPlot2D(...) which autoscales.
-			                   updatePlot2DInternal(image, data, axes, monitor);
+			                updatePlot2DInternal(image, data, axes, monitor);
 						}
 					});
 				}
@@ -534,14 +557,18 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		}
 	}
 
-	private void updatePlot2DInternal(final IImageTrace image,
+	private void updatePlot2DInternal(final ITrace image,
 			                          final AbstractDataset       data, 
 								      final List<AbstractDataset> axes,
 								      final IProgressMonitor      monitor) {
 		
 		if (data.getName()!=null) xyGraph.setTitle(data.getName());
 		
-		image.setData(data, axes, false);
+		if (image instanceof IImageTrace) {
+		    ((IImageTrace)image).setData(data, axes, false);
+		} else if (image instanceof ISurfaceTrace) {
+		    ((ISurfaceTrace)image).setData(data, axes);
+		}
 	}
 
 
@@ -580,20 +607,12 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 										List<AbstractDataset>       axes,
 										final IProgressMonitor      monitor) {
 		try {
-			
-			this.plottingMode = PlotType.IMAGE;
-			switchPlottingType(plottingMode);
+			if (plottingMode.is1D()) {
+				switchPlottingType(PlotType.IMAGE);
+			}
 
 			clearTraces(); // Only one image at a time!
-
-			final Axis xAxis = ((AspectAxis)getSelectedXAxis());
-			final Axis yAxis = ((AspectAxis)getSelectedYAxis());
-			xAxis.setLogScale(false);
-			yAxis.setLogScale(false);
-            
-			if (data.getName()!=null) xyGraph.setTitle(data.getName());
-			xyGraph.clearTraces();
-			
+            			
 			if (traceMap==null) traceMap = new LinkedHashMap<String, ITrace>(31);
 			traceMap.clear();
 			
@@ -601,24 +620,46 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 			if (part!=null&&(traceName==null||"".equals(traceName))) {
 				traceName = part.getTitle();
 			}
-			final ImageTrace trace = xyGraph.createImageTrace(traceName, xAxis, yAxis);
-			trace.setData(data, axes, true);
 			
-			traceMap.put(trace.getName(), trace);
+			ITrace trace=null;
+			if (plottingMode.is3D()) {
+				trace = createSurfaceTrace(traceName);
+				((ISurfaceTrace)trace).setData(data, axes);
+				addTrace(trace);
+			} else {
+				trace = createLightWeightImage(traceName, data, axes, monitor);
+				traceMap.put(trace.getName(), trace);
+				fireTraceAdded(new TraceEvent(trace));
+			}
 
-			fireWillPlot(new TraceWillPlotEvent(trace, true));
-			trace.setPlottingSystem(this);
-
-			xyGraph.addImageTrace(trace);
-			
-			fireTraceAdded(new TraceEvent(trace));
-			
 			return trace;
             
 		} catch (Throwable e) {
 			logger.error("Cannot load file "+data.getName(), e);
 			return null;
 		}
+	}
+
+
+	private ITrace createLightWeightImage(String traceName, AbstractDataset data, List<AbstractDataset> axes, IProgressMonitor monitor) {
+		
+		final Axis xAxis = ((AspectAxis)getSelectedXAxis());
+		final Axis yAxis = ((AspectAxis)getSelectedYAxis());
+		xAxis.setLogScale(false);
+		yAxis.setLogScale(false);
+
+		if (data.getName()!=null) xyGraph.setTitle(data.getName());
+		xyGraph.clearTraces();
+
+		final ImageTrace trace = xyGraph.createImageTrace(traceName, xAxis, yAxis);
+		trace.setData(data, axes, true);
+		
+		fireWillPlot(new TraceWillPlotEvent(trace, true));
+		trace.setPlottingSystem(this);
+
+		xyGraph.addImageTrace(trace);
+		
+		return trace;
 	}
 
 
@@ -781,21 +822,42 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	@Override
 	public ISurfaceTrace createSurfaceTrace(String traceName) {
 		
-        return jrealityViewer.createSurfaceTrace(traceName);
+        ISurfaceTrace trace = jrealityViewer.createSurfaceTrace(traceName);
+		
+        PaletteData palette = null;
+		if (trace.getPalette()==null) {
+			final Collection<ITrace> col = getTraces(IImageTrace.class);
+			if (col!=null && col.size()>0) {
+				palette = ((IImageTrace)col.iterator().next()).getPaletteData();
+			} else {
+				try {
+					palette = PaletteFactory.getPalette(Activator.getDefault().getPreferenceStore().getInt(PlottingConstants.P_PALETTE), true);
+				} catch (Exception e) {
+					palette = null;
+				}				
+			}
+			trace.setPalette(palette);
+		}
+
+		
+		return trace;
 	}
 
 	private void switchPlottingType( PlotType type ) {
 		
+		this.plottingMode=type;
 		this.lightWeightActionBarMan.switchActions(plottingMode);
+		
+		Control top = null;
 		if (type.is3D()) { 
 			createJRealityUI();
-			if (xyGraph!=null) xyGraph.setVisible(false);
-			jrealityViewer.getControl().setVisible(true);
+			top = jrealityViewer.getControl();
 		} else {
 			createLightWeightUI();
-			xyGraph.setVisible(true);
-			if (jrealityViewer.getControl()!=null) jrealityViewer.getControl().setVisible(false);
+			top = xyCanvas;
 		}
+		final StackLayout layout = (StackLayout)parent.getLayout();
+		layout.topControl = top;
 		parent.layout();
 	}
 	

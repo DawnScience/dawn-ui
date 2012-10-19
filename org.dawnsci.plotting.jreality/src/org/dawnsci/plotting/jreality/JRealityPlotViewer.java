@@ -137,7 +137,6 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	 */
 	public void createControl(final Composite parent) {
 		
-		parent.setLayout(new GridLayout(1, false));
 		init(parent);
 		createUI(parent);
 	}
@@ -170,6 +169,8 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	 */
 	public void addSurfaceTrace(final ISurfaceTrace trace) {	
 		SurfaceTrace surface = (SurfaceTrace)trace;
+		setMode(PlottingMode.SURF2D);
+		plotter.handleColourCast(surface.createImageData(), graph, surface.getData().min().doubleValue(), surface.getData().max().doubleValue());
 		plot(surface.getData(), surface.createAxisValues(), PlottingMode.SURF2D);
 		surface.setActive(true);
 	}
@@ -319,7 +320,9 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	private Composite createUI(Composite parent) {
 		
 		container = new SashForm(parent, SWT.NONE|SWT.VERTICAL);
-		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		if (parent.getLayout() instanceof GridLayout) {
+			container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		}
 		container.addPaintListener(this);
 		GridLayout gridLayout = new GridLayout();
 		gridLayout.numColumns = 1;
