@@ -5,6 +5,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.BoxLayout;
@@ -15,6 +16,7 @@ import org.dawnsci.plotting.jreality.compositing.CompositeEntry;
 import org.dawnsci.plotting.jreality.compositing.CompositingControl;
 import org.dawnsci.plotting.jreality.core.AxisMode;
 import org.dawnsci.plotting.jreality.core.IDataSet3DCorePlot;
+import org.dawnsci.plotting.jreality.data.ColourImageData;
 import org.dawnsci.plotting.jreality.impl.DataSet3DPlot1D;
 import org.dawnsci.plotting.jreality.impl.DataSet3DPlot1DStack;
 import org.dawnsci.plotting.jreality.impl.DataSet3DPlot2D;
@@ -25,6 +27,7 @@ import org.dawnsci.plotting.jreality.impl.DataSetScatterPlot3D;
 import org.dawnsci.plotting.jreality.impl.HistogramChartPlot1D;
 import org.dawnsci.plotting.jreality.impl.Plot1DAppearance;
 import org.dawnsci.plotting.jreality.impl.Plot1DGraphTable;
+import org.dawnsci.plotting.jreality.impl.PlotException;
 import org.dawnsci.plotting.jreality.legend.LegendChangeEvent;
 import org.dawnsci.plotting.jreality.legend.LegendChangeEventListener;
 import org.dawnsci.plotting.jreality.legend.LegendComponent;
@@ -47,6 +50,7 @@ import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
@@ -131,11 +135,11 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 	 * @param parent
 	 * @param initialMode may be null
 	 */
-	public void createControl(final Composite parent, PlottingMode initialMode) {
+	public void createControl(final Composite parent) {
 		
+		parent.setLayout(new GridLayout(1, false));
 		init(parent);
 		createUI(parent);
-		if (initialMode!=null) setInitMode(initialMode);
 	}
 	
 	/**
@@ -145,7 +149,7 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 	 * @param mode
 	 * @return true if something plotted
 	 */
-	public boolean plot(final AbstractDataset data, final List<AxisValues> axes, final PlottingMode mode) {
+	public boolean plot(final AbstractDataset data, final List<AxisValues> axes, final PlottingMode mode) throws Exception {
 		
 		setMode(mode);
 		
@@ -157,9 +161,9 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 			final AxisValues zAxis = axes.get(2);
 			
 			setMode(mode); // Does nothing if mode not supported
-			setAxisModes((xAxis == null ? AxisMode.LINEAR : AxisMode.CUSTOM),
-	                     (yAxis == null ? AxisMode.LINEAR : AxisMode.CUSTOM),
-	                     (zAxis == null ? AxisMode.LINEAR : AxisMode.CUSTOM));
+			setAxisModes((xAxis != null && xAxis.isData() ? AxisMode.CUSTOM : AxisMode.LINEAR),
+	                     (yAxis != null && yAxis.isData() ? AxisMode.CUSTOM : AxisMode.LINEAR),
+	                     (zAxis != null && zAxis.isData() ? AxisMode.CUSTOM : AxisMode.LINEAR));
 
 			setXAxisValues(xAxis, 1);
 			setYAxisValues(yAxis);
@@ -167,9 +171,10 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 			
 			setYTickLabelFormat(TickFormatting.roundAndChopMode);
 			setXTickLabelFormat(TickFormatting.roundAndChopMode);
-			
+
 			update(data);
 			setTitle(data.getName());
+			
 			refresh(true);
 			
 			return true;
@@ -180,17 +185,41 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 		
 	}
 	
-	
-	private void update(AbstractDataset data) {
-		final List<IDataset> sets = Arrays.asList((IDataset)data);
-		checkAndAddLegend(sets);
+	private void update(AbstractDataset data) throws Exception {
 		
-		if (graph==null) {
-			graph = plotter.buildGraph(sets, graph);
-		} else {
-			plotter.updateGraph(sets);
+		clearPlot();
+		final List<IDataset> sets = Arrays.asList((IDataset)data);
+		checkAndAddLegend(sets);		
+		sanityCheckDataSets(sets); // TODO still necessary?
+
+		graph = plotter.buildGraph(sets, graph);
+		
+		if (currentMode == PlottingMode.SURF2D || currentMode == PlottingMode.SCATTER3D) {
+			root.removeChild(bbox);
+			bbox = plotter.buildBoundingBox();
+			root.addChild(bbox);
 		}
 	}
+	
+	/**
+	 * This function updates the color mapping with a ColorMappingUpdate object
+	 * @param update
+	 */
+	public void setPalette(PaletteData palette){
+		ColourImageData imageData = new ColourImageData(256,1);
+		int lastValue=0;
+		for (int i = 0; i < imageData.getWidth(); i++){
+			int value =  ((255&0xff) << 24)+((palette.colors[i].red&0xff) << 16)+((palette.colors[i].green&0xff) << 8)+(palette.colors[i].blue&0xff);
+			if(i==252)
+				lastValue = value;
+			else if(i==253||i==254||i==255)
+				imageData.set(lastValue, i);
+			else if(i>=0&&i<252)
+				imageData.set(value, i);
+		}
+		//plotter.handleColourCast(imageData, graph, update.getMinValue(), update.getMaxValue());
+	}
+
 	
 	private void checkAndAddLegend(Collection<? extends IDataset> dataSets) {
 		if (currentMode == PlottingMode.ONED || currentMode == PlottingMode.SCATTER2D) {
@@ -208,19 +237,19 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 	private void setXAxisValues(AxisValues xAxis, int numOfDataSets) {
 		if (plotter != null) {
 			if (xAxis.getName()!=null) plotter.setXAxisLabel(xAxis.getName());
-			plotter.setXAxisValues(xAxis, numOfDataSets);
+			if (xAxis.isData()) plotter.setXAxisValues(xAxis, numOfDataSets);
 		}
 	}
 	private void setYAxisValues(AxisValues yAxis) {
 		if (plotter != null) {
 			if (yAxis.getName()!=null) plotter.setYAxisLabel(yAxis.getName());
-			plotter.setYAxisValues(yAxis);
+			if (yAxis.isData()) plotter.setYAxisValues(yAxis);
 		}
 	}
 	private void setZAxisValues(AxisValues zAxis) {
 		if (plotter != null) {
 			if (zAxis.getName()!=null) plotter.setZAxisLabel(zAxis.getName());
-			plotter.setZAxisValues(zAxis);
+			if (zAxis.isData()) plotter.setZAxisValues(zAxis);
 		}
 	}
 	private void setXTickLabelFormat(TickFormatting newFormat) {
@@ -231,80 +260,6 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 	}
 	private void setZTickLabelFormat(TickFormatting newFormat) {
 		if (plotter != null) plotter.setZAxisLabelMode(newFormat);
-	}
-
-	
-	private void setInitMode(PlottingMode mode) {
-		switch (currentMode) {
-		case ONED:
-			plotter = new DataSet3DPlot1D(viewerApp, plotArea, defaultCursor, graphColourTable, hasJOGL);
-			plotter.buildXCoordLabeling(coordXLabels);
-			plotter.buildYCoordLabeling(coordYLabels);
-			toolNode.removeTool(panTool);
-			viewerApp.getSceneRoot().removeTool(cameraZoomTool);
-			break;
-		case ONED_THREED:
-			plotter = new DataSet3DPlot1DStack(viewerApp, plotArea, defaultCursor, graphColourTable, hasJOGL);
-			plotter.buildXCoordLabeling(coordXLabels);
-			plotter.buildYCoordLabeling(coordYLabels);
-			plotter.buildZCoordLabeling(coordZLabels);
-			break;
-		case SCATTER2D:
-			plotter = new DataSetScatterPlot2D(viewerApp, plotArea, defaultCursor, graphColourTable, hasJOGL);
-			plotter.buildXCoordLabeling(coordXLabels);
-			plotter.buildYCoordLabeling(coordYLabels);
-			toolNode.removeTool(panTool);
-			viewerApp.getSceneRoot().removeTool(cameraZoomTool);
-			break;
-		case TWOD:
-			plotter = new DataSet3DPlot2D(viewerApp, plotArea, defaultCursor, panTool, hasJOGL, hasJOGLshaders);
-			coordTicks = plotter.buildCoordAxesTicks();
-			root.addChild(coordTicks);
-			plotter.buildXCoordLabeling(coordXLabels);
-			plotter.buildYCoordLabeling(coordYLabels);
-			break;
-		case MULTI2D:
-			plotter = new DataSet3DPlot2DMulti(viewerApp, plotArea, defaultCursor, panTool, hasJOGL, hasJOGLshaders);
-			coordTicks = plotter.buildCoordAxesTicks();
-			root.addChild(coordTicks);
-			plotter.buildXCoordLabeling(coordXLabels);
-			plotter.buildYCoordLabeling(coordYLabels);
-			break;
-		case SURF2D:
-			toolNode.removeTool(panTool);
-			plotter = new DataSet3DPlot3D(viewerApp, hasJOGL, false);
-			coordTicks = plotter.buildCoordAxesTicks();
-			root.addChild(coordTicks);
-			plotter.buildXCoordLabeling(coordXLabels);
-			plotter.buildYCoordLabeling(coordYLabels);
-			plotter.buildZCoordLabeling(coordZLabels);
-			toolNode.addTool(dragTool);
-			cameraNode.addTool(cameraRotateTool);
-			viewerApp.getSceneRoot().addTool(cameraZoomTool);		
-			break;
-		case SCATTER3D:
-			plotter = new DataSetScatterPlot3D(viewerApp, hasJOGL, false);
-			coordTicks = plotter.buildCoordAxesTicks();
-			root.addChild(coordTicks);
-			plotter.buildXCoordLabeling(coordXLabels);
-			plotter.buildYCoordLabeling(coordYLabels);
-			plotter.buildZCoordLabeling(coordZLabels);
-			toolNode.addTool(dragTool);
-			cameraNode.addTool(cameraRotateTool);
-			break;
-		case BARCHART:
-			toolNode.removeTool(panTool);
-			toolNode.removeTool(dragTool);
-			cameraNode.removeTool(cameraRotateTool);
-			viewerApp.getSceneRoot().removeTool(zoomTool);
-			viewerApp.getSceneRoot().removeTool(cameraZoomTool);
-			plotter = new HistogramChartPlot1D(viewerApp, graphColourTable, hasJOGL);
-			plotter.buildXCoordLabeling(coordXLabels);
-			plotter.buildYCoordLabeling(coordYLabels);
-			break;
-		case EMPTY:
-			break;
-		}
 	}
 
 	private void init(Composite parent) {
@@ -333,6 +288,7 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 	private Composite createUI(Composite parent) {
 		
 		container = new SashForm(parent, SWT.NONE|SWT.VERTICAL);
+		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		container.addPaintListener(this);
 		GridLayout gridLayout = new GridLayout();
 		gridLayout.numColumns = 1;
@@ -746,7 +702,7 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 		case SURF2D:
 			MatrixBuilder.euclidean().translate(0.0, 0.0, 0.0).assignTo(toolNode);
 			MatrixBuilder.euclidean().translate(0.0, 0.0, 0.0).assignTo(root);
-			plotter = new DataSet3DPlot3D(viewerApp, hasJOGL, false);
+			plotter = new DataSet3DPlot3D(viewerApp, hasJOGL, true);
 			plotter.buildXCoordLabeling(coordXLabels);
 			plotter.buildYCoordLabeling(coordYLabels);
 			plotter.buildZCoordLabeling(coordZLabels);
@@ -764,7 +720,7 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 		case SCATTER3D:
 			MatrixBuilder.euclidean().translate(0.0, 0.0, 0.0).assignTo(toolNode);
 			MatrixBuilder.euclidean().translate(0.0, 0.0, 0.0).assignTo(root);
-			plotter = new DataSetScatterPlot3D(viewerApp, hasJOGL, false);
+			plotter = new DataSetScatterPlot3D(viewerApp, hasJOGL, true);
 			plotter.buildXCoordLabeling(coordXLabels);
 			plotter.buildYCoordLabeling(coordYLabels);
 			plotter.buildZCoordLabeling(coordZLabels);
@@ -896,4 +852,35 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 	}
 
 
+	private boolean checkForNan(IDataset data) {
+		if (data instanceof AbstractDataset)
+			return ((AbstractDataset) data).containsNans();
+
+		for (int i = 0; i < data.getShape()[0]; i++)
+			if (Double.isNaN(data.getDouble(i)))
+				return true;
+		return false;
+	}
+
+	private boolean checkForInf(IDataset data) {
+		if (data instanceof AbstractDataset)
+			return ((AbstractDataset) data).containsInfs();
+
+		for (int i = 0; i < data.getShape()[0]; i++)
+			if (Double.isInfinite(data.getDouble(i)))
+				return true;
+		return false;
+	}
+
+	private static final String ERROR_MESG = "DataSet contains either NaNs or Infs can not plot";
+	private void sanityCheckDataSets(Collection<? extends IDataset> datasets) throws PlotException {
+		Iterator<? extends IDataset> iter = datasets.iterator();
+		while (iter.hasNext()) {
+			IDataset dataset = iter.next();
+
+			if (checkForNan(dataset) || checkForInf(dataset)) {
+				throw new PlotException(ERROR_MESG);
+			}
+		}
+	}
 }
