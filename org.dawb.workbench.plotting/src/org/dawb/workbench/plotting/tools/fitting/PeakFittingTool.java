@@ -231,7 +231,6 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 		return buf.toString();
 	}
 	
-	@Override
 	public DataReductionInfo export(DataReductionSlice slice) throws Exception {
 				
 		final RectangularROI roi = getFitBounds();
@@ -526,6 +525,10 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 			return fittedFunctions!=null && !fittedFunctions.isEmpty() ? fittedFunctions.getPeakFunctions() : null;
 		}
 		return super.getAdapter(key);
+	}
+	
+	public String exportFittedData(final String path) throws Exception {
+		return exportFittedPeaks(path);
 	}
 
 	/**

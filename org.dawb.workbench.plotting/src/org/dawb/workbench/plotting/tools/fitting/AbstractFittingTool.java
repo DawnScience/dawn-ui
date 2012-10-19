@@ -10,7 +10,6 @@ import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.RegionEvent;
 import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
-import org.dawb.common.ui.plot.tool.IDataReductionToolPage;
 import org.dawb.common.ui.plot.tool.IToolPage;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
@@ -48,7 +47,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
-public abstract class AbstractFittingTool extends AbstractToolPage implements IRegionListener, IDataReductionToolPage {
+public abstract class AbstractFittingTool extends AbstractToolPage implements IRegionListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(AbstractFittingTool.class);
 	
@@ -409,6 +408,9 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 	 * @param newBean
 	 */
 	protected abstract void createFittedFunctionUI(final FittedFunctions newBean);
+	
+	
+	abstract String exportFittedData(final String path) throws Exception;
 
 
 	protected int updateTracesChoice(ITrace selected) {

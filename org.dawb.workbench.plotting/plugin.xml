@@ -141,6 +141,12 @@
             label="Image History"
             tooltip="A tool to compare images between files by building up a history.">
       </plotting_tool_page>
+      <plotting_tool_page
+            class="org.dawb.workbench.plotting.tools.fitting.LineFittingTool"
+            icon="icons/plot-tool-line-fit.png"
+            id="org.dawb.workbench.plotting.plotting_tool_page4"
+            label="Line Fitting">
+      </plotting_tool_page>
    </extension>
    <extension
          point="org.eclipse.ui.views">
