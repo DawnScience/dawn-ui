@@ -12,6 +12,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JApplet;
 import javax.swing.JPanel;
 
+import org.dawb.common.ui.plot.trace.ISurfaceTrace;
 import org.dawnsci.plotting.jreality.compositing.CompositeEntry;
 import org.dawnsci.plotting.jreality.compositing.CompositingControl;
 import org.dawnsci.plotting.jreality.core.AxisMode;
@@ -50,12 +51,12 @@ import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Cursor;
-import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
@@ -88,10 +89,10 @@ import de.jreality.util.SystemProperties;
  * @author fcp94556
  *
  */
-public class HardwarePlotting implements SelectionListener, PaintListener, Listener {
+public class JRealityPlotViewer implements SelectionListener, PaintListener, Listener {
 
 	
-	private static Logger logger = LoggerFactory.getLogger(HardwarePlotting.class);
+	private static Logger logger = LoggerFactory.getLogger(JRealityPlotViewer.class);
 	
 	protected IDataSet3DCorePlot plotter = null;
 
@@ -128,7 +129,6 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 	private PlottingMode currentMode;
 	private boolean useLegend = true;
 	private CompositingControl cmpControl = null;
-
 	
 	/**
 	 * Call to create plotting
@@ -137,19 +137,66 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 	 */
 	public void createControl(final Composite parent) {
 		
-		parent.setLayout(new GridLayout(1, false));
 		init(parent);
 		createUI(parent);
 	}
 	
+
+	public Control getControl() {
+		return container;
+	}
+	
+	/**
+	 * Create a surface trace to be plotted in 3D.
+	 * 
+	 * As soon as you call this the plotting system will switch to surface mode.
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public SurfaceTrace createSurfaceTrace(final String name) {
+  	    return new SurfaceTrace(this, name);
+	}
+	
+	/**
+	 * Create a surface trace to be plotted in 3D.
+	 * 
+	 * As soon as you call this the plotting system will switch to surface mode.
+	 * 
+	 * @param name
+	 * @return
+	 * @throws Exception 
+	 */
+	public void addSurfaceTrace(final ISurfaceTrace trace) {	
+		SurfaceTrace surface = (SurfaceTrace)trace;
+		setMode(PlottingMode.SURF2D);
+		plotter.handleColourCast(surface.createImageData(), graph, surface.getData().min().doubleValue(), surface.getData().max().doubleValue());
+		plot(surface.getData(), surface.createAxisValues(), PlottingMode.SURF2D);
+		surface.setActive(true);
+	}
+	
+	/**
+	 * Clear the surface from being plotted.
+	 * 
+	 * The surface will be deactivated after removal but may be added again later.
+	 * 
+	 * @param name
+	 * @return
+	 * @throws Exception 
+	 */
+	public void removeSurfaceTrace(final SurfaceTrace surface) {
+		clearPlot();
+		surface.setActive(false);
+	}
+	
 	/**
 	 * 
-	 * @param data
-	 * @param axes AxesValues for each axis required, for 3D there should be three for instance.
+	 * @param data, its name is used for the title
+	 * @param axes Axes values for each axis required, there should be three.
 	 * @param mode
 	 * @return true if something plotted
 	 */
-	public boolean plot(final AbstractDataset data, final List<AxisValues> axes, final PlottingMode mode) throws Exception {
+	protected final boolean plot(final AbstractDataset data, final List<AxisValues> axes, final PlottingMode mode) {
 		
 		setMode(mode);
 		
@@ -172,7 +219,11 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 			setYTickLabelFormat(TickFormatting.roundAndChopMode);
 			setXTickLabelFormat(TickFormatting.roundAndChopMode);
 
-			update(data);
+			try {
+				update(data);
+			} catch (Throwable e) {
+				throw new RuntimeException(e);
+			}
 			setTitle(data.getName());
 			
 			refresh(true);
@@ -201,24 +252,6 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 		}
 	}
 	
-	/**
-	 * This function updates the color mapping with a ColorMappingUpdate object
-	 * @param update
-	 */
-	public void setPalette(PaletteData palette){
-		ColourImageData imageData = new ColourImageData(256,1);
-		int lastValue=0;
-		for (int i = 0; i < imageData.getWidth(); i++){
-			int value =  ((255&0xff) << 24)+((palette.colors[i].red&0xff) << 16)+((palette.colors[i].green&0xff) << 8)+(palette.colors[i].blue&0xff);
-			if(i==252)
-				lastValue = value;
-			else if(i==253||i==254||i==255)
-				imageData.set(lastValue, i);
-			else if(i>=0&&i<252)
-				imageData.set(value, i);
-		}
-		//plotter.handleColourCast(imageData, graph, update.getMinValue(), update.getMaxValue());
-	}
 
 	
 	private void checkAndAddLegend(Collection<? extends IDataset> dataSets) {
@@ -232,7 +265,6 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 			}
 		}
 	}
-
 	
 	private void setXAxisValues(AxisValues xAxis, int numOfDataSets) {
 		if (plotter != null) {
@@ -288,7 +320,9 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 	private Composite createUI(Composite parent) {
 		
 		container = new SashForm(parent, SWT.NONE|SWT.VERTICAL);
-		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		if (parent.getLayout() instanceof GridLayout) {
+			container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		}
 		container.addPaintListener(this);
 		GridLayout gridLayout = new GridLayout();
 		gridLayout.numColumns = 1;
@@ -562,22 +596,6 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 			if (legendTable != null) legendTable.setVisible(false);
 		}
 		legendTable.getParent().layout();
-	}
-
-	
-	private void setEnableImageScrollBars(boolean enable) {
-		if (!enable) {
-			if (hBar != null && hBar.isVisible())
-				hBar.setVisible(enable);
-			if (vBar != null && vBar.isVisible())
-				vBar.setVisible(enable);
-		}
-		if (zoomTool != null) {
-			if (zoomTool instanceof ClickWheelZoomToolWithScrollBar)
-				((ClickWheelZoomToolWithScrollBar)zoomTool).setScrollBars((enable?vBar:null), 
-																		  (enable?hBar:null));
-		}
-		showScrollBars = enable;
 	}
 	
 	private void setAxisModes(AxisMode xAxis, AxisMode yAxis, AxisMode zAxis) {
@@ -883,4 +901,9 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 			}
 		}
 	}
+
+	protected void handleColourCast(ColourImageData imageData, double minValue, double maxValue) {
+		plotter.handleColourCast(imageData, graph, minValue, maxValue);
+	}
+
 }
