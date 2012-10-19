@@ -2,13 +2,13 @@ package org.dawnsci.plotting.jreality;
 
 import java.util.Arrays;
 
+import org.dawb.common.ui.image.PaletteFactory;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.part.ViewPart;
 
-import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
@@ -32,13 +32,17 @@ public class TestView extends ViewPart {
 		final HardwarePlotting plotting = new HardwarePlotting();
 		plotting.createControl(container);
 		
+		final SurfaceTrace trace = plotting.createSurfaceTrace("Test Trace");
     	AbstractDataset data = Random.rand(0, 256, new int[]{256, 256});
-        AxisValues x = new AxisValues("X-Axis", DoubleDataset.arange(256, IntegerDataset.FLOAT64));
-        AxisValues y = new AxisValues("Y-Axis", DoubleDataset.arange(256, IntegerDataset.FLOAT64));
-        AxisValues z = new AxisValues("Z-Axis", null);
+    	AbstractDataset x = DoubleDataset.arange(256, IntegerDataset.FLOAT64);
+    	AbstractDataset y = DoubleDataset.arange(256, IntegerDataset.FLOAT64);
+    	AbstractDataset z = null;
+    	trace.setAxesNames(Arrays.asList("X Axis", "Y Axis", "Z Axis"));
+		trace.setPalette(PaletteFactory.makeRedsPalette());
 		
-		try {
-			plotting.plot(data, Arrays.asList(x,y,z), PlottingMode.SURF2D);
+    	try {
+			trace.setData(data, Arrays.asList(x,y,z));
+			plotting.addSurfaceTrace(trace);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

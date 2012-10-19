@@ -143,13 +143,53 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 	}
 	
 	/**
+	 * Create a surface trace to be plotted in 3D.
 	 * 
-	 * @param data
-	 * @param axes AxesValues for each axis required, for 3D there should be three for instance.
+	 * As soon as you call this the plotting system will switch to surface mode.
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public SurfaceTrace createSurfaceTrace(final String name) {
+  	    return new SurfaceTrace(this, name);
+	}
+	
+	/**
+	 * Create a surface trace to be plotted in 3D.
+	 * 
+	 * As soon as you call this the plotting system will switch to surface mode.
+	 * 
+	 * @param name
+	 * @return
+	 * @throws Exception 
+	 */
+	public void addSurfaceTrace(final SurfaceTrace surface) throws Exception {	
+		plot(surface.getData(), surface.createAxisValues(), PlottingMode.SURF2D);
+		surface.setActive(true);
+	}
+	
+	/**
+	 * Clear the surface from being plotted.
+	 * 
+	 * The surface will be deactivated after removal but may be added again later.
+	 * 
+	 * @param name
+	 * @return
+	 * @throws Exception 
+	 */
+	public void removeSurfaceTrace(final SurfaceTrace surface) throws Exception {
+		clearPlot();
+		surface.setActive(false);
+	}
+	
+	/**
+	 * 
+	 * @param data, its name is used for the title
+	 * @param axes Axes values for each axis required, there should be three.
 	 * @param mode
 	 * @return true if something plotted
 	 */
-	public boolean plot(final AbstractDataset data, final List<AxisValues> axes, final PlottingMode mode) throws Exception {
+	protected final boolean plot(final AbstractDataset data, final List<AxisValues> axes, final PlottingMode mode) throws Exception {
 		
 		setMode(mode);
 		
@@ -201,24 +241,6 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 		}
 	}
 	
-	/**
-	 * This function updates the color mapping with a ColorMappingUpdate object
-	 * @param update
-	 */
-	public void setPalette(PaletteData palette){
-		ColourImageData imageData = new ColourImageData(256,1);
-		int lastValue=0;
-		for (int i = 0; i < imageData.getWidth(); i++){
-			int value =  ((255&0xff) << 24)+((palette.colors[i].red&0xff) << 16)+((palette.colors[i].green&0xff) << 8)+(palette.colors[i].blue&0xff);
-			if(i==252)
-				lastValue = value;
-			else if(i==253||i==254||i==255)
-				imageData.set(lastValue, i);
-			else if(i>=0&&i<252)
-				imageData.set(value, i);
-		}
-		//plotter.handleColourCast(imageData, graph, update.getMinValue(), update.getMaxValue());
-	}
 
 	
 	private void checkAndAddLegend(Collection<? extends IDataset> dataSets) {
@@ -232,7 +254,6 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 			}
 		}
 	}
-
 	
 	private void setXAxisValues(AxisValues xAxis, int numOfDataSets) {
 		if (plotter != null) {
@@ -882,5 +903,9 @@ public class HardwarePlotting implements SelectionListener, PaintListener, Liste
 				throw new PlotException(ERROR_MESG);
 			}
 		}
+	}
+
+	protected void handleColourCast(ColourImageData imageData, double minValue, double maxValue) {
+		plotter.handleColourCast(imageData, graph, minValue, maxValue);
 	}
 }
