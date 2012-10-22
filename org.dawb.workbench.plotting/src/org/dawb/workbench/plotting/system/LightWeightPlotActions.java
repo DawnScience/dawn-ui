@@ -1,7 +1,5 @@
 package org.dawb.workbench.plotting.system;
 
-import java.util.Map;
-
 import org.csstudio.swt.xygraph.figures.XYGraphFlags;
 import org.csstudio.swt.xygraph.toolbar.AddAnnotationDialog;
 import org.csstudio.swt.xygraph.toolbar.RemoveAnnotationDialog;
@@ -12,7 +10,6 @@ import org.csstudio.swt.xygraph.undo.OperationsManager;
 import org.csstudio.swt.xygraph.undo.RemoveAnnotationCommand;
 import org.csstudio.swt.xygraph.undo.ZoomType;
 import org.dawb.common.services.ImageServiceBean.ImageOrigin;
-import org.dawb.common.ui.image.PaletteFactory;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
@@ -37,7 +34,6 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.ImageData;
-import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IActionBars;
 import org.slf4j.Logger;
@@ -80,7 +76,7 @@ class LightWeightPlotActions {
  		IActionBars bars = actionBarManager.getActionBars();
  		actionBarManager.createExportActionsToolBar(bars!=null?bars.getToolBarManager():null);
  		createAspectHistoAction(xyGraph);
- 		createPalleteActions(xyGraph);
+ 		actionBarManager.createPalleteActions();
  		createOriginActions(xyGraph);
  		actionBarManager.createExportActionsMenuBar();
  		createAdditionalActions(xyGraph, null);
@@ -416,47 +412,6 @@ class LightWeightPlotActions {
 
 	}
 	
-	protected void createPalleteActions(final XYRegionGraph xyGraph) {
-		
-    	final Map<String,Integer> names = PaletteFactory.getPaletteNames();
-    	
-		int paletteIndex = Activator.getDefault().getPreferenceStore().getInt(PlottingConstants.P_PALETTE);
-
-		final MenuAction lutCombo = new MenuAction("Color");
-		lutCombo.setId(getClass().getName()+lutCombo.getText());
-		
-		lutCombo.setImageDescriptor(Activator.getImageDescriptor("icons/color_wheel.png"));
-		
-		CheckableActionGroup group      = new CheckableActionGroup();
-		for (final String paletteName : names.keySet()) {
-			final Action action = new Action(paletteName, IAction.AS_CHECK_BOX) {
-				public void run() {
-					int paletteIndex = PaletteFactory.PALETTES.get(paletteName);
-					Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.P_PALETTE, paletteIndex);
-					try {
-						final PaletteData data = PaletteFactory.getPalette(paletteIndex, true);
-						xyGraph.setPaletteData(data);
-					} catch (Exception ne) {
-						logger.error("Cannot create palette data!", ne);
-					}
-				}
-			};
-			group.add(action);
-			lutCombo.add(action);
-			action.setChecked(PaletteFactory.PALETTES.get(paletteName)==paletteIndex);
-		}
-		lutCombo.setToolTipText("Histogram");
-
-		final IActionBars bars = actionBarManager.getActionBars();
-		if (bars!=null) {
-			final String groupName = lutCombo.getId()+".group";
-			bars.getMenuManager().add(new Separator(groupName));
-			bars.getMenuManager().insertAfter(groupName, lutCombo);
-			final ActionContainer cont = actionBarManager.register2DAction(groupName, lutCombo);
-			cont.setManager(bars.getMenuManager());
-		}
-	}
-	
 
 	public void createOriginActions(final XYRegionGraph xyGraph) {
 
@@ -487,11 +442,13 @@ class LightWeightPlotActions {
         if (selectedAction!=null) selectedAction.setChecked(true);
         
 		final IActionBars bars = actionBarManager.getActionBars();
-		bars.getMenuManager().add(new Separator(origins.getId()+".group"));
-		bars.getMenuManager().insertAfter(origins.getId()+".group", origins);
+		if (bars!=null) {
+			bars.getMenuManager().add(new Separator(origins.getId()+".group"));
+			bars.getMenuManager().insertAfter(origins.getId()+".group", origins);
+		}
 		
 		ActionContainer cont = actionBarManager.register2DAction(origins.getId()+".group", origins);
-		cont.setManager(bars.getMenuManager());
+		if (bars!=null) cont.setManager(bars.getMenuManager());
 
 	}
 

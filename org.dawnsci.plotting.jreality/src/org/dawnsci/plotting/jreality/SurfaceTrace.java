@@ -1,11 +1,16 @@
 package org.dawnsci.plotting.jreality;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
+import org.dawb.common.ui.plot.trace.IPaletteListener;
 import org.dawb.common.ui.plot.trace.ISurfaceTrace;
+import org.dawb.common.ui.plot.trace.PaletteEvent;
 import org.dawb.common.ui.plot.trace.TraceEvent;
+import org.dawb.common.services.ImageServiceBean;
 import org.dawnsci.plotting.jreality.data.ColourImageData;
 import org.eclipse.swt.graphics.PaletteData;
 
@@ -36,7 +41,7 @@ public class SurfaceTrace implements ISurfaceTrace{
 		this.name    = name;
 	}
 	
-	public PaletteData getPalette() {
+	public PaletteData getPaletteData() {
 		return palette;
 	}
 
@@ -44,11 +49,12 @@ public class SurfaceTrace implements ISurfaceTrace{
 	 * This function updates the color mapping with a ColorMappingUpdate object
 	 * @param update
 	 */
-	public void setPalette(PaletteData palette){
+	public void setPaletteData(PaletteData palette){
 		this.palette = palette;
 		if (isActive()) {
 			ColourImageData imageData = createImageData();
 			plotter.handleColourCast(imageData, data.min().doubleValue(), data.max().doubleValue());
+			firePaletteDataListeners(palette);
 		}
 	}
 	
@@ -177,6 +183,38 @@ public class SurfaceTrace implements ISurfaceTrace{
 
 	public void setPlottingSystem(AbstractPlottingSystem plottingSystem) {
 		this.plottingSystem = plottingSystem;
+	}
+
+	private ImageServiceBean serviceBean;
+	@Override
+	public ImageServiceBean getImageServiceBean() {
+		if (serviceBean==null) {
+			serviceBean = new ImageServiceBean();
+		}
+		serviceBean.setPalette(getPaletteData());
+		return serviceBean;
+	}
+
+	private Collection<IPaletteListener> paletteListeners;
+
+
+	@Override
+	public void addPaletteListener(IPaletteListener pl) {
+		if (paletteListeners==null) paletteListeners = new HashSet<IPaletteListener>(11);
+		paletteListeners.add(pl);
+	}
+
+	@Override
+	public void removePaletteListener(IPaletteListener pl) {
+		if (paletteListeners==null) return;
+		paletteListeners.remove(pl);
+	}
+	
+	
+	private void firePaletteDataListeners(PaletteData paletteData) {
+		if (paletteListeners==null) return;
+		final PaletteEvent evt = new PaletteEvent(this, getPaletteData()); // Important do not let Mark get at it :)
+		for (IPaletteListener pl : paletteListeners) pl.paletteChanged(evt);
 	}
 	
 }

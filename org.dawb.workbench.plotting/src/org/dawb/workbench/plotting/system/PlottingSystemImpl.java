@@ -524,7 +524,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
         ISurfaceTrace trace = jrealityViewer.createSurfaceTrace(traceName);
 		
         PaletteData palette = null;
-		if (trace.getPalette()==null) {
+		if (trace.getPaletteData()==null) {
 			final Collection<ITrace> col = getTraces(IImageTrace.class);
 			if (col!=null && col.size()>0) {
 				palette = ((IImageTrace)col.iterator().next()).getPaletteData();
@@ -535,7 +535,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 					palette = null;
 				}				
 			}
-			trace.setPalette(palette);
+			trace.setPaletteData(palette);
 		}
 
 		

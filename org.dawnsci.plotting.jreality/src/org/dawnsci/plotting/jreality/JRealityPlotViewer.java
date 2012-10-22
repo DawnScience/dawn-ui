@@ -886,6 +886,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 
 	protected void handleColourCast(ColourImageData imageData, double minValue, double maxValue) {
 		plotter.handleColourCast(imageData, graph, minValue, maxValue);
+		refresh(false);
 	}
 
 

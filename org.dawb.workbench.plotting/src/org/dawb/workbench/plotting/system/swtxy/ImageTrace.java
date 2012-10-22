@@ -325,6 +325,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 	private double getXRatio(boolean isTopLeft, final int[] shape, ImageOrigin origin) {
 		double xCoord = isTopLeft ? getXAxis().getRange().getLower() : getXAxis().getRange().getUpper();
+		if (origin==null) origin=ImageOrigin.TOP_LEFT;
 		switch (origin) {
 		case TOP_LEFT:
 			return xCoord/shape[1];

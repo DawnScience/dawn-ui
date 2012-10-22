@@ -25,6 +25,7 @@ Bundle-ClassPath: gluegen-rt.jar,
  jReality_modified.jar,
  .
 Import-Package: javax.vecmath,
+ org.dawb.common.services,
  org.slf4j
 Export-Package: de.jreality.backends.label,
  de.jreality.backends.texture,

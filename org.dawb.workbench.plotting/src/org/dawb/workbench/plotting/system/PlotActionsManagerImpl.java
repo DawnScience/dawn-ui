@@ -11,19 +11,25 @@
 package org.dawb.workbench.plotting.system;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.csstudio.swt.xygraph.undo.ZoomType;
+import org.dawb.common.ui.image.PaletteFactory;
+import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.ITraceActionProvider;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingActionBarManager;
 import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
+import org.dawb.common.ui.plot.trace.IPaletteTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.widgets.EmptyActionBars;
 import org.dawb.workbench.plotting.Activator;
+import org.dawb.workbench.plotting.preference.PlottingConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
@@ -33,6 +39,7 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.StatusLineManager;
 import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.ui.IActionBars;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,12 +78,16 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 	public void init(ITraceActionProvider traceActionProvider) {
 		
 		xyMenu =  new MenuAction("X/Y Plot");
-		system.getActionBars().getMenuManager().add(xyMenu);
-		system.getActionBars().getMenuManager().add(new Separator());
+		if (system.getActionBars()!=null) {
+			system.getActionBars().getMenuManager().add(xyMenu);
+			system.getActionBars().getMenuManager().add(new Separator());
+		}
 
 		imageMenu = new MenuAction("Image");
-		system.getActionBars().getMenuManager().add(imageMenu);
-		system.getActionBars().getMenuManager().add(new Separator());
+		if (system.getActionBars()!=null) {
+			system.getActionBars().getMenuManager().add(imageMenu);
+			system.getActionBars().getMenuManager().add(new Separator());
+		}
 		
 		this.traceActionProvider = traceActionProvider;
 	}       
@@ -391,7 +402,7 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 	 */
 	public ActionContainer register2DAction(String groupName, IAction action) {
 		final IActionBars bars = getActionBars();
-		final ActionContainer ac = new ActionContainer(groupName, action, bars.getToolBarManager());
+		final ActionContainer ac = new ActionContainer(groupName, action, bars!=null?bars.getToolBarManager():null);
 		twoDimensionalActions.add(ac);
 		return ac;
 	}
@@ -402,4 +413,50 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 		if (traceActionProvider!=null) traceActionProvider.fillTraceActions(toolBarManager, trace, system);
 	}
 
+	
+	protected void createPalleteActions() {
+		
+    	final Map<String,Integer> names = PaletteFactory.getPaletteNames();
+    	
+		int paletteIndex = Activator.getDefault().getPreferenceStore().getInt(PlottingConstants.P_PALETTE);
+
+		final MenuAction lutCombo = new MenuAction("Color");
+		lutCombo.setId(getClass().getName()+lutCombo.getText());
+		
+		lutCombo.setImageDescriptor(Activator.getImageDescriptor("icons/color_wheel.png"));
+		
+		CheckableActionGroup group      = new CheckableActionGroup();
+		for (final String paletteName : names.keySet()) {
+			final Action action = new Action(paletteName, IAction.AS_CHECK_BOX) {
+				public void run() {
+					int paletteIndex = PaletteFactory.PALETTES.get(paletteName);
+					Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.P_PALETTE, paletteIndex);
+					try {
+						final PaletteData data = PaletteFactory.getPalette(paletteIndex, true);
+						final Collection<ITrace> traces = system.getTraces();
+						if (traces!=null) for (ITrace trace: traces) {
+							if (trace instanceof IPaletteTrace) {
+								((IPaletteTrace)trace).setPaletteData(data);
+							}
+						}
+					} catch (Exception ne) {
+						logger.error("Cannot create palette data!", ne);
+					}
+				}
+			};
+			group.add(action);
+			lutCombo.add(action);
+			action.setChecked(PaletteFactory.PALETTES.get(paletteName)==paletteIndex);
+		}
+		lutCombo.setToolTipText("Histogram");
+
+		final IActionBars bars = getActionBars();
+		if (bars!=null) {
+			final String groupName = lutCombo.getId()+".group";
+			bars.getMenuManager().add(new Separator(groupName));
+			bars.getMenuManager().insertAfter(groupName, lutCombo);
+			final ActionContainer cont = register2DAction(groupName, lutCombo);
+			cont.setManager(bars.getMenuManager());
+		}
+	}
 }
