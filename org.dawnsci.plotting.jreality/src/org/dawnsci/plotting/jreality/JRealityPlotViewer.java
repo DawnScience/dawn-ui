@@ -184,8 +184,9 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	 * @return
 	 * @throws Exception 
 	 */
-	public void removeSurfaceTrace(final SurfaceTrace surface) {
-		clearPlot();
+	public void removeSurfaceTrace(final ISurfaceTrace trace) {
+		SurfaceTrace surface = (SurfaceTrace)trace;
+		removeOldSceneNodes();
 		surface.setActive(false);
 	}
 	
@@ -238,7 +239,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	
 	private void update(AbstractDataset data) throws Exception {
 		
-		clearPlot();
+        removeOldSceneNodes();
 		final List<IDataset> sets = Arrays.asList((IDataset)data);
 		checkAndAddLegend(sets);		
 		sanityCheckDataSets(sets); // TODO still necessary?
@@ -625,7 +626,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	private void setMode(PlottingMode newPlotMode) {
 		
 		if (newPlotMode==currentMode) return;
-		clearPlot();
+		removeOldSceneNodes();
 		currentMode = newPlotMode;
 		if (hasJOGL) plotArea.setFocus();
 
@@ -819,25 +820,6 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		if (needToRender) viewerApp.getCurrentViewer().render();
 	}
 
-	private void clearPlot() {
-		removeOldSceneNodes();
-		if (legendTable != null) {
-			legendTable.removeAllLegendChangeEventListener();
-			legendTable.dispose();
-			legendTable = null;
-		}
-		if (infoBox != null) {
-			infoBox.dispose();
-			infoBox = null;
-		}
-		if (cmpControl != null) {
-			cmpControl.removeSelectionListener(this);
-			cmpControl.dispose();
-			cmpControl = null;
-		}
-
-	}
-	
 	private void removeOldSceneNodes() {
 		if (bbox != null) {
 			root.removeChild(bbox);
@@ -904,6 +886,32 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 
 	protected void handleColourCast(ColourImageData imageData, double minValue, double maxValue) {
 		plotter.handleColourCast(imageData, graph, minValue, maxValue);
+	}
+
+
+	public void reset() {
+		if (plotter!=null) {
+			removeOldSceneNodes();
+		}
+	}
+
+
+	public void dispose() {
+		reset();
+		if (legendTable != null) {
+			legendTable.removeAllLegendChangeEventListener();
+			legendTable.dispose();
+			legendTable = null;
+		}
+		if (infoBox != null) {
+			infoBox.dispose();
+			infoBox = null;
+		}
+		if (cmpControl != null) {
+			cmpControl.removeSelectionListener(this);
+			cmpControl.dispose();
+			cmpControl = null;
+		}
 	}
 
 }

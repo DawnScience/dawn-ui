@@ -19,9 +19,8 @@ Require-Bundle: org.eclipse.ui,
  org.dawnsci.plotting.jreality;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
-Export-Package: org.dawb.workbench.plotting.system,
+Export-Package: org.dawb.workbench.plotting.composites,
  org.dawb.workbench.plotting.system.dialog,
- org.dawb.workbench.plotting.system.swtxy,
  org.dawb.workbench.plotting.system.swtxy.selection,
  org.dawb.workbench.plotting.tools,
  org.dawb.workbench.plotting.tools.profile,

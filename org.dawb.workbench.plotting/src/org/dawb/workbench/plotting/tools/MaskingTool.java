@@ -23,7 +23,7 @@ import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
-import org.dawb.workbench.plotting.system.LightWeightActionBarsManager;
+import org.dawb.workbench.plotting.system.PlotActionsManagerImpl;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -429,7 +429,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		actionBars.getToolBarManager().add(alwaysSave);
 
 
-		LightWeightActionBarsManager.fillTraceActions(actionBars.getToolBarManager(), getImageTrace(), getPlottingSystem());	
+		PlotActionsManagerImpl.fillTraceActions(actionBars.getToolBarManager(), getImageTrace(), getPlottingSystem());	
 	}
 
 	protected void saveMaskBuffer() {

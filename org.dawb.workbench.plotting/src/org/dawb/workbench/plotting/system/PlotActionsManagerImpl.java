@@ -75,12 +75,12 @@ import org.eclipse.ui.IActionBars;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LightWeightActionBarsManager extends PlottingActionBarManager {
+public class PlotActionsManagerImpl extends PlottingActionBarManager {
 
 
-	private static final Logger logger = LoggerFactory.getLogger(LightWeightActionBarsManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(PlotActionsManagerImpl.class);
 	
-	private LightWeightPlottingSystem system;
+	private PlottingSystemImpl        system;
 	private Action                    plotIndex, plotX;
 	private boolean                   datasetChoosingRequired = true;
 	private List<ActionContainer>     oneDimensionalActions;
@@ -88,7 +88,7 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 	private MenuAction                imageMenu;
 	private MenuAction                xyMenu;
 
-	protected LightWeightActionBarsManager(LightWeightPlottingSystem system) {
+	protected PlotActionsManagerImpl(PlottingSystemImpl system) {
 		super(system);
 		this.system = system;
 		oneDimensionalActions = new ArrayList<ActionContainer>();
@@ -153,13 +153,12 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
   	}
 	
 	
-	public void createConfigActions() {
+	public void createConfigActions(final XYRegionGraph xyGraph) {
 		
 		addToolbarSeparator("org.csstudio.swt.xygraph.toolbar.configure");	
 		
 		final Action configButton = new Action("Configure Settings...", Activator.getImageDescriptor("icons/Configure.png")) {
 			public void run() {
-				final XYRegionGraph xyGraph     = system.getGraph();
 				XYGraphConfigDialog dialog = new XYRegionConfigDialog(Display.getCurrent().getActiveShell(), xyGraph);
 				dialog.open();
 			}
@@ -168,25 +167,23 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 		
 		final Action showLegend = new Action("Show Legend", IAction.AS_CHECK_BOX) {
 			public void run() {
-				final XYRegionGraph xyGraph     = system.getGraph();
 				xyGraph.setShowLegend(!xyGraph.isShowLegend());
 			}
 		};
 		showLegend.setImageDescriptor(Activator.getImageDescriptor("icons/ShowLegend.png"));
 		if (system.getActionBars()!=null) system.getActionBars().getToolBarManager().add(showLegend);
 		
-		showLegend.setChecked(system.getGraph().isShowLegend());
+		showLegend.setChecked(xyGraph.isShowLegend());
 		
 		
 	}
 	
-	protected void createAnnotationActions() {
+	protected void createAnnotationActions(final XYRegionGraph xyGraph) {
 		
 		addToolbarSeparator("org.csstudio.swt.xygraph.toolbar.annotation");	
 		
 		final Action addAnnotation = new Action("Add Annotation...", Activator.getImageDescriptor("icons/Add_Annotation.png")) {
 			public void run() {
-				final XYRegionGraph xyGraph     = system.getGraph();
 				AddAnnotationDialog dialog = new AddAnnotationDialog(Display.getCurrent().getActiveShell(), xyGraph);
 				if(dialog.open() == Window.OK){
 					xyGraph.addAnnotation(dialog.getAnnotation());
@@ -201,7 +198,6 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 		
 		final Action delAnnotation = new Action("Remove Annotation...", Activator.getImageDescriptor("icons/Del_Annotation.png")) {
 			public void run() {
-				final XYRegionGraph xyGraph     = system.getGraph();
 				RemoveAnnotationDialog dialog = new RemoveAnnotationDialog(Display.getCurrent().getActiveShell(), xyGraph);
 				if(dialog.open() == Window.OK && dialog.getAnnotation() != null){
 					xyGraph.removeAnnotation(dialog.getAnnotation());
@@ -216,30 +212,29 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 		addToolbarSeparator("org.csstudio.swt.xygraph.toolbar.extra");	
 	}
 	
-	protected void createRegionActions() {
+	protected void createRegionActions(final XYRegionGraph xyGraph) {
 		
 		
 		if (system.getActionBars()!=null && system.getActionBars().getToolBarManager()!=null)  {
 			system.getActionBars().getToolBarManager().add(new Separator("lightweight.graph.region.actions"));
 		}
-		final XYRegionGraph xyGraph     = system.getGraph();
 		
         final MenuAction regionDropDown = new MenuAction("Selection region");
         regionDropDown.setId("org.dawb.workbench.ui.editors.plotting.swtxy.addRegions"); // Id used elsewhere...
  
-		regionDropDown.add(createRegionAction(RegionType.LINE,       regionDropDown, "Add line selection",     Activator.getImageDescriptor("icons/ProfileLine.png")));
-		regionDropDown.add(createRegionAction(RegionType.POLYLINE,   regionDropDown, "Add polyline selection", Activator.getImageDescriptor("icons/ProfilePolyline.png")));
-		regionDropDown.add(createRegionAction(RegionType.POLYGON,    regionDropDown, "Add polygon selection",  Activator.getImageDescriptor("icons/ProfilePolyline.png")));
-		regionDropDown.add(createRegionAction(RegionType.BOX,        regionDropDown, "Add box selection",      Activator.getImageDescriptor("icons/ProfileBox.png")));
-		regionDropDown.add(createRegionAction(RegionType.SECTOR,     regionDropDown, "Add sector selection",   Activator.getImageDescriptor("icons/ProfileSector.png")));
-		regionDropDown.add(createRegionAction(RegionType.RING,       regionDropDown, "Add ring selection",     Activator.getImageDescriptor("icons/ProfileCircle.png")));
-		regionDropDown.add(createRegionAction(RegionType.XAXIS,      regionDropDown, "Add X-axis selection",   Activator.getImageDescriptor("icons/Cursor-horiz.png")));
-		regionDropDown.add(createRegionAction(RegionType.YAXIS,      regionDropDown, "Add Y-axis selection",   Activator.getImageDescriptor("icons/Cursor-vert.png")));
-		regionDropDown.add(createRegionAction(RegionType.FREE_DRAW,  regionDropDown, "Free drawn selection",   Activator.getImageDescriptor("icons/ProfileFree.png")));
-		regionDropDown.add(createRegionAction(RegionType.POINT,      regionDropDown, "Single point selection", Activator.getImageDescriptor("icons/ProfilePoint.png")));
-		regionDropDown.add(createRegionAction(RegionType.CIRCLE,     regionDropDown, "Add circle selection",   Activator.getImageDescriptor("icons/ProfileCircle.png")));
-		regionDropDown.add(createRegionAction(RegionType.ELLIPSE,    regionDropDown, "Add ellipse selection",  Activator.getImageDescriptor("icons/ProfileEllipse.png")));
-		regionDropDown.add(createRegionAction(RegionType.ELLIPSEFIT, regionDropDown, "Ellipse fit selection",  Activator.getImageDescriptor("icons/ProfileEllipse.png")));
+		regionDropDown.add(createRegionAction(xyGraph, RegionType.LINE,       regionDropDown, "Add line selection",     Activator.getImageDescriptor("icons/ProfileLine.png")));
+		regionDropDown.add(createRegionAction(xyGraph, RegionType.POLYLINE,   regionDropDown, "Add polyline selection", Activator.getImageDescriptor("icons/ProfilePolyline.png")));
+		regionDropDown.add(createRegionAction(xyGraph, RegionType.POLYGON,    regionDropDown, "Add polygon selection",  Activator.getImageDescriptor("icons/ProfilePolyline.png")));
+		regionDropDown.add(createRegionAction(xyGraph, RegionType.BOX,        regionDropDown, "Add box selection",      Activator.getImageDescriptor("icons/ProfileBox.png")));
+		regionDropDown.add(createRegionAction(xyGraph, RegionType.SECTOR,     regionDropDown, "Add sector selection",   Activator.getImageDescriptor("icons/ProfileSector.png")));
+		regionDropDown.add(createRegionAction(xyGraph, RegionType.RING,       regionDropDown, "Add ring selection",     Activator.getImageDescriptor("icons/ProfileCircle.png")));
+		regionDropDown.add(createRegionAction(xyGraph, RegionType.XAXIS,      regionDropDown, "Add X-axis selection",   Activator.getImageDescriptor("icons/Cursor-horiz.png")));
+		regionDropDown.add(createRegionAction(xyGraph, RegionType.YAXIS,      regionDropDown, "Add Y-axis selection",   Activator.getImageDescriptor("icons/Cursor-vert.png")));
+		regionDropDown.add(createRegionAction(xyGraph, RegionType.FREE_DRAW,  regionDropDown, "Free drawn selection",   Activator.getImageDescriptor("icons/ProfileFree.png")));
+		regionDropDown.add(createRegionAction(xyGraph, RegionType.POINT,      regionDropDown, "Single point selection", Activator.getImageDescriptor("icons/ProfilePoint.png")));
+		regionDropDown.add(createRegionAction(xyGraph, RegionType.CIRCLE,     regionDropDown, "Add circle selection",   Activator.getImageDescriptor("icons/ProfileCircle.png")));
+		regionDropDown.add(createRegionAction(xyGraph, RegionType.ELLIPSE,    regionDropDown, "Add ellipse selection",  Activator.getImageDescriptor("icons/ProfileEllipse.png")));
+		regionDropDown.add(createRegionAction(xyGraph, RegionType.ELLIPSEFIT, regionDropDown, "Ellipse fit selection",  Activator.getImageDescriptor("icons/ProfileEllipse.png")));
 		
 		if (system.getActionBars()!=null && system.getActionBars().getMenuManager()!=null)  {
 			system.getActionBars().getMenuManager().add(regionDropDown);
@@ -285,9 +280,8 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 		
 	}
 	
-	protected void createRegion(MenuAction regionDropDown, Action action, RegionType type) throws Exception {
+	protected void createRegion(final XYRegionGraph xyGraph, MenuAction regionDropDown, Action action, RegionType type) throws Exception {
 		
-		final XYRegionGraph xyGraph     = system.getGraph();
 		if (xyGraph.getXAxisList().size()==1 && xyGraph.getYAxisList().size()==1) {
 			xyGraph.createRegion(RegionUtils.getUniqueName(type.getName(), system), system.getSelectedXAxis(), system.getSelectedYAxis(), type, true);
 		} else {
@@ -300,11 +294,11 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 		//regionDropDown.setChecked(true);
 	}
 	
-	private IAction createRegionAction(final RegionType type, final MenuAction regionDropDown, final String label, final ImageDescriptor icon) {
+	private IAction createRegionAction(final XYRegionGraph xyGraph, final RegionType type, final MenuAction regionDropDown, final String label, final ImageDescriptor icon) {
 		final Action regionAction = new Action(label, icon) {
 			public void run() {				
 				try {
-					createRegion(regionDropDown, this, type);
+					createRegion(xyGraph, regionDropDown, this, type);
 				} catch (Exception e) {
 					logger.error("Cannot create region!", e);
 				}
@@ -319,13 +313,12 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 		if (system.getActionBars()!=null) system.getActionBars().getToolBarManager().add(new Separator(	id ));	
 	}
 
-	public void createZoomActions(final int flags) {
+	public void createZoomActions(final XYRegionGraph xyGraph, final int flags) {
 		
 		addToolbarSeparator("org.csstudio.swt.xygraph.toolbar.zoom");		
 
         final Action autoScale = new Action("Perform Auto Scale", Activator.getImageDescriptor("icons/AutoScale.png")) {
         	public void run() {
-				final XYRegionGraph xyGraph     = system.getGraph();
 	            xyGraph.performAutoScale();
         	}
         };
@@ -345,7 +338,6 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 			};
 			final Action zoomAction = new Action(zoomType.getDescription(), IAction.AS_CHECK_BOX) {
 				public void run() {
-					final XYRegionGraph xyGraph     = system.getGraph();
 					xyGraph.setZoomType(zoomType);
 				}
 			};
@@ -376,12 +368,10 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 		if (system.getActionBars()!=null) system.getActionBars().getToolBarManager().add(rescaleAction);
 	}
 
-	public void createUndoRedoActions() {
+	public void createUndoRedoActions(final XYRegionGraph xyGraph) {
 		
 		addToolbarSeparator("org.csstudio.swt.xygraph.toolbar.undoredo");		
-
-		final XYRegionGraph xyGraph     = system.getGraph();
-
+		
 		//undo button		
 		final Action undoButton = new Action("Undo", Activator.getImageDescriptor("icons/Undo.png")) {
 			public void run() {
@@ -459,7 +449,7 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
        }	
 	}
 	
-	protected void createAspectHistoAction() {
+	protected void createAspectHistoAction(final XYRegionGraph xyGraph) {
 
 		final Action histo = new Action("Rehistogram on zoom in or zoom out (F5)", IAction.AS_PUSH_BUTTON) {
 			
@@ -489,7 +479,7 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 			
 		    public void run() {		    	
 		    	Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.ASPECT, isChecked());
-		    	system.getGraph().setKeepAspect(isChecked());
+		    	xyGraph.setKeepAspect(isChecked());
 		    	system.repaint(false);
 		    }
 		};
@@ -501,7 +491,7 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 			
 		    public void run() {		    	
 		    	Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.SHOW_AXES, isChecked());
-		    	system.getGraph().setShowAxes(isChecked());
+		    	xyGraph.setShowAxes(isChecked());
 		    	system.repaint(false);
 		    }
 		};
@@ -523,7 +513,7 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 
 	}
 	
-	protected void createPalleteActions() {
+	protected void createPalleteActions(final XYRegionGraph xyGraph) {
 		
     	final Map<String,Integer> names = PaletteFactory.getPaletteNames();
     	
@@ -542,7 +532,7 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 					Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.P_PALETTE, paletteIndex);
 					try {
 						final PaletteData data = PaletteFactory.getPalette(paletteIndex, true);
-						system.getGraph().setPaletteData(data);
+						xyGraph.setPaletteData(data);
 					} catch (Exception ne) {
 						logger.error("Cannot create palette data!", ne);
 					}
@@ -564,7 +554,7 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 	}
 	
 
-	public void createOriginActions() {
+	public void createOriginActions(final XYRegionGraph xyGraph) {
 
 		final MenuAction origins = new MenuAction("Image Origin");
 		origins.setId(getClass().getName()+".imageOrigin");
@@ -580,7 +570,7 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
         	final IAction action = new Action(origin.getLabel(), IAction.AS_CHECK_BOX) {
         		public void run() {
         			Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.ORIGIN_PREF, origin.getLabel());
-       			    system.getGraph().setImageOrigin(origin);
+       			    xyGraph.setImageOrigin(origin);
        			    setChecked(true);
         		}
         	};
@@ -605,7 +595,7 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 	 * Also uses 'bars' field to add the actions
 	 * @param rightClick
 	 */
-	protected void createAdditionalActions(final IContributionManager rightClick) {
+	protected void createAdditionalActions(final XYRegionGraph xyGraph, final IContributionManager rightClick) {
 		
         // Add additional if required
 		final IActionBars bars = system.getActionBars();
@@ -628,7 +618,7 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 			    	setChecked(true);
 			    	system.setXfirst(false);
 			    	setXfirst(false);
-			    	system.fireTracesAltered(new TraceEvent(system.getGraph()));
+			    	system.fireTracesAltered(new TraceEvent(xyGraph));
 			    }
 			};
 			plotIndex.setImageDescriptor(Activator.getImageDescriptor("icons/plotindex.png"));
@@ -641,7 +631,7 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 			    	setChecked(true);
 			    	system.setXfirst(true);
 			    	setXfirst(true);
-			    	system.fireTracesAltered(new TraceEvent(system.getGraph()));
+			    	system.fireTracesAltered(new TraceEvent(xyGraph));
 			    }
 			};
 			plotX.setImageDescriptor(Activator.getImageDescriptor("icons/plotxaxis.png"));
@@ -778,8 +768,8 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 			manager.add(visible);
 		}
 		
-		final XYRegionGraph xyGraph = sys instanceof LightWeightPlottingSystem 
-				                  ? ((LightWeightPlottingSystem)sys).getGraph()
+		final XYRegionGraph xyGraph = sys instanceof PlottingSystemImpl 
+				                  ? ((PlottingSystemImpl)sys).getLightWeightGraph()
 				                  : null;
 		
 
@@ -870,7 +860,12 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 			// Cache file name otherwise they have to keep
 			// choosing the folder.
 			public void run(){
-				lastscreeshot_filename = system.savePlotting(lastscreeshot_filename);
+				try {
+					lastscreeshot_filename = system.savePlotting(lastscreeshot_filename);
+				} catch (Exception e) {
+					logger.error("Cannot save "+lastscreeshot_filename, e);
+					return;
+				}
 				exportActionsDropDown.setSelectedAction(this);
 			}
 		};
@@ -917,7 +912,11 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 			// Cache file name otherwise they have to keep
 			// choosing the folder.
 			public void run(){
-				lastscreeshot_filename = system.savePlotting(lastscreeshot_filename);
+				try {
+					lastscreeshot_filename = system.savePlotting(lastscreeshot_filename);
+				} catch (Exception e) {
+					logger.error("Cannot savePlotting to "+lastscreeshot_filename, e);
+				}
 			}
 		};
 		Action copyToClipboardButton = new Action("Copy to clip-board       Ctrl+C", Activator.getImageDescriptor("icons/copy_edit_on.gif")) {
@@ -1010,7 +1009,7 @@ public class LightWeightActionBarsManager extends PlottingActionBarManager {
 
 		final Action configure = new Action("Configure '"+annotation.getName()+"'", Activator.getImageDescriptor("icons/Configure.png")) {
 			public void run() {
-				final XYRegionConfigDialog dialog = new XYRegionConfigDialog(Display.getCurrent().getActiveShell(), ((LightWeightPlottingSystem)system).getGraph());
+				final XYRegionConfigDialog dialog = new XYRegionConfigDialog(Display.getCurrent().getActiveShell(), ((PlottingSystemImpl)system).getLightWeightGraph());
 				dialog.setPlottingSystem(system);
 				dialog.setSelectedAnnotation(annotation);
 				dialog.open();

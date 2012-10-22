@@ -10,7 +10,7 @@
    <extension
          point="org.dawb.common.ui.plottingClass">
       <plottingSystem
-            class="org.dawb.workbench.plotting.system.LightWeightPlottingSystem"
+            class="org.dawb.workbench.plotting.system.PlottingSystemImpl"
             id="org.dawb.workbench.editors.plotting.lightWeightPlottingSystem"
             visible_type="Lightweight">
       </plottingSystem>

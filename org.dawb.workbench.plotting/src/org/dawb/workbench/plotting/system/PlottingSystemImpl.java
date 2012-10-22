@@ -9,7 +9,6 @@
  */ 
 package org.dawb.workbench.plotting.system;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -20,14 +19,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.csstudio.swt.xygraph.figures.Annotation;
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.Trace;
-import org.csstudio.swt.xygraph.figures.Trace.PointStyle;
-import org.csstudio.swt.xygraph.figures.XYGraphFlags;
-import org.csstudio.swt.xygraph.linearscale.AbstractScale.LabelSide;
-import org.csstudio.swt.xygraph.undo.AddAnnotationCommand;
-import org.csstudio.swt.xygraph.undo.RemoveAnnotationCommand;
+import org.csstudio.swt.xygraph.toolbar.XYGraphConfigDialog;
 import org.dawb.common.ui.image.PaletteFactory;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.PlotType;
@@ -36,71 +30,35 @@ import org.dawb.common.ui.plot.annotation.IAnnotation;
 import org.dawb.common.ui.plot.axis.IAxis;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
-import org.dawb.common.ui.plot.region.IRegionContainer;
 import org.dawb.common.ui.plot.region.IRegionListener;
-import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ISurfaceTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
-import org.dawb.common.ui.plot.trace.ITraceContainer;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.common.ui.plot.trace.TraceWillPlotEvent;
-import org.dawb.gda.extensions.util.DatasetTitleUtils;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
-import org.dawb.workbench.plotting.printing.PlotExportPrintUtil;
-import org.dawb.workbench.plotting.printing.PlotPrintPreviewDialog;
-import org.dawb.workbench.plotting.printing.PrintSettings;
-import org.dawb.workbench.plotting.system.swtxy.AspectAxis;
-import org.dawb.workbench.plotting.system.swtxy.ImageTrace;
 import org.dawb.workbench.plotting.system.swtxy.LineTrace;
-import org.dawb.workbench.plotting.system.swtxy.RegionArea;
-import org.dawb.workbench.plotting.system.swtxy.RegionCreationLayer;
+import org.dawb.workbench.plotting.system.swtxy.XYRegionConfigDialog;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
-import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
-import org.dawb.workbench.plotting.system.swtxy.selection.SelectionRegionFactory;
-import org.dawb.workbench.plotting.util.ColorUtility;
 import org.dawnsci.plotting.jreality.JRealityPlotViewer;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.draw2d.FigureCanvas;
-import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.Label;
-import org.eclipse.draw2d.LayeredPane;
-import org.eclipse.draw2d.LightweightSystem;
-import org.eclipse.draw2d.PrintFigureOperation;
-import org.eclipse.jface.action.ActionContributionItem;
-import org.eclipse.jface.action.IContributionItem;
-import org.eclipse.jface.action.IMenuListener;
-import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.IStatusLineManager;
-import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
-import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseWheelListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.PaletteData;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.printing.PrintDialog;
-import org.eclipse.swt.printing.Printer;
-import org.eclipse.swt.printing.PrinterData;
-import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -110,29 +68,31 @@ import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 
 
 /**
- * Link between EDNA 1D plotting and csstudio plotter and fable plotter.
+ * An implmentation of IPlottingSystem, not designed to be public.
  * 
+ * THIS CLASS SHOULD NOT BE USED OUTSIDE THIS PLUGIN!
+ * 
+ * THIS CLASS IS plugin private, do not export org.dawb.workbench.plotting.system from this plugin.
  * 
  * @author gerring
  *
  */
-public class LightWeightPlottingSystem extends AbstractPlottingSystem {
+public class PlottingSystemImpl extends AbstractPlottingSystem {
 
-	private Logger logger = LoggerFactory.getLogger(LightWeightPlottingSystem.class);
+	private Logger logger = LoggerFactory.getLogger(PlottingSystemImpl.class);
 	
 	private Composite      parent;
-
-	// Controls
-	private Canvas         xyCanvas;
-	private XYRegionGraph  xyGraph;
-		
-	private LightWeightActionBarsManager lightWeightActionBarMan;
-	private JRealityPlotViewer           jrealityViewer;
 	
-	public LightWeightPlottingSystem() {
+	private PlotActionsManagerImpl       actionBarManager;
+	private LightWeightPlotViewer        lightWeightViewer;
+	private JRealityPlotViewer           jrealityViewer;
+	protected PlotType plottingMode;
+	
+	public PlottingSystemImpl() {
 		super();
-		this.lightWeightActionBarMan = (LightWeightActionBarsManager)this.actionBarManager;
-		this.jrealityViewer          = new JRealityPlotViewer();
+		this.actionBarManager     = (PlotActionsManagerImpl)super.actionBarManager;
+		this.lightWeightViewer    = new LightWeightPlotViewer();
+		this.jrealityViewer       = new JRealityPlotViewer();
 	}
 	
 	
@@ -152,116 +112,30 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		// We ignore hint, we create a light weight plot as default because
 		// it looks nice. We swap this for a 3D one if required.
 		createLightWeightUI();
-		layout.topControl = xyCanvas;
+		layout.topControl = lightWeightViewer.getControl();
 	}
 	
 	@Override
 	protected PlottingActionBarManager createActionBarManager() {
-		return new LightWeightActionBarsManager(this);
+		return new PlotActionsManagerImpl(this);
 	}
 
 	
 	@Override
 	public Composite getPlotComposite() {
-		if (xyCanvas!=null)       return xyCanvas;
+		if (plottingMode!=null && plottingMode.is3D()) return (Composite)jrealityViewer.getControl();
+		if (lightWeightViewer.getControl()!=null)       return (Composite)lightWeightViewer.getControl();
 		return null;
 	}
-		
-	private LightweightSystem lws;
 	
 	private void createLightWeightUI() {
-		
-		if (xyCanvas!=null) return;		
-		
-		this.xyCanvas = new FigureCanvas(parent, SWT.DOUBLE_BUFFERED|SWT.NO_REDRAW_RESIZE|SWT.NO_BACKGROUND);
-		lws = new LightweightSystem(xyCanvas);
-		
-		// Stops a mouse wheel move corrupting the plotting area, but it wobbles a bit.
-		xyCanvas.addMouseWheelListener(getMouseWheelListener());
-		xyCanvas.addKeyListener(getKeyListener());
-		
-		lws.setControl(xyCanvas);
-		xyCanvas.setBackground(xyCanvas.getDisplay().getSystemColor(SWT.COLOR_WHITE));
-	
-		this.xyGraph = new XYRegionGraph();
-		xyGraph.setSelectionProvider(getSelectionProvider());
-		
-		// We contain the action bars in an internal object
-		// if the API user said they were null. This allows the API
-		// user to say null for action bars and then use:
-		// getPlotActionSystem().fillXXX() to add their own actions.
- 		if (bars==null) bars = lightWeightActionBarMan.createEmptyActionBars(); 
- 				
-// 		bars.getMenuManager().removeAll();
-// 		bars.getToolBarManager().removeAll();
 
- 		lightWeightActionBarMan.init();
- 		lightWeightActionBarMan.createConfigActions();
- 		lightWeightActionBarMan.createAnnotationActions();
- 		lightWeightActionBarMan.createToolDimensionalActions(ToolPageRole.ROLE_1D, "org.dawb.workbench.plotting.views.toolPageView.1D");
- 		lightWeightActionBarMan.createToolDimensionalActions(ToolPageRole.ROLE_2D, "org.dawb.workbench.plotting.views.toolPageView.2D");
- 		lightWeightActionBarMan.createToolDimensionalActions(ToolPageRole.ROLE_1D_AND_2D, "org.dawb.workbench.plotting.views.toolPageView.1D_and_2D");
- 		lightWeightActionBarMan.createRegionActions();
- 		lightWeightActionBarMan.createZoomActions(XYGraphFlags.COMBINED_ZOOM);
- 		lightWeightActionBarMan.createUndoRedoActions();
- 		lightWeightActionBarMan.createExportActionsToolBar(bars!=null?getActionBars().getToolBarManager():null);
- 		lightWeightActionBarMan.createAspectHistoAction();
- 		lightWeightActionBarMan.createPalleteActions();
- 		lightWeightActionBarMan.createOriginActions();
- 		lightWeightActionBarMan.createExportActionsMenuBar();
- 		lightWeightActionBarMan.createAdditionalActions(null);
-		 
- 		// Create the layers (currently everything apart from the temporary 
- 		// region draw layer is on 0)
- 		final LayeredPane layers      = new LayeredPane();
-        new RegionCreationLayer(layers, xyGraph.getRegionArea());  
-  		layers.add(xyGraph,     0);
-		lws.setContents(layers);
-		
-		// Create status contribution for position
-		if (part!=null) {
-			IStatusLineManager statusLine = null;
-		    if (part instanceof IViewPart) {
-		    	IActionBars bars = ((IViewPart)part).getViewSite().getActionBars();
-		    	statusLine = bars.getStatusLineManager();
-			} else if (part instanceof IEditorPart) {
-				IActionBars bars = ((IEditorPart)part).getEditorSite().getActionBars();
-		    	statusLine = bars.getStatusLineManager();
-			}
-		    if (statusLine!=null) {
-		    	xyGraph.getRegionArea().setStatusLineManager(statusLine);
-		    }
-		}
-		
-		// Configure axes
-		xyGraph.primaryXAxis.setShowMajorGrid(true);
-		xyGraph.primaryXAxis.setShowMinorGrid(true);		
-		xyGraph.primaryYAxis.setShowMajorGrid(true);
-		xyGraph.primaryYAxis.setShowMinorGrid(true);
-		xyGraph.primaryYAxis.setTitle("");
-		
-		if (plottingMode!=null) {
-			if (!Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.SHOW_AXES) && !plottingMode.is1D()) {
-				xyGraph.primaryXAxis.setVisible(false);
-				xyGraph.primaryYAxis.setVisible(false);
-			}
-		}
-		if (bars!=null) bars.updateActionBars();
-		if (bars!=null) bars.getToolBarManager().update(true);
-           
- 		final MenuManager popupMenu = new MenuManager();
-		popupMenu.setRemoveAllWhenShown(true); // Remake menu each time
-        xyCanvas.setMenu(popupMenu.createContextMenu(xyCanvas));
-        popupMenu.addMenuListener(getIMenuListener());
-        
-        if (plottingMode!=null) {
-		    this.lightWeightActionBarMan.switchActions(plottingMode);
-        }
-
-        parent.layout();
-
+		if (lightWeightViewer.getControl()!=null) return;
+		lightWeightViewer.init(this);
+		lightWeightViewer.createControl(parent);
+		parent.layout();
 	}
-	
+
 	private void createJRealityUI() {
 
 		if (jrealityViewer.getControl()!=null) return;
@@ -270,108 +144,19 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		parent.layout();
 	}
 
-	private IMenuListener popupListener;
-	private IMenuListener getIMenuListener() {
-		if (popupListener == null) {
-			popupListener = new IMenuListener() {			
-				@Override
-				public void menuAboutToShow(IMenuManager manager) {
-					Point   pnt       = Display.getDefault().getCursorLocation();
-					Point   par       = xyCanvas.toDisplay(new Point(0,0));
-					final int xOffset = par.x+xyGraph.getLocation().x;
-					final int yOffset = par.y+xyGraph.getLocation().y;
-					
-					final IFigure fig = xyGraph.findFigureAt(pnt.x-xOffset, pnt.y-yOffset);
-					if (fig!=null) {
-					    if (fig instanceof IRegionContainer) {
-							final IRegion region = ((IRegionContainer)fig).getRegion();
-							SelectionRegionFactory.fillActions(manager, region, xyGraph);
-					    }
-					    if (fig instanceof ITraceContainer) {
-							final ITrace trace = ((ITraceContainer)fig).getTrace();
-							LightWeightActionBarsManager.fillTraceActions(manager, trace, LightWeightPlottingSystem.this);
-					    }
-					    
-					    if (fig instanceof Label && fig.getParent() instanceof Annotation) {
-					    	
-					    	LightWeightActionBarsManager.fillAnnotationConfigure(manager, (Annotation)fig.getParent(), LightWeightPlottingSystem.this);
-					    }
-					}
-					lightWeightActionBarMan.fillZoomActions(manager);
-					manager.update();
-				}
-			};
-		}
-		return popupListener;
-	}
-
-
-	private MouseWheelListener mouseWheelListener;
-	private MouseWheelListener getMouseWheelListener() {
-		if (mouseWheelListener == null) mouseWheelListener = new MouseWheelListener() {
-			@Override
-			public void mouseScrolled(MouseEvent e) {
-				if (xyGraph==null) return;
-				if (e.count==0)    return;
-				int direction = e.count > 0 ? 1 : -1;
-				xyGraph.setZoomLevel(e, direction*0.05d);
-				xyGraph.repaint();
-			}	
-		};
-		return mouseWheelListener;
-	}
-
-	private KeyListener keyListener;
-	private KeyListener getKeyListener() {
-		if (keyListener==null) keyListener = new KeyAdapter() {
-			@Override
-			public void keyPressed(KeyEvent e) {
-				if (e.keyCode==16777230 || e.character=='h') {
-					final IContributionItem action = bars.getToolBarManager().find("org.dawb.workbench.plotting.histo");
-				    if (action!=null && action.isVisible() && action instanceof ActionContributionItem) {
-				    	ActionContributionItem iaction = (ActionContributionItem)action;
-				    	iaction.getAction().setChecked(!iaction.getAction().isChecked());
-				    	iaction.getAction().run();
-				    }
-				} else if (e.keyCode==16777217) {//Up
- 					Point point = Display.getDefault().getCursorLocation();
- 					point.y-=1;
- 					Display.getDefault().setCursorLocation(point);
-					
- 				} else if (e.keyCode==16777218) {//Down
- 					Point point = Display.getDefault().getCursorLocation();
- 					point.y+=1;
- 					Display.getDefault().setCursorLocation(point);
- 					
- 				} else if (e.keyCode==16777219) {//Left
- 					Point point = Display.getDefault().getCursorLocation();
- 					point.x-=1;
- 					Display.getDefault().setCursorLocation(point);
-					
- 				} if (e.keyCode==16777220) {//Right
- 					Point point = Display.getDefault().getCursorLocation();
- 					point.x+=1;
- 					Display.getDefault().setCursorLocation(point);
- 				}
-
-			}
-		};
-		return keyListener;
-	}
-
 
 	public void setFocus() {
-		if (xyCanvas!=null) xyCanvas.setFocus();
+		lightWeightViewer.setFocus();
 	}
 
 		
 	public void addTraceListener(final ITraceListener l) {
 		super.addTraceListener(l);
-		if (xyGraph!=null) ((RegionArea)xyGraph.getPlotArea()).addImageTraceListener(l);
+		lightWeightViewer.addImageTraceListener(l);
 	}
 	public void removeTraceListener(final ITraceListener l) {
 		super.removeTraceListener(l);
-		if (xyGraph!=null) ((RegionArea)xyGraph.getPlotArea()).removeImageTraceListener(l);
+		lightWeightViewer.removeImageTraceListener(l);
 	}
 	
 	
@@ -562,7 +347,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 								      final List<AbstractDataset> axes,
 								      final IProgressMonitor      monitor) {
 		
-		if (data.getName()!=null) xyGraph.setTitle(data.getName());
+		if (data.getName()!=null) lightWeightViewer.setTitle(data.getName());
 		
 		if (image instanceof IImageTrace) {
 		    ((IImageTrace)image).setData(data, axes, false);
@@ -627,7 +412,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 				((ISurfaceTrace)trace).setData(data, axes);
 				addTrace(trace);
 			} else {
-				trace = createLightWeightImage(traceName, data, axes, monitor);
+				trace = lightWeightViewer.createLightWeightImage(traceName, data, axes, monitor);
 				traceMap.put(trace.getName(), trace);
 				fireTraceAdded(new TraceEvent(trace));
 			}
@@ -641,37 +426,11 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	}
 
 
-	private ITrace createLightWeightImage(String traceName, AbstractDataset data, List<AbstractDataset> axes, IProgressMonitor monitor) {
-		
-		final Axis xAxis = ((AspectAxis)getSelectedXAxis());
-		final Axis yAxis = ((AspectAxis)getSelectedYAxis());
-		xAxis.setLogScale(false);
-		yAxis.setLogScale(false);
-
-		if (data.getName()!=null) xyGraph.setTitle(data.getName());
-		xyGraph.clearTraces();
-
-		final ImageTrace trace = xyGraph.createImageTrace(traceName, xAxis, yAxis);
-		trace.setData(data, axes, true);
-		
-		fireWillPlot(new TraceWillPlotEvent(trace, true));
-		trace.setPlottingSystem(this);
-
-		xyGraph.addImageTrace(trace);
-		
-		return trace;
-	}
-
 
 	@Override
 	public IImageTrace createImageTrace(String traceName) {
-		final Axis xAxis = (Axis)getSelectedXAxis();
-		final Axis yAxis = (Axis)getSelectedYAxis();
-		
-		final ImageTrace trace = xyGraph.createImageTrace(traceName, xAxis, yAxis);
-		trace.setPlottingSystem(this);
+		IImageTrace trace = lightWeightViewer.createImageTrace(traceName);
 		fireTraceCreated(new TraceEvent(trace));
-		
 		return trace;
 	}
 	
@@ -716,79 +475,10 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		}
 		if (traceMap==null) traceMap = new LinkedHashMap<String, ITrace>(31);
 	
-		if (xyGraph==null) return null;
+		if (lightWeightViewer.getControl()==null) return null;
 		
-		final AspectAxis xAxis = (AspectAxis)getSelectedXAxis();
-		xAxis.setLabelDataAndTitle(null);
-		final AspectAxis yAxis = (AspectAxis)getSelectedYAxis();
-		yAxis.setLabelDataAndTitle(null);
+		List<ITrace> traces = lightWeightViewer.createLineTraces(title, x, ys, traceMap, colorMap, monitor);
 
-		xAxis.setVisible(true);
-		yAxis.setVisible(true);
-
-		if (title==null) {
-			// TODO Fix titles for multiple calls to create1DPlot(...)
-		    xyGraph.setTitle(DatasetTitleUtils.getTitle(x, ys, true, rootName));
-		} else {
-			xyGraph.setTitle(title);
-		}
-		xAxis.setTitle(DatasetTitleUtils.getName(x,rootName));
-
-		//create a trace data provider, which will provide the data to the trace.
-		int iplot = 0;
-		
-		final List<ITrace> traces = new ArrayList<ITrace>(ys.size());
-		for (AbstractDataset y : ys) {
-
-			if (y==null) continue;
-			LightWeightDataProvider traceDataProvider = new LightWeightDataProvider(x, y);
-			
-			//create the trace
-			final LineTrace trace = new LineTrace(DatasetTitleUtils.getName(y,rootName), 
-					                      xAxis, 
-					                      yAxis,
-									      traceDataProvider);	
-			
-			LineTraceImpl wrapper = new LineTraceImpl(this, trace);
-			traces.add(wrapper);
-			
-			if (y.getName()!=null && !"".equals(y.getName())) {
-				traceMap.put(y.getName(), wrapper);
-				trace.setInternalName(y.getName());
-			}
-			
-			//set trace property
-			trace.setPointStyle(PointStyle.NONE);
-			int index = getTraces().size()+iplot-1;
-			if (index<0) index=0;
-			final Color plotColor = ColorUtility.getSwtColour(colorMap!=null?colorMap.values():null, index);
-			if (colorMap!=null) {
-				if (getColorOption()==ColorOption.BY_NAME) {
-					colorMap.put(y.getName(),plotColor);
-				} else {
-					colorMap.put(y,          plotColor);
-				}
-			}
-			trace.setTraceColor(plotColor);
-
-			//add the trace to xyGraph
-			xyGraph.addTrace(trace, false);
-			
-			
-			if (monitor!=null) monitor.worked(1);
-			iplot++;
-		}
-		
-		xyCanvas.redraw();
-		
-		if (isRescale()) {
-			getDisplay().syncExec(new Runnable() {
-				public void run() {
-					autoscaleAxes();
-					autoscaleAxes();
-				}
-			});
-		}
 		fireTracesPlotted(new TraceEvent(traces));
         return traces;
 	}
@@ -843,10 +533,10 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		return trace;
 	}
 
-	private void switchPlottingType( PlotType type ) {
+	protected void switchPlottingType( PlotType type ) {
 		
 		this.plottingMode=type;
-		this.lightWeightActionBarMan.switchActions(plottingMode);
+		this.actionBarManager.switchActions(plottingMode);
 		
 		Control top = null;
 		if (type.is3D()) { 
@@ -854,7 +544,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 			top = jrealityViewer.getControl();
 		} else {
 			createLightWeightUI();
-			top = xyCanvas;
+			top = lightWeightViewer.getControl();
 		}
 		final StackLayout layout = (StackLayout)parent.getLayout();
 		layout.topControl = top;
@@ -871,25 +561,14 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 		if (traceMap==null) this.traceMap = new HashMap<String, ITrace>(7);
 		traceMap.put(trace.getName(), trace);
 		
-		if (trace instanceof ImageTrace) {
-			this.plottingMode = PlotType.IMAGE; // Only one image allowed at a time
-			switchPlottingType(plottingMode);
-			fireWillPlot(new TraceWillPlotEvent(trace, true));
-			xyGraph.addImageTrace((ImageTrace)trace);
-			fireTraceAdded(new TraceEvent(trace));
-			
-		} else if (trace instanceof ISurfaceTrace) {
+		if (trace instanceof ISurfaceTrace) { // TODO FIXME Others?
 			this.plottingMode = PlotType.SURFACE; // Only one surface allowed at a time
 			switchPlottingType(plottingMode);
 			fireWillPlot(new TraceWillPlotEvent(trace, true));
 			jrealityViewer.addSurfaceTrace((ISurfaceTrace)trace);
 			
-		} else {
-			this.plottingMode = PlotType.PT1D;
-			switchPlottingType(plottingMode);
-			fireWillPlot(new TraceWillPlotEvent(trace, true));
-			xyGraph.addTrace(((LineTraceImpl)trace).getTrace(), true);
-			xyCanvas.redraw();
+		} else { // 1D, an image or LineTrace
+			lightWeightViewer.addTrace(trace);
 			fireTraceAdded(new TraceEvent(trace));
 		}
 	}
@@ -900,12 +579,13 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	 */
 	public void removeTrace(ITrace trace) {
 		if (traceMap!=null) traceMap.remove(trace.getName());
-		if (trace instanceof LineTraceImpl) {
-			xyGraph.removeTrace(((LineTraceImpl)trace).getTrace());
-		} else if (trace instanceof ImageTrace) {
-			xyGraph.removeImageTrace((ImageTrace)trace);
+		
+		if (trace instanceof ISurfaceTrace) { // TODO FIXME Others?
+			jrealityViewer.removeSurfaceTrace((ISurfaceTrace)trace);
+		} else {
+			lightWeightViewer.removeTrace(trace);
 		}
-		xyCanvas.redraw();
+
 		fireTraceRemoved(new TraceEvent(trace));
 	}
 
@@ -1006,26 +686,22 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	 * @param title
 	 */
 	public void setTitle(final String title) {
-		
-		if (xyGraph!=null) {
-			xyGraph.setTitle(title);
-			xyGraph.repaint();
+		super.setTitle(title);
+		if (plottingMode.is3D()) {
+			jrealityViewer.setTitle(title);
 		} else {
-			throw new RuntimeException("Cannot set the plot title when the plotting system is not created or plotting something!");
+			lightWeightViewer.setTitle(title);
 		}
 	}
-
+	
 	/**
 	 * Override this method to provide an implementation of show legend setting.
 	 * @param b
 	 */
 	@Override
 	public void setShowLegend(boolean b) {
-		if (xyGraph!=null) {
-			xyGraph.setShowLegend(b);
-			xyGraph.repaint();
-		} else {
-			throw new RuntimeException("Cannot set 'Show Legend' when the plotting system is not created or plotting something!");
+		if (lightWeightViewer!=null) {
+			lightWeightViewer.setShowLegend(b);
 		}
 	}
 
@@ -1072,20 +748,8 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	private void resetInternal() {
 		
 		if (colorMap!=null) colorMap.clear();
-		if (xyGraph!=null) {
-			try {
-				clearAnnotations();
-				clearRegions();
-				for (Axis axis : xyGraph.getAxisList()) {
-					axis.setRange(0,100);
-					axis.setTitle("");
-				}
-				clearTraces();
-	
-			} catch (Throwable e) {
-				logger.error("Cannot remove plots!", e);
-			}
-		}
+		lightWeightViewer.reset();
+		jrealityViewer.reset();
 				
 	}
 	
@@ -1105,7 +769,7 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 
 	}
 	private void clearInternal() {		
-		if (xyGraph!=null) {
+		if (lightWeightViewer.getControl()!=null) {
 			try {
 				clearTraces();
 				if (colorMap!=null) colorMap.clear();	
@@ -1126,19 +790,12 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 			colorMap = null;
 		}
 		clearTraces();
-		if (xyGraph!=null) {
-			xyGraph.dispose();
-			xyGraph = null;
-		}
-		if (xyCanvas!=null && !xyCanvas.isDisposed()) {
-			xyCanvas.removeMouseWheelListener(getMouseWheelListener());
-			xyCanvas.removeKeyListener(getKeyListener());
-			xyCanvas.dispose();
-		}
+		lightWeightViewer.dispose();
+		jrealityViewer.dispose();
 	}
 
 	private void clearTraces() {
-		if (xyGraph!=null)  xyGraph.clearTraces();
+		if (lightWeightViewer!=null)  lightWeightViewer.clearTraces();
 		if (traceMap!=null) traceMap.clear();
 		fireTracesCleared(new TraceEvent(this));
 	}
@@ -1146,26 +803,9 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	public void repaint() {
 		repaint(isRescale());
 	}
+	
 	public void repaint(final boolean autoScale) {
-		if (getDisplay().getThread()==Thread.currentThread()) {
-			if (xyCanvas!=null) {
-				if (autoScale) LightWeightPlottingSystem.this.xyGraph.performAutoScale();
-				LightWeightPlottingSystem.this.xyCanvas.layout(xyCanvas.getChildren());
-				LightWeightPlottingSystem.this.xyGraph.revalidate();
-				LightWeightPlottingSystem.this.xyGraph.repaint();
-			}
-		} else {
-			getDisplay().syncExec(new Runnable() {
-				public void run() {
-					if (xyCanvas!=null) {
-						if (autoScale)LightWeightPlottingSystem.this.xyGraph.performAutoScale();
-						LightWeightPlottingSystem.this.xyCanvas.layout(xyCanvas.getChildren());
-						LightWeightPlottingSystem.this.xyGraph.revalidate();
-						LightWeightPlottingSystem.this.xyGraph.repaint();
-					}
-				}
-			});
-		}
+		lightWeightViewer.repaint(autoScale);
 	}
 	
 	/**
@@ -1175,18 +815,9 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	 */
 	@Override
 	public Image getImage(Rectangle size) {
-		return xyGraph.getImage(size);
+		return lightWeightViewer.getImage(size);
 	}
 	
-	/**
-	 * Access to the XYGraph, may return null. Access discouraged, just for emergencies!
-	 * To use cast your IPlottingSystem to LightWeightPlottingSystem
-	 * 
-	 * @return
-	 */
-	public XYRegionGraph getGraph() {
-		return xyGraph;
-	}
 
 	/**
 	 * Use this method to create axes other than the default y and x axes.
@@ -1198,62 +829,39 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	 */
 	public IAxis createAxis(final String title, final boolean isYAxis, int side) {
 		
-		if (xyGraph==null) createLightWeightUI();
-			
-		AspectAxis axis = new AspectAxis(title, isYAxis);
-		if (side==SWT.LEFT||side==SWT.BOTTOM) {
-		    axis.setTickLabelSide(LabelSide.Primary);
-		} else {
-			axis.setTickLabelSide(LabelSide.Secondary);
-		}
-		axis.setAutoScaleThreshold(0.1);
-		axis.setShowMajorGrid(true);
-		axis.setShowMinorGrid(true);		
-	
-		xyGraph.addAxis(axis);
-		
-		return axis;
+		if (lightWeightViewer.getControl() == null) createLightWeightUI();
+					
+		return lightWeightViewer.createAxis(title, isYAxis, side);
 	}
 	
-	private IAxis selectedXAxis;
-	private IAxis selectedYAxis;
-
 	@Override
 	public IAxis getSelectedXAxis() {
-		if (selectedXAxis==null) {
-			if (xyGraph==null) createLightWeightUI();
-			return (AspectAxis)xyGraph.primaryXAxis;
-		}
-		return selectedXAxis;
+		return lightWeightViewer.getSelectedXAxis();
 	}
 
 	@Override
 	public void setSelectedXAxis(IAxis selectedXAxis) {
-		this.selectedXAxis = selectedXAxis;
+		lightWeightViewer.setSelectedXAxis(selectedXAxis);
 	}
 
 	@Override
 	public IAxis getSelectedYAxis() {
-		if (selectedYAxis==null) {
-			if (xyGraph==null) createLightWeightUI();
-			return (AspectAxis)xyGraph.primaryYAxis;
-		}
-		return selectedYAxis;
+		return lightWeightViewer.getSelectedYAxis();
 	}
 
 	@Override
 	public void setSelectedYAxis(IAxis selectedYAxis) {
-		this.selectedYAxis = selectedYAxis;
+		lightWeightViewer.setSelectedYAxis(selectedYAxis);
 	}
 	
 	public boolean addRegionListener(final IRegionListener l) {
-		if (xyGraph==null) createLightWeightUI();
-		return xyGraph.addRegionListener(l);
+		if (lightWeightViewer.getControl() == null) createLightWeightUI();
+		return lightWeightViewer.addRegionListener(l);
 	}
 	
 	public boolean removeRegionListener(final IRegionListener l) {
-		if (xyGraph==null) return false;
-		return xyGraph.removeRegionListener(l);
+		if (lightWeightViewer.getControl() == null) createLightWeightUI();
+		return lightWeightViewer.removeRegionListener(l);
 	}
 	
 	/**
@@ -1262,26 +870,18 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	 */
 	public IRegion createRegion(final String name, final RegionType regionType) throws Exception  {
 
-		if (xyGraph==null) createLightWeightUI();
-		final IAxis xAxis = getSelectedXAxis();
-		final IAxis yAxis = getSelectedYAxis();
-
-		return xyGraph.createRegion(name, xAxis, yAxis, regionType, true);
+		if (lightWeightViewer.getControl() == null) createLightWeightUI();
+		return lightWeightViewer.createRegion(name, regionType);
 	}
-	
-	/**
-	 * Thread safe
-	 */
+
 	public void clearRegions() {
-		if (xyGraph==null) return;
-		
-		xyGraph.clearRegions();
+		lightWeightViewer.clearRegions();
 	}
 	
 	protected void clearRegionTool() {
-		if (xyGraph==null) return;
+		if (lightWeightViewer.getControl() == null) return;
 		
-		xyGraph.clearRegionTool();
+		lightWeightViewer.clearRegionTool();
 	}
 
 	/**
@@ -1289,9 +889,8 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	 * @param region
 	 */
 	public void addRegion(final IRegion region) {
-		if (xyGraph == null) createLightWeightUI();
-		final AbstractSelectionRegion r = (AbstractSelectionRegion) region;
-		xyGraph.addRegion(r);
+		if (lightWeightViewer.getControl() == null) createLightWeightUI();
+		lightWeightViewer.addRegion(region);
 	}
 
 	/**
@@ -1299,16 +898,14 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	 * @param region
 	 */
 	public void removeRegion(final IRegion region) {
-		if (xyGraph == null) createLightWeightUI();
-		final AbstractSelectionRegion r = (AbstractSelectionRegion) region;
-		xyGraph.removeRegion(r);
+		if (lightWeightViewer.getControl() == null) createLightWeightUI();
+		lightWeightViewer.removeRegion(region);
 	}
 
 	@Override
 	public void renameRegion(final IRegion region, String name) {
-		if (xyGraph == null)
-			return;
-		xyGraph.renameRegion((AbstractSelectionRegion) region, name);
+		if (lightWeightViewer.getControl() == null) return;
+		lightWeightViewer.renameRegion(region, name);
 	}
 
 	/**
@@ -1317,9 +914,8 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	 * @return
 	 */
 	public IRegion getRegion(final String name) {
-		if (xyGraph == null)
-			return null;
-		return xyGraph.getRegion(name);
+		if (lightWeightViewer.getControl() == null) return null;
+		return lightWeightViewer.getRegion(name);
 	}
 
 	/**
@@ -1328,169 +924,83 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	 * @return
 	 */
 	public Collection<IRegion> getRegions() {
-		if (xyGraph == null)
-			return null;
-		List<AbstractSelectionRegion> regions = xyGraph.getRegions();
-		return new ArrayList<IRegion>(regions);
+		if (lightWeightViewer.getControl() == null) return null;
+		return lightWeightViewer.getRegions();
+	}
+	
+	@Override
+	public Collection<IRegion> getRegions(final RegionType type) {
+		if (lightWeightViewer.getControl() == null) return null;
+        return lightWeightViewer.getRegions(type);
 	}
 
 	@Override
 	public IAnnotation createAnnotation(final String name) throws Exception {
-		if (xyGraph == null) createLightWeightUI();
-
-		final List<Annotation> anns = xyGraph.getPlotArea().getAnnotationList();
-		for (Annotation annotation : anns) {
-			if (annotation.getName() != null && annotation.getName().equals(name)) {
-				throw new Exception("The annotation name '" + name + "' is already taken.");
-			}
-		}
-
-		final Axis xAxis = (Axis) getSelectedXAxis();
-		final Axis yAxis = (Axis) getSelectedYAxis();
-
-		return new AnnotationWrapper(name, xAxis, yAxis);
+		if (lightWeightViewer.getControl() == null) createLightWeightUI();
+        return lightWeightViewer.createAnnotation(name);
 	}
 
 	@Override
 	public void addAnnotation(final IAnnotation annotation) {
-		final AnnotationWrapper wrapper = (AnnotationWrapper) annotation;
-		xyGraph.addAnnotation(wrapper.getAnnotation());
-		xyGraph.getOperationsManager().addCommand(new AddAnnotationCommand(xyGraph, wrapper.getAnnotation()));
+		lightWeightViewer.addAnnotation(annotation);
 	}
 
 	@Override
 	public void removeAnnotation(final IAnnotation annotation) {
-		final AnnotationWrapper wrapper = (AnnotationWrapper) annotation;
-		xyGraph.removeAnnotation(wrapper.getAnnotation());
-		xyGraph.getOperationsManager().addCommand(new RemoveAnnotationCommand(xyGraph, wrapper.getAnnotation()));
+		lightWeightViewer.removeAnnotation(annotation);
 	}
 
 	@Override
 	public void renameAnnotation(final IAnnotation annotation, String name) {
-		final AnnotationWrapper wrapper = (AnnotationWrapper) annotation;
-		wrapper.getAnnotation().setName(name);
+		lightWeightViewer.renameAnnotation(annotation, name);
 	}
+	
+	@Override
+	public void clearAnnotations(){
+		lightWeightViewer.clearAnnotations();
+	}
+
 
 	@Override
 	public IAnnotation getAnnotation(final String name) {
-		final List<Annotation> anns = xyGraph.getPlotArea().getAnnotationList();
-		for (Annotation annotation : anns) {
-			if (annotation.getName() != null && annotation.getName().equals(name)) {
-				return new AnnotationWrapper(annotation);
-			}
-		}
-		return null;
-	}
-
-	@Override
-	public void clearAnnotations(){
-		final List<Annotation>anns = new ArrayList<Annotation>(xyGraph.getPlotArea().getAnnotationList());
-		for (Annotation annotation : anns) {
-			if (annotation==null) continue;
-			xyGraph.getPlotArea().removeAnnotation(annotation);
-		}
+		return lightWeightViewer.getAnnotation(name);
 	}
 
 	@Override
 	public void autoscaleAxes() {
-		if (xyGraph==null) return;
-		xyGraph.performAutoScale();
+		lightWeightViewer.autoscaleAxes();
 	}
-
-	/**
-	 * Override this method to provide an implementation of axis visibility.
-	 * @param isVisible
-	 * @param title
-	 */
-	public void setAxisAndTitleVisibility(boolean isVisible, String title) {
-		if (xyGraph!=null) {
-			xyGraph.primaryXAxis.setVisible(isVisible);
-			xyGraph.primaryYAxis.setVisible(isVisible);
-			xyGraph.setTitle(title);
-			xyGraph.repaint();
-		} else {
-			throw new RuntimeException("Cannot set the axis visibility when the plotting system is not created or plotting something!");
-		}
-	}
-
-	// Print / Export methods
-	private PrintSettings settings;
 
 	@Override
 	public void printPlotting(){
-		if (settings==null) settings = new PrintSettings();
-		PlotPrintPreviewDialog dialog = new PlotPrintPreviewDialog(xyGraph, Display.getCurrent(), settings);
-		settings=dialog.open();
+		lightWeightViewer.printPlotting();
 	}
 
 	/**
 	 * Print scaled plotting to printer
 	 */
 	public void printScaledPlotting(){
-		
-		PrintDialog dialog      = new PrintDialog(Display.getCurrent().getActiveShell(), SWT.NULL);
-		PrinterData printerData = dialog.open();
-		// TODO There are options on PrintFigureOperation
-		if (printerData != null) {
-            final PrintFigureOperation op = new PrintFigureOperation(new Printer(printerData), xyGraph);
-            op.run("Print "+xyGraph.getTitle());
-		}
+		lightWeightViewer.printScaledPlotting();
 	}
 
 	@Override
 	public void copyPlotting(){
-		PlotExportPrintUtil.copyGraph(xyGraph.getImage());
+		lightWeightViewer.copyPlotting();
 	}
 
 	@Override
-	public String savePlotting(String filename){
-		FileDialog dialog = new FileDialog (Display.getCurrent().getActiveShell(), SWT.SAVE);
-		String [] filterExtensions = new String [] {"*.png;*.PNG;*.jpg;*.JPG;*.jpeg;*.JPEG", "*.ps;*.eps"};
-		// TODO ,"*.svg;*.SVG"};
-		if (filename!=null) {
-			dialog.setFilterPath((new File(filename)).getParent());
-		} else {
-			String filterPath = "/";
-			String platform = SWT.getPlatform();
-			if (platform.equals("win32") || platform.equals("wpf")) {
-				filterPath = "c:\\";
-			}
-			dialog.setFilterPath (filterPath);
-		}
-		dialog.setFilterNames (PlotExportPrintUtil.FILE_TYPES);
-		dialog.setFilterExtensions (filterExtensions);
-		filename = dialog.open();
-		if (filename == null)
-			return null;
-		try {
-			final File file = new File(filename);
-			if (file.exists()) {
-				boolean yes = MessageDialog.openQuestion(Display.getDefault().getActiveShell(), "Confirm Overwrite", "The file '"+file.getName()+"' exists.\n\nWould you like to overwrite it?");
-			    if (!yes) return filename;
-			}
-			PlotExportPrintUtil.saveGraph(filename, PlotExportPrintUtil.FILE_TYPES[dialog.getFilterIndex()], xyGraph.getImage());
-			logger.debug("Plot saved");
-		} catch (Exception e) {
-			logger.error("Could not save the plot", e);
-		}
-		return filename;
+	public String savePlotting(String filename) throws Exception{
+		return lightWeightViewer.savePlotting(filename);
 	}
 
 	@Override
-	public void savePlotting(String filename, String filetype){
-		if (filename == null)
-			return;
-		try {
-			PlotExportPrintUtil.saveGraph(filename, filetype, xyGraph.getImage());
-			logger.debug("Plotting saved");
-		} catch (Exception e) {
-			logger.error("Could not save the plotting", e);
-		}
+	public void savePlotting(String filename, String filetype) throws Exception{
+		lightWeightViewer.savePlotting(filename, filetype);
 	}
 	
 	public void setXfirst(boolean xfirst) {
 		super.setXfirst(xfirst);
-		this.lightWeightActionBarMan.setXfirst(xfirst);
+		this.actionBarManager.setXfirst(xfirst);
 	}
 	
 	/**
@@ -1505,11 +1015,25 @@ public class LightWeightPlottingSystem extends AbstractPlottingSystem {
 	 * @param listener
 	 */
 	public void addPropertyChangeListener(IPropertyChangeListener listener) {
-		xyGraph.addPropertyChangeListener(listener);
+		lightWeightViewer.addPropertyChangeListener(listener);
 	}
 	
 	public void removePropertyChangeListener(IPropertyChangeListener listener) {
-		xyGraph.removePropertyChangeListener(listener);
+		lightWeightViewer.removePropertyChangeListener(listener);
 	}
+
+
+	/**
+	 * Plugin private, you may not use this outside this plugin.
+	 * 
+	 * DO NOT USE THIS METHOD PLEASE
+	 * 
+	 * @return
+	 */
+	public XYRegionGraph getLightWeightGraph() {
+		return lightWeightViewer.getXYRegionGraph();
+	}
+
+	
 
 }

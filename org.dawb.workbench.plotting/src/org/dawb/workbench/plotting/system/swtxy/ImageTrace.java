@@ -27,7 +27,7 @@ import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.common.ui.plot.trace.TraceWillPlotEvent;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
-import org.dawb.workbench.plotting.system.LightWeightPlottingSystem;
+import org.dawb.workbench.plotting.system.PlottingSystemImpl;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
@@ -70,7 +70,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	private List<AbstractDataset> axes;
 	private ImageServiceBean imageServiceBean;
 	private boolean          isMaximumZoom;
-	private LightWeightPlottingSystem plottingSystem;
+	private PlottingSystemImpl plottingSystem;
 		
 	public ImageTrace(final String name, 
 			          final Axis xAxis, 
@@ -1083,11 +1083,11 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		}		
 	}
 
-	public LightWeightPlottingSystem getPlottingSystem() {
+	public PlottingSystemImpl getPlottingSystem() {
 		return plottingSystem;
 	}
 
-	public void setPlottingSystem(LightWeightPlottingSystem plottingSystem) {
+	public void setPlottingSystem(PlottingSystemImpl plottingSystem) {
 		this.plottingSystem = plottingSystem;
 	}
 	

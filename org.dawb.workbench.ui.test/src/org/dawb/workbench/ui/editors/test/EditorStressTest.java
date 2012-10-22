@@ -13,7 +13,6 @@ import java.io.File;
 
 import org.dawb.common.util.eclipse.BundleUtils;
 import org.dawb.workbench.ui.editors.ImageEditor;
-import org.dawb.workbench.ui.editors.PlotImageEditor;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.runtime.Platform;
