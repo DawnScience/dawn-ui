@@ -1,12 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.2"?>
 <plugin>
-   <extension
-         point="org.eclipse.ui.views">
-      <view
-            class="org.dawnsci.plotting.jreality.TestView"
-            id="org.dawnsci.plotting.jreality.TestView"
-            name="Jreality Test Part">
-      </view>
-   </extension>
 </plugin>
