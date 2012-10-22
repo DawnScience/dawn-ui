@@ -64,6 +64,13 @@
             id="org.dawb.passerelle.actors.dawn.regionselect"
             name="Region Select">
       </actor>
+      <actor
+            class="org.dawb.passerelle.actors.dawn.CustomDataExportTransformer"
+            group="org.dawb.passerelle.actors.actorgroup.io"
+            icon="icons/data_export.png"
+            id="org.dawb.passerelle.actors.dawn.customdataexport"
+            name="Custom Data Export">
+      </actor>
    </extension>
 
 </fragment>
