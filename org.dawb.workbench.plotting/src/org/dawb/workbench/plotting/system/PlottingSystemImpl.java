@@ -21,7 +21,6 @@ import java.util.Map;
 
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.Trace;
-import org.csstudio.swt.xygraph.toolbar.XYGraphConfigDialog;
 import org.dawb.common.ui.image.PaletteFactory;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.PlotType;
@@ -41,13 +40,9 @@ import org.dawb.common.ui.plot.trace.TraceWillPlotEvent;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
 import org.dawb.workbench.plotting.system.swtxy.LineTrace;
-import org.dawb.workbench.plotting.system.swtxy.XYRegionConfigDialog;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
 import org.dawnsci.plotting.jreality.JRealityPlotViewer;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
@@ -60,6 +55,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.part.PageBook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,7 +82,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	private PlotActionsManagerImpl       actionBarManager;
 	private LightWeightPlotViewer        lightWeightViewer;
 	private JRealityPlotViewer           jrealityViewer;
-	protected PlotType plottingMode;
+	protected PlotType plottingMode = PlotType.PT1D;
 	
 	public PlottingSystemImpl() {
 		super();
@@ -104,15 +100,28 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 
 		super.createPlotPart(container, plotName, bars, hint, part);
 		
-		this.parent       = new Composite(container, SWT.NONE);
-		final StackLayout layout = new StackLayout();
-		this.parent.setLayout(layout);
-		parent.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
+		this.plottingMode = hint;
+		if (container.getLayout() instanceof PageBook.PageBookLayout) {
+			if (hint.is3D()) throw new RuntimeException("Cannot deal with "+PageBook.PageBookLayout.class.getName()+" and 3D at the moment!");
+		    this.parent       = container;
+		    logger.debug("Cannot deal with "+PageBook.PageBookLayout.class.getName()+" and 3D at the moment!");
+		} else {
+		
+			this.parent       = new Composite(container, SWT.NONE);
+			final StackLayout layout = new StackLayout();
+			this.parent.setLayout(layout);
+			parent.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
+		}
 		
 		// We ignore hint, we create a light weight plot as default because
 		// it looks nice. We swap this for a 3D one if required.
 		createLightWeightUI();
-		layout.topControl = lightWeightViewer.getControl();
+		
+		if (parent.getLayout() instanceof StackLayout) {
+			final StackLayout layout = (StackLayout)parent.getLayout();
+			layout.topControl = lightWeightViewer.getControl();
+			container.layout();
+		}
 	}
 	
 	@Override
@@ -546,9 +555,11 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			createLightWeightUI();
 			top = lightWeightViewer.getControl();
 		}
-		final StackLayout layout = (StackLayout)parent.getLayout();
-		layout.topControl = top;
-		parent.layout();
+		if (parent.getLayout() instanceof StackLayout) {
+			final StackLayout layout = (StackLayout)parent.getLayout();
+			layout.topControl = top;
+			parent.layout();
+		}
 	}
 	
 	/**
@@ -1000,7 +1011,6 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	
 	public void setXfirst(boolean xfirst) {
 		super.setXfirst(xfirst);
-		this.actionBarManager.setXfirst(xfirst);
 	}
 	
 	/**
@@ -1022,18 +1032,11 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		lightWeightViewer.removePropertyChangeListener(listener);
 	}
 
-
 	/**
-	 * Plugin private, you may not use this outside this plugin.
-	 * 
-	 * DO NOT USE THIS METHOD PLEASE
-	 * 
+	 * Internal use only do not use this method externally at any point!
 	 * @return
 	 */
 	public XYRegionGraph getLightWeightGraph() {
 		return lightWeightViewer.getXYRegionGraph();
 	}
-
-	
-
 }

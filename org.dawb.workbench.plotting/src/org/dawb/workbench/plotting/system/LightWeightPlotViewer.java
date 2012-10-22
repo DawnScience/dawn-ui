@@ -8,14 +8,16 @@ import java.util.Map;
 
 import org.csstudio.swt.xygraph.figures.Annotation;
 import org.csstudio.swt.xygraph.figures.Axis;
-import org.csstudio.swt.xygraph.figures.Trace.PointStyle;
-import org.csstudio.swt.xygraph.figures.XYGraphFlags;
 import org.csstudio.swt.xygraph.linearscale.AbstractScale.LabelSide;
 import org.csstudio.swt.xygraph.undo.AddAnnotationCommand;
 import org.csstudio.swt.xygraph.undo.RemoveAnnotationCommand;
+import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.AbstractPlottingSystem.ColorOption;
+import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.IPrintablePlotting;
+import org.dawb.common.ui.plot.ITraceActionProvider;
 import org.dawb.common.ui.plot.PlotType;
+import org.dawb.common.ui.plot.annotation.AnnotationUtils;
 import org.dawb.common.ui.plot.annotation.IAnnotation;
 import org.dawb.common.ui.plot.annotation.IAnnotationSystem;
 import org.dawb.common.ui.plot.axis.IAxis;
@@ -25,8 +27,10 @@ import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionContainer;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.IRegionSystem;
-import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
 import org.dawb.common.ui.plot.trace.IImageTrace;
+import org.dawb.common.ui.plot.trace.ILineTrace;
+import org.dawb.common.ui.plot.trace.ILineTrace.PointStyle;
+import org.dawb.common.ui.plot.trace.ILineTrace.TraceType;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceContainer;
 import org.dawb.common.ui.plot.trace.ITraceListener;
@@ -42,6 +46,7 @@ import org.dawb.workbench.plotting.system.swtxy.ImageTrace;
 import org.dawb.workbench.plotting.system.swtxy.LineTrace;
 import org.dawb.workbench.plotting.system.swtxy.RegionArea;
 import org.dawb.workbench.plotting.system.swtxy.RegionCreationLayer;
+import org.dawb.workbench.plotting.system.swtxy.XYRegionConfigDialog;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
 import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
 import org.dawb.workbench.plotting.system.swtxy.selection.SelectionRegionFactory;
@@ -53,12 +58,15 @@ import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.LayeredPane;
 import org.eclipse.draw2d.LightweightSystem;
 import org.eclipse.draw2d.PrintFigureOperation;
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IContributionItem;
+import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.swt.SWT;
@@ -93,13 +101,16 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
  * @author fcp94556
  *
  */
-class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSystem, IPrintablePlotting {
+class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSystem, IPrintablePlotting, ITraceActionProvider {
 
 	// Controls
-	private Canvas         xyCanvas;
-	private XYRegionGraph  xyGraph;
-	private LightweightSystem lws;
-	private PlottingSystemImpl system;
+	private Canvas                 xyCanvas;
+	private XYRegionGraph          xyGraph;
+	private LightweightSystem      lws;
+	
+	// Plotting stuff
+	private PlottingSystemImpl     system;
+	private LightWeightPlotActions plotActionsCreator;
 
 
 	public void init(PlottingSystemImpl system) {
@@ -139,21 +150,10 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 // 		bars.getMenuManager().removeAll();
 // 		bars.getToolBarManager().removeAll();
 
- 		actionBarManager.init();
- 		actionBarManager.createConfigActions(xyGraph);
- 		actionBarManager.createAnnotationActions(xyGraph);
- 		actionBarManager.createToolDimensionalActions(ToolPageRole.ROLE_1D, "org.dawb.workbench.plotting.views.toolPageView.1D");
- 		actionBarManager.createToolDimensionalActions(ToolPageRole.ROLE_2D, "org.dawb.workbench.plotting.views.toolPageView.2D");
- 		actionBarManager.createToolDimensionalActions(ToolPageRole.ROLE_1D_AND_2D, "org.dawb.workbench.plotting.views.toolPageView.1D_and_2D");
- 		actionBarManager.createRegionActions(xyGraph);
- 		actionBarManager.createZoomActions(xyGraph, XYGraphFlags.COMBINED_ZOOM);
- 		actionBarManager.createUndoRedoActions(xyGraph);
- 		actionBarManager.createExportActionsToolBar(bars!=null?bars.getToolBarManager():null);
- 		actionBarManager.createAspectHistoAction(xyGraph);
- 		actionBarManager.createPalleteActions(xyGraph);
- 		actionBarManager.createOriginActions(xyGraph);
- 		actionBarManager.createExportActionsMenuBar();
- 		actionBarManager.createAdditionalActions(xyGraph, null);
+ 		actionBarManager.init(this);
+ 		this.plotActionsCreator = new LightWeightPlotActions();
+ 		plotActionsCreator.init(this, xyGraph, actionBarManager);
+ 		plotActionsCreator.createLightWeightActions();
 		 
  		// Create the layers (currently everything apart from the temporary 
  		// region draw layer is on 0)
@@ -292,12 +292,12 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 					    }
 					    if (fig instanceof ITraceContainer) {
 							final ITrace trace = ((ITraceContainer)fig).getTrace();
-							PlotActionsManagerImpl.fillTraceActions(manager, trace, system);
+							fillTraceActions(manager, trace, system);
 					    }
 					    
 					    if (fig instanceof Label && fig.getParent() instanceof Annotation) {
 					    	
-					    	PlotActionsManagerImpl.fillAnnotationConfigure(manager, (Annotation)fig.getParent(), system);
+					    	fillAnnotationConfigure(manager, (Annotation)fig.getParent(), system);
 					    }
 					}
 					system.getPlotActionSystem().fillZoomActions(manager);
@@ -306,6 +306,125 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 			};
 		}
 		return popupListener;
+	}
+
+	protected void fillAnnotationConfigure(IMenuManager manager,
+													final Annotation annotation,
+													final IPlottingSystem system) {
+
+		final Action configure = new Action("Configure '"+annotation.getName()+"'", Activator.getImageDescriptor("icons/Configure.png")) {
+			public void run() {
+				final XYRegionConfigDialog dialog = new XYRegionConfigDialog(Display.getDefault().getActiveShell(), xyGraph);
+				dialog.setPlottingSystem(system);
+				dialog.setSelectedAnnotation(annotation);
+				dialog.open();
+			}
+		};
+		manager.add(configure);	
+
+		manager.add(new Separator("org.dawb.workbench.plotting.system.configure.group"));
+	}
+	
+    /**
+     * 
+     * Problems:
+     * 1. Line trace bounds extend over other line traces so the last line trace added, will
+     * always be the figure that the right click detects.
+     * 
+     * Useful things, visible, annotation, quick set to line or points, open configure page.
+     * 
+     * @param manager
+     * @param trace
+     * @param xyGraph
+     */
+	@Override
+	public void fillTraceActions(final IContributionManager manager, final ITrace trace, final IPlottingSystem sys) {
+
+		manager.add(new Separator("org.dawb.workbench.plotting.system.trace.start"));
+
+		final String name = trace!=null&&trace.getName()!=null?trace.getName():"";
+
+		if (trace instanceof ILineTrace) { // Does actually work for images but may confuse people.
+			final Action visible = new Action("Hide '"+name+"'", Activator.getImageDescriptor("icons/TraceVisible.png")) {
+				public void run() {
+					trace.setVisible(false);
+				}
+			};
+			manager.add(visible);
+		}
+		
+		if (xyGraph!=null) {
+			
+			if (SelectionRegionFactory.getStaticBuffer()!=null) {
+				final Action pasteRegion = new Action("Paste '"+SelectionRegionFactory.getStaticBuffer().getName()+"'", Activator.getImageDescriptor("icons/RegionPaste.png")) {
+					public void run() {
+						AbstractSelectionRegion region = null;
+						try {
+							region = (AbstractSelectionRegion)sys.createRegion(SelectionRegionFactory.getStaticBuffer().getName(), SelectionRegionFactory.getStaticBuffer().getRegionType());
+						} catch (Exception ne) {
+							MessageDialog.openError(Display.getDefault().getActiveShell(), "Cannot paste '"+SelectionRegionFactory.getStaticBuffer().getName()+"'",
+									                   "A region with the name '"+SelectionRegionFactory.getStaticBuffer().getName()+"' already exists.");
+							return;
+						}
+						
+						region.sync(SelectionRegionFactory.getStaticBuffer().getBean());
+						region.setROI(SelectionRegionFactory.getStaticBuffer().getROI());
+						sys.addRegion(region);
+					}
+				};
+				manager.add(pasteRegion);
+			}
+			
+			final Action addAnnotation = new Action("Add annotation to '"+name+"'", Activator.getImageDescriptor("icons/TraceAnnotation.png")) {
+				public void run() {
+					final String annotName = AnnotationUtils.getUniqueAnnotation(name+" annotation ", sys);
+					if (trace instanceof LineTraceImpl) {
+						final LineTraceImpl lt = (LineTraceImpl)trace;
+						xyGraph.addAnnotation(new Annotation(annotName, lt.getTrace()));
+					} else {
+						xyGraph.addAnnotation(new Annotation(annotName, xyGraph.primaryXAxis, xyGraph.primaryYAxis));
+					}
+				}
+			};
+			manager.add(addAnnotation);
+		}
+		
+		if (trace instanceof ILineTrace) {
+			final ILineTrace lt = (ILineTrace)trace;
+			if (lt.getTraceType()!=TraceType.POINT) { // Give them a quick change to points
+				final Action changeToPoints = new Action("Plot '"+name+"' as scatter", Activator.getImageDescriptor("icons/TraceScatter.png")) {
+					public void run() {
+						lt.setTraceType(TraceType.POINT);
+						lt.setPointSize(8);
+						lt.setPointStyle(PointStyle.XCROSS);
+					}
+				};
+				manager.add(changeToPoints);
+			} else if (lt.getTraceType()!=TraceType.SOLID_LINE) {
+				final Action changeToLine = new Action("Plot '"+name+"' as line", Activator.getImageDescriptor("icons/TraceLine.png")) {
+					public void run() {
+						lt.setTraceType(TraceType.SOLID_LINE);
+						lt.setLineWidth(1);
+						lt.setPointSize(1);
+						lt.setPointStyle(PointStyle.NONE);
+					}
+				};
+				manager.add(changeToLine);
+			}
+		}
+
+		if (xyGraph!=null) {
+			final Action configure = new Action("Configure '"+name+"'", Activator.getImageDescriptor("icons/TraceProperties.png")) {
+				public void run() {
+					final XYRegionConfigDialog dialog = new XYRegionConfigDialog(Display.getDefault().getActiveShell(), xyGraph);
+					dialog.setPlottingSystem(sys);
+					dialog.setSelectedTrace(trace);
+					dialog.open();
+				}
+			};
+			manager.add(configure);
+		}
+		manager.add(new Separator("org.dawb.workbench.plotting.system.trace.end"));
 	}
 
 
@@ -416,7 +535,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 			}
 			
 			//set trace property
-			trace.setPointStyle(PointStyle.NONE);
+			trace.setPointStyle(org.csstudio.swt.xygraph.figures.Trace.PointStyle.NONE);
 			int index = system.getTraces().size()+iplot-1;
 			if (index<0) index=0;
 			final Color plotColor = ColorUtility.getSwtColour(colorMap!=null?colorMap.values():null, index);
@@ -726,6 +845,9 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 	}
 
 	public void dispose() {
+		if (plotActionsCreator!=null) {
+			plotActionsCreator.dispose();
+		}
 		if (xyGraph!=null) {
 			xyGraph.dispose();
 			xyGraph = null;
@@ -738,7 +860,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 	}
 
 	public void repaint(final boolean autoScale) {
-		if (Display.getCurrent().getThread()==Thread.currentThread()) {
+		if (Display.getDefault().getThread()==Thread.currentThread()) {
 			if (xyCanvas!=null) {
 				if (autoScale) xyGraph.performAutoScale();
 				xyCanvas.layout(xyCanvas.getChildren());
@@ -746,7 +868,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 				xyGraph.repaint();
 			}
 		} else {
-			Display.getCurrent().syncExec(new Runnable() {
+			Display.getDefault().syncExec(new Runnable() {
 				public void run() {
 					if (xyCanvas!=null) {
 						if (autoScale)xyGraph.performAutoScale();
@@ -785,7 +907,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 	@Override
 	public void printPlotting(){
 		if (settings==null) settings = new PrintSettings();
-		PlotPrintPreviewDialog dialog = new PlotPrintPreviewDialog(xyGraph, Display.getCurrent(), settings);
+		PlotPrintPreviewDialog dialog = new PlotPrintPreviewDialog(xyGraph, Display.getDefault(), settings);
 		settings=dialog.open();
 	}
 
@@ -794,7 +916,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 	 */
 	public void printScaledPlotting(){
 		
-		PrintDialog dialog      = new PrintDialog(Display.getCurrent().getActiveShell(), SWT.NULL);
+		PrintDialog dialog      = new PrintDialog(Display.getDefault().getActiveShell(), SWT.NULL);
 		PrinterData printerData = dialog.open();
 		// TODO There are options on PrintFigureOperation
 		if (printerData != null) {
@@ -810,7 +932,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 
 	@Override
 	public String savePlotting(String filename) throws Exception {
-		FileDialog dialog = new FileDialog (Display.getCurrent().getActiveShell(), SWT.SAVE);
+		FileDialog dialog = new FileDialog (Display.getDefault().getActiveShell(), SWT.SAVE);
 		String [] filterExtensions = new String [] {"*.png;*.PNG;*.jpg;*.JPG;*.jpeg;*.JPEG", "*.ps;*.eps"};
 		// TODO ,"*.svg;*.SVG"};
 		if (filename!=null) {
@@ -856,6 +978,10 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 
 	protected XYRegionGraph getXYRegionGraph() {
 		return xyGraph;
+	}
+
+	AbstractPlottingSystem getSystem() {
+		return system;
 	}
 
 }

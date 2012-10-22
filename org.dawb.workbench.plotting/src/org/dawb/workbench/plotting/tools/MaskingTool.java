@@ -428,8 +428,8 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		alwaysSave.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(AUTO_SAVE_PROP));
 		actionBars.getToolBarManager().add(alwaysSave);
 
-
-		PlotActionsManagerImpl.fillTraceActions(actionBars.getToolBarManager(), getImageTrace(), getPlottingSystem());	
+        final IPlottingSystem system = getPlottingSystem();
+        system.getPlotActionSystem().fillTraceActions(actionBars.getToolBarManager(), getImageTrace(), system);	
 	}
 
 	protected void saveMaskBuffer() {
