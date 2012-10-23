@@ -201,6 +201,7 @@ public class DataReductionWizard extends Wizard implements IExportWizard {
 	private static IContainer exportFolder = null;
 	private final class ReductionPage extends WizardPage {
 
+		private Label   txtLabel;
 		private Text    txtPath;
 		private boolean overwrite = true;
 		private boolean open      = true;
@@ -255,11 +256,11 @@ public class DataReductionWizard extends Wizard implements IExportWizard {
 			label.setText("'"+getTool().getTitle()+"'");
 			label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 			
-			label = new Label(container, SWT.NULL);
-			label.setText("Export &File  ");
+			txtLabel = new Label(container, SWT.NULL);
+			txtLabel.setText("Export &File  ");
 			txtPath = new Text(container, SWT.BORDER);
 			txtPath.setEditable(false);
-			//txtPath.setEnabled(false);
+			txtPath.setEnabled(false);
 			txtPath.setText(getPath().getFullPath().toOSString());
 			GridData gd = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
 			txtPath.setLayoutData(gd);
@@ -347,14 +348,14 @@ public class DataReductionWizard extends Wizard implements IExportWizard {
 		private void pathChanged() {
 
             final String p = txtPath.getText();
-			txtPath.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_BLACK));
+            txtLabel.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_BLACK));
 			if (p==null || p.length() == 0) {
 				updateStatus("Please select a file to export to.");
 				return;
 			}
 			if (getPath().exists() && (!getPath().isAccessible() || getPath().isReadOnly())) {
 				updateStatus("Please choose another location to export to; this one is read only.");
-				txtPath.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_RED));
+				txtLabel.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_RED));
 				return;
 			}
 			if (getPath().exists() && !overwrite) {
