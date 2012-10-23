@@ -1,13 +1,14 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Jreality
-Bundle-SymbolicName: org.dawnsci.plotting.jreality
+Bundle-SymbolicName: org.dawnsci.plotting.jreality;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.dawnsci.plotting.jreality.Activator
 Bundle-Vendor: Diamond Light Source
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- uk.ac.diamond.scisoft.analysis;bundle-version="1.3.0"
+ uk.ac.diamond.scisoft.analysis;bundle-version="1.3.0",
+ org.dawb.common.ui;bundle-version="1.3.0"
 Bundle-NativeCode: lib/win32-x86/jogl_awt.dll;  lib/win32-x86/jogl_cg.dll; lib/win32-x86/gluegen-rt.dll;  lib/win32-x86/jogl.dll; 
  osname=Win32; processor=x86,
  lib/win32-x86_64/gluegen-rt.dll;  lib/win32-x86_64/jogl_awt.dll;  lib/win32-x86_64/jogl.dll; lib/win32-x86_64/jogl_cg.dll;
@@ -17,11 +18,82 @@ Bundle-NativeCode: lib/win32-x86/jogl_awt.dll;  lib/win32-x86/jogl_cg.dll; lib/w
  lib/linux-x86_64/libgluegen-rt.so; lib/linux-x86_64/libjogl_awt.so; lib/linux-x86_64/libjogl_cg.so; lib/linux-x86_64/libjogl.so;
  osname=Linux; processor=x86_64,
  *
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: gluegen-rt.jar,
  jogl.jar,
  jReality_modified.jar,
  .
-Import-Package: org.slf4j,
- uk.ac.diamond.scisoft.analysis.rcp.plotting.roi
+Import-Package: javax.vecmath,
+ org.dawb.common.services,
+ org.slf4j
+Export-Package: de.jreality.backends.label,
+ de.jreality.backends.texture,
+ de.jreality.geometry,
+ de.jreality.io,
+ de.jreality.io.jrs,
+ de.jreality.jogl,
+ de.jreality.jogl.pick,
+ de.jreality.jogl.plugin,
+ de.jreality.jogl.shader,
+ de.jreality.math,
+ de.jreality.reader,
+ de.jreality.reader.mathematica,
+ de.jreality.reader.vrml,
+ de.jreality.renderman,
+ de.jreality.renderman.shader,
+ de.jreality.scene,
+ de.jreality.scene.data,
+ de.jreality.scene.event,
+ de.jreality.scene.pick,
+ de.jreality.scene.proxy,
+ de.jreality.scene.proxy.scene,
+ de.jreality.scene.proxy.smrj,
+ de.jreality.scene.proxy.tree,
+ de.jreality.scene.tool,
+ de.jreality.shader,
+ de.jreality.soft,
+ de.jreality.softviewer,
+ de.jreality.softviewer.shader,
+ de.jreality.sunflow,
+ de.jreality.sunflow.batchrender,
+ de.jreality.sunflow.core.camera,
+ de.jreality.sunflow.core.light,
+ de.jreality.sunflow.core.primitive,
+ de.jreality.sunflow.core.shader,
+ de.jreality.swing,
+ de.jreality.swing.jrwindows,
+ de.jreality.tools,
+ de.jreality.toolsystem,
+ de.jreality.toolsystem.config,
+ de.jreality.toolsystem.raw,
+ de.jreality.toolsystem.util,
+ de.jreality.toolsystem.virtual,
+ de.jreality.ui.treeview,
+ de.jreality.ui.viewerapp,
+ de.jreality.ui.viewerapp.actions,
+ de.jreality.ui.viewerapp.actions.camera,
+ de.jreality.ui.viewerapp.actions.edit,
+ de.jreality.ui.viewerapp.actions.file,
+ de.jreality.ui.viewerapp.actions.view,
+ de.jreality.util,
+ de.jreality.writer,
+ de.jreality.writer.pdf,
+ de.jreality.writer.u3d,
+ de.jreality.writer.u3d.texture,
+ de.jreality.writer.u3d.u3dencoding,
+ org.dawnsci.plotting.jreality,
+ org.dawnsci.plotting.jreality.compositing,
+ org.dawnsci.plotting.jreality.core,
+ org.dawnsci.plotting.jreality.data,
+ org.dawnsci.plotting.jreality.impl,
+ org.dawnsci.plotting.jreality.legend,
+ org.dawnsci.plotting.jreality.overlay,
+ org.dawnsci.plotting.jreality.overlay.enums,
+ org.dawnsci.plotting.jreality.overlay.events,
+ org.dawnsci.plotting.jreality.overlay.objects,
+ org.dawnsci.plotting.jreality.overlay.primitives,
+ org.dawnsci.plotting.jreality.swt,
+ org.dawnsci.plotting.jreality.tick,
+ org.dawnsci.plotting.jreality.tool,
+ org.dawnsci.plotting.jreality.util

@@ -14,8 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
-import org.dawb.common.ui.plot.PlottingSelectionProvider;
-import org.dawb.workbench.plotting.system.LightWeightPlottingSystem;
 import org.dawb.workbench.ui.editors.AsciiEditor;
 import org.dawb.workbench.ui.editors.ImageEditor;
 import org.dawb.workbench.ui.editors.PlotDataEditor;
@@ -33,7 +31,6 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.LongDataset;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
-import uk.ac.gda.monitor.IMonitor;
 import fable.framework.toolbox.EclipseUtils;
 
 /**
@@ -158,7 +155,7 @@ public class SWTXYUpdateTest {
 		final PlotDataEditor plotter   = (PlotDataEditor)editor.getActiveEditor();
 		final AbstractPlottingSystem sys = plotter.getPlottingSystem();
 		
-		if (!(sys instanceof LightWeightPlottingSystem)) throw new Exception("This test is designed for "+LightWeightPlottingSystem.class.getName());
+		//if (!(sys instanceof PlottingSystemImpl)) throw new Exception("This test is designed for "+PlottingSystemImpl.class.getName());
 		page.setPartState(EclipseUtils.getPage().getActivePartReference(), IWorkbenchPage.STATE_MAXIMIZED);
 				
 		if (ys.get(0).getBuffer()==null || ys.get(0).getSize()<1) {

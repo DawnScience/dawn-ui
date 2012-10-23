@@ -15,7 +15,7 @@ import org.dawb.common.ui.plot.region.ROIEvent;
 import org.dawb.common.ui.plot.roi.ROIEditTable;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.util.GridUtils;
-import org.dawb.workbench.plotting.system.LightWeightPlottingSystem;
+import org.dawb.workbench.plotting.system.PlottingSystemImpl;
 import org.dawb.workbench.plotting.system.swtxy.AspectAxis;
 import org.dawb.workbench.plotting.system.swtxy.RegionArea;
 import org.dawb.workbench.plotting.system.swtxy.RegionCoordinateSystem;
@@ -76,7 +76,7 @@ public class RegionComposite extends Composite {
 	 */
 	public RegionComposite(final Composite parent, final int style, final AbstractPlottingSystem sys, final RegionType defaultRegion, final boolean isImplicit) {
      
-		this(parent,style, ((LightWeightPlottingSystem)sys).getGraph(), defaultRegion, isImplicit);
+		this(parent,style, ((PlottingSystemImpl)sys).getLightWeightGraph(), defaultRegion, isImplicit);
 	}
 	
 	/**

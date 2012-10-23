@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.dawnsci.plotting.jreality.core.AxisMode;
-import org.dawnsci.plotting.jreality.core.AxisValues;
 import org.dawnsci.plotting.jreality.core.IDataSet3DCorePlot;
 import org.dawnsci.plotting.jreality.core.ScaleType;
 import org.dawnsci.plotting.jreality.data.ColourImageData;
@@ -84,6 +83,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractCompoundDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.CompoundByteDataset;

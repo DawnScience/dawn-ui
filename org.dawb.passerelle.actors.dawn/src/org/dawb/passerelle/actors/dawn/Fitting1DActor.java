@@ -26,6 +26,7 @@ import ptolemy.kernel.util.IllegalActionException;
 import ptolemy.kernel.util.NameDuplicationException;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Slice;
 import uk.ac.diamond.scisoft.analysis.fitting.Fitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
@@ -38,6 +39,7 @@ public class Fitting1DActor extends AbstractDataMessageTransformer {
 	public StringParameter datasetName;
 	public StringParameter functionName;
 	public StringParameter xAxisName;
+	public StringParameter fitDirection;
 
 	public Fitting1DActor(CompositeEntity container, String name)
 			throws NameDuplicationException, IllegalActionException {
@@ -49,6 +51,8 @@ public class Fitting1DActor extends AbstractDataMessageTransformer {
 		registerConfigurableParameter(functionName);
 		xAxisName = new StringParameter(this, "xAxisName");
 		registerConfigurableParameter(xAxisName);
+		fitDirection = new StringParameter(this, "fitDirection");
+		registerConfigurableParameter(fitDirection);
 	}
 
 	@Override
@@ -77,6 +81,7 @@ public class Fitting1DActor extends AbstractDataMessageTransformer {
 		String dataset = datasetName.getExpression();
 		String function = functionName.getExpression();
 		String xAxis = xAxisName.getExpression();
+		Integer fitDim = Integer.parseInt(fitDirection.getExpression());
 		
 		AbstractDataset dataDS = ((AbstractDataset)data.get(dataset)).clone();
 		AFunction fitFunction = functions.get(function);
@@ -84,27 +89,39 @@ public class Fitting1DActor extends AbstractDataMessageTransformer {
 		if (data.containsKey(xAxis)) {
 			xAxisDS = ((AbstractDataset)data.get(xAxis)).clone();
 		} else {
-			xAxisDS = DoubleDataset.arange(dataDS.getShape()[1],0,-1);
+			xAxisDS = DoubleDataset.arange(dataDS.getShape()[fitDim],0,-1);
 		}
 		
-		// get the general parameters from the average fit.
-		AbstractDataset summed = dataDS.sum(0);
-		summed.idivide(dataDS.getShape()[1]);
+		// get the general parameters from the first fit.
+		ArrayList<Slice> slices = new ArrayList<Slice>();
+		for (int i = 0; i < dataDS.getShape().length; i++) {
+			if (i == fitDim) {
+				slices.add(new Slice(0,dataDS.getShape()[i], 1));
+			} else {
+				slices.add(new Slice(0,1,1));
+			}
+		}
+		AbstractDataset slice = dataDS.getSlice(slices.toArray(new Slice[0]));
+		slice.squeeze();
 		try {
-			Fitter.fit(xAxisDS, summed, new GeneticAlg(0.0001), fitFunction);
+			Fitter.fit(xAxisDS, slice, new GeneticAlg(0.0001), fitFunction);
 		} catch (Exception e1) {
 			throw createDataMessageException("Failed to fit the data profile using the Genetic Algorithm", e1);
 		}
 			
 		ArrayList<AbstractDataset> parametersDS = new ArrayList<AbstractDataset>(fitFunction.getNoOfParameters()); 
 		for(int i = 0; i < fitFunction.getNoOfParameters(); i++) {
-			parametersDS.add(new DoubleDataset(dataDS.getShape()[0]));
+			int[] shape = dataDS.getShape();
+			shape[fitDim] = 1;
+			DoubleDataset parameterDS = new DoubleDataset(shape);
+			parameterDS.squeeze();
+			parametersDS.add(parameterDS);
 		}
 		
-		AbstractDataset functionsDS = new DoubleDataset(dataDS.getShape());
+		AbstractDataset functionsDS = new DoubleDataset(shape);
 		
 		for(int i = 0; i < dataDS.getShape()[0]; i++) {
-			AbstractDataset slice = dataDS.getSlice(new int[] {i,0}, new int[] {i+1,dataDS.getShape()[1]}, new int[] {1,1});
+			slice = dataDS.getSlice(new int[] {i,0}, new int[] {i+1,dataDS.getShape()[1]}, new int[] {1,1});
 			slice.squeeze();
 			try {
 				CompositeFunction fitResult = Fitter.fit(xAxisDS, slice, new ApacheNelderMead(), fitFunction);

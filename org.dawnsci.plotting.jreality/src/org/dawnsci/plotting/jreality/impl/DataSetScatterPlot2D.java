@@ -22,12 +22,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.dawnsci.plotting.jreality.core.AxisMode;
-import org.dawnsci.plotting.jreality.core.AxisValues;
 import org.dawnsci.plotting.jreality.tool.SelectedWindow;
 import org.dawnsci.plotting.jreality.util.ErrorHelpers;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.widgets.Composite;
 
+import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import de.jreality.geometry.PointSetFactory;
 import de.jreality.scene.Appearance;

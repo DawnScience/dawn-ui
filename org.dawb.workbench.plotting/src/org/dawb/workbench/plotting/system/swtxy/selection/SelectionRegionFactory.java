@@ -1,10 +1,9 @@
 package org.dawb.workbench.plotting.system.swtxy.selection;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 
+import org.dawb.common.services.ITransferService;
 import org.dawb.common.ui.plot.axis.ICoordinateSystem;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
@@ -16,9 +15,9 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.dawb.passerelle.actors.roi.ROISource;
 
 /**
  * Class giving access to selection regions.
@@ -136,8 +135,15 @@ public class SelectionRegionFactory {
 				staticBuffer = (AbstractSelectionRegion)region;
 				
 				// We also copy the region as a pastable into workflows.
-				final Object transferable = createPasserelleRegionContents(region);
-				if (transferable!=null) Clipboard.getDefault().setContents(transferable);
+				final ITransferService service = (ITransferService)PlatformUI.getWorkbench().getService(ITransferService.class);
+				if (service!=null) {
+					try {
+						final Object transferable = service.createROISource(region.getName(), region.getROI());
+						if (transferable!=null) Clipboard.getDefault().setContents(transferable);
+					} catch (Exception ne) {
+						logger.trace("Cannot set the copied region as a workflow actor!", ne);
+					}
+				}
 			}
 		};
 		if (region instanceof AbstractSelectionRegion) manager.add(copy);
@@ -154,19 +160,6 @@ public class SelectionRegionFactory {
 		manager.add(new Separator("org.dawb.workbench.plotting.system.region.end"));
 		
 		return manager;
-	}
-
-	protected static Object createPasserelleRegionContents(IRegion region) {
-
-		try {
-	        final  List<ROISource> list = new ArrayList<ROISource>(1);// They force an ArrayList
-	        final ROISource source = ROISource.createSource(region.getName(), region.getROI());
-	        list.add(source);
-			return list;
-		} catch (Throwable ne) {
-			logger.error("Cannot create ROISource for region "+region.getName(), ne);
-			return null;
-		}
 	}
 
 }

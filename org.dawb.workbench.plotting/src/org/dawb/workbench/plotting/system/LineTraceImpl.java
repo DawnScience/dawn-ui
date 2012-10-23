@@ -19,9 +19,9 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 public class LineTraceImpl implements ILineTrace {
 
 	private LineTrace trace;
-	private LightWeightPlottingSystem sys;
+	private PlottingSystemImpl sys;
 
-	LineTraceImpl(LightWeightPlottingSystem sys, final LineTrace trace) {
+	LineTraceImpl(PlottingSystemImpl sys, final LineTrace trace) {
 		this.sys   = sys;
 		this.trace = trace;
 		if (trace instanceof ITraceContainer) {

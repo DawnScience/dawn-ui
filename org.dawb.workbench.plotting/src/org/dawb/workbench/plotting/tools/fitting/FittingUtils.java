@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.IAnalysisMonitor;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
+import uk.ac.diamond.scisoft.analysis.fitting.Fitter;
 import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.APeak;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
@@ -25,6 +26,7 @@ import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Lorentzian;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Offset;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.PearsonVII;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.Polynomial;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.PseudoVoigt;
 import uk.ac.diamond.scisoft.analysis.optimize.GeneticAlg;
 import uk.ac.diamond.scisoft.analysis.optimize.IOptimizer;
@@ -242,5 +244,32 @@ public class FittingUtils {
 		opts.put(PearsonVII.class.getName(),  new PearsonVII(1, 1, 1, 1));
 		opts.put(PseudoVoigt.class.getName(), new PseudoVoigt(1, 1, 1, 1));
 		return opts;
+	}
+	
+	public static int getPolynomialOrderRequired() {
+		return Activator.getDefault().getPreferenceStore().getInt(FittingConstants.POLY_ORDER);
+	}
+	
+	public static FittedFunctions getFittedPolynomial(final FittedPeaksInfo info) throws Exception {
+		
+		Polynomial poly = Fitter.polyFit(new AbstractDataset[] {info.getX()}, info.getY(), 1e-8, getPolynomialOrderRequired());
+		
+		CompositeFunction function = new CompositeFunction();
+		function.addFunction(poly);
+
+		final FittedFunctions bean = new FittedFunctions();
+
+		if (info.getMonitor().isCanceled()) return null;
+		
+		Double max = info.getX().max().doubleValue();
+		Double min = info.getX().min().doubleValue();
+		
+		RectangularROI bounds = new RectangularROI(min,0,max-min,0,0);
+
+		final AbstractDataset[] pf = getPeakFunction(info.getX(), info.getY(), function);
+
+		bean.addFittedPeak(new FittedFunction(function, bounds, pf));
+
+		return bean;
 	}
 }

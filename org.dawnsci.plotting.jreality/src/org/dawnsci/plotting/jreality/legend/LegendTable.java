@@ -164,11 +164,18 @@ public class LegendTable extends LegendComponent implements SelectionListener, K
 		// Nothing to do
 	}
 	
-	private void notifyAllListeners(int selectNr) {
+	private void notifyLegendDeleted(int selectNr) {
 		Iterator<LegendChangeEventListener> iter = listeners.iterator();
 		LegendChangeEvent evt = new LegendChangeEvent(this, selectNr);
 		while (iter.hasNext()) {
 			iter.next().legendDeleted(evt);
+		}
+	}
+	private void notifyLegendUpdated(int selectNr) {
+		Iterator<LegendChangeEventListener> iter = listeners.iterator();
+		LegendChangeEvent evt = new LegendChangeEvent(this, selectNr);
+		while (iter.hasNext()) {
+			iter.next().legendUpdated(evt);
 		}
 	}
 	
@@ -180,6 +187,7 @@ public class LegendTable extends LegendComponent implements SelectionListener, K
 			Plot1DAppearance app = plotTable.getLegendEntry(index);
 			Button checkButton = (Button)e.getSource();
 			app.setVisible(checkButton.getSelection());
+			notifyLegendUpdated(index);
 		}
 	}
 
@@ -190,7 +198,7 @@ public class LegendTable extends LegendComponent implements SelectionListener, K
 			TableItem item = tblLegend.getItem(tblLegend.getSelectionIndex());
 			if (item.getText(1).contains("History"))
 			{
-				notifyAllListeners(tblLegend.getSelectionIndex());
+				notifyLegendDeleted(tblLegend.getSelectionIndex());
 			}
 		}
 	}

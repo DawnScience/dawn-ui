@@ -182,6 +182,9 @@ class FittedFunction {
 	public IRegion getFwhm() {
 		return fwhm;
 	}
+	public CompositeFunction getFunction() {
+		return function;
+	}
 	public void setFwhm(IRegion fwhm) {
 		this.fwhm = fwhm;
 	}

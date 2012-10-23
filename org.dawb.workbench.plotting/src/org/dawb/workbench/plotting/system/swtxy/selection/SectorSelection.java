@@ -23,10 +23,10 @@ import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.draw2d.geometry.Rectangle;
 
-import uk.ac.diamond.scisoft.analysis.rcp.plotting.roi.HandleStatus;
-import uk.ac.diamond.scisoft.analysis.rcp.plotting.roi.SectorROIHandler;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
+import uk.ac.diamond.scisoft.analysis.roi.handler.HandleStatus;
+import uk.ac.diamond.scisoft.analysis.roi.handler.SectorROIHandler;
 
 public class SectorSelection extends AbstractSelectionRegion {
 

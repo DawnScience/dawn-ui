@@ -14,9 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
-import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.axis.IAxis;
-import org.dawb.workbench.plotting.system.LightWeightPlottingSystem;
 import org.dawb.workbench.ui.editors.AsciiEditor;
 import org.dawb.workbench.ui.editors.PlotDataEditor;
 import org.eclipse.core.filesystem.EFS;
@@ -112,7 +110,7 @@ public class SWTXYAxisUpdateTest {
 		final PlotDataEditor plotter   = (PlotDataEditor)editor.getActiveEditor();
 		final AbstractPlottingSystem sys = plotter.getPlottingSystem();
 		
-		if (!(sys instanceof LightWeightPlottingSystem)) throw new Exception("This test is designed for "+LightWeightPlottingSystem.class.getName());
+		//if (!(sys instanceof PlottingSystemImpl)) throw new Exception("This test is designed for "+PlottingSystemImpl.class.getName());
 		page.setPartState(EclipseUtils.getPage().getActivePartReference(), IWorkbenchPage.STATE_MAXIMIZED);
 			
 		

@@ -6,7 +6,6 @@ import java.util.Collection;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
-import org.dawb.common.ui.plot.tool.ProfileTool;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.gda.extensions.loaders.H5Utils;

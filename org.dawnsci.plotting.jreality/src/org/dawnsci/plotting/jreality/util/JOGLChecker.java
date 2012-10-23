@@ -49,8 +49,17 @@ public class JOGLChecker {
 	private static int maxYdim = 8192;
 	private static String glVendorStr = "";
 	
+	/**
+	 * 
+	 * @param viewer, may be null
+	 * @param parent
+	 * @return
+	 */
 	@SuppressWarnings("static-access")
 	static public boolean canUseJOGL_OpenGL(String viewer, Composite parent) {
+		
+		if (viewer==null) viewer = Secure.getProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_JOGL);
+
 		GLCanvas dummyCanvas = null;		
 		boolean hasJOGL = true;
 		try {
