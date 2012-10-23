@@ -145,7 +145,10 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		// if the API user said they were null. This allows the API
 		// user to say null for action bars and then use:
 		// getPlotActionSystem().fillXXX() to add their own actions.
- 		if (bars==null) bars = actionBarManager.createEmptyActionBars(); 
+ 		if (bars==null) {
+ 			bars = actionBarManager.createEmptyActionBars();
+ 			system.setActionBars(bars);
+ 		}
  				
 // 		bars.getMenuManager().removeAll();
 // 		bars.getToolBarManager().removeAll();

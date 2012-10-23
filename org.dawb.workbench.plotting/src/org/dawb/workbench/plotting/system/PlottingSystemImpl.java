@@ -1039,4 +1039,9 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	public XYRegionGraph getLightWeightGraph() {
 		return lightWeightViewer.getXYRegionGraph();
 	}
+
+
+	public void setActionBars(IActionBars bars) {
+		this.bars = bars;
+	}
 }
