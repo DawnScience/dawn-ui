@@ -12,9 +12,13 @@ package org.dawb.passerelle.actors.dawn;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.dawb.common.ui.slicing.DimsDataList;
+import org.dawb.common.ui.slicing.SliceUtils;
+import org.dawb.passerelle.actors.data.TriggerObject;
 import org.dawb.passerelle.common.actors.AbstractDataMessageTransformer;
 import org.dawb.passerelle.common.message.DataMessageComponent;
 import org.dawb.passerelle.common.message.DataMessageException;
@@ -26,10 +30,15 @@ import ptolemy.kernel.util.IllegalActionException;
 import ptolemy.kernel.util.NameDuplicationException;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IndexIterator;
 import uk.ac.diamond.scisoft.analysis.dataset.Slice;
+import uk.ac.diamond.scisoft.analysis.dataset.SliceIterator;
 import uk.ac.diamond.scisoft.analysis.fitting.Fitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
+import uk.ac.diamond.scisoft.analysis.io.IMetaData;
+import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
+import uk.ac.diamond.scisoft.analysis.io.SliceObject;
 import uk.ac.diamond.scisoft.analysis.optimize.ApacheNelderMead;
 import uk.ac.diamond.scisoft.analysis.optimize.GeneticAlg;
 
@@ -111,29 +120,49 @@ public class Fitting1DActor extends AbstractDataMessageTransformer {
 			
 		ArrayList<AbstractDataset> parametersDS = new ArrayList<AbstractDataset>(fitFunction.getNoOfParameters()); 
 		for(int i = 0; i < fitFunction.getNoOfParameters(); i++) {
-			int[] shape = dataDS.getShape();
+			int[] shape = dataDS.getShape().clone();
 			shape[fitDim] = 1;
 			DoubleDataset parameterDS = new DoubleDataset(shape);
 			parameterDS.squeeze();
 			parametersDS.add(parameterDS);
 		}
 		
-		AbstractDataset functionsDS = new DoubleDataset(shape);
+		AbstractDataset functionsDS = new DoubleDataset(dataDS.getShape());
 		
-		for(int i = 0; i < dataDS.getShape()[0]; i++) {
-			slice = dataDS.getSlice(new int[] {i,0}, new int[] {i+1,dataDS.getShape()[1]}, new int[] {1,1});
+		int[] starts = dataDS.getShape().clone();
+		starts[fitDim] = 1;
+		DoubleDataset ind = DoubleDataset.ones(starts);
+		IndexIterator iter = ind.getIterator();
+		while(iter.hasNext()) {
+			System.out.println(iter.index);
+			System.out.println(Arrays.toString(ind.getNDPosition(iter.index)));
+			int[] start = ind.getNDPosition(iter.index).clone();
+			int[] stop = start.clone();
+			for(int i = 0; i < stop.length; i++) {
+				stop[i] = stop[i]+1;
+			}
+			stop[fitDim] = dataDS.getShape()[fitDim];
+			slice = dataDS.getSlice(start, stop, null);
 			slice.squeeze();
 			try {
 				CompositeFunction fitResult = Fitter.fit(xAxisDS, slice, new ApacheNelderMead(), fitFunction);
+				int[] position = new int[dataDS.getShape().length-1];
+				int count = 0;
+				for(int i = 0; i < dataDS.getShape().length; i++) {
+					if(i != fitDim) {
+						position[count] = start[i];
+						count++;
+					}
+				}
 				for(int p = 0; p < fitResult.getNoOfParameters(); p++) {
-					parametersDS.get(p).set(fitResult.getParameter(p).getValue(), i);
+					parametersDS.get(p).set(fitResult.getParameter(p).getValue(), position);
 				}
 				
 				DoubleDataset resultFunctionDS = fitResult.makeDataset(xAxisDS);
-				functionsDS.setSlice(resultFunctionDS, new int[] {i,0}, new int[] {i+1,dataDS.getShape()[1]}, new int[] {1,1});
+				functionsDS.setSlice(resultFunctionDS, start, stop, null);
 				
 			} catch (Exception e) {
-				throw createDataMessageException("Failed to fit row "+i+" of the data", e);
+				throw createDataMessageException("Failed to fit row "+iter.index+" of the data", e);
 			}
 			
 		}
