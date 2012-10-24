@@ -700,7 +700,7 @@ public class HistogramToolPage extends AbstractToolPage {
 		histogramPlot.createPlotPart( histogramComposite, 
 				getTitle(), 
 				null, 
-				PlotType.PT1D,
+				PlotType.XY,
 				null);
 		histogramPlot.getPlotComposite().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 

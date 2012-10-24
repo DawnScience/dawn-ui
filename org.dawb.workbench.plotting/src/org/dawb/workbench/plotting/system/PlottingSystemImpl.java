@@ -82,7 +82,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	private PlotActionsManagerImpl       actionBarManager;
 	private LightWeightPlotViewer        lightWeightViewer;
 	private JRealityPlotViewer           jrealityViewer;
-	protected PlotType plottingMode = PlotType.PT1D;
+	protected PlotType plottingMode = PlotType.XY;
 	
 	public PlottingSystemImpl() {
 		super();
@@ -320,7 +320,15 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 							   final IProgressMonitor      monitor) {
 		
 		if (plottingMode.is1D()) {
-			switchPlottingType(PlotType.IMAGE);
+			if (getDisplay().getThread()==Thread.currentThread()) {
+				switchPlottingType(PlotType.IMAGE);
+			} else {
+				Display.getDefault().syncExec(new Runnable() {
+					public void run() {
+						switchPlottingType(PlotType.IMAGE);
+					}
+				});
+			}
 		}
 		
 		final Collection<ITrace> traces = plottingMode.is3D() 
@@ -467,7 +475,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 										final boolean               createdIndices,
 										final IProgressMonitor      monitor) {
 		
-		this.plottingMode = PlotType.PT1D;
+		this.plottingMode = PlotType.XY;
 		switchPlottingType(plottingMode);
 
 		Object[] oa = getOrderedDatasets(xIn, ysIn, createdIndices);

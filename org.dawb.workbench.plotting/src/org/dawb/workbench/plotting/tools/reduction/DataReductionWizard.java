@@ -203,7 +203,7 @@ public class DataReductionWizard extends Wizard implements IExportWizard {
 
 		private Label   txtLabel;
 		private Text    txtPath;
-		private boolean overwrite = true;
+		private boolean overwrite = false;
 		private boolean open      = true;
 		private IFile   path;
 
@@ -282,7 +282,7 @@ public class DataReductionWizard extends Wizard implements IExportWizard {
 			
 			final Button over = new Button(container, SWT.CHECK);
 			over.setText("Overwrite file if it exists.");
-			over.setSelection(true);
+			over.setSelection(false);
 			over.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {

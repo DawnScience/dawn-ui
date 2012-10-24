@@ -45,7 +45,7 @@ public class ConvertWizardHandler extends AbstractHandler implements IObjectActi
 
 	private void openWizard(final Shell shell) {
 		WizardDialog dialog = new WizardDialog(shell, new ConvertWizard());
-        dialog.setPageSize(new Point(400, 300));
+        dialog.setPageSize(new Point(400, 450));
         dialog.create();
         dialog.open();
 	}

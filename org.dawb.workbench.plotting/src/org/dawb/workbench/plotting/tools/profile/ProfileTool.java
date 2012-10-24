@@ -176,7 +176,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		profilePlottingSystem.createPlotPart(parent, 
 											 getTitle(), 
 											 actionbars, 
-											 PlotType.PT1D,
+											 PlotType.XY,
 											 this.getViewPart());				
 		
 		

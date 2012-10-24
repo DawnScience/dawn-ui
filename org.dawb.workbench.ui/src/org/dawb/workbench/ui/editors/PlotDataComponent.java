@@ -642,7 +642,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 			final Action xyAction = new Action("XY Plot", SWT.TOGGLE) {
 				@Override
 				public void run() {
-					setPlotMode(PlotType.PT1D);
+					setPlotMode(PlotType.XY);
 				}
 			};
 			xyAction.setImageDescriptor(Activator.getImageDescriptor("/icons/chart_curve.png"));
@@ -652,7 +652,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 			final Action staggeredAction = new Action("XY Staggered in Z",  SWT.TOGGLE) {
 				@Override
 				public void run() {
-					setPlotMode(PlotType.PT1D_STACKED);
+					setPlotMode(PlotType.XY_STACKED);
 				}
 			};		
 			staggeredAction.setImageDescriptor(Activator.getImageDescriptor("/icons/chart_curve_staggered.png"));
@@ -662,7 +662,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 			final Action xyzAction = new Action("XYZ",  SWT.TOGGLE) {
 				@Override
 				public void run() {
-					setPlotMode(PlotType.PT1D_3D);
+					setPlotMode(PlotType.XY_STACKED_3D);
 				}
 			};		
 			xyzAction.setImageDescriptor(Activator.getImageDescriptor("/icons/chart_curve_3D.png"));
@@ -775,9 +775,9 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 	
 	protected void updatePlotDimenionsSelected(Action xyAction, Action staggeredAction, Action xyzAction, PlotType plotMode) {
 
-		xyAction.setChecked(PlotType.PT1D.equals(plotMode));
-		staggeredAction.setChecked(PlotType.PT1D_STACKED.equals(plotMode));
-		xyzAction.setChecked(PlotType.PT1D_3D.equals(plotMode));
+		xyAction.setChecked(PlotType.XY.equals(plotMode));
+		staggeredAction.setChecked(PlotType.XY_STACKED.equals(plotMode));
+		xyzAction.setChecked(PlotType.XY_STACKED_3D.equals(plotMode));
 	}
 	
 	/**
@@ -1021,7 +1021,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 		return rootName;
 	}
 
-	private PlotType plotMode = PlotType.PT1D;
+	private PlotType plotMode = PlotType.XY;
 
 	public PlotType getPlotMode() {
 		return plotMode;
@@ -1165,9 +1165,9 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 							if (selections.indexOf(element)==0) {
 								return "X";
 							}
-							if (selections.size()>2) {
-								return "Y"+selections.indexOf(element);
-							}
+//							if (selections.size()>2) {
+//								return "Y"+selections.indexOf(element);
+//							}
 							return "Y";
 						}
 					} if (selections.size()==1 && selections.contains(element)) {

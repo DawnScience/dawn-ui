@@ -11,7 +11,6 @@ package org.dawb.workbench.ui.editors;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
