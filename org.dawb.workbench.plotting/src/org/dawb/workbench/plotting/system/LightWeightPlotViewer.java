@@ -580,7 +580,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 			xyGraph.addImageTrace((ImageTrace)trace);
 						
 		} else {
-			system.plottingMode = PlotType.PT1D;
+			system.plottingMode = PlotType.XY;
 			system.switchPlottingType(system.plottingMode);
 			system.fireWillPlot(new TraceWillPlotEvent(trace, true));
 			xyGraph.addTrace(((LineTraceImpl)trace).getTrace(), true);

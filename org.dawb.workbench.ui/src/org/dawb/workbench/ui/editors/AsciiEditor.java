@@ -68,7 +68,7 @@ public class AsciiEditor extends MultiPageEditorPart implements ISlicablePlottin
 				index++;
 			}
 
-			this.dataSetEditor = new PlotDataEditor(true, PlotType.PT1D);
+			this.dataSetEditor = new PlotDataEditor(true, PlotType.XY);
 			dataSetEditor.getPlottingSystem().setColorOption(ColorOption.BY_NAME);
 			addPage(index, dataSetEditor, getEditorInput());
 			setPageText(index, "Plot");

@@ -121,7 +121,7 @@ public class H5MultiEditor extends MultiPageEditorPart  implements ISlicablePlot
 			 * for H5 and a new PlotDataEditor which does not extract meta data
 			 * at all but loads sets as it sees them.
 			 */
-			this.dataSetEditor = new PlotDataEditor(false, PlotType.PT1D);
+			this.dataSetEditor = new PlotDataEditor(false, PlotType.XY);
 			dataSetEditor.getPlottingSystem().setColorOption(ColorOption.BY_NAME);	
 			addPage(index, dataSetEditor, getEditorInput());
 			setPageText(index, "Plot");

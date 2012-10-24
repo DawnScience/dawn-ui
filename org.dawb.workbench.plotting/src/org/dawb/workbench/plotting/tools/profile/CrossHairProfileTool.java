@@ -87,7 +87,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 		profilePlotter.createPlotPart(parent, 
 								getTitle(), 
 								site.getActionBars(), 
-								PlotType.PT1D,
+								PlotType.XY,
 								this.getViewPart());		
 		
 		profilePlotter.getSelectedYAxis().setTitle("Intensity");
