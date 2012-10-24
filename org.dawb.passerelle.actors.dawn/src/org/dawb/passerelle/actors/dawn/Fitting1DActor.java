@@ -16,9 +16,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.dawb.common.ui.slicing.DimsDataList;
-import org.dawb.common.ui.slicing.SliceUtils;
-import org.dawb.passerelle.actors.data.TriggerObject;
 import org.dawb.passerelle.common.actors.AbstractDataMessageTransformer;
 import org.dawb.passerelle.common.message.DataMessageComponent;
 import org.dawb.passerelle.common.message.DataMessageException;
@@ -32,13 +29,9 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IndexIterator;
 import uk.ac.diamond.scisoft.analysis.dataset.Slice;
-import uk.ac.diamond.scisoft.analysis.dataset.SliceIterator;
 import uk.ac.diamond.scisoft.analysis.fitting.Fitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
-import uk.ac.diamond.scisoft.analysis.io.IMetaData;
-import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
-import uk.ac.diamond.scisoft.analysis.io.SliceObject;
 import uk.ac.diamond.scisoft.analysis.optimize.ApacheNelderMead;
 import uk.ac.diamond.scisoft.analysis.optimize.GeneticAlg;
 
@@ -110,13 +103,6 @@ public class Fitting1DActor extends AbstractDataMessageTransformer {
 				slices.add(new Slice(0,1,1));
 			}
 		}
-		AbstractDataset slice = dataDS.getSlice(slices.toArray(new Slice[0]));
-		slice.squeeze();
-		try {
-			Fitter.fit(xAxisDS, slice, new GeneticAlg(0.0001), fitFunction);
-		} catch (Exception e1) {
-			throw createDataMessageException("Failed to fit the data profile using the Genetic Algorithm", e1);
-		}
 			
 		ArrayList<AbstractDataset> parametersDS = new ArrayList<AbstractDataset>(fitFunction.getNoOfParameters()); 
 		for(int i = 0; i < fitFunction.getNoOfParameters(); i++) {
@@ -133,6 +119,9 @@ public class Fitting1DActor extends AbstractDataMessageTransformer {
 		starts[fitDim] = 1;
 		DoubleDataset ind = DoubleDataset.ones(starts);
 		IndexIterator iter = ind.getIterator();
+		
+		boolean first = true;
+		
 		while(iter.hasNext()) {
 			System.out.println(iter.index);
 			System.out.println(Arrays.toString(ind.getNDPosition(iter.index)));
@@ -142,10 +131,16 @@ public class Fitting1DActor extends AbstractDataMessageTransformer {
 				stop[i] = stop[i]+1;
 			}
 			stop[fitDim] = dataDS.getShape()[fitDim];
-			slice = dataDS.getSlice(start, stop, null);
+			AbstractDataset slice = dataDS.getSlice(start, stop, null);
 			slice.squeeze();
 			try {
-				CompositeFunction fitResult = Fitter.fit(xAxisDS, slice, new ApacheNelderMead(), fitFunction);
+				CompositeFunction fitResult = null;
+				if (first) {
+					fitResult = Fitter.fit(xAxisDS, slice, new GeneticAlg(0.0001), fitFunction);
+					first = false;
+				} else {
+					fitResult = Fitter.fit(xAxisDS, slice, new ApacheNelderMead(), fitFunction);
+				}
 				int[] position = new int[dataDS.getShape().length-1];
 				int count = 0;
 				for(int i = 0; i < dataDS.getShape().length; i++) {
