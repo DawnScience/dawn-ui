@@ -12,6 +12,7 @@ import org.csstudio.swt.xygraph.undo.ZoomType;
 import org.dawb.common.services.ImageServiceBean.ImageOrigin;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
+import org.dawb.common.ui.plot.ActionContainer;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
@@ -465,7 +466,7 @@ class LightWeightPlotActions {
 		if (datasetChoosingRequired) {
 			// By index or using x 
 			final CheckableActionGroup group = new CheckableActionGroup();
-			plotIndex = new Action("Plot using indices", IAction.AS_CHECK_BOX) {
+			plotIndex = new Action("Plot data as separate plots", IAction.AS_CHECK_BOX) {
 			    public void run() {
 			    	Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.PLOT_X_DATASET, false);
 			    	setChecked(true);
@@ -478,7 +479,7 @@ class LightWeightPlotActions {
 			plotIndex.setId("org.dawb.workbench.plotting.plotIndex");
 			group.add(plotIndex);
 			
-			plotX = new Action("Plot using first data set selected as x-axis", IAction.AS_CHECK_BOX) {
+			plotX = new Action("Plot using first data set as x-axis", IAction.AS_CHECK_BOX) {
 			    public void run() {
 			    	Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.PLOT_X_DATASET, true);
 			    	setChecked(true);
