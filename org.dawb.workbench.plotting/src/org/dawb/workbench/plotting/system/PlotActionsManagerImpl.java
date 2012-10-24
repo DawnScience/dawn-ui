@@ -17,7 +17,8 @@ import org.csstudio.swt.xygraph.undo.ZoomType;
 import org.dawb.common.ui.image.PaletteFactory;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
-import org.dawb.common.ui.plot.ActionContainer;
+import org.dawb.common.ui.plot.ActionType;
+import org.dawb.common.ui.plot.ManagerType;
 import org.dawb.common.ui.plot.PlottingActionBarManager;
 import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
 import org.dawb.common.ui.plot.trace.IPaletteTrace;
@@ -55,12 +56,30 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 	
 
 	private static String lastscreeshot_filename;
+
+	public void createExportActions() {
+        final IAction exportActionDropDown = getExportActions();
+        registerToolBarGroup("lightweight.plotting.print.action");
+        registerAction("lightweight.plotting.print.action", exportActionDropDown, ActionType.XYANDIMAGE, ManagerType.TOOLBAR);
+        registerMenuBarGroup("lightweight.plotting.print.action");
+        registerAction("lightweight.plotting.print.action", exportActionDropDown, ActionType.XYANDIMAGE, ManagerType.MENUBAR);
+		
+	}
+
 	/**
 	 *  Create export and print buttons in tool bar 
 	 */
-	public void createExportActionsToolBar(IContributionManager toolbarManager) {
+	protected void createExportActions(IContributionManager toolbarManager) {
 
 		if (toolbarManager==null) return;
+        final IAction exportActionDropDown = getExportActions();
+		toolbarManager.add(exportActionDropDown);
+
+	}
+	
+
+	private IAction getExportActions() {
+		
 		final MenuAction exportActionsDropDown = new MenuAction("Export/Print");
 
 		Action exportSaveButton = new Action("Save plot screenshot as...", Activator.getImageDescriptor("icons/picture_save.png")){
@@ -104,54 +123,8 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 		exportActionsDropDown.addSeparator();
 		exportActionsDropDown.add(snapShotButton);
 		exportActionsDropDown.add(printButton);
-
-		if (this.system.getActionBars()!=null) {
-		    toolbarManager.add(exportActionsDropDown);
-		}
+		return exportActionsDropDown;
 	}
-
-	/**
-	 * Create export and print buttons in menu bar
-	 */
-	public void createExportActionsMenuBar() {
-		
-		Action exportSaveButton = new Action("Screenshot of the plot", Activator.getImageDescriptor("icons/picture_save.png")){
-			// Cache file name otherwise they have to keep
-			// choosing the folder.
-			public void run(){
-				try {
-					lastscreeshot_filename = system.savePlotting(lastscreeshot_filename);
-				} catch (Exception e) {
-					logger.error("Cannot savePlotting to "+lastscreeshot_filename, e);
-				}
-			}
-		};
-		Action copyToClipboardButton = new Action("Copy to clip-board       Ctrl+C", Activator.getImageDescriptor("icons/copy_edit_on.gif")) {
-			public void run() {
-				system.copyPlotting();
-			}
-		};
-		Action snapShotButton = new Action("Print plot", Activator.getImageDescriptor("icons/camera.gif")) {
-			public void run(){
-				system.printScaledPlotting();
-			}
-		};
-		Action printButton = new Action("Print scaled plot            Ctrl+P", Activator.getImageDescriptor("icons/printer.png")) {
-			public void run() {
-				system.printPlotting();
-			}
-		};
-		if (this.system.getActionBars()!=null) {
-			this.system.getActionBars().getMenuManager().add(new Separator(exportSaveButton.getId()+".group"));
-			this.system.getActionBars().getMenuManager().add(exportSaveButton);
-			this.system.getActionBars().getMenuManager().add(copyToClipboardButton);
-			this.system.getActionBars().getMenuManager().add(snapShotButton);
-			this.system.getActionBars().getMenuManager().add(printButton);
-			this.system.getActionBars().getMenuManager().add(new Separator(printButton.getId()+".group"));
-		}
-	}
-
-	
 
 	@Override
 	public void fillZoomActions(IContributionManager man) {
@@ -185,7 +158,7 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 
 	@Override
 	public void fillPrintActions(IContributionManager man) {
-		createExportActionsToolBar(man);
+		createExportActions(man);
 	}
 
 
@@ -240,13 +213,9 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 		}
 		lutCombo.setToolTipText("Histogram");
 
-		final IActionBars bars = getActionBars();
-		if (bars!=null) {
-			final String groupName = lutCombo.getId()+".group";
-			bars.getMenuManager().add(new Separator(groupName));
-			bars.getMenuManager().insertAfter(groupName, lutCombo);
-			final ActionContainer cont = register2DAction(groupName, lutCombo);
-			cont.setManager(bars.getMenuManager());
-		}
+		registerMenuBarGroup(lutCombo.getId()+".group");
+		registerAction(lutCombo.getId()+".group", lutCombo, ActionType.ALL, ManagerType.MENUBAR);
 	}
+
+
 }

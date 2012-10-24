@@ -12,7 +12,8 @@ import org.csstudio.swt.xygraph.undo.ZoomType;
 import org.dawb.common.services.ImageServiceBean.ImageOrigin;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
-import org.dawb.common.ui.plot.ActionContainer;
+import org.dawb.common.ui.plot.ActionType;
+import org.dawb.common.ui.plot.ManagerType;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
@@ -36,7 +37,6 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.IActionBars;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,19 +74,17 @@ class LightWeightPlotActions {
  		createRegionActions(xyGraph);
  		createZoomActions(xyGraph, XYGraphFlags.COMBINED_ZOOM);
  		createUndoRedoActions(xyGraph);
- 		IActionBars bars = actionBarManager.getActionBars();
- 		actionBarManager.createExportActionsToolBar(bars!=null?bars.getToolBarManager():null);
+ 		actionBarManager.createExportActions();
  		createAspectHistoAction(xyGraph);
  		actionBarManager.createPalleteActions();
  		createOriginActions(xyGraph);
- 		actionBarManager.createExportActionsMenuBar();
  		createAdditionalActions(xyGraph, null);
 		
 	}
 
 	public void createUndoRedoActions(final XYRegionGraph xyGraph) {
 		
-		addToolbarSeparator("org.csstudio.swt.xygraph.toolbar.undoredo");		
+		actionBarManager.registerToolBarGroup("org.csstudio.swt.xygraph.toolbar.undoredo");		
 		
 		//undo button		
 		final Action undoButton = new Action("Undo", Activator.getImageDescriptor("icons/Undo.png")) {
@@ -95,7 +93,7 @@ class LightWeightPlotActions {
 			}
 		};
 		undoButton.setEnabled(false);
-		if (actionBarManager.getActionBars()!=null) actionBarManager.getActionBars().getToolBarManager().add(undoButton);		
+		actionBarManager.registerAction("org.csstudio.swt.xygraph.toolbar.undoredo", undoButton, ActionType.XYANDIMAGE);		
 	
 		xyGraph.getOperationsManager().addListener(new IOperationsManagerListener(){
 			public void operationsHistoryChanged(OperationsManager manager) {
@@ -118,7 +116,7 @@ class LightWeightPlotActions {
 			}
 		};
 		redoButton.setEnabled(false);
-		if (actionBarManager.getActionBars()!=null) actionBarManager.getActionBars().getToolBarManager().add(redoButton);		
+		actionBarManager.registerAction("org.csstudio.swt.xygraph.toolbar.undoredo", redoButton, ActionType.XYANDIMAGE);		
 
 		xyGraph.getOperationsManager().addListener(new IOperationsManagerListener(){
 			public void operationsHistoryChanged(OperationsManager manager) {
@@ -137,7 +135,7 @@ class LightWeightPlotActions {
 
 	public void createConfigActions(final XYRegionGraph xyGraph) {
 		
-		addToolbarSeparator("org.csstudio.swt.xygraph.toolbar.configure");	
+		actionBarManager.registerToolBarGroup("org.csstudio.swt.xygraph.toolbar.configure");	
 		
 		final Action configButton = new Action("Configure Settings...", Activator.getImageDescriptor("icons/Configure.png")) {
 			public void run() {
@@ -145,7 +143,7 @@ class LightWeightPlotActions {
 				dialog.open();
 			}
 		};
-		if (actionBarManager.getActionBars()!=null) actionBarManager.getActionBars().getToolBarManager().add(configButton);
+		actionBarManager.registerAction("org.csstudio.swt.xygraph.toolbar.configure", configButton, ActionType.XYANDIMAGE);		
 		
 		final Action showLegend = new Action("Show Legend", IAction.AS_CHECK_BOX) {
 			public void run() {
@@ -153,7 +151,7 @@ class LightWeightPlotActions {
 			}
 		};
 		showLegend.setImageDescriptor(Activator.getImageDescriptor("icons/ShowLegend.png"));
-		if (actionBarManager.getActionBars()!=null) actionBarManager.getActionBars().getToolBarManager().add(showLegend);
+		actionBarManager.registerAction("org.csstudio.swt.xygraph.toolbar.configure", showLegend, ActionType.XYANDIMAGE);		
 		
 		showLegend.setChecked(xyGraph.isShowLegend());
 		
@@ -162,7 +160,7 @@ class LightWeightPlotActions {
 	
 	protected void createAnnotationActions(final XYRegionGraph xyGraph) {
 		
-		addToolbarSeparator("org.csstudio.swt.xygraph.toolbar.annotation");	
+		actionBarManager.registerToolBarGroup("org.csstudio.swt.xygraph.toolbar.annotation");	
 		
 		final Action addAnnotation = new Action("Add Annotation...", Activator.getImageDescriptor("icons/Add_Annotation.png")) {
 			public void run() {
@@ -175,7 +173,7 @@ class LightWeightPlotActions {
 				
 			}
 		};
-		if (actionBarManager.getActionBars()!=null) actionBarManager.getActionBars().getToolBarManager().add(addAnnotation);
+		actionBarManager.registerAction("org.csstudio.swt.xygraph.toolbar.annotation", addAnnotation, ActionType.XYANDIMAGE);		
 	
 		
 		final Action delAnnotation = new Action("Remove Annotation...", Activator.getImageDescriptor("icons/Del_Annotation.png")) {
@@ -189,17 +187,15 @@ class LightWeightPlotActions {
 				
 			}
 		};
-		if (actionBarManager.getActionBars()!=null) actionBarManager.getActionBars().getToolBarManager().add(delAnnotation);
+		actionBarManager.registerAction("org.csstudio.swt.xygraph.toolbar.annotation", delAnnotation, ActionType.XYANDIMAGE);		
 		
-		addToolbarSeparator("org.csstudio.swt.xygraph.toolbar.extra");	
+		actionBarManager.registerToolBarGroup("org.csstudio.swt.xygraph.toolbar.extra");	
 	}
 	
 	protected void createRegionActions(final XYRegionGraph xyGraph) {
 		
 		
-		if (actionBarManager.getActionBars()!=null && actionBarManager.getActionBars().getToolBarManager()!=null)  {
-			actionBarManager.getActionBars().getToolBarManager().add(new Separator("lightweight.graph.region.actions"));
-		}
+		actionBarManager.registerToolBarGroup("lightweight.graph.region.actions");
 		
         final MenuAction regionDropDown = new MenuAction("Selection region");
         regionDropDown.setId("org.dawb.workbench.ui.editors.plotting.swtxy.addRegions"); // Id used elsewhere...
@@ -218,9 +214,7 @@ class LightWeightPlotActions {
 		regionDropDown.add(createRegionAction(xyGraph, RegionType.ELLIPSE,    regionDropDown, "Add ellipse selection",  Activator.getImageDescriptor("icons/ProfileEllipse.png")));
 		regionDropDown.add(createRegionAction(xyGraph, RegionType.ELLIPSEFIT, regionDropDown, "Ellipse fit selection",  Activator.getImageDescriptor("icons/ProfileEllipse.png")));
 		
-		if (actionBarManager.getActionBars()!=null && actionBarManager.getActionBars().getMenuManager()!=null)  {
-			actionBarManager.getActionBars().getMenuManager().add(regionDropDown);
-		}
+		actionBarManager.registerAction(regionDropDown, ActionType.XYANDIMAGE, ManagerType.MENUBAR);
 			
         final MenuAction removeRegionDropDown = new MenuAction("Delete selection region(s)");
         removeRegionDropDown.setId("org.dawb.workbench.ui.editors.plotting.swtxy.removeRegions");
@@ -257,8 +251,7 @@ class LightWeightPlotActions {
 		removeRegionDropDown.add(removeAllRegions);
 
 		
-		if (actionBarManager.getActionBars()!=null) actionBarManager.getActionBars().getToolBarManager().add(removeRegionDropDown);
-		//if (actionBarManager.getActionBars()!=null) actionBarManager.getActionBars().getMenuManager().add(removeRegionDropDown);
+		actionBarManager.registerAction("lightweight.graph.region.actions", removeRegionDropDown, ActionType.XYANDIMAGE);
 		
 	}
 	
@@ -291,13 +284,9 @@ class LightWeightPlotActions {
 	}
 
 	
-	private void addToolbarSeparator(String id) {
-		if (actionBarManager.getActionBars()!=null) actionBarManager.getActionBars().getToolBarManager().add(new Separator(	id ));	
-	}
-
 	public void createZoomActions(final XYRegionGraph xyGraph, final int flags) {
 		
-		addToolbarSeparator("org.csstudio.swt.xygraph.toolbar.zoom");		
+		actionBarManager.registerToolBarGroup("org.csstudio.swt.xygraph.toolbar.zoom");		
 
         final Action autoScale = new Action("Perform Auto Scale", Activator.getImageDescriptor("icons/AutoScale.png")) {
         	public void run() {
@@ -305,7 +294,7 @@ class LightWeightPlotActions {
         	}
         };
         autoScale.setId("org.csstudio.swt.xygraph.autoscale");
-        if (actionBarManager.getActionBars()!=null) actionBarManager.getActionBars().getToolBarManager().add(autoScale);
+        actionBarManager.registerAction("org.csstudio.swt.xygraph.toolbar.zoom", autoScale, ActionType.XYANDIMAGE);
         
         final CheckableActionGroup zoomG = new CheckableActionGroup();
         Action panning = null;
@@ -329,7 +318,7 @@ class LightWeightPlotActions {
 			
 			if (zoomType == ZoomType.PANNING) panning = zoomAction;
 			
-			if (actionBarManager.getActionBars()!=null) actionBarManager.getActionBars().getToolBarManager().add(zoomAction);
+	        actionBarManager.registerAction("org.csstudio.swt.xygraph.toolbar.zoom", zoomAction, ActionType.XYANDIMAGE);
 		}
 		panning.setChecked(true);
 		panning.run(); 
@@ -347,11 +336,12 @@ class LightWeightPlotActions {
 		actionBarManager.addXYAction(rescaleAction);
 		actionBarManager.addImageAction(rescaleAction);
 		
-		if (actionBarManager.getActionBars()!=null) actionBarManager.getActionBars().getToolBarManager().add(rescaleAction);
+        actionBarManager.registerAction("org.csstudio.swt.xygraph.toolbar.zoom", rescaleAction, ActionType.XYANDIMAGE);
 	}
 
 	protected void createAspectHistoAction(final XYRegionGraph xyGraph) {
 
+		
 		final Action histo = new Action("Rehistogram on zoom in or zoom out (F5)", IAction.AS_PUSH_BUTTON) {
 			
 		    public void run() {		    	
@@ -365,17 +355,13 @@ class LightWeightPlotActions {
 		histo.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.HISTO));
 		histo.setAccelerator(SWT.F5);
 		
-		final IActionBars bars = actionBarManager.getActionBars();
-		if (bars!=null) {
-			bars.getToolBarManager().add(new Separator("org.dawb.workbench.plotting.histo.group"));
-			histo.setId("org.dawb.workbench.plotting.histo");
-			bars.getToolBarManager().insertAfter("org.dawb.workbench.plotting.histo.group", histo);	 
-			actionBarManager.register2DAction("org.dawb.workbench.plotting.histo.group", histo);
-			actionBarManager.addImageAction(histo);
-		}
+		actionBarManager.registerToolBarGroup("org.dawb.workbench.plotting.histo.group");
+		histo.setId("org.dawb.workbench.plotting.histo");
+		actionBarManager.registerAction("org.dawb.workbench.plotting.histo.group", histo, ActionType.IMAGE);	 
+		actionBarManager.addImageAction(histo);
 		
 		
-		final Action action = new Action("Keep aspect ratio", IAction.AS_CHECK_BOX) {
+		final Action aspect = new Action("Keep aspect ratio", IAction.AS_CHECK_BOX) {
 			
 		    public void run() {		    	
 		    	Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.ASPECT, isChecked());
@@ -384,8 +370,9 @@ class LightWeightPlotActions {
 		    }
 		};
         
-		action.setImageDescriptor(Activator.getImageDescriptor("icons/aspect.png"));
-		action.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.ASPECT));
+		aspect.setImageDescriptor(Activator.getImageDescriptor("icons/aspect.png"));
+		aspect.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.ASPECT));
+	    aspect.setId("org.dawb.workbench.plotting.aspect");
 		
 		final Action hideAxes = new Action("Show image axes", IAction.AS_CHECK_BOX) {
 			
@@ -397,19 +384,13 @@ class LightWeightPlotActions {
 		};
 		hideAxes.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.SHOW_AXES));
 		
-		if (bars!=null) {
-			bars.getToolBarManager().add(new Separator("org.dawb.workbench.plotting.aspect.group"));
-			action.setId("org.dawb.workbench.plotting.aspect");
-			bars.getToolBarManager().insertAfter("org.dawb.workbench.plotting.aspect.group", action);
-	 
-			actionBarManager.register2DAction("org.dawb.workbench.plotting.aspect.group", action);
-			
-			actionBarManager.addImageAction(action);
-			actionBarManager.addImageSeparator();
-			actionBarManager.addImageAction(hideAxes);
-			actionBarManager.addImageSeparator();
+		actionBarManager.registerToolBarGroup("org.dawb.workbench.plotting.aspect.group");
+	    actionBarManager.registerAction("org.dawb.workbench.plotting.aspect.group", aspect, ActionType.IMAGE);
 
-		}
+	    actionBarManager.addImageAction(aspect);
+	    actionBarManager.addImageSeparator();
+	    actionBarManager.addImageAction(hideAxes);
+	    actionBarManager.addImageSeparator();
 
 	}
 	
@@ -442,14 +423,8 @@ class LightWeightPlotActions {
         
         if (selectedAction!=null) selectedAction.setChecked(true);
         
-		final IActionBars bars = actionBarManager.getActionBars();
-		if (bars!=null) {
-			bars.getMenuManager().add(new Separator(origins.getId()+".group"));
-			bars.getMenuManager().insertAfter(origins.getId()+".group", origins);
-		}
-		
-		ActionContainer cont = actionBarManager.register2DAction(origins.getId()+".group", origins);
-		if (bars!=null) cont.setManager(bars.getMenuManager());
+        actionBarManager.registerMenuBarGroup(origins.getId()+".group");
+        actionBarManager.registerAction(origins.getId()+".group", origins, ActionType.IMAGE, ManagerType.MENUBAR);
 
 	}
 
@@ -459,10 +434,7 @@ class LightWeightPlotActions {
 	 * @param rightClick
 	 */
 	protected void createAdditionalActions(final XYRegionGraph xyGraph, final IContributionManager rightClick) {
-		
-        // Add additional if required
-		final IActionBars bars = actionBarManager.getActionBars();
-				
+						
 		if (datasetChoosingRequired) {
 			// By index or using x 
 			final CheckableActionGroup group = new CheckableActionGroup();
@@ -508,16 +480,15 @@ class LightWeightPlotActions {
 			actionBarManager.addXYAction(plotX);
 			actionBarManager.addXYAction(plotIndex);
 			actionBarManager.addXYSeparator();
-			if (bars!=null) {
+
 			
-				bars.getToolBarManager().add(new Separator(plotIndex.getId()+".group"));
-		        bars.getToolBarManager().add(new Separator(plotX.getId()+".group"));
-				bars.getToolBarManager().add(plotIndex);
-	       		actionBarManager.register1DAction(plotIndex.getId()+".group", plotIndex);
-				bars.getToolBarManager().add(plotX);
-				actionBarManager.register1DAction(plotX.getId()+".group", plotX);
-		        bars.getToolBarManager().add(new Separator());
-			}
+			actionBarManager.registerToolBarGroup(plotIndex.getId()+".group");
+		    actionBarManager.registerAction(plotIndex.getId()+".group", plotIndex, ActionType.XY);
+		    
+			actionBarManager.registerToolBarGroup(plotX.getId()+".group");
+		    actionBarManager.registerAction(plotX.getId()+".group", plotX, ActionType.XY);
+			
+		
 			
 			if (rightClick!=null){
 				rightClick.add(new Separator(plotIndex.getId()+".group"));
