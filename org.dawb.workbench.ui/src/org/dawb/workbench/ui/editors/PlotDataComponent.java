@@ -1165,9 +1165,9 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 							if (selections.indexOf(element)==0) {
 								return "X";
 							}
-							if (selections.size()>2) {
-								return "Y"+selections.indexOf(element);
-							}
+//							if (selections.size()>2) {
+//								return "Y"+selections.indexOf(element);
+//							}
 							return "Y";
 						}
 					} if (selections.size()==1 && selections.contains(element)) {
