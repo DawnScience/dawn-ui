@@ -9,6 +9,7 @@
  */ 
 package org.edna.workbench.actions;
 
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 
 import org.dawb.common.ui.util.CSVUtils;
@@ -66,10 +67,12 @@ public class ConvertWizard extends Wizard {
 					try {
 						monitor.beginTask("Convert "+dataFile.getName(), dataSetNames.length*2);
 						
+						final InputStream stream = CSVUtils.getCVSStream(dataFile.getLocation().toOSString(), dataSetNames,  monitor);
 						if (convertWizardPage1.isOverwrite() && csv.exists()) {
-							csv.delete(true, monitor);
+							csv.setContents(stream, IResource.FORCE, monitor);
+						} else {
+						    csv.create(stream, true, monitor);
 						}
-						csv.create(CSVUtils.getCVSStream(dataFile.getLocation().toOSString(), dataSetNames,  monitor), true, monitor);
 						csv.getParent().refreshLocal(IResource.DEPTH_INFINITE, monitor);
 						
 						if (convertWizardPage1.isOpen()) {
