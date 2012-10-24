@@ -11,11 +11,17 @@
 package org.dawb.passerelle.actors.dawn;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.dawb.common.ui.slicing.DimsDataList;
+import org.dawb.common.ui.slicing.SliceUtils;
+import org.dawb.passerelle.actors.data.TriggerObject;
 import org.dawb.passerelle.common.actors.AbstractDataMessageTransformer;
 import org.dawb.passerelle.common.message.DataMessageComponent;
+import org.dawb.passerelle.common.message.DataMessageException;
 import org.dawb.passerelle.common.message.MessageUtils;
 
 import ptolemy.data.expr.StringParameter;
@@ -23,20 +29,26 @@ import ptolemy.kernel.CompositeEntity;
 import ptolemy.kernel.util.IllegalActionException;
 import ptolemy.kernel.util.NameDuplicationException;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
-import uk.ac.diamond.scisoft.analysis.dataset.Image;
+import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IndexIterator;
+import uk.ac.diamond.scisoft.analysis.dataset.Slice;
+import uk.ac.diamond.scisoft.analysis.dataset.SliceIterator;
+import uk.ac.diamond.scisoft.analysis.fitting.Fitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction;
-
-import com.isencia.passerelle.actor.ProcessingException;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
+import uk.ac.diamond.scisoft.analysis.io.IMetaData;
+import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
+import uk.ac.diamond.scisoft.analysis.io.SliceObject;
+import uk.ac.diamond.scisoft.analysis.optimize.ApacheNelderMead;
+import uk.ac.diamond.scisoft.analysis.optimize.GeneticAlg;
 
 public class Fitting1DActor extends AbstractDataMessageTransformer {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 813882139346261410L;
 	public StringParameter datasetName;
 	public StringParameter functionName;
 	public StringParameter xAxisName;
+	public StringParameter fitDirection;
 
 	public Fitting1DActor(CompositeEntity container, String name)
 			throws NameDuplicationException, IllegalActionException {
@@ -48,13 +60,14 @@ public class Fitting1DActor extends AbstractDataMessageTransformer {
 		registerConfigurableParameter(functionName);
 		xAxisName = new StringParameter(this, "xAxisName");
 		registerConfigurableParameter(xAxisName);
-
-
+		fitDirection = new StringParameter(this, "fitDirection");
+		registerConfigurableParameter(fitDirection);
 	}
 
 	@Override
 	protected DataMessageComponent getTransformedMessage(
-			List<DataMessageComponent> cache) throws ProcessingException {
+			List<DataMessageComponent> cache) throws DataMessageException {
+		
 		// get the data out of the message, name of the item should be specified
 		final Map<String, Serializable>  data = MessageUtils.getList(cache);
 		
@@ -70,27 +83,101 @@ public class Fitting1DActor extends AbstractDataMessageTransformer {
 		try {
 			functions = MessageUtils.getFunctions(cache);
 		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			throw createDataMessageException("Failed to get the list of functions from the incomming message", e1);
 		}
 		
 		// get the required datasets
 		String dataset = datasetName.getExpression();
 		String function = functionName.getExpression();
 		String xAxis = xAxisName.getExpression();
+		Integer fitDim = Integer.parseInt(fitDirection.getExpression());
 		
 		AbstractDataset dataDS = ((AbstractDataset)data.get(dataset)).clone();
 		AFunction fitFunction = functions.get(function);
-		AbstractDataset xAxisDS = ((AbstractDataset)data.get(xAxis)).clone();
+		AbstractDataset xAxisDS = null;
+		if (data.containsKey(xAxis)) {
+			xAxisDS = ((AbstractDataset)data.get(xAxis)).clone();
+		} else {
+			xAxisDS = DoubleDataset.arange(dataDS.getShape()[fitDim],0,-1);
+		}
 		
-
+		// get the general parameters from the first fit.
+		ArrayList<Slice> slices = new ArrayList<Slice>();
+		for (int i = 0; i < dataDS.getShape().length; i++) {
+			if (i == fitDim) {
+				slices.add(new Slice(0,dataDS.getShape()[i], 1));
+			} else {
+				slices.add(new Slice(0,1,1));
+			}
+		}
+		AbstractDataset slice = dataDS.getSlice(slices.toArray(new Slice[0]));
+		slice.squeeze();
+		try {
+			Fitter.fit(xAxisDS, slice, new GeneticAlg(0.0001), fitFunction);
+		} catch (Exception e1) {
+			throw createDataMessageException("Failed to fit the data profile using the Genetic Algorithm", e1);
+		}
+			
+		ArrayList<AbstractDataset> parametersDS = new ArrayList<AbstractDataset>(fitFunction.getNoOfParameters()); 
+		for(int i = 0; i < fitFunction.getNoOfParameters(); i++) {
+			int[] shape = dataDS.getShape().clone();
+			shape[fitDim] = 1;
+			DoubleDataset parameterDS = new DoubleDataset(shape);
+			parameterDS.squeeze();
+			parametersDS.add(parameterDS);
+		}
+		
+		AbstractDataset functionsDS = new DoubleDataset(dataDS.getShape());
+		
+		int[] starts = dataDS.getShape().clone();
+		starts[fitDim] = 1;
+		DoubleDataset ind = DoubleDataset.ones(starts);
+		IndexIterator iter = ind.getIterator();
+		while(iter.hasNext()) {
+			System.out.println(iter.index);
+			System.out.println(Arrays.toString(ind.getNDPosition(iter.index)));
+			int[] start = ind.getNDPosition(iter.index).clone();
+			int[] stop = start.clone();
+			for(int i = 0; i < stop.length; i++) {
+				stop[i] = stop[i]+1;
+			}
+			stop[fitDim] = dataDS.getShape()[fitDim];
+			slice = dataDS.getSlice(start, stop, null);
+			slice.squeeze();
+			try {
+				CompositeFunction fitResult = Fitter.fit(xAxisDS, slice, new ApacheNelderMead(), fitFunction);
+				int[] position = new int[dataDS.getShape().length-1];
+				int count = 0;
+				for(int i = 0; i < dataDS.getShape().length; i++) {
+					if(i != fitDim) {
+						position[count] = start[i];
+						count++;
+					}
+				}
+				for(int p = 0; p < fitResult.getNoOfParameters(); p++) {
+					parametersDS.get(p).set(fitResult.getParameter(p).getValue(), position);
+				}
+				
+				DoubleDataset resultFunctionDS = fitResult.makeDataset(xAxisDS);
+				functionsDS.setSlice(resultFunctionDS, start, stop, null);
+				
+			} catch (Exception e) {
+				throw createDataMessageException("Failed to fit row "+iter.index+" of the data", e);
+			}
+			
+		}
+		
+		result.addList("fit_image", functionsDS);
+		for(int i = 0; i < fitFunction.getNoOfParameters(); i++) {
+			result.addList("fit_parameter_"+i, parametersDS.get(i));
+		}
 
 		return result;
 	}
 
 	@Override
 	protected String getOperationName() {
-		return "Normalise by region";
+		return "Fit 1D data in 2D image";
 	}
 
 }
