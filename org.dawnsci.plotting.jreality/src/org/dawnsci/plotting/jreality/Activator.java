@@ -1,5 +1,7 @@
 package org.dawnsci.plotting.jreality;
 
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -45,6 +47,20 @@ public class Activator extends AbstractUIPlugin {
 	 */
 	public static Activator getDefault() {
 		return plugin;
+	}
+
+	/**
+	 * Creates the image, this should be disposed later.
+	 * @param path
+	 * @return Image
+	 */
+	public static Image getImage(String path) {
+		ImageDescriptor des = imageDescriptorFromPlugin(PLUGIN_ID, path);
+		return des.createImage();
+	}
+
+	public static ImageDescriptor getImageDescriptor(String path) {
+		return imageDescriptorFromPlugin(PLUGIN_ID, path);
 	}
 
 }

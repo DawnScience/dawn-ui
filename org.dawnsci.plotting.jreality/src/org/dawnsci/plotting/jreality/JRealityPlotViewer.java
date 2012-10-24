@@ -12,6 +12,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JApplet;
 import javax.swing.JPanel;
 
+import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.trace.ISurfaceTrace;
 import org.dawnsci.plotting.jreality.compositing.CompositeEntry;
 import org.dawnsci.plotting.jreality.compositing.CompositingControl;
@@ -127,9 +128,16 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	private boolean hasJOGLshaders;
 	private PanningTool panTool = null;
 	private PlottingMode currentMode;
-	private boolean useLegend = true;
+	private boolean useLegend = false;
 	private CompositingControl cmpControl = null;
 	
+	private JRealityPlotActions plotActions;
+	private IPlottingSystem     system;
+	
+	public void init(IPlottingSystem system) {
+		this.system = system;
+	}
+
 	/**
 	 * Call to create plotting
 	 * @param parent
@@ -139,6 +147,10 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		
 		init(parent);
 		createUI(parent);
+		plotActions = new JRealityPlotActions(this, system);
+		plotActions.createActions();
+		system.getActionBars().getToolBarManager().update(true);
+		system.getActionBars().updateActionBars();
 	}
 	
 
@@ -592,11 +604,15 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		if (useLegend) {
 			if (legendTable == null) buildLegendTable();
 			legendTable.setVisible(true);
+			container.setWeights(new int[] {90, 10});		
 			legendTable.updateTable(graphColourTable);
 		} else {
-			if (legendTable != null) legendTable.setVisible(false);
+			if (legendTable != null) {
+				legendTable.setVisible(false);
+				container.setWeights(new int[] {100, 0});		
+			}
 		}
-		legendTable.getParent().layout();
+		if (legendTable != null)  legendTable.getParent().layout();
 	}
 	
 	private void setAxisModes(AxisMode xAxis, AxisMode yAxis, AxisMode zAxis) {
@@ -719,6 +735,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 			setPerspectiveCamera(true,false);			
 			break;
 		case SURF2D:
+			setUseLegend(false);
 			MatrixBuilder.euclidean().translate(0.0, 0.0, 0.0).assignTo(toolNode);
 			MatrixBuilder.euclidean().translate(0.0, 0.0, 0.0).assignTo(root);
 			plotter = new DataSet3DPlot3D(viewerApp, hasJOGL, true);
@@ -734,7 +751,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 			viewerApp.getSceneRoot().addTool(cameraZoomTool);
 			setPerspectiveCamera(true,false);
 			hBar.setVisible(false);
-			vBar.setVisible(false);						
+			vBar.setVisible(false);	
 			break;
 		case SCATTER3D:
 			MatrixBuilder.euclidean().translate(0.0, 0.0, 0.0).assignTo(toolNode);
@@ -899,6 +916,9 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 
 	public void dispose() {
 		reset();
+		if (plotActions!=null) {
+			plotActions.dispose();
+		}
 		if (legendTable != null) {
 			legendTable.removeAllLegendChangeEventListener();
 			legendTable.dispose();
@@ -915,4 +935,11 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		}
 	}
 
+	public void setTickGridLines(boolean xcoord, boolean ycoord, boolean zcoord) {
+		if (plotter!=null) {
+			plotter.setTickGridLinesActive(xcoord, ycoord, zcoord);		
+		}
+	}
+
+	
 }

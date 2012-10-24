@@ -155,7 +155,7 @@
             class="org.dawb.workbench.plotting.views.ToolPageView"
             icon="icons/plot-tool-1d.png"
             id="org.dawb.workbench.plotting.views.toolPageView.1D"
-            name="1D Tools"
+            name="XY Tools"
             restorable="true">
       </view>
       <view
@@ -164,6 +164,14 @@
             icon="icons/plot-tool-2d.png"
             id="org.dawb.workbench.plotting.views.toolPageView.2D"
             name="Image Tools"
+            restorable="true">
+      </view>
+      <view
+            category="org.dawb.workbench.application.data.analysis"
+            class="org.dawb.workbench.plotting.views.ToolPageView"
+            icon="icons/plot-tool-any.png"
+            id="org.dawb.workbench.plotting.views.toolPageView.3D"
+            name="3D Tools"
             restorable="true">
       </view>
       <view

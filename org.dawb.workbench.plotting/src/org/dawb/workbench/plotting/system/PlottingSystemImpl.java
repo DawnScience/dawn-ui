@@ -148,7 +148,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	private void createJRealityUI() {
 
 		if (jrealityViewer.getControl()!=null) return;
-		
+		jrealityViewer.init(this);
 		jrealityViewer.createControl(parent);
 		parent.layout();
 	}
@@ -334,6 +334,8 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		final Collection<ITrace> traces = plottingMode.is3D() 
 				                        ? getTraces(ISurfaceTrace.class)
 				                        : getTraces(IImageTrace.class);
+				                        
+		if (monitor!=null&&monitor.isCanceled()) return null;
 		if (traces!=null && traces.size()>0) {
 			
 			final ITrace image = traces.iterator().next();
@@ -366,6 +368,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		
 		if (data.getName()!=null) lightWeightViewer.setTitle(data.getName());
 		
+		if (monitor!=null&&monitor.isCanceled()) return;
 		if (image instanceof IImageTrace) {
 		    ((IImageTrace)image).setData(data, axes, false);
 		} else if (image instanceof ISurfaceTrace) {
@@ -422,6 +425,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			if (part!=null&&(traceName==null||"".equals(traceName))) {
 				traceName = part.getTitle();
 			}
+			if (monitor!=null&&monitor.isCanceled()) return null;
 			
 			ITrace trace=null;
 			if (plottingMode.is3D()) {
