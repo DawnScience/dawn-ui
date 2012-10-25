@@ -59,10 +59,11 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 
 	public void createExportActions() {
         final IAction exportActionDropDown = getExportActions();
-        registerToolBarGroup("lightweight.plotting.print.action");
-        registerAction("lightweight.plotting.print.action", exportActionDropDown, ActionType.XYANDIMAGE, ManagerType.TOOLBAR);
-        registerMenuBarGroup("lightweight.plotting.print.action");
-        registerAction("lightweight.plotting.print.action", exportActionDropDown, ActionType.XYANDIMAGE, ManagerType.MENUBAR);
+        registerToolBarGroup("lightweight.plotting.print.action.toolbar");
+        registerAction("lightweight.plotting.print.action.toolbar", exportActionDropDown, ActionType.XYANDIMAGE, ManagerType.TOOLBAR);
+        
+        registerMenuBarGroup("lightweight.plotting.print.action.menubar");
+        registerAction("lightweight.plotting.print.action.menubar", exportActionDropDown, ActionType.XYANDIMAGE, ManagerType.MENUBAR);
 		
 	}
 
