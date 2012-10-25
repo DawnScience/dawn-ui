@@ -37,6 +37,7 @@ import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.common.ui.plot.trace.TraceWillPlotEvent;
+import org.dawb.common.ui.util.GridUtils;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
 import org.dawb.workbench.plotting.system.swtxy.LineTrace;
@@ -50,6 +51,7 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -91,6 +93,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		this.jrealityViewer       = new JRealityPlotViewer();
 	}
 	
+	private boolean containerOverride = false;
 	
 	public void createPlotPart(final Composite      container,
 							   final String         plotName,
@@ -100,13 +103,17 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 
 		super.createPlotPart(container, plotName, bars, hint, part);
 		
+		if (container.getLayout() instanceof GridLayout) {
+			GridUtils.removeMargins(container);
+		}
+		
 		this.plottingMode = hint;
 		if (container.getLayout() instanceof PageBook.PageBookLayout) {
 			if (hint.is3D()) throw new RuntimeException("Cannot deal with "+PageBook.PageBookLayout.class.getName()+" and 3D at the moment!");
 		    this.parent       = container;
 		    logger.debug("Cannot deal with "+PageBook.PageBookLayout.class.getName()+" and 3D at the moment!");
 		} else {
-		
+		    this.containerOverride = true;
 			this.parent       = new Composite(container, SWT.NONE);
 			final StackLayout layout = new StackLayout();
 			this.parent.setLayout(layout);
@@ -132,8 +139,9 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	
 	@Override
 	public Composite getPlotComposite() {
+		if (containerOverride) return parent;
 		if (plottingMode!=null && plottingMode.is3D()) return (Composite)jrealityViewer.getControl();
-		if (lightWeightViewer.getControl()!=null)       return (Composite)lightWeightViewer.getControl();
+		if (lightWeightViewer.getControl()!=null)      return (Composite)lightWeightViewer.getControl();
 		return null;
 	}
 	
