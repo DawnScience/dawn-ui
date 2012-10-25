@@ -89,6 +89,37 @@ public class RegionSelectActor extends AbstractDataMessageTransformer {
 				// Return the calculated values
 				result.addList(dataRegion.getName(), dataRegion);
 			}
+			
+			// it could be an axis, and we want to scale these as well
+			// TODO, this is a dumb way of doing it, but is easy to implement, this should be improved somehow
+			if (dataset.getShape().length == 1) {
+
+				AbstractDataset dataRegionX = dataset.clone();
+				AbstractDataset dataRegionY = dataset.clone();
+				
+				try {
+					dataRegionX = dataRegionX.getSlice(new int[] { xStart },
+						new int[] { xStop },
+						new int[] { xInc});
+					
+					dataRegionX.setName(dataset.getName()+"_regionX");
+					result.addList(dataRegionX.getName(), dataRegionX);
+				} catch (Exception e) {
+					// Ignore, as this is not important
+				}
+				
+				try {
+					dataRegionY = dataRegionY.getSlice(new int[] { yStart },
+						new int[] { yStop },
+						new int[] { yInc});
+					
+					dataRegionY.setName(dataset.getName()+"_regionY");
+					result.addList(dataRegionY.getName(), dataRegionY);
+				} catch (Exception e) {
+					// Ignore as this is not important
+				}
+				
+			}
 		}
 		return result;
 	}
