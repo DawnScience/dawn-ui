@@ -154,6 +154,9 @@ public class ROIViewer  {
 			}
 			
 			final FloatSpinnerWrapper   rb = (FloatSpinnerWrapper)ed.getFieldWidget();
+			if (rb.getPrecision() < 2)
+				rb.setFormat(rb.getWidth(), 2);
+			
 			if (element instanceof LinearROI || element instanceof PointROI || element instanceof PolygonalROI
 			   || element instanceof RectangularROI) {
 				Range range;
