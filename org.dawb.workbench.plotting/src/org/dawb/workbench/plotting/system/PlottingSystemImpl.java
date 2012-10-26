@@ -346,19 +346,22 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		if (monitor!=null&&monitor.isCanceled()) return null;
 		if (traces!=null && traces.size()>0) {
 			
-			final ITrace image = traces.iterator().next();
+			ITrace image = traces.iterator().next();
 			final int[]       shape = image.getData()!=null ? image.getData().getShape() : null;
 			if (shape!=null && Arrays.equals(shape, data.getShape())) {
 				if (getDisplay().getThread()==Thread.currentThread()) {
-                    updatePlot2DInternal(image, data, axes, monitor);
+					image = updatePlot2DInternal(image, data, axes, monitor);
 				} else {
+					final List<ITrace> images = Arrays.asList(image);
 					Display.getDefault().syncExec(new Runnable() {
 						public void run() {
 							// This will keep the previous zoom level if there was one
 							// and will be faster than createPlot2D(...) which autoscales.
-			                updatePlot2DInternal(image, data, axes, monitor);
+			                ITrace im = updatePlot2DInternal(images.get(0), data, axes, monitor);
+			                images.set(0, im);
 						}
 					});
+					image = images.get(0);
 				}
 				return image;
 			} else {
@@ -369,18 +372,24 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		}
 	}
 
-	private void updatePlot2DInternal(final ITrace image,
+	private ITrace updatePlot2DInternal(final ITrace image,
 			                          final AbstractDataset       data, 
 								      final List<AbstractDataset> axes,
 								      final IProgressMonitor      monitor) {
 		
 		if (data.getName()!=null) lightWeightViewer.setTitle(data.getName());
 		
-		if (monitor!=null&&monitor.isCanceled()) return;
-		if (image instanceof IImageTrace) {
-		    ((IImageTrace)image).setData(data, axes, false);
-		} else if (image instanceof ISurfaceTrace) {
-		    ((ISurfaceTrace)image).setData(data, axes);
+		if (monitor!=null&&monitor.isCanceled()) return null;
+		try {
+			if (image instanceof IImageTrace) {
+			    ((IImageTrace)image).setData(data, axes, false);
+			} else if (image instanceof ISurfaceTrace) {
+			    ((ISurfaceTrace)image).setData(data, axes);
+			}
+			return image;
+		} catch (Exception ne) { // We create a new one then
+			clear();
+			return createPlot2D(data, axes, monitor);
 		}
 	}
 

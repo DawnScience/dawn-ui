@@ -341,6 +341,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 	private double getYRatio(boolean isTopLeft, final int[] shape, ImageOrigin origin) {
 		double yCoord = isTopLeft ? getYAxis().getRange().getUpper() : getYAxis().getRange().getLower();
+		if (origin==null) origin = ImageOrigin.TOP_LEFT;
 		switch (origin) {
 		case TOP_LEFT:
 			return yCoord/shape[0];

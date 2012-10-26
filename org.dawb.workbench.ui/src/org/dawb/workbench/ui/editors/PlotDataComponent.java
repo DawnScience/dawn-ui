@@ -456,6 +456,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 					wiz.setSliceData(getSliceData());
 					wiz.setNexusAxes(getNexusAxes());
 					
+					// TODO Should be non modal, it takes a while.
 					WizardDialog wd = new  WizardDialog(Display.getCurrent().getActiveShell(), wiz);
 					wd.setTitle(wiz.getWindowTitle());
 					wd.open();
