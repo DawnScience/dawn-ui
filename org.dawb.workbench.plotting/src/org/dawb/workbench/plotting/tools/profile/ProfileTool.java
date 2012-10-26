@@ -169,8 +169,8 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 			}
 		};
 		if (actionbars != null){
-			actionbars.getToolBarManager().add(reselect);
-			actionbars.getToolBarManager().add(new Separator());
+			actionbars.getToolBarManager().add(new Separator("org.dawb.workbench.plotting.tools.profile.newProfileGroup"));
+			actionbars.getToolBarManager().insertAfter("org.dawb.workbench.plotting.tools.profile.newProfileGroup", reselect);
 		}
 
 		profilePlottingSystem.createPlotPart(parent, 
