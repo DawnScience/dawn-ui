@@ -242,7 +242,10 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		if (keyListener==null) keyListener = new KeyAdapter() {
 			@Override
 			public void keyPressed(KeyEvent e) {
-				if (e.keyCode==16777230 || e.character=='h') {
+				if (e.keyCode==27) { // Esc
+					xyGraph.clearRegionTool();
+					
+				} if (e.keyCode==16777230 || e.character=='h') {
 					final IContributionItem action = bars.getToolBarManager().find("org.dawb.workbench.plotting.histo");
 				    if (action!=null && action.isVisible() && action instanceof ActionContributionItem) {
 				    	ActionContributionItem iaction = (ActionContributionItem)action;
