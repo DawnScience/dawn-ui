@@ -74,7 +74,10 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
+import org.eclipse.jface.viewers.ComboBoxCellEditor;
+import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -89,15 +92,19 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -186,7 +193,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 						logger.error("Unable to refresh data set list", ne);
 					}
 				} else if (event.getProperty().equals(EditorConstants.SHOW_XY_COLUMN)) {
-					setColumnVisible(1, 24, (Boolean)event.getNewValue());
+					setColumnVisible(1, 32, (Boolean)event.getNewValue());
 				} else if (event.getProperty().equals(EditorConstants.SHOW_DATA_SIZE)) {
 					setColumnVisible(2, 100, (Boolean)event.getNewValue());
 				} else if (event.getProperty().equals(EditorConstants.SHOW_DIMS)) {
@@ -270,7 +277,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 				
 		createRightClickMenu();
 		
-		setColumnVisible(1, 24,  Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_XY_COLUMN));
+		setColumnVisible(1, 36,  Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_XY_COLUMN));
 		setColumnVisible(2, 150, Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_DATA_SIZE));
 		setColumnVisible(3, 150, Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_DIMS));
 		setColumnVisible(4, 180, Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_SHAPE));
@@ -282,6 +289,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 				@Override
 				public void tracesUpdated(TraceEvent evt) {
 					updateSelection(true);
+					dataViewer.refresh();
 				}
 			};
 			getPlottingSystem().addTraceListener(traceListener);
@@ -552,8 +560,9 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 		
 		final TableViewerColumn axis   = new TableViewerColumn(dataViewer, SWT.LEFT, 1);
 		axis.getColumn().setText(" ");
-		axis.getColumn().setWidth(24);
+		axis.getColumn().setWidth(32);
 		axis.setLabelProvider(new DataSetColumnLabelProvider(1));
+		axis.setEditingSupport(new AxisEditingSupport(dataViewer));
 
 		final TableViewerColumn size   = new TableViewerColumn(dataViewer, SWT.LEFT, 2);
 		size.getColumn().setText("Size");
@@ -650,7 +659,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 			xyAction.setToolTipText("XY Graph of Data, overlayed for multiple data.");
 			dataComponentActions.add(xyAction);
 			
-			final Action staggeredAction = new Action("XY Staggered in Z",  SWT.TOGGLE) {
+			final Action staggeredAction = new Action("XY staggered in Z",  SWT.TOGGLE) {
 				@Override
 				public void run() {
 					setPlotMode(PlotType.XY_STACKED);
@@ -711,20 +720,13 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 			}
 		}
 		
-		final Action setX = new Action("Set Selected Set as X-Axis") {
+		final Action setX = new Action("Set selected data as x-axis") {
 			public void run() {
 				
 				final CheckableObject sel = (CheckableObject)((IStructuredSelection)dataViewer.getSelection()).getFirstElement();
 				if (sel==null) return;
 				
-				if (getActiveDimensions(sel, true)!=1) return; 
-				sel.setChecked(true);
-				
-				if (selections.contains(sel)) selections.remove(sel);
-			    selections.add(0, sel);
-				getPlottingSystem().setXfirst(true);
-				updateSelection(true);
-				dataViewer.refresh(sel);
+				setAsX(sel);
 			}
 		};
 		setX.setImageDescriptor(Activator.getImageDescriptor("/icons/to_x.png"));
@@ -733,7 +735,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 		manager.add(setX);
 		manager.add(new Separator());
 
-		final Action addExpression = new Action("Add Expression") {
+		final Action addExpression = new Action("Add expression") {
 			public void run() {
 				final ICommandService cs = (ICommandService)PlatformUI.getWorkbench().getService(ICommandService.class);
 				try {
@@ -749,7 +751,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 		dataComponentActions.add(addExpression);
 		manager.add(addExpression);
 		
-		final Action deleteExpression = new Action("Delete Expression") {
+		final Action deleteExpression = new Action("Delete expression") {
 			public void run() {
 				final ICommandService cs = (ICommandService)PlatformUI.getWorkbench().getService(ICommandService.class);
 				try {
@@ -766,6 +768,17 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 
 		dataComponentActions.add(preferences);
 
+	}
+
+	protected void setAsX(CheckableObject sel) {
+		if (getActiveDimensions(sel, true)!=1) return; 
+		sel.setChecked(true);
+		
+		if (selections.contains(sel)) selections.remove(sel);
+	    selections.add(0, sel);
+		getPlottingSystem().setXfirst(true);
+		updateSelection(true);
+		dataViewer.refresh();
 	}
 
 	public List<IAction> getDimensionalActions() {
@@ -865,10 +878,16 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 	public void mouseDown(MouseEvent e) {
 		if (e.button==1) {
 			
-		
-			final TableItem       item    = this.dataViewer.getTable().getItem(new Point(e.x, e.y));
+			final Point           pnt     = new Point(e.x, e.y);
+			final TableItem       item    = this.dataViewer.getTable().getItem(pnt);
 			if (item==null) return;
 			
+            Rectangle rect = item.getBounds(0); // First column (tick and name)
+            if (!rect.contains(pnt) && dataViewer.isCellEditorActive()) return;
+            if (rect.contains(pnt)  && dataViewer.isCellEditorActive()) {
+            	dataViewer.cancelEditing();
+            }
+		
 			final CheckableObject clicked = (CheckableObject)item.getData();
 			
 			if (e.stateMask==131072) { // Shift is pressed
@@ -1160,22 +1179,8 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 				}
 				return setName;
 			case 1:
-				if (selections!=null&&!selections.isEmpty()) {
-					if (selections.size()>1) {
-						if (selections.contains(element)) {
-							if (selections.indexOf(element)==0) {
-								return "X";
-							}
-//							if (selections.size()>2) {
-//								return "Y"+selections.indexOf(element);
-//							}
-							return "Y";
-						}
-					} if (selections.size()==1 && selections.contains(element)) {
-						return "Y";
-					}
-				}
-                return "";
+				return element.getAxis(selections, getPlottingSystem().is2D(), getPlottingSystem().isXfirst());
+
 			case 2:
 				if (!element.isExpression()) {
 					final String name = element.toString();
@@ -1491,5 +1496,59 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 	public ISelectionProvider getViewer() {
 		return dataViewer;
 	}
+	
+	
+	private class AxisEditingSupport extends EditingSupport {
+
+		public AxisEditingSupport(ColumnViewer viewer) {
+			super(viewer);
+		}
+		
+		@Override
+		protected CellEditor getCellEditor(final Object element) {
+			ComboBoxCellEditor ce = new ComboBoxCellEditor((Composite)getViewer().getControl(), new String[]{"X","Y1","Y2","Y3","Y4"} , SWT.READ_ONLY);
+			final CCombo ccombo = (CCombo)ce.getControl();
+			ccombo.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					setValue(element, ccombo.getSelectionIndex());
+				}
+			});
+			return ce;
+		}
+
+		@Override
+		protected boolean canEdit(Object element) {
+			CheckableObject co = (CheckableObject)element;
+			return co.isChecked();
+		}
+
+		@Override
+		protected Object getValue(Object element) {
+			return ((CheckableObject)element).getAxisIndex(selections, getPlottingSystem().isXfirst());
+		}
+
+		@Override
+		protected void setValue(Object element, Object value) {
+			CheckableObject co = (CheckableObject)element;
+			if (value instanceof Integer) {
+				int isel = ((Integer)value).intValue();
+				if (isel==0) {
+					setAsX(co);
+				} else {
+					
+					if (getPlottingSystem().isXfirst() && "X".equals(co.getAxis(selections, getPlottingSystem().is2D(), true))) {
+						// We lost an x
+						getPlottingSystem().setXfirst(false);
+					}
+					co.setYaxis(isel);
+
+					fireSelectionListeners(selections);
+					getViewer().refresh();
+				}
+			}
+		}
+		
+	}
+
 
 }

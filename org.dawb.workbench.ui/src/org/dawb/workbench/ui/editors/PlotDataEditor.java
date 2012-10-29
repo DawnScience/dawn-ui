@@ -291,19 +291,15 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		}
 	}
 	
-	private void createPlot(final Object[] selections, final IPlotUpdateParticipant participant, final IProgressMonitor monitor) {
+	private void createPlot(final CheckableObject[] selections, final IPlotUpdateParticipant participant, final IProgressMonitor monitor) {
 		
 		final AbstractDataset x  = getDataSet(selections[0], monitor);
 		List<AbstractDataset> ys = null;
 		if (selections.length>1) {
-			ys = new ArrayList<AbstractDataset>(3);
-			for (int i = 1; i < selections.length; i++) {
-				ys.add(getDataSet(selections[i], monitor));
-				if (monitor.isCanceled()) return;
-				monitor.worked(1);
-			}
+			ys = getYS(1, selections, monitor);
 		}
 
+		if (monitor.isCanceled()) return;
 		plottingSystem.clear();
 		if (participant.getPlotMode()==PlotType.IMAGE) {
 		    plottingSystem.createPlot2D(x, ys, monitor);
@@ -311,6 +307,18 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 			plottingSystem.createPlot1D(x, ys, getEditorInput().getName(), monitor);
 		}
 		monitor.done();
+	}
+
+	private List<AbstractDataset> getYS(int iyaxis, CheckableObject[] selections, IProgressMonitor monitor) {
+		
+		List<AbstractDataset> ys = new ArrayList<AbstractDataset>(3);
+		for (int i = 1; i < selections.length; i++) {
+			if (selections[i].getYaxis()!=iyaxis) continue;
+			ys.add(getDataSet(selections[i], monitor));
+			if (monitor.isCanceled()) return null;
+			monitor.worked(1);
+		}
+		return ys.isEmpty()?null:ys;
 	}
 
 	@Override

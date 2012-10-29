@@ -22,7 +22,7 @@ public class EditorPreferenceInitializer extends AbstractPreferenceInitializer {
 	public void initializeDefaultPreferences() {
 		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
 		store.setDefault(EditorConstants.IGNORE_DATASET_FILTERS, false);
-		store.setDefault(EditorConstants.SHOW_XY_COLUMN,         false);
+		store.setDefault(EditorConstants.SHOW_XY_COLUMN,         true);
 		store.setDefault(EditorConstants.SHOW_DATA_SIZE,         false);
 		store.setDefault(EditorConstants.SHOW_DIMS,              false);
 		store.setDefault(EditorConstants.SHOW_VARNAME,           false);

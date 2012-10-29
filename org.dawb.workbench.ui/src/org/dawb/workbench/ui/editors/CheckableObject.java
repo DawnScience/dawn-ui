@@ -9,6 +9,8 @@
  */ 
 package org.dawb.workbench.ui.editors;
 
+import java.util.List;
+
 import org.dawb.hdf5.editor.H5Path;
 import org.dawb.workbench.ui.editors.slicing.ExpressionObject;
 
@@ -92,4 +94,49 @@ public class CheckableObject implements H5Path{
 	public String getPath() {
 		return name;
 	}
-}
+	
+	/**
+	 * Get the axis, X, Y1..Y4
+	 * 
+	 * If this object is not in 
+	 * 
+	 * @param selections
+	 * @return
+	 */
+	public String getAxis(List<CheckableObject> selections, boolean is2D, boolean isXFirst) {
+		
+		if (is2D) return isChecked() ? "-" : "";
+		int axis = getAxisIndex(selections, isXFirst);
+		if (axis<0) return "";
+		if (axis==0) {
+			return isXFirst ? "X" : "Y1";
+		}
+		return "Y"+axis;
+	}
+	
+	public int getAxisIndex(List<CheckableObject> selections, boolean isXFirst) {
+		if (selections!=null&&!selections.isEmpty()) {
+			if (selections.size()>1) {
+				if (selections.contains(this)) {
+					if (selections.indexOf(this)==0) {
+						return isXFirst ? 0 : 1;
+					}
+					return yaxis;
+				}
+			} if (selections.size()==1 && selections.contains(this)) {
+				return yaxis;
+			}
+		}
+		
+        return -1;
+    }
+	
+	private int yaxis = 1;
+	public int getYaxis() {
+		return yaxis;
+	}
+	public void setYaxis(int yaxis) {
+		this.yaxis = yaxis;
+	}
+	
+ }
