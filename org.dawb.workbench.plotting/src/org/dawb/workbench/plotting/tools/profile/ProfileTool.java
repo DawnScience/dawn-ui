@@ -323,7 +323,10 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 	
 	protected synchronized void update(IRegion r, ROIBase rb, boolean isDrag) {
 	
-		if (r!=null && !isRegionTypeSupported(r.getRegionType())) return; // Nothing to do.
+		if (r!=null) {
+			if(!isRegionTypeSupported(r.getRegionType())) return; // Nothing to do.
+			if (!r.isUserRegion()) return; // Likewise
+		}
          
 		updateProfiles.profile(r, rb, isDrag);
 	}
@@ -383,6 +386,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 				final Collection<IRegion> regions = getPlottingSystem().getRegions();
 				if (regions!=null) {
 					for (IRegion iRegion : regions) {
+						if (!iRegion.isUserRegion()) continue;
 						if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
 						createProfile(image, iRegion, null, false, isDrag, monitor);
 					}
