@@ -84,13 +84,14 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 			bean.setTraceName(iTrace.getName());
 			bean.setPlotColour(lineTrace.getTraceColor().getRGB());
 			bean.setPlotName(getPlottingSystem().getPlotName());
+			bean.setSelected(true);
 			history.put(bean.getTraceKey(), bean);
 		}
 		refresh();
 	}
 
 	private ITraceListener autoAddTraceListener;
-	
+	private static Action autoAdd;
 	/**
 	 * May be overridden to provide additional actions.
 	 */
@@ -102,14 +103,9 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 				addTraces(); // Adds anything it can.
 			}
 		};
-		final Action autoAdd = new Action("Automatically add any new plots to history", IAction.AS_CHECK_BOX) {
+		if (autoAdd==null) autoAdd = new Action("Automatically add any new plots to history", IAction.AS_CHECK_BOX) {
 			public void run() {
-				if (isChecked()) {
-					getPlottingSystem().addTraceListener(autoAddTraceListener);
-					addTraces();
-				} else {
-					getPlottingSystem().removeTraceListener(autoAddTraceListener);
-				}
+				toggleAutomaticallyAddTraces();
 			}
 		};
 		getSite().getActionBars().getToolBarManager().add(autoAdd);
@@ -120,6 +116,31 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 		
 		return super.createActions(rightClick);
 	}
+	
+	protected void toggleAutomaticallyAddTraces() {
+		if (autoAdd==null)              return;
+		if (autoAddTraceListener==null) return;
+		if (getPlottingSystem()==null)  return;
+		if (autoAdd.isChecked()) {
+			getPlottingSystem().addTraceListener(autoAddTraceListener);
+			addTraces();
+		} else {
+			getPlottingSystem().removeTraceListener(autoAddTraceListener);
+		}		
+	}
+	
+	public void activate() {
+		super.activate();
+		toggleAutomaticallyAddTraces();
+	}
+	
+	public void deactivate() {
+		super.deactivate();
+		if (autoAddTraceListener==null) return;
+		if (getPlottingSystem()==null)  return;
+		getPlottingSystem().removeTraceListener(autoAddTraceListener);
+	}
+
 	protected void createColumns(TableViewer viewer) {
 		
 		ColumnViewerToolTipSupport.enableFor(viewer,ToolTip.NO_RECREATE);
@@ -148,7 +169,7 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 
 		var = new TableViewerColumn(viewer, SWT.CENTER, 4);
 		var.getColumn().setText("Color");
-		var.getColumn().setWidth(60);
+		var.getColumn().setWidth(70);
 		var.setLabelProvider(new HistoryLabelProvider());
 		
 	}   
@@ -252,7 +273,7 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 			     return Arrays.toString(bean.getYdata().getShape());
 			}
 			if (columnIndex==4) {
-			     return "-------";
+			     return "\u220E\u220E\u220E\u220E";
 			}
 			return "";
 		}
