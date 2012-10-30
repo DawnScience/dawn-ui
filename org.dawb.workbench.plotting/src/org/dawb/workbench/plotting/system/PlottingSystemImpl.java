@@ -84,7 +84,6 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	private PlotActionsManagerImpl       actionBarManager;
 	private LightWeightPlotViewer        lightWeightViewer;
 	private JRealityPlotViewer           jrealityViewer;
-	protected PlotType plottingMode = PlotType.XY;
 	
 	public PlottingSystemImpl() {
 		super();

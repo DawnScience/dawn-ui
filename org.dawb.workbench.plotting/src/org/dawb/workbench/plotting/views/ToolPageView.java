@@ -19,6 +19,7 @@ import java.util.Set;
 import org.dawb.common.ui.plot.EmptyTool;
 import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.tool.IToolChangeListener;
+import org.dawb.common.ui.plot.tool.IToolContainer;
 import org.dawb.common.ui.plot.tool.IToolPage;
 import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
 import org.dawb.common.ui.plot.tool.IToolPageSystem;
@@ -89,7 +90,7 @@ import org.slf4j.LoggerFactory;
  * @author fcp94556
  *
  */
-public class ToolPageView extends ViewPart implements IPartListener, IToolChangeListener { // Important: whole part must be IToolChangeListener
+public class ToolPageView extends ViewPart implements IPartListener, IToolChangeListener, IToolContainer { // Important: whole part must be IToolChangeListener
 
 	/**
 	 * The pagebook control, or <code>null</code> if not initialized.
@@ -1393,5 +1394,10 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 
 	public String toString() {
 		return ((IToolPage)getCurrentPage()).getTitle();
+	}
+
+	@Override
+	public IToolPage getActiveTool() {
+		return (IToolPage)getCurrentPage();
 	}
 }

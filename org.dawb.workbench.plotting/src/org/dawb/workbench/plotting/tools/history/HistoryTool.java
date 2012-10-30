@@ -83,7 +83,14 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 			bean.setYdata(lineTrace.getYData());
 			bean.setTraceName(iTrace.getName());
 			bean.setPlotColour(lineTrace.getTraceColor().getRGB());
+			
 			bean.setPlotName(getPlottingSystem().getPlotName());
+		    if (isLinkedToolPage()) {
+				// Go back up one so that history of profiles can be done.
+		    	// This is the plotting system for the image, so we take the
+		    	// image name and use that.
+				bean.setPlotName(getLinkedToolPage().getPlottingSystem().getPlotName());
+			}
 			bean.setSelected(true);
 			history.put(bean.getTraceKey(), bean);
 		}

@@ -22,6 +22,7 @@ import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingFactory;
+import org.dawb.common.ui.plot.axis.IAxis;
 import org.dawb.common.ui.plot.tool.IToolPageSystem;
 import org.dawb.common.ui.slicing.SliceComponent;
 import org.dawb.common.ui.util.EclipseUtils;
@@ -294,17 +295,35 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 	private void createPlot(final CheckableObject[] selections, final IPlotUpdateParticipant participant, final IProgressMonitor monitor) {
 		
 		final AbstractDataset x  = getDataSet(selections[0], monitor);
-		List<AbstractDataset> ys = null;
+		Map<Integer,List<AbstractDataset>> ys = null;
 		if (selections.length>1) {
-			ys = getYS(1, selections, monitor);
+			for (int i = 1; i <= 4; i++) {
+				List<AbstractDataset> tmp = getYS(i, selections, monitor);
+                if (tmp!=null) {
+                	if (ys==null) ys = new HashMap<Integer,List<AbstractDataset>>(4);
+                	ys.put(i, tmp);
+                }
+                
+			}
 		}
 
 		if (monitor.isCanceled()) return;
 		plottingSystem.clear();
 		if (participant.getPlotMode()==PlotType.IMAGE) {
-		    plottingSystem.createPlot2D(x, ys, monitor);
+		    plottingSystem.createPlot2D(x, null, monitor);
 		} else {
-			plottingSystem.createPlot1D(x, ys, getEditorInput().getName(), monitor);
+			if (ys==null) {
+			    plottingSystem.createPlot1D(x, null, getEditorInput().getName(), monitor);
+			} else {
+				// Create the ys on each of their axes
+				IAxis primaryY = plottingSystem.getSelectedYAxis();
+				try {
+					//TODO FIXME
+					plottingSystem.createPlot1D(x, ys.get(1), getEditorInput().getName(), monitor);
+				} finally {
+					plottingSystem.setSelectedYAxis(primaryY);
+				}
+			}
 		}
 		monitor.done();
 	}

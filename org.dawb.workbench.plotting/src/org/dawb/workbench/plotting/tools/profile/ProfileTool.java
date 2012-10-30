@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
+import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingFactory;
 import org.dawb.common.ui.plot.region.IROIListener;
@@ -18,9 +19,7 @@ import org.dawb.common.ui.plot.region.RegionEvent;
 import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
 import org.dawb.common.ui.plot.tool.IDataReductionToolPage;
-import org.dawb.common.ui.plot.tool.IToolPage;
 import org.dawb.common.ui.plot.tool.IToolPageSystem;
-import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.IPaletteListener;
@@ -437,4 +436,10 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 	public boolean isProfileTool() {
 		return true;
 	}
+	
+	@Override
+	public IPlottingSystem getToolPlottingSystem() {
+		return profilePlottingSystem;
+	}
+
 }
