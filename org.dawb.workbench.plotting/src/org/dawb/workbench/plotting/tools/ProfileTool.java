@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
+import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingFactory;
 import org.dawb.common.ui.plot.region.IROIListener;
@@ -414,4 +415,11 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		
 		return getImageTrace().getData().getMetadata();
 	}
+	
+	
+	@Override
+	public IPlottingSystem getToolPlottingSystem() {
+		return profilePlottingSystem;
+	}
+
 }

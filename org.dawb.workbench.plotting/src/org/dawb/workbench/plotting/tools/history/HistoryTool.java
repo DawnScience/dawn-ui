@@ -6,11 +6,14 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
+import org.dawb.common.ui.plot.IPlottingSystem;
+import org.dawb.common.ui.plot.tool.IToolPage;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.workbench.plotting.Activator;
+import org.dawb.workbench.plotting.views.ToolPageView;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.Action;
@@ -33,6 +36,7 @@ import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.IWorkbenchPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,11 +88,52 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 			bean.setTraceName(iTrace.getName());
 			bean.setPlotColour(lineTrace.getTraceColor().getRGB());
 			bean.setPlotName(getPlottingSystem().getPlotName());
+		    if (isLinkedToolPage()) {
+				// Go back up one so that history of profiles can be done.
+		    	// This is the plotting system for the image.
+				bean.setPlotName(getLinkedToolPage().getPlottingSystem().getPlotName());
+			}
 			bean.setSelected(true);
 			history.put(bean.getTraceKey(), bean);
 		}
 		refresh();
 	}
+	
+	/**
+	 * returns true if we are linked to an IToolPage
+	 * @return
+	 */
+	protected boolean isLinkedToolPage() {
+		return getLinkedToolPage()!=null;
+	}
+	
+	/**
+	 * Returns tool page we are a sub tool of or null if we are not
+	 * @return
+	 */
+    protected IToolPage getLinkedToolPage() {
+    	final IWorkbenchPart part = getPart();
+        if (part instanceof ToolPageView) {
+    		// Go back up one so that history of profiles can be done.
+    		ToolPageView tView  = (ToolPageView)getPart();
+    		if (tView.getCurrentPage() !=null) {
+    			final IToolPage tPage = (IToolPage)tView.getCurrentPage();
+    			return tPage;
+    		}
+    	}
+   	    return null;
+    }
+    
+    protected IPlottingSystem getLinkedToolPlot() {
+    	IToolPage linkedTool = getLinkedToolPage();
+    	return linkedTool !=null ? linkedTool.getToolPlottingSystem() : null;
+    }
+    
+    public IPlottingSystem getPlottingSystem() {
+    	if (getLinkedToolPlot()!=null) return getLinkedToolPlot();
+    	return super.getPlottingSystem();
+    }
+
 
 	private ITraceListener autoAddTraceListener;
 	private static Action autoAdd;
@@ -179,6 +224,11 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 	 */
 	protected void updatePlot(HistoryBean bean) {
 		
+		
+		if (getPlottingSystem().is2D()) {
+			logger.error("Plotting system is plotting 2D data, history should not be active.");
+			return;
+		}
 		if (updatingAPlotAlready) return;
 		try {
 			updatingAPlotAlready = true;
