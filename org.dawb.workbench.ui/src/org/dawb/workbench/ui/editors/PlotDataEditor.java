@@ -12,6 +12,7 @@ package org.dawb.workbench.ui.editors;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -92,8 +93,11 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 	private Composite                   tools;
 	private IMetaData                   metaData;
 	private PlotType                    defaultPlotType;
+	private Map<Integer, IAxis>         axisMap;
 
 	public PlotDataEditor(boolean useCaching, final PlotType defaultPlotType) {
+		
+	    this.axisMap = new HashMap<Integer, IAxis>(4);
 		try {
 			this.defaultPlotType= defaultPlotType;
 	        this.plottingSystem = PlottingFactory.createPlottingSystem();
@@ -173,7 +177,14 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		plot.setLayout(new FillLayout());
 		plot.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         plottingSystem.createPlotPart(plot, plotName, wrapper, defaultPlotType, this);
-			
+        
+        axisMap.put(1, plottingSystem.getSelectedYAxis());
+        for (int i = 2; i <=4; i++) {
+        	final IAxis yAxis = plottingSystem.createAxis("Y"+i, true, SWT.LEFT);
+        	yAxis.setVisible(false);
+            axisMap.put(i, yAxis);
+		}
+        
  		if (rightMan!=null) {
  		    Action menuAction = new Action("", Activator.getImageDescriptor("/icons/DropDown.png")) {
  		        @Override
@@ -294,46 +305,80 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 	
 	private void createPlot(final CheckableObject[] selections, final IPlotUpdateParticipant participant, final IProgressMonitor monitor) {
 		
-		final AbstractDataset x  = getDataSet(selections[0], monitor);
-		Map<Integer,List<AbstractDataset>> ys = null;
-		if (selections.length>1) {
-			for (int i = 1; i <= 4; i++) {
-				List<AbstractDataset> tmp = getYS(i, selections, monitor);
-                if (tmp!=null) {
-                	if (ys==null) ys = new HashMap<Integer,List<AbstractDataset>>(4);
-                	ys.put(i, tmp);
-                }
-                
-			}
-		}
 
 		if (monitor.isCanceled()) return;
 		plottingSystem.clear();
 		if (participant.getPlotMode()==PlotType.IMAGE) {
-		    plottingSystem.createPlot2D(x, null, monitor);
+		    plottingSystem.createPlot2D(getDataSet(selections[0], monitor), null, monitor);
+		    
 		} else {
-			if (ys==null) {
-			    plottingSystem.createPlot1D(x, null, getEditorInput().getName(), monitor);
+			List<CheckableObject> sels = new ArrayList<CheckableObject>(Arrays.asList(selections));
+			final AbstractDataset data = getDataSet(sels.get(0), monitor);
+
+			final AbstractDataset x;
+			if (plottingSystem.isXfirst()) {
+				x  = data;
+				sels.remove(0);
 			} else {
-				// Create the ys on each of their axes
-				IAxis primaryY = plottingSystem.getSelectedYAxis();
-				try {
-					//TODO FIXME
-					plottingSystem.createPlot1D(x, ys.get(1), getEditorInput().getName(), monitor);
-				} finally {
-					plottingSystem.setSelectedYAxis(primaryY);
-				}
+				x = null;
 			}
+			
+			if (sels.isEmpty() || (!plottingSystem.isXfirst() && sels.size()==1)) {
+		        plottingSystem.createPlot1D(x, Arrays.asList(data), getEditorInput().getName(), monitor);
+		        return;
+			}
+
+            final Map<Integer,List<AbstractDataset>> ys = sels.isEmpty()
+                                                       ? null
+                                		               : new HashMap<Integer,List<AbstractDataset>>(4);
+
+           // Sort ys by axes (for 2D there is one y)
+            if (!sels.isEmpty()) {
+        	   for (int i = 1; i <= 4; i++) {
+        		   List<AbstractDataset> tmp = getYS(i, sels, monitor);
+        		   if (tmp!=null) {
+        			   ys.put(i, tmp);
+        		   }
+        	   }
+            }
+
+            Display.getDefault().syncExec(new Runnable() {
+            	public void run() {
+            		createPlotSeparateAxes(x,ys,monitor);
+            	}
+            });
+
 		}
 		monitor.done();
 	}
 
-	private List<AbstractDataset> getYS(int iyaxis, CheckableObject[] selections, IProgressMonitor monitor) {
+	protected void createPlotSeparateAxes(final AbstractDataset                    x,
+			                              final Map<Integer,List<AbstractDataset>> ys,
+			                              final IProgressMonitor                   monitor) {
+		try {
+			for (int i = 1; i <= 4; i++) {
+				final IAxis axis = axisMap.get(i);
+				if (ys.get(i)==null) {
+					axis.setVisible(false);
+					continue;
+				}
+				axis.setVisible(true);
+				plottingSystem.setSelectedYAxis(axis);	
+
+				plottingSystem.createPlot1D(x, ys.get(i), getEditorInput().getName(), monitor);
+			} 
+		} finally {
+			plottingSystem.setSelectedYAxis(axisMap.get(1));
+		}
+	}
+
+	private List<AbstractDataset> getYS(int iyaxis, List<CheckableObject> selections, IProgressMonitor monitor) {
 		
 		List<AbstractDataset> ys = new ArrayList<AbstractDataset>(3);
-		for (int i = 1; i < selections.length; i++) {
-			if (selections[i].getYaxis()!=iyaxis) continue;
-			ys.add(getDataSet(selections[i], monitor));
+		for (CheckableObject co : selections) {
+			
+			if (co.getYaxis()!=iyaxis) continue;
+			ys.add(getDataSet(co, monitor));
 			if (monitor.isCanceled()) return null;
 			monitor.worked(1);
 		}

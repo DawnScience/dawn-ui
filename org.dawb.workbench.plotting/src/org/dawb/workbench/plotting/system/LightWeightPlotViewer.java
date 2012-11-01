@@ -470,7 +470,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		trace.setPlottingSystem(system);
 
 		xyGraph.addImageTrace(trace);
-		
+		removeAdditionalAxes();
 		return trace;
 	}
 
@@ -580,6 +580,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 			system.setPlotType(PlotType.IMAGE); // Only one image allowed at a time
 			system.fireWillPlot(new TraceWillPlotEvent(trace, true));
 			xyGraph.addImageTrace((ImageTrace)trace);
+			removeAdditionalAxes(); // Do not have others with images.
 						
 		} else {
 			system.setPlotType(PlotType.XY);
@@ -612,10 +613,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 			try {
 				clearAnnotations();
 				clearRegions();
-				for (Axis axis : xyGraph.getAxisList()) {
-					axis.setRange(0,100);
-					axis.setTitle("");
-				}
+				clearAxes();
 				clearTraces();
 	
 			} catch (Throwable e) {
@@ -624,6 +622,24 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		}
 	}
 		
+	private void clearAxes() {
+		for (Axis axis : xyGraph.getAxisList()) {
+			axis.setRange(0,100);
+			axis.setTitle("");
+			if (axis!=getSelectedXAxis() && axis!=getSelectedYAxis()) {
+				axis.setVisible(false);
+			}
+		}
+	}
+	
+	protected void removeAdditionalAxes() {
+		for (Axis axis : xyGraph.getAxisList()) {
+			if (axis!=getSelectedXAxis() && axis!=getSelectedYAxis()) {
+				axis.setVisible(false);
+			}
+		}
+	}
+
 
 	@Override
 	public IAnnotation createAnnotation(final String name) throws Exception {
