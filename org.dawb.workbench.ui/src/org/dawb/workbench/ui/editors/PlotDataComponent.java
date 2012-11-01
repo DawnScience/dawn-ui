@@ -66,7 +66,6 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceDialog;
@@ -75,10 +74,8 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.eclipse.jface.viewers.ColumnPixelData;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
-import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ComboBoxCellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.ICellModifier;
@@ -111,9 +108,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorPart;
@@ -168,8 +163,6 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 	private Stub traceListener;
 
 	private IToolChangeListener toolListener;
-
-	private TableColumnLayout tableColumnLayout;
 	
 	public PlotDataComponent(final IPlottingSystemData providerDeligate) {
 				
@@ -200,15 +193,15 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 						logger.error("Unable to refresh data set list", ne);
 					}
 				} else if (event.getProperty().equals(EditorConstants.SHOW_XY_COLUMN)) {
-					setColumnVisible(tableColumnLayout, 1, 32, (Boolean)event.getNewValue());
+					setColumnVisible(1, 32, (Boolean)event.getNewValue());
 				} else if (event.getProperty().equals(EditorConstants.SHOW_DATA_SIZE)) {
-					setColumnVisible(tableColumnLayout, 2, 100, (Boolean)event.getNewValue());
+					setColumnVisible(2, 100, (Boolean)event.getNewValue());
 				} else if (event.getProperty().equals(EditorConstants.SHOW_DIMS)) {
-					setColumnVisible(tableColumnLayout, 3, 100, (Boolean)event.getNewValue());
+					setColumnVisible(3, 100, (Boolean)event.getNewValue());
 				} else if (event.getProperty().equals(EditorConstants.SHOW_SHAPE)) {
-					setColumnVisible(tableColumnLayout, 4, 100, (Boolean)event.getNewValue());
+					setColumnVisible(4, 100, (Boolean)event.getNewValue());
 				} else if (event.getProperty().equals(EditorConstants.SHOW_VARNAME)) {
-					setColumnVisible(tableColumnLayout, 5, 100, (Boolean)event.getNewValue());
+					setColumnVisible(5, 100, (Boolean)event.getNewValue());
 				}
 			}
 		};
@@ -220,17 +213,10 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 		return container;
 	}
 
-	protected void setColumnVisible(final TableColumnLayout layout, final int col, final int sugWidth, boolean isVis) {
+	protected void setColumnVisible(final int col, final int width, boolean isVis) {
 		if (this.dataViewer==null || this.dataViewer.getControl().isDisposed()) return;
-		final TableColumn column = dataViewer.getTable().getColumn(col);
-		if (isVis) {
-		    layout.setColumnData(column, new ColumnWeightData(sugWidth));
-		} else {
-		    layout.setColumnData(column, new ColumnPixelData(0,false));
-		}
-		if (dataViewer!=null) {
-			dataViewer.getTable().getParent().layout(new Control[]{dataViewer.getTable()});
-		}
+		dataViewer.getTable().getColumn(col).setWidth(isVis?width:0);
+		dataViewer.getTable().getColumn(col).setResizable(isVis?true:false);
 	}
 	
 	/**
@@ -253,21 +239,16 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 		final Text searchText = new Text(container, SWT.SINGLE | SWT.BORDER | SWT.SEARCH | SWT.ICON_CANCEL);
 		searchText.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
 		searchText.setToolTipText("Search on data set name or shape\nFor instance '132, 4096' to find all of that shape." );
-			
-		final Composite tableComp = new Composite(container, SWT.NONE);
-		tableComp.setLayoutData(new GridData(GridData.FILL_BOTH));
-
-		this.tableColumnLayout = new TableColumnLayout();
-		tableComp.setLayout(tableColumnLayout);
-
-		this.dataViewer = new TableViewer(tableComp, SWT.FULL_SELECTION | SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+				
+		this.dataViewer = new TableViewer(container, SWT.FULL_SELECTION | SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER | SWT.VIRTUAL);
 		
+		dataViewer.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
 		dataViewer.getTable().addMouseListener(this);
 		dataViewer.getTable().addKeyListener(this);
 		dataViewer.getTable().setLinesVisible(true);
 		dataViewer.getTable().setHeaderVisible(true);
 		
-		createColumns(tableColumnLayout);
+		createColumns();
         dataViewer.setColumnProperties(new String[]{"Data","Length"});
         
         dataViewer.setCellEditors(createCellEditors(dataViewer));
@@ -296,11 +277,11 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 				
 		createRightClickMenu();
 		
-		setColumnVisible(tableColumnLayout, 1, 36,  Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_XY_COLUMN));
-		setColumnVisible(tableColumnLayout, 2, 150, Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_DATA_SIZE));
-		setColumnVisible(tableColumnLayout, 3, 150, Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_DIMS));
-		setColumnVisible(tableColumnLayout, 4, 180, Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_SHAPE));
-		setColumnVisible(tableColumnLayout, 5, 150, Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_VARNAME));
+		setColumnVisible(1, 36,  Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_XY_COLUMN));
+		setColumnVisible(2, 150, Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_DATA_SIZE));
+		setColumnVisible(3, 150, Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_DIMS));
+		setColumnVisible(4, 180, Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_SHAPE));
+		setColumnVisible(5, 150, Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_VARNAME));
 	
 		try {
 
@@ -568,44 +549,44 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 		return null;
 	}
 
-	private void createColumns(TableColumnLayout tLayout) {
+	private void createColumns() {
 		
 		ColumnViewerToolTipSupport.enableFor(dataViewer,ToolTip.NO_RECREATE);
 		
 		final TableViewerColumn name   = new TableViewerColumn(dataViewer, SWT.LEFT, 0);
 		name.getColumn().setText("Name");
+		name.getColumn().setWidth(180);
 		name.setLabelProvider(new DataSetColumnLabelProvider(0));
-		tLayout.setColumnData(name.getColumn(), new ColumnWeightData(180));
 		
 		final TableViewerColumn axis   = new TableViewerColumn(dataViewer, SWT.LEFT, 1);
 		axis.getColumn().setText(" ");
+		axis.getColumn().setWidth(32);
 		axis.setLabelProvider(new DataSetColumnLabelProvider(1));
 		axis.setEditingSupport(new AxisEditingSupport(dataViewer));
-		tLayout.setColumnData(axis.getColumn(), new ColumnWeightData(32));
 
 		final TableViewerColumn size   = new TableViewerColumn(dataViewer, SWT.LEFT, 2);
 		size.getColumn().setText("Size");
+		size.getColumn().setWidth(150);
 		size.getColumn().setResizable(true);
 		size.setLabelProvider(new DataSetColumnLabelProvider(2));
-		tLayout.setColumnData(size.getColumn(), new ColumnWeightData(150));
 			
 		final TableViewerColumn dims   = new TableViewerColumn(dataViewer, SWT.LEFT, 3);
 		dims.getColumn().setText("Dimensions");
+		dims.getColumn().setWidth(150);
 		dims.getColumn().setResizable(true);
 		dims.setLabelProvider(new DataSetColumnLabelProvider(3));
-		tLayout.setColumnData(dims.getColumn(), new ColumnWeightData(150));
 		
 		final TableViewerColumn shape   = new TableViewerColumn(dataViewer, SWT.LEFT, 4);
 		shape.getColumn().setText("Shape");
+		shape.getColumn().setWidth(200);
 		shape.getColumn().setResizable(true);
 		shape.setLabelProvider(new DataSetColumnLabelProvider(4));
-		tLayout.setColumnData(shape.getColumn(), new ColumnWeightData(200));
 
 		final TableViewerColumn varName   = new TableViewerColumn(dataViewer, SWT.LEFT, 5);
 		varName.getColumn().setText("Variable");
+		varName.getColumn().setWidth(150);
 		varName.getColumn().setResizable(true);
 		varName.setLabelProvider(new DataSetColumnLabelProvider(5));
-		tLayout.setColumnData(varName.getColumn(), new ColumnWeightData(150));
 	}
 	
 	private CellEditor[] createCellEditors(final TableViewer tableViewer) {
