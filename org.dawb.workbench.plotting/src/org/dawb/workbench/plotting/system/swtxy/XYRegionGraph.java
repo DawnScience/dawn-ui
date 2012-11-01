@@ -178,8 +178,12 @@ public class XYRegionGraph extends XYGraph {
 			//super.getLegendMap().clear();
 		}
 		
-		primaryXAxis.clear();
-		primaryYAxis.clear();
+		for(Axis axis : getXAxisList()){
+			axis.clear();
+		}
+		for(Axis axis : getYAxisList()){
+			axis.clear();
+		}
 		getRegionArea().clearTraces();
 		
 		revalidate();

@@ -180,7 +180,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
         
         axisMap.put(1, plottingSystem.getSelectedYAxis());
         for (int i = 2; i <=4; i++) {
-        	final IAxis yAxis = plottingSystem.createAxis("Y"+i, true, SWT.LEFT);
+        	final IAxis yAxis = plottingSystem.createAxis("Y"+i, true, i%2==0?SWT.RIGHT:SWT.LEFT);
         	yAxis.setVisible(false);
             axisMap.put(i, yAxis);
 		}
