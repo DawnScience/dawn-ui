@@ -309,7 +309,10 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 
 		if (monitor.isCanceled()) return;
 		plottingSystem.clear();
+		
+		boolean requireFullRefresh = plottingSystem.getPlotType()!=participant.getPlotMode();
 		if (participant.getPlotMode()==PlotType.IMAGE) {
+			
 		    plottingSystem.createPlot2D(getDataSet(selections[0], monitor), null, monitor);
 		    
 		} else {
@@ -349,6 +352,10 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
             	}
             });
 
+		}
+		
+		if (requireFullRefresh) {
+			plottingSystem.repaint(true);
 		}
 		monitor.done();
 	}
