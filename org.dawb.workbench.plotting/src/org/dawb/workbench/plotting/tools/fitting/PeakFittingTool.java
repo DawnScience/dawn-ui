@@ -77,12 +77,14 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 						
 						if (FittingConstants.PEAK_NUMBER.equals(event.getProperty())) {
 							final int ipeak = Activator.getDefault().getPreferenceStore().getInt(FittingConstants.PEAK_NUMBER);
-							if (ipeak<11) {
-								numberPeaks.setSelectedAction(ipeak-1);
-								numberPeaks.setCheckedAction(ipeak-1, true);
-							} else {
-								numberPeaks.setSelectedAction(10);
-								numberPeaks.setCheckedAction(10, true);
+							if (numberPeaks!=null) {
+								if (ipeak<11) {
+									numberPeaks.setSelectedAction(ipeak-1);
+									numberPeaks.setCheckedAction(ipeak-1, true);
+								} else {
+									numberPeaks.setSelectedAction(10);
+									numberPeaks.setCheckedAction(10, true);
+								}
 							}
 						}
 					}
