@@ -36,6 +36,6 @@ public class EditorPreferenceInitializer extends AbstractPreferenceInitializer {
 		store.setDefault(EditorConstants.SAVE_LOG_FORMAT,         false);
 		store.setDefault(EditorConstants.SAVE_TIME_FORMAT,        false);
 		store.setDefault(EditorConstants.SAVE_FORMAT_STRING,      false);
-       
+		store.setDefault(EditorConstants.RESCALE_SETTING,         true);
 	}
 }

@@ -1042,6 +1042,12 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		lightWeightViewer.setXFirst(xfirst);
 	}
 	
+	public void setRescale(boolean rescale) {
+		super.setRescale(rescale);
+		lightWeightViewer.setRescale(rescale);
+	}
+	
+	
 	/**
 	 * NOTE This listener is *not* notified once for each configuration setting made on 
 	 * the configuration but once whenever the form is applied by the user (and many things
@@ -1053,11 +1059,15 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	 * 
 	 * @param listener
 	 */
+	@Override
 	public void addPropertyChangeListener(IPropertyChangeListener listener) {
+		super.addPropertyChangeListener(listener);
 		lightWeightViewer.addPropertyChangeListener(listener);
 	}
 	
+	@Override
 	public void removePropertyChangeListener(IPropertyChangeListener listener) {
+		super.removePropertyChangeListener(listener);
 		lightWeightViewer.removePropertyChangeListener(listener);
 	}
 

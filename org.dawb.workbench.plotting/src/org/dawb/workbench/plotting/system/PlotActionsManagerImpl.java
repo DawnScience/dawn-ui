@@ -30,9 +30,7 @@ import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IContributionManager;
-import org.eclipse.jface.action.Separator;
 import org.eclipse.swt.graphics.PaletteData;
-import org.eclipse.ui.IActionBars;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -217,6 +215,7 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 		registerMenuBarGroup(lutCombo.getId()+".group");
 		registerAction(lutCombo.getId()+".group", lutCombo, ActionType.ALL, ManagerType.MENUBAR);
 	}
+
 
 
 }

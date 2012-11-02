@@ -511,4 +511,8 @@ class LightWeightPlotActions {
 			if (plotIndex!=null) plotIndex.setChecked(true);
 		}
 	}
+
+	public void setRescaleButton(boolean rescale) {
+		actionBarManager.findAction("org.dawb.workbench.plotting.rescale").setChecked(rescale);
+	}
 }

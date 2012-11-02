@@ -38,5 +38,7 @@ public class EditorConstants {
 	public static final String SAVE_LOG_FORMAT       = "data.format.save.log.format";
 	public static final String SAVE_TIME_FORMAT      = "data.format.save.time.format";
 	public static final String SAVE_FORMAT_STRING    = "data.format.save.time.format";
+	
+	public static final String RESCALE_SETTING       = "org.dawb.workbench.ui.editors.preference.plot.editor.rescale";
 
 }

@@ -1010,4 +1010,8 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		this.plotActionsCreator.setXfirstButtons(xfirst);
 	}
 
+	public void setRescale(boolean rescale) {
+		this.plotActionsCreator.setRescaleButton(rescale);
+	}
+
 }

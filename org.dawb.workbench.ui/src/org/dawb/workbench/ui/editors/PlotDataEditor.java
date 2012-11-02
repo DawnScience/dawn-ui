@@ -31,6 +31,7 @@ import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.views.PlotDataView;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawb.workbench.ui.Activator;
+import org.dawb.workbench.ui.editors.preference.EditorConstants;
 import org.dawb.workbench.ui.editors.slicing.ExpressionObject;
 import org.dawb.workbench.ui.views.PlotDataPage;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -42,6 +43,8 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
@@ -101,6 +104,15 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		try {
 			this.defaultPlotType= defaultPlotType;
 	        this.plottingSystem = PlottingFactory.createPlottingSystem();
+	        
+	        plottingSystem.addPropertyChangeListener(new IPropertyChangeListener() {				
+				@Override
+				public void propertyChange(PropertyChangeEvent event) {
+					if (IPlottingSystem.RESCALE_ID.equals(event.getProperty())) {
+						Activator.getDefault().getPreferenceStore().setValue(EditorConstants.RESCALE_SETTING, (Boolean)event.getNewValue());
+					}
+				}
+			});
 		} catch (Exception ne) {
 			logger.error("Cannot locate any plotting systems!", ne);
 		}
@@ -214,6 +226,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		
 		getEditorSite().setSelectionProvider(plottingSystem.getSelectionProvider());
 
+		plottingSystem.setRescale(Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.RESCALE_SETTING));
  	}
 	
 	/**
