@@ -1039,6 +1039,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	
 	public void setXfirst(boolean xfirst) {
 		super.setXfirst(xfirst);
+		lightWeightViewer.setXFirst(xfirst);
 	}
 	
 	/**

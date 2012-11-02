@@ -1006,4 +1006,8 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		return system;
 	}
 
+	public void setXFirst(boolean xfirst) {
+		this.plotActionsCreator.setXfirstButtons(xfirst);
+	}
+
 }
