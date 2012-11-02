@@ -20,6 +20,8 @@ import org.dawb.workbench.plotting.Activator;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -38,6 +40,7 @@ public class FittingPreferencePage extends PreferencePage implements IWorkbenchP
 	
 	private FloatSpinner accuracy;
 	private Spinner smoothing;
+	private Spinner peakNumber;
 
 	public FittingPreferencePage() {
 
@@ -79,7 +82,12 @@ public class FittingPreferencePage extends PreferencePage implements IWorkbenchP
 
 		accuracy = new FloatSpinner(algGroup, SWT.NONE, 6, 5);
 		accuracy.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
-
+		accuracy.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				storePreferences();
+			}			
+		});
+		
 		Label smoothingLab = new Label(algGroup, SWT.NONE);
 		smoothingLab.setText("Smoothing");
 		smoothingLab.setToolTipText("Smoothing over that many data points will be applied by the peak searching algorithm");
@@ -89,6 +97,28 @@ public class FittingPreferencePage extends PreferencePage implements IWorkbenchP
 		smoothing.setDigits(0);
 		smoothing.setMinimum(0);
 		smoothing.setMaximum(10000);
+		smoothing.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				storePreferences();
+			}			
+		});
+		
+		
+		Label peaksLab = new Label(algGroup, SWT.NONE);
+		peaksLab.setText("Number of peaks");
+		peaksLab.setToolTipText("The peak number to fit");
+
+		peakNumber = new Spinner(algGroup, SWT.NONE);
+		peakNumber.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
+		peakNumber.setDigits(0);
+		peakNumber.setMinimum(1);
+		peakNumber.setMaximum(1000);
+		peakNumber.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				storePreferences();
+			}			
+		});
+
 		
 		// initialize
 		initializePage();
@@ -98,6 +128,7 @@ public class FittingPreferencePage extends PreferencePage implements IWorkbenchP
 	private void initializePage() {
 		accuracy.setDouble(getAccuracy());
 		smoothing.setSelection(getSmoothing());
+		peakNumber.setSelection(getPeakNumber());
 	}
 
 	@Override
@@ -110,17 +141,23 @@ public class FittingPreferencePage extends PreferencePage implements IWorkbenchP
 	protected void performDefaults() {
 		accuracy.setDouble(getDefaultAccuracy());
 		smoothing.setSelection(getDefaultSmoothing());
+		peakNumber.setSelection(getDefaultPeakNumber());
 	}
 
 
 	private void storePreferences() {
 		setAccuracy(accuracy.getDouble());
 		setSmoothing(smoothing.getSelection());
+		setPeakNumber(peakNumber.getSelection());
 	}
 
 
 	private int getDefaultSmoothing() {
 		return getPreferenceStore().getDefaultInt(FittingConstants.SMOOTHING);
+	}
+	
+	private int getDefaultPeakNumber() {
+		return getPreferenceStore().getDefaultInt(FittingConstants.PEAK_NUMBER);
 	}
 
 	private double getDefaultAccuracy() {
@@ -131,9 +168,16 @@ public class FittingPreferencePage extends PreferencePage implements IWorkbenchP
 	public int getSmoothing() {
 		return getPreferenceStore().getInt(FittingConstants.SMOOTHING);
 	}
+	
+	public int getPeakNumber() {
+		return getPreferenceStore().getInt(FittingConstants.PEAK_NUMBER);
+	}
 
 	public void setSmoothing(int smooth) {
 		getPreferenceStore().setValue(FittingConstants.SMOOTHING, smooth);
+	}
+	public void setPeakNumber(int num) {
+		getPreferenceStore().setValue(FittingConstants.PEAK_NUMBER, num);
 	}
 
 	public double getAccuracy() {

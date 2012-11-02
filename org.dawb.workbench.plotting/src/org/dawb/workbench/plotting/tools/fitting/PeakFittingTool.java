@@ -38,6 +38,8 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.PreferenceDialog;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -59,10 +61,43 @@ import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 public class PeakFittingTool extends AbstractFittingTool implements IRegionListener, IDataReductionToolPage {
 
 	private static final Logger logger = LoggerFactory.getLogger(PeakFittingTool.class);
-	
+	private MenuAction numberPeaks;
 
 	public PeakFittingTool() {
 		super();
+		
+		
+		Activator.getDefault().getPreferenceStore().addPropertyChangeListener(new IPropertyChangeListener() {
+			
+			@Override
+			public void propertyChange(PropertyChangeEvent event) {
+				if (isActive()) {
+					if (isInterestedProperty(event)) {
+						if (isActive()) fittingJob.fit();
+						
+						if (FittingConstants.PEAK_NUMBER.equals(event.getProperty())) {
+							final int ipeak = Activator.getDefault().getPreferenceStore().getInt(FittingConstants.PEAK_NUMBER);
+							if (ipeak<11) {
+								numberPeaks.setSelectedAction(ipeak-1);
+								numberPeaks.setCheckedAction(ipeak-1, true);
+							} else {
+								numberPeaks.setSelectedAction(10);
+								numberPeaks.setCheckedAction(10, true);
+							}
+						}
+					}
+				}
+ 			}
+
+			private boolean isInterestedProperty(PropertyChangeEvent event) {
+				final String propName = event.getProperty();
+				return FittingConstants.PEAK_NUMBER.equals(propName) ||
+					   FittingConstants.SMOOTHING.equals(propName)   ||
+					   FittingConstants.QUALITY.equals(propName);
+			}
+		});
+		
+
 	}
 
 	@Override
@@ -440,7 +475,7 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 		getSite().getActionBars().getToolBarManager().add(tracesMenu);
 		getSite().getActionBars().getMenuManager().add(tracesMenu);
 				
-		final MenuAction numberPeaks = new MenuAction("Number peaks to fit");
+		this.numberPeaks = new MenuAction("Number peaks to fit");
 		numberPeaks.setToolTipText("Number peaks to fit");
 				
 		group = new CheckableActionGroup();
@@ -452,9 +487,6 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 			final Action action = new Action("Fit "+String.valueOf(ipeak)+" Peaks", IAction.AS_CHECK_BOX) {
 				public void run() {
 					Activator.getDefault().getPreferenceStore().setValue(FittingConstants.PEAK_NUMBER, peak);
-					numberPeaks.setSelectedAction(this);
-					setChecked(true);
-					if (isActive()) fittingJob.fit();
 				}
 			};
 			
@@ -465,11 +497,36 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 			action.setToolTipText("Fit "+ipeak+" peak(s)");
 			
 		}
+		final Action preferences = new Action("Preferences...") {
+			public void run() {
+				if (!isActive()) return;
+				PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), FittingPreferencePage.ID, null, null);
+				if (pref != null) pref.open();
+			}
+		};
+		
+		final Action npeaks = new Action("Fit n Peaks", IAction.AS_CHECK_BOX) {
+			public void run() {
+				preferences.run();
+			}
+		};
+		
+		npeaks.setImageDescriptor(IconUtils.createIconDescriptor("n"));
+		numberPeaks.add(npeaks);
+		group.add(npeaks);
+		npeaks.setChecked(false);
+		npeaks.setToolTipText("Fit n peaks");
+
 
 		final int ipeak = Activator.getDefault().getPreferenceStore().getInt(FittingConstants.PEAK_NUMBER);
-		numberPeaks.setSelectedAction(ipeak-1);
-		numberPeaks.setCheckedAction(ipeak-1, true);
-		
+		if (ipeak<11) {
+			numberPeaks.setSelectedAction(ipeak-1);
+			numberPeaks.setCheckedAction(ipeak-1, true);
+		} else {
+			numberPeaks.setSelectedAction(11);
+			numberPeaks.setCheckedAction(11, true);
+		}
+			
 		getSite().getActionBars().getToolBarManager().add(numberPeaks);
 		//getSite().getActionBars().getMenuManager().add(numberPeaks);
 		
@@ -495,13 +552,6 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 		
 		getSite().getActionBars().getToolBarManager().add(delete);
 
-		final Action preferences = new Action("Preferences...") {
-			public void run() {
-				if (!isActive()) return;
-				PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), FittingPreferencePage.ID, null, null);
-				if (pref != null) pref.open();
-			}
-		};
 
 		getSite().getActionBars().getMenuManager().add(preferences);
 		
