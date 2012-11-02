@@ -311,6 +311,8 @@ class FittedFunction {
 		//buf.append("\t");
 		buf.append(format.format(getPosition()));
 		buf.append("\t");
+		buf.append(format.format(getPeakValue()));
+		buf.append("\t");
 		buf.append(format.format(getFWHM()));
 		buf.append("\t");
 		buf.append(format.format(getArea()));
@@ -323,6 +325,7 @@ class FittedFunction {
 		final StringBuilder buf = new StringBuilder();
 		//buf.append("Peak_Name\t");
 		buf.append("# Position\t");
+		buf.append("Fit\t");
 		buf.append("FWHM\t");
 		buf.append("Area\t");
 		//buf.append("Peak_Type\t");

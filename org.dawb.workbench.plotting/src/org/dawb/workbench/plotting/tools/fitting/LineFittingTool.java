@@ -4,6 +4,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.dawb.common.ui.image.IconUtils;
 import org.dawb.common.ui.menu.CheckableActionGroup;
@@ -49,29 +51,36 @@ public class LineFittingTool extends AbstractFittingTool {
 	 * Columns in the UI Table.
 	 */
 	@Override
-	protected void createColumns(TableViewer viewer) {
+	protected List<TableViewerColumn> createColumns(TableViewer viewer) {
 		// Columns for coefficients of polynomials maybe?
 		ColumnViewerToolTipSupport.enableFor(viewer,ToolTip.NO_RECREATE);
 
+		List<TableViewerColumn> ret = new ArrayList<TableViewerColumn>(9);
         TableViewerColumn var   = new TableViewerColumn(viewer, SWT.LEFT, 0);
 		var.getColumn().setText("Trace");
 		var.getColumn().setWidth(80);
 		var.setLabelProvider(new LineLabelProvider(0));
+		ret.add(var);
 
 		var   = new TableViewerColumn(viewer, SWT.LEFT, 1);
 		var.getColumn().setText("Name");
 		var.getColumn().setWidth(150);
 		var.setLabelProvider(new LineLabelProvider(1));
-		
+		ret.add(var);
+	
         var   = new TableViewerColumn(viewer, SWT.LEFT, 2);
 		var.getColumn().setText("Type");
 		var.getColumn().setWidth(200);
 		var.setLabelProvider(new LineLabelProvider(2));
-		
+		ret.add(var);
+	
         var   = new TableViewerColumn(viewer, SWT.CENTER, 3);
 		var.getColumn().setText("Equation");
 		var.getColumn().setWidth(300);
 		var.setLabelProvider(new LineLabelProvider(3));
+		ret.add(var);
+		
+		return ret;
 
 	}
 

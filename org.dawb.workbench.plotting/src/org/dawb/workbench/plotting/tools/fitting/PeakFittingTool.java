@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 import ncsa.hdf.object.Dataset;
@@ -65,30 +66,36 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 	}
 
 	@Override
-	protected void createColumns(final TableViewer viewer) {
+	protected List<TableViewerColumn> createColumns(final TableViewer viewer) {
 		
 		ColumnViewerToolTipSupport.enableFor(viewer,ToolTip.NO_RECREATE);
 
+		List<TableViewerColumn> ret = new ArrayList<TableViewerColumn>(9);
+		
         TableViewerColumn var   = new TableViewerColumn(viewer, SWT.LEFT, 0);
 		var.getColumn().setText("Trace");
 		var.getColumn().setWidth(80);
 		var.setLabelProvider(new PeakLabelProvider(0));
+		ret.add(var);
 
 		var   = new TableViewerColumn(viewer, SWT.LEFT, 1);
 		var.getColumn().setText("Name");
 		var.getColumn().setWidth(150);
 		var.setLabelProvider(new PeakLabelProvider(1));
+		ret.add(var);
 		
         var   = new TableViewerColumn(viewer, SWT.CENTER, 2);
 		var.getColumn().setText("Position");
 		var.getColumn().setWidth(100);
 		var.setLabelProvider(new PeakLabelProvider(2));
+		ret.add(var);
 		
         var   = new TableViewerColumn(viewer, SWT.CENTER, 3);
 		var.getColumn().setText("Data");
 		var.getColumn().setToolTipText("The nearest data value of the fitted peak.");
 		var.getColumn().setWidth(100);
 		var.setLabelProvider(new PeakLabelProvider(3));
+		ret.add(var);
 		
 		// Data Column not that useful, do not show unless property set.
 		if (!Boolean.getBoolean("org.dawb.workbench.plotting.tools.fitting.tool.data.column.required")) {
@@ -101,26 +108,33 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 		var.getColumn().setToolTipText("The value of the fitted peak.");
 		var.getColumn().setWidth(100);
 		var.setLabelProvider(new PeakLabelProvider(4));
+		ret.add(var);
 
 		var   = new TableViewerColumn(viewer, SWT.CENTER, 5);
 		var.getColumn().setText("FWHM");
 		var.getColumn().setWidth(100);
 		var.setLabelProvider(new PeakLabelProvider(5));
+		ret.add(var);
 		
         var   = new TableViewerColumn(viewer, SWT.CENTER, 6);
 		var.getColumn().setText("Area");
 		var.getColumn().setWidth(100);
 		var.setLabelProvider(new PeakLabelProvider(6));
+		ret.add(var);
 
         var   = new TableViewerColumn(viewer, SWT.CENTER, 7);
 		var.getColumn().setText("Type");
 		var.getColumn().setWidth(100);
 		var.setLabelProvider(new PeakLabelProvider(7));
+		ret.add(var);
 		
         var   = new TableViewerColumn(viewer, SWT.CENTER, 8);
 		var.getColumn().setText("Algorithm");
 		var.getColumn().setWidth(100);
 		var.setLabelProvider(new PeakLabelProvider(8));
+		ret.add(var);
+		
+		return ret;
 
 	}
 	
@@ -547,7 +561,7 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 		try {
 			writer.write(FittedFunction.getCVSTitle());
 			writer.newLine();
-			for (FittedFunction peak : this.fittedFunctions.getFunctionList()) {
+			for (FittedFunction peak : getSortedFunctionList()) {
 				writer.write(peak.getTabString());
 				writer.newLine();
 			}

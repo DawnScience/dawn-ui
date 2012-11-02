@@ -1,5 +1,6 @@
 package org.dawb.workbench.plotting.tools.fitting;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Vector;
@@ -30,15 +31,18 @@ import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Link;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.slf4j.Logger;
@@ -120,6 +124,20 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 
 	}
 	
+
+	/**
+	 * The fitted functions from the table for exporting.
+	 */
+	public List<FittedFunction> getSortedFunctionList() {
+		final List<FittedFunction> ret = new ArrayList<FittedFunction>(3);
+		for (int i = 0; i < viewer.getTable().getItemCount(); i++) {
+			final FittedFunction f = (FittedFunction)viewer.getElementAt(i);
+			ret.add(f);
+		}
+		return ret;
+	}
+
+	
 	public void sync(IToolPage with) {
 		if (!with.getClass().equals(getClass())) return;
 		final AbstractFittingTool other = (AbstractFittingTool)with;
@@ -145,6 +163,14 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 
 		viewer = new TableViewer(composite, SWT.FULL_SELECTION | SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
         createColumns(viewer);
+		
+		FittingViewerComparator vc = new FittingViewerComparator();
+		viewer.setComparator(vc);
+
+		for (int i = 0; i < viewer.getTable().getColumnCount(); i++) {
+			viewer.getTable().getColumn(i).addSelectionListener(getTableColumnSortListener(vc, i));
+		}
+        
 		viewer.getTable().setLinesVisible(true);
 		viewer.getTable().setHeaderVisible(true);
 		viewer.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
@@ -181,6 +207,19 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 		});
 		activate();
 	}
+	
+	protected SelectionListener getTableColumnSortListener(final FittingViewerComparator vc, final int index) {
+		return new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				vc.setColumn(index);
+				int dir = vc.getDirection();
+				viewer.getTable().setSortDirection(dir);
+				viewer.refresh();
+			}
+		};
+	}
+
 
 	/**
 	 * Implement method to provide colums with information on the type of fit
@@ -188,7 +227,7 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 	 * 
 	 * @param viewer
 	 */
-	protected abstract void createColumns(TableViewer viewer);
+	protected abstract List<TableViewerColumn> createColumns(TableViewer viewer);
 
 	private IContentProvider createContentProvider() {
 		return new IStructuredContentProvider() {
