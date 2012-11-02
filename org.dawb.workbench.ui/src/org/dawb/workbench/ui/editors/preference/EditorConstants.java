@@ -40,5 +40,6 @@ public class EditorConstants {
 	public static final String SAVE_FORMAT_STRING    = "data.format.save.time.format";
 	
 	public static final String RESCALE_SETTING       = "org.dawb.workbench.ui.editors.preference.plot.editor.rescale";
+	public static final String PLOT_DATA_NAME_WIDTH  = "org.dawb.workbench.ui.editors.preference.plot.editor.data.name.width";
 
 }

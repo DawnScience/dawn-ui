@@ -109,6 +109,9 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorPart;
@@ -555,7 +558,13 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 		
 		final TableViewerColumn name   = new TableViewerColumn(dataViewer, SWT.LEFT, 0);
 		name.getColumn().setText("Name");
-		name.getColumn().setWidth(180);
+		name.getColumn().setWidth(Math.max(30,Activator.getDefault().getPreferenceStore().getInt(EditorConstants.PLOT_DATA_NAME_WIDTH)));
+		name.getColumn().addListener(SWT.Resize, new Listener() {		
+			@Override
+			public void handleEvent(Event event) {
+				Activator.getDefault().getPreferenceStore().setValue(EditorConstants.PLOT_DATA_NAME_WIDTH, name.getColumn().getWidth());
+			}
+		});
 		name.setLabelProvider(new DataSetColumnLabelProvider(0));
 		
 		final TableViewerColumn axis   = new TableViewerColumn(dataViewer, SWT.LEFT, 1);
