@@ -15,7 +15,10 @@ Require-Bundle: org.eclipse.ui,
  org.dawb.hdf5;bundle-version="1.2.0",
  org.csstudio.swt.xygraph;bundle-version="1.1.0",
  org.dawb.common.gpu;bundle-version="1.0.0",
- org.dawnsci.plotting.jreality;bundle-version="1.0.0"
+ org.dawnsci.plotting.jreality;bundle-version="1.0.0",
+ org.dawb.common.services;bundle-version="1.2.0",
+ org.dawb.common.util;bundle-version="1.2.0",
+ uk.ac.gda.common.rcp;bundle-version="1.2.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: org.dawb.workbench.plotting.composites,
@@ -26,11 +29,6 @@ Export-Package: org.dawb.workbench.plotting.composites,
  org.dawb.workbench.plotting.tools.reduction,
  org.dawb.workbench.plotting.util
 Import-Package: ncsa.hdf.object,
- org.dawb.common.services,
- org.dawb.common.ui.plot.region,
- org.dawb.common.util.io,
- org.dawb.common.util.list,
- org.dawb.common.util.text,
  org.dawb.hdf5,
  org.eclipse.core.resources,
  org.eclipse.emf.common.ui.dialogs,
@@ -42,6 +40,5 @@ Import-Package: ncsa.hdf.object,
  uk.ac.diamond.scisoft.analysis.rcp.plotting,
  uk.ac.diamond.scisoft.analysis.rcp.util,
  uk.ac.diamond.scisoft.analysis.rcp.views,
- uk.ac.gda.monitor,
- uk.ac.gda.richbeans.components.scalebox
+ uk.ac.gda.monitor
 Bundle-ClassPath: .

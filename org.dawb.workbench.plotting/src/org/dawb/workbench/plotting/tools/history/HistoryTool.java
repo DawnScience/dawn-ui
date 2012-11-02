@@ -32,6 +32,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -203,8 +204,8 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 				Activator.getDefault().getLog().log(new Status(IStatus.WARNING, "org.dawb.workbench.plotting", message));
 				final ITrace trace = getPlottingSystem().getTrace(bean.getTraceName());
 				if (trace!=null) {
-					bean.setPlotColour(((ILineTrace)trace).getTraceColor().getRGB());
-					if (viewer!=null) viewer.refresh(bean);
+//					bean.setPlotColour(((ILineTrace)trace).getTraceColor().getRGB());
+//					if (viewer!=null) viewer.refresh(bean);
 					return;
 				}
 			}
@@ -223,15 +224,33 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 					final ILineTrace trace = getPlottingSystem().createLineTrace(traceName);
 					trace.setUserObject(HistoryType.HISTORY_PLOT);
 					trace.setData(bean.getXdata(), bean.getYdata());
-					getPlottingSystem().addTrace(trace);
-					bean.setPlotColour(trace.getTraceColor().getRGB());
-					if (viewer!=null) viewer.refresh(bean);
+					if (!isColourOk(bean.getPlotColour())) {
+						getPlottingSystem().addTrace(trace);
+						bean.setPlotColour(trace.getTraceColor().getRGB());
+						if (viewer!=null) viewer.refresh(bean);
+					} else {
+						trace.setTraceColor(new Color(null, bean.getPlotColour()));
+						getPlottingSystem().addTrace(trace);
+					}
 				}
 			}
 			((AbstractPlottingSystem)getPlottingSystem()).repaint();
 		} finally {
 			updatingAPlotAlready = false;
 		}
+	}
+
+	private boolean isColourOk(RGB plotColour) {
+		
+		if (plotColour==null) return false;
+		final Collection<ITrace> lines = getPlottingSystem().getTraces(ILineTrace.class);
+		for (ITrace iTrace : lines) {
+			final ILineTrace lineTrace = (ILineTrace)iTrace;
+			if (lineTrace.getTraceColor()!=null && lineTrace.getTraceColor().getRGB().equals(plotColour)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	private class HistoryLabelProvider extends ColumnLabelProvider {
