@@ -305,6 +305,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			
 			return true;
 			
+		} catch (NullPointerException ne) {
+			throw ne;
 		} catch (Throwable ne) {
 			logger.error("Image scale error!", ne);
 			return false;

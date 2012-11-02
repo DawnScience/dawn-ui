@@ -386,7 +386,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			    ((ISurfaceTrace)image).setData(data, axes);
 			}
 			return image;
-		} catch (Exception ne) { // We create a new one then
+		} catch (Throwable ne) { // We create a new one then
 			clear();
 			return createPlot2D(data, axes, monitor);
 		}
