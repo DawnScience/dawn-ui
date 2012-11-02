@@ -180,8 +180,9 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
         
         axisMap.put(1, plottingSystem.getSelectedYAxis());
         for (int i = 2; i <=4; i++) {
-        	final IAxis yAxis = plottingSystem.createAxis("Y"+i, true, i%2==0?SWT.RIGHT:SWT.LEFT);
+        	final IAxis yAxis = plottingSystem.createAxis("Y"+i, true, i==3||i==4?SWT.RIGHT:SWT.LEFT);
         	yAxis.setVisible(false);
+        	yAxis.setTitle("Y"+i);
             axisMap.put(i, yAxis);
 		}
         
@@ -316,7 +317,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 			final AbstractDataset data = getDataSet(sels.get(0), monitor);
 
 			final AbstractDataset x;
-			if (plottingSystem.isXfirst()) {
+			if (plottingSystem.isXfirst() && sels.size()>1) {
 				x  = data;
 				sels.remove(0);
 			} else {

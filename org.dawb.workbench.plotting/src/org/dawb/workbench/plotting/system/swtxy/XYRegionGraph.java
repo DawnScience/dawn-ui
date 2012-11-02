@@ -371,8 +371,8 @@ public class XYRegionGraph extends XYGraph {
 	 * @param trace
 	 * @param toFront - if true, move regions to front
 	 */
-	public void addTrace(Trace trace, boolean toFront) {
-		super.addTrace(trace);
+	public void addTrace(Trace trace, Axis xAsxis, Axis yAxis, boolean toFront) {
+		super.addTrace(trace, xAsxis, yAxis);
 		getRegionArea().toFront();
 	}
 

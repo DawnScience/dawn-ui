@@ -555,7 +555,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 			trace.setTraceColor(plotColor);
 
 			//add the trace to xyGraph
-			xyGraph.addTrace(trace, false);
+			xyGraph.addTrace(trace, xAxis, yAxis, false);
 			
 			
 			if (monitor!=null) monitor.worked(1);
@@ -585,7 +585,9 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		} else {
 			system.setPlotType(PlotType.XY);
 			system.fireWillPlot(new TraceWillPlotEvent(trace, true));
-			xyGraph.addTrace(((LineTraceImpl)trace).getTrace(), true);
+			final AspectAxis xAxis = (AspectAxis)getSelectedXAxis();
+			final AspectAxis yAxis = (AspectAxis)getSelectedYAxis();
+			xyGraph.addTrace(((LineTraceImpl)trace).getTrace(), xAxis, yAxis, true);
 			xyCanvas.redraw();
 		}
 		
