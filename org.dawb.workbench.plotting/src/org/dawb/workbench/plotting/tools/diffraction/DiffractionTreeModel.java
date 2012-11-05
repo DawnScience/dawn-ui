@@ -2,6 +2,7 @@ package org.dawb.workbench.plotting.tools.diffraction;
 
 import javax.measure.quantity.Angle;
 import javax.measure.quantity.Dimensionless;
+import javax.measure.quantity.Duration;
 import javax.measure.quantity.Length;
 import javax.measure.unit.NonSI;
 import javax.measure.unit.SI;
@@ -98,6 +99,9 @@ public class DiffractionTreeModel {
 
         final NumericNode<Length> dist   = new NumericNode<Length>("Distance", detectorMeta, Length.UNIT);
         //if (detprop!=null) dist.setDefault(Amount.valueOf(detprop.getOrigin().z, SI.MILLIMETER));
+        
+        final NumericNode<Duration> exposure   = new NumericNode<Duration>("Exposure Time", detectorMeta, Duration.UNIT);
+        if (dce!=null) exposure.setDefault(Amount.valueOf(dce.getExposureTime(), SI.SECOND));
         
         final LabelNode size = new LabelNode("Size", detectorMeta);
         NumericNode<Length> x  = new NumericNode<Length>("x", size, Length.UNIT);
