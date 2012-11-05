@@ -127,6 +127,7 @@
             label="Zoom Profile"
             tooltip="A tool to zoom areas in a separate view.">
       </plotting_tool_page>
+      <!--
       <plotting_tool_page
             class="org.dawb.workbench.plotting.tools.profile.ImageTableTool"
             icon="icons/zoom_table.png"
@@ -134,6 +135,7 @@
             label="Zoom Table"
             tooltip="A tool to zoom areas and view values in a table.">
       </plotting_tool_page>
+      -->
       <plotting_tool_page
             class="org.dawb.workbench.plotting.tools.history.ImageHistoryTool"
             icon="icons/plot-tool-image-compare.png"
