@@ -913,6 +913,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			createScaledImage(ImageScaleType.FORCE_REIMAGE, null);
 			repaint();
 		}
+		firePaletteDataListeners(getPaletteData());
 	}
 
 	@Override

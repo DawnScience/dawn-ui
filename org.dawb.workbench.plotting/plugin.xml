@@ -149,6 +149,13 @@
             id="org.dawb.workbench.plotting.plotting_tool_page4"
             label="Line Fitting">
       </plotting_tool_page>
+      <plotting_tool_page
+            class="org.dawb.workbench.plotting.tools.diffraction.DiffractionTool"
+            icon="icons/plot-tool-diffraction.png"
+            id="org.dawb.workbench.plotting.tools.diffraction.Diffraction"
+            label="Diffraction"
+            tooltip="A tool to allow interpretation/modification of diffraction data">
+      </plotting_tool_page>
    </extension>
    <extension
          point="org.eclipse.ui.views">
