@@ -167,10 +167,10 @@ public class PlotImageActor	extends AbstractDataMessageTransformer{
 		}
 		try {
 			if (plotMode.equals(PlottingMode.ONED.toString())) {
-				if(xaxisName.equals("")||(yaxisName.equals("")))
+				if(xaxisName.equals(""))
 					SDAPlotter.plot(plotName, (AbstractDataset)data.get(dataName));
 				else
-					SDAPlotter.plot(plotName, ((AbstractDataset)data.get(xaxisName)), ((AbstractDataset)data.get(yaxisName)), ((AbstractDataset)data.get(dataName)));
+					SDAPlotter.plot(plotName, ((AbstractDataset)data.get(xaxisName)), ((AbstractDataset)data.get(dataName)));
 
 			} else if (plotMode.equals(PlottingMode.TWOD.toString())) {
 				if(xaxisName.equals("")||(yaxisName.equals("")))
