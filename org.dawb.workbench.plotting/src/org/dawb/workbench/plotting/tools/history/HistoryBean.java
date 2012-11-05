@@ -1,6 +1,9 @@
 package org.dawb.workbench.plotting.tools.history;
 
 import java.util.List;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.dawb.common.gpu.Operator;
 import org.eclipse.swt.graphics.RGB;
@@ -202,6 +205,37 @@ class HistoryBean {
 	}
 	public void setWeighting(int weighting) {
 		this.weighting = weighting;
+	}
+	
+	private static final Pattern pattern = Pattern.compile("(.+)(\\d+)");
+	
+	/**
+	 * Manipulates the original trace name in an attempt to get something 
+	 * unique.
+	 * 
+	 * @param keySet
+	 */
+	public void generateUniqueKey(Set<String> keySet) {
+		createFixedKey(true);
+		if (!keySet.contains(this.fixedImageKey)) return;
+		final Matcher matcher = pattern.matcher(traceName);
+		if (matcher.matches()) {
+			int index = Integer.parseInt(matcher.group(2));		
+			String traceName = matcher.group(1)+index;
+			
+			while(traceName.equals(getTraceName()) || keySet.contains(traceName+":"+getPlotName())) {
+				index++;
+				traceName = matcher.group(1)+index;
+			}
+			setTraceName(traceName);
+			this.fixedImageKey = traceName+":"+getPlotName();
+			return;
+		}
+		
+		int index = 1;
+		while(keySet.contains(fixedImageKey+"("+index+")")) index++;
+		this.fixedImageKey = fixedImageKey+"("+index+")";
+
 	}
 
 

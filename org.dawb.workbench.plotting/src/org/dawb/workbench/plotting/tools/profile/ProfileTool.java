@@ -131,6 +131,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 			registered = new HashSet<ITrace>(7);
 			registeredTraces.put(name, registered);
 		}
+		for (ITrace iTrace : traces) iTrace.setUserObject(ProfileType.PROFILE);
 		registered.addAll(traces);
 		
 		// Used to set the line on the image to the same color as the plot for line profiles only.
@@ -394,11 +395,11 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 
 				if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
 				createProfile(image, 
-						currentRegion, 
-						currentROI!=null?currentROI:currentRegion.getROI(), 
-								true, 
-								isDrag,
-								monitor);
+						      currentRegion, 
+						      currentROI!=null?currentROI:currentRegion.getROI(), 
+							  true, 
+							  isDrag,
+							  monitor);
 
 			}
 
