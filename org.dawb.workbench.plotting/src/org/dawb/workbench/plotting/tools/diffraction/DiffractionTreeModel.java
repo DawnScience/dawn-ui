@@ -97,7 +97,7 @@ public class DiffractionTreeModel {
         final LabelNode detectorMeta = new LabelNode("Detector", root);
 
         final NumericNode<Length> dist   = new NumericNode<Length>("x", detectorMeta, Length.UNIT);
-        if (detprop!=null) dist.setDefault(Amount.valueOf(detprop.getOrigin().z, SI.MILLIMETER));
+        //if (detprop!=null) dist.setDefault(Amount.valueOf(detprop.getOrigin().z, SI.MILLIMETER));
         
         final LabelNode size = new LabelNode("Size", detectorMeta);
         NumericNode<Length> x  = new NumericNode<Length>("x", size, Length.UNIT);

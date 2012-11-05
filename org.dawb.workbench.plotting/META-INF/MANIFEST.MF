@@ -44,5 +44,4 @@ Import-Package: javax.measure.quantity;version="4.3.1",
  uk.ac.diamond.scisoft.analysis.rcp.util,
  uk.ac.diamond.scisoft.analysis.rcp.views,
  uk.ac.gda.monitor
-Bundle-ClassPath: .,
- vecmath.jar
+Bundle-ClassPath: .
