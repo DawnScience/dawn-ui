@@ -30,7 +30,6 @@ Export-Package: org.dawb.workbench.plotting.composites,
  org.dawb.workbench.plotting.util
 Import-Package: javax.measure.quantity;version="4.3.1",
  javax.measure.unit,
- javax.vecmath,
  ncsa.hdf.object,
  org.dawb.hdf5,
  org.eclipse.core.resources,
@@ -45,4 +44,5 @@ Import-Package: javax.measure.quantity;version="4.3.1",
  uk.ac.diamond.scisoft.analysis.rcp.util,
  uk.ac.diamond.scisoft.analysis.rcp.views,
  uk.ac.gda.monitor
-Bundle-ClassPath: .
+Bundle-ClassPath: .,
+ vecmath.jar
