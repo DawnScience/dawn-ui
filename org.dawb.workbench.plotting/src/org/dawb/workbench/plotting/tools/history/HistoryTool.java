@@ -11,6 +11,7 @@ import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.workbench.plotting.Activator;
+import org.dawb.workbench.plotting.tools.profile.ProfileType;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.Action;
@@ -92,6 +93,12 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 		    	// image name and use that.
 				bean.setPlotName(getLinkedToolPage().getPlottingSystem().getPlotName());
 			}
+		    
+		    // All profiles are treated as unique
+		    if (iTrace.getUserObject()==ProfileType.PROFILE) {
+		    	bean.generateUniqueKey(history.keySet());
+		    }
+		    
 			bean.setSelected(true);
 			history.put(bean.getTraceKey(), bean);
 		}
