@@ -2,12 +2,17 @@ package org.dawb.workbench.plotting.tools.diffraction;
 
 import java.util.List;
 
+import org.dawb.common.ui.plot.region.IRegion;
+import org.dawb.common.ui.plot.region.IRegionListener;
+import org.dawb.common.ui.plot.region.RegionEvent;
+import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.viewers.TreeNodeContentProvider;
 import org.dawb.workbench.plotting.Activator;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
@@ -37,6 +42,10 @@ public class DiffractionTool extends AbstractToolPage {
 	private Composite  control;
 	private DiffractionTreeModel model;
 	
+	//Region and region listener added for 1-click beam centring
+	private IRegion tmpRegion;
+	private IRegionListener regionListener;
+	
 	@Override
 	public ToolPageRole getToolPageRole() {
 		return ToolPageRole.ROLE_2D;
@@ -61,12 +70,24 @@ public class DiffractionTool extends AbstractToolPage {
 
 		createDiffractionModel();
 		createActions();
+		createListeners();
 
 	}
 	
 	public void activate() {
 		super.activate();
 		createDiffractionModel();
+		
+		if (getPlottingSystem()!=null && this.regionListener != null) {
+			getPlottingSystem().addRegionListener(this.regionListener);
+		}
+	}
+	
+	public void deactivate() {
+		//remove region listener
+		if (getPlottingSystem()!=null) {
+			getPlottingSystem().removeRegionListener(this.regionListener);
+		}
 	}
 	
 	public void dispose() {
@@ -155,7 +176,61 @@ public class DiffractionTool extends AbstractToolPage {
 			}
 		};
 		showDefault.setChecked(false);// TODO Remember that?
+		
+		final Action reset = new Action("Reset all fields", Activator.getImageDescriptor("icons/book_previous.png")) {
+			@Override
+			public void run() {
+				//TODO add resets to data used to be:
+				//diffMetadataComp.resetAllToOriginal();
+			}
+		};
+		
+		final Action centre = new Action("One-click beam centre",IAction.AS_PUSH_BUTTON) {
+			@Override
+			public void run() {
+				logger.debug("1-click clicked");
+				
+				try {
+					if (tmpRegion != null) {
+						getPlottingSystem().removeRegion(tmpRegion);
+					}
+					tmpRegion = getPlottingSystem().createRegion(RegionUtils.getUniqueName("BeamCentrePicker", getPlottingSystem()), IRegion.RegionType.POINT);
+					tmpRegion.setUserRegion(false);
+					tmpRegion.setVisible(false);
+					
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+				
+			}
+		};
+		
+		centre.setImageDescriptor(Activator.getImageDescriptor("icons/centre.png"));
+		
 		toolMan.add(showDefault);
+		toolMan.add(reset);
+		toolMan.add(centre);
+	}
+	
+	private void createListeners() {
+		
+		this.regionListener = new IRegionListener.Stub() {
+			@Override
+			public void regionAdded(RegionEvent evt) {
+				//test if our region
+				if (evt.getRegion() == tmpRegion) {
+					//update beam position and remove region
+					logger.debug("1-Click region added");
+					double[] point = evt.getRegion().getROI().getPoint();
+					logger.debug("Clicked here X: " + point[0] + " Y : " + point[1]);
+					//TODO update beam positions
+					//diffMetadataComp.updateBeamPositionPixels(point);
+					getPlottingSystem().removeRegion(tmpRegion);
+				}
+			}
+		};
 	}
 
 
