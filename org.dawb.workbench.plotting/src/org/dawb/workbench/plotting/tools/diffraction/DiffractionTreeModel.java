@@ -124,7 +124,7 @@ public class DiffractionTreeModel {
         y  = new NumericNode<Length>("y", pixel, SI.MILLIMETER);
         if (detprop!=null) y.setDefault(Amount.valueOf(detprop.getVPxSize(), SI.MILLIMETER));
         
-        if (metaData.getMetaNames()!=null && metaData.getMetaNames().size()>0) {
+        if (metaData!=null && metaData.getMetaNames()!=null && metaData.getMetaNames().size()>0) {
             final LabelNode rawMeta = new LabelNode("Raw Meta", root);
         	for (String name : metaData.getMetaNames()) {
 				new ObjectNode(name, metaData.getMetaValue(name), rawMeta);
