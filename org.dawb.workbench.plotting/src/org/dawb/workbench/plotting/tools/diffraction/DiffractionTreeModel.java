@@ -62,6 +62,7 @@ public class DiffractionTreeModel {
        
         NumericNode<Length> lambda = new NumericNode<Length>("Wavelength", experimentalInfo, NonSI.ANGSTROM);
         if (dce!=null) lambda.setDefault(Amount.valueOf(dce.getWavelength(), NonSI.ANGSTROM));
+        lambda.setEditable(true);
        
         NumericNode<Angle> start = new NumericNode<Angle>("Start", experimentalInfo, NonSI.DEGREE_ANGLE);
         if (dce!=null)  start.setDefault(Amount.valueOf(dce.getPhiStart(), NonSI.DEGREE_ANGLE));
@@ -122,9 +123,12 @@ public class DiffractionTreeModel {
         final LabelNode pixel = new LabelNode("Pixel", detectorMeta);
         x  = new NumericNode<Length>("x", pixel, SI.MILLIMETER);
         if (detprop!=null) x.setDefault(Amount.valueOf(detprop.getHPxSize(), SI.MILLIMETER));
+        x.setEditable(true);
+
         y  = new NumericNode<Length>("y", pixel, SI.MILLIMETER);
         if (detprop!=null) y.setDefault(Amount.valueOf(detprop.getVPxSize(), SI.MILLIMETER));
-        
+        y.setEditable(true);
+       
         if (metaData!=null && metaData.getMetaNames()!=null && metaData.getMetaNames().size()>0) {
             final LabelNode rawMeta = new LabelNode("Raw Meta", root);
         	for (String name : metaData.getMetaNames()) {
