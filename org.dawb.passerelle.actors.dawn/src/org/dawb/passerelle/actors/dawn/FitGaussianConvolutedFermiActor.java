@@ -19,6 +19,7 @@ import java.util.Map;
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.optimization.GoalType;
 import org.apache.commons.math3.optimization.PointValuePair;
+import org.apache.commons.math3.optimization.direct.CMAESOptimizer;
 import org.apache.commons.math3.optimization.direct.NelderMeadSimplex;
 import org.apache.commons.math3.optimization.direct.SimplexOptimizer;
 import org.dawb.passerelle.common.actors.AbstractDataMessageTransformer;
@@ -126,9 +127,8 @@ public class FitGaussianConvolutedFermiActor extends
 				normalizeParameter(fitFunction.getParameterValue(4),
 						fitFunction.getParameter(4)) };
 
-		SimplexOptimizer simOpt = new SimplexOptimizer(0.00000001, 0.00000001);
-		simOpt.setSimplex(new NelderMeadSimplex(4));
-		PointValuePair result = simOpt.optimize(1000, f, GoalType.MINIMIZE,
+		CMAESOptimizer cOpt = new CMAESOptimizer(3);
+		PointValuePair result = cOpt.optimize(1000, f, GoalType.MINIMIZE,
 				start);
 
 		// set the input functions parameters to be the result before finishing.
@@ -180,8 +180,7 @@ public class FitGaussianConvolutedFermiActor extends
 					normalizeParameter(fitFunction.getParameterValue(5),
 							fitFunction.getParameter(5)) };
 
-			simOpt.setSimplex(new NelderMeadSimplex(5, 0.01));
-			result = simOpt.optimize(1000, f1, GoalType.MINIMIZE, start);
+			result = cOpt.optimize(1000, f1, GoalType.MINIMIZE, start);
 
 			// set the input functions parameters to be the result before
 			// finishing.
@@ -252,8 +251,7 @@ public class FitGaussianConvolutedFermiActor extends
 					fitFunction.getParameterValue(5),
 					fitFunction.getParameter(5)) };
 
-			simOpt.setSimplex(new NelderMeadSimplex(1, 0.001));
-			result = simOpt.optimize(1000, f1, GoalType.MINIMIZE, start);
+			result = cOpt.optimize(1000, f1, GoalType.MINIMIZE, start);
 
 			// set the input functions parameters to be the result before
 			// finishing.
