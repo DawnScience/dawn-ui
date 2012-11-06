@@ -41,13 +41,13 @@ public class DiffractionLabelProvider extends ColumnLabelProvider implements ISt
 		
 		switch(icolumn) {
 		
-		case 1:
+		case 1: // Default
 			return ret.append(node.getValue()+"", StyledString.QUALIFIER_STYLER);
 			
-		case 2:
-			return ret.append(node.getValue()+"");
-			
-		case 3:
+		case 2: // Value
+			return ret.append(node.getValue()+"", StyledString.DECORATIONS_STYLER);
+			 
+		case 3: // Unit
 			return ret.append("-", StyledString.QUALIFIER_STYLER);
 
 		}
@@ -59,16 +59,33 @@ public class DiffractionLabelProvider extends ColumnLabelProvider implements ISt
 		
 		switch(icolumn) {
 		
-		case 1:
+		case 1: // Default
 			return ret.append(format.format(node.getDefaultValue()), StyledString.QUALIFIER_STYLER);
 			
-		case 2:
-			return node.isEditable()
-				  ? ret.append(format.format(node.getValue())+" *", StyledString.DECORATIONS_STYLER)
-				  : ret.append(format.format(node.getValue()));
+		case 2: // Value
+			if (Double.isNaN(node.getValue())) {
+				if (node.isEditable()) {
+					ret.append("N/A");
+					ret.append(" *", StyledString.QUALIFIER_STYLER);
+				} else {
+					ret.append("N/A", StyledString.DECORATIONS_STYLER);
+				}
+			    return ret;
+			}
+			if (node.isEditable()) {
+				ret.append(format.format(node.getValue()));
+				ret.append(" *", StyledString.QUALIFIER_STYLER);
+			} else {
+				ret.append(format.format(node.getValue()), StyledString.DECORATIONS_STYLER);
+			}
+			return ret;
 			
-		case 3:
-			return ret.append(node.getUnit().toString());
+		case 3: // Unit
+			if (node.isEditable()) {
+				return ret.append(node.getUnit().toString());
+			} else {
+				return ret.append(node.getUnit().toString(), StyledString.DECORATIONS_STYLER);
+			}
 
 		}
 		return ret;

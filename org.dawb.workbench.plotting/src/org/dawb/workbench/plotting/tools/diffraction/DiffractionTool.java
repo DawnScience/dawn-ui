@@ -3,6 +3,7 @@ package org.dawb.workbench.plotting.tools.diffraction;
 import java.util.List;
 
 import javax.measure.quantity.Quantity;
+import javax.swing.tree.TreeNode;
 
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegionListener;
@@ -10,9 +11,14 @@ import org.dawb.common.ui.plot.region.RegionEvent;
 import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
 import org.dawb.common.ui.plot.trace.IImageTrace;
+import org.dawb.common.ui.plot.trace.IPaletteListener;
+import org.dawb.common.ui.plot.trace.ITraceListener;
+import org.dawb.common.ui.plot.trace.PaletteEvent;
+import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.viewers.TreeNodeContentProvider;
 import org.dawb.workbench.plotting.Activator;
+import org.dawnsci.common.widgets.celleditor.FloatSpinnerCellEditor;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IToolBarManager;
@@ -27,8 +33,12 @@ import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
+import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -56,10 +66,40 @@ public class DiffractionTool extends AbstractToolPage {
 	//Region and region listener added for 1-click beam centring
 	private IRegion tmpRegion;
 	private IRegionListener regionListener;
+	private IPaletteListener.Stub paletteListener;
+	private ITraceListener.Stub   traceListener;
 	
 	@Override
 	public ToolPageRole getToolPageRole() {
 		return ToolPageRole.ROLE_2D;
+	}
+	
+	public DiffractionTool() {
+		super();
+		
+        this.paletteListener = new IPaletteListener.Stub() {
+        	protected void updateEvent(PaletteEvent evt) {
+        		updateIntensity();
+        	}
+        };
+
+		this.traceListener = new ITraceListener.Stub() {
+			protected void update(TraceEvent evt) {
+				if (getImageTrace()!=null) getImageTrace().addPaletteListener(paletteListener);
+				updateIntensity();
+			}
+		};
+      
+	}
+
+	protected void updateIntensity() {
+		try {
+			if (model==null) return;
+			model.setIntensityValues(getImageTrace());
+			viewer.refresh();
+		} catch (Exception e) {
+			logger.error("Updating intensity values!", e);
+		}
 	}
 
 	@Override
@@ -100,12 +140,19 @@ public class DiffractionTool extends AbstractToolPage {
 		if (getPlottingSystem()!=null && this.regionListener != null) {
 			getPlottingSystem().addRegionListener(this.regionListener);
 		}
+		if (getPlottingSystem()!=null && this.traceListener != null) {
+			getPlottingSystem().addTraceListener(traceListener);
+		}
+		if (viewer!=null) viewer.refresh();
 	}
 	
 	public void deactivate() {
 		super.deactivate();
 		if (getPlottingSystem()!=null) {
 			getPlottingSystem().removeRegionListener(this.regionListener);
+		}
+		if (getPlottingSystem()!=null && this.traceListener != null) {
+			getPlottingSystem().addTraceListener(traceListener);
 		}
 	}
 	
@@ -119,11 +166,9 @@ public class DiffractionTool extends AbstractToolPage {
 		if (model!=null)  return;
 		if (viewer==null) return;
 		
-		if (getImageTrace()==null) return;
-
 		IMetaData meta = getMetaData();
 		try {
-			model = new DiffractionTreeModel(meta, getImageTrace(), viewer);
+			model = new DiffractionTreeModel(meta);
 		} catch (Exception e) {
 			logger.error("Cannot create model!", e);
 			return;
@@ -133,13 +178,26 @@ public class DiffractionTool extends AbstractToolPage {
 		
 		final List<?> top = model.getRoot().getChildren();
 		for (Object element : top) {
-			if (element instanceof LabelNode) {
-				LabelNode ln = (LabelNode)element;
-				if (ln.getLabel().toLowerCase().startsWith("raw")) continue;
-			}
-			viewer.setExpandedState(element, true);
+		   expand(element, viewer);
 		}
 
+	}
+	
+	
+
+	private void expand(Object element, TreeViewer viewer) {
+		
+        if (element instanceof LabelNode) {
+        	if (((LabelNode)element).isDefaultExpanded()) {
+        		viewer.setExpandedState(element, true);
+        	}
+        }
+        if (element instanceof TreeNode) {
+        	TreeNode node = (TreeNode)element;
+        	for (int i = 0; i < node.getChildCount(); i++) {
+        		expand(node.getChildAt(i), viewer);
+			}
+        }
 	}
 
 	private IMetaData getMetaData() {
@@ -182,7 +240,7 @@ public class DiffractionTool extends AbstractToolPage {
 		
 		var = new TreeViewerColumn(viewer, SWT.LEFT, 2);
 		var.getColumn().setText("Value"); // Selected
-		var.getColumn().setWidth(80);
+		var.getColumn().setWidth(100);
 		var.setLabelProvider(new DelegatingStyledCellLabelProvider(new DiffractionLabelProvider(2)));
 		var.setEditingSupport(new ValueEditingSupport(viewer));
 
@@ -199,8 +257,23 @@ public class DiffractionTool extends AbstractToolPage {
 		}
 
 		@Override
-		protected CellEditor getCellEditor(Object element) {
-			// TODO Auto-generated method stub
+		protected CellEditor getCellEditor(final Object element) {
+			if (element instanceof NumericNode) {
+				NumericNode<? extends Quantity> node = (NumericNode<? extends Quantity>)element;
+				final FloatSpinnerCellEditor fse = new FloatSpinnerCellEditor(viewer.getTree(), SWT.NONE);
+				fse.setMaximum(node.getUpperBoundDouble());
+				fse.setMinimum(node.getLowerBoundDouble());
+				fse.setIncrement(0.001d);
+				fse.setFormat(7, 3);
+				fse.addKeyListener(new KeyAdapter() {
+					public void keyPressed(KeyEvent e) {
+						if (e.character=='\n') {
+							setValue(element, fse.getValue());
+						}
+					}
+				});
+				return fse;
+			}
 			return null;
 		}
 
@@ -224,8 +297,8 @@ public class DiffractionTool extends AbstractToolPage {
 			if (!(element instanceof NumericNode)) return;
 			
 			NumericNode<? extends Quantity> node = (NumericNode<? extends Quantity>)element;
-			
-			// TODO
+			node.setValue((Double)value);
+			viewer.refresh(element);
 		}
 
 		

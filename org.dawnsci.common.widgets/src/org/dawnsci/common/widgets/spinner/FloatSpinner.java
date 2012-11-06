@@ -28,6 +28,7 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -291,5 +292,10 @@ public class FloatSpinner extends Composite {
 		 		manager.update();
 			}
 		});
+	}
+	
+	public void addKeyListener(KeyListener listener) {
+		super.addKeyListener(listener);
+        spinner.addKeyListener(listener);
 	}
 }

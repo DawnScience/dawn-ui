@@ -19,6 +19,7 @@ public class LabelNode implements TreeNode {
 	private TreeNode         parent;
 	private Vector<TreeNode> children;
 	private boolean    editable=false;
+	private boolean    defaultExpanded=false;
 
 	public LabelNode() {
 		this(null, null);
@@ -111,6 +112,12 @@ public class LabelNode implements TreeNode {
 
 	public void setEditable(boolean editable) {
 		this.editable = editable;
+	}
+	public boolean isDefaultExpanded() {
+		return defaultExpanded;
+	}
+	public void setDefaultExpanded(boolean defaultExpanded) {
+		this.defaultExpanded = defaultExpanded;
 	}
 
 }

@@ -16,6 +16,9 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 	
 	private Amount<E>  value;
 	private Amount<E>  defaultValue;
+	private Amount<E>  lowerBound;
+	private Amount<E>  upperBound;
+	private Unit<E>    defaultUnit;
 
 	/**
 	 * Unit must not be null.
@@ -33,7 +36,7 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 	 */
 	public NumericNode(String label, LabelNode parent, Unit<E> unit) {
 		super(label, parent);
-		this.defaultValue = Amount.valueOf(0, unit);
+		this.defaultUnit = unit;
 	}
 
     /**
@@ -46,12 +49,33 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 		return Double.NaN;
 	}
 
+
+	public void setValue(double val) {
+		if (value!=null)        {
+			value = Amount.valueOf(val, value.getUnit());
+			return;
+		}
+		if (defaultValue!=null) {
+			value = Amount.valueOf(val, defaultValue.getUnit());
+			return;
+		}
+		value = Amount.valueOf(val, defaultUnit);
+		return;
+	}
 	public void setValue(Amount<E> value) {
 		this.value = value;
 	}
 	
-	public void setDefault(Amount<E> defaultValue) {
-		this.defaultValue = defaultValue;
+	/**
+	 * Sets the default value and sets the bounds to
+	 * the values 0 and 10000.
+	 * @param value
+	 */
+	public void setDefault(double value, Unit<E> unit) {
+		if (Double.isNaN(value)) return;// The value is NaN, doing Amount.valueOf(...) would set to 0
+		this.defaultValue = Amount.valueOf(value, unit);
+		this.lowerBound   = Amount.valueOf(Integer.MIN_VALUE, unit);
+		this.upperBound   = Amount.valueOf(Integer.MAX_VALUE, unit);
 	}
 
     /**
@@ -66,7 +90,7 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 	public Unit<?> getUnit() {
 		if (value!=null)        return value.getUnit();
 		if (defaultValue!=null) return defaultValue.getUnit();
-		return null;
+		return defaultUnit;
 	}
 
 	public void setUnit(Unit<E> unit) {
@@ -76,6 +100,36 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 	
 	public void reset() {
 		value = null;
+	}
+
+	public Amount<E> getLowerBound() {
+		return lowerBound;
+	}
+	public double getLowerBoundDouble() {
+		return lowerBound.doubleValue(lowerBound.getUnit());
+	}
+
+	public void setLowerBound(Amount<E> lowerBound) {
+		this.lowerBound = lowerBound;
+	}
+	
+	public void setLowerBound(double lb) {
+		this.lowerBound = Amount.valueOf(lb, defaultValue.getUnit());
+	}
+
+	public Amount<E> getUpperBound() {
+		return upperBound;
+	}
+	public double getUpperBoundDouble() {
+		return upperBound.doubleValue(upperBound.getUnit());
+	}
+
+	public void setUpperBound(Amount<E> upperBound) {
+		this.upperBound = upperBound;
+	}
+	
+	public void setUpperBound(double ub) {
+		this.upperBound = Amount.valueOf(ub, defaultValue.getUnit());
 	}
 
 }
