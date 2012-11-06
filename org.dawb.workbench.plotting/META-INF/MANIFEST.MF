@@ -18,7 +18,8 @@ Require-Bundle: org.eclipse.ui,
  org.dawnsci.plotting.jreality;bundle-version="1.0.0",
  org.dawb.common.services;bundle-version="1.2.0",
  org.dawb.common.util;bundle-version="1.2.0",
- uk.ac.gda.common.rcp;bundle-version="1.2.0"
+ uk.ac.gda.common.rcp;bundle-version="1.2.0",
+ uk.ac.diamond.org.jscience;bundle-version="4.3.1"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: org.dawb.workbench.plotting.composites,
