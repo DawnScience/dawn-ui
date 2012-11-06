@@ -20,8 +20,6 @@ import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.optimization.GoalType;
 import org.apache.commons.math3.optimization.PointValuePair;
 import org.apache.commons.math3.optimization.direct.CMAESOptimizer;
-import org.apache.commons.math3.optimization.direct.NelderMeadSimplex;
-import org.apache.commons.math3.optimization.direct.SimplexOptimizer;
 import org.dawb.passerelle.common.actors.AbstractDataMessageTransformer;
 import org.dawb.passerelle.common.message.DataMessageComponent;
 import org.dawb.passerelle.common.message.DataMessageException;
@@ -128,8 +126,8 @@ public class FitGaussianConvolutedFermiActor extends
 						fitFunction.getParameter(4)) };
 
 		CMAESOptimizer cOpt = new CMAESOptimizer(3);
-		PointValuePair result = cOpt.optimize(1000, f, GoalType.MINIMIZE,
-				start);
+		PointValuePair result = cOpt
+				.optimize(1000, f, GoalType.MINIMIZE, start);
 
 		// set the input functions parameters to be the result before finishing.
 		double[] r = result.getPoint();
