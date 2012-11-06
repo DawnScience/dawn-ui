@@ -7,6 +7,7 @@ import javax.measure.quantity.Length;
 import javax.measure.unit.NonSI;
 import javax.measure.unit.SI;
 import javax.measure.unit.Unit;
+import javax.swing.tree.TreeNode;
 
 import org.dawb.common.services.IImageService;
 import org.dawb.common.services.ServiceManager;
@@ -170,5 +171,18 @@ public class DiffractionTreeModel {
 		image = null;
 		paletteListener = null;
 		root  = null;
+	}
+
+	public void reset() {
+		reset(root);
+	}
+
+	private void reset(TreeNode node) {
+		if (node instanceof NumericNode) {
+			((NumericNode)node).reset();
+		}
+		for (int i = 0; i < node.getChildCount(); i++) {
+			reset(node.getChildAt(i));
+		}
 	}
 }

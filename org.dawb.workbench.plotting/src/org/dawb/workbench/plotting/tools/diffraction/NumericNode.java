@@ -74,5 +74,8 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 		if (defaultValue!=null) defaultValue = Amount.valueOf(defaultValue.doubleValue(unit), unit);
 	}
 	
+	public void reset() {
+		value = null;
+	}
 
 }

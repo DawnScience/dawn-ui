@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.dawnsci.common.widgets.spinner.FloatSpinner;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -13,8 +14,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Slider;
-
-import uk.ac.diamond.scisoft.analysis.rcp.util.FloatSpinner;
 
 /**
  * Simple Class which combines a spinner and a slider so that they have the same bounds etc.

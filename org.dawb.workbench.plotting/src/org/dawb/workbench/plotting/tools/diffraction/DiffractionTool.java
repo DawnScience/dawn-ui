@@ -2,6 +2,8 @@ package org.dawb.workbench.plotting.tools.diffraction;
 
 import java.util.List;
 
+import javax.measure.quantity.Quantity;
+
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.RegionEvent;
@@ -14,17 +16,26 @@ import org.dawb.workbench.plotting.Activator;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.preference.JFacePreferences;
+import org.eclipse.jface.resource.ColorRegistry;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
+import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IEditorPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +66,8 @@ public class DiffractionTool extends AbstractToolPage {
 	public void createControl(Composite parent) {
 		
 		this.control = new Composite(parent, SWT.NONE);
-		control.setLayout(new GridLayout());
+		control.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
+		control.setLayout(new GridLayout(1, false));
 		GridUtils.removeMargins(control);
 		
 		viewer = new TreeViewer(control, SWT.FULL_SELECTION | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
@@ -65,6 +77,13 @@ public class DiffractionTool extends AbstractToolPage {
 		
 		viewer.getTree().setLinesVisible(true);
 		viewer.getTree().setHeaderVisible(true);
+		
+		final Label label = new Label(control, SWT.NONE);
+		label.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
+		ColorRegistry colorRegistry = JFaceResources.getColorRegistry();
+		label.setForeground(new Color(label.getDisplay(), colorRegistry.getRGB(JFacePreferences.QUALIFIER_COLOR)));
+		label.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
+		label.setText("* Click to change value  ");
 		
 		getSite().setSelectionProvider(viewer);
 
@@ -165,11 +184,51 @@ public class DiffractionTool extends AbstractToolPage {
 		var.getColumn().setText("Value"); // Selected
 		var.getColumn().setWidth(80);
 		var.setLabelProvider(new DelegatingStyledCellLabelProvider(new DiffractionLabelProvider(2)));
+		var.setEditingSupport(new ValueEditingSupport(viewer));
 
 		var = new TreeViewerColumn(viewer, SWT.LEFT, 3);
 		var.getColumn().setText("Unit"); // Selected
 		var.getColumn().setWidth(50);
 		var.setLabelProvider(new DelegatingStyledCellLabelProvider(new DiffractionLabelProvider(3)));
+	}
+	
+	private class ValueEditingSupport extends EditingSupport {
+
+		public ValueEditingSupport(ColumnViewer viewer) {
+			super(viewer);
+		}
+
+		@Override
+		protected CellEditor getCellEditor(Object element) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		protected boolean canEdit(Object element) {
+			if (!(element instanceof NumericNode)) return false;
+			return ((NumericNode)element).isEditable();
+		}
+
+		@Override
+		protected Object getValue(Object element) {
+			if (!(element instanceof NumericNode)) return null;
+			
+			NumericNode<? extends Quantity> node = (NumericNode<? extends Quantity>)element;
+			
+			return node.getValue();
+		}
+
+		@Override
+		protected void setValue(Object element, Object value) {
+			if (!(element instanceof NumericNode)) return;
+			
+			NumericNode<? extends Quantity> node = (NumericNode<? extends Quantity>)element;
+			
+			// TODO
+		}
+
+		
 	}
 	
 	private void createActions() {
@@ -186,8 +245,8 @@ public class DiffractionTool extends AbstractToolPage {
 		final Action reset = new Action("Reset all fields", Activator.getImageDescriptor("icons/book_previous.png")) {
 			@Override
 			public void run() {
-				//TODO add resets to data used to be:
-				//diffMetadataComp.resetAllToOriginal();
+				model.reset();
+				viewer.refresh();
 			}
 		};
 		

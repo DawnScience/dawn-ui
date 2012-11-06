@@ -20,7 +20,8 @@ Require-Bundle: org.eclipse.ui,
  org.dawb.common.util;bundle-version="1.2.0",
  uk.ac.gda.common.rcp;bundle-version="1.2.0",
  uk.ac.diamond.org.jscience;bundle-version="4.3.1",
- javax.vecmath;bundle-version="1.5.2"
+ javax.vecmath;bundle-version="1.5.2",
+ org.dawnsci.common.widgets;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: org.dawb.workbench.plotting.composites,
@@ -39,8 +40,5 @@ Import-Package: ncsa.hdf.object,
  org.eclipse.ui.cheatsheets,
  org.slf4j;version="1.5.6",
  uk.ac.diamond.scisoft.analysis.rcp.pixelinfoutils,
- uk.ac.diamond.scisoft.analysis.rcp.plotting,
- uk.ac.diamond.scisoft.analysis.rcp.util,
- uk.ac.diamond.scisoft.analysis.rcp.views,
  uk.ac.gda.monitor
 Bundle-ClassPath: .

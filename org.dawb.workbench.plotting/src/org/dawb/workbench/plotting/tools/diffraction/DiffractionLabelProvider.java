@@ -64,7 +64,7 @@ public class DiffractionLabelProvider extends ColumnLabelProvider implements ISt
 			
 		case 2:
 			return node.isEditable()
-				  ? ret.append(format.format(node.getValue()), StyledString.DECORATIONS_STYLER)
+				  ? ret.append(format.format(node.getValue())+" *", StyledString.DECORATIONS_STYLER)
 				  : ret.append(format.format(node.getValue()));
 			
 		case 3:

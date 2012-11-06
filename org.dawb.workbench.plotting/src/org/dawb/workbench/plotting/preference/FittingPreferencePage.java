@@ -17,6 +17,7 @@
 package org.dawb.workbench.plotting.preference;
 
 import org.dawb.workbench.plotting.Activator;
+import org.dawnsci.common.widgets.spinner.FloatSpinner;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
@@ -32,7 +33,6 @@ import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
-import uk.ac.diamond.scisoft.analysis.rcp.util.FloatSpinner;
 
 public class FittingPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
