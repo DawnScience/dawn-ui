@@ -18,7 +18,8 @@ Require-Bundle: org.eclipse.ui,
  org.dawnsci.plotting.jreality;bundle-version="1.0.0",
  org.dawb.common.services;bundle-version="1.2.0",
  org.dawb.common.util;bundle-version="1.2.0",
- uk.ac.gda.common.rcp;bundle-version="1.2.0"
+ uk.ac.gda.common.rcp;bundle-version="1.2.0",
+ uk.ac.diamond.org.jscience;bundle-version="4.3.1"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: org.dawb.workbench.plotting.composites,
@@ -28,16 +29,13 @@ Export-Package: org.dawb.workbench.plotting.composites,
  org.dawb.workbench.plotting.tools.profile,
  org.dawb.workbench.plotting.tools.reduction,
  org.dawb.workbench.plotting.util
-Import-Package: javax.measure.quantity;version="4.3.1",
- javax.measure.unit,
- ncsa.hdf.object,
+Import-Package: ncsa.hdf.object,
  org.dawb.hdf5,
  org.eclipse.core.resources,
  org.eclipse.emf.common.ui.dialogs,
  org.eclipse.gef.ui.actions,
  org.eclipse.ui,
  org.eclipse.ui.cheatsheets,
- org.jscience.physics.amount,
  org.slf4j;version="1.5.6",
  uk.ac.diamond.scisoft.analysis.rcp.pixelinfoutils,
  uk.ac.diamond.scisoft.analysis.rcp.plotting,
