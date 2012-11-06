@@ -26,8 +26,6 @@ import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 /**
  * Holds data for the Diffraction model.
  * 
- * Model will work with Swing trees and JFace trees.
- * 
  * @author fcp94556
  *
  */
@@ -72,7 +70,11 @@ public class DiffractionTreeModel {
         NumericNode<Angle> osci = new NumericNode<Angle>("Oscillation Range", experimentalInfo, Angle.UNIT);
         if (dce!=null)  osci.setDefault(Amount.valueOf(dce.getPhiRange(), NonSI.DEGREE_ANGLE));
         
+	    // Beam Center
+        final LabelNode beamCen = new LabelNode("Beam Center", root);
         
+        
+
         // Pixel Info
         final LabelNode pixelValue = new LabelNode("Intensity", root);
 				                 
@@ -98,7 +100,7 @@ public class DiffractionTreeModel {
         final LabelNode detectorMeta = new LabelNode("Detector", root);
 
         final NumericNode<Length> dist   = new NumericNode<Length>("Distance", detectorMeta, Length.UNIT);
-        //if (detprop!=null) dist.setDefault(Amount.valueOf(detprop.getOrigin().z, SI.MILLIMETER));
+        if (detprop!=null) dist.setDefault(Amount.valueOf(detprop.getOrigin().z, SI.MILLIMETER));
         
         final NumericNode<Duration> exposure   = new NumericNode<Duration>("Exposure Time", detectorMeta, Duration.UNIT);
         if (dce!=null) exposure.setDefault(Amount.valueOf(dce.getExposureTime(), SI.SECOND));
