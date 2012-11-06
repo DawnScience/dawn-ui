@@ -6,6 +6,7 @@ import javax.measure.quantity.Duration;
 import javax.measure.quantity.Length;
 import javax.measure.unit.NonSI;
 import javax.measure.unit.SI;
+import javax.measure.unit.Unit;
 
 import org.dawb.common.services.IImageService;
 import org.dawb.common.services.ServiceManager;
@@ -58,22 +59,28 @@ public class DiffractionTreeModel {
 	    // Experimental Info
         final LabelNode experimentalInfo = new LabelNode("Experimental Information", root);
        
-        NumericNode<Length> lambda = new NumericNode<Length>("Wavelength", experimentalInfo, Length.UNIT);
+        NumericNode<Length> lambda = new NumericNode<Length>("Wavelength", experimentalInfo, NonSI.ANGSTROM);
         if (dce!=null) lambda.setDefault(Amount.valueOf(dce.getWavelength(), NonSI.ANGSTROM));
        
-        NumericNode<Angle> start = new NumericNode<Angle>("Start", experimentalInfo, Angle.UNIT);
+        NumericNode<Angle> start = new NumericNode<Angle>("Start", experimentalInfo, NonSI.DEGREE_ANGLE);
         if (dce!=null)  start.setDefault(Amount.valueOf(dce.getPhiStart(), NonSI.DEGREE_ANGLE));
        
-        NumericNode<Angle> stop = new NumericNode<Angle>("Stop", experimentalInfo, Angle.UNIT);
+        NumericNode<Angle> stop = new NumericNode<Angle>("Stop", experimentalInfo, NonSI.DEGREE_ANGLE);
         if (dce!=null)  stop.setDefault(Amount.valueOf(dce.getPhiStart()+dce.getPhiRange(), NonSI.DEGREE_ANGLE));
 
-        NumericNode<Angle> osci = new NumericNode<Angle>("Oscillation Range", experimentalInfo, Angle.UNIT);
+        NumericNode<Angle> osci = new NumericNode<Angle>("Oscillation Range", experimentalInfo, NonSI.DEGREE_ANGLE);
         if (dce!=null)  osci.setDefault(Amount.valueOf(dce.getPhiRange(), NonSI.DEGREE_ANGLE));
         
 	    // Beam Center
         final LabelNode beamCen = new LabelNode("Beam Center", root);
         
-        
+        NumericNode<Length> beamX = new NumericNode<Length>("X", beamCen, SI.MILLIMETER);
+        beamX.setEditable(true);
+        if (detprop!=null) beamX.setDefault(Amount.valueOf(getBeamX(detprop, SI.MILLIMETER), SI.MILLIMETER));
+       
+        NumericNode<Length> beamY = new NumericNode<Length>("Y", beamCen, SI.MILLIMETER);
+        beamY.setEditable(true);
+        if (detprop!=null) beamY.setDefault(Amount.valueOf(getBeamY(detprop, SI.MILLIMETER), SI.MILLIMETER));
 
         // Pixel Info
         final LabelNode pixelValue = new LabelNode("Intensity", root);
@@ -99,25 +106,47 @@ public class DiffractionTreeModel {
         // Detector Meta
         final LabelNode detectorMeta = new LabelNode("Detector", root);
 
-        final NumericNode<Length> dist   = new NumericNode<Length>("Distance", detectorMeta, Length.UNIT);
+        final NumericNode<Length> dist   = new NumericNode<Length>("Distance", detectorMeta, SI.MILLIMETER);
         if (detprop!=null) dist.setDefault(Amount.valueOf(detprop.getOrigin().z, SI.MILLIMETER));
         
-        final NumericNode<Duration> exposure   = new NumericNode<Duration>("Exposure Time", detectorMeta, Duration.UNIT);
+        final NumericNode<Duration> exposure   = new NumericNode<Duration>("Exposure Time", detectorMeta, SI.SECOND);
         if (dce!=null) exposure.setDefault(Amount.valueOf(dce.getExposureTime(), SI.SECOND));
         
         final LabelNode size = new LabelNode("Size", detectorMeta);
-        NumericNode<Length> x  = new NumericNode<Length>("x", size, Length.UNIT);
+        NumericNode<Length> x  = new NumericNode<Length>("x", size, SI.MILLIMETER);
         if (detprop!=null) x.setDefault(Amount.valueOf(detprop.getDetectorSizeH(), SI.MILLIMETER));
-        NumericNode<Length> y  = new NumericNode<Length>("y", size, Length.UNIT);
+        NumericNode<Length> y  = new NumericNode<Length>("y", size, SI.MILLIMETER);
         if (detprop!=null) y.setDefault(Amount.valueOf(detprop.getDetectorSizeV(), SI.MILLIMETER));
 
         final LabelNode pixel = new LabelNode("Pixel", detectorMeta);
-        x  = new NumericNode<Length>("x", pixel, Length.UNIT);
+        x  = new NumericNode<Length>("x", pixel, SI.MILLIMETER);
         if (detprop!=null) x.setDefault(Amount.valueOf(detprop.getHPxSize(), SI.MILLIMETER));
-        y  = new NumericNode<Length>("y", pixel, Length.UNIT);
+        y  = new NumericNode<Length>("y", pixel, SI.MILLIMETER);
         if (detprop!=null) y.setDefault(Amount.valueOf(detprop.getVPxSize(), SI.MILLIMETER));
+        
+        if (metaData!=null && metaData.getMetaNames()!=null && metaData.getMetaNames().size()>0) {
+            final LabelNode rawMeta = new LabelNode("Raw Meta", root);
+        	for (String name : metaData.getMetaNames()) {
+				new ObjectNode(name, metaData.getMetaValue(name), rawMeta);
+			}
+        }
+
 	}
 	
+	private double getBeamY(DetectorProperties dce, Unit<Length> unit) {
+		final double[] beamCen = dce.getBeamLocation();
+		return getPosition(beamCen[0], dce.getHPxSize(), unit);
+	}
+
+	private double getBeamX(DetectorProperties dce, Unit<Length> unit) {
+		final double[] beamCen = dce.getBeamLocation();
+		return getPosition(beamCen[1], dce.getVPxSize(), unit);
+	}
+
+	private double getPosition(double value, double size, Unit<Length> unit) {
+		return unit==SI.MILLIMETER ? value*size : value;
+	}
+
 	private void setIntensityValues(NumericNode<Dimensionless> max,
 			                        NumericNode<Dimensionless> min, 
 			                        NumericNode<Dimensionless> mean) throws Exception {

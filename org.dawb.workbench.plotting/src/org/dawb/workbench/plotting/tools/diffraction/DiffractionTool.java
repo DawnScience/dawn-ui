@@ -84,7 +84,7 @@ public class DiffractionTool extends AbstractToolPage {
 	}
 	
 	public void deactivate() {
-		//remove region listener
+		super.deactivate();
 		if (getPlottingSystem()!=null) {
 			getPlottingSystem().removeRegionListener(this.regionListener);
 		}
@@ -113,7 +113,13 @@ public class DiffractionTool extends AbstractToolPage {
 		viewer.setInput(model.getRoot());
 		
 		final List<?> top = model.getRoot().getChildren();
-		for (Object element : top) viewer.setExpandedState(element, true);
+		for (Object element : top) {
+			if (element instanceof LabelNode) {
+				LabelNode ln = (LabelNode)element;
+				if (ln.getLabel().toLowerCase().startsWith("raw")) continue;
+			}
+			viewer.setExpandedState(element, true);
+		}
 
 	}
 
@@ -152,18 +158,18 @@ public class DiffractionTool extends AbstractToolPage {
 		var.getColumn().setText("Default"); // Selected
 		var.getColumn().setWidth(0);
 		var.getColumn().setResizable(false);
-		var.setLabelProvider(new DelegatingStyledCellLabelProvider(new NumericNodeLabelProvider(1)));
+		var.setLabelProvider(new DelegatingStyledCellLabelProvider(new DiffractionLabelProvider(1)));
 		defaultColumn = var;
 		
 		var = new TreeViewerColumn(viewer, SWT.LEFT, 2);
 		var.getColumn().setText("Value"); // Selected
 		var.getColumn().setWidth(80);
-		var.setLabelProvider(new DelegatingStyledCellLabelProvider(new NumericNodeLabelProvider(2)));
+		var.setLabelProvider(new DelegatingStyledCellLabelProvider(new DiffractionLabelProvider(2)));
 
 		var = new TreeViewerColumn(viewer, SWT.LEFT, 3);
 		var.getColumn().setText("Unit"); // Selected
 		var.getColumn().setWidth(50);
-		var.setLabelProvider(new DelegatingStyledCellLabelProvider(new NumericNodeLabelProvider(3)));
+		var.setLabelProvider(new DelegatingStyledCellLabelProvider(new DiffractionLabelProvider(3)));
 	}
 	
 	private void createActions() {

@@ -16,7 +16,6 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 	
 	private Amount<E>  value;
 	private Amount<E>  defaultValue;
-	private boolean    editable=false;
 
 	/**
 	 * Unit must not be null.
@@ -73,14 +72,6 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 	public void setUnit(Unit<E> unit) {
 		if (value!=null)        value        = Amount.valueOf(value.doubleValue(unit), unit);
 		if (defaultValue!=null) defaultValue = Amount.valueOf(defaultValue.doubleValue(unit), unit);
-	}
-
-	public boolean isEditable() {
-		return editable;
-	}
-
-	public void setEditable(boolean editable) {
-		this.editable = editable;
 	}
 	
 

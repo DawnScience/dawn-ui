@@ -18,6 +18,7 @@ public class LabelNode implements TreeNode {
 	private String           label;
 	private TreeNode         parent;
 	private Vector<TreeNode> children;
+	private boolean    editable=false;
 
 	public LabelNode() {
 		this(null, null);
@@ -101,6 +102,15 @@ public class LabelNode implements TreeNode {
 	
 	public String toString() {
 		return label!=null?label:"";
+	}
+
+
+	public boolean isEditable() {
+		return editable;
+	}
+
+	public void setEditable(boolean editable) {
+		this.editable = editable;
 	}
 
 }
