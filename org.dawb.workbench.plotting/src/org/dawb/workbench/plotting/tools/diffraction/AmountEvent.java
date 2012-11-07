@@ -1,0 +1,25 @@
+package org.dawb.workbench.plotting.tools.diffraction;
+
+import java.util.EventObject;
+
+import javax.measure.quantity.Quantity;
+
+import org.jscience.physics.amount.Amount;
+
+public class AmountEvent<E extends Quantity> extends EventObject {
+
+	private Amount<E> amount;
+
+	public AmountEvent(Object source, Amount<E> amount) {
+		super(source);
+		this.amount = amount;
+	}
+
+	public Amount<E> getAmount() {
+		return amount;
+	}
+
+	public void setAmount(Amount<E> amount) {
+		this.amount = amount;
+	}
+}

@@ -24,6 +24,8 @@ import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
@@ -239,5 +241,9 @@ public class FloatSpinnerCellEditor extends CellEditor {
 
 	public void addKeyListener(KeyListener listener) {
 		if (spinner!=null) spinner.addKeyListener(listener);
+	}
+
+	public void addSelectionListener(SelectionListener listener) {
+		if (spinner!=null) spinner.addSelectionListener(listener);
 	}
 }

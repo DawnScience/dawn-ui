@@ -3,6 +3,8 @@ package org.dawb.workbench.plotting.tools.diffraction;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.measure.quantity.Quantity;
@@ -65,6 +67,13 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 		if (defaultValue!=null) return defaultValue.doubleValue(defaultValue.getUnit());
 		return Double.NaN;
 	}
+	
+	public double getValue(Unit<E> requiredUnit) {
+		if (value!=null)        return value.doubleValue(requiredUnit);
+		if (defaultValue!=null) return defaultValue.doubleValue(requiredUnit);
+		return Double.NaN;
+	}
+	
 	public String getValue(boolean isFormat) {
 		if (isFormat) {
 			return format.format(getValue());
@@ -76,17 +85,67 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 	public void setValue(double val) {
 		if (value!=null)        {
 			value = Amount.valueOf(val, value.getUnit());
+			fireAmountChanged(value);
 			return;
 		}
 		if (defaultValue!=null) {
 			value = Amount.valueOf(val, defaultValue.getUnit());
+			fireAmountChanged(value);
 			return;
 		}
 		value = Amount.valueOf(val, defaultUnit);
+		fireAmountChanged(value);
 		return;
 	}
+	
+	private Collection<AmountListener> listeners;
+	
+	protected void fireAmountChanged(Amount<E> value) {
+		if (listeners==null) return;
+		final AmountEvent<E> evt = new AmountEvent<E>(this, value);
+		for (AmountListener l : listeners) {
+			l.amountChanged(evt);
+		}
+	}
+	
+	public void addAmountListener(AmountListener l) {
+		if (listeners==null) listeners = new HashSet<AmountListener>(3);
+		listeners.add(l);
+	}
+	
+	public void removeAmountListener(AmountListener l) {
+		if (listeners==null) return;
+		listeners.remove(l);
+	}
+	
+	private Collection<UnitListener> unitListeners;
+	
+	protected void fireUnitChanged(Unit<E> unit) {
+		if (unitListeners==null) return;
+		final UnitEvent<E> evt = new UnitEvent<E>(this, unit);
+		for (UnitListener l : unitListeners) {
+			l.unitChanged(evt);
+		}
+	}
+	
+	public void addUnitListener(UnitListener l) {
+		if (unitListeners==null) unitListeners = new HashSet<UnitListener>(3);
+		unitListeners.add(l);
+	}
+	
+	public void removeUnitListener(UnitListener l) {
+		if (listeners==null) return;
+		unitListeners.remove(l);
+	}
+
+	/**
+	 * May be null
+	 * @param value
+	 */
 	public void setValue(Amount<E> value) {
 		this.value = value;
+		if (value!=null) fireAmountChanged(value);
+		if (value!=null) fireUnitChanged(value.getUnit());
 	}
 	
 	/**
@@ -129,14 +188,16 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 	}
 	public void setUnitIndex(int index) {
 		if (allowedUnits==null) return;
-		final Unit to = allowedUnits.get(index);
+		final Unit<E> to = allowedUnits.get(index);
 		if (value!=null)        value        = value.to(to);
 		if (defaultValue!=null) defaultValue = defaultValue.to(to);
+		fireUnitChanged(to);
 	}
 
 	public void setUnit(Unit<E> unit) {
 		if (value!=null)        value        = Amount.valueOf(value.doubleValue(unit), unit);
 		if (defaultValue!=null) defaultValue = Amount.valueOf(defaultValue.doubleValue(unit), unit);
+		fireUnitChanged(unit);
 	}
 	
 	public void reset() {
@@ -202,12 +263,38 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 	}
 	public void setUnits(@SuppressWarnings("rawtypes") Unit... allowedUnits) {
 		this.allowedUnits = Arrays.asList(allowedUnits);
+		
+		if (value!=null)        {
+			value = convertToNewSet(value, allowedUnits);
+			fireAmountChanged(value);
+		}
+		if (defaultValue!=null) defaultValue = convertToNewSet(defaultValue, allowedUnits);
+	}
+
+	private Amount<E> convertToNewSet(Amount<E> val, Unit[] au) {
+
+		for (Unit unit : au) {
+			// This unit is active and may have just 
+			if (val.getUnit().toString().equals(unit.toString())) {
+				Amount standard = val.to(val.getUnit().getStandardUnit());
+				return standard.to(unit);
+			}
+		}
+		return val;
 	}
 
 	public String[] getUnitsString() {
 		final String[] ret = new String[allowedUnits.size()];
 		for (int i = 0; i < ret.length; i++) ret[i] = allowedUnits.get(i).toString();
 		return ret;
+	}
+
+	/**
+	 * Gets the decimal places used to view the number
+	 * @return
+	 */
+	public int getDecimalPlaces() {
+		return format.getMaximumFractionDigits();
 	}
 
 }

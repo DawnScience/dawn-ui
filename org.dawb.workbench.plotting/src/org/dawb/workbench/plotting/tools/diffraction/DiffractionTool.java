@@ -171,6 +171,7 @@ public class DiffractionTool extends AbstractToolPage {
 		IMetaData meta = getMetaData();
 		try {
 			model = new DiffractionTreeModel(meta);
+			model.setViewer(viewer);
 		} catch (Exception e) {
 			logger.error("Cannot create model!", e);
 			return;
@@ -248,7 +249,7 @@ public class DiffractionTool extends AbstractToolPage {
 
 		var = new TreeViewerColumn(viewer, SWT.LEFT, 3);
 		var.getColumn().setText("Unit"); // Selected
-		var.getColumn().setWidth(50);
+		var.getColumn().setWidth(90);
 		var.setLabelProvider(new DelegatingStyledCellLabelProvider(new DiffractionLabelProvider(3)));
 		var.setEditingSupport(new UnitEditingSupport(viewer));
 	}
@@ -262,12 +263,12 @@ public class DiffractionTool extends AbstractToolPage {
 		@Override
 		protected CellEditor getCellEditor(final Object element) {
 			if (element instanceof NumericNode) {
-				NumericNode<? extends Quantity> node = (NumericNode<? extends Quantity>)element;
+				final NumericNode<? extends Quantity> node = (NumericNode<? extends Quantity>)element;
 				final FloatSpinnerCellEditor fse = new FloatSpinnerCellEditor(viewer.getTree(), SWT.NONE);
+				fse.setFormat(7, node.getDecimalPlaces()+1);
+				fse.setIncrement(node.getIncrement());
 				fse.setMaximum(node.getUpperBoundDouble());
 				fse.setMinimum(node.getLowerBoundDouble());
-				fse.setIncrement(node.getIncrement());
-				fse.setFormat(7, 3);
 				fse.addKeyListener(new KeyAdapter() {
 					public void keyPressed(KeyEvent e) {
 						if (e.character=='\n') {
@@ -317,7 +318,7 @@ public class DiffractionTool extends AbstractToolPage {
 		protected CellEditor getCellEditor(final Object element) {
 			if (element instanceof NumericNode) {
 				NumericNode<? extends Quantity> node = (NumericNode<? extends Quantity>)element;
-				final CComboCellEditor cce = new CComboCellEditor(viewer.getTree(), node.getUnitsString());
+				final CComboCellEditor cce = new CComboCellEditor(viewer.getTree(), node.getUnitsString(), SWT.READ_ONLY);
 				cce.getCombo().addSelectionListener(new SelectionAdapter() {
 					public void widgetSelected(SelectionEvent e) {
 						setValue(element, cce.getValue());
