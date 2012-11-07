@@ -1,8 +1,5 @@
 package org.dawb.workbench.plotting.tools.diffraction;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-
 import javax.measure.quantity.Quantity;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -12,11 +9,9 @@ import org.eclipse.jface.viewers.StyledString;
 public class DiffractionLabelProvider extends ColumnLabelProvider implements IStyledLabelProvider{
 
 	private int icolumn;
-	private NumberFormat format;
 
 	public DiffractionLabelProvider(int icolumn) {
 		this.icolumn = icolumn;
-		this.format  = new DecimalFormat("#0.####");
 	}
 
 
@@ -60,7 +55,7 @@ public class DiffractionLabelProvider extends ColumnLabelProvider implements ISt
 		switch(icolumn) {
 		
 		case 1: // Default
-			return ret.append(format.format(node.getDefaultValue()), StyledString.QUALIFIER_STYLER);
+			return ret.append(node.getDefaultValue(true), StyledString.QUALIFIER_STYLER);
 			
 		case 2: // Value
 			if (Double.isNaN(node.getValue())) {
@@ -73,10 +68,10 @@ public class DiffractionLabelProvider extends ColumnLabelProvider implements ISt
 			    return ret;
 			}
 			if (node.isEditable()) {
-				ret.append(format.format(node.getValue()));
+				ret.append(node.getValue(true));
 				ret.append(" *", StyledString.QUALIFIER_STYLER);
 			} else {
-				ret.append(format.format(node.getValue()), StyledString.DECORATIONS_STYLER);
+				ret.append(node.getValue(true), StyledString.DECORATIONS_STYLER);
 			}
 			return ret;
 			

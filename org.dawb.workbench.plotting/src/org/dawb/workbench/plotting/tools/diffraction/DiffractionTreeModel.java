@@ -54,10 +54,19 @@ public class DiffractionTreeModel {
         NumericNode<Length> lambda = new NumericNode<Length>("Wavelength", experimentalInfo, NonSI.ANGSTROM);
         if (dce!=null) lambda.setDefault(dce.getWavelength(), NonSI.ANGSTROM);
         lambda.setEditable(true);
+        lambda.setIncrement(0.01);
+        lambda.setFormat("#0.##");
+        lambda.setLowerBound(0);
+        lambda.setUpperBound(1000);
+        lambda.setUnits(NonSI.ANGSTROM, NonSI.ELECTRON_VOLT);
         
         final NumericNode<Length> dist   = new NumericNode<Length>("Distance", experimentalInfo, SI.MILLIMETER);
         if (detprop!=null) dist.setDefault(detprop.getOrigin().z, SI.MILLIMETER);
         dist.setEditable(true);
+        dist.setIncrement(1);
+        dist.setFormat("#0.#");
+        dist.setLowerBound(0);
+        dist.setUpperBound(1000);
      
         NumericNode<Angle> start = new NumericNode<Angle>("Oscillation Start", experimentalInfo, NonSI.DEGREE_ANGLE);
         if (dce!=null)  start.setDefault(dce.getPhiStart(), NonSI.DEGREE_ANGLE);
@@ -106,11 +115,19 @@ public class DiffractionTreeModel {
         x  = new NumericNode<Length>("x", pixel, SI.MILLIMETER);
         if (detprop!=null) x.setDefault(detprop.getHPxSize(), SI.MILLIMETER);
         x.setEditable(true);
+        x.setIncrement(0.01);
+        x.setFormat("#0.##");
+        x.setLowerBound(0);
+        x.setUpperBound(1000);
 
         y  = new NumericNode<Length>("y", pixel, SI.MILLIMETER);
         if (detprop!=null) y.setDefault(detprop.getVPxSize(), SI.MILLIMETER);
         y.setEditable(true);
-       
+        y.setIncrement(0.01);
+        y.setFormat("#0.##");
+        y.setLowerBound(0);
+        y.setUpperBound(1000);
+      
         if (metaData!=null && metaData.getMetaNames()!=null && metaData.getMetaNames().size()>0) {
             final LabelNode rawMeta = new LabelNode("Raw Meta", root);
         	for (String name : metaData.getMetaNames()) {

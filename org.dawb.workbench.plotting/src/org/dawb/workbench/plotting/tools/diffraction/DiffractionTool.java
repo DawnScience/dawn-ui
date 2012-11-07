@@ -15,9 +15,11 @@ import org.dawb.common.ui.plot.trace.IPaletteListener;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.PaletteEvent;
 import org.dawb.common.ui.plot.trace.TraceEvent;
+import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.viewers.TreeNodeContentProvider;
 import org.dawb.workbench.plotting.Activator;
+import org.dawnsci.common.widgets.celleditor.CComboCellEditor;
 import org.dawnsci.common.widgets.celleditor.FloatSpinnerCellEditor;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -33,12 +35,12 @@ import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
-import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -53,7 +55,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.io.MetaDataAdapter;
-import uk.ac.gda.common.rcp.util.EclipseUtils;
+
 
 public class DiffractionTool extends AbstractToolPage {
 
@@ -248,6 +250,7 @@ public class DiffractionTool extends AbstractToolPage {
 		var.getColumn().setText("Unit"); // Selected
 		var.getColumn().setWidth(50);
 		var.setLabelProvider(new DelegatingStyledCellLabelProvider(new DiffractionLabelProvider(3)));
+		var.setEditingSupport(new UnitEditingSupport(viewer));
 	}
 	
 	private class ValueEditingSupport extends EditingSupport {
@@ -263,7 +266,7 @@ public class DiffractionTool extends AbstractToolPage {
 				final FloatSpinnerCellEditor fse = new FloatSpinnerCellEditor(viewer.getTree(), SWT.NONE);
 				fse.setMaximum(node.getUpperBoundDouble());
 				fse.setMinimum(node.getLowerBoundDouble());
-				fse.setIncrement(0.001d);
+				fse.setIncrement(node.getIncrement());
 				fse.setFormat(7, 3);
 				fse.addKeyListener(new KeyAdapter() {
 					public void keyPressed(KeyEvent e) {
@@ -303,6 +306,56 @@ public class DiffractionTool extends AbstractToolPage {
 
 		
 	}
+	
+	private class UnitEditingSupport extends EditingSupport {
+
+		public UnitEditingSupport(ColumnViewer viewer) {
+			super(viewer);
+		}
+
+		@Override
+		protected CellEditor getCellEditor(final Object element) {
+			if (element instanceof NumericNode) {
+				NumericNode<? extends Quantity> node = (NumericNode<? extends Quantity>)element;
+				final CComboCellEditor cce = new CComboCellEditor(viewer.getTree(), node.getUnitsString());
+				cce.getCombo().addSelectionListener(new SelectionAdapter() {
+					public void widgetSelected(SelectionEvent e) {
+						setValue(element, cce.getValue());
+					}
+				});
+				return cce;
+			}
+			return null;
+		}
+
+		@Override
+		protected boolean canEdit(Object element) {
+			if (!(element instanceof NumericNode)) return false;
+			NumericNode<? extends Quantity> node = (NumericNode<? extends Quantity>)element;
+			return node.isEditable() && node.getUnits()!=null;
+		}
+
+		@Override
+		protected Object getValue(Object element) {
+			if (!(element instanceof NumericNode)) return null;
+			
+			NumericNode<? extends Quantity> node = (NumericNode<? extends Quantity>)element;
+			
+			return node.getUnitIndex();
+		}
+
+		@Override
+		protected void setValue(Object element, Object value) {
+			if (!(element instanceof NumericNode)) return;
+			
+			NumericNode<? extends Quantity> node = (NumericNode<? extends Quantity>)element;
+			node.setUnitIndex((Integer)value);
+			viewer.refresh(element);
+		}
+
+		
+	}
+
 	
 	private void createActions() {
 		final IToolBarManager toolMan = getSite().getActionBars().getToolBarManager();
