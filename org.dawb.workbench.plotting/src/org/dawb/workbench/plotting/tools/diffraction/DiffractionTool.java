@@ -231,8 +231,8 @@ public class DiffractionTool extends AbstractToolPage {
 	
 	private void createColumns(TreeViewer viewer) {
 		
-		ColumnViewerToolTipSupport.enableFor(viewer,ToolTip.NO_RECREATE);
-		viewer.setColumnProperties(new String[] { "Name", "Default", "Value", "Unit" });
+		//ColumnViewerToolTipSupport.enableFor(viewer,ToolTip.NO_RECREATE);
+		//viewer.setColumnProperties(new String[] { "Name", "Original", "Value", "Unit" });
 
 		TreeViewerColumn var = new TreeViewerColumn(viewer, SWT.LEFT, 0);
 		var.getColumn().setText("Name"); // Selected

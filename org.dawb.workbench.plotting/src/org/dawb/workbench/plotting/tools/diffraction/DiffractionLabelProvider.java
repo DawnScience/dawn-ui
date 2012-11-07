@@ -87,4 +87,22 @@ public class DiffractionLabelProvider extends ColumnLabelProvider implements ISt
 	}
 
 
+	public String getToolTipText(Object element) {
+		
+		if (!(element instanceof LabelNode)) return super.getToolTipText(element);
+		
+		LabelNode ln = (LabelNode)element;
+		StringBuilder buf = new StringBuilder();
+		buf.append("'");
+		buf.append(ln.getPath());
+		buf.append("' ");
+		
+		if (ln.isEditable()) buf.append("\n Click to edit the value or the units.");
+
+		buf.append("\n Right click to copy or reset value.");
+		
+		return super.getToolTipText(element);
+	}
+
+
 }

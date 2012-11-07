@@ -44,6 +44,7 @@ public class DiffractionTreeModel {
     private TreeViewer  viewer;
 	private NumericNode<Dimensionless> max,min,mean;
 	private Map<String, TreeNode> nodeMap;
+	private boolean isDisposed;
 	
 	public DiffractionTreeModel(IMetaData metaData) throws Exception {
 		this.root     = new LabelNode();
@@ -83,7 +84,10 @@ public class DiffractionTreeModel {
         dist.setIncrement(1);
         dist.setFormat("#0.#");
         dist.setLowerBound(0);
-        dist.setUpperBound(1000);
+        dist.setUpperBound(1000000);
+        final Unit<Length> micron = SI.MILLIMETER.divide(1000);
+        UnitFormat.getInstance().label(micron, "µm");
+        dist.setUnits(SI.MILLIMETER, micron, NonSI.INCH);
      
         NumericNode<Angle> start = new NumericNode<Angle>("Oscillation Start", experimentalInfo, NonSI.DEGREE_ANGLE);
         registerNode(start);
@@ -266,7 +270,8 @@ public class DiffractionTreeModel {
 
 	public void setIntensityValues(IImageTrace image) throws Exception {
 		
-		if (image==null) return;
+		if (image==null)  return;
+		if (isDisposed)   return;
 		max.setDefault(image.getImageServiceBean().getMax().doubleValue(), Dimensionless.UNIT);
 		min.setDefault(image.getImageServiceBean().getMin().doubleValue(), Dimensionless.UNIT);
 
@@ -281,6 +286,7 @@ public class DiffractionTreeModel {
 	}
 
 	public void dispose() {
+		isDisposed = true;
 		root   = null;
 		viewer = null;
 		nodeMap.clear();

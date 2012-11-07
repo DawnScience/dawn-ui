@@ -189,9 +189,13 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 	public void setUnitIndex(int index) {
 		if (allowedUnits==null) return;
 		final Unit<E> to = allowedUnits.get(index);
-		if (value!=null)        value        = value.to(to);
-		if (defaultValue!=null) defaultValue = defaultValue.to(to);
-		fireUnitChanged(to);
+		if (value==null&&defaultValue!=null) {
+			value = defaultValue.copy();
+		}
+		if (value!=null) {
+			value        = value.to(to);
+			fireUnitChanged(to);
+		}
 	}
 
 	public void setUnit(Unit<E> unit) {
