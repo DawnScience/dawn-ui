@@ -24,6 +24,9 @@ import org.dawnsci.common.widgets.celleditor.FloatSpinnerCellEditor;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.JFacePreferences;
 import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.jface.resource.JFaceResources;
@@ -33,6 +36,7 @@ import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
 import org.eclipse.jface.viewers.EditingSupport;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.jface.window.ToolTip;
@@ -235,7 +239,7 @@ public class DiffractionTool extends AbstractToolPage {
 		var.setLabelProvider(new ColumnLabelProvider());
 		
 		var = new TreeViewerColumn(viewer, SWT.LEFT, 1);
-		var.getColumn().setText("Default"); // Selected
+		var.getColumn().setText("Original"); // Selected
 		var.getColumn().setWidth(0);
 		var.getColumn().setResizable(false);
 		var.setLabelProvider(new DelegatingStyledCellLabelProvider(new DiffractionLabelProvider(1)));
@@ -359,7 +363,9 @@ public class DiffractionTool extends AbstractToolPage {
 
 	
 	private void createActions() {
+		
 		final IToolBarManager toolMan = getSite().getActionBars().getToolBarManager();
+		final MenuManager     menuMan = new MenuManager();
 		
 		final Action showDefault = new Action("Show the original/default value column", Activator.getImageDescriptor("icons/plot-tool-diffraction-default.gif")) {
 			public void run() {
@@ -367,11 +373,24 @@ public class DiffractionTool extends AbstractToolPage {
 				defaultColumn.getColumn().setResizable(!isChecked());
 			}
 		};
-		showDefault.setChecked(false);// TODO Remember that?
+		showDefault.setChecked(false);
 		
-		final Action reset = new Action("Reset all fields", Activator.getImageDescriptor("icons/book_previous.png")) {
+		final Action reset = new Action("Reset selected field", Activator.getImageDescriptor("icons/reset.gif")) {
 			@Override
 			public void run() {
+				final TreeNode node = (TreeNode)((StructuredSelection)viewer.getSelection()).getFirstElement();
+				if (node instanceof NumericNode) {
+					((NumericNode)node).reset();
+					viewer.refresh(node);
+				}
+			}
+		};
+		final Action resetAll = new Action("Reset all fields", Activator.getImageDescriptor("icons/reset_red.png")) {
+			@Override
+			public void run() {
+				
+				boolean ok = MessageDialog.openConfirm(Display.getDefault().getActiveShell(), "Confirm Reset All", "Are you sure that you would like to reset all values?");
+				if (!ok) return;
 				model.reset();
 				viewer.refresh();
 			}
@@ -402,8 +421,19 @@ public class DiffractionTool extends AbstractToolPage {
 		centre.setImageDescriptor(Activator.getImageDescriptor("icons/centre.png"));
 		
 		toolMan.add(showDefault);
+		toolMan.add(new Separator());
 		toolMan.add(reset);
+		toolMan.add(resetAll);
+		toolMan.add(new Separator());
 		toolMan.add(centre);
+		
+		menuMan.add(showDefault);
+		menuMan.add(new Separator());
+		menuMan.add(reset);
+		menuMan.add(resetAll);
+		menuMan.add(new Separator());
+		menuMan.add(centre);
+		
 	}
 	
 	private void createListeners() {
