@@ -27,6 +27,7 @@ Export-Package: org.dawb.workbench.plotting.composites,
  org.dawb.workbench.plotting.system.dialog,
  org.dawb.workbench.plotting.system.swtxy.selection,
  org.dawb.workbench.plotting.tools,
+ org.dawb.workbench.plotting.tools.diffraction,
  org.dawb.workbench.plotting.tools.profile,
  org.dawb.workbench.plotting.tools.reduction,
  org.dawb.workbench.plotting.util
@@ -38,7 +39,10 @@ Import-Package: ncsa.hdf.object,
  org.eclipse.ui,
  org.eclipse.ui.cheatsheets,
  org.slf4j;version="1.5.6",
+ uk.ac.diamond.scisoft.analysis.rcp,
  uk.ac.diamond.scisoft.analysis.rcp.pixelinfoutils,
+ uk.ac.diamond.scisoft.analysis.rcp.preference,
+ uk.ac.diamond.sda.meta.page,
  uk.ac.gda.monitor,
  uk.ac.gda.richbeans.components.scalebox
 Bundle-ClassPath: .
