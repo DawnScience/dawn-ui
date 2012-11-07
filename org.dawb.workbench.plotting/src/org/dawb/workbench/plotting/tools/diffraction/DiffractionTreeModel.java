@@ -75,7 +75,7 @@ public class DiffractionTreeModel {
         lambda.setFormat("#0.##");
         lambda.setLowerBound(0);
         lambda.setUpperBound(1000);
-        lambda.setUnits(NonSI.ANGSTROM, NonSI.ELECTRON_VOLT);
+        lambda.setUnits(NonSI.ANGSTROM, NonSI.ELECTRON_VOLT, SI.KILO(NonSI.ELECTRON_VOLT), SI.GIGA(NonSI.ELECTRON_VOLT));
         
         final NumericNode<Length> dist   = new NumericNode<Length>("Distance", experimentalInfo, SI.MILLIMETER);
         registerNode(dist);
@@ -85,8 +85,7 @@ public class DiffractionTreeModel {
         dist.setFormat("#0.#");
         dist.setLowerBound(0);
         dist.setUpperBound(1000000);
-        final Unit<Length> micron = SI.MILLIMETER.divide(1000);
-        UnitFormat.getInstance().label(micron, "µm");
+        final Unit<Length> micron = SI.MICRO(SI.METER);
         dist.setUnits(SI.MILLIMETER, micron, NonSI.INCH);
      
         NumericNode<Angle> start = new NumericNode<Angle>("Oscillation Start", experimentalInfo, NonSI.DEGREE_ANGLE);

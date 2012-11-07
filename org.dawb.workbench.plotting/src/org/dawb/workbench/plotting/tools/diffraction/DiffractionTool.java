@@ -33,13 +33,11 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewer;
-import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
-import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
@@ -362,6 +360,7 @@ public class DiffractionTool extends AbstractToolPage {
 		
 	}
 
+	private TreeNode copiedNode;
 	
 	private void createActions() {
 		
@@ -394,6 +393,22 @@ public class DiffractionTool extends AbstractToolPage {
 				if (!ok) return;
 				model.reset();
 				viewer.refresh();
+			}
+		};
+		
+		final Action copy = new Action("Copy value", Activator.getImageDescriptor("icons/copy.gif")) {
+			@Override
+			public void run() {
+				copiedNode = (TreeNode)((StructuredSelection)viewer.getSelection()).getFirstElement();
+			}
+		};
+
+		final Action paste = new Action("Paste value", Activator.getImageDescriptor("icons/paste.gif")) {
+			@Override
+			public void run() {
+				if (copiedNode!=null) {
+					// TODO Paste value into something in the table.
+				}
 			}
 		};
 		
@@ -432,6 +447,9 @@ public class DiffractionTool extends AbstractToolPage {
 		menuMan.add(new Separator());
 		menuMan.add(reset);
 		menuMan.add(resetAll);
+		menuMan.add(new Separator());
+		menuMan.add(copy);
+		menuMan.add(paste);
 		menuMan.add(new Separator());
 		menuMan.add(centre);
 		final Menu menu = menuMan.createContextMenu(viewer.getControl());

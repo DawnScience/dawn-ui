@@ -8,9 +8,11 @@ import java.util.HashSet;
 import java.util.List;
 
 import javax.measure.quantity.Quantity;
+import javax.measure.unit.NonSI;
 import javax.measure.unit.Unit;
 
 import org.jscience.physics.amount.Amount;
+import org.jscience.physics.amount.Constants;
 
 /**
  * This class may be used with TreeNodeContentProvider to create a Tree of editable
@@ -21,7 +23,8 @@ import org.jscience.physics.amount.Amount;
  */
 public class NumericNode<E extends Quantity> extends LabelNode {
 		
-	private Amount<E>  value;
+	@SuppressWarnings("rawtypes")
+	private Amount  value;
 	private Amount<E>  defaultValue;
 	private Amount<E>  lowerBound;
 	private Amount<E>  upperBound;
@@ -193,9 +196,21 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 			value = defaultValue.copy();
 		}
 		if (value!=null) {
-			value        = value.to(to);
+			// BODGE for A and eV !
+			if (isAngstomDimenions(value, to)) {	
+				value = Constants.ℎ.times(Constants.c).divide(value).to(to); 
+			} else {
+			    value = value.to(to);
+			}
 			fireUnitChanged(to);
 		}
+	}
+
+
+	private boolean isAngstomDimenions(Amount val, Unit to) {
+		boolean isAngstom = allowedUnits!=null && allowedUnits.contains(NonSI.ANGSTROM) && allowedUnits.contains(NonSI.ELECTRON_VOLT);
+	    if (!isAngstom) return false;
+	    return !val.getUnit().isCompatible(to); // Only convert incompatible.
 	}
 
 	public void setUnit(Unit<E> unit) {
