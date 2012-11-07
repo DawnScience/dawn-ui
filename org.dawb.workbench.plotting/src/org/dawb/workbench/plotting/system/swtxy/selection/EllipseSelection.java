@@ -154,16 +154,15 @@ public class EllipseSelection extends AbstractSelectionRegion {
 			setFill(false);
 			handleListener = createHandleNotifier();
 			showMajorAxis(true);
-		}
-
-		public void setup(PointList corners) {
 			moveListener = new FigureListener() {
 				@Override
 				public void figureMoved(IFigure source) {
-					parent.repaint();
+					DecoratedEllipse.this.parent.repaint();
 				}
 			};
+		}
 
+		public void setup(PointList corners) {
 			Rectangle r = new Rectangle(corners.getFirstPoint(), corners.getLastPoint());
 			if (r.preciseWidth() < r.preciseHeight()) {
 				setAxes(r.preciseHeight(), r.preciseWidth());
@@ -351,13 +350,31 @@ public class EllipseSelection extends AbstractSelectionRegion {
 
 		private void updateHandlePositions() {
 			final int imax = handles.size() - 1;
-			for (int i = 0; i < imax; i++) {
-				Point np = getPoint(90*i);
-				SelectionHandle h = (SelectionHandle) handles.get(i);
-				h.setSelectionPoint(np);
+			if (imax > 0) {
+				for (int i = 0; i < imax; i++) {
+					Point np = getPoint(90 * i);
+					SelectionHandle h = (SelectionHandle) handles.get(i);
+					h.setSelectionPoint(np);
+				}
+				SelectionHandle h = (SelectionHandle) handles.get(imax);
+				h.setSelectionPoint(getCentre());
+			} else {
+				// handles
+				for (int i = 0; i < 4; i++) {
+					addHandle(getPoint(i*90));
+				}
+				addCentreHandle();
+
+				// figure move
+				addFigureListener(moveListener);
+				FigureTranslator mover = new FigureTranslator(getXyGraph(), parent, this, handles);
+				mover.addTranslationListener(createRegionNotifier());
+
+				setRegionObjects(this, handles);
+				Rectangle b = getBounds();
+				if (b != null)
+					setBounds(b);
 			}
-			SelectionHandle h = (SelectionHandle) handles.get(imax);
-			h.setSelectionPoint(getCentre());
 		}
 
 		@Override
