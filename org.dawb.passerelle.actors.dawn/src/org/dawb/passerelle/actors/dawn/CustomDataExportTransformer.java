@@ -98,10 +98,10 @@ public class CustomDataExportTransformer extends AbstractDataMessageTransformer 
 		CALIBRATION_TYPES.add("None");
 		CALIBRATION_TYPES.add("Use user defined calibration for ascii files");
 	}
-	
+
 	private Parameter         fileFormatParam;
 	private Parameter         fileWriteParam;
-//	private Parameter         calibParam;
+	//	private Parameter         calibParam;
 	private Parameter         dataSavePathParam;
 	private Parameter         datasetNameParam;
 	private Parameter         datasetSaveNameParam;
@@ -110,7 +110,7 @@ public class CustomDataExportTransformer extends AbstractDataMessageTransformer 
 	private Parameter         axis1SaveParam;
 	private Parameter         axis2SaveParam;
 	private ResourceParameter filePathParam;
-//	private FieldParameter    fieldParam;
+	//	private FieldParameter    fieldParam;
 	@SuppressWarnings("unused")
 	private String            fileFormat, filePath, fileWriteType, dataName, dataSaveName, dataSavePath, axis1, axis2, axis1Save, axis2Save;
 	private static String AXIS1_NAME = "axis1_name";
@@ -120,7 +120,7 @@ public class CustomDataExportTransformer extends AbstractDataMessageTransformer 
 	private static String DATA_SAVEPATH = "data_savepath";
 	private static String DATA_NAME = "data_name";
 	private static String DATA_SAVENAME = "data_savename";
-	
+
 	/**
 	 * 
 	 */
@@ -128,7 +128,7 @@ public class CustomDataExportTransformer extends AbstractDataMessageTransformer 
 
 	public CustomDataExportTransformer(CompositeEntity container, String name) throws NameDuplicationException, IllegalActionException {
 		super(container, name);
-		
+
 		fileFormatParam = new StringParameter(this,"File Format") {
 			private static final long serialVersionUID = 3209529425483671733L;
 			public String[] getChoices() {
@@ -141,46 +141,46 @@ public class CustomDataExportTransformer extends AbstractDataMessageTransformer 
 		fileWriteParam = new StringChoiceParameter(this, "Writing Type", WRITING_CHOICES, SWT.SINGLE);
 		registerConfigurableParameter(fileWriteParam);
 		fileWriteParam.setExpression(WRITING_CHOICES.get(3));
-		
+
 		filePathParam = new ResourceParameter(this, "Output");
 		filePathParam.setResourceType(IResource.FILE);
 		filePathParam.setExpression("/${project_name}/output/${file_name}");
 		registerConfigurableParameter(filePathParam);
-		
-//		calibParam = new StringParameter(this,"Calibration") {
-//			private static final long serialVersionUID = 7033872585443953608L;
-//			public String[] getChoices() {
-//				return CALIBRATION_TYPES.toArray(new String[CALIBRATION_TYPES.size()]);
-//			}
-//		};
-//		registerConfigurableParameter(calibParam);
-//		calibParam.setExpression(CALIBRATION_TYPES.get(0));
-		
+
+		//		calibParam = new StringParameter(this,"Calibration") {
+		//			private static final long serialVersionUID = 7033872585443953608L;
+		//			public String[] getChoices() {
+		//				return CALIBRATION_TYPES.toArray(new String[CALIBRATION_TYPES.size()]);
+		//			}
+		//		};
+		//		registerConfigurableParameter(calibParam);
+		//		calibParam.setExpression(CALIBRATION_TYPES.get(0));
+
 		dataSavePathParam = new StringParameter(this, "Data Path Save");
 		registerConfigurableParameter(dataSavePathParam);
 
 		datasetNameParam = new StringParameter(this, "Dataset Name");
 		registerConfigurableParameter(datasetNameParam);
-		
+
 		datasetSaveNameParam = new StringParameter(this, "Dataset Name Save");
 		registerConfigurableParameter(datasetSaveNameParam);
-		
+
 		axis1Param = new StringParameter(this, "Axis 1 Name");
 		registerConfigurableParameter(axis1Param);
-		
+
 		axis2Param = new StringParameter(this, "Axis 2 Name");
 		registerConfigurableParameter(axis2Param);
 
 		axis1SaveParam = new StringParameter(this, "Axis 1 Name Save");
 		registerConfigurableParameter(axis1SaveParam);
-		
+
 		axis2SaveParam = new StringParameter(this, "Axis 2 Name Save");
 		registerConfigurableParameter(axis2SaveParam);
-		
+
 		memoryManagementParam.setVisibility(Settable.NONE);
 		dataSetNaming.setVisibility(Settable.NONE);
 	}
-	
+
 	public void attributeChanged(Attribute attribute) throws IllegalActionException {
 
 		if (attribute == fileFormatParam) {
@@ -206,7 +206,7 @@ public class CustomDataExportTransformer extends AbstractDataMessageTransformer 
 			if (WRITING_CHOICES.get(0).equals(fileWriteType)||WRITING_CHOICES.get(1).equals(fileWriteType)) {
 				filePathParam.setResourceType(IResource.FILE); 
 			} else {
-			    filePathParam.setResourceType(IResource.FOLDER);
+				filePathParam.setResourceType(IResource.FOLDER);
 			}
 		}
 		super.attributeChanged(attribute);
@@ -214,45 +214,46 @@ public class CustomDataExportTransformer extends AbstractDataMessageTransformer 
 
 	@Override
 	protected DataMessageComponent getTransformedMessage(List<DataMessageComponent> cache) throws ProcessingException {
-		
+
 		String filePath = null;
 		try {
 			Map<String, String> map = MessageUtils.getScalar(cache);
-			
-//			final Map<String,String> scalar = MessageUtils.getScalar(cache);
-//			final String fileName = scalar!=null ? scalar.get("file_name") : null;
+
+			//			final Map<String,String> scalar = MessageUtils.getScalar(cache);
+			//			final String fileName = scalar!=null ? scalar.get("file_name") : null;
 			String fileName = filePathParam.getExpression();
-			
-//			final IFile  output   = getOutputPath(fileName);
-//			filePath = output.getLocation().toOSString();
-			filePath = fileName;
+			IFile file = (IFile)ResourcesPlugin.getWorkspace().getRoot().findMember(fileName, true);
+			//			final IFile  output   = getOutputPath(fileName);
+			//			filePath = output.getLocation().toOSString();
+			final File fullFile = new File(getProject().getParent().getLocation().toOSString(),file.getFullPath().toOSString());
+			filePath = fullFile.getAbsolutePath();
 			final DataMessageComponent comp = new DataMessageComponent();
 			comp.addScalar(map);
-			
+
 			String writeout = map.get("writeout");
 			writeout = writeout.split("\\.")[0];
 			comp.putScalar("writeout", writeout);
-			
+
 			comp.putScalar("file_path", filePath);
 			comp.putScalar("file_dir",  FileUtils.getDirectory(filePath));
-			
+
 			final File targetFile = new File(filePath);
 			comp.putScalar("file_name", targetFile.getName());
 			comp.putScalar("file_basename", FileUtils.getFileNameNoExtension(targetFile));
-			
+
 			final String datasetPath = dataSavePathParam.getExpression();
 			comp.putScalar(DATA_SAVEPATH, datasetPath);
-			
+
 			comp.putScalar(AXIS1_NAME, axis1Param.getExpression());
 			comp.putScalar(AXIS2_NAME, axis2Param.getExpression());
-			
+
 			comp.putScalar(DATA_NAME, datasetNameParam.getExpression());
 
 			comp.putScalar(DATA_SAVENAME, datasetSaveNameParam.getExpression());
-			
+
 			comp.putScalar(AXIS1_SAVENAME, axis1SaveParam.getExpression());
 			comp.putScalar(AXIS2_SAVENAME, axis2SaveParam.getExpression());
-			
+
 			comp.putScalar(DATA_SAVENAME, datasetSaveNameParam.getExpression());
 
 			// The write process may add scalars passed on.
@@ -265,20 +266,20 @@ public class CustomDataExportTransformer extends AbstractDataMessageTransformer 
 				writeImage(filePath, cache, comp);
 			}
 
-//			AbstractPassModeTransformer.refreshResource(output);
-			
+			//			AbstractPassModeTransformer.refreshResource(output);
+
 			return comp;
-			
+
 		} catch (Exception ne) {
 			throw createDataMessageException("Cannot write to "+filePath, ne);
 		} 
 	}
-	
+
 	private void writeAscii(final String filePath, final List<DataMessageComponent> cache, final DataMessageComponent ret) throws Exception {
-		
+
 		final List<IDataset> sets = MessageUtils.getDatasets(cache);
-	    final File  suggestedFile = new File(filePath);
-		
+		final File  suggestedFile = new File(filePath);
+
 		final Map<String,String>    scal = MessageUtils.getScalar(cache);
 		final DatWriter writer = new DatWriter();
 		writer.setMeta(scal);
@@ -286,95 +287,95 @@ public class CustomDataExportTransformer extends AbstractDataMessageTransformer 
 		writer.setWriteIndex(false);
 
 		final boolean isMultipleFiles = FILE_TYPES.get(3).equals(fileFormat);
-//		if (CALIBRATION_TYPES.get(1).equals(calibParam.getExpression())) {
-//			if (!isMultipleFiles) {
-//				writer.addData(SharedMemoryUtils.getCalibrated(sets.get(0), scal, false));
-//			}
-//		}
-		
+		//		if (CALIBRATION_TYPES.get(1).equals(calibParam.getExpression())) {
+		//			if (!isMultipleFiles) {
+		//				writer.addData(SharedMemoryUtils.getCalibrated(sets.get(0), scal, false));
+		//			}
+		//		}
+
 		int i = 1;
 		for (IDataset set : sets) {
-			
+
 			final String name = FileUtils.getLegalFileName(set.getName())+".dat"; // May cause an error
 			if (isMultipleFiles) { // New file
-			    final File  dir   = suggestedFile.getParentFile();
+				final File  dir   = suggestedFile.getParentFile();
 				final File   file = new File(dir, name);
 				writer.setFile(file);
-				
-//				if (CALIBRATION_TYPES.get(1).equals(calibParam.getExpression())) {
-//					writer.addData(SharedMemoryUtils.getCalibrated(set, scal, false));
-//				}
+
+				//				if (CALIBRATION_TYPES.get(1).equals(calibParam.getExpression())) {
+				//					writer.addData(SharedMemoryUtils.getCalibrated(set, scal, false));
+				//				}
 			}
-			
+
 			writer.addData(set);
-			
+
 			if (isMultipleFiles) { // New file
-			    writer.write();
-			    writer.clear();
+				writer.write();
+				writer.clear();
 				ret.putScalar("data_file_name"+i, name);
 			}
-			
+
 			++i;
 		}
-		
+
 		if (!isMultipleFiles) { // One file
 			ret.putScalar("data_file_name", suggestedFile.getName());
-		    writer.write();
+			writer.write();
 		}
 	}
-	
+
 	private void writeImage(final String filePath, final List<DataMessageComponent> cache, final DataMessageComponent ret) throws Exception {
 
 		boolean wroteSomething = false;
 		final List<IDataset> sets = MessageUtils.getDatasets(cache);
-		
+
 		int ifound = 1;
 
-        for (IDataset set : sets) {
-			
-        	if (set.getShape().length==2) {
-        		
-        		final File parent = (new File(filePath)).getParentFile();
-        		if (!parent.exists()) parent.mkdirs();
-        		ret.putScalar("dir_path", parent.getAbsolutePath());
-        		
-        		final String dataName;
-        		final File slice;
-        		if (WRITING_CHOICES.get(1).equals(fileWriteParam.getExpression())||
-        		    WRITING_CHOICES.get(4).equals(fileWriteParam.getExpression())) {
-        			slice = new File(filePath);
-        			final String name = slice.getName();
-        			dataName = PythonUtils.getLegalVarName(name.substring(0, name.indexOf('0')), null);
+		for (IDataset set : sets) {
 
-        		} else if(WRITING_CHOICES.get(2).equals(fileWriteParam.getExpression()) ) {
-        			slice = new File(filePath);
+			if (set.getShape().length==2) {
 
-        		} else {
-        			dataName = PythonUtils.getLegalVarName(set.getName(), null);
-       			    slice = new File(parent, dataName);
-        		}
-        		String     slicePath = slice.getAbsolutePath();
-        		if (slice.getName().indexOf('.')<0) slicePath = slicePath+"."+getExtension();
-        				
-        		final JavaImageSaver saver = new JavaImageSaver(slicePath, getExtension(), getBits(), true);
-        		final DataHolder     dh    = new DataHolder();
-        		dh.addDataset(set.getName(), set);
-        		saver.saveFile(dh);
-        		
-        		ret.addList("image"+ifound, (AbstractDataset)set);
-        		++ifound;
-        		
-        		wroteSomething = true;
-        	}
+				final File parent = (new File(filePath)).getParentFile();
+				if (!parent.exists()) parent.mkdirs();
+				ret.putScalar("dir_path", parent.getAbsolutePath());
+
+				final String dataName;
+				final File slice;
+				if (WRITING_CHOICES.get(1).equals(fileWriteParam.getExpression())||
+						WRITING_CHOICES.get(4).equals(fileWriteParam.getExpression())) {
+					slice = new File(filePath);
+					final String name = slice.getName();
+					dataName = PythonUtils.getLegalVarName(name.substring(0, name.indexOf('0')), null);
+
+				} else if(WRITING_CHOICES.get(2).equals(fileWriteParam.getExpression()) ) {
+					slice = new File(filePath);
+
+				} else {
+					dataName = PythonUtils.getLegalVarName(set.getName(), null);
+					slice = new File(parent, dataName);
+				}
+				String     slicePath = slice.getAbsolutePath();
+				if (slice.getName().indexOf('.')<0) slicePath = slicePath+"."+getExtension();
+
+				final JavaImageSaver saver = new JavaImageSaver(slicePath, getExtension(), getBits(), true);
+				final DataHolder     dh    = new DataHolder();
+				dh.addDataset(set.getName(), set);
+				saver.saveFile(dh);
+
+				ret.addList("image"+ifound, (AbstractDataset)set);
+				++ifound;
+
+				wroteSomething = true;
+			}
 		}
-        
-        if (!wroteSomething) {
-        	throw new Exception("No 2D data sets found! Cannot write "+fileFormat+" with this data!");
-        }
+
+		if (!wroteSomething) {
+			throw new Exception("No 2D data sets found! Cannot write "+fileFormat+" with this data!");
+		}
 	}
 
 	private IHierarchicalDataFile cachedFile;
-	
+
 	private synchronized void writeH5(final String filePath, final List<DataMessageComponent> cache, final DataMessageComponent ret) throws Exception {
 
 		IHierarchicalDataFile file = null;
@@ -386,15 +387,25 @@ public class CustomDataExportTransformer extends AbstractDataMessageTransformer 
 						final File iof = new File(filePath);
 						if (iof.exists()) iof.delete();
 					}
-					cachedFile = HierarchicalDataFactory.getWriter(filePath);
+
+					boolean fileinuse = true;
+					while(fileinuse) {
+						try {
+							cachedFile = HierarchicalDataFactory.getWriter(filePath);
+							fileinuse = false;
+						} catch (Exception e) {
+							System.out.println("Waiting for other writing to be complete");
+							Thread.sleep(1000);
+						}	
+					}
 				}
 				file = cachedFile;
 			} else {
-			    file = HierarchicalDataFactory.getWriter(filePath);
+				file = HierarchicalDataFactory.getWriter(filePath);
 			}
 			final Map<String, Serializable>  data = MessageUtils.getList(cache);
-//			final Map<String,String>    scal = MessageUtils.getScalar(cache);
-			
+			//			final Map<String,String>    scal = MessageUtils.getScalar(cache);
+
 			String fullEntry = ret.getScalar(DATA_SAVEPATH);
 			String[] entries = fullEntry.split("/");
 			entries = cleanArray(entries);
@@ -414,7 +425,7 @@ public class CustomDataExportTransformer extends AbstractDataMessageTransformer 
 					file.setNexusAttribute(entry, Nexus.ENTRY);
 					parent = entry;
 				}
-			
+
 			}
 
 			String axis1name = ret.getScalar(AXIS1_NAME);
@@ -423,7 +434,7 @@ public class CustomDataExportTransformer extends AbstractDataMessageTransformer 
 			String axis1SaveName = ret.getScalar(AXIS1_SAVENAME);
 			String axis2SaveName = ret.getScalar(AXIS2_SAVENAME);
 			String dataSaveName = ret.getScalar(DATA_SAVENAME);
-			
+
 			AbstractDataset xAxisData = (AbstractDataset)data.get(axis1name);
 			AbstractDataset yAxisData = (AbstractDataset)data.get(axis2name);
 			AbstractDataset myData = (AbstractDataset)data.get(dataName);
@@ -435,7 +446,7 @@ public class CustomDataExportTransformer extends AbstractDataMessageTransformer 
 				final Dataset dataset = file.createDataset(dataSaveName,  datatype, shape, myData.getBuffer(), parent);
 				file.setNexusAttribute(dataset, Nexus.SDS);
 			}
-			
+
 			if(xAxisData != null){
 				final Datatype      xDatatype = H5Utils.getDatatype(xAxisData);
 				final long[]         xShape = new long[xAxisData.getShape().length];
@@ -443,7 +454,7 @@ public class CustomDataExportTransformer extends AbstractDataMessageTransformer 
 				final Dataset xDataset = file.createDataset(axis1SaveName,  xDatatype, xShape, xAxisData.getBuffer(), parent);
 				file.setNexusAttribute(xDataset, Nexus.SDS);
 			}
-			
+
 			if(yAxisData != null){
 				final Datatype      yDatatype = H5Utils.getDatatype(yAxisData);
 				final long[]         yShape = new long[yAxisData.getShape().length];
@@ -452,70 +463,70 @@ public class CustomDataExportTransformer extends AbstractDataMessageTransformer 
 				file.setNexusAttribute(yDataset, Nexus.SDS);
 			}
 
-//			if (scal!=null) for (String name : scal.keySet()) {
-//				final Dataset s = file.createDataset(name, scal.get(name), parent);
-//				file.setNexusAttribute(s, Nexus.SDS);
-//			}
-//
-//			final String datasetNameStr = getDatasetName(cache);
-//			boolean separateSets = (datasetNameStr==null || datasetNameStr.endsWith("/"));
-//			if (separateSets) {
-//				Group group=parent;
-//				if (datasetNameStr!=null && datasetNameStr.endsWith("/")) {
-//					final String[]  paths = datasetNameStr.split("/");
-//					if (paths.length>0) {
-//						for (int i = 0; i < paths.length; i++) {
-//	                        final String path = paths[i];
-//							group = file.group(path, group);
-//							if (i<(paths.length-1)) file.setNexusAttribute(group, Nexus.ENTRY);
-//						}
-//					
-//					} else {
-//						group = file.group("data", parent);
-//					}
-//				} else {
-//					group = file.group("data", parent);
-//				}
-//				
-//				file.setNexusAttribute(group, Nexus.DATA);
-//				if (sets!=null) for (IDataset set : sets) {
-//					final AbstractDataset a = (AbstractDataset)set;
-//					final Datatype        d = H5Utils.getDatatype(a);
-//					final long[]      shape = new long[a.getShape().length];
-//					for (int i = 0; i < shape.length; i++) shape[i] = a.getShape()[i];
-//					final Dataset s = file.createDataset(a.getName(),  d, shape, a.getBuffer(), group);
-//					file.setNexusAttribute(s, Nexus.SDS);
-//				}		
-//			} else {
-//				final String[]  path = datasetNameStr.split("/");
-//				Group group = parent;
-//				if (path.length>2) {
-//					for (int i = 0; i < (path.length-2); i++) {
-//						group = file.group(path[i], group);
-//						file.setNexusAttribute(group, Nexus.ENTRY);
-//					}
-//					group = file.group(path[path.length-2], group);
-//					file.setNexusAttribute(group, Nexus.DATA);
-//				} else  if (path.length==2) {
-//					
-//					group = file.group(path[path.length-2], group);
-//					file.setNexusAttribute(group, Nexus.DATA);
-//					
-//				}
-//				
-//				
-//				final String name = path[path.length-1];
-//				if (sets!=null) for (IDataset set : sets) {
-//					final AbstractDataset a = (AbstractDataset)set;
-//					final Datatype        d = H5Utils.getDatatype(a);
-//					final long[]      shape = new long[a.getShape().length];
-//					for (int i = 0; i < shape.length; i++) shape[i] = a.getShape()[i];
-//					
-//					// TODO Assumes all sets going through pipeline are same size
-//					final Dataset s = file.appendDataset(name,  d, shape, a.getBuffer(), group);
-//					file.setNexusAttribute(s, Nexus.SDS);
-//				}	
-//			}
+			//			if (scal!=null) for (String name : scal.keySet()) {
+			//				final Dataset s = file.createDataset(name, scal.get(name), parent);
+			//				file.setNexusAttribute(s, Nexus.SDS);
+			//			}
+			//
+			//			final String datasetNameStr = getDatasetName(cache);
+			//			boolean separateSets = (datasetNameStr==null || datasetNameStr.endsWith("/"));
+			//			if (separateSets) {
+			//				Group group=parent;
+			//				if (datasetNameStr!=null && datasetNameStr.endsWith("/")) {
+			//					final String[]  paths = datasetNameStr.split("/");
+			//					if (paths.length>0) {
+			//						for (int i = 0; i < paths.length; i++) {
+			//	                        final String path = paths[i];
+			//							group = file.group(path, group);
+			//							if (i<(paths.length-1)) file.setNexusAttribute(group, Nexus.ENTRY);
+			//						}
+			//					
+			//					} else {
+			//						group = file.group("data", parent);
+			//					}
+			//				} else {
+			//					group = file.group("data", parent);
+			//				}
+			//				
+			//				file.setNexusAttribute(group, Nexus.DATA);
+			//				if (sets!=null) for (IDataset set : sets) {
+			//					final AbstractDataset a = (AbstractDataset)set;
+			//					final Datatype        d = H5Utils.getDatatype(a);
+			//					final long[]      shape = new long[a.getShape().length];
+			//					for (int i = 0; i < shape.length; i++) shape[i] = a.getShape()[i];
+			//					final Dataset s = file.createDataset(a.getName(),  d, shape, a.getBuffer(), group);
+			//					file.setNexusAttribute(s, Nexus.SDS);
+			//				}		
+			//			} else {
+			//				final String[]  path = datasetNameStr.split("/");
+			//				Group group = parent;
+			//				if (path.length>2) {
+			//					for (int i = 0; i < (path.length-2); i++) {
+			//						group = file.group(path[i], group);
+			//						file.setNexusAttribute(group, Nexus.ENTRY);
+			//					}
+			//					group = file.group(path[path.length-2], group);
+			//					file.setNexusAttribute(group, Nexus.DATA);
+			//				} else  if (path.length==2) {
+			//					
+			//					group = file.group(path[path.length-2], group);
+			//					file.setNexusAttribute(group, Nexus.DATA);
+			//					
+			//				}
+			//				
+			//				
+			//				final String name = path[path.length-1];
+			//				if (sets!=null) for (IDataset set : sets) {
+			//					final AbstractDataset a = (AbstractDataset)set;
+			//					final Datatype        d = H5Utils.getDatatype(a);
+			//					final long[]      shape = new long[a.getShape().length];
+			//					for (int i = 0; i < shape.length; i++) shape[i] = a.getShape()[i];
+			//					
+			//					// TODO Assumes all sets going through pipeline are same size
+			//					final Dataset s = file.appendDataset(name,  d, shape, a.getBuffer(), group);
+			//					file.setNexusAttribute(s, Nexus.SDS);
+			//				}	
+			//			}
 		} finally {
 			try {
 				if (file!=null) {
@@ -542,20 +553,20 @@ public class CustomDataExportTransformer extends AbstractDataMessageTransformer 
 		return list.toArray(result);
 	}
 
-//	private String getDatasetName(final List<DataMessageComponent> cache) throws Exception {
-//		return ParameterUtils.getSubstituedValue(datasetNameParam, cache);
-//	}
-	
+	//	private String getDatasetName(final List<DataMessageComponent> cache) throws Exception {
+	//		return ParameterUtils.getSubstituedValue(datasetNameParam, cache);
+	//	}
+
 	private boolean isWritingSingleFile() {
 		this.fileWriteType = fileWriteParam.getExpression();
 		if (WRITING_CHOICES.get(0).equals(fileWriteType) || WRITING_CHOICES.get(1).equals(fileWriteType) || (WRITING_CHOICES.get(3).equals(fileWriteType))) { 
-            return true;
+			return true;
 		}
-        return false;
+		return false;
 	}
 
 	private String getOutputPath() throws Exception {
-		
+
 		// Attempt to read file_name from previous nodes, if it will read.
 		final List<IVariable> vars = getInputVariables();
 		for (IVariable input : vars) {
@@ -575,20 +586,20 @@ public class CustomDataExportTransformer extends AbstractDataMessageTransformer 
 
 	@SuppressWarnings("unused")
 	private IFile getOutputPath(String fileName) throws Exception {
-		
+
 		if (fileName==null) fileName = "new_data_file.h5";
 		this.fileWriteType = fileWriteParam.getExpression();
-//		this.filePath = filePathParam.getExpression();
-//		this.filePath = ParameterUtils.substitute(filePath, this);
-		
+		//		this.filePath = filePathParam.getExpression();
+		//		this.filePath = ParameterUtils.substitute(filePath, this);
+
 		if (WRITING_CHOICES.get(0).equals(fileWriteType) || WRITING_CHOICES.get(1).equals(fileWriteType)) { //Append to file referenced by Output
 			IFile file = (IFile)ResourcesPlugin.getWorkspace().getRoot().findMember(fileName, true);
 			if (file == null) {
-				
+
 				// Make directories
 				try {
 					final File fullFile = new File(getProject().getParent().getLocation().toOSString()+"/"+filePath);
-					
+
 					if (!fullFile.exists() && !fullFile.getParentFile().exists()) {
 						fullFile.getParentFile().mkdirs();
 						fullFile.createNewFile();
@@ -599,62 +610,62 @@ public class CustomDataExportTransformer extends AbstractDataMessageTransformer 
 					logger.trace("Error refreshing", ne);
 					// Just carry on.
 				}
-				
-//				final File f = new File(filePath);
-//				final String name = f.getName();
-//				final String path = f.getParent();
-				
-//	            IContainer cont = IFileUtils.getContainer(path, getProject().getName(), "output");
-//				if (cont instanceof IProject) {
-//					file = ((IProject)cont).getFile(name);
-//							
-//				} else {
-//					file = ((IFolder)cont).getFile(name);
-//				}
-//				"/scratch/runtime-org.dawnsci.product.plugin.DAWN/ARPES/data/Copy(3)ofA-20120114-008.nxs";
-//				String fullpaths = f.getAbsolutePath();
-//				String link = f.get;
-//				Path mypath = new Path(fullpaths);
+
+				//				final File f = new File(filePath);
+				//				final String name = f.getName();
+				//				final String path = f.getParent();
+
+				//	            IContainer cont = IFileUtils.getContainer(path, getProject().getName(), "output");
+				//				if (cont instanceof IProject) {
+				//					file = ((IProject)cont).getFile(name);
+				//							
+				//				} else {
+				//					file = ((IFolder)cont).getFile(name);
+				//				}
+				//				"/scratch/runtime-org.dawnsci.product.plugin.DAWN/ARPES/data/Copy(3)ofA-20120114-008.nxs";
+				//				String fullpaths = f.getAbsolutePath();
+				//				String link = f.get;
+				//				Path mypath = new Path(fullpaths);
 				IPath workspacePath = ResourcesPlugin.getWorkspace().getRoot().getLocation();
 
-//				IWorkspace workspace= ResourcesPlugin.getWorkspace();
-//				IPath location= Path.fromOSString(workspacePath.toString()+f.getName()); 
-//				IFile ifile= workspace.getRoot().getFileForLocation(location);
+				//				IWorkspace workspace= ResourcesPlugin.getWorkspace();
+				//				IPath location= Path.fromOSString(workspacePath.toString()+f.getName()); 
+				//				IFile ifile= workspace.getRoot().getFileForLocation(location);
 				file = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(workspacePath);
 			}
 
 			return file;
-		
+
 		} else if (WRITING_CHOICES.get(2).equals(fileWriteType)) { //Create new file for each evaluation using ${file_name}
-			
+
 			if (fileName==null) throw createDataMessageException("Inputs to '"+getName()+"' must contain scalar value 'file_name' to determine h5 output name.", null);
 			final String rootName = fileName.substring(0, fileName.lastIndexOf("."));
-            final IContainer folder = IFileUtils.getContainer(filePath, getProject().getName(), "output");
-			      IFile      file   = folder instanceof IFolder
-					                ? ((IFolder)folder).getFile(rootName)
-					                : ((IProject)folder).getFile(rootName);
-            if (file.exists()) file = IFileUtils.getUniqueIFile(folder, rootName, getExtension());
-			return file;
-			
+			final IContainer folder = IFileUtils.getContainer(filePath, getProject().getName(), "output");
+			IFile      file   = folder instanceof IFolder
+					? ((IFolder)folder).getFile(rootName)
+							: ((IProject)folder).getFile(rootName);
+					if (file.exists()) file = IFileUtils.getUniqueIFile(folder, rootName, getExtension());
+					return file;
+
 		} else if (WRITING_CHOICES.get(3).equals(fileWriteType)||
-				   WRITING_CHOICES.get(4).equals(fileWriteType)) { //Create new file using ${file_name} then use that for everything
-			
+				WRITING_CHOICES.get(4).equals(fileWriteType)) { //Create new file using ${file_name} then use that for everything
+
 			if (fileName==null) throw createDataMessageException("Inputs to '"+getName()+"' must contain scalar value 'file_name' to determine h5 output name.", null);
 			if (fileWritingTo == null) {
 				final String rootName = fileName.indexOf('.')>-1
-				                      ? fileName.substring(0, fileName.lastIndexOf("."))
-				                      : fileName;
-	            IContainer folder = IFileUtils.getContainer(filePath, getProject().getName(), "output");
-	            fileWritingTo     = IFileUtils.getUniqueIFile(folder, rootName, getExtension());
+						? fileName.substring(0, fileName.lastIndexOf("."))
+								: fileName;
+						IContainer folder = IFileUtils.getContainer(filePath, getProject().getName(), "output");
+						fileWritingTo     = IFileUtils.getUniqueIFile(folder, rootName, getExtension());
 			}
-			
+
 			if (WRITING_CHOICES.get(4).equals(fileWriteType) && fileWritingTo.exists()) {
 				fileWritingTo.delete(true, new NullProgressMonitor());
 			}
-			
+
 			return fileWritingTo;
 		}
-		
+
 		return null;
 	}
 
@@ -671,7 +682,7 @@ public class CustomDataExportTransformer extends AbstractDataMessageTransformer 
 		if (FILE_TYPES.get(7).equals(fileFormat)) return "tiff";
 		return "h5";
 	}
-	
+
 
 	private int getBits() {
 		if (FILE_TYPES.get(4).equals(fileFormat)) return 8;
@@ -689,15 +700,15 @@ public class CustomDataExportTransformer extends AbstractDataMessageTransformer 
 
 	@Override
 	public List<IVariable> getOutputVariables() {
-		
+
 		final List<IVariable> ret = super.getOutputVariables();
 		try {
-//			final FieldContainer     fc            = (FieldContainer)fieldParam.getBeanFromValue(FieldContainer.class);
-//			if (fc==null || fc.isEmpty()) return ret;
+			//			final FieldContainer     fc            = (FieldContainer)fieldParam.getBeanFromValue(FieldContainer.class);
+			//			if (fc==null || fc.isEmpty()) return ret;
 
-//			for (FieldBean fb : fc.getFields()) {
-//				ret.add(new Variable(fb.getVariableName(), VARIABLE_TYPE.SCALAR, fb.getDefaultValue(), String.class));
-//			}
+			//			for (FieldBean fb : fc.getFields()) {
+			//				ret.add(new Variable(fb.getVariableName(), VARIABLE_TYPE.SCALAR, fb.getDefaultValue(), String.class));
+			//			}
 
 			// In ascii mode, the data set names get variables for their names
 			final List<IVariable> in = getInputVariables();
@@ -711,7 +722,7 @@ public class CustomDataExportTransformer extends AbstractDataMessageTransformer 
 				}
 			} else if (FILE_TYPES.get(3).equals(fileFormatParam.getExpression())) {
 				ret.add(new Variable("data_file_name", VARIABLE_TYPE.SCALAR, "${file_name}.dat", String.class));
-			
+
 			} else if (!FILE_TYPES.get(0).equals(fileFormatParam.getExpression())) {
 				if (in!=null) for (IVariable iVariable : in) {
 					int ifound = 1;
@@ -721,13 +732,13 @@ public class CustomDataExportTransformer extends AbstractDataMessageTransformer 
 					}
 				}
 			}
-			
+
 			ret.add(new Variable("file_path", VARIABLE_TYPE.PATH, getOutputPath(), String.class));
 			ret.add(new Variable("file_name", VARIABLE_TYPE.SCALAR, new File(getOutputPath()).getName(), String.class));
 			ret.add(new Variable("file_dir",  VARIABLE_TYPE.PATH, FileUtils.getDirectory(getOutputPath()), String.class));
 			ret.add(new Variable("file_basename",  VARIABLE_TYPE.PATH, FileUtils.getFileNameNoExtension(new File(getOutputPath())), String.class));
 			return ret;
-			
+
 		} catch (Exception ne) {
 			logger.error("Cannot get output folder for "+getName(), ne);
 			return ret;
