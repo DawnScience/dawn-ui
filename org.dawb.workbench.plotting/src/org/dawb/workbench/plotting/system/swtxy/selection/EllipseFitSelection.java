@@ -224,10 +224,7 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 
 		public void setup(PointList points) {
 			fitPoints(points, this);
-			configureHandles(points);
-		}
 
-		private void configureHandles(PointList points) {
 			// handles
 			final Point p = new Point();
 			for (int i = 0, imax = points.size(); i < imax; i++) {
