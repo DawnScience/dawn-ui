@@ -119,5 +119,22 @@ public class LabelNode implements TreeNode {
 	public void setDefaultExpanded(boolean defaultExpanded) {
 		this.defaultExpanded = defaultExpanded;
 	}
+	
+	public String getPath() {
+		StringBuilder buf = new StringBuilder();
+		getPath(buf);
+		return buf.toString();
+	}
+	
+	protected void getPath(StringBuilder buf) {
+		
+		if (parent instanceof LabelNode) {
+			((LabelNode)parent).getPath(buf);
+		}
+		if (getLabel()!=null) {
+			buf.append("/");
+			buf.append(getLabel().toLowerCase());
+		}
+	}
 
 }

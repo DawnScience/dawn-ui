@@ -98,7 +98,7 @@ public class DiffractionTool extends AbstractToolPage {
 		try {
 			if (model==null) return;
 			model.setIntensityValues(getImageTrace());
-			viewer.refresh();
+			if (!(viewer.getControl().isDisposed())) viewer.refresh();
 		} catch (Exception e) {
 			logger.error("Updating intensity values!", e);
 		}
