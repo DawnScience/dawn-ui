@@ -91,7 +91,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 			
 		if (isChecked) { 
 			if (detprop != null) {
-				double[] beamCentrePC = detprop.getBeamLocation();
+				double[] beamCentrePC = detprop.getBeamCentreCoords();
 				double length = (1 + Math.sqrt(detprop.getPx() * detprop.getPx() + detprop.getPy() * detprop.getPy()) * 0.01);
 				DecimalFormat df = new DecimalFormat("#.##");
 				String label = df.format(beamCentrePC[0]) + "px, " + df.format(beamCentrePC[1])+"px";
@@ -300,7 +300,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		
 	protected IRegion drawResolutionEllipse(ResolutionRing ring, String name) {
 		if (detprop != null && diffenv != null) {
-			double[] beamCentre = detprop.getBeamLocation(); // detConfig.pixelCoords(detConfig.getBeamPosition());
+			double[] beamCentre = detprop.getBeamCentreCoords(); // detConfig.pixelCoords(detConfig.getBeamPosition());
 			EllipticalROI ellipse = DSpacing.ellipseFromDSpacing(detprop, diffenv, ring.getResolution());
 			DecimalFormat df = new DecimalFormat("#.00");
 			return drawEllipse(beamCentre, ellipse, ring.getColour(), ring.getColour(), name,
@@ -330,7 +330,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 			double step = longestVector.length() / numberEvenSpacedRings; 
 			double d, twoThetaSpacing;
 			Vector3d toDetectorVector = new Vector3d();
-			Vector3d beamVector = detprop.getBeamPosition();
+			Vector3d beamVector = detprop.getBeamCentrePosition();
 			for (int i = 0; i < numberEvenSpacedRings - 1; i++) {
 				// increase the length of the vector by step.
 				longestVector.normalize();

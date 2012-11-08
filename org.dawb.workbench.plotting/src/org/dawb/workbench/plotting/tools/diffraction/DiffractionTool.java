@@ -532,7 +532,7 @@ public class DiffractionTool extends AbstractToolPage {
 					IMetaData data = getMetaData();
 					if (data instanceof IDiffractionMetadata) {
 						DetectorProperties detprop = ((IDiffractionMetadata)data).getDetector2DProperties();
-						detprop.setBeamLocation(point);
+						detprop.setBeamCentreCoords(point);
 					}
 					if (!augmenter.isShowingBeamCenter()) {
 						augmenter.drawBeamCentre(true);
