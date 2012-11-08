@@ -327,7 +327,7 @@ public class DiffractionTreeModel {
         Unit<Length> unit = SI.MILLIMETER.times(size.getValue(SI.MILLIMETER));
         UnitFormat.getInstance().label(unit, unitName);
         coord.setUnits(SI.MILLIMETER, unit);
-        if (viewer!=null) viewer.refresh(coord);
+        if (viewer!=null) viewer.update(coord, new String[]{"Value","Unit"});
 	}
 
 	private double getBeamX(DetectorProperties dce, Unit<Length> unit) {
