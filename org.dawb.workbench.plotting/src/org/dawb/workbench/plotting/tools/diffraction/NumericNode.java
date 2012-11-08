@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  * @author fcp94556
  *
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class NumericNode<E extends Quantity> extends LabelNode {
 	
 	private static Logger logger = LoggerFactory.getLogger(NumericNode.class);
@@ -42,7 +42,7 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 	/**
 	 * allowedUnits does not have to be E intentionally
 	 * For instance angstrom and eV are compatible using jscience
-	 * which knows about the Planck constant relatationship.
+	 * which knows about the Planck constant relationship.
 	 */
 	private List<Unit> allowedUnits;
 
@@ -352,15 +352,14 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 		this.format = new DecimalFormat(format);
 	}
 
-	@SuppressWarnings("rawtypes")
 	public List<Unit> getUnits() {
 		return allowedUnits;
 	}
 
-	public void setUnits(@SuppressWarnings("rawtypes") List<Unit> allowedUnits) {
+	public void setUnits(List<Unit> allowedUnits) {
 		this.allowedUnits = allowedUnits;
 	}
-	public void setUnits(@SuppressWarnings("rawtypes") Unit... allowedUnits) {
+	public void setUnits(Unit... allowedUnits) {
 		this.allowedUnits = Arrays.asList(allowedUnits);
 		
 		if (value!=null)        {
