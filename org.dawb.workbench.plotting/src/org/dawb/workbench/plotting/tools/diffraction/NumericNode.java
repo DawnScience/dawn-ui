@@ -200,6 +200,9 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 	    return null;
 	}
 
+	public void setDefault(Amount<E> amount) {
+		this.defaultValue = amount;
+	}
 	/**
 	 * Sets the default value and sets the bounds to
 	 * the values 0 and 10000.
@@ -270,6 +273,7 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 	
 	public void reset() {
 		value = null;
+		fireAmountChanged(getValue());
 	}
 
 	public Amount<E> getLowerBound() {
