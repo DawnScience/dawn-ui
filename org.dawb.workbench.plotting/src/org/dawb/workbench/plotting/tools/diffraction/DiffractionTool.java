@@ -445,11 +445,9 @@ public class DiffractionTool extends AbstractToolPage {
 					tmpRegion.setVisible(false);
 					
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.error("Cannot add beam center", e);
 				}
 
-				
 			}
 		};
 		
@@ -464,14 +462,16 @@ public class DiffractionTool extends AbstractToolPage {
 	    augmenter.addActions(dropdown);
 		
 	    toolMan.add(dropdown);
-		toolMan.add(showDefault);
+		toolMan.add(centre);
 		toolMan.add(new Separator());
 		toolMan.add(reset);
 		toolMan.add(resetAll);
 		toolMan.add(new Separator());
-		toolMan.add(centre);
+		toolMan.add(showDefault);
+		toolMan.add(new Separator());
 		
-		menuMan.add(showDefault);
+		menuMan.add(dropdown);
+	    menuMan.add(centre);
 		menuMan.add(new Separator());
 		menuMan.add(reset);
 		menuMan.add(resetAll);
@@ -479,7 +479,9 @@ public class DiffractionTool extends AbstractToolPage {
 		menuMan.add(copy);
 		menuMan.add(paste);
 		menuMan.add(new Separator());
-		menuMan.add(centre);
+		menuMan.add(showDefault);
+		menuMan.add(new Separator());
+		
 		final Menu menu = menuMan.createContextMenu(viewer.getControl());
 		viewer.getControl().setMenu(menu);
 		
@@ -501,6 +503,9 @@ public class DiffractionTool extends AbstractToolPage {
 					if (data instanceof IDiffractionMetadata) {
 						DetectorProperties detprop = ((IDiffractionMetadata)data).getDetector2DProperties();
 						detprop.setBeamLocation(point);
+					}
+					if (!augmenter.isShowingBeamCenter()) {
+						augmenter.drawBeamCentre(true);
 					}
 				}
 			}

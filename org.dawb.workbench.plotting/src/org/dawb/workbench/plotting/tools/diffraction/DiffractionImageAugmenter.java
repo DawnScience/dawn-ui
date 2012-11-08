@@ -79,8 +79,13 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	public void setImageCentre(double... coords) {
 		imageCentrePC = coords;
 	}
+	
+	public boolean isShowingBeamCenter() {
+		return this.beamCentre.isChecked();
+	}
 
 	protected void drawBeamCentre(boolean isChecked) {
+		beamCentre.setChecked(isChecked);
 		if (beamCentreRegion != null)
 			plottingSystem.removeRegion(beamCentreRegion);
 			
