@@ -296,7 +296,7 @@ public class DiffractionTool extends AbstractToolPage {
 			
 			NumericNode<? extends Quantity> node = (NumericNode<? extends Quantity>)element;
 			
-			return node.getValue();
+			return node.getDoubleValue();
 		}
 
 		@Override
@@ -304,7 +304,7 @@ public class DiffractionTool extends AbstractToolPage {
 			if (!(element instanceof NumericNode)) return;
 			
 			NumericNode<? extends Quantity> node = (NumericNode<? extends Quantity>)element;
-			node.setValue((Double)value);
+			node.setDoubleValue((Double)value);
 			viewer.refresh(element);
 		}
 

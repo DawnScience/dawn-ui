@@ -84,13 +84,18 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 	
 	public String getValue(boolean isFormat) {
 		if (isFormat) {
-			return format.format(getValue());
+			return format.format(getValue(getValue().getUnit()));
 		} else {
-			return String.valueOf(getValue());
+			return String.valueOf(getValue(getValue().getUnit()));
 		}
 	}
 
-	public void setValue(double val) {
+	public double getDoubleValue() {
+		final Amount<E> val = getValue();
+		return val!=null? val.doubleValue(val.getUnit()) : Double.NaN;
+	}
+	
+	public void setDoubleValue(double val) {
 		if (value!=null)        {
 			value = Amount.valueOf(val, value.getUnit());
 			fireAmountChanged(value);
@@ -203,9 +208,9 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 	}
 	public String getDefaultValue(boolean isFormat) {
 		if (isFormat) {
-			return format.format(getDefaultValue());
+			return format.format(getDefaultValue().doubleValue(getDefaultValue().getUnit()));
 		} else {
-			return String.valueOf(getDefaultValue());
+			return String.valueOf(getDefaultValue().doubleValue(getDefaultValue().getUnit()));
 		}
 	}
 	
@@ -356,7 +361,7 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = 1;
+		int result = super.hashCode();
 		result = prime * result
 				+ ((allowedUnits == null) ? 0 : allowedUnits.hashCode());
 		result = prime * result
@@ -379,7 +384,7 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
+		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
