@@ -161,12 +161,18 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 		if (value!=null) fireUnitChanged(value.getUnit());
 	}
 	
+	/**
+	 * @param val
+	 * @param unit
+	 */
 	public void setValue(double val, Unit<E> unit) {
 		if (Double.isNaN(val)) {
 			value=null;
 			return;// The value is NaN, doing Amount.valueOf(...) would set to 0
 		}
+		if (unit==null && value!=null) unit = value.getUnit();
 		this.value = Amount.valueOf(val, unit);
+		fireAmountChanged(value);
 	}
 
 	public boolean mergeValue(TreeNode node) {

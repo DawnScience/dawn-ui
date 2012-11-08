@@ -288,6 +288,11 @@ public class DiffractionTool extends AbstractToolPage {
 						}
 					}
 				});
+				fse.addSelectionListener(new SelectionAdapter() {
+					public void widgetSelected(SelectionEvent e) {
+						node.setValue((Double)fse.getValue(), null);
+					}
+				});
 				return fse;
 			}
 			return null;
