@@ -130,50 +130,25 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 				@Override
 				public void run() {
 					if(type == BoxLineType.VERTICAL_TYPE){
-//						profilePlottingSystem.setSelectedXAxis(yPixelAxis);
 						if(axes != null){
-							AbstractDataset xAxis = axes.get(0);
-//							xAxis.reverse(null);
-//							AbstractDataset yAxis = axes.get(1);
-//							xPixelAxis.setMaximumRange(0, y_trace.getXData().getSize());
-//							yPixelAxis.setMaximumRange(0, y_trace.getYData().getSize());
-//							xPixelAxis.setLabelDataAndTitle(xAxis);
-							yPixelAxis.setLabelDataAndTitle(xAxis);
-//							xPixelAxis.setRange(xAxis.getDouble(xAxis.argMin()), xAxis.getDouble(xAxis.argMax()));
-//							yPixelAxis.setRange(yAxis.getDouble(yAxis.argMin()), yAxis.getDouble(yAxis.argMax()));
-							
+							AbstractDataset axis = axes.get(1);
+							xPixelAxis.setLabelDataAndTitle(axis);
 							profilePlottingSystem.setSelectedXAxis(xPixelAxis);
-							profilePlottingSystem.setSelectedYAxis(yPixelAxis);
-							x_trace.setData(line1, xAxis);
-//							profilePlottingSystem.setSelectedXAxis(yPixelAxis);
-							y_trace.setData(line2, xAxis);
+							x_trace.setData(axis, line1);
+							y_trace.setData(axis, line2);
 						}
 					} else if (type == BoxLineType.HORIZONTAL_TYPE){
-//						profilePlottingSystem.setSelectedXAxis(yPixelAxis);
 						if(axes != null){
-							AbstractDataset xAxis = axes.get(0);
-//							AbstractDataset yAxis = axes.get(1);
-//							xPixelAxis.setMaximumRange(0, y_trace.getXData().getSize());
-//							yPixelAxis.setMaximumRange(0, y_trace.getYData().getSize());
-//							xPixelAxis.setLabelDataAndTitle(xAxis);
-							yPixelAxis.setLabelDataAndTitle(xAxis);
-//							xPixelAxis.setRange(xAxis.getDouble(xAxis.argMin()), xAxis.getDouble(xAxis.argMax()));
-//							yPixelAxis.setRange(yAxis.getDouble(yAxis.argMin()), yAxis.getDouble(yAxis.argMax()));
-							
+							AbstractDataset axis = axes.get(0);
+							xPixelAxis.setLabelDataAndTitle(axis);
 							profilePlottingSystem.setSelectedXAxis(xPixelAxis);
-							profilePlottingSystem.setSelectedYAxis(yPixelAxis);
-							x_trace.setData(xAxis, line1);
-//							profilePlottingSystem.setSelectedXAxis(yPixelAxis);
-							y_trace.setData(xAxis, line2);
+							x_trace.setData(axis, line1);
+							y_trace.setData(axis, line2);
 						}
 					}
 				}
 			});
-
-			
 		} else {
-						
-//			profilePlottingSystem.setSelectedXAxis(yPixelAxis);
 			profilePlottingSystem.setSelectedXAxis(xPixelAxis);
 			profilePlottingSystem.setSelectedYAxis(yPixelAxis);
 			Collection<ITrace> plotted = profilePlottingSystem.updatePlot1D(x_indices, Arrays.asList(new AbstractDataset[]{line1}), monitor);
