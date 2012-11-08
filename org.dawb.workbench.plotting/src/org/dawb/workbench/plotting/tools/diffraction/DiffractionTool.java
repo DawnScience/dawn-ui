@@ -426,6 +426,7 @@ public class DiffractionTool extends AbstractToolPage {
 					Object object = ((StructuredSelection)viewer.getSelection()).getFirstElement();
 					if (object instanceof NumericNode) {
 						((NumericNode<Quantity>)object).mergeValue(copiedNode);
+						viewer.refresh(object);
 					}
 				}
 			}

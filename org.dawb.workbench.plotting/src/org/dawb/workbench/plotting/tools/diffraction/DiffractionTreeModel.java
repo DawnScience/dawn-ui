@@ -265,7 +265,7 @@ public class DiffractionTreeModel {
         registerNode(experimentalInfo);
         experimentalInfo.setDefaultExpanded(true);
        
-        NumericNode<Length> lambda = new NumericNode<Length>("Wavelength", experimentalInfo, NonSI.ANGSTROM);
+        final NumericNode<Length> lambda = new NumericNode<Length>("Wavelength", experimentalInfo, NonSI.ANGSTROM);
         registerNode(lambda);
         if (dce!=null) {
            	lambda.setDefault(dce.getOriginal().getWavelength(), NonSI.ANGSTROM);
@@ -273,16 +273,34 @@ public class DiffractionTreeModel {
         	lambda.addAmountListener(new AmountListener<Length>() {		
 				@Override
 				public void amountChanged(AmountEvent<Length> evt) {
-					dce.setWavelength(evt.getAmount().doubleValue(NonSI.ANGSTROM));
+					dce.setWavelength(lambda.getValue(NonSI.ANGSTROM));
 				}
 			});
         }
         lambda.setEditable(true);
         lambda.setIncrement(0.01);
-        lambda.setFormat("#0.##");
+        lambda.setFormat("#0.####");
         lambda.setLowerBound(0);
-        lambda.setUpperBound(1000);
-        lambda.setUnits(NonSI.ANGSTROM, NonSI.ELECTRON_VOLT, SI.KILO(NonSI.ELECTRON_VOLT), SI.GIGA(NonSI.ELECTRON_VOLT));
+        lambda.setUpperBound(1000); // It can be ev as well.
+        lambda.setUnits(NonSI.ANGSTROM, NonSI.ELECTRON_VOLT, SI.KILO(NonSI.ELECTRON_VOLT));
+        lambda.addUnitListener(new UnitListener() {	
+			@Override
+			public void unitChanged(UnitEvent<? extends Quantity> evt) {
+				if (evt.getUnit().equals(NonSI.ANGSTROM)) {
+			        lambda.setIncrement(0.01);
+			        lambda.setFormat("#0.####");
+			        lambda.setLowerBound(0);
+			        lambda.setUpperBound(1000); // It can be ev as well.
+
+				} else {
+					lambda.setIncrement(1);
+					lambda.setFormat("#0");
+					lambda.setLowerBound(0);
+					lambda.setUpperBound(100000);
+
+				}
+			}
+		});
         
         final NumericNode<Length> dist   = new NumericNode<Length>("Distance", experimentalInfo, SI.MILLIMETER);
         registerNode(dist);

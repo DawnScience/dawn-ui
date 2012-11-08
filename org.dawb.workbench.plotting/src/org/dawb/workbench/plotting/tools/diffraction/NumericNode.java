@@ -7,13 +7,17 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
+import javax.measure.converter.UnitConverter;
 import javax.measure.quantity.Quantity;
 import javax.measure.unit.NonSI;
 import javax.measure.unit.Unit;
+import javax.measure.unit.UnitFormat;
 import javax.swing.tree.TreeNode;
 
 import org.jscience.physics.amount.Amount;
 import org.jscience.physics.amount.Constants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class may be used with TreeNodeContentProvider to create a Tree of editable
@@ -24,6 +28,8 @@ import org.jscience.physics.amount.Constants;
  */
 @SuppressWarnings("rawtypes")
 public class NumericNode<E extends Quantity> extends LabelNode {
+	
+	private static Logger logger = LoggerFactory.getLogger(NumericNode.class);
 		
 	private Amount     value;  // Intentionally not E
 	private Amount<E>  defaultValue;
@@ -73,12 +79,19 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 	public Amount<E> getValue() {
 		if (value!=null)        return value;
 		if (defaultValue!=null) return defaultValue;
-		return Amount.valueOf(Double.NaN, getUnit());
+		return null;
 	}
 	
-	public double getValue(Unit<E> requiredUnit) {
-		if (value!=null)        return value.doubleValue(requiredUnit);
-		if (defaultValue!=null) return defaultValue.doubleValue(requiredUnit);
+	public double getValue(Unit requiredUnit) {
+		Amount<E> val=getValue();
+		if (isAngstomDimenions(val, requiredUnit)) {	
+			return Constants.ℎ.times(Constants.c).divide(val).doubleValue(requiredUnit);
+		} else {
+			if (val!=null) {
+				return val.doubleValue(requiredUnit);
+			}
+		}
+
 		return Double.NaN;
 	}
 	
@@ -197,8 +210,22 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 		return false;
 	}
 	
-	private Amount<E> parseValue(Object val) {
-	    return null;
+	private Amount parseValue(Object val) {
+		try {
+			if (val instanceof Amount) return (Amount<E>)val;
+			
+			final double dbl = Double.parseDouble(val.toString());
+			return Amount.valueOf(dbl, getValue().getUnit());
+					
+		} catch (Throwable ne) {
+			try {
+				return (Amount)Amount.valueOf(val.toString()); //e.g. "100.0 mm"
+				
+			} catch (Throwable e) {
+				logger.error("Cannot deal with "+val.getClass().getName());
+			    return null;
+			}
+		}
 	}
 
 	public void setDefault(Amount<E> amount) {
