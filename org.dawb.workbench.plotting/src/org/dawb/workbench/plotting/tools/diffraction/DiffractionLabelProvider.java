@@ -58,7 +58,7 @@ public class DiffractionLabelProvider extends ColumnLabelProvider implements ISt
 			return ret.append(node.getDefaultValue(true), StyledString.QUALIFIER_STYLER);
 			
 		case 2: // Value
-			if (Double.isNaN(node.getValue())) {
+			if (node.isNaN()) {
 				if (node.isEditable()) {
 					ret.append("N/A");
 					ret.append(" *", StyledString.QUALIFIER_STYLER);

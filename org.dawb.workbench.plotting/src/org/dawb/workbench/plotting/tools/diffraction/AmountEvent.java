@@ -8,6 +8,11 @@ import org.jscience.physics.amount.Amount;
 
 public class AmountEvent<E extends Quantity> extends EventObject {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7433184477752660193L;
+	
 	private Amount<E> amount;
 
 	public AmountEvent(Object source, Amount<E> amount) {

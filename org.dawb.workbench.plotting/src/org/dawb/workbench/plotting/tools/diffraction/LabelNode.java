@@ -136,5 +136,9 @@ public class LabelNode implements TreeNode {
 			buf.append(getLabel().toLowerCase());
 		}
 	}
+	public void dispose() {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

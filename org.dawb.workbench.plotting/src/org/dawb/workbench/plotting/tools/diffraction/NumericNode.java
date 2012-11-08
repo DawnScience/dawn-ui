@@ -61,14 +61,19 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 		this.format  = new DecimalFormat("#0.####");
 	}
 
+
+	public boolean isNaN() {
+		return value==null&&defaultValue==null;
+	}
+
     /**
      * The double value in the current unit set.
      * @return
      */
-	public double getValue() {
-		if (value!=null)        return value.doubleValue(value.getUnit());
-		if (defaultValue!=null) return defaultValue.doubleValue(defaultValue.getUnit());
-		return Double.NaN;
+	public Amount<E> getValue() {
+		if (value!=null)        return value;
+		if (defaultValue!=null) return defaultValue;
+		return Amount.valueOf(Double.NaN, getUnit());
 	}
 	
 	public double getValue(Unit<E> requiredUnit) {
@@ -167,9 +172,9 @@ public class NumericNode<E extends Quantity> extends LabelNode {
      * The double value in the current unit set.
      * @return
      */
-	public double getDefaultValue() {
-		if (defaultValue!=null) return defaultValue.doubleValue(defaultValue.getUnit());
-		return Double.NaN;
+	public Amount<E> getDefaultValue() {
+		if (defaultValue!=null) return defaultValue;
+		return Amount.valueOf(Double.NaN, getUnit());
 	}
 	public String getDefaultValue(boolean isFormat) {
 		if (isFormat) {
@@ -179,7 +184,7 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 		}
 	}
 	
-	public Unit<?> getUnit() {
+	public Unit<E> getUnit() {
 		if (value!=null)        return value.getUnit();
 		if (defaultValue!=null) return defaultValue.getUnit();
 		return defaultUnit;
@@ -314,6 +319,13 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 	 */
 	public int getDecimalPlaces() {
 		return format.getMaximumFractionDigits();
+	}
+
+	public void dispose() {
+		if (listeners!=null) listeners.clear();
+		listeners = null;
+		if (unitListeners!=null) unitListeners.clear();
+		unitListeners = null;
 	}
 
 }
