@@ -189,7 +189,7 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 		fireAmountChanged(value);
 	}
 
-	public boolean mergeValue(TreeNode node) {
+	public boolean mergeValue(TreeNode node) throws Throwable {
 		
 		if (equals(node)) return false;
 		
@@ -210,7 +210,7 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 		return false;
 	}
 	
-	private Amount parseValue(Object val) {
+	private Amount parseValue(Object val) throws Throwable {
 		try {
 			if (val instanceof Amount) return (Amount<E>)val;
 			
@@ -222,8 +222,7 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 				return (Amount)Amount.valueOf(val.toString()); //e.g. "100.0 mm"
 				
 			} catch (Throwable e) {
-				logger.error("Cannot deal with "+val.getClass().getName());
-			    return null;
+				throw e;
 			}
 		}
 	}

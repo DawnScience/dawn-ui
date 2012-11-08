@@ -23,6 +23,8 @@ import org.dawb.common.ui.viewers.TreeNodeContentProvider;
 import org.dawb.workbench.plotting.Activator;
 import org.dawnsci.common.widgets.celleditor.CComboCellEditor;
 import org.dawnsci.common.widgets.celleditor.FloatSpinnerCellEditor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IToolBarManager;
@@ -56,6 +58,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.dialogs.FilteredTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +74,8 @@ public class DiffractionTool extends AbstractToolPage {
 
 	private static final Logger logger = LoggerFactory.getLogger(DiffractionTool.class);
 	
-	private TreeViewer viewer;
+	private DiffractionTree filteredTree;
+	private TreeViewer   viewer;
 	private Composite  control;
 	private DiffractionTreeModel model;
 	
@@ -86,6 +91,7 @@ public class DiffractionTool extends AbstractToolPage {
 	public ToolPageRole getToolPageRole() {
 		return ToolPageRole.ROLE_2D;
 	}
+	
 	
 	public DiffractionTool() {
 		super();
@@ -116,18 +122,18 @@ public class DiffractionTool extends AbstractToolPage {
 	}
 
 	@Override
-	public void createControl(Composite parent) {
+	public void createControl(final Composite parent) {
 		
 		this.control = new Composite(parent, SWT.NONE);
 		control.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		control.setLayout(new GridLayout(1, false));
 		GridUtils.removeMargins(control);
-		
-		viewer = new TreeViewer(control, SWT.FULL_SELECTION | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+	
+		this.filteredTree = new DiffractionTree(control, SWT.FULL_SELECTION | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER, new DiffractionFilter(this), true);		
+		viewer = filteredTree.getViewer();
 		viewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		createColumns(viewer);
 		viewer.setContentProvider(new TreeNodeContentProvider()); // Swing tree nodes
-		
 		viewer.getTree().setLinesVisible(true);
 		viewer.getTree().setHeaderVisible(true);
 		
@@ -193,14 +199,17 @@ public class DiffractionTool extends AbstractToolPage {
 				
 		viewer.setInput(model.getRoot());
 		
+        resetExpansion();
+	}
+	
+	
+
+	void resetExpansion() {
 		final List<?> top = model.getRoot().getChildren();
 		for (Object element : top) {
 		   expand(element, viewer);
 		}
-
 	}
-	
-	
 
 	private void expand(Object element, TreeViewer viewer) {
 		
@@ -407,8 +416,10 @@ public class DiffractionTool extends AbstractToolPage {
 				
 				boolean ok = MessageDialog.openConfirm(Display.getDefault().getActiveShell(), "Confirm Reset All", "Are you sure that you would like to reset all values?");
 				if (!ok) return;
+				filteredTree.clearText();
 				model.reset();
 				viewer.refresh();
+		        resetExpansion();
 			}
 		};
 		
@@ -425,7 +436,25 @@ public class DiffractionTool extends AbstractToolPage {
 				if (copiedNode!=null) {
 					Object object = ((StructuredSelection)viewer.getSelection()).getFirstElement();
 					if (object instanceof NumericNode) {
-						((NumericNode<Quantity>)object).mergeValue(copiedNode);
+						NumericNode<Quantity> nn = (NumericNode<Quantity>)object;
+						if (!nn.isEditable()) {
+							MessageDialog.openWarning(Display.getDefault().getActiveShell(), "Cannot paste", "The item '"+nn.getLabel()+"' is not writable.\n\nPlease choose a different value to paste to.");
+							return;
+						}
+						
+						try {
+						    nn.mergeValue(copiedNode);
+						} catch (Throwable e) {
+							try {
+								if (EclipseUtils.getActivePage().findView("org.eclipse.pde.runtime.LogView")==null) {
+								    EclipseUtils.getActivePage().showView("org.eclipse.pde.runtime.LogView");
+								}
+							} catch (PartInitException pe) {
+								// Ignored.
+							}
+							IStatus status = new Status(IStatus.INFO, Activator.PLUGIN_ID, "Cannot past into '"+nn.getLabel()+"'", e);
+							Activator.getDefault().getLog().log(status);
+						}
 						viewer.refresh(object);
 					}
 				}
@@ -523,5 +552,17 @@ public class DiffractionTool extends AbstractToolPage {
 	public void setFocus() {
 		viewer.getControl().setFocus();
 	}
+
+	class DiffractionTree extends FilteredTree {
+		public DiffractionTree(Composite control, int i,
+				DiffractionFilter diffractionFilter, boolean b) {
+			super(control,i,diffractionFilter,b);
+			filterText.setToolTipText("Enter search string to filter the tree.\nThis will match on name, value or units");
+		}
+
+		public void clearText() {
+            super.clearText();
+		}
+	};
 
 }
