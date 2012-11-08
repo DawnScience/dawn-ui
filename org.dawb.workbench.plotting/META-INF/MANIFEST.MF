@@ -44,5 +44,6 @@ Import-Package: ncsa.hdf.object,
  uk.ac.diamond.scisoft.analysis.rcp.preference,
  uk.ac.diamond.sda.meta.page,
  uk.ac.gda.monitor,
+ uk.ac.gda.richbeans.components,
  uk.ac.gda.richbeans.components.scalebox
 Bundle-ClassPath: .
