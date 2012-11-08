@@ -59,7 +59,7 @@ public class DiffractionTreeModel {
 		final DiffractionCrystalEnvironment dce = (metaData instanceof IDiffractionMetadata)
 				? ((IDiffractionMetadata)metaData).getDiffractionCrystalEnvironment()
 						: null;
-				
+								
 	    final DetectorProperties detprop = (metaData instanceof IDiffractionMetadata)
 	    		? ((IDiffractionMetadata)metaData).getDetector2DProperties()
 	    				: null;
@@ -72,7 +72,8 @@ public class DiffractionTreeModel {
         NumericNode<Length> lambda = new NumericNode<Length>("Wavelength", experimentalInfo, NonSI.ANGSTROM);
         registerNode(lambda);
         if (dce!=null) {
-        	lambda.setDefault(dce.getWavelength(), NonSI.ANGSTROM);
+           	lambda.setDefault(dce.getOriginal().getWavelength(), NonSI.ANGSTROM);
+           	lambda.setValue(dce.getWavelength(), NonSI.ANGSTROM);
         	lambda.addAmountListener(new AmountListener<Length>() {		
 				@Override
 				public void amountChanged(AmountEvent<Length> evt) {
@@ -90,7 +91,8 @@ public class DiffractionTreeModel {
         final NumericNode<Length> dist   = new NumericNode<Length>("Distance", experimentalInfo, SI.MILLIMETER);
         registerNode(dist);
         if (detprop!=null) {
-        	dist.setDefault(detprop.getOrigin().z, SI.MILLIMETER);
+        	dist.setDefault(detprop.getOriginal().getOrigin().z, SI.MILLIMETER);
+        	dist.setValue(detprop.getOrigin().z, SI.MILLIMETER);
             dist.addAmountListener(new AmountListener<Length>() {		
     			@Override
     			public void amountChanged(AmountEvent<Length> evt) {
@@ -111,15 +113,24 @@ public class DiffractionTreeModel {
      
         NumericNode<Angle> start = new NumericNode<Angle>("Oscillation Start", experimentalInfo, NonSI.DEGREE_ANGLE);
         registerNode(start);
-        if (dce!=null)  start.setDefault(dce.getPhiStart(), NonSI.DEGREE_ANGLE);
+        if (dce!=null)  {
+        	start.setDefault(dce.getOriginal().getPhiStart(), NonSI.DEGREE_ANGLE);
+        	start.setValue(dce.getPhiStart(), NonSI.DEGREE_ANGLE);
+        }
        
         NumericNode<Angle> stop = new NumericNode<Angle>("Oscillation Stop", experimentalInfo, NonSI.DEGREE_ANGLE);
         registerNode(stop);
-        if (dce!=null)  stop.setDefault(dce.getPhiStart()+dce.getPhiRange(), NonSI.DEGREE_ANGLE);
+        if (dce!=null)  {
+        	stop.setDefault(dce.getOriginal().getPhiStart()+dce.getOriginal().getPhiRange(), NonSI.DEGREE_ANGLE);
+        	stop.setValue(dce.getPhiStart()+dce.getPhiRange(), NonSI.DEGREE_ANGLE);
+        }
 
         NumericNode<Angle> osci = new NumericNode<Angle>("Oscillation Range", experimentalInfo, NonSI.DEGREE_ANGLE);
         registerNode(osci);
-        if (dce!=null)  osci.setDefault(dce.getPhiRange(), NonSI.DEGREE_ANGLE);
+        if (dce!=null)  {
+        	osci.setDefault(dce.getOriginal().getPhiRange(), NonSI.DEGREE_ANGLE);
+        	osci.setValue(dce.getPhiRange(), NonSI.DEGREE_ANGLE);
+        }
         
 	    // Beam Center
         final LabelNode beamCen = new LabelNode("Beam Center", experimentalInfo);
@@ -130,7 +141,8 @@ public class DiffractionTreeModel {
         registerNode(beamX);
         beamX.setEditable(true);
         if (detprop!=null) {
-        	beamX.setDefault(getBeamX(detprop, SI.MILLIMETER), SI.MILLIMETER);
+        	beamX.setDefault(getBeamX(detprop.getOriginal(), SI.MILLIMETER), SI.MILLIMETER);
+        	beamX.setValue(getBeamX(detprop, SI.MILLIMETER), SI.MILLIMETER);
         	beamX.addAmountListener(new AmountListener<Length>() {		
     			@Override
     			public void amountChanged(AmountEvent<Length> evt) {
@@ -148,7 +160,8 @@ public class DiffractionTreeModel {
         registerNode(beamY);
         beamY.setEditable(true);
         if (detprop!=null) {
-        	beamY.setDefault(getBeamY(detprop, SI.MILLIMETER), SI.MILLIMETER);
+        	beamY.setDefault(getBeamY(detprop.getOriginal(), SI.MILLIMETER), SI.MILLIMETER);
+        	beamY.setValue(getBeamY(detprop, SI.MILLIMETER), SI.MILLIMETER);
         	beamY.addAmountListener(new AmountListener<Length>() {		
     			@Override
     			public void amountChanged(AmountEvent<Length> evt) {
@@ -182,16 +195,25 @@ public class DiffractionTreeModel {
         
         final NumericNode<Duration> exposure   = new NumericNode<Duration>("Exposure Time", detectorMeta, SI.SECOND);
         registerNode(exposure);
-        if (dce!=null) exposure.setDefault(dce.getExposureTime(), SI.SECOND);
+        if (dce!=null) {
+           	exposure.setDefault(dce.getOriginal().getExposureTime(), SI.SECOND);
+           	exposure.setValue(dce.getExposureTime(), SI.SECOND);
+        }
         
         final LabelNode size = new LabelNode("Size", detectorMeta);
         registerNode(size);
         NumericNode<Length> x  = new NumericNode<Length>("x", size, SI.MILLIMETER);
         registerNode(x);
-        if (detprop!=null) x.setDefault(detprop.getDetectorSizeH(), SI.MILLIMETER);
+        if (detprop!=null) {
+        	x.setDefault(detprop.getOriginal().getDetectorSizeH(), SI.MILLIMETER);
+        	x.setValue(detprop.getDetectorSizeH(), SI.MILLIMETER);
+        }
         NumericNode<Length> y  = new NumericNode<Length>("y", size, SI.MILLIMETER);
         registerNode(y);
-        if (detprop!=null) y.setDefault(detprop.getDetectorSizeV(), SI.MILLIMETER);
+        if (detprop!=null) {
+        	y.setDefault(detprop.getOriginal().getDetectorSizeV(), SI.MILLIMETER);
+        	y.setValue(detprop.getDetectorSizeV(), SI.MILLIMETER);
+        }
 
         final LabelNode pixel = new LabelNode("Pixel", detectorMeta);
         registerNode(pixel);
@@ -199,7 +221,8 @@ public class DiffractionTreeModel {
         final NumericNode<Length> xPixelSize  = new NumericNode<Length>("x-size", pixel, SI.MILLIMETER);
         registerNode(xPixelSize);
         if (detprop!=null) {
-        	xPixelSize.setDefault(detprop.getHPxSize(), SI.MILLIMETER);
+           	xPixelSize.setDefault(detprop.getOriginal().getHPxSize(), SI.MILLIMETER);
+           	xPixelSize.setValue(detprop.getHPxSize(), SI.MILLIMETER);
         	xPixelSize.addAmountListener(new AmountListener<Length>() {				
 				@Override
 				public void amountChanged(AmountEvent<Length> evt) {
@@ -216,7 +239,8 @@ public class DiffractionTreeModel {
         final NumericNode<Length> yPixelSize  = new NumericNode<Length>("y-size", pixel, SI.MILLIMETER);
         registerNode(yPixelSize);
         if (detprop!=null) {
-        	yPixelSize.setDefault(detprop.getVPxSize(), SI.MILLIMETER);
+        	yPixelSize.setDefault(detprop.getOriginal().getVPxSize(), SI.MILLIMETER);
+        	yPixelSize.setValue(detprop.getVPxSize(), SI.MILLIMETER);
         	yPixelSize.addAmountListener(new AmountListener<Length>() {				
 				@Override
 				public void amountChanged(AmountEvent<Length> evt) {
