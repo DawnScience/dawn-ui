@@ -22,7 +22,9 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.jscience.physics.amount.Amount;
 
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
+import uk.ac.diamond.scisoft.analysis.diffraction.DetectorPropertyEvent;
 import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
+import uk.ac.diamond.scisoft.analysis.diffraction.IDetectorPropertyListener;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 
@@ -51,9 +53,11 @@ public class DiffractionTreeModel {
 	private Unit<Length>               xpixel, ypixel;
 	private NumericNode<Dimensionless> max,min,mean;
 	private NumericNode<Length>        beamX, beamY;
+	private final IMetaData metaData;
 	
 	
 	public DiffractionTreeModel(IMetaData metaData) throws Exception {
+		this.metaData = metaData;
 		this.root     = new LabelNode();
 		createDiffractionModel(metaData);
 		nodeMap = new TreeMap<String, TreeNode>();
@@ -61,13 +65,8 @@ public class DiffractionTreeModel {
 
 	private void createDiffractionModel(IMetaData metaData) throws Exception {
 
-		final DiffractionCrystalEnvironment dce = (metaData instanceof IDiffractionMetadata)
-				? ((IDiffractionMetadata)metaData).getDiffractionCrystalEnvironment()
-						: null;
-								
-	    final DetectorProperties detprop = (metaData instanceof IDiffractionMetadata)
-	    		? ((IDiffractionMetadata)metaData).getDetector2DProperties()
-	    				: null;
+		final DiffractionCrystalEnvironment dce = getCrystalEnvironment();						
+	    final DetectorProperties        detprop = getDetectorProperties();
 		
 	    LabelNode experimentalInfo = createExperimentalInfo(dce, detprop);
         
@@ -78,8 +77,23 @@ public class DiffractionTreeModel {
         
         createUnitsListeners(detprop);
         
+        // TODO listen to other things, for instance refine when it
+        // is available may change other values.
+        createBeamCenterListener(detprop);
 	}
 	
+	private DetectorProperties getDetectorProperties() {
+		return (metaData instanceof IDiffractionMetadata)
+				? ((IDiffractionMetadata)metaData).getDetector2DProperties()
+						: null;
+	}
+
+	private DiffractionCrystalEnvironment getCrystalEnvironment() {
+		return (metaData instanceof IDiffractionMetadata)
+				? ((IDiffractionMetadata)metaData).getDiffractionCrystalEnvironment()
+						: null;
+	}
+
 	private void createUnitsListeners(final DetectorProperties detprop) {
         if (detprop!=null) {
         	beamX.setDefault(getBeamX(detprop.getOriginal()));
@@ -330,13 +344,48 @@ public class DiffractionTreeModel {
 	private void setBeamX(DetectorProperties dce, Amount<Length> beamX) {
 		final double[] beamCen = dce.getBeamLocation();
 		beamCen[0] = beamX.doubleValue(xpixel);
-		dce.setBeamLocation(beamCen);
+		try {
+			beamCenterActive = false;
+		    dce.setBeamLocation(beamCen);
+		} finally {
+			beamCenterActive = true;
+		}
 	}
 	private void setBeamY(DetectorProperties dce, Amount<Length> beamY) {
 		final double[] beamCen = dce.getBeamLocation();
 		beamCen[1] = beamY.doubleValue(ypixel);
-		dce.setBeamLocation(beamCen);
+		try {
+			beamCenterActive = false;
+			dce.setBeamLocation(beamCen);
+		} finally {
+			beamCenterActive = true;
+		}
 	}
+	
+	private IDetectorPropertyListener beamCenterListener;
+	private boolean                   beamCenterActive=true;
+	private void createBeamCenterListener(final DetectorProperties detprop) {
+		if (beamCenterListener==null) this.beamCenterListener = new IDetectorPropertyListener() {
+			
+			@Override
+			public void detectorPropertiesChanged(DetectorPropertyEvent evt) {
+				if (!beamCenterActive) return;
+				if (evt.hasBeamCentreChanged()) {
+					double[]     cen = detprop.getBeamLocation();
+					Amount<Length> x = Amount.valueOf(cen[0], xpixel);
+					beamX.setValue(x.to(beamX.getValue().getUnit()));
+					if (viewer!=null) viewer.refresh(beamX); // Cancels cell editing.
+					
+					Amount<Length> y = Amount.valueOf(cen[1], ypixel);
+					beamY.setValue(y.to(beamY.getValue().getUnit()));
+					if (viewer!=null) viewer.refresh(beamY);  // Cancels cell editing.
+				}
+			}
+		};
+		detprop.addDetectorPropertyListener(beamCenterListener);
+	}
+
+	
 	private void registerNode(LabelNode node) {
 		final String labelPath = node.getPath();
 		// System.out.println(labelPath);
@@ -406,6 +455,12 @@ public class DiffractionTreeModel {
 			if (node instanceof LabelNode) {
 				((LabelNode)node).dispose();
 			}
+		}
+		
+	    final DetectorProperties detprop = getDetectorProperties();
+	    		
+		if (detprop!=null && beamCenterListener!=null) {
+			detprop.removeDetectorPropertyListener(beamCenterListener);
 		}
 		nodeMap.clear();
 		nodeMap = null;

@@ -35,11 +35,13 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewer;
+import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
+import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
@@ -238,8 +240,8 @@ public class DiffractionTool extends AbstractToolPage {
 	
 	private void createColumns(TreeViewer viewer) {
 		
-		//ColumnViewerToolTipSupport.enableFor(viewer,ToolTip.NO_RECREATE);
-		//viewer.setColumnProperties(new String[] { "Name", "Original", "Value", "Unit" });
+		ColumnViewerToolTipSupport.enableFor(viewer,ToolTip.NO_RECREATE);
+		viewer.setColumnProperties(new String[] { "Name", "Original", "Value", "Unit" });
 
 		TreeViewerColumn var = new TreeViewerColumn(viewer, SWT.LEFT, 0);
 		var.getColumn().setText("Name"); // Selected
@@ -490,18 +492,16 @@ public class DiffractionTool extends AbstractToolPage {
 			public void regionAdded(RegionEvent evt) {
 				//test if our region
 				if (evt.getRegion() == tmpRegion) {
-					//update beam position and remove region
 					logger.debug("1-Click region added");
 					double[] point = evt.getRegion().getROI().getPoint();
 					logger.debug("Clicked here X: " + point[0] + " Y : " + point[1]);
-					//TODO update beam positions
+					
+					getPlottingSystem().removeRegion(tmpRegion);
 					IMetaData data = getMetaData();
 					if (data instanceof IDiffractionMetadata) {
 						DetectorProperties detprop = ((IDiffractionMetadata)data).getDetector2DProperties();
 						detprop.setBeamLocation(point);
 					}
-					//diffMetadataComp.updateBeamPositionPixels(point);
-					getPlottingSystem().removeRegion(tmpRegion);
 				}
 			}
 		};
