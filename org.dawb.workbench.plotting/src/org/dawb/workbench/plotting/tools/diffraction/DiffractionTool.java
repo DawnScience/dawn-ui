@@ -5,6 +5,8 @@ import java.util.List;
 import javax.measure.quantity.Quantity;
 import javax.swing.tree.TreeNode;
 
+import org.dawb.common.ui.menu.MenuAction;
+import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.RegionEvent;
@@ -55,6 +57,8 @@ import org.eclipse.ui.IEditorPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
+import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.io.MetaDataAdapter;
@@ -73,6 +77,8 @@ public class DiffractionTool extends AbstractToolPage {
 	private IRegionListener regionListener;
 	private IPaletteListener.Stub paletteListener;
 	private ITraceListener.Stub   traceListener;
+	
+	protected DiffractionImageAugmenter augmenter;
 	
 	@Override
 	public ToolPageRole getToolPageRole() {
@@ -148,6 +154,16 @@ public class DiffractionTool extends AbstractToolPage {
 		if (getPlottingSystem()!=null && this.traceListener != null) {
 			getPlottingSystem().addTraceListener(traceListener);
 		}
+		
+		IMetaData data = getMetaData();
+		
+		if (getPlottingSystem()!=null &&
+				getPlottingSystem() instanceof AbstractPlottingSystem &&
+				data instanceof IDiffractionMetadata) {
+			augmenter = new DiffractionImageAugmenter((AbstractPlottingSystem)getPlottingSystem());
+			augmenter.setDiffractionMetadata((IDiffractionMetadata)data);
+		}
+		
 		if (viewer!=null) viewer.refresh();
 	}
 	
@@ -164,6 +180,8 @@ public class DiffractionTool extends AbstractToolPage {
 	public void dispose() {
 		super.dispose();
 		if (model!=null) model.dispose();
+		if (augmenter != null) augmenter.dispose();
+		
 	}
 
 	private void createDiffractionModel() {
@@ -436,6 +454,14 @@ public class DiffractionTool extends AbstractToolPage {
 		
 		centre.setImageDescriptor(Activator.getImageDescriptor("icons/centre.png"));
 		
+		MenuAction dropdown = new MenuAction("Resolution rings");
+	    //dropdown.setImageDescriptor(Activator.getImageDescriptor("/icons/resolution_rings.png"));
+
+	    augmenter.addActions(dropdown);
+	    
+	    
+		
+	    toolMan.add(dropdown);
 		toolMan.add(showDefault);
 		toolMan.add(new Separator());
 		toolMan.add(reset);
@@ -469,6 +495,11 @@ public class DiffractionTool extends AbstractToolPage {
 					double[] point = evt.getRegion().getROI().getPoint();
 					logger.debug("Clicked here X: " + point[0] + " Y : " + point[1]);
 					//TODO update beam positions
+					IMetaData data = getMetaData();
+					if (data instanceof IDiffractionMetadata) {
+						DetectorProperties detprop = ((IDiffractionMetadata)data).getDetector2DProperties();
+						detprop.setBeamLocation(point);
+					}
 					//diffMetadataComp.updateBeamPositionPixels(point);
 					getPlottingSystem().removeRegion(tmpRegion);
 				}
