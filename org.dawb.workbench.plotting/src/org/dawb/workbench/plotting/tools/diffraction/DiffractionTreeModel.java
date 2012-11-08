@@ -44,11 +44,14 @@ public class DiffractionTreeModel {
 
 	private LabelNode   root;
     private TreeViewer  viewer;
-	private NumericNode<Dimensionless> max,min,mean;
+    
 	private Map<String, TreeNode> nodeMap;
 	private boolean isDisposed;
 	
-	private Unit<Length> xpixel, ypixel;
+	private Unit<Length>               xpixel, ypixel;
+	private NumericNode<Dimensionless> max,min,mean;
+	private NumericNode<Length>        beamX, beamY;
+	
 	
 	public DiffractionTreeModel(IMetaData metaData) throws Exception {
 		this.root     = new LabelNode();
@@ -66,6 +69,183 @@ public class DiffractionTreeModel {
 	    		? ((IDiffractionMetadata)metaData).getDetector2DProperties()
 	    				: null;
 		
+	    LabelNode experimentalInfo = createExperimentalInfo(dce, detprop);
+        
+        createBeamCenter(detprop, experimentalInfo);
+        createIntensity();      
+        createDetector(dce, detprop);
+        createRaw(metaData);
+        
+        createUnitsListeners(detprop);
+        
+	}
+	
+	private void createUnitsListeners(final DetectorProperties detprop) {
+        if (detprop!=null) {
+        	beamX.setDefault(getBeamX(detprop.getOriginal()));
+        	beamX.setValue(getBeamX(detprop));
+        	beamX.addAmountListener(new AmountListener<Length>() {		
+    			@Override
+    			public void amountChanged(AmountEvent<Length> evt) {
+    				setBeamX(detprop, evt.getAmount());
+    			}
+    		});
+        }
+        beamX.setIncrement(1);
+		beamX.setFormat("#0");
+		beamX.setLowerBound(0);
+		beamX.setUpperBound(100000);
+        beamX.addUnitListener(createPixelFormatListener(beamX));
+        
+        if (detprop!=null) {
+        	beamY.setDefault(getBeamY(detprop.getOriginal()));
+        	beamY.setValue(getBeamY(detprop));
+        	beamY.addAmountListener(new AmountListener<Length>() {		
+    			@Override
+    			public void amountChanged(AmountEvent<Length> evt) {
+    				setBeamY(detprop, evt.getAmount());
+    			}
+    		});
+        }
+        beamY.setIncrement(1);
+        beamY.setFormat("#0");
+		beamY.setLowerBound(0);
+		beamY.setUpperBound(100000);
+        beamY.addUnitListener(createPixelFormatListener(beamY));		
+	}
+
+	private void createRaw(IMetaData metaData) throws Exception {
+		
+        if (metaData!=null && metaData.getMetaNames()!=null && metaData.getMetaNames().size()>0) {
+            final LabelNode rawMeta = new LabelNode("Raw Meta", root);
+	        registerNode(rawMeta);
+        	for (String name : metaData.getMetaNames()) {
+        		ObjectNode on = new ObjectNode(name, metaData.getMetaValue(name), rawMeta);
+		        registerNode(on);
+			}
+        }		
+	}
+
+	private void createDetector(final DiffractionCrystalEnvironment dce, final DetectorProperties detprop) {
+       
+		// Detector Meta
+        final LabelNode detectorMeta = new LabelNode("Detector", root);
+        registerNode(detectorMeta);
+        detectorMeta.setDefaultExpanded(true);
+        
+        final NumericNode<Duration> exposure   = new NumericNode<Duration>("Exposure Time", detectorMeta, SI.SECOND);
+        registerNode(exposure);
+        if (dce!=null) {
+           	exposure.setDefault(dce.getOriginal().getExposureTime(), SI.SECOND);
+           	exposure.setValue(dce.getExposureTime(), SI.SECOND);
+        }
+        
+        final LabelNode size = new LabelNode("Size", detectorMeta);
+        registerNode(size);
+        NumericNode<Length> x  = new NumericNode<Length>("x", size, SI.MILLIMETER);
+        registerNode(x);
+        if (detprop!=null) {
+        	x.setDefault(detprop.getOriginal().getDetectorSizeH(), SI.MILLIMETER);
+        	x.setValue(detprop.getDetectorSizeH(), SI.MILLIMETER);
+        }
+        NumericNode<Length> y  = new NumericNode<Length>("y", size, SI.MILLIMETER);
+        registerNode(y);
+        if (detprop!=null) {
+        	y.setDefault(detprop.getOriginal().getDetectorSizeV(), SI.MILLIMETER);
+        	y.setValue(detprop.getDetectorSizeV(), SI.MILLIMETER);
+        }
+
+        final LabelNode pixel = new LabelNode("Pixel", detectorMeta);
+        registerNode(pixel);
+        
+        final NumericNode<Length> xPixelSize  = new NumericNode<Length>("x-size", pixel, SI.MILLIMETER);
+        registerNode(xPixelSize);
+        if (detprop!=null) {
+           	xPixelSize.setDefault(detprop.getOriginal().getHPxSize(), SI.MILLIMETER);
+           	xPixelSize.setValue(detprop.getHPxSize(), SI.MILLIMETER);
+        	xPixelSize.addAmountListener(new AmountListener<Length>() {				
+				@Override
+				public void amountChanged(AmountEvent<Length> evt) {
+					detprop.setHPxSize(evt.getAmount().doubleValue(SI.MILLIMETER));
+				}
+			});
+        }
+        xPixelSize.setEditable(true);
+        xPixelSize.setIncrement(0.01);
+        xPixelSize.setFormat("#0.###");
+        xPixelSize.setLowerBound(0.001);
+        xPixelSize.setUpperBound(1000);
+
+        final NumericNode<Length> yPixelSize  = new NumericNode<Length>("y-size", pixel, SI.MILLIMETER);
+        registerNode(yPixelSize);
+        if (detprop!=null) {
+        	yPixelSize.setDefault(detprop.getOriginal().getVPxSize(), SI.MILLIMETER);
+        	yPixelSize.setValue(detprop.getVPxSize(), SI.MILLIMETER);
+        	yPixelSize.addAmountListener(new AmountListener<Length>() {				
+				@Override
+				public void amountChanged(AmountEvent<Length> evt) {
+					detprop.setVPxSize(evt.getAmount().doubleValue(SI.MILLIMETER));
+				}
+			});
+        }
+        yPixelSize.setEditable(true);
+        yPixelSize.setIncrement(0.01);
+        yPixelSize.setFormat("#0.###");
+        yPixelSize.setLowerBound(0.001);
+        yPixelSize.setUpperBound(1000);
+        
+        // Listeners
+        xpixel = setBeamCenterUnit(xPixelSize, beamX, "pixel");
+        xPixelSize.addAmountListener(new AmountListener() {		
+			@Override
+			public void amountChanged(AmountEvent evt) {
+		        xpixel = setBeamCenterUnit(xPixelSize, beamX, "pixel");
+			}
+		});
+        
+        ypixel = setBeamCenterUnit(yPixelSize, beamY, "pixel");
+        yPixelSize.addAmountListener(new AmountListener() {		
+			@Override
+			public void amountChanged(AmountEvent evt) {
+				ypixel = setBeamCenterUnit(yPixelSize, beamY, "pixel");
+			}
+		});		
+	}
+
+	private void createBeamCenter(DetectorProperties detprop,
+			                      LabelNode experimentalInfo) {
+	    // Beam Center
+        final LabelNode beamCen = new LabelNode("Beam Center", experimentalInfo);
+        registerNode(beamCen);
+        beamCen.setDefaultExpanded(true);
+      
+        this.beamX = new NumericNode<Length>("X", beamCen, SI.MILLIMETER);
+        registerNode(beamX);
+        beamX.setEditable(true);
+       
+        this.beamY = new NumericNode<Length>("Y", beamCen, SI.MILLIMETER);
+        registerNode(beamY);
+        beamY.setEditable(true);
+		
+	}
+
+	private void createIntensity() {
+	       // Pixel Info
+        final LabelNode pixelValue = new LabelNode("Intensity", root);
+        registerNode(pixelValue);
+        pixelValue.setDefaultExpanded(true);
+				                 
+        this.max  = new NumericNode<Dimensionless>("Visible Maximum", pixelValue, Dimensionless.UNIT);
+        registerNode(max);
+        this.min  = new NumericNode<Dimensionless>("Visible Minimum", pixelValue, Dimensionless.UNIT);
+        registerNode(min);
+        this.mean = new NumericNode<Dimensionless>("Mean", pixelValue, Dimensionless.UNIT);
+        registerNode(mean);
+ 		
+	}
+
+	private LabelNode createExperimentalInfo(final DiffractionCrystalEnvironment dce,
+			                                 final DetectorProperties detprop) {
 	    // Experimental Info
         final LabelNode experimentalInfo = new LabelNode("Experimental Information", root);
         registerNode(experimentalInfo);
@@ -133,160 +313,10 @@ public class DiffractionTreeModel {
         	osci.setDefault(dce.getOriginal().getPhiRange(), NonSI.DEGREE_ANGLE);
         	osci.setValue(dce.getPhiRange(), NonSI.DEGREE_ANGLE);
         }
-        
-	    // Beam Center
-        final LabelNode beamCen = new LabelNode("Beam Center", experimentalInfo);
-        registerNode(beamCen);
-        beamCen.setDefaultExpanded(true);
-      
-        final NumericNode<Length> beamX = new NumericNode<Length>("X", beamCen, SI.MILLIMETER);
-        registerNode(beamX);
-        beamX.setEditable(true);
-       
-        final NumericNode<Length> beamY = new NumericNode<Length>("Y", beamCen, SI.MILLIMETER);
-        registerNode(beamY);
-        beamY.setEditable(true);
-        
-        // Pixel Info
-        final LabelNode pixelValue = new LabelNode("Intensity", root);
-        registerNode(pixelValue);
-        pixelValue.setDefaultExpanded(true);
-				                 
-        this.max  = new NumericNode<Dimensionless>("Visible Maximum", pixelValue, Dimensionless.UNIT);
-        registerNode(max);
-        this.min  = new NumericNode<Dimensionless>("Visible Minimum", pixelValue, Dimensionless.UNIT);
-        registerNode(min);
-        this.mean = new NumericNode<Dimensionless>("Mean", pixelValue, Dimensionless.UNIT);
-        registerNode(mean);
-       
-        
-        // Detector Meta
-        final LabelNode detectorMeta = new LabelNode("Detector", root);
-        registerNode(detectorMeta);
-        detectorMeta.setDefaultExpanded(true);
-        
-        final NumericNode<Duration> exposure   = new NumericNode<Duration>("Exposure Time", detectorMeta, SI.SECOND);
-        registerNode(exposure);
-        if (dce!=null) {
-           	exposure.setDefault(dce.getOriginal().getExposureTime(), SI.SECOND);
-           	exposure.setValue(dce.getExposureTime(), SI.SECOND);
-        }
-        
-        final LabelNode size = new LabelNode("Size", detectorMeta);
-        registerNode(size);
-        NumericNode<Length> x  = new NumericNode<Length>("x", size, SI.MILLIMETER);
-        registerNode(x);
-        if (detprop!=null) {
-        	x.setDefault(detprop.getOriginal().getDetectorSizeH(), SI.MILLIMETER);
-        	x.setValue(detprop.getDetectorSizeH(), SI.MILLIMETER);
-        }
-        NumericNode<Length> y  = new NumericNode<Length>("y", size, SI.MILLIMETER);
-        registerNode(y);
-        if (detprop!=null) {
-        	y.setDefault(detprop.getOriginal().getDetectorSizeV(), SI.MILLIMETER);
-        	y.setValue(detprop.getDetectorSizeV(), SI.MILLIMETER);
-        }
 
-        final LabelNode pixel = new LabelNode("Pixel", detectorMeta);
-        registerNode(pixel);
-        
-        final NumericNode<Length> xPixelSize  = new NumericNode<Length>("x-size", pixel, SI.MILLIMETER);
-        registerNode(xPixelSize);
-        if (detprop!=null) {
-           	xPixelSize.setDefault(detprop.getOriginal().getHPxSize(), SI.MILLIMETER);
-           	xPixelSize.setValue(detprop.getHPxSize(), SI.MILLIMETER);
-        	xPixelSize.addAmountListener(new AmountListener<Length>() {				
-				@Override
-				public void amountChanged(AmountEvent<Length> evt) {
-					detprop.setHPxSize(evt.getAmount().doubleValue(SI.MILLIMETER));
-				}
-			});
-        }
-        xPixelSize.setEditable(true);
-        xPixelSize.setIncrement(0.01);
-        xPixelSize.setFormat("#0.###");
-        xPixelSize.setLowerBound(0);
-        xPixelSize.setUpperBound(1000);
-
-        final NumericNode<Length> yPixelSize  = new NumericNode<Length>("y-size", pixel, SI.MILLIMETER);
-        registerNode(yPixelSize);
-        if (detprop!=null) {
-        	yPixelSize.setDefault(detprop.getOriginal().getVPxSize(), SI.MILLIMETER);
-        	yPixelSize.setValue(detprop.getVPxSize(), SI.MILLIMETER);
-        	yPixelSize.addAmountListener(new AmountListener<Length>() {				
-				@Override
-				public void amountChanged(AmountEvent<Length> evt) {
-					detprop.setVPxSize(evt.getAmount().doubleValue(SI.MILLIMETER));
-				}
-			});
-        }
-        yPixelSize.setEditable(true);
-        yPixelSize.setIncrement(0.01);
-        yPixelSize.setFormat("#0.###");
-        yPixelSize.setLowerBound(0);
-        yPixelSize.setUpperBound(1000);
-      
-        if (metaData!=null && metaData.getMetaNames()!=null && metaData.getMetaNames().size()>0) {
-            final LabelNode rawMeta = new LabelNode("Raw Meta", root);
-	        registerNode(rawMeta);
-        	for (String name : metaData.getMetaNames()) {
-        		ObjectNode on = new ObjectNode(name, metaData.getMetaValue(name), rawMeta);
-		        registerNode(on);
-			}
-        }
-        
-        
-        // Listeners
-        xpixel = setBeamCenterUnit(xPixelSize, beamX, "pixel");
-        xPixelSize.addAmountListener(new AmountListener() {		
-			@Override
-			public void amountChanged(AmountEvent evt) {
-		        xpixel = setBeamCenterUnit(xPixelSize, beamX, "pixel");
-			}
-		});
-        
-        ypixel = setBeamCenterUnit(yPixelSize, beamY, "pixel");
-        yPixelSize.addAmountListener(new AmountListener() {		
-			@Override
-			public void amountChanged(AmountEvent evt) {
-				ypixel = setBeamCenterUnit(yPixelSize, beamY, "pixel");
-			}
-		});
-
-        if (detprop!=null) {
-        	beamX.setDefault(getBeamX(detprop.getOriginal()));
-        	beamX.setValue(getBeamX(detprop));
-        	beamX.addAmountListener(new AmountListener<Length>() {		
-    			@Override
-    			public void amountChanged(AmountEvent<Length> evt) {
-    				setBeamX(detprop, evt.getAmount());
-    			}
-    		});
-        }
-        beamX.setIncrement(0.1);
-        beamX.setFormat("#0.#");
-        beamX.setLowerBound(0);
-        beamX.setUpperBound(1000);
-        beamX.addUnitListener(createPixelFormatListener(beamX));
-        
-        if (detprop!=null) {
-        	beamY.setDefault(getBeamY(detprop.getOriginal()));
-        	beamY.setValue(getBeamY(detprop));
-        	beamY.addAmountListener(new AmountListener<Length>() {		
-    			@Override
-    			public void amountChanged(AmountEvent<Length> evt) {
-    				setBeamY(detprop, evt.getAmount());
-    			}
-    		});
-        }
-        beamY.setIncrement(0.1);
-        beamY.setFormat("#0.#");
-        beamY.setLowerBound(0);
-        beamY.setUpperBound(1000);
-        beamY.addUnitListener(createPixelFormatListener(beamY));
-
+	    return experimentalInfo;
 	}
-	
+
 	private Amount<Length> getBeamX(DetectorProperties dce) {
 		final double[] beamCen = dce.getBeamLocation();
 		return Amount.valueOf(beamCen[0], xpixel);

@@ -171,6 +171,7 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 			return;// The value is NaN, doing Amount.valueOf(...) would set to 0
 		}
 		if (unit==null && value!=null) unit = value.getUnit();
+		if (unit==null && defaultValue!=null) unit = defaultValue.getUnit();
 		this.value = Amount.valueOf(val, unit);
 		fireAmountChanged(value);
 	}
