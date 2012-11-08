@@ -223,7 +223,7 @@ public abstract class SectorProfileTool extends ProfileTool {
         
         if (dm.getDetector2DProperties()==null) return getImageCenter();
         
-        return dm.getDetector2DProperties().getBeamLocation();
+        return dm.getDetector2DProperties().getBeamCentreCoords();
  	}
 
 	private double[] getImageCenter() {
