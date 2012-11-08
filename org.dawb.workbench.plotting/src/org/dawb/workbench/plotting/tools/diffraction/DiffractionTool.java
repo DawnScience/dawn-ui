@@ -456,7 +456,7 @@ public class DiffractionTool extends AbstractToolPage {
 		centre.setImageDescriptor(Activator.getImageDescriptor("icons/centre.png"));
 		
 		MenuAction dropdown = new MenuAction("Resolution rings");
-	    //dropdown.setImageDescriptor(Activator.getImageDescriptor("/icons/resolution_rings.png"));
+	    dropdown.setImageDescriptor(Activator.getImageDescriptor("/icons/resolution_rings.png"));
 
 		IMetaData data = getMetaData();
 		augmenter = new DiffractionImageAugmenter((AbstractPlottingSystem)getPlottingSystem());
