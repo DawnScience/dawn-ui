@@ -10,6 +10,7 @@ import java.util.List;
 import javax.measure.quantity.Quantity;
 import javax.measure.unit.NonSI;
 import javax.measure.unit.Unit;
+import javax.swing.tree.TreeNode;
 
 import org.jscience.physics.amount.Amount;
 import org.jscience.physics.amount.Constants;
@@ -21,10 +22,10 @@ import org.jscience.physics.amount.Constants;
  * @author fcp94556
  *
  */
+@SuppressWarnings("rawtypes")
 public class NumericNode<E extends Quantity> extends LabelNode {
 		
-	@SuppressWarnings("rawtypes")
-	private Amount  value;
+	private Amount     value;  // Intentionally not E
 	private Amount<E>  defaultValue;
 	private Amount<E>  lowerBound;
 	private Amount<E>  upperBound;
@@ -37,7 +38,6 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 	 * For instance angstrom and eV are compatible using jscience
 	 * which knows about the Planck constant relatationship.
 	 */
-	@SuppressWarnings("rawtypes")
 	private List<Unit> allowedUnits;
 
 	/**
@@ -106,22 +106,22 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 		return;
 	}
 	
-	private Collection<AmountListener> listeners;
+	private Collection<AmountListener<E>> listeners;
 	
 	protected void fireAmountChanged(Amount<E> value) {
 		if (listeners==null) return;
 		final AmountEvent<E> evt = new AmountEvent<E>(this, value);
-		for (AmountListener l : listeners) {
+		for (AmountListener<E> l : listeners) {
 			l.amountChanged(evt);
 		}
 	}
 	
-	public void addAmountListener(AmountListener l) {
-		if (listeners==null) listeners = new HashSet<AmountListener>(3);
+	public void addAmountListener(AmountListener<E> l) {
+		if (listeners==null) listeners = new HashSet<AmountListener<E>>(3);
 		listeners.add(l);
 	}
 	
-	public void removeAmountListener(AmountListener l) {
+	public void removeAmountListener(AmountListener<E> l) {
 		if (listeners==null) return;
 		listeners.remove(l);
 	}
@@ -156,6 +156,31 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 		if (value!=null) fireUnitChanged(value.getUnit());
 	}
 	
+	public boolean mergeValue(TreeNode node) {
+		
+		if (equals(node)) return false;
+		
+		Amount<E> newValue = null;
+		if (node instanceof ObjectNode) {
+			ObjectNode on = (ObjectNode)node;
+			newValue = parseValue(on.getValue());
+		}
+		if (node instanceof NumericNode) {
+			NumericNode nn = (NumericNode)node;
+			newValue = nn.getValue();
+		}
+		
+		if (newValue!=null) {
+			setValue(newValue);
+			return true;
+		}
+		return false;
+	}
+	
+	private Amount<E> parseValue(Object val) {
+	    return null;
+	}
+
 	/**
 	 * Sets the default value and sets the bounds to
 	 * the values 0 and 10000.
@@ -326,6 +351,78 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 		listeners = null;
 		if (unitListeners!=null) unitListeners.clear();
 		unitListeners = null;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((allowedUnits == null) ? 0 : allowedUnits.hashCode());
+		result = prime * result
+				+ ((defaultUnit == null) ? 0 : defaultUnit.hashCode());
+		result = prime * result
+				+ ((defaultValue == null) ? 0 : defaultValue.hashCode());
+		result = prime * result + ((format == null) ? 0 : format.hashCode());
+		long temp;
+		temp = Double.doubleToLongBits(increment);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		result = prime * result
+				+ ((lowerBound == null) ? 0 : lowerBound.hashCode());
+		result = prime * result
+				+ ((upperBound == null) ? 0 : upperBound.hashCode());
+		result = prime * result + ((value == null) ? 0 : value.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		NumericNode other = (NumericNode) obj;
+		if (allowedUnits == null) {
+			if (other.allowedUnits != null)
+				return false;
+		} else if (!allowedUnits.equals(other.allowedUnits))
+			return false;
+		if (defaultUnit == null) {
+			if (other.defaultUnit != null)
+				return false;
+		} else if (!defaultUnit.equals(other.defaultUnit))
+			return false;
+		if (defaultValue == null) {
+			if (other.defaultValue != null)
+				return false;
+		} else if (!defaultValue.equals(other.defaultValue))
+			return false;
+		if (format == null) {
+			if (other.format != null)
+				return false;
+		} else if (!format.equals(other.format))
+			return false;
+		if (Double.doubleToLongBits(increment) != Double
+				.doubleToLongBits(other.increment))
+			return false;
+		if (lowerBound == null) {
+			if (other.lowerBound != null)
+				return false;
+		} else if (!lowerBound.equals(other.lowerBound))
+			return false;
+		if (upperBound == null) {
+			if (other.upperBound != null)
+				return false;
+		} else if (!upperBound.equals(other.upperBound))
+			return false;
+		if (value == null) {
+			if (other.value != null)
+				return false;
+		} else if (!value.equals(other.value))
+			return false;
+		return true;
 	}
 
 }

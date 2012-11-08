@@ -103,7 +103,7 @@ public class DiffractionTreeModel {
         dist.setEditable(true);
 
         dist.setIncrement(1);
-        dist.setFormat("#0.#");
+        dist.setFormat("#0.##");
         dist.setLowerBound(0);
         dist.setUpperBound(1000000);
         final Unit<Length> micron = SI.MICRO(SI.METER);
@@ -138,8 +138,8 @@ public class DiffractionTreeModel {
     			}
     		});
         }
-        beamX.setIncrement(0.01);
-        beamX.setFormat("#0.##");
+        beamX.setIncrement(0.1);
+        beamX.setFormat("#0.#");
         beamX.setLowerBound(0);
         beamX.setUpperBound(1000);
         beamX.addUnitListener(createPixelFormatListener(beamX));
@@ -156,8 +156,8 @@ public class DiffractionTreeModel {
     			}
     		});
         }
-        beamY.setIncrement(0.01);
-        beamY.setFormat("#0.##");
+        beamY.setIncrement(0.1);
+        beamY.setFormat("#0.#");
         beamY.setLowerBound(0);
         beamY.setUpperBound(1000);
         beamY.addUnitListener(createPixelFormatListener(beamY));
@@ -242,17 +242,17 @@ public class DiffractionTreeModel {
         
         // Listeners
         setBeamCenterUnit(xPixelSize, beamX, "pixel");
-        xPixelSize.addAmountListener(new AmountListener<Quantity>() {		
+        xPixelSize.addAmountListener(new AmountListener() {		
 			@Override
-			public void amountChanged(AmountEvent<Quantity> evt) {
+			public void amountChanged(AmountEvent evt) {
 		        setBeamCenterUnit(xPixelSize, beamX, "pixel");
 			}
 		});
         
         setBeamCenterUnit(yPixelSize, beamY, "pixel");
-        yPixelSize.addAmountListener(new AmountListener<Quantity>() {		
+        yPixelSize.addAmountListener(new AmountListener() {		
 			@Override
-			public void amountChanged(AmountEvent<Quantity> evt) {
+			public void amountChanged(AmountEvent evt) {
 		        setBeamCenterUnit(yPixelSize, beamY, "pixel");
 			}
 		});
@@ -349,16 +349,16 @@ public class DiffractionTreeModel {
 	}
 
 	public void dispose() {
-		for (TreeNode node : nodeMap.values()) {
+		if (nodeMap!=null) for (TreeNode node : nodeMap.values()) {
 			if (node instanceof LabelNode) {
 				((LabelNode)node).dispose();
 			}
 		}
+		nodeMap.clear();
+		nodeMap = null;
 		isDisposed = true;
 		root   = null;
 		viewer = null;
-		nodeMap.clear();
-		nodeMap = null;
 	}
 
 	public void reset() {

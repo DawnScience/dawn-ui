@@ -407,7 +407,10 @@ public class DiffractionTool extends AbstractToolPage {
 			@Override
 			public void run() {
 				if (copiedNode!=null) {
-					// TODO Paste value into something in the table.
+					Object object = ((StructuredSelection)viewer.getSelection()).getFirstElement();
+					if (object instanceof NumericNode) {
+						((NumericNode<Quantity>)object).mergeValue(copiedNode);
+					}
 				}
 			}
 		};
