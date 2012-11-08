@@ -7,11 +7,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-import javax.measure.converter.UnitConverter;
 import javax.measure.quantity.Quantity;
 import javax.measure.unit.NonSI;
 import javax.measure.unit.Unit;
-import javax.measure.unit.UnitFormat;
 import javax.swing.tree.TreeNode;
 
 import org.jscience.physics.amount.Amount;
