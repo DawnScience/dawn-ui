@@ -24,6 +24,8 @@ import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.widgets.Display;
 
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
@@ -37,6 +39,8 @@ public class EllipseSelection extends AbstractSelectionRegion {
 		setRegionColor(ColorConstants.lightGreen);
 		setAlpha(80);
 		setLineWidth(2);
+		labelColour = ColorConstants.black;
+		labelFont = new Font(Display.getCurrent(), "Dialog", 10, SWT.BOLD);
 	}
 
 	@Override
@@ -187,6 +191,10 @@ public class EllipseSelection extends AbstractSelectionRegion {
 			Point c = r.getCenter();
 			setCentre(c.preciseX(), c.preciseY());
 
+			createHandles(true);
+		}
+
+		private void createHandles(boolean createROI) {
 			// handles
 			for (int i = 0; i < 4; i++) {
 				addHandle(getPoint(i*90));
@@ -200,12 +208,24 @@ public class EllipseSelection extends AbstractSelectionRegion {
 			mover.addTranslationListener(createRegionNotifier());
 			fTranslators.add(mover);
 
-			createROI(true);
+			if (createROI)
+				createROI(true);
 
 			setRegionObjects(this, handles);
 			Rectangle b = getBounds();
 			if (b != null)
 				setBounds(b);
+		}
+
+		@Override
+		protected void outlineShape(Graphics graphics) {
+			super.outlineShape(graphics);
+			if (label != null && isShowLabel()) {
+				graphics.setAlpha(255);
+				graphics.setForegroundColor(labelColour);
+				graphics.setFont(labelFont);
+				graphics.drawText(label, getPoint(45));
+			}
 		}
 
 		@Override
@@ -231,8 +251,8 @@ public class EllipseSelection extends AbstractSelectionRegion {
 			h.setVisible(isVisible() && isMobile());
 			parent.add(h);
 			FigureTranslator mover = new FigureTranslator(getXyGraph(), h);
-			mover.addTranslationListener(handleListener);
 			mover.setActive(isMobile());
+			mover.addTranslationListener(handleListener);
 			fTranslators.add(mover);
 			h.addFigureListener(moveListener);
 			handles.add(h);
@@ -244,8 +264,8 @@ public class EllipseSelection extends AbstractSelectionRegion {
 			h.setVisible(isVisible() && isMobile());
 			parent.add(h);
 			FigureTranslator mover = new FigureTranslator(getXyGraph(), h, h, handles);
-			mover.addTranslationListener(createRegionNotifier());
 			mover.setActive(isMobile());
+			mover.addTranslationListener(createRegionNotifier());
 			fTranslators.add(mover);
 			h.addFigureListener(moveListener);
 			handles.add(h);
@@ -396,22 +416,7 @@ public class EllipseSelection extends AbstractSelectionRegion {
 				SelectionHandle h = (SelectionHandle) handles.get(imax);
 				h.setSelectionPoint(getCentre());
 			} else {
-				// handles
-				for (int i = 0; i < 4; i++) {
-					addHandle(getPoint(i*90));
-				}
-				addCentreHandle();
-
-				// figure move
-				addFigureListener(moveListener);
-				FigureTranslator mover = new FigureTranslator(getXyGraph(), parent, this, handles);
-				mover.addTranslationListener(createRegionNotifier());
-				mover.setActive(isMobile());
-				fTranslators.add(mover);
-				setRegionObjects(this, handles);
-				Rectangle b = getBounds();
-				if (b != null)
-					setBounds(b);
+				createHandles(false);
 			}
 		}
 
