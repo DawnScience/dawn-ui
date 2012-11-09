@@ -5,6 +5,10 @@ package org.dawb.workbench.plotting.tools.diffraction;
  * This class may be used with TreeNodeContentProvider to create a Tree of editable
  * items. It can also be used with a swing tree.
  * 
+ * The classes LabelNode, NumericNode and ObjectNode are generic and may be used 
+ * elsewhere. They have not been moved somewhere generic yet because they create a 
+ * dependency on jscience.
+
  * @author fcp94556
  *
  */

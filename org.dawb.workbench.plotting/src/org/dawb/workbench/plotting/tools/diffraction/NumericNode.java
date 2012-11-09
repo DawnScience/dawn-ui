@@ -14,21 +14,21 @@ import javax.swing.tree.TreeNode;
 
 import org.jscience.physics.amount.Amount;
 import org.jscience.physics.amount.Constants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This class may be used with TreeNodeContentProvider to create a Tree of editable
  * items.
+ * 
+ * The classes LabelNode, NumericNode and ObjectNode are generic and may be used 
+ * elsewhere. They have not been moved somewhere generic yet because they create a 
+ * dependency on jscience.
  * 
  * @author fcp94556
  *
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class NumericNode<E extends Quantity> extends LabelNode {
-	
-	private static Logger logger = LoggerFactory.getLogger(NumericNode.class);
-		
+			
 	private Amount     value;  // Intentionally not E
 	private Amount<E>  defaultValue;
 	private Amount<E>  lowerBound;
