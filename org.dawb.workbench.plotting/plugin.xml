@@ -215,6 +215,12 @@
             id="org.dawb.workbench.plotting.fittingPreferencePage"
             name="Fitting Preferences">
       </page>
+      <page
+            category="org.edna.workbench.preferences.root"
+            class="org.dawb.workbench.plotting.preference.diffraction.DiffractionPreferencePage"
+            id="org.dawb.workbench.plotting.preference.diffraction.calibrantPreferencePage"
+            name="Diffraction Calibrants">
+      </page>
    </extension>
    <extension
          point="org.eclipse.ui.cheatsheets.cheatSheetContent">
