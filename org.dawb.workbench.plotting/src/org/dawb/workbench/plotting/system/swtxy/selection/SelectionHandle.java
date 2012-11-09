@@ -99,13 +99,7 @@ public abstract class SelectionHandle extends Figure implements IMobileFigure {
 
 	protected String getLabelPositionText(double[] p) {
 		if (Double.isNaN(p[0])||Double.isNaN(p[1])) return "";
-		final StringBuilder buf = new StringBuilder();
-		buf.append("(");
-		buf.append(format.format(p[0]));
-		buf.append(", ");
-		buf.append(format.format(p[1]));
-		buf.append(")");
-		return buf.toString();
+		return String.format("(%s,%s)", format.format(p[0]), format.format(p[1]));
 	}
 	
 	public void setCursor(final Cursor cursor) {

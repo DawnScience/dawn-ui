@@ -40,6 +40,20 @@ public class EllipseSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
+	public void setVisible(boolean visible) {
+		if (ellipse != null)
+			ellipse.setVisible(visible);
+		getBean().setVisible(visible);
+	}
+
+	@Override
+	public void setMobile(final boolean mobile) {
+		getBean().setMobile(mobile);
+		if (ellipse != null)
+			ellipse.setMobile(mobile);
+	}
+
+	@Override
 	public void createContents(Figure parent) {
 		ellipse = new DecoratedEllipse(parent);
 		ellipse.setCursor(Draw2DUtils.getRoiMoveCursor());
@@ -182,7 +196,9 @@ public class EllipseSelection extends AbstractSelectionRegion {
 			// figure move
 			addFigureListener(moveListener);
 			FigureTranslator mover = new FigureTranslator(getXyGraph(), parent, this, handles);
+			mover.setActive(isMobile());
 			mover.addTranslationListener(createRegionNotifier());
+			fTranslators.add(mover);
 
 			createROI(true);
 
@@ -192,12 +208,31 @@ public class EllipseSelection extends AbstractSelectionRegion {
 				setBounds(b);
 		}
 
+		@Override
+		public void setVisible(boolean visible) {
+			super.setVisible(visible);
+			for (IFigure h : handles) {
+				h.setVisible(visible);
+			}
+		}
+
+		public void setMobile(boolean mobile) {
+			for (IFigure h : handles) {
+				h.setVisible(mobile);
+			}
+			for (FigureTranslator f : fTranslators) {
+				f.setActive(mobile);
+			}
+		}
+
 		private void addHandle(Point p) {
 			RectangularHandle h = new RectangularHandle(coords, getRegionColor(), this, SIDE,
 					p.preciseX(), p.preciseY());
+			h.setVisible(isVisible() && isMobile());
 			parent.add(h);
 			FigureTranslator mover = new FigureTranslator(getXyGraph(), h);
 			mover.addTranslationListener(handleListener);
+			mover.setActive(isMobile());
 			fTranslators.add(mover);
 			h.addFigureListener(moveListener);
 			handles.add(h);
@@ -206,9 +241,11 @@ public class EllipseSelection extends AbstractSelectionRegion {
 		private void addCentreHandle() {
 			Point c = getCentre();
 			RectangularHandle h = new RectangularHandle(coords, getRegionColor(), this, SIDE, c.preciseX(), c.preciseY());
+			h.setVisible(isVisible() && isMobile());
 			parent.add(h);
 			FigureTranslator mover = new FigureTranslator(getXyGraph(), h, h, handles);
 			mover.addTranslationListener(createRegionNotifier());
+			mover.setActive(isMobile());
 			fTranslators.add(mover);
 			h.addFigureListener(moveListener);
 			handles.add(h);
@@ -369,7 +406,8 @@ public class EllipseSelection extends AbstractSelectionRegion {
 				addFigureListener(moveListener);
 				FigureTranslator mover = new FigureTranslator(getXyGraph(), parent, this, handles);
 				mover.addTranslationListener(createRegionNotifier());
-
+				mover.setActive(isMobile());
+				fTranslators.add(mover);
 				setRegionObjects(this, handles);
 				Rectangle b = getBounds();
 				if (b != null)
