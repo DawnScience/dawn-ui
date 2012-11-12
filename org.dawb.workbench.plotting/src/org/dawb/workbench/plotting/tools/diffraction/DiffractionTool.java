@@ -199,9 +199,8 @@ public class DiffractionTool extends AbstractToolPage {
 		if (model!=null)  return;
 		if (viewer==null) return;
 		
-		IMetaData meta = getMetaData();
 		try {
-			model = new DiffractionTreeModel(meta);
+			model = new DiffractionTreeModel(getDiffractionMetaData());
 			model.setViewer(viewer);
 		} catch (Exception e) {
 			logger.error("Cannot create model!", e);
