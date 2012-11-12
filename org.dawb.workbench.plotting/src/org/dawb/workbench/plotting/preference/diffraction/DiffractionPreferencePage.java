@@ -16,6 +16,8 @@
 
 package org.dawb.workbench.plotting.preference.diffraction;
 
+import java.util.Collection;
+
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.workbench.plotting.Activator;
 import org.eclipse.jface.preference.PreferencePage;
@@ -86,7 +88,8 @@ public class DiffractionPreferencePage extends PreferencePage implements IWorkbe
 		caliLabel.setText("Calibrant ");
 		
 		this.calibrantChoice = new CCombo(buttons, SWT.READ_ONLY|SWT.BORDER);
-		calibrantChoice.setItems(CalibrationStandards.getCalibrantList().toArray(new String[CalibrationStandards.getCalibrantList().size()])); // TODO Add listener to 
+		final Collection<String> cl = CalibrationStandards.getInstance().getCalibrantList();
+		calibrantChoice.setItems(cl.toArray(new String[cl.size()])); // TODO Add listener to 
 		calibrantChoice.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		calibrantChoice.select(0); // TODO From Preference
 		calibrantChoice.addSelectionListener(new SelectionAdapter() {
@@ -139,7 +142,8 @@ public class DiffractionPreferencePage extends PreferencePage implements IWorkbe
 
 	private void setCalibrantName(String name) {
 		// TODO Save name
-		CalibrantSpacing spacing = CalibrationStandards.getCalibrationPeakMap(name);
+		final CalibrationStandards cs = CalibrationStandards.getInstance();
+		CalibrantSpacing spacing = cs.getCalibrationPeakMap(name);
 		setBean(spacing);
 	}
 
