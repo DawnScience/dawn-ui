@@ -21,6 +21,7 @@ import java.util.List;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.workbench.plotting.Activator;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -130,6 +131,20 @@ public class DiffractionPreferencePage extends PreferencePage implements IWorkbe
 		final Button removeCalibrant = new Button(buttons, SWT.NONE);
 		removeCalibrant.setText("Delete");
 		removeCalibrant.setToolTipText("Delete the selected calibrant.");
+		removeCalibrant.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				boolean ok = MessageDialog.openConfirm(Display.getDefault().getActiveShell(), "Confirm Delete", "Do you really want to delete '"+calibrationStandards.getSelectedCalibrant()+"'?");
+				if (ok) {
+					final String oldCal = calibrationStandards.getSelectedCalibrant();
+					final int oldIndex  = calibrationStandards.getCalibrantList().indexOf(oldCal);
+					if (oldIndex<0) return;
+					int index = oldIndex-1;
+					if (index<0) index = 0;
+					calibrationStandards.removeCalibrant(oldCal);
+					calibrationStandards.setSelectedCalibrant(calibrationStandards.getCalibrantList().get(index));
+				}
+			}
+		});
 
 		this.hkls  = new VerticalListEditor(main, SWT.BORDER);
 		Composite      hklEditor = new DiffractionRingsComposite(hkls, SWT.NONE); 
