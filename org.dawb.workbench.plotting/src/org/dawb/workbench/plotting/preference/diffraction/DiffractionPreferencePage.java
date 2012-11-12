@@ -16,7 +16,7 @@
 
 package org.dawb.workbench.plotting.preference.diffraction;
 
-import java.util.Collection;
+import java.util.List;
 
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.workbench.plotting.Activator;
@@ -38,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSpacing;
+import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationStandards;
 import uk.ac.diamond.scisoft.analysis.crystallography.HKL;
 import uk.ac.gda.richbeans.beans.BeanUI;
@@ -51,11 +52,18 @@ public class DiffractionPreferencePage extends PreferencePage implements IWorkbe
 	
 	private VerticalListEditor hkls;
 	private CCombo calibrantChoice;
+	private CalibrationStandards calibrationStandards;
 	
 	public DiffractionPreferencePage() {
 
 	}
-
+	@Override
+	public void init(IWorkbench workbench) {
+		setPreferenceStore(Activator.getDefault().getPreferenceStore());
+		this.calibrationStandards = CalibrationFactory.getCalibrationStandards(); // Reads from file.
+	}
+	
+	
 	/**
 	 * @wbp.parser.constructor
 	 */
@@ -67,10 +75,6 @@ public class DiffractionPreferencePage extends PreferencePage implements IWorkbe
 		super(title, image);
 	}
 
-	@Override
-	public void init(IWorkbench workbench) {
-		setPreferenceStore(Activator.getDefault().getPreferenceStore());
-	}
 
 	@Override
 	protected Control createContents(Composite parent) {
@@ -88,15 +92,8 @@ public class DiffractionPreferencePage extends PreferencePage implements IWorkbe
 		caliLabel.setText("Calibrant ");
 		
 		this.calibrantChoice = new CCombo(buttons, SWT.READ_ONLY|SWT.BORDER);
-		final Collection<String> cl = CalibrationStandards.getInstance().getCalibrantList();
-		calibrantChoice.setItems(cl.toArray(new String[cl.size()])); // TODO Add listener to 
+		
 		calibrantChoice.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		calibrantChoice.select(0); // TODO From Preference
-		calibrantChoice.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				setCalibrantName(calibrantChoice.getItem(calibrantChoice.getSelectionIndex()));
-			}
-		});
 		
 		final Button addCalibrant = new Button(buttons, SWT.NONE);
 		addCalibrant.setText("Create");
@@ -128,9 +125,13 @@ public class DiffractionPreferencePage extends PreferencePage implements IWorkbe
 
 		GridUtils.setVisibleAndLayout(hkls, true);
 		
-		// initialize
-		setCalibrantName(calibrantChoice.getItem(calibrantChoice.getSelectionIndex()));
 		
+		setDefaultCalibrantChoice(); 
+		calibrantChoice.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				setCalibrantName(calibrantChoice.getItem(calibrantChoice.getSelectionIndex()));
+			}
+		});
 		hkls.setShowAdditionalFields(true);
 
 		return main;
@@ -141,29 +142,43 @@ public class DiffractionPreferencePage extends PreferencePage implements IWorkbe
 	}
 
 	private void setCalibrantName(String name) {
-		// TODO Save name
-		final CalibrationStandards cs = CalibrationStandards.getInstance();
-		CalibrantSpacing spacing = cs.getCalibrationPeakMap(name);
+		calibrationStandards.setSelectedCalibrant(name);
+		CalibrantSpacing spacing = calibrationStandards.getCalibrationPeakMap(name);
 		setBean(spacing);
 	}
 
 	@Override
 	public boolean performOk() {
-		// TODO Store string preference in XML
+		try {
+			calibrationStandards.save();
+		} catch (Exception e) {
+			logger.error("Cannot save standards!", e);
+		}
 		return super.performOk();
 	}
 	
 	@Override
     public boolean performCancel() {
-		// TODO Ensure that beans are reset from
 		return super.performCancel();
 	}
 
 
 	@Override
 	protected void performDefaults() {
-		// TODO Read bean from default preference value
+		this.calibrationStandards = CalibrationFactory.getCalibrationStandards();
+		
 	}
+	
+	private void setDefaultCalibrantChoice() {
+		final List<String> cl = calibrationStandards.getCalibrantList();
+		calibrantChoice.setItems(cl.toArray(new String[cl.size()]));
+		calibrantChoice.select(cl.indexOf(calibrationStandards.getSelectedCalibrant())); 
+		
+		// initialize
+		setCalibrantName(calibrationStandards.getSelectedCalibrant());
+
+	}
+
 
 	public void setBean(Object bean) {
 		try {
