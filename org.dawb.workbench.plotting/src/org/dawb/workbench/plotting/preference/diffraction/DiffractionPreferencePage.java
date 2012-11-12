@@ -176,7 +176,7 @@ public class DiffractionPreferencePage extends PreferencePage implements IWorkbe
 		setDefaultCalibrantChoice(); 
 		calibrantChoice.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				setCalibrantName(calibrantChoice.getItem(calibrantChoice.getSelectionIndex()));
+				setCalibrantName(calibrantChoice.getItem(calibrantChoice.getSelectionIndex()), true);
 			}
 		});
 		hkls.setShowAdditionalFields(true);
@@ -218,15 +218,17 @@ public class DiffractionPreferencePage extends PreferencePage implements IWorkbe
 	private void setDefaultCalibrantChoice() {
 		final List<String> cl = calibrationStandards.getCalibrantList();
 		calibrantChoice.setItems(cl.toArray(new String[cl.size()]));
-		calibrantChoice.select(cl.indexOf(calibrationStandards.getSelectedCalibrant())); 
+		String selCalib = calibrationStandards.getSelectedCalibrant();
+		final int index = cl.indexOf(selCalib);
+		calibrantChoice.select(index); 
 		
 		// initialize
-		setCalibrantName(calibrationStandards.getSelectedCalibrant());
+		setCalibrantName(calibrationStandards.getSelectedCalibrant(), false);
 
 	}
 
-	private void setCalibrantName(String name) {
-		calibrationStandards.setSelectedCalibrant(name, true);
+	private void setCalibrantName(String name, boolean fireListeners) {
+		calibrationStandards.setSelectedCalibrant(name, fireListeners);
 		CalibrantSpacing spacing = calibrationStandards.getCalibrationPeakMap(name);
 		setBean(spacing);
 	}
@@ -242,7 +244,8 @@ public class DiffractionPreferencePage extends PreferencePage implements IWorkbe
 	}
 	@Override
 	public void calibrantSelectionChanged(CalibrantSelectionEvent evt) {
-		if (calibrantChoice.getItems()[calibrantChoice.getSelectionIndex()].equals(evt.getCalibrant())) return;
+		final int index = calibrantChoice.getSelectionIndex();
+		if (index>-1 && calibrantChoice.getItems()[index].equals(evt.getCalibrant())) return;
 		setDefaultCalibrantChoice();
 	}
 
