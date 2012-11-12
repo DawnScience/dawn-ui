@@ -595,7 +595,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 				}
 			};
 			grp.add(calibrantAction);
-			if (selected.equals(calibrant)) selectedAction = calibrantAction;
+			if (selected!=null&&selected.equals(calibrant)) selectedAction = calibrantAction;
 			calibrantActions.add(calibrantAction);
 		}
 		calibrantActions.addSeparator();
