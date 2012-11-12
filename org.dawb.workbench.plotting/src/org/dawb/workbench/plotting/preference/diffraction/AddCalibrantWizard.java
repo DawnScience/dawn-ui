@@ -39,7 +39,7 @@ public class AddCalibrantWizard extends Wizard implements IWorkbenchWizard{
 		cs.setName(page.name);
 		
 		calibrationStandards.addCalibrant(cs);
-		calibrationStandards.setSelectedCalibrant(cs.getName());
+		calibrationStandards.setSelectedCalibrant(cs.getName(), true);
 		
 	    return true;
 	}

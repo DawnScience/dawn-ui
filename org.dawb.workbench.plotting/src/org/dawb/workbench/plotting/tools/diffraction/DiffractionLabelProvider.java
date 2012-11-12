@@ -2,6 +2,9 @@ package org.dawb.workbench.plotting.tools.diffraction;
 
 import javax.measure.quantity.Quantity;
 
+import org.dawb.common.ui.tree.LabelNode;
+import org.dawb.common.ui.tree.NumericNode;
+import org.dawb.common.ui.tree.ObjectNode;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 import org.eclipse.jface.viewers.StyledString;

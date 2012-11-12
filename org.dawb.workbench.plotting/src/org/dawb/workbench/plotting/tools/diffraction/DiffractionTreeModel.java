@@ -18,6 +18,13 @@ import javax.vecmath.Vector3d;
 import org.dawb.common.services.IImageService;
 import org.dawb.common.services.ServiceManager;
 import org.dawb.common.ui.plot.trace.IImageTrace;
+import org.dawb.common.ui.tree.AmountEvent;
+import org.dawb.common.ui.tree.AmountListener;
+import org.dawb.common.ui.tree.LabelNode;
+import org.dawb.common.ui.tree.NumericNode;
+import org.dawb.common.ui.tree.ObjectNode;
+import org.dawb.common.ui.tree.UnitEvent;
+import org.dawb.common.ui.tree.UnitListener;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.jscience.physics.amount.Amount;
 
@@ -53,10 +60,10 @@ public class DiffractionTreeModel {
 	private Unit<Length>               xpixel, ypixel;
 	private NumericNode<Dimensionless> max,min,mean;
 	private NumericNode<Length>        beamX, beamY;
-	private final IMetaData metaData;
+	private final IDiffractionMetadata metaData;
 	
 	
-	public DiffractionTreeModel(IMetaData metaData) throws Exception {
+	public DiffractionTreeModel(IDiffractionMetadata metaData) throws Exception {
 		this.metaData = metaData;
 		this.root     = new LabelNode();
 		createDiffractionModel(metaData);
@@ -85,26 +92,18 @@ public class DiffractionTreeModel {
 	}
 	
 	private DetectorProperties getDetectorProperties() {
-		return (metaData instanceof IDiffractionMetadata)
-				? ((IDiffractionMetadata)metaData).getDetector2DProperties()
-						: null;
+		return metaData.getDetector2DProperties();
 	}
 
 	private DetectorProperties getOriginalDetectorProperties() {
-		return (metaData instanceof IDiffractionMetadata)
-				? ((IDiffractionMetadata)metaData).getOriginalDetector2DProperties()
-						: null;
+		return metaData.getOriginalDetector2DProperties();
 	}
 
 	private DiffractionCrystalEnvironment getCrystalEnvironment() {
-		return (metaData instanceof IDiffractionMetadata)
-				? ((IDiffractionMetadata)metaData).getDiffractionCrystalEnvironment()
-						: null;
+		return metaData.getDiffractionCrystalEnvironment();
 	}
 	private DiffractionCrystalEnvironment getOriginalCrystalEnvironment() {
-		return (metaData instanceof IDiffractionMetadata)
-				? ((IDiffractionMetadata)metaData).getOriginalDiffractionCrystalEnvironment()
-						: null;
+		return metaData.getOriginalDiffractionCrystalEnvironment();
 	}
 
 	private void createUnitsListeners(final DetectorProperties detprop, DetectorProperties odetprop) {
