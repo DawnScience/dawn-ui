@@ -72,7 +72,7 @@ public class DiffractionPreferencePage extends PreferencePage implements IWorkbe
 	@Override
 	public void init(IWorkbench workbench) {
 		setPreferenceStore(Activator.getDefault().getPreferenceStore());
-		this.calibrationStandards = CalibrationFactory.getCalibrationStandards(); // Reads from file.
+		this.calibrationStandards = CalibrationFactory.getCalibrationStandards(true); // Reads from file.
 		calibrationStandards.addCalibrantSelectionListener(this);
 	}
 	
@@ -206,7 +206,7 @@ public class DiffractionPreferencePage extends PreferencePage implements IWorkbe
 
 	@Override
 	protected void performDefaults() {
-		this.calibrationStandards = CalibrationFactory.getCalibrationStandards();
+		this.calibrationStandards = CalibrationFactory.getCalibrationStandards(true); // Reads from file
 		setDefaultCalibrantChoice();
 		calibrationStandards.addCalibrantSelectionListener(this);
 	}
