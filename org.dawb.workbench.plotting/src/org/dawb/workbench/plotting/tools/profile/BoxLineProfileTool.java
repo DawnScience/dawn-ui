@@ -29,6 +29,7 @@ import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.draw2d.ColorConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -123,7 +124,6 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 		//if (monitor.isCanceled()) return;
 		final ILineTrace x_trace = (ILineTrace)profilePlottingSystem.getTrace("X "+region.getName());
 		final ILineTrace y_trace = (ILineTrace)profilePlottingSystem.getTrace("Y "+region.getName());
-
 		if (tryUpdate && x_trace!=null && y_trace!=null) {
 			
 			getControl().getDisplay().syncExec(new Runnable() {
@@ -134,16 +134,28 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 							AbstractDataset axis = axes.get(1);
 							xPixelAxis.setLabelDataAndTitle(axis);
 							profilePlottingSystem.setSelectedXAxis(xPixelAxis);
+							x_trace.setTraceColor(ColorConstants.blue);
+							y_trace.setTraceColor(ColorConstants.red);
 							x_trace.setData(axis, line1);
 							y_trace.setData(axis, line2);
+							double min = axis.getInt(0);
+							double max = axis.getInt(axis.argMax());
+//							System.out.println(min+","+max);
+							createXAxisBoxRegion(profilePlottingSystem, new RectangularROI(min, 0, max/2, 100, 0 ), "X_Axis_box_1");
 						}
 					} else if (type == BoxLineType.HORIZONTAL_TYPE){
 						if(axes != null){
 							AbstractDataset axis = axes.get(0);
 							xPixelAxis.setLabelDataAndTitle(axis);
 							profilePlottingSystem.setSelectedXAxis(xPixelAxis);
+							x_trace.setTraceColor(ColorConstants.darkGreen);
+							y_trace.setTraceColor(ColorConstants.orange);
 							x_trace.setData(axis, line1);
 							y_trace.setData(axis, line2);
+							double min = axis.getInt(0);
+							double max = axis.getInt(axis.argMax());
+//							System.out.println(min+","+max);
+							createXAxisBoxRegion(profilePlottingSystem, new RectangularROI(min, 0, max/2, 100, 0), "X_Axis_box_2");
 						}
 					}
 				}
@@ -158,6 +170,13 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 			plotted = profilePlottingSystem.updatePlot1D(y_indices, Arrays.asList(new AbstractDataset[]{line2}), monitor);
 			registerTraces(region, plotted);	
 		}
+	}
+
+	/**
+	 * Returns the tool plotting system
+	 */
+	public AbstractPlottingSystem getToolPlottingSystem(){
+		return profilePlottingSystem;
 	}
 
 	public void setAxes(List<AbstractDataset> axes){
@@ -177,5 +196,24 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 		this.type = type;
 	}
 
-	
+	private void createXAxisBoxRegion(final AbstractPlottingSystem plottingSystem, 
+			final ROIBase roi, final String roiName){
+		try {
+			if(roi instanceof RectangularROI){
+				RectangularROI rroi = (RectangularROI)roi;
+				IRegion region = plottingSystem.getRegion(roiName);
+				
+				//Test if the region is already there and update the currentRegion
+				if(region!=null&&region.isVisible()){
+					region.setROI(region.getROI());
+				}else {
+					IRegion newRegion = plottingSystem.createRegion(roiName, RegionType.XAXIS);
+					newRegion.setROI(rroi);
+					plottingSystem.addRegion(newRegion);
+				}
+			}
+		} catch (Exception e) {
+			logger.error("Couldn't create ROI", e);
+		}
+	}
 }
