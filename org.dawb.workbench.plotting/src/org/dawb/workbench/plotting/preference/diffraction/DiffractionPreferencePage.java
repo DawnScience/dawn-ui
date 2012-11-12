@@ -92,7 +92,6 @@ public class DiffractionPreferencePage extends PreferencePage implements IWorkbe
 		caliLabel.setText("Calibrant ");
 		
 		this.calibrantChoice = new CCombo(buttons, SWT.READ_ONLY|SWT.BORDER);
-		
 		calibrantChoice.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		final Button addCalibrant = new Button(buttons, SWT.NONE);
