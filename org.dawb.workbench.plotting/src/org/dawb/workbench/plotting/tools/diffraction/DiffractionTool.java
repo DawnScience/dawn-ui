@@ -5,6 +5,7 @@ import java.util.List;
 import javax.measure.quantity.Quantity;
 import javax.swing.tree.TreeNode;
 
+import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.region.IRegion;
@@ -74,6 +75,10 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSelectedListener;
+import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSelectionEvent;
+import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
+import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationStandards;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
@@ -81,7 +86,7 @@ import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.io.MetaDataAdapter;
 
 
-public class DiffractionTool extends AbstractToolPage {
+public class DiffractionTool extends AbstractToolPage implements CalibrantSelectedListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(DiffractionTool.class);
 	
@@ -193,7 +198,7 @@ public class DiffractionTool extends AbstractToolPage {
 		super.dispose();
 		if (model!=null) model.dispose();
 		if (augmenter != null) augmenter.dispose();
-		
+		CalibrationFactory.removeCalibrantSelectionListener(this);
 	}
 
 	private void createDiffractionModel() {
@@ -423,7 +428,9 @@ public class DiffractionTool extends AbstractToolPage {
 		
 	}
 
-	private TreeNode copiedNode;
+	private TreeNode   copiedNode;
+	private MenuAction calibrantActions;
+	private Action     calPref;
 	
 	private void createActions() {
 		
@@ -521,13 +528,19 @@ public class DiffractionTool extends AbstractToolPage {
 		
 		centre.setImageDescriptor(Activator.getImageDescriptor("icons/centre.png"));
 		
-		final Action calPref = new Action("Configure Calibrants...") {
+		this.calPref = new Action("Configure Calibrants...") {
 			@Override
 			public void run() {
 				PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), DiffractionPreferencePage.ID, null, null);
 				if (pref != null) pref.open();
 			}
 		};
+
+		this.calibrantActions = new MenuAction("Calibrants");
+		calibrantActions.setImageDescriptor(Activator.getImageDescriptor("/icons/calibrant_rings.png"));
+		updateCalibrationActions(CalibrationFactory.getCalibrationStandards());
+		CalibrationFactory.addCalibrantSelectionListener(this);
+		
 		
 		// TODO Drop down of calibrant choices with action to open preferences?
 		
@@ -540,6 +553,7 @@ public class DiffractionTool extends AbstractToolPage {
 	    augmenter.addActions(dropdown);
 		
 	    toolMan.add(dropdown);
+	    toolMan.add(calibrantActions);
 		toolMan.add(centre);
 		toolMan.add(new Separator());
 		toolMan.add(reset);
@@ -569,6 +583,27 @@ public class DiffractionTool extends AbstractToolPage {
 		getSite().getActionBars().getMenuManager().add(new Separator());
 	}
 	
+	private void updateCalibrationActions(final CalibrationStandards standards) {
+		this.calibrantActions.clear();
+		final String selected = standards.getSelectedCalibrant();
+		final CheckableActionGroup grp = new CheckableActionGroup();
+		Action selectedAction=null;
+		for (final String calibrant : standards.getCalibrantList()) {
+			final Action calibrantAction = new Action(calibrant, IAction.AS_CHECK_BOX) {
+				public void run() {
+					standards.setSelectedCalibrant(calibrant, true);
+				}
+			};
+			grp.add(calibrantAction);
+			if (selected.equals(calibrant)) selectedAction = calibrantAction;
+			calibrantActions.add(calibrantAction);
+		}
+		calibrantActions.addSeparator();
+		calibrantActions.add(calPref);
+		if (selected!=null) selectedAction.setChecked(true);
+	}
+
+
 	private IDiffractionMetadata getDiffractionMetaData() {
 		IMetaData md = getMetaData();
 		if (md instanceof IDiffractionMetadata) {
@@ -628,6 +663,11 @@ public class DiffractionTool extends AbstractToolPage {
 		public void clearText() {
             super.clearText();
 		}
+	}
+
+	@Override
+	public void calibrantSelectionChanged(CalibrantSelectionEvent evt) {
+		updateCalibrationActions((CalibrationStandards)evt.getSource());
 	};
 
 }
