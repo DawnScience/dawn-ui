@@ -257,7 +257,7 @@ public class DiffractionTool extends AbstractToolPage {
 		
 		boolean setMetadata = false;
 		final IWorkbenchPage page = EclipseUtils.getPage();
-		final String setting = store.getDefaultString(DiffractionToolConstants.REMEMBER_DIFFRACTION_META);
+		final String setting = store.getString(DiffractionToolConstants.REMEMBER_DIFFRACTION_META);
 		if (setting.equals(MessageDialogWithToggle.PROMPT)) {
 			MessageDialogWithToggle dialog = MessageDialogWithToggle.openYesNoQuestion(page.getWorkbenchWindow().getShell(), 
 					"Diffraction Tool", "The Diffraction Tool requires an image to have metadata.\n\nWould you like to create default metadata now?", 
