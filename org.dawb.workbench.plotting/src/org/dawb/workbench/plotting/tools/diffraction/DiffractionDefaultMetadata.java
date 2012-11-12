@@ -47,10 +47,10 @@ public class DiffractionDefaultMetadata {
 	 * from the preferences store
 	 */
 	public static DiffractionCrystalEnvironment getDefaultDiffractionCrystalEnvironment() {
-		double lambda = 0.9;
-		double startOmega = 0.0;
-		double rangeOmega = 1.0;
-		double exposureTime = 1.0;
+		double lambda = Activator.getDefault().getPreferenceStore().getDouble(DiffractionToolConstants.LAMBDA);
+		double startOmega = Activator.getDefault().getPreferenceStore().getDouble(DiffractionToolConstants.START_OMEGA);
+		double rangeOmega = Activator.getDefault().getPreferenceStore().getDouble(DiffractionToolConstants.RANGE_OMEGA);
+		double exposureTime = Activator.getDefault().getPreferenceStore().getDouble(DiffractionToolConstants.EXPOSURE_TIME);
 		
 		return new DiffractionCrystalEnvironment(lambda, startOmega, rangeOmega, exposureTime);
 	}
@@ -76,6 +76,16 @@ public class DiffractionDefaultMetadata {
 			public DetectorProperties getDetector2DProperties() {
 				return detprop;
 			}
+			
+			@Override
+			public DetectorProperties getOriginalDetector2DProperties() {
+				return detprop;
+			}
+
+			@Override
+			public DiffractionCrystalEnvironment getOriginalDiffractionCrystalEnvironment() {
+				return diffenv;
+			}
 
 			@Override
 			public DiffractionMetaDataAdapter clone() {
@@ -90,6 +100,16 @@ public class DiffractionDefaultMetadata {
 					@Override
 					public DetectorProperties getDetector2DProperties() {
 						return detprop.clone();
+					}
+					
+					@Override
+					public DetectorProperties getOriginalDetector2DProperties() {
+						return detprop.clone();
+					}
+
+					@Override
+					public DiffractionCrystalEnvironment getOriginalDiffractionCrystalEnvironment() {
+						return diffenv.clone();
 					}
 				};
 			}
