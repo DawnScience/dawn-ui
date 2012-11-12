@@ -22,6 +22,7 @@ import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.viewers.TreeNodeContentProvider;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.DiffractionToolConstants;
+import org.dawb.workbench.plotting.preference.diffraction.DiffractionPreferencePage;
 import org.dawnsci.common.widgets.celleditor.CComboCellEditor;
 import org.dawnsci.common.widgets.celleditor.FloatSpinnerCellEditor;
 import org.eclipse.core.runtime.IStatus;
@@ -36,6 +37,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.JFacePreferences;
+import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.CellEditor;
@@ -64,7 +66,9 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.FilteredTree;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -514,6 +518,14 @@ public class DiffractionTool extends AbstractToolPage {
 		
 		centre.setImageDescriptor(Activator.getImageDescriptor("icons/centre.png"));
 		
+		final Action calPref = new Action("Configure Calibrants...") {
+			@Override
+			public void run() {
+				PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), DiffractionPreferencePage.ID, null, null);
+				if (pref != null) pref.open();
+			}
+		};
+		
 		MenuAction dropdown = new MenuAction("Resolution rings");
 	    dropdown.setImageDescriptor(Activator.getImageDescriptor("/icons/resolution_rings.png"));
 
@@ -542,10 +554,14 @@ public class DiffractionTool extends AbstractToolPage {
 		menuMan.add(new Separator());
 		menuMan.add(showDefault);
 		menuMan.add(new Separator());
+		menuMan.add(calPref);
 		
 		final Menu menu = menuMan.createContextMenu(viewer.getControl());
 		viewer.getControl().setMenu(menu);
-		
+
+		getSite().getActionBars().getMenuManager().add(new Separator());
+		getSite().getActionBars().getMenuManager().add(calPref);
+		getSite().getActionBars().getMenuManager().add(new Separator());
 	}
 	
 	private void createListeners() {

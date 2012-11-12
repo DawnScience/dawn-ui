@@ -262,7 +262,6 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		region.setRegionColor(colour);
 		region.setAlpha(100);
 		region.setUserRegion(false);
-		region.setMobile(false);
 
 		region.setLabel(labelText);
 		((AbstractSelectionRegion) region).setShowLabel(true);
@@ -270,6 +269,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 
 		region.setShowPosition(false);
 		plottingSystem.addRegion(region);
+		region.setMobile(false);
 
 		return region;
 	}

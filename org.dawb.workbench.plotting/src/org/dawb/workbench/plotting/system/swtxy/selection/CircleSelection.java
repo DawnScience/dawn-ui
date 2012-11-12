@@ -40,6 +40,20 @@ public class CircleSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
+	public void setVisible(boolean visible) {
+		if (circle != null)
+			circle.setVisible(visible);
+		getBean().setVisible(visible);
+	}
+
+	@Override
+	public void setMobile(final boolean mobile) {
+		getBean().setMobile(mobile);
+		if (circle != null)
+			circle.setMobile(mobile);
+	}
+
+	@Override
 	public void createContents(Figure parent) {
 		circle = new DecoratedCircle(parent);
 		circle.setCursor(Draw2DUtils.getRoiMoveCursor());
@@ -182,7 +196,10 @@ public class CircleSelection extends AbstractSelectionRegion {
 			Point c = r.getCenter();
 			setCentre(c.preciseX(), c.preciseY());
 
+			createHandles(true);
+		}
 
+		private void createHandles(boolean createROI) {
 			// handles
 			for (int i = 0; i < 4; i++) {
 				addHandle(getPoint(i*90));
@@ -192,14 +209,34 @@ public class CircleSelection extends AbstractSelectionRegion {
 			// figure move
 			addFigureListener(moveListener);
 			FigureTranslator mover = new FigureTranslator(getXyGraph(), parent, this, handles);
+			mover.setActive(isMobile());
 			mover.addTranslationListener(createRegionNotifier());
+			fTranslators.add(mover);
 
-			createROI(true);
+			if (createROI)
+				createROI(true);
 
 			setRegionObjects(this, handles);
 			Rectangle b = getBounds();
 			if (b != null)
 				setBounds(b);
+		}
+
+		@Override
+		public void setVisible(boolean visible) {
+			super.setVisible(visible);
+			for (IFigure h : handles) {
+				h.setVisible(visible);
+			}
+		}
+
+		public void setMobile(boolean mobile) {
+			for (IFigure h : handles) {
+				h.setVisible(mobile);
+			}
+			for (FigureTranslator f : fTranslators) {
+				f.setActive(mobile);
+			}
 		}
 
 		private Point getPoint(double degrees) {
@@ -232,13 +269,21 @@ public class CircleSelection extends AbstractSelectionRegion {
 		protected void outlineShape(Graphics graphics) {
 			double d = 2. * radius;
 			graphics.drawOval(new PrecisionRectangle(cx-radius, cy-radius, d, d));
+			if (label != null && isShowLabel()) {
+				graphics.setAlpha(255);
+				graphics.setForegroundColor(labelColour);
+				graphics.setFont(labelFont);
+				graphics.drawText(label, getPoint(45));
+			}
 		}
 
 		private void addHandle(Point p) {
 			RectangularHandle h = new RectangularHandle(coords, getRegionColor(), this, SIDE,
 					p.preciseX(), p.preciseY());
+			h.setVisible(isVisible() && isMobile());
 			parent.add(h);
 			FigureTranslator mover = new FigureTranslator(getXyGraph(), h);
+			mover.setActive(isMobile());
 			mover.addTranslationListener(handleListener);
 			fTranslators.add(mover);
 			h.addFigureListener(moveListener);
@@ -247,8 +292,10 @@ public class CircleSelection extends AbstractSelectionRegion {
 
 		private void addCentreHandle() {
 			RectangularHandle h = new RectangularHandle(coords, getRegionColor(), this, SIDE, cx, cy);
+			h.setVisible(isVisible() && isMobile());
 			parent.add(h);
 			FigureTranslator mover = new FigureTranslator(getXyGraph(), h, h, handles);
+			mover.setActive(isMobile());
 			mover.addTranslationListener(createRegionNotifier());
 			fTranslators.add(mover);
 			h.addFigureListener(moveListener);
@@ -409,13 +456,17 @@ public class CircleSelection extends AbstractSelectionRegion {
 
 		private void updateHandlePositions() {
 			final int imax = handles.size() - 1;
-			for (int i = 0; i < imax; i++) {
-				Point np = getPoint(90*i);
-				SelectionHandle h = (SelectionHandle) handles.get(i);
-				h.setSelectionPoint(np);
+			if (imax > 0) {
+				for (int i = 0; i < imax; i++) {
+					Point np = getPoint(90 * i);
+					SelectionHandle h = (SelectionHandle) handles.get(i);
+					h.setSelectionPoint(np);
+				}
+				SelectionHandle h = (SelectionHandle) handles.get(imax);
+				h.setSelectionPoint(getCentre());
+			} else {
+				createHandles(false);
 			}
-			SelectionHandle h = (SelectionHandle) handles.get(imax);
-			h.setSelectionPoint(getCentre());
 		}
 
 		@Override

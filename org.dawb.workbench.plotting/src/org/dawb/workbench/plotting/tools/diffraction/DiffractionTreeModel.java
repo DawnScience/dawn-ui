@@ -65,17 +65,19 @@ public class DiffractionTreeModel {
 
 	private void createDiffractionModel(IMetaData metaData) throws Exception {
 
-		final DiffractionCrystalEnvironment dce = getCrystalEnvironment();						
-	    final DetectorProperties        detprop = getDetectorProperties();
+		final DiffractionCrystalEnvironment  dce = getCrystalEnvironment();
+		final DiffractionCrystalEnvironment odce = getOriginalCrystalEnvironment();
+		final DetectorProperties         detprop = getDetectorProperties();
+	    final DetectorProperties        odetprop = getOriginalDetectorProperties();
 		
-	    LabelNode experimentalInfo = createExperimentalInfo(dce, detprop);
+	    LabelNode experimentalInfo = createExperimentalInfo(dce, odce, detprop, odetprop);
         
         createBeamCenter(detprop, experimentalInfo);
         createIntensity();      
-        createDetector(dce, detprop);
+        createDetector(dce, odce, detprop, odetprop);
         createRaw(metaData);
         
-        createUnitsListeners(detprop);
+        createUnitsListeners(detprop, odetprop);
         
         // TODO listen to other things, for instance refine when it
         // is available may change other values.
@@ -88,15 +90,26 @@ public class DiffractionTreeModel {
 						: null;
 	}
 
+	private DetectorProperties getOriginalDetectorProperties() {
+		return (metaData instanceof IDiffractionMetadata)
+				? ((IDiffractionMetadata)metaData).getOriginalDetector2DProperties()
+						: null;
+	}
+
 	private DiffractionCrystalEnvironment getCrystalEnvironment() {
 		return (metaData instanceof IDiffractionMetadata)
 				? ((IDiffractionMetadata)metaData).getDiffractionCrystalEnvironment()
 						: null;
 	}
+	private DiffractionCrystalEnvironment getOriginalCrystalEnvironment() {
+		return (metaData instanceof IDiffractionMetadata)
+				? ((IDiffractionMetadata)metaData).getOriginalDiffractionCrystalEnvironment()
+						: null;
+	}
 
-	private void createUnitsListeners(final DetectorProperties detprop) {
+	private void createUnitsListeners(final DetectorProperties detprop, DetectorProperties odetprop) {
         if (detprop!=null) {
-        	beamX.setDefault(getBeamX(detprop));
+        	beamX.setDefault(getBeamX(odetprop));
         	beamX.setValue(getBeamX(detprop));
         	beamX.addAmountListener(new AmountListener<Length>() {		
     			@Override
@@ -112,7 +125,7 @@ public class DiffractionTreeModel {
         beamX.addUnitListener(createPixelFormatListener(beamX));
         
         if (detprop!=null) {
-        	beamY.setDefault(getBeamY(detprop));
+        	beamY.setDefault(getBeamY(odetprop));
         	beamY.setValue(getBeamY(detprop));
         	beamY.addAmountListener(new AmountListener<Length>() {		
     			@Override
@@ -140,7 +153,7 @@ public class DiffractionTreeModel {
         }		
 	}
 
-	private void createDetector(final DiffractionCrystalEnvironment dce, final DetectorProperties detprop) {
+	private void createDetector(final DiffractionCrystalEnvironment dce, DiffractionCrystalEnvironment odce, final DetectorProperties detprop, DetectorProperties odetprop) {
        
 		// Detector Meta
         final LabelNode detectorMeta = new LabelNode("Detector", root);
@@ -150,7 +163,7 @@ public class DiffractionTreeModel {
         final NumericNode<Duration> exposure   = new NumericNode<Duration>("Exposure Time", detectorMeta, SI.SECOND);
         registerNode(exposure);
         if (dce!=null) {
-           	exposure.setDefault(dce.getExposureTime(), SI.SECOND);
+           	exposure.setDefault(odce.getExposureTime(), SI.SECOND);
            	exposure.setValue(dce.getExposureTime(), SI.SECOND);
         }
         
@@ -159,13 +172,13 @@ public class DiffractionTreeModel {
         NumericNode<Length> x  = new NumericNode<Length>("x", size, SI.MILLIMETER);
         registerNode(x);
         if (detprop!=null) {
-        	x.setDefault(detprop.getDetectorSizeH(), SI.MILLIMETER);
+        	x.setDefault(odetprop.getDetectorSizeH(), SI.MILLIMETER);
         	x.setValue(detprop.getDetectorSizeH(), SI.MILLIMETER);
         }
         NumericNode<Length> y  = new NumericNode<Length>("y", size, SI.MILLIMETER);
         registerNode(y);
         if (detprop!=null) {
-        	y.setDefault(detprop.getDetectorSizeV(), SI.MILLIMETER);
+        	y.setDefault(odetprop.getDetectorSizeV(), SI.MILLIMETER);
         	y.setValue(detprop.getDetectorSizeV(), SI.MILLIMETER);
         }
 
@@ -175,7 +188,7 @@ public class DiffractionTreeModel {
         final NumericNode<Length> xPixelSize  = new NumericNode<Length>("x-size", pixel, SI.MILLIMETER);
         registerNode(xPixelSize);
         if (detprop!=null) {
-           	xPixelSize.setDefault(detprop.getHPxSize(), SI.MILLIMETER);
+           	xPixelSize.setDefault(odetprop.getHPxSize(), SI.MILLIMETER);
            	xPixelSize.setValue(detprop.getHPxSize(), SI.MILLIMETER);
         	xPixelSize.addAmountListener(new AmountListener<Length>() {				
 				@Override
@@ -193,7 +206,7 @@ public class DiffractionTreeModel {
         final NumericNode<Length> yPixelSize  = new NumericNode<Length>("y-size", pixel, SI.MILLIMETER);
         registerNode(yPixelSize);
         if (detprop!=null) {
-        	yPixelSize.setDefault(detprop.getVPxSize(), SI.MILLIMETER);
+        	yPixelSize.setDefault(odetprop.getVPxSize(), SI.MILLIMETER);
         	yPixelSize.setValue(detprop.getVPxSize(), SI.MILLIMETER);
         	yPixelSize.addAmountListener(new AmountListener<Length>() {				
 				@Override
@@ -259,7 +272,7 @@ public class DiffractionTreeModel {
 	}
 
 	private LabelNode createExperimentalInfo(final DiffractionCrystalEnvironment dce,
-			                                 final DetectorProperties detprop) {
+			                                 DiffractionCrystalEnvironment odce, final DetectorProperties detprop, DetectorProperties odetprop) {
 	    // Experimental Info
         final LabelNode experimentalInfo = new LabelNode("Experimental Information", root);
         registerNode(experimentalInfo);
@@ -268,7 +281,7 @@ public class DiffractionTreeModel {
         final NumericNode<Length> lambda = new NumericNode<Length>("Wavelength", experimentalInfo, NonSI.ANGSTROM);
         registerNode(lambda);
         if (dce!=null) {
-           	lambda.setDefault(dce.getWavelength(), NonSI.ANGSTROM);
+           	lambda.setDefault(odce.getWavelength(), NonSI.ANGSTROM);
            	lambda.setValue(dce.getWavelength(), NonSI.ANGSTROM);
         	lambda.addAmountListener(new AmountListener<Length>() {		
 				@Override
@@ -305,7 +318,7 @@ public class DiffractionTreeModel {
         final NumericNode<Length> dist   = new NumericNode<Length>("Distance", experimentalInfo, SI.MILLIMETER);
         registerNode(dist);
         if (detprop!=null) {
-        	dist.setDefault(detprop.getOrigin().z, SI.MILLIMETER);
+        	dist.setDefault(odetprop.getOrigin().z, SI.MILLIMETER);
         	dist.setValue(detprop.getOrigin().z, SI.MILLIMETER);
             dist.addAmountListener(new AmountListener<Length>() {		
     			@Override
@@ -328,21 +341,21 @@ public class DiffractionTreeModel {
         NumericNode<Angle> start = new NumericNode<Angle>("Oscillation Start", experimentalInfo, NonSI.DEGREE_ANGLE);
         registerNode(start);
         if (dce!=null)  {
-        	start.setDefault(dce.getPhiStart(), NonSI.DEGREE_ANGLE);
+        	start.setDefault(odce.getPhiStart(), NonSI.DEGREE_ANGLE);
         	start.setValue(dce.getPhiStart(), NonSI.DEGREE_ANGLE);
         }
        
         NumericNode<Angle> stop = new NumericNode<Angle>("Oscillation Stop", experimentalInfo, NonSI.DEGREE_ANGLE);
         registerNode(stop);
         if (dce!=null)  {
-        	stop.setDefault(dce.getPhiStart()+dce.getPhiRange(), NonSI.DEGREE_ANGLE);
+        	stop.setDefault(odce.getPhiStart()+dce.getPhiRange(), NonSI.DEGREE_ANGLE);
         	stop.setValue(dce.getPhiStart()+dce.getPhiRange(), NonSI.DEGREE_ANGLE);
         }
 
         NumericNode<Angle> osci = new NumericNode<Angle>("Oscillation Range", experimentalInfo, NonSI.DEGREE_ANGLE);
         registerNode(osci);
         if (dce!=null)  {
-        	osci.setDefault(dce.getPhiRange(), NonSI.DEGREE_ANGLE);
+        	osci.setDefault(odce.getPhiRange(), NonSI.DEGREE_ANGLE);
         	osci.setValue(dce.getPhiRange(), NonSI.DEGREE_ANGLE);
         }
 

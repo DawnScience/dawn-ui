@@ -3,20 +3,14 @@ package org.dawb.workbench.plotting.tools.profile;
 import java.util.Arrays;
 import java.util.Collection;
 
-import ncsa.hdf.object.Group;
-
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
-import org.dawb.common.ui.plot.tool.IDataReductionToolPage.DataReductionInfo;
-import org.dawb.common.ui.plot.tool.IDataReductionToolPage.DataReductionSlice;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.gda.extensions.loaders.H5Utils;
-import org.dawb.hdf5.IHierarchicalDataFile;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
