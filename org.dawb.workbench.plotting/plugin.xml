@@ -218,8 +218,14 @@
       <page
             category="org.edna.workbench.preferences.root"
             class="org.dawb.workbench.plotting.preference.diffraction.DiffractionPreferencePage"
-            id="org.dawb.workbench.plotting.preference.diffraction.calibrantPreferencePage"
+            id="org.dawb.workbench.plotting.preference.diffraction.defaultsPreferencePage"
             name="Diffraction Calibrants">
+      </page>
+      <page
+            category="org.edna.workbench.preferences.root"
+            class="org.dawb.workbench.plotting.preference.DiffractionDefaultsPreferencePage"
+            id="org.dawb.workbench.plotting.page1"
+            name="Diffraction Tool Defaults">
       </page>
    </extension>
    <extension
