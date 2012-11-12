@@ -218,7 +218,7 @@
       <page
             category="org.edna.workbench.preferences.root"
             class="org.dawb.workbench.plotting.preference.diffraction.DiffractionPreferencePage"
-            id="org.dawb.workbench.plotting.preference.diffraction.defaultsPreferencePage"
+            id="org.dawb.workbench.plotting.preference.diffraction.calibrantPreferencePage"
             name="Diffraction Calibrants">
       </page>
       <page

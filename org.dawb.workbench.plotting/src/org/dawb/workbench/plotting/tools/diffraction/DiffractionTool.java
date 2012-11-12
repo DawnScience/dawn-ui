@@ -171,6 +171,7 @@ public class DiffractionTool extends AbstractToolPage {
 		if (getPlottingSystem()!=null && this.traceListener != null) {
 			getPlottingSystem().addTraceListener(traceListener);
 		}
+		if (augmenter!=null) augmenter.activate();
 			
 		if (viewer!=null) viewer.refresh();
 	}
@@ -183,6 +184,7 @@ public class DiffractionTool extends AbstractToolPage {
 		if (getPlottingSystem()!=null && this.traceListener != null) {
 			getPlottingSystem().addTraceListener(traceListener);
 		}
+		if (augmenter!=null) augmenter.deactivate();
 	}
 	
 	public void dispose() {
@@ -531,9 +533,9 @@ public class DiffractionTool extends AbstractToolPage {
 		MenuAction dropdown = new MenuAction("Resolution rings");
 	    dropdown.setImageDescriptor(Activator.getImageDescriptor("/icons/resolution_rings.png"));
 
-		IMetaData data = getMetaData();
+		IDiffractionMetadata data = getDiffractionMetaData();
 		augmenter = new DiffractionImageAugmenter((AbstractPlottingSystem)getPlottingSystem());
-		augmenter.setDiffractionMetadata((IDiffractionMetadata)data);
+		augmenter.setDiffractionMetadata(data);
 	    augmenter.addActions(dropdown);
 		
 	    toolMan.add(dropdown);
@@ -566,6 +568,19 @@ public class DiffractionTool extends AbstractToolPage {
 		getSite().getActionBars().getMenuManager().add(new Separator());
 	}
 	
+	private IDiffractionMetadata getDiffractionMetaData() {
+		IMetaData md = getMetaData();
+		if (md instanceof IDiffractionMetadata) {
+			return (IDiffractionMetadata)md;
+		}
+        try {
+            return DiffractionDefaultMetadata.getDiffractionMetadata(getImageTrace().getData().getShape());
+        } catch (Throwable ne) {
+        	return DiffractionDefaultMetadata.getDiffractionMetadata(new int[]{1024,1024});
+        }
+	}
+
+
 	private void createListeners() {
 		
 		this.regionListener = new IRegionListener.Stub() {

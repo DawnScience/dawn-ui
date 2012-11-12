@@ -46,6 +46,50 @@ import uk.ac.diamond.sda.meta.page.IDiffractionMetadataCompositeListener;
 public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDiffractionCrystalEnvironmentListener, IDiffractionMetadataCompositeListener, CalibrantSelectedListener
 {
 
+	private static DiffractionImageAugmenter activeAugmenter;
+	/**
+	 * Actions should be static so that opening multiple files in an editor,
+	 * plots the same ring configuration without having to manually choose.
+	 */
+	private static Action beamCentre;
+	private static Action standardRings;
+	private static Action iceRings;
+	private static Action calibrantRings;
+	
+	static {
+        standardRings = new Action("Standard rings", Activator.getImageDescriptor("/icons/standard_rings.png")) {
+	    	@Override
+	    	public void run() {
+	    		activeAugmenter.drawStandardRings(isChecked());
+	    	}
+		};
+		standardRings.setChecked(false);
+  
+		iceRings = new Action("Ice rings", Activator.getImageDescriptor("/icons/ice_rings.png")) {
+			@Override
+			public void run() {
+				activeAugmenter.drawIceRings(isChecked());
+			}
+		};
+		iceRings.setChecked(false);
+	
+		calibrantRings = new Action("Calibrant", Activator.getImageDescriptor("/icons/calibrant_rings.png")) {
+			@Override
+			public void run() {
+				activeAugmenter.drawCalibrantRings(isChecked(), CalibrationFactory.getCalibrationStandards().getCalibrant());
+			}
+		};
+		calibrantRings.setChecked(false);
+
+		beamCentre = new Action("Beam centre", Activator.getImageDescriptor("/icons/beam_centre.png")) {
+			@Override
+			public void run() {
+				activeAugmenter.drawBeamCentre(isChecked());
+			}
+		};
+		beamCentre.setChecked(false);
+	}	
+	
 	private static Logger logger = LoggerFactory.getLogger(DiffractionImageAugmenter.class);
 	
 	private AbstractPlottingSystem plottingSystem;
@@ -58,10 +102,8 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	private ResolutionRingList calibrantRingsList;
 	private ArrayList<IRegion> calibrantRingsRegionList;
 	private IRegion beamCentreRegion;
-	private Action beamCentre;
-	private Action standardRings;
-	private Action iceRings;
-	private Action calibrantRings;
+	
+
 
 	private double[] imageCentrePC;
 
@@ -75,6 +117,16 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	public DiffractionImageAugmenter(AbstractPlottingSystem system) {
 		plottingSystem = system;
 		CalibrationFactory.addCalibrantSelectionListener(this);
+		if (activeAugmenter==null) activeAugmenter = this;
+	}
+	
+	public void activate() {
+		activeAugmenter = this;
+		updateAll();
+	}
+	
+	public void deactivate() {
+		if (activeAugmenter == this) activeAugmenter=null;
 	}
 
 	/**
@@ -86,7 +138,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	}
 	
 	public boolean isShowingBeamCenter() {
-		return this.beamCentre.isChecked();
+		return beamCentre.isChecked();
 	}
 
 	protected void drawBeamCentre(boolean isChecked) {
@@ -173,78 +225,25 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	 * Add actions to given menu
 	 * @param menu
 	 */
-	public void addActions(MenuAction menu) {
-	    standardRings = new Action("Standard rings", Activator.getImageDescriptor("/icons/standard_rings.png")) {
-	    	@Override
-	    	public void run() {
-	    		drawStandardRings(isChecked());
-	    	}
-		};
-		standardRings.setChecked(false);
+	public void addActions(final MenuAction menu) {
+		
 		menu.add(standardRings);
-		iceRings = new Action("Ice rings", Activator.getImageDescriptor("/icons/ice_rings.png")) {
-			@Override
-			public void run() {
-				drawIceRings(isChecked());
-			}
-		};
-		iceRings.setChecked(false);
 		menu.add(iceRings);
-		calibrantRings = new Action("Calibrant", Activator.getImageDescriptor("/icons/calibrant_rings.png")) {
-			@Override
-			public void run() {
-				drawCalibrantRings(isChecked(), CalibrationFactory.getCalibrationStandards().getCalibrant());
-			}
-		};
-		calibrantRings.setChecked(false);
 		menu.add(calibrantRings);
-		beamCentre = new Action("Beam centre", Activator.getImageDescriptor("/icons/beam_centre.png")) {
-			@Override
-			public void run() {
-				drawBeamCentre(isChecked());
-			}
-		};
-		beamCentre.setChecked(false);
 		menu.add(beamCentre);
 	}
 
 	protected void removeRings(ArrayList<IRegion> regionList, ResolutionRingList resolutionRingList) {
 		for (IRegion region : regionList) {
-			plottingSystem.removeRegion(region);
+			try {
+			    plottingSystem.removeRegion(region);
+			} catch (Throwable ne) {
+				// They can delete regions themselves.
+			}
 		}
 		regionList.clear();
 		resolutionRingList.clear();
 	}
-	
-	/*
-		 * handle ring drawing, removal and clearing
-		 */
-	//	protected IRegion drawRing(double[] beamCentre, double innerRadius, double outerRadius, Color colour, Color labelColour, String nameStub, String labelText) {
-	//		IRegion region;
-	//		try {
-	//			final String regionName = RegionUtils.getUniqueName(nameStub, plottingSystem);
-	//			region = plottingSystem.createRegion(regionName, RegionType.RING);
-	//		} catch (Exception e) {
-	//			logger.error("Can't create region", e);
-	//			return null;
-	//		}
-	//	    final SectorROI sroi = new SectorROI(innerRadius, outerRadius);
-	//	    sroi.setPoint(beamCentre[0], beamCentre[1]);
-	//		region.setROI(sroi);
-	//		region.setRegionColor(colour);
-	//		region.setAlpha(100);
-	//		region.setUserRegion(false);
-	//		region.setMobile(false);
-	//		
-	//		region.setLabel(labelText);
-	//		((AbstractSelectionRegion)region).setShowLabel(true);
-	//		((AbstractSelectionRegion)region).setForegroundColor(labelColour);
-	//		
-	//		region.setShowPosition(false);
-	//		plottingSystem.addRegion(region);
-	//		
-	//		return region;
-	//	}
 
 	/*
 	 * handle ring drawing, removal and clearing
@@ -287,17 +286,6 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 			iceRingsRegionList = drawResolutionRings(iceRingsList, "ice");
 		}
 	}
-
-	//	protected IRegion drawResolutionRing(ResolutionRing ring, String name) {
-	//		if (detprop != null && diffenv != null) {
-	//			double[] beamCentre = detprop.getBeamLocation(); // detConfig.pixelCoords(detConfig.getBeamPosition());
-	//			double radius = Resolution.circularResolutionRingRadius(detprop, diffenv, ring.getResolution());
-	//			DecimalFormat df = new DecimalFormat("#.00");
-	//			return drawRing(beamCentre, radius, radius+4.0, ring.getColour(), ring.getColour(), name, df.format(ring.getResolution())+"Å");
-	//		}
-	//		else
-	//			return null;
-	//	}
 		
 	protected IRegion drawResolutionEllipse(ResolutionRing ring, String name) {
 		if (detprop != null && diffenv != null) {
@@ -313,7 +301,6 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	protected ArrayList<IRegion> drawResolutionRings(ResolutionRingList ringList, String typeName) {
 			ArrayList<IRegion> regions = new ArrayList<IRegion>(); 
 			for (int i = 0; i < ringList.size(); i++) {
-	//			regions.add(drawResolutionRing(ringList.get(i), typeName+i));
 				regions.add(drawResolutionEllipse(ringList.get(i), typeName+i));
 			}
 			return regions;
@@ -354,6 +341,10 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 
 	@Override
 	public void detectorPropertiesChanged(DetectorPropertyEvent evt) {
+		updateAll();
+	}
+
+	private void updateAll() {
 		beamCentre.run();
 		standardRings.run();
 		iceRings.run();
