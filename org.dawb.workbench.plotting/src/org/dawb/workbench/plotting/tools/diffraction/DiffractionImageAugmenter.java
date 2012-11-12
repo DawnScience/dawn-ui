@@ -3,6 +3,7 @@ package org.dawb.workbench.plotting.tools.diffraction;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
+import javax.measure.unit.NonSI;
 import javax.vecmath.Vector3d;
 
 import org.dawb.common.ui.menu.MenuAction;
@@ -14,11 +15,16 @@ import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.graphics.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSelectedListener;
+import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSelectionEvent;
+import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSpacing;
+import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
+import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationStandards;
+import uk.ac.diamond.scisoft.analysis.crystallography.HKL;
 import uk.ac.diamond.scisoft.analysis.diffraction.DSpacing;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorPropertyEvent;
@@ -27,8 +33,6 @@ import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironmentE
 import uk.ac.diamond.scisoft.analysis.diffraction.IDetectorPropertyListener;
 import uk.ac.diamond.scisoft.analysis.diffraction.IDiffractionCrystalEnvironmentListener;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
-import uk.ac.diamond.scisoft.analysis.rcp.AnalysisRCPActivator;
-import uk.ac.diamond.scisoft.analysis.rcp.preference.PreferenceConstants;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.ResolutionRing;
@@ -39,7 +43,7 @@ import uk.ac.diamond.sda.meta.page.IDiffractionMetadataCompositeListener;
 /**
  * Class to augment a diffraction image with beam centre, rings, etc. It has actions available for adding to a menu
  */
-public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDiffractionCrystalEnvironmentListener, IDiffractionMetadataCompositeListener
+public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDiffractionCrystalEnvironmentListener, IDiffractionMetadataCompositeListener, CalibrantSelectedListener
 {
 
 	private static Logger logger = LoggerFactory.getLogger(DiffractionImageAugmenter.class);
@@ -70,6 +74,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	 */
 	public DiffractionImageAugmenter(AbstractPlottingSystem system) {
 		plottingSystem = system;
+		CalibrationFactory.addCalibrantSelectionListener(this);
 	}
 
 	/**
@@ -105,7 +110,17 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		}
 	}
 
-	protected void drawCalibrantRings(boolean isChecked) {
+	@Override
+	public void calibrantSelectionChanged(CalibrantSelectionEvent evt) {
+		CalibrationStandards standards = (CalibrationStandards)evt.getSource();
+		/**
+		 * Important take CalibrantSpacing from event because it might be a standards the user is
+		 * editing in the preference editor.
+		 */
+		if (calibrantRings!=null) drawCalibrantRings(calibrantRings.isChecked(), standards.getCalibrant());
+	}
+	
+	protected void drawCalibrantRings(boolean isChecked, CalibrantSpacing spacing) {
 		if (calibrantRingsRegionList!=null && calibrantRingsList != null) {
 			removeRings(calibrantRingsRegionList, calibrantRingsList);
 		}
@@ -113,26 +128,12 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		if (isChecked) {
 			calibrantRingsList = new ResolutionRingList();
 	
-			IPreferenceStore preferenceStore = AnalysisRCPActivator.getDefault().getPreferenceStore();
-//			@SuppressWarnings("unused")
-//			String standardName;
-//			if (preferenceStore.isDefault(PreferenceConstants.DIFFRACTION_VIEWER_STANDARD_NAME))
-//				standardName = preferenceStore.getDefaultString(PreferenceConstants.DIFFRACTION_VIEWER_STANDARD_NAME);
-//			else
-//				standardName = preferenceStore.getString(PreferenceConstants.DIFFRACTION_VIEWER_STANDARD_NAME);
-	
-			String standardDistances;
-			if (preferenceStore.isDefault(PreferenceConstants.DIFFRACTION_VIEWER_STANDARD_DISTANCES))
-				standardDistances = preferenceStore.getDefaultString(PreferenceConstants.DIFFRACTION_VIEWER_STANDARD_DISTANCES);
-			else
-				standardDistances = preferenceStore.getString(PreferenceConstants.DIFFRACTION_VIEWER_STANDARD_DISTANCES);
-	
-			String[] tokens = standardDistances.split(",");
-			for (String t : tokens) {
+			for (HKL hkl : spacing.getHKLs()) {
+				final double d = Double.valueOf(hkl.getD().doubleValue(NonSI.ANGSTROM));
 				try {
-					calibrantRingsList.add(new ResolutionRing(Double.valueOf(t), true, ColorConstants.red, true, false, false));
+					calibrantRingsList.add(new ResolutionRing(d, true, ColorConstants.red, true, false, false));
 				} catch (NumberFormatException e) {
-					logger.warn("Could not parse item {} in standard distances", t);
+					logger.warn("Could not parse item {} in standard distances", d);
 				}
 			}
 			calibrantRingsRegionList = drawResolutionRings(calibrantRingsList, "calibrant");
@@ -192,7 +193,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		calibrantRings = new Action("Calibrant", Activator.getImageDescriptor("/icons/calibrant_rings.png")) {
 			@Override
 			public void run() {
-				drawCalibrantRings(isChecked());
+				drawCalibrantRings(isChecked(), CalibrationFactory.getCalibrationStandards().getCalibrant());
 			}
 		};
 		calibrantRings.setChecked(false);
@@ -348,6 +349,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	public void dispose() {
 		diffenv.removeDiffractionCrystalEnvironmentListener(this);
 		detprop.removeDetectorPropertyListener(this);
+		CalibrationFactory.removeCalibrantSelectionListener(this);
 	}
 
 	@Override
@@ -384,4 +386,5 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		detprop = metadata.getDetector2DProperties();
 		detprop.addDetectorPropertyListener(this);
 	}
+
 }

@@ -73,7 +73,7 @@ public class DiffractionPreferencePage extends PreferencePage implements IWorkbe
 	public void init(IWorkbench workbench) {
 		setPreferenceStore(Activator.getDefault().getPreferenceStore());
 		this.calibrationStandards = CalibrationFactory.getCalibrationStandards(true); // Reads from file.
-		calibrationStandards.addCalibrantSelectionListener(this);
+		CalibrationFactory.addCalibrantSelectionListener(this);
 	}
 	
 	
@@ -141,7 +141,7 @@ public class DiffractionPreferencePage extends PreferencePage implements IWorkbe
 					int index = oldIndex-1;
 					if (index<0) index = 0;
 					calibrationStandards.removeCalibrant(oldCal);
-					calibrationStandards.setSelectedCalibrant(calibrationStandards.getCalibrantList().get(index));
+					calibrationStandards.setSelectedCalibrant(calibrationStandards.getCalibrantList().get(index), true);
 				}
 			}
 		});
@@ -208,11 +208,10 @@ public class DiffractionPreferencePage extends PreferencePage implements IWorkbe
 	protected void performDefaults() {
 		this.calibrationStandards = CalibrationFactory.getCalibrationStandards(true); // Reads from file
 		setDefaultCalibrantChoice();
-		calibrationStandards.addCalibrantSelectionListener(this);
 	}
 	
 	public void dispose() {
-		calibrationStandards.removeCalibrantSelectionListener(this);
+		CalibrationFactory.removeCalibrantSelectionListener(this);
 		super.dispose();
 	}
 	
@@ -227,7 +226,7 @@ public class DiffractionPreferencePage extends PreferencePage implements IWorkbe
 	}
 
 	private void setCalibrantName(String name) {
-		calibrationStandards.setSelectedCalibrant(name);
+		calibrationStandards.setSelectedCalibrant(name, true);
 		CalibrantSpacing spacing = calibrationStandards.getCalibrationPeakMap(name);
 		setBean(spacing);
 	}
