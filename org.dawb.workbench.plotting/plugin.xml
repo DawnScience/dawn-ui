@@ -333,5 +333,13 @@
             class="org.dawb.workbench.plotting.preference.DiffractionToolPreferenceInitializer">
       </initializer>
    </extension>
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <wizard
+            class="org.dawb.workbench.plotting.preference.diffraction.AddCalibrantWizard"
+            id="org.dawb.workbench.plotting.preference.diffraction.addCalibrantWizard"
+            name="Add Calibrant">
+      </wizard>
+   </extension>
 
 </plugin>

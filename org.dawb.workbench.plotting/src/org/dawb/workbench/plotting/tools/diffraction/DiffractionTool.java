@@ -526,6 +526,8 @@ public class DiffractionTool extends AbstractToolPage {
 			}
 		};
 		
+		// TODO Drop down of calibrant choices with action to open preferences?
+		
 		MenuAction dropdown = new MenuAction("Resolution rings");
 	    dropdown.setImageDescriptor(Activator.getImageDescriptor("/icons/resolution_rings.png"));
 

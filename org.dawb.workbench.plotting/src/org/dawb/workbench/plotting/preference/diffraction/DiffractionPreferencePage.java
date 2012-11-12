@@ -16,10 +16,15 @@
 
 package org.dawb.workbench.plotting.preference.diffraction;
 
+import java.util.List;
+
+import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.workbench.plotting.Activator;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -29,31 +34,49 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSelectedListener;
+import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSelectionEvent;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSpacing;
+import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationStandards;
 import uk.ac.diamond.scisoft.analysis.crystallography.HKL;
 import uk.ac.gda.richbeans.beans.BeanUI;
 import uk.ac.gda.richbeans.components.selector.VerticalListEditor;
 
-
-public class DiffractionPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
+/**
+ * NOTE This class does not use preferences because the CalibrationFactory should
+ * work without eclipse preferences. It simply saves the object using XML serialization.
+ * 
+ * @author fcp94556
+ *
+ */
+public class DiffractionPreferencePage extends PreferencePage implements IWorkbenchPreferencePage, CalibrantSelectedListener {
 
 	public static final String ID = "org.dawb.workbench.plotting.preference.diffraction.calibrantPreferencePage";
 	private static final Logger logger = LoggerFactory.getLogger(DiffractionPreferencePage.class);
 	
 	private VerticalListEditor hkls;
 	private CCombo calibrantChoice;
+	private CalibrationStandards calibrationStandards;
 	
 	public DiffractionPreferencePage() {
 
 	}
-
+	@Override
+	public void init(IWorkbench workbench) {
+		setPreferenceStore(Activator.getDefault().getPreferenceStore());
+		this.calibrationStandards = CalibrationFactory.getCalibrationStandards(true); // Reads from file.
+		calibrationStandards.addCalibrantSelectionListener(this);
+	}
+	
+	
 	/**
 	 * @wbp.parser.constructor
 	 */
@@ -65,10 +88,6 @@ public class DiffractionPreferencePage extends PreferencePage implements IWorkbe
 		super(title, image);
 	}
 
-	@Override
-	public void init(IWorkbench workbench) {
-		setPreferenceStore(Activator.getDefault().getPreferenceStore());
-	}
 
 	@Override
 	protected Control createContents(Composite parent) {
@@ -83,27 +102,51 @@ public class DiffractionPreferencePage extends PreferencePage implements IWorkbe
 		buttons.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		final Label caliLabel = new Label(buttons, SWT.NONE);
-		caliLabel.setText("Calibrant ");
+		caliLabel.setText("Calibrant* ");
 		
 		this.calibrantChoice = new CCombo(buttons, SWT.READ_ONLY|SWT.BORDER);
-		calibrantChoice.setItems(CalibrationStandards.getCalibrantList().toArray(new String[CalibrationStandards.getCalibrantList().size()])); // TODO Add listener to 
+		calibrantChoice.setToolTipText("Choose the calibrant to edit.\nNote: this also sets the active calibrant.");
 		calibrantChoice.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		calibrantChoice.select(0); // TODO From Preference
-		calibrantChoice.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				setCalibrantName(calibrantChoice.getItem(calibrantChoice.getSelectionIndex()));
-			}
-		});
 		
 		final Button addCalibrant = new Button(buttons, SWT.NONE);
 		addCalibrant.setText("Create");
-		addCalibrant.setToolTipText("Create a new calibrant (you can optionally copy the current one.");
+		addCalibrant.setToolTipText("Create a new calibrant (can optionally copy the current one).");
+		addCalibrant.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				AddCalibrantWizard wiz=null;
+				try {
+					wiz = (AddCalibrantWizard)EclipseUtils.openWizard(AddCalibrantWizard.ID, false);
+				} catch (Exception e1) {
+					logger.error("Cannot open wizard "+AddCalibrantWizard.ID, e1);
+					return;
+				}
+				wiz.setCalibrationStandards(calibrationStandards);
+				WizardDialog wd = new  WizardDialog(Display.getCurrent().getActiveShell(), wiz);
+				wd.setTitle(wiz.getWindowTitle());
+				wd.open();
+			}
+		});
+		
 		
 		final Button removeCalibrant = new Button(buttons, SWT.NONE);
 		removeCalibrant.setText("Delete");
 		removeCalibrant.setToolTipText("Delete the selected calibrant.");
+		removeCalibrant.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				boolean ok = MessageDialog.openConfirm(Display.getDefault().getActiveShell(), "Confirm Delete", "Do you really want to delete '"+calibrationStandards.getSelectedCalibrant()+"'?");
+				if (ok) {
+					final String oldCal = calibrationStandards.getSelectedCalibrant();
+					final int oldIndex  = calibrationStandards.getCalibrantList().indexOf(oldCal);
+					if (oldIndex<0) return;
+					int index = oldIndex-1;
+					if (index<0) index = 0;
+					calibrationStandards.removeCalibrant(oldCal);
+					calibrationStandards.setSelectedCalibrant(calibrationStandards.getCalibrantList().get(index));
+				}
+			}
+		});
 
-		this.hkls  = new VerticalListEditor(main, SWT.NONE);
+		this.hkls  = new VerticalListEditor(main, SWT.BORDER);
 		Composite      hklEditor = new DiffractionRingsComposite(hkls, SWT.NONE); 
 		hklEditor.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
@@ -125,9 +168,17 @@ public class DiffractionPreferencePage extends PreferencePage implements IWorkbe
 
 		GridUtils.setVisibleAndLayout(hkls, true);
 		
-		// initialize
-		setCalibrantName(calibrantChoice.getItem(calibrantChoice.getSelectionIndex()));
-		
+		final Label info = new Label(main, SWT.NONE);
+		info.setText("* the calibrant to edit - also sets the active calibrant.");
+		info.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY));
+
+		// Initialize
+		setDefaultCalibrantChoice(); 
+		calibrantChoice.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				setCalibrantName(calibrantChoice.getItem(calibrantChoice.getSelectionIndex()));
+			}
+		});
 		hkls.setShowAdditionalFields(true);
 
 		return main;
@@ -137,28 +188,48 @@ public class DiffractionPreferencePage extends PreferencePage implements IWorkbe
 		return hkls;
 	}
 
-	private void setCalibrantName(String name) {
-		// TODO Save name
-		CalibrantSpacing spacing = CalibrationStandards.getCalibrationPeakMap(name);
-		setBean(spacing);
-	}
-
 	@Override
 	public boolean performOk() {
-		// TODO Store string preference in XML
+		try {
+			calibrationStandards.save();
+		} catch (Exception e) {
+			logger.error("Cannot save standards!", e);
+		}
 		return super.performOk();
 	}
 	
 	@Override
     public boolean performCancel() {
-		// TODO Ensure that beans are reset from
 		return super.performCancel();
 	}
 
 
 	@Override
 	protected void performDefaults() {
-		// TODO Read bean from default preference value
+		this.calibrationStandards = CalibrationFactory.getCalibrationStandards(true); // Reads from file
+		setDefaultCalibrantChoice();
+		calibrationStandards.addCalibrantSelectionListener(this);
+	}
+	
+	public void dispose() {
+		calibrationStandards.removeCalibrantSelectionListener(this);
+		super.dispose();
+	}
+	
+	private void setDefaultCalibrantChoice() {
+		final List<String> cl = calibrationStandards.getCalibrantList();
+		calibrantChoice.setItems(cl.toArray(new String[cl.size()]));
+		calibrantChoice.select(cl.indexOf(calibrationStandards.getSelectedCalibrant())); 
+		
+		// initialize
+		setCalibrantName(calibrationStandards.getSelectedCalibrant());
+
+	}
+
+	private void setCalibrantName(String name) {
+		calibrationStandards.setSelectedCalibrant(name);
+		CalibrantSpacing spacing = calibrationStandards.getCalibrationPeakMap(name);
+		setBean(spacing);
 	}
 
 	public void setBean(Object bean) {
@@ -169,6 +240,11 @@ public class DiffractionPreferencePage extends PreferencePage implements IWorkbe
 		} catch (Exception e) {
 			logger.error("Cannot send "+bean+" to dialog!", e);
 		}		
+	}
+	@Override
+	public void calibrantSelectionChanged(CalibrantSelectionEvent evt) {
+		if (calibrantChoice.getItems()[calibrantChoice.getSelectionIndex()].equals(evt.getCalibrant())) return;
+		setDefaultCalibrantChoice();
 	}
 
 }
