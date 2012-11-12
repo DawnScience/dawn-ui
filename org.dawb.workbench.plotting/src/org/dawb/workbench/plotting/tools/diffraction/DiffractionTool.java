@@ -21,6 +21,7 @@ import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.viewers.TreeNodeContentProvider;
 import org.dawb.workbench.plotting.Activator;
+import org.dawb.workbench.plotting.preference.DiffractionToolConstants;
 import org.dawnsci.common.widgets.celleditor.CComboCellEditor;
 import org.dawnsci.common.widgets.celleditor.FloatSpinnerCellEditor;
 import org.eclipse.core.runtime.IStatus;
@@ -30,7 +31,10 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.MessageDialogWithToggle;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.JFacePreferences;
 import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.jface.resource.JFaceResources;
@@ -58,6 +62,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.dialogs.FilteredTree;
 import org.slf4j.Logger;
@@ -240,8 +245,34 @@ public class DiffractionTool extends AbstractToolPage {
 
 		IImageTrace imageTrace = getImageTrace();
 		if (imageTrace==null) return new MetaDataAdapter();
-		md = imageTrace.getData().getMetadata();	
-
+		md = imageTrace.getData().getMetadata();
+		
+		if (md!=null) return md;
+		
+		final IPreferenceStore store = Activator.getDefault().getPreferenceStore();
+		
+		boolean setMetadata = false;
+		final IWorkbenchPage page = EclipseUtils.getPage();
+		final String setting = store.getDefaultString(DiffractionToolConstants.REMEMBER_DIFFRACTION_META);
+		if (setting.equals(MessageDialogWithToggle.PROMPT)) {
+			MessageDialogWithToggle dialog = MessageDialogWithToggle.openYesNoQuestion(page.getWorkbenchWindow().getShell(), 
+					"Diffraction Tool", "The Diffraction Tool requires an image to have metadata.\n\nWould you like to create default metadata now?", 
+					"Remember my decision", false, 
+					store, DiffractionToolConstants.REMEMBER_DIFFRACTION_META);
+			
+			if (dialog.getReturnCode() == IDialogConstants.YES_ID) {
+				setMetadata = true;
+			}
+			
+		} else if (setting.equals(MessageDialogWithToggle.ALWAYS)) {
+			setMetadata = true;
+		}
+		
+		if (setMetadata) {
+			md = DiffractionDefaultMetadata.getDiffractionMetadata(imageTrace.getData().getShape());
+			imageTrace.getData().setMetadata(md);
+		}
+		
 		return md;
 	}
 

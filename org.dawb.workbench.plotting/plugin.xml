@@ -315,5 +315,11 @@
             name="Data Reduction">
       </wizard>
    </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="org.dawb.workbench.plotting.preference.DiffractionToolPreferenceInitializer">
+      </initializer>
+   </extension>
 
 </plugin>
