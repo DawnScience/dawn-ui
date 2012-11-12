@@ -1,5 +1,8 @@
 package org.dawb.workbench.plotting.tools.diffraction;
 
+import org.dawb.common.ui.tree.LabelNode;
+import org.dawb.common.ui.tree.NumericNode;
+import org.dawb.common.ui.tree.ObjectNode;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.dialogs.PatternFilter;

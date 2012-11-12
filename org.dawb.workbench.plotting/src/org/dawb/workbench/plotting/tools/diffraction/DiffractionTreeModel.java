@@ -18,6 +18,13 @@ import javax.vecmath.Vector3d;
 import org.dawb.common.services.IImageService;
 import org.dawb.common.services.ServiceManager;
 import org.dawb.common.ui.plot.trace.IImageTrace;
+import org.dawb.common.ui.tree.AmountEvent;
+import org.dawb.common.ui.tree.AmountListener;
+import org.dawb.common.ui.tree.LabelNode;
+import org.dawb.common.ui.tree.NumericNode;
+import org.dawb.common.ui.tree.ObjectNode;
+import org.dawb.common.ui.tree.UnitEvent;
+import org.dawb.common.ui.tree.UnitListener;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.jscience.physics.amount.Amount;
 
