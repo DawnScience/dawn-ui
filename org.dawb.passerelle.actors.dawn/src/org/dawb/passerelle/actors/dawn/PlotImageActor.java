@@ -184,12 +184,6 @@ public class PlotImageActor	extends AbstractDataMessageTransformer{
 //				else
 //					SDAPlotter.imagePlot(plotName, ((AbstractDataset)data.get(xaxisName)), ((AbstractDataset)data.get(yaxisName)), ((AbstractDataset)data.get(dataName)));
 
-			} else if (plotMode.equals(PlottingMode.TWOD_ROIPROFILES.toString())) {
-				if(xaxisName.equals("")||(yaxisName.equals("")))
-					SDAPlotter.imagePlotProfile(plotName, (AbstractDataset)data.get(dataName));
-				else
-					SDAPlotter.imagePlotProfile(plotName, ((AbstractDataset)data.get(xaxisName)), ((AbstractDataset)data.get(yaxisName)), ((AbstractDataset)data.get(dataName)));
-
 			} else if (plotMode.equals(PlottingMode.SCATTER3D.toString())) {
 //				if(xaxisName.equals("")||(yaxisName.equals("")))
 //					SDAPlotter.imagePlot(plotName, (AbstractDataset)data.get(dataName));
