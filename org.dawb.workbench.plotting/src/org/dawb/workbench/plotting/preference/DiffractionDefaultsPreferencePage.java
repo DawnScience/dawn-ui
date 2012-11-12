@@ -2,12 +2,12 @@ package org.dawb.workbench.plotting.preference;
 
 import javax.measure.quantity.Quantity;
 
+import org.dawb.common.ui.tree.NumericNode;
 import org.dawb.common.ui.viewers.TreeNodeContentProvider;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.tools.diffraction.DiffractionDefaultMetadata;
 import org.dawb.workbench.plotting.tools.diffraction.DiffractionLabelProvider;
 import org.dawb.workbench.plotting.tools.diffraction.DiffractionTreeModel;
-import org.dawb.workbench.plotting.tools.diffraction.NumericNode;
 import org.dawnsci.common.widgets.celleditor.CComboCellEditor;
 import org.dawnsci.common.widgets.celleditor.FloatSpinnerCellEditor;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
