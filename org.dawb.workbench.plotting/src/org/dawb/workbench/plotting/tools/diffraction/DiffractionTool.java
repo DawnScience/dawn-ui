@@ -526,9 +526,18 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 
 			}
 		};
-		
 		centre.setImageDescriptor(Activator.getImageDescriptor("icons/centre.png"));
 		
+		final Action refine = new Action("Refine beam center",IAction.AS_PUSH_BUTTON) {
+			@Override
+			public void run() {
+				
+				//TODO FIXME Job or wizard running job to do the refine.
+                MessageDialog.openInformation(Display.getDefault().getActiveShell(), "No refinement done!", "Refinement has not been hooked up as yet!");
+			}
+		};
+		refine.setImageDescriptor(Activator.getImageDescriptor("icons/refine.png"));
+	
 		this.calPref = new Action("Configure Calibrants...") {
 			@Override
 			public void run() {
@@ -541,8 +550,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		calibrantActions.setImageDescriptor(Activator.getImageDescriptor("/icons/calibrant_rings.png"));
 		updateCalibrationActions(CalibrationFactory.getCalibrationStandards());		
 		
-		// TODO Drop down of calibrant choices with action to open preferences?
-		
+
 		MenuAction dropdown = new MenuAction("Resolution rings");
 	    dropdown.setImageDescriptor(Activator.getImageDescriptor("/icons/resolution_rings.png"));
 
@@ -553,7 +561,9 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		
 	    toolMan.add(dropdown);
 	    toolMan.add(calibrantActions);
+		toolMan.add(new Separator());
 		toolMan.add(centre);
+		toolMan.add(refine);
 		toolMan.add(new Separator());
 		toolMan.add(reset);
 		toolMan.add(resetAll);
@@ -563,6 +573,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		
 		menuMan.add(dropdown);
 	    menuMan.add(centre);
+	    menuMan.add(refine);
 		menuMan.add(new Separator());
 		menuMan.add(reset);
 		menuMan.add(resetAll);
