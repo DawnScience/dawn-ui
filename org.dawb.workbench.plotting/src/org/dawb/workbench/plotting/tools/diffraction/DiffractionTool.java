@@ -179,6 +179,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			getPlottingSystem().addTraceListener(traceListener);
 		}
 		if (augmenter!=null) augmenter.activate();
+		CalibrationFactory.addCalibrantSelectionListener(this);
 			
 		if (viewer!=null) viewer.refresh();
 	}
@@ -191,6 +192,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		if (getPlottingSystem()!=null && this.traceListener != null) {
 			getPlottingSystem().addTraceListener(traceListener);
 		}
+		CalibrationFactory.removeCalibrantSelectionListener(this);
 		if (augmenter!=null) augmenter.deactivate();
 	}
 	
@@ -198,7 +200,6 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		super.dispose();
 		if (model!=null) model.dispose();
 		if (augmenter != null) augmenter.dispose();
-		CalibrationFactory.removeCalibrantSelectionListener(this);
 	}
 
 	private void createDiffractionModel() {
@@ -538,9 +539,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 
 		this.calibrantActions = new MenuAction("Calibrants");
 		calibrantActions.setImageDescriptor(Activator.getImageDescriptor("/icons/calibrant_rings.png"));
-		updateCalibrationActions(CalibrationFactory.getCalibrationStandards());
-		CalibrationFactory.addCalibrantSelectionListener(this);
-		
+		updateCalibrationActions(CalibrationFactory.getCalibrationStandards());		
 		
 		// TODO Drop down of calibrant choices with action to open preferences?
 		
@@ -653,6 +652,11 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		viewer.getControl().setFocus();
 	}
 
+	@Override
+	public void calibrantSelectionChanged(CalibrantSelectionEvent evt) {
+		updateCalibrationActions((CalibrationStandards)evt.getSource());
+	};
+
 	class DiffractionTree extends FilteredTree {
 		public DiffractionTree(Composite control, int i,
 				DiffractionFilter diffractionFilter, boolean b) {
@@ -664,10 +668,5 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
             super.clearText();
 		}
 	}
-
-	@Override
-	public void calibrantSelectionChanged(CalibrantSelectionEvent evt) {
-		updateCalibrationActions((CalibrationStandards)evt.getSource());
-	};
 
 }
