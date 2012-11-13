@@ -484,6 +484,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 				} else {
 					augmenter.setDiffractionMetadata(getDiffractionMetaData());
 					createDiffractionModel(true);
+					model.reset();
 				}
 			}
 		};
