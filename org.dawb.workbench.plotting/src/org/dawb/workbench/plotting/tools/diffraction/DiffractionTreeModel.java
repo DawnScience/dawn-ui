@@ -62,12 +62,24 @@ public class DiffractionTreeModel {
 	private NumericNode<Length>        beamX, beamY;
 	private final IDiffractionMetadata metaData;
 	
+	private boolean isActive=false;
+	
 	
 	public DiffractionTreeModel(IDiffractionMetadata metaData) throws Exception {
 		this.metaData = metaData;
 		this.root     = new LabelNode();
 		createDiffractionModel(metaData);
 		nodeMap = new TreeMap<String, TreeNode>();
+	}
+	
+	public void activate() {
+		this.isActive = true;
+		getDetectorProperties().addDetectorPropertyListener(beamCenterListener);
+	}
+	
+	public void deactivate() {
+		this.isActive = false;
+		getDetectorProperties().removeDetectorPropertyListener(beamCenterListener);
 	}
 
 	private void createDiffractionModel(IMetaData metaData) throws Exception {
@@ -400,6 +412,7 @@ public class DiffractionTreeModel {
 			@Override
 			public void detectorPropertiesChanged(DetectorPropertyEvent evt) {
 				if (!beamCenterActive) return;
+				if (!isActive)         return;
 				if (evt.hasBeamCentreChanged()) {
 					double[]     cen = detprop.getBeamCentreCoords();
 					Amount<Length> x = Amount.valueOf(cen[0], xpixel);
@@ -412,7 +425,6 @@ public class DiffractionTreeModel {
 				}
 			}
 		};
-		detprop.addDetectorPropertyListener(beamCenterListener);
 	}
 
 	
@@ -492,6 +504,7 @@ public class DiffractionTreeModel {
 		if (detprop!=null && beamCenterListener!=null) {
 			detprop.removeDetectorPropertyListener(beamCenterListener);
 		}
+				
 		nodeMap.clear();
 		nodeMap = null;
 		isDisposed = true;

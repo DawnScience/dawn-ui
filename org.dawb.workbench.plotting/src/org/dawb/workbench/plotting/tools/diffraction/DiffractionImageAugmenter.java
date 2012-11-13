@@ -60,6 +60,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
         standardRings = new Action("Standard rings", Activator.getImageDescriptor("/icons/standard_rings.png")) {
 	    	@Override
 	    	public void run() {
+	    		if (activeAugmenter==null) return;
 	    		activeAugmenter.drawStandardRings(isChecked());
 	    	}
 		};
@@ -68,6 +69,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		iceRings = new Action("Ice rings", Activator.getImageDescriptor("/icons/ice_rings.png")) {
 			@Override
 			public void run() {
+	    		if (activeAugmenter==null) return;
 				activeAugmenter.drawIceRings(isChecked());
 			}
 		};
@@ -76,6 +78,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		calibrantRings = new Action("Calibrant", Activator.getImageDescriptor("/icons/calibrant_rings.png")) {
 			@Override
 			public void run() {
+	    		if (activeAugmenter==null) return;
 				activeAugmenter.drawCalibrantRings(isChecked(), CalibrationFactory.getCalibrationStandards().getCalibrant());
 			}
 		};
@@ -84,6 +87,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		beamCentre = new Action("Beam centre", Activator.getImageDescriptor("/icons/beam_centre.png")) {
 			@Override
 			public void run() {
+	    		if (activeAugmenter==null) return;
 				activeAugmenter.drawBeamCentre(isChecked());
 			}
 		};
@@ -120,13 +124,16 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		if (activeAugmenter==null) activeAugmenter = this;
 	}
 	
+	private boolean active = true;
 	public void activate() {
 		activeAugmenter = this;
+		active = true;
 		updateAll();
 	}
 	
 	public void deactivate() {
 		if (activeAugmenter == this) activeAugmenter=null;
+		active = false;
 	}
 
 	/**
@@ -142,6 +149,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	}
 
 	protected void drawBeamCentre(boolean isChecked) {
+		if (!active) return; // We are likely off screen.
 		beamCentre.setChecked(isChecked);
 		if (beamCentreRegion != null)
 			plottingSystem.removeRegion(beamCentreRegion);
@@ -173,6 +181,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	}
 	
 	protected void drawCalibrantRings(boolean isChecked, CalibrantSpacing spacing) {
+		if (!active) return; // We are likely off screen.
 		if (calibrantRingsRegionList!=null && calibrantRingsList != null) {
 			removeRings(calibrantRingsRegionList, calibrantRingsList);
 		}
@@ -193,6 +202,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	}
 
 	protected IRegion drawCrosshairs(double[] beamCentre, double length, Color colour, Color labelColour, String nameStub, String labelText) {
+		if (!active) return null; // We are likely off screen.
 		IRegion region;
 		try {
 			final String regionName = RegionUtils.getUniqueName(nameStub, plottingSystem);
@@ -250,7 +260,9 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	 */
 	protected IRegion drawEllipse(double[] beamCentre, EllipticalROI eroi, Color colour, Color labelColour,
 			String nameStub, String labelText) {
-		IRegion region;
+
+		if (!active) return null; // We are likely off screen.
+        IRegion region;
 		try {
 			final String regionName = RegionUtils.getUniqueName(nameStub, plottingSystem);
 			region = plottingSystem.createRegion(regionName, RegionType.ELLIPSE);
@@ -275,6 +287,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	}
 
 	protected void drawIceRings(boolean isChecked) {
+		if (!active) return; // We are likely off screen.
 		if (iceRingsRegionList!=null && iceRingsList!=null)
 			removeRings(iceRingsRegionList, iceRingsList);
 		
@@ -288,6 +301,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	}
 		
 	protected IRegion drawResolutionEllipse(ResolutionRing ring, String name) {
+		if (!active) return null; // We are likely off screen.
 		if (detprop != null && diffenv != null) {
 			double[] beamCentre = detprop.getBeamCentreCoords(); // detConfig.pixelCoords(detConfig.getBeamPosition());
 			EllipticalROI ellipse = DSpacing.ellipseFromDSpacing(detprop, diffenv, ring.getResolution());
@@ -307,6 +321,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		}
 
 	protected void drawStandardRings(boolean isChecked) {
+		if (!active) return; // We are likely off screen.
 		if (standardRingsRegionList != null && standardRingsList != null)
 			removeRings(standardRingsRegionList, standardRingsList); 
 	

@@ -176,6 +176,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	public void activate() {
 		super.activate();
 		createDiffractionModel(false);
+		model.activate();
 		
 		if (getPlottingSystem()!=null && this.regionListener != null) {
 			getPlottingSystem().addRegionListener(this.regionListener);
@@ -201,6 +202,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		CalibrationFactory.removeCalibrantSelectionListener(this);
 		if (augmenter!=null) augmenter.deactivate();
 		if (activeDiffractionTool==this) activeDiffractionTool = null;
+		model.deactivate();
 	}
 	
 	public void dispose() {
@@ -212,6 +214,10 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	private void createDiffractionModel(boolean force) {
 		
 		if (!force && model!=null)  return;
+		if (force && model!=null) {
+			model.dispose();
+			model= null;
+		}
 		if (viewer==null)           return;
 		
 		try {
@@ -269,29 +275,29 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		
 		if (md!=null) return md;
 		
-		final IPreferenceStore store = Activator.getDefault().getPreferenceStore();
-		
-		boolean setMetadata = false;
-		final IWorkbenchPage page = EclipseUtils.getPage();
-		final String setting = store.getString(DiffractionToolConstants.REMEMBER_DIFFRACTION_META);
-		if (setting.equals(MessageDialogWithToggle.PROMPT)) {
-			MessageDialogWithToggle dialog = MessageDialogWithToggle.openYesNoQuestion(page.getWorkbenchWindow().getShell(), 
-					"Diffraction Tool", "The Diffraction Tool requires an image to have metadata.\n\nWould you like to create default metadata now?", 
-					"Remember my decision", false, 
-					store, DiffractionToolConstants.REMEMBER_DIFFRACTION_META);
-			
-			if (dialog.getReturnCode() == IDialogConstants.YES_ID) {
-				setMetadata = true;
-			}
-			
-		} else if (setting.equals(MessageDialogWithToggle.ALWAYS)) {
-			setMetadata = true;
-		}
-		
-		if (setMetadata) {
+//		final IPreferenceStore store = Activator.getDefault().getPreferenceStore();
+//		
+//		boolean setMetadata = false;
+//		final IWorkbenchPage page = EclipseUtils.getPage();
+//		final String setting = store.getString(DiffractionToolConstants.REMEMBER_DIFFRACTION_META);
+//		if (setting.equals(MessageDialogWithToggle.PROMPT)) {
+//			MessageDialogWithToggle dialog = MessageDialogWithToggle.openYesNoQuestion(page.getWorkbenchWindow().getShell(), 
+//					"Diffraction Tool", "The Diffraction Tool requires an image to have metadata.\n\nWould you like to create default metadata now?", 
+//					"Remember my decision", false, 
+//					store, DiffractionToolConstants.REMEMBER_DIFFRACTION_META);
+//			
+//			if (dialog.getReturnCode() == IDialogConstants.YES_ID) {
+//				setMetadata = true;
+//			}
+//			
+//		} else if (setting.equals(MessageDialogWithToggle.ALWAYS)) {
+//			setMetadata = true;
+//		}
+//		
+//		if (setMetadata) {
 			md = DiffractionDefaultMetadata.getDiffractionMetadata(imageTrace.getData().getShape());
 			imageTrace.getData().setMetadata(md);
-		}
+//		}
 		
 		return md;
 	}
