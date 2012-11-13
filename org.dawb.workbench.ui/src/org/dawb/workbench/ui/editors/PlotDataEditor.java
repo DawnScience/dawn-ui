@@ -105,14 +105,6 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 			this.defaultPlotType= defaultPlotType;
 	        this.plottingSystem = PlottingFactory.createPlottingSystem();
 	        
-	        plottingSystem.addPropertyChangeListener(new IPropertyChangeListener() {				
-				@Override
-				public void propertyChange(PropertyChangeEvent event) {
-					if (IPlottingSystem.RESCALE_ID.equals(event.getProperty())) {
-						Activator.getDefault().getPreferenceStore().setValue(EditorConstants.RESCALE_SETTING, (Boolean)event.getNewValue());
-					}
-				}
-			});
 		} catch (Exception ne) {
 			logger.error("Cannot locate any plotting systems!", ne);
 		}
@@ -189,6 +181,14 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		plot.setLayout(new FillLayout());
 		plot.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         plottingSystem.createPlotPart(plot, plotName, wrapper, defaultPlotType, this);
+        plottingSystem.addPropertyChangeListener(new IPropertyChangeListener() {				
+			@Override
+			public void propertyChange(PropertyChangeEvent event) {
+				if (IPlottingSystem.RESCALE_ID.equals(event.getProperty())) {
+					Activator.getDefault().getPreferenceStore().setValue(EditorConstants.RESCALE_SETTING, (Boolean)event.getNewValue());
+				}
+			}
+		});
         
         axisMap.put(1, plottingSystem.getSelectedYAxis());
         for (int i = 2; i <=4; i++) {
