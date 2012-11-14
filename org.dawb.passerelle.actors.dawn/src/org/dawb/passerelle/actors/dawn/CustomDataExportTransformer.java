@@ -34,6 +34,7 @@ import org.dawb.passerelle.common.message.IVariable.VARIABLE_TYPE;
 import org.dawb.passerelle.common.message.IVariableProvider;
 import org.dawb.passerelle.common.message.MessageUtils;
 import org.dawb.passerelle.common.message.Variable;
+import org.dawb.passerelle.common.parameter.ParameterUtils;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -221,7 +222,7 @@ public class CustomDataExportTransformer extends AbstractDataMessageTransformer 
 
 			//			final Map<String,String> scalar = MessageUtils.getScalar(cache);
 			//			final String fileName = scalar!=null ? scalar.get("file_name") : null;
-			String fileName = filePathParam.getExpression();
+			String fileName = ParameterUtils.getSubstituedValue(filePathParam, cache);
 			IFile file = (IFile)ResourcesPlugin.getWorkspace().getRoot().findMember(fileName, true);
 			//			final IFile  output   = getOutputPath(fileName);
 			//			filePath = output.getLocation().toOSString();
@@ -241,20 +242,20 @@ public class CustomDataExportTransformer extends AbstractDataMessageTransformer 
 			comp.putScalar("file_name", targetFile.getName());
 			comp.putScalar("file_basename", FileUtils.getFileNameNoExtension(targetFile));
 
-			final String datasetPath = dataSavePathParam.getExpression();
+			final String datasetPath = ParameterUtils.getSubstituedValue(dataSavePathParam, cache);
 			comp.putScalar(DATA_SAVEPATH, datasetPath);
 
-			comp.putScalar(AXIS1_NAME, axis1Param.getExpression());
-			comp.putScalar(AXIS2_NAME, axis2Param.getExpression());
+			comp.putScalar(AXIS1_NAME, ParameterUtils.getSubstituedValue(axis1Param, cache));
+			comp.putScalar(AXIS2_NAME, ParameterUtils.getSubstituedValue(axis2Param, cache));
 
-			comp.putScalar(DATA_NAME, datasetNameParam.getExpression());
+			comp.putScalar(DATA_NAME, ParameterUtils.getSubstituedValue(datasetNameParam, cache));
 
-			comp.putScalar(DATA_SAVENAME, datasetSaveNameParam.getExpression());
+			comp.putScalar(DATA_SAVENAME, ParameterUtils.getSubstituedValue(datasetSaveNameParam, cache));
 
-			comp.putScalar(AXIS1_SAVENAME, axis1SaveParam.getExpression());
-			comp.putScalar(AXIS2_SAVENAME, axis2SaveParam.getExpression());
+			comp.putScalar(AXIS1_SAVENAME, ParameterUtils.getSubstituedValue(axis1SaveParam, cache));
+			comp.putScalar(AXIS2_SAVENAME, ParameterUtils.getSubstituedValue(axis2SaveParam, cache));
 
-			comp.putScalar(DATA_SAVENAME, datasetSaveNameParam.getExpression());
+			comp.putScalar(DATA_SAVENAME, ParameterUtils.getSubstituedValue(datasetSaveNameParam, cache));
 
 			// The write process may add scalars passed on.
 			if (FILE_TYPES.get(2).equals(fileFormat) || FILE_TYPES.get(3).equals(fileFormat)) { // 
