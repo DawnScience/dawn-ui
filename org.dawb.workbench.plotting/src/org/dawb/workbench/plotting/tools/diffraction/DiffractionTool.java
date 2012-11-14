@@ -1,5 +1,8 @@
 package org.dawb.workbench.plotting.tools.diffraction;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.measure.quantity.Quantity;
@@ -10,10 +13,12 @@ import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.region.IRegion;
+import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.RegionEvent;
 import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
+import org.dawb.common.ui.plot.tool.IToolPage;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.IPaletteListener;
 import org.dawb.common.ui.plot.trace.ITraceListener;
@@ -25,7 +30,6 @@ import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.viewers.TreeNodeContentProvider;
 import org.dawb.workbench.plotting.Activator;
-import org.dawb.workbench.plotting.preference.DiffractionToolConstants;
 import org.dawb.workbench.plotting.preference.diffraction.DiffractionPreferencePage;
 import org.dawnsci.common.widgets.celleditor.CComboCellEditor;
 import org.dawnsci.common.widgets.celleditor.FloatSpinnerCellEditor;
@@ -36,10 +40,7 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.MessageDialogWithToggle;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.JFacePreferences;
 import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.resource.ColorRegistry;
@@ -68,7 +69,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.FilteredTree;
@@ -80,10 +80,14 @@ import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSelectedListener;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSelectionEvent;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationStandards;
+import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.io.MetaDataAdapter;
+import uk.ac.diamond.scisoft.analysis.rcp.plotting.utils.BeamCenterRefinement;
+import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 
 
 public class DiffractionTool extends AbstractToolPage implements CalibrantSelectedListener {
@@ -549,11 +553,58 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		centre.setImageDescriptor(Activator.getImageDescriptor("icons/centre.png"));
 		
 		final Action refine = new Action("Refine beam center",IAction.AS_PUSH_BUTTON) {
+			
+			class Compare implements Comparator<IPeak> {
+
+				@Override
+				public int compare(IPeak o1, IPeak o2) {
+					if (o1.getPosition() > o2.getPosition()) {
+						return 1;
+					}
+					if (o1.getPosition() < o2.getPosition()) {
+						return -1;
+					}
+					return 0;
+				}
+
+			}
+			
+			
+			//FIXME: need to find a different way of loading peak positions
+			private List<IPeak> loadPeaks() {
+				IToolPage fittingTool = getToolSystem().getToolPage(
+						"org.dawb.workbench.plotting.tools.fittingTool");
+				if (fittingTool != null) {
+					// Use adapters to avoid direct link which is weak.
+					List<IPeak> fittedPeaks = (List<IPeak>) fittingTool.getAdapter(IPeak.class);
+
+					if (fittedPeaks != null) {
+						Collections.sort(fittedPeaks, new Compare());
+
+						ArrayList<IPeak> peaks = new ArrayList<IPeak>();
+						if (peaks != null && peaks.size() > 0)
+							peaks.clear();
+						for (IPeak peak : fittedPeaks) {
+							peaks.add(peak);
+						}
+						return peaks;
+					}
+				}
+                MessageDialog.openInformation(Display.getDefault().getActiveShell(), "No refinement done!", "Could not read peak positons to start refinement");
+				return null;
+			}
+
 			@Override
 			public void run() {
+				//FIXME: this doesn't work when tool is open in dedicated view
+				AbstractDataset dataset = getImageTrace().getData();
+				AbstractDataset mask = getImageTrace().getMask();
+				SectorROI sroi = (SectorROI) getPlottingSystem().getRegions(RegionType.SECTOR).iterator().next().getROI();
+				final BeamCenterRefinement beamOffset = new BeamCenterRefinement(dataset, mask, sroi);
+				List<IPeak> peaks = loadPeaks();
+				beamOffset.setInitPeaks(peaks);
 				
-				//TODO FIXME Job or wizard running job to do the refine.
-                MessageDialog.openInformation(Display.getDefault().getActiveShell(), "No refinement done!", "Refinement has not been hooked up as yet!");
+				beamOffset.optimize(sroi.getPoint());
 			}
 		};
 		refine.setImageDescriptor(Activator.getImageDescriptor("icons/refine.png"));
