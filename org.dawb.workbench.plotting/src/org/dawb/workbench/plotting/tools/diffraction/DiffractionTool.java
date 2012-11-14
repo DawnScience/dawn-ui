@@ -5,6 +5,8 @@ import java.util.List;
 import javax.measure.quantity.Quantity;
 import javax.swing.tree.TreeNode;
 
+import org.dawb.common.services.ILoaderService;
+import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.region.IRegion;
@@ -17,10 +19,13 @@ import org.dawb.common.ui.plot.trace.IPaletteListener;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.PaletteEvent;
 import org.dawb.common.ui.plot.trace.TraceEvent;
+import org.dawb.common.ui.tree.LabelNode;
+import org.dawb.common.ui.tree.NumericNode;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.viewers.TreeNodeContentProvider;
 import org.dawb.workbench.plotting.Activator;
+import org.dawb.workbench.plotting.preference.DiffractionToolConstants;
 import org.dawb.workbench.plotting.preference.diffraction.DiffractionPreferencePage;
 import org.dawnsci.common.widgets.celleditor.CComboCellEditor;
 import org.dawnsci.common.widgets.celleditor.FloatSpinnerCellEditor;
@@ -31,7 +36,10 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.MessageDialogWithToggle;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.JFacePreferences;
 import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.resource.ColorRegistry;
@@ -60,6 +68,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.FilteredTree;
@@ -67,25 +76,32 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSelectedListener;
+import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSelectionEvent;
+import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
+import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationStandards;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
+import uk.ac.diamond.scisoft.analysis.io.DiffractionMetaDataAdapter;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
-import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.io.MetaDataAdapter;
 
 
-public class DiffractionTool extends AbstractToolPage {
+public class DiffractionTool extends AbstractToolPage implements CalibrantSelectedListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(DiffractionTool.class);
 	
 	private DiffractionTree filteredTree;
-	private TreeViewer   viewer;
-	private Composite  control;
+	private TreeViewer      viewer;
+	private Composite       control;
 	private DiffractionTreeModel model;
+	private ILoaderService  service;
+	
+	private static DiffractionTool      activeDiffractionTool=null;
 	
 	//Region and region listener added for 1-click beam centring
-	private IRegion tmpRegion;
-	private IRegionListener regionListener;
+	private IRegion               tmpRegion;
+	private IRegionListener       regionListener;
 	private IPaletteListener.Stub paletteListener;
 	private ITraceListener.Stub   traceListener;
 	
@@ -112,6 +128,8 @@ public class DiffractionTool extends AbstractToolPage {
 				updateIntensity();
 			}
 		};
+		
+		this.service = (ILoaderService)PlatformUI.getWorkbench().getService(ILoaderService.class);
       
 	}
 
@@ -150,7 +168,7 @@ public class DiffractionTool extends AbstractToolPage {
 		
 		getSite().setSelectionProvider(viewer);
 
-		createDiffractionModel();
+		createDiffractionModel(false);
 		createActions();
 		createListeners();
 
@@ -158,7 +176,9 @@ public class DiffractionTool extends AbstractToolPage {
 	
 	public void activate() {
 		super.activate();
-		createDiffractionModel();
+		createDiffractionModel(false);
+		if (model != null)
+			model.activate();
 		
 		if (getPlottingSystem()!=null && this.regionListener != null) {
 			getPlottingSystem().addRegionListener(this.regionListener);
@@ -166,6 +186,9 @@ public class DiffractionTool extends AbstractToolPage {
 		if (getPlottingSystem()!=null && this.traceListener != null) {
 			getPlottingSystem().addTraceListener(traceListener);
 		}
+		if (augmenter!=null) augmenter.activate();
+		CalibrationFactory.addCalibrantSelectionListener(this);
+		activeDiffractionTool = this;
 			
 		if (viewer!=null) viewer.refresh();
 	}
@@ -178,23 +201,29 @@ public class DiffractionTool extends AbstractToolPage {
 		if (getPlottingSystem()!=null && this.traceListener != null) {
 			getPlottingSystem().addTraceListener(traceListener);
 		}
+		CalibrationFactory.removeCalibrantSelectionListener(this);
+		if (augmenter!=null) augmenter.deactivate();
+		if (activeDiffractionTool==this) activeDiffractionTool = null;
+		model.deactivate();
 	}
 	
 	public void dispose() {
 		super.dispose();
 		if (model!=null) model.dispose();
 		if (augmenter != null) augmenter.dispose();
-		
 	}
 
-	private void createDiffractionModel() {
+	private void createDiffractionModel(boolean force) {
 		
-		if (model!=null)  return;
-		if (viewer==null) return;
+		if (!force && model!=null)  return;
+		if (force && model!=null) {
+			model.dispose();
+			model= null;
+		}
+		if (viewer==null)           return;
 		
-		IMetaData meta = getMetaData();
 		try {
-			model = new DiffractionTreeModel(meta);
+			model = new DiffractionTreeModel(getDiffractionMetaData());
 			model.setViewer(viewer);
 		} catch (Exception e) {
 			logger.error("Cannot create model!", e);
@@ -209,6 +238,7 @@ public class DiffractionTool extends AbstractToolPage {
 	
 
 	void resetExpansion() {
+		if (model == null) return;
 		final List<?> top = model.getRoot().getChildren();
 		for (Object element : top) {
 		   expand(element, viewer);
@@ -231,21 +261,64 @@ public class DiffractionTool extends AbstractToolPage {
 	}
 
 	private IMetaData getMetaData() {
+		//Now always returns IDiffractionMetadata to prevent creation of a new
+		// metadata object after listeners have been added to the old metadata
 		
+		//Try to get metadata from part
 		IMetaData md = null;
 		if (getPart() instanceof IEditorPart) {
 			try {
-				md = LoaderFactory.getMetaData(EclipseUtils.getFilePath(((IEditorPart)getPart()).getEditorInput()), null);
+				md = service.getMetaData(EclipseUtils.getFilePath(((IEditorPart)getPart()).getEditorInput()), null);
 			} catch (Exception e) {
 				logger.error("Cannot read meta data from "+getPart().getTitle(), e);
 			}
 		}
-		if (md!=null) return md;
-
+		
+		// If it is there and diffraction data return it
+		if (md!=null && md instanceof IDiffractionMetadata) return md;
+		
+		//If not see if the trace has diffraction meta data
 		IImageTrace imageTrace = getImageTrace();
-		if (imageTrace==null) return new MetaDataAdapter();
-		md = imageTrace.getData().getMetadata();	
-
+		if (imageTrace==null) return new DiffractionMetaDataAdapter();
+		IMetaData mdImage = imageTrace.getData().getMetadata();
+		
+		//if the metadata on the image is IDiffraction metadata return it
+		if (mdImage !=null && mdImage  instanceof IDiffractionMetadata) return mdImage;
+		
+//		final IPreferenceStore store = Activator.getDefault().getPreferenceStore();
+//		
+//		boolean setMetadata = false;
+//		final IWorkbenchPage page = EclipseUtils.getPage();
+//		final String setting = store.getString(DiffractionToolConstants.REMEMBER_DIFFRACTION_META);
+//		if (setting.equals(MessageDialogWithToggle.PROMPT)) {
+//			MessageDialogWithToggle dialog = MessageDialogWithToggle.openYesNoQuestion(page.getWorkbenchWindow().getShell(), 
+//					"Diffraction Tool", "The Diffraction Tool requires an image to have metadata.\n\nWould you like to create default metadata now?", 
+//					"Remember my decision", false, 
+//					store, DiffractionToolConstants.REMEMBER_DIFFRACTION_META);
+//			
+//			if (dialog.getReturnCode() == IDialogConstants.YES_ID) {
+//				setMetadata = true;
+//			}
+//			
+//		} else if (setting.equals(MessageDialogWithToggle.ALWAYS)) {
+//			setMetadata = true;
+//		}
+//		
+//		if (setMetadata) {
+		
+		//if the file contains IMetaData but not IDiffraction meta data, wrap the old meta in a 
+		// new IDiffractionMetadata object and put it back in the dataset
+		if (md!=null) {
+			md = DiffractionDefaultMetadata.getDiffractionMetadata(imageTrace.getData().getShape(),md);
+			imageTrace.getData().setMetadata(md);
+			return md;
+		}
+		
+		// if there is no meta create default IDiff and put it in the dataset
+		md = DiffractionDefaultMetadata.getDiffractionMetadata(imageTrace.getData().getShape());
+		imageTrace.getData().setMetadata(md);
+//		}
+		
 		return md;
 	}
 
@@ -389,7 +462,10 @@ public class DiffractionTool extends AbstractToolPage {
 		
 	}
 
-	private TreeNode copiedNode;
+	private TreeNode   copiedNode;
+	private MenuAction calibrantActions;
+	private Action     calPref;
+	private static Action lock;
 	
 	private void createActions() {
 		
@@ -421,9 +497,15 @@ public class DiffractionTool extends AbstractToolPage {
 				boolean ok = MessageDialog.openConfirm(Display.getDefault().getActiveShell(), "Confirm Reset All", "Are you sure that you would like to reset all values?");
 				if (!ok) return;
 				filteredTree.clearText();
-				model.reset();
-				viewer.refresh();
-		        resetExpansion();
+				if (service.getLockedDiffractionMetaData()!=null) {
+					model.reset();
+					viewer.refresh();
+			        resetExpansion();
+				} else {
+					augmenter.setDiffractionMetadata(getDiffractionMetaData());
+					createDiffractionModel(true);
+					model.reset();
+				}
 			}
 		};
 		
@@ -484,27 +566,63 @@ public class DiffractionTool extends AbstractToolPage {
 
 			}
 		};
-		
 		centre.setImageDescriptor(Activator.getImageDescriptor("icons/centre.png"));
 		
-		final Action calPref = new Action("Configure Calibrants...") {
+		final Action refine = new Action("Refine beam center",IAction.AS_PUSH_BUTTON) {
+			@Override
+			public void run() {
+				
+				//TODO FIXME Job or wizard running job to do the refine.
+                MessageDialog.openInformation(Display.getDefault().getActiveShell(), "No refinement done!", "Refinement has not been hooked up as yet!");
+			}
+		};
+		refine.setImageDescriptor(Activator.getImageDescriptor("icons/refine.png"));
+		
+		if (lock==null) lock = new Action("Lock the diffraction data and apply it to newly opened files.",IAction.AS_CHECK_BOX) {
+		    @Override
+			public void run() {
+		    	if (isChecked()) {
+		    		IDiffractionMetadata data = activeDiffractionTool.getDiffractionMetaData().clone();
+		    		activeDiffractionTool.augmenter.setDiffractionMetadata(data);
+		    		service.setLockedDiffractionMetaData(data);
+		    	} else {
+		    		service.setLockedDiffractionMetaData(null);
+		    		activeDiffractionTool.augmenter.setDiffractionMetadata(activeDiffractionTool.getDiffractionMetaData());
+		    	}
+		    	activeDiffractionTool.createDiffractionModel(true);
+			}
+		};
+		lock.setImageDescriptor(Activator.getImageDescriptor("icons/lock.png"));
+
+	
+		this.calPref = new Action("Configure Calibrants...") {
 			@Override
 			public void run() {
 				PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), DiffractionPreferencePage.ID, null, null);
 				if (pref != null) pref.open();
 			}
 		};
+
+		this.calibrantActions = new MenuAction("Calibrants");
+		calibrantActions.setImageDescriptor(Activator.getImageDescriptor("/icons/calibrant_rings.png"));
+		updateCalibrationActions(CalibrationFactory.getCalibrationStandards());		
 		
+
 		MenuAction dropdown = new MenuAction("Resolution rings");
 	    dropdown.setImageDescriptor(Activator.getImageDescriptor("/icons/resolution_rings.png"));
 
-		IMetaData data = getMetaData();
+		IDiffractionMetadata data = getDiffractionMetaData();
 		augmenter = new DiffractionImageAugmenter((AbstractPlottingSystem)getPlottingSystem());
-		augmenter.setDiffractionMetadata((IDiffractionMetadata)data);
+		augmenter.setDiffractionMetadata(data);
 	    augmenter.addActions(dropdown);
 		
+	    toolMan.add(lock);
+		toolMan.add(new Separator());
 	    toolMan.add(dropdown);
+	    toolMan.add(calibrantActions);
+		toolMan.add(new Separator());
 		toolMan.add(centre);
+		toolMan.add(refine);
 		toolMan.add(new Separator());
 		toolMan.add(reset);
 		toolMan.add(resetAll);
@@ -514,6 +632,7 @@ public class DiffractionTool extends AbstractToolPage {
 		
 		menuMan.add(dropdown);
 	    menuMan.add(centre);
+	    menuMan.add(refine);
 		menuMan.add(new Separator());
 		menuMan.add(reset);
 		menuMan.add(resetAll);
@@ -533,6 +652,41 @@ public class DiffractionTool extends AbstractToolPage {
 		getSite().getActionBars().getMenuManager().add(new Separator());
 	}
 	
+	private void updateCalibrationActions(final CalibrationStandards standards) {
+		this.calibrantActions.clear();
+		final String selected = standards.getSelectedCalibrant();
+		final CheckableActionGroup grp = new CheckableActionGroup();
+		Action selectedAction=null;
+		for (final String calibrant : standards.getCalibrantList()) {
+			final Action calibrantAction = new Action(calibrant, IAction.AS_CHECK_BOX) {
+				public void run() {
+					standards.setSelectedCalibrant(calibrant, true);
+				}
+			};
+			grp.add(calibrantAction);
+			if (selected!=null&&selected.equals(calibrant)) selectedAction = calibrantAction;
+			calibrantActions.add(calibrantAction);
+		}
+		calibrantActions.addSeparator();
+		calibrantActions.add(calPref);
+		if (selected!=null) selectedAction.setChecked(true);
+	}
+
+
+	private IDiffractionMetadata getDiffractionMetaData() {
+		if (service.getLockedDiffractionMetaData()!=null) return service.getLockedDiffractionMetaData();
+		IMetaData md = getMetaData();
+		if (md instanceof IDiffractionMetadata) {
+			return (IDiffractionMetadata)md;
+		}
+        try {
+            return DiffractionDefaultMetadata.getDiffractionMetadata(getImageTrace().getData().getShape());
+        } catch (Throwable ne) {
+        	return DiffractionDefaultMetadata.getDiffractionMetadata(new int[]{1024,1024});
+        }
+	}
+
+
 	private void createListeners() {
 		
 		this.regionListener = new IRegionListener.Stub() {
@@ -545,11 +699,9 @@ public class DiffractionTool extends AbstractToolPage {
 					logger.debug("Clicked here X: " + point[0] + " Y : " + point[1]);
 					
 					getPlottingSystem().removeRegion(tmpRegion);
-					IMetaData data = getMetaData();
-					if (data instanceof IDiffractionMetadata) {
-						DetectorProperties detprop = ((IDiffractionMetadata)data).getDetector2DProperties();
-						detprop.setBeamCentreCoords(point);
-					}
+					IDiffractionMetadata data = getDiffractionMetaData();
+					DetectorProperties detprop = data.getDetector2DProperties();
+					detprop.setBeamCentreCoords(point);
 					if (!augmenter.isShowingBeamCenter()) {
 						augmenter.drawBeamCentre(true);
 					}
@@ -569,6 +721,11 @@ public class DiffractionTool extends AbstractToolPage {
 		viewer.getControl().setFocus();
 	}
 
+	@Override
+	public void calibrantSelectionChanged(CalibrantSelectionEvent evt) {
+		updateCalibrationActions((CalibrationStandards)evt.getSource());
+	};
+
 	class DiffractionTree extends FilteredTree {
 		public DiffractionTree(Composite control, int i,
 				DiffractionFilter diffractionFilter, boolean b) {
@@ -579,6 +736,6 @@ public class DiffractionTool extends AbstractToolPage {
 		public void clearText() {
             super.clearText();
 		}
-	};
+	}
 
 }

@@ -221,6 +221,12 @@
             id="org.dawb.workbench.plotting.preference.diffraction.calibrantPreferencePage"
             name="Diffraction Calibrants">
       </page>
+      <page
+            category="org.edna.workbench.preferences.root"
+            class="org.dawb.workbench.plotting.preference.DiffractionDefaultsPreferencePage"
+            id="org.dawb.workbench.plotting.page1"
+            name="Diffraction Tool Defaults">
+      </page>
    </extension>
    <extension
          point="org.eclipse.ui.cheatsheets.cheatSheetContent">
@@ -319,6 +325,20 @@
             icon="icons/data-reduction.png"
             id="org.dawb.workbench.plotting.dataReductionExportWizard"
             name="Data Reduction">
+      </wizard>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="org.dawb.workbench.plotting.preference.DiffractionToolPreferenceInitializer">
+      </initializer>
+   </extension>
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <wizard
+            class="org.dawb.workbench.plotting.preference.diffraction.AddCalibrantWizard"
+            id="org.dawb.workbench.plotting.preference.diffraction.addCalibrantWizard"
+            name="Add Calibrant">
       </wizard>
    </extension>
 
