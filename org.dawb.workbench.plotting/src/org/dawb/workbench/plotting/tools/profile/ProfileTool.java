@@ -422,7 +422,9 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		if (getPart() instanceof IEditorPart) {
 			IEditorPart editor = (IEditorPart)getPart();
 	    	try {
-				return LoaderFactory.getMetaData(EclipseUtils.getFilePath(editor.getEditorInput()), null);
+	    		IMetaData metaData = LoaderFactory.getMetaData(EclipseUtils.getFilePath(editor.getEditorInput()), null);
+	    		if (metaData != null)
+	    			return metaData;
 			} catch (Exception e) {
 				logger.error("Cannot get meta data for "+EclipseUtils.getFilePath(editor.getEditorInput()), e);
 			}
