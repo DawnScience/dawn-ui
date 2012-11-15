@@ -130,8 +130,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		this.traceListener = new ITraceListener.Stub() {
 			protected void update(TraceEvent evt) {
 				if (getImageTrace()!=null) getImageTrace().addPaletteListener(paletteListener);
-				//TODO update model for 2d traces and clean up when closing
-				//if (getImageTrace()!=null) createDiffractionModel(true);
+				if (getImageTrace()!=null) createDiffractionModel(true);
 				updateIntensity();
 			}
 		};
