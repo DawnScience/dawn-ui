@@ -384,9 +384,19 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 
 	public void setDiffractionMetadata(IDiffractionMetadata metadata) {
 		diffenv = metadata.getDiffractionCrystalEnvironment();
-		diffenv.addDiffractionCrystalEnvironmentListener(this);
+		if (diffenv!=null) {
+			diffenv.addDiffractionCrystalEnvironmentListener(this);
+		} else {
+			logger.error("DiffractionCrystalEnvironment is null!");
+			Thread.dumpStack();
+		}
 		detprop = metadata.getDetector2DProperties();
-		detprop.addDetectorPropertyListener(this);
+		if (detprop!=null) {
+		    detprop.addDetectorPropertyListener(this);
+		} else {
+			logger.error("DetectorProperties is null!");
+			Thread.dumpStack();
+		}
 	}
 
 }
