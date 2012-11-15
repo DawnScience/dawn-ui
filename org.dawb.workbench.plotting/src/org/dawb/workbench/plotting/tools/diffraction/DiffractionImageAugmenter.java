@@ -239,6 +239,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 
 	protected void removeRings(Object marker) {
 		if (plottingSystem==null) return;
+		if (plottingSystem.getRegions()==null) return;
 		for (IRegion region : plottingSystem.getRegions()) {
 			try {
 				if (region.getUserObject()!=marker) continue;
