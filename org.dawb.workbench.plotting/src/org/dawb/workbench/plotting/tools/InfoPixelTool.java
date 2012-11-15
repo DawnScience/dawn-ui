@@ -37,6 +37,10 @@ import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.tools.MeasurementTool.RegionColorListener;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.MouseEvent;
 import org.eclipse.draw2d.MouseListener;
@@ -59,6 +63,7 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,6 +84,10 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 	private Map<String,ROIBase> dragBounds;
 	public double xValues [] = new double[1];	public double yValues [] = new double[1];
 
+	// Jobs
+	private Job updateInfoPixelData;
+	// Internal Items
+	private boolean isUpdateRunning = false;
 		
 	public InfoPixelTool() {
 		dragBounds = new HashMap<String,ROIBase>(7);
@@ -418,7 +427,7 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 	}
 	
 	private void createColumns(final TableViewer viewer) {
-
+		
 		ColumnViewerToolTipSupport.enableFor(viewer,ToolTip.NO_RECREATE);
 
 		TableViewerColumn var   = new TableViewerColumn(viewer, SWT.CENTER, 0);
@@ -495,7 +504,8 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 				ROIBase rb = evt.getROI();
 							
 				dragBounds.put(region.getName(), rb);
-				viewer.refresh(region);
+				//viewer.refresh(region);
+				updateInfoPixel(region);
 				
 			} catch (Exception e) {
 				logger.error("problem creating point region:", e);
@@ -535,7 +545,7 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 
 	@Override
 	public void roiDragged(ROIEvent evt) {
-
+		logger.debug("ROI dragged ====> ");
 		if (viewer != null) {
 			IRegion region = (IRegion) evt.getSource();
 
@@ -545,6 +555,7 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 				
 				dragBounds.put(region.getName(), rb);
 				viewer.refresh(region);
+				//updateInfoPixel(region);
 			} else {
 				updateRegion(evt);
 			}
@@ -553,6 +564,44 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 
 	@Override
 	public void roiChanged(ROIEvent evt) {
+	}
+	
+	private synchronized void updateInfoPixel(final IRegion region) {
+
+		if (updateInfoPixelData==null) {
+			updateInfoPixelData = new Job("Info Pixel update") {
+
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					try {
+						isUpdateRunning = true;
+						logger.debug("Update Running");
+												 
+						PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+							public void run() {
+								//Run the update table viewer on a separate thread than the GUI
+								//logger.info("refresh viewer... "+ region.toString());
+								viewer.refresh(region);						
+							}
+						});
+						if (!isActive()) return Status.CANCEL_STATUS;
+						return Status.OK_STATUS;
+						
+					}finally {
+						//logger.debug("Update Finished In Finally");
+						isUpdateRunning = false;
+					}
+				}
+				
+			};
+			
+			updateInfoPixelData.setSystem(true);
+			updateInfoPixelData.setUser(false);
+			updateInfoPixelData.setPriority(Job.INTERACTIVE);
+		}
+		
+		updateInfoPixelData.schedule();
+
 	}
 	
 }
