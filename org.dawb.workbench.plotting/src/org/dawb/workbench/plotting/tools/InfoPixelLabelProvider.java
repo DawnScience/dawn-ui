@@ -55,12 +55,12 @@ public class InfoPixelLabelProvider extends ColumnLabelProvider {
 
 	@Override
 	public String getText(Object element) {
-			
+					
 		double xIndex = 0.0;
 		double yIndex = 0.0;
 		double xLabel = Double.NaN;
 		double yLabel = Double.NaN;
-		
+					
 		try {
 			if (element instanceof IRegion){
 				

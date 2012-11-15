@@ -19,6 +19,7 @@ import org.dawb.common.ui.plot.region.RegionEvent;
 import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
 import org.dawb.common.ui.plot.tool.IToolPage;
+import org.dawb.common.ui.plot.tool.IToolPageSystem;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.IPaletteListener;
 import org.dawb.common.ui.plot.trace.ITraceListener;
@@ -86,7 +87,6 @@ import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
 import uk.ac.diamond.scisoft.analysis.io.DiffractionMetaDataAdapter;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
-import uk.ac.diamond.scisoft.analysis.io.MetaDataAdapter;
 import uk.ac.diamond.scisoft.analysis.rcp.plotting.utils.BeamCenterRefinement;
 import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 
@@ -590,18 +590,18 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			}
 			
 			
-			//FIXME: need to find a different way of loading peak positions
 			private List<IPeak> loadPeaks() {
-				IToolPage fittingTool = getToolSystem().getToolPage(
+				IToolPage radialTool = getToolSystem().getToolPage(
+						"org.dawb.workbench.plotting.tools.radialProfileTool");
+				IToolPage fittingTool = ((IToolPageSystem)radialTool.getToolPlottingSystem()).getToolPage(
 						"org.dawb.workbench.plotting.tools.fittingTool");
 				if (fittingTool != null) {
-					// Use adapters to avoid direct link which is weak.
 					List<IPeak> fittedPeaks = (List<IPeak>) fittingTool.getAdapter(IPeak.class);
 
 					if (fittedPeaks != null) {
 						Collections.sort(fittedPeaks, new Compare());
 
-						ArrayList<IPeak> peaks = new ArrayList<IPeak>();
+						ArrayList<IPeak> peaks = new ArrayList<IPeak>(fittedPeaks.size());
 						if (peaks != null && peaks.size() > 0)
 							peaks.clear();
 						for (IPeak peak : fittedPeaks) {
@@ -610,13 +610,15 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 						return peaks;
 					}
 				}
-                MessageDialog.openInformation(Display.getDefault().getActiveShell(), "No refinement done!", "Could not read peak positons to start refinement");
+				
+				MessageDialog.openInformation(Display.getDefault().getActiveShell(),
+								"No refinement done!",
+								"Could not read peak positons to start refinement. Please use Peak Fitting tool in Radial Profile plot to select calibration peaks.");
 				return null;
 			}
 
 			@Override
 			public void run() {
-				//FIXME: this doesn't work when tool is open in dedicated view
 				AbstractDataset dataset = getImageTrace().getData();
 				AbstractDataset mask = getImageTrace().getMask();
 				SectorROI sroi = (SectorROI) getPlottingSystem().getRegions(RegionType.SECTOR).iterator().next().getROI();
