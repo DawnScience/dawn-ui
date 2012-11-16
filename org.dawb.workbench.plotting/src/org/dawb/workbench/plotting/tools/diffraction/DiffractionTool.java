@@ -231,16 +231,14 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		try {
 			data  = getDiffractionMetaData();
 			model = new DiffractionTreeModel(data);
+			model.setViewer(viewer);
+			if (augmenter != null) {
+				augmenter.setDiffractionMetadata(data);
+			}
 		} catch (Exception e) {
 			return;
 		}
 			
-		model.setViewer(viewer);
-		if (augmenter!=null) {
-			augmenter.setDiffractionMetadata(data);
-			if (isActive()) augmenter.activate();
-		}
-
 		viewer.setInput(model.getRoot());
 		
         resetExpansion();
