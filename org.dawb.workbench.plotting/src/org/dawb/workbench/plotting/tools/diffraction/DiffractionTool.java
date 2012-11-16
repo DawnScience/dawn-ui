@@ -41,6 +41,7 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.JFacePreferences;
 import org.eclipse.jface.preference.PreferenceDialog;
@@ -181,6 +182,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	
 	public void activate() {
 		super.activate();
+		createDiffractionModel(false);
 		if (model != null) model.activate();
 		
 		if (getPlottingSystem()!=null && this.regionListener != null) {
@@ -225,14 +227,20 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		}
 		if (viewer==null)           return;
 		
+		IDiffractionMetadata data=null;
 		try {
-			model = new DiffractionTreeModel(getDiffractionMetaData());
-			model.setViewer(viewer);
+			data  = getDiffractionMetaData();
+			model = new DiffractionTreeModel(data);
 		} catch (Exception e) {
-			logger.error("Cannot create model!", e);
 			return;
 		}
-				
+			
+		model.setViewer(viewer);
+		if (augmenter!=null) {
+			augmenter.setDiffractionMetadata(data);
+			if (isActive()) augmenter.activate();
+		}
+
 		viewer.setInput(model.getRoot());
 		
         resetExpansion();
@@ -322,32 +330,11 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		
 		//If not see if the trace has diffraction meta data
 		IImageTrace imageTrace = getImageTrace();
-		if (imageTrace==null) return new DiffractionMetaDataAdapter();
+		if (imageTrace==null) return null;
 		IMetaData mdImage = imageTrace.getData().getMetadata();
 		
 		//if the metadata on the image is IDiffraction metadata return it
 		if (mdImage !=null && mdImage  instanceof IDiffractionMetadata) return (IDiffractionMetadata)mdImage;
-		
-//		final IPreferenceStore store = Activator.getDefault().getPreferenceStore();
-//		
-//		boolean setMetadata = false;
-//		final IWorkbenchPage page = EclipseUtils.getPage();
-//		final String setting = store.getString(DiffractionToolConstants.REMEMBER_DIFFRACTION_META);
-//		if (setting.equals(MessageDialogWithToggle.PROMPT)) {
-//			MessageDialogWithToggle dialog = MessageDialogWithToggle.openYesNoQuestion(page.getWorkbenchWindow().getShell(), 
-//					"Diffraction Tool", "The Diffraction Tool requires an image to have metadata.\n\nWould you like to create default metadata now?", 
-//					"Remember my decision", false, 
-//					store, DiffractionToolConstants.REMEMBER_DIFFRACTION_META);
-//			
-//			if (dialog.getReturnCode() == IDialogConstants.YES_ID) {
-//				setMetadata = true;
-//			}
-//			
-//		} else if (setting.equals(MessageDialogWithToggle.ALWAYS)) {
-//			setMetadata = true;
-//		}
-//		
-//		if (setMetadata) {
 		
 		//if the file contains IMetaData but not IDiffraction meta data, wrap the old meta in a 
 		// new IDiffractionMetadata object and put it back in the dataset
@@ -545,7 +532,6 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 					viewer.refresh();
 			        resetExpansion();
 				} else {
-					augmenter.setDiffractionMetadata(getDiffractionMetaData());
 					createDiffractionModel(true);
 					model.reset();
 				}
@@ -650,22 +636,46 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 					}
 				}
 				
-				MessageDialog.openInformation(Display.getDefault().getActiveShell(),
-								"No refinement done!",
-								"Could not read peak positons to start refinement. Please use Peak Fitting tool in Radial Profile plot to select calibration peaks.");
 				return null;
 			}
 
 			@Override
 			public void run() {
-				AbstractDataset dataset = getImageTrace().getData();
-				AbstractDataset mask = getImageTrace().getMask();
-				SectorROI sroi = (SectorROI) getPlottingSystem().getRegions(RegionType.SECTOR).iterator().next().getROI();
-				final BeamCenterRefinement beamOffset = new BeamCenterRefinement(dataset, mask, sroi);
-				List<IPeak> peaks = loadPeaks();
-				beamOffset.setInitPeaks(peaks);
-				
-				beamOffset.optimize(sroi.getPoint());
+				try {
+					AbstractDataset dataset = getImageTrace().getData();
+					AbstractDataset mask = getImageTrace().getMask();
+					SectorROI sroi = (SectorROI) getPlottingSystem().getRegions(RegionType.SECTOR).iterator().next().getROI();
+					final BeamCenterRefinement beamOffset = new BeamCenterRefinement(dataset, mask, sroi);
+					List<IPeak> peaks = loadPeaks();
+					if (peaks==null) throw new Exception("Cannot find peaks!");
+					beamOffset.setInitPeaks(peaks);
+					
+					beamOffset.optimize(sroi.getPoint());
+				} catch (Throwable ne) {
+					
+					/**
+					 * Long discussion with Iralki on this. The algorithm must be set up in a particular way to 
+					 * run at the moment. 
+					 */
+					ConfigurableMessageDialog dialog = new ConfigurableMessageDialog(Display.getDefault().getActiveShell(),
+							"Experimental Refinement Algorithm Uncomplete",
+							null,
+							"Could not read peak positons to start refinement.\nThere is a process to set up the refinement because it is in an experimental form at the moment:\n\n"+
+							"1. Open the 'Diffraction' tool in a dedicated view (action on the right of the toolbar).\n"+
+							"2. Open the 'Radial Profile' tool (from the plot containing the image).\n" +
+							"3. Select a sector which bisects the rings wanted.\n"+
+							"4. In this 'Radial Profile' tool select peak fitting.\n"+
+							"5. Set up a peak fit on all the rings which the redial profile found.\n"+
+							"6. Now run the refine action in the diffraction tool again.\n\n"+
+							"Please note that the algorithm may not converge. A job is run for the refinement which may be stopped.\n"+
+							"Please contact your support representative for more training/help with refinement.\n\n"+
+							"(NOTE This dialog can be kept open as a guide while doing the proceedure.)",
+							MessageDialog.INFORMATION,
+							new String[]{IDialogConstants.OK_LABEL},
+							0);
+					dialog.setShellStyle(SWT.SHELL_TRIM|SWT.MODELESS);
+					dialog.open();
+				}
 			}
 		};
 		refine.setImageDescriptor(Activator.getImageDescriptor("icons/refine.png"));
@@ -675,11 +685,9 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			public void run() {
 		    	if (isChecked()) {
 		    		IDiffractionMetadata data = activeDiffractionTool.getDiffractionMetaData().clone();
-		    		activeDiffractionTool.augmenter.setDiffractionMetadata(data);
 		    		service.setLockedDiffractionMetaData(data);
 		    	} else {
 		    		service.setLockedDiffractionMetaData(null);
-		    		activeDiffractionTool.augmenter.setDiffractionMetadata(activeDiffractionTool.getDiffractionMetaData());
 		    	}
 		    	activeDiffractionTool.createDiffractionModel(true);
 			}
@@ -703,9 +711,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		MenuAction dropdown = new MenuAction("Resolution rings");
 	    dropdown.setImageDescriptor(Activator.getImageDescriptor("/icons/resolution_rings.png"));
 
-		IDiffractionMetadata data = getDiffractionMetaData();
 		augmenter = new DiffractionImageAugmenter((AbstractPlottingSystem)getPlottingSystem());
-		augmenter.setDiffractionMetadata(data);
 	    augmenter.addActions(dropdown);
 		
 	    toolMan.add(lock);
@@ -763,21 +769,6 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		calibrantActions.add(calPref);
 		if (selected!=null) selectedAction.setChecked(true);
 	}
-
-
-//	private IDiffractionMetadata getDiffractionMetaData() {
-//		//if (service.getLockedDiffractionMetaData()!=null) return service.getLockedDiffractionMetaData();
-//		IMetaData md = getMetaData();
-//		if (md instanceof IDiffractionMetadata) {
-//			return (IDiffractionMetadata)md;
-//		}
-//        try {
-//            return DiffractionDefaultMetadata.getDiffractionMetadata(getImageTrace().getData().getShape());
-//        } catch (Throwable ne) {
-//        	return DiffractionDefaultMetadata.getDiffractionMetadata(new int[]{1024,1024});
-//        }
-//	}
-
 
 	private void createListeners() {
 		

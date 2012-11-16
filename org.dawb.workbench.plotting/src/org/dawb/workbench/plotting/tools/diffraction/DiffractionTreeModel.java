@@ -67,6 +67,8 @@ public class DiffractionTreeModel {
 	
 	public DiffractionTreeModel(IDiffractionMetadata metaData) throws Exception {
 		this.metaData = metaData;
+		if (metaData.getDetector2DProperties()==null) throw new Exception("Must have detector properties!");
+		if (metaData.getDiffractionCrystalEnvironment()==null) throw new Exception("Must have crystall environment!");
 		this.root     = new LabelNode();
 		createDiffractionModel(metaData);
 		nodeMap = new TreeMap<String, TreeNode>();
@@ -497,18 +499,14 @@ public class DiffractionTreeModel {
 	public void dispose() {
 		
 		deactivate();
-		if (nodeMap!=null) for (TreeNode node : nodeMap.values()) {
-			if (node instanceof LabelNode) {
-				((LabelNode)node).dispose();
-			}
-		}
 		
 	    final DetectorProperties detprop = getDetectorProperties();
 	    		
 		if (detprop!=null && beamCenterListener!=null) {
 			detprop.removeDetectorPropertyListener(beamCenterListener);
 		}
-				
+			
+		root.dispose();
 		nodeMap.clear();
 		nodeMap = null;
 		isDisposed = true;
