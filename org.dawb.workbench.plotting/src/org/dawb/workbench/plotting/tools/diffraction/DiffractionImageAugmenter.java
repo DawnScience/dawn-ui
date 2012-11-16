@@ -409,7 +409,6 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 			}
 		} else {
 			logger.error("DiffractionCrystalEnvironment is null!");
-			Thread.dumpStack();
 		}
 		if (detprop!=null) {
 			if (register) {
@@ -419,7 +418,6 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 			}		    
 		} else {
 			logger.error("DetectorProperties is null!");
-			Thread.dumpStack();
 		}
         
 	}
