@@ -83,7 +83,6 @@ import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationStandards;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
-import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
 import uk.ac.diamond.scisoft.analysis.io.DiffractionMetaDataAdapter;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
@@ -182,10 +181,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	
 	public void activate() {
 		super.activate();
-		//creating model with the part should be enough
-		//createDiffractionModel(false);
-		if (model != null)
-			model.activate();
+		if (model != null) model.activate();
 		
 		if (getPlottingSystem()!=null && this.regionListener != null) {
 			getPlottingSystem().addRegionListener(this.regionListener);

@@ -130,7 +130,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	public void deactivate() {
 		if (activeAugmenter == this) activeAugmenter=null;
 		active = false;
-		
+		for (RING_TYPE rt : RING_TYPE.values()) removeRings(rt);
 		registerListeners(false);
 	}
 
@@ -160,7 +160,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 				String label = df.format(beamCentrePC[0]) + "px, " + df.format(beamCentrePC[1])+"px";
 				beamCentreRegion = drawCrosshairs(beamCentrePC, length, ColorConstants.red, ColorConstants.black, "beam centre", label);
 			}
-			else {
+			else if (imageCentrePC!=null){
 				DecimalFormat df = new DecimalFormat("#.##");
 				String label = df.format(imageCentrePC[0]) + "px, " + df.format(imageCentrePC[1])+"px";
 				beamCentreRegion = drawCrosshairs(imageCentrePC, imageCentrePC[1]/50, ColorConstants.red, ColorConstants.black, "beam centre", label);
@@ -386,6 +386,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	public void setDiffractionMetadata(IDiffractionMetadata metadata) {
 		diffenv = metadata.getDiffractionCrystalEnvironment();
 		detprop = metadata.getDetector2DProperties();
+		imageCentrePC = detprop!=null ? detprop.getBeamCentreCoords() : null;
 	}
 	
 	private void registerListeners(boolean register) {
