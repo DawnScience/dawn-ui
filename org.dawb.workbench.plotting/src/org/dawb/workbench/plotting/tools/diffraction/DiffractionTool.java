@@ -85,7 +85,6 @@ import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationStandards;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
-import uk.ac.diamond.scisoft.analysis.io.DiffractionMetaDataAdapter;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.rcp.plotting.utils.BeamCenterRefinement;
@@ -183,7 +182,6 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	public void activate() {
 		super.activate();
 		createDiffractionModel(true);
-		if (model != null) model.activate();
 		
 		if (getPlottingSystem()!=null && this.regionListener != null) {
 			getPlottingSystem().addRegionListener(this.regionListener);
@@ -243,6 +241,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		}
 			
 		viewer.setInput(model.getRoot());
+		model.activate();
 		
         resetExpansion();
 	}

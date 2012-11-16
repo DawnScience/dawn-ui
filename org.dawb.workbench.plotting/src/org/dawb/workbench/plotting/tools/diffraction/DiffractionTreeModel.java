@@ -287,7 +287,8 @@ public class DiffractionTreeModel {
 	}
 
 	private LabelNode createExperimentalInfo(final DiffractionCrystalEnvironment dce,
-			                                 DiffractionCrystalEnvironment odce, final DetectorProperties detprop, DetectorProperties odetprop) {
+			                                 DiffractionCrystalEnvironment odce, 
+			                                 final DetectorProperties detprop, DetectorProperties odetprop) {
 	    // Experimental Info
         final LabelNode experimentalInfo = new LabelNode("Experimental Information", root);
         registerNode(experimentalInfo);
@@ -373,8 +374,53 @@ public class DiffractionTreeModel {
         	osci.setDefault(odce.getPhiRange(), NonSI.DEGREE_ANGLE);
         	osci.setValue(dce.getPhiRange(), NonSI.DEGREE_ANGLE);
         }
-
+        
+        final LabelNode normal = new LabelNode("Normal (Orientation)", experimentalInfo);
+        registerNode(normal);
+        normal.setDefaultExpanded(true);
+        
+        final double[] oorientation = odetprop!=null ? odetprop.getNormalAnglesInDegrees() : null;
+        final double[] orientation  = detprop!=null  ? detprop.getNormalAnglesInDegrees()  : null;
+        
+        NumericNode<Angle> yaw   = createOrientation("Yaw",-180,180,oorientation,orientation,0,normal);
+        NumericNode<Angle> pitch = createOrientation("Pitch",-90,90,oorientation,orientation,1,normal);
+        NumericNode<Angle> roll  = createOrientation("Roll",-180,180,oorientation,orientation,2,normal);
+        
 	    return experimentalInfo;
+	}
+
+	private NumericNode<Angle> createOrientation(String label, 
+			                                     int lower,
+                                                 int upper,
+			                                     double[] oorientation, 
+			                                     double[] orientation, 
+			                                     final int index,
+			                                     LabelNode normal) {
+		
+		NumericNode<Angle> node = new NumericNode<Angle>(label, normal, NonSI.DEGREE_ANGLE);
+        registerNode(node);
+        if (orientation!=null)  {
+        	node.setDefault(oorientation[index], NonSI.DEGREE_ANGLE);
+        	node.setValue(orientation[index], NonSI.DEGREE_ANGLE);
+        }
+        node.setIncrement(1);
+        node.setFormat("#0.##");
+        node.setLowerBound(lower);
+        node.setUpperBound(upper);
+        node.setUnits(NonSI.DEGREE_ANGLE, SI.RADIAN);	
+        node.setEditable(true);
+        
+        node.addAmountListener(new AmountListener<Angle>() {		
+			@Override
+			public void amountChanged(AmountEvent<Angle> evt) {
+				
+				double[] ori = getDetectorProperties().getNormalAnglesInDegrees();
+				ori[index]   = evt.getAmount().doubleValue(NonSI.DEGREE_ANGLE);
+				getDetectorProperties().setNormalAnglesInDegrees(ori[0], ori[1], ori[2]);
+			}
+		});
+
+        return node;
 	}
 
 	private Amount<Length> getBeamX(DetectorProperties dce) {
