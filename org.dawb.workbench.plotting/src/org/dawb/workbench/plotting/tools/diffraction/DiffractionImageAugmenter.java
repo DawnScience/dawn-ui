@@ -116,7 +116,6 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	 */
 	public DiffractionImageAugmenter(AbstractPlottingSystem system) {
 		plottingSystem = system;
-		CalibrationFactory.addCalibrantSelectionListener(this);
 		if (activeAugmenter==null) activeAugmenter = this;
 	}
 	
@@ -125,11 +124,14 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		activeAugmenter = this;
 		active = true;
 		updateAll();
+		registerListeners(true);
 	}
 	
 	public void deactivate() {
 		if (activeAugmenter == this) activeAugmenter=null;
 		active = false;
+		
+		registerListeners(false);
 	}
 
 	/**
@@ -346,9 +348,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	}
 
 	public void dispose() {
-		diffenv.removeDiffractionCrystalEnvironmentListener(this);
-		detprop.removeDetectorPropertyListener(this);
-		CalibrationFactory.removeCalibrantSelectionListener(this);
+		deactivate();
 	}
 
 	@Override
@@ -385,19 +385,87 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 
 	public void setDiffractionMetadata(IDiffractionMetadata metadata) {
 		diffenv = metadata.getDiffractionCrystalEnvironment();
+		detprop = metadata.getDetector2DProperties();
+	}
+	
+	private void registerListeners(boolean register) {
+		
+		if (register) {
+			CalibrationFactory.addCalibrantSelectionListener(this);
+		} else {
+			CalibrationFactory.removeCalibrantSelectionListener(this);
+		}
+		
 		if (diffenv!=null) {
-			diffenv.addDiffractionCrystalEnvironmentListener(this);
+			if (register) {
+			    diffenv.addDiffractionCrystalEnvironmentListener(this);
+			} else {
+				diffenv.removeDiffractionCrystalEnvironmentListener(this);
+			}
 		} else {
 			logger.error("DiffractionCrystalEnvironment is null!");
 			Thread.dumpStack();
 		}
-		detprop = metadata.getDetector2DProperties();
 		if (detprop!=null) {
-		    detprop.addDetectorPropertyListener(this);
+			if (register) {
+				detprop.addDetectorPropertyListener(this);
+			} else {
+				detprop.removeDetectorPropertyListener(this);
+			}		    
 		} else {
 			logger.error("DetectorProperties is null!");
 			Thread.dumpStack();
 		}
+        
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (active ? 1231 : 1237);
+		result = prime
+				* result
+				+ ((beamCentreRegion == null) ? 0 : beamCentreRegion.hashCode());
+		result = prime * result + ((detprop == null) ? 0 : detprop.hashCode());
+		result = prime * result + ((diffenv == null) ? 0 : diffenv.hashCode());
+		result = prime * result
+				+ ((plottingSystem == null) ? 0 : plottingSystem.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DiffractionImageAugmenter other = (DiffractionImageAugmenter) obj;
+		if (active != other.active)
+			return false;
+		if (beamCentreRegion == null) {
+			if (other.beamCentreRegion != null)
+				return false;
+		} else if (!beamCentreRegion.equals(other.beamCentreRegion))
+			return false;
+		if (detprop == null) {
+			if (other.detprop != null)
+				return false;
+		} else if (!detprop.equals(other.detprop))
+			return false;
+		if (diffenv == null) {
+			if (other.diffenv != null)
+				return false;
+		} else if (!diffenv.equals(other.diffenv))
+			return false;
+		if (plottingSystem == null) {
+			if (other.plottingSystem != null)
+				return false;
+		} else if (!plottingSystem.equals(other.plottingSystem))
+			return false;
+		return true;
 	}
 
 }

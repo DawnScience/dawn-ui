@@ -79,7 +79,9 @@ public class DiffractionTreeModel {
 	
 	public void deactivate() {
 		this.isActive = false;
-		getDetectorProperties().removeDetectorPropertyListener(beamCenterListener);
+		if (getDetectorProperties()!=null && beamCenterListener!=null) {
+			getDetectorProperties().removeDetectorPropertyListener(beamCenterListener);
+		}
 	}
 
 	private void createDiffractionModel(IMetaData metaData) throws Exception {
@@ -493,6 +495,8 @@ public class DiffractionTreeModel {
 	}
 
 	public void dispose() {
+		
+		deactivate();
 		if (nodeMap!=null) for (TreeNode node : nodeMap.values()) {
 			if (node instanceof LabelNode) {
 				((LabelNode)node).dispose();
