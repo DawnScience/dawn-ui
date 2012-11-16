@@ -183,7 +183,6 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	public void activate() {
 		super.activate();
 		createDiffractionModel(true);
-		if (model != null) model.activate();
 		
 		if (getPlottingSystem()!=null && this.regionListener != null) {
 			getPlottingSystem().addRegionListener(this.regionListener);
@@ -235,6 +234,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			}
 			model = new DiffractionTreeModel(data);
 			model.setViewer(viewer);
+			model.activate();
 			if (augmenter != null) {
 				augmenter.setDiffractionMetadata(data);
 			}
