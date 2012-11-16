@@ -18,6 +18,7 @@ import java.util.Set;
 
 import org.dawb.common.ui.plot.EmptyTool;
 import org.dawb.common.ui.plot.IPlottingSystem;
+import org.dawb.common.ui.plot.tool.AbstractToolPage;
 import org.dawb.common.ui.plot.tool.IToolChangeListener;
 import org.dawb.common.ui.plot.tool.IToolContainer;
 import org.dawb.common.ui.plot.tool.IToolPage;
@@ -1218,6 +1219,8 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
             	return;
             }
             
+            /** Bodge warning. We now check a few incompatible tool combinations **/
+            
             // If we are a IToolPageSystem and required tool is no tool and 
             // if we have plotted data inconsistent with the existing tool, 
             // leave the existing tool where it is. Likely it is an image tool
@@ -1230,6 +1233,23 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
             		if (activeRec.tool.getToolPageRole()==ToolPageRole.ROLE_1D) return; // 1D original tool
             	}
             }
+            
+            /**
+             * For dedicated tools we do not want to link them to parts that are tools and also
+             * have the wrong dimensionality
+             */
+            if (activeRec.tool instanceof AbstractToolPage && sys instanceof IPlottingSystem) {
+            	if (((AbstractToolPage)activeRec.tool).isDedicatedView()) {
+            		IPlottingSystem ps = (IPlottingSystem)sys;
+            		if (activeRec.tool.getToolPageRole()==ToolPageRole.ROLE_2D && !ps.is2D()) {
+            			return;
+            		} else if (activeRec.tool.getToolPageRole()==ToolPageRole.ROLE_1D && ps.is2D()) {
+            			return;
+            		}
+            	}
+            }
+            
+            /** End bodge warning. **/
             
         
     		hiddenPart = null;

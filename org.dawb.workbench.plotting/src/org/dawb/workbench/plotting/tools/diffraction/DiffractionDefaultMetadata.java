@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 
+import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import ncsa.hdf.object.Metadata;
@@ -63,6 +64,42 @@ public class DiffractionDefaultMetadata {
 		double exposureTime = Activator.getDefault().getPreferenceStore().getDouble(DiffractionToolConstants.EXPOSURE_TIME);
 		
 		return new DiffractionCrystalEnvironment(lambda, startOmega, rangeOmega, exposureTime);
+	}
+	
+	/**
+	 * Static method to replace the values in the old DiffractionCrystalEnvironment with the new
+	 */
+	public static void copyNewOverOld(DiffractionCrystalEnvironment newDCE, DiffractionCrystalEnvironment oldDCE) {
+		
+		oldDCE.setExposureTime(newDCE.getExposureTime());
+		oldDCE.setPhiRange(newDCE.getPhiRange());
+		oldDCE.setPhiStart(newDCE.getPhiStart());
+		oldDCE.setWavelength(newDCE.getWavelength());
+
+	}
+	
+	/**
+	 * Static method to replace the values in the old DetectorProperties with the new
+	 */
+	public static void copyNewOverOld(DetectorProperties newDP, DetectorProperties oldDP) {
+		
+		oldDP.setOrigin(new Vector3d(newDP.getOrigin()));
+		oldDP.setBeamVector(new Vector3d(newDP.getBeamVector()));
+		oldDP.setPx(newDP.getPx());
+		oldDP.setPy(newDP.getPy());
+		oldDP.setVPxSize(newDP.getVPxSize());
+		oldDP.setHPxSize(newDP.getHPxSize());
+		oldDP.setOrientation(newDP.getOrientation());
+
+	}
+	
+	/**
+	 * Static method to replace the values in the DiffractionCrystalEnvironment and DetectorProperties
+	 *  of an old IDiffractionmetaData with a new
+	 */
+	public static void copyNewOverOld(IDiffractionMetadata newDM, IDiffractionMetadata oldDM){
+		copyNewOverOld(newDM.getDetector2DProperties(), oldDM.getDetector2DProperties());
+		copyNewOverOld(newDM.getDiffractionCrystalEnvironment(), oldDM.getDiffractionCrystalEnvironment());
 	}
 	
 	

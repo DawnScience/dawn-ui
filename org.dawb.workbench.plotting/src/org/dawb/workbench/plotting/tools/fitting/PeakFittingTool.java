@@ -525,8 +525,8 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 			numberPeaks.setSelectedAction(ipeak-1);
 			numberPeaks.setCheckedAction(ipeak-1, true);
 		} else {
-			numberPeaks.setSelectedAction(11);
-			numberPeaks.setCheckedAction(11, true);
+			numberPeaks.setSelectedAction(npeaks);
+			npeaks.setChecked(true);
 		}
 			
 		getSite().getActionBars().getToolBarManager().add(numberPeaks);

@@ -190,7 +190,10 @@ public class DiffractionPreferencePage extends PreferencePage implements IWorkbe
 
 	@Override
 	public boolean performOk() {
-		try {
+		try {			
+			
+			CalibrantSpacing spacing = calibrationStandards.getCalibrationPeakMap(calibrantChoice.getItem(calibrantChoice.getSelectionIndex()));
+			BeanUI.uiToBean(this, spacing);
 			calibrationStandards.save();
 		} catch (Exception e) {
 			logger.error("Cannot save standards!", e);
