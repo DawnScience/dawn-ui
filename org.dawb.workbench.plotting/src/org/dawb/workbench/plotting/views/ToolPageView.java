@@ -1215,7 +1215,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 					             ? sys.getCurrentToolPage(getViewRole())
 					             : sys.getToolPage(getViewSite().getSecondaryId());
 					            
-            if (tool.equals(getCurrentPage())) {
+            if (tool!=null&&tool.equals(getCurrentPage())) {
             	return;
             }
             

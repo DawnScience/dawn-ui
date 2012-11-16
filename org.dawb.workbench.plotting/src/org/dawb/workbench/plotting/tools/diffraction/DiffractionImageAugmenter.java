@@ -124,7 +124,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		activeAugmenter = this;
 		active = true;
 		updateAll();
-		registerListeners(true);
+		//registerListeners(true);
 	}
 	
 	public void deactivate() {
@@ -384,8 +384,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	}
 
 	public void setDiffractionMetadata(IDiffractionMetadata metadata) {
-		if (diffenv != null && detprop != null)
-			registerListeners(false);
+		if (diffenv != null && detprop != null) registerListeners(false);
 		diffenv = metadata.getDiffractionCrystalEnvironment();
 		detprop = metadata.getDetector2DProperties();
 		registerListeners(true);

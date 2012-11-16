@@ -209,7 +209,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		CalibrationFactory.removeCalibrantSelectionListener(this);
 		if (augmenter!=null) augmenter.deactivate();
 		if (activeDiffractionTool==this) activeDiffractionTool = null;
-		model.deactivate();
+		if (model!=null) model.deactivate();
 	}
 	
 	public void dispose() {
@@ -284,35 +284,32 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	}
 	
 	private IDiffractionMetadata getDiffractionMetaData() {
-		//Now always returns IDiffractionMetadata to prevent creation of a new
+		// Now always returns IDiffractionMetadata to prevent creation of a new
 		// metadata object after listeners have been added to the old metadata
 		
 		IDiffractionMetadata lockedMeta = service.getLockedDiffractionMetaData();
 		
 		if (lockedMeta != null) {
 			
-			IImageTrace imageTrace = getImageTrace();
+   		    IImageTrace imageTrace = getImageTrace();
 			if (imageTrace==null) return lockedMeta;
 			
 			IMetaData mdImage = imageTrace.getData().getMetadata();
 			
 			if (mdImage == null) {
 				imageTrace.getData().setMetadata(lockedMeta.clone());
-				return (IDiffractionMetadata)imageTrace.getData().getMetadata();
 			} else if (!(mdImage instanceof IDiffractionMetadata)) {
 				IDiffractionMetadata idm = DiffractionDefaultMetadata.getDiffractionMetadata(imageTrace.getData().getShape(),mdImage);
 				DiffractionDefaultMetadata.copyNewOverOld(lockedMeta, idm);
 				imageTrace.getData().setMetadata(idm);
-				return idm;
 			} else if (mdImage instanceof IDiffractionMetadata) {
-				if (diffractionMetadataAreEqual((IDiffractionMetadata)mdImage,lockedMeta))
-					return (IDiffractionMetadata)mdImage;
-				else {
+				if (!diffractionMetadataAreEqual((IDiffractionMetadata)mdImage,lockedMeta)) {
 					DiffractionDefaultMetadata.copyNewOverOld(lockedMeta, (IDiffractionMetadata)mdImage);
 					imageTrace.getData().setMetadata(mdImage);
-					return (IDiffractionMetadata)mdImage;
 				}
 			}
+			return lockedMeta;
+			
 		}
 		
 		
