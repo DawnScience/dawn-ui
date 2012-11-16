@@ -19,6 +19,7 @@ package org.dawb.workbench.plotting.tools;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
@@ -86,9 +87,17 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 
 	// Jobs
 	private Job updateInfoPixelData;
-	// Internal Items
-	private boolean isUpdateRunning = false;
 		
+	// Internal jobs items
+	private boolean isUpdateRunning = false;
+	
+	// values arrayList
+    ArrayList<String> values = new ArrayList<String>();
+	
+	// values hashmap
+    Hashtable<String, ArrayList<String>> valuesHash = new Hashtable<String, ArrayList<String>>();
+
+			
 	public InfoPixelTool() {
 		dragBounds = new HashMap<String,ROIBase>(7);
 		
@@ -109,8 +118,10 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 		} catch (Exception e) {
 			logger.error("Cannot get plotting system!", e);
 		}
+		
 	}
 	
+
 	@Override
 	public void createControl(Composite parent) {
 		
@@ -173,7 +184,7 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 	}
 
 	private void createRegions() {
-		
+				
 		if (getPlottingSystem()==null) return;
 		try {
 			if (xHair==null || getPlottingSystem().getRegion(xHair.getName())==null) {
@@ -235,7 +246,7 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 		// Needed to refresh the table when activated as other tools may create points
 		// which should be in the table.
 		try {
-			this.viewer.refresh();
+			viewer.refresh();
 		} catch (Throwable ignored) {
 			// Not a failure if we cannot refresh.
 		}
@@ -299,7 +310,6 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 
 	@Override
 	public void mousePressed(MouseEvent evt) {
-		logger.info("button clicked: " + evt.button);
 		
 		if(evt.button == 1){// left click
 			if (!isActive()) return;
@@ -427,7 +437,7 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 	}
 	
 	private void createColumns(final TableViewer viewer) {
-		
+			
 		ColumnViewerToolTipSupport.enableFor(viewer,ToolTip.NO_RECREATE);
 
 		TableViewerColumn var   = new TableViewerColumn(viewer, SWT.CENTER, 0);
@@ -545,7 +555,7 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 
 	@Override
 	public void roiDragged(ROIEvent evt) {
-		logger.debug("ROI dragged ====> ");
+		//logger.debug("ROI dragged ====> ");
 		if (viewer != null) {
 			IRegion region = (IRegion) evt.getSource();
 
@@ -575,20 +585,20 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
 						isUpdateRunning = true;
-						logger.debug("Update Running");
-												 
-						PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+						//logger.debug("Update Running");
+						if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+						PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
 							public void run() {
 								//Run the update table viewer on a separate thread than the GUI
-								//logger.info("refresh viewer... "+ region.toString());
-								viewer.refresh(region);						
+								viewer.refresh(region);
+							
 							}
+
 						});
 						if (!isActive()) return Status.CANCEL_STATUS;
 						return Status.OK_STATUS;
 						
 					}finally {
-						//logger.debug("Update Finished In Finally");
 						isUpdateRunning = false;
 					}
 				}
@@ -599,9 +609,8 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 			updateInfoPixelData.setUser(false);
 			updateInfoPixelData.setPriority(Job.INTERACTIVE);
 		}
-		
+		updateInfoPixelData.cancel();
 		updateInfoPixelData.schedule();
 
-	}
-	
+	}	
 }
