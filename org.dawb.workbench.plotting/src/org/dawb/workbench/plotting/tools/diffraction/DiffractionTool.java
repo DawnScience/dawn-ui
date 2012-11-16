@@ -230,6 +230,9 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		IDiffractionMetadata data=null;
 		try {
 			data  = getDiffractionMetaData();
+			if (data==null || data.getOriginalDetector2DProperties()==null || data.getDiffractionCrystalEnvironment()==null) {
+				return;
+			}
 			model = new DiffractionTreeModel(data);
 			model.setViewer(viewer);
 			if (augmenter != null) {
