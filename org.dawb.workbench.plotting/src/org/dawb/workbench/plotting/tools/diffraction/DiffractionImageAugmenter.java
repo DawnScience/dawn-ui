@@ -194,6 +194,8 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 				}
 			}
 			drawResolutionRings(calibrantRingsList, "calibrant", RING_TYPE.CALIBRANT);
+		} else {
+			hideRings(RING_TYPE.CALIBRANT);
 		}
 	}
 
@@ -239,6 +241,18 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		menu.add(beamCentre);
 	}
 
+	protected void hideRings(Object marker) {
+		if (plottingSystem==null) return;
+		if (plottingSystem.getRegions()==null) return;
+		for (IRegion region : plottingSystem.getRegions()) {
+			try {
+				if (region.getUserObject()!=marker) continue;
+				region.setVisible(false);
+			} catch (Throwable ne) {
+				// They can delete regions themselves.
+			}
+		}
+	}
 	protected void removeRings(Object marker) {
 		if (plottingSystem==null) return;
 		if (plottingSystem.getRegions()==null) return;
@@ -272,6 +286,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		if (elipses==null) return null;
 		final List<IRegion> ret = new ArrayList<IRegion>(elipses.size());
 		for (IRegion iRegion : elipses) {
+			if (iRegion.getUserObject()!=marker) continue;
 			ret.add(iRegion);
 		}
 		return ret;
@@ -326,6 +341,8 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 				iceRingsList.add(new ResolutionRing(res, true, ColorConstants.blue, true, false, false));
 			}
 			drawResolutionRings(iceRingsList, "ice", RING_TYPE.ICE);
+		} else {
+			hideRings(RING_TYPE.ICE);
 		}
 	}
 		
@@ -364,6 +381,8 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 				standardRingsList.add(new ResolutionRing(d, true, ColorConstants.yellow, false, true, true));
 			}
 			drawResolutionRings(standardRingsList, "standard", RING_TYPE.STANDARD);
+		} else {
+			hideRings(RING_TYPE.STANDARD);
 		}
 	}
 
