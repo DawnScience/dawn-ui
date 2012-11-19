@@ -42,7 +42,7 @@ public class EllipseSelection extends AbstractSelectionRegion {
 		labelColour = ColorConstants.black;
 		labelFont = new Font(Display.getCurrent(), "Dialog", 10, SWT.BOLD);
 	}
-
+	
 	@Override
 	public void setVisible(boolean visible) {
 		if (ellipse != null)

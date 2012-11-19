@@ -2,6 +2,7 @@ package org.dawb.workbench.plotting.tools.diffraction;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.measure.unit.NonSI;
@@ -180,7 +181,6 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	
 	protected void drawCalibrantRings(boolean isChecked, CalibrantSpacing spacing) {
 		if (!active) return; // We are likely off screen.
-		removeRings(RING_TYPE.CALIBRANT);
 	
 		if (isChecked) {
 			List<ResolutionRing> calibrantRingsList = new ArrayList<ResolutionRing>(7);
@@ -252,10 +252,36 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		}
 	}
 
+	protected void drawResolutionRings(List<ResolutionRing> ringList, String typeName, Object marker) {
+		
+		final List<IRegion> existing = getRegions(marker);
+		for (IRegion iRegion : existing) iRegion.setVisible(false);
+		
+		for (int i = 0; i < ringList.size(); i++) {
+			try {
+			    drawResolutionEllipse(existing.get(i), ringList.get(i), typeName+i, marker);
+			} catch (Throwable ne) {
+				drawResolutionEllipse(null, ringList.get(i), typeName+i, marker);
+			}
+		}
+	}
+
+	private List<IRegion> getRegions(Object marker) {
+		
+        final Collection<IRegion> elipses = plottingSystem.getRegions(RegionType.ELLIPSE);
+		if (elipses==null) return null;
+		final List<IRegion> ret = new ArrayList<IRegion>(elipses.size());
+		for (IRegion iRegion : elipses) {
+			ret.add(iRegion);
+		}
+		return ret;
+	}
+
 	/*
 	 * handle ring drawing, removal and clearing
 	 */
-	protected void drawEllipse(double[] beamCentre, 
+	protected void drawEllipse(IRegion region,
+			                     double[] beamCentre, 
 			                      EllipticalROI eroi, 
 			                      Color colour,
 			                      Color labelColour,
@@ -264,10 +290,12 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 			                      Object marker) {
 
 		if (!active) return; // We are likely off screen.
-        IRegion region;
-		try {
+		
+		boolean requireAdd = false;
+		if (region==null) try {
 			final String regionName = RegionUtils.getUniqueName(nameStub, plottingSystem);
 			region = plottingSystem.createRegion(regionName, RegionType.ELLIPSE);
+			requireAdd = true;
 		} catch (Exception e) {
 			logger.error("Can't create region", e);
 			return;
@@ -282,7 +310,8 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		((AbstractSelectionRegion) region).setForegroundColor(labelColour);
 
 		region.setShowPosition(false);
-		plottingSystem.addRegion(region);
+		if (requireAdd) plottingSystem.addRegion(region);
+		region.setVisible(true);
 		region.setMobile(false);
 		region.setUserObject(marker);
 
@@ -291,8 +320,6 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	protected void drawIceRings(boolean isChecked) {
 		if (!active) return; // We are likely off screen.
 	    
-		removeRings(RING_TYPE.ICE);
-		
 		if (isChecked) {
 			List<ResolutionRing> iceRingsList = new ArrayList<ResolutionRing>(7);
 			for (double res : iceResolution) {
@@ -302,28 +329,21 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		}
 	}
 		
-	protected void drawResolutionEllipse(ResolutionRing ring, String name, Object marker) {
+	protected void drawResolutionEllipse(IRegion reused, ResolutionRing ring, String name, Object marker) {
 		if (!active) return; // We are likely off screen.
 		if (detprop != null && diffenv != null) {
 			double[] beamCentre = detprop.getBeamCentreCoords(); // detConfig.pixelCoords(detConfig.getBeamPosition());
 			EllipticalROI ellipse = DSpacing.ellipseFromDSpacing(detprop, diffenv, ring.getResolution());
 			DecimalFormat df = new DecimalFormat("#.00");
-			drawEllipse(beamCentre, ellipse, ring.getColour(), ring.getColour(), name,
+			drawEllipse(reused, beamCentre, ellipse, ring.getColour(), ring.getColour(), name,
 					df.format(ring.getResolution()) + "Å", marker);
 		}
 	}
 
-	protected void drawResolutionRings(List<ResolutionRing> ringList, String typeName, Object marker) {
-		for (int i = 0; i < ringList.size(); i++) {
-			drawResolutionEllipse(ringList.get(i), typeName+i, marker);
-		}
-	}
 
 	protected void drawStandardRings(boolean isChecked) {
 		if (!active) return; // We are likely off screen.
-		
-		removeRings(RING_TYPE.STANDARD); 
-	
+			
 		if (isChecked && diffenv!= null && detprop != null) {
 			List<ResolutionRing> standardRingsList = new ArrayList<ResolutionRing>(7);
 			Double numberEvenSpacedRings = 6.0;
