@@ -2,6 +2,7 @@ package org.dawb.workbench.plotting.tools.diffraction;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -100,10 +101,9 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	private AbstractPlottingSystem plottingSystem;
 	private DetectorProperties detprop;
 	private DiffractionCrystalEnvironment diffenv;
-	private IRegion beamCentreRegion;
 	
     private enum RING_TYPE {
-    	ICE, STANDARD, CALIBRANT;
+    	ICE, STANDARD, CALIBRANT, BEAM_CENTRE;
     }
 
 	private double[] imageCentrePC;
@@ -146,10 +146,24 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	public boolean isShowingBeamCenter() {
 		return beamCentre.isChecked();
 	}
+	
+	protected IRegion getBeamCentre() {
+		IRegion region=null;
+		final Collection<IRegion> regions = plottingSystem.getRegions(RegionType.LINE);
+		for (IRegion iRegion : regions) {
+			if (iRegion.getUserObject()==RING_TYPE.BEAM_CENTRE) {
+				region = iRegion;
+				break;
+			}
+		}
+        return region;
+	}
 
 	protected void drawBeamCentre(boolean isChecked) {
 		if (!active) return; // We are likely off screen.
 		beamCentre.setChecked(isChecked);
+		
+		IRegion beamCentreRegion = getBeamCentre();
 		if (beamCentreRegion != null)
 			plottingSystem.removeRegion(beamCentreRegion);
 			
@@ -159,12 +173,12 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 				double length = (1 + Math.sqrt(detprop.getPx() * detprop.getPx() + detprop.getPy() * detprop.getPy()) * 0.01);
 				DecimalFormat df = new DecimalFormat("#.##");
 				String label = df.format(beamCentrePC[0]) + "px, " + df.format(beamCentrePC[1])+"px";
-				beamCentreRegion = drawCrosshairs(beamCentrePC, length, ColorConstants.red, ColorConstants.black, "beam centre", label);
+				drawCrosshairs(beamCentrePC, length, ColorConstants.red, ColorConstants.black, "beam centre", label);
 			}
 			else if (imageCentrePC!=null){
 				DecimalFormat df = new DecimalFormat("#.##");
 				String label = df.format(imageCentrePC[0]) + "px, " + df.format(imageCentrePC[1])+"px";
-				beamCentreRegion = drawCrosshairs(imageCentrePC, imageCentrePC[1]/50, ColorConstants.red, ColorConstants.black, "beam centre", label);
+				drawCrosshairs(imageCentrePC, imageCentrePC[1]/50, ColorConstants.red, ColorConstants.black, "beam centre", label);
 			}
 		}
 	}
@@ -201,7 +215,8 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 
 	protected IRegion drawCrosshairs(double[] beamCentre, double length, Color colour, Color labelColour, String nameStub, String labelText) {
 		if (!active) return null; // We are likely off screen.
-		IRegion region;
+		IRegion region=null;
+		
 		try {
 			final String regionName = RegionUtils.getUniqueName(nameStub, plottingSystem);
 			region = plottingSystem.createRegion(regionName, RegionType.LINE);
@@ -219,6 +234,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		region.setAlpha(100);
 		region.setUserRegion(false);
 		region.setShowPosition(false);
+		region.setUserObject(RING_TYPE.BEAM_CENTRE);
 		
 		region.setLabel(labelText);
 		((AbstractSelectionRegion)region).setShowLabel(true);
@@ -412,9 +428,10 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	@Override
 	public void diffractionMetadataCompositeChanged(DiffractionMetadataCompositeEvent evt) {
 		if (evt.hasBeamCentreChanged()) {
+			IRegion beamCentreRegion = getBeamCentre();
 			if (beamCentre.isChecked()) {
 				beamCentre.setChecked(false);
-				plottingSystem.removeRegion(beamCentreRegion);
+				if (beamCentreRegion!=null) plottingSystem.removeRegion(beamCentreRegion);
 			} else {
 				beamCentre.setChecked(true);
 				drawBeamCentre(true);
@@ -465,11 +482,9 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + (active ? 1231 : 1237);
-		result = prime
-				* result
-				+ ((beamCentreRegion == null) ? 0 : beamCentreRegion.hashCode());
 		result = prime * result + ((detprop == null) ? 0 : detprop.hashCode());
 		result = prime * result + ((diffenv == null) ? 0 : diffenv.hashCode());
+		result = prime * result + Arrays.hashCode(imageCentrePC);
 		result = prime * result
 				+ ((plottingSystem == null) ? 0 : plottingSystem.hashCode());
 		return result;
@@ -486,11 +501,6 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		DiffractionImageAugmenter other = (DiffractionImageAugmenter) obj;
 		if (active != other.active)
 			return false;
-		if (beamCentreRegion == null) {
-			if (other.beamCentreRegion != null)
-				return false;
-		} else if (!beamCentreRegion.equals(other.beamCentreRegion))
-			return false;
 		if (detprop == null) {
 			if (other.detprop != null)
 				return false;
@@ -500,6 +510,8 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 			if (other.diffenv != null)
 				return false;
 		} else if (!diffenv.equals(other.diffenv))
+			return false;
+		if (!Arrays.equals(imageCentrePC, other.imageCentrePC))
 			return false;
 		if (plottingSystem == null) {
 			if (other.plottingSystem != null)
