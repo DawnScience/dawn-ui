@@ -150,6 +150,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	protected IRegion getBeamCentre() {
 		IRegion region=null;
 		final Collection<IRegion> regions = plottingSystem.getRegions(RegionType.LINE);
+		if (regions==null) return null;
 		for (IRegion iRegion : regions) {
 			if (iRegion.getUserObject()==RING_TYPE.BEAM_CENTRE) {
 				region = iRegion;

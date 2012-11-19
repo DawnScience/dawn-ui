@@ -156,7 +156,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		control.setLayout(new GridLayout(1, false));
 		GridUtils.removeMargins(control);
 	
-		this.filteredTree = new DiffractionTree(control, SWT.FULL_SELECTION | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER, new DiffractionFilter(this), true);		
+		this.filteredTree = new DiffractionTree(control, SWT.FULL_SELECTION | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER, new DiffractionFilter(DiffractionTool.this), true);		
 		viewer = filteredTree.getViewer();
 		viewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		createColumns(viewer);
@@ -171,8 +171,6 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		label.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		label.setText("* Click to change value  ");
 		
-		getSite().setSelectionProvider(viewer);
-
 		createDiffractionModel(false);
 		createActions();
 		createListeners();
@@ -193,7 +191,14 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		CalibrationFactory.addCalibrantSelectionListener(this);
 		activeDiffractionTool = this;
 			
-		if (viewer!=null) viewer.refresh();
+		final IDiffractionMetadata dmd = getDiffractionMetaData();
+		if (viewer!=null && viewer.getInput()!=null && model!=null && dmd!=null && dmd.getDetector2DProperties()!=null && dmd.getOriginalDiffractionCrystalEnvironment()!=null) {
+			try {
+			    viewer.refresh();
+			} catch (Throwable ne) {
+				// Sometimes model could not be resolved at this point.
+			}
+		}
 	}
 	
 	public void deactivate() {
@@ -238,6 +243,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 				augmenter.setDiffractionMetadata(data);
 			}
 		} catch (Exception e) {
+			logger.error("Cannot create model!", e);
 			return;
 		}
 			
@@ -245,15 +251,21 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		model.activate();
 		
         resetExpansion();
+		getSite().setSelectionProvider(viewer);
+
 	}
 	
 	
 
 	void resetExpansion() {
-		if (model == null) return;
-		final List<?> top = model.getRoot().getChildren();
-		for (Object element : top) {
-		   expand(element, viewer);
+		try {
+			if (model == null) return;
+			final List<?> top = model.getRoot().getChildren();
+			for (Object element : top) {
+			   expand(element, viewer);
+			}
+		} catch (Throwable ne) {
+			// intentionally silent
 		}
 	}
 

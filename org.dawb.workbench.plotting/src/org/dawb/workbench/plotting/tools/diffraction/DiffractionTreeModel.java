@@ -529,6 +529,7 @@ public class DiffractionTreeModel {
 		
 		if (image==null)  return;
 		if (isDisposed)   return;
+		if (image.getImageServiceBean()==null) return;
 		max.setDefault(image.getImageServiceBean().getMax().doubleValue(), Dimensionless.UNIT);
 		min.setDefault(image.getImageServiceBean().getMin().doubleValue(), Dimensionless.UNIT);
 
