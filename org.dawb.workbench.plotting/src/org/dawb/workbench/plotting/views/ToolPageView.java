@@ -637,7 +637,12 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	private Image toolImageOverride = null;
 	private Image getImageForToolPage(String toolId) {
 		
-		if (toolImageOverride!=null&&toolImageOverride.isDisposed()) toolImageOverride = null;
+		try {
+		    if (toolImageOverride!=null&&toolImageOverride.isDisposed()) toolImageOverride = null;
+		} catch (Throwable ne) {
+			toolImageOverride = null;
+		}
+		
 		if (toolImageOverride!=null) return toolImageOverride;
 		final IConfigurationElement[] configs = Platform.getExtensionRegistry().getConfigurationElementsFor("org.dawb.common.ui.toolPage");
 	    for (IConfigurationElement e : configs) {
