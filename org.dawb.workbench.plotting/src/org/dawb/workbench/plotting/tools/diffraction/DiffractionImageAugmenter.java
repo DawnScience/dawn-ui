@@ -287,13 +287,10 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		
 		final List<IRegion> existing = getRegions(marker);
 		for (IRegion iRegion : existing) iRegion.setVisible(false);
-		
-		for (int i = 0; i < ringList.size(); i++) {
-			try {
-			    drawResolutionEllipse(existing.get(i), ringList.get(i), typeName+i, marker);
-			} catch (Throwable ne) {
-				drawResolutionEllipse(null, ringList.get(i), typeName+i, marker);
-			}
+		int nExisting = existing.size();
+		int nRings = ringList.size();
+		for (int i = 0; i < nRings; i++) {
+			drawResolutionEllipse(i >= nExisting ? null : existing.get(i), ringList.get(i), typeName+i, marker);
 		}
 	}
 
