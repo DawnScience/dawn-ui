@@ -209,7 +209,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 			yHair.setVisible(false);
 			yHair.removeROIListener(this);
 		}
-		profilePlotter.clear();
+		if (profilePlotter!=null) profilePlotter.clear();
 
 		if (getPlottingSystem()!=null) getPlottingSystem().removeTraceListener(traceListener);
 	}
