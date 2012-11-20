@@ -55,6 +55,10 @@ class BoxSelection extends AbstractSelectionRegion {
 		this.connection = new RegionFillFigure(this) {
 			@Override
 			public void paintFigure(Graphics gc) {
+				
+				/**
+				 * TODO Discuss with Peter about XOR mode
+				 */
 				super.paintFigure(gc);
 				final Rectangle size = getRectangleFromVertices();				
 				this.bounds = size;

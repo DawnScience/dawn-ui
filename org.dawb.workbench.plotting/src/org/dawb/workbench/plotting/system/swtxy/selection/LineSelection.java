@@ -68,6 +68,10 @@ class LineSelection extends AbstractSelectionRegion {
 
 			@Override
 			public void paintFigure(Graphics gc) {
+				
+				/**
+				 * TODO Discuss with Peter about XOR mode
+				 */
 				super.paintFigure(gc);
 				final Point startCenter = startBox.getSelectionPoint();
 				final Point endCenter   = endBox.getSelectionPoint();
