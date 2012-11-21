@@ -66,6 +66,11 @@ public class ImageEditor extends MultiPageEditorPart implements IReusableEditor 
 			
 			int index = 0;
 			
+			boolean dataFirst = false;
+			if (getEditorSite().getPage().findViewReference("uk.ac.diamond.scisoft.analysis.rcp.views.DatasetInspectorView")!=null) {
+				dataFirst = true;
+			}
+
 			try {
 				Collection<IEditorPart> extensions = EditorExtensionFactory.getEditors(this);
 				if (extensions!=null && extensions.size()>0) {
@@ -78,29 +83,24 @@ public class ImageEditor extends MultiPageEditorPart implements IReusableEditor 
 			} catch (Exception e) {
 				logger.error("Cannot read editor extensions!", e);
 			}
+			
+			if (dataFirst && System.getProperty("org.dawb.editor.ascii.hide.diamond.image.editor")==null) {
+				final uk.ac.diamond.scisoft.analysis.rcp.editors.ImageEditor im = new uk.ac.diamond.scisoft.analysis.rcp.editors.ImageEditor();
+				addPage(index, im,       getEditorInput());
+				setPageText(index, "Info");
+				index++;
+			}
 
 			this.plotImageEditor = new PlotImageEditor();
 			addPage(index, plotImageEditor,       getEditorInput());
 			setPageText(index, "Image");
 			index++;
 			
-			if (System.getProperty("org.dawb.editor.ascii.hide.diamond.image.editor")==null) {
+			if (!dataFirst && System.getProperty("org.dawb.editor.ascii.hide.diamond.image.editor")==null) {
 				final uk.ac.diamond.scisoft.analysis.rcp.editors.ImageEditor im = new uk.ac.diamond.scisoft.analysis.rcp.editors.ImageEditor();
 				addPage(index, im,       getEditorInput());
 				setPageText(index, "Info");
 			}
-
-			final int infoIndex = index;
-			getSite().getShell().getDisplay().asyncExec(new Runnable() {
-				@Override
-				public void run() {
-					if (EclipseUtils.getPage().findView("uk.ac.diamond.scisoft.analysis.rcp.views.DatasetInspectorView")!=null &&
-							getPageCount()>=2) {
-						setActivePage(infoIndex);
-					}
-
-				}
-			});
 
 		} catch (PartInitException e) {
 			logger.error("Cannot initiate "+getClass().getName()+"!", e);
