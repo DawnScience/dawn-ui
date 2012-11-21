@@ -394,6 +394,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		var.setEditingSupport(new UnitEditingSupport(viewer));
 	}
 	
+	@SuppressWarnings("unchecked")
 	private class ValueEditingSupport extends EditingSupport {
 
 		public ValueEditingSupport(ColumnViewer viewer) {
@@ -429,7 +430,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		@Override
 		protected boolean canEdit(Object element) {
 			if (!(element instanceof NumericNode)) return false;
-			return ((NumericNode)element).isEditable();
+			return ((NumericNode<?>)element).isEditable();
 		}
 
 		@Override
@@ -453,6 +454,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		
 	}
 	
+	@SuppressWarnings("unchecked")
 	private class UnitEditingSupport extends EditingSupport {
 
 		public UnitEditingSupport(ColumnViewer viewer) {
@@ -525,7 +527,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			public void run() {
 				final TreeNode node = (TreeNode)((StructuredSelection)viewer.getSelection()).getFirstElement();
 				if (node instanceof NumericNode) {
-					((NumericNode)node).reset();
+					((NumericNode<?>)node).reset();
 					viewer.refresh(node);
 				}
 			}
@@ -556,6 +558,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		};
 
 		final Action paste = new Action("Paste value", Activator.getImageDescriptor("icons/paste.gif")) {
+			@SuppressWarnings("unchecked")
 			@Override
 			public void run() {
 				if (copiedNode!=null) {
@@ -625,6 +628,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			}
 			
 			
+			@SuppressWarnings("unchecked")
 			private List<IPeak> loadPeaks() {
 				IToolPage radialTool = getToolSystem().getToolPage(
 						"org.dawb.workbench.plotting.tools.radialProfileTool");
