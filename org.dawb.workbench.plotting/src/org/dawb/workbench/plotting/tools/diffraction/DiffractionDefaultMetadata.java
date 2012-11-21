@@ -5,10 +5,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 
-import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
-
-import ncsa.hdf.object.Metadata;
 
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.DiffractionToolConstants;
@@ -52,7 +49,7 @@ public class DiffractionDefaultMetadata {
 		return new DetectorProperties(new Vector3d(detectorOrigin), heightInPixels, widthInPixels, 
 				pixelSizeX, pixelSizeY, detectorRotationX, detectorRotationY, detectorRotationZ);
 	}
-	
+
 	/**
 	 * Static method to produce a DiffractionCrystalEnvironment properties object populated with persisted values
 	 * from the preferences store
