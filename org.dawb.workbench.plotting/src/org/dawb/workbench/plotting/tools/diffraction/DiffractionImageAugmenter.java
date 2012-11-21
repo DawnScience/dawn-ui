@@ -339,8 +339,8 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		((AbstractSelectionRegion) region).setForegroundColor(labelColour);
 
 		region.setShowPosition(false);
-		if (requireAdd) plottingSystem.addRegion(region);
 		region.setVisible(true);
+		if (requireAdd) plottingSystem.addRegion(region);
 		region.setMobile(false);
 		region.setUserObject(marker);
 
@@ -365,6 +365,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		if (detprop != null && diffenv != null) {
 			double[] beamCentre = detprop.getBeamCentreCoords(); // detConfig.pixelCoords(detConfig.getBeamPosition());
 			EllipticalROI ellipse = DSpacing.ellipseFromDSpacing(detprop, diffenv, ring.getResolution());
+			logger.debug("Drawing {}", ellipse);
 			DecimalFormat df = new DecimalFormat("#.00");
 			drawEllipse(reused, beamCentre, ellipse, ring.getColour(), ring.getColour(), name,
 					df.format(ring.getResolution()) + "Å", marker);
