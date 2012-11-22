@@ -27,7 +27,7 @@ public class DiffractionLabelProvider extends ColumnLabelProvider implements ISt
 		}
 
 		if (element instanceof NumericNode) {
-			getStyledText(ret, (NumericNode)element);
+			getStyledText(ret, (NumericNode<?>)element);
 			
 		} else  if (element instanceof ObjectNode) {
 			getStyledText(ret, (ObjectNode)element);
