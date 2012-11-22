@@ -537,9 +537,15 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 			if (!data.exists()) {
 				try {
 					data.create(new NullProgressMonitor());
-					data.open(new NullProgressMonitor());
 				} catch (CoreException e) {
 					logger.error("Cannot create 'data' project!", e);
+				}
+			}
+			if (!data.isOpen()) {
+				try {
+					data.open(new NullProgressMonitor());
+				} catch (CoreException e) {
+					logger.error("Cannot open 'data' project!", e);
 				}
 			}
 			file = data.getFile(name);
