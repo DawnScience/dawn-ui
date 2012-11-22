@@ -339,8 +339,8 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		((AbstractSelectionRegion) region).setForegroundColor(labelColour);
 
 		region.setShowPosition(false);
-		if (requireAdd) plottingSystem.addRegion(region);
 		region.setVisible(true);
+		if (requireAdd) plottingSystem.addRegion(region);
 		region.setMobile(false);
 		region.setUserObject(marker);
 

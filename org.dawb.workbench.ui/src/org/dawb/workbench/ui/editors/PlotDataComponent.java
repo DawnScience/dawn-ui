@@ -11,6 +11,8 @@
 package org.dawb.workbench.ui.editors;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,6 +57,10 @@ import org.dawb.workbench.ui.editors.preference.EditorPreferencePage;
 import org.dawb.workbench.ui.editors.slicing.ExpressionObject;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -113,6 +119,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
@@ -513,10 +520,41 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 
 
 	protected IFile getIFile() {
-		if (providerDeligate instanceof IEditorPart) {
-			return (IFile)((IEditorPart)providerDeligate).getEditorInput().getAdapter(IFile.class);
+		IFile file = null;
+		IEditorInput input = (providerDeligate instanceof IEditorPart) 
+				           ? (IEditorInput)((IEditorPart)providerDeligate).getEditorInput()
+				           : null;
+				         
+		try {
+			file = EclipseUtils.getIFile(input);
+		} catch (Throwable ne) {
+			file = null;
 		}
-		return null;
+		
+		if (file==null) {// Might be external file
+			final String name = input.getName();
+			final IProject data = ResourcesPlugin.getWorkspace().getRoot().getProject("data");
+			if (!data.exists()) {
+				try {
+					data.create(new NullProgressMonitor());
+					data.open(new NullProgressMonitor());
+				} catch (CoreException e) {
+					logger.error("Cannot create 'data' project!", e);
+				}
+			}
+			file = data.getFile(name);
+			if (file.exists()) {
+				file = EclipseUtils.getUniqueFile(file, FileUtils.getFileExtension(name));
+			}
+			try {
+				file.create(new FileInputStream(EclipseUtils.getFile(input)), IResource.FORCE, new NullProgressMonitor());
+				data.refreshLocal(IResource.DEPTH_ONE, new NullProgressMonitor());
+			} catch (Exception e) {
+				logger.error("Cannot create file "+file.getName()+"!", e);
+			}
+		}
+		
+		return file;
 	}
 
 	protected List<String> getSelectionNames() {
