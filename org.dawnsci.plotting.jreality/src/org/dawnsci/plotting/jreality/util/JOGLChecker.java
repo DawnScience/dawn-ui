@@ -105,7 +105,7 @@ public class JOGLChecker {
 		} catch (UnsatisfiedLinkError le) {
 			logger.warn("JOGL linking error");
 			hasJOGL = false;
-		} catch (Exception e) { //
+		} catch (Throwable e) { //
 			logger.warn("No JOGL using software render",e);
 			hasJOGL = false;
 		}
