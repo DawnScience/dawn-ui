@@ -418,19 +418,24 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 	 * @return IMetaData, may be null
 	 */
 	protected IMetaData getMetaData() {
+		//Changed to try and get the metadata from the image first
+		//This works around issues that were arrising when the loader factory
+		// and image traces were returning different metadata
+		IMetaData metaData = getImageTrace().getData().getMetadata();
+		
+		if (metaData != null) return metaData;
 		
 		if (getPart() instanceof IEditorPart) {
 			IEditorPart editor = (IEditorPart)getPart();
 	    	try {
-	    		IMetaData metaData = LoaderFactory.getMetaData(EclipseUtils.getFilePath(editor.getEditorInput()), null);
-	    		if (metaData != null)
-	    			return metaData;
+	    		metaData = LoaderFactory.getMetaData(EclipseUtils.getFilePath(editor.getEditorInput()), null);
+	    		return metaData;
 			} catch (Exception e) {
 				logger.error("Cannot get meta data for "+EclipseUtils.getFilePath(editor.getEditorInput()), e);
 			}
 		}
 		
-		return getImageTrace().getData().getMetadata();
+		return metaData;
 	}
 	
 	/**
