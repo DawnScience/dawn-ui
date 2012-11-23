@@ -315,7 +315,10 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		
         getControl().getDisplay().asyncExec(new Runnable() {
         	public void run() {
-        		profilePlottingSystem.autoscaleAxes();
+        		//replaced with call to repaint which autoscales if autoscale when
+        		//plot changes is checked
+        		profilePlottingSystem.repaint();
+        		//profilePlottingSystem.autoscaleAxes();
         	}
         });
 
