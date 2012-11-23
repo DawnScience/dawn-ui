@@ -81,6 +81,10 @@
          id="org.embl.cca.dviewer.feature"
          version="0.0.0"/>
 
+   <includes
+         id="uk.ac.diamond.scisoft.feedback.feature"
+         version="0.0.0"/>
+
    <plugin
          id="uk.ac.diamond.scisoft.analysis.rcp.contributions"
          download-size="0"
@@ -137,24 +141,6 @@
 
    <plugin
          id="org.dawb.workbench.application"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.apache.httpcomponents.httpclient"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.apache.httpcomponents.httpcore"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="uk.ac.diamond.proxyvole"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
