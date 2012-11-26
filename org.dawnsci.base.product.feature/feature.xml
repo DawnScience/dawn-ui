@@ -85,6 +85,10 @@
          id="uk.ac.diamond.scisoft.feedback.feature"
          version="0.0.0"/>
 
+   <includes
+         id="uk.ac.diamond.scisoft.ispyb.feature"
+         version="0.0.0"/>
+
    <plugin
          id="uk.ac.diamond.scisoft.analysis.rcp.contributions"
          download-size="0"
