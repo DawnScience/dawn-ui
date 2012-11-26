@@ -41,6 +41,10 @@
          id="uk.ac.diamond.scisoft.arpes.feature"
          version="0.0.0"/>
 
+   <includes
+         id="uk.ac.diamond.scisoft.ispyb.feature"
+         version="0.0.0"/>
+
    <plugin
          id="org.dawnsci.intro"
          download-size="0"
