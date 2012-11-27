@@ -450,7 +450,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 	}
 
 	public void clearTraces() {
-		xyGraph.clearTraces();
+		if (xyGraph!=null) xyGraph.clearTraces();
 	}
 
 	protected ITrace createLightWeightImage(String traceName, AbstractDataset data, List<AbstractDataset> axes, IProgressMonitor monitor) {

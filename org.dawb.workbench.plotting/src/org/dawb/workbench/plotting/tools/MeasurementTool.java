@@ -365,8 +365,8 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 			viewer.removeSelectionChangedListener(viewUpdateListener);
 			viewUpdateListener.resetSelectionColor();
 		}
-		dragBounds.clear();
-		try {
+		if (dragBounds!=null) dragBounds.clear();
+		if (getPlottingSystem()!=null) try {
 			getPlottingSystem().removeRegionListener(this);
 			final Collection<IRegion> regions = getPlottingSystem().getRegions();
 			for (IRegion iRegion : regions) iRegion.removeROIListener(this);
