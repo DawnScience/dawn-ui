@@ -49,6 +49,8 @@ public class ZipEditor extends MultiPageEditorPart implements ISlicablePlottingP
 	private CSVDataEditor dataEditor;
 
 	private PlotDataEditor dataSetEditor;
+
+	private PlotImageEditor plotImageEditor;
 	
 	@Override
 	public void init(IEditorSite site, IEditorInput input) throws PartInitException{
@@ -100,7 +102,7 @@ public class ZipEditor extends MultiPageEditorPart implements ISlicablePlottingP
 							setPageText(i, "Image "+(i+1));				
 						}
 					} else {
-						PlotImageEditor plotImageEditor = new PlotImageEditor();
+						this.plotImageEditor = new PlotImageEditor();
 						addPage(0, plotImageEditor,  images[0]);
 						setPageText(0, "Image");
 						
@@ -219,8 +221,10 @@ public class ZipEditor extends MultiPageEditorPart implements ISlicablePlottingP
     public Object getAdapter(@SuppressWarnings("rawtypes") final Class clazz) {
 		
 		if (clazz == Page.class) {
-			final PlotDataEditor      ed  = getDataSetEditor();
-			return new PlotDataPage(ed);
+			if (dataSetEditor!=null) return new PlotDataPage(dataSetEditor);
+			if (plotImageEditor!=null) return plotImageEditor.getAdapter(clazz);
+			return null; //TODO a set of meta data pages if many zipped images?
+			
 		} else if (clazz == IToolPageSystem.class) {
 			if (dataSetEditor!=null) return dataSetEditor.getPlottingSystem();
 			for (int i = 0; i < getPageCount(); i++) {
