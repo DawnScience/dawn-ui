@@ -4,32 +4,34 @@ import java.util.Collection;
 
 import javax.vecmath.Vector3d;
 
+import org.dawb.common.services.ILoaderService;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.region.IRegion;
-import org.dawb.common.ui.plot.region.IRegionListener;
-import org.dawb.common.ui.plot.region.RegionEvent;
-import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.gda.extensions.loaders.H5Utils;
 import org.dawb.workbench.plotting.Activator;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.ui.PlatformUI;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
+import uk.ac.diamond.scisoft.analysis.diffraction.DetectorPropertyEvent;
 import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
+import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironmentEvent;
+import uk.ac.diamond.scisoft.analysis.diffraction.IDetectorPropertyListener;
+import uk.ac.diamond.scisoft.analysis.diffraction.IDiffractionCrystalEnvironmentListener;
 import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.roi.ROIProfile;
 import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 
-public class RadialProfileTool extends SectorProfileTool {
+public class RadialProfileTool extends SectorProfileTool implements IDetectorPropertyListener, IDiffractionCrystalEnvironmentListener{
 	
 	private enum XAxis {
 		PIXEL, RESOLUTION, ANGLE, Q,
@@ -37,6 +39,7 @@ public class RadialProfileTool extends SectorProfileTool {
 	
 	private XAxis axis = XAxis.PIXEL;
     private MenuAction profileAxis;
+    private Action metaLock;
 	
 	@Override
 	protected void configurePlottingSystem(AbstractPlottingSystem plotter) {
@@ -49,15 +52,19 @@ public class RadialProfileTool extends SectorProfileTool {
 			public void run() {
 				axis = XAxis.PIXEL;
 				profileAxis.setSelectedAction(this);
+				profilePlottingSystem.clear();
 				update(null, null, false);
 			}
 		};
+		
+		pixelAxis.setId("org.dawb.workbench.plotting.tools.profile.pixelAxisAction");
 		
 		final Action resolutionAxis = new Action("d ", IAction.AS_RADIO_BUTTON) {
 			@Override
 			public void run() {
 				axis = XAxis.RESOLUTION;
 				profileAxis.setSelectedAction(this);
+				profilePlottingSystem.clear();
 				update(null, null, false);
 			}
 		};
@@ -67,6 +74,7 @@ public class RadialProfileTool extends SectorProfileTool {
 			public void run() {
 				axis = XAxis.ANGLE;
 				profileAxis.setSelectedAction(this);
+				profilePlottingSystem.clear();
 				update(null, null, false);
 			}
 		};
@@ -76,14 +84,67 @@ public class RadialProfileTool extends SectorProfileTool {
 			public void run() {
 				axis = XAxis.Q;
 				profileAxis.setSelectedAction(this);
+				profilePlottingSystem.clear();
 				update(null, null, false);
 			}
 		};
 		
+		metaLock = new Action("Lock To Metadata", IAction.AS_CHECK_BOX) {
+			@Override
+			public void run() {
+				if (isChecked()) {
+					IMetaData meta = getMetaData();
+					profileAxis.setEnabled(true);
+					
+					if (meta != null && meta instanceof IDiffractionMetadata) {
+						updateSectorCenters(((IDiffractionMetadata)meta).getDetector2DProperties().getBeamCentreCoords());
+						registerMetadataListeners();
+					}
+					
+					if (getPlottingSystem()==null) return;
+					
+					final Collection<IRegion> regions = getPlottingSystem().getRegions();
+					if (regions!=null) for (final IRegion region : regions) {
+						if (isRegionTypeSupported(region.getRegionType())) {
+							region.setMobile(false);
+						}
+					}
+					
+					for (int i = 0; i < profileAxis.size(); ++i) {
+						IAction action = profileAxis.getAction(i);
+						if (action.isChecked()) {
+							profileAxis.setSelectedAction(i);
+							profileAxis.run();
+						}
+					}
+					
+					
+				} else {
+					
+					unregisterMetadataListeners();
+					IAction pixelAction = profileAxis.findAction("org.dawb.workbench.plotting.tools.profile.pixelAxisAction");
+					profileAxis.setEnabled(false);
+					pixelAction.run();
+					
+					final Collection<IRegion> regions = getPlottingSystem().getRegions();
+					if (regions!=null) for (final IRegion region : regions) {
+						if (isRegionTypeSupported(region.getRegionType())) {
+							region.setMobile(true);
+						}
+					}
+				}
+			}
+		};
+		
+		metaLock.setImageDescriptor(Activator.getImageDescriptor("icons/radial-tool-lock.png"));
+		
 		
 		getSite().getActionBars().getToolBarManager().add(profileAxis);
-
+		getSite().getActionBars().getToolBarManager().add(metaLock);
+		getSite().getActionBars().getToolBarManager().add(new Separator());
 		getSite().getActionBars().getMenuManager().add(profileAxis);
+		getSite().getActionBars().getMenuManager().add(metaLock);
+		getSite().getActionBars().getToolBarManager().add(new Separator());
 		
 		profileAxis.setSelectedAction(pixelAxis);
 		profileAxis.add(pixelAxis);
@@ -92,6 +153,7 @@ public class RadialProfileTool extends SectorProfileTool {
 		profileAxis.add(qAxis);
 		
 		setActionsEnabled(false);
+		profileAxis.setEnabled(false);
 		
 		IMetaData meta = getMetaData();
 		
@@ -101,11 +163,36 @@ public class RadialProfileTool extends SectorProfileTool {
 		super.configurePlottingSystem(plotter);
 
 	}
+	
+	public void activate () {
+		super.activate();
+		if (metaLock != null && metaLock.isChecked()) {
+			IMetaData meta = getMetaData();
+			if (meta!=null && (meta instanceof IDiffractionMetadata)) {
+				updateSectorCenters(((IDiffractionMetadata)meta).getDetector2DProperties().getBeamCentreCoords());
+			}
+			registerMetadataListeners();
+		}
+	}
+	
+	public void deactivate() {
+		super.deactivate();
+		unregisterMetadataListeners();
+	}
+	
+	@Override
+	protected void updateSectors() {
+		
+		if(metaLock.isChecked()) {
+			metaLock.run();
+		}
+		
+		super.updateSectors();
+	}
 
 
 	@Override
 	protected AbstractDataset[] getXAxis(final SectorROI sroi, AbstractDataset[] integrals) {
-		
 		final AbstractDataset xi = DatasetUtils.linSpace(sroi.getRadius(0), sroi.getRadius(1), integrals[0].getSize(), AbstractDataset.FLOAT64);
 		xi.setName("Radius (pixel)");
 		
@@ -136,7 +223,39 @@ public class RadialProfileTool extends SectorProfileTool {
 	}
 	
 	private void setActionsEnabled(boolean enable) {
-		profileAxis.setEnabled(enable);
+		metaLock.setEnabled(enable);
+	}
+	
+	@Override
+	protected IMetaData getMetaData() {
+		
+		ILoaderService service = (ILoaderService)PlatformUI.getWorkbench().getService(ILoaderService.class);
+		
+		IDiffractionMetadata meta = service.getLockedDiffractionMetaData();
+		
+		if (meta!= null)
+			return meta;
+		else
+			return super.getMetaData();
+		
+	}
+	
+	private void registerMetadataListeners() {
+		IMetaData meta = getMetaData();
+		if (meta!=null && (meta instanceof IDiffractionMetadata)) {
+			IDiffractionMetadata dm = (IDiffractionMetadata)meta;
+			dm.getDetector2DProperties().addDetectorPropertyListener(this);
+			dm.getDiffractionCrystalEnvironment().addDiffractionCrystalEnvironmentListener(this);
+		}
+	}
+	
+	private void unregisterMetadataListeners() {
+		IMetaData meta = getMetaData();
+		if (meta!=null && (meta instanceof IDiffractionMetadata)) {
+			IDiffractionMetadata dm = (IDiffractionMetadata)meta;
+			dm.getDetector2DProperties().removeDetectorPropertyListener(this);
+			dm.getDiffractionCrystalEnvironment().removeDiffractionCrystalEnvironmentListener(this);
+		}
 	}
 	
 	
@@ -240,4 +359,42 @@ public class RadialProfileTool extends SectorProfileTool {
 		}
 		return new DataReductionInfo(Status.OK_STATUS);
 	}
+
+
+	@Override
+	public void diffractionCrystalEnvironmentChanged(
+			DiffractionCrystalEnvironmentEvent evt) {
+		update(null, null, false);
+		
+	}
+
+
+	@Override
+	public void detectorPropertiesChanged(DetectorPropertyEvent evt) {
+		
+		if (evt.getSource() instanceof DetectorProperties) {
+			if(evt.hasBeamCentreChanged()) {
+				updateSectorCenters(((DetectorProperties)evt.getSource()).getBeamCentreCoords());
+			} else {
+				update(null, null, false);
+			}
+		}
+	}
+	
+	private void updateSectorCenters(double[] point) {
+		
+		if (getPlottingSystem()==null) return;
+		
+		final Collection<IRegion> regions = getPlottingSystem().getRegions();
+		if (regions!=null) for (final IRegion region : regions) {
+			if (isRegionTypeSupported(region.getRegionType())) {
+				final SectorROI sroi = (SectorROI)region.getROI();
+				sroi.setPoint(point);
+				region.setROI(sroi);
+			}
+		}
+		
+		update(null, null, false);
+	}
+	
 }
