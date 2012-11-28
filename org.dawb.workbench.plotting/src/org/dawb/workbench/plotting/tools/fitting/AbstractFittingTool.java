@@ -314,14 +314,18 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 	
 	public void dispose() {
 		deactivate();
+		
+        // Using clear and setting to null helps the garbage collector.
+        if (fittedFunctions!=null) {
+			fittedFunctions.removeSelections(getPlottingSystem(), true);
+        	fittedFunctions.dispose();
+        }
+        fittedFunctions = null;
+
 		viewUpdateListener = null;
 		selectedTraces.clear();
         if (viewer!=null) viewer.getControl().dispose();
-       
-        // Using clear and setting to null helps the garbage collector.
-        if (fittedFunctions!=null) fittedFunctions.dispose();
-        fittedFunctions = null;
-        
+              
 		super.dispose();
 	}
 
