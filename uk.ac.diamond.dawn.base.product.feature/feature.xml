@@ -34,10 +34,6 @@
          version="0.0.0"/>
 
    <includes
-         id="uk.ac.diamond.sda.bioclipse.jmol.feature"
-         version="0.0.0"/>
-
-   <includes
          id="uk.ac.diamond.scisoft.arpes.feature"
          version="0.0.0"/>
 
