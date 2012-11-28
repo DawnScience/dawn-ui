@@ -91,18 +91,26 @@ public class InfoPixelLabelProvider extends ColumnLabelProvider {
 					// Sometimes the image can have axes set. In this case we need the point
 					// ROI in the axes coordinates
 					if (trace!=null) {
-						pr = (PointROI)trace.getRegionInAxisCoordinates(pr);
-						xLabel = pr.getPointX();
-						yLabel = pr.getPointY();
+						try {
+							pr = (PointROI)trace.getRegionInAxisCoordinates(pr);
+							xLabel = pr.getPointX();
+							yLabel = pr.getPointY();
+						} catch (Exception aie) {
+						    return "-";
+						}
 					}
 					
 				} else {
 					xIndex = tool.xValues[0];
 					yIndex = tool.yValues[0];
 					final double[] dp = new double[]{tool.xValues[0], tool.yValues[0]};
-					if (trace!=null) trace.getPointInAxisCoordinates(dp);
-					xLabel = dp[0];
-					yLabel = dp[1];
+					try {
+						if (trace!=null) trace.getPointInAxisCoordinates(dp);
+						xLabel = dp[0];
+						yLabel = dp[1];
+					} catch (Exception aie) {
+					    return "-";
+					}
 				}
 	
 			}else {
