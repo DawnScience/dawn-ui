@@ -255,7 +255,7 @@ public class XYRegionGraph extends XYGraph {
 		}
 		
 		// Allow for available size
-		if (getRegionArea().getImageTrace()!=null) {
+		if (getRegionArea().getImageTrace()!=null && !Boolean.getBoolean("org.dawb.workbench.plotting.system.swtxy.not.size.fudging")) {
 			
 			// Fudged scaling algorithm
 			// TODO make a less jerky one
