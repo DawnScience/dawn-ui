@@ -267,12 +267,16 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
  					point.x-=1;
  					Display.getDefault().setCursorLocation(point);
 					
- 				} if (e.keyCode==16777220) {//Right
+ 				} else if (e.keyCode==16777220) {//Right
  					Point point = Display.getDefault().getCursorLocation();
  					point.x+=1;
  					Display.getDefault().setCursorLocation(point);
+ 				} else if (e.keyCode==127) {//Delete
+					IFigure fig = getFigureAtCurrentMousePosition();
+ 					if (fig!=null && fig instanceof IRegionContainer) {
+ 						xyGraph.removeRegion((AbstractSelectionRegion)((IRegionContainer)fig).getRegion());
+ 					}
  				}
-
 			}
 		};
 		return keyListener;
@@ -285,12 +289,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 			popupListener = new IMenuListener() {			
 				@Override
 				public void menuAboutToShow(IMenuManager manager) {
-					Point   pnt       = Display.getDefault().getCursorLocation();
-					Point   par       = xyCanvas.toDisplay(new Point(0,0));
-					final int xOffset = par.x+xyGraph.getLocation().x;
-					final int yOffset = par.y+xyGraph.getLocation().y;
-					
-					final IFigure fig = xyGraph.findFigureAt(pnt.x-xOffset, pnt.y-yOffset);
+					IFigure fig = getFigureAtCurrentMousePosition();
 					if (fig!=null) {
 					    if (fig instanceof IRegionContainer) {
 							final IRegion region = ((IRegionContainer)fig).getRegion();
@@ -312,6 +311,16 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 			};
 		}
 		return popupListener;
+	}
+	
+	protected IFigure getFigureAtCurrentMousePosition() {
+		Point   pnt       = Display.getDefault().getCursorLocation();
+		Point   par       = xyCanvas.toDisplay(new Point(0,0));
+		final int xOffset = par.x+xyGraph.getLocation().x;
+		final int yOffset = par.y+xyGraph.getLocation().y;
+		
+		return xyGraph.findFigureAt(pnt.x-xOffset, pnt.y-yOffset);
+
 	}
 
 	protected void fillAnnotationConfigure(IMenuManager manager,
