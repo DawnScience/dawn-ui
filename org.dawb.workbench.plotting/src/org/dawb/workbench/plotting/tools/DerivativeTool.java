@@ -228,16 +228,14 @@ public class DerivativeTool extends AbstractToolPage  {
 		
 		if (eventTraceList.isEmpty()) return;
 
-		if (!isUpdateRunning) {
-			Display.getDefault().syncExec(new Runnable() {
-				public void run() {
-					logger.debug("Update plot called from activate");
-					//Run the plot update on the GUI thread so we can check what needs to be plotted
-					updatePlot(dataCheck.getSelection(),derivCheck.getSelection(),deriv2Check.getSelection());					
-				}
-			});
-			
-		}
+		Display.getDefault().syncExec(new Runnable() {
+			public void run() {
+				logger.debug("Update plot called from activate");
+				//Run the plot update on the GUI thread so we can check what needs to be plotted
+				updatePlot(dataCheck.getSelection(),derivCheck.getSelection(),deriv2Check.getSelection());					
+			}
+		});
+
 
 	}
 
