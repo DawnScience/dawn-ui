@@ -225,9 +225,20 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		if (mouseWheelListener == null) mouseWheelListener = new MouseWheelListener() {
 			@Override
 			public void mouseScrolled(MouseEvent e) {
+				
+				int direction = e.count > 0 ? 1 : -1;
+
+				IFigure fig = getFigureAtCurrentMousePosition();
+				if (fig!=null && fig.getParent() instanceof Axis) {
+					Axis axis = (Axis)fig.getParent();
+					final double center = axis.getPositionValue(e.x, false);
+					axis.zoomInOut(center, direction*0.05d);
+					xyGraph.repaint();
+					return;
+				}
+			
 				if (xyGraph==null) return;
 				if (e.count==0)    return;
-				int direction = e.count > 0 ? 1 : -1;
 				xyGraph.setZoomLevel(e, direction*0.05d);
 				xyGraph.repaint();
 			}	
