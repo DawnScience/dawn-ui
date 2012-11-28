@@ -1368,6 +1368,12 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		// stop listening to part activation
 		getSite().getPage().removePartListener(partListener);
 
+		// Dedicated tool disposal
+		final String toolId = getViewSite().getSecondaryId();
+		if (toolId!=null && activeRec!=null && activeRec.tool!=null) {
+			activeRec.tool.dispose(); // Dispose cloned tool
+		}
+
 		// Deref all of the pages.
 		activeRec = null;
 		if (defaultPageRec != null) {
@@ -1376,7 +1382,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 			defaultPageRec.tool.dispose();
 			defaultPageRec = null;
 		}
-		
+				
 		for (IToolPageSystem sys : systems) {
 			sys.removeToolChangeListener(this);
 		}
@@ -1397,7 +1403,6 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 
 	}
 	
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;
