@@ -255,7 +255,7 @@ public class DerivativeTool extends AbstractToolPage  {
 			return;
 		}
 		
-		if (!isUpdateRunning && !duringDispose) {
+		if (!duringDispose) {
 			logger.debug("Update plot called from deactivate");
 			updatePlot(true,false,false);
 		}
