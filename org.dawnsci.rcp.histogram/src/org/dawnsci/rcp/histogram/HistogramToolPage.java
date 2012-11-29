@@ -29,11 +29,16 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.ControlAdapter;
+import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -96,6 +101,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 	// GUI
 	private Composite composite;
+	private ScrolledComposite sc;
 	private ExpansionAdapter expansionAdapter;
 
 
@@ -455,13 +461,13 @@ public class HistogramToolPage extends AbstractToolPage {
 		expansionAdapter = new ExpansionAdapter() {
 			@Override
 			public void expansionStateChanged(ExpansionEvent e) {
-				logger.trace("perChannelExpander");
 				composite.layout();
+				sc.notifyListeners(SWT.Resize, null);
 			}
 		};
 
 
-		// Get all information from the extention points
+		// Get all information from the extension points
 		extentionPointManager = new ExtentionPointManager();
 
 
@@ -527,9 +533,12 @@ public class HistogramToolPage extends AbstractToolPage {
 	@Override
 	public void createControl(final Composite parent) {
 		// Set up the composite to hold all the information
-		composite = new Composite(parent, SWT.RESIZE);
-		composite.setLayout(new GridLayout(1, false));		
+		sc = new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
+		sc.setLayout(new FillLayout());
 
+		composite = new Composite(sc, SWT.NONE);
+		composite.setLayout(new GridLayout(1, false));		
+		
 		// Set up the Colour scheme part of the GUI
 		colourSchemeExpander = new ExpandableComposite(composite, SWT.NONE);
 		colourSchemeExpander.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1));
@@ -727,6 +736,18 @@ public class HistogramToolPage extends AbstractToolPage {
 			}
 		});
 
+		sc.setContent(composite);
+		sc.setExpandVertical(true);
+		sc.setExpandHorizontal(true);
+		sc.addControlListener(new ControlAdapter() {
+			@Override
+			public void controlResized(ControlEvent e) {
+				Rectangle r = sc.getClientArea();
+				sc.setMinHeight(composite.computeSize(r.width, SWT.DEFAULT).y);
+				sc.setMinWidth(composite.computeSize(SWT.DEFAULT, r.height).x);
+			}
+		});
+		
 		// Activate this so the initial screen has content
 		activate();		
 	}
@@ -1061,7 +1082,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 	@Override
 	public Control getControl() {
-		return composite;
+		return sc;
 	}
 
 	@Override
