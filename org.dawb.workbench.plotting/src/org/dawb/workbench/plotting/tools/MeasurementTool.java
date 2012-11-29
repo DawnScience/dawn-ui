@@ -13,6 +13,9 @@ import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.ROIEvent;
 import org.dawb.common.ui.plot.region.RegionEvent;
 import org.dawb.common.ui.plot.region.RegionUtils;
+import org.dawb.common.ui.plot.roi.data.LinearROIData;
+import org.dawb.common.ui.plot.roi.data.ROIData;
+import org.dawb.common.ui.plot.roi.data.RectangularROIData;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
@@ -50,9 +53,6 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
-import uk.ac.diamond.scisoft.analysis.roi.data.LinearROIData;
-import uk.ac.diamond.scisoft.analysis.roi.data.ROIData;
-import uk.ac.diamond.scisoft.analysis.roi.data.RectangularROIData;
 
 /**
  * This tool shows the measurements of selected regions.
