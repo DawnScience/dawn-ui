@@ -204,7 +204,8 @@ public class DiffractionDefaultsPreferencePage extends PreferencePage implements
 		var.setLabelProvider(new DelegatingStyledCellLabelProvider(new DiffractionLabelProvider(3)));
 		var.setEditingSupport(new UnitEditingSupport(viewer));
 	}
-	
+
+	@SuppressWarnings("unchecked")
 	private class ValueEditingSupport extends EditingSupport {
 
 		public ValueEditingSupport(ColumnViewer viewer) {
@@ -240,7 +241,7 @@ public class DiffractionDefaultsPreferencePage extends PreferencePage implements
 		@Override
 		protected boolean canEdit(Object element) {
 			if (!(element instanceof NumericNode)) return false;
-			return ((NumericNode)element).isEditable();
+			return ((NumericNode<?>)element).isEditable();
 		}
 
 		@Override
@@ -264,6 +265,7 @@ public class DiffractionDefaultsPreferencePage extends PreferencePage implements
 		
 	}
 	
+	@SuppressWarnings("unchecked")
 	private class UnitEditingSupport extends EditingSupport {
 
 		public UnitEditingSupport(ColumnViewer viewer) {

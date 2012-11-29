@@ -13,7 +13,6 @@ import javax.measure.unit.SI;
 import javax.measure.unit.Unit;
 import javax.measure.unit.UnitFormat;
 import javax.swing.tree.TreeNode;
-import javax.vecmath.Vector3d;
 
 import org.dawb.common.services.IImageService;
 import org.dawb.common.services.ServiceManager;
@@ -63,6 +62,7 @@ public class DiffractionTreeModel {
 	private final IDiffractionMetadata metaData;
 	
 	private boolean isActive=false;
+	private NumericNode<Angle> yaw, pitch, roll;
 	
 	
 	public DiffractionTreeModel(IDiffractionMetadata metaData) throws Exception {
@@ -76,13 +76,18 @@ public class DiffractionTreeModel {
 	
 	public void activate() {
 		this.isActive = true;
-		getDetectorProperties().addDetectorPropertyListener(beamCenterListener);
+		DetectorProperties detector = getDetectorProperties();
+		if (detector != null) {
+			detector.addDetectorPropertyListener(detectorListener);
+		}
 	}
 	
 	public void deactivate() {
 		this.isActive = false;
-		if (getDetectorProperties()!=null && beamCenterListener!=null) {
-			getDetectorProperties().removeDetectorPropertyListener(beamCenterListener);
+		DetectorProperties detector = getDetectorProperties();
+		if (detector != null) {
+			if (detectorListener != null)
+				detector.removeDetectorPropertyListener(detectorListener);
 		}
 	}
 
@@ -104,7 +109,7 @@ public class DiffractionTreeModel {
         
         // TODO listen to other things, for instance refine when it
         // is available may change other values.
-        createBeamCenterListener(detprop);
+        createDetectorListener(detprop);
 	}
 	
 	private DetectorProperties getDetectorProperties() {
@@ -256,8 +261,8 @@ public class DiffractionTreeModel {
 
 	private void createBeamCenter(DetectorProperties detprop,
 			                      LabelNode experimentalInfo) {
-	    // Beam Center
-        final LabelNode beamCen = new LabelNode("Beam Center", experimentalInfo);
+	    // Beam Centre
+        final LabelNode beamCen = new LabelNode("Beam Centre", experimentalInfo);
         registerNode(beamCen);
         beamCen.setDefaultExpanded(true);
       
@@ -334,14 +339,12 @@ public class DiffractionTreeModel {
         final NumericNode<Length> dist   = new NumericNode<Length>("Distance", experimentalInfo, SI.MILLIMETER);
         registerNode(dist);
         if (detprop!=null) {
-        	dist.setDefault(odetprop.getOrigin().z, SI.MILLIMETER);
-        	dist.setValue(detprop.getOrigin().z, SI.MILLIMETER);
-            dist.addAmountListener(new AmountListener<Length>() {		
+        	dist.setDefault(odetprop.getBeamCentreDistance(), SI.MILLIMETER);
+        	dist.setValue(detprop.getBeamCentreDistance(), SI.MILLIMETER);
+            dist.addAmountListener(new AmountListener<Length>() {
     			@Override
     			public void amountChanged(AmountEvent<Length> evt) {
-    				Vector3d origin = detprop.getOrigin();
-    				origin.z = evt.getAmount().doubleValue(SI.MILLIMETER);
-    				detprop.setOrigin(origin);
+    				detprop.setBeamCentreDistance(evt.getAmount().doubleValue(SI.MILLIMETER));
     			}
     		});
         }
@@ -381,15 +384,14 @@ public class DiffractionTreeModel {
         
         final double[] oorientation = odetprop!=null ? odetprop.getNormalAnglesInDegrees() : null;
         final double[] orientation  = detprop!=null  ? detprop.getNormalAnglesInDegrees()  : null;
-        
-        NumericNode<Angle> yaw   = createOrientation("Yaw",-180,180,oorientation,orientation,0,normal);
-        NumericNode<Angle> pitch = createOrientation("Pitch",-90,90,oorientation,orientation,1,normal);
-        NumericNode<Angle> roll  = createOrientation("Roll",-180,180,oorientation,orientation,2,normal);
+		yaw = createOrientationNode("Yaw", -180, 180, oorientation, orientation, 0, normal);
+		pitch = createOrientationNode("Pitch", -90, 90, oorientation, orientation, 1, normal);
+		roll = createOrientationNode("Roll", -180, 180, oorientation, orientation, 2, normal);
         
 	    return experimentalInfo;
 	}
 
-	private NumericNode<Angle> createOrientation(String label, 
+	private NumericNode<Angle> createOrientationNode(String label, 
 			                                     int lower,
                                                  int upper,
 			                                     double[] oorientation, 
@@ -413,9 +415,9 @@ public class DiffractionTreeModel {
         node.addAmountListener(new AmountListener<Angle>() {		
 			@Override
 			public void amountChanged(AmountEvent<Angle> evt) {
-				
 				double[] ori = getDetectorProperties().getNormalAnglesInDegrees();
 				ori[index]   = evt.getAmount().doubleValue(NonSI.DEGREE_ANGLE);
+//				System.err.printf("Node %d amount set: %f\n", index, ori[index]);
 				getDetectorProperties().setNormalAnglesInDegrees(ori[0], ori[1], ori[2]);
 			}
 		});
@@ -454,30 +456,39 @@ public class DiffractionTreeModel {
 		}
 	}
 	
-	private IDetectorPropertyListener beamCenterListener;
+	private IDetectorPropertyListener detectorListener;
 	private boolean                   beamCenterActive=true;
-	private void createBeamCenterListener(final DetectorProperties detprop) {
-		if (beamCenterListener==null) this.beamCenterListener = new IDetectorPropertyListener() {
+	private void createDetectorListener(final DetectorProperties detprop) {
+		if (detectorListener==null) this.detectorListener = new IDetectorPropertyListener() {
 			
 			@Override
 			public void detectorPropertiesChanged(DetectorPropertyEvent evt) {
-				if (!beamCenterActive) return;
 				if (!isActive)         return;
 				if (evt.hasBeamCentreChanged()) {
+					if (!beamCenterActive)
+						return;
 					double[]     cen = detprop.getBeamCentreCoords();
 					Amount<Length> x = Amount.valueOf(cen[0], xpixel);
-					beamX.setValue(x.to(beamX.getValue().getUnit()));
+					beamX.setValueQuietly(x.to(beamX.getValue().getUnit()));
 					if (viewer!=null) viewer.refresh(beamX); // Cancels cell editing.
 					
 					Amount<Length> y = Amount.valueOf(cen[1], ypixel);
-					beamY.setValue(y.to(beamY.getValue().getUnit()));
+					beamY.setValueQuietly(y.to(beamY.getValue().getUnit()));
 					if (viewer!=null) viewer.refresh(beamY);  // Cancels cell editing.
+				} else if (evt.hasNormalChanged()) {
+					double[] angles = detprop.getNormalAnglesInDegrees();
+//					System.err.printf("Detector: %f, %f, %f\n", angles[0], angles[1], angles[2]);
+					yaw.setValueQuietly(angles[0], NonSI.DEGREE_ANGLE);
+					pitch.setValueQuietly(angles[1], NonSI.DEGREE_ANGLE);
+					roll.setValueQuietly(angles[2], NonSI.DEGREE_ANGLE);
+					if (viewer != null) {
+						viewer.update(new Object[] {yaw, pitch, roll}, null);
+					}
 				}
 			}
 		};
 	}
 
-	
 	private void registerNode(LabelNode node) {
 		final String labelPath = node.getPath();
 		// System.out.println(labelPath);
@@ -547,10 +558,10 @@ public class DiffractionTreeModel {
 		
 		deactivate();
 		
-	    final DetectorProperties detprop = getDetectorProperties();
-	    		
-		if (detprop!=null && beamCenterListener!=null) {
-			detprop.removeDetectorPropertyListener(beamCenterListener);
+		final DetectorProperties detprop = getDetectorProperties();
+		if (detprop != null) {
+			if (detectorListener != null)
+				detprop.removeDetectorPropertyListener(detectorListener);
 		}
 			
 		root.dispose();
@@ -565,10 +576,9 @@ public class DiffractionTreeModel {
 		reset(root);
 	}
 
-	@SuppressWarnings("rawtypes")
 	private void reset(TreeNode node) {
 		if (node instanceof NumericNode) {
-			((NumericNode)node).reset();
+			((NumericNode<?>)node).reset();
 		}
 		for (int i = 0; i < node.getChildCount(); i++) {
 			reset(node.getChildAt(i));

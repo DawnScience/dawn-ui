@@ -325,41 +325,46 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		}
 		
 		
-		//Try to get metadata from part
-		IMetaData md = null;
-		if (getPart() instanceof IEditorPart) {
-			try {
-				md = service.getMetaData(EclipseUtils.getFilePath(((IEditorPart)getPart()).getEditorInput()), null);
-			} catch (Exception e) {
-				logger.error("Cannot read meta data from "+getPart().getTitle(), e);
-			}
-		}
-		
-		// If it is there and diffraction data return it
-		if (md!=null && md instanceof IDiffractionMetadata) return (IDiffractionMetadata)md;
-		
 		//If not see if the trace has diffraction meta data
 		IImageTrace imageTrace = getImageTrace();
 		if (imageTrace==null) return null;
 		IMetaData mdImage = imageTrace.getData().getMetadata();
 		
-		//if the metadata on the image is IDiffraction metadata return it
 		if (mdImage !=null && mdImage  instanceof IDiffractionMetadata) return (IDiffractionMetadata)mdImage;
+		
+		// if it is null try and get it from the loader service
+		if (mdImage == null) {
+			
+			IMetaData md = null;
+			if (getPart() instanceof IEditorPart) {
+				try {
+					md = service.getMetaData(EclipseUtils.getFilePath(((IEditorPart)getPart()).getEditorInput()), null);
+				} catch (Exception e) {
+					logger.error("Cannot read meta data from "+getPart().getTitle(), e);
+				}
+			}
+			
+			// If it is there and diffraction data return it
+			if (md!=null && md instanceof IDiffractionMetadata) return (IDiffractionMetadata)md;
+			
+			if (md != null)
+				mdImage = md;
+		}
 		
 		//if the file contains IMetaData but not IDiffraction meta data, wrap the old meta in a 
 		// new IDiffractionMetadata object and put it back in the dataset
-		if (md!=null) {
-			md = DiffractionDefaultMetadata.getDiffractionMetadata(imageTrace.getData().getShape(),md);
-			imageTrace.getData().setMetadata(md);
-			return (IDiffractionMetadata)md;
+		if (mdImage!=null) {
+			mdImage = DiffractionDefaultMetadata.getDiffractionMetadata(imageTrace.getData().getShape(),mdImage);
+			imageTrace.getData().setMetadata(mdImage);
+			return (IDiffractionMetadata)mdImage;
 		}
 		
 		// if there is no meta create default IDiff and put it in the dataset
-		md = DiffractionDefaultMetadata.getDiffractionMetadata(imageTrace.getData().getShape());
-		imageTrace.getData().setMetadata(md);
+		mdImage = DiffractionDefaultMetadata.getDiffractionMetadata(imageTrace.getData().getShape());
+		imageTrace.getData().setMetadata(mdImage);
 //		}
 		
-		return (IDiffractionMetadata)md;
+		return (IDiffractionMetadata)mdImage;
 	}
 
 	private TreeViewerColumn defaultColumn;
@@ -394,6 +399,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		var.setEditingSupport(new UnitEditingSupport(viewer));
 	}
 	
+	@SuppressWarnings("unchecked")
 	private class ValueEditingSupport extends EditingSupport {
 
 		public ValueEditingSupport(ColumnViewer viewer) {
@@ -429,7 +435,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		@Override
 		protected boolean canEdit(Object element) {
 			if (!(element instanceof NumericNode)) return false;
-			return ((NumericNode)element).isEditable();
+			return ((NumericNode<?>)element).isEditable();
 		}
 
 		@Override
@@ -453,6 +459,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		
 	}
 	
+	@SuppressWarnings("unchecked")
 	private class UnitEditingSupport extends EditingSupport {
 
 		public UnitEditingSupport(ColumnViewer viewer) {
@@ -525,7 +532,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			public void run() {
 				final TreeNode node = (TreeNode)((StructuredSelection)viewer.getSelection()).getFirstElement();
 				if (node instanceof NumericNode) {
-					((NumericNode)node).reset();
+					((NumericNode<?>)node).reset();
 					viewer.refresh(node);
 				}
 			}
@@ -556,6 +563,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		};
 
 		final Action paste = new Action("Paste value", Activator.getImageDescriptor("icons/paste.gif")) {
+			@SuppressWarnings("unchecked")
 			@Override
 			public void run() {
 				if (copiedNode!=null) {
@@ -625,6 +633,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			}
 			
 			
+			@SuppressWarnings("unchecked")
 			private List<IPeak> loadPeaks() {
 				IToolPage radialTool = getToolSystem().getToolPage(
 						"org.dawb.workbench.plotting.tools.radialProfileTool");

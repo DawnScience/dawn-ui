@@ -100,6 +100,17 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 						clearTraces(evt.getRegion());
 					}
 				}
+				
+				@Override
+				public void regionsRemoved(RegionEvent evt) {
+					//clears traces if all regions removed
+					final Collection<IRegion> regions = getPlottingSystem().getRegions();
+					if (regions == null || regions.isEmpty()) {
+						registeredTraces.clear();
+						profilePlottingSystem.clear();
+					}
+				}
+				
 				@Override
 				public void regionAdded(RegionEvent evt) {
 					if (evt.getRegion()!=null) {
@@ -315,14 +326,18 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		
         getControl().getDisplay().asyncExec(new Runnable() {
         	public void run() {
-        		profilePlottingSystem.autoscaleAxes();
+        		//replaced with call to repaint which autoscales if autoscale when
+        		//plot changes is checked
+        		profilePlottingSystem.repaint();
+        		//profilePlottingSystem.autoscaleAxes();
         	}
         });
 
 	}
 	
 	protected synchronized void update(IRegion r, ROIBase rb, boolean isDrag) {
-	
+		if (!isActive()) return;
+		
 		if (r!=null) {
 			if(!isRegionTypeSupported(r.getRegionType())) return; // Nothing to do.
 			if (!r.isUserRegion()) return; // Likewise
@@ -379,17 +394,23 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 				return Status.OK_STATUS;
 			}
 
-			// Get the profiles from the line and box regions.
+			// if the current region is null try and update quickly (without creating 1D)
+			// if the trace is in the registered traces object
 			if (currentRegion==null) {
-				profilePlottingSystem.clear();
-				registeredTraces.clear();
 				final Collection<IRegion> regions = getPlottingSystem().getRegions();
 				if (regions!=null) {
 					for (IRegion iRegion : regions) {
 						if (!iRegion.isUserRegion()) continue;
 						if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
-						createProfile(image, iRegion, null, false, isDrag, monitor);
+						if (registeredTraces.containsKey(iRegion.getName())) {
+							createProfile(image, iRegion, iRegion.getROI(), true, isDrag, monitor);
+						} else {
+							createProfile(image, iRegion, iRegion.getROI(), false, isDrag, monitor);
+						}
 					}
+				} else {
+					registeredTraces.clear();
+					profilePlottingSystem.clear();
 				}
 			} else {
 
@@ -407,10 +428,8 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 			profilePlottingSystem.repaint();
 
 			return Status.OK_STATUS;
-
-		}	
 		
-		
+		}
 	}
 	
 	/**
@@ -418,19 +437,26 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 	 * @return IMetaData, may be null
 	 */
 	protected IMetaData getMetaData() {
+		//Changed to try and get the metadata from the image first
+		//This works around issues that were arrising when the loader factory
+		// and image traces were returning different metadata
+		IMetaData metaData = null;
+		if (getImageTrace()!= null && getImageTrace().getData() != null)
+			metaData = getImageTrace().getData().getMetadata();
+		
+		if (metaData != null) return metaData;
 		
 		if (getPart() instanceof IEditorPart) {
 			IEditorPart editor = (IEditorPart)getPart();
 	    	try {
-	    		IMetaData metaData = LoaderFactory.getMetaData(EclipseUtils.getFilePath(editor.getEditorInput()), null);
-	    		if (metaData != null)
-	    			return metaData;
+	    		metaData = LoaderFactory.getMetaData(EclipseUtils.getFilePath(editor.getEditorInput()), null);
+	    		return metaData;
 			} catch (Exception e) {
 				logger.error("Cannot get meta data for "+EclipseUtils.getFilePath(editor.getEditorInput()), e);
 			}
 		}
 		
-		return getImageTrace().getData().getMetadata();
+		return metaData;
 	}
 	
 	/**

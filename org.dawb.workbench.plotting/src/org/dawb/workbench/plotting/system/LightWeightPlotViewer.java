@@ -225,9 +225,20 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		if (mouseWheelListener == null) mouseWheelListener = new MouseWheelListener() {
 			@Override
 			public void mouseScrolled(MouseEvent e) {
+				
+				int direction = e.count > 0 ? 1 : -1;
+
+				IFigure fig = getFigureAtCurrentMousePosition();
+				if (fig!=null && fig.getParent() instanceof Axis) {
+					Axis axis = (Axis)fig.getParent();
+					final double center = axis.getPositionValue(e.x, false);
+					axis.zoomInOut(center, direction*0.05d);
+					xyGraph.repaint();
+					return;
+				}
+			
 				if (xyGraph==null) return;
 				if (e.count==0)    return;
-				int direction = e.count > 0 ? 1 : -1;
 				xyGraph.setZoomLevel(e, direction*0.05d);
 				xyGraph.repaint();
 			}	
@@ -267,12 +278,16 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
  					point.x-=1;
  					Display.getDefault().setCursorLocation(point);
 					
- 				} if (e.keyCode==16777220) {//Right
+ 				} else if (e.keyCode==16777220) {//Right
  					Point point = Display.getDefault().getCursorLocation();
  					point.x+=1;
  					Display.getDefault().setCursorLocation(point);
+ 				} else if (e.keyCode==127) {//Delete
+					IFigure fig = getFigureAtCurrentMousePosition();
+ 					if (fig!=null && fig instanceof IRegionContainer) {
+ 						xyGraph.removeRegion((AbstractSelectionRegion)((IRegionContainer)fig).getRegion());
+ 					}
  				}
-
 			}
 		};
 		return keyListener;
@@ -285,12 +300,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 			popupListener = new IMenuListener() {			
 				@Override
 				public void menuAboutToShow(IMenuManager manager) {
-					Point   pnt       = Display.getDefault().getCursorLocation();
-					Point   par       = xyCanvas.toDisplay(new Point(0,0));
-					final int xOffset = par.x+xyGraph.getLocation().x;
-					final int yOffset = par.y+xyGraph.getLocation().y;
-					
-					final IFigure fig = xyGraph.findFigureAt(pnt.x-xOffset, pnt.y-yOffset);
+					IFigure fig = getFigureAtCurrentMousePosition();
 					if (fig!=null) {
 					    if (fig instanceof IRegionContainer) {
 							final IRegion region = ((IRegionContainer)fig).getRegion();
@@ -312,6 +322,16 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 			};
 		}
 		return popupListener;
+	}
+	
+	protected IFigure getFigureAtCurrentMousePosition() {
+		Point   pnt       = Display.getDefault().getCursorLocation();
+		Point   par       = xyCanvas.toDisplay(new Point(0,0));
+		final int xOffset = par.x+xyGraph.getLocation().x;
+		final int yOffset = par.y+xyGraph.getLocation().y;
+		
+		return xyGraph.findFigureAt(pnt.x-xOffset, pnt.y-yOffset);
+
 	}
 
 	protected void fillAnnotationConfigure(IMenuManager manager,
@@ -450,7 +470,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 	}
 
 	public void clearTraces() {
-		xyGraph.clearTraces();
+		if (xyGraph!=null) xyGraph.clearTraces();
 	}
 
 	protected ITrace createLightWeightImage(String traceName, AbstractDataset data, List<AbstractDataset> axes, IProgressMonitor monitor) {

@@ -55,11 +55,16 @@ public abstract class SectorProfileTool extends ProfileTool {
 			
 			@Override
 			public void regionRemoved(RegionEvent evt) {
-				updateSectors();
+				if (evt.getRegion()!=null && evt.getRegion().isUserRegion()) { 
+					updateSectors();
+				};
 			}
 			@Override
 			public void regionAdded(RegionEvent evt) {
-				updateSectors();
+				if (evt.getRegion()!=null && evt.getRegion().isUserRegion()) { 
+					updateSectors();
+				}
+					
 				if (evt.getRegion()!=null && evt.getRegion().getRegionType()==RegionType.SECTOR) {
 					SectorROI sroi = (SectorROI)evt.getRegion().getROI().copy();
 					sroi.setSymmetry(preferredSymmetry);
@@ -151,7 +156,8 @@ public abstract class SectorProfileTool extends ProfileTool {
 					roi.setCombineSymmetry(isChecked());
 					iRegion.setROI(roi);
 				}
-				
+				//clear plotting system to make sure uncombined traces are cleared
+				profilePlottingSystem.clear();
 				update(null, null, false);
 			    
 			}
@@ -176,7 +182,7 @@ public abstract class SectorProfileTool extends ProfileTool {
 		}
 	}
 	
-	private void updateSectors() {
+	protected void updateSectors() {
 		
 		if (getPlottingSystem()==null) return;
 		
@@ -294,6 +300,7 @@ public abstract class SectorProfileTool extends ProfileTool {
 						x_trace.setData(xi, integral);
 					}
 				});
+			
 
 			} else {
 

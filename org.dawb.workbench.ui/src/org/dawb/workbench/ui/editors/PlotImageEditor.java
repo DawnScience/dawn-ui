@@ -152,7 +152,7 @@ public class PlotImageEditor extends EditorPart implements IReusableEditor {
 		plot.setLayout(new FillLayout());
 		
         plottingSystem.createPlotPart(plot, plotName, wrapper, PlotType.IMAGE, this);
-        
+        plottingSystem.getSelectedXAxis().setTitle("");
 	    Action menuAction = new Action("", Activator.getImageDescriptor("/icons/DropDown.png")) {
 	    	@Override
 	    	public void run() {

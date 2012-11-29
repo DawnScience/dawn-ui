@@ -71,7 +71,9 @@ public class PlotDataPage extends Page implements IPlotUpdateParticipant, IAdapt
 		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		this.dataSetComponent = new PlotDataComponent(editor);		
-		dataSetComponent.setFileName(editor.getEditorInput().getName());
+		if (editor!=null && editor.getEditorInput()!=null && dataSetComponent!=null) {
+			dataSetComponent.setFileName(editor.getEditorInput().getName());
+		}
 		dataSetComponent.createPartControl(form);
 		
 		if (dataSetComponent.getDataReductionAction()!=null) {

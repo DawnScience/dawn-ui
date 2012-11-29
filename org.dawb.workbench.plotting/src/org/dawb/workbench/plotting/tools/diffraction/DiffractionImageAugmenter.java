@@ -38,6 +38,7 @@ import uk.ac.diamond.scisoft.analysis.diffraction.IDiffractionCrystalEnvironment
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
+import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.ResolutionRing;
 import uk.ac.diamond.sda.meta.page.DiffractionMetadataCompositeEvent;
 import uk.ac.diamond.sda.meta.page.IDiffractionMetadataCompositeListener;
@@ -339,8 +340,8 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		((AbstractSelectionRegion) region).setForegroundColor(labelColour);
 
 		region.setShowPosition(false);
-		if (requireAdd) plottingSystem.addRegion(region);
 		region.setVisible(true);
+		if (requireAdd) plottingSystem.addRegion(region);
 		region.setMobile(false);
 		region.setUserObject(marker);
 
@@ -364,10 +365,12 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		if (!active) return; // We are likely off screen.
 		if (detprop != null && diffenv != null) {
 			double[] beamCentre = detprop.getBeamCentreCoords(); // detConfig.pixelCoords(detConfig.getBeamPosition());
-			EllipticalROI ellipse = DSpacing.ellipseFromDSpacing(detprop, diffenv, ring.getResolution());
-			DecimalFormat df = new DecimalFormat("#.00");
-			drawEllipse(reused, beamCentre, ellipse, ring.getColour(), ring.getColour(), name,
-					df.format(ring.getResolution()) + "Å", marker);
+			ROIBase roi  = DSpacing.conicFromDSpacing(detprop, diffenv, ring.getResolution());
+			if (roi instanceof EllipticalROI) {
+				DecimalFormat df = new DecimalFormat("#.00");
+				drawEllipse(reused, beamCentre, (EllipticalROI) roi, ring.getColour(), ring.getColour(), name,
+						df.format(ring.getResolution()) + "Å", marker);
+			}
 		}
 	}
 

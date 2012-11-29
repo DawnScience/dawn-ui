@@ -1304,7 +1304,8 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		final IToolPage tool= getViewSite().getSecondaryId()==null
 				            ? sys.getCurrentToolPage(getViewRole())
 				            : sys.getToolPage(getViewSite().getSecondaryId());
-		PageRec rec =  sys!=null ? pages.get(tool.getToolId()) : null;
+				            
+		PageRec rec =  (sys!=null && tool!=null) ? pages.get(tool.getToolId()) : null;
 		if (rec==null || rec.isDisposed()) return null;
 		return rec;
 	}	
@@ -1325,8 +1326,13 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 
 
 	protected void doDestroyPage(IWorkbenchPart part, PageRec pageRecord) {
-		
-		pageRecord.tool.dispose();
+		// We destroy this tool, but the plotting system may have a 
+		// reference to it, therefore we need to tell it to clone the
+		// stub of the tool (ready for creation) if the user chooses to 
+		// use the tool again.
+		for (IToolPageSystem sys : systems) {
+			sys.disposeToolPage(pageRecord.tool.getToolId());
+		}
 	}
 	
 	protected IWorkbenchPart getBootstrapPart() {
@@ -1363,6 +1369,12 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		// stop listening to part activation
 		getSite().getPage().removePartListener(partListener);
 
+		// Dedicated tool disposal
+		final String toolId = getViewSite().getSecondaryId();
+		if (toolId!=null && activeRec!=null && activeRec.tool!=null) {
+			activeRec.tool.dispose(); // Dispose cloned tool
+		}
+
 		// Deref all of the pages.
 		activeRec = null;
 		if (defaultPageRec != null) {
@@ -1371,27 +1383,27 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 			defaultPageRec.tool.dispose();
 			defaultPageRec = null;
 		}
-
+				
 		for (IToolPageSystem sys : systems) {
 			sys.removeToolChangeListener(this);
-			sys.clearCachedTools();
 		}
-		systems.clear();
-		systems = null;
-		
 		for(String partLoc : recs.keySet()) {
 			removeTools(partLoc, false);
 		}
 		recs.clear();
 		recs = null;
 		
+		if (mapToolToNumRecs!=null) this.mapToolToNumRecs.clear();
+		if (mapToolToSite!=null)    this.mapToolToSite.clear();
+		
+		systems.clear();
+		systems = null;
 
 		// Run super.
 		super.dispose();
 
 	}
 	
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;
