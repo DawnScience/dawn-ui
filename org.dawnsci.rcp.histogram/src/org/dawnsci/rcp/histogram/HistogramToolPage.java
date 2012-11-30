@@ -36,6 +36,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.PaletteData;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
@@ -533,7 +534,7 @@ public class HistogramToolPage extends AbstractToolPage {
 	@Override
 	public void createControl(final Composite parent) {
 		// Set up the composite to hold all the information
-		sc = new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
+		sc = new ScrolledComposite(parent, SWT.V_SCROLL);
 		sc.setLayout(new FillLayout());
 
 		composite = new Composite(sc, SWT.NONE);
@@ -703,7 +704,7 @@ public class HistogramToolPage extends AbstractToolPage {
 		histogramComposite = new Composite(histogramExpander, SWT.NONE);
 		histogramComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		histogramComposite.setLayout(new GridLayout(1, false));
-
+		
 		final IPageSite site = getSite();
 
 		histogramPlot.createPlotPart( histogramComposite, 
@@ -743,7 +744,11 @@ public class HistogramToolPage extends AbstractToolPage {
 			@Override
 			public void controlResized(ControlEvent e) {
 				Rectangle r = sc.getClientArea();
-				sc.setMinHeight(composite.computeSize(r.width, SWT.DEFAULT).y);
+				int height = composite.computeSize(r.width, SWT.DEFAULT).y;
+				if (histogramExpander.isExpanded()) {
+					height += 200;
+				}
+				sc.setMinHeight(height);
 				sc.setMinWidth(composite.computeSize(SWT.DEFAULT, r.height).x);
 			}
 		});
