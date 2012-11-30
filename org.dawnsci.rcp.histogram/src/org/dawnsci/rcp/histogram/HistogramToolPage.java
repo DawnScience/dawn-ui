@@ -674,7 +674,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 		deadZingerComposite = new Composite(deadZingerExpander, SWT.NONE);
 		deadZingerComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		deadZingerComposite.setLayout(new GridLayout(5, false));
+		deadZingerComposite.setLayout(new GridLayout(2, false));
 
 		deadPixelLabel = new Label(deadZingerComposite, SWT.NONE);
 		deadPixelLabel.setText(DEAD_PIXEL_LABEL);
