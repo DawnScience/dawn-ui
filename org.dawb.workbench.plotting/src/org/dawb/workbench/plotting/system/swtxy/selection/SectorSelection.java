@@ -342,10 +342,10 @@ public class SectorSelection extends AbstractSelectionRegion {
 			for (IFigure h : handles) {
 				h.setVisible(mobile);
 			}
-			// FIXME
-//			for (FigureTranslator f : fTranslators) {
-//				f.setActive(mobile);
-//			}
+
+			for (FigureTranslator f : fTranslators) {
+				f.setActive(mobile);
+			}
 		}
 
 		public TranslationListener createRegionNotifier() {
