@@ -42,12 +42,12 @@ public class EllipseSelection extends AbstractSelectionRegion {
 		labelColour = ColorConstants.black;
 		labelFont = new Font(Display.getCurrent(), "Dialog", 10, SWT.BOLD);
 	}
-	
+
 	@Override
 	public void setVisible(boolean visible) {
+		getBean().setVisible(visible);
 		if (ellipse != null)
 			ellipse.setVisible(visible);
-		getBean().setVisible(visible);
 	}
 
 	@Override
@@ -157,6 +157,14 @@ public class EllipseSelection extends AbstractSelectionRegion {
 		return 2;
 	}
 
+	@Override
+	public void dispose() {
+		super.dispose();
+		if (ellipse != null) {
+			ellipse.dispose();
+		}
+	}
+
 	class DecoratedEllipse extends RotatableEllipse implements IRegionContainer {
 		List<IFigure> handles;
 		List<FigureTranslator> fTranslators;
@@ -178,6 +186,16 @@ public class EllipseSelection extends AbstractSelectionRegion {
 					DecoratedEllipse.this.parent.repaint();
 				}
 			};
+		}
+
+		public void dispose() {
+			for (IFigure f : handles) {
+				((SelectionHandle) f).removeMouseListeners();
+			}
+			for (FigureTranslator t : fTranslators) {
+				t.removeTranslationListeners();
+			}
+			removeFigureListener(moveListener);
 		}
 
 		public void setup(PointList corners) {
