@@ -82,6 +82,10 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 		this.traceListener = new ITraceListener.Stub() {
 			
 			@Override
+			public void tracesUpdated(TraceEvent evt) {
+				fittingJob.schedule();
+			}
+			@Override
 			public void tracesAdded(TraceEvent evt) {
 				
 				@SuppressWarnings("unchecked")
