@@ -1142,4 +1142,11 @@ public class HistogramToolPage extends AbstractToolPage {
 			logger.error("Couldn't open histogram view and create ROI", e);
 		}
 	}
+
+	@Override
+	public void dispose() {
+		deactivate();
+		
+		super.dispose();
+	}
 }
