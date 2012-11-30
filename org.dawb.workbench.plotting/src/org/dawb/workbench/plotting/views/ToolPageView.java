@@ -1225,17 +1225,22 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
             }
             
             /** Bodge warning. We now check a few incompatible tool combinations **/
-            
+            // For null tools with different dimensionality to plotting system, we ignore
+           
             // If we are a IToolPageSystem and required tool is no tool and 
             // if we have plotted data inconsistent with the existing tool, 
             // leave the existing tool where it is. Likely it is an image tool
             // and sys is a 1D plot in a dedicated view.
-            if (!newPartFound && sys instanceof IPlottingSystem && tool instanceof EmptyTool) {
-            	final Collection<ITrace> images = ((IPlottingSystem)sys).getTraces(IImageTrace.class);
-            	if (images==null|| images.isEmpty()) { // 1D in this part
-            		if (activeRec.tool.getToolPageRole()==ToolPageRole.ROLE_2D) return; // 2D original tool
+            if (!newPartFound && sys instanceof IPlottingSystem && (tool instanceof EmptyTool || tool==null) ) {
+            	final Collection<ITrace> images = ((IPlottingSystem)sys).getTraces(IImageTrace.class);   
+                
+            	ToolPageRole role = (activeRec!=null && activeRec.tool!=null) 
+            			          ? activeRec.tool.getToolPageRole()
+            			          : getViewRole();
+             	if (images==null|| images.isEmpty()) { // 1D in this part
+            		if (role==ToolPageRole.ROLE_2D) return; // 2D original tool
             	} else { // 2D in this part
-            		if (activeRec.tool.getToolPageRole()==ToolPageRole.ROLE_1D) return; // 1D original tool
+            		if (role==ToolPageRole.ROLE_1D) return; // 1D original tool
             	}
             }
             
