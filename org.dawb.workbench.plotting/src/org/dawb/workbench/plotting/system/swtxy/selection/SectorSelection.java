@@ -40,6 +40,20 @@ public class SectorSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
+	public void setVisible(boolean visible) {
+		getBean().setVisible(visible);
+		if (sector != null)
+			sector.setVisible(visible);
+	}
+
+	@Override
+	public void setMobile(boolean mobile) {
+		getBean().setMobile(mobile);
+		if (sector != null)
+			sector.setMobile(mobile);
+	}
+
+	@Override
 	public void createContents(Figure parent) {
 		sector = new DecoratedSector(parent);
 		sector.setCursor(Draw2DUtils.getRoiMoveCursor());
@@ -216,8 +230,17 @@ public class SectorSelection extends AbstractSelectionRegion {
 		return 3;
 	}
 
+	@Override
+	public void dispose() {
+		super.dispose();
+		if (sector != null) {
+			sector.dispose();
+		}
+	}
+
 	class DecoratedSector extends Sector implements IRegionContainer {
 		private List<IFigure> handles;
+		List<FigureTranslator> fTranslators;
 		private Figure parent;
 		private static final int SIDE = 8;
 		private SectorROIHandler roiHandler;
@@ -227,6 +250,7 @@ public class SectorSelection extends AbstractSelectionRegion {
 		public DecoratedSector(Figure parent) {
 			super();
 			handles = new ArrayList<IFigure>();
+			fTranslators = new ArrayList<FigureTranslator>();
 			this.parent = parent;
 			roiHandler = new SectorROIHandler((SectorROI) roi);
 			handleListener = createHandleNotifier();
@@ -236,6 +260,16 @@ public class SectorSelection extends AbstractSelectionRegion {
 					DecoratedSector.this.parent.repaint();
 				}
 			};
+		}
+
+		public void dispose() {
+			for (IFigure f : handles) {
+				((SelectionHandle) f).removeMouseListeners();
+			}
+			for (FigureTranslator t : fTranslators) {
+				t.removeTranslationListeners();
+			}
+			removeFigureListener(moveListener);
 		}
 
 		/**
@@ -275,20 +309,43 @@ public class SectorSelection extends AbstractSelectionRegion {
 				
 				int[] p = coords.getValuePosition(hpt);
 				RectangularHandle h = new RectangularHandle(coords, getRegionColor(), this, SIDE, p[0], p[1]);
+				h.setVisible(isVisible() && isMobile());
 				parent.add(h);
 				mover = new FigureTranslator(getXyGraph(), h);
+				mover.setActive(isMobile());
 				mover.addTranslationListener(handleListener);
+				fTranslators.add(mover);
 				h.addFigureListener(moveListener);
 				handles.add(h);
 			}
 
 			addFigureListener(moveListener);
 			mover = new FigureTranslator(getXyGraph(), parent, this, handles);
+			mover.setActive(isMobile());
 			mover.addTranslationListener(createRegionNotifier());
+			fTranslators.add(mover);
 			setRegionObjects(this, handles);
 			Rectangle b = getBounds();
 			if (b != null)
 				setBounds(b);
+		}
+
+		@Override
+		public void setVisible(boolean visible) {
+			super.setVisible(visible);
+			for (IFigure h : handles) {
+				h.setVisible(visible);
+			}
+		}
+
+		public void setMobile(boolean mobile) {
+			for (IFigure h : handles) {
+				h.setVisible(mobile);
+			}
+			// FIXME
+//			for (FigureTranslator f : fTranslators) {
+//				f.setActive(mobile);
+//			}
 		}
 
 		public TranslationListener createRegionNotifier() {
