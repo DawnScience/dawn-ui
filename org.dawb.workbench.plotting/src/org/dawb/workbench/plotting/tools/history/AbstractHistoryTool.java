@@ -39,8 +39,8 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
     protected TableViewer    viewer;
     protected ITraceListener traceListener;
 	
-	public AbstractHistoryTool() {
-		this.traceListener = new ITraceListener.Stub() {
+	public AbstractHistoryTool(boolean requireCreateListener) {
+		if (requireCreateListener) this.traceListener = new ITraceListener.Stub() {
 			
 			@Override
 			public void tracesAdded(TraceEvent evt) {

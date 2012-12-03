@@ -15,7 +15,6 @@ import org.dawb.common.ui.components.cell.ScaleCellEditor;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
-import org.dawb.common.ui.plot.trace.ITraceListener.Stub;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.workbench.plotting.Activator;
 import org.eclipse.core.resources.IFile;
@@ -93,20 +92,30 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 	private boolean         includeCurrentPlot = true;
 
 	private IOperation operation;
-	private Stub origTraceListener;
 	
 	private enum ImageHistoryMarker { MARKER }
     
     public ImageHistoryTool() {
-    	super();
+    	super(false);
     	this.updateJob = new MathsJob();
     	
     	// Use CPU it is *not* slower for the maths this tool does
     	// To try GPU change to getBasicGpuOperation()
     	this.operation = OperationFactory.getBasicCpuOperation();
     	
-		this.origTraceListener = new ITraceListener.Stub() {
+		this.traceListener = new ITraceListener.Stub() {
 			
+			@Override
+			public void tracesAdded(TraceEvent evt) {
+				update(evt);
+				updatePlots();
+			}
+			
+			@Override
+			public void tracesRemoved(TraceEvent evt) {
+				update(evt);
+				updatePlots();
+			}
 			@Override
 			protected void update(TraceEvent evt) {
 				final IImageTrace imageTrace = getImageTrace();
@@ -124,9 +133,6 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
         if (getPlottingSystem()!=null && originalData==null) {        	
         	final IImageTrace imageTrace = getImageTrace();
         	this.originalData = imageTrace!=null ? imageTrace.getData() : null;
-        	if (originalData==null) {
-        		getPlottingSystem().addTraceListener(origTraceListener);         	 
-        	}
 		}
 		super.activate();
         refresh();
@@ -135,10 +141,6 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 	public void deactivate() {
 		super.deactivate();
 		operation.deactivate(); // It can still be used
-		
-		if (getPlottingSystem()!=null) {
-		    getPlottingSystem().addTraceListener(origTraceListener);         	 
-		}
 	}
 	
 	@Override
@@ -300,6 +302,10 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 		public IStatus run(IProgressMonitor monitor) {
 
 			try {
+				// Do nothing if 1D data plotted
+				if (!getPlottingSystem().is2D()) return Status.CANCEL_STATUS;
+				if (!isActive()) return Status.CANCEL_STATUS;
+				
 				// Loop over history and reprocess maths.
 				AbstractDataset od = getOriginalData();
 				AbstractDataset a  = od!=null&&includeCurrentPlot
@@ -310,6 +316,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 				for (String key : imageHistory.keySet()) {
 					
 					if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+					if (!isActive()) return Status.CANCEL_STATUS;
 					
 					final HistoryBean bean = imageHistory.get(key);
 					if (bean==null)         continue;
@@ -364,6 +371,8 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 		
 		Display.getDefault().syncExec(new Runnable() {
 			public void run () {
+				if (!getPlottingSystem().is2D()) return;
+				if (!isActive()) return;
 				getPlottingSystem().removeTraceListener(traceListener);
 				try {
 					final IImageTrace imageTrace = getImageTrace();

@@ -54,7 +54,7 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
     }
 		
 	public HistoryTool() {
-		super();
+		super(true);
 	}
 	
 	@Override
