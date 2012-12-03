@@ -197,6 +197,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		if (requireImageGeneration) {
 			try {
 				imageCreationAllowed = false;
+				if (image==null) return false;
 				AbstractDataset reducedFullImage = getDownsampled(image);
 
 				final IImageService service = (IImageService)PlatformUI.getWorkbench().getService(IImageService.class);

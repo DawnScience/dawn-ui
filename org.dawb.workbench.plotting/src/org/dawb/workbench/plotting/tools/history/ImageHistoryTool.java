@@ -311,10 +311,16 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 				// Do nothing if 1D data plotted
 				if (!getPlottingSystem().is2D()) return Status.CANCEL_STATUS;
 				if (!isActive()) return Status.CANCEL_STATUS;
-				if (!isActiveSelections()) return Status.CANCEL_STATUS;
+				if (!getPlottingSystem().getPlotType().is2D()) return Status.CANCEL_STATUS;
 				
 				// Loop over history and reprocess maths.
 				AbstractDataset od = getOriginalData();
+				
+				if (!isActiveSelections()) {
+					setPlotImage(od);
+					return Status.OK_STATUS;
+				}
+				
 				AbstractDataset a  = od!=null&&includeCurrentPlot
 						           ? od 
 						           : null;
@@ -380,11 +386,12 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 			public void run () {
 				if (!getPlottingSystem().is2D()) return;
 				if (!isActive())                 return;
-				if (!isActiveSelections())       return;
+				if (!getPlottingSystem().getPlotType().is2D()) return;
 				
 				getPlottingSystem().removeTraceListener(traceListener);
 				try {
 					final IImageTrace imageTrace = getImageTrace();
+					if (imageTrace==null) return;
 					getPlottingSystem().clear();
 					final IImageTrace image = getPlottingSystem().createImageTrace(imageTrace!=null?imageTrace.getName():"Image");
 					if (image==null) return;
@@ -392,6 +399,8 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 					image.setUserObject(ImageHistoryMarker.MARKER);
 					getPlottingSystem().addTrace(image);
 					getPlottingSystem().autoscaleAxes();
+				} catch (Throwable ne ) {
+					logger.error(ImageHistoryTool.class.getSimpleName()+" unable to process image. This might not be a fatal error because an image might not be plotted.");
 				} finally {
 					getPlottingSystem().addTraceListener(traceListener);
 				}
