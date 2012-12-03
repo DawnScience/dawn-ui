@@ -160,18 +160,24 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 					
 					if (iTrace.getUserObject()==HistoryType.HISTORY_PLOT) continue;
 					final IImageTrace imageTrace = (IImageTrace)iTrace;
-					
-					final HistoryBean bean = new HistoryBean();
-					bean.setData(imageTrace.getData());
-					bean.setAxes(imageTrace.getAxes());
-					bean.setTraceName(iTrace.getName());
-					bean.setPlotName(getPlottingSystem().getPlotName());
-					bean.setOperator(Operator.ADD);
-					imageHistory.put(bean.getTraceKey(), bean);
+					addImageToHistory(imageTrace.getData(), imageTrace.getName());
 				}
 				refresh();
 			}
 		};	
+	}
+	
+	protected void addImageToHistory(final AbstractDataset data, String name) {
+		
+		if (name==null) name = data.getName();
+		final HistoryBean bean = new HistoryBean();
+		bean.setData(data);
+		final List<AbstractDataset> axes = getImageTrace()!=null ? getImageTrace().getAxes() : null;
+		bean.setAxes(axes);
+		bean.setTraceName(name);
+		bean.setPlotName(getPlottingSystem().getPlotName());
+		bean.setOperator(Operator.ADD);
+		imageHistory.put(bean.getTraceKey(), bean);
 	}
 	
 	protected MenuManager createActions(MenuManager manager) {
@@ -305,6 +311,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 				// Do nothing if 1D data plotted
 				if (!getPlottingSystem().is2D()) return Status.CANCEL_STATUS;
 				if (!isActive()) return Status.CANCEL_STATUS;
+				if (isActiveSelections()) return Status.CANCEL_STATUS;
 				
 				// Loop over history and reprocess maths.
 				AbstractDataset od = getOriginalData();
@@ -372,7 +379,9 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 		Display.getDefault().syncExec(new Runnable() {
 			public void run () {
 				if (!getPlottingSystem().is2D()) return;
-				if (!isActive()) return;
+				if (!isActive())                 return;
+				if (isActiveSelections())        return;
+				
 				getPlottingSystem().removeTraceListener(traceListener);
 				try {
 					final IImageTrace imageTrace = getImageTrace();
@@ -387,6 +396,15 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 				}
 			}
 		});
+	}
+
+	public boolean isActiveSelections() {
+		final Map<String,HistoryBean> history = getHistoryCache();
+		if (history==null || history.size()<1) return false;
+		for (HistoryBean historyBean : history.values()) {
+			if (historyBean.isSelected()) return true;
+		}
+		return false;
 	}
 
 	@Override
