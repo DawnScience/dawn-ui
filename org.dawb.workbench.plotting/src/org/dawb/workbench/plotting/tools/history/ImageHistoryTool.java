@@ -130,9 +130,12 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 	@Override
 	public void activate() {
 		
-        if (getPlottingSystem()!=null && originalData==null) {        	
+        if (getPlottingSystem()!=null && originalData==null) { 
+        	
         	final IImageTrace imageTrace = getImageTrace();
-        	this.originalData = imageTrace!=null ? imageTrace.getData() : null;
+        	if (imageTrace.getUserObject()!=ImageHistoryMarker.MARKER)  {
+        	    this.originalData = imageTrace!=null ? imageTrace.getData() : null;
+        	}
 		}
 		super.activate();
         refresh();
@@ -392,6 +395,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 				try {
 					final IImageTrace imageTrace = getImageTrace();
 					if (imageTrace==null) return;
+					
 					getPlottingSystem().clear();
 					final IImageTrace image = getPlottingSystem().createImageTrace(imageTrace!=null?imageTrace.getName():"Image");
 					if (image==null) return;
