@@ -107,12 +107,14 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 			
 			@Override
 			public void tracesAdded(TraceEvent evt) {
+				if (updatingPlotsAlready) return;
 				update(evt);
 				updatePlots();
 			}
 			
 			@Override
 			public void tracesRemoved(TraceEvent evt) {
+				if (updatingPlotsAlready) return;
 				update(evt);
 				updatePlots();
 			}
