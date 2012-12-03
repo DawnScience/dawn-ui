@@ -84,8 +84,7 @@ public class ToolPageSite implements IPageSite, INestable {
 		subActionBars = new SubActionBars(parentViewSite.getActionBars(), this);
 
 		// Initialize the service locator.
-		IServiceLocatorCreator slc = (IServiceLocatorCreator) parentSite
-				.getService(IServiceLocatorCreator.class);
+		IServiceLocatorCreator slc = (IServiceLocatorCreator) parentSite.getService(IServiceLocatorCreator.class);
 		this.serviceLocator = (ServiceLocator) slc.createServiceLocator(
 				parentViewSite, null, new IDisposable(){
 					public void dispose() {
