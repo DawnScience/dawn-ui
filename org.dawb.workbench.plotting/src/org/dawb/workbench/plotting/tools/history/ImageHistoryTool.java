@@ -311,7 +311,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 				// Do nothing if 1D data plotted
 				if (!getPlottingSystem().is2D()) return Status.CANCEL_STATUS;
 				if (!isActive()) return Status.CANCEL_STATUS;
-				if (isActiveSelections()) return Status.CANCEL_STATUS;
+				if (!isActiveSelections()) return Status.CANCEL_STATUS;
 				
 				// Loop over history and reprocess maths.
 				AbstractDataset od = getOriginalData();
@@ -380,13 +380,14 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 			public void run () {
 				if (!getPlottingSystem().is2D()) return;
 				if (!isActive())                 return;
-				if (isActiveSelections())        return;
+				if (!isActiveSelections())       return;
 				
 				getPlottingSystem().removeTraceListener(traceListener);
 				try {
 					final IImageTrace imageTrace = getImageTrace();
 					getPlottingSystem().clear();
 					final IImageTrace image = getPlottingSystem().createImageTrace(imageTrace!=null?imageTrace.getName():"Image");
+					if (image==null) return;
 					image.setData(plot, imageTrace!=null?imageTrace.getAxes():null, false);
 					image.setUserObject(ImageHistoryMarker.MARKER);
 					getPlottingSystem().addTrace(image);
