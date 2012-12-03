@@ -38,7 +38,7 @@ public class BoxProfileTool extends ProfileTool {
 			plotter.getSelectedYAxis().setTitle("Intensity");
 		}
 	}
-
+	
 	@Override
 	protected void createProfile(IImageTrace  image, 
 			                     IRegion      region, 

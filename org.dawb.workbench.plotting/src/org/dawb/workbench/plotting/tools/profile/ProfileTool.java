@@ -214,7 +214,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 	 
 	
 	@Override
-	public ToolPageRole getToolPageRole() {
+	public final ToolPageRole getToolPageRole() {
 		return ToolPageRole.ROLE_2D;
 	}
 
@@ -246,13 +246,23 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		createNewRegion();
 	}
 	
-	private void createNewRegion() {
+	private final void createNewRegion() {
 		// Start with a selection of the right type
 		try {
-			getPlottingSystem().createRegion(RegionUtils.getUniqueName(getRegionName(), getPlottingSystem()), getCreateRegionType());
+			IRegion region = getPlottingSystem().createRegion(RegionUtils.getUniqueName(getRegionName(), getPlottingSystem()), getCreateRegionType());
+			region.setUserObject(getMarker());
 		} catch (Exception e) {
 			logger.error("Cannot create region for profile tool!");
 		}
+	}
+	
+	/**
+	 * The object used to mark this profile as being part of this tool.
+	 * By default just uses package string.
+	 * @return
+	 */
+	protected Object getMarker() {
+		return getToolPageRole().getClass().getName().intern();
 	}
 
 	/**
@@ -276,7 +286,19 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		}
 		if (getPlottingSystem()!=null) {
 			final Collection<IRegion> regions = getPlottingSystem().getRegions();
-			if (regions!=null) for (IRegion iRegion : regions) iRegion.removeROIListener(this);
+			if (regions!=null) for (IRegion iRegion : regions) {
+				if (iRegion.getUserObject()==getMarker()) {
+					iRegion.removeROIListener(this);
+					// If the plotting system has changed dimensionality
+					// to something not compatible with us, remove the region.
+					// TODO Change to having getRank() == rank 
+					if (getToolPageRole().is2D() && !getPlottingSystem().is2D()) {
+					    getPlottingSystem().removeRegion(iRegion);
+					} else if (getPlottingSystem().is2D() && !getToolPageRole().is2D()) {
+						getPlottingSystem().removeRegion(iRegion);
+					}
+				}
+			}
 		}
 		if (getPlottingSystem()!=null) {
 			if (getImageTrace()!=null) getImageTrace().removePaletteListener(paletteListener);
