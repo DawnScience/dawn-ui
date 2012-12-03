@@ -55,7 +55,7 @@
 
    <configurations>
       <plugin id="uk.ac.diamond.scisoft" autoStart="true" startLevel="0" />
-      <plugin id="uk.ac.diamond.scisoft.analysis.osgi" autoStart="true" startLevel="2" />
+      <plugin id="uk.ac.diamond.scisoft.analysis.osgi" autoStart="true" startLevel="1" />
       <property name="uk.ac.diamond.scisoft.analysis.rcp/plotView.plottingsystem" value="1" />
    </configurations>
 
