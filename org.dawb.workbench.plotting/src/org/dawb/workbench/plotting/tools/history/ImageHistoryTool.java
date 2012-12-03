@@ -12,6 +12,7 @@ import org.dawb.common.gpu.IOperation;
 import org.dawb.common.gpu.OperationFactory;
 import org.dawb.common.gpu.Operator;
 import org.dawb.common.ui.components.cell.ScaleCellEditor;
+import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
@@ -107,6 +108,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 			
 			@Override
 			public void tracesAdded(TraceEvent evt) {
+				if (!isActive())          return;
 				if (updatingPlotsAlready) return;
 				update(evt);
 				updatePlots();
@@ -114,6 +116,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 			
 			@Override
 			public void tracesRemoved(TraceEvent evt) {
+				if (!isActive())          return;
 				if (updatingPlotsAlready) return;
 				update(evt);
 				updatePlots();
@@ -135,7 +138,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
         if (getPlottingSystem()!=null && originalData==null) { 
         	
         	final IImageTrace imageTrace = getImageTrace();
-        	if (imageTrace.getUserObject()!=ImageHistoryMarker.MARKER)  {
+        	if (imageTrace!=null && imageTrace.getUserObject()!=ImageHistoryMarker.MARKER)  {
         	    this.originalData = imageTrace!=null ? imageTrace.getData() : null;
         	}
 		}
@@ -165,7 +168,11 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 					
 					if (iTrace.getUserObject()==HistoryType.HISTORY_PLOT) continue;
 					final IImageTrace imageTrace = (IImageTrace)iTrace;
-					addImageToHistory(imageTrace.getData(), imageTrace.getName());
+					String plotName =  ((AbstractPlottingSystem)getPlottingSystem()).getTitle();
+					if (plotName==null || "".equals(plotName)) {
+						plotName = imageTrace.getName();
+					}
+					addImageToHistory(imageTrace.getData(),plotName);
 				}
 				refresh();
 			}
@@ -398,7 +405,13 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 					final IImageTrace imageTrace = getImageTrace();
 					if (imageTrace==null) return;
 					
-					getPlottingSystem().clear();
+					boolean current = updatingPlotsAlready;
+					try {
+						updatingPlotsAlready = true;
+						getPlottingSystem().clear();
+			     	} finally {
+			     		updatingPlotsAlready = current;
+			     	}
 					final IImageTrace image = getPlottingSystem().createImageTrace(imageTrace!=null?imageTrace.getName():"Image");
 					if (image==null) return;
 					image.setData(plot, imageTrace!=null?imageTrace.getAxes():null, false);

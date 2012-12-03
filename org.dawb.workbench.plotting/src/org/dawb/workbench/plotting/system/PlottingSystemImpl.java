@@ -732,7 +732,13 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			lightWeightViewer.setTitle(title);
 		}
 	}
-	
+	public String getTitle() {
+		if (plottingMode.is3D()) {
+			return jrealityViewer.getTitle();
+		} else {
+			return lightWeightViewer.getTitle();
+		}
+	}	
 	/**
 	 * Override this method to provide an implementation of show legend setting.
 	 * @param b

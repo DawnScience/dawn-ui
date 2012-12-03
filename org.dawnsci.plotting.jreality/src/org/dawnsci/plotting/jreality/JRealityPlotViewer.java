@@ -619,7 +619,9 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		plotter.setAxisModes(xAxis, yAxis, zAxis);
 	}
 
+	private String title;
 	public void setTitle(final String titleStr) {
+		this.title = titleStr;
 		if(plotter != null) {
 			plotter.setTitle(titleStr);
 			if (infoBox != null) {
@@ -631,6 +633,10 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 				});
 			}
 		}
+	}
+
+	public String getTitle() {
+		return title;
 	}
 	
 	/**
