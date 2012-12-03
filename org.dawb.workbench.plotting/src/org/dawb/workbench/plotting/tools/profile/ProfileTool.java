@@ -233,10 +233,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 			getPlottingSystem().addRegionListener(regionListener);
 		}	
 		
-		if (getPlottingSystem()!=null) {
-			final Collection<IRegion> regions = getPlottingSystem().getRegions();
-			if (regions!=null) for (IRegion iRegion : regions) iRegion.addROIListener(this);
-		}
+		setRegionsActive(true);
 		
 		// We try to listen to the image mask changing and reprofile if it does.
 		if (getPlottingSystem()!=null) {
@@ -284,28 +281,41 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		if (getPlottingSystem()!=null) {
 			getPlottingSystem().removeRegionListener(regionListener);
 		}
-		if (getPlottingSystem()!=null) {
-			final Collection<IRegion> regions = getPlottingSystem().getRegions();
-			if (regions!=null) for (IRegion iRegion : regions) {
-				if (iRegion.getUserObject()==getMarker()) {
-					iRegion.removeROIListener(this);
-					// If the plotting system has changed dimensionality
-					// to something not compatible with us, remove the region.
-					// TODO Change to having getRank() == rank 
-					if (getToolPageRole().is2D() && !getPlottingSystem().is2D()) {
-					    getPlottingSystem().removeRegion(iRegion);
-					} else if (getPlottingSystem().is2D() && !getToolPageRole().is2D()) {
-						getPlottingSystem().removeRegion(iRegion);
-					}
-				}
-			}
-		}
+		setRegionsActive(false);
 		if (getPlottingSystem()!=null) {
 			if (getImageTrace()!=null) getImageTrace().removePaletteListener(paletteListener);
 		}
 
 	}
 	
+	private void setRegionsActive(boolean active) {
+		
+		if (getPlottingSystem()!=null) {
+			final Collection<IRegion> regions = getPlottingSystem().getRegions();
+			if (regions!=null) for (IRegion iRegion : regions) {
+				if (active) {
+					iRegion.addROIListener(this);
+				} else {
+					iRegion.removeROIListener(this);
+				}
+				if (iRegion.getUserObject()==getMarker()) {
+					if (active) {
+						iRegion.setVisible(active);
+					} else {
+						// If the plotting system has changed dimensionality
+						// to something not compatible with us, remove the region.
+						// TODO Change to having getRank() == rank 
+						if (getToolPageRole().is2D() && !getPlottingSystem().is2D()) {
+						    iRegion.setVisible(active);
+						} else if (getPlottingSystem().is2D() && !getToolPageRole().is2D()) {
+						    iRegion.setVisible(active);
+						}
+					}
+				}
+			}
+		}
+	}
+
 	@Override
 	public Control getControl() {
 		if (profilePlottingSystem==null) return null;

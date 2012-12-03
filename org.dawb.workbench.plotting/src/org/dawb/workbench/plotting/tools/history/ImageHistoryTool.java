@@ -14,6 +14,9 @@ import org.dawb.common.gpu.Operator;
 import org.dawb.common.ui.components.cell.ScaleCellEditor;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
+import org.dawb.common.ui.plot.trace.ITraceListener;
+import org.dawb.common.ui.plot.trace.ITraceListener.Stub;
+import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.workbench.plotting.Activator;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -53,6 +56,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.io.DataHolder;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 /**
@@ -89,6 +93,9 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 	private boolean         includeCurrentPlot = true;
 
 	private IOperation operation;
+	private Stub origTraceListener;
+	
+	private enum ImageHistoryMarker { MARKER }
     
     public ImageHistoryTool() {
     	super();
@@ -97,6 +104,18 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
     	// Use CPU it is *not* slower for the maths this tool does
     	// To try GPU change to getBasicGpuOperation()
     	this.operation = OperationFactory.getBasicCpuOperation();
+    	
+		this.origTraceListener = new ITraceListener.Stub() {
+			
+			@Override
+			protected void update(TraceEvent evt) {
+				final IImageTrace imageTrace = getImageTrace();
+				if (imageTrace!=null && imageTrace.getUserObject()!=ImageHistoryMarker.MARKER) {
+				    originalData = imageTrace!=null ? imageTrace.getData() : null;
+				}
+			}
+		};
+
     }
 	
 	@Override
@@ -105,9 +124,21 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
         if (getPlottingSystem()!=null && originalData==null) {        	
         	final IImageTrace imageTrace = getImageTrace();
         	this.originalData = imageTrace!=null ? imageTrace.getData() : null;
+        	if (originalData==null) {
+        		getPlottingSystem().addTraceListener(origTraceListener);         	 
+        	}
 		}
 		super.activate();
         refresh();
+	}
+	
+	public void deactivate() {
+		super.deactivate();
+		operation.deactivate(); // It can still be used
+		
+		if (getPlottingSystem()!=null) {
+		    getPlottingSystem().addTraceListener(origTraceListener);         	 
+		}
 	}
 	
 	@Override
@@ -208,7 +239,12 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 			IFile file = (IFile)((IEditorPart)getPart()).getEditorInput().getAdapter(IFile.class);
 			if (file!=null)
 				try {
-					plot = LoaderFactory.getData(file.getLocation().toOSString()).getDataset(0);
+					DataHolder holder = LoaderFactory.getData(file.getLocation().toOSString());
+					try {
+						return holder.getDataset(0);
+					} catch (java.lang.IllegalArgumentException iae) { // for H5 files with slicing
+						// Allowed HDF5 stacks must rely on traces being plotted
+					}
 				} catch (Exception e) {
 					logger.error("Cannot load "+file, e);
 					plot = null;
@@ -334,6 +370,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 					getPlottingSystem().clear();
 					final IImageTrace image = getPlottingSystem().createImageTrace(imageTrace!=null?imageTrace.getName():"Image");
 					image.setData(plot, imageTrace!=null?imageTrace.getAxes():null, false);
+					image.setUserObject(ImageHistoryMarker.MARKER);
 					getPlottingSystem().addTrace(image);
 					getPlottingSystem().autoscaleAxes();
 				} finally {
@@ -346,11 +383,6 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 	@Override
 	protected void updatePlot(HistoryBean bean) {
 		updatePlots(); // We update everything when one changes.
-	}
-	
-	public void deactivate() {
-		super.deactivate();
-		operation.deactivate(); // It can still be used
 	}
 
 	@Override
