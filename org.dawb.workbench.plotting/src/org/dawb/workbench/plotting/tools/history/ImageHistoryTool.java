@@ -138,7 +138,10 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 					evt.doit = false;
 					return;
 				}
-				evt.setImageData(set, getImageTrace().getAxes());
+				if (!set.isCompatibleWith(originalData)) return;
+				
+				evt.getImageTrace().setUserObject(ImageHistoryMarker.MARKER);
+				evt.setImageData(set, evt.getImageTrace().getAxes());
 			}
 
 		};
@@ -267,24 +270,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 	protected AbstractDataset getOriginalData() {
 		
 		// Try and read the original data from the editor.
-		AbstractDataset plot = null;
-		if (plot==null && getPart() instanceof IEditorPart) {
-			IFile file = (IFile)((IEditorPart)getPart()).getEditorInput().getAdapter(IFile.class);
-			if (file!=null)
-				try {
-					DataHolder holder = LoaderFactory.getData(file.getLocation().toOSString());
-					try {
-						return holder.getDataset(0);
-					} catch (java.lang.IllegalArgumentException iae) { // for H5 files with slicing
-						// Allowed HDF5 stacks must rely on traces being plotted
-					}
-				} catch (Exception e) {
-					logger.error("Cannot load "+file, e);
-					plot = null;
-				}
-		}
-		if (plot==null) plot = originalData; // We attempt to cache it otherwise.
-		return plot;
+		return originalData; // We attempt to cache it otherwise.
 	}
 
 	protected void moveBean(int i) {
@@ -370,7 +356,6 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 		
 		// Loop over history and reprocess maths.
 		AbstractDataset od = getOriginalData();
-		
 		if (!isActiveSelections()) {
 			if (includeCurrentPlot) {
 			    return od;
@@ -382,6 +367,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 		AbstractDataset a  = od!=null&&includeCurrentPlot
 				           ? od 
 				           : null;
+		if (od!=null && od.getRank()!=2) return null; // This is image compare!
 		
 		for (String key : imageHistory.keySet()) {
 			

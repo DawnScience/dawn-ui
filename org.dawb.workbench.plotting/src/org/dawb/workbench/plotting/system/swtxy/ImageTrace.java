@@ -677,14 +677,16 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 
 	@Override
-	public void setData(AbstractDataset image, List<AbstractDataset> axes, boolean performAuto) {
+	public boolean setData(AbstractDataset image, List<AbstractDataset> axes, boolean performAuto) {
 		
 		
 		if (plottingSystem!=null) try {
 			if (plottingSystem.getTraces().contains(this)) {
 				final TraceWillPlotEvent evt = new TraceWillPlotEvent(this, false);
+				evt.setImageData(image, axes);
+				evt.setNewImageDataSet(false);
 				plottingSystem.fireWillPlot(evt);
-				if(!evt.doit) return;
+				if (!evt.doit) return false;
 				if (evt.isNewImageDataSet()) {
 					image = evt.getImage();
 					axes  = evt.getAxes();
@@ -722,6 +724,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			// We allow things to proceed without a warning.
 		}
 
+		return true;
 	}
 	
 	@Override

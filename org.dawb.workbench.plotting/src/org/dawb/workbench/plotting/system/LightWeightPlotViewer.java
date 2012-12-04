@@ -484,13 +484,9 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		xyGraph.clearTraces();
 
 		final ImageTrace trace = xyGraph.createImageTrace(traceName, xAxis, yAxis);
-		trace.setData(data, axes, true);
-		
-		final TraceWillPlotEvent evt = new TraceWillPlotEvent(trace, true);
-		system.fireWillPlot(evt);
-		if (!evt.doit) return trace;
 		trace.setPlottingSystem(system);
-
+		if (!trace.setData(data, axes, true)) return trace; // But not plotted
+		
 		xyGraph.addImageTrace(trace);
 		removeAdditionalAxes();
 		return trace;
