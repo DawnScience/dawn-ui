@@ -2363,7 +2363,8 @@ public class DataSet3DPlot2D implements IDataSet3DCorePlot,
 	public void setTitle(String title) {
 		if (titleLabelStr == null || !title.equals(titleLabelStr)) {
 			titleLabelStr = title;
-			titleLabel.setGeometry(createTitleGeometry());
+			if(titleLabel != null)
+				titleLabel.setGeometry(createTitleGeometry());
 		}	
 	}
 
