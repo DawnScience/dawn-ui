@@ -77,13 +77,17 @@ public class HistogramToolPage extends AbstractToolPage {
 	// STATICS
 	private static final int SLIDER_STEPS = 1000;
 	private static final int MAX_BINS = 2048;
-
+	
 	// MODES
 	private static final int FULL = 0;
 	private static final int AUTO = 1;
 	private static final int FIXED = 2;
 
-	private int mode = FULL;
+	/**
+	 * Locking should be static so that the tool works in editor part mode.
+	 */
+	private static IAction lockAction;
+	private static int mode = FULL;
 
 
 	// HISTOGRAM 
@@ -126,7 +130,6 @@ public class HistogramToolPage extends AbstractToolPage {
 	private Button btnRedInverse;
 
 	private SelectionListener colourSelectionListener;
-
 
 	// BRIGHTNESS CONTRAST GUI
 	private static final String BRIGHTNESS_LABEL = "Brightness";
@@ -721,21 +724,26 @@ public class HistogramToolPage extends AbstractToolPage {
 
 		createRegion();
 
-
-		// Add the histogram locked tool
-		site.getActionBars().getMenuManager().add(new Action("Histogram Locked", IAction.AS_CHECK_BOX) {
-			public void run() {
-				if (mode == FIXED) {
-					setChecked(false);
-					mode=AUTO;
-					image.setRescaleHistogram(true);
-				} else {
-					setChecked(true);
-					mode=FIXED;
-					image.setRescaleHistogram(false);
+		if (lockAction==null) {
+			lockAction = new Action("Histogram Locked", IAction.AS_CHECK_BOX) {
+				public void run() {
+					if (mode == FIXED) {
+						setChecked(false);
+						mode=AUTO;
+						image.setRescaleHistogram(true);
+					} else {
+						setChecked(true);
+						mode=FIXED;
+						image.setRescaleHistogram(false);
+					}
 				}
-			}
-		});
+			};
+			lockAction.setImageDescriptor(Activator.getImageDescriptor("icons/lock.png"));
+		}
+
+		// Add the histogram locked tool. Important, add so that visible
+		site.getActionBars().getMenuManager().add(lockAction);
+		site.getActionBars().getToolBarManager().add(lockAction);
 
 		sc.setContent(composite);
 		sc.setExpandVertical(true);
