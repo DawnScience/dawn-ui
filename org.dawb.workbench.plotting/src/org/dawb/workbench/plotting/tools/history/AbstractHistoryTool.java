@@ -44,12 +44,12 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 			
 			@Override
 			public void tracesAdded(TraceEvent evt) {
-				updatePlots();
+				updatePlots(false);
 			}
 			
 			@Override
 			public void tracesRemoved(TraceEvent evet) {
-				updatePlots();
+				updatePlots(false);
 			}
 		};
 	}
@@ -66,7 +66,7 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 	 * Call to process history beans and update the plot with the
 	 * compare data
 	 */
-	protected abstract void updatePlot(HistoryBean bean);
+	protected abstract void updatePlot(HistoryBean bean, boolean force);
 	
 
 	/**
@@ -86,14 +86,14 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 	protected boolean updatingAPlotAlready = false;
 	protected boolean updatingPlotsAlready = false;
     
-	protected void updatePlots() {
+	protected void updatePlots(boolean force) {
 		
 		if (updatingPlotsAlready) return;
 		try {
 			updatingPlotsAlready = true;
 			// Loop over history and reprocess it all.
 			for (String key : getHistoryCache().keySet()) {
-				updatePlot(getHistoryCache().get(key));
+				updatePlot(getHistoryCache().get(key), force);
 			}
 		} finally {
 			updatingPlotsAlready = false;
@@ -106,7 +106,7 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 		this.composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new FillLayout());
 
-		viewer = new TableViewer(composite, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+		viewer = new TableViewer(composite, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER | SWT.FULL_SELECTION);
 		createColumns(viewer);
 		
 		viewer.getTable().setLinesVisible(true);
@@ -170,7 +170,7 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 					if (!bean.isModifiable()) continue;
 					bean.setSelected(false);
 				}
-				updatePlots();
+				updatePlots(false);
 				clearCache();
 			    refresh();
 			}
@@ -214,7 +214,7 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 		if (bean==null) return;
 		if (!bean.isModifiable()) return;
 		bean.setSelected(false);
-		updatePlot(bean);
+		updatePlot(bean, false);
 		getHistoryCache().remove(bean.getTraceKey());
 	    refresh();
 	}
@@ -224,7 +224,7 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 			if (!bean.isModifiable()) continue;
 			bean.setSelected(checked);
 		}
-		updatePlots();
+		updatePlots(false);
 	    refresh();		
 	}
 
@@ -256,7 +256,7 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 	@Override
 	public void activate() {
 		
-        updatePlots();
+        updatePlots(false);
         
         if (getPlottingSystem()!=null) {
         	getPlottingSystem().addTraceListener(this.traceListener);
@@ -293,7 +293,6 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 	@Override
 	public void mouseDown(MouseEvent e) {
 		if (e.button==1) {
-			if (viewer.isCellEditorActive() ) return;
 			
 			// Toggle if first column clicked.
 			Point     pnt  = new Point(e.x, e.y);
@@ -301,7 +300,7 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 	        if (item == null) return;
             Rectangle rect = item.getBounds(0);
             if (rect.contains(pnt)) {
-				toggleSelection();
+  				toggleSelection();
 	        } 	          
 		}
 	}
@@ -312,13 +311,16 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 		
 	}
 
-	public void toggleSelection() {
+	protected HistoryBean toggleSelection() {
 		final HistoryBean bean = getSelectedPlot();
 		if (bean!=null) {
- 			bean.setSelected(!bean.isSelected());
-			viewer.refresh(bean);
-			updatePlot(bean);
+ 			viewer.cancelEditing();
+			bean.setSelected(!bean.isSelected());
+			viewer.update(bean, null);
+			updatePlot(bean, true);
+			return bean;
 		}
+		return null;
 	}
 	
 	protected HistoryBean getSelectedPlot() {

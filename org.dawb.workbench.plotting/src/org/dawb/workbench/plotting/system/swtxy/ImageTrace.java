@@ -684,6 +684,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			if (plottingSystem.getTraces().contains(this)) {
 				final TraceWillPlotEvent evt = new TraceWillPlotEvent(this, false);
 				plottingSystem.fireWillPlot(evt);
+				if(!evt.doit) return;
 				if (evt.isNewImageDataSet()) {
 					image = evt.getImage();
 					axes  = evt.getAxes();

@@ -17,7 +17,9 @@ import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
+import org.dawb.common.ui.plot.trace.TraceWillPlotEvent;
 import org.dawb.workbench.plotting.Activator;
+import org.dawb.workbench.plotting.preference.PlottingConstants;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -56,6 +58,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 import uk.ac.diamond.scisoft.analysis.io.DataHolder;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
@@ -90,7 +93,6 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
      */
     private AbstractDataset originalData;
 	private MathsJob        updateJob;
-	private boolean         includeCurrentPlot = true;
 
 	private IOperation operation;
 	
@@ -107,27 +109,38 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 		this.traceListener = new ITraceListener.Stub() {
 			
 			@Override
-			public void tracesAdded(TraceEvent evt) {
+			public void traceAdded(TraceEvent evt) {
 				if (!isActive())          return;
 				if (updatingPlotsAlready) return;
-				update(evt);
-				updatePlots();
+				updatePlots(false);
 			}
 			
 			@Override
-			public void tracesRemoved(TraceEvent evt) {
+			public void traceRemoved(TraceEvent evt) {
 				if (!isActive())          return;
 				if (updatingPlotsAlready) return;
-				update(evt);
-				updatePlots();
+				updatePlots(false);
 			}
+			
 			@Override
-			protected void update(TraceEvent evt) {
-				final IImageTrace imageTrace = getImageTrace();
-				if (imageTrace!=null && imageTrace.getUserObject()!=ImageHistoryMarker.MARKER) {
-				    originalData = imageTrace!=null ? imageTrace.getData() : null;
+			public void traceWillPlot(final TraceWillPlotEvent evt) {
+				if (!isActive())               return;
+				if (updatingPlotsAlready)      return;
+				if (evt.getImageTrace()==null) return;
+				if (evt.getImageTrace().getUserObject()==ImageHistoryMarker.MARKER) return;
+				originalData = evt.getImage();
+				if (getImageTrace()==null) return;
+				if (!isActiveSelections()) return;
+		
+				AbstractDataset set = getCombinedData(null);
+				if (set==null) return;
+				if (set.getSize()==1) {
+					evt.doit = false;
+					return;
 				}
+				evt.setImageData(set, getImageTrace().getAxes());
 			}
+
 		};
 
     }
@@ -197,12 +210,12 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 
 		final IAction include = new Action("Include current plot", Activator.getImageDescriptor("icons/include-current-image.png")) {
 			public void run() {
-				ImageHistoryTool.this.includeCurrentPlot = isChecked();
-				updatePlots();
+				Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.INCLUDE_ORIGINAL, isChecked());
+				updatePlots(false);
 				refresh();
 			}
 		};
-		include.setChecked(true);
+		include.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.INCLUDE_ORIGINAL));
 		
 		final IAction revert = new Action("Revert plot", Activator.getImageDescriptor("icons/reset.gif")) {
 			public void run() {
@@ -213,7 +226,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 					imageHistory.get(key).setSelected(false);
 				}
 				setPlotImage(plot);
-				ImageHistoryTool.this.includeCurrentPlot = true;
+				Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.INCLUDE_ORIGINAL, true);
 				include.setChecked(true);
 				refresh();
 			}
@@ -294,16 +307,16 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 			imageHistory.put(key, tmp.get(key));
 		}
 		refresh();
-		updatePlots();
+		updatePlots(false);
 	}
 
 	@Override
-	protected void updatePlots() {
+	protected void updatePlots(boolean force) {
 		if (!getPlottingSystem().is2D()) {
 			logger.error("Plotting system is not plotting 2D data, image history should not be active.");
 			return;
 		}
-		if (updatingPlotsAlready) return;
+		if (updatingPlotsAlready&&!force) return;
 		updatingPlotsAlready = true;
 		updateJob.cancel();
 		updateJob.schedule();
@@ -325,64 +338,19 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 				if (!isActive()) return Status.CANCEL_STATUS;
 				if (!getPlottingSystem().getPlotType().is2D()) return Status.CANCEL_STATUS;
 				
-				// Loop over history and reprocess maths.
-				AbstractDataset od = getOriginalData();
-				
-				if (!isActiveSelections()) {
-					setPlotImage(od);
-					return Status.OK_STATUS;
-				}
-				
-				AbstractDataset a  = od!=null&&includeCurrentPlot
-						           ? od 
-						           : null;
-				
 				final long start = System.currentTimeMillis();
-				for (String key : imageHistory.keySet()) {
-					
-					if (monitor.isCanceled()) return Status.CANCEL_STATUS;
-					if (!isActive()) return Status.CANCEL_STATUS;
-					
-					final HistoryBean bean = imageHistory.get(key);
-					if (bean==null)         continue;
-					if (!bean.isSelected()) continue;
-					if (bean.getWeighting()<1) continue;
-					
-					if (a==null) { 
-						if (bean.getData()==null) continue;
-						a = bean.getData();
-						continue;
-					}
-					
-					if (!a.isCompatibleWith(bean.getData())) {
-						bean.setSelected(false);
-						Display.getDefault().syncExec(new Runnable() {
-							public void run() {
-								viewer.refresh(bean);
-							}
-						});
-						continue;
-					}
-					
-					AbstractDataset data = bean.getData();
-					if (bean.getWeighting()<100) { // Reduce its intensity
-						data = operation.process(data, bean.getWeighting()/100d, Operator.MULTIPLY);
-					}
-					a = operation.process(a, data, bean.getOperator());
+				AbstractDataset a = getCombinedData(monitor);
+				if (a==null) return Status.CANCEL_STATUS;
+				if (a.getSize()==1) {
+					getPlottingSystem().clear();
+					return Status.CANCEL_STATUS;
 				}
+				
 				final long end = System.currentTimeMillis();
 				logger.trace("Processed image maths in "+(end-start));
+				
+				setPlotImage(a);
 
-				if (a!=null) { // We plot it.
-					setPlotImage(a);
-				} else if (!includeCurrentPlot) { // We clear it
-					Display.getDefault().syncExec(new Runnable() {
-						public void run () {
-							getPlottingSystem().clear();
-						}
-					});
-				}
-	
 				return Status.OK_STATUS;
 				
 			} finally {
@@ -390,6 +358,65 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 			}
 		}
 		
+	}
+	
+	/**
+	 * 
+	 * @return Data to plot, size 1 dataset to do clear, null to do nothing
+	 */
+	private AbstractDataset getCombinedData(IProgressMonitor monitor) {
+		
+		boolean includeCurrentPlot = Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.INCLUDE_ORIGINAL);
+		
+		// Loop over history and reprocess maths.
+		AbstractDataset od = getOriginalData();
+		
+		if (!isActiveSelections()) {
+			if (includeCurrentPlot) {
+			    return od;
+			} else {
+				return new IntegerDataset(1); // Clear
+			}
+		}
+		
+		AbstractDataset a  = od!=null&&includeCurrentPlot
+				           ? od 
+				           : null;
+		
+		for (String key : imageHistory.keySet()) {
+			
+			if (monitor!=null && monitor.isCanceled()) return null;
+			if (!isActive()) return null;
+			
+			final HistoryBean bean = imageHistory.get(key);
+			if (bean==null)         continue;
+			if (!bean.isSelected()) continue;
+			if (bean.getWeighting()<1) continue;
+			
+			if (a==null) { 
+				if (bean.getData()==null) continue;
+				a = bean.getData();
+				continue;
+			}
+			
+			if (!a.isCompatibleWith(bean.getData())) {
+				bean.setSelected(false);
+				Display.getDefault().syncExec(new Runnable() {
+					public void run() {
+						viewer.refresh(bean);
+					}
+				});
+				continue;
+			}
+			
+			AbstractDataset data = bean.getData();
+			if (bean.getWeighting()<100) { // Reduce its intensity
+				data = operation.process(data, bean.getWeighting()/100d, Operator.MULTIPLY);
+			}
+			a = operation.process(a, data, bean.getOperator());
+		}
+
+		return a;
 	}
 	
 	public void setPlotImage(final AbstractDataset plot) {
@@ -402,8 +429,14 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 				
 				getPlottingSystem().removeTraceListener(traceListener);
 				try {
-					final IImageTrace imageTrace = getImageTrace();
-					if (imageTrace==null) return;
+					IImageTrace imageTrace = getImageTrace();
+					if (imageTrace==null) {
+						imageTrace = getPlottingSystem().createImageTrace(plot.getName()!=null?plot.getName():"");
+						imageTrace.setData(plot, null, false);
+						getPlottingSystem().addTrace(imageTrace);
+						getPlottingSystem().autoscaleAxes();	
+						return;
+					}
 					
 					boolean current = updatingPlotsAlready;
 					try {
@@ -427,7 +460,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 		});
 	}
 
-	public boolean isActiveSelections() {
+	protected boolean isActiveSelections() {
 		final Map<String,HistoryBean> history = getHistoryCache();
 		if (history==null || history.size()<1) return false;
 		for (HistoryBean historyBean : history.values()) {
@@ -435,10 +468,15 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 		}
 		return false;
 	}
+	protected boolean isEmpty() {
+		final Map<String,HistoryBean> history = getHistoryCache();
+		if (history==null || history.size()<1) return true;
+		return false;
+	}
 
 	@Override
-	protected void updatePlot(HistoryBean bean) {
-		updatePlots(); // We update everything when one changes.
+	protected void updatePlot(HistoryBean bean, boolean force) {
+		updatePlots(force); // We update everything when one changes.
 	}
 
 	@Override
@@ -532,8 +570,9 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 			     return bean.getPlotName();
 			}
 			if (columnIndex==3) {
+				boolean includeCurrentPlot = Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.INCLUDE_ORIGINAL);
 				if (getIndex(bean)==0 && !includeCurrentPlot) return "";
-			     return bean.getOperator().getName();
+			    return bean.getOperator().getName();
 			}
 			if (columnIndex==4) {
 				try {
@@ -649,7 +688,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 			((HistoryBean)element).setOperator(Operator.getOperator((Integer)value));
 			((HistoryBean)element).setSelected(true);
 			viewer.refresh(element);
-			updatePlots();
+			updatePlots(false);
 		}
 
 	}
@@ -662,7 +701,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 
 		@Override
 		protected CellEditor getCellEditor(final Object element) {
-			ScaleCellEditor ed = new ScaleCellEditor((Composite)getViewer().getControl());
+			final ScaleCellEditor ed = new ScaleCellEditor((Composite)getViewer().getControl());
 			ed.setMinimum(0);
 			ed.setMaximum(100);
 			ed.addSelectionListener(new SelectionAdapter() {		
@@ -680,6 +719,8 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 						bean.setWeighting(value);
 						bean.setSelected(true);
 					}
+					ed.getControl().setToolTipText(String.valueOf(value));
+					viewer.update(bean, new String[]{"Selected"});
 					updateJob.cancel();
 					updateJob.schedule();
 				}
@@ -701,7 +742,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 		protected void setValue(Object element, Object value) {
 			((HistoryBean)element).setWeighting((Integer)value);
 			viewer.refresh(element);
-			updatePlots();
+			updatePlots(false);
 		}
 
 	}
