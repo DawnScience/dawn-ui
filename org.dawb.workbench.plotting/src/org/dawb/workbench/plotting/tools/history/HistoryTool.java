@@ -192,13 +192,13 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 	/**
 	 * Pushes history plot to and from the main plot depending on if it is selected.
 	 */
-	protected void updatePlot(HistoryBean bean) {
+	protected void updatePlot(HistoryBean bean, boolean force) {
 		
 		if (getPlottingSystem().is2D()) {
 			logger.error("Plotting system is plotting 2D data, history should not be active.");
 			return;
 		}
-		if (updatingAPlotAlready) return;
+		if (updatingAPlotAlready&&!force) return;
 		try {
 			updatingAPlotAlready = true;
 			

@@ -24,7 +24,8 @@ Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: gluegen-rt.jar,
  jogl.jar,
  jReality_modified.jar,
- .
+ .,
+ jtem-beans.jar
 Import-Package: org.dawb.common.services,
  org.slf4j
 Export-Package: de.jreality.backends.label,

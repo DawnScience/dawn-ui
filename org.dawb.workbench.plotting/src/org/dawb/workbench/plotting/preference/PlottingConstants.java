@@ -85,5 +85,10 @@ public class PlottingConstants {
 	 * Property to store if axes should be shown.
 	 */
 	public static final String SHOW_AXES           = "org.dawb.workbench.plotting.preference.showAxes";
+	
+	/**
+	 * Save if image history should include original plot or not.
+	 */
+	public static final String INCLUDE_ORIGINAL    = "org.dawb.workbench.plotting.preference.includeOriginalPlot";
 
 }

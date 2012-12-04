@@ -603,7 +603,9 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		if (trace instanceof ISurfaceTrace) { // TODO FIXME Others?
 			this.plottingMode = PlotType.SURFACE; // Only one surface allowed at a time
 			switchPlottingType(plottingMode);
-			fireWillPlot(new TraceWillPlotEvent(trace, true));
+			TraceWillPlotEvent evt = new TraceWillPlotEvent(trace, true);
+			fireWillPlot(evt);
+			if (!evt.doit) return;
 			jrealityViewer.addSurfaceTrace((ISurfaceTrace)trace);
 			
 		} else { // 1D, an image or LineTrace
