@@ -737,6 +737,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 	public void setData(Object obj){
 		if(obj instanceof List<?>){
 			List<?> images = (List<?>)obj;
+			clearCache();
 			for (Object image : images) {
 				if(image instanceof AbstractDataset)
 					addImageToHistory((AbstractDataset)image, ((AbstractDataset)image).getName());
