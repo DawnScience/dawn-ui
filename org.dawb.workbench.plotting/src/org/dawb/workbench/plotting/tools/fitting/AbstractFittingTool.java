@@ -50,6 +50,7 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
+import uk.ac.gda.common.rcp.util.GridUtils;
 
 public abstract class AbstractFittingTool extends AbstractToolPage implements IRegionListener {
 
@@ -164,6 +165,7 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 		
 		this.composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout(1, false));
+		GridUtils.removeMargins(composite);
 
 		viewer = new TableViewer(composite, SWT.FULL_SELECTION | SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
         createColumns(viewer);

@@ -1131,7 +1131,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 					final ToolPageView view = (ToolPageView)EclipseUtils.getPage().showView("org.dawb.workbench.plotting.views.toolPageView.fixed",
 																							tool.getToolId(),
 																							IWorkbenchPage.VIEW_ACTIVATE);
-					view.update();
+					view.update(orig);
 					if (orig!=null && view.activeRec!=null && view.activeRec.tool!=null) {
 						view.activeRec.tool.sync(orig);
 						orig.deactivate();
@@ -1151,9 +1151,15 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		
 	}
 	
-	protected void update() {
-		// TODO Does this work ok?
-		partActivated(EclipseUtils.getActiveEditor());
+	protected void update(IToolPage orig) {
+		AbstractToolPage tp = (AbstractToolPage)orig;
+		if (tp!=null && tp.isLinkedToolPage()) {
+			final IToolPage link = tp.getLinkedToolPage();
+			partActivated(link.getViewPart());
+			
+		} else {
+		    partActivated(EclipseUtils.getActiveEditor());
+		}
 	}
 
 	private ToolPageRole getViewRole() {
@@ -1272,17 +1278,9 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
              * For dedicated tools we do not want to link them to parts that are tools and also
              * have the wrong dimensionality
              */
-            if (activeRec.tool instanceof AbstractToolPage && sys instanceof IPlottingSystem) {
-            	if (((AbstractToolPage)activeRec.tool).isDedicatedView()) {
-            		IPlottingSystem ps = (IPlottingSystem)sys;
-            		if (activeRec.tool.getToolPageRole()==ToolPageRole.ROLE_2D && !ps.is2D()) {
-            			return;
-            		} else if (activeRec.tool.getToolPageRole()==ToolPageRole.ROLE_1D && ps.is2D()) {
-            			return;
-            		}
-            	}
-            }
-            
+            if (!isDimensionalityOk(activeRec.tool, sys)) return;
+            if (!isDimensionalityOk(tool, sys))           return;
+                       
             /** End bodge warning. **/
             
         
@@ -1312,6 +1310,20 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
         }
 	}
 	
+	private boolean isDimensionalityOk(IToolPage tool, IToolPageSystem sys) {
+		if (tool instanceof AbstractToolPage && sys instanceof IPlottingSystem) {
+        	if (((AbstractToolPage)tool).isDedicatedView()) {
+        		IPlottingSystem ps = (IPlottingSystem)sys;
+        		if (tool.getToolPageRole()==ToolPageRole.ROLE_2D && !ps.is2D()) {
+        			return false;
+        		} else if (tool.getToolPageRole()==ToolPageRole.ROLE_1D && ps.is2D()) {
+        			return false;
+        		}
+        	}
+        }
+	    return true;	
+	}
+
 	private void updatePartInfo(IToolPage tool) {
 		if (isDisposed) return;
 		if (getViewSite().getSecondaryId()!=null) return; // It is fixed
@@ -1488,7 +1500,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	}
 
 	@Override
-	public IToolPage getActiveTool() {
-		return (IToolPage)getCurrentPage();
+	public AbstractToolPage getActiveTool() {
+		return (AbstractToolPage)getCurrentPage();
 	}
 }
