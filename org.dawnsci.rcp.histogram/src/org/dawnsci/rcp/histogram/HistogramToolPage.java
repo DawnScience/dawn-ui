@@ -85,8 +85,8 @@ public class HistogramToolPage extends AbstractToolPage {
 	/**
 	 * Locking should be static so that the tool works in editor part mode.
 	 */
-	private static IAction lockAction;
-	private static int mode = FULL;
+	private IAction lockAction;
+	private int mode = FULL;
 
 
 	// HISTOGRAM 
@@ -723,26 +723,24 @@ public class HistogramToolPage extends AbstractToolPage {
 
 		createRegion();
 
-		if (lockAction==null) {
-			lockAction = new Action("Histogram Locked", IAction.AS_CHECK_BOX) {
-				public void run() {
-					if (mode == FIXED) {
-						setChecked(false);
-						mode=AUTO;
-						image.setRescaleHistogram(true);
-					} else {
-						setChecked(true);
-						mode=FIXED;
-						image.setRescaleHistogram(false);
-					}
+		lockAction = new Action("Histogram range locked for this image", IAction.AS_CHECK_BOX) {
+			public void run() {
+				if (mode == FIXED) {
+					setChecked(false);
+					mode=AUTO;
+					image.setRescaleHistogram(true);
+				} else {
+					setChecked(true);
+					mode=FIXED;
+					image.setRescaleHistogram(false);
 				}
-			};
-			lockAction.setImageDescriptor(Activator.getImageDescriptor("icons/lock.png"));
-		}
+			}
+		};
+		lockAction.setImageDescriptor(Activator.getImageDescriptor("icons/lock.png"));
 
 		// Add the histogram locked tool. Important, add so that visible
 		site.getActionBars().getMenuManager().add(lockAction);
-		site.getActionBars().getToolBarManager().add(lockAction);
+		//site.getActionBars().getToolBarManager().add(lockAction);
 
 		sc.setContent(composite);
 		sc.setExpandVertical(true);
