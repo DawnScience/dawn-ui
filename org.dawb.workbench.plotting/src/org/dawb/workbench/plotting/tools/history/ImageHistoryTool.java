@@ -20,7 +20,6 @@ import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.common.ui.plot.trace.TraceWillPlotEvent;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -53,14 +52,11 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Scale;
-import org.eclipse.ui.IEditorPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
-import uk.ac.diamond.scisoft.analysis.io.DataHolder;
-import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 /**
  * Tool whereby images may be added to a static list which has various
@@ -436,7 +432,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 					image.setData(plot, imageTrace!=null?imageTrace.getAxes():null, false);
 					image.setUserObject(ImageHistoryMarker.MARKER);
 					getPlottingSystem().addTrace(image);
-					getPlottingSystem().autoscaleAxes();
+					getPlottingSystem().repaint();
 				} catch (Throwable ne ) {
 					logger.error(ImageHistoryTool.class.getSimpleName()+" unable to process image. This might not be a fatal error because an image might not be plotted.");
 				} finally {
