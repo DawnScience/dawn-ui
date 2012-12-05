@@ -57,6 +57,7 @@ jre/bin/java</programArgsLin>
    </features>
 
    <configurations>
+      <plugin id="uk.ac.diamond.scisoft" autoStart="true" startLevel="0" />
       <plugin id="uk.ac.diamond.scisoft.analysis.osgi" autoStart="true" startLevel="1" />
    </configurations>
 
