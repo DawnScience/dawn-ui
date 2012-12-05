@@ -133,6 +133,8 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	private Map<String,Map<String,PageRec>> recs;
 	private String                          unique_id;
 	
+	private IToolPage staticTool;
+	
 	public ToolPageView() {
 		super();
 		this.unique_id = StringUtils.getUniqueId(ToolPageView.class);
@@ -736,6 +738,12 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	 */
 	private void removeTools(String partLoc, boolean removeFromMap) {
 
+		
+		if (staticTool!=null) {
+			staticTool.deactivate();
+			return;
+		}
+		
 		final Map<String,PageRec> pageRecs = removeFromMap ? recs.remove(partLoc) : recs.get(partLoc);
 		
 		if (pageRecs==null) return;
@@ -853,6 +861,9 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	protected void showPageRec(PageRec pageRec) {
 		// If already showing do nothing
 		if (activeRec == pageRec) {
+			return;
+		}
+		if (staticTool!=null && activeRec!=null && activeRec.tool==staticTool) { // We never show owt else.
 			return;
 		}
 		// If the page is the same, just set activeRec to pageRec
@@ -1026,7 +1037,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	}
 	
 	protected synchronized PageRec doCreatePage(IWorkbenchPart part, IToolPage tool) {
-		
+				
 		// If static tool is not null we can only show that tool on this page.		
 		final IToolPageSystem sys = (IToolPageSystem)part.getAdapter(IToolPageSystem.class);
         if (systems==null||recs==null) return null;
@@ -1066,6 +1077,10 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 			tool.createControl(getPageBook());
 			createCommonActions(tool);
 			if (!tool.isActive()) tool.activate();
+			
+			if (tool.isStaticTool() && getViewSite().getSecondaryId()!=null) {
+				staticTool = tool;
+			}
 						
 			PageRec rec = new PageRec(part, tool);
 			recordPage(part, tool, rec);
@@ -1120,6 +1135,10 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 					if (orig!=null && view.activeRec!=null && view.activeRec.tool!=null) {
 						view.activeRec.tool.sync(orig);
 						orig.deactivate();
+						
+						if (view.activeRec.tool.isStaticTool()) {
+							view.staticTool = view.activeRec.tool;
+						}
 					}
 
 				} catch (Exception e) {
@@ -1174,6 +1193,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		
 		if (updatingActivated)                    return;
 		if (getViewSite().getSecondaryId()!=null) return;
+		if (staticTool!=null)                     return; // Cannot change tool.
 		
 		// If there is a dedicated view for this tool then we do not accept the change.
 		if (!isToolAllowed(evt.getNewPage())) return;
@@ -1215,6 +1235,10 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
         try {
             updatingActivated = true;
                        
+    		if (synchronizeStaticTool(part)) {
+    			return;
+    		}
+    		
         	IToolPageSystem sys  = (IToolPageSystem)part.getAdapter(IToolPageSystem.class);
     		final IToolPage tool = getViewSite().getSecondaryId()==null
 					             ? sys.getCurrentToolPage(getViewRole())
@@ -1299,6 +1323,10 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 
 	protected PageRec getPageRec(IWorkbenchPart part) {
 		
+		if (synchronizeStaticTool(part)) {
+			return activeRec;
+		}
+
 		final String path = getString(part);
 		if (path==null) return null;
 		
@@ -1315,6 +1343,26 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		return rec;
 	}	
 	
+	private boolean synchronizeStaticTool(IWorkbenchPart part) {
+		
+		try {
+			if (staticTool!=null && !(staticTool instanceof EmptyTool)) {
+				IToolPageSystem sys = (IToolPageSystem)part.getAdapter(IToolPageSystem.class);
+				staticTool.setToolSystem(sys);
+				if (sys instanceof IPlottingSystem) {
+					staticTool.setPlottingSystem((IPlottingSystem)sys);
+				}
+				staticTool.setPart(part);
+				staticTool.activate();
+				return true;
+			}
+			return false;
+		} catch (Throwable ne) {
+			logger.error("Cannot use static tool!", ne);
+			return false;
+		}
+	}
+
 	protected PageRec getPageRec(IPage page) {
 		
 		if (page instanceof IToolPage) {
@@ -1377,7 +1425,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		// Dedicated tool disposal
 		final String toolId = getViewSite().getSecondaryId();
 		if (toolId!=null && activeRec!=null && activeRec.tool!=null) {
-			activeRec.tool.dispose(); // Dispose cloned tool
+			activeRec.tool.dispose(); // Dispose cloned tool			
 		}
 
 		// Deref all of the pages.

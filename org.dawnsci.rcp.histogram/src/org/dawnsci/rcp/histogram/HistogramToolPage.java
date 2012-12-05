@@ -20,6 +20,7 @@ import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.PaletteEvent;
 import org.dawb.common.ui.plot.trace.TraceEvent;
+import org.dawb.common.ui.plot.trace.TraceWillPlotEvent;
 import org.dawnsci.rcp.functions.ColourSchemeContribution;
 import org.dawnsci.rcp.functions.TransferFunctionContribution;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -221,27 +222,28 @@ public class HistogramToolPage extends AbstractToolPage {
 
 		// Connect to the trace listener to deal with new images coming in
 		traceListener = new ITraceListener.Stub() {
+			
+			@Override
+			public void traceWillPlot(TraceWillPlotEvent evt) {
+				// Does not all update(...) intentionally.
+				IImageTrace it = null;
+				if (evt.getSource() instanceof IImageTrace) {
+					it = (IImageTrace)evt.getSource();
+				}
+				updateImage(it, false);
+				updatePalette(null);
+			}
 			@Override
 			public void tracesAdded(TraceEvent evt) {
 
 				logger.trace("tracelistener firing");
-
-				//				if (!(evt.getSource() instanceof List<?>)) {
-				//					return;
-				//				}
-
-				updateImage();
+				updateImage(null, false);
 			}
 
 			@Override
 			public void traceUpdated(TraceEvent evt) {
 				logger.trace("tracelistener firing");
-
-				//				if (!(evt.getSource() instanceof List<?>)) {
-				//					return;
-				//				}
-
-				updateImage();
+				updateImage(null, true);
 			}
 		};
 
@@ -449,7 +451,7 @@ public class HistogramToolPage extends AbstractToolPage {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
 				image.getImageServiceBean().setLogColorScale(btnColourMapLog.getSelection());
-				updateImage();
+				updateImage(null, true);
 
 			}
 
@@ -509,23 +511,33 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			@Override
 			public IStatus runInUIThread(IProgressMonitor mon) {
-				logger.trace("imagerepaintJob running");
-				internalEvent++;
-
-				image.setMax(histoMax);
-				if (mon.isCanceled()) return Status.CANCEL_STATUS;
-
-				image.setMin(histoMin);
-				if (mon.isCanceled()) return Status.CANCEL_STATUS;
-
-				image.setPaletteData(paletteData);
-				if (mon.isCanceled()) return Status.CANCEL_STATUS;
-
-				internalEvent--;
+				if (!updatePalette(mon)) return Status.CANCEL_STATUS;
 				return Status.OK_STATUS;
 			}
 		};
 
+	}
+
+	/**
+	 * 
+	 * @param mon, may be null
+	 */
+	protected boolean updatePalette(IProgressMonitor mon) {
+		logger.trace("imagerepaintJob running");
+		internalEvent++;
+
+		image.setMax(histoMax);
+		if (mon!=null && mon.isCanceled()) return false;
+
+		image.setMin(histoMin);
+		if (mon!=null && mon.isCanceled()) return false;
+
+		image.setPaletteData(paletteData);
+		logger.trace("Set palette data on image id = "+image.getName());
+		if (mon!=null && mon.isCanceled()) return false;
+
+		internalEvent--;
+		return true;
 	}
 
 	@Override
@@ -801,12 +813,12 @@ public class HistogramToolPage extends AbstractToolPage {
 	/**
 	 * Update when a new image comes in, this involves getting the data and then setting 
 	 * up all the local parameters
+	 * @param imageTrace, may be null.
 	 */
-	private void updateImage() {
+	private void updateImage(IImageTrace imageTrace, boolean repaintImage) {
 		if (getControl()==null) return; // We cannot plot unless its been created.
 
-		Collection<ITrace> traces = getPlottingSystem().getTraces(IImageTrace.class);
-		image = traces!=null && traces.size()>0 ? (IImageTrace)traces.iterator().next():null;
+		image = imageTrace==null ? getImageTrace() : imageTrace;
 
 		if (image != null) {
 
@@ -857,13 +869,13 @@ public class HistogramToolPage extends AbstractToolPage {
 			deadPixelText.setText(Double.toString(image.getMinCut().getBound().doubleValue()));
 
 			// Update the paletteData
-			paletteData = image.getPaletteData();
+			if (paletteData==null) paletteData = image.getPaletteData();
 
 			// calculate the histogram
 			generateHistogram(imageDataset);
 
 			// update all based on slider positions
-			updateHistogramToolElements(null);
+			updateHistogramToolElements(null, repaintImage);
 
 			// finally tie in the listener to the paletedata changes
 			image.addPaletteListener(paletteListener);
@@ -939,8 +951,7 @@ public class HistogramToolPage extends AbstractToolPage {
 		double scaleMinTemp = rangeMin;
 
 		if (getPlottingSystem()==null) return; // Nothing to update
-		Collection<ITrace> traces = getPlottingSystem().getTraces(IImageTrace.class);
-		image = traces!=null && traces.size()>0 ? (IImageTrace)traces.iterator().next():null;
+		image = getImageTrace()!=null ? getImageTrace() : image;
 		imageDataset = image.getImageServiceBean().getImage();
 		
 		if (Double.isInfinite(scaleMaxTemp)) scaleMaxTemp = imageDataset.max().doubleValue();
@@ -1073,7 +1084,8 @@ public class HistogramToolPage extends AbstractToolPage {
 		super.activate();
 		if (getPlottingSystem()!=null) {
 			getPlottingSystem().addTraceListener(traceListener);
-			updateImage(); 
+			
+			updateImage(null, true); 
 		}
 	}
 
@@ -1152,11 +1164,9 @@ public class HistogramToolPage extends AbstractToolPage {
 			logger.error("Couldn't open histogram view and create ROI", e);
 		}
 	}
-
-	@Override
-	public void dispose() {
-		deactivate();
-		
-		super.dispose();
+	
+	public boolean isStaticTool() {
+		return true;
 	}
+
 }
