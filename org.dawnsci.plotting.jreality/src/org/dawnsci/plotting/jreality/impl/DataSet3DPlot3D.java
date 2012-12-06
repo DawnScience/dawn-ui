@@ -812,7 +812,7 @@ public class DataSet3DPlot3D implements IDataSet3DCorePlot {
 	 *            information to build a new displaying dataset
 	 */
 	public void setDataWindow(SurfacePlotROI roi) {
-		if (useWindow) {
+		//if (useWindow) {
 			windowStartPosX = roi.getStartX();
 			windowStartPosY = roi.getStartY();
 			windowEndPosX = roi.getEndX();
@@ -904,7 +904,7 @@ public class DataSet3DPlot3D implements IDataSet3DCorePlot {
 				}
 			}
 			updateDisplay(roi.getXAspect(),roi.getYAspect());
-		}
+		//}
 	}
 	
 	protected void buildOtherNodes() {
