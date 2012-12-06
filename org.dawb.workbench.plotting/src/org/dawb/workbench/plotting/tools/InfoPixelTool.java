@@ -153,17 +153,22 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 				final Collection<IRegion> regions = getPlottingSystem().getRegions();
 				if (regions==null || regions.isEmpty()) return new Object[]{"-"};
 				
-			final List<IRegion> visible = new ArrayList<IRegion>();
-			
-				for (int i=0; i< regions.size(); i++){
-					IRegion pointRegion = (IRegion)(regions.toArray())[i];
-															
-					if (pointRegion.getRegionType() == RegionType.XAXIS_LINE || pointRegion.getRegionType() == RegionType.POINT ){
-						
-						visible.add(pointRegion);										
-					}				
+				final List<IRegion> visible = new ArrayList<IRegion>();
+				
+				for (IRegion region : regions) {
+					
+					if (region.getRegionType() == RegionType.XAXIS_LINE)
+						visible.add(region);
+					
 				}
-							
+				
+				for (IRegion region : regions) {
+					
+					if (region.getRegionType() == RegionType.POINT)
+						visible.add(region);
+					
+				}
+
 				return visible.toArray(new IRegion[visible.size()]);
 			}
 		});
@@ -246,6 +251,7 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 		// Needed to refresh the table when activated as other tools may create points
 		// which should be in the table.
 		try {
+			viewer.getTable().clearAll();
 			viewer.refresh();
 		} catch (Throwable ignored) {
 			// Not a failure if we cannot refresh.
@@ -277,21 +283,33 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 			xHair.removeMouseListener(this);
 			xHair.setVisible(false);
 			xHair.removeROIListener(this);
+			getPlottingSystem().removeRegion(xHair);
+			xHair = null;
+			updateInfoPixelData = null;
 		}
 		if (yHair!=null) {
 			yHair.setVisible(false);
 			yHair.removeROIListener(this);
+			getPlottingSystem().removeRegion(yHair);
+			yHair = null;
 		}
 		
 		plotter.clear();
+		viewer.getTable().clearAll();
 
 		if (getPlottingSystem()!=null) {
 			getPlottingSystem().removeTraceListener(traceListener);
 			getPlottingSystem().removeRegionListener(this);
 		}
+		
 	}
 	
 	public void dispose() {
+		
+		if (isActive()){
+			deactivate();
+		}
+		
 		if (viewUpdateListener!=null) viewer.removeSelectionChangedListener(viewUpdateListener);
 		viewUpdateListener = null;
 
