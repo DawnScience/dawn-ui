@@ -98,7 +98,11 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 			
 		final Action reset = new Action("Clear cross hair profiles", Activator.getImageDescriptor("icons/axis.png")) {
 			public void run() {
-				profilePlotter.reset();
+				//profilePlotter.reset();
+				for (ITrace trace : profilePlotter.getTraces(ILineTrace.class)) {
+					profilePlotter.removeTrace(trace);
+				}
+				
 				getPlottingSystem().clearRegions();
 			}
 		};
