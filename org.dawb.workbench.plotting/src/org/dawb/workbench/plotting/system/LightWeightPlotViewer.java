@@ -51,6 +51,7 @@ import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
 import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
 import org.dawb.workbench.plotting.system.swtxy.selection.SelectionRegionFactory;
 import org.dawb.workbench.plotting.util.ColorUtility;
+import org.dawb.workbench.plotting.util.TraceUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.draw2d.FigureCanvas;
 import org.eclipse.draw2d.IFigure;
@@ -379,6 +380,19 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 				}
 			};
 			manager.add(visible);
+			
+			if (trace instanceof LineTraceImpl) {
+	 			final Action export = new Action("Export '"+name+"' to ascii (dat file)", Activator.getImageDescriptor("icons/export_wiz.gif")) {
+					public void run() {
+						try {
+							TraceUtils.doExport((LineTraceImpl)trace);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				};
+				manager.add(export);
+			}
 		}
 		
 		if (xyGraph!=null) {

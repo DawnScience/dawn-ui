@@ -1,5 +1,6 @@
 package org.dawb.workbench.plotting.system;
 
+import org.csstudio.swt.xygraph.dataprovider.IDataProvider;
 import org.csstudio.swt.xygraph.figures.Trace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITraceContainer;
@@ -27,6 +28,10 @@ public class LineTraceImpl implements ILineTrace {
 		if (trace instanceof ITraceContainer) {
 			((ITraceContainer)trace).setTrace(this);
 		}
+	}
+	
+	public IDataProvider getDataProvider() {
+		return trace.getDataProvider();
 	}
 
 	public ILineTrace.TraceType getTraceType() {
