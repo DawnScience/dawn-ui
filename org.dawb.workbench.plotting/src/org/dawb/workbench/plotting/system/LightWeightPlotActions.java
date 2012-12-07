@@ -151,7 +151,7 @@ class LightWeightPlotActions {
 			}
 		};
 		showLegend.setImageDescriptor(Activator.getImageDescriptor("icons/ShowLegend.png"));
-		actionBarManager.registerAction("org.csstudio.swt.xygraph.toolbar.showLegend", showLegend, ActionType.XYANDIMAGE);		
+		actionBarManager.registerAction("org.csstudio.swt.xygraph.toolbar.configure", showLegend, ActionType.XYANDIMAGE);		
 		
 		showLegend.setChecked(xyGraph.isShowLegend());
 		
