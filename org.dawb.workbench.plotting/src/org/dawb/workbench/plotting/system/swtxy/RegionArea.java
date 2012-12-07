@@ -29,6 +29,7 @@ import org.eclipse.draw2d.MouseMotionListener;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.PaletteData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -245,7 +246,7 @@ public class RegionArea extends PlotArea {
 		if (regionListener!=null) {
 		    regionLayer.setMouseListenerActive(regionListener, false);
 		    regionListener = null;
-		    setCursor(null);
+		    setCursor(ZoomType.NONE.getCursor());
 		}
 	}
 

@@ -237,6 +237,7 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 		if (getPlottingSystem()!=null) {
 			getPlottingSystem().addTraceListener(traceListener);
 			getPlottingSystem().addRegionListener(this);
+			getPlottingSystem().setDefaultCursor(IPlottingSystem.CROSS_CURSOR);
 		}
 		
 		// We stop the adding of other regions because this tool does
@@ -287,10 +288,10 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 			yHair.removeROIListener(this);
 			getPlottingSystem().removeRegion(yHair);
 			yHair = null;
+			getPlottingSystem().setDefaultCursor(IPlottingSystem.NORMAL_CURSOR);
 		}
 		
 		plotter.clear();
-		viewer.getTable().clearAll();
 
 		if (getPlottingSystem()!=null) {
 			getPlottingSystem().removeTraceListener(traceListener);

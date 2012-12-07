@@ -11,6 +11,7 @@ import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.linearscale.AbstractScale.LabelSide;
 import org.csstudio.swt.xygraph.undo.AddAnnotationCommand;
 import org.csstudio.swt.xygraph.undo.RemoveAnnotationCommand;
+import org.csstudio.swt.xygraph.undo.ZoomType;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.AbstractPlottingSystem.ColorOption;
 import org.dawb.common.ui.plot.IPlottingSystem;
@@ -77,6 +78,7 @@ import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseWheelListener;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
@@ -1053,6 +1055,11 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 
 	public String getTitle() {
 		return xyGraph.getTitle();
+	}
+
+	public void setDefaultPlotCursor(Cursor cursor) {
+		xyGraph.getRegionArea().setCursor(cursor);
+		ZoomType.NONE.setCursor(cursor);
 	}
 
 }

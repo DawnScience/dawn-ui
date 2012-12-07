@@ -44,10 +44,12 @@ import org.dawb.workbench.plotting.system.swtxy.LineTrace;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
 import org.dawnsci.plotting.jreality.JRealityPlotViewer;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.draw2d.Cursors;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.Rectangle;
@@ -1090,5 +1092,12 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 
 	public void setActionBars(IActionBars bars) {
 		this.bars = bars;
+	}
+
+	@Override
+	public void setDefaultCursor(int cursorType) {
+		Cursor cursor = Cursors.ARROW;
+		if (cursorType == CROSS_CURSOR) cursor = Cursors.CROSS;
+		lightWeightViewer.setDefaultPlotCursor(cursor);
 	}
 }
