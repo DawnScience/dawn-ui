@@ -10,6 +10,8 @@
 package org.dawb.workbench.ui.views;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
@@ -40,6 +42,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.Page;
 import org.slf4j.Logger;
@@ -56,8 +59,27 @@ public class PlotDataPage extends Page implements IPlotUpdateParticipant, IAdapt
 	private IResourceChangeListener resourceListener;
 	private SliceComponent          sliceComponent;
 	private Composite               content;
+	
+	private static final Collection<String> INACTIVE_PERSPECTIVES;
+	static {
+		INACTIVE_PERSPECTIVES = Arrays.asList("uk.ac.diamond.scisoft.ncd.rcp.ncdperspective",
+				                              "uk.ac.diamond.scisoft.ncd.rcp.ncdcalibrationperspective",
+				                              "uk.ac.diamond.scisoft.dataexplorationperspective");
+	}
+	/**
+	 * Checks perspective to see if a 'Data' page is required.
+	 * @param ed
+	 * @return
+	 */
+	public static PlotDataPage getPageFor(IDatasetEditor ed) {
+		// Fix http://jira.diamond.ac.uk/browse/DAWNSCI-273
+		// for DExplore and NCD to not show 'Data' pages
+		final String id = EclipseUtils.getActivePage().getPerspective().getId();
+		if (INACTIVE_PERSPECTIVES.contains(id)) return null;
+		return new PlotDataPage(ed);
+	}
 
-	public PlotDataPage(IDatasetEditor ed) {
+	private PlotDataPage(IDatasetEditor ed) {
 		this.editor = ed;
 	}
 

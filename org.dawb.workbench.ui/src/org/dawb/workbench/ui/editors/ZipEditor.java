@@ -221,7 +221,7 @@ public class ZipEditor extends MultiPageEditorPart implements ISlicablePlottingP
     public Object getAdapter(@SuppressWarnings("rawtypes") final Class clazz) {
 		
 		if (clazz == Page.class) {
-			if (dataSetEditor!=null) return new PlotDataPage(dataSetEditor);
+			if (dataSetEditor!=null)   return PlotDataPage.getPageFor(dataSetEditor);
 			if (plotImageEditor!=null) return plotImageEditor.getAdapter(clazz);
 			return null; //TODO a set of meta data pages if many zipped images?
 			

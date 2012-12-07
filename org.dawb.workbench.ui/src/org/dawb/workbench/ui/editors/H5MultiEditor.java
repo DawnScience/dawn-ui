@@ -30,7 +30,6 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IReusableEditor;
-import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.eclipse.ui.part.Page;
@@ -142,16 +141,6 @@ public class H5MultiEditor extends MultiPageEditorPart  implements ISlicablePlot
 			logger.error("Cannot initiate "+getClass().getName()+"!", e);
 		}
 		
-		IWorkbenchPage page = EclipseUtils.getActivePage();
-		if (page != null) {
-			try {
-				if (page.findView("org.dawb.passerelle.views.ValueView")==null) {
-					page.showView("org.dawb.passerelle.views.ValueView");
-				}
-			} catch (PartInitException e) {
-				// do nothing
-			}
-		}
 		
  	}
 	
@@ -214,7 +203,7 @@ public class H5MultiEditor extends MultiPageEditorPart  implements ISlicablePlot
 		
 		if (clazz == Page.class) {
 			final PlotDataEditor      ed  = getDataSetEditor();
-			return new PlotDataPage(ed);
+			return PlotDataPage.getPageFor(ed);
 			
 		} else if (clazz == IContentProvider.class) {
 			return new H5ValuePage();
