@@ -1226,7 +1226,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 			switch (columnIndex) {
 			case 0:
 				String setName = element.toString();
-				if (!element.isExpression() && rootName!=null) {
+				if (!element.isExpression() && rootName!=null && setName.startsWith(rootName)) {
 					setName = setName.substring(rootName.length());
 				}
 				return setName;
