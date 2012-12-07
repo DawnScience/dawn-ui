@@ -202,6 +202,9 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	}
 	
 	public void deactivate() {
+		
+		if (!isActive()) {return;}
+		
 		super.deactivate();
 		if (getPlottingSystem()!=null) {
 			getPlottingSystem().removeRegionListener(this.regionListener);
