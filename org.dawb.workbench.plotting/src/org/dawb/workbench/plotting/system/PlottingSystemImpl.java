@@ -44,6 +44,7 @@ import org.dawb.workbench.plotting.system.swtxy.LineTrace;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
 import org.dawnsci.plotting.jreality.JRealityPlotViewer;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
@@ -84,6 +85,8 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	private PlotActionsManagerImpl       actionBarManager;
 	private LightWeightPlotViewer        lightWeightViewer;
 	private JRealityPlotViewer           jrealityViewer;
+
+	private final String SHOW_LEGEND_ACTION_ID = "org.csstudio.swt.xygraph.toolbar.configureShow Legend";
 	
 	public PlottingSystemImpl() {
 		super();
@@ -747,6 +750,8 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	 */
 	@Override
 	public void setShowLegend(boolean b) {
+		IAction action = actionBarManager.findAction(SHOW_LEGEND_ACTION_ID);
+		action.setChecked(b);
 		if (lightWeightViewer!=null) {
 			lightWeightViewer.setShowLegend(b);
 		}
