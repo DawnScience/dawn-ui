@@ -74,8 +74,12 @@ public class PlotDataPage extends Page implements IPlotUpdateParticipant, IAdapt
 	public static PlotDataPage getPageFor(IDatasetEditor ed) {
 		// Fix http://jira.diamond.ac.uk/browse/DAWNSCI-273
 		// for DExplore and NCD to not show 'Data' pages
-		final String id = EclipseUtils.getActivePage().getPerspective().getId();
-		if (INACTIVE_PERSPECTIVES.contains(id)) return null;
+		try {
+			final String id = EclipseUtils.getActivePage().getPerspective().getId();
+			if (INACTIVE_PERSPECTIVES.contains(id)) return null;
+		} catch (Throwable ne) {
+			// ignored
+		}
 		return new PlotDataPage(ed);
 	}
 

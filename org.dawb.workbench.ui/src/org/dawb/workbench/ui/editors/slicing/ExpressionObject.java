@@ -11,12 +11,21 @@
 package org.dawb.workbench.ui.editors.slicing;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.plot.IPlottingSystemData;
+import org.dawb.common.ui.slicing.DimsData;
+import org.dawb.common.ui.slicing.DimsDataList;
+import org.dawb.common.ui.slicing.SliceUtils;
+import org.dawb.workbench.ui.Activator;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.nfunk.jep.JEP;
 import org.nfunk.jep.ParseException;
 import org.nfunk.jep.SymbolTable;
@@ -24,6 +33,9 @@ import org.nfunk.jep.SymbolTable;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+import uk.ac.diamond.scisoft.analysis.io.IMetaData;
+import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
+import uk.ac.diamond.scisoft.analysis.io.SliceObject;
 
 public class ExpressionObject {
 	
@@ -106,6 +118,10 @@ public class ExpressionObject {
 	
 	public boolean isValid(IProgressMonitor monitor) {
 		try {
+			getDataSet(monitor);
+			if (dataSet!=null) {
+				return true;
+			}
 			final SymbolTable vars = getSymbolTable();
 		    for (Object key : vars.keySet()) {
 		    	final Object value = vars.getValue(key);
@@ -135,6 +151,17 @@ public class ExpressionObject {
 		return dataSet!=null ? dataSet.getSize() : 0;
 	}
 
+	public String getShape(IProgressMonitor monitor) {
+		if (dataSet==null) {
+			try {
+				getDataSet(monitor);
+			} catch (Exception e) {
+				return "0";
+			}
+		}
+		return dataSet!=null ? Arrays.toString(dataSet.getShape()) : "0";
+	}
+
 	private JEP             jepParser;
 	private AbstractDataset dataSet;
 	public AbstractDataset getDataSet(IProgressMonitor monitor) throws Exception {
@@ -142,6 +169,13 @@ public class ExpressionObject {
 		if (dataSet!=null) return dataSet;
 		
 	    if (expression==null||provider==null) return new DoubleDataset();
+	    
+	    try {
+	    	dataSet = getSlice();
+	    	if (dataSet!=null) return dataSet;
+	    } catch (Throwable ne) {
+	    	// We try to parse it as an expression.
+	    }
 		
 		final List<AbstractDataset> refs = getVariables(monitor);
 		final double[]       data = new double[refs.get(0).getSize()];
@@ -160,6 +194,76 @@ public class ExpressionObject {
 		dataSet.setName(getExpression());
 		return this.dataSet;
 	}
+	
+	private static final Pattern SLICE = Pattern.compile("(.+)\\[([0-9,\\-]+)\\]");
+
+	private AbstractDataset getSlice() {
+		
+		final Matcher matcher = SLICE.matcher(getExpression());
+		if (matcher.matches()) {
+			try {
+				final String filePath = provider.getFilePath();
+				final String fullName = matcher.group(1);
+				final String range    = matcher.group(2);
+				final String[]  idx   = range.split(",");
+				
+				final IMetaData meta  = LoaderFactory.getMetaData(filePath, null);
+				final int[]     shape = meta.getDataShapes().get(fullName);
+				if (shape.length!=idx.length) {
+					Activator.getDefault().getLog().log(new Status(IStatus.WARNING, "org.dawb.workbench.ui",
+							"Cannot parse '"+getExpression()+"' as slice. The data is a different shape to the slice inside the []."));
+					return null;
+				}
+				
+				SliceObject sliceObject = new SliceObject();
+				sliceObject.setPath(filePath);
+				sliceObject.setName(fullName);
+				
+                final DimsDataList ddl = new DimsDataList(shape);
+                int iaxis = 0;
+                for (int index = 0; index < shape.length; index++) {
+					final DimsData dd  = ddl.getDimsData(index);
+					final String   inc = idx[index];
+					if ("-".equals(inc) || "-1".equals(inc)) {
+						dd.setAxis(iaxis);
+						++iaxis;
+					} else {
+						dd.setAxis(-1);
+						dd.setSlice(Integer.parseInt(inc));
+					}
+				}
+                sliceObject = SliceUtils.createSliceObject(ddl, shape, sliceObject);
+                AbstractDataset slice = LoaderFactory.getSlice(sliceObject, null);
+    			slice = slice.squeeze();		
+                slice.setName(getExpression());
+                
+                if (iaxis!=slice.getRank()) {
+    				Activator.getDefault().getLog().log(new Status(IStatus.WARNING, "org.dawb.workbench.ui",
+    						"Cannot parse '"+getExpression()+"' as slice. The rank of the slice is not the same as intended."));
+                    return null;
+                }
+                
+                return slice;
+                
+				
+			} catch (Throwable ne) {
+				Activator.getDefault().getLog().log(new Status(IStatus.WARNING, "org.dawb.workbench.ui",
+				"Cannot parse '"+getExpression()+"' as slice. Slice syntax is: '/full_path[10,-,-] to get 10th image from 3D array."));
+			}
+		}
+		return null;
+	}
+	
+	public static void main(String[] args) {
+		System.out.println(SLICE.matcher("/entry1/data[1,]").matches());
+		System.out.println(SLICE.matcher("/entry1/data[1,-,-]").matches());
+		System.out.println(SLICE.matcher("/entry1/data[1,-,-]").matches());
+		System.out.println(SLICE.matcher("/entry1/data(1,2,)").matches());
+		System.out.println(SLICE.matcher("fred(1,2,)").matches());
+		System.out.println(SLICE.matcher("fred(1,2,)").matches());
+		System.out.println(SLICE.matcher("/entry/exchange/white_z[14,-,-]").matches());
+	}
+
 
 	private List<AbstractDataset> getVariables(IProgressMonitor monitor) throws Exception {
 		
@@ -271,5 +375,6 @@ public class ExpressionObject {
 		
 		return buf.toString();
 	}
+
 	
 }

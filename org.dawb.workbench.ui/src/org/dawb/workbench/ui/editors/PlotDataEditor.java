@@ -324,13 +324,16 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		plottingSystem.clear();
 		
 		boolean requireFullRefresh = plottingSystem.getPlotType()!=participant.getPlotMode();
-		if (participant.getPlotMode()==PlotType.IMAGE) {
+		final AbstractDataset data = getDataSet(selections[0], monitor);
+		
+		if (data.getRank()>2) return; // Cannot plot more that 2 dims!
+		
+		if (participant.getPlotMode()==PlotType.IMAGE || data.getRank()==2) {
 			
-		    plottingSystem.createPlot2D(getDataSet(selections[0], monitor), null, monitor);
+		    plottingSystem.createPlot2D(data, null, monitor);
 		    
 		} else {
 			List<CheckableObject> sels = new ArrayList<CheckableObject>(Arrays.asList(selections));
-			final AbstractDataset data = getDataSet(sels.get(0), monitor);
 
 			final AbstractDataset x;
 			if (plottingSystem.isXfirst() && sels.size()>1) {
@@ -666,6 +669,15 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 	public String toString(){
 		if (getEditorInput()!=null) return getEditorInput().getName();
 		return super.toString();
+	}
+	
+	@Override
+	public String getFilePath() {
+		try {
+		    return EclipseUtils.getFilePath(getEditorInput());
+		} catch (Throwable ne) {
+			return null;
+		}
 	}
 
 }

@@ -1262,7 +1262,8 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 					}
 					return Arrays.toString(metaData.getDataShapes().get(name));
 				} 
-				return "["+element.getExpression().getSize(new NullProgressMonitor())+"]";
+				return element.getExpression().getShape(null);
+
 			case 5:
 				if (!element.isExpression()) {
 				    return ExpressionObject.getSafeName(element.getName());
@@ -1600,6 +1601,11 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 			}
 		}
 		
+	}
+
+	@Override
+	public String getFilePath() {
+		return providerDeligate.getFilePath();
 	}
 
 
