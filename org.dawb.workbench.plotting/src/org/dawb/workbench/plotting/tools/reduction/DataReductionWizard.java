@@ -27,7 +27,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.common.ui.dialogs.WorkspaceResourceDialog;
+import org.eclipse.jface.dialogs.DialogMessageArea;
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -144,7 +146,25 @@ public class DataReductionWizard extends Wizard implements IExportWizard {
 							 final DimsDataList dl   = getSliceData();
 
 							 final int[]             shape  = meta.getDataShapes().get(path);
-							 final List<SliceObject> slices = SliceUtils.getExpandedSlices(shape, dl);
+							 List<SliceObject> slices = null;
+							 try {
+								 slices = SliceUtils.getExpandedSlices(shape, dl);
+							 } catch (Throwable ne) {
+								 Display.getDefault().syncExec(new Runnable() {
+									 public void run() {
+										 MessageDialog.openWarning(Display.getDefault().getActiveShell(), 
+												 "Cannot run data reduction tool",
+												 "The data reduction tool can only run on:\n"+
+														 "   - 1D data being extracted from a 2D stack or\n"+
+														 "   - 2D data being extracted from a 3D stack\n"+
+														 "in this version of Dawn.\n\n"+
+												 "Please contact your support representative for further information.");
+									 }
+
+								 });
+								 rp.setOpen(false);
+								 return;
+							 }
 
 							 monitor.beginTask("Reduction '"+getTool().getTitle()+"' on "+path, slices.size()*4);
 
@@ -176,13 +196,18 @@ public class DataReductionWizard extends Wizard implements IExportWizard {
 							 group.close(id);
 							 monitor.done();
 						 }
-					 } catch (Exception ne) {
+					 } catch (final Exception ne) {
 						 
 			            logger.error("Cannot run export process for data reduction from tool '"+getTool().getTitle()+"'", ne);
-			 			ErrorDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
-					              "Data Not Exported", 
-					              "Cannot run export process for data reduction from tool "+getTool().getTitle()+".\n\nPlease contact your support representative.",
-					              new Status(IStatus.WARNING, "org.edna.workbench.actions", ne.getMessage(), ne));
+			 			Display.getDefault().syncExec(new Runnable() {
+			 				public void run() {
+			 					ErrorDialog.openError(Display.getDefault().getActiveShell(),
+							              "Data Not Exported", 
+							              "Cannot run export process for data reduction from tool "+getTool().getTitle()+".\n\nPlease contact your support representative.",
+							              new Status(IStatus.WARNING, "org.edna.workbench.actions", ne.getMessage(), ne));
+			 				}
+			 			});
+						rp.setOpen(false);
 
 					 } finally {
 						 
@@ -250,6 +275,10 @@ public class DataReductionWizard extends Wizard implements IExportWizard {
 
 		protected ReductionPage(String pageName) {
 			super(pageName);
+		}
+
+		public void setOpen(boolean b) {
+			open = b;
 		}
 
 		@Override
