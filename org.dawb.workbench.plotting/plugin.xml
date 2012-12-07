@@ -43,9 +43,17 @@
       </plotting_tool_page>
       <plotting_tool_page
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.pixel"
-            class="org.dawb.workbench.plotting.tools.InfoPixelTool"
+            class="org.dawb.workbench.plotting.tools.InfoPixelTool1D"
             icon="icons/info.png"
-            id="org.dawb.workbench.plotting.tools.InfoPixel"
+            id="org.dawb.workbench.plotting.tools.InfoPixel1D"
+            label="XY Information"
+            tooltip="A tool for displaying information on the data currently plotted.">
+      </plotting_tool_page>
+      <plotting_tool_page
+            cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.pixel"
+            class="org.dawb.workbench.plotting.tools.InfoPixelTool2D"
+            icon="icons/info.png"
+            id="org.dawb.workbench.plotting.tools.InfoPixel2D"
             label="Pixel Information"
             tooltip="A tool for displaying information on the data currently plotted.">
       </plotting_tool_page>

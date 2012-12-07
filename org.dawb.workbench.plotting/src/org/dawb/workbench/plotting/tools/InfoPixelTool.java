@@ -71,7 +71,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.roi.PointROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
-public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRegionListener, MouseListener {
+public abstract class InfoPixelTool extends AbstractToolPage implements IROIListener, IRegionListener, MouseListener {
 
 	private final static Logger logger = LoggerFactory.getLogger(InfoPixelTool.class);
 	
@@ -214,11 +214,6 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 		region.setRegionColor(ColorConstants.red);
 		region.setUserRegion(false); // They cannot see preferences or change it!
 		getPlottingSystem().addRegion(region);
-	}
-
-	@Override
-	public ToolPageRole getToolPageRole() {
-		return ToolPageRole.ROLE_2D;
 	}
 
 	@Override
@@ -454,61 +449,8 @@ public class InfoPixelTool extends AbstractToolPage implements IROIListener, IRe
 		viewer.getControl().setMenu(menuManager.createContextMenu(viewer.getControl()));
 	}
 	
-	private void createColumns(final TableViewer viewer) {
-			
-		ColumnViewerToolTipSupport.enableFor(viewer,ToolTip.NO_RECREATE);
-
-		TableViewerColumn var   = new TableViewerColumn(viewer, SWT.CENTER, 0);
-		var.getColumn().setText("Point ID");
-		var.getColumn().setWidth(120);
-		var.setLabelProvider(new InfoPixelLabelProvider(this, 0));
-
-		var   = new TableViewerColumn(viewer, SWT.CENTER, 1);
-		var.getColumn().setText("X position");
-		var.getColumn().setWidth(120);
-		var.setLabelProvider(new InfoPixelLabelProvider(this, 1));
-
-		var   = new TableViewerColumn(viewer, SWT.CENTER, 2);
-		var.getColumn().setText("Y position");
-		var.getColumn().setWidth(100);
-		var.setLabelProvider(new InfoPixelLabelProvider(this, 2));
-
-		var   = new TableViewerColumn(viewer, SWT.CENTER, 3);
-		var.getColumn().setText("Data value");
-		var.getColumn().setWidth(100);
-		var.setLabelProvider(new InfoPixelLabelProvider(this, 3));
-
-		var   = new TableViewerColumn(viewer, SWT.CENTER, 4);
-		var.getColumn().setText("q X (1/\u00c5)");
-		var.getColumn().setWidth(100);
-		var.setLabelProvider(new InfoPixelLabelProvider(this, 4));
-
-		var   = new TableViewerColumn(viewer, SWT.CENTER, 5);
-		var.getColumn().setText("q Y (1/\u00c5)");
-		var.getColumn().setWidth(100);
-		var.setLabelProvider(new InfoPixelLabelProvider(this, 5));
-
-		var   = new TableViewerColumn(viewer, SWT.CENTER, 6);
-		var.getColumn().setText("q Z (1/\u00c5)");
-		var.getColumn().setWidth(100);
-		var.setLabelProvider(new InfoPixelLabelProvider(this, 6));
-
-		var   = new TableViewerColumn(viewer, SWT.CENTER, 7);
-		var.getColumn().setText("2\u03b8 (\u00b0)");
-		var.getColumn().setWidth(80);
-		var.setLabelProvider(new InfoPixelLabelProvider(this, 7));
-
-		var   = new TableViewerColumn(viewer, SWT.CENTER, 8);
-		var.getColumn().setText("Resolution (\u00c5)");
-		var.getColumn().setWidth(120);
-		var.setLabelProvider(new InfoPixelLabelProvider(this, 8));
-
-		var   = new TableViewerColumn(viewer, SWT.CENTER, 9);
-		var.getColumn().setText("Dataset name");
-		var.getColumn().setWidth(120);
-		var.setLabelProvider(new InfoPixelLabelProvider(this, 9));
-
-	}
+	protected abstract void createColumns(final TableViewer viewer);
+	
 	
 	public ROIBase getBounds(IRegion region) {
 		if (dragBounds!=null&&dragBounds.containsKey(region.getName())) return dragBounds.get(region.getName());

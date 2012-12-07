@@ -70,7 +70,7 @@ class LightWeightPlotActions {
  		createAnnotationActions(xyGraph);
  		actionBarManager.createToolDimensionalActions(ToolPageRole.ROLE_1D, "org.dawb.workbench.plotting.views.toolPageView.1D");
  		actionBarManager.createToolDimensionalActions(ToolPageRole.ROLE_2D, "org.dawb.workbench.plotting.views.toolPageView.2D");
- 		actionBarManager.createToolDimensionalActions(ToolPageRole.ROLE_1D_AND_2D, "org.dawb.workbench.plotting.views.toolPageView.1D_and_2D");
+ 		//actionBarManager.createToolDimensionalActions(ToolPageRole.ROLE_1D_AND_2D, "org.dawb.workbench.plotting.views.toolPageView.1D_and_2D");
  		createRegionActions(xyGraph);
  		createZoomActions(xyGraph, XYGraphFlags.COMBINED_ZOOM);
  		createUndoRedoActions(xyGraph);
@@ -151,7 +151,7 @@ class LightWeightPlotActions {
 			}
 		};
 		showLegend.setImageDescriptor(Activator.getImageDescriptor("icons/ShowLegend.png"));
-		actionBarManager.registerAction("org.csstudio.swt.xygraph.toolbar.configure", showLegend, ActionType.XYANDIMAGE);		
+		actionBarManager.registerAction("org.csstudio.swt.xygraph.toolbar.showLegend", showLegend, ActionType.XYANDIMAGE);		
 		
 		showLegend.setChecked(xyGraph.isShowLegend());
 		
