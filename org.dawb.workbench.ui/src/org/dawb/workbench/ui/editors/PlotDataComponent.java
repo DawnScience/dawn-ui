@@ -1251,7 +1251,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 			case 4:
 				if (!element.isExpression()) {
 					final String name = element.toString();
-					if (metaData.getDataShapes()==null) {
+					if (metaData.getDataShapes()==null || metaData.getDataShapes().get(name)==null) {
 						final IDataset set = getDataSet(name, (IMonitor)null);
 						if (set!=null) {
 							return Arrays.toString(set.getShape());
