@@ -71,6 +71,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	private ImageServiceBean imageServiceBean;
 	private boolean          isMaximumZoom;
 	private PlottingSystemImpl plottingSystem;
+
+	private IImageService service;
 		
 	public ImageTrace(final String name, 
 			          final Axis xAxis, 
@@ -92,6 +94,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		imageServiceBean.setMaximumCutBound(HistogramBound.fromString(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.MAX_CUT)));
 		imageServiceBean.setNanBound(HistogramBound.fromString(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.NAN_CUT)));
 		
+		this.service = (IImageService)PlatformUI.getWorkbench().getService(IImageService.class);
+
 		xAxis.addListener(this);
 		yAxis.addListener(this);
 
@@ -199,8 +203,6 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				imageCreationAllowed = false;
 				if (image==null) return false;
 				AbstractDataset reducedFullImage = getDownsampled(image);
-
-				final IImageService service = (IImageService)PlatformUI.getWorkbench().getService(IImageService.class);
 
 				imageServiceBean.setImage(reducedFullImage);
 				imageServiceBean.setMonitor(monitor);
@@ -706,8 +708,6 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		if (imageServiceBean==null) imageServiceBean = new ImageServiceBean();
 		imageServiceBean.setImage(image);
 		
-		final IImageService service = (IImageService)PlatformUI.getWorkbench().getService(IImageService.class);
-
 		if (rescaleHistogram) {
 			final float[] fa = service.getFastStatistics(imageServiceBean);
 			setMin(fa[0]);
