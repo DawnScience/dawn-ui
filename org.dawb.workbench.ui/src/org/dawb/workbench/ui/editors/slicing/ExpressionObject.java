@@ -195,7 +195,7 @@ public class ExpressionObject {
 		return this.dataSet;
 	}
 	
-	private static final Pattern SLICE = Pattern.compile("(.+)\\[([0-9,\\-]+)\\]");
+	private static final Pattern SLICE = Pattern.compile("(.+)\\[([0-9:,\\-]+)\\]");
 
 	private AbstractDataset getSlice() {
 		
@@ -224,7 +224,7 @@ public class ExpressionObject {
                 for (int index = 0; index < shape.length; index++) {
 					final DimsData dd  = ddl.getDimsData(index);
 					final String   inc = idx[index];
-					if ("-".equals(inc) || "-1".equals(inc)) {
+					if ("-".equals(inc) || "-1".equals(inc) || ":".equals(inc)) {
 						dd.setAxis(iaxis);
 						++iaxis;
 					} else {
