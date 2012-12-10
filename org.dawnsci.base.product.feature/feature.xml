@@ -78,10 +78,6 @@
          version="0.0.0"/>
 
    <includes
-         id="org.embl.cca.dviewer.feature"
-         version="0.0.0"/>
-
-   <includes
          id="uk.ac.diamond.scisoft.feedback.feature"
          version="0.0.0"/>
 
