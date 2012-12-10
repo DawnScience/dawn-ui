@@ -288,7 +288,7 @@ public class DiffractionDefaultMetadata {
 				 * 
 				 * @return collection
 				 */
-				public Collection<Object> getUserObjects() {return exMeta.getUserObjects();}
+				public Collection<Serializable> getUserObjects() {return exMeta.getUserObjects();}
 				
 				//All methods required for IExtendedMetadata
 				/**
@@ -431,7 +431,7 @@ public class DiffractionDefaultMetadata {
 				 * 
 				 * @return collection
 				 */
-				public Collection<Object> getUserObjects() {return metaData.getUserObjects();}
+				public Collection<Serializable> getUserObjects() {return metaData.getUserObjects();}
 
 				@Override
 				public DiffractionCrystalEnvironment getDiffractionCrystalEnvironment() {
