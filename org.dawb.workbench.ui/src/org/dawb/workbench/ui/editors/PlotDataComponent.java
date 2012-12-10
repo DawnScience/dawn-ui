@@ -12,7 +12,6 @@ package org.dawb.workbench.ui.editors;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1559,7 +1558,8 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 		
 		@Override
 		protected CellEditor getCellEditor(final Object element) {
-			ComboBoxCellEditor ce = new ComboBoxCellEditor((Composite)getViewer().getControl(), new String[]{"X","Y1","Y2","Y3","Y4"} , SWT.READ_ONLY);
+			// FIX to http://jira.diamond.ac.uk/browse/DAWNSCI-380 remove axes until they work
+			ComboBoxCellEditor ce = new ComboBoxCellEditor((Composite)getViewer().getControl(), new String[]{"X","Y1","Y2" /**,"Y3","Y4" **/} , SWT.READ_ONLY);
 			final CCombo ccombo = (CCombo)ce.getControl();
 			ccombo.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
