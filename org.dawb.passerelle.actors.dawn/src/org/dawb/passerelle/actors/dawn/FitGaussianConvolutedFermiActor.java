@@ -15,6 +15,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.optimization.GoalType;
@@ -86,8 +91,6 @@ public class FitGaussianConvolutedFermiActor extends
 					"Input function must be of type FermiGauss");
 		}
 
-		final double kT = fitFunction.getParameterValue(1);
-
 		// first fit using a simple fermi edge to get the initial parameters
 		MultivariateFunction f = new MultivariateFunction() {
 
@@ -97,13 +100,15 @@ public class FitGaussianConvolutedFermiActor extends
 				double p0 = deNormalizeParameter(p[0],
 						fitFunction.getParameter(0));
 				double p1 = deNormalizeParameter(p[1],
-						fitFunction.getParameter(2));
+						fitFunction.getParameter(1));
 				double p2 = deNormalizeParameter(p[2],
-						fitFunction.getParameter(3));
+						fitFunction.getParameter(2));
 				double p3 = deNormalizeParameter(p[3],
+						fitFunction.getParameter(3));
+				double p4 = deNormalizeParameter(p[4],
 						fitFunction.getParameter(4));
 
-				FermiGauss fg = new FermiGauss(p0, kT, p1, p2, p3, 0.0);
+				FermiGauss fg = new FermiGauss(p0, p1, p2, p3, p4, 0.0);
 
 				AbstractDataset fermiDS = fg.getFermiDS(xAxis);
 
@@ -118,6 +123,8 @@ public class FitGaussianConvolutedFermiActor extends
 		double[] start = new double[] {
 				normalizeParameter(fitFunction.getParameterValue(0),
 						fitFunction.getParameter(0)),
+				normalizeParameter(fitFunction.getParameterValue(1),
+						fitFunction.getParameter(1)),
 				normalizeParameter(fitFunction.getParameterValue(2),
 						fitFunction.getParameter(2)),
 				normalizeParameter(fitFunction.getParameterValue(3),
@@ -125,19 +132,20 @@ public class FitGaussianConvolutedFermiActor extends
 				normalizeParameter(fitFunction.getParameterValue(4),
 						fitFunction.getParameter(4)) };
 
-		CMAESOptimizer cOpt = new CMAESOptimizer(3);
+		CMAESOptimizer cOpt = new CMAESOptimizer(5);
 		PointValuePair result = cOpt
-				.optimize(1000, f, GoalType.MINIMIZE, start);
+				.optimize(2000, f, GoalType.MINIMIZE, start);
 
 		// set the input functions parameters to be the result before finishing.
 		double[] r = result.getPoint();
 
 		double r0 = deNormalizeParameter(r[0], fitFunction.getParameter(0));
-		double r1 = deNormalizeParameter(r[1], fitFunction.getParameter(2));
-		double r2 = deNormalizeParameter(r[2], fitFunction.getParameter(3));
-		double r3 = deNormalizeParameter(r[3], fitFunction.getParameter(4));
-		double r4 = 0.0;
-
+		double r1 = deNormalizeParameter(r[1], fitFunction.getParameter(1));
+		double r2 = deNormalizeParameter(r[2], fitFunction.getParameter(2));
+		double r3 = deNormalizeParameter(r[3], fitFunction.getParameter(3));
+		double r4 = deNormalizeParameter(r[4], fitFunction.getParameter(4));
+		double r5 = 0.0;
+		
 		// Now fit the system properly with the Full function
 		if (fitConvolution.getExpression().contains("Full")) {
 
@@ -150,15 +158,17 @@ public class FitGaussianConvolutedFermiActor extends
 					double p0 = deNormalizeParameter(p[0],
 							fitFunction.getParameter(0));
 					double p1 = deNormalizeParameter(p[1],
-							fitFunction.getParameter(2));
+							fitFunction.getParameter(1));
 					double p2 = deNormalizeParameter(p[2],
-							fitFunction.getParameter(3));
+							fitFunction.getParameter(2));
 					double p3 = deNormalizeParameter(p[3],
-							fitFunction.getParameter(4));
+							fitFunction.getParameter(3));
 					double p4 = deNormalizeParameter(p[4],
+							fitFunction.getParameter(4));
+					double p5 = deNormalizeParameter(p[5],
 							fitFunction.getParameter(5));
 
-					FermiGauss fg = new FermiGauss(p0, kT, p1, p2, p3, p4);
+					FermiGauss fg = new FermiGauss(p0, p1, p2, p3, p4, p5);
 
 					AbstractDataset fermiDS = fg.makeDataset(xAxis);
 
@@ -175,6 +185,7 @@ public class FitGaussianConvolutedFermiActor extends
 					r[1],
 					r[2],
 					r[3],
+					r[4],
 					normalizeParameter(fitFunction.getParameterValue(5),
 							fitFunction.getParameter(5)) };
 
@@ -191,6 +202,8 @@ public class FitGaussianConvolutedFermiActor extends
 			r4 = deNormalizeParameter(r[4], fitFunction.getParameter(5));
 		}
 
+		double kT = 0.0;
+		
 		// Now fit the system properly with the Full function
 		if (fitConvolution.getExpression().contains("Quick")) {
 
@@ -232,7 +245,7 @@ public class FitGaussianConvolutedFermiActor extends
 					double p0 = deNormalizeParameter(p[0],
 							fitFunction.getParameter(5));
 
-					FermiGauss fg = new FermiGauss(t0, kT, t1, t2, t3, p0);
+					FermiGauss fg = new FermiGauss(t0, 0.5, t1, t2, t3, p0);
 
 					AbstractDataset fermiDS = fg.makeDataset(trimmedXAxis);
 
@@ -257,10 +270,9 @@ public class FitGaussianConvolutedFermiActor extends
 
 			r4 = deNormalizeParameter(Math.abs(r[0]),
 					fitFunction.getParameter(5));
-		}
-		;
+		};
 
-		fitFunction.setParameterValues(r0, kT, r1, r2, r3, r4);
+		fitFunction.setParameterValues(r0, r1, r2, r3, r4, r5);
 
 		String plotName = updatePlotName.getExpression();
 		if (!plotName.isEmpty()) {
@@ -341,9 +353,9 @@ public class FitGaussianConvolutedFermiActor extends
 		starts[fitDim] = 1;
 		DoubleDataset ind = DoubleDataset.ones(starts);
 		IndexIterator iter = ind.getIterator();
-
-		boolean first = true;
-
+		
+		ExecutorService executorService = new ThreadPoolExecutor(4, 4, 1, TimeUnit.MINUTES, new ArrayBlockingQueue<Runnable>(10000,true), new ThreadPoolExecutor.CallerRunsPolicy() );
+		
 		while (iter.hasNext()) {
 			System.out.println(iter.index);
 			System.out.println(Arrays.toString(ind.getNDPosition(iter.index)));
@@ -355,38 +367,22 @@ public class FitGaussianConvolutedFermiActor extends
 			stop[fitDim] = dataDS.getShape()[fitDim];
 			AbstractDataset slice = dataDS.getSlice(start, stop, null);
 			slice.squeeze();
-			try {
-				AFunction fitResult = null;
-				if (first) {
-					fitResult = FitGaussianConvFermi(xAxisDS, slice,
-							fitFunction);
-					first = false;
-				} else {
-					fitResult = FitGaussianConvFermi(xAxisDS, slice,
-							fitFunction);
-				}
-				int[] position = new int[dataDS.getShape().length - 1];
-				int count = 0;
-				for (int i = 0; i < dataDS.getShape().length; i++) {
-					if (i != fitDim) {
-						position[count] = start[i];
-						count++;
-					}
-				}
-				for (int p = 0; p < fitResult.getNoOfParameters(); p++) {
-					parametersDS.get(p).set(
-							fitResult.getParameter(p).getValue(), position);
-				}
-
-				DoubleDataset resultFunctionDS = fitResult.makeDataset(xAxisDS);
-				functionsDS.setSlice(resultFunctionDS, start, stop, null);
-
-			} catch (Exception e) {
-				throw createDataMessageException("Failed to fit row "
-						+ iter.index + " of the data", e);
-			}
+			
+			AFunction localFitFunction = functions.get(function);
+			int dSlength = dataDS.getShape().length;
+			executorService.submit(new Worker(localFitFunction, xAxisDS, slice, dSlength , start, stop, fitDim, parametersDS, functionsDS));
 		}
-
+		
+		//TODO possibly add more fault tolerance here
+		executorService.shutdown();
+		try {
+			executorService.awaitTermination(10, TimeUnit.MINUTES);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
 		result.addList("fit_image", functionsDS);
 		for (int i = 0; i < fitFunction.getNoOfParameters(); i++) {
 			result.addList("fit_parameter_" + i, parametersDS.get(i));
@@ -427,6 +423,59 @@ public class FitGaussianConvolutedFermiActor extends
 		double min = iParameter.getLowerLimit();
 		double range = max - min;
 		return (value * range) + min;
+	}
+	
+	
+	private class Worker implements Runnable {
+
+		private AFunction fitFunction;
+		private AbstractDataset xAxisDS;
+		private AbstractDataset slice;
+		private int DSlength;
+		private int[] start;
+		private int[] stop;
+		private int fitDim;
+		private ArrayList<AbstractDataset> parametersDS;
+		private AbstractDataset functionsDS;
+		
+		public Worker(AFunction fitFunction, AbstractDataset xAxisDS,
+				AbstractDataset slice, int dSlength, int[] start, int[] stop,
+				int fitDim, ArrayList<AbstractDataset> parametersDS,
+				AbstractDataset functionsDS) {
+			super();
+			this.fitFunction = fitFunction;
+			this.xAxisDS = xAxisDS;
+			this.slice = slice;
+			DSlength = dSlength;
+			this.start = start;
+			this.stop = stop;
+			this.fitDim = fitDim;
+			this.parametersDS = parametersDS;
+			this.functionsDS = functionsDS;
+		}
+
+		@Override
+		public void run() {
+			AFunction fitResult = null;
+			fitResult = FitGaussianConvFermi(xAxisDS, slice,
+					fitFunction);
+			int[] position = new int[DSlength - 1];
+			int count = 0;
+			for (int i = 0; i < DSlength; i++) {
+				if (i != fitDim) {
+					position[count] = start[i];
+					count++;
+				}
+			}
+			for (int p = 0; p < fitResult.getNoOfParameters(); p++) {
+				parametersDS.get(p).set(
+						fitResult.getParameter(p).getValue(), position);
+			}
+
+			DoubleDataset resultFunctionDS = fitResult.makeDataset(xAxisDS);
+			functionsDS.setSlice(resultFunctionDS, start, stop, null);
+		}
+		
 	}
 
 }
