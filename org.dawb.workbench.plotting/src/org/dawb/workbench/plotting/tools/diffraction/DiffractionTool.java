@@ -49,7 +49,6 @@ import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.CellLabelProvider;
-import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
@@ -387,25 +386,25 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		var.getColumn().setText("Original"); // Selected
 		var.getColumn().setWidth(0);
 		var.getColumn().setResizable(false);
-		var.setLabelProvider(new DeligatingProviderWithTooltip(new DiffractionLabelProvider(1)));
+		var.setLabelProvider(new DelegatingProviderWithTooltip(new DiffractionLabelProvider(1)));
 		defaultColumn = var;
 		
 		var = new TreeViewerColumn(viewer, SWT.LEFT, 2);
 		var.getColumn().setText("Value"); // Selected
 		var.getColumn().setWidth(100);
-		var.setLabelProvider(new DeligatingProviderWithTooltip(new DiffractionLabelProvider(2)));
+		var.setLabelProvider(new DelegatingProviderWithTooltip(new DiffractionLabelProvider(2)));
 		var.setEditingSupport(new ValueEditingSupport(viewer));
 
 		var = new TreeViewerColumn(viewer, SWT.LEFT, 3);
 		var.getColumn().setText("Unit"); // Selected
 		var.getColumn().setWidth(90);
-		var.setLabelProvider(new DeligatingProviderWithTooltip(new DiffractionLabelProvider(3)));
+		var.setLabelProvider(new DelegatingProviderWithTooltip(new DiffractionLabelProvider(3)));
 		var.setEditingSupport(new UnitEditingSupport(viewer));
 	}
 	
-	private class DeligatingProviderWithTooltip extends DelegatingStyledCellLabelProvider {
+	private class DelegatingProviderWithTooltip extends DelegatingStyledCellLabelProvider {
 
-		public DeligatingProviderWithTooltip(IStyledLabelProvider labelProvider) {
+		public DelegatingProviderWithTooltip(IStyledLabelProvider labelProvider) {
 			super(labelProvider);
 		}
 		@Override
