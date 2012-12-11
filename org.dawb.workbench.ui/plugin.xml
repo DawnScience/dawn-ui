@@ -10,12 +10,20 @@
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
-            category="org.edna.workbench.preferences.root"
+            category="org.dawnsci.preferences.root"
             class="org.dawb.workbench.ui.editors.preference.EditorPreferencePage"
             id="org.edna.workbench.editors.preferencePage"
             name="Editors">
       </page>
     </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="org.eclipse.ui.internal.dialogs.EmptyPreferencePage"
+            id="org.dawnsci.preferences.root"
+            name="Data Analysis">
+      </page>
+   </extension>
    <extension
          point="org.eclipse.ui.commands">
       <command

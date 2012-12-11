@@ -219,22 +219,28 @@
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
-            category="org.edna.workbench.preferences.root"
+            category="org.dawnsci.preferences.root"
             class="org.dawb.workbench.plotting.preference.FittingPreferencePage"
             id="org.dawb.workbench.plotting.fittingPreferencePage"
             name="Fitting Preferences">
       </page>
       <page
-            category="org.edna.workbench.preferences.root"
-            class="org.dawb.workbench.plotting.preference.diffraction.DiffractionPreferencePage"
-            id="org.dawb.workbench.plotting.preference.diffraction.calibrantPreferencePage"
-            name="Diffraction Calibrants">
+            category="org.dawnsci.preferences.root"
+            class="org.eclipse.ui.internal.dialogs.EmptyPreferencePage"
+            id="org.dawnsci.preferences.diffraction"
+            name="Diffraction">
       </page>
       <page
-            category="org.edna.workbench.preferences.root"
+            category="org.dawnsci.preferences.diffraction"
+            class="org.dawb.workbench.plotting.preference.diffraction.DiffractionPreferencePage"
+            id="org.dawb.workbench.plotting.preference.diffraction.calibrantPreferencePage"
+            name="Calibrants">
+      </page>
+      <page
+            category="org.dawnsci.preferences.diffraction"
             class="org.dawb.workbench.plotting.preference.DiffractionDefaultsPreferencePage"
             id="org.dawb.workbench.plotting.page1"
-            name="Diffraction Tool Defaults">
+            name="Tool Defaults">
       </page>
    </extension>
    <extension
