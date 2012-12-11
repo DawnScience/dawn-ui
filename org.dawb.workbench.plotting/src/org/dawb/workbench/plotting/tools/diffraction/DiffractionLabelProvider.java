@@ -101,6 +101,11 @@ public class DiffractionLabelProvider extends ColumnLabelProvider implements ISt
 //		buf.append(ln.getPath());
 //		buf.append("'\n");
 		
+		if (ln.getTooltip()!=null) {
+			buf.append(ln.getTooltip());
+			buf.append("\n");
+		}
+		
 		if (ln.isEditable()) buf.append(" Click to edit the value or the units.\n");
 
 		buf.append(" Right click to copy or reset value.");
