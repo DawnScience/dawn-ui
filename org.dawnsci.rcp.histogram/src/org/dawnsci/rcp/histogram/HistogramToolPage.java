@@ -1,5 +1,6 @@
 package org.dawnsci.rcp.histogram;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -26,6 +27,7 @@ import org.dawnsci.rcp.functions.TransferFunctionContribution;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.swt.SWT;
@@ -51,6 +53,7 @@ import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.part.IPageSite;
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.eclipse.ui.progress.UIJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -225,6 +228,8 @@ public class HistogramToolPage extends AbstractToolPage {
 			
 			@Override
 			public void traceWillPlot(TraceWillPlotEvent evt) {
+				if (!isActive()) return;
+				
 				// Does not all update(...) intentionally.
 				IImageTrace it = null;
 				if (evt.getSource() instanceof IImageTrace) {
@@ -235,16 +240,12 @@ public class HistogramToolPage extends AbstractToolPage {
 			}
 			@Override
 			public void tracesAdded(TraceEvent evt) {
+				if (!isActive()) return;
 
 				logger.trace("tracelistener firing");
 				updateImage(null, false);
 			}
 
-			@Override
-			public void traceUpdated(TraceEvent evt) {
-				logger.trace("tracelistener firing");
-				updateImage(null, true);
-			}
 		};
 
 
@@ -473,7 +474,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 
 		// Get all information from the extension points
-		extentionPointManager = new ExtentionPointManager();
+		extentionPointManager = ExtentionPointManager.getManager();
 
 
 		histogramRegionListener = new IROIListener() {
@@ -574,7 +575,9 @@ public class HistogramToolPage extends AbstractToolPage {
 			cmbColourMap.add(contribution.getName());
 		}
 
-		cmbColourMap.select(0);
+		final ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawb.workbench.plotting");
+        final String schemeName = store.getString("org.dawb.plotting.system.colourSchemeName");
+		cmbColourMap.select(Arrays.asList(cmbColourMap.getItems()).indexOf(schemeName));
 
 		btnColourMapLog = new Button(colourSchemeComposite, SWT.CHECK);
 		btnColourMapLog.setText("Log Scale");
@@ -794,6 +797,9 @@ public class HistogramToolPage extends AbstractToolPage {
 		btnBlueInverse.setSelection(colourScheme.getBlueInverted());
 		btnAlphaInverse.setSelection(colourScheme.getAlphaInverted());
 
+		// Store as default preference
+		final ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawb.workbench.plotting");
+	    store.setValue("org.dawb.plotting.system.colourSchemeName", colourScheme.getName());
 	}
 
 	/**

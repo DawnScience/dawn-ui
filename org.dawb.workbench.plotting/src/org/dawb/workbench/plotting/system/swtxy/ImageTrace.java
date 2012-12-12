@@ -14,6 +14,7 @@ import org.csstudio.swt.xygraph.figures.IAxisListener;
 import org.csstudio.swt.xygraph.linearscale.Range;
 import org.dawb.common.services.HistogramBound;
 import org.dawb.common.services.IImageService;
+import org.dawb.common.services.IPaletteService;
 import org.dawb.common.services.ImageServiceBean;
 import org.dawb.common.services.ImageServiceBean.HistoType;
 import org.dawb.common.services.ImageServiceBean.ImageOrigin;
@@ -84,7 +85,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 		this.imageServiceBean = new ImageServiceBean();
 		try {
-			imageServiceBean.setPalette(PaletteFactory.getPalette(Activator.getDefault().getPreferenceStore().getInt(PlottingConstants.P_PALETTE), true));
+			final IPaletteService pservice = (IPaletteService)PlatformUI.getWorkbench().getService(IPaletteService.class);
+			final String scheme = Activator.getDefault().getPreferenceStore().getString(PlottingConstants.COLOUR_SCHEME);
+			imageServiceBean.setPalette(pservice.getPaletteData(scheme));	
 		} catch (Exception e) {
 			logger.error("Cannot create palette!", e);
 		}	

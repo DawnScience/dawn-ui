@@ -340,5 +340,14 @@
             name="Colour Mapping Example">
       </cheatsheet>
    </extension>
+   <extension
+         point="org.eclipse.ui.services">
+      <serviceFactory
+            factoryClass="org.dawnsci.rcp.service.PaletteService">
+         <service
+               serviceClass="org.dawb.common.services.IPaletteService">
+         </service>
+      </serviceFactory>
+   </extension>
 
 </plugin>

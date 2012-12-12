@@ -18,6 +18,15 @@ public class ExtentionPointManager {
 	private List<TransferFunctionContribution> transferFunctions;
 	private List<ColourSchemeContribution> colourSchemes;
 	
+	private static ExtentionPointManager staticManager;
+	public static ExtentionPointManager getManager() {
+		if (staticManager==null) staticManager = new ExtentionPointManager();
+		return staticManager;
+	}
+	private ExtentionPointManager() {
+		
+	}
+	
 	/**
 	 * Get all the extentions for a particular ID
 	 * @param extensionPointId The ID which is referenced
@@ -97,8 +106,23 @@ public class ExtentionPointManager {
 	 * @return
 	 */
 	public TransferFunctionContribution getTransferFunction(String name) {
+		if (transferFunctions==null) getTransferFunctionContributions();
 		for (TransferFunctionContribution function : transferFunctions) {
 			if (function.getName().compareTo(name) == 0) {
+				return function;
+			}
+		}
+		throw new IllegalArgumentException("Could not find an appropriate Transfer Function");
+	}
+	/**
+	 * Get a transfer function contribution by name
+	 * @param name the name of the Function
+	 * @return
+	 */
+	public TransferFunctionContribution getTransferFunctionByID(String id) {
+		if (transferFunctions==null) getTransferFunctionContributions();
+		for (TransferFunctionContribution function : transferFunctions) {
+			if (function.getId().compareTo(id) == 0) {
 				return function;
 			}
 		}

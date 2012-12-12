@@ -383,6 +383,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		try {
 			for (int i = 1; i <= 4; i++) {
 				final IAxis axis = axisMap.get(i);
+				if (axis==null) continue;
 				if (ys.get(i)==null) {
 					axis.setVisible(false);
 					continue;

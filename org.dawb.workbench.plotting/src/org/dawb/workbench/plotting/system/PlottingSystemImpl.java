@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.Trace;
+import org.dawb.common.services.IPaletteService;
 import org.dawb.common.ui.image.PaletteFactory;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.PlotType;
@@ -60,6 +61,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.PageBook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -563,7 +565,9 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 				palette = ((IImageTrace)col.iterator().next()).getPaletteData();
 			} else {
 				try {
-					palette = PaletteFactory.getPalette(Activator.getDefault().getPreferenceStore().getInt(PlottingConstants.P_PALETTE), true);
+					final IPaletteService pservice = (IPaletteService)PlatformUI.getWorkbench().getService(IPaletteService.class);
+					final String schemeName = Activator.getDefault().getPreferenceStore().getString(PlottingConstants.COLOUR_SCHEME);	
+					palette = pservice.getPaletteData(schemeName);
 				} catch (Exception e) {
 					palette = null;
 				}				
