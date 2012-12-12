@@ -56,6 +56,7 @@ public class FitGaussianConvolutedFermiActor extends
 	public StringParameter fitDirection;
 	public StringParameter fitConvolution;
 	public StringParameter updatePlotName;
+	//TODO can be removed
 	public StringParameter quickConvolutionWidth;
 
 	public FitGaussianConvolutedFermiActor(CompositeEntity container,
@@ -91,6 +92,8 @@ public class FitGaussianConvolutedFermiActor extends
 					"Input function must be of type FermiGauss");
 		}
 
+		double temperature = fitFunction.getParameterValue(1);
+		
 		// first fit using a simple fermi edge to get the initial parameters
 		MultivariateFunction f = new MultivariateFunction() {
 
@@ -145,6 +148,85 @@ public class FitGaussianConvolutedFermiActor extends
 		double r3 = deNormalizeParameter(r[3], fitFunction.getParameter(3));
 		double r4 = deNormalizeParameter(r[4], fitFunction.getParameter(4));
 		double r5 = 0.0;
+		
+		// Now fit the system quickly using several assumptions
+		if (fitConvolution.getExpression().contains("Quick") || fitConvolution.getExpression().contains("Full")) {
+
+			double approximateFWHM = ((FermiGauss)fitFunction).approximateFWHM(temperature, r1);
+			// trim the x_axis to just around the fermi edge
+			double width = Math.abs(approximateFWHM) * 2;
+
+
+			
+			// pull out the appropriate slice
+			Integer sliceStop = xAxis.getShape()[0];
+			Integer sliceStart = 0;
+			try {
+				Double afterCrossing = DatasetUtils.crossings(xAxis, r0 + width)
+						.get(0);
+				sliceStop = (int) Math.floor(afterCrossing);
+			} catch (Exception e) {
+				// Not an issue as this is handled
+				System.out.println(e);
+			}
+			
+			try {
+				Double beforeCrossing = DatasetUtils.crossings(xAxis, r0 - width)
+						.get(0);
+				sliceStart = (int) Math.floor(beforeCrossing);
+			} catch (Exception e) {
+				// Not an issue as this is not required
+				System.out.println(e);
+			}
+			
+			final AbstractDataset trimmedXAxis = xAxis.getSlice(new Slice(
+					sliceStart, sliceStop));
+			final AbstractDataset trimmedValues = values.getSlice(new Slice(
+					sliceStart, sliceStop));
+
+			// provide the fitting function which wrappers all the normal
+			// fitting functionality
+			final double t0 = r0;
+			// fix the temperature back to the right value
+			final double t1 = temperature;
+			final double t2 = r2;
+			final double t3 = r3;
+			final double t4 = r4;
+			
+			MultivariateFunction f1 = new MultivariateFunction() {
+
+				@Override
+				public double value(double[] p) {
+
+					double p0 = deNormalizeParameter(p[0],
+							fitFunction.getParameter(5));
+
+					FermiGauss fg = new FermiGauss(t0, t1, t2, t3, t4, p0);
+
+					AbstractDataset fermiDS = fg.makeDataset(trimmedXAxis);
+
+					AbstractDataset residual = Maths.subtract(fermiDS,
+							trimmedValues);
+					residual.ipower(2);
+
+					return (Double) residual.sum();
+				}
+			};
+
+			// preform the optimisation
+			start = new double[] { normalizeParameter(
+					approximateFWHM,
+					fitFunction.getParameter(5)) };
+
+			result = cOpt.optimize(1000, f1, GoalType.MINIMIZE, start);
+
+			// set the input functions parameters to be the result before
+			// finishing.
+			r = result.getPoint();
+
+			r5 = deNormalizeParameter(Math.abs(r[0]),
+					fitFunction.getParameter(5));
+		};
 		
 		// Now fit the system properly with the Full function
 		if (fitConvolution.getExpression().contains("Full")) {
@@ -202,77 +284,7 @@ public class FitGaussianConvolutedFermiActor extends
 			r4 = deNormalizeParameter(r[4], fitFunction.getParameter(5));
 		}
 
-		double kT = 0.0;
-		
-		// Now fit the system properly with the Full function
-		if (fitConvolution.getExpression().contains("Quick")) {
-
-			final double t0 = deNormalizeParameter(r[0],
-					fitFunction.getParameter(0));
-			final double t1 = deNormalizeParameter(r[1],
-					fitFunction.getParameter(2));
-			final double t2 = deNormalizeParameter(r[2],
-					fitFunction.getParameter(3));
-			final double t3 = deNormalizeParameter(r[3],
-					fitFunction.getParameter(4));
-
-			// trim the x_axis to just around the fermi edge
-			double width = 0.025;
-			try {
-				width = Double.parseDouble(quickConvolutionWidth
-						.getExpression());
-			} catch (Exception e) {
-				// Not an issue if this fails as we have a default.
-			}
-			Double afterCrossing = DatasetUtils.crossings(xAxis, t0 + width)
-					.get(0);
-			Double beforeCrossing = DatasetUtils.crossings(xAxis, t0 - width)
-					.get(0);
-			Integer sliceStop = (int) Math.floor(afterCrossing);
-			Integer sliceStart = (int) Math.floor(beforeCrossing);
-			final AbstractDataset trimmedXAxis = xAxis.getSlice(new Slice(
-					sliceStart, sliceStop));
-			final AbstractDataset trimmedValues = values.getSlice(new Slice(
-					sliceStart, sliceStop));
-
-			// provide the fitting function which wrappers all the normal
-			// fitting functionality
-			MultivariateFunction f1 = new MultivariateFunction() {
-
-				@Override
-				public double value(double[] p) {
-
-					double p0 = deNormalizeParameter(p[0],
-							fitFunction.getParameter(5));
-
-					FermiGauss fg = new FermiGauss(t0, 0.5, t1, t2, t3, p0);
-
-					AbstractDataset fermiDS = fg.makeDataset(trimmedXAxis);
-
-					AbstractDataset residual = Maths.subtract(fermiDS,
-							trimmedValues);
-					residual.ipower(2);
-
-					return (Double) residual.sum();
-				}
-			};
-
-			// preform the optimisation
-			start = new double[] { normalizeParameter(
-					fitFunction.getParameterValue(5),
-					fitFunction.getParameter(5)) };
-
-			result = cOpt.optimize(1000, f1, GoalType.MINIMIZE, start);
-
-			// set the input functions parameters to be the result before
-			// finishing.
-			r = result.getPoint();
-
-			r4 = deNormalizeParameter(Math.abs(r[0]),
-					fitFunction.getParameter(5));
-		};
-
-		fitFunction.setParameterValues(r0, r1, r2, r3, r4, r5);
+		fitFunction.setParameterValues(r0, temperature, r2, r3, r4, r5);
 
 		String plotName = updatePlotName.getExpression();
 		if (!plotName.isEmpty()) {
@@ -368,7 +380,7 @@ public class FitGaussianConvolutedFermiActor extends
 			AbstractDataset slice = dataDS.getSlice(start, stop, null);
 			slice.squeeze();
 			
-			AFunction localFitFunction = functions.get(function);
+			FermiGauss localFitFunction = new FermiGauss(functions.get(function).getParameters());
 			int dSlength = dataDS.getShape().length;
 			executorService.submit(new Worker(localFitFunction, xAxisDS, slice, dSlength , start, stop, fitDim, parametersDS, functionsDS));
 		}
