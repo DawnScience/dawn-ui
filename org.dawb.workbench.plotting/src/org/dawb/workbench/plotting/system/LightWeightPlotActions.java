@@ -513,6 +513,8 @@ class LightWeightPlotActions {
 	}
 
 	public void setRescaleButton(boolean rescale) {
-		actionBarManager.findAction("org.dawb.workbench.plotting.rescale").setChecked(rescale);
+		IAction action = actionBarManager.findAction("org.dawb.workbench.plotting.rescale");
+		if (action==null) return; // they are allowed to remove it.
+		action.setChecked(rescale);
 	}
 }
