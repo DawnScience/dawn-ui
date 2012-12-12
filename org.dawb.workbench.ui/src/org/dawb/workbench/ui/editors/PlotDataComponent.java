@@ -130,6 +130,8 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
+import uk.ac.diamond.scisoft.analysis.io.DataHolder;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.gda.monitor.IMonitor;
@@ -1162,6 +1164,28 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 	}
 	
 	@Override
+	public ILazyDataset getLazyDataSet(String name, final IMonitor monitor) {
+		
+		try {
+			if (providerDeligate!=null) {
+				return providerDeligate.getLazyDataSet(name, monitor);
+			}
+			if (this.filePath==null) return null;
+			
+			DataHolder holder = LoaderFactory.getData(filePath, monitor);
+			ILazyDataset set  = holder.getLazyDataset(name);
+			return set;
+			
+		} catch (IllegalArgumentException ie) {
+			return null;
+		} catch (Exception e) {
+			logger.error("Cannot get data set "+name+" from "+filePath+". Currently expressions can only contain existing Data Sets.", e);
+			return null;
+		}
+	}
+
+	
+	@Override
 	public AbstractDataset getExpressionSet(String name, final IMonitor monitor) {
 
 		AbstractDataset set = getDataSet(name, monitor);
@@ -1236,7 +1260,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 				if (!element.isExpression()) {
 					final String name = element.toString();
 					if (metaData.getDataSizes()==null) {
-						final IDataset set = getDataSet(name, (IMonitor)null);
+						final ILazyDataset set = getLazyDataSet(name, (IMonitor)null);
 						if (set!=null) {
 							return set.getSize()+"";
 						}
@@ -1252,7 +1276,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 				if (!element.isExpression()) {
 					final String name = element.toString();
 					if (metaData.getDataShapes()==null || metaData.getDataShapes().get(name)==null) {
-						final IDataset set = getDataSet(name, (IMonitor)null);
+						final ILazyDataset set = getLazyDataSet(name, null);
 						if (set!=null) {
 							return Arrays.toString(set.getShape());
 						}
@@ -1325,8 +1349,8 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 		
 		if (!element.isExpression()) {
 			final String name = element.getName();
-			if (metaData.getDataShapes()==null) {
-				final IDataset set = getDataSet(name, (IMonitor)null);
+			if (metaData.getDataShapes()==null || metaData.getDataShapes().get(name)==null) {
+				final ILazyDataset set = getLazyDataSet(name, (IMonitor)null);
 				// Assuming it has been squeezed already
 				if (set!=null) {
 					return set.getShape().length;

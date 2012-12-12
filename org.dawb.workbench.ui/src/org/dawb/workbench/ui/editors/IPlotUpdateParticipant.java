@@ -30,12 +30,6 @@ public interface IPlotUpdateParticipant {
 	int getDimensionCount(CheckableObject checkableObject);
 
 	/**
-	 * Return the IMetaData for this data file.
-	 * @return
-	 */
-	IMetaData getMetaData();
-
-	/**
 	 * The data needed by the slicer when the plot is updated.
 	 * @param name
 	 * @param filePath

@@ -10,7 +10,6 @@
 
 package org.dawb.workbench.ui.editors;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -42,7 +41,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.ToolBarManager;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
@@ -61,11 +59,9 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IReusableEditor;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.part.IPage;
 import org.eclipse.ui.part.Page;
-import org.eclipse.ui.progress.IProgressService;
 import org.eclipse.ui.progress.UIJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,14 +88,13 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 	// This view is a composite of two other views.
 	private AbstractPlottingSystem      plottingSystem;	
 	private Collection<String>          dataNames;
-	private Map<String,ILazyDataset>    dataCache; // TODO FIXME Do not need dataCache anymore, LoaderFactory does it!
 	private Composite                   tools;
 	private IMetaData                   metaData;
 	private PlotType                    defaultPlotType;
 	private Map<Integer, IAxis>         axisMap;
 	private PlotJob                     plotJob;
 
-	public PlotDataEditor(boolean useCaching, final PlotType defaultPlotType) {
+	public PlotDataEditor(final PlotType defaultPlotType) {
 		
 	    this.axisMap = new HashMap<Integer, IAxis>(4);
 	    this.plotJob = new PlotJob();
@@ -110,7 +105,6 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		} catch (Exception ne) {
 			logger.error("Cannot locate any plotting systems!", ne);
 		}
-        if (useCaching) this.dataCache = new HashMap<String,ILazyDataset>(7);
  	}
 
 	@Override
@@ -284,9 +278,9 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 				
 				participant.setSlicerVisible(true);
 				participant.setSlicerData(selections[0].toString(),
-						EclipseUtils.getFilePath(getEditorInput()), 
-						participant.getMetaData().getDataShapes().get(selections[0].toString()), 
-						plottingSystem);
+						                  EclipseUtils.getFilePath(getEditorInput()), 
+						                  getShape(selections[0].toString()), 
+						                  plottingSystem);
 
 				return;
 			}
@@ -303,12 +297,25 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		}
 	}
 	
+	private int[] getShape(String name) {
+		int[] shape=null;
+		try {
+			shape = metaData.getDataShapes().get(name);
+		} catch (Exception allowed) {
+			// It's ok
+		}
+		if (shape==null) {
+			shape = getLazyDataSet(name, null).getShape();
+		}
+		return shape;
+	}
+
 	private class PlotJob extends Job {
 
 		public PlotJob() {
 			super("Plot update");
-			setUser(true);
 			setSystem(true);
+			setUser(false);
 			setPriority(Job.INTERACTIVE);
 		}
 
@@ -341,6 +348,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		boolean requireFullRefresh = plottingSystem.getPlotType()!=participant.getPlotMode();
 		final AbstractDataset data = getDataSet(selections[0], monitor);
 		
+		if (data==null)       return;
 		if (data.getRank()>2) return; // Cannot plot more that 2 dims!
 		
 		if (participant.getPlotMode()==PlotType.IMAGE || data.getRank()==2) {
@@ -428,19 +436,8 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 	@Override
 	public AbstractDataset getDataSet(String name, IMonitor monitor) {
 		try {
-			if (dataCache!=null&&dataCache.containsKey(name)) return (AbstractDataset)dataCache.get(name);
 			
-			AbstractDataset set;
-			if (dataCache!=null) {
-				if (dataCache.isEmpty()) {
-					final DataHolder dh = LoaderFactory.getData(EclipseUtils.getFilePath(getEditorInput()), monitor);
-					dataCache.putAll(dh.getMap());
-				}
-				set = (AbstractDataset)dataCache.get(name);
-				
-			} else {
-				set = LoaderFactory.getDataSet(EclipseUtils.getFilePath(getEditorInput()), name, monitor);
-			}
+			AbstractDataset set = LoaderFactory.getDataSet(EclipseUtils.getFilePath(getEditorInput()), name, monitor);
 			try {
 			    set = set.squeeze();
 			} catch (Throwable ignored) {
@@ -451,10 +448,27 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 			return set;
 			
 		} catch (Exception e) {
-			logger.error("Cannot read "+name);
+			logger.error("Cannot read "+name, e);
 			return null;
 		}
 	}
+	
+	@Override
+	public ILazyDataset getLazyDataSet(String name, IMonitor monitor) {
+		try {
+			
+			DataHolder holder = LoaderFactory.getData(EclipseUtils.getFilePath(getEditorInput()), monitor);
+			ILazyDataset set  = holder.getLazyDataset(name);
+
+			if (set!=null) set.setName(name);
+			return set;
+			
+		} catch (Exception e) {
+			logger.error("Cannot read "+name, e);
+			return null;
+		}
+	}
+
 
 	@Override
 	public AbstractDataset getExpressionSet(String name, final IMonitor monitor) {
@@ -498,9 +512,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		
 		super.setInput(input);
 		setPartName(input.getName());
-		
-		if (dataCache!=null) dataCache.clear();
-		
+				
 		extractingMetaData = true;
 		// Get the meta data in a thread to avoid things breaking
 		final Job getMeta = new Job("Extract Meta Data") {

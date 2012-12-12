@@ -79,7 +79,7 @@ public class ZipEditor extends MultiPageEditorPart implements ISlicablePlottingP
 			// For 1D we are like an ascii editor and for 2D we are like an
 			// image editor for each image in the zip
 			if (isOneDZipFile()) {
-				this.dataSetEditor = new PlotDataEditor(true, PlotType.IMAGE);
+				this.dataSetEditor = new PlotDataEditor(PlotType.IMAGE);
 				addPage(0, dataSetEditor,    getUnzippedEditorInput());
 				setPageText(0, "Plot");
 

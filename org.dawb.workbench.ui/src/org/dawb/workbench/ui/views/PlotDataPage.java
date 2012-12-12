@@ -209,11 +209,6 @@ public class PlotDataPage extends Page implements IPlotUpdateParticipant, IAdapt
 	}
 
 	@Override
-	public IMetaData getMetaData() {
-		return dataSetComponent.getMetaData();
-	}
-
-	@Override
 	public void setSlicerData(String name, String filePath, int[] dims,
 			                  AbstractPlottingSystem plottingSystem) {
 		sliceComponent.setData(name, filePath, dims);
