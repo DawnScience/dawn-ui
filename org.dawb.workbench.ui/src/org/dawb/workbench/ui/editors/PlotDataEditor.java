@@ -97,10 +97,12 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 	private IMetaData                   metaData;
 	private PlotType                    defaultPlotType;
 	private Map<Integer, IAxis>         axisMap;
+	private PlotJob                     plotJob;
 
 	public PlotDataEditor(boolean useCaching, final PlotType defaultPlotType) {
 		
 	    this.axisMap = new HashMap<Integer, IAxis>(4);
+	    this.plotJob = new PlotJob();
 		try {
 			this.defaultPlotType= defaultPlotType;
 	        this.plottingSystem = PlottingFactory.createPlottingSystem();
@@ -292,29 +294,41 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 			participant.setSlicerVisible(false);
 			
 			if (useTask) {
-				IProgressService service =  getEditorSite()!=null 
-				                         ? (IProgressService)getSite().getService(IProgressService.class)
-						                 : (IProgressService)PlatformUI.getWorkbench().getService(IProgressService.class);
-				try {
-					service.run(true, true, new IRunnableWithProgress() {
-						@Override
-						public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-		
-							monitor.beginTask("Updating selected DataSets", 100);
-				
-							createPlot(selections, participant, monitor);
-						}
-	
-	
-					});
-				} catch (Exception e) {
-					logger.error("Cannot create plot required.", e);
-				} 
+				plotJob.plot(selections, participant); 
 			} else {
 				createPlot(selections, participant, new NullProgressMonitor());
 			}
 		} finally {
 			doingUpdate = false;
+		}
+	}
+	
+	private class PlotJob extends Job {
+
+		public PlotJob() {
+			super("Plot update");
+			setUser(true);
+			setSystem(true);
+			setPriority(Job.INTERACTIVE);
+		}
+
+		private CheckableObject[] selections;
+		private IPlotUpdateParticipant participant;
+
+		public void plot(CheckableObject[] selections,
+				               IPlotUpdateParticipant participant) {
+			
+			cancel();
+            this.selections  = selections;
+            this.participant = participant;
+            schedule();
+			
+		}
+		
+		public IStatus run(IProgressMonitor monitor) {
+			monitor.beginTask("Updating selected DataSets", 100);		
+			createPlot(selections, participant, monitor);
+			return Status.OK_STATUS;
 		}
 	}
 	
