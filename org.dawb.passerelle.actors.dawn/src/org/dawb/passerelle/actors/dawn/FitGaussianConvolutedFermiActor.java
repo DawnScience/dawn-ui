@@ -92,7 +92,7 @@ public class FitGaussianConvolutedFermiActor extends
 					"Input function must be of type FermiGauss");
 		}
 
-		double temperature = fitFunction.getParameterValue(1);
+		final double temperature = fitFunction.getParameterValue(1);
 		
 		// first fit using a simple fermi edge to get the initial parameters
 		MultivariateFunction f = new MultivariateFunction() {
@@ -240,17 +240,15 @@ public class FitGaussianConvolutedFermiActor extends
 					double p0 = deNormalizeParameter(p[0],
 							fitFunction.getParameter(0));
 					double p1 = deNormalizeParameter(p[1],
-							fitFunction.getParameter(1));
-					double p2 = deNormalizeParameter(p[2],
 							fitFunction.getParameter(2));
-					double p3 = deNormalizeParameter(p[3],
+					double p2 = deNormalizeParameter(p[2],
 							fitFunction.getParameter(3));
-					double p4 = deNormalizeParameter(p[4],
+					double p3 = deNormalizeParameter(p[3],
 							fitFunction.getParameter(4));
-					double p5 = deNormalizeParameter(p[5],
+					double p4 = deNormalizeParameter(p[4],
 							fitFunction.getParameter(5));
 
-					FermiGauss fg = new FermiGauss(p0, p1, p2, p3, p4, p5);
+					FermiGauss fg = new FermiGauss(p0, temperature, p1, p2, p3, p4);
 
 					AbstractDataset fermiDS = fg.makeDataset(xAxis);
 
@@ -263,13 +261,11 @@ public class FitGaussianConvolutedFermiActor extends
 
 			// preform the optimisation
 			start = new double[] {
-					r[0],
-					r[1],
-					r[2],
-					r[3],
-					r[4],
-					normalizeParameter(fitFunction.getParameterValue(5),
-							fitFunction.getParameter(5)) };
+					normalizeParameter(r0, fitFunction.getParameter(0)),
+					normalizeParameter(r2, fitFunction.getParameter(2)),
+					normalizeParameter(r3, fitFunction.getParameter(3)),
+					normalizeParameter(r4, fitFunction.getParameter(4)),
+					normalizeParameter(r5, fitFunction.getParameter(5))};
 
 			result = cOpt.optimize(1000, f1, GoalType.MINIMIZE, start);
 
@@ -278,10 +274,10 @@ public class FitGaussianConvolutedFermiActor extends
 			r = result.getPoint();
 
 			r0 = deNormalizeParameter(r[0], fitFunction.getParameter(0));
-			r1 = deNormalizeParameter(r[1], fitFunction.getParameter(2));
-			r2 = deNormalizeParameter(r[2], fitFunction.getParameter(3));
-			r3 = deNormalizeParameter(r[3], fitFunction.getParameter(4));
-			r4 = deNormalizeParameter(r[4], fitFunction.getParameter(5));
+			r2 = deNormalizeParameter(r[1], fitFunction.getParameter(2));
+			r3 = deNormalizeParameter(r[2], fitFunction.getParameter(3));
+			r4 = deNormalizeParameter(r[3], fitFunction.getParameter(4));
+			r5 = deNormalizeParameter(r[4], fitFunction.getParameter(5));
 		}
 
 		fitFunction.setParameterValues(r0, temperature, r2, r3, r4, r5);
