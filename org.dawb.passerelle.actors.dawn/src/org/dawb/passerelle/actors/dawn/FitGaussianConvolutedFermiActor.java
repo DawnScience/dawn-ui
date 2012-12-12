@@ -366,7 +366,9 @@ public class FitGaussianConvolutedFermiActor extends
 		DoubleDataset ind = DoubleDataset.ones(starts);
 		IndexIterator iter = ind.getIterator();
 		
-		ExecutorService executorService = new ThreadPoolExecutor(4, 4, 1, TimeUnit.MINUTES, new ArrayBlockingQueue<Runnable>(10000,true), new ThreadPoolExecutor.CallerRunsPolicy() );
+		int maxthreads = Runtime.getRuntime().availableProcessors();
+		
+		ExecutorService executorService = new ThreadPoolExecutor(maxthreads, maxthreads, 1, TimeUnit.MINUTES, new ArrayBlockingQueue<Runnable>(10000,true), new ThreadPoolExecutor.CallerRunsPolicy() );
 		
 		while (iter.hasNext()) {
 			System.out.println(iter.index);
