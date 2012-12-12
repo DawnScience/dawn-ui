@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.csstudio.swt.xygraph.undo.ZoomType;
+import org.dawb.common.services.IPaletteService;
 import org.dawb.common.ui.image.PaletteFactory;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
@@ -31,6 +32,7 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.swt.graphics.PaletteData;
+import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -178,9 +180,10 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 	
 	protected void createPalleteActions() {
 		
-    	final Map<String,Integer> names = PaletteFactory.getPaletteNames();
     	
-		int paletteIndex = Activator.getDefault().getPreferenceStore().getInt(PlottingConstants.P_PALETTE);
+		final IPaletteService pservice = (IPaletteService)PlatformUI.getWorkbench().getService(IPaletteService.class);
+    	final Collection<String> names = pservice.getColorSchemes();
+		final String schemeName = Activator.getDefault().getPreferenceStore().getString(PlottingConstants.COLOUR_SCHEME);	
 
 		final MenuAction lutCombo = new MenuAction("Color");
 		lutCombo.setId(getClass().getName()+lutCombo.getText());
@@ -188,13 +191,12 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 		lutCombo.setImageDescriptor(Activator.getImageDescriptor("icons/color_wheel.png"));
 		
 		CheckableActionGroup group      = new CheckableActionGroup();
-		for (final String paletteName : names.keySet()) {
+		for (final String paletteName : names) {
 			final Action action = new Action(paletteName, IAction.AS_CHECK_BOX) {
 				public void run() {
-					int paletteIndex = PaletteFactory.PALETTES.get(paletteName);
-					Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.P_PALETTE, paletteIndex);
+					Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.COLOUR_SCHEME, paletteName);
 					try {
-						final PaletteData data = PaletteFactory.getPalette(paletteIndex, true);
+						final PaletteData data = pservice.getPaletteData(paletteName);
 						final Collection<ITrace> traces = system.getTraces();
 						if (traces!=null) for (ITrace trace: traces) {
 							if (trace instanceof IPaletteTrace) {
@@ -208,7 +210,7 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 			};
 			group.add(action);
 			lutCombo.add(action);
-			action.setChecked(PaletteFactory.PALETTES.get(paletteName)==paletteIndex);
+			action.setChecked(paletteName.equals(schemeName));
 		}
 		lutCombo.setToolTipText("Histogram");
 

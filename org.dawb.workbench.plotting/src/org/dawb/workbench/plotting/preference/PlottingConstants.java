@@ -27,7 +27,7 @@ public class PlottingConstants {
 	/**
 	 * Used to store palette preference
 	 */
-	public static final String P_PALETTE = "org.dawb.plotting.system.paletteChoice";
+	public static final String COLOUR_SCHEME = "org.dawb.plotting.system.colourSchemeName";
 
 	/**
 	 * Used to store origin preference, do not change string
