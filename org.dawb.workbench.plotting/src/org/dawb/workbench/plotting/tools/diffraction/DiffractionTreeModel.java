@@ -68,7 +68,7 @@ public class DiffractionTreeModel {
 	public DiffractionTreeModel(IDiffractionMetadata metaData) throws Exception {
 		this.metaData = metaData;
 		if (metaData.getDetector2DProperties()==null) throw new Exception("Must have detector properties!");
-		if (metaData.getDiffractionCrystalEnvironment()==null) throw new Exception("Must have crystall environment!");
+		if (metaData.getDiffractionCrystalEnvironment()==null) throw new Exception("Must have crystal environment!");
 		this.root     = new LabelNode();
 		createDiffractionModel(metaData);
 		nodeMap = new TreeMap<String, TreeNode>();
@@ -98,9 +98,8 @@ public class DiffractionTreeModel {
 		final DetectorProperties         detprop = getDetectorProperties();
 	    final DetectorProperties        odetprop = getOriginalDetectorProperties();
 		
-	    LabelNode experimentalInfo = createExperimentalInfo(dce, odce, detprop, odetprop);
+	    createExperimentalInfo(dce, odce, detprop, odetprop);
         
-        createBeamCenter(detprop, experimentalInfo);
         createIntensity();      
         createDetector(dce, odce, detprop, odetprop);
         createRaw(metaData);
@@ -241,6 +240,20 @@ public class DiffractionTreeModel {
         yPixelSize.setLowerBound(0.001);
         yPixelSize.setUpperBound(1000);
         
+	    // Beam Centre
+        final LabelNode beamCen = new LabelNode("Beam Centre", detectorMeta);
+        beamCen.setTooltip("The beam centre is the intersection of the direct beam with the detector in terms of image coordinates. Can be undefined when there is no intersection.");
+        registerNode(beamCen);
+        beamCen.setDefaultExpanded(true);
+
+        beamX = new NumericNode<Length>("X", beamCen, SI.MILLIMETER);
+        registerNode(beamX);
+        beamX.setEditable(true);
+
+        beamY = new NumericNode<Length>("Y", beamCen, SI.MILLIMETER);
+        registerNode(beamY);
+        beamY.setEditable(true);
+
         // Listeners
         xpixel = setBeamCenterUnit(xPixelSize, beamX, "pixel");
         xPixelSize.addAmountListener(new AmountListener<Length>() {		
@@ -256,24 +269,45 @@ public class DiffractionTreeModel {
 			public void amountChanged(AmountEvent<Length> evt) {
 				ypixel = setBeamCenterUnit(yPixelSize, beamY, "pixel");
 			}
-		});		
-	}
+		});
 
-	private void createBeamCenter(DetectorProperties detprop,
-			                      LabelNode experimentalInfo) {
-	    // Beam Centre
-        final LabelNode beamCen = new LabelNode("Beam Centre", experimentalInfo);
-        registerNode(beamCen);
-        beamCen.setDefaultExpanded(true);
-      
-        this.beamX = new NumericNode<Length>("X", beamCen, SI.MILLIMETER);
-        registerNode(beamX);
-        beamX.setEditable(true);
-       
-        this.beamY = new NumericNode<Length>("Y", beamCen, SI.MILLIMETER);
-        registerNode(beamY);
-        beamY.setEditable(true);
-		
+        final LabelNode normal = new LabelNode("Normal (Orientation)", detectorMeta);
+        normal.setTooltip("Detector orientation is defined by the normal to its face outward and towards the scattering sample. Rotations are centred on the beam centre");
+        registerNode(normal);
+        normal.setDefaultExpanded(true);
+        
+        final double[] oorientation = odetprop!=null ? odetprop.getNormalAnglesInDegrees() : null;
+        final double[] orientation  = detprop!=null  ? detprop.getNormalAnglesInDegrees()  : null;
+		yaw = createOrientationNode("Yaw", -180, 180, oorientation, orientation, 0, normal);
+		yaw.setTooltip("Rotation about vertical axis, in degrees (positive is to the right).");
+		pitch = createOrientationNode("Pitch", -90, 90, oorientation, orientation, 1, normal);
+		pitch.setTooltip("Rotation about horizontal axis, in degrees (positive is upwards).");
+		roll = createOrientationNode("Roll", -180, 180, oorientation, orientation, 2, normal);
+		roll.setTooltip("Rotation about normal, in degrees (positive is clockwise).");
+        
+        
+        final NumericNode<Length> dist = new NumericNode<Length>("Distance", detectorMeta, SI.MILLIMETER);
+        dist.setTooltip("Distance from sample to beam centre");
+        registerNode(dist);
+        if (detprop!=null) {
+        	dist.setDefault(odetprop.getBeamCentreDistance(), SI.MILLIMETER);
+        	dist.setValue(detprop.getBeamCentreDistance(), SI.MILLIMETER);
+            dist.addAmountListener(new AmountListener<Length>() {
+    			@Override
+    			public void amountChanged(AmountEvent<Length> evt) {
+    				detprop.setBeamCentreDistance(evt.getAmount().doubleValue(SI.MILLIMETER));
+    			}
+    		});
+        }
+        dist.setEditable(true);
+
+        dist.setIncrement(1);
+        dist.setFormat("#0.##");
+        dist.setLowerBound(0);
+        dist.setUpperBound(1000000);
+        final Unit<Length> micron = SI.MICRO(SI.METER);
+        dist.setUnits(SI.MILLIMETER, micron, NonSI.INCH);
+
 	}
 
 	private void createIntensity() {
@@ -291,7 +325,7 @@ public class DiffractionTreeModel {
  		
 	}
 
-	private LabelNode createExperimentalInfo(final DiffractionCrystalEnvironment dce,
+	private void createExperimentalInfo(final DiffractionCrystalEnvironment dce,
 			                                 DiffractionCrystalEnvironment odce, 
 			                                 final DetectorProperties detprop, DetectorProperties odetprop) {
 	    // Experimental Info
@@ -335,27 +369,6 @@ public class DiffractionTreeModel {
 				}
 			}
 		});
-        
-        final NumericNode<Length> dist   = new NumericNode<Length>("Distance", experimentalInfo, SI.MILLIMETER);
-        registerNode(dist);
-        if (detprop!=null) {
-        	dist.setDefault(odetprop.getBeamCentreDistance(), SI.MILLIMETER);
-        	dist.setValue(detprop.getBeamCentreDistance(), SI.MILLIMETER);
-            dist.addAmountListener(new AmountListener<Length>() {
-    			@Override
-    			public void amountChanged(AmountEvent<Length> evt) {
-    				detprop.setBeamCentreDistance(evt.getAmount().doubleValue(SI.MILLIMETER));
-    			}
-    		});
-        }
-        dist.setEditable(true);
-
-        dist.setIncrement(1);
-        dist.setFormat("#0.##");
-        dist.setLowerBound(0);
-        dist.setUpperBound(1000000);
-        final Unit<Length> micron = SI.MICRO(SI.METER);
-        dist.setUnits(SI.MILLIMETER, micron, NonSI.INCH);
      
         NumericNode<Angle> start = new NumericNode<Angle>("Oscillation Start", experimentalInfo, NonSI.DEGREE_ANGLE);
         registerNode(start);
@@ -377,18 +390,6 @@ public class DiffractionTreeModel {
         	osci.setDefault(odce.getPhiRange(), NonSI.DEGREE_ANGLE);
         	osci.setValue(dce.getPhiRange(), NonSI.DEGREE_ANGLE);
         }
-        
-        final LabelNode normal = new LabelNode("Normal (Orientation)", experimentalInfo);
-        registerNode(normal);
-        normal.setDefaultExpanded(true);
-        
-        final double[] oorientation = odetprop!=null ? odetprop.getNormalAnglesInDegrees() : null;
-        final double[] orientation  = detprop!=null  ? detprop.getNormalAnglesInDegrees()  : null;
-		yaw = createOrientationNode("Yaw", -180, 180, oorientation, orientation, 0, normal);
-		pitch = createOrientationNode("Pitch", -90, 90, oorientation, orientation, 1, normal);
-		roll = createOrientationNode("Roll", -180, 180, oorientation, orientation, 2, normal);
-        
-	    return experimentalInfo;
 	}
 
 	private NumericNode<Angle> createOrientationNode(String label, 
