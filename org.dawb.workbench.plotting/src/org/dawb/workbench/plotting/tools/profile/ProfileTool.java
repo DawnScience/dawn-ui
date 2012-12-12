@@ -356,17 +356,6 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 	public void roiChanged(ROIEvent evt) {
 		final IRegion region = (IRegion)evt.getSource();
 		update(region, region.getROI(), false);
-		
-		
-        getControl().getDisplay().asyncExec(new Runnable() {
-        	public void run() {
-        		//replaced with call to repaint which autoscales if autoscale when
-        		//plot changes is checked
-        		profilePlottingSystem.repaint();
-        		//profilePlottingSystem.autoscaleAxes();
-        	}
-        });
-
 	}
 	
 	protected synchronized void update(IRegion r, ROIBase rb, boolean isDrag) {
