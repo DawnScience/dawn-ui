@@ -1,6 +1,5 @@
 package org.dawb.workbench.plotting.system.swtxy.util;
 
-import org.dawb.workbench.plotting.system.swtxy.selection.EllipseSelection;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.Shape;
 import org.eclipse.draw2d.geometry.Point;
@@ -8,7 +7,6 @@ import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Display;
 
 /**
  * A Draw2D ellipse that allows its orientation to be set. Its location is the centre of rotation
