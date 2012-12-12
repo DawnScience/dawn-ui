@@ -231,20 +231,21 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 				
 				int direction = e.count > 0 ? 1 : -1;
 
+
 				IFigure fig = getFigureAtCurrentMousePosition();
 				if (fig!=null && fig.getParent() instanceof Axis) {
 					Axis axis = (Axis)fig.getParent();
 					final double center = axis.getPositionValue(e.x, false);
-					String level  = System.getProperty("org.dawb.workbench.plotting.system.zoomLevel");
-					double factor = level!=null ? Double.parseDouble(level) :  0.1d;
-					axis.zoomInOut(center, direction*factor);
+					axis.zoomInOut(center, direction*0.01);
 					xyGraph.repaint();
 					return;
 				}
 			
 				if (xyGraph==null) return;
 				if (e.count==0)    return;
-				xyGraph.setZoomLevel(e, direction*0.05d);
+				String level  = System.getProperty("org.dawb.workbench.plotting.system.zoomLevel");
+				double factor = level!=null ? Double.parseDouble(level) :  0.1d;
+				xyGraph.setZoomLevel(e, direction*factor);
 				xyGraph.repaint();
 			}	
 		};

@@ -5,6 +5,7 @@ import org.eclipse.draw2d.Shape;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.PrecisionPoint;
+import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
 
 /**
@@ -173,6 +174,9 @@ public class RotatableEllipse extends Shape {
 
 	@Override
 	protected void fillShape(Graphics graphics) {
+		
+        if (!isShapeFriendlySize()) return;
+		
 		graphics.pushState();
 		graphics.setAdvanced(true);
 		graphics.setAntialias(SWT.ON);
@@ -185,20 +189,38 @@ public class RotatableEllipse extends Shape {
 
 	@Override
 	protected void outlineShape(Graphics graphics) {
+		
+        if (!isShapeFriendlySize()) return;
+        
 		graphics.pushState();
 		graphics.setAdvanced(true);
 		graphics.setAntialias(SWT.ON);
+				
 		graphics.translate((int) affine.getTranslationX(), (int) affine.getTranslationY());
 		graphics.rotate((float) affine.getRotationDegrees());
 		// NB do not use Graphics#scale and unit shape as there are precision problems
-		double ax = affine.getScaleX();
-		double ay = affine.getScaleY();
-		graphics.drawOval(0, 0, (int) ax, (int) ay);
+		int ax = (int)affine.getScaleX();
+		int ay = (int)affine.getScaleY();
+		graphics.drawOval(0, 0, ax, ay);
 		if (showMajorAxis) {
 			ay *= 0.5;
-			graphics.drawLine(0, (int) ay, (int) ax, (int) ay);
+			graphics.drawLine(0, ay, ax, ay);
 		}
 		graphics.popState();
+	}
+
+	private boolean isShapeFriendlySize() {
+		int ax = (int)affine.getScaleX();
+		int ay = (int)affine.getScaleY();
+		
+		// If the affine transform is outside the size of the bounds, we
+		// are very likely to be off-screen. 
+		// On linux off screen is bad therefore we do not draw
+		// Fix to http://jira.diamond.ac.uk/browse/DAWNSCI-429
+		Rectangle bnds = getParent().getBounds().getExpanded(500, 500); // This is a fudge, very elongated do still not show.
+		                                                                // Better than crashes however...
+		if (ax>bnds.width && ay>bnds.height) return false;
+		return true;
 	}
 
 }

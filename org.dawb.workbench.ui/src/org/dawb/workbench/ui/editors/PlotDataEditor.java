@@ -191,7 +191,8 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		});
         
         axisMap.put(1, plottingSystem.getSelectedYAxis());
-        for (int i = 2; i <=4; i++) {
+		// FIX to http://jira.diamond.ac.uk/browse/DAWNSCI-380 remove axes until they work
+        for (int i = 2; i <=2; i++) { //(Y4)
         	final IAxis yAxis = plottingSystem.createAxis("Y"+i, true, i==3||i==4?SWT.RIGHT:SWT.LEFT);
         	yAxis.setVisible(false);
         	yAxis.setTitle("Y"+i);

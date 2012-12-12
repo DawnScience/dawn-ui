@@ -268,7 +268,13 @@ public class CircleSelection extends AbstractSelectionRegion {
 		@Override
 		protected void outlineShape(Graphics graphics) {
 			double d = 2. * radius;
-			graphics.drawOval(new PrecisionRectangle(cx-radius, cy-radius, d, d));
+			// On linux off screen is bad therefore we do not draw
+			// Fix to http://jira.diamond.ac.uk/browse/DAWNSCI-429
+			PrecisionRectangle rect = new PrecisionRectangle(cx-radius, cy-radius, d, d);
+			Rectangle bnds = getParent().getBounds().getExpanded(200, 200);
+			if (!bnds.contains(rect)) return;
+			
+			graphics.drawOval(rect);
 			if (label != null && isShowLabel()) {
 				graphics.setAlpha(255);
 				graphics.setForegroundColor(labelColour);

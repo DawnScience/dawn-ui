@@ -48,7 +48,7 @@ import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.CellEditor;
-import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
@@ -56,13 +56,13 @@ import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
-import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -373,35 +373,61 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	private TreeViewerColumn defaultColumn;
 	
 	private void createColumns(TreeViewer viewer) {
-		
-		ColumnViewerToolTipSupport.enableFor(viewer,ToolTip.NO_RECREATE);
+				
 		viewer.setColumnProperties(new String[] { "Name", "Original", "Value", "Unit" });
+		ColumnViewerToolTipSupport.enableFor(viewer);
 
 		TreeViewerColumn var = new TreeViewerColumn(viewer, SWT.LEFT, 0);
 		var.getColumn().setText("Name"); // Selected
 		var.getColumn().setWidth(260);
-		var.setLabelProvider(new ColumnLabelProvider());
+		var.setLabelProvider(new DiffractionLabelProvider(0));
 		
 		var = new TreeViewerColumn(viewer, SWT.LEFT, 1);
 		var.getColumn().setText("Original"); // Selected
 		var.getColumn().setWidth(0);
 		var.getColumn().setResizable(false);
-		var.setLabelProvider(new DelegatingStyledCellLabelProvider(new DiffractionLabelProvider(1)));
+		var.setLabelProvider(new DelegatingProviderWithTooltip(new DiffractionLabelProvider(1)));
 		defaultColumn = var;
 		
 		var = new TreeViewerColumn(viewer, SWT.LEFT, 2);
 		var.getColumn().setText("Value"); // Selected
 		var.getColumn().setWidth(100);
-		var.setLabelProvider(new DelegatingStyledCellLabelProvider(new DiffractionLabelProvider(2)));
+		var.setLabelProvider(new DelegatingProviderWithTooltip(new DiffractionLabelProvider(2)));
 		var.setEditingSupport(new ValueEditingSupport(viewer));
 
 		var = new TreeViewerColumn(viewer, SWT.LEFT, 3);
 		var.getColumn().setText("Unit"); // Selected
 		var.getColumn().setWidth(90);
-		var.setLabelProvider(new DelegatingStyledCellLabelProvider(new DiffractionLabelProvider(3)));
+		var.setLabelProvider(new DelegatingProviderWithTooltip(new DiffractionLabelProvider(3)));
 		var.setEditingSupport(new UnitEditingSupport(viewer));
 	}
 	
+	private class DelegatingProviderWithTooltip extends DelegatingStyledCellLabelProvider {
+
+		public DelegatingProviderWithTooltip(IStyledLabelProvider labelProvider) {
+			super(labelProvider);
+		}
+		@Override
+		public String getToolTipText(Object element) {
+			return ((CellLabelProvider)getStyledStringProvider()).getToolTipText(element);
+		}
+
+		@Override
+		public Point getToolTipShift(Object element) {
+			return ((CellLabelProvider)getStyledStringProvider()).getToolTipShift(element);
+		}
+
+		@Override
+		public int getToolTipDisplayDelayTime(Object element) {
+			return ((CellLabelProvider)getStyledStringProvider()).getToolTipDisplayDelayTime(element);
+		}
+		@Override
+		public int getToolTipTimeDisplayed(Object element) {
+			return ((CellLabelProvider)getStyledStringProvider()).getToolTipTimeDisplayed(element);
+		}
+
+	}
+
 	@SuppressWarnings("unchecked")
 	private class ValueEditingSupport extends EditingSupport {
 

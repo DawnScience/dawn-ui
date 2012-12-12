@@ -176,6 +176,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 
 		if (getPlottingSystem()!=null) {
 			getPlottingSystem().addTraceListener(traceListener);
+			getPlottingSystem().setDefaultCursor(IPlottingSystem.CROSS_CURSOR);
 		}
 		
 		// We stop the adding of other regions because this tool does
@@ -183,6 +184,33 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 		setOtherRegionsEnabled(false);
 		
 		super.activate();	
+	}
+	
+	public void deactivate() {
+		super.deactivate();
+		setOtherRegionsEnabled(true);
+
+		if (xHair!=null) {
+			xHair.removeMouseListener(this);
+			xHair.setVisible(false);
+			xHair.removeROIListener(this);
+			getPlottingSystem().removeRegion(xHair);
+			xHair = null;
+		}
+		if (yHair!=null) {
+			yHair.setVisible(false);
+			yHair.removeROIListener(this);
+			getPlottingSystem().removeRegion(yHair);
+			yHair = null;
+			getPlottingSystem().setDefaultCursor(IPlottingSystem.NORMAL_CURSOR);
+		}
+		
+		if (profilePlotter!=null) profilePlotter.clear();
+
+		if (getPlottingSystem()!=null) {
+			getPlottingSystem().removeTraceListener(traceListener);
+			getPlottingSystem().setDefaultCursor(IPlottingSystem.NORMAL_CURSOR);
+		}
 	}
 	
 	private static final String regionId = "org.dawb.workbench.ui.editors.plotting.swtxy.addRegions";
@@ -200,23 +228,6 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
         }
 	}
 
-	public void deactivate() {
-		super.deactivate();
-		setOtherRegionsEnabled(true);
-
-		if (xHair!=null) {
-			xHair.removeMouseListener(this);
-			xHair.setVisible(false);
-			xHair.removeROIListener(this);
-		}
-		if (yHair!=null) {
-			yHair.setVisible(false);
-			yHair.removeROIListener(this);
-		}
-		if (profilePlotter!=null) profilePlotter.clear();
-
-		if (getPlottingSystem()!=null) getPlottingSystem().removeTraceListener(traceListener);
-	}
 	
 	public void dispose() {
 		

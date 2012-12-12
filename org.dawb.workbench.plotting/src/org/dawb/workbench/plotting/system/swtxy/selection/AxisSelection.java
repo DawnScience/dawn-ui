@@ -136,6 +136,21 @@ class AxisSelection extends AbstractSelectionRegion {
 	    			fireROIDragged(createROI(true), ROIEvent.DRAG_TYPE.TRANSLATE);
     			}
     		}
+    		
+    		/**
+    		 * @see org.eclipse.draw2d.MouseMotionListener#mouseEntered(MouseEvent)
+    		 */
+    		public void mouseEntered(MouseEvent me) {
+    			setVisible(true);
+    		}
+
+    		/**
+    		 * @see org.eclipse.draw2d.MouseMotionListener#mouseExited(MouseEvent)
+    		 */
+    		public void mouseExited(MouseEvent me) {
+    			setVisible(false);
+    		}
+
         };
         
         setTrackMouse(isTrackMouse());
