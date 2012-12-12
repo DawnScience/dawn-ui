@@ -174,6 +174,9 @@ public class RotatableEllipse extends Shape {
 
 	@Override
 	protected void fillShape(Graphics graphics) {
+		
+        if (!isShapeFriendlySize()) return;
+		
 		graphics.pushState();
 		graphics.setAdvanced(true);
 		graphics.setAntialias(SWT.ON);
@@ -187,6 +190,26 @@ public class RotatableEllipse extends Shape {
 	@Override
 	protected void outlineShape(Graphics graphics) {
 		
+        if (!isShapeFriendlySize()) return;
+        
+		graphics.pushState();
+		graphics.setAdvanced(true);
+		graphics.setAntialias(SWT.ON);
+				
+		graphics.translate((int) affine.getTranslationX(), (int) affine.getTranslationY());
+		graphics.rotate((float) affine.getRotationDegrees());
+		// NB do not use Graphics#scale and unit shape as there are precision problems
+		int ax = (int)affine.getScaleX();
+		int ay = (int)affine.getScaleY();
+		graphics.drawOval(0, 0, ax, ay);
+		if (showMajorAxis) {
+			ay *= 0.5;
+			graphics.drawLine(0, ay, ax, ay);
+		}
+		graphics.popState();
+	}
+
+	private boolean isShapeFriendlySize() {
 		int ax = (int)affine.getScaleX();
 		int ay = (int)affine.getScaleY();
 		
@@ -196,21 +219,8 @@ public class RotatableEllipse extends Shape {
 		// Fix to http://jira.diamond.ac.uk/browse/DAWNSCI-429
 		Rectangle bnds = getParent().getBounds().getExpanded(500, 500); // This is a fudge, very elongated do still not show.
 		                                                                // Better than crashes however...
-		if (ax>bnds.width && ay>bnds.height) return;
-
-		graphics.pushState();
-		graphics.setAdvanced(true);
-		graphics.setAntialias(SWT.ON);
-				
-		graphics.translate((int) affine.getTranslationX(), (int) affine.getTranslationY());
-		graphics.rotate((float) affine.getRotationDegrees());
-		// NB do not use Graphics#scale and unit shape as there are precision problems
-		graphics.drawOval(0, 0, ax, ay);
-		if (showMajorAxis) {
-			ay *= 0.5;
-			graphics.drawLine(0, ay, ax, ay);
-		}
-		graphics.popState();
+		if (ax>bnds.width && ay>bnds.height) return false;
+		return true;
 	}
 
 }
