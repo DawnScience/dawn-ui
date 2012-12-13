@@ -18,7 +18,6 @@ import org.dawb.common.services.IPaletteService;
 import org.dawb.common.services.ImageServiceBean;
 import org.dawb.common.services.ImageServiceBean.HistoType;
 import org.dawb.common.services.ImageServiceBean.ImageOrigin;
-import org.dawb.common.ui.image.PaletteFactory;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.IPaletteListener;
 import org.dawb.common.ui.plot.trace.ITrace;
