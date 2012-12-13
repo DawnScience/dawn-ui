@@ -16,8 +16,10 @@
 
 package org.dawb.workbench.plotting.tools.profile;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
@@ -34,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.ROIProfile;
@@ -48,11 +51,9 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 	private static final Logger logger = LoggerFactory.getLogger(BoxLineProfileTool.class);
 	private IAxis xPixelAxis;
 	private IAxis yPixelAxis;
-	private List<AbstractDataset> axes;
 	private BoxLineType type;
-	private double xPreviousStartValue;
-//	private double yPreviousStartValue;
-
+	private AbstractDataset originalAxis1;
+	private AbstractDataset originalAxis2;
 	public BoxLineProfileTool() {
 		this(BoxLineType.HORIZONTAL_TYPE);
 	}
@@ -68,34 +69,42 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 	protected void configurePlottingSystem(AbstractPlottingSystem plottingSystem) {
 		if (xPixelAxis == null) {
 			this.xPixelAxis = plottingSystem.getSelectedXAxis();
-
-			if(type == BoxLineType.VERTICAL_TYPE){
-				if(axes != null){
-					AbstractDataset axis = axes.get(1);
-					double min = axis.getDouble(0);
-					double max = axis.getDouble(axis.argMax());
-					xPixelAxis.setRange(min, max);
-					xPixelAxis.setTitle(axis.getName());
-					profilePlottingSystem.setSelectedXAxis(xPixelAxis);
-				}
-			} else if (type == BoxLineType.HORIZONTAL_TYPE){
-				if(axes != null){
-					AbstractDataset axis = axes.get(0);
-					double min = axis.getDouble(0);
-					double max = axis.getDouble(axis.argMax());
-					xPixelAxis.setRange(min, max);
-					xPixelAxis.setTitle(axis.getName());
-					profilePlottingSystem.setSelectedXAxis(xPixelAxis);
-				}
-			}
 		}
 		if (yPixelAxis == null) {
-//			profilePlottingSystem.setAxisAndTitleVisibility(false, "");
-//				this.yPixelAxis = plottingSystem.createAxis(plottingSystem.getSelectedYAxis().getTitle(), false, SWT.TOP);
-
-//			plottingSystem.getSelectedYAxis().setTitle("Intensity");
+			plottingSystem.getSelectedYAxis().setTitle("Intensity");
 			this.yPixelAxis = plottingSystem.getSelectedYAxis();
 		}
+
+		Collection<ITrace> traces = getPlottingSystem().getTraces();
+		List<AbstractDataset> axes = null;
+		for (Iterator<ITrace> iterator = traces.iterator(); iterator.hasNext();) {
+			ITrace trace = iterator.next();
+			if(trace instanceof IImageTrace){
+				IImageTrace image = (IImageTrace)trace;
+				axes = image.getAxes();
+			}
+		}
+		
+		if(type == BoxLineType.VERTICAL_TYPE){
+			if(axes != null){
+				AbstractDataset axis = axes.get(1);
+				double min = axis.getDouble(0);
+				double max = axis.getDouble(axis.argMax());
+				xPixelAxis.setRange(min, max);
+				xPixelAxis.setTitle(axis.getName());
+				profilePlottingSystem.setSelectedXAxis(xPixelAxis);
+			}
+		} else if (type == BoxLineType.HORIZONTAL_TYPE){
+			if(axes != null){
+				AbstractDataset axis = axes.get(0);
+				double min = axis.getDouble(0);
+				double max = axis.getDouble(axis.argMax());
+				xPixelAxis.setRange(min, max);
+				xPixelAxis.setTitle(axis.getName());
+				profilePlottingSystem.setSelectedXAxis(xPixelAxis);
+			}
+		}
+		
 		profilePlottingSystem.setShowLegend(false);
 		profilePlottingSystem.setTitle("");
 		logger.debug("profilePlottingSystem configured");
@@ -113,7 +122,7 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 
 	@Override
 	protected void createProfile(final IImageTrace image, IRegion region, ROIBase rbs, boolean tryUpdate, boolean isDrag,
-			IProgressMonitor monitor) {
+			final IProgressMonitor monitor) {
 		if (monitor.isCanceled()) return;
 		if (image==null) return;
 		
@@ -133,53 +142,41 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 		final AbstractDataset line1 = box[0];
 		line1.setName("X "+region.getName());
 		AbstractDataset xi = IntegerDataset.arange(line1.getSize());
-		AbstractDataset x_indices = xi;
+		final AbstractDataset x_indices = xi;
 		
 		final AbstractDataset line2 = box[1];
 		line2.setName("Y "+region.getName());
 		AbstractDataset yi = IntegerDataset.arange(line2.getSize());
 		final AbstractDataset y_indices = yi;
 
-		//if (monitor.isCanceled()) return;
+		final List<AbstractDataset> boxesLines = new ArrayList<AbstractDataset>(2);
+		boxesLines.add(line1);
+		boxesLines.add(line2);
+		
 		final ILineTrace x_trace = (ILineTrace)profilePlottingSystem.getTrace("X "+region.getName());
 		final ILineTrace y_trace = (ILineTrace)profilePlottingSystem.getTrace("Y "+region.getName());
+		final List<ILineTrace> traces = new ArrayList<ILineTrace>(2);
+		traces.add(x_trace);
+		traces.add(y_trace);
+		
 		if (tryUpdate && x_trace!=null && y_trace!=null) {
 			
 			getControl().getDisplay().syncExec(new Runnable() {
 				@Override
 				public void run() {
+					List<AbstractDataset> axes = image.getAxes();
 					if(type == BoxLineType.VERTICAL_TYPE){
-						if(axes != null){
-							AbstractDataset axis = axes.get(1);
-//							xPixelAxis.setLabelDataAndTitle(axis);
-							double min = axis.getDouble(0);
-							double max = axis.getDouble(axis.argMax());
 
-							updateAxes(image, axis);
+						updateAxes(traces, boxesLines, originalAxis1, axes.get(1), bounds.getPointY());
+						x_trace.setTraceColor(ColorConstants.blue);
+						y_trace.setTraceColor(ColorConstants.red);
 
-							x_trace.setTraceColor(ColorConstants.blue);
-							y_trace.setTraceColor(ColorConstants.red);
-							x_trace.setData(axis, line1);
-							y_trace.setData(axis, line2);
-//							System.out.println(min+","+max);
-							createXAxisBoxRegion(profilePlottingSystem, new RectangularROI(min, 0, (max-min)/2, 100, 0 ), "X_Axis_box_1");
-						}
 					} else if (type == BoxLineType.HORIZONTAL_TYPE){
-						if(axes != null){
-							AbstractDataset axis = axes.get(0);
-//							xPixelAxis.setLabelDataAndTitle(axis);
-							double min = axis.getDouble(0);
-							double max = axis.getDouble(axis.argMax());
-							
-							updateAxes(image, axis);
-							
-							x_trace.setTraceColor(ColorConstants.darkGreen);
-							y_trace.setTraceColor(ColorConstants.orange);
-							x_trace.setData(axis, line1);
-							y_trace.setData(axis, line2);
-//							System.out.println(min+","+(max-min)/2);
-							createXAxisBoxRegion(profilePlottingSystem, new RectangularROI(min, 0, (max-min)/2, 100, 0), "X_Axis_box_2");
-						}
+
+						updateAxes(traces, boxesLines, originalAxis2, axes.get(0), bounds.getPointX());
+						x_trace.setTraceColor(ColorConstants.darkGreen);
+						y_trace.setTraceColor(ColorConstants.orange);
+
 					}
 				}
 			});
@@ -196,47 +193,54 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 	}
 
 	/**
-	 * Slice the axes when a zoom occurs on the main plot
-	 * TODO axes not correctly being updated yet
-	 * @param image
-	 * @param data
+	 * Updates the profile axes according to the ROI start point
+	 * @param profiles
+	 * @param boxLines
+	 * @param originalAxis
+	 * @param axis
+	 * @param startPoint
 	 */
-	private void updateAxes(IImageTrace image, AbstractDataset data){
-		System.out.println("XAxis:"+getPlottingSystem().getSelectedXAxis().getLower());
-		IAxis xAxis = getPlottingSystem().getSelectedXAxis();
-		IAxis yAxis = getPlottingSystem().getSelectedYAxis();
-		
-		double xStartValue = xAxis.getLower();
-		double yStartValue = yAxis.getLower();
-		double xStopValue = xAxis.getUpper();
-		double yStopValue = yAxis.getUpper();
-		// if there is a change of axes (a zoom on the main plot for example), 
-		// we reset the axes on the profile plotting system
-		if(xPreviousStartValue != xStartValue){// || yPreviousStartValue != yStartValue){
-			xPreviousStartValue = xStartValue;
-//			yPreviousStartValue = yStartValue;
-			int xStart = xAxis.getValuePosition(xStartValue);
-			int yStart = yAxis.getValuePosition(yStartValue);
-			int xStop = xAxis.getValuePosition(xStopValue);
-			int yStop = yAxis.getValuePosition(yStopValue);
-			int xInc = xStart < xStop ? 1 : -1;
-			int yInc = yStart < yStart  ? 1 : -1;
+	private void updateAxes(List<ILineTrace> profiles, List<AbstractDataset> boxesLines, 
+			AbstractDataset originalAxis, AbstractDataset axis, double startPoint){
+		// shift the xaxis by yStart
+		try {
+			double xStart = axis.getElementDoubleAbs((int)Math.round(startPoint));
+			double min = axis.getDouble(0);
+			
+			if(originalAxis != null && axis.getElementDoubleAbs(0) == originalAxis.getElementDoubleAbs(0)){
 
-			try {
-				AbstractDataset slice =  image.getData().getSlice(
-					new int[] { yStart, xStart },
-					new int[] { yStop, xStop },
-					new int[] {yInc, xInc});
-				double min = slice.min().doubleValue();
-				double max = slice.max().doubleValue();
-				xPixelAxis.setRange(min, max);
-				xPixelAxis.setTitle(data.getName());
-				profilePlottingSystem.setSelectedXAxis(xPixelAxis);
-//				xPixelAxis.setLabelDataAndTitle(slice);
-			} catch(Exception e){
-				
+				axis.iadd(xStart-min);
+				profiles.get(0).setData(axis, boxesLines.get(0));
+				profiles.get(1).setData(axis, boxesLines.get(1));
+			} else {
+				if(originalAxis == null){
+					originalAxis = new DoubleDataset(axis);
+				}
+				axis = originalAxis.clone();
+				xStart = axis.getElementDoubleAbs((int)Math.round(startPoint));
+				min = axis.getDouble(0);
+				axis.iadd(xStart-min);
+
+				profiles.get(0).setData(axis, boxesLines.get(0));
+				profiles.get(1).setData(axis, boxesLines.get(1));
 			}
+			xPixelAxis.setTitle(axis.getName());
+			double max = axis.getDouble(axis.argMax());
+			createXAxisBoxRegion(profilePlottingSystem, new RectangularROI(min, 0, (max-min)/2, 100, 0), "X_Axis_box");
+		
+		} catch (ArrayIndexOutOfBoundsException ae) {
+			//do nothing
+		} catch (Exception e) {
+			logger.debug("An exception has occured:"+e);
 		}
+		
+		// autoscale Y Axis
+		ILineTrace line1 = profiles.get(0);
+		ILineTrace line2 = profiles.get(1);
+		double max1 = line1.getYData().max().doubleValue();
+		double max2 = line2.getYData().max().doubleValue();
+		profilePlottingSystem.getSelectedYAxis().setRange(0, max1 < max2 ? max2 : max1);
+		
 	}
 
 	/**
@@ -244,10 +248,6 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 	 */
 	public AbstractPlottingSystem getToolPlottingSystem(){
 		return profilePlottingSystem;
-	}
-
-	public void setAxes(List<AbstractDataset> axes){
-		this.axes = axes;
 	}
 
 	public BoxLineType getType(){
