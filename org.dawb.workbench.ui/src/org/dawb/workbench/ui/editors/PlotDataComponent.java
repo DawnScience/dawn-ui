@@ -496,7 +496,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 		menuManager.addMenuListener(new IMenuListener() {			
 			@Override
 			public void menuAboutToShow(IMenuManager manager) {
-				dataReduction.setEnabled(isDataReductionToolActive());
+				if (dataReduction!=null) dataReduction.setEnabled(isDataReductionToolActive());
 			}
 		});
 	}
