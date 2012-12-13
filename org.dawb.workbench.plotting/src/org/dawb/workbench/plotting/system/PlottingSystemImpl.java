@@ -229,6 +229,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 					                 final IProgressMonitor      monitor) {
         return this.createPlot1D(xIn, ysIn, null, monitor);
 	}
+
 	/**
 	 * Does not have to be called in UI thread.
 	 */
@@ -239,16 +240,26 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 					                 final IProgressMonitor      monitor) {
 		
 		if (monitor!=null) monitor.worked(1);
-		
-		final Object[] oa = getIndexedDatasets(xIn, ysIn);
-		final AbstractDataset       x   = (AbstractDataset)oa[0];
-		@SuppressWarnings("unchecked")
-		final List<AbstractDataset> ys  = (List<AbstractDataset>)oa[1];
-		final boolean createdIndices    = (Boolean)oa[2];
-		
 
+		// create index datasets if necessary
 		final List<ITrace> traces = new ArrayList<ITrace>(7);
-		
+		final AbstractDataset x;
+		final List<AbstractDataset> ys;
+		final boolean createdIndices;
+		if (ysIn == null || ysIn.isEmpty()) {
+			ys = new ArrayList<AbstractDataset>(1);
+			if (xIn == null)
+				return traces;
+			ys.add(xIn);
+			x = IntegerDataset.arange(xIn.getSize());
+			x.setName("Index of " + xIn.getName());
+			createdIndices = true;
+		} else {
+			ys = ysIn;
+			x = xIn;
+			createdIndices = false;
+		}
+
 		if (getDisplay().getThread()==Thread.currentThread()) {
 			List<ITrace> ts = createPlot1DInternal(x, ys, title, createdIndices, monitor);
 			if (ts!=null) traces.addAll(ts);
@@ -270,26 +281,6 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	
 	private Display getDisplay() {
 		return Display.getDefault();
-	}
-
-	private Object[] getIndexedDatasets(AbstractDataset data,
-			                            List<AbstractDataset> axes) {
-		
-		final AbstractDataset x;
-		final List<AbstractDataset> ys;
-		final boolean createdIndices;
-		if (axes==null || axes.isEmpty()) {
-			ys = new ArrayList<AbstractDataset>(1);
-			ys.add(data);
-			x = IntegerDataset.arange(ys.get(0).getSize());
-			x.setName("Index of "+data.getName());
-			createdIndices = true;
-		} else {
-			x  = data;
-			ys = axes;
-			createdIndices = false;
-		}
-		return new Object[]{x,ys,createdIndices};
 	}
 
 	@Override
@@ -505,10 +496,21 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		this.plottingMode = PlotType.XY;
 		switchPlottingType(plottingMode);
 
-		Object[] oa = getOrderedDatasets(xIn, ysIn, createdIndices);
-		final AbstractDataset       x  = (AbstractDataset)oa[0];
-		@SuppressWarnings("unchecked")
-		final List<AbstractDataset> ys = (List<AbstractDataset>)oa[1];
+		// order datasets
+		final AbstractDataset       x;
+		final List<AbstractDataset> ys;
+		if ((xfirst || createdIndices) && xIn!=null) {
+			x = xIn;
+			ys = ysIn;
+		} else {
+			ys = new ArrayList<AbstractDataset>(ysIn.size()+1);
+			if (xIn!=null) ys.add(xIn);
+			ys.addAll(ysIn);
+
+			final int max = getMaxSize(ys);
+			x = AbstractDataset.arange(0, max, 1, AbstractDataset.INT32);
+			x.setName("Indices");
+		}
 		
 		if (colorMap == null && getColorOption()!=ColorOption.NONE) {
 			if (getColorOption()==ColorOption.BY_NAME) {
@@ -706,29 +708,6 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		if (prov==null) return null;
 		
 		return isY ? prov.getY() : prov.getX();
-	}
-
-	private Object[] getOrderedDatasets(final AbstractDataset       xIn,
-										final List<AbstractDataset> ysIn,
-										final boolean               createdIndices) {
-
-		final AbstractDataset       x;
-		final List<AbstractDataset> ys;
-		if ((xfirst || createdIndices) && xIn!=null) {
-			x = xIn;
-			ys= ysIn;
-		} else {
-			ys = new ArrayList<AbstractDataset>(ysIn.size()+1);
-			if (xIn!=null) ys.add(xIn);
-			ys.addAll(ysIn);
-
-			final int max = getMaxSize(ys);
-			x = AbstractDataset.arange(0, max, 1, AbstractDataset.INT32);
-			x.setName("Indices");
-
-		}
-
-		return new Object[]{x,ys};
 	}
 
 	/**
