@@ -616,9 +616,17 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 
 	public Image getTitleImage() {
 		if (getViewSite()!=null && getViewSite().getSecondaryId()!=null) {
-			return getImageForToolPage(getViewSite().getSecondaryId());
+			Image image = getImageForToolPage(getViewSite().getSecondaryId());
+			if (image.isDisposed()) {
+				return null;
+			}
+			return image;
 		}
-		return super.getTitleImage();
+		Image image = super.getTitleImage();
+		if (image.isDisposed()) {
+			return null;
+		}
+		return image;
 	}
 
 	private String toolTitleOverride = null;
@@ -1431,7 +1439,10 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	private boolean isDisposed = false;
 	
 	public void dispose() {
+
+		// Run super.
 		super.dispose();
+
 		isDisposed = true;
 
 		// stop listening to part activation
@@ -1466,10 +1477,6 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		
 		systems.clear();
 		systems = null;
-
-		// Run super.
-		super.dispose();
-
 	}
 	
 	@Override
