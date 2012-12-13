@@ -251,6 +251,7 @@ public class AspectAxis extends Axis implements IAxis {
 		final Range norm = normalize(new Range(lower, upper));
 		super.setRange(norm.getLower(), norm.getUpper());
 	}
+
 	@Override
 	public void setRange(Range range) {
 		normalize(range);
