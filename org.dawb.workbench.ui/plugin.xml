@@ -184,7 +184,7 @@
             composite="false"
             contentFile="cheat/editors-images.xml"
             id="org.dawb.workbench.ui.editors.images"
-            name="Using Image Files">
+            name="Using Image Files (Fable Image Viewer)">
       </cheatsheet>
       <cheatsheet
             category="org.dawb.workbench.ui.cheat.sheet.basic.data.category"

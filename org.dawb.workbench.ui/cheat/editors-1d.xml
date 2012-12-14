@@ -42,7 +42,7 @@
     <item
          title="Plot One Data Set">
       <description>
-         In the 'Data' column of the part, select the item labelled 'Energy'. The plot created has the values of energy in the y-axis and the indexes in the x-axis.
+         In the &apos;Data&apos; tab of the perspective (not the small data tab on the editor with the plot and text tabs), select the item labelled &apos;Energy&apos;. The plot created has the values of energy in the y-axis and the indexes in the x-axis.
       </description>
     </item>
     <item
@@ -81,6 +81,9 @@
       </subitem>
       <subitem
             label="4. Select 'Panning' to move the plot window by clicking and dragging.">
+      </subitem>
+      <subitem
+            label="5. Select &apos;Perform Auto Scale&apos; to return the plot to its initial scale.">
       </subitem>
     </item>
     
@@ -125,13 +128,8 @@
     
     <item title="Undo">
       <description>
-         Hit the undo action, the grey undo button in the toolbar. This will change back the annotation name to the previous value.
-      </description>
-    </item>
-    
-    <item title="Snap-shot">
-      <description>
-         Hit the snap-shot action, you will be provided with a file save dialog and you can save this plot as now configured to PNG.
+         Hit the undo action, the grey undo button in the toolbar. This will change back the aSave to File name to the previous value.
+   In the print tool bar drop down, select &quot;save plot screenshot as...&quot; to save the plot to file.will be provided with a file save dialog and you can save this plot as now configured to PNG.
       </description>
     </item>
     

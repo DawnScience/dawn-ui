@@ -21,7 +21,7 @@
    <item
          title="Open File">
       <description>
-         Any file or directory of files, can be imported to a project in the Project Explorer and then opened. You can do this with click and drag or using the import wizard. Once done, the file can be double clicked to open in the workbench. Click to open an example image from the &apos;data&apos; project.
+         Any file or directory of files, can be imported to a project in the Project Explorer and then opened. You can do this with click and drag or using the import wizard. Once done, right click on the file and select &apos;Fable Viewer&apos;. Click to open an example image from the &apos;data&apos; project.
       </description>
       <command
             required="false"
