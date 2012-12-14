@@ -193,6 +193,13 @@
             id="org.dawb.workbench.ui.editors.1d"
             name="X/Y Plots">
       </cheatsheet>
+      <cheatsheet
+            category="org.dawb.workbench.ui.cheat.sheet.basic.data.category"
+            composite="false"
+            contentFile="cheat/basic-image.xml"
+            id="org.dawb.workbench.ui.editors.imagesbasic"
+            name="Basic Image File Viewing">
+      </cheatsheet>
    </extension>
    <extension
          point="org.eclipse.ui.cheatsheets.cheatSheetContent">

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cheatsheet
+      title="Basic Opening and Viewing images">
+   <intro>
+      <description>
+         This cheat sheet helps you to open any image file,
+			shows you how to zoom and extract data from the image.
+			If you have just completed the previous cheat sheet, please close all your data file parts.
+      </description>
+   </intro>
+   <item
+         title="Data Browsing Perspective">
+      <description>
+         Please choose the data browsing perspective if you do not already have it selected (nothing will happen if you do not).
+      </description>
+   </item>
+   <item
+         title="Open File">
+      <description>
+         Any file or directory of files, can be imported to a project in the Project Explorer and then opened. You can do this with click and drag or using the import wizard. Once done, double click on the file to open it for viewing. Click to open an example image from the &apos;data&apos; project.
+      </description>
+   </item>
+   <item
+         title="Setting Up">
+      <description>
+         Once the file is opened there are several steps to change how it appears. Complete the following sub-steps which choose your preference for image viewing. Note, these prefereces are saved for future use.
+      </description>
+      <subitem
+            label="1. Aspect Ratio. You can change the aspect ratio of the image by using the &apos;Keep aspect ratio when displaying image&apos; action in the toolbar over the image. Try clicking it now to see the effects on the example image.">
+      </subitem>
+      <subitem
+            label="2. Origin. You can change the image origin by using the menu at the side of the toolbar, the white down arrow. Click it and choose a different origin from the &apos;Image Origin&apos; sub-menu.">
+      </subitem>
+      <subitem
+            label="3. Coloring. You can change color by using the menu at the side of the toolbar, the white down arrow. Click it and choose another color from the &apos;Color&apos; sub-menu.">
+      </subitem>
+   </item>
+   <item
+         title="Zoom">
+      <description>
+         Now we will look at zooming functions.
+      </description>
+      <subitem
+            label="1. Select &apos;Rubberband Zoom&apos; from the toolbar in the part. Click and drag a box which you would like to zoom to, the graph will zoom to this region.">
+      </subitem>
+      <subitem
+            label="2. Select &apos;Zoom In&apos;. Click the graph and it will zoom, centered on where you have clicked.">
+      </subitem>
+      <subitem
+            label="3. Select &apos;Zoom Out&apos; to zoom out and click on the graph.">
+      </subitem>
+      <subitem
+            label="4. Select &apos;Panning&apos; to move the plot window by clicking and dragging.">
+      </subitem>
+      <subitem
+            label="5. Select &apos;Perform Auto Scale&apos; to return the plot to its initial scale.">
+      </subitem>
+   </item>
+   <item
+         title="Tools">
+      <description>
+         There are a variety of tools to inspect and profile images with.  Try experimenting with the tools in the plot view (spanner icon) and see how they can be used to investigate image data.
+      </description>
+   </item>
+</cheatsheet>
