@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="uk.ac.diamond.dawn.site"
-      label="SDA p2 site and product"
+      label="DawnDiamond p2 site and product"
       version="1.0.0.qualifier"
       provider-name="Diamond Light Source">
 
@@ -16,6 +16,10 @@
    <license url="http://www.example.com/license">
       [Enter License Description here.]
    </license>
+
+   <includes
+         id="org.eclipse.equinox.executable"
+         version="0.0.0"/>
 
    <includes
          id="uk.ac.diamond.dawn.product.feature"
