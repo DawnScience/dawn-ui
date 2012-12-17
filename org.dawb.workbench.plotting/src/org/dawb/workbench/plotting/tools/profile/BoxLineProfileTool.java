@@ -31,6 +31,7 @@ import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.swt.widgets.Control;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -130,26 +131,28 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 		traces.add(y_trace);
 		
 		if (tryUpdate && x_trace!=null && y_trace!=null) {
-			
-			getControl().getDisplay().syncExec(new Runnable() {
-				@Override
-				public void run() {
-					List<AbstractDataset> axes = image.getAxes();
-					if(type == BoxLineType.VERTICAL_TYPE){
+			Control control = getControl();
+			if(control != null && !control.isDisposed()) {
+					control.getDisplay().syncExec(new Runnable() {
+						@Override
+						public void run() {
+							List<AbstractDataset> axes = image.getAxes();
+							if(type == BoxLineType.VERTICAL_TYPE){
 
-						updateAxes(traces, boxesLines, originalAxis1, axes.get(1), bounds.getPointY());
-						x_trace.setTraceColor(ColorConstants.blue);
-						y_trace.setTraceColor(ColorConstants.red);
+								updateAxes(traces, boxesLines, originalAxis1, axes.get(1), bounds.getPointY());
+								x_trace.setTraceColor(ColorConstants.blue);
+								y_trace.setTraceColor(ColorConstants.red);
 
-					} else if (type == BoxLineType.HORIZONTAL_TYPE){
+							} else if (type == BoxLineType.HORIZONTAL_TYPE){
 
-						updateAxes(traces, boxesLines, originalAxis2, axes.get(0), bounds.getPointX());
-						x_trace.setTraceColor(ColorConstants.darkGreen);
-						y_trace.setTraceColor(ColorConstants.orange);
+								updateAxes(traces, boxesLines, originalAxis2, axes.get(0), bounds.getPointX());
+								x_trace.setTraceColor(ColorConstants.darkGreen);
+								y_trace.setTraceColor(ColorConstants.orange);
 
-					}
-				}
-			});
+							}
+						}
+					});
+			}
 		} else {
 			profilePlottingSystem.setSelectedXAxis(xPixelAxis);
 			profilePlottingSystem.setSelectedYAxis(yPixelAxis);
