@@ -22,7 +22,6 @@ import java.util.Map;
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.Trace;
 import org.dawb.common.services.IPaletteService;
-import org.dawb.common.ui.image.PaletteFactory;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingActionBarManager;
@@ -244,35 +243,34 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		// create index datasets if necessary
 		final List<ITrace> traces = new ArrayList<ITrace>(7);
 		final AbstractDataset x;
-		final List<AbstractDataset> ys;
-		final boolean createdIndices;
 		if (ysIn == null || ysIn.isEmpty()) {
-			ys = new ArrayList<AbstractDataset>(1);
-			if (xIn == null) return traces;
-			ys.add(xIn);
-			x = IntegerDataset.arange(xIn.getSize());
-			x.setName("Index of " + xIn.getName());
-			createdIndices = true;
+			return traces;
+		}
+
+		if (xIn == null) {
+			final int max = getMaxSize(ysIn);
+			x = AbstractDataset.arange(0, max, 1, AbstractDataset.INT32);
+			if (ysIn.size() == 1)
+				x.setName("Index of " + ysIn.get(0).getName());
+			else
+				x.setName("Indices");
 		} else {
-			ys = ysIn;
 			x = xIn;
-			createdIndices = false;
 		}
 
 		if (getDisplay().getThread()==Thread.currentThread()) {
-			List<ITrace> ts = createPlot1DInternal(x, ys, title, createdIndices, monitor);
+			List<ITrace> ts = createPlot1DInternal(x, ysIn, title, monitor);
 			if (ts!=null) traces.addAll(ts);
 		} else {
 			getDisplay().syncExec(new Runnable() {
 				@Override
 				public void run() {
-					List<ITrace> ts = createPlot1DInternal(x, ys, title, createdIndices, monitor);
+					List<ITrace> ts = createPlot1DInternal(x, ysIn, title, monitor);
 					if (ts!=null) traces.addAll(ts);
 				}
 			});
 		}
 
-		
 		if (monitor!=null) monitor.worked(1);
 		return traces;
 		
@@ -489,40 +487,23 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	private List<ITrace> createPlot1DInternal(  final AbstractDataset       xIn, 
 										final List<AbstractDataset> ysIn,
 										final String title,
-										final boolean               createdIndices,
 										final IProgressMonitor      monitor) {
 		
 		this.plottingMode = PlotType.XY;
 		switchPlottingType(plottingMode);
 
-		// order datasets
-		final AbstractDataset       x;
-		final List<AbstractDataset> ys;
-		if ((xfirst || createdIndices) && xIn!=null) {
-			x = xIn;
-			ys = ysIn;
-		} else {
-			ys = new ArrayList<AbstractDataset>(ysIn.size()+1);
-			//if (xIn!=null) ys.add(xIn);
-			ys.addAll(ysIn);
-
-			final int max = getMaxSize(ys);
-			x = AbstractDataset.arange(0, max, 1, AbstractDataset.INT32);
-			x.setName("Indices");
-		}
-		
 		if (colorMap == null && getColorOption()!=ColorOption.NONE) {
 			if (getColorOption()==ColorOption.BY_NAME) {
-				colorMap = new HashMap<Object,Color>(ys.size());
+				colorMap = new HashMap<Object,Color>(ysIn.size());
 			} else {
-				colorMap = new IdentityHashMap<Object,Color>(ys.size());
+				colorMap = new IdentityHashMap<Object,Color>(ysIn.size());
 			}
 		}
 		if (traceMap==null) traceMap = new LinkedHashMap<String, ITrace>(31);
 	
 		if (lightWeightViewer.getControl()==null) return null;
 		
-		List<ITrace> traces = lightWeightViewer.createLineTraces(title, x, ys, traceMap, colorMap, monitor);
+		List<ITrace> traces = lightWeightViewer.createLineTraces(title, xIn, ysIn, traceMap, colorMap, monitor);
 
 		fireTracesPlotted(new TraceEvent(traces));
         return traces;
@@ -752,20 +733,16 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		}
 		return null;
 	}
-	
+
 	private int getMaxSize(List<AbstractDataset> sets) {
 		int max = 1; // Cannot be less than one
 		for (AbstractDataset set : sets) {
-			try {
+			if (set != null)
 			    max = Math.max(max, set.getSize());
-			} catch (NullPointerException npe) {
-				continue;
-			}
 		}
 		
 		return max;
 	}
-	
 
 	@Override
 	public void reset() {
