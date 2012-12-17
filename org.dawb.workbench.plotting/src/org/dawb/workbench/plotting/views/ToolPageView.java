@@ -1133,7 +1133,9 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 						if (mapToolToNumRecs.get(activeRec.tool)!=null) {
 							mapToolToNumRecs.put(activeRec.tool, mapToolToNumRecs.get(activeRec.tool).intValue()-1);
 						}
-						if (activeRec.subActionBars!=null) activeRec.subActionBars.dispose();
+						if (activeRec.subActionBars!=null) {
+							activeRec.subActionBars.deactivate();
+						}
 						activeRec = null;
 					}
 					updatePartInfo(defaultPageRec.tool);
@@ -1149,7 +1151,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 						} catch (Throwable ne) {
 							logger.error("Unable to sync "+view.activeRec.tool.getToolId());
 						}
-						orig.deactivate();
+						if (orig.isActive()) orig.deactivate();
 						
 						if (view.activeRec.tool.isStaticTool()) {
 							view.staticTool = view.activeRec.tool;
