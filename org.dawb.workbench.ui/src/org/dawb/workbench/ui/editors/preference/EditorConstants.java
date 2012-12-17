@@ -41,5 +41,14 @@ public class EditorConstants {
 	
 	public static final String RESCALE_SETTING       = "org.dawb.workbench.ui.editors.preference.plot.editor.rescale";
 	public static final String PLOT_DATA_NAME_WIDTH  = "org.dawb.workbench.ui.editors.preference.plot.editor.data.name.width";
+	
+	/**
+	 * Property used for storing some axis settings.
+	 */
+	public static final String XAXIS_PROP_STUB = "org.dawb.workbench.ui.editors.preference.plot.xaxis.";
+	/**
+	 * Property used for storing some axis settings.
+	 */
+	public static final String YAXIS_PROP_STUB = "org.dawb.workbench.ui.editors.preference.plot.yaxis.";
 
 }

@@ -41,6 +41,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
@@ -182,10 +183,16 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 			public void propertyChange(PropertyChangeEvent event) {
 				if (IPlottingSystem.RESCALE_ID.equals(event.getProperty())) {
 					Activator.getDefault().getPreferenceStore().setValue(EditorConstants.RESCALE_SETTING, (Boolean)event.getNewValue());
+				} else {
+					setAxisSettings(EditorConstants.XAXIS_PROP_STUB, plottingSystem.getSelectedXAxis());
+					setAxisSettings(EditorConstants.YAXIS_PROP_STUB, plottingSystem.getSelectedYAxis());
 				}
+				
 			}
 		});
-        
+		getAxisSettings(EditorConstants.XAXIS_PROP_STUB, plottingSystem.getSelectedXAxis());
+		getAxisSettings(EditorConstants.YAXIS_PROP_STUB, plottingSystem.getSelectedYAxis());
+       
         axisMap.put(1, plottingSystem.getSelectedYAxis());
 		// FIX to http://jira.diamond.ac.uk/browse/DAWNSCI-380 remove axes until they work
         for (int i = 2; i <=2; i++) { //(Y4)
@@ -226,6 +233,27 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		plottingSystem.setRescale(Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.RESCALE_SETTING));
  	}
 	
+	protected void setAxisSettings(String propertyStub, IAxis axis) {
+		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
+		boolean isDateTime = axis.isDateFormatEnabled();
+		store.setValue(propertyStub+"isDateTime", isDateTime);
+		String  format     = axis.getFormatPattern();
+		store.setValue(propertyStub+"dateFormat", format);
+		boolean isLog      = axis.isLog10();		
+		store.setValue(propertyStub+"log10", isLog);
+	}
+	protected void getAxisSettings(String propertyStub, IAxis axis) {
+		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
+		if (store.contains(propertyStub+"isDateTime")) {
+			axis.setDateFormatEnabled(store.getBoolean(propertyStub+"isDateTime"));
+		}
+		if (store.contains(propertyStub+"dateFormat")) {
+			axis.setFormatPattern(store.getString(propertyStub+"dateFormat"));
+		}
+		if (store.contains(propertyStub+"log10")) {
+			axis.setLog10(store.getBoolean(propertyStub+"log10"));
+		}
+	}
 	/**
 	 * Call to change plot default by looking at data
 	 */
