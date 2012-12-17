@@ -248,8 +248,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		final boolean createdIndices;
 		if (ysIn == null || ysIn.isEmpty()) {
 			ys = new ArrayList<AbstractDataset>(1);
-			if (xIn == null)
-				return traces;
+			if (xIn == null) return traces;
 			ys.add(xIn);
 			x = IntegerDataset.arange(xIn.getSize());
 			x.setName("Index of " + xIn.getName());
@@ -504,7 +503,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			ys = ysIn;
 		} else {
 			ys = new ArrayList<AbstractDataset>(ysIn.size()+1);
-			if (xIn!=null) ys.add(xIn);
+			//if (xIn!=null) ys.add(xIn);
 			ys.addAll(ysIn);
 
 			final int max = getMaxSize(ys);

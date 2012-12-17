@@ -239,7 +239,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	    }
 
 		public boolean isDisposed() {
-			return isDisposed;
+			return isDisposed || (tool!=null && tool.isDisposed());
 		}
 
 	}
@@ -759,6 +759,9 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		for (String title : pageRecs.keySet()) {
 			
 			final PageRec rec = pageRecs.get(title);
+			if (rec.isDisposed()) {
+				continue;
+			}
 			
 			if (rec == defaultPageRec) continue;
 			if (rec == activeRec)      {
@@ -1141,7 +1144,11 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 																							IWorkbenchPage.VIEW_ACTIVATE);
 					view.update(orig);
 					if (orig!=null && view.activeRec!=null && view.activeRec.tool!=null) {
-						view.activeRec.tool.sync(orig);
+						try {
+						    view.activeRec.tool.sync(orig);
+						} catch (Throwable ne) {
+							logger.error("Unable to sync "+view.activeRec.tool.getToolId());
+						}
 						orig.deactivate();
 						
 						if (view.activeRec.tool.isStaticTool()) {
