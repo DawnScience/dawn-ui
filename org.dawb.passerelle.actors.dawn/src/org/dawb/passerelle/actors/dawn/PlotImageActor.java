@@ -224,7 +224,7 @@ public class PlotImageActor	extends AbstractDataMessageTransformer{
 					double height = maxPos[1];
 					myROI = new RectangularROI(width, height/2, 0);
 
-					plottingSystem = PlottingFactory.getPlottingSystem(plotName);
+					plottingSystem = (AbstractPlottingSystem)PlottingFactory.getPlottingSystem(plotName);
 
 					//Create Region(s)
 					Map<String, ROIBase> rois = null;
