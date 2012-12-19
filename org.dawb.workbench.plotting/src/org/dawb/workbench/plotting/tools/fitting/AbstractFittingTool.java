@@ -42,7 +42,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Link;
-import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.slf4j.Logger;
@@ -100,6 +99,11 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 					final int size = updateTracesChoice(traces.get(traces.size()-1));	
 					if (size>0) fittingJob.schedule();
 				}
+			}
+			
+			@Override
+			public void traceRemoved(TraceEvent evt) {
+				updateTracesChoice(null);
 			}
 			
 			@Override
