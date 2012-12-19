@@ -20,6 +20,7 @@ import org.dawb.common.ui.plot.axis.ICoordinateSystem;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.RegionEvent;
+import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
@@ -60,6 +61,17 @@ public class RegionArea extends PlotArea {
 			public void mouseMoved(MouseEvent me) {
 				double x = getRegionGraph().primaryXAxis.getPositionValue(me.x, false);
 				double y = getRegionGraph().primaryYAxis.getPositionValue(me.y, false);
+				final IImageTrace trace = getImageTrace();
+				if (trace!=null) {
+					try {
+						double[] da = trace.getPointInAxisCoordinates(new double[]{x,y});
+						statusLine.setMessage(format.format(da[0])+", "+format.format(da[1]));
+						return;
+					} catch (Throwable ignored) {
+                        // Normal position
+					}
+				}
+
 				statusLine.setMessage(format.format(x)+", "+format.format(y));
 			}
 		});
