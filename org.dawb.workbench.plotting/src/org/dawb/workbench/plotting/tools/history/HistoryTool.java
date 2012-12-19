@@ -103,6 +103,7 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 			history.put(bean.getTraceKey(), bean);
 		}
 		refresh();
+		updatePlots(true);
 	}
 
 	private ITraceListener autoAddTraceListener;

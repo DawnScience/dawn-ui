@@ -872,6 +872,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	protected void showPageRec(PageRec pageRec) {
 		// If already showing do nothing
 		if (activeRec == pageRec) {
+			if (!activeRec.tool.isActive()) activeRec.tool.activate();
 			return;
 		}
 		if (staticTool!=null && activeRec!=null && activeRec.tool==staticTool) { // We never show owt else.
