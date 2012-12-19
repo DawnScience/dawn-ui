@@ -38,6 +38,7 @@ import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
+import org.dawb.common.ui.plot.trace.TraceUtils;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,11 +78,11 @@ public class InfoPixelLabelProvider extends ColumnLabelProvider {
 		double xLabel = Double.NaN;
 		double yLabel = Double.NaN;
 		
+		final IImageTrace trace = tool.getImageTrace();
 		try {
 			if (element instanceof IRegion){
 				
 				final IRegion region = (IRegion)element;
-				IImageTrace trace = tool.getImageTrace();
 				
 				if (region.getRegionType()==RegionType.POINT) {
 					PointROI pr = (PointROI)tool.getBounds(region);
@@ -122,8 +123,6 @@ public class InfoPixelLabelProvider extends ColumnLabelProvider {
 	
 			IDiffractionMetadata dmeta = null;
 			AbstractDataset set = null;
-			final Collection<ITrace> traces = plotSystem.getTraces(IImageTrace.class);
-			final IImageTrace trace = traces!=null && traces.size()>0 ? (IImageTrace)traces.iterator().next() : null;
 			if (trace!=null) {
 				set = trace.getData();
 				final IMetaData      meta = set.getMetadata();
@@ -151,18 +150,22 @@ public class InfoPixelLabelProvider extends ColumnLabelProvider {
 					logger.error("Could not create a detector properties object from metadata", e);
 				}
 			}
-	
+							
+			final boolean isCustom = TraceUtils.isCustomAxes(trace);
+			
 			switch(column) {
 			case 0: // "Point Id"
 				return ( ( (IRegion)element).getRegionType() == RegionType.POINT) ? ((IRegion)element).getName(): "";
 			case 1: // "X position"
-				return String.format("% 4.4f", xLabel);
+				return isCustom ? String.format("% 4.4f", xLabel)
+						        : String.format("% 4.0f", xLabel);
 			case 2: // "Y position"
-				return String.format("% 4.4f", yLabel);
+				return isCustom ? String.format("% 4.4f", yLabel)
+			                    : String.format("% 4.0f", yLabel);
 			case 3: // "Data value"
 				//if (set == null || vectorUtil==null || vectorUtil.getQMask(qSpace, x, y) == null) return "-";
 				if (set == null) return "-";
-				return String.format("% 4.4f", set.getDouble((int)yIndex, (int) xIndex));
+				return String.format("% 4.4f", set.getDouble((int)Math.round(yIndex), (int) Math.round(xIndex)));
 			case 4: // q X
 				//if (vectorUtil==null || vectorUtil.getQMask(qSpace, x, y) == null) return "-";
 				if (vectorUtil==null ) return "-";

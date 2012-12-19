@@ -24,6 +24,7 @@ import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceContainer;
 import org.dawb.common.ui.plot.trace.PaletteEvent;
 import org.dawb.common.ui.plot.trace.TraceEvent;
+import org.dawb.common.ui.plot.trace.TraceUtils;
 import org.dawb.common.ui.plot.trace.TraceWillPlotEvent;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
@@ -1032,8 +1033,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	@Override
 	public ROIBase getRegionInAxisCoordinates(final ROIBase roi) throws Exception {
 		
-		if (axes==null)     return roi;
-		if (axes.isEmpty()) return roi;
+		if (!TraceUtils.isCustomAxes(this)) return roi;
 		
 		final AbstractDataset xl = axes.get(0); // May be null
 		final AbstractDataset yl = axes.get(1); // May be null
@@ -1079,8 +1079,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	
 	@Override
 	public double[] getPointInAxisCoordinates(final double[] point) throws Exception {
-		if (axes==null)     return point;
-		if (axes.isEmpty()) return point;
+		if (!TraceUtils.isCustomAxes(this)) return point;
 		
 		final AbstractDataset xl = axes.get(0); // May be null
 		final AbstractDataset yl = axes.get(1); // May be null
