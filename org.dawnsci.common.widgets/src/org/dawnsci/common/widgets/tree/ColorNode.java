@@ -9,6 +9,7 @@ public class ColorNode extends LabelNode {
 	public ColorNode(String label, Color color, LabelNode parent) {
 		super(label, parent);
 		this.color = color;
+		setEditable(true);
 	}
 
 	public Color getColor() {

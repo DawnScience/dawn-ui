@@ -9,12 +9,15 @@ import org.dawb.common.ui.plot.tool.AbstractToolPage;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.viewers.TreeNodeContentProvider;
 import org.dawnsci.common.widgets.tree.ClearableFilteredTree;
+import org.dawnsci.common.widgets.tree.ColorNode;
 import org.dawnsci.common.widgets.tree.DelegatingProviderWithTooltip;
 import org.dawnsci.common.widgets.tree.IResettableExpansion;
+import org.dawnsci.common.widgets.tree.LabelNode;
 import org.dawnsci.common.widgets.tree.NodeFilter;
 import org.dawnsci.common.widgets.tree.NodeLabelProvider;
 import org.dawnsci.common.widgets.tree.UnitEditingSupport;
 import org.dawnsci.common.widgets.tree.ValueEditingSupport;
+import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.JFacePreferences;
@@ -25,12 +28,20 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.graphics.Region;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.IActionBars;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,6 +108,74 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		
 		createGridModel();
 		createActions();
+
+		// Allow the colours to be drawn nicely.
+		final Tree tree = viewer.getTree();
+		tree.addListener(SWT.EraseItem, new Listener() {
+			public void handleEvent(Event event) {
+				if ((event.detail & SWT.SELECTED) != 0) {
+					GC gc = event.gc;
+					Rectangle area = tree.getClientArea();
+					/*
+					 * If you wish to paint the selection beyond the end of last column,
+					 * you must change the clipping region.
+					 */
+					int columnCount = tree.getColumnCount();
+					if (event.index == columnCount - 1 || columnCount == 0) {
+						int width = area.x + area.width - event.x;
+						if (width > 0) {
+							Region region = new Region();
+							gc.getClipping(region);
+							region.add(event.x, event.y, width, event.height);
+							gc.setClipping(region);
+							region.dispose();
+						}
+					}
+					gc.setAdvanced(true);
+					if (gc.getAdvanced()) gc.setAlpha(50);
+					Rectangle rect = event.getBounds();
+					Color foreground = gc.getForeground();
+					Color background = gc.getBackground();
+					gc.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_SELECTION));
+					gc.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+					gc.fillGradientRectangle(0, rect.y, 500, rect.height, false);
+
+					final TreeItem item = tree.getItem(new Point(event.x, event.y));
+					// Draw the colour in the Value column
+					if (item!=null && item.getData() instanceof ColorNode) {
+						gc.setAlpha(255);
+						Rectangle col = item.getBounds(1);
+						ColorNode cn = (ColorNode)item.getData();
+						gc.setBackground(cn.getColor());
+						gc.fillRectangle(col);
+					}
+
+					// restore colors for subsequent drawing
+					gc.setForeground(foreground);
+					gc.setBackground(background);
+					event.detail &= ~SWT.SELECTED;
+					return;
+				}
+				
+				if ((event.detail & SWT.HOT) != 0) {
+					final TreeItem item = tree.getItem(new Point(event.x, event.y));
+					// Draw the colour in the Value column
+					if (item!=null && item.getData() instanceof LabelNode) {
+						LabelNode ln = (LabelNode)item.getData();
+						GC gc = event.gc;
+						Color foreground = gc.getForeground();
+						Color background = gc.getBackground();
+						gc.setAdvanced(true);
+						gc.setForeground(ColorConstants.black);
+						gc.drawText(ln.getLabel(), item.getBounds().x+2, item.getBounds().y+1);
+						event.doit = false;
+						event.detail &= ~SWT.HOT;
+						gc.setForeground(foreground);
+						gc.setBackground(background);
+					}
+				}
+			}
+		});
 	}
 	
 	private void createActions() {
@@ -123,12 +202,12 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 
 		TreeViewerColumn var = new TreeViewerColumn(viewer, SWT.LEFT, 0);
 		var.getColumn().setText("Name"); // Selected
-		var.getColumn().setWidth(260);
+		var.getColumn().setWidth(220);
 		var.setLabelProvider(new NodeLabelProvider(0));
 				
 		var = new TreeViewerColumn(viewer, SWT.LEFT, 1);
 		var.getColumn().setText("Value"); // Selected
-		var.getColumn().setWidth(100);
+		var.getColumn().setWidth(140);
 		var.setLabelProvider(new DelegatingProviderWithTooltip(new NodeLabelProvider(2)));
 		var.setEditingSupport(new ValueEditingSupport(viewer));
 
