@@ -223,10 +223,12 @@ public class CustomDataExportTransformer extends AbstractDataMessageTransformer 
 			//			final Map<String,String> scalar = MessageUtils.getScalar(cache);
 			//			final String fileName = scalar!=null ? scalar.get("file_name") : null;
 			String fileName = ParameterUtils.getSubstituedValue(filePathParam, cache);
-			IFile file = (IFile)ResourcesPlugin.getWorkspace().getRoot().findMember(fileName, true);
+//			IWorkspaceRoot workspace = ResourcesPlugin.getWorkspace().getRoot();
+//			IFile file = (IFile)workspace.findMember(fileName, true);
 			//			final IFile  output   = getOutputPath(fileName);
 			//			filePath = output.getLocation().toOSString();
-			final File fullFile = new File(getProject().getParent().getLocation().toOSString(),file.getFullPath().toOSString());
+//			final File fullFile = new File(getProject().getParent().getLocation().toOSString(),file.getFullPath().toOSString());
+			File fullFile = new File(fileName);
 			filePath = fullFile.getAbsolutePath();
 			final DataMessageComponent comp = new DataMessageComponent();
 			comp.addScalar(map);
