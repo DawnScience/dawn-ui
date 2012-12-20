@@ -1,5 +1,8 @@
 package org.dawnsci.common.widgets.tree;
 
+import java.util.Collection;
+import java.util.HashSet;
+
 
 /**
  * This class may be used with TreeNodeContentProvider to create a Tree of editable
@@ -14,7 +17,7 @@ package org.dawnsci.common.widgets.tree;
  */
 public class ObjectNode extends LabelNode {
 
-    private Object value;
+    protected Object value;
 
 	public ObjectNode(String label, Object value, LabelNode parent) {
 		super(label, parent);
@@ -25,8 +28,12 @@ public class ObjectNode extends LabelNode {
 		return value;
 	}
 
-	public void setValue(String value) {
+	public void setValue(Object value) {
+		setValue(value, true);
+	}
+	public void setValue(Object value, boolean fireListeners) {
 		this.value = value;
+		if (fireListeners) fireValueChanged(new ValueEvent(this, value));
 	}
 
 	@Override
@@ -53,4 +60,29 @@ public class ObjectNode extends LabelNode {
 			return false;
 		return true;
 	}
+	
+	
+	private void fireValueChanged(ValueEvent evt) {
+		if (listeners==null) return;
+		for (ValueListener l : listeners) {
+			l.valueChanged(evt);
+		}
+	}
+
+	protected Collection<ValueListener> listeners;
+	
+	public void addValueListener(ValueListener l) {
+		if (listeners==null) listeners = new HashSet<ValueListener>(3);
+		listeners.add(l);
+	}
+	
+	public void removeValueListener(ValueListener l) {
+		if (listeners==null) return;
+		listeners.remove(l);
+	}
+
+	public boolean isSubClass() {
+		return false;
+	}
+
 }

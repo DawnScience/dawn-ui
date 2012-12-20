@@ -4,6 +4,7 @@ import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
 public class DelegatingProviderWithTooltip extends DelegatingStyledCellLabelProvider {
@@ -42,6 +43,10 @@ public class DelegatingProviderWithTooltip extends DelegatingStyledCellLabelProv
 	 */
 	public Color getForeground(Object element) {
 		return ((ColumnLabelProvider)getStyledStringProvider()).getForeground(element);
+	}
+
+	public Image getImage(Object element) {
+		return ((ColumnLabelProvider)getStyledStringProvider()).getImage(element);
 	}
 
 }

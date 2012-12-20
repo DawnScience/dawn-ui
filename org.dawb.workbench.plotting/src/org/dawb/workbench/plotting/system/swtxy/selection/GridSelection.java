@@ -21,9 +21,14 @@ import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
  *     |  o o o o o   |
  *     p3------------p4
  *     
+ *     This class is public so that it can be cast and the various
+ *     color settings accessed.
+ *     
+ *     Normally concrete class of IRegion should not be used
+ *     
  * @author fcp94556
  */
-class GridSelection extends BoxSelection {
+public class GridSelection extends BoxSelection {
 		
 	private Color pointColor = ColorConstants.white;
 	
@@ -37,7 +42,10 @@ class GridSelection extends BoxSelection {
 	protected String getCursorPath() {
 		return "icons/Cursor-grid.png";
 	}
-	
+	@Override
+	public RegionType getRegionType() {
+		return RegionType.GRID;
+	}	
 	protected Figure createRegionFillFigure() {
 		return new RegionFillFigure(this) {
 			@Override

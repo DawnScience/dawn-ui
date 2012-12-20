@@ -2,6 +2,7 @@ package org.dawnsci.common.widgets.tree;
 
 import javax.measure.quantity.Quantity;
 
+import org.dawnsci.common.widgets.Activator;
 import org.dawnsci.common.widgets.tree.LabelNode;
 import org.dawnsci.common.widgets.tree.NumericNode;
 import org.dawnsci.common.widgets.tree.ObjectNode;
@@ -9,6 +10,7 @@ import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Image;
 
 public class NodeLabelProvider extends ColumnLabelProvider implements IStyledLabelProvider{
 
@@ -30,7 +32,9 @@ public class NodeLabelProvider extends ColumnLabelProvider implements IStyledLab
 			getStyledText(ret, (NumericNode<?>)element);
 			
 		} else  if (element instanceof ObjectNode) {
-			getStyledText(ret, (ObjectNode)element);
+			final ObjectNode on = (ObjectNode)element;
+			if (on.isSubClass()) return ret;
+			getStyledText(ret, on);
 		}
 		return ret;
 	}
@@ -137,4 +141,20 @@ public class NodeLabelProvider extends ColumnLabelProvider implements IStyledLab
 		return null;
 	}
 
+	private Image ticked, unticked;
+	public Image getImage(Object element) {
+		if (element instanceof BooleanNode  && (icolumn==1 || icolumn==2)) { // Value
+			if (ticked==null)   ticked   = Activator.getImage("icons/ticked.png");
+			if (unticked==null) unticked = Activator.getImage("icons/unticked.gif");
+			return ((BooleanNode)element).isValue() 
+				   ? ticked
+				   : unticked;
+		}
+		return null;
+	}
+
+	public void dispose() {
+		if (ticked!=null)   ticked.dispose();
+		if (unticked!=null) unticked.dispose();
+	}
 }
