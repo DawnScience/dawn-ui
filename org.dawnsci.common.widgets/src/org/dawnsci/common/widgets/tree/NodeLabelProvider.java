@@ -1,19 +1,19 @@
-package org.dawb.workbench.plotting.tools.diffraction;
+package org.dawnsci.common.widgets.tree;
 
 import javax.measure.quantity.Quantity;
 
-import org.dawb.common.ui.tree.LabelNode;
-import org.dawb.common.ui.tree.NumericNode;
-import org.dawb.common.ui.tree.ObjectNode;
+import org.dawnsci.common.widgets.tree.LabelNode;
+import org.dawnsci.common.widgets.tree.NumericNode;
+import org.dawnsci.common.widgets.tree.ObjectNode;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
 
-public class DiffractionLabelProvider extends ColumnLabelProvider implements IStyledLabelProvider{
+public class NodeLabelProvider extends ColumnLabelProvider implements IStyledLabelProvider{
 
 	private int icolumn;
 
-	public DiffractionLabelProvider(int icolumn) {
+	public NodeLabelProvider(int icolumn) {
 		this.icolumn = icolumn;
 	}
 

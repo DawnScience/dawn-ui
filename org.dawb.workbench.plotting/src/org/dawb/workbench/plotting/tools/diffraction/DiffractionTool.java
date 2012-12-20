@@ -25,15 +25,19 @@ import org.dawb.common.ui.plot.trace.IPaletteListener;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.PaletteEvent;
 import org.dawb.common.ui.plot.trace.TraceEvent;
-import org.dawb.common.ui.tree.LabelNode;
-import org.dawb.common.ui.tree.NumericNode;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.viewers.TreeNodeContentProvider;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.diffraction.DiffractionPreferencePage;
-import org.dawnsci.common.widgets.celleditor.CComboCellEditor;
-import org.dawnsci.common.widgets.celleditor.FloatSpinnerCellEditor;
+import org.dawnsci.common.widgets.tree.ClearableFilteredTree;
+import org.dawnsci.common.widgets.tree.DelegatingProviderWithTooltip;
+import org.dawnsci.common.widgets.tree.IResettableExpansion;
+import org.dawnsci.common.widgets.tree.NodeFilter;
+import org.dawnsci.common.widgets.tree.NodeLabelProvider;
+import org.dawnsci.common.widgets.tree.NumericNode;
+import org.dawnsci.common.widgets.tree.UnitEditingSupport;
+import org.dawnsci.common.widgets.tree.ValueEditingSupport;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.Action;
@@ -47,22 +51,12 @@ import org.eclipse.jface.preference.JFacePreferences;
 import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.viewers.CellEditor;
-import org.eclipse.jface.viewers.CellLabelProvider;
-import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
-import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
-import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -73,7 +67,6 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,11 +84,11 @@ import uk.ac.diamond.scisoft.analysis.rcp.plotting.utils.BeamCenterRefinement;
 import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 
 
-public class DiffractionTool extends AbstractToolPage implements CalibrantSelectedListener {
+public class DiffractionTool extends AbstractToolPage implements CalibrantSelectedListener, IResettableExpansion {
 
 	private static final Logger logger = LoggerFactory.getLogger(DiffractionTool.class);
 	
-	private DiffractionTree filteredTree;
+	private ClearableFilteredTree filteredTree;
 	private TreeViewer      viewer;
 	private Composite       control;
 	private DiffractionTreeModel model;
@@ -156,7 +149,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		control.setLayout(new GridLayout(1, false));
 		GridUtils.removeMargins(control);
 	
-		this.filteredTree = new DiffractionTree(control, SWT.FULL_SELECTION | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER, new DiffractionFilter(DiffractionTool.this), true);		
+		this.filteredTree = new ClearableFilteredTree(control, SWT.FULL_SELECTION | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER, new NodeFilter(this), true);		
 		viewer = filteredTree.getViewer();
 		viewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		createColumns(viewer);
@@ -258,33 +251,16 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 
 	}
 	
-	
-
-	void resetExpansion() {
+	public void resetExpansion() {
 		try {
 			if (model == null) return;
 			final List<?> top = model.getRoot().getChildren();
 			for (Object element : top) {
-			   expand(element, viewer);
+			   filteredTree.expand(element);
 			}
 		} catch (Throwable ne) {
 			// intentionally silent
 		}
-	}
-
-	private void expand(Object element, TreeViewer viewer) {
-		
-        if (element instanceof LabelNode) {
-        	if (((LabelNode)element).isDefaultExpanded()) {
-        		viewer.setExpandedState(element, true);
-        	}
-        }
-        if (element instanceof TreeNode) {
-        	TreeNode node = (TreeNode)element;
-        	for (int i = 0; i < node.getChildCount(); i++) {
-        		expand(node.getChildAt(i), viewer);
-			}
-        }
 	}
 	
 	private boolean diffractionMetadataAreEqual(IDiffractionMetadata meta1,IDiffractionMetadata meta2) {
@@ -380,164 +356,28 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		TreeViewerColumn var = new TreeViewerColumn(viewer, SWT.LEFT, 0);
 		var.getColumn().setText("Name"); // Selected
 		var.getColumn().setWidth(260);
-		var.setLabelProvider(new DiffractionLabelProvider(0));
+		var.setLabelProvider(new NodeLabelProvider(0));
 		
 		var = new TreeViewerColumn(viewer, SWT.LEFT, 1);
 		var.getColumn().setText("Original"); // Selected
 		var.getColumn().setWidth(0);
 		var.getColumn().setResizable(false);
-		var.setLabelProvider(new DelegatingProviderWithTooltip(new DiffractionLabelProvider(1)));
+		var.setLabelProvider(new DelegatingProviderWithTooltip(new NodeLabelProvider(1)));
 		defaultColumn = var;
 		
 		var = new TreeViewerColumn(viewer, SWT.LEFT, 2);
 		var.getColumn().setText("Value"); // Selected
 		var.getColumn().setWidth(100);
-		var.setLabelProvider(new DelegatingProviderWithTooltip(new DiffractionLabelProvider(2)));
+		var.setLabelProvider(new DelegatingProviderWithTooltip(new NodeLabelProvider(2)));
 		var.setEditingSupport(new ValueEditingSupport(viewer));
 
 		var = new TreeViewerColumn(viewer, SWT.LEFT, 3);
 		var.getColumn().setText("Unit"); // Selected
 		var.getColumn().setWidth(90);
-		var.setLabelProvider(new DelegatingProviderWithTooltip(new DiffractionLabelProvider(3)));
+		var.setLabelProvider(new DelegatingProviderWithTooltip(new NodeLabelProvider(3)));
 		var.setEditingSupport(new UnitEditingSupport(viewer));
 	}
 	
-	private class DelegatingProviderWithTooltip extends DelegatingStyledCellLabelProvider {
-
-		public DelegatingProviderWithTooltip(IStyledLabelProvider labelProvider) {
-			super(labelProvider);
-		}
-		@Override
-		public String getToolTipText(Object element) {
-			return ((CellLabelProvider)getStyledStringProvider()).getToolTipText(element);
-		}
-
-		@Override
-		public Point getToolTipShift(Object element) {
-			return ((CellLabelProvider)getStyledStringProvider()).getToolTipShift(element);
-		}
-
-		@Override
-		public int getToolTipDisplayDelayTime(Object element) {
-			return ((CellLabelProvider)getStyledStringProvider()).getToolTipDisplayDelayTime(element);
-		}
-		@Override
-		public int getToolTipTimeDisplayed(Object element) {
-			return ((CellLabelProvider)getStyledStringProvider()).getToolTipTimeDisplayed(element);
-		}
-
-	}
-
-	@SuppressWarnings("unchecked")
-	private class ValueEditingSupport extends EditingSupport {
-
-		public ValueEditingSupport(ColumnViewer viewer) {
-			super(viewer);
-		}
-
-		@Override
-		protected CellEditor getCellEditor(final Object element) {
-			if (element instanceof NumericNode) {
-				final NumericNode<? extends Quantity> node = (NumericNode<? extends Quantity>)element;
-				final FloatSpinnerCellEditor fse = new FloatSpinnerCellEditor(viewer.getTree(), SWT.NONE);
-				fse.setFormat(7, node.getDecimalPlaces()+1);
-				fse.setIncrement(node.getIncrement());
-				fse.setMaximum(node.getUpperBoundDouble());
-				fse.setMinimum(node.getLowerBoundDouble());
-				fse.addKeyListener(new KeyAdapter() {
-					public void keyPressed(KeyEvent e) {
-						if (e.character=='\n') {
-							setValue(element, fse.getValue());
-						}
-					}
-				});
-				fse.addSelectionListener(new SelectionAdapter() {
-					public void widgetSelected(SelectionEvent e) {
-						node.setValue((Double)fse.getValue(), null);
-					}
-				});
-				return fse;
-			}
-			return null;
-		}
-
-		@Override
-		protected boolean canEdit(Object element) {
-			if (!(element instanceof NumericNode)) return false;
-			return ((NumericNode<?>)element).isEditable();
-		}
-
-		@Override
-		protected Object getValue(Object element) {
-			if (!(element instanceof NumericNode)) return null;
-			
-			NumericNode<? extends Quantity> node = (NumericNode<? extends Quantity>)element;
-			
-			return node.getDoubleValue();
-		}
-
-		@Override
-		protected void setValue(Object element, Object value) {
-			if (!(element instanceof NumericNode)) return;
-			
-			NumericNode<? extends Quantity> node = (NumericNode<? extends Quantity>)element;
-			node.setDoubleValue((Double)value);
-			viewer.refresh(element);
-		}
-
-		
-	}
-	
-	@SuppressWarnings("unchecked")
-	private class UnitEditingSupport extends EditingSupport {
-
-		public UnitEditingSupport(ColumnViewer viewer) {
-			super(viewer);
-		}
-
-		@Override
-		protected CellEditor getCellEditor(final Object element) {
-			if (element instanceof NumericNode) {
-				NumericNode<? extends Quantity> node = (NumericNode<? extends Quantity>)element;
-				final CComboCellEditor cce = new CComboCellEditor(viewer.getTree(), node.getUnitsString(), SWT.READ_ONLY);
-				cce.getCombo().addSelectionListener(new SelectionAdapter() {
-					public void widgetSelected(SelectionEvent e) {
-						setValue(element, cce.getValue());
-					}
-				});
-				return cce;
-			}
-			return null;
-		}
-
-		@Override
-		protected boolean canEdit(Object element) {
-			if (!(element instanceof NumericNode)) return false;
-			NumericNode<? extends Quantity> node = (NumericNode<? extends Quantity>)element;
-			return node.isEditable() && node.getUnits()!=null;
-		}
-
-		@Override
-		protected Object getValue(Object element) {
-			if (!(element instanceof NumericNode)) return null;
-			
-			NumericNode<? extends Quantity> node = (NumericNode<? extends Quantity>)element;
-			
-			return node.getUnitIndex();
-		}
-
-		@Override
-		protected void setValue(Object element, Object value) {
-			if (!(element instanceof NumericNode)) return;
-			
-			NumericNode<? extends Quantity> node = (NumericNode<? extends Quantity>)element;
-			node.setUnitIndex((Integer)value);
-			viewer.refresh(element);
-		}
-
-		
-	}
-
 	private TreeNode   copiedNode;
 	private MenuAction calibrantActions;
 	private Action     calPref;
@@ -855,18 +695,6 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	@Override
 	public void calibrantSelectionChanged(CalibrantSelectionEvent evt) {
 		updateCalibrationActions((CalibrationStandards)evt.getSource());
-	};
-
-	class DiffractionTree extends FilteredTree {
-		public DiffractionTree(Composite control, int i,
-				DiffractionFilter diffractionFilter, boolean b) {
-			super(control,i,diffractionFilter,b);
-			filterText.setToolTipText("Enter search string to filter the tree.\nThis will match on name, value or units");
-		}
-
-		public void clearText() {
-            super.clearText();
-		}
 	}
 
 }

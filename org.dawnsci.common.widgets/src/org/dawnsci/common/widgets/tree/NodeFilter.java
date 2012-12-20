@@ -1,17 +1,17 @@
-package org.dawb.workbench.plotting.tools.diffraction;
+package org.dawnsci.common.widgets.tree;
 
-import org.dawb.common.ui.tree.LabelNode;
-import org.dawb.common.ui.tree.NumericNode;
-import org.dawb.common.ui.tree.ObjectNode;
+import org.dawnsci.common.widgets.tree.LabelNode;
+import org.dawnsci.common.widgets.tree.NumericNode;
+import org.dawnsci.common.widgets.tree.ObjectNode;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.dialogs.PatternFilter;
 
-class DiffractionFilter extends PatternFilter {
+public class NodeFilter extends PatternFilter {
 	
-	private DiffractionTool tool;
+	private IResettableExpansion tool;
 
-	DiffractionFilter(DiffractionTool tool){
+	public NodeFilter(IResettableExpansion tool){
 		this.tool = tool;	
 	}
 	

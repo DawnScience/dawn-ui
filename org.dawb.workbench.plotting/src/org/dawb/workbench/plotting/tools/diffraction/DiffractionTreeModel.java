@@ -17,13 +17,14 @@ import javax.swing.tree.TreeNode;
 import org.dawb.common.services.IImageService;
 import org.dawb.common.services.ServiceManager;
 import org.dawb.common.ui.plot.trace.IImageTrace;
-import org.dawb.common.ui.tree.AmountEvent;
-import org.dawb.common.ui.tree.AmountListener;
-import org.dawb.common.ui.tree.LabelNode;
-import org.dawb.common.ui.tree.NumericNode;
-import org.dawb.common.ui.tree.ObjectNode;
-import org.dawb.common.ui.tree.UnitEvent;
-import org.dawb.common.ui.tree.UnitListener;
+import org.dawnsci.common.widgets.tree.AbstractNodeModel;
+import org.dawnsci.common.widgets.tree.AmountEvent;
+import org.dawnsci.common.widgets.tree.AmountListener;
+import org.dawnsci.common.widgets.tree.LabelNode;
+import org.dawnsci.common.widgets.tree.NumericNode;
+import org.dawnsci.common.widgets.tree.ObjectNode;
+import org.dawnsci.common.widgets.tree.UnitEvent;
+import org.dawnsci.common.widgets.tree.UnitListener;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.jscience.physics.amount.Amount;
 
@@ -48,14 +49,9 @@ import uk.ac.diamond.scisoft.analysis.io.IMetaData;
  * @author fcp94556
  *
  */
-public class DiffractionTreeModel {
+public class DiffractionTreeModel extends AbstractNodeModel {
 
-	private LabelNode   root;
-    private TreeViewer  viewer;
-    
-	private Map<String, TreeNode> nodeMap;
-	private boolean isDisposed;
-	
+    	
 	private Unit<Length>               xpixel, ypixel;
 	private NumericNode<Dimensionless> max,min,mean;
 	private NumericNode<Length>        beamX, beamY;
@@ -66,12 +62,11 @@ public class DiffractionTreeModel {
 	
 	
 	public DiffractionTreeModel(IDiffractionMetadata metaData) throws Exception {
+		super();
 		this.metaData = metaData;
 		if (metaData.getDetector2DProperties()==null) throw new Exception("Must have detector properties!");
 		if (metaData.getDiffractionCrystalEnvironment()==null) throw new Exception("Must have crystal environment!");
-		this.root     = new LabelNode();
 		createDiffractionModel(metaData);
-		nodeMap = new TreeMap<String, TreeNode>();
 	}
 	
 	public void activate() {
@@ -490,23 +485,6 @@ public class DiffractionTreeModel {
 		};
 	}
 
-	private void registerNode(LabelNode node) {
-		final String labelPath = node.getPath();
-		// System.out.println(labelPath);
-		if (labelPath!=null && nodeMap!=null) {
-			this.nodeMap.put(labelPath, node);
-		}
-	}
-	
-	/**
-	 * Get any node from the tree. Useful when running algorithms with the model.
-	 * @param labelPath
-	 * @return
-	 */
-	public TreeNode getNode(final String labelPath) {
-		return nodeMap.get(labelPath.toLowerCase());
-	}
-
 	private UnitListener createPixelFormatListener(final NumericNode<Length> node) {
 		return new UnitListener() {			
 			@Override
@@ -551,12 +529,9 @@ public class DiffractionTreeModel {
         mean.setLabel(image.getImageServiceBean().getHistogramType().getLabel());
 	}
 
-	public LabelNode getRoot() {
-		return root;
-	}
-
 	public void dispose() {
 		
+		super.dispose();
 		deactivate();
 		
 		final DetectorProperties detprop = getDetectorProperties();
@@ -565,32 +540,6 @@ public class DiffractionTreeModel {
 				detprop.removeDetectorPropertyListener(detectorListener);
 		}
 			
-		root.dispose();
-		nodeMap.clear();
-		nodeMap = null;
-		isDisposed = true;
-		root   = null;
-		viewer = null;
 	}
 
-	public void reset() {
-		reset(root);
-	}
-
-	private void reset(TreeNode node) {
-		if (node instanceof NumericNode) {
-			((NumericNode<?>)node).reset();
-		}
-		for (int i = 0; i < node.getChildCount(); i++) {
-			reset(node.getChildAt(i));
-		}
-	}
-
-	public TreeViewer getViewer() {
-		return viewer;
-	}
-
-	public void setViewer(TreeViewer viewer) {
-		this.viewer = viewer;
-	}
 }

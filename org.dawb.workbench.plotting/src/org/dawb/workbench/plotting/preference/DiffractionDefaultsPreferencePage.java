@@ -2,14 +2,14 @@ package org.dawb.workbench.plotting.preference;
 
 import javax.measure.quantity.Quantity;
 
-import org.dawb.common.ui.tree.NumericNode;
 import org.dawb.common.ui.viewers.TreeNodeContentProvider;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.tools.diffraction.DiffractionDefaultMetadata;
-import org.dawb.workbench.plotting.tools.diffraction.DiffractionLabelProvider;
 import org.dawb.workbench.plotting.tools.diffraction.DiffractionTreeModel;
 import org.dawnsci.common.widgets.celleditor.CComboCellEditor;
 import org.dawnsci.common.widgets.celleditor.FloatSpinnerCellEditor;
+import org.dawnsci.common.widgets.tree.NodeLabelProvider;
+import org.dawnsci.common.widgets.tree.NumericNode;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.viewers.CellEditor;
@@ -190,18 +190,18 @@ public class DiffractionDefaultsPreferencePage extends PreferencePage implements
 		var.getColumn().setText("Original"); // Selected
 		var.getColumn().setWidth(0);
 		var.getColumn().setResizable(false);
-		var.setLabelProvider(new DelegatingStyledCellLabelProvider(new DiffractionLabelProvider(1)));
+		var.setLabelProvider(new DelegatingStyledCellLabelProvider(new NodeLabelProvider(1)));
 		
 		var = new TreeViewerColumn(viewer, SWT.LEFT, 2);
 		var.getColumn().setText("Value"); // Selected
 		var.getColumn().setWidth(100);
-		var.setLabelProvider(new DelegatingStyledCellLabelProvider(new DiffractionLabelProvider(2)));
+		var.setLabelProvider(new DelegatingStyledCellLabelProvider(new NodeLabelProvider(2)));
 		var.setEditingSupport(new ValueEditingSupport(viewer));
 
 		var = new TreeViewerColumn(viewer, SWT.LEFT, 3);
 		var.getColumn().setText("Unit"); // Selected
 		var.getColumn().setWidth(90);
-		var.setLabelProvider(new DelegatingStyledCellLabelProvider(new DiffractionLabelProvider(3)));
+		var.setLabelProvider(new DelegatingStyledCellLabelProvider(new NodeLabelProvider(3)));
 		var.setEditingSupport(new UnitEditingSupport(viewer));
 	}
 
