@@ -8,6 +8,7 @@ import org.dawnsci.common.widgets.tree.ObjectNode;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.swt.graphics.Color;
 
 public class NodeLabelProvider extends ColumnLabelProvider implements IStyledLabelProvider{
 
@@ -25,7 +26,6 @@ public class NodeLabelProvider extends ColumnLabelProvider implements IStyledLab
 		if (!(element instanceof LabelNode)) {
 			return ret;
 		}
-
 		if (element instanceof NumericNode) {
 			getStyledText(ret, (NumericNode<?>)element);
 			
@@ -116,4 +116,25 @@ public class NodeLabelProvider extends ColumnLabelProvider implements IStyledLab
 	public int getToolTipDisplayDelayTime(Object object) {
 		return 500;
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.IColorProvider#getBackground(java.lang.Object)
+	 */
+	public Color getBackground(Object element) {
+		if (element instanceof ColorNode && (icolumn==1 || icolumn==2)) {
+			return ((ColorNode)element).getColor();
+		}
+		return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
+	 */
+	public Color getForeground(Object element) {
+		if (element instanceof ColorNode  && (icolumn==1 || icolumn==2)) { // Value
+			return ((ColorNode)element).getColor();
+		}
+		return null;
+	}
+
 }

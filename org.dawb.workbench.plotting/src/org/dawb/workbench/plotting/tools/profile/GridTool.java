@@ -129,13 +129,13 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		var = new TreeViewerColumn(viewer, SWT.LEFT, 1);
 		var.getColumn().setText("Value"); // Selected
 		var.getColumn().setWidth(100);
-		var.setLabelProvider(new DelegatingProviderWithTooltip(new NodeLabelProvider(1)));
+		var.setLabelProvider(new DelegatingProviderWithTooltip(new NodeLabelProvider(2)));
 		var.setEditingSupport(new ValueEditingSupport(viewer));
 
 		var = new TreeViewerColumn(viewer, SWT.LEFT, 2);
 		var.getColumn().setText("Unit"); // Selected
 		var.getColumn().setWidth(90);
-		var.setLabelProvider(new DelegatingProviderWithTooltip(new NodeLabelProvider(2)));
+		var.setLabelProvider(new DelegatingProviderWithTooltip(new NodeLabelProvider(3)));
 		var.setEditingSupport(new UnitEditingSupport(viewer));
 		
 	}
