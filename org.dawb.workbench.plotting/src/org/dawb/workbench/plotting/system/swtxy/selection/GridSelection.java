@@ -33,6 +33,11 @@ class GridSelection extends BoxSelection {
 		setAlpha(80);
 	}
 	
+	@Override
+	protected String getCursorPath() {
+		return "icons/Cursor-grid.png";
+	}
+	
 	protected Figure createRegionFillFigure() {
 		return new RegionFillFigure(this) {
 			@Override
