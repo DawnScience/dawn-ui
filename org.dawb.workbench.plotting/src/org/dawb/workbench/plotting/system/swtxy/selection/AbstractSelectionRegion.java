@@ -486,12 +486,24 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 			y-= h;
 		}
 
-		final RectangularROI rroi = new RectangularROI(x, y, w, h, 0);
-
-		return rroi;
+		return createROI(x, y, w, h, 0);
 	}
 	
-	private void reverse(double[] a1, double[] a2, int i) {
+	/**
+	 * Used from getRoiFromRectangle to get a ROI from the rectangle.
+	 * 
+	 * @param ptx
+	 * @param pty
+	 * @param width
+	 * @param height
+	 * @param angle
+	 * @return
+	 */
+	protected RectangularROI createROI(double ptx, double pty, double width, double height, double angle) {
+		return new RectangularROI(ptx, pty, width, height, angle);
+	}
+	
+	protected void reverse(double[] a1, double[] a2, int i) {
 		double tmp = a1[i];
 		a1[i] = a2[i];
 		a2[i] = tmp;

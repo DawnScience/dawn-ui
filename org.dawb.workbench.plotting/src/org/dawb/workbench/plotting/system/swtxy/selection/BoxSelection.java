@@ -3,6 +3,7 @@ package org.dawb.workbench.plotting.system.swtxy.selection;
 import java.util.Arrays;
 
 import org.dawb.common.ui.plot.axis.ICoordinateSystem;
+import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.ROIEvent;
 import org.dawb.workbench.plotting.system.swtxy.translate.FigureTranslator;
 import org.dawb.workbench.plotting.system.swtxy.translate.TranslationEvent;
@@ -34,13 +35,13 @@ class BoxSelection extends AbstractSelectionRegion {
 		
 	private static final int SIDE      = 8;
 	
-	private SelectionHandle p1, p2, p3, p4;
+	protected SelectionHandle p1, p2, p3, p4;
 
-	private Figure connection;
+	protected Figure connection;
 	
 	BoxSelection(String name, ICoordinateSystem coords) {
 		super(name, coords);
-		setRegionColor(ColorConstants.green);	
+		setRegionColor(IRegion.RegionType.BOX.getDefaultColor());	
 		setAlpha(80);
 	}
 
@@ -52,22 +53,7 @@ class BoxSelection extends AbstractSelectionRegion {
 		this.p3  = createSelectionRectangle(getRegionColor(), SIDE, 100, 200);
 		this.p4  = createSelectionRectangle(getRegionColor(), SIDE, 200, 200);
 				
-		this.connection = new RegionFillFigure(this) {
-			@Override
-			public void paintFigure(Graphics gc) {
-				
-				/**
-				 * TODO Discuss with Peter about XOR mode
-				 */
-				super.paintFigure(gc);
-				final Rectangle size = getRectangleFromVertices();				
-				this.bounds = size;
-				gc.setAlpha(getAlpha());
-				gc.fillRectangle(size);
-				
-				BoxSelection.this.drawLabel(gc, size);
-			}
-		};
+		this.connection = createRegionFillFigure();
 		connection.setCursor(Draw2DUtils.getRoiMoveCursor());
 		connection.setBackgroundColor(getRegionColor());
 		connection.setBounds(new Rectangle(p4.getSelectionPoint(), p1.getSelectionPoint()));
@@ -86,10 +72,12 @@ class BoxSelection extends AbstractSelectionRegion {
 			@Override
 			public void translateBefore(TranslationEvent evt) {
 				isCalculateCorners = false;
+				isTranslating      = true;
 			}
 
 			@Override
 			public void translationAfter(TranslationEvent evt) {
+				isTranslating      = true;
 				isCalculateCorners = true;
 				updateConnectionBounds();
 				fireROIDragged(createROI(false), ROIEvent.DRAG_TYPE.TRANSLATE);
@@ -97,8 +85,10 @@ class BoxSelection extends AbstractSelectionRegion {
 
 			@Override
 			public void translationCompleted(TranslationEvent evt) {
+				isTranslating      = false;
 				fireROIChanged(createROI(true));
 				fireROISelection();
+				connection.repaint();
 			}
 
 			@Override
@@ -113,6 +103,26 @@ class BoxSelection extends AbstractSelectionRegion {
         if (roi ==null) createROI(true);
 
 	}
+	
+	protected Figure createRegionFillFigure() {
+		return new RegionFillFigure(this) {
+			@Override
+			public void paintFigure(Graphics gc) {
+				
+				/**
+				 * TODO Discuss with Peter about XOR mode
+				 */
+				super.paintFigure(gc);
+				final Rectangle size = getRectangleFromVertices();				
+				this.bounds = size;
+				gc.setAlpha(getAlpha());
+				gc.fillRectangle(size);
+				
+				BoxSelection.this.drawLabel(gc, size);
+			}
+		};
+	}
+
 	@Override
 	public boolean containsPoint(double x, double y) {
 		
@@ -135,7 +145,8 @@ class BoxSelection extends AbstractSelectionRegion {
 		return "icons/Cursor-box.png";
 	}
 	
-	private boolean isCalculateCorners = true;
+	protected boolean isCalculateCorners = true;
+	protected boolean isTranslating      = false;
 
 	private SelectionHandle createSelectionRectangle(Color color, int size, double... location) {
 		
@@ -177,7 +188,7 @@ class BoxSelection extends AbstractSelectionRegion {
 	}
 
 	private void setCornerLocation( SelectionHandle c,
-			SelectionHandle d, 
+			                        SelectionHandle d, 
 									Rectangle sa, 
 									boolean quad1Or4) {
 		if (quad1Or4) {
