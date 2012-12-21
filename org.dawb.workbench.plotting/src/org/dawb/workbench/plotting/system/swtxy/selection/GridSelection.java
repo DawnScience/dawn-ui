@@ -6,6 +6,7 @@ import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 
 import uk.ac.diamond.scisoft.analysis.roi.GridROI;
@@ -75,6 +76,11 @@ public class GridSelection extends BoxSelection {
                         	drawMidPoint(xpoints[i], ypoints[i], gc);
  						}
 					}
+					
+					if (groi.isGridLineOn()) {
+						drawGridLines(groi, gc);
+					}
+
 				}
 			}
 		};
@@ -94,7 +100,7 @@ public class GridSelection extends BoxSelection {
 	/**
 	 * 
 	 * @param groi
-	 * @return
+	 * @return [xpoints][ypoints]
 	 */
 	protected double[][] getGridPoints(GridROI groi) {
 
@@ -118,6 +124,44 @@ public class GridSelection extends BoxSelection {
 		}
 		return null;
 	}
+	
+	/**
+	 * 
+	 * @param groi
+	 * @return [xpoints][ypoints]
+	 */
+	protected void drawGridLines(GridROI groi, Graphics gc) {
+
+		gc.pushState();
+		gc.setAlpha(255);
+		gc.setForegroundColor(gridColor);
+		gc.setBackgroundColor(gridColor);
+		gc.setLineWidth(1);
+		gc.setLineStyle(SWT.LINE_SOLID);
+		double[]   spt       = groi.getPoint();
+		double[]   len       = groi.getLengths();
+		double[][] gridLines = groi.getGridLines();
+		int xGrids = gridLines[0].length;
+		int yGrids = gridLines[1].length;
+		if (xGrids != 0 && yGrids != 0) {
+			for (int i = 0; i < xGrids; i++) {
+				int[] pnt1 = coords.getValuePosition(gridLines[0][i], spt[1]);
+				int[] pnt2 = coords.getValuePosition(gridLines[0][i], spt[1] + len[1]);
+				gc.drawLine(pnt1[0], pnt1[1], pnt2[0], pnt2[1]);
+			}
+			
+			for (int i = 0; i < yGrids; i++) {
+
+				int[] pnt1 = coords.getValuePosition(spt[0], gridLines[1][i]);
+				int[] pnt2 = coords.getValuePosition(spt[0] + len[0], gridLines[1][i]);
+				gc.drawLine(pnt1[0], pnt1[1], pnt2[0], pnt2[1]);
+			}
+		}
+		
+		gc.popState();
+
+	}
+
 
 	@Override
 	public ROIBase createROI(boolean recordResult) {

@@ -41,6 +41,7 @@ public class GridTreeModel extends AbstractNodeModel {
 	private NumericNode<Length> xres, yres;
 	private ObjectNode roiName;
 	private ColorNode regionColor, spotColor, gridColor;
+	private BooleanNode midPoints, gridLines;
 	/**
 	 * Same nodes to edit any 
 	 */
@@ -130,7 +131,7 @@ public class GridTreeModel extends AbstractNodeModel {
 		});
         registerNode(yres);
 
-        final BooleanNode midPoints = new BooleanNode("Display mid-points", true, grid);
+        this.midPoints = new BooleanNode("Display mid-points", true, grid);
         registerNode(midPoints);
         midPoints.addValueListener(new ValueListener() {		
 			@Override
@@ -142,7 +143,7 @@ public class GridTreeModel extends AbstractNodeModel {
 			}
 		});
         
-        final BooleanNode gridLines = new BooleanNode("Display grid", false, grid);
+        this.gridLines = new BooleanNode("Display grid", false, grid);
         registerNode(gridLines);
         gridLines.addValueListener(new ValueListener() {		
 			@Override
@@ -168,6 +169,13 @@ public class GridTreeModel extends AbstractNodeModel {
 			
 			roiName.setValue(region.getName());
 			viewer.update(roiName, new String[]{"Value"});
+			
+			// Grid, spots, on/off
+			midPoints.setValue(groi.isMidPointOn(), false);
+			viewer.update(midPoints, new String[]{"Value"});
+			
+			gridLines.setValue(groi.isGridLineOn(), false);
+			viewer.update(gridLines, new String[]{"Value"});
 		}
 		this.groi = groi;
         
@@ -191,7 +199,7 @@ public class GridTreeModel extends AbstractNodeModel {
 			spotColor.setValue(grid.getPointColor(),    false);
 			viewer.update(spotColor, new String[]{"Value"});
 
-			gridColor.setValue(grid.getRegionColor(),   false);
+			gridColor.setValue(grid.getGridColor(),   false);
 			viewer.update(gridColor, new String[]{"Value"});
 
 		}
