@@ -256,6 +256,56 @@ public class GridTreeModel extends AbstractNodeModel {
 		});
 		registerNode(y);
 
+		// TODO Custom axes
+		this.width = new NumericNode<Dimensionless>("width", pos, Dimensionless.UNIT);
+		width.setDefault(Amount.valueOf(0, Dimensionless.UNIT));
+		width.setUnits(Dimensionless.UNIT);
+		width.setFormat("#####0.##");
+		width.setEditable(true);
+		width.setLowerBound(Amount.valueOf(0, Dimensionless.UNIT));
+		width.setUpperBound(Amount.valueOf(10000, Dimensionless.UNIT));
+		width.setIncrement(0.1);
+		width.addAmountListener(new AmountListener<Dimensionless>() {		
+			@Override
+			public void amountChanged(AmountEvent<Dimensionless> evt) {
+				if (groi==null || region==null) return;
+				try {
+					adjustingValue = true;
+					final double val = evt.getAmount().doubleValue(Dimensionless.UNIT);
+					groi.setLengths(val, groi.getLengths()[1]);
+					region.setROI(groi);
+				} finally {
+					adjustingValue = false;
+				}
+			}
+		});
+		registerNode(width);
+
+		// TODO Custom axes
+		this.height = new NumericNode<Dimensionless>("height", pos, Dimensionless.UNIT);
+		height.setDefault(Amount.valueOf(0, Dimensionless.UNIT));
+		height.setUnits(Dimensionless.UNIT);
+		height.setFormat("#####0.##");
+		height.setEditable(true);
+		height.setLowerBound(Amount.valueOf(0, Dimensionless.UNIT));
+		height.setUpperBound(Amount.valueOf(10000, Dimensionless.UNIT));
+		height.setIncrement(0.1);
+		height.addAmountListener(new AmountListener<Dimensionless>() {		
+			@Override
+			public void amountChanged(AmountEvent<Dimensionless> evt) {
+				if (groi==null || region==null) return;
+				try {
+					adjustingValue = true;
+					final double val = evt.getAmount().doubleValue(Dimensionless.UNIT);
+					groi.setLengths(groi.getLengths()[0], val);
+					region.setROI(groi);
+				} finally {
+					adjustingValue = false;
+				}
+			}
+		});
+		registerNode(height);
+
 	}
 
 	protected void updateGridDimensions(GridROI groi) {
@@ -296,6 +346,13 @@ public class GridTreeModel extends AbstractNodeModel {
 		
 		this.y.setValueQuietly(groi.getPointY(), Dimensionless.UNIT);
 		viewer.update(y, new String[]{"Value"});
+		
+		this.width.setValueQuietly(groi.getLengths()[0], Dimensionless.UNIT);
+		viewer.update(width, new String[]{"Value"});
+		
+		this.height.setValueQuietly(groi.getLengths()[1], Dimensionless.UNIT);
+		viewer.update(height, new String[]{"Value"});
+
 	}
 
 	/**

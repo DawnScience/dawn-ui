@@ -70,11 +70,13 @@ public class GridSelection extends BoxSelection {
 				    GridROI groi = (GridROI)createROI(false);
 					if (groi.isMidPointOn()) {
 						double[][] points = getGridPoints(groi);
-						double[] xpoints = points[0];
-						double[] ypoints = points[1];
-                        for (int i = 0; i < Math.min(xpoints.length, ypoints.length); i++) {
-                        	drawMidPoint(xpoints[i], ypoints[i], gc);
- 						}
+						if (points!=null) {
+							double[] xpoints = points[0];
+							double[] ypoints = points[1];
+	                        for (int i = 0; i < Math.min(xpoints.length, ypoints.length); i++) {
+	                        	drawMidPoint(xpoints[i], ypoints[i], gc);
+	 						}
+						}
 					}
 					
 					if (groi.isGridLineOn()) {
