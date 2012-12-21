@@ -80,7 +80,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		
 		this.roiListener    = new IROIListener.Stub() {
 			@Override
-			public void roiDragged(ROIEvent evt) {
+			public void update(ROIEvent evt) {
 				if (!isActive()) return;
 				if (!(evt.getROI() instanceof GridROI)) return;
 				if (model!=null) {

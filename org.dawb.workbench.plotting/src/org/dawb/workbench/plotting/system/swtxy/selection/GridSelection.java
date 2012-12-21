@@ -31,13 +31,19 @@ import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 public class GridSelection extends BoxSelection {
 		
 	private Color pointColor = ColorConstants.white;
+	private Color gridColor  = ColorConstants.lightGray;
 	
+	/**
+	 * Non public, it can be used from outside but not created there.
+	 * @param name
+	 * @param coords
+	 */
 	GridSelection(String name, ICoordinateSystem coords) {
 		super(name, coords);
 		setRegionColor(IRegion.RegionType.GRID.getDefaultColor());	
 		setAlpha(80);
 	}
-	
+
 	@Override
 	protected String getCursorPath() {
 		return "icons/Cursor-grid.png";
@@ -160,5 +166,12 @@ public class GridSelection extends BoxSelection {
 	public void setPointColor(Color pointColor) {
 		this.pointColor = pointColor;
 	}
+	
+	public Color getGridColor() {
+		return gridColor;
+	}
 
+	public void setGridColor(Color gridColor) {
+		this.gridColor = gridColor;
+	}
 }

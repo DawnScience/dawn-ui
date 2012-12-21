@@ -40,6 +40,7 @@ public class GridTreeModel extends AbstractNodeModel {
 
 	private NumericNode<Length> xres, yres;
 	private ObjectNode roiName;
+	private ColorNode regionColor, spotColor, gridColor;
 	/**
 	 * Same nodes to edit any 
 	 */
@@ -52,7 +53,7 @@ public class GridTreeModel extends AbstractNodeModel {
         this.roiName = new ObjectNode("Region Name", "-", config);
         registerNode(roiName);
 
-        final ColorNode regionColor = new ColorNode("Region Color", IRegion.RegionType.GRID.getDefaultColor(), config);
+        this.regionColor = new ColorNode("Region Color", IRegion.RegionType.GRID.getDefaultColor(), config);
         registerNode(regionColor);
         regionColor.addValueListener(new ValueListener() {
         	public void valueChanged(ValueEvent evt) {
@@ -62,7 +63,7 @@ public class GridTreeModel extends AbstractNodeModel {
         	}
         });
        
-        final ColorNode spotColor = new ColorNode("Spot Color", ColorConstants.white, config);
+        this.spotColor = new ColorNode("Spot Color", ColorConstants.white, config);
         registerNode(spotColor);
         spotColor.addValueListener(new ValueListener() {
         	public void valueChanged(ValueEvent evt) {
@@ -74,8 +75,17 @@ public class GridTreeModel extends AbstractNodeModel {
         	}
         });
        
-        final ColorNode gridColor = new ColorNode("Grid Color", ColorConstants.lightGray, config);
+        this.gridColor = new ColorNode("Grid Color", ColorConstants.lightGray, config);
         registerNode(gridColor);
+        gridColor.addValueListener(new ValueListener() {
+        	public void valueChanged(ValueEvent evt) {
+				if (groi==null || region==null) return;
+				if (!(region instanceof GridSelection)) return;
+				GridSelection gl = (GridSelection)region;
+				gl.setGridColor((Color)evt.getValue());
+				region.repaint();	
+        	}
+        });
 
 		
         final LabelNode grid = new LabelNode("Grid", root);
@@ -172,8 +182,23 @@ public class GridTreeModel extends AbstractNodeModel {
 	 * @param groi
 	 */
 	public void setRegion(IRegion region, GridROI groi) {
+		if (!(region instanceof GridSelection)) return;
+		if (region!=this.region) {
+			GridSelection grid = (GridSelection)region;
+			regionColor.setValue(grid.getRegionColor(), false);
+			viewer.update(regionColor, new String[]{"Value"});
+
+			spotColor.setValue(grid.getPointColor(),    false);
+			viewer.update(spotColor, new String[]{"Value"});
+
+			gridColor.setValue(grid.getRegionColor(),   false);
+			viewer.update(gridColor, new String[]{"Value"});
+
+		}
 		this.region = region;
 		setGridROI(groi);
+		
+		
 	}
 
 

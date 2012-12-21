@@ -498,5 +498,9 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 			   ( isYAxis && orig==ImageOrigin.TOP_RIGHT)   ||
 			   ( isYAxis && orig==ImageOrigin.BOTTOM_LEFT);
 	}
+	@Override
+	public void roiSelected(ROIEvent evt) {
+		// TODO Auto-generated method stub
 
+	}
 }

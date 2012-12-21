@@ -369,7 +369,11 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 		final IRegion region = (IRegion)evt.getSource();
 		update(region, region.getROI(), false);
 	}
-	
+	@Override
+	public void roiSelected(ROIEvent evt) {
+		// TODO Auto-generated method stub
+
+	}	
 	protected synchronized void update(IRegion r, ROIBase rb, boolean isDrag) {
 	
 		if (r!=null && !isRegionTypeSupported(r.getRegionType())) return; // Nothing to do.

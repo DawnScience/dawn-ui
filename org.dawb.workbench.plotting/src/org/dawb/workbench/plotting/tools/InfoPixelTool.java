@@ -533,7 +533,11 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 	@Override
 	public void roiChanged(ROIEvent evt) {
 	}
-	
+	@Override
+	public void roiSelected(ROIEvent evt) {
+		// TODO Auto-generated method stub
+
+	}	
 	private synchronized void updateInfoPixel(final IRegion region) {
 
 		if (updateInfoPixelData==null) {

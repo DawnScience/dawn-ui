@@ -477,7 +477,7 @@ public class HistogramToolPage extends AbstractToolPage {
 		extentionPointManager = ExtentionPointManager.getManager();
 
 
-		histogramRegionListener = new IROIListener() {
+		histogramRegionListener = new IROIListener.Stub() {
 
 			@Override
 			public void roiDragged(ROIEvent evt) {

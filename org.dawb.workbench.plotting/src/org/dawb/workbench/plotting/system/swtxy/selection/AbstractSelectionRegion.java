@@ -20,6 +20,8 @@ import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.MouseEvent;
+import org.eclipse.draw2d.MouseListener;
 import org.eclipse.draw2d.Shape;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
@@ -186,6 +188,7 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 
 	protected void setRegionObjects(IFigure... objects) {
 		this.regionObjects = objects;
+		createSelectionListener(regionObjects);
 	}
 	
 	protected void setRegionObjects(IFigure first, List<IFigure> objects) {
@@ -194,6 +197,24 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 		regionObjects[i++] = first;
 		for (IFigure f : objects) {
 			regionObjects[i++] = f;
+		}
+		createSelectionListener(regionObjects);
+	}
+
+	private MouseListener selectionListener;
+	private void createSelectionListener(IFigure... ro) {
+		if (selectionListener==null) selectionListener = new MouseListener.Stub() {			
+			@Override
+			public void mousePressed(MouseEvent me) {
+				fireROISelected(getROI()); 
+			}
+		};
+		for (IFigure iFigure : ro) {
+			try {
+				iFigure.addMouseListener(selectionListener);
+			} catch (Throwable ne) {
+				continue;// Probably will not happen
+			}
 		}
 	}
 
@@ -210,7 +231,10 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 		if (coords!=null) coords.dispose();
 		if (getParent()!=null) getParent().remove(this);
 		if (regionObjects!=null)for (IFigure ob : regionObjects) {
-			if (ob.getParent()!=null) ob.getParent().remove(ob);
+			if (ob.getParent()!=null) {
+				ob.getParent().remove(ob);
+				ob.removeMouseListener(selectionListener);
+			}
 		}
 		if (cursor!=null) cursor.dispose();
 		cursor = null;

@@ -494,4 +494,9 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		return profilePlottingSystem;
 	}
 
+	@Override
+	public void roiSelected(ROIEvent evt) {
+		// TODO Auto-generated method stub
+
+	}
 }

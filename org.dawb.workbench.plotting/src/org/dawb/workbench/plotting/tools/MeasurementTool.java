@@ -441,7 +441,11 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 		if (!isActive()) return;
 		updateRegion(evt);
 	}
+	@Override
+	public void roiSelected(ROIEvent evt) {
+		// TODO Auto-generated method stub
 
+	}
 	private RegionBoundsUIJob updateJob;
 	/**
 	 * Uses cancellable UIJob
