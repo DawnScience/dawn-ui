@@ -1,6 +1,9 @@
 package org.dawb.workbench.plotting.tools.profile;
 
+import javax.measure.quantity.Angle;
+import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Length;
+import javax.measure.quantity.Quantity;
 import javax.measure.unit.SI;
 
 import org.dawb.common.ui.plot.region.IRegion;
@@ -31,7 +34,7 @@ public class GridTreeModel extends AbstractNodeModel {
 	
 	private GridROI   groi;
 	private IRegion   region;
-	
+	private boolean   adjustingValue = false;
 
 	GridTreeModel() {
 		super();
@@ -43,59 +46,74 @@ public class GridTreeModel extends AbstractNodeModel {
 	private ObjectNode  roiName, gridDims;
 	private ColorNode   regionColor, spotColor, gridColor;
 	private BooleanNode midPoints,   gridLines;
-	private NumericNode<Length> x, y, width, height;
+	private NumericNode<Dimensionless> x, y, width, height;
 	/**
 	 * Same nodes to edit any 
 	 */
 	private void createGridNodes() {
 		
-        final LabelNode config = new LabelNode("Configuration", root);
-        config.setDefaultExpanded(true);
-        registerNode(config);
-        
-        this.roiName = new ObjectNode("Region Name", "-", config);
-        registerNode(roiName);
+		final LabelNode config = new LabelNode("Configuration", root);
+		config.setDefaultExpanded(true);
+		registerNode(config);
 
-        this.regionColor = new ColorNode("Region Color", IRegion.RegionType.GRID.getDefaultColor(), config);
-        registerNode(regionColor);
-        regionColor.addValueListener(new ValueListener() {
-        	public void valueChanged(ValueEvent evt) {
+		this.roiName = new ObjectNode("Region Name", "-", config);
+		registerNode(roiName);
+
+		this.regionColor = new ColorNode("Region Color", IRegion.RegionType.GRID.getDefaultColor(), config);
+		registerNode(regionColor);
+		regionColor.addValueListener(new ValueListener() {
+			public void valueChanged(ValueEvent evt) {
 				if (groi==null || region==null) return;
-				region.setRegionColor((Color)evt.getValue());
-				region.repaint();	
-        	}
-        });
-       
-        this.spotColor = new ColorNode("Spot Color", ColorConstants.white, config);
-        registerNode(spotColor);
-        spotColor.addValueListener(new ValueListener() {
-        	public void valueChanged(ValueEvent evt) {
+				try {
+					adjustingValue = true;
+					region.setRegionColor((Color)evt.getValue());
+					region.repaint();	
+				} finally {
+					adjustingValue = false;
+				}
+			}
+		});
+
+		this.spotColor = new ColorNode("Spot Color", ColorConstants.white, config);
+		registerNode(spotColor);
+		spotColor.addValueListener(new ValueListener() {
+			public void valueChanged(ValueEvent evt) {
 				if (groi==null || region==null) return;
 				if (!(region instanceof GridSelection)) return;
-				GridSelection gl = (GridSelection)region;
-				gl.setPointColor((Color)evt.getValue());
-				region.repaint();	
-        	}
-        });
-       
-        this.gridColor = new ColorNode("Grid Color", ColorConstants.lightGray, config);
-        registerNode(gridColor);
-        gridColor.addValueListener(new ValueListener() {
-        	public void valueChanged(ValueEvent evt) {
+				try {
+					adjustingValue = true;
+					GridSelection gl = (GridSelection)region;
+					gl.setPointColor((Color)evt.getValue());
+					region.repaint();	
+				} finally {
+					adjustingValue = false;
+				}
+			}
+		});
+
+		this.gridColor = new ColorNode("Grid Color", ColorConstants.lightGray, config);
+		registerNode(gridColor);
+		gridColor.addValueListener(new ValueListener() {
+			public void valueChanged(ValueEvent evt) {
 				if (groi==null || region==null) return;
 				if (!(region instanceof GridSelection)) return;
-				GridSelection gl = (GridSelection)region;
-				gl.setGridColor((Color)evt.getValue());
-				region.repaint();	
-        	}
-        });
+				try {
+					adjustingValue = true;
+					GridSelection gl = (GridSelection)region;
+					gl.setGridColor((Color)evt.getValue());
+					region.repaint();	
+				} finally {
+					adjustingValue = false;
+				}
+			}
+		});
 
-		
-        final LabelNode grid = new LabelNode("Grid", root);
-        grid.setDefaultExpanded(true);
-        registerNode(grid);
-        
-        this.xres = new NumericNode<Length>("X-axis Resolution", grid, SI.MICRO(SI.METER));
+
+		final LabelNode grid = new LabelNode("Grid", root);
+		grid.setDefaultExpanded(true);
+		registerNode(grid);
+
+		this.xres = new NumericNode<Length>("X-axis Resolution", grid, SI.MICRO(SI.METER));
 		xres.setDefault(Amount.valueOf(0.01, SI.MICRO(SI.METER)));
 		xres.setUnits(SI.MICRO(SI.METER), SI.MILLIMETER);
 		xres.setEditable(true);
@@ -106,15 +124,20 @@ public class GridTreeModel extends AbstractNodeModel {
 			@Override
 			public void amountChanged(AmountEvent<Length> evt) {
 				if (groi==null || region==null) return;
-				double xspacing = groi.getGridPreferences().getXPixelsFromMicronsCoord(evt.getAmount().doubleValue(SI.MICRO(SI.METER)));
-				groi.setxSpacing(xspacing);
-				region.setROI(groi);
-				region.repaint();
-				updateGridDimensions();
+				try {
+					adjustingValue = true;
+					double xspacing = groi.getGridPreferences().getXPixelsFromMicronsCoord(evt.getAmount().doubleValue(SI.MICRO(SI.METER)));
+					groi.setxSpacing(xspacing);
+					region.setROI(groi);
+					region.repaint();
+					updateGridDimensions(groi);
+				} finally {
+					adjustingValue = false;
+				}
 			}
 		});
-        registerNode(xres);
-        
+		registerNode(xres);
+
 		this.yres = new NumericNode<Length>("Y-axis Resolution", grid, SI.MICRO(SI.METER));
 		yres.setDefault(Amount.valueOf(0.01, SI.MICRO(SI.METER)));
 		yres.setUnits(SI.MICRO(SI.METER), SI.MILLIMETER);
@@ -126,60 +149,127 @@ public class GridTreeModel extends AbstractNodeModel {
 			@Override
 			public void amountChanged(AmountEvent<Length> evt) {
 				if (groi==null || region==null) return;
-				double yspacing = groi.getGridPreferences().getYPixelsFromMicronsCoord(evt.getAmount().doubleValue(SI.MICRO(SI.METER)));
-				groi.setySpacing(yspacing);
-				region.setROI(groi);
-				region.repaint();
-				updateGridDimensions();
+				try {
+					adjustingValue = true;
+					double yspacing = groi.getGridPreferences().getYPixelsFromMicronsCoord(evt.getAmount().doubleValue(SI.MICRO(SI.METER)));
+					groi.setySpacing(yspacing);
+					region.setROI(groi);
+					region.repaint();
+					updateGridDimensions(groi);
+				} finally {
+					adjustingValue = false;
+				}
 			}
 		});
-        registerNode(yres);
-        
-        this.gridDims = new ObjectNode("Grid Dimensions", "0 x 0 = no grid", grid);
-        registerNode(gridDims);
+		registerNode(yres);
 
-        this.midPoints = new BooleanNode("Display mid-points", true, grid);
-        registerNode(midPoints);
-        midPoints.addValueListener(new ValueListener() {		
+		this.gridDims = new ObjectNode("Grid Dimensions", "0 x 0 = no grid", grid);
+		registerNode(gridDims);
+
+		this.midPoints = new BooleanNode("Display mid-points", true, grid);
+		registerNode(midPoints);
+		midPoints.addValueListener(new ValueListener() {		
 			@Override
 			public void valueChanged(ValueEvent evt) {
 				if (groi==null || region==null) return;
-				groi.setMidPointOn((Boolean)evt.getValue());
-				region.setROI(groi);
-				region.repaint();
+				try {
+					adjustingValue = true;
+					groi.setMidPointOn((Boolean)evt.getValue());
+					region.setROI(groi);
+					region.repaint();
+				} finally {
+					adjustingValue = false;
+				}
 			}
 		});
-        
-        this.gridLines = new BooleanNode("Display grid", false, grid);
-        registerNode(gridLines);
-        gridLines.addValueListener(new ValueListener() {		
+
+		this.gridLines = new BooleanNode("Display grid", false, grid);
+		registerNode(gridLines);
+		gridLines.addValueListener(new ValueListener() {		
 			@Override
 			public void valueChanged(ValueEvent evt) {
 				if (groi==null || region==null) return;
-				groi.setGridLineOn((Boolean)evt.getValue());
-				region.setROI(groi);
-				region.repaint();
+				try {
+					adjustingValue = true;
+					groi.setGridLineOn((Boolean)evt.getValue());
+					region.setROI(groi);
+					region.repaint();
+				} finally {
+					adjustingValue = false;
+				}
 			}
 		});
-        
-        
-        final LabelNode pos = new LabelNode("Position", root);
-        pos.setDefaultExpanded(true);
-        registerNode(pos);
-        
-        
+
+
+		final LabelNode pos = new LabelNode("Position", root);
+		pos.setDefaultExpanded(true);
+		registerNode(pos);
+
+
+		// TODO Custom axes
+		this.x = new NumericNode<Dimensionless>("x", pos, Dimensionless.UNIT);
+		x.setDefault(Amount.valueOf(0, Dimensionless.UNIT));
+		x.setUnits(Dimensionless.UNIT);
+		x.setEditable(true);
+		x.setFormat("#####0.##");
+		x.setLowerBound(Amount.valueOf(0, Dimensionless.UNIT));
+		x.setUpperBound(Amount.valueOf(10000, Dimensionless.UNIT));
+		x.setIncrement(0.1);
+		x.addAmountListener(new AmountListener<Dimensionless>() {		
+			@Override
+			public void amountChanged(AmountEvent<Dimensionless> evt) {
+				if (groi==null || region==null) return;
+				try {
+					adjustingValue = true;
+					final double xVal = evt.getAmount().doubleValue(Dimensionless.UNIT);
+					groi.setPoint(xVal, groi.getPoint()[1]);
+					region.setROI(groi);
+				} finally {
+					adjustingValue = false;
+				}
+			}
+		});
+		registerNode(x);
+
+		// TODO Custom axes
+		this.y = new NumericNode<Dimensionless>("y", pos, Dimensionless.UNIT);
+		y.setDefault(Amount.valueOf(0, Dimensionless.UNIT));
+		y.setUnits(Dimensionless.UNIT);
+		y.setFormat("#####0.##");
+		y.setEditable(true);
+		y.setLowerBound(Amount.valueOf(0, Dimensionless.UNIT));
+		y.setUpperBound(Amount.valueOf(10000, Dimensionless.UNIT));
+		y.setIncrement(0.1);
+		y.addAmountListener(new AmountListener<Dimensionless>() {		
+			@Override
+			public void amountChanged(AmountEvent<Dimensionless> evt) {
+				if (groi==null || region==null) return;
+				try {
+					adjustingValue = true;
+					final double yVal = evt.getAmount().doubleValue(Dimensionless.UNIT);
+					groi.setPoint(groi.getPoint()[0], yVal);
+					region.setROI(groi);
+				} finally {
+					adjustingValue = false;
+				}
+			}
+		});
+		registerNode(y);
+
 	}
 
-	protected void updateGridDimensions() {
+	protected void updateGridDimensions(GridROI groi) {
 		String value = String.format("%d x %d = %d point%s", groi.getDimensions()[0], groi.getDimensions()[1], groi
 				.getDimensions()[0]
-				* groi.getDimensions()[1], groi.getDimensions()[0] * groi.getDimensions()[1] == 1 ? "" : "s");
+						* groi.getDimensions()[1], groi.getDimensions()[0] * groi.getDimensions()[1] == 1 ? "" : "s");
 		this.gridDims.setValue(value, false);
 		viewer.update(gridDims,  new String[]{"Value"});
 	}
 
 	private void setGridROI(GridROI groi) {
-		
+
+		if (!adjustingValue) viewer.cancelEditing();
+
 		if (this.groi != groi) { // Grid spacings may have changed.
 			xres.setValueQuietly(Amount.valueOf(groi.getGridPreferences().getXMicronsFromPixelsLen(groi.getxSpacing()), SI.MICRO(SI.METER)));
 			viewer.update(xres, new String[]{"Value"});
@@ -197,12 +287,15 @@ public class GridTreeModel extends AbstractNodeModel {
 			gridLines.setValue(groi.isGridLineOn(), false);
 			viewer.update(gridLines, new String[]{"Value"});
 			
-			updateGridDimensions();
+			updateGridDimensions(groi);
 		}
 		this.groi = groi;
         
-		// TODO Position
+		this.x.setValueQuietly(groi.getPointX(), Dimensionless.UNIT);
+		viewer.update(x, new String[]{"Value"});
 		
+		this.y.setValueQuietly(groi.getPointY(), Dimensionless.UNIT);
+		viewer.update(y, new String[]{"Value"});
 	}
 
 	/**

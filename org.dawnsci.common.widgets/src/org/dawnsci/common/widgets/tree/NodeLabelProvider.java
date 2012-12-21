@@ -50,7 +50,7 @@ public class NodeLabelProvider extends ColumnLabelProvider implements IStyledLab
 			return ret.append(node.getValue()+"", StyledString.DECORATIONS_STYLER);
 			 
 		case 3: // Unit
-			return ret.append("-", StyledString.QUALIFIER_STYLER);
+			//return ret.append("-", StyledString.QUALIFIER_STYLER);
 
 		}
 		return ret;

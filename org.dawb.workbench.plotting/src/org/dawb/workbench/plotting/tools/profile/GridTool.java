@@ -1,5 +1,6 @@
 package org.dawb.workbench.plotting.tools.profile;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.dawb.common.ui.plot.region.IROIListener;
@@ -280,6 +281,12 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 	public void activate() {
 		super.activate();
 		if (getPlottingSystem()!=null) {
+			Collection<IRegion> regions = getPlottingSystem().getRegions();
+			for (IRegion region : regions) {
+				if (region!=null && region.getRegionType()==RegionType.GRID) {
+					region.addROIListener(roiListener);
+				}
+			}
 			getPlottingSystem().addRegionListener(regionListener);
 		}
 		createNewRegion();
@@ -289,6 +296,12 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 	public void deactivate() {
 		super.deactivate();
 		if (getPlottingSystem()!=null) {
+			Collection<IRegion> regions = getPlottingSystem().getRegions();
+		    for (IRegion region : regions) {
+				if (region!=null && region.getRegionType()==RegionType.GRID) {
+					region.removeROIListener(roiListener);
+				}
+			}
 			getPlottingSystem().removeRegionListener(regionListener);
 		}
 	}
