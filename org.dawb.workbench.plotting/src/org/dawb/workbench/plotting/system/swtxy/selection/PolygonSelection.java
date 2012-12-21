@@ -36,12 +36,30 @@ public class PolygonSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
+	public void setVisible(boolean visible) {
+		getBean().setVisible(visible);
+		if (pline != null)
+			pline.setVisible(visible);
+	}
+
+	@Override
+	public void setMobile(final boolean mobile) {
+		getBean().setMobile(mobile);
+		if (pline != null)
+			pline.setMobile(mobile);
+	}
+
+	@Override
 	public void createContents(Figure parent) {
 		pline = new DecoratedPolygon(parent);
 		pline.setCursor(Draw2DUtils.getRoiMoveCursor());
 
 		parent.add(pline);
 		sync(getBean());
+		setOpaque(false);
+		setAlpha(getAlpha());
+		pline.setForegroundColor(getRegionColor());
+		pline.setAlpha(getAlpha());
 		updateROI();
 		if (roi == null)
 			createROI(true);
@@ -124,42 +142,62 @@ public class PolygonSelection extends AbstractSelectionRegion {
 		return 0; // signifies unlimited presses
 	}
 
+	@Override
+	public void dispose() {
+		super.dispose();
+		if (pline != null) {
+			pline.dispose();
+		}
+	}
+
 	class DecoratedPolygon extends RotatablePolygonShape implements IRegionContainer {
 		List<IFigure> handles;
+		List<FigureTranslator> fTranslators;
 		private Figure parent;
+		private FigureListener moveListener;
 		private static final int SIDE = 8;
 
 		public DecoratedPolygon(Figure parent) {
 			super();
 			handles = new ArrayList<IFigure>();
+			fTranslators = new ArrayList<FigureTranslator>();
 			this.parent = parent;
+			moveListener = new FigureListener() {
+				@Override
+				public void figureMoved(IFigure source) {
+					DecoratedPolygon.this.parent.repaint();
+				}
+			};
+		}
+
+		public void dispose() {
+			for (IFigure f : handles) {
+				((SelectionHandle) f).removeMouseListeners();
+			}
+			for (FigureTranslator t : fTranslators) {
+				t.removeTranslationListeners();
+			}
+			removeFigureListener(moveListener);
 		}
 
 		@Override
 		public void setPoints(PointList points) {
 			super.setPoints(points);
-			FigureListener listener = new FigureListener() {
-				@Override
-				public void figureMoved(IFigure source) {
-					parent.repaint();
-				}
-			};
 
-			FigureTranslator mover;
 			final Point p = new Point();
+			boolean mobile = isMobile();
+			boolean visible = isVisible() && mobile;
 			for (int i = 0, imax = points.size(); i < imax; i++) {
 				points.getPoint(p, i);
-				RectangularHandle h = new RectangularHandle(coords, getRegionColor(), this, SIDE, p.preciseX(), p.preciseY());
-				parent.add(h);
-				mover = new FigureTranslator(getXyGraph(), h);
-				mover.addTranslationListener(createRegionNotifier());
-				h.addFigureListener(listener);
-				handles.add(h);
+				addHandle(p.preciseX(), p.preciseY(), mobile, visible);
 			}
 
-			addFigureListener(listener);
-			mover = new FigureTranslator(getXyGraph(), parent, this, handles);
+			addFigureListener(moveListener);
+			FigureTranslator mover = new FigureTranslator(getXyGraph(), parent, this, handles);
+			mover.setActive(isMobile());
 			mover.addTranslationListener(createRegionNotifier());
+			fTranslators.add(mover);
+
 			setRegionObjects(this, handles);
 		}
 
@@ -180,19 +218,80 @@ public class PolygonSelection extends AbstractSelectionRegion {
 			return b;
 		}
 
+		@Override
+		public void setVisible(boolean visible) {
+			super.setVisible(visible);
+			boolean hVisible = visible && isMobile();
+			for (IFigure h : handles) {
+				h.setVisible(hVisible);
+			}
+		}
+
+		public void setMobile(boolean mobile) {
+			for (IFigure h : handles) {
+				h.setVisible(mobile);
+			}
+			for (FigureTranslator f : fTranslators) {
+				f.setActive(mobile);
+			}
+		}
+
+		private void removeHandle(SelectionHandle h) {
+			parent.remove(h);
+			h.removeMouseListeners();
+		}
+
+		private void addHandle(double x, double y, boolean mobile, boolean visible) {
+			RectangularHandle h = new RectangularHandle(coords, getRegionColor(), this, SIDE, x, y);
+			h.setVisible(visible);
+			parent.add(h);
+			FigureTranslator mover = new FigureTranslator(getXyGraph(), h);
+			mover.setActive(mobile);
+			mover.addTranslationListener(createRegionNotifier());
+			fTranslators.add(mover);
+			h.addFigureListener(moveListener);
+			handles.add(h);
+		}
+
 		/**
 		 * Update according to ROI
-		 * @param sroi
+		 * @param proi
 		 */
 		public void updateFromROI(PolylineROI proi) {
 			final PointList pl = getPoints();
-			final int imax = handles.size();
-			if (imax != proi.getNumberOfPoints())
+			int imax = handles.size();
+			if (imax != proi.getNumberOfPoints()) {
+				for (int i = imax-1; i >= 0; i--) {
+					removeHandle((SelectionHandle) handles.remove(i));
+				}
+				imax = proi.getNumberOfPoints();
+				int np = pl.size();
+				boolean mobile = isMobile();
+				boolean visible = isVisible() && mobile;
+				for (int i = 0; i < imax; i++) {
+					PointROI r = proi.getPoint(i);
+					int[] pnt  = coords.getValuePosition(r.getPointRef());
+					Point p = new Point(pnt[0], pnt[1]);
+					if (i < np) {
+						setPoint(p, i);
+					} else {
+						addPoint(p);
+					}
+					addHandle(pnt[0], pnt[1], mobile, visible);
+				}
+
+				addFigureListener(moveListener);
+				FigureTranslator mover = new FigureTranslator(getXyGraph(), parent, this, handles);
+				mover.addTranslationListener(createRegionNotifier());
+				mover.setActive(isMobile());
+				fTranslators.add(mover);
+				setRegionObjects(this, handles);
 				return;
+			}
 
 			for (int i = 0; i < imax; i++) {
 				PointROI p = proi.getPoint(i);
-				int[] pnt  = coords.getValuePosition(p.getPoint());
+				int[] pnt  = coords.getValuePosition(p.getPointRef());
 				Point np = new Point(pnt[0], pnt[1]);
 				pl.setPoint(np, i);
 				SelectionHandle h = (SelectionHandle) handles.get(i);

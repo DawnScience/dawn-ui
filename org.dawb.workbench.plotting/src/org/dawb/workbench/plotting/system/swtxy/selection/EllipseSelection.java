@@ -213,11 +213,13 @@ public class EllipseSelection extends AbstractSelectionRegion {
 		}
 
 		private void createHandles(boolean createROI) {
+			boolean mobile = isMobile();
+			boolean visible = isVisible() && mobile;
 			// handles
 			for (int i = 0; i < 4; i++) {
-				addHandle(getPoint(i*90));
+				addHandle(getPoint(i*90), mobile, visible);
 			}
-			addCentreHandle();
+			addCentreHandle(mobile, visible);
 
 			// figure move
 			addFigureListener(moveListener);
@@ -249,8 +251,9 @@ public class EllipseSelection extends AbstractSelectionRegion {
 		@Override
 		public void setVisible(boolean visible) {
 			super.setVisible(visible);
+			boolean hVisible = visible && isMobile();
 			for (IFigure h : handles) {
-				h.setVisible(visible);
+				h.setVisible(hVisible);
 			}
 		}
 
@@ -263,26 +266,26 @@ public class EllipseSelection extends AbstractSelectionRegion {
 			}
 		}
 
-		private void addHandle(Point p) {
+		private void addHandle(Point p, boolean mobile, boolean visible) {
 			RectangularHandle h = new RectangularHandle(coords, getRegionColor(), this, SIDE,
 					p.preciseX(), p.preciseY());
-			h.setVisible(isVisible() && isMobile());
+			h.setVisible(visible);
 			parent.add(h);
 			FigureTranslator mover = new FigureTranslator(getXyGraph(), h);
-			mover.setActive(isMobile());
+			mover.setActive(mobile);
 			mover.addTranslationListener(handleListener);
 			fTranslators.add(mover);
 			h.addFigureListener(moveListener);
 			handles.add(h);
 		}
 
-		private void addCentreHandle() {
+		private void addCentreHandle(boolean mobile, boolean visible) {
 			Point c = getCentre();
 			RectangularHandle h = new RectangularHandle(coords, getRegionColor(), this, SIDE, c.preciseX(), c.preciseY());
-			h.setVisible(isVisible() && isMobile());
+			h.setVisible(visible);
 			parent.add(h);
 			FigureTranslator mover = new FigureTranslator(getXyGraph(), h, h, handles);
-			mover.setActive(isMobile());
+			mover.setActive(mobile);
 			mover.addTranslationListener(createRegionNotifier());
 			fTranslators.add(mover);
 			h.addFigureListener(moveListener);
