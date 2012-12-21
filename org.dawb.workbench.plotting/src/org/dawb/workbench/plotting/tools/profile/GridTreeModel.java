@@ -38,10 +38,12 @@ public class GridTreeModel extends AbstractNodeModel {
 		createGridNodes();
 	}
 
+	// All the nodes member data, not great
 	private NumericNode<Length> xres, yres;
-	private ObjectNode roiName;
-	private ColorNode regionColor, spotColor, gridColor;
-	private BooleanNode midPoints, gridLines;
+	private ObjectNode  roiName, gridDims;
+	private ColorNode   regionColor, spotColor, gridColor;
+	private BooleanNode midPoints,   gridLines;
+	private NumericNode<Length> x, y, width, height;
 	/**
 	 * Same nodes to edit any 
 	 */
@@ -108,6 +110,7 @@ public class GridTreeModel extends AbstractNodeModel {
 				groi.setxSpacing(xspacing);
 				region.setROI(groi);
 				region.repaint();
+				updateGridDimensions();
 			}
 		});
         registerNode(xres);
@@ -127,9 +130,13 @@ public class GridTreeModel extends AbstractNodeModel {
 				groi.setySpacing(yspacing);
 				region.setROI(groi);
 				region.repaint();
+				updateGridDimensions();
 			}
 		});
         registerNode(yres);
+        
+        this.gridDims = new ObjectNode("Grid Dimensions", "0 x 0 = no grid", grid);
+        registerNode(gridDims);
 
         this.midPoints = new BooleanNode("Display mid-points", true, grid);
         registerNode(midPoints);
@@ -156,6 +163,19 @@ public class GridTreeModel extends AbstractNodeModel {
 		});
         
         
+        final LabelNode pos = new LabelNode("Position", root);
+        pos.setDefaultExpanded(true);
+        registerNode(pos);
+        
+        
+	}
+
+	protected void updateGridDimensions() {
+		String value = String.format("%d x %d = %d point%s", groi.getDimensions()[0], groi.getDimensions()[1], groi
+				.getDimensions()[0]
+				* groi.getDimensions()[1], groi.getDimensions()[0] * groi.getDimensions()[1] == 1 ? "" : "s");
+		this.gridDims.setValue(value, false);
+		viewer.update(gridDims,  new String[]{"Value"});
 	}
 
 	private void setGridROI(GridROI groi) {
@@ -176,6 +196,8 @@ public class GridTreeModel extends AbstractNodeModel {
 			
 			gridLines.setValue(groi.isGridLineOn(), false);
 			viewer.update(gridLines, new String[]{"Value"});
+			
+			updateGridDimensions();
 		}
 		this.groi = groi;
         
