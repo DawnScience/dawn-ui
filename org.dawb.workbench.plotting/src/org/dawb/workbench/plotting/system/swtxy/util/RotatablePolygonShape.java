@@ -128,11 +128,6 @@ public class RotatablePolygonShape extends AbstractPointListShape {
 		// TODO On linux some of these points very far off screen will cause 
 		// the UI to go slow or die.
 		graphics.drawPolygon(npl);
-//		graphics.pushState();
-//		graphics.setAdvanced(true);
-//		graphics.rotate(angle);
-//		graphics.drawPolygon(opl);
-//		graphics.popState();
 	}
 
 	@Override
