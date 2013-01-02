@@ -246,9 +246,10 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 	}
 	
 	private void createActions() {
-		
-        final Action preferences = new Action("Preferences...") {
-        	public void run() {
+
+		createToolPageActions();
+		final Action preferences = new Action("Preferences...") {
+			public void run() {
 				//if (!isActive()) return;
 				PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "uk.ac.diamond.scisoft.analysis.rcp.gridScanPreferencePage", null, null);
 				if (pref != null) pref.open();
