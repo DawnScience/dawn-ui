@@ -330,6 +330,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 	public void mousePressed(MouseEvent me) {
 		
 		if (!isActive()) return;
+		if (me.button!=1) return;
 		try {
 			xUpdateJob.suspend(true);
 			yUpdateJob.suspend(true);
@@ -412,7 +413,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 			
             		                  
 			ILineTrace trace = (ILineTrace)profilePlotter.getTrace(region.getName());
-			if (trace == null || snapshot) {
+			if ((trace == null && region.isVisible()) || snapshot) {
 				synchronized (profilePlotter) {  // Only one job at a time can choose axis and create plot.
 					if (isXAxis(region)) {
 						profilePlotter.setSelectedXAxis(x1);
@@ -433,6 +434,15 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 						}	
 				    }
 				}
+			} else if (!region.isVisible() && trace!=null) {
+				final ITrace finalTrace = trace;
+				getControl().getDisplay().syncExec(new Runnable() {
+					public void run() {
+				        profilePlotter.removeTrace(finalTrace);
+				        profilePlotter.repaint();
+					}
+				});
+				return false;
 			}
 
 			final AbstractDataset data = image.getData();
@@ -460,6 +470,8 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 				logger.error("Cannot slice using "+bounds, ne);
 				return false;
 			}
+			
+			if (trace==null) return false;
 			slice.setName(trace.getName());
 			trace.setData(sliceIndex, slice);
 
