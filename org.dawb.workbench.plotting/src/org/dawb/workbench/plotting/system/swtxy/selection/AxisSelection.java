@@ -149,6 +149,7 @@ class AxisSelection extends AbstractSelectionRegion {
     		 */
     		public void mouseExited(MouseEvent me) {
     			setVisible(false);
+    			fireROIChanged(getROI());
     		}
 
         };
