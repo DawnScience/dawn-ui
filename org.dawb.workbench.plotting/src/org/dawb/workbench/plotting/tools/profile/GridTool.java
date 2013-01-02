@@ -13,6 +13,7 @@ import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.viewers.TreeNodeContentProvider;
+import org.dawb.workbench.plotting.preference.FittingPreferencePage;
 import org.dawnsci.common.widgets.tree.BooleanNode;
 import org.dawnsci.common.widgets.tree.ClearableFilteredTree;
 import org.dawnsci.common.widgets.tree.ColorNode;
@@ -26,9 +27,13 @@ import org.dawnsci.common.widgets.tree.ValueEditingSupport;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.JFacePreferences;
+import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
@@ -51,9 +56,13 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.rcp.AnalysisRCPActivator;
+import uk.ac.diamond.scisoft.analysis.rcp.preference.PreferenceConstants;
 import uk.ac.diamond.scisoft.analysis.roi.GridROI;
 
 /**
@@ -103,7 +112,8 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 			}
 		};
 	}
-	
+
+
 	@Override
 	public ToolPageRole getToolPageRole() {
 		return ToolPageRole.ROLE_2D;
@@ -236,8 +246,15 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 	}
 	
 	private void createActions() {
-		// TODO Auto-generated method stub
 		
+        final Action preferences = new Action("Preferences...") {
+        	public void run() {
+				//if (!isActive()) return;
+				PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "uk.ac.diamond.scisoft.analysis.rcp.gridScanPreferencePage", null, null);
+				if (pref != null) pref.open();
+        	}
+        };
+        getSite().getActionBars().getMenuManager().add(preferences);
 	}
 
 
@@ -282,7 +299,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		super.activate();
 		if (getPlottingSystem()!=null) {
 			Collection<IRegion> regions = getPlottingSystem().getRegions();
-			for (IRegion region : regions) {
+			if (regions!=null) for (IRegion region : regions) {
 				if (region!=null && region.getRegionType()==RegionType.GRID) {
 					region.addROIListener(roiListener);
 				}
@@ -297,7 +314,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		super.deactivate();
 		if (getPlottingSystem()!=null) {
 			Collection<IRegion> regions = getPlottingSystem().getRegions();
-		    for (IRegion region : regions) {
+		    if (regions!=null) for (IRegion region : regions) {
 				if (region!=null && region.getRegionType()==RegionType.GRID) {
 					region.removeROIListener(roiListener);
 				}
@@ -313,6 +330,9 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		try {
 			IRegion region = getPlottingSystem().createRegion(RegionUtils.getUniqueName(getRegionName(), getPlottingSystem()), getCreateRegionType());
 			region.setUserObject(getMarker());
+			
+			//TODO Set preferences here...
+			
 		} catch (Exception e) {
 			logger.error("Cannot create region for profile tool!");
 		}

@@ -60,7 +60,7 @@ public class GridSelection extends BoxSelection {
 				
 				super.paintFigure(gc);
 				final Rectangle size = getRectangleFromVertices();				
-				this.bounds = size;
+				this.bounds = size.getCopy().expand(5, 5);
 				gc.setAlpha(getAlpha());
 				gc.fillRectangle(size);
 				
@@ -182,6 +182,7 @@ public class GridSelection extends BoxSelection {
 				groi.setGridPreferences(oldRoi.getGridPreferences());
 			    groi.setGridLineOn(oldRoi.isGridLineOn());
 			    groi.setMidPointOn(oldRoi.isMidPointOn());
+			    
 			}
 			
 			if (recordResult) roi = groi;
@@ -220,4 +221,13 @@ public class GridSelection extends BoxSelection {
 	public void setGridColor(Color gridColor) {
 		this.gridColor = gridColor;
 	}
+	
+	@Override
+	protected void updateConnectionBounds() {
+		if (connection==null) return;
+		final Rectangle size = getRectangleFromVertices();				
+		size.expand(5, 5);
+		connection.setBounds(size);
+	}
+	
 }

@@ -1,9 +1,7 @@
 package org.dawb.workbench.plotting.tools.profile;
 
-import javax.measure.quantity.Angle;
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Length;
-import javax.measure.quantity.Quantity;
 import javax.measure.unit.SI;
 
 import org.dawb.common.ui.plot.region.IRegion;
@@ -19,9 +17,15 @@ import org.dawnsci.common.widgets.tree.ObjectNode;
 import org.dawnsci.common.widgets.tree.ValueEvent;
 import org.dawnsci.common.widgets.tree.ValueListener;
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.graphics.Color;
 import org.jscience.physics.amount.Amount;
 
+import uk.ac.diamond.scisoft.analysis.rcp.AnalysisRCPActivator;
+import uk.ac.diamond.scisoft.analysis.rcp.preference.PreferenceConstants;
+import uk.ac.diamond.scisoft.analysis.roi.GridPreferences;
 import uk.ac.diamond.scisoft.analysis.roi.GridROI;
 
 /**
@@ -39,6 +43,7 @@ public class GridTreeModel extends AbstractNodeModel {
 	GridTreeModel() {
 		super();
 		createGridNodes();
+		createPreferenceListener();
 	}
 
 	// All the nodes member data, not great
@@ -307,6 +312,73 @@ public class GridTreeModel extends AbstractNodeModel {
 		registerNode(height);
 
 	}
+	
+	private void createPreferenceListener() {
+		
+		AnalysisRCPActivator.getDefault().getPreferenceStore().addPropertyChangeListener(new IPropertyChangeListener() {
+			@Override
+			public void propertyChange(PropertyChangeEvent event) {
+				String property = event.getProperty();
+
+				if (groi==null) return;
+				
+				if (property.equals(PreferenceConstants.GRIDSCAN_RESOLUTION_X)
+						|| property.equals(PreferenceConstants.GRIDSCAN_RESOLUTION_Y)
+						|| property.equals(PreferenceConstants.GRIDSCAN_BEAMLINE_POSX)
+						|| property.equals(PreferenceConstants.GRIDSCAN_BEAMLINE_POSY)) {
+					setGridPreferences(true);
+				}
+			}
+		});
+
+	}
+
+
+	protected void setGridPreferences(boolean sendRoi) {
+		
+		if (groi==null) return;
+
+		IPreferenceStore preferenceStore = AnalysisRCPActivator.getDefault().getPreferenceStore();
+
+		double gridScanResolutionX;
+		if (preferenceStore.isDefault(PreferenceConstants.GRIDSCAN_RESOLUTION_X)) {
+			gridScanResolutionX = preferenceStore
+					.getDefaultDouble(PreferenceConstants.GRIDSCAN_RESOLUTION_X);
+		} else {
+			gridScanResolutionX = preferenceStore.getDouble(PreferenceConstants.GRIDSCAN_RESOLUTION_X);
+		}
+		groi.getGridPreferences().setResolutionX(gridScanResolutionX);
+
+		double gridScanResolutionY;
+		if (preferenceStore.isDefault(PreferenceConstants.GRIDSCAN_RESOLUTION_Y)) {
+			gridScanResolutionY = preferenceStore
+					.getDefaultDouble(PreferenceConstants.GRIDSCAN_RESOLUTION_Y);
+		} else {
+			gridScanResolutionY = preferenceStore.getDouble(PreferenceConstants.GRIDSCAN_RESOLUTION_Y);
+		}
+		groi.getGridPreferences().setResolutionY(gridScanResolutionY);
+
+		double xBeamPos;
+		if (preferenceStore.isDefault(PreferenceConstants.GRIDSCAN_BEAMLINE_POSX)) {
+			xBeamPos = preferenceStore.getDefaultDouble(PreferenceConstants.GRIDSCAN_BEAMLINE_POSX);
+		} else {
+			xBeamPos = preferenceStore.getDouble(PreferenceConstants.GRIDSCAN_BEAMLINE_POSX);
+		}
+		groi.getGridPreferences().setBeamlinePosX(xBeamPos);
+
+		double yBeamPos;
+		if (preferenceStore.isDefault(PreferenceConstants.GRIDSCAN_BEAMLINE_POSY)) {
+			yBeamPos = preferenceStore.getDefaultDouble(PreferenceConstants.GRIDSCAN_BEAMLINE_POSY);
+		} else {
+			yBeamPos = preferenceStore.getDouble(PreferenceConstants.GRIDSCAN_BEAMLINE_POSY);
+		}
+		groi.getGridPreferences().setBeamlinePosY(yBeamPos);
+		
+		if (sendRoi) {
+			region.setROI(groi);
+			region.repaint();
+		}
+	}
 
 	protected void updateGridDimensions(GridROI groi) {
 		String value = String.format("%d x %d = %d point%s", groi.getDimensions()[0], groi.getDimensions()[1], groi
@@ -338,6 +410,7 @@ public class GridTreeModel extends AbstractNodeModel {
 			viewer.update(gridLines, new String[]{"Value"});
 			
 			updateGridDimensions(groi);
+			setGridPreferences(false);
 		}
 		this.groi = groi;
         
