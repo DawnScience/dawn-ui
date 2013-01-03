@@ -61,6 +61,8 @@ import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 public class ImageTrace extends Figure implements IImageTrace, IAxisListener, ITraceContainer {
 	
 	private static final Logger logger = LoggerFactory.getLogger(ImageTrace.class);
+	
+	private static final int MINIMUM_ZOOM_SIZE = 4;
 
 	private String           name;
 	private Axis             xAxis;
@@ -269,24 +271,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				ImageData data = imageData;
 				ImageOrigin origin = getImageOrigin();
 				int[] shape = image.getShape();
-				int[] imageRanges = getImageBounds(shape, origin);
-				int[] axisRanges = getAxisBounds(); 
 				
-				//FIXME fix up the origin so it works properly.
-				
-//				switch (origin) {
-//				case TOP_LEFT:
-//					return xCoord/shape[1];
-//				case TOP_RIGHT:
-//					return (shape[0]-xCoord)/shape[0];
-//				case BOTTOM_RIGHT:
-//					return (shape[1]-xCoord)/shape[1];
-//				case BOTTOM_LEFT:
-//					return xCoord/shape[0];
-//				}
-				
-				
-				// ADDED CODE
 				Range xRange = xAxis.getRange();
 				Range yRange = yAxis.getRange();
 				
@@ -295,7 +280,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				double maxX = xRange.getUpper()/currentDownSampleBin;
 				double maxY = yRange.getUpper()/currentDownSampleBin;
 				
-				// check as getLower and getUpper dont work as expected
+				int xSize = shape[0]/currentDownSampleBin;
+				int ySize = shape[0]/currentDownSampleBin;
+				
+				// check as getLower and getUpper don't work as expected
 				if(maxX < minX){
 					double temp = maxX;
 					maxX = minX;
@@ -313,88 +301,75 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				double xScale = rbounds.width / xSpread;
 				double yScale = rbounds.height / ySpread;
 				
+				// These offfsets are used when the scaled images is drawn to the screen.
 				xOffset = (minX - Math.floor(minX))*xScale;
 				yOffset = (minY - Math.floor(minY))*yScale;
 				
+				// Deliberatly get the over-sised dimensions so that the edge pixels can be smoothly panned through.
+				int minXI = (int) Math.floor(minX);
+				int minYI = (int) Math.floor(minY);
 				
-				minX = (int) Math.floor(minX);
-				minY = (int) Math.floor(minY);
+				int maxXI = (int) Math.ceil(maxX);
+				int maxYI = (int) Math.ceil(maxY);
 				
-				maxX = (int) Math.ceil(maxX);
-				maxY = (int) Math.ceil(maxY);
+				int fullWidth = (int) ((maxXI-minXI));
+				int fullHeight = (int) ((maxYI-minYI));
 				
-				int fullWidth = (int) ((maxX-minX));
-				int fullHeight = (int) ((maxY-minY));
-				
-				if(fullWidth<=4) {
-					fullWidth = 4;
+				// Force a minimum size on the system
+				if(fullWidth<=MINIMUM_ZOOM_SIZE) {
+					fullWidth = MINIMUM_ZOOM_SIZE;
 					isMaximumZoom = true;
 				}
-				if (fullHeight<=4) {
-					fullHeight = 4;
+				if (fullHeight<=MINIMUM_ZOOM_SIZE) {
+					fullHeight = MINIMUM_ZOOM_SIZE;
 					isMaximumZoom = true;
 				};
-				
 				
 				int scaleWidth = (int) (fullWidth*xScale);
 				int scaleHeight = (int) (fullHeight*yScale);
 				
-					// Pixel slice on downsampled data = fast!
-					// NOTE Assumes 8-bit images
-					final int size   = fullWidth*fullHeight;
-					final byte[] pixels = new byte[size];
-					final int wid    = fullWidth;
-					for (int y = 0; y < fullHeight; y++) {
-						imageData.getPixels(((int)minX), ((int)minY)+y, wid, pixels, wid*y);
-					}
-					data = new ImageData(fullWidth, fullHeight, data.depth, getPaletteData(), 1, pixels);
-//				} else {
-//					isMaximumZoom = true;
-//					// minimum zoomed-in image is 4 pixels, TODO: block axis rescaling
-//					final byte[] pixels = new byte[16];
-//					for (int y = 0; y < 4; y++) {
-//						imageData.getPixels(((int)minX), ((int)minY)+y, 4, pixels, 4*y);
-//					}
-//					data = new ImageData(4, 4, data.depth, getPaletteData(), 1, pixels);
-//				}
+				int xPix = (int)minX;
+				int yPix = (int)minY;
 				
-//				RESCALE: if (!Arrays.equals(axisRanges, imageRanges)) {
-//
-//					final double x1Rat = getXRatio(true, shape, origin);
-//					final double y1Rat = getYRatio(true, shape, origin);
-//					final double x4Rat = getXRatio(false, shape, origin);
-//					final double y4Rat = getYRatio(false, shape, origin);
-//
-//					// If scales are not requiring a slice, break
-//					if (x1Rat==0d && y1Rat==0d && x4Rat==1d && y4Rat==1d) {
-//						break RESCALE;
-//					}
-//					
-//					int x1 = (int)Math.round(imageData.width*x1Rat);
-//					int y1 = (int)Math.round(imageData.height*y1Rat);
-//					int x4 = (int)Math.round(imageData.width*x4Rat);
-//					int y4 = (int)Math.round(imageData.height*y4Rat);
-//					
-//					if((x4-x1)>=2 && (y4-y1)>=2){
-//						// Pixel slice on downsampled data = fast!
-//						// NOTE Assumes 8-bit images
-//						final int size   = (x4-x1)*(y4-y1);
-//						final byte[] pixels = new byte[size];
-//						final int wid    = (x4-x1);
-//						for (int y = 0; y < (y4-y1); y++) {
-//							imageData.getPixels(x1, y1+y, wid, pixels, wid*y);
-//						}
-//						data = new ImageData((x4-x1), (y4-y1), data.depth, getPaletteData(), 1, pixels);
-//					} else {
-//						isMaximumZoom = true;
-//						// minimum zoomed-in image is 4 pixels, TODO: block axis rescaling
-//						final byte[] pixels = new byte[4];
-//						for (int y = 0; y < 2; y++) {
-//							imageData.getPixels(x1, y1+y, 2, pixels, 2*y);
-//						}
-//						data = new ImageData(2, 2, data.depth, getPaletteData(), 1, pixels);
-//					}
-//				}
+				double xPixD = 0;
+				double yPixD = 0;
+				
+				// Deal with the origin orientations correctly.
+				switch (origin) {
+				case TOP_LEFT:
+					break;
+				case TOP_RIGHT:
+					xPixD = xSize-maxX;
+					xPix = (int) Math.floor(xPixD);
+					xOffset = (xPixD - xPix)*xScale;
+					break;
+				case BOTTOM_RIGHT:
+					xPixD = xSize-maxX;
+					xPix = (int) Math.floor(xPixD);
+					xOffset = (xPixD - xPix)*xScale;
+					yPixD = ySize-maxY;
+					yPix = (int) Math.floor(yPixD);
+					yOffset = (yPixD - yPix)*yScale;
+					break;
+				case BOTTOM_LEFT:
+					yPixD = ySize-maxY;
+					yPix = (int) Math.floor(yPixD);
+					yOffset = (yPixD - yPix)*yScale;
+					break;
+				}
+				
+				// Slice the data.
+				// Pixel slice on downsampled data = fast!
+				// NOTE Assumes 8-bit images
+				final int size   = fullWidth*fullHeight;
+				final byte[] pixels = new byte[size];
+				final int wid    = fullWidth;
+				for (int y = 0; y < fullHeight; y++) {
+					imageData.getPixels(xPix, yPix+y, wid, pixels, wid*y);
+				}
+				data = new ImageData(fullWidth, fullHeight, data.depth, getPaletteData(), 1, pixels);
+				
+				// create the scaled image
 				data = data!=null ? data.scaledTo(scaleWidth, scaleHeight) : null;
 				if (scaledImage!=null &&!scaledImage.isDisposed()) scaledImage.dispose(); // IMPORTANT
 				scaledImage = data!=null ? new Image(Display.getDefault(), data) : null;
@@ -410,47 +385,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 	}
 
-	private int[] getAxisBounds() {
-		final Range xr = getXAxis().getRange();
-		final Range yr = getYAxis().getRange();
-		return getBounds(xr, yr);
-	}
-
 	private static final int[] getBounds(Range xr, Range yr) {
 		return new int[] {(int) Math.floor(xr.getLower()), (int) Math.floor(yr.getLower()),
 				(int) Math.ceil(xr.getUpper()), (int) Math.ceil(yr.getUpper())};
-	}
-
-	private double getXRatio(boolean isTopLeft, final int[] shape, ImageOrigin origin) {
-		double xCoord = isTopLeft ? getXAxis().getRange().getLower() : getXAxis().getRange().getUpper();
-		if (origin==null) origin=ImageOrigin.TOP_LEFT;
-		switch (origin) {
-		case TOP_LEFT:
-			return xCoord/shape[1];
-		case TOP_RIGHT:
-			return (shape[0]-xCoord)/shape[0];
-		case BOTTOM_RIGHT:
-			return (shape[1]-xCoord)/shape[1];
-		case BOTTOM_LEFT:
-			return xCoord/shape[0];
-		}
-		return 0d;
-	}
-
-	private double getYRatio(boolean isTopLeft, final int[] shape, ImageOrigin origin) {
-		double yCoord = isTopLeft ? getYAxis().getRange().getUpper() : getYAxis().getRange().getLower();
-		if (origin==null) origin = ImageOrigin.TOP_LEFT;
-		switch (origin) {
-		case TOP_LEFT:
-			return yCoord/shape[0];
-		case TOP_RIGHT:
-			return yCoord/shape[1];
-		case BOTTOM_RIGHT:
-			return (shape[0]-yCoord)/shape[0];
-		case BOTTOM_LEFT:
-			return (shape[1]-yCoord)/shape[1];
-		}
-		return 0d;
 	}
 
 	private Map<Integer, Reference<Object>> mipMap;
@@ -567,12 +504,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		final XYRegionGraph graph  = (XYRegionGraph)xAxis.getParent();
 		final Point         loc    = graph.getRegionArea().getLocation();
 		
-		System.out.println("Locations (" + loc.x + ":" + loc.y +") : xAxis is " + xAxis.getPositionValue(0, true) + "  : yAxis is :" + yAxis.getPositionValue(0, true) );
-		double posX = xAxis.getPositionValue(0, true);
-		posX = posX - Math.floor(posX); 
-		double posY = yAxis.getPositionValue(0, true);
-		posY = posY - Math.floor(posY); 
-		
+		// Offsets and scaled image are calculated in the createScaledImage method.
 		graphics.drawImage(scaledImage, loc.x-((int)xOffset), loc.y-((int)yOffset));
   	    
 		graphics.popState();
