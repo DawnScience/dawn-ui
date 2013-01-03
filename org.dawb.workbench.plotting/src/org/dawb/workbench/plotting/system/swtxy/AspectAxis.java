@@ -6,6 +6,7 @@ import java.util.Collection;
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.swt.xygraph.linearscale.Range;
+import org.csstudio.swt.xygraph.linearscale.AbstractScale.LabelSide;
 import org.dawb.common.services.ImageServiceBean.ImageOrigin;
 import org.dawb.common.ui.plot.axis.AxisEvent;
 import org.dawb.common.ui.plot.axis.IAxis;
@@ -387,5 +388,11 @@ public class AspectAxis extends Axis implements IAxis {
 
 	public String toString() {
 		return getTitle()+", "+getOrientation();
+	}
+	
+	@Override
+	public boolean isPrimaryAxis() {
+		final XYRegionGraph xyGraph = (XYRegionGraph)getGraph();
+		return xyGraph.primaryXAxis==this || xyGraph.primaryYAxis==this;
 	}
 }

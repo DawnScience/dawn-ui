@@ -54,6 +54,7 @@ public class RemoveAxisDialog extends Dialog {
 			}
 		});
 		title.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		title.select(0);
 		
 		return content;
 	}

@@ -871,7 +871,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 	
 	@Override
 	public IAxis removeAxis(final IAxis axis) {
-		if (axis.isPrimary()) return null;
+		if (axis.isPrimaryAxis()) return null;
 		if (!(axis instanceof AspectAxis)) return null;
 		xyGraph.removeAxis((AspectAxis)axis);
 		return axis;
