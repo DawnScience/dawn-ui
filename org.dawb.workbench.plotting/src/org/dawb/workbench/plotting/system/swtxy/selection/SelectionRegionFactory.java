@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import org.dawb.common.services.ITransferService;
+import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.axis.ICoordinateSystem;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
@@ -108,7 +109,8 @@ public class SelectionRegionFactory {
 	
 	public static IContributionManager fillActions(final IContributionManager    manager, 
 			                                       final IRegion                 region,
-			                                       final XYRegionGraph           xyGraph) {
+			                                       final XYRegionGraph           xyGraph,
+			                                       final AbstractPlottingSystem  system) {
 		
 		manager.add(new Separator("org.dawb.workbench.plotting.system.region.start"));
 
@@ -153,7 +155,7 @@ public class SelectionRegionFactory {
 
 		final Action configure = new Action("Configure '"+region.getName()+"'", Activator.getImageDescriptor("icons/RegionProperties.png")) {
 			public void run() {
-				final XYRegionConfigDialog dialog = new XYRegionConfigDialog(Display.getCurrent().getActiveShell(), xyGraph);
+				final XYRegionConfigDialog dialog = new XYRegionConfigDialog(Display.getCurrent().getActiveShell(), xyGraph, system.isRescale());
 				dialog.setSelectedRegion(region);
 				dialog.open();
 			}

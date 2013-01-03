@@ -1,5 +1,7 @@
 package org.dawb.workbench.plotting.system;
 
+import java.util.List;
+
 import org.csstudio.swt.xygraph.figures.XYGraphFlags;
 import org.csstudio.swt.xygraph.toolbar.AddAnnotationDialog;
 import org.csstudio.swt.xygraph.toolbar.RemoveAnnotationDialog;
@@ -14,6 +16,8 @@ import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.ActionType;
 import org.dawb.common.ui.plot.ManagerType;
+import org.dawb.common.ui.plot.axis.AxisUtils;
+import org.dawb.common.ui.plot.axis.IAxis;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
@@ -21,7 +25,9 @@ import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
+import org.dawb.workbench.plotting.system.dialog.AddAxisDialog;
 import org.dawb.workbench.plotting.system.dialog.AddRegionDialog;
+import org.dawb.workbench.plotting.system.dialog.RemoveAxisDialog;
 import org.dawb.workbench.plotting.system.dialog.RemoveRegionCommand;
 import org.dawb.workbench.plotting.system.dialog.RemoveRegionDialog;
 import org.dawb.workbench.plotting.system.swtxy.XYRegionConfigDialog;
@@ -30,6 +36,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.window.Window;
@@ -71,6 +78,7 @@ class LightWeightPlotActions {
  		actionBarManager.createToolDimensionalActions(ToolPageRole.ROLE_1D, "org.dawb.workbench.plotting.views.toolPageView.1D");
  		actionBarManager.createToolDimensionalActions(ToolPageRole.ROLE_2D, "org.dawb.workbench.plotting.views.toolPageView.2D");
  		//actionBarManager.createToolDimensionalActions(ToolPageRole.ROLE_1D_AND_2D, "org.dawb.workbench.plotting.views.toolPageView.1D_and_2D");
+		createAxisActions();
  		createRegionActions(xyGraph);
  		createZoomActions(xyGraph, XYGraphFlags.COMBINED_ZOOM);
  		createUndoRedoActions(xyGraph);
@@ -79,7 +87,38 @@ class LightWeightPlotActions {
  		actionBarManager.createPalleteActions();
  		createOriginActions(xyGraph);
  		createAdditionalActions(xyGraph, null);
+	}
+
+	private void createAxisActions() {
 		
+		final Action createAxis = new Action("Create Axis...") {
+			public void run() {
+				AddAxisDialog addAxis = new AddAxisDialog(Display.getDefault().getActiveShell(), viewer.getSystem());
+				int ok = addAxis.open();
+				if (ok == Dialog.OK) {
+					viewer.getSystem().createAxis(addAxis.getTitle(), addAxis.isY(), addAxis.getSide());
+				}
+			}
+		};
+		actionBarManager.addXYAction(createAxis);
+		
+		final Action deleteAxis = new Action("Remove Axis...") {
+			public void run() {
+				List<IAxis> axes = AxisUtils.getUserAxes(viewer.getSystem());
+				if (axes==null || axes.isEmpty()) {
+					MessageDialog.openWarning(Display.getDefault().getActiveShell(), "No Axes", "There are no axes currently available to delete.");
+					return;
+				}
+				RemoveAxisDialog delAxis = new RemoveAxisDialog(Display.getDefault().getActiveShell(), viewer.getSystem());
+				int ok = delAxis.open();
+				if (ok == Dialog.OK) {
+					viewer.getSystem().removeAxis(delAxis.getAxis());
+				}
+				
+			}
+		};
+		actionBarManager.addXYAction(deleteAxis);
+		actionBarManager.addXYSeparator();
 	}
 
 	public void createUndoRedoActions(final XYRegionGraph xyGraph) {
@@ -139,7 +178,7 @@ class LightWeightPlotActions {
 		
 		final Action configButton = new Action("Configure Settings...", Activator.getImageDescriptor("icons/Configure.png")) {
 			public void run() {
-				XYGraphConfigDialog dialog = new XYRegionConfigDialog(Display.getCurrent().getActiveShell(), xyGraph);
+				XYGraphConfigDialog dialog = new XYRegionConfigDialog(Display.getCurrent().getActiveShell(), xyGraph, viewer.getSystem().isRescale());
 				dialog.open();
 			}
 		};

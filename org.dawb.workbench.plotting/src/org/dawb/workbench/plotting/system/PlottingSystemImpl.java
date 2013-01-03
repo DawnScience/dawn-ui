@@ -840,12 +840,30 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	 * @param side - either SWT.LEFT, SWT.RIGHT, SWT.TOP, SWT.BOTTOM
 	 * @return
 	 */
+	@Override
 	public IAxis createAxis(final String title, final boolean isYAxis, int side) {
 		
 		if (lightWeightViewer.getControl() == null) createLightWeightUI();
 					
 		return lightWeightViewer.createAxis(title, isYAxis, side);
 	}
+	
+	@Override
+	public IAxis removeAxis(final IAxis axis) {
+		
+		if (lightWeightViewer.getControl() == null) createLightWeightUI();
+					
+		return lightWeightViewer.removeAxis(axis);
+	}
+	
+	@Override
+	public List<IAxis> getAxes() {
+		
+		if (lightWeightViewer.getControl() == null) createLightWeightUI();
+					
+		return lightWeightViewer.getAxes();
+	}
+
 	
 	@Override
 	public IAxis getSelectedXAxis() {

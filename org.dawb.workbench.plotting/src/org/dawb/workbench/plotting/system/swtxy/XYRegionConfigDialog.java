@@ -35,15 +35,16 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
 	protected Combo imageTraceCombo;
 	protected List<ImageTraceComposite> imageTraceConfigPageList;
 	protected IPlottingSystem     plottingSystem;
+	private boolean isRescale;
 
-	public XYRegionConfigDialog(Shell parentShell, XYGraph xyGraph) {
+	public XYRegionConfigDialog(Shell parentShell, XYGraph xyGraph, boolean isRescale) {
 		super(parentShell, xyGraph);
 		regionList = new ArrayList<RegionComposite>();
 		this.regionGraph = (XYRegionGraph)xyGraph;
 	
 		command = new XYRegionConfigCommand(xyGraph);
 		command.savePreviousStates();
-
+        this.isRescale = isRescale;
 	}
 
 	@Override
@@ -219,6 +220,9 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
 			comp.applyChanges();
 		}
 		regionGraph.fireConfigurationPropertyChangeListeners();
+		if (isRescale) regionGraph.performAutoScale();
+		xyGraph.revalidate();
+		xyGraph.repaint();	
 	}
 	@Override
 	protected void cancelPressed() {

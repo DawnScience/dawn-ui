@@ -310,7 +310,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 					if (fig!=null) {
 					    if (fig instanceof IRegionContainer) {
 							final IRegion region = ((IRegionContainer)fig).getRegion();
-							SelectionRegionFactory.fillActions(manager, region, xyGraph);
+							SelectionRegionFactory.fillActions(manager, region, xyGraph, getSystem());
 					    }
 					    if (fig instanceof ITraceContainer) {
 							final ITrace trace = ((ITraceContainer)fig).getTrace();
@@ -346,7 +346,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 
 		final Action configure = new Action("Configure '"+annotation.getName()+"'", Activator.getImageDescriptor("icons/Configure.png")) {
 			public void run() {
-				final XYRegionConfigDialog dialog = new XYRegionConfigDialog(Display.getDefault().getActiveShell(), xyGraph);
+				final XYRegionConfigDialog dialog = new XYRegionConfigDialog(Display.getDefault().getActiveShell(), xyGraph, getSystem().isRescale());
 				dialog.setPlottingSystem(system);
 				dialog.setSelectedAnnotation(annotation);
 				dialog.open();
@@ -461,7 +461,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		if (xyGraph!=null) {
 			final Action configure = new Action("Configure '"+name+"'", Activator.getImageDescriptor("icons/TraceProperties.png")) {
 				public void run() {
-					final XYRegionConfigDialog dialog = new XYRegionConfigDialog(Display.getDefault().getActiveShell(), xyGraph);
+					final XYRegionConfigDialog dialog = new XYRegionConfigDialog(Display.getDefault().getActiveShell(), xyGraph, getSystem().isRescale());
 					dialog.setPlottingSystem(sys);
 					dialog.setSelectedTrace(trace);
 					dialog.open();
@@ -851,6 +851,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 	 * @param side - either SWT.LEFT, SWT.RIGHT, SWT.TOP, SWT.BOTTOM
 	 * @return
 	 */
+	@Override
 	public IAxis createAxis(final String title, final boolean isYAxis, int side) {
 					
 		AspectAxis axis = new AspectAxis(title, isYAxis);
@@ -867,6 +868,28 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		
 		return axis;
 	}	
+	
+	@Override
+	public IAxis removeAxis(final IAxis axis) {
+		if (axis.isPrimary()) return null;
+		if (!(axis instanceof AspectAxis)) return null;
+		xyGraph.removeAxis((AspectAxis)axis);
+		return axis;
+	}	
+	
+	@Override
+	public List<IAxis> getAxes() {
+		
+		List<Axis> axes = xyGraph.getAxisList();
+		List<IAxis> ret = new ArrayList<IAxis>(axes.size());
+		for (Axis axis : axes) {
+			if (!(axis instanceof IAxis)) continue;
+			ret.add((IAxis)axis);
+		}
+		return ret;
+	}
+
+
 	
 	private IAxis selectedXAxis;
 	private IAxis selectedYAxis;
