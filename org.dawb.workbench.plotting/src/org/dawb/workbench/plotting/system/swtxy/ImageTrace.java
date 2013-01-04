@@ -358,17 +358,31 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 					break;
 				}
 				
-				// Slice the data.
-				// Pixel slice on downsampled data = fast!
-				// NOTE Assumes 8-bit images
-				final int size   = fullWidth*fullHeight;
-				final byte[] pixels = new byte[size];
-				final int wid    = fullWidth;
-				for (int y = 0; y < fullHeight; y++) {
-					imageData.getPixels(xPix, yPix+y, wid, pixels, wid*y);
+				if (imageData.depth < 8) {
+					// Slice the data.
+					// Pixel slice on downsampled data = fast!
+					// NOTE Assumes 8-bit images
+					final int size   = fullWidth*fullHeight;
+					final byte[] pixels = new byte[size];
+					final int wid    = fullWidth;
+					for (int y = 0; y < fullHeight; y++) {					
+						imageData.getPixels(xPix, yPix+y, wid, pixels, wid*y);
+					}
+					data = new ImageData(fullWidth, fullHeight, data.depth, getPaletteData(), 1, pixels);
+					
+				} else {
+					// Slice the data.
+					// Pixel slice on downsampled data = fast!
+					// NOTE Assumes 24 Bit Images
+					final int[] pixels = new int[fullWidth];
+					final int wid    = fullWidth;
+					
+					data = new ImageData(fullWidth, fullHeight, 24, new PaletteData(0xff0000, 0x00ff00, 0x0000ff));
+					for (int y = 0; y < fullHeight; y++) {					
+						imageData.getPixels(xPix, yPix+y, wid, pixels, 0);
+						data.setPixels(0, y, wid, pixels, 0);
+					}
 				}
-				data = new ImageData(fullWidth, fullHeight, data.depth, getPaletteData(), 1, pixels);
-				
 				// create the scaled image
 				data = data!=null ? data.scaledTo(scaleWidth, scaleHeight) : null;
 				if (scaledImage!=null &&!scaledImage.isDisposed()) scaledImage.dispose(); // IMPORTANT
