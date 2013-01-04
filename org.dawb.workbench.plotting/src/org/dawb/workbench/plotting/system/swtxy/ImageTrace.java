@@ -358,7 +358,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 					break;
 				}
 				
-				if (imageData.depth < 8) {
+				if (imageData.depth <= 8 ) {
 					// Slice the data.
 					// Pixel slice on downsampled data = fast!
 					// NOTE Assumes 8-bit images
