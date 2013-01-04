@@ -81,6 +81,10 @@
          id="uk.ac.diamond.scisoft.feedback.feature"
          version="0.0.0"/>
 
+   <includes
+         id="uk.ac.diamond.scisoft.icat.v42.feature"
+         version="0.0.0"/>
+
    <plugin
          id="uk.ac.diamond.scisoft.analysis.rcp.contributions"
          download-size="0"
@@ -152,6 +156,12 @@
 
    <plugin
          id="uk.ac.diamond.scisoft.customprojects.rcp"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="uk.ac.diamond.scisoft.icatexplorer.v42.rcp"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
