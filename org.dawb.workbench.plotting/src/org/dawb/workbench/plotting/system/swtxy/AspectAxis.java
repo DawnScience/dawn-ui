@@ -275,7 +275,9 @@ public class AspectAxis extends Axis implements IAxis {
 
 	@Override
 	public void setLabelDataAndTitle(AbstractDataset labels) {
-		if (labels!=null && labels.getRank()!=1) throw new RuntimeException("You must only label image data with one dimensional axes!");
+		if (labels!=null && labels.getRank()!=1) {
+			throw new RuntimeException("You must only label image data with one dimensional axes!");
+		}
 		this.labelData = labels;
 		if (labels != null)
 			setTitle(labels.getName());
