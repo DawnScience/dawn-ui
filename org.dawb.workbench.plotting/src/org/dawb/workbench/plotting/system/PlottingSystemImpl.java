@@ -70,7 +70,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 
 
 /**
- * An implmentation of IPlottingSystem, not designed to be public.
+ * An implementation of IPlottingSystem, not designed to be public.
  * 
  * THIS CLASS SHOULD NOT BE USED OUTSIDE THIS PLUGIN!
  * 

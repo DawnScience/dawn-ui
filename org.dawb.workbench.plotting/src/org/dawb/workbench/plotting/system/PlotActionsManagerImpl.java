@@ -11,11 +11,9 @@
 package org.dawb.workbench.plotting.system;
 
 import java.util.Collection;
-import java.util.Map;
 
 import org.csstudio.swt.xygraph.undo.ZoomType;
 import org.dawb.common.services.IPaletteService;
-import org.dawb.common.ui.image.PaletteFactory;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.ActionType;
@@ -37,7 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class manages swithcing actions between different plotting system
+ * This class manages switching actions between different plotting system
  * modes.
  * 
  * @author fcp94556
