@@ -31,13 +31,9 @@
 
 package org.dawb.workbench.plotting.tools;
 
-import java.util.Collection;
-
-import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.trace.IImageTrace;
-import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.TraceUtils;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.slf4j.Logger;
@@ -57,8 +53,6 @@ public class InfoPixelLabelProvider extends ColumnLabelProvider {
 
 	private final int column;
 	private final InfoPixelTool tool;
-	private final IPlottingSystem plotSystem;
-	//public strings cahcedvalues = null
 
 	private static final Logger logger = LoggerFactory.getLogger(InfoPixelLabelProvider.class);
 
@@ -66,7 +60,6 @@ public class InfoPixelLabelProvider extends ColumnLabelProvider {
 
 		this.column = i;
 		this.tool   = tool;
-		this.plotSystem = tool.getPlottingSystem();
 	}
 
 
@@ -158,14 +151,14 @@ public class InfoPixelLabelProvider extends ColumnLabelProvider {
 				return ( ( (IRegion)element).getRegionType() == RegionType.POINT) ? ((IRegion)element).getName(): "";
 			case 1: // "X position"
 				return isCustom ? String.format("% 4.4f", xLabel)
-						        : String.format("% 4.0f", xLabel);
+						        : String.format("% 4d", (int)Math.floor(xLabel));
 			case 2: // "Y position"
 				return isCustom ? String.format("% 4.4f", yLabel)
-			                    : String.format("% 4.0f", yLabel);
+			                    : String.format("% 4d", (int)Math.floor(yLabel));
 			case 3: // "Data value"
 				//if (set == null || vectorUtil==null || vectorUtil.getQMask(qSpace, x, y) == null) return "-";
 				if (set == null) return "-";
-				return String.format("% 4.4f", set.getDouble((int)Math.round(yIndex), (int) Math.round(xIndex)));
+				return String.format("% 4.4f", set.getDouble((int)Math.floor(yIndex), (int) Math.floor(xIndex)));
 			case 4: // q X
 				//if (vectorUtil==null || vectorUtil.getQMask(qSpace, x, y) == null) return "-";
 				if (vectorUtil==null ) return "-";
