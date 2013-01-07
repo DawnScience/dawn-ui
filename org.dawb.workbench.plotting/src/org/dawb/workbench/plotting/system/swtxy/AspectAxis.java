@@ -6,7 +6,6 @@ import java.util.Collection;
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.swt.xygraph.linearscale.Range;
-import org.csstudio.swt.xygraph.linearscale.AbstractScale.LabelSide;
 import org.dawb.common.services.ImageServiceBean.ImageOrigin;
 import org.dawb.common.ui.plot.axis.AxisEvent;
 import org.dawb.common.ui.plot.axis.IAxis;
@@ -282,24 +281,24 @@ public class AspectAxis extends Axis implements IAxis {
 			setTitle(labels.getName());
 	}
 	
-	public Range getScaleRange() {
-		
-		final Range realRange = getRange();
-		if (labelData==null) return realRange;
-
-		try {
-			final double lower = labelData.getSize()>(int)Math.round(realRange.getLower())
-					           ? labelData.getElementDoubleAbs((int)Math.round(realRange.getLower()))
-					           : labelData.getElementDoubleAbs(labelData.getSize()-1);
-					        			   
-			final double upper = labelData.getSize()>(int)Math.round(realRange.getUpper())
-					           ? labelData.getElementDoubleAbs((int)Math.round(realRange.getUpper()))
-					           : labelData.getElementDoubleAbs(labelData.getSize()-1);
-			return new Range(lower, upper);
-		} catch (Throwable ne) {
-			return realRange;
+	/**
+	 * Override to provide custom axis labels.
+	 */
+	@Override
+	public double getLabel(double value) {
+		// The value of the tick should be the 
+		// pixel 
+		if (labelData!=null) {
+			try {
+				int index = (int)Math.round(value);
+				return labelData.getDouble(index);
+			} catch (Throwable ne) {
+				return super.getLabel(value);
+			}
 		}
+		return super.getLabel(value);
 	}
+
 
 	@Override
 	public boolean isLog10() {

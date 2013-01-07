@@ -713,7 +713,6 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	@Override
 	public boolean setData(AbstractDataset image, List<AbstractDataset> axes, boolean performAuto) {
 		
-		
 		if (plottingSystem!=null) try {
 			if (plottingSystem.getTraces().contains(this)) {
 				final TraceWillPlotEvent evt = new TraceWillPlotEvent(this, false);
