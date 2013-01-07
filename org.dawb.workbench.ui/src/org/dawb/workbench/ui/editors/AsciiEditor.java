@@ -68,23 +68,27 @@ public class AsciiEditor extends MultiPageEditorPart implements ISlicablePlottin
 				index++;
 			}
 
-			this.dataSetEditor = new PlotDataEditor(PlotType.XY);
-			dataSetEditor.getPlottingSystem().setColorOption(ColorOption.BY_NAME);
-			addPage(index, dataSetEditor, getEditorInput());
-			setPageText(index, "Plot");
-			index++;
+			if (!dataFirst) {
+				this.dataSetEditor = new PlotDataEditor(PlotType.XY);
+				dataSetEditor.getPlottingSystem().setColorOption(ColorOption.BY_NAME);
+				addPage(index, dataSetEditor, getEditorInput());
+				setPageText(index, "Plot");
+				index++;
+			}
 
 			final TextEditor textEditor = new TextEditor();
 			addPage(index, textEditor,       getEditorInput());
 			setPageText(index, "Text");
 			index++;
 
-			final CSVDataEditor dataEditor = new CSVDataEditor();
-			dataEditor.setDataProvider(dataSetEditor);
-			addPage(index, dataEditor,   getEditorInput());
-			setPageText(index, "Data");
-			addPageChangedListener(dataEditor);
-			index++;
+			if (!dataFirst) {
+				final CSVDataEditor dataEditor = new CSVDataEditor();
+				dataEditor.setDataProvider(dataSetEditor);
+				addPage(index, dataEditor,   getEditorInput());
+				setPageText(index, "Data");
+				addPageChangedListener(dataEditor);
+				index++;
+			}
 			
 			if (!dataFirst && System.getProperty("org.dawb.editor.ascii.hide.diamond.srs")==null) {
 				final TextDataEditor srs = new TextDataEditor();
