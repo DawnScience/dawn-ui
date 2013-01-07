@@ -29,7 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
-import uk.ac.diamond.scisoft.analysis.rcp.editors.SRSEditor;
+import uk.ac.diamond.scisoft.analysis.rcp.editors.TextDataEditor;
 
 
 public class AsciiEditor extends MultiPageEditorPart implements ISlicablePlottingPart, IPlottingSystemSelection {
@@ -62,7 +62,7 @@ public class AsciiEditor extends MultiPageEditorPart implements ISlicablePlottin
 
 			int index = 0;
 			if (dataFirst && System.getProperty("org.dawb.editor.ascii.hide.diamond.srs")==null) {
-				final SRSEditor srs = new SRSEditor();
+				final TextDataEditor srs = new TextDataEditor();
 				addPage(index, srs,       getEditorInput());
 				setPageText(index, "Info");
 				index++;
@@ -87,7 +87,7 @@ public class AsciiEditor extends MultiPageEditorPart implements ISlicablePlottin
 			index++;
 			
 			if (!dataFirst && System.getProperty("org.dawb.editor.ascii.hide.diamond.srs")==null) {
-				final SRSEditor srs = new SRSEditor();
+				final TextDataEditor srs = new TextDataEditor();
 				addPage(3, srs,       getEditorInput());
 				setPageText(3, "Info");
 				
