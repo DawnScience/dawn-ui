@@ -254,8 +254,7 @@ public class AspectAxis extends Axis implements IAxis {
 
 	@Override
 	public void setRange(Range range) {
-		normalize(range);
-		super.setRange(range);
+		super.setRange(normalize(range));
 	}
 
 	/**
