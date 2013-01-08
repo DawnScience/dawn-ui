@@ -354,6 +354,14 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	}
 
 
+	public void setHandlesVisible(boolean mobile) {
+		if (regionObjects!=null) for (IFigure ob : regionObjects) {
+			if (ob instanceof IMobileFigure) {
+				((IMobileFigure)ob).setVisible(mobile);
+			}
+		}
+	}
+
 	public void repaint() {
 		if (regionObjects!=null) for (IFigure ob : regionObjects) {
 			if (ob!=null) ob.repaint();
