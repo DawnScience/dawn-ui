@@ -287,19 +287,17 @@ public class AspectAxis extends Axis implements IAxis {
 	 */
 	@Override
 	public double getLabel(double value) {
-		// The value of the tick should be the 
-		// pixel 
+		// The value of the tick should be the pixel 
 		if (labelData!=null) {
-			try {
-				int index = (int)Math.round(value);
-				return labelData.getDouble(index);
-			} catch (Throwable ne) {
-				return super.getLabel(value);
-			}
+			int index = (int) Math.round(value);
+
+			if (index >= labelData.getSize())
+				return Double.NaN; // this is ignored when used in TickFactory#getTickString()
+
+			return labelData.getDouble(index);
 		}
 		return super.getLabel(value);
 	}
-
 
 	@Override
 	public boolean isLog10() {
