@@ -70,7 +70,7 @@
          version="0.0.0"/>
 
    <includes
-         id="uk.ac.diamond.scisoft.icat.feature"
+         id="uk.ac.diamond.scisoft.icatexplorer.feature"
          version="0.0.0"/>
 
    <includes
@@ -82,7 +82,7 @@
          version="0.0.0"/>
 
    <includes
-         id="uk.ac.diamond.scisoft.icat.v42.feature"
+         id="uk.ac.diamond.scisoft.icatexplorer.v4.feature"
          version="0.0.0"/>
 
    <plugin
@@ -156,12 +156,6 @@
 
    <plugin
          id="uk.ac.diamond.scisoft.customprojects.rcp"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="uk.ac.diamond.scisoft.icatexplorer.v42.rcp"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
