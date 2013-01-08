@@ -323,7 +323,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				
 				int scaleWidth = (int) (fullWidth*xScale);
 				int scaleHeight = (int) (fullHeight*yScale);
-				System.err.println("Scaling to " + scaleWidth + "x" + scaleHeight);
+//				System.err.println("Scaling to " + scaleWidth + "x" + scaleHeight);
 				int xPix = (int)minX;
 				int yPix = (int)minY;
 				
