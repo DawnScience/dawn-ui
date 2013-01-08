@@ -39,8 +39,8 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -49,10 +49,8 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IActionBars2;
 import org.eclipse.ui.IEditorInput;
@@ -89,11 +87,11 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 	// This view is a composite of two other views.
 	private AbstractPlottingSystem      plottingSystem;	
 	private Collection<String>          dataNames;
-	private Composite                   tools;
 	private IMetaData                   metaData;
 	private PlotType                    defaultPlotType;
 	private Map<Integer, IAxis>         axisMap;
 	private PlotJob                     plotJob;
+	private ActionBarWrapper            wrapper;
 
 	public PlotDataEditor(final PlotType defaultPlotType) {
 		
@@ -137,8 +135,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 	
 
 	public void setToolbarsVisible(boolean isVisible) {
-		GridUtils.setVisible(tools, isVisible);
-		tools.getParent().layout(new Control[]{tools});
+		wrapper.setVisible(isVisible);
 	}
 
 	@Override
@@ -149,25 +146,8 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		main.setLayout(gridLayout);
 		GridUtils.removeMargins(main);
 		
-		this.tools = new Composite(main, SWT.RIGHT);
-		tools.setLayout(new GridLayout(2, false));
-		GridUtils.removeMargins(tools);
-		tools.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		
-		// We use a local toolbar to make it clear to the user the tools
-		// that they can use, also because the toolbar actions are 
-		// hard coded.
-		ToolBarManager toolMan = new ToolBarManager(SWT.FLAT|SWT.RIGHT|SWT.WRAP);
-		final ToolBar          toolBar = toolMan.createControl(tools);
-		toolBar.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
-
-		ToolBarManager rightMan = new ToolBarManager(SWT.FLAT|SWT.RIGHT|SWT.WRAP);
-		final ToolBar          rightBar = rightMan.createControl(tools);
-		rightBar.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-
-		final MenuManager    menuMan = new MenuManager();
 		final IActionBars bars = this.getEditorSite().getActionBars();
-		ActionBarWrapper wrapper = new ActionBarWrapper(toolMan,menuMan,null,(IActionBars2)bars);
+		this.wrapper = ActionBarWrapper.createActionBars(main,(IActionBars2)bars);
 				
 		// NOTE use name of input. This means that although two files of the same
 		// name could be opened, the editor name is clearly visible in the GUI and
@@ -202,11 +182,13 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
             axisMap.put(i, yAxis);
 		}
         
+        IToolBarManager rightMan = wrapper.getRightManager();
+        final MenuManager menuMan = (MenuManager)wrapper.getMenuManager();
  		if (rightMan!=null) {
  		    Action menuAction = new Action("", Activator.getImageDescriptor("/icons/DropDown.png")) {
  		        @Override
  		        public void run() {
- 	                final Menu   mbar = menuMan.createContextMenu(toolBar);
+ 	                final Menu   mbar = menuMan.createContextMenu(wrapper.getToolBar());
  	       		    mbar.setVisible(true);
  		        }
  		    };
@@ -215,8 +197,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
         		
 		
 		// Finally
-		if (toolMan!=null)  toolMan.update(true);
-		if (rightMan!=null) rightMan.update(true);
+		if (wrapper!=null)  wrapper.update(true);
 	    createData(getEditorInput());	
 	    
 		// We ensure that the view for choosing data sets is visible

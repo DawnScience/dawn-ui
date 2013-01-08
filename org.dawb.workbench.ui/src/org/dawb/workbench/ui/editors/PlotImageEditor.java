@@ -18,7 +18,6 @@ import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingFactory;
 import org.dawb.common.ui.plot.tool.IToolPageSystem;
 import org.dawb.common.ui.util.EclipseUtils;
-import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.views.HeaderTablePage;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawb.workbench.ui.Activator;
@@ -37,11 +36,7 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.ToolBar;
-import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.IActionBars2;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IReusableEditor;
@@ -71,7 +66,7 @@ public class PlotImageEditor extends EditorPart implements IReusableEditor {
 	
 	// This view is a composite of two other views.
 	private AbstractPlottingSystem      plottingSystem;	
-	private Composite                   tools;
+	private ActionBarWrapper            wrapper;
 
 
 	public PlotImageEditor() {
@@ -107,8 +102,7 @@ public class PlotImageEditor extends EditorPart implements IReusableEditor {
 	
 
 	public void setToolbarsVisible(boolean isVisible) {
-		GridUtils.setVisible(tools, isVisible);
-		tools.getParent().layout(new Control[]{tools});
+		wrapper.setVisible(isVisible);
 	}
 
 	@Override
@@ -122,25 +116,7 @@ public class PlotImageEditor extends EditorPart implements IReusableEditor {
 		gridLayout.horizontalSpacing = 0;
 		main.setLayout(gridLayout);
 		
-		this.tools = new Composite(main, SWT.RIGHT);
-		tools.setLayout(new GridLayout(2, false));
-		GridUtils.removeMargins(tools);
-		tools.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-
-		// We use a local toolbar to make it clear to the user the tools
-		// that they can use, also because the toolbar actions are 
-		// hard coded.
-		ToolBarManager toolMan = new ToolBarManager(SWT.FLAT|SWT.RIGHT|SWT.WRAP);
-		final ToolBar  toolBar = toolMan.createControl(tools);
-		toolBar.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
-
-		ToolBarManager rightMan = new ToolBarManager(SWT.FLAT|SWT.RIGHT|SWT.WRAP);
-		final ToolBar          rightBar = rightMan.createControl(tools);
-		rightBar.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-
-		final MenuManager    menuMan = new MenuManager();
-		final IActionBars bars = this.getEditorSite().getActionBars();
-		ActionBarWrapper wrapper = new ActionBarWrapper(toolMan,menuMan,null,(IActionBars2)bars);
+		this.wrapper = ActionBarWrapper.createActionBars(main, getEditorSite().getActionBars());
 
 		// NOTE use name of input. This means that although two files of the same
 		// name could be opened, the editor name is clearly visible in the GUI and
@@ -153,18 +129,19 @@ public class PlotImageEditor extends EditorPart implements IReusableEditor {
 		
         plottingSystem.createPlotPart(plot, plotName, wrapper, PlotType.IMAGE, this);
         plottingSystem.getSelectedXAxis().setTitle("");
+        
+        final MenuManager menuMan = (MenuManager)wrapper.getMenuManager();
 	    Action menuAction = new Action("", Activator.getImageDescriptor("/icons/DropDown.png")) {
 	    	@Override
 	    	public void run() {
-	    		final Menu   mbar = menuMan.createContextMenu(toolBar);
+	    		final Menu   mbar = menuMan.createContextMenu(wrapper.getToolBar());
 	    		mbar.setVisible(true);
 	    	}
 	    };
-	    rightMan.add(menuAction);
+	    wrapper.getRightManager().add(menuAction);
 
-		if (toolMan!=null)  toolMan.update(true);
-		if (rightMan!=null) rightMan.update(true);
-	    
+		wrapper.update(true);
+
 		createPlot();
 		
 		getEditorSite().setSelectionProvider(plottingSystem.getSelectionProvider());
