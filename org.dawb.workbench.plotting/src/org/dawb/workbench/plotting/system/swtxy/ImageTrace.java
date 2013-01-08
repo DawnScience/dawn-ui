@@ -277,8 +277,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				double minY = yRange.getLower()/currentDownSampleBin;
 				double maxX = xRange.getUpper()/currentDownSampleBin;
 				double maxY = yRange.getUpper()/currentDownSampleBin;
-				int xSize = imageData.width/currentDownSampleBin;
-				int ySize = imageData.height/currentDownSampleBin;
+				int xSize = imageData.width;
+				int ySize = imageData.height;
 				
 				// check as getLower and getUpper don't work as expected
 				if(maxX < minX){
@@ -357,9 +357,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 					break;
 				}
 				
+				// Slice the data.
+				// Pixel slice on downsampled data = fast!
 				if (imageData.depth <= 8) {
-					// Slice the data.
-					// Pixel slice on downsampled data = fast!
 					// NOTE Assumes 8-bit images
 					final int size   = fullWidth*fullHeight;
 					final byte[] pixels = new byte[size];
@@ -368,8 +368,6 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 					}
 					data = new ImageData(fullWidth, fullHeight, data.depth, getPaletteData(), 1, pixels);
 				} else {
-					// Slice the data.
-					// Pixel slice on downsampled data = fast!
 					// NOTE Assumes 24 Bit Images
 					final int[] pixels = new int[fullWidth];
 					
