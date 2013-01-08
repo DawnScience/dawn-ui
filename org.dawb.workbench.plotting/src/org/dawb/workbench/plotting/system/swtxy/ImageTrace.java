@@ -258,7 +258,6 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				if (monitor!=null && monitor.isCanceled()) return false;
 				if (scaledImage!=null &&!scaledImage.isDisposed()) scaledImage.dispose(); // IMPORTANT
 				scaledImage  = new Image(Display.getDefault(), imageData);
-
 			} else {
 				// slice data to get current zoom area
 				/**     
@@ -270,7 +269,6 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				 */
 				ImageData data = imageData;
 				ImageOrigin origin = getImageOrigin();
-				int[] shape = image.getShape();
 				
 				Range xRange = xAxis.getRange();
 				Range yRange = yAxis.getRange();
@@ -279,9 +277,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				double minY = yRange.getLower()/currentDownSampleBin;
 				double maxX = xRange.getUpper()/currentDownSampleBin;
 				double maxY = yRange.getUpper()/currentDownSampleBin;
-				
-				int xSize = shape[0]/currentDownSampleBin;
-				int ySize = shape[0]/currentDownSampleBin;
+				int xSize = imageData.width/currentDownSampleBin;
+				int ySize = imageData.height/currentDownSampleBin;
 				
 				// check as getLower and getUpper don't work as expected
 				if(maxX < minX){
@@ -300,40 +297,42 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				
 				double xScale = rbounds.width / xSpread;
 				double yScale = rbounds.height / ySpread;
+//				System.err.println("Area is " + rbounds + " with scale (x,y) " + xScale + ", " + yScale);
 				
-				// These offfsets are used when the scaled images is drawn to the screen.
-				xOffset = (minX - Math.floor(minX))*xScale;
-				yOffset = (minY - Math.floor(minY))*yScale;
-				
-				// Deliberatly get the over-sised dimensions so that the edge pixels can be smoothly panned through.
+				// Deliberately get the over-sized dimensions so that the edge pixels can be smoothly panned through.
 				int minXI = (int) Math.floor(minX);
 				int minYI = (int) Math.floor(minY);
 				
 				int maxXI = (int) Math.ceil(maxX);
 				int maxYI = (int) Math.ceil(maxY);
 				
-				int fullWidth = (int) ((maxXI-minXI));
-				int fullHeight = (int) ((maxYI-minYI));
+				int fullWidth = (int) (maxXI-minXI);
+				int fullHeight = (int) (maxYI-minYI);
 				
 				// Force a minimum size on the system
-				if(fullWidth<=MINIMUM_ZOOM_SIZE) {
-					fullWidth = MINIMUM_ZOOM_SIZE;
+				if (fullWidth <= MINIMUM_ZOOM_SIZE) {
+					if (fullWidth > imageData.width)
+						fullWidth = MINIMUM_ZOOM_SIZE;
 					isMaximumZoom = true;
 				}
-				if (fullHeight<=MINIMUM_ZOOM_SIZE) {
-					fullHeight = MINIMUM_ZOOM_SIZE;
+				if (fullHeight <= MINIMUM_ZOOM_SIZE) {
+					if (fullHeight > imageData.height)
+						fullHeight = MINIMUM_ZOOM_SIZE;
 					isMaximumZoom = true;
-				};
+				}
 				
 				int scaleWidth = (int) (fullWidth*xScale);
 				int scaleHeight = (int) (fullHeight*yScale);
-				
+				System.err.println("Scaling to " + scaleWidth + "x" + scaleHeight);
 				int xPix = (int)minX;
 				int yPix = (int)minY;
 				
 				double xPixD = 0;
 				double yPixD = 0;
 				
+				// These offsets are used when the scaled images is drawn to the screen.
+				xOffset = (minX - Math.floor(minX))*xScale;
+				yOffset = (minY - Math.floor(minY))*yScale;
 				// Deal with the origin orientations correctly.
 				switch (origin) {
 				case TOP_LEFT:
@@ -358,29 +357,26 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 					break;
 				}
 				
-				if (imageData.depth <= 8 ) {
+				if (imageData.depth <= 8) {
 					// Slice the data.
 					// Pixel slice on downsampled data = fast!
 					// NOTE Assumes 8-bit images
 					final int size   = fullWidth*fullHeight;
 					final byte[] pixels = new byte[size];
-					final int wid    = fullWidth;
-					for (int y = 0; y < fullHeight; y++) {					
-						imageData.getPixels(xPix, yPix+y, wid, pixels, wid*y);
+					for (int y = 0; y < fullHeight; y++) {
+						imageData.getPixels(xPix, yPix+y, fullWidth, pixels, fullWidth*y);
 					}
 					data = new ImageData(fullWidth, fullHeight, data.depth, getPaletteData(), 1, pixels);
-					
 				} else {
 					// Slice the data.
 					// Pixel slice on downsampled data = fast!
 					// NOTE Assumes 24 Bit Images
 					final int[] pixels = new int[fullWidth];
-					final int wid    = fullWidth;
 					
 					data = new ImageData(fullWidth, fullHeight, 24, new PaletteData(0xff0000, 0x00ff00, 0x0000ff));
 					for (int y = 0; y < fullHeight; y++) {					
-						imageData.getPixels(xPix, yPix+y, wid, pixels, 0);
-						data.setPixels(0, y, wid, pixels, 0);
+						imageData.getPixels(xPix, yPix+y, fullWidth, pixels, 0);
+						data.setPixels(0, y, fullWidth, pixels, 0);
 					}
 				}
 				// create the scaled image
@@ -388,15 +384,14 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				if (scaledImage!=null &&!scaledImage.isDisposed()) scaledImage.dispose(); // IMPORTANT
 				scaledImage = data!=null ? new Image(Display.getDefault(), data) : null;
 			}
+
 			return true;
-			
 		} catch (NullPointerException ne) {
 			throw ne;
 		} catch (Throwable ne) {
 			logger.error("Image scale error!", ne);
 			return false;
 		}
-
 	}
 
 	private static final int[] getBounds(Range xr, Range yr) {
