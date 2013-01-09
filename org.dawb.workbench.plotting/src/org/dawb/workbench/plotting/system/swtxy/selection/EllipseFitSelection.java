@@ -370,7 +370,7 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 			int[] p1 = coords.getValuePosition(xy[0], xy[1]);
 			int[] p2 = coords.getValuePosition(2*eroi.getSemiAxis(0) + xy[0], 2*eroi.getSemiAxis(1) + xy[1]);
 						
-			setAxes(p2[0] - p1[0], p2[1] - p2[0]);
+			setAxes(p2[0] - p1[0], p2[1] - p1[1]);
 
 			setCentre(p1[0], p1[1]);
 			setAngle(eroi.getAngleDegrees());
