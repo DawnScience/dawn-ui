@@ -11,6 +11,7 @@
    </configIni>
 
    <launcherArgs>
+      <programArgs>-showLocation</programArgs>
       <programArgsLin>-vm
 jre/bin/java</programArgsLin>
       <vmArgs>-Xms512m
@@ -48,6 +49,7 @@ jre/bin/java</programArgsLin>
 
    <vm>
    </vm>
+
 
    <plugins>
    </plugins>
