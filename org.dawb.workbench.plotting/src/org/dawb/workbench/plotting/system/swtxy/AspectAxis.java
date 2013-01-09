@@ -69,7 +69,7 @@ public class AspectAxis extends Axis implements IAxis {
 		// y correction for companion axis
 		if (!isHorizontal() && getTickLabelSide() == LabelSide.Primary) { 
 			
-			// We have to ensure that our own ticks have been layed out
+			// We have to ensure that our own ticks have been laid out
 			// because we use their size to set the location of the
 			// relative to field.
 			super.layoutTicks();
@@ -254,8 +254,7 @@ public class AspectAxis extends Axis implements IAxis {
 
 	@Override
 	public void setRange(Range range) {
-		normalize(range);
-		super.setRange(range);
+		super.setRange(normalize(range));
 	}
 
 	/**
@@ -288,19 +287,17 @@ public class AspectAxis extends Axis implements IAxis {
 	 */
 	@Override
 	public double getLabel(double value) {
-		// The value of the tick should be the 
-		// pixel 
+		// The value of the tick should be the pixel 
 		if (labelData!=null) {
-			try {
-				int index = (int)Math.round(value);
-				return labelData.getDouble(index);
-			} catch (Throwable ne) {
-				return super.getLabel(value);
-			}
+			int index = (int) Math.round(value);
+
+			if (index >= labelData.getSize())
+				return Double.NaN; // this is ignored when used in TickFactory#getTickString()
+
+			return labelData.getDouble(index);
 		}
 		return super.getLabel(value);
 	}
-
 
 	@Override
 	public boolean isLog10() {

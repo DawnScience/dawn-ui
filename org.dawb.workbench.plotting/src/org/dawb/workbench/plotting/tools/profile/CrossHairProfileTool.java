@@ -91,11 +91,11 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 								this.getViewPart());		
 		
 		profilePlotter.getSelectedYAxis().setTitle("Intensity");
-		this.x1 = profilePlotter.getSelectedXAxis();
+		x1 = profilePlotter.getSelectedXAxis();
 		x1.setTitle("X Slice");
 		
-		this.x2 = profilePlotter.createAxis("Y Slice", false, SWT.TOP);
-			
+		x2 = profilePlotter.createAxis("Y Slice", false, SWT.TOP);
+
 		final Action reset = new Action("Clear cross hair profiles", Activator.getImageDescriptor("icons/axis.png")) {
 			public void run() {
 				//profilePlotter.reset();
@@ -122,18 +122,21 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 		}
 	}
 
+	private final static String X_PROFILE_PREFIX = "X Profile";
+	private final static String Y_PROFILE_PREFIX = "Y Profile";
+
 	private void createRegions() {
 		
 		if (getPlottingSystem()==null) return;
 		try {
 			if (xHair==null || getPlottingSystem().getRegion(xHair.getName())==null) {
-				this.xHair = getPlottingSystem().createRegion(RegionUtils.getUniqueName("Y Profile", getPlottingSystem()), IRegion.RegionType.XAXIS_LINE);
+				this.xHair = getPlottingSystem().createRegion(RegionUtils.getUniqueName(Y_PROFILE_PREFIX, getPlottingSystem()), IRegion.RegionType.XAXIS_LINE);
 				this.xUpdateJob = addRegion("Updating x cross hair", xHair);
 
 			}
 			
 			if (yHair==null || getPlottingSystem().getRegion(yHair.getName())==null) {
-				this.yHair = getPlottingSystem().createRegion(RegionUtils.getUniqueName("X Profile", getPlottingSystem()), IRegion.RegionType.YAXIS_LINE);
+				this.yHair = getPlottingSystem().createRegion(RegionUtils.getUniqueName(X_PROFILE_PREFIX, getPlottingSystem()), IRegion.RegionType.YAXIS_LINE);
 				this.yUpdateJob = addRegion("Updating x cross hair", yHair);
 			}
 			
@@ -216,6 +219,8 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 	private static final String regionId = "org.dawb.workbench.ui.editors.plotting.swtxy.addRegions";
 	
 	private void setOtherRegionsEnabled(boolean isVisible) {
+		if (getPlottingSystem() == null)
+			return;
 
         final IActionBars bars = getPlottingSystem().getActionBars();
         if (bars.getToolBarManager().find(regionId)!=null) {
@@ -336,10 +341,10 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 			yUpdateJob.suspend(true);
 	
 	        final Color   snapShotColor = RegionUtils.getUnqueColor(xHair.getRegionType(), getPlottingSystem(), ColorUtility.DEFAULT_SWT_COLORS);
-	        final IRegion x = createStaticRegion("Y Profile Static", xBounds, snapShotColor, xHair.getRegionType());
+	        final IRegion x = createStaticRegion(Y_PROFILE_PREFIX + " Static", xBounds, snapShotColor, xHair.getRegionType());
 	        profile(x, xBounds, true, snapShotColor, new NullProgressMonitor());
 	        
-	        final IRegion y = createStaticRegion("X Profile Static", yBounds, snapShotColor, yHair.getRegionType());
+	        final IRegion y = createStaticRegion(X_PROFILE_PREFIX + " Static", yBounds, snapShotColor, yHair.getRegionType());
 	        profile(y, yBounds, true, snapShotColor, new NullProgressMonitor());
 
 			//getPlottingSystem().repaint();
@@ -410,12 +415,12 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 			}
 
 			if (monitor.isCanceled()) return  false;
-			
+			final boolean isRegionXAxis = isXAxis(region);
             		                  
 			ILineTrace trace = (ILineTrace)profilePlotter.getTrace(region.getName());
 			if ((trace == null && region.isVisible()) || snapshot) {
 				synchronized (profilePlotter) {  // Only one job at a time can choose axis and create plot.
-					if (isXAxis(region)) {
+					if (isRegionXAxis) {
 						profilePlotter.setSelectedXAxis(x1);
 
 					} else {
@@ -448,29 +453,25 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 			final AbstractDataset data = image.getData();
 			AbstractDataset slice=null, sliceIndex=null;
 			if (monitor.isCanceled())return  false;
-			
 			try {
-				if (isXAxis(region)) {
+				int[] shape = data.getShape();
+				if (isRegionXAxis) {
 					int index = (int)Math.round(bounds.getPointX());
-					slice = data.getSlice(new int[]{0,index}, new int[]{data.getShape()[0], index+1}, new int[]{1,1});
-					if (monitor.isCanceled()) return  false;
-					slice = slice.flatten();
-					if (monitor.isCanceled()) return  false;
-					sliceIndex = AbstractDataset.arange(slice.getSize(), AbstractDataset.INT);
-	
+					slice = data.getSlice(new int[]{0,index}, new int[]{shape[0], index+1}, new int[]{1,1});
 				} else {
 					int index = (int)Math.round(bounds.getPointY());
-					slice = data.getSlice(new int[]{index,0}, new int[]{index+1, data.getShape()[1]}, new int[]{1,1});
-					if (monitor.isCanceled()) return  false;
-					slice = slice.flatten();
-					if (monitor.isCanceled()) return  false;
-					sliceIndex = AbstractDataset.arange(slice.getSize(), AbstractDataset.INT);
+					slice = data.getSlice(new int[]{index,0}, new int[]{index+1, shape[1]}, new int[]{1,1});
 				}
 			} catch (Throwable ne) {
 				logger.error("Cannot slice using "+bounds, ne);
 				return false;
 			}
 			
+			if (monitor.isCanceled()) return  false;
+			slice = slice.flatten();
+			if (monitor.isCanceled()) return  false;
+			final int size = slice.getSize();
+			sliceIndex = AbstractDataset.arange(size, AbstractDataset.INT);
 			if (trace==null) return false;
 			slice.setName(trace.getName());
 			trace.setData(sliceIndex, slice);
@@ -488,13 +489,12 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 					}
 
 					if (monitor.isCanceled()) return;
-					profilePlotter.autoscaleAxes();
-					profilePlotter.repaint();
-					if (isXAxis(region)) {
-						x1.setRange(0, data.getShape()[0]);
+					if (isRegionXAxis) {
+						x1.setRange(0, size);
 					} else {
-						x2.setRange(0, data.getShape()[1]);
+						x2.setRange(0, size);
 					}
+					profilePlotter.autoscaleAxes();
 				}
 			});
 		}
@@ -502,8 +502,8 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 	}
 
 	private boolean isXAxis(IRegion region) {
-		boolean isXAxis  = region.getName().startsWith("Y Profile"); // Y profile is x-axis
-		boolean isYAxis  = region.getName().startsWith("X Profile"); // X profile is y-axis
+		boolean isXAxis  = region.getName().startsWith(Y_PROFILE_PREFIX); // Y profile is x-axis
+		boolean isYAxis  = region.getName().startsWith(X_PROFILE_PREFIX); // X profile is y-axis
 		ImageOrigin orig = getImageTrace().getImageOrigin();
 		return ( isXAxis && orig==ImageOrigin.TOP_LEFT )   ||
 			   ( isXAxis && orig==ImageOrigin.BOTTOM_RIGHT) ||

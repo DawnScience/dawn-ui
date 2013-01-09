@@ -35,7 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class manages swithcing actions between different plotting system
+ * This class manages switching actions between different plotting system
  * modes.
  * 
  * @author fcp94556
