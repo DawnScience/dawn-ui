@@ -59,72 +59,61 @@ public class ColoredBoxSelection extends BoxSelection {
 			public void paintFigure(Graphics gc) {
 				
 				super.paintFigure(gc);
-				final Rectangle size = getRectangleFromVertices();				
+				final Rectangle size = getRectangleFromVertices();
 				this.bounds = size.getCopy().expand(5, 5);
 				gc.setAlpha(getAlpha());
 				gc.fillRectangle(size);
-				
 				ColoredBoxSelection.this.drawLabel(gc, size);
-				
-				if (getROI()!=null && getROI() instanceof RectangularROI) {
-					RectangularROI rroi = (RectangularROI)createROI(false);
-					drawColoredEdges(rroi, gc);
-				}
+				drawColoredEdges(gc, size);
 			}
 		};
 	}
 
 	/**
+	 * Draws the coloured edges
 	 * 
-	 * @param rroi
+	 *   start-------------
+	 *     |               |
+	 *     |               |
+	 *     |               |
+	 *      --------------end
+	 *      
+	 * @param gc
+	 * @param rect
 	 */
-	protected void drawColoredEdges(RectangularROI rroi, Graphics gc) {
+	protected void drawColoredEdges(Graphics gc, Rectangle rect) {
 
 		gc.pushState();
 		gc.setAlpha(255);
 		gc.setLineWidth(2);
 		gc.setLineStyle(SWT.LINE_SOLID);
-		int[]   spt       = rroi.getIntPoint();
-		double[] ept = rroi.getEndPoint();
-		
-		int height = (int)(ept[1]-spt[1]);
-		int width = (int)(ept[0]-spt[0]);
+		int[] start = {rect.x, rect.y};
+		int[] end = {rect.x + rect.width, rect.y + rect.height};
 
-		if (height != 0 && width != 0) {
+		if (rect.width != 0 && rect.height != 0) {
 			
 			// draw top edge
-			int[] pnt1 = coords.getValuePosition(spt[0], spt[1]);
-			int[] pnt2 = coords.getValuePosition((int)ept[0], spt[1]);
 			gc.setForegroundColor(topColor);
 			gc.setBackgroundColor(topColor);
-			gc.drawLine(pnt1[0], pnt1[1], pnt2[0], pnt2[1]);
+			gc.drawLine(start[0], start[1], end[0], start[1]);
 			
 			// draw bottom edge
-			pnt1 = coords.getValuePosition(spt[0], (int)ept[1]);
-			pnt2 = coords.getValuePosition((int)ept[0], (int)ept[1]);
 			gc.setForegroundColor(bottomColor);
 			gc.setBackgroundColor(bottomColor);
-			gc.drawLine(pnt1[0], pnt1[1], pnt2[0], pnt2[1]);
+			gc.drawLine(start[0], end[1], end[0], end[1]);
 			
 			// draw left edge
-			pnt1 = coords.getValuePosition(spt[0], spt[1]);
-			pnt2 = coords.getValuePosition(spt[0], (int)ept[1]);
 			gc.setForegroundColor(leftColor);
 			gc.setBackgroundColor(leftColor);
-			gc.drawLine(pnt1[0], pnt1[1], pnt2[0], pnt2[1]);
+			gc.drawLine(start[0], start[1], start[0], end[1]);
 			
 			// draw right edge
-			pnt1 = coords.getValuePosition((int)ept[0], spt[1]);
-			pnt2 = coords.getValuePosition((int)ept[0], (int)ept[1]);
 			gc.setForegroundColor(rightColor);
 			gc.setBackgroundColor(rightColor);
-			gc.drawLine(pnt1[0], pnt1[1], pnt2[0], pnt2[1]);
+			gc.drawLine(end[0], start[1], end[0], end[1]);
 		}
-		
 		gc.popState();
-
 	}
-
 
 	@Override
 	public ROIBase createROI(boolean recordResult) {
