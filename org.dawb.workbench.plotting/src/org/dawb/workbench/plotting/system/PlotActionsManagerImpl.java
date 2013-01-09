@@ -11,11 +11,9 @@
 package org.dawb.workbench.plotting.system;
 
 import java.util.Collection;
-import java.util.Map;
 
 import org.csstudio.swt.xygraph.undo.ZoomType;
 import org.dawb.common.services.IPaletteService;
-import org.dawb.common.ui.image.PaletteFactory;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.ActionType;
