@@ -1,6 +1,9 @@
 package org.dawb.workbench.plotting.system.swtxy.util;
 
+import java.util.Arrays;
+
 import org.eclipse.draw2d.Graphics;
+import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Shape;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
@@ -210,6 +213,10 @@ public class RotatableEllipse extends Shape {
 	}
 
 	private boolean isShapeFriendlySize() {
+		IFigure p = getParent();
+		if (p == null)
+			return true;
+
 		int ax = (int)affine.getScaleX();
 		int ay = (int)affine.getScaleY();
 		
@@ -217,10 +224,14 @@ public class RotatableEllipse extends Shape {
 		// are very likely to be off-screen. 
 		// On linux off screen is bad therefore we do not draw
 		// Fix to http://jira.diamond.ac.uk/browse/DAWNSCI-429
-		Rectangle bnds = getParent().getBounds().getExpanded(500, 500); // This is a fudge, very elongated do still not show.
+		Rectangle bnds = p.getBounds().getExpanded(500, 500); // This is a fudge, very elongated do still not show.
 		                                                                // Better than crashes however...
 		if (ax>bnds.width && ay>bnds.height) return false;
 		return true;
 	}
 
+	@Override
+	public String toString() {
+		return "Axes " + Arrays.toString(getAxes()) + ", centre " + getCentre() + ", angle " + getAngleDegrees();
+	}
 }
