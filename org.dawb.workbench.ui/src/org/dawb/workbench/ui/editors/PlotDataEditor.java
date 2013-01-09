@@ -38,9 +38,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IToolBarManager;
-import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -50,7 +47,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IActionBars2;
 import org.eclipse.ui.IEditorInput;
@@ -180,21 +176,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
         	yAxis.setVisible(false);
         	yAxis.setTitle("Y"+i);
             axisMap.put(i, yAxis);
-		}
-        
-        IToolBarManager rightMan = wrapper.getRightManager();
-        final MenuManager menuMan = (MenuManager)wrapper.getMenuManager();
- 		if (rightMan!=null) {
- 		    Action menuAction = new Action("", Activator.getImageDescriptor("/icons/DropDown.png")) {
- 		        @Override
- 		        public void run() {
- 	                final Menu   mbar = menuMan.createContextMenu(wrapper.getToolBar());
- 	       		    mbar.setVisible(true);
- 		        }
- 		    };
- 		    rightMan.add(menuAction);
- 		}
-        		
+		}        		
 		
 		// Finally
 		if (wrapper!=null)  wrapper.update(true);

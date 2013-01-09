@@ -27,7 +27,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.preference.PreferenceDialog;
@@ -36,7 +35,6 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IReusableEditor;
@@ -130,16 +128,6 @@ public class PlotImageEditor extends EditorPart implements IReusableEditor {
         plottingSystem.createPlotPart(plot, plotName, wrapper, PlotType.IMAGE, this);
         plottingSystem.getSelectedXAxis().setTitle("");
         
-        final MenuManager menuMan = (MenuManager)wrapper.getMenuManager();
-	    Action menuAction = new Action("", Activator.getImageDescriptor("/icons/DropDown.png")) {
-	    	@Override
-	    	public void run() {
-	    		final Menu   mbar = menuMan.createContextMenu(wrapper.getToolBar());
-	    		mbar.setVisible(true);
-	    	}
-	    };
-	    wrapper.getRightManager().add(menuAction);
-
 		wrapper.update(true);
 
 		createPlot();
