@@ -1,5 +1,6 @@
 package org.dawb.workbench.plotting.tools.fitting;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -589,6 +590,11 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 
 	public void setFitBounds(RectangularROI fitBounds) {
 		this.fitBounds = fitBounds;
+	}
+
+	@Override
+	public Serializable getToolData() {
+		return fittedFunctions;
 	}
 
 }

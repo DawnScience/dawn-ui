@@ -1,5 +1,6 @@
 package org.dawb.workbench.plotting.tools.fitting;
 
+import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.List;
@@ -20,19 +21,27 @@ import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
-class FittedFunction {
+class FittedFunction implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8693565808148499724L;
+	
+	// Things serialised in getToolData().
 	private RectangularROI    roi;
 	private CompositeFunction function;
-	private IRegion           fwhm;
-	private IRegion           center;
-	private ITrace            dataTrace;
-	private ITrace            trace;
-	private IAnnotation       annotation;
-	private AbstractDataset[] peakFunctions;
 	private boolean           saved=false;
 	private String            peakName;
 	private AbstractDataset   x,y;
+	private AbstractDataset[] peakFunctions;
+	
+	// Things not serialised
+	private transient IRegion           fwhm;
+	private transient IRegion           center;
+	private transient ITrace            dataTrace;
+	private transient ITrace            trace;
+	private transient IAnnotation       annotation;
 	
 	public AbstractDataset getX() {
 		return x;
