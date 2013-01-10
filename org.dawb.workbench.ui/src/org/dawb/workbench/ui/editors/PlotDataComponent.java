@@ -470,7 +470,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 					}
 					wiz.setSource(getIFile());
 					wiz.setSelections(getSelectionNames());
-					wiz.setTool((IDataReductionToolPage)getTool());
+					wiz.setTool((IDataReductionToolPage)getPlottingSystem().getActiveTool());
 					wiz.setSliceData(getSliceData());
 					wiz.setNexusAxes(getNexusAxes());
 					
@@ -575,27 +575,12 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 	protected boolean isDataReductionToolActive() {
 		
 		if (H5Loader.isH5(getFileName())) {
-			IToolPage tool = getTool();
+			IToolPage tool = getPlottingSystem().getActiveTool();
 			return tool!=null && tool instanceof IDataReductionToolPage;
 		}
 		return false;
 	}
 	
-	protected IToolPage getTool() {
-		AbstractPlottingSystem aps = getPlottingSystem();
-		if (aps!=null) {
-			IToolPage page=null;			
-			// TODO FIXME 3D ??
-			if (aps.is2D()) {
-				page = aps.getCurrentToolPage(ToolPageRole.ROLE_2D);
-			} else {
-				page = aps.getCurrentToolPage(ToolPageRole.ROLE_1D);
-			}
-			return page;
-		}
-		return null;
-	}
-
 	private void createColumns() {
 		
 		ColumnViewerToolTipSupport.enableFor(dataViewer,ToolTip.NO_RECREATE);
