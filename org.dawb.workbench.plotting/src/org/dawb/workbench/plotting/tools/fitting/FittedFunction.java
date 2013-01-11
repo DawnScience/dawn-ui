@@ -1,6 +1,5 @@
 package org.dawb.workbench.plotting.tools.fitting;
 
-import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.List;
@@ -19,16 +18,12 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
+import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
-class FittedFunction implements Serializable {
+class FittedFunction  {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 8693565808148499724L;
 	
-	// Things serialised in getToolData().
 	private RectangularROI    roi;
 	private CompositeFunction function;
 	private boolean           saved=false;
@@ -36,12 +31,11 @@ class FittedFunction implements Serializable {
 	private AbstractDataset   x,y;
 	private AbstractDataset[] peakFunctions;
 	
-	// Things not serialised
-	private transient IRegion           fwhm;
-	private transient IRegion           center;
-	private transient ITrace            dataTrace;
-	private transient ITrace            trace;
-	private transient IAnnotation       annotation;
+	private IRegion           fwhm;
+	private IRegion           center;
+	private ITrace            dataTrace;
+	private ITrace            trace;
+	private IAnnotation       annotation;
 	
 	public AbstractDataset getX() {
 		return x;
@@ -359,6 +353,13 @@ class FittedFunction implements Serializable {
 
 	public void setDataTrace(ITrace dataTrace) {
 		this.dataTrace = dataTrace;
+	}
+
+	public List<ROIBase> getRegions() {
+		if (fwhm!=null && center!=null) {
+			return Arrays.asList(fwhm.getROI(), center.getROI());
+		}
+		return null;
 	}
 	
 }

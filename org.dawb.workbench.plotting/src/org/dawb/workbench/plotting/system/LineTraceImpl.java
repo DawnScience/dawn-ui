@@ -392,4 +392,7 @@ public class LineTraceImpl implements ILineTrace {
 		this.userObject = userObject;
 	}
 
+	public String toString() {
+		return trace.getName()+" (Internal name "+trace.getInternalName()+")";
+	}
 }

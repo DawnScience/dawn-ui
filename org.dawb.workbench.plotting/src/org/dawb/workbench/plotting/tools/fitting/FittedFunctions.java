@@ -1,6 +1,5 @@
 package org.dawb.workbench.plotting.tools.fitting;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -22,13 +21,7 @@ import uk.ac.diamond.scisoft.analysis.optimize.IOptimizer;
  * @author fcp94556
  *
  */
-public class FittedFunctions implements Serializable {
-
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -7123164626638947316L;
-	
+public class FittedFunctions {	
 	
 	private List<FittedFunction>     fittedPeakList;
 	private FittedFunction           selectedPeak; // Should be FittedPeak
@@ -242,5 +235,9 @@ public class FittedFunctions implements Serializable {
 			fp.getUsedNames(names);
 		}
 		return names.toArray(new String[names.size()]);
+	}
+	
+	public FittedFunction getSelectedPeak() {
+		return selectedPeak;
 	}
 }

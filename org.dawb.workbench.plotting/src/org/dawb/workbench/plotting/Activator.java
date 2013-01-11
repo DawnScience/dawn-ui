@@ -1,5 +1,9 @@
 package org.dawb.workbench.plotting;
 
+import java.util.Hashtable;
+
+import org.dawb.common.services.IClassLoaderService;
+import org.dawb.workbench.plotting.service.ClassLoaderService;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -29,6 +33,9 @@ public class Activator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		Hashtable<String, String> props = new Hashtable<String, String>(1);
+		props.put("description", "A service used to register a class loader which is aware of scisoft classes.");
+		context.registerService(IClassLoaderService.class, new ClassLoaderService(), props);
 	}
 
 	/*

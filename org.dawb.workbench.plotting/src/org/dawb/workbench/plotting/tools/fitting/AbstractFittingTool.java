@@ -49,6 +49,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.FunctionSquirts;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.FunctionSquirts.Squirt;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 import uk.ac.gda.common.rcp.util.GridUtils;
 
@@ -594,7 +596,28 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 
 	@Override
 	public Serializable getToolData() {
-		return fittedFunctions;
+		final FunctionSquirts fs = new FunctionSquirts();
+		
+		for (FittedFunction ff : fittedFunctions.getFunctionList()) {
+			fs.addSquirt(getSquirt(ff));
+		}
+		fs.setSelected(getSquirt(fittedFunctions.getSelectedPeak()));
+		
+		return fs;
+	}
+
+
+	private Squirt getSquirt(FittedFunction ff) {
+		if (ff == null) return null;
+		final Squirt skwert = new Squirt();
+		skwert.setBounds(ff.getRoi());
+		skwert.setFunction(ff.getFunction());
+		skwert.setName(ff.getPeakName());
+		skwert.setPeakFunctions(ff.getPeakFunctions());
+		skwert.setRegions(ff.getRegions());
+		skwert.setX(ff.getX());
+		skwert.setY(ff.getY());
+		return skwert;
 	}
 
 }
