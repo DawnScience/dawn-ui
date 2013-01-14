@@ -25,14 +25,17 @@
             id="org.dawb.passerelle.actors.dawn.regionNormalise"
             name="Region Normalise">
       </actor>
+      <!-- This actor has been objected to by the code police in favour of 
+           a format attribute of the original scalar actor
       <actor
             class="org.dawb.passerelle.actors.dawn.ScalarActor"
             figureCustomizer="org.dawb.passerelle.actors.data.MathCustomizer"
             group="org.dawb.passerelle.actors.actorgroup.maths"
             icon="icons/scalar.png"
             id="org.dawb.passerelle.actors.dawn.customscalar"
-            name="Custom Scalar">
+            name="Format Scalar">
       </actor>
+      -->
       <actor
             class="org.dawb.passerelle.actors.dawn.RegionSelectAndScale"
             group="org.dawb.passerelle.actors.dawn.plottinggroup"
