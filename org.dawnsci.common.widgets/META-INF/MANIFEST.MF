@@ -1,4 +1,7 @@
 Manifest-Version: 1.0
+Dependency-Notes: 
+ This plugin should be totally vanilla and not have dependencies on anything 
+ other than jscience and eclipse/swt/jface things.
 Bundle-ManifestVersion: 2
 Bundle-Name: DawnScience Widgets
 Bundle-SymbolicName: org.dawnsci.common.widgets
