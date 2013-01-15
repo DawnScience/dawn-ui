@@ -165,7 +165,7 @@ public class AsciiEditor extends MultiPageEditorPart implements ISlicablePlottin
 			final PlotDataEditor      ed  = getDataSetEditor();
 			return PlotDataPage.getPageFor(ed);
 		} else if (clazz == IToolPageSystem.class) {
-			return dataSetEditor.getPlottingSystem();
+			if (dataSetEditor!=null) return dataSetEditor.getPlottingSystem();
 		}
 		
 		return super.getAdapter(clazz);

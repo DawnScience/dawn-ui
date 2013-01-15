@@ -208,7 +208,7 @@ public class H5MultiEditor extends MultiPageEditorPart  implements ISlicablePlot
 		} else if (clazz == IContentProvider.class) {
 			return new H5ValuePage();
 		} else if (clazz == IToolPageSystem.class) {
-			return dataSetEditor.getPlottingSystem();
+			if (dataSetEditor!=null) return dataSetEditor.getPlottingSystem();
 		}
 		
 		return super.getAdapter(clazz);
