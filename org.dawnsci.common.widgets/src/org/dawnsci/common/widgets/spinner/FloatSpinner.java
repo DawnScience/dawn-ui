@@ -21,7 +21,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.dawb.common.ui.menu.MenuAction;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -259,18 +258,6 @@ public class FloatSpinner extends Composite {
 				popupMenu.add(copyAction);
 				popupMenu.add(pasteAction);
 				popupMenu.add(new Separator());
-
-		 		MenuAction incMenu = new MenuAction("Increment");
-		 		popupMenu.add(incMenu);
-		 		
-		 		for (final double inc: increments) {
-		 			incMenu.add(new Action(String.valueOf(inc)) {
-		 				@Override
-		 				public void run() {
-		 					setIncrement(inc);
-		 				}
-		 			});
-		 		}
 
 		 		popupMenu.add(new Action("Reset") {
 		 			@Override
