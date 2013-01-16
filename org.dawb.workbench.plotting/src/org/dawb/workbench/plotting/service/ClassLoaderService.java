@@ -3,6 +3,8 @@ package org.dawb.workbench.plotting.service;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 
+import javax.vecmath.Vector3d;
+
 import org.dawb.common.services.IClassLoaderService;
 import org.dawb.workbench.jmx.UserPlotBean;
 import org.eclipse.ui.services.AbstractServiceFactory;
@@ -32,6 +34,7 @@ public class ClassLoaderService extends AbstractServiceFactory implements IClass
 			final CompositeClassLoader customLoader = new CompositeClassLoader();
 			customLoader.add(UserPlotBean.class.getClassLoader());
 			customLoader.add(AbstractDataset.class.getClassLoader());
+			customLoader.add(Vector3d.class.getClassLoader());
 			classLoader = customLoader;
 		} else {
 			classLoader    = originalLoader;
