@@ -226,7 +226,7 @@ public class ErrorHelpers {
 		AbstractDataset ds = (AbstractDataset) dataset; 
 		
 		for(int i = 0; i < data.length; i++) {
-			data[i] = (ds.getErrorDouble(i)) * (worldmax/(graphmax - graphmin));
+			data[i] = ds.getError(i) * (worldmax/(graphmax - graphmin));
 		}
 
 		return data;
