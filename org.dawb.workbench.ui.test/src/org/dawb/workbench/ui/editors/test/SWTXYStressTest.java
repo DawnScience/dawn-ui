@@ -79,7 +79,7 @@ public class SWTXYStressTest {
 		trace.setData(IntegerDataset.arange(2048, AbstractDataset.INT32), data);
 		sys.addTrace(trace);
 
-        for (int i = 0; i < 1000000; i++) {
+        for (int i = 0; i < 10000; i++) { // TODO should be larger
 			
         	data = Random.rand(new int[]{2048});
         	
@@ -88,12 +88,10 @@ public class SWTXYStressTest {
         			AbstractDataset data = Random.rand(new int[]{2048});
          			trace.setData(IntegerDataset.arange(2048, AbstractDataset.INT32), data);
         			sys.repaint();
-        			
-      			    EclipseUtils.delay(200);
-        		}
+          		}
         	});
-        	
-    		EclipseUtils.delay(20);
+        	if (i%1000==0) System.out.println(i);
+    		EclipseUtils.delay(5);
       	
 		}
 	
@@ -125,7 +123,7 @@ public class SWTXYStressTest {
 		final IImageTrace          imt = (IImageTrace)traces.iterator().next();
 
 		// TODO Longer term tests may do while(true) here...
-        for (int i = 0; i < 1000000; i++) {
+        for (int i = 0; i < 10000; i++) {
 			
         	final DoubleDataset data = new DoubleDataset(new int[]{2048, 2048});
         	for (int j = 0; j < 2048*2048; j++) {
@@ -138,6 +136,7 @@ public class SWTXYStressTest {
         		}
         	});
         	
+        	if (i%1000==0) System.out.println(i);
     		EclipseUtils.delay(5);
       	
 		}
