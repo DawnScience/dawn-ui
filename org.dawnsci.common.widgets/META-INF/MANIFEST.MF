@@ -7,7 +7,7 @@ Bundle-Name: DawnScience Widgets
 Bundle-SymbolicName: org.dawnsci.common.widgets
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.dawnsci.common.widgets.Activator
-Bundle-Vendor: Diamond Light Source Ltd.
+Bundle-Vendor: Diamond Light Source
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
