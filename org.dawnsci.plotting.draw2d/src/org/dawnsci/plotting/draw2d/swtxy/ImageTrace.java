@@ -258,6 +258,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				
 				// We send the image drawn with the same palette to the 
 				// intensityScale
+				// TODO FIXME This will not work in log mode
 				final DoubleDataset dds = new DoubleDataset(256,1);
 				double inc = (getMax().doubleValue()-getMin().doubleValue())/256d;
 				for (int i = 0; i < 256; i++) {
