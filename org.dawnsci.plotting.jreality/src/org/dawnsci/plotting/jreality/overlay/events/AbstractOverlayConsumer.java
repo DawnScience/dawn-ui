@@ -47,6 +47,7 @@ public abstract class AbstractOverlayConsumer implements Overlay1DConsumer, Over
 	protected int[]           parts;
 	private AreaSelectEvent   start;
 	private Display           display;
+	private boolean mouseListenerEnabled = true;
 	
 	/**
 	 * @param display
@@ -85,13 +86,19 @@ public abstract class AbstractOverlayConsumer implements Overlay1DConsumer, Over
 
 	@Override
 	public void areaSelected(AreaSelectEvent event) {
-		if (event.getMode() == 0) {
-			start = event;
+		if (mouseListenerEnabled) {
+			if (event.getMode() == 0) {
+				start = event;
+			}
+			if (event.getMode() == 1 || event.getMode() == 2) {
+				drawOverlay(new OverlayDrawingEvent(provider, start, event, parts));
+				notifyGraphSelectionListeners(event);
+			}
 		}
-		if (event.getMode() == 1 || event.getMode() == 2) {
-			drawOverlay(new OverlayDrawingEvent(provider, start, event, parts));
-			notifyGraphSelectionListeners(event);
-		}
+	}
+
+	public void enableMouseListener(boolean enabled) {
+		mouseListenerEnabled = enabled;
 	}
 
 	/**
