@@ -16,7 +16,7 @@ import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.roi.ResolutionRing;
 import org.dawb.workbench.plotting.Activator;
-import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
+import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.swt.graphics.Color;

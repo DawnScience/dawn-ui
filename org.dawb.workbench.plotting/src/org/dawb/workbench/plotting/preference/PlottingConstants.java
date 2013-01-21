@@ -10,51 +10,15 @@
 
 package org.dawb.workbench.plotting.preference;
 
+import org.dawnsci.plotting.draw2d.swtxy.BasePlottingConstants;
 
-public class PlottingConstants {
+
+public class PlottingConstants extends BasePlottingConstants {
 
 	
 	public static final String PLOTTING_SYSTEM_CHOICE = "org.dawb.plotting.system.choice";
 
 	public static final String PLOT_X_DATASET = "org.dawb.lightweight.plot.x.choice";
-
-	
-	/**
-	 * 
-	 */
-	public final static String XY_SHOWLEGEND = "org.csstudio.swt.xygraph.preferences.show.legend";
-
-	/**
-	 * Used to store palette preference
-	 */
-	public static final String COLOUR_SCHEME = "org.dawb.plotting.system.colourSchemeName";
-
-	/**
-	 * Used to store origin preference, do not change string
-	 */
-	public static final String ORIGIN_PREF = "org.dawb.plotting.system.originChoice";
-
-	/**
-	 * true when the image should keep aspect ratio, otherwise it will stretch to the available area.
-	 */
-	public static final String ASPECT = "org.dawb.plotting.system.aspectRatio";
-
-	/**
-	 * true when zooming should rehistogram, also rehistograms when pressed.
-	 */
-	public static final String HISTO = "org.dawb.plotting.system.rehistogram";
-
-	/**
-	 * Used to store origin preference
-	 */
-	public static final String HISTO_PREF = "org.dawb.plotting.system.histogram.type";
-	
-	/**
-	 * Used for cut pixels
-	 */
-	public static final String MIN_CUT = "org.dawb.plotting.system.histogram.min.cut";
-	public static final String MAX_CUT = "org.dawb.plotting.system.histogram.max.cut";
-	public static final String NAN_CUT = "org.dawb.plotting.system.histogram.nan.cut";
 
 	/**
 	 * Used to store the users preference for free draw.

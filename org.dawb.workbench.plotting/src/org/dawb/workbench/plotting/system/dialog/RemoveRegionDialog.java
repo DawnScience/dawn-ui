@@ -1,9 +1,9 @@
 package org.dawb.workbench.plotting.system.dialog;
 
 import org.dawb.common.ui.plot.region.IRegion;
-import org.dawb.workbench.plotting.system.swtxy.RegionArea;
-import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
-import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
+import org.dawnsci.plotting.draw2d.swtxy.RegionArea;
+import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
+import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;

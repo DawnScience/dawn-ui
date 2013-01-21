@@ -5,7 +5,6 @@ import javax.measure.quantity.Length;
 import javax.measure.unit.SI;
 
 import org.dawb.common.ui.plot.region.IRegion;
-import org.dawb.workbench.plotting.system.swtxy.selection.GridSelection;
 import org.dawnsci.common.widgets.tree.AbstractNodeModel;
 import org.dawnsci.common.widgets.tree.AmountEvent;
 import org.dawnsci.common.widgets.tree.AmountListener;
@@ -16,6 +15,7 @@ import org.dawnsci.common.widgets.tree.NumericNode;
 import org.dawnsci.common.widgets.tree.ObjectNode;
 import org.dawnsci.common.widgets.tree.ValueEvent;
 import org.dawnsci.common.widgets.tree.ValueListener;
+import org.dawnsci.plotting.draw2d.swtxy.selection.GridSelection;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;

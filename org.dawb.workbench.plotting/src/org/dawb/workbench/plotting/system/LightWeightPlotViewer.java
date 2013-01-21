@@ -42,17 +42,17 @@ import org.dawb.workbench.plotting.preference.PlottingConstants;
 import org.dawb.workbench.plotting.printing.PlotExportPrintUtil;
 import org.dawb.workbench.plotting.printing.PlotPrintPreviewDialog;
 import org.dawb.workbench.plotting.printing.PrintSettings;
-import org.dawb.workbench.plotting.system.swtxy.AspectAxis;
-import org.dawb.workbench.plotting.system.swtxy.ImageTrace;
-import org.dawb.workbench.plotting.system.swtxy.LineTrace;
-import org.dawb.workbench.plotting.system.swtxy.RegionArea;
-import org.dawb.workbench.plotting.system.swtxy.RegionCreationLayer;
-import org.dawb.workbench.plotting.system.swtxy.XYRegionConfigDialog;
-import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
-import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
-import org.dawb.workbench.plotting.system.swtxy.selection.SelectionRegionFactory;
+import org.dawb.workbench.plotting.system.dialog.XYRegionConfigDialog;
 import org.dawb.workbench.plotting.util.ColorUtility;
 import org.dawb.workbench.plotting.util.TraceUtils;
+import org.dawnsci.plotting.draw2d.swtxy.AspectAxis;
+import org.dawnsci.plotting.draw2d.swtxy.ImageTrace;
+import org.dawnsci.plotting.draw2d.swtxy.LineTrace;
+import org.dawnsci.plotting.draw2d.swtxy.RegionArea;
+import org.dawnsci.plotting.draw2d.swtxy.RegionCreationLayer;
+import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
+import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
+import org.dawnsci.plotting.draw2d.swtxy.selection.SelectionRegionFactory;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.draw2d.FigureCanvas;
 import org.eclipse.draw2d.IFigure;
@@ -311,6 +311,18 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 					    if (fig instanceof IRegionContainer) {
 							final IRegion region = ((IRegionContainer)fig).getRegion();
 							SelectionRegionFactory.fillActions(manager, region, xyGraph, getSystem());
+							
+							final Action configure = new Action("Configure '"+region.getName()+"'", Activator.getImageDescriptor("icons/RegionProperties.png")) {
+								public void run() {
+									final XYRegionConfigDialog dialog = new XYRegionConfigDialog(Display.getCurrent().getActiveShell(), xyGraph, system.isRescale());
+									dialog.setSelectedRegion(region);
+									dialog.open();
+								}
+							};
+							manager.add(configure);
+							
+							manager.add(new Separator("org.dawb.workbench.plotting.system.region.end"));
+
 					    }
 					    if (fig instanceof ITraceContainer) {
 							final ITrace trace = ((ITraceContainer)fig).getTrace();
