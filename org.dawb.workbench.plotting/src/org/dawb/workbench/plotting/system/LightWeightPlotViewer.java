@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.csstudio.swt.widgets.figureparts.ColorMapRamp;
 import org.csstudio.swt.xygraph.figures.Annotation;
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.linearscale.AbstractScale.LabelSide;
@@ -54,12 +55,17 @@ import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.dawnsci.plotting.draw2d.swtxy.selection.SelectionRegionFactory;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.draw2d.BorderLayout;
+import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.FigureCanvas;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
+import org.eclipse.draw2d.Layer;
 import org.eclipse.draw2d.LayeredPane;
 import org.eclipse.draw2d.LightweightSystem;
+import org.eclipse.draw2d.LineBorder;
 import org.eclipse.draw2d.PrintFigureOperation;
+import org.eclipse.draw2d.SchemeBorder;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IContributionItem;
@@ -114,6 +120,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 	// Plotting stuff
 	private PlottingSystemImpl     system;
 	private LightWeightPlotActions plotActionsCreator;
+	private ColorMapRamp           intensity;
 
 
 	public void init(PlottingSystemImpl system) {
@@ -165,8 +172,16 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
  		// region draw layer is on 0)
  		final LayeredPane layers      = new LayeredPane();
         new RegionCreationLayer(layers, xyGraph.getRegionArea());  
-  		layers.add(xyGraph,     0);
-		lws.setContents(layers);
+        final Layer graphLayer = new Layer();
+        graphLayer.setLayoutManager(new BorderLayout());
+        graphLayer.add(xyGraph, BorderLayout.CENTER);
+		this.intensity = new ColorMapRamp();
+        graphLayer.add(intensity, BorderLayout.RIGHT);
+		intensity.setVisible(false);
+		intensity.setBorder(new LineBorder(ColorConstants.white, 5));
+		
+  		layers.add(graphLayer,     0);
+		lws.setContents(graphLayer);
 		
 		// Create status contribution for position
 		IWorkbenchPart part = system.getPart();
@@ -514,7 +529,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		if (data.getName()!=null) xyGraph.setTitle(data.getName());
 		xyGraph.clearTraces();
 
-		final ImageTrace trace = xyGraph.createImageTrace(traceName, xAxis, yAxis);
+		final ImageTrace trace = xyGraph.createImageTrace(traceName, xAxis, yAxis, intensity);
 		trace.setPlottingSystem(system);
 		if (!trace.setData(data, axes, true)) return trace; // But not plotted
 		
@@ -526,7 +541,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		final Axis xAxis = (Axis)getSelectedXAxis();
 		final Axis yAxis = (Axis)getSelectedYAxis();
 		
-		final ImageTrace trace = xyGraph.createImageTrace(traceName, xAxis, yAxis);
+		final ImageTrace trace = xyGraph.createImageTrace(traceName, xAxis, yAxis, intensity);
 		trace.setPlottingSystem(system);
 		return trace;
 	}
@@ -624,14 +639,15 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 	}
 
 	public void addTrace(ITrace trace) {
-		if (trace instanceof ImageTrace) {
+		if (trace instanceof IImageTrace) {
 			system.setPlotType(PlotType.IMAGE); // Only one image allowed at a time
 			final TraceWillPlotEvent evt = new TraceWillPlotEvent(trace, true);
 			system.fireWillPlot(evt);
 			if (!evt.doit) return;
 			xyGraph.addImageTrace((ImageTrace)trace);
 			removeAdditionalAxes(); // Do not have others with images.
-						
+			intensity.setVisible(true);
+
 		} else {
 			system.setPlotType(PlotType.XY);
 			final TraceWillPlotEvent evt = new TraceWillPlotEvent(trace, true);
@@ -640,9 +656,11 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 			final AspectAxis xAxis = (AspectAxis)getSelectedXAxis();
 			final AspectAxis yAxis = (AspectAxis)getSelectedYAxis();
 			xyGraph.addTrace(((LineTraceImpl)trace).getTrace(), xAxis, yAxis, true);
-			xyCanvas.redraw();
+			intensity.setVisible(false);
 		}
 		
+		xyCanvas.redraw();
+	
 	}
 
 	public void removeTrace(ITrace trace) {

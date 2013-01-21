@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
+import org.csstudio.swt.widgets.figureparts.ColorMapRamp;
 import org.csstudio.swt.xygraph.figures.Annotation;
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.IAnnotationLabelProvider;
@@ -99,9 +100,9 @@ public class XYRegionGraph extends XYGraph {
 	}
 
 
-	public ImageTrace createImageTrace(String name, Axis xAxis, Axis yAxis) {
+	public ImageTrace createImageTrace(String name, Axis xAxis, Axis yAxis, ColorMapRamp intensity) {
 		RegionArea ra = (RegionArea)getPlotArea();
-		return ra.createImageTrace(name, xAxis, yAxis);
+		return ra.createImageTrace(name, xAxis, yAxis, intensity);
 	}
 	public void addImageTrace(final ImageTrace trace) {
 		getRegionArea().addImageTrace(trace);

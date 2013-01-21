@@ -9,6 +9,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import org.csstudio.swt.widgets.datadefinition.ColorMap;
+import org.csstudio.swt.widgets.datadefinition.ColorMap.PredefinedColorMap;
+import org.csstudio.swt.widgets.figureparts.ColorMapRamp;
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.IAxisListener;
 import org.csstudio.swt.xygraph.linearscale.Range;
@@ -44,6 +47,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.function.Downsample;
 import uk.ac.diamond.scisoft.analysis.dataset.function.DownsampleMode;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
@@ -68,6 +72,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	private String           name;
 	private Axis             xAxis;
 	private Axis             yAxis;
+	private ColorMapRamp     intensityScale;
 	private AbstractDataset  image;
 	private DownsampleType   downsampleType=DownsampleType.MEAN;
 	private int              currentDownSampleBin=-1;
@@ -80,11 +85,13 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		
 	public ImageTrace(final String name, 
 			          final Axis xAxis, 
-			          final Axis yAxis) {
+			          final Axis yAxis,
+			          final ColorMapRamp intensityScale) {
 		
 		this.name  = name;
 		this.xAxis = xAxis;		
 		this.yAxis = yAxis;
+		this.intensityScale = intensityScale;
 
 		this.imageServiceBean = new ImageServiceBean();
 		try {
@@ -117,7 +124,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		}
 				
 	}
-
+	
 	private IPreferenceStore store;
 	private IPreferenceStore getPreferenceStore() {
 		if (store!=null) return store;
@@ -162,6 +169,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		if (imageServiceBean==null) return;
 		imageServiceBean.setPalette(paletteData);
 		createScaledImage(ImageScaleType.FORCE_REIMAGE, null);
+		intensityScale.repaint();
 		repaint();
 		firePaletteDataListeners(paletteData);
 	}
@@ -247,6 +255,18 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				}
 				
 				this.imageData   = service.getImageData(imageServiceBean);
+				
+				// We send the image drawn with the same palette to the 
+				// intensityScale
+				final DoubleDataset dds = new DoubleDataset(256,1);
+				double inc = (getMax().doubleValue()-getMin().doubleValue())/256d;
+				for (int i = 0; i < 256; i++) {
+					double val = getMax().doubleValue()-(i*inc);
+					dds.set(val, i, 0);
+				}
+				imageServiceBean.setImage(dds);
+				imageServiceBean.setMask(null);
+				intensityScale.setImageData(service.getImageData(imageServiceBean));
 				
 			} catch (Exception e) {
 				logger.error("Cannot create image from data!", e);
@@ -801,16 +821,18 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	public void setMin(Number min) {
 		if (imageServiceBean==null) return;
 		imageServiceBean.setMin(min);
+		intensityScale.setMin(min.doubleValue());
 		fireMinDataListeners();
 	}
 
 	public Number getMax() {
 		return imageServiceBean.getMax();
 	}
-
+	
 	public void setMax(Number max) {
 		if (imageServiceBean==null) return;
 		imageServiceBean.setMax(max);
+		intensityScale.setMax(max.doubleValue());
 		fireMaxDataListeners();
 	}
 

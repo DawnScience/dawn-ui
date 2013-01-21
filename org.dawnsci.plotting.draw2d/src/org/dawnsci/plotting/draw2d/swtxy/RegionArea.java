@@ -9,6 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.csstudio.swt.widgets.figureparts.ColorMapRamp;
 import org.csstudio.swt.xygraph.figures.Annotation;
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.PlotArea;
@@ -130,11 +131,11 @@ public class RegionArea extends PlotArea {
 	}
 	
 
-	public ImageTrace createImageTrace(String name, Axis xAxis, Axis yAxis) {
+	public ImageTrace createImageTrace(String name, Axis xAxis, Axis yAxis, ColorMapRamp intensity) {
 
         if (imageTraces.containsKey(name)) throw new RuntimeException("There is an image called '"+name+"' already plotted!");
         
-		final ImageTrace trace = new ImageTrace(name, xAxis, yAxis);
+		final ImageTrace trace = new ImageTrace(name, xAxis, yAxis, intensity);
 		
 		fireImageTraceCreated(new TraceEvent(trace));
 		
