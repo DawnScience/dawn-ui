@@ -181,7 +181,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		intensity.setBorder(new LineBorder(ColorConstants.white, 5));
 		
   		layers.add(graphLayer,     0);
-		lws.setContents(graphLayer);
+		lws.setContents(layers);
 		
 		// Create status contribution for position
 		IWorkbenchPart part = system.getPart();
