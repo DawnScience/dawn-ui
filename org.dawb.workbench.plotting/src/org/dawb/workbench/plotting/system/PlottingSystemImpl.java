@@ -570,9 +570,11 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		if (type.is3D()) { 
 			createJRealityUI();
 			top = jrealityViewer.getControl();
+			jrealityViewer.updatePlottingRole(type);
 		} else {
 			createLightWeightUI();
 			top = lightWeightViewer.getControl();
+			lightWeightViewer.updatePlottingRole(type);
 		}
 		if (parent.getLayout() instanceof StackLayout) {
 			final StackLayout layout = (StackLayout)parent.getLayout();

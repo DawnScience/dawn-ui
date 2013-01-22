@@ -261,7 +261,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 				String level  = System.getProperty("org.dawb.workbench.plotting.system.zoomLevel");
 				double factor = level!=null ? Double.parseDouble(level) :  0.1d;
 				xyGraph.setZoomLevel(e, direction*factor);
-				xyGraph.repaint();
+				xyCanvas.redraw();
 			}	
 		};
 		return mouseWheelListener;
@@ -1114,6 +1114,10 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 	public void setDefaultPlotCursor(Cursor cursor) {
 		xyGraph.getRegionArea().setCursor(cursor);
 		ZoomType.NONE.setCursor(cursor);
+	}
+
+	public void updatePlottingRole(PlotType type) {
+		intensity.setVisible(type.is2D());
 	}
 
 }

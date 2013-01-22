@@ -13,6 +13,7 @@ import javax.swing.JApplet;
 import javax.swing.JPanel;
 
 import org.dawb.common.ui.plot.IPlottingSystem;
+import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.trace.ISurfaceTrace;
 import org.dawnsci.plotting.jreality.compositing.CompositeEntry;
 import org.dawnsci.plotting.jreality.compositing.CompositingControl;
@@ -945,6 +946,11 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		if (plotter!=null) {
 			plotter.setTickGridLinesActive(xcoord, ycoord, zcoord);		
 		}
+	}
+	
+	public void updatePlottingRole(PlotType type) {
+		// TODO Tells us if surfaces or scatter etc.
+		
 	}
 
 	
