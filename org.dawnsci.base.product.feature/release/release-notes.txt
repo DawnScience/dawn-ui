@@ -1,0 +1,43 @@
+RELEASE NOTES FOR DAWN 1.1 Beta
+
+
+1. Use the '-data' switch to specify a different workspace if the disk access at your facility
+   is slow or restricted in the default location of ~/DAWN_Workspace. 
+   For instance:      dawn -data /scratch/dawn_workspace
+
+2. Toolbar actions on linux can be hidden using the plotting. If the part becomes small, instead 
+   of wrapping, some toolbar actions disappear. They can normally be found on the menu to the 
+   right of the toolbar (the white down arrow).
+
+2. The workflow does not support Jython actors in the Beta version.
+
+3. If using the .zip download version of Dawn, on Linux 32: It is sometimes necessary to delete 
+   the 'jre' folder from the install location. This is due to file permissions. 
+   Try doing this if your version does not work on linux and you installed it from a .zip file.
+
+4. If using workflows at Diamond using 'module load dawn/beta' they may not run. In this case do the following:
+   * Try to run a workflow, get a cryptic error about the "jre".
+   * Open the run configuration ‘WorkflowConfiguration’ go to the runtime jre setting and click on ‘installed jres...’
+   * Define a jre with the location on linux64 at Diamond of ‘/dls_sw/apps/java/x64/jdk1.6.0_38/jre’  for linux 64-bit.
+
+5. On windows the firewall can sometimes block the workflow which brings up a windows firewall dialog 
+   and stops the workflow from working. If this happens allow the connection and restart the workflow.
+
+6. If you try to run a workflow from a workspace path with spaces, the run/debug configuration 
+   has to be changed to include quotes around the model path: -Dmodel="${workspace_loc}${selected_resource_path}" 
+
+ Alternatively you can start dawn with a different workspace path 'dawn -data <another path>' one 
+ without spaces in the path. Edna actors usually do not work with spaces in the run path.
+
+7. When using the Python actor in the workflows, you must declare something for 'Dataset Outputs'. 
+   If you do not read information back into the workflow, create a dummy variable for this.
+
+8. On windows 32 there is a defect with 'Dataset Plot' view. If using the 'DExplore' perspective, 
+   you may see this. Try using the plotting inside ‘Data Browsing’ perspective in this case.
+
+9. Macos build of Dawn is experimental and ‘CBF’ files are not supported in version 1.1 Beta.
+
+10. To reliably find the Dawn version you are using go to:
+   * Help->About Dawn.
+   * Installation Details’ button.
+   * Installed Software’ tab, there is a version column.

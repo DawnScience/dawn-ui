@@ -42,5 +42,13 @@
          </property>
       </product>
    </extension>
+   <extension
+         point="org.eclipse.ui.installationPages">
+      <page
+            class="org.dawnsci.product.plugin.about.ReleaseNotesPage"
+            id="org.dawnsci.product.plugin.about.releasenotespage"
+            name="Release Notes">
+      </page>
+   </extension>
 
 </plugin>
