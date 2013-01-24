@@ -27,6 +27,7 @@ import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingActionBarManager;
 import org.dawb.common.ui.plot.annotation.IAnnotation;
 import org.dawb.common.ui.plot.axis.IAxis;
+import org.dawb.common.ui.plot.axis.IPositionListener;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
@@ -1084,4 +1085,17 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		if (cursorType == CROSS_CURSOR) cursor = Cursors.CROSS;
 		lightWeightViewer.setDefaultPlotCursor(cursor);
 	}
+	
+	@Override
+	public void addPositionListener(IPositionListener l) {
+		if (lightWeightViewer==null) return;
+		lightWeightViewer.addPositionListener(l);
+	}
+
+	@Override
+	public void removePositionListener(IPositionListener l) {
+		if (lightWeightViewer==null) return;
+		lightWeightViewer.removePositionListener(l);
+	}
+
 }

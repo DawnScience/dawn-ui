@@ -18,6 +18,8 @@ import org.csstudio.swt.xygraph.undo.ZoomType;
 import org.dawb.common.services.ImageServiceBean.ImageOrigin;
 import org.dawb.common.ui.plot.axis.IAxis;
 import org.dawb.common.ui.plot.axis.ICoordinateSystem;
+import org.dawb.common.ui.plot.axis.IPositionListener;
+import org.dawb.common.ui.plot.axis.PositionEvent;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.RegionEvent;
@@ -50,22 +52,51 @@ public class RegionArea extends PlotArea {
 		super(xyGraph);
 		this.regions     = new LinkedHashMap<String,AbstractSelectionRegion>();
 		this.imageTraces = new LinkedHashMap<String,ImageTrace>();	
+		
+		addMouseMotionListener(new MouseMotionListener.Stub() {
+			@Override
+			public void mouseMoved(MouseEvent me) {
+				firePositionListeners(new PositionEvent(RegionArea.this, 
+						                               (AspectAxis)getRegionGraph().primaryXAxis,
+						                               (AspectAxis)getRegionGraph().primaryYAxis,
+													    me.x, 
+													    me.y));
+			}
+		});
+
 	}
+
+	protected void firePositionListeners(PositionEvent positionEvent) {
+		if (positionListeners==null) return;
+		for (IPositionListener l : positionListeners) {
+			l.positionChanged(positionEvent);
+		}
+	}
+	
+	private Collection<IPositionListener> positionListeners;
+	public void addPositionListener(IPositionListener l) {
+		if (positionListeners==null) positionListeners = new HashSet<IPositionListener>();
+		positionListeners.add(l);
+	}
+	public void removePositionListener(IPositionListener l) {
+		if (positionListeners==null) return;
+		positionListeners.remove(l);
+	}
+
 
 	public void setStatusLineManager(final IStatusLineManager statusLine) {
 		
 		if (statusLine==null) return;
 		
 		final NumberFormat format = new DecimalFormat("#0.0000#");
-		addMouseMotionListener(new MouseMotionListener.Stub() {
+		addPositionListener(new IPositionListener() {
+
 			@Override
-			public void mouseMoved(MouseEvent me) {
-				double x = getRegionGraph().primaryXAxis.getPositionValue(me.x, false);
-				double y = getRegionGraph().primaryYAxis.getPositionValue(me.y, false);
+			public void positionChanged(PositionEvent me) {
 				final IImageTrace trace = getImageTrace();
 				if (trace!=null) {
 					try {
-						double[] da = trace.getPointInAxisCoordinates(new double[]{x,y});
+						double[] da = trace.getPointInAxisCoordinates(new double[]{me.x,me.y});
 						statusLine.setMessage(format.format(da[0])+", "+format.format(da[1]));
 						return;
 					} catch (Throwable ignored) {
@@ -73,7 +104,7 @@ public class RegionArea extends PlotArea {
 					}
 				}
 
-				statusLine.setMessage(format.format(x)+", "+format.format(y));
+				statusLine.setMessage(format.format(me.x)+", "+format.format(me.y));
 			}
 		});
 	}
