@@ -333,27 +333,27 @@ Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blo
     <target name="_create.product.zip.IncludeParentDirectory.UseNativeZip" depends="get-zip-environment" if="useNativeZipIncludeParentDirectory" unless="zipDone">
         <property.expand property="destination.zipfile" definition="${zip.file.name}"/>
         <echo>Zipping ${destination} (including the directory) into ${destination.parent}/${destination.zipfile}.zip using platform zip command</echo>
-        <exec executable="zip" osfamily="windows" dir="${destination.parent}" failonerror="true">
+        <exec executable="zip" osfamily="linux" dir="${destination.parent}" failonerror="true">
             <arg value="-qr" />
             <arg value="-n" />
             <arg value=".jar" />
             <arg value="${destination.zipfile}.zip" />
             <arg value="${destination.directory}" />
         </exec>
-        <property name="zipDoness" value="true" />
+        <property name="zipDone" value="true" />
     </target>
 
     <target name="_create.product.zip.ExcludeParentDirectory.UseNativeZip" depends="get-zip-environment" if="useNativeZipExcludeParentDirectory" unless="zipDone">
         <property.expand property="destination.zipfile" definition="${zip.file.name}"/>
         <echo>Zipping ${destination} (excluding the directory) into ${destination.parent}/${destination.zipfile}.zip using platform zip command</echo>
-        <exec executable="zip" osfamily="windows" dir="${destination}" failonerror="true">
+        <exec executable="zip" osfamily="linux" dir="${destination}" failonerror="true">
             <arg value="-qr" />
             <arg value="-n" />
             <arg value=".jar" />
             <arg value="${destination.parent}/${destination.zipfile}.zip" />
             <arg value="." />
         </exec>
-        <property name="zipDoness" value="true" />
+        <property name="zipDone" value="true" />
     </target>
 
     <target name="_create.product.zip.IncludeParentDirectory.UseAntZip" depends="get-product-description" if="useAntZipIncludeParentDirectory" unless="zipDone">
