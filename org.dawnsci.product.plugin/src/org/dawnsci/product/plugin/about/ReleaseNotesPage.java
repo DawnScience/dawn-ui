@@ -7,6 +7,8 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
@@ -46,13 +48,15 @@ public class ReleaseNotesPage extends InstallationPage {
 		text.setLayoutData(gridData);
 		text.setFont(JFaceResources.getTextFont());
 		
+		String releaseText = "";
 		try {
 			
-			String fullPath = Platform.getInstallLocation().getURL().toString()+releaseNotesFileName;
-			String releaseText = readFile(fullPath);
+			String fullPath = Platform.getInstallLocation().getURL().getPath().toString()+releaseNotesFileName;
+			releaseText = readFile(fullPath);
 			text.setText(releaseText);
 		} catch (IOException e) {
 			e.printStackTrace();
+			text.setText("The following path could not be found "+releaseText);
 		}
 	}
 
