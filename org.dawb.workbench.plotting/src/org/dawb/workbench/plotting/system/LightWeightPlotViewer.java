@@ -989,7 +989,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 
 	public void repaint(final boolean autoScale) {
 		if (Display.getDefault().getThread()==Thread.currentThread()) {
-			if (xyCanvas!=null) {
+			if (xyCanvas!=null && xyGraph != null) {
 				if (autoScale) xyGraph.performAutoScale();
 				xyCanvas.layout(xyCanvas.getChildren());
 				xyGraph.revalidate();
@@ -998,7 +998,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		} else {
 			Display.getDefault().syncExec(new Runnable() {
 				public void run() {
-					if (xyCanvas!=null) {
+					if (xyCanvas!=null && xyGraph != null) {
 						if (autoScale)xyGraph.performAutoScale();
 						xyCanvas.layout(xyCanvas.getChildren());
 						xyGraph.revalidate();
