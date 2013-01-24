@@ -289,34 +289,89 @@ Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blo
     <!--  Zip a previously created product  -->
     <!-- ================================== -->
 
-    <target name="get-zip-environment">
-        <condition property="runningOnLinux" value="true">
-            <os family="unix" />
+    <target name="get-zip-environment" depends="get-product-description">
+        <condition property="zip.file.name.OK" value="true">
+            <and>
+                <isset property="zip.file.name" />
+                <length string="${zip.file.name}" trim="true" when="greater" length="3" />
+            </and>
+        </condition>
+        <fail unless="zip.file.name.OK" message="Property zip.file.name was not set, but must be." />
+        <property name="zip.include.parent.directory" value="true"/>  <!-- default value -->
+        <condition property="useNativeZipIncludeParentDirectory" value="true">
+            <and>
+                <os family="unix" />
+                <istrue value="${zip.include.parent.directory}" />
+            </and>
+        </condition>
+        <condition property="useNativeZipExcludeParentDirectory" value="true">
+            <and>
+                <os family="unix" />
+                <isfalse value="${zip.include.parent.directory}" />
+            </and>
+        </condition>
+        <condition property="useAntZipIncludeParentDirectory" value="true">
+            <and>
+                <istrue value="${productIsWindows}" />
+                <istrue value="${zip.include.parent.directory}" />
+            </and>
+        </condition>
+        <condition property="useAntZipExcludeParentDirectory" value="true">
+            <and>
+                <istrue value="${productIsWindows}" />
+                <isfalse value="${zip.include.parent.directory}" />
+            </and>
         </condition>
     </target>
 
-    <target name="create.product.zip" depends="get-product-description, create.product.zip.using.zip, create.product.zip.using.ant">
-        <fail unless="zipDone" message="You cannot zip the product directory for platform  The version of ant bundled with Eclipse must be used to run the PDE build" />
+    <target name="create.product.zip" depends="get-zip-environment,
+        _create.product.zip.IncludeParentDirectory.UseNativeZip, _create.product.zip.ExcludeParentDirectory.UseNativeZip,
+        _create.product.zip.IncludeParentDirectory.UseAntZip, _create.product.zip.ExcludeParentDirectory.UseAntZip">
+        <fail unless="zipDone" message="You cannot zip the product directory for platform ${product.os}-${product.ws}-${product.arch}. Ant zip does not does not preserve file permissions." />
     </target>
 
-    <target name="create.product.zip.using.zip" depends="get-zip-environment" if="runningOnLinux" unless="zipDone">
+    <target name="_create.product.zip.IncludeParentDirectory.UseNativeZip" depends="get-zip-environment" if="useNativeZipIncludeParentDirectory" unless="zipDone">
         <property.expand property="destination.zipfile" definition="${zip.file.name}"/>
-        <echo>Zipping ${destination} into ${destination.parent}/${destination.zipfile} using platform zip command</echo>
-        <exec executable="zip" osfamily="unix" dir="${destination}" failonerror="true">
+        <echo>Zipping ${destination} (including the directory) into ${destination.parent}/${destination.zipfile}.zip using platform zip command</echo>
+        <exec executable="zip" osfamily="windows" dir="${destination.parent}" failonerror="true">
             <arg value="-qr" />
             <arg value="-n" />
             <arg value=".jar" />
-            <arg value="${destination.parent}/${destination.zipfile}" />
+            <arg value="${destination.zipfile}.zip" />
+            <arg value="${destination.directory}" />
+        </exec>
+        <property name="zipDoness" value="true" />
+    </target>
+
+    <target name="_create.product.zip.ExcludeParentDirectory.UseNativeZip" depends="get-zip-environment" if="useNativeZipExcludeParentDirectory" unless="zipDone">
+        <property.expand property="destination.zipfile" definition="${zip.file.name}"/>
+        <echo>Zipping ${destination} (excluding the directory) into ${destination.parent}/${destination.zipfile}.zip using platform zip command</echo>
+        <exec executable="zip" osfamily="windows" dir="${destination}" failonerror="true">
+            <arg value="-qr" />
+            <arg value="-n" />
+            <arg value=".jar" />
+            <arg value="${destination.parent}/${destination.zipfile}.zip" />
             <arg value="." />
         </exec>
+        <property name="zipDoness" value="true" />
+    </target>
+
+    <target name="_create.product.zip.IncludeParentDirectory.UseAntZip" depends="get-product-description" if="useAntZipIncludeParentDirectory" unless="zipDone">
+        <!-- Note the ANT zip does not preserve file permissions, so can't be used when zipping for Linux or Mac -->
+        <property.expand property="destination.zipfile" definition="${zip.file.name}.zip"/>
+        <echo>Zipping ${destination} (including the directory) into ${destination.parent}/${destination.zipfile} using ANT zip command</echo>
+        <zip destfile="${destination.parent}/${destination.zipfile}.zip"
+            keepcompression="true" defaultexcludes="no" whenempty="fail" duplicate="fail" level="6">
+            <zipfileset dir="${destination.parent}/${destination.directory}" prefix="${destination.directory}" />
+        </zip>
         <property name="zipDone" value="true" />
     </target>
 
-    <target name="create.product.zip.using.ant" depends="get-product-description" if="productIsWindows" unless="zipDone">
+    <target name="_create.product.zip.ExcludeParentDirectory.UseAntZip" depends="get-product-description" if="useAntZipExcludeParentDirectory" unless="zipDone">
         <!-- Note the ANT zip does not preserve file permissions, so can't be used when zipping for Linux or Mac -->
         <property.expand property="destination.zipfile" definition="${zip.file.name}"/>
-        <echo>Zipping ${destination} into ${destination.parent}/${destination.zipfile} using ANT zip command</echo>
-        <zip destfile="${destination.parent}/${destination.zipfile}" basedir="${destination}"
+        <echo>Zipping ${destination} (excluding the directory) into ${destination.parent}/${destination.zipfile} using ANT zip command</echo>
+        <zip destfile="${destination.parent}/${destination.zipfile}.zip" basedir="${destination}"
             keepcompression="true" defaultexcludes="no" whenempty="fail" duplicate="fail" level="6" />
         <property name="zipDone" value="true" />
     </target>
