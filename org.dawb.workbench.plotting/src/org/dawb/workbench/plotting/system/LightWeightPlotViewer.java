@@ -646,7 +646,12 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 			if (!evt.doit) return;
 			xyGraph.addImageTrace((ImageTrace)trace);
 			removeAdditionalAxes(); // Do not have others with images.
-			intensity.setVisible(true);
+			
+			if (trace.getData().getDtype() == AbstractDataset.RGB) {
+				intensity.setVisible(false);
+			} else {
+			    intensity.setVisible(true);
+			}
 
 		} else {
 			system.setPlotType(PlotType.XY);
