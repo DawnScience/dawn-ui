@@ -23,6 +23,7 @@ import org.dawb.common.ui.plot.annotation.IAnnotation;
 import org.dawb.common.ui.plot.annotation.IAnnotationSystem;
 import org.dawb.common.ui.plot.axis.IAxis;
 import org.dawb.common.ui.plot.axis.IAxisSystem;
+import org.dawb.common.ui.plot.axis.IPositionListener;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionContainer;
@@ -1084,6 +1085,18 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 	public void setDefaultPlotCursor(Cursor cursor) {
 		xyGraph.getRegionArea().setCursor(cursor);
 		ZoomType.NONE.setCursor(cursor);
+	}
+
+	@Override
+	public void addPositionListener(IPositionListener l) {
+		if (xyGraph==null || xyGraph.getRegionArea()==null) return;
+		xyGraph.getRegionArea().addPositionListener(l);
+	}
+
+	@Override
+	public void removePositionListener(IPositionListener l) {
+		if (xyGraph==null || xyGraph.getRegionArea()==null) return;
+		xyGraph.getRegionArea().removePositionListener(l);
 	}
 
 }
