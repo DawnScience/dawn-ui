@@ -128,7 +128,7 @@ public class XYRegionGraph extends XYGraph {
 		getRegionArea().clearImageTraces();
 	}
 	
-	protected RegionArea getRegionArea() {
+	public RegionArea getRegionArea() {
 		return (RegionArea)getPlotArea();
 	}
 
