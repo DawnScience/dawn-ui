@@ -66,7 +66,6 @@ import org.eclipse.draw2d.LayeredPane;
 import org.eclipse.draw2d.LightweightSystem;
 import org.eclipse.draw2d.LineBorder;
 import org.eclipse.draw2d.PrintFigureOperation;
-import org.eclipse.draw2d.SchemeBorder;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IContributionItem;
@@ -651,7 +650,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 			if (trace.getData().getDtype() == AbstractDataset.RGB) {
 				intensity.setVisible(false);
 			} else {
-			    intensity.setVisible(true);
+			    intensity.setVisible(Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.SHOW_INTENSITY));
 			}
 
 		} else {
@@ -1130,7 +1129,12 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 	}
 
 	public void updatePlottingRole(PlotType type) {
-		intensity.setVisible(type.is2D());
+		boolean shouldShow = Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.SHOW_INTENSITY);
+		intensity.setVisible(type.is2D()&&shouldShow);
+	}
+
+	protected void setShowIntensity(boolean checked) {
+		intensity.setVisible(checked);
 	}
 
 }

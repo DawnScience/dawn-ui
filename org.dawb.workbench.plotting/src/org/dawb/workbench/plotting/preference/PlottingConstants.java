@@ -55,4 +55,9 @@ public class PlottingConstants extends BasePlottingConstants {
 	 */
 	public static final String INCLUDE_ORIGINAL    = "org.dawb.workbench.plotting.preference.includeOriginalPlot";
 
+	/**
+	 * Stores if intensity scale should be shown.
+	 */
+	public static final String SHOW_INTENSITY = "org.dawb.workbench.plotting.preference.showIntensity";
+
 }
