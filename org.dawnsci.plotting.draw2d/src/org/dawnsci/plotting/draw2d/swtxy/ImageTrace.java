@@ -9,8 +9,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import org.csstudio.swt.widgets.datadefinition.ColorMap;
-import org.csstudio.swt.widgets.datadefinition.ColorMap.PredefinedColorMap;
 import org.csstudio.swt.widgets.figureparts.ColorMapRamp;
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.IAxisListener;
@@ -22,6 +20,8 @@ import org.dawb.common.services.ImageServiceBean;
 import org.dawb.common.services.ImageServiceBean.HistoType;
 import org.dawb.common.services.ImageServiceBean.ImageOrigin;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
+import org.dawb.common.ui.plot.trace.DownSampleEvent;
+import org.dawb.common.ui.plot.trace.IDownSampleListener;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.IPaletteListener;
 import org.dawb.common.ui.plot.trace.ITrace;
@@ -63,7 +63,7 @@ import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
  * @author fcp94556
  *
  */
-public class ImageTrace extends Figure implements IImageTrace, IAxisListener, ITraceContainer {
+public final class ImageTrace extends Figure implements IImageTrace, IAxisListener, ITraceContainer {
 	
 	private static final Logger logger = LoggerFactory.getLogger(ImageTrace.class);
 	
@@ -428,44 +428,86 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 	private Map<Integer, Reference<Object>> mipMap;
 	private Map<Integer, Reference<Object>> maskMap;
+	private Collection<IDownSampleListener> downsampleListeners;
 	
 	private AbstractDataset getDownsampled(AbstractDataset image) {
 		
 		// Down sample, no point histogramming the whole thing
         final int bin = getDownsampleBin();
-        this.currentDownSampleBin = bin;
-		if (bin==1) {
-	        logger.trace("No downsample bin (or bin=1)");
-			return image; // nothing to downsample
-		}
-		
-		if (image.getDtype()!=AbstractDataset.BOOL) {
-			if (mipMap!=null && mipMap.containsKey(bin) && mipMap.get(bin).get()!=null) {
-		        logger.trace("Downsample bin used, "+bin);
-				return (AbstractDataset)mipMap.get(bin).get();
+        
+        boolean newBin = false;
+        if (currentDownSampleBin!=bin) newBin = true;
+        
+        try {
+	        this.currentDownSampleBin = bin;
+			if (bin==1) {
+		        logger.trace("No downsample bin (or bin=1)");
+				return image; // nothing to downsample
 			}
-		} else {
-			if (maskMap!=null && maskMap.containsKey(bin) && maskMap.get(bin).get()!=null) {
-		        logger.trace("Downsample mask bin used, "+bin);
-				return (AbstractDataset)maskMap.get(bin).get();
+			
+			if (image.getDtype()!=AbstractDataset.BOOL) {
+				if (mipMap!=null && mipMap.containsKey(bin) && mipMap.get(bin).get()!=null) {
+			        logger.trace("Downsample bin used, "+bin);
+					return (AbstractDataset)mipMap.get(bin).get();
+				}
+			} else {
+				if (maskMap!=null && maskMap.containsKey(bin) && maskMap.get(bin).get()!=null) {
+			        logger.trace("Downsample mask bin used, "+bin);
+					return (AbstractDataset)maskMap.get(bin).get();
+				}
 			}
-		}
-		
-		final Downsample downSampler = new Downsample(getDownsampleTypeDiamond(), new int[]{bin,bin});
-		List<AbstractDataset>   sets = downSampler.value(image);
-		final AbstractDataset set = sets.get(0);
-		
-		if (image.getDtype()!=AbstractDataset.BOOL) {
-			if (mipMap==null) mipMap = new HashMap<Integer,Reference<Object>>(3);
-			mipMap.put(bin, new SoftReference<Object>(set));
-	        logger.trace("Downsample bin created, "+bin);
-		} else {
-			if (maskMap==null) maskMap = new HashMap<Integer,Reference<Object>>(3);
-			maskMap.put(bin, new SoftReference<Object>(set));
-	        logger.trace("Downsample mask bin created, "+bin);
-		}
-      
-		return set;
+			
+			final Downsample downSampler = new Downsample(getDownsampleTypeDiamond(), new int[]{bin,bin});
+			List<AbstractDataset>   sets = downSampler.value(image);
+			final AbstractDataset set = sets.get(0);
+			
+			if (image.getDtype()!=AbstractDataset.BOOL) {
+				if (mipMap==null) mipMap = new HashMap<Integer,Reference<Object>>(3);
+				mipMap.put(bin, new SoftReference<Object>(set));
+		        logger.trace("Downsample bin created, "+bin);
+			} else {
+				if (maskMap==null) maskMap = new HashMap<Integer,Reference<Object>>(3);
+				maskMap.put(bin, new SoftReference<Object>(set));
+		        logger.trace("Downsample mask bin created, "+bin);
+			}
+	      
+			return set;
+			
+        } finally {
+        	if (newBin) { // We fire a downsample event.
+        		fireDownsampleListeners(new DownSampleEvent(this, bin));
+        	}
+        }
+	}
+	
+	protected void fireDownsampleListeners(DownSampleEvent evt) {
+		if (downsampleListeners==null) return;
+		for (IDownSampleListener l : downsampleListeners) l.downSampleChanged(evt);
+	}
+
+	@Override
+	public int getBin() {
+		return currentDownSampleBin;
+	}
+	
+	/**
+	 * Add listener to be notifed if the dawnsampling changes.
+	 * @param l
+	 */
+	@Override
+	public void addDownsampleListener(IDownSampleListener l) {
+		if (downsampleListeners==null) downsampleListeners = new HashSet<IDownSampleListener>(7);
+		downsampleListeners.add(l);
+	}
+	
+	/**
+	 * Remove listener so that it is not notified.
+	 * @param l
+	 */
+	@Override
+	public void removeDownsampleListener(IDownSampleListener l) {
+		if (downsampleListeners==null) return;
+		downsampleListeners.remove(l);
 	}
 	
 	@Override
@@ -556,6 +598,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		if (maskMap!=null)          maskMap.clear();
 		if (scaledImage!=null)      scaledImage.dispose();
 		if (paletteListeners!=null) paletteListeners.clear();
+		if (downsampleListeners!=null) downsampleListeners.clear();
 		paletteListeners = null;
         clearAspect(xAxis);
         clearAspect(yAxis);

@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.dawb.common.services.HistogramBound;
 import org.dawb.common.ui.image.IconUtils;
+import org.dawb.common.ui.image.IconUtils.ShapeType;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.IPlottingSystem;
@@ -18,6 +19,8 @@ import org.dawb.common.ui.plot.region.ROIEvent;
 import org.dawb.common.ui.plot.region.RegionEvent;
 import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
+import org.dawb.common.ui.plot.trace.DownSampleEvent;
+import org.dawb.common.ui.plot.trace.IDownSampleListener;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
@@ -47,6 +50,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MouseEvent;
@@ -71,6 +75,7 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.BooleanDataset;
+import uk.ac.gda.common.rcp.util.GridUtils;
 
 public class MaskingTool extends AbstractToolPage implements MouseListener{
 
@@ -80,11 +85,15 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	private Spinner         minimum, maximum;
 	private Button          autoApply;
 	private MaskObject      maskObject;
-	private ITraceListener  traceListener;
-	private IRegionListener regionListener;
-	private IROIListener    regionBoundsListener;
 	private MaskJob         maskJob;
-	private TableViewer regionTable;
+	private TableViewer     regionTable;
+	private ToolBarManager  freeToolbar;
+	private CLabel          freeDrawLabel;
+	
+	private IDownSampleListener downSampleListener;
+	private ITraceListener      traceListener;
+	private IRegionListener     regionListener;
+	private IROIListener        regionBoundsListener;
 	
 	public MaskingTool() {
 		
@@ -93,7 +102,16 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			public void traceAdded(TraceEvent evt) {
 				if (evt.getSource() instanceof IImageTrace) {
 					getImageTrace().setMask(maskObject.getMaskDataset());
+					getImageTrace().addDownsampleListener(downSampleListener);
 				}
+			}
+		};
+		
+		this.downSampleListener = new IDownSampleListener() {	
+			@Override
+			public void downSampleChanged(DownSampleEvent evt) {
+				GridUtils.setVisible(freeToolbar.getControl(), evt.getBin()==1);
+                updateFreeDrawLabel(evt.getBin());
 			}
 		};
 		
@@ -147,6 +165,16 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		maskJob.setPriority(Job.INTERACTIVE);
 	}
 	
+	protected void updateFreeDrawLabel(int bin) {
+		if (bin!=1) {
+			GridUtils.setVisible(freeDrawLabel, true);
+			freeDrawLabel.setText("Downsampling bin is '"+bin+"' please zoom in until it's 1");
+		} else {
+			GridUtils.setVisible(freeDrawLabel, false);
+		}
+		freeDrawLabel.getParent().layout(new Control[]{freeDrawLabel});		
+	}
+
 	public void setPlottingSystem(IPlottingSystem system) {
 		super.setPlottingSystem(system);
 		this.maskObject   = new MaskObject(); //TODO maybe make maskCreator by only processing visible regions.
@@ -267,19 +295,38 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			}
 		});
 		
-		label = new Label(minMaxComp, SWT.WRAP);
-		label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2,1));
+		final Composite freeComp = new Composite(composite, SWT.NONE);
+		freeComp.setLayout(new GridLayout(1, false));
+		freeComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				
+		label = new Label(freeComp, SWT.HORIZONTAL|SWT.SEPARATOR);
+		GridData data = new GridData(SWT.FILL, SWT.FILL, true, false);
+		label.setLayoutData(data);
 		
+		this.freeDrawLabel = new CLabel(freeComp, SWT.NONE);
+		data = new GridData(SWT.FILL, SWT.FILL, false, false);
+		label.setLayoutData(data);
+		freeDrawLabel.setImage(Activator.getImage("icons/information.gif"));
+		updateFreeDrawLabel(image.getBin());
+		
+		this.freeToolbar = new ToolBarManager(SWT.FLAT|SWT.RIGHT);
+		createFreeToolbarActions(freeToolbar);
+		Control          tb         = freeToolbar.createControl(freeComp);
+		tb.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, false));
+		freeToolbar.getControl().setVisible(image.getBin()==1);
+      
+		image.addDownsampleListener(downSampleListener);
+
 		// Regions
 		final Composite        regionComp = new Composite(composite, SWT.NONE);
 		regionComp.setLayout(new GridLayout(1, false));
 		regionComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
+
 		label = new Label(regionComp, SWT.HORIZONTAL|SWT.SEPARATOR);
-		final GridData data = new GridData(SWT.FILL, SWT.FILL, false, false);
+		data = new GridData(SWT.FILL, SWT.FILL, false, false);
 		data.verticalIndent =20;
 		label.setLayoutData(data);
-		
+
 		final ToolBarManager   toolbar        = new ToolBarManager(SWT.FLAT|SWT.RIGHT);
 
 		final Button enableRegion = new Button(regionComp, SWT.CHECK);
@@ -296,7 +343,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		enableRegion.setSelection(Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.MASK_REGIONS_ENABLED));
 		
 		createMaskingRegionActions(toolbar);
-		final Control          tb         = toolbar.createControl(regionComp);
+		tb         = toolbar.createControl(regionComp);
 		tb.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, false));
 		toolbar.getControl().setEnabled(enableRegion.getSelection());
 		
@@ -373,6 +420,94 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		});
 		
 		createActions(getSite().getActionBars());
+	}
+
+	/**
+	 * Actions for 
+	 * @param freeToolbar2
+	 */
+	private void createFreeToolbarActions(ToolBarManager man) {
+		
+		final MenuAction penSize = new MenuAction("Pen Size");
+		penSize.setToolTipText("Pen size");
+		man.add(penSize);
+
+		CheckableActionGroup group = new CheckableActionGroup();		
+		final int[] pensizes = new int[]{1,2,3,4,5,6,7,8,9,10,12,14,16,18,20,24,32,64};
+		for (final int pensize : pensizes) {
+			
+			final Action action = new Action("Pen size of "+String.valueOf(pensize), IAction.AS_CHECK_BOX) {
+				public void run() {
+					Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.MASK_PEN_SIZE, pensize);
+					penSize.setSelectedAction(this);
+					penSize.setToolTipText(getToolTipText());
+					// TODO Set mouse icon for plot to new size.
+				}
+			};
+			
+			action.setImageDescriptor(IconUtils.createPenDescriptor(pensize));
+			penSize.add(action);
+			group.add(action);
+			action.setChecked(false);
+			action.setToolTipText("Set pen size to "+pensize);
+			
+		}
+		
+		
+		man.add(new Separator());
+
+		group = new CheckableActionGroup();
+		Action action = new Action("Square brush", IAction.AS_CHECK_BOX) {
+			public void run() {
+				
+			}
+		};
+		action.setImageDescriptor(IconUtils.getBrushIcon(12, ShapeType.SQUARE));
+		group.add(action);
+		man.add(action);
+		
+		action = new Action("Triangle brush", IAction.AS_CHECK_BOX) {
+			public void run() {
+				
+			}
+		};
+		action.setImageDescriptor(IconUtils.getBrushIcon(12,  ShapeType.TRIANGLE));
+		group.add(action);
+		man.add(action);
+		
+		action = new Action("Circular brush", IAction.AS_CHECK_BOX) {
+			public void run() {
+				
+			}
+		};
+		action.setImageDescriptor(IconUtils.getBrushIcon(12,  ShapeType.CIRCLE));
+		group.add(action);
+		man.add(action);
+
+		man.add(new Separator());
+		
+		group = new CheckableActionGroup();
+		action = new Action("Mask", IAction.AS_CHECK_BOX) {
+			public void run() {
+				
+			}
+		};
+		action.setImageDescriptor(Activator.getImageDescriptor("icons/mask-add.png"));
+		group.add(action);
+		man.add(action);
+		action.setChecked(true);
+		
+		action = new Action("Unmask", IAction.AS_CHECK_BOX) {
+			public void run() {
+				
+			}
+		};
+		action.setImageDescriptor(Activator.getImageDescriptor("icons/mask-remove.png"));
+		group.add(action);
+		man.add(action);
+
+		man.add(new Separator());
+
 	}
 
 	private static BooleanDataset savedMask=null;
