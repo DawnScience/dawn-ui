@@ -22,8 +22,12 @@ Require-Bundle: org.eclipse.ui,
  uk.ac.diamond.scisoft.analysis;bundle-version="1.1.0",
  uk.ac.diamond.org.jscience;bundle-version="4.3.1",
  uk.ac.gda.common.rcp;bundle-version="1.2.0",
+<<<<<<< HEAD
  javax.vecmath;bundle-version="1.5.2",
  org.dawb.passerelle.common;bundle-version="1.0.0"
+=======
+ javax.vecmath;bundle-version="1.5.2"
+>>>>>>> branch 'master' of git@github.com:DawnScience/dawn-ui.git
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: org.dawb.workbench.plotting.composites,
