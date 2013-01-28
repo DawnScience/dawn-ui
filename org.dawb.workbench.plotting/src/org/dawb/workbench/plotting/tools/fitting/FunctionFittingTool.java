@@ -431,29 +431,29 @@ public class FunctionFittingTool extends AbstractToolPage {
 				try {
 					result = compFunction.getFunction(index).getName();
 				} catch (Exception e) {
-					result = "Cannot Calculate";
+					logger.debug("Some error occured in the label provider of the Function fitting view.",e);
 				}
 				break;
 			case 1:
 				try {
-					result = "";
-					for (int i = 0; i < compFunction.getNoOfParameters(); i++) {
-						result += compFunction.getFunction(index)
-								.getParameterValue(i) + "\n";
+					result = Double.toString(compFunction.getFunction(index).getParameterValue(0));
+					for (int i = 1; i < compFunction.getFunction(index).getNoOfParameters(); i++) {
+						result += "\n";
+						result += compFunction.getFunction(index).getParameterValue(i);
 					}
 				} catch (Exception e) {
-					result = "Cannot Calculate";
+					logger.debug("Some error occured in the label provider of the Function fitting view.",e);
 				}
 				break;
 			case 2:
 				try {
-					result = "";
-					for (int i = 0; i < resultFunction.getNoOfParameters(); i++) {
-						result += resultFunction.getFunction(index)
-								.getParameterValue(i) + "\n";
+					result = Double.toString(resultFunction.getFunction(index).getParameterValue(0));
+					for (int i = 1; i < resultFunction.getFunction(index).getNoOfParameters(); i++) {
+						result += "\n";
+						result += resultFunction.getFunction(index).getParameterValue(i);
 					}
 				} catch (Exception e) {
-					result = "Cannot Calculate";
+					logger.debug("Some error occured in the label provider of the Function fitting view.",e);
 				}
 				break;
 			}
