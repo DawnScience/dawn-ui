@@ -15,8 +15,6 @@ import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.PlotArea;
 import org.csstudio.swt.xygraph.figures.Trace;
 import org.csstudio.swt.xygraph.undo.ZoomType;
-import org.csstudio.swt.xygraph.util.XYGraphMediaFactory;
-import org.csstudio.swt.xygraph.util.XYGraphMediaFactory.CURSOR_TYPE;
 import org.dawb.common.services.ImageServiceBean.ImageOrigin;
 import org.dawb.common.ui.plot.axis.IAxis;
 import org.dawb.common.ui.plot.axis.ICoordinateSystem;

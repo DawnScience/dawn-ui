@@ -46,6 +46,8 @@ import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
 import org.dawnsci.plotting.jreality.JRealityPlotViewer;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.draw2d.Cursors;
+import org.eclipse.draw2d.MouseListener;
+import org.eclipse.draw2d.MouseMotionListener;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -1110,4 +1112,11 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		lightWeightViewer.removePositionListener(l);
 	}
 
+	public void setMouseMotionListener(MouseMotionListener mml) {
+		lightWeightViewer.getXYRegionGraph().getRegionArea().setAuxilliaryMotionListener(mml);
+	}
+	
+	public void setMouseClickListener(MouseListener mcl) {
+		lightWeightViewer.getXYRegionGraph().getRegionArea().setAuxilliaryClickListener(mcl);
+	}
 }

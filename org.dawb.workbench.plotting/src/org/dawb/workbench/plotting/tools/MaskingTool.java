@@ -439,7 +439,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		createActions(getSite().getActionBars());
 	}
 
-	private ShapeType penShape = ShapeType.SQUARE;
+	private ShapeType penShape = null;
 	/**
 	 * Actions for 
 	 * @param freeToolbar2
@@ -460,7 +460,10 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 					Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.MASK_PEN_SIZE, pensize);
 					penSize.setSelectedAction(this);
 					penSize.setToolTipText(getToolTipText());
-					// TODO Set mouse icon for plot to new size.
+					
+					if (penShape!=null) {
+					    ((AbstractPlottingSystem)getPlottingSystem()).setSelectedCursor(IconUtils.getPenCursorIcon(pensize, penShape));
+					}
 				}
 			};
 			
@@ -515,7 +518,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		action.setId(getClass().getName()+".circleBrush");
 		group.add(action);
 		man.add(action);
-
+		
 		man.add(new Separator());
 		
 		group = new CheckableActionGroup();
