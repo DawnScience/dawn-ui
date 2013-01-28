@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.csstudio.swt.xygraph.undo.IUndoableCommand;
-import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
-import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
+import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
+import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 
 /**The undoable command to remove an annotation.
  * @author Xihui Chen

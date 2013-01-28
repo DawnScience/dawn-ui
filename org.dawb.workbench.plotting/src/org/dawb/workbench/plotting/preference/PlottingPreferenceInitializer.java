@@ -31,6 +31,7 @@ public class PlottingPreferenceInitializer extends AbstractPreferenceInitializer
 		store.setDefault(PlottingConstants.ORIGIN_PREF,     ImageOrigin.TOP_LEFT.getLabel());
 		store.setDefault(PlottingConstants.ASPECT,          true);
 		store.setDefault(PlottingConstants.SHOW_AXES,       true);
+		store.setDefault(PlottingConstants.SHOW_INTENSITY,  true);
 		store.setDefault(PlottingConstants.HISTO ,          false);
 		store.setDefault(PlottingConstants.HISTO_PREF ,     HistoType.MEAN.getLabel());
 		store.setDefault(PlottingConstants.MIN_CUT,         HistogramBound.DEFAULT_MINIMUM.toString());

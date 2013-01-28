@@ -106,6 +106,9 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 			
 			@Override
 			public void traceRemoved(TraceEvent evt) {
+				if (evt.getSource() instanceof ITrace) {
+					if (!((ITrace)evt.getSource()).isUserTrace()) return;
+				}
 				updateTracesChoice(null);
 			}
 			

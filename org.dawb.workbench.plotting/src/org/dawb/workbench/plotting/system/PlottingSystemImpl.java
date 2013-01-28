@@ -27,6 +27,7 @@ import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingActionBarManager;
 import org.dawb.common.ui.plot.annotation.IAnnotation;
 import org.dawb.common.ui.plot.axis.IAxis;
+import org.dawb.common.ui.plot.axis.IPositionListener;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
@@ -40,8 +41,8 @@ import org.dawb.common.ui.plot.trace.TraceWillPlotEvent;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
-import org.dawb.workbench.plotting.system.swtxy.LineTrace;
-import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
+import org.dawnsci.plotting.draw2d.swtxy.LineTrace;
+import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
 import org.dawnsci.plotting.jreality.JRealityPlotViewer;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.draw2d.Cursors;
@@ -570,9 +571,11 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		if (type.is3D()) { 
 			createJRealityUI();
 			top = jrealityViewer.getControl();
+			jrealityViewer.updatePlottingRole(type);
 		} else {
 			createLightWeightUI();
 			top = lightWeightViewer.getControl();
+			lightWeightViewer.updatePlottingRole(type);
 		}
 		if (parent.getLayout() instanceof StackLayout) {
 			final StackLayout layout = (StackLayout)parent.getLayout();
@@ -1082,4 +1085,17 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		if (cursorType == CROSS_CURSOR) cursor = Cursors.CROSS;
 		lightWeightViewer.setDefaultPlotCursor(cursor);
 	}
+	
+	@Override
+	public void addPositionListener(IPositionListener l) {
+		if (lightWeightViewer==null) return;
+		lightWeightViewer.addPositionListener(l);
+	}
+
+	@Override
+	public void removePositionListener(IPositionListener l) {
+		if (lightWeightViewer==null) return;
+		lightWeightViewer.removePositionListener(l);
+	}
+
 }

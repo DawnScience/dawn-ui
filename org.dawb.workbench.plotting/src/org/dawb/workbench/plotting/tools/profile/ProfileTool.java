@@ -222,7 +222,9 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 
 	@Override
 	public void setFocus() {
-		
+		if (getControl()!=null && !getControl().isDisposed()) {
+			getControl().setFocus();
+		}
 	}
 	
 	public void activate() {

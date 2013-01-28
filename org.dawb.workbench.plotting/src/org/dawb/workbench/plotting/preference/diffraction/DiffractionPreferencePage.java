@@ -166,7 +166,8 @@ public class DiffractionPreferencePage extends PreferencePage implements IWorkbe
 		hkls.setAddButtonText("Add Position");
 		hkls.setRemoveButtonText("Remove Position");
 
-		GridUtils.setVisibleAndLayout(hkls, true);
+		GridUtils.setVisible(hkls, true);
+		hkls.getParent().layout(new Control[]{hkls});
 		
 		final Label info = new Label(main, SWT.NONE);
 		info.setText("* the calibrant to edit - also sets the active calibrant.");

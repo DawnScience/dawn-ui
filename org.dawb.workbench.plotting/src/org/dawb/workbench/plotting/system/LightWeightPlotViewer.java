@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.csstudio.swt.widgets.figureparts.ColorMapRamp;
 import org.csstudio.swt.xygraph.figures.Annotation;
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.linearscale.AbstractScale.LabelSide;
@@ -23,6 +24,7 @@ import org.dawb.common.ui.plot.annotation.IAnnotation;
 import org.dawb.common.ui.plot.annotation.IAnnotationSystem;
 import org.dawb.common.ui.plot.axis.IAxis;
 import org.dawb.common.ui.plot.axis.IAxisSystem;
+import org.dawb.common.ui.plot.axis.IPositionListener;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionContainer;
@@ -42,23 +44,27 @@ import org.dawb.workbench.plotting.preference.PlottingConstants;
 import org.dawb.workbench.plotting.printing.PlotExportPrintUtil;
 import org.dawb.workbench.plotting.printing.PlotPrintPreviewDialog;
 import org.dawb.workbench.plotting.printing.PrintSettings;
-import org.dawb.workbench.plotting.system.swtxy.AspectAxis;
-import org.dawb.workbench.plotting.system.swtxy.ImageTrace;
-import org.dawb.workbench.plotting.system.swtxy.LineTrace;
-import org.dawb.workbench.plotting.system.swtxy.RegionArea;
-import org.dawb.workbench.plotting.system.swtxy.RegionCreationLayer;
-import org.dawb.workbench.plotting.system.swtxy.XYRegionConfigDialog;
-import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
-import org.dawb.workbench.plotting.system.swtxy.selection.AbstractSelectionRegion;
-import org.dawb.workbench.plotting.system.swtxy.selection.SelectionRegionFactory;
+import org.dawb.workbench.plotting.system.dialog.XYRegionConfigDialog;
 import org.dawb.workbench.plotting.util.ColorUtility;
 import org.dawb.workbench.plotting.util.TraceUtils;
+import org.dawnsci.plotting.draw2d.swtxy.AspectAxis;
+import org.dawnsci.plotting.draw2d.swtxy.ImageTrace;
+import org.dawnsci.plotting.draw2d.swtxy.LineTrace;
+import org.dawnsci.plotting.draw2d.swtxy.RegionArea;
+import org.dawnsci.plotting.draw2d.swtxy.RegionCreationLayer;
+import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
+import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
+import org.dawnsci.plotting.draw2d.swtxy.selection.SelectionRegionFactory;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.draw2d.BorderLayout;
+import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.FigureCanvas;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
+import org.eclipse.draw2d.Layer;
 import org.eclipse.draw2d.LayeredPane;
 import org.eclipse.draw2d.LightweightSystem;
+import org.eclipse.draw2d.LineBorder;
 import org.eclipse.draw2d.PrintFigureOperation;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
@@ -114,6 +120,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 	// Plotting stuff
 	private PlottingSystemImpl     system;
 	private LightWeightPlotActions plotActionsCreator;
+	private ColorMapRamp           intensity;
 
 
 	public void init(PlottingSystemImpl system) {
@@ -165,7 +172,15 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
  		// region draw layer is on 0)
  		final LayeredPane layers      = new LayeredPane();
         new RegionCreationLayer(layers, xyGraph.getRegionArea());  
-  		layers.add(xyGraph,     0);
+        final Layer graphLayer = new Layer();
+        graphLayer.setLayoutManager(new BorderLayout());
+        graphLayer.add(xyGraph, BorderLayout.CENTER);
+		this.intensity = new ColorMapRamp();
+        graphLayer.add(intensity, BorderLayout.RIGHT);
+		intensity.setVisible(false);
+		intensity.setBorder(new LineBorder(ColorConstants.white, 5));
+		
+  		layers.add(graphLayer,     0);
 		lws.setContents(layers);
 		
 		// Create status contribution for position
@@ -246,7 +261,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 				String level  = System.getProperty("org.dawb.workbench.plotting.system.zoomLevel");
 				double factor = level!=null ? Double.parseDouble(level) :  0.1d;
 				xyGraph.setZoomLevel(e, direction*factor);
-				xyGraph.repaint();
+				xyCanvas.redraw();
 			}	
 		};
 		return mouseWheelListener;
@@ -311,6 +326,18 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 					    if (fig instanceof IRegionContainer) {
 							final IRegion region = ((IRegionContainer)fig).getRegion();
 							SelectionRegionFactory.fillActions(manager, region, xyGraph, getSystem());
+							
+							final Action configure = new Action("Configure '"+region.getName()+"'", Activator.getImageDescriptor("icons/RegionProperties.png")) {
+								public void run() {
+									final XYRegionConfigDialog dialog = new XYRegionConfigDialog(Display.getCurrent().getActiveShell(), xyGraph, system.isRescale());
+									dialog.setSelectedRegion(region);
+									dialog.open();
+								}
+							};
+							manager.add(configure);
+							
+							manager.add(new Separator("org.dawb.workbench.plotting.system.region.end"));
+
 					    }
 					    if (fig instanceof ITraceContainer) {
 							final ITrace trace = ((ITraceContainer)fig).getTrace();
@@ -502,7 +529,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		if (data.getName()!=null) xyGraph.setTitle(data.getName());
 		xyGraph.clearTraces();
 
-		final ImageTrace trace = xyGraph.createImageTrace(traceName, xAxis, yAxis);
+		final ImageTrace trace = xyGraph.createImageTrace(traceName, xAxis, yAxis, intensity);
 		trace.setPlottingSystem(system);
 		if (!trace.setData(data, axes, true)) return trace; // But not plotted
 		
@@ -514,7 +541,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		final Axis xAxis = (Axis)getSelectedXAxis();
 		final Axis yAxis = (Axis)getSelectedYAxis();
 		
-		final ImageTrace trace = xyGraph.createImageTrace(traceName, xAxis, yAxis);
+		final ImageTrace trace = xyGraph.createImageTrace(traceName, xAxis, yAxis, intensity);
 		trace.setPlottingSystem(system);
 		return trace;
 	}
@@ -612,14 +639,20 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 	}
 
 	public void addTrace(ITrace trace) {
-		if (trace instanceof ImageTrace) {
+		if (trace instanceof IImageTrace) {
 			system.setPlotType(PlotType.IMAGE); // Only one image allowed at a time
 			final TraceWillPlotEvent evt = new TraceWillPlotEvent(trace, true);
 			system.fireWillPlot(evt);
 			if (!evt.doit) return;
 			xyGraph.addImageTrace((ImageTrace)trace);
 			removeAdditionalAxes(); // Do not have others with images.
-						
+			
+			if (trace.getData().getDtype() == AbstractDataset.RGB) {
+				intensity.setVisible(false);
+			} else {
+			    intensity.setVisible(Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.SHOW_INTENSITY));
+			}
+
 		} else {
 			system.setPlotType(PlotType.XY);
 			final TraceWillPlotEvent evt = new TraceWillPlotEvent(trace, true);
@@ -628,9 +661,11 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 			final AspectAxis xAxis = (AspectAxis)getSelectedXAxis();
 			final AspectAxis yAxis = (AspectAxis)getSelectedYAxis();
 			xyGraph.addTrace(((LineTraceImpl)trace).getTrace(), xAxis, yAxis, true);
-			xyCanvas.redraw();
+			intensity.setVisible(false);
 		}
 		
+		xyCanvas.redraw();
+	
 	}
 
 	public void removeTrace(ITrace trace) {
@@ -924,9 +959,16 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		return xyGraph.getImage(size);
 	}
 
-	public IRegion createRegion(String name, RegionType regionType, boolean b) {
-		// TODO Auto-generated method stub
-		return null;
+	@Override
+	public void addPositionListener(IPositionListener l) {
+		if (xyGraph==null || xyGraph.getRegionArea()==null) return;
+		xyGraph.getRegionArea().addPositionListener(l);
+	}
+
+	@Override
+	public void removePositionListener(IPositionListener l) {
+		if (xyGraph==null || xyGraph.getRegionArea()==null) return;
+		xyGraph.getRegionArea().removePositionListener(l);
 	}
 
 	public void dispose() {
@@ -946,7 +988,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 
 	public void repaint(final boolean autoScale) {
 		if (Display.getDefault().getThread()==Thread.currentThread()) {
-			if (xyCanvas!=null) {
+			if (xyCanvas!=null && xyGraph != null) {
 				if (autoScale) xyGraph.performAutoScale();
 				xyCanvas.layout(xyCanvas.getChildren());
 				xyGraph.revalidate();
@@ -955,7 +997,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		} else {
 			Display.getDefault().syncExec(new Runnable() {
 				public void run() {
-					if (xyCanvas!=null) {
+					if (xyCanvas!=null && xyGraph != null) {
 						if (autoScale)xyGraph.performAutoScale();
 						xyCanvas.layout(xyCanvas.getChildren());
 						xyGraph.revalidate();
@@ -1084,6 +1126,15 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 	public void setDefaultPlotCursor(Cursor cursor) {
 		xyGraph.getRegionArea().setCursor(cursor);
 		ZoomType.NONE.setCursor(cursor);
+	}
+
+	public void updatePlottingRole(PlotType type) {
+		boolean shouldShow = Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.SHOW_INTENSITY);
+		intensity.setVisible(type.is2D()&&shouldShow);
+	}
+
+	protected void setShowIntensity(boolean checked) {
+		intensity.setVisible(checked);
 	}
 
 }

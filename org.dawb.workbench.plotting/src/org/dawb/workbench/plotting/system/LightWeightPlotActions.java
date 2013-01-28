@@ -30,8 +30,8 @@ import org.dawb.workbench.plotting.system.dialog.AddRegionDialog;
 import org.dawb.workbench.plotting.system.dialog.RemoveAxisDialog;
 import org.dawb.workbench.plotting.system.dialog.RemoveRegionCommand;
 import org.dawb.workbench.plotting.system.dialog.RemoveRegionDialog;
-import org.dawb.workbench.plotting.system.swtxy.XYRegionConfigDialog;
-import org.dawb.workbench.plotting.system.swtxy.XYRegionGraph;
+import org.dawb.workbench.plotting.system.dialog.XYRegionConfigDialog;
+import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionManager;
@@ -425,12 +425,23 @@ class LightWeightPlotActions {
 		};
 		hideAxes.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.SHOW_AXES));
 		
+		final Action hideIntensity = new Action("Show intensity scale", IAction.AS_CHECK_BOX) {
+			
+		    public void run() {		    	
+		    	Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.SHOW_INTENSITY, isChecked());
+		    	viewer.setShowIntensity(isChecked());
+		    	viewer.getSystem().repaint(false);
+		    }
+		};
+		hideIntensity.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.SHOW_INTENSITY));
+		
 		actionBarManager.registerToolBarGroup("org.dawb.workbench.plotting.aspect.group");
 	    actionBarManager.registerAction("org.dawb.workbench.plotting.aspect.group", aspect, ActionType.IMAGE);
 
 	    actionBarManager.addImageAction(aspect);
 	    actionBarManager.addImageSeparator();
 	    actionBarManager.addImageAction(hideAxes);
+	    actionBarManager.addImageAction(hideIntensity);
 	    actionBarManager.addImageSeparator();
 
 	}
