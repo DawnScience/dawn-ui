@@ -47,6 +47,7 @@ import org.dawnsci.plotting.jreality.JRealityPlotViewer;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.draw2d.Cursors;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
@@ -1085,6 +1086,17 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		if (cursorType == CROSS_CURSOR) cursor = Cursors.CROSS;
 		lightWeightViewer.setDefaultPlotCursor(cursor);
 	}
+	
+	/**
+	 * Set the cursor using a custom icon on the plot.
+	 * This may get cancelled if other tools are used!
+	 */
+	public void setSelectedCursor(ImageDescriptor des) {
+		
+		final Cursor cursor = new Cursor(Display.getDefault(), des.getImageData(), des.getImageData().width/2, des.getImageData().height/2);
+		lightWeightViewer.setSelectedCursor(cursor);
+	}
+
 	
 	@Override
 	public void addPositionListener(IPositionListener l) {

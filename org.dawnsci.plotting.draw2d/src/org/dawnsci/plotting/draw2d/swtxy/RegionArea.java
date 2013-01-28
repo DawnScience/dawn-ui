@@ -15,6 +15,8 @@ import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.PlotArea;
 import org.csstudio.swt.xygraph.figures.Trace;
 import org.csstudio.swt.xygraph.undo.ZoomType;
+import org.csstudio.swt.xygraph.util.XYGraphMediaFactory;
+import org.csstudio.swt.xygraph.util.XYGraphMediaFactory.CURSOR_TYPE;
 import org.dawb.common.services.ImageServiceBean.ImageOrigin;
 import org.dawb.common.ui.plot.axis.IAxis;
 import org.dawb.common.ui.plot.axis.ICoordinateSystem;
@@ -33,6 +35,7 @@ import org.eclipse.draw2d.MouseMotionListener;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.PaletteData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -280,10 +283,6 @@ public class RegionArea extends PlotArea {
 		clearRegionTool();
 	}
 	
-	public void setZoomType(final ZoomType zoomType) {
-		clearRegionTool();
-        super.setZoomType(zoomType);
-	}
 	
 	protected void clearRegionTool() {
 		if (regionListener!=null) {
@@ -291,6 +290,26 @@ public class RegionArea extends PlotArea {
 		    regionListener = null;
 		    setCursor(ZoomType.NONE.getCursor());
 		}
+	}
+	
+	private Cursor specialCursor;
+	
+	public void setSelectedCursor(Cursor cursor) {
+		setZoomType(ZoomType.NONE);
+		setCursor(cursor);
+		specialCursor = cursor;
+	}
+	
+	public void setCursor(Cursor cursor) {
+		if (this.getCursor() == cursor) return;
+		if (specialCursor!=null) return;
+		super.setCursor(cursor);
+	}
+
+	public void setZoomType(final ZoomType zoomType) {
+		specialCursor = null;
+		clearRegionTool();
+		super.setZoomType(zoomType);
 	}
 
 	/**

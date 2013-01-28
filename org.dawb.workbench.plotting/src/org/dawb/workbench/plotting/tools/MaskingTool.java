@@ -10,6 +10,7 @@ import org.dawb.common.ui.image.IconUtils;
 import org.dawb.common.ui.image.IconUtils.ShapeType;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
+import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.region.IROIListener;
 import org.dawb.common.ui.plot.region.IRegion;
@@ -22,7 +23,9 @@ import org.dawb.common.ui.plot.tool.AbstractToolPage;
 import org.dawb.common.ui.plot.trace.DownSampleEvent;
 import org.dawb.common.ui.plot.trace.IDownSampleListener;
 import org.dawb.common.ui.plot.trace.IImageTrace;
+import org.dawb.common.ui.plot.trace.IPaletteListener;
 import org.dawb.common.ui.plot.trace.ITraceListener;
+import org.dawb.common.ui.plot.trace.PaletteEvent;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
@@ -59,6 +62,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -91,9 +95,16 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	private CLabel          freeDrawLabel;
 	
 	private IDownSampleListener downSampleListener;
+	private IPaletteListener    paletteListener;
 	private ITraceListener      traceListener;
 	private IRegionListener     regionListener;
 	private IROIListener        regionBoundsListener;
+	
+	/**
+	 * Boolean used to know if the free drawing is in mask out
+	 * mode or unmaks mode
+	 */
+	private boolean maskout = true;
 	
 	public MaskingTool() {
 		
@@ -103,6 +114,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 				if (evt.getSource() instanceof IImageTrace) {
 					getImageTrace().setMask(maskObject.getMaskDataset());
 					getImageTrace().addDownsampleListener(downSampleListener);
+					getImageTrace().addPaletteListener(paletteListener);
 				}
 			}
 		};
@@ -112,6 +124,14 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			public void downSampleChanged(DownSampleEvent evt) {
 				GridUtils.setVisible(freeToolbar.getControl(), evt.getBin()==1);
                 updateFreeDrawLabel(evt.getBin());
+			}
+		};
+		
+		this.paletteListener = new IPaletteListener.Stub() {
+			
+			@Override
+			public void nanBoundsChanged(PaletteEvent evt) {
+				updateIcons(evt.getTrace().getNanBound().getColor());
 			}
 		};
 		
@@ -316,6 +336,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		freeToolbar.getControl().setVisible(image.getBin()==1);
       
 		image.addDownsampleListener(downSampleListener);
+		image.addPaletteListener(paletteListener);
 
 		// Regions
 		final Composite        regionComp = new Composite(composite, SWT.NONE);
@@ -358,14 +379,10 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		getSite().setSelectionProvider(regionTable);
 		regionTable.setContentProvider(new IStructuredContentProvider() {			
 			@Override
-			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-				// TODO Auto-generated method stub
-				
+			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {				
 			}			
 			@Override
 			public void dispose() {
-				// TODO Auto-generated method stub
-				
 			}		
 			@Override
 			public Object[] getElements(Object inputElement) {
@@ -422,6 +439,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		createActions(getSite().getActionBars());
 	}
 
+	private ShapeType penShape = ShapeType.SQUARE;
 	/**
 	 * Actions for 
 	 * @param freeToolbar2
@@ -434,6 +452,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 
 		CheckableActionGroup group = new CheckableActionGroup();		
 		final int[] pensizes = new int[]{1,2,3,4,5,6,7,8,9,10,12,14,16,18,20,24,32,64};
+		Action currentSize=null;
 		for (final int pensize : pensizes) {
 			
 			final Action action = new Action("Pen size of "+String.valueOf(pensize), IAction.AS_CHECK_BOX) {
@@ -448,39 +467,52 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			action.setImageDescriptor(IconUtils.createPenDescriptor(pensize));
 			penSize.add(action);
 			group.add(action);
-			action.setChecked(false);
+			if (Activator.getDefault().getPreferenceStore().getInt(PlottingConstants.MASK_PEN_SIZE)==pensize) {
+				currentSize = action;
+			}
 			action.setToolTipText("Set pen size to "+pensize);
 			
 		}
 		
+		if (currentSize!=null) {
+			currentSize.setChecked(true);
+			penSize.setSelectedAction(currentSize);
+			penSize.setToolTipText(currentSize.getToolTipText());
+		}
 		
 		man.add(new Separator());
 
 		group = new CheckableActionGroup();
 		Action action = new Action("Square brush", IAction.AS_CHECK_BOX) {
 			public void run() {
-				
+				int pensize = Activator.getDefault().getPreferenceStore().getInt(PlottingConstants.MASK_PEN_SIZE);
+				penShape = ShapeType.SQUARE;
+				((AbstractPlottingSystem)getPlottingSystem()).setSelectedCursor(IconUtils.getPenCursorIcon(pensize, penShape));
 			}
 		};
-		action.setImageDescriptor(IconUtils.getBrushIcon(12, ShapeType.SQUARE));
+		action.setId(getClass().getName()+".squareBrush");
 		group.add(action);
 		man.add(action);
 		
 		action = new Action("Triangle brush", IAction.AS_CHECK_BOX) {
 			public void run() {
-				
+				int pensize = Activator.getDefault().getPreferenceStore().getInt(PlottingConstants.MASK_PEN_SIZE);
+				penShape = ShapeType.TRIANGLE;
+				((AbstractPlottingSystem)getPlottingSystem()).setSelectedCursor(IconUtils.getPenCursorIcon(pensize, penShape));
 			}
 		};
-		action.setImageDescriptor(IconUtils.getBrushIcon(12,  ShapeType.TRIANGLE));
+		action.setId(getClass().getName()+".triangleBrush");
 		group.add(action);
 		man.add(action);
 		
 		action = new Action("Circular brush", IAction.AS_CHECK_BOX) {
 			public void run() {
-				
+				int pensize = Activator.getDefault().getPreferenceStore().getInt(PlottingConstants.MASK_PEN_SIZE);
+				penShape = ShapeType.CIRCLE;
+				((AbstractPlottingSystem)getPlottingSystem()).setSelectedCursor(IconUtils.getPenCursorIcon(pensize, penShape));
 			}
 		};
-		action.setImageDescriptor(IconUtils.getBrushIcon(12,  ShapeType.CIRCLE));
+		action.setId(getClass().getName()+".circleBrush");
 		group.add(action);
 		man.add(action);
 
@@ -489,7 +521,8 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		group = new CheckableActionGroup();
 		action = new Action("Mask", IAction.AS_CHECK_BOX) {
 			public void run() {
-				
+				maskout=true;
+				updateIcons(getImageTrace().getNanBound().getColor());
 			}
 		};
 		action.setImageDescriptor(Activator.getImageDescriptor("icons/mask-add.png"));
@@ -499,7 +532,8 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		
 		action = new Action("Unmask", IAction.AS_CHECK_BOX) {
 			public void run() {
-				
+				maskout=false;
+				updateIcons(null);
 			}
 		};
 		action.setImageDescriptor(Activator.getImageDescriptor("icons/mask-remove.png"));
@@ -508,6 +542,14 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 
 		man.add(new Separator());
 
+		updateIcons(getImageTrace().getNanBound().getColor());
+	}
+	
+	private void updateIcons(RGB maskColor) {
+		
+		((ActionContributionItem)freeToolbar.find(getClass().getName()+".squareBrush")).getAction().setImageDescriptor(IconUtils.getBrushIcon(  12, ShapeType.SQUARE,   maskColor));
+		((ActionContributionItem)freeToolbar.find(getClass().getName()+".triangleBrush")).getAction().setImageDescriptor(IconUtils.getBrushIcon(12, ShapeType.TRIANGLE, maskColor));
+		((ActionContributionItem)freeToolbar.find(getClass().getName()+".circleBrush")).getAction().setImageDescriptor(IconUtils.getBrushIcon(  12, ShapeType.CIRCLE,   maskColor));
 	}
 
 	private static BooleanDataset savedMask=null;
