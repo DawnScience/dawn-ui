@@ -1116,16 +1116,19 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 
 	@Override
 	public void addMouseMotionListener(MouseMotionListener mml) {
+		if (isDisposed() || lightWeightViewer==null || lightWeightViewer.getXYRegionGraph()==null) return;
 		lightWeightViewer.getXYRegionGraph().getRegionArea().addAuxilliaryMotionListener(mml);
 	}
 	
 	@Override
 	public void addMouseClickListener(MouseListener mcl) {
+		if (isDisposed() || lightWeightViewer==null || lightWeightViewer.getXYRegionGraph()==null) return;
 		lightWeightViewer.getXYRegionGraph().getRegionArea().addAuxilliaryClickListener(mcl);
 	}
 	
 	@Override
 	public void removeMouseMotionListener(MouseMotionListener mml) {
+		if (isDisposed() || lightWeightViewer==null || lightWeightViewer.getXYRegionGraph()==null) return;
 		lightWeightViewer.getXYRegionGraph().getRegionArea().removeAuxilliaryMotionListener(mml);
 	}
 	
@@ -1135,6 +1138,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	 */
 	@Override
 	public void removeMouseClickListener(MouseListener mcl) {
+		if (isDisposed() || lightWeightViewer==null || lightWeightViewer.getXYRegionGraph()==null) return;
 		lightWeightViewer.getXYRegionGraph().getRegionArea().removeAuxilliaryClickListener(mcl);
 	}
 	public void setKeepAspect(boolean checked){
