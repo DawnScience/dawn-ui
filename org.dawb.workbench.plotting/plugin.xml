@@ -83,6 +83,15 @@
             visible="false">
       </plotting_tool_page>
       <plotting_tool_page
+            cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.boxprofile"
+            class="org.dawb.workbench.plotting.tools.profile.ColorBoxProfileTool"
+            icon="icons/plot-tool-color-box.png"
+            id="org.dawb.workbench.plotting.tools.colorBoxProfileTool"
+            label="Color Box Profile"
+            tooltip="A tool for showing box profiles of images."
+            visible="true">
+      </plotting_tool_page>
+      <plotting_tool_page
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.grid"
             class="org.dawb.workbench.plotting.tools.profile.GridTool"
             icon="icons/plot-tool-box-grid.png"
