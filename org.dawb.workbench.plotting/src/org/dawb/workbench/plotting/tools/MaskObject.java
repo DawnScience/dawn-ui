@@ -104,28 +104,29 @@ public class MaskObject {
 
         final IAxis xAxis = system.getSelectedXAxis();
         final IAxis yAxis = system.getSelectedYAxis();
-        
- 
-        if (penShape==ShapeType.SQUARE) {
-	        final List<int[]> span = new ArrayList<int[]>(2);
-	        Display.getDefault().syncExec(new Runnable() {
-	        	public void run() {
-	        		span.add(new int[]{(int)xAxis.getPositionValue(loc.x-rad), (int)yAxis.getPositionValue(loc.y-rad)});
-	        		span.add(new int[]{(int)xAxis.getPositionValue(loc.x+rad), (int)yAxis.getPositionValue(loc.y+rad)});
-	        	}
-	        });
-			int[] start = span.get(0);
-			int[] end   = span.get(1);
-			
-			Boolean mv = maskOut ? Boolean.FALSE : Boolean.TRUE;
-			for (int y = start[1]; y<=end[1]; ++y) {
-				for (int x = start[0]; x<=end[0]; ++x) {
-			        maskDataset.set(mv, y, x);
-				}
-			}
-			
-        } else if (penShape==ShapeType.CIRCLE) {
-        	
+
+
+        final List<int[]> span = new ArrayList<int[]>(2);
+        Display.getDefault().syncExec(new Runnable() {
+        	public void run() {
+        		span.add(new int[]{(int)xAxis.getPositionValue(loc.x-rad), (int)yAxis.getPositionValue(loc.y-rad)});
+        		span.add(new int[]{(int)xAxis.getPositionValue(loc.x+rad), (int)yAxis.getPositionValue(loc.y+rad)});
+        	}
+        });
+        int[] start = span.get(0);
+        int[] end   = span.get(1);
+
+        Boolean mv = maskOut ? Boolean.FALSE : Boolean.TRUE;
+        for (int y = start[1]; y<=end[1]; ++y) {
+        	for (int x = start[0]; x<=end[0]; ++x) {
+        		if (penShape==ShapeType.SQUARE) {
+        			maskDataset.set(mv, y, x);
+
+        		} else if (penShape==ShapeType.CIRCLE) {
+        			// Check inside circle
+
+        		}
+        	}
         }
 	}
 	

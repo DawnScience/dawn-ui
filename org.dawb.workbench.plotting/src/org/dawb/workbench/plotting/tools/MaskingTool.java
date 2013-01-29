@@ -183,11 +183,21 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	protected final class MaskMouseListener extends MouseMotionListener.Stub implements org.eclipse.draw2d.MouseListener		 {
 
 		@Override
-		public void mousePressed(org.eclipse.draw2d.MouseEvent me) {
+		public void mousePressed(org.eclipse.draw2d.MouseEvent me) {			
+			if (((AbstractPlottingSystem)getPlottingSystem()).getSelectedCursor()==null) {
+				ActionContributionItem item = (ActionContributionItem)directToolbar.find(ShapeType.NONE.getId());
+				if (item!=null) item.getAction().setChecked(true);
+				return;
+			}
 			maskJob.schedule(false, null, me.getLocation());
 		}
 		@Override
 		public void mouseDragged(org.eclipse.draw2d.MouseEvent me) {
+			if (((AbstractPlottingSystem)getPlottingSystem()).getSelectedCursor()==null) {
+				ActionContributionItem item = (ActionContributionItem)directToolbar.find(ShapeType.NONE.getId());
+				if (item!=null) item.getAction().setChecked(true);
+				return;
+			}
 			maskJob.schedule(false, null, me.getLocation());
 		}
 		@Override

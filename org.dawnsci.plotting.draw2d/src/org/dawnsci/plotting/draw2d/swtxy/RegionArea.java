@@ -304,6 +304,13 @@ public class RegionArea extends PlotArea {
 		setCursor(cursor);
 		specialCursor = cursor;
 	}
+	/**
+	 * Custom cursor if one set, or null
+	 * @return
+	 */
+	public Cursor getSelectedCursor() {
+		return specialCursor;
+	}
 	
 	public void setCursor(Cursor cursor) {
 		if (this.getCursor() == cursor) return;

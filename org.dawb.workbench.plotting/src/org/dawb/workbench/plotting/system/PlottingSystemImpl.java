@@ -1095,10 +1095,17 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	 */
 	public void setSelectedCursor(ImageDescriptor des) {
 		
+		if (isDisposed() || lightWeightViewer==null || lightWeightViewer.getXYRegionGraph()==null) return;
 		final Cursor cursor = des!=null
 				            ? new Cursor(Display.getDefault(), des.getImageData(), des.getImageData().width/2, des.getImageData().height/2)
 	                        : null;
 		lightWeightViewer.setSelectedCursor(cursor);
+	}
+	
+	public Cursor getSelectedCursor() {
+		
+		if (isDisposed() || lightWeightViewer==null || lightWeightViewer.getXYRegionGraph()==null) return null;
+		return lightWeightViewer.getXYRegionGraph().getRegionArea().getSelectedCursor();
 	}
 
 	
