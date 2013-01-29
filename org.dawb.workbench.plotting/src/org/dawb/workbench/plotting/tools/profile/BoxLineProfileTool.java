@@ -53,8 +53,6 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 	private IAxis xPixelAxis;
 	private IAxis yPixelAxis;
 	private BoxLineType type;
-	private AbstractDataset originalAxis1;
-	private AbstractDataset originalAxis2;
 	public BoxLineProfileTool() {
 		this(BoxLineType.HORIZONTAL_TYPE);
 	}
@@ -110,13 +108,22 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 		
 		if (box==null) return;
 		
+		String traceName1 = "", traceName2 = "";
+		if(type == BoxLineType.HORIZONTAL_TYPE){
+			traceName1 = "Horizontal Profile 1";
+			traceName2 = "Horizontal Profile 2";
+		} else if(type == BoxLineType.VERTICAL_TYPE){
+			traceName1 = "Vertical Profile 1";
+			traceName2 = "Vertical Profile 2";
+		}
+			
 		final AbstractDataset line1 = box[0];
-		line1.setName("X "+region.getName());
+		line1.setName(traceName1);
 		AbstractDataset xi = IntegerDataset.arange(line1.getSize());
 		final AbstractDataset x_indices = xi;
 		
 		final AbstractDataset line2 = box[1];
-		line2.setName("Y "+region.getName());
+		line2.setName(traceName2);
 		AbstractDataset yi = IntegerDataset.arange(line2.getSize());
 		final AbstractDataset y_indices = yi;
 
@@ -124,8 +131,8 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 		boxesLines.add(line1);
 		boxesLines.add(line2);
 		
-		final ILineTrace x_trace = (ILineTrace)profilePlottingSystem.getTrace("X "+region.getName());
-		final ILineTrace y_trace = (ILineTrace)profilePlottingSystem.getTrace("Y "+region.getName());
+		final ILineTrace x_trace = (ILineTrace)profilePlottingSystem.getTrace(traceName1);
+		final ILineTrace y_trace = (ILineTrace)profilePlottingSystem.getTrace(traceName2);
 		final List<ILineTrace> traces = new ArrayList<ILineTrace>(2);
 		traces.add(x_trace);
 		traces.add(y_trace);
@@ -139,13 +146,13 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 							List<AbstractDataset> axes = image.getAxes();
 							if(type == BoxLineType.VERTICAL_TYPE){
 
-								updateAxes(traces, boxesLines, originalAxis1, axes.get(1), bounds.getPointY());
+								updateAxes(traces, boxesLines, axes.get(1), bounds.getPointY());
 								x_trace.setTraceColor(ColorConstants.blue);
 								y_trace.setTraceColor(ColorConstants.red);
 
 							} else if (type == BoxLineType.HORIZONTAL_TYPE){
 
-								updateAxes(traces, boxesLines, originalAxis2, axes.get(0), bounds.getPointX());
+								updateAxes(traces, boxesLines, axes.get(0), bounds.getPointX());
 								x_trace.setTraceColor(ColorConstants.darkGreen);
 								y_trace.setTraceColor(ColorConstants.orange);
 
@@ -172,31 +179,21 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 	 * @param axis
 	 * @param startPoint
 	 */
-	private void updateAxes(List<ILineTrace> profiles, List<AbstractDataset> boxesLines, 
-			AbstractDataset originalAxis, AbstractDataset axis, double startPoint){
+	private void updateAxes(List<ILineTrace> profiles, List<AbstractDataset> boxesLines,
+			AbstractDataset axis, double startPoint){
 		// shift the xaxis by yStart
 		try {
 			double xStart = axis.getElementDoubleAbs((int)Math.round(startPoint));
 			double min = axis.getDouble(0);
-			
-			if(originalAxis != null && axis.getElementDoubleAbs(0) == originalAxis.getElementDoubleAbs(0)){
 
-				axis.iadd(xStart-min);
-				//set the new XAxis given the xStart point of the ROI
-				profiles.get(0).setData(axis.getSlice(new Slice(0, boxesLines.get(0).getShape()[0], 1)), boxesLines.get(0));
-				profiles.get(1).setData(axis.getSlice(new Slice(0, boxesLines.get(1).getShape()[0], 1)), boxesLines.get(1));
-			} else {
-				if(originalAxis == null){
-					originalAxis = new DoubleDataset(axis);
-				}
-				axis = originalAxis.clone();
-				xStart = axis.getElementDoubleAbs((int)Math.round(startPoint));
-				min = axis.getDouble(0);
-				axis.iadd(xStart-min);
+			axis = new DoubleDataset(axis);
+			xStart = axis.getElementDoubleAbs((int)Math.round(startPoint));
+			min = axis.getDouble(0);
+			axis.iadd(xStart-min);
 
-				profiles.get(0).setData(axis.getSlice(new Slice(0, boxesLines.get(0).getShape()[0], 1)), boxesLines.get(0));
-				profiles.get(1).setData(axis.getSlice(new Slice(0, boxesLines.get(1).getShape()[0], 1)), boxesLines.get(1));
-			}
+			profiles.get(0).setData(axis.getSlice(new Slice(0, boxesLines.get(0).getShape()[0], 1)), boxesLines.get(0));
+			profiles.get(1).setData(axis.getSlice(new Slice(0, boxesLines.get(1).getShape()[0], 1)), boxesLines.get(1));
+
 			xPixelAxis.setTitle(axis.getName());
 			double max = axis.getDouble(axis.argMax());
 			createXAxisBoxRegion(profilePlottingSystem, new RectangularROI(min, 0, (max-min)/2, 100, 0), "X_Axis_box");
