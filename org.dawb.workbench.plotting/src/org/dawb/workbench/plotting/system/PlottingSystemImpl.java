@@ -1098,4 +1098,8 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		lightWeightViewer.removePositionListener(l);
 	}
 
+	@Override
+	public void setKeepAspect(boolean checked){
+		lightWeightViewer.setKeepAspect(checked);
+	}
 }
