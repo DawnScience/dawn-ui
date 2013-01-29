@@ -1095,7 +1095,9 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	 */
 	public void setSelectedCursor(ImageDescriptor des) {
 		
-		final Cursor cursor = new Cursor(Display.getDefault(), des.getImageData(), des.getImageData().width/2, des.getImageData().height/2);
+		final Cursor cursor = des!=null
+				            ? new Cursor(Display.getDefault(), des.getImageData(), des.getImageData().width/2, des.getImageData().height/2)
+	                        : null;
 		lightWeightViewer.setSelectedCursor(cursor);
 	}
 
@@ -1112,11 +1114,28 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		lightWeightViewer.removePositionListener(l);
 	}
 
-	public void setMouseMotionListener(MouseMotionListener mml) {
-		lightWeightViewer.getXYRegionGraph().getRegionArea().setAuxilliaryMotionListener(mml);
+	@Override
+	public void addMouseMotionListener(MouseMotionListener mml) {
+		lightWeightViewer.getXYRegionGraph().getRegionArea().addAuxilliaryMotionListener(mml);
 	}
 	
-	public void setMouseClickListener(MouseListener mcl) {
-		lightWeightViewer.getXYRegionGraph().getRegionArea().setAuxilliaryClickListener(mcl);
+	@Override
+	public void addMouseClickListener(MouseListener mcl) {
+		lightWeightViewer.getXYRegionGraph().getRegionArea().addAuxilliaryClickListener(mcl);
 	}
+	
+	@Override
+	public void removeMouseMotionListener(MouseMotionListener mml) {
+		lightWeightViewer.getXYRegionGraph().getRegionArea().removeAuxilliaryMotionListener(mml);
+	}
+	
+	/**
+	 * Please override for draw2d listeners.
+	 * @deprecated draw2d Specific
+	 */
+	@Override
+	public void removeMouseClickListener(MouseListener mcl) {
+		lightWeightViewer.getXYRegionGraph().getRegionArea().removeAuxilliaryClickListener(mcl);
+	}
+
 }
