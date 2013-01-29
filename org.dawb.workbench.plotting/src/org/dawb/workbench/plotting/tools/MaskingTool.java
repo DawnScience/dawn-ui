@@ -438,6 +438,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 				Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.MASK_DRAW_TYPE, "region");
 				layout.topControl = regionComp;
 				drawContent.layout();
+				((AbstractPlottingSystem)getPlottingSystem()).setSelectedCursor(null);
 			}
 		});
 		
