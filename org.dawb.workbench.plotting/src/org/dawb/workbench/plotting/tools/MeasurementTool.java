@@ -406,7 +406,9 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 		
 		
 	}
-
+	@Override
+	public void regionCancelled(RegionEvent evt) {
+	}
 	@Override
 	public void regionAdded(RegionEvent evt) {
 		if (!isActive()) return;

@@ -46,7 +46,10 @@ import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
 import org.dawnsci.plotting.jreality.JRealityPlotViewer;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.draw2d.Cursors;
+import org.eclipse.draw2d.MouseListener;
+import org.eclipse.draw2d.MouseMotionListener;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
@@ -1086,6 +1089,26 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		lightWeightViewer.setDefaultPlotCursor(cursor);
 	}
 	
+	/**
+	 * Set the cursor using a custom icon on the plot.
+	 * This may get cancelled if other tools are used!
+	 */
+	public void setSelectedCursor(ImageDescriptor des) {
+		
+		if (isDisposed() || lightWeightViewer==null || lightWeightViewer.getXYRegionGraph()==null) return;
+		final Cursor cursor = des!=null
+				            ? new Cursor(Display.getDefault(), des.getImageData(), des.getImageData().width/2, des.getImageData().height/2)
+	                        : null;
+		lightWeightViewer.setSelectedCursor(cursor);
+	}
+	
+	public Cursor getSelectedCursor() {
+		
+		if (isDisposed() || lightWeightViewer==null || lightWeightViewer.getXYRegionGraph()==null) return null;
+		return lightWeightViewer.getXYRegionGraph().getRegionArea().getSelectedCursor();
+	}
+
+	
 	@Override
 	public void addPositionListener(IPositionListener l) {
 		if (lightWeightViewer==null) return;
@@ -1099,6 +1122,32 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	}
 
 	@Override
+	public void addMouseMotionListener(MouseMotionListener mml) {
+		if (isDisposed() || lightWeightViewer==null || lightWeightViewer.getXYRegionGraph()==null) return;
+		lightWeightViewer.getXYRegionGraph().getRegionArea().addAuxilliaryMotionListener(mml);
+	}
+	
+	@Override
+	public void addMouseClickListener(MouseListener mcl) {
+		if (isDisposed() || lightWeightViewer==null || lightWeightViewer.getXYRegionGraph()==null) return;
+		lightWeightViewer.getXYRegionGraph().getRegionArea().addAuxilliaryClickListener(mcl);
+	}
+	
+	@Override
+	public void removeMouseMotionListener(MouseMotionListener mml) {
+		if (isDisposed() || lightWeightViewer==null || lightWeightViewer.getXYRegionGraph()==null) return;
+		lightWeightViewer.getXYRegionGraph().getRegionArea().removeAuxilliaryMotionListener(mml);
+	}
+	
+	/**
+	 * Please override for draw2d listeners.
+	 * @deprecated draw2d Specific
+	 */
+	@Override
+	public void removeMouseClickListener(MouseListener mcl) {
+		if (isDisposed() || lightWeightViewer==null || lightWeightViewer.getXYRegionGraph()==null) return;
+		lightWeightViewer.getXYRegionGraph().getRegionArea().removeAuxilliaryClickListener(mcl);
+	}
 	public void setKeepAspect(boolean checked){
 		lightWeightViewer.setKeepAspect(checked);
 	}

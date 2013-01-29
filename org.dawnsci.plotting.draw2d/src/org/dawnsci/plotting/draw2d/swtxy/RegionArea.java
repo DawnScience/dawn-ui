@@ -20,6 +20,7 @@ import org.dawb.common.ui.plot.axis.IAxis;
 import org.dawb.common.ui.plot.axis.ICoordinateSystem;
 import org.dawb.common.ui.plot.axis.IPositionListener;
 import org.dawb.common.ui.plot.axis.PositionEvent;
+import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.RegionEvent;
@@ -33,6 +34,7 @@ import org.eclipse.draw2d.MouseMotionListener;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.PaletteData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -280,17 +282,46 @@ public class RegionArea extends PlotArea {
 		clearRegionTool();
 	}
 	
-	public void setZoomType(final ZoomType zoomType) {
-		clearRegionTool();
-        super.setZoomType(zoomType);
-	}
 	
 	protected void clearRegionTool() {
 		if (regionListener!=null) {
 		    regionLayer.setMouseListenerActive(regionListener, false);
+			IRegion wasBeingAdded = regionListener.getRegionBeingAdded();
 		    regionListener = null;
 		    setCursor(ZoomType.NONE.getCursor());
+		    
+			if (wasBeingAdded!=null) {
+				fireRegionCancelled(new RegionEvent(wasBeingAdded));
+			}
+
 		}
+	}
+	
+	private Cursor specialCursor;
+	
+	public void setSelectedCursor(Cursor cursor) {
+		setZoomType(ZoomType.NONE);
+		setCursor(cursor);
+		specialCursor = cursor;
+	}
+	/**
+	 * Custom cursor if one set, or null
+	 * @return
+	 */
+	public Cursor getSelectedCursor() {
+		return specialCursor;
+	}
+	
+	public void setCursor(Cursor cursor) {
+		if (this.getCursor() == cursor) return;
+		if (specialCursor!=null) return;
+		super.setCursor(cursor);
+	}
+
+	public void setZoomType(final ZoomType zoomType) {
+		specialCursor = null;
+		clearRegionTool();
+		super.setZoomType(zoomType);
 	}
 
 	/**
@@ -323,6 +354,17 @@ public class RegionArea extends PlotArea {
 		}
 	}
 	
+	protected void fireRegionCancelled(RegionEvent evt) {
+		if (regionListeners==null) return;
+		for (IRegionListener l : regionListeners) {
+			try {
+				l.regionCancelled(evt);
+			} catch (Throwable ne) {
+				logger.error("Notifying of region add being cancelled", ne);
+				continue;
+			}
+		}
+	}
 
 	protected void fireRegionAdded(RegionEvent evt) {
 		if (regionListeners==null) return;

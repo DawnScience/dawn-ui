@@ -356,6 +356,9 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 		
 		
 	}
+	@Override
+	public void regionCancelled(RegionEvent evt) {
+	}
 
 	@Override
 	public void regionAdded(RegionEvent evt) {

@@ -5,8 +5,14 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.dawb.common.ui.image.ShapeType;
+import org.dawb.common.ui.plot.IPlottingSystem;
+import org.dawb.common.ui.plot.axis.IAxis;
 import org.dawb.common.ui.plot.region.IRegion;
+import org.dawb.workbench.plotting.Activator;
+import org.dawb.workbench.plotting.preference.PlottingConstants;
 import org.eclipse.draw2d.geometry.Point;
+import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,7 +82,54 @@ public class MaskObject {
 			}
 		}
 	}
+	
+	/**
+	 * Attempts to process a pen shape at a given draw2d location.
+	 * 
+	 * Translate from click location using 'system' parameter.
+	 * 
+	 * @param loc
+	 * @param system
+	 */
+	public void process(final Point loc, final IPlottingSystem system) {
+				
+		ShapeType penShape = ShapeType.valueOf(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.MASK_PEN_SHAPE));
+        if (penShape==ShapeType.NONE) return;
+        
+		createMaskIfNeeded();
+       
+		boolean maskOut       = Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.MASK_PEN_MASKOUT);
+        final int     penSize = Activator.getDefault().getPreferenceStore().getInt(PlottingConstants.MASK_PEN_SIZE);
+        final int     rad     = (int)Math.ceil(penSize/2f);
 
+        final IAxis xAxis = system.getSelectedXAxis();
+        final IAxis yAxis = system.getSelectedYAxis();
+
+
+        final List<int[]> span = new ArrayList<int[]>(2);
+        Display.getDefault().syncExec(new Runnable() {
+        	public void run() {
+        		span.add(new int[]{(int)xAxis.getPositionValue(loc.x-rad), (int)yAxis.getPositionValue(loc.y-rad)});
+        		span.add(new int[]{(int)xAxis.getPositionValue(loc.x+rad), (int)yAxis.getPositionValue(loc.y+rad)});
+        	}
+        });
+        int[] start = span.get(0);
+        int[] end   = span.get(1);
+
+        Boolean mv = maskOut ? Boolean.FALSE : Boolean.TRUE;
+        for (int y = start[1]; y<=end[1]; ++y) {
+        	for (int x = start[0]; x<=end[0]; ++x) {
+        		if (penShape==ShapeType.SQUARE) {
+        			maskDataset.set(mv, y, x);
+
+        		} else if (penShape==ShapeType.CIRCLE) {
+        			// Check inside circle
+
+        		}
+        	}
+        }
+	}
+	
 	/**
 	 * Designed to be called after processBounds(...) has been called at least once.
 	 * Deals with fact that that may leave us with no mask and will create one if needed.
@@ -122,15 +175,13 @@ public class MaskObject {
 		if (validRegions==null && requireMinMax) {
 			for (int y = 0; y<shape[0]; ++y) {
 				for (int x = 0; x<shape[1]; ++x) {
-					if (requireMinMax) {
-						final float val = imageDataset.getFloat(y, x);
-						boolean isValid = isValid(val,min,max);
-						if (!isValid) maskDataset.set(Boolean.FALSE, y, x); // false = masked
-					}
+					final float val = imageDataset.getFloat(y, x);
+					boolean isValid = isValid(val,min,max);
+					if (!isValid) maskDataset.set(Boolean.FALSE, y, x); // false = masked
 				}
 			}
 		} else if (validRegions!=null){
-			Display.getDefault().asyncExec(new Runnable() {
+			Display.getDefault().syncExec(new Runnable() {
 				public void run() {
 					for (int y = 0; y<shape[0]; ++y) {
 						for (int x = 0; x<shape[1]; ++x) {

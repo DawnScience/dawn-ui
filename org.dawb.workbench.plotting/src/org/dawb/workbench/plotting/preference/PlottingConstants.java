@@ -28,6 +28,11 @@ public class PlottingConstants extends BasePlottingConstants {
 	/**
 	 * 
 	 */
+	public static final String MASK_DRAW_TYPE = "org.dawb.plotting.system.masking.draw.type";
+
+	/**
+	 * 
+	 */
 	public static final String MASK_DRAW_MULTIPLE = "org.dawb.plotting.system.region.multi.draw.mode";
 
 	/**
@@ -39,6 +44,21 @@ public class PlottingConstants extends BasePlottingConstants {
 	 * 
 	 */
 	public static final String MASK_REGIONS_ENABLED = "org.dawb.plotting.system.masking.regions.enabled";
+	
+	/**
+	 * 
+	 */
+	public static final String MASK_PEN_SIZE = "org.dawb.plotting.system.masking.pen.size";
+
+	/**
+	 * 
+	 */
+	public static final String MASK_PEN_SHAPE = "org.dawb.plotting.system.masking.pen.shape";
+	
+	/**
+	 * 
+	 */
+	public static final String MASK_PEN_MASKOUT = "org.dawb.plotting.system.masking.pen.mask.out";
 
 	/**
 	 * 

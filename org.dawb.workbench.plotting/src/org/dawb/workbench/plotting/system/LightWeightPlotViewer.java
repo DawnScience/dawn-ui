@@ -1127,6 +1127,16 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		xyGraph.getRegionArea().setCursor(cursor);
 		ZoomType.NONE.setCursor(cursor);
 	}
+	
+	/**
+	 * Also clears any region or zoom tools assuming that this
+	 * special cursor is to do with a custom drawing mode.
+	 * For instance masking.
+	 * @param cursor
+	 */
+	public void setSelectedCursor(Cursor cursor) {
+		xyGraph.getRegionArea().setSelectedCursor(cursor);
+	}
 
 	public void updatePlottingRole(PlotType type) {
 		boolean shouldShow = Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.SHOW_INTENSITY);
