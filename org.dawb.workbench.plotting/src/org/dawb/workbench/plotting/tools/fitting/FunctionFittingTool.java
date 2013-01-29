@@ -1,5 +1,6 @@
 package org.dawb.workbench.plotting.tools.fitting;
 
+import org.dawb.common.ui.plot.function.FunctionDialog;
 import org.dawb.common.ui.plot.region.IROIListener;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
@@ -11,7 +12,6 @@ import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.common.ui.plot.trace.TraceWillPlotEvent;
 import org.dawb.common.ui.widgets.FunctionWidget;
-import org.dawb.passerelle.common.parameter.function.FunctionDialog;
 import org.dawb.workbench.plotting.Activator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -36,6 +36,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
@@ -72,6 +73,12 @@ public class FunctionFittingTool extends AbstractToolPage {
 	private Action updateAllAction;
 	private ITraceListener traceListener;
 	private Action addFunctionAction;
+
+	private Composite infoComposite;
+
+	private Label chiSquaredInfoLabel;
+
+	private Label chiSquaredValueLabel;
 
 	public FunctionFittingTool() {
 
@@ -163,6 +170,16 @@ public class FunctionFittingTool extends AbstractToolPage {
 		composite.setLayout(new GridLayout(1, false));
 		GridUtils.removeMargins(composite);
 
+		infoComposite = new Composite(composite, SWT.NONE);
+		infoComposite.setLayout(new GridLayout(2, false));
+		
+		chiSquaredInfoLabel = new Label(infoComposite, SWT.NONE);
+		chiSquaredInfoLabel.setText("Normalised goodness of fit :");
+		
+		chiSquaredValueLabel = new Label(infoComposite, SWT.NONE);
+		chiSquaredValueLabel.setText("Not Calculated"); 
+		
+		
 		viewer = new TableViewer(composite, SWT.FULL_SELECTION | SWT.SINGLE
 				| SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
 
@@ -269,6 +286,10 @@ public class FunctionFittingTool extends AbstractToolPage {
 		super.deactivate();
 	}
 
+	private void setChiSquaredValue(double value) {
+		chiSquaredValueLabel.setText(Double.toString(value)); 
+	}
+	
 	private void createActions() {
 		// Add Function action
 		addFunctionAction = new Action("Add a new Function",
@@ -530,6 +551,8 @@ public class FunctionFittingTool extends AbstractToolPage {
 				@Override
 				public void run() {
 
+					setChiSquaredValue(resultFunction.residual(true, y, x)/x.count());
+					
 					fitTrace = (ILineTrace) getPlottingSystem().getTrace("Fit");
 					if (fitTrace == null) {
 						fitTrace = getPlottingSystem().createLineTrace("Fit");
