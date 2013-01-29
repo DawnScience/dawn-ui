@@ -1,5 +1,6 @@
 package org.dawb.workbench.plotting.tools.fitting;
 
+import org.dawb.common.ui.plot.function.FunctionDialog;
 import org.dawb.common.ui.plot.region.IROIListener;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
@@ -11,7 +12,6 @@ import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.common.ui.plot.trace.TraceWillPlotEvent;
 import org.dawb.common.ui.widgets.FunctionWidget;
-import org.dawb.passerelle.common.parameter.function.FunctionDialog;
 import org.dawb.workbench.plotting.Activator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
