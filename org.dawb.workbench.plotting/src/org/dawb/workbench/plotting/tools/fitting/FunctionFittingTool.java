@@ -28,16 +28,22 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,6 +85,14 @@ public class FunctionFittingTool extends AbstractToolPage {
 	private Label chiSquaredInfoLabel;
 
 	private Label chiSquaredValueLabel;
+	
+	private double accuracy = 0.0001;
+
+	private Label accurasyInfoLabel;
+
+	private Text accurasyValueText;
+
+	private Button refitButton;
 
 	public FunctionFittingTool() {
 
@@ -178,6 +192,43 @@ public class FunctionFittingTool extends AbstractToolPage {
 		
 		chiSquaredValueLabel = new Label(infoComposite, SWT.NONE);
 		chiSquaredValueLabel.setText("Not Calculated"); 
+		
+		accurasyInfoLabel = new Label(infoComposite, SWT.NONE);
+		accurasyInfoLabel.setText("Accurasy of Fitting Routine :");
+		
+		accurasyValueText = new Text(infoComposite, SWT.NONE);
+		accurasyValueText.setText(Double.toString(accuracy));
+		accurasyValueText.addModifyListener(new ModifyListener() {
+			
+			@Override
+			public void modifyText(ModifyEvent e) {
+				try {
+					accuracy = Double.parseDouble(accurasyValueText.getText());
+				} catch (Exception exception) {
+					logger.debug("Had a oproblem whilst passing the accurasy String",e);
+				}
+			}
+		});
+		
+		refitButton = new Button(infoComposite, SWT.NONE);
+		refitButton.setText("Refit");
+		refitButton.addMouseListener(new MouseListener() {
+			
+			@Override
+			public void mouseUp(MouseEvent e) {
+				updateFunctionPlot();
+			}
+			
+			@Override
+			public void mouseDown(MouseEvent e) {
+				return;
+			}
+			
+			@Override
+			public void mouseDoubleClick(MouseEvent e) {
+				return;
+			}
+		});
 		
 		
 		viewer = new TableViewer(composite, SWT.FULL_SELECTION | SWT.SINGLE
@@ -540,7 +591,8 @@ public class FunctionFittingTool extends AbstractToolPage {
 
 			try {
 				resultFunction = compFunction.duplicate();
-				resultFunction = Fitter.fit(x, y, new NelderMead(0.0001),
+				logger.debug("Accurasy is set to {}",accuracy);
+				resultFunction = Fitter.fit(x, y, new NelderMead(accuracy),
 						resultFunction.getFunctions());
 			} catch (Exception e) {
 				return Status.CANCEL_STATUS;
