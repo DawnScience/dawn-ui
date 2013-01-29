@@ -92,7 +92,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			@Override
 			public void traceAdded(TraceEvent evt) {
 				if (evt.getSource() instanceof IImageTrace) {
-					getImageTrace().setMask(maskObject.getMaskDataset());
+					((IImageTrace) evt.getSource()).setMask(maskObject.getMaskDataset());
 				}
 			}
 		};
