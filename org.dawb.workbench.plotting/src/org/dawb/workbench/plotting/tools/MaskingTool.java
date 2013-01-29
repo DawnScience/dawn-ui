@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.draw2d.MouseMotionListener;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
@@ -81,6 +82,7 @@ import uk.ac.gda.common.rcp.util.GridUtils;
 
 public class MaskingTool extends AbstractToolPage implements MouseListener{
 
+
 	private static final Logger logger = LoggerFactory.getLogger(MaskingTool.class);
 	
 	private Group           composite;
@@ -95,7 +97,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	private ITraceListener      traceListener;
 	private IRegionListener     regionListener;
 	private IROIListener        regionBoundsListener;
-	private org.eclipse.draw2d.MouseListener clickListener;
+	private MaskMouseListener   clickListener;
 	
 	
 	public MaskingTool() {
@@ -126,12 +128,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			}
 		};
 		
-		this.clickListener = new org.eclipse.draw2d.MouseListener.Stub() {	
-			@Override
-			public void mousePressed(org.eclipse.draw2d.MouseEvent me) {
-                processMask(me.getLocation());
-			}
-		};
+		this.clickListener = new MaskMouseListener();
 		
 		this.regionListener = new IRegionListener.Stub() {
 			@Override
@@ -182,7 +179,24 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		this.maskJob = new MaskJob();
 		maskJob.setPriority(Job.INTERACTIVE);
 	}
-	
+
+	protected final class MaskMouseListener extends MouseMotionListener.Stub implements org.eclipse.draw2d.MouseListener		 {
+
+		@Override
+		public void mousePressed(org.eclipse.draw2d.MouseEvent me) {
+			maskJob.schedule(false, null, me.getLocation());
+		}
+		@Override
+		public void mouseDragged(org.eclipse.draw2d.MouseEvent me) {
+			maskJob.schedule(false, null, me.getLocation());
+		}
+		@Override
+		public void mouseReleased(org.eclipse.draw2d.MouseEvent me) { }
+
+		@Override
+		public void mouseDoubleClicked(org.eclipse.draw2d.MouseEvent me) { }
+		
+	}
 
 	public void setPlottingSystem(IPlottingSystem system) {
 		super.setPlottingSystem(system);
@@ -558,7 +572,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		man.add(new Separator());
 		
 		group = new CheckableActionGroup();
-		Action mask = new Action("Mask", IAction.AS_CHECK_BOX) {
+		final Action mask = new Action("Mask", IAction.AS_CHECK_BOX) {
 			public void run() {
 				Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.MASK_PEN_MASKOUT, true);
 				updateIcons(getImageTrace().getNanBound().getColor());
@@ -568,7 +582,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		group.add(mask);
 		man.add(mask);
 		
-		Action unmask = new Action("Unmask", IAction.AS_CHECK_BOX) {
+		final Action unmask = new Action("Unmask", IAction.AS_CHECK_BOX) {
 			public void run() {
 				Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.MASK_PEN_MASKOUT, false);
 				updateIcons(null);
@@ -578,19 +592,20 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		group.add(unmask);
 		man.add(unmask);
 		
-		boolean maskout = Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.MASK_PEN_MASKOUT);
-		if (maskout) {
-			mask.setChecked(true);
-		} else {
-			unmask.setChecked(true);
-		}
-
 		man.add(new Separator());
 
-		updateIcons(getImageTrace().getNanBound().getColor());
+		boolean maskout = Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.MASK_PEN_MASKOUT);
+		if (maskout) {
+			updateIcons(getImageTrace().getNanBound().getColor());
+			mask.setChecked(true);
+		} else {
+			updateIcons(null);
+			unmask.setChecked(true);
+		}
 		
 		Display.getDefault().asyncExec(new Runnable() {
 			public void run() {
+
 				String savedShape = Activator.getDefault().getPreferenceStore().getString(PlottingConstants.MASK_PEN_SHAPE);
 				if (savedShape!=null && !"".equals(savedShape)) {
 					ShapeType type = ShapeType.valueOf(savedShape);
@@ -827,16 +842,6 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
         return defaultInt;
 	}
 	
-	private void processMask(org.eclipse.draw2d.geometry.Point location) {
-		
-		ShapeType penShape = ShapeType.valueOf(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.MASK_PEN_SHAPE));
-        if (penShape==ShapeType.NONE) return;
-        
-		boolean maskOut = Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.MASK_PEN_MASKOUT);
-        int     penSize = Activator.getDefault().getPreferenceStore().getInt(PlottingConstants.MASK_PEN_SIZE);
-		//maskObject.process(
-	}
-
 	
 	private void processMask() {
 		processMask(false, false, null);
@@ -857,7 +862,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		final IImageTrace image = getImageTrace();
 		if (image == null) return;
 		
-		maskJob.schedule(resetMask, region);
+		maskJob.schedule(resetMask, region, null);
 	}
 	
 	protected void resetMask() { // Reread the file from disk or cached one if this is a view
@@ -909,6 +914,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			}
 
 			((AbstractPlottingSystem)getPlottingSystem()).addMouseClickListener(clickListener);
+			((AbstractPlottingSystem)getPlottingSystem()).addMouseMotionListener(clickListener);
 		}
 		if (this.regionTable!=null && !regionTable.getControl().isDisposed()) {
 			regionTable.refresh();
@@ -943,6 +949,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			}
 
 			((AbstractPlottingSystem)getPlottingSystem()).removeMouseClickListener(clickListener);
+			((AbstractPlottingSystem)getPlottingSystem()).removeMouseMotionListener(clickListener);
 
 		}
 	}
@@ -971,6 +978,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		private boolean isRegionsEnabled  = false;
 		private IRegion region            = null;
 		private Integer min=null, max=null;
+		private org.eclipse.draw2d.geometry.Point location;
 		
 		@Override
 		protected IStatus run(final IProgressMonitor monitor) {
@@ -1001,7 +1009,10 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			if (autoApplySavedMask && savedMask!=null) maskObject.process(savedMask);
 			
 			// Just process a changing region
-			if (region!=null) {
+			if (location!=null) {
+				maskObject.process(location, getPlottingSystem());
+				
+			} else if (region!=null) {
 				if (!maskObject.isSupportedRegion(region)) return Status.CANCEL_STATUS;
 				maskObject.process(region);
 				
@@ -1027,10 +1038,11 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			return Status.OK_STATUS;
 		}
 
-		public void schedule(boolean resetMask, IRegion region) {
+		public void schedule(boolean resetMask, IRegion region, org.eclipse.draw2d.geometry.Point loc) {
 			this.isRegionsEnabled = regionTable.getTable().isEnabled();
 			this.resetMask    = resetMask;
 			this.region       = region;
+			this.location     = loc;
 			min = (minimum.isEnabled()) ? minimum.getSelection() : null;
 		    max = (maximum.isEnabled()) ? maximum.getSelection() : null;
 			super.schedule();

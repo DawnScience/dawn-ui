@@ -20,6 +20,7 @@ import org.dawb.common.ui.plot.axis.IAxis;
 import org.dawb.common.ui.plot.axis.ICoordinateSystem;
 import org.dawb.common.ui.plot.axis.IPositionListener;
 import org.dawb.common.ui.plot.axis.PositionEvent;
+import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.RegionEvent;
@@ -285,8 +286,14 @@ public class RegionArea extends PlotArea {
 	protected void clearRegionTool() {
 		if (regionListener!=null) {
 		    regionLayer.setMouseListenerActive(regionListener, false);
+			IRegion wasBeingAdded = regionListener.getRegionBeingAdded();
 		    regionListener = null;
 		    setCursor(ZoomType.NONE.getCursor());
+		    
+			if (wasBeingAdded!=null) {
+				fireRegionCancelled(new RegionEvent(wasBeingAdded));
+			}
+
 		}
 	}
 	
@@ -340,6 +347,17 @@ public class RegionArea extends PlotArea {
 		}
 	}
 	
+	protected void fireRegionCancelled(RegionEvent evt) {
+		if (regionListeners==null) return;
+		for (IRegionListener l : regionListeners) {
+			try {
+				l.regionCancelled(evt);
+			} catch (Throwable ne) {
+				logger.error("Notifying of region add being cancelled", ne);
+				continue;
+			}
+		}
+	}
 
 	protected void fireRegionAdded(RegionEvent evt) {
 		if (regionListeners==null) return;

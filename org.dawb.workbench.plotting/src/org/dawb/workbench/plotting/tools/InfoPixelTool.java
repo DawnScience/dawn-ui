@@ -509,6 +509,9 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 	@Override
 	public void regionCreated(RegionEvent evt) {
 	}
+	@Override
+	public void regionCancelled(RegionEvent evt) {
+	}
 
 
 	@Override
