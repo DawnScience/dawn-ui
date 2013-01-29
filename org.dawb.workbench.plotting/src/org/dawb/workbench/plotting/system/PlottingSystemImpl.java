@@ -1137,5 +1137,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	public void removeMouseClickListener(MouseListener mcl) {
 		lightWeightViewer.getXYRegionGraph().getRegionArea().removeAuxilliaryClickListener(mcl);
 	}
-
+	public void setKeepAspect(boolean checked){
+		lightWeightViewer.setKeepAspect(checked);
+	}
 }

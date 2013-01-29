@@ -1147,4 +1147,8 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		intensity.setVisible(checked);
 	}
 
+	public void setKeepAspect(boolean checked){
+		xyGraph.setKeepAspect(checked);
+	}
+
 }
