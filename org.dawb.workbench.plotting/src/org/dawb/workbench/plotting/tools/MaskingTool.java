@@ -475,7 +475,10 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
         	if ("direct".equals(drawType)) {
         		directDraw.setSelection(true);
 				layout.topControl = directComp;
-				ShapeType penShape = ShapeType.valueOf(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.MASK_PEN_SHAPE));
+				ShapeType penShape = ShapeType.NONE;
+				if (Activator.getDefault().getPreferenceStore().contains(PlottingConstants.MASK_PEN_SHAPE)) {
+					penShape = ShapeType.valueOf(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.MASK_PEN_SHAPE));
+				}
 				ActionContributionItem item= ((ActionContributionItem)directToolbar.find(penShape.getId()));
 				if (item!=null) item.getAction().run();
      		
