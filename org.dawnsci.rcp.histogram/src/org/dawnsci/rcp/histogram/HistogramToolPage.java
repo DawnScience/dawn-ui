@@ -1,7 +1,6 @@
 package org.dawnsci.rcp.histogram;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 import org.dawb.common.services.HistogramBound;
@@ -17,7 +16,6 @@ import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace.TraceType;
 import org.dawb.common.ui.plot.trace.IPaletteListener;
-import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.PaletteEvent;
 import org.dawb.common.ui.plot.trace.TraceEvent;
@@ -173,8 +171,6 @@ public class HistogramToolPage extends AbstractToolPage {
 
 	private ITraceListener traceListener;
 
-	private IImageTrace image;
-
 	private ILineTrace histoTrace;
 	private ILineTrace redTrace;
 	private ILineTrace greenTrace;
@@ -264,7 +260,7 @@ public class HistogramToolPage extends AbstractToolPage {
 			public void minChanged(PaletteEvent event) {
 				if (internalEvent > 0 || mode == FIXED) return;
 				logger.trace("paletteListener minChanged firing");
-				histoMin = image.getImageServiceBean().getMin().doubleValue();
+				histoMin = ((IImageTrace)event.getSource()).getImageServiceBean().getMin().doubleValue();
 				updateHistogramToolElements(null, false);
 
 			}
@@ -273,7 +269,7 @@ public class HistogramToolPage extends AbstractToolPage {
 			public void maxChanged(PaletteEvent event) {
 				if (internalEvent > 0 || mode == FIXED) return;
 				logger.trace("paletteListener maxChanged firing");
-				histoMax = image.getImageServiceBean().getMax().doubleValue();
+				histoMax = ((IImageTrace)event.getSource()).getImageServiceBean().getMax().doubleValue();
 				updateHistogramToolElements(null, false);
 			}
 
@@ -281,7 +277,7 @@ public class HistogramToolPage extends AbstractToolPage {
 			public void maxCutChanged(PaletteEvent evt) {
 				if (internalEvent > 0 || mode == FIXED) return;
 				logger.trace("paletteListener maxCutChanged firing");
-				rangeMax = image.getImageServiceBean().getMaximumCutBound().getBound().doubleValue();
+				rangeMax = ((IImageTrace)evt.getSource()).getImageServiceBean().getMaximumCutBound().getBound().doubleValue();
 				zingerText.setText(Double.toString(rangeMax));
 				if(histoMax > rangeMax) histoMax = rangeMax;
 				generateHistogram(imageDataset);
@@ -292,7 +288,7 @@ public class HistogramToolPage extends AbstractToolPage {
 			public void minCutChanged(PaletteEvent evt) {
 				if (internalEvent > 0 || mode == FIXED) return;
 				logger.trace("paletteListener minCutChanged firing");
-				rangeMin = image.getImageServiceBean().getMinimumCutBound().getBound().doubleValue();
+				rangeMin = ((IImageTrace)evt.getSource()).getImageServiceBean().getMinimumCutBound().getBound().doubleValue();
 				deadPixelText.setText(Double.toString(rangeMin));
 				if(histoMin < rangeMin) histoMin = rangeMin;
 				generateHistogram(imageDataset);
@@ -369,8 +365,11 @@ public class HistogramToolPage extends AbstractToolPage {
 					if (histoMax > rangeMax) histoMax = rangeMax;
 					if (histoMin < rangeMin) histoMin = rangeMin;
 
-					image.setMaxCut(new HistogramBound(rangeMax, image.getMaxCut().getColor()));		
-					image.setMinCut(new HistogramBound(rangeMin, image.getMinCut().getColor()));
+					IImageTrace image = getImageTrace();
+					if (image!=null) {
+						image.setMaxCut(new HistogramBound(rangeMax, image.getMaxCut().getColor()));		
+						image.setMinCut(new HistogramBound(rangeMin, image.getMinCut().getColor()));
+					}
 
 					// calculate the histogram
 					generateHistogram(imageDataset);
@@ -396,8 +395,11 @@ public class HistogramToolPage extends AbstractToolPage {
 				rangeMax = Double.POSITIVE_INFINITY;
 				rangeMin = Double.NEGATIVE_INFINITY;
 
-				image.setMaxCut(new HistogramBound(rangeMax, image.getMaxCut().getColor()));		
-				image.setMinCut(new HistogramBound(rangeMin, image.getMinCut().getColor()));
+				IImageTrace image = getImageTrace();
+				if (image!=null) {
+			        image.setMaxCut(new HistogramBound(rangeMax, image.getMaxCut().getColor()));		
+				    image.setMinCut(new HistogramBound(rangeMin, image.getMinCut().getColor()));
+				}
 
 				zingerText.setText(Double.toString(rangeMax));
 				deadPixelText.setText(Double.toString(rangeMin));
@@ -451,8 +453,11 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				image.getImageServiceBean().setLogColorScale(btnColourMapLog.getSelection());
-				updateImage(null, true);
+				IImageTrace image = getImageTrace();
+				if (image!=null) {
+					image.getImageServiceBean().setLogColorScale(btnColourMapLog.getSelection());
+					updateImage(null, true);
+				}
 
 			}
 
@@ -527,6 +532,7 @@ public class HistogramToolPage extends AbstractToolPage {
 		logger.trace("imagerepaintJob running");
 		internalEvent++;
 
+		IImageTrace image = getImageTrace();
 		image.setMax(histoMax);
 		if (mon!=null && mon.isCanceled()) return false;
 
@@ -740,6 +746,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 		lockAction = new Action("Histogram range locked for this image", IAction.AS_CHECK_BOX) {
 			public void run() {
+				IImageTrace image = getImageTrace();
 				if (mode == FIXED) {
 					setChecked(false);
 					mode=AUTO;
@@ -824,7 +831,7 @@ public class HistogramToolPage extends AbstractToolPage {
 	private void updateImage(IImageTrace imageTrace, boolean repaintImage) {
 		if (getControl()==null) return; // We cannot plot unless its been created.
 
-		image = imageTrace==null ? getImageTrace() : imageTrace;
+		IImageTrace image = imageTrace==null ? getImageTrace() : imageTrace;
 
 		if (image != null) {
 
@@ -891,9 +898,7 @@ public class HistogramToolPage extends AbstractToolPage {
 	private void removeImagePaletteListener() {
 		if (getControl()==null) return; // We cannot plot unless its been created.
 
-		Collection<ITrace> traces = getPlottingSystem().getTraces(IImageTrace.class);
-		image = traces!=null && traces.size()>0 ? (IImageTrace)traces.iterator().next():null;
-
+		IImageTrace image = getImageTrace();
 		if (image != null) {
 
 			image.removePaletteListener(paletteListener);
@@ -957,7 +962,9 @@ public class HistogramToolPage extends AbstractToolPage {
 		double scaleMinTemp = rangeMin;
 
 		if (getPlottingSystem()==null) return; // Nothing to update
-		image = getImageTrace()!=null ? getImageTrace() : image;
+		IImageTrace image = getImageTrace();
+		if (image==null) return;
+		
 		imageDataset = image.getImageServiceBean().getImage();
 		
 		if (Double.isInfinite(scaleMaxTemp)) scaleMaxTemp = imageDataset.max().doubleValue();
@@ -1038,6 +1045,8 @@ public class HistogramToolPage extends AbstractToolPage {
 		}
 
 		// now build the RGB Lines  ( All the -3's here are to avoid the min/max/NAN colours)
+		IImageTrace image = getImageTrace();
+		if (image==null) return;
 		PaletteData paletteData = image.getPaletteData();
 		final DoubleDataset R = new DoubleDataset(paletteData.colors.length-3);
 		final DoubleDataset G = new DoubleDataset(paletteData.colors.length-3);

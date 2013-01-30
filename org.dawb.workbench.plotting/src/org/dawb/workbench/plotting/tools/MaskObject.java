@@ -114,12 +114,15 @@ public class MaskObject {
         		span.add(new int[]{(int)xAxis.getPositionValue(loc.x), (int)yAxis.getPositionValue(loc.y)});
         	}
         });
-        int[] start = span.get(0);
-        int[] end   = span.get(1);
-        int[] cen   = span.get(2);
-        int radius  = end[1]-cen[1];
+        int[]  start = span.get(0);
+        int[]  end   = span.get(1);
+        int[]  cen   = span.get(2);
+        int[]  b     = new int[]{cen[0], start[1]};
+        double m1    = (b[1]-start[1]) / (b[0]-start[0]);
+        int radius   = end[1]-cen[1];
 
         Boolean mv = maskOut ? Boolean.FALSE : Boolean.TRUE;
+        
         for (int y = start[1]; y<=end[1]; ++y) {
         	for (int x = start[0]; x<=end[0]; ++x) {
         		if (penShape==ShapeType.SQUARE) {
@@ -128,6 +131,21 @@ public class MaskObject {
         		} else if (penShape==ShapeType.CIRCLE) {
         			double r = Math.hypot(x - cen[0], y - cen[1]);
                     if (r<=radius) maskDataset.set(mv, y, x);
+                    
+        		} else if (penShape==ShapeType.TRIANGLE) {
+
+           			if (x <= b[0] ) { // px<=bx
+           				double ydash = m1*(x-start[0]);
+           				double yreal = y-start[1];
+           				System.out.println("ydash="+ydash);
+           				System.out.println("yreal="+yreal);
+        				if (yreal<=ydash) {
+        					maskDataset.set(mv, y, x);
+        				}
+        			} else { // px>bx
+  
+        			}
+       			
         		}
         	}
         }

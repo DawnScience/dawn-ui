@@ -968,7 +968,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 
 			((AbstractPlottingSystem)getPlottingSystem()).removeMouseClickListener(clickListener);
 			((AbstractPlottingSystem)getPlottingSystem()).removeMouseMotionListener(clickListener);
-
+			((AbstractPlottingSystem)getPlottingSystem()).setSelectedCursor(null);
 		}
 	}
 	
