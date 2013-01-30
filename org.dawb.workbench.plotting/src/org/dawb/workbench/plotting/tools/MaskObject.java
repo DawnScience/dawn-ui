@@ -71,8 +71,7 @@ public class MaskObject {
 		for (int y = 0; y<shape[0]; ++y) {
 			for (int x = 0; x<shape[1]; ++x) {
 		        try {
-		        	// We only add the falses
-		        	// 
+		        	// We only add the falses 
 		        	if (!savedMask.getBoolean(y,x)) {
 		        		this.maskDataset.set(Boolean.FALSE, y,x);
 		        	}
@@ -134,13 +133,13 @@ public class MaskObject {
         		} else if (penShape==ShapeType.TRIANGLE) {
 
            			if (x <= b[0] ) { // px<=bx
-           				double yreal = y-start[1];
-           				double ydash = 2*(x-start[0]);
-        				if (yreal<=ydash) {
-        					maskDataset.set(mv, y, x);
+           				double real = y-start[1];
+           				double dash = 2*(x-start[0]);
+        				if (real>dash) {
+        					maskDataset.set(mv, y, x+(cen[0]-start[0]));
         				}
         			} else { // px>bx
-  
+                        
         			}
        			
         		}
