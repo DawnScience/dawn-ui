@@ -89,7 +89,7 @@ public final class ImageTrace extends Figure implements IImageTrace, IAxisListen
 			          final ColorMapRamp intensityScale) {
 		
 		this.name  = name;
-		this.xAxis = xAxis;		
+		this.xAxis = xAxis;
 		this.yAxis = yAxis;
 		this.intensityScale = intensityScale;
 
@@ -114,6 +114,8 @@ public final class ImageTrace extends Figure implements IImageTrace, IAxisListen
 
 		xAxis.setTicksAtEnds(false);
 		yAxis.setTicksAtEnds(false);
+		xAxis.setTicksIndexBased(true);
+		yAxis.setTicksIndexBased(true);
 
 		if (xAxis instanceof AspectAxis && yAxis instanceof AspectAxis) {
 			
@@ -146,6 +148,7 @@ public final class ImageTrace extends Figure implements IImageTrace, IAxisListen
 
 	public void setXAxis(Axis xAxis) {
 		this.xAxis = xAxis;
+		xAxis.setTicksIndexBased(true);
 	}
 
 	public AspectAxis getYAxis() {
@@ -154,6 +157,7 @@ public final class ImageTrace extends Figure implements IImageTrace, IAxisListen
 
 	public void setYAxis(Axis yAxis) {
 		this.yAxis = yAxis;
+		yAxis.setTicksIndexBased(true);
 	}
 
 	public AbstractDataset getImage() {
@@ -607,6 +611,8 @@ public final class ImageTrace extends Figure implements IImageTrace, IAxisListen
 		yAxis.removeListener(this);
 		xAxis.setTicksAtEnds(true);
 		yAxis.setTicksAtEnds(true);
+		xAxis.setTicksIndexBased(false);
+		yAxis.setTicksIndexBased(false);
 		axisRedrawActive = false;
 		imageServiceBean.dispose();
 		if (this.scaledImage!=null && !scaledImage.isDisposed()) scaledImage.dispose();
