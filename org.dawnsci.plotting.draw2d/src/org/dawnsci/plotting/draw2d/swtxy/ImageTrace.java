@@ -89,7 +89,7 @@ public final class ImageTrace extends Figure implements IImageTrace, IAxisListen
 			          final ColorMapRamp intensityScale) {
 		
 		this.name  = name;
-		this.xAxis = xAxis;		
+		this.xAxis = xAxis;
 		this.yAxis = yAxis;
 		this.intensityScale = intensityScale;
 
@@ -114,6 +114,8 @@ public final class ImageTrace extends Figure implements IImageTrace, IAxisListen
 
 		xAxis.setTicksAtEnds(false);
 		yAxis.setTicksAtEnds(false);
+		xAxis.setTicksIndexBased(true);
+		yAxis.setTicksIndexBased(true);
 
 		if (xAxis instanceof AspectAxis && yAxis instanceof AspectAxis) {
 			
@@ -146,6 +148,7 @@ public final class ImageTrace extends Figure implements IImageTrace, IAxisListen
 
 	public void setXAxis(Axis xAxis) {
 		this.xAxis = xAxis;
+		xAxis.setTicksIndexBased(true);
 	}
 
 	public AspectAxis getYAxis() {
@@ -154,6 +157,7 @@ public final class ImageTrace extends Figure implements IImageTrace, IAxisListen
 
 	public void setYAxis(Axis yAxis) {
 		this.yAxis = yAxis;
+		yAxis.setTicksIndexBased(true);
 	}
 
 	public AbstractDataset getImage() {
@@ -252,22 +256,24 @@ public final class ImageTrace extends Figure implements IImageTrace, IAxisListen
 						setMin(fa[0]);
 						setMax(fa[1]);
 					}
+					
+					
+					// We send the image drawn with the same palette to the 
+					// intensityScale
+					// TODO FIXME This will not work in log mode
+					final DoubleDataset dds = new DoubleDataset(256,1);
+					double inc = (getMax().doubleValue()-getMin().doubleValue())/256d;
+					for (int i = 0; i < 256; i++) {
+						double val = getMax().doubleValue()-(i*inc);
+						dds.set(val, i, 0);
+					}
+					histoBean.setImage(dds);
+					intensityScale.setImageData(service.getImageData(histoBean));
+
 				}
 				
 				this.imageData   = service.getImageData(imageServiceBean);
 				
-				// We send the image drawn with the same palette to the 
-				// intensityScale
-				// TODO FIXME This will not work in log mode
-				final DoubleDataset dds = new DoubleDataset(256,1);
-				double inc = (getMax().doubleValue()-getMin().doubleValue())/256d;
-				for (int i = 0; i < 256; i++) {
-					double val = getMax().doubleValue()-(i*inc);
-					dds.set(val, i, 0);
-				}
-				imageServiceBean.setImage(dds);
-				imageServiceBean.setMask(null);
-				intensityScale.setImageData(service.getImageData(imageServiceBean));
 				
 			} catch (Exception e) {
 				logger.error("Cannot create image from data!", e);
@@ -607,6 +613,8 @@ public final class ImageTrace extends Figure implements IImageTrace, IAxisListen
 		yAxis.removeListener(this);
 		xAxis.setTicksAtEnds(true);
 		yAxis.setTicksAtEnds(true);
+		xAxis.setTicksIndexBased(false);
+		yAxis.setTicksIndexBased(false);
 		axisRedrawActive = false;
 		imageServiceBean.dispose();
 		if (this.scaledImage!=null && !scaledImage.isDisposed()) scaledImage.dispose();
