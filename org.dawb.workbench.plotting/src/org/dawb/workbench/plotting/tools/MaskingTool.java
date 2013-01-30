@@ -691,7 +691,12 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			}
 		};
 		alwaysSave.setImageDescriptor(Activator.getImageDescriptor("icons/plot-tool-masking-autosave.png"));
-		alwaysSave.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(AUTO_SAVE_PROP));
+		if (Activator.getDefault().getPreferenceStore().contains(AUTO_SAVE_PROP)) {
+			alwaysSave.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(AUTO_SAVE_PROP));
+		} else {
+			Activator.getDefault().getPreferenceStore().setValue(AUTO_SAVE_PROP, true);
+			alwaysSave.setChecked(true);
+		}
 		actionBars.getToolBarManager().add(alwaysSave);
 
         final IPlottingSystem system = getPlottingSystem();
