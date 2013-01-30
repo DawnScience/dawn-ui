@@ -29,6 +29,7 @@ import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.draw2d.MouseMotionListener;
@@ -178,6 +179,8 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		};
 		this.maskJob = new MaskJob();
 		maskJob.setPriority(Job.INTERACTIVE);
+		maskJob.setSystem(true);
+		maskJob.setUser(false);
 	}
 
 	protected final class MaskMouseListener extends MouseMotionListener.Stub implements org.eclipse.draw2d.MouseListener		 {
@@ -1048,14 +1051,39 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			return Status.OK_STATUS;
 		}
 
+		/**
+		 * Uses job thread
+		 * @param resetMask
+		 * @param region
+		 * @param loc
+		 */
 		public void schedule(boolean resetMask, IRegion region, org.eclipse.draw2d.geometry.Point loc) {
+			assign(resetMask, region, loc);
+			schedule();
+		}
+		
+		private void assign(boolean resetMask, IRegion region, org.eclipse.draw2d.geometry.Point loc) {
 			this.isRegionsEnabled = regionTable.getTable().isEnabled();
 			this.resetMask    = resetMask;
 			this.region       = region;
 			this.location     = loc;
 			min = (minimum.isEnabled()) ? minimum.getSelection() : null;
-		    max = (maximum.isEnabled()) ? maximum.getSelection() : null;
-			super.schedule();
+		    max = (maximum.isEnabled()) ? maximum.getSelection() : null;			
+		}
+
+		/**
+		 * Done in calling thread.
+		 * @param resetMask
+		 * @param region
+		 * @param loc
+		 */
+		public void run(boolean resetMask, IRegion region, org.eclipse.draw2d.geometry.Point loc) {
+			assign(resetMask, region, loc);
+			try {
+			    run(new NullProgressMonitor());
+			} catch (Throwable ne) {
+				logger.error("Cannot run masking job!", ne);
+			}
 		}
 	}
 

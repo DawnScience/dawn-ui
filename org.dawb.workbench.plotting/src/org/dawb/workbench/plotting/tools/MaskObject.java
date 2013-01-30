@@ -100,21 +100,24 @@ public class MaskObject {
        
 		boolean maskOut       = Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.MASK_PEN_MASKOUT);
         final int     penSize = Activator.getDefault().getPreferenceStore().getInt(PlottingConstants.MASK_PEN_SIZE);
-        final int     rad     = (int)Math.ceil(penSize/2f);
+        final int     rad1     = (int)Math.ceil(penSize/2f);
+        final int     rad2     = (int)Math.floor(penSize/2f);
 
         final IAxis xAxis = system.getSelectedXAxis();
         final IAxis yAxis = system.getSelectedYAxis();
 
-
-        final List<int[]> span = new ArrayList<int[]>(2);
+        final List<int[]> span = new ArrayList<int[]>(3);
         Display.getDefault().syncExec(new Runnable() {
         	public void run() {
-        		span.add(new int[]{(int)xAxis.getPositionValue(loc.x-rad), (int)yAxis.getPositionValue(loc.y-rad)});
-        		span.add(new int[]{(int)xAxis.getPositionValue(loc.x+rad), (int)yAxis.getPositionValue(loc.y+rad)});
+        		span.add(new int[]{(int)xAxis.getPositionValue(loc.x-rad2), (int)yAxis.getPositionValue(loc.y-rad2)});
+        		span.add(new int[]{(int)xAxis.getPositionValue(loc.x+rad1), (int)yAxis.getPositionValue(loc.y+rad1)});
+        		span.add(new int[]{(int)xAxis.getPositionValue(loc.x), (int)yAxis.getPositionValue(loc.y)});
         	}
         });
         int[] start = span.get(0);
         int[] end   = span.get(1);
+        int[] cen   = span.get(2);
+        int radius  = end[1]-cen[1];
 
         Boolean mv = maskOut ? Boolean.FALSE : Boolean.TRUE;
         for (int y = start[1]; y<=end[1]; ++y) {
@@ -123,12 +126,13 @@ public class MaskObject {
         			maskDataset.set(mv, y, x);
 
         		} else if (penShape==ShapeType.CIRCLE) {
-        			// Check inside circle
-
+        			double r = Math.hypot(x - cen[0], y - cen[1]);
+                    if (r<=radius) maskDataset.set(mv, y, x);
         		}
         	}
         }
 	}
+
 	
 	/**
 	 * Designed to be called after processBounds(...) has been called at least once.
