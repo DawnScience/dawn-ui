@@ -118,7 +118,6 @@ public class MaskObject {
         int[]  end   = span.get(1);
         int[]  cen   = span.get(2);
         int[]  b     = new int[]{cen[0], start[1]};
-        double m1    = (b[1]-start[1]) / (b[0]-start[0]);
         int radius   = end[1]-cen[1];
 
         Boolean mv = maskOut ? Boolean.FALSE : Boolean.TRUE;
@@ -135,10 +134,8 @@ public class MaskObject {
         		} else if (penShape==ShapeType.TRIANGLE) {
 
            			if (x <= b[0] ) { // px<=bx
-           				double ydash = m1*(x-start[0]);
            				double yreal = y-start[1];
-           				System.out.println("ydash="+ydash);
-           				System.out.println("yreal="+yreal);
+           				double ydash = 2*(x-start[0]);
         				if (yreal<=ydash) {
         					maskDataset.set(mv, y, x);
         				}
