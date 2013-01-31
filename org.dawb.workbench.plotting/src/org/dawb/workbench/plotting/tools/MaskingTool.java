@@ -514,7 +514,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 					
 					ShapeType penShape = ShapeType.valueOf(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.MASK_PEN_SHAPE));
 					if (penShape!=null) {
-					    ((AbstractPlottingSystem)getPlottingSystem()).setSelectedCursor(getCursor(IconUtils.getPenCursorIcon(pensize, penShape)));
+					    ((AbstractPlottingSystem)getPlottingSystem()).setSelectedCursor(IconUtils.getPenCursor(pensize, penShape));
 					}
 				}
 
@@ -543,7 +543,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			public void run() {
 				int pensize = Activator.getDefault().getPreferenceStore().getInt(PlottingConstants.MASK_PEN_SIZE);
 				ShapeType penShape = ShapeType.SQUARE;
-				((AbstractPlottingSystem)getPlottingSystem()).setSelectedCursor(getCursor(IconUtils.getPenCursorIcon(pensize, penShape)));
+				((AbstractPlottingSystem)getPlottingSystem()).setSelectedCursor(IconUtils.getPenCursor(pensize, penShape));
 				Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.MASK_PEN_SHAPE, penShape.name());
 			}
 		};
@@ -555,7 +555,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			public void run() {
 				int pensize = Activator.getDefault().getPreferenceStore().getInt(PlottingConstants.MASK_PEN_SIZE);
 				ShapeType penShape = ShapeType.TRIANGLE;
-				((AbstractPlottingSystem)getPlottingSystem()).setSelectedCursor(getCursor(IconUtils.getPenCursorIcon(pensize, penShape)));
+				((AbstractPlottingSystem)getPlottingSystem()).setSelectedCursor(IconUtils.getPenCursor(pensize, penShape));
 				Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.MASK_PEN_SHAPE, penShape.name());
 			}
 		};
@@ -567,7 +567,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			public void run() {
 				int pensize = Activator.getDefault().getPreferenceStore().getInt(PlottingConstants.MASK_PEN_SIZE);
 				ShapeType penShape = ShapeType.CIRCLE;
-				((AbstractPlottingSystem)getPlottingSystem()).setSelectedCursor(getCursor(IconUtils.getPenCursorIcon(pensize, penShape)));
+				((AbstractPlottingSystem)getPlottingSystem()).setSelectedCursor(IconUtils.getPenCursor(pensize, penShape));
 				Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.MASK_PEN_SHAPE, penShape.name());
 			}
 		};
