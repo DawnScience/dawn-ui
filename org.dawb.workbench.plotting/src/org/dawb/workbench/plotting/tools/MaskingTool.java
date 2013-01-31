@@ -1021,60 +1021,65 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		
 		@Override
 		protected IStatus run(final IProgressMonitor monitor) {
-						
-			final IImageTrace image = getImageTrace();
-			if (image == null) return Status.CANCEL_STATUS;
-			
-			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
-			
-			if (region!=null && !isRegionsEnabled) return Status.CANCEL_STATUS;
-			
-			if (resetMask)  maskObject.setMaskDataset(null, false);
-			
-			if (maskObject.getMaskDataset()==null) {
-				// The mask must be maintained as a BooleanDataset so that there is the option
-				// of applying the same mask to many images.
-				final AbstractDataset unmasked = image.getData();
-				maskObject.setMaskDataset(new BooleanDataset(unmasked.getShape()), true);
-				maskObject.setImageDataset(unmasked);
-			}
-			
-			if (maskObject.getImageDataset()==null) {
-				final AbstractDataset unmasked = image.getData();
-				maskObject.setImageDataset(unmasked);
-			}
-			
-			// Keep the saved mask
-			if (autoApplySavedMask && savedMask!=null) maskObject.process(savedMask);
-			
-			// Just process a changing region
-			if (location!=null) {
-				maskObject.process(location, getPlottingSystem());
 				
-			} else if (region!=null) {
-				if (!maskObject.isSupportedRegion(region)) return Status.CANCEL_STATUS;
-				maskObject.process(region);
+			try {
+				final IImageTrace image = getImageTrace();
+				if (image == null) return Status.CANCEL_STATUS;
 				
+				if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 				
-			} else { // process everything
+				if (region!=null && !isRegionsEnabled) return Status.CANCEL_STATUS;
 				
-				maskObject.process(min, max, isRegionsEnabled?getPlottingSystem().getRegions():null);
+				if (resetMask)  maskObject.setMaskDataset(null, false);
 				
-			}
-			
-			if (Activator.getDefault().getPreferenceStore().getBoolean(AUTO_SAVE_PROP)) {
-				saveMaskBuffer();
-			}
-			
-			Display.getDefault().syncExec(new Runnable() {
-				public void run() {
-					// NOTE the mask will have a reference kept and
-					// will downsample with the data.
-					image.setMask(maskObject.getMaskDataset()); 
+				if (maskObject.getMaskDataset()==null) {
+					// The mask must be maintained as a BooleanDataset so that there is the option
+					// of applying the same mask to many images.
+					final AbstractDataset unmasked = image.getData();
+					maskObject.setMaskDataset(new BooleanDataset(unmasked.getShape()), true);
+					maskObject.setImageDataset(unmasked);
 				}
-			});
-			
-			return Status.OK_STATUS;
+				
+				if (maskObject.getImageDataset()==null) {
+					final AbstractDataset unmasked = image.getData();
+					maskObject.setImageDataset(unmasked);
+				}
+				
+				// Keep the saved mask
+				if (autoApplySavedMask && savedMask!=null) maskObject.process(savedMask);
+				
+				// Just process a changing region
+				if (location!=null) {
+					maskObject.process(location, getPlottingSystem());
+					
+				} else if (region!=null) {
+					if (!maskObject.isSupportedRegion(region)) return Status.CANCEL_STATUS;
+					maskObject.process(region);
+					
+					
+				} else { // process everything
+					
+					maskObject.process(min, max, isRegionsEnabled?getPlottingSystem().getRegions():null);
+					
+				}
+				
+				if (Activator.getDefault().getPreferenceStore().getBoolean(AUTO_SAVE_PROP)) {
+					saveMaskBuffer();
+				}
+				
+				Display.getDefault().syncExec(new Runnable() {
+					public void run() {
+						// NOTE the mask will have a reference kept and
+						// will downsample with the data.
+						image.setMask(maskObject.getMaskDataset()); 
+					}
+				});
+				
+				return Status.OK_STATUS;
+			} catch (Throwable ne) {
+				logger.error("Cannot mask properly at the edges as yet!", ne);
+				return Status.CANCEL_STATUS;
+			}
 		}
 
 		/**

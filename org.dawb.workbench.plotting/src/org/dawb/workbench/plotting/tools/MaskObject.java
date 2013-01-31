@@ -110,11 +110,11 @@ public class MaskObject {
         	public void run() {
         		span.add(new int[]{(int)xAxis.getPositionValue(loc.x-rad2), (int)yAxis.getPositionValue(loc.y-rad2)});
         		span.add(new int[]{(int)xAxis.getPositionValue(loc.x+rad1), (int)yAxis.getPositionValue(loc.y+rad1)});
-        		span.add(new int[]{(int)xAxis.getPositionValue(loc.x), (int)yAxis.getPositionValue(loc.y)});
+        		span.add(new int[]{(int)xAxis.getPositionValue(loc.x),      (int)yAxis.getPositionValue(loc.y)});
         	}
         });
-        int[]  start = span.get(0);
-        int[]  end   = span.get(1);
+        int[]  start = normalize(span.get(0));
+        int[]  end   = normalize(span.get(1));
         int[]  cen   = span.get(2);
         int[]  b     = new int[]{cen[0], start[1]};
         int radius   = end[1]-cen[1];
@@ -152,6 +152,17 @@ public class MaskObject {
 	}
 
 	
+	private int[] normalize(int[] is) {
+		int maxX = imageDataset.getShape()[1]-1;
+		if (is[0]>maxX) is[0] = maxX;
+		if (is[0]<0)    is[0] = 0;
+		
+		int maxY = imageDataset.getShape()[0]-1;
+		if (is[1]>maxY) is[1] = maxY;
+		if (is[1]<0)    is[1] = 0;
+        return is;
+	}
+
 	/**
 	 * Designed to be called after processBounds(...) has been called at least once.
 	 * Deals with fact that that may leave us with no mask and will create one if needed.
