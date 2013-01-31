@@ -3,6 +3,7 @@ package org.dawb.workbench.plotting.tools;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 import org.dawb.common.services.HistogramBound;
@@ -791,6 +792,17 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 
 	}
 
+	private static final Collection<RegionType> maskingTypes;
+	static {
+		maskingTypes = new ArrayList<RegionType>(6);
+		maskingTypes.add(RegionType.FREE_DRAW);
+		maskingTypes.add(RegionType.RING);
+		maskingTypes.add(RegionType.BOX);
+		maskingTypes.add(RegionType.LINE);
+		maskingTypes.add(RegionType.POLYLINE);
+		maskingTypes.add(RegionType.POLYGON);
+		maskingTypes.add(RegionType.SECTOR);
+	}
 	private void createMaskingRegionActions(IToolBarManager man) {		
 		
 		final Action multipleRegion  = new Action("Continuously add the same region", IAction.AS_CHECK_BOX) {
@@ -801,6 +813,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		multipleRegion.setImageDescriptor(Activator.getImageDescriptor("icons/RegionMultiple.png"));
 		multipleRegion.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.MASK_DRAW_MULTIPLE));
 		man.add(multipleRegion);
+		man.add(new Separator());
 		
 		final MenuAction widthChoice = new MenuAction("Line With");
 		widthChoice.setToolTipText("Line width for free draw and line regions");
@@ -810,13 +823,14 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		ActionContributionItem menu  = (ActionContributionItem)getPlottingSystem().getActionBars().getMenuManager().find("org.dawb.workbench.ui.editors.plotting.swtxy.addRegions");
 		MenuAction        menuAction = (MenuAction)menu.getAction();	
 		IAction fd = null;
-		for (RegionType type : RegionType.ALL_TYPES) {
+		for (RegionType type : maskingTypes) {
 			final IAction action = menuAction.findAction(type.getId());
 			if (action==null) continue;
 			man.add(action);
 			
 			if (type==RegionType.FREE_DRAW) {
 				fd = action;
+				man.add(new Separator());
 			}
 		}
 		
@@ -846,6 +860,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
         widthChoice.setSelectedAction(wid-1);
 		widthChoice.setCheckedAction(wid-1, true);
 
+		man.add(new Separator());
 		menu  = (ActionContributionItem)getPlottingSystem().getActionBars().getToolBarManager().find("org.dawb.workbench.ui.editors.plotting.swtxy.removeRegions");
 		if (menu!=null) {
 			menuAction = (MenuAction)menu.getAction();	

@@ -126,7 +126,7 @@ public class MaskObject {
         		if (penShape==ShapeType.SQUARE) {
         			maskDataset.set(mv, y, x);
 
-        		} else if (penShape==ShapeType.CIRCLE) {
+        		} else if (penShape==ShapeType.CIRCLE || penSize<3) {
         			double r = Math.hypot(x - cen[0], y - cen[1]);
                     if (r<=radius) maskDataset.set(mv, y, x);
                     
@@ -136,10 +136,14 @@ public class MaskObject {
            				double real = y-start[1];
            				double dash = 2*(x-start[0]);
         				if (real>dash) {
-        					maskDataset.set(mv, y, x+(cen[0]-start[0]));
+        					maskDataset.set(mv, y, 2*cen[0]-x-(cen[0]-start[0]));
         				}
         			} else { // px>bx
-                        
+        				double real = y-start[1];
+           				double dash = 2*(x-cen[0]);
+        				if (real>dash) {
+        					maskDataset.set(mv, y, x);
+        				}
         			}
        			
         		}

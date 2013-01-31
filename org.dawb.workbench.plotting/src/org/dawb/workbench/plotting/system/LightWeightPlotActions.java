@@ -241,7 +241,7 @@ class LightWeightPlotActions {
  
 		regionDropDown.add(createRegionAction(xyGraph, RegionType.LINE,       regionDropDown, "Add line selection",     Activator.getImageDescriptor("icons/ProfileLine.png")));
 		regionDropDown.add(createRegionAction(xyGraph, RegionType.POLYLINE,   regionDropDown, "Add polyline selection", Activator.getImageDescriptor("icons/ProfilePolyline.png")));
-		regionDropDown.add(createRegionAction(xyGraph, RegionType.POLYGON,    regionDropDown, "Add polygon selection",  Activator.getImageDescriptor("icons/ProfilePolyline.png")));
+		regionDropDown.add(createRegionAction(xyGraph, RegionType.POLYGON,    regionDropDown, "Add polygon selection",  Activator.getImageDescriptor("icons/ProfilePolygon.png")));
 		regionDropDown.add(createRegionAction(xyGraph, RegionType.BOX,        regionDropDown, "Add box selection",      Activator.getImageDescriptor("icons/ProfileBox.png")));
 		regionDropDown.add(createRegionAction(xyGraph, RegionType.COLORBOX,   regionDropDown, "Add color box selection",Activator.getImageDescriptor("icons/ProfileColorbox.png")));
 		regionDropDown.add(createRegionAction(xyGraph, RegionType.GRID,       regionDropDown, "Add grid selection",     Activator.getImageDescriptor("icons/ProfileGrid.png")));

@@ -18,6 +18,7 @@ import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 
 import uk.ac.diamond.scisoft.analysis.roi.PointROI;
 import uk.ac.diamond.scisoft.analysis.roi.PolygonalROI;
@@ -27,10 +28,11 @@ import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 public class PolygonSelection extends AbstractSelectionRegion {
 
 	DecoratedPolygon pline;
+	private static final Color magenta = new Color(null, 238, 0,	238);
 
 	public PolygonSelection(String name, ICoordinateSystem coords) {
 		super(name, coords);
-		setRegionColor(ColorConstants.cyan);
+		setRegionColor(magenta);
 		setAlpha(80);
 		setLineWidth(2);
 	}
