@@ -602,6 +602,8 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 
 	@Override
 	public Serializable getToolData() {
+		
+		if (fittedFunctions==null) return null;
 		final FunctionSquirts fs = new FunctionSquirts();
 		
 		for (FittedFunction ff : fittedFunctions.getFunctionList()) {
