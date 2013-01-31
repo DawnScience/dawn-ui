@@ -640,13 +640,6 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		((ActionContributionItem)directToolbar.find(ShapeType.TRIANGLE.getId())).getAction().setImageDescriptor(IconUtils.getBrushIcon(12, ShapeType.TRIANGLE, maskColor));
 		((ActionContributionItem)directToolbar.find(ShapeType.CIRCLE.getId())).getAction().setImageDescriptor(IconUtils.getBrushIcon(  12, ShapeType.CIRCLE,   maskColor));
 	}
-	
-	private Cursor getCursor(ImageData iconData) {
-		final Cursor cursor = iconData!=null
-	            ? new Cursor(Display.getDefault(), iconData, iconData.width/2, iconData.height/2)
-                : null;
-	    return cursor;
-	}
 
 
 	private static BooleanDataset savedMask=null;
