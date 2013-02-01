@@ -1,5 +1,8 @@
 package org.dawb.workbench.plotting.tools.fitting;
 
+import java.io.Serializable;
+import java.util.Map;
+
 import org.dawb.common.ui.plot.function.FunctionDialog;
 import org.dawb.common.ui.plot.region.IROIListener;
 import org.dawb.common.ui.plot.region.IRegion;
@@ -12,6 +15,7 @@ import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.common.ui.plot.trace.TraceWillPlotEvent;
 import org.dawb.common.ui.widgets.FunctionWidget;
+import org.dawb.workbench.jmx.UserPlotBean;
 import org.dawb.workbench.plotting.Activator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -627,6 +631,35 @@ public class FunctionFittingTool extends AbstractToolPage {
 			return Status.OK_STATUS;
 		}
 
+	}
+
+	private Map<String, Serializable> functions=null;
+	/**
+	 * Override to set the tool data to something specific
+	 * @param toolData
+	 */
+	@Override
+	public void setToolData(Serializable toolData) {
+		
+		final UserPlotBean bean = (UserPlotBean)toolData;
+		this.functions = bean.getFunctions();
+		
+		//TODO FIXME, set functions in tool somehow
+		// Ensure that functions end up being the right ones
+	}
+
+	/**
+	 * @see IToolPage.getToolData()
+	 */
+	@Override
+	public Serializable getToolData() {
+		UserPlotBean bean = new UserPlotBean();
+		bean.setFunctions(functions); // We only set functions because it does a replace merge.
+		
+		return bean; // Service knows that if the tool data
+		             // is a UserPlotBean, this should automatically
+		             // be merged (replace-merge) over the UserPlotBean
+		             // returned and the tool data set to null.
 	}
 
 }
