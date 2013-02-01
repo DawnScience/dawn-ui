@@ -314,7 +314,7 @@ public class RegionArea extends PlotArea {
 	
 	public void setCursor(Cursor cursor) {
 		if (this.getCursor() == cursor) return;
-		if (specialCursor!=null) return;
+		if (specialCursor!=null) cursor = specialCursor;
 		super.setCursor(cursor);
 	}
 

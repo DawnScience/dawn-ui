@@ -1093,15 +1093,14 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	 * Set the cursor using a custom icon on the plot.
 	 * This may get cancelled if other tools are used!
 	 */
-	public void setSelectedCursor(ImageDescriptor des) {
+	@Override
+	public void setSelectedCursor(Cursor cursor) {
 		
 		if (isDisposed() || lightWeightViewer==null || lightWeightViewer.getXYRegionGraph()==null) return;
-		final Cursor cursor = des!=null
-				            ? new Cursor(Display.getDefault(), des.getImageData(), des.getImageData().width/2, des.getImageData().height/2)
-	                        : null;
 		lightWeightViewer.setSelectedCursor(cursor);
 	}
 	
+	@Override
 	public Cursor getSelectedCursor() {
 		
 		if (isDisposed() || lightWeightViewer==null || lightWeightViewer.getXYRegionGraph()==null) return null;

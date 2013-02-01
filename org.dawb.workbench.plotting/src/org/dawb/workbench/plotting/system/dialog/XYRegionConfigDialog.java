@@ -6,6 +6,7 @@ import java.util.List;
 import org.csstudio.swt.xygraph.figures.Annotation;
 import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.swt.xygraph.toolbar.XYGraphConfigDialog;
+import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.trace.ILineTrace;
@@ -53,7 +54,7 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
 	@Override
 	protected Control createDialogArea(Composite parent) {
 
-		final Composite parent_composite = (Composite)super.createDialogArea(parent);
+		final Composite parent_composite = (Composite)super.createDialogArea(parent, !isRescale);
 		final TabFolder tabFolder = (TabFolder)parent_composite.getChildren()[0];  
 
 		int imageTraceIndex = -1;

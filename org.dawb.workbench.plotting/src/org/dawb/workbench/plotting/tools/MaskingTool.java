@@ -3,7 +3,6 @@ package org.dawb.workbench.plotting.tools;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 
 import org.dawb.common.services.HistogramBound;
@@ -61,7 +60,9 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
@@ -513,9 +514,10 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 					
 					ShapeType penShape = ShapeType.valueOf(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.MASK_PEN_SHAPE));
 					if (penShape!=null) {
-					    ((AbstractPlottingSystem)getPlottingSystem()).setSelectedCursor(IconUtils.getPenCursorIcon(pensize, penShape));
+					    ((AbstractPlottingSystem)getPlottingSystem()).setSelectedCursor(IconUtils.getPenCursor(pensize, penShape));
 					}
 				}
+
 			};
 			
 			action.setImageDescriptor(IconUtils.createPenDescriptor(pensize));
@@ -541,7 +543,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			public void run() {
 				int pensize = Activator.getDefault().getPreferenceStore().getInt(PlottingConstants.MASK_PEN_SIZE);
 				ShapeType penShape = ShapeType.SQUARE;
-				((AbstractPlottingSystem)getPlottingSystem()).setSelectedCursor(IconUtils.getPenCursorIcon(pensize, penShape));
+				((AbstractPlottingSystem)getPlottingSystem()).setSelectedCursor(IconUtils.getPenCursor(pensize, penShape));
 				Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.MASK_PEN_SHAPE, penShape.name());
 			}
 		};
@@ -553,7 +555,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			public void run() {
 				int pensize = Activator.getDefault().getPreferenceStore().getInt(PlottingConstants.MASK_PEN_SIZE);
 				ShapeType penShape = ShapeType.TRIANGLE;
-				((AbstractPlottingSystem)getPlottingSystem()).setSelectedCursor(IconUtils.getPenCursorIcon(pensize, penShape));
+				((AbstractPlottingSystem)getPlottingSystem()).setSelectedCursor(IconUtils.getPenCursor(pensize, penShape));
 				Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.MASK_PEN_SHAPE, penShape.name());
 			}
 		};
@@ -565,7 +567,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			public void run() {
 				int pensize = Activator.getDefault().getPreferenceStore().getInt(PlottingConstants.MASK_PEN_SIZE);
 				ShapeType penShape = ShapeType.CIRCLE;
-				((AbstractPlottingSystem)getPlottingSystem()).setSelectedCursor(IconUtils.getPenCursorIcon(pensize, penShape));
+				((AbstractPlottingSystem)getPlottingSystem()).setSelectedCursor(IconUtils.getPenCursor(pensize, penShape));
 				Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.MASK_PEN_SHAPE, penShape.name());
 			}
 		};
@@ -638,6 +640,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		((ActionContributionItem)directToolbar.find(ShapeType.TRIANGLE.getId())).getAction().setImageDescriptor(IconUtils.getBrushIcon(12, ShapeType.TRIANGLE, maskColor));
 		((ActionContributionItem)directToolbar.find(ShapeType.CIRCLE.getId())).getAction().setImageDescriptor(IconUtils.getBrushIcon(  12, ShapeType.CIRCLE,   maskColor));
 	}
+
 
 	private static BooleanDataset savedMask=null;
 	private static boolean        autoApplySavedMask=false;
@@ -1018,60 +1021,65 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		
 		@Override
 		protected IStatus run(final IProgressMonitor monitor) {
-						
-			final IImageTrace image = getImageTrace();
-			if (image == null) return Status.CANCEL_STATUS;
-			
-			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
-			
-			if (region!=null && !isRegionsEnabled) return Status.CANCEL_STATUS;
-			
-			if (resetMask)  maskObject.setMaskDataset(null, false);
-			
-			if (maskObject.getMaskDataset()==null) {
-				// The mask must be maintained as a BooleanDataset so that there is the option
-				// of applying the same mask to many images.
-				final AbstractDataset unmasked = image.getData();
-				maskObject.setMaskDataset(new BooleanDataset(unmasked.getShape()), true);
-				maskObject.setImageDataset(unmasked);
-			}
-			
-			if (maskObject.getImageDataset()==null) {
-				final AbstractDataset unmasked = image.getData();
-				maskObject.setImageDataset(unmasked);
-			}
-			
-			// Keep the saved mask
-			if (autoApplySavedMask && savedMask!=null) maskObject.process(savedMask);
-			
-			// Just process a changing region
-			if (location!=null) {
-				maskObject.process(location, getPlottingSystem());
 				
-			} else if (region!=null) {
-				if (!maskObject.isSupportedRegion(region)) return Status.CANCEL_STATUS;
-				maskObject.process(region);
+			try {
+				final IImageTrace image = getImageTrace();
+				if (image == null) return Status.CANCEL_STATUS;
 				
+				if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 				
-			} else { // process everything
+				if (region!=null && !isRegionsEnabled) return Status.CANCEL_STATUS;
 				
-				maskObject.process(min, max, isRegionsEnabled?getPlottingSystem().getRegions():null);
+				if (resetMask)  maskObject.setMaskDataset(null, false);
 				
-			}
-			
-			if (Activator.getDefault().getPreferenceStore().getBoolean(AUTO_SAVE_PROP)) {
-				saveMaskBuffer();
-			}
-			
-			Display.getDefault().syncExec(new Runnable() {
-				public void run() {
-					// NOTE the mask will have a reference kept and
-					// will downsample with the data.
-					image.setMask(maskObject.getMaskDataset()); 
+				if (maskObject.getMaskDataset()==null) {
+					// The mask must be maintained as a BooleanDataset so that there is the option
+					// of applying the same mask to many images.
+					final AbstractDataset unmasked = image.getData();
+					maskObject.setMaskDataset(new BooleanDataset(unmasked.getShape()), true);
+					maskObject.setImageDataset(unmasked);
 				}
-			});
-			
-			return Status.OK_STATUS;
+				
+				if (maskObject.getImageDataset()==null) {
+					final AbstractDataset unmasked = image.getData();
+					maskObject.setImageDataset(unmasked);
+				}
+				
+				// Keep the saved mask
+				if (autoApplySavedMask && savedMask!=null) maskObject.process(savedMask);
+				
+				// Just process a changing region
+				if (location!=null) {
+					maskObject.process(location, getPlottingSystem());
+					
+				} else if (region!=null) {
+					if (!maskObject.isSupportedRegion(region)) return Status.CANCEL_STATUS;
+					maskObject.process(region);
+					
+					
+				} else { // process everything
+					
+					maskObject.process(min, max, isRegionsEnabled?getPlottingSystem().getRegions():null);
+					
+				}
+				
+				if (Activator.getDefault().getPreferenceStore().getBoolean(AUTO_SAVE_PROP)) {
+					saveMaskBuffer();
+				}
+				
+				Display.getDefault().syncExec(new Runnable() {
+					public void run() {
+						// NOTE the mask will have a reference kept and
+						// will downsample with the data.
+						image.setMask(maskObject.getMaskDataset()); 
+					}
+				});
+				
+				return Status.OK_STATUS;
+			} catch (Throwable ne) {
+				logger.error("Cannot mask properly at the edges as yet!", ne);
+				return Status.CANCEL_STATUS;
+			}
 		}
 
 		/**
