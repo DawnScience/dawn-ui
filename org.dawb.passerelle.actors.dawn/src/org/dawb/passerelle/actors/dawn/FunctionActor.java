@@ -92,13 +92,20 @@ public class FunctionActor extends AbstractDataMessageSource {
 	}
 	
 	protected boolean firedOnce = false;
+	protected ManagedMessage triggerMsg;
 	
 	@Override
 	protected ManagedMessage getDataMessage() throws ProcessingException {
 		
 		if (firedOnce) return null; // We only send one function from here.
 		try {
-			DataMessageComponent despatch = new DataMessageComponent();
+			DataMessageComponent despatch;
+			
+			if (triggerMsg!=null) { 
+				despatch = MessageUtils.coerceMessage(triggerMsg);
+			} else {
+				despatch = new DataMessageComponent();
+			}
 			despatch.addFunction(nameParam.getExpression(), functionParam.getFunction());
 
 			try {
@@ -106,6 +113,9 @@ public class FunctionActor extends AbstractDataMessageSource {
 			} catch (Exception e) {
 				throw createDataMessageException("Cannot set scalar "+nameParam.getExpression(), e);
 			}
+		} catch(Exception ne) {
+			throw createDataMessageException("Cannot fire "+getName(), ne);
+	
 		} finally {
 			firedOnce = true;
 		}
@@ -139,7 +149,10 @@ public class FunctionActor extends AbstractDataMessageSource {
 	
 	@Override
 	protected boolean mustWaitForTrigger() {
-		return false;
+		return trigger.getWidth()>0;
 	}
-
+	
+	protected void acceptTriggerMessage(ManagedMessage triggerMsg) {
+		this.triggerMsg = triggerMsg;
+	}
 }

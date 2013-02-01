@@ -48,12 +48,19 @@ public class Fitting1DActor extends AbstractDataMessageTransformer {
 		super(container, name);
 
 		datasetName = new StringParameter(this, "datasetName");
+		datasetName.setDisplayName("Dataset Name");
 		registerConfigurableParameter(datasetName);
+		
 		functionName = new StringParameter(this, "functionName");
+		functionName.setDisplayName("Function Name");
 		registerConfigurableParameter(functionName);
+		
 		xAxisName = new StringParameter(this, "xAxisName");
+		xAxisName.setDisplayName("Name of X-Axis");
 		registerConfigurableParameter(xAxisName);
+		
 		fitDirection = new StringParameter(this, "fitDirection");
+		fitDirection.setDisplayName("Fit Direction");
 		registerConfigurableParameter(fitDirection);
 	}
 
