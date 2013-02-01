@@ -257,24 +257,24 @@ public final class ImageTrace extends Figure implements IImageTrace, IAxisListen
 						setMax(fa[1]);
 					}
 					
-					
-					// We send the image drawn with the same palette to the 
-					// intensityScale
-					// TODO FIXME This will not work in log mode
-					final DoubleDataset dds = new DoubleDataset(256,1);
-					double inc = (getMax().doubleValue()-getMin().doubleValue())/256d;
-					for (int i = 0; i < 256; i++) {
-						double val = getMax().doubleValue()-(i*inc);
-						dds.set(val, i, 0);
-					}
-					histoBean.setImage(dds);
-					intensityScale.setImageData(service.getImageData(histoBean));
 
 				}
-				
+								
 				this.imageData   = service.getImageData(imageServiceBean);
 				
-				
+				// We send the image drawn with the same palette to the 
+				// intensityScale
+				// TODO FIXME This will not work in log mode
+				final DoubleDataset dds = new DoubleDataset(256,1);
+				double inc = (getMax().doubleValue()-getMin().doubleValue())/256d;
+				for (int i = 0; i < 256; i++) {
+					double val = getMax().doubleValue()-(i*inc);
+					dds.set(val, i, 0);
+				}
+				imageServiceBean.setImage(dds);
+				imageServiceBean.setMask(null);
+				intensityScale.setImageData(service.getImageData(imageServiceBean));
+
 			} catch (Exception e) {
 				logger.error("Cannot create image from data!", e);
 			} finally {
