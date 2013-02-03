@@ -642,10 +642,17 @@ public class FunctionFittingTool extends AbstractToolPage {
 	public void setToolData(Serializable toolData) {
 		
 		final UserPlotBean bean = (UserPlotBean)toolData;
-		this.functions = bean.getFunctions();
+		functions = bean.getFunctions();
 		
-		//TODO FIXME, set functions in tool somehow
-		// Ensure that functions end up being the right ones
+		compFunction = new CompositeFunction();
+		for (String key : functions.keySet()) {
+			if (functions.get(key) instanceof AFunction) {
+				AFunction function = (AFunction) functions.get(key);
+				compFunction.addFunction(function);
+				
+			}
+		}
+
 	}
 
 	/**
@@ -653,8 +660,18 @@ public class FunctionFittingTool extends AbstractToolPage {
 	 */
 	@Override
 	public Serializable getToolData() {
+		
 		UserPlotBean bean = new UserPlotBean();
+		
+		int count = 0;
+		for (String key : functions.keySet()) {
+			functions.put(key, compFunction.getFunction(count));
+			count++;
+		}
+		
 		bean.setFunctions(functions); // We only set functions because it does a replace merge.
+		
+
 		
 		return bean; // Service knows that if the tool data
 		             // is a UserPlotBean, this should automatically
