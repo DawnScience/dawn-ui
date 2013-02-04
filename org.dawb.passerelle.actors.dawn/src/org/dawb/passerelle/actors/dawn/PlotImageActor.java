@@ -167,6 +167,7 @@ public class PlotImageActor	extends AbstractDataMessageTransformer{
 		}
 		try {
 			AbstractDataset aData = ((AbstractDataset)data.get(dataName));
+			aData.setName(dataName);
 			if(aData != null){
 				if (plotMode.equals(PlottingMode.ONED.toString())) {
 					if(xaxisName.equals(""))
