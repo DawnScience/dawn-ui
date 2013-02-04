@@ -1,6 +1,7 @@
 package org.dawb.workbench.plotting.tools.fitting;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Map;
 
 import org.dawb.common.ui.plot.function.FunctionDialog;
@@ -333,11 +334,16 @@ public class FunctionFittingTool extends AbstractToolPage {
 
 	@Override
 	public void deactivate() {
-		region.removeROIListener(roiListener);
-		getPlottingSystem().removeRegion(region);
-		getPlottingSystem().removeTrace(estimate);
-		getPlottingSystem().removeTrace(fitTrace);
+		if (region != null) {
+			region.removeROIListener(roiListener);
+		}
+		Collection<ITrace> traces = getPlottingSystem().getTraces();
+		if (traces.contains(region)) getPlottingSystem().removeRegion(region);
+		if (traces.contains(estimate)) getPlottingSystem().removeTrace(estimate);
+		if (traces.contains(fitTrace)) getPlottingSystem().removeTrace(fitTrace);
+		
 		getPlottingSystem().removeTraceListener(traceListener);
+		
 		super.deactivate();
 	}
 
@@ -642,10 +648,17 @@ public class FunctionFittingTool extends AbstractToolPage {
 	public void setToolData(Serializable toolData) {
 		
 		final UserPlotBean bean = (UserPlotBean)toolData;
-		this.functions = bean.getFunctions();
+		functions = bean.getFunctions();
 		
-		//TODO FIXME, set functions in tool somehow
-		// Ensure that functions end up being the right ones
+		compFunction = new CompositeFunction();
+		for (String key : functions.keySet()) {
+			if (functions.get(key) instanceof AFunction) {
+				AFunction function = (AFunction) functions.get(key);
+				compFunction.addFunction(function);
+				
+			}
+		}
+
 	}
 
 	/**
@@ -653,8 +666,18 @@ public class FunctionFittingTool extends AbstractToolPage {
 	 */
 	@Override
 	public Serializable getToolData() {
+		
 		UserPlotBean bean = new UserPlotBean();
+		
+		int count = 0;
+		for (String key : functions.keySet()) {
+			functions.put(key, compFunction.getFunction(count));
+			count++;
+		}
+		
 		bean.setFunctions(functions); // We only set functions because it does a replace merge.
+		
+
 		
 		return bean; // Service knows that if the tool data
 		             // is a UserPlotBean, this should automatically
