@@ -408,15 +408,19 @@ AbstractDataMessageTransformer {
 
 		ArrayList<AbstractDataset> parametersDS = new ArrayList<AbstractDataset>(
 				fitFunction.getNoOfParameters());
+		
+		int[] shape = dataDS.getShape().clone();
+		shape[fitDim] = 1;
+		
 		for (int i = 0; i < fitFunction.getNoOfParameters(); i++) {
-			int[] shape = dataDS.getShape().clone();
-			shape[fitDim] = 1;
 			DoubleDataset parameterDS = new DoubleDataset(shape);
 			parameterDS.squeeze();
 			parametersDS.add(parameterDS);
 		}
 
 		AbstractDataset functionsDS = new DoubleDataset(dataDS.getShape());
+		AbstractDataset residualDS = new DoubleDataset(shape);
+		residualDS.squeeze();
 
 		int[] starts = dataDS.getShape().clone();
 		starts[fitDim] = 1;
@@ -424,8 +428,6 @@ AbstractDataMessageTransformer {
 		IndexIterator iter = ind.getIterator();
 
 		int maxthreads = Runtime.getRuntime().availableProcessors();
-//		// fix to 1 for the moment
-//		maxthreads = 1;
 		
 		ExecutorService executorService = new ThreadPoolExecutor(maxthreads,
 				maxthreads, 1, TimeUnit.MINUTES,
@@ -448,19 +450,64 @@ AbstractDataMessageTransformer {
 					.get(function).getParameters());
 			int dSlength = dataDS.getShape().length;
 			executorService.submit(new Worker(localFitFunction, xAxisDS, slice,
-					dSlength, start, stop, fitDim, parametersDS, functionsDS));
+					dSlength, start, stop, fitDim, parametersDS, functionsDS, residualDS));
 		}
 
 		// TODO possibly add more fault tolerance here
 		executorService.shutdown();
 		try {
-			executorService.awaitTermination(10, TimeUnit.MINUTES);
+			executorService.awaitTermination(10, TimeUnit.HOURS);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+
+		// Now have a look at the residuals, and see if any are particularly bad (or zero)
+		double resMean = (Double) residualDS.mean();
+		double resStd = (Double) residualDS.stdDeviation();
+		iter.reset();
+
+		executorService = new ThreadPoolExecutor(maxthreads,
+				maxthreads, 1, TimeUnit.MINUTES,
+				new ArrayBlockingQueue<Runnable>(10000, true),
+				new ThreadPoolExecutor.CallerRunsPolicy());
+
+		while (iter.hasNext()) {
+			double value = residualDS.getDouble(iter.index);
+			double disp = Math.abs(value-resMean);
+			if (disp > resStd*3) {
+				System.out.println(iter.index);
+				System.out.println(Arrays.toString(ind.getNDPosition(iter.index)));
+				int[] start = ind.getNDPosition(iter.index).clone();
+				int[] stop = start.clone();
+				for (int i = 0; i < stop.length; i++) {
+					stop[i] = stop[i] + 1;
+				}
+				stop[fitDim] = dataDS.getShape()[fitDim];
+				AbstractDataset slice = dataDS.getSlice(start, stop, null);
+				slice.squeeze();
+
+				FermiGauss localFitFunction = new FermiGauss(functions
+						.get(function).getParameters());
+				int dSlength = dataDS.getShape().length;
+				executorService.submit(new Worker(localFitFunction, xAxisDS, slice,
+						dSlength, start, stop, fitDim, parametersDS, functionsDS, residualDS));
+			}
+		}
+
+
+		// TODO possibly add more fault tolerance here
+		executorService.shutdown();
+		try {
+			executorService.awaitTermination(10, TimeUnit.HOURS);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
 		result.addList("fit_image", functionsDS);
+		result.addList("fit_residuals", residualDS);
 		for (int i = 0; i < fitFunction.getNoOfParameters(); i++) {
 			result.addList("fit_parameter_" + i, parametersDS.get(i));
 		}
@@ -513,11 +560,12 @@ AbstractDataMessageTransformer {
 		private int fitDim;
 		private ArrayList<AbstractDataset> parametersDS;
 		private AbstractDataset functionsDS;
+		private AbstractDataset residualsDS;
 
 		public Worker(AFunction fitFunction, AbstractDataset xAxisDS,
 				AbstractDataset slice, int dSlength, int[] start, int[] stop,
 				int fitDim, ArrayList<AbstractDataset> parametersDS,
-				AbstractDataset functionsDS) {
+				AbstractDataset functionsDS, AbstractDataset residualsDS) {
 			super();
 			this.fitFunction = fitFunction;
 			this.xAxisDS = xAxisDS;
@@ -528,6 +576,7 @@ AbstractDataMessageTransformer {
 			this.fitDim = fitDim;
 			this.parametersDS = parametersDS;
 			this.functionsDS = functionsDS;
+			this.residualsDS = residualsDS;
 		}
 
 		@Override
@@ -542,6 +591,7 @@ AbstractDataMessageTransformer {
 					count++;
 				}
 			}
+			
 			for (int p = 0; p < fitResult.getNoOfParameters(); p++) {
 				parametersDS.get(p).set(fitResult.getParameter(p).getValue(),
 						position);
@@ -549,6 +599,11 @@ AbstractDataMessageTransformer {
 
 			DoubleDataset resultFunctionDS = fitResult.makeDataset(xAxisDS);
 			functionsDS.setSlice(resultFunctionDS, start, stop, null);
+			
+			AbstractDataset residual = Maths.subtract(slice, resultFunctionDS);
+			residual.ipower(2);
+			
+			residualsDS.set(residual.sum(), position);
 		}
 
 	}
