@@ -1,4 +1,4 @@
-package org.dawb.workbench.plotting.tools;
+package org.dawb.workbench.plotting.tools.masking;
 
 
 import java.util.ArrayList;
@@ -27,6 +27,8 @@ import org.dawb.common.ui.plot.trace.PaletteEvent;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
+import org.eclipse.core.commands.operations.IOperationHistoryListener;
+import org.eclipse.core.commands.operations.OperationHistoryEvent;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -60,9 +62,7 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
@@ -188,7 +188,9 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	protected final class MaskMouseListener extends MouseMotionListener.Stub implements org.eclipse.draw2d.MouseListener		 {
 
 		@Override
-		public void mousePressed(org.eclipse.draw2d.MouseEvent me) {			
+		public void mousePressed(org.eclipse.draw2d.MouseEvent me) {	
+			if (me.button!=1) return;
+			
 			if (((AbstractPlottingSystem)getPlottingSystem()).getSelectedCursor()==null) {
 				ActionContributionItem item = (ActionContributionItem)directToolbar.find(ShapeType.NONE.getId());
 				if (item!=null) item.getAction().setChecked(true);
@@ -198,6 +200,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		}
 		@Override
 		public void mouseDragged(org.eclipse.draw2d.MouseEvent me) {
+			if (me.button!=0) return;
 			if (((AbstractPlottingSystem)getPlottingSystem()).getSelectedCursor()==null) {
 				ActionContributionItem item = (ActionContributionItem)directToolbar.find(ShapeType.NONE.getId());
 				if (item!=null) item.getAction().setChecked(true);
@@ -668,6 +671,33 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	
 	private void createActions(IActionBars actionBars) {
 		
+		final Action undo = new Action("Undo mask operation", Activator.getImageDescriptor("icons/mask-undo.png")) {
+			public void run() {
+				maskObject.undo();
+				getImageTrace().setMask(maskObject.getMaskDataset());
+			}			
+		};
+		actionBars.getToolBarManager().add(undo);
+		undo.setEnabled(false);
+		final Action redo = new Action("Redo mask operation", Activator.getImageDescriptor("icons/mask-redo.png")) {
+			public void run() {
+				maskObject.redo();
+				getImageTrace().setMask(maskObject.getMaskDataset());
+			}			
+		};
+		actionBars.getToolBarManager().add(redo);
+		redo.setEnabled(false);
+		actionBars.getToolBarManager().add(new Separator());
+		
+		maskObject.getOperationManager().addOperationHistoryListener(new IOperationHistoryListener() {
+			 
+			@Override
+			public void historyNotification(OperationHistoryEvent event) {
+				undo.setEnabled(maskObject.getOperationManager().canUndo(MaskOperation.MASK_CONTEXT));
+				redo.setEnabled(maskObject.getOperationManager().canRedo(MaskOperation.MASK_CONTEXT));
+			}
+		});
+		
 		final Action reset = new Action("Reset Mask", Activator.getImageDescriptor("icons/reset.gif")) {
 			public void run() {
 				resetMask();
@@ -997,6 +1027,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	public void dispose() {
 		super.dispose();
 		if (composite!=null) composite.dispose();
+		if (maskObject!=null)maskObject.dispose();
 		composite      = null;
 		traceListener  = null;
 		regionListener = null;

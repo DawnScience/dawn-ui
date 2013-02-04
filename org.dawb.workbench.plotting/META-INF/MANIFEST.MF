@@ -30,6 +30,7 @@ Export-Package: org.dawb.workbench.plotting.composites,
  org.dawb.workbench.plotting.system.dialog,
  org.dawb.workbench.plotting.tools,
  org.dawb.workbench.plotting.tools.diffraction,
+ org.dawb.workbench.plotting.tools.masking,
  org.dawb.workbench.plotting.tools.profile,
  org.dawb.workbench.plotting.tools.reduction,
  org.dawb.workbench.plotting.util
