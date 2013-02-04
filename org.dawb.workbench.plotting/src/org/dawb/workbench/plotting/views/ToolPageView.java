@@ -1124,41 +1124,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		final Action cloneAction = new Action("Open '"+tool.getTitle()+"' in dedicated view") {
 			public void run() {
 				try {
-					
-					IToolPage orig = null;
-					if (activeRec!=null) {
-						orig = activeRec.tool; 
-						if (recs.get(getString(tool.getPart()))!=null) {
-							recs.get(getString(tool.getPart())).remove(tool.getToolId());
-						}
-						if (mapToolToNumRecs.get(activeRec.tool)!=null) {
-							mapToolToNumRecs.put(activeRec.tool, mapToolToNumRecs.get(activeRec.tool).intValue()-1);
-						}
-						if (activeRec.subActionBars!=null) {
-							activeRec.subActionBars.deactivate();
-						}
-						activeRec = null;
-					}
-					updatePartInfo(defaultPageRec.tool);
-					showPageRec(defaultPageRec);
-					
-					final ToolPageView view = (ToolPageView)EclipseUtils.getPage().showView("org.dawb.workbench.plotting.views.toolPageView.fixed",
-																							tool.getToolId(),
-																							IWorkbenchPage.VIEW_ACTIVATE);
-					view.update(orig);
-					if (orig!=null && view.activeRec!=null && view.activeRec.tool!=null) {
-						try {
-						    view.activeRec.tool.sync(orig);
-						} catch (Throwable ne) {
-							logger.error("Unable to sync "+view.activeRec.tool.getToolId());
-						}
-						if (orig.isActive()) orig.deactivate();
-						
-						if (view.activeRec.tool.isStaticTool()) {
-							view.staticTool = view.activeRec.tool;
-						}
-					}
-
+					createToolInDedicatedView(tool);
 				} catch (Exception e) {
 					logger.error("Cannot open tool on its own page!", e);
 				}
@@ -1167,6 +1133,46 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		
 		tool.getSite().getActionBars().getMenuManager().add(cloneAction);
 		
+	}
+	
+	@Override
+	public IToolPage createToolInDedicatedView(IToolPage tool) throws Exception {
+		
+		IToolPage orig = null;
+		if (activeRec!=null) {
+			orig = activeRec.tool; 
+			if (recs.get(getString(tool.getPart()))!=null) {
+				recs.get(getString(tool.getPart())).remove(tool.getToolId());
+			}
+			if (mapToolToNumRecs.get(activeRec.tool)!=null) {
+				mapToolToNumRecs.put(activeRec.tool, mapToolToNumRecs.get(activeRec.tool).intValue()-1);
+			}
+			if (activeRec.subActionBars!=null) {
+				activeRec.subActionBars.deactivate();
+			}
+			activeRec = null;
+		}
+		updatePartInfo(defaultPageRec.tool);
+		showPageRec(defaultPageRec);
+		
+		final ToolPageView view = (ToolPageView)EclipseUtils.getPage().showView("org.dawb.workbench.plotting.views.toolPageView.fixed",
+																				tool.getToolId(),
+																				IWorkbenchPage.VIEW_ACTIVATE);
+		view.update(orig);
+		if (orig!=null && view.activeRec!=null && view.activeRec.tool!=null) {
+			try {
+			    view.activeRec.tool.sync(orig);
+			} catch (Throwable ne) {
+				logger.error("Unable to sync "+view.activeRec.tool.getToolId());
+			}
+			if (orig.isActive()) orig.deactivate();
+			
+			if (view.activeRec.tool.isStaticTool()) {
+				view.staticTool = view.activeRec.tool;
+			}
+		}
+
+		return view.staticTool;
 	}
 	
 	protected void update(IToolPage orig) {
