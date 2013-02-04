@@ -1,6 +1,7 @@
 package org.dawb.workbench.plotting.tools.fitting;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Map;
 
 import org.dawb.common.ui.plot.function.FunctionDialog;
@@ -333,11 +334,16 @@ public class FunctionFittingTool extends AbstractToolPage {
 
 	@Override
 	public void deactivate() {
-		region.removeROIListener(roiListener);
-		getPlottingSystem().removeRegion(region);
-		getPlottingSystem().removeTrace(estimate);
-		getPlottingSystem().removeTrace(fitTrace);
+		if (region != null) {
+			region.removeROIListener(roiListener);
+		}
+		Collection<ITrace> traces = getPlottingSystem().getTraces();
+		if (traces.contains(region)) getPlottingSystem().removeRegion(region);
+		if (traces.contains(estimate)) getPlottingSystem().removeTrace(estimate);
+		if (traces.contains(fitTrace)) getPlottingSystem().removeTrace(fitTrace);
+		
 		getPlottingSystem().removeTraceListener(traceListener);
+		
 		super.deactivate();
 	}
 

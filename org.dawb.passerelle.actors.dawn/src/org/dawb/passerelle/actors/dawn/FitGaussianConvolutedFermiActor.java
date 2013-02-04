@@ -16,16 +16,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 import org.apache.commons.math3.analysis.MultivariateFunction;
-import org.apache.commons.math3.analysis.ParametricUnivariateFunction;
-import org.apache.commons.math3.fitting.CurveFitter;
-import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.NelderMeadSimplex;
-import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.SimplexOptimizer;
 import org.apache.commons.math3.optimization.GoalType;
 import org.apache.commons.math3.optimization.PointValuePair;
 import org.apache.commons.math3.optimization.direct.CMAESOptimizer;
@@ -50,6 +46,8 @@ import uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.FermiGauss;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IParameter;
 
+@SuppressWarnings("deprecation")
+//TODO there are lots of things in apache commons maths which are depricated
 public class FitGaussianConvolutedFermiActor extends
 AbstractDataMessageTransformer {
 
@@ -279,6 +277,19 @@ AbstractDataMessageTransformer {
 
 		FermiGauss initialFit = fitFermiNoFWHM(xAxis, values, new FermiGauss(fitFunction.getParameters()));
 
+		int count = 0;
+		while (functionsSimilarIgnoreFWHM(initialFit,(FermiGauss)fitFunction, 0.0) && count < 5) {
+			System.out.println("Function not fitted, trying again :" + count);
+			count++;
+			
+			initialFit = fitFermiNoFWHM(xAxis, values, new FermiGauss(initialFit.getParameters()));
+		}
+		
+		if (count >= 5) {
+			System.out.println("Fitting Failed");
+		}
+		
+		
 		// return if that is all we need to do
 		if (fitConvolutionValue.contains("Off")) {
 			plotFunction(initialFit, xAxis, values);
@@ -287,11 +298,8 @@ AbstractDataMessageTransformer {
 
 		// Now fit the system quickly using several assumptions
 
-		// get the approximate fwhm
-		//TODO this could be a tidier method which just applies the right values into the function
-		double approximateFWHM = ((FermiGauss)fitFunction).approximateFWHM(temperature, initialFit.getParameterValue(1));
-		// trim the x_axis to just around the fermi edge
-		double width = Math.abs(approximateFWHM) * 2;
+		// get the approximate fwhm and required width for calculation
+		double width = initialFit.approximateFWHM(temperature);
 
 		double fermiEdge = initialFit.getParameterValue(0);
 		
@@ -324,13 +332,13 @@ AbstractDataMessageTransformer {
 
 
 		// set up the temperature and approximate FWHM correctly
-		initialFit.getParameter(1).setValue(temperature);
-		initialFit.getParameter(5).setValue(approximateFWHM);
+		//initialFit.getParameter(1).setValue(temperature);
+		//initialFit.getParameter(5).setValue(approximateFWHM);
 		FermiGauss fwhmQuickFit = fitFermiOnlyFWHM(trimmedXAxis, trimmedValues, initialFit);
 
 		// if this is all that is required return the new fitted value
 		if(fitConvolutionValue.contains("Quick")) {
-			plotFunction(fwhmQuickFit, xAxis, values);
+			plotFunction(fwhmQuickFit, trimmedXAxis, trimmedValues);
 			return fwhmQuickFit;
 		}
 
@@ -340,6 +348,15 @@ AbstractDataMessageTransformer {
 		plotFunction(fullFit, xAxis, values);
 		return fullFit;
 	}
+
+	private boolean functionsSimilarIgnoreFWHM(FermiGauss initialFit,
+			FermiGauss fitFunction, double tollerence) {
+		for (int i = 0; i < 5; i++) {
+			if (Math.abs(initialFit.getParameterValue(i)-fitFunction.getParameterValue(i)) <= tollerence) return true;
+		}
+		return false;
+	}
+
 
 	@Override
 	protected DataMessageComponent getTransformedMessage(
@@ -407,7 +424,9 @@ AbstractDataMessageTransformer {
 		IndexIterator iter = ind.getIterator();
 
 		int maxthreads = Runtime.getRuntime().availableProcessors();
-
+//		// fix to 1 for the moment
+//		maxthreads = 1;
+		
 		ExecutorService executorService = new ThreadPoolExecutor(maxthreads,
 				maxthreads, 1, TimeUnit.MINUTES,
 				new ArrayBlockingQueue<Runnable>(10000, true),
