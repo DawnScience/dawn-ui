@@ -223,6 +223,18 @@
       </colour_scheme>
       <colour_scheme
             alpha_inverted="true"
+            alpha_transfer_function="org.dawnsci.rcp.histogram.zero"
+            blue_inverted="true"
+            blue_transfer_function="org.dawnsci.rcp.histogram.squared"
+            green_inverted="true"
+            green_transfer_function="org.dawnsci.rcp.histogram.squared"
+            id="org.dawnsci.rcp.histogram.squaredfilmnegative"
+            name="Squared Film Negative"
+            red_inverted="true"
+            red_transfer_function="org.dawnsci.rcp.histogram.squared">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="true"
             alpha_transfer_function="org.dawnsci.rcp.histogram.sqrt"
             blue_inverted="true"
             blue_transfer_function="org.dawnsci.rcp.histogram.sqrt"

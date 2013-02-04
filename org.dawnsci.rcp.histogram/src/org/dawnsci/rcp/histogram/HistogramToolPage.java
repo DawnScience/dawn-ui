@@ -27,7 +27,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -744,6 +746,22 @@ public class HistogramToolPage extends AbstractToolPage {
 
 		createRegion();
 
+		Action reset = new Action("Reset histogram", IAction.AS_PUSH_BUTTON) {
+			public void run() {
+				
+				final IContributionItem action = getPlottingSystem().getActionBars().getToolBarManager().find("org.dawb.workbench.plotting.histo");
+			    if (action!=null && action.isVisible() && action instanceof ActionContributionItem) {
+			    	ActionContributionItem iaction = (ActionContributionItem)action;
+			    	iaction.getAction().setChecked(!iaction.getAction().isChecked());
+			    	iaction.getAction().run();
+			    }
+			}
+		};
+		
+		reset.setImageDescriptor(Activator.getImageDescriptor("icons/reset.gif"));
+		site.getActionBars().getMenuManager().add(reset);
+		getSite().getActionBars().getToolBarManager().add(reset);
+		
 		lockAction = new Action("Histogram range locked for this image", IAction.AS_CHECK_BOX) {
 			public void run() {
 				IImageTrace image = getImageTrace();
@@ -759,11 +777,9 @@ public class HistogramToolPage extends AbstractToolPage {
 			}
 		};
 		lockAction.setImageDescriptor(Activator.getImageDescriptor("icons/lock.png"));
-
-		// Add the histogram locked tool. Important, add so that visible
 		site.getActionBars().getMenuManager().add(lockAction);
-		//site.getActionBars().getToolBarManager().add(lockAction);
-
+		getSite().getActionBars().getToolBarManager().add(lockAction);
+		
 		sc.setContent(composite);
 		sc.setExpandVertical(true);
 		sc.setExpandHorizontal(true);
