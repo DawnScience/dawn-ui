@@ -1,4 +1,4 @@
-package org.dawb.workbench.plotting.tools;
+package org.dawb.workbench.plotting.tools.masking;
 
 
 import java.util.ArrayList;
@@ -27,11 +27,14 @@ import org.dawb.common.ui.plot.trace.PaletteEvent;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
+import org.eclipse.core.commands.operations.IOperationHistoryListener;
+import org.eclipse.core.commands.operations.OperationHistoryEvent;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.MouseMotionListener;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
@@ -60,9 +63,7 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
@@ -188,7 +189,9 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	protected final class MaskMouseListener extends MouseMotionListener.Stub implements org.eclipse.draw2d.MouseListener		 {
 
 		@Override
-		public void mousePressed(org.eclipse.draw2d.MouseEvent me) {			
+		public void mousePressed(org.eclipse.draw2d.MouseEvent me) {	
+			if (me.button!=1) return;
+			
 			if (((AbstractPlottingSystem)getPlottingSystem()).getSelectedCursor()==null) {
 				ActionContributionItem item = (ActionContributionItem)directToolbar.find(ShapeType.NONE.getId());
 				if (item!=null) item.getAction().setChecked(true);
@@ -198,6 +201,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		}
 		@Override
 		public void mouseDragged(org.eclipse.draw2d.MouseEvent me) {
+			if (me.button!=0) return;
 			if (((AbstractPlottingSystem)getPlottingSystem()).getSelectedCursor()==null) {
 				ActionContributionItem item = (ActionContributionItem)directToolbar.find(ShapeType.NONE.getId());
 				if (item!=null) item.getAction().setChecked(true);
@@ -234,7 +238,6 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		} else {
 			composite.setText("Masking ");
 		}
-		
 
 		final Composite minMaxComp = new Composite(composite, SWT.NONE);
 		minMaxComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -615,7 +618,11 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 
 		boolean maskout = Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.MASK_PEN_MASKOUT);
 		if (maskout) {
-			updateIcons(getImageTrace().getNanBound().getColor());
+			if (getImageTrace()!=null) {
+			    updateIcons(getImageTrace().getNanBound().getColor());
+			} else {
+				updateIcons(ColorConstants.green.getRGB());
+			}
 			mask.setChecked(true);
 		} else {
 			updateIcons(null);
@@ -644,8 +651,11 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 
 	private static BooleanDataset savedMask=null;
 	private static boolean        autoApplySavedMask=false;
+	private static MaskingTool    currentMaskingTool=null;
 	private static final String   AUTO_SAVE_PROP="org.dawb.workbench.plotting.tools.auto.save.mask";
-	private Action loadMask;
+	private IAction loadMask;
+
+	private static IAction autoApplyMask, alwaysSave;
 	
 	/**
 	 * You can programmatically set the last saved mask by calling this method.
@@ -660,6 +670,9 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	public static void setSavedMask(final BooleanDataset sm, final boolean autoApply) {
 		savedMask          = sm;
 		autoApplySavedMask = autoApply;
+		if (autoApplyMask!=null) {
+			autoApplyMask.setChecked(autoApply);
+		}
 	}
 	
 	public static BooleanDataset getSavedMask() {
@@ -667,6 +680,33 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	}
 	
 	private void createActions(IActionBars actionBars) {
+		
+		final Action undo = new Action("Undo mask operation", Activator.getImageDescriptor("icons/mask-undo.png")) {
+			public void run() {
+				maskObject.undo();
+				getImageTrace().setMask(maskObject.getMaskDataset());
+			}			
+		};
+		actionBars.getToolBarManager().add(undo);
+		undo.setEnabled(false);
+		final Action redo = new Action("Redo mask operation", Activator.getImageDescriptor("icons/mask-redo.png")) {
+			public void run() {
+				maskObject.redo();
+				getImageTrace().setMask(maskObject.getMaskDataset());
+			}			
+		};
+		actionBars.getToolBarManager().add(redo);
+		redo.setEnabled(false);
+		actionBars.getToolBarManager().add(new Separator());
+		
+		maskObject.getOperationManager().addOperationHistoryListener(new IOperationHistoryListener() {
+			 
+			@Override
+			public void historyNotification(OperationHistoryEvent event) {
+				undo.setEnabled(maskObject.getOperationManager().canUndo(MaskOperation.MASK_CONTEXT));
+				redo.setEnabled(maskObject.getOperationManager().canRedo(MaskOperation.MASK_CONTEXT));
+			}
+		});
 		
 		final Action reset = new Action("Reset Mask", Activator.getImageDescriptor("icons/reset.gif")) {
 			public void run() {
@@ -691,19 +731,45 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		loadMask.setEnabled(savedMask!=null);
 		actionBars.getToolBarManager().add(loadMask);
 		
+		if (autoApplyMask==null) {
+			autoApplyMask  = new Action("Automatically apply the mask buffer to any image plotted.", IAction.AS_CHECK_BOX) {
+				public void run() {
+					autoApplySavedMask = isChecked();
+					if (autoApplySavedMask&&currentMaskingTool!=null) {
+						if (savedMask==null) currentMaskingTool.saveMaskBuffer();
+						currentMaskingTool.mergeSavedMask();
+						if (!isDedicatedView()) {
+							try {
+								currentMaskingTool.createToolInDedicatedView();
+							} catch (Exception e) {
+								logger.error("Internal error!", e);
+							}
+						}
+					}
+				}
+			};
+			autoApplyMask.setChecked(autoApplySavedMask);
+			autoApplyMask.setImageDescriptor(Activator.getImageDescriptor("icons/mask-autoapply.png"));
+		};
+		actionBars.getToolBarManager().add(autoApplyMask);
+
+		
 		actionBars.getToolBarManager().add(new Separator());
-		Action alwaysSave  = new Action("Auto-save the mask to the buffer when it changes", IAction.AS_CHECK_BOX) {
-			public void run() {
-				Activator.getDefault().getPreferenceStore().setValue(AUTO_SAVE_PROP, isChecked());
+		if (alwaysSave==null) { // Needs to be static else you have to go back to all editors and
+			                       // uncheck each one.
+			alwaysSave  = new Action("Auto-save the mask to the buffer when it changes", IAction.AS_CHECK_BOX) {
+				public void run() {
+					Activator.getDefault().getPreferenceStore().setValue(AUTO_SAVE_PROP, isChecked());
+				}
+			};
+			alwaysSave.setImageDescriptor(Activator.getImageDescriptor("icons/plot-tool-masking-autosave.png"));
+			if (Activator.getDefault().getPreferenceStore().contains(AUTO_SAVE_PROP)) {
+				alwaysSave.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(AUTO_SAVE_PROP));
+			} else {
+				Activator.getDefault().getPreferenceStore().setValue(AUTO_SAVE_PROP, true);
+				alwaysSave.setChecked(true);
 			}
 		};
-		alwaysSave.setImageDescriptor(Activator.getImageDescriptor("icons/plot-tool-masking-autosave.png"));
-		if (Activator.getDefault().getPreferenceStore().contains(AUTO_SAVE_PROP)) {
-			alwaysSave.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(AUTO_SAVE_PROP));
-		} else {
-			Activator.getDefault().getPreferenceStore().setValue(AUTO_SAVE_PROP, true);
-			alwaysSave.setChecked(true);
-		}
 		actionBars.getToolBarManager().add(alwaysSave);
 
         final IPlottingSystem system = getPlottingSystem();
@@ -717,12 +783,14 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 
 	protected void mergeSavedMask() {
 		
-		if (savedMask==null) return;
-		if (maskObject.getImageDataset()==null){
-			maskObject.setImageDataset(getImageTrace().getData());
+		if (getImageTrace()!=null) {
+			if (savedMask==null) return;
+			if (maskObject.getImageDataset()==null){
+				maskObject.setImageDataset(getImageTrace().getData());
+			}
+			maskObject.process(savedMask);
+			getImageTrace().setMask(maskObject.getMaskDataset());
 		}
-		maskObject.process(savedMask);
-		getImageTrace().setMask(maskObject.getMaskDataset());
 	}
 
 	private void createColumns(TableViewer viewer) {
@@ -935,7 +1003,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	@Override
 	public void activate() {
 		super.activate();
-		
+		currentMaskingTool = this;
 		if (getPlottingSystem()!=null) {
 			getPlottingSystem().addTraceListener(traceListener); // If it changes get reference to image.
 			
@@ -961,19 +1029,24 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 
 		if (loadMask!=null) loadMask.setEnabled(savedMask!=null);
 		
-		if (autoApplySavedMask && savedMask!=null) {
-			try {
-			    mergeSavedMask();
-			} catch (Throwable ne) {
-				logger.error("Problem loading saved mask!", ne);
+		Display.getDefault().asyncExec(new Runnable() {
+			public void run() {
+				if (autoApplySavedMask && savedMask!=null) {
+					try {
+					    mergeSavedMask();
+					} catch (Throwable ne) {
+						logger.error("Problem loading saved mask!", ne);
+					}
+				}				
 			}
-		}
+		});
 	}
 	
 	@Override
 	public void deactivate() {
 		super.deactivate();
 		
+		currentMaskingTool = null;
 		if (getPlottingSystem()!=null) {
 			getPlottingSystem().removeTraceListener(traceListener);
 			
@@ -997,6 +1070,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	public void dispose() {
 		super.dispose();
 		if (composite!=null) composite.dispose();
+		if (maskObject!=null)maskObject.dispose();
 		composite      = null;
 		traceListener  = null;
 		regionListener = null;

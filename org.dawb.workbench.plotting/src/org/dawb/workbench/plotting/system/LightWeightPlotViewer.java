@@ -284,6 +284,12 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 				    	iaction.getAction().setChecked(!iaction.getAction().isChecked());
 				    	iaction.getAction().run();
 				    }
+				} else if (e.keyCode== SWT.F11) {
+					final IContributionItem action = bars.getToolBarManager().find("org.dawb.workbench.fullscreen");
+				    if (action!=null && action.isVisible() && action instanceof ActionContributionItem) {
+				    	ActionContributionItem iaction = (ActionContributionItem)action;
+				    	iaction.getAction().run();
+				    }
 				} else if (e.keyCode==16777217) {//Up
  					Point point = Display.getDefault().getCursorLocation();
  					point.y-=1;

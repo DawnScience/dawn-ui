@@ -16,12 +16,14 @@ import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.ActionType;
 import org.dawb.common.ui.plot.ManagerType;
+import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.axis.AxisUtils;
 import org.dawb.common.ui.plot.axis.IAxis;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
 import org.dawb.common.ui.plot.trace.IImageTrace;
+import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
@@ -42,8 +44,15 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.window.Window;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,6 +96,7 @@ class LightWeightPlotActions {
  		actionBarManager.createPalleteActions();
  		createOriginActions(xyGraph);
  		createAdditionalActions(xyGraph, null);
+ 		createFullScreenActions(xyGraph);
 	}
 
 	private void createAxisActions() {
@@ -291,7 +301,6 @@ class LightWeightPlotActions {
 		
 		removeRegionDropDown.add(removeAllRegions);
 
-		
 		actionBarManager.registerAction("lightweight.graph.region.actions", removeRegionDropDown, ActionType.XYANDIMAGE);
 		
 	}
@@ -446,6 +455,114 @@ class LightWeightPlotActions {
 
 	}
 	
+	public void createFullScreenActions(final XYRegionGraph xyGraph) {
+		
+		actionBarManager.registerToolBarGroup("org.dawb.workbench.toolbar.fullscreen");
+		
+		final Action fullScreen = new Action("View plot in full screen (F11)", IAction.AS_PUSH_BUTTON) {
+			
+		    public void run() {
+		    	final Shell shell = new Shell(Display.getDefault(), SWT.NO_TRIM);
+		    	shell.setText("Full screen image");
+		    	
+		    	final Rectangle rect = Display.getDefault().getPrimaryMonitor().getBounds();
+		    	//setFullScreen seems to have issues on linux
+		    	shell.setBounds(rect);
+		    	final PlotType plotType = viewer.getSystem().getPlotType();
+		    	updateShellBackground(shell, rect ,plotType);
+		    	
+		    	shell.addKeyListener(new KeyListener() {
+					@Override
+					public void keyPressed(KeyEvent e) {
+						//ESC key to close
+						if (e.keyCode == SWT.ESC || e.keyCode ==SWT.F11){
+							shell.close();
+						}
+						
+					}
+					@Override
+					public void keyReleased(KeyEvent e) {
+						// do nothing
+						
+					}
+				});
+		    	
+		    	final ITraceListener traceListener = new ITraceListener.Stub() {
+		    		
+		    		@Override
+		    		public void tracesUpdated(TraceEvent evt) {
+		    			updateShellBackground(shell, rect, viewer.getSystem().getPlotType());
+		    		}
+		    		@Override
+		    		public void tracesRemoved(TraceEvent evt) {
+		    			updateShellBackground(shell, rect, viewer.getSystem().getPlotType());
+		    		}
+		    		@Override
+		    		public void tracesAdded(TraceEvent evt) {
+		    			updateShellBackground(shell, rect, viewer.getSystem().getPlotType());
+		    		}
+		    		@Override
+		    		public void traceUpdated(TraceEvent evt) {
+		    			updateShellBackground(shell, rect, viewer.getSystem().getPlotType());
+		    		}
+		    		@Override
+		    		public void traceAdded(TraceEvent evt) {
+		    			updateShellBackground(shell, rect, viewer.getSystem().getPlotType());
+		    		}
+		    		@Override
+		    		public void traceRemoved(TraceEvent evt) {
+		    			updateShellBackground(shell, rect, viewer.getSystem().getPlotType());
+		    		}
+		    	};
+		    	
+		    	viewer.getSystem().addTraceListener(traceListener);
+		    	
+		    	shell.addDisposeListener(new DisposeListener() {
+					@Override
+					public void widgetDisposed(DisposeEvent e) {
+						viewer.getSystem().removeTraceListener(traceListener);
+						Image oldbg = shell.getBackgroundImage();
+						if (oldbg!=null && oldbg.isDisposed() == false) {oldbg.dispose();}
+						
+					}
+				});
+		    	shell.open();
+		    }
+		};
+        
+		fullScreen.setImageDescriptor(Activator.getImageDescriptor("icons/fullscreen.png"));
+		fullScreen.setId("org.dawb.workbench.fullscreen");
+		fullScreen.setAccelerator(SWT.F11);
+		actionBarManager.registerAction("org.dawb.workbench.toolbar.fullscreen", fullScreen, ActionType.XYANDIMAGE);
+	}
+	
+	private void updateShellBackground(final Shell shell, final Rectangle rect, PlotType plotType) {
+		
+		Image oldbg = shell.getBackgroundImage();
+		shell.setBackgroundImage(null);
+		
+		//remove axes for images
+		if (plotType == PlotType.IMAGE) {
+
+			boolean xVis = xyGraph.primaryXAxis.isVisible();
+			boolean yVis = xyGraph.primaryYAxis.isVisible();
+
+			xyGraph.primaryXAxis.setVisible(false);
+			xyGraph.primaryYAxis.setVisible(false);
+
+			try {
+				shell.setBackgroundImage(xyGraph.getImage(rect));
+			} finally {
+				xyGraph.primaryXAxis.setVisible(xVis);
+				xyGraph.primaryYAxis.setVisible(yVis);
+			}
+		} else {
+			
+			shell.setBackgroundImage(xyGraph.getImage(rect));
+		}
+		
+		if (oldbg != null && !oldbg.isDisposed()) {oldbg.dispose();}
+	}
 
 	public void createOriginActions(final XYRegionGraph xyGraph) {
 

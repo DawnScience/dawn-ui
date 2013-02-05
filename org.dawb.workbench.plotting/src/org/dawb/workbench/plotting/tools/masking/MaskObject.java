@@ -1,4 +1,4 @@
-package org.dawb.workbench.plotting.tools;
+package org.dawb.workbench.plotting.tools.masking;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,8 +11,10 @@ import org.dawb.common.ui.plot.axis.IAxis;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.workbench.plotting.Activator;
 import org.dawb.workbench.plotting.preference.PlottingConstants;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.commands.operations.DefaultOperationHistory;
+import org.eclipse.core.commands.operations.IOperationHistory;
 import org.eclipse.draw2d.geometry.Point;
-import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +61,16 @@ public class MaskObject {
     private BooleanDataset  maskDataset;
     private AbstractDataset imageDataset;
     
-
+    /**
+     * Used for undoable masking operations.
+     */
+	private DefaultOperationHistory operationManager;
+    
+	MaskObject() {
+		operationManager = new DefaultOperationHistory();
+		operationManager.setLimit(MaskOperation.MASK_CONTEXT, 20);	
+	}
+	
     /**
      * Designed to copy data in an incoming mask onto this one as best as possible.
      * @param savedMask
@@ -67,19 +78,27 @@ public class MaskObject {
 	public void process(BooleanDataset savedMask) {
 		createMaskIfNeeded();
 		
+        MaskOperation op = new MaskOperation(maskDataset, savedMask.getSize()/16);
 		final int[] shape = savedMask.getShape();
 		for (int y = 0; y<shape[0]; ++y) {
 			for (int x = 0; x<shape[1]; ++x) {
 		        try {
 		        	// We only add the falses 
 		        	if (!savedMask.getBoolean(y,x)) {
-		        		this.maskDataset.set(Boolean.FALSE, y,x);
+		        		toggleMask(op, Boolean.FALSE, y,x);
 		        	}
 		        } catch (Throwable ignored) {
 		        	continue;
 		        }
 			}
 		}
+		
+        try {
+        	if (op.getSize()>0) operationManager.execute(op, null, null);
+		} catch (ExecutionException e) {
+			logger.error("Internal error processing external mask.", e);
+		}
+
 	}
 	
 	/**
@@ -119,16 +138,21 @@ public class MaskObject {
         int[]  b     = new int[]{cen[0], start[1]};
         int radius   = end[1]-cen[1];
 
-        Boolean mv = maskOut ? Boolean.FALSE : Boolean.TRUE;
+        boolean mv = maskOut ? Boolean.FALSE : Boolean.TRUE;
         
+        final int maximumMaskPoints = (end[1]-start[1]+1)*(end[0]-start[0]+1);
+        
+        MaskOperation op = new MaskOperation(maskDataset, maximumMaskPoints);
         for (int y = start[1]; y<=end[1]; ++y) {
         	for (int x = start[0]; x<=end[0]; ++x) {
         		if (penShape==ShapeType.SQUARE) {
-        			maskDataset.set(mv, y, x);
+        			toggleMask(op, mv, y, x);
 
         		} else if (penShape==ShapeType.CIRCLE || penSize<3) {
         			double r = Math.hypot(x - cen[0], y - cen[1]);
-                    if (r<=radius) maskDataset.set(mv, y, x);
+                    if (r<=radius) {
+                    	toggleMask(op, mv, y, x);
+                    }
                     
         		} else if (penShape==ShapeType.TRIANGLE) {
 
@@ -136,22 +160,46 @@ public class MaskObject {
            				double real = y-start[1];
            				double dash = 2*(x-start[0]);
         				if (real>dash) {
-        					maskDataset.set(mv, y, 2*cen[0]-x-(cen[0]-start[0]));
+        					toggleMask(op, mv, y, 2*cen[0]-x-(cen[0]-start[0]));
         				}
         			} else { // px>bx
         				double real = y-start[1];
            				double dash = 2*(x-cen[0]);
         				if (real>dash) {
-        					maskDataset.set(mv, y, x);
+        					toggleMask(op, mv, y, x);
         				}
         			}
        			
         		}
         	}
         }
+        
+        try {
+        	if (op.getSize()>0) operationManager.execute(op, null, null);
+		} catch (ExecutionException e) {
+			logger.error("Problem processing mask draw.", e);
+		}
 	}
 
+	/**
+	 * Toggles a pixel and adds the pixels toggled state to the
+	 * AbstractOperation to allow undo/redo to work.
+	 * @param mv
+	 * @param y
+	 * @param x
+	 */
+	private void toggleMask(MaskOperation op, boolean mv, int y, int x) {
+		if (maskDataset.getBoolean(y,x)!=mv) {
+			op.addVertex(mv, y, x);		
+		}
+	}
 	
+	public void dispose() {
+		if (operationManager!=null) {
+			operationManager.dispose(MaskOperation.MASK_CONTEXT, true, true, true);
+		}
+	}
+
 	private int[] normalize(int[] is) {
 		int maxX = imageDataset.getShape()[1]-1;
 		if (is[0]>maxX) is[0] = maxX;
@@ -203,14 +251,16 @@ public class MaskObject {
 			validRegions.add(region);
 		}
 		
-		// Slightly wrong AbstractDataset loop, but it is faster...
+        final MaskOperation op = new MaskOperation(maskDataset, getMaskDataset().getSize()/16);
+
+        // Slightly wrong AbstractDataset loop, but it is faster...
 		final int[] shape = imageDataset.getShape();
 		if (validRegions==null && requireMinMax) {
 			for (int y = 0; y<shape[0]; ++y) {
 				for (int x = 0; x<shape[1]; ++x) {
 					final float val = imageDataset.getFloat(y, x);
 					boolean isValid = isValid(val,min,max);
-					if (!isValid) maskDataset.set(Boolean.FALSE, y, x); // false = masked
+					if (!isValid) toggleMask(op, Boolean.FALSE, y, x); // false = masked
 				}
 			}
 		} else if (validRegions!=null){
@@ -221,12 +271,12 @@ public class MaskObject {
 							if (requireMinMax) {
 								final float val = imageDataset.getFloat(y, x);
 								boolean isValid = isValid(val,min,max);
-								if (!isValid) maskDataset.set(Boolean.FALSE, y, x); // false = masked
+								if (!isValid) toggleMask(op, Boolean.FALSE, y, x); // false = masked
 							}
 							if (validRegions!=null) for (IRegion region : validRegions) {
 								try {
 									if (region.containsPoint(x, y)) {
-										maskDataset.set(Boolean.FALSE, y, x);
+										toggleMask(op, Boolean.FALSE, y, x);
 									}
 								} catch (Throwable ne) {
 									logger.trace("Cannot process point "+(new Point(x,y)), ne);
@@ -241,6 +291,12 @@ public class MaskObject {
 			    
 		}
 		
+        try {
+			if (op.getSize()>0) operationManager.execute(op, null, null);
+		} catch (ExecutionException e) {
+			logger.error("Internal error processing region mask.", e);
+		}
+
 		return true;
 	}
 	
@@ -250,7 +306,11 @@ public class MaskObject {
 			maskDataset.setName("mask");
 			maskDataset.setExtendible(false);
 			maskDataset.fill(true);
-		}		
+		}	
+		if (operationManager ==null)  {
+			operationManager = new DefaultOperationHistory();
+			operationManager.setLimit(MaskOperation.MASK_CONTEXT, 20);
+		}
 	}
 
 	private static final boolean isValid(float val, Number min, Number max) {
@@ -320,5 +380,27 @@ public class MaskObject {
 
 	public void reset() {
 		this.maskDataset = null;
+		if (operationManager!=null) {
+			operationManager.dispose(MaskOperation.MASK_CONTEXT, true, true, true);
+		}
+	}
+
+	public IOperationHistory getOperationManager() {
+		return operationManager;
+	}
+
+	public void undo() {
+		try {
+			operationManager.undo(MaskOperation.MASK_CONTEXT, null, null);
+		} catch (ExecutionException e) {
+			logger.error("Internal error - unable to undo!", e);
+		}
+	}
+	public void redo() {
+		try {
+			operationManager.redo(MaskOperation.MASK_CONTEXT, null, null);
+		} catch (ExecutionException e) {
+			logger.error("Internal error - unable to redo!", e);
+		}
 	}
 }
