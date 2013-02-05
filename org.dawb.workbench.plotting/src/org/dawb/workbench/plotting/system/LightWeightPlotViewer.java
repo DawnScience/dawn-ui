@@ -288,6 +288,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 					final IContributionItem action = bars.getToolBarManager().find("org.dawb.workbench.fullscreen");
 				    if (action!=null && action.isVisible() && action instanceof ActionContributionItem) {
 				    	ActionContributionItem iaction = (ActionContributionItem)action;
+				    	iaction.getAction().setChecked(!iaction.getAction().isChecked());
 				    	iaction.getAction().run();
 				    }
 				} else if (e.keyCode==16777217) {//Up
