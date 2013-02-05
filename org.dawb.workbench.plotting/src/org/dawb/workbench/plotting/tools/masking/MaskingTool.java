@@ -102,6 +102,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	private IRegionListener     regionListener;
 	private IROIListener        regionBoundsListener;
 	private MaskMouseListener   clickListener;
+	private ColorSelector       colorSelector;
 	
 	
 	public MaskingTool() {
@@ -114,6 +115,9 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 
 					((IImageTrace)evt.getSource()).setMask(maskObject.getMaskDataset());
 					((IImageTrace)evt.getSource()).addPaletteListener(paletteListener);
+					RGB rgb = ((IImageTrace)evt.getSource()).getImageServiceBean().getNanBound().getColor();
+					updateIcons(rgb);
+					colorSelector.setColorValue(rgb);
 				}
 			}
 			@Override
@@ -325,13 +329,13 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1,1));
 		label.setText("Mask Color");
 		
-		final ColorSelector selector = new ColorSelector(minMaxComp);
-		selector.getButton().setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1,1));
-		if (image!=null) selector.setColorValue(image.getNanBound().getColor());
-		selector.addListener(new IPropertyChangeListener() {			
+		this.colorSelector = new ColorSelector(minMaxComp);
+		colorSelector.getButton().setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1,1));
+		if (image!=null) colorSelector.setColorValue(image.getNanBound().getColor());
+		colorSelector.addListener(new IPropertyChangeListener() {			
 			@Override
 			public void propertyChange(PropertyChangeEvent event) {
-				getImageTrace().setNanBound(new HistogramBound(Double.NaN, selector.getColorValue()));
+				getImageTrace().setNanBound(new HistogramBound(Double.NaN, colorSelector.getColorValue()));
 				getImageTrace().rehistogram();
 			}
 		});
@@ -738,7 +742,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 					if (autoApplySavedMask&&currentMaskingTool!=null) {
 						if (savedMask==null) currentMaskingTool.saveMaskBuffer();
 						currentMaskingTool.mergeSavedMask();
-						if (!isDedicatedView()) {
+						if (!currentMaskingTool.isDedicatedView()) {
 							try {
 								currentMaskingTool.createToolInDedicatedView();
 							} catch (Exception e) {
