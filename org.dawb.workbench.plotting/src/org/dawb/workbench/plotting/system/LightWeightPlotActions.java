@@ -73,6 +73,8 @@ class LightWeightPlotActions {
 	private LightWeightPlotViewer  viewer;
 	private boolean                datasetChoosingRequired = true;
 	private Action                 plotIndex, plotX;
+	
+	private Shell fullScreenShell;
 
 	public void init(final LightWeightPlotViewer viewer, XYRegionGraph xyGraph, PlotActionsManagerImpl actionBarManager) {
 		this.viewer  = viewer;
@@ -459,26 +461,31 @@ class LightWeightPlotActions {
 		
 		actionBarManager.registerToolBarGroup("org.dawb.workbench.toolbar.fullscreen");
 		
-		final Action fullScreen = new Action("View plot in full screen (F11)", IAction.AS_PUSH_BUTTON) {
+		final Action fullScreen = new Action("View plot in full screen (F11)", IAction.AS_CHECK_BOX) {
 			
 		    public void run() {
-		    	final Shell shell = new Shell(Display.getDefault(), SWT.NO_TRIM);
-		    	shell.setText("Full screen image");
+		    	
+		    	if (!isChecked() && fullScreenShell != null && !fullScreenShell.isDisposed()) {
+		    		fullScreenShell.close();
+		    		return;
+		    	}
+		    	
+		    	fullScreenShell = new Shell(Display.getCurrent(), SWT.NO_TRIM);
+		    	fullScreenShell.setText("Full screen image");
 		    	
 		    	final Rectangle rect = Display.getDefault().getPrimaryMonitor().getBounds();
 		    	//setFullScreen seems to have issues on linux
-		    	shell.setBounds(rect);
+		    	fullScreenShell.setBounds(rect);
 		    	final PlotType plotType = viewer.getSystem().getPlotType();
-		    	updateShellBackground(shell, rect ,plotType);
+		    	updateShellBackground(fullScreenShell, rect ,plotType);
 		    	
-		    	shell.addKeyListener(new KeyListener() {
+		    	fullScreenShell.addKeyListener(new KeyListener() {
 					@Override
 					public void keyPressed(KeyEvent e) {
 						//ESC key to close
 						if (e.keyCode == SWT.ESC || e.keyCode ==SWT.F11){
-							shell.close();
-						}
-						
+							fullScreenShell.close();
+						}	
 					}
 					@Override
 					public void keyReleased(KeyEvent e) {
@@ -491,42 +498,44 @@ class LightWeightPlotActions {
 		    		
 		    		@Override
 		    		public void tracesUpdated(TraceEvent evt) {
-		    			updateShellBackground(shell, rect, viewer.getSystem().getPlotType());
+		    			updateShellBackground(fullScreenShell, rect, viewer.getSystem().getPlotType());
 		    		}
 		    		@Override
 		    		public void tracesRemoved(TraceEvent evt) {
-		    			updateShellBackground(shell, rect, viewer.getSystem().getPlotType());
+		    			updateShellBackground(fullScreenShell, rect, viewer.getSystem().getPlotType());
 		    		}
 		    		@Override
 		    		public void tracesAdded(TraceEvent evt) {
-		    			updateShellBackground(shell, rect, viewer.getSystem().getPlotType());
+		    			updateShellBackground(fullScreenShell, rect, viewer.getSystem().getPlotType());
 		    		}
 		    		@Override
 		    		public void traceUpdated(TraceEvent evt) {
-		    			updateShellBackground(shell, rect, viewer.getSystem().getPlotType());
+		    			updateShellBackground(fullScreenShell, rect, viewer.getSystem().getPlotType());
 		    		}
 		    		@Override
 		    		public void traceAdded(TraceEvent evt) {
-		    			updateShellBackground(shell, rect, viewer.getSystem().getPlotType());
+		    			updateShellBackground(fullScreenShell, rect, viewer.getSystem().getPlotType());
 		    		}
 		    		@Override
 		    		public void traceRemoved(TraceEvent evt) {
-		    			updateShellBackground(shell, rect, viewer.getSystem().getPlotType());
+		    			updateShellBackground(fullScreenShell, rect, viewer.getSystem().getPlotType());
 		    		}
 		    	};
 		    	
 		    	viewer.getSystem().addTraceListener(traceListener);
 		    	
-		    	shell.addDisposeListener(new DisposeListener() {
+		    	fullScreenShell.addDisposeListener(new DisposeListener() {
 					@Override
 					public void widgetDisposed(DisposeEvent e) {
 						viewer.getSystem().removeTraceListener(traceListener);
-						Image oldbg = shell.getBackgroundImage();
+						Image oldbg = fullScreenShell.getBackgroundImage();
 						if (oldbg!=null && oldbg.isDisposed() == false) {oldbg.dispose();}
-						
+						if (actionBarManager.findAction("org.dawb.workbench.fullscreen") != null) {
+							actionBarManager.findAction("org.dawb.workbench.fullscreen").setChecked(false);
+						}
 					}
 				});
-		    	shell.open();
+		    	fullScreenShell.open();
 		    }
 		};
         
