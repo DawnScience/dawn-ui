@@ -19,7 +19,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
 
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.optimization.GoalType;
@@ -29,6 +28,9 @@ import org.dawb.passerelle.common.actors.AbstractDataMessageTransformer;
 import org.dawb.passerelle.common.message.DataMessageComponent;
 import org.dawb.passerelle.common.message.DataMessageException;
 import org.dawb.passerelle.common.message.MessageUtils;
+import org.dawb.passerelle.common.parameter.ParameterUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ptolemy.data.expr.StringParameter;
 import ptolemy.kernel.CompositeEntity;
@@ -51,6 +53,8 @@ import uk.ac.diamond.scisoft.analysis.fitting.functions.IParameter;
 public class FitGaussianConvolutedFermiActor extends
 AbstractDataMessageTransformer {
 
+	private static final Logger logger = LoggerFactory.getLogger(FitGaussianConvolutedFermiActor.class);
+	
 	private static final long serialVersionUID = 813882139346261410L;
 	public StringParameter datasetName;
 	public StringParameter functionName;
@@ -75,9 +79,9 @@ AbstractDataMessageTransformer {
 		fitDirection = new StringParameter(this, "fitDirection");
 		registerConfigurableParameter(fitDirection);
 		fitConvolution = new StringParameter(this, "fitConvolution");
-		fitConvolution.addChoice("Off");
-		fitConvolution.addChoice("Quick");
-		fitConvolution.addChoice("Full");
+//		fitConvolution.addChoice("Off");
+//		fitConvolution.addChoice("Quick");
+//		fitConvolution.addChoice("Full");
 		registerConfigurableParameter(fitConvolution);
 		updatePlotName = new StringParameter(this, "updatePlotName");
 		registerConfigurableParameter(updatePlotName);
@@ -271,7 +275,13 @@ AbstractDataMessageTransformer {
 					"Input function must be of type FermiGauss");
 		}
 
-		String fitConvolutionValue = fitConvolution.getExpression();
+		String fitConvolutionValue = "Off";
+		try {
+			fitConvolutionValue = ParameterUtils.getSubstituedValue(fitConvolution, cache);
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 
 		final double temperature = fitFunction.getParameterValue(1);
 
@@ -279,14 +289,14 @@ AbstractDataMessageTransformer {
 
 		int count = 0;
 		while (functionsSimilarIgnoreFWHM(initialFit,(FermiGauss)fitFunction, 0.0) && count < 5) {
-			System.out.println("Function not fitted, trying again :" + count);
+			logger.debug("Function not fitted, trying again :" + count);
 			count++;
 			
 			initialFit = fitFermiNoFWHM(xAxis, values, new FermiGauss(initialFit.getParameters()));
 		}
 		
 		if (count >= 5) {
-			System.out.println("Fitting Failed");
+			logger.debug("Fitting Failed");
 		}
 		
 		
@@ -313,7 +323,7 @@ AbstractDataMessageTransformer {
 			sliceStop = (int) Math.floor(afterCrossing);
 		} catch (Exception e) {
 			// Not an issue as this is handled
-			System.out.println(e);
+			logger.debug("Minnor Issue occured, but this is handled, simply put here for reporting",e);
 		}
 
 		try {
@@ -322,7 +332,7 @@ AbstractDataMessageTransformer {
 			sliceStart = (int) Math.floor(beforeCrossing);
 		} catch (Exception e) {
 			// Not an issue as this is not required
-			System.out.println(e);
+			logger.debug("Minnor Issue occured, but this is handled, simply put here for reporting",e);
 		}
 
 		final AbstractDataset trimmedXAxis = xAxis.getSlice(new Slice(
@@ -435,8 +445,7 @@ AbstractDataMessageTransformer {
 				new ThreadPoolExecutor.CallerRunsPolicy());
 
 		while (iter.hasNext()) {
-			System.out.println(iter.index);
-			System.out.println(Arrays.toString(ind.getNDPosition(iter.index)));
+			logger.debug(Arrays.toString(ind.getNDPosition(iter.index)));
 			int[] start = ind.getNDPosition(iter.index).clone();
 			int[] stop = start.clone();
 			for (int i = 0; i < stop.length; i++) {
@@ -477,8 +486,7 @@ AbstractDataMessageTransformer {
 			double value = residualDS.getDouble(iter.index);
 			double disp = Math.abs(value-resMean);
 			if (disp > resStd*3) {
-				System.out.println(iter.index);
-				System.out.println(Arrays.toString(ind.getNDPosition(iter.index)));
+				logger.debug(Arrays.toString(ind.getNDPosition(iter.index)));
 				int[] start = ind.getNDPosition(iter.index).clone();
 				int[] stop = start.clone();
 				for (int i = 0; i < stop.length; i++) {

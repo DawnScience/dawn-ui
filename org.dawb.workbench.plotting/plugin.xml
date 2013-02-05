@@ -126,7 +126,7 @@
       </plotting_tool_page>
       <plotting_tool_page
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.masking"
-            class="org.dawb.workbench.plotting.tools.MaskingTool"
+            class="org.dawb.workbench.plotting.tools.masking.MaskingTool"
             icon="icons/plot-tool-masking.png"
             id="org.dawb.workbench.plotting.tools.maskingTool"
             label="Masking"
