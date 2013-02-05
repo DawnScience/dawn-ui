@@ -1,6 +1,7 @@
 package org.dawb.workbench.plotting.tools.fitting;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Map;
 
@@ -59,9 +60,14 @@ import uk.ac.diamond.scisoft.analysis.fitting.Fitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.StraightLine;
+import uk.ac.diamond.scisoft.analysis.optimize.ApacheNelderMead;
+import uk.ac.diamond.scisoft.analysis.optimize.GeneticAlg;
+import uk.ac.diamond.scisoft.analysis.optimize.IOptimizer;
 import uk.ac.diamond.scisoft.analysis.optimize.NelderMead;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 import uk.ac.gda.common.rcp.util.GridUtils;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.custom.CCombo;
 
 public class FunctionFittingTool extends AbstractToolPage {
 
@@ -98,6 +104,8 @@ public class FunctionFittingTool extends AbstractToolPage {
 	private Text accurasyValueText;
 
 	private Button refitButton;
+
+	private Action duplicateAction;
 
 	public FunctionFittingTool() {
 
@@ -190,18 +198,22 @@ public class FunctionFittingTool extends AbstractToolPage {
 		GridUtils.removeMargins(composite);
 
 		infoComposite = new Composite(composite, SWT.NONE);
+		infoComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 		infoComposite.setLayout(new GridLayout(2, false));
 		
 		chiSquaredInfoLabel = new Label(infoComposite, SWT.NONE);
-		chiSquaredInfoLabel.setText("Normalised goodness of fit :");
+		chiSquaredInfoLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+		chiSquaredInfoLabel.setText("Normalised goodness of fit");
 		
 		chiSquaredValueLabel = new Label(infoComposite, SWT.NONE);
+		chiSquaredValueLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		chiSquaredValueLabel.setText("Not Calculated"); 
 		
 		accurasyInfoLabel = new Label(infoComposite, SWT.NONE);
-		accurasyInfoLabel.setText("Accurasy of Fitting Routine :");
+		accurasyInfoLabel.setText("Accuracy of Fitting Routine");
 		
-		accurasyValueText = new Text(infoComposite, SWT.NONE);
+		accurasyValueText = new Text(infoComposite, SWT.BORDER);
+		accurasyValueText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		accurasyValueText.setText(Double.toString(accuracy));
 		accurasyValueText.addModifyListener(new ModifyListener() {
 			
@@ -210,18 +222,24 @@ public class FunctionFittingTool extends AbstractToolPage {
 				try {
 					accuracy = Double.parseDouble(accurasyValueText.getText());
 				} catch (Exception exception) {
-					logger.debug("Had a oproblem whilst passing the accurasy String",e);
+					logger.debug("Had a problem whilst passing the accurasy String",e);
 				}
 			}
 		});
 		
-		refitButton = new Button(infoComposite, SWT.NONE);
-		refitButton.setText("Refit");
+		refitButton = new Button(infoComposite, SWT.TOGGLE);
+		refitButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+		refitButton.setText("Auto Refit");
+		
 		refitButton.addMouseListener(new MouseListener() {
 			
 			@Override
 			public void mouseUp(MouseEvent e) {
-				updateFunctionPlot();
+				if(refitButton.getSelection()) {
+					updateFunctionPlot();
+				} else {
+					getPlottingSystem().removeTrace(fitTrace);
+				}
 			}
 			
 			@Override
@@ -235,13 +253,19 @@ public class FunctionFittingTool extends AbstractToolPage {
 			}
 		});
 		
+		combo = new CCombo(infoComposite, SWT.BORDER);
+		combo.setEditable(false);
+		combo.setListVisible(true);
+		combo.setItems(new String[] {"Nelder Mead Fitting", "Nelder Mead Fitting (Apache Maths)", "Genetic Algorithm"});
+		combo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+		combo.select(0);
 		
 		viewer = new TableViewer(composite, SWT.FULL_SELECTION | SWT.SINGLE
 				| SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
 
 		TableViewerColumn tblCol1 = new TableViewerColumn(viewer, SWT.NONE);
 		tblCol1.getColumn().setText("Function Name");
-		tblCol1.getColumn().setWidth(100);
+		tblCol1.getColumn().setWidth(120);
 
 		TableViewerColumn tblCol2 = new TableViewerColumn(viewer, SWT.NONE);
 		tblCol2.getColumn().setText("Initial Parameters");
@@ -265,8 +289,7 @@ public class FunctionFittingTool extends AbstractToolPage {
 			public void widgetSelected(SelectionEvent e) {
 				selectedPosition = (Integer) viewer.getTable().getSelection()[0]
 						.getData();
-				functionWidget.setFunction(compFunction
-						.getFunction(selectedPosition));
+				updateFunctionWidget();
 			}
 
 			@Override
@@ -279,6 +302,7 @@ public class FunctionFittingTool extends AbstractToolPage {
 		menuManager.add(deleteAction);
 		menuManager.add(updateAction);
 		menuManager.add(addFunctionAction);
+		menuManager.add(duplicateAction);
 		viewer.getControl().setMenu(
 				menuManager.createContextMenu(viewer.getControl()));
 
@@ -296,6 +320,11 @@ public class FunctionFittingTool extends AbstractToolPage {
 				});
 	}
 
+	private void updateFunctionWidget() {
+		functionWidget.setFunction(compFunction
+				.getFunction(selectedPosition));
+	}
+	
 	@Override
 	public Control getControl() {
 		return composite;
@@ -322,9 +351,9 @@ public class FunctionFittingTool extends AbstractToolPage {
 						.getSelectedXAxis().getUpper()
 						- getPlottingSystem().getSelectedXAxis().getLower(),
 						100, 0));
-				region.addROIListener(roiListener);
 				getPlottingSystem().addRegion(region);
 			}
+			region.addROIListener(roiListener);
 			updateFunctionPlot();
 
 		} catch (Exception e) {
@@ -359,6 +388,7 @@ public class FunctionFittingTool extends AbstractToolPage {
 				compFunction.addFunction(showFunctionDialog(null));
 				viewer.refresh();
 				updateFunctionPlot();
+				updateFunctionWidget();
 			}
 		};
 		addFunctionAction.setToolTipText("Add a new function to be fitted");
@@ -374,14 +404,34 @@ public class FunctionFittingTool extends AbstractToolPage {
 				if (resultFunction != null) {
 					resultFunction.removeFunction(index);
 				}
-				;
 				viewer.refresh();
 				updateFunctionPlot();
+				updateFunctionWidget();
 			}
 		};
 		deleteAction
 				.setToolTipText("Delete the selected function from the list");
 		getSite().getActionBars().getToolBarManager().add(deleteAction);
+		
+		// Duplicate a function
+		duplicateAction = new Action("Duplicate Selected Function",
+				Activator.getImageDescriptor("icons/copy.gif")) {
+			public void run() {
+				Integer index = (Integer) viewer.getTable().getSelection()[0]
+						.getData();
+				try {
+					compFunction.addFunction(compFunction.getFunction(index).copy());
+				} catch (Exception e) {
+					logger.error("Could not copy function",e);
+				}
+				viewer.refresh();
+				updateFunctionPlot();
+				updateFunctionWidget();
+			}
+		};
+		duplicateAction
+		.setToolTipText("Duplicate the current function");
+		getSite().getActionBars().getToolBarManager().add(duplicateAction);
 
 		// Update the parameters
 		updateAction = new Action("Update Single Parameters",
@@ -393,6 +443,7 @@ public class FunctionFittingTool extends AbstractToolPage {
 						resultFunction.getFunction(index).getParameterValues());
 				viewer.refresh();
 				updateFunctionPlot();
+				updateFunctionWidget();
 			}
 		};
 		updateAction
@@ -407,6 +458,7 @@ public class FunctionFittingTool extends AbstractToolPage {
 						.getParameterValues());
 				viewer.refresh();
 				updateFunctionPlot();
+				updateFunctionWidget();
 			}
 		};
 		updateAllAction
@@ -466,17 +518,21 @@ public class FunctionFittingTool extends AbstractToolPage {
 				}
 			}
 		}
-		viewer.refresh();
+		if (viewer != null ) viewer.refresh();
 	}
 
 	private void updateFittedPlot(final AbstractDataset x,
 			final AbstractDataset y) {
 
-		if (updateFittedPlotJob == null) {
-			updateFittedPlotJob = new UpdateFitPlotJob("Update Fitted Plot");
+		
+		if(refitButton != null && refitButton.getSelection()) {
+
+			if (updateFittedPlotJob == null) {
+				updateFittedPlotJob = new UpdateFitPlotJob("Update Fitted Plot");
+			}
+			updateFittedPlotJob.setData(x, y);
+			updateFittedPlotJob.schedule();
 		}
-		updateFittedPlotJob.setData(x, y);
-		updateFittedPlotJob.schedule();
 
 	}
 
@@ -535,7 +591,7 @@ public class FunctionFittingTool extends AbstractToolPage {
 						result += resultFunction.getFunction(index).getParameterValue(i);
 					}
 				} catch (Exception e) {
-					logger.debug("Some error occured in the label provider of the Function fitting view.",e);
+					logger.debug("Some error occured in the label provider of the Function fitting view. Not Normally an Issue");
 				}
 				break;
 			}
@@ -581,6 +637,7 @@ public class FunctionFittingTool extends AbstractToolPage {
 
 		private AbstractDataset x;
 		private AbstractDataset y;
+		private int index;
 
 		public void setData(AbstractDataset x, AbstractDataset y) {
 			this.x = x.clone();
@@ -590,19 +647,38 @@ public class FunctionFittingTool extends AbstractToolPage {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 
+			
+			
 			PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
 
 				@Override
 				public void run() {
 					fitTrace.setVisible(false);
 					getPlottingSystem().repaint();
+					index = combo.getSelectionIndex();
 				}
 			});
 
 			try {
 				resultFunction = compFunction.duplicate();
 				logger.debug("Accurasy is set to {}",accuracy);
-				resultFunction = Fitter.fit(x, y, new NelderMead(accuracy),
+				IOptimizer fitMethod = null;
+				switch (index) {
+				case 0:
+					fitMethod = new NelderMead(accuracy);
+					break;
+				case 1:
+					fitMethod = new ApacheNelderMead();
+					break;
+				case 2:
+					fitMethod = new GeneticAlg(accuracy);
+					break;
+				default:
+					fitMethod = new NelderMead(accuracy);
+					break;
+				} 
+				
+				resultFunction = Fitter.fit(x, y, fitMethod,
 						resultFunction.getFunctions());
 			} catch (Exception e) {
 				return Status.CANCEL_STATUS;
@@ -640,6 +716,7 @@ public class FunctionFittingTool extends AbstractToolPage {
 	}
 
 	private Map<String, Serializable> functions=null;
+	private CCombo combo;
 	/**
 	 * Override to set the tool data to something specific
 	 * @param toolData
@@ -677,12 +754,7 @@ public class FunctionFittingTool extends AbstractToolPage {
 		
 		bean.setFunctions(functions); // We only set functions because it does a replace merge.
 		
-
-		
-		return bean; // Service knows that if the tool data
-		             // is a UserPlotBean, this should automatically
-		             // be merged (replace-merge) over the UserPlotBean
-		             // returned and the tool data set to null.
+		return bean;
 	}
 
 }
