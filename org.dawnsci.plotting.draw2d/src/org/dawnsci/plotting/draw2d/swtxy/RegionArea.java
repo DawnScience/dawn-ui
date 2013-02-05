@@ -15,6 +15,7 @@ import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.PlotArea;
 import org.csstudio.swt.xygraph.figures.Trace;
 import org.csstudio.swt.xygraph.undo.ZoomType;
+import org.csstudio.swt.xygraph.util.XYGraphMediaFactory;
 import org.dawb.common.services.ImageServiceBean.ImageOrigin;
 import org.dawb.common.ui.plot.axis.IAxis;
 import org.dawb.common.ui.plot.axis.ICoordinateSystem;
@@ -29,13 +30,23 @@ import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.dawnsci.plotting.draw2d.swtxy.selection.SelectionRegionFactory;
+import org.eclipse.draw2d.FigureUtilities;
+import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.MouseEvent;
 import org.eclipse.draw2d.MouseMotionListener;
+import org.eclipse.draw2d.geometry.Dimension;
+import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.PaletteData;
+import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +60,7 @@ public class RegionArea extends PlotArea {
 	
 	private Collection<IRegionListener>     regionListeners;
 	private Collection<ITraceListener>      imageTraceListeners;
+	private boolean                         containsMouse=false;
 
 	public RegionArea(XYRegionGraph xyGraph) {
 		super(xyGraph);
@@ -58,12 +70,27 @@ public class RegionArea extends PlotArea {
 		addMouseMotionListener(new MouseMotionListener.Stub() {
 			@Override
 			public void mouseMoved(MouseEvent me) {
+				createPositionCursor(me);
 				firePositionListeners(new PositionEvent(RegionArea.this, 
 						                               (AspectAxis)getRegionGraph().primaryXAxis,
 						                               (AspectAxis)getRegionGraph().primaryYAxis,
 													    me.x, 
 													    me.y));
 			}
+			/**
+			 * @see org.eclipse.draw2d.MouseMotionListener#mouseEntered(MouseEvent)
+			 */
+			public void mouseEntered(MouseEvent me) {
+				containsMouse = true;
+			}
+
+			/**
+			 * @see org.eclipse.draw2d.MouseMotionListener#mouseExited(MouseEvent)
+			 */
+			public void mouseExited(MouseEvent me) {
+				containsMouse = false;
+			}
+			
 		});
 
 	}
@@ -85,6 +112,12 @@ public class RegionArea extends PlotArea {
 		positionListeners.remove(l);
 	}
 
+	@Override
+	protected void paintClientArea(final Graphics graphics) {
+		super.paintClientArea(graphics);
+		
+		
+	}
 
 	public void setStatusLineManager(final IStatusLineManager statusLine) {
 		
@@ -109,6 +142,76 @@ public class RegionArea extends PlotArea {
 				statusLine.setMessage(format.format(me.x)+", "+format.format(me.y));
 			}
 		});
+	}
+	
+	private final static int CURSOR_SIZE = 28;
+	private final static Color TRANSPARENT_COLOR = XYGraphMediaFactory.getInstance().getColor(new RGB(123,0,23));
+	private final static Color BLACK_COLOR = XYGraphMediaFactory.getInstance().getColor(XYGraphMediaFactory.COLOR_BLACK);
+	private final static Color WHITE_COLOR = XYGraphMediaFactory.getInstance().getColor(XYGraphMediaFactory.COLOR_WHITE);
+	
+    private static NumberFormat intensityFormat =  new DecimalFormat("############.0##");
+	/**
+	 * Whenever cursor is NONE we show intensity info.
+	 * @param me
+	 */
+	protected void createPositionCursor(MouseEvent me) {
+		
+		if (!containsMouse)            return;
+		if (getSelectedCursor()!=null) return;
+		if (zoomType!=ZoomType.NONE)   return;
+
+		
+		if(getCursor() != null) getCursor().dispose();
+		
+		Axis xAxis = xyGraph.primaryXAxis, yAxis = xyGraph.primaryYAxis;
+		double xCoordinate = xAxis.getPositionValue(me.x, false);
+		double yCoordinate = yAxis.getPositionValue(me.y, false);
+		double intensity   = Double.NaN;
+		if (getImageTrace()!=null) {
+			xCoordinate = Math.round(xCoordinate);
+			yCoordinate = Math.round(yCoordinate);
+		    intensity   = getImageTrace().getData().getDouble((int)yCoordinate, (int)xCoordinate);
+		    
+		    
+			try {
+				double[] axisPnt = getImageTrace().getPointInAxisCoordinates(new double[]{xCoordinate, yCoordinate});
+			    xCoordinate = axisPnt[0];
+			    yCoordinate = axisPnt[1];
+			} catch (Exception ignored) {
+				// It is not fatal for the custom axes not to work.
+			}
+		}
+		
+		String text = Double.isNaN(intensity)
+				    ? "(" + xAxis.format(xCoordinate) + ", " + yAxis.format(yCoordinate) + ")"
+				    : "(" + xAxis.format(xCoordinate) + ", " + yAxis.format(yCoordinate) + ", "+ 
+				             intensityFormat.format(intensity) + ")";
+		
+		Dimension size = FigureUtilities.getTextExtents(
+				text, Display.getDefault().getSystemFont());
+		Image image = new Image(Display.getDefault(),
+				size.width + CURSOR_SIZE, size.height + CURSOR_SIZE);
+		
+		GC gc = new GC(image);
+		//gc.setAlpha(0);
+		gc.setBackground(TRANSPARENT_COLOR);					
+		gc.fillRectangle(image.getBounds());
+		gc.setForeground(BLACK_COLOR);
+		gc.drawLine(0, CURSOR_SIZE/2, CURSOR_SIZE, CURSOR_SIZE/2);
+		gc.drawLine(CURSOR_SIZE/2, 0, CURSOR_SIZE/2, CURSOR_SIZE);
+		gc.setBackground(WHITE_COLOR);
+		gc.fillRectangle(CURSOR_SIZE, CURSOR_SIZE, 
+				image.getBounds().width-CURSOR_SIZE, 
+				image.getBounds().height-CURSOR_SIZE);					
+		gc.drawText(text, CURSOR_SIZE, CURSOR_SIZE, true);
+		
+		ImageData imageData = image.getImageData();
+		imageData.transparentPixel = imageData.palette.getPixel(TRANSPARENT_COLOR.getRGB());
+		setCursor(new Cursor(Display.getCurrent(),
+				imageData, CURSOR_SIZE/2 ,CURSOR_SIZE/2));
+		gc.dispose();
+		image.dispose();
+
 	}
 
 

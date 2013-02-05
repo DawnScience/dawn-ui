@@ -349,7 +349,7 @@ class LightWeightPlotActions {
         actionBarManager.registerAction("org.csstudio.swt.xygraph.toolbar.zoom", autoScale, ActionType.XYANDIMAGE);
         
         final CheckableActionGroup zoomG = new CheckableActionGroup();
-        Action panning = null;
+        Action none = null;
 		for(final ZoomType zoomType : ZoomType.values()){
 		    if (! zoomType.useWithFlags(flags)) continue;
 		 		
@@ -368,12 +368,11 @@ class LightWeightPlotActions {
 			zoomAction.setId(zoomType.getId());
 			zoomG.add(zoomAction);	
 			
-			if (zoomType == ZoomType.PANNING) panning = zoomAction;
+			if (zoomType == ZoomType.NONE) none = zoomAction;
 			
 	        actionBarManager.registerAction("org.csstudio.swt.xygraph.toolbar.zoom", zoomAction, ActionType.XYANDIMAGE);
 		}
-		panning.setChecked(true);
-		panning.run(); 
+		none.setChecked(true);
 		
 	       
         // Add more actions
