@@ -120,14 +120,11 @@ public class Sector extends Shape {
 		if (r < radius[0] || r > radius[1])
 			return false;
 		double a = Math.toDegrees(Math.atan2(py, px));
-		if (angle[0] > 0) {
-			if (a < 0)
-				a += 360;
-		} else {
-			if (a < angle[0])
-				a += 360;
+		if (a < angle[0]) {
+			a += 360;
+		} else if (a > angle[1]) {
+			a -= 360;
 		}
-
 		return a >= angle[0] && a <= angle[1];
 	}
 
