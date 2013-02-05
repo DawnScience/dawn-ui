@@ -557,7 +557,7 @@ public class HistogramToolPage extends AbstractToolPage {
 	@Override
 	public void createControl(final Composite parent) {
 		// Set up the composite to hold all the information
-		sc = new ScrolledComposite(parent, SWT.V_SCROLL);
+		sc = new ScrolledComposite(parent, SWT.V_SCROLL | SWT.H_SCROLL);
 		sc.setLayout(new FillLayout());
 
 		composite = new Composite(sc, SWT.NONE);
