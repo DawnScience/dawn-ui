@@ -14,5 +14,4 @@ Bundle-ActivationPolicy: lazy
 Import-Package: org.dawb.common.ui.monitor,
  org.dawb.common.ui.util,
  org.eclipse.emf.common.ui.dialogs,
- org.slf4j,
- uk.ac.gda.monitor
+ org.slf4j
