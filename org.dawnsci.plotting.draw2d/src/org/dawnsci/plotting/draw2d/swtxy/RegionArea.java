@@ -182,13 +182,18 @@ public class RegionArea extends PlotArea {
 			}
 		}
 		
-		String text = Double.isNaN(intensity)
-				    ? "(" + xAxis.format(xCoordinate) + ", " + yAxis.format(yCoordinate) + ")"
-				    : "(" + xAxis.format(xCoordinate) + ", " + yAxis.format(yCoordinate) + ", "+ 
-				             intensityFormat.format(intensity) + ")";
+		StringBuilder buf = new StringBuilder();
+		if (!Double.isNaN(intensity)) {
+			buf.append(intensityFormat.format(intensity));
+			//buf.append("  ");
+		}
+		buf.append("\n[");
+		buf.append(xAxis.format(xCoordinate));
+		buf.append(", ");
+		buf.append(yAxis.format(yCoordinate));
+		buf.append("]");
 		
-		Dimension size = FigureUtilities.getTextExtents(
-				text, Display.getDefault().getSystemFont());
+		Dimension size = FigureUtilities.getTextExtents(buf.toString(), Display.getDefault().getSystemFont());
 		Image image = new Image(Display.getDefault(),
 				size.width + CURSOR_SIZE, size.height + CURSOR_SIZE);
 		
@@ -203,7 +208,7 @@ public class RegionArea extends PlotArea {
 		gc.fillRectangle(CURSOR_SIZE, CURSOR_SIZE, 
 				image.getBounds().width-CURSOR_SIZE, 
 				image.getBounds().height-CURSOR_SIZE);					
-		gc.drawText(text, CURSOR_SIZE, CURSOR_SIZE, true);
+		gc.drawText(buf.toString(), CURSOR_SIZE, CURSOR_SIZE, true);
 		
 		ImageData imageData = image.getImageData();
 		imageData.transparentPixel = imageData.palette.getPixel(TRANSPARENT_COLOR.getRGB());
