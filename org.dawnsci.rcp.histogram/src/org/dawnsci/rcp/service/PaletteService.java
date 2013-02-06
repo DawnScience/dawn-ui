@@ -32,6 +32,10 @@ public class PaletteService extends AbstractServiceFactory implements IPaletteSe
 
 	@Override
 	public PaletteData getPaletteData(String colourSchemeName) {
+		
+		if ("".equals(colourSchemeName)) {
+			colourSchemeName = "Film Negative";
+		}
 		ColourSchemeContribution csc = extensionManager.getColourSchemeContribution(colourSchemeName);
 		int[] red   = extensionManager.getTransferFunctionByID(csc.getRedID()).getFunction().getArray();
 		int[] green = extensionManager.getTransferFunctionByID(csc.getGreenID()).getFunction().getArray();
