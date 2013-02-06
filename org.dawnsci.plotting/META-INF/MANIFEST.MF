@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Plotting
-Bundle-SymbolicName: org.dawb.workbench.plotting;singleton:=true
+Bundle-SymbolicName: org.dawnsci.plotting;singleton:=true
 Bundle-Version: 1.1.0.qualifier
 Bundle-Activator: org.dawb.workbench.plotting.Activator
 Bundle-Vendor: Diamond Light Source
