@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Plotting
 Bundle-SymbolicName: org.dawnsci.plotting;singleton:=true
 Bundle-Version: 1.1.0.qualifier
-Bundle-Activator: org.dawb.workbench.plotting.Activator
+Bundle-Activator: org.dawnsci.plotting.Activator
 Bundle-Vendor: Diamond Light Source
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
@@ -26,14 +26,14 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.forms;bundle-version="3.5.101"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
-Export-Package: org.dawb.workbench.plotting.composites,
- org.dawb.workbench.plotting.system.dialog,
- org.dawb.workbench.plotting.tools,
- org.dawb.workbench.plotting.tools.diffraction,
- org.dawb.workbench.plotting.tools.masking,
- org.dawb.workbench.plotting.tools.profile,
- org.dawb.workbench.plotting.tools.reduction,
- org.dawb.workbench.plotting.util
+Export-Package: org.dawnsci.plotting.composites,
+ org.dawnsci.plotting.system.dialog,
+ org.dawnsci.plotting.tools,
+ org.dawnsci.plotting.tools.diffraction,
+ org.dawnsci.plotting.tools.masking,
+ org.dawnsci.plotting.tools.profile,
+ org.dawnsci.plotting.tools.reduction,
+ org.dawnsci.plotting.util
 Import-Package: com.thoughtworks.xstream.core.util,
  ncsa.hdf.object,
  org.dawb.hdf5,

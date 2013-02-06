@@ -4,13 +4,13 @@
    <extension
          point="org.eclipse.core.runtime.preferences">
       <initializer
-            class="org.dawb.workbench.plotting.preference.PlottingPreferenceInitializer">
+            class="org.dawnsci.plotting.preference.PlottingPreferenceInitializer">
       </initializer>
    </extension>
    <extension
          point="org.dawb.common.ui.plottingClass">
       <plottingSystem
-            class="org.dawb.workbench.plotting.system.PlottingSystemImpl"
+            class="org.dawnsci.plotting.system.PlottingSystemImpl"
             id="org.dawb.workbench.editors.plotting.lightWeightPlottingSystem"
             visible_type="Lightweight">
       </plottingSystem>
@@ -19,7 +19,7 @@
          point="org.dawb.common.ui.toolPage">
       <plotting_tool_page
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.peak"
-            class="org.dawb.workbench.plotting.tools.fitting.PeakFittingTool"
+            class="org.dawnsci.plotting.tools.fitting.PeakFittingTool"
             icon="icons/plot-tool-peak-fit.png"
             id="org.dawb.workbench.plotting.tools.fittingTool"
             label="Peak Fitting"
@@ -27,7 +27,7 @@
       </plotting_tool_page>
       <plotting_tool_page
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.derivative"
-            class="org.dawb.workbench.plotting.tools.DerivativeTool"
+            class="org.dawnsci.plotting.tools.DerivativeTool"
             icon="icons/plot-tool-derivative.png"
             id="org.dawb.workbench.plotting.tools.derivative"
             label="Derivative"
@@ -35,7 +35,7 @@
       </plotting_tool_page>
       <plotting_tool_page
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.measurement"
-            class="org.dawb.workbench.plotting.tools.MeasurementTool"
+            class="org.dawnsci.plotting.tools.MeasurementTool"
             icon="icons/plot-tool-measure.png"
             id="org.dawb.workbench.plotting.tools.measure"
             label="Measurement"
@@ -43,7 +43,7 @@
       </plotting_tool_page>
       <plotting_tool_page
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.pixel"
-            class="org.dawb.workbench.plotting.tools.InfoPixelTool1D"
+            class="org.dawnsci.plotting.tools.InfoPixelTool1D"
             icon="icons/info.png"
             id="org.dawb.workbench.plotting.tools.InfoPixel1D"
             label="XY Information"
@@ -51,7 +51,7 @@
       </plotting_tool_page>
       <plotting_tool_page
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.pixel"
-            class="org.dawb.workbench.plotting.tools.InfoPixelTool2D"
+            class="org.dawnsci.plotting.tools.InfoPixelTool2D"
             icon="icons/info.png"
             id="org.dawb.workbench.plotting.tools.InfoPixel2D"
             label="Pixel Information"
@@ -59,7 +59,7 @@
       </plotting_tool_page>
       <plotting_tool_page
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.lineprofile"
-            class="org.dawb.workbench.plotting.tools.profile.LineProfileTool"
+            class="org.dawnsci.plotting.tools.profile.LineProfileTool"
             icon="icons/plot-tool-line-profile.png"
             id="org.dawb.workbench.plotting.tools.lineProfileTool"
             label="Line Profile"
@@ -67,7 +67,7 @@
       </plotting_tool_page>
       <plotting_tool_page
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.boxprofile"
-            class="org.dawb.workbench.plotting.tools.profile.BoxProfileTool"
+            class="org.dawnsci.plotting.tools.profile.BoxProfileTool"
             icon="icons/plot-tool-box-profile.png"
             id="org.dawb.workbench.plotting.tools.boxProfileTool"
             label="Box Profile"
@@ -75,7 +75,7 @@
       </plotting_tool_page>
       <plotting_tool_page
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.boxprofile"
-            class="org.dawb.workbench.plotting.tools.profile.BoxLineProfileTool"
+            class="org.dawnsci.plotting.tools.profile.BoxLineProfileTool"
             icon="icons/plot-tool-color-box.png"
             id="org.dawb.workbench.plotting.tools.boxLineProfileTool"
             label="Box Line Profile"
@@ -84,7 +84,7 @@
       </plotting_tool_page>
       <plotting_tool_page
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.boxprofile"
-            class="org.dawb.workbench.plotting.tools.profile.ColorBoxProfileTool"
+            class="org.dawnsci.plotting.tools.profile.ColorBoxProfileTool"
             icon="icons/plot-tool-color-box.png"
             id="org.dawb.workbench.plotting.tools.colorBoxProfileTool"
             label="Color Box Profile"
@@ -93,7 +93,7 @@
       </plotting_tool_page>
       <plotting_tool_page
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.grid"
-            class="org.dawb.workbench.plotting.tools.profile.GridTool"
+            class="org.dawnsci.plotting.tools.profile.GridTool"
             icon="icons/plot-tool-box-grid.png"
             id="org.dawb.workbench.plotting.tools.gridTool"
             label="Grid"
@@ -102,7 +102,7 @@
       </plotting_tool_page>
       <plotting_tool_page
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.radialprofile"
-            class="org.dawb.workbench.plotting.tools.profile.RadialProfileTool"
+            class="org.dawnsci.plotting.tools.profile.RadialProfileTool"
             icon="icons/plot-tool-radial-integral.png"
             id="org.dawb.workbench.plotting.tools.radialProfileTool"
             label="Radial Profile"
@@ -110,7 +110,7 @@
       </plotting_tool_page>
       <plotting_tool_page
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.aziprofile"
-            class="org.dawb.workbench.plotting.tools.profile.AzimuthalProfileTool"
+            class="org.dawnsci.plotting.tools.profile.AzimuthalProfileTool"
             icon="icons/plot-tool-azimuthal-integral.png"
             id="org.dawb.workbench.plotting.tools.azimuthalProfileTool"
             label="Azimuthal Profile"
@@ -118,7 +118,7 @@
       </plotting_tool_page>
       <plotting_tool_page
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.crosshairprofile"
-            class="org.dawb.workbench.plotting.tools.profile.CrossHairProfileTool"
+            class="org.dawnsci.plotting.tools.profile.CrossHairProfileTool"
             icon="icons/plot-tool-cross-hairs.png"
             id="org.dawb.workbench.plotting.tools.crossHairProfileTool"
             label="Cross Hair Profile"
@@ -126,7 +126,7 @@
       </plotting_tool_page>
       <plotting_tool_page
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.masking"
-            class="org.dawb.workbench.plotting.tools.masking.MaskingTool"
+            class="org.dawnsci.plotting.tools.masking.MaskingTool"
             icon="icons/plot-tool-masking.png"
             id="org.dawb.workbench.plotting.tools.maskingTool"
             label="Masking"
@@ -134,21 +134,21 @@
       </plotting_tool_page>
       <plotting_tool_page
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.ellipsefitting"
-            class="org.dawb.workbench.plotting.tools.EllipseFittingTool"
+            class="org.dawnsci.plotting.tools.EllipseFittingTool"
             icon="icons/plot-tool-ellipse.png"
             id="org.dawb.workbench.plotting.tools.ellipseFittingTool"
             label="Ellipse Fitting"
             tooltip="A tool which shows the fitted ellipse parameters.">
       </plotting_tool_page>
       <plotting_tool_page
-            class="org.dawb.workbench.plotting.tools.history.HistoryTool"
+            class="org.dawnsci.plotting.tools.history.HistoryTool"
             icon="icons/plot-tool-history.png"
             id="org.dawb.workbench.plotting.tools.xyHistoryTool"
             label="History"
             tooltip="A tool to compare plots between data files.">
       </plotting_tool_page>
       <plotting_tool_page
-            class="org.dawb.workbench.plotting.tools.profile.ZoomTool"
+            class="org.dawnsci.plotting.tools.profile.ZoomTool"
             icon="icons/zoom_box.png"
             id="org.dawb.workbench.plotting.tools.zoomTool"
             label="Zoom Profile"
@@ -164,27 +164,27 @@
       </plotting_tool_page>
       -->
       <plotting_tool_page
-            class="org.dawb.workbench.plotting.tools.history.ImageHistoryTool"
+            class="org.dawnsci.plotting.tools.history.ImageHistoryTool"
             icon="icons/plot-tool-image-compare.png"
             id="org.dawb.workbench.plotting.tools.imageCompareTool"
             label="Image History"
             tooltip="A tool to compare images between files by building up a history.">
       </plotting_tool_page>
       <plotting_tool_page
-            class="org.dawb.workbench.plotting.tools.fitting.LineFittingTool"
+            class="org.dawnsci.plotting.tools.fitting.LineFittingTool"
             icon="icons/plot-tool-line-fit.png"
             id="org.dawb.workbench.plotting.plotting_tool_page4"
             label="Line Fitting">
       </plotting_tool_page>
       <plotting_tool_page
-            class="org.dawb.workbench.plotting.tools.diffraction.DiffractionTool"
+            class="org.dawnsci.plotting.tools.diffraction.DiffractionTool"
             icon="icons/plot-tool-diffraction.png"
             id="org.dawb.workbench.plotting.tools.diffraction.Diffraction"
             label="Diffraction"
             tooltip="A tool to allow interpretation/modification of diffraction data">
       </plotting_tool_page>
       <plotting_tool_page
-            class="org.dawb.workbench.plotting.tools.fitting.FunctionFittingTool"
+            class="org.dawnsci.plotting.tools.fitting.FunctionFittingTool"
             icon="icons/plot-tool-line-fit.png"
             id="org.dawb.workbench.plotting.function_fitting_tool"
             label="Function Fitting"
@@ -195,7 +195,7 @@
          point="org.eclipse.ui.views">
       <view
             category="org.dawb.workbench.application.data.analysis"
-            class="org.dawb.workbench.plotting.views.ToolPageView"
+            class="org.dawnsci.plotting.views.ToolPageView"
             icon="icons/plot-tool-1d.png"
             id="org.dawb.workbench.plotting.views.toolPageView.1D"
             name="XY Tools"
@@ -203,7 +203,7 @@
       </view>
       <view
             category="org.dawb.workbench.application.data.analysis"
-            class="org.dawb.workbench.plotting.views.ToolPageView"
+            class="org.dawnsci.plotting.views.ToolPageView"
             icon="icons/plot-tool-2d.png"
             id="org.dawb.workbench.plotting.views.toolPageView.2D"
             name="Image Tools"
@@ -211,7 +211,7 @@
       </view>
       <view
             category="org.dawb.workbench.application.data.analysis"
-            class="org.dawb.workbench.plotting.views.ToolPageView"
+            class="org.dawnsci.plotting.views.ToolPageView"
             icon="icons/plot-tool-any.png"
             id="org.dawb.workbench.plotting.views.toolPageView.3D"
             name="3D Tools"
@@ -219,7 +219,7 @@
       </view>
       <view
             category="org.dawb.workbench.application.data.analysis"
-            class="org.dawb.workbench.plotting.views.ToolPageView"
+            class="org.dawnsci.plotting.views.ToolPageView"
             icon="icons/plot-tool-any.png"
             id="org.dawb.workbench.plotting.views.toolPageView.1D_and_2D"
             name="Tool"
@@ -228,7 +228,7 @@
       <view
             allowMultiple="true"
             category="org.dawb.workbench.application.data.analysis"
-            class="org.dawb.workbench.plotting.views.ToolPageView"
+            class="org.dawnsci.plotting.views.ToolPageView"
             icon="icons/plot-tool-any.png"
             id="org.dawb.workbench.plotting.views.toolPageView.fixed"
             name=" "
@@ -238,14 +238,14 @@
    <extension
          point="org.eclipse.core.runtime.preferences">
       <initializer
-            class="org.dawb.workbench.plotting.preference.FittingPreferenceInitializer">
+            class="org.dawnsci.plotting.preference.FittingPreferenceInitializer">
       </initializer>
    </extension>
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
             category="org.dawnsci.preferences.root"
-            class="org.dawb.workbench.plotting.preference.FittingPreferencePage"
+            class="org.dawnsci.plotting.preference.FittingPreferencePage"
             id="org.dawb.workbench.plotting.fittingPreferencePage"
             name="Fitting Preferences">
       </page>
@@ -257,13 +257,13 @@
       </page>
       <page
             category="org.dawnsci.preferences.diffraction"
-            class="org.dawb.workbench.plotting.preference.diffraction.DiffractionPreferencePage"
+            class="org.dawnsci.plotting.preference.diffraction.DiffractionPreferencePage"
             id="org.dawb.workbench.plotting.preference.diffraction.calibrantPreferencePage"
             name="Calibrants">
       </page>
       <page
             category="org.dawnsci.preferences.diffraction"
-            class="org.dawb.workbench.plotting.preference.DiffractionDefaultsPreferencePage"
+            class="org.dawnsci.plotting.preference.DiffractionDefaultsPreferencePage"
             id="org.dawb.workbench.plotting.page1"
             name="Tool Defaults">
       </page>
@@ -355,13 +355,13 @@
    <extension
          point="org.eclipse.ui.exportWizards">
       <wizard
-            class="org.dawb.workbench.plotting.tools.fitting.FittedPeaksExportWizard"
+            class="org.dawnsci.plotting.tools.fitting.FittedPeaksExportWizard"
             icon="icons/plot-tool-peak-fit.png"
             id="org.dawb.workbench.plotting.fittedPeaksExportWizard"
             name="Fitted Peaks">
       </wizard>
       <wizard
-            class="org.dawb.workbench.plotting.tools.reduction.DataReductionWizard"
+            class="org.dawnsci.plotting.tools.reduction.DataReductionWizard"
             icon="icons/data-reduction.png"
             id="org.dawb.workbench.plotting.dataReductionExportWizard"
             name="Data Reduction">
@@ -370,13 +370,13 @@
    <extension
          point="org.eclipse.core.runtime.preferences">
       <initializer
-            class="org.dawb.workbench.plotting.preference.DiffractionToolPreferenceInitializer">
+            class="org.dawnsci.plotting.preference.DiffractionToolPreferenceInitializer">
       </initializer>
    </extension>
    <extension
          point="org.eclipse.ui.newWizards">
       <wizard
-            class="org.dawb.workbench.plotting.preference.diffraction.AddCalibrantWizard"
+            class="org.dawnsci.plotting.preference.diffraction.AddCalibrantWizard"
             id="org.dawb.workbench.plotting.preference.diffraction.addCalibrantWizard"
             name="Add Calibrant">
       </wizard>
@@ -384,7 +384,7 @@
    <extension
          point="org.eclipse.ui.services">
       <serviceFactory
-            factoryClass="org.dawb.workbench.plotting.service.ClassLoaderService">
+            factoryClass="org.dawnsci.plotting.service.ClassLoaderService">
          <service
                serviceClass="org.dawb.common.services.IClassLoaderService">
          </service>
