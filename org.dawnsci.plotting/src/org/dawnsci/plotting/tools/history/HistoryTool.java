@@ -211,7 +211,7 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 				logger.trace(message);
 			    
 				// User may be interested in this fact.
-				Activator.getDefault().getLog().log(new Status(IStatus.WARNING, "org.dawb.workbench.plotting", message));
+				Activator.getDefault().getLog().log(new Status(IStatus.WARNING, "org.dawnsci.plotting", message));
 				final ITrace trace = getPlottingSystem().getTrace(bean.getTraceName());
 				if (trace!=null) {
 //					bean.setPlotColour(((ILineTrace)trace).getTraceColor().getRGB());

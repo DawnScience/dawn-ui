@@ -583,7 +583,7 @@ public class HistogramToolPage extends AbstractToolPage {
 			cmbColourMap.add(contribution.getName());
 		}
 
-		final ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawb.workbench.plotting");
+		final ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
         final String schemeName = store.getString("org.dawb.plotting.system.colourSchemeName");
 		cmbColourMap.select(Arrays.asList(cmbColourMap.getItems()).indexOf(schemeName));
 
@@ -821,7 +821,7 @@ public class HistogramToolPage extends AbstractToolPage {
 		btnAlphaInverse.setSelection(colourScheme.getAlphaInverted());
 
 		// Store as default preference
-		final ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawb.workbench.plotting");
+		final ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
 	    store.setValue("org.dawb.plotting.system.colourSchemeName", colourScheme.getName());
 	}
 
