@@ -720,14 +720,14 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		actionBars.getToolBarManager().add(reset);
 		actionBars.getToolBarManager().add(new Separator());
 		
-		final Action saveMask  = new Action("Save the mask into a buffer", Activator.getImageDescriptor("icons/import_wiz.gif")) {
+		final Action saveMask  = new Action("Save the mask into a temporary buffer", Activator.getImageDescriptor("icons/import_wiz.gif")) {
 			public void run() {
 				saveMaskBuffer();
 			}
 		};
 		actionBars.getToolBarManager().add(saveMask);
 		
-	    loadMask  = new Action("Merge the previously saved mask from buffer with this mask (if any)", Activator.getImageDescriptor("icons/export_wiz.gif")) {
+	    loadMask  = new Action("Merge in the mask from temporary buffer", Activator.getImageDescriptor("icons/export_wiz.gif")) {
 			public void run() {
 				mergeSavedMask();
 			}
