@@ -7,6 +7,8 @@ import org.eclipse.ui.IWorkbench;
 
 public class MaskImportWizard extends Wizard implements IImportWizard {
 
+	public static final String ID = "org.dawnsci.plotting.importMask";
+
 	public MaskImportWizard() {
 		// TODO Auto-generated constructor stub
 	}
