@@ -72,7 +72,7 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 
 	@Override
 	public RegionType getRegionType() {
-		return RegionType.CIRCLE;
+		return RegionType.CIRCLEFIT;
 	}
 
 	@Override
