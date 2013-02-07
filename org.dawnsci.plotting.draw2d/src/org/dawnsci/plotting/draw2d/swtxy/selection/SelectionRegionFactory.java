@@ -15,7 +15,6 @@ import org.eclipse.gef.ui.actions.Clipboard;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +43,7 @@ public class SelectionRegionFactory {
 		SUPPORTED_REGIONS.add(RegionType.FREE_DRAW);
 		SUPPORTED_REGIONS.add(RegionType.POINT);
 		SUPPORTED_REGIONS.add(RegionType.CIRCLE);
+		SUPPORTED_REGIONS.add(RegionType.CIRCLEFIT);
 		SUPPORTED_REGIONS.add(RegionType.ELLIPSE);
 		SUPPORTED_REGIONS.add(RegionType.ELLIPSEFIT);
 		SUPPORTED_REGIONS.add(RegionType.POLYLINE);
@@ -84,6 +84,8 @@ public class SelectionRegionFactory {
 			region = new PointSelection(name, coords);
 		} else if (regionType==RegionType.CIRCLE) {
 			region = new CircleSelection(name, coords);
+		} else if (regionType==RegionType.CIRCLEFIT) {
+			region = new CircleFitSelection(name, coords);
 		} else if (regionType==RegionType.ELLIPSE) {
 			region = new EllipseSelection(name, coords);
 		} else if (regionType==RegionType.ELLIPSEFIT) {
