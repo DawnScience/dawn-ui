@@ -80,7 +80,7 @@ public class MaskExportWizard extends Wizard implements IExportWizard {
 					 
 					 System.out.println(system);
 
-					 // TODO FIXME use the wizzy new service for saving mask!
+					 // TODO FIXME use the wizzy new service for saving mask! Send regions off to it...
 				 }
 			 });
 		 } catch (Exception ne) {
