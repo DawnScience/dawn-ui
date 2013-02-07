@@ -132,8 +132,8 @@ public class DiffractionTreeModel extends AbstractNodeModel {
     			}
     		});
         }
-        beamX.setIncrement(1);
-		beamX.setFormat("#0");
+        beamX.setIncrement(0.01);
+		beamX.setFormat("#0.##");
 		beamX.setLowerBound(0);
 		beamX.setUpperBound(100000);
         beamX.addUnitListener(createPixelFormatListener(beamX));
@@ -148,8 +148,8 @@ public class DiffractionTreeModel extends AbstractNodeModel {
     			}
     		});
         }
-        beamY.setIncrement(1);
-        beamY.setFormat("#0");
+        beamY.setIncrement(0.01);
+        beamY.setFormat("#0.##");
 		beamY.setLowerBound(0);
 		beamY.setUpperBound(100000);
         beamY.addUnitListener(createPixelFormatListener(beamY));		
@@ -356,8 +356,8 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 			        lambda.setUpperBound(1000); // It can be ev as well.
 
 				} else {
-					lambda.setIncrement(1);
-					lambda.setFormat("#0");
+					lambda.setIncrement(0.01);
+					lambda.setFormat("#0.##");
 					lambda.setLowerBound(0);
 					lambda.setUpperBound(100000);
 
