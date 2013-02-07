@@ -286,7 +286,7 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 
 		private void calcBox() {
 			box = affine.getTransformedUnitSquare();
-			setBounds(box.getBounds());
+			setBounds(box.getBounds().expand(2, 0));
 		}
 
 		@Override
