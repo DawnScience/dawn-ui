@@ -50,6 +50,20 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
+	public void setVisible(boolean visible) {
+		if (circle != null)
+			circle.setVisible(visible);
+		getBean().setVisible(visible);
+	}
+
+	@Override
+	public void setMobile(final boolean mobile) {
+		getBean().setMobile(mobile);
+		if (circle != null)
+			circle.setMobile(mobile);
+	}
+
+	@Override
 	public void createContents(Figure parent) {
 		circle = new DecoratedCircle(parent);
 		circle.setCursor(Draw2DUtils.getRoiMoveCursor());
@@ -232,6 +246,23 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 					DecoratedCircle.this.parent.repaint();
 				}
 			};
+		}
+
+		@Override
+		public void setVisible(boolean visible) {
+			super.setVisible(visible);
+			for (IFigure h : handles) {
+				h.setVisible(visible);
+			}
+		}
+
+		public void setMobile(boolean mobile) {
+			for (IFigure h : handles) {
+				h.setVisible(mobile);
+			}
+			for (FigureTranslator f : fTranslators) {
+				f.setActive(mobile);
+			}
 		}
 
 		/**

@@ -51,6 +51,20 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
+	public void setVisible(boolean visible) {
+		getBean().setVisible(visible);
+		if (ellipse != null)
+			ellipse.setVisible(visible);
+	}
+
+	@Override
+	public void setMobile(final boolean mobile) {
+		getBean().setMobile(mobile);
+		if (ellipse != null)
+			ellipse.setMobile(mobile);
+	}
+
+	@Override
 	public void createContents(Figure parent) {
 		ellipse = new DecoratedEllipse(parent);
 		ellipse.setCursor(Draw2DUtils.getRoiMoveCursor());
@@ -235,6 +249,24 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 			};
 
 			showMajorAxis(true);
+		}
+
+		@Override
+		public void setVisible(boolean visible) {
+			super.setVisible(visible);
+			boolean hVisible = visible && isMobile();
+			for (IFigure h : handles) {
+				h.setVisible(hVisible);
+			}
+		}
+
+		public void setMobile(boolean mobile) {
+			for (IFigure h : handles) {
+				h.setVisible(mobile);
+			}
+			for (FigureTranslator f : fTranslators) {
+				f.setActive(mobile);
+			}
 		}
 
 		public void setup(PointList points) {
