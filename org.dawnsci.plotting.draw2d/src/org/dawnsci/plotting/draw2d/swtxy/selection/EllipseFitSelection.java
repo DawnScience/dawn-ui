@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
+import uk.ac.diamond.scisoft.analysis.fitting.CircleFitter;
 import uk.ac.diamond.scisoft.analysis.fitting.EllipseFitter;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalFitROI;
 import uk.ac.diamond.scisoft.analysis.roi.PointROI;
@@ -34,16 +35,19 @@ import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 public class EllipseFitSelection extends AbstractSelectionRegion {
 	private final static Logger logger = LoggerFactory.getLogger(EllipseFitSelection.class);
 
-	private static final int MIN_POINTS = 5; // minimum number of points to define ellipse
+	private static final int CIR_POINTS = 3; // minimum number of points to define circle
+	private static final int ELL_POINTS = 5; // minimum number of points to define ellipse
 	DecoratedEllipse ellipse;
-	private EllipseFitter fitter;
+	private EllipseFitter eFitter;
+	private CircleFitter cFitter;
 
 	public EllipseFitSelection(String name, ICoordinateSystem coords) {
 		super(name, coords);
 		setRegionColor(ColorConstants.lightGreen);
 		setAlpha(80);
 		setLineWidth(2);
-		fitter = new EllipseFitter();
+		eFitter = new EllipseFitter();
+		cFitter = new CircleFitter();
 	}
 
 	@Override
@@ -98,17 +102,28 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 		}
 		AbstractDataset xds = new DoubleDataset(x, n); 
 		AbstractDataset yds = new DoubleDataset(y, n);
+
 		try {
-			fitter.geometricFit(xds, yds, null);
-			final double[] parameters = fitter.getParameters();
-			
-			int[] pnt1 = coords.getValuePosition(2 * parameters[0] + parameters[3], 2 * parameters[1] + parameters[4]);
-			int[] pnt2 = coords.getValuePosition(parameters[3], parameters[4]);
-			
-			ellipse.setAxes(pnt1[0]- pnt2[0],pnt1[1]- pnt2[1]);
-			
+			int[] pnt1;
+			int[] pnt2;
+			double ang;
+			if (n >= CIR_POINTS && n < ELL_POINTS) {
+				cFitter.geometricFit(xds, yds, null);
+				final double[] parameters = cFitter.getParameters();
+				pnt1 = coords.getValuePosition(2 * parameters[0] + parameters[1], 2 * parameters[0] + parameters[2]);
+				pnt2 = coords.getValuePosition(parameters[1], parameters[2]);
+				ang = 0;
+			} else {
+				eFitter.geometricFit(xds, yds, null);
+				final double[] parameters = eFitter.getParameters();
+				pnt1 = coords.getValuePosition(2 * parameters[0] + parameters[3], 2 * parameters[1] + parameters[4]);
+				pnt2 = coords.getValuePosition(parameters[3], parameters[4]);
+				ang = Math.toDegrees(parameters[2]);
+			}
+
+			ellipse.setAxes(pnt1[0] - pnt2[0], pnt1[1] - pnt2[1]);
 			ellipse.setCentre(pnt2[0], pnt2[1]);
-			ellipse.setAngle(Math.toDegrees(parameters[2]));
+			ellipse.setAngle(ang);
 		} catch (IllegalArgumentException e) {
 			logger.info("Can not fit current selection");
 		}
@@ -123,7 +138,7 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 		g.setAlpha(getAlpha());
 		g.setLineStyle(Graphics.LINE_DOT);
 		g.drawPolyline(clicks);
-		if (clicks.size() >= MIN_POINTS) {
+		if (clicks.size() >= CIR_POINTS) {
 			if (tempEllipse == null) {
 				tempEllipse = new RotatableEllipse();
 				tempEllipse.setOutline(true);
@@ -195,7 +210,7 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 
 	@Override
 	public int getMinimumMousePresses() {
-		return MIN_POINTS;
+		return CIR_POINTS;
 	}
 
 	class DecoratedEllipse extends RotatableEllipse implements IRegionContainer {
@@ -340,7 +355,7 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 					SelectionHandle h = (SelectionHandle) f;
 					Point p = h.getSelectionPoint();
 					setCentre(p.preciseX(), p.preciseY());
-					double[] parameters = fitter.getParameters();
+					double[] parameters = eFitter.getParameters();
 					double[] ps   = coords.getPositionValue(p.x(), p.y());
 					parameters[3] = ps[0];
 					parameters[4] = ps[1];
