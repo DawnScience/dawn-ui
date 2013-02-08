@@ -226,6 +226,7 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 		private TranslationListener handleListener;
 		private FigureListener moveListener;
 		private static final int SIDE = 8;
+		private static final double HALF_SIDE = 8/2;
 
 		public DecoratedCircle() {
 			super();
@@ -425,7 +426,7 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 
 		private void addHandle(Point p) {
 			RectangularHandle h = new RectangularHandle(coords, getRegionColor(), this, SIDE,
-					p.preciseX(), p.preciseY());
+					p.preciseX() - HALF_SIDE, p.preciseY() - HALF_SIDE);
 			parent.add(h);
 			FigureTranslator mover = new FigureTranslator(getXyGraph(), h);
 			mover.addTranslationListener(handleListener);
@@ -436,7 +437,8 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 
 		private void addCentreHandle() {
 			Point c = getCentre();
-			RectangularHandle h = new RectangularHandle(coords, getRegionColor(), this, SIDE, c.preciseX(), c.preciseY());
+			RectangularHandle h = new RectangularHandle(coords, getRegionColor(), this, SIDE,
+					c.preciseX() - HALF_SIDE, c.preciseY() - HALF_SIDE);
 			parent.add(h);
 			FigureTranslator mover = new FigureTranslator(getXyGraph(), h, h, handles);
 			mover.addTranslationListener(createRegionNotifier());
