@@ -146,7 +146,7 @@ public class RotatableEllipse extends Shape {
 
 	private void calcBox() {
 		box = affine.getTransformedUnitSquare();
-		setBounds(box.getBounds().expand(2, 0));
+		setBounds(box.getBounds().expand(2, 2));
 	}
 
 	@Override
