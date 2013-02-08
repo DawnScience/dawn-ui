@@ -314,6 +314,8 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		if (imageTrace==null) return null;
 		IMetaData mdImage = imageTrace.getData().getMetadata();
 		
+		int[] imageShape = imageTrace.getData().getShape();
+		
 		if (mdImage !=null && mdImage  instanceof IDiffractionMetadata) return (IDiffractionMetadata)mdImage;
 		
 		// if it is null try and get it from the loader service
@@ -323,6 +325,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			if (getPart() instanceof IEditorPart) {
 				try {
 					md = service.getMetaData(EclipseUtils.getFilePath(((IEditorPart)getPart()).getEditorInput()), null);
+					
 				} catch (Exception e) {
 					logger.error("Cannot read meta data from "+getPart().getTitle(), e);
 				}
@@ -333,6 +336,15 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			
 			if (md != null)
 				mdImage = md;
+		}
+		
+		if (mdImage!=null) {
+			IDiffractionMetadata difMet = NexusDiffractionMetaCreator.diffractionMetadataFromNexus(EclipseUtils.getFilePath(((IEditorPart)getPart()).getEditorInput()),
+																			   mdImage,imageShape);
+			if (difMet !=null) {
+				imageTrace.getData().setMetadata(difMet);
+				return difMet;
+			}
 		}
 		
 		//if the file contains IMetaData but not IDiffraction meta data, wrap the old meta in a 
