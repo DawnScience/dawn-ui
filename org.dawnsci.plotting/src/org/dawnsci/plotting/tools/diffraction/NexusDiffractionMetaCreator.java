@@ -31,6 +31,8 @@ public class NexusDiffractionMetaCreator {
 	 */
 	public static IDiffractionMetadata diffractionMetadataFromNexus(String filePath, final IMetaData metaData, int[] imageSize) {
 		
+		if (!HierarchicalDataFactory.isHDF5(filePath)) return null;
+		
 		final DetectorProperties detprop = DiffractionDefaultMetadata.getPersistedDetectorProperties(imageSize);
 		final DiffractionCrystalEnvironment diffcrys = DiffractionDefaultMetadata.getPersistedDiffractionCrystalEnvironment();
 		
@@ -50,6 +52,7 @@ public class NexusDiffractionMetaCreator {
 				//Find NXinstrument (hopefully there is only one!)
 				NexusFindGroupByAttributeText finder = new NexusFindGroupByAttributeText("NXinstrument",NexusUtils.NXCLASS);
 				List<HObject> hOb = NexusUtils.nexusBreadthFirstSearch(finder, (Group)rootGroup.getMemberList().get(0), true);
+				//if no instrument best just return null
 				if (hOb.isEmpty() || !(hOb.get(0) instanceof Group)) { return null;}
 				Group nxInstrument = (Group)hOb.get(0);
 				
@@ -58,6 +61,7 @@ public class NexusDiffractionMetaCreator {
 				//  this will also validate detprop.setPx(px) detprop.setPy(py) 
 				List<Group> nxDetectors = findNXdetetors(nxInstrument, "pixel");
 				
+				//also if no detectors return null
 				if (nxDetectors.isEmpty()) {return null;}
 				// TODO do something better if list is empty or has more than one object
 				
@@ -69,9 +73,10 @@ public class NexusDiffractionMetaCreator {
 				//find nx mono
 				finder.attributeValue = "NXmonochromator";
 				hOb = NexusUtils.nexusBreadthFirstSearch(finder, (Group)rootGroup.getMemberList().get(0), true);
-				if (hOb.isEmpty() || !(hOb.get(0) instanceof Group)) { return null;}
-				Group mxMono = (Group)hOb.get(0);
-				updateEnergy(mxMono,diffcrys);
+				if (!hOb.isEmpty() || (hOb.get(0) instanceof Group)) {
+					Group mxMono = (Group)hOb.get(0);
+					updateEnergy(mxMono,diffcrys);
+				}
 			}
 
 		} catch (Exception e) {
@@ -101,11 +106,6 @@ public class NexusDiffractionMetaCreator {
 			@Override
 			public DetectorProperties getDetector2DProperties() {
 				return detpropClone;
-			}
-			
-			@Override
-			public IDiffractionMetadata clone(){
-				return null;
 			}
 			
 			@Override
