@@ -18,7 +18,11 @@ import org.dawb.common.ui.plot.tool.AbstractToolPage;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawnsci.plotting.Activator;
+import org.dawnsci.plotting.draw2d.swtxy.selection.EllipseFitSelection;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
@@ -51,6 +55,10 @@ public class EllipseFittingTool extends AbstractToolPage {
 	private TableViewer viewer;
 	private List<IRegion> ellipses;
 
+	private EllipseFitSelection cRegion;
+
+	protected boolean circleOnly;
+
 	public EllipseFittingTool() {
 		ellipses = new ArrayList<IRegion>(5);
 
@@ -68,6 +76,14 @@ public class EllipseFittingTool extends AbstractToolPage {
 			@Override
 			public void regionAdded(RegionEvent evt) {
 				updateEllipse(evt.getRegion());
+			}
+
+			@Override
+			public void regionCreated(RegionEvent evt) {
+				IRegion r = evt.getRegion();
+				if (r instanceof EllipseFitSelection) {
+					((EllipseFitSelection) r).setFitCircle(circleOnly);
+				}
 			}
 		};
 
@@ -107,6 +123,7 @@ public class EllipseFittingTool extends AbstractToolPage {
 			return;
 
 		region.addROIListener(ellipseROIListener);
+		cRegion = (EllipseFitSelection) region;
 		ellipses.add(region);
 		viewer.refresh();
 	}
@@ -258,8 +275,26 @@ public class EllipseFittingTool extends AbstractToolPage {
 		};
 		delete.setToolTipText("Delete selected region, if there is one.");
 
-		getSite().getActionBars().getToolBarManager().add(delete);
-		getSite().getActionBars().getMenuManager().add(delete);
+		final Action circle = new Action("Use circle for fit", IAction.AS_CHECK_BOX) {
+			@Override
+			public void run() {
+				circleOnly = isChecked();
+				logger.debug("Circle fit clicked: {}", circleOnly);
+
+				if (cRegion != null) {
+					cRegion.setFitCircle(circleOnly);
+					
+				}
+			}
+		};
+		circle.setImageDescriptor(Activator.getImageDescriptor("icons/aspect.png"));
+
+		IToolBarManager tbm = getSite().getActionBars().getToolBarManager();
+		tbm.add(circle);
+		tbm.add(delete);
+		IMenuManager mm = getSite().getActionBars().getMenuManager();
+		mm.add(circle);
+		mm.add(delete);
 	}
 
 	class EllipseROILabelProvider extends ColumnLabelProvider {
@@ -318,7 +353,7 @@ public class EllipseFittingTool extends AbstractToolPage {
 
 		// Start with a selection of the right type
 		try {
-			plotter.createRegion(RegionUtils.getUniqueName("Ellipse fit", plotter), RegionType.ELLIPSEFIT);
+			cRegion = (EllipseFitSelection) plotter.createRegion(RegionUtils.getUniqueName("Ellipse fit", plotter), RegionType.ELLIPSEFIT);
 		} catch (Exception e) {
 			logger.error("Cannot create region for ellipse fitting tool!");
 		}
