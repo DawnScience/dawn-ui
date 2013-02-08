@@ -10,70 +10,69 @@ import org.dawb.common.ui.plot.region.ROIEvent;
 import org.dawnsci.plotting.draw2d.swtxy.translate.FigureTranslator;
 import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationEvent;
 import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationListener;
+import org.dawnsci.plotting.draw2d.swtxy.util.AffineTransform;
 import org.dawnsci.plotting.draw2d.swtxy.util.Draw2DUtils;
-import org.dawnsci.plotting.draw2d.swtxy.util.RotatableEllipse;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.FigureListener;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.Shape;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
+import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.swt.SWT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.fitting.CircleFitter;
-import uk.ac.diamond.scisoft.analysis.fitting.EllipseFitter;
-import uk.ac.diamond.scisoft.analysis.roi.EllipticalFitROI;
+import uk.ac.diamond.scisoft.analysis.roi.CircularFitROI;
 import uk.ac.diamond.scisoft.analysis.roi.PointROI;
 import uk.ac.diamond.scisoft.analysis.roi.PolylineROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
-public class EllipseFitSelection extends AbstractSelectionRegion {
-	private final static Logger logger = LoggerFactory.getLogger(EllipseFitSelection.class);
+public class CircleFitSelection extends AbstractSelectionRegion {
+	private final static Logger logger = LoggerFactory.getLogger(CircleFitSelection.class);
 
-	private static final int CIR_POINTS = 3; // minimum number of points to define circle
-	private static final int ELL_POINTS = 5; // minimum number of points to define ellipse
-	DecoratedEllipse ellipse;
-	private EllipseFitter eFitter;
-	private CircleFitter cFitter;
+	private static final int MIN_POINTS = 3; // minimum number of points to define ellipse
+	DecoratedCircle circle;
+	private CircleFitter fitter;
 
-	public EllipseFitSelection(String name, ICoordinateSystem coords) {
+	public CircleFitSelection(String name, ICoordinateSystem coords) {
 		super(name, coords);
-		setRegionColor(ColorConstants.lightGreen);
+		setRegionColor(ColorConstants.yellow);
 		setAlpha(80);
 		setLineWidth(2);
-		eFitter = new EllipseFitter();
-		cFitter = new CircleFitter();
+		fitter = new CircleFitter();
 	}
 
 	@Override
 	public void setVisible(boolean visible) {
+		if (circle != null)
+			circle.setVisible(visible);
 		getBean().setVisible(visible);
-		if (ellipse != null)
-			ellipse.setVisible(visible);
 	}
 
 	@Override
 	public void setMobile(final boolean mobile) {
 		getBean().setMobile(mobile);
-		if (ellipse != null)
-			ellipse.setMobile(mobile);
+		if (circle != null)
+			circle.setMobile(mobile);
 	}
 
 	@Override
 	public void createContents(Figure parent) {
-		ellipse = new DecoratedEllipse(parent);
-		ellipse.setCursor(Draw2DUtils.getRoiMoveCursor());
+		circle = new DecoratedCircle(parent);
+		circle.setCursor(Draw2DUtils.getRoiMoveCursor());
 
-		parent.add(ellipse);
+		parent.add(circle);
 		sync(getBean());
-		ellipse.setForegroundColor(getRegionColor());
-		ellipse.setAlpha(getAlpha());
-		ellipse.setLineWidth(getLineWidth());
+		circle.setForegroundColor(getRegionColor());
+		circle.setAlpha(getAlpha());
+		circle.setLineWidth(getLineWidth());
 		updateROI();
 		if (roi == null)
 			createROI(true);
@@ -82,25 +81,25 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 	@Override
 	public boolean containsPoint(double x, double y) {
 		final int[] pix = coords.getValuePosition(x,y);
-		return ellipse.containsPoint(pix[0], pix[1]);
+		return circle.containsPoint(pix[0], pix[1]);
 	}
 
 	@Override
 	public RegionType getRegionType() {
-		return RegionType.ELLIPSEFIT;
+		return RegionType.CIRCLEFIT;
 	}
 
 	@Override
 	protected void updateConnectionBounds() {
-		if (ellipse != null) {
-			ellipse.updateFromHandles();
-			Rectangle b = ellipse.getBounds();
+		if (circle != null) {
+			circle.updateFromHandles();
+			Rectangle b = circle.getBounds();
 			if (b != null)
-				ellipse.setBounds(b);
+				circle.setBounds(b);
 		}
 	}
 
-	private void fitPoints(PointList pts, RotatableEllipse ellipse) {
+	private void fitPoints(PointList pts, DecoratedCircle circle) {
 		if (pts == null)
 			return;
 
@@ -116,34 +115,21 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 		}
 		AbstractDataset xds = new DoubleDataset(x, n); 
 		AbstractDataset yds = new DoubleDataset(y, n);
-
 		try {
-			int[] pnt1;
-			int[] pnt2;
-			double ang;
-			if (n >= CIR_POINTS && n < ELL_POINTS) {
-				cFitter.geometricFit(xds, yds, null);
-				final double[] parameters = cFitter.getParameters();
-				pnt1 = coords.getValuePosition(2 * parameters[0] + parameters[1], 2 * parameters[0] + parameters[2]);
-				pnt2 = coords.getValuePosition(parameters[1], parameters[2]);
-				ang = 0;
-			} else {
-				eFitter.geometricFit(xds, yds, null);
-				final double[] parameters = eFitter.getParameters();
-				pnt1 = coords.getValuePosition(2 * parameters[0] + parameters[3], 2 * parameters[1] + parameters[4]);
-				pnt2 = coords.getValuePosition(parameters[3], parameters[4]);
-				ang = Math.toDegrees(parameters[2]);
-			}
+			fitter.geometricFit(xds, yds, null);
+			final double[] parameters = fitter.getParameters();
 
-			ellipse.setAxes(pnt1[0] - pnt2[0], pnt1[1] - pnt2[1]);
-			ellipse.setCentre(pnt2[0], pnt2[1]);
-			ellipse.setAngle(ang);
+			int[] pnt1 = coords.getValuePosition(parameters[0] + parameters[1], 0);
+			int[] pnt2 = coords.getValuePosition(parameters[1], parameters[2]);
+			
+			circle.setRadius(pnt1[0] - pnt2[0]);
+			circle.setCentre(pnt2[0], pnt2[1]);
 		} catch (IllegalArgumentException e) {
 			logger.info("Can not fit current selection");
 		}
 	}
 
-	private RotatableEllipse tempEllipse;
+	private DecoratedCircle tempCircle;
 
 	@Override
 	public void paintBeforeAdded(Graphics g, PointList clicks, Rectangle parentBounds) {
@@ -152,21 +138,21 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 		g.setAlpha(getAlpha());
 		g.setLineStyle(Graphics.LINE_DOT);
 		g.drawPolyline(clicks);
-		if (clicks.size() >= CIR_POINTS) {
-			if (tempEllipse == null) {
-				tempEllipse = new RotatableEllipse();
-				tempEllipse.setOutline(true);
-				tempEllipse.setFill(false);
+		if (clicks.size() >= MIN_POINTS) {
+			if (tempCircle == null) {
+				tempCircle = new DecoratedCircle();
+				tempCircle.setOutline(true);
+				tempCircle.setFill(false);
 			}
-			fitPoints(clicks, tempEllipse);
-			tempEllipse.paintFigure(g);
+			fitPoints(clicks, tempCircle);
+			tempCircle.paintFigure(g);
 		}
 	}
 
 	@Override
 	public void setLocalBounds(PointList clicks, Rectangle parentBounds) {
-		if (ellipse != null) {
-			ellipse.setup(clicks);
+		if (circle != null) {
+			circle.setup(clicks);
 			setRegionColor(getRegionColor());
 			setOpaque(false);
 			setAlpha(getAlpha());
@@ -177,12 +163,12 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 
 	@Override
 	protected String getCursorPath() {
-		return "icons/Cursor-ellipse.png";
+		return "icons/Cursor-circle.png";
 	}
 
 	@Override
 	protected ROIBase createROI(boolean recordResult) {
-		final PointList pl = ellipse.getPoints();
+		final PointList pl = circle.getPoints();
 		if (pl == null) {
 			return null;
 		}
@@ -195,11 +181,11 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 		}
 
 		try {
-			final EllipticalFitROI eroi = new EllipticalFitROI(hroi);
+			final CircularFitROI croi = new CircularFitROI(hroi);
 			if (recordResult) {
-				roi = eroi;
+				roi = croi;
 			}
-			return eroi;
+			return croi;
 		} catch (IllegalArgumentException e) {
 			// do nothing
 		}
@@ -208,11 +194,11 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 
 	@Override
 	protected void updateROI(ROIBase roi) {
-		if (ellipse == null)
+		if (circle == null)
 			return;
 
-		if (roi instanceof EllipticalFitROI) {
-			ellipse.updateFromROI((EllipticalFitROI) roi);
+		if (roi instanceof CircularFitROI) {
+			circle.updateFromROI((CircularFitROI) roi);
 			updateConnectionBounds();
 		}
 	}
@@ -224,18 +210,31 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 
 	@Override
 	public int getMinimumMousePresses() {
-		return CIR_POINTS;
+		return MIN_POINTS;
 	}
 
-	class DecoratedEllipse extends RotatableEllipse implements IRegionContainer {
+	private static PrecisionPoint centre = new PrecisionPoint(0.5, 0.5);
+
+	class DecoratedCircle extends Shape implements IRegionContainer {
+		private AffineTransform affine; // transforms unit square (origin at top-left corner) to transformed rectangle
+		private PointList box; // bounding box of ellipse
+		private boolean outlineOnly = false;
+
 		List<IFigure> handles;
 		List<FigureTranslator> fTranslators;
 		private Figure parent;
 		private TranslationListener handleListener;
 		private FigureListener moveListener;
 		private static final int SIDE = 8;
-		public DecoratedEllipse(Figure parent) {
+
+		public DecoratedCircle() {
 			super();
+			affine = new AffineTransform();
+		}
+
+		public DecoratedCircle(Figure parent) {
+			super();
+			affine = new AffineTransform();
 			handles = new ArrayList<IFigure>();
 			fTranslators = new ArrayList<FigureTranslator>();
 			this.parent = parent;
@@ -244,19 +243,16 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 			moveListener = new FigureListener() {
 				@Override
 				public void figureMoved(IFigure source) {
-					DecoratedEllipse.this.parent.repaint();
+					DecoratedCircle.this.parent.repaint();
 				}
 			};
-
-			showMajorAxis(true);
 		}
 
 		@Override
 		public void setVisible(boolean visible) {
 			super.setVisible(visible);
-			boolean hVisible = visible && isMobile();
 			for (IFigure h : handles) {
-				h.setVisible(hVisible);
+				h.setVisible(visible);
 			}
 		}
 
@@ -267,6 +263,140 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 			for (FigureTranslator f : fTranslators) {
 				f.setActive(mobile);
 			}
+		}
+
+		/**
+		 * Set centre position
+		 * @param cx
+		 * @param cy
+		 */
+		public void setCentre(double cx, double cy) {
+			Point oc = affine.getTransformed(centre);
+			affine.setTranslation(affine.getTranslationX() + cx - oc.preciseX(), affine.getTranslationY() + cy - oc.preciseY());
+			calcBox();
+		}
+
+		/**
+		 * @return centre of circle
+		 */
+		public Point getCentre() {
+			return affine.getTransformed(centre);
+		}
+
+		/**
+		 * @return radius
+		 */
+		public double getRadius() {
+			return 0.5*affine.getScaleX();
+		}
+
+		/**
+		 * Get point on circle at given angle
+		 * @param degrees (positive for anti-clockwise)
+		 * @return
+		 */
+		public Point getPoint(double degrees) {
+			double angle = -Math.toRadians(degrees);
+			double c = Math.cos(angle);
+			double s = Math.sin(angle);
+			PrecisionPoint p = new PrecisionPoint(0.5*(c+1), 0.5*(s+1));
+			return affine.getTransformed(p);
+		}
+
+		/**
+		 * Set radius
+		 * @param radius
+		 */
+		public void setRadius(double radius) {
+			Point oc = affine.getTransformed(centre);
+			affine.setScale(2*radius);
+			Point nc = affine.getTransformed(centre);
+			affine.setTranslation(affine.getTranslationX() + oc.preciseX() - nc.preciseX(), affine.getTranslationY() + oc.preciseY() - nc.preciseY());
+			calcBox();
+		}
+
+		private void calcBox() {
+			box = affine.getTransformedUnitSquare();
+			setBounds(box.getBounds().expand(2, 0));
+		}
+
+		@Override
+		public void setLocation(Point p) {
+			affine.setTranslation(p.preciseX(), p.preciseY());
+			calcBox();
+		}
+
+		@Override
+		public boolean containsPoint(int x, int y) {
+			if (outlineOnly) {
+				double d = affine.getInverseTransformed(new PrecisionPoint(x, y)).getDistance(centre);
+				return Math.abs(d - 0.5) < 2./affine.getScaleX();
+			}
+
+			if (!super.containsPoint(x, y) || !box.polygonContainsPoint(x, y))
+				return false;
+
+			Point p = affine.getInverseTransformed(new PrecisionPoint(x, y));
+			return p.getDistance(centre) <= 0.5;
+		}
+
+		@Override
+		public void setFill(boolean b) {
+			super.setFill(b);
+			outlineOnly  = !b;
+		}
+
+		@Override
+		protected void fillShape(Graphics graphics) {
+	        if (!isShapeFriendlySize()) return;
+
+	        graphics.pushState();
+			graphics.setAdvanced(true);
+			graphics.setAntialias(SWT.ON);
+			graphics.translate((int) affine.getTranslationX(), (int) affine.getTranslationY());
+			graphics.rotate((float) affine.getRotationDegrees());
+			// NB do not use Graphics#scale and unit shape as there are precision problems
+			int d = (int)affine.getScaleX();
+			graphics.fillOval(0, 0, d, d);
+			graphics.popState();
+		}
+
+		@Override
+		protected void outlineShape(Graphics graphics) {
+	        if (!isShapeFriendlySize()) return;
+
+	        graphics.pushState();
+			graphics.setAdvanced(true);
+			graphics.setAntialias(SWT.ON);
+
+			graphics.translate((int) affine.getTranslationX(), (int) affine.getTranslationY());
+			graphics.rotate((float) affine.getRotationDegrees());
+			// NB do not use Graphics#scale and unit shape as there are precision problems
+			int d = (int)affine.getScaleX();
+			graphics.drawOval(0, 0, d, d);
+			graphics.popState();
+		}
+
+		private boolean isShapeFriendlySize() {
+			IFigure p = getParent();
+			if (p == null)
+				return true;
+
+			int r = (int)affine.getScaleX();
+			
+			// If the affine transform is outside the size of the bounds, we
+			// are very likely to be off-screen. 
+			// On linux off screen is bad therefore we do not draw
+			// Fix to http://jira.diamond.ac.uk/browse/DAWNSCI-429
+			Rectangle bnds = p.getBounds().getExpanded(500, 500); // This is a fudge, very elongated do still not show.
+			                                                                // Better than crashes however...
+			if (r>bnds.width && r>bnds.height) return false;
+			return true;
+		}
+
+		@Override
+		public String toString() {
+			return "Radius " + getRadius() + ", centre " + getCentre();
 		}
 
 		public void setup(PointList points) {
@@ -335,7 +465,7 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 				public void translationAfter(TranslationEvent evt) {
 					Object src = evt.getSource();
 					if (src instanceof FigureTranslator) {
-						fitPoints(getPoints(), DecoratedEllipse.this);
+						fitPoints(getPoints(), DecoratedCircle.this);
 						if (handles.size() > 0) {
 							IFigure f = handles.get(handles.size() - 1);
 							if (f instanceof SelectionHandle) {
@@ -387,10 +517,10 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 					SelectionHandle h = (SelectionHandle) f;
 					Point p = h.getSelectionPoint();
 					setCentre(p.preciseX(), p.preciseY());
-					double[] parameters = eFitter.getParameters();
+					double[] parameters = fitter.getParameters();
 					double[] ps   = coords.getPositionValue(p.x(), p.y());
-					parameters[3] = ps[0];
-					parameters[4] = ps[1];
+					parameters[1] = ps[0];
+					parameters[2] = ps[1];
 				}
 			}
 		}
@@ -412,18 +542,18 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 		 * Update according to ROI
 		 * @param sroi
 		 */
-		public void updateFromROI(EllipticalFitROI eroi) {
-			final double[] xy = eroi.getPointRef();
+		public void updateFromROI(CircularFitROI croi) {
+			final double[] xy = croi.getPointRef();
 			int[] p1 = coords.getValuePosition(xy[0], xy[1]);
-			int[] p2 = coords.getValuePosition(2*eroi.getSemiAxis(0) + xy[0], 2*eroi.getSemiAxis(1) + xy[1]);
-						
-			setAxes(p2[0] - p1[0], p2[1] - p1[1]);
+			double r = croi.getRadius();
+			int[] p2 = coords.getValuePosition(r + xy[0], r + xy[1]);
+
+			setRadius(p2[0] - p1[0]);
 
 			setCentre(p1[0], p1[1]);
-			setAngle(eroi.getAngleDegrees());
 
 			int imax = handles.size() - 1;
-			PolylineROI proi = eroi.getPoints();
+			PolylineROI proi = croi.getPoints();
 
 			if (imax != proi.getNumberOfPoints()) {
 				for (int i = imax; i >= 0; i--) {
@@ -454,7 +584,7 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 
 		@Override
 		public IRegion getRegion() {
-			return EllipseFitSelection.this;
+			return CircleFitSelection.this;
 		}
 
 		@Override

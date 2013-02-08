@@ -12,9 +12,11 @@ import org.dawb.common.services.ILoaderService;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
+import org.dawb.common.ui.plot.region.IROIListener;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
+import org.dawb.common.ui.plot.region.ROIEvent;
 import org.dawb.common.ui.plot.region.RegionEvent;
 import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
@@ -81,6 +83,8 @@ import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.rcp.plotting.utils.BeamCenterRefinement;
+import uk.ac.diamond.scisoft.analysis.roi.CircularFitROI;
+import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 
 
@@ -101,6 +105,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	private IRegionListener       regionListener;
 	private IPaletteListener.Stub paletteListener;
 	private ITraceListener.Stub   traceListener;
+	private IROIListener roiListener;
 	
 	protected DiffractionImageAugmenter augmenter;
 	
@@ -463,7 +468,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			}
 		};
 		
-		final Action centre = new Action("One-click beam centre",IAction.AS_PUSH_BUTTON) {
+		final Action centre = new Action("One-click beam centre", IAction.AS_PUSH_BUTTON) {
 			@Override
 			public void run() {
 				logger.debug("1-click clicked");
@@ -484,7 +489,29 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		};
 		centre.setImageDescriptor(Activator.getImageDescriptor("icons/centre.png"));
 		
-		final Action refine = new Action("Refine beam center",IAction.AS_PUSH_BUTTON) {
+		final Action cCentre = new Action("Three-click beam centre", IAction.AS_PUSH_BUTTON) {
+			@Override
+			public void run() {
+				logger.debug("3-click clicked");
+				
+				try {
+					if (tmpRegion != null) {
+						getPlottingSystem().removeRegion(tmpRegion);
+					}
+					tmpRegion = getPlottingSystem().createRegion(RegionUtils.getUniqueName("BeamCentrePicker", getPlottingSystem()), IRegion.RegionType.CIRCLEFIT);
+					tmpRegion.setUserRegion(false);
+//					tmpRegion.setVisible(false);
+					tmpRegion.setMobile(true);
+					tmpRegion.addROIListener(roiListener);
+				} catch (Exception e) {
+					logger.error("Cannot add beam center", e);
+				}
+
+			}
+		};
+		cCentre.setImageDescriptor(Activator.getImageDescriptor("icons/centre.png"));
+
+		final Action refine = new Action("Refine beam center", IAction.AS_PUSH_BUTTON) {
 			
 			class Compare implements Comparator<IPeak> {
 
@@ -608,6 +635,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	    toolMan.add(calibrantActions);
 		toolMan.add(new Separator());
 		toolMan.add(centre);
+		toolMan.add(cCentre);
 		toolMan.add(refine);
 		toolMan.add(new Separator());
 		toolMan.add(reset);
@@ -618,6 +646,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		
 		menuMan.add(dropdown);
 	    menuMan.add(centre);
+	    menuMan.add(cCentre);
 	    menuMan.add(refine);
 		menuMan.add(new Separator());
 		menuMan.add(reset);
@@ -665,11 +694,29 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			public void regionAdded(RegionEvent evt) {
 				//test if our region
 				if (evt.getRegion() == tmpRegion) {
-					logger.debug("1-Click region added");
-					double[] point = evt.getRegion().getROI().getPoint();
-					logger.debug("Clicked here X: " + point[0] + " Y : " + point[1]);
-					
-					getPlottingSystem().removeRegion(tmpRegion);
+					logger.debug("1-Click region added (type: {})", tmpRegion.getRegionType());
+					double[] point = tmpRegion.getROI().getPointRef();
+					logger.debug("Clicked here X: {} Y : {}", point[0], point[1]);
+
+					if (tmpRegion.getRegionType() == RegionType.POINT)
+						getPlottingSystem().removeRegion(tmpRegion);
+					IDiffractionMetadata data = getDiffractionMetaData();
+					DetectorProperties detprop = data.getDetector2DProperties();
+					detprop.setBeamCentreCoords(point);
+					if (!augmenter.isShowingBeamCenter()) {
+						augmenter.drawBeamCentre(true);
+					}
+				}
+			}
+		};
+
+		roiListener = new IROIListener.Stub() {
+			@Override
+			public void update(ROIEvent evt) {
+				ROIBase r = evt.getROI();
+				if (r instanceof CircularFitROI) {
+					double[] point = r.getPointRef();
+					logger.debug("ROI moved here X: {} Y : {}", point[0], point[1]);
 					IDiffractionMetadata data = getDiffractionMetaData();
 					DetectorProperties detprop = data.getDetector2DProperties();
 					detprop.setBeamCentreCoords(point);
