@@ -96,7 +96,6 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	private TreeViewer      viewer;
 	private Composite       control;
 	private DiffractionTreeModel model;
-	private ILoaderService  service;
 	
 	private static DiffractionTool      activeDiffractionTool=null;
 	
@@ -131,9 +130,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 				updateIntensity();
 			}
 		};
-		
-		this.service = (ILoaderService)PlatformUI.getWorkbench().getService(ILoaderService.class);
-      
+	      
 	}
 
 	protected void updateIntensity() {
@@ -189,7 +186,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		CalibrationFactory.addCalibrantSelectionListener(this);
 		activeDiffractionTool = this;
 			
-		final IDiffractionMetadata dmd = getDiffractionMetaData();
+		final IDiffractionMetadata dmd = DiffractionDefaultMetadata.getDiffractionMetaData(getImageTrace(), getPart());
 		if (viewer!=null && viewer.getInput()!=null && model!=null && dmd!=null && dmd.getDetector2DProperties()!=null && dmd.getOriginalDiffractionCrystalEnvironment()!=null) {
 			try {
 			    viewer.refresh();
@@ -233,7 +230,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		
 		IDiffractionMetadata data=null;
 		try {
-			data  = getDiffractionMetaData();
+			data  = DiffractionDefaultMetadata.getDiffractionMetaData(getImageTrace(), getPart());
 			if (data==null || data.getOriginalDetector2DProperties()==null || data.getDiffractionCrystalEnvironment()==null) {
 				return;
 			}
@@ -268,88 +265,6 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		}
 	}
 	
-	private boolean diffractionMetadataAreEqual(IDiffractionMetadata meta1,IDiffractionMetadata meta2) {
-		
-		if (meta1.getDetector2DProperties().equals(meta2.getDetector2DProperties()) &&
-				meta1.getDiffractionCrystalEnvironment().equals(meta2.getDiffractionCrystalEnvironment())) {
-			return true;
-		}
-		
-		return false;
-		
-	}
-	
-	private IDiffractionMetadata getDiffractionMetaData() {
-		// Now always returns IDiffractionMetadata to prevent creation of a new
-		// metadata object after listeners have been added to the old metadata
-		
-		IDiffractionMetadata lockedMeta = service.getLockedDiffractionMetaData();
-		
-		if (lockedMeta != null) {
-			
-   		    IImageTrace imageTrace = getImageTrace();
-			if (imageTrace==null) return lockedMeta;
-			
-			IMetaData mdImage = imageTrace.getData().getMetadata();
-			
-			if (mdImage == null) {
-				imageTrace.getData().setMetadata(lockedMeta.clone());
-			} else if (!(mdImage instanceof IDiffractionMetadata)) {
-				IDiffractionMetadata idm = DiffractionDefaultMetadata.getDiffractionMetadata(imageTrace.getData().getShape(),mdImage);
-				DiffractionDefaultMetadata.copyNewOverOld(lockedMeta, idm);
-				imageTrace.getData().setMetadata(idm);
-			} else if (mdImage instanceof IDiffractionMetadata) {
-				if (!diffractionMetadataAreEqual((IDiffractionMetadata)mdImage,lockedMeta)) {
-					DiffractionDefaultMetadata.copyNewOverOld(lockedMeta, (IDiffractionMetadata)mdImage);
-					imageTrace.getData().setMetadata(mdImage);
-				}
-			}
-			return lockedMeta;
-			
-		}
-		
-		
-		//If not see if the trace has diffraction meta data
-		IImageTrace imageTrace = getImageTrace();
-		if (imageTrace==null) return null;
-		IMetaData mdImage = imageTrace.getData().getMetadata();
-		
-		if (mdImage !=null && mdImage  instanceof IDiffractionMetadata) return (IDiffractionMetadata)mdImage;
-		
-		// if it is null try and get it from the loader service
-		if (mdImage == null) {
-			
-			IMetaData md = null;
-			if (getPart() instanceof IEditorPart) {
-				try {
-					md = service.getMetaData(EclipseUtils.getFilePath(((IEditorPart)getPart()).getEditorInput()), null);
-				} catch (Exception e) {
-					logger.error("Cannot read meta data from "+getPart().getTitle(), e);
-				}
-			}
-			
-			// If it is there and diffraction data return it
-			if (md!=null && md instanceof IDiffractionMetadata) return (IDiffractionMetadata)md;
-			
-			if (md != null)
-				mdImage = md;
-		}
-		
-		//if the file contains IMetaData but not IDiffraction meta data, wrap the old meta in a 
-		// new IDiffractionMetadata object and put it back in the dataset
-		if (mdImage!=null) {
-			mdImage = DiffractionDefaultMetadata.getDiffractionMetadata(imageTrace.getData().getShape(),mdImage);
-			imageTrace.getData().setMetadata(mdImage);
-			return (IDiffractionMetadata)mdImage;
-		}
-		
-		// if there is no meta create default IDiff and put it in the dataset
-		mdImage = DiffractionDefaultMetadata.getDiffractionMetadata(imageTrace.getData().getShape());
-		imageTrace.getData().setMetadata(mdImage);
-//		}
-		
-		return (IDiffractionMetadata)mdImage;
-	}
 
 	private TreeViewerColumn defaultColumn;
 	
@@ -418,6 +333,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 				boolean ok = MessageDialog.openConfirm(Display.getDefault().getActiveShell(), "Confirm Reset All", "Are you sure that you would like to reset all values?");
 				if (!ok) return;
 				filteredTree.clearText();
+				ILoaderService service = (ILoaderService)PlatformUI.getWorkbench().getService(ILoaderService.class);
 				if (service.getLockedDiffractionMetaData()!=null) {
 					model.reset();
 					viewer.refresh();
@@ -598,6 +514,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		if (lock==null) lock = new Action("Lock the diffraction data and apply it to newly opened files.",IAction.AS_CHECK_BOX) {
 		    @Override
 			public void run() {
+				ILoaderService       service    = (ILoaderService)PlatformUI.getWorkbench().getService(ILoaderService.class);
 		    	if (isChecked()) {
 		    		IDiffractionMetadata data = activeDiffractionTool.getDiffractionMetaData().clone();
 		    		service.setLockedDiffractionMetaData(data);
@@ -667,6 +584,10 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		getSite().getActionBars().getMenuManager().add(new Separator());
 	}
 	
+	private IDiffractionMetadata getDiffractionMetaData() {
+		return DiffractionDefaultMetadata.getDiffractionMetaData(getImageTrace(), getPart());
+	}
+	
 	private void updateCalibrationActions(final CalibrationStandards standards) {
 		this.calibrantActions.clear();
 		final String selected = standards.getSelectedCalibrant();
@@ -700,7 +621,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 
 					if (tmpRegion.getRegionType() == RegionType.POINT)
 						getPlottingSystem().removeRegion(tmpRegion);
-					IDiffractionMetadata data = getDiffractionMetaData();
+					IDiffractionMetadata data = DiffractionDefaultMetadata.getDiffractionMetaData(getImageTrace(), getPart());
 					DetectorProperties detprop = data.getDetector2DProperties();
 					detprop.setBeamCentreCoords(point);
 					if (!augmenter.isShowingBeamCenter()) {
@@ -717,7 +638,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 				if (r instanceof CircularFitROI) {
 					double[] point = r.getPointRef();
 					logger.debug("ROI moved here X: {} Y : {}", point[0], point[1]);
-					IDiffractionMetadata data = getDiffractionMetaData();
+					IDiffractionMetadata data = DiffractionDefaultMetadata.getDiffractionMetaData(getImageTrace(), getPart());
 					DetectorProperties detprop = data.getDetector2DProperties();
 					detprop.setBeamCentreCoords(point);
 					if (!augmenter.isShowingBeamCenter()) {

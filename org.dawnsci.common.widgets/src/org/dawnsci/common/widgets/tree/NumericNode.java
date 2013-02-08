@@ -451,7 +451,7 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 	 * @return
 	 */
 	public int getDecimalPlaces() {
-		return format.getMaximumFractionDigits();
+		return format.getMinimumFractionDigits();
 	}
 
 	public void dispose() {

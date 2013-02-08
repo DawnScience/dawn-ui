@@ -1,11 +1,10 @@
 package org.dawnsci.plotting.tools.grid;
 
 import javax.measure.quantity.Dimensionless;
-import javax.measure.quantity.Duration;
 import javax.measure.quantity.Length;
-import javax.measure.unit.NonSI;
 import javax.measure.unit.SI;
 import javax.measure.unit.Unit;
+import javax.measure.unit.UnitFormat;
 
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawnsci.common.widgets.tree.AbstractNodeModel;
@@ -26,11 +25,8 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.graphics.Color;
 import org.jscience.physics.amount.Amount;
 
-import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
-import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
 import uk.ac.diamond.scisoft.analysis.rcp.AnalysisRCPActivator;
 import uk.ac.diamond.scisoft.analysis.rcp.preference.PreferenceConstants;
-import uk.ac.diamond.scisoft.analysis.roi.GridPreferences;
 import uk.ac.diamond.scisoft.analysis.roi.GridROI;
 
 /**
@@ -216,8 +212,6 @@ public class GridTreeModel extends AbstractNodeModel {
 		pos.setDefaultExpanded(true);
 		registerNode(pos);
 
-
-		// TODO Custom axes
 		this.x = new NumericNode<Dimensionless>("x", pos, Dimensionless.UNIT);
 		x.setDefault(Amount.valueOf(0, Dimensionless.UNIT));
 		x.setUnits(Dimensionless.UNIT);
@@ -242,7 +236,6 @@ public class GridTreeModel extends AbstractNodeModel {
 		});
 		registerNode(x);
 
-		// TODO Custom axes
 		this.y = new NumericNode<Dimensionless>("y", pos, Dimensionless.UNIT);
 		y.setDefault(Amount.valueOf(0, Dimensionless.UNIT));
 		y.setUnits(Dimensionless.UNIT);
@@ -267,7 +260,6 @@ public class GridTreeModel extends AbstractNodeModel {
 		});
 		registerNode(y);
 
-		// TODO Custom axes
 		this.width = new NumericNode<Dimensionless>("width", pos, Dimensionless.UNIT);
 		width.setDefault(Amount.valueOf(0, Dimensionless.UNIT));
 		width.setUnits(Dimensionless.UNIT);
@@ -292,7 +284,6 @@ public class GridTreeModel extends AbstractNodeModel {
 		});
 		registerNode(width);
 
-		// TODO Custom axes
 		this.height = new NumericNode<Dimensionless>("height", pos, Dimensionless.UNIT);
 		height.setDefault(Amount.valueOf(0, Dimensionless.UNIT));
 		height.setUnits(Dimensionless.UNIT);
@@ -447,11 +438,15 @@ public class GridTreeModel extends AbstractNodeModel {
         registerNode(beamCen);
         beamCen.setDefaultExpanded(true);
 
-        NumericNode<Length> beamX = new NumericNode<Length>("X", beamCen, SI.MILLIMETER);
+        Unit<Length> unknown = SI.MILLIMETER;
+        UnitFormat.getInstance().label(unknown, "unit");
+        NumericNode<Length> beamX = new NumericNode<Length>("X", beamCen,  SI.MILLIMETER);
+        beamX.setUnits(unknown);
         registerNode(beamX);
         beamX.setEditable(true);
 
         NumericNode<Length> beamY = new NumericNode<Length>("Y", beamCen, SI.MILLIMETER);
+        beamX.setUnits(unknown);
         registerNode(beamY);
         beamY.setEditable(true);
 

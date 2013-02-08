@@ -1,9 +1,11 @@
 package org.dawnsci.plotting.tools.grid;
 
+import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.List;
 
-import org.dawb.common.ui.plot.AbstractPlottingSystem;
+import javax.measure.quantity.Length;
+
 import org.dawb.common.ui.plot.region.IROIListener;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
@@ -14,6 +16,8 @@ import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.viewers.TreeNodeContentProvider;
+import org.dawnsci.common.widgets.tree.AmountEvent;
+import org.dawnsci.common.widgets.tree.AmountListener;
 import org.dawnsci.common.widgets.tree.BooleanNode;
 import org.dawnsci.common.widgets.tree.ClearableFilteredTree;
 import org.dawnsci.common.widgets.tree.ColorNode;
@@ -22,20 +26,18 @@ import org.dawnsci.common.widgets.tree.IResettableExpansion;
 import org.dawnsci.common.widgets.tree.LabelNode;
 import org.dawnsci.common.widgets.tree.NodeFilter;
 import org.dawnsci.common.widgets.tree.NodeLabelProvider;
+import org.dawnsci.common.widgets.tree.NumericNode;
 import org.dawnsci.common.widgets.tree.UnitEditingSupport;
 import org.dawnsci.common.widgets.tree.ValueEditingSupport;
-import org.dawnsci.plotting.preference.FittingPreferencePage;
-import org.dawnsci.plotting.tools.diffraction.DiffractionImageAugmenter;
+import org.dawnsci.plotting.Activator;
+import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.JFacePreferences;
 import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
@@ -60,12 +62,13 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
+import org.jscience.physics.amount.Amount;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.rcp.AnalysisRCPActivator;
-import uk.ac.diamond.scisoft.analysis.rcp.preference.PreferenceConstants;
+import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.roi.GridROI;
+import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 
 /**
  * Tool to draw and configure a grid.
@@ -232,6 +235,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		tree.addMouseListener(new MouseAdapter() {
 			public void mouseDown(MouseEvent e) {
 				final TreeItem item = tree.getItem(new Point(e.x, e.y));
+				if (item==null) return;
 				if (item.getData() instanceof BooleanNode) {
 					if (item!=null) {
 						Rectangle r = item.getBounds(1);
@@ -245,14 +249,89 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 				}
 			}			
 		});
+		
+		connectBeamCenterControls();
 	}
 	
+	private void connectBeamCenterControls() {
+		// TODO FIXME Define beamCenter differently to actual center?
+		this.beamCenter = getBeamCenter();
+		
+		final NumericNode<Length> x = (NumericNode<Length>)model.getNode("/Detector/Beam Centre/X");
+		x.setDefault(Amount.valueOf(beamCenter[0], x.getUnit()));
+		x.setLowerBound(0);
+		x.setUpperBound(getMaxX());
+		x.addAmountListener(new AmountListener<Length>() {		
+			@Override
+			public void amountChanged(AmountEvent<Length> evt) {
+				beamCenter[0] = x.getDoubleValue();
+				drawBeamCentre(beamCenterAction.isChecked());
+			}
+		});
+		
+		final NumericNode<Length> y = (NumericNode<Length>)model.getNode("/Detector/Beam Centre/Y");
+		y.setDefault(Amount.valueOf(beamCenter[1], y.getUnit()));
+		y.setLowerBound(0);
+		y.setUpperBound(getMaxY());
+		y.addAmountListener(new AmountListener<Length>() {		
+			@Override
+			public void amountChanged(AmountEvent<Length> evt) {
+				beamCenter[1] = y.getDoubleValue();
+				drawBeamCentre(beamCenterAction.isChecked());
+			}
+		});
+		
+	}
+
+	private double[] beamCenter;
+	private Action   beamCenterAction;
+
+	/**
+	 * Gets beam center from centre of custom axes, if any or
+	 * 
+	 * @return
+	 */
+	private double[] getBeamCenter() {
+		
+		double[] ret = new double[2];
+		final List<AbstractDataset> axes = getImageTrace().getAxes();
+		if (axes!=null) {
+			ret[0] = axes.get(0).getDouble((axes.get(0).getSize() / 2));
+			ret[1] = axes.get(1).getDouble((axes.get(1).getSize() / 2));
+			return ret;
+		}
+		final int[] shape = getImageTrace().getData().getShape();
+		ret[0] = shape[1]/2;
+		ret[1] = shape[0]/2;
+		
+		return ret;
+	}
+	
+	private double getMaxX() {
+		final List<AbstractDataset> axes = getImageTrace().getAxes();
+		if (axes!=null) return axes.get(0).max().doubleValue();
+		return getImageTrace().getData().getShape()[1];
+	}
+	private double getMaxY() {
+		final List<AbstractDataset> axes = getImageTrace().getAxes();
+		if (axes!=null) return axes.get(1).max().doubleValue();
+		return getImageTrace().getData().getShape()[0];
+	}
+
+
 	private void createActions() {
 
 		createToolPageActions();
 		
-		DiffractionImageAugmenter augmenter = new DiffractionImageAugmenter((AbstractPlottingSystem)getPlottingSystem());
-		augmenter.addBeamCenterAction(getSite().getActionBars().getToolBarManager());
+		this.beamCenterAction = new Action("Beam centre", Activator.getImageDescriptor("/icons/beam_centre.png")) {
+			@Override
+			public void run() {
+	    		drawBeamCentre(isChecked());
+			}
+		};
+		beamCenterAction.setChecked(false);
+		
+		getSite().getActionBars().getToolBarManager().add(beamCenterAction);
 		getSite().getActionBars().getToolBarManager().add(new Separator());
 
 		final Action preferences = new Action("Preferences...") {
@@ -264,8 +343,72 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
         };
         getSite().getActionBars().getMenuManager().add(preferences);
 	}
+	
+	
+	protected void drawBeamCentre(boolean isChecked) {
+		if (!isActive()) return; // We are likely off screen.
+		
+		IRegion beamCentreRegion = getBeamCentre();
+		if (beamCentreRegion != null)
+			getPlottingSystem().removeRegion(beamCentreRegion);
+			
+		if (isChecked) { 
+			if (beamCenter!=null){
+				DecimalFormat df = new DecimalFormat("#.##");
+				String label = df.format(beamCenter[0]) + "px, " + df.format(beamCenter[1])+"px";
+				drawCrosshairs(beamCenter, beamCenter[1]/20, ColorConstants.red, ColorConstants.black, "beam centre", label);
+			}
+		}
+	}
+	enum RING_TYPE {
+		BEAM_CENTRE;
+	}
 
+	protected IRegion getBeamCentre() {
+		IRegion region=null;
+		final Collection<IRegion> regions = getPlottingSystem().getRegions(RegionType.LINE);
+		if (regions==null) return null;
+		for (IRegion iRegion : regions) {
+			if (iRegion.getUserObject()==RING_TYPE.BEAM_CENTRE) {
+				region = iRegion;
+				break;
+			}
+		}
+        return region;
+	}
 
+	protected IRegion drawCrosshairs(double[] beamCentre, double length, Color colour, Color labelColour, String nameStub, String labelText) {
+		if (!isActive()) return null; // We are likely off screen.
+		IRegion region=null;
+		
+		try {
+			final String regionName = RegionUtils.getUniqueName(nameStub, getPlottingSystem());
+			region = getPlottingSystem().createRegion(regionName, RegionType.LINE);
+		} catch (Exception e) {
+			logger.error("Can't create region", e);
+			return null;
+		}
+	
+		final LinearROI lroi = new LinearROI(length, 0);
+		double dbc[] = {(double)beamCentre[0], (double)beamCentre[1]};
+		lroi.setMidPoint(dbc);
+		lroi.setCrossHair(true);
+		region.setROI(lroi);
+		region.setRegionColor(colour);
+		region.setAlpha(100);
+		region.setUserRegion(false);
+		region.setShowPosition(false);
+		region.setUserObject(RING_TYPE.BEAM_CENTRE);
+		
+		region.setLabel(labelText);
+		((AbstractSelectionRegion)region).setShowLabel(true);
+		
+		getPlottingSystem().addRegion(region);
+		region.setMobile(false); // NOTE: Must be done **AFTER** calling the addRegion method.
+	
+		return region;
+	}
+	
 	private void createGridModel() {
 		
 		model = new GridTreeModel();
@@ -338,9 +481,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		try {
 			IRegion region = getPlottingSystem().createRegion(RegionUtils.getUniqueName(getRegionName(), getPlottingSystem()), getCreateRegionType());
 			region.setUserObject(getMarker());
-			
-			//TODO Set preferences here...
-			
+						
 		} catch (Exception e) {
 			logger.error("Cannot create region for profile tool!");
 		}

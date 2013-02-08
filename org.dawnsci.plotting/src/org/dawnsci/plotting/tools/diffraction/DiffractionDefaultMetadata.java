@@ -7,8 +7,16 @@ import java.util.Map;
 
 import javax.vecmath.Vector3d;
 
+import org.dawb.common.services.ILoaderService;
+import org.dawb.common.ui.plot.trace.IImageTrace;
+import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.preference.DiffractionToolConstants;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.PlatformUI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
 import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
@@ -18,6 +26,93 @@ import uk.ac.diamond.scisoft.analysis.io.IExtendedMetadata;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 
 public class DiffractionDefaultMetadata {
+	
+	private static Logger logger = LoggerFactory.getLogger(DiffractionDefaultMetadata.class);
+	
+	public static IDiffractionMetadata getDiffractionMetaData(IImageTrace imageTrace, IWorkbenchPart part) {
+		
+		// Now always returns IDiffractionMetadata to prevent creation of a new
+		// metadata object after listeners have been added to the old metadata
+
+		ILoaderService       service    = (ILoaderService)PlatformUI.getWorkbench().getService(ILoaderService.class);
+		IDiffractionMetadata lockedMeta = service.getLockedDiffractionMetaData();
+
+		if (lockedMeta != null) {
+
+			if (imageTrace==null) return lockedMeta;
+
+			IMetaData mdImage = imageTrace.getData().getMetadata();
+
+			if (mdImage == null) {
+				imageTrace.getData().setMetadata(lockedMeta.clone());
+			} else if (!(mdImage instanceof IDiffractionMetadata)) {
+				IDiffractionMetadata idm = DiffractionDefaultMetadata.getDiffractionMetadata(imageTrace.getData().getShape(),mdImage);
+				DiffractionDefaultMetadata.copyNewOverOld(lockedMeta, idm);
+				imageTrace.getData().setMetadata(idm);
+			} else if (mdImage instanceof IDiffractionMetadata) {
+				if (!diffractionMetadataAreEqual((IDiffractionMetadata)mdImage,lockedMeta)) {
+					DiffractionDefaultMetadata.copyNewOverOld(lockedMeta, (IDiffractionMetadata)mdImage);
+					imageTrace.getData().setMetadata(mdImage);
+				}
+			}
+			return lockedMeta;
+
+		}
+
+
+		//If not see if the trace has diffraction meta data
+		if (imageTrace==null) return null;
+		IMetaData mdImage = imageTrace.getData().getMetadata();
+
+		if (mdImage !=null && mdImage  instanceof IDiffractionMetadata) return (IDiffractionMetadata)mdImage;
+
+		// if it is null try and get it from the loader service
+		if (mdImage == null) {
+
+			IMetaData md = null;
+			if (part instanceof IEditorPart) {
+				try {
+					md = service.getMetaData(EclipseUtils.getFilePath(((IEditorPart)part).getEditorInput()), null);
+				} catch (Exception e) {
+					logger.error("Cannot read meta data from "+part.getTitle(), e);
+				}
+			}
+
+			// If it is there and diffraction data return it
+			if (md!=null && md instanceof IDiffractionMetadata) return (IDiffractionMetadata)md;
+
+			if (md != null)
+				mdImage = md;
+		}
+
+		//if the file contains IMetaData but not IDiffraction meta data, wrap the old meta in a 
+		// new IDiffractionMetadata object and put it back in the dataset
+		if (mdImage!=null) {
+			mdImage = DiffractionDefaultMetadata.getDiffractionMetadata(imageTrace.getData().getShape(),mdImage);
+			imageTrace.getData().setMetadata(mdImage);
+			return (IDiffractionMetadata)mdImage;
+		}
+
+		// if there is no meta create default IDiff and put it in the dataset
+		mdImage = DiffractionDefaultMetadata.getDiffractionMetadata(imageTrace.getData().getShape());
+		imageTrace.getData().setMetadata(mdImage);
+		//			}
+
+		return (IDiffractionMetadata)mdImage;
+	}
+
+	
+	private static boolean diffractionMetadataAreEqual(IDiffractionMetadata meta1,IDiffractionMetadata meta2) {
+		
+		if (meta1.getDetector2DProperties().equals(meta2.getDetector2DProperties()) &&
+				meta1.getDiffractionCrystalEnvironment().equals(meta2.getDiffractionCrystalEnvironment())) {
+			return true;
+		}
+		
+		return false;
+		
+	}
+
 	
 	/**
 	 * Static method to produce a Detector properties object populated with persisted values
