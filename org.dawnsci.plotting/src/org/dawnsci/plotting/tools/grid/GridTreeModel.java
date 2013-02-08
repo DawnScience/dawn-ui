@@ -1,8 +1,11 @@
-package org.dawnsci.plotting.tools.profile;
+package org.dawnsci.plotting.tools.grid;
 
 import javax.measure.quantity.Dimensionless;
+import javax.measure.quantity.Duration;
 import javax.measure.quantity.Length;
+import javax.measure.unit.NonSI;
 import javax.measure.unit.SI;
+import javax.measure.unit.Unit;
 
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawnsci.common.widgets.tree.AbstractNodeModel;
@@ -23,6 +26,8 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.graphics.Color;
 import org.jscience.physics.amount.Amount;
 
+import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
+import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
 import uk.ac.diamond.scisoft.analysis.rcp.AnalysisRCPActivator;
 import uk.ac.diamond.scisoft.analysis.rcp.preference.PreferenceConstants;
 import uk.ac.diamond.scisoft.analysis.roi.GridPreferences;
@@ -205,7 +210,8 @@ public class GridTreeModel extends AbstractNodeModel {
 			}
 		});
 
-
+		createDetector();
+		
 		final LabelNode pos = new LabelNode("Position", root);
 		pos.setDefaultExpanded(true);
 		registerNode(pos);
@@ -425,6 +431,29 @@ public class GridTreeModel extends AbstractNodeModel {
 		
 		this.height.setValueQuietly(groi.getLengths()[1], Dimensionless.UNIT);
 		viewer.update(height, new String[]{"Value"});
+
+	}
+	
+	private void createDetector() {
+	       
+		// Detector Meta
+        final LabelNode detectorMeta = new LabelNode("Detector", root);
+        registerNode(detectorMeta);
+        detectorMeta.setDefaultExpanded(true);
+        
+	    // Beam Centre
+        final LabelNode beamCen = new LabelNode("Beam Centre", detectorMeta);
+        beamCen.setTooltip("The beam centre is the intersection of the direct beam with the detector in terms of image coordinates. Can be undefined when there is no intersection.");
+        registerNode(beamCen);
+        beamCen.setDefaultExpanded(true);
+
+        NumericNode<Length> beamX = new NumericNode<Length>("X", beamCen, SI.MILLIMETER);
+        registerNode(beamX);
+        beamX.setEditable(true);
+
+        NumericNode<Length> beamY = new NumericNode<Length>("Y", beamCen, SI.MILLIMETER);
+        registerNode(beamY);
+        beamY.setEditable(true);
 
 	}
 

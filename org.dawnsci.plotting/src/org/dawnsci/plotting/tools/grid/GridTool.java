@@ -1,8 +1,9 @@
-package org.dawnsci.plotting.tools.profile;
+package org.dawnsci.plotting.tools.grid;
 
 import java.util.Collection;
 import java.util.List;
 
+import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.region.IROIListener;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
@@ -24,6 +25,7 @@ import org.dawnsci.common.widgets.tree.NodeLabelProvider;
 import org.dawnsci.common.widgets.tree.UnitEditingSupport;
 import org.dawnsci.common.widgets.tree.ValueEditingSupport;
 import org.dawnsci.plotting.preference.FittingPreferencePage;
+import org.dawnsci.plotting.tools.diffraction.DiffractionImageAugmenter;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.Separator;
@@ -248,6 +250,11 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 	private void createActions() {
 
 		createToolPageActions();
+		
+		DiffractionImageAugmenter augmenter = new DiffractionImageAugmenter((AbstractPlottingSystem)getPlottingSystem());
+		augmenter.addBeamCenterAction(getSite().getActionBars().getToolBarManager());
+		getSite().getActionBars().getToolBarManager().add(new Separator());
+
 		final Action preferences = new Action("Preferences...") {
 			public void run() {
 				//if (!isActive()) return;
