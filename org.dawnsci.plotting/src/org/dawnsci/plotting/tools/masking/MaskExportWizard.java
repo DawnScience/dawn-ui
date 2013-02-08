@@ -12,10 +12,14 @@ import org.dawb.common.ui.wizard.CheckWizardPage;
 import org.dawb.common.ui.wizard.FileChoosePage;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPart;
@@ -68,23 +72,31 @@ public class MaskExportWizard extends Wizard implements IExportWizard {
 	@Override
 	public boolean performFinish() {
 		
-		 final IFile           file   = fcp.createNewFile();
-		 final IWorkbenchPart  part   = EclipseUtils.getPage().getActivePart();
-		 final IPlottingSystem system = new ThreadSafePlottingSystem((IPlottingSystem)part.getAdapter(IPlottingSystem.class));
-		 
+		 IFile file = null;
 		 try {
+			 file   = fcp.createNewFile();
+			 final IWorkbenchPart  part   = EclipseUtils.getPage().getActivePart();
+			 final IPlottingSystem system = new ThreadSafePlottingSystem((IPlottingSystem)part.getAdapter(IPlottingSystem.class));
+
+			 final IFile finalFile = file;
 			 getContainer().run(true, true, new IRunnableWithProgress() {
 
 				 @Override
 				 public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					 
+
 					 System.out.println(system);
 
 					 // TODO FIXME use the wizzy new service for saving mask! Send regions off to it...
 				 }
 			 });
 		 } catch (Exception ne) {
-			 logger.error("Cannot save masking file!", ne);
+			 String message = null;
+			 if (file!=null) {
+				 message = "Cannot export '"+file.getName()+"' ";
+			 } else {
+				 message = "Cannot export masking file.";
+			 }
+		     ErrorDialog.openError(Display.getDefault().getActiveShell(), "Export failure", message, new Status(IStatus.WARNING, "org.dawnsci.plotting", message, ne));
 		 }
 		 
 		 return true;
