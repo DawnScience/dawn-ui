@@ -1,8 +1,5 @@
 package org.dawnsci.plotting.tools.diffraction;
 
-import java.util.Map;
-import java.util.TreeMap;
-
 import javax.measure.quantity.Angle;
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Duration;
@@ -12,7 +9,6 @@ import javax.measure.unit.NonSI;
 import javax.measure.unit.SI;
 import javax.measure.unit.Unit;
 import javax.measure.unit.UnitFormat;
-import javax.swing.tree.TreeNode;
 
 import org.dawb.common.services.IImageService;
 import org.dawb.common.services.ServiceManager;
@@ -25,7 +21,6 @@ import org.dawnsci.common.widgets.tree.NumericNode;
 import org.dawnsci.common.widgets.tree.ObjectNode;
 import org.dawnsci.common.widgets.tree.UnitEvent;
 import org.dawnsci.common.widgets.tree.UnitListener;
-import org.eclipse.jface.viewers.TreeViewer;
 import org.jscience.physics.amount.Amount;
 
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;

@@ -19,6 +19,8 @@ import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IContributionManager;
+import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.swt.graphics.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -258,6 +260,12 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		menu.add(calibrantRings);
 		menu.add(beamCentre);
 	}
+	
+
+	public void addBeamCenterAction(IContributionManager man) {
+		man.add(beamCentre);
+	}
+
 
 	protected void hideRings(Object marker) {
 		if (plottingSystem==null) return;

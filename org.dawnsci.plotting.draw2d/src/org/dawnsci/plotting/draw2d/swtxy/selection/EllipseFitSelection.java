@@ -100,6 +100,8 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 		}
 	}
 
+	private boolean circleOnly = false;
+
 	private void fitPoints(PointList pts, RotatableEllipse ellipse) {
 		if (pts == null)
 			return;
@@ -121,7 +123,7 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 			int[] pnt1;
 			int[] pnt2;
 			double ang;
-			if (n >= CIR_POINTS && n < ELL_POINTS) {
+			if (circleOnly || (n >= CIR_POINTS && n < ELL_POINTS)) {
 				cFitter.geometricFit(xds, yds, null);
 				final double[] parameters = cFitter.getParameters();
 				pnt1 = coords.getValuePosition(2 * parameters[0] + parameters[1], 2 * parameters[0] + parameters[2]);
@@ -195,7 +197,7 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 		}
 
 		try {
-			final EllipticalFitROI eroi = new EllipticalFitROI(hroi);
+			final EllipticalFitROI eroi = new EllipticalFitROI(hroi, circleOnly);
 			if (recordResult) {
 				roi = eroi;
 			}
@@ -225,6 +227,20 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 	@Override
 	public int getMinimumMousePresses() {
 		return CIR_POINTS;
+	}
+
+	/**
+	 * Set whether fit is restricted to a circle
+	 * @param fitCircle if true, then fit to circle
+	 */
+	public void setFitCircle(boolean fitCircle) {
+		boolean renew = circleOnly ^ fitCircle;
+		circleOnly = fitCircle;
+		if (renew && ellipse != null) {
+			createROI(true);
+			updateROI(roi);
+			fireROIChanged(roi);
+		}
 	}
 
 	class DecoratedEllipse extends RotatableEllipse implements IRegionContainer {
@@ -461,4 +477,5 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 		public void setRegion(IRegion region) {
 		}
 	}
+
 }
