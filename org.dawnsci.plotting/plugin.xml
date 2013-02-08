@@ -87,7 +87,7 @@
             class="org.dawnsci.plotting.tools.profile.ColorBoxProfileTool"
             icon="icons/plot-tool-color-box.png"
             id="org.dawb.workbench.plotting.tools.colorBoxProfileTool"
-            label="Color Box Profile"
+            label="Colour Box Profile"
             tooltip="A tool for showing box profiles of images."
             visible="true">
       </plotting_tool_page>

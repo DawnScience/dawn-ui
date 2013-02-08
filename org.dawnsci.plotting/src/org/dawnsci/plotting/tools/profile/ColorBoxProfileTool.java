@@ -65,7 +65,7 @@ import uk.ac.diamond.scisoft.analysis.roi.ROIProfile.BoxLineType;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 /**
- * Color Box tool that creates a tool page with 3 plotting systems and a composite:<br>
+ * Colour Box tool that creates a tool page with 3 plotting systems and a composite:<br>
  * - a zoom profile<br>
  * - an XY plot that shows the line profiles of the vertical edges of the box<br>
  * - an XY plot that show the line profiles of the horizontal edges of the box<br>
@@ -241,7 +241,7 @@ public class ColorBoxProfileTool extends AbstractToolPage  implements IROIListen
 			ExpandableComposite mainRegionInfoExpander = new ExpandableComposite(contentComposite, SWT.NONE);
 			mainRegionInfoExpander.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1));
 			mainRegionInfoExpander.setLayout(new GridLayout(1, false));
-			mainRegionInfoExpander.setText("Color Box ROI");
+			mainRegionInfoExpander.setText("Colour Box ROI");
 
 			Composite mainRegionComposite = new Composite(mainRegionInfoExpander, SWT.NONE);
 			GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
