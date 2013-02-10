@@ -233,10 +233,6 @@ public class CustomDataExportTransformer extends AbstractDataMessageTransformer 
 			final DataMessageComponent comp = new DataMessageComponent();
 			comp.addScalar(map);
 
-			String writeout = map.get("writeout");
-			writeout = writeout.split("\\.")[0];
-			comp.putScalar("writeout", writeout);
-
 			comp.putScalar("file_path", filePath);
 			comp.putScalar("file_dir",  FileUtils.getDirectory(filePath));
 
@@ -263,8 +259,7 @@ public class CustomDataExportTransformer extends AbstractDataMessageTransformer 
 			if (FILE_TYPES.get(2).equals(fileFormat) || FILE_TYPES.get(3).equals(fileFormat)) { // 
 				writeAscii(filePath, cache, comp);
 			} else if (FILE_TYPES.get(0).equals(fileFormat) || FILE_TYPES.get(1).equals(fileFormat)) { // hdf5
-				if(Integer.valueOf(writeout) != 0)
-					writeH5(filePath, cache, comp);
+				writeH5(filePath, cache, comp);
 			} else { // Write an image
 				writeImage(filePath, cache, comp);
 			}
