@@ -69,12 +69,12 @@ public class RegionArea extends PlotArea {
 		addMouseMotionListener(new MouseMotionListener.Stub() {
 			@Override
 			public void mouseMoved(MouseEvent me) {
-				createPositionCursor(me);
 				firePositionListeners(new PositionEvent(RegionArea.this, 
 						                               (AspectAxis)getRegionGraph().primaryXAxis,
 						                               (AspectAxis)getRegionGraph().primaryYAxis,
 													    me.x, 
 													    me.y));
+				createPositionCursor(me);
 			}
 			/**
 			 * @see org.eclipse.draw2d.MouseMotionListener#mouseEntered(MouseEvent)
@@ -149,18 +149,19 @@ public class RegionArea extends PlotArea {
 	private final static Color WHITE_COLOR = XYGraphMediaFactory.getInstance().getColor(XYGraphMediaFactory.COLOR_WHITE);
 	
     private static NumberFormat intensityFormat =  new DecimalFormat("############.0##");
+    private Cursor positionCursor;
 	/**
 	 * Whenever cursor is NONE we show intensity info.
 	 * @param me
 	 */
 	protected void createPositionCursor(MouseEvent me) {
 		
-		if (!containsMouse)            return;
+		if (!containsMouse)  {
+			setCursor(null);
+			return;
+		}
 		if (getSelectedCursor()!=null) return;
 		if (zoomType!=ZoomType.NONE)   return;
-
-		
-		if(getCursor() != null) getCursor().dispose();
 		
 		Axis xAxis = xyGraph.primaryXAxis, yAxis = xyGraph.primaryYAxis;
 		double xCoordinate = xAxis.getPositionValue(me.x, false);
@@ -211,8 +212,10 @@ public class RegionArea extends PlotArea {
 		
 		ImageData imageData = image.getImageData();
 		imageData.transparentPixel = imageData.palette.getPixel(TRANSPARENT_COLOR.getRGB());
-		setCursor(new Cursor(Display.getCurrent(),
-				imageData, CURSOR_SIZE/2 ,CURSOR_SIZE/2));
+		
+		if (positionCursor!=null) positionCursor.dispose();
+		positionCursor = new Cursor(Display.getCurrent(), imageData, CURSOR_SIZE/2 ,CURSOR_SIZE/2);
+		setCursor(positionCursor);
 		gc.dispose();
 		image.dispose();
 
@@ -395,7 +398,7 @@ public class RegionArea extends PlotArea {
 		    regionLayer.setMouseListenerActive(regionListener, false);
 			IRegion wasBeingAdded = regionListener.getRegionBeingAdded();
 		    regionListener = null;
-		    setCursor(ZoomType.NONE.getCursor());
+		    setCursor(null);
 		    
 			if (wasBeingAdded!=null) {
 				fireRegionCancelled(new RegionEvent(wasBeingAdded));
@@ -419,10 +422,18 @@ public class RegionArea extends PlotArea {
 		return specialCursor;
 	}
 	
+	private Cursor internalCursor;
 	public void setCursor(Cursor cursor) {
-		if (this.getCursor() == cursor) return;
-		if (specialCursor!=null) cursor = specialCursor;
+		
 		try {
+			if (cursor!=null&&cursor.isDisposed()) cursor = null;
+			if (cursor!=null && this.internalCursor == cursor) return;
+			if (specialCursor!=null && !specialCursor.isDisposed()) {
+				cursor = specialCursor;
+			}
+
+			internalCursor = cursor;
+			if (cursor!=null&&cursor.isDisposed()) cursor = null;
 		    super.setCursor(cursor);
 		} catch (Throwable ignored) {
 			// Intentionally ignore bad cursors.
