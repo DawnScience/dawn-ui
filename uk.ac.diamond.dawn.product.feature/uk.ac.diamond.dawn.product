@@ -50,7 +50,6 @@ jre/bin/java</programArgsLin>
    <vm>
    </vm>
 
-
    <plugins>
    </plugins>
 
@@ -59,6 +58,7 @@ jre/bin/java</programArgsLin>
    </features>
 
    <configurations>
+      <plugin id="org.dawnsci.persistence" autoStart="true" startLevel="1" />
       <plugin id="uk.ac.diamond.scisoft" autoStart="true" startLevel="0" />
       <plugin id="uk.ac.diamond.scisoft.analysis.osgi" autoStart="true" startLevel="1" />
    </configurations>
