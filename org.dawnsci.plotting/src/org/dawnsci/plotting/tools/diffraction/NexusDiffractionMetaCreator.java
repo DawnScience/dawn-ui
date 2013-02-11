@@ -61,8 +61,8 @@ public class NexusDiffractionMetaCreator {
 				//  this will also validate detprop.setPx(px) detprop.setPy(py) 
 				List<Group> nxDetectors = findNXdetetors(nxInstrument, "pixel");
 				
-				//also if no detectors return null
-				if (nxDetectors.isEmpty()) {return null;}
+				//if no detectors with pixel in search the entire nxInstrument group
+				if (nxDetectors.isEmpty()) {nxDetectors.add(nxInstrument);}
 				// TODO do something better if list is empty or has more than one object
 				
 				//populate the crystal environ
@@ -73,7 +73,7 @@ public class NexusDiffractionMetaCreator {
 				//find nx mono
 				finder.attributeValue = "NXmonochromator";
 				hOb = NexusUtils.nexusBreadthFirstSearch(finder, (Group)rootGroup.getMemberList().get(0), true);
-				if (!hOb.isEmpty() || (hOb.get(0) instanceof Group)) {
+				if (!hOb.isEmpty() && (hOb.get(0) instanceof Group)) {
 					Group mxMono = (Group)hOb.get(0);
 					updateEnergy(mxMono,diffcrys);
 				}
@@ -172,11 +172,32 @@ public class NexusDiffractionMetaCreator {
 		if (units.equals("s")) {diffcrys.setExposureTime(values[0]);}
 	}
 	
+	private static void updateBeamCentre(Group nexusGroup, DetectorProperties detprop) {
+		H5ScalarDS dataset = getDataset(nexusGroup, "beam centre");
+		if (dataset == null) return;
+		double[] values = getDoubleData(dataset);
+		if (values == null) return;
+		String units = NexusUtils.getNexusGroupAttributeValue(dataset, "units");
+		if (units == null) return;
+		if (units.equals("pixels")) {detprop.setBeamCentreCoords(values);}
+	}
+	
+	private static void updateDetectorDistance(Group nexusGroup, DetectorProperties detprop) {
+		H5ScalarDS dataset = getDataset(nexusGroup, "camera length");
+		if (dataset == null) return;
+		double[] values = getDoubleData(dataset);
+		if (values == null) return;
+		String units = NexusUtils.getNexusGroupAttributeValue(dataset, "units");
+		if (units == null) return;
+		if (units.equals("mm")) {detprop.setBeamCentreDistance(values[0]);}
+	}
+	
+	
 	private static void populateFromNexus(Group nxDetector, DetectorProperties detprop) {
 		
 		updatePixelSize(nxDetector,detprop);
-		// TODO detprop.setBeamCentreCoords(coords);
-		// TODO detprop.setDetectorDistance(distance);
+		updateBeamCentre(nxDetector,detprop);
+		updateDetectorDistance(nxDetector,detprop);
 		// TODO detprop.setNormalAnglesInDegrees(yaw, pitch, roll);
 	}
 	
