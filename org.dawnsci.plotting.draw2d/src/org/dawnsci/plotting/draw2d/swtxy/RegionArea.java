@@ -150,7 +150,7 @@ public class RegionArea extends PlotArea {
 		if (zoomType!=ZoomType.NONE)   return;
 		
 
-		if (positionCursor==null) positionCursor.dispose();
+		if (positionCursor!=null) positionCursor.dispose();
 		positionCursor = CursorUtils.getPositionCursor(me, (AspectAxis)getRegionGraph().primaryXAxis, (AspectAxis)getRegionGraph().primaryYAxis, getImageTrace());
 		setCursor(positionCursor);
 	}
