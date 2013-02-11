@@ -137,7 +137,7 @@
             class="org.dawnsci.plotting.tools.EllipseFittingTool"
             icon="icons/plot-tool-ellipse.png"
             id="org.dawb.workbench.plotting.tools.ellipseFittingTool"
-            label="Ellipse Fitting"
+            label="Circle/Ellipse Fitting"
             tooltip="A tool which shows the fitted ellipse parameters.">
       </plotting_tool_page>
       <plotting_tool_page
