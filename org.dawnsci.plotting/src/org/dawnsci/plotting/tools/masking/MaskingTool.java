@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.dawb.common.services.HistogramBound;
+import org.dawb.common.ui.image.CursorUtils;
 import org.dawb.common.ui.image.IconUtils;
 import org.dawb.common.ui.image.ShapeType;
 import org.dawb.common.ui.menu.CheckableActionGroup;
@@ -28,7 +29,6 @@ import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.preference.PlottingConstants;
-import org.dawnsci.plotting.tools.reduction.DataReductionWizard;
 import org.eclipse.core.commands.operations.IOperationHistoryListener;
 import org.eclipse.core.commands.operations.OperationHistoryEvent;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -81,7 +81,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -526,7 +525,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 					
 					ShapeType penShape = ShapeType.valueOf(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.MASK_PEN_SHAPE));
 					if (penShape!=null) {
-					    ((AbstractPlottingSystem)getPlottingSystem()).setSelectedCursor(IconUtils.getPenCursor(pensize, penShape));
+					    ((AbstractPlottingSystem)getPlottingSystem()).setSelectedCursor(CursorUtils.getPenCursor(pensize, penShape));
 					}
 				}
 
@@ -555,7 +554,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			public void run() {
 				int pensize = Activator.getDefault().getPreferenceStore().getInt(PlottingConstants.MASK_PEN_SIZE);
 				ShapeType penShape = ShapeType.SQUARE;
-				((AbstractPlottingSystem)getPlottingSystem()).setSelectedCursor(IconUtils.getPenCursor(pensize, penShape));
+				((AbstractPlottingSystem)getPlottingSystem()).setSelectedCursor(CursorUtils.getPenCursor(pensize, penShape));
 				Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.MASK_PEN_SHAPE, penShape.name());
 			}
 		};
@@ -567,7 +566,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			public void run() {
 				int pensize = Activator.getDefault().getPreferenceStore().getInt(PlottingConstants.MASK_PEN_SIZE);
 				ShapeType penShape = ShapeType.TRIANGLE;
-				((AbstractPlottingSystem)getPlottingSystem()).setSelectedCursor(IconUtils.getPenCursor(pensize, penShape));
+				((AbstractPlottingSystem)getPlottingSystem()).setSelectedCursor(CursorUtils.getPenCursor(pensize, penShape));
 				Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.MASK_PEN_SHAPE, penShape.name());
 			}
 		};
@@ -579,7 +578,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			public void run() {
 				int pensize = Activator.getDefault().getPreferenceStore().getInt(PlottingConstants.MASK_PEN_SIZE);
 				ShapeType penShape = ShapeType.CIRCLE;
-				((AbstractPlottingSystem)getPlottingSystem()).setSelectedCursor(IconUtils.getPenCursor(pensize, penShape));
+				((AbstractPlottingSystem)getPlottingSystem()).setSelectedCursor(CursorUtils.getPenCursor(pensize, penShape));
 				Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.MASK_PEN_SHAPE, penShape.name());
 			}
 		};

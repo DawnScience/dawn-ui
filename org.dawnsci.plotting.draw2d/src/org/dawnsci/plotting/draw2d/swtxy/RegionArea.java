@@ -15,8 +15,8 @@ import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.PlotArea;
 import org.csstudio.swt.xygraph.figures.Trace;
 import org.csstudio.swt.xygraph.undo.ZoomType;
-import org.csstudio.swt.xygraph.util.XYGraphMediaFactory;
 import org.dawb.common.services.ImageServiceBean.ImageOrigin;
+import org.dawb.common.ui.image.CursorUtils;
 import org.dawb.common.ui.plot.axis.IAxis;
 import org.dawb.common.ui.plot.axis.ICoordinateSystem;
 import org.dawb.common.ui.plot.axis.IPositionListener;
@@ -30,22 +30,14 @@ import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.dawnsci.plotting.draw2d.swtxy.selection.SelectionRegionFactory;
-import org.eclipse.draw2d.FigureUtilities;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.MouseEvent;
 import org.eclipse.draw2d.MouseMotionListener;
-import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
-import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.PaletteData;
-import org.eclipse.swt.graphics.RGB;
-import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,12 +61,12 @@ public class RegionArea extends PlotArea {
 		addMouseMotionListener(new MouseMotionListener.Stub() {
 			@Override
 			public void mouseMoved(MouseEvent me) {
-				createPositionCursor(me);
 				firePositionListeners(new PositionEvent(RegionArea.this, 
 						                               (AspectAxis)getRegionGraph().primaryXAxis,
 						                               (AspectAxis)getRegionGraph().primaryYAxis,
 													    me.x, 
 													    me.y));
+				createPositionCursor(me);
 			}
 			/**
 			 * @see org.eclipse.draw2d.MouseMotionListener#mouseEntered(MouseEvent)
@@ -143,79 +135,24 @@ public class RegionArea extends PlotArea {
 		});
 	}
 	
-	private final static int CURSOR_SIZE = 28;
-	private final static Color TRANSPARENT_COLOR = XYGraphMediaFactory.getInstance().getColor(new RGB(123,0,23));
-	private final static Color BLACK_COLOR = XYGraphMediaFactory.getInstance().getColor(XYGraphMediaFactory.COLOR_BLACK);
-	private final static Color WHITE_COLOR = XYGraphMediaFactory.getInstance().getColor(XYGraphMediaFactory.COLOR_WHITE);
-	
-    private static NumberFormat intensityFormat =  new DecimalFormat("############.0##");
+    private Cursor positionCursor;
 	/**
 	 * Whenever cursor is NONE we show intensity info.
 	 * @param me
 	 */
 	protected void createPositionCursor(MouseEvent me) {
 		
-		if (!containsMouse)            return;
+		if (!containsMouse)  {
+			setCursor(null);
+			return;
+		}
 		if (getSelectedCursor()!=null) return;
 		if (zoomType!=ZoomType.NONE)   return;
+		
 
-		
-		if(getCursor() != null) getCursor().dispose();
-		
-		Axis xAxis = xyGraph.primaryXAxis, yAxis = xyGraph.primaryYAxis;
-		double xCoordinate = xAxis.getPositionValue(me.x, false);
-		double yCoordinate = yAxis.getPositionValue(me.y, false);
-		double intensity   = Double.NaN;
-		if (getImageTrace()!=null) {
-			xCoordinate = Math.round(xCoordinate);
-			yCoordinate = Math.round(yCoordinate);
-		    intensity   = getImageTrace().getData().getDouble((int)yCoordinate, (int)xCoordinate);
-		    
-		    
-			try {
-				double[] axisPnt = getImageTrace().getPointInAxisCoordinates(new double[]{xCoordinate, yCoordinate});
-			    xCoordinate = axisPnt[0];
-			    yCoordinate = axisPnt[1];
-			} catch (Exception ignored) {
-				// It is not fatal for the custom axes not to work.
-			}
-		}
-		
-		StringBuilder buf = new StringBuilder();
-		if (!Double.isNaN(intensity)) {
-			buf.append(intensityFormat.format(intensity));
-			//buf.append("  ");
-		}
-		buf.append("\n[");
-		buf.append(xAxis.format(xCoordinate));
-		buf.append(", ");
-		buf.append(yAxis.format(yCoordinate));
-		buf.append("]");
-		
-		Dimension size = FigureUtilities.getTextExtents(buf.toString(), Display.getDefault().getSystemFont());
-		Image image = new Image(Display.getDefault(),
-				size.width + CURSOR_SIZE, size.height + CURSOR_SIZE);
-		
-		GC gc = new GC(image);
-		//gc.setAlpha(0);
-		gc.setBackground(TRANSPARENT_COLOR);					
-		gc.fillRectangle(image.getBounds());
-		gc.setForeground(BLACK_COLOR);
-		gc.drawLine(0, CURSOR_SIZE/2, CURSOR_SIZE, CURSOR_SIZE/2);
-		gc.drawLine(CURSOR_SIZE/2, 0, CURSOR_SIZE/2, CURSOR_SIZE);
-		gc.setBackground(WHITE_COLOR);
-		gc.fillRectangle(CURSOR_SIZE, CURSOR_SIZE, 
-				image.getBounds().width-CURSOR_SIZE, 
-				image.getBounds().height-CURSOR_SIZE);					
-		gc.drawText(buf.toString(), CURSOR_SIZE, CURSOR_SIZE, true);
-		
-		ImageData imageData = image.getImageData();
-		imageData.transparentPixel = imageData.palette.getPixel(TRANSPARENT_COLOR.getRGB());
-		setCursor(new Cursor(Display.getCurrent(),
-				imageData, CURSOR_SIZE/2 ,CURSOR_SIZE/2));
-		gc.dispose();
-		image.dispose();
-
+		if (positionCursor!=null) positionCursor.dispose();
+		positionCursor = CursorUtils.getPositionCursor(me, (AspectAxis)getRegionGraph().primaryXAxis, (AspectAxis)getRegionGraph().primaryYAxis, getImageTrace());
+		setCursor(positionCursor);
 	}
 
 
@@ -395,7 +332,7 @@ public class RegionArea extends PlotArea {
 		    regionLayer.setMouseListenerActive(regionListener, false);
 			IRegion wasBeingAdded = regionListener.getRegionBeingAdded();
 		    regionListener = null;
-		    setCursor(ZoomType.NONE.getCursor());
+		    setCursor(null);
 		    
 			if (wasBeingAdded!=null) {
 				fireRegionCancelled(new RegionEvent(wasBeingAdded));
@@ -419,10 +356,18 @@ public class RegionArea extends PlotArea {
 		return specialCursor;
 	}
 	
+	private Cursor internalCursor;
 	public void setCursor(Cursor cursor) {
-		if (this.getCursor() == cursor) return;
-		if (specialCursor!=null) cursor = specialCursor;
+		
 		try {
+			if (cursor!=null&&cursor.isDisposed()) cursor = null;
+			if (cursor!=null && this.internalCursor == cursor) return;
+			if (specialCursor!=null && !specialCursor.isDisposed()) {
+				cursor = specialCursor;
+			}
+
+			internalCursor = cursor;
+			if (cursor!=null&&cursor.isDisposed()) cursor = null;
 		    super.setCursor(cursor);
 		} catch (Throwable ignored) {
 			// Intentionally ignore bad cursors.
