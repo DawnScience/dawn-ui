@@ -700,19 +700,6 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	private void createActions(IActionBars actionBars) {
 		
 		
-		final Action importMask = new Action("Import mask from file", Activator.getImageDescriptor("icons/mask-import-wiz.png")) {
-			public void run() {
-				try {
-					IWizard wiz = EclipseUtils.openWizard(MaskImportWizard.ID, false);
-					WizardDialog wd = new  WizardDialog(Display.getCurrent().getActiveShell(), wiz);
-					wd.setTitle(wiz.getWindowTitle());
-					wd.open();
-				} catch (Exception e) {
-					logger.error("Problem opening import!", e);
-				}
-			}			
-		};
-		actionBars.getToolBarManager().add(importMask);
 		
 		final Action exportMask = new Action("Export mask to file", Activator.getImageDescriptor("icons/mask-export-wiz.png")) {
 			public void run() {
@@ -727,6 +714,22 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			}			
 		};
 		actionBars.getToolBarManager().add(exportMask);
+		
+		final Action importMask = new Action("Import mask from file", Activator.getImageDescriptor("icons/mask-import-wiz.png")) {
+			public void run() {
+				try {
+					IWizard wiz = EclipseUtils.openWizard(MaskImportWizard.ID, false);
+					WizardDialog wd = new  WizardDialog(Display.getCurrent().getActiveShell(), wiz);
+					wd.setTitle(wiz.getWindowTitle());
+					wd.open();
+				} catch (Exception e) {
+					logger.error("Problem opening import!", e);
+				}
+			}			
+		};
+		actionBars.getToolBarManager().add(importMask);
+
+		
 		actionBars.getToolBarManager().add(new Separator());
 
 		final Action undo = new Action("Undo mask operation", Activator.getImageDescriptor("icons/mask-undo.png")) {

@@ -356,7 +356,7 @@
          point="org.eclipse.ui.importWizards">
       <wizard
             class="org.dawnsci.plotting.tools.masking.MaskImportWizard"
-            icon="icons/mask-import-wiz.png"
+            icon="icons/mask-export-wiz.png"
             id="org.dawnsci.plotting.importMask"
             name="Import Mask">
       </wizard>
@@ -377,7 +377,7 @@
       </wizard>
       <wizard
             class="org.dawnsci.plotting.tools.masking.MaskExportWizard"
-            icon="icons/mask-export-wiz.png"
+            icon="icons/mask-import-wiz.png"
             id="org.dawnsci.plotting.exportMask"
             name="Export Mask">
       </wizard>
