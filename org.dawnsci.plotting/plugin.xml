@@ -267,6 +267,12 @@
             id="org.dawb.workbench.plotting.page1"
             name="Tool Defaults">
       </page>
+      <page
+            category="org.dawnsci.preferences.diffraction"
+            class="org.dawnsci.plotting.preference.detector.DiffractionDetectorPreferencePage"
+            id="org.dawnsci.plotting.preference.detector"
+            name="Diffraction Detectors">
+      </page>
    </extension>
    <extension
          point="org.eclipse.ui.cheatsheets.cheatSheetContent">
@@ -386,6 +392,9 @@
          point="org.eclipse.core.runtime.preferences">
       <initializer
             class="org.dawnsci.plotting.preference.DiffractionToolPreferenceInitializer">
+      </initializer>
+      <initializer
+            class="org.dawnsci.plotting.preference.detector.DiffractionDetectorPreferenceInitializer">
       </initializer>
    </extension>
    <extension
