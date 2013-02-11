@@ -7,6 +7,7 @@ import org.dawb.common.ui.plot.axis.ICoordinateSystem;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegionContainer;
 import org.dawb.common.ui.plot.region.ROIEvent;
+import org.dawnsci.plotting.draw2d.Activator;
 import org.dawnsci.plotting.draw2d.swtxy.translate.FigureTranslator;
 import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationEvent;
 import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationListener;
@@ -271,8 +272,10 @@ public class CircleSelection extends AbstractSelectionRegion {
 			// On linux off screen is bad therefore we do not draw
 			// Fix to http://jira.diamond.ac.uk/browse/DAWNSCI-429
 			PrecisionRectangle rect = new PrecisionRectangle(cx-radius, cy-radius, d, d);
-			Rectangle bnds = getParent().getBounds().getExpanded(200, 200);
-			if (!bnds.contains(rect)) return;
+			if (Activator.isLinuxOS()) {
+				Rectangle bnds = getParent().getBounds().getExpanded(200, 200);
+				if (!bnds.contains(rect)) return;
+			}
 			
 			graphics.drawOval(rect);
 			if (label != null && isShowLabel()) {

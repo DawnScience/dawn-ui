@@ -25,8 +25,11 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
@@ -116,8 +119,10 @@ public class EllipseFittingTool extends AbstractToolPage {
 		if (region == null)
 			return;
 
-		if (ellipses.contains(region))
+		if (ellipses.contains(region)) {
+			viewer.setSelection(new StructuredSelection(region));
 			return;
+		}
 
 		if (region.getRegionType() != RegionType.ELLIPSEFIT)
 			return;
@@ -126,6 +131,7 @@ public class EllipseFittingTool extends AbstractToolPage {
 		cRegion = (EllipseFitSelection) region;
 		ellipses.add(region);
 		viewer.refresh();
+		viewer.setSelection(new StructuredSelection(region));
 	}
 
 	protected void removeEllipse(IRegion region) {
@@ -206,6 +212,17 @@ public class EllipseFittingTool extends AbstractToolPage {
 		});
 
 		viewer.setInput(ellipses);
+		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				IStructuredSelection s = (IStructuredSelection) event.getSelection();
+				IRegion r = (IRegion) s.getFirstElement();
+				if (r instanceof EllipseFitSelection) {
+					cRegion = (EllipseFitSelection) r;
+					cRegion.setFitCircle(circleOnly);
+				}
+			}
+		});
 		parent.layout();
 	}
 
@@ -264,11 +281,13 @@ public class EllipseFittingTool extends AbstractToolPage {
 			@Override
 			public void run() {
 				if (!isActive()) return;
-				final IStructuredSelection sel = (IStructuredSelection)viewer.getSelection();
+				final IStructuredSelection sel = (IStructuredSelection) viewer.getSelection();
 
 				if (sel != null && sel.getFirstElement() != null) {
 					final IRegion region = (IRegion) sel.getFirstElement();
 					getPlottingSystem().removeRegion(region);
+					if (region == cRegion)
+						cRegion = null;
 					viewer.refresh();
 				}
 			}
@@ -288,6 +307,7 @@ public class EllipseFittingTool extends AbstractToolPage {
 			}
 		};
 		circle.setImageDescriptor(Activator.getImageDescriptor("icons/aspect.png"));
+		circle.setToolTipText("Restrict fit to a circle");
 
 		IToolBarManager tbm = getSite().getActionBars().getToolBarManager();
 		tbm.add(circle);

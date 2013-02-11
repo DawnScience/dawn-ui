@@ -137,7 +137,7 @@
             class="org.dawnsci.plotting.tools.EllipseFittingTool"
             icon="icons/plot-tool-ellipse.png"
             id="org.dawb.workbench.plotting.tools.ellipseFittingTool"
-            label="Ellipse Fitting"
+            label="Circle/Ellipse Fitting"
             tooltip="A tool which shows the fitted ellipse parameters.">
       </plotting_tool_page>
       <plotting_tool_page
@@ -362,7 +362,7 @@
          point="org.eclipse.ui.importWizards">
       <wizard
             class="org.dawnsci.plotting.tools.masking.MaskImportWizard"
-            icon="icons/mask-import-wiz.png"
+            icon="icons/mask-export-wiz.png"
             id="org.dawnsci.plotting.importMask"
             name="Import Mask">
       </wizard>
@@ -383,7 +383,7 @@
       </wizard>
       <wizard
             class="org.dawnsci.plotting.tools.masking.MaskExportWizard"
-            icon="icons/mask-export-wiz.png"
+            icon="icons/mask-import-wiz.png"
             id="org.dawnsci.plotting.exportMask"
             name="Export Mask">
       </wizard>

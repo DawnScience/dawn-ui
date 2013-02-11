@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<cheatsheet title="Ellipse fitting tool">
+<cheatsheet title="Circle/Ellipse fitting tool">
 
 	<intro>
 		<description>
-		    This cheat sheet helps you to open an image, and shows you how to use the ellipse
+		    This cheat sheet helps you to open an image, and shows you how to use the circle/ellipse
 		    fitting tool with the file. If you have just completed the previous cheat sheet, please
 		    close all your data file parts.
 	    </description>
@@ -28,32 +28,42 @@
             serialization="org.eclipse.ui.navigate.openResource(filePath=data/examples/results/billeA_4201_EF_XRD_5998.edf)"/>
    </item>
    <item
-         title="Select 'Ellipse Fitting' tool">
+         title="Select 'Circle/Ellipse Fitting' tool">
       <description>
-         Select the 'Ellipse Fitting' tool from the toolbar above the plot, tools labelled 'Image
+         Select the 'Circle/Ellipse Fitting' tool from the toolbar above the plot, tools labelled 'Image
          tools used to profile and inspect images'. These tools may be obscured on Linux if the
          window containing the plot is too small.
       </description>
    </item>
    <item
-         title="Fit an ellipse">
+         title="Circle-only fitting">
       <description>
-         Select a elliptical or circular feature in the image to fit. Click on at least 5 points of
-         the selected feature spreading points over broad curves and concentrating points on tighter
-         sections. A dashed segmented line is shown that joins the selected points together. After
-         the fifth point is clicked, the fitted ellipse is shown and more points can be added. To
-         finish adding points, click on the last point again without moving the mouse.
-         <p>The fitting ellipse is display with handle boxes on the clicked points and a centre
-         handle box on its major axis.</p>
+         A button near the top left of the tool view can be toggled on to restrict the shape
+         fitted to a circle instead of an ellipse. It affects the current fit and any future fits.
+      </description>
+   </item>
+   <item
+         title="Fit a circle or an ellipse">
+      <description>
+         Select an elliptical or circular feature in the image to fit. Click on at least 3 (or 5
+         for an ellipse) points of the selected feature spreading points over broad curves and
+         concentrating points on tighter sections. A dashed segmented line is shown that joins the
+         selected points together. After the third point is clicked, the fitted circle is shown and
+         more points can be added. To finish adding points, click on the last point again without
+         moving the mouse. If the circle-only button is off, then the fitted shape becomes an ellipse
+         on the fifth point added, otherwise it remains a circle.
+         <p>The fitted ellipse is displayed with handle boxes on the clicked points and a centre
+         handle box shown on its major axis.</p>
       </description>
    </item>
    <item
          title="Fitted ellipse parameters">
       <description>
-         Look at the 'Ellipse Fitting' tool view on the right hand side of the image. Here you will
+         Look at the 'Circle/Ellipse Fitting' tool view on the right hand side of the image. Here you will
          see a table of geometric parameters of the fitted ellipses. The columns include major and
          minor semi-axes lengths (equivalent to radius of a circle), angle of the major axis and
-         centre coordinates.
+         centre coordinates. For a circular fit, the semi-axes are equal in length and the angle is
+         zero.
       </description>
    </item>
    <item
@@ -64,7 +74,7 @@
          points.
       </description>
       <onCompletion>
-         Congratulations, you can now fit ellipses to features in images. Try with your own images.
+         Congratulations, you can now fit circles and ellipses to features in images. Try with your own images.
       </onCompletion>
    </item>
 

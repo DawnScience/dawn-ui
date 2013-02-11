@@ -114,7 +114,7 @@ public class RegionArea extends PlotArea {
 		
 		if (statusLine==null) return;
 		
-		final NumberFormat format = new DecimalFormat("#0.0000#");
+		final NumberFormat format = new DecimalFormat("#0.0##");
 		addPositionListener(new IPositionListener() {
 
 			@Override

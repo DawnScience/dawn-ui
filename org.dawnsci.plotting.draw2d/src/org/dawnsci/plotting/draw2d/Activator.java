@@ -59,4 +59,12 @@ public class Activator extends AbstractUIPlugin  {
 		return imageDescriptorFromPlugin(PLUGIN_ID, path);
 	}
 
+	/**
+	 * @return true if linux
+	 */
+	public static boolean isLinuxOS() {
+		String os = System.getProperty("os.name");
+		return os != null && os.startsWith("Linux");
+	}
+
 }

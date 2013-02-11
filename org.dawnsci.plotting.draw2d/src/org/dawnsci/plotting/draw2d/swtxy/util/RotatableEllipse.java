@@ -2,6 +2,7 @@ package org.dawnsci.plotting.draw2d.swtxy.util;
 
 import java.util.Arrays;
 
+import org.dawnsci.plotting.draw2d.Activator;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Shape;
@@ -224,9 +225,11 @@ public class RotatableEllipse extends Shape {
 		// are very likely to be off-screen. 
 		// On linux off screen is bad therefore we do not draw
 		// Fix to http://jira.diamond.ac.uk/browse/DAWNSCI-429
-		Rectangle bnds = p.getBounds().getExpanded(500, 500); // This is a fudge, very elongated do still not show.
-		                                                                // Better than crashes however...
-		if (ax>bnds.width && ay>bnds.height) return false;
+		if (Activator.isLinuxOS()) {
+			Rectangle bnds = p.getBounds().getExpanded(500, 500); // This is a fudge, very elongated do still not show.
+			                                                                // Better than crashes however...
+			if (ax>bnds.width && ay>bnds.height) return false;
+		}
 		return true;
 	}
 

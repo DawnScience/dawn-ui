@@ -471,6 +471,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 				ShapeType penShape = ShapeType.valueOf(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.MASK_PEN_SHAPE));
 				ActionContributionItem item= ((ActionContributionItem)directToolbar.find(penShape.getId()));
 				if (item!=null) item.getAction().run();
+				setRegionsVisible(false);
 			}
 		});
 		
@@ -480,6 +481,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 				layout.topControl = regionComp;
 				drawContent.layout();
 				((AbstractPlottingSystem)getPlottingSystem()).setSelectedCursor(null);
+				setRegionsVisible(true);
 			}
 		});
 		
@@ -500,6 +502,14 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 				layout.topControl = regionComp;
         	}
         }
+	}
+
+	protected void setRegionsVisible(boolean isVis) {
+		if (getPlottingSystem()==null) return;
+		final Collection<IRegion> regions = getPlottingSystem().getRegions();
+		for (IRegion iRegion : regions) {
+			if (iRegion.isMaskRegion()) iRegion.setVisible(isVis);
+		}
 	}
 
 	/**
@@ -690,19 +700,6 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	private void createActions(IActionBars actionBars) {
 		
 		
-		final Action importMask = new Action("Import mask from file", Activator.getImageDescriptor("icons/mask-import-wiz.png")) {
-			public void run() {
-				try {
-					IWizard wiz = EclipseUtils.openWizard(MaskImportWizard.ID, false);
-					WizardDialog wd = new  WizardDialog(Display.getCurrent().getActiveShell(), wiz);
-					wd.setTitle(wiz.getWindowTitle());
-					wd.open();
-				} catch (Exception e) {
-					logger.error("Problem opening import!", e);
-				}
-			}			
-		};
-		actionBars.getToolBarManager().add(importMask);
 		
 		final Action exportMask = new Action("Export mask to file", Activator.getImageDescriptor("icons/mask-export-wiz.png")) {
 			public void run() {
@@ -717,6 +714,22 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			}			
 		};
 		actionBars.getToolBarManager().add(exportMask);
+		
+		final Action importMask = new Action("Import mask from file", Activator.getImageDescriptor("icons/mask-import-wiz.png")) {
+			public void run() {
+				try {
+					IWizard wiz = EclipseUtils.openWizard(MaskImportWizard.ID, false);
+					WizardDialog wd = new  WizardDialog(Display.getCurrent().getActiveShell(), wiz);
+					wd.setTitle(wiz.getWindowTitle());
+					wd.open();
+				} catch (Exception e) {
+					logger.error("Problem opening import!", e);
+				}
+			}			
+		};
+		actionBars.getToolBarManager().add(importMask);
+
+		
 		actionBars.getToolBarManager().add(new Separator());
 
 		final Action undo = new Action("Undo mask operation", Activator.getImageDescriptor("icons/mask-undo.png")) {
