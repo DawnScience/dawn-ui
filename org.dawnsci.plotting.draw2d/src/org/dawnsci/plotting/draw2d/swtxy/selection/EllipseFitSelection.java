@@ -7,6 +7,7 @@ import org.dawb.common.ui.plot.axis.ICoordinateSystem;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegionContainer;
 import org.dawb.common.ui.plot.region.ROIEvent;
+import org.dawnsci.plotting.draw2d.swtxy.RegionBean;
 import org.dawnsci.plotting.draw2d.swtxy.translate.FigureTranslator;
 import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationEvent;
 import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationListener;
@@ -458,6 +459,9 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 				}
 				addCentreHandle();
 				setRegionObjects(this, handles);
+				RegionBean b = getBean();
+				setVisible(b.isVisible());
+				setMobile(b.isMobile());
 			} else {
 				for (int i = 0; i < imax; i++) {
 					PointROI p = proi.getPoint(i);
