@@ -202,7 +202,7 @@ class LightWeightPlotActions {
 			}
 		};
 		showLegend.setImageDescriptor(Activator.getImageDescriptor("icons/ShowLegend.png"));
-		actionBarManager.registerAction("org.csstudio.swt.xygraph.toolbar.configure", showLegend, ActionType.XYANDIMAGE);		
+		actionBarManager.registerAction("org.csstudio.swt.xygraph.toolbar.configure", showLegend, ActionType.XY);		
 		
 		showLegend.setChecked(xyGraph.isShowLegend());
 		
@@ -211,7 +211,7 @@ class LightWeightPlotActions {
 	
 	protected void createAnnotationActions(final XYRegionGraph xyGraph) {
 		
-		actionBarManager.registerToolBarGroup("org.csstudio.swt.xygraph.toolbar.annotation");	
+		actionBarManager.registerMenuBarGroup("org.csstudio.swt.xygraph.toolbar.annotation");	
 		
 		final Action addAnnotation = new Action("Add Annotation...", Activator.getImageDescriptor("icons/Add_Annotation.png")) {
 			public void run() {
@@ -224,7 +224,7 @@ class LightWeightPlotActions {
 				
 			}
 		};
-		actionBarManager.registerAction("org.csstudio.swt.xygraph.toolbar.annotation", addAnnotation, ActionType.XYANDIMAGE);		
+		actionBarManager.registerAction("org.csstudio.swt.xygraph.toolbar.annotation", addAnnotation, ActionType.XYANDIMAGE, ManagerType.MENUBAR);		
 	
 		
 		final Action delAnnotation = new Action("Remove Annotation...", Activator.getImageDescriptor("icons/Del_Annotation.png")) {
@@ -238,7 +238,7 @@ class LightWeightPlotActions {
 				
 			}
 		};
-		actionBarManager.registerAction("org.csstudio.swt.xygraph.toolbar.annotation", delAnnotation, ActionType.XYANDIMAGE);		
+		actionBarManager.registerAction("org.csstudio.swt.xygraph.toolbar.annotation", delAnnotation, ActionType.XYANDIMAGE, ManagerType.MENUBAR);		
 		
 		actionBarManager.registerToolBarGroup("org.csstudio.swt.xygraph.toolbar.extra");	
 	}
