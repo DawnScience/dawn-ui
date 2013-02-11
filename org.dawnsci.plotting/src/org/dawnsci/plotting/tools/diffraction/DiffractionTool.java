@@ -12,6 +12,7 @@ import org.dawb.common.services.ILoaderService;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
+import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.region.IROIListener;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
@@ -179,12 +180,16 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		super.activate();
 		createDiffractionModel(true);
 		
-		if (getPlottingSystem()!=null && this.regionListener != null) {
-			getPlottingSystem().addRegionListener(this.regionListener);
+		IPlottingSystem plotting = getPlottingSystem();
+		if (plotting != null) {
+			if (regionListener != null)
+				plotting.addRegionListener(regionListener);
+			if (traceListener != null)
+				plotting.addTraceListener(traceListener);
+			if (tmpRegion != null)
+				plotting.addRegion(tmpRegion);
 		}
-		if (getPlottingSystem()!=null && this.traceListener != null) {
-			getPlottingSystem().addTraceListener(traceListener);
-		}
+
 		if (augmenter!=null) augmenter.activate();
 		CalibrationFactory.addCalibrantSelectionListener(this);
 		activeDiffractionTool = this;
@@ -204,12 +209,15 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		if (!isActive()) {return;}
 		
 		super.deactivate();
-		if (getPlottingSystem()!=null) {
-			getPlottingSystem().removeRegionListener(this.regionListener);
+		IPlottingSystem plotting = getPlottingSystem();
+		if (plotting != null) {
+			plotting.removeRegionListener(regionListener);
+			if (traceListener != null)
+				plotting.removeTraceListener(traceListener);
+			if (tmpRegion != null)
+				plotting.removeRegion(tmpRegion);
 		}
-		if (getPlottingSystem()!=null && this.traceListener != null) {
-			getPlottingSystem().addTraceListener(traceListener);
-		}
+
 		CalibrationFactory.removeCalibrantSelectionListener(this);
 		if (augmenter!=null) augmenter.deactivate();
 		if (activeDiffractionTool==this) activeDiffractionTool = null;
@@ -504,10 +512,10 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		};
 		centre.setImageDescriptor(Activator.getImageDescriptor("icons/centre.png"));
 		
-		final Action cCentre = new Action("Three-click beam centre", IAction.AS_PUSH_BUTTON) {
+		final Action cCentre = new Action("Circle-based beam centre", IAction.AS_PUSH_BUTTON) {
 			@Override
 			public void run() {
-				logger.debug("3-click clicked");
+				logger.debug("Circling centre clicked");
 				
 				try {
 					if (tmpRegion != null) {
@@ -515,8 +523,6 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 					}
 					tmpRegion = getPlottingSystem().createRegion(RegionUtils.getUniqueName("BeamCentrePicker", getPlottingSystem()), IRegion.RegionType.CIRCLEFIT);
 					tmpRegion.setUserRegion(false);
-//					tmpRegion.setVisible(false);
-					tmpRegion.setMobile(true);
 					tmpRegion.addROIListener(roiListener);
 				} catch (Exception e) {
 					logger.error("Cannot add beam center", e);

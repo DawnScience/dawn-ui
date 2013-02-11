@@ -96,8 +96,8 @@ public class RegionBean implements Serializable {
 		return mobile;
 	}
 
-	public void setMobile(boolean motile) {
-		this.mobile = motile;
+	public void setMobile(boolean mobile) {
+		this.mobile = mobile;
 	}
 
 	@Override
