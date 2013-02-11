@@ -471,6 +471,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 				ShapeType penShape = ShapeType.valueOf(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.MASK_PEN_SHAPE));
 				ActionContributionItem item= ((ActionContributionItem)directToolbar.find(penShape.getId()));
 				if (item!=null) item.getAction().run();
+				setRegionsVisible(false);
 			}
 		});
 		
@@ -480,6 +481,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 				layout.topControl = regionComp;
 				drawContent.layout();
 				((AbstractPlottingSystem)getPlottingSystem()).setSelectedCursor(null);
+				setRegionsVisible(true);
 			}
 		});
 		
@@ -500,6 +502,14 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 				layout.topControl = regionComp;
         	}
         }
+	}
+
+	protected void setRegionsVisible(boolean isVis) {
+		if (getPlottingSystem()==null) return;
+		final Collection<IRegion> regions = getPlottingSystem().getRegions();
+		for (IRegion iRegion : regions) {
+			if (iRegion.isMaskRegion()) iRegion.setVisible(isVis);
+		}
 	}
 
 	/**
