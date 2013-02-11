@@ -29,10 +29,10 @@ public class Draw2DUtils {
 	}
 
 	public static Cursor getRoiControlPointCursor() {
-		return Display.getCurrent().getSystemCursor(SWT.CURSOR_SIZEALL);
+		return Display.getCurrent().getSystemCursor(SWT.CURSOR_HAND);
 	}
 	public static Cursor getRoiMoveCursor() {
-		return Display.getCurrent().getSystemCursor(SWT.CURSOR_CROSS);
+		return Display.getCurrent().getSystemCursor(SWT.CURSOR_SIZEALL);
 	}
 
 
