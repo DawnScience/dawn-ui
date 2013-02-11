@@ -553,11 +553,11 @@ public class ColorBoxProfileTool extends AbstractToolPage  implements IROIListen
 
 		String traceName1 = "", traceName2 = "";
 		if(type == BoxLineType.HORIZONTAL_TYPE){
-			traceName1 = "Horizontal Profile 1";
-			traceName2 = "Horizontal Profile 2";
+			traceName1 = "Top Profile";
+			traceName2 = "Bottom Profile";
 		} else if(type == BoxLineType.VERTICAL_TYPE){
-			traceName1 = "Vertical Profile 1";
-			traceName2 = "Vertical Profile 2";
+			traceName1 = "Left Profile";
+			traceName2 = "Right Profile";
 		}
 
 		final AbstractDataset line1 = box[0];
