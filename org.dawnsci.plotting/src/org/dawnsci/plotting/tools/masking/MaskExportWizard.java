@@ -125,10 +125,7 @@ public class MaskExportWizard extends Wizard implements IExportWizard {
 		 IFile file = null;
 		 try {
 			 file   = fcp.createNewFile();
-			 
-			 // Start a new file.
-			 file.delete(true, new NullProgressMonitor());
-			 
+			 			 
 			 final IWorkbenchPart  part   = EclipseUtils.getPage().getActivePart();
 			 final IPlottingSystem system = new ThreadSafePlottingSystem((IPlottingSystem)part.getAdapter(IPlottingSystem.class));
 
