@@ -757,7 +757,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 
 	@Override
 	public void setFocus() {
-		viewer.getControl().setFocus();
+		if (viewer!=null && !viewer.getControl().isDisposed()) viewer.getControl().setFocus();
 	}
 
 	@Override
