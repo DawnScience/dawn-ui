@@ -11,6 +11,7 @@ import java.util.Map;
 import org.dawb.common.services.IPersistenceService;
 import org.dawb.common.services.IPersistentFile;
 import org.dawb.common.services.ServiceManager;
+import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.ThreadSafePlottingSystem;
 import org.dawb.common.ui.plot.region.IRegion;
@@ -41,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.BooleanDataset;
+import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
 public class MaskExportWizard extends Wizard implements IExportWizard {
@@ -150,7 +152,8 @@ public class MaskExportWizard extends Wizard implements IExportWizard {
 						 if (options.is("Mask") && trace instanceof IImageTrace) {
 							 IImageTrace image = (IImageTrace)trace;
 							 final String name = options.getString("Mask");
-							 file.addMask(name, (BooleanDataset)image.getMask());
+							 IMonitor mon = monitor!=null? new ProgressMonitorWrapper(monitor): null;
+							 file.addMask(name, (BooleanDataset)image.getMask(), mon);
 						 }
 						 final Collection<IRegion> regions = system.getRegions();
 						 if (options.is("Regions") && regions!=null && !regions.isEmpty()) {
