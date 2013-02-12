@@ -423,7 +423,12 @@ public class ColorBoxProfileTool extends AbstractToolPage  implements IROIListen
 		if (getPlottingSystem()!=null) {
 			if (getImageTrace()!=null) getImageTrace().removePaletteListener(paletteListener);
 		}
-
+		if(myROIWidget != null)
+			myROIWidget.dispose();
+		if(verticalProfileROIWidget != null)
+			verticalProfileROIWidget.dispose();
+		if(horizontalProfileROIWidget != null)
+			horizontalProfileROIWidget.dispose();
 	}
 	
 	private void setRegionsActive(boolean active) {
