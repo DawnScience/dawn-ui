@@ -39,6 +39,8 @@ public class SpinnerScaleSet {
 
 	private List<SelectionListener> externalListeners = new ArrayList<SelectionListener>();
 
+	private boolean listenerOn = true;
+	
 	public SpinnerScaleSet(Composite parent, int sliderSteps, String... names) {
 
 		// Set up the composite
@@ -64,27 +66,34 @@ public class SpinnerScaleSet {
 			SelectionListener listener = new SelectionListener() {			
 				@Override
 				public void widgetSelected(SelectionEvent event) {
-					if (event.getSource() instanceof Scale) {
-						for (String name : scales.keySet()) {
-							if(scales.get(name) == event.getSource()) {
-								updateSpinner(name);
-								continue;
+					
+					if (!listenerOn) return;
+					try {
+						listenerOn = false;
+						if (event.getSource() instanceof Scale) {
+							for (String name : scales.keySet()) {
+								if(scales.get(name) == event.getSource()) {
+									updateSpinner(name);
+									continue;
+								}
 							}
 						}
-					}
-					if (event.getSource() instanceof FloatSpinner) {
-						for (String name : spinners.keySet()) {
-							if(spinners.get(name) == event.getSource()) {
-								updateScale(name);
-								continue;
+						if (event.getSource() instanceof FloatSpinner) {
+							for (String name : spinners.keySet()) {
+								if(spinners.get(name) == event.getSource()) {
+									updateScale(name);
+									continue;
+								}
 							}
 						}
+						updateListeners(event);
+					} finally {
+						listenerOn = true;
 					}
-					updateListeners(event);
 				}
 				@Override
 				public void widgetDefaultSelected(SelectionEvent event) {
-					widgetSelected(event);
+					//widgetSelected(event);
 				}
 			};
 			

@@ -262,9 +262,9 @@ public final class ImageTrace extends Figure implements IImageTrace, IAxisListen
 								
 				this.imageData   = service.getImageData(imageServiceBean);
 				
-				AbstractDataset imageOrig = imageServiceBean.getImage();
-				AbstractDataset maskOrig  = imageServiceBean.getMask();
 				try {
+					ImageServiceBean intensityScaleBean = imageServiceBean.clone();
+					
 					// We send the image drawn with the same palette to the 
 					// intensityScale
 					// TODO FIXME This will not work in log mode
@@ -274,12 +274,11 @@ public final class ImageTrace extends Figure implements IImageTrace, IAxisListen
 						double val = getMax().doubleValue()-(i*inc);
 						dds.set(val, i, 0);
 					}
-					imageServiceBean.setImage(dds);
-					imageServiceBean.setMask(null);
-					intensityScale.setImageData(service.getImageData(imageServiceBean));
-				} finally {
-					imageServiceBean.setImage(imageOrig);
-					imageServiceBean.setMask(maskOrig);
+					intensityScaleBean.setImage(dds);
+					intensityScaleBean.setMask(null);
+					intensityScale.setImageData(service.getImageData(intensityScaleBean));
+				} catch (Throwable ne) {
+					logger.warn("Cannot update intensity!");
 				}
 
 			} catch (Exception e) {
@@ -692,7 +691,7 @@ public final class ImageTrace extends Figure implements IImageTrace, IAxisListen
 
 	@Override
 	public void axisRangeChanged(Axis axis, Range old_range, Range new_range) {
-		//createScaledImage(true, null);
+		//createScaledImage(ImageScaleType.REIMAGE_ALLOWED, null);
 	}
 
 	/**
