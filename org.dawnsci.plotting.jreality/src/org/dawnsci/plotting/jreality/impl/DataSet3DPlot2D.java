@@ -2958,4 +2958,10 @@ public class DataSet3DPlot2D implements IDataSet3DCorePlot,
 		throw new UnsupportedOperationException("Unsupported/implemented for DataSet3DPlot2D, please implement if needed");
 	}
 
+	@Override
+	public boolean isDrawable(double xSize, double ySize) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }
