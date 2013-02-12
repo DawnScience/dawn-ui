@@ -11,11 +11,25 @@ public class DiffractionDetector implements Serializable{
 
 	private static final long serialVersionUID = -1133345866155946034L;
 	
-	//public final static Unit<Length> MICROMETER = SI.MILLIMETER;
-	
 	private String detectorName;
 	private Amount<Length> xPixelSize;
 	private Amount<Length> yPixelSize;
+	private int numberOfPixelsX;
+	private int numberOfPixelsY;
+	
+	public int getNumberOfPixelsX() {
+		return numberOfPixelsX;
+	}
+	public void setNumberOfPixelsX(int numberOfPixelsX) {
+		this.numberOfPixelsX = numberOfPixelsX;
+	}
+	public int getNumberOfPixelsY() {
+		return numberOfPixelsY;
+	}
+	public void setNumberOfPixelsY(int numberOfPixelsY) {
+		this.numberOfPixelsY = numberOfPixelsY;
+	}
+
 	private String units;
 	
 	public String getDetectorName() {
@@ -30,12 +44,40 @@ public class DiffractionDetector implements Serializable{
 	public void setxPixelSize(Amount<Length> xPixelSize) {
 		this.xPixelSize = xPixelSize;
 	}
+
+	
+	public Amount<Length> getPixelSize() {
+		return yPixelSize;
+	}
+	public void setyPixelSize(Amount<Length> yPixelSize) {
+		this.yPixelSize = yPixelSize;
+	}
+	
+	public double getXPixelMM() {
+		if (xPixelSize ==  null) return Double.NaN;
+		return xPixelSize.doubleValue(SI.MILLIMETER);
+	}
+	
+	public void setXPixelMM(double pixmm) {
+		xPixelSize = Amount.valueOf(pixmm, SI.MILLIMETER);
+	}
+	
+	public double getYPixelMM() {
+		if (yPixelSize ==  null) return Double.NaN;
+		return yPixelSize.doubleValue(SI.MILLIMETER);
+	}
+	
+	public void setYPixelMM(double pixmm) {
+		yPixelSize = Amount.valueOf(pixmm, SI.MILLIMETER);
+	}
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result
 				+ ((detectorName == null) ? 0 : detectorName.hashCode());
+		result = prime * result + numberOfPixelsX;
+		result = prime * result + numberOfPixelsY;
 		result = prime * result + ((units == null) ? 0 : units.hashCode());
 		result = prime * result
 				+ ((xPixelSize == null) ? 0 : xPixelSize.hashCode());
@@ -57,6 +99,10 @@ public class DiffractionDetector implements Serializable{
 				return false;
 		} else if (!detectorName.equals(other.detectorName))
 			return false;
+		if (numberOfPixelsX != other.numberOfPixelsX)
+			return false;
+		if (numberOfPixelsY != other.numberOfPixelsY)
+			return false;
 		if (units == null) {
 			if (other.units != null)
 				return false;
@@ -74,34 +120,5 @@ public class DiffractionDetector implements Serializable{
 			return false;
 		return true;
 	}
-	public Amount<Length> getyPixelSize() {
-		return yPixelSize;
-	}
-	public void setyPixelSize(Amount<Length> yPixelSize) {
-		this.yPixelSize = yPixelSize;
-	}
-	public String getUnits() {
-		return units;
-	}
-	public void setUnits(String units) {
-		this.units = units;
-	}
 	
-	public double getXPixelMM() {
-		if (xPixelSize ==  null) return Double.NaN;
-		return xPixelSize.doubleValue(SI.MILLIMETER);
-	}
-	
-	public void setXPixelMM(double pixmm) {
-		xPixelSize = Amount.valueOf(pixmm, SI.MILLIMETER);
-	}
-	
-	public double getYPixelMM() {
-		if (yPixelSize ==  null) return Double.NaN;
-		return yPixelSize.doubleValue(SI.MILLIMETER);
-	}
-	
-	public void setYPixelMM(double pixmm) {
-		yPixelSize = Amount.valueOf(pixmm, SI.MILLIMETER);
-	}
 }

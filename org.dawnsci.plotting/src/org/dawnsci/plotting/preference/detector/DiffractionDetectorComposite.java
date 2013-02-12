@@ -15,6 +15,8 @@ public class DiffractionDetectorComposite extends Composite  {
 	private TextWrapper    detectorName;
 	private NumberBox      xPixelSize;
 	private NumberBox      yPixelSize;
+	private NumberBox      numberOfPixelsX;
+	private NumberBox      numberOfPixelsY;
 
 	public DiffractionDetectorComposite(Composite par, int config) {
 		super(par, config);
@@ -35,6 +37,14 @@ public class DiffractionDetectorComposite extends Composite  {
 		yPixelSize = createRangeBox("y pixel size", 0, 10, "mm");
 		yPixelSize.setDecimalPlaces(5);
 		yPixelSize.setName("y pixel size");
+		
+		numberOfPixelsX = createRangeBox("number of pixels X", 0, 1000000, "pixels");
+		numberOfPixelsX.setDecimalPlaces(0);
+		numberOfPixelsX.setName("No of Pixels (X)");
+		
+		numberOfPixelsY = createRangeBox("number of pixels Y", 0, 1000000, "pixels");
+		numberOfPixelsY.setDecimalPlaces(0);
+		numberOfPixelsY.setName("No of Pixels (Y)");
 
 	}
 
@@ -64,6 +74,14 @@ public class DiffractionDetectorComposite extends Composite  {
 	
 	public NumberBox getYPixelMM() {
 		return yPixelSize;
+	}
+	
+	public NumberBox getNumberOfPixelsX() {
+		return numberOfPixelsX;
+	}
+	
+	public NumberBox getNumberOfPixelsY() {
+		return numberOfPixelsY;
 	}
 	
 }

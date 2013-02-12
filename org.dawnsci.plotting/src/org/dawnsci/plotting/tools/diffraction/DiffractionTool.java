@@ -186,8 +186,9 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 				plotting.addRegionListener(regionListener);
 			if (traceListener != null)
 				plotting.addTraceListener(traceListener);
-			if (tmpRegion != null)
-				plotting.addRegion(tmpRegion);
+			if (tmpRegion != null) {
+				tmpRegion.setVisible(true);
+			}
 		}
 
 		if (augmenter!=null) augmenter.activate();
@@ -214,8 +215,9 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			plotting.removeRegionListener(regionListener);
 			if (traceListener != null)
 				plotting.removeTraceListener(traceListener);
-			if (tmpRegion != null)
-				plotting.removeRegion(tmpRegion);
+			if (tmpRegion != null) {
+				tmpRegion.setVisible(false);
+			}
 		}
 
 		CalibrationFactory.removeCalibrantSelectionListener(this);
@@ -369,7 +371,6 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		// if there is no meta create default IDiff and put it in the dataset
 		mdImage = DiffractionDefaultMetadata.getDiffractionMetadata(imageTrace.getData().getShape());
 		imageTrace.getData().setMetadata(mdImage);
-//		}
 		
 		return (IDiffractionMetadata)mdImage;
 	}
@@ -495,12 +496,18 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			@Override
 			public void run() {
 				logger.debug("1-click clicked");
-				
+
+				IPlottingSystem plotter = getPlottingSystem();
+				if (plotter == null) {
+					logger.debug("No plotting system found");
+					return;
+				}
+
 				try {
 					if (tmpRegion != null) {
-						getPlottingSystem().removeRegion(tmpRegion);
+						plotter.removeRegion(tmpRegion);
 					}
-					tmpRegion = getPlottingSystem().createRegion(RegionUtils.getUniqueName("BeamCentrePicker", getPlottingSystem()), IRegion.RegionType.POINT);
+					tmpRegion = plotter.createRegion(RegionUtils.getUniqueName("BeamCentrePicker", getPlottingSystem()), IRegion.RegionType.POINT);
 					tmpRegion.setUserRegion(false);
 					tmpRegion.setVisible(false);
 					
@@ -516,12 +523,18 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			@Override
 			public void run() {
 				logger.debug("Circling centre clicked");
-				
+
+				IPlottingSystem plotter = getPlottingSystem();
+				if (plotter == null) {
+					logger.debug("No plotting system found");
+					return;
+				}
+
 				try {
 					if (tmpRegion != null) {
-						getPlottingSystem().removeRegion(tmpRegion);
+						plotter.removeRegion(tmpRegion);
 					}
-					tmpRegion = getPlottingSystem().createRegion(RegionUtils.getUniqueName("BeamCentrePicker", getPlottingSystem()), IRegion.RegionType.CIRCLEFIT);
+					tmpRegion = plotter.createRegion(RegionUtils.getUniqueName("BeamCentrePicker", getPlottingSystem()), IRegion.RegionType.CIRCLEFIT);
 					tmpRegion.setUserRegion(false);
 					tmpRegion.addROIListener(roiListener);
 				} catch (Exception e) {
@@ -715,7 +728,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			public void regionAdded(RegionEvent evt) {
 				//test if our region
 				if (evt.getRegion() == tmpRegion) {
-					logger.debug("1-Click region added (type: {})", tmpRegion.getRegionType());
+					logger.debug("Region added (type: {})", tmpRegion.getRegionType());
 					double[] point = tmpRegion.getROI().getPointRef();
 					logger.debug("Clicked here X: {} Y : {}", point[0], point[1]);
 
@@ -741,9 +754,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 					IDiffractionMetadata data = getDiffractionMetaData();
 					DetectorProperties detprop = data.getDetector2DProperties();
 					detprop.setBeamCentreCoords(point);
-					if (!augmenter.isShowingBeamCenter()) {
-						augmenter.drawBeamCentre(true);
-					}
+					augmenter.drawBeamCentre(augmenter.isShowingBeamCenter());
 				}
 			}
 		};
@@ -757,7 +768,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 
 	@Override
 	public void setFocus() {
-		viewer.getControl().setFocus();
+		if (viewer!=null && !viewer.getControl().isDisposed()) viewer.getControl().setFocus();
 	}
 
 	@Override

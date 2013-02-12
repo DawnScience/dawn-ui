@@ -20,7 +20,6 @@ import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IContributionManager;
-import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.swt.graphics.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,7 +103,8 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	private AbstractPlottingSystem plottingSystem;
 	private DetectorProperties detprop;
 	private DiffractionCrystalEnvironment diffenv;
-	
+	private IRegion crosshairs;
+
     private enum RING_TYPE {
     	ICE, STANDARD, CALIBRANT, BEAM_CENTRE;
     }
@@ -124,6 +124,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	}
 	
 	private boolean active = true;
+
 	public void activate() {
 		activeAugmenter = this;
 		active = true;
@@ -134,6 +135,10 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	public void deactivate() {
 		if (activeAugmenter == this) activeAugmenter=null;
 		active = false;
+		if (crosshairs != null && plottingSystem != null) {
+			plottingSystem.removeRegion(crosshairs);
+			crosshairs = null;
+		}
 		for (RING_TYPE rt : RING_TYPE.values()) removeRings(rt);
 		registerListeners(false);
 	}
@@ -149,41 +154,25 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	public boolean isShowingBeamCenter() {
 		return beamCentre.isChecked();
 	}
-	
-	protected IRegion getBeamCentre() {
-		IRegion region=null;
-		final Collection<IRegion> regions = plottingSystem.getRegions(RegionType.LINE);
-		if (regions==null) return null;
-		for (IRegion iRegion : regions) {
-			if (iRegion.getUserObject()==RING_TYPE.BEAM_CENTRE) {
-				region = iRegion;
-				break;
-			}
-		}
-        return region;
-	}
 
 	protected void drawBeamCentre(boolean isChecked) {
 		if (!active) return; // We are likely off screen.
 		beamCentre.setChecked(isChecked);
-		
-		IRegion beamCentreRegion = getBeamCentre();
-		if (beamCentreRegion != null)
-			plottingSystem.removeRegion(beamCentreRegion);
 			
 		if (isChecked) { 
+			DecimalFormat df = new DecimalFormat("#.##");
 			if (detprop != null) {
 				double[] beamCentrePC = detprop.getBeamCentreCoords();
 				double length = (1 + Math.sqrt(detprop.getPx() * detprop.getPx() + detprop.getPy() * detprop.getPy()) * 0.01);
-				DecimalFormat df = new DecimalFormat("#.##");
 				String label = df.format(beamCentrePC[0]) + "px, " + df.format(beamCentrePC[1])+"px";
 				drawCrosshairs(beamCentrePC, length, ColorConstants.red, ColorConstants.black, "beam centre", label);
-			}
-			else if (imageCentrePC!=null){
-				DecimalFormat df = new DecimalFormat("#.##");
+			} else if (imageCentrePC!=null) {
 				String label = df.format(imageCentrePC[0]) + "px, " + df.format(imageCentrePC[1])+"px";
 				drawCrosshairs(imageCentrePC, imageCentrePC[1]/50, ColorConstants.red, ColorConstants.black, "beam centre", label);
 			}
+		} else if (crosshairs != null) {
+			plottingSystem.removeRegion(crosshairs);
+			crosshairs = null;
 		}
 	}
 
@@ -217,36 +206,42 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		}
 	}
 
-	protected IRegion drawCrosshairs(double[] beamCentre, double length, Color colour, Color labelColour, String nameStub, String labelText) {
-		if (!active) return null; // We are likely off screen.
-		IRegion region=null;
-		
-		try {
-			final String regionName = RegionUtils.getUniqueName(nameStub, plottingSystem);
-			region = plottingSystem.createRegion(regionName, RegionType.LINE);
-		} catch (Exception e) {
-			logger.error("Can't create region", e);
-			return null;
+	protected void drawCrosshairs(double[] beamCentre, double length, Color colour, Color labelColour, String nameStub, String labelText) {
+		if (!active) return; // We are likely off screen.
+
+		if (crosshairs == null) {
+			try {
+				final String regionName = RegionUtils.getUniqueName(nameStub, plottingSystem);
+				crosshairs = plottingSystem.createRegion(regionName, RegionType.LINE);
+			} catch (Exception e) {
+				logger.error("Can't create region", e);
+				return;
+			}
+
+			final LinearROI lroi = new LinearROI(length, 0);
+			lroi.setMidPoint(beamCentre);
+			lroi.setCrossHair(true);
+			crosshairs.setROI(lroi);
+			crosshairs.setRegionColor(colour);
+			crosshairs.setAlpha(100);
+			crosshairs.setUserRegion(false);
+			crosshairs.setShowPosition(false);
+			crosshairs.setUserObject(RING_TYPE.BEAM_CENTRE);
+
+			crosshairs.setLabel(labelText);
+			((AbstractSelectionRegion) crosshairs).setShowLabel(true);
+
+			plottingSystem.addRegion(crosshairs);
+			crosshairs.setMobile(false); // NOTE: Must be done **AFTER** calling the
+										// addRegion method.
+		} else {
+			LinearROI lroi = (LinearROI) crosshairs.getROI();
+			lroi.setLength(length);
+			lroi.setMidPoint(beamCentre);
+			crosshairs.setRegionColor(colour);
+			crosshairs.setLabel(labelText);
+			crosshairs.setROI(lroi);
 		}
-	
-		final LinearROI lroi = new LinearROI(length, 0);
-		double dbc[] = {(double)beamCentre[0], (double)beamCentre[1]};
-		lroi.setMidPoint(dbc);
-		lroi.setCrossHair(true);
-		region.setROI(lroi);
-		region.setRegionColor(colour);
-		region.setAlpha(100);
-		region.setUserRegion(false);
-		region.setShowPosition(false);
-		region.setUserObject(RING_TYPE.BEAM_CENTRE);
-		
-		region.setLabel(labelText);
-		((AbstractSelectionRegion)region).setShowLabel(true);
-		
-		plottingSystem.addRegion(region);
-		region.setMobile(false); // NOTE: Must be done **AFTER** calling the addRegion method.
-	
-		return region;
 	}
 
 	/**
@@ -305,10 +300,10 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 
 	private List<IRegion> getRegions(Object marker) {
 		
-        final Collection<IRegion> elipses = plottingSystem.getRegions(RegionType.ELLIPSE);
-		if (elipses==null) return null;
-		final List<IRegion> ret = new ArrayList<IRegion>(elipses.size());
-		for (IRegion iRegion : elipses) {
+        final Collection<IRegion> ellipses = plottingSystem.getRegions(RegionType.ELLIPSE);
+		if (ellipses==null) return null;
+		final List<IRegion> ret = new ArrayList<IRegion>(ellipses.size());
+		for (IRegion iRegion : ellipses) {
 			if (iRegion.getUserObject()!=marker) continue;
 			ret.add(iRegion);
 		}
@@ -437,10 +432,12 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	@Override
 	public void diffractionMetadataCompositeChanged(DiffractionMetadataCompositeEvent evt) {
 		if (evt.hasBeamCentreChanged()) {
-			IRegion beamCentreRegion = getBeamCentre();
 			if (beamCentre.isChecked()) {
 				beamCentre.setChecked(false);
-				if (beamCentreRegion!=null) plottingSystem.removeRegion(beamCentreRegion);
+				if (crosshairs != null) {
+					plottingSystem.removeRegion(crosshairs);
+					crosshairs = null;
+				}
 			} else {
 				beamCentre.setChecked(true);
 				drawBeamCentre(true);

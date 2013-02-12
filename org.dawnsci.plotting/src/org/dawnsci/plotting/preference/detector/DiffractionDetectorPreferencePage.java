@@ -31,8 +31,7 @@ public class DiffractionDetectorPreferencePage extends PreferencePage implements
 	@Override
 	public void init(IWorkbench workbench) {
 		setPreferenceStore(Activator.getDefault().getPreferenceStore());
-		detectors = test();
-		setBean(detectors);
+		getDetectorsFromPreference();
 		
 	}
 
@@ -56,9 +55,9 @@ public class DiffractionDetectorPreferencePage extends PreferencePage implements
 		// TODO make editor UI
 		detectorEditor.setEditorUI(detectorComposite);
 		detectorEditor.setNameField("detectorName");
-		detectorEditor.setAdditionalFields(new String[]{"XPixelMM","YPixelMM"});
-		detectorEditor.setColumnWidths(150,100,100);
-		detectorEditor.setColumnNames("Name", "x pixel size", "y pixel size");
+		detectorEditor.setAdditionalFields(new String[]{"XPixelMM","YPixelMM","NumberOfPixelsX","NumberOfPixelsY"});
+		detectorEditor.setColumnWidths(80,80,80,80,80);
+		detectorEditor.setColumnNames("Name", "X Pixel (mm)", "Y Pixel (mm)","X (pixels)", "Y (pixels");
 		detectorEditor.setColumnFormat("##0.####");
 		detectorEditor.setListHeight(150);
 		detectorEditor.setAddButtonText("Add Detector");
@@ -92,7 +91,7 @@ public class DiffractionDetectorPreferencePage extends PreferencePage implements
 	
 	@Override
 	protected void performDefaults() {
-		getDetectorsFromPreference();
+		getDefaultDetectorsFromPreference();
 	}
 	
 	private void setDetectorsToPreference() {
@@ -114,18 +113,17 @@ public class DiffractionDetectorPreferencePage extends PreferencePage implements
 		setBean(detectors);
 
 	}
+	
+	private void getDefaultDetectorsFromPreference() {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		XMLEncoder xmlEncoder = new XMLEncoder(baos);
+		xmlEncoder.writeObject(detectors);
+		xmlEncoder.close();
+		String xml = getPreferenceStore().getDefaultString(DiffractionDetectorConstants.DETECTOR);
+		XMLDecoder xmlDecoder =new XMLDecoder(new ByteArrayInputStream(xml.getBytes()));
+		detectors = (DiffractionDetectors) xmlDecoder.readObject();
+		setBean(detectors);
 
-
-	private DiffractionDetectors test() {
-		DiffractionDetectors dds = new DiffractionDetectors();
-		DiffractionDetector dd = new DiffractionDetector();
-		dd.setDetectorName("testDetector");
-		dd.setxPixelSize(Amount.valueOf(1.5, SI.MILLIMETER));
-		dd.setyPixelSize(Amount.valueOf(1.5, SI.MILLIMETER));
-		dd.setUnits("mm");
-		dds.addDiffractionDetector(dd);
-		dds.setDiffractionDetector(dd);
-		return dds;
 	}
 	
 	public void setBean(Object bean) {

@@ -171,4 +171,11 @@ public interface Overlay2DProvider extends OverlayProvider {
 	 */
 	public void drawImage(int imageID, Image image, double lux, double luy, double rlx, double rly);
 
+	/**
+	 * Whether objects will be too small to draw (< 1 pixel in either height or width)
+	 * @param xSize
+	 * @param ySize
+	 * @return drawable
+	 */
+	boolean isDrawable(double xSize, double ySize);
 }
