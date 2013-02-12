@@ -82,6 +82,15 @@ public class DiffractionDetectorPreferenceInitializer extends AbstractPreference
 		dd7.setNumberOfPixelsY(3072);
 		dds.addDiffractionDetector(dd7);
 		
+		//MAR 345 image plate
+		DiffractionDetector dd8 = new DiffractionDetector();
+		dd8.setDetectorName("MAR 345 image plate");
+		dd8.setxPixelSize(Amount.valueOf(0.1000, SI.MILLIMETER));
+		dd8.setyPixelSize(Amount.valueOf(0.1000, SI.MILLIMETER));
+		dd8.setNumberOfPixelsX(3450);
+		dd8.setNumberOfPixelsY(3450);
+		dds.addDiffractionDetector(dd8);
+		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		XMLEncoder xmlEncoder = new XMLEncoder(baos);
 		xmlEncoder.writeObject(dds);
