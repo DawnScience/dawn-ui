@@ -186,8 +186,9 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 				plotting.addRegionListener(regionListener);
 			if (traceListener != null)
 				plotting.addTraceListener(traceListener);
-			if (tmpRegion != null)
-				plotting.addRegion(tmpRegion);
+			if (tmpRegion != null) {
+				tmpRegion.setVisible(true);
+			}
 		}
 
 		if (augmenter!=null) augmenter.activate();
@@ -214,8 +215,9 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			plotting.removeRegionListener(regionListener);
 			if (traceListener != null)
 				plotting.removeTraceListener(traceListener);
-			if (tmpRegion != null)
-				plotting.removeRegion(tmpRegion);
+			if (tmpRegion != null) {
+				tmpRegion.setVisible(false);
+			}
 		}
 
 		CalibrationFactory.removeCalibrantSelectionListener(this);
@@ -369,7 +371,6 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		// if there is no meta create default IDiff and put it in the dataset
 		mdImage = DiffractionDefaultMetadata.getDiffractionMetadata(imageTrace.getData().getShape());
 		imageTrace.getData().setMetadata(mdImage);
-//		}
 		
 		return (IDiffractionMetadata)mdImage;
 	}
