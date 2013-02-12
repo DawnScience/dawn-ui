@@ -348,6 +348,14 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		
 		//if the file contains IMetaData and is hdf5 try and pull some meta data from it.
 		if (mdImage!=null) {
+			if (mdImage.getFilePath()!= null) {
+				IDiffractionMetadata difMet = NexusDiffractionMetaCreator.diffractionMetadataFromNexus(mdImage.getFilePath(),mdImage,imageShape);
+				if (difMet !=null) {
+					imageTrace.getData().setMetadata(difMet);
+					return difMet;
+				}
+			}
+			
 			if (getPart() instanceof IEditorPart) {
 				IDiffractionMetadata difMet = NexusDiffractionMetaCreator.diffractionMetadataFromNexus(EclipseUtils.getFilePath(((IEditorPart)getPart()).getEditorInput()),
 						mdImage,imageShape);

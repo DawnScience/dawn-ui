@@ -12,6 +12,7 @@ import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.preference.DiffractionToolConstants;
+import org.dawnsci.plotting.preference.detector.DiffractionDetectorHelper;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
@@ -132,6 +133,14 @@ public class DiffractionDefaultMetadata {
 		double pixelSizeX  = Activator.getDefault().getPreferenceStore().getDouble(DiffractionToolConstants.PIXEL_SIZE_X);
 		double pixelSizeY  = Activator.getDefault().getPreferenceStore().getDouble(DiffractionToolConstants.PIXEL_SIZE_Y);
 		double distance = Activator.getDefault().getPreferenceStore().getDouble(DiffractionToolConstants.DISTANCE);
+		
+		//Guess pixel Size from the shape of the image
+		double[] pixelXY = DiffractionDetectorHelper.getXYPixelSizeMM(shape);
+		
+		if (pixelXY != null) {
+			pixelSizeX = pixelXY[0];
+			pixelSizeY = pixelXY[1];
+		}
 		
 		// Create the detector origin vector based on the above
 		double[] detectorOrigin = { (widthInPixels - widthInPixels/2d) * pixelSizeX, (heightInPixels - heightInPixels/2d) * pixelSizeY, distance };

@@ -5,8 +5,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import ncsa.hdf.object.Attribute;
-import ncsa.hdf.object.Datatype;
 import ncsa.hdf.object.Group;
 import ncsa.hdf.object.HObject;
 import ncsa.hdf.object.h5.H5ScalarDS;
@@ -17,6 +15,9 @@ import org.dawb.hdf5.nexus.IFindInNexus;
 import org.dawb.hdf5.nexus.NexusFindDatasetByName;
 import org.dawb.hdf5.nexus.NexusFindGroupByAttributeText;
 import org.dawb.hdf5.nexus.NexusUtils;
+import org.dawnsci.plotting.preference.detector.DiffractionDetectorHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
 import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
@@ -25,6 +26,9 @@ import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 
 public class NexusDiffractionMetaCreator {
+	
+	private static final Logger logger = LoggerFactory.getLogger(NexusDiffractionMetaCreator.class);
+	
 	/**
 	 * Static method to obtain a DiffractionMetaDataAdapter wrapping the argument metadata
 	 *  and populated with default values from the preferences store and from the nexus file
@@ -44,11 +48,11 @@ public class NexusDiffractionMetaCreator {
 			Group rootGroup = hiFile.getRoot();
 			
 			//Check only one entry in root - might not act on it at the moment but may be useful to know
+			if (rootGroup.getMemberList().size() > 1)
+				logger.warn("More than one root node in file, metadata may be incorrect");
 			
 			if (rootGroup.getMemberList().get(0) instanceof Group) {
 				
-				boolean isEntry = NexusUtils.getNexusGroupAttributeValue((Group)rootGroup.getMemberList().get(0),
-																		NexusUtils.NXCLASS).equals("NXentry");
 				//Find NXinstrument (hopefully there is only one!)
 				NexusFindGroupByAttributeText finder = new NexusFindGroupByAttributeText("NXinstrument",NexusUtils.NXCLASS);
 				List<HObject> hOb = NexusUtils.nexusBreadthFirstSearch(finder, (Group)rootGroup.getMemberList().get(0), true);
@@ -57,18 +61,44 @@ public class NexusDiffractionMetaCreator {
 				Group nxInstrument = (Group)hOb.get(0);
 				
 				//Find nxDetectors in instrument
-				// TODO maybe use the image size to make sure we have the correct detector
-				//  this will also validate detprop.setPx(px) detprop.setPy(py) 
+				// TODO should probably change to find data then locate correct
+				// detector from image size
 				List<Group> nxDetectors = findNXdetetors(nxInstrument, "pixel");
 				
+				Group searchNode = null;
+				
+				// use the image size to make sure we have the correct detector
+				//  this will also validate detprop.setPx(px) detprop.setPy(py) 
+				if (nxDetectors.size() > 1) {
+					
+					for (Group detector : nxDetectors) {
+						H5ScalarDS dataset = getDataset(detector, "data");
+						
+						long[] dataShape = dataset.getDims();
+						
+						boolean matchesX = false;
+						boolean matchesY = false;
+						
+						for (long val : dataShape) {
+							if (val == imageSize[0]) matchesX = true;
+							else if (val == imageSize[1]) matchesY = true;
+						}
+						
+						if (matchesX & matchesY) {
+							searchNode = detector;
+						}
+						
+					}
+					
+				}
+				
 				//if no detectors with pixel in search the entire nxInstrument group
-				if (nxDetectors.isEmpty()) {nxDetectors.add(nxInstrument);}
-				// TODO do something better if list is empty or has more than one object
+				if (nxDetectors.isEmpty() || searchNode == null) {searchNode = nxInstrument;}
 				
 				//populate the crystal environ
-				populateFromNexus(nxDetectors.get(0), diffcrys);
+				populateFromNexus(searchNode, diffcrys);
 				
-				populateFromNexus(nxDetectors.get(0), detprop);
+				populateFromNexus(searchNode, detprop, imageSize);
 				
 				//find nx mono
 				finder.attributeValue = "NXmonochromator";
@@ -80,14 +110,12 @@ public class NexusDiffractionMetaCreator {
 			}
 
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
 			if (hiFile!= null)
 				try {
 					hiFile.close();
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 		}
@@ -193,33 +221,46 @@ public class NexusDiffractionMetaCreator {
 	}
 	
 	
-	private static void populateFromNexus(Group nxDetector, DetectorProperties detprop) {
+	private static void populateFromNexus(Group nxDetector, DetectorProperties detprop, int[] shape) {
 		
-		updatePixelSize(nxDetector,detprop);
+		if (!updatePixelSize(nxDetector,detprop)) {
+			double[] pixelSize = DiffractionDetectorHelper.getXYPixelSizeMM(shape);
+			if (pixelSize != null) {
+				detprop.setHPxSize(pixelSize[0]);
+				detprop.setVPxSize(pixelSize[0]);
+			}
+			
+		}
 		updateBeamCentre(nxDetector,detprop);
 		updateDetectorDistance(nxDetector,detprop);
 		// TODO detprop.setNormalAnglesInDegrees(yaw, pitch, roll);
 	}
 	
-	private static void updatePixelSize(Group nexusGroup, DetectorProperties detprop) {
+	private static boolean updatePixelSize(Group nexusGroup, DetectorProperties detprop) {
 		H5ScalarDS dataset = getDataset(nexusGroup, "x_pixel_size");
-		if (dataset == null) return;
+		if (dataset == null) return false;
 		double[] xPx = getDoubleData(dataset);
-		if (xPx == null) return;
+		if (xPx == null) return false;
 		String units = NexusUtils.getNexusGroupAttributeValue(dataset, "units");
-		if (units == null) return;
+		if (units == null) return false;
 		
 		if (units.equals("mm")) {detprop.setVPxSize(xPx[0]);}
 		else if (units.equals("m")) {detprop.setVPxSize(xPx[0]*1000);}
 		
 		dataset = getDataset(nexusGroup, "y_pixel_size");
-		if (dataset == null) return;
+		if (dataset == null) return false;
 		String unitsy = NexusUtils.getNexusGroupAttributeValue(dataset, "units");
 		double[] yPx = getDoubleData(dataset);
-		if (yPx == null) return;
-		if (unitsy == null) return;
-		if (unitsy.equals("mm")) {detprop.setHPxSize(xPx[0]);}
-		else if (unitsy.equals("m")) {detprop.setHPxSize(xPx[0]*1000);}
+		if (yPx == null) return false;
+		if (unitsy == null) return false;
+		if (unitsy.equals("mm")) {
+			detprop.setHPxSize(xPx[0]);
+			return true;
+		} else if (unitsy.equals("m")) {
+			detprop.setHPxSize(xPx[0]*1000);
+			return true;
+		}
+		return false;
 		
 	}
 	
