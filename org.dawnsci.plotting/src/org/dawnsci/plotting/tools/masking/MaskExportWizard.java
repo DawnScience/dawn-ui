@@ -41,6 +41,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.BooleanDataset;
 import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
@@ -127,10 +128,7 @@ public class MaskExportWizard extends Wizard implements IExportWizard {
 		 IFile file = null;
 		 try {
 			 file   = fcp.createNewFile();
-			 
-			 // Start a new file.
-			 file.delete(true, new NullProgressMonitor());
-			 
+			 			 
 			 final IWorkbenchPart  part   = EclipseUtils.getPage().getActivePart();
 			 final IPlottingSystem system = new ThreadSafePlottingSystem((IPlottingSystem)part.getAdapter(IPlottingSystem.class));
 
@@ -139,22 +137,30 @@ public class MaskExportWizard extends Wizard implements IExportWizard {
 
 				 @Override
 				 public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					 
 					 IPersistentFile file = null;
 					 try {
 						 IPersistenceService service = (IPersistenceService)ServiceManager.getService(IPersistenceService.class);
 						 file    = service.createPersistentFile(finalFile.getLocation().toOSString());
 						 
- 					     // Save things.
+						 final IMonitor mon = new ProgressMonitorWrapper(monitor);
+
+						 // Save things.
 						 ITrace trace  = system.getTraces().iterator().next();
 						 if (options.is("Original Data")) {
 							 file.setData(trace.getData());
+							 if (trace instanceof IImageTrace) {
+								 final List<AbstractDataset> axes = ((IImageTrace)trace).getAxes();
+								 if (axes!=null) file.setAxes(axes);
+							 }
 						 }
+						 
 						 if (options.is("Mask") && trace instanceof IImageTrace) {
 							 IImageTrace image = (IImageTrace)trace;
 							 final String name = options.getString("Mask");
-							 IMonitor mon = monitor!=null? new ProgressMonitorWrapper(monitor): null;
 							 file.addMask(name, (BooleanDataset)image.getMask(), mon);
 						 }
+						 
 						 final Collection<IRegion> regions = system.getRegions();
 						 if (options.is("Regions") && regions!=null && !regions.isEmpty()) {
 							 final Map<String, ROIBase> rois   = new LinkedHashMap<String, ROIBase>(regions.size());
@@ -179,7 +185,7 @@ public class MaskExportWizard extends Wizard implements IExportWizard {
 			 } else {
 				 message = "Cannot export masking file.";
 			 }
-		     ErrorDialog.openError(Display.getDefault().getActiveShell(), "Export failure", message, new Status(IStatus.WARNING, "org.dawnsci.plotting", message, ne));
+		     ErrorDialog.openError(Display.getDefault().getActiveShell(), "Export failure", message, new Status(IStatus.WARNING, "org.dawnsci.plotting", ne.getMessage(), ne));
 		     return true;
 		 } finally {
 			 try {

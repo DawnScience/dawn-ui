@@ -213,7 +213,6 @@ public class RegionArea extends PlotArea {
         if (imageTraces.containsKey(name)) throw new RuntimeException("There is an image called '"+name+"' already plotted!");
         
 		final ImageTrace trace = new ImageTrace(name, xAxis, yAxis, intensity);
-		
 		fireImageTraceCreated(new TraceEvent(trace));
 		
 		return trace;

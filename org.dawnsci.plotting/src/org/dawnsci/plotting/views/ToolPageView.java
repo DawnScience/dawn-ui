@@ -9,6 +9,7 @@
  */ 
 package org.dawnsci.plotting.views;
 
+import java.lang.ref.SoftReference;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -129,7 +130,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 
 	public static final String ID = "org.dawb.workbench.plotting.views.ToolPageView";
 	
-	private Collection<IToolPageSystem>     systems;
+	private Collection<SoftReference<IToolPageSystem>>     systems;
 	private Map<String,Map<String,PageRec>> recs;
 	private String                          unique_id;
 	
@@ -138,7 +139,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	public ToolPageView() {
 		super();
 		this.unique_id = StringUtils.getUniqueId(ToolPageView.class);
-		this.systems   = new HashSet<IToolPageSystem>(7);
+		this.systems   = new HashSet<SoftReference<IToolPageSystem>>(7);
 		this.recs      = new HashMap<String,Map<String,PageRec>>(7);
 	}
 
@@ -786,7 +787,8 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 				}
 	
 				// free the page
-				doDestroyPage(rec.part, rec);
+				IToolPageSystem toolSystem = (IToolPageSystem)rec.tool.getPlottingSystem();
+				toolSystem.disposeToolPage(rec.tool.getToolId());
 	
 				if (rec.subActionBars != null) {
 					rec.subActionBars.dispose();
@@ -1057,7 +1059,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		if (sys!=null) {
 			
 			if (getViewSite().getSecondaryId()==null) {
-				systems.add(sys);
+				systems.add(new SoftReference<IToolPageSystem>(sys));
 				sys.addToolChangeListener(this);
 			} else {
 				try {
@@ -1193,10 +1195,11 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	}
 
 	private void recordPage(IWorkbenchPart part, IToolPage tool, PageRec rec) {
-		Map<String,PageRec> pages = recs.get(getString(part));
+		final String path = getString(part);
+		Map<String,PageRec> pages = recs.get(path);
 		if (pages==null) {
 			pages = new HashMap<String, PageRec>(3);
-			recs.put(getString(part), pages);
+			recs.put(path, pages);
 		}
 		pages.put(tool.getToolId(), rec);
 	}
@@ -1415,17 +1418,6 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 			return null;
 		}
 	}
-
-
-	protected void doDestroyPage(IWorkbenchPart part, PageRec pageRecord) {
-		// We destroy this tool, but the plotting system may have a 
-		// reference to it, therefore we need to tell it to clone the
-		// stub of the tool (ready for creation) if the user chooses to 
-		// use the tool again.
-		for (IToolPageSystem sys : systems) {
-			sys.disposeToolPage(pageRecord.tool.getToolId());
-		}
-	}
 	
 	protected IWorkbenchPart getBootstrapPart() {
 		
@@ -1479,8 +1471,9 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 			defaultPageRec = null;
 		}
 				
-		for (IToolPageSystem sys : systems) {
-			sys.removeToolChangeListener(this);
+		for (SoftReference<IToolPageSystem> ref : systems) {
+			IToolPageSystem sys = ref.get();
+			if (sys!=null) sys.removeToolChangeListener(this);
 		}
 		for(String partLoc : recs.keySet()) {
 			removeTools(partLoc, false);
