@@ -163,12 +163,10 @@ public class MaskExportWizard extends Wizard implements IExportWizard {
 						 
 						 final Collection<IRegion> regions = system.getRegions();
 						 if (options.is("Regions") && regions!=null && !regions.isEmpty()) {
-							 final Map<String, ROIBase> rois   = new LinkedHashMap<String, ROIBase>(regions.size());
 							 for (IRegion iRegion : regions) {
 								 if (!file.isRegionSupported(iRegion.getROI())) continue;
-								 rois.put(iRegion.getName(), iRegion.getROI());
+								 file.addROI(iRegion.getName(), iRegion.getROI(), iRegion.getRegionType().getName());
 							 }
-							 file.setROIs(rois);
 						 }
 						 
 					 } catch (Exception e) {
