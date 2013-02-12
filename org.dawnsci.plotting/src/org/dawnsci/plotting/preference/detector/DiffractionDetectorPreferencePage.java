@@ -5,8 +5,6 @@ import java.beans.XMLEncoder;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
-import javax.measure.unit.SI;
-
 import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.plotting.Activator;
 import org.eclipse.jface.preference.PreferencePage;
@@ -17,7 +15,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
-import org.jscience.physics.amount.Amount;
 
 import uk.ac.gda.richbeans.beans.BeanUI;
 import uk.ac.gda.richbeans.components.selector.VerticalListEditor;
@@ -103,10 +100,6 @@ public class DiffractionDetectorPreferencePage extends PreferencePage implements
 	}
 	
 	private void getDetectorsFromPreference() {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		XMLEncoder xmlEncoder = new XMLEncoder(baos);
-		xmlEncoder.writeObject(detectors);
-		xmlEncoder.close();
 		String xml = getPreferenceStore().getString(DiffractionDetectorConstants.DETECTOR);
 		XMLDecoder xmlDecoder =new XMLDecoder(new ByteArrayInputStream(xml.getBytes()));
 		detectors = (DiffractionDetectors) xmlDecoder.readObject();
