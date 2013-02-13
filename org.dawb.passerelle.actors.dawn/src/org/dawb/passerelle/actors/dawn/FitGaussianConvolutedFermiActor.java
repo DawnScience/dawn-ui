@@ -59,6 +59,7 @@ AbstractDataMessageTransformer {
 	public StringParameter datasetName;
 	public StringParameter functionName;
 	public StringParameter xAxisName;
+	public StringParameter anglesAxisName;
 	public StringParameter fitDirection;
 	public StringParameter fitConvolution;
 	public StringParameter updatePlotName;
@@ -76,6 +77,8 @@ AbstractDataMessageTransformer {
 		registerConfigurableParameter(functionName);
 		xAxisName = new StringParameter(this, "xAxisName");
 		registerConfigurableParameter(xAxisName);
+		anglesAxisName = new StringParameter(this, "anglesAxisName");
+		registerConfigurableParameter(anglesAxisName);
 		fitDirection = new StringParameter(this, "fitDirection");
 		registerConfigurableParameter(fitDirection);
 		fitConvolution = new StringParameter(this, "fitConvolution");
@@ -88,6 +91,7 @@ AbstractDataMessageTransformer {
 		quickConvolutionWidth = new StringParameter(this,
 				"quickConvolutionWidth");
 		registerConfigurableParameter(quickConvolutionWidth);
+		
 	}
 
 
@@ -292,7 +296,7 @@ AbstractDataMessageTransformer {
 			logger.debug("Function not fitted, trying again :" + count);
 			count++;
 			
-			initialFit = fitFermiNoFWHM(xAxis, values, new FermiGauss(initialFit.getParameters()));
+			initialFit = fitFermiNoFWHM(xAxis, values, new FermiGauss(fitFunction.getParameters()));
 		}
 		
 		if (count >= 5) {
@@ -362,7 +366,9 @@ AbstractDataMessageTransformer {
 	private boolean functionsSimilarIgnoreFWHM(FermiGauss initialFit,
 			FermiGauss fitFunction, double tollerence) {
 		for (int i = 0; i < 5; i++) {
-			if (Math.abs(initialFit.getParameterValue(i)-fitFunction.getParameterValue(i)) <= tollerence) return true;
+			if (Math.abs(fitFunction.getParameterValue(i)-initialFit.getParameterValue(i)) <= tollerence) return true;
+			if (Math.abs(fitFunction.getParameter(i).getLowerLimit()-initialFit.getParameterValue(i)) <= tollerence) return true;
+			if (Math.abs(fitFunction.getParameter(i).getUpperLimit()-initialFit.getParameterValue(i)) <= tollerence) return true;
 		}
 		return false;
 	}
@@ -396,6 +402,7 @@ AbstractDataMessageTransformer {
 		String dataset = datasetName.getExpression();
 		String function = functionName.getExpression();
 		String xAxis = xAxisName.getExpression();
+		String anglesAxis = anglesAxisName.getExpression();
 		Integer fitDim = Integer.parseInt(fitDirection.getExpression());
 
 		AbstractDataset dataDS = ((AbstractDataset) data.get(dataset)).clone();
@@ -405,6 +412,13 @@ AbstractDataMessageTransformer {
 			xAxisDS = ((AbstractDataset) data.get(xAxis)).clone();
 		} else {
 			xAxisDS = DoubleDataset.arange(dataDS.getShape()[fitDim], 0, -1);
+		}
+		
+		AbstractDataset anglesAxisDS = null;
+		if (data.containsKey(anglesAxis)) {
+			anglesAxisDS = ((AbstractDataset) data.get(anglesAxis)).clone();
+		} else {
+			anglesAxisDS = DoubleDataset.arange(dataDS.getShape()[Math.abs(fitDim-1)], 0, -1);
 		}
 
 		ArrayList<Slice> slices = new ArrayList<Slice>();
@@ -458,7 +472,7 @@ AbstractDataMessageTransformer {
 			FermiGauss localFitFunction = new FermiGauss(functions
 					.get(function).getParameters());
 			int dSlength = dataDS.getShape().length;
-			executorService.submit(new Worker(localFitFunction, xAxisDS, slice,
+			executorService.submit(new Worker(localFitFunction, xAxisDS, anglesAxisDS, slice,
 					dSlength, start, stop, fitDim, parametersDS, functionsDS, residualDS));
 		}
 
@@ -499,7 +513,7 @@ AbstractDataMessageTransformer {
 				FermiGauss localFitFunction = new FermiGauss(functions
 						.get(function).getParameters());
 				int dSlength = dataDS.getShape().length;
-				executorService.submit(new Worker(localFitFunction, xAxisDS, slice,
+				executorService.submit(new Worker(localFitFunction, xAxisDS, anglesAxisDS, slice,
 						dSlength, start, stop, fitDim, parametersDS, functionsDS, residualDS));
 			}
 		}
@@ -561,6 +575,7 @@ AbstractDataMessageTransformer {
 
 		private AFunction fitFunction;
 		private AbstractDataset xAxisDS;
+		private AbstractDataset anglesAxisDS;
 		private AbstractDataset slice;
 		private int DSlength;
 		private int[] start;
@@ -570,13 +585,14 @@ AbstractDataMessageTransformer {
 		private AbstractDataset functionsDS;
 		private AbstractDataset residualsDS;
 
-		public Worker(AFunction fitFunction, AbstractDataset xAxisDS,
+		public Worker(AFunction fitFunction, AbstractDataset xAxisDS, AbstractDataset anglesAxisDS,
 				AbstractDataset slice, int dSlength, int[] start, int[] stop,
 				int fitDim, ArrayList<AbstractDataset> parametersDS,
 				AbstractDataset functionsDS, AbstractDataset residualsDS) {
 			super();
 			this.fitFunction = fitFunction;
 			this.xAxisDS = xAxisDS;
+			this.anglesAxisDS = anglesAxisDS;
 			this.slice = slice;
 			DSlength = dSlength;
 			this.start = start;
@@ -605,6 +621,12 @@ AbstractDataMessageTransformer {
 						position);
 			}
 
+			try {
+				SDAPlotter.plot("Mu", anglesAxisDS, parametersDS.get(0));
+			} catch (Exception e) {
+				logger.debug("Soething happend during the Mu update process",e);
+			}
+			
 			DoubleDataset resultFunctionDS = fitResult.makeDataset(xAxisDS);
 			functionsDS.setSlice(resultFunctionDS, start, stop, null);
 			
