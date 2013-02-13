@@ -40,9 +40,11 @@ import org.dawnsci.common.widgets.tree.NumericNode;
 import org.dawnsci.common.widgets.tree.UnitEditingSupport;
 import org.dawnsci.common.widgets.tree.ValueEditingSupport;
 import org.dawnsci.plotting.Activator;
+import org.dawnsci.plotting.draw2d.swtxy.selection.CircleFitSelection;
 import org.dawnsci.plotting.preference.diffraction.DiffractionPreferencePage;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IToolBarManager;
@@ -80,11 +82,14 @@ import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationStandards;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
+import uk.ac.diamond.scisoft.analysis.diffraction.PowderRingsUtils;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.rcp.plotting.utils.BeamCenterRefinement;
 import uk.ac.diamond.scisoft.analysis.roi.CircularFitROI;
+import uk.ac.diamond.scisoft.analysis.roi.CircularROI;
+import uk.ac.diamond.scisoft.analysis.roi.PolylineROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 
@@ -598,6 +603,30 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 
 			@Override
 			public void run() {
+				if (tmpRegion instanceof CircleFitSelection) {
+					IPlottingSystem plotter = getPlottingSystem();
+					IImageTrace t = getImageTrace();
+					if (t != null) {
+						PolylineROI points = PowderRingsUtils.findPOIsNearCircle(t.getData(), (CircularROI) tmpRegion.getROI());
+						try {
+							IRegion region = plotter.createRegion(RegionUtils.getUniqueName("Pixel peaks", getPlottingSystem()), RegionType.CIRCLEFIT);
+							CircularFitROI cfroi = new CircularFitROI(points);
+							logger.debug("Circle from peaks: {}", cfroi);
+							region.setROI(cfroi);
+							region.setRegionColor(ColorConstants.cyan);
+							plotter.removeRegion(tmpRegion);
+							tmpRegion = region;
+							tmpRegion.setUserRegion(false);
+							tmpRegion.addROIListener(roiListener);
+							roiListener.roiSelected(new ROIEvent(tmpRegion, cfroi)); // trigger beam centre update
+							plotter.addRegion(region);
+
+						} catch (Exception e) {
+						}
+
+					}
+					return;
+				}
 				try {
 					AbstractDataset dataset = getImageTrace().getData();
 					AbstractDataset mask = getImageTrace().getMask();

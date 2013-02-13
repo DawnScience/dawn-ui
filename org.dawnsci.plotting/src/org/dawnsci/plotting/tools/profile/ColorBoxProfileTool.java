@@ -141,7 +141,6 @@ public class ColorBoxProfileTool extends AbstractToolPage  implements IROIListen
 				public void regionRemoved(RegionEvent evt) {
 					if (evt.getRegion()!=null) {
 						evt.getRegion().removeROIListener(ColorBoxProfileTool.this);
-						clearTraces(evt.getRegion());
 					}
 				}
 				@Override
@@ -370,17 +369,20 @@ public class ColorBoxProfileTool extends AbstractToolPage  implements IROIListen
 		update(null, null, false);
 		if (getPlottingSystem()!=null) {
 			getPlottingSystem().addTraceListener(traceListener);
-		}
-		if (getPlottingSystem()!=null) {
 			getPlottingSystem().addRegionListener(regionListener);
-		}	
-		setRegionsActive(true);
-
-		// We try to listen to the image mask changing and reprofile if it does.
-		if (getPlottingSystem()!=null) {
+			// We try to listen to the image mask changing and reprofile if it does.
 			if (getImageTrace()!=null) getImageTrace().addPaletteListener(paletteListener);
 		}
+		setRegionsActive(true);
+
 		createNewRegion();
+
+		if(myROIWidget != null)
+			myROIWidget.addRegionListener((AbstractPlottingSystem)getPlottingSystem());
+		if(verticalProfileROIWidget != null)
+			verticalProfileROIWidget.addRegionListener(verticalProfilePlottingSystem);
+		if(horizontalProfileROIWidget != null)
+			horizontalProfileROIWidget.addRegionListener(horizontalProfilePlottingSystem);
 	}
 	
 	private final void createNewRegion() {
@@ -415,14 +417,11 @@ public class ColorBoxProfileTool extends AbstractToolPage  implements IROIListen
 		super.deactivate();
 		if (getPlottingSystem()!=null) {
 			getPlottingSystem().removeTraceListener(traceListener);
-		}
-		if (getPlottingSystem()!=null) {
 			getPlottingSystem().removeRegionListener(regionListener);
-		}
-		setRegionsActive(false);
-		if (getPlottingSystem()!=null) {
 			if (getImageTrace()!=null) getImageTrace().removePaletteListener(paletteListener);
 		}
+		setRegionsActive(false);
+
 		if(myROIWidget != null)
 			myROIWidget.dispose();
 		if(verticalProfileROIWidget != null)
@@ -736,16 +735,6 @@ public class ColorBoxProfileTool extends AbstractToolPage  implements IROIListen
 					}
 				});
 			}
-		}
-	}
-
-	protected void clearTraces(final IRegion region) {
-		final String name = region.getName();
-		Collection<ITrace> registered = this.registeredTraces.get(name);
-		if (registered!=null) for (ITrace iTrace : registered) {
-			zoomProfilePlottingSystem.removeTrace(iTrace);
-			verticalProfilePlottingSystem.removeTrace(iTrace);
-			horizontalProfilePlottingSystem.removeTrace(iTrace);
 		}
 	}
 
