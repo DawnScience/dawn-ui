@@ -37,7 +37,7 @@ import org.dawb.common.ui.plot.tool.IToolPageSystem;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawnsci.plotting.Activator;
-import org.dawnsci.plotting.tools.MeasurementTool.RegionColorListener;
+import org.dawnsci.plotting.tools.region.AbstractRegionTableTool.RegionColorListener;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;

@@ -1,4 +1,4 @@
-package org.dawnsci.plotting.tools;
+package org.dawnsci.plotting.tools.region;
 
 import java.text.DecimalFormat;
 
@@ -17,10 +17,10 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 	private static final Logger logger = LoggerFactory.getLogger(MeasurementLabelProvider.class);
 	
 	private int column;
-	private MeasurementTool tool;
+	private AbstractRegionTableTool tool;
 	private DecimalFormat format;
 
-	public MeasurementLabelProvider(MeasurementTool tool, int i) {
+	public MeasurementLabelProvider(AbstractRegionTableTool tool, int i) {
 		this.column = i;
 		this.tool   = tool;
 		this.format = new DecimalFormat("##0.00E0");
