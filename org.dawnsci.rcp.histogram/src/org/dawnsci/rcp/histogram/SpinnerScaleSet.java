@@ -105,6 +105,7 @@ public class SpinnerScaleSet {
 			FloatSpinner spinner = new FloatSpinner(comp, SWT.BORDER);
 			spinner.setLayoutData(gridDataSpinner);
 			spinner.addSelectionListener(listener);
+			spinner.setFormat(12, 4);
 			spinners.put(name, spinner);
 
 			GridData gridDataScale = new GridData(SWT.FILL, SWT.CENTER, true, false);
