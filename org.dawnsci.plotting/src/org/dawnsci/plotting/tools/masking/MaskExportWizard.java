@@ -97,11 +97,27 @@ public class MaskExportWizard extends Wizard implements IExportWizard {
     		    if (names!=null && !names.isEmpty()) {
     		    	options.setStringValue("Mask", names.get(0));
     		    }
-    		    
+    		        		    
     		} catch (Throwable ne) {
     			logger.error("Cannot read persistence file at "+file);
     		} finally {
     			if (pf!=null) pf.close();
+    		}
+
+    		final IWorkbenchPart  part   = EclipseUtils.getPage().getActivePart();
+    		if (part!=null) {
+    			final IPlottingSystem system = (IPlottingSystem)part.getAdapter(IPlottingSystem.class);
+    			if (system != null) {
+    				ITrace trace  = system.getTraces().iterator().next();
+    				if (trace!=null && trace instanceof IImageTrace && ((IImageTrace)trace).getMask()==null) {
+    					options.setOptionEnabled("Mask", false);
+    				}
+    				final Collection<IRegion> regions = system.getRegions();
+    				if (regions==null || regions.isEmpty()) {
+    					options.setOptionEnabled("Regions", false);
+    				}
+   				
+    			}
     		}
 
     	}
@@ -158,7 +174,9 @@ public class MaskExportWizard extends Wizard implements IExportWizard {
 						 if (options.is("Mask") && trace instanceof IImageTrace) {
 							 IImageTrace image = (IImageTrace)trace;
 							 final String name = options.getString("Mask");
-							 file.addMask(name, (BooleanDataset)image.getMask(), mon);
+							 if (image.getMask()!=null) {
+								 file.addMask(name, (BooleanDataset)image.getMask(), mon);
+							 }
 						 }
 						 
 						 final Collection<IRegion> regions = system.getRegions();
