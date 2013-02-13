@@ -291,12 +291,11 @@ public class DiffractionTreeModel extends AbstractNodeModel {
         }
         dist.setEditable(true);
 
-        dist.setIncrement(1);
+        dist.setIncrement(0.01);
         dist.setFormat("#0.##");
         dist.setLowerBound(0);
         dist.setUpperBound(1000000);
-        final Unit<Length> micron = SI.MICRO(SI.METER);
-        dist.setUnits(SI.MILLIMETER, micron, NonSI.INCH);
+        dist.setUnits(SI.MILLIMETER, SI.CENTIMETER, SI.METER);
 
 	}
 
