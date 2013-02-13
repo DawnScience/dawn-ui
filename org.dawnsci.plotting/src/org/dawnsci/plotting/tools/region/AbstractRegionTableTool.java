@@ -1,4 +1,4 @@
-package org.dawnsci.plotting.tools;
+package org.dawnsci.plotting.tools.region;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -60,7 +60,7 @@ import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
  * @author fcp94556
  *
  */
-public class MeasurementTool extends AbstractToolPage implements IRegionListener, IROIListener {
+public abstract class AbstractRegionTableTool extends AbstractToolPage implements IRegionListener, IROIListener {
 
 	public class RegionColorListener implements ISelectionChangedListener {
 
@@ -86,9 +86,11 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 			previousRegion = null;
 			previousColor  = null;
 		}
-	}
+	}	
+	
+	protected abstract void createNewRegion();
 
-	private static final Logger logger = LoggerFactory.getLogger(MeasurementTool.class);
+	protected static final Logger logger = LoggerFactory.getLogger(AbstractRegionTableTool.class);
 	
 	private Composite     composite;
 	private TableViewer   viewer;
@@ -101,7 +103,7 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 	 */
 	private Map<String,ROIBase> dragBounds;
 
-	public MeasurementTool() {
+	public AbstractRegionTableTool() {
 		super();
 		dragBounds = new HashMap<String,ROIBase>(7);
 	}
@@ -148,11 +150,6 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 		this.viewUpdateListener = new RegionColorListener();
 		
 		activate();
-	}
-
-	@Override
-	public ToolPageRole getToolPageRole() {
-		return ToolPageRole.ROLE_1D;
 	}
 
 	private void createActions() {
@@ -244,56 +241,6 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 	    for (IContributionItem item : getSite().getActionBars().getMenuManager().getItems()) menuManager.add(item);
 	    viewer.getControl().setMenu(menuManager.createContextMenu(viewer.getControl()));
 	}
-
-	private void createColumns(final TableViewer viewer) {
-		
-		ColumnViewerToolTipSupport.enableFor(viewer,ToolTip.NO_RECREATE);
-
-		TableViewerColumn var = new TableViewerColumn(viewer, SWT.LEFT, 0);
-		var.getColumn().setText("Name");
-		var.getColumn().setWidth(120);
-		var.setLabelProvider(new MeasurementLabelProvider(this, 0));
-
-		var = new TableViewerColumn(viewer, SWT.CENTER, 1);
-		var.getColumn().setText("Region Type");
-		var.getColumn().setWidth(100);
-		var.setLabelProvider(new MeasurementLabelProvider(this, 1));
-
-		var = new TableViewerColumn(viewer, SWT.LEFT, 2);
-		var.getColumn().setText("dx");
-		var.getColumn().setWidth(80);
-		var.setLabelProvider(new MeasurementLabelProvider(this, 2));
-
-		var = new TableViewerColumn(viewer, SWT.LEFT, 3);
-		var.getColumn().setText("dy");
-		var.getColumn().setWidth(80);
-		var.setLabelProvider(new MeasurementLabelProvider(this, 3));
-
-		var = new TableViewerColumn(viewer, SWT.LEFT, 4);
-		var.getColumn().setText("length");
-		var.getColumn().setWidth(80);
-		var.setLabelProvider(new MeasurementLabelProvider(this, 4));
-
-		var = new TableViewerColumn(viewer, SWT.LEFT, 5);
-		var.getColumn().setText("Max Intensity");
-		var.getColumn().setWidth(80);
-		var.setLabelProvider(new MeasurementLabelProvider(this, 5));
-
-		var = new TableViewerColumn(viewer, SWT.LEFT, 6);
-		var.getColumn().setText("Inside radius");
-		var.getColumn().setWidth(80);
-		var.setLabelProvider(new MeasurementLabelProvider(this, 6));
-
-		var = new TableViewerColumn(viewer, SWT.LEFT, 7);
-		var.getColumn().setText("Outside radius");
-		var.getColumn().setWidth(80);
-		var.setLabelProvider(new MeasurementLabelProvider(this, 7));
-
-		var = new TableViewerColumn(viewer, SWT.LEFT, 8);
-		var.getColumn().setText("Coordinates");
-		var.getColumn().setWidth(500);
-		var.setLabelProvider(new MeasurementLabelProvider(this, 8));
-	}
 	
 	@SuppressWarnings("unused")
 	private IContentProvider createActorContentProvider(final int numerOfPeaks) {
@@ -318,6 +265,8 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 		};
 	}
 	
+	protected abstract void createColumns(final TableViewer viewer);
+
 
 	@Override
 	public void activate() {
@@ -346,14 +295,6 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 		} catch (Exception e) {
 			logger.error("Cannot put the selection into fitting region mode!", e);
 		}		
-	}
-	
-	private void createNewRegion() {
-		try {
-			getPlottingSystem().createRegion(RegionUtils.getUniqueName("Measurement", getPlottingSystem()), IRegion.RegionType.LINE);
-		} catch (Exception e) {
-			logger.error("Cannot create line region for selecting in measurement tool!", e);
-		}
 	}
 
 	@Override

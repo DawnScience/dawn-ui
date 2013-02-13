@@ -176,13 +176,17 @@ public class MaskExportWizard extends Wizard implements IExportWizard {
 					 }
 				 }
 			 });
-		 } catch (Exception ne) {
+		 } catch (Throwable ne) {
+			 if (ne instanceof InvocationTargetException && ((InvocationTargetException)ne).getCause()!=null){
+				 ne = ((InvocationTargetException)ne).getCause();
+			 }
 			 String message = null;
 			 if (file!=null) {
 				 message = "Cannot export '"+file.getName()+"' ";
 			 } else {
 				 message = "Cannot export masking file.";
 			 }
+			 logger.error("Cannot export mask file!", ne);
 		     ErrorDialog.openError(Display.getDefault().getActiveShell(), "Export failure", message, new Status(IStatus.WARNING, "org.dawnsci.plotting", ne.getMessage(), ne));
 		     return true;
 		 } finally {
