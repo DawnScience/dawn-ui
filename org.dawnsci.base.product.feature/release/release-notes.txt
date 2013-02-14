@@ -2,14 +2,14 @@ RELEASE NOTES FOR DAWN 1.1 Beta
 
 
 1. Use the '-data' switch to specify a different workspace if the disk access at your facility
-   is slow or restricted in the default location of ~/DAWN_Workspace. 
+   is slow or restricted in the default location. 
    For instance:      dawn -data /scratch/dawn_workspace
 
 2. Toolbar actions on linux can be hidden using the plotting. If the part becomes small, instead 
    of wrapping, some toolbar actions disappear. They can normally be found on the menu to the 
    right of the toolbar (the white down arrow).
 
-2. The workflow does not support Jython actors in the Beta version.
+2. Workflows do not support Jython actors in the Beta version.
 
 3. If using the .zip download version of Dawn, on Linux 32: It is sometimes necessary to delete 
    the 'jre' folder from the install location. This is due to file permissions. 
