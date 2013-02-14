@@ -40,4 +40,4 @@ RELEASE NOTES FOR DAWN 1.1 Beta
 10. To reliably find the Dawn version you are using go to:
    * Help->About Dawn.
    * Installation Details’ button.
-   * Installed Software’ tab, there is a version column.
+   * On the 'Installed Software' tab, there is a version column.
