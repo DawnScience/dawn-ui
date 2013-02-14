@@ -1,9 +1,7 @@
 package org.dawnsci.plotting.tools.diffraction;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 import ncsa.hdf.object.Group;
 import ncsa.hdf.object.HObject;
@@ -21,9 +19,8 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
 import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
-import uk.ac.diamond.scisoft.analysis.io.DiffractionMetaDataAdapter;
+import uk.ac.diamond.scisoft.analysis.io.DiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
-import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 
 public class NexusDiffractionMetaCreator {
 	
@@ -33,7 +30,7 @@ public class NexusDiffractionMetaCreator {
 	 * Static method to obtain a DiffractionMetaDataAdapter wrapping the argument metadata
 	 *  and populated with default values from the preferences store and from the nexus file
 	 */
-	public static IDiffractionMetadata diffractionMetadataFromNexus(String filePath, final IMetaData metaData, int[] imageSize) {
+	public static IDiffractionMetadata diffractionMetadataFromNexus(String filePath, int[] imageSize) {
 		
 		if (!HierarchicalDataFactory.isHDF5(filePath)) return null;
 		
@@ -120,58 +117,7 @@ public class NexusDiffractionMetaCreator {
 				}
 		}
 		
-		
-		final DiffractionCrystalEnvironment diffClone = diffcrys.clone();
-		final DetectorProperties detpropClone = detprop.clone(); 
-		
-		return new DiffractionMetaDataAdapter() {
-			
-			@Override
-			public DiffractionCrystalEnvironment getDiffractionCrystalEnvironment() {
-				return diffClone;
-			}
-			
-			@Override
-			public DetectorProperties getDetector2DProperties() {
-				return detpropClone;
-			}
-			
-			@Override
-			public DetectorProperties getOriginalDetector2DProperties() {
-				return detprop;
-			}
-			
-			@Override
-			public DiffractionCrystalEnvironment getOriginalDiffractionCrystalEnvironment() {
-				return diffcrys;
-			}
-			
-			@Override
-			public Collection<String> getMetaNames() throws Exception{
-				return metaData.getMetaNames();
-			}
-
-			@Override
-			public String getMetaValue(String fullAttributeKey) throws Exception{
-				return metaData.getMetaValue(fullAttributeKey).toString();
-			}
-			
-			@Override
-			public Collection<String> getDataNames() {
-				return metaData.getDataNames();
-			}
-
-			@Override
-			public Map<String, Integer> getDataSizes() {
-				return metaData.getDataSizes();
-			}
-
-			@Override
-			public Map<String, int[]> getDataShapes() {
-				return metaData.getDataShapes();
-			}
-			
-		};
+		return new DiffractionMetadata(filePath,detprop,diffcrys);
 	}
 	
 	private static void populateFromNexus(Group nexusGroup, DiffractionCrystalEnvironment diffcrys) {
