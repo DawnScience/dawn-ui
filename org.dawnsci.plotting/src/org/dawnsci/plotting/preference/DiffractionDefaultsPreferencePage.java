@@ -10,7 +10,6 @@ import org.dawnsci.common.widgets.tree.NumericNode;
 import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.tools.diffraction.DiffractionDefaultMetadata;
 import org.dawnsci.plotting.tools.diffraction.DiffractionTreeModel;
-import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -22,7 +21,6 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -48,7 +46,6 @@ import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 public class DiffractionDefaultsPreferencePage extends PreferencePage implements
 		IWorkbenchPreferencePage {
 	
-	private CCombo metaPrompt;
 	private FilteredTree filteredTree;
 	private TreeViewer viewer;
 	private DiffractionTreeModel model;
@@ -70,23 +67,6 @@ public class DiffractionDefaultsPreferencePage extends PreferencePage implements
 		main.setLayout(new GridLayout(1, false));
 		GridData gdc = new GridData(SWT.FILL, SWT.FILL, true, true);
 		main.setLayoutData(gdc);
-		
-		//create combobox to allow reseting of the prompt to create
-		// metadata for metadata-less images
-		final Label metaDefaultLabel = new Label(main, SWT.NONE);
-		metaDefaultLabel.setText("If an image has no metadata should default data be created?: ");
-		
-		metaPrompt = new CCombo(main, SWT.READ_ONLY|SWT.BORDER);
-		metaPrompt.setItems(new String[] {MessageDialogWithToggle.PROMPT,
-				MessageDialogWithToggle.ALWAYS, MessageDialogWithToggle.NEVER});
-		metaPrompt.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		
-		metaPrompt.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelection(SelectionEvent e) {
-				String selected = metaPrompt.getItem(metaPrompt.getSelectionIndex());
-				setMetadataPrompt(selected);
-			}
-		});
 		
 		//Use the DiffractionTool treeview to display the default meta values
 		Label label = new Label(main, SWT.NONE);
@@ -111,9 +91,7 @@ public class DiffractionDefaultsPreferencePage extends PreferencePage implements
 	@Override
 	protected void performDefaults() {
 		super.performDefaults();
-		//Reset combo to default values in store
-		metaPrompt.select(metaPrompt.indexOf(getDefaultMetadataPrompt()));
-		
+
 		//reset tree to original values (the defaults in the store)
 		model.reset();
 		viewer.refresh();
@@ -121,7 +99,6 @@ public class DiffractionDefaultsPreferencePage extends PreferencePage implements
 	
 	private void initializePage() {
 		createDiffractionModel();
-		metaPrompt.select(metaPrompt.indexOf(getMetadataPrompt()));
 	}
 
 	@Override
@@ -131,8 +108,6 @@ public class DiffractionDefaultsPreferencePage extends PreferencePage implements
 	}
 	
 	private void storePreferences() {
-		//Persist prompt, detector properties and crystal environment
-		setMetadataPrompt(metaPrompt.getItem(metaPrompt.getSelectionIndex()));
 		setPersistedDetectorPropertes(metaData.getDetector2DProperties());
 		setPersistedEnvironment(metaData.getDiffractionCrystalEnvironment());
 	}
@@ -146,24 +121,12 @@ public class DiffractionDefaultsPreferencePage extends PreferencePage implements
 		DiffractionDefaultMetadata.setPersistedDiffractionCrystalEnvironmentValues(dce);
 	}
 	
-	private String getDefaultMetadataPrompt() {
-		return getPreferenceStore().getDefaultString(DiffractionToolConstants.REMEMBER_DIFFRACTION_META);
-	}
-	
-	private void setMetadataPrompt(String prompt) {
-		getPreferenceStore().setValue(DiffractionToolConstants.REMEMBER_DIFFRACTION_META, prompt);
-	}
-	
-	private String getMetadataPrompt() {
-		return getPreferenceStore().getString(DiffractionToolConstants.REMEMBER_DIFFRACTION_META);
-	}
-	
 	private void createDiffractionModel() {
 		
 		if (model!=null)  return;
 		if (viewer==null) return;
 		
-		metaData = DiffractionDefaultMetadata.getDiffractionMetadata(new int[] {1000,1000});
+		metaData = DiffractionDefaultMetadata.getDiffractionMetadata(null,new int[] {1000,1000});
 		try {
 			model = new DiffractionTreeModel(metaData);
 			model.setViewer(viewer);

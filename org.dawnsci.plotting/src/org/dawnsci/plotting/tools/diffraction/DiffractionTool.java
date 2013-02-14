@@ -297,22 +297,17 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	private IDiffractionMetadata getDiffractionMetaData() {
 		// Now always returns IDiffractionMetadata to prevent creation of a new
 		// metadata object after listeners have been added to the old metadata
-		
+		//TODO improve this section- its pretty horrible
 		IDiffractionMetadata lockedMeta = service.getLockedDiffractionMetaData();
 		
 		if (lockedMeta != null) {
-			
    		    IImageTrace imageTrace = getImageTrace();
 			if (imageTrace==null) return lockedMeta;
 			
 			IMetaData mdImage = imageTrace.getData().getMetadata();
 			
-			if (mdImage == null) {
+			if (mdImage == null || !(mdImage instanceof IDiffractionMetadata)) {
 				imageTrace.getData().setMetadata(lockedMeta.clone());
-			} else if (!(mdImage instanceof IDiffractionMetadata)) {
-				IDiffractionMetadata idm = DiffractionDefaultMetadata.getDiffractionMetadata(imageTrace.getData().getShape(),mdImage);
-				DiffractionDefaultMetadata.copyNewOverOld(lockedMeta, idm);
-				imageTrace.getData().setMetadata(idm);
 			} else if (mdImage instanceof IDiffractionMetadata) {
 				if (!diffractionMetadataAreEqual((IDiffractionMetadata)mdImage,lockedMeta)) {
 					DiffractionDefaultMetadata.copyNewOverOld(lockedMeta, (IDiffractionMetadata)mdImage);
@@ -320,68 +315,52 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 				}
 			}
 			return lockedMeta;
-			
 		}
-		
 		
 		//If not see if the trace has diffraction meta data
 		IImageTrace imageTrace = getImageTrace();
 		if (imageTrace==null) return null;
+		if (imageTrace.getData()==null) return null;
 		IMetaData mdImage = imageTrace.getData().getMetadata();
+		if (mdImage !=null && mdImage  instanceof IDiffractionMetadata) return (IDiffractionMetadata)mdImage;
+		
 		
 		int[] imageShape = imageTrace.getData().getShape();
 		
-		if (mdImage !=null && mdImage  instanceof IDiffractionMetadata) return (IDiffractionMetadata)mdImage;
+		//Try and get the filename here, it will help later on
+		String filePath = (mdImage !=null && mdImage.getFilePath()!= null) ? mdImage.getFilePath() : null;
 		
+		if (filePath == null && getPart() instanceof IEditorPart) {
+			filePath = EclipseUtils.getFilePath(((IEditorPart)getPart()).getEditorInput());
+		}
+		
+		if (filePath != null) {
+			//see if we can read diffraction info from nexus files
+			IDiffractionMetadata difMet = NexusDiffractionMetaCreator.diffractionMetadataFromNexus(filePath,imageShape);
+			if (difMet !=null) {
+				imageTrace.getData().setMetadata(difMet);
+			return difMet;
+			}
+		}
+				
 		// if it is null try and get it from the loader service
-		if (mdImage == null) {
-			
+		if (mdImage == null  && filePath != null) {
 			IMetaData md = null;
-			if (getPart() instanceof IEditorPart) {
-				try {
-					md = service.getMetaData(EclipseUtils.getFilePath(((IEditorPart)getPart()).getEditorInput()), null);
-					
-				} catch (Exception e) {
-					logger.error("Cannot read meta data from "+getPart().getTitle(), e);
-				}
+			try {
+				md = service.getMetaData(filePath, null);
+			} catch (Exception e) {
+				logger.error("Cannot read meta data from "+getPart().getTitle(), e);
 			}
 			
-			// If it is there and diffraction data return it
+			//If it is there and diffraction data return it
 			if (md!=null && md instanceof IDiffractionMetadata) return (IDiffractionMetadata)md;
 			
 			if (md != null)
 				mdImage = md;
 		}
 		
-		//if the file contains IMetaData and is hdf5 try and pull some meta data from it.
-		if (mdImage!=null) {
-			if (mdImage.getFilePath()!= null) {
-				IDiffractionMetadata difMet = NexusDiffractionMetaCreator.diffractionMetadataFromNexus(mdImage.getFilePath(),imageShape);
-				if (difMet !=null) {
-					imageTrace.getData().setMetadata(difMet);
-					return difMet;
-				}
-			}
-			
-			if (getPart() instanceof IEditorPart) {
-				IDiffractionMetadata difMet = NexusDiffractionMetaCreator.diffractionMetadataFromNexus(EclipseUtils.getFilePath(((IEditorPart)getPart()).getEditorInput()),imageShape);
-				if (difMet !=null) {
-					imageTrace.getData().setMetadata(difMet);
-					return difMet;
-				}
-			}
-		}
-		
-		//if the file contains IMetaData but not IDiffraction meta data, wrap the old meta in a 
-		// new IDiffractionMetadata object and put it back in the dataset
-		if (mdImage!=null) {
-			mdImage = DiffractionDefaultMetadata.getDiffractionMetadata(imageTrace.getData().getShape(),mdImage);
-			imageTrace.getData().setMetadata(mdImage);
-			return (IDiffractionMetadata)mdImage;
-		}
-		
-		// if there is no meta create default IDiff and put it in the dataset
-		mdImage = DiffractionDefaultMetadata.getDiffractionMetadata(imageTrace.getData().getShape());
+		// if there is no meta or is not nexus or IDiff create default IDiff and put it in the dataset
+		mdImage = DiffractionDefaultMetadata.getDiffractionMetadata(filePath,imageTrace.getData().getShape());
 		imageTrace.getData().setMetadata(mdImage);
 		
 		return (IDiffractionMetadata)mdImage;
