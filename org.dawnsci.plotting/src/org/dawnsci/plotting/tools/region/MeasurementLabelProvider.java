@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
-import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 
 public class MeasurementLabelProvider extends ColumnLabelProvider {
 
@@ -43,60 +42,54 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 			case 0:
 				return region.getName();
 			case 1:
-				return region.getRegionType().getName();
+				if(roi instanceof LinearROI)
+					fobj = ((LinearROI)roi).getPoint()[0];
+				else if (roi instanceof RectangularROI)
+					fobj = ((RectangularROI)roi).getPoint()[0];
+				else
+					;
+				return fobj == null ? NA : format.format(fobj);
 			case 2: // dx
-				if (roi instanceof LinearROI) {
-					LinearROI lroi = (LinearROI) roi;
-					fobj = lroi.getEndPoint()[0] - lroi.getPointX();
-				} else if (roi instanceof RectangularROI) {
-					RectangularROI rroi = (RectangularROI) roi;
-					fobj = rroi.getEndPoint()[0] - rroi.getPointX();
-				} else {
-					
-				}
+				if(roi instanceof LinearROI)
+					fobj = ((LinearROI)roi).getPoint()[1];
+				else if (roi instanceof RectangularROI)
+					fobj = ((RectangularROI)roi).getPoint()[1];
+				else
+					;
 				return fobj == null ? NA : format.format(fobj);
 			case 3: // dy
-				if (roi instanceof LinearROI) {
-					LinearROI lroi = (LinearROI) roi;
-					fobj = lroi.getEndPoint()[1] - lroi.getPointY();
-				} else if (roi instanceof RectangularROI) {
-					RectangularROI rroi = (RectangularROI) roi;
-					fobj = rroi.getEndPoint()[1] - rroi.getPointY();
-				} else {
-					
-				}
+				if(roi instanceof LinearROI)
+					fobj = ((LinearROI)roi).getEndPoint()[0];
+				else if(roi instanceof RectangularROI)
+					fobj = ((RectangularROI)roi).getEndPoint()[0];
+				else
+					;
 				return fobj == null ? NA : format.format(fobj);
 			case 4: // length
-				if (roi instanceof LinearROI) {
-					LinearROI lroi = (LinearROI) roi;
-					fobj = lroi.getLength();
-				} else if (roi instanceof RectangularROI) {
-					RectangularROI rroi = (RectangularROI) roi;
-					double[] lens = rroi.getLengths();
-					fobj = Math.hypot(lens[0], lens[1]);
-				} else {
-					
-				}
+				if(roi instanceof LinearROI)
+					fobj = ((LinearROI)roi).getEndPoint()[1];
+				else if(roi instanceof RectangularROI)
+					fobj = ((RectangularROI)roi).getEndPoint()[1];
+				else
+					;
 				return fobj == null ? NA : format.format(fobj);
 			case 5: // max
 				final double max = tool.getMaxIntensity(region);
 			    if (Double.isNaN(max)) return "-";
 				return format.format(max);
 			case 6: // in rad
-				if (roi instanceof SectorROI) {
-					SectorROI sroi = (SectorROI) roi;
-					fobj = sroi.getRadius(0);
-				}
-				return fobj == null ? NA : format.format(fobj);
-			case 7: // out rad
-				if (roi instanceof SectorROI) {
-					SectorROI sroi = (SectorROI) roi;
-					fobj = sroi.getRadius(1);
-				}
-				return fobj == null ? NA : format.format(fobj);
-			case 8: // region
-				return tool.getROI(region).toString();
-	
+				final double sum = tool.getSum(region);
+				if(Double.isNaN(sum)) return "-";
+				return format.format(sum);
+//			case 7: // out rad
+//				if (roi instanceof SectorROI) {
+//					SectorROI sroi = (SectorROI) roi;
+//					fobj = sroi.getRadius(1);
+//				}
+//				return fobj == null ? NA : format.format(fobj);
+//			case 8: // region
+//				return tool.getROI(region).toString();
+//	
 			default:
 				return "Not found";
 			}

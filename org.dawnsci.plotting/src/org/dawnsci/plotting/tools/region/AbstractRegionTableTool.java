@@ -12,7 +12,6 @@ import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.ROIEvent;
 import org.dawb.common.ui.plot.region.RegionEvent;
-import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.roi.data.LinearROIData;
 import org.dawb.common.ui.plot.roi.data.ROIData;
 import org.dawb.common.ui.plot.roi.data.RectangularROIData;
@@ -28,16 +27,13 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.TextTransfer;
@@ -50,6 +46,7 @@ import org.eclipse.ui.progress.UIJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
@@ -61,6 +58,8 @@ import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
  *
  */
 public abstract class AbstractRegionTableTool extends AbstractToolPage implements IRegionListener, IROIListener {
+
+	protected ROIBase roi;
 
 	public class RegionColorListener implements ISelectionChangedListener {
 
@@ -396,7 +395,7 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 	 * @param evt
 	 */
 	private void updateRegion(final ROIEvent evt) {
-		
+		if(viewer.isCellEditorActive()) return; 
 		if (updateJob==null) {
 			updateJob = new RegionBoundsUIJob();
 			updateJob.setPriority(UIJob.INTERACTIVE);
@@ -479,5 +478,54 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
         
         return Double.NaN;
       
+	}
+
+	/**
+	 * Method that gets the sum of all pixels for the region
+	 * @param region
+	 * @return
+	 */
+	public double getSum(IRegion region){
+		double result = Double.NaN;
+		Collection<ITrace> traces = getPlottingSystem().getTraces();
+		
+		if (traces!=null&&traces.size()==1&&traces.iterator().next() instanceof IImageTrace) {
+			final IImageTrace     trace        = (IImageTrace)traces.iterator().next();
+			ROIBase roi = region.getROI();
+			AbstractDataset dataRegion = trace.getData();
+			try {
+				if(roi instanceof RectangularROI){
+					RectangularROI rroi = (RectangularROI)roi;
+					int xStart = (int) rroi.getPoint()[0];
+					int yStart = (int) rroi.getPoint()[1];
+					int xStop = (int) rroi.getEndPoint()[0];
+					int yStop = (int) rroi.getEndPoint()[1];
+					int xInc = rroi.getPoint()[0]<rroi.getEndPoint()[0] ? 1 : -1;
+					int yInc = rroi.getPoint()[1]<rroi.getEndPoint()[1] ? 1 : -1;
+					dataRegion = dataRegion.getSlice(
+							new int[] { yStart, xStart },
+							new int[] { yStop, xStop },
+							new int[] {yInc, xInc});
+					result = (Double)dataRegion.sum(true);
+				} else if (roi instanceof LinearROI){
+//					LinearROI lroi = (LinearROI)roi;
+//					int xStart = (int) lroi.getPoint()[0];
+//					int yStart = (int) lroi.getPoint()[1];
+//					int xStop = (int) lroi.getEndPoint()[0];
+//					int yStop = (int) lroi.getEndPoint()[1];
+//					int xInc = lroi.getPoint()[0]<lroi.getEndPoint()[0] ? 1 : -1;
+//					int yInc = lroi.getPoint()[1]<lroi.getEndPoint()[1] ? 1 : -1;
+//					dataRegion = dataRegion.getSlice(
+//							new int[] { yStart, xStart },
+//							new int[] { yStop, xStop },
+//							new int[] {yInc, xInc});
+				}
+				
+			} catch (IllegalArgumentException e) {
+				logger.debug("Error getting region data:"+ e);
+			}
+			
+		}
+		return result;
 	}
 }
