@@ -34,6 +34,7 @@ public abstract class SelectionHandle extends Figure implements IMobileFigure {
 		setOpaque(false);
 
 		this.label = new Figure() {
+			@Override
 			protected void paintFigure(Graphics graphics) {
 				if (!isVisible()) return;
                 final String text = getLabelPositionText(getPosition());
@@ -74,13 +75,12 @@ public abstract class SelectionHandle extends Figure implements IMobileFigure {
 	 * @return
 	 */
 	public double[] getPosition() {
-		final Point p = getSelectionPoint();
-		try {
-		    double[] point = coords.getPositionValue(new int[]{p.x, p.y});
-		    return point;
-		} catch (NullPointerException ne) {
-			return new double[]{Double.NaN, Double.NaN};
+		if (coords != null) {
+			final Point p = getSelectionPoint();
+			double[] point = coords.getPositionValue(new int[] { p.x, p.y });
+			return point;
 		}
+	    return new double[]{Double.NaN, Double.NaN};
 	}
 	
 	/**
