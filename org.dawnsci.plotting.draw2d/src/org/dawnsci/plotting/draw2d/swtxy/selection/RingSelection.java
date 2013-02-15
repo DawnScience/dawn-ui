@@ -203,7 +203,7 @@ class RingSelection extends AbstractSelectionRegion {
 			final Rectangle in  = new Rectangle(new Point(cen.x+innerRad, cen.y+innerRad), new Point(cen.x-innerRad, cen.y-innerRad));
 			
 			double[] rcen = coords.getPositionValue(cen.x,cen.y);
-			double cenY   = rcen[0];
+			double cenY   = rcen[1];
 			double inRad  = coords.getPositionValue(0,in.getTop().y)[1]-cenY;
 			double outRad = coords.getPositionValue(0,out.getTop().y)[1]-cenY;
 			if (inRad < 0)
