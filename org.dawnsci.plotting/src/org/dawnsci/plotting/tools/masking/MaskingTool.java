@@ -102,6 +102,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	private MaskJob         maskJob;
 	private TableViewer     regionTable;
 	private ToolBarManager  directToolbar;
+	private Button          apply;
 	
 	private IPaletteListener    paletteListener;
 	private ITraceListener      traceListener;
@@ -109,6 +110,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	private IROIListener        regionBoundsListener;
 	private MaskMouseListener   clickListener;
 	private ColorSelector       colorSelector;
+
 	
 	
 	public MaskingTool() {
@@ -431,7 +433,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		autoApply.setText("Automatically apply mask when something changes.");
 		autoApply.setSelection(Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.MASK_AUTO_APPLY));
 		
-		final Button apply = new Button(buttons, SWT.PUSH);
+		this.apply = new Button(buttons, SWT.PUSH);
 		apply.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		apply.setImage(Activator.getImage("icons/apply.gif"));
 		apply.setText("Apply");
@@ -720,6 +722,8 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		final Action importMask = new Action("Import mask from file", Activator.getImageDescriptor("icons/mask-import-wiz.png")) {
 			public void run() {
 				try {
+					autoApply.setSelection(false);
+					apply.setEnabled(true); 
 					IWizard wiz = EclipseUtils.openWizard(PersistenceImportWizard.ID, false);
 					WizardDialog wd = new  WizardDialog(Display.getCurrent().getActiveShell(), wiz);
 					wd.setTitle(wiz.getWindowTitle());
