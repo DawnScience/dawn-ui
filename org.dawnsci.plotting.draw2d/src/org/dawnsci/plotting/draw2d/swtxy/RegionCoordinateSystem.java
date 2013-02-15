@@ -11,6 +11,8 @@ import org.dawb.common.ui.plot.axis.IAxisListener;
 import org.dawb.common.ui.plot.axis.ICoordinateSystem;
 import org.dawb.common.ui.plot.axis.ICoordinateSystemListener;
 import org.dawb.common.ui.plot.trace.IImageTrace;
+import org.eclipse.draw2d.geometry.Point;
+import org.eclipse.draw2d.geometry.PrecisionPoint;
 
 public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener {
 
@@ -58,15 +60,47 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 	}
 
 	@Override
+	public Point getValuePosition(Point value) {
+		if (isDisposed) throw new RuntimeException(getClass().getName()+" is disposed!");
+
+		double[] pos = new double[]{x.getValuePosition(value.preciseX()), y.getValuePosition(value.preciseY())};
+		if (isReversed()) {
+			return new PrecisionPoint(pos[1], pos[0]);
+		}
+		return new PrecisionPoint(pos[0], pos[1]);
+	}
+
+	private double aspectRatio = 1.0;
+
+	private void calcAspectRatio() {
+		aspectRatio = Math.abs(x.getScaling() / y.getScaling());
+	}
+
+	@Override
+	public double getAspectRatio() {
+		return aspectRatio;
+	}
+
+	@Override
 	public double[] getPositionValue(int... position) {
 		if (isDisposed) throw new RuntimeException(getClass().getName()+" is disposed!");
 		
 		double[] value = new double[]{x.getPositionValue(position[0]), y.getPositionValue(position[1])};
 		if (isReversed()) {
 			return new double[]{value[1], value[0]};
-		} else {
-			return value;
 		}
+		return value;
+	}
+
+	@Override
+	public Point getPositionValue(Point position) {
+		if (isDisposed) throw new RuntimeException(getClass().getName()+" is disposed!");
+
+		double[] value = new double[]{x.getPositionValue(position.x), y.getPositionValue(position.y)};
+		if (isReversed()) {
+			return new PrecisionPoint(value[1], value[0]);
+		}
+		return new PrecisionPoint(value[0], value[1]);
 	}
 
 	private Collection<ICoordinateSystemListener> coordinateListeners;
@@ -117,6 +151,7 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 
 	@Override
 	public void revalidated(AxisEvent evt) {
+		calcAspectRatio();
 		fireCoordinateSystemListeners();
 	}
 
