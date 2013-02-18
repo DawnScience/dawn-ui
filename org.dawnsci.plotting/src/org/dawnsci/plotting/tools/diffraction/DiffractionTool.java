@@ -31,6 +31,8 @@ import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.viewers.TreeNodeContentProvider;
+import org.dawb.common.ui.wizard.persistence.PersistenceExportWizard;
+import org.dawb.common.ui.wizard.persistence.PersistenceImportWizard;
 import org.dawnsci.common.widgets.tree.ClearableFilteredTree;
 import org.dawnsci.common.widgets.tree.DelegatingProviderWithTooltip;
 import org.dawnsci.common.widgets.tree.IResettableExpansion;
@@ -62,6 +64,8 @@ import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
+import org.eclipse.jface.wizard.IWizard;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
@@ -440,6 +444,36 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		final IToolBarManager toolMan = getSite().getActionBars().getToolBarManager();
 		final MenuManager     menuMan = new MenuManager();
 		
+		
+		final Action exportMeta = new Action("Export metadata to file", Activator.getImageDescriptor("icons/mask-export-wiz.png")) {
+			public void run() {
+				try {
+					IWizard wiz = EclipseUtils.openWizard(PersistenceExportWizard.ID, false);
+					WizardDialog wd = new  WizardDialog(Display.getCurrent().getActiveShell(), wiz);
+					wd.setTitle(wiz.getWindowTitle());
+					wd.open();
+				} catch (Exception e) {
+					logger.error("Problem opening import!", e);
+				}
+			}			
+		};
+		
+		final Action importMeta = new Action("Import metadata from file", Activator.getImageDescriptor("icons/mask-import-wiz.png")) {
+			public void run() {
+				//TODO make import work
+//				try {
+//					IWizard wiz = EclipseUtils.openWizard(PersistenceImportWizard.ID, false);
+//					WizardDialog wd = new  WizardDialog(Display.getCurrent().getActiveShell(), wiz);
+//					wd.setTitle(wiz.getWindowTitle());
+//					wd.open();
+//				} catch (Exception e) {
+//					logger.error("Problem opening import!", e);
+//				}
+			}			
+		};
+		
+		
+		
 		final Action showDefault = new Action("Show the original/default value column", Activator.getImageDescriptor("icons/plot-tool-diffraction-default.gif")) {
 			public void run() {
 				defaultColumn.getColumn().setWidth(isChecked()?80:0);
@@ -727,6 +761,9 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		augmenter = new DiffractionImageAugmenter((AbstractPlottingSystem)getPlottingSystem());
 	    augmenter.addActions(dropdown);
 		
+	    toolMan.add(exportMeta);
+	    toolMan.add(importMeta);
+		toolMan.add(new Separator());
 	    toolMan.add(lock);
 		toolMan.add(new Separator());
 	    toolMan.add(dropdown);
