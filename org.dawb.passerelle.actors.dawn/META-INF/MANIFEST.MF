@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Dawn
-Bundle-SymbolicName: org.dawb.passerelle.actors.dawn;singleton:=true
+Bundle-SymbolicName: org.dawb.passerelle.actors.plot;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: Diamond Light Source
 Fragment-Host: org.dawb.passerelle.actors;bundle-version="1.0.0"
