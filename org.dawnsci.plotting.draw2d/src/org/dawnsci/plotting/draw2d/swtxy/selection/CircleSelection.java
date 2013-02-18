@@ -121,6 +121,8 @@ public class CircleSelection extends AbstractSelectionRegion {
 		} else {
 			r.height = r.width;
 		}
+		double ratio = coords.getAspectRatio();
+		r.height /= ratio;
 		g.drawOval(r);
 	}
 
@@ -148,7 +150,7 @@ public class CircleSelection extends AbstractSelectionRegion {
 		croi.setPoint(coords.getPositionValue(p.x(), p.y()));
 		double r = circle.getRadius();
 		double[] v = coords.getPositionValue((int) (p.preciseX() + r), (int) (p.preciseY() + r));
-		croi.setRadius(v[0] - croi.getPointX());
+		croi.setRadius(v[0] - croi.getPointX()); // NB do not use y as aspect ratio can change(!)
 
 //		System.err.println("To roi, " + croi.toString());
 		if (recordResult) {
@@ -185,6 +187,7 @@ public class CircleSelection extends AbstractSelectionRegion {
 		private TranslationListener handleListener;
 		private FigureListener moveListener;
 		private static final int SIDE = 8;
+		private final boolean isLinux = Activator.isLinuxOS();
 
 		public DecoratedCircle(Figure parent) {
 			super();
@@ -202,12 +205,13 @@ public class CircleSelection extends AbstractSelectionRegion {
 		}
 
 		public void setup(PointList corners) {
-			Rectangle r = new Rectangle(corners.getFirstPoint(), corners.getLastPoint());
+			Rectangle r = new Rectangle(coords.getPositionValue(corners.getFirstPoint()), coords.getPositionValue(corners.getLastPoint()));
 			if (r.width < r.height) {
 				r.width = r.height;
 			} else {
 				r.height = r.width;
 			}
+			r = new Rectangle(coords.getValuePosition(r.getTopLeft()), coords.getValuePosition(r.getBottomRight()));
 			setRadius(0.5*r.width);
 			
 			Point c = r.getCenter();
@@ -258,7 +262,8 @@ public class CircleSelection extends AbstractSelectionRegion {
 
 		private Point getPoint(double degrees) {
 			double angle = -Math.toRadians(degrees);
-			return new PrecisionPoint(radius * Math.cos(angle) + cx, radius * Math.sin(angle) + cy);
+			double ratio = coords.getAspectRatio();
+			return new PrecisionPoint(radius * Math.cos(angle) + cx, radius * Math.sin(angle) * ratio + cy);
 		}
 
 		private void setCentre(double x, double y) {
@@ -287,8 +292,9 @@ public class CircleSelection extends AbstractSelectionRegion {
 			double d = 2. * radius;
 			// On linux off screen is bad therefore we do not draw
 			// Fix to http://jira.diamond.ac.uk/browse/DAWNSCI-429
-			PrecisionRectangle rect = new PrecisionRectangle(cx-radius, cy-radius, d, d);
-			if (Activator.isLinuxOS()) {
+			double ratio = coords.getAspectRatio();
+			PrecisionRectangle rect = new PrecisionRectangle(cx - radius, cy - radius*ratio, d, d*ratio);
+			if (isLinux) {
 				Rectangle bnds = getParent().getBounds().getExpanded(200, 200);
 				if (!bnds.contains(rect)) return;
 			}
@@ -298,10 +304,12 @@ public class CircleSelection extends AbstractSelectionRegion {
 				graphics.setAlpha(255);
 				graphics.setForegroundColor(labelColour);
 				graphics.setFont(labelFont);
-				graphics.drawText(label, getPoint(45));
+				Point p = getPoint(45);
+				graphics.drawText(label, p);
 			}
 		}
 
+		// remove handles from parent and draw directly...
 		private void addHandle(Point p) {
 			RectangularHandle h = new RectangularHandle(coords, getRegionColor(), this, SIDE,
 					p.preciseX(), p.preciseY());
@@ -340,7 +348,8 @@ public class CircleSelection extends AbstractSelectionRegion {
 
 		@Override
 		public boolean containsPoint(int x, int y) {
-			double r = Math.hypot(x - cx, y - cy);
+			double ratio = coords.getAspectRatio(); 
+			double r = Math.hypot(x - cx, (y - cy)/ratio);
 
 			if (outlineOnly) {
 				return Math.abs(r - radius) < tolerance; 
@@ -502,6 +511,5 @@ public class CircleSelection extends AbstractSelectionRegion {
 		@Override
 		public void setRegion(IRegion region) {
 		}
-
 	}
 }
