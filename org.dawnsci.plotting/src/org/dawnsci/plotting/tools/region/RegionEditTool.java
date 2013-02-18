@@ -2,8 +2,8 @@ package org.dawnsci.plotting.tools.region;
 
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.RegionUtils;
-import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.CheckboxCellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.EditingSupport;
@@ -14,14 +14,12 @@ import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Spinner;
 
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 import uk.ac.gda.richbeans.components.cell.FieldComponentCellEditor;
-import uk.ac.gda.richbeans.components.wrappers.BooleanWrapper;
 import uk.ac.gda.richbeans.components.wrappers.FloatSpinnerWrapper;
 import uk.ac.gda.richbeans.components.wrappers.SpinnerWrapper;
 
@@ -162,26 +160,7 @@ public class RegionEditTool extends AbstractRegionTableTool {
 				
 				return ed;
 			} else if(column == 7){
-				try{
-					ed = new FieldComponentCellEditor(((TableViewer)getViewer()).getTable(), BooleanWrapper.class.getName(), SWT.LEFT);
-				}catch (ClassNotFoundException e) {
-					logger.error("Cannot get FieldComponentCellEditor for "+BooleanWrapper.class.getName(), e);
-					return null;
-				}
-				final BooleanWrapper bw = (BooleanWrapper)((FieldComponentCellEditor)ed).getFieldWidget();
-				bw.setVisible(true);
-				bw.setActive(true);
-				((Button)bw.getControl()).addSelectionListener(new SelectionAdapter() {
-					@Override
-					public void widgetSelected(SelectionEvent e) {
-						try {
-							setValue(element, bw.getValue(), false);
-						} catch (Exception e1) {
-							logger.debug("Error while setting table value");
-							e1.printStackTrace();
-						}
-					}
-				});
+				ed = new CheckboxCellEditor(((TableViewer)getViewer()).getTable(), SWT.RIGHT);
 				return ed;
 			}
 			return null;
@@ -298,13 +277,12 @@ public class RegionEditTool extends AbstractRegionTableTool {
 			case 6: //sum
 				break;
 			case 7: //isPlot
-				final boolean    isActive = (Boolean)value;
-				myRoi.setPlot(isActive);
-				if(isActive){
-					if (region!=null) region.setRegionColor(ColorConstants.green);
-				} else {
-					if (region!=null) region.setRegionColor(ColorConstants.gray);
-				}
+				myRoi.setPlot((Boolean)value);
+//				if(isActive){
+//					if (region!=null) region.setRegionColor(ColorConstants.green);
+//				} else {
+//					if (region!=null) region.setRegionColor(ColorConstants.gray);
+//				}
 				break;
 			default:
 				break;

@@ -3,7 +3,10 @@ package org.dawnsci.plotting.tools.region;
 import java.text.DecimalFormat;
 
 import org.dawb.common.ui.plot.region.IRegion;
+import org.dawnsci.plotting.Activator;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.swt.graphics.Image;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,14 +21,31 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 	private int column;
 	private AbstractRegionTableTool tool;
 	private DecimalFormat format;
+	private Image checkedIcon;
+	private Image uncheckedIcon;
 
 	public MeasurementLabelProvider(AbstractRegionTableTool tool, int i) {
 		this.column = i;
 		this.tool   = tool;
 		this.format = new DecimalFormat("##0.00E0");
+		ImageDescriptor id = Activator.getImageDescriptor("icons/ticked.png");
+		checkedIcon   = id.createImage();
+		id = Activator.getImageDescriptor("icons/unticked.gif");
+		uncheckedIcon =  id.createImage();
 	}
 
 	private static final String NA = "-";
+
+	@Override
+	public Image getImage(Object element){
+		
+		if (!(element instanceof IRegion)) return null;
+		if (column==7){
+			final IRegion region = (IRegion)element;
+			return region.getROI().isPlot() && tool.getControl().isEnabled() ? checkedIcon : uncheckedIcon;
+		}
+		return null;
+	}
 
 	@Override
 	public String getText(Object element) {
@@ -37,7 +57,7 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 
 		try {
 			Object fobj = null;
-
+			if (element instanceof String) return "";
 			switch(column) {
 			case 0:
 				return region.getLabel();
@@ -81,23 +101,9 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 				final double sum = tool.getSum(region);
 				if(Double.isNaN(sum)) return "-";
 				return format.format(sum);
-			case 7: // isPlot TODO: to be replaced by images 
-				if(roi.isPlot())
-					return "true";
-				else
-					return "false";
-//			case 7: // out rad
-//				if (roi instanceof SectorROI) {
-//					SectorROI sroi = (SectorROI) roi;
-//					fobj = sroi.getRadius(1);
-//				}
-//				return fobj == null ? NA : format.format(fobj);
-//			case 8: // region
-//				return tool.getROI(region).toString();
-//	
-			default:
-				return "Not found";
+
 			}
+			return "";
 		} catch (Throwable ne) {
 			// One must not throw RuntimeExceptions like null pointers from this
 			// methd becuase the user gets an eclipse dialog confusing them with 
@@ -111,4 +117,10 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 		return "Any selection region can be used in measurement tool. Try box and axis selections as well as line...";
 	}
 
+	@Override
+	public void dispose(){
+		super.dispose();
+		checkedIcon.dispose();
+		uncheckedIcon.dispose();
+	}
 }
