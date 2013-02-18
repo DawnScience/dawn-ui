@@ -41,6 +41,8 @@ import org.dawnsci.common.widgets.tree.UnitEditingSupport;
 import org.dawnsci.common.widgets.tree.ValueEditingSupport;
 import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.draw2d.swtxy.selection.CircleFitSelection;
+import org.dawnsci.plotting.preference.DiffractionDefaultsPreferencePage;
+import org.dawnsci.plotting.preference.detector.DiffractionDetectorPreferencePage;
 import org.dawnsci.plotting.preference.diffraction.DiffractionPreferencePage;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -696,6 +698,23 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 				if (pref != null) pref.open();
 			}
 		};
+		
+		Action configDetectors = new Action("Configure Detectors...") {
+			@Override
+			public void run() {
+				PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), DiffractionDetectorPreferencePage.ID, null, null);
+				if (pref != null) pref.open();
+			}
+		};
+		
+		Action configDefaultMeta = new Action("Configure Default Metadata...") {
+			@Override
+			public void run() {
+				PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), DiffractionDefaultsPreferencePage.ID, null, null);
+				if (pref != null) pref.open();
+			}
+		};
+		
 
 		this.calibrantActions = new MenuAction("Calibrants");
 		calibrantActions.setImageDescriptor(Activator.getImageDescriptor("/icons/calibrant_rings.png"));
@@ -743,6 +762,8 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 
 		getSite().getActionBars().getMenuManager().add(new Separator());
 		getSite().getActionBars().getMenuManager().add(calPref);
+		getSite().getActionBars().getMenuManager().add(configDetectors);
+		getSite().getActionBars().getMenuManager().add(configDefaultMeta);
 		getSite().getActionBars().getMenuManager().add(new Separator());
 	}
 	

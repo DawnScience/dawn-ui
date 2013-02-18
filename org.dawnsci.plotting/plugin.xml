@@ -272,8 +272,8 @@
       <page
             category="org.dawnsci.preferences.diffraction"
             class="org.dawnsci.plotting.preference.DiffractionDefaultsPreferencePage"
-            id="org.dawb.workbench.plotting.page1"
-            name="Tool Defaults">
+            id="org.dawb.workbench.plotting.preference.diffraction.defaultsPreferencePage"
+            name="Diffraction Metadata Defaults">
       </page>
       <page
             category="org.dawnsci.preferences.diffraction"
