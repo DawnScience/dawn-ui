@@ -532,7 +532,9 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	 * @return
 	 */
 	protected RectangularROI createROI(double ptx, double pty, double width, double height, double angle) {
-		return new RectangularROI(ptx, pty, width, height, angle);
+		RectangularROI tmp = new RectangularROI(ptx, pty, width, height, angle);
+		if (roi!=null) tmp.setPlot(roi.isPlot());
+		return tmp;
 	}
 	
 	protected void reverse(double[] a1, double[] a2, int i) {

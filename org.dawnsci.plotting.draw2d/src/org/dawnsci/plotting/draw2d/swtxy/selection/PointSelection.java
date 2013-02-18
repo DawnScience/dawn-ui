@@ -150,6 +150,7 @@ public class PointSelection extends AbstractSelectionRegion {
 	protected ROIBase createROI(boolean recordResult) {
 		if (point == null) return getROI();
 		final PointROI proi = new PointROI(point.getPosition());
+		if (roi!=null) proi.setPlot(roi.isPlot());
 		if (recordResult) roi = proi;
 
 		return proi;

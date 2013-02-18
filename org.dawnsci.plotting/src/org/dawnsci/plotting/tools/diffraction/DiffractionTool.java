@@ -1,6 +1,7 @@
 package org.dawnsci.plotting.tools.diffraction;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -42,12 +43,15 @@ import org.dawnsci.common.widgets.tree.NumericNode;
 import org.dawnsci.common.widgets.tree.UnitEditingSupport;
 import org.dawnsci.common.widgets.tree.ValueEditingSupport;
 import org.dawnsci.plotting.Activator;
+import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.dawnsci.plotting.draw2d.swtxy.selection.CircleFitSelection;
 import org.dawnsci.plotting.preference.DiffractionDefaultsPreferencePage;
 import org.dawnsci.plotting.preference.detector.DiffractionDetectorPreferencePage;
 import org.dawnsci.plotting.preference.diffraction.DiffractionPreferencePage;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -87,6 +91,7 @@ import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSelectionEvent;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationStandards;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.BooleanDataset;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
 import uk.ac.diamond.scisoft.analysis.diffraction.PowderRingsUtils;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
@@ -95,6 +100,7 @@ import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.rcp.plotting.utils.BeamCenterRefinement;
 import uk.ac.diamond.scisoft.analysis.roi.CircularFitROI;
 import uk.ac.diamond.scisoft.analysis.roi.CircularROI;
+import uk.ac.diamond.scisoft.analysis.roi.EllipticalFitROI;
 import uk.ac.diamond.scisoft.analysis.roi.PolylineROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
@@ -602,7 +608,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		};
 		cCentre.setImageDescriptor(Activator.getImageDescriptor("icons/centre.png"));
 
-		final Action refine = new Action("Refine beam center", IAction.AS_PUSH_BUTTON) {
+		final Action refine = new Action("Refine beam centre", IAction.AS_PUSH_BUTTON) {
 			
 			class Compare implements Comparator<IPeak> {
 
@@ -648,33 +654,65 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			@Override
 			public void run() {
 				if (tmpRegion instanceof CircleFitSelection) {
-					IPlottingSystem plotter = getPlottingSystem();
-					IImageTrace t = getImageTrace();
+					final IPlottingSystem plotter = getPlottingSystem();
+					final IImageTrace t = getImageTrace();
+					final Display display = control.getDisplay();
 					if (t != null) {
-						PolylineROI points = PowderRingsUtils.findPOIsNearCircle(t.getData(), (CircularROI) tmpRegion.getROI());
-						try {
-							IRegion region = plotter.createRegion(RegionUtils.getUniqueName("Pixel peaks", getPlottingSystem()), RegionType.CIRCLEFIT);
-							CircularFitROI cfroi = new CircularFitROI(points);
-							logger.debug("Circle from peaks: {}", cfroi);
-							region.setROI(cfroi);
-							region.setRegionColor(ColorConstants.cyan);
-							plotter.removeRegion(tmpRegion);
-							tmpRegion = region;
-							tmpRegion.setUserRegion(false);
-							tmpRegion.addROIListener(roiListener);
-							roiListener.roiSelected(new ROIEvent(tmpRegion, cfroi)); // trigger beam centre update
-							plotter.addRegion(region);
+						Job job = new Job("Circle fit refinement") {
+							private IStatus status = Status.OK_STATUS;
+							
+							@Override
+							protected IStatus run(final IProgressMonitor monitor) {
+								monitor.beginTask("Refine circular fit", 100);
+								monitor.subTask("Find POIs near initial circle");
+								BooleanDataset mask = (BooleanDataset) t.getMask();
+								final PolylineROI points = PowderRingsUtils.findPOIsNearCircle(t.getData(), mask, (CircularROI) tmpRegion.getROI());
+								monitor.worked(20);
+								display.syncExec(new Runnable() {
 
-						} catch (Exception e) {
-						}
+									public void run() {
+										try {
+											IRegion region = plotter.createRegion(RegionUtils.getUniqueName("Pixel peaks", getPlottingSystem()), RegionType.CIRCLEFIT);
+											monitor.subTask("Fit POIs");
+											EllipticalFitROI efroi = PowderRingsUtils.fitAndTrimOutliers(points, 2, true);
+											CircularFitROI cfroi = new CircularFitROI(efroi.getPoints());
+//											CircularFitROI cfroi = new CircularFitROI(points);
+											monitor.worked(50);
+											logger.debug("Circle from peaks: {}", cfroi);
+											region.setROI(cfroi);
+											region.setRegionColor(ColorConstants.cyan);
+											plotter.removeRegion(tmpRegion);
+											monitor.subTask("Add region");
+											tmpRegion = region;
+											tmpRegion.setUserRegion(false);
+											tmpRegion.addROIListener(roiListener);
+											roiListener.roiSelected(new ROIEvent(tmpRegion, cfroi)); // trigger beam centre update
+											plotter.addRegion(region);
+											monitor.worked(30);
+										} catch (Exception e) {
+											status = Status.CANCEL_STATUS;
+										}
+									}
+								});
+								return status;
+							}
+						};
+						job.setPriority(Job.SHORT);
+//						job.setUser(true);
+						job.schedule();
 
 					}
 					return;
 				}
 				try {
+					
+					Collection<IRegion> regions = getPlottingSystem().getRegions(RegionType.SECTOR);
+					if (regions.size() == 0) {
+						return;
+					}
+					SectorROI sroi = (SectorROI) regions.iterator().next().getROI();
 					AbstractDataset dataset = getImageTrace().getData();
 					AbstractDataset mask = getImageTrace().getMask();
-					SectorROI sroi = (SectorROI) getPlottingSystem().getRegions(RegionType.SECTOR).iterator().next().getROI();
 					final BeamCenterRefinement beamOffset = new BeamCenterRefinement(dataset, mask, sroi);
 					List<IPeak> peaks = loadPeaks();
 					if (peaks==null) throw new Exception("Cannot find peaks!");
@@ -843,6 +881,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 					if (!augmenter.isShowingBeamCenter()) {
 						augmenter.drawBeamCentre(true);
 					}
+					((AbstractSelectionRegion) tmpRegion).setShowLabel(true);
 				}
 			}
 		};
@@ -857,7 +896,9 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 					IDiffractionMetadata data = getDiffractionMetaData();
 					DetectorProperties detprop = data.getDetector2DProperties();
 					detprop.setBeamCentreCoords(point);
-					augmenter.drawBeamCentre(augmenter.isShowingBeamCenter());
+					if (!augmenter.isShowingBeamCenter()) {
+						augmenter.drawBeamCentre(true);
+					}
 				}
 			}
 		};

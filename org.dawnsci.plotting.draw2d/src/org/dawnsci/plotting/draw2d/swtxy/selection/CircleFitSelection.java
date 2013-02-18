@@ -48,6 +48,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.fitting.CircleFitter;
 import uk.ac.diamond.scisoft.analysis.roi.CircularFitROI;
+import uk.ac.diamond.scisoft.analysis.roi.CircularROI;
 import uk.ac.diamond.scisoft.analysis.roi.PointROI;
 import uk.ac.diamond.scisoft.analysis.roi.PolylineROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
@@ -64,6 +65,7 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 		setRegionColor(ColorConstants.yellow);
 		setAlpha(80);
 		setLineWidth(2);
+		labelColour = ColorConstants.black;
 		fitter = new CircleFitter();
 	}
 
@@ -117,9 +119,9 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 		}
 	}
 
-	private void fitPoints(PointList pts, DecoratedCircle circle) {
+	private boolean fitPoints(PointList pts, DecoratedCircle circle) {
 		if (pts == null)
-			return;
+			return false;
 
 		final int n = pts.size();
 		final double[] x = new double[n];
@@ -144,7 +146,9 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 			circle.setCentre(pnt2[0], pnt2[1]);
 		} catch (IllegalArgumentException e) {
 			logger.info("Can not fit current selection");
+			return false;
 		}
+		return true;
 	}
 
 	private DecoratedCircle tempCircle;
@@ -162,8 +166,12 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 				tempCircle.setOutline(true);
 				tempCircle.setFill(false);
 			}
-			fitPoints(clicks, tempCircle);
-			tempCircle.paintFigure(g);
+			if (fitPoints(clicks, tempCircle)) {
+				tempCircle.setVisible(true);
+				tempCircle.paintFigure(g);
+			} else {
+				tempCircle.setVisible(false);
+			}
 		}
 	}
 
@@ -200,14 +208,20 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 
 		try {
 			final CircularFitROI croi = new CircularFitROI(hroi);
+			if (roi!=null) croi.setPlot(roi.isPlot());
 			if (recordResult) {
 				roi = croi;
 			}
+			updateLabel(croi);
 			return croi;
 		} catch (IllegalArgumentException e) {
 			// do nothing
 		}
 		return roi;
+	}
+
+	private void updateLabel(CircularROI croi) {
+		setLabel(String.format("%.2f", croi.getRadius()));
 	}
 
 	@Override
@@ -217,6 +231,7 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 
 		if (roi instanceof CircularFitROI) {
 			circle.updateFromROI((CircularFitROI) roi);
+			updateLabel((CircularROI) roi);
 			updateConnectionBounds();
 		}
 	}
@@ -238,8 +253,8 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 		private PointList box; // bounding box of ellipse
 		private boolean outlineOnly = false;
 
-		List<IFigure> handles;
-		List<FigureTranslator> fTranslators;
+		private final List<IFigure> handles;
+		private final List<FigureTranslator> fTranslators;
 		private Figure parent;
 		private TranslationListener handleListener;
 		private FigureListener moveListener;
@@ -249,6 +264,8 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 		public DecoratedCircle() {
 			super();
 			affine = new AffineTransform();
+			handles = new ArrayList<IFigure>();
+			fTranslators = null;
 		}
 
 		public DecoratedCircle(Figure parent) {
@@ -373,7 +390,7 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 			graphics.setAdvanced(true);
 			graphics.setAntialias(SWT.ON);
 			graphics.translate((int) affine.getTranslationX(), (int) affine.getTranslationY());
-			graphics.rotate((float) affine.getRotationDegrees());
+//			graphics.rotate((float) affine.getRotationDegrees());
 			// NB do not use Graphics#scale and unit shape as there are precision problems
 			int d = (int)affine.getScaleX();
 			graphics.fillOval(0, 0, d, d);
@@ -389,11 +406,23 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 			graphics.setAntialias(SWT.ON);
 
 			graphics.translate((int) affine.getTranslationX(), (int) affine.getTranslationY());
-			graphics.rotate((float) affine.getRotationDegrees());
+//			graphics.rotate((float) affine.getRotationDegrees());
 			// NB do not use Graphics#scale and unit shape as there are precision problems
 			int d = (int)affine.getScaleX();
 			graphics.drawOval(0, 0, d, d);
 			graphics.popState();
+
+			if (label != null && isShowLabel()) {
+		        graphics.pushState();
+		        graphics.setLineStyle(SWT.LINE_DASH);
+				Rectangle r = new Rectangle(getPoint(135), getCentre());
+		        graphics.drawLine(r.getTopLeft(), r.getBottomRight());
+		        graphics.setAlpha(255);
+				graphics.setForegroundColor(labelColour);
+				graphics.setFont(labelFont);
+				graphics.drawText(label, r.getCenter().getTranslated(0, -labeldim.height));
+				graphics.popState();
+			}
 		}
 
 		private boolean isShapeFriendlySize() {
@@ -487,15 +516,16 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 				public void translationAfter(TranslationEvent evt) {
 					Object src = evt.getSource();
 					if (src instanceof FigureTranslator) {
-						fitPoints(getPoints(), DecoratedCircle.this);
-						if (handles.size() > 0) {
-							IFigure f = handles.get(handles.size() - 1);
-							if (f instanceof SelectionHandle) {
-								SelectionHandle h = (SelectionHandle) f;
-								h.setSelectionPoint(getCentre());
+						if (fitPoints(getPoints(), DecoratedCircle.this)) {
+							if (handles.size() > 0) {
+								IFigure f = handles.get(handles.size() - 1);
+								if (f instanceof SelectionHandle) {
+									SelectionHandle h = (SelectionHandle) f;
+									h.setSelectionPoint(getCentre());
+								}
 							}
+							fireROIDragged(createROI(false), ROIEvent.DRAG_TYPE.RESIZE);
 						}
-						fireROIDragged(createROI(false), ROIEvent.DRAG_TYPE.RESIZE);
 					}
 				}
 
