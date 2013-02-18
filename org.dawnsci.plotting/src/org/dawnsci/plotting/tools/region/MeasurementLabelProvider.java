@@ -40,7 +40,7 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 
 			switch(column) {
 			case 0:
-				return region.getName();
+				return region.getLabel();
 			case 1:
 				if(roi instanceof LinearROI)
 					fobj = ((LinearROI)roi).getPoint()[0];
