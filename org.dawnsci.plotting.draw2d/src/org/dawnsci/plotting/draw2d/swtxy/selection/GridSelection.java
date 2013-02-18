@@ -193,7 +193,9 @@ public class GridSelection extends BoxSelection {
 	
 	@Override
 	protected RectangularROI createROI(double ptx, double pty, double width, double height, double angle) {
-		return new GridROI(ptx, pty, width, height, angle);
+		GridROI groi = new GridROI(ptx, pty, width, height, angle);
+		if (roi!=null) groi.setPlot(roi.isPlot());
+		return groi;
 	}
 
 	

@@ -136,6 +136,7 @@ public class PolygonSelection extends AbstractSelectionRegion {
 			Point p = pl.getPoint(i);
 			proi.insertPoint(i, coords.getPositionValue(p.x(),p.y()));
 		}
+		if (roi!=null) proi.setPlot(roi.isPlot());
 		if (recordResult)
 			roi = proi;
 
