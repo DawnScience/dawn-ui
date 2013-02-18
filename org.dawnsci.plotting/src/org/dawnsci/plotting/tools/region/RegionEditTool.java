@@ -137,7 +137,12 @@ public class RegionEditTool extends AbstractRegionTableTool {
 						.addSelectionListener(new SelectionAdapter() {
 							@Override
 							public void widgetSelected(SelectionEvent e) {
-								setValue(element, rb.getValue(), false);
+								try {
+									setValue(element, rb.getValue(), false);
+								} catch (Exception e1) {
+									logger.debug("Error while setting table value");
+									e1.printStackTrace();
+								}
 								
 							}
 						});	
@@ -163,7 +168,7 @@ public class RegionEditTool extends AbstractRegionTableTool {
 
 			switch (column){
 			case 0:
-				return region.getName();
+				return region.getLabel();
 			case 1:
 				return region.getROI().getPointX();
 			case 2:
@@ -194,16 +199,22 @@ public class RegionEditTool extends AbstractRegionTableTool {
 
 		@Override
 		protected void setValue(Object element, Object value) {
-			this.setValue(element, value, true);
+			try {
+				this.setValue(element, value, true);
+			} catch (Exception e) {
+				logger.debug("Error while setting table value");
+				e.printStackTrace();
+			}
 		}
 		
-		protected void setValue(Object element, Object value, boolean tableRefresh) {
+		protected void setValue(Object element, Object value, boolean tableRefresh) throws Exception {
 
 			final IRegion region = (IRegion) element;
 			ROIBase myRoi = region.getROI();
 			switch (column){
 			case 0:
-				region.setName((String)value);
+				// takes care of renaming the region (label and key value in hash table)
+				getPlottingSystem().renameRegion(region, (String)value);
 				break;
 			case 1:
 				if(myRoi instanceof LinearROI){
