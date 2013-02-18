@@ -431,6 +431,7 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 	 * @param evt
 	 */
 	private void updateRegion(final ROIEvent evt) {
+		if(viewer == null) return;
 		if(viewer.isCellEditorActive()) return; 
 		if (updateJob==null) {
 			updateJob = new RegionBoundsUIJob();
