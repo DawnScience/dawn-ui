@@ -182,7 +182,8 @@ public class HistogramToolPage extends AbstractToolPage {
 	private ExtentionPointManager extentionPointManager;
 	private UIJob imagerepaintJob;
 	private PaletteData paletteData;
-	private int internalEvent = 0;
+	private int internalEvent = 0; // This is very likely to go wrong, suggest avoid
+	                               // having counters for events.
 
 
 	private IPaletteListener paletteListener;
@@ -234,7 +235,7 @@ public class HistogramToolPage extends AbstractToolPage {
 					it = (IImageTrace)evt.getSource();
 				}
 				updateImage(it, false);
-				updatePalette(null);
+				updatePalette(it, null);
 			}
 			@Override
 			public void tracesAdded(TraceEvent evt) {
@@ -255,7 +256,7 @@ public class HistogramToolPage extends AbstractToolPage {
 				if (internalEvent > 0) return;
 				logger.trace("paletteChanged");
 				paletteData = event.getPaletteData();
-				updateHistogramToolElements(null, false);
+				updateHistogramToolElements(event.getTrace(), null, false);
 			}
 
 			@Override
@@ -263,7 +264,7 @@ public class HistogramToolPage extends AbstractToolPage {
 				if (internalEvent > 0 || mode == FIXED) return;
 				logger.trace("paletteListener minChanged firing");
 				histoMin = ((IImageTrace)event.getSource()).getImageServiceBean().getMin().doubleValue();
-				updateHistogramToolElements(null, false);
+				updateHistogramToolElements(event.getTrace(), null, false);
 
 			}
 
@@ -272,7 +273,7 @@ public class HistogramToolPage extends AbstractToolPage {
 				if (internalEvent > 0 || mode == FIXED) return;
 				logger.trace("paletteListener maxChanged firing");
 				histoMax = ((IImageTrace)event.getSource()).getImageServiceBean().getMax().doubleValue();
-				updateHistogramToolElements(null, false);
+				updateHistogramToolElements(event.getTrace(), null, false);
 			}
 
 			@Override
@@ -283,7 +284,7 @@ public class HistogramToolPage extends AbstractToolPage {
 				zingerText.setText(Double.toString(rangeMax));
 				if(histoMax > rangeMax) histoMax = rangeMax;
 				generateHistogram(imageDataset);
-				updateHistogramToolElements(null, false);
+				updateHistogramToolElements(evt.getTrace(), null, false);
 			}
 
 			@Override
@@ -294,7 +295,7 @@ public class HistogramToolPage extends AbstractToolPage {
 				deadPixelText.setText(Double.toString(rangeMin));
 				if(histoMin < rangeMin) histoMin = rangeMin;
 				generateHistogram(imageDataset);
-				updateHistogramToolElements(null, false);
+				updateHistogramToolElements(evt.getTrace(), null, false);
 
 			}
 
@@ -519,7 +520,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			@Override
 			public IStatus runInUIThread(IProgressMonitor mon) {
-				if (!updatePalette(mon)) return Status.CANCEL_STATUS;
+				if (!updatePalette(null, mon)) return Status.CANCEL_STATUS;
 				return Status.OK_STATUS;
 			}
 		};
@@ -530,23 +531,27 @@ public class HistogramToolPage extends AbstractToolPage {
 	 * 
 	 * @param mon, may be null
 	 */
-	protected boolean updatePalette(IProgressMonitor mon) {
+	protected boolean updatePalette(IImageTrace eventsImage, IProgressMonitor mon) {
 		logger.trace("imagerepaintJob running");
 		internalEvent++;
 
-		IImageTrace image = getImageTrace();
-		image.setMax(histoMax);
-		if (mon!=null && mon.isCanceled()) return false;
-
-		image.setMin(histoMin);
-		if (mon!=null && mon.isCanceled()) return false;
-
-		image.setPaletteData(paletteData);
-		logger.trace("Set palette data on image id = "+image.getName());
-		if (mon!=null && mon.isCanceled()) return false;
-
-		internalEvent--;
-		return true;
+		IImageTrace image = eventsImage!=null ? eventsImage : getImageTrace();
+		if (image!=null) {
+			image.setMax(histoMax);
+			if (mon!=null && mon.isCanceled()) return false;
+	
+			image.setMin(histoMin);
+			if (mon!=null && mon.isCanceled()) return false;
+	
+			image.setPaletteData(paletteData);
+			logger.trace("Set palette data on image id = "+image.getName());
+			if (mon!=null && mon.isCanceled()) return false;
+	
+			internalEvent--;
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	@Override
@@ -904,7 +909,7 @@ public class HistogramToolPage extends AbstractToolPage {
 			generateHistogram(imageDataset);
 
 			// update all based on slider positions
-			updateHistogramToolElements(null, repaintImage);
+			updateHistogramToolElements(image, null, repaintImage);
 
 			// finally tie in the listener to the paletedata changes
 			image.addPaletteListener(paletteListener);
@@ -923,19 +928,19 @@ public class HistogramToolPage extends AbstractToolPage {
 
 
 	private void updateHistogramToolElements(SelectionEvent event) {
-		updateHistogramToolElements(event, true);
+		updateHistogramToolElements(getImageTrace(), event, true);
 	}
 
 	/**
 	 * Update everything based on the new slider positions  
 	 * @param event  MAY BE NULL
 	 */
-	private void updateHistogramToolElements(SelectionEvent event, boolean repaintImage) {
+	private void updateHistogramToolElements(IImageTrace trace, SelectionEvent event, boolean repaintImage) {
 		// update the ranges
-		updateRanges(event);
+		updateRanges(trace, event);
 
 		// plot the histogram
-		plotHistogram();
+		plotHistogram(trace);
 
 		// repaint the image if required
 		if(repaintImage) imagerepaintJob.schedule();
@@ -972,13 +977,12 @@ public class HistogramToolPage extends AbstractToolPage {
 	 * Update all the gui element ranges based on the internal values for them
 	 * @param event 
 	 */
-	private void updateRanges(SelectionEvent event) {
+	private void updateRanges(IImageTrace image, SelectionEvent event) {
 		
 		double scaleMaxTemp = rangeMax;
 		double scaleMinTemp = rangeMin;
 
 		if (getPlottingSystem()==null) return; // Nothing to update
-		IImageTrace image = getImageTrace();
 		if (image==null) return;
 		
 		imageDataset = image.getImageServiceBean().getImage();
@@ -1019,7 +1023,7 @@ public class HistogramToolPage extends AbstractToolPage {
 	/**
 	 * Plots the histogram, and RGB lines
 	 */
-	private void plotHistogram() {	
+	private void plotHistogram(IImageTrace image) {	
 
 
 		// Initialise the histogram Plot if required
@@ -1061,7 +1065,6 @@ public class HistogramToolPage extends AbstractToolPage {
 		}
 
 		// now build the RGB Lines  ( All the -3's here are to avoid the min/max/NAN colours)
-		IImageTrace image = getImageTrace();
 		if (image==null) return;
 		PaletteData paletteData = image.getPaletteData();
 		final DoubleDataset R = new DoubleDataset(paletteData.colors.length-3);
