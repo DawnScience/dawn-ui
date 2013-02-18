@@ -81,8 +81,10 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 			if (!(sel.getFirstElement() instanceof IRegion)) return;
 			final IRegion          region = (IRegion)sel.getFirstElement();
 			previousRegion = region;
+			if((region != null) && region.getROI().isPlot()) region.setRegionColor(ColorConstants.green);
+			else if ((region != null) && !region.getROI().isPlot()) region.setRegionColor(ColorConstants.gray);
 			previousColor  = region!=null ? region.getRegionColor() : null;
-			
+
 			if (region!=null) region.setRegionColor(ColorConstants.red);
 		}
 
@@ -91,7 +93,7 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 			previousRegion = null;
 			previousColor  = null;
 		}
-	}	
+	}
 	
 	protected abstract void createNewRegion();
 
@@ -390,7 +392,9 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 		if (!isActive()) return;
 		if (viewer!=null) viewer.refresh();
 		if (evt.getRegion()!=null) {
-			evt.getRegion().addROIListener(this);
+			IRegion region = evt.getRegion();
+			region.addROIListener(this);
+			region.getROI().setPlot(true);
 		}
 	}
 

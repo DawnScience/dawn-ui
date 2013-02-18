@@ -77,10 +77,15 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 				final double max = tool.getMaxIntensity(region);
 			    if (Double.isNaN(max)) return "-";
 				return format.format(max);
-			case 6: // in rad
+			case 6: // sum
 				final double sum = tool.getSum(region);
 				if(Double.isNaN(sum)) return "-";
 				return format.format(sum);
+			case 7: // isPlot TODO: to be replaced by images 
+				if(roi.isPlot())
+					return "true";
+				else
+					return "false";
 //			case 7: // out rad
 //				if (roi instanceof SectorROI) {
 //					SectorROI sroi = (SectorROI) roi;

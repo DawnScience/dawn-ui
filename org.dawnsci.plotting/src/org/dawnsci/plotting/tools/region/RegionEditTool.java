@@ -2,6 +2,7 @@ package org.dawnsci.plotting.tools.region;
 
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.RegionUtils;
+import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
@@ -13,12 +14,14 @@ import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Spinner;
 
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 import uk.ac.gda.richbeans.components.cell.FieldComponentCellEditor;
+import uk.ac.gda.richbeans.components.wrappers.BooleanWrapper;
 import uk.ac.gda.richbeans.components.wrappers.FloatSpinnerWrapper;
 import uk.ac.gda.richbeans.components.wrappers.SpinnerWrapper;
 
@@ -87,6 +90,13 @@ public class RegionEditTool extends AbstractRegionTableTool {
 		var.setLabelProvider(new MeasurementLabelProvider(this, 6));
 		regionEditor = new RegionEditingSupport(viewer, 6);
 		var.setEditingSupport(regionEditor);
+
+		var = new TableViewerColumn(viewer, SWT.LEFT, 7);
+		var.getColumn().setText("Active");
+		var.getColumn().setWidth(100);
+		var.setLabelProvider(new MeasurementLabelProvider(this, 7));
+		regionEditor = new RegionEditingSupport(viewer, 7);
+		var.setEditingSupport(regionEditor);
 	}
 	
 	
@@ -112,9 +122,9 @@ public class RegionEditTool extends AbstractRegionTableTool {
 		}
 		@Override
 		protected CellEditor getCellEditor(final Object element) {
+			CellEditor ed = null;
 			
-			if(column!=0){
-				FieldComponentCellEditor ed = null;
+			if(column > 0 && column < 7){
 				try {
 					ed = new FieldComponentCellEditor(((TableViewer)getViewer()).getTable(), 
 							                     FloatSpinnerWrapper.class.getName(), SWT.RIGHT);
@@ -123,7 +133,7 @@ public class RegionEditTool extends AbstractRegionTableTool {
 					return null;
 				}
 				
-				final FloatSpinnerWrapper   rb = (FloatSpinnerWrapper)ed.getFieldWidget();
+				final FloatSpinnerWrapper   rb = (FloatSpinnerWrapper)((FieldComponentCellEditor)ed).getFieldWidget();
 				if (rb.getPrecision() < 3)
 					rb.setFormat(rb.getWidth(), 3);
 				
@@ -147,11 +157,34 @@ public class RegionEditTool extends AbstractRegionTableTool {
 							}
 						});	
 				return ed;
-			} else {
-				TextCellEditor ed = new TextCellEditor(((TableViewer)getViewer()).getTable(), SWT.RIGHT);
+			} else if(column == 0){
+				ed = new TextCellEditor(((TableViewer)getViewer()).getTable(), SWT.RIGHT);
 				
 				return ed;
+			} else if(column == 7){
+				try{
+					ed = new FieldComponentCellEditor(((TableViewer)getViewer()).getTable(), BooleanWrapper.class.getName(), SWT.LEFT);
+				}catch (ClassNotFoundException e) {
+					logger.error("Cannot get FieldComponentCellEditor for "+BooleanWrapper.class.getName(), e);
+					return null;
+				}
+				final BooleanWrapper bw = (BooleanWrapper)((FieldComponentCellEditor)ed).getFieldWidget();
+				bw.setVisible(true);
+				bw.setActive(true);
+				((Button)bw.getControl()).addSelectionListener(new SelectionAdapter() {
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						try {
+							setValue(element, bw.getValue(), false);
+						} catch (Exception e1) {
+							logger.debug("Error while setting table value");
+							e1.printStackTrace();
+						}
+					}
+				});
+				return ed;
 			}
+			return null;
 			
 		}
 
@@ -189,8 +222,10 @@ public class RegionEditTool extends AbstractRegionTableTool {
 					return null;
 			case 5: //max intensity
 				return null;
-			case 6: //sum?
+			case 6: //sum
 				return null;
+			case 7: //isPlot
+				return roi.isPlot();
 			default:
 				return null;
 			}
@@ -261,6 +296,15 @@ public class RegionEditTool extends AbstractRegionTableTool {
 			case 5: //intensity
 				break;
 			case 6: //sum
+				break;
+			case 7: //isPlot
+				final boolean    isActive = (Boolean)value;
+				myRoi.setPlot(isActive);
+				if(isActive){
+					if (region!=null) region.setRegionColor(ColorConstants.green);
+				} else {
+					if (region!=null) region.setRegionColor(ColorConstants.gray);
+				}
 				break;
 			default:
 				break;
