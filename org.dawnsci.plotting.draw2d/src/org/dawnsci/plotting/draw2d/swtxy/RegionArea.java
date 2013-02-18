@@ -184,6 +184,7 @@ public class RegionArea extends PlotArea {
 	public void renameRegion(final AbstractSelectionRegion region, String name) {
 	    regions.remove(region.getName());
 	    region.setName(name);
+	    region.setLabel(name);
 	    regions.put(name, region);
 	}
 	

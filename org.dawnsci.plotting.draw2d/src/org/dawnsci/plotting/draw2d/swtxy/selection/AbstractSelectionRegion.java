@@ -174,10 +174,10 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	}
 
 	protected void drawLabel(Graphics gc, Rectangle size) {
-		if (isShowLabel() && label!=null) {
+		if (isShowLabel() && getLabel()!=null) {
 			gc.setAlpha(255);
 			gc.setForegroundColor(ColorConstants.black);
-			gc.drawText(label, size.getCenter());
+			gc.drawText(getLabel(), size.getCenter());
 		}
 	}
 
