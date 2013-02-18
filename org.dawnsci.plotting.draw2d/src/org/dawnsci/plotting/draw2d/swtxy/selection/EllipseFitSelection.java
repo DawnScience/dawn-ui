@@ -44,6 +44,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.fitting.CircleFitter;
 import uk.ac.diamond.scisoft.analysis.fitting.EllipseFitter;
+import uk.ac.diamond.scisoft.analysis.fitting.IConicSectionFitter;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalFitROI;
 import uk.ac.diamond.scisoft.analysis.roi.PointROI;
 import uk.ac.diamond.scisoft.analysis.roi.PolylineROI;
@@ -55,7 +56,7 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 	private static final int CIR_POINTS = 3; // minimum number of points to define circle
 	private static final int ELL_POINTS = 5; // minimum number of points to define ellipse
 	DecoratedEllipse ellipse;
-	private EllipseFitter eFitter;
+	private IConicSectionFitter eFitter;
 	private CircleFitter cFitter;
 
 	public EllipseFitSelection(String name, ICoordinateSystem coords) {
@@ -119,9 +120,9 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 
 	private boolean circleOnly = false;
 
-	private void fitPoints(PointList pts, RotatableEllipse ellipse) {
+	private boolean fitPoints(PointList pts, RotatableEllipse ellipse) {
 		if (pts == null)
-			return;
+			return false;
 
 		final int n = pts.size();
 		final double[] x = new double[n];
@@ -159,7 +160,9 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 			ellipse.setAngle(ang);
 		} catch (IllegalArgumentException e) {
 			logger.info("Can not fit current selection");
+			return false;
 		}
+		return true;
 	}
 
 	private RotatableEllipse tempEllipse;
@@ -177,8 +180,12 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 				tempEllipse.setOutline(true);
 				tempEllipse.setFill(false);
 			}
-			fitPoints(clicks, tempEllipse);
-			tempEllipse.paintFigure(g);
+			if (fitPoints(clicks, tempEllipse)) {
+				tempEllipse.setVisible(true);
+				tempEllipse.paintFigure(g);
+			} else {
+				tempEllipse.setVisible(false);
+			}
 		}
 	}
 
@@ -371,15 +378,16 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 				public void translationAfter(TranslationEvent evt) {
 					Object src = evt.getSource();
 					if (src instanceof FigureTranslator) {
-						fitPoints(getPoints(), DecoratedEllipse.this);
-						if (handles.size() > 0) {
-							IFigure f = handles.get(handles.size() - 1);
-							if (f instanceof SelectionHandle) {
-								SelectionHandle h = (SelectionHandle) f;
-								h.setSelectionPoint(getCentre());
+						if (fitPoints(getPoints(), DecoratedEllipse.this)) {
+							if (handles.size() > 0) {
+								IFigure f = handles.get(handles.size() - 1);
+								if (f instanceof SelectionHandle) {
+									SelectionHandle h = (SelectionHandle) f;
+									h.setSelectionPoint(getCentre());
+								}
 							}
+							fireROIDragged(createROI(false), ROIEvent.DRAG_TYPE.RESIZE);
 						}
-						fireROIDragged(createROI(false), ROIEvent.DRAG_TYPE.RESIZE);
 					}
 				}
 
