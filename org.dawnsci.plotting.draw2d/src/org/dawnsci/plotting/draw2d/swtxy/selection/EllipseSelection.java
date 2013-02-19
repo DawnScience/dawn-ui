@@ -258,10 +258,11 @@ public class EllipseSelection extends AbstractSelectionRegion {
 		protected void outlineShape(Graphics graphics) {
 			super.outlineShape(graphics);
 			if (label != null && isShowLabel()) {
-				graphics.setAlpha(255);
+				graphics.setAlpha(192);
 				graphics.setForegroundColor(labelColour);
+				graphics.setBackgroundColor(ColorConstants.white);
 				graphics.setFont(labelFont);
-				graphics.drawText(label, getPoint(45));
+				graphics.fillString(label, getPoint(45));
 			}
 		}
 

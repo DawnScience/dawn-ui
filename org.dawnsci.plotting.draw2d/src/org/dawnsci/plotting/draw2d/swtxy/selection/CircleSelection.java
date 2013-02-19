@@ -302,11 +302,11 @@ public class CircleSelection extends AbstractSelectionRegion {
 			
 			graphics.drawOval(rect);
 			if (label != null && isShowLabel()) {
-				graphics.setAlpha(255);
+				graphics.setAlpha(192);
 				graphics.setForegroundColor(labelColour);
+				graphics.setBackgroundColor(ColorConstants.white);
 				graphics.setFont(labelFont);
-				Point p = getPoint(45);
-				graphics.drawText(label, p);
+				graphics.fillString(label, getPoint(45));
 			}
 		}
 
