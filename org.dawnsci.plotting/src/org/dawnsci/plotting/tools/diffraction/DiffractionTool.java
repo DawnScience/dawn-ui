@@ -93,6 +93,7 @@ import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationStandards;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.BooleanDataset;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
+import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionMetadataUtils;
 import uk.ac.diamond.scisoft.analysis.diffraction.PowderRingsUtils;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
@@ -326,15 +327,31 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		
 		if (lockedMeta != null) {
    		    IImageTrace imageTrace = getImageTrace();
-			if (imageTrace==null) return lockedMeta;
+			if (imageTrace==null || imageTrace.getData() ==null) return lockedMeta;
 			
 			IMetaData mdImage = imageTrace.getData().getMetadata();
 			
 			if (mdImage == null || !(mdImage instanceof IDiffractionMetadata)) {
-				imageTrace.getData().setMetadata(lockedMeta.clone());
+				//TODO check image dimensions here!!!!
+				int[] shape = imageTrace.getData().getShape();
+				
+				if (shape[0] == lockedMeta.getDetector2DProperties().getPx() &&
+					shape[1] == lockedMeta.getDetector2DProperties().getPy()) {
+					imageTrace.getData().setMetadata(lockedMeta.clone());
+				} else {
+					IDiffractionMetadata clone = lockedMeta.clone();
+					clone.getDetector2DProperties().setPx(shape[0]);
+					clone.getDetector2DProperties().setPy(shape[1]);
+					statusString = "Locked metadata doesnt match image dimensions!";
+				}
+				
 			} else if (mdImage instanceof IDiffractionMetadata) {
 				if (!diffractionMetadataAreEqual((IDiffractionMetadata)mdImage,lockedMeta)) {
-					DiffractionDefaultMetadata.copyNewOverOld(lockedMeta, (IDiffractionMetadata)mdImage);
+					try {
+						DiffractionMetadataUtils.copyNewOverOld(lockedMeta, (IDiffractionMetadata)mdImage);
+					} catch (IllegalArgumentException e) {
+						statusString = "Locked metadata doesnt match image dimensions!";
+					}
 					imageTrace.getData().setMetadata(mdImage);
 				}
 			}
@@ -466,15 +483,14 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		
 		final Action importMeta = new Action("Import metadata from file", Activator.getImageDescriptor("icons/mask-import-wiz.png")) {
 			public void run() {
-				//TODO make import work
-//				try {
-//					IWizard wiz = EclipseUtils.openWizard(PersistenceImportWizard.ID, false);
-//					WizardDialog wd = new  WizardDialog(Display.getCurrent().getActiveShell(), wiz);
-//					wd.setTitle(wiz.getWindowTitle());
-//					wd.open();
-//				} catch (Exception e) {
-//					logger.error("Problem opening import!", e);
-//				}
+				try {
+					IWizard wiz = EclipseUtils.openWizard(PersistenceImportWizard.ID, false);
+					WizardDialog wd = new  WizardDialog(Display.getCurrent().getActiveShell(), wiz);
+					wd.setTitle(wiz.getWindowTitle());
+					wd.open();
+				} catch (Exception e) {
+					logger.error("Problem opening import!", e);
+				}
 			}			
 		};
 		
