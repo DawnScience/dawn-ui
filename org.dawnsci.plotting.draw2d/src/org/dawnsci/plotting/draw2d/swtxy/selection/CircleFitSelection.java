@@ -19,7 +19,9 @@ package org.dawnsci.plotting.draw2d.swtxy.selection;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.dawb.common.ui.plot.axis.CoordinateSystemEvent;
 import org.dawb.common.ui.plot.axis.ICoordinateSystem;
+import org.dawb.common.ui.plot.axis.ICoordinateSystemListener;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegionContainer;
 import org.dawb.common.ui.plot.region.ROIEvent;
@@ -100,8 +102,7 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 
 	@Override
 	public boolean containsPoint(double x, double y) {
-		final int[] pix = coords.getValuePosition(x,y);
-		return circle.containsPoint(pix[0], pix[1]);
+		return circle.containsPoint((int) x, (int) y);
 	}
 
 	@Override
@@ -113,9 +114,6 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 	protected void updateConnectionBounds() {
 		if (circle != null) {
 			circle.updateFromHandles();
-			Rectangle b = circle.getBounds();
-			if (b != null)
-				circle.setBounds(b);
 		}
 	}
 
@@ -250,7 +248,7 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 
 	class DecoratedCircle extends Shape implements IRegionContainer {
 		private AffineTransform affine; // transforms unit square (origin at top-left corner) to transformed rectangle
-		private PointList box; // bounding box of ellipse
+		private Rectangle box; // bounding box of ellipse
 		private boolean outlineOnly = false;
 
 		private final List<IFigure> handles;
@@ -266,6 +264,13 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 			affine = new AffineTransform();
 			handles = new ArrayList<IFigure>();
 			fTranslators = null;
+			coords.addCoordinateSystemListener(new ICoordinateSystemListener() {
+				
+				@Override
+				public void coordinatesChanged(CoordinateSystemEvent evt) {
+					calcBox(true);
+				}
+			});
 		}
 
 		public DecoratedCircle(Figure parent) {
@@ -307,9 +312,10 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 		 * @param cy
 		 */
 		public void setCentre(double cx, double cy) {
+			affine.setAspectRatio(coords.getAspectRatio());
 			Point oc = affine.getTransformed(centre);
 			affine.setTranslation(affine.getTranslationX() + cx - oc.preciseX(), affine.getTranslationY() + cy - oc.preciseY());
-			calcBox();
+			calcBox(true);
 		}
 
 		/**
@@ -344,32 +350,39 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 		 * @param radius
 		 */
 		public void setRadius(double radius) {
+			affine.setAspectRatio(coords.getAspectRatio());
 			Point oc = affine.getTransformed(centre);
 			affine.setScale(2*radius);
 			Point nc = affine.getTransformed(centre);
 			affine.setTranslation(affine.getTranslationX() + oc.preciseX() - nc.preciseX(), affine.getTranslationY() + oc.preciseY() - nc.preciseY());
-			calcBox();
+			calcBox(true);
 		}
 
-		private void calcBox() {
-			box = affine.getTransformedUnitSquare();
-			setBounds(box.getBounds().expand(2, 0));
+		// do not set to prevent recursive repaint
+		private void calcBox(boolean redraw) {
+			affine.setAspectRatio(coords.getAspectRatio());
+			box = affine.getBounds();
+			if (redraw) {
+				setBounds(box.expand(2, 2));
+			}
 		}
 
 		@Override
 		public void setLocation(Point p) {
 			affine.setTranslation(p.preciseX(), p.preciseY());
-			calcBox();
+			calcBox(true);
 		}
 
 		@Override
 		public boolean containsPoint(int x, int y) {
 			if (outlineOnly) {
-				double d = affine.getInverseTransformed(new PrecisionPoint(x, y)).getDistance(centre);
-				return Math.abs(d - 0.5) < 2./affine.getScaleX();
+				calcBox(false);
+				Point p = affine.getInverseTransformed(new PrecisionPoint(x, y));
+				double d = p.getDistance(centre);
+				return Math.abs(d - 0.5) * affine.getScaleX() < 2.;
 			}
 
-			if (!super.containsPoint(x, y) || !box.polygonContainsPoint(x, y))
+			if (!super.containsPoint(x, y) || !box.contains(x, y))
 				return false;
 
 			Point p = affine.getInverseTransformed(new PrecisionPoint(x, y));
@@ -389,11 +402,10 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 	        graphics.pushState();
 			graphics.setAdvanced(true);
 			graphics.setAntialias(SWT.ON);
-			graphics.translate((int) affine.getTranslationX(), (int) affine.getTranslationY());
-//			graphics.rotate((float) affine.getRotationDegrees());
+			graphics.translate((int) affine.getTranslationX(), (int) (affine.getTranslationY()));
 			// NB do not use Graphics#scale and unit shape as there are precision problems
-			int d = (int)affine.getScaleX();
-			graphics.fillOval(0, 0, d, d);
+			calcBox(false);
+			graphics.fillOval(box);
 			graphics.popState();
 		}
 
@@ -405,11 +417,10 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 			graphics.setAdvanced(true);
 			graphics.setAntialias(SWT.ON);
 
-			graphics.translate((int) affine.getTranslationX(), (int) affine.getTranslationY());
-//			graphics.rotate((float) affine.getRotationDegrees());
+			calcBox(false);
 			// NB do not use Graphics#scale and unit shape as there are precision problems
-			int d = (int)affine.getScaleX();
-			graphics.drawOval(0, 0, d, d);
+			graphics.drawOval(box);
+
 			graphics.popState();
 
 			if (label != null && isShowLabel()) {

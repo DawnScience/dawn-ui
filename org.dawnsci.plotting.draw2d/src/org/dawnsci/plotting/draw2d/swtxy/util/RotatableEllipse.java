@@ -23,7 +23,6 @@ import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Shape;
 import org.eclipse.draw2d.geometry.Point;
-import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
@@ -35,7 +34,7 @@ import org.eclipse.swt.SWT;
 public class RotatableEllipse extends Shape {
 	private static PrecisionPoint centre = new PrecisionPoint(0.5, 0.5);
 	private AffineTransform affine; // transforms unit square (origin at top-left corner) to transformed rectangle
-	private PointList box; // bounding box of ellipse
+	private Rectangle box; // bounding box of ellipse
 	private boolean outlineOnly = false;
 	private boolean showMajorAxis = false;
 
@@ -161,9 +160,17 @@ public class RotatableEllipse extends Shape {
 		calcBox();
 	}
 
+	/**
+	 * Set aspect ratio for y/x scaling
+	 * @param aspect
+	 */
+	public void setAspectRatio(double aspect) {
+		affine.setAspectRatio(aspect);
+	}
+
 	private void calcBox() {
-		box = affine.getTransformedUnitSquare();
-		setBounds(box.getBounds().expand(2, 2));
+		box = affine.getBounds();
+		setBounds(box.expand(2, 2));
 	}
 
 	@Override
@@ -179,7 +186,7 @@ public class RotatableEllipse extends Shape {
 			return Math.abs(d - 0.5) < 2./Math.max(affine.getScaleX(), affine.getScaleY());
 		}
 
-		if (!super.containsPoint(x, y) || !box.polygonContainsPoint(x, y))
+		if (!super.containsPoint(x, y) || !box.contains(x, y))
 			return false;
 
 		Point p = affine.getInverseTransformed(new PrecisionPoint(x, y));
