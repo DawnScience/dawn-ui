@@ -106,10 +106,11 @@ class LineSelection extends AbstractSelectionRegion {
 
 				// Draw the label
 				if (isShowLabel() && label!=null) {
-					gc.setAlpha(255);
+					gc.setAlpha(192);
+					gc.setBackgroundColor(ColorConstants.white);
 					gc.setForegroundColor(ColorConstants.black);
 					gc.setFont(labelFont);
-					gc.drawText(label, startCenter);
+					gc.fillText(label, startCenter.getTranslated(shape.getBounds().width, 0));
 				}
 
 			}

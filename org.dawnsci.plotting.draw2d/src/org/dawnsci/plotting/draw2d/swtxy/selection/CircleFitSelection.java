@@ -221,7 +221,7 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 	}
 
 	private void updateLabel(CircularROI croi) {
-		setLabel(String.format("%.2f", croi.getRadius()));
+		setLabel(String.format("%.2fpx", croi.getRadius()));
 	}
 
 	@Override
@@ -417,10 +417,11 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 		        graphics.setLineStyle(SWT.LINE_DASH);
 				Rectangle r = new Rectangle(getPoint(135), getCentre());
 		        graphics.drawLine(r.getTopLeft(), r.getBottomRight());
-		        graphics.setAlpha(255);
+		        graphics.setAlpha(192);
+				graphics.setBackgroundColor(ColorConstants.white);
 				graphics.setForegroundColor(labelColour);
 				graphics.setFont(labelFont);
-				graphics.drawText(label, r.getCenter().getTranslated(0, -labeldim.height));
+				graphics.fillString(label, r.getCenter().getTranslated(0, -labeldim.height));
 				graphics.popState();
 			}
 		}
