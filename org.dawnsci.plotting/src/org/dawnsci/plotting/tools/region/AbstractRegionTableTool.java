@@ -221,7 +221,7 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 		getSite().getActionBars().getToolBarManager().add(copy);
 		getSite().getActionBars().getMenuManager().add(copy);
 
-		final Action delete = new Action("Delete selected region", Activator.getImageDescriptor("icons/plot-tool-measure-delete.png")) {
+		final Action delete = new Action("Delete selected region", Activator.getImageDescriptor("icons/RegionDelete.png")) {
 			public void run() {
 				if (!isActive()) return;
 				final IStructuredSelection sel = (IStructuredSelection)viewer.getSelection();
