@@ -570,10 +570,6 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 					SelectionHandle h = (SelectionHandle) f;
 					Point p = h.getSelectionPoint();
 					setCentre(p.preciseX(), p.preciseY());
-					double[] parameters = fitter.getParameters();
-					double[] ps   = coords.getPositionValue(p.x(), p.y());
-					parameters[1] = ps[0];
-					parameters[2] = ps[1];
 				}
 			}
 		}
