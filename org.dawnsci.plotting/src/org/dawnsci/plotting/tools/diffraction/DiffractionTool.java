@@ -885,9 +885,9 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			public void regionAdded(RegionEvent evt) {
 				//test if our region
 				if (evt.getRegion() == tmpRegion) {
-					logger.debug("Region added (type: {})", tmpRegion.getRegionType());
+//					logger.debug("Region added (type: {})", tmpRegion.getRegionType());
 					double[] point = tmpRegion.getROI().getPointRef();
-					logger.debug("Clicked here X: {} Y : {}", point[0], point[1]);
+//					logger.debug("Clicked here X: {} Y : {}", point[0], point[1]);
 
 					if (tmpRegion.getRegionType() == RegionType.POINT)
 						getPlottingSystem().removeRegion(tmpRegion);
@@ -908,7 +908,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 				ROIBase r = evt.getROI();
 				if (r instanceof CircularFitROI) {
 					double[] point = r.getPointRef();
-					logger.debug("ROI moved here X: {} Y : {}", point[0], point[1]);
+//					logger.debug("ROI moved here X: {} Y : {}", point[0], point[1]);
 					IDiffractionMetadata data = getDiffractionMetaData();
 					DetectorProperties detprop = data.getDetector2DProperties();
 					detprop.setBeamCentreCoords(point);
