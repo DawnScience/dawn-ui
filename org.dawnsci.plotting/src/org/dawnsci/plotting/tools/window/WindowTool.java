@@ -44,6 +44,7 @@ import org.dawb.common.ui.plot.region.RegionEvent;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
+import org.dawb.common.ui.plot.tool.IToolPageSystem;
 import org.dawb.common.ui.plot.trace.ISurfaceTrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
@@ -64,6 +65,8 @@ import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
  * A tool which has one box region for configuring the region
  * which defines the window of a 3D plot.
  * 
+ * TODO Add ascpect ratio controls like the old windowing tool used to have.
+ * 
  * @author fcp94556
  *
  */
@@ -79,18 +82,14 @@ public class WindowTool extends AbstractToolPage {
  
 	public WindowTool() {
 		try {
-			this.windowSystem = PlottingFactory.createPlottingSystem();
-			this.windowJob      = new WindowJob();
+			this.windowSystem  = PlottingFactory.createPlottingSystem();
+			this.windowJob     = new WindowJob();
 			
-			this.traceListener  = new ITraceListener.Stub() {
+			this.traceListener = new ITraceListener.Stub() {
 				protected void update(TraceEvent evt) {
 					ISurfaceTrace trace = getSurfaceTrace();
 					if (trace!=null) {
-						AbstractDataset data = trace.getData();
-						List<AbstractDataset> axes = trace.getAxes();
-						if (axes!=null) axes = Arrays.asList(axes.get(0), axes.get(1));
-						windowSystem.updatePlot2D(data, axes, null);
-						
+						updateWindowPlot(trace);
 					} else {
 						windowSystem.clear();
 					}
@@ -121,6 +120,14 @@ public class WindowTool extends AbstractToolPage {
 	}
 	
 	
+	protected void updateWindowPlot(ISurfaceTrace trace) {
+		AbstractDataset data = trace.getData();
+		List<AbstractDataset> axes = trace.getAxes();
+		if (axes!=null) axes = Arrays.asList(axes.get(0), axes.get(1));
+		windowSystem.updatePlot2D(data, axes, null);		
+	}
+
+
 	@Override
 	public void activate() {
 		super.activate();
@@ -129,6 +136,12 @@ public class WindowTool extends AbstractToolPage {
 			
 			getPlottingSystem().addTraceListener(traceListener);
 			
+		}
+		if (windowSystem!=null && windowSystem.getPlotComposite()!=null) {
+			
+			final ISurfaceTrace surface = getSurfaceTrace();
+			if (surface!=null) updateWindowPlot(surface);
+
 			windowSystem.addRegionListener(regionListener);
 			
 			final Collection<IRegion> boxes = windowSystem.getRegions(RegionType.BOX);
@@ -139,10 +152,13 @@ public class WindowTool extends AbstractToolPage {
 	@Override
 	public void deactivate() {
 		super.deactivate();
+		
 		if (getPlottingSystem()!=null) {
 			
 			getPlottingSystem().removeTraceListener(traceListener);
 			
+		}
+		if (windowSystem!=null && windowSystem.getPlotComposite()!=null) {
 			windowSystem.removeRegionListener(regionListener);
 			
 			final Collection<IRegion> boxes = windowSystem.getRegions(RegionType.BOX);
@@ -164,6 +180,7 @@ public class WindowTool extends AbstractToolPage {
 		try {
 			final ISurfaceTrace surface = getSurfaceTrace();
 			if (surface!=null) {
+							
 			    final IRegion region = windowSystem.createRegion("Window", RegionType.BOX);
 			    region.setROI(surface.getWindow());
 			    windowSystem.addRegion(region);
@@ -180,6 +197,16 @@ public class WindowTool extends AbstractToolPage {
 	public Control getControl() {
 		return windowSystem.getPlotComposite();
 	}
+	
+	@Override
+	public Object getAdapter(@SuppressWarnings("rawtypes") Class clazz) {
+		if (clazz == IToolPageSystem.class) {
+			return windowSystem;
+		} else {
+			return super.getAdapter(clazz);
+		}
+	}
+
 
 	@Override
 	public void setFocus() {

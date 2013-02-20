@@ -23,14 +23,14 @@ public class JRealityPlotActions {
 	}
 
 	public void createActions() {
-		
-		// Configure
-        createGridLineActions();
-		
+				
 		// Tools
  		actionMan.createToolDimensionalActions(ToolPageRole.ROLE_3D, "org.dawb.workbench.plotting.views.toolPageView.3D");
 
- 		// Zooms
+		// Configure
+        createGridLineActions();
+
+        // Zooms
  		
  		// Others
 	}

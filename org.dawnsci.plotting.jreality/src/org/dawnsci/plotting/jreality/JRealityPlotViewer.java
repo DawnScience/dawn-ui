@@ -205,11 +205,9 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 				surfRoi = (SurfacePlotROI)roi;
 			} else if (roi instanceof RectangularROI) {
 				RectangularROI rroi = (RectangularROI)roi;
-				final int startX = (int)Math.round(rroi.getPointX());
-				final int startY = (int)Math.round(rroi.getPointY());
-				final int roiWidth = (int)Math.round(rroi.getEndPoint()[0])-startX;
-				final int roiHeight = (int)Math.round(rroi.getEndPoint()[1])-startY;
-				surfRoi = new SurfacePlotROI(startX, startY, roiWidth, roiHeight, 0,0,0,0);
+				final int[] start = rroi.getIntPoint();
+				final int[] lens  = rroi.getIntLengths();
+				surfRoi = new SurfacePlotROI(start[0], start[1], start[0]+lens[0], start[1]+lens[1], 0,0,0,0);
 			} else {
 				throw new RuntimeException("The region '"+roi+"' is not supported for windows! Only rectangles are!");
 			}
@@ -267,8 +265,8 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 			final AxisValues zAxis = axes.get(2);
 
 			setAxisModes((xAxis != null && xAxis.isData() ? AxisMode.CUSTOM : AxisMode.LINEAR),
-					(yAxis != null && yAxis.isData() ? AxisMode.CUSTOM : AxisMode.LINEAR),
-					(zAxis != null && zAxis.isData() ? AxisMode.CUSTOM : AxisMode.LINEAR));
+					     (yAxis != null && yAxis.isData() ? AxisMode.CUSTOM : AxisMode.LINEAR),
+					     (zAxis != null && zAxis.isData() ? AxisMode.CUSTOM : AxisMode.LINEAR));
 
 			if (xAxis.isData()) plotter.setXAxisValues(xAxis, 1);
 			if (yAxis.isData()) plotter.setYAxisValues(yAxis);

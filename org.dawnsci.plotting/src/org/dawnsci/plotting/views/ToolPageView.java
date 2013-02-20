@@ -1191,6 +1191,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	private ToolPageRole getViewRole() {
 		if (getSite().getId().endsWith(".1D")) return ToolPageRole.ROLE_1D;
 		if (getSite().getId().endsWith(".2D")) return ToolPageRole.ROLE_2D;
+		if (getSite().getId().endsWith(".3D")) return ToolPageRole.ROLE_3D;
 		return ToolPageRole.ROLE_1D_AND_2D;
 	}
 
@@ -1300,7 +1301,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
              	if (images==null|| images.isEmpty()) { // 1D in this part
             		if (role==ToolPageRole.ROLE_2D) return; // 2D original tool
             	} else { // 2D in this part
-            		if (role==ToolPageRole.ROLE_1D) return; // 1D original tool
+            		if (role!=ToolPageRole.ROLE_2D) return; // 1D original tool
             	}
             }
             
