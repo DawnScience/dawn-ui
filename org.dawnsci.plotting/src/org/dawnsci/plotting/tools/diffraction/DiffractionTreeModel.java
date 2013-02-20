@@ -290,29 +290,6 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 		pitch.setTooltip("Rotation about horizontal axis, in degrees (positive is upwards).");
 		roll = createOrientationNode("Roll", -180, 180, oorientation, orientation, 2, normal);
 		roll.setTooltip("Rotation about normal, in degrees (positive is clockwise).");
-        
-        
-        dist = new NumericNode<Length>("Distance", detectorMeta, SI.MILLIMETER);
-        dist.setTooltip("Distance from sample to beam centre");
-        registerNode(dist);
-        if (detprop!=null) {
-        	dist.setDefault(odetprop.getBeamCentreDistance(), SI.MILLIMETER);
-        	dist.setValue(detprop.getBeamCentreDistance(), SI.MILLIMETER);
-            dist.addAmountListener(new AmountListener<Length>() {
-    			@Override
-    			public void amountChanged(AmountEvent<Length> evt) {
-    				setDistance(detprop, evt.getAmount());
-    			}
-    		});
-        }
-        dist.setEditable(true);
-
-        dist.setIncrement(0.01);
-        dist.setFormat("#0.##");
-        dist.setLowerBound(0);
-        dist.setUpperBound(1000000);
-        dist.setUnits(SI.MILLIMETER, SI.CENTIMETER, SI.METER);
-
 	}
 
 	private void createIntensity() {
@@ -374,6 +351,28 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 				}
 			}
 		});
+        
+        //Moved node SCI-775
+        dist = new NumericNode<Length>("Distance", experimentalInfo, SI.MILLIMETER);
+        dist.setTooltip("Distance from sample to beam centre");
+        registerNode(dist);
+        if (detprop!=null) {
+        	dist.setDefault(odetprop.getBeamCentreDistance(), SI.MILLIMETER);
+        	dist.setValue(detprop.getBeamCentreDistance(), SI.MILLIMETER);
+            dist.addAmountListener(new AmountListener<Length>() {
+    			@Override
+    			public void amountChanged(AmountEvent<Length> evt) {
+    				setDistance(detprop, evt.getAmount());
+    			}
+    		});
+        }
+        dist.setEditable(true);
+
+        dist.setIncrement(0.01);
+        dist.setFormat("#0.##");
+        dist.setLowerBound(0);
+        dist.setUpperBound(1000000);
+        dist.setUnits(SI.MILLIMETER, SI.CENTIMETER, SI.METER);
      
         NumericNode<Angle> start = new NumericNode<Angle>("Oscillation Start", experimentalInfo, NonSI.DEGREE_ANGLE);
         registerNode(start);
