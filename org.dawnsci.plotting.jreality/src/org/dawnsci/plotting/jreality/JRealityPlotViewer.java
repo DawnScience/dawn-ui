@@ -12,6 +12,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JApplet;
 import javax.swing.JPanel;
 
+import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.roi.data.SurfacePlotROI;
@@ -191,29 +192,32 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	 */
 	public void addSurfaceTrace(final ISurfaceTrace trace) {	
 		SurfaceTrace surface = (SurfaceTrace)trace;
-		setMode(PlottingMode.SURF2D);
-		plotter.handleColourCast(surface.createImageData(), graph, surface.getData().min().doubleValue(), surface.getData().max().doubleValue());
-		plot(surface.getData(), surface.createAxisValues(), getWindow(surface.getWindow()), PlottingMode.SURF2D);
+		try {
+			surface.setPlottingSystem((AbstractPlottingSystem)system);
+			graph.setVisible(false);
+			plot(surface.createAxisValues(), getWindow(surface.getWindow()), PlottingMode.SURF2D, surface.getData());
+			plotter.handleColourCast(surface.createImageData(), graph, surface.getData().min().doubleValue(), surface.getData().max().doubleValue());
+		} finally {
+			graph.setVisible(true);
+			refresh(true);
+		}
 		surface.setActive(true);
 	}
 	
 	protected SurfacePlotROI getWindow(ROIBase roi) {
 		if (roi==null) return null;
-		if (currentMode == PlottingMode.SURF2D) {
-			SurfacePlotROI surfRoi = null;
-			if (roi instanceof SurfacePlotROI) {
-				surfRoi = (SurfacePlotROI)roi;
-			} else if (roi instanceof RectangularROI) {
-				RectangularROI rroi = (RectangularROI)roi;
-				final int[] start = rroi.getIntPoint();
-				final int[] lens  = rroi.getIntLengths();
-				surfRoi = new SurfacePlotROI(start[0], start[1], start[0]+lens[0], start[1]+lens[1], 0,0,0,0);
-			} else {
-				throw new RuntimeException("The region '"+roi+"' is not supported for windows! Only rectangles are!");
-			}
-			return surfRoi;
+		SurfacePlotROI surfRoi = null;
+		if (roi instanceof SurfacePlotROI) {
+			surfRoi = (SurfacePlotROI)roi;
+		} else if (roi instanceof RectangularROI) {
+			RectangularROI rroi = (RectangularROI)roi;
+			final int[] start = rroi.getIntPoint();
+			final int[] lens  = rroi.getIntLengths();
+			surfRoi = new SurfacePlotROI(start[0], start[1], start[0]+lens[0], start[1]+lens[1], 0,0,0,0);
+		} else {
+			throw new RuntimeException("The region '"+roi+"' is not supported for windows! Only rectangles are!");
 		}
-		return null;
+		return surfRoi;
 	}
 	
 	public void setWindow(ROIBase window) {
@@ -248,59 +252,69 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	 * @param mode
 	 * @return true if something plotted
 	 */
-	protected final boolean plot(final AbstractDataset  data, 
-			                     final List<AxisValues> axes, 
-			                     final SurfacePlotROI   window,
-			                     final PlottingMode     mode) {
-
-		setMode(mode);
-
-
-		switch(mode) {
-
-		case SURF2D:
-
-			final AxisValues xAxis = axes.get(0);
-			final AxisValues yAxis = axes.get(1);
-			final AxisValues zAxis = axes.get(2);
-
-			setAxisModes((xAxis != null && xAxis.isData() ? AxisMode.CUSTOM : AxisMode.LINEAR),
-					     (yAxis != null && yAxis.isData() ? AxisMode.CUSTOM : AxisMode.LINEAR),
-					     (zAxis != null && zAxis.isData() ? AxisMode.CUSTOM : AxisMode.LINEAR));
-
-			if (xAxis.isData()) plotter.setXAxisValues(xAxis, 1);
-			if (yAxis.isData()) plotter.setYAxisValues(yAxis);
-			if (zAxis.isData()) plotter.setZAxisValues(zAxis);
-
-			setXTickLabelFormat(TickFormatting.roundAndChopMode);
-			setYTickLabelFormat(TickFormatting.roundAndChopMode);
-
-			try {
-				graph.setVisible(false);
-				
-				plotter.setXAxisLabel(xAxis.getName());
-				plotter.setYAxisLabel(yAxis.getName());
-				plotter.setZAxisLabel(zAxis.getName());
-				update(data);
-				setTickGridLines(xcoord, ycoord, zcoord);
-				
-				((DataSet3DPlot3D) plotter).setDataWindow(window);
-				setTitle(data.getName());
-
-			} catch (Throwable e) {
-				throw new RuntimeException(e);
-			} finally {
-				graph.setVisible(true);
-			}
-
+	protected final boolean updatePlot(final List<AxisValues>    axes, 
+						               final SurfacePlotROI      window,
+						               final PlottingMode        mode,
+						               final AbstractDataset...  data) {
+		try {
+			graph.setVisible(false);
+			return plot(axes, window, mode, data);
+		} finally {
+			graph.setVisible(true);
 			refresh(true);
+		}
+	}
 
-			return true;
-		default:
-			return false;
+	
+	/**
+	 * 
+	 * @param data, its name is used for the title
+	 * @param axes Axes values for each axis required, there should be three.
+	 * @param window - may be null
+	 * @param mode
+	 * @return true if something plotted
+	 */
+	private final boolean plot(final List<AxisValues>    axes, 
+			                   final SurfacePlotROI      window,
+			                   final PlottingMode        mode,
+			                   final AbstractDataset...  data) {
+
+		
+		final boolean newMode = setMode(mode);
+
+
+		final AxisValues xAxis = axes.get(0);
+		final AxisValues yAxis = axes.get(1);
+		final AxisValues zAxis = axes.get(2);
+
+		setAxisModes((xAxis != null && xAxis.isData() ? AxisMode.CUSTOM : AxisMode.LINEAR),
+				(yAxis != null && yAxis.isData() ? AxisMode.CUSTOM : AxisMode.LINEAR),
+				(zAxis != null && zAxis.isData() ? AxisMode.CUSTOM : AxisMode.LINEAR));
+
+		if (xAxis.isData()) plotter.setXAxisValues(xAxis, 1);
+		if (yAxis.isData()) plotter.setYAxisValues(yAxis);
+		if (zAxis.isData()) plotter.setZAxisValues(zAxis);
+
+		setXTickLabelFormat(TickFormatting.roundAndChopMode);
+		setYTickLabelFormat(TickFormatting.roundAndChopMode);
+
+		try {
+
+			plotter.setXAxisLabel(xAxis.getName());
+			plotter.setYAxisLabel(yAxis.getName());
+			plotter.setZAxisLabel(zAxis.getName());
+			update(newMode, data);
+			
+			setTickGridLines(xcoord, ycoord, zcoord);
+
+			((DataSet3DPlot3D) plotter).setDataWindow(window);
+			setTitle(data[0].getName());
+
+		} catch (Throwable e) {
+			throw new RuntimeException(e);
 		}
 
-
+		return true;
 	}
 	
 	@Override
@@ -308,13 +322,17 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		viewerApp.getCurrentViewer().render();
 	}
 	
-	private void update(AbstractDataset data) throws Exception {
+	private void update(boolean newMode, IDataset... data) throws Exception {
 		
-		final List<IDataset> sets = Arrays.asList((IDataset)data);
+		final List<IDataset> sets = Arrays.asList(data);
 		checkAndAddLegend(sets);		
 		sanityCheckDataSets(sets);
 
-		graph      = plotter.buildGraph(sets, graph);
+		if (newMode) {
+			graph = plotter.buildGraph(sets, graph);
+		} else {
+			plotter.updateGraph(sets);
+		}
 		
 		if (currentMode == PlottingMode.SURF2D || currentMode == PlottingMode.SCATTER3D) {
 			root.removeChild(bbox);
@@ -681,9 +699,9 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	 * @param newPlotMode
 	 *            the new plotting mode
 	 */
-	private void setMode(PlottingMode newPlotMode) {
+	private boolean setMode(PlottingMode newPlotMode) {
 		
-		if (newPlotMode==currentMode) return;
+		if (newPlotMode==currentMode) return false;
 		removeOldSceneNodes();
 		currentMode = newPlotMode;
 		if (hasJOGL) plotArea.setFocus();
@@ -830,6 +848,8 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		coordYLabels.setVisible(true);	
 		coordZLabels.setVisible(true);
 		coordAxes.setVisible(true);
+		
+		return true;
 	}
 
 	private void buildInfoBox() {

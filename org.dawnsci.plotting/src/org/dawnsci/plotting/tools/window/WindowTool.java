@@ -65,7 +65,7 @@ import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
  * A tool which has one box region for configuring the region
  * which defines the window of a 3D plot.
  * 
- * TODO Add ascpect ratio controls like the old windowing tool used to have.
+ * TODO Add aspect ratio controls like the old windowing tool used to have.
  * 
  * @author fcp94556
  *
