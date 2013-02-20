@@ -17,8 +17,8 @@
 package org.dawnsci.plotting.draw2d.swtxy.util;
 
 import org.eclipse.draw2d.geometry.Point;
-import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.PrecisionPoint;
+import org.eclipse.draw2d.geometry.Rectangle;
 
 /**
  * Represent an affine transformation
@@ -30,9 +30,9 @@ import org.eclipse.draw2d.geometry.PrecisionPoint;
  * ca, sa are cosine and sine of rotation angle (anti-clockwise is positive)
  */
 public class AffineTransform {
-	private double scaleX = 1.0, scaleY = 1.0, dx, dy, cos = 1.0, sin;
+	private double scaleX = 1.0, scaleY = 1.0, dx, dy, cdy, cos = 1.0, sin;
 	private double angle; // in radians (anti-clockwise is positive)
-	private PointList box = new PointList(4);
+	private double ratio = 1.0; // factor for scaling y when aspect ratio is not unity
 
 	@Override
 	protected AffineTransform clone() {
@@ -45,6 +45,10 @@ public class AffineTransform {
 		return a;
 	}
 
+	private void calcCachedDy() {
+		cdy = dy + scaleY * (1 - ratio) * 0.5;
+	}
+
 	/**
 	 * Sets the value for the amount of scaling to be done along both axes.
 	 * 
@@ -53,6 +57,7 @@ public class AffineTransform {
 	 */
 	public void setScale(double scale) {
 		scaleX = scaleY = scale;
+		calcCachedDy();
 	}
 
 	/**
@@ -67,6 +72,7 @@ public class AffineTransform {
 	public void setScale(double x, double y) {
 		scaleX = x;
 		scaleY = y;
+		calcCachedDy();
 	}
 
 	/**
@@ -103,6 +109,16 @@ public class AffineTransform {
 	public void setTranslation(double x, double y) {
 		dx = x;
 		dy = y;
+		calcCachedDy();
+	}
+
+	/**
+	 * Sets the aspect ratio y/x for post-transform point scaling
+	 * @param aspect
+	 */
+	public void setAspectRatio(double aspect) {
+		ratio = aspect;
+		calcCachedDy();
 	}
 
 	public double getScaleX() {
@@ -150,9 +166,9 @@ public class AffineTransform {
 		y = y * cos + x * sin;
 		x = temp;
 		if (p instanceof PrecisionPoint) {
-			return new PrecisionPoint(x + dx, y + dy);
+			return new PrecisionPoint(x + dx, ratio * y + cdy);
 		}
-		return new Point((int) Math.round(x + dx), (int) Math.round(y + dy));
+		return new Point((int) Math.round(x + dx), (int) Math.round(ratio * y + cdy));
 	}
 
 	/**
@@ -165,7 +181,7 @@ public class AffineTransform {
 	 */
 	public Point getInverseTransformed(Point p) {
 		double x = p.preciseX() - dx;
-		double y = p.preciseY() - dy;
+		double y = (p.preciseY() - cdy)/ratio;
 		double temp;
 
 		temp = x * cos + y * sin;
@@ -180,15 +196,17 @@ public class AffineTransform {
 	}
 
 	/**
-	 * Returns a point list of transformed unit square
-	 * @return transformed unit square
+	 * Returns bounding box
+	 * @return bounds
 	 */
-	public PointList getTransformedUnitSquare() {
-		box.removeAllPoints();
-		box.addPoint(getTransformed(new Point(0,0)));
-		box.addPoint(getTransformed(new Point(1,0)));
-		box.addPoint(getTransformed(new Point(1,1)));
-		box.addPoint(getTransformed(new Point(0,1)));
-		return box;
+	public Rectangle getBounds() {
+		Rectangle r = new Rectangle();
+		Point p = getTransformed(new Point(0,0));
+		r.setLocation(p);
+		r.union(p);
+		r.union(getTransformed(new Point(1,0)));
+		r.union(getTransformed(new Point(1,1)));
+		r.union(getTransformed(new Point(0,1)));
+		return r;
 	}
 }

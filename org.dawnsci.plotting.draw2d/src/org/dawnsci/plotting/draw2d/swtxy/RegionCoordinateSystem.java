@@ -19,6 +19,7 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 	private IImageTrace imageTrace;
 	private IAxis x,y;
 	private boolean isDisposed=false;
+	private double aspectRatio = 1.0;
 
 	/**
 	 * 
@@ -30,6 +31,7 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 		this.imageTrace = imageTrace;
 		this.x          = x;
 		this.y          = y;
+		calcAspectRatio();
 	}
 	
 	public IAxis getX() {
@@ -69,8 +71,6 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 		}
 		return new PrecisionPoint(pos[0], pos[1]);
 	}
-
-	private double aspectRatio = 1.0;
 
 	private void calcAspectRatio() {
 		aspectRatio = Math.abs(x.getScaling() / y.getScaling());

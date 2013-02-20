@@ -16,6 +16,7 @@ import org.eclipse.swt.graphics.PaletteData;
 
 import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
 /**
  * A class for holding surface trace data.
@@ -27,14 +28,15 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
  */
 public class SurfaceTrace implements ISurfaceTrace{
 
-	private String                name;
-	private AbstractDataset       data;
-	private List<AbstractDataset> axes;
-	private List<String>          axesNames;
-	private JRealityPlotViewer    plotter;
-	private boolean               active;
-	private PaletteData           palette;
+	private String                 name;
+	private AbstractDataset        data;
+	private List<AbstractDataset>  axes;
+	private List<String>           axesNames;
+	private JRealityPlotViewer     plotter;
+	private boolean                active;
+	private PaletteData            palette;
 	private AbstractPlottingSystem plottingSystem;
+	private ROIBase                window;
 	
 	public SurfaceTrace(JRealityPlotViewer plotter, String name) {
 		this.plotter = plotter;
@@ -83,7 +85,7 @@ public class SurfaceTrace implements ISurfaceTrace{
 		this.data = data;
 		this.axes = axes;
 		if (isActive()) {
-			plotter.plot(getData(), createAxisValues(), PlottingMode.SURF2D);
+			plotter.plot(getData(), createAxisValues(), plotter.getWindow(getWindow()), PlottingMode.SURF2D);
 			
 			if (plottingSystem!=null) {
 				plottingSystem.fireTraceUpdated(new TraceEvent(this));
@@ -197,7 +199,6 @@ public class SurfaceTrace implements ISurfaceTrace{
 
 	private Collection<IPaletteListener> paletteListeners;
 
-
 	@Override
 	public void addPaletteListener(IPaletteListener pl) {
 		if (paletteListeners==null) paletteListeners = new HashSet<IPaletteListener>(11);
@@ -215,6 +216,17 @@ public class SurfaceTrace implements ISurfaceTrace{
 		if (paletteListeners==null) return;
 		final PaletteEvent evt = new PaletteEvent(this, getPaletteData()); // Important do not let Mark get at it :)
 		for (IPaletteListener pl : paletteListeners) pl.paletteChanged(evt);
+	}
+
+	@Override
+	public ROIBase getWindow() {
+		return window;
+	}
+
+	@Override
+	public void setWindow(ROIBase window) {
+		this.window = window;
+		if (plotter!=null && this.isActive()) plotter.setWindow(window);
 	}
 	
 }
