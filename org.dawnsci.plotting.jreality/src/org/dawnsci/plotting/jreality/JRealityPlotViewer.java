@@ -105,7 +105,8 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	private Plot1DGraphTable graphColourTable;
 	private InfoBoxComponent infoBox = null;
 	private boolean hasJOGL;
-	private boolean isInExporting = false;
+	private boolean exporting = false;
+
 	private boolean showScrollBars = true;
 	private LegendComponent legendTable = null;	
 	private boolean donotProcessEvent = false;
@@ -520,7 +521,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	}
 
 	private void refreshInternal(boolean async) {
-		if (!isInExporting) {
+		if (!exporting) {
 			if (viewerApp != null) {
 				if (!async)
 					viewerApp.getCurrentViewer().render();
@@ -1013,6 +1014,62 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		
 	}
 
+	protected void setBoundingBoxEnabled(boolean checked) {
+		if (checked) {
+			bbox = plotter.buildBoundingBox();
+			root.addChild(bbox);
+		} else {
+			root.removeChild(bbox);
+		}
+	}
 
-	
+	protected void resetView() {
+		MatrixBuilder.euclidean().translate(0.0f, 0.0f, 0.0f).assignTo(toolNode);
+		MatrixBuilder.euclidean().translate(0.0f, 0.0f, 0.0f).assignTo(root);
+		if (currentMode == PlottingMode.ONED_THREED || currentMode == PlottingMode.SURF2D) {
+			Camera sceneCamera = CameraUtility.getCamera(viewerApp.getCurrentViewer());
+
+			if (sceneCamera.isPerspective()) {
+				sceneCamera.setFieldOfView(56.5);
+			} else {
+				sceneCamera.setFieldOfView(140.0);
+			}
+		}
+		if (vBar != null) {
+			vBar.setVisible(false);
+			vBar.setMaximum(0);
+			vBar.setMinimum(0);
+			vBar.setIncrement(0);
+		}
+		if (hBar != null) {
+			hBar.setVisible(false);
+			hBar.setMaximum(0);
+			hBar.setMinimum(0);
+			hBar.setIncrement(0);
+		}
+		plotArea.redraw();
+		plotter.resetView();
+	}
+
+	protected boolean isExporting() {
+		return exporting;
+	}
+
+	protected void setExporting(boolean exporting) {
+		this.exporting = exporting;
+	}
+
+	protected AbstractViewerApp getViewer() {
+		return viewerApp;
+	}
+
+	protected PlottingMode getPlottingMode() {
+		return currentMode;
+	}
+
+	protected Plot1DGraphTable getGraphTable() {
+		return graphColourTable;
+	}
+
+
 }
