@@ -1,7 +1,6 @@
 package org.dawnsci.plotting.tools.region;
 
-import java.text.DecimalFormat;
-
+import org.dawb.common.util.number.DoubleUtils;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawnsci.plotting.Activator;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -20,15 +19,12 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 	
 	private int column;
 	private AbstractRegionTableTool tool;
-	private DecimalFormat format;
 	private Image checkedIcon;
 	private Image uncheckedIcon;
 
 	public MeasurementLabelProvider(AbstractRegionTableTool tool, int i) {
 		this.column = i;
 		this.tool   = tool;
-		this.format = new DecimalFormat("0.######E0");
-//		this.format = new DecimalFormat("##0.00e0");
 		ImageDescriptor id = Activator.getImageDescriptor("icons/ticked.png");
 		checkedIcon   = id.createImage();
 		id = Activator.getImageDescriptor("icons/unticked.gif");
@@ -67,7 +63,7 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 					fobj = ((LinearROI)roi).getPoint()[0];
 				else if (roi instanceof RectangularROI)
 					fobj = ((RectangularROI)roi).getPoint()[0];
-				return fobj == null ? NA : formatDouble((Double)fobj);
+				return fobj == null ? NA : DoubleUtils.formatDouble((Double)fobj);
 			case 2: // dx
 				if(roi instanceof LinearROI)
 					fobj = ((LinearROI)roi).getPoint()[1];
@@ -75,7 +71,7 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 					fobj = ((RectangularROI)roi).getPoint()[1];
 				else
 					;
-				return fobj == null ? NA : formatDouble((Double)fobj);
+				return fobj == null ? NA : DoubleUtils.formatDouble((Double)fobj);
 			case 3: // dy
 				if(roi instanceof LinearROI)
 					fobj = ((LinearROI)roi).getEndPoint()[0];
@@ -83,7 +79,7 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 					fobj = ((RectangularROI)roi).getEndPoint()[0];
 				else
 					;
-				return fobj == null ? NA : formatDouble((Double)fobj);
+				return fobj == null ? NA : DoubleUtils.formatDouble((Double)fobj);
 			case 4: // length
 				if(roi instanceof LinearROI)
 					fobj = ((LinearROI)roi).getEndPoint()[1];
@@ -91,15 +87,15 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 					fobj = ((RectangularROI)roi).getEndPoint()[1];
 				else
 					;
-				return fobj == null ? NA : formatDouble((Double)fobj);
+				return fobj == null ? NA : DoubleUtils.formatDouble((Double)fobj);
 			case 5: // max
 				final double max = tool.getMaxIntensity(region);
-			    if (Double.isNaN(max)) return "-";
-				return formatDouble(max);
+			    if (Double.isNaN(max)) return NA;
+				return DoubleUtils.formatDouble(max);
 			case 6: // sum
 				final double sum = tool.getSum(region);
-				if(Double.isNaN(sum)) return "-";
-				return formatDouble(sum);
+				if(Double.isNaN(sum)) return NA;
+				return DoubleUtils.formatDouble(sum);
 
 			}
 			return "";
@@ -110,35 +106,6 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 			logger.error("Cannot get value in info table", ne);
 			return "";
 		}
-	}
-
-	/**
-	 * Returns a formatted Double value<br>
-	 * If more than 4 integer, then we display the value in scientific notation
-	 * @param value
-	 * @return
-	 * TODO: put the method in a utility class (as it could also be used in AxisPixelROIEditTable)
-	 */
-	private String formatDouble(double value){
-		String result;
-
-		if(((int)value) > 9999 || ((int)value) < -9999)
-			result = format.format(value);
-		else
-			result = String.valueOf(roundDouble(value, 3));
-
-		return result == null ? NA : result;
-	}
-
-	/**
-	 * Method that rounds a value to the n precision decimals
-	 * @param value
-	 * @param precision
-	 * @return double
-	 */
-	private double roundDouble(double value, int precision){
-		int rounder = (int)Math.pow(10, precision);
-		return (double)Math.round(value * rounder) / rounder;
 	}
 
 	public String getToolTipText(Object element) {

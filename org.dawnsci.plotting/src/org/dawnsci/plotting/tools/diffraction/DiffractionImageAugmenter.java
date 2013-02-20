@@ -290,6 +290,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	protected void drawResolutionRings(List<ResolutionRing> ringList, String typeName, Object marker) {
 		
 		final List<IRegion> existing = getRegions(marker);
+		if (existing == null) return;
 		for (IRegion iRegion : existing) iRegion.setVisible(false);
 		int nExisting = existing.size();
 		int nRings = ringList.size();

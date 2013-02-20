@@ -332,7 +332,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			IMetaData mdImage = imageTrace.getData().getMetadata();
 			
 			if (mdImage == null || !(mdImage instanceof IDiffractionMetadata)) {
-				//TODO check image dimensions here!!!!
+				//TODO what if the image is rotated?
 				int[] shape = imageTrace.getData().getShape();
 				
 				if (shape[0] == lockedMeta.getDetector2DProperties().getPx() &&
@@ -476,7 +476,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 					wd.setTitle(wiz.getWindowTitle());
 					wd.open();
 				} catch (Exception e) {
-					logger.error("Problem opening import!", e);
+					logger.error("Problem opening export!", e);
 				}
 			}			
 		};
@@ -493,8 +493,6 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 				}
 			}			
 		};
-		
-		
 		
 		final Action showDefault = new Action("Show the original/default value column", Activator.getImageDescriptor("icons/plot-tool-diffraction-default.gif")) {
 			public void run() {
@@ -919,7 +917,6 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			}
 		};
 	}
-
 
 	@Override
 	public Control getControl() {
