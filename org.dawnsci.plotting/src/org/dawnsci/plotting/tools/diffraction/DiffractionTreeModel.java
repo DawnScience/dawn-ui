@@ -26,7 +26,9 @@ import org.jscience.physics.amount.Amount;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorPropertyEvent;
 import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
+import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironmentEvent;
 import uk.ac.diamond.scisoft.analysis.diffraction.IDetectorPropertyListener;
+import uk.ac.diamond.scisoft.analysis.diffraction.IDiffractionCrystalEnvironmentListener;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 
@@ -49,7 +51,8 @@ public class DiffractionTreeModel extends AbstractNodeModel {
     	
 	private Unit<Length>               xpixel, ypixel;
 	private NumericNode<Dimensionless> max,min,mean;
-	private NumericNode<Length>        beamX, beamY;
+	private NumericNode<Length>        beamX, beamY, dist, xPixelSize,yPixelSize;
+	private NumericNode<Length>        lambda,xSize,ySize;
 	private final IDiffractionMetadata metaData;
 	
 	private boolean isActive=false;
@@ -70,6 +73,12 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 		if (detector != null) {
 			detector.addDetectorPropertyListener(detectorListener);
 		}
+		
+		DiffractionCrystalEnvironment dce = getCrystalEnvironment();
+		if (dce != null) {
+			if (environmentListener != null)
+				dce.addDiffractionCrystalEnvironmentListener(environmentListener);
+		}
 	}
 	
 	public void deactivate() {
@@ -78,6 +87,12 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 		if (detector != null) {
 			if (detectorListener != null)
 				detector.removeDetectorPropertyListener(detectorListener);
+		}
+		
+		DiffractionCrystalEnvironment dce = getCrystalEnvironment();
+		if (dce != null) {
+			if (environmentListener != null)
+				dce.removeDiffractionCrystalEnvironmentListener(environmentListener);
 		}
 	}
 
@@ -99,6 +114,7 @@ public class DiffractionTreeModel extends AbstractNodeModel {
         // TODO listen to other things, for instance refine when it
         // is available may change other values.
         createDetectorListener(detprop);
+        createEnvironmentListener(dce);
 	}
 	
 	private DetectorProperties getDetectorProperties() {
@@ -178,23 +194,23 @@ public class DiffractionTreeModel extends AbstractNodeModel {
         
         final LabelNode size = new LabelNode("Size", detectorMeta);
         registerNode(size);
-        NumericNode<Length> x  = new NumericNode<Length>("x", size, SI.MILLIMETER);
-        registerNode(x);
+        xSize  = new NumericNode<Length>("x", size, SI.MILLIMETER);
+        registerNode(xSize);
         if (detprop!=null) {
-        	x.setDefault(odetprop.getDetectorSizeH(), SI.MILLIMETER);
-        	x.setValue(detprop.getDetectorSizeH(), SI.MILLIMETER);
+        	xSize.setDefault(odetprop.getDetectorSizeH(), SI.MILLIMETER);
+        	xSize.setValue(detprop.getDetectorSizeH(), SI.MILLIMETER);
         }
-        NumericNode<Length> y  = new NumericNode<Length>("y", size, SI.MILLIMETER);
-        registerNode(y);
+        ySize  = new NumericNode<Length>("y", size, SI.MILLIMETER);
+        registerNode(ySize);
         if (detprop!=null) {
-        	y.setDefault(odetprop.getDetectorSizeV(), SI.MILLIMETER);
-        	y.setValue(detprop.getDetectorSizeV(), SI.MILLIMETER);
+        	ySize.setDefault(odetprop.getDetectorSizeV(), SI.MILLIMETER);
+        	ySize.setValue(detprop.getDetectorSizeV(), SI.MILLIMETER);
         }
 
         final LabelNode pixel = new LabelNode("Pixel", detectorMeta);
         registerNode(pixel);
         
-        final NumericNode<Length> xPixelSize  = new NumericNode<Length>("x-size", pixel, SI.MILLIMETER);
+        xPixelSize  = new NumericNode<Length>("x-size", pixel, SI.MILLIMETER);
         registerNode(xPixelSize);
         if (detprop!=null) {
            	xPixelSize.setDefault(odetprop.getHPxSize(), SI.MILLIMETER);
@@ -202,7 +218,7 @@ public class DiffractionTreeModel extends AbstractNodeModel {
         	xPixelSize.addAmountListener(new AmountListener<Length>() {				
 				@Override
 				public void amountChanged(AmountEvent<Length> evt) {
-					detprop.setHPxSize(evt.getAmount().doubleValue(SI.MILLIMETER));
+					setXPixelSize(detprop,evt.getAmount());
 				}
 			});
         }
@@ -212,7 +228,7 @@ public class DiffractionTreeModel extends AbstractNodeModel {
         xPixelSize.setLowerBound(0.001);
         xPixelSize.setUpperBound(1000);
 
-        final NumericNode<Length> yPixelSize  = new NumericNode<Length>("y-size", pixel, SI.MILLIMETER);
+        yPixelSize  = new NumericNode<Length>("y-size", pixel, SI.MILLIMETER);
         registerNode(yPixelSize);
         if (detprop!=null) {
         	yPixelSize.setDefault(odetprop.getVPxSize(), SI.MILLIMETER);
@@ -220,7 +236,7 @@ public class DiffractionTreeModel extends AbstractNodeModel {
         	yPixelSize.addAmountListener(new AmountListener<Length>() {				
 				@Override
 				public void amountChanged(AmountEvent<Length> evt) {
-					detprop.setVPxSize(evt.getAmount().doubleValue(SI.MILLIMETER));
+					setYPixelSize(detprop,evt.getAmount());
 				}
 			});
         }
@@ -276,7 +292,7 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 		roll.setTooltip("Rotation about normal, in degrees (positive is clockwise).");
         
         
-        final NumericNode<Length> dist = new NumericNode<Length>("Distance", detectorMeta, SI.MILLIMETER);
+        dist = new NumericNode<Length>("Distance", detectorMeta, SI.MILLIMETER);
         dist.setTooltip("Distance from sample to beam centre");
         registerNode(dist);
         if (detprop!=null) {
@@ -285,7 +301,7 @@ public class DiffractionTreeModel extends AbstractNodeModel {
             dist.addAmountListener(new AmountListener<Length>() {
     			@Override
     			public void amountChanged(AmountEvent<Length> evt) {
-    				detprop.setBeamCentreDistance(evt.getAmount().doubleValue(SI.MILLIMETER));
+    				setDistance(detprop, evt.getAmount());
     			}
     		});
         }
@@ -322,7 +338,7 @@ public class DiffractionTreeModel extends AbstractNodeModel {
         registerNode(experimentalInfo);
         experimentalInfo.setDefaultExpanded(true);
        
-        final NumericNode<Length> lambda = new NumericNode<Length>("Wavelength", experimentalInfo, NonSI.ANGSTROM);
+        lambda = new NumericNode<Length>("Wavelength", experimentalInfo, NonSI.ANGSTROM);
         registerNode(lambda);
         if (dce!=null) {
            	lambda.setDefault(odce.getWavelength(), NonSI.ANGSTROM);
@@ -330,7 +346,7 @@ public class DiffractionTreeModel extends AbstractNodeModel {
         	lambda.addAmountListener(new AmountListener<Length>() {		
 				@Override
 				public void amountChanged(AmountEvent<Length> evt) {
-					dce.setWavelength(lambda.getValue(NonSI.ANGSTROM));
+					setWavelength(dce);
 				}
 			});
         }
@@ -429,42 +445,78 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 		final double[] beamCen = dce.getBeamCentreCoords();
 		beamCen[0] = beamX.doubleValue(xpixel);
 		try {
-			beamCenterActive = false;
+			canUpdate  = false;
 			dce.setBeamCentreCoords(beamCen);
 		} finally {
-			beamCenterActive = true;
+			canUpdate  = true;
 		}
 	}
 	private void setBeamY(DetectorProperties dce, Amount<Length> beamY) {
 		final double[] beamCen = dce.getBeamCentreCoords();
 		beamCen[1] = beamY.doubleValue(ypixel);
 		try {
-			beamCenterActive = false;
+			canUpdate  = false;
 			dce.setBeamCentreCoords(beamCen);
 		} finally {
-			beamCenterActive = true;
+			canUpdate  = true;
+		}
+	}
+	
+	private void setDistance(DetectorProperties dce, Amount<Length> distAmount) {
+		double beamDist = distAmount.doubleValue(SI.MILLIMETER);
+		try {
+			canUpdate  = false;
+			dce.setBeamCentreDistance(beamDist);
+		} finally {
+			canUpdate  = true;
+		}
+	}
+	
+	private void setYPixelSize(DetectorProperties dce, Amount<Length> pixAmount) {
+		double yPixel = pixAmount.doubleValue(SI.MILLIMETER);
+		try {
+			canUpdate  = false;
+			dce.setVPxSize(yPixel);
+			ySize.setValue(dce.getDetectorSizeV(), SI.MILLIMETER);
+			if (viewer!=null) viewer.update(ySize,null);
+		} finally {
+			canUpdate  = true;
+		}
+	}
+	
+	private void setXPixelSize(DetectorProperties dce, Amount<Length> pixAmount) {
+		double xPixel = pixAmount.doubleValue(SI.MILLIMETER);
+		try {
+			canUpdate  = false;
+			dce.setHPxSize(xPixel);
+			xSize.setValue(dce.getDetectorSizeH(), SI.MILLIMETER);
+			if (viewer!=null) viewer.update(xSize,null);
+		} finally {
+			canUpdate  = true;
+		}
+	}
+	
+	private void setWavelength(DiffractionCrystalEnvironment dce) {
+		double wave = lambda.getValue(NonSI.ANGSTROM);
+		try {
+			canUpdate  = false;
+			dce.setWavelength(wave);
+		} finally {
+			canUpdate  = true;
 		}
 	}
 	
 	private IDetectorPropertyListener detectorListener;
-	private boolean                   beamCenterActive=true;
+	private boolean					  canUpdate = true;
 	private void createDetectorListener(final DetectorProperties detprop) {
 		if (detectorListener==null) this.detectorListener = new IDetectorPropertyListener() {
 			
 			@Override
 			public void detectorPropertiesChanged(DetectorPropertyEvent evt) {
 				if (!isActive)         return;
+				if (!canUpdate)        return;
 				if (evt.hasBeamCentreChanged()) {
-					if (!beamCenterActive)
-						return;
-					double[]     cen = detprop.getBeamCentreCoords();
-					Amount<Length> x = Amount.valueOf(cen[0], xpixel);
-					beamX.setValueQuietly(x.to(beamX.getValue().getUnit()));
-					if (viewer!=null) viewer.refresh(beamX); // Cancels cell editing.
-					
-					Amount<Length> y = Amount.valueOf(cen[1], ypixel);
-					beamY.setValueQuietly(y.to(beamY.getValue().getUnit()));
-					if (viewer!=null) viewer.refresh(beamY);  // Cancels cell editing.
+					updateBeamCentre(detprop);
 				} else if (evt.hasNormalChanged()) {
 					double[] angles = detprop.getNormalAnglesInDegrees();
 //					System.err.printf("Detector: %f, %f, %f\n", angles[0], angles[1], angles[2]);
@@ -474,9 +526,46 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 					if (viewer != null) {
 						viewer.update(new Object[] {yaw, pitch, roll}, null);
 					}
+				} else if (evt.hasOriginChanged()) {
+					dist.setValueQuietly(detprop.getBeamCentreDistance(), SI.MILLIMETER);
+					updateBeamCentre(detprop);
+					if (viewer!=null) viewer.refresh(dist);
+				} else if (evt.hasHPxSizeChanged()) {
+					xPixelSize.setValueQuietly(detprop.getVPxSize(), SI.MILLIMETER);
+					if (viewer!=null) viewer.refresh(xPixelSize);
+				} else if (evt.hasVPxSizeChanged()) {
+					yPixelSize.setValueQuietly(detprop.getVPxSize(), SI.MILLIMETER);
+					if (viewer!=null) viewer.refresh(yPixelSize);
 				}
 			}
 		};
+	}
+	
+	private IDiffractionCrystalEnvironmentListener environmentListener;
+	private void createEnvironmentListener(final DiffractionCrystalEnvironment dce) {
+		if (environmentListener==null) this.environmentListener = new IDiffractionCrystalEnvironmentListener() {
+			@Override
+			public void diffractionCrystalEnvironmentChanged(
+					DiffractionCrystalEnvironmentEvent evt) {
+				if (!isActive)         return;
+				if (!canUpdate)        return;
+				if (evt.hasWavelengthChanged()) {
+					lambda.setValueQuietly(dce.getWavelength(), NonSI.ANGSTROM);
+					if (viewer!=null) viewer.refresh(lambda);
+				}
+			}
+		};
+	}
+	
+	private void updateBeamCentre(DetectorProperties detprop) {
+		double[]     cen = detprop.getBeamCentreCoords();
+		Amount<Length> x = Amount.valueOf(cen[0], xpixel);
+		beamX.setValueQuietly(x.to(beamX.getValue().getUnit()));
+		if (viewer!=null) viewer.refresh(beamX); // Cancels cell editing.
+		
+		Amount<Length> y = Amount.valueOf(cen[1], ypixel);
+		beamY.setValueQuietly(y.to(beamY.getValue().getUnit()));
+		if (viewer!=null) viewer.refresh(beamY);  // Cancels cell editing.
 	}
 
 	private UnitListener createPixelFormatListener(final NumericNode<Length> node) {
@@ -532,6 +621,11 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 		if (detprop != null) {
 			if (detectorListener != null)
 				detprop.removeDetectorPropertyListener(detectorListener);
+		}
+		final DiffractionCrystalEnvironment dce = getCrystalEnvironment();
+		if (dce != null) {
+			if (environmentListener != null)
+				dce.removeDiffractionCrystalEnvironmentListener(environmentListener);
 		}
 			
 	}
