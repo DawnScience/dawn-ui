@@ -647,11 +647,19 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 	}
 
 	public void addTrace(ITrace trace) {
+		
 		if (trace instanceof IImageTrace) {
 			system.setPlotType(PlotType.IMAGE); // Only one image allowed at a time
-			final TraceWillPlotEvent evt = new TraceWillPlotEvent(trace, true);
-			system.fireWillPlot(evt);
-			if (!evt.doit) return;
+		} else {
+			system.setPlotType(PlotType.XY);
+		}
+			
+		final TraceWillPlotEvent evt = new TraceWillPlotEvent(trace, true);
+		system.fireWillPlot(evt);
+		if (!evt.doit) return;
+
+		if (trace instanceof IImageTrace) {
+
 			xyGraph.addImageTrace((ImageTrace)trace);
 			removeAdditionalAxes(); // Do not have others with images.
 			
@@ -662,10 +670,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 			}
 
 		} else {
-			system.setPlotType(PlotType.XY);
-			final TraceWillPlotEvent evt = new TraceWillPlotEvent(trace, true);
-			system.fireWillPlot(evt);
-			if (!evt.doit) return;
+			
 			final AspectAxis xAxis = (AspectAxis)getSelectedXAxis();
 			final AspectAxis yAxis = (AspectAxis)getSelectedYAxis();
 			xyGraph.addTrace(((LineTraceImpl)trace).getTrace(), xAxis, yAxis, true);

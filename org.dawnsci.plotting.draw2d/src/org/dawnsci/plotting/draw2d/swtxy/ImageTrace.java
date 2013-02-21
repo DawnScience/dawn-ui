@@ -1227,4 +1227,19 @@ public final class ImageTrace extends Figure implements IImageTrace, IAxisListen
 		this.plottingSystem = plottingSystem;
 	}
 	
+	@Override
+	public boolean isActive() {
+		return getParent()!=null;
+	}
+
+	@Override
+	public List<String> getAxesNames() {
+        return Arrays.asList(xAxis.getTitle(), yAxis.getTitle());
+	}
+
+	@Override
+	public boolean is3DTrace() {
+		return false;
+	}
+	
 }
