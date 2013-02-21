@@ -645,7 +645,8 @@ public class DataSet3DPlot1D implements IDataSet3DCorePlot, AreaSelectListener, 
 			factory.setVertexCoordinates(coords);
 			factory.setVertexLabels(edgeLabels);
 			factory.update();
-			xAxisLabel.setGeometry(factory.getPointSet());
+			PointSet set = factory.getPointSet();
+			if (xAxisLabel!=null && set!=null) xAxisLabel.setGeometry(set);
 		}
 	}
 
@@ -685,7 +686,8 @@ public class DataSet3DPlot1D implements IDataSet3DCorePlot, AreaSelectListener, 
 			factory.setVertexCoordinates(coords);
 			factory.setVertexLabels(edgeLabels);
 			factory.update();
-			yAxisLabel.setGeometry(factory.getPointSet());
+			PointSet set = factory.getPointSet();
+			if (yAxisLabel!=null && set!=null) yAxisLabel.setGeometry(set);
 		}
 	}
 
@@ -1282,6 +1284,9 @@ public class DataSet3DPlot1D implements IDataSet3DCorePlot, AreaSelectListener, 
 			Iterator<AxisValues> axisIter = xAxes.iterator();
 			currentSelectWindow = new SelectedWindow(0, (int) globalXmax, 0, 0);
 			numGraphs = 0;
+			
+			AxisValues xAxisValues = null;
+			
 			while (iter.hasNext()) {
 				IDataset currentDataSet = iter.next();
 				SceneGraphComponent subGraph = SceneGraphUtility.createFullSceneGraphComponent(GRAPHNAMEPREFIX
@@ -1297,8 +1302,8 @@ public class DataSet3DPlot1D implements IDataSet3DCorePlot, AreaSelectListener, 
 				}
 					break;
 				case CUSTOM: {
-					AxisValues xAxis = axisIter.next();
-					subGraph.setGeometry(createGraphGeometry(currentDataSet, xAxis));
+					xAxisValues = axisIter.hasNext() ? axisIter.next() : xAxisValues;
+					subGraph.setGeometry(createGraphGeometry(currentDataSet, xAxisValues));
 				}
 					break;
 				}
@@ -2875,7 +2880,8 @@ public class DataSet3DPlot1D implements IDataSet3DCorePlot, AreaSelectListener, 
 				factory.setVertexCoordinates(coords);
 				factory.setVertexLabels(edgeLabels);
 				factory.update();
-				titleLabel.setGeometry(factory.getPointSet());
+				final PointSet set = factory.getPointSet();
+				if (set!=null && titleLabel!=null) titleLabel.setGeometry(set);
 			}
 		}
 	}

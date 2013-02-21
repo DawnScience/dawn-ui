@@ -106,5 +106,9 @@ public class Plot1DGraphTable {
 	{
 		legendEntries.clear();
 	}
+
+	public int size() {
+		return legendEntries.size();
+	}
 		
 }

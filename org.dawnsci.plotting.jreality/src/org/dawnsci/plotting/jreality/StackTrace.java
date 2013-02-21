@@ -6,7 +6,9 @@ import java.util.List;
 import org.dawb.common.ui.plot.trace.IStackTrace;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 
+import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 
 public class StackTrace extends PlotterTrace implements IStackTrace {
 
@@ -45,6 +47,24 @@ public class StackTrace extends PlotterTrace implements IStackTrace {
 		}
 
 	}
+	
+	@Override
+	protected List<AxisValues> createAxisValues() {
+		
+		final AxisValues xAxis = new AxisValues(getLabel(0), axes!=null?axes.get(0):null);
+		final AxisValues yAxis = new AxisValues(getLabel(1), axes!=null?axes.get(1):null);
+		final AxisValues zAxis;
+		if (getWindow()==null || !(getWindow() instanceof LinearROI)) {
+		    zAxis = new AxisValues(getLabel(2), axes!=null?axes.get(2):null);
+		} else {
+			final int x1 = window.getIntPoint()[0];
+			final int x2 = (int)Math.round(((LinearROI)window).getEndPoint()[0]);
+			final int len = x2-x1;
+			zAxis = new AxisValues(getLabel(2), AbstractDataset.arange(len, AbstractDataset.INT32));
+		}
+		return Arrays.asList(xAxis, yAxis, zAxis);
+	}
+
 	@Override
 	public boolean is3DTrace() {
 		return true;

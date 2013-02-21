@@ -30,7 +30,6 @@ public class SurfaceTrace extends PlotterTrace implements ISurfaceTrace{
 
 	private AbstractDataset        data;
 	private PaletteData            palette;
-	private ROIBase                window;
 	
 	public SurfaceTrace(JRealityPlotViewer plotter, String name) {
 		super(plotter, name);
@@ -121,11 +120,6 @@ public class SurfaceTrace extends PlotterTrace implements ISurfaceTrace{
 		for (IPaletteListener pl : paletteListeners) pl.paletteChanged(evt);
 	}
 
-	@Override
-	public ROIBase getWindow() {
-		return window;
-	}
-
 	/**
 	 * Also ignores data windows outside the data size.
 	 */
@@ -145,7 +139,7 @@ public class SurfaceTrace extends PlotterTrace implements ISurfaceTrace{
 		}
 			
 		this.window = window;
-		if (plotter!=null && this.isActive()) plotter.setWindow(window);
+		if (plotter!=null && this.isActive()) plotter.setSurfaceWindow(window);
 	}
 
 	private int[] normalize(int[] point, int maxX, int maxY) {

@@ -174,6 +174,9 @@ public class DataSet3DPlot1DStack extends DataSet3DPlot1D {
 		globalXmax = -Float.MAX_VALUE;
 		globalRealXmin = Float.MAX_VALUE;
 		globalRealXmax = -Float.MAX_VALUE;
+		
+		AxisValues xAxisValues = null;
+		
 		while (iter.hasNext()) {
 			IDataset set = iter.next();
 			globalYmin = Math.min(globalYmin, set.min().doubleValue());
@@ -191,9 +194,9 @@ public class DataSet3DPlot1DStack extends DataSet3DPlot1D {
 			}
 				break;
 			case CUSTOM: {
-				AxisValues xAxis = axisIter.next();
-				globalRealXmin = Math.min(globalRealXmin, xAxis.getMinValue());
-				globalRealXmax = Math.max(globalRealXmax, xAxis.getMaxValue());
+				xAxisValues = axisIter.hasNext() ? axisIter.next() : xAxisValues;
+				globalRealXmin = Math.min(globalRealXmin, xAxisValues.getMinValue());
+				globalRealXmax = Math.max(globalRealXmax, xAxisValues.getMaxValue());
 			}
 				break;
 			}
@@ -563,7 +566,8 @@ public class DataSet3DPlot1DStack extends DataSet3DPlot1D {
 		factory.setVertexCoordinates(coords);
 		factory.setVertexLabels(edgeLabels);		
 		factory.update();		
-		zAxisLabel.setGeometry(factory.getPointSet());
+		PointSet set = factory.getPointSet();
+		if (zAxisLabel!=null && set!=null) zAxisLabel.setGeometry(set);
 	}
 	
 	@Override

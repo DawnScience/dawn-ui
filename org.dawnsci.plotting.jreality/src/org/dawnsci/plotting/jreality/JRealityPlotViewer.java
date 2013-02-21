@@ -74,6 +74,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 import de.jreality.math.MatrixBuilder;
@@ -172,7 +173,10 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	}
 	
 	public IStackTrace createStackTrace(final String name) {
-		return new StackTrace(this, name);
+		StackTrace stack = new StackTrace(this, name);
+		// No more than 25 in the stack.
+		stack.setWindow(new LinearROI(new double[]{0.0,0.0}, new double[]{25.0,0.0}));
+		return stack;
 	}
 	
 	protected void addStackTrace(final IStackTrace trace) {
@@ -180,7 +184,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		try {
 			stack.setPlottingSystem((AbstractPlottingSystem)system);
 			graph.setVisible(false);
-			plot(stack.createAxisValues(), null, PlottingMode.ONED_THREED, stack.getStack());
+			plot(stack.createAxisValues(), stack.getWindow(), PlottingMode.ONED_THREED, stack.getStack());
 
 			// TODO Colour of lines?
 		} finally {
@@ -294,14 +298,13 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		return surfRoi;
 	}
 	
-	protected void setWindow(ROIBase window) {
+	protected void setSurfaceWindow(ROIBase window) {
 		if (currentMode == PlottingMode.SURF2D) {
 			final SurfacePlotROI surfRoi = getWindow(window);
 			((DataSet3DPlot3D) plotter).setDataWindow(surfRoi);
 			refresh(false);		
 		}
 	}
-
 
 	
 	/**
@@ -313,7 +316,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	 * @return true if something plotted
 	 */
 	protected final boolean updatePlot(final List<AxisValues>    axes, 
-						               final SurfacePlotROI      window,
+						               final ROIBase             window,
 						               final PlottingMode        mode,
 						               final AbstractDataset...  data) {
 		try {
@@ -335,13 +338,24 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	 * @return true if something plotted
 	 */
 	private final boolean plot(final List<AxisValues>    axes, 
-			                   final SurfacePlotROI      window,
+			                   final ROIBase             window,
 			                   final PlottingMode        mode,
-			                   final AbstractDataset...  data) {
+			                   final IDataset...         rawData) {
 
 		
 		final boolean newMode = setMode(mode);
 
+		List<IDataset> data = Arrays.asList(rawData);
+		
+		if (window!=null && window instanceof LinearROI && data.size()>1) {
+			final int x1 = window.getIntPoint()[0];
+			final int x2 = (int)Math.round(((LinearROI)window).getEndPoint()[0]);
+			try {
+				data = data.subList(x1, x2);
+			} catch (Throwable ignored) {
+				// Leave data alone.
+			}
+		}
 
 		final AxisValues xAxis = axes.get(0);
 		final AxisValues yAxis = axes.get(1);
@@ -360,15 +374,17 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 
 		try {
 
-			plotter.setXAxisLabel(xAxis.getName());
-			plotter.setYAxisLabel(yAxis.getName());
-			plotter.setZAxisLabel(zAxis.getName());
 			update(newMode, data);
+			plotter.setXAxisLabel(getName(xAxis.getName(), "x"));
+			plotter.setYAxisLabel(getName(yAxis.getName(), "y"));
+			plotter.setZAxisLabel(getName(zAxis.getName(), "z"));
 			
 			setTickGridLines(xcoord, ycoord, zcoord);
 
-			((DataSet3DPlot3D) plotter).setDataWindow(window);
-			setTitle(data[0].getName());
+			if (window instanceof SurfacePlotROI) {
+			    ((DataSet3DPlot3D) plotter).setDataWindow((SurfacePlotROI)window);
+			}
+			setTitle(data.get(0).getName());
 
 		} catch (Throwable e) {
 			throw new RuntimeException(e);
@@ -377,39 +393,46 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		return true;
 	}
 	
+	private String getName(String name, String defaultName) {
+		if (name!=null && !"".equals(name)) return name;
+		return defaultName;
+	}
+
 	@Override
 	public void paintControl(PaintEvent e) {
 		viewerApp.getCurrentViewer().render();
 	}
 	
-	private void update(boolean newMode, IDataset... data) throws Exception {
+	private void update(boolean newMode, List<IDataset> sets) throws Exception {
 		
-		final List<IDataset> sets = Arrays.asList(data);
-		checkAndAddLegend(sets);		
+    	checkAndAddLegend(sets);		
 		sanityCheckDataSets(sets);
-
+		
 		if (newMode) {
 			graph = plotter.buildGraph(sets, graph);
 		} else {
 			plotter.updateGraph(sets);
 		}
 		
-		if (currentMode == PlottingMode.SURF2D || currentMode == PlottingMode.SCATTER3D) {
+		if (currentMode == PlottingMode.SURF2D     || 
+			currentMode == PlottingMode.SCATTER3D  ||
+			currentMode == PlottingMode.ONED_THREED) {
 			root.removeChild(bbox);
 			bbox = plotter.buildBoundingBox();
 			root.addChild(bbox);
 		}
 	}
 	
-
-	
-	private void checkAndAddLegend(Collection<? extends IDataset> dataSets) {
-		if (currentMode == PlottingMode.ONED || currentMode == PlottingMode.SCATTER2D) {
+	private void checkAndAddLegend(List<? extends IDataset> dataSets) {
+		if (currentMode == PlottingMode.ONED || currentMode == PlottingMode.SCATTER2D || currentMode==PlottingMode.ONED_THREED) {
 			if (dataSets != null && dataSets.size() > graphColourTable.getLegendSize()) {
 				logger.info("# graphs > # of entries in the legend will auto add entries");
 				for (int i = graphColourTable.getLegendSize(); i < dataSets.size(); i++) {
+					
+					final String name = getName(dataSets.get(i).getName(), "");
 					graphColourTable.addEntryOnLegend(new Plot1DAppearance(PlotColorUtility.getDefaultColour(i),
-							PlotColorUtility.getDefaultStyle(i), ""));
+							                                               PlotColorUtility.getDefaultStyle(i), 
+							                                               name));
 				}
 			}
 		}
@@ -776,6 +799,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		viewerApp.getSceneRoot().removeTool(zoomTool);
 		viewerApp.getSceneRoot().removeTool(cameraZoomTool);
 
+		
 		switch (currentMode) {
 		case ONED:
 			MatrixBuilder.euclidean().translate(0.0, 0.0, 0.0).assignTo(toolNode);
@@ -790,9 +814,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 			vBar.setVisible(false);			
 			break;
 		case ONED_THREED:
-			// this might be a bit strange but to make sure
-			// the tool doesn't get added twice first remove
-			// it if it isn't attached it will simply do nothing
+			if (coordAxes!=null) root.removeChild(coordAxes);
 			plotter = new DataSet3DPlot1DStack(viewerApp, plotArea, defaultCursor, graphColourTable, hasJOGL);
 			plotter.buildXCoordLabeling(coordXLabels);
 			plotter.buildYCoordLabeling(coordYLabels);

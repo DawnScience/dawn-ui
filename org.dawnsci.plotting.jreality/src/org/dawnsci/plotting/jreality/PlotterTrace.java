@@ -8,6 +8,7 @@ import org.dawb.common.ui.plot.trace.TraceEvent;
 
 import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
 class PlotterTrace {
 	
@@ -17,6 +18,8 @@ class PlotterTrace {
 	protected JRealityPlotViewer     plotter;
 	protected boolean                active;
 	protected AbstractPlottingSystem plottingSystem;
+	protected ROIBase                window;
+
 
 	public PlotterTrace(JRealityPlotViewer plotter2, String name2) {
 		this.plotter = plotter2;
@@ -48,7 +51,7 @@ class PlotterTrace {
 		return Arrays.asList(xAxis, yAxis, zAxis);
 	}
 
-	private String getLabel(int i) {
+	protected String getLabel(int i) {
 		String label = axesNames!=null ? axesNames.get(i) : null;
 		if  (label==null) label = (axes!=null && axes.get(i)!=null) ? axes.get(i).getName() : null;
 		return label;
@@ -108,6 +111,13 @@ class PlotterTrace {
 
 	public void setPlottingSystem(AbstractPlottingSystem plottingSystem) {
 		this.plottingSystem = plottingSystem;
+	}
+
+    public ROIBase getWindow() {
+		return window;
+	}
+    public void setWindow(ROIBase roi) {
+		window=roi;
 	}
 
 }

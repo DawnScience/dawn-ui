@@ -488,12 +488,16 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	private Map<String, ITrace> traceMap; // Warning can be mem leak
 
 
-	private List<ITrace> createPlot1DInternal(  final AbstractDataset       xIn, 
-										final List<AbstractDataset> ysIn,
-										final String title,
-										final IProgressMonitor      monitor) {
+	private List<ITrace> createPlot1DInternal(final AbstractDataset       xIn, 
+										      final List<AbstractDataset> ysIn,
+										      final String                title,
+										      final IProgressMonitor      monitor) {
 		
-		this.plottingMode = PlotType.XY;
+		if (plottingMode.is1D()) {
+		    this.plottingMode = PlotType.XY;
+		} else {
+			this.plottingMode = PlotType.XY_STACKED_3D;
+		}
 		switchPlottingType(plottingMode);
 
 		if (colorMap == null && getColorOption()!=ColorOption.NONE) {
@@ -505,10 +509,21 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		}
 		if (traceMap==null) traceMap = new LinkedHashMap<String, ITrace>(31);
 	
-		if (lightWeightViewer.getControl()==null) return null;
-		
-		List<ITrace> traces = lightWeightViewer.createLineTraces(title, xIn, ysIn, traceMap, colorMap, monitor);
-
+		List<ITrace> traces=null;
+		if (plottingMode.is1D()) {
+			if (lightWeightViewer.getControl()==null) return null;	
+			traces = lightWeightViewer.createLineTraces(title, xIn, ysIn, traceMap, colorMap, monitor);
+			
+		} else {
+			IStackTrace trace = jrealityViewer.createStackTrace(title);
+			final AbstractDataset x = xIn;
+			final AbstractDataset y = AbstractDataset.arange(getMaxSize(ysIn), AbstractDataset.INT32);
+			final AbstractDataset z = AbstractDataset.arange(ysIn.size(), AbstractDataset.INT32);
+			trace.setData(Arrays.asList(x,y,z), ysIn.toArray(new AbstractDataset[ysIn.size()]));
+			jrealityViewer.addTrace(trace);
+			traces = Arrays.asList((ITrace)trace);
+		}
+		  	
 		fireTracesPlotted(new TraceEvent(traces));
         return traces;
 	}
