@@ -12,8 +12,10 @@ import javax.swing.BoxLayout;
 import javax.swing.JApplet;
 import javax.swing.JPanel;
 
+import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.PlotType;
+import org.dawb.common.ui.plot.roi.data.SurfacePlotROI;
 import org.dawb.common.ui.plot.trace.ISurfaceTrace;
 import org.dawnsci.plotting.jreality.compositing.CompositeEntry;
 import org.dawnsci.plotting.jreality.compositing.CompositingControl;
@@ -69,6 +71,8 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
+import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
@@ -99,6 +103,20 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	protected IDataSet3DCorePlot plotter = null;
 
 	private Plot1DGraphTable graphColourTable;
+	private InfoBoxComponent infoBox = null;
+	private boolean hasJOGL;
+	private boolean exporting = false;
+
+	private boolean showScrollBars = true;
+	private LegendComponent legendTable = null;	
+	private boolean donotProcessEvent = false;
+	private boolean hasJOGLshaders;
+	private PlottingMode currentMode;
+	private boolean useLegend = false;
+	private CompositingControl cmpControl = null;
+	
+	// Jreality
+	private AbstractViewerApp viewerApp;
 	private SceneGraphComponent root;
 	private SceneGraphComponent graph;
 	private SceneGraphComponent coordAxes;
@@ -111,27 +129,18 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	private SceneGraphComponent cameraNode = null;
 	private SceneGraphComponent bbox = null;
 	private CameraRotationTool cameraRotateTool = null;
-	private InfoBoxComponent infoBox = null;
 	private SceneDragTool dragTool = null;
 	private ClickWheelZoomTool zoomTool = null;
-	private boolean hasJOGL;
-	private boolean isInExporting = false;
-	private boolean showScrollBars = true;
-	private LegendComponent legendTable = null;
 	private ClickWheelCameraZoomTool cameraZoomTool = null;
+	private PanningTool panTool = null;
+
+	// SWT
 	private SashForm container;
 	private Composite plotArea;
 	private ScrollBar hBar;
-	private boolean donotProcessEvent = false;
 	private ScrollBar vBar;
 	private Cursor defaultCursor;
-	private AbstractViewerApp viewerApp;
-	private boolean hasJOGLshaders;
-	private PanningTool panTool = null;
-	private PlottingMode currentMode;
-	private boolean useLegend = false;
-	private CompositingControl cmpControl = null;
-	
+
 	private JRealityPlotActions plotActions;
 	private IPlottingSystem     system;
 	
@@ -168,7 +177,9 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	 * @return
 	 */
 	public SurfaceTrace createSurfaceTrace(final String name) {
-  	    return new SurfaceTrace(this, name);
+		SurfaceTrace surface = new SurfaceTrace(this, name);
+		surface.setWindow(new RectangularROI(0, 0, 300, 300, 0));
+		return surface;
 	}
 	
 	/**
@@ -182,11 +193,42 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	 */
 	public void addSurfaceTrace(final ISurfaceTrace trace) {	
 		SurfaceTrace surface = (SurfaceTrace)trace;
-		setMode(PlottingMode.SURF2D);
-		plotter.handleColourCast(surface.createImageData(), graph, surface.getData().min().doubleValue(), surface.getData().max().doubleValue());
-		plot(surface.getData(), surface.createAxisValues(), PlottingMode.SURF2D);
+		try {
+			surface.setPlottingSystem((AbstractPlottingSystem)system);
+			graph.setVisible(false);
+			plot(surface.createAxisValues(), getWindow(surface.getWindow()), PlottingMode.SURF2D, surface.getData());
+			plotter.handleColourCast(surface.createImageData(), graph, surface.getData().min().doubleValue(), surface.getData().max().doubleValue());
+		} finally {
+			graph.setVisible(true);
+			refresh(true);
+		}
 		surface.setActive(true);
 	}
+	
+	protected SurfacePlotROI getWindow(ROIBase roi) {
+		if (roi==null) return null;
+		SurfacePlotROI surfRoi = null;
+		if (roi instanceof SurfacePlotROI) {
+			surfRoi = (SurfacePlotROI)roi;
+		} else if (roi instanceof RectangularROI) {
+			RectangularROI rroi = (RectangularROI)roi;
+			final int[] start = rroi.getIntPoint();
+			final int[] lens  = rroi.getIntLengths();
+			surfRoi = new SurfacePlotROI(start[0], start[1], start[0]+lens[0], start[1]+lens[1], 0,0,0,0);
+		} else {
+			throw new RuntimeException("The region '"+roi+"' is not supported for windows! Only rectangles are!");
+		}
+		return surfRoi;
+	}
+	
+	public void setWindow(ROIBase window) {
+		if (currentMode == PlottingMode.SURF2D) {
+			final SurfacePlotROI surfRoi = getWindow(window);
+			((DataSet3DPlot3D) plotter).setDataWindow(surfRoi);
+			refresh(false);		
+		}
+	}
+
 	
 	/**
 	 * Clear the surface from being plotted.
@@ -207,57 +249,91 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	 * 
 	 * @param data, its name is used for the title
 	 * @param axes Axes values for each axis required, there should be three.
+	 * @param window - may be null
 	 * @param mode
 	 * @return true if something plotted
 	 */
-	protected final boolean plot(final AbstractDataset data, final List<AxisValues> axes, final PlottingMode mode) {
-		
-		setMode(mode);
-		
-		switch(mode) {
-		
-		case SURF2D:
-			final AxisValues xAxis = axes.get(0);
-			final AxisValues yAxis = axes.get(1);
-			final AxisValues zAxis = axes.get(2);
-			
-			setMode(mode); // Does nothing if mode not supported
-			setAxisModes((xAxis != null && xAxis.isData() ? AxisMode.CUSTOM : AxisMode.LINEAR),
-	                     (yAxis != null && yAxis.isData() ? AxisMode.CUSTOM : AxisMode.LINEAR),
-	                     (zAxis != null && zAxis.isData() ? AxisMode.CUSTOM : AxisMode.LINEAR));
-
-			setXAxisValues(xAxis, 1);
-			setYAxisValues(yAxis);
-			setZAxisValues(zAxis);
-			
-			setYTickLabelFormat(TickFormatting.roundAndChopMode);
-			setXTickLabelFormat(TickFormatting.roundAndChopMode);
-
-			try {
-				update(data);
-			} catch (Throwable e) {
-				throw new RuntimeException(e);
-			}
-			setTitle(data.getName());
-			
+	protected final boolean updatePlot(final List<AxisValues>    axes, 
+						               final SurfacePlotROI      window,
+						               final PlottingMode        mode,
+						               final AbstractDataset...  data) {
+		try {
+			graph.setVisible(false);
+			return plot(axes, window, mode, data);
+		} finally {
+			graph.setVisible(true);
 			refresh(true);
-			
-			return true;
-		default:
-			return false;
 		}
+	}
+
+	
+	/**
+	 * 
+	 * @param data, its name is used for the title
+	 * @param axes Axes values for each axis required, there should be three.
+	 * @param window - may be null
+	 * @param mode
+	 * @return true if something plotted
+	 */
+	private final boolean plot(final List<AxisValues>    axes, 
+			                   final SurfacePlotROI      window,
+			                   final PlottingMode        mode,
+			                   final AbstractDataset...  data) {
+
 		
-		
+		final boolean newMode = setMode(mode);
+
+
+		final AxisValues xAxis = axes.get(0);
+		final AxisValues yAxis = axes.get(1);
+		final AxisValues zAxis = axes.get(2);
+
+		setAxisModes((xAxis != null && xAxis.isData() ? AxisMode.CUSTOM : AxisMode.LINEAR),
+				(yAxis != null && yAxis.isData() ? AxisMode.CUSTOM : AxisMode.LINEAR),
+				(zAxis != null && zAxis.isData() ? AxisMode.CUSTOM : AxisMode.LINEAR));
+
+		if (xAxis.isData()) plotter.setXAxisValues(xAxis, 1);
+		if (yAxis.isData()) plotter.setYAxisValues(yAxis);
+		if (zAxis.isData()) plotter.setZAxisValues(zAxis);
+
+		setXTickLabelFormat(TickFormatting.roundAndChopMode);
+		setYTickLabelFormat(TickFormatting.roundAndChopMode);
+
+		try {
+
+			plotter.setXAxisLabel(xAxis.getName());
+			plotter.setYAxisLabel(yAxis.getName());
+			plotter.setZAxisLabel(zAxis.getName());
+			update(newMode, data);
+			
+			setTickGridLines(xcoord, ycoord, zcoord);
+
+			((DataSet3DPlot3D) plotter).setDataWindow(window);
+			setTitle(data[0].getName());
+
+		} catch (Throwable e) {
+			throw new RuntimeException(e);
+		}
+
+		return true;
 	}
 	
-	private void update(AbstractDataset data) throws Exception {
+	@Override
+	public void paintControl(PaintEvent e) {
+		viewerApp.getCurrentViewer().render();
+	}
+	
+	private void update(boolean newMode, IDataset... data) throws Exception {
 		
-        removeOldSceneNodes();
-		final List<IDataset> sets = Arrays.asList((IDataset)data);
+		final List<IDataset> sets = Arrays.asList(data);
 		checkAndAddLegend(sets);		
-		sanityCheckDataSets(sets); // TODO still necessary?
+		sanityCheckDataSets(sets);
 
-		graph = plotter.buildGraph(sets, graph);
+		if (newMode) {
+			graph = plotter.buildGraph(sets, graph);
+		} else {
+			plotter.updateGraph(sets);
+		}
 		
 		if (currentMode == PlottingMode.SURF2D || currentMode == PlottingMode.SCATTER3D) {
 			root.removeChild(bbox);
@@ -280,24 +356,6 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		}
 	}
 	
-	private void setXAxisValues(AxisValues xAxis, int numOfDataSets) {
-		if (plotter != null) {
-			if (xAxis.getName()!=null) plotter.setXAxisLabel(xAxis.getName());
-			if (xAxis.isData()) plotter.setXAxisValues(xAxis, numOfDataSets);
-		}
-	}
-	private void setYAxisValues(AxisValues yAxis) {
-		if (plotter != null) {
-			if (yAxis.getName()!=null) plotter.setYAxisLabel(yAxis.getName());
-			if (yAxis.isData()) plotter.setYAxisValues(yAxis);
-		}
-	}
-	private void setZAxisValues(AxisValues zAxis) {
-		if (plotter != null) {
-			if (zAxis.getName()!=null) plotter.setZAxisLabel(zAxis.getName());
-			if (zAxis.isData()) plotter.setZAxisValues(zAxis);
-		}
-	}
 	private void setXTickLabelFormat(TickFormatting newFormat) {
 		if (plotter != null) plotter.setXAxisLabelMode(newFormat);
 	}
@@ -352,7 +410,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		if (hasJOGL)
 			plotArea = new Composite(container, SWT.DOUBLE_BUFFERED | SWT.V_SCROLL | SWT.H_SCROLL);
 		else
-			plotArea = new Composite(container, SWT.EMBEDDED | SWT.V_SCROLL | SWT.H_SCROLL);
+			plotArea = new Composite(container, SWT.DOUBLE_BUFFERED | SWT.EMBEDDED | SWT.V_SCROLL | SWT.H_SCROLL);
 		hBar = plotArea.getHorizontalBar();
 		hBar.addSelectionListener(this);
 		vBar = plotArea.getVerticalBar();
@@ -463,7 +521,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	}
 
 	private void refreshInternal(boolean async) {
-		if (!isInExporting) {
+		if (!exporting) {
 			if (viewerApp != null) {
 				if (!async)
 					viewerApp.getCurrentViewer().render();
@@ -519,11 +577,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		donotProcessEvent = false;
 	}
 
-	
-	@Override
-	public void paintControl(PaintEvent e) {
-		viewerApp.getCurrentViewer().render();
-	}
+
 
 	@Override
 	public void handleEvent(Event event) {
@@ -646,9 +700,9 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	 * @param newPlotMode
 	 *            the new plotting mode
 	 */
-	private void setMode(PlottingMode newPlotMode) {
+	private boolean setMode(PlottingMode newPlotMode) {
 		
-		if (newPlotMode==currentMode) return;
+		if (newPlotMode==currentMode) return false;
 		removeOldSceneNodes();
 		currentMode = newPlotMode;
 		if (hasJOGL) plotArea.setFocus();
@@ -795,6 +849,8 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		coordYLabels.setVisible(true);	
 		coordZLabels.setVisible(true);
 		coordAxes.setVisible(true);
+		
+		return true;
 	}
 
 	private void buildInfoBox() {
@@ -942,9 +998,14 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		}
 	}
 
+	private boolean xcoord=true, ycoord=true, zcoord=true;
 	public void setTickGridLines(boolean xcoord, boolean ycoord, boolean zcoord) {
 		if (plotter!=null) {
-			plotter.setTickGridLinesActive(xcoord, ycoord, zcoord);		
+			this.xcoord = xcoord;
+			this.ycoord = ycoord;
+			this.zcoord = zcoord;
+			plotter.setTickGridLinesActive(xcoord, ycoord, zcoord);
+			refresh(false);	
 		}
 	}
 	
@@ -953,5 +1014,62 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		
 	}
 
-	
+	protected void setBoundingBoxEnabled(boolean checked) {
+		if (checked) {
+			bbox = plotter.buildBoundingBox();
+			root.addChild(bbox);
+		} else {
+			root.removeChild(bbox);
+		}
+	}
+
+	protected void resetView() {
+		MatrixBuilder.euclidean().translate(0.0f, 0.0f, 0.0f).assignTo(toolNode);
+		MatrixBuilder.euclidean().translate(0.0f, 0.0f, 0.0f).assignTo(root);
+		if (currentMode == PlottingMode.ONED_THREED || currentMode == PlottingMode.SURF2D) {
+			Camera sceneCamera = CameraUtility.getCamera(viewerApp.getCurrentViewer());
+
+			if (sceneCamera.isPerspective()) {
+				sceneCamera.setFieldOfView(56.5);
+			} else {
+				sceneCamera.setFieldOfView(140.0);
+			}
+		}
+		if (vBar != null) {
+			vBar.setVisible(false);
+			vBar.setMaximum(0);
+			vBar.setMinimum(0);
+			vBar.setIncrement(0);
+		}
+		if (hBar != null) {
+			hBar.setVisible(false);
+			hBar.setMaximum(0);
+			hBar.setMinimum(0);
+			hBar.setIncrement(0);
+		}
+		plotArea.redraw();
+		plotter.resetView();
+	}
+
+	protected boolean isExporting() {
+		return exporting;
+	}
+
+	protected void setExporting(boolean exporting) {
+		this.exporting = exporting;
+	}
+
+	protected AbstractViewerApp getViewer() {
+		return viewerApp;
+	}
+
+	protected PlottingMode getPlottingMode() {
+		return currentMode;
+	}
+
+	protected Plot1DGraphTable getGraphTable() {
+		return graphColourTable;
+	}
+
+
 }

@@ -87,7 +87,7 @@ public class CircleSelection extends AbstractSelectionRegion {
 
 	@Override
 	public boolean containsPoint(double x, double y) {
-		final int[] pix = coords.getValuePosition(x,y);
+		final int[] pix = coords.getValuePosition(x, y);
 		return circle.containsPoint(pix[0], pix[1]);
 	}
 
@@ -302,11 +302,11 @@ public class CircleSelection extends AbstractSelectionRegion {
 			
 			graphics.drawOval(rect);
 			if (label != null && isShowLabel()) {
-				graphics.setAlpha(255);
+				graphics.setAlpha(192);
 				graphics.setForegroundColor(labelColour);
+				graphics.setBackgroundColor(ColorConstants.white);
 				graphics.setFont(labelFont);
-				Point p = getPoint(45);
-				graphics.drawText(label, p);
+				graphics.fillString(label, getPoint(45));
 			}
 		}
 

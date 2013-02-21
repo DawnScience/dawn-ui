@@ -332,7 +332,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			IMetaData mdImage = imageTrace.getData().getMetadata();
 			
 			if (mdImage == null || !(mdImage instanceof IDiffractionMetadata)) {
-				//TODO check image dimensions here!!!!
+				//TODO what if the image is rotated?
 				int[] shape = imageTrace.getData().getShape();
 				
 				if (shape[0] == lockedMeta.getDetector2DProperties().getPx() &&
@@ -476,7 +476,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 					wd.setTitle(wiz.getWindowTitle());
 					wd.open();
 				} catch (Exception e) {
-					logger.error("Problem opening import!", e);
+					logger.error("Problem opening export!", e);
 				}
 			}			
 		};
@@ -493,8 +493,6 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 				}
 			}			
 		};
-		
-		
 		
 		final Action showDefault = new Action("Show the original/default value column", Activator.getImageDescriptor("icons/plot-tool-diffraction-default.gif")) {
 			public void run() {
@@ -885,9 +883,9 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			public void regionAdded(RegionEvent evt) {
 				//test if our region
 				if (evt.getRegion() == tmpRegion) {
-					logger.debug("Region added (type: {})", tmpRegion.getRegionType());
+//					logger.debug("Region added (type: {})", tmpRegion.getRegionType());
 					double[] point = tmpRegion.getROI().getPointRef();
-					logger.debug("Clicked here X: {} Y : {}", point[0], point[1]);
+//					logger.debug("Clicked here X: {} Y : {}", point[0], point[1]);
 
 					if (tmpRegion.getRegionType() == RegionType.POINT)
 						getPlottingSystem().removeRegion(tmpRegion);
@@ -908,7 +906,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 				ROIBase r = evt.getROI();
 				if (r instanceof CircularFitROI) {
 					double[] point = r.getPointRef();
-					logger.debug("ROI moved here X: {} Y : {}", point[0], point[1]);
+//					logger.debug("ROI moved here X: {} Y : {}", point[0], point[1]);
 					IDiffractionMetadata data = getDiffractionMetaData();
 					DetectorProperties detprop = data.getDetector2DProperties();
 					detprop.setBeamCentreCoords(point);
@@ -919,7 +917,6 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			}
 		};
 	}
-
 
 	@Override
 	public Control getControl() {

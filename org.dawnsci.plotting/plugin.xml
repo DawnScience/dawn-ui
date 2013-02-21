@@ -95,8 +95,8 @@
             class="org.dawnsci.plotting.tools.profile.ColorBoxProfileTool"
             icon="icons/plot-tool-color-box.png"
             id="org.dawb.workbench.plotting.tools.colorBoxProfileTool"
-            label="Colour Box Profile"
-            tooltip="A tool for showing box profiles of images."
+            label="Perimeter Box Profile"
+            tooltip="A tool for showing box perimeter profiles of images."
             visible="true">
       </plotting_tool_page>
       <plotting_tool_page
@@ -198,6 +198,13 @@
             label="Function Fitting"
             tooltip="Tool for fitting a generic function to some data">
       </plotting_tool_page>
+      <plotting_tool_page
+            class="org.dawnsci.plotting.tools.window.WindowTool"
+            icon="icons/plot-tool-window.png"
+            id="org.dawb.workbench.plotting.tools.windowTool"
+            label="Window"
+            tooltip="A tool to set a window used for 3D plotting.">
+      </plotting_tool_page>
    </extension>
    <extension
          point="org.eclipse.ui.views">
@@ -242,6 +249,10 @@
             name=" "
             restorable="true">
       </view>
+      <category
+            id="org.dawb.workbench.application.data.analysis"
+            name="DAWN">
+      </category>
    </extension>
    <extension
          point="org.eclipse.core.runtime.preferences">

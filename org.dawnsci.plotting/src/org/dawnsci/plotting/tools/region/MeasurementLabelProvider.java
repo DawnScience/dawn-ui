@@ -1,7 +1,6 @@
 package org.dawnsci.plotting.tools.region;
 
-import java.text.DecimalFormat;
-
+import org.dawb.common.util.number.DoubleUtils;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawnsci.plotting.Activator;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -20,14 +19,12 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 	
 	private int column;
 	private AbstractRegionTableTool tool;
-	private DecimalFormat format;
 	private Image checkedIcon;
 	private Image uncheckedIcon;
 
 	public MeasurementLabelProvider(AbstractRegionTableTool tool, int i) {
 		this.column = i;
 		this.tool   = tool;
-		this.format = new DecimalFormat("##0.00E0");
 		ImageDescriptor id = Activator.getImageDescriptor("icons/ticked.png");
 		checkedIcon   = id.createImage();
 		id = Activator.getImageDescriptor("icons/unticked.gif");
@@ -66,9 +63,7 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 					fobj = ((LinearROI)roi).getPoint()[0];
 				else if (roi instanceof RectangularROI)
 					fobj = ((RectangularROI)roi).getPoint()[0];
-				else
-					;
-				return fobj == null ? NA : format.format(fobj);
+				return fobj == null ? NA : DoubleUtils.formatDouble((Double)fobj);
 			case 2: // dx
 				if(roi instanceof LinearROI)
 					fobj = ((LinearROI)roi).getPoint()[1];
@@ -76,7 +71,7 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 					fobj = ((RectangularROI)roi).getPoint()[1];
 				else
 					;
-				return fobj == null ? NA : format.format(fobj);
+				return fobj == null ? NA : DoubleUtils.formatDouble((Double)fobj);
 			case 3: // dy
 				if(roi instanceof LinearROI)
 					fobj = ((LinearROI)roi).getEndPoint()[0];
@@ -84,7 +79,7 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 					fobj = ((RectangularROI)roi).getEndPoint()[0];
 				else
 					;
-				return fobj == null ? NA : format.format(fobj);
+				return fobj == null ? NA : DoubleUtils.formatDouble((Double)fobj);
 			case 4: // length
 				if(roi instanceof LinearROI)
 					fobj = ((LinearROI)roi).getEndPoint()[1];
@@ -92,15 +87,15 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 					fobj = ((RectangularROI)roi).getEndPoint()[1];
 				else
 					;
-				return fobj == null ? NA : format.format(fobj);
+				return fobj == null ? NA : DoubleUtils.formatDouble((Double)fobj);
 			case 5: // max
 				final double max = tool.getMaxIntensity(region);
-			    if (Double.isNaN(max)) return "-";
-				return format.format(max);
+			    if (Double.isNaN(max)) return NA;
+				return DoubleUtils.formatDouble(max);
 			case 6: // sum
 				final double sum = tool.getSum(region);
-				if(Double.isNaN(sum)) return "-";
-				return format.format(sum);
+				if(Double.isNaN(sum)) return NA;
+				return DoubleUtils.formatDouble(sum);
 
 			}
 			return "";
@@ -112,7 +107,7 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 			return "";
 		}
 	}
-	
+
 	public String getToolTipText(Object element) {
 		return "Any selection region can be used in measurement tool. Try box and axis selections as well as line...";
 	}

@@ -47,7 +47,7 @@ public class NexusDiffractionMetaCreator {
 	}
 	
 	/**
-	 * Have enough values to perform downstream calcuations been read (ie exposure time not read)
+	 * Have enough values to perform downstream calculations been read (ie exposure time not read)
 	 */
 	public boolean isPartialRead() {
 		return nexusDiffraction.isPartialRead();

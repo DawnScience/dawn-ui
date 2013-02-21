@@ -38,6 +38,10 @@ import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceContainer;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceWillPlotEvent;
+import org.dawb.common.ui.printing.IPrintImageProvider;
+import org.dawb.common.ui.printing.PlotExportPrintUtil;
+import org.dawb.common.ui.printing.PlotPrintPreviewDialog;
+import org.dawb.common.ui.printing.PrintSettings;
 import org.dawb.gda.extensions.util.DatasetTitleUtils;
 import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.draw2d.swtxy.AspectAxis;
@@ -49,9 +53,6 @@ import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.dawnsci.plotting.draw2d.swtxy.selection.SelectionRegionFactory;
 import org.dawnsci.plotting.preference.PlottingConstants;
-import org.dawnsci.plotting.printing.PlotExportPrintUtil;
-import org.dawnsci.plotting.printing.PlotPrintPreviewDialog;
-import org.dawnsci.plotting.printing.PrintSettings;
 import org.dawnsci.plotting.system.dialog.XYRegionConfigDialog;
 import org.dawnsci.plotting.util.ColorUtility;
 import org.dawnsci.plotting.util.TraceUtils;
@@ -1041,7 +1042,18 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 	@Override
 	public void printPlotting(){
 		if (settings==null) settings = new PrintSettings();
-		PlotPrintPreviewDialog dialog = new PlotPrintPreviewDialog(xyGraph, Display.getDefault(), settings);
+		final IPrintImageProvider prov = new IPrintImageProvider() {
+			@Override
+			public Image getImage(Rectangle size) {
+				return xyGraph.getImage(size);
+			}
+			@Override
+			public Rectangle getBounds() {
+				org.eclipse.draw2d.geometry.Rectangle rect = xyGraph.getBounds();
+				return new Rectangle(rect.x, rect.y, rect.width, rect.height);
+			}			
+		};
+		PlotPrintPreviewDialog dialog = new PlotPrintPreviewDialog(prov, Display.getDefault(), settings);
 		settings=dialog.open();
 	}
 

@@ -812,6 +812,8 @@ public class DataSet3DPlot3D implements IDataSet3DCorePlot {
 	 *            information to build a new displaying dataset
 	 */
 	public void setDataWindow(SurfacePlotROI roi) {
+		
+		if (roi==null) return; // TODO Should probably clear
 		//if (useWindow) {
 			windowStartPosX = roi.getStartX();
 			windowStartPosY = roi.getStartY();
@@ -1313,6 +1315,7 @@ public class DataSet3DPlot3D implements IDataSet3DCorePlot {
 
 	@Override
 	public void setXAxisLabel(String label) {
+		if (label==null) return;
 		if (!label.equals(xAxisLabelStr)) {
 			xAxisLabelStr = label;
 			if (xAxisLabel != null)
@@ -1339,6 +1342,7 @@ public class DataSet3DPlot3D implements IDataSet3DCorePlot {
 
 	@Override
 	public void setYAxisLabel(String label) {
+		if (label==null) return;
 		if (!label.equals(yAxisLabelStr)) {
 			yAxisLabelStr = label;
 			if (yAxisLabel != null)
@@ -1366,6 +1370,7 @@ public class DataSet3DPlot3D implements IDataSet3DCorePlot {
 
 	@Override
 	public void setZAxisLabel(String label) {
+		if (label==null) return;
 		if (!label.equals(zAxisLabelStr)) {
 			zAxisLabelStr = label;
 			if (zAxisLabel != null)
