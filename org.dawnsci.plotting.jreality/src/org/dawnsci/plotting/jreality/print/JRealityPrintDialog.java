@@ -115,8 +115,10 @@ public class JRealityPrintDialog extends Dialog {
 	 * @param settings
 	 *            The input PrintSettings. Will construct a default one if null.
 	 */
-	public JRealityPrintDialog(AbstractViewerApp viewerApp, Display device, Plot1DGraphTable legendTable,
-			PrintSettings settings) {
+	public JRealityPrintDialog(AbstractViewerApp viewerApp, 
+			                   Display           device, 
+			                   Plot1DGraphTable  legendTable,
+			                   PrintSettings     settings) {
 		
 		super(device.getActiveShell());
 		this.display = device;

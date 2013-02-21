@@ -33,6 +33,7 @@ import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
+import org.dawb.common.ui.plot.trace.IStackTrace;
 import org.dawb.common.ui.plot.trace.ISurfaceTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
@@ -563,7 +564,12 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		
 		return trace;
 	}
-
+	
+	@Override
+	public IStackTrace createStackTrace(String traceName) {	
+		return jrealityViewer.createStackTrace(traceName);
+	}
+	
 	protected void switchPlottingType( PlotType type ) {
 		
 		this.plottingMode=type;
@@ -596,13 +602,9 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		if (traceMap==null) this.traceMap = new HashMap<String, ITrace>(7);
 		traceMap.put(trace.getName(), trace);
 		
-		if (trace instanceof ISurfaceTrace) { // TODO FIXME Others?
-			this.plottingMode = PlotType.SURFACE; // Only one surface allowed at a time
-			switchPlottingType(plottingMode);
-			TraceWillPlotEvent evt = new TraceWillPlotEvent(trace, true);
-			fireWillPlot(evt);
-			if (!evt.doit) return;
-			jrealityViewer.addSurfaceTrace((ISurfaceTrace)trace);
+		if (trace.is3DTrace()) {
+			jrealityViewer.addTrace(trace);
+			fireTraceAdded(new TraceEvent(trace));
 			
 		} else { // 1D, an image or LineTrace
 			lightWeightViewer.addTrace(trace);

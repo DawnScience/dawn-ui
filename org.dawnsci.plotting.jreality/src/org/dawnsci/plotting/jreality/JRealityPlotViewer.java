@@ -16,7 +16,10 @@ import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.roi.data.SurfacePlotROI;
+import org.dawb.common.ui.plot.trace.IStackTrace;
 import org.dawb.common.ui.plot.trace.ISurfaceTrace;
+import org.dawb.common.ui.plot.trace.ITrace;
+import org.dawb.common.ui.plot.trace.TraceWillPlotEvent;
 import org.dawnsci.plotting.jreality.compositing.CompositeEntry;
 import org.dawnsci.plotting.jreality.compositing.CompositingControl;
 import org.dawnsci.plotting.jreality.core.AxisMode;
@@ -142,10 +145,10 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	private Cursor defaultCursor;
 
 	private JRealityPlotActions plotActions;
-	private IPlottingSystem     system;
+	private AbstractPlottingSystem     system;
 	
 	public void init(IPlottingSystem system) {
-		this.system = system;
+		this.system = (AbstractPlottingSystem)system;
 	}
 
 	/**
@@ -168,18 +171,38 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		return container;
 	}
 	
+	public IStackTrace createStackTrace(final String name) {
+		return new StackTrace(this, name);
+	}
+	
+	protected void addStackTrace(final IStackTrace trace) {
+		StackTrace stack = (StackTrace)trace;
+		try {
+			stack.setPlottingSystem((AbstractPlottingSystem)system);
+			graph.setVisible(false);
+			plot(stack.createAxisValues(), null, PlottingMode.ONED_THREED, stack.getStack());
+
+			// TODO Colour of lines?
+		} finally {
+			graph.setVisible(true);
+			refresh(true);
+		}
+		stack.setActive(true);
+	}
+	
 	/**
-	 * Create a surface trace to be plotted in 3D.
+	 * Clear the surface from being plotted.
 	 * 
-	 * As soon as you call this the plotting system will switch to surface mode.
+	 * The surface will be deactivated after removal but may be added again later.
 	 * 
 	 * @param name
 	 * @return
+	 * @throws Exception 
 	 */
-	public SurfaceTrace createSurfaceTrace(final String name) {
-		SurfaceTrace surface = new SurfaceTrace(this, name);
-		surface.setWindow(new RectangularROI(0, 0, 300, 300, 0));
-		return surface;
+	public void removeStackTrace(final IStackTrace trace) {
+		StackTrace surface = (StackTrace)trace;
+		removeOldSceneNodes();
+		surface.setActive(false);
 	}
 	
 	/**
@@ -189,9 +212,42 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	 * 
 	 * @param name
 	 * @return
+	 */
+	public ISurfaceTrace createSurfaceTrace(final String name) {
+		SurfaceTrace surface = new SurfaceTrace(this, name);
+		surface.setWindow(new RectangularROI(0, 0, 300, 300, 0));
+		return surface;
+	}
+	
+	public void addTrace(ITrace trace) {
+		
+		if (trace instanceof ISurfaceTrace) {
+			system.setPlotType(PlotType.SURFACE);
+		} else if (trace instanceof IStackTrace) {
+			system.setPlotType(PlotType.XY_STACKED_3D);
+		}
+		TraceWillPlotEvent evt = new TraceWillPlotEvent(trace, true);
+		system.fireWillPlot(evt);
+		if (!evt.doit) return;
+
+		if (trace instanceof ISurfaceTrace) {
+			addSurfaceTrace((ISurfaceTrace)trace);
+		} else if (trace instanceof IStackTrace) {
+			addStackTrace((IStackTrace)trace);
+		}
+ 		
+	}
+
+	/**
+	 * Create a surface trace to be plotted in 3D.
+	 * 
+	 * As soon as you call this the plotting system will switch to surface mode.
+	 * 
+	 * @param name
+	 * @return
 	 * @throws Exception 
 	 */
-	public void addSurfaceTrace(final ISurfaceTrace trace) {	
+	protected void addSurfaceTrace(final ISurfaceTrace trace) {	
 		SurfaceTrace surface = (SurfaceTrace)trace;
 		try {
 			surface.setPlottingSystem((AbstractPlottingSystem)system);
@@ -204,6 +260,23 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		}
 		surface.setActive(true);
 	}
+	
+	/**
+	 * Clear the surface from being plotted.
+	 * 
+	 * The surface will be deactivated after removal but may be added again later.
+	 * 
+	 * @param name
+	 * @return
+	 * @throws Exception 
+	 */
+	public void removeSurfaceTrace(final ISurfaceTrace trace) {
+		SurfaceTrace surface = (SurfaceTrace)trace;
+		removeOldSceneNodes();
+		surface.setActive(false);
+	}
+	
+	//////////////////////////////////////////////////////////////////////////////////////////
 	
 	protected SurfacePlotROI getWindow(ROIBase roi) {
 		if (roi==null) return null;
@@ -221,7 +294,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		return surfRoi;
 	}
 	
-	public void setWindow(ROIBase window) {
+	protected void setWindow(ROIBase window) {
 		if (currentMode == PlottingMode.SURF2D) {
 			final SurfacePlotROI surfRoi = getWindow(window);
 			((DataSet3DPlot3D) plotter).setDataWindow(surfRoi);
@@ -229,21 +302,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		}
 	}
 
-	
-	/**
-	 * Clear the surface from being plotted.
-	 * 
-	 * The surface will be deactivated after removal but may be added again later.
-	 * 
-	 * @param name
-	 * @return
-	 * @throws Exception 
-	 */
-	public void removeSurfaceTrace(final ISurfaceTrace trace) {
-		SurfaceTrace surface = (SurfaceTrace)trace;
-		removeOldSceneNodes();
-		surface.setActive(false);
-	}
+
 	
 	/**
 	 * 
@@ -289,8 +348,8 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		final AxisValues zAxis = axes.get(2);
 
 		setAxisModes((xAxis != null && xAxis.isData() ? AxisMode.CUSTOM : AxisMode.LINEAR),
-				(yAxis != null && yAxis.isData() ? AxisMode.CUSTOM : AxisMode.LINEAR),
-				(zAxis != null && zAxis.isData() ? AxisMode.CUSTOM : AxisMode.LINEAR));
+				     (yAxis != null && yAxis.isData() ? AxisMode.CUSTOM : AxisMode.LINEAR),
+				     (zAxis != null && zAxis.isData() ? AxisMode.CUSTOM : AxisMode.LINEAR));
 
 		if (xAxis.isData()) plotter.setXAxisValues(xAxis, 1);
 		if (yAxis.isData()) plotter.setYAxisValues(yAxis);

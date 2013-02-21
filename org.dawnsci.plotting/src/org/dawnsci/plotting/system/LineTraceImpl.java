@@ -395,4 +395,10 @@ public class LineTraceImpl implements ILineTrace {
 	public String toString() {
 		return trace.getName()+" (Internal name "+trace.getInternalName()+")";
 	}
+	
+	@Override
+	public boolean is3DTrace() {
+		return false;
+	}
+
 }
