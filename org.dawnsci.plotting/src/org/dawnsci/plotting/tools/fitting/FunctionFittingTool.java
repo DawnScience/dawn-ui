@@ -564,7 +564,7 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 				}
 			}
 		}
-		if (viewer != null ) viewer.refresh();
+		if (viewer != null ) refreshViewer();
 	}
 
 	private void updateFittedPlot(final AbstractDataset x,
@@ -752,7 +752,7 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 					fitTrace.setVisible(true);
 
 					getPlottingSystem().repaint();
-					viewer.refresh();
+					refreshViewer();
 				}
 			});
 
@@ -852,9 +852,14 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 			@Override
 			public void run() {
 				getPlottingSystem().repaint();
-				viewer.refresh();
+				refreshViewer();
 			}
 		});
+	}
+	
+	private void refreshViewer() {
+		viewer.setInput(compFunction);
+		viewer.refresh();
 	}
 	
 }
