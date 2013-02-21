@@ -1,10 +1,11 @@
 package org.dawnsci.plotting.tools.fitting;
 
 import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
+import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.function.FunctionDialog;
 import org.dawb.common.ui.plot.region.IROIListener;
 import org.dawb.common.ui.plot.region.IRegion;
@@ -16,9 +17,13 @@ import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.common.ui.plot.trace.TraceWillPlotEvent;
+import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.widgets.FunctionWidget;
+import org.dawb.common.ui.wizard.persistence.PersistenceExportWizard;
+import org.dawb.common.ui.wizard.persistence.PersistenceImportWizard;
 import org.dawb.workbench.jmx.UserPlotBean;
 import org.dawnsci.plotting.Activator;
+import org.eclipse.core.runtime.IPlatformRunnable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -33,7 +38,10 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.wizard.IWizard;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.MouseEvent;
@@ -59,6 +67,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.fitting.Fitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunctionService;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.StraightLine;
 import uk.ac.diamond.scisoft.analysis.optimize.ApacheNelderMead;
 import uk.ac.diamond.scisoft.analysis.optimize.GeneticAlg;
@@ -66,10 +75,8 @@ import uk.ac.diamond.scisoft.analysis.optimize.IOptimizer;
 import uk.ac.diamond.scisoft.analysis.optimize.NelderMead;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 import uk.ac.gda.common.rcp.util.GridUtils;
-import org.eclipse.swt.widgets.Combo;
-import org.eclipse.swt.custom.CCombo;
 
-public class FunctionFittingTool extends AbstractToolPage {
+public class FunctionFittingTool extends AbstractToolPage implements IFunctionService {
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(FunctionFittingTool.class);
@@ -106,6 +113,10 @@ public class FunctionFittingTool extends AbstractToolPage {
 	private Button refitButton;
 
 	private Action duplicateAction;
+
+	private Action importAction;
+
+	private Action exportAction;
 
 	public FunctionFittingTool() {
 
@@ -381,6 +392,42 @@ public class FunctionFittingTool extends AbstractToolPage {
 	}
 	
 	private void createActions() {
+		// export action
+		exportAction = new Action("Export Functions",
+				Activator.getImageDescriptor("icons/mask-export-wiz.png")) {
+			public void run() {
+				try {
+					IWizard wiz = EclipseUtils.openWizard(PersistenceExportWizard.ID, false);
+					WizardDialog wd = new  WizardDialog(Display.getCurrent().getActiveShell(), wiz);
+					wd.setTitle(wiz.getWindowTitle());
+					wd.open();
+				} catch (Exception e) {
+					logger.error("Problem opening import!", e);
+				}
+			}
+		};
+		exportAction
+		.setToolTipText("Export function data from an H5 file");
+		getSite().getActionBars().getToolBarManager().add(exportAction);
+
+		// import action
+		importAction = new Action("Import Functions",
+				Activator.getImageDescriptor("icons/mask-import-wiz.png")) {
+			public void run() {
+				try {
+					IWizard wiz = EclipseUtils.openWizard(PersistenceImportWizard.ID, false);
+					WizardDialog wd = new  WizardDialog(Display.getCurrent().getActiveShell(), wiz);
+					wd.setTitle(wiz.getWindowTitle());
+					wd.open();
+				} catch (Exception e) {
+					logger.error("Problem opening import!", e);
+				}
+			}
+		};
+		importAction
+		.setToolTipText("Import function data from an H5 file");
+		getSite().getActionBars().getToolBarManager().add(importAction);
+
 		// Add Function action
 		addFunctionAction = new Action("Add a new Function",
 				Activator.getImageDescriptor("icons/add.png")) {
@@ -464,7 +511,6 @@ public class FunctionFittingTool extends AbstractToolPage {
 		updateAllAction
 				.setToolTipText("Update the initial parameters to the fitted parameters for All Functions");
 		getSite().getActionBars().getToolBarManager().add(updateAllAction);
-
 	}
 
 	private void updateFunctionPlot() {
@@ -757,4 +803,58 @@ public class FunctionFittingTool extends AbstractToolPage {
 		return bean;
 	}
 
+	@Override
+	public Object getAdapter(Class key) {
+		if (key == IFunctionService.class) return this;
+		return super.getAdapter(key);
+	}
+
+	@Override
+	public Map<String, AFunction> getFunctions() {
+
+		HashMap<String, AFunction> functions = new HashMap<String, AFunction>();
+		
+		if (compFunction != null) {
+			for (int i = 0; i < compFunction.getNoOfFunctions(); i++) {
+				String key = String.format("%03d_initial_%s", i,compFunction.getFunction(i).getName());
+				functions.put(key, compFunction.getFunction(i));
+			}
+		}
+		
+		if(resultFunction != null) {
+			for (int i = 0; i < resultFunction.getNoOfFunctions(); i++) {
+				String key = String.format("%03d_result_%s", i,resultFunction.getFunction(i).getName());
+				functions.put(key, resultFunction.getFunction(i));
+			}
+		}
+		
+		return functions;
+	}
+
+	@Override
+	public void setFunctions(Map<String, AFunction> functions) {
+		// clear the composite function
+		compFunction = new CompositeFunction();
+		for (String key : functions.keySet()) {
+			if (key.contains("_initial_")) {
+				compFunction.addFunction(functions.get(key));
+			}
+		}
+		
+		resultFunction = new CompositeFunction();
+		for (String key : functions.keySet()) {
+			if (key.contains("_result_")) {
+				resultFunction.addFunction(functions.get(key));
+			}
+		}
+		
+		PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				getPlottingSystem().repaint();
+				viewer.refresh();
+			}
+		});
+	}
+	
 }
