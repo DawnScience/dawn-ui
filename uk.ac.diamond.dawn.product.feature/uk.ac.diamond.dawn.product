@@ -53,9 +53,10 @@
    </features>
 
    <configurations>
-      <plugin id="org.dawnsci.persistence" autoStart="true" startLevel="1" />
-      <plugin id="uk.ac.diamond.scisoft" autoStart="true" startLevel="0" />
-      <plugin id="uk.ac.diamond.scisoft.analysis.osgi" autoStart="true" startLevel="1" />
+      <plugin id="org.dawnsci.persistence" autoStart="true" startLevel="2" />
+      <plugin id="uk.ac.diamond.scisoft" autoStart="true" startLevel="1" />
+      <plugin id="uk.ac.diamond.scisoft.analysis" autoStart="true" startLevel="2" />
+      <plugin id="uk.ac.diamond.scisoft.analysis.osgi" autoStart="true" startLevel="2" />
    </configurations>
 
 </product>
