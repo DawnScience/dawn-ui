@@ -244,7 +244,8 @@ public final class ImageTrace extends Figure implements IImageTrace, IAxisListen
 				if (rescaleType==ImageScaleType.REHISTOGRAM) { // Avoids changing colouring to 
 					// max and min of new selection.
 					AbstractDataset  slice     = slice(getXAxis().getRange(), getYAxis().getRange(), getData());
-					ImageServiceBean histoBean = new ImageServiceBean(slice, getHistoType());
+					ImageServiceBean histoBean = imageServiceBean.clone();
+					histoBean.setImage(slice);
 					if (fullMask!=null) histoBean.setMask(slice(getXAxis().getRange(), getYAxis().getRange(), fullMask));
 					float[] fa = service.getFastStatistics(histoBean);
 					
