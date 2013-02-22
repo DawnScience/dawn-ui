@@ -144,18 +144,42 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 						@Override
 						public void run() {
 							List<AbstractDataset> axes = image.getAxes();
-							if(type == BoxLineType.VERTICAL_TYPE){
+							if(axes != null){
+								if(type == BoxLineType.VERTICAL_TYPE){
 
-								updateAxes(traces, boxesLines, axes.get(1), bounds.getPointY());
-								x_trace.setTraceColor(ColorConstants.blue);
-								y_trace.setTraceColor(ColorConstants.red);
+									updateAxes(traces, boxesLines, axes.get(1), bounds.getPointY());
+									x_trace.setTraceColor(ColorConstants.blue);
+									y_trace.setTraceColor(ColorConstants.red);
 
-							} else if (type == BoxLineType.HORIZONTAL_TYPE){
+								} else if (type == BoxLineType.HORIZONTAL_TYPE){
 
-								updateAxes(traces, boxesLines, axes.get(0), bounds.getPointX());
-								x_trace.setTraceColor(ColorConstants.darkGreen);
-								y_trace.setTraceColor(ColorConstants.orange);
+									updateAxes(traces, boxesLines, axes.get(0), bounds.getPointX());
+									x_trace.setTraceColor(ColorConstants.darkGreen);
+									y_trace.setTraceColor(ColorConstants.orange);
 
+								}
+							}
+							else { //if no axes we set them manually according to the data shape
+								int[] shapes = image.getData().getShape();
+								if(type == BoxLineType.VERTICAL_TYPE){
+									int[] verticalAxis = new int[shapes[1]];
+									for(int i = 0; i < verticalAxis.length; i ++){
+										verticalAxis[i] = i;
+									}
+									AbstractDataset vertical = new IntegerDataset(verticalAxis, shapes[1]);
+									updateAxes(traces, boxesLines, vertical, bounds.getPointY());
+									x_trace.setTraceColor(ColorConstants.blue);
+									y_trace.setTraceColor(ColorConstants.red);
+								} else if (type == BoxLineType.HORIZONTAL_TYPE){
+									int[] horizontalAxis = new int[shapes[0]];
+									for(int i = 0; i < horizontalAxis.length; i ++){
+										horizontalAxis[i] = i;
+									}
+									AbstractDataset horizontal = new IntegerDataset(horizontalAxis, shapes[0]);
+									updateAxes(traces, boxesLines, horizontal, bounds.getPointX());
+									x_trace.setTraceColor(ColorConstants.darkGreen);
+									y_trace.setTraceColor(ColorConstants.orange);
+								}
 							}
 						}
 					});
