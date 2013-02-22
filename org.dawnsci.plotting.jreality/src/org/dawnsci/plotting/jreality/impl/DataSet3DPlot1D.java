@@ -1524,6 +1524,7 @@ public class DataSet3DPlot1D implements IDataSet3DCorePlot, AreaSelectListener, 
 			Iterator<SceneGraphComponent> graphIter = subGraphs.iterator();
 			Iterator<Double> offsetIter = offsets.iterator();
 			Iterator<AxisValues> axisIter = xAxes.iterator();
+			AxisValues xAxisValues=null;
 			while (iter.hasNext()) {
 				IDataset dataSet = iter.next();
 				SceneGraphComponent currentGraph = graphIter.next();
@@ -1537,8 +1538,8 @@ public class DataSet3DPlot1D implements IDataSet3DCorePlot, AreaSelectListener, 
 				}
 					break;
 				case CUSTOM: {
-					AxisValues xAxis = axisIter.next();
-					currentGraph.setGeometry(createGraphGeometry(dataSet, xAxis));
+					xAxisValues = axisIter.hasNext() ? axisIter.next() : xAxisValues;
+					currentGraph.setGeometry(createGraphGeometry(dataSet, xAxisValues));
 				}
 					break;
 				}
@@ -1670,8 +1671,8 @@ public class DataSet3DPlot1D implements IDataSet3DCorePlot, AreaSelectListener, 
 				secondaryXAxisTicks.setGeometry(create2ndXTicksGeometry());
 			secondaryAxes.setVisible(true);
 		} else {
-			secondaryAxes.setVisible(false);
-			secondXAxisLabel.setGeometry(null);
+			if (secondaryAxes!=null)    secondaryAxes.setVisible(false);
+			if (secondXAxisLabel!=null) secondXAxisLabel.setGeometry(null);
 		}
 	}
 

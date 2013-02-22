@@ -515,12 +515,14 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			traces = lightWeightViewer.createLineTraces(title, xIn, ysIn, traceMap, colorMap, monitor);
 			
 		} else {
+			traceMap.clear();
 			IStackTrace trace = jrealityViewer.createStackTrace(title);
 			final AbstractDataset x = xIn;
 			final AbstractDataset y = AbstractDataset.arange(getMaxSize(ysIn), AbstractDataset.INT32);
 			final AbstractDataset z = AbstractDataset.arange(ysIn.size(), AbstractDataset.INT32);
 			trace.setData(Arrays.asList(x,y,z), ysIn.toArray(new AbstractDataset[ysIn.size()]));
 			jrealityViewer.addTrace(trace);
+			traceMap.put(trace.getName(), trace);
 			traces = Arrays.asList((ITrace)trace);
 		}
 		  	

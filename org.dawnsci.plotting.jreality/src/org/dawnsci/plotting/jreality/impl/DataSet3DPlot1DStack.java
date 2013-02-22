@@ -294,7 +294,7 @@ public class DataSet3DPlot1DStack extends DataSet3DPlot1D {
 		}
 		updateGraphsZPosition();
 		
-		axis.setGeometry(createAxisGeometry());
+		if (axis!=null) axis.setGeometry(createAxisGeometry());
 		if (zAxisLabelStr != null)
 			generateZLabelGeom();
 		if (zLabels != null)
