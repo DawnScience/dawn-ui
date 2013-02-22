@@ -262,7 +262,7 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 			});
 			mainRegionInfoExpander.setClient(mainRegionComposite);
 			mainRegionInfoExpander.addExpansionListener(expansionAdapter);
-			mainRegionInfoExpander.setExpanded(false);
+			mainRegionInfoExpander.setExpanded(true);
 
 			//vertical xaxis roi
 			ExpandableComposite verticalRegionInfoExpander = new ExpandableComposite(contentComposite, SWT.NONE);
