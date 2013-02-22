@@ -41,3 +41,5 @@ RELEASE NOTES FOR DAWN 1.1 Beta
    * Help->About Dawn.
    * Installation Details' button.
    * On the 'Installed Software' tab, there is a version column.
+   
+11. Workflows are no longer supported on Windows XP, 32-bit.
