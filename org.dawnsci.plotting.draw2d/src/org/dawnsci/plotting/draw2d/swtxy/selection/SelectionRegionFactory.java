@@ -71,7 +71,7 @@ public class SelectionRegionFactory {
 		} else if (regionType==RegionType.BOX) {
 			region = new BoxSelection(name, coords);
 		} else if (regionType==RegionType.PERIMETERBOX) {
-			region = new ColoredBoxSelection(name, coords);
+			region = new PerimeterBoxSelection(name, coords);
 		} else if (regionType==RegionType.GRID) {
 			region = new  GridSelection(name, coords);
 		} else if (regionType==RegionType.SECTOR) {
