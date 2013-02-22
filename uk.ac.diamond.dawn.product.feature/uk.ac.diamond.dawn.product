@@ -16,7 +16,6 @@
 -Xmx2048m
 -XX:PermSize=128m
 -XX:MaxPermSize=256m
--Djava.library.path=${project_loc:uk.ac.gda.libs}/lib/${target.os}-${target.arch}
 -Ddbconnect=config/dbconnect.ispyb.properties
 -Dentry=MyVisitsEntryPoint
 -DidaEmbedded=yes
