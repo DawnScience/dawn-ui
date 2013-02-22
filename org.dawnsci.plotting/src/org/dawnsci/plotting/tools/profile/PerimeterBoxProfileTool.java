@@ -405,11 +405,11 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 	}
 
 	private boolean isRegionTypeSupported(RegionType type) {
-		return (type==RegionType.BOX)||(type==RegionType.COLORBOX)||(type==RegionType.XAXIS)||(type==RegionType.YAXIS);
+		return (type==RegionType.BOX)||(type==RegionType.PERIMETERBOX)||(type==RegionType.XAXIS)||(type==RegionType.YAXIS);
 	}
 
 	private RegionType getCreateRegionType() {
-		return RegionType.COLORBOX;
+		return RegionType.PERIMETERBOX;
 	}
 
 	@Override

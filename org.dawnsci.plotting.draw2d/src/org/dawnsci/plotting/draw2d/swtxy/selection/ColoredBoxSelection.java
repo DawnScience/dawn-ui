@@ -41,7 +41,7 @@ public class ColoredBoxSelection extends BoxSelection {
 	 */
 	ColoredBoxSelection(String name, ICoordinateSystem coords) {
 		super(name, coords);
-		setRegionColor(IRegion.RegionType.COLORBOX.getDefaultColor());	
+		setRegionColor(IRegion.RegionType.PERIMETERBOX.getDefaultColor());	
 		setAlpha(80);
 	}
 
@@ -51,7 +51,7 @@ public class ColoredBoxSelection extends BoxSelection {
 	}
 	@Override
 	public RegionType getRegionType() {
-		return RegionType.COLORBOX;
+		return RegionType.PERIMETERBOX;
 	}	
 	protected Figure createRegionFillFigure() {
 		return new RegionFillFigure(this) {
