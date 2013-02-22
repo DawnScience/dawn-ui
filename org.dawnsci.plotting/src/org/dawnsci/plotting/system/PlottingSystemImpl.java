@@ -493,7 +493,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 										      final String                title,
 										      final IProgressMonitor      monitor) {
 		
-		if (plottingMode.is1D()) {
+		if (plottingMode.is1Dor2D()) {
 		    this.plottingMode = PlotType.XY;
 		} else {
 			this.plottingMode = PlotType.XY_STACKED_3D;

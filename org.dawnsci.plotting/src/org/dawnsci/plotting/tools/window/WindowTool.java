@@ -101,7 +101,7 @@ public class WindowTool extends AbstractToolPage {
 	private IROIListener           roiListener;
 	private ITraceListener         traceListener;
 	private WindowJob              windowJob;
-	private Composite              sliceControl;
+	private Composite              sliceControl, blankComposite;
 	private Composite              content;
  
 	public WindowTool() {
@@ -171,6 +171,8 @@ public class WindowTool extends AbstractToolPage {
 		} else if (trace instanceof IStackTrace) {
 		    stackLayout.topControl = sliceControl;
 		}
+		
+		this.blankComposite = new Composite(content, SWT.BORDER);
         
 	}
 	
@@ -306,7 +308,7 @@ public class WindowTool extends AbstractToolPage {
 		} else {
 		    setActionsEnabled(false);
 			StackLayout stackLayout = (StackLayout)content.getLayout();
-			stackLayout.topControl  = null;
+			stackLayout.topControl  = blankComposite;
 			content.layout();
 		}
 	}
