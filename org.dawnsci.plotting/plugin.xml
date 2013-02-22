@@ -92,9 +92,9 @@
       </plotting_tool_page>
       <plotting_tool_page
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.boxprofile"
-            class="org.dawnsci.plotting.tools.profile.ColorBoxProfileTool"
+            class="org.dawnsci.plotting.tools.profile.PerimeterBoxProfileTool"
             icon="icons/plot-tool-color-box.png"
-            id="org.dawb.workbench.plotting.tools.colorBoxProfileTool"
+            id="org.dawb.workbench.plotting.tools.perimeterBoxProfileTool"
             label="Perimeter Box Profile"
             tooltip="A tool for showing box perimeter profiles of images."
             visible="true">

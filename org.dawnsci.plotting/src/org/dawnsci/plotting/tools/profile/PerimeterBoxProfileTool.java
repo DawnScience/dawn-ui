@@ -65,7 +65,7 @@ import uk.ac.diamond.scisoft.analysis.roi.ROIProfile.BoxLineType;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 /**
- * Colour Box tool that creates a tool page with 3 plotting systems and a composite:<br>
+ * Perimeter Box tool that creates a tool page with 3 plotting systems and a composite:<br>
  * - a zoom profile<br>
  * - an XY plot that shows the line profiles of the vertical edges of the box<br>
  * - an XY plot that show the line profiles of the horizontal edges of the box<br>
@@ -74,9 +74,9 @@ import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
  * @author wqk87977
  *
  */
-public class ColorBoxProfileTool extends AbstractToolPage  implements IROIListener {
+public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROIListener {
 
-	private final static Logger logger = LoggerFactory.getLogger(ColorBoxProfileTool.class);
+	private final static Logger logger = LoggerFactory.getLogger(PerimeterBoxProfileTool.class);
 	
 	private AbstractPlottingSystem zoomProfilePlottingSystem;
 	private AbstractPlottingSystem verticalProfilePlottingSystem;
@@ -100,7 +100,7 @@ public class ColorBoxProfileTool extends AbstractToolPage  implements IROIListen
 
 	private Composite profileContentComposite;
 
-	public ColorBoxProfileTool() {
+	public PerimeterBoxProfileTool() {
 		
 		this.registeredTraces = new HashMap<String,Collection<ITrace>>(7);
 		try {
@@ -128,11 +128,11 @@ public class ColorBoxProfileTool extends AbstractToolPage  implements IROIListen
 						return;
 					}
 					if (getImageTrace()!=null) getImageTrace().addPaletteListener(paletteListener);
-					ColorBoxProfileTool.this.update(null, null, false);
+					PerimeterBoxProfileTool.this.update(null, null, false);
 				}
 				@Override
 				protected void update(TraceEvent evt) {
-					ColorBoxProfileTool.this.update(null, null, false);
+					PerimeterBoxProfileTool.this.update(null, null, false);
 				}
 			};
 
@@ -140,7 +140,7 @@ public class ColorBoxProfileTool extends AbstractToolPage  implements IROIListen
 				@Override
 				public void regionRemoved(RegionEvent evt) {
 					if (evt.getRegion()!=null) {
-						evt.getRegion().removeROIListener(ColorBoxProfileTool.this);
+						evt.getRegion().removeROIListener(PerimeterBoxProfileTool.this);
 					}
 				}
 				@Override
@@ -157,17 +157,17 @@ public class ColorBoxProfileTool extends AbstractToolPage  implements IROIListen
 				@Override
 				public void regionAdded(RegionEvent evt) {
 					if (evt.getRegion()!=null) {
-						ColorBoxProfileTool.this.update(null, null, false);
+						PerimeterBoxProfileTool.this.update(null, null, false);
 					}
 				}
 				@Override
 				public void regionCreated(RegionEvent evt) {
 					if (evt.getRegion()!=null) {
-						evt.getRegion().addROIListener(ColorBoxProfileTool.this);
+						evt.getRegion().addROIListener(PerimeterBoxProfileTool.this);
 					}
 				}
 				protected void update(RegionEvent evt) {
-					ColorBoxProfileTool.this.update(null, null, false);
+					PerimeterBoxProfileTool.this.update(null, null, false);
 				}
 			};
 		} catch (Exception e) {
