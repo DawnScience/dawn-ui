@@ -33,7 +33,7 @@ public class SelectionRegionFactory {
 		SUPPORTED_REGIONS= new HashSet<RegionType>();
 		SUPPORTED_REGIONS.add(RegionType.LINE);
 		SUPPORTED_REGIONS.add(RegionType.BOX);
-		SUPPORTED_REGIONS.add(RegionType.COLORBOX);
+		SUPPORTED_REGIONS.add(RegionType.PERIMETERBOX);
 		SUPPORTED_REGIONS.add(RegionType.GRID);
 		SUPPORTED_REGIONS.add(RegionType.RING);
 		SUPPORTED_REGIONS.add(RegionType.XAXIS);
@@ -70,8 +70,8 @@ public class SelectionRegionFactory {
 			region = new LineSelection(name, coords);
 		} else if (regionType==RegionType.BOX) {
 			region = new BoxSelection(name, coords);
-		} else if (regionType==RegionType.COLORBOX) {
-			region = new ColoredBoxSelection(name, coords);
+		} else if (regionType==RegionType.PERIMETERBOX) {
+			region = new PerimeterBoxSelection(name, coords);
 		} else if (regionType==RegionType.GRID) {
 			region = new  GridSelection(name, coords);
 		} else if (regionType==RegionType.SECTOR) {

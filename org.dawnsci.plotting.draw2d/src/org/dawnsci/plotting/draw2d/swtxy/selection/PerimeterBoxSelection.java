@@ -27,7 +27,7 @@ import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
  *     Normally concrete class of IRegion should not be used
  *     
  */
-public class ColoredBoxSelection extends BoxSelection {
+public class PerimeterBoxSelection extends BoxSelection {
 		
 	private Color leftColor = ColorConstants.blue;
 	private Color rightColor = ColorConstants.red;
@@ -39,9 +39,9 @@ public class ColoredBoxSelection extends BoxSelection {
 	 * @param name
 	 * @param coords
 	 */
-	ColoredBoxSelection(String name, ICoordinateSystem coords) {
+	PerimeterBoxSelection(String name, ICoordinateSystem coords) {
 		super(name, coords);
-		setRegionColor(IRegion.RegionType.COLORBOX.getDefaultColor());	
+		setRegionColor(IRegion.RegionType.PERIMETERBOX.getDefaultColor());	
 		setAlpha(80);
 	}
 
@@ -51,7 +51,7 @@ public class ColoredBoxSelection extends BoxSelection {
 	}
 	@Override
 	public RegionType getRegionType() {
-		return RegionType.COLORBOX;
+		return RegionType.PERIMETERBOX;
 	}	
 	protected Figure createRegionFillFigure() {
 		return new RegionFillFigure(this) {
@@ -63,7 +63,7 @@ public class ColoredBoxSelection extends BoxSelection {
 				this.bounds = size.getCopy().expand(5, 5);
 				gc.setAlpha(getAlpha());
 				gc.fillRectangle(size);
-				ColoredBoxSelection.this.drawLabel(gc, size);
+				PerimeterBoxSelection.this.drawLabel(gc, size);
 				drawColoredEdges(gc, size);
 			}
 		};

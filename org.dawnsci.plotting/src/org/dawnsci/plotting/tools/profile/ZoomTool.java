@@ -37,7 +37,7 @@ public class ZoomTool extends ProfileTool {
 
 	@Override
 	protected boolean isRegionTypeSupported(RegionType type) {
-		return type==RegionType.BOX||type==RegionType.COLORBOX;
+		return type==RegionType.BOX||type==RegionType.PERIMETERBOX;
 	}
 
 	@Override
@@ -56,7 +56,7 @@ public class ZoomTool extends ProfileTool {
 		if (monitor.isCanceled()) return;
 		if (image==null) return;
 		
-		if ((region.getRegionType()!=RegionType.BOX)&&(region.getRegionType()!=RegionType.COLORBOX)) return;
+		if ((region.getRegionType()!=RegionType.BOX)&&(region.getRegionType()!=RegionType.PERIMETERBOX)) return;
 
 		final RectangularROI bounds = (RectangularROI) (rbs==null ? region.getROI() : rbs);
 		if (bounds==null) return;

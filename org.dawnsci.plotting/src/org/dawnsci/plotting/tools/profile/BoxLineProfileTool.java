@@ -81,12 +81,12 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 
 	@Override
 	protected boolean isRegionTypeSupported(RegionType type) {
-		return (type==RegionType.BOX)||(type==RegionType.COLORBOX)||(type==RegionType.XAXIS)||(type==RegionType.YAXIS);
+		return (type==RegionType.BOX)||(type==RegionType.PERIMETERBOX)||(type==RegionType.XAXIS)||(type==RegionType.YAXIS);
 	}
 
 	@Override
 	protected RegionType getCreateRegionType() {
-		return RegionType.COLORBOX;
+		return RegionType.PERIMETERBOX;
 	}
 
 	@Override
