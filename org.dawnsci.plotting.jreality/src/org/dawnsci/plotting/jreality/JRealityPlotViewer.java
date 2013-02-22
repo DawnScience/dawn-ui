@@ -104,6 +104,9 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	
 	private static Logger logger = LoggerFactory.getLogger(JRealityPlotViewer.class);
 	
+	// TODO FIXME Too many classwide variables here.
+	// Move into separate deligates to deal with separate things
+	// If this many are really needed, I'll eat my hat.
 	protected IDataSet3DCorePlot plotter = null;
 
 	private Plot1DGraphTable graphColourTable;
@@ -223,6 +226,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		return surface;
 	}
 	
+	private ITrace currentTrace;
 	public void addTrace(ITrace trace) {
 		
 		if (trace instanceof ISurfaceTrace) {
@@ -239,7 +243,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		} else if (trace instanceof IStackTrace) {
 			addStackTrace((IStackTrace)trace);
 		}
- 		
+ 		currentTrace = trace;
 	}
 
 	/**
@@ -304,6 +308,19 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 			((DataSet3DPlot3D) plotter).setDataWindow(surfRoi);
 			refresh(false);		
 		}
+	}
+
+	public void setStackWindow(ROIBase window) {
+		if (currentMode == PlottingMode.ONED_THREED) {
+			final StackTrace stack = (StackTrace)currentTrace;
+			try {
+				graph.setVisible(false);
+				plot(stack.createAxisValues(), stack.getWindow(), PlottingMode.ONED_THREED, stack.getStack());
+			} finally {
+				graph.setVisible(true);
+				refresh(false);
+			}
+		}		
 	}
 
 	

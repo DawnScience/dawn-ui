@@ -49,13 +49,17 @@ import org.dawb.common.ui.plot.trace.IStackTrace;
 import org.dawb.common.ui.plot.trace.ISurfaceTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
+import org.dawb.common.ui.plot.trace.IWindowTrace;
 import org.dawb.common.ui.plot.trace.TraceEvent;
+import org.dawb.common.ui.util.GridUtils;
+import org.dawnsci.plotting.Activator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IContributionManager;
+import org.eclipse.jface.viewers.deferred.SetModel;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.StackLayout;
@@ -67,14 +71,23 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
 import org.mihalis.opal.rangeSlider.RangeSlider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
+import uk.ac.gda.richbeans.ACTIVE_MODE;
+import uk.ac.gda.richbeans.components.scalebox.IntegerBox;
+import uk.ac.gda.richbeans.components.scalebox.NumberBox;
+import uk.ac.gda.richbeans.components.scalebox.RangeBox;
+import uk.ac.gda.richbeans.components.wrappers.SpinnerWrapper;
+import uk.ac.gda.richbeans.event.ValueAdapter;
+import uk.ac.gda.richbeans.event.ValueEvent;
 
 /**
  * A tool which has one box region for configuring the region
@@ -167,67 +180,126 @@ public class WindowTool extends AbstractToolPage {
         
 	}
 	
+	private CLabel      errorLabel;
+	private RangeSlider sliceSlider;
+	private NumberBox   lowerControl, upperControl;
+	private int         lastLower = -1, lastUpper = -1;
+	
 	private Composite createSliceControl() {
 		Composite sliceControl = new Composite(content, SWT.NONE);
 		sliceControl.setLayout(new GridLayout(3, false));
 		
-		final CLabel info = new CLabel(sliceControl, SWT.WRAP);
+		final Label info = new Label(sliceControl, SWT.WRAP);
 		info.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 2));
 		info.setText("Please edit the window of the data, not more than 100 symultaneous plots are allowed in 3D.");
 	
-		final RangeSlider slider = new RangeSlider(sliceControl, SWT.HORIZONTAL);
-		slider.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 2));
-		slider.setMinimum(0);
-		slider.setMaximum(1024);
-		slider.setLowerValue(0);
-		slider.setUpperValue(25);
-		slider.setIncrement(1);
+		sliceSlider = new RangeSlider(sliceControl, SWT.HORIZONTAL);
+		sliceSlider.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 2));
+		sliceSlider.setMinimum(0);
+		sliceSlider.setMaximum(25);
+		sliceSlider.setLowerValue(0);
+		sliceSlider.setUpperValue(25);
+		sliceSlider.setIncrement(1);
 		
-		final Label hLabelLower = new Label(sliceControl, SWT.NONE);
-        hLabelLower.setLayoutData(new GridData(GridData.BEGINNING, GridData.BEGINNING, false, false, 1, 1));
-        hLabelLower.setText("Lower Value:");
-
-        final Text hTextLower = new Text(sliceControl, SWT.BORDER);
-        hTextLower.setLayoutData(new GridData(GridData.FILL, GridData.BEGINNING, false, false, 1, 1));
-        hTextLower.setText(slider.getLowerValue() + "   ");
-        hTextLower.setEnabled(false);
-
-        final Label hLabelUpper = new Label(sliceControl, SWT.NONE);
-        hLabelUpper.setLayoutData(new GridData(GridData.BEGINNING, GridData.BEGINNING, false, false, 1, 1));
-        hLabelUpper.setText("Upper Value:");
-
-        final Text hTextUpper = new Text(sliceControl, SWT.BORDER);
-        hTextUpper.setLayoutData(new GridData(GridData.FILL, GridData.BEGINNING, false, false, 1, 1));
-        hTextUpper.setText(slider.getUpperValue() + "   ");
-        hTextUpper.setEnabled(false);
+		GridData gridData = new GridData(GridData.FILL, GridData.BEGINNING, false, false, 2, 1);
+		gridData.widthHint=100;
+		
+        lowerControl = new IntegerBox(sliceControl, SWT.NONE);
+        lowerControl.setLabel(" Lower    ");
+        lowerControl.setLayoutData(gridData);
+        lowerControl.setIntegerValue(sliceSlider.getLowerValue());
+        lowerControl.setActive(true);
+        lowerControl.on();
+        lowerControl.addValueListener(new ValueAdapter() {			
+			@Override
+			public void valueChangePerformed(ValueEvent e) {
+				sliceSlider.setLowerValue(lowerControl.getIntegerValue());
+				final int lower = sliceSlider.getLowerValue();
+				final int upper = sliceSlider.getUpperValue();
+				if (lower<0 || upper<0)                   return;
+				updateSliceRange(lower, upper, sliceSlider.getMaximum(), false);
+				lastLower = lower;
+				lastUpper = upper;
+			}
+		});
+ 
+        upperControl = new IntegerBox(sliceControl, SWT.NONE);
+        upperControl.setLabel(" Upper    ");
+        upperControl.setLayoutData(gridData);
+        upperControl.setIntegerValue(sliceSlider.getUpperValue());
+        upperControl.setActive(true);
+        upperControl.on();
+        upperControl.addValueListener(new ValueAdapter() {			
+			@Override
+			public void valueChangePerformed(ValueEvent e) {
+				sliceSlider.setUpperValue(upperControl.getIntegerValue());
+				final int lower = sliceSlider.getLowerValue();
+				final int upper = sliceSlider.getUpperValue();
+				if (lower<0 || upper<0)                   return;
+				updateSliceRange(lower, upper, sliceSlider.getMaximum(), false);
+				lastLower = lower;
+				lastUpper = upper;
+			}
+		});
         
-		slider.addMouseMoveListener(new MouseMoveListener() {
+        upperControl.setMinimum(lowerControl);
+        upperControl.setMaximum(25);
+        lowerControl.setMinimum(0);
+        lowerControl.setMaximum(upperControl);
+        
+		errorLabel = new CLabel(sliceControl, SWT.WRAP);
+		errorLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
+		errorLabel.setText("The slice range is too large.");
+		errorLabel.setImage(Activator.getImage("icons/error.png"));
+        
+		sliceSlider.addMouseMoveListener(new MouseMoveListener() {
 			
 			@Override
 			public void mouseMove(MouseEvent e) {
 				if ((e.button & SWT.BUTTON1)==0) {
-					final int lower = slider.getLowerValue();
-					final int upper = slider.getUpperValue();
-					slider.setToolTipText(lower+" <-> "+upper);
-					hTextUpper.setText(String.valueOf(upper));
-					hTextLower.setText(String.valueOf(lower));
-					updateSliceRange(lower, upper);
+					final int lower = sliceSlider.getLowerValue();
+					final int upper = sliceSlider.getUpperValue();
+					if (lower<0 || upper<0)                   return;
+					if (lower==lastLower && upper==lastUpper) return;
+					
+					sliceSlider.setToolTipText("("+sliceSlider.getMinimum()+")  "+lower+" <-> "+upper+"  ("+sliceSlider.getMaximum()+")");
+					upperControl.setIntegerValue(upper);
+					lowerControl.setIntegerValue(lower);
+					updateSliceRange(lower, upper, sliceSlider.getMaximum(), false);
+					
+					lastLower = lower;
+					lastUpper = upper;
 				}
 			}
 		});
 		
 
-
-		
 		return sliceControl;
 	}
 
 	
-	protected void updateSliceRange(int lower, int upper) {
+	protected void updateSliceRange(int lower, int upper, int max, boolean setValue) {
 		if (upper-lower>100) {
-			
+			GridUtils.setVisible(errorLabel, true);
+			errorLabel.getParent().layout();
+			return;
 		}
 		
+		GridUtils.setVisible(errorLabel, false);
+		errorLabel.getParent().layout();
+		
+		if (setValue) { // Send to UI
+			sliceSlider.setMaximum(max);
+			sliceSlider.setLowerValue(lower);
+			sliceSlider.setUpperValue(upper);
+			lowerControl.setIntegerValue(lower);
+			upperControl.setIntegerValue(upper);
+	        upperControl.setMaximum(max);
+		} else {        // Send to region
+			final LinearROI   roi   = new LinearROI(new double[]{lower,0}, new double[]{upper,0});
+			windowJob.schedule(roi);
+		}
+	
 	}
 
 	protected void updateTrace(ITrace trace) {
@@ -269,7 +341,13 @@ public class WindowTool extends AbstractToolPage {
 		
 		StackLayout stackLayout = (StackLayout)content.getLayout();
 		stackLayout.topControl  = sliceControl;
-		// TODO 
+		
+		final LinearROI roi = (LinearROI)trace.getWindow();
+		if (roi!=null) {
+			final int lower = roi.getIntPoint()[0];
+			final int upper = (int)Math.round(((LinearROI)roi).getEndPoint()[0]);
+		    updateSliceRange(lower, upper, trace.getStack().length, true);
+		}
 		content.layout();
 	}
 
@@ -367,14 +445,15 @@ public class WindowTool extends AbstractToolPage {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			
-			final ISurfaceTrace surface = getSurfaceTrace();
-			if (surface!=null) {
+			final IWindowTrace windowTrace = getWindowTrace();
+			if (windowTrace!=null) {
 				Display.getDefault().syncExec(new Runnable() {
 					public void run() {
-						surface.setWindow(window);
+						windowTrace.setWindow(window);
 					}
 				});
 			}
+	
 			return Status.OK_STATUS;
 		}
 		

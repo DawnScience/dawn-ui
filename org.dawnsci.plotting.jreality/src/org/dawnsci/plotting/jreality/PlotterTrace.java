@@ -116,8 +116,5 @@ class PlotterTrace {
     public ROIBase getWindow() {
 		return window;
 	}
-    public void setWindow(ROIBase roi) {
-		window=roi;
-	}
 
 }
