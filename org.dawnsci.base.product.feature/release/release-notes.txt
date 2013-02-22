@@ -3,7 +3,7 @@ RELEASE NOTES FOR DAWN 1.1 Beta
 
 1. Use the '-data' switch to specify a different workspace if the disk access at your facility
    is slow or restricted in the default location. 
-   For instance:      dawn -data /scratch/dawn_workspace
+   For instance: dawn -data /scratch/dawn_workspace
 
 2. Toolbar actions on linux can be hidden using the plotting. If the part becomes small, instead 
    of wrapping, some toolbar actions disappear. They can normally be found on the menu to the 
@@ -17,8 +17,8 @@ RELEASE NOTES FOR DAWN 1.1 Beta
 
 4. If using workflows at Diamond using 'module load dawn/beta' they may not run. In this case do the following:
    * Try to run a workflow, get a cryptic error about the "jre".
-   * Open the run configuration ‘WorkflowConfiguration’ go to the runtime jre setting and click on ‘installed jres...’
-   * Define a jre with the location on linux64 at Diamond of ‘/dls_sw/apps/java/x64/jdk1.6.0_38/jre’  for linux 64-bit.
+   * Open the run configuration 'WorkflowConfiguration' go to the runtime jre setting and click on 'installed jres...'
+   * Define a jre with the location on linux64 at Diamond of '/dls_sw/apps/java/x64/jdk1.6.0_38/jre' for linux 64-bit.
 
 5. On windows the firewall can sometimes block the workflow which brings up a windows firewall dialog 
    and stops the workflow from working. If this happens allow the connection and restart the workflow.
@@ -33,11 +33,11 @@ RELEASE NOTES FOR DAWN 1.1 Beta
    If you do not read information back into the workflow, create a dummy variable for this.
 
 8. On windows 32 there is a defect with 'Dataset Plot' view. If using the 'DExplore' perspective, 
-   you may see this. Try using the plotting inside ‘Data Browsing’ perspective in this case.
+   you may see this. Try using the plotting inside 'Data Browsing' perspective in this case.
 
-9. Macos build of Dawn is experimental and ‘CBF’ files are not supported in version 1.1 Beta.
+9. Macos build of Dawn is experimental and 'CBF' files are not supported in version 1.1 Beta.
 
 10. To reliably find the Dawn version you are using go to:
    * Help->About Dawn.
-   * Installation Details’ button.
+   * Installation Details' button.
    * On the 'Installed Software' tab, there is a version column.
