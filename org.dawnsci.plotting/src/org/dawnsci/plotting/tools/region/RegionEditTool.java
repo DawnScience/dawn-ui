@@ -133,7 +133,7 @@ public class RegionEditTool extends AbstractRegionTableTool {
 				
 				final FloatSpinnerWrapper   rb = (FloatSpinnerWrapper)((FieldComponentCellEditor)ed).getFieldWidget();
 				if (rb.getPrecision() < 3)
-					rb.setFormat(rb.getWidth(), 3);
+					rb.setFormat(rb.getWidth(), 0);
 				
 				rb.setMaximum(Double.MAX_VALUE);
 				rb.setMinimum(-Double.MAX_VALUE);
