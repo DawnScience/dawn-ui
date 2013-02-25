@@ -256,7 +256,7 @@ public class HistogramToolPage extends AbstractToolPage {
 				if (internalEvent > 0) return;
 				logger.trace("paletteChanged");
 				paletteData = event.getPaletteData();
-				updateHistogramToolElements(event.getTrace(), null, false);
+				updateHistogramToolElements(event.getImageTrace(), null, false);
 			}
 
 			@Override
@@ -264,7 +264,7 @@ public class HistogramToolPage extends AbstractToolPage {
 				if (internalEvent > 0 || mode == FIXED) return;
 				logger.trace("paletteListener minChanged firing");
 				histoMin = ((IImageTrace)event.getSource()).getImageServiceBean().getMin().doubleValue();
-				updateHistogramToolElements(event.getTrace(), null, false);
+				updateHistogramToolElements(event.getImageTrace(), null, false);
 
 			}
 
@@ -273,7 +273,7 @@ public class HistogramToolPage extends AbstractToolPage {
 				if (internalEvent > 0 || mode == FIXED) return;
 				logger.trace("paletteListener maxChanged firing");
 				histoMax = ((IImageTrace)event.getSource()).getImageServiceBean().getMax().doubleValue();
-				updateHistogramToolElements(event.getTrace(), null, false);
+				updateHistogramToolElements(event.getImageTrace(), null, false);
 			}
 
 			@Override
@@ -284,7 +284,7 @@ public class HistogramToolPage extends AbstractToolPage {
 				zingerText.setText(Double.toString(rangeMax));
 				if(histoMax > rangeMax) histoMax = rangeMax;
 				generateHistogram(imageDataset);
-				updateHistogramToolElements(evt.getTrace(), null, false);
+				updateHistogramToolElements(evt.getImageTrace(), null, false);
 			}
 
 			@Override
@@ -295,7 +295,7 @@ public class HistogramToolPage extends AbstractToolPage {
 				deadPixelText.setText(Double.toString(rangeMin));
 				if(histoMin < rangeMin) histoMin = rangeMin;
 				generateHistogram(imageDataset);
-				updateHistogramToolElements(evt.getTrace(), null, false);
+				updateHistogramToolElements(evt.getImageTrace(), null, false);
 
 			}
 
