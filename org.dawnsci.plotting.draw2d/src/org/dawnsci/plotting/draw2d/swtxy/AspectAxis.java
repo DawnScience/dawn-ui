@@ -401,4 +401,9 @@ public class AspectAxis extends Axis implements IAxis {
 		final XYRegionGraph xyGraph = (XYRegionGraph)getGraph();
 		return xyGraph.primaryXAxis==this || xyGraph.primaryYAxis==this;
 	}
+
+	@Override
+	public boolean areLabelCustomised() {
+		return labelData != null;
+	}
 }
