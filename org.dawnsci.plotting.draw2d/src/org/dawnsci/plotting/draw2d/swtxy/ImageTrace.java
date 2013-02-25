@@ -692,7 +692,7 @@ public final class ImageTrace extends Figure implements IImageTrace, IAxisListen
 
 	@Override
 	public void axisRangeChanged(Axis axis, Range old_range, Range new_range) {
-		//createScaledImage(ImageScaleType.REIMAGE_ALLOWED, null);
+		createScaledImage(ImageScaleType.REIMAGE_ALLOWED, null);
 	}
 
 	/**
