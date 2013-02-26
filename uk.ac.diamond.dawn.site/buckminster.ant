@@ -109,15 +109,28 @@ Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blo
             </first>
         </pathconvert>
 
-        <echo message="buildfile   = ${ant.file}" />
-        <echo message="launcher    = ${equinox.launcher.jar}" />
-        <echo message="repository  = ${repository}" />
-        <echo message="installIU   = ${iu}" />
-        <echo message="version     = ${product.version.full}" />
-        <echo message="target      = product.os=${product.os} product.ws=${product.ws} product.arch=${product.arch}" />
-        <echo message="destination = ${destination}" />
+        <echo message="buildfile   : ${ant.file}" />
+        <echo message="ant         : version=${ant.version}, home=${ant.home}" />
+        <echo message="launcher    : ${equinox.launcher.jar}" />
+        <echo message="repository  : ${repository}" />
+        <echo message="installIU   : ${iu}" />
+        <echo message="version     : ${product.version.full}" />
+        <echo message="target      : product.os=${product.os}, product.ws=${product.ws}, product.arch=${product.arch}" />
+        <echo message="destination : ${destination}" />
 
-        <java jar="${equinox.launcher.jar}" fork="true" failonerror="true" >
+        <!-- If running Java 7, use the new Garbage Collector -->
+        <condition property="jvmarg.gc" value="-XX:+DisableExplicitGC -XX:+UseG1GC -XX:MaxGCPauseMillis=2000" else="-XX:+DisableExplicitGC">
+            <matches string="${java.version}" pattern="^1\.[78]\..*" />
+        </condition>
+        <echo message="java        : version=${java.version}, home=${java.home}, additional jvmarg=${jvmarg.gc}" />
+
+        <java jar="${equinox.launcher.jar}" fork="true" maxmemory="1536m" failonerror="true" >
+            <!-- (effective on some Linux only) control memory alloction on RedHat 6 (See Jira DATAACQTEAM-50) -->
+            <env key="MALLOC_ARENA_MAX" value="4" />
+            <!-- (probably not required) make sure that we live in a UTF-8 world -->
+            <env key="LANG" value="en_GB.UTF-8" />
+            <jvmarg value="-Dfile.encoding=UTF-8" />
+            <jvmarg value="-Dsun.jnu.encoding=UTF-8" />
             <arg value="-application"/>
             <arg value="org.eclipse.equinox.p2.director"/>
             <arg value="-repository"/>
@@ -138,6 +151,7 @@ Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blo
             <arg value="${product.arch}" />
             <arg value="-roaming"/>
             <arg value="-consoleLog"/>
+            <jvmarg line="${jvmarg.gc}"/>
             <!-- jvmarg value="-agentlib:jdwp=transport=dt_socket,address=8000,server=y,suspend=y"/ -->
         </java>
     </target>
