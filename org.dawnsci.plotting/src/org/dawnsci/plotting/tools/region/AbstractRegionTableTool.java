@@ -496,10 +496,12 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
         	final IImageTrace     trace        = (IImageTrace)traces.iterator().next();
         	
         	ROIData rd = null;
-        	if (region.getRegionType() == RegionType.BOX && bounds instanceof RectangularROI) {
+        	RegionType type = region.getRegionType();
+
+        	if ((type == RegionType.BOX || type == RegionType.PERIMETERBOX) && bounds instanceof RectangularROI) {
 	    		final RectangularROI roi = (RectangularROI) bounds;
 	    		rd = new RectangularROIData(roi, trace.getData());
-        	} else if (region.getRegionType()==RegionType.LINE && bounds instanceof LinearROI) {
+        	} else if (type == RegionType.LINE && bounds instanceof LinearROI) {
         		final LinearROI roi = (LinearROI) bounds;
         		rd = new LinearROIData(roi, trace.getData(), 1d);     
         	}
