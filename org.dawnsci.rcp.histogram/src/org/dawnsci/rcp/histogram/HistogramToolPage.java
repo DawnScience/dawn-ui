@@ -59,7 +59,6 @@ import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.part.IPageSite;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.eclipse.ui.progress.UIJob;
-import org.mihalis.opal.rangeSlider.RangeSlider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -745,7 +744,6 @@ public class HistogramToolPage extends AbstractToolPage {
 		rangeExpander.setClient(rangeComposite);
 		rangeExpander.addExpansionListener(expansionAdapter);
 		
-		//TODO range slider
 		//new max/min range using opal range slider
 		// Set up the Min Max range part of the GUI
 		rangeOpalExpander = new ExpandableComposite(composite, SWT.NONE);
@@ -1086,7 +1084,11 @@ public class HistogramToolPage extends AbstractToolPage {
 		if (!brightnessContrastValue.isSpinner(CONTRAST_LABEL, event)) brightnessContrastValue.setValue(CONTRAST_LABEL, histoMax-histoMin);
 		
 		if (!rangeSlider.isEventSource(event)) {
-			rangeSlider.setRangeLimits(scaleMin, scaleMax);
+			double tempMin = scaleMin;
+			double tempMax = scaleMax;
+			if (histoMin < scaleMin) tempMin = histoMin;
+			if (histoMax > scaleMax) tempMax = histoMax;
+			rangeSlider.setRangeLimits(tempMin, tempMax);
 			rangeSlider.setSliderValues(histoMin, histoMax);
 		}
 	}

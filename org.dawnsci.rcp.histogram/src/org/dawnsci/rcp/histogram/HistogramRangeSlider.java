@@ -14,6 +14,22 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.mihalis.opal.rangeSlider.RangeSlider;
 
+
+/**
+ * Simple Class combining a range slider with two labels which show the % position
+ * the upper and lower tabs on the range slider.
+ * 
+ * To use:
+ * Construct the object
+ * Call setRangeLimits to set the data range
+ * Call getMinValue/getMaxValue to get the data value of the slider tabs
+ * 
+ * Has selection and key events
+ * Keys are:
+ * Arrows for fine movement
+ * Page Up/Page Down for coarse movement
+ * Home/End to move to range stops
+ */
 public class HistogramRangeSlider {
 
 	Composite composite;
@@ -28,7 +44,13 @@ public class HistogramRangeSlider {
 	
 	private ArrayList<SelectionListener> listeners = new ArrayList<SelectionListener>();
 	private ArrayList<KeyListener> keylisteners = new ArrayList<KeyListener>();
-
+	
+	/**
+	 *Sole constructor
+	 *
+	 *@param parent			Composite of the parent
+	 *@param granularity	How fine the scale is (ie a granularity of 1000 allows steps of 0.1%)
+	 */
 	public HistogramRangeSlider(Composite parent, int granularity) {
 		
 		composite = new Composite(parent, SWT.NONE);
@@ -101,8 +123,16 @@ public class HistogramRangeSlider {
 		rangeSlider.addSelectionListener(listener);
 		rangeSlider.addKeyListener(keyListener);
 	}
-	
+	/**
+	 *Set the slider values 
+	 *
+	 *@param parent			Composite of the parent
+	 *@param granularity	How fine the scale is (ie a granularity of 1000 allows steps of 0.1%)
+	 */
 	public void setSliderValues(double rangeMin, double rangeMax) {
+		
+		if (rangeMin < minValue) minValue = rangeMin;
+		if (rangeMax > maxValue) maxValue = rangeMax; 
 		
 		int min = getSliderValue(rangeMin);
 		int max = getSliderValue(rangeMax);
@@ -124,13 +154,10 @@ public class HistogramRangeSlider {
 	}
 	
 	public double getMinValue() {
-		
-		return getDataValue(rangeSlider.getLowerValue());
-		
+		return getDataValue(rangeSlider.getLowerValue());		
 	}
 	
 	public double getMaxValue() {
-		
 		return getDataValue(rangeSlider.getUpperValue());
 	}
 	
@@ -172,10 +199,9 @@ public class HistogramRangeSlider {
 	
 	private double getDataValue(int sliderValue) {
 		int granularity = rangeSlider.getMaximum();
-		
 		double rangeVal = maxValue-minValue;
 		double step = rangeVal/granularity;
-		return sliderValue*step;
+		return (sliderValue*step) + minValue;
 
 	}
 	
@@ -183,7 +209,7 @@ public class HistogramRangeSlider {
 		int granularity = rangeSlider.getMaximum();
 		double rangeVal = maxValue-minValue;
 		double step = rangeVal/granularity;
-		return (int)Math.round(dataValue/step);
+		return (int)Math.round((dataValue-minValue)/step);
 	}
 
 }
