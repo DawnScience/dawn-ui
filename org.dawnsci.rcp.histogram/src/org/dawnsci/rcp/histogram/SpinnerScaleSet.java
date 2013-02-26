@@ -1,6 +1,7 @@
 package org.dawnsci.rcp.histogram;
 
 import java.util.ArrayList;
+import java.util.EventObject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -178,7 +179,7 @@ public class SpinnerScaleSet {
 		scales.get(name).setSelection((int) (((minval-mins.get(name))/(maxs.get(name)-mins.get(name)))*steps));
 	}
 
-	public boolean isSpinner(String label, SelectionEvent event) {
+	public boolean isSpinner(String label, EventObject event) {
 		if (event==null) return false;
 		Object source = event.getSource();
 		if (this.spinners.get(label) instanceof FloatSpinner) {

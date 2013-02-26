@@ -1,6 +1,7 @@
 package org.dawnsci.rcp.histogram;
 
 import java.util.Arrays;
+import java.util.EventObject;
 import java.util.List;
 
 import org.dawb.common.services.HistogramBound;
@@ -16,6 +17,7 @@ import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace.TraceType;
 import org.dawb.common.ui.plot.trace.IPaletteListener;
+import org.dawb.common.ui.plot.trace.IPaletteTrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.PaletteEvent;
 import org.dawb.common.ui.plot.trace.TraceEvent;
@@ -35,6 +37,8 @@ import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
@@ -55,6 +59,7 @@ import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.part.IPageSite;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.eclipse.ui.progress.UIJob;
+import org.mihalis.opal.rangeSlider.RangeSlider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -142,6 +147,8 @@ public class HistogramToolPage extends AbstractToolPage {
 	//private SpinnerSliderSet brightnessContrastValue;
 	private SpinnerScaleSet brightnessContrastValue;
 	private SelectionListener brightnessContrastListener;
+	private SelectionListener rangeSelectionListener;
+	private KeyListener rangeKeyListener;
 
 
 	// MIN MAX GUI	
@@ -152,6 +159,11 @@ public class HistogramToolPage extends AbstractToolPage {
 	//private SpinnerSliderSet minMaxValue;
 	private SpinnerScaleSet minMaxValue;
 	private SelectionListener minMaxValueListener;
+	
+	//Opal Min Max
+	private ExpandableComposite rangeOpalExpander;
+	private Composite rangeOpalComposite;
+	private HistogramRangeSlider rangeSlider;
 
 	// DEAD ZINGER GUI
 	private ExpandableComposite deadZingerExpander;
@@ -331,6 +343,43 @@ public class HistogramToolPage extends AbstractToolPage {
 			@Override
 			public void widgetDefaultSelected(SelectionEvent event) {
 				widgetSelected(event);
+			}
+		};
+		
+		rangeSelectionListener = new SelectionListener() {
+
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				logger.trace("rangelisteer");
+				histoMax = rangeSlider.getMaxValue();
+				histoMin = rangeSlider.getMinValue();
+				updateHistogramToolElements(event);
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent event) {
+				widgetSelected(event);
+			}
+		};
+		
+		rangeKeyListener = new KeyListener() {
+			
+			@Override
+			public void keyReleased(KeyEvent e) {
+				logger.trace("rangelisteer");
+				histoMax = rangeSlider.getMaxValue();
+				histoMin = rangeSlider.getMinValue();
+				updateHistogramToolElements(e);
+				
+			}
+			
+			@Override
+			public void keyPressed(KeyEvent e) {
+				logger.trace("rangelisteer");
+				histoMax = rangeSlider.getMaxValue();
+				histoMin = rangeSlider.getMinValue();
+				updateHistogramToolElements(e);
+				
 			}
 		};
 
@@ -695,6 +744,25 @@ public class HistogramToolPage extends AbstractToolPage {
 
 		rangeExpander.setClient(rangeComposite);
 		rangeExpander.addExpansionListener(expansionAdapter);
+		
+		//TODO range slider
+		//new max/min range using opal range slider
+		// Set up the Min Max range part of the GUI
+		rangeOpalExpander = new ExpandableComposite(composite, SWT.NONE);
+		rangeOpalExpander.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1));
+		rangeOpalExpander.setLayout(new GridLayout(1, false));
+		rangeOpalExpander.setText("Histogram Range Percentage");
+
+		rangeOpalComposite = new Composite(rangeOpalExpander, SWT.NONE);
+		rangeOpalComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		rangeOpalComposite.setLayout(new GridLayout(1, false));
+		
+		rangeOpalExpander.setClient(rangeOpalComposite);
+		rangeOpalExpander.addExpansionListener(expansionAdapter);
+		
+		rangeSlider = new HistogramRangeSlider(rangeOpalComposite, 10000);
+		rangeSlider.addSelectionListener(rangeSelectionListener);
+		rangeSlider.addKeyListener(rangeKeyListener);
 
 		// Set up the dead and zingers range part of the GUI
 		deadZingerExpander = new ExpandableComposite(composite, SWT.NONE);
@@ -927,7 +995,7 @@ public class HistogramToolPage extends AbstractToolPage {
 	}
 
 
-	private void updateHistogramToolElements(SelectionEvent event) {
+	private void updateHistogramToolElements(EventObject event) {
 		updateHistogramToolElements(getImageTrace(), event, true);
 	}
 
@@ -935,7 +1003,7 @@ public class HistogramToolPage extends AbstractToolPage {
 	 * Update everything based on the new slider positions  
 	 * @param event  MAY BE NULL
 	 */
-	private void updateHistogramToolElements(IImageTrace trace, SelectionEvent event, boolean repaintImage) {
+	private void updateHistogramToolElements(IPaletteTrace trace, EventObject event, boolean repaintImage) {
 		// update the ranges
 		updateRanges(trace, event);
 
@@ -977,7 +1045,7 @@ public class HistogramToolPage extends AbstractToolPage {
 	 * Update all the gui element ranges based on the internal values for them
 	 * @param event 
 	 */
-	private void updateRanges(IImageTrace image, SelectionEvent event) {
+	private void updateRanges(IPaletteTrace image, EventObject event) {
 		
 		double scaleMaxTemp = rangeMax;
 		double scaleMinTemp = rangeMin;
@@ -1016,14 +1084,18 @@ public class HistogramToolPage extends AbstractToolPage {
 		brightnessContrastValue.setMin(CONTRAST_LABEL, 0.0);
 		brightnessContrastValue.setMax(CONTRAST_LABEL, scaleMax-scaleMin);
 		if (!brightnessContrastValue.isSpinner(CONTRAST_LABEL, event)) brightnessContrastValue.setValue(CONTRAST_LABEL, histoMax-histoMin);
-
+		
+		if (!rangeSlider.isEventSource(event)) {
+			rangeSlider.setRangeLimits(scaleMin, scaleMax);
+			rangeSlider.setSliderValues(histoMin, histoMax);
+		}
 	}
 
 
 	/**
 	 * Plots the histogram, and RGB lines
 	 */
-	private void plotHistogram(IImageTrace image) {	
+	private void plotHistogram(IPaletteTrace image) {	
 
 
 		// Initialise the histogram Plot if required
