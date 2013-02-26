@@ -45,14 +45,19 @@ import org.dawb.common.ui.plot.region.ROIEvent;
 import org.dawb.common.ui.plot.region.RegionEvent;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
 import org.dawb.common.ui.plot.tool.IToolPageSystem;
+import org.dawb.common.ui.plot.trace.IPaletteListener;
+import org.dawb.common.ui.plot.trace.IPaletteListener.Stub;
+import org.dawb.common.ui.plot.trace.IPaletteTrace;
 import org.dawb.common.ui.plot.trace.IStackTrace;
 import org.dawb.common.ui.plot.trace.ISurfaceTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.IWindowTrace;
+import org.dawb.common.ui.plot.trace.PaletteEvent;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.plotting.Activator;
+import org.dawnsci.plotting.jreality.SurfaceTrace;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -100,9 +105,11 @@ public class WindowTool extends AbstractToolPage {
 	private IRegionListener        regionListener;
 	private IROIListener           roiListener;
 	private ITraceListener         traceListener;
+	private IPaletteListener       paletteListener;
 	private WindowJob              windowJob;
 	private Composite              sliceControl, blankComposite;
 	private Composite              content;
+
  
 	public WindowTool() {
 		try {
@@ -116,6 +123,20 @@ public class WindowTool extends AbstractToolPage {
 						updateTrace(trace);
 					} else {
 						windowSystem.clear();
+					}
+				}
+			};
+			
+			this.paletteListener = new IPaletteListener.Stub() {
+				@Override
+				public void paletteChanged(PaletteEvent evt) {
+					try {
+					     ITrace trace = windowSystem.getTraces().iterator().next();
+					     if (trace instanceof IPaletteTrace) {
+					    	 ((IPaletteTrace)trace).setPaletteData(evt.getPaletteData()); 
+					     }
+					} catch (Exception ne) {
+						logger.error("Cannot set new palette.", ne);
 					}
 				}
 			};
@@ -302,6 +323,7 @@ public class WindowTool extends AbstractToolPage {
 		if (trace instanceof ISurfaceTrace) {
 		    setActionsEnabled(true);
 			updateWindowPlot((ISurfaceTrace)trace);
+			((SurfaceTrace)trace).addPaletteListener(paletteListener);
 		} else if (trace instanceof IStackTrace) {
 		    setActionsEnabled(false);
 		    updateSlicePlot((IStackTrace)trace);

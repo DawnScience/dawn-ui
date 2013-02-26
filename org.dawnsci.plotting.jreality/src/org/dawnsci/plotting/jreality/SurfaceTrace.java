@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
+import org.dawb.common.services.HistogramBound;
+import org.dawb.common.services.IPaletteService;
 import org.dawb.common.services.ImageServiceBean;
 import org.dawb.common.ui.plot.roi.data.SurfacePlotROI;
 import org.dawb.common.ui.plot.trace.IPaletteListener;
@@ -12,7 +14,13 @@ import org.dawb.common.ui.plot.trace.ISurfaceTrace;
 import org.dawb.common.ui.plot.trace.PaletteEvent;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawnsci.plotting.jreality.data.ColourImageData;
+import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.graphics.PaletteData;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
@@ -27,16 +35,33 @@ import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
  *
  */
 public class SurfaceTrace extends PlotterTrace implements ISurfaceTrace{
+	
+	private static Logger logger = LoggerFactory.getLogger(SurfaceTrace.class);
 
 	private AbstractDataset        data;
 	private PaletteData            palette;
 	
 	public SurfaceTrace(JRealityPlotViewer plotter, String name) {
 		super(plotter, name);
+		
+		try {
+			final IPaletteService pservice = (IPaletteService)PlatformUI.getWorkbench().getService(IPaletteService.class);
+			final String scheme = getPreferenceStore().getString("org.dawb.plotting.system.colourSchemeName");
+			this.palette = pservice.getPaletteData(scheme);
+		} catch (Exception e) {
+			logger.trace("Cannot get palette!", e);
+		}
 	}
 	
 	public PaletteData getPaletteData() {
 		return palette;
+	}
+	
+	private IPreferenceStore store;
+	private IPreferenceStore getPreferenceStore() {
+		if (store!=null) return store;
+		store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
+		return store;
 	}
 
 	/**
@@ -67,6 +92,31 @@ public class SurfaceTrace extends PlotterTrace implements ISurfaceTrace{
 		
 		return imageData;
 	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public Number getMin() {
+		return null;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public Number getMax() {
+		return null;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public HistogramBound getNanBound() {
+		return HistogramBound.DEFAULT_NAN;
+	}
+
 
 	public void setData(final AbstractDataset data, List<AbstractDataset> axes) {
 		
