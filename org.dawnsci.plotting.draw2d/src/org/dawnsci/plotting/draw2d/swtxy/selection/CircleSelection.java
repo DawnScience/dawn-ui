@@ -23,11 +23,11 @@ import org.dawb.common.ui.plot.axis.ICoordinateSystem;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegionContainer;
 import org.dawb.common.ui.plot.region.ROIEvent;
-import org.dawnsci.plotting.draw2d.Activator;
 import org.dawnsci.plotting.draw2d.swtxy.translate.FigureTranslator;
 import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationEvent;
 import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationListener;
 import org.dawnsci.plotting.draw2d.swtxy.util.Draw2DUtils;
+import org.dawnsci.plotting.draw2d.swtxy.util.PointFunction;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.FigureListener;
@@ -38,7 +38,6 @@ import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.PrecisionPoint;
-import org.eclipse.draw2d.geometry.PrecisionRectangle;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
 
@@ -176,7 +175,7 @@ public class CircleSelection extends AbstractSelectionRegion {
 		return 2;
 	}
 
-	class DecoratedCircle extends Shape implements IRegionContainer {
+	class DecoratedCircle extends Shape implements IRegionContainer, PointFunction {
 		private int tolerance = 2;
 		double radius = 1;
 		double cx, cy;
@@ -188,7 +187,6 @@ public class CircleSelection extends AbstractSelectionRegion {
 		private TranslationListener handleListener;
 		private FigureListener moveListener;
 		private static final int SIDE = 8;
-		private final boolean isLinux = Activator.isLinuxOS();
 
 		public DecoratedCircle(Figure parent) {
 			super();
@@ -267,6 +265,11 @@ public class CircleSelection extends AbstractSelectionRegion {
 			return new PrecisionPoint(radius * Math.cos(angle) + cx, radius * Math.sin(angle) * ratio + cy);
 		}
 
+		@Override
+		public Point calculatePoint(double... parameter) {
+			return getPoint(parameter[0]);
+		}
+
 		private void setCentre(double x, double y) {
 			cx = x;
 			cy = y;
@@ -287,20 +290,12 @@ public class CircleSelection extends AbstractSelectionRegion {
 		@Override
 		protected void fillShape(Graphics graphics) {
 		}
-
+		
 		@Override
 		protected void outlineShape(Graphics graphics) {
-			double d = 2. * radius;
-			// On linux off screen is bad therefore we do not draw
-			// Fix to http://jira.diamond.ac.uk/browse/DAWNSCI-429
-			double ratio = coords.getAspectRatio();
-			PrecisionRectangle rect = new PrecisionRectangle(cx - radius, cy - radius*ratio, d, d*ratio);
-			if (isLinux) {
-				Rectangle bnds = getParent().getBounds().getExpanded(200, 200);
-				if (!bnds.contains(rect)) return;
-			}
-			
-			graphics.drawOval(rect);
+			PointList points = Draw2DUtils.generateCurve(DecoratedCircle.this, 0, 360, 1, 3, Math.toRadians(1));
+			Draw2DUtils.drawClippedPolyline(graphics, points, getParent().getBounds(), true);
+
 			if (label != null && isShowLabel()) {
 				graphics.setAlpha(192);
 				graphics.setForegroundColor(labelColour);

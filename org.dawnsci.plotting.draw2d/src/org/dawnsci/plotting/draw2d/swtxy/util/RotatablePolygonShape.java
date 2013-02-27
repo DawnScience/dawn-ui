@@ -140,10 +140,8 @@ public class RotatablePolygonShape extends AbstractPointListShape {
 
 	@Override
 	protected void outlineShape(Graphics graphics) {
-		
-		// TODO On linux some of these points very far off screen will cause 
-		// the UI to go slow or die.
-		graphics.drawPolygon(npl);
+		Rectangle b = getParent().getBounds();
+		Draw2DUtils.drawClippedPolyline(graphics, npl, b, true);
 	}
 
 	@Override

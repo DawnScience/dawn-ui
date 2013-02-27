@@ -18,6 +18,7 @@ package org.dawnsci.plotting.draw2d.swtxy.util;
 
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.geometry.PointList;
+import org.eclipse.draw2d.geometry.Rectangle;
 
 /**
  * A Draw2D polyline shape that allows its orientation to be set. Its location is the centre of
@@ -40,14 +41,8 @@ public class RotatablePolylineShape extends RotatablePolygonShape {
 
 	@Override
 	protected void outlineShape(Graphics graphics) {
-		// TODO On linux some of these points very far off screen will cause 
-		// the UI to go slow or die.
-		graphics.drawPolyline(npl);
-//		graphics.pushState();
-//		graphics.setAdvanced(true);
-//		graphics.rotate(angle);
-//		graphics.drawPolyline(opl);
-//		graphics.popState();
+		Rectangle b = getParent().getBounds();
+		Draw2DUtils.drawClippedPolyline(graphics, npl, b, false);
 	}
 
 	@Override

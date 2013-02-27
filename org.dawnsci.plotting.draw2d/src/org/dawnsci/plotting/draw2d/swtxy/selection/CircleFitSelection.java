@@ -32,6 +32,7 @@ import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationEvent;
 import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationListener;
 import org.dawnsci.plotting.draw2d.swtxy.util.AffineTransform;
 import org.dawnsci.plotting.draw2d.swtxy.util.Draw2DUtils;
+import org.dawnsci.plotting.draw2d.swtxy.util.PointFunction;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.FigureListener;
@@ -246,7 +247,7 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 
 	private static PrecisionPoint centre = new PrecisionPoint(0.5, 0.5);
 
-	class DecoratedCircle extends Shape implements IRegionContainer {
+	class DecoratedCircle extends Shape implements IRegionContainer, PointFunction {
 		private AffineTransform affine; // transforms unit square (origin at top-left corner) to transformed rectangle
 		private Rectangle box; // bounding box of ellipse
 		private boolean outlineOnly = false;
@@ -345,6 +346,11 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 			return affine.getTransformed(p);
 		}
 
+		@Override
+		public Point calculatePoint(double... parameter) {
+			return getPoint(parameter[0]);
+		}
+
 		/**
 		 * Set radius
 		 * @param radius
@@ -411,15 +417,14 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 
 		@Override
 		protected void outlineShape(Graphics graphics) {
-	        if (!isShapeFriendlySize()) return;
-
 	        graphics.pushState();
 			graphics.setAdvanced(true);
 			graphics.setAntialias(SWT.ON);
 
 			calcBox(false);
 			// NB do not use Graphics#scale and unit shape as there are precision problems
-			graphics.drawOval(box);
+			PointList points = Draw2DUtils.generateCurve(DecoratedCircle.this, 0, 360, 1, 3, Math.toRadians(1));
+			Draw2DUtils.drawClippedPolyline(graphics, points, box.expand(2, 2), true);
 
 			graphics.popState();
 
