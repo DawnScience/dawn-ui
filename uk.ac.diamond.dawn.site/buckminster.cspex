@@ -21,7 +21,7 @@
                 <property key="product.os" value="linux" />
                 <property key="product.ws" value="gtk" />
                 <property key="product.arch" value="x86" />
-                <property key="profile" value="Dawn" />
+                <property key="profile" value="DawnDiamond" />
                 <property key="iu" value="uk.ac.diamond.dawn.product" />
             </properties>
             <prerequisites>
@@ -44,7 +44,7 @@
                 <property key="product.os" value="linux" />
                 <property key="product.ws" value="gtk" />
                 <property key="product.arch" value="x86_64" />
-                <property key="profile" value="Dawn" />
+                <property key="profile" value="DawnDiamond" />
                 <property key="iu" value="uk.ac.diamond.dawn.product" />
             </properties>
             <prerequisites>
@@ -67,7 +67,7 @@
                 <property key="product.os" value="win32" />
                 <property key="product.ws" value="win32" />
                 <property key="product.arch" value="x86" />
-                <property key="profile" value="Dawn" />
+                <property key="profile" value="DawnDiamond" />
                 <property key="iu" value="uk.ac.diamond.dawn.product" />
             </properties>
             <prerequisites>
@@ -90,7 +90,7 @@
                 <property key="product.os" value="win32" />
                 <property key="product.ws" value="win32" />
                 <property key="product.arch" value="x86_64" />
-                <property key="profile" value="Dawn" />
+                <property key="profile" value="DawnDiamond" />
                 <property key="iu" value="uk.ac.diamond.dawn.product" />
             </properties>
             <prerequisites>
@@ -113,7 +113,7 @@
                 <property key="product.os" value="macosx" />
                 <property key="product.ws" value="cocoa" />
                 <property key="product.arch" value="x86" />
-                <property key="profile" value="Dawn" />
+                <property key="profile" value="DawnDiamond" />
                 <property key="iu" value="uk.ac.diamond.dawn.base.product" />
             </properties>
             <prerequisites>
@@ -136,7 +136,7 @@
                 <property key="product.os" value="macosx" />
                 <property key="product.ws" value="cocoa" />
                 <property key="product.arch" value="x86_64" />
-                <property key="profile" value="Dawn" />
+                <property key="profile" value="DawnDiamond" />
                 <property key="iu" value="uk.ac.diamond.dawn.product" />
             </properties>
             <prerequisites>

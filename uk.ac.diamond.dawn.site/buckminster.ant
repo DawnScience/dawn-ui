@@ -5,6 +5,14 @@ Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blo
     </description>
     <import file="${buckminster.pdetasks}"/>
 
+    <tstamp>
+        <format property="action.datetime" pattern="yyyyMMdd-HHmm" />
+    </tstamp>
+    <pathconvert property="action.date" setonempty="internal_error_with_action.date">
+        <regexpmapper from="([0-9]{8})\-.*$$" to="\1"/>
+        <path path="${action.datetime}" />
+    </pathconvert>
+
     <macrodef name="property.expand">
         <attribute name="property"/>
         <attribute name="definition"/>
@@ -18,22 +26,21 @@ Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blo
     <!-- ====================================================================================== -->
 
     <!--  Only call this using antcall, to allow reuse of properties  -->
-    <target name="setup.directory" depends="_directory.check.requirement, _directory.create, _directory.set.group">
+    <target name="setup.directory" depends="_directory.check.params, _directory.delete, _directory.create, _directory.set.group">
     </target>
-    <target name="_directory.check.requirement">
-        <condition property="directory.setup.not.required">
-            <or>
-                <not>
-                    <isset property="setup.directory.name" />
-                </not>
-                <available file="${setup.directory.name}" type="dir" />
-            </or>
+    <target name="_directory.check.params">
+        <fail message="setup.directory called, but setup.directory.name not set" unless="setup.directory.name" />
+        <condition property="directory.setup.skip">
+            <available file="${setup.directory.name}" type="dir" />
         </condition>
     </target>
-    <target name="_directory.create" unless="directory.setup.not.required">
+    <target name="_directory.delete" if="${setup.directory.delete.previous}">
+        <delete dir="${setup.directory.name}" includeemptydirs="true" quiet="true" />
+    </target>
+    <target name="_directory.create" unless="directory.setup.skip">
         <mkdir dir="${setup.directory.name}"/>
     </target>
-    <target name="_directory.set.group" if="output.directory.group.set" unless="directory.setup.not.required">
+    <target name="_directory.set.group" if="${output.directory.group.set}" unless="directory.setup.skip">
         <chgrp file="${setup.directory.name}" type="dir" group="${output.directory.group}" />
         <chmod file="${setup.directory.name}" type="dir" perm="g+s" />
     </target>
@@ -89,9 +96,9 @@ Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blo
         <antcall target="setup.directory">
             <param name="setup.directory.name" value="${destination.parent}" />
         </antcall>
-        <delete dir="${destination}"/>
         <antcall target="setup.directory">
             <param name="setup.directory.name" value="${destination}" />
+            <param name="setup.directory.delete.previous" value="true" />
         </antcall>
     </target>
 
@@ -160,7 +167,7 @@ Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blo
     <!--  Copy native library code to product root  -->
     <!-- ========================================== -->
 
-    <target name="lib-copy" if="lib.copy.requested" >
+    <target name="lib-copy" if="${lib.copy.requested}" >
         <property name="lib_root" value="${destination}/lib" />
         <echo message="lib copy: copying selected libs to ${lib_root}" />
         <mkdir dir="${lib_root}" />
@@ -287,12 +294,15 @@ Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blo
         <!-- Invoked as a separate Buckminster action so that it runs BEFORE the site.p2 action -->
         <antcall target="setup.directory">
             <param name="setup.directory.name" value="${buckminster.root.prefix}" />
+            <param name="setup.directory.delete.previous" value="${buckminster.root.prefix.delete.previous}" />
         </antcall>
         <antcall target="setup.directory">
             <param name="setup.directory.name" value="${buckminster.output.root}" />
+            <param name="setup.directory.delete.previous" value="${buckminster.output.root.delete.previous}" />
         </antcall>
         <antcall target="setup.directory">
             <param name="setup.directory.name" value="${buckminster.temp.root}" />
+            <param name="setup.directory.delete.previous" value="${buckminster.temp.root.delete.previous}" />
         </antcall>
     </target>
 
