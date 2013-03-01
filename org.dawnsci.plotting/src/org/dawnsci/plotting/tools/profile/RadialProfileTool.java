@@ -155,10 +155,8 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 		setActionsEnabled(false);
 		profileAxis.setEnabled(false);
 		
-		IMetaData meta = getMetaData();
 		
-		if (meta!=null && (meta instanceof IDiffractionMetadata))
-			setActionsEnabled(true);
+		setActionsEnabled(isValidMetadata(getMetaData()));
 		
 		super.configurePlottingSystem(plotter);
 
@@ -166,12 +164,27 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 	
 	public void activate () {
 		super.activate();
-		if (metaLock != null && metaLock.isChecked()) {
-			IMetaData meta = getMetaData();
-			if (meta!=null && (meta instanceof IDiffractionMetadata)) {
+		
+		//setup the lock action to work for valid metadata
+		if (metaLock == null) return;
+		IMetaData meta = getMetaData();
+		if (meta==null) return;
+		
+		if (metaLock.isChecked()) {
+			if (isValidMetadata(meta)) {
 				updateSectorCenters(((IDiffractionMetadata)meta).getDetector2DProperties().getBeamCentreCoords());
+				registerMetadataListeners();
+			} else {
+				metaLock.setChecked(false);
+				metaLock.run();
+				metaLock.setEnabled(false);
 			}
-			registerMetadataListeners();
+		} else {
+			if (isValidMetadata(meta)) {
+				metaLock.setEnabled(true);
+			} else {
+				metaLock.setEnabled(false);
+			}
 		}
 	}
 	
@@ -190,7 +203,6 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 		super.updateSectors();
 	}
 
-
 	@Override
 	protected AbstractDataset[] getXAxis(final SectorROI sroi, AbstractDataset[] integrals) {
 		final AbstractDataset xi = DatasetUtils.linSpace(sroi.getRadius(0), sroi.getRadius(1), integrals[0].getSize(), AbstractDataset.FLOAT64);
@@ -200,7 +212,7 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 		
 		if (!sroi.hasSeparateRegions())  {
 			
-			if (meta!=null && (meta instanceof IDiffractionMetadata)) {
+			if (meta!=null && isValidMetadata(meta)) {
 				setActionsEnabled(true);
 				return new AbstractDataset[]{pixelToValue(xi,(IDiffractionMetadata)meta)};
 			}
@@ -212,7 +224,7 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 			final AbstractDataset xii = DatasetUtils.linSpace(sroi.getRadius(0), sroi.getRadius(1), integrals[1].getSize(), AbstractDataset.FLOAT64);
 			xii.setName("Radius (pixel)");
 			
-			if (meta!=null && (meta instanceof IDiffractionMetadata)) {
+			if (meta!=null && isValidMetadata(meta)) {
 				setActionsEnabled(true);
 				return new AbstractDataset[]{pixelToValue(xi,(IDiffractionMetadata)meta),pixelToValue(xii,(IDiffractionMetadata)meta)};
 			}
@@ -224,6 +236,24 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 	
 	private void setActionsEnabled(boolean enable) {
 		metaLock.setEnabled(enable);
+	}
+	
+	private boolean isValidMetadata(IMetaData meta) {
+		
+		if (meta!=null && (meta instanceof IDiffractionMetadata)) {
+
+			IDiffractionMetadata dm = (IDiffractionMetadata)meta;
+			double[] angles = dm.getDetector2DProperties().getNormalAnglesInDegrees();
+			
+			//non zero pitch roll and yaw currently not supported
+			if (angles[0] == 0 &&
+				angles[1] == 0 &&
+				angles[2] == 0) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 	
 	@Override
