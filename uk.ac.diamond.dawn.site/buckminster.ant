@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="product builder" basedir=".">
     <description>
-Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blog/eclipsercp/rcp_builds/.
+Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blog/eclipsercp/rcp_builds/, heavily modified at Diamond Light Source.
     </description>
     <import file="${buckminster.pdetasks}"/>
 
@@ -93,6 +93,14 @@ Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blo
     </target>
 
     <target name="make_product_dir">
+        <fail message="ERROR: ${destination} already exists, but property product.directory.fail.if.already.exists=true was specified">
+            <condition>
+                <and>
+                    <istrue value="${product.directory.fail.if.already.exists}" />
+                    <available file="${destination}" type="dir" />
+                </and>
+            </condition>
+        </fail>
         <antcall target="setup.directory">
             <param name="setup.directory.name" value="${destination.parent}" />
         </antcall>
@@ -167,7 +175,7 @@ Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blo
     <!--  Copy native library code to product root  -->
     <!-- ========================================== -->
 
-    <target name="lib-copy" if="${lib.copy.requested}" >
+    <target name="lib-copy" if="${lib.copy.requested}">
         <property name="lib_root" value="${destination}/lib" />
         <echo message="lib copy: copying selected libs to ${lib_root}" />
         <mkdir dir="${lib_root}" />
@@ -292,6 +300,9 @@ Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blo
 
     <target name="create.product.setup">
         <!-- Invoked as a separate Buckminster action so that it runs BEFORE the site.p2 action -->
+        <fail message="ERROR: product.parent.directory.location not set - did you remember to specify a .properties file?">
+            <condition><not><isset property="product.parent.directory.location" /></not></condition>
+        </fail>
         <antcall target="setup.directory">
             <param name="setup.directory.name" value="${buckminster.root.prefix}" />
             <param name="setup.directory.delete.previous" value="${buckminster.root.prefix.delete.previous}" />
@@ -307,6 +318,9 @@ Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blo
     </target>
 
     <target name="create.product" depends="install-product, lib-copy, jre-copy">
+        <echo>
+== Product has been built in ${destination} ==
+        </echo>
     </target>
 
     <!-- ================================== -->
