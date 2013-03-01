@@ -923,11 +923,11 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	private static final Collection<RegionType> maskingTypes;
 	static {
 		maskingTypes = new ArrayList<RegionType>(6);
-		maskingTypes.add(RegionType.FREE_DRAW);
+		//maskingTypes.add(RegionType.FREE_DRAW);
 		maskingTypes.add(RegionType.RING);
 		maskingTypes.add(RegionType.BOX);
 		maskingTypes.add(RegionType.LINE);
-		maskingTypes.add(RegionType.POLYLINE);
+		//maskingTypes.add(RegionType.POLYLINE);
 		maskingTypes.add(RegionType.POLYGON);
 		maskingTypes.add(RegionType.SECTOR);
 	}
