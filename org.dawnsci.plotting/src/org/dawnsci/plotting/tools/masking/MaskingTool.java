@@ -927,7 +927,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		maskingTypes.add(RegionType.RING);
 		maskingTypes.add(RegionType.BOX);
 		maskingTypes.add(RegionType.LINE);
-		maskingTypes.add(RegionType.POLYLINE);
+		//maskingTypes.add(RegionType.POLYLINE);
 		maskingTypes.add(RegionType.POLYGON);
 		maskingTypes.add(RegionType.SECTOR);
 	}
