@@ -159,8 +159,4 @@ public class ImageEditor extends MultiPageEditorPart implements IReusableEditor 
 		if (getEditorInput()!=null) return getEditorInput().getName();
 		return super.toString();
 	}
-
-	public PlotImageEditor getPlotImageEditor() {
-		return plotImageEditor;
-	}
 }

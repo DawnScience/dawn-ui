@@ -14,7 +14,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
+import org.dawb.common.ui.plot.PlottingFactory;
 import org.dawb.workbench.ui.editors.AsciiEditor;
+import org.dawb.workbench.ui.editors.IDatasetEditor;
 import org.dawb.workbench.ui.editors.ImageEditor;
 import org.dawb.workbench.ui.editors.PlotDataEditor;
 import org.dawb.workbench.ui.editors.PlotImageEditor;
@@ -70,8 +72,7 @@ public class SWTXYUpdateTest {
 		final ImageEditor editor       = (ImageEditor)page.openEditor(new FileStoreEditorInput(externalFile), ImageEditor.ID);
 		page.setPartState(EclipseUtils.getPage().getActivePartReference(), IWorkbenchPage.STATE_MAXIMIZED);		
 		
-		final PlotImageEditor ed = editor.getPlotImageEditor();
-		final AbstractPlottingSystem system = ed.getPlottingSystem();
+		final AbstractPlottingSystem system = (AbstractPlottingSystem)PlottingFactory.getPlottingSystem(editor.getTitle());
 		
 		// We update all the images in the directory.
 		final File[] fa = dir.listFiles();

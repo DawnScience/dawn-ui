@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
+import org.dawb.common.ui.plot.PlottingFactory;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace.PointStyle;
@@ -67,8 +68,7 @@ public class SWTXYTraceTest {
 
 		EclipseUtils.delay(2000);
 		
-		final ImageEditor editor       = (ImageEditor)part;
-		final AbstractPlottingSystem sys = editor.getPlotImageEditor().getPlottingSystem();
+		final AbstractPlottingSystem sys = (AbstractPlottingSystem)PlottingFactory.getPlottingSystem(part.getTitle());
 
 		final Collection<ITrace>   traces= sys.getTraces(IImageTrace.class);
 		final IImageTrace            imt = (IImageTrace)traces.iterator().next();

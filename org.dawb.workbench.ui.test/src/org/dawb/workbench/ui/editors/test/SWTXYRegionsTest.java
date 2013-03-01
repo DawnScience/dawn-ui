@@ -17,6 +17,7 @@ import java.util.List;
 
 import org.dawb.common.ui.image.PaletteFactory;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
+import org.dawb.common.ui.plot.PlottingFactory;
 import org.dawb.common.ui.plot.axis.IAxis;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
@@ -27,6 +28,7 @@ import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.util.text.NumberUtils;
 import org.dawb.workbench.ui.editors.AsciiEditor;
+import org.dawb.workbench.ui.editors.IDatasetEditor;
 import org.dawb.workbench.ui.editors.ImageEditor;
 import org.dawb.workbench.ui.editors.PlotDataEditor;
 import org.dawb.workbench.ui.editors.PlotImageEditor;
@@ -295,8 +297,7 @@ public class SWTXYRegionsTest {
 		final ImageEditor editor       = (ImageEditor)page.openEditor(new FileStoreEditorInput(externalFile), ImageEditor.ID);
 		page.setPartState(EclipseUtils.getPage().getActivePartReference(), IWorkbenchPage.STATE_MAXIMIZED);		
 		
-		final PlotImageEditor ed = editor.getPlotImageEditor();
-		final AbstractPlottingSystem sys = ed.getPlottingSystem();
+		final AbstractPlottingSystem sys = (AbstractPlottingSystem)PlottingFactory.getPlottingSystem(editor.getPartName());
 		
  		EclipseUtils.delay(2000); // Wait for image to be plotted...
  		
