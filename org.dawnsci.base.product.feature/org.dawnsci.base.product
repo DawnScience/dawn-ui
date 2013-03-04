@@ -31,9 +31,9 @@ All other trademarks are the property of their respective owners.
 
    <launcherArgs>
       <vmArgs>-Xms512m
+-Xmx2048m
 -XX:PermSize=128m
 -XX:MaxPermSize=256m
--Djava.library.path=${project_loc:uk.ac.gda.libs}/lib/${target.os}-${target.arch}
 -Ddbconnect=config/dbconnect.ispyb.properties
 -Dentry=MyVisitsEntryPoint
 -DidaEmbedded=yes
@@ -42,10 +42,7 @@ All other trademarks are the property of their respective owners.
 -Dcom.isencia.require.file.source=true
 -Dpasserelle.workbench.version=1.0.0
 -Dorg.dawb.editor.h5.use.default=true</vmArgs>
-      <vmArgsLin>-Xmx2048m</vmArgsLin>
-      <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts
--Xmx2048m</vmArgsMac>
-      <vmArgsSol>-Xmx2048m</vmArgsSol>
+      <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts</vmArgsMac>
    </launcherArgs>
 
    <windowImages i16="/org.dawnsci.product.plugin/icons/Temp-16x16-icon.png" i48="/org.dawnsci.product.plugin/icons/Temp-48x48-icon.png"/>
@@ -88,9 +85,10 @@ See the License for the specific language governing permissions and limitations 
    </features>
 
    <configurations>
-      <plugin id="org.dawnsci.persistence" autoStart="true" startLevel="1" />
-      <plugin id="uk.ac.diamond.scisoft" autoStart="true" startLevel="0" />
-      <plugin id="uk.ac.diamond.scisoft.analysis.osgi" autoStart="true" startLevel="1" />
+      <plugin id="org.dawnsci.persistence" autoStart="true" startLevel="2" />
+      <plugin id="uk.ac.diamond.scisoft" autoStart="true" startLevel="1" />
+      <plugin id="uk.ac.diamond.scisoft.analysis" autoStart="true" startLevel="2" />
+      <plugin id="uk.ac.diamond.scisoft.analysis.osgi" autoStart="true" startLevel="2" />
    </configurations>
 
 </product>
