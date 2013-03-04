@@ -24,14 +24,20 @@ import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingFactory;
 import org.dawb.common.ui.plot.tool.IToolPageSystem;
 import org.dawb.common.ui.plot.trace.IImageStackTrace;
+import org.dawb.common.ui.plot.trace.IStackPositionListener;
+import org.dawb.common.ui.plot.trace.StackPositionEvent;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.views.HeaderTablePage;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawb.common.util.io.FileUtils;
 import org.dawb.common.util.list.SortNatural;
 import org.dawb.workbench.ui.Activator;
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileStore;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -48,12 +54,15 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IReusableEditor;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
+import org.eclipse.ui.ide.FileStoreEditorInput;
 import org.eclipse.ui.part.EditorPart;
+import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.Page;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.slf4j.Logger;
@@ -80,10 +89,17 @@ public class PlotImageEditor extends EditorPart implements IReusableEditor {
 	// This view is a composite of two other views.
 	private AbstractPlottingSystem      plottingSystem;	
 	private ActionBarWrapper            wrapper;
+	private final IReusableEditor       parent;
+    private boolean                     plotUpdateAllowed=true;
 
 
 	public PlotImageEditor() {
+		this(null);
+	}
 	
+	public PlotImageEditor(IReusableEditor parent) {
+	
+		this.parent = parent;
 		try {
 	        this.plottingSystem = PlottingFactory.createPlottingSystem();
 	        plottingSystem.setColorOption(ColorOption.NONE);
@@ -105,6 +121,7 @@ public class PlotImageEditor extends EditorPart implements IReusableEditor {
 		super.setInput(input);
 		setPartName(input.getName());
 		createPlot();
+		firePropertyChange(IEditorPart.PROP_INPUT);
 	}
 
 
@@ -152,6 +169,8 @@ public class PlotImageEditor extends EditorPart implements IReusableEditor {
  	}
 	private void createPlot() {
 		
+		if (!plotUpdateAllowed) return;
+		
 		final Job job = new Job("Read image data") {
 
 			@Override
@@ -181,16 +200,16 @@ public class PlotImageEditor extends EditorPart implements IReusableEditor {
 					try {
 						final IImageStackTrace stack = plottingSystem.createImageStackTrace("image");
 						
-						List<String> imageFilenames = new ArrayList<String>();
-						final File  file  = new File(filePath);
+						final List<String> imageFilenames = new ArrayList<String>();
+						final File   file  = new File(filePath);
 						final String ext  = FileUtils.getFileExtension(file.getName());
-						final File parent = file.getParentFile();
+						final File   par = file.getParentFile();
 						int selection=0;
-						if (parent.isDirectory()) {
+						if (par.isDirectory()) {
 							int index=0;
-							for (String fName : parent.list()) {
+							for (String fName : par.list()) {
 								if (fName.endsWith(ext)) {
-									final File f = new File(parent,fName);
+									final File f = new File(par,fName);
 									imageFilenames.add(f.getAbsolutePath());
 									if (f.getAbsolutePath().equals(filePath)) {
 										selection = index;
@@ -206,6 +225,38 @@ public class PlotImageEditor extends EditorPart implements IReusableEditor {
 							LazyDataset lazyDataset = new LazyDataset("Folder Stack", loader.getDtype(), loader.getShape(), loader);
 							
 							stack.setStack(lazyDataset);
+							
+							if (parent!=null) stack.addStackPositionListener(new IStackPositionListener() {			
+								
+								@Override
+								public void stackPositionChanged(StackPositionEvent evt) {
+									
+									final String path = imageFilenames.get(evt.getPosition());
+									final File file = new File(path);
+									
+									try { // We do this to change the title of the editor part.
+										plotUpdateAllowed = false;
+										IEditorInput input = null;
+										try {
+											IFile ifile = (IFile)getEditorInput().getAdapter(IFile.class);
+											final IFile nfile = ifile.getParent().getFile(new Path(file.getName()));
+											input = new FileEditorInput(nfile);
+											
+										} catch (Throwable ne) {
+											final IFileStore externalFile = EFS.getLocalFileSystem().fromLocalFile(file);
+											input      = new FileStoreEditorInput(externalFile);
+										}
+										final IEditorInput finalInput = input;
+										if (finalInput!=null) Display.getDefault().syncExec(new Runnable() {
+											public void run() {
+												parent.setInput(finalInput);
+											}
+										});
+									} finally {
+										plotUpdateAllowed = true;
+									}
+								}
+							});
 						}
 						
 						final int stackIndex = selection;

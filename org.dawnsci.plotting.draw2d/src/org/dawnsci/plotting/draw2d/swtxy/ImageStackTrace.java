@@ -1,8 +1,13 @@
 package org.dawnsci.plotting.draw2d.swtxy;
 
+import java.util.Collection;
+import java.util.HashSet;
+
 import org.csstudio.swt.widgets.figureparts.ColorMapRamp;
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.dawb.common.ui.plot.trace.IImageStackTrace;
+import org.dawb.common.ui.plot.trace.IStackPositionListener;
+import org.dawb.common.ui.plot.trace.StackPositionEvent;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
@@ -44,7 +49,38 @@ public class ImageStackTrace extends ImageTrace implements IImageStackTrace {
 									new int[]{1,1,1});
 		set = (IDataset)set.squeeze();
 		setData((AbstractDataset)set, getAxes(), false);
+		fireStackPositionListeners(index);
+	}
+
+	private void fireStackPositionListeners(int i) {
+		if (listeners==null) return;
+		final StackPositionEvent evt = new StackPositionEvent(this, i);
+		for (IStackPositionListener l : listeners) {
+			try {
+				l.stackPositionChanged(evt);
+			} catch (Exception e) {
+				e.printStackTrace();
+				continue;
+			}
+		}
+	}
+
+	private Collection<IStackPositionListener> listeners;
+	@Override
+	public void addStackPositionListener(IStackPositionListener l) {
+		if (listeners==null) listeners = new HashSet<IStackPositionListener>(7);
+		listeners.add(l);
+	}
+
+	@Override
+	public void removeStackPositionListener(IStackPositionListener l) {
+		if (listeners==null) return;
+		listeners.remove(l);
 	}
 	
-	
+	public void remove() {
+        super.remove();
+        if (listeners!=null) listeners.clear();
+        listeners = null;
+	}
 }
