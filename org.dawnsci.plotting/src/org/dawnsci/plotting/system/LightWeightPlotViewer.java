@@ -739,7 +739,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 				IImageStackTrace stack = (IImageStackTrace)image;
                 if (stack.getStackSize()>1) {
 					setFolderScaleVisible(true);
-					folderScale.setRange(0, stack.getStackSize());
+					folderScale.setRange(0, stack.getStackSize()-1);
 					folderScale.setValue(stack.getStackIndex());
                 } else {
                 	setFolderScaleVisible(false);

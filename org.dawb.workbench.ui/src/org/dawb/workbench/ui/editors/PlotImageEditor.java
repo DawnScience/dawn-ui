@@ -230,12 +230,12 @@ public class PlotImageEditor extends EditorPart implements IReusableEditor {
 								
 								@Override
 								public void stackPositionChanged(StackPositionEvent evt) {
-									
-									final String path = imageFilenames.get(evt.getPosition());
-									final File file = new File(path);
-									
+										
 									try { // We do this to change the title of the editor part.
 										plotUpdateAllowed = false;
+										
+										final String path = imageFilenames.get(evt.getPosition());
+										final File file = new File(path);
 										IEditorInput input = null;
 										try {
 											IFile ifile = (IFile)getEditorInput().getAdapter(IFile.class);
@@ -252,6 +252,8 @@ public class PlotImageEditor extends EditorPart implements IReusableEditor {
 												parent.setInput(finalInput);
 											}
 										});
+									} catch (Throwable ignored) {
+										// TODO should we report problems?
 									} finally {
 										plotUpdateAllowed = true;
 									}
