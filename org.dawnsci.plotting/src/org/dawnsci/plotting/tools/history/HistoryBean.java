@@ -12,6 +12,10 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 
 class HistoryBean {
 	
+	public enum FORCE_TYPE {
+		NONE, IFKEYNULL, FORCE;
+	}
+	
 	// Image compare
 	private AbstractDataset       data;
 	private List<AbstractDataset> axes;
@@ -38,7 +42,7 @@ class HistoryBean {
 	}
 	public String getTraceKey() {
 		if (fixedImageKey!=null) return fixedImageKey;
-		createFixedKey(true);
+		createFixedKey(FORCE_TYPE.IFKEYNULL);
 		return fixedImageKey;
 	}
 	
@@ -71,22 +75,34 @@ class HistoryBean {
 	}
 	public void setPlotName(String parentPlotName) {
 		this.plotName = parentPlotName;
-		createFixedKey(false);
+		createFixedKey(FORCE_TYPE.NONE);
 	}
-	private void createFixedKey(boolean force) {
+	private String createFixedKey(FORCE_TYPE type) {
 		if (fixedImageKey==null && traceName!=null && plotName!=null) {
 			fixedImageKey = getTraceName()+":"+getPlotName();
 		}
-		if (force && fixedImageKey==null) { // Nulls allowed
+		if (type==FORCE_TYPE.IFKEYNULL && fixedImageKey==null) { // Nulls allowed
 			fixedImageKey = getTraceName()+":"+getPlotName();
 		}
+		if (type==FORCE_TYPE.FORCE) { // Nulls allowed
+			fixedImageKey = getTraceName()+":"+getPlotName();
+		}
+
+		return fixedImageKey;
 	}
 	public String getTraceName() {
 		return traceName;
 	}
-	public void setTraceName(String originalTraceName) {
-		this.traceName = originalTraceName;
-		createFixedKey(false);
+	public String setTraceName(String name) {
+		return setTraceName(name, false);
+	}
+	public String setTraceName(String name, boolean force) {
+		this.traceName = name;
+		if (force) {
+			return createFixedKey(FORCE_TYPE.FORCE);
+		} else {
+			return createFixedKey(FORCE_TYPE.NONE);
+		}
 	}
 	public AbstractDataset getYdata() {
 		return ydata;
@@ -216,7 +232,7 @@ class HistoryBean {
 	 * @param keySet
 	 */
 	public void generateUniqueKey(Set<String> keySet) {
-		createFixedKey(true);
+		createFixedKey(FORCE_TYPE.IFKEYNULL);
 		if (!keySet.contains(this.fixedImageKey)) return;
 		final Matcher matcher = pattern.matcher(traceName);
 		if (matcher.matches()) {

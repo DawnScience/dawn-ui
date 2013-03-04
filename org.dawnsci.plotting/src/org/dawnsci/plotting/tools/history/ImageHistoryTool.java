@@ -203,7 +203,8 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 		bean.setTraceName(name);
 		bean.setPlotName(getPlottingSystem().getPlotName());
 		bean.setOperator(Operator.ADD);
-		imageHistory.put(bean.getTraceKey(), bean);
+		final String key = bean.getTraceKey();
+		imageHistory.put(key, bean);
 	}
 	
 	protected MenuManager createActions(MenuManager manager) {
@@ -632,7 +633,11 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 
 		@Override
 		protected void setValue(Object element, Object value) {
-			((HistoryBean)element).setTraceName((String)value);
+			final HistoryBean bean = (HistoryBean)element;
+			final String old = bean.getTraceKey();
+			final String key = bean.setTraceName((String)value, true);
+			imageHistory.remove(old);
+			imageHistory.put(key, bean);
 			viewer.refresh(element);
 		}
 
