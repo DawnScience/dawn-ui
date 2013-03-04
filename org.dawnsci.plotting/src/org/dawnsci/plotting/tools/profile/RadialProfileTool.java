@@ -155,7 +155,7 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 		setActionsEnabled(false);
 		profileAxis.setEnabled(false);
 		
-		
+		//plotter.get
 		setActionsEnabled(isValidMetadata(getMetaData()));
 		
 		super.configurePlottingSystem(plotter);
@@ -175,21 +175,25 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 				updateSectorCenters(((IDiffractionMetadata)meta).getDetector2DProperties().getBeamCentreCoords());
 				registerMetadataListeners();
 			} else {
+				
 				metaLock.setChecked(false);
 				metaLock.run();
 				metaLock.setEnabled(false);
+				setError(true);
 			}
 		} else {
 			if (isValidMetadata(meta)) {
 				metaLock.setEnabled(true);
 			} else {
 				metaLock.setEnabled(false);
+				setError(true);
 			}
 		}
 	}
 	
 	public void deactivate() {
 		super.deactivate();
+		setError(false);
 		unregisterMetadataListeners();
 	}
 	
@@ -267,6 +271,15 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 			return meta;
 		else
 			return super.getMetaData();
+		
+	}
+	
+	private void setError(boolean isError) {
+		if (isError) {
+			getSite().getActionBars().getStatusLineManager().setErrorMessage("WARNING: Locking profile to meta data not supported for non-zero detector pitch/roll/yaw");
+		} else {
+			getSite().getActionBars().getStatusLineManager().setErrorMessage(null);
+		}
 		
 	}
 	
