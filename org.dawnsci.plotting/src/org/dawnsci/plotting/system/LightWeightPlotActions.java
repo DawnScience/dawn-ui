@@ -25,6 +25,7 @@ import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
+import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
 import org.dawnsci.plotting.preference.PlottingConstants;
@@ -53,6 +54,11 @@ import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IEditorReference;
+import org.eclipse.ui.IEditorRegistry;
+import org.eclipse.ui.IReusableEditor;
+import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -446,13 +452,31 @@ class LightWeightPlotActions {
 		};
 		hideIntensity.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.SHOW_INTENSITY));
 		
+		final Action showStack = new Action("Show other images in the same directory", IAction.AS_CHECK_BOX) {
+			
+		    public void run() {		    	
+		    	Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.LOAD_IMAGE_STACKS, isChecked());
+		    	IEditorReference[] refs = EclipseUtils.getActivePage().getEditorReferences();
+		    	for (IEditorReference iEditorReference : refs) {
+		    		IEditorPart part = iEditorReference.getEditor(false);
+		    		if (part instanceof IReusableEditor) {
+		    			((IReusableEditor)part).setInput(part.getEditorInput());
+		    		}
+				}
+		    }
+		};
+		showStack.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.LOAD_IMAGE_STACKS));
+
+		
 		actionBarManager.registerToolBarGroup("org.dawb.workbench.plotting.aspect.group");
 	    actionBarManager.registerAction("org.dawb.workbench.plotting.aspect.group", aspect, ActionType.IMAGE);
 
+	    
 	    actionBarManager.addImageAction(aspect);
 	    actionBarManager.addImageSeparator();
 	    actionBarManager.addImageAction(hideAxes);
 	    actionBarManager.addImageAction(hideIntensity);
+	    actionBarManager.addImageAction(showStack);
 	    actionBarManager.addImageSeparator();
 
 	}

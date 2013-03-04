@@ -63,7 +63,7 @@ import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
  * @author fcp94556
  *
  */
-public final class ImageTrace extends Figure implements IImageTrace, IAxisListener, ITraceContainer {
+public class ImageTrace extends Figure implements IImageTrace, IAxisListener, ITraceContainer {
 	
 	private static final Logger logger = LoggerFactory.getLogger(ImageTrace.class);
 	

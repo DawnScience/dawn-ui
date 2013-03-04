@@ -218,6 +218,18 @@ public class RegionArea extends PlotArea {
 		
 		return trace;
 	}
+	
+
+	public ImageStackTrace createImageStackTrace(String name, Axis xAxis, Axis yAxis, ColorMapRamp intensity) {
+		
+        if (imageTraces.containsKey(name)) throw new RuntimeException("There is an image called '"+name+"' already plotted!");
+        
+		final ImageStackTrace trace = new ImageStackTrace(name, xAxis, yAxis, intensity);
+		fireImageTraceCreated(new TraceEvent(trace));
+		
+		return trace;
+	}
+
 
 	/**Add a trace to the plot area.
 	 * @param trace the trace to be added.

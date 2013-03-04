@@ -48,7 +48,7 @@ import org.dawb.common.ui.plot.tool.IToolPageSystem;
 import org.dawb.common.ui.plot.trace.IPaletteListener;
 import org.dawb.common.ui.plot.trace.IPaletteListener.Stub;
 import org.dawb.common.ui.plot.trace.IPaletteTrace;
-import org.dawb.common.ui.plot.trace.IStackTrace;
+import org.dawb.common.ui.plot.trace.ILineStackTrace;
 import org.dawb.common.ui.plot.trace.ISurfaceTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
@@ -189,7 +189,7 @@ public class WindowTool extends AbstractToolPage {
         final ITrace trace = getTrace();
 		if (trace instanceof ISurfaceTrace) {
 			stackLayout.topControl = windowSystem.getPlotComposite();
-		} else if (trace instanceof IStackTrace) {
+		} else if (trace instanceof ILineStackTrace) {
 		    stackLayout.topControl = sliceControl;
 		}
 		
@@ -219,7 +219,7 @@ public class WindowTool extends AbstractToolPage {
 		sliceSlider.setIncrement(1);
 		
 		GridData gridData = new GridData(GridData.FILL, GridData.BEGINNING, false, false, 2, 1);
-		gridData.widthHint=100;
+		gridData.widthHint=130;
 		
         lowerControl = new IntegerBox(sliceControl, SWT.NONE);
         lowerControl.setLabel(" Lower    ");
@@ -324,9 +324,9 @@ public class WindowTool extends AbstractToolPage {
 		    setActionsEnabled(true);
 			updateWindowPlot((ISurfaceTrace)trace);
 			((SurfaceTrace)trace).addPaletteListener(paletteListener);
-		} else if (trace instanceof IStackTrace) {
+		} else if (trace instanceof ILineStackTrace) {
 		    setActionsEnabled(false);
-		    updateSlicePlot((IStackTrace)trace);
+		    updateSlicePlot((ILineStackTrace)trace);
 		} else {
 		    setActionsEnabled(false);
 			StackLayout stackLayout = (StackLayout)content.getLayout();
@@ -360,7 +360,7 @@ public class WindowTool extends AbstractToolPage {
 		content.layout();
 	}
 	
-	protected void updateSlicePlot(IStackTrace trace) {
+	protected void updateSlicePlot(ILineStackTrace trace) {
 		
 		StackLayout stackLayout = (StackLayout)content.getLayout();
 		stackLayout.topControl  = sliceControl;

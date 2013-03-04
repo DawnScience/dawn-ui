@@ -10,31 +10,43 @@
 
 package org.dawb.workbench.ui.editors;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.dawb.common.services.ILoaderService;
 import org.dawb.common.services.ServiceManager;
+import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.AbstractPlottingSystem.ColorOption;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingFactory;
 import org.dawb.common.ui.plot.tool.IToolPageSystem;
+import org.dawb.common.ui.plot.trace.IImageStackTrace;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.views.HeaderTablePage;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
+import org.dawb.common.util.io.FileUtils;
+import org.dawb.common.util.list.SortNatural;
 import org.dawb.workbench.ui.Activator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IReusableEditor;
@@ -43,10 +55,13 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.part.Page;
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.LazyDataset;
+import uk.ac.diamond.scisoft.analysis.io.ImageStackLoader;
 
 
 /**
@@ -143,17 +158,70 @@ public class PlotImageEditor extends EditorPart implements IReusableEditor {
 			protected IStatus run(IProgressMonitor monitor) {
 				
 				final String filePath = EclipseUtils.getFilePath(getEditorInput());
-				AbstractDataset set;
-				try {
-					final ILoaderService service = (ILoaderService)ServiceManager.getService(ILoaderService.class);
-					set = service.getDataset(filePath);
-				} catch (Throwable e) {
-					logger.error("Cannot load file "+filePath, e);
-					return Status.CANCEL_STATUS;
+				
+				final IPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
+				final boolean isStackAllowed = store.getBoolean("org.dawb.workbench.plotting.preference.loadImageStacks");
+				
+				if (!isStackAllowed) {
+					AbstractDataset set;
+					try {
+						final ILoaderService service = (ILoaderService)ServiceManager.getService(ILoaderService.class);
+						set = service.getDataset(filePath);
+					} catch (Throwable e) {
+						logger.error("Cannot load file "+filePath, e);
+						return Status.CANCEL_STATUS;
+					}
+					
+					set.setName(""); // Stack trace if null - stupid.
+					plottingSystem.clear();
+					plottingSystem.createPlot2D(set, null, monitor);
+				} else {
+				
+					plottingSystem.clear();
+					try {
+						final IImageStackTrace stack = plottingSystem.createImageStackTrace("image");
+						
+						List<String> imageFilenames = new ArrayList<String>();
+						final File  file  = new File(filePath);
+						final String ext  = FileUtils.getFileExtension(file.getName());
+						final File parent = file.getParentFile();
+						int selection=0;
+						if (parent.isDirectory()) {
+							int index=0;
+							for (String fName : parent.list()) {
+								if (fName.endsWith(ext)) {
+									final File f = new File(parent,fName);
+									imageFilenames.add(f.getAbsolutePath());
+									if (f.getAbsolutePath().equals(filePath)) {
+										selection = index;
+									}
+									index++;
+								}
+							}
+						}
+						
+						if (imageFilenames.size() > 1) {
+				 		    Collections.sort(imageFilenames, new SortNatural<String>(true));
+							ImageStackLoader loader = new ImageStackLoader(imageFilenames , new ProgressMonitorWrapper(monitor));
+							LazyDataset lazyDataset = new LazyDataset("Folder Stack", loader.getDtype(), loader.getShape(), loader);
+							
+							stack.setStack(lazyDataset);
+						}
+						
+						final int stackIndex = selection;
+						Display.getDefault().syncExec(new Runnable() {
+							@Override
+							public void run() {
+								stack.setStackIndex(stackIndex);
+								plottingSystem.addTrace(stack);
+								plottingSystem.repaint(true);
+							}
+						});
+					} catch (Exception ne) {
+						ne.printStackTrace();
+					}
 				}
-								
-				set.setName(""); // Stack trace if null - stupid.
-				plottingSystem.updatePlot2D(set, null, monitor);
+
 				
 				return Status.OK_STATUS;
 			}

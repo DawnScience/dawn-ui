@@ -16,7 +16,7 @@ import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.roi.data.SurfacePlotROI;
-import org.dawb.common.ui.plot.trace.IStackTrace;
+import org.dawb.common.ui.plot.trace.ILineStackTrace;
 import org.dawb.common.ui.plot.trace.ISurfaceTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.TraceWillPlotEvent;
@@ -175,14 +175,14 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		return container;
 	}
 	
-	public IStackTrace createStackTrace(final String name) {
+	public ILineStackTrace createStackTrace(final String name) {
 		StackTrace stack = new StackTrace(this, name);
 		// No more than 25 in the stack.
 		stack.setWindow(new LinearROI(new double[]{0.0,0.0}, new double[]{25.0,0.0}));
 		return stack;
 	}
 	
-	protected void addStackTrace(final IStackTrace trace) {
+	protected void addStackTrace(final ILineStackTrace trace) {
 		StackTrace stack = (StackTrace)trace;
 		try {
 			stack.setPlottingSystem((AbstractPlottingSystem)system);
@@ -206,7 +206,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	 * @return
 	 * @throws Exception 
 	 */
-	public void removeStackTrace(final IStackTrace trace) {
+	public void removeStackTrace(final ILineStackTrace trace) {
 		StackTrace surface = (StackTrace)trace;
 		removeOldSceneNodes();
 		surface.setActive(false);
@@ -231,7 +231,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		
 		if (trace instanceof ISurfaceTrace) {
 			system.setPlotType(PlotType.SURFACE);
-		} else if (trace instanceof IStackTrace) {
+		} else if (trace instanceof ILineStackTrace) {
 			system.setPlotType(PlotType.XY_STACKED_3D);
 		}
 		TraceWillPlotEvent evt = new TraceWillPlotEvent(trace, true);
@@ -240,8 +240,8 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 
 		if (trace instanceof ISurfaceTrace) {
 			addSurfaceTrace((ISurfaceTrace)trace);
-		} else if (trace instanceof IStackTrace) {
-			addStackTrace((IStackTrace)trace);
+		} else if (trace instanceof ILineStackTrace) {
+			addStackTrace((ILineStackTrace)trace);
 		}
  		currentTrace = trace;
 	}

@@ -3,7 +3,7 @@ package org.dawnsci.plotting.jreality;
 import java.util.Arrays;
 import java.util.List;
 
-import org.dawb.common.ui.plot.trace.IStackTrace;
+import org.dawb.common.ui.plot.trace.ILineStackTrace;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 
 import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
@@ -11,7 +11,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
-public class StackTrace extends PlotterTrace implements IStackTrace {
+public class StackTrace extends PlotterTrace implements ILineStackTrace {
 
 	
 	private AbstractDataset[] stack;

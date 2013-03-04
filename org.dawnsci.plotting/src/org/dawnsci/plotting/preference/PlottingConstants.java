@@ -79,5 +79,10 @@ public class PlottingConstants extends BasePlottingConstants {
 	 * Stores if intensity scale should be shown.
 	 */
 	public static final String SHOW_INTENSITY = "org.dawb.workbench.plotting.preference.showIntensity";
+	
+	/**
+	 * Tells the Image editor to attempt to load stacks.
+	 */
+	public static final String LOAD_IMAGE_STACKS = "org.dawb.workbench.plotting.preference.loadImageStacks";
 
 }

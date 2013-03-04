@@ -31,9 +31,10 @@ import org.dawb.common.ui.plot.axis.IPositionListener;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
+import org.dawb.common.ui.plot.trace.IImageStackTrace;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
-import org.dawb.common.ui.plot.trace.IStackTrace;
+import org.dawb.common.ui.plot.trace.ILineStackTrace;
 import org.dawb.common.ui.plot.trace.ISurfaceTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
@@ -470,6 +471,13 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		return trace;
 	}
 	
+	@Override
+	public IImageStackTrace createImageStackTrace(String traceName) {
+		IImageStackTrace trace = lightWeightViewer.createImageStackTrace(traceName);
+		fireTraceCreated(new TraceEvent(trace));
+		return trace;
+	}
+
 	/**
 	 * An IdentityHashMap used to map AbstractDataset to color used to plot it.
 	 * records keys for both strings and sets so that different models for the
@@ -516,7 +524,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			
 		} else {
 			traceMap.clear();
-			IStackTrace trace = jrealityViewer.createStackTrace(title);
+			ILineStackTrace trace = jrealityViewer.createStackTrace(title);
 			final AbstractDataset x = xIn;
 			final AbstractDataset y = AbstractDataset.arange(getMaxSize(ysIn), AbstractDataset.INT32);
 			final AbstractDataset z = AbstractDataset.arange(ysIn.size(), AbstractDataset.INT32);
@@ -583,7 +591,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	}
 	
 	@Override
-	public IStackTrace createStackTrace(String traceName) {	
+	public ILineStackTrace createLineStackTrace(String traceName) {	
 		return jrealityViewer.createStackTrace(traceName);
 	}
 	

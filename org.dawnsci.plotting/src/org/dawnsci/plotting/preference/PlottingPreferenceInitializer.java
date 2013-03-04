@@ -46,5 +46,6 @@ public class PlottingPreferenceInitializer extends AbstractPreferenceInitializer
 		store.setDefault(PlottingConstants.MASK_REGIONS_ENABLED, false);
 		store.setDefault(PlottingConstants.RESET_ON_DEACTIVATE,  true);
 		store.setDefault(PlottingConstants.INCLUDE_ORIGINAL,     true);
+		store.setDefault(PlottingConstants.LOAD_IMAGE_STACKS,    false);
 	}
 }

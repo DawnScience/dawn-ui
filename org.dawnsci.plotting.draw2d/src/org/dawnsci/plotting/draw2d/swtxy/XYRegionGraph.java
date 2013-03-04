@@ -104,6 +104,11 @@ public class XYRegionGraph extends XYGraph {
 		RegionArea ra = (RegionArea)getPlotArea();
 		return ra.createImageTrace(name, xAxis, yAxis, intensity);
 	}
+	public ImageStackTrace createImageStackTrace(String name, Axis xAxis, Axis yAxis, ColorMapRamp intensity) {
+		RegionArea ra = (RegionArea)getPlotArea();
+		return ra.createImageStackTrace(name, xAxis, yAxis, intensity);
+	}
+	
 	public void addImageTrace(final ImageTrace trace) {
 		getRegionArea().addImageTrace(trace);
 	}

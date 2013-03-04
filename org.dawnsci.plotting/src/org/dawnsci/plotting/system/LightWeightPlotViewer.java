@@ -6,7 +6,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.csstudio.swt.widgets.datadefinition.IManualValueChangeListener;
 import org.csstudio.swt.widgets.figureparts.ColorMapRamp;
+import org.csstudio.swt.widgets.figures.ScaledSliderFigure;
 import org.csstudio.swt.xygraph.figures.Annotation;
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.linearscale.AbstractScale.LabelSide;
@@ -30,6 +32,7 @@ import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionContainer;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.IRegionSystem;
+import org.dawb.common.ui.plot.trace.IImageStackTrace;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace.PointStyle;
@@ -45,6 +48,7 @@ import org.dawb.common.ui.printing.PrintSettings;
 import org.dawb.gda.extensions.util.DatasetTitleUtils;
 import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.draw2d.swtxy.AspectAxis;
+import org.dawnsci.plotting.draw2d.swtxy.ImageStackTrace;
 import org.dawnsci.plotting.draw2d.swtxy.ImageTrace;
 import org.dawnsci.plotting.draw2d.swtxy.LineTrace;
 import org.dawnsci.plotting.draw2d.swtxy.RegionArea;
@@ -59,7 +63,10 @@ import org.dawnsci.plotting.util.TraceUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.draw2d.BorderLayout;
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.FigureCanvas;
+import org.eclipse.draw2d.GridData;
+import org.eclipse.draw2d.GridLayout;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.Layer;
@@ -121,8 +128,9 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 	// Plotting stuff
 	private PlottingSystemImpl     system;
 	private LightWeightPlotActions plotActionsCreator;
+	private Figure                 plotContents;
 	private ColorMapRamp           intensity;
-
+    private ScaledSliderFigure     folderScale;
 
 	public void init(PlottingSystemImpl system) {
 		this.system = system;
@@ -173,13 +181,37 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
  		// region draw layer is on 0)
  		final LayeredPane layers      = new LayeredPane();
         new RegionCreationLayer(layers, xyGraph.getRegionArea());  
-        final Layer graphLayer = new Layer();
+        Layer graphLayer = new Layer();
+        
         graphLayer.setLayoutManager(new BorderLayout());
-        graphLayer.add(xyGraph, BorderLayout.CENTER);
+        
+        plotContents = new Figure();
+        plotContents.setLayoutManager(new GridLayout(1, false));
+        plotContents.add(xyGraph, new GridData(SWT.FILL, SWT.FILL, true, true));
+        graphLayer.add(plotContents, BorderLayout.CENTER);
+        
 		this.intensity = new ColorMapRamp();
+ 		intensity.setBorder(new LineBorder(ColorConstants.white, 5));
         graphLayer.add(intensity, BorderLayout.RIGHT);
-		intensity.setVisible(false);
-		intensity.setBorder(new LineBorder(ColorConstants.white, 5));
+        intensity.setVisible(false);
+      
+        this.folderScale = new ScaledSliderFigure();
+        folderScale.setRange(0, 100);
+        folderScale.setStepIncrement(1.0);
+        folderScale.setValue(0);
+        folderScale.setHorizontal(true);
+        folderScale.setShowHi(false);
+        folderScale.setShowLo(false);
+        folderScale.setShowHihi(false);
+        folderScale.setShowLolo(false);
+        folderScale.setShowMarkers(false);
+        folderScale.setDrawFocus(false);
+        folderScale.addManualValueChangeListener(new IManualValueChangeListener() {			
+			@Override
+			public void manualValueChanged(double newValue) {
+				setStackIndex((int)Math.round(newValue));
+			}
+		});
 		
   		layers.add(graphLayer,     0);
 		lws.setContents(layers);
@@ -229,6 +261,28 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		
 		
 	}
+	
+	private void setStackIndex(int index) {
+		if (system.getTraces()!=null && !system.getTraces().isEmpty()) {
+			final ITrace trace = system.getTraces().iterator().next();
+			if (trace instanceof IImageStackTrace) {
+				IImageStackTrace stack = (IImageStackTrace)trace;
+				stack.setStackIndex(index); // Updates the plot.
+			}
+		}
+	}
+
+	private void setFolderScaleVisible(boolean vis) {
+		if (vis) {
+	        GridData data = new GridData(SWT.FILL, SWT.FILL, true, false);
+	        data.heightHint=80;
+	        plotContents.add(folderScale, data);
+		} else {
+			if (folderScale.getParent()==null) return;
+			plotContents.remove(folderScale);
+		}
+	}
+
 	
 	public void addImageTraceListener(final ITraceListener l) {
 		if (xyGraph!=null) ((RegionArea)xyGraph.getPlotArea()).addImageTraceListener(l);
@@ -553,6 +607,16 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		trace.setPlottingSystem(system);
 		return trace;
 	}
+	
+	protected IImageStackTrace createImageStackTrace(String traceName) {
+		final Axis xAxis = (Axis)getSelectedXAxis();
+		final Axis yAxis = (Axis)getSelectedYAxis();
+		
+		final ImageStackTrace trace = xyGraph.createImageStackTrace(traceName, xAxis, yAxis, intensity);
+		trace.setPlottingSystem(system);
+		return trace;
+	}
+
 
 	/**
 	 * Internal usage only
@@ -660,13 +724,28 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 
 		if (trace instanceof IImageTrace) {
 
-			xyGraph.addImageTrace((ImageTrace)trace);
+			final IImageTrace image = (IImageTrace)trace;
+			xyGraph.addImageTrace((ImageTrace)image);
 			removeAdditionalAxes(); // Do not have others with images.
 			
 			if (trace.getData().getDtype() == AbstractDataset.RGB) {
 				intensity.setVisible(false);
 			} else {
 			    intensity.setVisible(Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.SHOW_INTENSITY));
+			}
+			
+			// If we are a stack, show the scale for iterating images.
+			if (image instanceof IImageStackTrace) {
+				IImageStackTrace stack = (IImageStackTrace)image;
+                if (stack.getStackSize()>1) {
+					setFolderScaleVisible(true);
+					folderScale.setRange(0, stack.getStackSize());
+					folderScale.setValue(stack.getStackIndex());
+                } else {
+                	setFolderScaleVisible(false);
+                }
+			} else {
+				setFolderScaleVisible(false);
 			}
 
 		} else {
