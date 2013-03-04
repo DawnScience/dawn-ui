@@ -243,10 +243,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				
 				if (rescaleType==ImageScaleType.REHISTOGRAM) { // Avoids changing colouring to 
 					// max and min of new selection.
-					AbstractDataset  slice     = slice(getXAxis().getRange(), getYAxis().getRange(), getData());
+					AbstractDataset  slice     = slice(getYAxis().getRange(), getXAxis().getRange(), getData());
 					ImageServiceBean histoBean = imageServiceBean.clone();
 					histoBean.setImage(slice);
-					if (fullMask!=null) histoBean.setMask(slice(getXAxis().getRange(), getYAxis().getRange(), fullMask));
+					if (fullMask!=null) histoBean.setMask(slice(getYAxis().getRange(), getXAxis().getRange(), fullMask));
 					float[] fa = service.getFastStatistics(histoBean);
 					
 					// Not sure how to deal with this better, but if the bean is logged, then you need to modify the values
@@ -257,8 +257,6 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 						setMin(fa[0]);
 						setMax(fa[1]);
 					}
-					
-
 				}
 								
 				this.imageData   = service.getImageData(imageServiceBean);
