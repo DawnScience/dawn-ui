@@ -91,7 +91,7 @@ public class ImageEditor extends MultiPageEditorPart implements IReusableEditor 
 				index++;
 			}
 
-			this.plotImageEditor = new PlotImageEditor();
+			this.plotImageEditor = new PlotImageEditor(this);
 			addPage(index, plotImageEditor,       getEditorInput());
 			setPageText(index, "Image");
 			index++;
