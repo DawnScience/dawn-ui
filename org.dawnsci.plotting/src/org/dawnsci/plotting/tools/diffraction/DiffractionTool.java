@@ -727,7 +727,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 				}
 			}
 		};
-		refine.setImageDescriptor(Activator.getImageDescriptor("icons/findmorerings.png"));
+		refine.setImageDescriptor(Activator.getImageDescriptor("icons/refine.png"));
 
 		final Action findMore = new Action("Find more rings", IAction.AS_PUSH_BUTTON) {
 			@Override
@@ -769,7 +769,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 				}
 			}
 		};
-		findMore.setImageDescriptor(Activator.getImageDescriptor("icons/refine.png"));
+		findMore.setImageDescriptor(Activator.getImageDescriptor("icons/findmorerings.png"));
 		findMore.setToolTipText("Find more rings");
 
 		if (lock==null) lock = new Action("Lock the diffraction data and apply it to newly opened files.",IAction.AS_CHECK_BOX) {
