@@ -27,12 +27,15 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CLabel;
+import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Spinner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,15 +44,25 @@ import org.slf4j.LoggerFactory;
  * A spinner class that supports floating point numbers of fixed precision
  */
 public class FloatSpinner extends Composite {
+	
 	private static final Logger logger = LoggerFactory.getLogger(FloatSpinner.class);
 
-	private int width;
-	private int precision;
-	private int maximumValue;
+	/**
+	 * prims
+	 */
+	private int    width;
+	private int    precision;
+	private int    maximumValue;
 	private double factor;
-	private Spinner spinner;
+	
+	/**
+	 * objects
+	 */
+	private Spinner                 spinner;
 	private List<SelectionListener> listeners;
-	private SelectionAdapter sListener;
+	private SelectionAdapter        sListener;
+	private CLabel                  errorLabel;
+	private Composite               content;
 
 	/**
 	 * Create a fixed float spinner
@@ -72,7 +85,11 @@ public class FloatSpinner extends Composite {
 	public FloatSpinner(Composite parent, int style, int width, int precision) {
 		super(parent, SWT.NONE);
 		setLayout(new FillLayout());
-		spinner = new Spinner(this, style);
+		
+		this.content = new Composite(this, SWT.NONE);
+		content.setLayout(new StackLayout());
+		
+		spinner = new Spinner(content, style);
 		setFormat(width, precision);
 		listeners = new ArrayList<SelectionListener>();
 		sListener = new SelectionAdapter() {
@@ -83,6 +100,9 @@ public class FloatSpinner extends Composite {
 		};
 		spinner.addSelectionListener(sListener);
 
+		this.errorLabel = new CLabel(content, SWT.NONE);
+		errorLabel.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_RED));
+		((StackLayout)content.getLayout()).topControl = spinner;
 	}
 
 	protected void notifySelectionListeners(SelectionEvent e) {
@@ -135,10 +155,20 @@ public class FloatSpinner extends Composite {
 		return width;
 	}
 
+	private Double invalidValue = null;
 	/**
 	 * @param value
 	 */
 	public void setDouble(double value) {
+		if (Double.isInfinite(value)||Double.isNaN(value)) {
+			((StackLayout)content.getLayout()).topControl = errorLabel;
+			errorLabel.setText(String.valueOf(value));
+			content.layout();
+			invalidValue = value;
+			return;
+		}
+		((StackLayout)content.getLayout()).topControl = spinner;
+
 		spinner.setSelection((int) (value * factor));
 	}
 
@@ -146,6 +176,7 @@ public class FloatSpinner extends Composite {
 	 * @return value
 	 */
 	public double getDouble() {
+		if (invalidValue!=null) return invalidValue;
 		return spinner.getSelection() / factor;
 	}
 
