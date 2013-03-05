@@ -336,7 +336,7 @@ public class EllipseFittingTool extends AbstractToolPage {
 				}
 			}
 		};
-		circle.setImageDescriptor(Activator.getImageDescriptor("icons/aspect.png"));
+		circle.setImageDescriptor(Activator.getImageDescriptor("icons/fitocircle.png"));
 		circle.setToolTipText("Restrict fit to a circle");
 
 		IToolBarManager tbm = getSite().getActionBars().getToolBarManager();
