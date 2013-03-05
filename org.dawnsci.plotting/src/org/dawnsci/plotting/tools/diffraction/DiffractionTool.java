@@ -619,7 +619,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 				}
 			}
 		};
-		fitRing.setImageDescriptor(Activator.getImageDescriptor("icons/centre.png"));
+		fitRing.setImageDescriptor(Activator.getImageDescriptor("icons/eclipsecirclepoints.png"));
 		fitRing.setToolTipText("Select 3 or 4 points on ring to fit a circle or 5 points or more for an ellipse");
 
 		final Action refine = new Action("Refine beam centre", IAction.AS_PUSH_BUTTON) {
@@ -727,7 +727,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 				}
 			}
 		};
-		refine.setImageDescriptor(Activator.getImageDescriptor("icons/refine.png"));
+		refine.setImageDescriptor(Activator.getImageDescriptor("icons/findmorerings.png"));
 
 		final Action findMore = new Action("Find more rings", IAction.AS_PUSH_BUTTON) {
 			@Override
