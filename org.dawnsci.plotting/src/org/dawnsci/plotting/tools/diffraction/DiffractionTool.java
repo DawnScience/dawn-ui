@@ -585,6 +585,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 				}
 
 				try {
+					clearRegions(plotter);
 					if (tmpRegion != null) {
 						plotter.removeRegion(tmpRegion);
 					}
@@ -612,6 +613,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 				}
 
 				try {
+					clearRegions(plotter);
 					if (tmpRegion != null) {
 						plotter.removeRegion(tmpRegion);
 					}
@@ -876,6 +878,16 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		getSite().getActionBars().getMenuManager().add(new Separator());
 	}
 
+	private static final String RING_PREFIX = "Ring";
+	private void clearRegions(IPlottingSystem plotter) {
+		Collection<IRegion> regions = plotter.getRegions();
+		for (IRegion r : regions) {
+			String n = r.getName();
+			if (n.startsWith(RING_PREFIX))
+				plotter.removeRegion(r);
+		}
+	}
+
 	private IStatus runEllipseFit(final IProgressMonitor monitor, Display display, final IPlottingSystem plotter, IImageTrace t, final boolean circle) {
 		final String shape = circle ? "circle" : "ellipse";
 		monitor.beginTask("Refine " + shape + " fit", 100);
@@ -929,7 +941,8 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 						monitor.subTask("Add region: " + i);
 						EllipticalROI e = ells.get(i);
 						logger.debug("Ellipse from peaks: {}, {}", i, e);
-						IRegion region = plotter.createRegion(RegionUtils.getUniqueName("Ring", getPlottingSystem()), e instanceof EllipticalFitROI ? RegionType.ELLIPSEFIT : RegionType.ELLIPSE);
+						IRegion region = plotter.createRegion(RegionUtils.getUniqueName(RING_PREFIX, getPlottingSystem()), RegionType.ELLIPSE);
+						region.setMobile(false);
 						region.setROI(e);
 						monitor.worked(20);
 						region.setRegionColor(ColorConstants.orange);
