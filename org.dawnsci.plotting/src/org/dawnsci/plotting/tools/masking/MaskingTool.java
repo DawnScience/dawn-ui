@@ -46,16 +46,21 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.ColorSelector;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
+import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.window.ToolTip;
@@ -73,6 +78,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -894,12 +900,62 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		var.getColumn().setText("Name");
 		var.getColumn().setWidth(200);
 		var.setLabelProvider(new MaskingLabelProvider());
+		var.setEditingSupport(new NameEditingSupport(viewer));
 		
 		var = new TableViewerColumn(viewer, SWT.CENTER, 2);
 		var.getColumn().setText("Type");
 		var.getColumn().setWidth(120);
 		var.setLabelProvider(new MaskingLabelProvider());
 	}
+	
+	private boolean isInDoubleClick = false;
+	private class NameEditingSupport extends EditingSupport {
+
+		public NameEditingSupport(ColumnViewer viewer) {
+			super(viewer);
+		}
+
+		@Override
+		protected CellEditor getCellEditor(Object element) {
+			return new TextCellEditor((Composite)getViewer().getControl());
+		}
+
+		@Override
+		protected boolean canEdit(Object element) {
+			return isInDoubleClick;
+		}
+
+		@Override
+		protected Object getValue(Object element) {
+			return ((IRegion)element).getName();
+		}
+
+		@Override
+		protected void setValue(Object element, Object value) {
+			IRegion region  = (IRegion)element;
+			try {
+				String name = (String)value;
+				if (name!=null) {
+					name = name.trim();
+					if (name.equals(region.getName())) return;
+				}
+				
+				if (getPlottingSystem().getRegion(name)!=null || name==null || "".equals(name)) {
+					throw new Exception("The region name '"+name+"' is not allowed.");
+				}
+				getPlottingSystem().renameRegion(region, name);
+				
+			} catch (Exception e) {
+				final String message = "The name '"+value+"' is not valid.";
+				final Status status  = new Status(Status.WARNING, "org.dawnsci.plotting", message, e);
+				ErrorDialog.openError(Display.getDefault().getActiveShell(), "Cannot rename region", message, status);
+			    return;
+			}
+			getViewer().refresh(element);
+		}
+
+	}
+
 		
 	private class MaskingLabelProvider extends ColumnLabelProvider {
 	
@@ -1282,12 +1338,28 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	@Override
 	public void mouseDoubleClick(MouseEvent e) {
 		
+		final TableItem item = this.regionTable.getTable().getItem(new Point(e.x, e.y));
+		if (e.button==1 && item!=null) {
+			
+			Rectangle rect = item.getBounds(1); // Name
+            if (!rect.contains(e.x,e.y)) return;
+			try {
+				IRegion region = (IRegion)item.getData();
+				isInDoubleClick = true;
+				regionTable.editElement(region, 1);
+			} finally {
+				isInDoubleClick = false;
+			}
+		}
 	}
 
 	@Override
 	public void mouseDown(MouseEvent e) {
 		final TableItem item = this.regionTable.getTable().getItem(new Point(e.x, e.y));
 		if (item!=null) {
+			Rectangle rect = item.getBounds(0); // Tick
+            if (!rect.contains(e.x,e.y)) return;
+
 			IRegion region = (IRegion)item.getData();
 			region.setMaskRegion(!region.isMaskRegion());
 			region.setUserObject(MaskObject.MaskRegionType.REGION_FROM_MASKING);
