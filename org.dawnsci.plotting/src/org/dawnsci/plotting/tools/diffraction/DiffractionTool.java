@@ -460,6 +460,10 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	private TreeNode   copiedNode;
 	private MenuAction calibrantActions;
 	private Action     calPref;
+
+	private Action refine;
+
+	private Action findMore;
 	private static Action lock;
 	
 	private void createActions() {
@@ -587,7 +591,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 					tmpRegion = plotter.createRegion(RegionUtils.getUniqueName("BeamCentrePicker", getPlottingSystem()), IRegion.RegionType.POINT);
 					tmpRegion.setUserRegion(false);
 					tmpRegion.setVisible(false);
-					
+					refine.setEnabled(true);
 				} catch (Exception e) {
 					logger.error("Cannot add beam centre", e);
 				}
@@ -614,6 +618,8 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 					tmpRegion = plotter.createRegion(RegionUtils.getUniqueName("RingPicker", getPlottingSystem()), IRegion.RegionType.ELLIPSEFIT);
 					tmpRegion.setUserRegion(false);
 					tmpRegion.addROIListener(roiListener);
+					findMore.setEnabled(true);
+					refine.setEnabled(true);
 				} catch (Exception e) {
 					logger.error("Cannot add ring", e);
 				}
@@ -622,7 +628,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		fitRing.setImageDescriptor(Activator.getImageDescriptor("icons/eclipsecirclepoints.png"));
 		fitRing.setToolTipText("Select 3 or 4 points on ring to fit a circle or 5 points or more for an ellipse");
 
-		final Action refine = new Action("Refine beam centre", IAction.AS_PUSH_BUTTON) {
+		refine = new Action("Refine beam centre", IAction.AS_PUSH_BUTTON) {
 			
 			class Compare implements Comparator<IPeak> {
 
@@ -667,9 +673,9 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 
 			@Override
 			public void run() {
+				final IPlottingSystem plotter = getPlottingSystem();
+				final IImageTrace t = getImageTrace();
 				if (tmpRegion instanceof EllipseFitSelection) {
-					final IPlottingSystem plotter = getPlottingSystem();
-					final IImageTrace t = getImageTrace();
 					final Display display = control.getDisplay();
 					if (t != null) {
 						Job job = new Job("Circle fit refinement") {
@@ -687,13 +693,13 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 				}
 				try {
 					
-					Collection<IRegion> regions = getPlottingSystem().getRegions(RegionType.SECTOR);
+					Collection<IRegion> regions = plotter.getRegions(RegionType.SECTOR);
 					if (regions.size() == 0) {
-						return;
+						throw new IllegalStateException();
 					}
 					SectorROI sroi = (SectorROI) regions.iterator().next().getROI();
-					AbstractDataset dataset = getImageTrace().getData();
-					AbstractDataset mask = getImageTrace().getMask();
+					AbstractDataset dataset = t.getData();
+					AbstractDataset mask = t.getMask();
 					final BeamCenterRefinement beamOffset = new BeamCenterRefinement(dataset, mask, sroi);
 					List<IPeak> peaks = loadPeaks();
 					if (peaks==null) throw new Exception("Cannot find peaks!");
@@ -728,8 +734,9 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			}
 		};
 		refine.setImageDescriptor(Activator.getImageDescriptor("icons/refine.png"));
+		refine.setEnabled(false);
 
-		final Action findMore = new Action("Find more rings", IAction.AS_PUSH_BUTTON) {
+		findMore = new Action("Find more rings", IAction.AS_PUSH_BUTTON) {
 			@Override
 			public void run() {
 				logger.debug("Find more clicked");
@@ -771,6 +778,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		};
 		findMore.setImageDescriptor(Activator.getImageDescriptor("icons/findmorerings.png"));
 		findMore.setToolTipText("Find more rings");
+		findMore.setEnabled(false);
 
 		if (lock==null) lock = new Action("Lock the diffraction data and apply it to newly opened files.",IAction.AS_CHECK_BOX) {
 		    @Override
@@ -886,7 +894,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 					monitor.worked(50);
 					logger.debug("{} from peaks: {}", shape, froi);
 					region.setROI(froi);
-					region.setRegionColor(ColorConstants.cyan);
+					region.setRegionColor(circle ? ColorConstants.cyan : ColorConstants.orange);
 					plotter.removeRegion(tmpRegion);
 					monitor.subTask("Add region");
 					tmpRegion = region;
@@ -915,6 +923,8 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			public void run() {
 				try {
 					int emax = ells.size();
+					if (emax > 0)
+						plotter.removeRegion(tmpRegion);
 					for (int i = 0; i < emax; i++) {
 						monitor.subTask("Add region: " + i);
 						EllipticalROI e = ells.get(i);
@@ -922,7 +932,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 						IRegion region = plotter.createRegion(RegionUtils.getUniqueName("Ring", getPlottingSystem()), e instanceof EllipticalFitROI ? RegionType.ELLIPSEFIT : RegionType.ELLIPSE);
 						region.setROI(e);
 						monitor.worked(20);
-						region.setRegionColor(ColorConstants.cyan);
+						region.setRegionColor(ColorConstants.orange);
 						region.setUserRegion(false);
 						plotter.addRegion(region);
 					}
@@ -1011,5 +1021,4 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	public void calibrantSelectionChanged(CalibrantSelectionEvent evt) {
 		updateCalibrationActions((CalibrationStandards)evt.getSource());
 	}
-
 }
