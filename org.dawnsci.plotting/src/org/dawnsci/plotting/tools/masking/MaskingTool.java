@@ -62,6 +62,7 @@ import org.eclipse.jface.window.ToolTip;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
@@ -151,11 +152,13 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			public void regionCreated(RegionEvent evt) {
 				// Those created while the tool is active are mask regions			
                 evt.getRegion().setMaskRegion(true);
+                evt.getRegion().setUserObject(MaskObject.MaskRegionType.REGION_FROM_MASKING);
                 int wid = Activator.getDefault().getPreferenceStore().getInt(PlottingConstants.FREE_DRAW_WIDTH);
                 evt.getRegion().setLineWidth(wid);
 			}
 			@Override
 			public void regionAdded(final RegionEvent evt) {
+				setLastActionRange(false);
 				evt.getRegion().addROIListener(regionBoundsListener);
 				processMask(evt.getRegion());
 				regionTable.refresh();
@@ -209,6 +212,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 				if (item!=null) item.getAction().setChecked(true);
 				return;
 			}
+			setLastActionRange(false);
 			maskJob.schedule(false, null, me.getLocation());
 		}
 		@Override
@@ -219,6 +223,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 				if (item!=null) item.getAction().setChecked(true);
 				return;
 			}
+			setLastActionRange(false);
 			maskJob.schedule(false, null, me.getLocation());
 		}
 		@Override
@@ -257,7 +262,14 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		
 		Label label = new Label(minMaxComp, SWT.WRAP);
 		label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2,1));
-		label.setText("Create a mask, the mask is saved and available in other tools.");	
+		label.setText("Create a mask, the mask can be saved and available in other tools.");
+		
+		final CLabel warningMessage = new CLabel(minMaxComp, SWT.WRAP);
+		warningMessage.setText("Changing lower / upper can reset the mask.");
+		warningMessage.setToolTipText("The reset can occur because the algorithm which processes intensity values,\ndoes not know if the mask pixel should be unmasked or not.\nIt can only take into account intensity.\nTherefore it is best to define intensity masks first,\nbefore the custom masks using pen or region tools." );
+		warningMessage.setImage(Activator.getImage("icons/error.png"));
+		warningMessage.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2,1));
+		GridUtils.setVisible(warningMessage, false);
 		
 		// Max and min
 		
@@ -265,16 +277,6 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		minEnabled.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1,1));
 		minEnabled.setText("Enable lower mask    ");
 		minEnabled.setToolTipText("Enable the lower bound mask, removing pixels with lower intensity.");
-		minEnabled.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				minimum.setEnabled(minEnabled.getSelection());
-				if (!minEnabled.getSelection()) {
-					processMask(true, true, null);
-				} else {
-				    processMask(false, true, null);
-				}
-			}
-		});
 		
 		this.minimum = new Spinner(minMaxComp, SWT.NONE);
 		minimum.setEnabled(false);
@@ -286,12 +288,13 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		minimum.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				processMask(true, false, null);
+				setLastActionRange(true);
 			}
 		});
 		minimum.addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
 				if (e.character=='\n' || e.character=='\r') {
-					processMask(true, true, null);
+					processMask(isLastActionRange(), true, null);
 				}
 			}
 		});
@@ -301,9 +304,25 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		maxEnabled.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1,1));
 		maxEnabled.setText("Enable upper mask    ");
 		maxEnabled.setToolTipText("Enable the upper bound mask, removing pixels with higher intensity.");
+		
+		
+		minEnabled.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				minimum.setEnabled(minEnabled.getSelection());
+				GridUtils.setVisible(warningMessage, minEnabled.getSelection()||maxEnabled.getSelection());
+				warningMessage.getParent().getParent().layout();
+				if (!minEnabled.getSelection()) {
+					warningMessage.getParent().getParent().layout();
+				} else {
+				    processMask(false, true, null);
+				}
+			}
+		});
 		maxEnabled.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				maximum.setEnabled(maxEnabled.getSelection());
+				GridUtils.setVisible(warningMessage, minEnabled.getSelection()||maxEnabled.getSelection());
+				warningMessage.getParent().getParent().layout();
 				if (!maxEnabled.getSelection()) {
 					processMask(true, true, null);
 				} else {
@@ -322,12 +341,13 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		maximum.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				processMask(true, false, null);
+				setLastActionRange(true);
 			}
 		});
 		maximum.addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
 				if (e.character=='\n' || e.character=='\r') {
-					processMask(true, true, null);
+					processMask(isLastActionRange(), true, null);
 				}
 			}
 		});
@@ -439,7 +459,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		apply.setText("Apply");
 		apply.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				processMask(true, true, null);
+				processMask(isLastActionRange(), true, null);
 			}
 		});
 		apply.setEnabled(true);
@@ -506,6 +526,16 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 				layout.topControl = regionComp;
         	}
         }
+	}
+	
+	private boolean lastActionRange = false;
+	
+	protected void setLastActionRange(boolean isRange) {
+		lastActionRange = isRange;
+	}
+
+	protected boolean isLastActionRange() {
+		return lastActionRange;
 	}
 
 	protected void setRegionsVisible(boolean isVis) {
@@ -1260,6 +1290,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		if (item!=null) {
 			IRegion region = (IRegion)item.getData();
 			region.setMaskRegion(!region.isMaskRegion());
+			region.setUserObject(MaskObject.MaskRegionType.REGION_FROM_MASKING);
 			regionTable.refresh(region);
 			processMask(true, false, null);
 		}
