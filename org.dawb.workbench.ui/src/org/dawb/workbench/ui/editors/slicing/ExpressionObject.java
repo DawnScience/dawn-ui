@@ -14,21 +14,25 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.jexl2.Expression;
+import org.apache.commons.jexl2.ExpressionImpl;
+import org.apache.commons.jexl2.JexlContext;
+import org.apache.commons.jexl2.JexlEngine;
+import org.apache.commons.jexl2.MapContext;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.plot.IPlottingSystemData;
 import org.dawb.common.ui.slicing.DimsData;
 import org.dawb.common.ui.slicing.DimsDataList;
 import org.dawb.common.ui.slicing.SliceUtils;
 import org.dawb.workbench.ui.Activator;
+import org.dawnsci.jexl.utils.JexlUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.nfunk.jep.JEP;
-import org.nfunk.jep.ParseException;
-import org.nfunk.jep.SymbolTable;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
@@ -42,6 +46,7 @@ public class ExpressionObject {
 	private String expression;
 	private String mementoKey;
 	private IPlottingSystemData provider;
+	private JexlEngine jexl;
 	
 	public ExpressionObject(IPlottingSystemData provider) {
 		this(provider, null, generateMementoKey());
@@ -122,13 +127,14 @@ public class ExpressionObject {
 			if (dataSet!=null) {
 				return true;
 			}
-			final SymbolTable vars = getSymbolTable();
-		    for (Object key : vars.keySet()) {
-		    	final Object value = vars.getValue(key);
-		    	if (value==null) {
-		    		if (monitor.isCanceled()) return false;
-		    		if (!provider.isExpressionSetName(key.toString(), new ProgressMonitorWrapper(monitor))) return false;
-		    	}
+			if (jexl==null) jexl = JexlUtils.getDawnJexlEngine();
+			ExpressionImpl ex    = (ExpressionImpl)jexl.createExpression(expression);
+			Set<List<String>> names = ex.getVariables();
+			
+		    for (List<String> entry : names) {
+		    	final String key = entry.get(0);
+		    	if (monitor.isCanceled()) return false;
+		    	if (!provider.isExpressionSetName(key, new ProgressMonitorWrapper(monitor))) return false;
 			}
 			return true;
 		} catch (Exception ne) {
@@ -162,7 +168,6 @@ public class ExpressionObject {
 		return dataSet!=null ? Arrays.toString(dataSet.getShape()) : "0";
 	}
 
-	private JEP             jepParser;
 	private AbstractDataset dataSet;
 	public AbstractDataset getDataSet(IProgressMonitor monitor) throws Exception {
 		
@@ -178,19 +183,19 @@ public class ExpressionObject {
 	    }
 		
 		final List<AbstractDataset> refs = getVariables(monitor);
-		final double[]       data = new double[refs.get(0).getSize()];
 		
-		// TODO evaluate expression with numpy-like level not individual
-		for (int i = 0; i < data.length; i++) {
-			for (AbstractDataset d : refs) {
-				final String name = getSafeName(d.getName());
-				jepParser.addVariable(name, d.getDouble(i));
-			}
-			jepParser.parseExpression(expression);
-			data[i] = jepParser.getValue();
+		if (jexl==null) jexl = JexlUtils.getDawnJexlEngine();
+		
+		JexlContext context = new MapContext();
+
+		for (AbstractDataset d : refs) {
+			final String name = getSafeName(d.getName());
+			context.set(name, d);
 		}
 		
-		this.dataSet = new DoubleDataset(data);
+		Expression ex = jexl.createExpression(expression);
+        
+		this.dataSet = (AbstractDataset)ex.evaluate(context);
 		dataSet.setName(getExpression());
 		return this.dataSet;
 	}
@@ -268,38 +273,23 @@ public class ExpressionObject {
 	private List<AbstractDataset> getVariables(IProgressMonitor monitor) throws Exception {
 		
 		final List<AbstractDataset> refs = new ArrayList<AbstractDataset>(7);
-		final SymbolTable vars = getSymbolTable();
-	    for (Object key : vars.keySet()) {
-	    	final Object value = vars.getValue(key);
-	    	if (value==null) {
-	    		if (monitor.isCanceled()) return null;
-	    		final AbstractDataset set = provider!=null 
-	    		                          ? provider.getExpressionSet(key.toString(), new ProgressMonitorWrapper(monitor)) 
-	    		                          : null;
-	    		if (set!=null) refs.add(set);
-	    	}
+		
+		if (jexl==null) jexl = JexlUtils.getDawnJexlEngine();
+		ExpressionImpl ex = (ExpressionImpl)jexl.createExpression(expression);
+		final Set<List<String>> names = ex.getVariables();
+		
+	    for (List<String> entry : names) {
+	    	final String key = entry.get(0);
+	    	if (monitor.isCanceled()) return null;
+	    	final AbstractDataset set = provider!=null 
+	    			                  ? provider.getExpressionSet(key, new ProgressMonitorWrapper(monitor)) 
+	    					          : null;
+	    	if (set!=null) refs.add(set);
 		}
 	    
 		if (refs.isEmpty()) throw new Exception("No variables recognized in expression.");
-		
-		// Check all same size
-		final int size = refs.get(0).getSize();
-		for (IDataset dataSet : refs) {
-			if (dataSet.getSize()!=size) throw new Exception("Data sets in expression are not all the same size.");
-		}
 
 	    return refs;
-	}
-
-	private SymbolTable getSymbolTable() throws ParseException {
-		jepParser = new JEP();
-		jepParser.addStandardFunctions();
-		jepParser.addStandardConstants();
-		jepParser.setAllowUndeclared(true);
-		jepParser.setImplicitMul(true);
-		
-	    jepParser.parse(expression);
-	    return jepParser.getSymbolTable();
 	}
 
 	/**
