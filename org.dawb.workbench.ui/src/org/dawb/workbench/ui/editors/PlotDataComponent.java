@@ -1465,6 +1465,10 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 	}
 
 	public void addExpression() {
+		
+		if (!Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_VARNAME)) {
+		    Activator.getDefault().getPreferenceStore().setValue(EditorConstants.SHOW_VARNAME, true);
+		} 
 		final CheckableObject newItem = new CheckableObject(new ExpressionObject(this));
 		data.add(newItem);
 		dataViewer.refresh();
