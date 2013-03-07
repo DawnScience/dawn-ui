@@ -9,8 +9,10 @@
  */ 
 package org.dawb.workbench.ui.editors;
 
+import java.util.Date;
 import java.util.List;
 
+import org.dawb.common.ui.plot.IPlottingSystemData;
 import org.dawb.hdf5.editor.H5Path;
 import org.dawb.workbench.ui.editors.slicing.ExpressionObject;
 
@@ -18,16 +20,44 @@ public class CheckableObject implements H5Path{
 
 	private boolean          checked;
 	private String           name;
-    private ExpressionObject expression;
+	private String           variable;
+	private ExpressionObject expression;
+	private String           mementoKey;
+	
+	private static int expressionCount=0;
+	
 	public CheckableObject() {
-		
+		expressionCount++;
+		this.variable   = "expr"+expressionCount;
 	}
 	public CheckableObject(final String name) {
-		this.name = name;
+		this.name     = name;
+		this.variable = ExpressionObject.getSafeName(name);
 	}
 	
 	public CheckableObject(ExpressionObject expression2) {
 		this.expression = expression2;
+		expressionCount++;
+		this.variable   = "expr"+expressionCount;
+	}
+	
+	public static boolean isMementoKey(final String key) {
+		if (key==null)      return false;
+		if ("".equals(key)) return false;
+		return key.matches("CheckableObject\\$(\\d)+\\$(.+)");
+	}
+
+	private String generateMementoKey() {
+		return "CheckableObject$"+System.currentTimeMillis()+"$"+getVariable();
+	}
+	
+	public static String getVariable(String memento) {
+		final String[] parts = memento.split(DELIMITER);
+		return parts[0];
+	}
+	public static String getName(String memento) {
+		final String[] parts = memento.split(DELIMITER);
+		return parts[1];
 	}
 	
 	@Override
@@ -38,6 +68,9 @@ public class CheckableObject implements H5Path{
 		result = prime * result
 				+ ((expression == null) ? 0 : expression.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result
+				+ ((variable == null) ? 0 : variable.hashCode());
+		result = prime * result + yaxis;
 		return result;
 	}
 	@Override
@@ -61,10 +94,17 @@ public class CheckableObject implements H5Path{
 				return false;
 		} else if (!name.equals(other.name))
 			return false;
+		if (variable == null) {
+			if (other.variable != null)
+				return false;
+		} else if (!variable.equals(other.variable))
+			return false;
+		if (yaxis != other.yaxis)
+			return false;
 		return true;
 	}
 	public String getName() {
-		if (expression!=null) return expression.getExpression();
+		if (expression!=null) return expression.getExpressionString();
 		return name;
 	}
 	public void setName(String name) {
@@ -138,5 +178,40 @@ public class CheckableObject implements H5Path{
 	public void setYaxis(int yaxis) {
 		this.yaxis = yaxis;
 	}
+    public String getVariable() {
+		return variable;
+	}
+	public void setVariable(String variable) {
+		this.variable = variable;
+		if (expression!=null) expression.clear();
+	}
 	
+	private static final String DELIMITER = "£";
+	
+	public void createExpression(IPlottingSystemData psData, String mementoKey, String memento) {
+		final String[] parts = memento.split(DELIMITER);
+		this.variable   = parts[0];
+		this.expression = new ExpressionObject(psData, parts[1]);
+	}
+	
+	public String getMemento() {
+		return variable+DELIMITER+getName();
+	}
+	
+	/**
+	 * @return Returns the mementoKey.
+	 */
+	public String getMementoKey() {
+		if (mementoKey==null) mementoKey = generateMementoKey();
+		return mementoKey;
+	}
+
+
+	/**
+	 * @param mementoKey The mementoKey to set.
+	 */
+	public void setMementoKey(String mementoKey) {
+		this.mementoKey = mementoKey;
+	}
+
  }

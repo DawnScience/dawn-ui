@@ -339,8 +339,9 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		boolean requireFullRefresh = plottingSystem.getPlotType()!=participant.getPlotMode();
 		final AbstractDataset data = getDataSet(selections[0], monitor);
 		
-		if (data==null)       return;
-		if (data.getRank()>2) return; // Cannot plot more that 2 dims!
+		if (data==null)             return;
+		if (data.getBuffer()==null) return;
+		if (data.getRank()>2)       return; // Cannot plot more that 2 dims!
 		
 		if (participant.getPlotMode()==PlotType.IMAGE || data.getRank()==2) {
 			
@@ -462,7 +463,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 
 
 	@Override
-	public AbstractDataset getExpressionSet(String name, final IMonitor monitor) {
+	public AbstractDataset getVariableValue(String name, final IMonitor monitor) {
 
 		throw new NullPointerException("Expressions are not supported by "+getClass().getName());
 	}
@@ -474,7 +475,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 	}
 	
 	@Override	
-	public boolean isExpressionSetName(String name, IMonitor monitor) {
+	public boolean isVariableName(String name, IMonitor monitor) {
 		throw new NullPointerException("Expressions are not supported by "+getClass().getName());
 	}
 	

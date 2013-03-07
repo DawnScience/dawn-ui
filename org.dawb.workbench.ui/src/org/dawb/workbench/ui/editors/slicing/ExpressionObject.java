@@ -10,10 +10,10 @@
 
 package org.dawb.workbench.ui.editors.slicing;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -36,61 +36,48 @@ import org.eclipse.core.runtime.Status;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
-import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.io.SliceObject;
 
 public class ExpressionObject {
 	
-	private String expression;
-	private String mementoKey;
+	private String expressionString;
 	private IPlottingSystemData provider;
 	private JexlEngine jexl;
 	
 	public ExpressionObject(IPlottingSystemData provider) {
-		this(provider, null, generateMementoKey());
+		this(provider, null);
 	}
 
-
-	public ExpressionObject(final IPlottingSystemData provider, String expression, String mementoKey) {
-		this.provider   = provider;
-		this.expression = expression;
-		this.mementoKey = mementoKey;
-	}
-
-	public static boolean isExpressionKey(final String key) {
-		if (key==null)      return false;
-		if ("".equals(key)) return false;
-		return key.matches("Expression\\:(\\d)+");
-	}
-
-	private static String generateMementoKey() {
-		return "Expression:"+((new Date()).getTime());
+	public ExpressionObject(final IPlottingSystemData provider, String expression) {
+		this.provider         = provider;
+		this.expressionString = expression;
 	}
 
 
 	/**
 	 * @return Returns the expression.
 	 */
-	public String getExpression() {
-		return expression;
+	public String getExpressionString() {
+		return expressionString;
 	}
 
 	/**
 	 * @param expression The expression to set.
 	 */
-	public void setExpression(String expression) {
+	public void setExpressionString(String expression) {
 		this.dataSet    = null;
-		this.expression = expression;
+		this.expressionString = expression;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((expression == null) ? 0 : expression.hashCode());
-		result = prime * result + ((mementoKey == null) ? 0 : mementoKey.hashCode());
+		result = prime
+				* result
+				+ ((expressionString == null) ? 0 : expressionString.hashCode());
 		return result;
 	}
 
@@ -103,22 +90,17 @@ public class ExpressionObject {
 		if (getClass() != obj.getClass())
 			return false;
 		ExpressionObject other = (ExpressionObject) obj;
-		if (expression == null) {
-			if (other.expression != null)
+		if (expressionString == null) {
+			if (other.expressionString != null)
 				return false;
-		} else if (!expression.equals(other.expression))
-			return false;
-		if (mementoKey == null) {
-			if (other.mementoKey != null)
-				return false;
-		} else if (!mementoKey.equals(other.mementoKey))
+		} else if (!expressionString.equals(other.expressionString))
 			return false;
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return expression!=null ? expression : "";
+		return expressionString!=null ? expressionString : "";
 	}
 	
 	public boolean isValid(IProgressMonitor monitor) {
@@ -128,13 +110,13 @@ public class ExpressionObject {
 				return true;
 			}
 			if (jexl==null) jexl = JexlUtils.getDawnJexlEngine();
-			ExpressionImpl ex    = (ExpressionImpl)jexl.createExpression(expression);
+			ExpressionImpl ex    = (ExpressionImpl)jexl.createExpression(expressionString);
 			Set<List<String>> names = ex.getVariables();
 			
 		    for (List<String> entry : names) {
 		    	final String key = entry.get(0);
 		    	if (monitor.isCanceled()) return false;
-		    	if (!provider.isExpressionSetName(key, new ProgressMonitorWrapper(monitor))) return false;
+		    	if (!provider.isVariableName(key, new ProgressMonitorWrapper(monitor))) return false;
 			}
 			return true;
 		} catch (Exception ne) {
@@ -173,7 +155,7 @@ public class ExpressionObject {
 		
 		if (dataSet!=null) return dataSet;
 		
-	    if (expression==null||provider==null) return new DoubleDataset();
+	    if (expressionString==null||provider==null) return new DoubleDataset();
 	    
 	    try {
 	    	dataSet = getSlice();
@@ -182,21 +164,19 @@ public class ExpressionObject {
 	    	// We try to parse it as an expression.
 	    }
 		
-		final List<AbstractDataset> refs = getVariables(monitor);
+		final Map<String,AbstractDataset> refs = getVariables(monitor);
 		
 		if (jexl==null) jexl = JexlUtils.getDawnJexlEngine();
 		
 		JexlContext context = new MapContext();
-
-		for (AbstractDataset d : refs) {
-			final String name = getSafeName(d.getName());
-			context.set(name, d);
+		for (String variableName : refs.keySet()) {
+			context.set(variableName, refs.get(variableName));
 		}
 		
-		Expression ex = jexl.createExpression(expression);
+		Expression ex = jexl.createExpression(expressionString);
         
 		this.dataSet = (AbstractDataset)ex.evaluate(context);
-		dataSet.setName(getExpression());
+		dataSet.setName(getExpressionString());
 		return this.dataSet;
 	}
 	
@@ -204,7 +184,7 @@ public class ExpressionObject {
 
 	private AbstractDataset getSlice() {
 		
-		final Matcher matcher = SLICE.matcher(getExpression());
+		final Matcher matcher = SLICE.matcher(getExpressionString());
 		if (matcher.matches()) {
 			try {
 				final String filePath = provider.getFilePath();
@@ -216,7 +196,7 @@ public class ExpressionObject {
 				final int[]     shape = meta.getDataShapes().get(fullName);
 				if (shape.length!=idx.length) {
 					Activator.getDefault().getLog().log(new Status(IStatus.WARNING, "org.dawb.workbench.ui",
-							"Cannot parse '"+getExpression()+"' as slice. The data is a different shape to the slice inside the []."));
+							"Cannot parse '"+getExpressionString()+"' as slice. The data is a different shape to the slice inside the []."));
 					return null;
 				}
 				
@@ -240,11 +220,11 @@ public class ExpressionObject {
                 sliceObject = SliceUtils.createSliceObject(ddl, shape, sliceObject);
                 AbstractDataset slice = LoaderFactory.getSlice(sliceObject, null);
     			slice = slice.squeeze();		
-                slice.setName(getExpression());
+                slice.setName(getExpressionString());
                 
                 if (iaxis!=slice.getRank()) {
     				Activator.getDefault().getLog().log(new Status(IStatus.WARNING, "org.dawb.workbench.ui",
-    						"Cannot parse '"+getExpression()+"' as slice. The rank of the slice is not the same as intended."));
+    						"Cannot parse '"+getExpressionString()+"' as slice. The rank of the slice is not the same as intended."));
                     return null;
                 }
                 
@@ -253,7 +233,7 @@ public class ExpressionObject {
 				
 			} catch (Throwable ne) {
 				Activator.getDefault().getLog().log(new Status(IStatus.WARNING, "org.dawb.workbench.ui",
-				"Cannot parse '"+getExpression()+"' as slice. Slice syntax is: '/full_path[10,-,-] to get 10th image from 3D array."));
+				"Cannot parse '"+getExpressionString()+"' as slice. Slice syntax is: '/full_path[10,-,-] to get 10th image from 3D array."));
 			}
 		}
 		return null;
@@ -270,26 +250,41 @@ public class ExpressionObject {
 	}
 
 
-	private List<AbstractDataset> getVariables(IProgressMonitor monitor) throws Exception {
+	private Map<String, AbstractDataset> getVariables(IProgressMonitor monitor) throws Exception {
 		
-		final List<AbstractDataset> refs = new ArrayList<AbstractDataset>(7);
+		final Map<String,AbstractDataset> refs = new HashMap<String,AbstractDataset>(7);
 		
 		if (jexl==null) jexl = JexlUtils.getDawnJexlEngine();
-		ExpressionImpl ex = (ExpressionImpl)jexl.createExpression(expression);
-		final Set<List<String>> names = ex.getVariables();
+		ExpressionImpl ex = (ExpressionImpl)jexl.createExpression(expressionString);
+		final Set<List<String>> variableNames = ex.getVariables();
 		
-	    for (List<String> entry : names) {
-	    	final String key = entry.get(0);
+	    for (List<String> entry : variableNames) {
+	    	final String variableName = entry.get(0);
 	    	if (monitor.isCanceled()) return null;
 	    	final AbstractDataset set = provider!=null 
-	    			                  ? provider.getExpressionSet(key, new ProgressMonitorWrapper(monitor)) 
+	    			                  ? provider.getVariableValue(variableName, new ProgressMonitorWrapper(monitor)) 
 	    					          : null;
-	    	if (set!=null) refs.add(set);
+	    	if (set!=null) refs.put(variableName, set);
 		}
 	    
 		if (refs.isEmpty()) throw new Exception("No variables recognized in expression.");
 
 	    return refs;
+	}
+	
+	public boolean isReferencedVariable(String variableName) {
+		
+        if (variableName==null || "".equals(variableName)) return false;
+        
+		if (jexl==null) jexl = JexlUtils.getDawnJexlEngine();
+		ExpressionImpl ex = (ExpressionImpl)jexl.createExpression(expressionString);
+		final Set<List<String>> variableNames = ex.getVariables();
+		
+	    for (List<String> entry : variableNames) {
+	    	final String vn = entry.get(0);
+            if (variableName.equals(vn)) return true;
+	    }
+	    return false;
 	}
 
 	/**
@@ -306,23 +301,6 @@ public class ExpressionObject {
 	public void setProvider(IPlottingSystemData provider) {
 		this.provider = provider;
 	}
-
-
-	/**
-	 * @return Returns the mementoKey.
-	 */
-	public String getMementoKey() {
-		return mementoKey;
-	}
-
-
-	/**
-	 * @param mementoKey The mementoKey to set.
-	 */
-	public void setMementoKey(String mementoKey) {
-		this.mementoKey = mementoKey;
-	}
-
 
 	/**
 	 * Clears the current calculated data set from memory.

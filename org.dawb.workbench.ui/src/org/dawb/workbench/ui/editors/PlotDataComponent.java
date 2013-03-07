@@ -34,7 +34,6 @@ import org.dawb.common.ui.plot.axis.IAxis;
 import org.dawb.common.ui.plot.tool.IDataReductionToolPage;
 import org.dawb.common.ui.plot.tool.IToolChangeListener;
 import org.dawb.common.ui.plot.tool.IToolPage;
-import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
 import org.dawb.common.ui.plot.tool.ToolChangeEvent;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.ITraceListener.Stub;
@@ -42,7 +41,6 @@ import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.common.ui.slicing.DimsDataList;
 import org.dawb.common.ui.slicing.ISlicablePlottingPart;
 import org.dawb.common.ui.util.EclipseUtils;
-import org.dawb.common.ui.widgets.DoubleClickModifier;
 import org.dawb.common.util.io.FileUtils;
 import org.dawb.common.util.io.PropUtils;
 import org.dawb.common.util.io.SortingUtils;
@@ -64,6 +62,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionManager;
@@ -71,6 +70,7 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceDialog;
@@ -83,7 +83,6 @@ import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ComboBoxCellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
-import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
@@ -129,7 +128,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
-import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
 import uk.ac.diamond.scisoft.analysis.io.DataHolder;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
@@ -203,15 +201,15 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 						logger.error("Unable to refresh data set list", ne);
 					}
 				} else if (event.getProperty().equals(EditorConstants.SHOW_XY_COLUMN)) {
-					setColumnVisible(1, 32, (Boolean)event.getNewValue());
+					setColumnVisible(2, 32, (Boolean)event.getNewValue());
 				} else if (event.getProperty().equals(EditorConstants.SHOW_DATA_SIZE)) {
-					setColumnVisible(2, 100, (Boolean)event.getNewValue());
-				} else if (event.getProperty().equals(EditorConstants.SHOW_DIMS)) {
 					setColumnVisible(3, 100, (Boolean)event.getNewValue());
-				} else if (event.getProperty().equals(EditorConstants.SHOW_SHAPE)) {
+				} else if (event.getProperty().equals(EditorConstants.SHOW_DIMS)) {
 					setColumnVisible(4, 100, (Boolean)event.getNewValue());
-				} else if (event.getProperty().equals(EditorConstants.SHOW_VARNAME)) {
+				} else if (event.getProperty().equals(EditorConstants.SHOW_SHAPE)) {
 					setColumnVisible(5, 100, (Boolean)event.getNewValue());
+				} else if (event.getProperty().equals(EditorConstants.SHOW_VARNAME)) {
+					setColumnVisible(6, 100, (Boolean)event.getNewValue());
 				}
 			}
 		};
@@ -260,10 +258,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 		
 		createColumns();
         dataViewer.setColumnProperties(new String[]{"Data","Length"});
-        
-        dataViewer.setCellEditors(createCellEditors(dataViewer));
-        dataViewer.setCellModifier(createModifier(dataViewer));
-        
+         
 		dataViewer.getTable().setItemCount(data.size());
 		dataViewer.setUseHashlookup(true);
 
@@ -287,11 +282,11 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 				
 		createRightClickMenu();
 		
-		setColumnVisible(1, 36,  Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_XY_COLUMN));
-		setColumnVisible(2, 150, Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_DATA_SIZE));
-		setColumnVisible(3, 150, Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_DIMS));
-		setColumnVisible(4, 180, Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_SHAPE));
-		setColumnVisible(5, 150, Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_VARNAME));
+		setColumnVisible(2, 36,  Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_XY_COLUMN));
+		setColumnVisible(3, 150, Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_DATA_SIZE));
+		setColumnVisible(4, 150, Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_DIMS));
+		setColumnVisible(5, 80, Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_SHAPE));
+		setColumnVisible(6, 150, Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_VARNAME));
 	
 		try {
 
@@ -400,16 +395,39 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 		}
 	}
 
+	private void readExpressions() throws Exception {
+		
+		final String cachePath = DawbUtils.getDawbHome()+getFileName()+".properties";
+		Properties props = PropUtils.loadProperties(cachePath);
+		if (props!=null) {
+			try {
+				for (Object ob : props.keySet()) {
+					final String mementoKey = (String)ob;
+					final String memento    = props.getProperty(mementoKey);
+					if (CheckableObject.isMementoKey(mementoKey)) {
+						final String possibleName = CheckableObject.getName(memento);
+						CheckableObject o = getCheckableObjectByName(possibleName);
+						if (o!=null) {
+							o.setVariable(CheckableObject.getVariable(memento));
+						} else {
+							o = new CheckableObject();
+							o.createExpression(this, mementoKey, props.getProperty(mementoKey));
+							data.add(o);
+						}
+					}
+				}
+			} catch (Exception ne) {
+				throw new PartInitException(ne.getMessage());
+			}
+		}
+	}
+	
 	private void saveExpressions() {
 		try {
 			final Properties props = new Properties();
 			for (CheckableObject check : data) {
-				if (check.isExpression()) {
-					ExpressionObject o = check.getExpression();
-					props.setProperty(o.getMementoKey(), o.getExpression());
-				}
+				props.put(check.getMementoKey(), check.getMemento());
 			}
-			
 			// Save properties to workspace.
 			final String cachePath = DawbUtils.getDawbHome()+getFileName()+".properties";
 			PropUtils.storeProperties(props, cachePath);
@@ -419,26 +437,6 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 		}
 	}
 	
-	private void readExpressions() throws Exception {
-		
-		final String cachePath = DawbUtils.getDawbHome()+getFileName()+".properties";
-		Properties props = PropUtils.loadProperties(cachePath);
-		if (props!=null) {
-			try {
-				for (Object name : props.keySet()) {
-					final String key = name.toString();
-					if (ExpressionObject.isExpressionKey(key)) {
-						final CheckableObject o = new CheckableObject();
-						o.setExpression(new ExpressionObject(this, props.getProperty(key), key));
-						data.add(o);
-					}
-				}
-			} catch (Exception ne) {
-				throw new PartInitException(ne.getMessage());
-			}
-		}
-	}
-
 	private void createRightClickMenu() {	
 	    final MenuManager menuManager = new MenuManager();
 	    dataViewer.getControl().setMenu (menuManager.createContextMenu(dataViewer.getControl()));
@@ -585,7 +583,13 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 		
 		ColumnViewerToolTipSupport.enableFor(dataViewer,ToolTip.NO_RECREATE);
 		
-		final TableViewerColumn name   = new TableViewerColumn(dataViewer, SWT.LEFT, 0);
+		
+		final TableViewerColumn tick   = new TableViewerColumn(dataViewer, SWT.LEFT, 0);
+		tick.getColumn().setText(" ");
+		tick.getColumn().setWidth(30);
+		tick.setLabelProvider(new DataSetColumnLabelProvider(0));
+	
+		final TableViewerColumn name   = new TableViewerColumn(dataViewer, SWT.LEFT, 1);
 		name.getColumn().setText("Name");
 		name.getColumn().setWidth(Math.max(30,Activator.getDefault().getPreferenceStore().getInt(EditorConstants.PLOT_DATA_NAME_WIDTH)));
 		name.getColumn().addListener(SWT.Resize, new Listener() {		
@@ -594,83 +598,147 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 				Activator.getDefault().getPreferenceStore().setValue(EditorConstants.PLOT_DATA_NAME_WIDTH, name.getColumn().getWidth());
 			}
 		});
-		name.setLabelProvider(new DataSetColumnLabelProvider(0));
+		name.setLabelProvider(new DataSetColumnLabelProvider(1));
+		name.setEditingSupport(new ExpressionEditingSupport(dataViewer));
 		
-		final TableViewerColumn axis   = new TableViewerColumn(dataViewer, SWT.LEFT, 1);
+		final TableViewerColumn axis   = new TableViewerColumn(dataViewer, SWT.LEFT, 2);
 		axis.getColumn().setText(" ");
 		axis.getColumn().setWidth(32);
-		axis.setLabelProvider(new DataSetColumnLabelProvider(1));
+		axis.setLabelProvider(new DataSetColumnLabelProvider(2));
 		axis.setEditingSupport(new AxisEditingSupport(dataViewer));
 
-		final TableViewerColumn size   = new TableViewerColumn(dataViewer, SWT.LEFT, 2);
+		final TableViewerColumn size   = new TableViewerColumn(dataViewer, SWT.LEFT, 3);
 		size.getColumn().setText("Size");
 		size.getColumn().setWidth(150);
 		size.getColumn().setResizable(true);
-		size.setLabelProvider(new DataSetColumnLabelProvider(2));
+		size.setLabelProvider(new DataSetColumnLabelProvider(3));
 			
-		final TableViewerColumn dims   = new TableViewerColumn(dataViewer, SWT.LEFT, 3);
+		final TableViewerColumn dims   = new TableViewerColumn(dataViewer, SWT.LEFT, 4);
 		dims.getColumn().setText("Dimensions");
 		dims.getColumn().setWidth(150);
 		dims.getColumn().setResizable(true);
-		dims.setLabelProvider(new DataSetColumnLabelProvider(3));
+		dims.setLabelProvider(new DataSetColumnLabelProvider(4));
 		
-		final TableViewerColumn shape   = new TableViewerColumn(dataViewer, SWT.LEFT, 4);
+		final TableViewerColumn shape   = new TableViewerColumn(dataViewer, SWT.LEFT, 5);
 		shape.getColumn().setText("Shape");
-		shape.getColumn().setWidth(200);
+		shape.getColumn().setWidth(80);
 		shape.getColumn().setResizable(true);
-		shape.setLabelProvider(new DataSetColumnLabelProvider(4));
+		shape.setLabelProvider(new DataSetColumnLabelProvider(5));
 
-		final TableViewerColumn varName   = new TableViewerColumn(dataViewer, SWT.LEFT, 5);
+		final TableViewerColumn varName   = new TableViewerColumn(dataViewer, SWT.LEFT, 6);
 		varName.getColumn().setText("Variable");
 		varName.getColumn().setWidth(150);
 		varName.getColumn().setResizable(true);
-		varName.setLabelProvider(new DataSetColumnLabelProvider(5));
+		varName.setLabelProvider(new DataSetColumnLabelProvider(6));
+		varName.setEditingSupport(new VariableNameEditingSupport(dataViewer));
 	}
 	
-	private CellEditor[] createCellEditors(final TableViewer tableViewer) {
-		CellEditor[] editors  = new CellEditor[1];
-		TextCellEditor nameEd = new TextCellEditor(tableViewer.getTable());
-		((Text)nameEd.getControl()).setTextLimit(60);
-		// NOTE Must not add verify listener - it breaks things.
-		editors[0] = nameEd;
-		
-		return editors;
-	}
+	private boolean isExpressionActive   = false;
 	
-	private ICellModifier createModifier(final TableViewer tableViewer) {
-		return new DoubleClickModifier(tableViewer) {
-			@Override
-			public boolean canModify(Object element, String property) {
-				if (!enabled) return false;
-				return (element instanceof CheckableObject) && ((CheckableObject)element).isExpression() && "Data".equalsIgnoreCase(property);
-			}
+	private class ExpressionEditingSupport extends EditingSupport {
 
-			@Override
-			public Object getValue(Object element, String property) {
-				// NOTE: Only works for scannables right now which have one name
-				final String expr = ((CheckableObject)element).getExpression().getExpression();
-				return expr!=null ? expr : "";
-			}
-			@Override
-			public void modify(Object item, String property, Object value) {
+		public ExpressionEditingSupport(ColumnViewer viewer) {
+			super(viewer);
+		}
+
+		@Override
+		protected CellEditor getCellEditor(Object element) {
+			return new TextCellEditor((Composite)getViewer().getControl());
+		}
+
+		@Override
+		protected boolean canEdit(Object element) {
+			if (!isExpressionActive) return false;
+			return (element instanceof CheckableObject) && ((CheckableObject)element).isExpression();
+		}
+
+		@Override
+		protected Object getValue(Object element) {
+			CheckableObject check = (CheckableObject)element;
+			String text = check.getExpression().getExpressionString();
+			if (text==null) return "";
+			return text;
+		}
+
+		@Override
+		protected void setValue(Object element, Object value) {
+			final CheckableObject check = (CheckableObject)element;
+			try {
+				String         expression   = (String)value;
+				final ExpressionObject ob   = check.getExpression();
+				if (expression!=null) expression = expression.trim();
+				if (value==null || "".equals(expression))  return;
+				if (value.equals(ob.getExpressionString()))      return;
 				
-				try {
-				    final CheckableObject check = (CheckableObject)((IStructuredSelection)dataViewer.getSelection()).getFirstElement();
-				    final ExpressionObject ob   = check.getExpression();
-					ob.setExpression((String)value);
-					check.setChecked(true);
-					dataViewer.refresh();
-					
-					saveExpressions();
-					
-				} catch (Exception e) {
-					logger.error("Cannot set "+property, e);
+				ob.setExpressionString(expression);
+				check.setChecked(false); // selectionChanged(...) puts it to true
+				selectionChanged(check, true);
+				saveExpressions();
+
+			} catch (Exception e) {
+				logger.error("Cannot set expression "+check.getName(), e);
+
+			} 
+			getViewer().refresh();
+		}
+
+	}
+
 	
-				} finally {
-					setEnabled(false);
+	private boolean isVariableNameActive = false;
+	
+	private class VariableNameEditingSupport extends EditingSupport {
+
+		public VariableNameEditingSupport(ColumnViewer viewer) {
+			super(viewer);
+		}
+
+		@Override
+		protected CellEditor getCellEditor(Object element) {
+			return new TextCellEditor((Composite)getViewer().getControl());
+		}
+
+		@Override
+		protected boolean canEdit(Object element) {
+			return isVariableNameActive;
+		}
+
+		@Override
+		protected Object getValue(Object element) {
+			return ((CheckableObject)element).getVariable();
+		}
+
+		@Override
+		protected void setValue(Object element, Object value) {
+			CheckableObject data  = (CheckableObject)element;
+			try {
+				String variableName = (String)value;
+				if (variableName!=null) {
+					variableName = variableName.trim();
+					if (variableName.equals(data.getVariable())) return;
 				}
+				
+				final String    safeName = ExpressionObject.getSafeName(variableName);				
+				if (!variableName.equals(safeName) || variableName==null || "".equals(variableName)) {
+					throw new Exception("The expression variable name '"+safeName+"' is not allowed.");
+				}
+				
+				final CheckableObject ob = getCheckableObjectByVariable(safeName);				
+				if (ob!=null) throw new Exception("The name '"+safeName+"' is not unique!");
+
+				clearExpressionCache();
+				data.setVariable(safeName);
+				saveExpressions();
+				
+			} catch (Exception e) {
+				final String message = "The name '"+value+"' is not valid.";
+				final Status status  = new Status(Status.WARNING, "org.dawb.workbench.ui", message, e);
+				ErrorDialog.openError(Display.getDefault().getActiveShell(), "Cannot rename data", message, status);
+			    return;
 			}
-	    };
+			getViewer().refresh();
+		}
+
 	}
 
 	private void createDimensionalActions(IContributionManager manager, boolean isToolbar) {
@@ -808,6 +876,12 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 
 	}
 
+	private void clearExpressionCache() {
+		for (CheckableObject ob : data) {
+			if (ob.isExpression())  ob.getExpression().clear();
+		}
+	}
+
 	protected void setAsX(CheckableObject sel) {
 		if (getActiveDimensions(sel, true)!=1) return; 
 		sel.setChecked(true);
@@ -892,21 +966,30 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 	
 	public void mouseDoubleClick(MouseEvent e){ 
 		
-	}
-	
-	public void keyPressed(KeyEvent e) {
-		if (e.keyCode==13) {
-			selectionChanged((CheckableObject)((IStructuredSelection)dataViewer.getSelection()).getFirstElement(), true);
+		if (e.button==1) {
+			final Point           pnt     = new Point(e.x, e.y);
+			final TableItem       item    = this.dataViewer.getTable().getItem(pnt);
+			if (item==null) return;
+			
+            Rectangle rect1 = item.getBounds(1);
+            Rectangle rect6 = item.getBounds(6);
+            if (!rect1.contains(pnt) && !rect6.contains(pnt)) return;
+			try {
+				CheckableObject data = (CheckableObject)item.getData();
+				if (rect1.contains(pnt)) {
+					isExpressionActive  = true;
+				} else {
+					isVariableNameActive= true;
+				}
+				dataViewer.editElement(data, rect1.contains(pnt)?1:6);
+			} finally {
+				isExpressionActive  = false;
+				isVariableNameActive= false;
+			}
+          
 		}
 	}
-
-	/**
-	 * Sent when a key is released on the system keyboard.
-	 *
-	 * @param e an event containing information about the key release
-	 */
-	public void keyReleased(KeyEvent e) {
-	}
+	
 
 	/**
 	 * Sent when a mouse button is pressed.
@@ -914,6 +997,9 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 	 * @param e an event containing information about the mouse button press
 	 */
 	public void mouseDown(MouseEvent e) {
+		
+		isVariableNameActive = false;
+		isExpressionActive   = false;
 		if (e.button==1) {
 			
 			final Point           pnt     = new Point(e.x, e.y);
@@ -921,11 +1007,9 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 			if (item==null) return;
 			
             Rectangle rect = item.getBounds(0); // First column (tick and name)
-            if (!rect.contains(pnt) && dataViewer.isCellEditorActive()) return;
-            if (rect.contains(pnt)  && dataViewer.isCellEditorActive()) {
-            	dataViewer.cancelEditing();
-            }
+            if (!rect.contains(pnt)) return;
 		
+            dataViewer.cancelEditing();
 			final CheckableObject clicked = (CheckableObject)item.getData();
 			
 			if (e.stateMask==131072) { // Shift is pressed
@@ -948,9 +1032,25 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 			} else{
  			    selectionChanged(clicked, true);
 			}
+	        dataViewer.cancelEditing();
 		}
 	}
 
+
+	
+	public void keyPressed(KeyEvent e) {
+		if (e.keyCode==13) {
+			selectionChanged((CheckableObject)((IStructuredSelection)dataViewer.getSelection()).getFirstElement(), true);
+		}
+	}
+
+	/**
+	 * Sent when a key is released on the system keyboard.
+	 *
+	 * @param e an event containing information about the key release
+	 */
+	public void keyReleased(KeyEvent e) {
+	}
 	/**
 	 * Sent when a mouse button is released.
 	 *
@@ -1171,35 +1271,43 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 
 	
 	@Override
-	public AbstractDataset getExpressionSet(String name, final IMonitor monitor) {
+	public AbstractDataset getVariableValue(String variableName, final IMonitor monitor) {
 
-		AbstractDataset set = getDataSet(name, monitor);
-		if (set==null) {
-			final List<String> names = getStringSelections(data);
-			for (String n : names) {
-				if (ExpressionObject.getSafeName(n).equals(name)) {
-					set = getDataSet(n, monitor);
-				}
+		final CheckableObject ob = getCheckableObjectByVariable(variableName);
+		if (!ob.isExpression()) {
+			return getDataSet(ob.getName(), monitor);
+		} else {
+			try {
+				return ob.getExpression().getDataSet(new NullProgressMonitor());
+			} catch (Exception e) {
+				return null;
 			}
-		}
-		
-		return set;
+		}		
 	}
+	@Override
+	public boolean isVariableName(String variableName, IMonitor monitor) {
+		final CheckableObject ob = getCheckableObjectByVariable(variableName);
+		return ob!=null;
+	}
+	
+	private CheckableObject getCheckableObjectByVariable(String variableName) {
+		for (CheckableObject ob : data) {
+			if (ob.getVariable().equals(variableName)) return ob;
+		}
+		return null;
+	}
+	private CheckableObject getCheckableObjectByName(String name) {
+		for (CheckableObject ob : data) {
+			if (ob.getName().equals(name)) return ob;
+		}
+		return null;
+	}
+
 	
 	@Override
 	public boolean isDataSetName(String name, IMonitor monitor) {
 		final List<String> allNames = getStringSelections(data);
 		return allNames.contains(name);
-	}
-	
-	@Override
-	public boolean isExpressionSetName(String name, IMonitor monitor) {
-		if (isDataSetName(name, monitor)) return true;
-		final List<String> allNames = getStringSelections(data);
-		for (String n : allNames) {
-			if (ExpressionObject.getSafeName(n).equals(name)) return true;
-		}
-		return false;
 	}
 
 	private class DataSetColumnLabelProvider extends ColumnLabelProvider {
@@ -1233,15 +1341,17 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 			final CheckableObject element = (CheckableObject)ob;
 			switch (columnIndex) {
 			case 0:
+				return null;
+			case 1:
 				String setName = element.toString();
 				if (!element.isExpression() && rootName!=null && setName.startsWith(rootName)) {
 					setName = setName.substring(rootName.length());
 				}
 				return setName;
-			case 1:
+			case 2:
 				return element.getAxis(selections, getPlottingSystem().is2D(), getPlottingSystem().isXfirst());
 
-			case 2:
+			case 3:
 				if (!element.isExpression()) {
 					final String name = element.toString();
 					if (metaData.getDataSizes()==null) {
@@ -1255,9 +1365,9 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 					return metaData.getDataSizes().get(name)+"";
 				} 
 				return element.getExpression().getSize(new NullProgressMonitor())+"";
-			case 3:
-				return getActiveDimensions(element, false)+"";
 			case 4:
+				return getActiveDimensions(element, false)+"";
+			case 5:
 				if (!element.isExpression()) {
 					final String name = element.toString();
 					if (metaData.getDataShapes()==null || metaData.getDataShapes().get(name)==null) {
@@ -1272,12 +1382,8 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 				} 
 				return element.getExpression().getShape(null);
 
-			case 5:
-				if (!element.isExpression()) {
-				    return ExpressionObject.getSafeName(element.getName());
-				} else {
-					return "";
-				}
+			case 6:
+				return element.getVariable();
 			default:
 				return element.toString();
 			}
@@ -1291,7 +1397,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 			final CheckableObject element = (CheckableObject)ob;
 	    		    	
 			switch (columnIndex) {
-			case 0:
+			case 1:
 				if (!element.isExpression()) {
 					final String         name = element.toString();
 					if (getPlottingSystem()!=null) {
@@ -1303,7 +1409,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 					return o.isValid(new NullProgressMonitor()) ? BLUE : RED;
 				}
 				return BLACK;
-			case 5:
+			case 6:
 				return BLUE;
 			default:
 				return BLACK;
@@ -1362,10 +1468,12 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 		final CheckableObject newItem = new CheckableObject(new ExpressionObject(this));
 		data.add(newItem);
 		dataViewer.refresh();
-		
-		((DoubleClickModifier)dataViewer.getCellModifier()).setEnabled(true);		
-		dataViewer.editElement(newItem, 0);
-		
+		try {
+			isExpressionActive = true;
+			dataViewer.editElement(newItem, 1);	
+		} finally {
+			isExpressionActive = false;
+		}
 	}
 
 	protected void addExpression(ExpressionObject expressionObject) {
@@ -1459,21 +1567,6 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 		this.dataViewer.refresh();
 	}
 
-	/**
-	 * @return exprs can be null or empty
-	 */
-	public List<Object> getExpressions(IPlottingSystemData prov) {
-		if (data == null) return null;
-		final List<Object> exprs = new ArrayList<Object>(3);
-		for (Object o : data) {
-			if (o instanceof ExpressionObject) {
-				ExpressionObject e = (ExpressionObject)o;
-				e = new ExpressionObject(prov, e.getExpression(), e.getMementoKey());
-				exprs.add(e);
-			}
-		}
-		return exprs;
-	}
 
 	public String getFileName() {
 		if (filePath!=null) return (new File(filePath)).getName();
