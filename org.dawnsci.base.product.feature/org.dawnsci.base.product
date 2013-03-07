@@ -31,9 +31,6 @@ All other trademarks are the property of their respective owners.
 
    <launcherArgs>
       <vmArgs>-Xms512m
--Xmx2048m
--XX:PermSize=128m
--XX:MaxPermSize=256m
 -Ddbconnect=config/dbconnect.ispyb.properties
 -Dentry=MyVisitsEntryPoint
 -DidaEmbedded=yes
