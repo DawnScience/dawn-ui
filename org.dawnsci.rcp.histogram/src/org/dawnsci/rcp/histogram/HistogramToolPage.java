@@ -32,6 +32,8 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -869,8 +871,21 @@ public class HistogramToolPage extends AbstractToolPage {
 		
 		// Activate this so the initial screen has content
 		activate();		
+		
+		store.addPropertyChangeListener(new IPropertyChangeListener() {			
+			@Override
+			public void propertyChange(PropertyChangeEvent event) {
+				if ("org.dawb.plotting.system.colourSchemeName".equals(event.getProperty())) {
+					if (updatingColorSchemeInternally) return;
+					final String schemeName = (String)event.getNewValue();
+					cmbColourMap.select(Arrays.asList(cmbColourMap.getItems()).indexOf(schemeName));
+				}
+			}
+		});
+
 	}
 
+	private boolean updatingColorSchemeInternally = false;
 	/**
 	 * Use the controls from the GUI to set the individual colour elements from the selected colour scheme
 	 */
@@ -892,8 +907,13 @@ public class HistogramToolPage extends AbstractToolPage {
 		btnAlphaInverse.setSelection(colourScheme.getAlphaInverted());
 
 		// Store as default preference
-		final ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
-	    store.setValue("org.dawb.plotting.system.colourSchemeName", colourScheme.getName());
+		try {
+			updatingColorSchemeInternally=true;
+			final ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
+		    store.setValue("org.dawb.plotting.system.colourSchemeName", colourScheme.getName());
+		} finally {
+			updatingColorSchemeInternally = false;
+		}
 	}
 
 	/**

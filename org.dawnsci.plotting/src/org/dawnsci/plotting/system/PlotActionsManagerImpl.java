@@ -29,6 +29,8 @@ import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IContributionManager;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
@@ -176,6 +178,7 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 		if (action!=null) man.add(((ActionContributionItem)action).getAction());
 	}
 	
+	private boolean updatingColorSchemeInternally = false;
 	protected void createPalleteActions() {
 		
     	
@@ -192,8 +195,9 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 		for (final String paletteName : names) {
 			final Action action = new Action(paletteName, IAction.AS_CHECK_BOX) {
 				public void run() {
-					Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.COLOUR_SCHEME, paletteName);
 					try {
+						updatingColorSchemeInternally = true;
+						Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.COLOUR_SCHEME, paletteName);
 						final PaletteData data = pservice.getPaletteData(paletteName);
 						final Collection<ITrace> traces = system.getTraces();
 						if (traces!=null) for (ITrace trace: traces) {
@@ -203,14 +207,28 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 						}
 					} catch (Exception ne) {
 						logger.error("Cannot create palette data!", ne);
+					} finally {
+						updatingColorSchemeInternally = false;
 					}
 				}
 			};
+			action.setId(paletteName);
 			group.add(action);
 			lutCombo.add(action);
 			action.setChecked(paletteName.equals(schemeName));
 		}
 		lutCombo.setToolTipText("Histogram");
+		
+		Activator.getDefault().getPreferenceStore().addPropertyChangeListener(new IPropertyChangeListener() {			
+			@Override
+			public void propertyChange(PropertyChangeEvent event) {
+				if (PlottingConstants.COLOUR_SCHEME.equals(event.getProperty())) {
+					if (updatingColorSchemeInternally) return;
+					final IAction action = lutCombo.findAction((String)event.getNewValue());
+					action.setChecked(true);
+				}
+			}
+		});
 
 		registerMenuBarGroup(lutCombo.getId()+".group");
 		registerAction(lutCombo.getId()+".group", lutCombo, ActionType.ALL, ManagerType.MENUBAR);
