@@ -878,7 +878,11 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	public void setMin(Number min) {
 		if (imageServiceBean==null) return;
 		imageServiceBean.setMin(min);
-		intensityScale.setMin(min.doubleValue());
+		try {
+			intensityScale.setMin(min.doubleValue());
+		} catch (Exception e) {
+			logger.error("Cannot set scale of intensity!",e);
+		}
 		fireMinDataListeners();
 	}
 
@@ -889,7 +893,11 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	public void setMax(Number max) {
 		if (imageServiceBean==null) return;
 		imageServiceBean.setMax(max);
-		intensityScale.setMax(max.doubleValue());
+		try {
+			intensityScale.setMax(max.doubleValue());
+		} catch (Exception e) {
+			logger.error("Cannot set scale of intensity!",e);
+		}
 		fireMaxDataListeners();
 	}
 

@@ -34,6 +34,10 @@ public class MaskObject {
 
 	private static final Logger logger = LoggerFactory.getLogger(MaskObject.class);
 	
+	enum MaskRegionType {
+		REGION_FROM_MASKING;
+	}
+	
 	public enum MaskMode {
 		/**
 		 * Draw the mask, ie do the mask
@@ -247,7 +251,7 @@ public class MaskObject {
 		if (validRegions!=null) for (IRegion region : regions) {
 			if (region == null)             continue;
 			if (!isSupportedRegion(region)) continue;
-			if (!region.isMaskRegion())     continue;
+			if (region.getUserObject()!=MaskRegionType.REGION_FROM_MASKING)     continue;
 			validRegions.add(region);
 		}
 		
@@ -276,7 +280,7 @@ public class MaskObject {
 							if (validRegions!=null) for (IRegion region : validRegions) {
 								try {
 									if (region.containsPoint(x, y)) {
-										toggleMask(op, Boolean.FALSE, y, x);
+										toggleMask(op, !region.isMaskRegion(), y, x);
 									}
 								} catch (Throwable ne) {
 									logger.trace("Cannot process point "+(new Point(x,y)), ne);

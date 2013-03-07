@@ -289,6 +289,10 @@ public class CircleSelection extends AbstractSelectionRegion {
 
 		@Override
 		protected void fillShape(Graphics graphics) {
+//			graphics.setBackgroundColor(ColorConstants.cyan);
+//			
+//			PointList points = Draw2DUtils.generateCurve(DecoratedCircle.this, 0, 360, 1, 3, Math.toRadians(1));
+//			Draw2DUtils.fillClippedPolygon(graphics, points, getParent().getBounds());
 		}
 		
 		@Override

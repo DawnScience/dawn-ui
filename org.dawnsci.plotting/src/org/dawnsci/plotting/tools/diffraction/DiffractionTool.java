@@ -44,6 +44,7 @@ import org.dawnsci.common.widgets.tree.UnitEditingSupport;
 import org.dawnsci.common.widgets.tree.ValueEditingSupport;
 import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
+import org.dawnsci.plotting.draw2d.swtxy.selection.CircleFitSelection;
 import org.dawnsci.plotting.draw2d.swtxy.selection.EllipseFitSelection;
 import org.dawnsci.plotting.preference.DiffractionDefaultsPreferencePage;
 import org.dawnsci.plotting.preference.detector.DiffractionDetectorPreferencePage;
@@ -100,6 +101,7 @@ import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.rcp.plotting.utils.BeamCenterRefinement;
 import uk.ac.diamond.scisoft.analysis.roi.CircularFitROI;
+import uk.ac.diamond.scisoft.analysis.roi.CircularROI;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalFitROI;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
 import uk.ac.diamond.scisoft.analysis.roi.PolylineROI;
@@ -585,10 +587,11 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 				}
 
 				try {
+					clearRegions(plotter);
 					if (tmpRegion != null) {
 						plotter.removeRegion(tmpRegion);
 					}
-					tmpRegion = plotter.createRegion(RegionUtils.getUniqueName("BeamCentrePicker", getPlottingSystem()), IRegion.RegionType.POINT);
+					tmpRegion = plotter.createRegion(RegionUtils.getUniqueName("BeamCentrePicker", plotter), IRegion.RegionType.POINT);
 					tmpRegion.setUserRegion(false);
 					tmpRegion.setVisible(false);
 					refine.setEnabled(true);
@@ -612,10 +615,11 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 				}
 
 				try {
+					clearRegions(plotter);
 					if (tmpRegion != null) {
 						plotter.removeRegion(tmpRegion);
 					}
-					tmpRegion = plotter.createRegion(RegionUtils.getUniqueName("RingPicker", getPlottingSystem()), IRegion.RegionType.ELLIPSEFIT);
+					tmpRegion = plotter.createRegion(RegionUtils.getUniqueName("RingPicker", plotter), IRegion.RegionType.ELLIPSEFIT);
 					tmpRegion.setUserRegion(false);
 					tmpRegion.addROIListener(roiListener);
 					findMore.setEnabled(true);
@@ -681,7 +685,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 						Job job = new Job("Circle fit refinement") {
 							@Override
 							protected IStatus run(final IProgressMonitor monitor) {
-								return runEllipseFit(monitor, display, plotter, t, true);
+								return runEllipseFit(monitor, display, plotter, t, tmpRegion.getROI(), true);
 							}
 						};
 						job.setPriority(Job.SHORT);
@@ -741,7 +745,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			public void run() {
 				logger.debug("Find more clicked");
 
-				if (tmpRegion instanceof EllipseFitSelection) {
+				if (tmpRegion instanceof CircleFitSelection || tmpRegion instanceof EllipseFitSelection) {
 					final IPlottingSystem plotter = getPlottingSystem();
 					final IImageTrace t = getImageTrace();
 					final Display display = control.getDisplay();
@@ -749,7 +753,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 						Job job = new Job("Ellipse rings finding") {
 							@Override
 							protected IStatus run(final IProgressMonitor monitor) {
-								IStatus stat = runEllipseFit(monitor, display, plotter, t, false);
+								IStatus stat = runEllipseFit(monitor, display, plotter, t, tmpRegion.getROI(), false);
 								if (stat.isOK()) {
 									stat = runFindRings(monitor, display, plotter, t);
 								}
@@ -876,18 +880,29 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		getSite().getActionBars().getMenuManager().add(new Separator());
 	}
 
-	private IStatus runEllipseFit(final IProgressMonitor monitor, Display display, final IPlottingSystem plotter, IImageTrace t, final boolean circle) {
+	private static final String RING_PREFIX = "Ring";
+	private void clearRegions(IPlottingSystem plotter) {
+		Collection<IRegion> regions = plotter.getRegions();
+		for (IRegion r : regions) {
+			String n = r.getName();
+			if (n.startsWith(RING_PREFIX))
+				plotter.removeRegion(r);
+		}
+	}
+
+	private IStatus runEllipseFit(final IProgressMonitor monitor, Display display, final IPlottingSystem plotter, IImageTrace t, ROIBase roi, final boolean circle) {
 		final String shape = circle ? "circle" : "ellipse";
 		monitor.beginTask("Refine " + shape + " fit", 100);
 		monitor.subTask("Find POIs near initial " + shape);
-		final PolylineROI points = PowderRingsUtils.findPOIsNearEllipse(t.getData(), (BooleanDataset) t.getMask(), (EllipticalROI) tmpRegion.getROI());
+		final PolylineROI points = roi instanceof CircularROI ? PowderRingsUtils.findPOIsNearCircle(t.getData(), (BooleanDataset) t.getMask(), (CircularROI) roi)
+				: PowderRingsUtils.findPOIsNearEllipse(t.getData(), (BooleanDataset) t.getMask(), (EllipticalROI) roi);
 		monitor.worked(20);
 		final boolean[] status = {true};
 		display.syncExec(new Runnable() {
 
 			public void run() {
 				try {
-					IRegion region = plotter.createRegion(RegionUtils.getUniqueName("Pixel peaks", getPlottingSystem()), circle ? RegionType.CIRCLEFIT : RegionType.ELLIPSEFIT);
+					IRegion region = plotter.createRegion(RegionUtils.getUniqueName("Pixel peaks", plotter), circle ? RegionType.CIRCLEFIT : RegionType.ELLIPSEFIT);
 					monitor.subTask("Fit POIs");
 					EllipticalFitROI efroi = PowderRingsUtils.fitAndTrimOutliers(points, 2, circle);
 					ROIBase froi = circle ? new CircularFitROI(efroi.getPoints()) : new EllipticalFitROI(efroi.getPoints());
@@ -929,7 +944,8 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 						monitor.subTask("Add region: " + i);
 						EllipticalROI e = ells.get(i);
 						logger.debug("Ellipse from peaks: {}, {}", i, e);
-						IRegion region = plotter.createRegion(RegionUtils.getUniqueName("Ring", getPlottingSystem()), e instanceof EllipticalFitROI ? RegionType.ELLIPSEFIT : RegionType.ELLIPSE);
+						IRegion region = plotter.createRegion(RegionUtils.getUniqueName(RING_PREFIX, plotter), e instanceof EllipticalFitROI ? RegionType.ELLIPSEFIT : RegionType.ELLIPSE);
+						region.setMobile(false);
 						region.setROI(e);
 						monitor.worked(20);
 						region.setRegionColor(ColorConstants.orange);
