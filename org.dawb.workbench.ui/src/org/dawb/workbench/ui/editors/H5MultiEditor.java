@@ -12,6 +12,7 @@ package org.dawb.workbench.ui.editors;
 
 import java.util.Collection;
 
+import org.dawb.common.services.IVariableManager;
 import org.dawb.common.ui.editors.EditorExtensionFactory;
 import org.dawb.common.ui.plot.AbstractPlottingSystem.ColorOption;
 import org.dawb.common.ui.plot.IPlottingSystemSelection;
@@ -178,7 +179,7 @@ public class H5MultiEditor extends MultiPageEditorPart  implements ISlicablePlot
 	}
 	
 	@Override
-	public PlotDataComponent getDataSetComponent() {
+	public IVariableManager getDataSetComponent() {
 		return dataSetEditor.getDataSetComponent();
 	}
 	@Override
@@ -217,12 +218,12 @@ public class H5MultiEditor extends MultiPageEditorPart  implements ISlicablePlot
 
 	@Override
 	public AbstractDataset setDatasetSelected(String name, boolean clearOthers) {
-		return getDataSetComponent().setDatasetSelected(name, clearOthers);
+		return ((IPlottingSystemSelection)getDataSetComponent()).setDatasetSelected(name, clearOthers);
 	}
 
 	@Override
 	public void setAll1DSelected(boolean overide) {
-		getDataSetComponent().setAll1DSelected(overide);
+		((IPlottingSystemSelection)getDataSetComponent()).setAll1DSelected(overide);
 	}
 
 	@Override

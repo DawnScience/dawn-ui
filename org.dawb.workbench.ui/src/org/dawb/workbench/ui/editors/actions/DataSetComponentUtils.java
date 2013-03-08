@@ -10,7 +10,7 @@
 
 package org.dawb.workbench.ui.editors.actions;
 
-import org.dawb.common.ui.plot.IExpressionPlottingManager;
+import org.dawb.common.services.IVariableManager;
 import org.dawb.common.ui.slicing.ISlicablePlottingPart;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.eclipse.ui.IEditorPart;
@@ -22,9 +22,9 @@ public class DataSetComponentUtils {
 	 * Trys to find an active DataSetPlotView 
 	 * @return DataSetPlotView
 	 */
-	public static IExpressionPlottingManager getActiveComponent() {
+	public static IVariableManager getActiveComponent() {
 		
-		IExpressionPlottingManager sets =  null;
+		IVariableManager sets =  null;
 		
 
 		IEditorPart editor = EclipseUtils.getActivePage().getActiveEditor();

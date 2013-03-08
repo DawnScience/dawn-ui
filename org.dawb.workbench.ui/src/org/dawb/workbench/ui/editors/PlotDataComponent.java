@@ -30,7 +30,6 @@ import org.dawb.common.services.IVariableManager;
 import org.dawb.common.ui.DawbUtils;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
-import org.dawb.common.ui.plot.IExpressionPlottingManager;
 import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.IPlottingSystemSelection;
 import org.dawb.common.ui.plot.PlotType;
@@ -61,6 +60,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -141,7 +141,7 @@ import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
  * This view can view and plot any file. It is most efficient if the Loader that LoaderFactory
  * uses for this file type is an IMetaLoader. 
  */
-public class PlotDataComponent implements IExpressionPlottingManager, MouseListener, KeyListener, IPlottingSystemSelection {
+public class PlotDataComponent implements IVariableManager, MouseListener, KeyListener, IPlottingSystemSelection, IAdaptable {
 		
 	private static final Logger logger = LoggerFactory.getLogger(PlotDataComponent.class);
 
@@ -163,7 +163,7 @@ public class PlotDataComponent implements IExpressionPlottingManager, MouseListe
 	private   boolean               staggerSupported = false;
 
 	protected IMetaData             metaData;
-	protected final IExpressionPlottingManager providerDeligate;
+	protected final IDatasetEditor  providerDeligate;
 	private IPropertyChangeListener propListener;
 	private ArrayList<IAction>      dataComponentActions;
 	private Composite               container;
@@ -174,7 +174,7 @@ public class PlotDataComponent implements IExpressionPlottingManager, MouseListe
 	private IToolChangeListener      toolListener;
 	private IExpressionObjectService service;
 	
-	public PlotDataComponent(final IExpressionPlottingManager providerDeligate) {
+	public PlotDataComponent(final IDatasetEditor providerDeligate) {
 				
 		this.data = new ArrayList<CheckableObject>(7);
 		this.providerDeligate   = providerDeligate;
@@ -1216,7 +1216,6 @@ public class PlotDataComponent implements IExpressionPlottingManager, MouseListe
 	}
 
 	
-	@Override
 	public AbstractDataset getDataSet(String name, final IMonitor monitor) {
 		
 		try {
@@ -1241,7 +1240,6 @@ public class PlotDataComponent implements IExpressionPlottingManager, MouseListe
 		}
 	}
 	
-	@Override
 	public ILazyDataset getLazyDataSet(String name, final IMonitor monitor) {
 		
 		try {
@@ -1296,8 +1294,6 @@ public class PlotDataComponent implements IExpressionPlottingManager, MouseListe
 		return null;
 	}
 
-	
-	@Override
 	public boolean isDataSetName(String name, IMonitor monitor) {
 		final List<String> allNames = getStringSelections(data);
 		return allNames.contains(name);
@@ -1622,7 +1618,6 @@ public class PlotDataComponent implements IExpressionPlottingManager, MouseListe
 		return metaData;
 	}
 
-    @Override
 	public IPlottingSystem getPlottingSystem() {
 		return providerDeligate!=null ? providerDeligate.getPlottingSystem() : null;
 	}
@@ -1705,8 +1700,11 @@ public class PlotDataComponent implements IExpressionPlottingManager, MouseListe
 	}
 
 	@Override
-	public String getFilePath() {
-		return providerDeligate.getFilePath();
+	public Object getAdapter(Class adapter) {
+		if (adapter==IPlottingSystem.class) {
+			return getPlottingSystem();
+		}
+		return null;
 	}
 
 

@@ -43,12 +43,12 @@ Export-Package: org.dawb.workbench.ui.editors;
    org.eclipse.jface.viewers,
    org.eclipse.swt.widgets,
    org.eclipse.jface.dialogs",
- org.dawb.workbench.ui.editors.expression;uses:="uk.ac.diamond.scisoft.analysis.dataset,org.eclipse.core.runtime,org.dawb.common.ui.plot",
  org.dawb.workbench.ui.editors.preference;
   uses:="org.eclipse.jface.preference,
    org.eclipse.ui,
    org.eclipse.core.commands,
    org.eclipse.core.runtime.preferences",
+ org.dawb.workbench.ui.editors.zip;uses:="uk.ac.diamond.scisoft.analysis.dataset,org.eclipse.core.runtime,org.dawb.common.ui.plot",
  org.dawb.workbench.ui.perspective,
  org.dawb.workbench.ui.project;
   uses:="org.eclipse.jface.wizard,

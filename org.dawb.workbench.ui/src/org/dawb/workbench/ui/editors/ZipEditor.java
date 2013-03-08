@@ -13,6 +13,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.InputStream;
 
+import org.dawb.common.services.IVariableManager;
 import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.IPlottingSystemSelection;
 import org.dawb.common.ui.plot.PlotType;
@@ -21,7 +22,7 @@ import org.dawb.common.ui.slicing.ISlicablePlottingPart;
 import org.dawb.common.ui.slicing.SliceComponent;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.util.io.FileUtils;
-import org.dawb.workbench.ui.editors.expression.ZipUtils;
+import org.dawb.workbench.ui.editors.zip.ZipUtils;
 import org.dawb.workbench.ui.views.PlotDataPage;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
@@ -194,7 +195,7 @@ public class ZipEditor extends MultiPageEditorPart implements ISlicablePlottingP
 	}
 
 	@Override
-	public PlotDataComponent getDataSetComponent() {
+	public IVariableManager getDataSetComponent() {
 		return dataSetEditor.getDataSetComponent();
 	}
 	@Override
@@ -239,12 +240,12 @@ public class ZipEditor extends MultiPageEditorPart implements ISlicablePlottingP
 
 	@Override
 	public AbstractDataset setDatasetSelected(String name, boolean clearOthers) {
-		return getDataSetComponent().setDatasetSelected(name, clearOthers);
+		return ((IPlottingSystemSelection)getDataSetComponent()).setDatasetSelected(name, clearOthers);
 	}
 
 	@Override
 	public void setAll1DSelected(boolean overide) {
-		getDataSetComponent().setAll1DSelected(overide);
+		((IPlottingSystemSelection)getDataSetComponent()).setAll1DSelected(overide);
 	}
 
 }

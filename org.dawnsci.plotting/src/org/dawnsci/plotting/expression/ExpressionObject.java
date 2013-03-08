@@ -21,17 +21,13 @@ import org.apache.commons.jexl2.ExpressionImpl;
 import org.apache.commons.jexl2.JexlContext;
 import org.apache.commons.jexl2.JexlEngine;
 import org.apache.commons.jexl2.MapContext;
-import org.dawb.common.services.IVariableManager;
 import org.dawb.common.services.IExpressionObject;
-import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
-import org.dawb.common.ui.plot.IExpressionPlottingManager;
+import org.dawb.common.services.IVariableManager;
 import org.dawnsci.jexl.utils.JexlUtils;
-import org.eclipse.core.runtime.IProgressMonitor;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
-import uk.ac.diamond.scisoft.analysis.monitor.IMonitor.Stub;
 
 /**
  * An object which can be used to hold data about expressions in tables
@@ -193,7 +189,7 @@ class ExpressionObject implements IExpressionObject {
 	/**
 	 * @param provider The provider to set.
 	 */
-	public void setProvider(IExpressionPlottingManager provider) {
+	public void setProvider(IVariableManager provider) {
 		this.provider = provider;
 	}
 

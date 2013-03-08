@@ -11,14 +11,18 @@ package org.dawb.workbench.ui.editors;
 
 import java.util.Map;
 
-import org.dawb.common.ui.plot.IExpressionPlottingManager;
+import org.dawb.common.services.IVariableManager;
+import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.slicing.ISlicablePlottingPart;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 
+import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
+import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 
-public interface IDatasetEditor extends IExpressionPlottingManager, IEditorPart, ISlicablePlottingPart {
+public interface IDatasetEditor extends IVariableManager, IEditorPart, ISlicablePlottingPart {
 
 	/**
 	 * Update the plot with checkables selected by the user.
@@ -41,5 +45,38 @@ public interface IDatasetEditor extends IExpressionPlottingManager, IEditorPart,
 	 * @return
 	 */
 	Map<String, IDataset> getSelected();
+
+	
+	/**
+	 * A data set which can be used without loading the data
+	 * @param name
+	 * @param monitor
+	 * @return
+	 */
+	public ILazyDataset getLazyDataSet(String name, IMonitor monitor);
+
+	/**
+	 * Return data set for name
+	 * @param name
+	 * @param monitor
+	 * @return
+	 */
+	public AbstractDataset getDataSet(final String name, final IMonitor monitor);
+
+
+	/**
+	 * Test if data set name.
+	 * @param name
+	 * @param monitor
+	 * @return
+	 */
+	public boolean isDataSetName(String name, IMonitor monitor);
+	
+	/**
+	 * May return null, if data not plotting
+	 * @return
+	 */
+	public IPlottingSystem getPlottingSystem();
+
 
 }

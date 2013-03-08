@@ -3,10 +3,12 @@ package org.dawnsci.plotting.tools.history;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.dawb.common.services.IVariableManager;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawnsci.plotting.Activator;
+import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.MenuManager;
@@ -27,9 +29,17 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.commands.ICommandService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public abstract class AbstractHistoryTool extends AbstractToolPage implements MouseListener, KeyListener {
+import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 
+public abstract class AbstractHistoryTool extends AbstractToolPage implements MouseListener, KeyListener, IVariableManager {
+
+	protected final static Logger logger = LoggerFactory.getLogger(AbstractHistoryTool.class);
 	
 	public enum HistoryType {
     	HISTORY_PLOT;
@@ -203,6 +213,39 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 		getSite().getActionBars().getToolBarManager().add(editAction);
 		rightClick.add(editAction);
 		
+		getSite().getActionBars().getToolBarManager().add(new Separator());
+		final Action addExpression = new Action("Add expression") {
+			public void run() {
+				final ICommandService cs = (ICommandService)PlatformUI.getWorkbench().getService(ICommandService.class);
+				try {
+					cs.getCommand("org.dawb.workbench.editors.addExpression").executeWithChecks(new ExecutionEvent());
+				} catch (Exception e) {
+					logger.error("Cannot run action", e);
+				} 
+				
+			}
+		};
+		addExpression.setImageDescriptor(Activator.getImageDescriptor("icons/add_expression.png"));
+		addExpression.setToolTipText("Adds an expression which can be plotted. Must be function of other data sets.");
+		getSite().getActionBars().getToolBarManager().add(addExpression);
+		rightClick.add(addExpression);
+		
+		final Action deleteExpression = new Action("Delete expression") {
+			public void run() {
+				final ICommandService cs = (ICommandService)PlatformUI.getWorkbench().getService(ICommandService.class);
+				try {
+				    cs.getCommand("org.dawb.workbench.editors.deleteExpression").executeWithChecks(new ExecutionEvent());
+				} catch (Exception e) {
+					logger.error("Cannot run action", e);
+				} 
+			}
+		};
+		deleteExpression.setImageDescriptor(Activator.getImageDescriptor("icons/delete_expression.png"));
+		deleteExpression.setToolTipText("Deletes an expression.");
+		getSite().getActionBars().getToolBarManager().add(deleteExpression);
+		rightClick.add(deleteExpression);
+
+		
 		final Menu menu = rightClick.createContextMenu(viewer.getControl());
 		viewer.getControl().setMenu(menu);
 		
@@ -330,13 +373,35 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 		}
 		return null;
 	}
+	
 
-	/**
-	 * Override to return true if the tool, when opened should always be
-	 * in a popped out view
-	 * @return
-	 */
+	@Override
+	public boolean isVariableName(String name, IMonitor monitor) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public AbstractDataset getVariableValue(String expressionName, IMonitor monitor) {
+		// TODO Auto-generated method stub
+		return null;
+	}	
+
+	@Override
+	public void deleteExpression() {
+		
+	}
+
+
+	@Override
+	public void addExpression() {
+		
+	}
+
+
+	@Override
 	public boolean isAlwaysSeparateView() {
 		return true;
 	}
+
 }

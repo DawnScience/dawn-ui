@@ -7,7 +7,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */ 
-package org.dawb.workbench.ui.editors.expression;
+package org.dawb.workbench.ui.editors.zip;
 
 import java.io.File;
 import java.io.FileInputStream;

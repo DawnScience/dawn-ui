@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.dawb.common.services.IVariableManager;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.slicing.SliceComponent;
@@ -194,7 +195,7 @@ public class PlotDataPage extends Page implements IPlotUpdateParticipant, IAdapt
  		super.dispose();
 	}
 
-	public PlotDataComponent getDataSetComponent() {
+	public IVariableManager getDataSetComponent() {
 		return dataSetComponent;
 	}
 

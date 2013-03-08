@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.dawb.common.services.IExpressionObject;
+import org.dawb.common.services.IVariableManager;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.IPlottingSystem;
@@ -111,7 +112,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 	@Override
 	public Map<String, IDataset> getSelected() {
 		
-		final PlotDataComponent dataSetComponent = getDataSetComponent();
+		final PlotDataComponent dataSetComponent = (PlotDataComponent)getDataSetComponent();
         final Map<String,IDataset> ret = new HashMap<String, IDataset>(3);
 		if (dataSetComponent==null) return ret;
 		
@@ -224,7 +225,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 	    // If the data is only 2D we tell the PlottingSystem to switch to 2D mode.
 		boolean is1D = false;
 		
-		final PlotDataComponent dataSetComponent = getDataSetComponent();
+		final PlotDataComponent dataSetComponent = (PlotDataComponent)getDataSetComponent();
  		if (dataSetComponent!=null) {
 			for (CheckableObject set : dataSetComponent.getData()) {
 				if (dataSetComponent.getActiveDimensions(set, true)==1)	{
@@ -425,7 +426,6 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		return ys.isEmpty()?null:ys;
 	}
 
-	@Override
 	public AbstractDataset getDataSet(String name, IMonitor monitor) {
 		try {
 			
@@ -445,7 +445,6 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		}
 	}
 	
-	@Override
 	public ILazyDataset getLazyDataSet(String name, IMonitor monitor) {
 		try {
 			
@@ -468,7 +467,6 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		throw new NullPointerException("Expressions are not supported by "+getClass().getName());
 	}
 	
-	@Override
 	public boolean isDataSetName(String name, IMonitor monitor) {
 		if (dataNames==null) return false;
 		return dataNames.contains(name);
@@ -541,8 +539,8 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
      */
 	public void setAll1DSelected(final boolean overide) {
 		
-		final PlotDataComponent dataSetComponent = getDataSetComponent();
-         dataSetComponent.setAll1DSelected(overide);
+		final PlotDataComponent dataSetComponent = (PlotDataComponent)getDataSetComponent();
+		dataSetComponent.setAll1DSelected(overide);
 	}
 
 	/**
@@ -554,7 +552,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 			
 			@Override
 			public IStatus runInUIThread(IProgressMonitor monitor) {
-				final PlotDataComponent dataSetComponent = getDataSetComponent();
+				final PlotDataComponent dataSetComponent = (PlotDataComponent)getDataSetComponent();
 		 		if (dataSetComponent==null) return Status.CANCEL_STATUS;
 				try {
 					
@@ -595,7 +593,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		Display.getDefault().asyncExec(new Runnable() {
 			@Override
 			public void run() {
-				PlotDataComponent pc = getDataSetComponent();
+				final PlotDataComponent pc = (PlotDataComponent)getDataSetComponent();
 				if (pc!=null && (pc.getData()==null || pc.getData().isEmpty())) {
 					createData(getEditorInput());
 				}			
@@ -627,8 +625,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
      	super.dispose();
     }
 
-	@Override
-	public PlotDataComponent getDataSetComponent() {
+	public IVariableManager getDataSetComponent() {
 		
 		final IWorkbenchPage wb =EclipseUtils.getActivePage();
 		if (wb==null) return null;
@@ -691,13 +688,4 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		return super.toString();
 	}
 	
-	@Override
-	public String getFilePath() {
-		try {
-		    return EclipseUtils.getFilePath(getEditorInput());
-		} catch (Throwable ne) {
-			return null;
-		}
-	}
-
 }

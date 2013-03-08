@@ -13,7 +13,7 @@ import java.util.List;
 
 import org.dawb.common.services.IExpressionObject;
 import org.dawb.common.services.IExpressionObjectService;
-import org.dawb.common.ui.plot.IExpressionPlottingManager;
+import org.dawb.common.services.IVariableManager;
 import org.dawb.hdf5.editor.H5Path;
 import org.eclipse.ui.PlatformUI;
 
@@ -194,7 +194,7 @@ public class CheckableObject implements H5Path{
 	
 	private static final String DELIMITER = "£";
 	
-	public void createExpression(IExpressionPlottingManager psData, String mementoKey, String memento) {
+	public void createExpression(IVariableManager psData, String mementoKey, String memento) {
 		final String[] parts = memento.split(DELIMITER);
 		this.variable   = parts[0];
 		this.expression = service.createExpressionObject(psData, parts[1]);

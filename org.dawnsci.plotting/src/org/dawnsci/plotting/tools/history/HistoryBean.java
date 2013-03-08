@@ -6,6 +6,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.dawb.common.gpu.Operator;
+import org.dawb.common.services.IExpressionObject;
 import org.eclipse.swt.graphics.RGB;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
@@ -19,8 +20,9 @@ class HistoryBean {
 	// Image compare
 	private AbstractDataset       data;
 	private List<AbstractDataset> axes;
-	private Operator    operator;
-	private int              weighting=100;
+	private Operator              operator;
+	private int                   weighting=100;
+	private IExpressionObject     expression;
 	
 	// 1D history
 	private AbstractDataset xdata;
@@ -123,6 +125,8 @@ class HistoryBean {
 		result = prime * result + ((axes == null) ? 0 : axes.hashCode());
 		result = prime * result + ((data == null) ? 0 : data.hashCode());
 		result = prime * result
+				+ ((expression == null) ? 0 : expression.hashCode());
+		result = prime * result
 				+ ((fixedImageKey == null) ? 0 : fixedImageKey.hashCode());
 		result = prime * result + (modifiable ? 1231 : 1237);
 		result = prime * result
@@ -157,6 +161,11 @@ class HistoryBean {
 			if (other.data != null)
 				return false;
 		} else if (!data.equals(other.data))
+			return false;
+		if (expression == null) {
+			if (other.expression != null)
+				return false;
+		} else if (!expression.equals(other.expression))
 			return false;
 		if (fixedImageKey == null) {
 			if (other.fixedImageKey != null)
@@ -254,5 +263,11 @@ class HistoryBean {
 
 	}
 
+	public IExpressionObject getExpression() {
+		return expression;
+	}
+	public void setExpression(IExpressionObject expression) {
+		this.expression = expression;
+	}
 
 }

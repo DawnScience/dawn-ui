@@ -10,7 +10,7 @@
 
 package org.dawb.workbench.ui.editors.actions;
 
-import org.dawb.common.ui.plot.IExpressionPlottingManager;
+import org.dawb.common.services.IVariableManager;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -29,7 +29,7 @@ public class DeleteExpressionHandler extends AbstractHandler  implements IEditor
 	}
 
 	private void doAction() {
-		IExpressionPlottingManager sets = DataSetComponentUtils.getActiveComponent();
+		IVariableManager sets = DataSetComponentUtils.getActiveComponent();
 		if (sets==null) return;
 		
 		sets.deleteExpression();
