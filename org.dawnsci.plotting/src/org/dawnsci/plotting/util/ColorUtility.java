@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 
 /**
@@ -145,4 +146,14 @@ public class ColorUtility {
 		return new org.eclipse.swt.graphics.Color(Display.getCurrent(), col.getRed(), col.getGreen(), col.getBlue());
 	}
 
+	
+	public static final int[] getIntArray(RGB rgb) {
+		if (rgb==null) return null;
+		return new int[]{rgb.red, rgb.green, rgb.blue};
+	}
+
+	public static final RGB getRGB(int... color) {
+		if (color==null) return null;
+		return new RGB(color[0], color[1], color[2]);
+	}
 }

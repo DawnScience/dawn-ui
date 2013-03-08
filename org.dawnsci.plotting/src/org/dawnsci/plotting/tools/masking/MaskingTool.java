@@ -31,6 +31,7 @@ import org.dawb.common.ui.wizard.persistence.PersistenceExportWizard;
 import org.dawb.common.ui.wizard.persistence.PersistenceImportWizard;
 import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.preference.PlottingConstants;
+import org.dawnsci.plotting.util.ColorUtility;
 import org.eclipse.core.commands.operations.IOperationHistoryListener;
 import org.eclipse.core.commands.operations.OperationHistoryEvent;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -130,9 +131,9 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 
 					((IImageTrace)evt.getSource()).setMask(maskObject.getMaskDataset());
 					((IImageTrace)evt.getSource()).addPaletteListener(paletteListener);
-					RGB rgb = ((IImageTrace)evt.getSource()).getImageServiceBean().getNanBound().getColor();
-					updateIcons(rgb);
-					colorSelector.setColorValue(rgb);
+					int[] ia = ((IImageTrace)evt.getSource()).getImageServiceBean().getNanBound().getColor();
+					updateIcons(ia);
+					colorSelector.setColorValue(ColorUtility.getRGB(ia));
 				}
 			}
 			@Override
@@ -365,11 +366,11 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		
 		this.colorSelector = new ColorSelector(minMaxComp);
 		colorSelector.getButton().setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1,1));
-		if (image!=null) colorSelector.setColorValue(image.getNanBound().getColor());
+		if (image!=null) colorSelector.setColorValue(ColorUtility.getRGB(image.getNanBound().getColor()));
 		colorSelector.addListener(new IPropertyChangeListener() {			
 			@Override
 			public void propertyChange(PropertyChangeEvent event) {
-				getImageTrace().setNanBound(new HistogramBound(Double.NaN, colorSelector.getColorValue()));
+				getImageTrace().setNanBound(new HistogramBound(Double.NaN, ColorUtility.getIntArray(colorSelector.getColorValue())));
 				getImageTrace().rehistogram();
 			}
 		});
@@ -679,7 +680,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			if (getImageTrace()!=null) {
 			    updateIcons(getImageTrace().getNanBound().getColor());
 			} else {
-				updateIcons(ColorConstants.green.getRGB());
+				updateIcons(new int[]{0,255,0});
 			}
 			mask.setChecked(true);
 		} else {
@@ -699,8 +700,9 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		});
 	}
 	
-	private void updateIcons(RGB maskColor) {
+	private void updateIcons(int[] ia) {
 		
+		RGB maskColor = ColorUtility.getRGB(ia);
 		((ActionContributionItem)directToolbar.find(ShapeType.SQUARE.getId())).getAction().setImageDescriptor(IconUtils.getBrushIcon(  12, ShapeType.SQUARE,   maskColor));
 		((ActionContributionItem)directToolbar.find(ShapeType.TRIANGLE.getId())).getAction().setImageDescriptor(IconUtils.getBrushIcon(12, ShapeType.TRIANGLE, maskColor));
 		((ActionContributionItem)directToolbar.find(ShapeType.CIRCLE.getId())).getAction().setImageDescriptor(IconUtils.getBrushIcon(  12, ShapeType.CIRCLE,   maskColor));

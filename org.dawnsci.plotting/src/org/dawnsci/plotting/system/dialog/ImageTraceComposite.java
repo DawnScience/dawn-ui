@@ -10,6 +10,7 @@ import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.IImageTrace.DownsampleType;
 import org.dawnsci.plotting.Activator;
+import org.dawnsci.plotting.util.ColorUtility;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.ColorSelector;
 import org.eclipse.swt.SWT;
@@ -17,6 +18,7 @@ import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -188,7 +190,7 @@ public class ImageTraceComposite extends Composite {
 		
 		minCutColor = new ColorSelector(cuts);
 		minCutColor.getButton().setLayoutData(new GridData());		
-		if (imageTrace.getMinCut()!=null) minCutColor.setColorValue(imageTrace.getMinCut().getColor());
+		if (imageTrace.getMinCut()!=null) minCutColor.setColorValue(ColorUtility.getRGB(imageTrace.getMinCut().getColor()));
 
 		label = new Label(cuts, SWT.NONE);
 		label.setText("Upper cut");
@@ -211,7 +213,7 @@ public class ImageTraceComposite extends Composite {
 		
 		maxCutColor = new ColorSelector(cuts);
 		maxCutColor.getButton().setLayoutData(new GridData());		
-		if (imageTrace.getMaxCut()!=null) maxCutColor.setColorValue(imageTrace.getMaxCut().getColor());
+		if (imageTrace.getMaxCut()!=null) maxCutColor.setColorValue(ColorUtility.getRGB(imageTrace.getMaxCut().getColor()));
 	
 		label = new Label(cuts, SWT.NONE);
 		label.setText("Invalid number color");
@@ -219,7 +221,7 @@ public class ImageTraceComposite extends Composite {
 
 		nanColor = new ColorSelector(cuts);
 		nanColor.getButton().setLayoutData(new GridData());		
-		if (imageTrace.getNanBound()!=null) nanColor.setColorValue(imageTrace.getNanBound().getColor());
+		if (imageTrace.getNanBound()!=null) nanColor.setColorValue(ColorUtility.getRGB(imageTrace.getNanBound().getColor()));
 		
 		final Button reset = new Button(cuts, SWT.NONE);
 		reset.setLayoutData(new GridData());		
@@ -232,11 +234,11 @@ public class ImageTraceComposite extends Composite {
 				imageTrace.setMaxCut(HistogramBound.DEFAULT_MAXIMUM);
 				imageTrace.setNanBound(HistogramBound.DEFAULT_NAN);
 				minCut.setNumericValue(Double.NEGATIVE_INFINITY);
-				minCutColor.setColorValue(HistogramBound.DEFAULT_MINIMUM.getColor());
+				minCutColor.setColorValue(ColorUtility.getRGB(HistogramBound.DEFAULT_MINIMUM.getColor()));
 				maxCut.setNumericValue(Double.POSITIVE_INFINITY);
-				maxCutColor.setColorValue(HistogramBound.DEFAULT_MAXIMUM.getColor());
+				maxCutColor.setColorValue(ColorUtility.getRGB(HistogramBound.DEFAULT_MAXIMUM.getColor()));
 				((StyledText)maxCut.getControl()).setText("Infinity");
-				nanColor.setColorValue(HistogramBound.DEFAULT_NAN.getColor());
+				nanColor.setColorValue(ColorUtility.getRGB(HistogramBound.DEFAULT_NAN.getColor()));
 			}
 		});
 		
@@ -278,12 +280,12 @@ public class ImageTraceComposite extends Composite {
 			if (!Double.isNaN(maximum.getNumericValue())) imageTrace.setMax(maximum.getNumericValue());
 			
 			final double min = !Double.isNaN(minCut.getNumericValue()) ? minCut.getNumericValue() : imageTrace.getMinCut().getBound().doubleValue();
-			imageTrace.setMinCut(new HistogramBound(min, minCutColor.getColorValue()));
+			imageTrace.setMinCut(new HistogramBound(min, ColorUtility.getIntArray(minCutColor.getColorValue())));
 			
 			final double max = !Double.isNaN(maxCut.getNumericValue()) ? maxCut.getNumericValue() : imageTrace.getMaxCut().getBound().doubleValue();
-			imageTrace.setMaxCut(new HistogramBound(max, maxCutColor.getColorValue()));
+			imageTrace.setMaxCut(new HistogramBound(max, ColorUtility.getIntArray(maxCutColor.getColorValue())));
 			
-			imageTrace.setNanBound(new HistogramBound(Double.NaN, nanColor.getColorValue()));
+			imageTrace.setNanBound(new HistogramBound(Double.NaN, ColorUtility.getIntArray(nanColor.getColorValue())));
 			imageTrace.setDownsampleType(DownsampleType.values()[downsampleChoice.getSelectionIndex()]);
 		} finally {
 			imageTrace.setImageUpdateActive(true);

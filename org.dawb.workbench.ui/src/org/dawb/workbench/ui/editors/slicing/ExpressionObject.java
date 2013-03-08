@@ -29,6 +29,13 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 
+/**
+ * An object which can be used to hold data about expressions in tables
+ * of data (which data is AbstractDataset).
+ * 
+ * @author fcp94556
+ *
+ */
 public class ExpressionObject {
 	
 	private String expressionString;
@@ -184,21 +191,6 @@ public class ExpressionObject {
 	    return refs;
 	}
 	
-	public boolean isReferencedVariable(String variableName) {
-		
-        if (variableName==null || "".equals(variableName)) return false;
-        
-		if (jexl==null) jexl = JexlUtils.getDawnJexlEngine();
-		ExpressionImpl ex = (ExpressionImpl)jexl.createExpression(expressionString);
-		final Set<List<String>> variableNames = ex.getVariables();
-		
-	    for (List<String> entry : variableNames) {
-	    	final String vn = entry.get(0);
-            if (variableName.equals(vn)) return true;
-	    }
-	    return false;
-	}
-
 	/**
 	 * @return Returns the provider.
 	 */
