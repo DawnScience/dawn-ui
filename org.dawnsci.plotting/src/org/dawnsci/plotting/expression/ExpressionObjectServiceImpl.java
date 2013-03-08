@@ -1,4 +1,4 @@
-package org.dawb.workbench.ui.editors.expression;
+package org.dawnsci.plotting.expression;
 
 import org.dawb.common.services.IExpressionObject;
 import org.dawb.common.services.IExpressionObjectService;

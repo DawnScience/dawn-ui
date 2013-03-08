@@ -8,7 +8,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  */ 
 
-package org.dawb.workbench.ui.editors.expression;
+package org.dawnsci.plotting.expression;
 
 import java.util.Arrays;
 import java.util.HashMap;

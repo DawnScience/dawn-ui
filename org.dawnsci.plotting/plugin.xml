@@ -417,6 +417,12 @@
                serviceClass="org.dawb.common.services.IClassLoaderService">
          </service>
       </serviceFactory>
+      <serviceFactory
+            factoryClass="org.dawnsci.plotting.expression.ExpressionObjectServiceImpl">
+         <service
+               serviceClass="org.dawb.common.services.IExpressionObjectService">
+         </service>
+      </serviceFactory>
    </extension>
 
 </plugin>
