@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
 import org.dawb.common.ui.DawbUtils;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
-import org.dawb.common.ui.plot.IPlottingSystemData;
+import org.dawb.common.ui.plot.IExpressionPlottingManager;
 import org.dawb.common.ui.plot.IPlottingSystemSelection;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.axis.IAxis;
@@ -138,7 +138,7 @@ import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
  * This view can view and plot any file. It is most efficient if the Loader that LoaderFactory
  * uses for this file type is an IMetaLoader. 
  */
-public class PlotDataComponent implements IPlottingSystemData, MouseListener, KeyListener, IPlottingSystemSelection {
+public class PlotDataComponent implements IExpressionPlottingManager, MouseListener, KeyListener, IPlottingSystemSelection {
 		
 	private static final Logger logger = LoggerFactory.getLogger(PlotDataComponent.class);
 
@@ -160,7 +160,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 	private   boolean               staggerSupported = false;
 
 	protected IMetaData             metaData;
-	protected final IPlottingSystemData providerDeligate;
+	protected final IExpressionPlottingManager providerDeligate;
 	private IPropertyChangeListener propListener;
 	private ArrayList<IAction>      dataComponentActions;
 	private Composite               container;
@@ -172,7 +172,7 @@ public class PlotDataComponent implements IPlottingSystemData, MouseListener, Ke
 
 	private IToolChangeListener toolListener;
 	
-	public PlotDataComponent(final IPlottingSystemData providerDeligate) {
+	public PlotDataComponent(final IExpressionPlottingManager providerDeligate) {
 				
 		this.data = new ArrayList<CheckableObject>(7);
 		this.providerDeligate   = providerDeligate;

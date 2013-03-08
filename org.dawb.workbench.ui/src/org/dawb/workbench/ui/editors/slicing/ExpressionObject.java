@@ -24,7 +24,7 @@ import org.apache.commons.jexl2.JexlContext;
 import org.apache.commons.jexl2.JexlEngine;
 import org.apache.commons.jexl2.MapContext;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
-import org.dawb.common.ui.plot.IPlottingSystemData;
+import org.dawb.common.ui.plot.IExpressionPlottingManager;
 import org.dawb.common.ui.slicing.DimsData;
 import org.dawb.common.ui.slicing.DimsDataList;
 import org.dawb.common.ui.slicing.SliceUtils;
@@ -43,14 +43,14 @@ import uk.ac.diamond.scisoft.analysis.io.SliceObject;
 public class ExpressionObject {
 	
 	private String expressionString;
-	private IPlottingSystemData provider;
+	private IExpressionPlottingManager provider;
 	private JexlEngine jexl;
 	
-	public ExpressionObject(IPlottingSystemData provider) {
+	public ExpressionObject(IExpressionPlottingManager provider) {
 		this(provider, null);
 	}
 
-	public ExpressionObject(final IPlottingSystemData provider, String expression) {
+	public ExpressionObject(final IExpressionPlottingManager provider, String expression) {
 		this.provider         = provider;
 		this.expressionString = expression;
 	}
@@ -290,7 +290,7 @@ public class ExpressionObject {
 	/**
 	 * @return Returns the provider.
 	 */
-	public IPlottingSystemData getProvider() {
+	public IExpressionPlottingManager getProvider() {
 		return provider;
 	}
 
@@ -298,7 +298,7 @@ public class ExpressionObject {
 	/**
 	 * @param provider The provider to set.
 	 */
-	public void setProvider(IPlottingSystemData provider) {
+	public void setProvider(IExpressionPlottingManager provider) {
 		this.provider = provider;
 	}
 

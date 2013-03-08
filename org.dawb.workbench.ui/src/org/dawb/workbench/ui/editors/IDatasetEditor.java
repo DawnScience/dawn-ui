@@ -11,14 +11,14 @@ package org.dawb.workbench.ui.editors;
 
 import java.util.Map;
 
-import org.dawb.common.ui.plot.IPlottingSystemData;
+import org.dawb.common.ui.plot.IExpressionPlottingManager;
 import org.dawb.common.ui.slicing.ISlicablePlottingPart;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
-public interface IDatasetEditor extends IPlottingSystemData, IEditorPart, ISlicablePlottingPart {
+public interface IDatasetEditor extends IExpressionPlottingManager, IEditorPart, ISlicablePlottingPart {
 
 	/**
 	 * Update the plot with checkables selected by the user.

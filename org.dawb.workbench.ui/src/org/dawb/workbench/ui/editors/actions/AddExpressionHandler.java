@@ -10,8 +10,7 @@
 
 package org.dawb.workbench.ui.editors.actions;
 
-import org.dawb.common.ui.plot.IPlottingSystemData;
-import org.dawb.workbench.ui.editors.PlotDataComponent;
+import org.dawb.common.ui.plot.IExpressionPlottingManager;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -41,7 +40,7 @@ public class AddExpressionHandler extends AbstractHandler implements IEditorActi
 	}
 
 	private void doAction() {
-		IPlottingSystemData sets = DataSetComponentUtils.getActiveComponent();
+		IExpressionPlottingManager sets = DataSetComponentUtils.getActiveComponent();
 		if (sets==null) return;
 		
 		sets.addExpression();

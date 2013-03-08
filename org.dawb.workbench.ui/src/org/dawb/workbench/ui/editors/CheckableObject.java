@@ -9,10 +9,9 @@
  */ 
 package org.dawb.workbench.ui.editors;
 
-import java.util.Date;
 import java.util.List;
 
-import org.dawb.common.ui.plot.IPlottingSystemData;
+import org.dawb.common.ui.plot.IExpressionPlottingManager;
 import org.dawb.hdf5.editor.H5Path;
 import org.dawb.workbench.ui.editors.slicing.ExpressionObject;
 
@@ -188,7 +187,7 @@ public class CheckableObject implements H5Path{
 	
 	private static final String DELIMITER = "£";
 	
-	public void createExpression(IPlottingSystemData psData, String mementoKey, String memento) {
+	public void createExpression(IExpressionPlottingManager psData, String mementoKey, String memento) {
 		final String[] parts = memento.split(DELIMITER);
 		this.variable   = parts[0];
 		this.expression = new ExpressionObject(psData, parts[1]);
