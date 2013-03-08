@@ -40,7 +40,7 @@ public class AddExpressionHandler extends AbstractHandler implements IEditorActi
 	}
 
 	private void doAction() {
-		IVariableManager sets = DataSetComponentUtils.getActiveComponent();
+		IVariableManager sets = VariableManagerUtils.getActiveComponent();
 		if (sets==null) return;
 		
 		sets.addExpression();

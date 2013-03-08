@@ -29,7 +29,7 @@ public class DeleteExpressionHandler extends AbstractHandler  implements IEditor
 	}
 
 	private void doAction() {
-		IVariableManager sets = DataSetComponentUtils.getActiveComponent();
+		IVariableManager sets = VariableManagerUtils.getActiveComponent();
 		if (sets==null) return;
 		
 		sets.deleteExpression();

@@ -395,7 +395,7 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 
 	@Override
 	public void addExpression() {
-		
+		System.out.println();
 	}
 
 
