@@ -15,8 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.jexl2.Expression;
 import org.apache.commons.jexl2.ExpressionImpl;
@@ -25,20 +23,11 @@ import org.apache.commons.jexl2.JexlEngine;
 import org.apache.commons.jexl2.MapContext;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.plot.IExpressionPlottingManager;
-import org.dawb.common.ui.slicing.DimsData;
-import org.dawb.common.ui.slicing.DimsDataList;
-import org.dawb.common.ui.slicing.SliceUtils;
-import org.dawb.workbench.ui.Activator;
 import org.dawnsci.jexl.utils.JexlUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
-import uk.ac.diamond.scisoft.analysis.io.IMetaData;
-import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
-import uk.ac.diamond.scisoft.analysis.io.SliceObject;
 
 public class ExpressionObject {
 	
@@ -157,13 +146,6 @@ public class ExpressionObject {
 		
 	    if (expressionString==null||provider==null) return new DoubleDataset();
 	    
-	    try {
-	    	dataSet = getSlice();
-	    	if (dataSet!=null) return dataSet;
-	    } catch (Throwable ne) {
-	    	// We try to parse it as an expression.
-	    }
-		
 		final Map<String,AbstractDataset> refs = getVariables(monitor);
 		
 		if (jexl==null) jexl = JexlUtils.getDawnJexlEngine();
@@ -179,76 +161,6 @@ public class ExpressionObject {
 		dataSet.setName(getExpressionString());
 		return this.dataSet;
 	}
-	
-	private static final Pattern SLICE = Pattern.compile("(.+)\\[([0-9:,\\-]+)\\]");
-
-	private AbstractDataset getSlice() {
-		
-		final Matcher matcher = SLICE.matcher(getExpressionString());
-		if (matcher.matches()) {
-			try {
-				final String filePath = provider.getFilePath();
-				final String fullName = matcher.group(1);
-				final String range    = matcher.group(2);
-				final String[]  idx   = range.split(",");
-				
-				final IMetaData meta  = LoaderFactory.getMetaData(filePath, null);
-				final int[]     shape = meta.getDataShapes().get(fullName);
-				if (shape.length!=idx.length) {
-					Activator.getDefault().getLog().log(new Status(IStatus.WARNING, "org.dawb.workbench.ui",
-							"Cannot parse '"+getExpressionString()+"' as slice. The data is a different shape to the slice inside the []."));
-					return null;
-				}
-				
-				SliceObject sliceObject = new SliceObject();
-				sliceObject.setPath(filePath);
-				sliceObject.setName(fullName);
-				
-                final DimsDataList ddl = new DimsDataList(shape);
-                int iaxis = 0;
-                for (int index = 0; index < shape.length; index++) {
-					final DimsData dd  = ddl.getDimsData(index);
-					final String   inc = idx[index];
-					if ("-".equals(inc) || "-1".equals(inc) || ":".equals(inc)) {
-						dd.setAxis(iaxis);
-						++iaxis;
-					} else {
-						dd.setAxis(-1);
-						dd.setSlice(Integer.parseInt(inc));
-					}
-				}
-                sliceObject = SliceUtils.createSliceObject(ddl, shape, sliceObject);
-                AbstractDataset slice = LoaderFactory.getSlice(sliceObject, null);
-    			slice = slice.squeeze();		
-                slice.setName(getExpressionString());
-                
-                if (iaxis!=slice.getRank()) {
-    				Activator.getDefault().getLog().log(new Status(IStatus.WARNING, "org.dawb.workbench.ui",
-    						"Cannot parse '"+getExpressionString()+"' as slice. The rank of the slice is not the same as intended."));
-                    return null;
-                }
-                
-                return slice;
-                
-				
-			} catch (Throwable ne) {
-				Activator.getDefault().getLog().log(new Status(IStatus.WARNING, "org.dawb.workbench.ui",
-				"Cannot parse '"+getExpressionString()+"' as slice. Slice syntax is: '/full_path[10,-,-] to get 10th image from 3D array."));
-			}
-		}
-		return null;
-	}
-	
-	public static void main(String[] args) {
-		System.out.println(SLICE.matcher("/entry1/data[1,]").matches());
-		System.out.println(SLICE.matcher("/entry1/data[1,-,-]").matches());
-		System.out.println(SLICE.matcher("/entry1/data[1,-,-]").matches());
-		System.out.println(SLICE.matcher("/entry1/data(1,2,)").matches());
-		System.out.println(SLICE.matcher("fred(1,2,)").matches());
-		System.out.println(SLICE.matcher("fred(1,2,)").matches());
-		System.out.println(SLICE.matcher("/entry/exchange/white_z[14,-,-]").matches());
-	}
-
 
 	private Map<String, AbstractDataset> getVariables(IProgressMonitor monitor) throws Exception {
 		
