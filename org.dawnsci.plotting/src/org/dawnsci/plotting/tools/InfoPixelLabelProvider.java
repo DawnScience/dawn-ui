@@ -45,7 +45,6 @@ import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
 import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
-import uk.ac.diamond.scisoft.analysis.rcp.pixelinfoutils.Vector3dutil;
 import uk.ac.diamond.scisoft.analysis.roi.PointROI;
 
 public class InfoPixelLabelProvider extends ColumnLabelProvider {

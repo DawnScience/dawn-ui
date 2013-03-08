@@ -1,3 +1,5 @@
+Dependency-Note: Do not add dependencies to this plugin without discussing. For instance
+ uk.ac.diamond.scisoft.analysis.rcp is right out.
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Plotting
@@ -24,7 +26,8 @@ Require-Bundle: org.eclipse.ui,
  uk.ac.gda.common.rcp;bundle-version="1.2.0",
  javax.vecmath;bundle-version="1.5.2",
  org.eclipse.ui.forms;bundle-version="3.5.101",
- org.dawnsci.persistence;bundle-version="1.0.0"
+ org.dawnsci.persistence;bundle-version="1.0.0",
+ org.apache.commons.math3;bundle-version="3.1.1"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: org.dawnsci.plotting.composites,
@@ -47,9 +50,5 @@ Import-Package: com.thoughtworks.xstream.core.util,
  org.eclipse.ui.dialogs,
  org.eclipse.ui.part,
  org.slf4j;version="1.5.6",
- uk.ac.diamond.scisoft.analysis.rcp,
- uk.ac.diamond.scisoft.analysis.rcp.pixelinfoutils,
- uk.ac.diamond.scisoft.analysis.rcp.plotting.utils,
- uk.ac.diamond.scisoft.analysis.rcp.preference,
  uk.ac.diamond.sda.meta.page
 Bundle-ClassPath: .

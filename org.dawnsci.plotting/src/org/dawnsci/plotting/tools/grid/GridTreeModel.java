@@ -18,15 +18,15 @@ import org.dawnsci.common.widgets.tree.ObjectNode;
 import org.dawnsci.common.widgets.tree.ValueEvent;
 import org.dawnsci.common.widgets.tree.ValueListener;
 import org.dawnsci.plotting.draw2d.swtxy.selection.GridSelection;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.jscience.physics.amount.Amount;
 
-import uk.ac.diamond.scisoft.analysis.rcp.AnalysisRCPActivator;
-import uk.ac.diamond.scisoft.analysis.rcp.preference.PreferenceConstants;
 import uk.ac.diamond.scisoft.analysis.roi.GridROI;
 
 /**
@@ -310,19 +310,25 @@ public class GridTreeModel extends AbstractNodeModel {
 
 	}
 	
+	public static final String GRIDSCAN_RESOLUTION_X = "gridscan.res.x";
+	public static final String GRIDSCAN_RESOLUTION_Y = "gridscan.res.y";
+	public static final String GRIDSCAN_BEAMLINE_POSX = "gridscan.beamline.posx";
+	public static final String GRIDSCAN_BEAMLINE_POSY = "gridscan.beamline.posy";
+
 	private void createPreferenceListener() {
 		
-		AnalysisRCPActivator.getDefault().getPreferenceStore().addPropertyChangeListener(new IPropertyChangeListener() {
+		final IPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "uk.ac.diamond.scisoft.analysis.rcp");
+		store.addPropertyChangeListener(new IPropertyChangeListener() {
 			@Override
 			public void propertyChange(PropertyChangeEvent event) {
 				String property = event.getProperty();
 
 				if (groi==null) return;
 				
-				if (property.equals(PreferenceConstants.GRIDSCAN_RESOLUTION_X)
-						|| property.equals(PreferenceConstants.GRIDSCAN_RESOLUTION_Y)
-						|| property.equals(PreferenceConstants.GRIDSCAN_BEAMLINE_POSX)
-						|| property.equals(PreferenceConstants.GRIDSCAN_BEAMLINE_POSY)) {
+				if (property.equals(GRIDSCAN_RESOLUTION_X)
+						|| property.equals(GRIDSCAN_RESOLUTION_Y)
+						|| property.equals(GRIDSCAN_BEAMLINE_POSX)
+						|| property.equals(GRIDSCAN_BEAMLINE_POSY)) {
 					setGridPreferences(true);
 				}
 			}
@@ -335,39 +341,39 @@ public class GridTreeModel extends AbstractNodeModel {
 		
 		if (groi==null) return;
 
-		IPreferenceStore preferenceStore = AnalysisRCPActivator.getDefault().getPreferenceStore();
+		final IPreferenceStore preferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, "uk.ac.diamond.scisoft.analysis.rcp");
 
 		double gridScanResolutionX;
-		if (preferenceStore.isDefault(PreferenceConstants.GRIDSCAN_RESOLUTION_X)) {
+		if (preferenceStore.isDefault(GRIDSCAN_RESOLUTION_X)) {
 			gridScanResolutionX = preferenceStore
-					.getDefaultDouble(PreferenceConstants.GRIDSCAN_RESOLUTION_X);
+					.getDefaultDouble(GRIDSCAN_RESOLUTION_X);
 		} else {
-			gridScanResolutionX = preferenceStore.getDouble(PreferenceConstants.GRIDSCAN_RESOLUTION_X);
+			gridScanResolutionX = preferenceStore.getDouble(GRIDSCAN_RESOLUTION_X);
 		}
 		groi.getGridPreferences().setResolutionX(gridScanResolutionX);
 
 		double gridScanResolutionY;
-		if (preferenceStore.isDefault(PreferenceConstants.GRIDSCAN_RESOLUTION_Y)) {
+		if (preferenceStore.isDefault(GRIDSCAN_RESOLUTION_Y)) {
 			gridScanResolutionY = preferenceStore
-					.getDefaultDouble(PreferenceConstants.GRIDSCAN_RESOLUTION_Y);
+					.getDefaultDouble(GRIDSCAN_RESOLUTION_Y);
 		} else {
-			gridScanResolutionY = preferenceStore.getDouble(PreferenceConstants.GRIDSCAN_RESOLUTION_Y);
+			gridScanResolutionY = preferenceStore.getDouble(GRIDSCAN_RESOLUTION_Y);
 		}
 		groi.getGridPreferences().setResolutionY(gridScanResolutionY);
 
 		double xBeamPos;
-		if (preferenceStore.isDefault(PreferenceConstants.GRIDSCAN_BEAMLINE_POSX)) {
-			xBeamPos = preferenceStore.getDefaultDouble(PreferenceConstants.GRIDSCAN_BEAMLINE_POSX);
+		if (preferenceStore.isDefault(GRIDSCAN_BEAMLINE_POSX)) {
+			xBeamPos = preferenceStore.getDefaultDouble(GRIDSCAN_BEAMLINE_POSX);
 		} else {
-			xBeamPos = preferenceStore.getDouble(PreferenceConstants.GRIDSCAN_BEAMLINE_POSX);
+			xBeamPos = preferenceStore.getDouble(GRIDSCAN_BEAMLINE_POSX);
 		}
 		groi.getGridPreferences().setBeamlinePosX(xBeamPos);
 
 		double yBeamPos;
-		if (preferenceStore.isDefault(PreferenceConstants.GRIDSCAN_BEAMLINE_POSY)) {
-			yBeamPos = preferenceStore.getDefaultDouble(PreferenceConstants.GRIDSCAN_BEAMLINE_POSY);
+		if (preferenceStore.isDefault(GRIDSCAN_BEAMLINE_POSY)) {
+			yBeamPos = preferenceStore.getDefaultDouble(GRIDSCAN_BEAMLINE_POSY);
 		} else {
-			yBeamPos = preferenceStore.getDouble(PreferenceConstants.GRIDSCAN_BEAMLINE_POSY);
+			yBeamPos = preferenceStore.getDouble(GRIDSCAN_BEAMLINE_POSY);
 		}
 		groi.getGridPreferences().setBeamlinePosY(yBeamPos);
 		
