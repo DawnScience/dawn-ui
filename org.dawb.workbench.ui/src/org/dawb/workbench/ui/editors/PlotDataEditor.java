@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.dawb.common.services.IExpressionObject;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.IPlottingSystem;
@@ -31,7 +32,6 @@ import org.dawb.common.ui.views.PlotDataView;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawb.workbench.ui.Activator;
 import org.dawb.workbench.ui.editors.preference.EditorConstants;
-import org.dawb.workbench.ui.editors.slicing.ExpressionObject;
 import org.dawb.workbench.ui.views.PlotDataPage;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -486,9 +486,9 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 			CheckableObject check = (CheckableObject)input;
 			object = check.isExpression() ? check.getExpression() : check.getName();
 		}
-		if (object instanceof ExpressionObject) {
+		if (object instanceof IExpressionObject) {
 			try {
-				return ((ExpressionObject)object).getDataSet(monitor);
+				return ((IExpressionObject)object).getDataSet(new ProgressMonitorWrapper(monitor));
 			} catch (Exception e) {
 				// valid, user can enter an invalid expression. In this case
 				// it colours red but does not stop them from using the view.

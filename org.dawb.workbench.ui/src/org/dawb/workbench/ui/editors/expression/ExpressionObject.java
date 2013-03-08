@@ -8,7 +8,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  */ 
 
-package org.dawb.workbench.ui.editors.slicing;
+package org.dawb.workbench.ui.editors.expression;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,6 +21,8 @@ import org.apache.commons.jexl2.ExpressionImpl;
 import org.apache.commons.jexl2.JexlContext;
 import org.apache.commons.jexl2.JexlEngine;
 import org.apache.commons.jexl2.MapContext;
+import org.dawb.common.services.IVariableManager;
+import org.dawb.common.services.IExpressionObject;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.plot.IExpressionPlottingManager;
 import org.dawnsci.jexl.utils.JexlUtils;
@@ -28,6 +30,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
+import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
+import uk.ac.diamond.scisoft.analysis.monitor.IMonitor.Stub;
 
 /**
  * An object which can be used to hold data about expressions in tables
@@ -36,21 +40,16 @@ import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
  * @author fcp94556
  *
  */
-public class ExpressionObject {
+class ExpressionObject implements IExpressionObject {
 	
 	private String expressionString;
-	private IExpressionPlottingManager provider;
+	private IVariableManager provider;
 	private JexlEngine jexl;
 	
-	public ExpressionObject(IExpressionPlottingManager provider) {
-		this(provider, null);
-	}
-
-	public ExpressionObject(final IExpressionPlottingManager provider, String expression) {
+	public ExpressionObject(final IVariableManager provider, String expression) {
 		this.provider         = provider;
 		this.expressionString = expression;
 	}
-
 
 	/**
 	 * @return Returns the expression.
@@ -99,7 +98,7 @@ public class ExpressionObject {
 		return expressionString!=null ? expressionString : "";
 	}
 	
-	public boolean isValid(IProgressMonitor monitor) {
+	public boolean isValid(IMonitor monitor) {
 		try {
 			getDataSet(monitor);
 			if (dataSet!=null) {
@@ -111,8 +110,8 @@ public class ExpressionObject {
 			
 		    for (List<String> entry : names) {
 		    	final String key = entry.get(0);
-		    	if (monitor.isCanceled()) return false;
-		    	if (!provider.isVariableName(key, new ProgressMonitorWrapper(monitor))) return false;
+		    	if (monitor.isCancelled()) return false;
+		    	if (!provider.isVariableName(key, monitor)) return false;
 			}
 			return true;
 		} catch (Exception ne) {
@@ -124,7 +123,7 @@ public class ExpressionObject {
 	 * Returns the size of the expression in the current environment.
 	 * @return the size
 	 */
-	public int getSize(IProgressMonitor monitor) {
+	public int getSize(IMonitor monitor) {
 		if (dataSet==null) {
 			try {
 				getDataSet(monitor);
@@ -135,7 +134,7 @@ public class ExpressionObject {
 		return dataSet!=null ? dataSet.getSize() : 0;
 	}
 
-	public String getShape(IProgressMonitor monitor) {
+	public String getShape(IMonitor monitor) {
 		if (dataSet==null) {
 			try {
 				getDataSet(monitor);
@@ -147,13 +146,13 @@ public class ExpressionObject {
 	}
 
 	private AbstractDataset dataSet;
-	public AbstractDataset getDataSet(IProgressMonitor monitor) throws Exception {
+	public AbstractDataset getDataSet(IMonitor mon) throws Exception {
 		
 		if (dataSet!=null) return dataSet;
 		
 	    if (expressionString==null||provider==null) return new DoubleDataset();
 	    
-		final Map<String,AbstractDataset> refs = getVariables(monitor);
+		final Map<String,AbstractDataset> refs = getVariables(mon);
 		
 		if (jexl==null) jexl = JexlUtils.getDawnJexlEngine();
 		
@@ -169,7 +168,7 @@ public class ExpressionObject {
 		return this.dataSet;
 	}
 
-	private Map<String, AbstractDataset> getVariables(IProgressMonitor monitor) throws Exception {
+	private Map<String, AbstractDataset> getVariables(IMonitor monitor) throws Exception {
 		
 		final Map<String,AbstractDataset> refs = new HashMap<String,AbstractDataset>(7);
 		
@@ -179,9 +178,9 @@ public class ExpressionObject {
 		
 	    for (List<String> entry : variableNames) {
 	    	final String variableName = entry.get(0);
-	    	if (monitor.isCanceled()) return null;
+	    	if (monitor.isCancelled()) return null;
 	    	final AbstractDataset set = provider!=null 
-	    			                  ? provider.getVariableValue(variableName, new ProgressMonitorWrapper(monitor)) 
+	    			                  ? provider.getVariableValue(variableName, monitor) 
 	    					          : null;
 	    	if (set!=null) refs.put(variableName, set);
 		}
@@ -190,14 +189,6 @@ public class ExpressionObject {
 
 	    return refs;
 	}
-	
-	/**
-	 * @return Returns the provider.
-	 */
-	public IExpressionPlottingManager getProvider() {
-		return provider;
-	}
-
 
 	/**
 	 * @param provider The provider to set.
@@ -247,6 +238,5 @@ public class ExpressionObject {
 		
 		return buf.toString();
 	}
-
 	
 }

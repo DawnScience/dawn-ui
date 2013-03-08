@@ -11,33 +11,40 @@ package org.dawb.workbench.ui.editors;
 
 import java.util.List;
 
+import org.dawb.common.services.IExpressionObject;
+import org.dawb.common.services.IExpressionObjectService;
 import org.dawb.common.ui.plot.IExpressionPlottingManager;
 import org.dawb.hdf5.editor.H5Path;
-import org.dawb.workbench.ui.editors.slicing.ExpressionObject;
+import org.eclipse.ui.PlatformUI;
 
 public class CheckableObject implements H5Path{
 
-	private boolean          checked;
-	private String           name;
-	private String           variable;
-	private ExpressionObject expression;
-	private String           mementoKey;
+	private boolean           checked;
+	private String            name;
+	private String            variable;
+	private IExpressionObject expression;
+	private String            mementoKey;
+	private IExpressionObjectService service;
 	
 	private static int expressionCount=0;
 	
 	public CheckableObject() {
 		expressionCount++;
 		this.variable   = "expr"+expressionCount;
-	}
-	public CheckableObject(final String name) {
-		this.name     = name;
-		this.variable = ExpressionObject.getSafeName(name);
+		this.service  = (IExpressionObjectService)PlatformUI.getWorkbench().getService(IExpressionObjectService.class);
 	}
 	
-	public CheckableObject(ExpressionObject expression2) {
+	public CheckableObject(final String name) {
+		this.name     = name;
+		this.service  = (IExpressionObjectService)PlatformUI.getWorkbench().getService(IExpressionObjectService.class);
+		this.variable = service.getSafeName(name);
+	}
+	
+	public CheckableObject(IExpressionObject expression2) {
 		this.expression = expression2;
 		expressionCount++;
 		this.variable   = "expr"+expressionCount;
+		this.service  = (IExpressionObjectService)PlatformUI.getWorkbench().getService(IExpressionObjectService.class);
 	}
 	
 	public static boolean isMementoKey(final String key) {
@@ -109,10 +116,10 @@ public class CheckableObject implements H5Path{
 	public void setName(String name) {
 		this.name = name;
 	}
-	public ExpressionObject getExpression() {
+	public IExpressionObject getExpression() {
 		return expression;
 	}
-	public void setExpression(ExpressionObject expression) {
+	public void setExpression(IExpressionObject expression) {
 		this.expression = expression;
 	}
     public boolean isExpression() {
@@ -190,7 +197,7 @@ public class CheckableObject implements H5Path{
 	public void createExpression(IExpressionPlottingManager psData, String mementoKey, String memento) {
 		final String[] parts = memento.split(DELIMITER);
 		this.variable   = parts[0];
-		this.expression = new ExpressionObject(psData, parts[1]);
+		this.expression = service.createExpressionObject(psData, parts[1]);
 	}
 	
 	public String getMemento() {

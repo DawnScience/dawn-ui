@@ -24,10 +24,14 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
+import org.dawb.common.services.IExpressionObject;
+import org.dawb.common.services.IExpressionObjectService;
+import org.dawb.common.services.IVariableManager;
 import org.dawb.common.ui.DawbUtils;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.IExpressionPlottingManager;
+import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.IPlottingSystemSelection;
 import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.axis.IAxis;
@@ -50,7 +54,6 @@ import org.dawb.gda.extensions.util.DatasetTitleUtils;
 import org.dawb.workbench.ui.Activator;
 import org.dawb.workbench.ui.editors.preference.EditorConstants;
 import org.dawb.workbench.ui.editors.preference.EditorPreferencePage;
-import org.dawb.workbench.ui.editors.slicing.ExpressionObject;
 import org.dawnsci.plotting.tools.reduction.DataReductionWizard;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.resources.IFile;
@@ -166,17 +169,17 @@ public class PlotDataComponent implements IExpressionPlottingManager, MouseListe
 	private Composite               container;
 	private DataFilter              dataFilter;
 
-	private IAction dataReduction;
-
-	private Stub traceListener;
-
-	private IToolChangeListener toolListener;
+	private IAction                  dataReduction;
+	private Stub                     traceListener;
+	private IToolChangeListener      toolListener;
+	private IExpressionObjectService service;
 	
 	public PlotDataComponent(final IExpressionPlottingManager providerDeligate) {
 				
 		this.data = new ArrayList<CheckableObject>(7);
 		this.providerDeligate   = providerDeligate;
 		
+		this.service  = (IExpressionObjectService)PlatformUI.getWorkbench().getService(IExpressionObjectService.class);
 		this.propListener = new IPropertyChangeListener() {
 			@Override
 			public void propertyChange(PropertyChangeEvent event) {
@@ -309,10 +312,10 @@ public class PlotDataComponent implements IExpressionPlottingManager, MouseListe
 						}
 					}
 				};
-				getPlottingSystem().addToolChangeListener(toolListener);
+				getAbstractPlottingSystem().addToolChangeListener(toolListener);
 			}
 			
-			getPlottingSystem().addPropertyChangeListener(new IPropertyChangeListener() {				
+			getAbstractPlottingSystem().addPropertyChangeListener(new IPropertyChangeListener() {				
 				@Override
 				public void propertyChange(PropertyChangeEvent event) {
 					try {
@@ -468,7 +471,7 @@ public class PlotDataComponent implements IExpressionPlottingManager, MouseListe
 					}
 					wiz.setSource(getIFile());
 					wiz.setSelections(getSelectionNames());
-					wiz.setTool((IDataReductionToolPage)getPlottingSystem().getActiveTool());
+					wiz.setTool((IDataReductionToolPage)getAbstractPlottingSystem().getActiveTool());
 					wiz.setSliceData(getSliceData());
 					wiz.setNexusAxes(getNexusAxes());
 					
@@ -573,7 +576,7 @@ public class PlotDataComponent implements IExpressionPlottingManager, MouseListe
 	protected boolean isDataReductionToolActive() {
 		
 		if (H5Loader.isH5(getFileName())) {
-			IToolPage tool = getPlottingSystem().getActiveTool();
+			IToolPage tool = getAbstractPlottingSystem().getActiveTool();
 			return tool!=null && tool instanceof IDataReductionToolPage;
 		}
 		return false;
@@ -665,7 +668,7 @@ public class PlotDataComponent implements IExpressionPlottingManager, MouseListe
 			final CheckableObject check = (CheckableObject)element;
 			try {
 				String         expression   = (String)value;
-				final ExpressionObject ob   = check.getExpression();
+				final IExpressionObject ob   = check.getExpression();
 				if (expression!=null) expression = expression.trim();
 				if (value==null || "".equals(expression))  return;
 				if (value.equals(ob.getExpressionString()))      return;
@@ -712,22 +715,12 @@ public class PlotDataComponent implements IExpressionPlottingManager, MouseListe
 		protected void setValue(Object element, Object value) {
 			CheckableObject data  = (CheckableObject)element;
 			try {
-				String variableName = (String)value;
-				if (variableName!=null) {
-					variableName = variableName.trim();
-					if (variableName.equals(data.getVariable())) return;
-				}
-				
-				final String    safeName = ExpressionObject.getSafeName(variableName);				
-				if (!variableName.equals(safeName) || variableName==null || "".equals(variableName)) {
-					throw new Exception("The expression variable name '"+safeName+"' is not allowed.");
-				}
-				
-				final CheckableObject ob = getCheckableObjectByVariable(safeName);				
-				if (ob!=null) throw new Exception("The name '"+safeName+"' is not unique!");
-
+        		if (data.getVariable()!=null && data.getVariable().equals(value)) return;
+        		if (data.getVariable()!=null && value!=null && data.getVariable().equals(((String)value).trim())) return;
+                String variableName = service.validate(PlotDataComponent.this, (String)value);
+ 
 				clearExpressionCache();
-				data.setVariable(safeName);
+				data.setVariable(variableName);
 				saveExpressions();
 				
 			} catch (Exception e) {
@@ -888,7 +881,7 @@ public class PlotDataComponent implements IExpressionPlottingManager, MouseListe
 		
 		if (selections.contains(sel)) selections.remove(sel);
 	    selections.add(0, sel);
-		getPlottingSystem().setXfirst(true);
+	    getAbstractPlottingSystem().setXfirst(true);
 		updateSelection(true);
 		dataViewer.refresh();
 	}
@@ -1278,7 +1271,7 @@ public class PlotDataComponent implements IExpressionPlottingManager, MouseListe
 			return getDataSet(ob.getName(), monitor);
 		} else {
 			try {
-				return ob.getExpression().getDataSet(new NullProgressMonitor());
+				return ob.getExpression().getDataSet(new IMonitor.Stub());
 			} catch (Exception e) {
 				return null;
 			}
@@ -1349,7 +1342,7 @@ public class PlotDataComponent implements IExpressionPlottingManager, MouseListe
 				}
 				return setName;
 			case 2:
-				return element.getAxis(selections, getPlottingSystem().is2D(), getPlottingSystem().isXfirst());
+				return element.getAxis(selections, getPlottingSystem().is2D(), getAbstractPlottingSystem().isXfirst());
 
 			case 3:
 				if (!element.isExpression()) {
@@ -1364,7 +1357,7 @@ public class PlotDataComponent implements IExpressionPlottingManager, MouseListe
 					}
 					return metaData.getDataSizes().get(name)+"";
 				} 
-				return element.getExpression().getSize(new NullProgressMonitor())+"";
+				return element.getExpression().getSize(new IMonitor.Stub())+"";
 			case 4:
 				return getActiveDimensions(element, false)+"";
 			case 5:
@@ -1380,7 +1373,7 @@ public class PlotDataComponent implements IExpressionPlottingManager, MouseListe
 					}
 					return Arrays.toString(metaData.getDataShapes().get(name));
 				} 
-				return element.getExpression().getShape(null);
+				return element.getExpression().getShape(new IMonitor.Stub());
 
 			case 6:
 				return element.getVariable();
@@ -1401,12 +1394,12 @@ public class PlotDataComponent implements IExpressionPlottingManager, MouseListe
 				if (!element.isExpression()) {
 					final String         name = element.toString();
 					if (getPlottingSystem()!=null) {
-						final Color col = getPlottingSystem().get1DPlotColor(name);
+						final Color col = getAbstractPlottingSystem().get1DPlotColor(name);
 						return col;
 					}
 				} else {
-					final ExpressionObject o = element.getExpression();
-					return o.isValid(new NullProgressMonitor()) ? BLUE : RED;
+					final IExpressionObject o = element.getExpression();
+					return o.isValid(new IMonitor.Stub()) ? BLUE : RED;
 				}
 				return BLACK;
 			case 6:
@@ -1428,7 +1421,7 @@ public class PlotDataComponent implements IExpressionPlottingManager, MouseListe
 			getPlottingSystem().removeTraceListener(this.traceListener);
 		}
 		if (getPlottingSystem()!=null&&toolListener!=null) {
-			getPlottingSystem().removeToolChangeListener(this.toolListener);
+			getAbstractPlottingSystem().removeToolChangeListener(this.toolListener);
 		}
 		if (dataViewer!=null && !dataViewer.getControl().isDisposed()) {
 			dataViewer.getTable().removeMouseListener(this);
@@ -1469,7 +1462,7 @@ public class PlotDataComponent implements IExpressionPlottingManager, MouseListe
 		if (!Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_VARNAME)) {
 		    Activator.getDefault().getPreferenceStore().setValue(EditorConstants.SHOW_VARNAME, true);
 		} 
-		final CheckableObject newItem = new CheckableObject(new ExpressionObject(this));
+		final CheckableObject newItem = new CheckableObject(service.createExpressionObject(this, null));
 		data.add(newItem);
 		dataViewer.refresh();
 		try {
@@ -1480,7 +1473,7 @@ public class PlotDataComponent implements IExpressionPlottingManager, MouseListe
 		}
 	}
 
-	protected void addExpression(ExpressionObject expressionObject) {
+	protected void addExpression(IExpressionObject expressionObject) {
 		data.add(new CheckableObject(expressionObject));
 		dataViewer.refresh();
 	}
@@ -1629,12 +1622,14 @@ public class PlotDataComponent implements IExpressionPlottingManager, MouseListe
 		return metaData;
 	}
 
-
-	@Override
-	public AbstractPlottingSystem getPlottingSystem() {
+    @Override
+	public IPlottingSystem getPlottingSystem() {
 		return providerDeligate!=null ? providerDeligate.getPlottingSystem() : null;
 	}
 
+	private AbstractPlottingSystem getAbstractPlottingSystem() {
+		return (AbstractPlottingSystem)getPlottingSystem();
+	}
 
 	public boolean isStaggerSupported() {
 		return staggerSupported;
@@ -1683,7 +1678,7 @@ public class PlotDataComponent implements IExpressionPlottingManager, MouseListe
 
 		@Override
 		protected Object getValue(Object element) {
-			return ((CheckableObject)element).getAxisIndex(selections, getPlottingSystem().isXfirst());
+			return ((CheckableObject)element).getAxisIndex(selections, getAbstractPlottingSystem().isXfirst());
 		}
 
 		@Override
@@ -1695,9 +1690,9 @@ public class PlotDataComponent implements IExpressionPlottingManager, MouseListe
 					setAsX(co);
 				} else {
 					
-					if (getPlottingSystem().isXfirst() && "X".equals(co.getAxis(selections, getPlottingSystem().is2D(), true))) {
+					if (getAbstractPlottingSystem().isXfirst() && "X".equals(co.getAxis(selections, getPlottingSystem().is2D(), true))) {
 						// We lost an x
-						getPlottingSystem().setXfirst(false);
+						getAbstractPlottingSystem().setXfirst(false);
 					}
 					co.setYaxis(isel);
 

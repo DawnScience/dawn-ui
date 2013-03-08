@@ -21,7 +21,7 @@ import org.dawb.common.ui.slicing.ISlicablePlottingPart;
 import org.dawb.common.ui.slicing.SliceComponent;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.util.io.FileUtils;
-import org.dawb.workbench.ui.editors.slicing.ZipUtils;
+import org.dawb.workbench.ui.editors.expression.ZipUtils;
 import org.dawb.workbench.ui.views.PlotDataPage;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
