@@ -264,6 +264,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 		};
 		
 		getSite().getActionBars().getToolBarManager().add(export);
+		getSite().getActionBars().getToolBarManager().add(new Separator());
 		getSite().getActionBars().getToolBarManager().add(include);
 		getSite().getActionBars().getToolBarManager().add(revert);
 		getSite().getActionBars().getToolBarManager().add(new Separator());
@@ -273,6 +274,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 		getSite().getActionBars().getToolBarManager().add(new Separator());
 		
 		manager.add(export);
+		manager.add(new Separator());
 		manager.add(include);
 		manager.add(revert);
 		manager.add(new Separator());
