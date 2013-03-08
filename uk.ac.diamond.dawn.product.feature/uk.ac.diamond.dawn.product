@@ -12,7 +12,9 @@
 
    <launcherArgs>
       <programArgs>-showLocation</programArgs>
-      <vmArgs>-Xms512m
+      <vmArgs>-Xms1024m
+-XX:+UseG1GC
+-XX:MaxGCPauseMillis=1000
 -Ddbconnect=config/dbconnect.ispyb.properties
 -Dentry=MyVisitsEntryPoint
 -DidaEmbedded=yes
@@ -41,7 +43,6 @@
 
    <vm>
    </vm>
-
 
    <plugins>
    </plugins>
