@@ -18,6 +18,8 @@ import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.common.ui.plot.trace.TraceWillPlotEvent;
+import org.dawb.common.ui.util.EclipseUtils;
+import org.dawb.common.ui.wizard.persistence.PersistenceExportWizard;
 import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.preference.PlottingConstants;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -40,6 +42,8 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.window.ToolTip;
+import org.eclipse.jface.wizard.IWizard;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.MouseListener;
@@ -209,7 +213,20 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 	
 	protected MenuManager createActions(MenuManager manager) {
 		
-
+		
+		final IAction export = new Action("Export image to file", Activator.getImageDescriptor("icons/mask-export-wiz.png")) {
+			public void run() {
+				try {
+					IWizard wiz = EclipseUtils.openWizard(PersistenceExportWizard.ID, false);
+					WizardDialog wd = new  WizardDialog(Display.getCurrent().getActiveShell(), wiz);
+					wd.setTitle(wiz.getWindowTitle());
+					wd.open();
+				} catch (Exception e) {
+					logger.error("Problem opening export!", e);
+				}
+			}			
+		};
+		
 		final IAction include = new Action("Include current plot", Activator.getImageDescriptor("icons/include-current-image.png")) {
 			public void run() {
 				Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.INCLUDE_ORIGINAL, isChecked());
@@ -246,6 +263,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 			}
 		};
 		
+		getSite().getActionBars().getToolBarManager().add(export);
 		getSite().getActionBars().getToolBarManager().add(include);
 		getSite().getActionBars().getToolBarManager().add(revert);
 		getSite().getActionBars().getToolBarManager().add(new Separator());
@@ -254,6 +272,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 		getSite().getActionBars().getToolBarManager().add(down);
 		getSite().getActionBars().getToolBarManager().add(new Separator());
 		
+		manager.add(export);
 		manager.add(include);
 		manager.add(revert);
 		manager.add(new Separator());
