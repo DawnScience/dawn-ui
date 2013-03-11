@@ -3,20 +3,34 @@ package org.dawnsci.plotting.tools.history;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.dawb.common.gpu.Operator;
+import org.dawb.common.services.IExpressionObjectService;
 import org.dawb.common.services.IVariableManager;
+import org.dawb.common.services.ServiceManager;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
+import org.dawb.common.ui.util.EclipseUtils;
+import org.dawb.common.ui.wizard.persistence.PersistenceExportWizard;
 import org.dawnsci.plotting.Activator;
 import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.ColumnViewer;
+import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.wizard.IWizard;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
@@ -27,6 +41,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.PlatformUI;
@@ -86,8 +101,9 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 	
 	/**
 	 * Called to create the table columns for interacting with the history
+	 * @return the number of columns added (meaning that it's equal to the next column index to add as 0-based loops).
 	 */
-	protected abstract void createColumns(TableViewer viewer);
+	protected abstract int createColumns(TableViewer viewer);
 
 	
 	/**
@@ -117,7 +133,15 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 		composite.setLayout(new FillLayout());
 
 		viewer = new TableViewer(composite, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER | SWT.FULL_SELECTION);
-		createColumns(viewer);
+		int length = createColumns(viewer);
+		
+		// Add variable name column
+		TableViewerColumn var = new TableViewerColumn(viewer, SWT.LEFT, length);
+		var.getColumn().setText("Variable Name");
+		var.getColumn().setWidth(80);
+		var.setLabelProvider(new VariableNameLabelProvider());
+		var.setEditingSupport(new VariableNameEditingSupport(viewer));
+		setColumnVisible(length, -1 , false);
 		
 		viewer.getTable().setLinesVisible(true);
 		viewer.getTable().setHeaderVisible(true);
@@ -146,6 +170,62 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 		viewer.getTable().addKeyListener(this);
 	}
 	
+	private class VariableNameEditingSupport extends EditingSupport {
+
+		private IExpressionObjectService service;
+
+		public VariableNameEditingSupport(ColumnViewer viewer) {
+			super(viewer);
+			try {
+				this.service = (IExpressionObjectService)ServiceManager.getService(IExpressionObjectService.class);
+			} catch (Exception e) {
+				this.service = null; // allowed to be null.
+			}
+		}
+
+		@Override
+		protected CellEditor getCellEditor(Object element) {
+			return new TextCellEditor((Composite)getViewer().getControl());
+		}
+
+		@Override
+		protected boolean canEdit(Object element) {
+			return true;
+		}
+
+		@Override
+		protected Object getValue(Object element) {
+			return ((HistoryBean)element).getVariable();
+		}
+
+		@Override
+		protected void setValue(Object element, Object value) {
+			try {
+				final HistoryBean bean = (HistoryBean)element;
+	    		if (bean.getVariable()!=null && bean.getVariable().equals(value)) return;
+	    		if (bean.getVariable()!=null && value!=null && bean.getVariable().equals(((String)value).trim())) return;
+	            String variableName = service.validate(bean.getVariableManager(), (String)value);
+
+				clearExpressionCache();
+				bean.setVariable(variableName);
+				
+			} catch (Exception e) {
+				final String message = "The name '"+value+"' is not valid.";
+				final Status status  = new Status(Status.WARNING, "org.dawb.workbench.ui", message, e);
+				ErrorDialog.openError(Display.getDefault().getActiveShell(), "Cannot rename expression", message, status);
+			    return;
+			}
+			getViewer().refresh();
+
+		}
+
+	}
+	protected void clearExpressionCache() {
+		for (HistoryBean bean : getHistoryCache().values()) {
+			if (bean.isExpression())  bean.getExpression().clear();
+		}
+	}
+	
 	public void keyPressed(KeyEvent e) {
 		if (e.character==SWT.DEL) {
 			deleteSelectedBean();
@@ -156,12 +236,32 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 		
 	}
 
+
+	protected void setColumnVisible(final int col, final int width, boolean isVis) {
+		if (this.viewer==null || this.viewer.getControl().isDisposed()) return;
+		viewer.getTable().getColumn(col).setWidth(isVis?width:0);
+		viewer.getTable().getColumn(col).setResizable(isVis?true:false);
+	}
 	
 	/**
 	 * May be overridden to provide additional actions.
 	 */
 	protected MenuManager createActions(final MenuManager rightClick) {
 		
+		final Action exportHist = new Action("Export history", Activator.getImageDescriptor("icons/mask-export-wiz.png")) {
+			public void run() {
+				try {
+					IWizard wiz = EclipseUtils.openWizard(PersistenceExportWizard.ID, false);
+					WizardDialog wd = new  WizardDialog(Display.getCurrent().getActiveShell(), wiz);
+					wd.setTitle(wiz.getWindowTitle());
+					wd.open();
+				} catch (Exception e) {
+					logger.error("Problem opening import!", e);
+				}
+			}			
+		};
+		getSite().getActionBars().getToolBarManager().add(exportHist);
+				
 		final IAction addPlot = createAddAction();
 		getSite().getActionBars().getToolBarManager().add(addPlot);
 		rightClick.add(addPlot);
@@ -377,25 +477,52 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 
 	@Override
 	public boolean isVariableName(String name, IMonitor monitor) {
-		// TODO Auto-generated method stub
+		final Map<String, HistoryBean> history = getHistoryCache();
+		for (HistoryBean bean : history.values()) {
+			if (bean.getVariable().equals(name)) return true;
+ 		}
 		return false;
 	}
 
 	@Override
-	public AbstractDataset getVariableValue(String expressionName, IMonitor monitor) {
-		// TODO Auto-generated method stub
+	public AbstractDataset getVariableValue(String name, IMonitor monitor) {
+		final Map<String, HistoryBean> history = getHistoryCache();
+		for (HistoryBean bean : history.values()) {
+			if (bean.getVariable().equals(name)) return bean.getData();
+ 		}
 		return null;
 	}	
 
 	@Override
 	public void deleteExpression() {
 		
+		final HistoryBean bean = getSelectedPlot();
+		if (bean==null) return;
+		
+		final Map<String, HistoryBean> history = getHistoryCache();
+		history.remove(bean.getTraceKey());
+		
+		viewer.refresh();
 	}
 
 
 	@Override
 	public void addExpression() {
-		System.out.println();
+		
+		final HistoryBean bean = new HistoryBean(this);
+		bean.setExpression(true);
+		bean.setPlotName("Expression");
+		bean.setOperator(Operator.ADD);
+		
+		final Map<String, HistoryBean> history = getHistoryCache();
+		final String traceKey = bean.getTraceKey();
+		System.out.println(traceKey);
+		history.put(traceKey, bean);
+		
+		viewer.refresh();
+		setColumnVisible(viewer.getTable().getColumnCount()-1, 120, true);
+
+		viewer.editElement(bean, 1);
 	}
 
 

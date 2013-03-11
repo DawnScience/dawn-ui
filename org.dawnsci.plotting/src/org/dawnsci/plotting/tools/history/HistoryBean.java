@@ -7,9 +7,13 @@ import java.util.regex.Pattern;
 
 import org.dawb.common.gpu.Operator;
 import org.dawb.common.services.IExpressionObject;
+import org.dawb.common.services.IExpressionObjectService;
+import org.dawb.common.services.IVariableManager;
+import org.dawb.common.services.ServiceManager;
 import org.eclipse.swt.graphics.RGB;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 
 class HistoryBean {
 	
@@ -22,11 +26,13 @@ class HistoryBean {
 	private List<AbstractDataset> axes;
 	private Operator              operator;
 	private int                   weighting=100;
+	
+	// Expressions
 	private IExpressionObject     expression;
+	private String                variable;
 	
 	// 1D history
 	private AbstractDataset xdata;
-	private AbstractDataset ydata;	
 	private RGB             plotColour;
 	
 	// Anyone
@@ -34,6 +40,34 @@ class HistoryBean {
 	private String          traceName;
 	private boolean         selected;
 	private boolean         modifiable=true;
+	
+	private final IVariableManager         variableManager;
+	private       IExpressionObjectService service;
+	
+	private static int count=0;
+	HistoryBean(IVariableManager varManager) {
+		this.variableManager = varManager;
+		try {
+			this.service = (IExpressionObjectService)ServiceManager.getService(IExpressionObjectService.class);
+		} catch (Exception e) {
+			this.service = null; // allowed to be null.
+		}
+		
+		while(true) { 
+			// With UI threads, while(true) better than set range because it obviously identifies a problem.
+			// With multiple threads w
+			try {
+				count++;
+				if (count>2000000) throw new RuntimeException("More than 2m variable names assigned! Algorithm is misbehaving.");
+				
+				variable = "var"+count;
+				this.variable = service.validate(variableManager, variable);
+				break;
+			} catch (Exception e) {
+				continue; // try another name
+			}
+		}
+	}
 	
 	/**
 	 * Human readable trace name
@@ -43,7 +77,7 @@ class HistoryBean {
 		return getTraceName()+" ("+getPlotName()+")";
 	}
 	public String getTraceKey() {
-		if (fixedImageKey!=null) return fixedImageKey;
+		if (fixedImageKey!=null)   return fixedImageKey;
 		createFixedKey(FORCE_TYPE.IFKEYNULL);
 		return fixedImageKey;
 	}
@@ -54,10 +88,22 @@ class HistoryBean {
 	}
 
 	public AbstractDataset getXdata() {
+		if (xdata==null) {
+			AbstractDataset data = getData();
+			if (data!=null && data.getRank()==1) {
+				xdata = AbstractDataset.arange(data.getSize(), AbstractDataset.INT32);
+			}
+		}
 		return xdata;
 	}
 
 	public AbstractDataset getData() {
+		if (expression!=null)
+			try {
+				return expression.getDataSet(new IMonitor.Stub());
+			} catch (Exception e) {
+				// Allowed
+			}
 		return data;
 	}
 	public void setData(AbstractDataset data) {
@@ -80,7 +126,9 @@ class HistoryBean {
 		createFixedKey(FORCE_TYPE.NONE);
 	}
 	private String createFixedKey(FORCE_TYPE type) {
-		if (fixedImageKey==null && traceName!=null && plotName!=null) {
+		
+		final String originalKey = fixedImageKey;
+		if (fixedImageKey==null && getTraceName()!=null && getPlotName()!=null) {
 			fixedImageKey = getTraceName()+":"+getPlotName();
 		}
 		if (type==FORCE_TYPE.IFKEYNULL && fixedImageKey==null) { // Nulls allowed
@@ -89,28 +137,47 @@ class HistoryBean {
 		if (type==FORCE_TYPE.FORCE) { // Nulls allowed
 			fixedImageKey = getTraceName()+":"+getPlotName();
 		}
+		if (expression!=null && !fixedImageKey.equals(originalKey)) {
+			fixedImageKey = variable+fixedImageKey;
+		}
 
 		return fixedImageKey;
 	}
 	public String getTraceName() {
+		if (expression!=null) return expression.getExpressionString();
 		return traceName;
 	}
 	public String setTraceName(String name) {
 		return setTraceName(name, false);
 	}
+	
+	private final static Pattern DEF_VAR_NAME = Pattern.compile("var(\\d+)");
+	
 	public String setTraceName(String name, boolean force) {
 		this.traceName = name;
+		
+		String ret = null;
 		if (force) {
-			return createFixedKey(FORCE_TYPE.FORCE);
+			ret = createFixedKey(FORCE_TYPE.FORCE);
 		} else {
-			return createFixedKey(FORCE_TYPE.NONE);
+			ret = createFixedKey(FORCE_TYPE.NONE);
 		}
+		if (variable==null || DEF_VAR_NAME.matcher(variable).matches()) {
+			
+			try {
+				this.variable = service.validate(variableManager, name);			
+			} catch (Exception e) {
+				// Not an error.
+			}
+		}
+		
+		return ret;
 	}
 	public AbstractDataset getYdata() {
-		return ydata;
+		return getData();
 	}
 	public void setYdata(AbstractDataset data) {
-		this.ydata = data;
+		setData(data);
 	}
 	public RGB getPlotColour() {
 		return plotColour;
@@ -138,9 +205,10 @@ class HistoryBean {
 		result = prime * result + (selected ? 1231 : 1237);
 		result = prime * result
 				+ ((traceName == null) ? 0 : traceName.hashCode());
+		result = prime * result
+				+ ((variable == null) ? 0 : variable.hashCode());
 		result = prime * result + weighting;
 		result = prime * result + ((xdata == null) ? 0 : xdata.hashCode());
-		result = prime * result + ((ydata == null) ? 0 : ydata.hashCode());
 		return result;
 	}
 	@Override
@@ -193,17 +261,17 @@ class HistoryBean {
 				return false;
 		} else if (!traceName.equals(other.traceName))
 			return false;
+		if (variable == null) {
+			if (other.variable != null)
+				return false;
+		} else if (!variable.equals(other.variable))
+			return false;
 		if (weighting != other.weighting)
 			return false;
 		if (xdata == null) {
 			if (other.xdata != null)
 				return false;
 		} else if (!xdata.equals(other.xdata))
-			return false;
-		if (ydata == null) {
-			if (other.ydata != null)
-				return false;
-		} else if (!ydata.equals(other.ydata))
 			return false;
 		return true;
 	}
@@ -268,6 +336,29 @@ class HistoryBean {
 	}
 	public void setExpression(IExpressionObject expression) {
 		this.expression = expression;
+	}
+	public void setExpression(boolean requireExpression) {
+		if (!requireExpression) {
+			this.expression = null;
+			return;
+		} else {
+			expression = service.createExpressionObject(variableManager, "");
+		}
+	}
+
+	public String getVariable() {
+		return variable;
+	}
+	public void setVariable(String variable) {
+		this.variable = variable;
+	}
+
+	public IVariableManager getVariableManager() {
+		return variableManager;
+	}
+
+	public boolean isExpression() {
+		return expression!=null;
 	}
 
 }

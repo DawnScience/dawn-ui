@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.dawb.common.services.IExpressionObject;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
@@ -35,8 +36,12 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 
 public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 
@@ -80,7 +85,7 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 			if (iTrace.getUserObject()==HistoryType.HISTORY_PLOT) continue;
 			if (!iTrace.isUserTrace()) continue;
 			final ILineTrace lineTrace = (ILineTrace)iTrace;
-			final HistoryBean bean = new HistoryBean();
+			final HistoryBean bean = new HistoryBean(this);
 			bean.setXdata(lineTrace.getXData());
 			bean.setYdata(lineTrace.getYData());
 			bean.setTraceName(iTrace.getName());
@@ -159,7 +164,7 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 		getPlottingSystem().removeTraceListener(autoAddTraceListener);
 	}
 
-	protected void createColumns(TableViewer viewer) {
+	protected int createColumns(TableViewer viewer) {
 		
 		ColumnViewerToolTipSupport.enableFor(viewer,ToolTip.NO_RECREATE);
 		viewer.setColumnProperties(new String[] { "Selected", "Name", "Original Plot", "Color" });
@@ -190,6 +195,7 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 		var.getColumn().setWidth(70);
 		var.setLabelProvider(new HistoryLabelProvider());
 		
+		return 5;
 	}   
 	
 	/**
@@ -267,6 +273,7 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 		
 		private Image checkedIcon;
 		private Image uncheckedIcon;
+		private Color BLUE,RED;
 		
 		public HistoryLabelProvider() {
 			
@@ -274,6 +281,8 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 			checkedIcon   = id.createImage();
 			id = Activator.getImageDescriptor("icons/unticked.gif");
 			uncheckedIcon =  id.createImage();
+			BLUE = Display.getDefault().getSystemColor(SWT.COLOR_BLUE);
+			RED  = Display.getDefault().getSystemColor(SWT.COLOR_RED);
 		}
 		
 		private int columnIndex;
@@ -297,19 +306,23 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 		public String getText(Object element) {
 			
 			if (element instanceof String) return "";
-			
+
 			final HistoryBean bean = (HistoryBean)element;
 			if (columnIndex==1) {
-			     return bean.getTraceName();
+				final  IExpressionObject o = bean.getExpression();
+				if (o!=null) return o.getExpressionString();
+				return bean.getTraceName();
 			}
 			if (columnIndex==2) {
-			     return bean.getPlotName();
+				return bean.getPlotName();
 			}
 			if (columnIndex==3) {
-			     return Arrays.toString(bean.getYdata().getShape());
+				AbstractDataset data = bean.getYdata();
+				if (data==null) return "-";
+				return Arrays.toString(bean.getYdata().getShape());
 			}
 			if (columnIndex==4) {
-			     return "\u220E\u220E\u220E\u220E";
+				return "\u220E\u220E\u220E\u220E";
 			}
 			return "";
 		}
@@ -324,6 +337,7 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 			if (!(element instanceof HistoryBean)) return null;
 			if (columnIndex==4) {
 				final HistoryBean bean = (HistoryBean)element;
+				if (bean.getPlotColour()==null) return null;
 				return new Color(null, bean.getPlotColour());
 			}
 			return null;
@@ -333,6 +347,12 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 		 * @see org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
 		 */
 		public Color getForeground(Object element) {
+			if (columnIndex==1) {
+				final  IExpressionObject o = ((HistoryBean)element).getExpression();
+				if (o!=null) {
+				    return o.isValid(new IMonitor.Stub()) ? BLUE : RED;
+				}
+			}
 			return getColor(element);
 		}
 
@@ -356,12 +376,19 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 
 		@Override
 		protected Object getValue(Object element) {
-			return ((HistoryBean)element).getTraceName();
+			final HistoryBean bean = ((HistoryBean)element);
+			return bean.getTraceName();
 		}
 
 		@Override
 		protected void setValue(Object element, Object value) {
-			((HistoryBean)element).setTraceName((String)value);
+			final HistoryBean bean = ((HistoryBean)element);
+			final  IExpressionObject o = bean.getExpression();
+            if (o!=null) {
+            	o.setExpressionString((String)value);
+            } else {
+			    ((HistoryBean)element).setTraceName((String)value);
+            }
 			viewer.refresh(element);
 		}
 

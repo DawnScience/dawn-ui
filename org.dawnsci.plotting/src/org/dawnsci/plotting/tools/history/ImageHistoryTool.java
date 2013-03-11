@@ -11,6 +11,7 @@ import java.util.Map;
 import org.dawb.common.gpu.IOperation;
 import org.dawb.common.gpu.OperationFactory;
 import org.dawb.common.gpu.Operator;
+import org.dawb.common.services.IExpressionObject;
 import org.dawb.common.ui.components.cell.ScaleCellEditor;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.trace.IImageTrace;
@@ -18,8 +19,6 @@ import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.common.ui.plot.trace.TraceWillPlotEvent;
-import org.dawb.common.ui.util.EclipseUtils;
-import org.dawb.common.ui.wizard.persistence.PersistenceExportWizard;
 import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.preference.PlottingConstants;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -42,8 +41,6 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.window.ToolTip;
-import org.eclipse.jface.wizard.IWizard;
-import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.MouseListener;
@@ -61,6 +58,7 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
+import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 
 /**
  * Tool whereby images may be added to a static list which has various
@@ -199,8 +197,11 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 	
 	protected void addImageToHistory(final AbstractDataset data, String name) {
 		
-		if (name==null) name = data.getName();
-		final HistoryBean bean = new HistoryBean();
+		if (name==null || "".equals(name)) name = data.getName();
+		if ("".equals(name)) name = null;
+		if (name==null) name = getPart().getTitle();
+		
+		final HistoryBean bean = new HistoryBean(this);
 		bean.setData(data);
 		final List<AbstractDataset> axes = getImageTrace()!=null ? getImageTrace().getAxes() : null;
 		bean.setAxes(axes);
@@ -213,20 +214,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 	
 	protected MenuManager createActions(MenuManager manager) {
 		
-		
-		final IAction export = new Action("Export image to file", Activator.getImageDescriptor("icons/mask-export-wiz.png")) {
-			public void run() {
-				try {
-					IWizard wiz = EclipseUtils.openWizard(PersistenceExportWizard.ID, false);
-					WizardDialog wd = new  WizardDialog(Display.getCurrent().getActiveShell(), wiz);
-					wd.setTitle(wiz.getWindowTitle());
-					wd.open();
-				} catch (Exception e) {
-					logger.error("Problem opening export!", e);
-				}
-			}			
-		};
-		
+				
 		final IAction include = new Action("Include current plot", Activator.getImageDescriptor("icons/include-current-image.png")) {
 			public void run() {
 				Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.INCLUDE_ORIGINAL, isChecked());
@@ -263,8 +251,6 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 			}
 		};
 		
-		getSite().getActionBars().getToolBarManager().add(export);
-		getSite().getActionBars().getToolBarManager().add(new Separator());
 		getSite().getActionBars().getToolBarManager().add(include);
 		getSite().getActionBars().getToolBarManager().add(revert);
 		getSite().getActionBars().getToolBarManager().add(new Separator());
@@ -273,8 +259,6 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 		getSite().getActionBars().getToolBarManager().add(down);
 		getSite().getActionBars().getToolBarManager().add(new Separator());
 		
-		manager.add(export);
-		manager.add(new Separator());
 		manager.add(include);
 		manager.add(revert);
 		manager.add(new Separator());
@@ -437,6 +421,8 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 				try {
 					IImageTrace imageTrace = getImageTrace();
 					if (imageTrace==null) {
+						((AbstractPlottingSystem)getPlottingSystem()).setFocus();
+						getPlottingSystem().reset();
 						imageTrace = getPlottingSystem().createImageTrace(plot.getName()!=null?plot.getName():"");
 						imageTrace.setData(plot, null, false);
 						getPlottingSystem().addTrace(imageTrace);
@@ -457,6 +443,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 					image.setUserObject(ImageHistoryMarker.MARKER);
 					getPlottingSystem().addTrace(image);
 					getPlottingSystem().repaint();
+					
 				} catch (Throwable ne ) {
 					logger.error(ImageHistoryTool.class.getSimpleName()+" unable to process image. This might not be a fatal error because an image might not be plotted.");
 				} finally {
@@ -486,7 +473,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 	}
 
 	@Override
-	protected void createColumns(TableViewer viewer) {
+	protected int createColumns(TableViewer viewer) {
 		
 		viewer.getTable().addListener(SWT.MeasureItem, new Listener() {
 			public void handleEvent(Event event) {
@@ -531,12 +518,15 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 		var.getColumn().setWidth(150);
 		var.setLabelProvider(new ImageCompareLabelProvider());
 		var.setEditingSupport(new ImageWeightingEditingSupport(viewer));
+		
+		return 6;
 	}
 	
 	private class ImageCompareLabelProvider extends ColumnLabelProvider {
 		
 		private Image checkedIcon;
 		private Image uncheckedIcon;
+		private Color BLUE, RED;
 		
 		public ImageCompareLabelProvider() {
 			
@@ -544,6 +534,8 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 			checkedIcon   = id.createImage();
 			id = Activator.getImageDescriptor("icons/unticked.gif");
 			uncheckedIcon =  id.createImage();
+			BLUE = Display.getDefault().getSystemColor(SWT.COLOR_BLUE);
+			RED  = Display.getDefault().getSystemColor(SWT.COLOR_RED);
 		}
 		
 		private int columnIndex;
@@ -570,6 +562,8 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 			
 			final HistoryBean bean = (HistoryBean)element;
 			if (columnIndex==1) {
+				final  IExpressionObject o = bean.getExpression();
+				if (o!=null) return o.getExpressionString();
 			     return bean.getTraceName();
 			}
 			if (columnIndex==2) {
@@ -602,6 +596,13 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 			if (!(element instanceof HistoryBean)) return null;
 			HistoryBean bean = (HistoryBean)element;
 			
+			if (columnIndex==1) {
+				final  IExpressionObject o = ((HistoryBean)element).getExpression();
+				if (o!=null) {
+				    return o.isValid(new IMonitor.Stub()) ? BLUE : RED;
+				}
+			}
+
 			if (columnIndex==4&&!isShapeCompatible(element)) {
 				return Display.getDefault().getSystemColor(SWT.COLOR_RED);
 			}
@@ -621,6 +622,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 			if (od==null) return true;
 			if (!(element instanceof HistoryBean)) return true;
 			HistoryBean bean = (HistoryBean)element;
+			if (bean.getData()==null) return false;
 			return od.isCompatibleWith(bean.getData());
 		}
 
@@ -655,10 +657,16 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 		@Override
 		protected void setValue(Object element, Object value) {
 			final HistoryBean bean = (HistoryBean)element;
-			final String old = bean.getTraceKey();
-			final String key = bean.setTraceName((String)value, true);
-			imageHistory.remove(old);
-			imageHistory.put(key, bean);
+			final  IExpressionObject o = bean.getExpression();
+            if (o!=null) {
+            	o.setExpressionString((String)value);
+            	clearExpressionCache();
+            } else {
+				final String old = bean.getTraceKey();
+				final String key = bean.setTraceName((String)value, true);
+				imageHistory.remove(old);
+				imageHistory.put(key, bean);
+            }
 			viewer.refresh(element);
 		}
 
