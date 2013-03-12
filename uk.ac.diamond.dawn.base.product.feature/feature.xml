@@ -49,10 +49,6 @@
          id="net.sf.py4j.feature"
          version="0.0.0"/>
 
-   <includes
-         id="uk.ac.diamond.tomography.reconstruction.feature"
-         version="0.0.0"/>
-
    <plugin
          id="org.dawnsci.intro"
          download-size="0"
