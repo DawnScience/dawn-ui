@@ -13,15 +13,10 @@
    <launcherArgs>
       <programArgs>-showLocation</programArgs>
       <vmArgs>-Xms1024m
+-Xmx2048m
+-XX:MaxPermSize=64m
 -XX:+UseG1GC
--XX:MaxGCPauseMillis=1000
--Ddbconnect=config/dbconnect.ispyb.properties
--Dentry=MyVisitsEntryPoint
--DidaEmbedded=yes
--Dcolour=on
--Dosgi.locking=none
--Dcom.isencia.require.file.source=true
--Dorg.dawb.editor.h5.use.default=true</vmArgs>
+-XX:MaxGCPauseMillis=1000</vmArgs>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts</vmArgsMac>
    </launcherArgs>
 
@@ -56,6 +51,13 @@
       <plugin id="uk.ac.diamond.scisoft" autoStart="true" startLevel="1" />
       <plugin id="uk.ac.diamond.scisoft.analysis" autoStart="true" startLevel="2" />
       <plugin id="uk.ac.diamond.scisoft.analysis.osgi" autoStart="true" startLevel="2" />
+      <property name="colour" value="on" />
+      <property name="com.isencia.require.file.source" value="true" />
+      <property name="dbconnect" value="config/dbconnect.ispyb.properties" />
+      <property name="entry" value="MyVisitsEntryPoint" />
+      <property name="idaEmbedded" value="yes" />
+      <property name="org.dawb.editor.h5.use.default" value="true" />
+      <property name="osgi.locking" value="java.io" />
    </configurations>
 
 </product>
