@@ -12,6 +12,7 @@ import javax.swing.tree.TreeNode;
 import org.dawb.common.services.ILoaderService;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
+import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.region.IROIListener;
@@ -91,11 +92,14 @@ import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSelectedListener;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSelectionEvent;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationStandards;
+import uk.ac.diamond.scisoft.analysis.crystallography.HKL;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.BooleanDataset;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
+import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
 import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionMetadataUtils;
 import uk.ac.diamond.scisoft.analysis.diffraction.PowderRingsUtils;
+import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
@@ -465,6 +469,8 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	private Action refine;
 
 	private Action findMore;
+
+	private Action calibrate;
 	private static Action lock;
 	
 	private void createActions() {
@@ -752,9 +758,10 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 						Job job = new Job("Ellipse rings finding") {
 							@Override
 							protected IStatus run(final IProgressMonitor monitor) {
-								IStatus stat = runEllipseFit(monitor, display, plotter, t, tmpRegion.getROI(), false);
+								ROIBase roi = tmpRegion.getROI();
+								IStatus stat = runEllipseFit(monitor, display, plotter, t, roi, false);
 								if (stat.isOK()) {
-									stat = runFindRings(monitor, display, plotter, t);
+									stat = runFindRings(monitor, display, plotter, t, roi);
 								}
 								return stat;
 							}
@@ -762,14 +769,13 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 						job.setPriority(Job.SHORT);
 //						job.setUser(true);
 						job.schedule();
-
 					}
 					return;
 				} else {
 					ConfigurableMessageDialog dialog = new ConfigurableMessageDialog(Display.getDefault().getActiveShell(),
 							"Rings locator - no initial ring",
 							null,
-							"Please define an initial ring ",
+							"Please define an initial ring",
 							MessageDialog.INFORMATION,
 							new String[]{IDialogConstants.OK_LABEL},
 							0);
@@ -782,6 +788,49 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		findMore.setImageDescriptor(Activator.getImageDescriptor("icons/findmorerings.png"));
 		findMore.setToolTipText("Find more rings");
 		findMore.setEnabled(false);
+
+		calibrate = new Action("Calibrate against standard", IAction.AS_PUSH_BUTTON) {
+			@Override
+			public void run() {
+				CalibrationStandards standards = CalibrationFactory.getCalibrationStandards();
+				String name = standards.getSelectedCalibrant();
+				if (name != null) {
+					logger.debug("Calibrating against {}", name);
+					final List<HKL> spacings = standards.getCalibrationPeakMap(name).getHKLs();
+
+					final IPlottingSystem plotter = getPlottingSystem();
+					final IImageTrace t = getImageTrace();
+					final Display display = control.getDisplay();
+					if (t != null) {
+						Job job = new Job("Calibrating detector") {
+							@Override
+							protected IStatus run(final IProgressMonitor monitor) {
+								return runCalibrateDetector(monitor, display, plotter, spacings);
+							}
+						};
+						job.setPriority(Job.SHORT);
+//						job.setUser(true);
+						job.schedule();
+
+					}
+					return;
+				} else {
+					ConfigurableMessageDialog dialog = new ConfigurableMessageDialog(Display.getDefault().getActiveShell(),
+							"Calibrator - no standard selected",
+							null,
+							"Please define calibrant",
+							MessageDialog.INFORMATION,
+							new String[]{IDialogConstants.OK_LABEL},
+							0);
+					dialog.setShellStyle(SWT.SHELL_TRIM|SWT.MODELESS);
+					dialog.open();
+
+				}
+			}
+		};
+		calibrate.setImageDescriptor(Activator.getImageDescriptor("icons/findmorerings.png"));
+		calibrate.setToolTipText("Calibrate detector using rings");
+		calibrate.setEnabled(false);
 
 		if (lock==null) lock = new Action("Lock the diffraction data and apply it to newly opened files.",IAction.AS_CHECK_BOX) {
 		    @Override
@@ -846,6 +895,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		toolMan.add(fitRing);
 		toolMan.add(refine);
 		toolMan.add(findMore);
+		toolMan.add(calibrate);
 		toolMan.add(new Separator());
 		toolMan.add(reset);
 		toolMan.add(resetAll);
@@ -858,6 +908,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	    menuMan.add(fitRing);
 	    menuMan.add(refine);
 	    menuMan.add(findMore);
+	    menuMan.add(calibrate);
 		menuMan.add(new Separator());
 		menuMan.add(reset);
 		menuMan.add(resetAll);
@@ -889,13 +940,15 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		}
 	}
 
-	private IStatus runEllipseFit(final IProgressMonitor monitor, Display display, final IPlottingSystem plotter, IImageTrace t, ROIBase roi, final boolean circle) {
+	private IStatus runEllipseFit(final IProgressMonitor monitor, Display display, final IPlottingSystem plotter, IImageTrace t, ROIBase roi, final boolean forceCircle) {
+		final boolean circle = forceCircle ? true : (roi instanceof CircularROI);
 		final String shape = circle ? "circle" : "ellipse";
-		monitor.beginTask("Refine " + shape + " fit", 100);
+		final ProgressMonitorWrapper mon = new ProgressMonitorWrapper(monitor);
+		monitor.beginTask("Refine " + shape + " fit", IProgressMonitor.UNKNOWN);
 		monitor.subTask("Find POIs near initial " + shape);
-		final PolylineROI points = roi instanceof CircularROI ? PowderRingsUtils.findPOIsNearCircle(t.getData(), (BooleanDataset) t.getMask(), (CircularROI) roi)
-				: PowderRingsUtils.findPOIsNearEllipse(t.getData(), (BooleanDataset) t.getMask(), (EllipticalROI) roi);
-		monitor.worked(20);
+		final PolylineROI points = roi instanceof CircularROI ? PowderRingsUtils.findPOIsNearCircle(mon, t.getData(), (BooleanDataset) t.getMask(), (CircularROI) roi)
+				: PowderRingsUtils.findPOIsNearEllipse(mon, t.getData(), (BooleanDataset) t.getMask(), (EllipticalROI) roi);
+
 		final boolean[] status = {true};
 		display.syncExec(new Runnable() {
 
@@ -903,9 +956,8 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 				try {
 					IRegion region = plotter.createRegion(RegionUtils.getUniqueName("Pixel peaks", plotter), circle ? RegionType.CIRCLEFIT : RegionType.ELLIPSEFIT);
 					monitor.subTask("Fit POIs");
-					EllipticalFitROI efroi = PowderRingsUtils.fitAndTrimOutliers(points, 2, circle);
+					EllipticalFitROI efroi = PowderRingsUtils.fitAndTrimOutliers(mon, points, 2, circle);
 					ROIBase froi = circle ? new CircularFitROI(efroi.getPoints()) : new EllipticalFitROI(efroi.getPoints());
-					monitor.worked(50);
 					logger.debug("{} from peaks: {}", shape, froi);
 					region.setROI(froi);
 					region.setRegionColor(circle ? ColorConstants.cyan : ColorConstants.orange);
@@ -916,7 +968,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 					tmpRegion.addROIListener(roiListener);
 					roiListener.roiSelected(new ROIEvent(tmpRegion, froi)); // trigger beam centre update
 					plotter.addRegion(region);
-					monitor.worked(30);
+					monitor.worked(1);
 				} catch (Exception e) {
 					status[0] = false;
 				}
@@ -926,11 +978,14 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		return status[0] ? Status.OK_STATUS : Status.CANCEL_STATUS;
 	}
 
-	private IStatus runFindRings(final IProgressMonitor monitor, Display display, final IPlottingSystem plotter, IImageTrace t) {
-		monitor.beginTask("Find elliptical rings", 100);
+	private IStatus runFindRings(final IProgressMonitor monitor, Display display, final IPlottingSystem plotter, IImageTrace t, ROIBase roi) {
+		final ProgressMonitorWrapper mon = new ProgressMonitorWrapper(monitor);
+		monitor.beginTask("Find elliptical rings", IProgressMonitor.UNKNOWN);
 		monitor.subTask("Find rings");
-		final List<EllipticalROI> ells = PowderRingsUtils.findOtherEllipses(t.getData(), (BooleanDataset) t.getMask(), (EllipticalROI) tmpRegion.getROI());
-		monitor.worked(100);
+		if (roi instanceof CircularFitROI) {
+			roi = new EllipticalFitROI(((CircularFitROI) roi).getPoints(), true);
+		}
+		final List<EllipticalROI> ells = PowderRingsUtils.findOtherEllipses(mon, t.getData(), (BooleanDataset) t.getMask(), (EllipticalROI) roi);
 		final boolean[] status = {true};
 		display.syncExec(new Runnable() {
 
@@ -946,11 +1001,12 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 						IRegion region = plotter.createRegion(RegionUtils.getUniqueName(RING_PREFIX, plotter), e instanceof EllipticalFitROI ? RegionType.ELLIPSEFIT : RegionType.ELLIPSE);
 						region.setMobile(false);
 						region.setROI(e);
-						monitor.worked(20);
 						region.setRegionColor(ColorConstants.orange);
 						region.setUserRegion(false);
 						plotter.addRegion(region);
+						monitor.worked(1);
 					}
+					calibrate.setEnabled(true);
 				} catch (Exception e) {
 					status[0] = false;
 				}
@@ -958,6 +1014,39 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		});
 
 		return status[0] ? Status.OK_STATUS : Status.CANCEL_STATUS;
+	}
+
+	private IStatus runCalibrateDetector(final IProgressMonitor monitor, Display display, final IPlottingSystem plotter, List<HKL> spacings) {
+		final ProgressMonitorWrapper mon = new ProgressMonitorWrapper(monitor);
+		monitor.beginTask("Calibrate detector from rings", IProgressMonitor.UNKNOWN);
+		monitor.subTask("Find rings");
+		Collection<IRegion> regions = plotter.getRegions();
+		List<EllipticalROI> rois = new ArrayList<EllipticalROI>();
+		for (IRegion r : regions) {
+			String n = r.getName();
+			if (n.startsWith(RING_PREFIX))
+				rois.add((EllipticalROI) r.getROI());
+		}
+		monitor.worked(1);
+		
+		monitor.subTask("Fit detector");
+		try {
+			IDiffractionMetadata md = getDiffractionMetaData();
+			final DetectorProperties det = md.getDetector2DProperties();
+			final DiffractionCrystalEnvironment env = md.getDiffractionCrystalEnvironment();
+			final QSpace q = PowderRingsUtils.fitToQSpace(mon, det, env, rois, spacings);
+			display.syncExec(new Runnable() {
+				@Override
+				public void run() {
+					det.setGeometry(q.getDetectorProperties());
+					env.setWavelength(q.getWavelength());
+				}
+			});
+		} catch (Exception e) {
+			return Status.CANCEL_STATUS;
+		}
+
+		return Status.OK_STATUS;
 	}
 	
 	private void updateCalibrationActions(final CalibrationStandards standards) {
