@@ -93,6 +93,8 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 	private MathsJob        updateJob;
 
 	private IOperation operation;
+
+	private static ImageHistoryTool currentTool;
 	
 	private enum ImageHistoryMarker { MARKER }
     
@@ -151,6 +153,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 	@Override
 	public void activate() {
 		
+		currentTool = this;
         if (getPlottingSystem()!=null && originalData==null) { 
         	
         	final IImageTrace imageTrace = getImageTrace();
@@ -163,6 +166,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 	}
 	
 	public void deactivate() {
+		currentTool = null;
 		super.deactivate();
 		operation.deactivate(); // It can still be used
 	}
@@ -212,17 +216,24 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 		imageHistory.put(key, bean);
 	}
 	
+	private static IAction include;
+	
 	protected MenuManager createActions(MenuManager manager) {
 		
 				
-		final IAction include = new Action("Include current plot", Activator.getImageDescriptor("icons/include-current-image.png")) {
-			public void run() {
-				Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.INCLUDE_ORIGINAL, isChecked());
-				updatePlots(false);
-				refresh();
-			}
-		};
-		include.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.INCLUDE_ORIGINAL));
+		if (include==null) {
+			include = new Action("Include current plot", Activator.getImageDescriptor("icons/include-current-image.png")) {
+
+				public void run() {
+					Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.INCLUDE_ORIGINAL, isChecked());
+					if (currentTool!=null) {
+						currentTool.updatePlots(false);
+						currentTool.refresh();
+					}
+				}
+			};
+		    include.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.INCLUDE_ORIGINAL));
+		}
 		
 		final IAction revert = new Action("Revert plot", Activator.getImageDescriptor("icons/reset.gif")) {
 			public void run() {
