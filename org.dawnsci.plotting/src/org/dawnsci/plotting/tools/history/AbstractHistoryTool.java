@@ -50,6 +50,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
 import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 
 public abstract class AbstractHistoryTool extends AbstractToolPage implements MouseListener, KeyListener, IVariableManager {
@@ -153,11 +154,9 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 		viewer.setContentProvider(new IStructuredContentProvider() {			
 			@Override
 			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-				// TODO Auto-generated method stub				
 			}			
 			@Override
 			public void dispose() {
-				// TODO Auto-generated method stub				
 			}		
 			@Override
 			public Object[] getElements(Object inputElement) {
@@ -429,7 +428,6 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 
 	@Override
 	public void mouseDoubleClick(MouseEvent e) {
-		// TODO Auto-generated method stub
 		
 	}
 
@@ -450,7 +448,6 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 
 	@Override
 	public void mouseUp(MouseEvent e) {
-		// TODO Auto-generated method stub
 		
 	}
 
@@ -492,6 +489,21 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
  		}
 		return null;
 	}	
+	
+	/**
+	 * TODO Make history properly lazy? At the moment we assume 
+	 * that the history can kept hard references to fully loaded 
+	 * data.
+	 */
+	@Override
+	public ILazyDataset getLazyValue(String name, IMonitor monitor) {
+		final Map<String, HistoryBean> history = getHistoryCache();
+		for (HistoryBean bean : history.values()) {
+			if (bean.getVariable().equals(name)) return bean.getData();
+ 		}
+		return null;
+	}	
+
 
 	@Override
 	public void deleteExpression() {

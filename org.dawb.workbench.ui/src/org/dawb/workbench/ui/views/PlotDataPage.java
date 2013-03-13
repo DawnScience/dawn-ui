@@ -49,7 +49,11 @@ import org.eclipse.ui.part.Page;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
+import uk.ac.diamond.scisoft.analysis.io.DataHolder;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
+import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
+import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 
 public class PlotDataPage extends Page implements IPlotUpdateParticipant, IAdaptable {
 
@@ -210,9 +214,21 @@ public class PlotDataPage extends Page implements IPlotUpdateParticipant, IAdapt
 	}
 
 	@Override
-	public void setSlicerData(String name, String filePath, int[] dims,
+	public void setSlicerData(CheckableObject object, String filePath, int[] dims,
 			                  AbstractPlottingSystem plottingSystem) {
-		sliceComponent.setData(name, filePath, dims);
+		
+		if (object.isExpression()) {
+			final ILazyDataset lazy = object.getExpression().getLazyDataSet(object.getVariable(), new IMonitor.Stub());
+		    sliceComponent.setData(lazy, object.getName(), filePath);
+		} else {
+			try {
+				final DataHolder holder = LoaderFactory.getData(filePath, new IMonitor.Stub());
+				final ILazyDataset lazy = holder.getLazyDataset(object.getName());
+			    sliceComponent.setData(lazy, object.getName(), filePath);
+			} catch (Throwable e) {
+				logger.error("Cannot load lazy data!", e);
+			}
+		}
 	}
 
 	@Override

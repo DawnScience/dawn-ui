@@ -950,7 +950,7 @@ public class HistogramToolPage extends AbstractToolPage {
 			}
 
 			// get the image data
-			imageDataset = image.getImageServiceBean().getImage();//image.getData();
+			imageDataset = (AbstractDataset)image.getImageServiceBean().getImage();//image.getData();
 
 			if (imageDataset.containsInvalidNumbers() ) {
 				logger.debug("imageDataset contains invalid numbers");
@@ -1071,7 +1071,7 @@ public class HistogramToolPage extends AbstractToolPage {
 		if (getPlottingSystem()==null) return; // Nothing to update
 		if (image==null) return;
 		
-		imageDataset = image.getImageServiceBean().getImage();
+		imageDataset = (AbstractDataset)image.getImageServiceBean().getImage();
 		
 		if (Double.isInfinite(scaleMaxTemp)) scaleMaxTemp = imageDataset.max().doubleValue();
 		if (Double.isInfinite(scaleMinTemp)) scaleMinTemp = imageDataset.min().doubleValue();

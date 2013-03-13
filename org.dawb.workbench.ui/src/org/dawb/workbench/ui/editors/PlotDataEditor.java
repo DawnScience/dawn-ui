@@ -269,9 +269,9 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 			if (selections.length==1 && participant.getDimensionCount(selections[0])!=1) {
 				
 				participant.setSlicerVisible(true);
-				participant.setSlicerData(selections[0].toString(),
+				participant.setSlicerData(selections[0],
 						                  EclipseUtils.getFilePath(getEditorInput()), 
-						                  getShape(selections[0].toString()), 
+						                  getShape(selections[0]), 
 						                  plottingSystem);
 
 				return;
@@ -289,17 +289,23 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		}
 	}
 	
-	private int[] getShape(String name) {
-		int[] shape=null;
-		try {
-			shape = metaData.getDataShapes().get(name);
-		} catch (Exception allowed) {
-			// It's ok
+	private int[] getShape(CheckableObject ob) {
+		
+		if (ob.isExpression()) {
+			return null; 
+		} else {
+			String name = ob.getName();
+			int[] shape=null;
+			try {
+				shape = metaData.getDataShapes().get(name);
+			} catch (Exception allowed) {
+				// It's ok
+			}
+			if (shape==null) {
+				shape = getLazyDataSet(name, null).getShape();
+			}
+			return shape;
 		}
-		if (shape==null) {
-			shape = getLazyDataSet(name, null).getShape();
-		}
-		return shape;
 	}
 
 	private class PlotJob extends Job {
@@ -466,6 +472,11 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 
 		throw new NullPointerException("Expressions are not supported by "+getClass().getName());
 	}
+	@Override
+	public AbstractDataset getLazyValue(String name, final IMonitor monitor) {
+
+		throw new NullPointerException("Expressions are not supported by "+getClass().getName());
+	}
 	
 	public boolean isDataSetName(String name, IMonitor monitor) {
 		if (dataNames==null) return false;
@@ -486,7 +497,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		}
 		if (object instanceof IExpressionObject) {
 			try {
-				return ((IExpressionObject)object).getDataSet(new ProgressMonitorWrapper(monitor));
+				return ((IExpressionObject)object).getDataSet(null, new ProgressMonitorWrapper(monitor));
 			} catch (Exception e) {
 				// valid, user can enter an invalid expression. In this case
 				// it colours red but does not stop them from using the view.

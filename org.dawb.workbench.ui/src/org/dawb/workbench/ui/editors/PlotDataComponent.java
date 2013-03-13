@@ -1269,12 +1269,28 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 			return getDataSet(ob.getName(), monitor);
 		} else {
 			try {
-				return ob.getExpression().getDataSet(new IMonitor.Stub());
+				return ob.getExpression().getDataSet(null, new IMonitor.Stub());
 			} catch (Exception e) {
 				return null;
 			}
 		}		
 	}
+	
+	@Override
+	public ILazyDataset getLazyValue(String name, final IMonitor monitor) {
+		final CheckableObject ob = getCheckableObjectByVariable(name);
+		if (!ob.isExpression()) {
+			return getLazyDataSet(ob.getName(), monitor);
+		} else {
+			try {
+				return ob.getExpression().getLazyDataSet(name, new IMonitor.Stub());
+			} catch (Exception e) {
+				return null;
+			}
+		}		
+	}
+
+	
 	@Override
 	public boolean isVariableName(String variableName, IMonitor monitor) {
 		final CheckableObject ob = getCheckableObjectByVariable(variableName);
@@ -1328,6 +1344,8 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		public String getText(Object ob) {
 			
 			final CheckableObject element = (CheckableObject)ob;
+			final String          name    = element.toString();
+			
 			switch (columnIndex) {
 			case 0:
 				return null;
@@ -1342,7 +1360,6 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 
 			case 3:
 				if (!element.isExpression()) {
-					final String name = element.toString();
 					if (metaData.getDataSizes()==null) {
 						final ILazyDataset set = getLazyDataSet(name, (IMonitor)null);
 						if (set!=null) {
@@ -1352,13 +1369,17 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 						
 					}
 					return metaData.getDataSizes().get(name)+"";
-				} 
-				return element.getExpression().getSize(new IMonitor.Stub())+"";
+				} else {
+					final ILazyDataset set = element.getExpression().getLazyDataSet(name, new IMonitor.Stub());
+					if (set!=null) {
+						return set.getSize()+"";
+					}
+				    return "Unknown";
+				}
 			case 4:
 				return getActiveDimensions(element, false)+"";
 			case 5:
 				if (!element.isExpression()) {
-					final String name = element.toString();
 					if (metaData.getDataShapes()==null || metaData.getDataShapes().get(name)==null) {
 						final ILazyDataset set = getLazyDataSet(name, null);
 						if (set!=null) {
@@ -1368,8 +1389,13 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 						
 					}
 					return Arrays.toString(metaData.getDataShapes().get(name));
-				} 
-				return element.getExpression().getShape(new IMonitor.Stub());
+				}  else {
+					final ILazyDataset set = element.getExpression().getLazyDataSet(name, new IMonitor.Stub());
+					if (set!=null) {
+						return Arrays.toString(set.getShape());
+					}
+				    return "Unknown";
+				}
 
 			case 6:
 				return element.getVariable();
@@ -1427,29 +1453,36 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 
 	public int getActiveDimensions(CheckableObject element, boolean squeeze) {
 		
-		if (!element.isExpression()) {
-			final String name = element.getName();
-			if (metaData.getDataShapes()==null || metaData.getDataShapes().get(name)==null) {
-				final ILazyDataset set = getLazyDataSet(name, (IMonitor)null);
-				// Assuming it has been squeezed already
-				if (set!=null) {
-					return set.getShape().length;
-				}
-			    return 1;
-				
+		if (element.isExpression()) {
+		    try {
+				return element.getExpression().getLazyDataSet(element.getVariable(), new IMonitor.Stub()).getRank();
+			} catch (Exception e) {
+				logger.error("Could not get shape of "+element.getVariable());
+				return 1;
 			}
-			if (metaData.getDataShapes().get(name)!=null) {
-				final int[] shape = metaData.getDataShapes().get(name);
-				if (squeeze) {
-					int count = 0;
-					for (int i : shape) if (i>1) ++count;
-					if (count<1) count=1;
-				    return count;
-				} else {
-					return shape.length;
-				}
+		}
+		
+		final String name = element.getName();
+		if (metaData.getDataShapes()==null || metaData.getDataShapes().get(name)==null) {
+			final ILazyDataset set = getLazyDataSet(name, (IMonitor)null);
+			// Assuming it has been squeezed already
+			if (set!=null) {
+				return set.getShape().length;
 			}
-		} 
+			return 1;
+
+		}
+		if (metaData.getDataShapes().get(name)!=null) {
+			final int[] shape = metaData.getDataShapes().get(name);
+			if (squeeze) {
+				int count = 0;
+				for (int i : shape) if (i>1) ++count;
+				if (count<1) count=1;
+				return count;
+			} else {
+				return shape.length;
+			}
+		}
 		return 1;
 	}
 
@@ -1482,7 +1515,6 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		data.remove(sel);
 		dataViewer.refresh();
 		saveExpressions();
-
 	}
 	
 	

@@ -31,12 +31,12 @@ public interface IPlotUpdateParticipant {
 
 	/**
 	 * The data needed by the slicer when the plot is updated.
-	 * @param name
+	 * @param object
 	 * @param filePath
 	 * @param dims
 	 * @param plottingSystem
 	 */
-	void setSlicerData(String name, 
+	void setSlicerData(CheckableObject object, 
 			           String filePath, 
 			           int[] dims,
 			           AbstractPlottingSystem plottingSystem);
