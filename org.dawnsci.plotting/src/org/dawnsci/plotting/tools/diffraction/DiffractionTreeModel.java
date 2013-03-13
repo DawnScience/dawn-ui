@@ -516,7 +516,8 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 				if (!canUpdate)        return;
 				if (evt.hasBeamCentreChanged()) {
 					updateBeamCentre(detprop);
-				} else if (evt.hasNormalChanged()) {
+				}
+				if (evt.hasNormalChanged()) {
 					double[] angles = detprop.getNormalAnglesInDegrees();
 //					System.err.printf("Detector: %f, %f, %f\n", angles[0], angles[1], angles[2]);
 					yaw.setValueQuietly(angles[0], NonSI.DEGREE_ANGLE);
@@ -525,14 +526,17 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 					if (viewer != null) {
 						viewer.update(new Object[] {yaw, pitch, roll}, null);
 					}
-				} else if (evt.hasOriginChanged()) {
+				}
+				if (evt.hasOriginChanged()) {
 					dist.setValueQuietly(detprop.getBeamCentreDistance(), SI.MILLIMETER);
 					updateBeamCentre(detprop);
 					if (viewer!=null) viewer.refresh(dist);
-				} else if (evt.hasHPxSizeChanged()) {
+				}
+				if (evt.hasHPxSizeChanged()) {
 					xPixelSize.setValueQuietly(detprop.getVPxSize(), SI.MILLIMETER);
 					if (viewer!=null) viewer.refresh(xPixelSize);
-				} else if (evt.hasVPxSizeChanged()) {
+				}
+				if (evt.hasVPxSizeChanged()) {
 					yPixelSize.setValueQuietly(detprop.getVPxSize(), SI.MILLIMETER);
 					if (viewer!=null) viewer.refresh(yPixelSize);
 				}
