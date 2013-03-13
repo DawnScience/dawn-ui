@@ -100,7 +100,7 @@ class HistoryBean {
 	public AbstractDataset getData() {
 		if (expression!=null)
 			try {
-				return expression.getDataSet(new IMonitor.Stub());
+				return expression.getDataSet(null, new IMonitor.Stub());
 			} catch (Exception e) {
 				// Allowed
 			}

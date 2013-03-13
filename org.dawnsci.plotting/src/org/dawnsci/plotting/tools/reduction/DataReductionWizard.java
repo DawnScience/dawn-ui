@@ -54,6 +54,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
+import uk.ac.diamond.scisoft.analysis.io.DataHolder;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.io.SliceObject;
@@ -180,7 +182,9 @@ public class DataReductionWizard extends Wizard implements IExportWizard {
 								 slice.setName(path);
 
 								 // y Data, in indices
-								 final AbstractDataset set = SliceUtils.getSlice(slice, monitor);
+								 final DataHolder      dh  = LoaderFactory.getData(slice.getPath());
+								 final ILazyDataset    ld  = dh.getLazyDataset(slice.getName());
+								 final AbstractDataset set = SliceUtils.getSlice(ld, slice, monitor);
 
 								 DataReductionSlice sliceInfo = new DataReductionSlice(hf, group, set, userData, monitor);
 								 sliceInfo.setAxes(axes);

@@ -10,7 +10,6 @@
 
 package org.dawnsci.plotting.expression;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +26,8 @@ import org.dawnsci.jexl.utils.JexlUtils;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.LazyDataset;
 import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 
 /**
@@ -59,6 +60,7 @@ class ExpressionObject implements IExpressionObject {
 	 */
 	public void setExpressionString(String expression) {
 		this.dataSet    = null;
+		this.lazySet    = null;
 		this.expressionString = expression;
 	}
 
@@ -96,10 +98,9 @@ class ExpressionObject implements IExpressionObject {
 	
 	public boolean isValid(IMonitor monitor) {
 		try {
-			getDataSet(monitor);
-			if (dataSet!=null) {
-				return true;
-			}
+			if (dataSet!=null) return true;
+			if (lazySet!=null) return true;
+			
 			if (jexl==null) jexl = JexlUtils.getDawnJexlEngine();
 			ExpressionImpl ex    = (ExpressionImpl)jexl.createExpression(expressionString);
 			Set<List<String>> names = ex.getVariables();
@@ -114,35 +115,39 @@ class ExpressionObject implements IExpressionObject {
 			return false;
 		}
 	}
-
+	
+	private ILazyDataset lazySet;
+	
 	/**
-	 * Returns the size of the expression in the current environment.
-	 * @return the size
+	 * Just gives a lazy the same size as one of the 
 	 */
-	public int getSize(IMonitor monitor) {
-		if (dataSet==null) {
-			try {
-				getDataSet(monitor);
-			} catch (Exception e) {
-				return 0;
-			}
+	public ILazyDataset getLazyDataSet(String suggestedName, IMonitor monitor) {
+		
+		if (lazySet!=null) return lazySet;
+		
+		if (jexl==null) jexl = JexlUtils.getDawnJexlEngine();
+		try {
+			ExpressionImpl ex = (ExpressionImpl)jexl.createExpression(expressionString);
+			final Set<List<String>> variableNames = ex.getVariables();
+			
+		    for (List<String> entry : variableNames) {
+		    	final String variableName = entry.get(0);
+		    	if (monitor.isCancelled()) return null;
+		        final ILazyDataset ld = provider.getLazyValue(variableName, monitor);
+		        if (ld!=null) { // We are going to copy it's shape
+		        	if (suggestedName==null) throw new RuntimeException("Please set a name for dataset "+getExpressionString());
+		        	return new LazyDataset(suggestedName, AbstractDataset.FLOAT64, ld.getShape(), null);
+		        }
+		    }
+		    return null;
+		    
+		} catch (Throwable allowed) {
+			return null;
 		}
-		return dataSet!=null ? dataSet.getSize() : 0;
 	}
-
-	public String getShape(IMonitor monitor) {
-		if (dataSet==null) {
-			try {
-				getDataSet(monitor);
-			} catch (Exception e) {
-				return "0";
-			}
-		}
-		return dataSet!=null ? Arrays.toString(dataSet.getShape()) : "0";
-	}
-
+	
 	private AbstractDataset dataSet;
-	public AbstractDataset getDataSet(IMonitor mon) throws Exception {
+	public AbstractDataset getDataSet(String suggestedName, IMonitor mon) throws Exception {
 		
 		if (dataSet!=null) return dataSet;
 		
@@ -160,7 +165,11 @@ class ExpressionObject implements IExpressionObject {
 		Expression ex = jexl.createExpression(expressionString);
         
 		this.dataSet = (AbstractDataset)ex.evaluate(context);
-		dataSet.setName(getExpressionString());
+		if (suggestedName==null) {
+		    dataSet.setName(getExpressionString());
+		} else {
+			dataSet.setName(suggestedName);
+		}
 		return this.dataSet;
 	}
 
@@ -199,6 +208,7 @@ class ExpressionObject implements IExpressionObject {
 	 */
 	public void clear() {
 		this.dataSet = null;
+		this.lazySet = null;
 	}
 
 
