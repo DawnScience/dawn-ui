@@ -2,6 +2,7 @@ package org.dawnsci.plotting.tools.region;
 
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.RegionUtils;
+import org.dawnsci.plotting.tools.region.MeasurementLabelProvider.LabelType;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.CheckboxCellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
@@ -43,56 +44,56 @@ public class RegionEditTool extends AbstractRegionTableTool {
 		TableViewerColumn var = new TableViewerColumn(viewer, SWT.LEFT, 0);
 		var.getColumn().setText("Name");
 		var.getColumn().setWidth(120);
-		var.setLabelProvider(new MeasurementLabelProvider(this, 0));
+		var.setLabelProvider(new MeasurementLabelProvider(this, LabelType.ROINAME));
 		RegionEditingSupport regionEditor = new RegionEditingSupport(viewer, 0);
 		var.setEditingSupport(regionEditor);
 
 		var = new TableViewerColumn(viewer, SWT.CENTER, 1);
 		var.getColumn().setText("Start point x");
 		var.getColumn().setWidth(100);
-		var.setLabelProvider(new MeasurementLabelProvider(this, 1));
+		var.setLabelProvider(new MeasurementLabelProvider(this, LabelType.STARTX));
 		regionEditor = new RegionEditingSupport(viewer, 1);
 		var.setEditingSupport(regionEditor);
 
 		var = new TableViewerColumn(viewer, SWT.LEFT, 2);
 		var.getColumn().setText("Start point y");
 		var.getColumn().setWidth(100);
-		var.setLabelProvider(new MeasurementLabelProvider(this, 2));
+		var.setLabelProvider(new MeasurementLabelProvider(this, LabelType.STARTY));
 		regionEditor = new RegionEditingSupport(viewer, 2);
 		var.setEditingSupport(regionEditor);
 
 		var = new TableViewerColumn(viewer, SWT.LEFT, 3);
 		var.getColumn().setText("End Point x");
 		var.getColumn().setWidth(100);
-		var.setLabelProvider(new MeasurementLabelProvider(this, 3));
+		var.setLabelProvider(new MeasurementLabelProvider(this, LabelType.ENDX));
 		regionEditor = new RegionEditingSupport(viewer, 3);
 		var.setEditingSupport(regionEditor);
 
 		var = new TableViewerColumn(viewer, SWT.LEFT, 4);
 		var.getColumn().setText("End point y");
 		var.getColumn().setWidth(100);
-		var.setLabelProvider(new MeasurementLabelProvider(this, 4));
+		var.setLabelProvider(new MeasurementLabelProvider(this, LabelType.ENDY));
 		regionEditor = new RegionEditingSupport(viewer, 4);
 		var.setEditingSupport(regionEditor);
 
 		var = new TableViewerColumn(viewer, SWT.LEFT, 5);
 		var.getColumn().setText("Max Intensity");
 		var.getColumn().setWidth(100);
-		var.setLabelProvider(new MeasurementLabelProvider(this, 5));
+		var.setLabelProvider(new MeasurementLabelProvider(this, LabelType.MAX));
 		regionEditor = new RegionEditingSupport(viewer, 5);
 		var.setEditingSupport(regionEditor);
 
 		var = new TableViewerColumn(viewer, SWT.LEFT, 6);
 		var.getColumn().setText("Sum");
 		var.getColumn().setWidth(100);
-		var.setLabelProvider(new MeasurementLabelProvider(this, 6));
+		var.setLabelProvider(new MeasurementLabelProvider(this, LabelType.SUM));
 		regionEditor = new RegionEditingSupport(viewer, 6);
 		var.setEditingSupport(regionEditor);
 
 		var = new TableViewerColumn(viewer, SWT.LEFT, 7);
 		var.getColumn().setText("Active");
 		var.getColumn().setWidth(100);
-		var.setLabelProvider(new MeasurementLabelProvider(this, 7));
+		var.setLabelProvider(new MeasurementLabelProvider(this, LabelType.ACTIVE));
 		regionEditor = new RegionEditingSupport(viewer, 7);
 		var.setEditingSupport(regionEditor);
 	}
