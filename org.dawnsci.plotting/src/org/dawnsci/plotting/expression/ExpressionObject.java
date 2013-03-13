@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.apache.commons.jexl2.Expression;
 import org.apache.commons.jexl2.ExpressionImpl;
@@ -27,7 +28,7 @@ import org.dawnsci.jexl.utils.JexlUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
-import uk.ac.diamond.scisoft.analysis.dataset.LazyDataset;
+import uk.ac.diamond.scisoft.analysis.io.ILazyLoader;
 import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 
 /**
@@ -124,28 +125,55 @@ class ExpressionObject implements IExpressionObject {
 	public ILazyDataset getLazyDataSet(String suggestedName, IMonitor monitor) {
 		
 		if (lazySet!=null) return lazySet;
+		lazySet = null;
 		
 		if (jexl==null) jexl = JexlUtils.getDawnJexlEngine();
 		try {
 			ExpressionImpl ex = (ExpressionImpl)jexl.createExpression(expressionString);
 			final Set<List<String>> variableNames = ex.getVariables();
 			
-		    for (List<String> entry : variableNames) {
-		    	final String variableName = entry.get(0);
-		    	if (monitor.isCancelled()) return null;
-		        final ILazyDataset ld = provider.getLazyValue(variableName, monitor);
-		        if (ld!=null) { // We are going to copy it's shape
-		        	if (suggestedName==null) throw new RuntimeException("Please set a name for dataset "+getExpressionString());
-		        	return new LazyDataset(suggestedName, AbstractDataset.FLOAT64, ld.getShape(), null);
-		        }
-		    }
-		    return null;
+			if (isCustomFunctionExpression(getExpressionString())) { // We evaluate the function in memory
+				
+				lazySet = getDataSet(suggestedName, monitor);
+				
+			} else { 
+				
+				// Try to allow for slices meaning larger stacks can be used.
+				// Try for the largest rank.
+				int[] largestShape = null;
+				int   largestRank  = -1;
+			    for (List<String> entry : variableNames) {
+			    	final String variableName = entry.get(0);
+			    	if (monitor.isCancelled()) return null;
+			        final ILazyDataset ld = provider.getLazyValue(variableName, monitor);
+			        if (ld!=null) { // We are going to copy it's shape
+			        	if (suggestedName==null) throw new RuntimeException("Please set a name for dataset "+getExpressionString());
+			        	if (ld.getRank()>largestRank) {
+			        		largestRank  = ld.getRank();
+			        		largestShape = ld.getShape();
+			        	}
+			        }
+			    }
+			    
+			    if (largestShape!=null) {
+		        	ILazyLoader loader = new ExpressionLazyLoader(suggestedName, getExpressionString(), provider);
+		        	lazySet = new ExpressionLazyDataset(suggestedName, AbstractDataset.FLOAT64, largestShape, loader);
+			    }
+
+			}
 		    
 		} catch (Throwable allowed) {
-			return null;
+			return lazySet;
 		}
+		return lazySet;
 	}
 	
+	private static final Pattern function = Pattern.compile("[a-zA-Z]+\\:(.*)+");
+	
+	private boolean isCustomFunctionExpression(String expr) {
+		return function.matcher(expr).matches();
+	}
+
 	private AbstractDataset dataSet;
 	public AbstractDataset getDataSet(String suggestedName, IMonitor mon) throws Exception {
 		
@@ -169,6 +197,10 @@ class ExpressionObject implements IExpressionObject {
 		    dataSet.setName(getExpressionString());
 		} else {
 			dataSet.setName(suggestedName);
+		}
+		
+		if (lazySet!=null && lazySet instanceof ExpressionLazyDataset) {
+			((ExpressionLazyDataset)lazySet).setShapeSilently(dataSet.getShape());
 		}
 		return this.dataSet;
 	}
