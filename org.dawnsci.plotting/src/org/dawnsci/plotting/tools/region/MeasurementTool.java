@@ -2,6 +2,7 @@ package org.dawnsci.plotting.tools.region;
 
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.RegionUtils;
+import org.dawnsci.plotting.tools.region.MeasurementLabelProvider.LabelType;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -24,32 +25,32 @@ public class MeasurementTool extends AbstractRegionTableTool {
 		TableViewerColumn var = new TableViewerColumn(viewer, SWT.LEFT, 0);
 		var.getColumn().setText("Name");
 		var.getColumn().setWidth(120);
-		var.setLabelProvider(new MeasurementLabelProvider(this, 0));
+		var.setLabelProvider(new MeasurementLabelProvider(this, LabelType.ROINAME));
 
 		var = new TableViewerColumn(viewer, SWT.CENTER, 1);
 		var.getColumn().setText("Region Type");
 		var.getColumn().setWidth(100);
-		var.setLabelProvider(new MeasurementLabelProvider(this, 1));
+		var.setLabelProvider(new MeasurementLabelProvider(this, LabelType.ROITYPE));
 
 		var = new TableViewerColumn(viewer, SWT.LEFT, 2);
 		var.getColumn().setText("dx");
 		var.getColumn().setWidth(80);
-		var.setLabelProvider(new MeasurementLabelProvider(this, 2));
+		var.setLabelProvider(new MeasurementLabelProvider(this, LabelType.DX));
 
 		var = new TableViewerColumn(viewer, SWT.LEFT, 3);
 		var.getColumn().setText("dy");
 		var.getColumn().setWidth(80);
-		var.setLabelProvider(new MeasurementLabelProvider(this, 3));
+		var.setLabelProvider(new MeasurementLabelProvider(this, LabelType.DY));
 
 		var = new TableViewerColumn(viewer, SWT.LEFT, 4);
 		var.getColumn().setText("length");
 		var.getColumn().setWidth(80);
-		var.setLabelProvider(new MeasurementLabelProvider(this, 4));
+		var.setLabelProvider(new MeasurementLabelProvider(this, LabelType.LENGTH));
 
 		var = new TableViewerColumn(viewer, SWT.LEFT, 5);
 		var.getColumn().setText("Coordinates");
 		var.getColumn().setWidth(500);
-		var.setLabelProvider(new MeasurementLabelProvider(this, 8));
+		var.setLabelProvider(new MeasurementLabelProvider(this, LabelType.ROISTRING));
 	}
 	
 	
