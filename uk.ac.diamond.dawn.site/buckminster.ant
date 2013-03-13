@@ -226,8 +226,8 @@ Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blo
             <and>
                 <istrue value="${jre.include}" />
                 <or>
-                    <equals arg1="${jre.include.plaforms}" arg2="all" />
-                    <contains string="${jre.include.plaforms}" substring="${jre.os}-${jre.arch}" />
+                    <equals arg1="${jre.include.platforms}" arg2="all" />
+                    <contains string="${jre.include.platforms}" substring="${jre.os}-${jre.arch}" />
                 </or>
             </and>
         </condition>
