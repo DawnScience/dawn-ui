@@ -57,7 +57,7 @@
       <property name="entry" value="MyVisitsEntryPoint" />
       <property name="idaEmbedded" value="yes" />
       <property name="org.dawb.editor.h5.use.default" value="true" />
-      <property name="osgi.locking" value="java.io" />
+      <property name="osgi.locking" value="none" />
    </configurations>
 
 </product>
