@@ -4,7 +4,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.LazyDataset;
 import uk.ac.diamond.scisoft.analysis.io.ILazyLoader;
 
-public class ExpressionLazyDataset extends LazyDataset {
+class ExpressionLazyDataset extends LazyDataset {
 
 	/**
 	 * 

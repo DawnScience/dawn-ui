@@ -18,7 +18,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
 import uk.ac.diamond.scisoft.analysis.io.ILazyLoader;
 import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 
-public class ExpressionLazyLoader implements ILazyLoader {
+class ExpressionLazyLoader implements ILazyLoader {
 
 	/**
 	 * 

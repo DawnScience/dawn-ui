@@ -132,6 +132,10 @@ class ExpressionObject implements IExpressionObject {
 			ExpressionImpl ex = (ExpressionImpl)jexl.createExpression(expressionString);
 			final Set<List<String>> variableNames = ex.getVariables();
 			
+			/**
+			 * TODO FIXME this means you cannot do something like dat:mean(x,0) where 
+			 * x is too large to fit in memory. 
+			 */
 			if (isCustomFunctionExpression(getExpressionString())) { // We evaluate the function in memory
 				
 				lazySet = getDataSet(suggestedName, monitor);
