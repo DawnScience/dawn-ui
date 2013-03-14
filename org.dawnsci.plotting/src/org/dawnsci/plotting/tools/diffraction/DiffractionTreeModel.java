@@ -514,9 +514,6 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 			public void detectorPropertiesChanged(DetectorPropertyEvent evt) {
 				if (!isActive)         return;
 				if (!canUpdate)        return;
-				if (evt.hasBeamCentreChanged()) {
-					updateBeamCentre(detprop);
-				}
 				if (evt.hasNormalChanged()) {
 					double[] angles = detprop.getNormalAnglesInDegrees();
 //					System.err.printf("Detector: %f, %f, %f\n", angles[0], angles[1], angles[2]);
@@ -526,11 +523,13 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 					if (viewer != null) {
 						viewer.update(new Object[] {yaw, pitch, roll}, null);
 					}
+				} else if (evt.hasBeamCentreChanged()) {
+						updateBeamCentre(detprop);
 				}
 				if (evt.hasOriginChanged()) {
 					dist.setValueQuietly(detprop.getBeamCentreDistance(), SI.MILLIMETER);
 					updateBeamCentre(detprop);
-					if (viewer!=null) viewer.refresh(dist);
+					if (viewer!=null) viewer.update(dist, null);
 				}
 				if (evt.hasHPxSizeChanged()) {
 					xPixelSize.setValueQuietly(detprop.getVPxSize(), SI.MILLIMETER);
@@ -564,11 +563,11 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 		double[]     cen = detprop.getBeamCentreCoords();
 		Amount<Length> x = Amount.valueOf(cen[0], xpixel);
 		beamX.setValueQuietly(x.to(beamX.getValue().getUnit()));
-		if (viewer!=null) viewer.refresh(beamX); // Cancels cell editing.
+		if (viewer!=null) viewer.update(beamX, null); // Cancels cell editing.
 		
 		Amount<Length> y = Amount.valueOf(cen[1], ypixel);
 		beamY.setValueQuietly(y.to(beamY.getValue().getUnit()));
-		if (viewer!=null) viewer.refresh(beamY);  // Cancels cell editing.
+		if (viewer!=null) viewer.update(beamY, null);  // Cancels cell editing.
 	}
 
 	private UnitListener createPixelFormatListener(final NumericNode<Length> node) {
