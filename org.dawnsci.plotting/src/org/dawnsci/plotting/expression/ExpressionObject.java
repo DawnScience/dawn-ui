@@ -125,6 +125,7 @@ class ExpressionObject implements IExpressionObject {
 	public ILazyDataset getLazyDataSet(String suggestedName, IMonitor monitor) {
 		
 		if (lazySet!=null) return lazySet;
+		if (dataSet!=null) return dataSet;
 		lazySet = null;
 		
 		if (jexl==null) jexl = JexlUtils.getDawnJexlEngine();
