@@ -55,20 +55,20 @@ public class DiffractionDetector implements Serializable{
 	
 	public double getXPixelMM() {
 		if (xPixelSize ==  null) return Double.NaN;
-		return xPixelSize.doubleValue(SI.MILLIMETER);
+		return xPixelSize.doubleValue(SI.MILLIMETRE);
 	}
 	
 	public void setXPixelMM(double pixmm) {
-		xPixelSize = Amount.valueOf(pixmm, SI.MILLIMETER);
+		xPixelSize = Amount.valueOf(pixmm, SI.MILLIMETRE);
 	}
 	
 	public double getYPixelMM() {
 		if (yPixelSize ==  null) return Double.NaN;
-		return yPixelSize.doubleValue(SI.MILLIMETER);
+		return yPixelSize.doubleValue(SI.MILLIMETRE);
 	}
 	
 	public void setYPixelMM(double pixmm) {
-		yPixelSize = Amount.valueOf(pixmm, SI.MILLIMETER);
+		yPixelSize = Amount.valueOf(pixmm, SI.MILLIMETRE);
 	}
 	@Override
 	public int hashCode() {
