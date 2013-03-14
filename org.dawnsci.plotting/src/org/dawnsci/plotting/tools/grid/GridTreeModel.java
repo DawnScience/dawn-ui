@@ -119,12 +119,12 @@ public class GridTreeModel extends AbstractNodeModel {
 		grid.setDefaultExpanded(true);
 		registerNode(grid);
 
-		this.xres = new NumericNode<Length>("X-axis Resolution", grid, SI.MICRO(SI.METER));
-		xres.setDefault(Amount.valueOf(0.01, SI.MICRO(SI.METER)));
-		xres.setUnits(SI.MICRO(SI.METER), SI.MILLIMETER);
+		this.xres = new NumericNode<Length>("X-axis Resolution", grid, SI.MICRO(SI.METRE));
+		xres.setDefault(Amount.valueOf(0.01, SI.MICRO(SI.METRE)));
+		xres.setUnits(SI.MICRO(SI.METRE), SI.MILLIMETRE);
 		xres.setEditable(true);
-		xres.setLowerBound(Amount.valueOf(0.01, SI.MICRO(SI.METER)));
-		xres.setUpperBound(Amount.valueOf(100, SI.MILLIMETER));
+		xres.setLowerBound(Amount.valueOf(0.01, SI.MICRO(SI.METRE)));
+		xres.setUpperBound(Amount.valueOf(100, SI.MILLIMETRE));
 		xres.setIncrement(0.1);
 		xres.addAmountListener(new AmountListener<Length>() {		
 			@Override
@@ -132,7 +132,7 @@ public class GridTreeModel extends AbstractNodeModel {
 				if (groi==null || region==null) return;
 				try {
 					adjustingValue = true;
-					double xspacing = groi.getGridPreferences().getXPixelsFromMicronsCoord(evt.getAmount().doubleValue(SI.MICRO(SI.METER)));
+					double xspacing = groi.getGridPreferences().getXPixelsFromMicronsCoord(evt.getAmount().doubleValue(SI.MICRO(SI.METRE)));
 					groi.setxSpacing(xspacing);
 					region.setROI(groi);
 					region.repaint();
@@ -144,12 +144,12 @@ public class GridTreeModel extends AbstractNodeModel {
 		});
 		registerNode(xres);
 
-		this.yres = new NumericNode<Length>("Y-axis Resolution", grid, SI.MICRO(SI.METER));
-		yres.setDefault(Amount.valueOf(0.01, SI.MICRO(SI.METER)));
-		yres.setUnits(SI.MICRO(SI.METER), SI.MILLIMETER);
+		this.yres = new NumericNode<Length>("Y-axis Resolution", grid, SI.MICRO(SI.METRE));
+		yres.setDefault(Amount.valueOf(0.01, SI.MICRO(SI.METRE)));
+		yres.setUnits(SI.MICRO(SI.METRE), SI.MILLIMETRE);
 		yres.setEditable(true);
-		yres.setLowerBound(Amount.valueOf(0.01, SI.MICRO(SI.METER)));
-		yres.setUpperBound(Amount.valueOf(100, SI.MILLIMETER));
+		yres.setLowerBound(Amount.valueOf(0.01, SI.MICRO(SI.METRE)));
+		yres.setUpperBound(Amount.valueOf(100, SI.MILLIMETRE));
 		yres.setIncrement(0.1);
 		yres.addAmountListener(new AmountListener<Length>() {		
 			@Override
@@ -157,7 +157,7 @@ public class GridTreeModel extends AbstractNodeModel {
 				if (groi==null || region==null) return;
 				try {
 					adjustingValue = true;
-					double yspacing = groi.getGridPreferences().getYPixelsFromMicronsCoord(evt.getAmount().doubleValue(SI.MICRO(SI.METER)));
+					double yspacing = groi.getGridPreferences().getYPixelsFromMicronsCoord(evt.getAmount().doubleValue(SI.MICRO(SI.METRE)));
 					groi.setySpacing(yspacing);
 					region.setROI(groi);
 					region.repaint();
@@ -396,10 +396,10 @@ public class GridTreeModel extends AbstractNodeModel {
 		if (!adjustingValue) viewer.cancelEditing();
 
 		if (this.groi != groi) { // Grid spacings may have changed.
-			xres.setValueQuietly(Amount.valueOf(groi.getGridPreferences().getXMicronsFromPixelsLen(groi.getxSpacing()), SI.MICRO(SI.METER)));
+			xres.setValueQuietly(Amount.valueOf(groi.getGridPreferences().getXMicronsFromPixelsLen(groi.getxSpacing()), SI.MICRO(SI.METRE)));
 			viewer.update(xres, new String[]{"Value"});
 			
-			yres.setValueQuietly(Amount.valueOf(groi.getGridPreferences().getYMicronsFromPixelsLen(groi.getySpacing()), SI.MICRO(SI.METER)));
+			yres.setValueQuietly(Amount.valueOf(groi.getGridPreferences().getYMicronsFromPixelsLen(groi.getySpacing()), SI.MICRO(SI.METRE)));
 			viewer.update(yres, new String[]{"Value"});
 			
 			roiName.setValue(region.getName());
@@ -444,14 +444,14 @@ public class GridTreeModel extends AbstractNodeModel {
         registerNode(beamCen);
         beamCen.setDefaultExpanded(true);
 
-        Unit<Length> unknown = SI.MILLIMETER;
+        Unit<Length> unknown = SI.MILLIMETRE;
         UnitFormat.getInstance().label(unknown, "unit");
-        NumericNode<Length> beamX = new NumericNode<Length>("X", beamCen,  SI.MILLIMETER);
+        NumericNode<Length> beamX = new NumericNode<Length>("X", beamCen,  SI.MILLIMETRE);
         beamX.setUnits(unknown);
         registerNode(beamX);
         beamX.setEditable(true);
 
-        NumericNode<Length> beamY = new NumericNode<Length>("Y", beamCen, SI.MILLIMETER);
+        NumericNode<Length> beamY = new NumericNode<Length>("Y", beamCen, SI.MILLIMETRE);
         beamX.setUnits(unknown);
         registerNode(beamY);
         beamY.setEditable(true);
