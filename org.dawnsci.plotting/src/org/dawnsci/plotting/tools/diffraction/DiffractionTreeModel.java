@@ -178,112 +178,113 @@ public class DiffractionTreeModel extends AbstractNodeModel {
         }		
 	}
 
-	private void createDetector(final DiffractionCrystalEnvironment dce, DiffractionCrystalEnvironment odce, final DetectorProperties detprop, DetectorProperties odetprop) {
-       
+	private void createDetector(final DiffractionCrystalEnvironment dce, DiffractionCrystalEnvironment odce,
+			final DetectorProperties detprop, DetectorProperties odetprop) {
+
 		// Detector Meta
-        final LabelNode detectorMeta = new LabelNode("Detector", root);
-        registerNode(detectorMeta);
-        detectorMeta.setDefaultExpanded(true);
-        
-        final NumericNode<Duration> exposure   = new NumericNode<Duration>("Exposure Time", detectorMeta, SI.SECOND);
-        registerNode(exposure);
-        if (dce!=null) {
-           	exposure.setDefault(odce.getExposureTime(), SI.SECOND);
-           	exposure.setValue(dce.getExposureTime(), SI.SECOND);
-        }
-        
-        final LabelNode size = new LabelNode("Size", detectorMeta);
-        registerNode(size);
-        xSize  = new NumericNode<Length>("x", size, SI.MILLIMETER);
-        registerNode(xSize);
-        if (detprop!=null) {
-        	xSize.setDefault(odetprop.getDetectorSizeH(), SI.MILLIMETER);
-        	xSize.setValue(detprop.getDetectorSizeH(), SI.MILLIMETER);
-        }
-        ySize  = new NumericNode<Length>("y", size, SI.MILLIMETER);
-        registerNode(ySize);
-        if (detprop!=null) {
-        	ySize.setDefault(odetprop.getDetectorSizeV(), SI.MILLIMETER);
-        	ySize.setValue(detprop.getDetectorSizeV(), SI.MILLIMETER);
-        }
+		final LabelNode detectorMeta = new LabelNode("Detector", root);
+		registerNode(detectorMeta);
+		detectorMeta.setDefaultExpanded(true);
 
-        final LabelNode pixel = new LabelNode("Pixel", detectorMeta);
-        registerNode(pixel);
-        
-        xPixelSize  = new NumericNode<Length>("x-size", pixel, SI.MILLIMETER);
-        registerNode(xPixelSize);
-        if (detprop!=null) {
-           	xPixelSize.setDefault(odetprop.getHPxSize(), SI.MILLIMETER);
-           	xPixelSize.setValue(detprop.getHPxSize(), SI.MILLIMETER);
-        	xPixelSize.addAmountListener(new AmountListener<Length>() {				
+		final NumericNode<Duration> exposure = new NumericNode<Duration>("Exposure Time", detectorMeta, SI.SECOND);
+		registerNode(exposure);
+		if (dce != null) {
+			exposure.setDefault(odce.getExposureTime(), SI.SECOND);
+			exposure.setValue(dce.getExposureTime(), SI.SECOND);
+		}
+
+		final LabelNode size = new LabelNode("Size", detectorMeta);
+		registerNode(size);
+		xSize = new NumericNode<Length>("x", size, SI.MILLIMETRE);
+		registerNode(xSize);
+		if (detprop != null) {
+			xSize.setDefault(odetprop.getDetectorSizeH(), SI.MILLIMETRE);
+			xSize.setValue(detprop.getDetectorSizeH(), SI.MILLIMETRE);
+		}
+		ySize = new NumericNode<Length>("y", size, SI.MILLIMETRE);
+		registerNode(ySize);
+		if (detprop != null) {
+			ySize.setDefault(odetprop.getDetectorSizeV(), SI.MILLIMETRE);
+			ySize.setValue(detprop.getDetectorSizeV(), SI.MILLIMETRE);
+		}
+
+		final LabelNode pixel = new LabelNode("Pixel", detectorMeta);
+		registerNode(pixel);
+
+		xPixelSize = new NumericNode<Length>("x-size", pixel, SI.MILLIMETRE);
+		registerNode(xPixelSize);
+		if (detprop != null) {
+			xPixelSize.setDefault(odetprop.getHPxSize(), SI.MILLIMETRE);
+			xPixelSize.setValue(detprop.getHPxSize(), SI.MILLIMETRE);
+			xPixelSize.addAmountListener(new AmountListener<Length>() {
 				@Override
 				public void amountChanged(AmountEvent<Length> evt) {
-					setXPixelSize(detprop,evt.getAmount());
+					setXPixelSize(detprop, evt.getAmount());
 				}
 			});
-        }
-        xPixelSize.setEditable(true);
-        xPixelSize.setIncrement(0.01);
-        xPixelSize.setFormat("#0.###");
-        xPixelSize.setLowerBound(0.001);
-        xPixelSize.setUpperBound(1000);
+		}
+		xPixelSize.setEditable(true);
+		xPixelSize.setIncrement(0.01);
+		xPixelSize.setFormat("#0.###");
+		xPixelSize.setLowerBound(0.001);
+		xPixelSize.setUpperBound(1000);
 
-        yPixelSize  = new NumericNode<Length>("y-size", pixel, SI.MILLIMETER);
-        registerNode(yPixelSize);
-        if (detprop!=null) {
-        	yPixelSize.setDefault(odetprop.getVPxSize(), SI.MILLIMETER);
-        	yPixelSize.setValue(detprop.getVPxSize(), SI.MILLIMETER);
-        	yPixelSize.addAmountListener(new AmountListener<Length>() {				
+		yPixelSize = new NumericNode<Length>("y-size", pixel, SI.MILLIMETRE);
+		registerNode(yPixelSize);
+		if (detprop != null) {
+			yPixelSize.setDefault(odetprop.getVPxSize(), SI.MILLIMETRE);
+			yPixelSize.setValue(detprop.getVPxSize(), SI.MILLIMETRE);
+			yPixelSize.addAmountListener(new AmountListener<Length>() {
 				@Override
 				public void amountChanged(AmountEvent<Length> evt) {
-					setYPixelSize(detprop,evt.getAmount());
+					setYPixelSize(detprop, evt.getAmount());
 				}
 			});
-        }
-        yPixelSize.setEditable(true);
-        yPixelSize.setIncrement(0.01);
-        yPixelSize.setFormat("#0.###");
-        yPixelSize.setLowerBound(0.001);
-        yPixelSize.setUpperBound(1000);
-        
-	    // Beam Centre
-        final LabelNode beamCen = new LabelNode("Beam Centre", detectorMeta);
-        beamCen.setTooltip("The beam centre is the intersection of the direct beam with the detector in terms of image coordinates. Can be undefined when there is no intersection.");
-        registerNode(beamCen);
-        beamCen.setDefaultExpanded(true);
+		}
+		yPixelSize.setEditable(true);
+		yPixelSize.setIncrement(0.01);
+		yPixelSize.setFormat("#0.###");
+		yPixelSize.setLowerBound(0.001);
+		yPixelSize.setUpperBound(1000);
 
-        beamX = new NumericNode<Length>("X", beamCen, SI.MILLIMETER);
-        registerNode(beamX);
-        beamX.setEditable(true);
+		// Beam Centre
+		final LabelNode beamCen = new LabelNode("Beam Centre", detectorMeta);
+		beamCen.setTooltip("The beam centre is the intersection of the direct beam with the detector in terms of image coordinates. Can be undefined when there is no intersection.");
+		registerNode(beamCen);
+		beamCen.setDefaultExpanded(true);
 
-        beamY = new NumericNode<Length>("Y", beamCen, SI.MILLIMETER);
-        registerNode(beamY);
-        beamY.setEditable(true);
+		beamX = new NumericNode<Length>("X", beamCen, SI.MILLIMETRE);
+		registerNode(beamX);
+		beamX.setEditable(true);
 
-        // Listeners
-        xpixel = setBeamCenterUnit(xPixelSize, beamX, "pixel");
-        xPixelSize.addAmountListener(new AmountListener<Length>() {		
+		beamY = new NumericNode<Length>("Y", beamCen, SI.MILLIMETRE);
+		registerNode(beamY);
+		beamY.setEditable(true);
+
+		// Listeners
+		xpixel = setBeamCenterUnit(xPixelSize, beamX, "pixel");
+		xPixelSize.addAmountListener(new AmountListener<Length>() {
 			@Override
 			public void amountChanged(AmountEvent<Length> evt) {
-		        xpixel = setBeamCenterUnit(xPixelSize, beamX, "pixel");
+				xpixel = setBeamCenterUnit(xPixelSize, beamX, "pixel");
 			}
 		});
-        
-        ypixel = setBeamCenterUnit(yPixelSize, beamY, "pixel");
-        yPixelSize.addAmountListener(new AmountListener<Length>() {		
+
+		ypixel = setBeamCenterUnit(yPixelSize, beamY, "pixel");
+		yPixelSize.addAmountListener(new AmountListener<Length>() {
 			@Override
 			public void amountChanged(AmountEvent<Length> evt) {
 				ypixel = setBeamCenterUnit(yPixelSize, beamY, "pixel");
 			}
 		});
 
-        final LabelNode normal = new LabelNode("Normal (Orientation)", detectorMeta);
-        normal.setTooltip("Detector orientation is defined by the normal to its face outward and towards the scattering sample. Rotations are centred on the beam centre");
-        registerNode(normal);
-        normal.setDefaultExpanded(true);
-        
-        final double[] oorientation = odetprop!=null ? odetprop.getNormalAnglesInDegrees() : null;
-        final double[] orientation  = detprop!=null  ? detprop.getNormalAnglesInDegrees()  : null;
+		final LabelNode normal = new LabelNode("Normal (Orientation)", detectorMeta);
+		normal.setTooltip("Detector orientation is defined by the normal to its face outward and towards the scattering sample. Rotations are centred on the beam centre");
+		registerNode(normal);
+		normal.setDefaultExpanded(true);
+
+		final double[] oorientation = odetprop != null ? odetprop.getNormalAnglesInDegrees() : null;
+		final double[] orientation = detprop != null ? detprop.getNormalAnglesInDegrees() : null;
 		yaw = createOrientationNode("Yaw", -180, 180, oorientation, orientation, 0, normal);
 		yaw.setTooltip("Rotation about vertical axis, in degrees (positive is to the right).");
 		pitch = createOrientationNode("Pitch", -90, 90, oorientation, orientation, 1, normal);
@@ -293,18 +294,18 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 	}
 
 	private void createIntensity() {
-	       // Pixel Info
-        final LabelNode pixelValue = new LabelNode("Intensity", root);
-        registerNode(pixelValue);
-        pixelValue.setDefaultExpanded(true);
-				                 
-        this.max  = new NumericNode<Dimensionless>("Visible Maximum", pixelValue, Dimensionless.UNIT);
-        registerNode(max);
-        this.min  = new NumericNode<Dimensionless>("Visible Minimum", pixelValue, Dimensionless.UNIT);
-        registerNode(min);
-        this.mean = new NumericNode<Dimensionless>("Mean", pixelValue, Dimensionless.UNIT);
-        registerNode(mean);
- 		
+		// Pixel Info
+		final LabelNode pixelValue = new LabelNode("Intensity", root);
+		registerNode(pixelValue);
+		pixelValue.setDefaultExpanded(true);
+
+		this.max = new NumericNode<Dimensionless>("Visible Maximum", pixelValue, Dimensionless.UNIT);
+		registerNode(max);
+		this.min = new NumericNode<Dimensionless>("Visible Minimum", pixelValue, Dimensionless.UNIT);
+		registerNode(min);
+		this.mean = new NumericNode<Dimensionless>("Mean", pixelValue, Dimensionless.UNIT);
+		registerNode(mean);
+
 	}
 
 	private void createExperimentalInfo(final DiffractionCrystalEnvironment dce,
@@ -351,29 +352,28 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 				}
 			}
 		});
-        
-        //Moved node SCI-775
-        dist = new NumericNode<Length>("Distance", experimentalInfo, SI.MILLIMETER);
-        dist.setTooltip("Distance from sample to beam centre");
-        registerNode(dist);
-        if (detprop!=null) {
-        	dist.setDefault(odetprop.getBeamCentreDistance(), SI.MILLIMETER);
-        	dist.setValue(detprop.getBeamCentreDistance(), SI.MILLIMETER);
-            dist.addAmountListener(new AmountListener<Length>() {
-    			@Override
-    			public void amountChanged(AmountEvent<Length> evt) {
-    				setDistance(detprop, evt.getAmount());
-    			}
-    		});
-        }
-        dist.setEditable(true);
 
-        dist.setIncrement(0.01);
-        dist.setFormat("#0.##");
-        dist.setLowerBound(0);
-        dist.setUpperBound(1000000);
-        dist.setUnits(SI.MILLIMETER, SI.CENTIMETER, SI.METER);
-     
+		// Moved node SCI-775
+		dist = new NumericNode<Length>("Distance", experimentalInfo, SI.MILLIMETRE);
+		dist.setTooltip("Distance from sample to beam centre");
+		registerNode(dist);
+		if (detprop != null) {
+			dist.setDefault(odetprop.getBeamCentreDistance(), SI.MILLIMETRE);
+			dist.setValue(detprop.getBeamCentreDistance(), SI.MILLIMETRE);
+			dist.addAmountListener(new AmountListener<Length>() {
+				@Override
+				public void amountChanged(AmountEvent<Length> evt) {
+					setDistance(detprop, evt.getAmount());
+				}
+			});
+		}
+		dist.setEditable(true);
+		dist.setIncrement(0.01);
+		dist.setFormat("#0.##");
+		dist.setLowerBound(0);
+		dist.setUpperBound(1000000);
+		dist.setUnits(SI.MILLIMETRE, SI.CENTIMETRE, SI.METRE);
+
         NumericNode<Angle> start = new NumericNode<Angle>("Oscillation Start", experimentalInfo, NonSI.DEGREE_ANGLE);
         registerNode(start);
         if (dce!=null)  {
@@ -434,7 +434,7 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 		final double[] beamCen = dce.getBeamCentreCoords();
 		return Amount.valueOf(beamCen[0], xpixel);
 	}
-	
+
 	private Amount<Length> getBeamY(DetectorProperties dce) {
 		final double[] beamCen = dce.getBeamCentreCoords();
 		return Amount.valueOf(beamCen[1], ypixel);
@@ -444,67 +444,70 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 		final double[] beamCen = dce.getBeamCentreCoords();
 		beamCen[0] = beamX.doubleValue(xpixel);
 		try {
-			canUpdate  = false;
+			canUpdate = false;
 			dce.setBeamCentreCoords(beamCen);
 		} finally {
-			canUpdate  = true;
+			canUpdate = true;
 		}
 	}
+
 	private void setBeamY(DetectorProperties dce, Amount<Length> beamY) {
 		final double[] beamCen = dce.getBeamCentreCoords();
 		beamCen[1] = beamY.doubleValue(ypixel);
 		try {
-			canUpdate  = false;
+			canUpdate = false;
 			dce.setBeamCentreCoords(beamCen);
 		} finally {
-			canUpdate  = true;
+			canUpdate = true;
 		}
 	}
-	
+
 	private void setDistance(DetectorProperties dce, Amount<Length> distAmount) {
-		double beamDist = distAmount.doubleValue(SI.MILLIMETER);
+		double beamDist = distAmount.doubleValue(SI.MILLIMETRE);
 		try {
-			canUpdate  = false;
+			canUpdate = false;
 			dce.setBeamCentreDistance(beamDist);
 		} finally {
-			canUpdate  = true;
+			canUpdate = true;
 		}
 	}
-	
+
 	private void setYPixelSize(DetectorProperties dce, Amount<Length> pixAmount) {
-		double yPixel = pixAmount.doubleValue(SI.MILLIMETER);
+		double yPixel = pixAmount.doubleValue(SI.MILLIMETRE);
 		try {
-			canUpdate  = false;
+			canUpdate = false;
 			dce.setVPxSize(yPixel);
-			ySize.setValue(dce.getDetectorSizeV(), SI.MILLIMETER);
-			if (viewer!=null) viewer.update(ySize,null);
+			ySize.setValue(dce.getDetectorSizeV(), SI.MILLIMETRE);
+			if (viewer != null)
+				viewer.update(ySize, null);
 		} finally {
-			canUpdate  = true;
+			canUpdate = true;
 		}
 	}
-	
+
 	private void setXPixelSize(DetectorProperties dce, Amount<Length> pixAmount) {
-		double xPixel = pixAmount.doubleValue(SI.MILLIMETER);
+		double xPixel = pixAmount.doubleValue(SI.MILLIMETRE);
 		try {
-			canUpdate  = false;
+			canUpdate = false;
 			dce.setHPxSize(xPixel);
-			xSize.setValue(dce.getDetectorSizeH(), SI.MILLIMETER);
-			if (viewer!=null) viewer.update(xSize,null);
+			xSize.setValue(dce.getDetectorSizeH(), SI.MILLIMETRE);
+			if (viewer != null)
+				viewer.update(xSize, null);
 		} finally {
-			canUpdate  = true;
+			canUpdate = true;
 		}
 	}
-	
+
 	private void setWavelength(DiffractionCrystalEnvironment dce) {
 		double wave = lambda.getValue(NonSI.ANGSTROM);
 		try {
-			canUpdate  = false;
+			canUpdate = false;
 			dce.setWavelength(wave);
 		} finally {
-			canUpdate  = true;
+			canUpdate = true;
 		}
 	}
-	
+
 	private IDetectorPropertyListener detectorListener;
 	private boolean					  canUpdate = true;
 	private void createDetectorListener(final DetectorProperties detprop) {
@@ -528,16 +531,16 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 					}
 				}
 				if (evt.hasOriginChanged()) {
-					dist.setValueQuietly(detprop.getBeamCentreDistance(), SI.MILLIMETER);
+					dist.setValueQuietly(detprop.getBeamCentreDistance(), SI.MILLIMETRE);
 					updateBeamCentre(detprop);
 					if (viewer!=null) viewer.refresh(dist);
 				}
 				if (evt.hasHPxSizeChanged()) {
-					xPixelSize.setValueQuietly(detprop.getVPxSize(), SI.MILLIMETER);
+					xPixelSize.setValueQuietly(detprop.getVPxSize(), SI.MILLIMETRE);
 					if (viewer!=null) viewer.refresh(xPixelSize);
 				}
 				if (evt.hasVPxSizeChanged()) {
-					yPixelSize.setValueQuietly(detprop.getVPxSize(), SI.MILLIMETER);
+					yPixelSize.setValueQuietly(detprop.getVPxSize(), SI.MILLIMETRE);
 					if (viewer!=null) viewer.refresh(yPixelSize);
 				}
 			}
@@ -593,12 +596,13 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 	protected Unit<Length> setBeamCenterUnit(NumericNode<Length> size,
 			                                 NumericNode<Length> coord,
 			                                 String unitName) {
-		
-        Unit<Length> unit = SI.MILLIMETER.times(size.getValue(SI.MILLIMETER));
-        UnitFormat.getInstance().label(unit, unitName);
-        coord.setUnits(SI.MILLIMETER, unit);
-        if (viewer!=null) viewer.update(coord, new String[]{"Value","Unit"});
-        return unit;
+
+		Unit<Length> unit = SI.MILLIMETRE.times(size.getValue(SI.MILLIMETRE));
+		UnitFormat.getInstance().label(unit, unitName);
+		coord.setUnits(SI.MILLIMETRE, unit);
+		if (viewer != null)
+			viewer.update(coord, new String[] { "Value", "Unit" });
+		return unit;
 	}
 
 	public void setIntensityValues(IImageTrace image) throws Exception {

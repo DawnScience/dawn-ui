@@ -467,9 +467,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	private Action     calPref;
 
 	private Action refine;
-
 	private Action findMore;
-
 	private Action calibrate;
 	private static Action lock;
 	
