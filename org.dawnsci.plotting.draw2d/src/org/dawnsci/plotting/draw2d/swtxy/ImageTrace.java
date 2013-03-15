@@ -613,7 +613,6 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		if (scaledImage!=null)      scaledImage.dispose();
 		if (paletteListeners!=null) paletteListeners.clear();
 		if (downsampleListeners!=null) downsampleListeners.clear();
-		if (intensityScale!=null)   intensityScale.dispose();
 		paletteListeners = null;
         clearAspect(xAxis);
         clearAspect(yAxis);
@@ -629,6 +628,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		if (this.scaledImage!=null && !scaledImage.isDisposed()) scaledImage.dispose();
 		imageServiceBean = null;
 		service = null;
+		intensityScale = null;
 	}
 
 	private void clearAspect(Axis axis) {
