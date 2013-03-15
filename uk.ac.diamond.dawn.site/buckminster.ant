@@ -186,8 +186,7 @@ Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blo
             </patternset>
             <mapper type="glob" from="lib/${product.os}-${product.arch}/*" to="*"/>
         </unjar>
-        <concat destfile="README">
-The contents of this directory are specified by the lib.copy.* entries in buckminster.properties file in the .site project for this product
+        <concat destfile="${lib_root}/README">The contents of this directory are specified by the lib.copy.* entries in buckminster.properties file in the .site project for this product
 The actual copy operation is done by the buckminster.ant file in the .site project for this product
 </concat>
     </target>
