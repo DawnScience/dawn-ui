@@ -92,6 +92,9 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 			if (lineTrace.getTraceColor()!=null) {
 				bean.setPlotColour(lineTrace.getTraceColor().getRGB());
 			}
+			if (lineTrace.getUserObject()!=null && lineTrace.getUserObject() instanceof String) {
+				bean.setVariable((String)lineTrace.getUserObject());
+			}
 			
 			bean.setPlotName(getPlottingSystem().getPlotName());
 		    if (isLinkedToolPage()) {
@@ -176,13 +179,13 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 
 		var = new TableViewerColumn(viewer, SWT.CENTER, 1);
 		var.getColumn().setText("Name");
-		var.getColumn().setWidth(200);
+		var.getColumn().setWidth(140);
 		var.setLabelProvider(new HistoryLabelProvider());
 		var.setEditingSupport(new HistoryEditingSupport(viewer));
 		
 		var = new TableViewerColumn(viewer, SWT.CENTER, 2);
 		var.getColumn().setText("Original Plot");
-		var.getColumn().setWidth(200);
+		var.getColumn().setWidth(140);
 		var.setLabelProvider(new HistoryLabelProvider());
 
 		var = new TableViewerColumn(viewer, SWT.CENTER, 3);

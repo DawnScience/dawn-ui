@@ -26,6 +26,7 @@ import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingFactory;
 import org.dawb.common.ui.plot.axis.IAxis;
 import org.dawb.common.ui.plot.tool.IToolPageSystem;
+import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.slicing.SliceComponent;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.util.GridUtils;
@@ -366,8 +367,9 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 			}
 			
 			if (sels.isEmpty() || (!plottingSystem.isXfirst() && sels.size()==1)) {
-		        plottingSystem.createPlot1D(x, Arrays.asList(data), getEditorInput().getName(), monitor);
-		        return;
+				final List<ITrace> traces = plottingSystem.createPlot1D(x, Arrays.asList(data), getEditorInput().getName(), monitor);
+		        sync(sels,traces);
+				return;
 			}
 
             final Map<Integer,List<AbstractDataset>> ys = sels.isEmpty()
@@ -384,11 +386,13 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
         	   }
             }
 
+    		final List<ITrace> traces = new ArrayList<ITrace>();
             Display.getDefault().syncExec(new Runnable() {
             	public void run() {
-            		createPlotSeparateAxes(x,ys,monitor);
+            		traces.addAll(createPlotSeparateAxes(x,ys,monitor));
             	}
             });
+	        sync(sels,traces);
 
 		}
 		
@@ -398,9 +402,23 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		monitor.done();
 	}
 
-	protected void createPlotSeparateAxes(final AbstractDataset                    x,
+	private void sync(List<CheckableObject> sels, List<ITrace> traces) {
+		if (sels==null || traces==null) return ;
+		if (sels.size() == traces.size()) {
+			for (int i = 0; i < sels.size(); i++) {
+				if (traces.get(i).getUserObject()==null || traces.get(i).getUserObject() instanceof String) {
+					traces.get(i).setUserObject(sels.get(i).getVariable());
+				}
+			}
+		}
+		
+	}
+
+	protected List<ITrace> createPlotSeparateAxes(final AbstractDataset                    x,
 			                              final Map<Integer,List<AbstractDataset>> ys,
 			                              final IProgressMonitor                   monitor) {
+		
+		List<ITrace> traces = new ArrayList<ITrace>();
 		try {
 			for (int i = 1; i <= 4; i++) {
 				final IAxis axis = axisMap.get(i);
@@ -412,8 +430,9 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 				axis.setVisible(true);
 				plottingSystem.setSelectedYAxis(axis);	
 
-				plottingSystem.createPlot1D(x, ys.get(i), getEditorInput().getName(), monitor);
+				traces.addAll(plottingSystem.createPlot1D(x, ys.get(i), getEditorInput().getName(), monitor));
 			} 
+			return traces;
 		} finally {
 			plottingSystem.setSelectedYAxis(axisMap.get(1));
 		}

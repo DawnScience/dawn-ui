@@ -12,9 +12,12 @@ import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.wizard.persistence.PersistenceExportWizard;
+import org.dawnsci.common.widgets.tree.ColorNode;
+import org.dawnsci.common.widgets.tree.LabelNode;
 import org.dawnsci.plotting.Activator;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.MenuManager;
@@ -36,13 +39,19 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.graphics.Region;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
@@ -167,6 +176,76 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 
 		viewer.getTable().addMouseListener(this);
 		viewer.getTable().addKeyListener(this);
+		
+		
+		// Allow the colours to be drawn nicely.
+		final Table table = viewer.getTable();
+		table.addListener(SWT.EraseItem, new Listener() {
+			public void handleEvent(Event event) {
+				if ((event.detail & SWT.SELECTED) != 0) {
+					GC gc = event.gc;
+					Rectangle area = table.getClientArea();
+					/*
+					 * If you wish to paint the selection beyond the end of last column,
+					 * you must change the clipping region.
+					 */
+					int columnCount = table.getColumnCount();
+					if (event.index == columnCount - 1 || columnCount == 0) {
+						int width = area.x + area.width - event.x;
+						if (width > 0) {
+							Region region = new Region();
+							gc.getClipping(region);
+							region.add(event.x, event.y, width, event.height);
+							gc.setClipping(region);
+							region.dispose();
+						}
+					}
+					gc.setAdvanced(true);
+					if (gc.getAdvanced()) gc.setAlpha(50);
+					Rectangle rect = event.getBounds();
+					Color foreground = gc.getForeground();
+					Color background = gc.getBackground();
+					gc.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_SELECTION));
+					gc.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+					gc.fillGradientRectangle(0, rect.y, 500, rect.height, false);
+
+					final TableItem item = table.getItem(new Point(event.x, event.y));
+					// Draw the colour in the Value column
+					if (item!=null && item.getData() instanceof ColorNode) {
+						gc.setAlpha(255);
+						Rectangle col = item.getBounds(1);
+						ColorNode cn = (ColorNode)item.getData();
+						gc.setBackground(cn.getColor());
+						gc.fillRectangle(col);
+					}
+
+					// restore colors for subsequent drawing
+					gc.setForeground(foreground);
+					gc.setBackground(background);
+					event.detail &= ~SWT.SELECTED;
+					return;
+				}
+				
+				if ((event.detail & SWT.HOT) != 0) {
+					final TableItem item = table.getItem(new Point(event.x, event.y));
+					// Draw the colour in the Value column
+					if (item!=null && item.getData() instanceof LabelNode) {
+						LabelNode ln = (LabelNode)item.getData();
+						GC gc = event.gc;
+						Color foreground = gc.getForeground();
+						Color background = gc.getBackground();
+						gc.setAdvanced(true);
+						gc.setForeground(ColorConstants.black);
+						gc.drawText(ln.getLabel(), item.getBounds().x+2, item.getBounds().y+1);
+						event.doit = false;
+						event.detail &= ~SWT.HOT;
+						gc.setForeground(foreground);
+						gc.setBackground(background);
+					}
+				}
+			}
+		});
+
 	}
 	
 	private class VariableNameEditingSupport extends EditingSupport {
