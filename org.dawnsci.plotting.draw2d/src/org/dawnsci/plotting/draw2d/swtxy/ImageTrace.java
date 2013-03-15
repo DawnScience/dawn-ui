@@ -424,6 +424,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			}
 
 			return true;
+		} catch (java.lang.NegativeArraySizeException allowed) {
+			return false;
+			
 		} catch (NullPointerException ne) {
 			throw ne;
 		} catch (Throwable ne) {
@@ -610,6 +613,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		if (scaledImage!=null)      scaledImage.dispose();
 		if (paletteListeners!=null) paletteListeners.clear();
 		if (downsampleListeners!=null) downsampleListeners.clear();
+		if (intensityScale!=null)   intensityScale.dispose();
 		paletteListeners = null;
         clearAspect(xAxis);
         clearAspect(yAxis);
