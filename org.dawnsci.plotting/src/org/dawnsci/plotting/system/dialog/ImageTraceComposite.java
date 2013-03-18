@@ -178,6 +178,7 @@ public class ImageTraceComposite extends Composite {
 		if (imageTrace.getImageServiceBean()!=null) lo.setValue(imageTrace.getImageServiceBean().getLo());
 		lo.setActive(true);
 		lo.on();
+		lo.setDecimalPlaces(3);
 		lo.setUnit("%");
 		lo.addValueListener(new ValueAdapter() {		
 			@Override
@@ -204,6 +205,7 @@ public class ImageTraceComposite extends Composite {
 		
 		this.hi = new ScaleBox(outlierComp, SWT.NONE);
 		hi.setUnit("%");
+		hi.setDecimalPlaces(3);
 		hi.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 		if (imageTrace.getImageServiceBean()!=null) hi.setValue(imageTrace.getImageServiceBean().getHi());
 		hi.setActive(true);
