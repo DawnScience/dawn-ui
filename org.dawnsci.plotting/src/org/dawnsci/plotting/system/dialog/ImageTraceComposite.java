@@ -187,7 +187,8 @@ public class ImageTraceComposite extends Composite {
 				try {
 					HistoType type = HistoType.values()[histoChoice.getSelectionIndex()];
 					imageTrace.getImageServiceBean().setLo(lo.getNumericValue());
-					imageTrace.setHistoType(type);
+					boolean ok = imageTrace.setHistoType(type);
+					if (!ok) throw new Exception("Histo not working!");
 					getPreferenceStore().setValue(BasePlottingConstants.HISTO_LO, lo.getNumericValue());
 					maximum.setNumericValue(imageTrace.getMax().doubleValue());
 					minimum.setNumericValue(imageTrace.getMin().doubleValue());
@@ -215,7 +216,8 @@ public class ImageTraceComposite extends Composite {
 				try {
 					HistoType type = HistoType.values()[histoChoice.getSelectionIndex()];
 					imageTrace.getImageServiceBean().setHi(hi.getNumericValue());
-					imageTrace.setHistoType(type);
+					boolean ok = imageTrace.setHistoType(type);
+					if (!ok) throw new Exception("Histo not working!");
 					getPreferenceStore().setValue(BasePlottingConstants.HISTO_HI, hi.getNumericValue());
 					maximum.setNumericValue(imageTrace.getMax().doubleValue());
 					minimum.setNumericValue(imageTrace.getMin().doubleValue());

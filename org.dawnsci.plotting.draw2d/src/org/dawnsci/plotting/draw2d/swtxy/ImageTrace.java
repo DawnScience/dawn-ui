@@ -1037,12 +1037,13 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 * Sets the histo type.
 	 */
 	@Override
-	public void setHistoType(HistoType type) {
-		if (imageServiceBean==null) return;
+	public boolean setHistoType(HistoType type) {
+		if (imageServiceBean==null) return false;
 		imageServiceBean.setHistogramType(type);
 		getPreferenceStore().setValue(BasePlottingConstants.HISTO_PREF, type.getLabel());
-		createScaledImage(ImageScaleType.REHISTOGRAM, null);
+		boolean histoOk = createScaledImage(ImageScaleType.REHISTOGRAM, null);
 		repaint();
+		return histoOk;
 	}
 
 	@Override
