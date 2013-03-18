@@ -49,7 +49,7 @@ public class EditorStressTest {
 		EclipseUtils.delay(1000);
 		long size2 = Runtime.getRuntime().freeMemory();
 		if (size1-size2 > 10000) throw new Exception("The memory leak was "+(size1-size2)+"b which is too large!");
-	    System.out.println(">>>>> 25 editors had a memory leak of "+(size1-size2)+"b compared to open editor.");
+	    System.out.println("Testing many editors for a memory leak pass. They had a memory leak of "+(size1-size2)+"b compared to open editor.");
 	}
 	
 	@Test
