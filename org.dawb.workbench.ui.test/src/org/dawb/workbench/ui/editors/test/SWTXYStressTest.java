@@ -168,7 +168,7 @@ public class SWTXYStressTest {
 		sys.addTrace(trace);
 
 		System.gc();
-		long sizeStart = Runtime.getRuntime().totalMemory();
+		long sizeStart = Runtime.getRuntime().freeMemory();
 				
         for (int i = 0; i < 1000; i++) { // TODO should be larger
 			
@@ -190,8 +190,8 @@ public class SWTXYStressTest {
 		System.gc();
 		EclipseUtils.delay(1000);
 		
-		long sizeEnd = Runtime.getRuntime().totalMemory();
-        if ((sizeEnd-sizeStart)>10000) throw new Exception("Unexpected memory leak - "+(sizeEnd-sizeStart));
+		long sizeEnd = Runtime.getRuntime().freeMemory();
+        if ((sizeStart-sizeEnd)>10000) throw new Exception("Unexpected memory leak - "+(sizeStart-sizeEnd));
 	} 
 
 	@Test
@@ -216,7 +216,7 @@ public class SWTXYStressTest {
 		final IImageTrace          imt = (IImageTrace)traces.iterator().next();
 
 		System.gc();
-		long sizeStart = Runtime.getRuntime().totalMemory();
+		long sizeStart = Runtime.getRuntime().freeMemory();
 
         for (int i = 0; i < 1000; i++) {
 			
@@ -240,8 +240,8 @@ public class SWTXYStressTest {
 		System.gc();
 		EclipseUtils.delay(1000);
 		
-		long sizeEnd = Runtime.getRuntime().totalMemory();
-        if ((sizeEnd-sizeStart)>10000) throw new Exception("Unexpected memory leak - "+(sizeEnd-sizeStart));
+		long sizeEnd = Runtime.getRuntime().freeMemory();
+		if ((sizeStart-sizeEnd)>10000) throw new Exception("Unexpected memory leak - "+(sizeStart-sizeEnd));
 		
 	}
 
