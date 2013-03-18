@@ -276,7 +276,6 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 
 			verticalProfileROIWidget = new ROIWidget(verticalProfileComposite, verticalProfilePlottingSystem, "Left/Right region editor");
 			verticalProfileROIWidget.setIsProfile(true);
-			verticalProfileROIWidget.showSumMinMax(false);
 			verticalProfileROIWidget.createWidget();
 			verticalProfileROIWidget.addSelectionChangedListener(new ISelectionChangedListener() {
 				@Override
@@ -305,7 +304,6 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 
 			horizontalProfileROIWidget = new ROIWidget(horizontalProfileComposite, horizontalProfilePlottingSystem, "Bottom/Up region editor");
 			horizontalProfileROIWidget.setIsProfile(true);
-			horizontalProfileROIWidget.showSumMinMax(false);
 			horizontalProfileROIWidget.createWidget();
 			horizontalProfileROIWidget.addSelectionChangedListener(new ISelectionChangedListener() {
 				@Override
