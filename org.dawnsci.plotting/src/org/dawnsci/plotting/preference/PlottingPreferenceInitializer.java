@@ -36,8 +36,8 @@ public class PlottingPreferenceInitializer extends AbstractPreferenceInitializer
 		store.setDefault(PlottingConstants.HISTO ,          false);
 		store.setDefault(PlottingConstants.DOWNSAMPLE_PREF, DownsampleType.MAXIMUM.getLabel());
 		store.setDefault(PlottingConstants.HISTO_PREF ,     HistoType.MEAN.getLabel());
-		store.setDefault(PlottingConstants.HISTO_LO ,       10.0);
-		store.setDefault(PlottingConstants.HISTO_HI ,       90.0);
+		store.setDefault(PlottingConstants.HISTO_LO ,       00.01);
+		store.setDefault(PlottingConstants.HISTO_HI ,       99.99);
 		store.setDefault(PlottingConstants.MIN_CUT,         HistogramBound.DEFAULT_MINIMUM.toString());
 		store.setDefault(PlottingConstants.MAX_CUT,         HistogramBound.DEFAULT_MAXIMUM.toString());
 		store.setDefault(PlottingConstants.NAN_CUT,         HistogramBound.DEFAULT_NAN.toString());
