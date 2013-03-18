@@ -74,7 +74,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	private Axis             yAxis;
 	private ColorMapRamp     intensityScale;
 	private AbstractDataset  image;
-	private DownsampleType   downsampleType=DownsampleType.MEAN;
+	private DownsampleType   downsampleType=DownsampleType.MAXIMUM;
 	private int              currentDownSampleBin=-1;
 	private List<AbstractDataset> axes;
 	private ImageServiceBean imageServiceBean;
@@ -106,8 +106,11 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		imageServiceBean.setMinimumCutBound(HistogramBound.fromString(getPreferenceStore().getString(BasePlottingConstants.MIN_CUT)));
 		imageServiceBean.setMaximumCutBound(HistogramBound.fromString(getPreferenceStore().getString(BasePlottingConstants.MAX_CUT)));
 		imageServiceBean.setNanBound(HistogramBound.fromString(getPreferenceStore().getString(BasePlottingConstants.NAN_CUT)));
+		imageServiceBean.setLo(getPreferenceStore().getDouble(BasePlottingConstants.HISTO_LO));
+		imageServiceBean.setHi(getPreferenceStore().getDouble(BasePlottingConstants.HISTO_HI));		
 		
 		this.service = (IImageService)PlatformUI.getWorkbench().getService(IImageService.class);
+		downsampleType = DownsampleType.forLabel(getPreferenceStore().getString(BasePlottingConstants.DOWNSAMPLE_PREF));
 
 		xAxis.addListener(this);
 		yAxis.addListener(this);
@@ -984,6 +987,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		if (this.mipMap!=null) mipMap.clear();
 		this.downsampleType = type;
 		createScaledImage(ImageScaleType.FORCE_REIMAGE, null);
+		getPreferenceStore().setValue(BasePlottingConstants.DOWNSAMPLE_PREF, type.getLabel());
 		repaint();
 	}
 

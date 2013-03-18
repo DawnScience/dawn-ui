@@ -81,7 +81,7 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
 			imageTraceCombo.select(0); // Normally only 1!
 
 			final Composite traceConfigComposite = new Composite(traceTabComposite, SWT.NONE);
-			traceConfigComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			traceConfigComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			final StackLayout traceStackLayout = new StackLayout();
 			traceConfigComposite.setLayout(traceStackLayout);  
 			

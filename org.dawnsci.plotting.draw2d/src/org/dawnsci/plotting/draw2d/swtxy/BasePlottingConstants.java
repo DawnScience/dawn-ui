@@ -40,10 +40,24 @@ public class BasePlottingConstants {
 	public static final String HISTO = "org.dawb.plotting.system.rehistogram";
 
 	/**
-	 * Used to store origin preference
+	 * Used to store histo preference
 	 */
 	public static final String HISTO_PREF = "org.dawb.plotting.system.histogram.type";
 
+	/**
+	 * 
+	 */
+	public static final String HISTO_LO = "org.dawb.plotting.system.histogram.lo";
+	
+	/**
+	 * 
+	 */
+	public static final String HISTO_HI = "org.dawb.plotting.system.histogram.hi";
+
+	/**
+	 * Used to store downsample preference
+	 */
+	public static final String DOWNSAMPLE_PREF = "org.dawb.plotting.system.downsample.type";
 	
 	
 	/**

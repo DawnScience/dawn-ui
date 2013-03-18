@@ -2,48 +2,55 @@ package org.dawnsci.plotting.system.dialog;
 
 import java.util.Arrays;
 
-import org.dawb.common.services.ImageServiceBean.HistoType;
 import org.dawb.common.services.HistogramBound;
+import org.dawb.common.services.ImageServiceBean.HistoType;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.IImageTrace.DownsampleType;
+import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.plotting.Activator;
+import org.dawnsci.plotting.draw2d.swtxy.BasePlottingConstants;
 import org.dawnsci.plotting.util.ColorUtility;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.ColorSelector;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
-
+import uk.ac.diamond.scisoft.analysis.dataset.RGBDataset;
+import uk.ac.gda.richbeans.components.scalebox.NumberBox;
+import uk.ac.gda.richbeans.components.scalebox.ScaleBox;
+import uk.ac.gda.richbeans.event.ValueAdapter;
+import uk.ac.gda.richbeans.event.ValueEvent;
 /**
  * TODO Replace with alternate widget library.
  */
-import uk.ac.gda.richbeans.components.scalebox.NumberBox;
-import uk.ac.gda.richbeans.components.scalebox.ScaleBox;
 
 public class ImageTraceComposite extends Composite {
 	
 	private static final Logger logger = LoggerFactory.getLogger(ImageTraceComposite.class);
 
 	private IImageTrace   imageTrace;
-	private NumberBox     maximum, minimum, minCut, maxCut;
+	private NumberBox     maximum, minimum, minCut, maxCut, lo, hi;
 	private CCombo        downsampleChoice, histoChoice;
 	private Text          nameText;
     private ColorSelector minCutColor, maxCutColor, nanColor;
@@ -125,9 +132,9 @@ public class ImageTraceComposite extends Composite {
 		downsampleChoice.setToolTipText("The algorithm used when downsampling the full image for display.");
 		downsampleChoice.select(imageTrace.getDownsampleType().getIndex());
 		
-		label = new Label(group, SWT.NONE);
-		label.setText("Histogram Type");
-		label.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1));
+		Label histolabel = new Label(group, SWT.NONE);
+		histolabel.setText("Histogram Type");
+		histolabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1));
 		
 		this.histoChoice = new CCombo(group, SWT.READ_ONLY);
 		histoChoice.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
@@ -136,6 +143,11 @@ public class ImageTraceComposite extends Composite {
 		}
 		histoChoice.setToolTipText("The algorithm used when histogramming the downsampled image.\nNOTE: median is much slower. If you change this, max and min will be recalculated.");
 		histoChoice.select(imageTrace.getHistoType().getIndex());
+		
+		final Composite outlierComp = new Composite(group, SWT.NONE);
+		outlierComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+		outlierComp.setLayout(new GridLayout(2, false));
+
 		histoChoice.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -145,8 +157,87 @@ public class ImageTraceComposite extends Composite {
 					maximum.setNumericValue(imageTrace.getMax().doubleValue());
 					minimum.setNumericValue(imageTrace.getMin().doubleValue());
 				}
+				GridUtils.setVisible(outlierComp, type==HistoType.OUTLIER_VALUES);
+				outlierComp.getParent().layout(new Control[]{outlierComp});
+				layout();
+				getParent().layout(new Control[]{ImageTraceComposite.this});
+				getShell().layout();
 			}
 		});
+
+		if (imageTrace.getData() instanceof RGBDataset) {
+			histoChoice.setEnabled(false);
+		}
+		
+		label = new Label(outlierComp, SWT.NONE);
+		label.setText("Outlier low");
+		label.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false, 1, 1));
+		
+		this.lo = new ScaleBox(outlierComp, SWT.NONE);
+		lo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
+		if (imageTrace.getImageServiceBean()!=null) lo.setValue(imageTrace.getImageServiceBean().getLo());
+		lo.setActive(true);
+		lo.on();
+		lo.setUnit("%");
+		lo.addValueListener(new ValueAdapter() {		
+			@Override
+			public void valueChangePerformed(ValueEvent e) {
+				if (!lo.isValidBounds()) return;
+				final double orig = imageTrace.getImageServiceBean().getLo();
+				try {
+					HistoType type = HistoType.values()[histoChoice.getSelectionIndex()];
+					imageTrace.getImageServiceBean().setLo(lo.getNumericValue());
+					imageTrace.setHistoType(type);
+					getPreferenceStore().setValue(BasePlottingConstants.HISTO_LO, lo.getNumericValue());
+					maximum.setNumericValue(imageTrace.getMax().doubleValue());
+					minimum.setNumericValue(imageTrace.getMin().doubleValue());
+				} catch (Throwable ne) {
+					imageTrace.getImageServiceBean().setLo(orig);
+				}
+			}
+		});
+
+		label = new Label(outlierComp, SWT.NONE);
+		label.setText("Outlier high");
+		label.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false, 1, 1));
+		
+		this.hi = new ScaleBox(outlierComp, SWT.NONE);
+		hi.setUnit("%");
+		hi.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
+		if (imageTrace.getImageServiceBean()!=null) hi.setValue(imageTrace.getImageServiceBean().getHi());
+		hi.setActive(true);
+		hi.on();
+		hi.addValueListener(new ValueAdapter() {		
+			@Override
+			public void valueChangePerformed(ValueEvent e) {
+				if (!hi.isValidBounds()) return;
+				final double orig = imageTrace.getImageServiceBean().getHi();
+				try {
+					HistoType type = HistoType.values()[histoChoice.getSelectionIndex()];
+					imageTrace.getImageServiceBean().setHi(hi.getNumericValue());
+					imageTrace.setHistoType(type);
+					getPreferenceStore().setValue(BasePlottingConstants.HISTO_HI, hi.getNumericValue());
+					maximum.setNumericValue(imageTrace.getMax().doubleValue());
+					minimum.setNumericValue(imageTrace.getMin().doubleValue());
+				} catch (Throwable ne) {
+					imageTrace.getImageServiceBean().setHi(orig);
+				}
+			}
+		});
+      		
+		hi.setMaximum(100);
+		hi.setMinimum(lo);
+		lo.setMaximum(hi);
+		lo.setMinimum(0);
+		
+		if (imageTrace.getData() instanceof RGBDataset) {
+			histolabel.setEnabled(false);
+			histoChoice.setEnabled(false);
+			hi.setEnabled(false);
+			lo.setEnabled(false);
+		}
+
+		GridUtils.setVisible(outlierComp, imageTrace.getHistoType()==HistoType.OUTLIER_VALUES);
 		
 		if (plottingSystem!=null) {
 			label = new Label(group, SWT.NONE);
@@ -269,6 +360,14 @@ public class ImageTraceComposite extends Composite {
 		maxCut.checkBounds();
 		minimum.getControl().setForeground(Display.getDefault().getSystemColor(SWT.COLOR_BLACK));
 	}
+	
+	private IPreferenceStore store;
+	private IPreferenceStore getPreferenceStore() {
+		if (store!=null) return store;
+		store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
+		return store;
+	}
+
 
 	public void applyChanges() {
 
