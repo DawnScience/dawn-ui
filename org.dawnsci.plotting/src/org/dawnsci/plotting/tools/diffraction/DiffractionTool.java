@@ -968,7 +968,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			npts = efroi.getPoints().getNumberOfPoints(); 
 		} while (lpts > npts);
 
-		final ROIBase froi = circle ? new CircularFitROI(efroi.getPoints()) : efroi.getPoints();
+		final ROIBase froi = circle ? new CircularFitROI(efroi.getPoints()) : efroi;
 		monitor.worked(1);
 		logger.debug("{} from peaks: {}", shape, froi);
 

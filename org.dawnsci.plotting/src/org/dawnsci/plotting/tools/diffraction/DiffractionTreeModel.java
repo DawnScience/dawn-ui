@@ -527,7 +527,7 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 						viewer.update(new Object[] {yaw, pitch, roll}, null);
 					}
 				} else if (evt.hasBeamCentreChanged()) {
-						updateBeamCentre(detprop);
+					updateBeamCentre(detprop);
 				}
 				if (evt.hasOriginChanged()) {
 					dist.setValueQuietly(detprop.getBeamCentreDistance(), SI.MILLIMETRE);
