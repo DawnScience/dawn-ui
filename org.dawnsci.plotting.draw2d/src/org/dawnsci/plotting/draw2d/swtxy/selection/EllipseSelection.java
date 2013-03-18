@@ -46,11 +46,11 @@ import org.eclipse.swt.widgets.Display;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
-public class EllipseSelection extends AbstractSelectionRegion {
+class EllipseSelection extends AbstractSelectionRegion {
 
 	DecoratedEllipse ellipse;
 
-	public EllipseSelection(String name, ICoordinateSystem coords) {
+	EllipseSelection(String name, ICoordinateSystem coords) {
 		super(name, coords);
 		setRegionColor(ColorConstants.lightGreen);
 		setAlpha(80);
