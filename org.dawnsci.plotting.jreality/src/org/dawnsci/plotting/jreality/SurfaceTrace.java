@@ -206,4 +206,14 @@ public class SurfaceTrace extends PlotterTrace implements ISurfaceTrace{
 		return true;
 	}
 
+	public void dispose() {
+		try {
+			plotter.removeSurfaceTrace(this);
+			super.dispose();
+		} catch (Throwable ignored) {
+			// It's disposed anyway
+		}
+	}
+
+
 }

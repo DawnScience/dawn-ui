@@ -400,5 +400,10 @@ public class LineTraceImpl implements ILineTrace {
 	public boolean is3DTrace() {
 		return false;
 	}
+	
+	public void dispose() {
+		if (trace!=null) trace.dispose();
+		sys=null;
+	}
 
 }

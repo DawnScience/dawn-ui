@@ -75,5 +75,15 @@ public class StackTrace extends PlotterTrace implements ILineStackTrace {
 		window=roi;
 		if (plotter!=null && this.isActive()) plotter.setStackWindow(window);
 	}
+    
+	public void dispose() {
+		try {
+			plotter.removeStackTrace(this);
+			super.dispose();
+		} catch (Throwable ignored) {
+			// It's disposed anyway
+		}
+	}
+
 
 }

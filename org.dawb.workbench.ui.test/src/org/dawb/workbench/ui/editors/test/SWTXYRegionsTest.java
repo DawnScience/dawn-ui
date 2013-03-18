@@ -26,12 +26,11 @@ import org.dawb.common.ui.plot.region.RegionEvent;
 import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
+import org.dawb.common.util.io.FileUtils;
 import org.dawb.common.util.text.NumberUtils;
 import org.dawb.workbench.ui.editors.AsciiEditor;
-import org.dawb.workbench.ui.editors.IDatasetEditor;
 import org.dawb.workbench.ui.editors.ImageEditor;
 import org.dawb.workbench.ui.editors.PlotDataEditor;
-import org.dawb.workbench.ui.editors.PlotImageEditor;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.runtime.Platform;
@@ -92,13 +91,17 @@ public class SWTXYRegionsTest {
 		
 		// We update all the images in the directory.
 		final File[] fa = dir.listFiles();
+		int i = 0;
 		for (File file : fa) {
 			if (!file.isFile()) continue;
-			
-			final AbstractDataset set = LoaderFactory.getData(file.getAbsolutePath(), null).getDataset(0);
-			system.updatePlot2D(set, null, null);
-			
-			EclipseUtils.delay(100);
+			if (LoaderFactory.getSupportedExtensions().contains(FileUtils.getFileExtension(file))) {
+				final AbstractDataset set = LoaderFactory.getData(file.getAbsolutePath(), null).getDataset(0);
+				system.updatePlot2D(set, null, null);
+				
+				EclipseUtils.delay(1);
+				++i;
+				if (i>20) break; // that's enough!
+			}
 		}
 		
 	}
@@ -278,7 +281,7 @@ public class SWTXYRegionsTest {
 		
 		// Get some kind of image directory for testing different images. 
 		String imagesDirPath = System.getProperty("org.dawb.workbench.ui.editors.test.images.directory");
-		if (imagesDirPath==null) imagesDirPath = "C:/Work/results/ID22-ODA";
+		if (imagesDirPath==null) imagesDirPath = "\\\\Data.diamond.ac.uk\\i03\\data\\2013\\in5790-8\\35873";
 		File dir = new File(imagesDirPath);
 		if (!dir.exists()) {
 			// TODO check on linux

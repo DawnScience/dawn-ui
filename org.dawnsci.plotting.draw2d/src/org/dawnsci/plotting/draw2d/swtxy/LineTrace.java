@@ -22,6 +22,8 @@ public class LineTrace extends Trace implements ITraceContainer {
 	
 
 	public void dispose() {
+		
+		if (getParent()!=null) getParent().remove(this);
 		removeAll();
 		getHotSampleList().clear();
 		name=null;
@@ -37,6 +39,7 @@ public class LineTrace extends Trace implements ITraceContainer {
 		xErrorBarType=null;
 		errorBarColor=null;
 		xyGraph=null;
+		traceDataProvider=null;
 	}
 
 	public boolean isDisposed() {

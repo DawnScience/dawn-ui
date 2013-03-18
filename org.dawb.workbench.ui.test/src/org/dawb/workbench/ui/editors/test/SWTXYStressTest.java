@@ -40,6 +40,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.LongDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Random;
+import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import fable.framework.toolbox.EclipseUtils;
 
 /**
@@ -51,118 +52,23 @@ import fable.framework.toolbox.EclipseUtils;
  */
 public class SWTXYStressTest {
 	
-	@Test
-	public void testIfMemoryLeak1D() throws Throwable {
-		
-		final Bundle bun  = Platform.getBundle("org.dawb.workbench.ui.test");
-
-		String path = (bun.getLocation()+"src/org/dawb/workbench/ui/editors/test/ascii.dat");
-		path = path.substring("reference:file:".length());
-		if (path.startsWith("/C:")) path = path.substring(1);
-		
-		final IWorkbenchPage page      = EclipseUtils.getPage();		
-		final IFileStore  externalFile = EFS.getLocalFileSystem().fromLocalFile(new File(path));
-		final IEditorPart part         = page.openEditor(new FileStoreEditorInput(externalFile), AsciiEditor.ID);
-		
-		final AsciiEditor editor       = (AsciiEditor)part;
-		final PlotDataEditor plotter   = (PlotDataEditor)editor.getActiveEditor();
-		final AbstractPlottingSystem sys = plotter.getPlottingSystem();
-		
-    	AbstractDataset data = Random.rand(new int[]{2048});
-    	
-    	final IRegion region = sys.createRegion(RegionUtils.getUniqueName("Y Profile", sys), IRegion.RegionType.XAXIS_LINE);
-		region.setTrackMouse(true);
-		region.setRegionColor(ColorConstants.red);
-		region.setUserRegion(false); // They cannot see preferences or change it!
-		sys.addRegion(region);
-		
-		final ILineTrace trace = sys.createLineTrace("Test line plot");
-		trace.setData(IntegerDataset.arange(2048, AbstractDataset.INT32), data);
-		sys.addTrace(trace);
-
-        for (int i = 0; i < 10000; i++) { // TODO should be larger
-			
-        	data = Random.rand(new int[]{2048});
-        	
-        	Display.getDefault().syncExec(new Runnable() {
-        		public void run() {
-        			AbstractDataset data = Random.rand(new int[]{2048});
-         			trace.setData(IntegerDataset.arange(2048, AbstractDataset.INT32), data);
-        			sys.repaint();
-          		}
-        	});
-        	if (i%1000==0) System.out.println(i);
-    		EclipseUtils.delay(5);
-      	
-		}
-	
-		
-		EclipseUtils.delay(1000);
-		
-	}
-
-	@Test
-	public void testIfMemoryLeak2D() throws Throwable {
-		
-		final Bundle bun  = Platform.getBundle("org.dawb.workbench.ui.test");
-
-		String path = (bun.getLocation()+"src/org/dawb/workbench/ui/editors/test/billeA.edf");
-		path = path.substring("reference:file:".length());
-		if (path.startsWith("/C:")) path = path.substring(1);
-
-		final IWorkbenchPage page      = EclipseUtils.getPage();		
-		final IFileStore  externalFile = EFS.getLocalFileSystem().fromLocalFile(new File(path));
-		final IEditorPart part         = page.openEditor(new FileStoreEditorInput(externalFile), ImageEditor.ID);
-		page.setPartState(EclipseUtils.getPage().getActivePartReference(), IWorkbenchPage.STATE_MAXIMIZED);
-
-		EclipseUtils.delay(2000);
-		
-		final AbstractPlottingSystem sys = (AbstractPlottingSystem)PlottingFactory.getPlottingSystem(part.getTitle());
-
-		final Collection<ITrace>   traces= sys.getTraces(IImageTrace.class);
-		final IImageTrace          imt = (IImageTrace)traces.iterator().next();
-
-		// TODO Longer term tests may do while(true) here...
-        for (int i = 0; i < 10000; i++) {
-			
-        	final DoubleDataset data = new DoubleDataset(new int[]{2048, 2048});
-        	for (int j = 0; j < 2048*2048; j++) {
-        		data.getData()[j] =  Math.random();
-			}
-        	
-        	Display.getDefault().syncExec(new Runnable() {
-        		public void run() {
-                	imt.setData(data, null, false);
-        		}
-        	});
-        	
-        	if (i%1000==0) System.out.println(i);
-    		EclipseUtils.delay(5);
-      	
-		}
-	
-		
-		EclipseUtils.delay(1000);
-		
-	}
-
 	
 	@Test
 	public void testRandomNumbers() throws Throwable {
 		
-		createTest(createTestArraysRandom(10, 1000), 1000);
+		createTest(createTestArraysRandom(10, 1000), 3000);
 	}
 	
 	@Test
 	public void testCoherantNumbers1() throws Throwable {
 		
-		createTest(createTestArraysCoherant(10, 1000), 1000);
+		createTest(createTestArraysCoherant(10, 1000), 3000);
 	}
 	
 	@Test
 	public void testCoherantNumbers2() throws Throwable {
 		
-		createTest(createTestArraysCoherant(100, 10000), 2000);
+		createTest(createTestArraysCoherant(100, 10000), 3000);
 	}
 
 	private void createTest(final List<AbstractDataset> ys, long expectedTime) throws Throwable {
@@ -231,4 +137,113 @@ public class SWTXYStressTest {
 		return ys;
 	}
 	
+	
+	@Test
+	public void testIfMemoryLeak1D() throws Throwable {
+		
+		final Bundle bun  = Platform.getBundle("org.dawb.workbench.ui.test");
+
+		String path = (bun.getLocation()+"src/org/dawb/workbench/ui/editors/test/ascii.dat");
+		path = path.substring("reference:file:".length());
+		if (path.startsWith("/C:")) path = path.substring(1);
+		
+		final IWorkbenchPage page      = EclipseUtils.getPage();		
+		final IFileStore  externalFile = EFS.getLocalFileSystem().fromLocalFile(new File(path));
+		final IEditorPart part         = page.openEditor(new FileStoreEditorInput(externalFile), AsciiEditor.ID);
+		
+		final AsciiEditor editor       = (AsciiEditor)part;
+		final PlotDataEditor plotter   = (PlotDataEditor)editor.getActiveEditor();
+		final AbstractPlottingSystem sys = plotter.getPlottingSystem();
+		
+    	AbstractDataset data = Random.rand(new int[]{2048});
+    	
+    	final IRegion region = sys.createRegion(RegionUtils.getUniqueName("Y Profile", sys), IRegion.RegionType.XAXIS_LINE);
+		region.setTrackMouse(true);
+		region.setRegionColor(ColorConstants.red);
+		region.setUserRegion(false); // They cannot see preferences or change it!
+		sys.addRegion(region);
+		
+		final ILineTrace trace = sys.createLineTrace("Test line plot");
+		trace.setData(IntegerDataset.arange(2048, AbstractDataset.INT32), data);
+		sys.addTrace(trace);
+
+		System.gc();
+		long sizeStart = Runtime.getRuntime().totalMemory();
+				
+        for (int i = 0; i < 1000; i++) { // TODO should be larger
+			
+        	data = Random.rand(new int[]{2048});
+        	
+        	Display.getDefault().syncExec(new Runnable() {
+        		public void run() {
+        			AbstractDataset data = Random.rand(new int[]{2048});
+         			trace.setData(IntegerDataset.arange(2048, AbstractDataset.INT32), data);
+        			sys.repaint();
+          		}
+        	});
+        	if (i%1000==0) System.out.println(i);
+    		EclipseUtils.delay(1);
+		}
+	
+		
+ 		LoaderFactory.clear();
+		System.gc();
+		EclipseUtils.delay(1000);
+		
+		long sizeEnd = Runtime.getRuntime().totalMemory();
+        if ((sizeEnd-sizeStart)>10000) throw new Exception("Unexpected memory leak - "+(sizeEnd-sizeStart));
+	} 
+
+	@Test
+	public void testIfMemoryLeak2D() throws Throwable {
+		
+		final Bundle bun  = Platform.getBundle("org.dawb.workbench.ui.test");
+
+		String path = (bun.getLocation()+"src/org/dawb/workbench/ui/editors/test/billeA.edf");
+		path = path.substring("reference:file:".length());
+		if (path.startsWith("/C:")) path = path.substring(1);
+
+		final IWorkbenchPage page      = EclipseUtils.getPage();		
+		final IFileStore  externalFile = EFS.getLocalFileSystem().fromLocalFile(new File(path));
+		final IEditorPart part         = page.openEditor(new FileStoreEditorInput(externalFile), ImageEditor.ID);
+		page.setPartState(EclipseUtils.getPage().getActivePartReference(), IWorkbenchPage.STATE_MAXIMIZED);
+
+		EclipseUtils.delay(2000);
+		
+		final AbstractPlottingSystem sys = (AbstractPlottingSystem)PlottingFactory.getPlottingSystem(part.getTitle());
+
+		final Collection<ITrace>   traces= sys.getTraces(IImageTrace.class);
+		final IImageTrace          imt = (IImageTrace)traces.iterator().next();
+
+		System.gc();
+		long sizeStart = Runtime.getRuntime().totalMemory();
+
+        for (int i = 0; i < 1000; i++) {
+			
+        	final DoubleDataset data = new DoubleDataset(new int[]{2048, 2048});
+        	for (int j = 0; j < 2048*2048; j++) {
+        		data.getData()[j] =  Math.random();
+			}
+        	
+        	Display.getDefault().syncExec(new Runnable() {
+        		public void run() {
+                	imt.setData(data, null, false);
+        		}
+        	});
+        	
+        	if (i%1000==0) System.out.println(i);
+    		EclipseUtils.delay(1);
+      	
+		}
+	
+ 		LoaderFactory.clear();
+		System.gc();
+		EclipseUtils.delay(1000);
+		
+		long sizeEnd = Runtime.getRuntime().totalMemory();
+        if ((sizeEnd-sizeStart)>10000) throw new Exception("Unexpected memory leak - "+(sizeEnd-sizeStart));
+		
+	}
+
+
 }

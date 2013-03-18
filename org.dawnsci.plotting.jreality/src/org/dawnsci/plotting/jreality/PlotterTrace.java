@@ -20,6 +20,15 @@ class PlotterTrace {
 	protected AbstractPlottingSystem plottingSystem;
 	protected ROIBase                window;
 
+	public void dispose() {
+		if (axes!=null) axes.clear();
+		axes = null;
+		if (axesNames!=null) axesNames.clear();
+		axesNames = null;
+		plotter = null;
+		plottingSystem=null;
+		window=null;
+	}
 
 	public PlotterTrace(JRealityPlotViewer plotter2, String name2) {
 		this.plotter = plotter2;

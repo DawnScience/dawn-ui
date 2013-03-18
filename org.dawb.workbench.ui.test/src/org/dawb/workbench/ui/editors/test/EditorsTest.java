@@ -21,6 +21,8 @@ import org.eclipse.ui.ide.FileStoreEditorInput;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 
+import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
+
 import fable.framework.toolbox.EclipseUtils;
 
 
@@ -54,6 +56,7 @@ public class EditorsTest {
 		final IWorkbenchPage     page = EclipseUtils.getPage();		
 		final IFileStore externalFile = EFS.getLocalFileSystem().fromLocalFile(new File(path));
  
+		System.gc();
 		final long startSize = Runtime.getRuntime().totalMemory();
 
 		final MultiScanMultiEditor      editor = (MultiScanMultiEditor)page.openEditor(new FileStoreEditorInput(externalFile), "org.dawb.tango.extensions.specEditor");
@@ -68,10 +71,9 @@ public class EditorsTest {
 		
 		EclipseUtils.getPage().closeEditor(editor, false);
 	
-	    System.gc();
-	
-		EclipseUtils.delay(500);
-
+ 		LoaderFactory.clear();
+		System.gc();
+		EclipseUtils.delay(1000);
 		final long endSize = Runtime.getRuntime().totalMemory();
 		final long leak    = (endSize-startSize);
 		if (leak>800000000) throw new Exception("The memory leak is too large! It is "+leak);

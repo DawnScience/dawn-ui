@@ -22,13 +22,13 @@ import org.junit.runners.Suite.SuiteClasses;
 	
     EditorsTest.class,
     EditorStressTest.class,
-    LargeFilesTest.class,
-    SWTXYStressTest.class,
     SWTXYUpdateTest.class,
     SWTXYAxisTest.class,
     SWTXYAxisUpdateTest.class,
     SWTXYRegionsTest.class,
-    SWTXYTraceTest.class
+    SWTXYTraceTest.class,
+    LargeFilesTest.class,
+    SWTXYStressTest.class
 })
 public class Suite {
 	// Run this as a junit plugin test and all the links will be satisfied.

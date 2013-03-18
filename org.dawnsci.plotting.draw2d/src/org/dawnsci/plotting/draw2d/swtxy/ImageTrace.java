@@ -614,11 +614,15 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		if (mipMap!=null)           mipMap.clear();
 		if (maskMap!=null)          maskMap.clear();
 		if (scaledImage!=null)      scaledImage.dispose();
+		
 		if (paletteListeners!=null) paletteListeners.clear();
-		if (downsampleListeners!=null) downsampleListeners.clear();
 		paletteListeners = null;
+		if (downsampleListeners!=null) downsampleListeners.clear();
+		downsampleListeners = null;
+		
         clearAspect(xAxis);
         clearAspect(yAxis);
+        
 		if (getParent()!=null) getParent().remove(this);
 		xAxis.removeListener(this);
 		yAxis.removeListener(this);
@@ -627,11 +631,17 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		xAxis.setTicksIndexBased(false);
 		yAxis.setTicksIndexBased(false);
 		axisRedrawActive = false;
-		imageServiceBean.dispose();
+		if (imageServiceBean!=null) imageServiceBean.dispose();
 		if (this.scaledImage!=null && !scaledImage.isDisposed()) scaledImage.dispose();
-		imageServiceBean = null;
-		service = null;
-		intensityScale = null;
+		
+		this.imageServiceBean = null;
+		this.service          = null;
+		this.intensityScale   = null;
+		this.image            = null;
+	}
+	
+	public void dispose() {
+		remove();
 	}
 
 	private void clearAspect(Axis axis) {

@@ -840,6 +840,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	}
 
 	private void clearTraces() {
+		
 		if (lightWeightViewer!=null)  lightWeightViewer.clearTraces();
 		if (traceMap!=null) traceMap.clear();
 		fireTracesCleared(new TraceEvent(this));
