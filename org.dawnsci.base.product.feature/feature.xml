@@ -70,10 +70,6 @@
          version="0.0.0"/>
 
    <includes
-         id="uk.ac.diamond.scisoft.icatexplorer.feature"
-         version="0.0.0"/>
-
-   <includes
          id="org.dawnsci.mx.feature"
          version="0.0.0"/>
 
@@ -188,7 +184,7 @@
          version="0.0.0"
          unpack="false"/>
 
-   <plugin
+ <plugin
          id="com.isencia.passerelle.workbench.starter"
          download-size="0"
          install-size="0"
