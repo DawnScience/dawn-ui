@@ -31,9 +31,14 @@ All other trademarks are the property of their respective owners.
 
    <launcherArgs>
       <programArgs>-showLocation</programArgs>
-      <vmArgs>-Dosgi.locking=none
--Xms1024m
+      <vmArgs>-Xms1024m
 -XX:MaxPermSize=256M
+-Dcolour=on
+-Dcom.isencia.require.file.source=true
+-Ddbconnect=config/dbconnect.ispyb.properties
+-Dentry=MyVisitsEntryPoint
+-Dorg.dawb.editor.h5.use.default=true
+-Dosgi.locking=none
 -Dpasserelle.workbench.version=1.0.0</vmArgs>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts</vmArgsMac>
    </launcherArgs>
@@ -82,13 +87,6 @@ See the License for the specific language governing permissions and limitations 
       <plugin id="uk.ac.diamond.scisoft" autoStart="true" startLevel="1" />
       <plugin id="uk.ac.diamond.scisoft.analysis" autoStart="true" startLevel="2" />
       <plugin id="uk.ac.diamond.scisoft.analysis.osgi" autoStart="true" startLevel="2" />
-      <property name="colour" value="on" />
-      <property name="com.isencia.require.file.source" value="true" />
-      <property name="dbconnect" value="config/dbconnect.ispyb.properties" />
-      <property name="entry" value="MyVisitsEntryPoint" />
-      <property name="idaEmbedded" value="yes" />
-      <property name="org.dawb.editor.h5.use.default" value="true" />
-      <property name="osgi.locking" value="none" />
    </configurations>
 
 </product>
