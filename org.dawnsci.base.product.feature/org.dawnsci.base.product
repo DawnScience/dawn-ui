@@ -31,7 +31,9 @@ All other trademarks are the property of their respective owners.
 
    <launcherArgs>
       <programArgs>-showLocation</programArgs>
-      <vmArgs>-Xms512m
+      <vmArgs>-Dosgi.locking=none
+-Xms1024m
+-XX:MaxPermSize=256M
 -Dpasserelle.workbench.version=1.0.0</vmArgs>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts</vmArgsMac>
    </launcherArgs>
