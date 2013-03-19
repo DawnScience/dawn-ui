@@ -70,10 +70,6 @@
          version="0.0.0"/>
 
    <includes
-         id="uk.ac.diamond.scisoft.icatexplorer.feature"
-         version="0.0.0"/>
-
-   <includes
          id="org.dawnsci.mx.feature"
          version="0.0.0"/>
 
