@@ -204,6 +204,7 @@ public class SectorSelection extends AbstractSelectionRegion {
 		final SectorROI sroi = new SectorROI(p1[0], p1[1], p2[0]-p1[0],
 				                             p2[1]-p1[1],
 				                             Math.toRadians(360 - a[1]), Math.toRadians(360 - a[0]));
+		sroi.setName(getName());
 		sroi.setSymmetry(symmetry);
 		sroi.setCombineSymmetry(combine);
 		if (roi!=null) sroi.setPlot(roi.isPlot());
