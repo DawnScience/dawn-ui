@@ -32,7 +32,10 @@ All other trademarks are the property of their respective owners.
    <launcherArgs>
       <programArgs>-showLocation</programArgs>
       <vmArgs>-Xms1024m
--XX:MaxPermSize=256M
+-Xmx2048m
+-XX:MaxPermSize=256m
+-XX:+UseG1GC
+-XX:MaxGCPauseMillis=1000
 -Dcolour=on
 -Dcom.isencia.require.file.source=true
 -Ddbconnect=config/dbconnect.ispyb.properties
