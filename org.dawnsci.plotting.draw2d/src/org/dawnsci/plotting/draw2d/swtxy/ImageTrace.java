@@ -239,7 +239,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				imageServiceBean.setImage(reducedFullImage);
 				imageServiceBean.setMonitor(monitor);
 				if (fullMask!=null) {
-					imageServiceBean.setMask(getDownsampled(fullMask));
+					// For masks, we preserve the min (the falses) to avoid loosing fine lines
+					// which are masked.
+					imageServiceBean.setMask(getDownsampled(fullMask, DownsampleMode.MINIMUM));
 				} else {
 					imageServiceBean.setMask(null); // Ensure we lose the mask!
 				}
@@ -448,6 +450,17 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	private Collection<IDownSampleListener> downsampleListeners;
 	
 	private AbstractDataset getDownsampled(AbstractDataset image) {
+	
+		return getDownsampled(image, getDownsampleTypeDiamond());
+ 	}
+	
+	/**
+	 * Uses caches based on bin, not DownsampleMode.
+	 * @param image
+	 * @param mode
+	 * @return
+	 */
+	private AbstractDataset getDownsampled(AbstractDataset image, DownsampleMode mode) {
 		
 		// Down sample, no point histogramming the whole thing
         final int bin = getDownsampleBin();
@@ -474,7 +487,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				}
 			}
 			
-			final Downsample downSampler = new Downsample(getDownsampleTypeDiamond(), new int[]{bin,bin});
+			final Downsample downSampler = new Downsample(mode, new int[]{bin,bin});
 			List<AbstractDataset>   sets = downSampler.value(image);
 			final AbstractDataset set = sets.get(0);
 			
@@ -534,7 +547,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	
 	public AbstractDataset getDownsampledMask() {
 		if (getMask()==null) return null;
-		return getDownsampled(getMask());
+		return getDownsampled(getMask(), DownsampleMode.MINIMUM);
 	}
 
 	/**
@@ -994,7 +1007,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	
 	@Override
 	public void setDownsampleType(DownsampleType type) {
-		if (this.mipMap!=null) mipMap.clear();
+		if (this.mipMap!=null)  mipMap.clear();
+		if (this.maskMap!=null) maskMap.clear();
 		this.downsampleType = type;
 		createScaledImage(ImageScaleType.FORCE_REIMAGE, null);
 		getPreferenceStore().setValue(BasePlottingConstants.DOWNSAMPLE_PREF, type.getLabel());
