@@ -308,7 +308,6 @@ public class MaskObject {
 		if (maskDataset == null || !maskDataset.isCompatibleWith(imageDataset)) {
 			maskDataset = new BooleanDataset(imageDataset.getShape());
 			maskDataset.setName("mask");
-			maskDataset.setExtendible(false);
 			maskDataset.fill(true);
 		}	
 		if (operationManager ==null)  {

@@ -3206,9 +3206,10 @@ public class DataSet3DPlot1D implements IDataSet3DCorePlot, AreaSelectListener, 
 			if (sets.size() > 0) {
 				IDataset currentDataSet = sets.get(0);
 				SceneGraphComponent graph = subGraphs.get(0);
-				int length = currentDataSet.getShape()[0];
-				for (int i = 0; i < points.length; i++)
-					currentDataSet.set(points[i], length + i);
+				int n = currentDataSet.getSize();
+				currentDataSet.resize(n + points.length);
+				for (double p : points)
+					currentDataSet.set(p, n++);
 				if (undoSelectStack.size() == 0) {
 					determineRanges(sets);
 					currentSelectWindow = new SelectedWindow(0, (int) globalXmax, 0, 0);
@@ -3243,11 +3244,11 @@ public class DataSet3DPlot1D implements IDataSet3DCorePlot, AreaSelectListener, 
 				IDataset currentDataSet = sets.get(0);
 				SceneGraphComponent graph = subGraphs.get(0);
 				AxisValues axisVal = xAxes.get(0);
-				int length = currentDataSet.getShape()[0];
-				for (int i = 0; i < points.length; i++)
-					currentDataSet.set(points[i], length + i);
-				for (int i = 0; i < axisVals.length; i++)
-					axisVal.addValue(axisVals[i]);
+				int n = currentDataSet.getSize();
+				currentDataSet.resize(n + points.length);
+				for (double p : points)
+					currentDataSet.set(p, n++);
+				axisVal.addValues(axisVals);
 				if (undoSelectStack.size() == 0) {
 					determineRanges(sets);
 					currentSelectWindow = new SelectedWindow(0, (int) globalXmax, 0, 0);
@@ -3270,7 +3271,6 @@ public class DataSet3DPlot1D implements IDataSet3DCorePlot, AreaSelectListener, 
 	 * @param valueList
 	 * @throws PlotException
 	 */
-	@SuppressWarnings("null")
 	public void addDataPoints(List<double[]> valueList) throws PlotException {
 		if (xAxis == AxisMode.LINEAR || xAxis == AxisMode.LINEAR_WITH_OFFSET) {
 			if (valueList.size() == sets.size()) {
@@ -3283,9 +3283,10 @@ public class DataSet3DPlot1D implements IDataSet3DCorePlot, AreaSelectListener, 
 				while (newDataIter.hasNext()) {
 					double[] newValues = newDataIter.next();
 					IDataset currentDataSet = dataIter.next();
-					int length = currentDataSet.getShape()[0];
-					for (int i = 0; i < newValues.length; i++)
-						currentDataSet.set(newValues[i], length + i);
+					int n = currentDataSet.getSize();
+					currentDataSet.resize(n + newValues.length);
+					for (double p : newValues)
+						currentDataSet.set(p, n++);
 				}
 				if (undoSelectStack.size() == 0) {
 					determineRanges(sets);
@@ -3333,11 +3334,11 @@ public class DataSet3DPlot1D implements IDataSet3DCorePlot, AreaSelectListener, 
 					double[] newAxisValues = newAxisDataIter.next();
 					IDataset currentDataSet = dataIter.next();
 					AxisValues axis = axisIter.next();
-					int length = currentDataSet.getShape()[0];
-					for (int i = 0; i < newValues.length; i++)
-						currentDataSet.set(newValues[i], length + i);
-					for (int i = 0; i < newAxisValues.length; i++)
-						axis.addValue(newAxisValues[i]);
+					int n = currentDataSet.getSize();
+					currentDataSet.resize(n + newValues.length);
+					for (double p : newValues)
+						currentDataSet.set(p, n++);
+					axis.addValues(newAxisValues);
 				}
 				if (undoSelectStack.size() == 0) {
 					determineRanges(sets);
