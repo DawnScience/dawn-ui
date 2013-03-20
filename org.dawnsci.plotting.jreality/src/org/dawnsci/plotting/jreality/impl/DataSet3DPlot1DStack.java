@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Composite;
 
 import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import de.jreality.geometry.IndexedLineSetFactory;
 import de.jreality.geometry.PointSetFactory;
@@ -286,8 +287,8 @@ public class DataSet3DPlot1DStack extends DataSet3DPlot1D {
 		super.updateGraph(datasets);
 		if (zAxisValues != null) {
 			if (zAxisValues.size() < datasets.size()) {
-				for (int i = zAxisValues.size(), imax = datasets.size(); i < imax; i++)
-					zAxisValues.addValue((i+1)+zOffset);
+				DoubleDataset values = DoubleDataset.arange(zOffset+1, zOffset + 1 + datasets.size(), 1);
+				zAxisValues.addValues(values.getData());
 			}
 		} else {
 			zAxisValues = new AxisValues(AbstractDataset.arange(1+datasets.size()+zOffset, AbstractDataset.FLOAT64));
