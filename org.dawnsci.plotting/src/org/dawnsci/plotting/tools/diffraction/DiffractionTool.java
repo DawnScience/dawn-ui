@@ -746,7 +746,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		findOuter = new Action("Find outer rings", IAction.AS_PUSH_BUTTON) {
 			@Override
 			public void run() {
-				logger.debug("Find more clicked");
+				logger.debug("Find outer rings clicked");
 
 				if (tmpRegion instanceof CircleFitSelection || tmpRegion instanceof EllipseFitSelection) {
 					final IPlottingSystem plotter = getPlottingSystem();
@@ -1025,7 +1025,9 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 						plotter.addRegion(region);
 						monitor.worked(1);
 					}
+					// TODO set beam centre in case of all circles
 					calibrate.setEnabled(true);
+					findOuter.setEnabled(false);
 				} catch (Exception e) {
 					status[0] = false;
 				}

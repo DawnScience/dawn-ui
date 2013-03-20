@@ -149,7 +149,7 @@ class EllipseSelection extends AbstractSelectionRegion {
 		v[0] -= eroi.getPointX(); v[0] *= 0.5;
 		v[1] -= eroi.getPointY(); v[1] *= 0.5;
 		eroi.setSemiAxes(v);
-
+		eroi.setName(getName());
 		if (roi!=null) eroi.setPlot(roi.isPlot());
 //		System.err.println("To roi, " + eroi.toString());
 		if (recordResult) {
