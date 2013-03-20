@@ -402,6 +402,11 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		monitor.done();
 	}
 
+	/**
+	 * Records any expression names so that they can be available in the history tool.
+	 * @param sels
+	 * @param traces
+	 */
 	private void sync(List<CheckableObject> sels, List<ITrace> traces) {
 		if (sels==null || traces==null) return ;
 		if (sels.size() == traces.size()) {
