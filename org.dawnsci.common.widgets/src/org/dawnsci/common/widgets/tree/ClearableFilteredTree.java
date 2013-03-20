@@ -7,10 +7,13 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.dialogs.FilteredTree;
 
 public class ClearableFilteredTree extends FilteredTree {
-	public ClearableFilteredTree(Composite control, int i,
-			NodeFilter diffractionFilter, boolean b) {
-		super(control,i,diffractionFilter,b);
-		filterText.setToolTipText("Enter search string to filter the tree.\nThis will match on name, value or units");
+	
+	public ClearableFilteredTree(Composite control, 
+			                     int swtSwitches,
+			                     NodeFilter diffractionFilter, boolean useNewLook,
+			                     final String tooltip) {
+		super(control,swtSwitches,diffractionFilter,useNewLook);
+		filterText.setToolTipText(tooltip);
 	}
 
 	public void clearText() {
