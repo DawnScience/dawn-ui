@@ -53,6 +53,7 @@
    </features>
 
    <configurations>
+      <plugin id="com.isencia.passerelle.workbench.starter" autoStart="true" startLevel="5" />
       <plugin id="org.dawnsci.persistence" autoStart="true" startLevel="2" />
       <plugin id="uk.ac.diamond.scisoft" autoStart="true" startLevel="1" />
       <plugin id="uk.ac.diamond.scisoft.analysis" autoStart="true" startLevel="2" />

@@ -54,8 +54,10 @@
    </features>
 
    <configurations>
+      <plugin id="com.isencia.passerelle.workbench.starter" autoStart="true" startLevel="5" />
       <plugin id="org.dawnsci.persistence" autoStart="true" startLevel="1" />
       <plugin id="uk.ac.diamond.scisoft" autoStart="true" startLevel="0" />
+      <plugin id="uk.ac.diamond.scisoft.analysis" autoStart="true" startLevel="0" />
       <plugin id="uk.ac.diamond.scisoft.analysis.osgi" autoStart="true" startLevel="1" />
       <property name="uk.ac.diamond.scisoft.analysis.rcp/plotView.plottingsystem" value="1" />
    </configurations>
