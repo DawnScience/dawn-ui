@@ -961,7 +961,7 @@ public class HistogramToolPage extends AbstractToolPage {
 				num_bins = MAX_BINS;
 			} else {
 				// set the number of points to the range
-				num_bins = (Integer) imageDataset.max().intValue() - imageDataset.min().intValue();
+				num_bins = (Integer) imageDataset.max(true).intValue() - imageDataset.min(true).intValue();
 				if (num_bins > MAX_BINS) num_bins = MAX_BINS;
 			}
 
@@ -1041,8 +1041,8 @@ public class HistogramToolPage extends AbstractToolPage {
 		// calculate the histogram for the whole image
 		double rMax = rangeMax;
 		double rMin = rangeMin;
-		if (Double.isInfinite(rMax)) rMax = imageDataset.max().doubleValue();
-		if (Double.isInfinite(rMin)) rMin = imageDataset.min().doubleValue();
+		if (Double.isInfinite(rMax)) rMax = imageDataset.max(true).doubleValue();
+		if (Double.isInfinite(rMin)) rMin = imageDataset.min(true).doubleValue();
 
 		Histogram hist = new Histogram(num_bins, rMin, rMax, true);
 		List<AbstractDataset> histogram_values = hist.value(image);
@@ -1073,8 +1073,8 @@ public class HistogramToolPage extends AbstractToolPage {
 		
 		imageDataset = (AbstractDataset)image.getImageServiceBean().getImage();
 		
-		if (Double.isInfinite(scaleMaxTemp)) scaleMaxTemp = imageDataset.max().doubleValue();
-		if (Double.isInfinite(scaleMinTemp)) scaleMinTemp = imageDataset.min().doubleValue();
+		if (Double.isInfinite(scaleMaxTemp)) scaleMaxTemp = imageDataset.max(true).doubleValue();
+		if (Double.isInfinite(scaleMinTemp)) scaleMinTemp = imageDataset.min(true).doubleValue();
 		
 		if (mode == FIXED) {
 			if (scaleMaxTemp > scaleMax) scaleMax = scaleMaxTemp;
@@ -1169,7 +1169,7 @@ public class HistogramToolPage extends AbstractToolPage {
 		G.setName("green");
 		B.setName("blue");
 		RGBX.setName("Axis");
-		double scale = ((histogramY.max().doubleValue())/256.0);
+		double scale = ((histogramY.max(true).doubleValue())/256.0);
 		if(scale <= 0) scale = 1.0/256.0;
 
 		//palleteData.colors = new RGB[256];
