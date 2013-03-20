@@ -39,7 +39,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.MouseMotionListener;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
@@ -69,7 +68,10 @@ import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.StackLayout;
+import org.eclipse.swt.events.ControlAdapter;
+import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MouseEvent;
@@ -103,7 +105,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 
 	private static final Logger logger = LoggerFactory.getLogger(MaskingTool.class);
 	
-	private Group           composite;
+	private ScrolledComposite scrollComp;
 	private Spinner         minimum, maximum;
 	private Button          autoApply;
 	private MaskObject      maskObject;
@@ -254,7 +256,9 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	@Override
 	public void createControl(Composite parent) {
 		
-		this.composite = new Group(parent, SWT.NONE);
+		scrollComp = new ScrolledComposite(parent, SWT.V_SCROLL | SWT.H_SCROLL);
+		
+		final Group composite = new Group(scrollComp, SWT.NONE);
 		composite.setLayout(new GridLayout(1, false));
 		final IImageTrace image = getImageTrace();
 		if (image!=null) {
@@ -533,6 +537,20 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 				layout.topControl = regionComp;
         	}
         }
+        
+        
+		scrollComp.setContent(composite);
+		scrollComp.setExpandVertical(true);
+		scrollComp.setExpandHorizontal(true);
+		scrollComp.addControlListener(new ControlAdapter() {
+			@Override
+			public void controlResized(ControlEvent e) {
+				Rectangle r = scrollComp.getClientArea();
+				scrollComp.setMinHeight(composite.computeSize(r.width, SWT.DEFAULT).y);
+				scrollComp.setMinWidth(composite.computeSize(SWT.DEFAULT, r.height).x);
+			}
+		});
+
 	}
 	
 	private boolean lastActionRange = false;
@@ -1137,12 +1155,12 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		
 	@Override
 	public Control getControl() {
-		return composite;
+		return scrollComp;
 	}
 
 	@Override
 	public void setFocus() {
-		if (composite!=null) composite.setFocus();
+		if (scrollComp!=null) scrollComp.setFocus();
 	}
 	
 	@Override
@@ -1214,9 +1232,9 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	@Override
 	public void dispose() {
 		super.dispose();
-		if (composite!=null) composite.dispose();
+		if (scrollComp!=null) scrollComp.dispose();
 		if (maskObject!=null)maskObject.dispose();
-		composite      = null;
+		scrollComp     = null;
 		traceListener  = null;
 		regionListener = null;
 		regionBoundsListener = null;
