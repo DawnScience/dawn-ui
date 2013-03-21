@@ -106,6 +106,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 		xAxis.setTicksAtEnds(false);
 		yAxis.setTicksAtEnds(false);
+		xAxis.setTicksIndexBased(true);
+		yAxis.setTicksIndexBased(true);
 
 		if (xAxis instanceof AspectAxis && yAxis instanceof AspectAxis) {
 			
@@ -131,6 +133,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 	public void setXAxis(Axis xAxis) {
 		this.xAxis = xAxis;
+		xAxis.setTicksIndexBased(true);
 	}
 
 	public AspectAxis getYAxis() {
@@ -139,6 +142,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 	public void setYAxis(Axis yAxis) {
 		this.yAxis = yAxis;
+		yAxis.setTicksIndexBased(true);
 	}
 
 	public AbstractDataset getImage() {
@@ -535,6 +539,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		yAxis.removeListener(this);
 		xAxis.setTicksAtEnds(true);
 		yAxis.setTicksAtEnds(true);
+		xAxis.setTicksIndexBased(false);
+		yAxis.setTicksIndexBased(false);
 		axisRedrawActive = false;
 		imageServiceBean.dispose();
 		if (this.scaledImage!=null && !scaledImage.isDisposed()) scaledImage.dispose();
