@@ -47,6 +47,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.BooleanDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.function.Downsample;
 import uk.ac.diamond.scisoft.analysis.dataset.function.DownsampleMode;
@@ -1150,9 +1151,32 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 * 
 	 * @param bd
 	 */
-	public void setMask(AbstractDataset bd) {
+	public void setMask(AbstractDataset mask) {
+		
+		if (image.isCompatibleWith(mask)) {
+			
+			BooleanDataset maskDataset = new BooleanDataset(image.getShape());
+			maskDataset.setName("mask");
+			maskDataset.fill(true);
+
+			final int[] shape = mask.getShape();
+			for (int y = 0; y<shape[0]; ++y) {
+				for (int x = 0; x<shape[1]; ++x) {
+			        try {
+			        	// We only add the falses 
+			        	if (!mask.getBoolean(y,x)) {
+			        		maskDataset.set(Boolean.FALSE, y,x);
+			        	}
+			        } catch (Throwable ignored) {
+			        	continue;
+			        }
+				}
+			}
+
+			mask = maskDataset;
+		}
 		if (maskMap!=null) maskMap.clear();
-		fullMask = bd;
+		fullMask = mask;
 		rehistogram();
 		fireMaskListeners();
 	}
