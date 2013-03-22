@@ -282,6 +282,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 					intensityScaleBean.setImage(dds);
 					intensityScaleBean.setMask(null);
 					intensityScale.setImageData(service.getImageData(intensityScaleBean));
+					intensityScale.setLog10(getImageServiceBean().isLogColorScale());
 				} catch (Throwable ne) {
 					logger.warn("Cannot update intensity!");
 				}
