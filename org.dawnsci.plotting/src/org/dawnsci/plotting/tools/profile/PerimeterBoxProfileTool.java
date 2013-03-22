@@ -29,6 +29,7 @@ import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.PaletteEvent;
 import org.dawb.common.ui.plot.trace.TraceEvent;
+import org.dawb.common.ui.widgets.ROISumWidget;
 import org.dawb.common.ui.widgets.ROIWidget;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -99,6 +100,8 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 	private IAxis yPixelAxisVertical;
 
 	private Composite profileContentComposite;
+
+	private ROISumWidget roiSumWidget;
 
 	public PerimeterBoxProfileTool() {
 		
@@ -260,6 +263,9 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 					}
 				}
 			});
+			
+			roiSumWidget = new ROISumWidget(mainRegionComposite, (AbstractPlottingSystem) getPlottingSystem());
+			
 			mainRegionInfoExpander.setClient(mainRegionComposite);
 			mainRegionInfoExpander.addExpansionListener(expansionAdapter);
 			mainRegionInfoExpander.setExpanded(true);
@@ -422,6 +428,8 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 
 		if(myROIWidget != null)
 			myROIWidget.dispose();
+		if(roiSumWidget != null)
+			roiSumWidget.dispose();
 		if(verticalProfileROIWidget != null)
 			verticalProfileROIWidget.dispose();
 		if(horizontalProfileROIWidget != null)
