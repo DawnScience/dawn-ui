@@ -12,11 +12,12 @@
 
    <launcherArgs>
       <programArgs>-showLocation</programArgs>
-      <vmArgs>-Xms1024m
--Xmx2048m
--XX:MaxPermSize=256m
+      <vmArgs>-Xms256m
+-Xmx1024m
 -XX:+UseG1GC
 -XX:MaxGCPauseMillis=1000
+-XX:PermSize=128m
+-XX:MaxPermSize=256m
 -Dcolour=on
 -Dcom.isencia.require.file.source=true
 -Ddbconnect=config/dbconnect.ispyb.properties
