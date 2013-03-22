@@ -1154,7 +1154,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 */
 	public void setMask(AbstractDataset mask) {
 		
-		if (image.isCompatibleWith(mask)) {
+		if (mask!=null && image!=null && !image.isCompatibleWith(mask)) {
 			
 			BooleanDataset maskDataset = new BooleanDataset(image.getShape());
 			maskDataset.setName("mask");
