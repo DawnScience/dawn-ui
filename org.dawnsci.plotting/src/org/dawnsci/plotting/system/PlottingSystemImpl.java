@@ -791,10 +791,11 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	}
 	private void resetInternal() {
 		
+		if (traceMap!=null) traceMap.clear();
 		if (colorMap!=null) colorMap.clear();
 		lightWeightViewer.reset();
 		jrealityViewer.reset();
-				
+		fireTracesCleared(new TraceEvent(this));
 	}
 	
 	@Override
