@@ -31,7 +31,7 @@ import org.osgi.framework.Bundle;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.LongDataset;
-import fable.framework.toolbox.EclipseUtils;
+import org.dawb.common.ui.util.EclipseUtils;
 
 /**
  * 

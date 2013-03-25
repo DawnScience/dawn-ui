@@ -53,7 +53,7 @@ import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
-import fable.framework.toolbox.EclipseUtils;
+import org.dawb.common.ui.util.EclipseUtils;
 
 /**
  * 

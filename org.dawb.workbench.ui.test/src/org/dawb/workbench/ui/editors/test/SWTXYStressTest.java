@@ -41,7 +41,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.LongDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Random;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
-import fable.framework.toolbox.EclipseUtils;
+import org.dawb.common.ui.util.EclipseUtils;
 
 /**
  * 

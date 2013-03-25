@@ -23,7 +23,7 @@ import org.osgi.framework.Bundle;
 
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
-import fable.framework.toolbox.EclipseUtils;
+import org.dawb.common.ui.util.EclipseUtils;
 
 
 public class EditorsTest {

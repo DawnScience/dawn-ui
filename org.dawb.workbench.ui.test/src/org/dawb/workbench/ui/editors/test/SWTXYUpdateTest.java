@@ -15,9 +15,7 @@ import java.util.List;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.workbench.ui.editors.AsciiEditor;
-import org.dawb.workbench.ui.editors.ImageEditor;
 import org.dawb.workbench.ui.editors.PlotDataEditor;
-import org.dawb.workbench.ui.editors.PlotImageEditor;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.runtime.Platform;
@@ -30,8 +28,6 @@ import org.osgi.framework.Bundle;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.LongDataset;
-import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
-import uk.ac.gda.monitor.IMonitor;
 import fable.framework.toolbox.EclipseUtils;
 
 /**
