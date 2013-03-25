@@ -17,7 +17,6 @@ import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace.TraceType;
 import org.dawb.common.ui.plot.trace.IPaletteListener;
-import org.dawb.common.ui.plot.trace.IPaletteListener;
 import org.dawb.common.ui.plot.trace.IPaletteTrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.PaletteEvent;
@@ -952,10 +951,6 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			// get the image data
 			imageDataset = (AbstractDataset)image.getImageServiceBean().getImage();//image.getData();
-
-			if (imageDataset.containsInvalidNumbers() ) {
-				logger.debug("imageDataset contains invalid numbers");
-			}
 
 			if (imageDataset.containsInvalidNumbers() ) {
 				logger.debug("imageDataset contains invalid numbers");

@@ -465,11 +465,6 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 			} catch (Throwable ignored) {
 				// Leave set assigned as read
 			}
-			try {
-			    set = set.squeeze();
-			} catch (Throwable ignored) {
-				// Leave set assigned as read
-			}
 
 			if (set!=null) set.setName(name);
 			return set;
