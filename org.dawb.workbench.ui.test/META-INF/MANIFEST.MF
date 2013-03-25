@@ -6,6 +6,12 @@ Bundle-Version: 1.1.0.qualifier
 Bundle-Vendor: ESRF
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: fable.framework.toolbox,
+<<<<<<< HEAD
+=======
+ fable.imageviewer.editor,
+ org.csstudio.swt.xygraph.dataprovider,
+ org.csstudio.swt.xygraph.figures,
+>>>>>>> refs/remotes/origin/1.1
  org.dawb.common.ui.image,
  org.dawb.common.ui.plot,
  org.dawb.common.ui.plot.axis,
@@ -24,7 +30,12 @@ Import-Package: fable.framework.toolbox,
  org.junit,
  uk.ac.diamond.scisoft.analysis.dataset,
  uk.ac.diamond.scisoft.analysis.io,
+<<<<<<< HEAD
  uk.ac.diamond.scisoft.analysis.roi
+=======
+ uk.ac.diamond.scisoft.analysis.roi,
+ uk.ac.gda.monitor
+>>>>>>> refs/remotes/origin/1.1
 Export-Package: org.dawb.workbench.ui.editors.test
 Require-Bundle: org.eclipse.core.filesystem;bundle-version="1.3.1",
  org.eclipse.core.runtime;bundle-version="3.6.0",

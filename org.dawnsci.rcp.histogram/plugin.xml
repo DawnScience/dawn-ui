@@ -361,5 +361,15 @@
          </service>
       </serviceFactory>
    </extension>
+   <extension
+         point="org.eclipse.ui.cheatsheets.cheatSheetContent">
+      <cheatsheet
+            category="org.dawb.workbench.plotting.tools.category"
+            composite="false"
+            contentFile="cheat/ColourMappingExample.xml"
+            id="org.dawnsci.rcp.histogram.cheatsheet.colourmapping"
+            name="Colour Mapping Example">
+      </cheatsheet>
+   </extension>
 
 </plugin>

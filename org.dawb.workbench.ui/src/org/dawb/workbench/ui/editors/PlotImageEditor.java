@@ -273,9 +273,7 @@ public class PlotImageEditor extends EditorPart implements IReusableEditor {
 					} catch (Exception ne) {
 						ne.printStackTrace();
 					}
-				}
-
-				
+				}				
 				return Status.OK_STATUS;
 			}
 			

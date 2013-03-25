@@ -13,5 +13,10 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Import-Package: org.dawb.common.ui.monitor,
  org.dawb.common.ui.util,
+<<<<<<< HEAD
  org.eclipse.emf.common.ui.dialogs,
  org.slf4j
+=======
+ org.slf4j,
+ uk.ac.gda.monitor
+>>>>>>> refs/remotes/origin/1.1

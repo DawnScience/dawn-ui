@@ -17,6 +17,7 @@ import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace.TraceType;
 import org.dawb.common.ui.plot.trace.IPaletteListener;
+import org.dawb.common.ui.plot.trace.IPaletteListener;
 import org.dawb.common.ui.plot.trace.IPaletteTrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.PaletteEvent;
@@ -956,6 +957,10 @@ public class HistogramToolPage extends AbstractToolPage {
 				logger.debug("imageDataset contains invalid numbers");
 			}
 
+			if (imageDataset.containsInvalidNumbers() ) {
+				logger.debug("imageDataset contains invalid numbers");
+			}
+
 			logger.trace("Image Data is of type :" + imageDataset.getDtype());
 			if (imageDataset.hasFloatingPointElements()) {
 				num_bins = MAX_BINS;
@@ -1083,7 +1088,7 @@ public class HistogramToolPage extends AbstractToolPage {
 			scaleMax = scaleMaxTemp;
 			scaleMin = scaleMinTemp;
 		}
-		
+
 		// set the minmax values
 		minMaxValue.setMin(MIN_LABEL, scaleMin);
 		minMaxValue.setMax(MIN_LABEL, scaleMax);
