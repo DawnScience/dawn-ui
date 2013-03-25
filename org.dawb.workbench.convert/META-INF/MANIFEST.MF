@@ -19,4 +19,3 @@ Import-Package: org.dawb.common.ui.monitor,
 =======
  org.slf4j,
  uk.ac.gda.monitor
->>>>>>> refs/remotes/origin/1.1

@@ -23,10 +23,7 @@ import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
 import org.dawb.common.ui.plot.region.IRegionListener;
 import org.dawb.common.ui.plot.region.RegionEvent;
-<<<<<<< HEAD
 import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
-=======
->>>>>>> refs/remotes/origin/1.1
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.util.io.FileUtils;
@@ -98,7 +95,6 @@ public class SWTXYRegionsTest {
 		
 		// We update all the images in the directory.
 		final File[] fa = dir.listFiles();
-<<<<<<< HEAD
 		int i = 0;
 		for (File file : fa) {
 			if (!file.isFile()) continue;
@@ -110,15 +106,6 @@ public class SWTXYRegionsTest {
 				++i;
 				if (i>20) break; // that's enough!
 			}
-=======
-		for (File file : fa) {
-			if (!file.isFile()) continue;
-			
-			final AbstractDataset set = LoaderFactory.getData(file.getAbsolutePath(), null).getDataset(0);
-			system.updatePlot2D(set, null, null);
-			
-			EclipseUtils.delay(100);
->>>>>>> refs/remotes/origin/1.1
 		}
 		
 	}
@@ -298,7 +285,6 @@ public class SWTXYRegionsTest {
 		
 		// Get some kind of image directory for testing different images. 
 		String imagesDirPath = System.getProperty("org.dawb.workbench.ui.editors.test.images.directory");
-<<<<<<< HEAD
 		if (imagesDirPath==null) imagesDirPath = "\\\\Data.diamond.ac.uk\\i03\\data\\2013\\in5790-8\\35873";
 		File dir = new File(imagesDirPath);
 		if (!dir.exists()) {
@@ -319,29 +305,6 @@ public class SWTXYRegionsTest {
 		page.setPartState(EclipseUtils.getPage().getActivePartReference(), IWorkbenchPage.STATE_MAXIMIZED);		
 		
 		final AbstractPlottingSystem sys = (AbstractPlottingSystem)PlottingFactory.getPlottingSystem(editor.getPartName());
-=======
-		if (imagesDirPath==null) imagesDirPath = "C:/Work/results/ID22-ODA";
-		File dir = new File(imagesDirPath);
-		if (!dir.exists()) {
-			// TODO check on linux
-			dir = new File("/dls/sci-scratch/i12/27_nir_tomo15/sinograms");
-		}
-		if (!dir.exists()||!dir.isDirectory()) throw new Exception("Cannot find test folder for test!");
-		
-		final Bundle bun  = Platform.getBundle("org.dawb.workbench.ui.test");
-
-		String path = (bun.getLocation()+"src/org/dawb/workbench/ui/editors/test/billeA.edf");
-		path = path.substring("reference:file:".length());
-		if (path.startsWith("/C:")) path = path.substring(1);
-		
-		final IWorkbenchPage page      = EclipseUtils.getPage();		
-		final IFileStore  externalFile = EFS.getLocalFileSystem().fromLocalFile(new File(path));
-		final ImageEditor editor       = (ImageEditor)page.openEditor(new FileStoreEditorInput(externalFile), ImageEditor.ID);
-		page.setPartState(EclipseUtils.getPage().getActivePartReference(), IWorkbenchPage.STATE_MAXIMIZED);		
-		
-		final PlotImageEditor ed = editor.getPlotImageEditor();
-		final AbstractPlottingSystem sys = ed.getPlottingSystem();
->>>>>>> refs/remotes/origin/1.1
 		
  		EclipseUtils.delay(2000); // Wait for image to be plotted...
  		

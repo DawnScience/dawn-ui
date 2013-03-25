@@ -44,50 +44,6 @@ import fable.framework.toolbox.EclipseUtils;
 public class SWTXYUpdateTest {
 	
 	
-	/**
-	 * Does update on lots of images.
-	 * If directory cannot be found, test fails.
-	 */
-	@Test
-	public void testImageUpdate() throws Exception {
-		
-		// Get some kind of image directory for testing different images. 
-		String imagesDirPath = System.getProperty("org.dawb.workbench.ui.editors.test.images.directory");
-		if (imagesDirPath==null) imagesDirPath = "C:/Work/results/ID22-ODA";
-		File dir = new File(imagesDirPath);
-		if (!dir.exists()) {
-			// TODO check on linux
-			dir = new File("/dls/sci-scratch/i12/27_nir_tomo15/sinograms");
-		}
-		if (!dir.exists()||!dir.isDirectory()) throw new Exception("Cannot find test folder for test!");
-		
-		final Bundle bun  = Platform.getBundle("org.dawb.workbench.ui.test");
-
-		String path = (bun.getLocation()+"src/org/dawb/workbench/ui/editors/test/billeA.edf");
-		path = path.substring("reference:file:".length());
-		if (path.startsWith("/C:")) path = path.substring(1);
-		
-		final IWorkbenchPage page      = EclipseUtils.getPage();		
-		final IFileStore  externalFile = EFS.getLocalFileSystem().fromLocalFile(new File(path));
-		final ImageEditor editor       = (ImageEditor)page.openEditor(new FileStoreEditorInput(externalFile), ImageEditor.ID);
-		page.setPartState(EclipseUtils.getPage().getActivePartReference(), IWorkbenchPage.STATE_MAXIMIZED);		
-		
-		final PlotImageEditor ed = editor.getPlotImageEditor();
-		final AbstractPlottingSystem system = ed.getPlottingSystem();
-		
-		// We update all the images in the directory.
-		final File[] fa = dir.listFiles();
-		for (File file : fa) {
-			if (!file.isFile()) continue;
-			
-			final AbstractDataset set = LoaderFactory.getData(file.getAbsolutePath(), null).getDataset(0);
-			system.updatePlot2D(set, null, null);
-			
-			EclipseUtils.delay(20);
-		}
-		
-	}
-	
 	/** TODO
 	 * 1. Test large data.
 	 * 2. Test threads.
