@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.RGBDataset;
 import uk.ac.gda.richbeans.components.scalebox.NumberBox;
+import uk.ac.gda.richbeans.components.scalebox.RangeBox;
 import uk.ac.gda.richbeans.components.scalebox.ScaleBox;
 import uk.ac.gda.richbeans.event.ValueAdapter;
 import uk.ac.gda.richbeans.event.ValueEvent;
@@ -173,7 +174,7 @@ public class ImageTraceComposite extends Composite {
 		label.setText("Outlier low");
 		label.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false, 1, 1));
 		
-		this.lo = new ScaleBox(outlierComp, SWT.NONE);
+		this.lo = new RangeBox(outlierComp, SWT.NONE);
 		lo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 		if (imageTrace.getImageServiceBean()!=null) lo.setValue(imageTrace.getImageServiceBean().getLo());
 		lo.setActive(true);
@@ -203,7 +204,7 @@ public class ImageTraceComposite extends Composite {
 		label.setText("Outlier high");
 		label.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false, 1, 1));
 		
-		this.hi = new ScaleBox(outlierComp, SWT.NONE);
+		this.hi = new RangeBox(outlierComp, SWT.NONE);
 		hi.setUnit("%");
 		hi.setDecimalPlaces(3);
 		hi.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
