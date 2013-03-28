@@ -45,6 +45,8 @@ import org.dawb.common.ui.printing.IPrintImageProvider;
 import org.dawb.common.ui.printing.PlotExportPrintUtil;
 import org.dawb.common.ui.printing.PlotPrintPreviewDialog;
 import org.dawb.common.ui.printing.PrintSettings;
+import org.dawb.common.ui.util.ColorUtility;
+import org.dawb.common.ui.util.DisplayUtils;
 import org.dawb.gda.extensions.util.DatasetTitleUtils;
 import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.draw2d.swtxy.AspectAxis;
@@ -58,7 +60,6 @@ import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.dawnsci.plotting.draw2d.swtxy.selection.SelectionRegionFactory;
 import org.dawnsci.plotting.preference.PlottingConstants;
 import org.dawnsci.plotting.system.dialog.XYRegionConfigDialog;
-import org.dawnsci.plotting.util.ColorUtility;
 import org.dawnsci.plotting.util.TraceUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.draw2d.BorderLayout;
@@ -1079,25 +1080,16 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 	}
 
 	public void repaint(final boolean autoScale) {
-		if (Display.getDefault().getThread()==Thread.currentThread()) {
-			if (xyCanvas!=null && xyGraph != null) {
-				if (autoScale) xyGraph.performAutoScale();
-				xyCanvas.layout(xyCanvas.getChildren());
-				xyGraph.revalidate();
-				xyGraph.repaint();
-			}
-		} else {
-			Display.getDefault().syncExec(new Runnable() {
-				public void run() {
-					if (xyCanvas!=null && xyGraph != null) {
-						if (autoScale)xyGraph.performAutoScale();
-						xyCanvas.layout(xyCanvas.getChildren());
-						xyGraph.revalidate();
-						xyGraph.repaint();
-					}
+		DisplayUtils.runInDisplayThread(true, null, new Runnable() {
+			public void run() {
+				if (xyCanvas!=null && xyGraph != null) {
+					if (autoScale)xyGraph.performAutoScale();
+					xyCanvas.layout(xyCanvas.getChildren());
+					xyGraph.revalidate();
+					xyGraph.repaint();
 				}
-			});
-		}		
+			}
+		});
 	}
 
 	/**

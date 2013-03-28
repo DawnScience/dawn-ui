@@ -20,6 +20,7 @@ import org.dawb.common.ui.plot.trace.ILineStackTrace;
 import org.dawb.common.ui.plot.trace.ISurfaceTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.TraceWillPlotEvent;
+import org.dawb.common.ui.util.DisplayUtils;
 import org.dawnsci.plotting.jreality.compositing.CompositeEntry;
 import org.dawnsci.plotting.jreality.compositing.CompositingControl;
 import org.dawnsci.plotting.jreality.core.AxisMode;
@@ -64,7 +65,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.ScrollBar;
@@ -606,31 +606,21 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	 * @param async
 	 */
 	public void refresh(final boolean async) {
-		
-		if (Thread.currentThread()==Display.getDefault().getThread()) {
-			refreshInternal(async);
-		} else {
-			Display.getDefault().syncExec(new Runnable() {
-				public void run() {
-					refreshInternal(async);
+		DisplayUtils.runInDisplayThread(false, null, new Runnable() {
+			public void run() {
+				if (!exporting) {
+					if (viewerApp != null) {
+						if (async)
+							viewerApp.getCurrentViewer().renderAsync();
+						else
+							viewerApp.getCurrentViewer().render();
+					}
 				}
-			});
-		}
-		
-	}
-
-	private void refreshInternal(boolean async) {
-		if (!exporting) {
-			if (viewerApp != null) {
-				if (!async)
-					viewerApp.getCurrentViewer().render();
-				else
-					viewerApp.getCurrentViewer().renderAsync();
+				if ((currentMode == PlottingMode.ONED || currentMode == PlottingMode.ONED_THREED || currentMode == PlottingMode.SCATTER2D)
+						&& legendTable != null)
+					legendTable.updateTable(graphColourTable);
 			}
-		}
-		if ((currentMode == PlottingMode.ONED || currentMode == PlottingMode.ONED_THREED || currentMode == PlottingMode.SCATTER2D)
-				&& legendTable != null)
-			legendTable.updateTable(graphColourTable);
+		});
 	}
 
 	@Override
