@@ -14,8 +14,6 @@
       <programArgs>-showLocation</programArgs>
       <vmArgs>-Xms256m
 -Xmx1024m
--XX:+UseG1GC
--XX:MaxGCPauseMillis=1000
 -XX:PermSize=128m
 -XX:MaxPermSize=256m
 -Dcolour=on
