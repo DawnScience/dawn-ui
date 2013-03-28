@@ -175,6 +175,7 @@ public class ImageTraceComposite extends Composite {
 		label.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false, 1, 1));
 		
 		this.lo = new RangeBox(outlierComp, SWT.NONE);
+		lo.setButtonVisible(false);
 		lo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 		if (imageTrace.getImageServiceBean()!=null) lo.setValue(imageTrace.getImageServiceBean().getLo());
 		lo.setActive(true);
@@ -205,6 +206,7 @@ public class ImageTraceComposite extends Composite {
 		label.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false, 1, 1));
 		
 		this.hi = new RangeBox(outlierComp, SWT.NONE);
+		hi.setButtonVisible(false);
 		hi.setUnit("%");
 		hi.setDecimalPlaces(3);
 		hi.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
