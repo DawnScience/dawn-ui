@@ -76,7 +76,7 @@ class EllipseSelection extends AbstractSelectionRegion {
 	@Override
 	public void createContents(Figure parent) {
 		ellipse = new DecoratedEllipse(parent);
-		ellipse.setCursor(Draw2DUtils.getRoiMoveCursor());
+		//ellipse.setCursor(Draw2DUtils.getRoiMoveCursor());
 
 		parent.add(ellipse);
 		sync(getBean());
