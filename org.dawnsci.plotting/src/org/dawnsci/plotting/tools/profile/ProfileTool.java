@@ -408,51 +408,57 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 
-			if (!isActive()) return Status.CANCEL_STATUS;
-
-			final Collection<ITrace> traces= getPlottingSystem().getTraces(IImageTrace.class);	
-			IImageTrace image = traces!=null && traces.size()>0 ? (IImageTrace)traces.iterator().next() : null;
-
-			if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
-			if (image==null) {
-				profilePlottingSystem.clear();
-				return Status.OK_STATUS;
-			}
-
-			// if the current region is null try and update quickly (without creating 1D)
-			// if the trace is in the registered traces object
-			if (currentRegion==null) {
-				final Collection<IRegion> regions = getPlottingSystem().getRegions();
-				if (regions!=null) {
-					for (IRegion iRegion : regions) {
-						if (!iRegion.isUserRegion()) continue;
-						if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
-						if (registeredTraces.containsKey(iRegion.getName())) {
-							createProfile(image, iRegion, iRegion.getROI(), true, isDrag, monitor);
-						} else {
-							createProfile(image, iRegion, iRegion.getROI(), false, isDrag, monitor);
+			try {
+				if (!isActive()) return Status.CANCEL_STATUS;
+	
+				final Collection<ITrace> traces= getPlottingSystem().getTraces(IImageTrace.class);	
+				IImageTrace image = traces!=null && traces.size()>0 ? (IImageTrace)traces.iterator().next() : null;
+	
+				if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
+				if (image==null) {
+					profilePlottingSystem.clear();
+					return Status.OK_STATUS;
+				}
+	
+				// if the current region is null try and update quickly (without creating 1D)
+				// if the trace is in the registered traces object
+				if (currentRegion==null) {
+					final Collection<IRegion> regions = getPlottingSystem().getRegions();
+					if (regions!=null) {
+						for (IRegion iRegion : regions) {
+							if (!iRegion.isUserRegion()) continue;
+							if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
+							if (registeredTraces.containsKey(iRegion.getName())) {
+								createProfile(image, iRegion, iRegion.getROI(), true, isDrag, monitor);
+							} else {
+								createProfile(image, iRegion, iRegion.getROI(), false, isDrag, monitor);
+							}
 						}
+					} else {
+						registeredTraces.clear();
+						profilePlottingSystem.clear();
 					}
 				} else {
-					registeredTraces.clear();
-					profilePlottingSystem.clear();
+	
+					if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
+					createProfile(image, 
+							      currentRegion, 
+							      currentROI!=null?currentROI:currentRegion.getROI(), 
+								  true, 
+								  isDrag,
+								  monitor);
+	
 				}
-			} else {
-
-				if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
-				createProfile(image, 
-						      currentRegion, 
-						      currentROI!=null?currentROI:currentRegion.getROI(), 
-							  true, 
-							  isDrag,
-							  monitor);
-
+	
+				if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+				profilePlottingSystem.repaint();
+	
+				return Status.OK_STATUS;
+				
+			} catch (Throwable ne) {
+				logger.error("Internal error processing profile! ", ne);
+				return Status.CANCEL_STATUS;
 			}
-
-			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
-			profilePlottingSystem.repaint();
-
-			return Status.OK_STATUS;
 		
 		}
 	}

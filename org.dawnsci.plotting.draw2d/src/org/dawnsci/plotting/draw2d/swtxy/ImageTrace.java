@@ -48,7 +48,9 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.BooleanDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Maths;
 import uk.ac.diamond.scisoft.analysis.dataset.function.Downsample;
 import uk.ac.diamond.scisoft.analysis.dataset.function.DownsampleMode;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
@@ -1270,10 +1272,27 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		
 		final AbstractDataset xl = axes.get(0); // May be null
 		final AbstractDataset yl = axes.get(1); // May be null
-		transform(xl,0,point);
-		transform(yl,1,point);
-        return point;
+		final double[] ret = point.clone();
+		transform(xl,0,ret);
+		transform(yl,1,ret);
+        return ret;
 	}
+	
+	@Override
+	public double[] getPointInImageCoordinates(final double[] axisLocation) throws Exception {
+		if (!TraceUtils.isCustomAxes(this)) return axisLocation;
+		
+		final AbstractDataset xl = axes.get(0); // May be null
+		final AbstractDataset yl = axes.get(1); // May be null
+		final double xIndex = Double.isNaN(axisLocation[0])
+				            ? Double.NaN
+				            : DatasetUtils.crossings(xl, axisLocation[0]).get(0);
+		final double yIndex = Double.isNaN(axisLocation[1])
+	                        ? Double.NaN
+	            		    : DatasetUtils.crossings(yl, axisLocation[1]).get(0);
+        return new double[]{xIndex, yIndex};
+	}
+
 	
 	private void transform(AbstractDataset label, int index, double[]... points) {
 		if (label!=null) {

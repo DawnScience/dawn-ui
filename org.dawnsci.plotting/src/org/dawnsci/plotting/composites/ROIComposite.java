@@ -230,7 +230,7 @@ public class ROIComposite extends Composite {
 	public void setEditingRegion(final AbstractSelectionRegion region) {
 
 		this.editingRegion = region;
-		this.roiViewer.setRegion(region.getROI(), region.getRegionType());
+		this.roiViewer.setRegion(region.getROI(), region.getRegionType(), region.getCoordinateSystem());
 		this.roiListener = new IROIListener.Stub() {
 			@Override
 			public void roiChanged(ROIEvent evt) {

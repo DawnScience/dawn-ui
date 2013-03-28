@@ -168,4 +168,19 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 		return imageTrace.getImageOrigin()!=ImageOrigin.TOP_LEFT &&
 			   imageTrace.getImageOrigin()!=ImageOrigin.TOP_RIGHT;
 	}
+
+	@Override
+	public double[] getValueAxisLocation(double... values) throws Exception {
+		// No need to test for reversal here, the labels and the image do not get reversed.
+		if (imageTrace==null) return values;
+		return imageTrace.getPointInAxisCoordinates(values);
+	}
+	
+	@Override
+	public double[] getAxisLocationValue(double... axisLocation) throws Exception {
+		// No need to test for reversal here, the labels and the image do not get reversed.
+		if (imageTrace==null) return axisLocation;
+		return imageTrace.getPointInImageCoordinates(axisLocation);
+	}
+
 }
