@@ -21,11 +21,11 @@ Bundle-NativeCode: lib/win32-x86/jogl_awt.dll;  lib/win32-x86/jogl_cg.dll; lib/w
  *
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
-Bundle-ClassPath: gluegen-rt.jar,
- jogl.jar,
- jReality_modified.jar,
- .,
- jtem-beans.jar
+Bundle-ClassPath: jars/gluegen-rt.jar,
+ jars/jogl.jar,
+ jars/jReality_modified.jar,
+ jars/jtem-beans.jar,
+ .
 Import-Package: org.dawb.common.services,
  org.slf4j
 Export-Package: de.jreality.backends.label,
