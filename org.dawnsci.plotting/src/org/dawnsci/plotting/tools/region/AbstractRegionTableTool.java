@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.dawb.common.ui.plot.axis.ICoordinateSystem;
 import org.dawb.common.ui.plot.region.IROIListener;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.IRegion.RegionType;
@@ -81,8 +82,8 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 			if (!(sel.getFirstElement() instanceof IRegion)) return;
 			final IRegion          region = (IRegion)sel.getFirstElement();
 			previousRegion = region;
-			if((region != null) && region.getROI().isPlot()) region.setRegionColor(ColorConstants.green);
-			else if ((region != null) && !region.getROI().isPlot()) region.setRegionColor(ColorConstants.gray);
+			if((region != null) && region.isActive()) region.setRegionColor(ColorConstants.green);
+			else if ((region != null) && !region.isActive()) region.setRegionColor(ColorConstants.gray);
 			previousColor  = region!=null ? region.getRegionColor() : null;
 
 			if (region!=null) region.setRegionColor(ColorConstants.red);
@@ -395,6 +396,8 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 			IRegion region = evt.getRegion();
 			region.addROIListener(this);
 			region.getROI().setPlot(true);
+			// set the Region isActive flag
+			region.setActive(true);
 		}
 	}
 
@@ -570,5 +573,33 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 			
 		}
 		return result;
+	}
+
+	/**
+	 * get point in axis coords
+	 * @param coords
+	 * @return
+	 */
+	public static double[] getAxisPoint(ICoordinateSystem coords, double... vals) {
+		if (coords==null) return vals;
+		try {
+			return coords.getValueAxisLocation(vals);
+		} catch (Exception e) {
+			return vals;
+		}
+	}
+
+	/**
+	 * get point in image coords
+	 * @param coords
+	 * @return
+	 */
+	public double[] getImagePoint(ICoordinateSystem coords, double... vals) {
+		if (coords==null) return vals;
+		try {
+			return coords.getAxisLocationValue(vals);
+		} catch (Exception e) {
+			return vals;
+		}
 	}
 }

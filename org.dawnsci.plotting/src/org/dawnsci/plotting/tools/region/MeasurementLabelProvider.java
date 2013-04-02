@@ -3,6 +3,7 @@ package org.dawnsci.plotting.tools.region;
 import java.text.DecimalFormat;
 
 import org.dawb.common.util.number.DoubleUtils;
+import org.dawb.common.ui.plot.axis.ICoordinateSystem;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawnsci.plotting.Activator;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -48,7 +49,7 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 		if (!(element instanceof IRegion)) return null;
 		if (column==LabelType.ACTIVE){
 			final IRegion region = (IRegion)element;
-			return region.getROI().isPlot() && tool.getControl().isEnabled() ? checkedIcon : uncheckedIcon;
+			return region.isActive() && tool.getControl().isEnabled() ? checkedIcon : uncheckedIcon;
 		}
 		return null;
 	}
@@ -64,36 +65,37 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 		try {
 			Object fobj = null;
 			if (element instanceof String) return "";
+			ICoordinateSystem coords = region.getCoordinateSystem();
 			switch(column) {
 			case ROINAME:
 				return region.getLabel();
 			case STARTX:
 				if(roi instanceof LinearROI)
-					fobj = ((LinearROI)roi).getPoint()[0];
+					fobj = AbstractRegionTableTool.getAxisPoint(coords, ((LinearROI)roi).getPoint())[0];
 				else if (roi instanceof RectangularROI)
-					fobj = ((RectangularROI)roi).getPoint()[0];
+					fobj = AbstractRegionTableTool.getAxisPoint(coords, ((RectangularROI)roi).getPoint())[0];
 				return fobj == null ? NA : DoubleUtils.formatDouble((Double)fobj, 0);
 			case STARTY: // dx
 				if(roi instanceof LinearROI)
-					fobj = ((LinearROI)roi).getPoint()[1];
+					fobj = AbstractRegionTableTool.getAxisPoint(coords, ((LinearROI)roi).getPoint())[1];
 				else if (roi instanceof RectangularROI)
-					fobj = ((RectangularROI)roi).getPoint()[1];
+					fobj = AbstractRegionTableTool.getAxisPoint(coords, ((RectangularROI)roi).getPoint())[1];
 				else
 					;
 				return fobj == null ? NA : DoubleUtils.formatDouble((Double)fobj, 0);
 			case ENDX: // dy
 				if(roi instanceof LinearROI)
-					fobj = ((LinearROI)roi).getEndPoint()[0];
+					fobj = AbstractRegionTableTool.getAxisPoint(coords, ((LinearROI)roi).getEndPoint())[0];
 				else if(roi instanceof RectangularROI)
-					fobj = ((RectangularROI)roi).getEndPoint()[0];
+					fobj = AbstractRegionTableTool.getAxisPoint(coords, ((RectangularROI)roi).getEndPoint())[0];
 				else
 					;
 				return fobj == null ? NA : DoubleUtils.formatDouble((Double)fobj, 0);
 			case ENDY: // length
 				if(roi instanceof LinearROI)
-					fobj = ((LinearROI)roi).getEndPoint()[1];
+					fobj = AbstractRegionTableTool.getAxisPoint(coords, ((LinearROI)roi).getEndPoint())[1];
 				else if(roi instanceof RectangularROI)
-					fobj = ((RectangularROI)roi).getEndPoint()[1];
+					fobj = AbstractRegionTableTool.getAxisPoint(coords, ((RectangularROI)roi).getEndPoint())[1];
 				else
 					;
 				return fobj == null ? NA : DoubleUtils.formatDouble((Double)fobj, 0);
