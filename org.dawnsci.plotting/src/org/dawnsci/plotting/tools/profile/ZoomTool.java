@@ -68,9 +68,23 @@ public class ZoomTool extends ProfileTool {
 		final int xInc = bounds.getPoint()[0]<bounds.getEndPoint()[0] ? 1 : -1;
 		
 		try {
-			final AbstractDataset slice = image.getData().getSlice(new int[] { (int) bounds.getPoint()[1], (int) bounds.getPoint()[0] },
-					                                               new int[] { (int) bounds.getEndPoint()[1], (int) bounds.getEndPoint()[0] },
-					                                               new int[] {yInc, xInc});
+			AbstractDataset slice = null;
+			// If the region is out of the image bounds (left and top) we set the start points to 0
+			if((int) bounds.getPoint()[0]<0 && (int) bounds.getPoint()[1]>=0)
+				slice = image.getData().getSlice(new int[] { (int) bounds.getPoint()[1], 0 },
+						new int[] { (int) bounds.getEndPoint()[1], (int) bounds.getEndPoint()[0] },
+						new int[] {yInc, xInc});
+			else if ((int) bounds.getPoint()[1]<0 && (int) bounds.getPoint()[0]>=0)
+				slice = image.getData().getSlice(new int[] { 0, (int) bounds.getPoint()[0] },
+						new int[] { (int) bounds.getEndPoint()[1], (int) bounds.getEndPoint()[0] },
+						new int[] {yInc, xInc});
+			else if((int) bounds.getPoint()[0]<0 && (int) bounds.getPoint()[1]<0)
+				slice = image.getData().getSlice(new int[] { 0, 0 },
+						new int[] { (int) bounds.getEndPoint()[1], (int) bounds.getEndPoint()[0] },
+						new int[] {yInc, xInc});
+			else slice = image.getData().getSlice(new int[] { (int) bounds.getPoint()[1], (int) bounds.getPoint()[0] },
+					new int[] { (int) bounds.getEndPoint()[1], (int) bounds.getEndPoint()[0] },
+					new int[] {yInc, xInc});
 			
 	
 			slice.setName(region.getName());
