@@ -184,6 +184,8 @@ class LineSelection extends AbstractSelectionRegion {
 			final LinearROI lroi = new LinearROI(p1, p2);
 			lroi.setName(getName());
 			if (roi!=null) lroi.setPlot(roi.isPlot());
+			// set the Region isActive flag
+			this.setActive(this.isActive());
 			if (recordResult)
 				roi = lroi;
 			return lroi;

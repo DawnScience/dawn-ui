@@ -1,5 +1,6 @@
 package org.dawnsci.plotting.tools.region;
 
+import org.dawb.common.ui.plot.axis.ICoordinateSystem;
 import org.dawb.common.ui.plot.region.IRegion;
 import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawnsci.plotting.tools.region.MeasurementLabelProvider.LabelType;
@@ -178,26 +179,26 @@ public class RegionEditTool extends AbstractRegionTableTool {
 		protected Object getValue(Object element) {
 			final IRegion region = (IRegion)element;
 			ROIBase roi = region.getROI();
-
+			ICoordinateSystem coords = region.getCoordinateSystem();
 			switch (column){
 			case 0:
 				return region.getLabel();
 			case 1:
-				return region.getROI().getPointX();
+				return getAxisPoint(coords, roi.getPoint())[0];
 			case 2:
-				return region.getROI().getPointY();
+				return getAxisPoint(coords, roi.getPoint())[1];
 			case 3:
 				if(roi instanceof RectangularROI)
-					return ((RectangularROI)roi).getEndPoint()[0];
+					return getAxisPoint(coords, ((RectangularROI)roi).getEndPoint())[0];
 				else if(roi instanceof LinearROI)
-					return ((LinearROI)roi).getEndPoint()[0];
+					return getAxisPoint(coords, ((LinearROI)roi).getEndPoint())[0];
 				else 
 					return null;
 			case 4:
 				if(roi instanceof RectangularROI)
-					return ((RectangularROI)roi).getEndPoint()[1];
+					return getAxisPoint(coords, ((RectangularROI)roi).getEndPoint())[1];
 				else if(roi instanceof LinearROI)
-					return ((LinearROI)roi).getEndPoint()[1];
+					return getAxisPoint(coords, ((LinearROI)roi).getEndPoint())[1];
 				else 
 					return null;
 			case 5: //max intensity
@@ -205,7 +206,8 @@ public class RegionEditTool extends AbstractRegionTableTool {
 			case 6: //sum
 				return null;
 			case 7: //isPlot
-				return roi.isPlot();
+				return region.isActive();
+//				return roi.isPlot();
 			default:
 				return null;
 			}
@@ -222,10 +224,11 @@ public class RegionEditTool extends AbstractRegionTableTool {
 			}
 		}
 		
-		protected void setValue(Object element, Object value, boolean tableRefresh) throws Exception {
+		private void setValue(Object element, Object value, boolean tableRefresh) throws Exception {
 
 			final IRegion region = (IRegion) element;
 			ROIBase myRoi = region.getROI();
+			ICoordinateSystem coords = region.getCoordinateSystem();
 			switch (column){
 			case 0:
 				// takes care of renaming the region (label and key value in hash table)
@@ -235,14 +238,17 @@ public class RegionEditTool extends AbstractRegionTableTool {
 				if(myRoi instanceof LinearROI){
 					LinearROI lroi = (LinearROI)myRoi;
 					double[] endPoint = lroi.getEndPoint();
+					double[] startPoint = getImagePoint(coords, new double[]{(Double)value, lroi.getPointY()});
+					lroi.setPoint(startPoint);
 					lroi.setPoint((Double)value, lroi.getPointY());
 					lroi.setEndPoint(endPoint);
 					myRoi = lroi;
 				} else if(myRoi instanceof RectangularROI){
 					RectangularROI rroi = (RectangularROI)myRoi;
 					double[] endPoint = rroi.getEndPoint();
-					rroi.setPoint((Double)value, myRoi.getPointY());
-					rroi.setLengths(endPoint[0] - (Double)value, rroi.getLengths()[1]); //set new endpoint
+					double[] startPoint = getImagePoint(coords, new double[]{(Double)value, rroi.getPointY()});
+					rroi.setPoint(startPoint);
+					rroi.setLengths(endPoint[0] - startPoint[0], rroi.getLengths()[1]); //set new endpoint
 					myRoi = rroi;
 				}
 				break;
@@ -250,28 +256,43 @@ public class RegionEditTool extends AbstractRegionTableTool {
 				if(myRoi instanceof LinearROI){
 					LinearROI lroi = (LinearROI)myRoi;
 					double[] endPoint = lroi.getEndPoint();
-					lroi.setPoint(lroi.getPointX(), (Double)value);
+					double[] startPoint = getImagePoint(coords, new double[]{lroi.getPointX(), (Double)value});
+					lroi.setPoint(startPoint);
 					lroi.setEndPoint(endPoint);
 					myRoi = lroi;
 				} else if(myRoi instanceof RectangularROI){
 					RectangularROI rroi = (RectangularROI)myRoi;
 					double[] endPoint = rroi.getEndPoint();
-					rroi.setPoint(myRoi.getPointX(), (Double)value);
-					rroi.setLengths(rroi.getLengths()[0], endPoint[1] - (Double)value); //set new endpoint
+					double[] startPoint = getImagePoint(coords, new double[]{rroi.getPointX(), (Double)value});
+					rroi.setPoint(startPoint);
+					rroi.setLengths(rroi.getLengths()[0], endPoint[1] - startPoint[1]); //set new endpoint
 					myRoi = rroi;
 				}
 				break;
 			case 3:
-				if(myRoi instanceof LinearROI)
-					((LinearROI)myRoi).setEndPoint((Double)value, ((LinearROI)myRoi).getEndPoint()[1]);
-				else if (myRoi instanceof RectangularROI)
-					((RectangularROI)myRoi).setEndPoint(new double[]{(Double)value, ((RectangularROI)myRoi).getEndPoint()[1]});
+				if(myRoi instanceof LinearROI){
+					double[] endPoint = getImagePoint(coords, 
+							new double[]{(Double)value, ((LinearROI)myRoi).getEndPoint()[1]});
+					((LinearROI)myRoi).setEndPoint(endPoint);
+				}
+				else if (myRoi instanceof RectangularROI){
+					double[] endPoint = getImagePoint(coords, 
+							new double[]{(Double)value, ((RectangularROI)myRoi).getEndPoint()[1]});
+					((RectangularROI)myRoi).setEndPoint(endPoint);
+				}
 				break;
 			case 4:
-				if(myRoi instanceof LinearROI)
-					((LinearROI)myRoi).setEndPoint(((LinearROI)myRoi).getEndPoint()[0], (Double)value);
-				else if (myRoi instanceof RectangularROI)
-					((RectangularROI)myRoi).setEndPoint(new double[]{((RectangularROI)myRoi).getEndPoint()[0], (Double)value});
+				if(myRoi instanceof LinearROI){
+					double[] endPoint = getImagePoint(coords, 
+							new double[]{((LinearROI)myRoi).getEndPoint()[0], (Double)value});
+					((LinearROI)myRoi).setEndPoint(endPoint);
+				}
+				else if (myRoi instanceof RectangularROI){
+					double[] endPoint = getImagePoint(coords, 
+							new double[]{((RectangularROI)myRoi).getEndPoint()[0], (Double)value});
+					((RectangularROI)myRoi).setEndPoint(endPoint);
+
+				}
 				break;
 			case 5: //intensity
 				break;
@@ -279,11 +300,7 @@ public class RegionEditTool extends AbstractRegionTableTool {
 				break;
 			case 7: //isPlot
 				myRoi.setPlot((Boolean)value);
-//				if(isActive){
-//					if (region!=null) region.setRegionColor(ColorConstants.green);
-//				} else {
-//					if (region!=null) region.setRegionColor(ColorConstants.gray);
-//				}
+				region.setActive((Boolean)value);
 				break;
 			default:
 				break;
@@ -292,16 +309,11 @@ public class RegionEditTool extends AbstractRegionTableTool {
 			if (tableRefresh) {
 				getViewer().refresh();
 			}
-			
+
 			roi = myRoi;
 			IRegion myregion = getPlottingSystem().getRegion(region.getName());
 			if(myregion!= null)
 				myregion.setROI(myRoi);
-			
 		}
-
-		
 	}
-
-	
 }

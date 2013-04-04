@@ -151,6 +151,8 @@ public class PointSelection extends AbstractSelectionRegion {
 		if (point == null) return getROI();
 		final PointROI proi = new PointROI(point.getPosition());
 		if (roi!=null) proi.setPlot(roi.isPlot());
+		// set the Region isActive flag
+		this.setActive(this.isActive());
 		if (recordResult) roi = proi;
 
 		return proi;

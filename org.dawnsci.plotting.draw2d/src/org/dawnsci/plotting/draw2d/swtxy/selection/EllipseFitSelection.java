@@ -27,7 +27,6 @@ import org.dawnsci.plotting.draw2d.swtxy.RegionBean;
 import org.dawnsci.plotting.draw2d.swtxy.translate.FigureTranslator;
 import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationEvent;
 import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationListener;
-import org.dawnsci.plotting.draw2d.swtxy.util.Draw2DUtils;
 import org.dawnsci.plotting.draw2d.swtxy.util.RotatableEllipse;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
@@ -85,7 +84,7 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 	@Override
 	public void createContents(Figure parent) {
 		ellipse = new DecoratedEllipse(parent);
-		ellipse.setCursor(Draw2DUtils.getRoiMoveCursor());
+		//ellipse.setCursor(Draw2DUtils.getRoiMoveCursor());
 
 		parent.add(ellipse);
 		sync(getBean());
@@ -223,6 +222,8 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 		try {
 			final EllipticalFitROI eroi = new EllipticalFitROI(hroi, circleOnly);
 			if (roi!=null) eroi.setPlot(roi.isPlot());
+			// set the Region isActive flag
+			this.setActive(this.isActive());
 			if (recordResult) {
 				roi = eroi;
 			}

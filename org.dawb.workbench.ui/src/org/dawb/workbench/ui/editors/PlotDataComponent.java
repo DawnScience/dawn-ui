@@ -1513,6 +1513,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		
 		if (!((CheckableObject)sel).isExpression()) return;
 		data.remove(sel);
+		clearExpressionCache();
 		dataViewer.refresh();
 		saveExpressions();
 	}

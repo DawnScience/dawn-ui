@@ -213,6 +213,8 @@ class RingSelection extends AbstractSelectionRegion {
 			final RingROI sroi = new RingROI(inRad, outRad);
 			sroi.setPoint(rcen);
 			if (roi!=null) sroi.setPlot(roi.isPlot());
+			// set the Region isActive flag
+			this.setActive(this.isActive());
 
 			if (recordResult)
 				roi = sroi;
