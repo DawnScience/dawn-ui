@@ -216,7 +216,7 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 		
 		if (!sroi.hasSeparateRegions())  {
 			
-			if (meta!=null && isValidMetadata(meta)) {
+			if (meta!=null && isValidMetadata(meta) && (meta instanceof IDiffractionMetadata)) {
 				setActionsEnabled(true);
 				return new AbstractDataset[]{pixelToValue(xi,(IDiffractionMetadata)meta)};
 			}
@@ -255,6 +255,8 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 				angles[2] == 0) {
 				return true;
 			}
+		} else if (meta!=null && !(meta instanceof IDiffractionMetadata)) {
+			return true;
 		}
 		
 		return false;
