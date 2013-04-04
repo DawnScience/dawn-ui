@@ -309,7 +309,7 @@ public class ImageTraceComposite extends Composite {
 		maxCut.setActive(true);
 		maxCut.setIntegerBox(isInt);
 		maxCut.setMinimum(maximum);
-		minCut.setMaximum(Double.POSITIVE_INFINITY);
+		maxCut.setMaximum(Double.POSITIVE_INFINITY);
 		
 		maxCutColor = new ColorSelector(cuts);
 		maxCutColor.getButton().setLayoutData(new GridData());		
