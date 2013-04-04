@@ -232,10 +232,10 @@ public class ImageTraceComposite extends Composite {
 			}
 		});
       		
-		hi.setMaximum(100);
+		hi.setMaximum(99.999);
 		hi.setMinimum(lo);
 		lo.setMaximum(hi);
-		lo.setMinimum(0);
+		lo.setMinimum(0.001);
 		
 		if (imageTrace.getData() instanceof RGBDataset) {
 			histolabel.setEnabled(false);
@@ -285,6 +285,7 @@ public class ImageTraceComposite extends Composite {
 		minCut.setActive(true);
 		minCut.setIntegerBox(isInt);
 		minCut.setMaximum(minimum);
+		minCut.setMinimum(Double.NEGATIVE_INFINITY);
 		
 		minCutColor = new ColorSelector(cuts);
 		minCutColor.getButton().setLayoutData(new GridData());		
@@ -308,6 +309,7 @@ public class ImageTraceComposite extends Composite {
 		maxCut.setActive(true);
 		maxCut.setIntegerBox(isInt);
 		maxCut.setMinimum(maximum);
+		minCut.setMaximum(Double.POSITIVE_INFINITY);
 		
 		maxCutColor = new ColorSelector(cuts);
 		maxCutColor.getButton().setLayoutData(new GridData());		
