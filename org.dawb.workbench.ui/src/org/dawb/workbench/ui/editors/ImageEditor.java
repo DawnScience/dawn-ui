@@ -20,6 +20,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IReusableEditor;
+import org.eclipse.ui.IShowEditorInput;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.eclipse.ui.part.Page;
@@ -27,7 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class ImageEditor extends MultiPageEditorPart implements IReusableEditor  {
+public class ImageEditor extends MultiPageEditorPart implements IReusableEditor, IShowEditorInput  {
 
 	public static final String ID = "org.dawb.workbench.editors.ImageEditor"; //$NON-NLS-1$
 
@@ -91,10 +92,13 @@ public class ImageEditor extends MultiPageEditorPart implements IReusableEditor 
 				index++;
 			}
 
-			this.plotImageEditor = new PlotImageEditor(this);
-			addPage(index, plotImageEditor,       getEditorInput());
-			setPageText(index, "Image");
-			index++;
+			final String plotImageEditorDisabled = "org.dawb.workbench.ui.editors.plotimageeditor.disabled";
+			if( System.getProperty(plotImageEditorDisabled) == null || "false".equals(System.getProperty(plotImageEditorDisabled)) ) {
+				this.plotImageEditor = new PlotImageEditor();
+				addPage(index, plotImageEditor,       getEditorInput());
+				setPageText(index, "Image");
+				index++;
+			}
 			
 			if (!dataFirst && System.getProperty("org.dawb.editor.ascii.hide.diamond.image.editor")==null) {
 				final uk.ac.diamond.scisoft.analysis.rcp.editors.ImageEditor im = new uk.ac.diamond.scisoft.analysis.rcp.editors.ImageEditor();
@@ -158,5 +162,14 @@ public class ImageEditor extends MultiPageEditorPart implements IReusableEditor 
 	public String toString(){
 		if (getEditorInput()!=null) return getEditorInput().getName();
 		return super.toString();
+	}
+
+	public PlotImageEditor getPlotImageEditor() {
+		return plotImageEditor;
+	}
+
+	@Override
+	public void showEditorInput(IEditorInput editorInput) {
+		setInput(editorInput);		
 	}
 }
