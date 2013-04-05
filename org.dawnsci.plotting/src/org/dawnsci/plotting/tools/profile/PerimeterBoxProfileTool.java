@@ -22,6 +22,7 @@ import org.dawb.common.ui.plot.region.RegionEvent;
 import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.tool.AbstractToolPage;
 import org.dawb.common.ui.plot.tool.IToolPageSystem;
+import org.dawb.common.ui.plot.tool.ToolPageFactory;
 import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.IPaletteListener;
@@ -29,7 +30,6 @@ import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.plot.trace.PaletteEvent;
 import org.dawb.common.ui.plot.trace.TraceEvent;
-import org.dawb.common.ui.widgets.ROISumWidget;
 import org.dawb.common.ui.widgets.ROIWidget;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -43,12 +43,14 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
@@ -101,7 +103,7 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 
 	private Composite profileContentComposite;
 
-	private ROISumWidget roiSumWidget;
+	private AbstractToolPage roiSumProfile;
 
 	public PerimeterBoxProfileTool() {
 		
@@ -185,11 +187,14 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 		profileContentComposite.setLayout(new GridLayout(1, true));
 		SashForm sashForm = new SashForm(profileContentComposite, SWT.HORIZONTAL);
 		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
+		sashForm.setBackground(new Color(parent.getDisplay(), 192, 192, 192));
+
 		SashForm sashForm2 = new SashForm(sashForm, SWT.VERTICAL);
 		sashForm2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		sashForm2.setBackground(new Color(parent.getDisplay(), 192, 192, 192));
 		SashForm sashForm3 = new SashForm(sashForm, SWT.VERTICAL);
 		sashForm3.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		sashForm3.setBackground(new Color(parent.getDisplay(), 192, 192, 192));
 
 		try {
 			// we create the zool plot part
@@ -263,9 +268,21 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 					}
 				}
 			});
-			
-			roiSumWidget = new ROISumWidget(mainRegionComposite, (AbstractPlottingSystem) getPlottingSystem());
-			
+
+			Group regionSumGroup = new Group(mainRegionComposite, SWT.NONE);
+			regionSumGroup.setText("Sum");
+			gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
+			regionSumGroup.setLayout(new GridLayout(1, false));
+			regionSumGroup.setLayoutData(gridData);
+			roiSumProfile = (AbstractToolPage)ToolPageFactory.getToolPage("org.dawb.workbench.plotting.tools.regionSumTool");
+			roiSumProfile.setToolSystem((AbstractPlottingSystem) getPlottingSystem());
+			roiSumProfile.setPlottingSystem((AbstractPlottingSystem) getPlottingSystem());
+			roiSumProfile.setTitle("Region_Sum");
+			//roiSumProfile.setPart((IViewPart)getGuiManager());
+			roiSumProfile.setToolId(String.valueOf(roiSumProfile.hashCode()));
+			roiSumProfile.createControl(regionSumGroup);
+			roiSumProfile.activate();
+
 			mainRegionInfoExpander.setClient(mainRegionComposite);
 			mainRegionInfoExpander.addExpansionListener(expansionAdapter);
 			mainRegionInfoExpander.setExpanded(true);
@@ -428,8 +445,8 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 
 		if(myROIWidget != null)
 			myROIWidget.dispose();
-		if(roiSumWidget != null)
-			roiSumWidget.dispose();
+		if(roiSumProfile != null)
+			roiSumProfile.dispose();
 		if(verticalProfileROIWidget != null)
 			verticalProfileROIWidget.dispose();
 		if(horizontalProfileROIWidget != null)
