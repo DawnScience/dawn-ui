@@ -10,6 +10,8 @@
 
 package org.dawnsci.plotting.expression;
 
+import java.lang.ref.Reference;
+import java.lang.ref.SoftReference;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +45,8 @@ class ExpressionObject implements IExpressionObject {
 	private String expressionString;
 	private IVariableManager provider;
 	private JexlEngine jexl;
+	private Reference<ILazyDataset>    lazySet;
+	private Reference<AbstractDataset> dataSet;
 	
 	public ExpressionObject(final IVariableManager provider, String expression) {
 		this.provider         = provider;
@@ -116,18 +120,17 @@ class ExpressionObject implements IExpressionObject {
 			return false;
 		}
 	}
-	
-	private ILazyDataset lazySet;
-	
+		
 	/**
 	 * Just gives a lazy the same size as one of the 
 	 */
 	public ILazyDataset getLazyDataSet(String suggestedName, IMonitor monitor) {
 		
-		if (lazySet!=null) return lazySet;
-		if (dataSet!=null) return dataSet;
+		if (lazySet!=null&&lazySet.get()!=null) return lazySet.get();
+		if (dataSet!=null&&dataSet.get()!=null) return dataSet.get();
 		lazySet = null;
 		
+		ILazyDataset lazy = null;
 		if (jexl==null) jexl = JexlUtils.getDawnJexlEngine();
 		try {
 			ExpressionImpl ex = (ExpressionImpl)jexl.createExpression(expressionString);
@@ -139,7 +142,7 @@ class ExpressionObject implements IExpressionObject {
 			 */
 			if (isCustomFunctionExpression(getExpressionString())) { // We evaluate the function in memory
 				
-				lazySet = getDataSet(suggestedName, monitor);
+				lazy = getDataSet(suggestedName, monitor);
 				
 			} else { 
 				
@@ -162,15 +165,16 @@ class ExpressionObject implements IExpressionObject {
 			    
 			    if (largestShape!=null) {
 		        	ILazyLoader loader = new ExpressionLazyLoader(suggestedName, getExpressionString(), provider);
-		        	lazySet = new ExpressionLazyDataset(suggestedName, AbstractDataset.FLOAT64, largestShape, loader);
+		        	lazy = new ExpressionLazyDataset(suggestedName, AbstractDataset.FLOAT64, largestShape, loader);
 			    }
 
 			}
 		    
-		} catch (Throwable allowed) {
-			return lazySet;
+		} catch (Throwable ignored) {
+			
 		}
-		return lazySet;
+		if (lazy!=null) lazySet = new SoftReference<ILazyDataset>(lazy);
+		return lazy;
 	}
 	
 	private static final Pattern function = Pattern.compile("[a-zA-Z]+\\:(.*)+");
@@ -179,10 +183,9 @@ class ExpressionObject implements IExpressionObject {
 		return function.matcher(expr).matches();
 	}
 
-	private AbstractDataset dataSet;
 	public AbstractDataset getDataSet(String suggestedName, IMonitor mon) throws Exception {
 		
-		if (dataSet!=null) return dataSet;
+		if (dataSet!=null&&dataSet.get()!=null) return dataSet.get();
 		
 	    if (expressionString==null||provider==null) return new DoubleDataset();
 	    
@@ -197,17 +200,18 @@ class ExpressionObject implements IExpressionObject {
 		
 		Expression ex = jexl.createExpression(expressionString);
         
-		this.dataSet = (AbstractDataset)ex.evaluate(context);
+		AbstractDataset ads = (AbstractDataset)ex.evaluate(context);
 		if (suggestedName==null) {
-		    dataSet.setName(getExpressionString());
+			ads.setName(getExpressionString());
 		} else {
-			dataSet.setName(suggestedName);
+			ads.setName(suggestedName);
 		}
 		
-		if (lazySet!=null && lazySet instanceof ExpressionLazyDataset) {
-			((ExpressionLazyDataset)lazySet).setShapeSilently(dataSet.getShape());
+		if (lazySet!=null && lazySet.get() instanceof ExpressionLazyDataset) {
+			((ExpressionLazyDataset)lazySet.get()).setShapeSilently(ads.getShape());
 		}
-		return this.dataSet;
+		if (ads!=null) dataSet = new SoftReference<AbstractDataset>(ads);
+		return ads;
 	}
 
 	private Map<String, AbstractDataset> getVariables(IMonitor monitor) throws Exception {
