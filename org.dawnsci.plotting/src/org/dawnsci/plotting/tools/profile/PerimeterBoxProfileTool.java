@@ -445,8 +445,8 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 
 		if(myROIWidget != null)
 			myROIWidget.dispose();
-		if(roiSumProfile != null)
-			roiSumProfile.dispose();
+//		if(roiSumProfile != null)
+//			roiSumProfile.dispose();
 		if(verticalProfileROIWidget != null)
 			verticalProfileROIWidget.dispose();
 		if(horizontalProfileROIWidget != null)
