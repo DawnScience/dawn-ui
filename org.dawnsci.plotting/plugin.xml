@@ -205,6 +205,14 @@
             label="Window"
             tooltip="A tool to set a window used for 3D plotting.">
       </plotting_tool_page>
+      <plotting_tool_page
+            class="org.dawnsci.plotting.tools.RegionSumTool"
+            icon="icons/sum.png"
+            id="org.dawb.workbench.plotting.tools.regionSumTool"
+            label="Region Sum"
+            tooltip="A tool that shows the sum of the region selection"
+            visible="false">
+      </plotting_tool_page>
    </extension>
    <extension
          point="org.eclipse.ui.views">
@@ -247,6 +255,15 @@
             icon="icons/plot-tool-any.png"
             id="org.dawb.workbench.plotting.views.toolPageView.fixed"
             name=" "
+            restorable="true">
+      </view>
+      <view
+            allowMultiple="true"
+            category="uk.ac.diamond.scisoft.arpes"
+            class="org.dawnsci.plotting.views.RegionSumView"
+            icon="icons/sum.png"
+            id="uk.ac.diamond.scisoft.arpes.regionSumView"
+            name="Region Sum"
             restorable="true">
       </view>
       <category
