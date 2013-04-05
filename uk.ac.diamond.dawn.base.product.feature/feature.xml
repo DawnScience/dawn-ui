@@ -53,6 +53,10 @@
          id="uk.ac.diamond.tomography.reconstruction.feature"
          version="0.0.0"/>
 
+   <includes
+         id="org.embl.cca.dviewer.feature"
+         version="0.0.0"/>
+
    <plugin
          id="org.dawnsci.intro"
          download-size="0"
