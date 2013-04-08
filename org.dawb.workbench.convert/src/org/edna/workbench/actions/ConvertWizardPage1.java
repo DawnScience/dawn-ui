@@ -15,13 +15,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-<<<<<<< HEAD
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.eclipse.core.resources.IContainer;
-=======
-import org.dawb.common.ui.util.EclipseUtils;
->>>>>>> refs/remotes/origin/1.1
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
@@ -59,10 +55,6 @@ import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
 import uk.ac.diamond.scisoft.analysis.io.DataHolder;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
-<<<<<<< HEAD
-=======
-import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
->>>>>>> refs/remotes/origin/1.1
 
 /**
  *   ConvertWizardPage1
