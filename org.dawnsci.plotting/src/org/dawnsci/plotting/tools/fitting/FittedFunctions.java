@@ -5,8 +5,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Vector;
+
+import javax.vecmath.Vector3d;
 
 import org.dawb.common.ui.plot.IPlottingSystem;
+import org.dawb.common.ui.plot.annotation.IAnnotation;
 import org.dawb.common.ui.plot.trace.ILineTrace;
 import org.dawb.common.ui.plot.trace.ITrace;
 import org.eclipse.draw2d.ColorConstants;
@@ -88,11 +92,19 @@ public class FittedFunctions {
 		}
 	}
 
+	IAnnotation distAnnotation=null;
+
+	public void setDistAnnotation(IAnnotation ann){
+		distAnnotation=ann;
+	}
+
 	public void setPeaksVisible(boolean isVis) {
 		if (fittedPeakList!=null) {
 			for (FittedFunction fp : fittedPeakList) {
 				fp.setCenterVisible(isVis);
 			}
+			if (distAnnotation !=null)
+				distAnnotation.setVisible(isVis);
 		}
 	}
 
@@ -103,6 +115,67 @@ public class FittedFunctions {
 			}
 		}
 	}
+
+	public Vector3d calcReflectionDistance() {
+		double max=-1;
+		double thFactor=0.1;
+		FittedFunction fpmax=null;
+		FittedFunction fpmin=null;
+		if (fittedPeakList!=null) {
+			//look for max
+			for (FittedFunction fp : fittedPeakList) {
+				max=Math.max(max, fp.getDataValue());
+			}
+			//select and sort
+			Vector<Double> pos= new Vector<Double>();
+			Vector<Vector3d> qVec=new Vector<Vector3d>();
+			for (int ct=fittedPeakList.size()-1;ct>=0;ct--) {
+				if ( fittedPeakList.get(ct).getDataValue() < max*thFactor) {
+					fittedPeakList.remove(ct);
+				}
+			}
+			double min=max;
+			for (FittedFunction fp : fittedPeakList) {
+				if (fp.getDataValue()==max)
+					fpmax=fp;
+				if (fp.getDataValue()<min)
+					fpmin=fp;
+				//if ( fp.getPeakValue() >= max*thFactor) {
+					boolean last=true;
+					for (int i=0; i<pos.size();i++) {
+						if ( ((Double)(pos.elementAt(i))).doubleValue() > fp.getPosition() ) {
+							pos.insertElementAt(new Double(fp.getPosition()), i);
+							qVec.insertElementAt(fp.getQ(), i);
+							last=false;
+							break;
+						}
+					}
+					if (last) {
+						pos.addElement(new Double(fp.getPosition()));
+						qVec.addElement(fp.getQ());
+					}
+							
+				//}
+			}
+			//calc avg distance
+			double avg=0;
+			for (int i=1; i<pos.size();i++) {
+				Vector3d t= new Vector3d((Vector3d)(qVec.elementAt(i)));
+				t.sub((Vector3d)(qVec.elementAt(i-1)));
+				double len=t.length()-avg;
+				avg+=len/i;
+			}
+			//convert to real space
+			if (avg!=0) {
+				avg=1/avg;
+				
+				//display
+				return new Vector3d(fpmax.getPosition(), fpmin.getDataValue(),avg);                  	
+			}
+		}
+		return new Vector3d(0,0,0);
+	}
+
 	public void setAnnotationsVisible(boolean isVis) {
 		if (fittedPeakList!=null) {
 			for (FittedFunction fp : fittedPeakList) {

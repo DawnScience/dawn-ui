@@ -21,9 +21,10 @@ import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
-class FittedFunction  {
+import javax.vecmath.Vector3d;
 
-	
+public class FittedFunction  {
+
 	private RectangularROI    roi;
 	private CompositeFunction function;
 	private boolean           saved=false;
@@ -37,12 +38,22 @@ class FittedFunction  {
 	private ITrace            trace;
 	private IAnnotation       annotation;
 	
+	private Vector3d q;
+
 	public AbstractDataset getX() {
 		return x;
 	}
 
 	public void setX(AbstractDataset x) {
 		this.x = x;
+	}
+
+	public void setQ(Vector3d q) {
+		this.q=q;
+	}
+	
+	public Vector3d getQ() {
+		return this.q;
 	}
 
 	public boolean isSaved() {

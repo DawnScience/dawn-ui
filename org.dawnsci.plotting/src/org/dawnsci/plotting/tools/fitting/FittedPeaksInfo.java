@@ -2,6 +2,10 @@ package org.dawnsci.plotting.tools.fitting;
 
 import java.util.List;
 
+import org.dawb.common.ui.plot.IPlottingSystem;
+import org.dawb.common.ui.plot.trace.ILineTrace;
+import org.dawnsci.plotting.Activator;
+import org.dawnsci.plotting.preference.FittingConstants;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
@@ -19,12 +23,39 @@ public class FittedPeaksInfo {
 	private AbstractDataset  x; 
 	private AbstractDataset  y;
 	private IProgressMonitor monitor;
+
+	private IPlottingSystem plottingSystem;
+	private ILineTrace selectedTrace;
+	private int numPeaks = -1;
 	
 	public FittedPeaksInfo(AbstractDataset x, AbstractDataset y, IProgressMonitor monitor) {
 		this.x = x;
 		this.y = y;
 		this.monitor = monitor;
 	}
+
+	public FittedPeaksInfo(final AbstractDataset  x, 
+			final AbstractDataset  y,
+			final IProgressMonitor monitor,
+			IPlottingSystem plottingSystem, 
+			ILineTrace selectedTrace){
+		this(x, y, monitor);
+		this.setPlottingSystem(plottingSystem);
+		this.setSelectedTrace(selectedTrace);
+	}
+
+	public FittedPeaksInfo(final AbstractDataset  x, 
+			final AbstractDataset  y,
+			final IProgressMonitor monitor,
+			IPlottingSystem plottingSystem,
+			ILineTrace selectedTrace,
+			int numPeaks){
+		this(x, y, monitor);
+		this.setPlottingSystem(plottingSystem);
+		this.setSelectedTrace(selectedTrace);
+		this.setNumPeaks(numPeaks);
+	}
+
 	public List<IdentifiedPeak> getIdentifiedPeaks() {
 		return identifiedPeaks;
 	}
@@ -90,5 +121,31 @@ public class FittedPeaksInfo {
 		} else if (!y.equals(other.y))
 			return false;
 		return true;
+	}
+
+	public ILineTrace getSelectedTrace() {
+		return selectedTrace;
+	}
+
+	public void setSelectedTrace(ILineTrace selectedTrace) {
+		this.selectedTrace = selectedTrace;
+	}
+
+	public int getNumPeaks() {
+		if(numPeaks == -1)
+			return Activator.getDefault().getPreferenceStore().getInt(FittingConstants.PEAK_NUMBER);
+		return numPeaks;
+	}
+
+	public void setNumPeaks(int numPeaks) {
+		this.numPeaks = numPeaks;
+	}
+
+	public IPlottingSystem getPlottingSystem() {
+		return plottingSystem;
+	}
+
+	public void setPlottingSystem(IPlottingSystem plottingSystem) {
+		this.plottingSystem = plottingSystem;
 	}
 }
