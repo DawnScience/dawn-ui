@@ -432,7 +432,7 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 				}
 	
 				try {
-					final FittedFunctions bean = FittingUtils.getFittedPeaks(new FittedPeaksInfo(x, y, monitor, getPlottingSystem(), selectedTrace));
+					final FittedFunctions bean = getFittedFunctions(new FittedPeaksInfo(x, y, monitor, getPlottingSystem(), selectedTrace));
 					if (bean!=null) for (FittedFunction p : bean.getFunctionList()) {
 		    			p.setX(selectedTrace.getXData());
 		    			p.setY(selectedTrace.getYData());
