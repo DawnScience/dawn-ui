@@ -16,11 +16,6 @@ import java.util.List;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.PlottingFactory;
-import org.dawb.common.ui.plot.region.IRegion;
-import org.dawb.common.ui.plot.region.RegionUtils;
-import org.dawb.common.ui.plot.trace.IImageTrace;
-import org.dawb.common.ui.plot.trace.ILineTrace;
-import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.workbench.ui.editors.AsciiEditor;
 import org.dawb.workbench.ui.editors.ImageEditor;
 import org.dawb.workbench.ui.editors.PlotDataEditor;
@@ -42,6 +37,11 @@ import uk.ac.diamond.scisoft.analysis.dataset.LongDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Random;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import org.dawb.common.ui.util.EclipseUtils;
+import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.RegionUtils;
+import org.dawnsci.plotting.api.trace.IImageTrace;
+import org.dawnsci.plotting.api.trace.ILineTrace;
+import org.dawnsci.plotting.api.trace.ITrace;
 
 /**
  * 

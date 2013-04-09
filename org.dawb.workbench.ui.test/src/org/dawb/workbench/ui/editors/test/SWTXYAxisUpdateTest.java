@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
-import org.dawb.common.ui.plot.axis.IAxis;
 import org.dawb.workbench.ui.editors.AsciiEditor;
 import org.dawb.workbench.ui.editors.PlotDataEditor;
 import org.eclipse.core.filesystem.EFS;
@@ -31,6 +30,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.LongDataset;
 import org.dawb.common.ui.util.EclipseUtils;
+import org.dawnsci.plotting.api.axis.IAxis;
 
 /**
  * 

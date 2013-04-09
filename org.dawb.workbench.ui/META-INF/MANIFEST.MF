@@ -16,7 +16,8 @@ Require-Bundle: org.eclipse.ui,
  org.dawb.common.util,
  org.eclipse.ui.cheatsheets,
  org.eclipse.ui.ide,
- org.eclipse.jface.text
+ org.eclipse.jface.text,
+ org.dawnsci.plotting.api;bundle-version="1.0.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: org.dawb.common.services,

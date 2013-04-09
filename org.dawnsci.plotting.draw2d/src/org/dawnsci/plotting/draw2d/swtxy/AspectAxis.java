@@ -6,10 +6,6 @@ import java.util.Collection;
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.swt.xygraph.linearscale.Range;
-import org.dawb.common.services.ImageServiceBean.ImageOrigin;
-import org.dawb.common.ui.plot.axis.AxisEvent;
-import org.dawb.common.ui.plot.axis.IAxis;
-import org.dawb.common.ui.plot.axis.IAxisListener;
 import org.dawb.common.util.text.NumberUtils;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.draw2d.IFigure;
@@ -17,6 +13,10 @@ import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
+import org.dawnsci.plotting.api.axis.AxisEvent;
+import org.dawnsci.plotting.api.axis.IAxis;
+import org.dawnsci.plotting.api.axis.IAxisListener;
+import org.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 

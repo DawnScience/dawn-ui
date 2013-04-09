@@ -1,7 +1,7 @@
 package org.dawnsci.plotting.tools.region;
 
-import org.dawb.common.ui.plot.region.IRegion;
-import org.dawb.common.ui.plot.region.RegionUtils;
+import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.RegionUtils;
 import org.dawnsci.plotting.tools.region.MeasurementLabelProvider.LabelType;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.TableViewer;

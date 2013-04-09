@@ -11,22 +11,22 @@ import org.csstudio.swt.xygraph.undo.IOperationsManagerListener;
 import org.csstudio.swt.xygraph.undo.OperationsManager;
 import org.csstudio.swt.xygraph.undo.RemoveAnnotationCommand;
 import org.csstudio.swt.xygraph.undo.ZoomType;
-import org.dawb.common.services.ImageServiceBean.ImageOrigin;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
-import org.dawb.common.ui.plot.ActionType;
-import org.dawb.common.ui.plot.ManagerType;
-import org.dawb.common.ui.plot.PlotType;
-import org.dawb.common.ui.plot.axis.AxisUtils;
-import org.dawb.common.ui.plot.axis.IAxis;
-import org.dawb.common.ui.plot.region.IRegion.RegionType;
-import org.dawb.common.ui.plot.region.RegionUtils;
-import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
-import org.dawb.common.ui.plot.trace.IImageTrace;
-import org.dawb.common.ui.plot.trace.ITraceListener;
-import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.plotting.Activator;
+import org.dawnsci.plotting.api.ActionType;
+import org.dawnsci.plotting.api.ManagerType;
+import org.dawnsci.plotting.api.PlotType;
+import org.dawnsci.plotting.api.axis.AxisUtils;
+import org.dawnsci.plotting.api.axis.IAxis;
+import org.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
+import org.dawnsci.plotting.api.region.RegionUtils;
+import org.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
+import org.dawnsci.plotting.api.trace.IImageTrace;
+import org.dawnsci.plotting.api.trace.ITraceListener;
+import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
 import org.dawnsci.plotting.preference.PlottingConstants;
 import org.dawnsci.plotting.system.dialog.AddAxisDialog;
@@ -56,12 +56,9 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
-import org.eclipse.ui.IEditorRegistry;
 import org.eclipse.ui.IReusableEditor;
-import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 /**
  * Deligating class for light-weight actions.
  * 

@@ -3,14 +3,14 @@ package org.dawnsci.plotting.draw2d.swtxy;
 import java.util.Collection;
 import java.util.HashSet;
 
-import org.dawb.common.services.ImageServiceBean.ImageOrigin;
-import org.dawb.common.ui.plot.axis.AxisEvent;
-import org.dawb.common.ui.plot.axis.CoordinateSystemEvent;
-import org.dawb.common.ui.plot.axis.IAxis;
-import org.dawb.common.ui.plot.axis.IAxisListener;
-import org.dawb.common.ui.plot.axis.ICoordinateSystem;
-import org.dawb.common.ui.plot.axis.ICoordinateSystemListener;
-import org.dawb.common.ui.plot.trace.IImageTrace;
+import org.dawnsci.plotting.api.axis.AxisEvent;
+import org.dawnsci.plotting.api.axis.CoordinateSystemEvent;
+import org.dawnsci.plotting.api.axis.IAxis;
+import org.dawnsci.plotting.api.axis.IAxisListener;
+import org.dawnsci.plotting.api.axis.ICoordinateSystem;
+import org.dawnsci.plotting.api.axis.ICoordinateSystemListener;
+import org.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
+import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PrecisionPoint;
 
@@ -61,7 +61,6 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 		}
 	}
 
-	@Override
 	public Point getValuePosition(Point value) {
 		if (isDisposed) throw new RuntimeException(getClass().getName()+" is disposed!");
 
@@ -92,7 +91,6 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 		return value;
 	}
 
-	@Override
 	public Point getPositionValue(Point position) {
 		if (isDisposed) throw new RuntimeException(getClass().getName()+" is disposed!");
 

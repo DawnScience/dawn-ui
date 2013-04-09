@@ -23,28 +23,28 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
-import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.PlottingFactory;
-import org.dawb.common.ui.plot.region.IROIListener;
-import org.dawb.common.ui.plot.region.IRegion;
-import org.dawb.common.ui.plot.region.IRegion.RegionType;
-import org.dawb.common.ui.plot.region.IRegionListener;
-import org.dawb.common.ui.plot.region.ROIEvent;
-import org.dawb.common.ui.plot.region.RegionEvent;
-import org.dawb.common.ui.plot.region.RegionUtils;
-import org.dawb.common.ui.plot.tool.AbstractToolPage;
-import org.dawb.common.ui.plot.tool.IToolPageSystem;
-import org.dawb.common.ui.plot.trace.ITraceListener;
-import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawnsci.plotting.Activator;
+import org.dawnsci.plotting.api.IPlottingSystem;
+import org.dawnsci.plotting.api.region.IROIListener;
+import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.IRegionListener;
+import org.dawnsci.plotting.api.region.MouseEvent;
+import org.dawnsci.plotting.api.region.MouseListener;
+import org.dawnsci.plotting.api.region.ROIEvent;
+import org.dawnsci.plotting.api.region.RegionEvent;
+import org.dawnsci.plotting.api.region.RegionUtils;
+import org.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.dawnsci.plotting.api.tool.AbstractToolPage;
+import org.dawnsci.plotting.api.tool.IToolPageSystem;
+import org.dawnsci.plotting.api.trace.ITraceListener;
+import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.tools.region.AbstractRegionTableTool.RegionColorListener;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.MouseEvent;
-import org.eclipse.draw2d.MouseListener;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.MenuManager;
@@ -323,7 +323,7 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 	@Override
 	public void mousePressed(MouseEvent evt) {
 		
-		if(evt.button == 1){// left click
+		if(evt.getButton() == 1){// left click
 			if (!isActive()) return;
 
 			final Collection<IRegion> regions = getPlottingSystem().getRegions();
@@ -333,8 +333,8 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 				// add a point region
 				final IRegion point = getPlottingSystem().createRegion(RegionUtils.getUniqueName("Point", getPlottingSystem()), RegionType.POINT);
 				final PointROI regionBounds= new PointROI();
-				double x = getPlottingSystem().getSelectedXAxis().getPositionValue(evt.x);
-				double y = getPlottingSystem().getSelectedYAxis().getPositionValue(evt.y);
+				double x = getPlottingSystem().getSelectedXAxis().getPositionValue(evt.getX());
+				double y = getPlottingSystem().getSelectedYAxis().getPositionValue(evt.getY());
 				regionBounds.setPoint(new double[]{x,y});
 				point.setROI(regionBounds);
 				point.setMobile(true);

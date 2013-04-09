@@ -19,12 +19,12 @@ package org.dawnsci.plotting.draw2d.swtxy.selection;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.dawb.common.ui.plot.axis.CoordinateSystemEvent;
-import org.dawb.common.ui.plot.axis.ICoordinateSystem;
-import org.dawb.common.ui.plot.axis.ICoordinateSystemListener;
-import org.dawb.common.ui.plot.region.IRegion;
-import org.dawb.common.ui.plot.region.IRegionContainer;
-import org.dawb.common.ui.plot.region.ROIEvent;
+import org.dawnsci.plotting.api.axis.CoordinateSystemEvent;
+import org.dawnsci.plotting.api.axis.ICoordinateSystem;
+import org.dawnsci.plotting.api.axis.ICoordinateSystemListener;
+import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.IRegionContainer;
+import org.dawnsci.plotting.api.region.ROIEvent;
 import org.dawnsci.plotting.draw2d.Activator;
 import org.dawnsci.plotting.draw2d.swtxy.RegionBean;
 import org.dawnsci.plotting.draw2d.swtxy.translate.FigureTranslator;

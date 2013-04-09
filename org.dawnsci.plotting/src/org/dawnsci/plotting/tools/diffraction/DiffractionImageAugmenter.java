@@ -11,11 +11,11 @@ import javax.vecmath.Vector3d;
 
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
-import org.dawb.common.ui.plot.region.IRegion;
-import org.dawb.common.ui.plot.region.IRegion.RegionType;
-import org.dawb.common.ui.plot.region.RegionUtils;
 import org.dawb.common.ui.plot.roi.ResolutionRing;
 import org.dawnsci.plotting.Activator;
+import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.RegionUtils;
+import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.action.Action;

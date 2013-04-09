@@ -31,10 +31,10 @@
 
 package org.dawnsci.plotting.tools;
 
-import org.dawb.common.ui.plot.region.IRegion;
-import org.dawb.common.ui.plot.region.IRegion.RegionType;
-import org.dawb.common.ui.plot.trace.IImageTrace;
-import org.dawb.common.ui.plot.trace.TraceUtils;
+import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.dawnsci.plotting.api.trace.IImageTrace;
+import org.dawnsci.plotting.api.trace.TraceUtils;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

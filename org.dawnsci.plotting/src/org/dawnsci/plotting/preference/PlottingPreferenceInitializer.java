@@ -10,11 +10,11 @@
 
 package org.dawnsci.plotting.preference;
 
-import org.dawb.common.services.HistogramBound;
-import org.dawb.common.services.ImageServiceBean.HistoType;
-import org.dawb.common.services.ImageServiceBean.ImageOrigin;
-import org.dawb.common.ui.plot.trace.IImageTrace.DownsampleType;
 import org.dawnsci.plotting.Activator;
+import org.dawnsci.plotting.api.histogram.HistogramBound;
+import org.dawnsci.plotting.api.histogram.ImageServiceBean.HistoType;
+import org.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
+import org.dawnsci.plotting.api.trace.IImageTrace.DownsampleType;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 

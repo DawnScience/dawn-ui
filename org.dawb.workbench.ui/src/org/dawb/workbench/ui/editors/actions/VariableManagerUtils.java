@@ -11,10 +11,10 @@
 package org.dawb.workbench.ui.editors.actions;
 
 import org.dawb.common.services.IVariableManager;
-import org.dawb.common.ui.plot.tool.IToolContainer;
-import org.dawb.common.ui.plot.tool.IToolPage;
 import org.dawb.common.ui.slicing.ISlicablePlottingPart;
 import org.dawb.common.ui.util.EclipseUtils;
+import org.dawnsci.plotting.api.tool.IToolContainer;
+import org.dawnsci.plotting.api.tool.IToolPage;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPart;

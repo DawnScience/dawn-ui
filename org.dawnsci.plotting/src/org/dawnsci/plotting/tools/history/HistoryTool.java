@@ -7,11 +7,11 @@ import java.util.Map;
 
 import org.dawb.common.services.IExpressionObject;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
-import org.dawb.common.ui.plot.trace.ILineTrace;
-import org.dawb.common.ui.plot.trace.ITrace;
-import org.dawb.common.ui.plot.trace.ITraceListener;
-import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawnsci.plotting.Activator;
+import org.dawnsci.plotting.api.trace.ILineTrace;
+import org.dawnsci.plotting.api.trace.ITrace;
+import org.dawnsci.plotting.api.trace.ITraceListener;
+import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.tools.profile.ProfileType;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;

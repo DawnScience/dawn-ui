@@ -10,7 +10,7 @@
 package org.dawb.workbench.ui.editors;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
-import org.dawb.common.ui.plot.PlotType;
+import org.dawnsci.plotting.api.PlotType;
 
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 

@@ -6,9 +6,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
-import org.dawb.common.ui.plot.IPlottingSystem;
-import org.dawb.common.ui.plot.trace.ILineTrace;
-import org.dawb.common.ui.plot.trace.ITrace;
+import org.dawnsci.plotting.api.IPlottingSystem;
+import org.dawnsci.plotting.api.trace.ILineTrace;
+import org.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.draw2d.ColorConstants;
 
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;

@@ -4,14 +4,14 @@ import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.List;
 
-import org.dawb.common.ui.plot.IPlottingSystem;
-import org.dawb.common.ui.plot.annotation.AnnotationUtils;
-import org.dawb.common.ui.plot.annotation.IAnnotation;
-import org.dawb.common.ui.plot.region.IRegion;
-import org.dawb.common.ui.plot.region.RegionUtils;
-import org.dawb.common.ui.plot.trace.ITrace;
-import org.dawb.common.ui.plot.trace.TraceUtils;
 import org.dawnsci.plotting.Activator;
+import org.dawnsci.plotting.api.IPlottingSystem;
+import org.dawnsci.plotting.api.annotation.AnnotationUtils;
+import org.dawnsci.plotting.api.annotation.IAnnotation;
+import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.RegionUtils;
+import org.dawnsci.plotting.api.trace.ITrace;
+import org.dawnsci.plotting.api.trace.TraceUtils;
 import org.dawnsci.plotting.preference.FittingConstants;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;

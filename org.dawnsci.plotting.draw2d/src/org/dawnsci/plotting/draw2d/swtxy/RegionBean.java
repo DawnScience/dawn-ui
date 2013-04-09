@@ -3,7 +3,7 @@ package org.dawnsci.plotting.draw2d.swtxy;
 import java.io.Serializable;
 
 import org.csstudio.swt.xygraph.figures.XYGraph;
-import org.dawb.common.ui.plot.axis.ICoordinateSystem;
+import org.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.eclipse.swt.graphics.Color;
 
 public class RegionBean implements Serializable {

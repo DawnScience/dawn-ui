@@ -19,9 +19,9 @@ package org.dawnsci.plotting.draw2d.swtxy.selection;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.dawb.common.ui.plot.axis.ICoordinateSystem;
-import org.dawb.common.ui.plot.region.IRegion;
-import org.dawb.common.ui.plot.region.IRegionContainer;
+import org.dawnsci.plotting.api.axis.ICoordinateSystem;
+import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.IRegionContainer;
 import org.dawnsci.plotting.draw2d.swtxy.translate.FigureTranslator;
 import org.dawnsci.plotting.draw2d.swtxy.util.Draw2DUtils;
 import org.dawnsci.plotting.draw2d.swtxy.util.RotatablePolylineShape;

@@ -2,10 +2,10 @@ package org.dawnsci.plotting.system;
 
 import org.csstudio.swt.xygraph.dataprovider.IDataProvider;
 import org.csstudio.swt.xygraph.figures.Trace;
-import org.dawb.common.ui.plot.trace.ILineTrace;
-import org.dawb.common.ui.plot.trace.ITraceContainer;
-import org.dawb.common.ui.plot.trace.TraceEvent;
-import org.dawb.common.ui.plot.trace.TraceWillPlotEvent;
+import org.dawnsci.plotting.api.trace.ILineTrace;
+import org.dawnsci.plotting.api.trace.ITraceContainer;
+import org.dawnsci.plotting.api.trace.TraceEvent;
+import org.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.dawnsci.plotting.draw2d.swtxy.LineTrace;
 import org.eclipse.swt.graphics.Color;
 

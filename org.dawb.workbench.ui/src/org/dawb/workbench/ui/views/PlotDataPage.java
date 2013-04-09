@@ -16,13 +16,13 @@ import java.util.List;
 
 import org.dawb.common.services.IVariableManager;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
-import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.slicing.SliceComponent;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.workbench.ui.editors.CheckableObject;
 import org.dawb.workbench.ui.editors.IDatasetEditor;
 import org.dawb.workbench.ui.editors.IPlotUpdateParticipant;
 import org.dawb.workbench.ui.editors.PlotDataComponent;
+import org.dawnsci.plotting.api.PlotType;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;

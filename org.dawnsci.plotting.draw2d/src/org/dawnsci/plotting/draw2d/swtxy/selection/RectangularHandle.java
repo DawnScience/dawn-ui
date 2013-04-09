@@ -1,6 +1,6 @@
 package org.dawnsci.plotting.draw2d.swtxy.selection;
 
-import org.dawb.common.ui.plot.axis.ICoordinateSystem;
+import org.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.dawnsci.plotting.draw2d.swtxy.util.RotatablePolygonShape;
 import org.dawnsci.plotting.draw2d.swtxy.util.RotatableRectangle;
 import org.eclipse.draw2d.Figure;

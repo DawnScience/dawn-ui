@@ -19,10 +19,10 @@ package org.dawnsci.plotting.draw2d.swtxy.selection;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.dawb.common.ui.plot.axis.ICoordinateSystem;
-import org.dawb.common.ui.plot.region.IRegion;
-import org.dawb.common.ui.plot.region.IRegionContainer;
-import org.dawb.common.ui.plot.region.ROIEvent;
+import org.dawnsci.plotting.api.axis.ICoordinateSystem;
+import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.IRegionContainer;
+import org.dawnsci.plotting.api.region.ROIEvent;
 import org.dawnsci.plotting.draw2d.swtxy.translate.FigureTranslator;
 import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationEvent;
 import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationListener;
@@ -205,13 +205,17 @@ public class CircleSelection extends AbstractSelectionRegion {
 		}
 
 		public void setup(PointList corners) {
-			Rectangle r = new Rectangle(coords.getPositionValue(corners.getFirstPoint()), coords.getPositionValue(corners.getLastPoint()));
+			double[] start = coords.getPositionValue(corners.getFirstPoint().x, corners.getFirstPoint().y);
+			double[] end   = coords.getPositionValue(corners.getLastPoint().x, corners.getLastPoint().y);
+			Rectangle r = new Rectangle(new PrecisionPoint(start[0], start[1]), new PrecisionPoint(end[0], end[1]));
 			if (r.width < r.height) {
 				r.width = r.height;
 			} else {
 				r.height = r.width;
 			}
-			r = new Rectangle(coords.getValuePosition(r.getTopLeft()), coords.getValuePosition(r.getBottomRight()));
+			start = coords.getPositionValue(r.getTopLeft().x,     r.getTopLeft().y);
+			end   = coords.getPositionValue(r.getBottomRight().x, r.getBottomRight().y);
+			r = new Rectangle(new PrecisionPoint(start[0], start[1]), new PrecisionPoint(end[0], end[1]));
 			setRadius(0.5*r.width);
 			
 			Point c = r.getCenter();

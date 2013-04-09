@@ -10,9 +10,7 @@ import javax.measure.unit.SI;
 import javax.measure.unit.Unit;
 import javax.measure.unit.UnitFormat;
 
-import org.dawb.common.services.IImageService;
 import org.dawb.common.services.ServiceManager;
-import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawnsci.common.widgets.tree.AbstractNodeModel;
 import org.dawnsci.common.widgets.tree.AmountEvent;
 import org.dawnsci.common.widgets.tree.AmountListener;
@@ -21,6 +19,8 @@ import org.dawnsci.common.widgets.tree.NumericNode;
 import org.dawnsci.common.widgets.tree.ObjectNode;
 import org.dawnsci.common.widgets.tree.UnitEvent;
 import org.dawnsci.common.widgets.tree.UnitListener;
+import org.dawnsci.plotting.api.histogram.IImageService;
+import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.jscience.physics.amount.Amount;
 
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;

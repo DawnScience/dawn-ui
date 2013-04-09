@@ -3,8 +3,8 @@ package org.dawnsci.plotting.jreality;
 import java.util.Arrays;
 import java.util.List;
 
-import org.dawb.common.ui.plot.trace.ILineStackTrace;
-import org.dawb.common.ui.plot.trace.TraceEvent;
+import org.dawnsci.plotting.api.trace.ILineStackTrace;
+import org.dawnsci.plotting.api.trace.TraceEvent;
 
 import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
