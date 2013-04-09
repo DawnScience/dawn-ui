@@ -1938,6 +1938,11 @@ public class DataSet3DPlot1D implements IDataSet3DCorePlot, AreaSelectListener, 
 				else
 					startPosInData = xAxis.nearestLowEntry(startPosX);
 				int endPosInData = xAxis.nearestUpEntry(endPosX);
+				if (startPosInData > endPosInData) { // ensure reversed axis works
+					int t = startPosInData;
+					startPosInData = endPosInData;
+					endPosInData = t;
+				}
 				if (startPosInData == -1)
 					startPosInData = 0;
 				if (endPosInData == -1)
