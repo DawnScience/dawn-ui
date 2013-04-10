@@ -119,11 +119,6 @@ public class ImageServiceBean {
 	 * image will be shifted.
 	 */
 	public IDataset getImage() {
-		if (logColorScale) {
-			IDataset result = subtract(image, logOffset);
-			result = log10(result);
-			return result;
-		}
 		return image;
 	}
 
@@ -535,25 +530,8 @@ public class ImageServiceBean {
 		return true;
 	}
 
-	public static IDataset subtract(final IDataset a, final double b) {
-
-		throw new RuntimeException("Cannot substract with IDataset!");
+	public double getLogOffset() {
+		return logOffset;
 	}
-	private IDataset log10(IDataset result) {
-		throw new RuntimeException("Cannot log10 with IDataset!");
-	}
-	
-	private static StringBuilder bracketIfNecessary(final IDataset dataset) {
-		final String name = dataset.getName();
-		StringBuilder newName = new StringBuilder(name);
-		if (name.contains("+") || name.contains("-") || name.contains("*") ||
-				name.contains("/") || name.contains("^") || name.contains("'")) {
-			newName.insert(0, '(');
-			newName.append(')');
-		}
-
-		return newName;
-	}
-
 
 }
