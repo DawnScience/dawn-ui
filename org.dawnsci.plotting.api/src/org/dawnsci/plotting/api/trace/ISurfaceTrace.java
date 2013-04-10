@@ -3,7 +3,7 @@ package org.dawnsci.plotting.api.trace;
 import java.util.List;
 
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
 /**
  * 
@@ -34,12 +34,12 @@ public interface ISurfaceTrace extends IPaletteTrace, IWindowTrace {
 	 * 
 	 * @return the region of the window, usually a SurfacePlotROI or a RectangularROI
 	 */
-	public ROIBase getWindow();
+	public IROI getWindow();
 	
 	/**
 	 * Set the window to be used as a SurfacePlotROI or RectangularROI
 	 * @param window
 	 */
-	public void setWindow(ROIBase window);
+	public void setWindow(IROI window);
 
 }

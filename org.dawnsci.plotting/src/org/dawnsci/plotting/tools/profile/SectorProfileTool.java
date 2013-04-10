@@ -67,7 +67,7 @@ public abstract class SectorProfileTool extends ProfileTool {
 				}
 					
 				if (evt.getRegion()!=null && evt.getRegion().getRegionType()==RegionType.SECTOR) {
-					SectorROI sroi = (SectorROI)evt.getRegion().getROI().copy();
+					SectorROI sroi = (SectorROI)((ROIBase)evt.getRegion().getROI()).copy();
 					sroi.setSymmetry(preferredSymmetry);
 					sroi.setCombineSymmetry(preferredCombine);
 					evt.getRegion().setROI(sroi);

@@ -528,7 +528,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		}
 		if (object instanceof IExpressionObject) {
 			try {
-				return ((IExpressionObject)object).getDataSet(null, new ProgressMonitorWrapper(monitor));
+				return (AbstractDataset)((IExpressionObject)object).getDataSet(null, new ProgressMonitorWrapper(monitor));
 			} catch (Exception e) {
 				// valid, user can enter an invalid expression. In this case
 				// it colours red but does not stop them from using the view.

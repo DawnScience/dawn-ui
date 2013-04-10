@@ -65,7 +65,6 @@ import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Slice;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.ROIProfile;
-import uk.ac.diamond.scisoft.analysis.roi.ROIProfile.BoxLineType;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 /**
@@ -261,7 +260,7 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 			myROIWidget.addSelectionChangedListener(new ISelectionChangedListener() {
 				@Override
 				public void selectionChanged(SelectionChangedEvent event) {
-					ROIBase newRoi = myROIWidget.getROI();
+					ROIBase newRoi = (ROIBase)myROIWidget.getROI();
 					String regionName = myROIWidget.getRegionName();
 					IRegion region = getPlottingSystem().getRegion(regionName);
 					if(region != null){
@@ -304,7 +303,7 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 			verticalProfileROIWidget.addSelectionChangedListener(new ISelectionChangedListener() {
 				@Override
 				public void selectionChanged(SelectionChangedEvent event) {
-					ROIBase newRoi = verticalProfileROIWidget.getROI();
+					ROIBase newRoi = (ROIBase)verticalProfileROIWidget.getROI();
 					String regionName = verticalProfileROIWidget.getRegionName();
 					IRegion region = verticalProfilePlottingSystem.getRegion(regionName);
 					if(region != null){
@@ -332,7 +331,7 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 			horizontalProfileROIWidget.addSelectionChangedListener(new ISelectionChangedListener() {
 				@Override
 				public void selectionChanged(SelectionChangedEvent event) {
-					ROIBase newRoi = horizontalProfileROIWidget.getROI();
+					ROIBase newRoi = (ROIBase)horizontalProfileROIWidget.getROI();
 					String regionName = horizontalProfileROIWidget.getRegionName();
 					IRegion region = horizontalProfilePlottingSystem.getRegion(regionName);
 					if(region != null){
@@ -579,15 +578,15 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 		//end zoom profile
 
 		// vertical and horizontal profiles
-		updateProfile(verticalProfilePlottingSystem, image, bounds, region, BoxLineType.VERTICAL_TYPE, tryUpdate, monitor);
-		updateProfile(horizontalProfilePlottingSystem, image, bounds, region, BoxLineType.HORIZONTAL_TYPE, tryUpdate, monitor);
+		updateProfile(verticalProfilePlottingSystem, image, bounds, region, SWT.VERTICAL, tryUpdate, monitor);
+		updateProfile(horizontalProfilePlottingSystem, image, bounds, region, SWT.HORIZONTAL, tryUpdate, monitor);
 	}
 
 	private void updateProfile(AbstractPlottingSystem profilePlottingSystem, 
 						final IImageTrace image, 
 						final RectangularROI bounds, 
 						IRegion region, 
-						final BoxLineType type, 
+						final int type, 
 						boolean tryUpdate, 
 						IProgressMonitor monitor){
 
@@ -596,10 +595,10 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 		if (box==null) return;
 
 		String traceName1 = "", traceName2 = "";
-		if(type == BoxLineType.HORIZONTAL_TYPE){
+		if(type == SWT.HORIZONTAL){
 			traceName1 = "Top Profile";
 			traceName2 = "Bottom Profile";
-		} else if(type == BoxLineType.VERTICAL_TYPE){
+		} else if(type == SWT.VERTICAL){
 			traceName1 = "Left Profile";
 			traceName2 = "Right Profile";
 		}
@@ -632,18 +631,18 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 					public void run() {
 						List<IDataset> axes = image.getAxes();
 						if(axes != null){
-							if(type == BoxLineType.VERTICAL_TYPE){
+							if(type == SWT.VERTICAL){
 								updateAxes(traces, boxesLines, (AbstractDataset)axes.get(1), bounds.getPointY(), type);
 								x_trace.setTraceColor(ColorConstants.blue);
 								y_trace.setTraceColor(ColorConstants.red);
-							} else if (type == BoxLineType.HORIZONTAL_TYPE){
+							} else if (type == SWT.HORIZONTAL){
 								updateAxes(traces, boxesLines, (AbstractDataset)axes.get(0), bounds.getPointX(), type);
 								x_trace.setTraceColor(ColorConstants.darkGreen);
 								y_trace.setTraceColor(ColorConstants.orange);
 							}
 						} else { //if no axes we set them manually according to the data shape
 							int[] shapes = image.getData().getShape();
-							if(type == BoxLineType.VERTICAL_TYPE){
+							if(type == SWT.VERTICAL){
 								int[] verticalAxis = new int[shapes[1]];
 								for(int i = 0; i < verticalAxis.length; i ++){
 									verticalAxis[i] = i;
@@ -652,7 +651,7 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 								updateAxes(traces, boxesLines, vertical, bounds.getPointY(), type);
 								x_trace.setTraceColor(ColorConstants.blue);
 								y_trace.setTraceColor(ColorConstants.red);
-							} else if (type == BoxLineType.HORIZONTAL_TYPE){
+							} else if (type == SWT.HORIZONTAL){
 								int[] horizontalAxis = new int[shapes[0]];
 								for(int i = 0; i < horizontalAxis.length; i ++){
 									horizontalAxis[i] = i;
@@ -667,10 +666,10 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 				});
 			}
 		} else {
-			if(type == BoxLineType.HORIZONTAL_TYPE){
+			if(type == SWT.HORIZONTAL){
 				profilePlottingSystem.setSelectedXAxis(xPixelAxisHorizontal);
 				profilePlottingSystem.setSelectedYAxis(yPixelAxisHorizontal);
-			} else if (type == BoxLineType.VERTICAL_TYPE){
+			} else if (type == SWT.VERTICAL){
 				profilePlottingSystem.setSelectedXAxis(xPixelAxisVertical);
 				profilePlottingSystem.setSelectedYAxis(yPixelAxisVertical);
 			}
@@ -693,7 +692,7 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 	 * @param type
 	 */
 	private void updateAxes(List<ILineTrace> profiles, List<AbstractDataset> boxesLines, 
-			AbstractDataset axis, double startPoint, BoxLineType type){
+			AbstractDataset axis, double startPoint, int type){
 		// shift the xaxis by yStart
 		try {
 			double xStart = axis.getElementDoubleAbs((int)Math.round(startPoint));
@@ -708,10 +707,10 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 			profiles.get(1).setData(axis.getSlice(new Slice(0, boxesLines.get(1).getShape()[0], 1)), boxesLines.get(1));
 
 			double max = axis.getDouble(axis.argMax());
-			if(type == BoxLineType.HORIZONTAL_TYPE){
+			if(type == SWT.HORIZONTAL){
 				xPixelAxisHorizontal.setTitle(axis.getName());
 				createXAxisBoxRegion(horizontalProfilePlottingSystem, new RectangularROI(min, 0, (max-min)/2, 100, 0), "X_Axis_box");
-			} else if(type == BoxLineType.VERTICAL_TYPE){
+			} else if(type == SWT.VERTICAL){
 				xPixelAxisVertical.setTitle(axis.getName());
 				createXAxisBoxRegion(verticalProfilePlottingSystem, new RectangularROI(min, 0, (max-min)/2, 100, 0), "X_Axis_box");
 			}
@@ -780,13 +779,13 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 
 	@Override
 	public void roiDragged(ROIEvent evt) {
-		update((IRegion)evt.getSource(), evt.getROI(), true);
+		update((IRegion)evt.getSource(), (ROIBase)evt.getROI(), true);
 	}
 
 	@Override
 	public void roiChanged(ROIEvent evt) {
 		final IRegion region = (IRegion)evt.getSource();
-		update(region, region.getROI(), false);
+		update(region, (ROIBase)region.getROI(), false);
 	}
 	
 	private synchronized void update(IRegion r, ROIBase rb, boolean isDrag) {
@@ -868,10 +867,10 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 						if (monitor.isCanceled())
 							return Status.CANCEL_STATUS;
 						if (registeredTraces.containsKey(iRegion.getName())) {
-							createProfile(image, iRegion, iRegion.getROI(),
+							createProfile(image, iRegion, (ROIBase)iRegion.getROI(),
 									true, isDrag, monitor);
 						} else {
-							createProfile(image, iRegion, iRegion.getROI(),
+							createProfile(image, iRegion, (ROIBase)iRegion.getROI(),
 									false, isDrag, monitor);
 						}
 					}
@@ -888,7 +887,7 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 				createProfile(
 						image,
 						currentRegion,
-						currentROI != null ? currentROI : currentRegion
+						currentROI != null ? currentROI : (ROIBase)currentRegion
 								.getROI(), true, isDrag, monitor);
 
 			}

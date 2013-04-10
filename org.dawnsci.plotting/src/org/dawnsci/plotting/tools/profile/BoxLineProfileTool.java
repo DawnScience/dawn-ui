@@ -31,6 +31,7 @@ import org.dawnsci.plotting.api.trace.ILineTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Control;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +43,6 @@ import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Slice;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.ROIProfile;
-import uk.ac.diamond.scisoft.analysis.roi.ROIProfile.BoxLineType;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 /**
@@ -53,15 +53,15 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 	private static final Logger logger = LoggerFactory.getLogger(BoxLineProfileTool.class);
 	private IAxis xPixelAxis;
 	private IAxis yPixelAxis;
-	private BoxLineType type;
+	private int type;
 	public BoxLineProfileTool() {
-		this(BoxLineType.HORIZONTAL_TYPE);
+		this(SWT.HORIZONTAL);
 	}
 	/**
 	 * Constructor to this profile tool
-	 * @param type can be either VERTICAL_TYPE or HORIZONTAL_TYPE
+	 * @param type can be either VERTICAL or HORIZONTAL
 	 */
-	public BoxLineProfileTool(BoxLineType type){
+	public BoxLineProfileTool(int type){
 		this.type = type;
 	}
 
@@ -110,10 +110,10 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 		if (box==null) return;
 		
 		String traceName1 = "", traceName2 = "";
-		if(type == BoxLineType.HORIZONTAL_TYPE){
+		if(type == SWT.HORIZONTAL){
 			traceName1 = "Horizontal Profile 1";
 			traceName2 = "Horizontal Profile 2";
-		} else if(type == BoxLineType.VERTICAL_TYPE){
+		} else if(type == SWT.VERTICAL){
 			traceName1 = "Vertical Profile 1";
 			traceName2 = "Vertical Profile 2";
 		}
@@ -146,13 +146,13 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 						public void run() {
 							List<IDataset> axes = image.getAxes();
 							if(axes != null){
-								if(type == BoxLineType.VERTICAL_TYPE){
+								if(type == SWT.VERTICAL){
 
 									updateAxes(traces, boxesLines, (AbstractDataset)axes.get(1), bounds.getPointY());
 									x_trace.setTraceColor(ColorConstants.blue);
 									y_trace.setTraceColor(ColorConstants.red);
 
-								} else if (type == BoxLineType.HORIZONTAL_TYPE){
+								} else if (type == SWT.HORIZONTAL){
 
 									updateAxes(traces, boxesLines, (AbstractDataset)axes.get(0), bounds.getPointX());
 									x_trace.setTraceColor(ColorConstants.darkGreen);
@@ -162,7 +162,7 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 							}
 							else { //if no axes we set them manually according to the data shape
 								int[] shapes = image.getData().getShape();
-								if(type == BoxLineType.VERTICAL_TYPE){
+								if(type == SWT.VERTICAL){
 									int[] verticalAxis = new int[shapes[1]];
 									for(int i = 0; i < verticalAxis.length; i ++){
 										verticalAxis[i] = i;
@@ -171,7 +171,7 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 									updateAxes(traces, boxesLines, vertical, bounds.getPointY());
 									x_trace.setTraceColor(ColorConstants.blue);
 									y_trace.setTraceColor(ColorConstants.red);
-								} else if (type == BoxLineType.HORIZONTAL_TYPE){
+								} else if (type == SWT.HORIZONTAL){
 									int[] horizontalAxis = new int[shapes[0]];
 									for(int i = 0; i < horizontalAxis.length; i ++){
 										horizontalAxis[i] = i;
@@ -238,7 +238,7 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 		return profilePlottingSystem;
 	}
 
-	public BoxLineType getType(){
+	public int getType(){
 		return type;
 	}
 
@@ -247,7 +247,7 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 		// TODO Auto-generated method stub
 		return null;
 	}
-	public void setLineType(BoxLineType type) {
+	public void setLineType(int type) {
 		this.type = type;
 	}
 

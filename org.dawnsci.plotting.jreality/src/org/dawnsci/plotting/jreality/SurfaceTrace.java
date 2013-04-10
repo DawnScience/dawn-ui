@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
@@ -175,7 +176,7 @@ public class SurfaceTrace extends PlotterTrace implements ISurfaceTrace{
 	 * Also ignores data windows outside the data size.
 	 */
 	@Override
-	public void setWindow(ROIBase window) {
+	public void setWindow(IROI window) {
 		if (window instanceof RectangularROI && getData()!=null) {
 			RectangularROI rroi = (RectangularROI)window;
 			int[]       start = rroi.getIntPoint();
@@ -189,8 +190,8 @@ public class SurfaceTrace extends PlotterTrace implements ISurfaceTrace{
 			window = new SurfacePlotROI(start[0], start[1], end[0], end[1], 0,0,0,0);
 		}
 			
-		this.window = window;
-		if (plotter!=null && this.isActive()) plotter.setSurfaceWindow(window);
+		this.window = (ROIBase)window;
+		if (plotter!=null && this.isActive()) plotter.setSurfaceWindow(this.window);
 	}
 
 	private int[] normalize(int[] point, int maxX, int maxY) {

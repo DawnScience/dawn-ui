@@ -3,7 +3,7 @@ package org.dawnsci.plotting.api.trace;
 import java.util.List;
 
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
 /**
  * Interface for plotting stack of plots in 3D.
@@ -53,7 +53,7 @@ public interface ILineStackTrace extends IAxesTrace, IWindowTrace {
 	 * 
 	 * @return the region of the window, usually a LineROI
 	 */
-	public ROIBase getWindow();
+	public IROI getWindow();
 	
 	/**
 	 * Set the window to be used as a LineROI. The first x value is
@@ -65,6 +65,6 @@ public interface ILineStackTrace extends IAxesTrace, IWindowTrace {
 	 * 
 	 * @param window
 	 */
-	public void setWindow(ROIBase window);
+	public void setWindow(IROI window);
 
 }

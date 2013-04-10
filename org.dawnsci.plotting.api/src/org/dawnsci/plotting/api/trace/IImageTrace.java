@@ -7,7 +7,7 @@ import org.dawnsci.plotting.api.histogram.ImageServiceBean.HistoType;
 import org.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
 
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
 /**
  * Interface used for the plotting system to plot images.
@@ -266,7 +266,7 @@ public interface IImageTrace extends IPaletteTrace, IDownsampledTrace{
 	 * @throws Exception if the roi could not be transformed or the roi type
 	 *         is unknown.
 	 */
-	public ROIBase getRegionInAxisCoordinates(final ROIBase roi) throws Exception;
+	public IROI getRegionInAxisCoordinates(final IROI roi) throws Exception;
 	
 	
 	/**

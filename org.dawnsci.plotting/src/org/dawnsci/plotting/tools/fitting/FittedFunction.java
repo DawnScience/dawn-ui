@@ -368,7 +368,7 @@ public class FittedFunction  {
 
 	public List<ROIBase> getRegions() {
 		if (fwhm!=null && center!=null) {
-			return Arrays.asList(fwhm.getROI(), center.getROI());
+			return Arrays.asList((ROIBase)fwhm.getROI(), (ROIBase)center.getROI());
 		}
 		return null;
 	}

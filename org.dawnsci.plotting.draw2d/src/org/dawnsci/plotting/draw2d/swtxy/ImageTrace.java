@@ -53,11 +53,11 @@ import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.function.Downsample;
 import uk.ac.diamond.scisoft.analysis.dataset.function.DownsampleMode;
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.PointROI;
 import uk.ac.diamond.scisoft.analysis.roi.PolygonalROI;
 import uk.ac.diamond.scisoft.analysis.roi.PolylineROI;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 /**
@@ -1220,7 +1220,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 *         is created. The data processing needs rois with indices.
 	 */
 	@Override
-	public ROIBase getRegionInAxisCoordinates(final ROIBase roi) throws Exception {
+	public IROI getRegionInAxisCoordinates(final IROI roi) throws Exception {
 		
 		if (!TraceUtils.isCustomAxes(this)) return roi;
 		

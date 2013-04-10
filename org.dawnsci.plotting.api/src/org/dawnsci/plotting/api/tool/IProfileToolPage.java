@@ -1,6 +1,6 @@
 package org.dawnsci.plotting.api.tool;
 
-import uk.ac.diamond.scisoft.analysis.roi.ROIProfile.BoxLineType;
+import org.dawnsci.plotting.api.tool.IToolPage;
 
 /**
  * Interface designed to hide special tool pages.
@@ -11,8 +11,8 @@ public interface IProfileToolPage extends IToolPage {
 
 	/**
 	 * Line type for Box Line Profiles
-	 * @param horizontalType
+	 * @param lineType either SWT.VERTICAL, or SWT.HORIZONTAL
 	 */
-	void setLineType(BoxLineType lineType);
+	void setLineType(int lineType);
 
 }

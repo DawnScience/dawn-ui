@@ -19,6 +19,7 @@ import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
 /**
@@ -107,10 +108,10 @@ public abstract class AbstractRegion extends Figure implements IRegion, IRegionC
 	}
 
 	@Override
-	public void setROI(ROIBase roi) {
-		this.roi = roi;
+	public void setROI(IROI roi) {
+		this.roi = (ROIBase)roi;
 		updateROI();
-		fireROIChanged(roi);
+		fireROIChanged(this.roi);
 	}
 
 	/**

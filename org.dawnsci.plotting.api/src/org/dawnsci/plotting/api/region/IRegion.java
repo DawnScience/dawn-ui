@@ -8,25 +8,7 @@ import java.util.List;
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.eclipse.swt.graphics.Color;
 
-import uk.ac.diamond.scisoft.analysis.roi.CircularFitROI;
-import uk.ac.diamond.scisoft.analysis.roi.CircularROI;
-import uk.ac.diamond.scisoft.analysis.roi.EllipticalFitROI;
-import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
-import uk.ac.diamond.scisoft.analysis.roi.FreeDrawROI;
-import uk.ac.diamond.scisoft.analysis.roi.GridROI;
-import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
-import uk.ac.diamond.scisoft.analysis.roi.PerimeterBoxROI;
-import uk.ac.diamond.scisoft.analysis.roi.PointROI;
-import uk.ac.diamond.scisoft.analysis.roi.PolygonalROI;
-import uk.ac.diamond.scisoft.analysis.roi.PolylineROI;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
-import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
-import uk.ac.diamond.scisoft.analysis.roi.RingROI;
-import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
-import uk.ac.diamond.scisoft.analysis.roi.XAxisBoxROI;
-import uk.ac.diamond.scisoft.analysis.roi.XAxisLineBoxROI;
-import uk.ac.diamond.scisoft.analysis.roi.YAxisBoxROI;
-import uk.ac.diamond.scisoft.analysis.roi.YAxisLineBoxROI;
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
 /**
  * A selection region must conform to this interface. You can set its position, colour and transparency settings.
@@ -130,12 +112,12 @@ public interface IRegion {
 	/**
 	 * Get the region of interest (in coordinate frame of the axis that region is added to)
 	 */
-	public ROIBase getROI();
+	public IROI getROI();
 
 	/**
 	 * Set the region of interest (in coordinate frame of the axis that region is added to)
 	 */
-	public void setROI(ROIBase roi);
+	public void setROI(IROI roi);
 
 	/**
 	 * Returns whether the region is active or not
@@ -176,31 +158,34 @@ public interface IRegion {
 	/**
 	 * Class packages types of regions, their default names, colours and indices.
 	 * @author fcp94556
+	 * 
+	 * Used to be:
+	 * 
+	 * 		
 	 *
 	 */
 	public enum RegionType {
-		LINE("Line",               ColorConstants.cyan,       LinearROI.class),
-		POLYLINE("Polyline",       ColorConstants.cyan,       PolylineROI.class),
-		POLYGON("Polygon",         ColorConstants.cyan,       PolygonalROI.class),
-		BOX("Box",                 ColorConstants.green,      RectangularROI.class),
-		PERIMETERBOX("Perimeter box", ColorConstants.gray,       PerimeterBoxROI.class),
-		GRID("Grid",               ColorConstants.lightGray,  GridROI.class),
-		CIRCLE("Circle",           darkYellow,                CircularROI.class),
-		CIRCLEFIT("Circle fit",    darkYellow,                CircularFitROI.class),
-		SECTOR("Sector",           ColorConstants.red,        SectorROI.class),
-		POINT("Point",             darkMagenta,               PointROI.class),
-		ELLIPSE("Ellipse",         ColorConstants.lightGreen, EllipticalROI.class),
-		ELLIPSEFIT("Ellipse fit",  ColorConstants.lightGreen, EllipticalFitROI.class),
-		RING("Ring",               darkYellow,                RingROI.class),
-		XAXIS("X-Axis",            ColorConstants.blue,       XAxisBoxROI.class),
-		YAXIS("Y-Axis",            ColorConstants.blue,       YAxisBoxROI.class),
-		XAXIS_LINE("X-Axis Line",  ColorConstants.blue,       XAxisLineBoxROI.class),
-		YAXIS_LINE("Y-Axis Line",  ColorConstants.blue,       YAxisLineBoxROI.class),
-		FREE_DRAW("Free draw",     darkYellow,                FreeDrawROI.class);
+		LINE("Line",               ColorConstants.cyan),
+		POLYLINE("Polyline",       ColorConstants.cyan),
+		POLYGON("Polygon",         ColorConstants.cyan),
+		BOX("Box",                 ColorConstants.green),
+		PERIMETERBOX("Perimeter box", ColorConstants.gray),
+		GRID("Grid",               ColorConstants.lightGray),
+		CIRCLE("Circle",           darkYellow),
+		CIRCLEFIT("Circle fit",    darkYellow),
+		SECTOR("Sector",           ColorConstants.red),
+		POINT("Point",             darkMagenta),
+		ELLIPSE("Ellipse",         ColorConstants.lightGreen),
+		ELLIPSEFIT("Ellipse fit",  ColorConstants.lightGreen),
+		RING("Ring",               darkYellow),
+		XAXIS("X-Axis",            ColorConstants.blue),
+		YAXIS("Y-Axis",            ColorConstants.blue),
+		XAXIS_LINE("X-Axis Line",  ColorConstants.blue),
+		YAXIS_LINE("Y-Axis Line",  ColorConstants.blue),
+		FREE_DRAW("Free draw",     darkYellow);
 
 		private String name;
 		private Color defaultColor;
-		private Class<? extends ROIBase> roiClass;
 		
 		public static final List<RegionType> ALL_TYPES;
 		static {
@@ -209,10 +194,9 @@ public interface IRegion {
 			ALL_TYPES = Collections.unmodifiableList(tmp);
 		}
 
-		RegionType(String name, Color defaultColor, Class<? extends ROIBase> roiClass) {
+		RegionType(String name, Color defaultColor) {
 			this.name = name;
 			this.defaultColor = defaultColor;
-			this.roiClass = roiClass;
 		}
 
 		public int getIndex() {
@@ -227,42 +211,14 @@ public interface IRegion {
 			return defaultColor;
 		}
 
-		public Class<? extends ROIBase> getROIClass() {
-			return roiClass;
-		}
-
 		public static RegionType getRegion(int index) {
 			return ALL_TYPES.get(index);
-		}
-
-		/**
-		 * @return first type that has given class (can return null)
-		 */
-		public static RegionType getRegion(Class<? extends ROIBase> roiClass) {
-			for (RegionType t : ALL_TYPES) {
-				if (roiClass.equals(t.getROIClass())) {
-					return t;
-				}
-			}
-			return null;
 		}
 
 		public String getId() {
 			return IRegion.class.getPackage().getName()+"."+toString();
 		}
 
-		/**
-		 * Find out the IRegion for the ROIBase
-		 * @param roi
-		 * @return
-		 */
-		public static RegionType forROI(ROIBase roi) {
-			// All region types have their own ROIBase equivalent
-			for (RegionType t : values()) {
-				if (t.getROIClass() == roi.getClass()) return t;
-			}
-			return null;
-		}
 	}
 
 	/**

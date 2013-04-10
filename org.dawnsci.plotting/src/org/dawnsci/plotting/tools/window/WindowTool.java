@@ -144,7 +144,7 @@ public class WindowTool extends AbstractToolPage {
 			
 			this.roiListener = new IROIListener.Stub() {
 				public void update(ROIEvent evt) {
-					windowJob.schedule(evt.getROI());
+					windowJob.schedule((ROIBase)evt.getROI());
 				}
 			};
 			

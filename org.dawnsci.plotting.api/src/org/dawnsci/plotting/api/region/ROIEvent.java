@@ -2,7 +2,7 @@ package org.dawnsci.plotting.api.region;
 
 import java.util.EventObject;
 
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
 public class ROIEvent extends EventObject {
 
@@ -14,14 +14,14 @@ public class ROIEvent extends EventObject {
 	 * 
 	 */
 	private static final long serialVersionUID = 5892437380421200585L;
-	private ROIBase roi;
+	private IROI roi;
 
-	public ROIEvent(Object source, ROIBase region) {
+	public ROIEvent(Object source, IROI region) {
 		super(source);
 		this.roi = region;
 	}
 
-	public ROIBase getROI() {
+	public IROI getROI() {
 		return roi;
 	}
 

@@ -12,13 +12,13 @@ import org.dawnsci.plotting.api.axis.IAxis;
 import org.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
 import org.dawnsci.plotting.api.region.IROIListener;
 import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.region.IRegionListener;
 import org.dawnsci.plotting.api.region.MouseEvent;
 import org.dawnsci.plotting.api.region.MouseListener;
 import org.dawnsci.plotting.api.region.ROIEvent;
 import org.dawnsci.plotting.api.region.RegionEvent;
 import org.dawnsci.plotting.api.region.RegionUtils;
-import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.dawnsci.plotting.api.trace.IImageTrace;
@@ -43,7 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
 public class CrossHairProfileTool extends AbstractToolPage implements IROIListener, MouseListener  {
 
@@ -54,7 +54,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 	private   IRegion                xHair, yHair;
 	private   IAxis                  x1,x2;
 	private   RunningJob             xUpdateJob, yUpdateJob;
-	private   ROIBase           xBounds, yBounds;
+	private   IROI                   xBounds, yBounds;
 	
 	public CrossHairProfileTool() {
 		try {
@@ -276,7 +276,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 	
 				if (x1==null | x2==null) return Status.OK_STATUS;
 	
-				ROIBase bounds = region==xHair ? xBounds : yBounds;
+				IROI bounds = region==xHair ? xBounds : yBounds;
 				
 				final boolean ok = profile(region, bounds, false, null, monitor);
 
@@ -318,7 +318,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 		update(region, region.getROI());
 	}
 	
-	private void update(IRegion r, ROIBase rb) {
+	private void update(IRegion r, IROI rb) {
 		if (r == xHair) {
 			xUpdateJob.stop();
 			this.xBounds = rb;
@@ -357,7 +357,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 		}
 	}
 
-	private IRegion createStaticRegion(String nameStub, final ROIBase bounds, final Color snapShotColor, final RegionType regionType) throws Exception {
+	private IRegion createStaticRegion(String nameStub, final IROI bounds, final Color snapShotColor, final RegionType regionType) throws Exception {
 		
 
 		final IRegion region = getPlottingSystem().createRegion(RegionUtils.getUniqueName(nameStub, getPlottingSystem()), regionType);
@@ -397,7 +397,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 
 	
 	private boolean profile(final IRegion      region, 
-			                final ROIBase bounds, 
+			                final IROI         bounds, 
 			                final boolean      snapshot,
 			                final Color        snapShotColor,
 			                final IProgressMonitor monitor) {

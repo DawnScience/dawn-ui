@@ -1269,7 +1269,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 			return getDataSet(ob.getName(), monitor);
 		} else {
 			try {
-				return ob.getExpression().getDataSet(null, new IMonitor.Stub());
+				return (AbstractDataset)ob.getExpression().getDataSet(null, new IMonitor.Stub());
 			} catch (Exception e) {
 				return null;
 			}

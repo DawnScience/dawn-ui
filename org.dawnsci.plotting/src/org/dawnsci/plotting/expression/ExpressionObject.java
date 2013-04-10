@@ -226,7 +226,7 @@ class ExpressionObject implements IExpressionObject {
 	    	final String variableName = entry.get(0);
 	    	if (monitor.isCancelled()) return null;
 	    	final AbstractDataset set = provider!=null 
-	    			                  ? provider.getVariableValue(variableName, monitor) 
+	    			                  ? (AbstractDataset)provider.getVariableValue(variableName, monitor) 
 	    					          : null;
 	    	if (set!=null) refs.put(variableName, set);
 		}

@@ -352,13 +352,13 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 
 	@Override
 	public void roiDragged(ROIEvent evt) {
-		update((IRegion)evt.getSource(), evt.getROI(), true);
+		update((IRegion)evt.getSource(), (ROIBase)evt.getROI(), true);
 	}
 
 	@Override
 	public void roiChanged(ROIEvent evt) {
 		final IRegion region = (IRegion)evt.getSource();
-		update(region, region.getROI(), false);
+		update(region, (ROIBase)region.getROI(), false);
 	}
 	
 	protected synchronized void update(IRegion r, ROIBase rb, boolean isDrag) {
@@ -430,9 +430,9 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 							if (!iRegion.isUserRegion()) continue;
 							if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
 							if (registeredTraces.containsKey(iRegion.getName())) {
-								createProfile(image, iRegion, iRegion.getROI(), true, isDrag, monitor);
+								createProfile(image, iRegion, (ROIBase)iRegion.getROI(), true, isDrag, monitor);
 							} else {
-								createProfile(image, iRegion, iRegion.getROI(), false, isDrag, monitor);
+								createProfile(image, iRegion, (ROIBase)iRegion.getROI(), false, isDrag, monitor);
 							}
 						}
 					} else {
@@ -444,7 +444,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 					if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
 					createProfile(image, 
 							      currentRegion, 
-							      currentROI!=null?currentROI:currentRegion.getROI(), 
+							      currentROI!=null?currentROI:(ROIBase)currentRegion.getROI(), 
 								  true, 
 								  isDrag,
 								  monitor);

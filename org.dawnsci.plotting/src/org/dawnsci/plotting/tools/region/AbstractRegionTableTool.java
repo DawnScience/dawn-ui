@@ -208,7 +208,7 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 				if (sel!=null && sel.getFirstElement()!=null) {
 					final IRegion region = (IRegion)sel.getFirstElement();
 					if (region==null||region.getROI()==null) return;
-					final ROIBase bounds = region.getROI();
+					final ROIBase bounds = (ROIBase)region.getROI();
 					if (bounds.getPointRef()==null) return;
 					
 					final Clipboard cb = new Clipboard(composite.getDisplay());
@@ -463,7 +463,7 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 				if(monitor.isCanceled())	return Status.CANCEL_STATUS;
 
 				IRegion  region = (IRegion)evt.getSource();
-				ROIBase rb = evt.getROI();
+				ROIBase rb = (ROIBase)evt.getROI();
 				
 				if(monitor.isCanceled())	return Status.CANCEL_STATUS;
 				dragBounds.put(region.getName(), rb);
@@ -481,7 +481,7 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 
 	public ROIBase getROI(IRegion region) {
 		if (dragBounds!=null&&dragBounds.containsKey(region.getName())) return dragBounds.get(region.getName());
-		return region.getROI();
+		return (ROIBase)region.getROI();
 	}
 
 	/**
@@ -537,7 +537,7 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 		
 		if (traces!=null&&traces.size()==1&&traces.iterator().next() instanceof IImageTrace) {
 			final IImageTrace     trace        = (IImageTrace)traces.iterator().next();
-			ROIBase roi = region.getROI();
+			ROIBase roi = (ROIBase)region.getROI();
 			AbstractDataset dataRegion =  (AbstractDataset)trace.getData();
 			try {
 				if(roi instanceof RectangularROI){

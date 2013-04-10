@@ -185,7 +185,7 @@ public class PlotImageEditor extends EditorPart implements IReusableEditor {
 					AbstractDataset set;
 					try {
 						final ILoaderService service = (ILoaderService)ServiceManager.getService(ILoaderService.class);
-						set = service.getDataset(filePath);
+						set = (AbstractDataset)service.getDataset(filePath);
 					} catch (Throwable e) {
 						logger.error("Cannot load file "+filePath, e);
 						return Status.CANCEL_STATUS;

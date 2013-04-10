@@ -357,7 +357,7 @@ public class EllipseFittingTool extends AbstractToolPage {
 		@Override
 		public String getText(Object element) {
 
-			ROIBase rb = ((IRegion) element).getROI();
+			ROIBase rb = (ROIBase)((IRegion) element).getROI();
 
 			if (!(rb instanceof EllipticalROI)) {
 				return null;

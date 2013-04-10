@@ -10,19 +10,7 @@ import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.swt.graphics.Color;
 
-import uk.ac.diamond.scisoft.analysis.roi.CircularFitROI;
-import uk.ac.diamond.scisoft.analysis.roi.CircularROI;
-import uk.ac.diamond.scisoft.analysis.roi.EllipticalFitROI;
-import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
-import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
-import uk.ac.diamond.scisoft.analysis.roi.PerimeterBoxROI;
-import uk.ac.diamond.scisoft.analysis.roi.PointROI;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
-import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
-import uk.ac.diamond.scisoft.analysis.roi.RingROI;
-import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
-import uk.ac.diamond.scisoft.analysis.roi.XAxisBoxROI;
-import uk.ac.diamond.scisoft.analysis.roi.YAxisBoxROI;
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
 /**
  * Class containing utility methods for regions to avoid duplication 
@@ -92,9 +80,8 @@ public class RegionUtils {
 	 * @param roi
 	 * @param roiName
 	 * @return
-	 */
 	public static IRegion createRegion( final IPlottingSystem plottingSystem,
-										final ROIBase         roi, 
+										final IROI            roi, 
 										final String          roiName) throws Exception {
 
 		IRegion region = plottingSystem.getRegion(roiName);
@@ -150,6 +137,7 @@ public class RegionUtils {
 		return newRegion;
 
 	}
+	 */
 		
 
 }

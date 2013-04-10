@@ -9,6 +9,7 @@ import org.dawnsci.plotting.api.trace.TraceEvent;
 import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
@@ -72,8 +73,9 @@ public class StackTrace extends PlotterTrace implements ILineStackTrace {
 		return true;
 	}
 
-    public void setWindow(ROIBase roi) {
-		window=roi;
+	@Override
+    public void setWindow(IROI roi) {
+		window=(ROIBase)roi;
 		if (plotter!=null && this.isActive()) plotter.setStackWindow(window);
 	}
     

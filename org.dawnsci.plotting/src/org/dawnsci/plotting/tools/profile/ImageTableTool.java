@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 public class ImageTableTool extends AbstractToolPage  implements IROIListener {
@@ -245,7 +245,7 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 	 */
 	protected void createProfile(IImageTrace image, 
 								IRegion region, 
-								ROIBase rbs, 
+								IROI    rbs, 
 								boolean tryUpdate, 
 								boolean isDrag,
 								IProgressMonitor monitor) {
@@ -372,7 +372,7 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 		// TODO Auto-generated method stub
 
 	}	
-	protected synchronized void update(IRegion r, ROIBase rb, boolean isDrag) {
+	protected synchronized void update(IRegion r, IROI rb, boolean isDrag) {
 	
 		if (r!=null && !isRegionTypeSupported(r.getRegionType())) return; // Nothing to do.
          
@@ -382,7 +382,7 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 	private final class ProfileTableJob extends Job {
 		
 		private   IRegion                currentRegion;
-		private   ROIBase                currentROI;
+		private   IROI                   currentROI;
 		private   boolean                isDrag;
 
 		ProfileTableJob() {
@@ -392,7 +392,7 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 			setPriority(Job.INTERACTIVE);
 		}
 
-		public void profile(IRegion r, ROIBase rb, boolean isDrag) {
+		public void profile(IRegion r, IROI rb, boolean isDrag) {
 
 	        // This in principle is not needed and appears to make no difference wether in or out.
 		    // However Irakli has advised that it is needed in some circumstances.

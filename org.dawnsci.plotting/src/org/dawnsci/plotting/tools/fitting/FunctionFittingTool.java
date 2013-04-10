@@ -12,18 +12,16 @@ import org.dawb.common.ui.wizard.persistence.PersistenceExportWizard;
 import org.dawb.common.ui.wizard.persistence.PersistenceImportWizard;
 import org.dawb.workbench.jmx.UserPlotBean;
 import org.dawnsci.plotting.Activator;
-import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.region.IROIListener;
 import org.dawnsci.plotting.api.region.IRegion;
-import org.dawnsci.plotting.api.region.ROIEvent;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.dawnsci.plotting.api.region.ROIEvent;
 import org.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.dawnsci.plotting.api.trace.ILineTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.api.trace.ITraceListener;
 import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.api.trace.TraceWillPlotEvent;
-import org.eclipse.core.runtime.IPlatformRunnable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -67,6 +65,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.fitting.Fitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunctionService;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.StraightLine;
 import uk.ac.diamond.scisoft.analysis.optimize.ApacheNelderMead;
@@ -810,9 +809,9 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 	}
 
 	@Override
-	public Map<String, AFunction> getFunctions() {
+	public Map<String, IFunction> getFunctions() {
 
-		HashMap<String, AFunction> functions = new HashMap<String, AFunction>();
+		HashMap<String, IFunction> functions = new HashMap<String, IFunction>();
 		
 		if (compFunction != null) {
 			for (int i = 0; i < compFunction.getNoOfFunctions(); i++) {
@@ -832,19 +831,19 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 	}
 
 	@Override
-	public void setFunctions(Map<String, AFunction> functions) {
+	public void setFunctions(Map<String, IFunction> functions) {
 		// clear the composite function
 		compFunction = new CompositeFunction();
 		for (String key : functions.keySet()) {
 			if (key.contains("_initial_")) {
-				compFunction.addFunction(functions.get(key));
+				compFunction.addFunction((AFunction)functions.get(key));
 			}
 		}
 		
 		resultFunction = new CompositeFunction();
 		for (String key : functions.keySet()) {
 			if (key.contains("_result_")) {
-				resultFunction.addFunction(functions.get(key));
+				resultFunction.addFunction((AFunction)functions.get(key));
 			}
 		}
 		

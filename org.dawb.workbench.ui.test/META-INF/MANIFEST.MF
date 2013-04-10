@@ -21,10 +21,7 @@ Import-Package: fable.framework.toolbox,
  org.eclipse.ui,
  org.eclipse.ui.ide,
  org.eclipse.ui.part,
- org.junit,
- uk.ac.diamond.scisoft.analysis.dataset,
- uk.ac.diamond.scisoft.analysis.io,
- uk.ac.diamond.scisoft.analysis.roi
+ org.junit
 Export-Package: org.dawb.workbench.ui.editors.test
 Require-Bundle: org.eclipse.core.filesystem;bundle-version="1.3.1",
  org.eclipse.core.runtime;bundle-version="3.6.0",
@@ -36,4 +33,6 @@ Require-Bundle: org.eclipse.core.filesystem;bundle-version="1.3.1",
  org.dawb.common.util;bundle-version="1.0.0",
  org.dawb.common.services;bundle-version="1.2.0",
  org.dawnsci.plotting.api;bundle-version="1.0.0",
- org.dawb.common.ui;bundle-version="1.3.0"
+ org.dawb.common.ui;bundle-version="1.3.0",
+ uk.ac.diamond.scisoft.analysis;bundle-version="1.3.0",
+ uk.ac.diamond.scisoft.analysis.api;bundle-version="1.0.0"

@@ -688,7 +688,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 						Job job = new Job("Circle fit refinement") {
 							@Override
 							protected IStatus run(final IProgressMonitor monitor) {
-								return runEllipseFit(monitor, display, plotter, t, tmpRegion.getROI(), true);
+								return runEllipseFit(monitor, display, plotter, t, (ROIBase)tmpRegion.getROI(), true);
 							}
 						};
 						job.setPriority(Job.SHORT);
@@ -756,7 +756,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 						Job job = new Job("Ellipse rings finding") {
 							@Override
 							protected IStatus run(final IProgressMonitor monitor) {
-								ROIBase roi = tmpRegion.getROI();
+								ROIBase roi = (ROIBase)tmpRegion.getROI();
 								IStatus stat = runEllipseFit(monitor, display, plotter, t, roi, false);
 								if (stat.isOK()) {
 									stat = runFindOuterRings(monitor, display, plotter, t, roi);
@@ -1119,7 +1119,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		roiListener = new IROIListener.Stub() {
 			@Override
 			public void update(ROIEvent evt) {
-				ROIBase r = evt.getROI();
+				ROIBase r = (ROIBase)evt.getROI();
 				if (r instanceof CircularFitROI || (r instanceof EllipticalFitROI && ((EllipticalFitROI) r).isCircular())) {
 					double[] point = r.getPointRef();
 //					logger.debug("ROI moved here X: {} Y : {}", point[0], point[1]);
