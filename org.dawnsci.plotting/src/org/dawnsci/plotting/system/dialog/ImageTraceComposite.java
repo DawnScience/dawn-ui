@@ -91,9 +91,10 @@ public class ImageTraceComposite extends Composite {
 		group.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
 		group.setLayout(new GridLayout(2, false));
 		
-		boolean isInt = imageTrace.getData().getDtype()==AbstractDataset.INT16 ||
-		                imageTrace.getData().getDtype()==AbstractDataset.INT32 ||
-				        imageTrace.getData().getDtype()==AbstractDataset.INT64;
+		final int dType = ((AbstractDataset)imageTrace.getData()).getDtype();
+		boolean isInt = dType==AbstractDataset.INT16 ||
+				        dType==AbstractDataset.INT32 ||
+				        dType==AbstractDataset.INT64;
 
 		label = new Label(group, SWT.NONE);
 		label.setText("Minimum Intensity");

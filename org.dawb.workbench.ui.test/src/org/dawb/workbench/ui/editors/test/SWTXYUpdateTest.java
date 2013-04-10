@@ -113,7 +113,7 @@ public class SWTXYUpdateTest {
 		//if (!(sys instanceof PlottingSystemImpl)) throw new Exception("This test is designed for "+PlottingSystemImpl.class.getName());
 		page.setPartState(EclipseUtils.getPage().getActivePartReference(), IWorkbenchPage.STATE_MAXIMIZED);
 				
-		if (ys.get(0).getBuffer()==null || ys.get(0).getSize()<1) {
+		if (((AbstractDataset)ys.get(0)).getBuffer()==null || ys.get(0).getSize()<1) {
 		    sys.createPlot1D(new IntegerDataset(), ys, null);
 		} else {
 		    sys.createPlot1D(AbstractDataset.arange(0, ys.get(0).getSize(), 1, AbstractDataset.INT32), ys, null);
@@ -127,7 +127,7 @@ public class SWTXYUpdateTest {
 				
 				final IDataset y = ys.get(i);
 				
-				final int index =  (ys.get(0).getBuffer()==null || ys.get(0).getSize()<1) 
+				final int index =  (((AbstractDataset)ys.get(0)).getBuffer()==null || ys.get(0).getSize()<1) 
 						        ? total+1
 						        : y.getSize()+total+1;
 				

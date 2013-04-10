@@ -57,7 +57,9 @@ public class TraceUtils {
 		if (axes==null)     return false;
 		if (axes.isEmpty()) return false;
 		
-		if (axes.get(0).getDtype()!=IDataset.INT32 || axes.get(1).getDtype()!=IDataset.INT32) {
+		final Class<?> xClazz = axes.get(0).elementClass();
+		final Class<?> yClazz = axes.get(1).elementClass();
+		if (!xClazz.isInstance(int.class) || !yClazz.isInstance(int.class)) {
 			return true;
 		}
 		
