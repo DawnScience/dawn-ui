@@ -431,7 +431,7 @@ public class RegionSumTool extends AbstractToolPage implements IROIListener {
 		int xInc = bounds.getPoint()[0]<bounds.getEndPoint()[0] ? 1 : -1;
 		int yInc = bounds.getPoint()[1]<bounds.getEndPoint()[1] ? 1 : -1;
 		
-		AbstractDataset dataRegion = image.getData();
+		AbstractDataset dataRegion = (AbstractDataset)image.getData();
 		try {
 			dataRegion = dataRegion.getSlice(
 					new int[] { yStartPt, xStartPt },

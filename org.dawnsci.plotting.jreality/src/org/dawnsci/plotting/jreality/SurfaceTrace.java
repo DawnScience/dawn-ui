@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
@@ -118,13 +119,13 @@ public class SurfaceTrace extends PlotterTrace implements ISurfaceTrace{
 	}
 
 
-	public void setData(final AbstractDataset data, List<AbstractDataset> axes) {
+	public void setData(final IDataset data, List<IDataset> axes) {
 		
 		if (axes!=null && axes.size()==2) {
 			axes = Arrays.asList(axes.get(0), axes.get(1), null);
 		}
 		
-		this.data = data;
+		this.data = (AbstractDataset)data;
 		this.axes = axes;
 		if (isActive()) {
 			plotter.updatePlot(createAxisValues(), plotter.getWindow(getWindow()), PlottingMode.SURF2D, getData());

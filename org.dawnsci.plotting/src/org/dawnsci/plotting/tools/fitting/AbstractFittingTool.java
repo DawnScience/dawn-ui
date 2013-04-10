@@ -421,8 +421,8 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 				final double[] p2 = bounds.getEndPoint();
 	
 				// We peak fit only the first of the data sets plotted for now.
-				AbstractDataset x  = selectedTrace.getXData();
-				AbstractDataset y  = selectedTrace.getYData();
+				AbstractDataset x  = (AbstractDataset)selectedTrace.getXData();
+				AbstractDataset y  = (AbstractDataset)selectedTrace.getYData();
 	
 				try {
 					AbstractDataset[] a= FittingUtils.xintersection(x,y,p1[0],p2[0]);
@@ -434,8 +434,8 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 				try {
 					final FittedFunctions bean = getFittedFunctions(new FittedPeaksInfo(x, y, monitor, getPlottingSystem(), selectedTrace));
 					if (bean!=null) for (FittedFunction p : bean.getFunctionList()) {
-		    			p.setX(selectedTrace.getXData());
-		    			p.setY(selectedTrace.getYData());
+		    			p.setX((AbstractDataset)selectedTrace.getXData());
+		    			p.setY((AbstractDataset)selectedTrace.getYData());
 		    			p.setDataTrace(selectedTrace);
 					}
 					// Add saved peaks if any.

@@ -2,7 +2,7 @@ package org.dawnsci.plotting.api.trace;
 
 import java.util.List;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
 /**
@@ -22,7 +22,7 @@ public interface ISurfaceTrace extends IPaletteTrace, IWindowTrace {
 	 * @param axes
 	 * @throws Exception
 	 */
-	public void setData(final AbstractDataset data, final List<AbstractDataset> axes);
+	public void setData(final IDataset data, final List<IDataset> axes);
 			
 	/**
 	 * 

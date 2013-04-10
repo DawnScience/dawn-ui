@@ -24,11 +24,11 @@ import org.dawnsci.common.widgets.tree.ValueEditingSupport;
 import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.api.region.IROIListener;
 import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.region.IRegionListener;
 import org.dawnsci.plotting.api.region.ROIEvent;
 import org.dawnsci.plotting.api.region.RegionEvent;
 import org.dawnsci.plotting.api.region.RegionUtils;
-import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.eclipse.draw2d.ColorConstants;
@@ -66,7 +66,7 @@ import org.jscience.physics.amount.Amount;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.roi.GridROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 
@@ -294,7 +294,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 	private double[] getBeamCenter() {
 		
 		double[] ret = new double[2];
-		final List<AbstractDataset> axes = getImageTrace().getAxes();
+		final List<IDataset> axes = getImageTrace().getAxes();
 		if (axes!=null) {
 			ret[0] = axes.get(0).getDouble((axes.get(0).getSize() / 2));
 			ret[1] = axes.get(1).getDouble((axes.get(1).getSize() / 2));
@@ -308,12 +308,12 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 	}
 	
 	private double getMaxX() {
-		final List<AbstractDataset> axes = getImageTrace().getAxes();
+		final List<IDataset> axes = getImageTrace().getAxes();
 		if (axes!=null) return axes.get(0).max().doubleValue();
 		return getImageTrace().getData().getShape()[1];
 	}
 	private double getMaxY() {
-		final List<AbstractDataset> axes = getImageTrace().getAxes();
+		final List<IDataset> axes = getImageTrace().getAxes();
 		if (axes!=null) return axes.get(1).max().doubleValue();
 		return getImageTrace().getData().getShape()[0];
 	}

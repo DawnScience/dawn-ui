@@ -31,11 +31,11 @@ import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.region.IROIListener;
 import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.region.IRegionListener;
 import org.dawnsci.plotting.api.region.ROIEvent;
 import org.dawnsci.plotting.api.region.RegionEvent;
 import org.dawnsci.plotting.api.region.RegionUtils;
-import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.dawnsci.plotting.api.tool.IToolPage;
 import org.dawnsci.plotting.api.tool.IToolPageSystem;
@@ -334,7 +334,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
    		    IImageTrace imageTrace = getImageTrace();
 			if (imageTrace==null || imageTrace.getData() ==null) return lockedMeta;
 			
-			IMetaData mdImage = imageTrace.getData().getMetadata();
+			IMetaData mdImage = ((AbstractDataset)imageTrace.getData()).getMetadata();
 			
 			if (mdImage == null || !(mdImage instanceof IDiffractionMetadata)) {
 				//TODO what if the image is rotated?
@@ -368,7 +368,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		IImageTrace imageTrace = getImageTrace();
 		if (imageTrace==null) return null;
 		if (imageTrace.getData()==null) return null;
-		IMetaData mdImage = imageTrace.getData().getMetadata();
+		IMetaData mdImage = ((AbstractDataset)imageTrace.getData()).getMetadata();
 		if (mdImage !=null && mdImage  instanceof IDiffractionMetadata) {
 			if (statusString.equals("")) statusString = "Metadata loaded from image";
 			return (IDiffractionMetadata)mdImage;
@@ -705,8 +705,8 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 						throw new IllegalStateException();
 					}
 					SectorROI sroi = (SectorROI) regions.iterator().next().getROI();
-					AbstractDataset dataset = t.getData();
-					AbstractDataset mask = t.getMask();
+					AbstractDataset dataset = (AbstractDataset)t.getData();
+					AbstractDataset mask    = (AbstractDataset)t.getMask();
 					final BeamCenterRefinement beamOffset = new BeamCenterRefinement(dataset, mask, sroi);
 					List<IPeak> peaks = loadPeaks();
 					if (peaks==null) throw new Exception("Cannot find peaks!");
@@ -947,7 +947,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		final ProgressMonitorWrapper mon = new ProgressMonitorWrapper(monitor);
 		monitor.beginTask("Refine " + shape + " fit", IProgressMonitor.UNKNOWN);
 		monitor.subTask("Find POIs near initial " + shape);
-		AbstractDataset image = t.getData();
+		AbstractDataset image = (AbstractDataset)t.getData();
 		BooleanDataset mask = (BooleanDataset) t.getMask();
 		PolylineROI points;
 		EllipticalFitROI efroi;
@@ -1004,7 +1004,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		if (roi instanceof CircularFitROI) {
 			roi = new EllipticalFitROI(((CircularFitROI) roi).getPoints(), true);
 		}
-		final List<EllipticalROI> ells = PowderRingsUtils.findOtherEllipses(mon, t.getData(), (BooleanDataset) t.getMask(), (EllipticalROI) roi);
+		final List<EllipticalROI> ells = PowderRingsUtils.findOtherEllipses(mon, (AbstractDataset)t.getData(), (BooleanDataset) t.getMask(), (EllipticalROI) roi);
 		final boolean[] status = {true};
 		display.syncExec(new Runnable() {
 

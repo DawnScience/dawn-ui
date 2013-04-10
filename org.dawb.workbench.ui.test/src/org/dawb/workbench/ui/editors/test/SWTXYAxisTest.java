@@ -15,8 +15,10 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
+import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.workbench.ui.editors.AsciiEditor;
 import org.dawb.workbench.ui.editors.PlotDataEditor;
+import org.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.runtime.Platform;
@@ -29,9 +31,8 @@ import org.junit.Test;
 import org.osgi.framework.Bundle;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.LongDataset;
-import org.dawb.common.ui.util.EclipseUtils;
-import org.dawnsci.plotting.api.axis.IAxis;
 
 /**
  * 
@@ -111,7 +112,7 @@ public class SWTXYAxisTest {
 				} else {
 					sys.setSelectedYAxis(alternateYaxis);
 				}
-				sys.createPlot1D(indices, Arrays.asList(new AbstractDataset[]{y}), null);
+				sys.createPlot1D(indices, Arrays.asList(new IDataset[]{y}), null);
 
 			}
 
@@ -124,7 +125,7 @@ public class SWTXYAxisTest {
 				sys.setSelectedYAxis(alternateYaxis);
 				if (i%2==0) alternateYaxis.setLog10(true);
 				
-				sys.createPlot1D(indices, Arrays.asList(new AbstractDataset[]{y}), null);
+				sys.createPlot1D(indices, Arrays.asList(new IDataset[]{y}), null);
 				sys.setXfirst(true);
 				
 				final Color colour = sys.get1DPlotColor(y.getName());

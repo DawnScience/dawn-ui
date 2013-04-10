@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.SWT;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.ROIProfile;
@@ -58,7 +59,7 @@ public class BoxProfileTool extends ProfileTool {
 
 		if (monitor.isCanceled()) return;
 		
-		AbstractDataset[] box = ROIProfile.box(image.getData(), image.getMask(), bounds, true);
+		AbstractDataset[] box = ROIProfile.box((AbstractDataset)image.getData(), (AbstractDataset)image.getMask(), bounds, true);
         if (box==null) return;
 		//if (monitor.isCanceled()) return;
 				
@@ -93,11 +94,11 @@ public class BoxProfileTool extends ProfileTool {
 		} else {
 						
 			profilePlottingSystem.setSelectedXAxis(xPixelAxis);
-			Collection<ITrace> plotted = profilePlottingSystem.updatePlot1D(x_indices, Arrays.asList(new AbstractDataset[]{x_intensity}), monitor);
+			Collection<ITrace> plotted = profilePlottingSystem.updatePlot1D(x_indices, Arrays.asList(new IDataset[]{x_intensity}), monitor);
 			registerTraces(region, plotted);
 			
 			profilePlottingSystem.setSelectedXAxis(yPixelAxis);
-			plotted = profilePlottingSystem.updatePlot1D(y_indices, Arrays.asList(new AbstractDataset[]{y_intensity}), monitor);
+			plotted = profilePlottingSystem.updatePlot1D(y_indices, Arrays.asList(new IDataset[]{y_intensity}), monitor);
 			registerTraces(region, plotted);
 			
 		}
@@ -128,7 +129,7 @@ public class BoxProfileTool extends ProfileTool {
 			if (!region.isVisible())    continue;
 			if (!region.isUserRegion()) continue;
 			
-			AbstractDataset[] box = ROIProfile.box(slice.getData(), image.getMask(), (RectangularROI)region.getROI(), false);
+			AbstractDataset[] box = ROIProfile.box(slice.getData(), (AbstractDataset)image.getMask(), (RectangularROI)region.getROI(), false);
 			
 			final AbstractDataset x_intensity = box[0];
 			x_intensity.setName("X_"+region.getName().replace(' ', '_'));

@@ -80,6 +80,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
@@ -352,8 +353,8 @@ public class WindowTool extends AbstractToolPage {
 		StackLayout stackLayout = (StackLayout)content.getLayout();
 		stackLayout.topControl  = windowSystem.getPlotComposite();
 		
-		AbstractDataset data = trace.getData();
-		List<AbstractDataset> axes = trace.getAxes();
+		AbstractDataset data =  (AbstractDataset)trace.getData();
+		List<IDataset> axes = trace.getAxes();
 		if (axes!=null) axes = Arrays.asList(axes.get(0), axes.get(1));
 		windowSystem.updatePlot2D(data, axes, null);	
 		

@@ -345,10 +345,14 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		plottingSystem.clear();
 		
 		boolean requireFullRefresh = plottingSystem.getPlotType()!=participant.getPlotMode();
-		final AbstractDataset data = getDataSet(selections[0], monitor);
+		final IDataset data = getDataSet(selections[0], monitor);
 		
 		if (data==null)             return;
-		if (data.getBuffer()==null) return;
+		try {
+		    if (data.getSize()<0) return;
+		} catch (Exception ne) {
+			return;
+		}
 		if (data.getRank()>2)       return; // Cannot plot more that 2 dims!
 		
 		if (participant.getPlotMode()==PlotType.IMAGE || data.getRank()==2) {
@@ -358,7 +362,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		} else {
 			List<CheckableObject> sels = new ArrayList<CheckableObject>(Arrays.asList(selections));
 
-			final AbstractDataset x;
+			final IDataset x;
 			if (plottingSystem.isXfirst() && sels.size()>1) {
 				x  = data;
 				sels.remove(0);
@@ -419,7 +423,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		
 	}
 
-	protected List<ITrace> createPlotSeparateAxes(final AbstractDataset                    x,
+	protected List<ITrace> createPlotSeparateAxes(final IDataset                    x,
 			                              final Map<Integer,List<AbstractDataset>> ys,
 			                              final IProgressMonitor                   monitor) {
 		
@@ -435,7 +439,10 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 				axis.setVisible(true);
 				plottingSystem.setSelectedYAxis(axis);	
 
-				traces.addAll(plottingSystem.createPlot1D(x, ys.get(i), getEditorInput().getName(), monitor));
+				final List<AbstractDataset> ysAbs = ys.get(i);
+				final List<IDataset>       ysReal = new ArrayList<IDataset>();
+				if (ysAbs!=null) for (AbstractDataset a : ysAbs) ysReal.add(a);
+				traces.addAll(plottingSystem.createPlot1D(x, ysReal, getEditorInput().getName(), monitor));
 			} 
 			return traces;
 		} finally {

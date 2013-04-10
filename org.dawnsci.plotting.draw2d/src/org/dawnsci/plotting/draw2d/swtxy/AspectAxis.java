@@ -7,18 +7,19 @@ import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.swt.xygraph.linearscale.Range;
 import org.dawb.common.util.text.NumberUtils;
+import org.dawnsci.plotting.api.axis.AxisEvent;
+import org.dawnsci.plotting.api.axis.IAxis;
+import org.dawnsci.plotting.api.axis.IAxisListener;
+import org.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
-import org.dawnsci.plotting.api.axis.AxisEvent;
-import org.dawnsci.plotting.api.axis.IAxis;
-import org.dawnsci.plotting.api.axis.IAxisListener;
-import org.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 /**
  * An axis which can keep aspect with another and have a maximum possible extend which cannot
@@ -281,11 +282,11 @@ public class AspectAxis extends Axis implements IAxis {
 	}
 
 	@Override
-	public void setLabelDataAndTitle(AbstractDataset labels) {
+	public void setLabelDataAndTitle(IDataset labels) {
 		if (labels!=null && labels.getRank()!=1) {
 			return;
 		}
-		this.labelData = labels;
+		this.labelData = (AbstractDataset)labels;
 		if (labels != null)
 			setTitle(labels.getName());
 	}

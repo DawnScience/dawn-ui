@@ -241,7 +241,7 @@ public class ZipEditor extends MultiPageEditorPart implements ISlicablePlottingP
 
 	@Override
 	public AbstractDataset setDatasetSelected(String name, boolean clearOthers) {
-		return ((IPlottingSystemSelection)getDataSetComponent()).setDatasetSelected(name, clearOthers);
+		return (AbstractDataset)((IPlottingSystemSelection)getDataSetComponent()).setDatasetSelected(name, clearOthers);
 	}
 
 	@Override

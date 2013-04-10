@@ -12,6 +12,7 @@ import org.csstudio.swt.xygraph.linearscale.Range;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 /**
  * A IDataProvider which uses an AbstractDataset for its data.
@@ -28,9 +29,9 @@ public class LightWeightDataProvider implements IDataProvider {
 	public LightWeightDataProvider() {
 		
 	}
-	public LightWeightDataProvider(final AbstractDataset x, final AbstractDataset y) {
-		this.x = x;
-		this.y = y;
+	public LightWeightDataProvider(final IDataset x, final IDataset y) {
+		this.x = (AbstractDataset)x;
+		this.y = (AbstractDataset)y;
 	}
 
 	@Override
@@ -109,9 +110,9 @@ public class LightWeightDataProvider implements IDataProvider {
 		return listeners.remove(listener);
 	}
 
-	public void setData(AbstractDataset xData, AbstractDataset yData) {
-		this.x = xData;
-		this.y = yData;
+	public void setData(IDataset xData, IDataset yData) {
+		this.x = (AbstractDataset)xData;
+		this.y = (AbstractDataset)yData;
 		this.cachedXRange = null;
 		this.cachedYRange = null;
 		

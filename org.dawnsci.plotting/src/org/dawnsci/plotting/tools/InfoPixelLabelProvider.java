@@ -116,7 +116,7 @@ public class InfoPixelLabelProvider extends ColumnLabelProvider {
 			IDiffractionMetadata dmeta = null;
 			AbstractDataset set = null;
 			if (trace!=null) {
-				set = trace.getData();
+				set = (AbstractDataset)trace.getData();
 				final IMetaData      meta = set.getMetadata();
 				if (meta instanceof IDiffractionMetadata) {
 	

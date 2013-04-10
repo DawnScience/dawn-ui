@@ -2,7 +2,7 @@ package org.dawnsci.plotting.api.trace;
 
 import java.util.List;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 public interface IAxesTrace extends ITrace {
 
@@ -12,7 +12,7 @@ public interface IAxesTrace extends ITrace {
 	 * May contain nulls (z is often null for intensity).
 	 * @return
 	 */
-	public List<AbstractDataset> getAxes();
+	public List<IDataset> getAxes();
 	
 	
 	/**

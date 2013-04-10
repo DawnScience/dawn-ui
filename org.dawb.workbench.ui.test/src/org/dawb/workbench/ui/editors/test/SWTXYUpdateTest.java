@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.osgi.framework.Bundle;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.LongDataset;
 import fable.framework.toolbox.EclipseUtils;
@@ -93,7 +94,7 @@ public class SWTXYUpdateTest {
 	}
 
 
-	private void createUpdateTest(final List<AbstractDataset> ys, boolean isRandom, int updateAmount) throws Throwable {
+	private void createUpdateTest(final List<IDataset> ys, boolean isRandom, int updateAmount) throws Throwable {
 		
 		final Bundle bun  = Platform.getBundle("org.dawb.workbench.ui.test");
 
@@ -124,7 +125,7 @@ public class SWTXYUpdateTest {
 			// We now loop and add a 1000 random points to each set.
 			for (int i = 0; i < ys.size(); i++) {
 				
-				final AbstractDataset y = ys.get(i);
+				final IDataset y = ys.get(i);
 				
 				final int index =  (ys.get(0).getBuffer()==null || ys.get(0).getSize()<1) 
 						        ? total+1
@@ -166,8 +167,8 @@ public class SWTXYUpdateTest {
 		}	
 		
 		// Check sizes
-		for (AbstractDataset a : ys) {
-			final AbstractDataset set = sys.getData(a.getName());
+		for (IDataset a : ys) {
+			final IDataset set = sys.getData(a.getName());
 			if (set==null) throw new Exception("There must be a data set called "+set.getName());
 			try {
 				if (set.getSize()!=(updateAmount+a.getSize())) {
@@ -183,9 +184,9 @@ public class SWTXYUpdateTest {
 	}
 
 	
-	private List<AbstractDataset> createTestArraysRandom(final int numberPlots, final int size) {
+	private List<IDataset> createTestArraysRandom(final int numberPlots, final int size) {
 		
-		final List<AbstractDataset> ys = new ArrayList<AbstractDataset>(numberPlots);
+		final List<IDataset> ys = new ArrayList<IDataset>(numberPlots);
 		for (int i = 0; i < numberPlots; i++) {
 			final long[] buffer = new long[size];
 			for (int j = 0; j < size; j++) buffer[j] = Math.round(Math.random()*10000);
@@ -196,9 +197,9 @@ public class SWTXYUpdateTest {
 		return ys;
 	}
 	
-	private List<AbstractDataset> createTestArraysCoherant(final int numberPlots, final int size, final String name) {
+	private List<IDataset> createTestArraysCoherant(final int numberPlots, final int size, final String name) {
 		
-		final List<AbstractDataset> ys = new ArrayList<AbstractDataset>(numberPlots);
+		final List<IDataset> ys = new ArrayList<IDataset>(numberPlots);
 		for (int i = 0; i < numberPlots; i++) {
 			
 			double rand = Math.random();

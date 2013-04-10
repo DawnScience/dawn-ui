@@ -503,10 +503,10 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 
         	if ((type == RegionType.BOX || type == RegionType.PERIMETERBOX) && bounds instanceof RectangularROI) {
 	    		final RectangularROI roi = (RectangularROI) bounds;
-	    		rd = new RectangularROIData(roi, trace.getData());
+	    		rd = new RectangularROIData(roi,  (AbstractDataset)trace.getData());
         	} else if (type == RegionType.LINE && bounds instanceof LinearROI) {
         		final LinearROI roi = (LinearROI) bounds;
-        		rd = new LinearROIData(roi, trace.getData(), 1d);     
+        		rd = new LinearROIData(roi,  (AbstractDataset)trace.getData(), 1d);     
         	}
         	
         	if (rd!=null) {
@@ -538,7 +538,7 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 		if (traces!=null&&traces.size()==1&&traces.iterator().next() instanceof IImageTrace) {
 			final IImageTrace     trace        = (IImageTrace)traces.iterator().next();
 			ROIBase roi = region.getROI();
-			AbstractDataset dataRegion = trace.getData();
+			AbstractDataset dataRegion =  (AbstractDataset)trace.getData();
 			try {
 				if(roi instanceof RectangularROI){
 					RectangularROI rroi = (RectangularROI)roi;

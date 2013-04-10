@@ -530,8 +530,8 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 
 					// We peak fit only the first of the data sets plotted
 					// for now.
-					AbstractDataset x = trace.getXData();
-					AbstractDataset y = trace.getYData();
+					AbstractDataset x = (AbstractDataset)trace.getXData();
+					AbstractDataset y = (AbstractDataset)trace.getYData();
 
 					try {
 						AbstractDataset[] a = FittingUtils.xintersection(x, y,

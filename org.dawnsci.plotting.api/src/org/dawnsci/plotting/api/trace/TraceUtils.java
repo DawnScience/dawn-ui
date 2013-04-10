@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.dawnsci.plotting.api.IPlottingSystem;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 /**
  * Class containing utility methods for regions to avoid duplication 
@@ -51,13 +51,13 @@ public class TraceUtils {
 	public static boolean isCustomAxes(IImageTrace trace) {
 		
 		if (trace==null) return false;
-		List<AbstractDataset> axes = trace.getAxes();
-		AbstractDataset      image = trace.getData();
+		List<IDataset> axes = trace.getAxes();
+		IDataset      image = trace.getData();
 		
 		if (axes==null)     return false;
 		if (axes.isEmpty()) return false;
 		
-		if (axes.get(0).getDtype()!=AbstractDataset.INT32 || axes.get(1).getDtype()!=AbstractDataset.INT32) {
+		if (axes.get(0).getDtype()!=IDataset.INT32 || axes.get(1).getDtype()!=IDataset.INT32) {
 			return true;
 		}
 		

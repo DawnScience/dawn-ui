@@ -10,6 +10,7 @@ import org.dawnsci.plotting.draw2d.swtxy.LineTrace;
 import org.eclipse.swt.graphics.Color;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 /**
  * This class only wraps line traces, images have their own IImageTrace implementor.
@@ -321,7 +322,7 @@ public class LineTraceImpl implements ILineTrace {
 	 * You may need a repaint after calling this
 	 */
 	@Override
-	public void setData(AbstractDataset xData, AbstractDataset yData) {
+	public void setData(IDataset xData, IDataset yData) {
 		
 		LightWeightDataProvider prov = (LightWeightDataProvider)trace.getDataProvider();
 		if (prov!=null) {

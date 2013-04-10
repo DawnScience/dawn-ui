@@ -219,7 +219,7 @@ public class H5MultiEditor extends MultiPageEditorPart  implements ISlicablePlot
 
 	@Override
 	public AbstractDataset setDatasetSelected(String name, boolean clearOthers) {
-		return ((IPlottingSystemSelection)getDataSetComponent()).setDatasetSelected(name, clearOthers);
+		return (AbstractDataset)((IPlottingSystemSelection)getDataSetComponent()).setDatasetSelected(name, clearOthers);
 	}
 
 	@Override

@@ -390,7 +390,7 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 			if (!region.isUserRegion()) continue;
 			
 			final SectorROI sroi = (SectorROI)region.getROI();
-			AbstractDataset[] profile = ROIProfile.sector(slice.getData(), image.getMask(), sroi, true, false, false);
+			AbstractDataset[] profile = ROIProfile.sector(slice.getData(), (AbstractDataset)image.getMask(), sroi, true, false, false);
 		
 			AbstractDataset integral = profile[0];
 			integral.setName("radial_"+region.getName().replace(' ', '_'));     

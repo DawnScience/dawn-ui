@@ -22,9 +22,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.graphics.PaletteData;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
-import uk.ac.diamond.scisoft.analysis.dataset.Maths;
 
 /**
  * As histogramming has become more complex and gained more options, this class has become more
@@ -93,7 +91,7 @@ public class ImageServiceBean {
 		return new HistogramBound(clone.getBound(), clone.getColor());
 	}
 
-	public ImageServiceBean(AbstractDataset slice, HistoType histoType) {
+	public ImageServiceBean(IDataset slice, HistoType histoType) {
 		this.image = slice;
 		this.histogramType = histoType;
 	}
@@ -122,12 +120,13 @@ public class ImageServiceBean {
 	 */
 	public IDataset getImage() {
 		if (logColorScale) {
-			AbstractDataset result = Maths.subtract(image, logOffset);
-			result = Maths.log10(result);
+			IDataset result = subtract(image, logOffset);
+			result = log10(result);
 			return result;
 		}
 		return image;
 	}
+
 	public void setImage(IDataset image) {
 		this.image = image;
 	}
@@ -328,7 +327,7 @@ public class ImageServiceBean {
 	 * The mask is false to mask and true to do nothing
 	 * @return
 	 */
-	public void setMask(AbstractDataset mask) {
+	public void setMask(IDataset mask) {
 		this.mask = mask;
 	}
 	public boolean isLogColorScale() {
@@ -535,5 +534,26 @@ public class ImageServiceBean {
 			return false;
 		return true;
 	}
+
+	public static IDataset subtract(final IDataset a, final double b) {
+
+		throw new RuntimeException("Cannot substract with IDataset!");
+	}
+	private IDataset log10(IDataset result) {
+		throw new RuntimeException("Cannot log10 with IDataset!");
+	}
+	
+	private static StringBuilder bracketIfNecessary(final IDataset dataset) {
+		final String name = dataset.getName();
+		StringBuilder newName = new StringBuilder(name);
+		if (name.contains("+") || name.contains("-") || name.contains("*") ||
+				name.contains("/") || name.contains("^") || name.contains("'")) {
+			newName.insert(0, '(');
+			newName.append(')');
+		}
+
+		return newName;
+	}
+
 
 }

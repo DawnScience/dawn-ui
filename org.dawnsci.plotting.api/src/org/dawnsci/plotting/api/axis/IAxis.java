@@ -3,7 +3,7 @@ package org.dawnsci.plotting.api.axis;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 /**
  * Interface used to define an axis on the graph (multiple x and y are allowed).
@@ -225,7 +225,7 @@ public interface IAxis {
 	 * Sets an alternative dataset to use for the labels and the title
 	 * @param labels
 	 */
-	public void setLabelDataAndTitle(AbstractDataset labels);
+	public void setLabelDataAndTitle(IDataset labels);
 	
 	/**
 	 * Call to set a maximum range for the axis 

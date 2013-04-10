@@ -6,7 +6,7 @@ import org.dawnsci.plotting.api.histogram.HistogramBound;
 import org.dawnsci.plotting.api.histogram.ImageServiceBean.HistoType;
 import org.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
 /**
@@ -96,19 +96,19 @@ public interface IImageTrace extends IPaletteTrace, IDownsampledTrace{
 	 * @param performAutoScale - true to rescale to new selection, otherwise keeps last axis position.
 	 * @return false if could not set data
 	 */
-	public boolean setData(final AbstractDataset image, List<AbstractDataset> axes, boolean performAutoScale);
+	public boolean setData(final IDataset image, List<IDataset> axes, boolean performAutoScale);
 	
 	/**
 	 * Change the axes without changing the underlying data.
 	 * @param axes
 	 * @param performAutoScale
 	 */
-	public void setAxes(List<AbstractDataset> axes, boolean performAutoScale);
+	public void setAxes(List<IDataset> axes, boolean performAutoScale);
 	
 	/**
 	 * @return the axes if they were set - may be null
 	 */
-	public List<AbstractDataset> getAxes();
+	public List<IDataset> getAxes();
 
 	/**
 	 * The min intensity for generating the image
@@ -183,13 +183,13 @@ public interface IImageTrace extends IPaletteTrace, IDownsampledTrace{
 	 * 
 	 * @return the current downsampled AbstractDataset being used to draw the image.
 	 */
-	public AbstractDataset getDownsampled();
+	public IDataset getDownsampled();
 
 	/**
 	 * 
 	 * @return the current downsampled mask or null if there is no mask.
 	 */
-	public AbstractDataset getDownsampledMask();
+	public IDataset getDownsampledMask();
 
 	
 	/**
@@ -240,7 +240,7 @@ public interface IImageTrace extends IPaletteTrace, IDownsampledTrace{
 	 * 
 	 * @return
 	 */
-	public AbstractDataset getMask();
+	public IDataset getMask();
 	
 	/**
 	 * The masking dataset of there is one, normally null.
@@ -251,7 +251,7 @@ public interface IImageTrace extends IPaletteTrace, IDownsampledTrace{
 	 * 
 	 * @return
 	 */
-	public void setMask(AbstractDataset bd);
+	public void setMask(IDataset bd);
 
 	
 	/**

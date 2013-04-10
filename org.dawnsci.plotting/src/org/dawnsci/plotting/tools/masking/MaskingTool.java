@@ -899,7 +899,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		if (getImageTrace()!=null) {
 			if (savedMask==null) return;
 			if (maskObject.getImageDataset()==null){
-				maskObject.setImageDataset(getImageTrace().getData());
+				maskObject.setImageDataset((AbstractDataset)getImageTrace().getData());
 			}
 			maskObject.process(savedMask);
 			getImageTrace().setMask(maskObject.getMaskDataset());
@@ -1272,13 +1272,13 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 				if (maskObject.getMaskDataset()==null) {
 					// The mask must be maintained as a BooleanDataset so that there is the option
 					// of applying the same mask to many images.
-					final AbstractDataset unmasked = image.getData();
+					final AbstractDataset unmasked = (AbstractDataset)image.getData();
 					maskObject.setMaskDataset(new BooleanDataset(unmasked.getShape()), true);
 					maskObject.setImageDataset(unmasked);
 				}
 				
 				if (maskObject.getImageDataset()==null) {
-					final AbstractDataset unmasked = image.getData();
+					final AbstractDataset unmasked = (AbstractDataset)image.getData();
 					maskObject.setImageDataset(unmasked);
 				}
 				

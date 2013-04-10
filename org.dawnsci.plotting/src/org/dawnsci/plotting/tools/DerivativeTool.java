@@ -34,7 +34,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dawb.common.ui.util.ColorUtility;
-import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.dawnsci.plotting.api.tool.IToolPage;
 import org.dawnsci.plotting.api.trace.ILineTrace;
@@ -455,12 +454,12 @@ public class DerivativeTool extends AbstractToolPage  {
 		// Calculate the derivative from the data in trace,
 		// return as an abstract dataset since we dont want to interact with the plot here
 		// to generate the traces
-		final AbstractDataset traceData = trace.getData();
+		final AbstractDataset traceData =  (AbstractDataset)trace.getData();
 		
 		//Get x data if present or if not generate index range
 		final AbstractDataset x = (trace instanceof ILineTrace) 
-				? ((ILineTrace)trace).getXData() 
-						: AbstractDataset.arange(0, traceData.getSize(), 1, AbstractDataset.INT32);
+				? (AbstractDataset)((ILineTrace)trace).getXData() 
+			    : AbstractDataset.arange(0, traceData.getSize(), 1, AbstractDataset.INT32);
 
 		AbstractDataset derv = null;
 		

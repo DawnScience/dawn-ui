@@ -22,7 +22,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchPart;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 
 /**
@@ -129,8 +129,8 @@ public interface IPlottingSystem extends ITraceSystem, IRegionSystem, IAxisSyste
 	 *         plotting systems will wholly or partially support ILineTrace. If plotting mode is XY_STACKED_3D then 
 	 *         will return a list of size 1 with the trace of type IStackTrace.
 	 */
-	public List<ITrace> createPlot1D(AbstractDataset       x, 
-							         List<AbstractDataset> ys,
+	public List<ITrace> createPlot1D(IDataset       x, 
+							         List<IDataset> ys,
 							         IProgressMonitor      monitor);
 	/**
 	 * @see createPlot1D(AbstractDataset, List<AbstractDataset>, IProgressMonitor)
@@ -140,8 +140,8 @@ public interface IPlottingSystem extends ITraceSystem, IRegionSystem, IAxisSyste
 	 * @param monitor
 	 * @return
 	 */
-	public List<ITrace> createPlot1D(AbstractDataset       x, 
-							         List<AbstractDataset> ys,
+	public List<ITrace> createPlot1D(IDataset       x, 
+							         List<IDataset> ys,
 							         String title,
 							         IProgressMonitor      monitor);
 
@@ -156,8 +156,8 @@ public interface IPlottingSystem extends ITraceSystem, IRegionSystem, IAxisSyste
 	 * @param monitor
 	 * @return
 	 */
-	public List<ITrace> updatePlot1D(AbstractDataset       x, 
-							         List<AbstractDataset> ys,
+	public List<ITrace> updatePlot1D(IDataset       x, 
+							         List<IDataset> ys,
 							         IProgressMonitor      monitor);
 
 	/**
@@ -179,8 +179,8 @@ public interface IPlottingSystem extends ITraceSystem, IRegionSystem, IAxisSyste
 	 *         PlotType.IMAGE and and ISurfaceTrace for PlotType.SURFACE. You can
 	 *         use any image methods offered by these interface.
 	 */
-	public ITrace createPlot2D(AbstractDataset       image, 
-							   List<AbstractDataset> axes,
+	public ITrace createPlot2D(IDataset       image, 
+							   List<IDataset> axes,
 							   IProgressMonitor      monitor);
 	
 	
@@ -194,8 +194,8 @@ public interface IPlottingSystem extends ITraceSystem, IRegionSystem, IAxisSyste
 	 * @param monitor
 	 * @return
 	 */
-	public ITrace updatePlot2D(AbstractDataset       image, 
-							   List<AbstractDataset> axes,
+	public ITrace updatePlot2D(IDataset       image, 
+							   List<IDataset> axes,
 							   IProgressMonitor      monitor);
 	
 	/**
@@ -288,7 +288,7 @@ public interface IPlottingSystem extends ITraceSystem, IRegionSystem, IAxisSyste
 	 * as doubles for instance. If the append(...) method has been used, the data returned by
 	 * name from here will include the appended points.
 	 */
-	public AbstractDataset getData(final String dataSetName);
+	public IDataset getData(final String dataSetName);
 
 	/**
 	 * Will return the current plot type 1D, 2D etc.

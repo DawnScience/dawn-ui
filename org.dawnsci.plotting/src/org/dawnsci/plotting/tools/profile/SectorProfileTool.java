@@ -24,6 +24,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
@@ -233,7 +234,7 @@ public abstract class SectorProfileTool extends ProfileTool {
  	}
 
 	private double[] getImageCenter() {
-    	final AbstractDataset image = getImageTrace().getData();
+    	final AbstractDataset image = (AbstractDataset)getImageTrace().getData();
     	return new double[]{image.getShape()[1]/2d, image.getShape()[0]/2d};
 	}
 
@@ -275,8 +276,8 @@ public abstract class SectorProfileTool extends ProfileTool {
 
 		if (monitor.isCanceled()) return;
 		
-		final AbstractDataset data = isDrag ? image.getDownsampled()     : image.getData();
-		final AbstractDataset mask = isDrag ? image.getDownsampledMask() : image.getMask();
+		final AbstractDataset data = isDrag ? (AbstractDataset)image.getDownsampled()     : (AbstractDataset)image.getData();
+		final AbstractDataset mask = isDrag ? (AbstractDataset)image.getDownsampledMask() : (AbstractDataset)image.getMask();
 		
 		SectorROI downsroi = null;
 		if (isDrag) {
@@ -304,7 +305,7 @@ public abstract class SectorProfileTool extends ProfileTool {
 
 			} else {
 
-				Collection<ITrace> plotted = profilePlottingSystem.createPlot1D(xi, Arrays.asList(new AbstractDataset[]{integral}), monitor);
+				Collection<ITrace> plotted = profilePlottingSystem.createPlot1D(xi, Arrays.asList(new IDataset[]{integral}), monitor);
 				registerTraces(region, plotted);			
 			}
 		}

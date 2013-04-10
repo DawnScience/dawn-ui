@@ -174,7 +174,7 @@ public class AsciiEditor extends MultiPageEditorPart implements ISlicablePlottin
 
 	@Override
 	public AbstractDataset setDatasetSelected(String name, boolean clearOthers) {
-		return ((IPlottingSystemSelection)getDataSetComponent()).setDatasetSelected(name, clearOthers);
+		return (AbstractDataset)((IPlottingSystemSelection)getDataSetComponent()).setDatasetSelected(name, clearOthers);
 	}
 
 	@Override

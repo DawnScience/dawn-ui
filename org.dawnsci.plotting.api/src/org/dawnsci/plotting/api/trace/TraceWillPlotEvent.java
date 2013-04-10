@@ -12,7 +12,7 @@ package org.dawnsci.plotting.api.trace;
 import java.util.EventObject;
 import java.util.List;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 /**
  * Note the source to this event can either be the ITrace
@@ -25,11 +25,11 @@ public class TraceWillPlotEvent extends EventObject {
 
 	public  boolean         doit = true;
 	
-	private AbstractDataset image=null;
+	private IDataset image=null;
 	private boolean         newImageDataSet = false;
 	
-	private List<AbstractDataset> axes=null;
-	private AbstractDataset xLineData=null, yLineData=null;
+	private List<IDataset> axes=null;
+	private IDataset xLineData=null, yLineData=null;
 	private boolean         newLineDataSet = false;
 	
 	private final boolean applyStraightAway;
@@ -56,11 +56,11 @@ public class TraceWillPlotEvent extends EventObject {
 
 	}
 
-	public AbstractDataset getImage() {
+	public IDataset getImage() {
 		return image;
 	}
 
-	public void setImageData(AbstractDataset image, List<AbstractDataset> axes) {
+	public void setImageData(IDataset image, List<IDataset> axes) {
 		this.image = image;
 		this.axes = axes;
 		newImageDataSet = true;
@@ -75,18 +75,18 @@ public class TraceWillPlotEvent extends EventObject {
 		this.newImageDataSet = newImageDataSet;
 	}
 
-	public List<AbstractDataset> getAxes() {
+	public List<IDataset> getAxes() {
 		return axes;
 	}
 
-	public AbstractDataset getXData() {
+	public IDataset getXData() {
 		return xLineData;
 	}
-	public AbstractDataset getYData() {
+	public IDataset getYData() {
 		return yLineData;
 	}
 
-	public void setLineData(AbstractDataset xLineData, AbstractDataset yLineData) {
+	public void setLineData(IDataset xLineData, IDataset yLineData) {
 		this.xLineData = xLineData;
 		this.yLineData = yLineData;
 		newLineDataSet = true;

@@ -1,7 +1,7 @@
 package org.dawnsci.plotting.api.trace;
 
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 /**
  * A representation of a plotted data set.
@@ -29,7 +29,7 @@ public interface ITrace {
 	/**
 	 * Call this method to return a plotted data set by this trace.
 	 */
-	public AbstractDataset getData();
+	public IDataset getData();
 	
 	/**
 	 * True if visible

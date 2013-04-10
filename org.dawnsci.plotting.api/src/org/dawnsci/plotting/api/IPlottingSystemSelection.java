@@ -9,7 +9,7 @@
  */ 
 package org.dawnsci.plotting.api;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 public interface IPlottingSystemSelection {
 	
@@ -19,7 +19,7 @@ public interface IPlottingSystemSelection {
 	 * @param clearOthers
 	 * @return
 	 */
-	public AbstractDataset setDatasetSelected(final String name, final boolean clearOthers);
+	public IDataset setDatasetSelected(final String name, final boolean clearOthers);
 	
 
 	/**

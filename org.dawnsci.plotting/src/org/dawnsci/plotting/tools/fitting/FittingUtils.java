@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.IAnalysisMonitor;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
 import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
 import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
@@ -120,8 +121,8 @@ public class FittingUtils {
 		bean.setOptimizer(optimizer);
 		if (bean != null && info.getSelectedTrace()!=null)
 			for (FittedFunction p : bean.getFunctionList()) {
-				p.setX(info.getSelectedTrace().getXData());
-				p.setY(info.getSelectedTrace().getYData());
+				p.setX((AbstractDataset)info.getSelectedTrace().getXData());
+				p.setY((AbstractDataset)info.getSelectedTrace().getYData());
 				p.setDataTrace(info.getSelectedTrace());
 				p.setQ(getQ(info, p));
 			}
@@ -141,12 +142,12 @@ public class FittingUtils {
 		double [] pt = bounds.getPoint(p.getPosition()/l);
 		
 		IDiffractionMetadata dmeta = null;
-		AbstractDataset set = null;
+		IDataset set = null;
 		final Collection<ITrace> traces = info.getPlottingSystem().getTraces(IImageTrace.class);
 		final IImageTrace trace = traces!=null && traces.size()>0 ? (IImageTrace)traces.iterator().next() : null;
 		if (trace!=null) {
 			set = trace.getData();
-			final IMetaData      meta = set.getMetadata();
+			final IMetaData      meta = ((AbstractDataset)set).getMetadata();
 			if (meta instanceof IDiffractionMetadata) {
 
 				dmeta = (IDiffractionMetadata)meta;

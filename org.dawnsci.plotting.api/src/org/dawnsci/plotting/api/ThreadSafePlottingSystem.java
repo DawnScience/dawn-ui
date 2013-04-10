@@ -36,7 +36,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 /**
  * Will be a thread safe version of all the plotting system methods.
  * 
@@ -273,31 +273,31 @@ public class ThreadSafePlottingSystem extends StandardMBean implements IPlotting
 	}
 
 	@Override
-	public List<ITrace> createPlot1D(AbstractDataset x, List<AbstractDataset> ys, IProgressMonitor monitor) {
+	public List<ITrace> createPlot1D(IDataset x, List<IDataset> ys, IProgressMonitor monitor) {
 		return deligate.createPlot1D(x, ys, monitor);
 	}
 
 	@Override
-	public List<ITrace> createPlot1D(AbstractDataset x,
-			List<AbstractDataset> ys, String title, IProgressMonitor monitor) {
+	public List<ITrace> createPlot1D(IDataset x,
+			List<IDataset> ys, String title, IProgressMonitor monitor) {
 		return deligate.createPlot1D(x, ys, title, monitor);
 	}
 
 	@Override
-	public List<ITrace> updatePlot1D(AbstractDataset x,
-			List<AbstractDataset> ys, IProgressMonitor monitor) {
+	public List<ITrace> updatePlot1D(IDataset x,
+			List<IDataset> ys, IProgressMonitor monitor) {
 		return deligate.updatePlot1D(x, ys, monitor);
 	}
 
 	@Override
-	public ITrace createPlot2D(AbstractDataset image,
-			List<AbstractDataset> axes, IProgressMonitor monitor) {
+	public ITrace createPlot2D(IDataset image,
+			List<IDataset> axes, IProgressMonitor monitor) {
 		return deligate.createPlot2D(image, axes, monitor);
 	}
 
 	@Override
-	public ITrace updatePlot2D(AbstractDataset image,
-			List<AbstractDataset> axes, IProgressMonitor monitor) {
+	public ITrace updatePlot2D(IDataset image,
+			List<IDataset> axes, IProgressMonitor monitor) {
 		return deligate.updatePlot2D(image, axes, monitor);
 	}
 
@@ -342,7 +342,7 @@ public class ThreadSafePlottingSystem extends StandardMBean implements IPlotting
 	}
 
 	@Override
-	public AbstractDataset getData(String dataSetName) {
+	public IDataset getData(String dataSetName) {
 		return deligate.getData(dataSetName);
 	}
 

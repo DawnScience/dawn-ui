@@ -12,8 +12,8 @@ import org.dawnsci.plotting.api.annotation.IAnnotation;
 import org.dawnsci.plotting.api.axis.IAxis;
 import org.dawnsci.plotting.api.axis.IPositionListener;
 import org.dawnsci.plotting.api.region.IRegion;
-import org.dawnsci.plotting.api.region.IRegionListener;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.dawnsci.plotting.api.region.IRegionListener;
 import org.dawnsci.plotting.api.trace.IImageStackTrace;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.ILineStackTrace;
@@ -28,6 +28,7 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchPart;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 /**
  * This class implements IPlottingSystem but can be used 
@@ -282,31 +283,31 @@ public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSyste
 	}
 
 	@Override
-	public List<ITrace> createPlot1D(AbstractDataset x, List<AbstractDataset> ys, IProgressMonitor monitor) {
+	public List<ITrace> createPlot1D(IDataset x, List<IDataset> ys, IProgressMonitor monitor) {
 		return (List<ITrace>)call(getMethodName(Thread.currentThread().getStackTrace()), x,ys,monitor);
 	}
 
 	@Override
-	public List<ITrace> createPlot1D(AbstractDataset x,
-			List<AbstractDataset> ys, String title, IProgressMonitor monitor) {
+	public List<ITrace> createPlot1D(IDataset x,
+			List<IDataset> ys, String title, IProgressMonitor monitor) {
 		return (List<ITrace>)call(getMethodName(Thread.currentThread().getStackTrace()), x,ys, title, monitor);
 	}
 
 	@Override
-	public List<ITrace> updatePlot1D(AbstractDataset x,
-			List<AbstractDataset> ys, IProgressMonitor monitor) {
+	public List<ITrace> updatePlot1D(IDataset x,
+			List<IDataset> ys, IProgressMonitor monitor) {
 		return (List<ITrace>)call(getMethodName(Thread.currentThread().getStackTrace()), x,ys,monitor);
 	}
 
 	@Override
-	public ITrace createPlot2D(AbstractDataset image,
-			List<AbstractDataset> axes, IProgressMonitor monitor) {
+	public ITrace createPlot2D(IDataset image,
+			List<IDataset> axes, IProgressMonitor monitor) {
 		return (ITrace)call(getMethodName(Thread.currentThread().getStackTrace()), image,axes,monitor);
 	}
 
 	@Override
-	public ITrace updatePlot2D(AbstractDataset image,
-			List<AbstractDataset> axes, IProgressMonitor monitor) {
+	public ITrace updatePlot2D(IDataset image,
+			List<IDataset> axes, IProgressMonitor monitor) {
 		return (ITrace)call(getMethodName(Thread.currentThread().getStackTrace()), image,axes,monitor);
 	}
 

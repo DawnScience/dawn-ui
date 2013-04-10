@@ -36,19 +36,19 @@ import org.dawnsci.plotting.api.axis.IAxis;
 import org.dawnsci.plotting.api.axis.IAxisSystem;
 import org.dawnsci.plotting.api.axis.IPositionListener;
 import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.region.IRegionContainer;
 import org.dawnsci.plotting.api.region.IRegionListener;
 import org.dawnsci.plotting.api.region.IRegionSystem;
-import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.trace.IImageStackTrace;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.ILineTrace;
+import org.dawnsci.plotting.api.trace.ILineTrace.PointStyle;
+import org.dawnsci.plotting.api.trace.ILineTrace.TraceType;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.api.trace.ITraceContainer;
 import org.dawnsci.plotting.api.trace.ITraceListener;
 import org.dawnsci.plotting.api.trace.TraceWillPlotEvent;
-import org.dawnsci.plotting.api.trace.ILineTrace.PointStyle;
-import org.dawnsci.plotting.api.trace.ILineTrace.TraceType;
 import org.dawnsci.plotting.draw2d.swtxy.AspectAxis;
 import org.dawnsci.plotting.draw2d.swtxy.ImageStackTrace;
 import org.dawnsci.plotting.draw2d.swtxy.ImageTrace;
@@ -111,6 +111,7 @@ import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPart;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 /**
  * Package private. This class deals with plotting actions specific to the
@@ -582,7 +583,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		if (xyGraph!=null) xyGraph.clearTraces();
 	}
 
-	protected ITrace createLightWeightImage(String traceName, AbstractDataset data, List<AbstractDataset> axes, IProgressMonitor monitor) {
+	protected ITrace createLightWeightImage(String traceName, IDataset data, List<IDataset> axes, IProgressMonitor monitor) {
 		
 		final Axis xAxis = ((AspectAxis)system.getSelectedXAxis());
 		final Axis yAxis = ((AspectAxis)system.getSelectedYAxis());
@@ -629,8 +630,8 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 	 * @return
 	 */
 	protected List<ITrace> createLineTraces(final String                title, 
-			                                    final AbstractDataset       x, 
-			                                    final List<AbstractDataset> ys,
+			                                    final IDataset       x, 
+			                                    final List<IDataset> ys,
 			                                    final Map<String,ITrace>    traceMap,
 			                                    final Map<Object, Color>    colorMap,
 			                                    final IProgressMonitor      monitor) {
@@ -657,7 +658,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		int iplot = 0;
 		
 		final List<ITrace> traces = new ArrayList<ITrace>(ys.size());
-		for (AbstractDataset y : ys) {
+		for (IDataset y : ys) {
 
 			if (y==null) continue;
 			LightWeightDataProvider traceDataProvider = new LightWeightDataProvider(x, y);

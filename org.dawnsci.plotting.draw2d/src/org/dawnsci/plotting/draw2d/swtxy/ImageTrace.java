@@ -50,6 +50,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.BooleanDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.function.Downsample;
 import uk.ac.diamond.scisoft.analysis.dataset.function.DownsampleMode;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
@@ -78,7 +79,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	private AbstractDataset  image;
 	private DownsampleType   downsampleType=DownsampleType.MAXIMUM;
 	private int              currentDownSampleBin=-1;
-	private List<AbstractDataset> axes;
+	private List<IDataset>  axes;
 	private ImageServiceBean imageServiceBean;
 	private boolean          isMaximumZoom;
 	private AbstractPlottingSystem plottingSystem;
@@ -250,7 +251,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				
 				if (rescaleType==ImageScaleType.REHISTOGRAM) { // Avoids changing colouring to 
 					// max and min of new selection.
-					AbstractDataset  slice     = slice(getYAxis().getRange(), getXAxis().getRange(), getData());
+					AbstractDataset  slice     = slice(getYAxis().getRange(), getXAxis().getRange(), (AbstractDataset)getData());
 					ImageServiceBean histoBean = imageServiceBean.clone();
 					histoBean.setImage(slice);
 					if (fullMask!=null) histoBean.setMask(slice(getYAxis().getRange(), getXAxis().getRange(), fullMask));
@@ -669,7 +670,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 
 	@Override
-	public AbstractDataset getData() {
+	public IDataset getData() {
 		return image;
 	}
 
@@ -813,7 +814,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		}
 	}
 	
-	private void setupAxis(Axis axis, Range bounds, AbstractDataset labels) {
+	private void setupAxis(Axis axis, Range bounds, IDataset labels) {
 		((AspectAxis)axis).setMaximumRange(bounds);
 		((AspectAxis)axis).setLabelDataAndTitle(labels);
 	}
@@ -836,7 +837,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 
 	@Override
-	public boolean setData(AbstractDataset image, List<AbstractDataset> axes, boolean performAuto) {
+	public boolean setData(IDataset image, List<IDataset> axes, boolean performAuto) {
 		
 		if (plottingSystem!=null) try {
 			if (plottingSystem.getTraces().contains(this)) {
@@ -858,7 +859,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		// We do not currently reflect it as it takes too long. Instead in the slice
 		// method, we allow for the fact that the dataset is in a different orientation to 
 		// what is plotted.
-		this.image = image;
+		this.image = (AbstractDataset)image;
 		if (this.mipMap!=null) mipMap.clear();
 		
 		
@@ -886,7 +887,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 	
 	@Override
-	public void setAxes(List<AbstractDataset> axes, boolean performAuto) {
+	public void setAxes(List<IDataset> axes, boolean performAuto) {
 		this.axes  = axes;
 		createAxisBounds();
 		
@@ -1046,7 +1047,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	
 
 	@Override
-	public List<AbstractDataset> getAxes() {
+	public List<IDataset> getAxes() {
 		return axes;
 	}
 
@@ -1153,7 +1154,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 * 
 	 * @param bd
 	 */
-	public void setMask(AbstractDataset mask) {
+	public void setMask(IDataset mask) {
 		
 		if (mask!=null && image!=null && !image.isCompatibleWith(mask)) {
 			
@@ -1178,7 +1179,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			mask = maskDataset;
 		}
 		if (maskMap!=null) maskMap.clear();
-		fullMask = mask;
+		fullMask = (AbstractDataset)mask;
 		rehistogram();
 		fireMaskListeners();
 	}
@@ -1223,8 +1224,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		
 		if (!TraceUtils.isCustomAxes(this)) return roi;
 		
-		final AbstractDataset xl = axes.get(0); // May be null
-		final AbstractDataset yl = axes.get(1); // May be null
+		final AbstractDataset xl = (AbstractDataset)axes.get(0); // May be null
+		final AbstractDataset yl = (AbstractDataset)axes.get(1); // May be null
 		
 		if (roi instanceof LinearROI) {
 			double[] sp = ((LinearROI)roi).getPoint();
@@ -1269,8 +1270,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	public double[] getPointInAxisCoordinates(final double[] point) throws Exception {
 		if (!TraceUtils.isCustomAxes(this)) return point;
 		
-		final AbstractDataset xl = axes.get(0); // May be null
-		final AbstractDataset yl = axes.get(1); // May be null
+		final AbstractDataset xl = (AbstractDataset)axes.get(0); // May be null
+		final AbstractDataset yl = (AbstractDataset)axes.get(1); // May be null
 		final double[] ret = point.clone();
 		transform(xl,0,ret);
 		transform(yl,1,ret);
@@ -1281,8 +1282,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	public double[] getPointInImageCoordinates(final double[] axisLocation) throws Exception {
 		if (!TraceUtils.isCustomAxes(this)) return axisLocation;
 		
-		final AbstractDataset xl = axes.get(0); // May be null
-		final AbstractDataset yl = axes.get(1); // May be null
+		final AbstractDataset xl = (AbstractDataset)axes.get(0); // May be null
+		final AbstractDataset yl = (AbstractDataset)axes.get(1); // May be null
 		final double xIndex = Double.isNaN(axisLocation[0])
 				            ? Double.NaN
 				            : DatasetUtils.crossings(xl, axisLocation[0]).get(0);

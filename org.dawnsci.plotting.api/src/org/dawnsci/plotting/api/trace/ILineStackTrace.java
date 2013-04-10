@@ -2,7 +2,7 @@ package org.dawnsci.plotting.api.trace;
 
 import java.util.List;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
 /**
@@ -26,7 +26,7 @@ public interface ILineStackTrace extends IAxesTrace, IWindowTrace {
 	 * all the time which ask you to use getStack() instead.
 	 */
 	@Override
-	public AbstractDataset getData() throws RuntimeException;
+	public IDataset getData() throws RuntimeException;
 
 	/**
 	 * Set the data of the plot, will re-plot if called on an active plot.
@@ -34,13 +34,13 @@ public interface ILineStackTrace extends IAxesTrace, IWindowTrace {
 	 * @param axes
 	 * @throws Exception
 	 */
-	public void setData(final List<AbstractDataset> axes, final AbstractDataset... stack);
+	public void setData(final List<IDataset> axes, final IDataset... stack);
 	
 	/**
 	 * The stack that is being plotted.
 	 * @return
 	 */
-	public AbstractDataset[] getStack();
+	public IDataset[] getStack();
 			
 	/**
 	 * 

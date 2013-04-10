@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.eclipse.swt.graphics.Color;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 /**
  * Line trace is used for all 1D trace data. So as well as lines,
@@ -241,21 +241,21 @@ public interface ILineTrace extends ITrace {
 	 * might often be indices of y. 
 	 * @return
 	 */
-	public AbstractDataset getYData();
+	public IDataset getYData();
 	
 	
 	/**
 	 * The x data of the plot - might often be indices of y. 
 	 * @return
 	 */
-	public AbstractDataset getXData();
+	public IDataset getXData();
 
 	/**
 	 * Set the yData for the trace, replaces old yData
 	 * Repaint may be required as the system does not assume you want to repaint right away.
 	 * @param yData
 	 */
-	public void setData(AbstractDataset xData, AbstractDataset yData);
+	public void setData(IDataset xData, IDataset yData);
 	
 	/**
 	 * May be called to refresh the whole graph, for instance if you change trace

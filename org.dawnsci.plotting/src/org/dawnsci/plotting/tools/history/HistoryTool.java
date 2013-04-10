@@ -86,8 +86,8 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 			if (!iTrace.isUserTrace()) continue;
 			final ILineTrace lineTrace = (ILineTrace)iTrace;
 			final HistoryBean bean = new HistoryBean(this);
-			bean.setXdata(lineTrace.getXData());
-			bean.setYdata(lineTrace.getYData());
+			bean.setXdata((AbstractDataset)lineTrace.getXData());
+			bean.setYdata((AbstractDataset)lineTrace.getYData());
 			bean.setTraceName(iTrace.getName());
 			if (lineTrace.getTraceColor()!=null) {
 				bean.setPlotColour(lineTrace.getTraceColor().getRGB());

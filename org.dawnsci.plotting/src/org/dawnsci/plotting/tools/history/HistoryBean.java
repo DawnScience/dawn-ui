@@ -13,6 +13,7 @@ import org.dawb.common.services.ServiceManager;
 import org.eclipse.swt.graphics.RGB;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 
 class HistoryBean {
@@ -23,7 +24,7 @@ class HistoryBean {
 	
 	// Image compare
 	private AbstractDataset       data;
-	private List<AbstractDataset> axes;
+	private List<IDataset>        axes;
 	private Operator              operator;
 	private int                   weighting=100;
 	
@@ -275,10 +276,10 @@ class HistoryBean {
 			return false;
 		return true;
 	}
-	public List<AbstractDataset> getAxes() {
+	public List<IDataset> getAxes() {
 		return axes;
 	}
-	public void setAxes(List<AbstractDataset> axes) {
+	public void setAxes(List<IDataset> axes) {
 		this.axes = axes;
 	}
 	public Operator getOperator() {

@@ -450,7 +450,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 				return false;
 			}
 
-			final AbstractDataset data = image.getData();
+			final AbstractDataset data = (AbstractDataset)image.getData();
 			AbstractDataset slice=null, sliceIndex=null;
 			if (monitor.isCanceled())return  false;
 			try {

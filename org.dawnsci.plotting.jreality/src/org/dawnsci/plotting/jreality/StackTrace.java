@@ -8,6 +8,7 @@ import org.dawnsci.plotting.api.trace.TraceEvent;
 
 import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
@@ -26,17 +27,17 @@ public class StackTrace extends PlotterTrace implements ILineStackTrace {
 	}
 	
 	@Override
-	public AbstractDataset[] getStack() {
+	public IDataset[] getStack() {
 		return stack;
 	}
 
 	@Override
-	public void setData(List<AbstractDataset> axes, AbstractDataset... stack) {
+	public void setData(List<IDataset> axes, IDataset... s) {
 		if (axes!=null && axes.size()==2) {
 			axes = Arrays.asList(axes.get(0), axes.get(1), null);
 		}
 		
-		this.stack = stack;
+		this.stack = getStack(s);
 		this.axes  = axes;
 		
 		if (isActive()) {
@@ -52,11 +53,11 @@ public class StackTrace extends PlotterTrace implements ILineStackTrace {
 	@Override
 	protected List<AxisValues> createAxisValues() {
 		
-		final AxisValues xAxis = new AxisValues(getLabel(0), axes!=null?axes.get(0):null);
-		final AxisValues yAxis = new AxisValues(getLabel(1), axes!=null?axes.get(1):null);
+		final AxisValues xAxis = new AxisValues(getLabel(0), axes!=null?(AbstractDataset)axes.get(0):null);
+		final AxisValues yAxis = new AxisValues(getLabel(1), axes!=null?(AbstractDataset)axes.get(1):null);
 		final AxisValues zAxis;
 		if (getWindow()==null || !(getWindow() instanceof LinearROI)) {
-		    zAxis = new AxisValues(getLabel(2), axes!=null?axes.get(2):null);
+		    zAxis = new AxisValues(getLabel(2), axes!=null?(AbstractDataset)axes.get(2):null);
 		} else {
 			final int x1 = window.getIntPoint()[0];
 			final int x2 = (int)Math.round(((LinearROI)window).getEndPoint()[0]);
