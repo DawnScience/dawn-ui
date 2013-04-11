@@ -827,7 +827,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			}
 		};
 		calibrate.setImageDescriptor(Activator.getImageDescriptor("icons/findmorerings.png"));
-		calibrate.setToolTipText("Calibrate detector using rings");
+		calibrate.setToolTipText("Calibrate detector using rings - this is an experimental feature and does not work robustly");
 		calibrate.setEnabled(false);
 
 		if (lock==null) lock = new Action("Lock the diffraction data and apply it to newly opened files.",IAction.AS_CHECK_BOX) {
@@ -988,6 +988,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 					roiListener.roiSelected(new ROIEvent(tmpRegion, froi)); // trigger beam centre update
 					plotter.addRegion(region);
 					monitor.worked(1);
+					findOuter.setEnabled(true);
 				} catch (Exception e) {
 					status[0] = false;
 				}
