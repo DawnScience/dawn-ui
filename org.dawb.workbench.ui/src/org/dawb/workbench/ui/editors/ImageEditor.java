@@ -94,7 +94,7 @@ public class ImageEditor extends MultiPageEditorPart implements IReusableEditor,
 
 			final String plotImageEditorDisabled = "org.dawb.workbench.ui.editors.plotimageeditor.disabled";
 			if( System.getProperty(plotImageEditorDisabled) == null || "false".equals(System.getProperty(plotImageEditorDisabled)) ) {
-				this.plotImageEditor = new PlotImageEditor();
+				this.plotImageEditor = new PlotImageEditor(this);
 				addPage(index, plotImageEditor,       getEditorInput());
 				setPageText(index, "Image");
 				index++;
@@ -162,10 +162,6 @@ public class ImageEditor extends MultiPageEditorPart implements IReusableEditor,
 	public String toString(){
 		if (getEditorInput()!=null) return getEditorInput().getName();
 		return super.toString();
-	}
-
-	public PlotImageEditor getPlotImageEditor() {
-		return plotImageEditor;
 	}
 
 	@Override
