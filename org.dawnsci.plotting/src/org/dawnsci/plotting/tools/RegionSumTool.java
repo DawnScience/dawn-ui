@@ -10,17 +10,20 @@ import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.widgets.FontExtenderWidget;
 import org.dawb.common.util.number.DoubleUtils;
 import org.dawnsci.plotting.Activator;
+import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.region.IROIListener;
 import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.region.IRegionListener;
 import org.dawnsci.plotting.api.region.ROIEvent;
 import org.dawnsci.plotting.api.region.RegionEvent;
 import org.dawnsci.plotting.api.region.RegionUtils;
-import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.dawnsci.plotting.api.tool.ToolPageFactory;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
+import org.dawnsci.plotting.api.trace.ITraceListener;
+import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.views.RegionSumView;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -84,6 +87,8 @@ public class RegionSumTool extends AbstractToolPage implements IROIListener {
 
 	private IRegion region;
 
+	private ITraceListener traceListener;
+
 	public RegionSumTool(){
 		this.sumJob = new SumJob();
 		this.regionListener = new IRegionListener.Stub() {
@@ -113,6 +118,30 @@ public class RegionSumTool extends AbstractToolPage implements IROIListener {
 			
 			protected void update(RegionEvent evt) {
 				RegionSumTool.this.update(null, null, false);
+			}
+		};
+
+		this.traceListener = new ITraceListener.Stub() {
+			@Override
+			public void tracesAdded(TraceEvent evt) {}
+			@Override
+			protected void update(TraceEvent evt) {
+				if(evt.getSource() instanceof ITrace){
+					ITrace trace = (ITrace)evt.getSource();
+					if(trace instanceof IImageTrace){
+						updateSum((IImageTrace)trace, currentROI, region, false, null);
+					}
+				} else if(evt.getSource() instanceof IPlottingSystem){
+					IPlottingSystem plotSystem = (IPlottingSystem)evt.getSource();
+					Collection<ITrace> traces = plotSystem.getTraces();
+					Iterator<ITrace> it = traces.iterator();
+					while (it.hasNext()) {
+						ITrace iTrace = (ITrace) it.next();
+						if(iTrace instanceof IImageTrace){
+							updateSum((IImageTrace)iTrace, currentROI, region, false, null);
+						}
+					}
+				}
 			}
 		};
 	}
@@ -313,6 +342,7 @@ public class RegionSumTool extends AbstractToolPage implements IROIListener {
 	public void deactivate() {
 		super.deactivate();
 		if (getPlottingSystem()!=null) {
+			getPlottingSystem().removeTraceListener(traceListener);
 			getPlottingSystem().removeRegionListener(regionListener);
 		}
 		setRegionsActive(false);
@@ -323,6 +353,7 @@ public class RegionSumTool extends AbstractToolPage implements IROIListener {
 		super.activate();
 		update(null, null, false);
 		if (getPlottingSystem()!=null) {
+			getPlottingSystem().addTraceListener(traceListener);
 			getPlottingSystem().addRegionListener(regionListener);
 		}
 		setRegionsActive(true);
