@@ -127,17 +127,6 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 	private ILineTrace y_trace;
 	private ILineTrace av_trace;
 
-	enum TraceNames {
-		TOP, BOTTOM, H_MEAN, LEFT, RIGHT, V_MEAN; // ; is required here.
-
-		@Override
-		public String toString() {
-			// only capitalize the first letter
-			String s = super.toString();
-			return s.substring(0, 1) + s.substring(1).toLowerCase();
-		}
-	}
-	
 	public PerimeterBoxProfileTool() {
 		
 		this.registeredTraces = new HashMap<String,Collection<ITrace>>(7);
