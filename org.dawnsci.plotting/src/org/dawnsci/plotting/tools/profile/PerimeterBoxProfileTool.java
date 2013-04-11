@@ -10,17 +10,19 @@ import java.util.Map;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.PlottingFactory;
+import org.dawb.common.ui.util.DisplayUtils;
 import org.dawb.common.ui.widgets.ROIWidget;
+import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.axis.IAxis;
 import org.dawnsci.plotting.api.region.IROIListener;
 import org.dawnsci.plotting.api.region.IRegion;
-import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.region.IRegionListener;
 import org.dawnsci.plotting.api.region.ROIEvent;
 import org.dawnsci.plotting.api.region.RegionEvent;
 import org.dawnsci.plotting.api.region.RegionUtils;
+import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.dawnsci.plotting.api.tool.ToolPageFactory;
@@ -31,11 +33,16 @@ import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.api.trace.ITraceListener;
 import org.dawnsci.plotting.api.trace.PaletteEvent;
 import org.dawnsci.plotting.api.trace.TraceEvent;
+import org.dawnsci.plotting.tools.RegionSumTool;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
@@ -55,6 +62,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
+import org.eclipse.ui.part.IPageSite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,7 +80,8 @@ import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
  * - a zoom profile<br>
  * - an XY plot that shows the line profiles of the vertical edges of the box<br>
  * - an XY plot that show the line profiles of the horizontal edges of the box<br>
- * - a composite with table viewers used to display and edit the box X/Y points and width/height.<br>
+ * - a composite with table viewers used to display and edit the box X/Y points and width/height,<br>
+ *    as well as a canvas where the sum of the ROI is shown.<br>
  * 
  * @author wqk87977
  *
@@ -103,7 +112,21 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 
 	private Composite profileContentComposite;
 
-	private AbstractToolPage roiSumProfile;
+	private RegionSumTool roiSumProfile;
+
+	private boolean isEdgePlotted = true;
+	private boolean isAveragePlotted = false;
+
+	private IRegion region;
+
+	private String traceName1;
+	private String traceName2;
+	private String traceName3;
+
+	private ILineTrace x_trace;
+	private ILineTrace y_trace;
+	private ILineTrace av_trace;
+
 
 	public PerimeterBoxProfileTool() {
 		
@@ -182,6 +205,8 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 
 	@Override
 	public void createControl(Composite parent) {
+		// Create extra toolbar buttons
+		createActions(getSite());
 
 		profileContentComposite = new Composite(parent, SWT.NONE);
 		profileContentComposite.setLayout(new GridLayout(1, true));
@@ -274,11 +299,10 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 			gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 			regionSumGroup.setLayout(new GridLayout(1, false));
 			regionSumGroup.setLayoutData(gridData);
-			roiSumProfile = (AbstractToolPage)ToolPageFactory.getToolPage("org.dawb.workbench.plotting.tools.regionSumTool");
+			roiSumProfile = (RegionSumTool)ToolPageFactory.getToolPage("org.dawb.workbench.plotting.tools.regionSumTool");
 			roiSumProfile.setToolSystem((AbstractPlottingSystem) getPlottingSystem());
 			roiSumProfile.setPlottingSystem((AbstractPlottingSystem) getPlottingSystem());
 			roiSumProfile.setTitle("Region_Sum");
-			//roiSumProfile.setPart((IViewPart)getGuiManager());
 			roiSumProfile.setToolId(String.valueOf(roiSumProfile.hashCode()));
 			roiSumProfile.createControl(regionSumGroup);
 			roiSumProfile.activate();
@@ -363,6 +387,52 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 		}
 	}
 
+	private void createActions(IPageSite site) {
+
+		final Action plotAverage = new Action("Plot Average Box Profiles", IAction.AS_CHECK_BOX) {
+			@Override
+			public void run() {
+				if(isChecked())
+					isAveragePlotted = true;
+				else
+					isAveragePlotted = false;
+				
+				if (region != null)
+					update(region, (ROIBase)region.getROI(), false);
+			}
+		};
+		plotAverage.setToolTipText("Toggle On/Off Average Profiles");
+		plotAverage.setText("Average");
+		plotAverage.setImageDescriptor(Activator.getImageDescriptor("icons/average.png"));
+
+		final Action plotEdge = new Action("Plot Edge Box Profiles", IAction.AS_CHECK_BOX) {
+			@Override
+			public void run() {
+				if(isChecked())
+					isEdgePlotted = true;
+				else
+					isEdgePlotted = false;
+					
+				if (region != null)
+					update(region, (ROIBase)region.getROI(), false);
+			}
+		};
+		plotEdge.setToolTipText("Toggle On/Off Perimeter Profiles");
+		plotEdge.setText("Edge");
+		plotEdge.setChecked(true);
+		plotEdge.setImageDescriptor(Activator.getImageDescriptor("icons/edge-color-box.png"));
+
+		// if site is null, the tool has been called programmatically
+		if(site != null){
+			IToolBarManager toolMan = getSite().getActionBars().getToolBarManager();
+			MenuManager menuMan = new MenuManager();
+			toolMan.add(plotEdge);
+			menuMan.add(plotEdge);
+			toolMan.add(plotAverage);
+			menuMan.add(plotAverage);
+		} 
+	}
+
 	@Override
 	public Object getAdapter(@SuppressWarnings("rawtypes") Class clazz) {
 		if (clazz == IToolPageSystem.class) {
@@ -443,10 +513,10 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 		}
 		setRegionsActive(false);
 
+		verticalProfilePlottingSystem.clear();
+		horizontalProfilePlottingSystem.clear();
 		if(myROIWidget != null)
 			myROIWidget.dispose();
-//		if(roiSumProfile != null)
-//			roiSumProfile.dispose();
 		if(verticalProfileROIWidget != null)
 			verticalProfileROIWidget.dispose();
 		if(horizontalProfileROIWidget != null)
@@ -517,13 +587,34 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 		
 		if (!isRegionTypeSupported(region.getRegionType())) return;
 
-		final RectangularROI bounds = (RectangularROI) (roi==null ? region.getROI() : roi);
+		RectangularROI bounds = (RectangularROI) (roi==null ? region.getROI() : roi);
 		if (bounds==null) return;
 		if (!region.isVisible()) return;
 
 		if (monitor.isCanceled()) return;
 		
-		//start zoom profile
+		updateZoomProfile(image, bounds, monitor);
+
+		bounds = getPositiveBounds(bounds);
+		// vertical and horizontal profiles
+		if(isEdgePlotted && !isAveragePlotted){
+			updatePerimeterProfile(verticalProfilePlottingSystem, image, bounds, region, SWT.VERTICAL, tryUpdate, monitor);
+			updatePerimeterProfile(horizontalProfilePlottingSystem, image, bounds, region, SWT.HORIZONTAL, tryUpdate, monitor);
+		} else if (!isEdgePlotted && isAveragePlotted){
+			updateAverageProfile(verticalProfilePlottingSystem, image, bounds, region, SWT.VERTICAL, tryUpdate, monitor);
+			updateAverageProfile(horizontalProfilePlottingSystem, image, bounds, region, SWT.HORIZONTAL, tryUpdate, monitor);
+		} else if (isEdgePlotted && isAveragePlotted){
+			updatePerimeterAndAverageProfile(verticalProfilePlottingSystem, image, bounds, region, SWT.VERTICAL, tryUpdate, monitor);
+			updatePerimeterAndAverageProfile(horizontalProfilePlottingSystem, image, bounds, region, SWT.HORIZONTAL, tryUpdate, monitor);
+		} else if (!isEdgePlotted && !isAveragePlotted){
+			removeTraces(horizontalProfilePlottingSystem, SWT.HORIZONTAL);
+			removeTraces(verticalProfilePlottingSystem, SWT.VERTICAL);
+		}
+		
+		roiSumProfile.createProfile(image, region, bounds, tryUpdate, isDrag, monitor);
+	}
+
+	private void updateZoomProfile(final IImageTrace image, RectangularROI bounds, IProgressMonitor monitor){
 		final int yInc = bounds.getPoint()[1]<bounds.getEndPoint()[1] ? 1 : -1;
 		final int xInc = bounds.getPoint()[0]<bounds.getEndPoint()[0] ? 1 : -1;
 		try {
@@ -551,7 +642,7 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 			// Calculate axes to have real values not size
 			AbstractDataset yLabels = null;
 			AbstractDataset xLabels = null;
-			if (image.getAxes()!=null) {
+			if (image.getAxes()!=null && image.getAxes().size() > 0) {
 				AbstractDataset xl = (AbstractDataset)image.getAxes().get(0);
 				if (xl!=null) xLabels = getLabelsFromLabels(xl, bounds, 0);
 				AbstractDataset yl = (AbstractDataset)image.getAxes().get(1);
@@ -568,100 +659,114 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 					zoom_trace.setPaletteData(image.getPaletteData());
 				}
 			});
-			
 		} catch (IllegalArgumentException ne) {
 			// Occurs when slice outside
 			logger.trace("Slice outside bounds of image!", ne);
 		} catch (Throwable ne) {
 			logger.warn("Problem slicing image in "+getClass().getSimpleName(), ne);
-		}
-		//end zoom profile
-
-		// vertical and horizontal profiles
-		updateProfile(verticalProfilePlottingSystem, image, bounds, region, SWT.VERTICAL, tryUpdate, monitor);
-		updateProfile(horizontalProfilePlottingSystem, image, bounds, region, SWT.HORIZONTAL, tryUpdate, monitor);
+		} 
 	}
 
-	private void updateProfile(AbstractPlottingSystem profilePlottingSystem, 
-						final IImageTrace image, 
-						final RectangularROI bounds, 
-						IRegion region, 
-						final int type, 
-						boolean tryUpdate, 
-						IProgressMonitor monitor){
+	private RectangularROI getPositiveBounds(RectangularROI bounds){
+		double[] startpt = bounds.getPoint();
+		if(startpt[0] < 0) startpt[0] = 0;
+		if(startpt[1] < 0) startpt[1] = 0;
+		bounds.setPoint(startpt);
+		bounds.setEndPoint(bounds.getEndPoint());
+		return bounds;
+	}
 
-		AbstractDataset[] box = ROIProfile.boxLine((AbstractDataset)image.getData(), (AbstractDataset)image.getMask(), bounds, true, type);
+	/**
+	 * Update the perimeter profiles and the average profile
+	 * TODO Make a single generic method called updateProfile in order to lower number of lines of code
+	 * @param profilePlottingSystem
+	 * @param image
+	 * @param bounds
+	 * @param region
+	 * @param type
+	 * @param tryUpdate
+	 * @param monitor
+	 */
+	private void updatePerimeterAndAverageProfile(
+			final AbstractPlottingSystem profilePlottingSystem,
+			final IImageTrace image, final RectangularROI bounds,
+			IRegion region, final int type, boolean tryUpdate,
+			IProgressMonitor monitor) {
+		AbstractDataset[] boxLine = ROIProfile.boxLine((AbstractDataset)image.getData(), (AbstractDataset)image.getMask(), bounds, true, type);
+		AbstractDataset[] boxMean = ROIProfile.boxMean((AbstractDataset)image.getData(), (AbstractDataset)image.getMask(), bounds, true);
 
-		if (box==null) return;
+		if (boxLine == null) return;
+		if (boxMean == null) return;
 
-		String traceName1 = "", traceName2 = "";
-		if(type == SWT.HORIZONTAL){
-			traceName1 = "Top Profile";
-			traceName2 = "Bottom Profile";
-		} else if(type == SWT.VERTICAL){
-			traceName1 = "Left Profile";
-			traceName2 = "Right Profile";
-		}
+		setTraceNames(type);
+		AbstractDataset line3 = null;
 
-		final AbstractDataset line1 = box[0];
+		if (type == SWT.HORIZONTAL) line3 = boxMean[0];
+		else if (type == SWT.VERTICAL) line3 = boxMean[1];
+
+		AbstractDataset line1 = boxLine[0];
 		line1.setName(traceName1);
 		AbstractDataset xi = IntegerDataset.arange(line1.getSize());
 		final AbstractDataset x_indices = xi;
 
-		final AbstractDataset line2 = box[1];
+		AbstractDataset line2 = boxLine[1];
 		line2.setName(traceName2);
 		AbstractDataset yi = IntegerDataset.arange(line2.getSize());
 		final AbstractDataset y_indices = yi;
 
-		final List<AbstractDataset> boxesLines = new ArrayList<AbstractDataset>(2);
-		boxesLines.add(line1);
-		boxesLines.add(line2);
+		// Average profile
+		line3.setName(traceName3);
+		AbstractDataset av_indices = IntegerDataset.arange(line3.getSize());
 
-		final ILineTrace x_trace = (ILineTrace)profilePlottingSystem.getTrace(traceName1);
-		final ILineTrace y_trace = (ILineTrace)profilePlottingSystem.getTrace(traceName2);
-		final List<ILineTrace> traces = new ArrayList<ILineTrace>(2);
+		final List<AbstractDataset> lines = new ArrayList<AbstractDataset>(3);
+		lines.add(line1);
+		lines.add(line2);
+		lines.add(line3);
+
+		x_trace = (ILineTrace) profilePlottingSystem.getTrace(traceName1);
+		y_trace = (ILineTrace) profilePlottingSystem.getTrace(traceName2);
+		av_trace = (ILineTrace) profilePlottingSystem.getTrace(traceName3);
+
+		final List<ILineTrace> traces = new ArrayList<ILineTrace>(3);
 		traces.add(x_trace);
 		traces.add(y_trace);
+		traces.add(av_trace);
 
-		if (tryUpdate && x_trace!=null && y_trace!=null) {
+		if (tryUpdate && x_trace != null && y_trace != null && av_trace != null) {
 			Control control = getControl();
-			if(control != null && !control.isDisposed()) {
+			if (control != null && !control.isDisposed()) {
 				control.getDisplay().syncExec(new Runnable() {
 					@Override
 					public void run() {
 						List<IDataset> axes = image.getAxes();
-						if(axes != null){
-							if(type == SWT.VERTICAL){
-								updateAxes(traces, boxesLines, (AbstractDataset)axes.get(1), bounds.getPointY(), type);
-								x_trace.setTraceColor(ColorConstants.blue);
-								y_trace.setTraceColor(ColorConstants.red);
-							} else if (type == SWT.HORIZONTAL){
-								updateAxes(traces, boxesLines, (AbstractDataset)axes.get(0), bounds.getPointX(), type);
-								x_trace.setTraceColor(ColorConstants.darkGreen);
-								y_trace.setTraceColor(ColorConstants.orange);
+						if (axes != null) {
+							if (type == SWT.VERTICAL) {
+								updateAxes(traces, lines, (AbstractDataset)axes.get(1), bounds.getPointY(), type);
+							} else if (type == SWT.HORIZONTAL) {
+								updateAxes(traces, lines, (AbstractDataset)axes.get(0), bounds.getPointX(), type);
 							}
-						} else { //if no axes we set them manually according to the data shape
+						} else { // if no axes we set them manually according to
+									// the data shape
 							int[] shapes = image.getData().getShape();
-							if(type == SWT.VERTICAL){
+							if (type == SWT.VERTICAL) {
 								int[] verticalAxis = new int[shapes[1]];
-								for(int i = 0; i < verticalAxis.length; i ++){
+								for (int i = 0; i < verticalAxis.length; i++) {
 									verticalAxis[i] = i;
 								}
 								AbstractDataset vertical = new IntegerDataset(verticalAxis, shapes[1]);
-								updateAxes(traces, boxesLines, vertical, bounds.getPointY(), type);
-								x_trace.setTraceColor(ColorConstants.blue);
-								y_trace.setTraceColor(ColorConstants.red);
-							} else if (type == SWT.HORIZONTAL){
+								updateAxes(traces, lines, vertical, bounds.getPointY(), type);
+							} else if (type == SWT.HORIZONTAL) {
 								int[] horizontalAxis = new int[shapes[0]];
-								for(int i = 0; i < horizontalAxis.length; i ++){
+								for (int i = 0; i < horizontalAxis.length; i++) {
 									horizontalAxis[i] = i;
 								}
 								AbstractDataset horizontal = new IntegerDataset(horizontalAxis, shapes[0]);
-								updateAxes(traces, boxesLines, horizontal, bounds.getPointX(), type);
-								x_trace.setTraceColor(ColorConstants.darkGreen);
-								y_trace.setTraceColor(ColorConstants.orange);
+								updateAxes(traces, lines, horizontal, bounds.getPointX(), type);
 							}
 						}
+						setTracesColor(profilePlottingSystem, type);
+						// clean traces if necessary
+						removeTraces(profilePlottingSystem, type);
 					}
 				});
 			}
@@ -673,13 +778,301 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 				profilePlottingSystem.setSelectedXAxis(xPixelAxisVertical);
 				profilePlottingSystem.setSelectedYAxis(yPixelAxisVertical);
 			}
-
-			Collection<ITrace> plotted = profilePlottingSystem.updatePlot1D(x_indices, Arrays.asList(new IDataset[]{line1}), monitor);
+			Collection<ITrace> plotted = profilePlottingSystem.updatePlot1D(x_indices,
+							Arrays.asList(new IDataset[] { line1 }), monitor);
 			registerTraces(region, plotted);
-
-			plotted = profilePlottingSystem.updatePlot1D(y_indices, Arrays.asList(new IDataset[]{line2}), monitor);
-			registerTraces(region, plotted);	
+			plotted = profilePlottingSystem.updatePlot1D(y_indices,
+							Arrays.asList(new IDataset[] { line2 }), monitor);
+			registerTraces(region, plotted);
+			plotted = profilePlottingSystem.updatePlot1D(av_indices,
+							Arrays.asList(new IDataset[] { line3 }), monitor);
+			registerTraces(region, plotted);
+			setTracesColor(profilePlottingSystem, type);
 		}
+		setTracesColor(profilePlottingSystem, type);
+		removeTraces(profilePlottingSystem, type);
+	}
+
+	/**
+	 * Update the perimeter profiles if no average profile
+	 * @param profilePlottingSystem
+	 * @param image
+	 * @param bounds
+	 * @param region
+	 * @param type
+	 * @param tryUpdate
+	 * @param monitor
+	 */
+	private void updatePerimeterProfile(
+			final AbstractPlottingSystem profilePlottingSystem,
+			final IImageTrace image, final RectangularROI bounds,
+			IRegion region, final int type, boolean tryUpdate,
+			IProgressMonitor monitor) {
+		AbstractDataset[] boxLine = ROIProfile.boxLine((AbstractDataset)image.getData(), (AbstractDataset)image.getMask(), bounds, true, type);
+		if (boxLine == null) return;
+
+		setTraceNames(type);
+
+		AbstractDataset line1 = boxLine[0];
+		line1.setName(traceName1);
+		AbstractDataset xi = IntegerDataset.arange(line1.getSize());
+		final AbstractDataset x_indices = xi;
+
+		AbstractDataset line2 = boxLine[1];
+		line2.setName(traceName2);
+		AbstractDataset yi = IntegerDataset.arange(line2.getSize());
+		final AbstractDataset y_indices = yi;
+
+		final List<AbstractDataset> lines = new ArrayList<AbstractDataset>(3);
+		lines.add(line1);
+		lines.add(line2);
+
+		x_trace = (ILineTrace) profilePlottingSystem.getTrace(traceName1);
+		y_trace = (ILineTrace) profilePlottingSystem.getTrace(traceName2);
+
+		final List<ILineTrace> traces = new ArrayList<ILineTrace>(3);
+		traces.add(x_trace);
+		traces.add(y_trace);
+
+		if (tryUpdate && x_trace != null && y_trace != null) {
+			Control control = getControl();
+			if (control != null && !control.isDisposed()) {
+				control.getDisplay().syncExec(new Runnable() {
+					@Override
+					public void run() {
+						List<IDataset> axes = image.getAxes();
+						if (axes != null && axes.size() > 0) {
+							if (type == SWT.VERTICAL) {
+								updateAxes(traces, lines, (AbstractDataset)axes.get(1), bounds.getPointY(), type);
+							} else if (type == SWT.HORIZONTAL) {
+								updateAxes(traces, lines, (AbstractDataset)axes.get(0), bounds.getPointX(), type);
+							}
+						} else { // if no axes we set them manually according to
+									// the data shape
+							int[] shapes = image.getData().getShape();
+							if (type == SWT.VERTICAL) {
+								int[] verticalAxis = new int[shapes[1]];
+								for (int i = 0; i < verticalAxis.length; i++) {
+									verticalAxis[i] = i;
+								}
+								AbstractDataset vertical = new IntegerDataset(verticalAxis, shapes[1]);
+								updateAxes(traces, lines, vertical, bounds.getPointY(), type);
+							} else if (type == SWT.HORIZONTAL) {
+								int[] horizontalAxis = new int[shapes[0]];
+								for (int i = 0; i < horizontalAxis.length; i++) {
+									horizontalAxis[i] = i;
+								}
+								AbstractDataset horizontal = new IntegerDataset(horizontalAxis, shapes[0]);
+								updateAxes(traces, lines, horizontal, bounds.getPointX(), type);
+							}
+						}
+						setTracesColor(profilePlottingSystem, type);
+						// clean traces if necessary
+						removeTraces(profilePlottingSystem, type);
+					}
+				});
+			}
+		}
+
+		else {
+			if (type == SWT.HORIZONTAL) {
+				profilePlottingSystem.setSelectedXAxis(xPixelAxisHorizontal);
+				profilePlottingSystem.setSelectedYAxis(yPixelAxisHorizontal);
+			} else if (type == SWT.VERTICAL) {
+				profilePlottingSystem.setSelectedXAxis(xPixelAxisVertical);
+				profilePlottingSystem.setSelectedYAxis(yPixelAxisVertical);
+			}
+			Collection<ITrace> plotted = null;
+			plotted = profilePlottingSystem.updatePlot1D(x_indices,
+								Arrays.asList(new IDataset[] { line1 }), monitor);
+				registerTraces(region, plotted);
+				plotted = profilePlottingSystem.updatePlot1D(y_indices,
+								Arrays.asList(new IDataset[] { line2 }), monitor);
+				registerTraces(region, plotted);
+			setTracesColor(profilePlottingSystem, type);
+		}
+		setTracesColor(profilePlottingSystem, type);
+		removeTraces(profilePlottingSystem, type);
+	}
+
+	/**
+	 * Update the average profile without the perimeter profiles
+	 * @param profilePlottingSystem
+	 * @param image
+	 * @param bounds
+	 * @param region
+	 * @param type
+	 * @param tryUpdate
+	 * @param monitor
+	 */
+	private void updateAverageProfile(
+			final AbstractPlottingSystem profilePlottingSystem,
+			final IImageTrace image, final RectangularROI bounds,
+			IRegion region, final int type, boolean tryUpdate,
+			IProgressMonitor monitor) {
+		AbstractDataset[] boxMean = ROIProfile.boxMean((AbstractDataset)image.getData(), (AbstractDataset)image.getMask(), bounds, true);
+
+		if (boxMean==null) return;
+
+		setTraceNames(type);
+		AbstractDataset line3 = null;
+		if (type == SWT.HORIZONTAL) line3 = boxMean[0];
+		else if (type == SWT.VERTICAL) line3 = boxMean[1];
+
+		// Average profile
+		line3.setName(traceName3);
+		AbstractDataset av_indices = IntegerDataset.arange(line3.getSize());
+
+		final List<AbstractDataset> lines = new ArrayList<AbstractDataset>(1);
+		lines.add(line3);
+
+		av_trace = (ILineTrace) profilePlottingSystem.getTrace(traceName3);
+
+		final List<ILineTrace> traces = new ArrayList<ILineTrace>(1);
+		traces.add(av_trace);
+
+		if (tryUpdate && av_trace != null) {
+			Control control = getControl();
+			if (control != null && !control.isDisposed()) {
+				control.getDisplay().syncExec(new Runnable() {
+					@Override
+					public void run() {
+						List<IDataset> axes = image.getAxes();
+						if (axes != null) {
+							if (type == SWT.VERTICAL) {
+								updateAxes(traces, lines, (AbstractDataset)axes.get(1), bounds.getPointY(), type);
+							} else if (type == SWT.HORIZONTAL) {
+								updateAxes(traces, lines, (AbstractDataset)axes.get(0), bounds.getPointX(), type);
+							}
+						} else { // if no axes we set them manually according to
+									// the data shape
+							int[] shapes = image.getData().getShape();
+							if (type == SWT.VERTICAL) {
+								int[] verticalAxis = new int[shapes[1]];
+								for (int i = 0; i < verticalAxis.length; i++) {
+									verticalAxis[i] = i;
+								}
+								AbstractDataset vertical = new IntegerDataset(verticalAxis, shapes[1]);
+								updateAxes(traces, lines, vertical, bounds.getPointY(), type);
+							} else if (type == SWT.HORIZONTAL) {
+								int[] horizontalAxis = new int[shapes[0]];
+								for (int i = 0; i < horizontalAxis.length; i++) {
+									horizontalAxis[i] = i;
+								}
+								AbstractDataset horizontal = new IntegerDataset(horizontalAxis, shapes[0]);
+								updateAxes(traces, lines, horizontal, bounds.getPointX(), type);
+							}
+						}
+						setTracesColor(profilePlottingSystem, type);
+						// clean traces if necessary
+						removeTraces(profilePlottingSystem, type);
+					}
+				});
+			}
+		} else {
+			if (type == SWT.HORIZONTAL) {
+				profilePlottingSystem.setSelectedXAxis(xPixelAxisHorizontal);
+				profilePlottingSystem.setSelectedYAxis(yPixelAxisHorizontal);
+			} else if (type == SWT.VERTICAL) {
+				profilePlottingSystem.setSelectedXAxis(xPixelAxisVertical);
+				profilePlottingSystem.setSelectedYAxis(yPixelAxisVertical);
+			}
+			Collection<ITrace> plotted = profilePlottingSystem.updatePlot1D(av_indices,
+						Arrays.asList(new IDataset[] { line3 }), monitor);
+			registerTraces(region, plotted);
+			
+			// clear traces and set colors
+			removeTraces(profilePlottingSystem, type);
+			setTracesColor(profilePlottingSystem, type);
+		}
+		setTracesColor(profilePlottingSystem, type);
+		removeTraces(profilePlottingSystem, type);
+	}
+
+	private void removeTraces(final AbstractPlottingSystem profilePlottingSystem, final int type){
+		DisplayUtils.runInDisplayThread(true, getControl(), new Runnable() {
+			@Override
+			public void run() {
+				
+				setTraceNames(type);
+				if(!isEdgePlotted){
+					x_trace = (ILineTrace)profilePlottingSystem.getTrace(traceName1);
+					y_trace = (ILineTrace)profilePlottingSystem.getTrace(traceName2);
+					if(x_trace != null && y_trace != null){
+						profilePlottingSystem.removeTrace(x_trace);
+						profilePlottingSystem.removeTrace(y_trace);
+					}
+				}
+				if(!isAveragePlotted){
+					av_trace = (ILineTrace)profilePlottingSystem.getTrace(traceName3);
+					if(av_trace != null){
+						profilePlottingSystem.removeTrace(av_trace);
+					}
+				}
+			}
+		});
+	}
+
+	/**
+	 * Set the trace names given the type of profile
+	 * @param type
+	 */
+	private void setTraceNames(int type){
+		if (type == SWT.HORIZONTAL) {
+			traceName1 = getHorizontalTraceNames()[0];
+			traceName2 = getHorizontalTraceNames()[1];
+			traceName3 = getHorizontalTraceNames()[2];
+		} else if (type == SWT.VERTICAL) {
+			traceName1 = getVerticalTraceNames()[0];
+			traceName2 = getVerticalTraceNames()[1];
+			traceName3 = getVerticalTraceNames()[2];
+		}
+	}
+
+	private String[] getHorizontalTraceNames(){
+		return new String[]{
+				"Top Profile",
+				"Bottom Profile",
+				"Horizontal Average Profile"
+		};
+	}
+
+	private String[] getVerticalTraceNames(){
+		return new String[]{
+				"Left Profile",
+				"Right Profile",
+				"Vertical Average Profile"
+		};
+	}
+
+	/**
+	 * Set the traces colour given the type of profile
+	 * @param profilePlottingSystem
+	 * @param type
+	 */
+	private void setTracesColor(final AbstractPlottingSystem profilePlottingSystem, final int type){
+		DisplayUtils.runInDisplayThread(true, getControl(), new Runnable() {
+			@Override
+			public void run() {
+				setTraceNames(type);
+				x_trace = (ILineTrace)profilePlottingSystem.getTrace(traceName1);
+				y_trace = (ILineTrace)profilePlottingSystem.getTrace(traceName2);
+				if (type == SWT.VERTICAL) {
+					if(x_trace != null && y_trace != null){
+						x_trace.setTraceColor(ColorConstants.blue);
+						y_trace.setTraceColor(ColorConstants.red);
+					}
+				} else if (type == SWT.HORIZONTAL) {
+					if(x_trace != null && y_trace != null){
+						x_trace.setTraceColor(ColorConstants.darkGreen);
+						y_trace.setTraceColor(ColorConstants.orange);
+					}
+				}
+				av_trace = (ILineTrace)profilePlottingSystem.getTrace(traceName3);
+				if(av_trace != null)
+					av_trace.setTraceColor(ColorConstants.cyan);
+			}
+		});
 	}
 
 	/**
@@ -691,7 +1084,7 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 	 * @param startPoint
 	 * @param type
 	 */
-	private void updateAxes(List<ILineTrace> profiles, List<AbstractDataset> boxesLines, 
+	private void updateAxes(List<ILineTrace> profiles, List<AbstractDataset> lines, 
 			AbstractDataset axis, double startPoint, int type){
 		// shift the xaxis by yStart
 		try {
@@ -703,8 +1096,18 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 			min = axis.getDouble(0);
 			axis.iadd(xStart-min);
 
-			profiles.get(0).setData(axis.getSlice(new Slice(0, boxesLines.get(0).getShape()[0], 1)), boxesLines.get(0));
-			profiles.get(1).setData(axis.getSlice(new Slice(0, boxesLines.get(1).getShape()[0], 1)), boxesLines.get(1));
+			if(profiles == null) return;
+			if(isEdgePlotted && !isAveragePlotted){
+				profiles.get(0).setData(axis.getSlice(new Slice(0, lines.get(0).getShape()[0], 1)), lines.get(0));
+				profiles.get(1).setData(axis.getSlice(new Slice(0, lines.get(1).getShape()[0], 1)), lines.get(1));
+			}
+			else if(!isEdgePlotted && isAveragePlotted)
+				profiles.get(0).setData(axis.getSlice(new Slice(0, lines.get(0).getShape()[0], 1)), lines.get(0));
+			else if(isEdgePlotted && isAveragePlotted){
+				profiles.get(0).setData(axis.getSlice(new Slice(0, lines.get(0).getShape()[0], 1)), lines.get(0));
+				profiles.get(1).setData(axis.getSlice(new Slice(0, lines.get(1).getShape()[0], 1)), lines.get(1));
+				profiles.get(2).setData(axis.getSlice(new Slice(0, lines.get(2).getShape()[0], 1)), lines.get(2));
+			}
 
 			double max = axis.getDouble(axis.argMax());
 			if(type == SWT.HORIZONTAL){
@@ -717,6 +1120,7 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 		} catch (ArrayIndexOutOfBoundsException ae) {
 			//do nothing
 		} catch (Exception e) {
+			e.printStackTrace();
 			logger.debug("An exception has occured:"+e);
 		}
 	}
@@ -779,13 +1183,16 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 
 	@Override
 	public void roiDragged(ROIEvent evt) {
+		region = (IRegion)evt.getSource();
 		update((IRegion)evt.getSource(), (ROIBase)evt.getROI(), true);
+		myROIWidget.setEditingRegion(region);
 	}
 
 	@Override
 	public void roiChanged(ROIEvent evt) {
-		final IRegion region = (IRegion)evt.getSource();
+		region = (IRegion)evt.getSource();
 		update(region, (ROIBase)region.getROI(), false);
+		myROIWidget.setEditingRegion(region);
 	}
 	
 	private synchronized void update(IRegion r, ROIBase rb, boolean isDrag) {
@@ -884,11 +1291,8 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 
 				if (monitor.isCanceled())
 					return Status.CANCEL_STATUS;
-				createProfile(
-						image,
-						currentRegion,
-						currentROI != null ? currentROI : (ROIBase)currentRegion
-								.getROI(), true, isDrag, monitor);
+				createProfile(image, currentRegion, currentROI != null ? 
+						currentROI : (ROIBase)currentRegion.getROI(), true, isDrag, monitor);
 
 			}
 
