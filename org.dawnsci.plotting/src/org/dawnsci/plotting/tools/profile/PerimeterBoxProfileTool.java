@@ -127,7 +127,17 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 	private ILineTrace y_trace;
 	private ILineTrace av_trace;
 
+	enum TraceNames {
+		TOP, BOTTOM, H_MEAN, LEFT, RIGHT, V_MEAN; // ; is required here.
 
+		@Override
+		public String toString() {
+			// only capitalize the first letter
+			String s = super.toString();
+			return s.substring(0, 1) + s.substring(1).toLowerCase();
+		}
+	}
+	
 	public PerimeterBoxProfileTool() {
 		
 		this.registeredTraces = new HashMap<String,Collection<ITrace>>(7);
@@ -611,7 +621,6 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 			removeTraces(verticalProfilePlottingSystem, SWT.VERTICAL);
 		}
 		
-		roiSumProfile.createProfile(image, region, bounds, tryUpdate, isDrag, monitor);
 	}
 
 	private void updateZoomProfile(final IImageTrace image, RectangularROI bounds, IProgressMonitor monitor){
@@ -778,16 +787,11 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 				profilePlottingSystem.setSelectedXAxis(xPixelAxisVertical);
 				profilePlottingSystem.setSelectedYAxis(yPixelAxisVertical);
 			}
-			Collection<ITrace> plotted = profilePlottingSystem.updatePlot1D(x_indices,
-							Arrays.asList(new IDataset[] { line1 }), monitor);
+			Collection<ITrace> plotted = profilePlottingSystem.updatePlot1D(x_indices, Arrays.asList(new IDataset[] { line1 }), monitor);
 			registerTraces(region, plotted);
-			plotted = profilePlottingSystem.updatePlot1D(y_indices,
-							Arrays.asList(new IDataset[] { line2 }), monitor);
+			plotted = profilePlottingSystem.updatePlot1D(y_indices, Arrays.asList(new IDataset[] { line2 }), monitor);
 			registerTraces(region, plotted);
-			plotted = profilePlottingSystem.updatePlot1D(av_indices,
-							Arrays.asList(new IDataset[] { line3 }), monitor);
-			registerTraces(region, plotted);
-			setTracesColor(profilePlottingSystem, type);
+			plotted = profilePlottingSystem.updatePlot1D(av_indices, Arrays.asList(new IDataset[] { line3 }), monitor);
 		}
 		setTracesColor(profilePlottingSystem, type);
 		removeTraces(profilePlottingSystem, type);
@@ -883,13 +887,9 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 				profilePlottingSystem.setSelectedYAxis(yPixelAxisVertical);
 			}
 			Collection<ITrace> plotted = null;
-			plotted = profilePlottingSystem.updatePlot1D(x_indices,
-								Arrays.asList(new IDataset[] { line1 }), monitor);
-				registerTraces(region, plotted);
-				plotted = profilePlottingSystem.updatePlot1D(y_indices,
-								Arrays.asList(new IDataset[] { line2 }), monitor);
-				registerTraces(region, plotted);
-			setTracesColor(profilePlottingSystem, type);
+			plotted = profilePlottingSystem.updatePlot1D(x_indices, Arrays.asList(new IDataset[] { line1 }), monitor);
+			registerTraces(region, plotted);
+			plotted = profilePlottingSystem.updatePlot1D(y_indices, Arrays.asList(new IDataset[] { line2 }), monitor);
 		}
 		setTracesColor(profilePlottingSystem, type);
 		removeTraces(profilePlottingSystem, type);
@@ -977,13 +977,9 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 				profilePlottingSystem.setSelectedXAxis(xPixelAxisVertical);
 				profilePlottingSystem.setSelectedYAxis(yPixelAxisVertical);
 			}
-			Collection<ITrace> plotted = profilePlottingSystem.updatePlot1D(av_indices,
-						Arrays.asList(new IDataset[] { line3 }), monitor);
+			Collection<ITrace> plotted = profilePlottingSystem.updatePlot1D(av_indices, Arrays.asList(new IDataset[] { line3 }), monitor);
 			registerTraces(region, plotted);
 			
-			// clear traces and set colors
-			removeTraces(profilePlottingSystem, type);
-			setTracesColor(profilePlottingSystem, type);
 		}
 		setTracesColor(profilePlottingSystem, type);
 		removeTraces(profilePlottingSystem, type);
@@ -993,7 +989,6 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 		DisplayUtils.runInDisplayThread(true, getControl(), new Runnable() {
 			@Override
 			public void run() {
-				
 				setTraceNames(type);
 				if(!isEdgePlotted){
 					x_trace = (ILineTrace)profilePlottingSystem.getTrace(traceName1);
@@ -1019,30 +1014,14 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 	 */
 	private void setTraceNames(int type){
 		if (type == SWT.HORIZONTAL) {
-			traceName1 = getHorizontalTraceNames()[0];
-			traceName2 = getHorizontalTraceNames()[1];
-			traceName3 = getHorizontalTraceNames()[2];
+			traceName1 = "Top Profile";
+			traceName2 = "Bottom Profile";
+			traceName3 = "Horizontal Average Profile";
 		} else if (type == SWT.VERTICAL) {
-			traceName1 = getVerticalTraceNames()[0];
-			traceName2 = getVerticalTraceNames()[1];
-			traceName3 = getVerticalTraceNames()[2];
+			traceName1 = "Left Profile";
+			traceName2 = "Right Profile";
+			traceName3 = "Vertical Average Profile";
 		}
-	}
-
-	private String[] getHorizontalTraceNames(){
-		return new String[]{
-				"Top Profile",
-				"Bottom Profile",
-				"Horizontal Average Profile"
-		};
-	}
-
-	private String[] getVerticalTraceNames(){
-		return new String[]{
-				"Left Profile",
-				"Right Profile",
-				"Vertical Average Profile"
-		};
 	}
 
 	/**
@@ -1158,7 +1137,6 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 	}
 
 	private void registerTraces(final IRegion region, final Collection<ITrace> traces) {
-		
 		final String name = region.getName();
 		Collection<ITrace> registered = this.registeredTraces.get(name);
 		if (registered==null) {
@@ -1167,7 +1145,6 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 		}
 		for (ITrace iTrace : traces) iTrace.setUserObject(ProfileType.PROFILE);
 		registered.addAll(traces);
-		
 		// Used to set the line on the image to the same color as the plot for line profiles only.
 		if (!traces.isEmpty()) {
 			final ITrace first = traces.iterator().next();
@@ -1194,7 +1171,7 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 		update(region, (ROIBase)region.getROI(), false);
 		myROIWidget.setEditingRegion(region);
 	}
-	
+
 	private synchronized void update(IRegion r, ROIBase rb, boolean isDrag) {
 		if (!isActive()) return;
 		if (r!=null) {
@@ -1209,7 +1186,6 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 	}
 
 	private final class ProfileJob extends Job {
-
 		private IRegion currentRegion;
 		private ROIBase currentROI;
 		private boolean isDrag;
@@ -1222,38 +1198,20 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 		}
 
 		public void profile(IRegion r, ROIBase rb, boolean isDrag) {
-
-			// This in principle is not needed and appears to make no difference
-			// wether in or out.
-			// However Irakli has advised that it is needed in some
-			// circumstances.
-			// This causes the defect reported here however:
-			// http://jira.diamond.ac.uk/browse/DAWNSCI-214
-			// therefore we are currently not using the extra cancelling.
-			// for (Job job : Job.getJobManager().find(null))
-			// if (job.getClass()==getClass() && job.getState() != Job.RUNNING)
-			// job.cancel();
-
 			this.currentRegion = r;
 			this.currentROI = rb;
 			this.isDrag = isDrag;
-
 			schedule();
 		}
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
+			if (!isActive()) return Status.CANCEL_STATUS;
 
-			if (!isActive())
-				return Status.CANCEL_STATUS;
+			final Collection<ITrace> traces = getPlottingSystem().getTraces(IImageTrace.class);
+			IImageTrace image = traces != null && traces.size() > 0 ? (IImageTrace) traces.iterator().next() : null;
 
-			final Collection<ITrace> traces = getPlottingSystem().getTraces(
-					IImageTrace.class);
-			IImageTrace image = traces != null && traces.size() > 0 ? (IImageTrace) traces
-					.iterator().next() : null;
-
-			if (monitor.isCanceled())
-				return Status.CANCEL_STATUS;
+			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 			if (image == null) {
 				zoomProfilePlottingSystem.clear();
 				verticalProfilePlottingSystem.clear();
@@ -1265,20 +1223,15 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 			// creating 1D)
 			// if the trace is in the registered traces object
 			if (currentRegion == null) {
-				final Collection<IRegion> regions = getPlottingSystem()
-						.getRegions();
+				final Collection<IRegion> regions = getPlottingSystem().getRegions();
 				if (regions != null) {
 					for (IRegion iRegion : regions) {
-						if (!iRegion.isUserRegion())
-							continue;
-						if (monitor.isCanceled())
-							return Status.CANCEL_STATUS;
+						if (!iRegion.isUserRegion()) continue;
+						if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 						if (registeredTraces.containsKey(iRegion.getName())) {
-							createProfile(image, iRegion, (ROIBase)iRegion.getROI(),
-									true, isDrag, monitor);
+							createProfile(image, iRegion, (ROIBase)iRegion.getROI(), true, isDrag, monitor);
 						} else {
-							createProfile(image, iRegion, (ROIBase)iRegion.getROI(),
-									false, isDrag, monitor);
+							createProfile(image, iRegion, (ROIBase)iRegion.getROI(), false, isDrag, monitor);
 						}
 					}
 				} else {
@@ -1288,22 +1241,14 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 					horizontalProfilePlottingSystem.clear();
 				}
 			} else {
-
-				if (monitor.isCanceled())
-					return Status.CANCEL_STATUS;
-				createProfile(image, currentRegion, currentROI != null ? 
-						currentROI : (ROIBase)currentRegion.getROI(), true, isDrag, monitor);
-
+				if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+				createProfile(image, currentRegion, currentROI != null ? currentROI : (ROIBase)currentRegion.getROI(), true, isDrag, monitor);
 			}
-
-			if (monitor.isCanceled())
-				return Status.CANCEL_STATUS;
+			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 			zoomProfilePlottingSystem.repaint();
 			verticalProfilePlottingSystem.repaint();
 			horizontalProfilePlottingSystem.repaint();
-
 			return Status.OK_STATUS;
-
 		}
 	}
 
