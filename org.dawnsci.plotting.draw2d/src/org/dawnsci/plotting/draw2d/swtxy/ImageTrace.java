@@ -256,15 +256,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 					histoBean.setImage(slice);
 					if (fullMask!=null) histoBean.setMask(slice(getYAxis().getRange(), getXAxis().getRange(), fullMask));
 					float[] fa = service.getFastStatistics(histoBean);
-					
-					// Not sure how to deal with this better, but if the bean is logged, then you need to modify the values
-					if (imageServiceBean.isLogColorScale()) {
-						setMin(Math.log10(fa[0]));
-						setMax(Math.log10(fa[1]));
-					} else {
-						setMin(fa[0]);
-						setMax(fa[1]);
-					}
+					setMin(fa[0]);
+					setMax(fa[1]);
+
 				}
 								
 				this.imageData   = service.getImageData(imageServiceBean);

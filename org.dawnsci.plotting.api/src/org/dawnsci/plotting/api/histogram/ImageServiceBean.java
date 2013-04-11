@@ -150,47 +150,15 @@ public class ImageServiceBean {
 	 * @return
 	 */
 	public Number getMin() {
-		if (this.min == null) {
-			return null;
-		}
-		if (logColorScale) {
-			double result = Math.log10(min.doubleValue() - logOffset);
-			if (Double.isNaN(result)) {
-				return 0.0;
-			}
-			return result;
-		}
 		return min;
 	}
 	public void setMin(Number min) {
-		if (min == null) {
-			this.min = null;
-			return;
-		}
-		if (logColorScale) {
-			this.min = Math.pow(10, min.doubleValue());
-			return;
-		}
 		this.min = min;
 	}
 	public Number getMax() {
-		if (this.max == null) {
-			return null;
-		}
-		if (logColorScale) {
-			return Math.log10(max.doubleValue() - logOffset);
-		}
 		return max;
 	}
 	public void setMax(Number max) {
-		if (max == null) {
-			this.max = null;
-			return;
-		}
-		if (logColorScale) {
-			this.max = Math.pow(10, max.doubleValue());
-			return;
-		}
 		this.max = max;
 	}
 	public void setMonitor(IProgressMonitor monitor) {
@@ -207,9 +175,6 @@ public class ImageServiceBean {
 	 * @return
 	 */
 	public HistogramBound getMaximumCutBound() {
-		if (logColorScale) {
-			return new HistogramBound(Math.log10(maximumCutBound.bound.doubleValue() - logOffset),maximumCutBound.color);
-		}
 		return maximumCutBound;
 	}
 	public void setMaximumCutBound(HistogramBound maximumBound) {
@@ -220,13 +185,6 @@ public class ImageServiceBean {
 	 * @return
 	 */
 	public HistogramBound getMinimumCutBound() {
-		if (logColorScale) {
-			double value = Math.log10(minimumCutBound.bound.doubleValue() - logOffset);
-			if (Double.isNaN(value)) {
-				value = -1.0f;
-			}
-			return new HistogramBound(value,minimumCutBound.color);
-		}
 		return minimumCutBound;
 	}
 	public void setMinimumCutBound(HistogramBound minimumBound) {

@@ -1207,6 +1207,7 @@ public class HistogramToolPage extends AbstractToolPage {
 				greenTrace.setData(RGBX, G);
 				blueTrace.setData(RGBX, B);
 				histogramPlot.getSelectedXAxis().setRange(scaleMin, scaleMax);
+				histogramPlot.getSelectedXAxis().setLog10(btnColourMapLog.getSelection());
 				histogramPlot.getSelectedYAxis().setRange(0, finalScale*256);
 				histogramPlot.repaint();
 			}
