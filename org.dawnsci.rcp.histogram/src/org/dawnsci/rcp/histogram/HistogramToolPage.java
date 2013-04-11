@@ -1004,10 +1004,10 @@ public class HistogramToolPage extends AbstractToolPage {
 
 	private AbstractDataset getImageData(IPaletteTrace image) {
 		AbstractDataset imageDataset = (AbstractDataset)image.getImageServiceBean().getImage();
-		if (image.getImageServiceBean().isLogColorScale()) {
-			AbstractDataset result = Maths.subtract(imageDataset, image.getImageServiceBean().getLogOffset());
-			imageDataset = Maths.log10(result);
-		}
+//		if (image.getImageServiceBean().isLogColorScale()) {
+//			AbstractDataset result = Maths.subtract(imageDataset, image.getImageServiceBean().getLogOffset());
+//			imageDataset = Maths.log10(result);
+//		}
 		return imageDataset;
 	}
 
@@ -1207,6 +1207,7 @@ public class HistogramToolPage extends AbstractToolPage {
 				greenTrace.setData(RGBX, G);
 				blueTrace.setData(RGBX, B);
 				histogramPlot.getSelectedXAxis().setRange(scaleMin, scaleMax);
+				histogramPlot.getSelectedXAxis().setLog10(btnColourMapLog.getSelection());
 				histogramPlot.getSelectedYAxis().setRange(0, finalScale*256);
 				histogramPlot.repaint();
 			}

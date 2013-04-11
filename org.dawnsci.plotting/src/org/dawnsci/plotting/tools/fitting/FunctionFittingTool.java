@@ -266,7 +266,7 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 		combo = new CCombo(infoComposite, SWT.BORDER);
 		combo.setEditable(false);
 		combo.setListVisible(true);
-		combo.setItems(new String[] {"Nelder Mead Fitting", "Nelder Mead Fitting (Apache Maths)", "Genetic Algorithm"});
+		combo.setItems(new String[] {"Nelder Mead Fitting", "Genetic Algorithm"});
 		combo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 		combo.select(0);
 		
@@ -710,16 +710,13 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 				IOptimizer fitMethod = null;
 				switch (index) {
 				case 0:
-					fitMethod = new NelderMead(accuracy);
-					break;
-				case 1:
 					fitMethod = new ApacheNelderMead();
 					break;
-				case 2:
+				case 1:
 					fitMethod = new GeneticAlg(accuracy);
 					break;
 				default:
-					fitMethod = new NelderMead(accuracy);
+					fitMethod = new ApacheNelderMead();
 					break;
 				} 
 				
