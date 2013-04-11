@@ -82,6 +82,8 @@ public class RegionSumTool extends AbstractToolPage implements IROIListener {
 
 	private DecimalFormat normNotationFormat = new DecimalFormat("###.#####");
 
+	private IRegion region;
+
 	public RegionSumTool(){
 		this.sumJob = new SumJob();
 		this.regionListener = new IRegionListener.Stub() {
@@ -142,7 +144,7 @@ public class RegionSumTool extends AbstractToolPage implements IROIListener {
 		};
 		fontChooser.setToolTipText("Configure Font");
 		fontChooser.setText("Font");
-		fontChooser.setImageDescriptor(Activator.getImageDescriptor("icons/ConfigureFont.png"));
+		fontChooser.setImageDescriptor(Activator.getImageDescriptor("icons/font.gif"));
 
 		final Action sumCopy = new Action("Copy Sum", IAction.AS_PUSH_BUTTON) {
 			@Override
@@ -267,6 +269,10 @@ public class RegionSumTool extends AbstractToolPage implements IROIListener {
 						RegionSumView viewPart = (RegionSumView)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView("uk.ac.diamond.scisoft.arpes.regionSumView");
 						roiSumProfile.createControl(viewPart.getComposite());
 						roiSumProfile.activate();
+						// update the sum profile
+						roiSumProfile.createProfile(getImageTrace(), region, currentROI, true, false, null);
+						// refresh the layout
+						viewPart.getComposite().layout();
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -405,7 +411,7 @@ public class RegionSumTool extends AbstractToolPage implements IROIListener {
 			                              boolean tryUpdate, 
 			                              boolean isDrag,
 			                              IProgressMonitor monitor){
-		if (monitor.isCanceled()) return;
+		if (monitor!= null && monitor.isCanceled()) return;
 		if (image==null) return;
 		
 		if (!isRegionTypeSupported(region.getRegionType())) return;
@@ -414,7 +420,7 @@ public class RegionSumTool extends AbstractToolPage implements IROIListener {
 		if (bounds==null) return;
 		if (!region.isVisible()) return;
 
-		if (monitor.isCanceled()) return;
+		if (monitor!= null && monitor.isCanceled()) return;
 		// sum profile
 		updateSum(image, bounds, region, tryUpdate, monitor);
 	}
@@ -437,7 +443,7 @@ public class RegionSumTool extends AbstractToolPage implements IROIListener {
 					new int[] { yStartPt, xStartPt },
 					new int[] { yStopPt, xStopPt },
 					new int[] {yInc, xInc});
-			if (monitor.isCanceled()) return;
+			if (monitor!= null && monitor.isCanceled()) return;
 		} catch (IllegalArgumentException e) {
 			logger.debug("Error getting region data:"+ e);
 		}
@@ -450,7 +456,7 @@ public class RegionSumTool extends AbstractToolPage implements IROIListener {
 			sumStr = normNotationFormat.format(value);
 		}
 
-		if (monitor.isCanceled()) return;
+		if (monitor!= null && monitor.isCanceled()) return;
 
 		Display.getDefault().syncExec(new Runnable() {
 			@Override
@@ -477,11 +483,16 @@ public class RegionSumTool extends AbstractToolPage implements IROIListener {
 	}
 
 	@Override
-	public void roiDragged(ROIEvent evt) {}
+	public void roiDragged(ROIEvent evt) {
+		if(evt.getROI() instanceof RectangularROI){
+			currentROI = (RectangularROI)evt.getROI();
+			update((IRegion)evt.getSource(), currentROI, true);
+		}
+	}
 
 	@Override
 	public void roiChanged(ROIEvent evt) {
-		final IRegion region = (IRegion)evt.getSource();
+		region = (IRegion)evt.getSource();
 		if(region.getROI() instanceof RectangularROI){
 			currentROI = (RectangularROI)region.getROI();
 			update(region, currentROI, false);
