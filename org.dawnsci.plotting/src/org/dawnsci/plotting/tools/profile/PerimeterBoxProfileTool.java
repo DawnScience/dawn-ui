@@ -179,7 +179,9 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 			zoomProfilePlottingSystem.setRescale(true);
 			zoomProfilePlottingSystem.setKeepAspect(false);
 			verticalProfilePlottingSystem = (AbstractPlottingSystem)sideProfile2.getToolPlottingSystem();
+			verticalProfilePlottingSystem.setShowLegend(false);
 			horizontalProfilePlottingSystem = (AbstractPlottingSystem)sideProfile1.getToolPlottingSystem();
+			horizontalProfilePlottingSystem.setShowLegend(false);
 
 			//start: we create the ROI information composite
 			final ScrolledComposite scrollComposite = new ScrolledComposite(sashForm3, SWT.H_SCROLL | SWT.V_SCROLL);
@@ -335,8 +337,6 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 				}
 				sideProfile1.update(region);
 				sideProfile2.update(region);
-//				if (region != null)
-//					update(region, (ROIBase)region.getROI(), false);
 			}
 		};
 		plotAverage.setToolTipText("Toggle On/Off Average Profiles");
@@ -356,8 +356,6 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 				}
 				sideProfile1.update(region);
 				sideProfile2.update(region);
-//				if (region != null)
-//					update(region, (ROIBase)region.getROI(), false);
 			}
 		};
 		plotEdge.setToolTipText("Toggle On/Off Perimeter Profiles");
