@@ -2,7 +2,6 @@ package org.dawnsci.plotting.tools;
 
 import java.text.DecimalFormat;
 import java.util.Collection;
-import java.util.Iterator;
 
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
@@ -105,7 +104,7 @@ public class RegionSumTool extends AbstractToolPage implements IROIListener {
 			@Override
 			public void regionAdded(RegionEvent evt) {
 				if (evt.getRegion()!=null) {
-					RegionSumTool.this.update(null, null, false);
+//					RegionSumTool.this.update(image, null, null, false);
 				}
 			}
 			
@@ -117,31 +116,17 @@ public class RegionSumTool extends AbstractToolPage implements IROIListener {
 			}
 			
 			protected void update(RegionEvent evt) {
-				RegionSumTool.this.update(null, null, false);
+//				RegionSumTool.this.update(image, null, null, false);
 			}
 		};
 
 		this.traceListener = new ITraceListener.Stub() {
 			@Override
 			public void tracesAdded(TraceEvent evt) {}
+
 			@Override
 			protected void update(TraceEvent evt) {
-				if(evt.getSource() instanceof ITrace){
-					ITrace trace = (ITrace)evt.getSource();
-					if(trace instanceof IImageTrace){
-						updateSum((IImageTrace)trace, currentROI, region, false, null);
-					}
-				} else if(evt.getSource() instanceof IPlottingSystem){
-					IPlottingSystem plotSystem = (IPlottingSystem)evt.getSource();
-					Collection<ITrace> traces = plotSystem.getTraces();
-					Iterator<ITrace> it = traces.iterator();
-					while (it.hasNext()) {
-						ITrace iTrace = (ITrace) it.next();
-						if(iTrace instanceof IImageTrace){
-							updateSum((IImageTrace)iTrace, currentROI, region, false, null);
-						}
-					}
-				}
+				RegionSumTool.this.update(region, currentROI, false);
 			}
 		};
 	}
@@ -166,7 +151,6 @@ public class RegionSumTool extends AbstractToolPage implements IROIListener {
 					if (sumDisplay.getFont() != null)
 						sumDisplay.getFont().dispose();
 					sumDisplay.setFont(new Font(parent.getShell().getDisplay(), fontData));
-					sumDisplay.update();
 					sumDisplay.update(sumDisplay.getText());
 				}
 			}
@@ -257,6 +241,7 @@ public class RegionSumTool extends AbstractToolPage implements IROIListener {
 				} else {
 					sumDisplay.setAutoResize(false);
 				}
+				sumDisplay.update(sumStr);
 			}
 		};
 		autoResize.setToolTipText("Toggle On/Off the Font automatic resize");
@@ -287,8 +272,7 @@ public class RegionSumTool extends AbstractToolPage implements IROIListener {
 						// If view already opened do nothing
 						IViewReference[] viewRefs = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getViewReferences();
 						for (IViewReference iViewReference : viewRefs) {
-							if(iViewReference.getId().equals("uk.ac.diamond.scisoft.arpes.regionSumView"))
-								return;
+							if(iViewReference.getId().equals("uk.ac.diamond.scisoft.arpes.regionSumView")) return;
 						}
 						RegionSumTool roiSumProfile = (RegionSumTool)ToolPageFactory.getToolPage("org.dawb.workbench.plotting.tools.regionSumTool");
 						roiSumProfile.setToolSystem((AbstractPlottingSystem)getPlottingSystem());
@@ -351,7 +335,6 @@ public class RegionSumTool extends AbstractToolPage implements IROIListener {
 	@Override
 	public void activate() {
 		super.activate();
-		update(null, null, false);
 		if (getPlottingSystem()!=null) {
 			getPlottingSystem().addTraceListener(traceListener);
 			getPlottingSystem().addRegionListener(regionListener);
@@ -467,8 +450,12 @@ public class RegionSumTool extends AbstractToolPage implements IROIListener {
 		int yStopPt = (int) bounds.getEndPoint()[1];
 		int xInc = bounds.getPoint()[0]<bounds.getEndPoint()[0] ? 1 : -1;
 		int yInc = bounds.getPoint()[1]<bounds.getEndPoint()[1] ? 1 : -1;
-		
-		AbstractDataset dataRegion = image.getData();
+
+		if(image == null) return;
+		AbstractDataset dataRegion = (AbstractDataset)image.getData();
+
+		if(dataRegion == null) return;
+
 		try {
 			dataRegion = dataRegion.getSlice(
 					new int[] { yStartPt, xStartPt },
@@ -542,7 +529,6 @@ public class RegionSumTool extends AbstractToolPage implements IROIListener {
 
 	protected synchronized void update(IRegion r, RectangularROI rb, boolean isDrag) {
 		if (!isActive()) return;
-		
 		if (r!=null) {
 			if(!isRegionTypeSupported(r.getRegionType())) return; // Nothing to do.
 			if (!r.isUserRegion()) return; // Likewise
@@ -565,34 +551,24 @@ public class RegionSumTool extends AbstractToolPage implements IROIListener {
 		}
 
 		public void profile(IRegion r, RectangularROI rb, boolean isDrag) {
-
-			// This in principle is not needed and appears to make no difference wether in or out.
-			// However Irakli has advised that it is needed in some circumstances.
-			// This causes the defect reported here however: http://jira.diamond.ac.uk/browse/DAWNSCI-214
-			// therefore we are currently not using the extra cancelling.
-			//for (Job job : Job.getJobManager().find(null))
-			//  if (job.getClass()==getClass() && job.getState() != Job.RUNNING)
-			//		job.cancel();
-
 			this.currentRegion = r;
 			this.currentROI    = rb;
 			this.isDrag        = isDrag;
-			
 			schedule();
 		}
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			Collection<ITrace> traces = getPlottingSystem().getTraces();
+//			Collection<ITrace> traces = getPlottingSystem().getTraces();
 				
-			Iterator<ITrace> it = traces.iterator();
-			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
-			while (it.hasNext()) {
-				ITrace iTrace = (ITrace) it.next();
-				if(iTrace instanceof IImageTrace){
-					updateSum((IImageTrace)iTrace, currentROI, currentRegion, isDrag, monitor);
-				}
-			}
+//			Iterator<ITrace> it = traces.iterator();
+//			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+//			while (it.hasNext()) {
+//				ITrace iTrace = (ITrace) it.next();
+//				if(iTrace instanceof IImageTrace){
+					updateSum(getImageTrace(), currentROI, currentRegion, isDrag, monitor);
+//				}
+//			}
 			return Status.OK_STATUS;
 		}
 	}
