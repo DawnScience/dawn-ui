@@ -71,7 +71,6 @@ import uk.ac.diamond.scisoft.analysis.fitting.functions.StraightLine;
 import uk.ac.diamond.scisoft.analysis.optimize.ApacheNelderMead;
 import uk.ac.diamond.scisoft.analysis.optimize.GeneticAlg;
 import uk.ac.diamond.scisoft.analysis.optimize.IOptimizer;
-import uk.ac.diamond.scisoft.analysis.optimize.NelderMead;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 import uk.ac.gda.common.rcp.util.GridUtils;
 
@@ -621,7 +620,7 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 				try {
 					result = Double.toString(compFunction.getFunction(index).getParameterValue(0));
 					for (int i = 1; i < compFunction.getFunction(index).getNoOfParameters(); i++) {
-						result += "\n";
+						result += System.getProperty("line.separator");
 						result += compFunction.getFunction(index).getParameterValue(i);
 					}
 				} catch (Exception e) {
@@ -632,7 +631,7 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 				try {
 					result = Double.toString(resultFunction.getFunction(index).getParameterValue(0));
 					for (int i = 1; i < resultFunction.getFunction(index).getNoOfParameters(); i++) {
-						result += "\n";
+						result += System.getProperty("line.separator");
 						result += resultFunction.getFunction(index).getParameterValue(i);
 					}
 				} catch (Exception e) {
