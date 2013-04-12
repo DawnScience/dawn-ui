@@ -34,7 +34,7 @@ public interface ILineStackTrace extends IAxesTrace, IWindowTrace {
 	 * @param axes
 	 * @throws Exception
 	 */
-	public void setData(final List<IDataset> axes, final IDataset... stack);
+	public void setData(final List<? extends IDataset> axes, final IDataset... stack);
 	
 	/**
 	 * The stack that is being plotted.

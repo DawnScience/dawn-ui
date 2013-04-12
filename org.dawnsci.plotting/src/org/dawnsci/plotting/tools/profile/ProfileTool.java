@@ -202,6 +202,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 
 		profilePlottingSystem.setXfirst(true);
 		profilePlottingSystem.setRescale(true);
+				
 	}
 
 	@Override
@@ -246,6 +247,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		}
 		
 		createNewRegion();
+		
 	}
 	
 	private final void createNewRegion() {

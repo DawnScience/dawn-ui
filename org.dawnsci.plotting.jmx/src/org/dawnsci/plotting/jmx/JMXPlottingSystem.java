@@ -46,6 +46,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
  * @author fcp94556
  *
  */
+@SuppressWarnings("unchecked")
 public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSystem {
 
 	
@@ -151,7 +152,7 @@ public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSyste
 
 	@Override
 	public Collection<IRegion> getRegions(RegionType type) {
-        return (Collection<IRegion>)call(getMethodName(Thread.currentThread().getStackTrace()), type);
+		return (Collection<IRegion>)call(getMethodName(Thread.currentThread().getStackTrace()), type);
 	}
 
 	@Override
@@ -283,31 +284,31 @@ public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSyste
 	}
 
 	@Override
-	public List<ITrace> createPlot1D(IDataset x, List<IDataset> ys, IProgressMonitor monitor) {
+	public List<ITrace> createPlot1D(IDataset x, List<? extends IDataset> ys, IProgressMonitor monitor) {
 		return (List<ITrace>)call(getMethodName(Thread.currentThread().getStackTrace()), x,ys,monitor);
 	}
 
 	@Override
 	public List<ITrace> createPlot1D(IDataset x,
-			List<IDataset> ys, String title, IProgressMonitor monitor) {
+			List<? extends IDataset> ys, String title, IProgressMonitor monitor) {
 		return (List<ITrace>)call(getMethodName(Thread.currentThread().getStackTrace()), x,ys, title, monitor);
 	}
 
 	@Override
 	public List<ITrace> updatePlot1D(IDataset x,
-			List<IDataset> ys, IProgressMonitor monitor) {
+			List<? extends IDataset> ys, IProgressMonitor monitor) {
 		return (List<ITrace>)call(getMethodName(Thread.currentThread().getStackTrace()), x,ys,monitor);
 	}
 
 	@Override
 	public ITrace createPlot2D(IDataset image,
-			List<IDataset> axes, IProgressMonitor monitor) {
+			List<? extends IDataset> axes, IProgressMonitor monitor) {
 		return (ITrace)call(getMethodName(Thread.currentThread().getStackTrace()), image,axes,monitor);
 	}
 
 	@Override
 	public ITrace updatePlot2D(IDataset image,
-			List<IDataset> axes, IProgressMonitor monitor) {
+			List<? extends IDataset> axes, IProgressMonitor monitor) {
 		return (ITrace)call(getMethodName(Thread.currentThread().getStackTrace()), image,axes,monitor);
 	}
 
@@ -378,27 +379,26 @@ public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSyste
 
 	@Override
 	public void setDefaultCursor(int cursorType) {
-		call(getMethodName(Thread.currentThread().getStackTrace()), new Class[]{int.class}, cursorType);
+		call(getMethodName(Thread.currentThread().getStackTrace()), new Class[] { int.class }, cursorType);
 	}
-		
+
 	@Override
 	public IAxis removeAxis(IAxis axis) {
-		return (IAxis)call(getMethodName(Thread.currentThread().getStackTrace()), axis);	
-	}  
-	
-	@SuppressWarnings("unchecked")
+		return (IAxis) call(getMethodName(Thread.currentThread().getStackTrace()), axis);
+	}
+
 	@Override
 	public List<IAxis> getAxes() {
-		return (List<IAxis>)call(getMethodName(Thread.currentThread().getStackTrace()));	
+		return (List<IAxis>) call(getMethodName(Thread.currentThread().getStackTrace()));
 	}
-	
+
 	@Override
 	public void addPositionListener(IPositionListener l) {
-		call(getMethodName(Thread.currentThread().getStackTrace()), new Class[]{IPositionListener.class}, l);
+		call(getMethodName(Thread.currentThread().getStackTrace()), new Class[] { IPositionListener.class }, l);
 	}
 
 	@Override
 	public void removePositionListener(IPositionListener l) {
-		call(getMethodName(Thread.currentThread().getStackTrace()), new Class[]{IPositionListener.class}, l);
+		call(getMethodName(Thread.currentThread().getStackTrace()), new Class[] { IPositionListener.class }, l);
 	}
 }

@@ -60,9 +60,10 @@ public class TraceWillPlotEvent extends EventObject {
 		return image;
 	}
 
-	public void setImageData(IDataset image, List<IDataset> axes) {
+	@SuppressWarnings("unchecked")
+	public void setImageData(IDataset image, List<? extends IDataset> axes) {
 		this.image = image;
-		this.axes = axes;
+		this.axes = (List<IDataset>) axes;
 		newImageDataSet = true;
 		
 		if (applyStraightAway && source instanceof IImageTrace) {

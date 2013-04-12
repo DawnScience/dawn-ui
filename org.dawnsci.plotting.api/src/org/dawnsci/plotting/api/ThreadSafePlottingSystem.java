@@ -273,31 +273,31 @@ public class ThreadSafePlottingSystem extends StandardMBean implements IPlotting
 	}
 
 	@Override
-	public List<ITrace> createPlot1D(IDataset x, List<IDataset> ys, IProgressMonitor monitor) {
+	public List<ITrace> createPlot1D(IDataset x, List<? extends IDataset> ys, IProgressMonitor monitor) {
 		return deligate.createPlot1D(x, ys, monitor);
 	}
 
 	@Override
 	public List<ITrace> createPlot1D(IDataset x,
-			List<IDataset> ys, String title, IProgressMonitor monitor) {
+			List<? extends IDataset> ys, String title, IProgressMonitor monitor) {
 		return deligate.createPlot1D(x, ys, title, monitor);
 	}
 
 	@Override
 	public List<ITrace> updatePlot1D(IDataset x,
-			List<IDataset> ys, IProgressMonitor monitor) {
+			List<? extends IDataset> ys, IProgressMonitor monitor) {
 		return deligate.updatePlot1D(x, ys, monitor);
 	}
 
 	@Override
 	public ITrace createPlot2D(IDataset image,
-			List<IDataset> axes, IProgressMonitor monitor) {
+			List<? extends IDataset> axes, IProgressMonitor monitor) {
 		return deligate.createPlot2D(image, axes, monitor);
 	}
 
 	@Override
 	public ITrace updatePlot2D(IDataset image,
-			List<IDataset> axes, IProgressMonitor monitor) {
+			List<? extends IDataset> axes, IProgressMonitor monitor) {
 		return deligate.updatePlot2D(image, axes, monitor);
 	}
 
@@ -378,6 +378,7 @@ public class ThreadSafePlottingSystem extends StandardMBean implements IPlotting
 	 */
 	private Object call(final String methodName, final Object... args) {
 		
+		@SuppressWarnings("rawtypes")
 		final Class[] classes = args!=null ? new Class[args.length] : null;
 		if (classes!=null) {
 			for (int i = 0; i < args.length; i++) classes[i]=args[i].getClass();
@@ -390,7 +391,7 @@ public class ThreadSafePlottingSystem extends StandardMBean implements IPlotting
 	 * @param methodName
 	 * @param args
 	 */
-	private Object call(final String methodName, final Class[] classes, final Object... args) {
+	private Object call(final String methodName, @SuppressWarnings("rawtypes") final Class[] classes, final Object... args) {
 		
 		final List<Object> ret = new ArrayList<Object>(1);
 		Display.getDefault().syncExec(new Runnable() {

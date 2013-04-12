@@ -135,8 +135,7 @@ public class FittingUtils {
 			
 			bounds = (LinearROI)(info.getPlottingSystem().getRegion(info.getSelectedTrace().getName()).getROI());
 		} catch (Throwable e1) {
-			bounds = new LinearROI();
-			e1.printStackTrace();
+			return null;
 		}
 		double l=bounds.getLength();
 		double [] pt = bounds.getPoint(p.getPosition()/l);
