@@ -36,7 +36,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Control;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -156,7 +155,7 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 		} else if (isEdgePlotted && isAveragePlotted) {
 			updatePerimeterAndAverageProfile(image, bounds, region, tryUpdate, monitor);
 		} else if (!isEdgePlotted && !isAveragePlotted) {
-			removeTraces();
+			hideTraces();
 		}
 	}
 
@@ -172,7 +171,6 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 	/**
 	 * Update the perimeter profiles and the average profile
 	 * TODO Make a single generic method called updateProfile in order to lower number of lines of code
-	 * @param profilePlottingSystem
 	 * @param image
 	 * @param bounds
 	 * @param region
@@ -224,60 +222,22 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 		traces.add(av_trace);
 
 		if (tryUpdate && x_trace != null && y_trace != null && av_trace != null) {
-			Control control = getControl();
-			if (control != null && !control.isDisposed()) {
-				control.getDisplay().syncExec(new Runnable() {
-					@Override
-					public void run() {
-						List<IDataset> axes = image.getAxes();
-						if (axes != null) {
-							if (type == SWT.VERTICAL) {
-								updateAxes(traces, lines, (AbstractDataset)axes.get(1), bounds.getPointY());
-							} else if (type == SWT.HORIZONTAL) {
-								updateAxes(traces, lines, (AbstractDataset)axes.get(0), bounds.getPointX());
-							}
-						} else { // if no axes we set them manually according to
-									// the data shape
-							int[] shapes = image.getData().getShape();
-							if (type == SWT.VERTICAL) {
-								int[] verticalAxis = new int[shapes[1]];
-								for (int i = 0; i < verticalAxis.length; i++) {
-									verticalAxis[i] = i;
-								}
-								AbstractDataset vertical = new IntegerDataset(verticalAxis, shapes[1]);
-								updateAxes(traces, lines, vertical, bounds.getPointY());
-							} else if (type == SWT.HORIZONTAL) {
-								int[] horizontalAxis = new int[shapes[0]];
-								for (int i = 0; i < horizontalAxis.length; i++) {
-									horizontalAxis[i] = i;
-								}
-								AbstractDataset horizontal = new IntegerDataset(horizontalAxis, shapes[0]);
-								updateAxes(traces, lines, horizontal, bounds.getPointX());
-							}
-						}
-						setTracesColor();
-						// clean traces if necessary
-						removeTraces();
-					}
-				});
-			}
+			updateAxes(image, traces, lines, bounds);
 		} else {
 			profilePlottingSystem.setSelectedXAxis(xPixelAxis);
 			profilePlottingSystem.setSelectedYAxis(yPixelAxis);
-			
 			Collection<ITrace> plotted = profilePlottingSystem.updatePlot1D(x_indices, Arrays.asList(new IDataset[] { line1 }), monitor);
 			registerTraces(region, plotted);
 			plotted = profilePlottingSystem.updatePlot1D(y_indices, Arrays.asList(new IDataset[] { line2 }), monitor);
 			registerTraces(region, plotted);
 			plotted = profilePlottingSystem.updatePlot1D(av_indices, Arrays.asList(new IDataset[] { line3 }), monitor);
+			registerTraces(region, plotted);
+			hideTraces();
 		}
-		setTracesColor();
-		removeTraces();
 	}
 
 	/**
 	 * Update the perimeter profiles if no average profile
-	 * @param profilePlottingSystem
 	 * @param image
 	 * @param bounds
 	 * @param region
@@ -315,55 +275,16 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 		traces.add(y_trace);
 
 		if (tryUpdate && x_trace != null && y_trace != null) {
-			Control control = getControl();
-			if (control != null && !control.isDisposed()) {
-				control.getDisplay().syncExec(new Runnable() {
-					@Override
-					public void run() {
-						List<IDataset> axes = image.getAxes();
-						if (axes != null && axes.size() > 0) {
-							if (type == SWT.VERTICAL) {
-								updateAxes(traces, lines, (AbstractDataset)axes.get(1), bounds.getPointY());
-							} else if (type == SWT.HORIZONTAL) {
-								updateAxes(traces, lines, (AbstractDataset)axes.get(0), bounds.getPointX());
-							}
-						} else { // if no axes we set them manually according to
-									// the data shape
-							int[] shapes = image.getData().getShape();
-							if (type == SWT.VERTICAL) {
-								int[] verticalAxis = new int[shapes[1]];
-								for (int i = 0; i < verticalAxis.length; i++) {
-									verticalAxis[i] = i;
-								}
-								AbstractDataset vertical = new IntegerDataset(verticalAxis, shapes[1]);
-								updateAxes(traces, lines, vertical, bounds.getPointY());
-							} else if (type == SWT.HORIZONTAL) {
-								int[] horizontalAxis = new int[shapes[0]];
-								for (int i = 0; i < horizontalAxis.length; i++) {
-									horizontalAxis[i] = i;
-								}
-								AbstractDataset horizontal = new IntegerDataset(horizontalAxis, shapes[0]);
-								updateAxes(traces, lines, horizontal, bounds.getPointX());
-							}
-						}
-						setTracesColor();
-						// clean traces if necessary
-						removeTraces();
-					}
-				});
-			}
-		}
-
-		else {
+			updateAxes(image, traces, lines, bounds);
+		} else {
 			profilePlottingSystem.setSelectedXAxis(xPixelAxis);
 			profilePlottingSystem.setSelectedYAxis(yPixelAxis);
 			Collection<ITrace> plotted = null;
 			plotted = profilePlottingSystem.updatePlot1D(x_indices, Arrays.asList(new IDataset[] { line1 }), monitor);
 			registerTraces(region, plotted);
 			plotted = profilePlottingSystem.updatePlot1D(y_indices, Arrays.asList(new IDataset[] { line2 }), monitor);
+			registerTraces(region, plotted);
 		}
-		setTracesColor();
-		removeTraces();
 	}
 
 	/**
@@ -400,74 +321,13 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 		traces.add(av_trace);
 
 		if (tryUpdate && av_trace != null) {
-			Control control = getControl();
-			if (control != null && !control.isDisposed()) {
-				control.getDisplay().syncExec(new Runnable() {
-					@Override
-					public void run() {
-						List<IDataset> axes = image.getAxes();
-						if (axes != null) {
-							if (type == SWT.VERTICAL) {
-								updateAxes(traces, lines, (AbstractDataset)axes.get(1), bounds.getPointY());
-							} else if (type == SWT.HORIZONTAL) {
-								updateAxes(traces, lines, (AbstractDataset)axes.get(0), bounds.getPointX());
-							}
-						} else { // if no axes we set them manually according to
-									// the data shape
-							int[] shapes = image.getData().getShape();
-							if (type == SWT.VERTICAL) {
-								int[] verticalAxis = new int[shapes[1]];
-								for (int i = 0; i < verticalAxis.length; i++) {
-									verticalAxis[i] = i;
-								}
-								AbstractDataset vertical = new IntegerDataset(verticalAxis, shapes[1]);
-								updateAxes(traces, lines, vertical, bounds.getPointY());
-							} else if (type == SWT.HORIZONTAL) {
-								int[] horizontalAxis = new int[shapes[0]];
-								for (int i = 0; i < horizontalAxis.length; i++) {
-									horizontalAxis[i] = i;
-								}
-								AbstractDataset horizontal = new IntegerDataset(horizontalAxis, shapes[0]);
-								updateAxes(traces, lines, horizontal, bounds.getPointX());
-							}
-						}
-						setTracesColor();
-						// clean traces if necessary
-						removeTraces();
-					}
-				});
-			}
+			updateAxes(image, traces, lines, bounds);
 		} else {
 			profilePlottingSystem.setSelectedXAxis(xPixelAxis);
 			profilePlottingSystem.setSelectedYAxis(yPixelAxis);
 			Collection<ITrace> plotted = profilePlottingSystem.updatePlot1D(av_indices, Arrays.asList(new IDataset[] { line3 }), monitor);
 			registerTraces(region, plotted);
 		}
-		setTracesColor();
-		removeTraces();
-	}
-
-	private void removeTraces(){
-		DisplayUtils.runInDisplayThread(true, getControl(), new Runnable() {
-			@Override
-			public void run() {
-				setTraceNames();
-				if(!isEdgePlotted){
-					x_trace = (ILineTrace)profilePlottingSystem.getTrace(traceName1);
-					y_trace = (ILineTrace)profilePlottingSystem.getTrace(traceName2);
-					if(x_trace != null && y_trace != null){
-						profilePlottingSystem.removeTrace(x_trace);
-						profilePlottingSystem.removeTrace(y_trace);
-					}
-				}
-				if(!isAveragePlotted){
-					av_trace = (ILineTrace)profilePlottingSystem.getTrace(traceName3);
-					if(av_trace != null){
-						profilePlottingSystem.removeTrace(av_trace);
-					}
-				}
-			}
-		});
 	}
 
 	/**
@@ -485,30 +345,38 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 		}
 	}
 
-	/**
-	 * Set the traces colour given the type of profile
-	 */
-	private void setTracesColor(){
-		DisplayUtils.runInDisplayThread(true, getControl(), new Runnable() {
+	private void updateAxes(final IImageTrace image, final List<ILineTrace> traces, final List<AbstractDataset> lines, final RectangularROI bounds){
+		DisplayUtils.runInDisplayThread(false, getControl(), new Runnable() {
 			@Override
 			public void run() {
-				setTraceNames();
-				x_trace = (ILineTrace)profilePlottingSystem.getTrace(traceName1);
-				y_trace = (ILineTrace)profilePlottingSystem.getTrace(traceName2);
-				if (type == SWT.VERTICAL) {
-					if(x_trace != null && y_trace != null){
-						x_trace.setTraceColor(ColorConstants.blue);
-						y_trace.setTraceColor(ColorConstants.red);
+				List<IDataset> axes = image.getAxes();
+				if (axes != null && axes.size() > 0) {
+					if (type == SWT.VERTICAL) {
+						updateAxes(traces, lines, (AbstractDataset)axes.get(1), bounds.getPointY());
+					} else if (type == SWT.HORIZONTAL) {
+						updateAxes(traces, lines, (AbstractDataset)axes.get(0), bounds.getPointX());
 					}
-				} else if (type == SWT.HORIZONTAL) {
-					if(x_trace != null && y_trace != null){
-						x_trace.setTraceColor(ColorConstants.darkGreen);
-						y_trace.setTraceColor(ColorConstants.orange);
+				} else { // if no axes we set them manually according to
+							// the data shape
+					int[] shapes = image.getData().getShape();
+					if (type == SWT.VERTICAL) {
+						int[] verticalAxis = new int[shapes[1]];
+						for (int i = 0; i < verticalAxis.length; i++) {
+							verticalAxis[i] = i;
+						}
+						AbstractDataset vertical = new IntegerDataset(verticalAxis, shapes[1]);
+						updateAxes(traces, lines, vertical, bounds.getPointY());
+					} else if (type == SWT.HORIZONTAL) {
+						int[] horizontalAxis = new int[shapes[0]];
+						for (int i = 0; i < horizontalAxis.length; i++) {
+							horizontalAxis[i] = i;
+						}
+						AbstractDataset horizontal = new IntegerDataset(horizontalAxis, shapes[0]);
+						updateAxes(traces, lines, horizontal, bounds.getPointX());
 					}
 				}
-				av_trace = (ILineTrace)profilePlottingSystem.getTrace(traceName3);
-				if(av_trace != null)
-					av_trace.setTraceColor(ColorConstants.cyan);
+				setTracesColor();
+				hideTraces();
 			}
 		});
 	}
@@ -556,6 +424,38 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 			e.printStackTrace();
 			logger.debug("An exception has occured:"+e);
 		}
+	}
+
+	/**
+	 * Set the traces colour given the type of profile
+	 */
+	private void setTracesColor(){
+		setTraceNames();
+		x_trace = (ILineTrace)profilePlottingSystem.getTrace(traceName1);
+		y_trace = (ILineTrace)profilePlottingSystem.getTrace(traceName2);
+		if (type == SWT.VERTICAL) {
+			if(x_trace != null && y_trace != null){
+				x_trace.setTraceColor(ColorConstants.blue);
+				y_trace.setTraceColor(ColorConstants.red);
+			}
+		} else if (type == SWT.HORIZONTAL) {
+			if(x_trace != null && y_trace != null){
+				x_trace.setTraceColor(ColorConstants.darkGreen);
+				y_trace.setTraceColor(ColorConstants.orange);
+			}
+		}
+		av_trace = (ILineTrace)profilePlottingSystem.getTrace(traceName3);
+		if(av_trace != null)
+			av_trace.setTraceColor(ColorConstants.cyan);
+	}
+
+	private void hideTraces(){
+		if(x_trace != null && y_trace != null){
+			x_trace.setVisible(isEdgePlotted);
+			y_trace.setVisible(isEdgePlotted);
+		} 
+		if(av_trace != null)
+			av_trace.setVisible(isAveragePlotted);
 	}
 
 	private void createXAxisBoxRegion(final AbstractPlottingSystem plottingSystem, 
