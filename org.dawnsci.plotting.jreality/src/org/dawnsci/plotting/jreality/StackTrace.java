@@ -32,14 +32,15 @@ public class StackTrace extends PlotterTrace implements ILineStackTrace {
 		return stack;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public void setData(List<IDataset> axes, IDataset... s) {
+	public void setData(List<? extends IDataset> axes, IDataset... s) {
 		if (axes!=null && axes.size()==2) {
 			axes = Arrays.asList(axes.get(0), axes.get(1), null);
 		}
 		
 		this.stack = getStack(s);
-		this.axes  = axes;
+		this.axes  = (List<IDataset>) axes;
 		
 		if (isActive()) {
 			plotter.updatePlot(createAxisValues(), null, PlottingMode.ONED_THREED, stack);

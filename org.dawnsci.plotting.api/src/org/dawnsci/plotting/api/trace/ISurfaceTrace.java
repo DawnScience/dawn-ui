@@ -22,7 +22,7 @@ public interface ISurfaceTrace extends IPaletteTrace, IWindowTrace {
 	 * @param axes
 	 * @throws Exception
 	 */
-	public void setData(final IDataset data, final List<IDataset> axes);
+	public void setData(final IDataset data, final List<? extends IDataset> axes);
 			
 	/**
 	 * 

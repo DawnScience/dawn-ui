@@ -188,7 +188,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	
 	
 	public List<ITrace> updatePlot1D(IDataset             x, 
-						             final List<IDataset> ys,
+						             final List<? extends IDataset> ys,
 						             final IProgressMonitor      monitor) {
 
 		final List<ITrace> updatedAndCreated = new ArrayList<ITrace>(3);		
@@ -229,7 +229,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	
 	@Override
 	public List<ITrace> createPlot1D(final IDataset       xIn, 
-					                 final List<IDataset> ysIn,
+					                 final List<? extends IDataset> ysIn,
 					                 final IProgressMonitor      monitor) {
         return this.createPlot1D(xIn, ysIn, null, monitor);
 	}
@@ -239,7 +239,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	 */
 	@Override
 	public List<ITrace> createPlot1D(final IDataset       xIn, 
-					                 final List<IDataset> ysIn,
+					                 final List<? extends IDataset> ysIn,
 					                 final String                title,
 					                 final IProgressMonitor      monitor) {
 		
@@ -323,7 +323,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	}
 	
 	public ITrace updatePlot2D(final IDataset       data, 
-							   final List<IDataset> axes,
+							   final List<? extends IDataset> axes,
 							   final IProgressMonitor      monitor) {
 		
 		if (plottingMode.is1D()) {
@@ -373,7 +373,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 
 	private ITrace updatePlot2DInternal(final ITrace image,
 			                          final IDataset       data, 
-								      final List<IDataset> axes,
+								      final List<? extends IDataset> axes,
 								      final IProgressMonitor      monitor) {
 		
 		if (data.getName()!=null) lightWeightViewer.setTitle(data.getName());
@@ -403,7 +403,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	 */
 	@Override
 	public ITrace createPlot2D(final IDataset       data, 
-							   final List<IDataset> axes,
+							   final List<? extends IDataset> axes,
 							   final IProgressMonitor      monitor) {
   
 		final List<ITrace> traces = new ArrayList<ITrace>(7);
@@ -425,7 +425,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	}
 
 	public ITrace createPlot2DInternal(final IDataset       data, 
-										List<IDataset>       axes,
+										List<? extends IDataset>       axes,
 										final IProgressMonitor      monitor) {
 		try {
 			if (plottingMode.is1D()) {
@@ -497,7 +497,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 
 
 	private List<ITrace> createPlot1DInternal(final IDataset       xIn, 
-										      final List<IDataset> ysIn,
+										      final List<? extends IDataset> ysIn,
 										      final String                title,
 										      final IProgressMonitor      monitor) {
 		
@@ -766,7 +766,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		return null;
 	}
 
-	private int getMaxSize(List<IDataset> sets) {
+	private int getMaxSize(List<? extends IDataset> sets) {
 		int max = 1; // Cannot be less than one
 		for (IDataset set : sets) {
 			if (set != null)

@@ -583,7 +583,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		if (xyGraph!=null) xyGraph.clearTraces();
 	}
 
-	protected ITrace createLightWeightImage(String traceName, IDataset data, List<IDataset> axes, IProgressMonitor monitor) {
+	protected ITrace createLightWeightImage(String traceName, IDataset data, List<? extends IDataset> axes, IProgressMonitor monitor) {
 		
 		final Axis xAxis = ((AspectAxis)system.getSelectedXAxis());
 		final Axis yAxis = ((AspectAxis)system.getSelectedYAxis());
@@ -631,7 +631,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 	 */
 	protected List<ITrace> createLineTraces(final String                title, 
 			                                    final IDataset       x, 
-			                                    final List<IDataset> ys,
+			                                    final List<? extends IDataset> ys,
 			                                    final Map<String,ITrace>    traceMap,
 			                                    final Map<Object, Color>    colorMap,
 			                                    final IProgressMonitor      monitor) {

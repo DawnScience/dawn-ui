@@ -79,7 +79,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	private AbstractDataset  image;
 	private DownsampleType   downsampleType=DownsampleType.MAXIMUM;
 	private int              currentDownSampleBin=-1;
-	private List<IDataset>  axes;
+	private List<IDataset>    axes;
 	private ImageServiceBean imageServiceBean;
 	private boolean          isMaximumZoom;
 	private AbstractPlottingSystem plottingSystem;
@@ -831,7 +831,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 
 	@Override
-	public boolean setData(IDataset image, List<IDataset> axes, boolean performAuto) {
+	public boolean setData(IDataset image, List<? extends IDataset> axes, boolean performAuto) {
 		
 		if (plottingSystem!=null) try {
 			if (plottingSystem.getTraces().contains(this)) {
@@ -880,9 +880,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		return true;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
-	public void setAxes(List<IDataset> axes, boolean performAuto) {
-		this.axes  = axes;
+	public void setAxes(List<? extends IDataset> axes, boolean performAuto) {
+		this.axes  = (List<IDataset>) axes;
 		createAxisBounds();
 		
 		if (performAuto) {
@@ -1039,10 +1040,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		repaint();
 	}
 	
-
 	@Override
 	public List<IDataset> getAxes() {
-		return axes;
+		return (List<IDataset>) axes;
 	}
 
 	/**

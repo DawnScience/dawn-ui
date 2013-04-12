@@ -120,14 +120,15 @@ public class SurfaceTrace extends PlotterTrace implements ISurfaceTrace{
 	}
 
 
-	public void setData(final IDataset data, List<IDataset> axes) {
+	@SuppressWarnings("unchecked")
+	public void setData(final IDataset data, List<? extends IDataset> axes) {
 		
 		if (axes!=null && axes.size()==2) {
 			axes = Arrays.asList(axes.get(0), axes.get(1), null);
 		}
 		
 		this.data = (AbstractDataset)data;
-		this.axes = axes;
+		this.axes = (List<IDataset>) axes;
 		if (isActive()) {
 			plotter.updatePlot(createAxisValues(), plotter.getWindow(getWindow()), PlottingMode.SURF2D, getData());
 			

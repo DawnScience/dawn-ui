@@ -130,7 +130,7 @@ public interface IPlottingSystem extends ITraceSystem, IRegionSystem, IAxisSyste
 	 *         will return a list of size 1 with the trace of type IStackTrace.
 	 */
 	public List<ITrace> createPlot1D(IDataset       x, 
-							         List<IDataset> ys,
+							         List<? extends IDataset> ys,
 							         IProgressMonitor      monitor);
 	/**
 	 * @see createPlot1D(AbstractDataset, List<AbstractDataset>, IProgressMonitor)
@@ -141,7 +141,7 @@ public interface IPlottingSystem extends ITraceSystem, IRegionSystem, IAxisSyste
 	 * @return
 	 */
 	public List<ITrace> createPlot1D(IDataset       x, 
-							         List<IDataset> ys,
+							         List<? extends IDataset> ys,
 							         String title,
 							         IProgressMonitor      monitor);
 
@@ -157,7 +157,7 @@ public interface IPlottingSystem extends ITraceSystem, IRegionSystem, IAxisSyste
 	 * @return
 	 */
 	public List<ITrace> updatePlot1D(IDataset       x, 
-							         List<IDataset> ys,
+							         List<? extends IDataset> ys,
 							         IProgressMonitor      monitor);
 
 	/**
@@ -180,7 +180,7 @@ public interface IPlottingSystem extends ITraceSystem, IRegionSystem, IAxisSyste
 	 *         use any image methods offered by these interface.
 	 */
 	public ITrace createPlot2D(IDataset       image, 
-							   List<IDataset> axes,
+							   List<? extends IDataset> axes,
 							   IProgressMonitor      monitor);
 	
 	
@@ -195,7 +195,7 @@ public interface IPlottingSystem extends ITraceSystem, IRegionSystem, IAxisSyste
 	 * @return
 	 */
 	public ITrace updatePlot2D(IDataset       image, 
-							   List<IDataset> axes,
+							   List<? extends IDataset> axes,
 							   IProgressMonitor      monitor);
 	
 	/**
