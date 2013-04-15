@@ -42,7 +42,7 @@ import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
 
 import uk.ac.diamond.scisoft.analysis.roi.CircularROI;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
 public class CircleSelection extends AbstractSelectionRegion {
 
@@ -143,7 +143,7 @@ public class CircleSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	protected ROIBase createROI(boolean recordResult) {
+	protected IROI createROI(boolean recordResult) {
 		final CircularROI croi = new CircularROI();
 		Point p = circle.getCentre();
 		croi.setPoint(coords.getPositionValue(p.x(), p.y()));
@@ -161,7 +161,7 @@ public class CircleSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	protected void updateROI(ROIBase roi) {
+	protected void updateROI(IROI roi) {
 		if (circle == null)
 			return;
 

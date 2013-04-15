@@ -41,10 +41,10 @@ import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.region.IROIListener;
 import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.region.IRegionListener;
 import org.dawnsci.plotting.api.region.ROIEvent;
 import org.dawnsci.plotting.api.region.RegionEvent;
-import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.dawnsci.plotting.api.trace.ILineStackTrace;
@@ -56,7 +56,6 @@ import org.dawnsci.plotting.api.trace.ITraceListener;
 import org.dawnsci.plotting.api.trace.IWindowTrace;
 import org.dawnsci.plotting.api.trace.PaletteEvent;
 import org.dawnsci.plotting.api.trace.TraceEvent;
-import org.dawnsci.plotting.api.trace.IPaletteListener.Stub;
 import org.dawnsci.plotting.jreality.SurfaceTrace;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -81,8 +80,8 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 import uk.ac.gda.richbeans.components.scalebox.IntegerBox;
 import uk.ac.gda.richbeans.components.scalebox.NumberBox;
@@ -144,7 +143,7 @@ public class WindowTool extends AbstractToolPage {
 			
 			this.roiListener = new IROIListener.Stub() {
 				public void update(ROIEvent evt) {
-					windowJob.schedule((ROIBase)evt.getROI());
+					windowJob.schedule(evt.getROI());
 				}
 			};
 			
@@ -451,7 +450,7 @@ public class WindowTool extends AbstractToolPage {
 	
 	private class WindowJob extends Job {
 
-		private ROIBase window;
+		private IROI window;
 
 		public WindowJob() {
 			super("Window");
@@ -460,7 +459,7 @@ public class WindowTool extends AbstractToolPage {
 			setSystem(true);
 		}
 		
-		protected void schedule(ROIBase window) {
+		protected void schedule(IROI window) {
 			cancel();
 			this.window = window;
 			schedule();

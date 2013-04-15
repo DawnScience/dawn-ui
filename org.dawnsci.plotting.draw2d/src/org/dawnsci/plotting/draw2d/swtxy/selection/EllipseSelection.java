@@ -43,7 +43,7 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.widgets.Display;
 
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
 class EllipseSelection extends AbstractSelectionRegion {
 
@@ -138,7 +138,7 @@ class EllipseSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	protected ROIBase createROI(boolean recordResult) {
+	protected IROI createROI(boolean recordResult) {
 		final EllipticalROI eroi = new EllipticalROI();
 		Point p = ellipse.getCentre();
 		eroi.setPoint(coords.getPositionValue(p.x(), p.y()));
@@ -159,7 +159,7 @@ class EllipseSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	protected void updateROI(ROIBase roi) {
+	protected void updateROI(IROI roi) {
 		if (ellipse == null)
 			return;
 

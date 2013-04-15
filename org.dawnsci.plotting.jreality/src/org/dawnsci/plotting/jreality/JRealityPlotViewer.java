@@ -74,8 +74,8 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.Camera;
@@ -286,7 +286,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	
 	//////////////////////////////////////////////////////////////////////////////////////////
 	
-	protected SurfacePlotROI getWindow(ROIBase roi) {
+	protected SurfacePlotROI getWindow(IROI roi) {
 		if (roi==null) return null;
 		SurfacePlotROI surfRoi = null;
 		if (roi instanceof SurfacePlotROI) {
@@ -302,7 +302,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		return surfRoi;
 	}
 	
-	protected void setSurfaceWindow(ROIBase window) {
+	protected void setSurfaceWindow(IROI window) {
 		if (currentMode == PlottingMode.SURF2D) {
 			final SurfacePlotROI surfRoi = getWindow(window);
 			((DataSet3DPlot3D) plotter).setDataWindow(surfRoi);
@@ -310,7 +310,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		}
 	}
 
-	public void setStackWindow(ROIBase window) {
+	public void setStackWindow(IROI window) {
 		if (currentMode == PlottingMode.ONED_THREED) {
 			final StackTrace stack = (StackTrace)currentTrace;
 			try {
@@ -333,7 +333,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	 * @return true if something plotted
 	 */
 	protected final boolean updatePlot(final List<AxisValues>    axes, 
-						               final ROIBase             window,
+						               final IROI             window,
 						               final PlottingMode        mode,
 						               final AbstractDataset...  data) {
 		try {
@@ -355,7 +355,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	 * @return true if something plotted
 	 */
 	private final boolean plot(final List<AxisValues>    axes, 
-			                   final ROIBase             window,
+			                   final IROI             window,
 			                   final PlottingMode        mode,
 			                   final IDataset...         rawData) {
 

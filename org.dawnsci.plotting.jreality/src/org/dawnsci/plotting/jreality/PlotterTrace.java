@@ -9,7 +9,7 @@ import org.dawnsci.plotting.api.trace.TraceEvent;
 import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
 class PlotterTrace {
 	
@@ -19,7 +19,7 @@ class PlotterTrace {
 	protected JRealityPlotViewer     plotter;
 	protected boolean                active;
 	protected AbstractPlottingSystem plottingSystem;
-	protected ROIBase                window;
+	protected IROI                   window;
 
 	public void dispose() {
 		if (axes!=null) axes.clear();
@@ -129,7 +129,7 @@ class PlotterTrace {
 		this.plottingSystem = plottingSystem;
 	}
 
-    public ROIBase getWindow() {
+    public IROI getWindow() {
 		return window;
 	}
 

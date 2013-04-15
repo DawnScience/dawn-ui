@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 public class ZoomTool extends ProfileTool {
@@ -49,7 +49,7 @@ public class ZoomTool extends ProfileTool {
 	@Override
 	protected void createProfile(final IImageTrace  image, 
 			                     IRegion      region,
-			                     ROIBase      rbs, 
+			                     IROI      rbs, 
 			                     boolean      tryUpdate, 
 			                     boolean      isDrag,
 			                     IProgressMonitor monitor) {

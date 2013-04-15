@@ -16,8 +16,8 @@ import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
 
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
 /**                 startBox2 (if isCrossHair()) 
  *                      |
@@ -122,7 +122,6 @@ class LineSelection extends AbstractSelectionRegion {
 			}
 		};
 
-
 		connection.setCursor(Draw2DUtils.getRoiMoveCursor());
 		connection.setForegroundColor(getRegionColor());
 		connection.setBounds(getConnectionBounds()); 
@@ -140,17 +139,17 @@ class LineSelection extends AbstractSelectionRegion {
 		mover.addTranslationListener(createRegionNotifier());
 		setRegionObjects(connection, startBox, endBox);
 		sync(getBean());
-        updateROI();
-        if (roi == null) createROI(true);
+		updateROI();
+		if (roi == null)
+			createROI(true);
 	}
-	
+
 	@Override
 	public boolean containsPoint(double x, double y) {
 		
 		final int[] pix = coords.getValuePosition(new double[]{x,y});
 		return connection.containsPoint(pix[0], pix[1]);
 	}
-
 
 	@Override
 	public void paintBeforeAdded(final Graphics gc, PointList clicks, Rectangle parentBounds) {
@@ -168,16 +167,16 @@ class LineSelection extends AbstractSelectionRegion {
 	}
 
 	protected FigureListener createFigureListener() {
-		return new FigureListener() {		
+		return new FigureListener() {
 			@Override
-			public void figureMoved(IFigure source) {				
+			public void figureMoved(IFigure source) {
 				connection.repaint();
- 			}
+			}
 		};
 	}
 
 	@Override
-	public ROIBase createROI(boolean recordResult) {
+	public IROI createROI(boolean recordResult) {
 		if (startBox != null) {
 			final double[] p1 = startBox.getPosition();
 			final double[] p2 = endBox.getPosition();
@@ -194,7 +193,7 @@ class LineSelection extends AbstractSelectionRegion {
 	}
 	
 	@Override
-	protected void updateROI(ROIBase roi) {
+	protected void updateROI(IROI roi) {
 		if (roi instanceof LinearROI) {
 			LinearROI lroi = (LinearROI) roi;
 			if (startBox != null)
@@ -279,7 +278,7 @@ class LineSelection extends AbstractSelectionRegion {
 
 			bounds  = new Rectangle(new Point(startx, starty), new Point(endx, endy));
 		}
-			
+
 		// Union with the label bounds
 		Point pos1 = startBox.getSelectionPoint();
 		Point pos2 = new Point(pos1.x + labeldim.width + 10, pos1.y + labeldim.height + 10);

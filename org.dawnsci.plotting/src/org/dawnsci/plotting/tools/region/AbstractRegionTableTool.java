@@ -54,8 +54,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 /**
@@ -66,7 +66,7 @@ import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
  */
 public abstract class AbstractRegionTableTool extends AbstractToolPage implements IRegionListener, IROIListener {
 
-	protected ROIBase roi;
+	protected IROI roi;
 
 	public class RegionColorListener implements ISelectionChangedListener {
 
@@ -109,11 +109,11 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 	 * A map to store dragBounds which are not the official bounds
 	 * of the selection until the user lets go.
 	 */
-	private Map<String,ROIBase> dragBounds;
+	private Map<String,IROI> dragBounds;
 
 	public AbstractRegionTableTool() {
 		super();
-		dragBounds = new HashMap<String,ROIBase>(7);
+		dragBounds = new HashMap<String,IROI>(7);
 	}
 
 	@Override
@@ -208,7 +208,7 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 				if (sel!=null && sel.getFirstElement()!=null) {
 					final IRegion region = (IRegion)sel.getFirstElement();
 					if (region==null||region.getROI()==null) return;
-					final ROIBase bounds = (ROIBase)region.getROI();
+					final IROI bounds = region.getROI();
 					if (bounds.getPointRef()==null) return;
 					
 					final Clipboard cb = new Clipboard(composite.getDisplay());
@@ -463,7 +463,7 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 				if(monitor.isCanceled())	return Status.CANCEL_STATUS;
 
 				IRegion  region = (IRegion)evt.getSource();
-				ROIBase rb = (ROIBase)evt.getROI();
+				IROI rb = evt.getROI();
 				
 				if(monitor.isCanceled())	return Status.CANCEL_STATUS;
 				dragBounds.put(region.getName(), rb);
@@ -479,9 +479,9 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 		}
 	};
 
-	public ROIBase getROI(IRegion region) {
+	public IROI getROI(IRegion region) {
 		if (dragBounds!=null&&dragBounds.containsKey(region.getName())) return dragBounds.get(region.getName());
-		return (ROIBase)region.getROI();
+		return region.getROI();
 	}
 
 	/**
@@ -492,7 +492,7 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 	public double getMaxIntensity(IRegion region) {
 
         final Collection<ITrace> traces = getPlottingSystem().getTraces();
-        final ROIBase bounds = getROI(region);
+        final IROI bounds = getROI(region);
         if (bounds==null) return Double.NaN;
         
         if (traces!=null&&traces.size()==1&&traces.iterator().next() instanceof IImageTrace) {
@@ -537,7 +537,7 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 		
 		if (traces!=null&&traces.size()==1&&traces.iterator().next() instanceof IImageTrace) {
 			final IImageTrace     trace        = (IImageTrace)traces.iterator().next();
-			ROIBase roi = (ROIBase)region.getROI();
+			IROI roi = region.getROI();
 			AbstractDataset dataRegion =  (AbstractDataset)trace.getData();
 			try {
 				if(roi instanceof RectangularROI){

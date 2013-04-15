@@ -40,11 +40,11 @@ import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.region.IROIListener;
 import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.region.IRegionListener;
 import org.dawnsci.plotting.api.region.ROIEvent;
 import org.dawnsci.plotting.api.region.RegionEvent;
 import org.dawnsci.plotting.api.region.RegionUtils;
-import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.dawnsci.plotting.api.trace.ITraceListener;
 import org.dawnsci.plotting.api.trace.TraceEvent;
@@ -75,7 +75,7 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalFitROI;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
 public class EllipseFittingTool extends AbstractToolPage {
 	private final static Logger logger = LoggerFactory.getLogger(EllipseFittingTool.class);
@@ -357,7 +357,7 @@ public class EllipseFittingTool extends AbstractToolPage {
 		@Override
 		public String getText(Object element) {
 
-			ROIBase rb = (ROIBase)((IRegion) element).getROI();
+			IROI rb = ((IRegion) element).getROI();
 
 			if (!(rb instanceof EllipticalROI)) {
 				return null;

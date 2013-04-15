@@ -49,7 +49,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 /**
@@ -419,7 +419,7 @@ public class RegionSumTool extends AbstractToolPage implements IROIListener {
 	 */
 	public void createProfile(final IImageTrace image, 
 			                              IRegion region, 
-			                              ROIBase roi, 
+			                              IROI roi, 
 			                              boolean tryUpdate, 
 			                              boolean isDrag,
 			                              IProgressMonitor monitor){

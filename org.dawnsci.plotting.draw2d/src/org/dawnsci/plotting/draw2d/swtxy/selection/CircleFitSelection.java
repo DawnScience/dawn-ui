@@ -52,9 +52,9 @@ import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.fitting.CircleFitter;
 import uk.ac.diamond.scisoft.analysis.roi.CircularFitROI;
 import uk.ac.diamond.scisoft.analysis.roi.CircularROI;
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.PointROI;
 import uk.ac.diamond.scisoft.analysis.roi.PolylineROI;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
 public class CircleFitSelection extends AbstractSelectionRegion {
 	private final static Logger logger = LoggerFactory.getLogger(CircleFitSelection.class);
@@ -192,7 +192,7 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	protected ROIBase createROI(boolean recordResult) {
+	protected IROI createROI(boolean recordResult) {
 		final PointList pl = circle.getPoints();
 		if (pl == null) {
 			return null;
@@ -226,7 +226,7 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	protected void updateROI(ROIBase roi) {
+	protected void updateROI(IROI roi) {
 		if (circle == null)
 			return;
 

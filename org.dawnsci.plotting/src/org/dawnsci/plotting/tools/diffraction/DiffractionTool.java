@@ -107,8 +107,8 @@ import uk.ac.diamond.scisoft.analysis.roi.CircularFitROI;
 import uk.ac.diamond.scisoft.analysis.roi.CircularROI;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalFitROI;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.PolylineROI;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 
 
@@ -688,7 +688,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 						Job job = new Job("Circle fit refinement") {
 							@Override
 							protected IStatus run(final IProgressMonitor monitor) {
-								return runEllipseFit(monitor, display, plotter, t, (ROIBase)tmpRegion.getROI(), true);
+								return runEllipseFit(monitor, display, plotter, t, tmpRegion.getROI(), true);
 							}
 						};
 						job.setPriority(Job.SHORT);
@@ -756,7 +756,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 						Job job = new Job("Ellipse rings finding") {
 							@Override
 							protected IStatus run(final IProgressMonitor monitor) {
-								ROIBase roi = (ROIBase)tmpRegion.getROI();
+								IROI roi = tmpRegion.getROI();
 								IStatus stat = runEllipseFit(monitor, display, plotter, t, roi, false);
 								if (stat.isOK()) {
 									stat = runFindOuterRings(monitor, display, plotter, t, roi);
@@ -938,7 +938,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		}
 	}
 
-	private IStatus runEllipseFit(final IProgressMonitor monitor, Display display, final IPlottingSystem plotter, IImageTrace t, ROIBase roi, final boolean forceCircle) {
+	private IStatus runEllipseFit(final IProgressMonitor monitor, Display display, final IPlottingSystem plotter, IImageTrace t, IROI roi, final boolean forceCircle) {
 		if (roi == null)
 			return Status.CANCEL_STATUS;
 
@@ -968,7 +968,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			npts = efroi.getPoints().getNumberOfPoints(); 
 		} while (lpts > npts);
 
-		final ROIBase froi = circle ? new CircularFitROI(efroi.getPoints()) : efroi;
+		final IROI froi = circle ? new CircularFitROI(efroi.getPoints()) : efroi;
 		monitor.worked(1);
 		logger.debug("{} from peaks: {}", shape, froi);
 
@@ -998,7 +998,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		return status[0] ? Status.OK_STATUS : Status.CANCEL_STATUS;
 	}
 
-	private IStatus runFindOuterRings(final IProgressMonitor monitor, Display display, final IPlottingSystem plotter, IImageTrace t, ROIBase roi) {
+	private IStatus runFindOuterRings(final IProgressMonitor monitor, Display display, final IPlottingSystem plotter, IImageTrace t, IROI roi) {
 		final ProgressMonitorWrapper mon = new ProgressMonitorWrapper(monitor);
 		monitor.beginTask("Find elliptical rings", IProgressMonitor.UNKNOWN);
 		monitor.subTask("Find rings");
@@ -1120,7 +1120,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		roiListener = new IROIListener.Stub() {
 			@Override
 			public void update(ROIEvent evt) {
-				ROIBase r = (ROIBase)evt.getROI();
+				IROI r = evt.getROI();
 				if (r instanceof CircularFitROI || (r instanceof EllipticalFitROI && ((EllipticalFitROI) r).isCircular())) {
 					double[] point = r.getPointRef();
 //					logger.debug("ROI moved here X: {} Y : {}", point[0], point[1]);

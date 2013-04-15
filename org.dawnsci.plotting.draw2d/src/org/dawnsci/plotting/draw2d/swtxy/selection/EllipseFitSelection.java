@@ -45,9 +45,9 @@ import uk.ac.diamond.scisoft.analysis.fitting.CircleFitter;
 import uk.ac.diamond.scisoft.analysis.fitting.EllipseFitter;
 import uk.ac.diamond.scisoft.analysis.fitting.IConicSectionFitter;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalFitROI;
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.PointROI;
 import uk.ac.diamond.scisoft.analysis.roi.PolylineROI;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
 public class EllipseFitSelection extends AbstractSelectionRegion {
 	private final static Logger logger = LoggerFactory.getLogger(EllipseFitSelection.class);
@@ -206,7 +206,7 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	protected ROIBase createROI(boolean recordResult) {
+	protected IROI createROI(boolean recordResult) {
 		final PointList pl = ellipse.getPoints();
 		if (pl == null) {
 			return null;
@@ -235,7 +235,7 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	protected void updateROI(ROIBase roi) {
+	protected void updateROI(IROI roi) {
 		if (ellipse == null)
 			return;
 

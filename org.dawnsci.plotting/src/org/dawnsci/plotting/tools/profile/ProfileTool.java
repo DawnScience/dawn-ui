@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
 public abstract class ProfileTool extends AbstractToolPage  implements IROIListener, IDataReductionToolPage {
 
@@ -347,23 +347,23 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 	 */
 	protected abstract void createProfile(IImageTrace image, 
 			                              IRegion region, 
-			                              ROIBase roi, 
+			                              IROI roi, 
 			                              boolean tryUpdate, 
 			                              boolean isDrag,
 			                              IProgressMonitor monitor);
 
 	@Override
 	public void roiDragged(ROIEvent evt) {
-		update((IRegion)evt.getSource(), (ROIBase)evt.getROI(), true);
+		update((IRegion)evt.getSource(), evt.getROI(), true);
 	}
 
 	@Override
 	public void roiChanged(ROIEvent evt) {
 		final IRegion region = (IRegion)evt.getSource();
-		update(region, (ROIBase)region.getROI(), false);
+		update(region, region.getROI(), false);
 	}
 	
-	protected synchronized void update(IRegion r, ROIBase rb, boolean isDrag) {
+	protected synchronized void update(IRegion r, IROI rb, boolean isDrag) {
 		if (!isActive()) return;
 		
 		if (r!=null) {
@@ -381,7 +381,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 	private final class ProfileJob extends Job {
 		
 		private   IRegion                currentRegion;
-		private   ROIBase                currentROI;
+		private   IROI                currentROI;
 		private   boolean                isDrag;
 
 		ProfileJob() {
@@ -391,7 +391,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 			setPriority(Job.INTERACTIVE);
 		}
 
-		public void profile(IRegion r, ROIBase rb, boolean isDrag) {
+		public void profile(IRegion r, IROI rb, boolean isDrag) {
 
 	        // This in principle is not needed and appears to make no difference wether in or out.
 		    // However Irakli has advised that it is needed in some circumstances.
@@ -432,9 +432,9 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 							if (!iRegion.isUserRegion()) continue;
 							if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
 							if (registeredTraces.containsKey(iRegion.getName())) {
-								createProfile(image, iRegion, (ROIBase)iRegion.getROI(), true, isDrag, monitor);
+								createProfile(image, iRegion, iRegion.getROI(), true, isDrag, monitor);
 							} else {
-								createProfile(image, iRegion, (ROIBase)iRegion.getROI(), false, isDrag, monitor);
+								createProfile(image, iRegion, iRegion.getROI(), false, isDrag, monitor);
 							}
 						}
 					} else {
@@ -446,7 +446,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 					if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
 					createProfile(image, 
 							      currentRegion, 
-							      currentROI!=null?currentROI:(ROIBase)currentRegion.getROI(), 
+							      currentROI!=null?currentROI:currentRegion.getROI(), 
 								  true, 
 								  isDrag,
 								  monitor);

@@ -14,8 +14,8 @@ import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.roi.ResolutionRing;
 import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.api.region.IRegion;
-import org.dawnsci.plotting.api.region.RegionUtils;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.dawnsci.plotting.api.region.RegionUtils;
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.action.Action;
@@ -39,8 +39,8 @@ import uk.ac.diamond.scisoft.analysis.diffraction.IDetectorPropertyListener;
 import uk.ac.diamond.scisoft.analysis.diffraction.IDiffractionCrystalEnvironmentListener;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.sda.meta.page.DiffractionMetadataCompositeEvent;
 import uk.ac.diamond.sda.meta.page.IDiffractionMetadataCompositeListener;
 
@@ -369,7 +369,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		if (!active) return; // We are likely off screen.
 		if (detprop != null && diffenv != null) {
 			double[] beamCentre = detprop.getBeamCentreCoords(); // detConfig.pixelCoords(detConfig.getBeamPosition());
-			ROIBase roi  = DSpacing.conicFromDSpacing(detprop, diffenv, ring.getResolution());
+			IROI roi  = DSpacing.conicFromDSpacing(detprop, diffenv, ring.getResolution());
 			if (roi instanceof EllipticalROI) {
 				DecimalFormat df = new DecimalFormat("#.00");
 				drawEllipse(reused, beamCentre, (EllipticalROI) roi, ring.getColour(), ring.getColour(), name,

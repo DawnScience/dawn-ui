@@ -65,8 +65,8 @@ import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.PointROI;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
 public abstract class InfoPixelTool extends AbstractToolPage implements IROIListener, IRegionListener, MouseListener {
 
@@ -79,7 +79,7 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 	private Composite     composite;
 	private TableViewer   viewer;
 	private RegionColorListener viewUpdateListener;
-	private Map<String,ROIBase> dragBounds;
+	private Map<String,IROI> dragBounds;
 	public int xValues [] = new int[1];	
 	public int yValues [] = new int[1];
 
@@ -97,7 +97,7 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 
 			
 	public InfoPixelTool() {
-		dragBounds = new HashMap<String,ROIBase>(7);
+		dragBounds = new HashMap<String,IROI>(7);
 		
 		try {
 			
@@ -371,7 +371,7 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 				if (sel!=null && sel.getFirstElement()!=null) {
 					final IRegion region = (IRegion)sel.getFirstElement();
 					if (region==null||region.getROI()==null) return;
-					final ROIBase bounds = (ROIBase)region.getROI();
+					final IROI bounds = region.getROI();
 					if (bounds.getPointRef()==null) return;
 
 					final Clipboard cb = new Clipboard(composite.getDisplay());
@@ -451,9 +451,9 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 	protected abstract void createColumns(final TableViewer viewer);
 	
 	
-	public ROIBase getBounds(IRegion region) {
+	public IROI getBounds(IRegion region) {
 		if (dragBounds!=null&&dragBounds.containsKey(region.getName())) return dragBounds.get(region.getName());
-		return (ROIBase)region.getROI();
+		return region.getROI();
 	}
 	
 	private void updateRegion(ROIEvent evt) {
@@ -470,7 +470,7 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 				this.yValues[0] = (int)Math.round(evt.getROI().getPointY());
 			  }
 							    
-				ROIBase rb = (ROIBase)evt.getROI();
+			    IROI rb = evt.getROI();
 							
 				dragBounds.put(region.getName(), rb);
 				//viewer.refresh(region);
@@ -523,7 +523,7 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 
 			if (region.getRegionType() == RegionType.POINT) {
 				// update table for current point region
-				ROIBase rb = (ROIBase)evt.getROI();
+				IROI rb = evt.getROI();
 				
 				dragBounds.put(region.getName(), rb);
 				viewer.refresh(region);

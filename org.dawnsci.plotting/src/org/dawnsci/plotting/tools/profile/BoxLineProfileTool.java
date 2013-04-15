@@ -44,7 +44,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Slice;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIProfile;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
@@ -134,7 +134,7 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 
 	@Override
 	protected void createProfile(IImageTrace image, IRegion region,
-			ROIBase rbs, boolean tryUpdate, boolean isDrag,
+			IROI rbs, boolean tryUpdate, boolean isDrag,
 			IProgressMonitor monitor) {
 		if (monitor.isCanceled()) return;
 		if (image==null) return;
@@ -459,7 +459,7 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 	}
 
 	private void createXAxisBoxRegion(final AbstractPlottingSystem plottingSystem, 
-			final ROIBase roi, final String roiName){
+			final IROI roi, final String roiName){
 		try {
 			if(roi instanceof RectangularROI){
 				RectangularROI rroi = (RectangularROI)roi;
