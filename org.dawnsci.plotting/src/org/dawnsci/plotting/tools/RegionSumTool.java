@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FontDialog;
+import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.IPageSite;
@@ -278,6 +279,10 @@ public class RegionSumTool extends AbstractToolPage implements IROIListener {
 						roiSumProfile.setTitle("Region_Sum_View");
 						roiSumProfile.setToolId(String.valueOf(roiSumProfile.hashCode()));
 						RegionSumView viewPart = (RegionSumView)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView("uk.ac.diamond.scisoft.arpes.regionSumView");
+						// Check that the controls have not already been created
+						Control[] children = viewPart.getComposite().getChildren();
+						for (Control control : children)
+							if(control instanceof ToolBar || control instanceof FontExtenderWidget) return;
 						roiSumProfile.createControl(viewPart.getComposite());
 						roiSumProfile.activate();
 						// update the sum profile
