@@ -450,7 +450,7 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 	}
 
 	private void hideTraces(){
-		DisplayUtils.runInDisplayThread(true, getControl(), new Runnable(){
+		Display.getDefault().asyncExec(new Runnable(){
 			@Override
 			public void run() {
 				if(x_trace != null && y_trace != null){
