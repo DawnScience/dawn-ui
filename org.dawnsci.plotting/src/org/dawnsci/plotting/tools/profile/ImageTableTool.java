@@ -4,23 +4,22 @@ import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.List;
 
-import org.dawb.common.ui.plot.region.IROIListener;
-import org.dawb.common.ui.plot.region.IRegion;
-import org.dawb.common.ui.plot.region.IRegion.RegionType;
-import org.dawb.common.ui.plot.region.IRegionListener;
-import org.dawb.common.ui.plot.region.ROIEvent;
-import org.dawb.common.ui.plot.region.RegionEvent;
-import org.dawb.common.ui.plot.region.RegionUtils;
-import org.dawb.common.ui.plot.tool.AbstractToolPage;
-import org.dawb.common.ui.plot.trace.IImageTrace;
-import org.dawb.common.ui.plot.trace.IPaletteListener;
-import org.dawb.common.ui.plot.trace.ITrace;
-import org.dawb.common.ui.plot.trace.ITraceListener;
-import org.dawb.common.ui.plot.trace.PaletteEvent;
-import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.util.GridUtils;
-import org.dawb.common.ui.views.ImageItem;
+import org.dawnsci.plotting.api.region.IROIListener;
+import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.dawnsci.plotting.api.region.IRegionListener;
+import org.dawnsci.plotting.api.region.ROIEvent;
+import org.dawnsci.plotting.api.region.RegionEvent;
+import org.dawnsci.plotting.api.region.RegionUtils;
+import org.dawnsci.plotting.api.tool.AbstractToolPage;
+import org.dawnsci.plotting.api.trace.IImageTrace;
+import org.dawnsci.plotting.api.trace.IPaletteListener;
+import org.dawnsci.plotting.api.trace.ITrace;
+import org.dawnsci.plotting.api.trace.ITraceListener;
+import org.dawnsci.plotting.api.trace.PaletteEvent;
+import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -30,7 +29,6 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.nebula.widgets.gallery.GalleryItem;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -51,7 +49,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 public class ImageTableTool extends AbstractToolPage  implements IROIListener {
@@ -247,7 +245,7 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 	 */
 	protected void createProfile(IImageTrace image, 
 								IRegion region, 
-								ROIBase rbs, 
+								IROI    rbs, 
 								boolean tryUpdate, 
 								boolean isDrag,
 								IProgressMonitor monitor) {
@@ -268,7 +266,7 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 		final int xInc = bounds.getPoint()[0]<bounds.getEndPoint()[0] ? 1 : -1;
 		
 		try {
-			final AbstractDataset slice = image.getData().getSlice(new int[] { (int) bounds.getPoint()[1],    (int) bounds.getPoint()[0] },
+			final AbstractDataset slice = ((AbstractDataset)image.getData()).getSlice(new int[] { (int) bounds.getPoint()[1],    (int) bounds.getPoint()[0] },
 					                                               new int[] { (int) bounds.getEndPoint()[1], (int) bounds.getEndPoint()[0] },
 					                                               new int[] {yInc, xInc});
 		
@@ -374,7 +372,7 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 		// TODO Auto-generated method stub
 
 	}	
-	protected synchronized void update(IRegion r, ROIBase rb, boolean isDrag) {
+	protected synchronized void update(IRegion r, IROI rb, boolean isDrag) {
 	
 		if (r!=null && !isRegionTypeSupported(r.getRegionType())) return; // Nothing to do.
          
@@ -384,7 +382,7 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 	private final class ProfileTableJob extends Job {
 		
 		private   IRegion                currentRegion;
-		private   ROIBase                currentROI;
+		private   IROI                   currentROI;
 		private   boolean                isDrag;
 
 		ProfileTableJob() {
@@ -394,7 +392,7 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 			setPriority(Job.INTERACTIVE);
 		}
 
-		public void profile(IRegion r, ROIBase rb, boolean isDrag) {
+		public void profile(IRegion r, IROI rb, boolean isDrag) {
 
 	        // This in principle is not needed and appears to make no difference wether in or out.
 		    // However Irakli has advised that it is needed in some circumstances.
@@ -482,6 +480,6 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 			}
 		}
 		
-		return getImageTrace().getData().getMetadata();
+		return ((AbstractDataset)getImageTrace().getData()).getMetadata();
 	}
 }

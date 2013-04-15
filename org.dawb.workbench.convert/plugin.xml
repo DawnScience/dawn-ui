@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            defaultHandler="org.edna.workbench.actions.ConvertWizardHandler"
+            id="org.edna.workbench.actions.csvConvertCommand"
+            name="Convert">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="toolbar:org.eclipse.ui.navigator.ProjectExplorer?after=additions">
+         <command
+               commandId="org.edna.workbench.actions.csvConvertCommand"
+               icon="icons/page_white_excel.png"
+               label="Convert..."
+               style="push"
+               tooltip="Convert data to other formats">
+            <visibleWhen
+                  checkEnabled="true">
+            </visibleWhen>
+         </command>
+      </menuContribution>
+      <menuContribution
+            locationURI="menu:org.eclipse.ui.navigator.ProjectExplorer?after=additions">
+         <command
+               commandId="org.edna.workbench.actions.csvConvertCommand"
+               icon="icons/page_white_excel.png"
+               label="Convert..."
+               style="push"
+               tooltip="Convert data to other formats">
+            <visibleWhen
+                  checkEnabled="true">
+            </visibleWhen>
+         </command>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            adaptable="true"
+            id="org.edna.workbench.actions.convertContribution"
+            objectClass="org.eclipse.core.resources.IFile">
+         <menu
+               icon="icons/page_white_excel.png"
+               id="org.edna.workbench.actions.convertMenu"
+               label="Convert"
+               path="additions">
+         </menu>
+         <action
+               class="org.edna.workbench.actions.ConvertWizardHandler"
+               enablesFor="+"
+               icon="icons/page_white_world.png"
+               id="org.edna.workbench.actions.convertCSV"
+               label="Open Wizard..."
+               menubarPath="org.edna.workbench.actions.convertMenu/convert"
+               tooltip="Convert to csv file in the same project location">
+         </action>
+         
+      </objectContribution>
+   </extension>
+
+</plugin>

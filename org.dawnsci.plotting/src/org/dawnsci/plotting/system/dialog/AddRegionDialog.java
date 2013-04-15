@@ -1,6 +1,6 @@
 package org.dawnsci.plotting.system.dialog;
 
-import org.dawb.common.ui.plot.region.IRegion.RegionType;
+import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.eclipse.jface.dialogs.Dialog;

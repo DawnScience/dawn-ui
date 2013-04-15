@@ -7,10 +7,10 @@ import javax.vecmath.Vector3d;
 import org.dawb.common.services.ILoaderService;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
-import org.dawb.common.ui.plot.region.IRegion;
-import org.dawb.common.ui.plot.trace.IImageTrace;
 import org.dawb.gda.extensions.loaders.H5Utils;
 import org.dawnsci.plotting.Activator;
+import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -390,7 +390,7 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 			if (!region.isUserRegion()) continue;
 			
 			final SectorROI sroi = (SectorROI)region.getROI();
-			AbstractDataset[] profile = ROIProfile.sector(slice.getData(), image.getMask(), sroi, true, false, false);
+			AbstractDataset[] profile = ROIProfile.sector(slice.getData(), (AbstractDataset)image.getMask(), sroi, true, false, false);
 		
 			AbstractDataset integral = profile[0];
 			integral.setName("radial_"+region.getName().replace(' ', '_'));     

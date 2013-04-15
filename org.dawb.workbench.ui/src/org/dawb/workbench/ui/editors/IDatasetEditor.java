@@ -12,8 +12,8 @@ package org.dawb.workbench.ui.editors;
 import java.util.Map;
 
 import org.dawb.common.services.IVariableManager;
-import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.slicing.ISlicablePlottingPart;
+import org.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 

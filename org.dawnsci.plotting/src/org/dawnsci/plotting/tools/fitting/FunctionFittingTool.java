@@ -5,25 +5,23 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.dawb.common.ui.plot.IPlottingSystem;
 import org.dawb.common.ui.plot.function.FunctionDialog;
-import org.dawb.common.ui.plot.region.IROIListener;
-import org.dawb.common.ui.plot.region.IRegion;
-import org.dawb.common.ui.plot.region.IRegion.RegionType;
-import org.dawb.common.ui.plot.region.ROIEvent;
-import org.dawb.common.ui.plot.tool.AbstractToolPage;
-import org.dawb.common.ui.plot.trace.ILineTrace;
-import org.dawb.common.ui.plot.trace.ITrace;
-import org.dawb.common.ui.plot.trace.ITraceListener;
-import org.dawb.common.ui.plot.trace.TraceEvent;
-import org.dawb.common.ui.plot.trace.TraceWillPlotEvent;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.widgets.FunctionWidget;
 import org.dawb.common.ui.wizard.persistence.PersistenceExportWizard;
 import org.dawb.common.ui.wizard.persistence.PersistenceImportWizard;
 import org.dawb.workbench.jmx.UserPlotBean;
 import org.dawnsci.plotting.Activator;
-import org.eclipse.core.runtime.IPlatformRunnable;
+import org.dawnsci.plotting.api.region.IROIListener;
+import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.dawnsci.plotting.api.region.ROIEvent;
+import org.dawnsci.plotting.api.tool.AbstractToolPage;
+import org.dawnsci.plotting.api.trace.ILineTrace;
+import org.dawnsci.plotting.api.trace.ITrace;
+import org.dawnsci.plotting.api.trace.ITraceListener;
+import org.dawnsci.plotting.api.trace.TraceEvent;
+import org.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -67,12 +65,12 @@ import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.fitting.Fitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunctionService;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.StraightLine;
 import uk.ac.diamond.scisoft.analysis.optimize.ApacheNelderMead;
 import uk.ac.diamond.scisoft.analysis.optimize.GeneticAlg;
 import uk.ac.diamond.scisoft.analysis.optimize.IOptimizer;
-import uk.ac.diamond.scisoft.analysis.optimize.NelderMead;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 import uk.ac.gda.common.rcp.util.GridUtils;
 
@@ -267,7 +265,7 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 		combo = new CCombo(infoComposite, SWT.BORDER);
 		combo.setEditable(false);
 		combo.setListVisible(true);
-		combo.setItems(new String[] {"Nelder Mead Fitting", "Nelder Mead Fitting (Apache Maths)", "Genetic Algorithm"});
+		combo.setItems(new String[] {"Nelder Mead Fitting", "Genetic Algorithm"});
 		combo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 		combo.select(0);
 		
@@ -530,8 +528,8 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 
 					// We peak fit only the first of the data sets plotted
 					// for now.
-					AbstractDataset x = trace.getXData();
-					AbstractDataset y = trace.getYData();
+					AbstractDataset x = (AbstractDataset)trace.getXData();
+					AbstractDataset y = (AbstractDataset)trace.getYData();
 
 					try {
 						AbstractDataset[] a = FittingUtils.xintersection(x, y,
@@ -622,7 +620,7 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 				try {
 					result = Double.toString(compFunction.getFunction(index).getParameterValue(0));
 					for (int i = 1; i < compFunction.getFunction(index).getNoOfParameters(); i++) {
-						result += "\n";
+						result += System.getProperty("line.separator");
 						result += compFunction.getFunction(index).getParameterValue(i);
 					}
 				} catch (Exception e) {
@@ -633,7 +631,7 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 				try {
 					result = Double.toString(resultFunction.getFunction(index).getParameterValue(0));
 					for (int i = 1; i < resultFunction.getFunction(index).getNoOfParameters(); i++) {
-						result += "\n";
+						result += System.getProperty("line.separator");
 						result += resultFunction.getFunction(index).getParameterValue(i);
 					}
 				} catch (Exception e) {
@@ -711,16 +709,13 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 				IOptimizer fitMethod = null;
 				switch (index) {
 				case 0:
-					fitMethod = new NelderMead(accuracy);
-					break;
-				case 1:
 					fitMethod = new ApacheNelderMead();
 					break;
-				case 2:
+				case 1:
 					fitMethod = new GeneticAlg(accuracy);
 					break;
 				default:
-					fitMethod = new NelderMead(accuracy);
+					fitMethod = new ApacheNelderMead();
 					break;
 				} 
 				
@@ -810,9 +805,9 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 	}
 
 	@Override
-	public Map<String, AFunction> getFunctions() {
+	public Map<String, IFunction> getFunctions() {
 
-		HashMap<String, AFunction> functions = new HashMap<String, AFunction>();
+		HashMap<String, IFunction> functions = new HashMap<String, IFunction>();
 		
 		if (compFunction != null) {
 			for (int i = 0; i < compFunction.getNoOfFunctions(); i++) {
@@ -832,19 +827,19 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 	}
 
 	@Override
-	public void setFunctions(Map<String, AFunction> functions) {
+	public void setFunctions(Map<String, IFunction> functions) {
 		// clear the composite function
 		compFunction = new CompositeFunction();
 		for (String key : functions.keySet()) {
 			if (key.contains("_initial_")) {
-				compFunction.addFunction(functions.get(key));
+				compFunction.addFunction((AFunction)functions.get(key));
 			}
 		}
 		
 		resultFunction = new CompositeFunction();
 		for (String key : functions.keySet()) {
 			if (key.contains("_result_")) {
-				resultFunction.addFunction(functions.get(key));
+				resultFunction.addFunction((AFunction)functions.get(key));
 			}
 		}
 		

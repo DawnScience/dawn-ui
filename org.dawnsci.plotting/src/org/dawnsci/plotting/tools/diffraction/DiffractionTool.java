@@ -14,22 +14,6 @@ import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
-import org.dawb.common.ui.plot.IPlottingSystem;
-import org.dawb.common.ui.plot.region.IROIListener;
-import org.dawb.common.ui.plot.region.IRegion;
-import org.dawb.common.ui.plot.region.IRegion.RegionType;
-import org.dawb.common.ui.plot.region.IRegionListener;
-import org.dawb.common.ui.plot.region.ROIEvent;
-import org.dawb.common.ui.plot.region.RegionEvent;
-import org.dawb.common.ui.plot.region.RegionUtils;
-import org.dawb.common.ui.plot.tool.AbstractToolPage;
-import org.dawb.common.ui.plot.tool.IToolPage;
-import org.dawb.common.ui.plot.tool.IToolPageSystem;
-import org.dawb.common.ui.plot.trace.IImageTrace;
-import org.dawb.common.ui.plot.trace.IPaletteListener;
-import org.dawb.common.ui.plot.trace.ITraceListener;
-import org.dawb.common.ui.plot.trace.PaletteEvent;
-import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.viewers.TreeNodeContentProvider;
@@ -44,6 +28,22 @@ import org.dawnsci.common.widgets.tree.NumericNode;
 import org.dawnsci.common.widgets.tree.UnitEditingSupport;
 import org.dawnsci.common.widgets.tree.ValueEditingSupport;
 import org.dawnsci.plotting.Activator;
+import org.dawnsci.plotting.api.IPlottingSystem;
+import org.dawnsci.plotting.api.region.IROIListener;
+import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.dawnsci.plotting.api.region.IRegionListener;
+import org.dawnsci.plotting.api.region.ROIEvent;
+import org.dawnsci.plotting.api.region.RegionEvent;
+import org.dawnsci.plotting.api.region.RegionUtils;
+import org.dawnsci.plotting.api.tool.AbstractToolPage;
+import org.dawnsci.plotting.api.tool.IToolPage;
+import org.dawnsci.plotting.api.tool.IToolPageSystem;
+import org.dawnsci.plotting.api.trace.IImageTrace;
+import org.dawnsci.plotting.api.trace.IPaletteListener;
+import org.dawnsci.plotting.api.trace.ITraceListener;
+import org.dawnsci.plotting.api.trace.PaletteEvent;
+import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.dawnsci.plotting.draw2d.swtxy.selection.CircleFitSelection;
 import org.dawnsci.plotting.draw2d.swtxy.selection.EllipseFitSelection;
@@ -334,7 +334,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
    		    IImageTrace imageTrace = getImageTrace();
 			if (imageTrace==null || imageTrace.getData() ==null) return lockedMeta;
 			
-			IMetaData mdImage = imageTrace.getData().getMetadata();
+			IMetaData mdImage = ((AbstractDataset)imageTrace.getData()).getMetadata();
 			
 			if (mdImage == null || !(mdImage instanceof IDiffractionMetadata)) {
 				//TODO what if the image is rotated?
@@ -368,7 +368,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		IImageTrace imageTrace = getImageTrace();
 		if (imageTrace==null) return null;
 		if (imageTrace.getData()==null) return null;
-		IMetaData mdImage = imageTrace.getData().getMetadata();
+		IMetaData mdImage = ((AbstractDataset)imageTrace.getData()).getMetadata();
 		if (mdImage !=null && mdImage  instanceof IDiffractionMetadata) {
 			if (statusString.equals("")) statusString = "Metadata loaded from image";
 			return (IDiffractionMetadata)mdImage;
@@ -688,7 +688,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 						Job job = new Job("Circle fit refinement") {
 							@Override
 							protected IStatus run(final IProgressMonitor monitor) {
-								return runEllipseFit(monitor, display, plotter, t, tmpRegion.getROI(), true);
+								return runEllipseFit(monitor, display, plotter, t, (ROIBase)tmpRegion.getROI(), true);
 							}
 						};
 						job.setPriority(Job.SHORT);
@@ -705,8 +705,8 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 						throw new IllegalStateException();
 					}
 					SectorROI sroi = (SectorROI) regions.iterator().next().getROI();
-					AbstractDataset dataset = t.getData();
-					AbstractDataset mask = t.getMask();
+					AbstractDataset dataset = (AbstractDataset)t.getData();
+					AbstractDataset mask    = (AbstractDataset)t.getMask();
 					final BeamCenterRefinement beamOffset = new BeamCenterRefinement(dataset, mask, sroi);
 					List<IPeak> peaks = loadPeaks();
 					if (peaks==null) throw new Exception("Cannot find peaks!");
@@ -756,7 +756,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 						Job job = new Job("Ellipse rings finding") {
 							@Override
 							protected IStatus run(final IProgressMonitor monitor) {
-								ROIBase roi = tmpRegion.getROI();
+								ROIBase roi = (ROIBase)tmpRegion.getROI();
 								IStatus stat = runEllipseFit(monitor, display, plotter, t, roi, false);
 								if (stat.isOK()) {
 									stat = runFindOuterRings(monitor, display, plotter, t, roi);
@@ -827,7 +827,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			}
 		};
 		calibrate.setImageDescriptor(Activator.getImageDescriptor("icons/findmorerings.png"));
-		calibrate.setToolTipText("Calibrate detector using rings");
+		calibrate.setToolTipText("Calibrate detector using rings - this is an experimental feature and does not work robustly");
 		calibrate.setEnabled(false);
 
 		if (lock==null) lock = new Action("Lock the diffraction data and apply it to newly opened files.",IAction.AS_CHECK_BOX) {
@@ -947,7 +947,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		final ProgressMonitorWrapper mon = new ProgressMonitorWrapper(monitor);
 		monitor.beginTask("Refine " + shape + " fit", IProgressMonitor.UNKNOWN);
 		monitor.subTask("Find POIs near initial " + shape);
-		AbstractDataset image = t.getData();
+		AbstractDataset image = (AbstractDataset)t.getData();
 		BooleanDataset mask = (BooleanDataset) t.getMask();
 		PolylineROI points;
 		EllipticalFitROI efroi;
@@ -988,6 +988,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 					roiListener.roiSelected(new ROIEvent(tmpRegion, froi)); // trigger beam centre update
 					plotter.addRegion(region);
 					monitor.worked(1);
+					findOuter.setEnabled(true);
 				} catch (Exception e) {
 					status[0] = false;
 				}
@@ -1004,7 +1005,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		if (roi instanceof CircularFitROI) {
 			roi = new EllipticalFitROI(((CircularFitROI) roi).getPoints(), true);
 		}
-		final List<EllipticalROI> ells = PowderRingsUtils.findOtherEllipses(mon, t.getData(), (BooleanDataset) t.getMask(), (EllipticalROI) roi);
+		final List<EllipticalROI> ells = PowderRingsUtils.findOtherEllipses(mon, (AbstractDataset)t.getData(), (BooleanDataset) t.getMask(), (EllipticalROI) roi);
 		final boolean[] status = {true};
 		display.syncExec(new Runnable() {
 
@@ -1119,7 +1120,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		roiListener = new IROIListener.Stub() {
 			@Override
 			public void update(ROIEvent evt) {
-				ROIBase r = evt.getROI();
+				ROIBase r = (ROIBase)evt.getROI();
 				if (r instanceof CircularFitROI || (r instanceof EllipticalFitROI && ((EllipticalFitROI) r).isCircular())) {
 					double[] point = r.getPointRef();
 //					logger.debug("ROI moved here X: {} Y : {}", point[0], point[1]);

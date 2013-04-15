@@ -12,9 +12,9 @@ package org.dawb.workbench.ui.editors;
 import java.util.Collection;
 
 import org.dawb.common.ui.editors.EditorExtensionFactory;
-import org.dawb.common.ui.plot.tool.IToolPageSystem;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.views.HeaderTablePage;
+import org.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;

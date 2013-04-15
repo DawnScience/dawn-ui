@@ -2,8 +2,10 @@ package org.dawnsci.plotting.draw2d.swtxy.selection;
 
 import java.util.Arrays;
 
-import org.dawb.common.ui.plot.axis.ICoordinateSystem;
-import org.dawb.common.ui.plot.region.ROIEvent;
+import org.dawnsci.plotting.api.axis.ICoordinateSystem;
+import org.dawnsci.plotting.api.region.MouseListener;
+import org.dawnsci.plotting.api.region.MouseMotionListener;
+import org.dawnsci.plotting.api.region.ROIEvent;
 import org.dawnsci.plotting.draw2d.swtxy.IMobileFigure;
 import org.dawnsci.plotting.draw2d.swtxy.translate.FigureTranslator;
 import org.dawnsci.plotting.draw2d.swtxy.util.Draw2DUtils;
@@ -14,8 +16,6 @@ import org.eclipse.draw2d.FigureListener;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.MouseEvent;
-import org.eclipse.draw2d.MouseListener;
-import org.eclipse.draw2d.MouseMotionListener;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
@@ -45,7 +45,7 @@ class AxisSelection extends AbstractSelectionRegion {
 
 	private RegionType regionType;
 
-	private MouseMotionListener mouseTrackListener;
+	private org.eclipse.draw2d.MouseMotionListener mouseTrackListener;
 	
 	AxisSelection(String name, ICoordinateSystem coords, RegionType regionType) {
 		super(name, coords);
@@ -118,7 +118,7 @@ class AxisSelection extends AbstractSelectionRegion {
 			}
 		});
         
-        this.mouseTrackListener = new MouseMotionListener.Stub() {
+        this.mouseTrackListener = new org.eclipse.draw2d.MouseMotionListener.Stub() {
         	
         	/**
     		 * @see org.eclipse.draw2d.MouseMotionListener#mouseMoved(MouseEvent)
@@ -424,22 +424,22 @@ class AxisSelection extends AbstractSelectionRegion {
 	
 	@Override
 	public void addMouseListener(MouseListener l) {
-		if (line1!=null) line1.getParent().addMouseListener(l);
+		if (line1!=null) line1.getParent().addMouseListener(new MouseListenerAdapter(l));
 	}	
 	
 	@Override
 	public void removeMouseListener(MouseListener l){
-		if (line1!=null) line1.getParent().removeMouseListener(l);
+		if (line1!=null) line1.getParent().removeMouseListener(new MouseListenerAdapter(l));
 	}
 
 	@Override
 	public void addMouseMotionListener(MouseMotionListener l){
-		if (line1!=null) line1.getParent().addMouseMotionListener(l);
+		if (line1!=null) line1.getParent().addMouseMotionListener(new MouseMotionAdapter(l));
 	}
 
 	@Override
 	public void removeMouseMotionListener(MouseMotionListener l){
-		if (line1!=null) line1.getParent().removeMouseMotionListener(l);
+		if (line1!=null) line1.getParent().removeMouseMotionListener(new MouseMotionAdapter(l));
 	}
 
 	@Override

@@ -4,14 +4,14 @@ import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.List;
 
-import org.dawb.common.ui.plot.IPlottingSystem;
-import org.dawb.common.ui.plot.annotation.AnnotationUtils;
-import org.dawb.common.ui.plot.annotation.IAnnotation;
-import org.dawb.common.ui.plot.region.IRegion;
-import org.dawb.common.ui.plot.region.RegionUtils;
-import org.dawb.common.ui.plot.trace.ITrace;
-import org.dawb.common.ui.plot.trace.TraceUtils;
 import org.dawnsci.plotting.Activator;
+import org.dawnsci.plotting.api.IPlottingSystem;
+import org.dawnsci.plotting.api.annotation.AnnotationUtils;
+import org.dawnsci.plotting.api.annotation.IAnnotation;
+import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.RegionUtils;
+import org.dawnsci.plotting.api.trace.ITrace;
+import org.dawnsci.plotting.api.trace.TraceUtils;
 import org.dawnsci.plotting.preference.FittingConstants;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
@@ -21,9 +21,10 @@ import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
-class FittedFunction  {
+import javax.vecmath.Vector3d;
 
-	
+public class FittedFunction  {
+
 	private RectangularROI    roi;
 	private CompositeFunction function;
 	private boolean           saved=false;
@@ -37,12 +38,22 @@ class FittedFunction  {
 	private ITrace            trace;
 	private IAnnotation       annotation;
 	
+	private Vector3d q;
+
 	public AbstractDataset getX() {
 		return x;
 	}
 
 	public void setX(AbstractDataset x) {
 		this.x = x;
+	}
+
+	public void setQ(Vector3d q) {
+		this.q=q;
+	}
+	
+	public Vector3d getQ() {
+		return this.q;
 	}
 
 	public boolean isSaved() {
@@ -357,7 +368,7 @@ class FittedFunction  {
 
 	public List<ROIBase> getRegions() {
 		if (fwhm!=null && center!=null) {
-			return Arrays.asList(fwhm.getROI(), center.getROI());
+			return Arrays.asList((ROIBase)fwhm.getROI(), (ROIBase)center.getROI());
 		}
 		return null;
 	}

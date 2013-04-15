@@ -3,12 +3,18 @@ package org.dawnsci.plotting.tools.fitting;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.vecmath.Vector3d;
+
 import org.dawnsci.plotting.Activator;
+import org.dawnsci.plotting.api.trace.IImageTrace;
+import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.preference.FittingConstants;
+import org.dawnsci.plotting.tools.Vector3dutil;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +22,10 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.IAnalysisMonitor;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
+import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
+import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
 import uk.ac.diamond.scisoft.analysis.fitting.Fitter;
 import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.APeak;
@@ -28,8 +38,11 @@ import uk.ac.diamond.scisoft.analysis.fitting.functions.Offset;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.PearsonVII;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Polynomial;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.PseudoVoigt;
+import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
+import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.optimize.GeneticAlg;
 import uk.ac.diamond.scisoft.analysis.optimize.IOptimizer;
+import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 public class FittingUtils {
@@ -60,7 +73,7 @@ public class FittingUtils {
 		
 		List<CompositeFunction> composites=null;
 		final IOptimizer optimizer = getOptimizer();
-		if (getPeaksRequired()==1) {
+		if (info.getNumPeaks()==1) {
 			double lowOffset = info.getY().min().doubleValue();
 			double highOffset = (Double) info.getY().mean();
 			Offset offset = new Offset(lowOffset, highOffset);
@@ -79,7 +92,7 @@ public class FittingUtils {
 			composites.add(comp);
 		
 		} else {
-			composites =  Generic1DFitter.fitPeakFunctions(info.getIdentifiedPeaks(), info.getX(), info.getY(), getPeakType(), optimizer, getSmoothing(), getPeaksRequired(), 0.0, false, false, new IAnalysisMonitor() {
+			composites =  Generic1DFitter.fitPeakFunctions(info.getIdentifiedPeaks(), info.getX(), info.getY(), getPeakType(), optimizer, getSmoothing(), info.getNumPeaks(), 0.0, false, false, new IAnalysisMonitor() {
 				@Override
 				public boolean hasBeenCancelled() {
 					return info.getMonitor().isCanceled(); // We always use the monitor.isCancelled() the fitting can take a while
@@ -106,9 +119,62 @@ public class FittingUtils {
 		}
 		
 		bean.setOptimizer(optimizer);
+		if (bean != null && info.getSelectedTrace()!=null)
+			for (FittedFunction p : bean.getFunctionList()) {
+				p.setX((AbstractDataset)info.getSelectedTrace().getXData());
+				p.setY((AbstractDataset)info.getSelectedTrace().getYData());
+				p.setDataTrace(info.getSelectedTrace());
+				p.setQ(getQ(info, p));
+			}
 		return bean;
 	}
-	
+
+	public static Vector3d getQ(FittedPeaksInfo info,FittedFunction p) {
+		LinearROI bounds;
+		try {
+			
+			bounds = (LinearROI)(info.getPlottingSystem().getRegion(info.getSelectedTrace().getName()).getROI());
+		} catch (Throwable e1) {
+			return null;
+		}
+		double l=bounds.getLength();
+		double [] pt = bounds.getPoint(p.getPosition()/l);
+		
+		IDiffractionMetadata dmeta = null;
+		IDataset set = null;
+		final Collection<ITrace> traces = info.getPlottingSystem().getTraces(IImageTrace.class);
+		final IImageTrace trace = traces!=null && traces.size()>0 ? (IImageTrace)traces.iterator().next() : null;
+		if (trace!=null) {
+			set = trace.getData();
+			final IMetaData      meta = ((AbstractDataset)set).getMetadata();
+			if (meta instanceof IDiffractionMetadata) {
+
+				dmeta = (IDiffractionMetadata)meta;
+			}
+		}
+		QSpace qSpace  = null;
+		Vector3dutil vectorUtil= null;
+		if (dmeta != null) {
+
+			try {
+				DetectorProperties detector2dProperties = dmeta.getDetector2DProperties();
+				DiffractionCrystalEnvironment diffractionCrystalEnvironment = dmeta.getDiffractionCrystalEnvironment();
+				
+				if (!(detector2dProperties == null)){
+					qSpace = new QSpace(detector2dProperties,
+							diffractionCrystalEnvironment,1);
+									
+					vectorUtil = new Vector3dutil(qSpace, pt[0], pt[1]);
+					return new Vector3d(vectorUtil.getQx(),vectorUtil.getQy(),vectorUtil.getQz());
+				}
+			} catch (Exception e) {
+				logger.error("Could not create a detector properties object from metadata", e);
+			}
+		}
+		
+		return new Vector3d(0,0,0);
+	}
+
 	public static List<IdentifiedPeak> getIdentifiedPeaks(final FittedFunctions      fittedPeaks,
 			                                              final AbstractDataset  x,
 								                          final IProgressMonitor monitor) throws Exception {

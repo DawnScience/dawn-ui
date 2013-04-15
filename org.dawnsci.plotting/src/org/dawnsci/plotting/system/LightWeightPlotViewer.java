@@ -17,30 +17,6 @@ import org.csstudio.swt.xygraph.undo.RemoveAnnotationCommand;
 import org.csstudio.swt.xygraph.undo.ZoomType;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.AbstractPlottingSystem.ColorOption;
-import org.dawb.common.ui.plot.IPlottingSystem;
-import org.dawb.common.ui.plot.IPrintablePlotting;
-import org.dawb.common.ui.plot.ITraceActionProvider;
-import org.dawb.common.ui.plot.PlotType;
-import org.dawb.common.ui.plot.annotation.AnnotationUtils;
-import org.dawb.common.ui.plot.annotation.IAnnotation;
-import org.dawb.common.ui.plot.annotation.IAnnotationSystem;
-import org.dawb.common.ui.plot.axis.IAxis;
-import org.dawb.common.ui.plot.axis.IAxisSystem;
-import org.dawb.common.ui.plot.axis.IPositionListener;
-import org.dawb.common.ui.plot.region.IRegion;
-import org.dawb.common.ui.plot.region.IRegion.RegionType;
-import org.dawb.common.ui.plot.region.IRegionContainer;
-import org.dawb.common.ui.plot.region.IRegionListener;
-import org.dawb.common.ui.plot.region.IRegionSystem;
-import org.dawb.common.ui.plot.trace.IImageStackTrace;
-import org.dawb.common.ui.plot.trace.IImageTrace;
-import org.dawb.common.ui.plot.trace.ILineTrace;
-import org.dawb.common.ui.plot.trace.ILineTrace.PointStyle;
-import org.dawb.common.ui.plot.trace.ILineTrace.TraceType;
-import org.dawb.common.ui.plot.trace.ITrace;
-import org.dawb.common.ui.plot.trace.ITraceContainer;
-import org.dawb.common.ui.plot.trace.ITraceListener;
-import org.dawb.common.ui.plot.trace.TraceWillPlotEvent;
 import org.dawb.common.ui.printing.IPrintImageProvider;
 import org.dawb.common.ui.printing.PlotExportPrintUtil;
 import org.dawb.common.ui.printing.PlotPrintPreviewDialog;
@@ -49,6 +25,30 @@ import org.dawb.common.ui.util.ColorUtility;
 import org.dawb.common.ui.util.DisplayUtils;
 import org.dawb.gda.extensions.util.DatasetTitleUtils;
 import org.dawnsci.plotting.Activator;
+import org.dawnsci.plotting.api.IPlottingSystem;
+import org.dawnsci.plotting.api.IPrintablePlotting;
+import org.dawnsci.plotting.api.ITraceActionProvider;
+import org.dawnsci.plotting.api.PlotType;
+import org.dawnsci.plotting.api.annotation.AnnotationUtils;
+import org.dawnsci.plotting.api.annotation.IAnnotation;
+import org.dawnsci.plotting.api.annotation.IAnnotationSystem;
+import org.dawnsci.plotting.api.axis.IAxis;
+import org.dawnsci.plotting.api.axis.IAxisSystem;
+import org.dawnsci.plotting.api.axis.IPositionListener;
+import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.dawnsci.plotting.api.region.IRegionContainer;
+import org.dawnsci.plotting.api.region.IRegionListener;
+import org.dawnsci.plotting.api.region.IRegionSystem;
+import org.dawnsci.plotting.api.trace.IImageStackTrace;
+import org.dawnsci.plotting.api.trace.IImageTrace;
+import org.dawnsci.plotting.api.trace.ILineTrace;
+import org.dawnsci.plotting.api.trace.ILineTrace.PointStyle;
+import org.dawnsci.plotting.api.trace.ILineTrace.TraceType;
+import org.dawnsci.plotting.api.trace.ITrace;
+import org.dawnsci.plotting.api.trace.ITraceContainer;
+import org.dawnsci.plotting.api.trace.ITraceListener;
+import org.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.dawnsci.plotting.draw2d.swtxy.AspectAxis;
 import org.dawnsci.plotting.draw2d.swtxy.ImageStackTrace;
 import org.dawnsci.plotting.draw2d.swtxy.ImageTrace;
@@ -111,6 +111,7 @@ import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPart;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 /**
  * Package private. This class deals with plotting actions specific to the
@@ -582,7 +583,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		if (xyGraph!=null) xyGraph.clearTraces();
 	}
 
-	protected ITrace createLightWeightImage(String traceName, AbstractDataset data, List<AbstractDataset> axes, IProgressMonitor monitor) {
+	protected ITrace createLightWeightImage(String traceName, IDataset data, List<? extends IDataset> axes, IProgressMonitor monitor) {
 		
 		final Axis xAxis = ((AspectAxis)system.getSelectedXAxis());
 		final Axis yAxis = ((AspectAxis)system.getSelectedYAxis());
@@ -629,8 +630,8 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 	 * @return
 	 */
 	protected List<ITrace> createLineTraces(final String                title, 
-			                                    final AbstractDataset       x, 
-			                                    final List<AbstractDataset> ys,
+			                                    final IDataset       x, 
+			                                    final List<? extends IDataset> ys,
 			                                    final Map<String,ITrace>    traceMap,
 			                                    final Map<Object, Color>    colorMap,
 			                                    final IProgressMonitor      monitor) {
@@ -657,7 +658,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		int iplot = 0;
 		
 		final List<ITrace> traces = new ArrayList<ITrace>(ys.size());
-		for (AbstractDataset y : ys) {
+		for (IDataset y : ys) {
 
 			if (y==null) continue;
 			LightWeightDataProvider traceDataProvider = new LightWeightDataProvider(x, y);
@@ -729,7 +730,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 			xyGraph.addImageTrace((ImageTrace)image);
 			removeAdditionalAxes(); // Do not have others with images.
 			
-			if (trace.getData().getDtype() == AbstractDataset.RGB) {
+			if (((AbstractDataset)trace.getData()).getDtype() == AbstractDataset.RGB) {
 				intensity.setVisible(false);
 			} else {
 			    intensity.setVisible(Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.SHOW_INTENSITY));

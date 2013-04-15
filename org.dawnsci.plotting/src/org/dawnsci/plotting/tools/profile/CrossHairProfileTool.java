@@ -3,35 +3,35 @@ package org.dawnsci.plotting.tools.profile;
 import java.util.Collection;
 import java.util.List;
 
-import org.dawb.common.services.ImageServiceBean.ImageOrigin;
-import org.dawb.common.ui.plot.IPlottingSystem;
-import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingFactory;
-import org.dawb.common.ui.plot.axis.IAxis;
-import org.dawb.common.ui.plot.region.IROIListener;
-import org.dawb.common.ui.plot.region.IRegion;
-import org.dawb.common.ui.plot.region.IRegion.RegionType;
-import org.dawb.common.ui.plot.region.IRegionListener;
-import org.dawb.common.ui.plot.region.ROIEvent;
-import org.dawb.common.ui.plot.region.RegionEvent;
-import org.dawb.common.ui.plot.region.RegionUtils;
-import org.dawb.common.ui.plot.tool.AbstractToolPage;
-import org.dawb.common.ui.plot.tool.IToolPageSystem;
-import org.dawb.common.ui.plot.trace.IImageTrace;
-import org.dawb.common.ui.plot.trace.ILineTrace;
-import org.dawb.common.ui.plot.trace.ITrace;
-import org.dawb.common.ui.plot.trace.ITraceListener;
-import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.common.ui.util.ColorUtility;
 import org.dawnsci.plotting.Activator;
+import org.dawnsci.plotting.api.IPlottingSystem;
+import org.dawnsci.plotting.api.PlotType;
+import org.dawnsci.plotting.api.axis.IAxis;
+import org.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
+import org.dawnsci.plotting.api.region.IROIListener;
+import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.dawnsci.plotting.api.region.IRegionListener;
+import org.dawnsci.plotting.api.region.MouseEvent;
+import org.dawnsci.plotting.api.region.MouseListener;
+import org.dawnsci.plotting.api.region.ROIEvent;
+import org.dawnsci.plotting.api.region.RegionEvent;
+import org.dawnsci.plotting.api.region.RegionUtils;
+import org.dawnsci.plotting.api.tool.AbstractToolPage;
+import org.dawnsci.plotting.api.tool.IToolPageSystem;
+import org.dawnsci.plotting.api.trace.IImageTrace;
+import org.dawnsci.plotting.api.trace.ILineTrace;
+import org.dawnsci.plotting.api.trace.ITrace;
+import org.dawnsci.plotting.api.trace.ITraceListener;
+import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.MouseEvent;
-import org.eclipse.draw2d.MouseListener;
 import org.eclipse.jface.action.Action;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
@@ -43,7 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
 public class CrossHairProfileTool extends AbstractToolPage implements IROIListener, MouseListener  {
 
@@ -54,7 +54,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 	private   IRegion                xHair, yHair;
 	private   IAxis                  x1,x2;
 	private   RunningJob             xUpdateJob, yUpdateJob;
-	private   ROIBase           xBounds, yBounds;
+	private   IROI                   xBounds, yBounds;
 	
 	public CrossHairProfileTool() {
 		try {
@@ -276,7 +276,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 	
 				if (x1==null | x2==null) return Status.OK_STATUS;
 	
-				ROIBase bounds = region==xHair ? xBounds : yBounds;
+				IROI bounds = region==xHair ? xBounds : yBounds;
 				
 				final boolean ok = profile(region, bounds, false, null, monitor);
 
@@ -318,7 +318,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 		update(region, region.getROI());
 	}
 	
-	private void update(IRegion r, ROIBase rb) {
+	private void update(IRegion r, IROI rb) {
 		if (r == xHair) {
 			xUpdateJob.stop();
 			this.xBounds = rb;
@@ -335,7 +335,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 	public void mousePressed(MouseEvent me) {
 		
 		if (!isActive()) return;
-		if (me.button!=1) return;
+		if (me.getButton()!=1) return;
 		try {
 			xUpdateJob.suspend(true);
 			yUpdateJob.suspend(true);
@@ -357,7 +357,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 		}
 	}
 
-	private IRegion createStaticRegion(String nameStub, final ROIBase bounds, final Color snapShotColor, final RegionType regionType) throws Exception {
+	private IRegion createStaticRegion(String nameStub, final IROI bounds, final Color snapShotColor, final RegionType regionType) throws Exception {
 		
 
 		final IRegion region = getPlottingSystem().createRegion(RegionUtils.getUniqueName(nameStub, getPlottingSystem()), regionType);
@@ -397,7 +397,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 
 	
 	private boolean profile(final IRegion      region, 
-			                final ROIBase bounds, 
+			                final IROI         bounds, 
 			                final boolean      snapshot,
 			                final Color        snapShotColor,
 			                final IProgressMonitor monitor) {
@@ -450,7 +450,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 				return false;
 			}
 
-			final AbstractDataset data = image.getData();
+			final AbstractDataset data = (AbstractDataset)image.getData();
 			AbstractDataset slice=null, sliceIndex=null;
 			if (monitor.isCanceled())return  false;
 			try {

@@ -6,10 +6,10 @@ import java.util.Collection;
 import java.util.List;
 
 import org.dawb.common.ui.image.ShapeType;
-import org.dawb.common.ui.plot.IPlottingSystem;
-import org.dawb.common.ui.plot.axis.IAxis;
-import org.dawb.common.ui.plot.region.IRegion;
 import org.dawnsci.plotting.Activator;
+import org.dawnsci.plotting.api.IPlottingSystem;
+import org.dawnsci.plotting.api.axis.IAxis;
+import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.preference.PlottingConstants;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.operations.DefaultOperationHistory;

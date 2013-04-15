@@ -16,14 +16,15 @@ import java.util.List;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.PlottingFactory;
-import org.dawb.common.ui.plot.region.IRegion;
-import org.dawb.common.ui.plot.region.RegionUtils;
-import org.dawb.common.ui.plot.trace.IImageTrace;
-import org.dawb.common.ui.plot.trace.ILineTrace;
-import org.dawb.common.ui.plot.trace.ITrace;
+import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.workbench.ui.editors.AsciiEditor;
 import org.dawb.workbench.ui.editors.ImageEditor;
 import org.dawb.workbench.ui.editors.PlotDataEditor;
+import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.RegionUtils;
+import org.dawnsci.plotting.api.trace.IImageTrace;
+import org.dawnsci.plotting.api.trace.ILineTrace;
+import org.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.runtime.Platform;
@@ -37,11 +38,11 @@ import org.osgi.framework.Bundle;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.LongDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Random;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
-import org.dawb.common.ui.util.EclipseUtils;
 
 /**
  * 
@@ -71,7 +72,7 @@ public class SWTXYStressTest {
 		createTest(createTestArraysCoherant(100, 10000), 3000);
 	}
 
-	private void createTest(final List<AbstractDataset> ys, long expectedTime) throws Throwable {
+	private void createTest(final List<IDataset> ys, long expectedTime) throws Throwable {
 		
 		final Bundle bun  = Platform.getBundle("org.dawb.workbench.ui.test");
 
@@ -108,9 +109,9 @@ public class SWTXYStressTest {
 	}
 
 	
-	private List<AbstractDataset> createTestArraysRandom(final int numberPlots, final int size) {
+	private List<IDataset> createTestArraysRandom(final int numberPlots, final int size) {
 		
-		final List<AbstractDataset> ys = new ArrayList<AbstractDataset>(numberPlots);
+		final List<IDataset> ys = new ArrayList<IDataset>(numberPlots);
 		for (int i = 0; i < numberPlots; i++) {
 			final long[] buffer = new long[size];
 			for (int j = 0; j < size; j++) buffer[j] = Math.round(Math.random()*10000);
@@ -121,9 +122,9 @@ public class SWTXYStressTest {
 		return ys;
 	}
 	
-	private List<AbstractDataset> createTestArraysCoherant(final int numberPlots, final int size) {
+	private List<IDataset> createTestArraysCoherant(final int numberPlots, final int size) {
 		
-		final List<AbstractDataset> ys = new ArrayList<AbstractDataset>(numberPlots);
+		final List<IDataset> ys = new ArrayList<IDataset>(numberPlots);
 		for (int i = 0; i < numberPlots; i++) {
 			
 			double rand = Math.random();

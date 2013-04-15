@@ -14,9 +14,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
-import org.dawb.common.ui.plot.axis.IAxis;
+import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.workbench.ui.editors.AsciiEditor;
 import org.dawb.workbench.ui.editors.PlotDataEditor;
+import org.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.runtime.Platform;
@@ -28,9 +29,9 @@ import org.junit.Test;
 import org.osgi.framework.Bundle;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.LongDataset;
-import org.dawb.common.ui.util.EclipseUtils;
 
 /**
  * 
@@ -94,7 +95,7 @@ public class SWTXYAxisUpdateTest {
 	}
 
 
-	private void createUpdateTest(final List<AbstractDataset> ys, boolean isRandom, int updateAmount) throws Throwable {
+	private void createUpdateTest(final List<IDataset> ys, boolean isRandom, int updateAmount) throws Throwable {
 		
 		final Bundle bun  = Platform.getBundle("org.dawb.workbench.ui.test");
 
@@ -114,7 +115,7 @@ public class SWTXYAxisUpdateTest {
 		page.setPartState(EclipseUtils.getPage().getActivePartReference(), IWorkbenchPage.STATE_MAXIMIZED);
 			
 		
-		if (ys.get(0).getBuffer()==null || ys.get(0).getSize()<1) {
+		if (((AbstractDataset)ys.get(0)).getBuffer()==null || ys.get(0).getSize()<1) {
 		    sys.createPlot1D(new IntegerDataset(), ys, null);
 		} else {
 		    sys.createPlot1D(AbstractDataset.arange(0, ys.get(0).getSize(), 1, AbstractDataset.INT32), ys, null);
@@ -129,9 +130,9 @@ public class SWTXYAxisUpdateTest {
 			// We now loop and add a 1000 random points to each set.
 			for (int i = 0; i < ys.size(); i++) {
 				
-				final AbstractDataset y = ys.get(i);
+				final IDataset y = ys.get(i);
 				
-				final int index =  (ys.get(0).getBuffer()==null || ys.get(0).getSize()<1) 
+				final int index =  (((AbstractDataset)ys.get(0)).getBuffer()==null || ys.get(0).getSize()<1) 
 						        ? total+1
 						        : y.getSize()+total+1;
 				
@@ -173,9 +174,9 @@ public class SWTXYAxisUpdateTest {
 	}
 
 	
-	private List<AbstractDataset> createTestArraysRandom(final int numberPlots, final int size) {
+	private List<IDataset> createTestArraysRandom(final int numberPlots, final int size) {
 		
-		final List<AbstractDataset> ys = new ArrayList<AbstractDataset>(numberPlots);
+		final List<IDataset> ys = new ArrayList<IDataset>(numberPlots);
 		for (int i = 0; i < numberPlots; i++) {
 			final long[] buffer = new long[size];
 			for (int j = 0; j < size; j++) buffer[j] = Math.round(Math.random()*10000);
@@ -186,9 +187,9 @@ public class SWTXYAxisUpdateTest {
 		return ys;
 	}
 	
-	private List<AbstractDataset> createTestArraysCoherant(final int numberPlots, final int size, final String name) {
+	private List<IDataset> createTestArraysCoherant(final int numberPlots, final int size, final String name) {
 		
-		final List<AbstractDataset> ys = new ArrayList<AbstractDataset>(numberPlots);
+		final List<IDataset> ys = new ArrayList<IDataset>(numberPlots);
 		for (int i = 0; i < numberPlots; i++) {
 			
 			double rand = Math.random();

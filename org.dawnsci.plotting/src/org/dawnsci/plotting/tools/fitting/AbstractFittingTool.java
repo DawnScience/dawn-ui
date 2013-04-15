@@ -7,16 +7,16 @@ import java.util.List;
 import java.util.Vector;
 
 import org.dawb.common.ui.menu.MenuAction;
-import org.dawb.common.ui.plot.region.IRegion;
-import org.dawb.common.ui.plot.region.IRegionListener;
-import org.dawb.common.ui.plot.region.RegionEvent;
-import org.dawb.common.ui.plot.region.RegionUtils;
-import org.dawb.common.ui.plot.tool.AbstractToolPage;
-import org.dawb.common.ui.plot.tool.IToolPage;
-import org.dawb.common.ui.plot.trace.ILineTrace;
-import org.dawb.common.ui.plot.trace.ITrace;
-import org.dawb.common.ui.plot.trace.ITraceListener;
-import org.dawb.common.ui.plot.trace.TraceEvent;
+import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.IRegionListener;
+import org.dawnsci.plotting.api.region.RegionEvent;
+import org.dawnsci.plotting.api.region.RegionUtils;
+import org.dawnsci.plotting.api.tool.AbstractToolPage;
+import org.dawnsci.plotting.api.tool.IToolPage;
+import org.dawnsci.plotting.api.trace.ILineTrace;
+import org.dawnsci.plotting.api.trace.ITrace;
+import org.dawnsci.plotting.api.trace.ITraceListener;
+import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.preference.FittingPreferencePage;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -421,8 +421,8 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 				final double[] p2 = bounds.getEndPoint();
 	
 				// We peak fit only the first of the data sets plotted for now.
-				AbstractDataset x  = selectedTrace.getXData();
-				AbstractDataset y  = selectedTrace.getYData();
+				AbstractDataset x  = (AbstractDataset)selectedTrace.getXData();
+				AbstractDataset y  = (AbstractDataset)selectedTrace.getYData();
 	
 				try {
 					AbstractDataset[] a= FittingUtils.xintersection(x,y,p1[0],p2[0]);
@@ -432,13 +432,13 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 				}
 	
 				try {
-					final FittedFunctions bean = getFittedFunctions(new FittedPeaksInfo(x, y, monitor));
-		    		if (bean!=null) for (FittedFunction p : bean.getFunctionList()) {
-		    			p.setX(selectedTrace.getXData());
-		    			p.setY(selectedTrace.getYData());
+					final FittedFunctions bean = getFittedFunctions(new FittedPeaksInfo(x, y, monitor, getPlottingSystem(), selectedTrace));
+					if (bean!=null) for (FittedFunction p : bean.getFunctionList()) {
+		    			p.setX((AbstractDataset)selectedTrace.getXData());
+		    			p.setY((AbstractDataset)selectedTrace.getYData());
 		    			p.setDataTrace(selectedTrace);
 					}
-		    		// Add saved peaks if any.
+					// Add saved peaks if any.
 		    		if (fittedFunctions!=null && !fittedFunctions.isEmpty() && bean!=null) {
 		    			bean.addFittedFunctions(fittedFunctions.getFunctionList());
 		    		}

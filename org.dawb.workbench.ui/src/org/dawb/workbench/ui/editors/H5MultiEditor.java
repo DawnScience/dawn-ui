@@ -15,9 +15,6 @@ import java.util.Collection;
 import org.dawb.common.services.IVariableManager;
 import org.dawb.common.ui.editors.EditorExtensionFactory;
 import org.dawb.common.ui.plot.AbstractPlottingSystem.ColorOption;
-import org.dawb.common.ui.plot.IPlottingSystemSelection;
-import org.dawb.common.ui.plot.PlotType;
-import org.dawb.common.ui.plot.tool.IToolPageSystem;
 import org.dawb.common.ui.slicing.ISlicablePlottingPart;
 import org.dawb.common.ui.slicing.SliceComponent;
 import org.dawb.common.ui.util.EclipseUtils;
@@ -25,6 +22,9 @@ import org.dawb.hdf5.editor.H5Editor;
 import org.dawb.hdf5.editor.H5ValuePage;
 import org.dawb.hdf5.editor.IH5Editor;
 import org.dawb.workbench.ui.views.PlotDataPage;
+import org.dawnsci.plotting.api.IPlottingSystemSelection;
+import org.dawnsci.plotting.api.PlotType;
+import org.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.ui.IEditorInput;
@@ -219,7 +219,7 @@ public class H5MultiEditor extends MultiPageEditorPart  implements ISlicablePlot
 
 	@Override
 	public AbstractDataset setDatasetSelected(String name, boolean clearOthers) {
-		return ((IPlottingSystemSelection)getDataSetComponent()).setDatasetSelected(name, clearOthers);
+		return (AbstractDataset)((IPlottingSystemSelection)getDataSetComponent()).setDatasetSelected(name, clearOthers);
 	}
 
 	@Override

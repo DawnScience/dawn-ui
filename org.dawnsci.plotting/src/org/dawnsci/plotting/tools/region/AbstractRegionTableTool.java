@@ -6,23 +6,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.dawb.common.ui.plot.axis.ICoordinateSystem;
-import org.dawb.common.ui.plot.region.IROIListener;
-import org.dawb.common.ui.plot.region.IRegion;
-import org.dawb.common.ui.plot.region.IRegion.RegionType;
-import org.dawb.common.ui.plot.region.IRegionListener;
-import org.dawb.common.ui.plot.region.ROIEvent;
-import org.dawb.common.ui.plot.region.RegionEvent;
 import org.dawb.common.ui.plot.roi.data.LinearROIData;
 import org.dawb.common.ui.plot.roi.data.ROIData;
 import org.dawb.common.ui.plot.roi.data.RectangularROIData;
-import org.dawb.common.ui.plot.tool.AbstractToolPage;
-import org.dawb.common.ui.plot.trace.IImageTrace;
-import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.wizard.persistence.PersistenceExportWizard;
 import org.dawb.common.ui.wizard.persistence.PersistenceImportWizard;
 import org.dawnsci.plotting.Activator;
+import org.dawnsci.plotting.api.axis.ICoordinateSystem;
+import org.dawnsci.plotting.api.region.IROIListener;
+import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.IRegionListener;
+import org.dawnsci.plotting.api.region.ROIEvent;
+import org.dawnsci.plotting.api.region.RegionEvent;
+import org.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.dawnsci.plotting.api.tool.AbstractToolPage;
+import org.dawnsci.plotting.api.trace.IImageTrace;
+import org.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -208,7 +208,7 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 				if (sel!=null && sel.getFirstElement()!=null) {
 					final IRegion region = (IRegion)sel.getFirstElement();
 					if (region==null||region.getROI()==null) return;
-					final ROIBase bounds = region.getROI();
+					final ROIBase bounds = (ROIBase)region.getROI();
 					if (bounds.getPointRef()==null) return;
 					
 					final Clipboard cb = new Clipboard(composite.getDisplay());
@@ -463,7 +463,7 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 				if(monitor.isCanceled())	return Status.CANCEL_STATUS;
 
 				IRegion  region = (IRegion)evt.getSource();
-				ROIBase rb = evt.getROI();
+				ROIBase rb = (ROIBase)evt.getROI();
 				
 				if(monitor.isCanceled())	return Status.CANCEL_STATUS;
 				dragBounds.put(region.getName(), rb);
@@ -481,7 +481,7 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 
 	public ROIBase getROI(IRegion region) {
 		if (dragBounds!=null&&dragBounds.containsKey(region.getName())) return dragBounds.get(region.getName());
-		return region.getROI();
+		return (ROIBase)region.getROI();
 	}
 
 	/**
@@ -503,10 +503,10 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 
         	if ((type == RegionType.BOX || type == RegionType.PERIMETERBOX) && bounds instanceof RectangularROI) {
 	    		final RectangularROI roi = (RectangularROI) bounds;
-	    		rd = new RectangularROIData(roi, trace.getData());
+	    		rd = new RectangularROIData(roi,  (AbstractDataset)trace.getData());
         	} else if (type == RegionType.LINE && bounds instanceof LinearROI) {
         		final LinearROI roi = (LinearROI) bounds;
-        		rd = new LinearROIData(roi, trace.getData(), 1d);     
+        		rd = new LinearROIData(roi,  (AbstractDataset)trace.getData(), 1d);     
         	}
         	
         	if (rd!=null) {
@@ -537,8 +537,8 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 		
 		if (traces!=null&&traces.size()==1&&traces.iterator().next() instanceof IImageTrace) {
 			final IImageTrace     trace        = (IImageTrace)traces.iterator().next();
-			ROIBase roi = region.getROI();
-			AbstractDataset dataRegion = trace.getData();
+			ROIBase roi = (ROIBase)region.getROI();
+			AbstractDataset dataRegion =  (AbstractDataset)trace.getData();
 			try {
 				if(roi instanceof RectangularROI){
 					RectangularROI rroi = (RectangularROI)roi;

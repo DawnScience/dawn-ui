@@ -21,18 +21,18 @@ import org.dawb.common.ui.editors.IEditorExtension;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.AbstractPlottingSystem.ColorOption;
-import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingFactory;
-import org.dawb.common.ui.plot.tool.IToolPageSystem;
-import org.dawb.common.ui.plot.trace.IImageStackTrace;
-import org.dawb.common.ui.plot.trace.IStackPositionListener;
-import org.dawb.common.ui.plot.trace.StackPositionEvent;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.views.HeaderTablePage;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawb.common.util.io.FileUtils;
 import org.dawb.common.util.list.SortNatural;
 import org.dawb.workbench.ui.Activator;
+import org.dawnsci.plotting.api.PlotType;
+import org.dawnsci.plotting.api.tool.IToolPageSystem;
+import org.dawnsci.plotting.api.trace.IImageStackTrace;
+import org.dawnsci.plotting.api.trace.IStackPositionListener;
+import org.dawnsci.plotting.api.trace.StackPositionEvent;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFile;
@@ -186,7 +186,7 @@ public class PlotImageEditor extends EditorPart implements IEditorExtension, IRe
 					AbstractDataset set;
 					try {
 						final ILoaderService service = (ILoaderService)ServiceManager.getService(ILoaderService.class);
-						set = service.getDataset(filePath);
+						set = (AbstractDataset)service.getDataset(filePath);
 					} catch (Throwable e) {
 						logger.error("Cannot load file "+filePath, e);
 						return Status.CANCEL_STATUS;

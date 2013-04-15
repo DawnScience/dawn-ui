@@ -2,16 +2,16 @@ package org.dawnsci.plotting.system.dialog;
 
 import java.util.Arrays;
 
-import org.dawb.common.services.HistogramBound;
-import org.dawb.common.services.ImageServiceBean.HistoType;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
-import org.dawb.common.ui.plot.IPlottingSystem;
-import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
-import org.dawb.common.ui.plot.trace.IImageTrace;
-import org.dawb.common.ui.plot.trace.IImageTrace.DownsampleType;
 import org.dawb.common.ui.util.ColorUtility;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.plotting.Activator;
+import org.dawnsci.plotting.api.IPlottingSystem;
+import org.dawnsci.plotting.api.histogram.HistogramBound;
+import org.dawnsci.plotting.api.histogram.ImageServiceBean.HistoType;
+import org.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
+import org.dawnsci.plotting.api.trace.IImageTrace;
+import org.dawnsci.plotting.api.trace.IImageTrace.DownsampleType;
 import org.dawnsci.plotting.draw2d.swtxy.BasePlottingConstants;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.dialogs.Dialog;
@@ -91,9 +91,10 @@ public class ImageTraceComposite extends Composite {
 		group.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
 		group.setLayout(new GridLayout(2, false));
 		
-		boolean isInt = imageTrace.getData().getDtype()==AbstractDataset.INT16 ||
-		                imageTrace.getData().getDtype()==AbstractDataset.INT32 ||
-				        imageTrace.getData().getDtype()==AbstractDataset.INT64;
+		final int dType = ((AbstractDataset)imageTrace.getData()).getDtype();
+		boolean isInt = dType==AbstractDataset.INT16 ||
+				        dType==AbstractDataset.INT32 ||
+				        dType==AbstractDataset.INT64;
 
 		label = new Label(group, SWT.NONE);
 		label.setText("Minimum Intensity");

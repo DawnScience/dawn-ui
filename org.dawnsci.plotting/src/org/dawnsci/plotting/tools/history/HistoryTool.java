@@ -7,11 +7,11 @@ import java.util.Map;
 
 import org.dawb.common.services.IExpressionObject;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
-import org.dawb.common.ui.plot.trace.ILineTrace;
-import org.dawb.common.ui.plot.trace.ITrace;
-import org.dawb.common.ui.plot.trace.ITraceListener;
-import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawnsci.plotting.Activator;
+import org.dawnsci.plotting.api.trace.ILineTrace;
+import org.dawnsci.plotting.api.trace.ITrace;
+import org.dawnsci.plotting.api.trace.ITraceListener;
+import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.tools.profile.ProfileType;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -86,8 +86,8 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 			if (!iTrace.isUserTrace()) continue;
 			final ILineTrace lineTrace = (ILineTrace)iTrace;
 			final HistoryBean bean = new HistoryBean(this);
-			bean.setXdata(lineTrace.getXData());
-			bean.setYdata(lineTrace.getYData());
+			bean.setXdata((AbstractDataset)lineTrace.getXData());
+			bean.setYdata((AbstractDataset)lineTrace.getYData());
 			bean.setTraceName(iTrace.getName());
 			if (lineTrace.getTraceColor()!=null) {
 				bean.setPlotColour(lineTrace.getTraceColor().getRGB());

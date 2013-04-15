@@ -11,13 +11,13 @@ package org.dawb.workbench.ui.editors;
 
 import org.dawb.common.services.IVariableManager;
 import org.dawb.common.ui.plot.AbstractPlottingSystem.ColorOption;
-import org.dawb.common.ui.plot.IPlottingSystem;
-import org.dawb.common.ui.plot.IPlottingSystemSelection;
-import org.dawb.common.ui.plot.PlotType;
-import org.dawb.common.ui.plot.tool.IToolPageSystem;
 import org.dawb.common.ui.slicing.ISlicablePlottingPart;
 import org.dawb.common.ui.slicing.SliceComponent;
 import org.dawb.workbench.ui.views.PlotDataPage;
+import org.dawnsci.plotting.api.IPlottingSystem;
+import org.dawnsci.plotting.api.IPlottingSystemSelection;
+import org.dawnsci.plotting.api.PlotType;
+import org.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -174,7 +174,7 @@ public class AsciiEditor extends MultiPageEditorPart implements ISlicablePlottin
 
 	@Override
 	public AbstractDataset setDatasetSelected(String name, boolean clearOthers) {
-		return ((IPlottingSystemSelection)getDataSetComponent()).setDatasetSelected(name, clearOthers);
+		return (AbstractDataset)((IPlottingSystemSelection)getDataSetComponent()).setDatasetSelected(name, clearOthers);
 	}
 
 	@Override

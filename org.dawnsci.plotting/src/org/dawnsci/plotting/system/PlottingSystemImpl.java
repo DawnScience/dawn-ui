@@ -23,24 +23,24 @@ import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.Trace;
 import org.dawb.common.services.IPaletteService;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
-import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingActionBarManager;
-import org.dawb.common.ui.plot.annotation.IAnnotation;
-import org.dawb.common.ui.plot.axis.IAxis;
-import org.dawb.common.ui.plot.axis.IPositionListener;
-import org.dawb.common.ui.plot.region.IRegion;
-import org.dawb.common.ui.plot.region.IRegion.RegionType;
-import org.dawb.common.ui.plot.region.IRegionListener;
-import org.dawb.common.ui.plot.trace.IImageStackTrace;
-import org.dawb.common.ui.plot.trace.IImageTrace;
-import org.dawb.common.ui.plot.trace.ILineStackTrace;
-import org.dawb.common.ui.plot.trace.ILineTrace;
-import org.dawb.common.ui.plot.trace.ISurfaceTrace;
-import org.dawb.common.ui.plot.trace.ITrace;
-import org.dawb.common.ui.plot.trace.ITraceListener;
-import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.plotting.Activator;
+import org.dawnsci.plotting.api.PlotType;
+import org.dawnsci.plotting.api.annotation.IAnnotation;
+import org.dawnsci.plotting.api.axis.IAxis;
+import org.dawnsci.plotting.api.axis.IPositionListener;
+import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.dawnsci.plotting.api.region.IRegionListener;
+import org.dawnsci.plotting.api.trace.IImageStackTrace;
+import org.dawnsci.plotting.api.trace.IImageTrace;
+import org.dawnsci.plotting.api.trace.ILineStackTrace;
+import org.dawnsci.plotting.api.trace.ILineTrace;
+import org.dawnsci.plotting.api.trace.ISurfaceTrace;
+import org.dawnsci.plotting.api.trace.ITrace;
+import org.dawnsci.plotting.api.trace.ITraceListener;
+import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.draw2d.swtxy.LineTrace;
 import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
 import org.dawnsci.plotting.jreality.JRealityPlotViewer;
@@ -70,6 +70,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 
 
@@ -186,20 +187,20 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	}
 	
 	
-	public List<ITrace> updatePlot1D(AbstractDataset             x, 
-						             final List<AbstractDataset> ys,
+	public List<ITrace> updatePlot1D(IDataset             x, 
+						             final List<? extends IDataset> ys,
 						             final IProgressMonitor      monitor) {
 
 		final List<ITrace> updatedAndCreated = new ArrayList<ITrace>(3);		
-		final List<AbstractDataset> unfoundYs = new ArrayList<AbstractDataset>(ys.size());
+		final List<IDataset> unfoundYs = new ArrayList<IDataset>(ys.size());
 		
-		for (final AbstractDataset y : ys) {
+		for (final IDataset y : ys) {
 			
 			final ITrace trace = getTrace(y.getName());
 			if (trace!=null && trace instanceof ILineTrace) {
 				
 				if (x==null) x = IntegerDataset.arange(y.getSize(), IntegerDataset.INT32);
-				final AbstractDataset finalX = x;
+				final IDataset finalX = x;
 				final ILineTrace lineTrace = (ILineTrace)trace;
 				updatedAndCreated.add(lineTrace);
 				
@@ -227,8 +228,8 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	}
 	
 	@Override
-	public List<ITrace> createPlot1D(final AbstractDataset       xIn, 
-					                 final List<AbstractDataset> ysIn,
+	public List<ITrace> createPlot1D(final IDataset       xIn, 
+					                 final List<? extends IDataset> ysIn,
 					                 final IProgressMonitor      monitor) {
         return this.createPlot1D(xIn, ysIn, null, monitor);
 	}
@@ -237,8 +238,8 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	 * Does not have to be called in UI thread.
 	 */
 	@Override
-	public List<ITrace> createPlot1D(final AbstractDataset       xIn, 
-					                 final List<AbstractDataset> ysIn,
+	public List<ITrace> createPlot1D(final IDataset       xIn, 
+					                 final List<? extends IDataset> ysIn,
 					                 final String                title,
 					                 final IProgressMonitor      monitor) {
 		
@@ -246,7 +247,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 
 		// create index datasets if necessary
 		final List<ITrace> traces = new ArrayList<ITrace>(7);
-		final AbstractDataset x;
+		final IDataset x;
 		if (ysIn == null || ysIn.isEmpty()) {
 			return traces;
 		}
@@ -321,8 +322,8 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		}
 	}
 	
-	public ITrace updatePlot2D(final AbstractDataset       data, 
-							   final List<AbstractDataset> axes,
+	public ITrace updatePlot2D(final IDataset       data, 
+							   final List<? extends IDataset> axes,
 							   final IProgressMonitor      monitor) {
 		
 		if (plottingMode.is1D()) {
@@ -371,8 +372,8 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	}
 
 	private ITrace updatePlot2DInternal(final ITrace image,
-			                          final AbstractDataset       data, 
-								      final List<AbstractDataset> axes,
+			                          final IDataset       data, 
+								      final List<? extends IDataset> axes,
 								      final IProgressMonitor      monitor) {
 		
 		if (data.getName()!=null) lightWeightViewer.setTitle(data.getName());
@@ -401,8 +402,8 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	 * @param monitor
 	 */
 	@Override
-	public ITrace createPlot2D(final AbstractDataset       data, 
-							   final List<AbstractDataset> axes,
+	public ITrace createPlot2D(final IDataset       data, 
+							   final List<? extends IDataset> axes,
 							   final IProgressMonitor      monitor) {
   
 		final List<ITrace> traces = new ArrayList<ITrace>(7);
@@ -423,8 +424,8 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		return traces.size()>0 ? traces.get(0) : null;
 	}
 
-	public ITrace createPlot2DInternal(final AbstractDataset       data, 
-										List<AbstractDataset>       axes,
+	public ITrace createPlot2DInternal(final IDataset       data, 
+										List<? extends IDataset>       axes,
 										final IProgressMonitor      monitor) {
 		try {
 			if (plottingMode.is1D()) {
@@ -495,8 +496,8 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	private Map<String, ITrace> traceMap; // Warning can be mem leak
 
 
-	private List<ITrace> createPlot1DInternal(final AbstractDataset       xIn, 
-										      final List<AbstractDataset> ysIn,
+	private List<ITrace> createPlot1DInternal(final IDataset       xIn, 
+										      final List<? extends IDataset> ysIn,
 										      final String                title,
 										      final IProgressMonitor      monitor) {
 		
@@ -524,7 +525,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		} else {
 			traceMap.clear();
 			ILineStackTrace trace = jrealityViewer.createStackTrace(title);
-			final AbstractDataset x = xIn;
+			final IDataset x = xIn;
 			final AbstractDataset y = AbstractDataset.arange(getMaxSize(ysIn), AbstractDataset.INT32);
 			final AbstractDataset z = AbstractDataset.arange(ysIn.size(), AbstractDataset.INT32);
 			trace.setData(Arrays.asList(x,y,z), ysIn.toArray(new AbstractDataset[ysIn.size()]));
@@ -747,6 +748,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	@Override
 	public void setShowLegend(boolean b) {
 		IAction action = actionBarManager.findAction(SHOW_LEGEND_ACTION_ID);
+		if(action == null) return;
 		action.setChecked(b);
 		if (lightWeightViewer!=null) {
 			lightWeightViewer.setShowLegend(b);
@@ -765,9 +767,9 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		return null;
 	}
 
-	private int getMaxSize(List<AbstractDataset> sets) {
+	private int getMaxSize(List<? extends IDataset> sets) {
 		int max = 1; // Cannot be less than one
-		for (AbstractDataset set : sets) {
+		for (IDataset set : sets) {
 			if (set != null)
 			    max = Math.max(max, set.getSize());
 		}

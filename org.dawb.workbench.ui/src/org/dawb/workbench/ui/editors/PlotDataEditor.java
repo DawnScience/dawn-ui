@@ -21,12 +21,7 @@ import org.dawb.common.services.IExpressionObject;
 import org.dawb.common.services.IVariableManager;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
-import org.dawb.common.ui.plot.IPlottingSystem;
-import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingFactory;
-import org.dawb.common.ui.plot.axis.IAxis;
-import org.dawb.common.ui.plot.tool.IToolPageSystem;
-import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.slicing.SliceComponent;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.util.GridUtils;
@@ -35,6 +30,11 @@ import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawb.workbench.ui.Activator;
 import org.dawb.workbench.ui.editors.preference.EditorConstants;
 import org.dawb.workbench.ui.views.PlotDataPage;
+import org.dawnsci.plotting.api.IPlottingSystem;
+import org.dawnsci.plotting.api.PlotType;
+import org.dawnsci.plotting.api.axis.IAxis;
+import org.dawnsci.plotting.api.tool.IToolPageSystem;
+import org.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -345,10 +345,14 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		plottingSystem.clear();
 		
 		boolean requireFullRefresh = plottingSystem.getPlotType()!=participant.getPlotMode();
-		final AbstractDataset data = getDataSet(selections[0], monitor);
+		final IDataset data = getDataSet(selections[0], monitor);
 		
 		if (data==null)             return;
-		if (data.getBuffer()==null) return;
+		try {
+		    if (data.getSize()<0) return;
+		} catch (Exception ne) {
+			return;
+		}
 		if (data.getRank()>2)       return; // Cannot plot more that 2 dims!
 		
 		if (participant.getPlotMode()==PlotType.IMAGE || data.getRank()==2) {
@@ -358,7 +362,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		} else {
 			List<CheckableObject> sels = new ArrayList<CheckableObject>(Arrays.asList(selections));
 
-			final AbstractDataset x;
+			final IDataset x;
 			if (plottingSystem.isXfirst() && sels.size()>1) {
 				x  = data;
 				sels.remove(0);
@@ -419,7 +423,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		
 	}
 
-	protected List<ITrace> createPlotSeparateAxes(final AbstractDataset                    x,
+	protected List<ITrace> createPlotSeparateAxes(final IDataset                    x,
 			                              final Map<Integer,List<AbstractDataset>> ys,
 			                              final IProgressMonitor                   monitor) {
 		
@@ -435,7 +439,10 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 				axis.setVisible(true);
 				plottingSystem.setSelectedYAxis(axis);	
 
-				traces.addAll(plottingSystem.createPlot1D(x, ys.get(i), getEditorInput().getName(), monitor));
+				final List<AbstractDataset> ysAbs = ys.get(i);
+				final List<IDataset>       ysReal = new ArrayList<IDataset>();
+				if (ysAbs!=null) for (AbstractDataset a : ysAbs) ysReal.add(a);
+				traces.addAll(plottingSystem.createPlot1D(x, ysReal, getEditorInput().getName(), monitor));
 			} 
 			return traces;
 		} finally {
@@ -521,7 +528,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		}
 		if (object instanceof IExpressionObject) {
 			try {
-				return ((IExpressionObject)object).getDataSet(null, new ProgressMonitorWrapper(monitor));
+				return (AbstractDataset)((IExpressionObject)object).getDataSet(null, new ProgressMonitorWrapper(monitor));
 			} catch (Exception e) {
 				// valid, user can enter an invalid expression. In this case
 				// it colours red but does not stop them from using the view.

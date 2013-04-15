@@ -2,12 +2,12 @@ package org.dawnsci.plotting.jreality;
 
 import java.io.File;
 
-import org.dawb.common.ui.plot.ActionType;
-import org.dawb.common.ui.plot.IPlotActionSystem;
-import org.dawb.common.ui.plot.IPlottingSystem;
-import org.dawb.common.ui.plot.ManagerType;
-import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
 import org.dawb.common.ui.printing.PrintSettings;
+import org.dawnsci.plotting.api.ActionType;
+import org.dawnsci.plotting.api.IPlotActionSystem;
+import org.dawnsci.plotting.api.IPlottingSystem;
+import org.dawnsci.plotting.api.ManagerType;
+import org.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
 import org.dawnsci.plotting.jreality.print.JRealityPrintDialog;
 import org.dawnsci.plotting.jreality.print.PlotExportUtil;
 import org.eclipse.core.runtime.IStatus;

@@ -18,19 +18,18 @@ import java.util.Map;
 import java.util.Set;
 
 import org.dawb.common.ui.plot.EmptyTool;
-import org.dawb.common.ui.plot.IPlottingSystem;
-import org.dawb.common.ui.plot.tool.AbstractToolPage;
-import org.dawb.common.ui.plot.tool.IToolChangeListener;
-import org.dawb.common.ui.plot.tool.IToolContainer;
-import org.dawb.common.ui.plot.tool.IToolPage;
-import org.dawb.common.ui.plot.tool.IToolPage.ToolPageRole;
-import org.dawb.common.ui.plot.tool.IToolPageSystem;
-import org.dawb.common.ui.plot.tool.ToolChangeEvent;
-import org.dawb.common.ui.plot.trace.IImageTrace;
-import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.common.ui.util.EclipseUtils;
-import org.dawb.common.util.text.StringUtils;
 import org.dawnsci.plotting.Activator;
+import org.dawnsci.plotting.api.IPlottingSystem;
+import org.dawnsci.plotting.api.tool.AbstractToolPage;
+import org.dawnsci.plotting.api.tool.IToolChangeListener;
+import org.dawnsci.plotting.api.tool.IToolContainer;
+import org.dawnsci.plotting.api.tool.IToolPage;
+import org.dawnsci.plotting.api.tool.IToolPageSystem;
+import org.dawnsci.plotting.api.tool.ToolChangeEvent;
+import org.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
+import org.dawnsci.plotting.api.trace.IImageTrace;
+import org.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.core.commands.common.EventManager;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
@@ -138,7 +137,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	
 	public ToolPageView() {
 		super();
-		this.unique_id = StringUtils.getUniqueId(ToolPageView.class);
+		this.unique_id = AbstractToolPage.getUniqueId(ToolPageView.class);
 		this.systems   = new HashSet<SoftReference<IToolPageSystem>>(7);
 		this.recs      = new HashMap<String,Map<String,PageRec>>(7);
 	}

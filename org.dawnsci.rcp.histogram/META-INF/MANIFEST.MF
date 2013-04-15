@@ -12,7 +12,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.forms,
  org.dawb.common.services;bundle-version="1.0.0",
  org.eclipse.ui.cheatsheets;bundle-version="3.4.100",
- org.dawnsci.common.widgets;bundle-version="1.0.0"
+ org.dawnsci.common.widgets;bundle-version="1.0.0",
+ org.dawnsci.plotting.api;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Import-Package: org.slf4j

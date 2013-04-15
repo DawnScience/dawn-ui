@@ -5,9 +5,9 @@ import java.util.HashSet;
 
 import org.csstudio.swt.widgets.figureparts.ColorMapRamp;
 import org.csstudio.swt.xygraph.figures.Axis;
-import org.dawb.common.ui.plot.trace.IImageStackTrace;
-import org.dawb.common.ui.plot.trace.IStackPositionListener;
-import org.dawb.common.ui.plot.trace.StackPositionEvent;
+import org.dawnsci.plotting.api.trace.IImageStackTrace;
+import org.dawnsci.plotting.api.trace.IStackPositionListener;
+import org.dawnsci.plotting.api.trace.StackPositionEvent;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;

@@ -10,9 +10,9 @@ import java.util.Map;
 import ncsa.hdf.object.Group;
 
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
-import org.dawb.common.ui.plot.tool.IDataReductionToolPage;
-import org.dawb.common.ui.plot.tool.IDataReductionToolPage.DataReductionInfo;
-import org.dawb.common.ui.plot.tool.IDataReductionToolPage.DataReductionSlice;
+import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
+import org.dawb.common.ui.plot.tools.IDataReductionToolPage.DataReductionSlice;
+import org.dawb.common.ui.plot.tools.IDataReductionToolPage.DataReductionInfo;
 import org.dawb.common.ui.slicing.DimsDataList;
 import org.dawb.common.ui.slicing.SliceUtils;
 import org.dawb.common.ui.util.EclipseUtils;

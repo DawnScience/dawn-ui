@@ -3,9 +3,9 @@ package org.dawnsci.plotting.tools.region;
 import java.text.DecimalFormat;
 
 import org.dawb.common.util.number.DoubleUtils;
-import org.dawb.common.ui.plot.axis.ICoordinateSystem;
-import org.dawb.common.ui.plot.region.IRegion;
 import org.dawnsci.plotting.Activator;
+import org.dawnsci.plotting.api.axis.ICoordinateSystem;
+import org.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.swt.graphics.Image;

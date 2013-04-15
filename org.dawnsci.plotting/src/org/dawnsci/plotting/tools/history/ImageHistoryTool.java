@@ -14,12 +14,12 @@ import org.dawb.common.gpu.Operator;
 import org.dawb.common.services.IExpressionObject;
 import org.dawb.common.ui.components.cell.ScaleCellEditor;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
-import org.dawb.common.ui.plot.trace.IImageTrace;
-import org.dawb.common.ui.plot.trace.ITrace;
-import org.dawb.common.ui.plot.trace.ITraceListener;
-import org.dawb.common.ui.plot.trace.TraceEvent;
-import org.dawb.common.ui.plot.trace.TraceWillPlotEvent;
 import org.dawnsci.plotting.Activator;
+import org.dawnsci.plotting.api.trace.IImageTrace;
+import org.dawnsci.plotting.api.trace.ITrace;
+import org.dawnsci.plotting.api.trace.ITraceListener;
+import org.dawnsci.plotting.api.trace.TraceEvent;
+import org.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.dawnsci.plotting.preference.PlottingConstants;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -57,6 +57,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 
@@ -130,7 +131,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 				if (updatingPlotsAlready)      return;
 				if (evt.getImageTrace()==null) return;
 				if (evt.getImageTrace().getUserObject()==ImageHistoryMarker.MARKER) return;
-				originalData = evt.getImage();
+				originalData = (AbstractDataset)evt.getImage();
 				if (getImageTrace()==null) return;
 				if (!isActiveSelections()) return;
 		
@@ -158,7 +159,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
         	
         	final IImageTrace imageTrace = getImageTrace();
         	if (imageTrace!=null && imageTrace.getUserObject()!=ImageHistoryMarker.MARKER)  {
-        	    this.originalData = imageTrace!=null ? imageTrace.getData() : null;
+        	    this.originalData = imageTrace!=null ? (AbstractDataset)imageTrace.getData() : null;
         	}
 		}
 		super.activate();
@@ -192,7 +193,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 					if (plotName==null || "".equals(plotName)) {
 						plotName = imageTrace.getName();
 					}
-					addImageToHistory(imageTrace.getData(),plotName);
+					addImageToHistory((AbstractDataset)imageTrace.getData(),plotName);
 				}
 				refresh();
 			}
@@ -207,7 +208,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 		
 		final HistoryBean bean = new HistoryBean(this);
 		bean.setData(data);
-		final List<AbstractDataset> axes = getImageTrace()!=null ? getImageTrace().getAxes() : null;
+		final List<IDataset> axes = getImageTrace()!=null ? getImageTrace().getAxes() : null;
 		bean.setAxes(axes);
 		bean.setTraceName(name);
 		bean.setPlotName(getPlottingSystem().getPlotName());

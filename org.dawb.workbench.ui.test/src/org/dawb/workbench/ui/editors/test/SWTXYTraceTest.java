@@ -17,14 +17,15 @@ import java.util.List;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.PlottingFactory;
-import org.dawb.common.ui.plot.trace.IImageTrace;
-import org.dawb.common.ui.plot.trace.ILineTrace;
-import org.dawb.common.ui.plot.trace.ILineTrace.PointStyle;
-import org.dawb.common.ui.plot.trace.ILineTrace.TraceType;
-import org.dawb.common.ui.plot.trace.ITrace;
+import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.workbench.ui.editors.AsciiEditor;
 import org.dawb.workbench.ui.editors.ImageEditor;
 import org.dawb.workbench.ui.editors.PlotDataEditor;
+import org.dawnsci.plotting.api.trace.IImageTrace;
+import org.dawnsci.plotting.api.trace.ILineTrace;
+import org.dawnsci.plotting.api.trace.ILineTrace.PointStyle;
+import org.dawnsci.plotting.api.trace.ILineTrace.TraceType;
+import org.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.runtime.Platform;
@@ -37,8 +38,8 @@ import org.osgi.framework.Bundle;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.LongDataset;
-import org.dawb.common.ui.util.EclipseUtils;
 
 /**
  * 
@@ -72,10 +73,10 @@ public class SWTXYTraceTest {
 
 		final Collection<ITrace>   traces= sys.getTraces(IImageTrace.class);
 		final IImageTrace            imt = (IImageTrace)traces.iterator().next();
-		AbstractDataset       data = imt.getData();
+		IDataset       data = imt.getData();
 		
 		// Create a short line of invalid values...
-		data = data.cast(AbstractDataset.FLOAT64);
+		data = ((AbstractDataset)data).cast(AbstractDataset.FLOAT64);
 		for (int i = 0; i <20; i++) {
 			data.set(value, i*10,i*10);
 		}
@@ -111,7 +112,7 @@ public class SWTXYTraceTest {
 		da1.set(funny, 50);
 
 		da1.setName(name);
-		final Object[] oa = createSomethingPlotted(Arrays.asList(new AbstractDataset[]{da1}));
+		final Object[] oa = createSomethingPlotted(Arrays.asList(new IDataset[]{da1}));
 
 		final List<ITrace>        traces = (List<ITrace>)oa[2];
 		
@@ -202,7 +203,7 @@ public class SWTXYTraceTest {
 		EclipseUtils.getPage().closeEditor(editor, false);
 	}
 
-	private Object[] createSomethingPlotted(final List<AbstractDataset> ys) throws Throwable {
+	private Object[] createSomethingPlotted(final List<IDataset> ys) throws Throwable {
 		
 		final Bundle bun  = Platform.getBundle("org.dawb.workbench.ui.test");
 
@@ -223,7 +224,7 @@ public class SWTXYTraceTest {
 			
 		sys.clear();
 		
-		AbstractDataset indices = AbstractDataset.arange(0, ys.get(0).getSize(), 1, AbstractDataset.INT32);
+		IDataset indices = AbstractDataset.arange(0, ys.get(0).getSize(), 1, AbstractDataset.INT32);
 
 		List<ITrace> traces = sys.createPlot1D(indices, ys, null);
 
@@ -231,9 +232,9 @@ public class SWTXYTraceTest {
 	}
 
 	
-	private List<AbstractDataset> createTestArraysCoherant(final int numberPlots, final int size, final String name) {
+	private List<IDataset> createTestArraysCoherant(final int numberPlots, final int size, final String name) {
 		
-		final List<AbstractDataset> ys = new ArrayList<AbstractDataset>(numberPlots);
+		final List<IDataset> ys = new ArrayList<IDataset>(numberPlots);
 		for (int i = 0; i < numberPlots; i++) {
 			
 			double rand = Math.random();

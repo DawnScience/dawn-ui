@@ -7,27 +7,27 @@ import java.util.List;
 import java.util.Map;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
-import org.dawb.common.ui.plot.IPlottingSystem;
-import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingFactory;
-import org.dawb.common.ui.plot.region.IROIListener;
-import org.dawb.common.ui.plot.region.IRegion;
-import org.dawb.common.ui.plot.region.IRegion.RegionType;
-import org.dawb.common.ui.plot.region.IRegionListener;
-import org.dawb.common.ui.plot.region.ROIEvent;
-import org.dawb.common.ui.plot.region.RegionEvent;
-import org.dawb.common.ui.plot.region.RegionUtils;
-import org.dawb.common.ui.plot.tool.AbstractToolPage;
-import org.dawb.common.ui.plot.tool.IDataReductionToolPage;
-import org.dawb.common.ui.plot.tool.IToolPageSystem;
-import org.dawb.common.ui.plot.trace.IImageTrace;
-import org.dawb.common.ui.plot.trace.ILineTrace;
-import org.dawb.common.ui.plot.trace.IPaletteListener;
-import org.dawb.common.ui.plot.trace.ITrace;
-import org.dawb.common.ui.plot.trace.ITraceListener;
-import org.dawb.common.ui.plot.trace.PaletteEvent;
-import org.dawb.common.ui.plot.trace.TraceEvent;
+import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
 import org.dawb.common.ui.util.EclipseUtils;
+import org.dawnsci.plotting.api.IPlottingSystem;
+import org.dawnsci.plotting.api.PlotType;
+import org.dawnsci.plotting.api.region.IROIListener;
+import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.dawnsci.plotting.api.region.IRegionListener;
+import org.dawnsci.plotting.api.region.ROIEvent;
+import org.dawnsci.plotting.api.region.RegionEvent;
+import org.dawnsci.plotting.api.region.RegionUtils;
+import org.dawnsci.plotting.api.tool.AbstractToolPage;
+import org.dawnsci.plotting.api.tool.IToolPageSystem;
+import org.dawnsci.plotting.api.trace.IImageTrace;
+import org.dawnsci.plotting.api.trace.ILineTrace;
+import org.dawnsci.plotting.api.trace.IPaletteListener;
+import org.dawnsci.plotting.api.trace.ITrace;
+import org.dawnsci.plotting.api.trace.ITraceListener;
+import org.dawnsci.plotting.api.trace.PaletteEvent;
+import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -42,6 +42,7 @@ import org.eclipse.ui.part.IPageSite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
@@ -201,6 +202,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 
 		profilePlottingSystem.setXfirst(true);
 		profilePlottingSystem.setRescale(true);
+				
 	}
 
 	@Override
@@ -245,6 +247,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		}
 		
 		createNewRegion();
+		
 	}
 	
 	private final void createNewRegion() {
@@ -351,13 +354,13 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 
 	@Override
 	public void roiDragged(ROIEvent evt) {
-		update((IRegion)evt.getSource(), evt.getROI(), true);
+		update((IRegion)evt.getSource(), (ROIBase)evt.getROI(), true);
 	}
 
 	@Override
 	public void roiChanged(ROIEvent evt) {
 		final IRegion region = (IRegion)evt.getSource();
-		update(region, region.getROI(), false);
+		update(region, (ROIBase)region.getROI(), false);
 	}
 	
 	protected synchronized void update(IRegion r, ROIBase rb, boolean isDrag) {
@@ -429,9 +432,9 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 							if (!iRegion.isUserRegion()) continue;
 							if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
 							if (registeredTraces.containsKey(iRegion.getName())) {
-								createProfile(image, iRegion, iRegion.getROI(), true, isDrag, monitor);
+								createProfile(image, iRegion, (ROIBase)iRegion.getROI(), true, isDrag, monitor);
 							} else {
-								createProfile(image, iRegion, iRegion.getROI(), false, isDrag, monitor);
+								createProfile(image, iRegion, (ROIBase)iRegion.getROI(), false, isDrag, monitor);
 							}
 						}
 					} else {
@@ -443,7 +446,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 					if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
 					createProfile(image, 
 							      currentRegion, 
-							      currentROI!=null?currentROI:currentRegion.getROI(), 
+							      currentROI!=null?currentROI:(ROIBase)currentRegion.getROI(), 
 								  true, 
 								  isDrag,
 								  monitor);
@@ -473,7 +476,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		// and image traces were returning different metadata
 		IMetaData metaData = null;
 		if (getImageTrace()!= null && getImageTrace().getData() != null)
-			metaData = getImageTrace().getData().getMetadata();
+			metaData = ((AbstractDataset)getImageTrace().getData()).getMetadata();
 		
 		if (metaData != null) return metaData;
 		

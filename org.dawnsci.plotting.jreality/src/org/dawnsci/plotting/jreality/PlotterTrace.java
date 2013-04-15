@@ -4,16 +4,17 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
-import org.dawb.common.ui.plot.trace.TraceEvent;
+import org.dawnsci.plotting.api.trace.TraceEvent;
 
 import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
 class PlotterTrace {
 	
 	protected String                 name;
-	protected List<AbstractDataset>  axes;
+	protected List<IDataset>         axes;
 	protected List<String>           axesNames;
 	protected JRealityPlotViewer     plotter;
 	protected boolean                active;
@@ -29,6 +30,12 @@ class PlotterTrace {
 		plottingSystem=null;
 		window=null;
 	}
+	
+	protected AbstractDataset[] getStack(IDataset... s) {
+		AbstractDataset[] stack = new AbstractDataset[s.length];
+		for (int i = 0; i < s.length; i++) stack[i] = (AbstractDataset)s[i];
+		return stack;
+	}
 
 	public PlotterTrace(JRealityPlotViewer plotter2, String name2) {
 		this.plotter = plotter2;
@@ -38,7 +45,7 @@ class PlotterTrace {
 		return name;
 	}
 
-	public List<AbstractDataset> getAxes() {
+	public List<IDataset> getAxes() {
 		return axes;
 	}
 
@@ -54,9 +61,9 @@ class PlotterTrace {
 	}
 	protected List<AxisValues> createAxisValues() {
 		
-		final AxisValues xAxis = new AxisValues(getLabel(0), axes!=null?axes.get(0):null);
-		final AxisValues yAxis = new AxisValues(getLabel(1), axes!=null?axes.get(1):null);
-		final AxisValues zAxis = new AxisValues(getLabel(2), axes!=null?axes.get(2):null);
+		final AxisValues xAxis = new AxisValues(getLabel(0), axes!=null?(AbstractDataset)axes.get(0):null);
+		final AxisValues yAxis = new AxisValues(getLabel(1), axes!=null?(AbstractDataset)axes.get(1):null);
+		final AxisValues zAxis = new AxisValues(getLabel(2), axes!=null?(AbstractDataset)axes.get(2):null);
 		return Arrays.asList(xAxis, yAxis, zAxis);
 	}
 

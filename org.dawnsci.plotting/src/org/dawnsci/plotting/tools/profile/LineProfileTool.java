@@ -4,16 +4,17 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
-import org.dawb.common.ui.plot.region.IRegion;
-import org.dawb.common.ui.plot.region.IRegion.RegionType;
-import org.dawb.common.ui.plot.trace.IImageTrace;
-import org.dawb.common.ui.plot.trace.ILineTrace;
-import org.dawb.common.ui.plot.trace.ITrace;
 import org.dawb.gda.extensions.loaders.H5Utils;
+import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.dawnsci.plotting.api.trace.IImageTrace;
+import org.dawnsci.plotting.api.trace.ILineTrace;
+import org.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Status;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
@@ -45,7 +46,7 @@ public class LineProfileTool extends ProfileTool {
 		if (!region.isVisible()) return;
 
 		if (monitor.isCanceled()) return;
-		AbstractDataset[] profileData = ROIProfile.line(image.getData(), image.getMask(), bounds, 1d, true);
+		AbstractDataset[] profileData = ROIProfile.line((AbstractDataset)image.getData(), (AbstractDataset)image.getMask(), bounds, 1d, true);
         if (profileData==null) return;
 
 		if (monitor.isCanceled()) return;
@@ -65,7 +66,7 @@ public class LineProfileTool extends ProfileTool {
 			
 		} else {
 			if (monitor.isCanceled()) return;
-			Collection<ITrace> plotted = profilePlottingSystem.updatePlot1D(indices, Arrays.asList(new AbstractDataset[]{intensity}), monitor);
+			Collection<ITrace> plotted = profilePlottingSystem.updatePlot1D(indices, Arrays.asList(new IDataset[]{intensity}), monitor);
 			registerTraces(region, plotted);
 			
 		}
@@ -94,7 +95,7 @@ public class LineProfileTool extends ProfileTool {
 			if (!region.isVisible())    continue;
 			if (!region.isUserRegion()) continue;
 			
-			AbstractDataset[] profileData = ROIProfile.line(slice.getData(), image.getMask(), (LinearROI)region.getROI(), 1d, false);
+			AbstractDataset[] profileData = ROIProfile.line(slice.getData(), (AbstractDataset)image.getMask(), (LinearROI)region.getROI(), 1d, false);
 			final AbstractDataset intensity = profileData[0];
 			intensity.setName(region.getName().replace(' ', '_'));
 			

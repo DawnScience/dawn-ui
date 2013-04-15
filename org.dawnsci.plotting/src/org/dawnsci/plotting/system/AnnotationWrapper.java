@@ -3,7 +3,7 @@ package org.dawnsci.plotting.system;
 import org.csstudio.swt.xygraph.figures.Annotation;
 import org.csstudio.swt.xygraph.figures.Annotation.CursorLineStyle;
 import org.csstudio.swt.xygraph.figures.Axis;
-import org.dawb.common.ui.plot.annotation.IAnnotation;
+import org.dawnsci.plotting.api.annotation.IAnnotation;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 

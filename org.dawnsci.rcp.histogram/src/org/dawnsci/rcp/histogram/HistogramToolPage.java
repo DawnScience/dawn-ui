@@ -4,24 +4,24 @@ import java.util.Arrays;
 import java.util.EventObject;
 import java.util.List;
 
-import org.dawb.common.services.HistogramBound;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
-import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingFactory;
-import org.dawb.common.ui.plot.region.IROIListener;
-import org.dawb.common.ui.plot.region.IRegion;
-import org.dawb.common.ui.plot.region.IRegion.RegionType;
-import org.dawb.common.ui.plot.region.ROIEvent;
-import org.dawb.common.ui.plot.tool.AbstractToolPage;
-import org.dawb.common.ui.plot.trace.IImageTrace;
-import org.dawb.common.ui.plot.trace.ILineTrace;
-import org.dawb.common.ui.plot.trace.ILineTrace.TraceType;
-import org.dawb.common.ui.plot.trace.IPaletteListener;
-import org.dawb.common.ui.plot.trace.IPaletteTrace;
-import org.dawb.common.ui.plot.trace.ITraceListener;
-import org.dawb.common.ui.plot.trace.PaletteEvent;
-import org.dawb.common.ui.plot.trace.TraceEvent;
-import org.dawb.common.ui.plot.trace.TraceWillPlotEvent;
+import org.dawnsci.plotting.api.PlotType;
+import org.dawnsci.plotting.api.histogram.HistogramBound;
+import org.dawnsci.plotting.api.region.IROIListener;
+import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.dawnsci.plotting.api.region.ROIEvent;
+import org.dawnsci.plotting.api.tool.AbstractToolPage;
+import org.dawnsci.plotting.api.trace.IImageTrace;
+import org.dawnsci.plotting.api.trace.ILineTrace;
+import org.dawnsci.plotting.api.trace.ILineTrace.TraceType;
+import org.dawnsci.plotting.api.trace.IPaletteListener;
+import org.dawnsci.plotting.api.trace.IPaletteTrace;
+import org.dawnsci.plotting.api.trace.ITraceListener;
+import org.dawnsci.plotting.api.trace.PaletteEvent;
+import org.dawnsci.plotting.api.trace.TraceEvent;
+import org.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.dawnsci.rcp.functions.ColourSchemeContribution;
 import org.dawnsci.rcp.functions.TransferFunctionContribution;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -950,7 +950,7 @@ public class HistogramToolPage extends AbstractToolPage {
 			}
 
 			// get the image data
-			imageDataset = (AbstractDataset)image.getImageServiceBean().getImage();//image.getData();
+			imageDataset = getImageData(image);
 
 			if (imageDataset.containsInvalidNumbers() ) {
 				logger.debug("imageDataset contains invalid numbers");
@@ -1000,6 +1000,15 @@ public class HistogramToolPage extends AbstractToolPage {
 			// finally tie in the listener to the paletedata changes
 			image.addPaletteListener(paletteListener);
 		}				
+	}
+
+	private AbstractDataset getImageData(IPaletteTrace image) {
+		AbstractDataset imageDataset = (AbstractDataset)image.getImageServiceBean().getImage();
+//		if (image.getImageServiceBean().isLogColorScale()) {
+//			AbstractDataset result = Maths.subtract(imageDataset, image.getImageServiceBean().getLogOffset());
+//			imageDataset = Maths.log10(result);
+//		}
+		return imageDataset;
 	}
 
 	private void removeImagePaletteListener() {
@@ -1071,7 +1080,7 @@ public class HistogramToolPage extends AbstractToolPage {
 		if (getPlottingSystem()==null) return; // Nothing to update
 		if (image==null) return;
 		
-		imageDataset = (AbstractDataset)image.getImageServiceBean().getImage();
+		imageDataset = getImageData(image);
 		
 		if (Double.isInfinite(scaleMaxTemp)) scaleMaxTemp = imageDataset.max(true).doubleValue();
 		if (Double.isInfinite(scaleMinTemp)) scaleMinTemp = imageDataset.min(true).doubleValue();
@@ -1198,6 +1207,7 @@ public class HistogramToolPage extends AbstractToolPage {
 				greenTrace.setData(RGBX, G);
 				blueTrace.setData(RGBX, B);
 				histogramPlot.getSelectedXAxis().setRange(scaleMin, scaleMax);
+				histogramPlot.getSelectedXAxis().setLog10(btnColourMapLog.getSelection());
 				histogramPlot.getSelectedYAxis().setRange(0, finalScale*256);
 				histogramPlot.repaint();
 			}

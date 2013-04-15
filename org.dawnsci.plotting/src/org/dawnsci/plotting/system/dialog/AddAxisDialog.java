@@ -1,7 +1,7 @@
 package org.dawnsci.plotting.system.dialog;
 
-import org.dawb.common.ui.plot.IPlottingSystem;
-import org.dawb.common.ui.plot.axis.AxisUtils;
+import org.dawnsci.plotting.api.IPlottingSystem;
+import org.dawnsci.plotting.api.axis.AxisUtils;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;

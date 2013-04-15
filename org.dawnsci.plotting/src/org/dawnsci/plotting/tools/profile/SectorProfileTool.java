@@ -7,16 +7,16 @@ import java.util.Collection;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
-import org.dawb.common.ui.plot.region.IRegion;
-import org.dawb.common.ui.plot.region.IRegion.RegionType;
-import org.dawb.common.ui.plot.region.IRegionListener;
-import org.dawb.common.ui.plot.region.ROIEvent;
-import org.dawb.common.ui.plot.region.RegionEvent;
-import org.dawb.common.ui.plot.trace.IImageTrace;
-import org.dawb.common.ui.plot.trace.ILineTrace;
-import org.dawb.common.ui.plot.trace.ITrace;
 
 import org.dawnsci.plotting.Activator;
+import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.IRegionListener;
+import org.dawnsci.plotting.api.region.ROIEvent;
+import org.dawnsci.plotting.api.region.RegionEvent;
+import org.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.dawnsci.plotting.api.trace.IImageTrace;
+import org.dawnsci.plotting.api.trace.ILineTrace;
+import org.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -24,6 +24,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
@@ -66,7 +67,7 @@ public abstract class SectorProfileTool extends ProfileTool {
 				}
 					
 				if (evt.getRegion()!=null && evt.getRegion().getRegionType()==RegionType.SECTOR) {
-					SectorROI sroi = (SectorROI)evt.getRegion().getROI().copy();
+					SectorROI sroi = (SectorROI)((ROIBase)evt.getRegion().getROI()).copy();
 					sroi.setSymmetry(preferredSymmetry);
 					sroi.setCombineSymmetry(preferredCombine);
 					evt.getRegion().setROI(sroi);
@@ -233,7 +234,7 @@ public abstract class SectorProfileTool extends ProfileTool {
  	}
 
 	private double[] getImageCenter() {
-    	final AbstractDataset image = getImageTrace().getData();
+    	final AbstractDataset image = (AbstractDataset)getImageTrace().getData();
     	return new double[]{image.getShape()[1]/2d, image.getShape()[0]/2d};
 	}
 
@@ -275,8 +276,8 @@ public abstract class SectorProfileTool extends ProfileTool {
 
 		if (monitor.isCanceled()) return;
 		
-		final AbstractDataset data = isDrag ? image.getDownsampled()     : image.getData();
-		final AbstractDataset mask = isDrag ? image.getDownsampledMask() : image.getMask();
+		final AbstractDataset data = isDrag ? (AbstractDataset)image.getDownsampled()     : (AbstractDataset)image.getData();
+		final AbstractDataset mask = isDrag ? (AbstractDataset)image.getDownsampledMask() : (AbstractDataset)image.getMask();
 		
 		SectorROI downsroi = null;
 		if (isDrag) {
@@ -304,7 +305,7 @@ public abstract class SectorProfileTool extends ProfileTool {
 
 			} else {
 
-				Collection<ITrace> plotted = profilePlottingSystem.createPlot1D(xi, Arrays.asList(new AbstractDataset[]{integral}), monitor);
+				Collection<ITrace> plotted = profilePlottingSystem.createPlot1D(xi, Arrays.asList(new IDataset[]{integral}), monitor);
 				registerTraces(region, plotted);			
 			}
 		}

@@ -5,32 +5,32 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.dawb.common.services.HistogramBound;
 import org.dawb.common.ui.image.CursorUtils;
 import org.dawb.common.ui.image.IconUtils;
 import org.dawb.common.ui.image.ShapeType;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
-import org.dawb.common.ui.plot.IPlottingSystem;
-import org.dawb.common.ui.plot.region.IROIListener;
-import org.dawb.common.ui.plot.region.IRegion;
-import org.dawb.common.ui.plot.region.IRegion.RegionType;
-import org.dawb.common.ui.plot.region.IRegionListener;
-import org.dawb.common.ui.plot.region.ROIEvent;
-import org.dawb.common.ui.plot.region.RegionEvent;
-import org.dawb.common.ui.plot.region.RegionUtils;
-import org.dawb.common.ui.plot.tool.AbstractToolPage;
-import org.dawb.common.ui.plot.trace.IImageTrace;
-import org.dawb.common.ui.plot.trace.IPaletteListener;
-import org.dawb.common.ui.plot.trace.ITraceListener;
-import org.dawb.common.ui.plot.trace.PaletteEvent;
-import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.common.ui.util.ColorUtility;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.wizard.persistence.PersistenceExportWizard;
 import org.dawb.common.ui.wizard.persistence.PersistenceImportWizard;
 import org.dawnsci.plotting.Activator;
+import org.dawnsci.plotting.api.IPlottingSystem;
+import org.dawnsci.plotting.api.histogram.HistogramBound;
+import org.dawnsci.plotting.api.region.IROIListener;
+import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.IRegionListener;
+import org.dawnsci.plotting.api.region.ROIEvent;
+import org.dawnsci.plotting.api.region.RegionEvent;
+import org.dawnsci.plotting.api.region.RegionUtils;
+import org.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.dawnsci.plotting.api.tool.AbstractToolPage;
+import org.dawnsci.plotting.api.trace.IImageTrace;
+import org.dawnsci.plotting.api.trace.IPaletteListener;
+import org.dawnsci.plotting.api.trace.ITraceListener;
+import org.dawnsci.plotting.api.trace.PaletteEvent;
+import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.preference.PlottingConstants;
 import org.eclipse.core.commands.operations.IOperationHistoryListener;
 import org.eclipse.core.commands.operations.OperationHistoryEvent;
@@ -899,7 +899,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		if (getImageTrace()!=null) {
 			if (savedMask==null) return;
 			if (maskObject.getImageDataset()==null){
-				maskObject.setImageDataset(getImageTrace().getData());
+				maskObject.setImageDataset((AbstractDataset)getImageTrace().getData());
 			}
 			maskObject.process(savedMask);
 			getImageTrace().setMask(maskObject.getMaskDataset());
@@ -1272,13 +1272,13 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 				if (maskObject.getMaskDataset()==null) {
 					// The mask must be maintained as a BooleanDataset so that there is the option
 					// of applying the same mask to many images.
-					final AbstractDataset unmasked = image.getData();
+					final AbstractDataset unmasked = (AbstractDataset)image.getData();
 					maskObject.setMaskDataset(new BooleanDataset(unmasked.getShape()), true);
 					maskObject.setImageDataset(unmasked);
 				}
 				
 				if (maskObject.getImageDataset()==null) {
-					final AbstractDataset unmasked = image.getData();
+					final AbstractDataset unmasked = (AbstractDataset)image.getData();
 					maskObject.setImageDataset(unmasked);
 				}
 				

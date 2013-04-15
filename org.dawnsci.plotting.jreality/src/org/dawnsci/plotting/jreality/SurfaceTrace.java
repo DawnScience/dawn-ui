@@ -5,14 +5,14 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-import org.dawb.common.services.HistogramBound;
 import org.dawb.common.services.IPaletteService;
-import org.dawb.common.services.ImageServiceBean;
 import org.dawb.common.ui.plot.roi.data.SurfacePlotROI;
-import org.dawb.common.ui.plot.trace.IPaletteListener;
-import org.dawb.common.ui.plot.trace.ISurfaceTrace;
-import org.dawb.common.ui.plot.trace.PaletteEvent;
-import org.dawb.common.ui.plot.trace.TraceEvent;
+import org.dawnsci.plotting.api.histogram.HistogramBound;
+import org.dawnsci.plotting.api.histogram.ImageServiceBean;
+import org.dawnsci.plotting.api.trace.IPaletteListener;
+import org.dawnsci.plotting.api.trace.ISurfaceTrace;
+import org.dawnsci.plotting.api.trace.PaletteEvent;
+import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.jreality.data.ColourImageData;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -23,6 +23,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
@@ -118,14 +120,15 @@ public class SurfaceTrace extends PlotterTrace implements ISurfaceTrace{
 	}
 
 
-	public void setData(final AbstractDataset data, List<AbstractDataset> axes) {
+	@SuppressWarnings("unchecked")
+	public void setData(final IDataset data, List<? extends IDataset> axes) {
 		
 		if (axes!=null && axes.size()==2) {
 			axes = Arrays.asList(axes.get(0), axes.get(1), null);
 		}
 		
-		this.data = data;
-		this.axes = axes;
+		this.data = (AbstractDataset)data;
+		this.axes = (List<IDataset>) axes;
 		if (isActive()) {
 			plotter.updatePlot(createAxisValues(), plotter.getWindow(getWindow()), PlottingMode.SURF2D, getData());
 			
@@ -174,7 +177,7 @@ public class SurfaceTrace extends PlotterTrace implements ISurfaceTrace{
 	 * Also ignores data windows outside the data size.
 	 */
 	@Override
-	public void setWindow(ROIBase window) {
+	public void setWindow(IROI window) {
 		if (window instanceof RectangularROI && getData()!=null) {
 			RectangularROI rroi = (RectangularROI)window;
 			int[]       start = rroi.getIntPoint();
@@ -188,8 +191,8 @@ public class SurfaceTrace extends PlotterTrace implements ISurfaceTrace{
 			window = new SurfacePlotROI(start[0], start[1], end[0], end[1], 0,0,0,0);
 		}
 			
-		this.window = window;
-		if (plotter!=null && this.isActive()) plotter.setSurfaceWindow(window);
+		this.window = (ROIBase)window;
+		if (plotter!=null && this.isActive()) plotter.setSurfaceWindow(this.window);
 	}
 
 	private int[] normalize(int[] point, int maxX, int maxY) {

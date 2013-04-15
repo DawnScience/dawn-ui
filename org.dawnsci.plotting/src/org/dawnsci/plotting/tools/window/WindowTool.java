@@ -35,28 +35,28 @@ import java.util.Collection;
 import java.util.List;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
-import org.dawb.common.ui.plot.PlotType;
 import org.dawb.common.ui.plot.PlottingFactory;
-import org.dawb.common.ui.plot.region.IROIListener;
-import org.dawb.common.ui.plot.region.IRegion;
-import org.dawb.common.ui.plot.region.IRegion.RegionType;
-import org.dawb.common.ui.plot.region.IRegionListener;
-import org.dawb.common.ui.plot.region.ROIEvent;
-import org.dawb.common.ui.plot.region.RegionEvent;
-import org.dawb.common.ui.plot.tool.AbstractToolPage;
-import org.dawb.common.ui.plot.tool.IToolPageSystem;
-import org.dawb.common.ui.plot.trace.IPaletteListener;
-import org.dawb.common.ui.plot.trace.IPaletteListener.Stub;
-import org.dawb.common.ui.plot.trace.IPaletteTrace;
-import org.dawb.common.ui.plot.trace.ILineStackTrace;
-import org.dawb.common.ui.plot.trace.ISurfaceTrace;
-import org.dawb.common.ui.plot.trace.ITrace;
-import org.dawb.common.ui.plot.trace.ITraceListener;
-import org.dawb.common.ui.plot.trace.IWindowTrace;
-import org.dawb.common.ui.plot.trace.PaletteEvent;
-import org.dawb.common.ui.plot.trace.TraceEvent;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.plotting.Activator;
+import org.dawnsci.plotting.api.PlotType;
+import org.dawnsci.plotting.api.region.IROIListener;
+import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.IRegionListener;
+import org.dawnsci.plotting.api.region.ROIEvent;
+import org.dawnsci.plotting.api.region.RegionEvent;
+import org.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.dawnsci.plotting.api.tool.AbstractToolPage;
+import org.dawnsci.plotting.api.tool.IToolPageSystem;
+import org.dawnsci.plotting.api.trace.ILineStackTrace;
+import org.dawnsci.plotting.api.trace.IPaletteListener;
+import org.dawnsci.plotting.api.trace.IPaletteTrace;
+import org.dawnsci.plotting.api.trace.ISurfaceTrace;
+import org.dawnsci.plotting.api.trace.ITrace;
+import org.dawnsci.plotting.api.trace.ITraceListener;
+import org.dawnsci.plotting.api.trace.IWindowTrace;
+import org.dawnsci.plotting.api.trace.PaletteEvent;
+import org.dawnsci.plotting.api.trace.TraceEvent;
+import org.dawnsci.plotting.api.trace.IPaletteListener.Stub;
 import org.dawnsci.plotting.jreality.SurfaceTrace;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -80,6 +80,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
@@ -143,7 +144,7 @@ public class WindowTool extends AbstractToolPage {
 			
 			this.roiListener = new IROIListener.Stub() {
 				public void update(ROIEvent evt) {
-					windowJob.schedule(evt.getROI());
+					windowJob.schedule((ROIBase)evt.getROI());
 				}
 			};
 			
@@ -352,8 +353,8 @@ public class WindowTool extends AbstractToolPage {
 		StackLayout stackLayout = (StackLayout)content.getLayout();
 		stackLayout.topControl  = windowSystem.getPlotComposite();
 		
-		AbstractDataset data = trace.getData();
-		List<AbstractDataset> axes = trace.getAxes();
+		AbstractDataset data =  (AbstractDataset)trace.getData();
+		List<IDataset> axes = trace.getAxes();
 		if (axes!=null) axes = Arrays.asList(axes.get(0), axes.get(1));
 		windowSystem.updatePlot2D(data, axes, null);	
 		

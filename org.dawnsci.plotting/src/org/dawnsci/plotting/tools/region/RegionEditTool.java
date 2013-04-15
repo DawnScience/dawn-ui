@@ -1,8 +1,8 @@
 package org.dawnsci.plotting.tools.region;
 
-import org.dawb.common.ui.plot.axis.ICoordinateSystem;
-import org.dawb.common.ui.plot.region.IRegion;
-import org.dawb.common.ui.plot.region.RegionUtils;
+import org.dawnsci.plotting.api.axis.ICoordinateSystem;
+import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.RegionUtils;
 import org.dawnsci.plotting.tools.region.MeasurementLabelProvider.LabelType;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.CheckboxCellEditor;
@@ -178,7 +178,7 @@ public class RegionEditTool extends AbstractRegionTableTool {
 		@Override
 		protected Object getValue(Object element) {
 			final IRegion region = (IRegion)element;
-			ROIBase roi = region.getROI();
+			ROIBase roi = (ROIBase)region.getROI();
 			ICoordinateSystem coords = region.getCoordinateSystem();
 			switch (column){
 			case 0:
@@ -227,7 +227,7 @@ public class RegionEditTool extends AbstractRegionTableTool {
 		private void setValue(Object element, Object value, boolean tableRefresh) throws Exception {
 
 			final IRegion region = (IRegion) element;
-			ROIBase myRoi = region.getROI();
+			ROIBase myRoi = (ROIBase)region.getROI();
 			ICoordinateSystem coords = region.getCoordinateSystem();
 			switch (column){
 			case 0:

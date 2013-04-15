@@ -13,23 +13,23 @@ import org.csstudio.swt.widgets.figureparts.ColorMapRamp;
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.IAxisListener;
 import org.csstudio.swt.xygraph.linearscale.Range;
-import org.dawb.common.services.HistogramBound;
-import org.dawb.common.services.IImageService;
 import org.dawb.common.services.IPaletteService;
-import org.dawb.common.services.ImageServiceBean;
-import org.dawb.common.services.ImageServiceBean.HistoType;
-import org.dawb.common.services.ImageServiceBean.ImageOrigin;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
-import org.dawb.common.ui.plot.trace.DownSampleEvent;
-import org.dawb.common.ui.plot.trace.IDownSampleListener;
-import org.dawb.common.ui.plot.trace.IImageTrace;
-import org.dawb.common.ui.plot.trace.IPaletteListener;
-import org.dawb.common.ui.plot.trace.ITrace;
-import org.dawb.common.ui.plot.trace.ITraceContainer;
-import org.dawb.common.ui.plot.trace.PaletteEvent;
-import org.dawb.common.ui.plot.trace.TraceEvent;
-import org.dawb.common.ui.plot.trace.TraceUtils;
-import org.dawb.common.ui.plot.trace.TraceWillPlotEvent;
+import org.dawnsci.plotting.api.histogram.HistogramBound;
+import org.dawnsci.plotting.api.histogram.IImageService;
+import org.dawnsci.plotting.api.histogram.ImageServiceBean;
+import org.dawnsci.plotting.api.histogram.ImageServiceBean.HistoType;
+import org.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
+import org.dawnsci.plotting.api.trace.DownSampleEvent;
+import org.dawnsci.plotting.api.trace.IDownSampleListener;
+import org.dawnsci.plotting.api.trace.IImageTrace;
+import org.dawnsci.plotting.api.trace.IPaletteListener;
+import org.dawnsci.plotting.api.trace.ITrace;
+import org.dawnsci.plotting.api.trace.ITraceContainer;
+import org.dawnsci.plotting.api.trace.PaletteEvent;
+import org.dawnsci.plotting.api.trace.TraceEvent;
+import org.dawnsci.plotting.api.trace.TraceUtils;
+import org.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.draw2d.Figure;
@@ -50,14 +50,14 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.BooleanDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
-import uk.ac.diamond.scisoft.analysis.dataset.Maths;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.function.Downsample;
 import uk.ac.diamond.scisoft.analysis.dataset.function.DownsampleMode;
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.PointROI;
 import uk.ac.diamond.scisoft.analysis.roi.PolygonalROI;
 import uk.ac.diamond.scisoft.analysis.roi.PolylineROI;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 /**
@@ -79,7 +79,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	private AbstractDataset  image;
 	private DownsampleType   downsampleType=DownsampleType.MAXIMUM;
 	private int              currentDownSampleBin=-1;
-	private List<AbstractDataset> axes;
+	private List<IDataset>    axes;
 	private ImageServiceBean imageServiceBean;
 	private boolean          isMaximumZoom;
 	private AbstractPlottingSystem plottingSystem;
@@ -251,20 +251,14 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				
 				if (rescaleType==ImageScaleType.REHISTOGRAM) { // Avoids changing colouring to 
 					// max and min of new selection.
-					AbstractDataset  slice     = slice(getYAxis().getRange(), getXAxis().getRange(), getData());
+					AbstractDataset  slice     = slice(getYAxis().getRange(), getXAxis().getRange(), (AbstractDataset)getData());
 					ImageServiceBean histoBean = imageServiceBean.clone();
 					histoBean.setImage(slice);
 					if (fullMask!=null) histoBean.setMask(slice(getYAxis().getRange(), getXAxis().getRange(), fullMask));
 					float[] fa = service.getFastStatistics(histoBean);
-					
-					// Not sure how to deal with this better, but if the bean is logged, then you need to modify the values
-					if (imageServiceBean.isLogColorScale()) {
-						setMin(Math.log10(fa[0]));
-						setMax(Math.log10(fa[1]));
-					} else {
-						setMin(fa[0]);
-						setMax(fa[1]);
-					}
+					setMin(fa[0]);
+					setMax(fa[1]);
+
 				}
 								
 				this.imageData   = service.getImageData(imageServiceBean);
@@ -670,7 +664,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 
 	@Override
-	public AbstractDataset getData() {
+	public IDataset getData() {
 		return image;
 	}
 
@@ -814,7 +808,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		}
 	}
 	
-	private void setupAxis(Axis axis, Range bounds, AbstractDataset labels) {
+	private void setupAxis(Axis axis, Range bounds, IDataset labels) {
 		((AspectAxis)axis).setMaximumRange(bounds);
 		((AspectAxis)axis).setLabelDataAndTitle(labels);
 	}
@@ -837,7 +831,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 
 	@Override
-	public boolean setData(AbstractDataset image, List<AbstractDataset> axes, boolean performAuto) {
+	public boolean setData(IDataset image, List<? extends IDataset> axes, boolean performAuto) {
 		
 		if (plottingSystem!=null) try {
 			if (plottingSystem.getTraces().contains(this)) {
@@ -859,7 +853,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		// We do not currently reflect it as it takes too long. Instead in the slice
 		// method, we allow for the fact that the dataset is in a different orientation to 
 		// what is plotted.
-		this.image = image;
+		this.image = (AbstractDataset)image;
 		if (this.mipMap!=null) mipMap.clear();
 		
 		
@@ -886,9 +880,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		return true;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
-	public void setAxes(List<AbstractDataset> axes, boolean performAuto) {
-		this.axes  = axes;
+	public void setAxes(List<? extends IDataset> axes, boolean performAuto) {
+		this.axes  = (List<IDataset>) axes;
 		createAxisBounds();
 		
 		if (performAuto) {
@@ -1045,10 +1040,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		repaint();
 	}
 	
-
 	@Override
-	public List<AbstractDataset> getAxes() {
-		return axes;
+	public List<IDataset> getAxes() {
+		return (List<IDataset>) axes;
 	}
 
 	/**
@@ -1154,7 +1148,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 * 
 	 * @param bd
 	 */
-	public void setMask(AbstractDataset mask) {
+	public void setMask(IDataset mask) {
 		
 		if (mask!=null && image!=null && !image.isCompatibleWith(mask)) {
 			
@@ -1179,7 +1173,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			mask = maskDataset;
 		}
 		if (maskMap!=null) maskMap.clear();
-		fullMask = mask;
+		fullMask = (AbstractDataset)mask;
 		rehistogram();
 		fireMaskListeners();
 	}
@@ -1220,12 +1214,12 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 *         is created. The data processing needs rois with indices.
 	 */
 	@Override
-	public ROIBase getRegionInAxisCoordinates(final ROIBase roi) throws Exception {
+	public IROI getRegionInAxisCoordinates(final IROI roi) throws Exception {
 		
 		if (!TraceUtils.isCustomAxes(this)) return roi;
 		
-		final AbstractDataset xl = axes.get(0); // May be null
-		final AbstractDataset yl = axes.get(1); // May be null
+		final AbstractDataset xl = (AbstractDataset)axes.get(0); // May be null
+		final AbstractDataset yl = (AbstractDataset)axes.get(1); // May be null
 		
 		if (roi instanceof LinearROI) {
 			double[] sp = ((LinearROI)roi).getPoint();
@@ -1270,8 +1264,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	public double[] getPointInAxisCoordinates(final double[] point) throws Exception {
 		if (!TraceUtils.isCustomAxes(this)) return point;
 		
-		final AbstractDataset xl = axes.get(0); // May be null
-		final AbstractDataset yl = axes.get(1); // May be null
+		final AbstractDataset xl = (AbstractDataset)axes.get(0); // May be null
+		final AbstractDataset yl = (AbstractDataset)axes.get(1); // May be null
 		final double[] ret = point.clone();
 		transform(xl,0,ret);
 		transform(yl,1,ret);
@@ -1282,8 +1276,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	public double[] getPointInImageCoordinates(final double[] axisLocation) throws Exception {
 		if (!TraceUtils.isCustomAxes(this)) return axisLocation;
 		
-		final AbstractDataset xl = axes.get(0); // May be null
-		final AbstractDataset yl = axes.get(1); // May be null
+		final AbstractDataset xl = (AbstractDataset)axes.get(0); // May be null
+		final AbstractDataset yl = (AbstractDataset)axes.get(1); // May be null
 		final double xIndex = Double.isNaN(axisLocation[0])
 				            ? Double.NaN
 				            : DatasetUtils.crossings(xl, axisLocation[0]).get(0);

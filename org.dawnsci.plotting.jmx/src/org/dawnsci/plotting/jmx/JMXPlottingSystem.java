@@ -5,22 +5,22 @@ import java.util.List;
 
 import javax.management.MalformedObjectNameException;
 
-import org.dawb.common.ui.plot.IPlotActionSystem;
-import org.dawb.common.ui.plot.IPlottingSystem;
-import org.dawb.common.ui.plot.PlotType;
-import org.dawb.common.ui.plot.annotation.IAnnotation;
-import org.dawb.common.ui.plot.axis.IAxis;
-import org.dawb.common.ui.plot.axis.IPositionListener;
-import org.dawb.common.ui.plot.region.IRegion;
-import org.dawb.common.ui.plot.region.IRegion.RegionType;
-import org.dawb.common.ui.plot.region.IRegionListener;
-import org.dawb.common.ui.plot.trace.IImageStackTrace;
-import org.dawb.common.ui.plot.trace.IImageTrace;
-import org.dawb.common.ui.plot.trace.ILineStackTrace;
-import org.dawb.common.ui.plot.trace.ILineTrace;
-import org.dawb.common.ui.plot.trace.ISurfaceTrace;
-import org.dawb.common.ui.plot.trace.ITrace;
-import org.dawb.common.ui.plot.trace.ITraceListener;
+import org.dawnsci.plotting.api.IPlotActionSystem;
+import org.dawnsci.plotting.api.IPlottingSystem;
+import org.dawnsci.plotting.api.PlotType;
+import org.dawnsci.plotting.api.annotation.IAnnotation;
+import org.dawnsci.plotting.api.axis.IAxis;
+import org.dawnsci.plotting.api.axis.IPositionListener;
+import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.dawnsci.plotting.api.region.IRegionListener;
+import org.dawnsci.plotting.api.trace.IImageStackTrace;
+import org.dawnsci.plotting.api.trace.IImageTrace;
+import org.dawnsci.plotting.api.trace.ILineStackTrace;
+import org.dawnsci.plotting.api.trace.ILineTrace;
+import org.dawnsci.plotting.api.trace.ISurfaceTrace;
+import org.dawnsci.plotting.api.trace.ITrace;
+import org.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.widgets.Composite;
@@ -28,6 +28,7 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchPart;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 /**
  * This class implements IPlottingSystem but can be used 
@@ -45,6 +46,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
  * @author fcp94556
  *
  */
+@SuppressWarnings("unchecked")
 public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSystem {
 
 	
@@ -150,7 +152,7 @@ public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSyste
 
 	@Override
 	public Collection<IRegion> getRegions(RegionType type) {
-        return (Collection<IRegion>)call(getMethodName(Thread.currentThread().getStackTrace()), type);
+		return (Collection<IRegion>)call(getMethodName(Thread.currentThread().getStackTrace()), type);
 	}
 
 	@Override
@@ -282,31 +284,31 @@ public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSyste
 	}
 
 	@Override
-	public List<ITrace> createPlot1D(AbstractDataset x, List<AbstractDataset> ys, IProgressMonitor monitor) {
+	public List<ITrace> createPlot1D(IDataset x, List<? extends IDataset> ys, IProgressMonitor monitor) {
 		return (List<ITrace>)call(getMethodName(Thread.currentThread().getStackTrace()), x,ys,monitor);
 	}
 
 	@Override
-	public List<ITrace> createPlot1D(AbstractDataset x,
-			List<AbstractDataset> ys, String title, IProgressMonitor monitor) {
+	public List<ITrace> createPlot1D(IDataset x,
+			List<? extends IDataset> ys, String title, IProgressMonitor monitor) {
 		return (List<ITrace>)call(getMethodName(Thread.currentThread().getStackTrace()), x,ys, title, monitor);
 	}
 
 	@Override
-	public List<ITrace> updatePlot1D(AbstractDataset x,
-			List<AbstractDataset> ys, IProgressMonitor monitor) {
+	public List<ITrace> updatePlot1D(IDataset x,
+			List<? extends IDataset> ys, IProgressMonitor monitor) {
 		return (List<ITrace>)call(getMethodName(Thread.currentThread().getStackTrace()), x,ys,monitor);
 	}
 
 	@Override
-	public ITrace createPlot2D(AbstractDataset image,
-			List<AbstractDataset> axes, IProgressMonitor monitor) {
+	public ITrace createPlot2D(IDataset image,
+			List<? extends IDataset> axes, IProgressMonitor monitor) {
 		return (ITrace)call(getMethodName(Thread.currentThread().getStackTrace()), image,axes,monitor);
 	}
 
 	@Override
-	public ITrace updatePlot2D(AbstractDataset image,
-			List<AbstractDataset> axes, IProgressMonitor monitor) {
+	public ITrace updatePlot2D(IDataset image,
+			List<? extends IDataset> axes, IProgressMonitor monitor) {
 		return (ITrace)call(getMethodName(Thread.currentThread().getStackTrace()), image,axes,monitor);
 	}
 
@@ -377,27 +379,26 @@ public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSyste
 
 	@Override
 	public void setDefaultCursor(int cursorType) {
-		call(getMethodName(Thread.currentThread().getStackTrace()), new Class[]{int.class}, cursorType);
+		call(getMethodName(Thread.currentThread().getStackTrace()), new Class[] { int.class }, cursorType);
 	}
-		
+
 	@Override
 	public IAxis removeAxis(IAxis axis) {
-		return (IAxis)call(getMethodName(Thread.currentThread().getStackTrace()), axis);	
-	}  
-	
-	@SuppressWarnings("unchecked")
+		return (IAxis) call(getMethodName(Thread.currentThread().getStackTrace()), axis);
+	}
+
 	@Override
 	public List<IAxis> getAxes() {
-		return (List<IAxis>)call(getMethodName(Thread.currentThread().getStackTrace()));	
+		return (List<IAxis>) call(getMethodName(Thread.currentThread().getStackTrace()));
 	}
-	
+
 	@Override
 	public void addPositionListener(IPositionListener l) {
-		call(getMethodName(Thread.currentThread().getStackTrace()), new Class[]{IPositionListener.class}, l);
+		call(getMethodName(Thread.currentThread().getStackTrace()), new Class[] { IPositionListener.class }, l);
 	}
 
 	@Override
 	public void removePositionListener(IPositionListener l) {
-		call(getMethodName(Thread.currentThread().getStackTrace()), new Class[]{IPositionListener.class}, l);
+		call(getMethodName(Thread.currentThread().getStackTrace()), new Class[] { IPositionListener.class }, l);
 	}
 }
