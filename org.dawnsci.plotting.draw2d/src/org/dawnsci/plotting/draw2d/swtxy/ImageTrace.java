@@ -431,6 +431,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			}
 
 			return true;
+		} catch (IllegalArgumentException ie) {
+			logger.error(ie.toString());
+			return false;
 		} catch (java.lang.NegativeArraySizeException allowed) {
 			return false;
 			
