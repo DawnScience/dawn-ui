@@ -16,8 +16,8 @@ import org.eclipse.core.runtime.Status;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.ROIProfile;
 
 public class LineProfileTool extends ProfileTool {
@@ -31,7 +31,7 @@ public class LineProfileTool extends ProfileTool {
 	@Override
 	protected void createProfile(	IImageTrace  image, 
 						            IRegion      region, 
-						            ROIBase      rbs, 
+						            IROI         rbs, 
 						            boolean      tryUpdate,
 				                    boolean      isDrag,
 						            IProgressMonitor monitor) {

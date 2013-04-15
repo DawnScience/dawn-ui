@@ -20,8 +20,8 @@ import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
 
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 
@@ -310,7 +310,7 @@ class AxisSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	public ROIBase createROI(boolean recordResult) {
+	public IROI createROI(boolean recordResult) {
 		if (line1!=null) {
 			final Rectangle rect = getRectangleFromVertices();
 			final RectangularROI rroi = getRoiFromRectangle(rect);
@@ -321,7 +321,7 @@ class AxisSelection extends AbstractSelectionRegion {
 		return super.getROI();
 	}
 	
-	protected void updateROI(ROIBase roi) {
+	protected void updateROI(IROI roi) {
 		
 		if (line1 == null) return;
 		

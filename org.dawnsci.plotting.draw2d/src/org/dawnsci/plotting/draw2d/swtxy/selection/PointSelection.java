@@ -16,8 +16,8 @@ import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.graphics.Color;
 
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.PointROI;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
 public class PointSelection extends AbstractSelectionRegion {
 
@@ -147,7 +147,7 @@ public class PointSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	protected ROIBase createROI(boolean recordResult) {
+	protected IROI createROI(boolean recordResult) {
 		if (point == null) return getROI();
 		final PointROI proi = new PointROI(point.getPosition());
 		if (roi!=null) proi.setPlot(roi.isPlot());
@@ -159,7 +159,7 @@ public class PointSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	protected void updateROI(ROIBase roi) {
+	protected void updateROI(IROI roi) {
 		if (roi instanceof PointROI) {
 			if (point==null) return;
 

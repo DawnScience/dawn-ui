@@ -10,7 +10,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 
 import uk.ac.diamond.scisoft.analysis.roi.GridROI;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 
@@ -166,7 +166,7 @@ public class GridSelection extends BoxSelection {
 
 
 	@Override
-	public ROIBase createROI(boolean recordResult) {
+	public IROI createROI(boolean recordResult) {
 		if (p1!=null) {
 			final Rectangle  rect = getRectangleFromVertices();			
 			final GridROI    groi = (GridROI)getRoiFromRectangle(rect);
@@ -200,8 +200,8 @@ public class GridSelection extends BoxSelection {
 		return groi;
 	}
 
-	
-	protected void updateROI(ROIBase roi) {
+	@Override
+	protected void updateROI(IROI roi) {
 		if (roi instanceof GridROI) {
 			GridROI groi = (GridROI) roi;
 			if (p1!=null) p1.setPosition(groi.getPointRef());

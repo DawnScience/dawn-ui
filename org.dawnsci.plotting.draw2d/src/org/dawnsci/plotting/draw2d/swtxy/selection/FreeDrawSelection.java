@@ -13,7 +13,7 @@ import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
 
 import uk.ac.diamond.scisoft.analysis.roi.FreeDrawROI;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
 /**
  * Used for masking. This region can be transformed into the masking
@@ -167,7 +167,7 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	protected ROIBase createROI(boolean recordResult) {
+	protected IROI createROI(boolean recordResult) {
 		if (points == null) return getROI();
 		
 		final FreeDrawROI proi = new FreeDrawROI();
@@ -186,13 +186,13 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	protected void updateROI(ROIBase roi) {
+	protected void updateROI(IROI roi) {
 		if (roi instanceof FreeDrawROI) {
 			final FreeDrawROI proi = (FreeDrawROI) roi;
 			if (points==null) points = new PointList();
 	        points.removeAllPoints();
 	        
-	        for (ROIBase p : proi) {
+	        for (IROI p : proi) {
 	           	final int[] pix = coords.getValuePosition(p.getPoint());
 	           	points.addPoint(new Point(pix[0],pix[1]));
 			}

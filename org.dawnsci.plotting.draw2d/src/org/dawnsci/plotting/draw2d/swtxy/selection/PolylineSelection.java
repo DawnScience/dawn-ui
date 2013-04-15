@@ -35,9 +35,9 @@ import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
 
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.PointROI;
 import uk.ac.diamond.scisoft.analysis.roi.PolylineROI;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
 public class PolylineSelection extends AbstractSelectionRegion {
 
@@ -127,7 +127,7 @@ public class PolylineSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	protected ROIBase createROI(boolean recordResult) {
+	protected IROI createROI(boolean recordResult) {
 		final PointList pl = pline.getPoints();
 		final PolylineROI proi = new PolylineROI();
 		for (int i = 0, imax = pl.size(); i < imax; i++) {
@@ -144,7 +144,7 @@ public class PolylineSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	protected void updateROI(ROIBase roi) {
+	protected void updateROI(IROI roi) {
 		if (roi instanceof PolylineROI) {
 			if (pline == null)
 				return;

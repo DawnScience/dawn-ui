@@ -11,7 +11,6 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
 public class StackTrace extends PlotterTrace implements ILineStackTrace {
 
@@ -76,7 +75,7 @@ public class StackTrace extends PlotterTrace implements ILineStackTrace {
 
 	@Override
     public void setWindow(IROI roi) {
-		window=(ROIBase)roi;
+		window=roi;
 		if (plotter!=null && this.isActive()) plotter.setStackWindow(window);
 	}
     

@@ -18,7 +18,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 import javax.vecmath.Vector3d;
@@ -366,9 +366,9 @@ public class FittedFunction  {
 		this.dataTrace = dataTrace;
 	}
 
-	public List<ROIBase> getRegions() {
+	public List<IROI> getRegions() {
 		if (fwhm!=null && center!=null) {
-			return Arrays.asList((ROIBase)fwhm.getROI(), (ROIBase)center.getROI());
+			return Arrays.asList(fwhm.getROI(), center.getROI());
 		}
 		return null;
 	}

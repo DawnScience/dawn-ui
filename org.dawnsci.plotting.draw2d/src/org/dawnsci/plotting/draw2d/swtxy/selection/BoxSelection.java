@@ -18,7 +18,7 @@ import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.graphics.Color;
 
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 
@@ -208,7 +208,7 @@ class BoxSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	public ROIBase createROI(boolean recordResult) {
+	public IROI createROI(boolean recordResult) {
 		if (p1!=null) {
 			final Rectangle rect = getRectangleFromVertices();			
 			final RectangularROI rroi = getRoiFromRectangle(rect);
@@ -220,7 +220,7 @@ class BoxSelection extends AbstractSelectionRegion {
 		return super.getROI();
 	}
 
-	protected void updateROI(ROIBase roi) {
+	protected void updateROI(IROI roi) {
 		if (roi instanceof RectangularROI) {
 			RectangularROI rroi = (RectangularROI) roi;
 			if (p1!=null) p1.setPosition(rroi.getPointRef());

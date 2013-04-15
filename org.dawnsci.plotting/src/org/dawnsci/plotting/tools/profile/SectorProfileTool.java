@@ -7,13 +7,12 @@ import java.util.Collection;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
-
 import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.region.IRegionListener;
 import org.dawnsci.plotting.api.region.ROIEvent;
 import org.dawnsci.plotting.api.region.RegionEvent;
-import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.ILineTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
@@ -27,7 +26,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 
 public abstract class SectorProfileTool extends ProfileTool {
@@ -67,7 +66,7 @@ public abstract class SectorProfileTool extends ProfileTool {
 				}
 					
 				if (evt.getRegion()!=null && evt.getRegion().getRegionType()==RegionType.SECTOR) {
-					SectorROI sroi = (SectorROI)((ROIBase)evt.getRegion().getROI()).copy();
+					SectorROI sroi = (SectorROI) evt.getRegion().getROI().copy();
 					sroi.setSymmetry(preferredSymmetry);
 					sroi.setCombineSymmetry(preferredCombine);
 					evt.getRegion().setROI(sroi);
@@ -260,7 +259,7 @@ public abstract class SectorProfileTool extends ProfileTool {
 	@Override
 	protected void createProfile(IImageTrace  image, 
 			                     IRegion      region, 
-			                     ROIBase      rbs, 
+			                     IROI      rbs, 
 			                     boolean      tryUpdate,
 			                     boolean      isDrag,
 			                     IProgressMonitor monitor) {

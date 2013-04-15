@@ -2,18 +2,9 @@ package org.dawnsci.plotting.tools.profile;
 
 import java.util.Collection;
 
-import ncsa.hdf.object.Dataset;
-import ncsa.hdf.object.Group;
-
-import org.dawb.common.ui.plot.tools.IDataReductionToolPage.DataReductionInfo;
-import org.dawb.common.ui.plot.tools.IDataReductionToolPage.DataReductionSlice;
 import org.dawb.gda.extensions.loaders.H5Utils;
-import org.dawb.hdf5.IHierarchicalDataFile;
-import org.dawb.hdf5.Nexus;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.trace.IImageTrace;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;

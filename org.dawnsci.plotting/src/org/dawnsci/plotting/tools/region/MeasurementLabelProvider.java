@@ -12,8 +12,8 @@ import org.eclipse.swt.graphics.Image;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 
@@ -60,7 +60,7 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 		if (!(element instanceof IRegion)) return null;
 		final IRegion    region = (IRegion)element;
 
-		ROIBase roi = tool.getROI(region);
+		IROI roi = tool.getROI(region);
 
 		try {
 			Object fobj = null;
@@ -71,15 +71,15 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 				return region.getLabel();
 			case STARTX:
 				if(roi instanceof LinearROI)
-					fobj = AbstractRegionTableTool.getAxisPoint(coords, ((LinearROI)roi).getPoint())[0];
+					fobj = AbstractRegionTableTool.getAxisPoint(coords, roi.getPoint())[0];
 				else if (roi instanceof RectangularROI)
-					fobj = AbstractRegionTableTool.getAxisPoint(coords, ((RectangularROI)roi).getPoint())[0];
+					fobj = AbstractRegionTableTool.getAxisPoint(coords, roi.getPoint())[0];
 				return fobj == null ? NA : DoubleUtils.formatDouble((Double)fobj, 0);
 			case STARTY: // dx
 				if(roi instanceof LinearROI)
-					fobj = AbstractRegionTableTool.getAxisPoint(coords, ((LinearROI)roi).getPoint())[1];
+					fobj = AbstractRegionTableTool.getAxisPoint(coords, roi.getPoint())[1];
 				else if (roi instanceof RectangularROI)
-					fobj = AbstractRegionTableTool.getAxisPoint(coords, ((RectangularROI)roi).getPoint())[1];
+					fobj = AbstractRegionTableTool.getAxisPoint(coords, roi.getPoint())[1];
 				else
 					;
 				return fobj == null ? NA : DoubleUtils.formatDouble((Double)fobj, 0);
@@ -164,7 +164,7 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 			
 		} catch (Throwable ne) {
 			// One must not throw RuntimeExceptions like null pointers from this
-			// methd becuase the user gets an eclipse dialog confusing them with 
+			// method because the user gets an eclipse dialog confusing them with 
 			// the error
 			logger.error("Cannot get value in info table", ne);
 			return "";

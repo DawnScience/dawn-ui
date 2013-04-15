@@ -18,8 +18,8 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Spinner;
 
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 import uk.ac.gda.richbeans.components.cell.FieldComponentCellEditor;
 import uk.ac.gda.richbeans.components.wrappers.FloatSpinnerWrapper;
@@ -178,7 +178,7 @@ public class RegionEditTool extends AbstractRegionTableTool {
 		@Override
 		protected Object getValue(Object element) {
 			final IRegion region = (IRegion)element;
-			ROIBase roi = (ROIBase)region.getROI();
+			IROI roi = region.getROI();
 			ICoordinateSystem coords = region.getCoordinateSystem();
 			switch (column){
 			case 0:
@@ -227,7 +227,7 @@ public class RegionEditTool extends AbstractRegionTableTool {
 		private void setValue(Object element, Object value, boolean tableRefresh) throws Exception {
 
 			final IRegion region = (IRegion) element;
-			ROIBase myRoi = (ROIBase)region.getROI();
+			IROI myRoi = region.getROI();
 			ICoordinateSystem coords = region.getCoordinateSystem();
 			switch (column){
 			case 0:

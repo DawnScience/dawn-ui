@@ -47,7 +47,7 @@ import org.eclipse.ui.part.IPageSite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
 /**
  * Perimeter Box tool that creates a tool page with 3 plotting systems and a composite:<br>
@@ -218,7 +218,7 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 			myROIWidget.addSelectionChangedListener(new ISelectionChangedListener() {
 				@Override
 				public void selectionChanged(SelectionChangedEvent event) {
-					ROIBase newRoi = (ROIBase)myROIWidget.getROI();
+					IROI newRoi = myROIWidget.getROI();
 					String regionName = myROIWidget.getRegionName();
 					IRegion region = getPlottingSystem().getRegion(regionName);
 					if(region != null){
@@ -260,7 +260,7 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 			verticalProfileROIWidget.addSelectionChangedListener(new ISelectionChangedListener() {
 				@Override
 				public void selectionChanged(SelectionChangedEvent event) {
-					ROIBase newRoi = (ROIBase)verticalProfileROIWidget.getROI();
+					IROI newRoi = verticalProfileROIWidget.getROI();
 					String regionName = verticalProfileROIWidget.getRegionName();
 					IRegion region = verticalProfilePlottingSystem.getRegion(regionName);
 					if(region != null){
@@ -288,7 +288,7 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 			horizontalProfileROIWidget.addSelectionChangedListener(new ISelectionChangedListener() {
 				@Override
 				public void selectionChanged(SelectionChangedEvent event) {
-					ROIBase newRoi = (ROIBase)horizontalProfileROIWidget.getROI();
+					IROI newRoi = horizontalProfileROIWidget.getROI();
 					String regionName = horizontalProfileROIWidget.getRegionName();
 					IRegion region = horizontalProfilePlottingSystem.getRegion(regionName);
 					if(region != null){

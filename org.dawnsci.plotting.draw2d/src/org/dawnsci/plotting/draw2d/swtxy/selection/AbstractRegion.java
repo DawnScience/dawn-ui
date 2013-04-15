@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
 
 /**
  * This is a Figure, disabled for mouse events. 
@@ -56,7 +55,7 @@ public abstract class AbstractRegion extends Figure implements IRegion, IRegionC
 		roiListeners.clear();
 	}
 	
-	protected void fireROIDragged(ROIBase roi, ROIEvent.DRAG_TYPE type) {
+	protected void fireROIDragged(IROI roi, ROIEvent.DRAG_TYPE type) {
 		if (roiListeners==null) return;
 		if (!regionEventsActive) return;
 		
@@ -73,7 +72,7 @@ public abstract class AbstractRegion extends Figure implements IRegion, IRegionC
 	
 	private static final Logger logger = LoggerFactory.getLogger(AbstractRegion.class);
 	
-	protected void fireROIChanged(ROIBase roi) {
+	protected void fireROIChanged(IROI roi) {
 		if (roiListeners==null)  return;
 		if (!regionEventsActive) return;
 		
@@ -86,7 +85,7 @@ public abstract class AbstractRegion extends Figure implements IRegion, IRegionC
 			}
 		}
 	}
-	protected void fireROISelected(ROIBase roi) {
+	protected void fireROISelected(IROI roi) {
 		if (roiListeners==null)  return;
 		if (!regionEventsActive) return;
 		
@@ -100,16 +99,16 @@ public abstract class AbstractRegion extends Figure implements IRegion, IRegionC
 		}
 	}
 
-	protected ROIBase roi;
+	protected IROI roi;
 
 	@Override
-	public ROIBase getROI() {
+	public IROI getROI() {
 		return roi;
 	}
 
 	@Override
 	public void setROI(IROI roi) {
-		this.roi = (ROIBase)roi;
+		this.roi = roi;
 		updateROI();
 		fireROIChanged(this.roi);
 	}
@@ -118,7 +117,7 @@ public abstract class AbstractRegion extends Figure implements IRegion, IRegionC
 	 * Implement to return the region of interest
 	 * @param recordResult if true this calculation changes the recorded absolute position
 	 */
-	protected abstract ROIBase createROI(boolean recordResult);
+	protected abstract IROI createROI(boolean recordResult);
 
 	/**
 	 * Updates the region, usually called when items have been created and the position of the
@@ -140,7 +139,7 @@ public abstract class AbstractRegion extends Figure implements IRegion, IRegionC
 	 * 
 	 * @param roi
 	 */
-	protected abstract void updateROI(ROIBase roi);
+	protected abstract void updateROI(IROI roi);
 
 	public String toString() {
 		if (getName()!=null) return getName();
