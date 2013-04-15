@@ -450,12 +450,17 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 	}
 
 	private void hideTraces(){
-		if(x_trace != null && y_trace != null){
-			x_trace.setVisible(isEdgePlotted);
-			y_trace.setVisible(isEdgePlotted);
-		} 
-		if(av_trace != null)
-			av_trace.setVisible(isAveragePlotted);
+		DisplayUtils.runInDisplayThread(true, getControl(), new Runnable(){
+			@Override
+			public void run() {
+				if(x_trace != null && y_trace != null){
+					x_trace.setVisible(isEdgePlotted);
+					y_trace.setVisible(isEdgePlotted);
+				} 
+				if(av_trace != null)
+					av_trace.setVisible(isAveragePlotted);
+			}
+		});
 	}
 
 	private void createXAxisBoxRegion(final AbstractPlottingSystem plottingSystem, 

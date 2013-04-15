@@ -18,7 +18,6 @@ import org.dawb.common.ui.plot.tool.IProfileToolPage;
 import org.dawb.common.ui.plot.tool.IToolPageSystem;
 import org.dawb.common.ui.plot.tool.ToolPageFactory;
 import org.dawb.common.ui.plot.trace.ITrace;
-import org.dawb.common.ui.plot.trace.ITraceListener;
 import org.dawb.common.ui.widgets.ROIWidget;
 import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.tools.RegionSumTool;
@@ -68,7 +67,6 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 	private AbstractPlottingSystem zoomProfilePlottingSystem;
 	private AbstractPlottingSystem verticalProfilePlottingSystem;
 	private AbstractPlottingSystem horizontalProfilePlottingSystem;
-	private ITraceListener         traceListener;
 	private IRegionListener        regionListener;
 	private Map<String,Collection<ITrace>> registeredTraces;
 
@@ -399,7 +397,6 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 	public void activate() {
 		super.activate();
 		if (getPlottingSystem()!=null) {
-			getPlottingSystem().addTraceListener(traceListener);
 			getPlottingSystem().addRegionListener(regionListener);
 		}
 		setRegionsActive(true);
@@ -452,7 +449,6 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 	public void deactivate() {
 		super.deactivate();
 		if (getPlottingSystem()!=null) {
-			getPlottingSystem().removeTraceListener(traceListener);
 			getPlottingSystem().removeRegionListener(regionListener);
 		}
 		setRegionsActive(false);
