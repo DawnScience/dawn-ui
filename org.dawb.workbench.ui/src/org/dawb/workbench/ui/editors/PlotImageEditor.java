@@ -17,6 +17,7 @@ import java.util.List;
 
 import org.dawb.common.services.ILoaderService;
 import org.dawb.common.services.ServiceManager;
+import org.dawb.common.ui.editors.IEditorExtension;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.AbstractPlottingSystem.ColorOption;
@@ -80,7 +81,7 @@ import uk.ac.diamond.scisoft.analysis.io.ImageStackLoader;
  * editor will not show.
  * 
  */
-public class PlotImageEditor extends EditorPart implements IReusableEditor {
+public class PlotImageEditor extends EditorPart implements IEditorExtension, IReusableEditor {
 	
 	public static final String ID = "org.dawb.workbench.editors.plotImageEditor";
 
@@ -157,14 +158,14 @@ public class PlotImageEditor extends EditorPart implements IReusableEditor {
 		plot.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		plot.setLayout(new FillLayout());
 		
-        plottingSystem.createPlotPart(plot, plotName, wrapper, PlotType.IMAGE, this);
-        plottingSystem.getSelectedXAxis().setTitle("");
+		getPlottingSystem().createPlotPart(plot, plotName, wrapper, PlotType.IMAGE, this);
+		getPlottingSystem().getSelectedXAxis().setTitle("");
         
 		wrapper.update(true);
 
 		createPlot();
 		
-		getEditorSite().setSelectionProvider(plottingSystem.getSelectionProvider());
+		getEditorSite().setSelectionProvider(getPlottingSystem().getSelectionProvider());
 
  	}
 	private void createPlot() {
@@ -192,13 +193,13 @@ public class PlotImageEditor extends EditorPart implements IReusableEditor {
 					}
 					
 					set.setName(""); // Stack trace if null - stupid.
-					plottingSystem.clear();
-					plottingSystem.createPlot2D(set, null, monitor);
+					getPlottingSystem().clear();
+					getPlottingSystem().createPlot2D(set, null, monitor);
 				} else {
 				
-					plottingSystem.clear();
+					getPlottingSystem().clear();
 					try {
-						final IImageStackTrace stack = plottingSystem.createImageStackTrace("image");
+						final IImageStackTrace stack = getPlottingSystem().createImageStackTrace("image");
 						
 						final List<String> imageFilenames = new ArrayList<String>();
 						final File   file  = new File(filePath);
@@ -266,8 +267,8 @@ public class PlotImageEditor extends EditorPart implements IReusableEditor {
 							@Override
 							public void run() {
 								stack.setStackIndex(stackIndex);
-								plottingSystem.addTrace(stack);
-								plottingSystem.repaint(true);
+								getPlottingSystem().addTrace(stack);
+								getPlottingSystem().repaint(true);
 							}
 						});
 					} catch (Exception ne) {
@@ -308,8 +309,8 @@ public class PlotImageEditor extends EditorPart implements IReusableEditor {
 
 	@Override
 	public void setFocus() {
-		if (plottingSystem!=null && plottingSystem.getPlotComposite()!=null) {
-			plottingSystem.setFocus();
+		if (getPlottingSystem()!=null && getPlottingSystem().getPlotComposite()!=null) {
+			getPlottingSystem().setFocus();
 		}
 	}
 
@@ -330,7 +331,7 @@ public class PlotImageEditor extends EditorPart implements IReusableEditor {
 
     @Override
     public void dispose() {
-     	if (plottingSystem!=null) plottingSystem.dispose();
+     	if (getPlottingSystem()!=null) getPlottingSystem().dispose();
      	super.dispose();
     }
 
@@ -339,14 +340,20 @@ public class PlotImageEditor extends EditorPart implements IReusableEditor {
 		if (clazz == Page.class) {
 			return new HeaderTablePage(EclipseUtils.getFilePath(getEditorInput()));
 		} else if (clazz == IToolPageSystem.class) {
-			return plottingSystem;
+			return getPlottingSystem();
 		}
 		
 		return super.getAdapter(clazz);
 	}
-    
+    @Override
     public AbstractPlottingSystem getPlottingSystem() {
     	return this.plottingSystem;
     }
+
+	@Override
+	public boolean isApplicable(String filePath, String extension,
+			String perspectiveId) {
+		return true;
+	}
 
 }
