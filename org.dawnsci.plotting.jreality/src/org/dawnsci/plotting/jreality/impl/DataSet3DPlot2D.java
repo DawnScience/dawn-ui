@@ -2516,6 +2516,8 @@ public class DataSet3DPlot2D implements IDataSet3DCorePlot,
 				case ELLIPSE:
 					prim = new EllipsePrimitive(comp,fixedSize);
 				break;
+				default:
+				break;
 			}
 			prim2DMap.put(primKeyID, prim);
 			return primKeyID;

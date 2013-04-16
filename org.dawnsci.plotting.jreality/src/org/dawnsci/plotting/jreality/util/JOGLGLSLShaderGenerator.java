@@ -154,7 +154,7 @@ public class JOGLGLSLShaderGenerator {
 		return name;
 	}
 	
-	public static String generateCompositeShader(@SuppressWarnings("unused") boolean useLog, int numTextures) {
+	public static String generateCompositeShader(boolean useLog, int numTextures) {
 		String returnStr = "";
 		for (int i = 0; i < numTextures; i++)
 			returnStr +=  "uniform sampler2D sampler"+i+";\n";
@@ -230,7 +230,7 @@ public class JOGLGLSLShaderGenerator {
 		return returnStr;
 	}
 	
-	public static String generateCompositeShaderName(@SuppressWarnings("unused") boolean useLog, int numTextures) {
+	public static String generateCompositeShaderName(boolean useLog, int numTextures) {
 		String returnStr = "compositeShader.#"+numTextures;
 		return returnStr;
 	}

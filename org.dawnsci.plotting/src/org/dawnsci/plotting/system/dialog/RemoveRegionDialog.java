@@ -1,6 +1,5 @@
 package org.dawnsci.plotting.system.dialog;
 
-import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.draw2d.swtxy.RegionArea;
 import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;

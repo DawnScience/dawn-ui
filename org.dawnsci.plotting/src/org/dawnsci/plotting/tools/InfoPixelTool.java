@@ -87,6 +87,7 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 	private Job updateInfoPixelData;
 		
 	// Internal jobs items
+	@SuppressWarnings("unused")
 	private boolean isUpdateRunning = false;
 	
 	// values arrayList

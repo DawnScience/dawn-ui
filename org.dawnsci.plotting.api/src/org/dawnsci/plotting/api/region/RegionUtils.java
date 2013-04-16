@@ -10,8 +10,6 @@ import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.swt.graphics.Color;
 
-import uk.ac.diamond.scisoft.analysis.roi.IROI;
-
 /**
  * Class containing utility methods for regions to avoid duplication 
  * @author fcp94556

@@ -23,6 +23,10 @@ import java.util.EventObject;
  */
 public class DataPositionEvent extends EventObject implements IDataPositionEvent {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	protected double position[];
 	protected Mode currentMode;
 	

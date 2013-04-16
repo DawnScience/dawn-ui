@@ -298,6 +298,7 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 		x = a[0]; AbstractDataset y=a[1];
 		
 		// If the IdentifiedPeaks are null, we make them.
+		@SuppressWarnings("unchecked")
 		List<IdentifiedPeak> identifiedPeaks = (List<IdentifiedPeak>)slice.getUserData();
 		if (slice.getUserData()==null) {
 			identifiedPeaks = Generic1DFitter.parseDataDerivative(x, y, FittingUtils.getSmoothing());

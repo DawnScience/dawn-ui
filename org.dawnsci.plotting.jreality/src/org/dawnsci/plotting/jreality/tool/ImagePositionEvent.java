@@ -25,6 +25,10 @@ import java.util.List;
  */
 public class ImagePositionEvent extends DataPositionEvent implements IImagePositionEvent {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private int imagePosition[];
 	private int primitiveID;
 	private short flags;

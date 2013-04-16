@@ -25,6 +25,10 @@ import org.dawnsci.plotting.jreality.tool.AreaSelectEvent;
  */
 public class GraphSelectionEvent extends EventObject {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	protected AreaSelectEvent start,end;
 
 	/**

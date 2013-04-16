@@ -20,6 +20,7 @@ public class EmptyWorkbenchPart extends WorkbenchPart {
 		this.system = system;
 	}
 	
+	@SuppressWarnings("rawtypes")
 	@Override
     public Object getAdapter(final Class clazz) {
 		

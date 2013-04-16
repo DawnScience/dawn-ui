@@ -26,6 +26,7 @@ public class PeakLabelProvider extends ColumnLabelProvider {
 
 	private int           column;
 	private ColumnViewer  viewer;
+	@SuppressWarnings("unused")
 	private DecimalFormat intFormat, format;
 	private Image         savedIcon;
 

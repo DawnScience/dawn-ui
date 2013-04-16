@@ -44,7 +44,7 @@ public class ClassLoaderService extends AbstractServiceFactory implements IClass
 		if (classLoader==null) return;
 		
 		final ClassLoader finalCL = classLoader;
-		AccessController.doPrivileged(new PrivilegedAction() {
+		AccessController.doPrivileged(new PrivilegedAction<Object>() {
 			public Object run() {
 				Thread.currentThread().setContextClassLoader(finalCL);
 				return null;

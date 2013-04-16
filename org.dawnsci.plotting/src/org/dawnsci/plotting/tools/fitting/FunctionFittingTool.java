@@ -798,6 +798,7 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 		return bean;
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public Object getAdapter(Class key) {
 		if (key == IFunctionService.class) return this;

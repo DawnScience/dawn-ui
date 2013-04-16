@@ -506,6 +506,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	 * <code>IAdaptable</code> method delegates to the current page, if it
 	 * implements <code>IAdaptable</code>.
 	 */
+	@SuppressWarnings("rawtypes")
 	public Object getAdapter(Class key) {
 		// delegate to the current page, if supported
 		IPage page = getCurrentPage();
@@ -720,17 +721,18 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	/**
 	 * Refreshes the global actions for the active page.
 	 */
+	@SuppressWarnings("rawtypes")
 	private void refreshGlobalActionHandlers() {
 		// Clear old actions.
 		IActionBars bars = getViewSite().getActionBars();
 		bars.clearGlobalActionHandlers();
 
 		// Set new actions.
-		Map newActionHandlers = activeRec.subActionBars
+		Map<?, ?> newActionHandlers = activeRec.subActionBars
 				.getGlobalActionHandlers();
 		if (newActionHandlers != null) {
-			Set keys = newActionHandlers.entrySet();
-			Iterator iter = keys.iterator();
+			Set<?> keys = newActionHandlers.entrySet();
+			Iterator<?> iter = keys.iterator();
 			while (iter.hasNext()) {
 				Map.Entry entry = (Map.Entry) iter.next();
 				bars.setGlobalActionHandler((String) entry.getKey(),

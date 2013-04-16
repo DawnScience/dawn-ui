@@ -257,6 +257,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		// TODO FIXME Define beamCenter differently to actual center?
 		this.beamCenter = getBeamCenter();
 		
+		@SuppressWarnings("unchecked")
 		final NumericNode<Length> x = (NumericNode<Length>)model.getNode("/Detector/Beam Centre/X");
 		x.setDefault(Amount.valueOf(beamCenter[0], x.getUnit()));
 		x.setLowerBound(0);
@@ -269,6 +270,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 			}
 		});
 		
+		@SuppressWarnings("unchecked")
 		final NumericNode<Length> y = (NumericNode<Length>)model.getNode("/Detector/Beam Centre/Y");
 		y.setDefault(Amount.valueOf(beamCenter[1], y.getUnit()));
 		y.setLowerBound(0);

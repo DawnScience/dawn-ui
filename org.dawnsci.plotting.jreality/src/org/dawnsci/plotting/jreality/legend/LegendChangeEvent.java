@@ -23,6 +23,10 @@ import java.util.EventObject;
  */
 public class LegendChangeEvent extends EventObject {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private int legendEntryNr;
 	
 	public LegendChangeEvent(Object source, int entryNr) {

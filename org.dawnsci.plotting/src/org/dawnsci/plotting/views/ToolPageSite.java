@@ -48,7 +48,7 @@ public class ToolPageSite implements IPageSite, INestable {
 	/**
 	 * The list of menu extender for each registered menu.
 	 */
-	private ArrayList menuExtenders;
+	private ArrayList<?> menuExtenders;
 
 	/**
 	 * The "parent" view site
@@ -118,14 +118,14 @@ public class ToolPageSite implements IPageSite, INestable {
 	 */
 	protected void dispose() {
 		if (menuExtenders != null) {
-			HashSet managers = new HashSet(menuExtenders.size());
+			HashSet<MenuManager> managers = new HashSet<MenuManager>(menuExtenders.size());
 			for (int i = 0; i < menuExtenders.size(); i++) {
 				PopupMenuExtender ext = (PopupMenuExtender) menuExtenders.get(i);
 				managers.add(ext.getManager());
 				ext.dispose();
 			}
 			if (managers.size()>0) {
-				for (Iterator iterator = managers.iterator(); iterator
+				for (Iterator<MenuManager> iterator = managers.iterator(); iterator
 						.hasNext();) {
 					MenuManager mgr = (MenuManager) iterator.next();
 					mgr.dispose();
@@ -152,6 +152,7 @@ public class ToolPageSite implements IPageSite, INestable {
 	 * 
 	 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
 	 */
+	@SuppressWarnings("rawtypes")
 	public Object getAdapter(Class adapter) {
 		return Platform.getAdapterManager().getAdapter(this, adapter);
 	}
@@ -170,6 +171,7 @@ public class ToolPageSite implements IPageSite, INestable {
 		return selectionProvider;
 	}
 
+	@SuppressWarnings("rawtypes")
 	public final Object getService(final Class key) {
 		return serviceLocator.getService(key);
 	}
@@ -188,6 +190,7 @@ public class ToolPageSite implements IPageSite, INestable {
 		return parentSite.getWorkbenchWindow();
 	}
 
+	@SuppressWarnings("rawtypes")
 	public final boolean hasService(final Class key) {
 		return serviceLocator.hasService(key);
 	}
@@ -195,6 +198,7 @@ public class ToolPageSite implements IPageSite, INestable {
 	/*
 	 * (non-Javadoc) Method declared on IPageSite.
 	 */
+	@SuppressWarnings("rawtypes")
 	public void registerContextMenu(String menuID, MenuManager menuMgr,
 			ISelectionProvider selProvider) {
 		if (menuExtenders == null) {
