@@ -878,6 +878,7 @@ public class HistogramToolPage extends AbstractToolPage {
 				if ("org.dawb.plotting.system.colourSchemeName".equals(event.getProperty())) {
 					if (updatingColorSchemeInternally) return;
 					final String schemeName = (String)event.getNewValue();
+					if(cmbColourMap == null || cmbColourMap.isDisposed()) return;
 					cmbColourMap.select(Arrays.asList(cmbColourMap.getItems()).indexOf(schemeName));
 				}
 			}
