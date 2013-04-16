@@ -43,6 +43,8 @@ import org.dawb.gda.extensions.util.DatasetTitleUtils;
 import org.dawb.workbench.ui.Activator;
 import org.dawb.workbench.ui.editors.preference.EditorConstants;
 import org.dawb.workbench.ui.editors.preference.EditorPreferencePage;
+import org.dawb.workbench.ui.expressions.ExpressionFunctionProposalProvider;
+import org.dawb.workbench.ui.expressions.TextCellEditorWithContentProposal;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.IPlottingSystemSelection;
 import org.dawnsci.plotting.api.PlotType;
@@ -74,6 +76,7 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.fieldassist.IContentProposalProvider;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceDialog;
@@ -640,13 +643,18 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	
 	private class ExpressionEditingSupport extends EditingSupport {
 
+		private TextCellEditorWithContentProposal cellEditor;
+		
 		public ExpressionEditingSupport(ColumnViewer viewer) {
 			super(viewer);
+			
+			IContentProposalProvider contentProposalProvider = new ExpressionFunctionProposalProvider(service.createExpressionObject(null,null).getFunctions());
+			cellEditor = new TextCellEditorWithContentProposal((Composite)getViewer().getControl(), contentProposalProvider, null, new char[]{':'});
 		}
 
 		@Override
 		protected CellEditor getCellEditor(Object element) {
-			return new TextCellEditor((Composite)getViewer().getControl());
+			return cellEditor;
 		}
 
 		@Override

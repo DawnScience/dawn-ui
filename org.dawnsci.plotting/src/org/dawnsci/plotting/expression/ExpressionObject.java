@@ -285,5 +285,11 @@ class ExpressionObject implements IExpressionObject {
 		
 		return buf.toString();
 	}
+
+	@Override
+	public Map<String, Object> getFunctions() {
+		if (jexl==null) jexl = JexlUtils.getDawnJexlEngine();
+		return jexl.getFunctions();
+	}
 	
 }
