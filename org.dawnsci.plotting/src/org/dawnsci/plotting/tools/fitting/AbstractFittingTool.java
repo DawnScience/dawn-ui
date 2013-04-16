@@ -487,7 +487,7 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 		
 		selectedTraces.clear();
 		int index = 0;
-		int selectionIndex=0;
+		//int selectionIndex=0;
 		
 		if (traces.size()>3) {
 			final Action selectAll = new Action("Select all", IAction.AS_PUSH_BUTTON) {

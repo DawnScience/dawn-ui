@@ -256,6 +256,7 @@ public class FittedFunctions {
 	 * The traces for the fitted peaks in no particular order
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public Collection<ITrace> getFittedTraces() {
 		
 		if (fittedPeakList==null || fittedPeakList.isEmpty()) return Collections.EMPTY_SET;

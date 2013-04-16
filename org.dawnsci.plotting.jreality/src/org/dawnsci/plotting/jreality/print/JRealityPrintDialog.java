@@ -67,6 +67,7 @@ public class JRealityPrintDialog extends Dialog {
 	private static final String PRINTSETTINGS_ORIENTATION = "printsettings.orientation";
 	private static final String PRINTSETTINGS_SCALE = "printsettings.scale";
 	private static final String PRINTSETTINGS_RESOLUTION = "printsettings.resolution";
+	@SuppressWarnings("unused")
 	private static final String PRINTSETTINGS_ASPECTRATIO = "printsettings.aspectratio";
 
 	private Shell shell;

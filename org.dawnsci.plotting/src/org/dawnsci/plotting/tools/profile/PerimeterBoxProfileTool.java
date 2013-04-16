@@ -459,9 +459,13 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 			sideProfile2.deactivate();
 			roiSumProfile.deactivate();
 		}
-		zoomProfilePlottingSystem.clear();
-		verticalProfilePlottingSystem.clear();
-		horizontalProfilePlottingSystem.clear();
+		if(zoomProfilePlottingSystem != null
+				&& verticalProfilePlottingSystem != null
+				&& horizontalProfilePlottingSystem != null){
+			zoomProfilePlottingSystem.clear();
+			verticalProfilePlottingSystem.clear();
+			horizontalProfilePlottingSystem.clear();
+		}
 		if(myROIWidget != null)
 			myROIWidget.dispose();
 		if(verticalProfileROIWidget != null)

@@ -55,10 +55,10 @@ public class ClickWheelZoomTool extends AbstractTool {
 			sceneNode.setTransformation(new Transformation());
 	}
 
-	protected void updateEdgePoints(@SuppressWarnings("unused") Matrix m) {
+	protected void updateEdgePoints(Matrix m) {
 	}
 	
-	protected void updateEdgePointsAfterMouse(@SuppressWarnings("unused") Matrix m) {
+	protected void updateEdgePointsAfterMouse(Matrix m) {
 	}
 	
 	@Override

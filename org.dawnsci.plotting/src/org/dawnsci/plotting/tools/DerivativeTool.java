@@ -118,6 +118,7 @@ public class DerivativeTool extends AbstractToolPage  {
 			this.traceListener = new ITraceListener.Stub() {
 				// Response to traces plotted event, a bit complicated, has to deal with a
 				// few cases
+				@SuppressWarnings("unchecked")
 				@Override
 				public void tracesAdded(TraceEvent evt) {
 					//First, if the event source is not a list or ITrace ignore event

@@ -196,6 +196,7 @@ public class FittedPeaksExportWizard extends Wizard implements IExportWizard {
 			return open;
 		}
 
+		@SuppressWarnings("unused")
 		public void setOpen(boolean open) {
 			this.open = open;
 		}

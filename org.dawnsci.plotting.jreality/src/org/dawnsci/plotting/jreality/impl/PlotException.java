@@ -21,6 +21,11 @@ package org.dawnsci.plotting.jreality.impl;
  */
 public class PlotException extends Exception {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	public PlotException(String failureMessage) {
 		super(failureMessage);
 	}

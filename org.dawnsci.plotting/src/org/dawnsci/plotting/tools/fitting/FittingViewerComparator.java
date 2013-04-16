@@ -1,16 +1,11 @@
 package org.dawnsci.plotting.tools.fitting;
 
-import java.util.List;
-
 import org.dawb.common.util.list.SortNatural;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.TableColumn;
 
 class FittingViewerComparator extends ViewerComparator {
 

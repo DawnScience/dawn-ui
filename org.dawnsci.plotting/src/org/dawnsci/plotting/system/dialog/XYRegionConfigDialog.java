@@ -244,6 +244,7 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
 	}
 	
 	private Object selectedTrace;
+	@SuppressWarnings("unused")
 	private String selectedTraceName;
 	private Annotation selectedAnnotation;
 

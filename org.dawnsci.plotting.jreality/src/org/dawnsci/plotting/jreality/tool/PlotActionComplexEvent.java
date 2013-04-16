@@ -26,6 +26,10 @@ import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 public class PlotActionComplexEvent extends PlotActionEvent {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private IDataset associatedData;
 	private SelectedWindow window;
 	private AxisValues associateXAxis;

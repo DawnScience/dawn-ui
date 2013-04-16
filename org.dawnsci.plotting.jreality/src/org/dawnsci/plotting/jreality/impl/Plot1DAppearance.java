@@ -34,6 +34,10 @@ import de.jreality.shader.DefaultPointShader;
  */
 public class Plot1DAppearance implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private java.awt.Color plotColour;
 	private Plot1DStyles plotStyle;
 	private int lineWidth;

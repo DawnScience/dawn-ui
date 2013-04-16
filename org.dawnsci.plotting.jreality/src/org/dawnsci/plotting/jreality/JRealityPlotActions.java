@@ -265,4 +265,8 @@ public class JRealityPlotActions {
 		system             = null;
 	}
 
+	public IPlottingSystem getPlottingSystem(){
+		return system;
+	}
+
 }

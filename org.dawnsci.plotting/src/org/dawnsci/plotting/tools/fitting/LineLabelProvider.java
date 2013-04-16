@@ -1,6 +1,5 @@
 package org.dawnsci.plotting.tools.fitting;
 
-import java.text.AttributedString;
 import java.text.DecimalFormat;
 
 import org.dawnsci.plotting.Activator;
@@ -17,6 +16,7 @@ import uk.ac.diamond.scisoft.analysis.fitting.functions.Polynomial;
 public class LineLabelProvider extends ColumnLabelProvider{
 	private int           column;
 	private ColumnViewer  viewer;
+	@SuppressWarnings("unused")
 	private DecimalFormat intFormat, format;
 	private Image         savedIcon;
 
@@ -43,6 +43,7 @@ public class LineLabelProvider extends ColumnLabelProvider{
 		if (!(element instanceof FittedFunction)) return "";
 		final FittedFunction  peak  = (FittedFunction)element;
 		//if (peak. instanceof NullFunction) return "";
+		@SuppressWarnings("unused")
 		final FittedFunctions bean = (FittedFunctions)viewer.getInput();
 		
 		
@@ -88,6 +89,7 @@ public class LineLabelProvider extends ColumnLabelProvider{
 		return null;
 	}
 	
+	@SuppressWarnings("unused")
 	private String getPolynomialDescription(Polynomial func){
 		
 		StringBuilder out = new StringBuilder();

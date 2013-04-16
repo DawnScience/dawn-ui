@@ -114,6 +114,7 @@ public class AddCalibrantWizard extends Wizard implements IWorkbenchWizard{
 			setPageComplete(message == null);
 		}
 
+		@SuppressWarnings("unused")
 		public boolean isCopy() {
 			return isCopy;
 		}

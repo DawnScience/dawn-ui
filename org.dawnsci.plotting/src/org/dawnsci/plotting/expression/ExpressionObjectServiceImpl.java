@@ -43,6 +43,7 @@ public class ExpressionObjectServiceImpl extends AbstractServiceFactory implemen
 		return ExpressionObject.getSafeName(name);
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public Object create(Class serviceInterface, IServiceLocator parentLocator, IServiceLocator locator) {
 		if (serviceInterface==IExpressionObjectService.class) {

@@ -25,6 +25,10 @@ import org.dawnsci.plotting.jreality.tool.AreaSelectEvent;
  */
 public class OverlayDrawingEvent extends GraphSelectionEvent {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private OverlayProvider provider;
 	private int[]           parts;
 	private boolean         isInitialDraw;

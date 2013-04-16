@@ -461,6 +461,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	private void setYTickLabelFormat(TickFormatting newFormat) {
 		if (plotter != null) plotter.setYAxisLabelMode(newFormat);
 	}
+	@SuppressWarnings("unused")
 	private void setZTickLabelFormat(TickFormatting newFormat) {
 		if (plotter != null) plotter.setZAxisLabelMode(newFormat);
 	}
@@ -582,6 +583,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		}
 		container.setWeights(new int[] {90, 10});		
 		legendTable.addLegendChangeEventListener(new LegendChangeEventListener() {
+			@SuppressWarnings("unused")
 			@Override
 			public void legendDeleted(LegendChangeEvent evt) {
 				if (currentMode == PlottingMode.ONED) {

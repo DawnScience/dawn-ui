@@ -13,6 +13,7 @@ import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 
 public class XYRegionConfigCommand extends XYGraphConfigCommand {
 
+	@SuppressWarnings("unused")
 	public XYRegionConfigCommand(XYGraph xyGraph) {
 		
 		super(xyGraph);
