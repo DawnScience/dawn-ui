@@ -2,7 +2,7 @@ package org.dawnsci.plotting.api;
 
 public enum ActionType {
 
-	XY, IMAGE, XYANDIMAGE, THREED, ALL;
+	XY, IMAGE, XYANDIMAGE, THREED, SURFACE, ALL;
 
 	public boolean isCompatible(PlotType type) {
 		
@@ -18,6 +18,9 @@ public enum ActionType {
 			return true;
 		}
 		if (type.is3D() && this==THREED) {
+			return true;
+		}
+		if(type.equals(PlotType.SURFACE) && this==SURFACE){
 			return true;
 		}
 		

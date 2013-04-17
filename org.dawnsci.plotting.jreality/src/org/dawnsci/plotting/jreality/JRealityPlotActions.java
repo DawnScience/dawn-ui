@@ -2,12 +2,14 @@ package org.dawnsci.plotting.jreality;
 
 import java.io.File;
 
+import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.printing.PrintSettings;
 import org.dawnsci.plotting.api.ActionType;
 import org.dawnsci.plotting.api.IPlotActionSystem;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.ManagerType;
 import org.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
+import org.dawnsci.plotting.jreality.impl.SurfPlotStyles;
 import org.dawnsci.plotting.jreality.print.JRealityPrintDialog;
 import org.dawnsci.plotting.jreality.print.PlotExportUtil;
 import org.eclipse.core.runtime.IStatus;
@@ -51,6 +53,66 @@ public class JRealityPlotActions {
         createExportActions();
  		
  		// Others
+        createSurfaceModeActions();
+	}
+
+	private void createSurfaceModeActions() {
+		CheckableActionGroup surfaceModeGroup = new CheckableActionGroup();
+		actionMan.registerGroup("jreality.plotting.surface.mode.actions", ManagerType.MENUBAR);
+		Action displayFilled = new Action("Filled", IAction.AS_CHECK_BOX) {
+			@Override
+			public void run() {
+				plotter.setPlot2DSurfStyle(SurfPlotStyles.FILLED);
+				plotter.refresh(false);
+				setChecked(true);
+			}
+		};
+		displayFilled.setText("Filled mode");
+		displayFilled.setDescription("Render the graph in filled mode");
+		displayFilled.setImageDescriptor(Activator.getImageDescriptor("icons/save.gif"));
+		displayFilled.setChecked(true);
+		surfaceModeGroup.add(displayFilled);
+		actionMan.registerAction("jreality.plotting.surface.mode.actions", displayFilled, ActionType.SURFACE, ManagerType.MENUBAR);
+
+		Action displayWireframe = new Action("Wireframe", IAction.AS_CHECK_BOX) {
+			@Override
+			public void run() {
+				plotter.setPlot2DSurfStyle(SurfPlotStyles.WIREFRAME);
+				SurfPlotStyles.values();
+				plotter.refresh(false);
+				setChecked(true);
+			}
+		};
+		displayWireframe.setText("Wireframe mode");
+		displayWireframe.setDescription("Render the graph in wireframe mode");
+		surfaceModeGroup.add(displayWireframe);
+		actionMan.registerAction("jreality.plotting.surface.mode.actions", displayWireframe, ActionType.SURFACE, ManagerType.MENUBAR);
+
+		Action displayLinegraph = new Action("LineGraph", IAction.AS_CHECK_BOX) {
+			@Override
+			public void run() {
+				plotter.setPlot2DSurfStyle(SurfPlotStyles.LINEGRAPH);
+				plotter.refresh(true);
+				setChecked(true);
+			}
+		};
+		displayLinegraph.setText("Linegraph mode");
+		displayLinegraph.setDescription("Render the graph in linegraph mode");
+		surfaceModeGroup.add(displayLinegraph);
+		actionMan.registerAction("jreality.plotting.surface.mode.actions", displayLinegraph, ActionType.SURFACE, ManagerType.MENUBAR);
+
+		Action displayPoint = new Action("Point", IAction.AS_CHECK_BOX) {
+			@Override
+			public void run() {
+				plotter.setPlot2DSurfStyle(SurfPlotStyles.POINTS);
+				plotter.refresh(false);	
+				setChecked(true);
+			}
+		};
+		displayPoint.setText("Point mode");
+		displayPoint.setDescription("Render the graph in dot mode");
+		surfaceModeGroup.add(displayPoint);
+		actionMan.registerAction("jreality.plotting.surface.mode.actions", displayPoint, ActionType.SURFACE, ManagerType.MENUBAR);
 	}
 
 	private void createExportActions() {

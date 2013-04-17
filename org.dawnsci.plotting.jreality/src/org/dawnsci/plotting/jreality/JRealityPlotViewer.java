@@ -37,6 +37,7 @@ import org.dawnsci.plotting.jreality.impl.HistogramChartPlot1D;
 import org.dawnsci.plotting.jreality.impl.Plot1DAppearance;
 import org.dawnsci.plotting.jreality.impl.Plot1DGraphTable;
 import org.dawnsci.plotting.jreality.impl.PlotException;
+import org.dawnsci.plotting.jreality.impl.SurfPlotStyles;
 import org.dawnsci.plotting.jreality.legend.LegendChangeEvent;
 import org.dawnsci.plotting.jreality.legend.LegendChangeEventListener;
 import org.dawnsci.plotting.jreality.legend.LegendComponent;
@@ -1161,5 +1162,15 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		return graphColourTable;
 	}
 
-
+	/**
+	 * Set the plotting style in 2D surface plotting
+	 * 
+	 * @param newStyle
+	 *            the new selected style
+	 */
+	public void setPlot2DSurfStyle(SurfPlotStyles newStyle) {
+		if (currentMode == PlottingMode.SURF2D) {
+			((DataSet3DPlot3D) plotter).setStyle(newStyle);
+		}
+	}
 }
