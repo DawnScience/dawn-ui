@@ -393,9 +393,9 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		try {
 
 			update(newMode, data);
-			plotter.setXAxisLabel(getName(xAxis.getName(), "x"));
-			plotter.setYAxisLabel(getName(yAxis.getName(), "y"));
-			plotter.setZAxisLabel(getName(zAxis.getName(), "z"));
+			plotter.setXAxisLabel(getName(xAxis.getName(), "X-Axis"));
+			plotter.setYAxisLabel(getName(yAxis.getName(), "Y-Axis"));
+			plotter.setZAxisLabel(getName(zAxis.getName(), "Z-Axis"));
 			
 			setTickGridLines(xcoord, ycoord, zcoord);
 
