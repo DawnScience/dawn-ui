@@ -39,7 +39,7 @@ public class RegionUtils {
 	 * @param plotter
 	 * @return
 	 */
-	public static Color getUnqueColor(IRegion.RegionType type, IPlottingSystem plotter, Collection<Color> colours) {
+	public static Color getUniqueColor(IRegion.RegionType type, IPlottingSystem plotter, Collection<Color> colours) {
 
 		final Collection<Color> used = new HashSet<Color>(7);
 		for (IRegion reg : plotter.getRegions()) {
