@@ -18,14 +18,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.apache.commons.jexl2.Expression;
-import org.apache.commons.jexl2.ExpressionImpl;
-import org.apache.commons.jexl2.JexlContext;
-import org.apache.commons.jexl2.JexlEngine;
-import org.apache.commons.jexl2.MapContext;
 import org.dawb.common.services.IExpressionObject;
 import org.dawb.common.services.IVariableManager;
-import org.dawnsci.jexl.utils.JexlUtils;
+import org.dawb.common.services.ServiceManager;
+import org.dawb.common.services.expressions.IExpressionEngine;
+import org.dawb.common.services.expressions.IExpressionService;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
@@ -44,13 +41,23 @@ class ExpressionObject implements IExpressionObject {
 	
 	private String expressionString;
 	private IVariableManager provider;
-	private JexlEngine jexl;
+	private IExpressionEngine engine;
 	private Reference<ILazyDataset>    lazySet;
 	private Reference<AbstractDataset> dataSet;
 	
 	public ExpressionObject(final IVariableManager provider, String expression) {
 		this.provider         = provider;
 		this.expressionString = expression;
+		
+		try {
+			IExpressionService service = (IExpressionService)ServiceManager.getService(IExpressionService.class);
+			this.engine = service.getExpressionEngine();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block, find out what happens when there is no service
+			e.printStackTrace();
+		}
+		
+		
 	}
 
 	/**
@@ -106,9 +113,9 @@ class ExpressionObject implements IExpressionObject {
 			if (dataSet!=null) return true;
 			if (lazySet!=null) return true;
 			
-			if (jexl==null) jexl = JexlUtils.getDawnJexlEngine();
-			ExpressionImpl ex    = (ExpressionImpl)jexl.createExpression(expressionString);
-			Set<List<String>> names = ex.getVariables();
+			//if (engine==null) engine = JexlUtils.getDawnJexlEngine();
+			engine.createExpression(expressionString);
+			Set<List<String>> names = engine.getVariableNamesFromExpression();
 			
 		    for (List<String> entry : names) {
 		    	final String key = entry.get(0);
@@ -131,10 +138,11 @@ class ExpressionObject implements IExpressionObject {
 		lazySet = null;
 		
 		ILazyDataset lazy = null;
-		if (jexl==null) jexl = JexlUtils.getDawnJexlEngine();
+		//if (engine==null) engine = JexlUtils.getDawnJexlEngine();
 		try {
-			ExpressionImpl ex = (ExpressionImpl)jexl.createExpression(expressionString);
-			final Set<List<String>> variableNames = ex.getVariables();
+			engine.createExpression(expressionString);
+			
+			final Set<List<String>> variableNames = engine.getVariableNamesFromExpression();
 			
 			/**
 			 * TODO FIXME this means you cannot do something like dat:mean(x,0) where 
@@ -189,18 +197,17 @@ class ExpressionObject implements IExpressionObject {
 		
 	    if (expressionString==null||provider==null) return new DoubleDataset();
 	    
-		final Map<String,AbstractDataset> refs = getVariables(mon);
+		final Map<String,Object> refs = getVariables(mon);
 		
-		if (jexl==null) jexl = JexlUtils.getDawnJexlEngine();
+		engine.setLoadedVariables(refs);
 		
-		JexlContext context = new MapContext();
-		for (String variableName : refs.keySet()) {
-			context.set(variableName, refs.get(variableName));
-		}
-		
-		Expression ex = jexl.createExpression(expressionString);
+		Object output = engine.evaluate();
         
-		AbstractDataset ads = (AbstractDataset)ex.evaluate(context);
+		//AbstractDataset ads = (AbstractDataset)ex.evaluate(context);
+		
+		if (!(output instanceof AbstractDataset))return null;
+		AbstractDataset ads = (AbstractDataset)output;
+		
 		if (suggestedName==null) {
 			ads.setName(getExpressionString());
 		} else {
@@ -214,13 +221,13 @@ class ExpressionObject implements IExpressionObject {
 		return ads;
 	}
 
-	private Map<String, AbstractDataset> getVariables(IMonitor monitor) throws Exception {
+	private Map<String, Object> getVariables(IMonitor monitor) throws Exception {
 		
-		final Map<String,AbstractDataset> refs = new HashMap<String,AbstractDataset>(7);
+		final Map<String,Object> refs = new HashMap<String,Object>(7);
 		
-		if (jexl==null) jexl = JexlUtils.getDawnJexlEngine();
-		ExpressionImpl ex = (ExpressionImpl)jexl.createExpression(expressionString);
-		final Set<List<String>> variableNames = ex.getVariables();
+		//if (engine==null) engine = JexlUtils.getDawnJexlEngine();
+		engine.createExpression(expressionString);
+		final Set<List<String>> variableNames = engine.getVariableNamesFromExpression();
 		
 	    for (List<String> entry : variableNames) {
 	    	final String variableName = entry.get(0);
@@ -288,8 +295,7 @@ class ExpressionObject implements IExpressionObject {
 
 	@Override
 	public Map<String, Object> getFunctions() {
-		if (jexl==null) jexl = JexlUtils.getDawnJexlEngine();
-		return jexl.getFunctions();
+		return engine.getFunctions();
 	}
 	
 }

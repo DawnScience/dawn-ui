@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.jexl2.JexlEngine;
 import org.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
@@ -27,7 +26,6 @@ import org.eclipse.jface.viewers.Viewer;
 public class ExpressionTool extends AbstractToolPage {
 	
 	ITextViewer consoleViewer;
-	JexlEngine engine;
 	ExpressionConsole console;
 	Composite mainComposite;
 	Map<String,String> variables;
