@@ -242,6 +242,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		xyGraph.primaryYAxis.setTitle("");
 		
 		if (system.getPlotType()!=null) {
+			// Do not change this, the test is correct, remove axes in non-1D only. 1D always has axes.
 			if (!Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.SHOW_AXES) && !system.getPlotType().is1D()) {
 				xyGraph.primaryXAxis.setVisible(false);
 				xyGraph.primaryYAxis.setVisible(false);
