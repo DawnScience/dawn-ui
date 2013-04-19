@@ -36,6 +36,8 @@ import java.util.List;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.PlottingFactory;
+import org.dawb.common.ui.plot.roi.data.SurfacePlotROI;
+import org.dawb.common.ui.util.DisplayUtils;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.api.PlotType;
@@ -68,12 +70,17 @@ import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseMoveListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Spinner;
 import org.mihalis.opal.rangeSlider.RangeSlider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,7 +104,7 @@ import uk.ac.gda.richbeans.event.ValueEvent;
  * @author fcp94556
  *
  */
-public class WindowTool extends AbstractToolPage {
+public class WindowTool extends AbstractToolPage implements SelectionListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(WindowTool.class);
 	
@@ -110,7 +117,19 @@ public class WindowTool extends AbstractToolPage {
 	private Composite              sliceControl, blankComposite;
 	private Composite              content;
 
- 
+	private Label lblStartX;
+	private Spinner spnStartX;
+	private Label lblStartY;
+	private Spinner spnStartY;
+	private Label lblEndX;
+	private Spinner spnEndX;
+	private Spinner spnEndY;
+	private Button btnOverwriteAspect;
+	private Spinner spnXAspect;
+	private Label lblDelimiter;
+	private Spinner spnYAspect;
+	private Composite windowControl;
+
 	public WindowTool() {
 		try {
 			this.windowSystem  = PlottingFactory.createPlottingSystem();
@@ -143,7 +162,33 @@ public class WindowTool extends AbstractToolPage {
 			
 			this.roiListener = new IROIListener.Stub() {
 				public void update(ROIEvent evt) {
-					windowJob.schedule(evt.getROI());
+					IROI roi = evt.getROI();
+					if(roi!=null){
+						final int startX = (int)Math.round(roi.getPointX());
+						final int startY = (int)Math.round(roi.getPointY());
+						if (roi instanceof RectangularROI){
+							RectangularROI rroi = (RectangularROI) roi;
+							int roiWidth = (int)Math.round(rroi.getLengths()[0]);
+							int roiHeight = (int)Math.round(rroi.getLengths()[1]);
+							setSpinnerValues(startX, startY, roiWidth, roiHeight);
+							if(btnOverwriteAspect.getSelection()){
+								int xSize = getTrace().getData().getShape()[1];
+								int ySize = getTrace().getData().getShape()[0];
+								int xSamplingRate = Math.max(1, xSize / MAXDISPLAYDIM);
+								int ySamplingRate = Math.max(1, ySize / MAXDISPLAYDIM);
+								SurfacePlotROI sroi = new SurfacePlotROI(startX * xSamplingRate, 
+																startY * ySamplingRate, 
+																roiWidth * xSamplingRate, 
+																roiHeight * ySamplingRate, 
+																0, 0, 
+																spnXAspect.getSelection(), 
+																spnYAspect.getSelection());
+								windowJob.schedule(sroi);
+							} else {
+								windowJob.schedule(rroi);
+							}
+						}
+					}
 				}
 			};
 			
@@ -170,25 +215,13 @@ public class WindowTool extends AbstractToolPage {
 		this.content = new Composite(parent, SWT.NONE);
 		final StackLayout stackLayout = new StackLayout();
 		content.setLayout(stackLayout);
-		
-		windowSystem.createPlotPart(content, getTitle(), getSite().getActionBars(), PlotType.IMAGE, getPart());
-		
-		try {
-			final ISurfaceTrace surface = getSurfaceTrace();
-							
-			final IRegion region = windowSystem.createRegion("Window", RegionType.BOX);
-			region.setROI(surface!=null ? surface.getWindow() : new RectangularROI(0,0,300,300,0));
-			windowSystem.addRegion(region);
-			
-		} catch (Exception e) {
-			logger.error("Cannot create region for surface!", e);
-		}
-		
+
+		this.windowControl = createWindowRegionControl();
         this.sliceControl = createSliceControl();
    
         final ITrace trace = getTrace();
 		if (trace instanceof ISurfaceTrace) {
-			stackLayout.topControl = windowSystem.getPlotComposite();
+			stackLayout.topControl = windowControl;
 		} else if (trace instanceof ILineStackTrace) {
 		    stackLayout.topControl = sliceControl;
 		}
@@ -201,7 +234,7 @@ public class WindowTool extends AbstractToolPage {
 	private RangeSlider sliceSlider;
 	private NumberBox   lowerControl, upperControl;
 	private int         lastLower = -1, lastUpper = -1;
-	
+
 	private Composite createSliceControl() {
 		Composite sliceControl = new Composite(content, SWT.NONE);
 		sliceControl.setLayout(new GridLayout(3, false));
@@ -294,7 +327,105 @@ public class WindowTool extends AbstractToolPage {
 		return sliceControl;
 	}
 
-	
+	private Composite createWindowRegionControl(){
+		Composite windowComposite = new Composite(content, SWT.NONE);
+		windowComposite.setLayout(new FillLayout(SWT.VERTICAL));
+		
+		windowSystem.createPlotPart(windowComposite, getTitle(), getSite().getActionBars(), PlotType.IMAGE, this.getViewPart());
+		final ISurfaceTrace surface = getSurfaceTrace();
+		//create Region
+		try {
+			final IRegion region = windowSystem.createRegion("Window", RegionType.BOX);
+			region.setROI(surface!=null ? surface.getWindow() : new SurfacePlotROI(0,0,300,300, 0 ,0, 0, 0));
+			windowSystem.addRegion(region);
+		} catch (Exception e) {
+			logger.debug("Cannot create region for surface!", e);
+		}
+		int xStartPt = (int) (surface!=null ? surface.getWindow().getPoint()[0] : 0);
+		int yStartPt = (int) (surface!=null ? surface.getWindow().getPoint()[1] : 0);
+		int width = 300;
+		int height = 300;
+		if(surface!=null && surface.getWindow() instanceof SurfacePlotROI){
+			width = surface!=null ? ((SurfacePlotROI)surface.getWindow()).getEndX() : width;
+			height = surface!=null ? ((SurfacePlotROI)surface.getWindow()).getEndY() : height;
+		}
+		int xSize = getTrace()!=null ? getTrace().getData().getShape()[1] : 1000;
+		int ySize = getTrace()!=null ? getTrace().getData().getShape()[0] : 1000;
+		
+		Composite bottomComposite = new Composite(windowComposite,SWT.NONE | SWT.BORDER);
+		bottomComposite.setLayout(new GridLayout(1, false));
+		bottomComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
+
+		Composite spinnersComp = new Composite(bottomComposite, SWT.NONE);
+		spinnersComp.setLayout(new GridLayout(4, false));
+		spinnersComp.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
+		lblStartX = new Label(spinnersComp, SWT.RIGHT);
+		lblStartX.setText("Start X:");
+		
+		spnStartX = new Spinner(spinnersComp, SWT.BORDER);
+		spnStartX.setMinimum(0);
+		spnStartX.setMaximum(xSize);
+		spnStartX.setSize(62, 18);
+		spnStartX.addSelectionListener(this);
+
+		lblStartY = new Label(spinnersComp, SWT.RIGHT);
+		lblStartY.setText("Start Y:");
+
+		spnStartY = new Spinner(spinnersComp, SWT.BORDER);
+		spnStartY.setMinimum(0);
+		spnStartY.setMaximum(ySize);
+		spnStartY.setSize(62, 18);
+		spnStartY.addSelectionListener(this);
+
+		lblEndX = new Label(spinnersComp, SWT.RIGHT);
+		lblEndX.setText("Width:");
+
+		spnEndX = new Spinner(spinnersComp, SWT.BORDER);
+		spnEndX.setMinimum(0);
+		spnEndX.setMaximum(xSize);
+		spnEndX.setSize(62, 18);
+		spnEndX.addSelectionListener(this);
+
+		Label lblEndY = new Label(spinnersComp, SWT.RIGHT);
+		lblEndY.setText("Height:");
+
+		spnEndY = new Spinner(spinnersComp, SWT.BORDER);
+		spnEndY.setSize(62, 18);
+		spnEndY.setMinimum(0);
+		spnEndY.setMaximum(ySize);
+		spnEndY.addSelectionListener(this);
+
+		setSpinnerValues(xStartPt, yStartPt, width, height);
+
+		Composite aspectComp = new Composite(bottomComposite, SWT.NONE); 
+		aspectComp.setLayout(new GridLayout(4, false));
+		aspectComp.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
+		btnOverwriteAspect = new Button(aspectComp,SWT.CHECK);
+		btnOverwriteAspect.setText("Override Aspect-Ratio");
+		btnOverwriteAspect.addSelectionListener(this);
+
+		spnXAspect = new Spinner(aspectComp,SWT.NONE);
+		spnXAspect.setEnabled(false);
+		spnXAspect.setMinimum(1);
+		spnXAspect.setMaximum(10);
+		spnXAspect.setSelection(1);
+		spnXAspect.setIncrement(1);
+		spnXAspect.addSelectionListener(this);
+
+		lblDelimiter = new Label(aspectComp,SWT.NONE);
+		lblDelimiter.setText(":");
+
+		spnYAspect = new Spinner(aspectComp,SWT.NONE);
+		spnYAspect.setEnabled(false);
+		spnYAspect.setMinimum(1);
+		spnYAspect.setMaximum(10);
+		spnYAspect.setSelection(1);
+		spnYAspect.setIncrement(1);
+		spnYAspect.addSelectionListener(this);
+
+		return windowComposite;
+	}
+
 	protected void updateSliceRange(int lower, int upper, int max, boolean setValue) {
 		if (upper-lower>100) {
 			GridUtils.setVisible(errorLabel, true);
@@ -350,8 +481,8 @@ public class WindowTool extends AbstractToolPage {
 
 	protected void updateWindowPlot(ISurfaceTrace trace) {
 		StackLayout stackLayout = (StackLayout)content.getLayout();
-		stackLayout.topControl  = windowSystem.getPlotComposite();
-		
+		stackLayout.topControl = windowControl;
+
 		AbstractDataset data =  (AbstractDataset)trace.getData();
 		List<IDataset> axes = trace.getAxes();
 		if (axes!=null) axes = Arrays.asList(axes.get(0), axes.get(1));
@@ -443,8 +574,21 @@ public class WindowTool extends AbstractToolPage {
 	@Override
 	public void dispose() {
 		super.dispose();
-		if (windowSystem!=null) windowSystem.dispose();
-		windowSystem = null;
+		if (windowSystem!=null) {
+			windowSystem.removeRegionListener(regionListener);
+			windowSystem.removeTraceListener(traceListener);
+			windowSystem.dispose();
+			windowSystem = null;
+		}
+		
+		if (!spnStartX.isDisposed())
+			spnStartX.removeSelectionListener(this);
+		if (!spnStartY.isDisposed())
+			spnStartY.removeSelectionListener(this);
+		if (!spnEndX.isDisposed())
+			spnEndX.removeSelectionListener(this);
+		if (!spnEndY.isDisposed())
+			spnEndY.removeSelectionListener(this);
 	}
 	
 	
@@ -482,4 +626,76 @@ public class WindowTool extends AbstractToolPage {
 		
 	}
 
+	private final static int MAXDISPLAYDIM = 1024;
+
+	@Override
+	public void widgetSelected(SelectionEvent e) {
+		if (!e.getSource().equals(btnOverwriteAspect)) {
+			int startPosX = spnStartX.getSelection();
+			int startPosY = spnStartY.getSelection();
+			int width = spnEndX.getSelection();
+			int height = spnEndY.getSelection();
+			if (startPosX + width > spnEndX.getMaximum()) {
+				width = spnEndX.getMaximum() - startPosX;
+			}
+			if (startPosY + height > spnEndY.getMaximum()) {
+				height = spnEndY.getMaximum() - startPosY;
+			}
+			
+			IRegion region = windowSystem.getRegion("Window");
+			RectangularROI rroi = new RectangularROI(startPosX, startPosY, width, height, 0);
+			if (region != null)
+				region.setROI(rroi);
+			if(btnOverwriteAspect.getSelection()){
+				int xSize = getTrace().getData().getShape()[1];
+				int ySize = getTrace().getData().getShape()[0];
+				int xSamplingRate = Math.max(1, xSize / MAXDISPLAYDIM);
+				int ySamplingRate = Math.max(1, ySize / MAXDISPLAYDIM);
+				SurfacePlotROI sroi = new SurfacePlotROI(startPosX * xSamplingRate, 
+										startPosY * ySamplingRate, 
+										width * xSamplingRate, 
+										height * ySamplingRate, 
+										0, 0, 
+										spnXAspect.getSelection(), 
+										spnYAspect.getSelection());
+				windowJob.schedule(sroi);
+			} else {
+				windowJob.schedule(rroi);
+			}
+		} else if (e.getSource().equals(btnOverwriteAspect)) {
+			spnXAspect.setEnabled(btnOverwriteAspect.getSelection());
+			spnYAspect.setEnabled(btnOverwriteAspect.getSelection());
+			if (btnOverwriteAspect.getSelection())
+				windowJob.schedule();
+			else
+				windowJob.schedule();
+		}
+	}
+
+	@Override
+	public void widgetDefaultSelected(SelectionEvent e) {
+		widgetSelected(e);
+	}
+
+	/**
+	 * Set the spinner values
+	 * @param startX start position in x dimension
+	 * @param startY start position in y dimension
+	 * @param width
+	 * @param height
+	 */
+	public void setSpinnerValues(final int startX, 
+								 final int startY, 
+								 final int width, 
+								 final int height) {
+		DisplayUtils.runInDisplayThread(true, getControl(), new Runnable() {
+			@Override
+			public void run() {
+				spnStartX.setSelection(startX);
+				spnStartY.setSelection(startY);
+				spnEndX.setSelection(width);
+				spnEndY.setSelection(height);
+			}
+		});
+	}
 }
