@@ -1021,33 +1021,24 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 
 
 	
-	private IAxis selectedXAxis;
-	private IAxis selectedYAxis;
-
 	@Override
 	public IAxis getSelectedXAxis() {
-		if (selectedXAxis==null) {
-			return (AspectAxis)xyGraph.primaryXAxis;
-		}
-		return selectedXAxis;
+		return xyGraph.getSelectedXAxis();
 	}
 
 	@Override
 	public void setSelectedXAxis(IAxis selectedXAxis) {
-		this.selectedXAxis = selectedXAxis;
+		xyGraph.setSelectedXAxis(selectedXAxis);
 	}
 
 	@Override
 	public IAxis getSelectedYAxis() {
-		if (selectedYAxis==null) {
-			return (AspectAxis)xyGraph.primaryYAxis;
-		}
-		return selectedYAxis;
+		return xyGraph.getSelectedYAxis();
 	}
 
 	@Override
 	public void setSelectedYAxis(IAxis selectedYAxis) {
-		this.selectedYAxis = selectedYAxis;
+		xyGraph.setSelectedYAxis(selectedYAxis);
 	}
 
 	public Image getImage(Rectangle size) {

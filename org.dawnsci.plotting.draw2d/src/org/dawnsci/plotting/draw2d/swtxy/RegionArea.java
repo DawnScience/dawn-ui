@@ -151,7 +151,9 @@ public class RegionArea extends PlotArea {
 		
 
 		if (positionCursor!=null) positionCursor.dispose();
-		positionCursor = CursorUtils.getPositionCursor(me, (AspectAxis)getRegionGraph().primaryXAxis, (AspectAxis)getRegionGraph().primaryYAxis, getImageTrace());
+		final IAxis  x = getRegionGraph().getSelectedXAxis();
+		final IAxis  y = getRegionGraph().getSelectedYAxis();
+		positionCursor = CursorUtils.getPositionCursor(me, x, y, getImageTrace());
 		setCursor(positionCursor);
 	}
 

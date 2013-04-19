@@ -390,4 +390,29 @@ public class XYRegionGraph extends XYGraph {
 		getRegionArea().toFront();
 	}
 
+	
+	private IAxis selectedXAxis;
+	private IAxis selectedYAxis;
+
+	public IAxis getSelectedXAxis() {
+		if (selectedXAxis==null) {
+			return (AspectAxis)primaryXAxis;
+		}
+		return selectedXAxis;
+	}
+
+	public void setSelectedXAxis(IAxis selectedXAxis) {
+		this.selectedXAxis = selectedXAxis;
+	}
+
+	public IAxis getSelectedYAxis() {
+		if (selectedYAxis==null) {
+			return (AspectAxis)primaryYAxis;
+		}
+		return selectedYAxis;
+	}
+
+	public void setSelectedYAxis(IAxis selectedYAxis) {
+		this.selectedYAxis = selectedYAxis;
+	}
 }
