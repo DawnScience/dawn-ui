@@ -250,7 +250,7 @@ public class JRealityPlotActions {
 		actionMan.registerGroup("jreality.plotting.grid.line.actions", ManagerType.TOOLBAR);
 		
 		
-		Action reset = new Action("Reset orientation",IAction.AS_PUSH_BUTTON) {
+		Action reset = new Action("Reset orientation and zoom",IAction.AS_PUSH_BUTTON) {
 			@Override
 			public void run()
 			{
@@ -262,7 +262,7 @@ public class JRealityPlotActions {
 		reset.setImageDescriptor(Activator.getImageDescriptor("icons/axis.png"));
 		actionMan.registerAction("jreality.plotting.grid.line.actions", reset, ActionType.THREED, ManagerType.TOOLBAR);
 
-		boundingBox = new Action("Show a  box around the plot",IAction.AS_CHECK_BOX) {
+		boundingBox = new Action("Toggle bounding box",IAction.AS_CHECK_BOX) {
 			@Override
 			public void run()
 			{
