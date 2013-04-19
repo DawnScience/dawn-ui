@@ -2,15 +2,15 @@ package org.dawnsci.plotting.expression;
 
 import gda.analysis.io.ScanFileHolderException;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.jexl2.ExpressionImpl;
-import org.apache.commons.jexl2.JexlContext;
-import org.apache.commons.jexl2.JexlEngine;
-import org.apache.commons.jexl2.MapContext;
 import org.dawb.common.services.IVariableManager;
-import org.dawnsci.jexl.utils.JexlUtils;
+import org.dawb.common.services.ServiceManager;
+import org.dawb.common.services.expressions.IExpressionEngine;
+import org.dawb.common.services.expressions.IExpressionService;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
@@ -28,7 +28,7 @@ class ExpressionLazyLoader implements ILazyLoader {
 	private final String           variableName;
 	private final String           expressionString;
 	private final IVariableManager manager;
-	private final JexlEngine       jexl;
+	private IExpressionEngine       engine;
 
 	public ExpressionLazyLoader(final String           variableName,
 			                    final String           expressionString,
@@ -37,7 +37,15 @@ class ExpressionLazyLoader implements ILazyLoader {
 		this.variableName     = variableName;
 		this.expressionString = expressionString;
 		this.manager          = manager;
-		this.jexl             = JexlUtils.getDawnJexlEngine();
+		
+		try {
+			IExpressionService service = (IExpressionService)ServiceManager.getService(IExpressionService.class);
+			this.engine = service.getExpressionEngine();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block, find out what happens when there is no service
+			e.printStackTrace();
+		}
+		
 	}
 
 	@Override
@@ -52,16 +60,23 @@ class ExpressionLazyLoader implements ILazyLoader {
 			 							int[] stop, 
 			 							int[] step) throws ScanFileHolderException {
 		
-		ExpressionImpl ex = (ExpressionImpl)jexl.createExpression(expressionString);
-		final Set<List<String>> names = ex.getVariables();
-
-		JexlContext context = new MapContext();
+		try {
+			engine.createExpression(expressionString);
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+			return null;
+		}
+		final Set<List<String>> names = engine.getVariableNamesFromExpression();
+		
+		Map<String,Object> context = new HashMap<String,Object>();
+		//JexlContext context = new MapContext();
 				
 	    for (List<String> entry : names) {
 	    	final String name = entry.get(0);
 	    	try {
 	    		ILazyDataset set = manager.getLazyValue(name, mon);
-	    		context.set(name, set.getSlice(mon, start, stop, step));
+	    		context.put(name, set.getSlice(mon, start, stop, step));
 	    		
 	    	} catch (Throwable ignored) {
 	    		// We try to add the unsliced value as they may be putting a 
@@ -69,14 +84,23 @@ class ExpressionLazyLoader implements ILazyLoader {
 	    		// medium of a stack for flat field images.
 	    		try {
 		    		IDataset set = manager.getVariableValue(name, mon);
-		    		context.set(name, set);
+		    		context.put(name, set);
 	    		} catch (Throwable ignored2) { // Might get memory problems here.
 	    			continue;
 	    		}
 	    	}
 	    }
        
-		AbstractDataset value = (AbstractDataset)ex.evaluate(context);
+	    Object output = null;
+		try {
+			engine.setLoadedVariables(context);
+			output = engine.evaluate();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    if (!(output instanceof AbstractDataset))return null;
+		AbstractDataset value = (AbstractDataset)output;
 		value.setName("Slice of "+variableName);
 		
 		return value;
