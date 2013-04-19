@@ -122,8 +122,8 @@ public class WindowTool extends AbstractToolPage implements SelectionListener {
 	private Label lblStartY;
 	private Spinner spnStartY;
 	private Label lblEndX;
-	private Spinner spnEndX;
-	private Spinner spnEndY;
+	private Spinner spnWidth;
+	private Spinner spnHeight;
 	private Button btnOverwriteAspect;
 	private Spinner spnXAspect;
 	private Label lblDelimiter;
@@ -170,6 +170,8 @@ public class WindowTool extends AbstractToolPage implements SelectionListener {
 							RectangularROI rroi = (RectangularROI) roi;
 							int roiWidth = (int)Math.round(rroi.getLengths()[0]);
 							int roiHeight = (int)Math.round(rroi.getLengths()[1]);
+							int endX = (int)Math.round(rroi.getEndPoint()[0]);
+							int endY = (int)Math.round(rroi.getEndPoint()[1]);
 							setSpinnerValues(startX, startY, roiWidth, roiHeight);
 							if(btnOverwriteAspect.getSelection()){
 								int xSize = getTrace().getData().getShape()[1];
@@ -178,8 +180,8 @@ public class WindowTool extends AbstractToolPage implements SelectionListener {
 								int ySamplingRate = Math.max(1, ySize / MAXDISPLAYDIM);
 								SurfacePlotROI sroi = new SurfacePlotROI(startX * xSamplingRate, 
 																startY * ySamplingRate, 
-																roiWidth * xSamplingRate, 
-																roiHeight * ySamplingRate, 
+																endX * xSamplingRate, 
+																endY * ySamplingRate, 
 																0, 0, 
 																spnXAspect.getSelection(), 
 																spnYAspect.getSelection());
@@ -380,20 +382,20 @@ public class WindowTool extends AbstractToolPage implements SelectionListener {
 		lblEndX = new Label(spinnersComp, SWT.RIGHT);
 		lblEndX.setText("Width:");
 
-		spnEndX = new Spinner(spinnersComp, SWT.BORDER);
-		spnEndX.setMinimum(0);
-		spnEndX.setMaximum(xSize);
-		spnEndX.setSize(62, 18);
-		spnEndX.addSelectionListener(this);
+		spnWidth = new Spinner(spinnersComp, SWT.BORDER);
+		spnWidth.setMinimum(0);
+		spnWidth.setMaximum(xSize);
+		spnWidth.setSize(62, 18);
+		spnWidth.addSelectionListener(this);
 
 		Label lblEndY = new Label(spinnersComp, SWT.RIGHT);
 		lblEndY.setText("Height:");
 
-		spnEndY = new Spinner(spinnersComp, SWT.BORDER);
-		spnEndY.setSize(62, 18);
-		spnEndY.setMinimum(0);
-		spnEndY.setMaximum(ySize);
-		spnEndY.addSelectionListener(this);
+		spnHeight = new Spinner(spinnersComp, SWT.BORDER);
+		spnHeight.setSize(62, 18);
+		spnHeight.setMinimum(0);
+		spnHeight.setMaximum(ySize);
+		spnHeight.addSelectionListener(this);
 
 		setSpinnerValues(xStartPt, yStartPt, width, height);
 
@@ -585,10 +587,10 @@ public class WindowTool extends AbstractToolPage implements SelectionListener {
 			spnStartX.removeSelectionListener(this);
 		if (!spnStartY.isDisposed())
 			spnStartY.removeSelectionListener(this);
-		if (!spnEndX.isDisposed())
-			spnEndX.removeSelectionListener(this);
-		if (!spnEndY.isDisposed())
-			spnEndY.removeSelectionListener(this);
+		if (!spnWidth.isDisposed())
+			spnWidth.removeSelectionListener(this);
+		if (!spnHeight.isDisposed())
+			spnHeight.removeSelectionListener(this);
 	}
 	
 	
@@ -633,15 +635,16 @@ public class WindowTool extends AbstractToolPage implements SelectionListener {
 		if (!e.getSource().equals(btnOverwriteAspect)) {
 			int startPosX = spnStartX.getSelection();
 			int startPosY = spnStartY.getSelection();
-			int width = spnEndX.getSelection();
-			int height = spnEndY.getSelection();
-			if (startPosX + width > spnEndX.getMaximum()) {
-				width = spnEndX.getMaximum() - startPosX;
+			int width = spnWidth.getSelection();
+			int height = spnHeight.getSelection();
+			if (startPosX + width > spnWidth.getMaximum()) {
+				width = spnWidth.getMaximum() - startPosX;
 			}
-			if (startPosY + height > spnEndY.getMaximum()) {
-				height = spnEndY.getMaximum() - startPosY;
+			if (startPosY + height > spnHeight.getMaximum()) {
+				height = spnHeight.getMaximum() - startPosY;
 			}
-			
+			int endPtX = width + startPosX;
+			int endPtY = height + startPosY;
 			IRegion region = windowSystem.getRegion("Window");
 			RectangularROI rroi = new RectangularROI(startPosX, startPosY, width, height, 0);
 			if (region != null)
@@ -653,8 +656,8 @@ public class WindowTool extends AbstractToolPage implements SelectionListener {
 				int ySamplingRate = Math.max(1, ySize / MAXDISPLAYDIM);
 				SurfacePlotROI sroi = new SurfacePlotROI(startPosX * xSamplingRate, 
 										startPosY * ySamplingRate, 
-										width * xSamplingRate, 
-										height * ySamplingRate, 
+										endPtX * xSamplingRate, 
+										endPtY * ySamplingRate, 
 										0, 0, 
 										spnXAspect.getSelection(), 
 										spnYAspect.getSelection());
@@ -693,8 +696,8 @@ public class WindowTool extends AbstractToolPage implements SelectionListener {
 			public void run() {
 				spnStartX.setSelection(startX);
 				spnStartY.setSelection(startY);
-				spnEndX.setSelection(width);
-				spnEndY.setSelection(height);
+				spnWidth.setSelection(width);
+				spnHeight.setSelection(height);
 			}
 		});
 	}
