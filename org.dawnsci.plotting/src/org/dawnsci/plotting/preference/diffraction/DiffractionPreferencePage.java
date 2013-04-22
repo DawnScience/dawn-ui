@@ -36,8 +36,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -210,9 +212,27 @@ public class DiffractionPreferencePage extends PreferencePage implements IWorkbe
 
 	@Override
 	protected void performDefaults() {
-		this.calibrationStandards = CalibrationFactory.getCalibrationStandards(true); // Reads from file
-		setDefaultCalibrantChoice();
+		//Reloads currently selected calibrant from the defaults list if possible
+		String name = calibrationStandards.getSelectedCalibrant();
+		
+		if (name == null) {
+			showDefaultsError("No calibrant selected.");
+		}
+		
+		CalibrantSpacing calibrant = calibrationStandards.getDefaultSpacing(name);
+		
+		if (calibrant == null) {
+			showDefaultsError("Selected calibrant has no default values.");
+		}
+ 		
+		setBean(calibrant);
 	}
+	
+	private void showDefaultsError(String message) {
+		Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(); 
+		MessageDialog.openError(shell, "Restore Defaults Error", message);
+	}
+	
 	
 	public void dispose() {
 		CalibrationFactory.removeCalibrantSelectionListener(this);
