@@ -20,6 +20,7 @@ import org.dawnsci.plotting.api.histogram.IImageService;
 import org.dawnsci.plotting.api.histogram.ImageServiceBean;
 import org.dawnsci.plotting.api.histogram.ImageServiceBean.HistoType;
 import org.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
+import org.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.dawnsci.plotting.api.trace.DownSampleEvent;
 import org.dawnsci.plotting.api.trace.IDownSampleListener;
 import org.dawnsci.plotting.api.trace.IImageTrace;

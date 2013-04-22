@@ -16,6 +16,7 @@ import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.swt.xygraph.linearscale.AbstractScale.LabelSide;
 import org.dawnsci.plotting.api.axis.IAxis;
 import org.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
+import org.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.dawnsci.plotting.api.region.IRegionListener;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;

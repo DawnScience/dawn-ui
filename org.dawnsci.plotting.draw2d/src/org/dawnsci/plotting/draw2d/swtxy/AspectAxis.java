@@ -11,6 +11,7 @@ import org.dawnsci.plotting.api.axis.AxisEvent;
 import org.dawnsci.plotting.api.axis.IAxis;
 import org.dawnsci.plotting.api.axis.IAxisListener;
 import org.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
+import org.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Dimension;

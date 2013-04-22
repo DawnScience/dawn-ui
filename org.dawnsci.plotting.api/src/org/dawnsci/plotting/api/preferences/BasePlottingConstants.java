@@ -8,7 +8,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  */ 
 
-package org.dawnsci.plotting.draw2d.swtxy;
+package org.dawnsci.plotting.api.preferences;
 
 
 public class BasePlottingConstants {

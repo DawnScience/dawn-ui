@@ -10,7 +10,7 @@
 
 package org.dawnsci.plotting.preference;
 
-import org.dawnsci.plotting.draw2d.swtxy.BasePlottingConstants;
+import org.dawnsci.plotting.api.preferences.BasePlottingConstants;
 
 
 public class PlottingConstants extends BasePlottingConstants {
