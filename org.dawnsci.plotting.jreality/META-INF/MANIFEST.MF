@@ -28,6 +28,7 @@ Bundle-ClassPath: jars/gluegen-rt.jar,
  jars/jtem-beans.jar,
  .
 Import-Package: org.dawb.common.services,
+ org.dawnsci.plotting.draw2d.swtxy,
  org.slf4j
 Export-Package: de.jreality.backends.label,
  de.jreality.backends.texture,

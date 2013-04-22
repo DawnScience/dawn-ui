@@ -2,7 +2,6 @@ package org.dawnsci.plotting.api.trace;
 
 import java.util.List;
 
-import org.dawnsci.plotting.api.histogram.HistogramBound;
 import org.dawnsci.plotting.api.histogram.ImageServiceBean.HistoType;
 import org.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
 
@@ -109,31 +108,6 @@ public interface IImageTrace extends IPaletteTrace, IDownsampledTrace{
 	 * @return the axes if they were set - may be null
 	 */
 	public List<IDataset> getAxes();
-
-	/**
-	 * The min intensity for generating the image
-	 * @return
-	 */
-	public Number getMin();
-	
-	/**
-	 * The min intensity for generating the image
-	 * @return
-	 */
-	public void setMin(Number min);
-	
-	/**
-	 * The max intensity for generating the image
-	 * @return
-	 */
-	public Number getMax();
-	
-	/**
-	 * The max intensity for generating the image
-	 * @return
-	 */
-	public void setMax(Number max);
-	
 	
 	/**
 	 * 
@@ -197,42 +171,6 @@ public interface IImageTrace extends IPaletteTrace, IDownsampledTrace{
                The bin is a square of side = the return value.
 	 */
 	public int getDownsampleBin();
-	
-	/**
-	 * Gets the min cut, a RGB and a bound.
-	 * @return
-	 */
-	public HistogramBound getMinCut();
-	
-	/**
-	 * Gets the min cut, a RGB and a bound.
-	 * @return
-	 */
-	public void setMinCut(HistogramBound bound);
-
-	/**
-	 * Gets the max cut, a RGB and a bound.
-	 * @return
-	 */
-	public HistogramBound getMaxCut();
-
-	/**
-	 * Gets the min cut, a RGB and a bound.
-	 * @return
-	 */
-	public void setMaxCut(HistogramBound bound);
-	
-	/**
-	 * Gets the Nan cut
-	 * @return
-	 */
-	public HistogramBound getNanBound();
-	
-	/**
-	 * Gets the Nan cut
-	 * @return
-	 */
-	public void setNanBound(HistogramBound bound);
 
 	/**
 	 * The masking dataset of there is one, normally null.
@@ -305,16 +243,4 @@ public interface IImageTrace extends IPaletteTrace, IDownsampledTrace{
 	 *         is unknown.
 	 */
 	public double[] getPointInImageCoordinates(final double[] axisLocation) throws Exception;
-
-	/**
-	 * Is the imagetrace set to rescale the histogram when a new image update occurs
-	 * @return the current state.
-	 */
-	public boolean isRescaleHistogram();
-
-	/**
-	 * Set wheter an update to the image trace triggers a rehistogram
-	 * @param rescaleHistogram
-	 */
-	public void setRescaleHistogram(boolean rescaleHistogram);
 }

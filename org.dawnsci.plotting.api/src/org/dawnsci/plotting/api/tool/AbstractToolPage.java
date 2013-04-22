@@ -8,6 +8,7 @@ import java.util.Collections;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.ILineStackTrace;
+import org.dawnsci.plotting.api.trace.IPaletteTrace;
 import org.dawnsci.plotting.api.trace.ISurfaceTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.api.trace.IWindowTrace;
@@ -214,6 +215,11 @@ public abstract class AbstractToolPage extends Page implements IToolPage, IAdapt
 	protected ISurfaceTrace getSurfaceTrace() {
 		final ITrace trace = getTrace();
 		return trace instanceof ISurfaceTrace ? (ISurfaceTrace)trace : null;
+	}
+
+	public IPaletteTrace getPaletteTrace() {
+		final ITrace trace = getTrace();
+		return trace instanceof IPaletteTrace ? (IPaletteTrace)trace : null;
 	}
 	
 	protected ILineStackTrace getStackTrace() {

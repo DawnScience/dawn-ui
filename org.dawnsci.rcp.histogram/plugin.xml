@@ -12,6 +12,13 @@
             label="Colour mapping"
             tooltip="Colour mapping tool for adjusting contrast, brightness and other image colour settings">
       </plotting_tool_page>
+      <plotting_tool_page
+            class="org.dawnsci.rcp.histogram.HistogramTool3D"
+            icon="icons/brightness_contrast.gif"
+            id="org.dawnsci.rcp.histogram.histogram_tool_3d"
+            label="Colour mapping"
+            tooltip="Colour mapping tool for adjusting contrast, brightness and other image colour settings">
+      </plotting_tool_page>
    </extension>
    <extension
          point="org.dawnsci.rcp.histogram.channelColourScheme">

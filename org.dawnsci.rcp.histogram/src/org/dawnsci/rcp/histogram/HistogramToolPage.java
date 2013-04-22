@@ -70,18 +70,14 @@ import uk.ac.diamond.scisoft.analysis.dataset.Maths;
 import uk.ac.diamond.scisoft.analysis.dataset.function.Histogram;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
-
 public class HistogramToolPage extends AbstractToolPage {
 
 	private static final String ZINGER_LABEL = "Zinger Min value cutoff";
 
-
 	private static final String DEAD_PIXEL_LABEL = "Dead Pixel Max cutoff";
-
 
 	// LOGGER
 	private static final Logger logger = LoggerFactory.getLogger(HistogramToolPage.class);
-
 
 	// STATICS
 	private static final int SLIDER_STEPS = 1000;
@@ -97,7 +93,6 @@ public class HistogramToolPage extends AbstractToolPage {
 	 */
 	private IAction lockAction;
 	private int mode = FULL;
-
 
 	// HISTOGRAM 
 	private double rangeMax = 100.0;
@@ -118,13 +113,11 @@ public class HistogramToolPage extends AbstractToolPage {
 	private ScrolledComposite sc;
 	private ExpansionAdapter expansionAdapter;
 
-
 	// COLOUR SCHEME GUI 
 	private ExpandableComposite colourSchemeExpander;
 	private Composite colourSchemeComposite;
 	private CCombo cmbColourMap;	
 	private SelectionListener colourSchemeListener;
-
 
 	// PER CHANNEL SCHEME GUI
 	private ExpandableComposite perChannelExpander;
@@ -150,7 +143,6 @@ public class HistogramToolPage extends AbstractToolPage {
 	private SelectionListener brightnessContrastListener;
 	private SelectionListener rangeSelectionListener;
 	private KeyListener rangeKeyListener;
-
 
 	// MIN MAX GUI	
 	private static final String MAX_LABEL = "Max";
@@ -178,7 +170,6 @@ public class HistogramToolPage extends AbstractToolPage {
 	private Button resetButton;
 	private SelectionListener resetListener;
 
-
 	// HISTOGRAM PLOT
 	private ExpandableComposite histogramExpander;
 	private Composite histogramComposite;
@@ -198,28 +189,19 @@ public class HistogramToolPage extends AbstractToolPage {
 	private int internalEvent = 0; // This is very likely to go wrong, suggest avoid
 	                               // having counters for events.
 
-
 	private IPaletteListener paletteListener;
-
 
 	private Button btnColourMapLog;
 
-
 	private SelectionListener colourSchemeLogListener;
-
 
 	private double scaleMax = 1;
 
-
 	private double scaleMin = 0;
-
-
 
 	protected boolean regionDragging = false;
 
-
 	private IROIListener histogramRegionListener;
-
 
 	/**
 	 * Basic Constructor
@@ -234,7 +216,6 @@ public class HistogramToolPage extends AbstractToolPage {
 			logger.error("Cannot locate any plotting systems!", ne);
 		}
 
-
 		// Connect to the trace listener to deal with new images coming in
 		traceListener = new ITraceListener.Stub() {
 			
@@ -243,9 +224,9 @@ public class HistogramToolPage extends AbstractToolPage {
 				if (!isActive()) return;
 				
 				// Does not all update(...) intentionally.
-				IImageTrace it = null;
-				if (evt.getSource() instanceof IImageTrace) {
-					it = (IImageTrace)evt.getSource();
+				IPaletteTrace it = null;
+				if (evt.getSource() instanceof IPaletteTrace) {
+					it = (IPaletteTrace)evt.getSource();
 				}
 				updateImage(it, false);
 				updatePalette(it, null);
@@ -269,15 +250,15 @@ public class HistogramToolPage extends AbstractToolPage {
 				if (internalEvent > 0) return;
 				logger.trace("paletteChanged");
 				paletteData = event.getPaletteData();
-				updateHistogramToolElements(event.getImageTrace(), null, false);
+				updateHistogramToolElements(event.getTrace(), null, false);
 			}
 
 			@Override
 			public void minChanged(PaletteEvent event) {
 				if (internalEvent > 0 || mode == FIXED) return;
 				logger.trace("paletteListener minChanged firing");
-				histoMin = ((IImageTrace)event.getSource()).getImageServiceBean().getMin().doubleValue();
-				updateHistogramToolElements(event.getImageTrace(), null, false);
+				histoMin = ((IPaletteTrace)event.getSource()).getImageServiceBean().getMin().doubleValue();
+				updateHistogramToolElements(event.getTrace(), null, false);
 
 			}
 
@@ -285,30 +266,30 @@ public class HistogramToolPage extends AbstractToolPage {
 			public void maxChanged(PaletteEvent event) {
 				if (internalEvent > 0 || mode == FIXED) return;
 				logger.trace("paletteListener maxChanged firing");
-				histoMax = ((IImageTrace)event.getSource()).getImageServiceBean().getMax().doubleValue();
-				updateHistogramToolElements(event.getImageTrace(), null, false);
+				histoMax = ((IPaletteTrace)event.getSource()).getImageServiceBean().getMax().doubleValue();
+				updateHistogramToolElements(event.getTrace(), null, false);
 			}
 
 			@Override
 			public void maxCutChanged(PaletteEvent evt) {
 				if (internalEvent > 0 || mode == FIXED) return;
 				logger.trace("paletteListener maxCutChanged firing");
-				rangeMax = ((IImageTrace)evt.getSource()).getImageServiceBean().getMaximumCutBound().getBound().doubleValue();
+				rangeMax = ((IPaletteTrace)evt.getSource()).getImageServiceBean().getMaximumCutBound().getBound().doubleValue();
 				zingerText.setText(Double.toString(rangeMax));
 				if(histoMax > rangeMax) histoMax = rangeMax;
 				generateHistogram(imageDataset);
-				updateHistogramToolElements(evt.getImageTrace(), null, false);
+				updateHistogramToolElements(evt.getTrace(), null, false);
 			}
 
 			@Override
 			public void minCutChanged(PaletteEvent evt) {
 				if (internalEvent > 0 || mode == FIXED) return;
 				logger.trace("paletteListener minCutChanged firing");
-				rangeMin = ((IImageTrace)evt.getSource()).getImageServiceBean().getMinimumCutBound().getBound().doubleValue();
+				rangeMin = ((IPaletteTrace)evt.getSource()).getImageServiceBean().getMinimumCutBound().getBound().doubleValue();
 				deadPixelText.setText(Double.toString(rangeMin));
 				if(histoMin < rangeMin) histoMin = rangeMin;
 				generateHistogram(imageDataset);
-				updateHistogramToolElements(evt.getImageTrace(), null, false);
+				updateHistogramToolElements(evt.getTrace(), null, false);
 
 			}
 
@@ -418,7 +399,7 @@ public class HistogramToolPage extends AbstractToolPage {
 					if (histoMax > rangeMax) histoMax = rangeMax;
 					if (histoMin < rangeMin) histoMin = rangeMin;
 
-					IImageTrace image = getImageTrace();
+					IPaletteTrace image = getPaletteTrace();
 					if (image!=null) {
 						image.setMaxCut(new HistogramBound(rangeMax, image.getMaxCut().getColor()));		
 						image.setMinCut(new HistogramBound(rangeMin, image.getMinCut().getColor()));
@@ -448,7 +429,7 @@ public class HistogramToolPage extends AbstractToolPage {
 				rangeMax = Double.POSITIVE_INFINITY;
 				rangeMin = Double.NEGATIVE_INFINITY;
 
-				IImageTrace image = getImageTrace();
+				IPaletteTrace image = getPaletteTrace();
 				if (image!=null) {
 			        image.setMaxCut(new HistogramBound(rangeMax, image.getMaxCut().getColor()));		
 				    image.setMinCut(new HistogramBound(rangeMin, image.getMinCut().getColor()));
@@ -506,7 +487,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				IImageTrace image = getImageTrace();
+				IPaletteTrace image = getPaletteTrace();
 				if (image!=null) {
 					image.getImageServiceBean().setLogColorScale(btnColourMapLog.getSelection());
 					updateImage(null, true);
@@ -581,11 +562,11 @@ public class HistogramToolPage extends AbstractToolPage {
 	 * 
 	 * @param mon, may be null
 	 */
-	protected boolean updatePalette(IImageTrace eventsImage, IProgressMonitor mon) {
+	protected boolean updatePalette(IPaletteTrace eventsImage, IProgressMonitor mon) {
 		logger.trace("imagerepaintJob running");
 		internalEvent++;
 
-		IImageTrace image = eventsImage!=null ? eventsImage : getImageTrace();
+		IPaletteTrace image = eventsImage!=null ? eventsImage : getPaletteTrace();
 		if (image!=null) {
 			image.setMax(histoMax);
 			if (mon!=null && mon.isCanceled()) return false;
@@ -936,10 +917,10 @@ public class HistogramToolPage extends AbstractToolPage {
 	 * up all the local parameters
 	 * @param imageTrace, may be null.
 	 */
-	private void updateImage(IImageTrace imageTrace, boolean repaintImage) {
+	private void updateImage(IPaletteTrace imageTrace, boolean repaintImage) {
 		if (getControl()==null) return; // We cannot plot unless its been created.
 
-		IImageTrace image = imageTrace==null ? getImageTrace() : imageTrace;
+		IPaletteTrace image = imageTrace==null ? getPaletteTrace() : imageTrace;
 
 		if (image != null) {
 
@@ -1015,7 +996,7 @@ public class HistogramToolPage extends AbstractToolPage {
 	private void removeImagePaletteListener() {
 		if (getControl()==null) return; // We cannot plot unless its been created.
 
-		IImageTrace image = getImageTrace();
+		IPaletteTrace image = getPaletteTrace();
 		if (image != null) {
 
 			image.removePaletteListener(paletteListener);
@@ -1024,7 +1005,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 
 	private void updateHistogramToolElements(EventObject event) {
-		updateHistogramToolElements(getImageTrace(), event, true);
+		updateHistogramToolElements(getPaletteTrace(), event, true);
 	}
 
 	/**

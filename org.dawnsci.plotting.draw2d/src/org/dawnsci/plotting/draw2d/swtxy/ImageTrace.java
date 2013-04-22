@@ -830,6 +830,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		return rescaleHistogram;
 	}
 
+	@Override
 	public void setRescaleHistogram(boolean rescaleHistogram) {
 		this.rescaleHistogram = rescaleHistogram;
 	}
@@ -1291,7 +1292,6 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
         return new double[]{xIndex, yIndex};
 	}
 
-	
 	private void transform(AbstractDataset label, int index, double[]... points) {
 		if (label!=null) {
 			for (double[] ds : points) {
