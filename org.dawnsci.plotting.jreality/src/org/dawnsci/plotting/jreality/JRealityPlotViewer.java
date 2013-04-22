@@ -337,13 +337,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 						               final IROI             window,
 						               final PlottingMode        mode,
 						               final AbstractDataset...  data) {
-		try {
-			graph.setVisible(false);
-			return plot(axes, window, mode, data);
-		} finally {
-			graph.setVisible(true);
-			refresh(true);
-		}
+		return plot(axes, window, mode, data);
 	}
 
 	
