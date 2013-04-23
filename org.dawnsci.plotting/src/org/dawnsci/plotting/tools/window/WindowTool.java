@@ -78,7 +78,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
 import org.mihalis.opal.rangeSlider.RangeSlider;
@@ -526,6 +525,7 @@ public class WindowTool extends AbstractToolPage implements SelectionListener {
 			
 			final Collection<IRegion> boxes = windowSystem.getRegions(RegionType.BOX);
 			if (boxes!=null) for (IRegion iRegion : boxes) iRegion.addROIListener(roiListener);
+			windowJob.schedule();
 		}
 	}
 	
@@ -576,11 +576,10 @@ public class WindowTool extends AbstractToolPage implements SelectionListener {
 	@Override
 	public void dispose() {
 		super.dispose();
-		if (windowSystem!=null) {
+		if(getPlottingSystem() != null)
+			getPlottingSystem().removeTraceListener(traceListener);
+		if (windowSystem!=null && !windowSystem.isDisposed()) {
 			windowSystem.removeRegionListener(regionListener);
-			windowSystem.removeTraceListener(traceListener);
-			windowSystem.dispose();
-			windowSystem = null;
 		}
 		
 		if (!spnStartX.isDisposed())
@@ -592,7 +591,6 @@ public class WindowTool extends AbstractToolPage implements SelectionListener {
 		if (!spnHeight.isDisposed())
 			spnHeight.removeSelectionListener(this);
 	}
-	
 	
 	private class WindowJob extends Job {
 
@@ -616,11 +614,13 @@ public class WindowTool extends AbstractToolPage implements SelectionListener {
 			
 			final IWindowTrace windowTrace = getWindowTrace();
 			if (windowTrace!=null) {
-				Display.getDefault().syncExec(new Runnable() {
+				DisplayUtils.runInDisplayThread(true, getControl(), new Runnable() {
 					public void run() {
 						windowTrace.setWindow(window);
 					}
 				});
+			} else {
+				return Status.CANCEL_STATUS;
 			}
 	
 			return Status.OK_STATUS;
