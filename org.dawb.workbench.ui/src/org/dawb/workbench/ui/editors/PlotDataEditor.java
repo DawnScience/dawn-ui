@@ -197,22 +197,27 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 
 		plottingSystem.setRescale(Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.RESCALE_SETTING));
  	}
-	
+
 	protected void setAxisSettings(String propertyStub, IAxis axis) {
 		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
 		boolean isDateTime = axis.isDateFormatEnabled();
 		store.setValue(propertyStub+"isDateTime", isDateTime);
-		String  format     = axis.getFormatPattern();
-		store.setValue(propertyStub+"dateFormat", format);
-		boolean isLog      = axis.isLog10();		
-		store.setValue(propertyStub+"log10", isLog);
+		if (isDateTime) {
+			String format = axis.getFormatPattern();
+			store.setValue(propertyStub + "dateFormat", format);
+		}
+		boolean isLog = axis.isLog10();
+		store.setValue(propertyStub + "log10", isLog);
 	}
+
 	protected void getAxisSettings(String propertyStub, IAxis axis) {
 		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
+		boolean isDateTime = false;
 		if (store.contains(propertyStub+"isDateTime")) {
-			axis.setDateFormatEnabled(store.getBoolean(propertyStub+"isDateTime"));
+			isDateTime = store.getBoolean(propertyStub+"isDateTime");
+			axis.setDateFormatEnabled(isDateTime);
 		}
-		if (store.contains(propertyStub+"dateFormat")) {
+		if (isDateTime && store.contains(propertyStub+"dateFormat")) {
 			axis.setFormatPattern(store.getString(propertyStub+"dateFormat"));
 		}
 		if (store.contains(propertyStub+"log10")) {
