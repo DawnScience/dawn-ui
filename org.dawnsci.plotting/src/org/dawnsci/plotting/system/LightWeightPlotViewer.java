@@ -1073,7 +1073,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 	}
 
 	public void repaint(final boolean autoScale) {
-		DisplayUtils.runInDisplayThread(true, null, new Runnable() {
+		DisplayUtils.runInDisplayThread(false, null, new Runnable() {
 			public void run() {
 				if (xyCanvas!=null && xyGraph != null) {
 					if (autoScale)xyGraph.performAutoScale();
