@@ -29,9 +29,9 @@ import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
  */
 public class PerimeterBoxSelection extends BoxSelection {
 		
-	private Color leftColor = ColorConstants.blue;
-	private Color rightColor = ColorConstants.red;
-	private Color topColor = ColorConstants.darkGreen;
+	private Color leftColor = ColorConstants.red;
+	private Color rightColor = ColorConstants.darkGreen;
+	private Color topColor = ColorConstants.blue;
 	private Color bottomColor = ColorConstants.orange;
 	
 	/**

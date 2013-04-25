@@ -435,12 +435,12 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 		y_trace = (ILineTrace)profilePlottingSystem.getTrace(traceName2);
 		if (type == SWT.VERTICAL) {
 			if(x_trace != null && y_trace != null){
-				x_trace.setTraceColor(ColorConstants.blue);
-				y_trace.setTraceColor(ColorConstants.red);
+				x_trace.setTraceColor(ColorConstants.red);
+				y_trace.setTraceColor(ColorConstants.darkGreen);
 			}
 		} else if (type == SWT.HORIZONTAL) {
 			if(x_trace != null && y_trace != null){
-				x_trace.setTraceColor(ColorConstants.darkGreen);
+				x_trace.setTraceColor(ColorConstants.blue);
 				y_trace.setTraceColor(ColorConstants.orange);
 			}
 		}
