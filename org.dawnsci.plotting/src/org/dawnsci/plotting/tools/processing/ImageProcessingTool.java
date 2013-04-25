@@ -87,6 +87,7 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 				public void regionRemoved(RegionEvent evt) {
 					if (evt.getRegion()!=null) {
 						evt.getRegion().removeROIListener(ImageProcessingTool.this);
+						clearTraces(evt.getRegion());
 					}
 				}
 				@Override
@@ -402,6 +403,15 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 	@Override
 	public boolean isStaticTool() {
 		return true;
+	}
+
+	protected void clearTraces(final IRegion region) {
+		final String name = region.getName();
+		Collection<ITrace> registered = this.registeredTraces.get(name);
+		if (registered!=null) for (ITrace iTrace : registered) {
+			profilePlottingSystem.removeTrace(iTrace);
+			displayPlottingSystem.removeTrace(iTrace);
+		}
 	}
 
 	protected void registerTraces(final IRegion region, final Collection<ITrace> traces) {
