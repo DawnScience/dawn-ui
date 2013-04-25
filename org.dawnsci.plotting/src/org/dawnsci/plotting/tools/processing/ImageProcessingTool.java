@@ -171,7 +171,6 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 
 		//bottom part
 		SashForm bottomSashForm = new SashForm(mainSashForm, SWT.HORIZONTAL);
-		bottomSashForm.setLayoutData(new GridData(GridData.FILL_BOTH));
 		bottomSashForm.setBackground(new Color(parent.getDisplay(), 192, 192, 192));
 
 		Composite displayComp = new Composite(bottomSashForm, SWT.NONE);
@@ -197,7 +196,7 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 			e.printStackTrace();
 			logger.error("Error while creating Controls:"+e);
 		}
-
+		bottomSashForm.setWeights(new int[] { 2, 1});
 		mainSashForm.setWeights(new int[]{1, 1});
 		parent.layout();
 	}
