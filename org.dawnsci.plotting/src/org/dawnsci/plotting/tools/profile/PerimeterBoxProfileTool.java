@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
+import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.widgets.ROIWidget;
 import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.api.IPlottingSystem;
@@ -128,6 +129,7 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 
 		profileContentComposite = new Composite(parent, SWT.NONE);
 		profileContentComposite.setLayout(new GridLayout(1, true));
+		GridUtils.removeMargins(profileContentComposite);
 		SashForm sashForm = new SashForm(profileContentComposite, SWT.HORIZONTAL);
 		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		sashForm.setBackground(new Color(parent.getDisplay(), 192, 192, 192));
