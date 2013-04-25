@@ -213,6 +213,14 @@
             tooltip="A tool that shows the sum of the region selection"
             visible="false">
       </plotting_tool_page>
+      <plotting_tool_page
+            class="org.dawnsci.plotting.tools.processing.ExampleProcessTool"
+            icon="icons/process_color.png"
+            id="org.dawb.workbench.plotting.tools.imageProcessingTool"
+            label="Image Processing"
+            tooltip="A tool for image processing"
+            visible="false">
+      </plotting_tool_page>
    </extension>
    <extension
          point="org.eclipse.ui.views">

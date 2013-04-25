@@ -175,7 +175,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 
 	public void createControl(Composite parent, IActionBars actionbars) {
 		
-		final Action reselect = new Action("Create new profile.", getImageDescriptor()) {
+		final Action reselect = new Action("Create new profile", getImageDescriptor()) {
 			public void run() {
 				createNewRegion();
 			}
@@ -250,7 +250,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		
 	}
 	
-	private final void createNewRegion() {
+	protected final void createNewRegion() {
 		// Start with a selection of the right type
 		try {
 			IRegion region = getPlottingSystem().createRegion(RegionUtils.getUniqueName(getRegionName(), getPlottingSystem()), getCreateRegionType());
