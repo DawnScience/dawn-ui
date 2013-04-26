@@ -29,7 +29,7 @@ import uk.ac.diamond.scisoft.analysis.roi.ROIProfile;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 /**
- * 
+ * Image processing tool example that implements a zoom profile and a box profile
  * @author wqk87977
  *
  */

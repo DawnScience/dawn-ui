@@ -53,7 +53,8 @@ import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
 /**
- * 
+ * Abstract Image Processing Tool
+ * This tool has two profile plotting systems and a composite of controls
  * @author wqk87977
  *
  */
@@ -325,7 +326,7 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 		return (type==RegionType.BOX)||(type==RegionType.PERIMETERBOX)||(type==RegionType.XAXIS)||(type==RegionType.YAXIS);
 	}
 
-	private RegionType getCreateRegionType() {
+	protected RegionType getCreateRegionType() {
 		return RegionType.BOX;
 	}
 
