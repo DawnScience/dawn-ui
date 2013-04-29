@@ -46,6 +46,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
@@ -409,36 +410,20 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 		getSite().getActionBars().getToolBarManager().add(sep);
 		getSite().getActionBars().getMenuManager().add(sep);
 
-		final Action show = new Action("Show all vertex values", Activator.getImageDescriptor("icons/plot-tool-measure-vertices.png")) {
+		final Action show = new Action("Show all vertex values", IAction.AS_CHECK_BOX) {
 			@Override
 			public void run() {
 				if (!isActive()) return;
 				final Object[] oa = ((IStructuredContentProvider)viewer.getContentProvider()).getElements(null);
 				for (Object object : oa) {
-					if (object instanceof IRegion) ((IRegion)object).setShowPosition(true);
+					if (object instanceof IRegion) ((IRegion)object).setShowPosition(isChecked());
 				}
 			}
 		};
 		show.setToolTipText("Show vertices in all visible regions");
-
+		show.setImageDescriptor(Activator.getImageDescriptor("icons/plot-tool-measure-vertices.png"));
 		getSite().getActionBars().getToolBarManager().add(show);
 		getSite().getActionBars().getMenuManager().add(show);
-
-
-		final Action clear = new Action("Show no vertex values", Activator.getImageDescriptor("icons/plot-tool-measure-clear.png")) {
-			@Override
-			public void run() {
-				if (!isActive()) return;
-				final Object[] oa = ((IStructuredContentProvider)viewer.getContentProvider()).getElements(null);
-				for (Object object : oa) {
-					if (object instanceof IRegion) ((IRegion)object).setShowPosition(false);
-				}
-			}
-		};
-		clear.setToolTipText("Clear all vertices shown in the plotting");
-
-		getSite().getActionBars().getToolBarManager().add(clear);
-		getSite().getActionBars().getMenuManager().add(clear);
 
 		createRightClickMenu();
 	}
