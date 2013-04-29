@@ -225,7 +225,11 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		if (augmenter!=null) augmenter.activate();
 		CalibrationFactory.addCalibrantSelectionListener(this);
 		activeDiffractionTool = this;
-			
+		
+		if (calibrantActions != null && calibrantActions.getSelectedAction() != null) {
+			calibrantActions.getSelectedAction().run();
+		}
+		
 		final IDiffractionMetadata dmd = getDiffractionMetaData();
 		if (viewer!=null && viewer.getInput()!=null && model!=null && dmd!=null && dmd.getDetector2DProperties()!=null && dmd.getOriginalDiffractionCrystalEnvironment()!=null) {
 			try {
