@@ -136,6 +136,8 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	private IPaletteListener.Stub paletteListener;
 	private ITraceListener.Stub   traceListener;
 	private IROIListener roiListener;
+	private IDetectorPropertyListener detpropListener;
+	private IDiffractionCrystalEnvironmentListener difcrysListener;
 	
 	protected DiffractionImageAugmenter augmenter;
 	
@@ -263,6 +265,12 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		if (augmenter!=null) augmenter.deactivate();
 		if (activeDiffractionTool==this) activeDiffractionTool = null;
 		if (model!=null) model.deactivate();
+		
+		IDiffractionMetadata data  = getDiffractionMetaData();
+		if (data!=null && data.getDetector2DProperties()!=null && data.getDiffractionCrystalEnvironment()!=null) {
+			data.getDetector2DProperties().removeDetectorPropertyListener(detpropListener);
+			data.getDiffractionCrystalEnvironment().removeDiffractionCrystalEnvironmentListener(difcrysListener);
+		}
 	}
 	
 	public void dispose() {
@@ -292,27 +300,28 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			if (augmenter != null) {
 				augmenter.setDiffractionMetadata(data);
 			}
-			
-			data.getDetector2DProperties().addDetectorPropertyListener(new IDetectorPropertyListener() {
-				
+
+			detpropListener = new IDetectorPropertyListener() {
 				@Override
 				public void detectorPropertiesChanged(DetectorPropertyEvent evt) {
 					if (evt.getSource() instanceof DetectorProperties)
 						DiffractionDefaultMetadata.setPersistedDetectorPropertieValues((DetectorProperties)evt.getSource());
-					
+
 				}
-			});
-			
-			data.getDiffractionCrystalEnvironment().addDiffractionCrystalEnvironmentListener(new IDiffractionCrystalEnvironmentListener() {
-				
+			};
+
+			difcrysListener =new IDiffractionCrystalEnvironmentListener() {
 				@Override
 				public void diffractionCrystalEnvironmentChanged(
 						DiffractionCrystalEnvironmentEvent evt) {
 					if (evt.getSource() instanceof DiffractionCrystalEnvironmentEvent)
 						DiffractionDefaultMetadata.setPersistedDiffractionCrystalEnvironmentValues((DiffractionCrystalEnvironment)evt.getSource());
-					
+
 				}
-			});
+			};
+			
+			data.getDetector2DProperties().addDetectorPropertyListener(detpropListener);
+			data.getDiffractionCrystalEnvironment().addDiffractionCrystalEnvironmentListener(difcrysListener);
 			
 		} catch (Exception e) {
 			logger.error("Cannot create model!", e);
