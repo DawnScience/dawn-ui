@@ -52,9 +52,24 @@ public class DiffractionDefaultMetadata {
 		double detectorRotationX = Activator.getDefault().getPreferenceStore().getDouble(DiffractionToolConstants.DETECTOR_ROTATION_X);
 		double detectorRotationY = Activator.getDefault().getPreferenceStore().getDouble(DiffractionToolConstants.DETECTOR_ROTATION_Y);
 		double detectorRotationZ = Activator.getDefault().getPreferenceStore().getDouble(DiffractionToolConstants.DETECTOR_ROTATION_Z);
-
-		return new DetectorProperties(new Vector3d(detectorOrigin), heightInPixels, widthInPixels, 
+		
+		DetectorProperties detprop =new DetectorProperties(new Vector3d(detectorOrigin), heightInPixels, widthInPixels, 
 				pixelSizeX, pixelSizeY, detectorRotationX, detectorRotationY, detectorRotationZ);
+		
+		double x = Activator.getDefault().getPreferenceStore().getDouble(DiffractionToolConstants.BEAM_CENTRE_X);
+		double y = Activator.getDefault().getPreferenceStore().getDouble(DiffractionToolConstants.BEAM_CENTRE_Y);
+		
+		double yaw = Activator.getDefault().getPreferenceStore().getDouble(DiffractionToolConstants.DETECTOR_YAW);
+		double pitch = Activator.getDefault().getPreferenceStore().getDouble(DiffractionToolConstants.DETECTOR_PITCH);
+		double roll = Activator.getDefault().getPreferenceStore().getDouble(DiffractionToolConstants.DETECTOR_ROLL);
+		
+		detprop.setBeamCentreCoords(new double[] {x,y});
+		
+		detprop.setNormalAnglesInDegrees(yaw, pitch, roll);
+		
+		detprop.setBeamCentreDistance(distance);
+		
+		return detprop;
 	}
 
 	/**
@@ -97,8 +112,22 @@ public class DiffractionDefaultMetadata {
 		double detectorRotationY = Activator.getDefault().getPreferenceStore().getDefaultDouble(DiffractionToolConstants.DETECTOR_ROTATION_Y);
 		double detectorRotationZ = Activator.getDefault().getPreferenceStore().getDefaultDouble(DiffractionToolConstants.DETECTOR_ROTATION_Z);
 
-		return new DetectorProperties(new Vector3d(detectorOrigin), heightInPixels, widthInPixels, 
+		DetectorProperties detprop =new DetectorProperties(new Vector3d(detectorOrigin), heightInPixels, widthInPixels, 
 				pixelSizeX, pixelSizeY, detectorRotationX, detectorRotationY, detectorRotationZ);
+		
+		
+		double x = Activator.getDefault().getPreferenceStore().getDefaultDouble(DiffractionToolConstants.BEAM_CENTRE_X);
+		double y = Activator.getDefault().getPreferenceStore().getDefaultDouble(DiffractionToolConstants.BEAM_CENTRE_Y);
+		
+		double yaw = Activator.getDefault().getPreferenceStore().getDefaultDouble(DiffractionToolConstants.DETECTOR_YAW);
+		double pitch = Activator.getDefault().getPreferenceStore().getDefaultDouble(DiffractionToolConstants.DETECTOR_PITCH);
+		double roll = Activator.getDefault().getPreferenceStore().getDefaultDouble(DiffractionToolConstants.DETECTOR_ROLL);
+		
+		detprop.setBeamCentreCoords(new double[] {x,y});
+		
+		detprop.setNormalAnglesInDegrees(yaw, pitch, roll);
+		
+		return detprop;
 	}
 	
 	/**
@@ -131,7 +160,14 @@ public class DiffractionDefaultMetadata {
 	public static void setPersistedDetectorPropertieValues(DetectorProperties detprop) {
 		Activator.getDefault().getPreferenceStore().setValue(DiffractionToolConstants.PIXEL_SIZE_X, detprop.getVPxSize());
 		Activator.getDefault().getPreferenceStore().setValue(DiffractionToolConstants.PIXEL_SIZE_Y, detprop.getHPxSize());
-		Activator.getDefault().getPreferenceStore().setValue(DiffractionToolConstants.DISTANCE, detprop.getOrigin().z);
+		Activator.getDefault().getPreferenceStore().setValue(DiffractionToolConstants.DISTANCE, detprop.getBeamCentreDistance());
+		Activator.getDefault().getPreferenceStore().setValue(DiffractionToolConstants.BEAM_CENTRE_X, detprop.getBeamCentreCoords()[0]);
+		Activator.getDefault().getPreferenceStore().setValue(DiffractionToolConstants.BEAM_CENTRE_Y, detprop.getBeamCentreCoords()[1]);
+		double[] normalAngles = detprop.getNormalAnglesInDegrees();
+		Activator.getDefault().getPreferenceStore().setValue(DiffractionToolConstants.DETECTOR_YAW,normalAngles[0]);
+		Activator.getDefault().getPreferenceStore().setValue(DiffractionToolConstants.DETECTOR_PITCH,normalAngles[1]);
+		Activator.getDefault().getPreferenceStore().setValue(DiffractionToolConstants.DETECTOR_ROLL,normalAngles[2]);
+		
 		
 	}
 	
