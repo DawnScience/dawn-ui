@@ -1,5 +1,7 @@
 package org.dawnsci.plotting.api.histogram;
 
+import java.awt.image.BufferedImage;
+
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 
@@ -60,4 +62,13 @@ public interface IImageService {
 	 * @return
 	 */
 	public float[] getFastStatistics(ImageServiceBean bean);
+	
+	/**
+	 * Call to convert the ImageData to a BufferedImage which may be written to 
+	 * file using a proper RBG map.
+	 * 
+	 * @param data
+	 * @return
+	 */
+	public BufferedImage getBufferedImage(final ImageData data);
 }

@@ -136,7 +136,7 @@ public class ExtentionPointManager {
 	 * @return
 	 */
 	public ColourSchemeContribution getColourSchemeContribution(String name) {
-		for (ColourSchemeContribution colourScheme : colourSchemes) {
+		for (ColourSchemeContribution colourScheme : getColourSchemeContributions()) {
 			if(colourScheme.getName().compareTo(name) == 0) {
 				return colourScheme;
 			}

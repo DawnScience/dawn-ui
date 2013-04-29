@@ -1,5 +1,10 @@
 package org.dawnsci.rcp.histogram;
 
+import java.util.Hashtable;
+
+import org.dawb.common.services.IPaletteService;
+import org.dawb.common.services.conversion.IConversionService;
+import org.dawnsci.rcp.service.PaletteService;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -27,6 +32,9 @@ public class Activator extends AbstractUIPlugin {
 	 */
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
+		Hashtable<String, String> props = new Hashtable<String, String>(1);
+		props.put("description", "A service used to get colour schemes registered with Dawn.");
+		context.registerService(IPaletteService.class, new PaletteService(), props);
 		plugin = this;
 	}
 
