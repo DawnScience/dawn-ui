@@ -65,9 +65,6 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 	protected AbstractPlottingSystem profilePlottingSystem;
 	protected AbstractPlottingSystem displayPlottingSystem;
 
-	private List<Entry<String,Action>> radioActions;
-	private List<Entry<String, Action>> comboActions;
-
 	private HashMap<String, Collection<ITrace>> registeredTraces;
 	private IRegionListener regionListener;
 	private Composite profileContentComposite;
@@ -187,23 +184,30 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 												 PlotType.XY, 
 												 null);
 		configureDisplayPlottingSystem(displayPlottingSystem);
-		Composite radioControlComp = new Composite(bottomSashForm, SWT.NONE);
-		radioControlComp.setLayout(new GridLayout(1, false));
-		radioControlComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		try {
-			createRadioControls(radioControlComp, getRadioActions());
-			createComboControls(radioControlComp, getComboActionS());
-		} catch (Exception e) {
-			e.printStackTrace();
-			logger.error("Error while creating Controls:"+e);
-		}
+		Composite controlComp = new Composite(bottomSashForm, SWT.NONE);
+		controlComp.setLayout(new GridLayout(1, false));
+		controlComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		createControlComposite(controlComp);
 		bottomSashForm.setWeights(new int[] { 2, 1});
 		mainSashForm.setWeights(new int[]{1, 1});
 		parent.layout();
 	}
 
+	/**
+	 * Composite to create the controls
+	 * @param parent
+	 */
+	protected abstract void createControlComposite(Composite parent);
+
+	/**
+	 * Create a set of Radio buttons given a list of Actions
+	 * @param parent
+	 * @param actions
+	 * @throws Exception
+	 */
 	protected void createRadioControls(Composite parent, List<Entry<String, Action>> actions) throws Exception{
 		if(actions == null) return;
+		int i = 0;
 		for (final Entry<String, Action> action : actions) {
 			final Button radioButton = new Button(parent, SWT.RADIO);
 			radioButton.setText(action.getKey());
@@ -218,9 +222,18 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 						action.getValue().run();
 				}
 			});
+			if(i == 0)
+				radioButton.setSelection(true);
+			i++;
 		}
 	}
 
+	/**
+	 * Create a set of action items in a Combo box given a list of actions
+	 * @param parent
+	 * @param actions
+	 * @throws Exception
+	 */
 	protected void createComboControls(Composite parent, final List<Entry<String, Action>> actions) throws Exception{
 		if(actions == null) return;
 		final Combo comboButton = new Combo(parent, SWT.BORDER);
@@ -239,22 +252,7 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 				actions.get(index).getValue().run();
 			}
 		});
-	}
-
-	public List<Entry<String,Action>> getRadioActions() {
-		return radioActions;
-	}
-
-	public void setRadioActions(List<Entry<String,Action>> radioActions) {
-		this.radioActions = radioActions;
-	}
-
-	public List<Entry<String, Action>> getComboActionS() {
-		return comboActions;
-	}
-
-	public void setComboActions(List<Entry<String,Action>> comboActions) {
-		this.comboActions = comboActions;
+		comboButton.select(0);
 	}
 
 	@Override

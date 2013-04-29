@@ -17,6 +17,7 @@ import org.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.Action;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,10 +42,6 @@ public class ExampleProcessTool extends ImageProcessingTool {
 	private IAxis yPixelAxis;
 	private IAxis xDisplayPixelAxis;
 	private IAxis yDIsplayPixelAxis;
-
-	public ExampleProcessTool(){
-		createRadioActions();
-	}
 
 	@Override
 	protected void configurePlottingSystem(AbstractPlottingSystem plotter) {
@@ -72,7 +69,19 @@ public class ExampleProcessTool extends ImageProcessingTool {
 		}
 	}
 
-	private void createRadioActions(){
+	@Override
+	protected void createControlComposite(Composite parent) {
+		try {
+			createRadioControls(parent, createActions());
+			createComboControls(parent, createActions());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			logger.error("Could not create controls:"+e);
+		}
+	}
+
+	private List<Entry<String, Action>> createActions(){
 		List<Entry<String, Action>> radioActions = new ArrayList<Entry<String, Action>>();
 		
 		Entry<String, Action> action1 = new AbstractMap.SimpleEntry<String, Action>("Test 1 ",
@@ -111,9 +120,7 @@ public class ExampleProcessTool extends ImageProcessingTool {
 		radioActions.add(action2);
 		radioActions.add(action3);
 		radioActions.add(action4);
-		setRadioActions(radioActions);
-
-		setComboActions(radioActions);
+		return radioActions;
 	}
 
 	@Override
