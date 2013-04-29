@@ -21,6 +21,11 @@ public class DiffractionToolPreferenceInitializer extends
 		store.setDefault(DiffractionToolConstants.START_OMEGA,  0.0);
 		store.setDefault(DiffractionToolConstants.RANGE_OMEGA,  1.0);
 		store.setDefault(DiffractionToolConstants.EXPOSURE_TIME,  1.0);
+		store.setDefault(DiffractionToolConstants.BEAM_CENTRE_X,  0.0);
+		store.setDefault(DiffractionToolConstants.BEAM_CENTRE_Y,  0.0);
+		store.setDefault(DiffractionToolConstants.DETECTOR_YAW,  0.0);
+		store.setDefault(DiffractionToolConstants.DETECTOR_PITCH,  0.0);
+		store.setDefault(DiffractionToolConstants.DETECTOR_ROLL,  0.0);
 	}
 
 }

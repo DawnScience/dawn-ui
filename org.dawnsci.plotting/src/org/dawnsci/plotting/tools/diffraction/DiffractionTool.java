@@ -96,8 +96,12 @@ import uk.ac.diamond.scisoft.analysis.crystallography.HKL;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.BooleanDataset;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
+import uk.ac.diamond.scisoft.analysis.diffraction.DetectorPropertyEvent;
 import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
+import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironmentEvent;
 import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionMetadataUtils;
+import uk.ac.diamond.scisoft.analysis.diffraction.IDetectorPropertyListener;
+import uk.ac.diamond.scisoft.analysis.diffraction.IDiffractionCrystalEnvironmentListener;
 import uk.ac.diamond.scisoft.analysis.diffraction.PowderRingsUtils;
 import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
@@ -279,7 +283,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		IDiffractionMetadata data=null;
 		try {
 			data  = getDiffractionMetaData();
-			if (data==null || data.getOriginalDetector2DProperties()==null || data.getDiffractionCrystalEnvironment()==null) {
+			if (data==null || data.getDetector2DProperties()==null || data.getDiffractionCrystalEnvironment()==null) {
 				return;
 			}
 			model = new DiffractionTreeModel(data);
@@ -288,6 +292,28 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			if (augmenter != null) {
 				augmenter.setDiffractionMetadata(data);
 			}
+			
+			data.getDetector2DProperties().addDetectorPropertyListener(new IDetectorPropertyListener() {
+				
+				@Override
+				public void detectorPropertiesChanged(DetectorPropertyEvent evt) {
+					if (evt.getSource() instanceof DetectorProperties)
+						DiffractionDefaultMetadata.setPersistedDetectorPropertieValues((DetectorProperties)evt.getSource());
+					
+				}
+			});
+			
+			data.getDiffractionCrystalEnvironment().addDiffractionCrystalEnvironmentListener(new IDiffractionCrystalEnvironmentListener() {
+				
+				@Override
+				public void diffractionCrystalEnvironmentChanged(
+						DiffractionCrystalEnvironmentEvent evt) {
+					if (evt.getSource() instanceof DiffractionCrystalEnvironmentEvent)
+						DiffractionDefaultMetadata.setPersistedDiffractionCrystalEnvironmentValues((DiffractionCrystalEnvironment)evt.getSource());
+					
+				}
+			});
+			
 		} catch (Exception e) {
 			logger.error("Cannot create model!", e);
 			return;
