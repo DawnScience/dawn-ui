@@ -639,13 +639,20 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	
 	private class ExpressionEditingSupport extends EditingSupport {
 
-		private TextCellEditorWithContentProposal cellEditor;
+		private TextCellEditor cellEditor;
 		
 		public ExpressionEditingSupport(ColumnViewer viewer) {
 			super(viewer);
 			
-			IContentProposalProvider contentProposalProvider = new ExpressionFunctionProposalProvider(service.createExpressionObject(null,null).getFunctions());
-			cellEditor = new TextCellEditorWithContentProposal((Composite)getViewer().getControl(), contentProposalProvider, null, new char[]{':'});
+			IExpressionObject exObj = service.createExpressionObject(null,"");
+			
+			if (exObj != null) {
+				IContentProposalProvider contentProposalProvider = new ExpressionFunctionProposalProvider(exObj.getFunctions());
+				cellEditor = new TextCellEditorWithContentProposal((Composite)getViewer().getControl(), contentProposalProvider, null, new char[]{':'});
+			} else {
+				cellEditor = new TextCellEditor((Composite)getViewer().getControl());
+				logger.error("Expression Object service returned null");
+			}
 		}
 
 		@Override

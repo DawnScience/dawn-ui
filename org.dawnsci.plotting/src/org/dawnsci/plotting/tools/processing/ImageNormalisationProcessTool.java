@@ -2,6 +2,7 @@ package org.dawnsci.plotting.tools.processing;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -9,6 +10,7 @@ import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.trace.IImageTrace;
+import org.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.Action;
 import org.eclipse.swt.SWT;
@@ -26,6 +28,8 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
+import uk.ac.diamond.scisoft.analysis.optimize.ApachePolynomial;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIProfile;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
@@ -38,21 +42,30 @@ import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 public class ImageNormalisationProcessTool extends ImageProcessingTool {
 
 	private final Logger logger = LoggerFactory.getLogger(ImageNormalisationProcessTool.class);
-	private boolean isDirty = false;
 	private AbstractDataset profile;
+	
+	private boolean divideNormalization = false;
+	private Spinner smoothingSpinner;
+	private int smoothLevel = 1;
+
+	private enum NormaliseType{
+		NONE, ROI, AUX;
+	}
+
+	private NormaliseType type = NormaliseType.NONE;
 
 	public ImageNormalisationProcessTool() {
 		// TODO Auto-generated constructor stub
 	}
 
 	@Override
-	protected void configurePlottingSystem(AbstractPlottingSystem plotter) {
+	protected void configureNormPlottingSystem(AbstractPlottingSystem plotter) {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	protected void configureDisplayPlottingSystem(AbstractPlottingSystem plotter) {
+	protected void configurePreNormPlottingSystem(AbstractPlottingSystem plotter) {
 		// TODO Auto-generated method stub
 
 	}
@@ -76,7 +89,7 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 			smoothingComp.setLayout(new GridLayout(2, false));
 			Label smoothingLabel = new Label(smoothingComp, SWT.NONE);
 			smoothingLabel.setText("Smoothing:");
-			Spinner smoothingSpinner = new Spinner(smoothingComp, SWT.BORDER);
+			smoothingSpinner = new Spinner(smoothingComp, SWT.BORDER);
 			smoothingSpinner.setMinimum(1);
 			smoothingSpinner.setMaximum(Integer.MAX_VALUE);
 			smoothingSpinner.addSelectionListener(new SelectionListener() {
@@ -86,13 +99,11 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 				}
 				@Override
 				public void widgetDefaultSelected(SelectionEvent e) {
-					// TODO Auto-generated method stub
-					
+					smoothLevel = smoothingSpinner.getSelection();
+					updateProfiles();
 				}
 			});
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 			logger.error("Could not create controls:"+e);
 		}
 	}
@@ -103,8 +114,8 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 			new Action("None") {
 				@Override
 				public void run() {
-					//TODO
-					System.out.println("No normalisation");
+					type = NormaliseType.NONE;
+					updateProfiles();
 				}
 			}
 		);
@@ -112,8 +123,8 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 				new Action("ROI normalisation") {
 					@Override
 					public void run() {
-						//TODO
-						System.out.println("ROI normalisation");
+						type = NormaliseType.ROI;
+						updateProfiles();
 					}
 				}
 			);
@@ -121,7 +132,8 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 				new Action("Auxiliary normalisation") {
 					@Override
 					public void run() {
-						//TODO
+						type = NormaliseType.AUX;
+//						updateProfiles();
 						System.out.println("Auxiliary normalisation");
 					}
 				}
@@ -135,21 +147,13 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 	private List<Entry<String, Action>> createOperationActions(){
 		List<Entry<String, Action>> radioActions = new ArrayList<Entry<String, Action>>();
 		
-		Entry<String, Action> noOperation = new AbstractMap.SimpleEntry<String, Action>("None",
-				new Action("None") {
-					@Override
-					public void run() {
-						//TODO
-						System.out.println("None");
-					}
-				}
-			);
 		Entry<String, Action> subtractOperation = new AbstractMap.SimpleEntry<String, Action>("Subtract",
 			new Action("Subtract") {
+
 				@Override
 				public void run() {
-					//TODO
-					System.out.println("Subtract");
+					divideNormalization = false;
+					updateProfiles();
 				}
 			}
 		);
@@ -157,56 +161,88 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 				new Action("Divide") {
 					@Override
 					public void run() {
-						//TODO
-						System.out.println("Divide");
+						divideNormalization = true;
+						updateProfiles();
 					}
 				}
 			);
-		radioActions.add(noOperation);
 		radioActions.add(subtractOperation);
 		radioActions.add(divideOperation);
 		return radioActions;
 	}
 
 	@Override
-	protected void createProfile(IImageTrace image, IRegion region, IROI roi,
+	protected void createNormProfile(IImageTrace image, IRegion region, IROI roi,
 			boolean tryUpdate, boolean isDrag, IProgressMonitor monitor) {
-		if(isDirty){
-			AbstractDataset ds = ((AbstractDataset)image.getData()).clone();
-			AbstractDataset tile = profile.reshape(profile.getShape()[0],1);
-			if(roi == null){
-				isDirty = false;
-				return;
-			}
-			double width = ((RectangularROI)roi).getLengths()[0];
-			tile.idivide(width);
-			AbstractDataset correction = DatasetUtils.tile(tile, ds.getShape()[1]);
-			ds.idivide(correction);
 			
-			profilePlottingSystem.updatePlot2D(ds, image.getAxes(), monitor);
-			isDirty = false;
-		}
-		
-
+			switch (type) {
+			case NONE:
+				normProfilePlotSystem.updatePlot2D((AbstractDataset)image.getData(), image.getAxes(), monitor);
+				break;
+			case ROI:
+				AbstractDataset ds = ((AbstractDataset)image.getData()).clone();
+				AbstractDataset tmpProfile =  profile.clone();
+				AbstractDataset tile = tmpProfile.reshape(tmpProfile.getShape()[0],1);
+				if(roi == null) return;
+				
+				double width = ((RectangularROI)roi).getLengths()[0];
+				tile.idivide(width);
+				AbstractDataset correction = DatasetUtils.tile(tile, ds.getShape()[1]);
+				if(divideNormalization){
+					ds.idivide(correction);
+				} else {
+					ds.isubtract(correction);
+				}
+				normProfilePlotSystem.updatePlot2D(ds, image.getAxes(), monitor);
+				break;
+			case AUX:
+				normProfilePlotSystem.clear();
+				break;
+			default:
+				break;
+			}
 	}
 
 	@Override
-	protected void createDisplayProfile(IImageTrace image, IRegion region,
+	protected void createPreNormProfile(IImageTrace image, IRegion region,
 			IROI roi, boolean tryUpdate, boolean isDrag,
 			IProgressMonitor monitor) {
-		
-		AbstractDataset ds = ((AbstractDataset)image.getData()).clone();
-		if(roi == null){
-			isDirty = true;
-			return;
-		}
-		AbstractDataset[] profiles = ROIProfile.box(ds, (RectangularROI)roi);
-		profile = profiles[1];
 		List<IDataset> data = new ArrayList<IDataset>();
-		data.add(profiles[1]);
-		displayPlottingSystem.clear();
-		displayPlottingSystem.createPlot1D(image.getAxes().get(1), data, monitor);
-		isDirty = true;
+		Collection<ITrace> plotted = null;
+
+		switch (type) {
+		case NONE:
+			data.add(new IntegerDataset(image.getData().getShape()[0]));
+			data.get(0).setName("Norm");
+			plotted = preNormProfilePlotSystem.updatePlot1D(image.getAxes().get(1), data, monitor);
+			if(plotted == null) return;
+			registerTraces(region, plotted);
+			break;
+		case ROI:
+			AbstractDataset ds = ((AbstractDataset)image.getData()).clone();
+			if(roi == null)return;
+			
+			AbstractDataset[] profiles = ROIProfile.box(ds, (RectangularROI)roi);
+			profile = profiles[1];
+			if(smoothLevel > 1){
+				try {
+					profile = ApachePolynomial.getPolynomialSmoothed(((AbstractDataset)image.getAxes().get(1)), profile, smoothLevel, 3);
+				} catch (Exception e) {
+					logger.error("Could not smooth the plot:"+e);
+				}
+			}
+			data.add(profile);
+			data.get(0).setName("Norm");
+			plotted = preNormProfilePlotSystem.updatePlot1D(image.getAxes().get(1), data, monitor);
+			if(plotted == null) return;
+			registerTraces(region, plotted);
+			break;
+		case AUX:
+			normProfilePlotSystem.clear();
+			break;
+		default:
+			break;
+		}
 	}
 
 	@Override

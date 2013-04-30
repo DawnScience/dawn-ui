@@ -50,7 +50,7 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 
     	
 	private Unit<Length>               xpixel, ypixel;
-	private NumericNode<Dimensionless> max,min,mean;
+	private NumericNode<Dimensionless> max,min;
 	private NumericNode<Length>        beamX, beamY, dist, xPixelSize,yPixelSize;
 	private NumericNode<Length>        lambda,xSize,ySize;
 	private final IDiffractionMetadata metaData;
@@ -299,12 +299,10 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 		registerNode(pixelValue);
 		pixelValue.setDefaultExpanded(true);
 
-		this.max = new NumericNode<Dimensionless>("Visible Maximum", pixelValue, Dimensionless.UNIT);
+		this.max = new NumericNode<Dimensionless>("Data Maximum", pixelValue, Dimensionless.UNIT);
 		registerNode(max);
-		this.min = new NumericNode<Dimensionless>("Visible Minimum", pixelValue, Dimensionless.UNIT);
+		this.min = new NumericNode<Dimensionless>("Data Minimum", pixelValue, Dimensionless.UNIT);
 		registerNode(min);
-		this.mean = new NumericNode<Dimensionless>("Mean", pixelValue, Dimensionless.UNIT);
-		registerNode(mean);
 
 	}
 
@@ -608,14 +606,10 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 		
 		if (image==null)  return;
 		if (isDisposed)   return;
-		if (image.getImageServiceBean()==null) return;
-		max.setDefault(image.getImageServiceBean().getMax().doubleValue(), Dimensionless.UNIT);
-		min.setDefault(image.getImageServiceBean().getMin().doubleValue(), Dimensionless.UNIT);
+		if (image.getData()==null) return;
+		max.setDefault(image.getData().max().doubleValue(), Dimensionless.UNIT);
+		min.setDefault(image.getData().min().doubleValue(), Dimensionless.UNIT);
 
-		IImageService service = (IImageService)ServiceManager.getService(IImageService.class);
-		float[] fa = service.getFastStatistics(image.getImageServiceBean());
-		mean.setDefault(fa[2], Dimensionless.UNIT);
-        mean.setLabel(image.getImageServiceBean().getHistogramType().getLabel());
 	}
 
 	public void dispose() {

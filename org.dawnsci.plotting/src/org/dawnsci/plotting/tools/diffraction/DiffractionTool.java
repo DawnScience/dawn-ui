@@ -40,9 +40,7 @@ import org.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.dawnsci.plotting.api.tool.IToolPage;
 import org.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.dawnsci.plotting.api.trace.IImageTrace;
-import org.dawnsci.plotting.api.trace.IPaletteListener;
 import org.dawnsci.plotting.api.trace.ITraceListener;
-import org.dawnsci.plotting.api.trace.PaletteEvent;
 import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.dawnsci.plotting.draw2d.swtxy.selection.CircleFitSelection;
@@ -133,7 +131,6 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	//Region and region listener added for 1-click beam centring
 	private IRegion               tmpRegion;
 	private IRegionListener       regionListener;
-	private IPaletteListener.Stub paletteListener;
 	private ITraceListener.Stub   traceListener;
 	private IROIListener roiListener;
 	private IDetectorPropertyListener detpropListener;
@@ -150,15 +147,8 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	public DiffractionTool() {
 		super();
 		
-        this.paletteListener = new IPaletteListener.Stub() {
-        	protected void updateEvent(PaletteEvent evt) {
-        		updateIntensity();
-        	}
-        };
-
 		this.traceListener = new ITraceListener.Stub() {
 			protected void update(TraceEvent evt) {
-				if (getImageTrace()!=null) getImageTrace().addPaletteListener(paletteListener);
 				if (getImageTrace()!=null) createDiffractionModel(true);
 				updateIntensity();
 			}
@@ -235,7 +225,11 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		if (augmenter!=null) augmenter.activate();
 		CalibrationFactory.addCalibrantSelectionListener(this);
 		activeDiffractionTool = this;
-			
+		
+		if (calibrantActions != null && calibrantActions.getSelectedAction() != null) {
+			calibrantActions.getSelectedAction().run();
+		}
+		
 		final IDiffractionMetadata dmd = getDiffractionMetaData();
 		if (viewer!=null && viewer.getInput()!=null && model!=null && dmd!=null && dmd.getDetector2DProperties()!=null && dmd.getOriginalDiffractionCrystalEnvironment()!=null) {
 			try {
@@ -300,7 +294,9 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			if (augmenter != null) {
 				augmenter.setDiffractionMetadata(data);
 			}
-
+			
+			updateIntensity();
+			
 			detpropListener = new IDetectorPropertyListener() {
 				@Override
 				public void detectorPropertiesChanged(DetectorPropertyEvent evt) {
