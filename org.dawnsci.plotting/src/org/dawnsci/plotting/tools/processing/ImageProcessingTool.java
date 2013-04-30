@@ -74,7 +74,7 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 	private PreNormProfileJob updatePreNormProfile;
 	private ITraceListener traceListener;
 
-	private HashMap<String, IDataset> auxiliaryDatasets = new HashMap<String, IDataset>();
+	protected HashMap<String, IDataset> auxiliaryDatasets = new HashMap<String, IDataset>();
 
 	private IRegion region;
 
