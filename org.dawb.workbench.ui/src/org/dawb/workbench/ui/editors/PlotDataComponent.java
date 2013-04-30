@@ -148,10 +148,6 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		
 	private static final Logger logger = LoggerFactory.getLogger(PlotDataComponent.class);
 
-	// NOTE Old ID before this class was convert to display files without knowing the 
-	// underlying file type.
-	public static final String ID = "uk.ac.gda.views.nexus.NexusPlotView"; //$NON-NLS-1$
-
 	// Use table as it might get extended to do more later.
 	protected TableViewer dataViewer;
 	
@@ -524,7 +520,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	}
 
 
-	protected IFile getIFile() {
+	public IFile getIFile() {
 		IFile file = null;
 		IEditorInput input = (providerDeligate instanceof IEditorPart) 
 				           ? (IEditorInput)((IEditorPart)providerDeligate).getEditorInput()

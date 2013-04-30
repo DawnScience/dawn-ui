@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.dawb.common.services.IExpressionObject;
 import org.dawb.common.services.IVariableManager;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.slicing.SliceComponent;
@@ -43,7 +44,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.Page;
 import org.slf4j.Logger;
@@ -51,7 +51,6 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
 import uk.ac.diamond.scisoft.analysis.io.DataHolder;
-import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 
@@ -244,6 +243,16 @@ public class PlotDataPage extends Page implements IPlotUpdateParticipant, IAdapt
 	public Object getAdapter(Class type) {
 		if (type == String.class) {
 			return "Data";
+		} else if (type == List.class) {
+			final List<IExpressionObject> exprs = new ArrayList<IExpressionObject>();
+			for (CheckableObject ob : dataSetComponent.getData()) {
+				if (ob.getExpression()!=null) {
+					exprs.add(ob.getExpression());
+				}
+			}
+			return exprs;
+		} else if (type == IFile.class) {
+			return dataSetComponent.getIFile();
 		}
 		return null;
 	}
