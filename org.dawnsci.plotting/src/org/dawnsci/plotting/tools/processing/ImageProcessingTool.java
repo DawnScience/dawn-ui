@@ -53,6 +53,7 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
+import uk.ac.diamond.scisoft.analysis.roi.XAxisBoxROI;
 
 /**
  * Abstract Image Processing Tool
@@ -64,41 +65,45 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 	
 	private static Logger logger = LoggerFactory.getLogger(ImageProcessingTool.class);
 
-	protected AbstractPlottingSystem normProfilePlotSystem;
-	protected AbstractPlottingSystem preNormProfilePlotSystem;
+	protected AbstractPlottingSystem selectionPlottingSystem;
+	protected AbstractPlottingSystem reviewPlottingSystem;
 
 	private HashMap<String, Collection<ITrace>> registeredTraces;
 	private IRegionListener regionListener;
 	private Composite profileContentComposite;
-	private NormProfileJob updateNormProfile;
-	private PreNormProfileJob updatePreNormProfile;
+	private SelectionJob updateSelectionJob;
+	private ReviewJob updateReviewJob;
 	private ITraceListener traceListener;
 
 	protected HashMap<String, IDataset> auxiliaryDatasets = new HashMap<String, IDataset>();
 
 	private IRegion region;
 
+	protected IDataset originalData;
+	protected List<IDataset> originalAxes;
+	protected IDataset auxiliaryData;
+
 	public ImageProcessingTool(){
 
 		this.registeredTraces = new HashMap<String,Collection<ITrace>>(7);
 		try {
-			normProfilePlotSystem = PlottingFactory.createPlottingSystem();
-			preNormProfilePlotSystem = PlottingFactory.createPlottingSystem();
+			selectionPlottingSystem = PlottingFactory.createPlottingSystem();
+			reviewPlottingSystem = PlottingFactory.createPlottingSystem();
 
-			updatePreNormProfile = new PreNormProfileJob();
-			updatePreNormProfile.addJobChangeListener(new JobChangeAdapter() {
-					@Override
-					public void done(IJobChangeEvent event) {
-						super.done(event);
-						final IStatus s = event.getResult();
-						if (s.isOK()) {
-							if(region== null)return;
-							updateNormProfile(region, region.getROI(), false);
-						}
+			updateReviewJob = new ReviewJob();
+			updateSelectionJob = new SelectionJob();
+			updateSelectionJob.addJobChangeListener(new JobChangeAdapter() {
+				@Override
+				public void done(IJobChangeEvent event) {
+					super.done(event);
+					final IStatus s = event.getResult();
+					if (s.isOK()) {
+						if(region== null)return;
+						updateReviewProfile(region, region.getROI(), false);
 					}
-				});
-			updateNormProfile = new NormProfileJob();
-
+				}
+			});
+		
 			this.regionListener = new IRegionListener.Stub() {
 				@Override
 				public void regionRemoved(RegionEvent evt) {
@@ -110,12 +115,12 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 				@Override
 				public void regionsRemoved(RegionEvent evt) {
 					//clears traces if all regions removed
-					final Collection<IRegion> regions = getPlottingSystem().getRegions();
-					if (regions == null || regions.isEmpty()) {
-						registeredTraces.clear();
-						normProfilePlotSystem.clear();
-						preNormProfilePlotSystem.clear();
-					}
+//					final Collection<IRegion> regions = getPlottingSystem().getRegions();
+//					if (regions == null || regions.isEmpty()) {
+//						registeredTraces.clear();
+//						normProfilePlotSystem.clear();
+//						preNormProfilePlotSystem.clear();
+//					}
 				}
 				@Override
 				public void regionAdded(RegionEvent evt) {}
@@ -134,16 +139,17 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 					if (!(evt.getSource() instanceof List<?>)) {
 						return;
 					}
-					ImageProcessingTool.this.updateNormProfile(null, null, false);
+					//updateProfiles();
 				}
 				@Override
 				protected void update(TraceEvent evt) {
-					ImageProcessingTool.this.updateNormProfile(null, null, false);
+					//updateProfiles();
 				}
 			};
 		} catch (Exception e) {
 			logger.error("Cannot get plotting system!", e);
 		}
+
 	}
 
 	protected String getRegionName() {
@@ -173,19 +179,21 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 		Composite profilePlotComposite = new Composite(mainSashForm, SWT.BORDER);
 		profilePlotComposite.setLayout(new FillLayout());
 		
-		normProfilePlotSystem.createPlotPart(profilePlotComposite, 
+		selectionPlottingSystem.createPlotPart(profilePlotComposite, 
 				 getTitle(), 
 				 getSite().getActionBars(), 
 				 PlotType.XY,
 				 null);
-		configureNormPlottingSystem(normProfilePlotSystem);
+		configureSelectionPlottingSystem(selectionPlottingSystem);
 		// Unused actions removed for tool
-		normProfilePlotSystem.getPlotActionSystem().remove("org.dawb.workbench.plotting.rescale");
-		normProfilePlotSystem.getPlotActionSystem().remove("org.dawb.workbench.plotting.plotIndex");
-		normProfilePlotSystem.getPlotActionSystem().remove("org.dawb.workbench.plotting.plotX");
-		normProfilePlotSystem.setXfirst(true);
-		normProfilePlotSystem.setRescale(true);
-
+		selectionPlottingSystem.getPlotActionSystem().remove("org.dawb.workbench.plotting.rescale");
+		selectionPlottingSystem.getPlotActionSystem().remove("org.dawb.workbench.plotting.plotIndex");
+		selectionPlottingSystem.getPlotActionSystem().remove("org.dawb.workbench.plotting.plotX");
+		selectionPlottingSystem.setXfirst(true);
+		selectionPlottingSystem.setRescale(true);
+		selectionPlottingSystem.addRegionListener(regionListener);
+		createNewRegion();
+		
 		//bottom part
 		SashForm bottomSashForm = new SashForm(mainSashForm, SWT.HORIZONTAL);
 		bottomSashForm.setBackground(new Color(parent.getDisplay(), 192, 192, 192));
@@ -197,12 +205,12 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 		Composite displayPlotComp  = new Composite(displayComp, SWT.BORDER);
 		displayPlotComp.setLayout(new FillLayout());
 		displayPlotComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		preNormProfilePlotSystem.createPlotPart(displayPlotComp, 
+		reviewPlottingSystem.createPlotPart(displayPlotComp, 
 												 "User display", 
 												 actionBarWrapper, 
 												 PlotType.XY, 
 												 null);
-		configurePreNormPlottingSystem(preNormProfilePlotSystem);
+		configureReviewPlottingSystem(reviewPlottingSystem);
 		Composite controlComp = new Composite(bottomSashForm, SWT.NONE);
 		controlComp.setLayout(new GridLayout(1, false));
 		controlComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -210,6 +218,9 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 		bottomSashForm.setWeights(new int[] { 2, 1});
 		mainSashForm.setWeights(new int[]{1, 1});
 		parent.layout();
+
+		originalData = getPlottingSystem().getTraces().iterator().next().getData().clone();
+		originalAxes = ((IImageTrace)getPlottingSystem().getTraces().iterator().next()).getAxes();
 	}
 
 	/**
@@ -296,19 +307,6 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 	}
 
 	@Override
-	public void activate() {
-		super.activate();
-		if (getPlottingSystem()!=null) {
-			getPlottingSystem().addTraceListener(traceListener);
-			getPlottingSystem().addRegionListener(regionListener);
-		}
-		setRegionsActive(true);
-
-		createNewRegion();
-
-	}
-
-	@Override
 	public void addDataset(IDataset data) {
 		if(data == null) return;
 		auxiliaryDatasets.put(data.getName(), data);
@@ -320,11 +318,14 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 		auxiliaryDatasets.remove(data.getName());
 	}
 
-	private final void createNewRegion() {
+	protected final void createNewRegion() {
 		// Start with a selection of the right type
 		try {
-			IRegion region = getPlottingSystem().createRegion(RegionUtils.getUniqueName(getRegionName(), getPlottingSystem()), getCreateRegionType());
-			region.setUserObject(getMarker());
+			IRegion region = selectionPlottingSystem.createRegion(RegionUtils.getUniqueName(getRegionName(), getPlottingSystem()), getCreateRegionType());
+			double width = getImageTrace().getData().getShape()[0];
+			region.setROI(new XAxisBoxROI(width, 0));
+			selectionPlottingSystem.addRegion(region);
+//			region.setUserObject(getMarker());
 		} catch (Exception e) {
 			logger.error("Cannot create region for profile tool!");
 		}
@@ -348,25 +349,38 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 	}
 
 	@Override
+	public void activate() {
+		super.activate();
+		if(getPlottingSystem() != null){
+			getPlottingSystem().addTraceListener(traceListener);
+			originalData = getPlottingSystem().getTraces().iterator().next().getData().clone();
+			originalAxes = ((IImageTrace)getPlottingSystem().getTraces().iterator().next()).getAxes();
+
+		}
+		setRegionsActive(true);
+		updateProfiles();
+	}
+
+	@Override
 	public void deactivate() {
 		super.deactivate();
-		if (getPlottingSystem()!=null) {
-			getPlottingSystem().removeRegionListener(regionListener);
-			getPlottingSystem().removeTraceListener(traceListener);
-		}
 		setRegionsActive(false);
 
-		if(normProfilePlotSystem != null){
-			normProfilePlotSystem.clear();
+		if(getPlottingSystem() != null){
+			getPlottingSystem().removeTraceListener(traceListener);
 		}
-		if(preNormProfilePlotSystem != null){
-			preNormProfilePlotSystem.clear();
+		if(selectionPlottingSystem != null){
+			selectionPlottingSystem.removeRegionListener(regionListener);
+			selectionPlottingSystem.clear();
+		}
+		if(reviewPlottingSystem != null){
+			reviewPlottingSystem.clear();
 		}
 	}
 	
 	private void setRegionsActive(boolean active) {
-		if (getPlottingSystem()!=null) {
-			final Collection<IRegion> regions = getPlottingSystem().getRegions();
+		if (selectionPlottingSystem!=null) {
+			final Collection<IRegion> regions = selectionPlottingSystem.getRegions();
 			if (regions!=null) for (IRegion iRegion : regions) {
 				if (active) {
 					iRegion.addROIListener(this);
@@ -380,9 +394,9 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 						// If the plotting system has changed dimensionality
 						// to something not compatible with us, remove the region.
 						// TODO Change to having getRank() == rank 
-						if (getToolPageRole().is2D() && !getPlottingSystem().is2D()) {
+						if (getToolPageRole().is2D() && !selectionPlottingSystem.is2D()) {
 							iRegion.setVisible(active);
-						} else if (getPlottingSystem().is2D() && !getToolPageRole().is2D()) {
+						} else if (selectionPlottingSystem.is2D() && !getToolPageRole().is2D()) {
 							iRegion.setVisible(active);
 						}
 					}
@@ -400,16 +414,16 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 	public void dispose() {
 		deactivate();
 		registeredTraces.clear();
-		if (normProfilePlotSystem!=null) normProfilePlotSystem.dispose();
-		normProfilePlotSystem = null;
-		if (preNormProfilePlotSystem!=null) preNormProfilePlotSystem.dispose();
-		preNormProfilePlotSystem = null;
+		if (selectionPlottingSystem!=null) selectionPlottingSystem.dispose();
+		selectionPlottingSystem = null;
+		if (reviewPlottingSystem!=null) reviewPlottingSystem.dispose();
+		reviewPlottingSystem = null;
 		super.dispose();
 	}
 
 	@Override
 	public IPlottingSystem getToolPlottingSystem() {
-		return normProfilePlotSystem;
+		return selectionPlottingSystem;
 	}
 	@Override
 	public void roiSelected(ROIEvent evt) {
@@ -426,8 +440,8 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 		final String name = region.getName();
 		Collection<ITrace> registered = this.registeredTraces.get(name);
 		if (registered!=null) for (ITrace iTrace : registered) {
-			normProfilePlotSystem.removeTrace(iTrace);
-			preNormProfilePlotSystem.removeTrace(iTrace);
+			selectionPlottingSystem.removeTrace(iTrace);
+			reviewPlottingSystem.removeTrace(iTrace);
 		}
 	}
 
@@ -457,13 +471,13 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 	@Override
 	public void roiDragged(ROIEvent evt) {
 		region = (IRegion)evt.getSource();
-		updatePreNormProfile(region, evt.getROI(), true);
+		updateSelectionProfile(region, evt.getROI(), true);
 	}
 
 	@Override
 	public void roiChanged(ROIEvent evt) {
 		region = (IRegion)evt.getSource();
-		updatePreNormProfile(region, region.getROI(), false);
+		updateSelectionProfile(region, region.getROI(), false);
 	}
 
 	/**
@@ -474,47 +488,47 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 		if(getRegion()== null)return;
 		if(!isRegionTypeSupported(getRegion().getRegionType())) return;
 		if (!getRegion().isUserRegion()) return;
-		updatePreNormProfile.profile(getRegion(), getRegion().getROI(), false);
+		updateSelectionJob.profile(getRegion(), getRegion().getROI(), false);
 	}
 
-	protected synchronized void updateNormProfile(IRegion r, IROI rb, boolean isDrag) {
+	protected synchronized void updateSelectionProfile(IRegion r, IROI rb, boolean isDrag) {
 		if (!isActive()) return;
 		if (r!=null) {
 			if(!isRegionTypeSupported(r.getRegionType())) return;
 			if (!r.isUserRegion()) return;
 		}
-		updateNormProfile.profile(r, rb, isDrag);
+		updateSelectionJob.profile(r, rb, isDrag);
 	}
 
-	protected synchronized void updatePreNormProfile(IRegion r, IROI rb, boolean isDrag) {
+	protected synchronized void updateReviewProfile(IRegion r, IROI rb, boolean isDrag) {
 		if (!isActive()) return;
 		if (r!=null) {
 			if(!isRegionTypeSupported(r.getRegionType())) return;
 			if (!r.isUserRegion()) return;
 		}
-		updatePreNormProfile.profile(r, rb, isDrag);
+		updateReviewJob.profile(r, rb, isDrag);
 	}
 
 	/**
 	 * 
 	 * @param plotter
 	 */
-	protected abstract void configureNormPlottingSystem(AbstractPlottingSystem plotter);
+	protected abstract void configureSelectionPlottingSystem(AbstractPlottingSystem plotter);
 
 	/**
 	 * 
 	 * @param plotter
 	 */
-	protected abstract void configurePreNormPlottingSystem(AbstractPlottingSystem plotter);
+	protected abstract void configureReviewPlottingSystem(AbstractPlottingSystem plotter);
 
 	/**
-	 * Creates the resulting normalization profile
+	 * Creates selection profile
 	 * @param image
 	 * @param region
 	 * @param roi - may be null
 	 * @param monitor
 	 */
-	protected abstract void createNormProfile(IImageTrace image, 
+	protected abstract void createSelectionProfile(IImageTrace image, 
 													  IRegion region, 
 													  IROI roi, 
 													  boolean tryUpdate, 
@@ -522,13 +536,13 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 													  IProgressMonitor monitor);
 
 	/**
-	 * Creates the pre-normalization profile
+	 * Creates the review profile
 	 * @param image
 	 * @param region
 	 * @param roi - may be null
 	 * @param monitor
 	 */
-	protected abstract void createPreNormProfile(IImageTrace image, 
+	protected abstract void createReviewProfile(IImageTrace image, 
 													  IRegion region, 
 													  IROI roi, 
 													  boolean tryUpdate, 
@@ -539,12 +553,12 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 		return region;
 	}
 
-	private final class NormProfileJob extends Job {
+	private final class SelectionJob extends Job {
 		private   IRegion                currentRegion;
 		private   IROI                currentROI;
 		private   boolean                isDrag;
 
-		NormProfileJob() {
+		SelectionJob() {
 			super(getRegionName()+" update");
 			setSystem(true);
 			setUser(false);
@@ -562,34 +576,37 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 		protected IStatus run(IProgressMonitor monitor) {
 			try {
 				if (!isActive()) return Status.CANCEL_STATUS;
-				final Collection<ITrace> traces= getPlottingSystem().getTraces(IImageTrace.class);	
+				Collection<ITrace> traces= selectionPlottingSystem.getTraces(IImageTrace.class);
+				if(traces!=null && traces.size() == 0){
+					traces = getPlottingSystem().getTraces(IImageTrace.class);
+				}
+				
 				IImageTrace image = traces!=null && traces.size()>0 ? (IImageTrace)traces.iterator().next() : null;
-	
 				if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
 				if (image==null) {
-					normProfilePlotSystem.clear();
+					getPlottingSystem().clear();
 					return Status.OK_STATUS;
 				}
 				// if the current region is null try and update quickly (without creating 1D)
 				// if the trace is in the registered traces object
 				if (currentRegion==null) {
-					final Collection<IRegion> regions = getPlottingSystem().getRegions();
+					final Collection<IRegion> regions = selectionPlottingSystem.getRegions();
 					if (regions!=null) {
 						for (IRegion iRegion : regions) {
 							if (!iRegion.isUserRegion()) continue;
 							if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
-							createNormProfile(image, iRegion, iRegion.getROI(), true, isDrag, monitor);
+							createSelectionProfile(image, iRegion, iRegion.getROI(), true, isDrag, monitor);
 						}
 					} else {
-						normProfilePlotSystem.clear();
+						getPlottingSystem().clear();
 					}
 				} else {
 					if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
-					createNormProfile(image, currentRegion, currentROI!=null?currentROI:currentRegion.getROI(), 
+					createSelectionProfile(image, currentRegion, currentROI!=null?currentROI:currentRegion.getROI(), 
 							true, isDrag, monitor);
 				}
 				if (monitor.isCanceled()) return Status.CANCEL_STATUS;
-				normProfilePlotSystem.repaint();
+				getPlottingSystem().repaint();
 				return Status.OK_STATUS;
 			} catch (Throwable ne) {
 				logger.error("Internal error processing profile! ", ne);
@@ -598,12 +615,12 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 		}
 	}
 
-	private final class PreNormProfileJob extends Job {
+	private final class ReviewJob extends Job {
 		private   IRegion                currentRegion;
 		private   IROI                currentROI;
 		private   boolean                isDrag;
 
-		PreNormProfileJob() {
+		ReviewJob() {
 			super(getRegionName()+" pre norm update");
 			setSystem(true);
 			setUser(false);
@@ -622,12 +639,12 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 			try {
 				if (!isActive()) return Status.CANCEL_STATUS;
 	
-				final Collection<ITrace> traces= getPlottingSystem().getTraces(IImageTrace.class);	
+				final Collection<ITrace> traces= selectionPlottingSystem.getTraces(IImageTrace.class);	
 				IImageTrace image = traces!=null && traces.size()>0 ? (IImageTrace)traces.iterator().next() : null;
 	
 				if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
 				if (image==null) {
-					preNormProfilePlotSystem.clear();
+					reviewPlottingSystem.clear();
 					return Status.OK_STATUS;
 				}
 				if (currentRegion==null) {
@@ -637,22 +654,22 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 							if (!iRegion.isUserRegion()) continue;
 							if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
 							if (registeredTraces.containsKey(iRegion.getName())) {
-								createPreNormProfile(image, iRegion, iRegion.getROI(), true, isDrag, monitor);
+								createReviewProfile(image, iRegion, iRegion.getROI(), true, isDrag, monitor);
 							} else {
-								createPreNormProfile(image, iRegion, iRegion.getROI(), false, isDrag, monitor);
+								createReviewProfile(image, iRegion, iRegion.getROI(), false, isDrag, monitor);
 							}
 						}
 					} else {
 						registeredTraces.clear();
-						preNormProfilePlotSystem.clear();
+						reviewPlottingSystem.clear();
 					}
 				} else {
 					if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
-					createPreNormProfile(image, currentRegion, currentROI!=null?currentROI:currentRegion.getROI(), 
+					createReviewProfile(image, currentRegion, currentROI!=null?currentROI:currentRegion.getROI(), 
 							true, isDrag, monitor);
 				}
 				if (monitor.isCanceled()) return Status.CANCEL_STATUS;
-				preNormProfilePlotSystem.repaint();
+				reviewPlottingSystem.repaint();
 				return Status.OK_STATUS;
 			} catch (Throwable ne) {
 				logger.error("Internal error processing profile! ", ne);

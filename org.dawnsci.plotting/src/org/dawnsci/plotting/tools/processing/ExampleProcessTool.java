@@ -44,7 +44,7 @@ public class ExampleProcessTool extends ImageProcessingTool {
 	private IAxis yDIsplayPixelAxis;
 
 	@Override
-	protected void configureNormPlottingSystem(AbstractPlottingSystem plotter) {
+	protected void configureSelectionPlottingSystem(AbstractPlottingSystem plotter) {
 		if (xPixelAxis==null) {
 			this.xPixelAxis = plotter.getSelectedXAxis();
 			xPixelAxis.setTitle("X Pixel");
@@ -57,7 +57,7 @@ public class ExampleProcessTool extends ImageProcessingTool {
 	}
 
 	@Override
-	protected void configurePreNormPlottingSystem(AbstractPlottingSystem plotter) {
+	protected void configureReviewPlottingSystem(AbstractPlottingSystem plotter) {
 		if (xDisplayPixelAxis==null) {
 			this.xDisplayPixelAxis = plotter.getSelectedXAxis();
 			xDisplayPixelAxis.setTitle("X Pixel");
@@ -124,7 +124,7 @@ public class ExampleProcessTool extends ImageProcessingTool {
 	}
 
 	@Override
-	public void createNormProfile(final IImageTrace  image, 
+	public void createSelectionProfile(final IImageTrace  image, 
 			                     IRegion      region,
 			                     IROI      rbs, 
 			                     boolean      tryUpdate, 
@@ -182,7 +182,7 @@ public class ExampleProcessTool extends ImageProcessingTool {
 			if (yLabels==null) yLabels = IntegerDataset.arange(bounds.getPoint()[1], bounds.getEndPoint()[1], yInc);
 			if (xLabels==null) xLabels = IntegerDataset.arange(bounds.getPoint()[0], bounds.getEndPoint()[0], xInc);
 			
-			final IImageTrace zoom_trace = (IImageTrace)normProfilePlotSystem.updatePlot2D(slice, Arrays.asList(new IDataset[]{xLabels, yLabels}), monitor);
+			final IImageTrace zoom_trace = (IImageTrace)selectionPlottingSystem.updatePlot2D(slice, Arrays.asList(new IDataset[]{xLabels, yLabels}), monitor);
 			registerTraces(region, Arrays.asList(new ITrace[]{zoom_trace}));
 			Display.getDefault().syncExec(new Runnable()  {
 				public void run() {
@@ -212,7 +212,7 @@ public class ExampleProcessTool extends ImageProcessingTool {
 	}
 
 	@Override
-	public void createPreNormProfile(IImageTrace image, IRegion region,
+	public void createReviewProfile(IImageTrace image, IRegion region,
 			IROI roi, boolean tryUpdate, boolean isDrag,
 			IProgressMonitor monitor) {
 		// This is an example of profile (here Box profile)
@@ -244,16 +244,16 @@ public class ExampleProcessTool extends ImageProcessingTool {
 		y_indices.setName("Y Pixel");
 
 		//if (monitor.isCanceled()) return;
-		final ILineTrace x_trace = (ILineTrace)preNormProfilePlotSystem.getTrace("X "+region.getName());
-		final ILineTrace y_trace = (ILineTrace)preNormProfilePlotSystem.getTrace("Y "+region.getName());
+		final ILineTrace x_trace = (ILineTrace)reviewPlottingSystem.getTrace("X "+region.getName());
+		final ILineTrace y_trace = (ILineTrace)reviewPlottingSystem.getTrace("Y "+region.getName());
 		
 		if (tryUpdate && x_trace!=null && y_trace!=null) {
 			
 			getControl().getDisplay().syncExec(new Runnable() {
 				public void run() {
-					preNormProfilePlotSystem.setSelectedXAxis(xDisplayPixelAxis);
+					reviewPlottingSystem.setSelectedXAxis(xDisplayPixelAxis);
 					x_trace.setData(x_indices, x_intensity);
-					preNormProfilePlotSystem.setSelectedXAxis(yDIsplayPixelAxis);
+					reviewPlottingSystem.setSelectedXAxis(yDIsplayPixelAxis);
 					y_trace.setData(y_indices, y_intensity);
 				}
 			});
@@ -261,12 +261,12 @@ public class ExampleProcessTool extends ImageProcessingTool {
 			
 		} else {
 						
-			preNormProfilePlotSystem.setSelectedXAxis(xDisplayPixelAxis);
-			Collection<ITrace> plotted = preNormProfilePlotSystem.updatePlot1D(x_indices, Arrays.asList(new IDataset[]{x_intensity}), monitor);
+			reviewPlottingSystem.setSelectedXAxis(xDisplayPixelAxis);
+			Collection<ITrace> plotted = reviewPlottingSystem.updatePlot1D(x_indices, Arrays.asList(new IDataset[]{x_intensity}), monitor);
 			registerTraces(region, plotted);
 			
-			preNormProfilePlotSystem.setSelectedXAxis(yDIsplayPixelAxis);
-			plotted = preNormProfilePlotSystem.updatePlot1D(y_indices, Arrays.asList(new IDataset[]{y_intensity}), monitor);
+			reviewPlottingSystem.setSelectedXAxis(yDIsplayPixelAxis);
+			plotted = reviewPlottingSystem.updatePlot1D(y_indices, Arrays.asList(new IDataset[]{y_intensity}), monitor);
 			registerTraces(region, plotted);
 			
 		}
