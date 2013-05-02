@@ -3,16 +3,13 @@ package org.dawnsci.plotting.tools.processing;
 import java.io.File;
 import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.util.io.IOUtils;
-import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.trace.IImageTrace;
-import org.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.Action;
@@ -145,6 +142,7 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 					@Override
 					public void run() {
 						type = NormaliseType.ROI;
+						selectionPlottingSystem.updatePlot2D(originalData, originalAxes, null);
 						updateProfiles();
 						setInputFieldEnabled(false);
 					}
@@ -155,6 +153,8 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 					@Override
 					public void run() {
 						type = NormaliseType.AUX;
+						if(auxiliaryData != null)
+							selectionPlottingSystem.updatePlot2D((IDataset)auxiliaryData.squeeze(), originalAxes, null);
 						updateProfiles();
 						setInputFieldEnabled(true);
 					}
@@ -270,8 +270,7 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 	}
 
 	@Override
-	protected void createSelectionProfile(IImageTrace image, IRegion region, IROI roi,
-			boolean tryUpdate, boolean isDrag, IProgressMonitor monitor) {
+	protected void createSelectionProfile(IImageTrace image, IROI roi, IProgressMonitor monitor) {
 		AbstractDataset data = (AbstractDataset)image.getData();
 		AbstractDataset ds = data.clone();
 
@@ -295,64 +294,39 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 
 			AbstractDataset[] profiles = ROIProfile.box(ds, (RectangularROI)roi);
 			profile = profiles[1];
-			if(smoothLevel > 1){
-				try {
-					profile = ApachePolynomial.getPolynomialSmoothed(((AbstractDataset)image.getAxes().get(1)), profile, smoothLevel, 3);
-				} catch (Exception e) {
-					logger.error("Could not smooth the plot:"+e);
-				}
-			}
-
-			AbstractDataset tmpProfile = profile.clone();
-			AbstractDataset tile = tmpProfile.reshape(tmpProfile.getShape()[0],1);
-
-			if(type.equals(NormaliseType.AUX))
-				ds = (AbstractDataset) originalData.clone();
-
-			tile.idivide(width);
-			AbstractDataset correction = DatasetUtils.tile(tile, ds.getShape()[1]);
-			ds.idivide(correction);
-
-			getPlottingSystem().updatePlot2D(ds, image.getAxes(), monitor);
+			profile.idivide(width);
 		}
 	}
 
 	@Override
-	protected void createReviewProfile(IImageTrace image, IRegion region,
-			IROI roi, boolean tryUpdate, boolean isDrag,
-			IProgressMonitor monitor) {
+	protected void createReviewProfile(IProgressMonitor monitor) {
 		List<IDataset> data = new ArrayList<IDataset>();
-		Collection<ITrace> plotted = null;
-		switch (type) {
-		case NONE:
-			data.add(new IntegerDataset(image.getData().getShape()[0]));
+		if(type.equals(NormaliseType.NONE)){
+			data.add(new IntegerDataset(originalData.getShape()[0]));
 			data.get(0).setName("Norm");
-			plotted = reviewPlottingSystem.updatePlot1D(image.getAxes().get(1), data, monitor);
-			if(plotted == null) return;
-			registerTraces(region, plotted);
-			break;
-		case ROI:
-			if(roi == null)return;
-
+			reviewPlottingSystem.updatePlot1D(originalAxes.get(1), data, monitor);
+		} else if(type.equals(NormaliseType.ROI) || type.equals(NormaliseType.AUX)){
+			// smooth the review plot
+			if(smoothLevel > 1){
+				try {
+					profile = ApachePolynomial.getPolynomialSmoothed((AbstractDataset)originalAxes.get(1), profile, smoothLevel, 3);
+				} catch (Exception e) {
+					logger.error("Could not smooth the plot:"+e);
+				}
+			} 
 			data.add(profile);
 			data.get(0).setName("Norm");
-			plotted = reviewPlottingSystem.updatePlot1D(image.getAxes().get(1), data, monitor);
+			reviewPlottingSystem.updatePlot1D(originalAxes.get(1), data, monitor);
 
-			if(plotted == null) return;
-			registerTraces(region, plotted);
-			break;
-		case AUX:
-			if(auxiliaryData == null)return;
+			AbstractDataset tmpProfile = profile.clone();
+			AbstractDataset tile = tmpProfile.reshape(tmpProfile.getShape()[0],1);
 
-			data.add(profile);
-			data.get(0).setName("Norm");
-			IDataset xAxis = ((IImageTrace)selectionPlottingSystem.getTraces().iterator().next()).getAxes().get(1);
-			plotted = reviewPlottingSystem.updatePlot1D(xAxis, data, monitor);
-			if(plotted == null) return;
-			registerTraces(region, plotted);
-			break;
-		default:
-			break;
+			AbstractDataset ds = (AbstractDataset) originalData.clone();
+
+			AbstractDataset correction = DatasetUtils.tile(tile, ds.getShape()[1]);
+			ds.idivide(correction);
+
+			getPlottingSystem().updatePlot2D(ds, originalAxes, monitor);
 		}
 	}
 
@@ -362,23 +336,13 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 	}
 
 	private IDataset loadDataset(final String path) {
-//		Job loadFileJob = new Job("Loading File") {
-//			
-//			@Override
-//			protected IStatus run(IProgressMonitor monitor) {
-//				final IMonitor mon = new ProgressMonitorWrapper(monitor);
-				try {
-					auxiliaryData = LoaderFactory.getDataSet(path, "/entry1/analyser/data", null);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-//					return Status.CANCEL_STATUS;
-				}
-//				return Status.OK_STATUS;
-//			}
-//		};
-//		loadFileJob.schedule();
-//		
+		try {
+			auxiliaryData = LoaderFactory.getDataSet(path,
+					"/entry1/analyser/data", null);
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("Could not load the auxiliary data:"+e);
+		}
 		return auxiliaryData;
 	}
 }
