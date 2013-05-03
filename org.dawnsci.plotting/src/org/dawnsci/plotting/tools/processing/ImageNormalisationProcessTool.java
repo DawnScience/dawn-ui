@@ -117,7 +117,7 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 				@Override
 				public void widgetDefaultSelected(SelectionEvent e) {
 					smoothLevel = smoothingSpinner.getSelection();
-					updateProfiles();
+					updateProfiles(false);
 				}
 			});
 		} catch (Exception e) {
@@ -132,7 +132,7 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 				@Override
 				public void run() {
 					type = NormaliseType.NONE;
-					updateProfiles();
+					updateProfiles(true);
 					setInputFieldEnabled(false);
 				}
 			}
@@ -143,7 +143,7 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 					public void run() {
 						type = NormaliseType.ROI;
 						selectionPlottingSystem.updatePlot2D(originalData, originalAxes, null);
-						updateProfiles();
+						updateProfiles(true);
 						setInputFieldEnabled(false);
 					}
 				}
@@ -155,7 +155,7 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 						type = NormaliseType.AUX;
 						if(auxiliaryData != null)
 							selectionPlottingSystem.updatePlot2D((IDataset)auxiliaryData.squeeze(), originalAxes, null);
-						updateProfiles();
+						updateProfiles(true);
 						setInputFieldEnabled(true);
 					}
 				}
@@ -265,7 +265,7 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 			List<? extends IDataset> axes = getImageTrace().getAxes();
 			selectionPlottingSystem.updatePlot2D((IDataset)auxiliaryData.squeeze(), axes, null);
 
-			updateProfiles();
+			updateProfiles(true);
 		}
 	}
 
@@ -307,18 +307,20 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 			reviewPlottingSystem.updatePlot1D(originalAxes.get(1), data, monitor);
 		} else if(type.equals(NormaliseType.ROI) || type.equals(NormaliseType.AUX)){
 			// smooth the review plot
+			AbstractDataset tmpProfile = profile.clone();
+			
 			if(smoothLevel > 1){
 				try {
-					profile = ApachePolynomial.getPolynomialSmoothed((AbstractDataset)originalAxes.get(1), profile, smoothLevel, 3);
+					tmpProfile = ApachePolynomial.getPolynomialSmoothed((AbstractDataset)originalAxes.get(1), profile, smoothLevel, 3);
 				} catch (Exception e) {
 					logger.error("Could not smooth the plot:"+e);
 				}
-			} 
-			data.add(profile);
+			}
+			
+			data.add(tmpProfile);
 			data.get(0).setName("Norm");
 			reviewPlottingSystem.updatePlot1D(originalAxes.get(1), data, monitor);
 
-			AbstractDataset tmpProfile = profile.clone();
 			AbstractDataset tile = tmpProfile.reshape(tmpProfile.getShape()[0],1);
 
 			AbstractDataset ds = (AbstractDataset) originalData.clone();

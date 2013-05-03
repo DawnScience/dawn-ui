@@ -345,7 +345,7 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 			}
 		}
 		setRegionsActive(true);
-		updateProfiles();
+		updateProfiles(true);
 	}
 
 	@Override
@@ -425,29 +425,40 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 	@Override
 	public void roiDragged(ROIEvent evt) {
 		region = (IRegion)evt.getSource();
-		updateSelectionAndReviewProfile(region, evt.getROI());
+		updateProfiles(region, evt.getROI(), true);
 	}
 
 	@Override
 	public void roiChanged(ROIEvent evt) {
 		region = (IRegion)evt.getSource();
-		updateSelectionAndReviewProfile(region, region.getROI());
+		updateProfiles(region, region.getROI(), true);
 	}
 
 	/**
-	 * Updates the normalization profiles
+	 * Updates the normalisation profiles
+	 * @param isFullProcess
+	 *         set to true for the full process, false for the review process only
 	 */
-	protected void updateProfiles(){
-		updateSelectionAndReviewProfile(getRegion(), getRegion().getROI());
+	protected void updateProfiles(boolean isFullProcess){
+		updateProfiles(getRegion(), getRegion().getROI(), isFullProcess);
 	}
 
-	protected synchronized void updateSelectionAndReviewProfile(IRegion r, IROI rb) {
+	/**
+	 * Update the normalisation profiles
+	 * @param r 
+	 *         the region
+	 * @param rb 
+	 *         the roi
+	 * @param isFullProcess
+	 *         set to true for the full process, false for the review process only
+	 */
+	protected synchronized void updateProfiles(IRegion r, IROI rb, boolean isFullProcess) {
 		if (!isActive()) return;
 		if (r!=null) {
 			if(!isRegionTypeSupported(r.getRegionType())) return;
 			if (!r.isUserRegion()) return;
 		}
-		updateNormaliseProcess.profile(r, rb);
+		updateNormaliseProcess.profile(r, rb, isFullProcess);
 	}
 
 	/**
@@ -489,6 +500,7 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 	private final class NormaliseProcessJob extends Job {
 		private IRegion currentRegion;
 		private IROI currentROI;
+		private boolean isFullProcess;
 
 		NormaliseProcessJob() {
 			super(getRegionName()+" update");
@@ -503,9 +515,10 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 		 * @param roi can be null
 		 * @param isFullProcess
 		 */
-		public void profile(IRegion region, IROI roi) {
+		public void profile(IRegion region, IROI roi, boolean isFullProcess) {
 			this.currentRegion = region;
 			this.currentROI    = roi;
+			this.isFullProcess = isFullProcess;
 			schedule();
 		}
 
@@ -526,25 +539,26 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 					reviewPlottingSystem.clear();
 					return Status.OK_STATUS;
 				}
-
-				if (currentRegion==null) {
-					final Collection<IRegion> regions = selectionPlottingSystem.getRegions();
-					if (regions!=null) {
-					for (IRegion iRegion : regions) {
-						if (!iRegion.isUserRegion()) continue;
-						if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
-							createSelectionProfile(image, iRegion.getROI(), monitor);
+				if(isFullProcess){
+					if (currentRegion==null) {
+						final Collection<IRegion> regions = selectionPlottingSystem.getRegions();
+						if (regions!=null) {
+						for (IRegion iRegion : regions) {
+							if (!iRegion.isUserRegion()) continue;
+							if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
+								createSelectionProfile(image, iRegion.getROI(), monitor);
+							}
+						} else {
+							getPlottingSystem().clear();
 						}
 					} else {
-						getPlottingSystem().clear();
+						if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
+						createSelectionProfile(image, currentROI!=null?currentROI:currentRegion.getROI(), monitor);
 					}
-				} else {
-					if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
-					createSelectionProfile(image, currentROI!=null?currentROI:currentRegion.getROI(), monitor);
-				}
-				if (monitor.isCanceled()) return Status.CANCEL_STATUS;
-				getPlottingSystem().repaint();
-
+					if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+					getPlottingSystem().repaint();
+				} 
+				
 				createReviewProfile(monitor);
 
 				if (monitor.isCanceled()) return Status.CANCEL_STATUS;
