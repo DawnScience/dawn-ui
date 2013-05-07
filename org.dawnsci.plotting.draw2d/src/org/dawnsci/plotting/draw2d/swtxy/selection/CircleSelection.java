@@ -205,17 +205,12 @@ public class CircleSelection extends AbstractSelectionRegion {
 		}
 
 		public void setup(PointList corners) {
-			double[] start = coords.getPositionValue(corners.getFirstPoint().x, corners.getFirstPoint().y);
-			double[] end   = coords.getPositionValue(corners.getLastPoint().x, corners.getLastPoint().y);
-			Rectangle r = new Rectangle(new PrecisionPoint(start[0], start[1]), new PrecisionPoint(end[0], end[1]));
+			Rectangle r = new Rectangle(corners.getFirstPoint(), corners.getLastPoint());
 			if (r.width < r.height) {
 				r.width = r.height;
 			} else {
 				r.height = r.width;
 			}
-			start = coords.getPositionValue(r.getTopLeft().x,     r.getTopLeft().y);
-			end   = coords.getPositionValue(r.getBottomRight().x, r.getBottomRight().y);
-			r = new Rectangle(new PrecisionPoint(start[0], start[1]), new PrecisionPoint(end[0], end[1]));
 			setRadius(0.5*r.width);
 			
 			Point c = r.getCenter();
