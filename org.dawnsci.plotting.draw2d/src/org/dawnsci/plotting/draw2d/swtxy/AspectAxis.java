@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.csstudio.swt.xygraph.figures.Axis;
-import org.csstudio.swt.xygraph.figures.XYGraph;
+import org.csstudio.swt.xygraph.linearscale.LinearScaleTickMarks;
 import org.csstudio.swt.xygraph.linearscale.Range;
 import org.dawb.common.util.text.NumberUtils;
 import org.dawnsci.plotting.api.axis.AxisEvent;
@@ -12,9 +12,13 @@ import org.dawnsci.plotting.api.axis.IAxis;
 import org.dawnsci.plotting.api.axis.IAxisListener;
 import org.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
 import org.dawnsci.plotting.api.preferences.BasePlottingConstants;
+import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Dimension;
+import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
@@ -35,6 +39,7 @@ public class AspectAxis extends Axis implements IAxis {
 	private Range      maximumRange;
     private boolean    keepAspect; // This is so that the user may have images with and without aspect in the same application.
 	private AbstractDataset labelData;
+	
 	public AspectAxis(String title, boolean yAxis) {
 		super(title, yAxis);
 		keepAspect = getPreferenceStore().getBoolean(BasePlottingConstants.ASPECT);
@@ -93,9 +98,84 @@ public class AspectAxis extends Axis implements IAxis {
 		}
 
 	}
+	
+	@Override
+	protected void paintClientArea(final Graphics graphics) {
+        if (!isVisible()) return;
+        
+        super.paintClientArea(graphics);
+        
+        
+        /** HACK WARNING **/
+        // If data is greater than zoom, extends give visual clue to Claire P.
+        // Hack for http://jira.diamond.ac.uk/browse/DAWNSCI-552
+        
+        final XYRegionGraph graph = getGraph();
+        final IImageTrace   trace = graph.getRegionArea().getImageTrace();
+        if (trace!=null && trace.getImageOrigin()==ImageOrigin.TOP_LEFT) {
+        	// TODO FIXME not for other orientations!
+        	final int[] shape  = trace.getData().getShape();
+        	final Range range  = getRange();
+        	
+        	LinearScaleTickMarks marks = getScaleTickMarks();
+   			final int height = marks.getBounds().height;
+   			
+   			graphics.pushState();
+			graphics.setBackgroundColor(ColorConstants.red);
+			graphics.setAlpha(100);
+        	if (isYAxis()) {
+       			final int x      = marks.getBounds().x;
+       			final int y      = marks.getBounds().y;
+       		    if (range.getUpper()>0) { // Zoom at top not to edge
+        			final PointList triangle = new PointList();
+          			triangle.addPoint(x+6,  y+9);
+           			triangle.addPoint(x+11, y+15);
+           			triangle.addPoint(x+1,  y+15);
+        			graphics.fillPolygon(triangle);
+        			
+         		} 
+        		
+        		if (range.getLower()<shape[0]) {
+         			
+        			final PointList triangle = new PointList();
+         			triangle.addPoint(x+6,  y+height-9);
+           			triangle.addPoint(x+11, y+height-15);
+           			triangle.addPoint(x+1,  y+height-15);
+           			graphics.fillPolygon(triangle);
+         		}
+        	} else {
+        		
+       			final int x      = getValuePosition(range.getLower());
+       			final int y      = marks.getBounds().y;
+ 
+        		if (range.getLower()>0) { // Zoom at top not to edge
+        			final PointList triangle = new PointList();
+          			triangle.addPoint(x, y);
+           			triangle.addPoint(x+6, y+6);
+           			triangle.addPoint(x+6, y-6);
+        			graphics.fillPolygon(triangle);
+        			
+         		} 
+        		
+        		if (range.getUpper()<shape[1]) {
+          			final int width  = getValuePosition(range.getUpper());
+        			final PointList triangle = new PointList();
+          			triangle.addPoint(width,   y);
+           			triangle.addPoint(width-6, y+6);
+           			triangle.addPoint(width-6, y-6);
+        			graphics.fillPolygon(triangle);
+         		}
 
-	private XYGraph getGraph() {
-		return (XYGraph)getParent();
+        	}
+   
+         	graphics.popState();
+        }
+        /** HACK OVER **/
+		
+	}
+
+	private XYRegionGraph getGraph() {
+		return (XYRegionGraph)getParent();
 	}
 	
 	protected void pan(Range temp, double t1, double t2) {
