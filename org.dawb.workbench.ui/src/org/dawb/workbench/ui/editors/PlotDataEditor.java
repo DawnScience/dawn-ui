@@ -19,6 +19,9 @@ import java.util.Map;
 
 import org.dawb.common.services.IExpressionObject;
 import org.dawb.common.services.IVariableManager;
+import org.dawb.common.ui.editors.ICheckableObject;
+import org.dawb.common.ui.editors.IDatasetEditor;
+import org.dawb.common.ui.editors.IPlotUpdateParticipant;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.PlottingFactory;
@@ -117,7 +120,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
         final Map<String,IDataset> ret = new HashMap<String, IDataset>(3);
 		if (dataSetComponent==null) return ret;
 		
-        final List<CheckableObject> selectedNames = dataSetComponent.getSelections();
+        final List<ICheckableObject> selectedNames = dataSetComponent.getSelections();
         for (Object object : selectedNames) {
         	final AbstractDataset set = getDataSet(object, null);
         	if (set==null) continue;
@@ -233,7 +236,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		
 		final PlotDataComponent dataSetComponent = (PlotDataComponent)getDataSetComponent();
  		if (dataSetComponent!=null) {
-			for (CheckableObject set : dataSetComponent.getData()) {
+			for (ICheckableObject set : dataSetComponent.getData()) {
 				if (dataSetComponent.getActiveDimensions(set, true)==1)	{
 					is1D=true;
 					break;
@@ -255,7 +258,8 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 	 * @param selections
 	 * @param useTask
 	 */
-	public void updatePlot(final CheckableObject[]      selections, 
+	@Override
+	public void updatePlot(final ICheckableObject[]      selections, 
 			               final IPlotUpdateParticipant participant,
 			               final boolean                useTask) {
 		
@@ -295,7 +299,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		}
 	}
 	
-	private int[] getShape(CheckableObject ob) {
+	private int[] getShape(ICheckableObject ob) {
 		
 		if (ob.isExpression()) {
 			return null; 
@@ -308,7 +312,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 				// It's ok
 			}
 			if (shape==null) {
-				shape = getLazyDataSet(name, null).getShape();
+				shape = getLazyDataset(name, null).getShape();
 			}
 			return shape;
 		}
@@ -323,10 +327,10 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 			setPriority(Job.INTERACTIVE);
 		}
 
-		private CheckableObject[] selections;
+		private ICheckableObject[] selections;
 		private IPlotUpdateParticipant participant;
 
-		public void plot(CheckableObject[] selections,
+		public void plot(ICheckableObject[] selections,
 				               IPlotUpdateParticipant participant) {
 			
 			cancel();
@@ -343,7 +347,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		}
 	}
 	
-	private void createPlot(final CheckableObject[] selections, final IPlotUpdateParticipant participant, final IProgressMonitor monitor) {
+	private void createPlot(final ICheckableObject[] selections, final IPlotUpdateParticipant participant, final IProgressMonitor monitor) {
 		
 
 		if (monitor.isCanceled()) return;
@@ -365,7 +369,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		    plottingSystem.createPlot2D(data, null, monitor);
 		    
 		} else {
-			List<CheckableObject> sels = new ArrayList<CheckableObject>(Arrays.asList(selections));
+			List<ICheckableObject> sels = new ArrayList<ICheckableObject>(Arrays.asList(selections));
 
 			final IDataset x;
 			if (plottingSystem.isXfirst() && sels.size()>1) {
@@ -416,7 +420,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 	 * @param sels
 	 * @param traces
 	 */
-	private void sync(List<CheckableObject> sels, List<ITrace> traces) {
+	private void sync(List<ICheckableObject> sels, List<ITrace> traces) {
 		if (sels==null || traces==null) return ;
 		if (sels.size() == traces.size()) {
 			for (int i = 0; i < sels.size(); i++) {
@@ -455,10 +459,10 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		}
 	}
 
-	private List<AbstractDataset> getYS(int iyaxis, List<CheckableObject> selections, IProgressMonitor monitor) {
+	private List<AbstractDataset> getYS(int iyaxis, List<ICheckableObject> selections, IProgressMonitor monitor) {
 		
 		List<AbstractDataset> ys = new ArrayList<AbstractDataset>(3);
-		for (CheckableObject co : selections) {
+		for (ICheckableObject co : selections) {
 			
 			if (co.getYaxis()!=iyaxis) continue;
 			ys.add(getDataSet(co, monitor));
@@ -468,7 +472,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		return ys.isEmpty()?null:ys;
 	}
 
-	public AbstractDataset getDataSet(String name, IMonitor monitor) {
+	public AbstractDataset getDataset(String name, IMonitor monitor) {
 		try {
 			
 			AbstractDataset set = LoaderFactory.getDataSet(EclipseUtils.getFilePath(getEditorInput()), name, monitor);
@@ -487,7 +491,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		}
 	}
 	
-	public ILazyDataset getLazyDataSet(String name, IMonitor monitor) {
+	public ILazyDataset getLazyDataset(String name, IMonitor monitor) {
 		try {
 			
 			DataHolder holder = LoaderFactory.getData(EclipseUtils.getFilePath(getEditorInput()), monitor);
@@ -514,7 +518,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		throw new NullPointerException("Expressions are not supported by "+getClass().getName());
 	}
 	
-	public boolean isDataSetName(String name, IMonitor monitor) {
+	public boolean containsDatasetName(String name, IMonitor monitor) {
 		if (dataNames==null) return false;
 		return dataNames.contains(name);
 	}
@@ -528,7 +532,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		
 	    Object object = input;	
 		if (input instanceof CheckableObject) {
-			CheckableObject check = (CheckableObject)input;
+			ICheckableObject check = (ICheckableObject)input;
 			object = check.isExpression() ? check.getExpression() : check.getName();
 		}
 		if (object instanceof IExpressionObject) {
@@ -540,7 +544,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 				return new DoubleDataset();
 			}
 		}
- 		return getDataSet((String)object, new ProgressMonitorWrapper(monitor));
+ 		return getDataset((String)object, new ProgressMonitorWrapper(monitor));
 	}
 
 

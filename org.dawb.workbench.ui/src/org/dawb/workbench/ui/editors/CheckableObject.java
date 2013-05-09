@@ -14,10 +14,11 @@ import java.util.List;
 import org.dawb.common.services.IExpressionObject;
 import org.dawb.common.services.IExpressionObjectService;
 import org.dawb.common.services.IVariableManager;
+import org.dawb.common.ui.editors.ICheckableObject;
 import org.dawb.hdf5.editor.H5Path;
 import org.eclipse.ui.PlatformUI;
 
-public class CheckableObject implements H5Path{
+public class CheckableObject implements H5Path, ICheckableObject{
 
 	private boolean           checked;
 	private String            name;
@@ -25,28 +26,28 @@ public class CheckableObject implements H5Path{
 	private IExpressionObject expression;
 	private String            mementoKey;
 	private IExpressionObjectService service;
-	
+
 	private static int expressionCount=0;
-	
+
 	public CheckableObject() {
 		expressionCount++;
 		this.variable   = "expr"+expressionCount;
 		this.service  = (IExpressionObjectService)PlatformUI.getWorkbench().getService(IExpressionObjectService.class);
 	}
-	
+
 	public CheckableObject(final String name) {
 		this.name     = name;
 		this.service  = (IExpressionObjectService)PlatformUI.getWorkbench().getService(IExpressionObjectService.class);
 		this.variable = service.getSafeName(name);
 	}
-	
+
 	public CheckableObject(IExpressionObject expression2) {
 		this.expression = expression2;
 		expressionCount++;
 		this.variable   = "expr"+expressionCount;
 		this.service  = (IExpressionObjectService)PlatformUI.getWorkbench().getService(IExpressionObjectService.class);
 	}
-	
+
 	public static boolean isMementoKey(final String key) {
 		if (key==null)      return false;
 		if ("".equals(key)) return false;
@@ -56,16 +57,17 @@ public class CheckableObject implements H5Path{
 	private String generateMementoKey() {
 		return "CheckableObject$"+System.currentTimeMillis()+"$"+getVariable();
 	}
-	
+
 	public static String getVariable(String memento) {
 		final String[] parts = memento.split(DELIMITER);
 		return parts[0];
 	}
+
 	public static String getName(String memento) {
 		final String[] parts = memento.split(DELIMITER);
 		return parts[1];
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -79,6 +81,7 @@ public class CheckableObject implements H5Path{
 		result = prime * result + yaxis;
 		return result;
 	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -109,47 +112,56 @@ public class CheckableObject implements H5Path{
 			return false;
 		return true;
 	}
+
+	@Override
 	public String getName() {
 		if (expression!=null) return expression.getExpressionString();
 		return name;
 	}
+
+	@Override
 	public void setName(String name) {
 		this.name = name;
 	}
+
+	@Override
 	public IExpressionObject getExpression() {
 		return expression;
 	}
+
+	@Override
 	public void setExpression(IExpressionObject expression) {
 		this.expression = expression;
 	}
-    public boolean isExpression() {
+
+    @Override
+	public boolean isExpression() {
     	return expression!=null;
     }
-    public boolean isChecked() {
+
+    @Override
+	public boolean isChecked() {
 		return checked;
 	}
+
+	@Override
 	public void setChecked(boolean checked) {
 		this.checked = checked;
 	}
 
+	@Override
 	public String toString() {
 		if (expression!=null) return expression.toString();
 		return name;
 	}
-	
+
+	@Override
 	public String getPath() {
 		return name;
 	}
-	
-	/**
-	 * Get the axis, X, Y1..Y4
-	 * 
-	 * If this object is not in 
-	 * 
-	 * @param selections
-	 * @return
-	 */
-	public String getAxis(List<CheckableObject> selections, boolean is2D, boolean isXFirst) {
+
+	@Override
+	public String getAxis(List<ICheckableObject> selections, boolean is2D, boolean isXFirst) {
 		
 		if (is2D) return isChecked() ? "-" : "";
 		int axis = getAxisIndex(selections, isXFirst);
@@ -159,8 +171,9 @@ public class CheckableObject implements H5Path{
 		}
 		return "Y"+axis;
 	}
-	
-	public int getAxisIndex(List<CheckableObject> selections, boolean isXFirst) {
+
+	@Override
+	public int getAxisIndex(List<ICheckableObject> selections, boolean isXFirst) {
 		if (selections!=null&&!selections.isEmpty()) {
 			if (selections.size()>1) {
 				if (selections.contains(this)) {
@@ -178,15 +191,23 @@ public class CheckableObject implements H5Path{
     }
 	
 	private int yaxis = 1;
+
+	@Override
 	public int getYaxis() {
 		return yaxis;
 	}
+
+	@Override
 	public void setYaxis(int yaxis) {
 		this.yaxis = yaxis;
 	}
-    public String getVariable() {
+
+    @Override
+	public String getVariable() {
 		return variable;
 	}
+
+	@Override
 	public void setVariable(String variable) {
 		this.variable = variable;
 		if (expression!=null) expression.clear();
@@ -194,28 +215,25 @@ public class CheckableObject implements H5Path{
 	
 	private static final String DELIMITER = "£";
 	
+	@Override
 	public void createExpression(IVariableManager psData, String mementoKey, String memento) {
 		final String[] parts = memento.split(DELIMITER);
 		this.variable   = parts[0];
 		this.expression = service.createExpressionObject(psData, parts[1]);
 	}
 	
+	@Override
 	public String getMemento() {
 		return variable+DELIMITER+getName();
 	}
 	
-	/**
-	 * @return Returns the mementoKey.
-	 */
+	@Override
 	public String getMementoKey() {
 		if (mementoKey==null) mementoKey = generateMementoKey();
 		return mementoKey;
 	}
 
-
-	/**
-	 * @param mementoKey The mementoKey to set.
-	 */
+	@Override
 	public void setMementoKey(String mementoKey) {
 		this.mementoKey = mementoKey;
 	}
