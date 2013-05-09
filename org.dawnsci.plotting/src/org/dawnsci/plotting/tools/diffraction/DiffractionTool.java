@@ -80,6 +80,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
@@ -124,7 +125,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	private DiffractionTreeModel model;
 	private ILoaderService  service;
 	private Label statusMessage;
-	private String statusString = "";
+	private String[] statusString = new String[1];
 	
 	private static DiffractionTool      activeDiffractionTool=null;
 	
@@ -193,8 +194,9 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		ColorRegistry colorRegistry = JFaceResources.getColorRegistry();
 		statusMessage.setForeground(new Color(statusMessage.getDisplay(), colorRegistry.getRGB(JFacePreferences.QUALIFIER_COLOR)));
 		statusMessage.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
-		statusMessage.setText(statusString);
-		
+		if (statusString != null && statusString[0] != null)
+			statusMessage.setText(statusString[0]);
+
 		final Label label = new Label(status, SWT.NONE);
 		label.setLayoutData(new GridData(GridData.END, GridData.CENTER, true, false));
 		label.setForeground(new Color(label.getDisplay(), colorRegistry.getRGB(JFacePreferences.QUALIFIER_COLOR)));
@@ -344,7 +346,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		}
 	}
 	
-	private boolean diffractionMetadataAreEqual(IDiffractionMetadata meta1,IDiffractionMetadata meta2) {
+	private static boolean diffractionMetadataAreEqual(IDiffractionMetadata meta1,IDiffractionMetadata meta2) {
 		
 		if (meta1.getDetector2DProperties().equals(meta2.getDetector2DProperties()) &&
 				meta1.getDiffractionCrystalEnvironment().equals(meta2.getDiffractionCrystalEnvironment())) {
@@ -356,13 +358,24 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	}
 	
 	private IDiffractionMetadata getDiffractionMetaData() {
+		return getDiffractionMetadata(getPart(), getImageTrace(), service, statusString);
+	}
+
+	/**
+	 * Fetch diffraction metadata
+	 * @param part
+	 * @param imageTrace
+	 * @param service
+	 * @param statusText returned message (can be null)
+	 * @return diffraction metadata
+	 */
+	public static IDiffractionMetadata getDiffractionMetadata(IWorkbenchPart part, IImageTrace imageTrace, ILoaderService service, String[] statusText) {
 		// Now always returns IDiffractionMetadata to prevent creation of a new
 		// metadata object after listeners have been added to the old metadata
 		//TODO improve this section- its pretty horrible
 		IDiffractionMetadata lockedMeta = service.getLockedDiffractionMetaData();
 		
 		if (lockedMeta != null) {
-   		    IImageTrace imageTrace = getImageTrace();
 			if (imageTrace==null || imageTrace.getData() ==null) return lockedMeta;
 			
 			IMetaData mdImage = ((AbstractDataset)imageTrace.getData()).getMetadata();
@@ -378,7 +391,8 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 					IDiffractionMetadata clone = lockedMeta.clone();
 					clone.getDetector2DProperties().setPx(shape[0]);
 					clone.getDetector2DProperties().setPy(shape[1]);
-					statusString = "Locked metadata doesnt match image dimensions!";
+					if (statusText != null)
+						statusText[0] = "Locked metadata doesnt match image dimensions!";
 				}
 				
 			} else if (mdImage instanceof IDiffractionMetadata) {
@@ -386,22 +400,26 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 					try {
 						DiffractionMetadataUtils.copyNewOverOld(lockedMeta, (IDiffractionMetadata)mdImage);
 					} catch (IllegalArgumentException e) {
-						statusString = "Locked metadata doesnt match image dimensions!";
+						if (statusText != null)
+							statusText[0] = "Locked metadata doesnt match image dimensions!";
 					}
 					imageTrace.getData().setMetadata(mdImage);
 				}
 			}
-			if (statusString.equals("")) statusString = "Metadata loaded from lock";
+			if (statusText != null && statusText[0] == null) {
+				statusText[0] = "Metadata loaded from lock";
+			}
 			return lockedMeta;
 		}
 		
 		//If not see if the trace has diffraction meta data
-		IImageTrace imageTrace = getImageTrace();
 		if (imageTrace==null) return null;
 		if (imageTrace.getData()==null) return null;
 		IMetaData mdImage = ((AbstractDataset)imageTrace.getData()).getMetadata();
 		if (mdImage !=null && mdImage  instanceof IDiffractionMetadata) {
-			if (statusString.equals("")) statusString = "Metadata loaded from image";
+			if (statusText != null && statusText[0] == null) {
+				statusText[0] = "Metadata loaded from image";
+			}
 			return (IDiffractionMetadata)mdImage;
 		}
 		
@@ -411,8 +429,8 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		//Try and get the filename here, it will help later on
 		String filePath = (mdImage !=null && mdImage.getFilePath()!= null) ? mdImage.getFilePath() : null;
 		
-		if (filePath == null && getPart() instanceof IEditorPart) {
-			filePath = EclipseUtils.getFilePath(((IEditorPart)getPart()).getEditorInput());
+		if (filePath == null && part instanceof IEditorPart) {
+			filePath = EclipseUtils.getFilePath(((IEditorPart) part).getEditorInput());
 		}
 		
 		if (filePath != null) {
@@ -421,16 +439,16 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			IDiffractionMetadata difMet = ndmc.getDiffractionMetadataFromNexus(imageShape);
 			if (difMet !=null) {
 				imageTrace.getData().setMetadata(difMet);
-				
-				if (ndmc.isCompleteRead() && statusString.equals(""))
-					statusString = "Metadata completely loaded from nexus tree";
-				else if (ndmc.isPartialRead() && statusString.equals(""))
-					statusString = "Required metadata loaded from nexus tree";
-				else if (ndmc.anyValuesRead() && statusString.equals(""))
-					statusString = "Partial metadata loaded from nexus tree";
-				else if (statusString.equals(""))
-					statusString = "No metadata in nexus tree, metadata loaded from preferences";
-				
+				if (statusText != null && statusText[0] == null) {
+					if (ndmc.isCompleteRead())
+						statusText[0] = "Metadata completely loaded from nexus tree";
+					else if (ndmc.isPartialRead())
+						statusText[0] = "Required metadata loaded from nexus tree";
+					else if (ndmc.anyValuesRead())
+						statusText[0] = "Partial metadata loaded from nexus tree";
+					else
+						statusText[0] = "No metadata in nexus tree, metadata loaded from preferences";
+				}
 				return difMet;
 			}
 		}
@@ -441,12 +459,14 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			try {
 				md = service.getMetaData(filePath, null);
 			} catch (Exception e) {
-				logger.error("Cannot read meta data from "+getPart().getTitle(), e);
+				logger.error("Cannot read meta data from "+part.getTitle(), e);
 			}
 			
 			//If it is there and diffraction data return it
 			if (md!=null && md instanceof IDiffractionMetadata) {
-				if (statusString.equals("")) statusString = "Metadata loaded from disk";
+				if (statusText != null && statusText[0] == null) {
+					statusText[0] = "Metadata loaded from disk";
+				}
 				return (IDiffractionMetadata)md;
 			}
 			
@@ -457,7 +477,9 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		// if there is no meta or is not nexus or IDiff create default IDiff and put it in the dataset
 		mdImage = DiffractionDefaultMetadata.getDiffractionMetadata(filePath,imageTrace.getData().getShape());
 		imageTrace.getData().setMetadata(mdImage);
-		if (statusString.equals("")) statusString = "No metadata found. Values loaded from preferences:";
+		if (statusText != null && statusText[0] == null) {
+			statusText[0] = "No metadata found. Values loaded from preferences:";
+		}
 		return (IDiffractionMetadata)mdImage;
 	}
 
