@@ -135,6 +135,7 @@ public class RegionArea extends PlotArea {
 		});
 	}
 	
+	private boolean requirePositionWithCursor=true;
     private Cursor positionCursor;
 	/**
 	 * Whenever cursor is NONE we show intensity info.
@@ -142,6 +143,7 @@ public class RegionArea extends PlotArea {
 	 */
 	protected void createPositionCursor(MouseEvent me) {
 		
+		if (!requirePositionWithCursor) return;
 		if (!containsMouse)  {
 			setCursor(null);
 			return;
@@ -514,25 +516,6 @@ public class RegionArea extends PlotArea {
 		final Collection<AbstractSelectionRegion> vals = regions.values();
 		return new ArrayList<AbstractSelectionRegion>(vals);
 	}
-	
-//	private Image rawImage;
-	
-//	@Override
-//	protected void paintClientArea(final Graphics graphics) {
-	
-// TODO
-//		if (rawImage==null) {
-//			rawImage = new Image(Display.getCurrent(), "C:/tmp/ESRF_Pilatus_Data.png");
-//		}
-//		
-//		final Rectangle bounds = getBounds();
-//		final Image scaled = new Image(Display.getCurrent(),
-//				rawImage.getImageData().scaledTo(bounds.width,bounds.height));
-//		graphics.drawImage(scaled, new Point(0,0));
-//
-//		super.paintClientArea(graphics);
-//
-//	}
 
 	public Collection<String> getRegionNames() {
 		return regions.keySet();
@@ -629,6 +612,14 @@ public class RegionArea extends PlotArea {
 
 	XYRegionGraph getRegionGraph() {
 		return (XYRegionGraph)xyGraph;
+	}
+
+	public boolean isRequirePositionWithCursor() {
+		return requirePositionWithCursor;
+	}
+
+	public void setRequirePositionWithCursor(boolean requirePositionWithCursor) {
+		this.requirePositionWithCursor = requirePositionWithCursor;
 	}
 
 }
