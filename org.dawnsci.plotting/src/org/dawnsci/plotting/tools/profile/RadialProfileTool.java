@@ -7,7 +7,6 @@ import javax.vecmath.Vector3d;
 import org.dawb.common.services.ILoaderService;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
-import org.dawb.gda.extensions.loaders.H5Utils;
 import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.trace.IImageTrace;
@@ -394,12 +393,12 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 		
 			AbstractDataset integral = profile[0];
 			integral.setName("radial_"+region.getName().replace(' ', '_'));     
-			H5Utils.appendDataset(slice.getFile(), slice.getParent(), integral);
+			slice.appendData(integral);
 			
 		    if (profile.length>=3 && profile[2]!=null && sroi.hasSeparateRegions()) {
 				final AbstractDataset reflection = profile[2];
 				reflection.setName("radial_sym_"+region.getName().replace(' ', '_'));     
-				H5Utils.appendDataset(slice.getFile(), slice.getParent(), reflection);
+				slice.appendData(reflection);
 		    }
 		}
 		return new DataReductionInfo(Status.OK_STATUS);
