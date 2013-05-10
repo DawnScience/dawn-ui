@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.dawb.common.ui.editors.IDatasetEditor;
 import org.dawb.common.ui.util.CSVUtils;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.util.GridUtils;

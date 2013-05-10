@@ -16,10 +16,10 @@ import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
 import org.dawb.common.ui.util.EclipseUtils;
-import org.dawb.gda.extensions.loaders.H5Utils;
 import org.dawb.hdf5.IHierarchicalDataFile;
 import org.dawb.hdf5.Nexus;
 import org.dawb.hdf5.nexus.NexusUtils;
+import org.dawnsci.io.h5.H5Utils;
 import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.api.annotation.AnnotationUtils;
 import org.dawnsci.plotting.api.annotation.IAnnotation;
@@ -291,7 +291,7 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 		final double[] p2 = roi.getEndPoint();
 
 		AbstractDataset x  = slice.getAxes()!=null && !slice.getAxes().isEmpty()
-				           ? slice.getAxes().get(0)
+				           ? (AbstractDataset)slice.getAxes().get(0)
 				           : IntegerDataset.arange(slice.getData().getSize(), AbstractDataset.INT32);
 
 		AbstractDataset[] a= FittingUtils.xintersection(x,slice.getData(),p1[0],p2[0]);

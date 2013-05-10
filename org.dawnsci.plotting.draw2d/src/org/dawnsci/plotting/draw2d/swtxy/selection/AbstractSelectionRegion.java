@@ -225,7 +225,7 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	 * Remove from graph and remove all RegionBoundsListeners.
 	 * 
 	 */
-	public final void remove() {
+	public void remove() {
 		clearListeners();
 		if (coords!=null) coords.dispose();
 		if (getParent()!=null) getParent().remove(this);

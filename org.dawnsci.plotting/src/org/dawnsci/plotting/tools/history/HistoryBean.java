@@ -343,7 +343,7 @@ class HistoryBean {
 			this.expression = null;
 			return;
 		} else {
-			expression = service.createExpressionObject(variableManager, "");
+			expression = service.createExpressionObject(variableManager, null, "");
 		}
 	}
 

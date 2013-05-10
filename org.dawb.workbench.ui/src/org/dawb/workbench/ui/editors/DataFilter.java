@@ -11,6 +11,7 @@ package org.dawb.workbench.ui.editors;
 
 import java.util.Arrays;
 
+import org.dawb.common.ui.editors.ICheckableObject;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
@@ -32,7 +33,7 @@ class DataFilter extends ViewerFilter {
 			return true;
 		}
 
-		final String dsName = ((CheckableObject)element).getName();
+		final String dsName = ((ICheckableObject)element).getName();
 		final String name   = dsName.toLowerCase();
 
 		if (name==null || "".equals(name)) return true;

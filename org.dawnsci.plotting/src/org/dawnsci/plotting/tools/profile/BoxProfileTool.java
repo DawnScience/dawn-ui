@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
-import org.dawb.gda.extensions.loaders.H5Utils;
 import org.dawnsci.plotting.api.axis.IAxis;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -133,11 +132,11 @@ public class BoxProfileTool extends ProfileTool {
 			
 			final AbstractDataset x_intensity = box[0];
 			x_intensity.setName("X_"+region.getName().replace(' ', '_'));
-			H5Utils.appendDataset(slice.getFile(), slice.getParent(), x_intensity);
+			slice.appendData(x_intensity);
 			
 			final AbstractDataset y_intensity = box[1];
 			y_intensity.setName("Y_"+region.getName().replace(' ', '_'));
-			H5Utils.appendDataset(slice.getFile(), slice.getParent(), y_intensity);
+			slice.appendData(y_intensity);
 		}
 		 
         return new DataReductionInfo(Status.OK_STATUS);

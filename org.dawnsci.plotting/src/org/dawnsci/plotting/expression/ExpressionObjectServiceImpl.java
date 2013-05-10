@@ -1,8 +1,14 @@
 package org.dawnsci.plotting.expression;
 
+import java.util.List;
+
 import org.dawb.common.services.IExpressionObject;
 import org.dawb.common.services.IExpressionObjectService;
 import org.dawb.common.services.IVariableManager;
+import org.dawb.common.ui.util.EclipseUtils;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.services.AbstractServiceFactory;
 import org.eclipse.ui.services.IServiceLocator;
 
@@ -11,8 +17,8 @@ import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 public class ExpressionObjectServiceImpl extends AbstractServiceFactory implements IExpressionObjectService {
 
 	@Override
-	public IExpressionObject createExpressionObject(IVariableManager manager, String expression) {
-		return new ExpressionObject(manager, expression);
+	public IExpressionObject createExpressionObject(IVariableManager manager, String expressionName, String expression) {
+		return new ExpressionObject(manager, expressionName, expression);
 	}
 	
 	@Override
@@ -50,6 +56,34 @@ public class ExpressionObjectServiceImpl extends AbstractServiceFactory implemen
 			return new ExpressionObjectServiceImpl();
 		} 
 		return null;
+	}
+	
+	/**
+	 * 
+	 * @param sourcePath, may be null
+	 * @return
+	 * @throws Exception
+	 */
+	@Override
+	public List<IExpressionObject> getActiveExpressions(String sourcePath) throws Exception {
+		
+	    final IWorkbenchPage page = EclipseUtils.getPage();
+	    final IViewPart dataPart  = page.findView("org.dawb.workbench.views.dataSetView");
+	    if (dataPart!=null) {
+	    	final IFile currentData = (IFile)dataPart.getAdapter(IFile.class);
+	    	
+	    	sourcePath = sourcePath!=null ? sourcePath.replace('\\','/') : null;
+	    	if (currentData!=null && sourcePath!=null) {
+	    		final String curPath = currentData.getLocation().toOSString();
+	    		if (curPath!=null && curPath.replace('\\','/').equals(sourcePath)) {
+	    			return (List<IExpressionObject>)dataPart.getAdapter(List.class);
+	    		}
+	    	} else if (sourcePath==null) {
+	    		return (List<IExpressionObject>)dataPart.getAdapter(List.class);
+	    	}
+	    }
+	    
+	    return null;
 	}
 
 }

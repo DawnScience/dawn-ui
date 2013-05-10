@@ -3,9 +3,12 @@ package org.dawnsci.plotting.tools.masking;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.dawb.common.ui.image.ShapeType;
+import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.axis.IAxis;
@@ -14,6 +17,7 @@ import org.dawnsci.plotting.preference.PlottingConstants;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.operations.DefaultOperationHistory;
 import org.eclipse.core.commands.operations.IOperationHistory;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
@@ -113,70 +117,85 @@ public class MaskObject {
 	 * @param loc
 	 * @param system
 	 */
-	public void process(final Point loc, final IPlottingSystem system) {
+	public void process(final Point finishLocation, final IPlottingSystem system, IProgressMonitor monitor) {
 				
 		ShapeType penShape = ShapeType.valueOf(Activator.getDefault().getPreferenceStore().getString(PlottingConstants.MASK_PEN_SHAPE));
         if (penShape==ShapeType.NONE) return;
         
 		createMaskIfNeeded();
        
-		boolean maskOut       = Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.MASK_PEN_MASKOUT);
-        final int     penSize = Activator.getDefault().getPreferenceStore().getInt(PlottingConstants.MASK_PEN_SIZE);
+		boolean maskOut        = Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.MASK_PEN_MASKOUT);
+        final int     penSize  = Activator.getDefault().getPreferenceStore().getInt(PlottingConstants.MASK_PEN_SIZE);
         final int     rad1     = (int)Math.ceil(penSize/2f);
         final int     rad2     = (int)Math.floor(penSize/2f);
 
         final IAxis xAxis = system.getSelectedXAxis();
         final IAxis yAxis = system.getSelectedYAxis();
 
-        final List<int[]> span = new ArrayList<int[]>(3);
-        Display.getDefault().syncExec(new Runnable() {
-        	public void run() {
-        		span.add(new int[]{(int)xAxis.getPositionValue(loc.x-rad2), (int)yAxis.getPositionValue(loc.y-rad2)});
-        		span.add(new int[]{(int)xAxis.getPositionValue(loc.x+rad1), (int)yAxis.getPositionValue(loc.y+rad1)});
-        		span.add(new int[]{(int)xAxis.getPositionValue(loc.x),      (int)yAxis.getPositionValue(loc.y)});
-        	}
-        });
-        int[]  start = normalize(span.get(0));
-        int[]  end   = normalize(span.get(1));
-        int[]  cen   = span.get(2);
-        int[]  b     = new int[]{cen[0], start[1]};
-        int radius   = end[1]-cen[1];
-
-        boolean mv = maskOut ? Boolean.FALSE : Boolean.TRUE;
-        
-        final int maximumMaskPoints = (end[1]-start[1]+1)*(end[0]-start[0]+1);
-        
-        MaskOperation op = new MaskOperation(maskDataset, maximumMaskPoints);
-        for (int y = start[1]; y<=end[1]; ++y) {
-        	for (int x = start[0]; x<=end[0]; ++x) {
-        		if (penShape==ShapeType.SQUARE) {
-        			toggleMask(op, mv, y, x);
-
-        		} else if (penShape==ShapeType.CIRCLE || penSize<3) {
-        			double r = Math.hypot(x - cen[0], y - cen[1]);
-                    if (r<=radius) {
-                    	toggleMask(op, mv, y, x);
-                    }
-                    
-        		} else if (penShape==ShapeType.TRIANGLE) {
-
-           			if (x <= b[0] ) { // px<=bx
-           				double real = y-start[1];
-           				double dash = 2*(x-start[0]);
-        				if (real>dash) {
-        					toggleMask(op, mv, y, 2*cen[0]-x-(cen[0]-start[0]));
-        				}
-        			} else { // px>bx
-        				double real = y-start[1];
-           				double dash = 2*(x-cen[0]);
-        				if (real>dash) {
-        					toggleMask(op, mv, y, x);
-        				}
-        			}
-       			
-        		}
-        	}
+        final Point startLocation = ((AbstractPlottingSystem)system).getShiftPoint();
+        final Collection<Point> locations;
+        if (startLocation==null) {
+        	locations = new HashSet<Point>(7);
+        	locations.add(finishLocation);
+        } else {
+        	locations = lineBresenham(startLocation, finishLocation);
         }
+        
+        MaskOperation op = new MaskOperation(maskDataset, 300);
+        
+        for (final Point loc : locations) {
+        	
+	        monitor.worked(1);
+	        
+	        final List<int[]> span = new ArrayList<int[]>(3);
+	        Display.getDefault().syncExec(new Runnable() {
+	        	public void run() {
+	        		span.add(new int[]{(int)xAxis.getPositionValue(loc.x-rad2), (int)yAxis.getPositionValue(loc.y-rad2)});
+	        		span.add(new int[]{(int)xAxis.getPositionValue(loc.x+rad1), (int)yAxis.getPositionValue(loc.y+rad1)});
+	        		span.add(new int[]{(int)xAxis.getPositionValue(loc.x),      (int)yAxis.getPositionValue(loc.y)});
+	        	}
+	        });
+	        int[]  start = normalize(span.get(0));
+	        int[]  end   = normalize(span.get(1));
+	        int[]  cen   = span.get(2);
+	        int[]  b     = new int[]{cen[0], start[1]};
+	        int radius   = end[1]-cen[1];
+	
+	        boolean mv = maskOut ? Boolean.FALSE : Boolean.TRUE;
+	        
+	        for (int y = start[1]; y<=end[1]; ++y) {
+	        	for (int x = start[0]; x<=end[0]; ++x) {
+	        		       		
+	        		if (penShape==ShapeType.SQUARE) {
+	        			toggleMask(op, mv, y, x);
+	
+	        		} else if (penShape==ShapeType.CIRCLE || penSize<3) {
+	        			
+	        			double r = Math.hypot(x - cen[0], y - cen[1]);
+	                    if (r<=radius) {
+	                    	toggleMask(op, mv, y, x);
+	                    }
+	                    
+	        		} else if (penShape==ShapeType.TRIANGLE) {
+	
+	           			if (x <= b[0] ) { // px<=bx
+	           				double real = y-start[1];
+	           				double dash = 2*(x-start[0]);
+	        				if (real>dash) {
+	        					toggleMask(op, mv, y, 2*cen[0]-x-(cen[0]-start[0]));
+	        				}
+	        			} else { // px>bx
+	        				double real = y-start[1];
+	           				double dash = 2*(x-cen[0]);
+	        				if (real>dash) {
+	        					toggleMask(op, mv, y, x);
+	        				}
+	        			}
+	       			
+	        		}
+	        	}
+	        }
+       }
         
         try {
         	if (op.getSize()>0) operationManager.execute(op, null, null);
@@ -184,6 +203,59 @@ public class MaskObject {
 			logger.error("Problem processing mask draw.", e);
 		}
 	}
+	
+	private final static Collection<Point> lineBresenham(Point from, Point to) {
+		
+		
+		int x0 =from.x, x1 = to.x, y0 = from.y, y1 = to.y;
+		int dy = y1 - y0;
+		int dx = x1 - x0;
+		int stepx, stepy;
+
+		if (dy < 0) {
+			dy = -dy;
+			stepy = -1;
+		} else {
+			stepy = 1;
+		}
+		if (dx < 0) {
+			dx = -dx;
+			stepx = -1;
+		} else {
+			stepx = 1;
+		}
+		dy <<= 1; // dy is now 2*dy
+		dx <<= 1; // dx is now 2*dx
+
+		final List<Point> ret = new ArrayList<Point>(31);
+		ret.add(new Point(x0, y0));
+		if (dx > dy) {
+			int fraction = dy - (dx >> 1); // same as 2*dy - dx
+			while (x0 != x1) {
+				if (fraction >= 0) {
+					y0 += stepy;
+					fraction -= dx; // same as fraction -= 2*dx
+				}
+				x0 += stepx;
+				fraction += dy; // same as fraction -= 2*dy
+				ret.add(new Point(x0, y0));
+			}
+		} else {
+			int fraction = dx - (dy >> 1);
+			while (y0 != y1) {
+				if (fraction >= 0) {
+					x0 += stepx;
+					fraction -= dy;
+				}
+				y0 += stepy;
+				fraction += dx;
+				ret.add(new Point(x0, y0));
+			}
+		}
+		
+		return ret;
+	}
+
 
 	/**
 	 * Toggles a pixel and adds the pixels toggled state to the
@@ -222,8 +294,8 @@ public class MaskObject {
 	 * @param region
 	 * @return
 	 */
-	public boolean process(IRegion region) {
-        return process(null, null, Arrays.asList(new IRegion[]{region}));
+	public boolean process(IRegion region, IProgressMonitor monitor) {
+        return process(null, null, Arrays.asList(new IRegion[]{region}), monitor);
 	}
 
 	/**
@@ -236,7 +308,7 @@ public class MaskObject {
 	 * @param max
 	 * @return
 	 */
-	public boolean process(final Number min, final Number max, Collection<IRegion> regions) {
+	public boolean process(final Number min, final Number max, Collection<IRegion> regions, final IProgressMonitor monitor) {
 
 		boolean tmp = true;
 		if (max == null && min == null) {
@@ -245,6 +317,7 @@ public class MaskObject {
 		final boolean requireMinMax = tmp;
 		
 		createMaskIfNeeded();
+		monitor.worked(1);
 		
 		// Remove invalid regions first to make processing faster.
 		final List<IRegion> validRegions = regions!=null?new ArrayList<IRegion>(regions.size()):null;
@@ -266,6 +339,7 @@ public class MaskObject {
 					boolean isValid = isValid(val,min,max);
 					if (!isValid) toggleMask(op, Boolean.FALSE, y, x); // false = masked
 				}
+				monitor.worked(1);
 			}
 		} else if (validRegions!=null){
 			Display.getDefault().syncExec(new Runnable() {
@@ -278,6 +352,7 @@ public class MaskObject {
 								if (!isValid) toggleMask(op, Boolean.FALSE, y, x); // false = masked
 							}
 							if (validRegions!=null) for (IRegion region : validRegions) {
+								monitor.worked(1);
 								try {
 									if (region.containsPoint(x, y)) {
 										toggleMask(op, !region.isMaskRegion(), y, x);

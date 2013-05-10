@@ -16,12 +16,13 @@ import java.util.List;
 
 import org.dawb.common.services.IExpressionObject;
 import org.dawb.common.services.IVariableManager;
+import org.dawb.common.ui.editors.ICheckableObject;
+import org.dawb.common.ui.editors.IDatasetEditor;
+import org.dawb.common.ui.editors.IPlotUpdateParticipant;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.slicing.SliceComponent;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.workbench.ui.editors.CheckableObject;
-import org.dawb.workbench.ui.editors.IDatasetEditor;
-import org.dawb.workbench.ui.editors.IPlotUpdateParticipant;
 import org.dawb.workbench.ui.editors.PlotDataComponent;
 import org.dawnsci.plotting.api.PlotType;
 import org.eclipse.core.resources.IFile;
@@ -157,8 +158,8 @@ public class PlotDataPage extends Page implements IPlotUpdateParticipant, IAdapt
 									logger.error("Cannot refresh "+content, e);
 								}
 								editor.setInput(new FileEditorInput(content));
-								final List<CheckableObject> sels = dataSetComponent.getSelections();
-								if (sels!=null) editor.updatePlot(sels.toArray(new CheckableObject[sels.size()]), PlotDataPage.this, false);
+								final List<ICheckableObject> sels = dataSetComponent.getSelections();
+								if (sels!=null) editor.updatePlot(sels.toArray(new ICheckableObject[sels.size()]), PlotDataPage.this, false);
 							}
 						});
 					}
@@ -208,12 +209,12 @@ public class PlotDataPage extends Page implements IPlotUpdateParticipant, IAdapt
 	}
 
 	@Override
-	public int getDimensionCount(CheckableObject checkableObject) {
+	public int getDimensionCount(ICheckableObject checkableObject) {
 		return dataSetComponent.getActiveDimensions(checkableObject, true);
 	}
 
 	@Override
-	public void setSlicerData(CheckableObject object, String filePath, int[] dims,
+	public void setSlicerData(ICheckableObject object, String filePath, int[] dims,
 			                  AbstractPlottingSystem plottingSystem) {
 		
 		if (object.isExpression()) {
@@ -245,7 +246,7 @@ public class PlotDataPage extends Page implements IPlotUpdateParticipant, IAdapt
 			return "Data";
 		} else if (type == List.class) {
 			final List<IExpressionObject> exprs = new ArrayList<IExpressionObject>();
-			for (CheckableObject ob : dataSetComponent.getData()) {
+			for (ICheckableObject ob : dataSetComponent.getData()) {
 				if (ob.getExpression()!=null) {
 					exprs.add(ob.getExpression());
 				}

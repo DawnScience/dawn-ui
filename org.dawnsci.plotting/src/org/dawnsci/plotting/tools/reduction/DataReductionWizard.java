@@ -11,8 +11,8 @@ import ncsa.hdf.object.Group;
 
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
-import org.dawb.common.ui.plot.tools.IDataReductionToolPage.DataReductionSlice;
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage.DataReductionInfo;
+import org.dawb.common.ui.plot.tools.IDataReductionToolPage.DataReductionSlice;
 import org.dawb.common.ui.slicing.DimsDataList;
 import org.dawb.common.ui.slicing.SliceUtils;
 import org.dawb.common.ui.util.EclipseUtils;
@@ -54,6 +54,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
 import uk.ac.diamond.scisoft.analysis.io.DataHolder;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
@@ -173,7 +174,7 @@ public class DataReductionWizard extends Wizard implements IExportWizard {
 							 final SliceObject so = slices.get(0);
 							 so.setPath(source.getLocation().toOSString());
 							 so.setName(path);
-							 final List<AbstractDataset> axes = getAxes(so, monitor);
+							 final List<IDataset> axes = getAxes(so, monitor);
 
 							 // Iterate slice data
 							 Object userData = null;
@@ -246,18 +247,18 @@ public class DataReductionWizard extends Wizard implements IExportWizard {
 		 return true;
 	}
 	
-	protected final List<AbstractDataset> getAxes(SliceObject slice, IProgressMonitor monitor) throws Exception {
+	protected final List<IDataset> getAxes(SliceObject slice, IProgressMonitor monitor) throws Exception {
 		
 		slice.setNexusAxes(nexusAxes);
 		if (slice.getNexusAxes()==null || slice.getNexusAxes().isEmpty()) return null;
 		int[] shape = slice.getSlicedShape();
 		if (shape.length==1) {
-			final AbstractDataset x = SliceUtils.getNexusAxis(slice, shape[0], slice.getX()+1, false, monitor);
+			final IDataset x = SliceUtils.getNexusAxis(slice, shape[0], slice.getX()+1, false, monitor);
 			if (x==null) return null;
 			return Arrays.asList(x);
 		} else if (shape.length==2) {
-			final AbstractDataset x = SliceUtils.getNexusAxis(slice, shape[1], slice.getX()+1, false, monitor);
-			final AbstractDataset y = SliceUtils.getNexusAxis(slice, shape[0], slice.getY()+1, false, monitor);
+			final IDataset x = SliceUtils.getNexusAxis(slice, shape[1], slice.getX()+1, false, monitor);
+			final IDataset y = SliceUtils.getNexusAxis(slice, shape[0], slice.getY()+1, false, monitor);
 			return Arrays.asList(x,y);
 		}
 		return null;

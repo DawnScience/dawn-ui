@@ -1,12 +1,16 @@
 package org.dawnsci.plotting.draw2d.swtxy.selection;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.dawnsci.plotting.api.region.MouseListener;
 import org.dawnsci.plotting.api.region.MouseMotionListener;
 import org.dawnsci.plotting.api.region.ROIEvent;
+import org.dawnsci.plotting.api.trace.ITraceContainer;
 import org.dawnsci.plotting.draw2d.swtxy.IMobileFigure;
+import org.dawnsci.plotting.draw2d.swtxy.RegionArea;
 import org.dawnsci.plotting.draw2d.swtxy.translate.FigureTranslator;
 import org.dawnsci.plotting.draw2d.swtxy.util.Draw2DUtils;
 import org.eclipse.draw2d.ColorConstants;
@@ -41,11 +45,12 @@ class AxisSelection extends AbstractSelectionRegion {
 	private static final int WIDTH = 8;
 	
 	private LineFigure line1, line2;
-	private Figure connection;
-
+	private Figure     connection;
+	private RegionArea regionArea;
 	private RegionType regionType;
 
 	private org.eclipse.draw2d.MouseMotionListener mouseTrackListener;
+
 	
 	AxisSelection(String name, ICoordinateSystem coords, RegionType regionType) {
 		super(name, coords);
@@ -61,7 +66,8 @@ class AxisSelection extends AbstractSelectionRegion {
 	@Override
 	public void createContents(final Figure parent) {
 		
-     	this.line1  = new LineFigure(true,  parent.getBounds());
+		this.regionArea  = (RegionArea)parent;
+     	this.line1       = new LineFigure(true,  parent.getBounds());
      	
      	if (regionType==RegionType.XAXIS || regionType==RegionType.YAXIS) {
     	    this.line2  = new LineFigure(false, parent.getBounds());
@@ -120,6 +126,7 @@ class AxisSelection extends AbstractSelectionRegion {
         
         this.mouseTrackListener = new org.eclipse.draw2d.MouseMotionListener.Stub() {
         	
+        	private List<IFigure> extraFigures = new ArrayList<IFigure>();
         	/**
     		 * @see org.eclipse.draw2d.MouseMotionListener#mouseMoved(MouseEvent)
     		 */
@@ -141,6 +148,11 @@ class AxisSelection extends AbstractSelectionRegion {
     		 * @see org.eclipse.draw2d.MouseMotionListener#mouseEntered(MouseEvent)
     		 */
     		public void mouseEntered(MouseEvent me) {
+    			final IFigure into = parent.findFigureAt(me.getLocation());
+    			if (into instanceof ITraceContainer || into == parent) {
+    				for (IFigure figure : extraFigures) figure.removeMouseMotionListener(this);
+    				extraFigures.clear();
+    			}
     			setVisible(true);
     		}
 
@@ -148,7 +160,14 @@ class AxisSelection extends AbstractSelectionRegion {
     		 * @see org.eclipse.draw2d.MouseMotionListener#mouseExited(MouseEvent)
     		 */
     		public void mouseExited(MouseEvent me) {
-    			setVisible(false);
+    			
+    			final IFigure into = parent.findFigureAt(me.getLocation());
+    			if (into==null) {
+    				setVisible(false);
+    			} else if (into!=AxisSelection.this && (AxisSelection.this).line1!=into && into != parent){
+    				extraFigures.add(into);
+    				into.addMouseMotionListener(this);
+    			}
     			fireROIChanged(getROI());
     		}
 
@@ -394,6 +413,7 @@ class AxisSelection extends AbstractSelectionRegion {
        
 		if (line1!=null) {
 			if (isTrackMouse()) {
+				regionArea.setRequirePositionWithCursor(false);
 				line1.setEnabled(false);// This stops the figure being part of mouse listeners
 				line1.getParent().addMouseMotionListener(mouseTrackListener);
 	        	line1.getParent().setCursor(Cursors.CROSS);
@@ -401,6 +421,7 @@ class AxisSelection extends AbstractSelectionRegion {
 	        	if (connection!=null) connection.setCursor(null);
 	        	line1.setMotile(false); // Not moved by the user, moved by the mouse position.
 	        } else {
+				regionArea.setRequirePositionWithCursor(true);
 	        	line1.getParent().removeMouseMotionListener(mouseTrackListener);
 	        	line1.getParent().setCursor(null);
 	        	line1.setEnabled(true);// This starts the figure part of mouse listeners
@@ -445,5 +466,11 @@ class AxisSelection extends AbstractSelectionRegion {
 	@Override
 	public int getMaximumMousePresses() {
 		return 2;
+	}
+	
+	public final void remove() {
+        super.remove();
+        regionArea.setRequirePositionWithCursor(true);
+        regionArea = null;
 	}
 }
