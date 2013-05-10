@@ -206,7 +206,6 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		};
 		this.maskJob = new MaskJob();
 		maskJob.setPriority(Job.INTERACTIVE);
-		maskJob.setSystem(true);
 		maskJob.setUser(false);
 	}
 
@@ -236,7 +235,10 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			maskJob.schedule(false, null, me.getLocation());
 		}
 		@Override
-		public void mouseReleased(org.eclipse.draw2d.MouseEvent me) { }
+		public void mouseReleased(org.eclipse.draw2d.MouseEvent me) {
+			// record shift point
+			((AbstractPlottingSystem)getPlottingSystem()).setShiftPoint(me.getLocation());
+		}
 
 		@Override
 		public void mouseDoubleClicked(org.eclipse.draw2d.MouseEvent me) { }
@@ -414,6 +416,11 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		createDirectToolbarActions(directToolbar);
 		Control          tb         = directToolbar.createControl(directComp);
 		tb.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, false));
+		
+		new Label(directComp, SWT.NONE);
+		final Label shiftLabel = new Label(directComp, SWT.WRAP);
+		shiftLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, true, false));
+		shiftLabel.setText("(Hold down the 'shift' key to draw lines.)");
      
 		// Regions
 		final Composite        regionComp = new Composite(drawContent, SWT.NONE);
@@ -1029,7 +1036,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	private static final Collection<RegionType> maskingTypes;
 	static {
 		maskingTypes = new ArrayList<RegionType>(6);
-		maskingTypes.add(RegionType.FREE_DRAW);
+		//maskingTypes.add(RegionType.FREE_DRAW);
 		maskingTypes.add(RegionType.RING);
 		maskingTypes.add(RegionType.BOX);
 		maskingTypes.add(RegionType.LINE);
@@ -1056,20 +1063,20 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		// Region actions supported
 		ActionContributionItem menu  = (ActionContributionItem)getPlottingSystem().getActionBars().getMenuManager().find("org.dawb.workbench.ui.editors.plotting.swtxy.addRegions");
 		MenuAction        menuAction = (MenuAction)menu.getAction();	
-		IAction fd = null;
+		IAction ld = null;
 		for (RegionType type : maskingTypes) {
 			final IAction action = menuAction.findAction(type.getId());
 			if (action==null) continue;
 			man.add(action);
 			
-			if (type==RegionType.FREE_DRAW) {
-				fd = action;
+			if (type==RegionType.LINE) {
+				ld = action;
 				man.add(new Separator());
 			}
 		}
 		
 		CheckableActionGroup group = new CheckableActionGroup();
-		final IAction freeDraw = fd;
+		final IAction lineDraw = ld;
 		
 		final int maxWidth = 10;
 		for (int iwidth = 1; iwidth <= maxWidth; iwidth++) {
@@ -1079,7 +1086,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 				public void run() {
 					Activator.getDefault().getPreferenceStore().setValue(PlottingConstants.FREE_DRAW_WIDTH, width);
 					widthChoice.setSelectedAction(this);
-					freeDraw.run();
+					lineDraw.run();
 				}
 			};
 			
@@ -1226,6 +1233,8 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			((AbstractPlottingSystem)getPlottingSystem()).removeMouseClickListener(clickListener);
 			((AbstractPlottingSystem)getPlottingSystem()).removeMouseMotionListener(clickListener);
 			((AbstractPlottingSystem)getPlottingSystem()).setSelectedCursor(null);
+			((AbstractPlottingSystem)getPlottingSystem()).setShiftPoint(null);
+
 		}
 	}
 	
@@ -1260,6 +1269,8 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		protected IStatus run(final IProgressMonitor monitor) {
 				
 			try {
+				
+				monitor.beginTask("Mask Process", 100);
 				final IImageTrace image = getImageTrace();
 				if (image == null) return Status.CANCEL_STATUS;
 				
@@ -1285,18 +1296,20 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 				// Keep the saved mask
 				if (autoApplySavedMask && savedMask!=null) maskObject.process(savedMask);
 				
+				monitor.worked(1);
+				
 				// Just process a changing region
 				if (location!=null) {
-					maskObject.process(location, getPlottingSystem());
+					maskObject.process(location, getPlottingSystem(), monitor);
 					
 				} else if (region!=null) {
 					if (!maskObject.isSupportedRegion(region)) return Status.CANCEL_STATUS;
-					maskObject.process(region);
+					maskObject.process(region, monitor);
 					
 					
 				} else { // process everything
 					
-					maskObject.process(min, max, isRegionsEnabled?getPlottingSystem().getRegions():null);
+					maskObject.process(min, max, isRegionsEnabled?getPlottingSystem().getRegions():null, monitor);
 					
 				}
 				
@@ -1316,6 +1329,8 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			} catch (Throwable ne) {
 				logger.error("Cannot mask properly at the edges as yet!", ne);
 				return Status.CANCEL_STATUS;
+			} finally {
+				monitor.done();
 			}
 		}
 

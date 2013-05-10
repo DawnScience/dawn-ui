@@ -1,5 +1,6 @@
 package org.dawnsci.plotting.draw2d.swtxy;
 
+import java.awt.Color;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -22,17 +23,19 @@ import org.dawnsci.plotting.api.axis.IPositionListener;
 import org.dawnsci.plotting.api.axis.PositionEvent;
 import org.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
 import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.region.IRegionListener;
 import org.dawnsci.plotting.api.region.RegionEvent;
-import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.ITraceListener;
 import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.dawnsci.plotting.draw2d.swtxy.selection.SelectionRegionFactory;
+import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.MouseEvent;
 import org.eclipse.draw2d.MouseMotionListener;
+import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -102,12 +105,25 @@ public class RegionArea extends PlotArea {
 		if (positionListeners==null) return;
 		positionListeners.remove(l);
 	}
+	
+	private Point   shiftPoint;
+	private Point   toPoint;
+    private boolean shiftDown;
 
 	@Override
 	protected void paintClientArea(final Graphics graphics) {
 		super.paintClientArea(graphics);
 		
-		
+		if (shiftPoint!=null && toPoint!=null && shiftDown && getSelectedCursor()!=null) {
+			graphics.pushState();
+			graphics.setForegroundColor(ColorConstants.white);
+			graphics.setLineDash(new int[]{1,1});
+			graphics.drawLine(shiftPoint.x, shiftPoint.y, toPoint.x, toPoint.y);
+			graphics.setLineDash(new int[]{2,2});
+			graphics.setForegroundColor(ColorConstants.black);
+			graphics.drawLine(shiftPoint.x, shiftPoint.y, toPoint.x, toPoint.y);
+			graphics.popState();
+		}
 	}
 
 	public void setStatusLineManager(final IStatusLineManager statusLine) {
@@ -373,6 +389,7 @@ public class RegionArea extends PlotArea {
 	}
 	
 	private Cursor internalCursor;
+
 	public void setCursor(Cursor cursor) {
 		
 		try {
@@ -620,6 +637,47 @@ public class RegionArea extends PlotArea {
 
 	public void setRequirePositionWithCursor(boolean requirePositionWithCursor) {
 		this.requirePositionWithCursor = requirePositionWithCursor;
+	}
+
+
+	public Point getShiftPoint() {
+		if (!shiftDown) return null;
+		return shiftPoint;
+	}
+
+	private MouseMotionListener motionListener;
+	public void setShiftPoint(Point point) {
+		
+		this.shiftPoint = point;
+		
+		if (shiftPoint==null && motionListener!=null) {
+			removeMouseMotionListener(motionListener);
+			motionListener = null;
+			
+		} else if (shiftPoint!=null && motionListener==null) {
+			
+			motionListener = new MouseMotionListener.Stub() {
+				public void mouseExited(MouseEvent me) {
+					toPoint = null;
+				}
+				public void mouseMoved(MouseEvent me) {
+					toPoint = me.getLocation();
+					if (shiftPoint!=null && shiftDown){
+						repaint();
+					}
+				}
+			};
+			addMouseMotionListener(motionListener);
+		}
+	}
+
+	public boolean isShiftDown() {
+		return shiftDown;
+	}
+
+	public void setShiftDown(boolean shiftDown) {
+		this.shiftDown = shiftDown;
+		repaint();
 	}
 
 }

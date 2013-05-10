@@ -49,6 +49,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.draw2d.Cursors;
 import org.eclipse.draw2d.MouseListener;
 import org.eclipse.draw2d.MouseMotionListener;
+import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.swt.SWT;
@@ -1127,6 +1128,18 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		
 		if (isDisposed() || lightWeightViewer==null || lightWeightViewer.getXYRegionGraph()==null) return;
 		lightWeightViewer.setSelectedCursor(cursor);
+	}
+	
+	@Override
+	public void setShiftPoint(Point point) {
+		if (isDisposed() || lightWeightViewer==null || lightWeightViewer.getXYRegionGraph()==null) return;
+		lightWeightViewer.setShiftPoint(point);
+	}
+	
+	@Override
+	public Point getShiftPoint() {
+		if (isDisposed() || lightWeightViewer==null || lightWeightViewer.getXYRegionGraph()==null) return null;
+		return lightWeightViewer.getShiftPoint();
 	}
 	
 	@Override

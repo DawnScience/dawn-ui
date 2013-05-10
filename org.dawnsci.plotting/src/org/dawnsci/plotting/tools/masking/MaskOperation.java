@@ -1,7 +1,7 @@
 package org.dawnsci.plotting.tools.masking;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.operations.AbstractOperation;
@@ -30,13 +30,13 @@ public class MaskOperation extends AbstractOperation {
 	/**
 	 * Can be large!
 	 */
-	private List<MaskPoint> vertexList;
+	private Set<MaskPoint> vertexList;
 	private BooleanDataset  maskDataset;
 
-	public MaskOperation(BooleanDataset maskDataset, int maxSize) {
+	public MaskOperation(BooleanDataset maskDataset, int maxExpectedSize) {
 		super("Mask operation");
 		this.maskDataset = maskDataset;
-		this.vertexList  = new ArrayList<MaskPoint>(maxSize);
+		this.vertexList  = new HashSet<MaskPoint>(maxExpectedSize);
 		addContext(MASK_CONTEXT);
 	}
 
@@ -105,6 +105,17 @@ public class MaskOperation extends AbstractOperation {
 
 	public void addVertex(boolean mv, int y, int x) {
 		vertexList.add(new MaskPoint(mv, x, y));
+	}
+
+	/**
+	 * Fast, uses hashing algorithm
+	 * @param mv
+	 * @param y
+	 * @param x
+	 * @return
+	 */
+	public boolean isVertex(boolean mv, int y, int x) {
+		return vertexList.contains(new MaskPoint(mv, x, y));
 	}
 
 	public int getSize() {

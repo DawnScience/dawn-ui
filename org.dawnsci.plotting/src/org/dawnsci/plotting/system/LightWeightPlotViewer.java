@@ -374,6 +374,16 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
  						xyGraph.removeRegion((AbstractSelectionRegion)((IRegionContainer)fig).getRegion());
  					}
  				}
+				if (e.keyCode == 131072) { // SHIFT
+					xyGraph.getRegionArea().setShiftDown(true);
+				}
+			}
+			
+			@Override
+			public void keyReleased(KeyEvent e) {
+				if ((e.stateMask & SWT.SHIFT)==SWT.SHIFT) {
+					xyGraph.getRegionArea().setShiftDown(false);
+				}
 			}
 		};
 		return keyListener;
@@ -1237,6 +1247,14 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 
 	public void setKeepAspect(boolean checked){
 		xyGraph.setKeepAspect(checked);
+	}
+
+	public void setShiftPoint(org.eclipse.draw2d.geometry.Point point) {
+		xyGraph.getRegionArea().setShiftPoint(point);
+	}
+
+	public org.eclipse.draw2d.geometry.Point getShiftPoint() {
+		return xyGraph.getRegionArea().getShiftPoint();
 	}
 
 }
