@@ -39,14 +39,16 @@ import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
  */
 class ExpressionObject implements IExpressionObject {
 	
+	private String expressionName;
 	private String expressionString;
 	private IVariableManager provider;
 	private IExpressionEngine engine;
 	private Reference<ILazyDataset>    lazySet;
 	private Reference<AbstractDataset> dataSet;
 	
-	public ExpressionObject(final IVariableManager provider, String expression) {
+	public ExpressionObject(final IVariableManager provider, String expressionName, String expression) {
 		this.provider         = provider;
+		this.expressionName   = expressionName;
 		this.expressionString = expression;
 		
 		try {
@@ -55,9 +57,7 @@ class ExpressionObject implements IExpressionObject {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block, find out what happens when there is no service
 			e.printStackTrace();
-		}
-		
-		
+		}	
 	}
 
 	/**
@@ -80,6 +80,8 @@ class ExpressionObject implements IExpressionObject {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result
+				+ ((expressionName == null) ? 0 : expressionName.hashCode());
 		result = prime
 				* result
 				+ ((expressionString == null) ? 0 : expressionString.hashCode());
@@ -95,6 +97,11 @@ class ExpressionObject implements IExpressionObject {
 		if (getClass() != obj.getClass())
 			return false;
 		ExpressionObject other = (ExpressionObject) obj;
+		if (expressionName == null) {
+			if (other.expressionName != null)
+				return false;
+		} else if (!expressionName.equals(other.expressionName))
+			return false;
 		if (expressionString == null) {
 			if (other.expressionString != null)
 				return false;
@@ -296,6 +303,14 @@ class ExpressionObject implements IExpressionObject {
 	@Override
 	public Map<String, Object> getFunctions() {
 		return engine.getFunctions();
+	}
+
+	public String getExpressionName() {
+		return expressionName;
+	}
+
+	public void setExpressionName(String expressionName) {
+		this.expressionName = expressionName;
 	}
 	
 }

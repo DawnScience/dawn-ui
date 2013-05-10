@@ -46,6 +46,7 @@ public class CheckableObject implements H5Path, ICheckableObject{
 		expressionCount++;
 		this.variable   = "expr"+expressionCount;
 		this.service  = (IExpressionObjectService)PlatformUI.getWorkbench().getService(IExpressionObjectService.class);
+		expression2.setExpressionName(variable);
 	}
 
 	public static boolean isMementoKey(final String key) {
@@ -210,7 +211,10 @@ public class CheckableObject implements H5Path, ICheckableObject{
 	@Override
 	public void setVariable(String variable) {
 		this.variable = variable;
-		if (expression!=null) expression.clear();
+		if (expression!=null) {
+			expression.clear();
+			expression.setExpressionName(variable);
+		}
 	}
 	
 	private static final String DELIMITER = "£";
@@ -219,7 +223,7 @@ public class CheckableObject implements H5Path, ICheckableObject{
 	public void createExpression(IVariableManager psData, String mementoKey, String memento) {
 		final String[] parts = memento.split(DELIMITER);
 		this.variable   = parts[0];
-		this.expression = service.createExpressionObject(psData, parts[1]);
+		this.expression = service.createExpressionObject(psData, variable, parts[1]);
 	}
 	
 	@Override

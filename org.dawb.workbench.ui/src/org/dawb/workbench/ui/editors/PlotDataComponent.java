@@ -646,7 +646,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		public ExpressionEditingSupport(ColumnViewer viewer) {
 			super(viewer);
 			
-			IExpressionObject exObj = service.createExpressionObject(null,"");
+			IExpressionObject exObj = service.createExpressionObject(null,null,"");
 			
 			if (exObj != null) {
 				IContentProposalProvider contentProposalProvider = new ExpressionFunctionProposalProvider(exObj.getFunctions());
@@ -1504,7 +1504,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		if (!Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_VARNAME)) {
 		    Activator.getDefault().getPreferenceStore().setValue(EditorConstants.SHOW_VARNAME, true);
 		} 
-		final CheckableObject newItem = new CheckableObject(service.createExpressionObject(this, null));
+		final CheckableObject newItem = new CheckableObject(service.createExpressionObject(this, null, null));
 		data.add(newItem);
 		dataViewer.refresh();
 		try {

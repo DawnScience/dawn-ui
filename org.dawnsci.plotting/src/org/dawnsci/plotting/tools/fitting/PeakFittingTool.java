@@ -291,7 +291,7 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 		final double[] p2 = roi.getEndPoint();
 
 		AbstractDataset x  = slice.getAxes()!=null && !slice.getAxes().isEmpty()
-				           ? slice.getAxes().get(0)
+				           ? (AbstractDataset)slice.getAxes().get(0)
 				           : IntegerDataset.arange(slice.getData().getSize(), AbstractDataset.INT32);
 
 		AbstractDataset[] a= FittingUtils.xintersection(x,slice.getData(),p1[0],p2[0]);
