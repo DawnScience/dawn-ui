@@ -7,14 +7,14 @@
          point="org.eclipse.core.runtime.products">
       <product
             application="org.eclipse.ui.ide.workbench"
-            name="Dawn">
+            name="DAWN Science">
          <property
                name="appName"
-               value="Dawn">
+               value="DAWN Science">
          </property>
          <property
                name="startupForegroundColor"
-               value="000000">
+               value="0000FF">
          </property>
          <property
                name="startupMessageRect"
@@ -22,7 +22,7 @@
          </property>
          <property
                name="startupProgressRect"
-               value="0,245,600,15">
+               value="0,0,200,15">
          </property>
          <property
                name="preferenceCustomization"
@@ -34,11 +34,7 @@
          </property>
          <property
                name="aboutImage"
-               value="icons/Temp-48x48-icon.png">
-         </property>
-         <property
-               name="aboutText"
-               value="Welcome to Data Analysis Workbench&#x0D;&#x0A;the tools set for online data analysis&#x0D;&#x0A;Copyright, 2010 - 2013&#x0D;&#x0A;&#x0D;&#x0A;Please go to 'Installation Details' to get version.&#x0A;&#x0D;&#x0A;This version of Data Analysis Workbench is licensed under&#x0D;&#x0A;the Eclipse Public License version 1.0.&#x0D;&#x0A;&#x0D;&#x0A;Please see the license file in the installation directory and &#x0D;&#x0A;contact us if you cannot locate it. More details can be found at&#x0D;&#x0A;http://www.dawnsci.org&#x0D;&#x0A;&#x0D;&#x0A;Based on Eclipse, www.eclipse.org &#x0D;&#x0A;Uses: Java, GEF, Log4J, Passerelle&#x0D;&#x0A;&#x0D;&#x0A;Diamond Light Source and ESRF are registered trade marks &#x0D;&#x0A;All other trademarks are the property of their respective owners.">
+               value="icons/Temp-3Col-Splash.png">
          </property>
       </product>
    </extension>
