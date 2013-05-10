@@ -529,7 +529,6 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		final IToolBarManager toolMan = getSite().getActionBars().getToolBarManager();
 		final MenuManager     menuMan = new MenuManager();
 		
-		
 		final Action exportMeta = new Action("Export metadata to file", Activator.getImageDescriptor("icons/mask-export-wiz.png")) {
 			public void run() {
 				try {
@@ -586,8 +585,9 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 					viewer.refresh();
 			        resetExpansion();
 				} else {
-					createDiffractionModel(true);
 					model.reset();
+					createDiffractionModel(true);
+					viewer.refresh();
 				}
 			}
 		};
