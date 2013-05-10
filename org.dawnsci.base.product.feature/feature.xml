@@ -93,6 +93,10 @@
          id="org.embl.cca.dviewer.feature"
          version="0.0.0"/>
 
+   <includes
+         id="uk.ac.diamond.scisoft.icat.actors.feature"
+         version="0.0.0"/>
+
    <plugin
          id="uk.ac.diamond.scisoft.analysis.rcp.contributions"
          download-size="0"
