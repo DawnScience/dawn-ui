@@ -1,11 +1,11 @@
 package org.dawnsci.plotting.tools.diffraction;
 
-import org.dawnsci.persistence.metadata.diffraction.NexusDiffractionMetaReader;
 import org.dawnsci.plotting.preference.detector.DiffractionDetectorHelper;
 
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
 import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
+import uk.ac.diamond.scisoft.analysis.io.NexusDiffractionMetaReader;
 
 
 public class NexusDiffractionMetaCreator {
