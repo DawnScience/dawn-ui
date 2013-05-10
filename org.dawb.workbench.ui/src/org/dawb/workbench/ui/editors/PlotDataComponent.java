@@ -40,13 +40,13 @@ import org.dawb.common.util.io.FileUtils;
 import org.dawb.common.util.io.PropUtils;
 import org.dawb.common.util.io.SortingUtils;
 import org.dawb.common.util.list.SortNatural;
-import org.dawb.gda.extensions.loaders.H5Loader;
 import org.dawb.gda.extensions.util.DatasetTitleUtils;
 import org.dawb.workbench.ui.Activator;
 import org.dawb.workbench.ui.editors.preference.EditorConstants;
 import org.dawb.workbench.ui.editors.preference.EditorPreferencePage;
 import org.dawb.workbench.ui.expressions.ExpressionFunctionProposalProvider;
 import org.dawb.workbench.ui.expressions.TextCellEditorWithContentProposal;
+import org.dawnsci.io.h5.H5Loader;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.IPlottingSystemSelection;
 import org.dawnsci.plotting.api.PlotType;
@@ -1746,7 +1746,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	}
 
 	@Override
-	public Object getAdapter(Class adapter) {
+	public Object getAdapter(@SuppressWarnings("rawtypes") Class adapter) {
 		if (adapter==IPlottingSystem.class) {
 			return getPlottingSystem();
 		}

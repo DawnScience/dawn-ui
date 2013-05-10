@@ -229,6 +229,13 @@
             tooltip="A tool for normalising an image"
             visible="false">
       </plotting_tool_page>
+      <plotting_tool_page
+            class="org.dawnsci.plotting.tools.TestSelectionTool"
+            icon="icons/plot-tool-ellipse.png"
+            id="org.dawnsci.plotting.tools.testSelectionTool"
+            label="Test selection"
+            tooltip="A tool which sets selections.">
+      </plotting_tool_page>
    </extension>
    <extension
          point="org.eclipse.ui.views">
