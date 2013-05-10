@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
-import org.dawb.gda.extensions.loaders.H5Utils;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.trace.IImageTrace;
@@ -153,7 +152,7 @@ public class ZoomTool extends ProfileTool {
 											                       new int[] {yInc, xInc});
 			slice.setName(region.getName().replace(' ','_'));
 			
-			H5Utils.appendDataset(drslice.getFile(), drslice.getParent(), slice);
+			drslice.appendData(slice);
 		}
         return new DataReductionInfo(Status.OK_STATUS);
 

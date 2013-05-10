@@ -2,7 +2,6 @@ package org.dawnsci.plotting.tools.profile;
 
 import java.util.Collection;
 
-import org.dawb.gda.extensions.loaders.H5Utils;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.core.runtime.Status;
@@ -77,12 +76,12 @@ public class AzimuthalProfileTool extends SectorProfileTool {
 		
 			AbstractDataset integral = profile[1];
 			integral.setName("azimuthal_"+region.getName().replace(' ', '_'));     
-			H5Utils.appendDataset(slice.getFile(), slice.getParent(), integral);
+			slice.appendData(integral);
 			
 		    if (profile.length>=4 && profile[3]!=null && sroi.hasSeparateRegions()) {
 				final AbstractDataset reflection = profile[3];
 				reflection.setName("azimuthal_sym_"+region.getName().replace(' ', '_'));     
-				H5Utils.appendDataset(slice.getFile(), slice.getParent(), reflection);
+				slice.appendData(reflection);
 		    }
 		}
 		return new DataReductionInfo(Status.OK_STATUS);

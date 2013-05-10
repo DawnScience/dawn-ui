@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
-import org.dawb.gda.extensions.loaders.H5Utils;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.trace.IImageTrace;
@@ -98,8 +97,7 @@ public class LineProfileTool extends ProfileTool {
 			AbstractDataset[] profileData = ROIProfile.line(slice.getData(), (AbstractDataset)image.getMask(), (LinearROI)region.getROI(), 1d, false);
 			final AbstractDataset intensity = profileData[0];
 			intensity.setName(region.getName().replace(' ', '_'));
-			
-			H5Utils.appendDataset(slice.getFile(), slice.getParent(), intensity);
+			slice.appendData(intensity);
 		}
         return new DataReductionInfo(Status.OK_STATUS);
 	}
