@@ -18,7 +18,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.cheatsheets,
  org.eclipse.ui.ide,
  org.eclipse.jface.text,
- org.dawnsci.plotting.api;bundle-version="1.0.0"
+ org.dawnsci.plotting.api;bundle-version="1.0.0",
+ org.dawnsci.io;bundle-version="1.0.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: org.apache.commons.beanutils,
