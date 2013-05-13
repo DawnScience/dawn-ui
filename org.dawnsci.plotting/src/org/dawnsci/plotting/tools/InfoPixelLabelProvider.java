@@ -33,6 +33,7 @@ package org.dawnsci.plotting.tools;
 
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.TraceUtils;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -64,7 +65,7 @@ public class InfoPixelLabelProvider extends ColumnLabelProvider {
 
 	@Override
 	public String getText(Object element) {
-			
+		//TODO could use ToolPageRole on the tool to separate 1D and 2D cases better
 		double xIndex = 0.0;
 		double yIndex = 0.0;
 		double xLabel = Double.NaN;
@@ -94,9 +95,9 @@ public class InfoPixelLabelProvider extends ColumnLabelProvider {
 					}
 					
 				} else {
-					xIndex = tool.xValues[0];
-					yIndex = tool.yValues[0];
-					final double[] dp = new double[]{tool.xValues[0], tool.yValues[0]};
+					xIndex = tool.getXValues()[0];
+					yIndex = tool.getYValues()[0];
+					final double[] dp = new double[]{tool.getXValues()[0], tool.getXValues()[0]};
 					try {
 						if (trace!=null) trace.getPointInAxisCoordinates(dp);
 						xLabel = dp[0];
@@ -143,7 +144,7 @@ public class InfoPixelLabelProvider extends ColumnLabelProvider {
 				}
 			}
 							
-			final boolean isCustom = TraceUtils.isCustomAxes(trace);
+			final boolean isCustom = TraceUtils.isCustomAxes(trace)  || tool.getToolPageRole() == ToolPageRole.ROLE_1D;
 			
 			switch(column) {
 			case 0: // "Point Id"

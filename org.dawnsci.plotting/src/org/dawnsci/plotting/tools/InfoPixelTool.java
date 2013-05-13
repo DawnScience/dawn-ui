@@ -81,8 +81,8 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 	private TableViewer   viewer;
 	private RegionColorListener viewUpdateListener;
 	private Map<String,IROI> dragBounds;
-	public int xValues [] = new int[1];	
-	public int yValues [] = new int[1];
+	private double xValues [] = new double[1];	
+	private double yValues [] = new double[1];
 
 	// Jobs
 	private Job updateInfoPixelData;
@@ -219,6 +219,14 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 	@Override
 	public void setFocus() {
 		if (viewer!=null && !viewer.getControl().isDisposed()) viewer.getControl().setFocus();
+	}
+	
+	public double[] getXValues() {
+		return this.xValues;
+	}
+	
+	public double[] getYValues() {
+		return this.yValues;
 	}
 	
 	public void activate() {
@@ -450,10 +458,10 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 				region = (IRegion)evt.getSource();
 			
 				if (region.getRegionType() == RegionType.XAXIS_LINE){
-				this.xValues[0] = (int)Math.round(evt.getROI().getPointX());
+				this.xValues[0] = evt.getROI().getPointX();
 			  }
 			    if (region.getRegionType() == RegionType.YAXIS_LINE){
-				this.yValues[0] = (int)Math.round(evt.getROI().getPointY());
+				this.yValues[0] = evt.getROI().getPointY();
 			  }
 							    
 			    IROI rb = evt.getROI();
