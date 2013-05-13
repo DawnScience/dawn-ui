@@ -219,12 +219,12 @@ public class PlotDataPage extends Page implements IPlotUpdateParticipant, IAdapt
 		
 		if (object.isExpression()) {
 			final ILazyDataset lazy = object.getExpression().getLazyDataSet(object.getVariable(), new IMonitor.Stub());
-		    sliceComponent.setData(lazy, object.getName(), filePath);
+		    sliceComponent.setData(lazy, object.getName(), filePath, true);
 		} else {
 			try {
 				final DataHolder holder = LoaderFactory.getData(filePath, new IMonitor.Stub());
 				final ILazyDataset lazy = holder.getLazyDataset(object.getName());
-			    sliceComponent.setData(lazy, object.getName(), filePath);
+			    sliceComponent.setData(lazy, object.getName(), filePath, false);
 			} catch (Throwable e) {
 				logger.error("Cannot load lazy data!", e);
 			}
