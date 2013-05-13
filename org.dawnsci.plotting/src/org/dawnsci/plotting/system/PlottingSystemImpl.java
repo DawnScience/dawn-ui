@@ -756,6 +756,12 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		}
 	}
 
+	@Override
+	public void setShowIntensity(boolean b){
+		lightWeightViewer.setShowIntensity(b);
+		lightWeightViewer.getSystem().repaint(false);
+	}
+
 	public Color get1DPlotColor(Object object) {
 		if (getColorOption()==ColorOption.NONE) return null;
 		if (colorMap==null) return null;
