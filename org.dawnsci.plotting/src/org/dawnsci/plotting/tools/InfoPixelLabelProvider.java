@@ -65,7 +65,7 @@ public class InfoPixelLabelProvider extends ColumnLabelProvider {
 
 	@Override
 	public String getText(Object element) {
-			
+		//TODO could use ToolPageRole on the tool to separate 1D and 2D cases better
 		double xIndex = 0.0;
 		double yIndex = 0.0;
 		double xLabel = Double.NaN;
