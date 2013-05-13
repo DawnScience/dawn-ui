@@ -52,8 +52,8 @@ public class TraceUtils {
 		
 		if (trace==null) return false;
 		List<IDataset> axes = trace.getAxes();
-		IDataset      image = trace.getData();
-		
+		int[]         shape = trace.getData().getShape();
+
 		if (axes==null)     return false;
 		if (axes.isEmpty()) return false;
 		
@@ -63,18 +63,18 @@ public class TraceUtils {
 			return true;
 		}
 		
-		if (axes.get(0).getSize() == image.getShape()[1] &&
-		    axes.get(1).getSize() == image.getShape()[0]) {
+		if (axes.get(0).getSize() == shape[1] &&
+		    axes.get(1).getSize() == shape[0]) {
 			boolean startZero = axes.get(0).getDouble(0)==0d  &&
 				                axes.get(1).getDouble(0)==0d;
 			
 			if (!startZero) return true;
 			
-			double xEnd = axes.get(0).getDouble(axes.get(0).getSize()-1);
-			double yEnd = axes.get(1).getDouble(axes.get(1).getSize()-1);
+			double xEnd = axes.get(0).getDouble(shape[1]-1);
+			double yEnd = axes.get(1).getDouble(shape[0]-1);
 			
-			boolean maxSame =	xEnd==image.getShape()[1]-1 &&
-				                yEnd==image.getShape()[0]-1;
+			boolean maxSame =	xEnd==shape[1]-1 &&
+				                yEnd==shape[0]-1;
 			
 			if (maxSame) return false;
 		}
