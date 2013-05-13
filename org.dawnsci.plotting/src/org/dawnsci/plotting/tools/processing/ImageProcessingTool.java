@@ -72,7 +72,7 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 
 	protected HashMap<String, IDataset> auxiliaryDatasets = new HashMap<String, IDataset>();
 
-	private IRegion region;
+	protected IRegion region;
 
 	protected IDataset originalData;
 	protected List<IDataset> originalAxes;

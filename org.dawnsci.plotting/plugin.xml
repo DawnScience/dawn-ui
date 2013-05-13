@@ -221,6 +221,14 @@
             tooltip="A tool for normalising an image"
             visible="false">
       </plotting_tool_page>
+      <plotting_tool_page
+            class="org.dawnsci.plotting.tools.processing.ImageARPESRemappingProcessTool"
+            icon="icons/process_color.png"
+            id="org.dawb.workbench.plotting.tools.imageARPESRemappingProcessTool"
+            label="Image Remapping ARPES Processing"
+            tooltip="A tool for remapping an ARPES image"
+            visible="false">
+      </plotting_tool_page>
    </extension>
    <extension
          point="org.eclipse.ui.views">
