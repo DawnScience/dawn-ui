@@ -1,6 +1,5 @@
 package org.dawnsci.plotting.draw2d.swtxy;
 
-import java.awt.Color;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
