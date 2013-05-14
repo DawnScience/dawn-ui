@@ -449,6 +449,17 @@ class LightWeightPlotActions {
 		};
 		hideIntensity.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(PlottingConstants.SHOW_INTENSITY));
 		
+		final Action lockHisto = new Action("Lock histogram", IAction.AS_CHECK_BOX) {
+			
+		    public void run() {		    	
+		    	final IImageTrace trace = xyGraph.getRegionArea().getImageTrace();
+		    	if (trace!=null) {
+		    		trace.setRescaleHistogram(!isChecked());
+		    	}
+		    }
+		};
+		lockHisto.setChecked(false);
+		
 		final Action showStack = new Action("Show other images in the same directory", IAction.AS_CHECK_BOX) {
 			
 		    public void run() {		    	
@@ -474,6 +485,7 @@ class LightWeightPlotActions {
 	    actionBarManager.addImageAction(hideAxes);
 	    actionBarManager.addImageAction(hideIntensity);
 	    actionBarManager.addImageAction(showStack);
+	    actionBarManager.addImageAction(lockHisto);
 	    actionBarManager.addImageSeparator();
 
 	}
