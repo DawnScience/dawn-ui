@@ -202,8 +202,8 @@ public class GridSelection extends BoxSelection {
 
 	@Override
 	protected void updateROI(IROI roi) {
-		if (roi instanceof GridROI) {
-			GridROI groi = (GridROI) roi;
+		if (roi instanceof RectangularROI) {
+			RectangularROI groi = (RectangularROI) roi;
 			if (p1!=null) p1.setPosition(groi.getPointRef());
 			if (p4!=null) p4.setPosition(groi.getEndPoint());
 			updateConnectionBounds();

@@ -293,11 +293,9 @@ public class ROIComposite extends Composite {
 
 		final AspectAxis x = getAxis(xyGraph.getXAxisList(), xIndex);
 		final AspectAxis y = getAxis(xyGraph.getYAxisList(), yIndex);
-		RegionCoordinateSystem sys = new RegionCoordinateSystem(
-				getImageTrace(), x, y);
+		RegionCoordinateSystem sys = new RegionCoordinateSystem(getImageTrace(), x, y);
 		editingRegion.setCoordinateSystem(sys);
-		editingRegion.setRegionColor(new Color(getDisplay(), colorSelector
-				.getColorValue()));
+		editingRegion.setRegionColor(new Color(getDisplay(), colorSelector.getColorValue()));
 		editingRegion.setAlpha(alpha.getSelection());
 		// editingRegion.setShowLabel(showLabel.getSelection());
 

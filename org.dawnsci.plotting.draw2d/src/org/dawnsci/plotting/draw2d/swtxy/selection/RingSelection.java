@@ -21,6 +21,7 @@ import org.eclipse.swt.widgets.Display;
 
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.RingROI;
+import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 
 /**
 
@@ -225,8 +226,8 @@ class RingSelection extends AbstractSelectionRegion {
 
 	@Override
 	protected void updateROI(IROI roi) {
-		if (roi instanceof RingROI) {
-			RingROI sroi = (RingROI) roi;
+		if (roi instanceof SectorROI) {
+			SectorROI sroi = (SectorROI) roi;
 			if (center!=null) {
 				center.setPosition(sroi.getPointRef());
 				double y = sroi.getPointY();
