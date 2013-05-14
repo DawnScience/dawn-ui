@@ -14,6 +14,7 @@ import org.eclipse.draw2d.geometry.Rectangle;
 
 import uk.ac.diamond.scisoft.analysis.roi.FreeDrawROI;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
+import uk.ac.diamond.scisoft.analysis.roi.PolylineROI;
 
 /**
  * Used for masking. This region can be transformed into the masking
@@ -187,8 +188,8 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 
 	@Override
 	protected void updateROI(IROI roi) {
-		if (roi instanceof FreeDrawROI) {
-			final FreeDrawROI proi = (FreeDrawROI) roi;
+		if (roi instanceof PolylineROI) {
+			final PolylineROI proi = (PolylineROI) roi;
 			if (points==null) points = new PointList();
 	        points.removeAllPoints();
 	        

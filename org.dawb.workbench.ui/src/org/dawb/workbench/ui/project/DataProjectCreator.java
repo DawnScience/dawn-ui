@@ -15,9 +15,11 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ui.IStartup;
+import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +44,10 @@ public class DataProjectCreator implements IStartup{
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
+					// Only create data if we have examples to go in it.
+					final Bundle bundle = Platform.getBundle("org.dawb.workbench.examples");
+                    if (bundle==null) return Status.CANCEL_STATUS;
+					
 					DataProjectUtils.createDataProject("data", root, true, monitor);
 					
 					IWorkspace ws = ResourcesPlugin.getWorkspace();
