@@ -470,7 +470,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 					} catch (Exception e) {
 						logger.error("Cannot open wizard "+DataReductionWizard.ID, e);
 					}
-					wiz.setSource(getIFile());
+					wiz.setSource(getIFile(true));
 					wiz.setSelections(getSelectionNames());
 					wiz.setTool((IDataReductionToolPage)getAbstractPlottingSystem().getActiveTool());
 					wiz.setSliceData(getSliceData());
@@ -522,7 +522,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	}
 
 
-	public IFile getIFile() {
+	public IFile getIFile(boolean createNewFile) {
 		IFile file = null;
 		IEditorInput input = (providerDeligate instanceof IEditorPart) 
 				           ? (IEditorInput)((IEditorPart)providerDeligate).getEditorInput()
@@ -534,7 +534,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 			file = null;
 		}
 		
-		if (file==null) {// Might be external file
+		if (createNewFile && file==null) {// Might be external file
 			final String name = input.getName();
 			final IProject data = ResourcesPlugin.getWorkspace().getRoot().getProject("data");
 			if (!data.exists()) {

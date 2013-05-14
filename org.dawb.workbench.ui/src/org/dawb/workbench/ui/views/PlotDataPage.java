@@ -253,7 +253,7 @@ public class PlotDataPage extends Page implements IPlotUpdateParticipant, IAdapt
 			}
 			return exprs;
 		} else if (type == IFile.class) {
-			return dataSetComponent.getIFile();
+			return dataSetComponent.getIFile(false);
 		}
 		return null;
 	}
