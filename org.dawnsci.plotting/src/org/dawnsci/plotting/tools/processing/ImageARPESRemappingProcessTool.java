@@ -40,7 +40,6 @@ import org.eclipse.ui.part.ResourceTransfer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.SDAPlotter;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
@@ -401,6 +400,9 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 		remappedAxes.add(energyRegion.getSlice(new int[] {0,0}, new int[] {1,energyRegion.getShape()[1]}, new int[] {1,1}).squeeze());
 		remappedAxes.add(kParaAxis);
 		
+		userPlotBean.addList("remapped", remappedRegion.clone());
+		userPlotBean.addList("remapped_energy", remappedAxes.get(0).clone());
+		userPlotBean.addList("remapped_k_parallel", remappedAxes.get(1).clone());
 		
 		getPlottingSystem().updatePlot2D(remappedRegion, remappedAxes , null);
 		
