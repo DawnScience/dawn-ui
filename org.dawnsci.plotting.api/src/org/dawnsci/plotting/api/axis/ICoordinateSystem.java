@@ -122,4 +122,10 @@ public interface ICoordinateSystem {
 	 */
 	public double[] getAxisLocationValue(final double... axisLocation) throws Exception;
 
+	/**
+	 * 
+	 * @return true if coordinates have been dispose because the region has been removed.
+	 */
+	public boolean isDisposed();
+
 }
