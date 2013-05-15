@@ -28,6 +28,7 @@ import javax.vecmath.Vector3d;
 import org.dawb.common.services.ILoaderService;
 import org.dawb.common.ui.parts.PartUtils;
 import org.dawb.common.ui.util.EclipseUtils;
+import org.dawb.workbench.ui.Activator;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -290,7 +291,7 @@ public class DiffractionCalibrationView extends ViewPart {
 		l = new Label(gHolder, SWT.NONE);
 		b = new Button(gHolder, SWT.PUSH);
 		b.setText("Find rings in image");
-		b.setToolTipText("");
+		b.setToolTipText("Use pixel values to find rings in image near calibration rings");
 		b.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 3, 1));
 		b.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -303,6 +304,7 @@ public class DiffractionCalibrationView extends ViewPart {
 		l = new Label(gHolder, SWT.NONE);
 		l = new Label(gHolder, SWT.NONE);
 		l = new Label(gHolder, SWT.NONE);
+
 //		gHolder.setSize(gHolder.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 //		gHolder.layout();
 
@@ -316,7 +318,17 @@ public class DiffractionCalibrationView extends ViewPart {
 		tableViewer.setInput(model);
 		tableViewer.refresh();
 
-//		sHolder.setSize(sHolder.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		b = new Button(sHolder, SWT.PUSH);
+		b.setText("Calibrate chosen images");
+		b.setToolTipText("Calibrate detector and wavelength from images chosen in table");
+		b.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				calibrateImages();
+			}
+		});
+
+		//		sHolder.setSize(sHolder.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		sHolder.layout();
 		sComp.setContent(sHolder);
 		sComp.setExpandHorizontal(true);
@@ -326,7 +338,7 @@ public class DiffractionCalibrationView extends ViewPart {
 	}
 
 	protected void findRings() {
-		MyData data = model.get(currentSystem);
+		final MyData data = model.get(currentSystem);
 		if (data == null)
 			return;
 
@@ -337,14 +349,11 @@ public class DiffractionCalibrationView extends ViewPart {
 		final List<IROI> resROIs = aug.getResolutionROIs();
 		final IImageTrace image = getImageTrace(currentSystem);
 		final Display display = sComp.getDisplay();
-		List<IROI> fit = data.rois;
-		if (fit == null) {
-			fit = new ArrayList<IROI>();
-			data.rois = fit;
+		if (data.rois == null) {
+			data.rois = new ArrayList<IROI>();
 		} else {
-			fit.clear();
+			data.rois.clear();
 		}
-		final List<IROI> ffit = fit;
 		clearFoundRings(display, currentSystem);
 		Job job = new Job("Ellipse rings finding") {
 			@Override
@@ -364,13 +373,13 @@ public class DiffractionCalibrationView extends ViewPart {
 						IROI roi = DiffractionTool.runEllipseFit(monitor, display, currentSystem, image, e, e.isCircular(), delta);
 						if (roi == null)
 							return Status.CANCEL_STATUS;
-						ffit.add(roi);
+						data.rois.add(roi);
 
 						stat = drawFoundRing(monitor, display, currentSystem, roi, e.isCircular());
 						if (!stat.isOK())
 							break;
 					} catch (IllegalArgumentException ex) {
-						ffit.add(null); // null placeholder
+						data.rois.add(null); // null placeholder
 						System.err.println("Could not find " + r + ": " + ex);
 					}
 				}
@@ -387,6 +396,11 @@ public class DiffractionCalibrationView extends ViewPart {
 		job.setPriority(Job.SHORT);
 //		 job.setUser(true);
 		job.schedule();
+	}
+
+	protected void calibrateImages() {
+		// TODO
+		
 	}
 
 	protected void drawCalibrantRings() {
@@ -498,7 +512,7 @@ public class DiffractionCalibrationView extends ViewPart {
 		DiffractionImageAugmenter augmenter;
 		Listener listener;
 		List<IROI> rois;
-		boolean use = true;
+		boolean use = false;
 	}
 
 	class MyContentProvider implements IStructuredContentProvider {
@@ -526,6 +540,8 @@ public class DiffractionCalibrationView extends ViewPart {
 		}
 	}
 
+	private static final Image TICK = Activator.getImageDescriptor("icons/tick.png").createImage();
+
 	class MyLabelProvider implements ITableLabelProvider {
 		@Override
 		public void addListener(ILabelProviderListener listener) {
@@ -546,6 +562,14 @@ public class DiffractionCalibrationView extends ViewPart {
 
 		@Override
 		public Image getColumnImage(Object element, int columnIndex) {
+			if (columnIndex != 0)
+				return null;
+			if (element == null)
+				return null;
+
+			MyData data = (MyData) element;
+			if (data.use)
+				return TICK;
 			return null;
 		}
 
@@ -563,7 +587,12 @@ public class DiffractionCalibrationView extends ViewPart {
 			} else if (columnIndex == 2) {
 				if (data.rois == null)
 					return null;
-				return String.valueOf(data.rois.size());
+				int n = 0;
+				for (IROI r : data.rois) {
+					if (r != null)
+						n++;
+				}
+				return String.valueOf(n);
 			}
 
 			DiffractionImageAugmenter aug = data.augmenter;
