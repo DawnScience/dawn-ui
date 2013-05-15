@@ -208,8 +208,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 */
 
 	private double xOffset;
-
 	private double yOffset;
+	private org.eclipse.swt.graphics.Rectangle  screenRectangle;
+	
 	private boolean createScaledImage(ImageScaleType rescaleType, final IProgressMonitor monitor) {
 			
 		if (!imageCreationAllowed) return false;
@@ -422,9 +423,33 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 					}
 				}
 				// create the scaled image
-				data = data!=null ? data.scaledTo(scaleWidth, scaleHeight) : null;
-				if (scaledImage!=null &&!scaledImage.isDisposed()) scaledImage.dispose(); // IMPORTANT
-				scaledImage = data!=null ? new Image(Display.getDefault(), data) : null;
+				// We are suspicious if the algorithm wants to create an image
+				// bigger than the screen size and in that case do not scale
+				// Fix to http://jira.diamond.ac.uk/browse/SCI-926
+				boolean proceedWithScale = true;
+				try {
+					if (screenRectangle == null) {
+						screenRectangle = Display.getCurrent().getPrimaryMonitor().getClientArea();
+					}
+					if (scaleWidth>screenRectangle.width*2      || 
+						scaleHeight>screenRectangle.height*2) {
+						
+						logger.error("Image scaling algorithm has malfunctioned and asked for an image bigger than the screen!");
+						logger.debug("scaleWidth="+scaleWidth);
+						logger.debug("scaleHeight="+scaleHeight);
+						proceedWithScale = false;
+					}
+				} catch (Throwable ne) {
+					proceedWithScale = true;
+				}
+				
+				if (proceedWithScale) {
+				    data = data!=null ? data.scaledTo(scaleWidth, scaleHeight) : null;
+					if (scaledImage!=null &&!scaledImage.isDisposed()) scaledImage.dispose(); // IMPORTANT
+					scaledImage = data!=null ? new Image(Display.getDefault(), data) : null;
+				} else if (scaledImage==null) {
+					scaledImage = data!=null ? new Image(Display.getDefault(), data) : null;
+				}
 			}
 
 			return true;

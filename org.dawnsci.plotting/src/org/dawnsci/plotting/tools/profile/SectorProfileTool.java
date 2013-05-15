@@ -38,8 +38,8 @@ public abstract class SectorProfileTool extends ProfileTool {
 	@Override
 	protected void configurePlottingSystem(AbstractPlottingSystem plotter) {
 
-		// We will add an action here for centering the sector.
-		this.center = new MenuAction("Center selection");
+		// We will add an action here for centring the sector.
+		this.center = new MenuAction("Centre selection");
 		center.setImageDescriptor(Activator.getImageDescriptor("icons/sector-center-menu.png"));
 		
 		getSite().getActionBars().getToolBarManager().add(center);
@@ -79,7 +79,7 @@ public abstract class SectorProfileTool extends ProfileTool {
 		getSite().getActionBars().getToolBarManager().add(symmetry);
 		getSite().getActionBars().getMenuManager().add(symmetry);
 		
-		addSymetryActions(symmetry);
+		addSymmetryActions(symmetry);
 		
 	}
 	
@@ -101,14 +101,14 @@ public abstract class SectorProfileTool extends ProfileTool {
 	private int     preferredSymmetry = SectorROI.NONE;
 	private boolean preferredCombine  = false;
 	
-	private void addSymetryActions(final MenuAction symmetry) {
+	private void addSymmetryActions(final MenuAction symmetry) {
 		
 		final CheckableActionGroup group = new CheckableActionGroup();
-		for (int isymetry = 0; isymetry < 7; isymetry++) {
+		for (int isymmetry = 0; isymmetry < 7; isymmetry++) {
 
-			final int finalSym = isymetry;
+			final int finalSym = isymmetry;
 			
-			final Action action = new Action(SectorROI.getSymmetryText(isymetry), IAction.AS_CHECK_BOX) {
+			final Action action = new Action(SectorROI.getSymmetryText(isymmetry), IAction.AS_CHECK_BOX) {
 				@Override
 				public void run() {
 					

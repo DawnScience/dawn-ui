@@ -10,9 +10,9 @@ import javax.measure.unit.NonSI;
 import javax.vecmath.Vector3d;
 
 import org.dawb.common.ui.menu.MenuAction;
-import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.roi.ResolutionRing;
 import org.dawnsci.plotting.Activator;
+import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.region.RegionUtils;
@@ -100,7 +100,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	
 	private static Logger logger = LoggerFactory.getLogger(DiffractionImageAugmenter.class);
 	
-	private AbstractPlottingSystem plottingSystem;
+	private IPlottingSystem plottingSystem;
 	private DetectorProperties detprop;
 	private DiffractionCrystalEnvironment diffenv;
 	private IRegion crosshairs;
@@ -118,12 +118,22 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	 * Create and tie augmenter to a plotting system
 	 * @param system
 	 */
-	public DiffractionImageAugmenter(AbstractPlottingSystem system) {
+	public DiffractionImageAugmenter(IPlottingSystem system) {
 		plottingSystem = system;
 		if (activeAugmenter==null) activeAugmenter = this;
+		resROIs = new ArrayList<IROI>();
 	}
 	
 	private boolean active = true;
+	private IDiffractionMetadata dmd;
+	private List<IROI> resROIs;
+
+	/**
+	 * @return list of ROIs representing resolution rings
+	 */
+	public List<IROI> getResolutionROIs() {
+		return resROIs;
+	}
 
 	public void activate() {
 		activeAugmenter = this;
@@ -150,12 +160,12 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	public void setImageCentre(double... coords) {
 		imageCentrePC = coords;
 	}
-	
+
 	public boolean isShowingBeamCenter() {
 		return beamCentre.isChecked();
 	}
 
-	protected void drawBeamCentre(boolean isChecked) {
+	public void drawBeamCentre(boolean isChecked) {
 		if (!active) return; // We are likely off screen.
 		beamCentre.setChecked(isChecked);
 			
@@ -163,6 +173,10 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 			DecimalFormat df = new DecimalFormat("#.##");
 			if (detprop != null) {
 				double[] beamCentrePC = detprop.getBeamCentreCoords();
+				if (beamCentrePC[0] == 0) // ensure there are no negative zeros
+					beamCentrePC[0] = 0;
+				if (beamCentrePC[1] == 0)
+					beamCentrePC[1] = 0;
 				double length = (1 + Math.sqrt(detprop.getPx() * detprop.getPx() + detprop.getPy() * detprop.getPy()) * 0.01);
 				String label = df.format(beamCentrePC[0]) + "px, " + df.format(beamCentrePC[1])+"px";
 				drawCrosshairs(beamCentrePC, length, ColorConstants.red, ColorConstants.black, "beam centre", label);
@@ -186,7 +200,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		if (calibrantRings!=null) drawCalibrantRings(calibrantRings.isChecked(), standards.getCalibrant());
 	}
 	
-	protected void drawCalibrantRings(boolean isChecked, CalibrantSpacing spacing) {
+	public void drawCalibrantRings(boolean isChecked, CalibrantSpacing spacing) {
 		if (!active) return; // We are likely off screen.
 	
 		if (isChecked) {
@@ -294,6 +308,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		for (IRegion iRegion : existing) iRegion.setVisible(false);
 		int nExisting = existing.size();
 		int nRings = ringList.size();
+		resROIs.clear();
 		for (int i = 0; i < nRings; i++) {
 			drawResolutionEllipse(i >= nExisting ? null : existing.get(i), ringList.get(i), typeName+i, marker);
 		}
@@ -370,6 +385,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		if (detprop != null && diffenv != null) {
 			double[] beamCentre = detprop.getBeamCentreCoords(); // detConfig.pixelCoords(detConfig.getBeamPosition());
 			IROI roi  = DSpacing.conicFromDSpacing(detprop, diffenv, ring.getResolution());
+			resROIs.add(roi);
 			if (roi instanceof EllipticalROI) {
 				DecimalFormat df = new DecimalFormat("#.00");
 				drawEllipse(reused, beamCentre, (EllipticalROI) roi, ring.getColour(), ring.getColour(), name,
@@ -448,13 +464,18 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 
 	public void setDiffractionMetadata(IDiffractionMetadata metadata) {
 		if (diffenv != null && detprop != null) registerListeners(false);
+		dmd = metadata;
 		diffenv = metadata.getDiffractionCrystalEnvironment();
 		detprop = metadata.getDetector2DProperties();
 		registerListeners(true);
 		imageCentrePC = detprop!=null ? detprop.getBeamCentreCoords() : null;
 		updateAll();
 	}
-	
+
+	public IDiffractionMetadata getDiffractionMetadata() {
+		return dmd;
+	}
+
 	private void registerListeners(boolean register) {
 		
 		if (register) {

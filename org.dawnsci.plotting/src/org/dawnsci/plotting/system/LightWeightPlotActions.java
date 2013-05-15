@@ -60,7 +60,7 @@ import org.eclipse.ui.IReusableEditor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /**
- * Deligating class for light-weight actions.
+ * Delegating class for light-weight actions.
  * 
  * This class creates actions for the lightweight plotting system.
  * 

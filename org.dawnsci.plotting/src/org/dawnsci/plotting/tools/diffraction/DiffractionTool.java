@@ -13,7 +13,6 @@ import org.dawb.common.services.ILoaderService;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
-import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.viewers.TreeNodeContentProvider;
@@ -94,6 +93,7 @@ import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationStandards;
 import uk.ac.diamond.scisoft.analysis.crystallography.HKL;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.BooleanDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorPropertyEvent;
 import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
@@ -283,10 +283,10 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			model= null;
 		}
 		if (viewer==null)           return;
-		
-		IDiffractionMetadata data=null;
+
+		IDiffractionMetadata data = null;
 		try {
-			data  = getDiffractionMetaData();
+			data = getDiffractionMetaData();
 			if (data==null || data.getDetector2DProperties()==null || data.getDiffractionCrystalEnvironment()==null) {
 				return;
 			}
@@ -296,9 +296,9 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			if (augmenter != null) {
 				augmenter.setDiffractionMetadata(data);
 			}
-			
+
 			updateIntensity();
-			
+
 			detpropListener = new IDetectorPropertyListener() {
 				@Override
 				public void detectorPropertiesChanged(DetectorPropertyEvent evt) {
@@ -346,99 +346,91 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		}
 	}
 	
-	private static boolean diffractionMetadataAreEqual(IDiffractionMetadata meta1,IDiffractionMetadata meta2) {
-		
-		if (meta1.getDetector2DProperties().equals(meta2.getDetector2DProperties()) &&
-				meta1.getDiffractionCrystalEnvironment().equals(meta2.getDiffractionCrystalEnvironment())) {
-			return true;
-		}
-		
-		return false;
-		
-	}
-	
 	private IDiffractionMetadata getDiffractionMetaData() {
-		return getDiffractionMetadata(getPart(), getImageTrace(), service, statusString);
+		IDataset image = getImageTrace() == null ? null : getImageTrace().getData();
+		IWorkbenchPart part = getPart();
+		String altPath = part instanceof IEditorPart ? EclipseUtils.getFilePath(((IEditorPart) part).getEditorInput()) : null;
+		return getDiffractionMetadata(image, altPath, service, statusString);
 	}
 
 	/**
 	 * Fetch diffraction metadata
-	 * @param part
-	 * @param imageTrace
+	 * @param image
+	 * @param altPath alternative for file path if metadata is null or does not hold it
 	 * @param service
 	 * @param statusText returned message (can be null)
 	 * @return diffraction metadata
 	 */
-	public static IDiffractionMetadata getDiffractionMetadata(IWorkbenchPart part, IImageTrace imageTrace, ILoaderService service, String[] statusText) {
+	public static IDiffractionMetadata getDiffractionMetadata(IDataset image, String altPath, ILoaderService service, String[] statusText) {
 		// Now always returns IDiffractionMetadata to prevent creation of a new
 		// metadata object after listeners have been added to the old metadata
-		//TODO improve this section- its pretty horrible
+		//TODO improve this section- it's pretty horrible
 		IDiffractionMetadata lockedMeta = service.getLockedDiffractionMetaData();
 		
+		if (image == null)
+			return lockedMeta;
+
+		int[] shape = image.getShape();
+		IMetaData mdImage = null;
+		try {
+			mdImage = image.getMetadata();
+		} catch (Exception e1) {
+			// do nothing
+		}
 		if (lockedMeta != null) {
-			if (imageTrace==null || imageTrace.getData() ==null) return lockedMeta;
-			
-			IMetaData mdImage = ((AbstractDataset)imageTrace.getData()).getMetadata();
-			
-			if (mdImage == null || !(mdImage instanceof IDiffractionMetadata)) {
+			if (mdImage instanceof IDiffractionMetadata) {
+				IDiffractionMetadata dmd = (IDiffractionMetadata) mdImage;
+				if (!dmd.getDiffractionCrystalEnvironment().equals(lockedMeta.getDiffractionCrystalEnvironment()) ||
+						!dmd.getDetector2DProperties().equals(lockedMeta.getDetector2DProperties())) {
+					try {
+						DiffractionMetadataUtils.copyNewOverOld(lockedMeta, (IDiffractionMetadata)mdImage);
+					} catch (IllegalArgumentException e) {
+						if (statusText != null)
+							statusText[0] = "Locked metadata does not match image dimensions!";
+					}
+					image.setMetadata(mdImage);
+				}
+			} else {
 				//TODO what if the image is rotated?
-				int[] shape = imageTrace.getData().getShape();
 				
 				if (shape[0] == lockedMeta.getDetector2DProperties().getPx() &&
 					shape[1] == lockedMeta.getDetector2DProperties().getPy()) {
-					imageTrace.getData().setMetadata(lockedMeta.clone());
+					image.setMetadata(lockedMeta.clone());
 				} else {
 					IDiffractionMetadata clone = lockedMeta.clone();
 					clone.getDetector2DProperties().setPx(shape[0]);
 					clone.getDetector2DProperties().setPy(shape[1]);
 					if (statusText != null)
-						statusText[0] = "Locked metadata doesnt match image dimensions!";
-				}
-				
-			} else if (mdImage instanceof IDiffractionMetadata) {
-				if (!diffractionMetadataAreEqual((IDiffractionMetadata)mdImage,lockedMeta)) {
-					try {
-						DiffractionMetadataUtils.copyNewOverOld(lockedMeta, (IDiffractionMetadata)mdImage);
-					} catch (IllegalArgumentException e) {
-						if (statusText != null)
-							statusText[0] = "Locked metadata doesnt match image dimensions!";
-					}
-					imageTrace.getData().setMetadata(mdImage);
+						statusText[0] = "Locked metadata does not match image dimensions!";
 				}
 			}
 			if (statusText != null && statusText[0] == null) {
-				statusText[0] = "Metadata loaded from lock";
+				statusText[0] = "Metadata loaded from locked version";
 			}
 			return lockedMeta;
 		}
-		
+
 		//If not see if the trace has diffraction meta data
-		if (imageTrace==null) return null;
-		if (imageTrace.getData()==null) return null;
-		IMetaData mdImage = ((AbstractDataset)imageTrace.getData()).getMetadata();
-		if (mdImage !=null && mdImage  instanceof IDiffractionMetadata) {
+		if (mdImage instanceof IDiffractionMetadata) {
 			if (statusText != null && statusText[0] == null) {
 				statusText[0] = "Metadata loaded from image";
 			}
-			return (IDiffractionMetadata)mdImage;
+			return (IDiffractionMetadata) mdImage;
 		}
 		
-		
-		int[] imageShape = imageTrace.getData().getShape();
-		
 		//Try and get the filename here, it will help later on
-		String filePath = (mdImage !=null && mdImage.getFilePath()!= null) ? mdImage.getFilePath() : null;
+		String filePath = mdImage == null ? null : mdImage.getFilePath();
 		
-		if (filePath == null && part instanceof IEditorPart) {
-			filePath = EclipseUtils.getFilePath(((IEditorPart) part).getEditorInput());
+		if (filePath == null) {
+			filePath = altPath;
 		}
 		
 		if (filePath != null) {
 			//see if we can read diffraction info from nexus files
 			NexusDiffractionMetaCreator ndmc = new NexusDiffractionMetaCreator(filePath);
-			IDiffractionMetadata difMet = ndmc.getDiffractionMetadataFromNexus(imageShape);
+			IDiffractionMetadata difMet = ndmc.getDiffractionMetadataFromNexus(shape);
 			if (difMet !=null) {
-				imageTrace.getData().setMetadata(difMet);
+				image.setMetadata(difMet);
 				if (statusText != null && statusText[0] == null) {
 					if (ndmc.isCompleteRead())
 						statusText[0] = "Metadata completely loaded from nexus tree";
@@ -452,35 +444,32 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 				return difMet;
 			}
 		}
-				
+
 		// if it is null try and get it from the loader service
-		if (mdImage == null  && filePath != null) {
+		if (mdImage == null && filePath != null) {
 			IMetaData md = null;
 			try {
 				md = service.getMetaData(filePath, null);
 			} catch (Exception e) {
-				logger.error("Cannot read meta data from "+part.getTitle(), e);
+				logger.error("Cannot read meta data from part", e);
 			}
 			
 			//If it is there and diffraction data return it
-			if (md!=null && md instanceof IDiffractionMetadata) {
+			if (md instanceof IDiffractionMetadata) {
 				if (statusText != null && statusText[0] == null) {
-					statusText[0] = "Metadata loaded from disk";
+					statusText[0] = "Metadata loaded from file";
 				}
-				return (IDiffractionMetadata)md;
+				return (IDiffractionMetadata) md;
 			}
-			
-			if (md != null)
-				mdImage = md;
 		}
 		
 		// if there is no meta or is not nexus or IDiff create default IDiff and put it in the dataset
-		mdImage = DiffractionDefaultMetadata.getDiffractionMetadata(filePath,imageTrace.getData().getShape());
-		imageTrace.getData().setMetadata(mdImage);
+		mdImage = DiffractionDefaultMetadata.getDiffractionMetadata(filePath, shape);
+		image.setMetadata(mdImage);
 		if (statusText != null && statusText[0] == null) {
 			statusText[0] = "No metadata found. Values loaded from preferences:";
 		}
-		return (IDiffractionMetadata)mdImage;
+		return (IDiffractionMetadata) mdImage;
 	}
 
 	private TreeViewerColumn defaultColumn;
@@ -741,7 +730,11 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 						Job job = new Job("Circle fit refinement") {
 							@Override
 							protected IStatus run(final IProgressMonitor monitor) {
-								return runEllipseFit(monitor, display, plotter, t, tmpRegion.getROI(), true);
+								IROI roi = runEllipseFit(monitor, display, plotter, t, tmpRegion.getROI(), true, RADIAL_DELTA);
+								if (roi == null)
+									return Status.CANCEL_STATUS;
+								
+								return drawRing(monitor, display, plotter, roi, true);
 							}
 						};
 						job.setPriority(Job.SHORT);
@@ -810,7 +803,12 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 							@Override
 							protected IStatus run(final IProgressMonitor monitor) {
 								IROI roi = tmpRegion.getROI();
-								IStatus stat = runEllipseFit(monitor, display, plotter, t, roi, false);
+								boolean circle = roi instanceof CircularROI;
+								roi = runEllipseFit(monitor, display, plotter, t, roi, circle, RADIAL_DELTA);
+								if (roi == null)
+									return Status.CANCEL_STATUS;
+
+								IStatus stat = drawRing(monitor, display, plotter, roi, circle);
 								if (stat.isOK()) {
 									stat = runFindOuterRings(monitor, display, plotter, t, roi);
 								}
@@ -931,7 +929,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		MenuAction dropdown = new MenuAction("Resolution rings");
 	    dropdown.setImageDescriptor(Activator.getImageDescriptor("/icons/resolution_rings.png"));
 
-		augmenter = new DiffractionImageAugmenter((AbstractPlottingSystem)getPlottingSystem());
+		augmenter = new DiffractionImageAugmenter(getPlottingSystem());
 	    augmenter.addActions(dropdown);
 		
 	    toolMan.add(exportMeta);
@@ -991,11 +989,14 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		}
 	}
 
-	private IStatus runEllipseFit(final IProgressMonitor monitor, Display display, final IPlottingSystem plotter, IImageTrace t, IROI roi, final boolean forceCircle) {
-		if (roi == null)
-			return Status.CANCEL_STATUS;
+	private static final double ARC_LENGTH = 8;
+	private static final double RADIAL_DELTA = 10;
+	private static final int MAX_POINTS = 200;
 
-		final boolean circle = forceCircle ? true : (roi instanceof CircularROI);
+	public static IROI runEllipseFit(final IProgressMonitor monitor, Display display, final IPlottingSystem plotter, IImageTrace t, IROI roi, final boolean circle, double radialDelta) {
+		if (roi == null)
+			return null;
+
 		String shape = circle ? "circle" : "ellipse";
 		final ProgressMonitorWrapper mon = new ProgressMonitorWrapper(monitor);
 		monitor.beginTask("Refine " + shape + " fit", IProgressMonitor.UNKNOWN);
@@ -1005,8 +1006,11 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		PolylineROI points;
 		EllipticalFitROI efroi;
 		monitor.subTask("Fit POIs");
-		points = roi instanceof CircularROI ? PowderRingsUtils.findPOIsNearCircle(mon, image, mask, (CircularROI) roi)
-				: PowderRingsUtils.findPOIsNearEllipse(mon, image, mask, (EllipticalROI) roi);
+		points = roi instanceof CircularROI ? PowderRingsUtils.findPOIsNearCircle(mon, image, mask, (CircularROI) roi, ARC_LENGTH, radialDelta, MAX_POINTS)
+				: PowderRingsUtils.findPOIsNearEllipse(mon, image, mask, (EllipticalROI) roi, ARC_LENGTH, radialDelta, MAX_POINTS);
+		if (points.getNumberOfPoints() < 3) {
+			throw new IllegalArgumentException("Could not find enough points to trim");
+		}
 
 		monitor.subTask("Trim POIs");
 		efroi = PowderRingsUtils.fitAndTrimOutliers(mon, points, 2, circle);
@@ -1021,10 +1025,17 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			npts = efroi.getPoints().getNumberOfPoints(); 
 		} while (lpts > npts);
 
+		if (monitor.isCanceled())
+			return null;
+
 		final IROI froi = circle ? new CircularFitROI(efroi.getPoints()) : efroi;
 		monitor.worked(1);
 		logger.debug("{} from peaks: {}", shape, froi);
 
+		return froi;
+	}
+
+	private IStatus drawRing(final IProgressMonitor monitor, Display display, final IPlottingSystem plotter, final IROI froi, final boolean circle) {
 		final boolean[] status = {true};
 		display.syncExec(new Runnable() {
 
