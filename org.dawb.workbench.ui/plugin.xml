@@ -324,4 +324,15 @@
             project="false">
       </wizard>
    </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            allowMultiple="false"
+            category="org.dawb.workbench"
+            class="org.dawb.workbench.ui.views.DiffractionCalibrationView"
+            icon="icons/calibrant_rings.png"
+            id="org.dawb.workbench.ui.views.DiffractionCalibrationView"
+            name="Diffraction Calibration">
+      </view>
+   </extension>
 </plugin>
