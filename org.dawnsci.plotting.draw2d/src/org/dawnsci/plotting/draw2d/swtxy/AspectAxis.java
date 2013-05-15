@@ -474,8 +474,9 @@ public class AspectAxis extends Axis implements IAxis {
 		return super.isDateEnabled();
 	}
 
+	@Override
 	public String toString() {
-		return getTitle()+", "+getOrientation();
+		return "(" + getTitle() + ", " + getOrientation() + ")";
 	}
 	
 	@Override

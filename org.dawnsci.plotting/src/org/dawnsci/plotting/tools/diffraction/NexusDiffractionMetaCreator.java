@@ -10,12 +10,10 @@ import uk.ac.diamond.scisoft.analysis.io.NexusDiffractionMetaReader;
 
 public class NexusDiffractionMetaCreator {
 	
-	
-	String filePath;
 	NexusDiffractionMetaReader nexusDiffraction = null;
 	
 	public NexusDiffractionMetaCreator(String filePath) {
-		this.filePath = filePath;
+		nexusDiffraction = new NexusDiffractionMetaReader(filePath); 
 	}
 	
 	/**
@@ -28,9 +26,6 @@ public class NexusDiffractionMetaCreator {
 	 * @param imageSize. Size of the image the diffraction metadata is associated with in pixels (can be null)
 	 */
 	public IDiffractionMetadata getDiffractionMetadataFromNexus(int[] imageSize) {
-		
-		nexusDiffraction = new NexusDiffractionMetaReader(filePath); 
-		
 		final DetectorProperties detprop = DiffractionDefaultMetadata.getPersistedDetectorProperties(imageSize);
 		final DiffractionCrystalEnvironment diffcrys = DiffractionDefaultMetadata.getPersistedDiffractionCrystalEnvironment();
 		
