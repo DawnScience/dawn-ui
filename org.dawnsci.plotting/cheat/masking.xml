@@ -40,6 +40,25 @@
          Go to the 'Masking' tool view to the right of the image and click on 'Enable lower mask' and 'Enable upper mask'. No go down to the bottom of the tool and press the 'Apply' button. You will see intensity values higher or lower than the upper and lower values will be coloured green. There is a 'Mask colour' button for changing this colour.
       </description>
    </item>
+   
+   
+   <item
+         title="Mask using direct draw">
+      <description>
+      Now we will mask using direct drawing.
+      </description>
+          
+         <subitem 
+          label="Click on the &apos;Direct draw&apos; radio button. From the toolbar select &apos;Square brush&apos;."/>
+          
+            <subitem 
+          label="Now we can draw by clicking once or clicking and dragging on the image. Notice that the pen size and shape can be changed."/>
+                      
+           <subitem 
+           label="Experiment with holding the shift key to obtain straight lines using the direct draw brush. There is a button on the toolbar also for rubbing out mask and there is undo/redo on the main toolbar."/>
+   </item>
+
+   
  
     <item
          title="Mask using regions">
@@ -47,16 +66,16 @@
       Now we will mask using the mouse to select the mask.
       </description>
          <subitem 
-          label="Untick the upper and lower mask and press apply. Now tick 'Automatically apply mask when something changes' to apply changes automatically."/>
+          label="If you have not already, untick the upper and lower mask. Now tick 'Automatically apply mask when something changes' to apply changes automatically."/>
           
          <subitem 
-          label="Click 'Enable masking using regions' a toolbar becomes active, from this toolbar select 'Continuously add the same region'."/>
+          label="Click on the &apos;Regions&apos; radio button, a toolbar becomes active. From this toolbar select &apos;Continuously add the same region&apos;."/>
           
-          <subitem 
-          label="Now we will use free draw to mask out custom areas. Select the 'Free drawn selection' region and draw in the image."/>
+            <subitem 
+          label="Now we will use polygons to mask out custom areas. Select the 'Add polygon selection' region and draw in the image by clicking several points. Double click to finish and start a new polygon."/>
           
            <subitem 
-          label="You will see that where you draw is masked out when you click and drag on the image. You can also change the line size of this free draw, there is an action on the toolbar for choosing the width. (This is the width in screen pixels, not camera pixels.)"/>
+          label="You will see that polygon(s) are added and after a while the green masked pixels update. You can move this polygon and resize it. Notice that using regions for masking is not as accurate as direct draw. This is because the area that the region is covering is interpolated back to the underlying mask."/>
             
            <subitem 
            label="Experiment masking using a ring selection to take out a section of intensity by using the 'Add circle selection' action and clicking and dragging in the image. Notice how the image rehistograms (changes colour) when a ring of intensity is removed."/>
@@ -65,7 +84,7 @@
     <item
          title="Save mask">
        <description>
-      We can save the mask to a buffer and re-apply it to other images. In the 'Masking' view selection there is a toolbar at the top with the action 'Save the mask into a buffer'. Select this then open the file (choose 'click to perform', below), choose the masking tool and select 'Merge the previously saved mask from buffer'. You will see your mask applied to the new image.
+      We can save the mask to a buffer and re-apply it to other images. In the 'Masking' view selection there is a toolbar at the top with the tool-tip 'Save the mask into a buffer'. Select this then open the file (choose 'click to perform', below), choose the masking tool and select 'Merge the previously saved mask from buffer'. You will see your mask applied to the new image.
       </description>
       <command
             required="true"
