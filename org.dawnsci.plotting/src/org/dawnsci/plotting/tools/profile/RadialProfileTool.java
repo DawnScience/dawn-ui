@@ -138,7 +138,7 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 			}
 		};
 		
-		final Action addFullSector = new Action("Add Full area sector", IAction.AS_PUSH_BUTTON) {
+		final Action addFullSector = new Action("Add full area sector", IAction.AS_PUSH_BUTTON) {
 			@Override
 			public void run() {
 				IPlottingSystem plot = getPlottingSystem();
@@ -148,6 +148,7 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 					SectorROI sector = getFullSector();
 					region.setROI(sector);
 					plot.addRegion(region);
+					//do it again to override preferedSymmetry
 					region.setROI(sector);
 					
 				} catch (Exception e) {
