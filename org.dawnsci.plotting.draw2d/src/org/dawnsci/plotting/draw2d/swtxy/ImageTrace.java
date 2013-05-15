@@ -423,7 +423,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 					}
 				}
 				// create the scaled image
-				// We suspicious if the algorithm wants to create an image
+				// We are suspicious if the algorithm wants to create an image
 				// bigger than the screen size and in that case do not scale
 				// Fix to http://jira.diamond.ac.uk/browse/SCI-926
 				boolean proceedWithScale = true;
@@ -431,8 +431,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 					if (screenRectangle == null) {
 						screenRectangle = Display.getCurrent().getPrimaryMonitor().getClientArea();
 					}
-					if (scaleWidth>screenRectangle.width      || 
-						scaleHeight>screenRectangle.height) {
+					if (scaleWidth>screenRectangle.width*2      || 
+						scaleHeight>screenRectangle.height*2) {
 						
 						logger.error("Image scaling algorithm has malfunctioned and asked for an image bigger than the screen!");
 						logger.debug("scaleWidth="+scaleWidth);
