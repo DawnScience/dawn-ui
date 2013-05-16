@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.util.io.IOUtils;
+import org.dawnsci.plotting.api.axis.IAxis;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.ROIEvent;
 import org.dawnsci.plotting.api.trace.IImageTrace;
@@ -36,6 +37,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,6 +81,18 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 	private List<IDataset> correctedAxes;
 	private AbstractDataset energyMap;
 	private AbstractDataset angleMap;
+	private Text photonEnergyText;
+	private Text workFunctionText;
+	private Label workFunctionLabel;
+	private Label photonEnergyLabel;
+	private Double photonEnergy;
+	private Double workFunction;
+	private Label angleOffsetLabel;
+	private Text angleOffsetText;
+	private Label energyOffsetLabel;
+	private Text energyOffsetText;
+	protected Double energyOffset;
+	protected Double angleOffset;
 
 	public ImageARPESRemappingProcessTool() {
 	}
@@ -202,7 +216,29 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 		inputBrowse.setToolTipText("Choose Auxiliary Data Input");
 		inputBrowse.addSelectionListener(getInputBrowseListener());
 
-		setInputFieldEnabled(false);
+		setInputFieldEnabled(true);
+		
+		
+		// now add 2 fields for setting angle and energy offfsets
+		angleOffsetLabel = new Label(comp, SWT.NONE);
+		angleOffsetLabel.setText("Angle Offset");
+		angleOffsetText  = new Text(comp, SWT.NONE);
+		angleOffsetText.setText("0.0");
+		energyOffsetLabel = new Label(comp, SWT.NONE);
+		energyOffsetLabel.setText("Energy Offset");
+		energyOffsetText  = new Text(comp, SWT.NONE);
+		energyOffsetText.setText("0.0");
+		
+		// now add 2 fields for setting the numbers for Photon Energy and Work Function
+		workFunctionLabel = new Label(comp, SWT.NONE);
+		workFunctionLabel.setText("Work Function");
+		workFunctionText  = new Text(comp, SWT.NONE);
+		workFunctionText.setText("2.1");
+		photonEnergyLabel = new Label(comp, SWT.NONE);
+		photonEnergyLabel.setText("Photon Energy");
+		photonEnergyText  = new Text(comp, SWT.NONE);
+		photonEnergyText.setText("20.0");
+		
 	}
 
 	private void setInputFieldEnabled(boolean value){
@@ -300,17 +336,6 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 			correctedAxes.add(originalAxes.get(1).clone());
 		}
 		
-		// Now create the full size maps
-		energyMap = (AbstractDataset) correctedAxes.get(0);
-		energyMap = energyMap.reshape(1,energyMap.getShape()[0]);
-		energyMap = DatasetUtils.tile(energyMap, correctedData.getShape()[0], 1);
-		
-		// need to calculate angleRegion here
-		angleMap = (AbstractDataset) correctedAxes.get(1);
-		angleMap = angleMap.reshape(angleMap.getShape()[0],1);
-		angleMap = DatasetUtils.tile(angleMap, correctedData.getShape()[1]);
-		
-		
 		selectionPlottingSystem.updatePlot2D(correctedData, correctedAxes, null);
 		
 		
@@ -336,6 +361,49 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 		
 		logger.debug("Calling the ROI update");
 		
+		photonEnergy = null;
+		workFunction = null;
+		angleOffset = null;
+		energyOffset = null;
+		
+		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				try {
+					angleOffset = Double.parseDouble(angleOffsetText.getText());
+					energyOffset = Double.parseDouble(energyOffsetText.getText());
+					photonEnergy = Double.parseDouble(photonEnergyText.getText());
+					workFunction = Double.parseDouble(workFunctionText.getText());
+				} catch (Exception e) {
+					logger.error("cannot parse offsests, work function or photon energy",e);
+				}
+			}
+		});
+		
+		if (photonEnergy == null || workFunction == null || angleOffset == null || energyOffset == null) {
+			logger.error("Photon energy, work function angle or energy offset not valid");
+			return;
+		}
+		
+		// modify the axes of the main plot if offset
+		ArrayList<IDataset> updatedAxes = new ArrayList<IDataset>();
+		updatedAxes.add(Maths.add((AbstractDataset)correctedAxes.get(0),energyOffset));
+		updatedAxes.add(Maths.add((AbstractDataset)correctedAxes.get(1),angleOffset));
+
+		
+		selectionPlottingSystem.updatePlot2D(correctedData, updatedAxes, monitor);
+		// Now create the full size maps
+		energyMap = (AbstractDataset) updatedAxes.get(0);
+		energyMap = energyMap.reshape(1,energyMap.getShape()[0]);
+		energyMap = DatasetUtils.tile(energyMap, correctedData.getShape()[0], 1);
+		
+		// need to calculate angleRegion here
+		angleMap = (AbstractDataset) updatedAxes.get(1);
+		angleMap = angleMap.reshape(angleMap.getShape()[0],1);
+		angleMap = DatasetUtils.tile(angleMap, correctedData.getShape()[1]);
+		
+		
 		createMomentumDatasets();
 	}
 
@@ -355,8 +423,7 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 		// TODO these should be read off the GUI
 		if (correctedData == null) return;
 		
-		double photonEnergy = 5.0;
-		double workFunction = 1.8;
+
 		
 		// then get the regions
 		IRegion roi = selectionPlottingSystem.getRegion("Processed Region 1");
