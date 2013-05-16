@@ -78,7 +78,7 @@
           label="You will see that polygon(s) are added and after a while the green masked pixels update. You can move this polygon and resize it. Notice that using regions for masking is not as accurate as direct draw. This is because the area that the region is covering is interpolated back to the underlying mask."/>
             
            <subitem 
-           label="Experiment masking using a ring selection to take out a section of intensity by using the 'Add circle selection' action and clicking and dragging in the image. Notice how the image rehistograms (changes colour) when a ring of intensity is removed."/>
+           label="Experiment masking using a ring selection to take out a section of intensity by using the 'Add circle selection' action and clicking and dragging in the image."/>
    </item>
 
     <item
