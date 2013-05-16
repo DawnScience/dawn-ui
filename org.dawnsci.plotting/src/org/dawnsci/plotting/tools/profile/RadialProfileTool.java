@@ -467,11 +467,23 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 	
 	private SectorROI getFullSector() {
 		
-		int[] shape = getImageTrace().getData().getShape();
+		int[] shape = new int[2];
+
+		if (getMetaData() instanceof IDiffractionMetadata) {
+			shape[0] = ((IDiffractionMetadata)getMetaData()).getDetector2DProperties().getPx();
+			shape[1] = ((IDiffractionMetadata)getMetaData()).getDetector2DProperties().getPy();
+			
+		} else {
+			shape = getImageTrace().getData().getShape();
+			int temp = shape[0];
+			shape[0] = shape[1];
+			shape[1] = temp;
+		}
+		
 		double[] beamCenter = getBeamCenter();
 		double[] farCorner = new double[]{0,0};
-		if (beamCenter[1] < shape[0]/2.0) farCorner[0] = shape[0];
-		if (beamCenter[0] < shape[1]/2.0) farCorner[1] = shape[1];
+		if (beamCenter[0] < shape[0]/2.0) farCorner[0] = shape[0];
+		if (beamCenter[1] < shape[1]/2.0) farCorner[1] = shape[1];
 		double maxDistance = Math.sqrt(Math.pow(beamCenter[0]-farCorner[0],2)+Math.pow(beamCenter[1]-farCorner[1],2));
 		SectorROI sector = new SectorROI(beamCenter[0], beamCenter[1], 0, maxDistance, 0, 1);
 		sector.setSymmetry(SectorROI.FULL);
