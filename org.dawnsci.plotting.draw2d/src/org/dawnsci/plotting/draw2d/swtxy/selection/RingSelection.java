@@ -78,7 +78,7 @@ class RingSelection extends AbstractSelectionRegion {
 	public void createContents(final Figure parent) {
 		
 		this.center = new RectangularHandle(coords, getRegionColor(), connection, SIDE, 100, 100);
-		center.setCursor(null);
+		center.setCursor(Draw2DUtils.getRoiMoveCursor());
 
 		this.innerControl = createSelectionHandle();
 		this.outerControl = createSelectionHandle();
@@ -140,6 +140,9 @@ class RingSelection extends AbstractSelectionRegion {
 		FigureTranslator mover = new FigureTranslator(getXyGraph(), parent, connection, Arrays.asList(new IFigure[]{center, connection, innerControl, outerControl}));
 		// Add a translation listener to be notified when the mover will translate so that
 		// we do not recompute point locations during the move.
+		mover.addTranslationListener(createRegionNotifier());
+		
+		mover= new FigureTranslator(getXyGraph(), parent, this.center, Arrays.asList(new IFigure[]{center, connection, innerControl, outerControl}));
 		mover.addTranslationListener(createRegionNotifier());
 		
 		setRegionObjects(connection, center, innerControl, outerControl);
