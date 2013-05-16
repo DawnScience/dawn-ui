@@ -181,4 +181,9 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 		return imageTrace.getPointInImageCoordinates(axisLocation);
 	}
 
+	@Override
+	public boolean isDisposed() {
+		return isDisposed;
+	}
+
 }

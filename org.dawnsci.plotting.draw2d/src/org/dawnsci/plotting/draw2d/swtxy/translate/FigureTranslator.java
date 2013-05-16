@@ -53,7 +53,7 @@ public class FigureTranslator implements MouseListener, MouseMotionListener {
 	@Override
 	public void mouseDragged(MouseEvent event) {
 		
-		if (!active) return;
+		if (!isActive()) return;
 		
 		try {
 			if (location == null) return;
@@ -127,7 +127,7 @@ public class FigureTranslator implements MouseListener, MouseMotionListener {
 
 	@Override
 	public void mousePressed(MouseEvent event) {
-		if (!active) return;
+		if (!isActive()) return;
 
 		location = event.getLocation();
 		startLocation = event.getLocation();
@@ -138,7 +138,7 @@ public class FigureTranslator implements MouseListener, MouseMotionListener {
 
 	@Override
 	public void mouseReleased(MouseEvent event) {
-		if (!active) return;
+		if (!isActive()) return;
 
 		if (location == null) return;
 		fireCompletedTranslation(new TranslationEvent(this));

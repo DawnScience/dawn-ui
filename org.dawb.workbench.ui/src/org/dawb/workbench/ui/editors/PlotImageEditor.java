@@ -186,7 +186,7 @@ public class PlotImageEditor extends EditorPart implements IEditorExtension, IRe
 					AbstractDataset set;
 					try {
 						final ILoaderService service = (ILoaderService)ServiceManager.getService(ILoaderService.class);
-						set = (AbstractDataset)service.getDataset(filePath);
+						set = (AbstractDataset)service.getDataset(filePath, null);
 					} catch (Throwable e) {
 						logger.error("Cannot load file "+filePath, e);
 						return Status.CANCEL_STATUS;

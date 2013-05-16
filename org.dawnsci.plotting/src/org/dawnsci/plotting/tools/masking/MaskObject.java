@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.BooleanDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IndexIterator;
 
 /**
  * This class is taken directly out of the class of the same name in SDA
@@ -308,13 +309,10 @@ public class MaskObject {
 	 * @param max
 	 * @return
 	 */
-	public boolean process(final Number min, final Number max, Collection<IRegion> regions, final IProgressMonitor monitor) {
-
-		boolean tmp = true;
-		if (max == null && min == null) {
-			tmp = false;
-		}
-		final boolean requireMinMax = tmp;
+	public boolean process(final Number              minNumber, 
+			               final Number              maxNumber, 
+			               final Collection<IRegion> regions, 
+			               final IProgressMonitor    monitor) {
 		
 		createMaskIfNeeded();
 		monitor.worked(1);
@@ -328,32 +326,35 @@ public class MaskObject {
 			validRegions.add(region);
 		}
 		
-        final MaskOperation op = new MaskOperation(maskDataset, getMaskDataset().getSize()/16);
 
         // Slightly wrong AbstractDataset loop, but it is faster...
-		final int[] shape = imageDataset.getShape();
-		if (validRegions==null && requireMinMax) {
-			for (int y = 0; y<shape[0]; ++y) {
-				for (int x = 0; x<shape[1]; ++x) {
-					final float val = imageDataset.getFloat(y, x);
-					boolean isValid = isValid(val,min,max);
-					if (!isValid) toggleMask(op, Boolean.FALSE, y, x); // false = masked
-				}
-				monitor.worked(1);
+		if (minNumber!=null || maxNumber!=null) {
+			final IndexIterator ita = imageDataset.getIterator();
+			final int           as  = imageDataset.getElementsPerItem();
+			if (as!=1) throw new RuntimeException("Cannot deal with mulitple elements in mask processing!");
+			
+			double              lo  = minNumber!=null ? minNumber.doubleValue() : Double.NaN;
+			double              hi  = maxNumber!=null ? maxNumber.doubleValue() : Double.NaN;
+			int i = 0;
+			while (ita.hasNext()) {
+				double x = imageDataset.getElementDoubleAbs(ita.index);
+				maskDataset.setAbs(i++, isValid(x, lo, hi));
 			}
-		} else if (validRegions!=null){
+		}
+			
+		if (validRegions!=null && !validRegions.isEmpty()){
+			
+	        final MaskOperation op = new MaskOperation(maskDataset, getMaskDataset().getSize()/16);
+			final int[] shape = imageDataset.getShape();
+		
 			Display.getDefault().syncExec(new Runnable() {
 				public void run() {
-					for (int y = 0; y<shape[0]; ++y) {
+					MAIN_LOOP: for (int y = 0; y<shape[0]; ++y) {
 						for (int x = 0; x<shape[1]; ++x) {
-							if (requireMinMax) {
-								final float val = imageDataset.getFloat(y, x);
-								boolean isValid = isValid(val,min,max);
-								if (!isValid) toggleMask(op, Boolean.FALSE, y, x); // false = masked
-							}
-							if (validRegions!=null) for (IRegion region : validRegions) {
+							for (IRegion region : validRegions) {
 								monitor.worked(1);
 								try {
+									if (region.getCoordinateSystem().isDisposed()) break MAIN_LOOP;
 									if (region.containsPoint(x, y)) {
 										toggleMask(op, !region.isMaskRegion(), y, x);
 									}
@@ -367,14 +368,14 @@ public class MaskObject {
 
 				}
 			});
-			    
+			
+	        try {
+				if (op.getSize()>0) operationManager.execute(op, null, null);
+			} catch (ExecutionException e) {
+				logger.error("Internal error processing region mask.", e);
+			}   
 		}
 		
-        try {
-			if (op.getSize()>0) operationManager.execute(op, null, null);
-		} catch (ExecutionException e) {
-			logger.error("Internal error processing region mask.", e);
-		}
 
 		return true;
 	}
@@ -391,9 +392,9 @@ public class MaskObject {
 		}
 	}
 
-	private static final boolean isValid(float val, Number min, Number max) {
-		if (min!=null && val<=min.floatValue()) return false;
-		if (max!=null && val>=max.floatValue()) return false;
+	private static final boolean isValid(double val, double min, double max) {
+		if (!Double.isNaN(min) && val<=min) return false;
+		if (!Double.isNaN(max) && val>=max) return false;
 		return true;
 	}
 

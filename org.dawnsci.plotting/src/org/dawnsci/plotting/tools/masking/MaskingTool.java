@@ -278,7 +278,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		label.setText("Create a mask, the mask can be saved and available in other tools.");
 		
 		final CLabel warningMessage = new CLabel(minMaxComp, SWT.WRAP);
-		warningMessage.setText("Changing lower / upper can reset the mask.");
+		warningMessage.setText("Changing lower / upper can reset the mask as is not undoable.");
 		warningMessage.setToolTipText("The reset can occur because the algorithm which processes intensity values,\ndoes not know if the mask pixel should be unmasked or not.\nIt can only take into account intensity.\nTherefore it is best to define intensity masks first,\nbefore the custom masks using pen or region tools." );
 		warningMessage.setImage(Activator.getImage("icons/error.png"));
 		warningMessage.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2,1));
@@ -836,14 +836,14 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		actionBars.getToolBarManager().add(reset);
 		actionBars.getToolBarManager().add(new Separator());
 		
-		final Action saveMask  = new Action("Save the mask into a temporary buffer", Activator.getImageDescriptor("icons/import_wiz.gif")) {
+		final Action saveMask  = new Action("Export the mask into a temporary buffer", Activator.getImageDescriptor("icons/export_wiz.gif")) {
 			public void run() {
 				saveMaskBuffer();
 			}
 		};
 		actionBars.getToolBarManager().add(saveMask);
 		
-	    loadMask  = new Action("Merge in the mask from temporary buffer", Activator.getImageDescriptor("icons/export_wiz.gif")) {
+	    loadMask  = new Action("Import the mask from temporary buffer", Activator.getImageDescriptor("icons/import_wiz.gif")) {
 			public void run() {
 				mergeSavedMask();
 			}

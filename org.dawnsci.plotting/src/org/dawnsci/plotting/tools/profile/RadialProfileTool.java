@@ -8,7 +8,10 @@ import org.dawb.common.services.ILoaderService;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawnsci.plotting.Activator;
+import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.dawnsci.plotting.api.region.RegionUtils;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.Action;
@@ -135,12 +138,33 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 			}
 		};
 		
+		final Action addFullSector = new Action("Add full area sector", IAction.AS_PUSH_BUTTON) {
+			@Override
+			public void run() {
+				IPlottingSystem plot = getPlottingSystem();
+				String name = RegionUtils.getUniqueName(getRegionName(), plot);
+				try {
+					IRegion region = plot.createRegion(name, RegionType.SECTOR);
+					SectorROI sector = getFullSector();
+					region.setROI(sector);
+					plot.addRegion(region);
+					//do it again to override preferedSymmetry
+					region.setROI(sector);
+					
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		};
+		
 		metaLock.setImageDescriptor(Activator.getImageDescriptor("icons/radial-tool-lock.png"));
+		addFullSector.setImageDescriptor(Activator.getImageDescriptor("icons/sector-full.png"));
 		
-		
+		getSite().getActionBars().getToolBarManager().add(addFullSector);
 		getSite().getActionBars().getToolBarManager().add(profileAxis);
 		getSite().getActionBars().getToolBarManager().add(metaLock);
 		getSite().getActionBars().getToolBarManager().add(new Separator());
+		getSite().getActionBars().getMenuManager().add(addFullSector);
 		getSite().getActionBars().getMenuManager().add(profileAxis);
 		getSite().getActionBars().getMenuManager().add(metaLock);
 		getSite().getActionBars().getToolBarManager().add(new Separator());
@@ -439,6 +463,19 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 		}
 		
 		update(null, null, false);
+	}
+	
+	private SectorROI getFullSector() {
+		
+		int[] shape = getImageTrace().getData().getShape();
+		double[] beamCenter = getBeamCenter();
+		double[] farCorner = new double[]{0,0};
+		if (beamCenter[1] < shape[0]/2.0) farCorner[0] = shape[0];
+		if (beamCenter[0] < shape[1]/2.0) farCorner[1] = shape[1];
+		double maxDistance = Math.sqrt(Math.pow(beamCenter[0]-farCorner[0],2)+Math.pow(beamCenter[1]-farCorner[1],2));
+		SectorROI sector = new SectorROI(beamCenter[0], beamCenter[1], 0, maxDistance, 0, 1);
+		sector.setSymmetry(SectorROI.FULL);
+		return sector;
 	}
 	
 }

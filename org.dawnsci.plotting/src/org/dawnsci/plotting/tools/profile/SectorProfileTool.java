@@ -8,6 +8,7 @@ import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawnsci.plotting.Activator;
+import org.dawnsci.plotting.api.region.ILockableRegion;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.region.IRegionListener;
@@ -19,6 +20,7 @@ import org.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 
@@ -38,8 +40,8 @@ public abstract class SectorProfileTool extends ProfileTool {
 	@Override
 	protected void configurePlottingSystem(AbstractPlottingSystem plotter) {
 
-		// We will add an action here for centering the sector.
-		this.center = new MenuAction("Center selection");
+		// We will add an action here for centring the sector.
+		this.center = new MenuAction("Centre selection");
 		center.setImageDescriptor(Activator.getImageDescriptor("icons/sector-center-menu.png"));
 		
 		getSite().getActionBars().getToolBarManager().add(center);
@@ -79,7 +81,7 @@ public abstract class SectorProfileTool extends ProfileTool {
 		getSite().getActionBars().getToolBarManager().add(symmetry);
 		getSite().getActionBars().getMenuManager().add(symmetry);
 		
-		addSymetryActions(symmetry);
+		addSymmetryActions(symmetry);
 		
 	}
 	
@@ -101,14 +103,14 @@ public abstract class SectorProfileTool extends ProfileTool {
 	private int     preferredSymmetry = SectorROI.NONE;
 	private boolean preferredCombine  = false;
 	
-	private void addSymetryActions(final MenuAction symmetry) {
+	private void addSymmetryActions(final MenuAction symmetry) {
 		
 		final CheckableActionGroup group = new CheckableActionGroup();
-		for (int isymetry = 0; isymetry < 7; isymetry++) {
+		for (int isymmetry = 0; isymmetry < 7; isymmetry++) {
 
-			final int finalSym = isymetry;
+			final int finalSym = isymmetry;
 			
-			final Action action = new Action(SectorROI.getSymmetryText(isymetry), IAction.AS_CHECK_BOX) {
+			final Action action = new Action(SectorROI.getSymmetryText(isymmetry), IAction.AS_CHECK_BOX) {
 				@Override
 				public void run() {
 					
@@ -165,6 +167,26 @@ public abstract class SectorProfileTool extends ProfileTool {
 		combine.setImageDescriptor(Activator.getImageDescriptor("icons/sector-symmetry-combine.png"));
 		getSite().getActionBars().getToolBarManager().add(combine);
 		getSite().getActionBars().getMenuManager().add(combine);
+		
+		
+		final Action lock = new Action("Lock center of all current sectors", IAction.AS_CHECK_BOX) {
+			@Override
+			public void run() {
+				final boolean centerMovable = !isChecked();
+				final Collection<IRegion> regions = getPlottingSystem().getRegions();
+				if (regions!=null) for (IRegion iRegion : regions) {
+					if (iRegion instanceof ILockableRegion) {
+						ILockableRegion lr = (ILockableRegion)iRegion;
+						lr.setCenterMovable(centerMovable);
+					}
+				}
+			}
+		};
+
+		getSite().getActionBars().getToolBarManager().add(new Separator());
+		lock.setImageDescriptor(Activator.getImageDescriptor("icons/lock.png"));
+    	getSite().getActionBars().getToolBarManager().add(lock);
+		
 	}
 
 	public void activate() {
