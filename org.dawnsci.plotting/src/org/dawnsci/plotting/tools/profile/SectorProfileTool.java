@@ -8,6 +8,7 @@ import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawnsci.plotting.Activator;
+import org.dawnsci.plotting.api.region.ILockableRegion;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.region.IRegionListener;
@@ -19,6 +20,7 @@ import org.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 
@@ -165,6 +167,26 @@ public abstract class SectorProfileTool extends ProfileTool {
 		combine.setImageDescriptor(Activator.getImageDescriptor("icons/sector-symmetry-combine.png"));
 		getSite().getActionBars().getToolBarManager().add(combine);
 		getSite().getActionBars().getMenuManager().add(combine);
+		
+		
+		final Action lock = new Action("Lock center of all current sectors", IAction.AS_CHECK_BOX) {
+			@Override
+			public void run() {
+				final boolean centerMovable = !isChecked();
+				final Collection<IRegion> regions = getPlottingSystem().getRegions();
+				if (regions!=null) for (IRegion iRegion : regions) {
+					if (iRegion instanceof ILockableRegion) {
+						ILockableRegion lr = (ILockableRegion)iRegion;
+						lr.setCenterMovable(centerMovable);
+					}
+				}
+			}
+		};
+
+		getSite().getActionBars().getToolBarManager().add(new Separator());
+		lock.setImageDescriptor(Activator.getImageDescriptor("icons/lock.png"));
+    	getSite().getActionBars().getToolBarManager().add(lock);
+		
 	}
 
 	public void activate() {

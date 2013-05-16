@@ -6,6 +6,7 @@ import java.util.List;
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegionContainer;
+import org.dawnsci.plotting.api.region.ILockableRegion;
 import org.dawnsci.plotting.api.region.ROIEvent;
 import org.dawnsci.plotting.draw2d.swtxy.translate.FigureTranslator;
 import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationEvent;
@@ -17,6 +18,7 @@ import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.FigureListener;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.MouseEvent;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
@@ -28,11 +30,18 @@ import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 import uk.ac.diamond.scisoft.analysis.roi.handler.HandleStatus;
 import uk.ac.diamond.scisoft.analysis.roi.handler.SectorROIHandler;
 
-public class SectorSelection extends AbstractSelectionRegion {
+/**
+ * You should not call this concrete class outside of the draw2d 
+ * extensions unless absolutely required.
+ * 
+ * @author Peter Chang
+ *
+ */
+class SectorSelection extends AbstractSelectionRegion implements ILockableRegion{
 
 	DecoratedSector sector;
 
-	public SectorSelection(String name, ICoordinateSystem coords) {
+	SectorSelection(String name, ICoordinateSystem coords) {
 		super(name, coords);
 		setRegionColor(ColorConstants.red);
 		setAlpha(80);
@@ -241,6 +250,8 @@ public class SectorSelection extends AbstractSelectionRegion {
 			sector.dispose();
 		}
 	}
+	
+	private boolean isCenterMovable=true;
 
 	class DecoratedSector extends Sector implements IRegionContainer {
 		private List<IFigure> handles;
@@ -324,7 +335,12 @@ public class SectorSelection extends AbstractSelectionRegion {
 			}
 
 			addFigureListener(moveListener);
-			mover = new FigureTranslator(getXyGraph(), parent, this, handles);
+			mover = new FigureTranslator(getXyGraph(), parent, this, handles) {
+				public void mouseDragged(MouseEvent event) {
+					if (!isCenterMovable) return;
+					super.mouseDragged(event);
+				}
+			};
 			mover.setActive(isMobile());
 			mover.addTranslationListener(createRegionNotifier());
 			fTranslators.add(mover);
@@ -530,6 +546,30 @@ public class SectorSelection extends AbstractSelectionRegion {
 
 		@Override
 		public void setRegion(IRegion region) {
+		}
+
+		public List<FigureTranslator> getHandleTranslators() {
+			return fTranslators;
+		}
+		public List<IFigure> getHandles() {
+			return handles;
+		}
+	}
+
+	public boolean isCenterMovable() {
+		return isCenterMovable;
+	}
+
+	public void setCenterMovable(boolean isCenterMovable) {
+		this.isCenterMovable = isCenterMovable;
+		if (isCenterMovable) {
+			sector.setCursor(Draw2DUtils.getRoiMoveCursor());
+			sector.getHandleTranslators().get(sector.getHandleTranslators().size()-1).setActive(true);
+			sector.getHandles().get(sector.getHandles().size()-1).setVisible(true);
+		} else {
+			sector.setCursor(null);			
+			sector.getHandleTranslators().get(sector.getHandleTranslators().size()-1).setActive(false);
+			sector.getHandles().get(sector.getHandles().size()-1).setVisible(false);
 		}
 	}
 }

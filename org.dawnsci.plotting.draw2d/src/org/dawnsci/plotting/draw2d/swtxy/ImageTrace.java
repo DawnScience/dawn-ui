@@ -252,7 +252,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				}
 				
 				if (rescaleType==ImageScaleType.REHISTOGRAM) { // Avoids changing colouring to 
-					// max and min of new selection.
+					                                           // max and min of new selection.
 					AbstractDataset  slice     = slice(getYAxis().getRange(), getXAxis().getRange(), (AbstractDataset)getData());
 					ImageServiceBean histoBean = imageServiceBean.clone();
 					histoBean.setImage(slice);
@@ -1070,6 +1070,17 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		repaint();
 	}
 	
+	protected void remask() {
+		if (imageServiceBean==null) return;
+		
+		createScaledImage(ImageScaleType.FORCE_REIMAGE, null);
+
+		// Max and min changed in all likely-hood
+		fireMaskListeners();
+		repaint();
+	}
+
+	
 	@Override
 	public List<IDataset> getAxes() {
 		return (List<IDataset>) axes;
@@ -1204,8 +1215,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		}
 		if (maskMap!=null) maskMap.clear();
 		fullMask = (AbstractDataset)mask;
-		rehistogram();
-		fireMaskListeners();
+		remask();
 	}
 
 	private boolean userTrace = true;
