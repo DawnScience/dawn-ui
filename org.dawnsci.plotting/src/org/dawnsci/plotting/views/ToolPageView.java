@@ -50,6 +50,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -1168,6 +1169,20 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 			} catch (Throwable ne) {
 				logger.error("Unable to sync "+view.activeRec.tool.getToolId());
 			}
+			
+			if (orig.getPart()!=null) {
+				final IToolPage finalOrig = orig;
+				Display.getDefault().asyncExec(new Runnable() {
+					public void run() {
+						try {
+						    EclipseUtils.getActivePage().activate(finalOrig.getPart());
+						} catch (Throwable ne) {
+							logger.error("Cannot activate part "+finalOrig, ne);
+						}
+					}
+				});
+			}
+			
 			if (orig.isActive()) orig.deactivate();
 			
 			if (view.activeRec.tool.isStaticTool()) {
