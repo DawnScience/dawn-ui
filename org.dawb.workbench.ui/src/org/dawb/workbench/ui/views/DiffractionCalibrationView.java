@@ -501,18 +501,17 @@ public class DiffractionCalibrationView extends ViewPart {
 				IStatus stat = Status.OK_STATUS;
 				final ProgressMonitorWrapper mon = new ProgressMonitorWrapper(monitor);
 				monitor.beginTask("Calibrate detector", IProgressMonitor.UNKNOWN);
+				CalibrantSpacing calib = CalibrationFactory.getCalibrationStandards().getCalibrant();
 				for (MyData data : model) {
-					if (!data.use || data.nrois <= 0) {
+					if (!data.use || data.nrois <= 0 || data.md == null) {
 						continue;
 					}
 					monitor.subTask("Fitting rings in " + data.name);
 					data.q = null;
 
-					CalibrantSpacing calib = CalibrationFactory.getCalibrationStandards().getCalibrant();
-					IDiffractionMetadata md = data.augmenter.getDiffractionMetadata();
 					try {
-						data.q = PowderRingsUtils.fitAllEllipsesToQSpace(mon, md.getDetector2DProperties(),
-								md.getDiffractionCrystalEnvironment(), data.rois, calib.getHKLs());
+						data.q = PowderRingsUtils.fitAllEllipsesToQSpace(mon, data.md.getDetector2DProperties(),
+								data.md.getDiffractionCrystalEnvironment(), data.rois, calib.getHKLs());
 						System.err.println(data.q);
 					} catch (IllegalArgumentException e) {
 						System.err.println(e);
@@ -522,25 +521,22 @@ public class DiffractionCalibrationView extends ViewPart {
 				display.asyncExec(new Runnable() {
 					@Override
 					public void run() {
-						if (currentData == null || currentData.augmenter == null || currentData.q == null)
+						if (currentData == null || currentData.md == null || currentData.q == null)
 							return;
 
-						IDiffractionMetadata md = currentData.augmenter.getDiffractionMetadata();
-						if (md != null) {
-							DetectorProperties dp = md.getDetector2DProperties();
-							if (dp != null) {
-								DetectorProperties fp = currentData.q.getDetectorProperties();
-								double[] angs = fp.getNormalAnglesInDegrees();
-								dp.setNormalAnglesInDegrees(angs[0], angs[1], angs[2]);
-							}
-							DiffractionCrystalEnvironment ce =  md.getDiffractionCrystalEnvironment();
-							if (ce != null) {
-								ce.setWavelength(currentData.q.getWavelength());
-							}
-							refreshTable();
-							hideFoundRings();
-							drawCalibrantRings();
+						DetectorProperties dp = currentData.md.getDetector2DProperties();
+						if (dp != null) {
+							DetectorProperties fp = currentData.q.getDetectorProperties();
+							double[] angs = fp.getNormalAnglesInDegrees();
+							dp.setNormalAnglesInDegrees(angs[0], angs[1], angs[2]);
 						}
+						DiffractionCrystalEnvironment ce = currentData.md.getDiffractionCrystalEnvironment();
+						if (ce != null) {
+							ce.setWavelength(currentData.q.getWavelength());
+						}
+						refreshTable();
+						hideFoundRings();
+						drawCalibrantRings();
 					}
 				});
 				return stat;
@@ -651,7 +647,10 @@ public class DiffractionCalibrationView extends ViewPart {
 				data.augmenter = aug;
 			}
 			aug.activate();
-			aug.setDiffractionMetadata(DiffractionTool.getDiffractionMetadata(image.getData(), data.path, service, null));
+			if (data.md == null)
+				data.md = DiffractionTool.getDiffractionMetadata(image.getData(), data.path, service, null);
+
+			aug.setDiffractionMetadata(data.md);
 			refreshTable();
 			drawCalibrantRings();
 		}
@@ -662,6 +661,7 @@ public class DiffractionCalibrationView extends ViewPart {
 		String path;
 		String name;
 		DiffractionImageAugmenter augmenter;
+		IDiffractionMetadata md;
 		Listener listener;
 		List<IROI> rois;
 		QSpace q;
@@ -736,10 +736,7 @@ public class DiffractionCalibrationView extends ViewPart {
 				return String.valueOf(data.nrois);
 			}
 
-			DiffractionImageAugmenter aug = data.augmenter;
-			if (aug == null)
-				return null;
-			IDiffractionMetadata md = aug.getDiffractionMetadata();
+			IDiffractionMetadata md = data.md;
 			if (md == null)
 				return null;
 
@@ -881,18 +878,10 @@ public class DiffractionCalibrationView extends ViewPart {
 	}
 
 	private void changeRings(ManipulateMode mode, boolean fast) {
-		if (currentSystem == null || currentData == null)
+		if (currentSystem == null || currentData == null || currentData.md == null)
 			return;
 
-		DiffractionImageAugmenter aug = currentData.augmenter;
-		if (aug == null)
-			return;
-
-		IDiffractionMetadata dmd = aug.getDiffractionMetadata();
-		if (dmd == null)
-			return;
-
-		DetectorProperties detprop = dmd.getDetector2DProperties();
+		DetectorProperties detprop = currentData.md.getDetector2DProperties();
 		if (detprop == null)
 			return;
 
