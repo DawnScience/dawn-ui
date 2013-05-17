@@ -312,7 +312,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 				@Override
 				public void diffractionCrystalEnvironmentChanged(
 						DiffractionCrystalEnvironmentEvent evt) {
-					if (evt.getSource() instanceof DiffractionCrystalEnvironmentEvent)
+					if (evt.getSource() instanceof DiffractionCrystalEnvironment)
 						DiffractionDefaultMetadata.setPersistedDiffractionCrystalEnvironmentValues((DiffractionCrystalEnvironment)evt.getSource());
 
 				}
