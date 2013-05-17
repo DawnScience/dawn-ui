@@ -9,6 +9,7 @@ import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.api.IPlottingSystem;
+import org.dawnsci.plotting.api.region.ILockableRegion;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.region.RegionUtils;
@@ -97,21 +98,26 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 				if (isChecked()) {
 					IMetaData meta = getMetaData();
 					profileAxis.setEnabled(true);
-					
+
 					if (meta != null && meta instanceof IDiffractionMetadata) {
 						updateSectorCenters(((IDiffractionMetadata)meta).getDetector2DProperties().getBeamCentreCoords());
 						registerMetadataListeners();
 					}
-					
+
 					if (getPlottingSystem()==null) return;
-					
+
 					final Collection<IRegion> regions = getPlottingSystem().getRegions();
 					if (regions!=null) for (final IRegion region : regions) {
 						if (isRegionTypeSupported(region.getRegionType())) {
-							region.setMobile(false);
+							if (region instanceof ILockableRegion) {
+								ILockableRegion lr = (ILockableRegion)region;
+								lr.setCenterMovable(false);
+							} else {
+								region.setMobile(false);
+							}
 						}
 					}
-					
+
 					for (int i = 0; i < profileAxis.size(); ++i) {
 						IAction action = profileAxis.getAction(i);
 						if (action.isChecked()) {
@@ -119,19 +125,24 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 							profileAxis.run();
 						}
 					}
-					
-					
+
+
 				} else {
-					
+
 					unregisterMetadataListeners();
 					IAction pixelAction = profileAxis.findAction("org.dawb.workbench.plotting.tools.profile.pixelAxisAction");
 					profileAxis.setEnabled(false);
 					pixelAction.run();
-					
+
 					final Collection<IRegion> regions = getPlottingSystem().getRegions();
 					if (regions!=null) for (final IRegion region : regions) {
 						if (isRegionTypeSupported(region.getRegionType())) {
-							region.setMobile(true);
+							if (region instanceof ILockableRegion) {
+								ILockableRegion lr = (ILockableRegion)region;
+								lr.setCenterMovable(true);
+							} else {
+								region.setMobile(true);
+							}
 						}
 					}
 				}
