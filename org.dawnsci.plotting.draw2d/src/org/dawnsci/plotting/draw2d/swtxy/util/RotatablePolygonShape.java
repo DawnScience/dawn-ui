@@ -101,19 +101,19 @@ public class RotatablePolygonShape extends AbstractPointListShape {
 	}
 
 	/**
-	 * Set angle of rotated polyline to given degrees anti-clockwise
+	 * Set angle of rotated polyline to given degrees clockwise
 	 * @param degrees
 	 */
 	public void setAngle(double degrees) {
-		affine.setRotationDegrees(-degrees);
+		affine.setRotationDegrees(degrees);
 		recalcPoints(opl, npl, true);
 	}
 
 	/**
-	 * @return angle of rotation in degrees (positive anti-clockwise)
+	 * @return angle of rotation in degrees (positive clockwise)
 	 */
 	public double getAngleDegrees() {
-		return -affine.getRotationDegrees();
+		return affine.getRotationDegrees();
 	}
 
 	@Override

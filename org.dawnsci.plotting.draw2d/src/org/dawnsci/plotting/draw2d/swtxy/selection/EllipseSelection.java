@@ -219,7 +219,7 @@ class EllipseSelection extends AbstractSelectionRegion {
 			Rectangle r = new Rectangle(corners.getFirstPoint(), corners.getLastPoint());
 			if (r.preciseWidth() < r.preciseHeight()) {
 				setAxes(r.preciseHeight(), r.preciseWidth());
-				setAngle(90);
+				setAngleDegrees(90);
 			} else {
 				setAxes(r.preciseWidth(), r.preciseHeight());
 			}
@@ -439,7 +439,7 @@ class EllipseSelection extends AbstractSelectionRegion {
 			setAxes(p2[0] - p1[0], p2[1] - p1[1]);
 
 			setCentre(p1[0], p1[1]);
-			setAngle(eroi.getAngleDegrees());
+			setAngleDegrees(eroi.getAngleDegrees());
 
 			updateHandlePositions();
 		}

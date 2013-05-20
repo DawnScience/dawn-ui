@@ -52,13 +52,13 @@ public class RotatableEllipse extends Shape implements PointFunction {
 	 * @param cy centre
 	 * @param major axis length
 	 * @param minor axis length
-	 * @param angle of major axis from horizontal (in degrees, positive for anti-clockwise)
+	 * @param angle of major axis from horizontal (in degrees, positive for clockwise)
 	 */
 	public RotatableEllipse(double cx, double cy, double major, double minor, double angle) {
 		affine = new AffineTransform();
 		affine.setTranslation(cx - 0.5 * major, cy - 0.5 * minor);
 		affine.setScale(major, minor);
-		setAngle(angle);
+		setAngleDegrees(angle);
 	}
 
 	/**
@@ -73,12 +73,12 @@ public class RotatableEllipse extends Shape implements PointFunction {
 	}
 
 	/**
-	 * Set angle of rotated ellipse to given degrees (positive for anti-clockwise)
+	 * Set angle of rotated ellipse to given degrees (positive for clockwise)
 	 * @param degrees
 	 */
-	public void setAngle(double degrees) {
+	public void setAngleDegrees(double degrees) {
 		Point oc = affine.getTransformed(centre);
-		affine.setRotationDegrees(-degrees);
+		affine.setRotationDegrees(degrees);
 		Point nc = affine.getTransformed(centre);
 		affine.setTranslation(affine.getTranslationX() + oc.preciseX() - nc.preciseX(), affine.getTranslationY() + oc.preciseY() - nc.preciseY());
 		calcBox(true);
@@ -88,7 +88,7 @@ public class RotatableEllipse extends Shape implements PointFunction {
 	 * @return angle of rotation in degrees (positive for anti-clockwise)
 	 */
 	public double getAngleDegrees() {
-		return -affine.getRotationDegrees();
+		return affine.getRotationDegrees();
 	}
 
 	/**

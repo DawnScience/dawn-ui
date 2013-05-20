@@ -156,7 +156,7 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 
 			ellipse.setAxes(pnt1[0] - pnt2[0], pnt1[1] - pnt2[1]);
 			ellipse.setCentre(pnt2[0], pnt2[1]);
-			ellipse.setAngle(ang);
+			ellipse.setAngleDegrees(ang);
 		} catch (IllegalArgumentException e) {
 			logger.info("Can not fit current selection");
 			return false;
@@ -466,7 +466,7 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 			setAxes(p2[0] - p1[0], p2[1] - p1[1]);
 
 			setCentre(p1[0], p1[1]);
-			setAngle(eroi.getAngleDegrees());
+			setAngleDegrees(eroi.getAngleDegrees());
 
 			int imax = handles.size() - 1;
 			PolylineROI proi = eroi.getPoints();
