@@ -39,14 +39,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
-import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
-import uk.ac.diamond.scisoft.analysis.fitting.Fitter;
+import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
+import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
+import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
+import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Gaussian;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
+import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.optimize.GeneticAlg;
 import uk.ac.diamond.scisoft.analysis.roi.ROIProfile;
+import uk.ac.diamond.scisoft.analysis.roi.ROIProfile.XAxis;
 import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 
 /**
@@ -59,12 +63,13 @@ public class BeamCenterRefinement implements MultivariateFunction {
 
 	private AbstractDataset dataset, mask;
 	private SectorROI sroi;
+	private XAxis axis;
 
 	private int cmaesLambda = 15;
 	private double[] cmaesInputSigma = new double[] { 3.0, 3.0 };
 	private int cmaesMaxIterations = 10000;
 	private int cmaesCheckFeasableCount = 10;
-	private ConvergenceChecker<PointValuePair> cmaesChecker = new SimplePointChecker<PointValuePair>(1e-4, 1e-2);
+	private ConvergenceChecker<PointValuePair> cmaesChecker = new SimplePointChecker<PointValuePair>(1e-3, 1e-4);
 
 	private static final Logger logger = LoggerFactory.getLogger(BeamCenterRefinement.class);
 
@@ -73,6 +78,7 @@ public class BeamCenterRefinement implements MultivariateFunction {
 		this.dataset = dataset;
 		this.mask = mask;
 		this.sroi = sroi;
+		this.axis = XAxis.Q;	// TODO: set this values from Radial Profile and/or Peak Fitting tools 
 	}
 
 	/**
@@ -132,29 +138,37 @@ public class BeamCenterRefinement implements MultivariateFunction {
 	@Override
 	public double value(final double[] beamxy) {
 
-		if (monitor.isCanceled())
+		if (monitor.isCanceled()) {
 			return Double.NaN;
-
-		SectorROI tmpRoi = new SectorROI(beamxy[0], beamxy[1], sroi.getRadius(0), sroi.getRadius(1), sroi.getAngle(0),
+		}
+		Display.getDefault().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				((IDiffractionMetadata) dataset.getMetadata()).getDetector2DProperties().setBeamCentreCoords(
+						beamxy);
+			}
+		});
+		SectorROI tmpRoi = new SectorROI(sroi.getPointX(), sroi.getPointY(), sroi.getRadius(0), sroi.getRadius(1), sroi.getAngle(0),
 				sroi.getAngle(1), 1.0, true, sroi.getSymmetry());
-		AbstractDataset[] intresult = ROIProfile.sector(dataset, mask, tmpRoi, true, false, true);
-		AbstractDataset axis = DatasetUtils.linSpace(tmpRoi.getRadius(0), tmpRoi.getRadius(1), intresult[0].getSize(),
-				AbstractDataset.INT32);
+		QSpace qSpace = null;
+		IMetaData metadata = dataset.getMetadata();
+		if (metadata instanceof IDiffractionMetadata) {
+			IDiffractionMetadata dm = (IDiffractionMetadata)metadata;
+			DetectorProperties detprops = dm.getDetector2DProperties();
+	    	DiffractionCrystalEnvironment diffexp = dm.getDiffractionCrystalEnvironment();
+	    	if (detprops != null && diffexp != null) {
+		    	qSpace = new QSpace(detprops, diffexp);
+	    	}
+		}
+		AbstractDataset[] intresult = ROIProfile.sector(dataset, mask, tmpRoi, true, false, false, qSpace, axis);
+		AbstractDataset axis = intresult[4];
 		double error = 0.0;
 		ArrayList<IPeak> peaks = new ArrayList<IPeak>(initPeaks.size());
-		for (int idx = 0; idx < initPeaks.size(); idx++) {
-			IPeak refPeak = initPeaks.get(idx);
-			double pos = refPeak.getPosition();
-			double fwhm = refPeak.getFWHM() / 2.0;
-			int startIdx = DatasetUtils.findIndexGreaterThanOrEqualTo(axis, pos - fwhm);
-			int stopIdx = DatasetUtils.findIndexGreaterThanOrEqualTo(axis, pos + fwhm) + 1;
-
-			AbstractDataset axisSlice = axis.getSlice(new int[] { startIdx }, new int[] { stopIdx }, null);
-			AbstractDataset peakSlice = intresult[0].getSlice(new int[] { startIdx }, new int[] { stopIdx }, null);
+		List<CompositeFunction> fittedGaussian = Generic1DFitter.fitPeakFunctions(axis, intresult[0], new Gaussian(), new GeneticAlg(0.0001),
+				10, initPeaks.size());
+		for (CompositeFunction peakFit : fittedGaussian) {
 			try {
-				CompositeFunction peakFit = Fitter.fit(axisSlice, peakSlice, new GeneticAlg(0.0001), new Gaussian(
-						refPeak.getParameters()));
-				IPeak fitPeak = new Gaussian(peakFit.getParameters());
+				IPeak fitPeak = new Gaussian(peakFit.getFunction(0).getParameters());
 				peaks.add(fitPeak);
 				error += Math.log(1.0 + fitPeak.getHeight() / fitPeak.getFWHM());
 			} catch (Exception e) {
@@ -163,9 +177,9 @@ public class BeamCenterRefinement implements MultivariateFunction {
 			}
 
 		}
-		if (checkPeakOverlap(peaks))
+		if (checkPeakOverlap(peaks)) {
 			return Double.NaN;
-
+		}
 		logger.info("Error value for beam postion ({}, {}) is {}", new Object[] { beamxy[0], beamxy[1], error });
 		return error;
 	}
@@ -206,6 +220,8 @@ public class BeamCenterRefinement implements MultivariateFunction {
 				function.setInitPeaks(initPeaks);
 				function.setMonitor(monitor);
 
+				final double[] lB = new double [] {startPosition[0] - 20, startPosition[1] - 20};
+				final double[] uB = new double [] {startPosition[0] + 20, startPosition[1] + 20};
 				CMAESOptimizer beamPosOptimizer = new CMAESOptimizer(cmaesMaxIterations,
 						0.0,
 						true,
@@ -219,7 +235,7 @@ public class BeamCenterRefinement implements MultivariateFunction {
 						GoalType.MAXIMIZE,
 						new CMAESOptimizer.PopulationSize(cmaesLambda),
 						new CMAESOptimizer.Sigma(cmaesInputSigma),
-						SimpleBounds.unbounded(2),
+						new SimpleBounds(lB, uB),
 						new InitialGuess(startPosition));
 				
 				final double[] newBeamPosition = result.getPoint();
@@ -229,7 +245,6 @@ public class BeamCenterRefinement implements MultivariateFunction {
 					public void run() {
 						((IDiffractionMetadata) dataset.getMetadata()).getDetector2DProperties().setBeamCentreCoords(
 								newBeamPosition);
-						sroi.setPoint(newBeamPosition);
 					}
 				});
 

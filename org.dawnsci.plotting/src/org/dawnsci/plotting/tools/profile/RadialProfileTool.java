@@ -32,13 +32,10 @@ import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.roi.ROIProfile;
+import uk.ac.diamond.scisoft.analysis.roi.ROIProfile.XAxis;
 import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 
 public class RadialProfileTool extends SectorProfileTool implements IDetectorPropertyListener, IDiffractionCrystalEnvironmentListener{
-	
-	private enum XAxis {
-		PIXEL, RESOLUTION, ANGLE, Q,
-	}
 	
 	private XAxis axis = XAxis.PIXEL;
     private MenuAction profileAxis;
@@ -55,6 +52,13 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 			public void run() {
 				axis = XAxis.PIXEL;
 				profileAxis.setSelectedAction(this);
+				
+				if (!combineSymmetry.isEnabled()) { 
+					combineSymmetry.setChecked(false);
+					combineSymmetry.run();
+					combineSymmetry.setEnabled(true);
+				}
+				
 				profilePlottingSystem.clear();
 				update(null, null, false);
 			}
@@ -67,6 +71,13 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 			public void run() {
 				axis = XAxis.RESOLUTION;
 				profileAxis.setSelectedAction(this);
+				
+				if (combineSymmetry.isEnabled()) { 
+					combineSymmetry.setChecked(false);
+					combineSymmetry.run();
+					combineSymmetry.setEnabled(false);
+				}
+				
 				profilePlottingSystem.clear();
 				update(null, null, false);
 			}
@@ -77,6 +88,13 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 			public void run() {
 				axis = XAxis.ANGLE;
 				profileAxis.setSelectedAction(this);
+				
+				if (combineSymmetry.isEnabled()) { 
+					combineSymmetry.setChecked(false);
+					combineSymmetry.run();
+					combineSymmetry.setEnabled(false);
+				}
+				
 				profilePlottingSystem.clear();
 				update(null, null, false);
 			}
@@ -87,6 +105,12 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 			public void run() {
 				axis = XAxis.Q;
 				profileAxis.setSelectedAction(this);
+				
+				if (combineSymmetry.isEnabled()) { 
+					combineSymmetry.setChecked(false);
+					combineSymmetry.run();
+					combineSymmetry.setEnabled(false);
+				}
 				profilePlottingSystem.clear();
 				update(null, null, false);
 			}
@@ -102,6 +126,7 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 					if (meta != null && meta instanceof IDiffractionMetadata) {
 						updateSectorCenters(((IDiffractionMetadata)meta).getDetector2DProperties().getBeamCentreCoords());
 						registerMetadataListeners();
+						setMessage(true);
 					}
 
 					if (getPlottingSystem()==null) return;
@@ -132,6 +157,7 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 					unregisterMetadataListeners();
 					IAction pixelAction = profileAxis.findAction("org.dawb.workbench.plotting.tools.profile.pixelAxisAction");
 					profileAxis.setEnabled(false);
+					setMessage(false);
 					pixelAction.run();
 
 					final Collection<IRegion> regions = getPlottingSystem().getRegions();
@@ -213,21 +239,18 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 				metaLock.setChecked(false);
 				metaLock.run();
 				metaLock.setEnabled(false);
-				setError(true);
 			}
 		} else {
 			if (isValidMetadata(meta)) {
 				metaLock.setEnabled(true);
 			} else {
 				metaLock.setEnabled(false);
-				setError(true);
 			}
 		}
 	}
 	
 	public void deactivate() {
 		super.deactivate();
-		setError(false);
 		unregisterMetadataListeners();
 	}
 	
@@ -243,6 +266,11 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 
 	@Override
 	protected AbstractDataset[] getXAxis(final SectorROI sroi, AbstractDataset[] integrals) {
+		
+		if (integrals[2] != null) {
+			return new AbstractDataset[]{integrals[2], integrals[3]};
+		}
+		
 		final AbstractDataset xi = DatasetUtils.linSpace(sroi.getRadius(0), sroi.getRadius(1), integrals[0].getSize(), AbstractDataset.FLOAT64);
 		xi.setName("Radius (pixel)");
 		
@@ -278,18 +306,7 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 	
 	private boolean isValidMetadata(IMetaData meta) {
 		
-		if (meta!=null && (meta instanceof IDiffractionMetadata)) {
-
-			IDiffractionMetadata dm = (IDiffractionMetadata)meta;
-			double[] angles = dm.getDetector2DProperties().getNormalAnglesInDegrees();
-			
-			//non zero pitch roll and yaw currently not supported
-			if (angles[0] == 0 &&
-				angles[1] == 0 &&
-				angles[2] == 0) {
-				return true;
-			}
-		} else if (meta!=null && !(meta instanceof IDiffractionMetadata)) {
+		if (meta != null && (meta instanceof IDiffractionMetadata)) {
 			return true;
 		}
 		
@@ -310,9 +327,9 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 		
 	}
 	
-	private void setError(boolean isError) {
-		if (isError) {
-			getSite().getActionBars().getStatusLineManager().setErrorMessage("WARNING: Locking profile to meta data not supported for non-zero detector pitch/roll/yaw");
+	private void setMessage(boolean isMessage) {
+		if (isMessage) {
+			getSite().getActionBars().getStatusLineManager().setErrorMessage("WARNING: Locking profile to meta data for non-zero detector pitch/roll/yaw is an experimental feature");
 		} else {
 			getSite().getActionBars().getStatusLineManager().setErrorMessage(null);
 		}
@@ -389,26 +406,55 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 			                              AbstractDataset mask, 
 			                              SectorROI       sroi, 
 			                              IRegion         region,
-			                              boolean         isDrag) {
+			                              boolean         isDrag,
+			                              int             downsample) {
 
 
-		AbstractDataset[] profile = ROIProfile.sector(data, mask, sroi, true, false, isDrag);
+		IDiffractionMetadata dm = null;
+		IMetaData meta = getMetaData();
+		QSpace qSpace = null;
 		
-        if (profile==null) return null;
-				
+		if (meta != null && (meta instanceof IDiffractionMetadata)) {
+			dm = (IDiffractionMetadata)meta;
+			DetectorProperties detprops = dm.getDetector2DProperties().clone();
+	    	DiffractionCrystalEnvironment diffexp = dm.getDiffractionCrystalEnvironment().clone();
+	    	// Update metadata values for downsampled datasets
+			if (downsample != 1) {
+				double[] beamCoords = detprops.getBeamCentreCoords();
+				double hps = detprops.getHPxSize();
+				double vps = detprops.getVPxSize();
+				int px = detprops.getPx();
+				int py = detprops.getPy();
+				detprops.setHPxSize(hps * downsample);
+				detprops.setVPxSize(vps * downsample);
+				detprops.setPx(px / downsample);
+				detprops.setPy(py / downsample);
+				detprops.setBeamCentreCoords(new double[] {beamCoords[0] / downsample, beamCoords[1] / downsample});
+			}
+			qSpace = new QSpace(detprops, diffexp);
+		}
+		
+		AbstractDataset[] profile = ROIProfile.sector(data, mask, sroi, true, false, isDrag, qSpace, axis);
+		
+        if (profile == null) {
+        	return null;
+        }
+        
 		final AbstractDataset integral = profile[0];
+		final AbstractDataset ax = profile[4];
 		integral.setName("Radial Profile "+region.getName());
 		
 		// If not symmetry profile[2] is null, otherwise plot it.
 	    if (profile.length>=3 && profile[2]!=null && sroi.hasSeparateRegions()) {
 	    	
 			final AbstractDataset reflection = profile[2];
+			final AbstractDataset axref = profile[6];
 			reflection.setName("Symmetry "+region.getName());
 
-			return new AbstractDataset[]{integral, reflection};
+			return new AbstractDataset[]{integral, reflection, ax, axref};
 	    	
 	    } else {
-	    	return new AbstractDataset[]{integral};
+	    	return new AbstractDataset[]{integral, null, ax, null};
 	    }
 	}
 

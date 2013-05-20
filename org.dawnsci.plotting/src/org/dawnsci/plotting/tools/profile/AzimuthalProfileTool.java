@@ -22,12 +22,12 @@ public class AzimuthalProfileTool extends SectorProfileTool {
 			xi = DatasetUtils.linSpace(sroi.getAngleDegrees(0), sroi.getAngleDegrees(1),integral[0].getSize(), AbstractDataset.FLOAT64);
 		else
 			xi = DatasetUtils.linSpace(sroi.getAngleDegrees(0), sroi.getAngleDegrees(0) + 360., integral[0].getSize(), AbstractDataset.FLOAT64);
-		xi.setName("Angle (°)");
+		xi.setName("Angle (\u00b0)");
 		
 		if (!sroi.hasSeparateRegions())  return new AbstractDataset[]{xi};
 		
 		AbstractDataset xii = DatasetUtils.linSpace(sroi.getAngleDegrees(0), sroi.getAngleDegrees(1), integral[1].getSize(), AbstractDataset.FLOAT64);
-		xii.setName("Angle (°)");
+		xii.setName("Angle (\u00b0)");
 	
 		return new AbstractDataset[]{xi, xii};
 	}
@@ -37,7 +37,8 @@ public class AzimuthalProfileTool extends SectorProfileTool {
 			                              AbstractDataset mask, 
 			                              SectorROI       sroi, 
 			                              IRegion         region,
-			                              boolean         isDrag) {
+			                              boolean         isDrag,
+			                              int             downsample) {
 
 
 		final AbstractDataset[] profile = ROIProfile.sector(data, mask, sroi, false, true, isDrag);
@@ -56,7 +57,7 @@ public class AzimuthalProfileTool extends SectorProfileTool {
 			return new AbstractDataset[]{integral, reflection};
 	    	
 	    } else {
-	    	return new AbstractDataset[]{integral};
+	    	return new AbstractDataset[]{integral, null};
 	    }
 	}
 
