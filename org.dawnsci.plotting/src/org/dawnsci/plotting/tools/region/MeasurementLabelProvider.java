@@ -48,7 +48,7 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 		if (!(element instanceof IRegion)) return null;
 		if (column==LabelType.ACTIVE){
 			final IRegion region = (IRegion)element;
-			return region.getROI().isPlot() && tool.getControl().isEnabled() ? checkedIcon : uncheckedIcon;
+			return region.isActive() && tool.getControl().isEnabled() ? checkedIcon : uncheckedIcon;
 		}
 		return null;
 	}

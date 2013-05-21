@@ -395,6 +395,8 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 			IRegion region = evt.getRegion();
 			region.addROIListener(this);
 			region.getROI().setPlot(true);
+			// set the Region isActive flag
+			region.setActive(true);
 		}
 	}
 

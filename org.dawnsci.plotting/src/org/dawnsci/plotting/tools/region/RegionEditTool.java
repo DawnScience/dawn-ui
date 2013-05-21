@@ -279,6 +279,7 @@ public class RegionEditTool extends AbstractRegionTableTool {
 				break;
 			case 7: //isPlot
 				myRoi.setPlot((Boolean)value);
+				region.setActive((Boolean)value);
 //				if(isActive){
 //					if (region!=null) region.setRegionColor(ColorConstants.green);
 //				} else {
