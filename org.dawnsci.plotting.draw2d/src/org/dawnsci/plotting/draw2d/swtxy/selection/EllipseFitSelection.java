@@ -223,6 +223,8 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 		try {
 			final EllipticalFitROI eroi = new EllipticalFitROI(hroi, circleOnly);
 			if (roi!=null) eroi.setPlot(roi.isPlot());
+			// set the Region isActive flag
+			this.setActive(this.isActive());
 			if (recordResult) {
 				roi = eroi;
 			}
