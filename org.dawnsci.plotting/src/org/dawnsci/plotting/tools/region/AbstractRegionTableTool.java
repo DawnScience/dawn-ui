@@ -81,8 +81,8 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 			if (!(sel.getFirstElement() instanceof IRegion)) return;
 			final IRegion          region = (IRegion)sel.getFirstElement();
 			previousRegion = region;
-			if((region != null) && region.getROI().isPlot()) region.setRegionColor(ColorConstants.green);
-			else if ((region != null) && !region.getROI().isPlot()) region.setRegionColor(ColorConstants.gray);
+			if((region != null) && region.isActive()) region.setRegionColor(ColorConstants.green);
+			else if ((region != null) && !region.isActive()) region.setRegionColor(ColorConstants.gray);
 			previousColor  = region!=null ? region.getRegionColor() : null;
 
 			if (region!=null) region.setRegionColor(ColorConstants.red);
