@@ -419,7 +419,7 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 				double[] ori = getDetectorProperties().getNormalAnglesInDegrees();
 				ori[index]   = evt.getAmount().doubleValue(NonSI.DEGREE_ANGLE);
 //				System.err.printf("Node %d amount set: %f\n", index, ori[index]);
-				getDetectorProperties().setNormalAnglesInDegrees(ori[0], ori[1], ori[2]);
+				getDetectorProperties().setNormalAnglesInDegrees(ori);
 			}
 		});
 

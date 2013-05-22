@@ -384,7 +384,12 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		if (!active) return; // We are likely off screen.
 		if (detprop != null && diffenv != null) {
 			double[] beamCentre = detprop.getBeamCentreCoords(); // detConfig.pixelCoords(detConfig.getBeamPosition());
-			IROI roi  = DSpacing.conicFromDSpacing(detprop, diffenv, ring.getResolution());
+			IROI roi;
+			try {
+				roi = DSpacing.conicFromDSpacing(detprop, diffenv, ring.getResolution());
+			} catch (IllegalArgumentException e) {
+				return;
+			}
 			resROIs.add(roi);
 			if (roi instanceof EllipticalROI) {
 				DecimalFormat df = new DecimalFormat("#.00");

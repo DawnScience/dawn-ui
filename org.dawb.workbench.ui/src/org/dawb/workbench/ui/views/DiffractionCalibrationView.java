@@ -528,7 +528,8 @@ public class DiffractionCalibrationView extends ViewPart {
 						if (dp != null) {
 							DetectorProperties fp = currentData.q.getDetectorProperties();
 							double[] angs = fp.getNormalAnglesInDegrees();
-							dp.setNormalAnglesInDegrees(angs[0], angs[1], angs[2]);
+							dp.setNormalAnglesInDegrees(angs);
+							dp.setOrigin(fp.getOrigin());
 						}
 						DiffractionCrystalEnvironment ce = currentData.md.getDiffractionCrystalEnvironment();
 						if (ce != null) {
@@ -749,7 +750,7 @@ public class DiffractionCalibrationView extends ViewPart {
 				DiffractionCrystalEnvironment ce = md.getDiffractionCrystalEnvironment();
 				if (ce == null)
 					return null;
-				return String.format("%.2f", ce.getWavelength());
+				return String.format("%.3f", ce.getWavelength());
 			}
 			return null;
 		}
