@@ -18,15 +18,11 @@ import org.dawnsci.common.widgets.tree.ValueEvent;
 import org.dawnsci.common.widgets.tree.ValueListener;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.draw2d.swtxy.selection.GridSelection;
-import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.jscience.physics.amount.Amount;
 
+import uk.ac.diamond.scisoft.analysis.roi.GridPreferences;
 import uk.ac.diamond.scisoft.analysis.roi.GridROI;
 
 /**
@@ -44,7 +40,6 @@ public class GridTreeModel extends AbstractNodeModel {
 	GridTreeModel() {
 		super();
 		createGridNodes();
-		createPreferenceListener();
 	}
 
 	// All the nodes member data, not great
@@ -132,7 +127,7 @@ public class GridTreeModel extends AbstractNodeModel {
 				if (groi==null || region==null) return;
 				try {
 					adjustingValue = true;
-					double xspacing = groi.getGridPreferences().getXPixelsFromMicronsCoord(evt.getAmount().doubleValue(SI.MICRO(SI.METRE)));
+					double xspacing = groi.getGridPreferences().getXPixelsFromMicronsLen(evt.getAmount().doubleValue(SI.MICRO(SI.METRE)));
 					groi.setxSpacing(xspacing);
 					region.setROI(groi);
 					region.repaint();
@@ -157,7 +152,7 @@ public class GridTreeModel extends AbstractNodeModel {
 				if (groi==null || region==null) return;
 				try {
 					adjustingValue = true;
-					double yspacing = groi.getGridPreferences().getYPixelsFromMicronsCoord(evt.getAmount().doubleValue(SI.MICRO(SI.METRE)));
+					double yspacing = groi.getGridPreferences().getYPixelsFromMicronsLen(evt.getAmount().doubleValue(SI.MICRO(SI.METRE)));
 					groi.setySpacing(yspacing);
 					region.setROI(groi);
 					region.repaint();
@@ -315,74 +310,6 @@ public class GridTreeModel extends AbstractNodeModel {
 	public static final String GRIDSCAN_BEAMLINE_POSX = "gridscan.beamline.posx";
 	public static final String GRIDSCAN_BEAMLINE_POSY = "gridscan.beamline.posy";
 
-	private void createPreferenceListener() {
-		
-		final IPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "uk.ac.diamond.scisoft.analysis.rcp");
-		store.addPropertyChangeListener(new IPropertyChangeListener() {
-			@Override
-			public void propertyChange(PropertyChangeEvent event) {
-				String property = event.getProperty();
-
-				if (groi==null) return;
-				
-				if (property.equals(GRIDSCAN_RESOLUTION_X)
-						|| property.equals(GRIDSCAN_RESOLUTION_Y)
-						|| property.equals(GRIDSCAN_BEAMLINE_POSX)
-						|| property.equals(GRIDSCAN_BEAMLINE_POSY)) {
-					setGridPreferences(true);
-				}
-			}
-		});
-
-	}
-
-
-	protected void setGridPreferences(boolean sendRoi) {
-		
-		if (groi==null) return;
-
-		final IPreferenceStore preferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, "uk.ac.diamond.scisoft.analysis.rcp");
-
-		double gridScanResolutionX;
-		if (preferenceStore.isDefault(GRIDSCAN_RESOLUTION_X)) {
-			gridScanResolutionX = preferenceStore
-					.getDefaultDouble(GRIDSCAN_RESOLUTION_X);
-		} else {
-			gridScanResolutionX = preferenceStore.getDouble(GRIDSCAN_RESOLUTION_X);
-		}
-		groi.getGridPreferences().setResolutionX(gridScanResolutionX);
-
-		double gridScanResolutionY;
-		if (preferenceStore.isDefault(GRIDSCAN_RESOLUTION_Y)) {
-			gridScanResolutionY = preferenceStore
-					.getDefaultDouble(GRIDSCAN_RESOLUTION_Y);
-		} else {
-			gridScanResolutionY = preferenceStore.getDouble(GRIDSCAN_RESOLUTION_Y);
-		}
-		groi.getGridPreferences().setResolutionY(gridScanResolutionY);
-
-		double xBeamPos;
-		if (preferenceStore.isDefault(GRIDSCAN_BEAMLINE_POSX)) {
-			xBeamPos = preferenceStore.getDefaultDouble(GRIDSCAN_BEAMLINE_POSX);
-		} else {
-			xBeamPos = preferenceStore.getDouble(GRIDSCAN_BEAMLINE_POSX);
-		}
-		groi.getGridPreferences().setBeamlinePosX(xBeamPos);
-
-		double yBeamPos;
-		if (preferenceStore.isDefault(GRIDSCAN_BEAMLINE_POSY)) {
-			yBeamPos = preferenceStore.getDefaultDouble(GRIDSCAN_BEAMLINE_POSY);
-		} else {
-			yBeamPos = preferenceStore.getDouble(GRIDSCAN_BEAMLINE_POSY);
-		}
-		groi.getGridPreferences().setBeamlinePosY(yBeamPos);
-		
-		if (sendRoi) {
-			region.setROI(groi);
-			region.repaint();
-		}
-	}
-
 	protected void updateGridDimensions(GridROI groi) {
 		String value = String.format("%d x %d = %d point%s", groi.getDimensions()[0], groi.getDimensions()[1], groi
 				.getDimensions()[0]
@@ -413,7 +340,6 @@ public class GridTreeModel extends AbstractNodeModel {
 			viewer.update(gridLines, new String[]{"Value"});
 			
 			updateGridDimensions(groi);
-			setGridPreferences(false);
 		}
 		this.groi = groi;
         
@@ -446,13 +372,45 @@ public class GridTreeModel extends AbstractNodeModel {
 
         Unit<Length> unknown = SI.MILLIMETRE;
         UnitFormat.getInstance().label(unknown, "unit");
-        NumericNode<Length> beamX = new NumericNode<Length>("X", beamCen,  SI.MILLIMETRE);
-        beamX.setUnits(unknown);
+        NumericNode<Dimensionless> beamX = new NumericNode<Dimensionless>("X", beamCen, Dimensionless.UNIT);
+        beamX.setUnits(Dimensionless.UNIT);
+        beamX.addAmountListener(new AmountListener<Dimensionless>() {		
+			@Override
+			public void amountChanged(AmountEvent<Dimensionless> evt) {
+				if (groi==null || region==null) return;
+				try {
+					adjustingValue = true;
+					final double val = evt.getAmount().doubleValue(Dimensionless.UNIT);
+					GridPreferences gp = groi.getGridPreferences();
+					gp.setBeamlinePosX(val);
+					groi.setGridPreferences(gp);
+					region.setROI(groi);
+				} finally {
+					adjustingValue = false;
+				}
+			}
+		});
         registerNode(beamX);
         beamX.setEditable(true);
 
-        NumericNode<Length> beamY = new NumericNode<Length>("Y", beamCen, SI.MILLIMETRE);
-        beamX.setUnits(unknown);
+        NumericNode<Dimensionless> beamY = new NumericNode<Dimensionless>("Y", beamCen, Dimensionless.UNIT);
+        beamY.setUnits(Dimensionless.UNIT);
+        beamY.addAmountListener(new AmountListener<Dimensionless>() {		
+			@Override
+			public void amountChanged(AmountEvent<Dimensionless> evt) {
+				if (groi==null || region==null) return;
+				try {
+					adjustingValue = true;
+					final double val = evt.getAmount().doubleValue(Dimensionless.UNIT);
+					GridPreferences gp = groi.getGridPreferences();
+					gp.setBeamlinePosY(val);
+					groi.setGridPreferences(gp);
+					region.setROI(groi);
+				} finally {
+					adjustingValue = false;
+				}
+			}
+		});
         registerNode(beamY);
         beamY.setEditable(true);
 
@@ -480,9 +438,5 @@ public class GridTreeModel extends AbstractNodeModel {
 		}
 		this.region = region;
 		setGridROI(groi);
-		
-		
 	}
-
-
 }

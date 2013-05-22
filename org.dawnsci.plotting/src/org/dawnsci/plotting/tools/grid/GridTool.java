@@ -30,10 +30,14 @@ import org.dawnsci.plotting.api.region.ROIEvent;
 import org.dawnsci.plotting.api.region.RegionEvent;
 import org.dawnsci.plotting.api.region.RegionUtils;
 import org.dawnsci.plotting.api.tool.AbstractToolPage;
+import org.dawnsci.plotting.api.trace.ITraceListener;
+import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.JFacePreferences;
 import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.resource.ColorRegistry;
@@ -62,11 +66,14 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.jscience.physics.amount.Amount;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+import uk.ac.diamond.scisoft.analysis.io.IMetaData;
+import uk.ac.diamond.scisoft.analysis.roi.GridPreferences;
 import uk.ac.diamond.scisoft.analysis.roi.GridROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 
@@ -76,6 +83,13 @@ import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
  * GDA will also be able to add custom actions for running the
  * scan to this tool using the extension point for adding actions
  * to tools.
+ * 
+ * Instead of using the preference store to get the GridPreferences (beam position, resolution)
+ * it should now be passed in as metadata on the abstract dataset which is plotted.
+ * 
+ * The metadata dictionary should contain a populated GridPreferences object value associated
+ * with the key "GDA_GRID_METADATA" (public static on this class)
+ * 
  * 
  * @author fcp94556
  *
@@ -90,6 +104,8 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 	private ClearableFilteredTree filteredTree;
 	private IRegionListener       regionListener;
 	private IROIListener          roiListener;
+	private ITraceListener        traceListener;
+	public static final String    GDA_GRID_METADATA ="GDA_GRID_METADATA";  
 
 	public GridTool() {
 		
@@ -99,11 +115,15 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 				if (!isActive()) return;
 				if (!(evt.getROI() instanceof GridROI)) return;
 				if (model!=null) {
-					model.setRegion((IRegion)evt.getSource(), (GridROI)evt.getROI());
+					GridROI roi = (GridROI)evt.getROI();
+					if (gridPreferences != null) {
+						roi.setGridPreferences(gridPreferences);
+					}
+					model.setRegion((IRegion)evt.getSource(), roi);
 				}
 			}
 		};
-		
+
 		this.regionListener = new IRegionListener.Stub() {
 			@Override
 			public void regionRemoved(RegionEvent evt) {
@@ -116,6 +136,22 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 				}
 			}
 		};
+		
+		this.traceListener = new ITraceListener.Stub() {
+			protected void update(TraceEvent evt) {
+				if (getImageTrace()!=null) {
+					updateGridPreferences();
+				}
+			}
+			
+			@Override
+			public void traceAdded(TraceEvent evt) {
+				if (getImageTrace()!=null) {
+					updateGridPreferences();
+				}
+			}
+		};
+		
 	}
 
 
@@ -124,6 +160,17 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		return ToolPageRole.ROLE_2D;
 	}
 	
+//  Example metadata object expected by the grid tool to correctly populate the grid preferences
+//	private IMetaData getGDAGridPreferences() {
+//
+//		Map<String,GridPreferences> gdaMap = new HashMap<String, GridPreferences>();
+//		
+//		GridPreferences gp = new GridPreferences(100000, 10000, Math.random()*1000, Math.random()*1000);
+//
+//		gdaMap.put(GDA_GRID_METADATA, gp);
+//
+//		return new Metadata(gdaMap);
+//	}
 
 	@Override
 	public void createControl(Composite parent) {
@@ -249,12 +296,32 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 				}
 			}			
 		});
-		
+		gridPreferences = getGridPreferences();
 		connectBeamCenterControls();
+	}
+	
+	private void updateGridPreferences() {
+		gridPreferences = getGridPreferences();
+		updateBeamCentre();
+		drawBeamCentre(beamCenterAction.isChecked());
+	}
+	
+	private void updateBeamCentre() {
+		this.beamCenter = getBeamCenter();
+		@SuppressWarnings("unchecked")
+		final NumericNode<Length> x = (NumericNode<Length>)model.getNode("/Detector/Beam Centre/X");
+		x.setValue(Amount.valueOf(beamCenter[0], x.getUnit()));
+		viewer.update(x, new String[]{"Value"});
+		
+		@SuppressWarnings("unchecked")
+		final NumericNode<Length> y = (NumericNode<Length>)model.getNode("/Detector/Beam Centre/Y");
+		y.setValue(Amount.valueOf(beamCenter[1], y.getUnit()));
+		viewer.update(y, new String[]{"Value"});
 	}
 	
 	private void connectBeamCenterControls() {
 		// TODO FIXME Define beamCenter differently to actual center?
+		//Now gets beamcentre from GDA metadata if supplied
 		this.beamCenter = getBeamCenter();
 		
 		@SuppressWarnings("unchecked")
@@ -287,6 +354,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 
 	private double[] beamCenter;
 	private Action   beamCenterAction;
+	private GridPreferences gridPreferences;
 
 	/**
 	 * Gets beam center from centre of custom axes, if any or
@@ -294,6 +362,13 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 	 * @return
 	 */
 	private double[] getBeamCenter() {
+		
+		if (gridPreferences != null) {
+			double x = gridPreferences.getBeamlinePosX();
+			double y = gridPreferences.getBeamlinePosY();
+			
+			return new double[]{x,y};
+		}
 		
 		double[] ret = new double[2];
 		final List<IDataset> axes = getImageTrace().getAxes();
@@ -358,7 +433,19 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 			if (beamCenter!=null){
 				DecimalFormat df = new DecimalFormat("#.##");
 				String label = df.format(beamCenter[0]) + "px, " + df.format(beamCenter[1])+"px";
-				drawCrosshairs(beamCenter, beamCenter[1]/20, ColorConstants.red, ColorConstants.black, "beam centre", label);
+				
+				int imx = 2000;
+				int imy = 2000;
+				
+				if (getImageTrace() != null && getImageTrace().getData() != null) {
+					int[] shape = getImageTrace().getData().getShape();
+					imx = shape[0];
+					imy = shape[0];
+				}
+				
+				double length = (1 + Math.sqrt(imx * imx + imy * imy) * 0.02);
+				
+				drawCrosshairs(beamCenter, length, ColorConstants.red, ColorConstants.black, "beam centre", label);
 			}
 		}
 	}
@@ -403,7 +490,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		region.setUserObject(RING_TYPE.BEAM_CENTRE);
 		
 		region.setLabel(labelText);
-		((AbstractSelectionRegion)region).setShowLabel(true);
+		((AbstractSelectionRegion)region).setShowLabel(false);
 		
 		getPlottingSystem().addRegion(region);
 		region.setMobile(false); // NOTE: Must be done **AFTER** calling the addRegion method.
@@ -458,6 +545,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 				}
 			}
 			getPlottingSystem().addRegionListener(regionListener);
+			getPlottingSystem().addTraceListener(traceListener);
 		}
 		createNewRegion();
 	}
@@ -473,6 +561,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 				}
 			}
 			getPlottingSystem().removeRegionListener(regionListener);
+			getPlottingSystem().removeTraceListener(traceListener);
 		}
 	}
 	
@@ -533,6 +622,35 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		} catch (Throwable ne) {
 			// intentionally silent
 		}
+	}
+	
+	private GridPreferences getGridPreferences() {
+		
+		GridPreferences gp = null;
+		
+		try {
+			IMetaData m = getImageTrace().getData().getMetadata();
+			if (m != null && m.getMetaNames().contains(GDA_GRID_METADATA)) {
+				Object ob = m.getMetaValue(GDA_GRID_METADATA);
+				if (ob instanceof GridPreferences) {
+					gp = (GridPreferences)ob;
+				}
+			}
+		} catch (Exception e) {
+			return getGridFromStore();
+		}
+		return gp;
+		
+	}
+	
+	private GridPreferences getGridFromStore() {
+		final IPreferenceStore preferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, "uk.ac.diamond.scisoft.analysis.rcp");
+		double xRes = preferenceStore.getDouble(GridTreeModel.GRIDSCAN_RESOLUTION_X);
+		double yRes = preferenceStore.getDouble(GridTreeModel.GRIDSCAN_RESOLUTION_Y);
+		double xbeam = preferenceStore.getDouble(GridTreeModel.GRIDSCAN_BEAMLINE_POSX);
+		double ybeam = preferenceStore.getDouble(GridTreeModel.GRIDSCAN_BEAMLINE_POSY);
+		
+		return new GridPreferences(xRes, yRes, xbeam, ybeam);
 	}
 
 }
