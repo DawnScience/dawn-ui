@@ -163,7 +163,9 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		try {
 			if (model==null) return;
 			model.setIntensityValues(getImageTrace());
-			if (!(viewer.getControl().isDisposed())) viewer.refresh();
+			if (viewer != null) {
+				if (!(viewer.getControl().isDisposed())) viewer.refresh();
+			}
 		} catch (Exception e) {
 			logger.error("Updating intensity values!", e);
 		}
