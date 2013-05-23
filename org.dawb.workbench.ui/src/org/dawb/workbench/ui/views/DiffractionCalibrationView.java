@@ -86,6 +86,7 @@ import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
 import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
 import uk.ac.diamond.scisoft.analysis.diffraction.PowderRingsUtils;
 import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
+import uk.ac.diamond.scisoft.analysis.io.AbstractFileLoader;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
@@ -131,7 +132,7 @@ public class DiffractionCalibrationView extends ViewPart {
 				IWorkbenchPart part = partRef.getPart(false);
 				System.err.println("part visible: " + part.getTitle());
 				IPlottingSystem system = PartUtils.getPlottingSystem(part);
-				if (system != null) { // TODO fix for PlotView
+				if (system != null) {
 					String altPath = part instanceof IEditorPart ? EclipseUtils.getFilePath(((IEditorPart) part).getEditorInput()) : null;
 					setData(altPath, system);
 				}
@@ -628,7 +629,7 @@ public class DiffractionCalibrationView extends ViewPart {
 
 		@Override
 		public void traceRemoved(TraceEvent evt) {
-			// ignore
+			data.path = null;
 		}
 
 		@Override
@@ -648,6 +649,12 @@ public class DiffractionCalibrationView extends ViewPart {
 				data.augmenter = aug;
 			}
 			aug.activate();
+			if (data.path == null) {
+				String path = getPathFromTrace(image);
+				data.path = path;
+				data.name = path.substring(path.lastIndexOf(File.separatorChar) + 1);
+				data.md = DiffractionTool.getDiffractionMetadata(image.getData(), data.path, service, null);
+			}
 			if (data.md == null)
 				data.md = DiffractionTool.getDiffractionMetadata(image.getData(), data.path, service, null);
 
@@ -807,12 +814,30 @@ public class DiffractionCalibrationView extends ViewPart {
 		}
 	}
 
+	private String getPathFromTrace(IImageTrace trace) {
+		String path = null;
+		if (trace != null) {
+			path = trace.getData().getName();
+			if (!new File(path).canRead()) {
+				int i = path.lastIndexOf(AbstractFileLoader.FILEPATH_DATASET_SEPARATOR);
+				path = i < 0 ? null : path.substring(0, i);
+			}
+		}
+		return path;
+	}
+
 	private void setData(String path, IPlottingSystem system) {
+		if (path == null) { // cope with PlotView
+			path = getPathFromTrace(getImageTrace(system));
+		}
+
 		MyData data = null;
-		for (MyData d : model) {
-			if (path.equals(d.path)) {
-				data = d;
-				break;
+		if (path != null) {
+			for (MyData d : model) {
+				if (path.equals(d.path)) {
+					data = d;
+					break;
+				}
 			}
 		}
 		if (system == currentSystem && data == currentData)
@@ -830,8 +855,10 @@ public class DiffractionCalibrationView extends ViewPart {
 		if (data == null) {
 			data = new MyData();
 			model.add(data);
-			data.path = path;
-			data.name = path.substring(path.lastIndexOf(File.separatorChar) + 1);
+			if (path != null && new File(path).canRead()) {
+				data.path = path;
+				data.name = path.substring(path.lastIndexOf(File.separatorChar) + 1);
+			}
 		}
 		currentData = data;
 		data.system = currentSystem;
@@ -971,9 +998,6 @@ public class DiffractionCalibrationView extends ViewPart {
 			if (d.system == system) {
 				d.system = null;
 				d.augmenter = null;
-				// TODO
-//				d.rois = null;
-//				d.nrois = -1;
 			}
 		}
 		refreshTable();
