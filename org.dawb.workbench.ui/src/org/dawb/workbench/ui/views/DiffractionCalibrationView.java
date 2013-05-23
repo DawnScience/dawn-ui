@@ -911,15 +911,23 @@ public class DiffractionCalibrationView extends ViewPart {
 				row.scale(10);
 			orig.sub(row);
 		} else if (mode == ManipulateMode.ENLARGE) {
-			Vector3d orig = detprop.getOrigin();
 			Vector3d norm = new Vector3d(detprop.getNormal());
 			norm.scale((fast ? 15 : 1)*detprop.getHPxSize());
+			double[] bc = detprop.getBeamCentreCoords();
+			Vector3d orig = detprop.getOrigin();
 			orig.sub(norm);
+			if (!Double.isNaN(bc[0])) { // fix on beam centre
+				detprop.setBeamCentreCoords(bc);
+			}
 		} else if (mode == ManipulateMode.SHRINK) {
-			Vector3d orig = detprop.getOrigin();
 			Vector3d norm = new Vector3d(detprop.getNormal());
 			norm.scale((fast ? 15 : 1)*detprop.getHPxSize());
+			double[] bc = detprop.getBeamCentreCoords();
+			Vector3d orig = detprop.getOrigin();
 			orig.add(norm);
+			if (!Double.isNaN(bc[0])) { // fix on beam centre
+				detprop.setBeamCentreCoords(bc);
+			}
 		} else if (mode == ManipulateMode.ELONGATE) {
 			double tilt = Math.toDegrees(detprop.getTiltAngle());
 			double[] angle = detprop.getNormalAnglesInDegrees();
