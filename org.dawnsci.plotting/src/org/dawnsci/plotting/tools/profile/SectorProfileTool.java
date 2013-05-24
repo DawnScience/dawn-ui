@@ -182,6 +182,8 @@ public abstract class SectorProfileTool extends ProfileTool {
 				}
 			}
 		};
+		
+		lock.setId("org.dawb.workbench.plotting.tools.profile.lockSectorCenters");
 
 		getSite().getActionBars().getToolBarManager().add(new Separator());
 		lock.setImageDescriptor(Activator.getImageDescriptor("icons/lock.png"));

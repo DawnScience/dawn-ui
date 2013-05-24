@@ -9,14 +9,15 @@ import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.api.IPlottingSystem;
-import org.dawnsci.plotting.api.region.ILockableRegion;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.region.RegionUtils;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.ui.PlatformUI;
 
@@ -105,19 +106,14 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 					}
 
 					if (getPlottingSystem()==null) return;
-
-					final Collection<IRegion> regions = getPlottingSystem().getRegions();
-					if (regions!=null) for (final IRegion region : regions) {
-						if (isRegionTypeSupported(region.getRegionType())) {
-							if (region instanceof ILockableRegion) {
-								ILockableRegion lr = (ILockableRegion)region;
-								lr.setCenterMovable(false);
-							} else {
-								region.setMobile(false);
-							}
-						}
+					
+					IContributionItem item = profilePlottingSystem.getActionBars().getToolBarManager().find("org.dawb.workbench.plotting.tools.profile.lockSectorCenters");
+					
+					if (item != null && item instanceof ActionContributionItem) {
+						((ActionContributionItem)item).getAction().setChecked(true);
+						((ActionContributionItem)item).getAction().run();
 					}
-
+					
 					for (int i = 0; i < profileAxis.size(); ++i) {
 						IAction action = profileAxis.getAction(i);
 						if (action.isChecked()) {
@@ -126,24 +122,18 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 						}
 					}
 
-
 				} else {
 
 					unregisterMetadataListeners();
 					IAction pixelAction = profileAxis.findAction("org.dawb.workbench.plotting.tools.profile.pixelAxisAction");
 					profileAxis.setEnabled(false);
 					pixelAction.run();
-
-					final Collection<IRegion> regions = getPlottingSystem().getRegions();
-					if (regions!=null) for (final IRegion region : regions) {
-						if (isRegionTypeSupported(region.getRegionType())) {
-							if (region instanceof ILockableRegion) {
-								ILockableRegion lr = (ILockableRegion)region;
-								lr.setCenterMovable(true);
-							} else {
-								region.setMobile(true);
-							}
-						}
+					
+					IContributionItem item = profilePlottingSystem.getActionBars().getToolBarManager().find("org.dawb.workbench.plotting.tools.profile.lockSectorCenters");
+					
+					if (item != null && item instanceof ActionContributionItem) {
+						((ActionContributionItem)item).getAction().setChecked(false);
+						((ActionContributionItem)item).getAction().run();
 					}
 				}
 			}
