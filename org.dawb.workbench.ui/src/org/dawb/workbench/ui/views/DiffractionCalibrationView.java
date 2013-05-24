@@ -988,7 +988,6 @@ public class DiffractionCalibrationView extends ViewPart {
 		for (MyData d : model) {
 			if (d.use) {
 				used++;
-				break;
 			}
 		}
 		calibrateImages.setEnabled(used > 0);
