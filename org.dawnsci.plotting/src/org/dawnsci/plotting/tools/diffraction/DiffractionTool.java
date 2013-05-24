@@ -760,7 +760,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 					if (peaks==null) throw new Exception("Cannot find peaks!");
 					beamOffset.setInitPeaks(peaks);
 					
-					beamOffset.optimize(sroi.getPoint());
+					beamOffset.optimize(((IDiffractionMetadata) dataset.getMetadata()).getDetector2DProperties().getBeamCentreCoords());
 				} catch (Throwable ne) {
 					
 					/**
@@ -774,9 +774,12 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 							"1. Open the 'Diffraction' tool in a dedicated view (action on the right of the toolbar).\n"+
 							"2. Open the 'Radial Profile' tool (from the plot containing the image).\n" +
 							"3. Select a sector which bisects the rings wanted.\n"+
-							"4. In this 'Radial Profile' tool select peak fitting.\n"+
-							"5. Set up a peak fit on all the rings which the redial profile found.\n"+
-							"6. Now run the refine action in the diffraction tool again.\n\n"+
+							"4. In the 'Radial Profile' tool press 'Lock to Metadata' button.\n"+
+							"5. In the 'Radial Profile' tool press 'Lock to Metadata' button.\n"+
+							"6. Select 'q' from the 'Select x axis values' list in the 'Radial Profile' toolbar.\n"+
+							"7. In the 'Radial Profile' tool select peak fitting.\n"+
+							"8. Set up a peak fit on all the rings which the redial profile found.\n"+
+							"9. Now run the refine action in the diffraction tool again.\n\n"+
 							"Please note that the algorithm may not converge. A job is run for the refinement which may be stopped.\n"+
 							"Please contact your support representative for more training/help with refinement.\n\n"+
 							"(NOTE This dialog can be kept open as a guide while doing the proceedure.)",

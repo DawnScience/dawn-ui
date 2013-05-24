@@ -34,8 +34,9 @@ import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 public abstract class SectorProfileTool extends ProfileTool {
 
 
-	private MenuAction      center;
-	private IRegionListener sectorRegionListener;
+	private   MenuAction      center;
+	protected Action          combineSymmetry;
+	private   IRegionListener sectorRegionListener;
 
 	@Override
 	protected void configurePlottingSystem(AbstractPlottingSystem plotter) {
@@ -146,7 +147,7 @@ public abstract class SectorProfileTool extends ProfileTool {
 	
 		symmetry.getAction(0).setChecked(true);
 		
-		final Action combine = new Action("Combine symmetry", IAction.AS_CHECK_BOX) {
+		this.combineSymmetry = new Action("Combine symmetry", IAction.AS_CHECK_BOX) {
 			@Override
 			public void run() {
 				preferredCombine = isChecked();
@@ -164,9 +165,9 @@ public abstract class SectorProfileTool extends ProfileTool {
 			    
 			}
 		};
-		combine.setImageDescriptor(Activator.getImageDescriptor("icons/sector-symmetry-combine.png"));
-		getSite().getActionBars().getToolBarManager().add(combine);
-		getSite().getActionBars().getMenuManager().add(combine);
+		combineSymmetry.setImageDescriptor(Activator.getImageDescriptor("icons/sector-symmetry-combine.png"));
+		getSite().getActionBars().getToolBarManager().add(combineSymmetry);
+		getSite().getActionBars().getMenuManager().add(combineSymmetry);
 		
 		
 		final Action lock = new Action("Lock center of all current sectors", IAction.AS_CHECK_BOX) {
@@ -277,7 +278,8 @@ public abstract class SectorProfileTool extends ProfileTool {
 										              final AbstractDataset mask, 
 										              final SectorROI       sroi, 
 						                              final IRegion         region,
-										              final boolean         isDrag);
+										              final boolean         isDrag,
+										              final int             downsample);
 
 
 	@Override
@@ -298,7 +300,6 @@ public abstract class SectorProfileTool extends ProfileTool {
 		if (!region.isVisible()) return;
 
 		if (monitor.isCanceled()) return;
-		
 		final AbstractDataset data = isDrag ? (AbstractDataset)image.getDownsampled()     : (AbstractDataset)image.getData();
 		final AbstractDataset mask = isDrag ? (AbstractDataset)image.getDownsampledMask() : (AbstractDataset)image.getMask();
 		
@@ -308,31 +309,31 @@ public abstract class SectorProfileTool extends ProfileTool {
 			downsroi.downsample(image.getDownsampleBin());
 		}
 			
-		final AbstractDataset[] integrals = getIntegral(data, mask, isDrag ? downsroi : sroi, region, isDrag);	
+		final AbstractDataset[] integrals = getIntegral(data, mask, isDrag ? downsroi : sroi, region, isDrag, isDrag ? image.getDownsampleBin() : 1);	
         if (integrals==null) return;
 				
 		final AbstractDataset[] xis = getXAxis(sroi, integrals);
 
-		for (int i = 0; i < integrals.length; i++) {
-			final AbstractDataset integral = integrals[i];
-			final AbstractDataset xi       = xis[i];
-			
-			final ILineTrace x_trace = (ILineTrace)profilePlottingSystem.getTrace(integral.getName());
-			if (tryUpdate && x_trace!=null) {
-				getControl().getDisplay().syncExec(new Runnable() {
-					public void run() {
-						x_trace.setData(xi, integral);
+		for (int i = 0; i < 2; i++) {
+			if (integrals[i] != null) {
+				final AbstractDataset integral = integrals[i];
+				final AbstractDataset xi = xis[i];
+
+				if (integral != null) {
+					final ILineTrace x_trace = (ILineTrace) profilePlottingSystem.getTrace(integral.getName());
+					if (tryUpdate && x_trace != null) {
+						getControl().getDisplay().syncExec(new Runnable() {
+							public void run() {
+								x_trace.setData(xi, integral);
+							}
+						});
+					} else {
+						Collection<ITrace> plotted = profilePlottingSystem.createPlot1D(xi, Arrays.asList(new IDataset[] { integral }), monitor);
+						registerTraces(region, plotted);
 					}
-				});
-			
-
-			} else {
-
-				Collection<ITrace> plotted = profilePlottingSystem.createPlot1D(xi, Arrays.asList(new IDataset[]{integral}), monitor);
-				registerTraces(region, plotted);			
+				}
 			}
 		}
-
 	}
 	
 	@Override
