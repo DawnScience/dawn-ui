@@ -149,8 +149,6 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 					SectorROI sector = getFullSector();
 					region.setROI(sector);
 					plot.addRegion(region);
-					//do it again to override preferedSymmetry
-					region.setROI(sector);
 					
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -486,8 +484,7 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 		if (beamCenter[0] < shape[0]/2.0) farCorner[0] = shape[0];
 		if (beamCenter[1] < shape[1]/2.0) farCorner[1] = shape[1];
 		double maxDistance = Math.sqrt(Math.pow(beamCenter[0]-farCorner[0],2)+Math.pow(beamCenter[1]-farCorner[1],2));
-		SectorROI sector = new SectorROI(beamCenter[0], beamCenter[1], 0, maxDistance, 0, 1);
-		sector.setSymmetry(SectorROI.FULL);
+		SectorROI sector = new SectorROI(beamCenter[0], beamCenter[1], 0, maxDistance, 0, 2*Math.PI);
 		return sector;
 	}
 	
