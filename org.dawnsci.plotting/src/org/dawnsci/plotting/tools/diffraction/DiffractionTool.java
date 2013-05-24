@@ -1122,7 +1122,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			IDiffractionMetadata md = getDiffractionMetaData();
 			final DetectorProperties det = md.getDetector2DProperties();
 			final DiffractionCrystalEnvironment env = md.getDiffractionCrystalEnvironment();
-			final QSpace q = PowderRingsUtils.fitEllipsesToQSpace(mon, det, env, rois, spacings);
+			final QSpace q = PowderRingsUtils.fitEllipsesToQSpace(mon, det, env, rois, spacings, true);
 			if (q == null)
 				return Status.CANCEL_STATUS;
 			display.syncExec(new Runnable() {

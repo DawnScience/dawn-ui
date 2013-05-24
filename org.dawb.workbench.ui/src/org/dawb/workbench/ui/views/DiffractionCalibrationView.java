@@ -79,13 +79,16 @@ import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 
-import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSpacing;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationStandards;
+import uk.ac.diamond.scisoft.analysis.crystallography.HKL;
+import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
 import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
 import uk.ac.diamond.scisoft.analysis.diffraction.PowderRingsUtils;
 import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
+import uk.ac.diamond.scisoft.analysis.fitting.Fitter;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.Polynomial;
 import uk.ac.diamond.scisoft.analysis.io.AbstractFileLoader;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
@@ -111,7 +114,8 @@ public class DiffractionCalibrationView extends ViewPart {
 	private ILoaderService service;
 	private TableViewer tableViewer;
 	private IPartListener2 listener;
-	private Button calibrate;
+	private Button calibrateImages;
+	private Button calibrateWD;
 
 	enum ManipulateMode {
 		LEFT, RIGHT, UP, DOWN, ENLARGE, SHRINK, ELONGATE, SQUASH, CLOCKWISE, ANTICLOCKWISE
@@ -400,16 +404,27 @@ public class DiffractionCalibrationView extends ViewPart {
 		tableViewer.setInput(model);
 		tableViewer.refresh();
 
-		calibrate = new Button(sHolder, SWT.PUSH);
-		calibrate.setText("Calibrate chosen images");
-		calibrate.setToolTipText("Calibrate detector and wavelength from images chosen in table");
-		calibrate.addSelectionListener(new SelectionAdapter() {
+		calibrateImages = new Button(sHolder, SWT.PUSH);
+		calibrateImages.setText("Calibrate chosen images");
+		calibrateImages.setToolTipText("Calibrate detector in chosen images");
+		calibrateImages.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				calibrateImages();
 			}
 		});
-		calibrate.setEnabled(false);
+		calibrateImages.setEnabled(false);
+
+		calibrateWD = new Button(sHolder, SWT.PUSH);
+		calibrateWD.setText("Calibrate wavelength");
+		calibrateWD.setToolTipText("Calibrate wavelength from images chosen in table");
+		calibrateWD.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				calibrateWavelength();
+			}
+		});
+		calibrateWD.setEnabled(false);
 
 		//		sHolder.setSize(sHolder.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		sHolder.layout();
@@ -481,7 +496,7 @@ public class DiffractionCalibrationView extends ViewPart {
 					public void run() {
 						if (currentData.nrois > 0) {
 							currentData.use = true;
-							setCalibrateButton();
+							setCalibrateButtons();
 						}
 						refreshTable();
 					}
@@ -502,18 +517,27 @@ public class DiffractionCalibrationView extends ViewPart {
 				IStatus stat = Status.OK_STATUS;
 				final ProgressMonitorWrapper mon = new ProgressMonitorWrapper(monitor);
 				monitor.beginTask("Calibrate detector", IProgressMonitor.UNKNOWN);
-				CalibrantSpacing calib = CalibrationFactory.getCalibrationStandards().getCalibrant();
+				List<HKL> spacings = CalibrationFactory.getCalibrationStandards().getCalibrant().getHKLs();
 				for (MyData data : model) {
-					if (!data.use || data.nrois <= 0 || data.md == null) {
+					IDiffractionMetadata md = data.md;
+					if (!data.use || data.nrois <= 0 || md == null) {
 						continue;
 					}
 					monitor.subTask("Fitting rings in " + data.name);
 					data.q = null;
 
+					DetectorProperties dp = md.getDetector2DProperties();
+					DiffractionCrystalEnvironment ce = md.getDiffractionCrystalEnvironment();
+					if (dp == null || ce == null) {
+						continue;
+					}
 					try {
-						data.q = PowderRingsUtils.fitAllEllipsesToQSpace(mon, data.md.getDetector2DProperties(),
-								data.md.getDiffractionCrystalEnvironment(), data.rois, calib.getHKLs());
+						data.q = PowderRingsUtils.fitAllEllipsesToQSpace(mon, dp, ce, data.rois, spacings, true);
+
 						System.err.println(data.q);
+						data.od = dp.getDetectorDistance(); // store old values
+						data.ow = ce.getWavelength();
+
 					} catch (IllegalArgumentException e) {
 						System.err.println(e);
 					}
@@ -522,23 +546,31 @@ public class DiffractionCalibrationView extends ViewPart {
 				display.asyncExec(new Runnable() {
 					@Override
 					public void run() {
-						if (currentData == null || currentData.md == null || currentData.q == null)
-							return;
+						for (MyData data : model) {
+							IDiffractionMetadata md = data.md;
+							if (!data.use || data.nrois <= 0 || md == null) {
+								continue;
+							}
+							DetectorProperties dp = md.getDetector2DProperties();
+							DiffractionCrystalEnvironment ce = md.getDiffractionCrystalEnvironment();
+							if (dp == null || ce == null || data.q == null) {
+								continue;
+							}
 
-						DetectorProperties dp = currentData.md.getDetector2DProperties();
-						if (dp != null) {
-							DetectorProperties fp = currentData.q.getDetectorProperties();
+							DetectorProperties fp = data.q.getDetectorProperties();
 							double[] angs = fp.getNormalAnglesInDegrees();
 							dp.setNormalAnglesInDegrees(angs);
 							dp.setOrigin(fp.getOrigin());
+							ce.setWavelength(data.q.getWavelength());
 						}
-						DiffractionCrystalEnvironment ce = currentData.md.getDiffractionCrystalEnvironment();
-						if (ce != null) {
-							ce.setWavelength(currentData.q.getWavelength());
-						}
+
+						if (currentData == null || currentData.md == null || currentData.q == null)
+							return;
+
 						refreshTable();
 						hideFoundRings();
 						drawCalibrantRings();
+						setCalibrateButtons();
 					}
 				});
 				return stat;
@@ -547,7 +579,62 @@ public class DiffractionCalibrationView extends ViewPart {
 		job.setPriority(Job.SHORT);
 //		 job.setUser(true);
 		job.schedule();
+	}
 
+	protected void calibrateWavelength() {
+		final Display display = sComp.getDisplay();
+		Job job = new Job("Calibrate wavelength") {
+			@Override
+			protected IStatus run(final IProgressMonitor monitor) {
+				IStatus stat = Status.OK_STATUS;
+				monitor.beginTask("Calibrate wavelength", IProgressMonitor.UNKNOWN);
+				List<Double> odist = new ArrayList<Double>();
+				List<Double> ndist = new ArrayList<Double>();
+//				double[] centre = null;
+				for (MyData data : model) {
+					if (!data.use || data.nrois <= 0 || data.md == null) {
+						continue;
+					}
+					
+					if (data.q == null || Double.isNaN(data.od)) {
+						continue;
+					}
+
+//					if (centre == null) {
+//						
+//					}
+					odist.add(data.od);
+					ndist.add(data.q.getDetectorProperties().getDetectorDistance());
+				}
+				Polynomial p = new Polynomial(1);
+				Fitter.llsqFit(new AbstractDataset[] {AbstractDataset.createFromList(odist)}, AbstractDataset.createFromList(ndist), p);
+				System.err.println(p);
+
+				double f = p.getParameterValue(0);
+				for (MyData data : model) {
+					if (!data.use || data.nrois <= 0 || data.md == null) {
+						continue;
+					}
+
+					DiffractionCrystalEnvironment ce = data.md.getDiffractionCrystalEnvironment();
+					if (ce != null) {
+						data.ow = ce.getWavelength();
+						ce.setWavelength(data.ow/f);
+					}
+				}
+
+				display.asyncExec(new Runnable() {
+					@Override
+					public void run() {
+						refreshTable();
+						drawCalibrantRings();
+					}
+				});
+				return stat;
+			}
+		};
+		job.setPriority(Job.SHORT);
+		job.schedule();
 	}
 
 	protected void drawCalibrantRings() {
@@ -673,6 +760,8 @@ public class DiffractionCalibrationView extends ViewPart {
 		Listener listener;
 		List<IROI> rois;
 		QSpace q;
+		double ow = Double.NaN;
+		double od = Double.NaN;
 		int nrois = -1;
 		boolean use = false;
 	}
@@ -793,7 +882,7 @@ public class DiffractionCalibrationView extends ViewPart {
 			data.use = (Boolean) value;
 			tv.refresh();
 
-			setCalibrateButton();
+			setCalibrateButtons();
 		}
 		
 	}
@@ -893,16 +982,17 @@ public class DiffractionCalibrationView extends ViewPart {
 		tableViewer.getControl().getParent().layout();
 	}
 
-	private void setCalibrateButton() {
+	private void setCalibrateButtons() {
 		// enable/disable calibrate button according to use column
-		boolean any = false;
+		int used = 0;
 		for (MyData d : model) {
 			if (d.use) {
-				any = true;
+				used++;
 				break;
 			}
 		}
-		calibrate.setEnabled(any);
+		calibrateImages.setEnabled(used > 0);
+		calibrateWD.setEnabled(used > 2);
 	}
 
 	private void changeRings(ManipulateMode mode, boolean fast) {
