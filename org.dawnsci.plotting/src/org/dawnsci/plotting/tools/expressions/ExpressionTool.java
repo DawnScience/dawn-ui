@@ -22,6 +22,7 @@ import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
+//import org.eclipse.jface.text.contentassist.ContentAssistant;
 
 public class ExpressionTool extends AbstractToolPage {
 	
@@ -64,6 +65,12 @@ public class ExpressionTool extends AbstractToolPage {
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		
 		consoleViewer = new ExpressionConsoleViewer(composite, console.getConsole());
+		
+//		ContentAssistant contentAssistant = new ContentAssistant();
+//		
+//		contentAssistant.install(consoleViewer);
+		
+		
 		Map<String,Object> functions = console.getFunctions();
 		functions.put("plt", getPlottingSystem());
 		
