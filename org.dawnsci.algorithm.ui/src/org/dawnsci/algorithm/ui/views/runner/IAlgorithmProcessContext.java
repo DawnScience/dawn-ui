@@ -21,7 +21,7 @@ public interface IAlgorithmProcessContext {
 	public ISourceProvider[] getSourceProviders();
 	
     /**
-     * Runs the algorithm at the given path. If sameVm is
+     * Runs the workflow at the given path. If sameVm is
      * true the current running VM is used (faster but more dangerous!)
      * 
      * No job is used, call the run method from a job unless you want the UI to
@@ -29,7 +29,7 @@ public interface IAlgorithmProcessContext {
      * 
      * This method is thread safe, you can call it from a Job.
      * 
-     * @param filePath (to moml file).
+     * @param filePath (to moml file) may not be null.
      * @param sameVm
      * @param monitor, may be null
      * @throws Exception if anything goes wrong with the run, or it is stopped.
