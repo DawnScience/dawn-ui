@@ -22,7 +22,7 @@
    <extension
          point="org.eclipse.ui.views">
       <view
-            class="org.dawnsci.algorithm.ui.views.runner.WorkflowRunView"
+            class="org.dawnsci.algorithm.ui.views.runner.AlgorithmView"
             icon="icons/add.gif"
             id="org.dawnsci.algorithm.ui.view.exampleWorkflowRun"
             name="Maths Example"
@@ -30,13 +30,13 @@
       </view>
    </extension>
    <extension
-         point="org.dawnsci.algorithm.ui.workflowRunPage">
+         point="org.dawnsci.algorithm.ui.processPage">
       <workflowRunPage
             class="org.dawnsci.algorithm.ui.views.runner.ExampleRunPage"
             viewId="org.dawnsci.algorithm.ui.view.exampleWorkflowRun">
       </workflowRunPage>
    </extension>
-
    -->
+  
    
 </plugin>

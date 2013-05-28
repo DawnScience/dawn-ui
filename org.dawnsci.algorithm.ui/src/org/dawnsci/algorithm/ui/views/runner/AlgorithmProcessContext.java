@@ -39,11 +39,24 @@ class AlgorithmProcessContext implements IAlgorithmProcessContext {
 	public void execute(final String momlPath, boolean sameVm, IProgressMonitor monitor) throws Exception {
 		
 		if (sameVm) {
-			modelRunner = new ModelRunner();
-			modelRunner.runModel(momlPath,false);
-			modelRunner = null;
-			// RemoteWorkbenchImpl sets the status to the actor running.
-			view.getViewSite().getActionBars().getStatusLineManager().setMessage("");
+			try {
+				ActionContributionItem run = (ActionContributionItem)view.getViewSite().getActionBars().getToolBarManager().find(IAlgorithmProcessContext.RUN_ID_STUB+getTitle());
+				run.getAction().setEnabled(false);
+				ActionContributionItem stop = (ActionContributionItem)view.getViewSite().getActionBars().getToolBarManager().find(IAlgorithmProcessContext.STOP_ID_STUB+getTitle());
+				stop.getAction().setEnabled(true);
+				modelRunner = new ModelRunner();
+				modelRunner.runModel(momlPath,false);
+				modelRunner = null;
+				
+			} finally {
+				ActionContributionItem run = (ActionContributionItem)view.getViewSite().getActionBars().getToolBarManager().find(IAlgorithmProcessContext.RUN_ID_STUB+getTitle());
+				run.getAction().setEnabled(true);
+				ActionContributionItem stop = (ActionContributionItem)view.getViewSite().getActionBars().getToolBarManager().find(IAlgorithmProcessContext.STOP_ID_STUB+getTitle());
+				stop.getAction().setEnabled(false);
+				
+				// RemoteWorkbenchImpl sets the status to the actor running.
+				view.getViewSite().getActionBars().getStatusLineManager().setMessage("");
+			}
 			
 		} else {
 			RunAction runAction = new RunAction();		
