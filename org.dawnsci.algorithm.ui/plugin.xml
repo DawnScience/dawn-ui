@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension-point id="processPage" name="Algorithm Run Page" schema="schema/processPage.exsd"/>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            class="org.dawnsci.algorithm.ui.views.runner.WorkflowRunView"
+            id="org.dawnsci.algorithm.ui.dataReductionFileSelectionView"
+            name="Data Reduction File Selector"
+            restorable="true">
+      </view>
+   </extension>
+   <extension point="org.dawnsci.algorithm.ui.processPage">
+      <processPage
+            class="org.dawnsci.algorithm.ui.datareduction.DataReductionFileSelectionPage"
+            runIcon1="icons/run_workflow.gif"
+            stopIcon1="icons/stop_workflow.gif"
+            viewId="org.dawnsci.algorithm.ui.dataReductionFileSelectionView"
+            workflowFile1="workflows/dummyFile.moml">
+      </processPage>
+   </extension>
+   
+   <!--
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            class="org.dawnsci.algorithm.ui.views.runner.WorkflowRunView"
+            icon="icons/add.gif"
+            id="org.dawnsci.algorithm.ui.view.exampleWorkflowRun"
+            name="Maths Example"
+            restorable="true">
+      </view>
+   </extension>
+   <extension
+         point="org.dawnsci.algorithm.ui.workflowRunPage">
+      <workflowRunPage
+            class="org.dawnsci.algorithm.ui.views.runner.ExampleRunPage"
+            viewId="org.dawnsci.algorithm.ui.view.exampleWorkflowRun">
+      </workflowRunPage>
+   </extension>
+
+   -->
+   
+</plugin>
