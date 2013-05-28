@@ -30,8 +30,8 @@ import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.algorithm.ui.Activator;
 import org.dawnsci.algorithm.ui.updater.IWorkflowUpdater;
 import org.dawnsci.algorithm.ui.updater.WorkflowUpdaterCreator;
-import org.dawnsci.algorithm.ui.views.runner.AbstractWorkflowRunPage;
-import org.dawnsci.algorithm.ui.views.runner.IWorkflowContext;
+import org.dawnsci.algorithm.ui.views.runner.AbstractAlgorithmProcessPage;
+import org.dawnsci.algorithm.ui.views.runner.IAlgorithmProcessContext;
 //import org.dawb.common.ui.wizard.persistence.datareduction.PersistenceSavingWizard;
 import org.dawnsci.plotting.api.PlotType;
 import org.eclipse.core.runtime.FileLocator;
@@ -84,7 +84,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.rcp.plotting.datareduction.DataReductionPlotter;
 
-public class DataReductionFileSelectionPage extends AbstractWorkflowRunPage {
+public class DataReductionFileSelectionPage extends AbstractAlgorithmProcessPage {
 
 	private static final Logger logger = LoggerFactory.getLogger(DataReductionFileSelectionPage.class);
 
@@ -374,7 +374,7 @@ public class DataReductionFileSelectionPage extends AbstractWorkflowRunPage {
 	}
 
 	@Override
-	public void run(final IWorkflowContext context) throws Exception {
+	public void run(final IAlgorithmProcessContext context) throws Exception {
 		//For now take programmatically this workflow file from uk.ac.diamond.analysis.rcp
 		//should be replaced by the resource path provided in the extension point
 		//TODO: make a new Diamond plugin in which to put the workflow and this datareduction page view.

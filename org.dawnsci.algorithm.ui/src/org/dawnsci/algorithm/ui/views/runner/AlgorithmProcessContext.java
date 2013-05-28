@@ -13,13 +13,13 @@ import com.isencia.passerelle.workbench.model.editor.ui.editor.actions.RunAction
 import com.isencia.passerelle.workbench.model.editor.ui.editor.actions.StopAction;
 import com.isencia.passerelle.workbench.model.launch.ModelRunner;
 
-class WorkflowContext implements IWorkflowContext {
+class AlgorithmProcessContext implements IAlgorithmProcessContext {
 	
 	private ISourceProvider[] providers;
-	private WorkflowRunView   view;
+	private AlgorithmView   view;
 	private String workflowFilePath;
 
-	WorkflowContext(WorkflowRunView view, ISourceProvider[] providers) {
+	AlgorithmProcessContext(AlgorithmView view, ISourceProvider[] providers) {
 		this.view      = view;
 		this.providers = providers;
 	}
@@ -108,12 +108,12 @@ class WorkflowContext implements IWorkflowContext {
 	}
 
 	@Override
-	public void setWorkflowFilePath(String workflowFilePath) {
+	public void setFilePath(String workflowFilePath) {
 		this.workflowFilePath = workflowFilePath;
 	}
 
 	@Override
-	public String getWorkflowFilePath(){
+	public String getFilePath(){
 		return workflowFilePath;
 	}
 }

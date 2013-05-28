@@ -29,7 +29,7 @@ import org.eclipse.ui.ISourceProvider;
  * @author fcp94556
  *
  */
-public class ExampleRunPage extends AbstractWorkflowRunPage {
+public class ExampleRunPage extends AbstractAlgorithmProcessPage {
 
 	private ResourceChoiceBox fileBox;
 	private Composite composite;
@@ -61,7 +61,7 @@ public class ExampleRunPage extends AbstractWorkflowRunPage {
 	}
 
 	@Override
-	public void run(final IWorkflowContext context) throws Exception {
+	public void run(final IAlgorithmProcessContext context) throws Exception {
 		
 		final String momlPath = fileBox.getAbsoluteFilePath();
 		final Job run = new Job("Execute "+getTitles().get(momlPath)) {

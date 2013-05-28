@@ -10,18 +10,18 @@ import org.eclipse.ui.ISourceProvider;
  * @author fcp94556
  *
  */
-public interface IWorkflowRunPage {
+public interface IAlgorithmProcessPage {
 		
     /**
      * 	
      * @return the title of your custom page. The user will not know what
-     * a worklflow is so this should use the language of the custom technique they
+     * a algorithm is so this should use the language of the custom technique they
      * would like to run.
      */
 	public Map<String, String> getTitles();
 
 	/**
-	 * Creates the custom UI which will configure workflow configuration.
+	 * Creates the custom UI which will configure algorithm configuration.
 	 * 
 	 * @param parent
 	 * @return the composite you added which will be used for focus. Not the parent.
@@ -31,9 +31,9 @@ public interface IWorkflowRunPage {
 	
 	/**
 	 * Run with the current values.  The context provides a method for running
-	 * the workflow so there is no need to copy workflow running around.
+	 * the algorithm so there is no need to copy algorithm running around.
 	 */
-	public void run(IWorkflowContext context) throws Exception;
+	public void run(IAlgorithmProcessContext context) throws Exception;
 
 	
 	/**
@@ -58,7 +58,7 @@ public interface IWorkflowRunPage {
 	 * 
 	 * @param view
 	 */
-	public void setWorkflowView(WorkflowRunView view);
+	public void setAlgorithmView(AlgorithmView view);
 
 	/**
 	 * Called when containing view is disposed.

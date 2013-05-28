@@ -1,6 +1,6 @@
 /**
  * Package for view and associated classes for creating
- * custom views which run workflows.
+ * custom views which run algorithms e.g. workflows.
  * 
  * @author fcp94556
  */

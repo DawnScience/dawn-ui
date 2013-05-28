@@ -22,24 +22,25 @@ import org.slf4j.LoggerFactory;
 
 /**
  * 
- * This view can run arbitrary workflows with a custom UI. Use it as follows:
+ * This view can run arbitrary algorithms (e.g. workflows) with a custom UI. Use it as follows:
  * 
  * 0. Depend on this plugin.
  * 1. In your plugin declare a view with an id using this class.
- * 2. In your plugin define an extension point for IWorkflowRunConfiguration and
- *    give it the id of your view. 
+ * 2. In your plugin define an extension point for org.dawnsci.algorithm.ui.processPage and
+ *    give it the id of your view. It will reference a class extending AbstractAlgorithmProcessPage
+ *    most likely.
  *    
  * Now your view will have the custom UI and be able to run workflows using the 
- * IWorkflowContext passed into the run method when the run action is pressed.
+ * IAlgorithmContext passed into the run method when the run action is pressed.
  * 
  * @author fcp94556
  *
  */
-public class WorkflowRunView extends ViewPart {
+public class AlgorithmView extends ViewPart {
 	
-	private static final Logger logger = LoggerFactory.getLogger(WorkflowRunView.class);
+	private static final Logger logger = LoggerFactory.getLogger(AlgorithmView.class);
 	
-	private IWorkflowRunPage runner;
+	private IAlgorithmProcessPage runner;
 	private Composite        component;
 //	private Action           runAction;
 //	private Action           stopAction;
@@ -79,7 +80,7 @@ public class WorkflowRunView extends ViewPart {
 			        	if(stopIcon != null)
 			        		stopIcons.put(workflowFile, stopIcon);
 		        	}
-	        		runner = (IWorkflowRunPage)e.createExecutableExtension("class");
+	        		runner = (IAlgorithmProcessPage)e.createExecutableExtension("class");
 	        		break;
 	        	}
 	        	
@@ -88,7 +89,7 @@ public class WorkflowRunView extends ViewPart {
 			logger.error("Cannot assign the IWorkflowRunPage for '"+site.getId()+"'. Invalid view part created! Configuration error - please fix this.");
 		    return;
 		}
-		if (runner!=null) runner.setWorkflowView(this);
+		if (runner!=null) runner.setAlgorithmView(this);
 	}
 
 	@Override
@@ -101,7 +102,7 @@ public class WorkflowRunView extends ViewPart {
 		//createButtons();
 	}
 
-	private IWorkflowContext context;
+	private IAlgorithmProcessContext context;
 	
 	/**
 	 * TODO Something to grey out actions when one is running.
@@ -130,8 +131,8 @@ public class WorkflowRunView extends ViewPart {
 					try {
 						stopActions.get(workflowFile).setEnabled(true);
 						if (context!=null) context.stop();
-						context = new WorkflowContext(WorkflowRunView.this, runner.getSourceProviders());
-						context.setWorkflowFilePath(workflowFiles.get(workflowFile));
+						context = new AlgorithmProcessContext(AlgorithmView.this, runner.getSourceProviders());
+						context.setFilePath(workflowFiles.get(workflowFile));
 						runner.run(context);
 						
 					} catch (Exception e) {
@@ -193,7 +194,7 @@ public class WorkflowRunView extends ViewPart {
 		return stopActions;
 	}
 
-	public IWorkflowContext getContext(){
+	public IAlgorithmProcessContext getContext(){
 		return context;
 	}
 
