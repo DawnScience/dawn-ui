@@ -1,8 +1,5 @@
 package org.dawnsci.algorithm.ui.views.runner;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.dawnsci.common.widgets.file.ResourceChoiceBox;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -35,10 +32,8 @@ public class ExampleRunPage extends AbstractAlgorithmProcessPage {
 	private Composite composite;
 
 	@Override
-	public Map<String, String> getTitles() {
-		Map<String, String> titles = new HashMap<String, String>();
-		titles.put("MOML_FILE_PATH", "Maths example");
-		return titles;
+	public String getTitle() {
+		return "Maths example";
 	}
 
 	@Override
@@ -64,7 +59,7 @@ public class ExampleRunPage extends AbstractAlgorithmProcessPage {
 	public void run(final IAlgorithmProcessContext context) throws Exception {
 		
 		final String momlPath = fileBox.getAbsoluteFilePath();
-		final Job run = new Job("Execute "+getTitles().get(momlPath)) {
+		final Job run = new Job("Execute Maths Example") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {

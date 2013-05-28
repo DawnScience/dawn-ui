@@ -10,6 +10,9 @@ import org.eclipse.ui.ISourceProvider;
  */
 public interface IAlgorithmProcessContext {
 
+	public static String STOP_ID_STUB = "org.dawnsci.algorithm.ui.views.runner.stopAction.";
+	public static String RUN_ID_STUB  = "org.dawnsci.algorithm.ui.views.runner.runAction.";
+
 	/**
 	 * 
 	 * @return a list of the data bound UI used in the custom algorithm
@@ -57,4 +60,18 @@ public interface IAlgorithmProcessContext {
 	 * @return workflowFileName
 	 */
 	public String getFilePath();
+	
+	/**
+	 * The title of the algorithm being run
+	 * @return
+	 */
+	public String getTitle();
+	
+	
+	/**
+	 * The title of the algorithm being run
+	 * @return
+	 */
+	public void setTitle(String title);
+
 }

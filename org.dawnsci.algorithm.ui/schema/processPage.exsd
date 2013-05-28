@@ -54,6 +54,9 @@
          </documentation>
       </annotation>
       <complexType>
+         <sequence minOccurs="0" maxOccurs="unbounded">
+            <element ref="connection" minOccurs="0" maxOccurs="unbounded"/>
+         </sequence>
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
@@ -74,7 +77,17 @@
                </appinfo>
             </annotation>
          </attribute>
-         <attribute name="workflowFile1" type="string" use="required">
+      </complexType>
+   </element>
+
+   <element name="connection">
+      <annotation>
+         <documentation>
+            The connection to an algorithm (e.g. moml file) can be made optionally by adding 0-n connection objects to the processPage. These say the file which should run and the algorithm file accociated with it. It is legal to have no connections. In this case the execute method is called without a file location.
+         </documentation>
+      </annotation>
+      <complexType>
+         <attribute name="algorithmFile" type="string" use="required">
             <annotation>
                <documentation>
                   The workflow file to run
@@ -84,17 +97,7 @@
                </appinfo>
             </annotation>
          </attribute>
-         <attribute name="workflowFile2" type="string">
-            <annotation>
-               <documentation>
-                  
-               </documentation>
-               <appinfo>
-                  <meta.attribute kind="resource"/>
-               </appinfo>
-            </annotation>
-         </attribute>
-         <attribute name="runIcon1" type="string" use="required">
+         <attribute name="runIcon" type="string" use="required">
             <annotation>
                <documentation>
                   The Run action icon
@@ -104,17 +107,7 @@
                </appinfo>
             </annotation>
          </attribute>
-         <attribute name="runIcon2" type="string">
-            <annotation>
-               <documentation>
-                  
-               </documentation>
-               <appinfo>
-                  <meta.attribute kind="resource"/>
-               </appinfo>
-            </annotation>
-         </attribute>
-         <attribute name="stopIcon1" type="string" use="required">
+         <attribute name="stopIcon" type="string" use="required">
             <annotation>
                <documentation>
                   The Stop action icon
@@ -124,14 +117,11 @@
                </appinfo>
             </annotation>
          </attribute>
-         <attribute name="stopIcon2" type="string">
+         <attribute name="title" type="string" use="required">
             <annotation>
                <documentation>
-                  The Stop action icon
+                  The title of the algorithm connection which will be run.
                </documentation>
-               <appinfo>
-                  <meta.attribute kind="resource"/>
-               </appinfo>
             </annotation>
          </attribute>
       </complexType>

@@ -25,14 +25,12 @@ import java.util.Map;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.PlottingFactory;
-//import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.algorithm.ui.Activator;
 import org.dawnsci.algorithm.ui.updater.IWorkflowUpdater;
 import org.dawnsci.algorithm.ui.updater.WorkflowUpdaterCreator;
 import org.dawnsci.algorithm.ui.views.runner.AbstractAlgorithmProcessPage;
 import org.dawnsci.algorithm.ui.views.runner.IAlgorithmProcessContext;
-//import org.dawb.common.ui.wizard.persistence.datareduction.PersistenceSavingWizard;
 import org.dawnsci.plotting.api.PlotType;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -62,8 +60,6 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.ToolTip;
-//import org.eclipse.jface.wizard.IWizard;
-//import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.graphics.Image;
@@ -71,7 +67,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-//import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.ISourceProvider;
@@ -83,6 +78,11 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.rcp.plotting.datareduction.DataReductionPlotter;
+//import org.dawb.common.ui.util.EclipseUtils;
+//import org.dawb.common.ui.wizard.persistence.datareduction.PersistenceSavingWizard;
+//import org.eclipse.jface.wizard.IWizard;
+//import org.eclipse.jface.wizard.WizardDialog;
+//import org.eclipse.swt.widgets.Display;
 
 public class DataReductionFileSelectionPage extends AbstractAlgorithmProcessPage {
 
@@ -141,7 +141,7 @@ public class DataReductionFileSelectionPage extends AbstractAlgorithmProcessPage
 	@Override
 	public Composite createPartControl(Composite parent) {
 
-		createPersistenceActions(workflowRunView.getViewSite());
+		createPersistenceActions(algorithmViewPart.getViewSite());
 
 		mainComposite = new Composite(parent, SWT.NONE);
 		mainComposite.setLayout(new GridLayout(1, true));
@@ -176,7 +176,7 @@ public class DataReductionFileSelectionPage extends AbstractAlgorithmProcessPage
 		viewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		viewer.getTable().setLinesVisible(true);
 		viewer.getTable().setHeaderVisible(true);
-		workflowRunView.getSite().setSelectionProvider(viewer);
+		algorithmViewPart.getSite().setSelectionProvider(viewer);
 		rows = createSelectedDataRows();
 		viewer.setContentProvider(new IStructuredContentProvider() {
 			@Override
@@ -195,28 +195,29 @@ public class DataReductionFileSelectionPage extends AbstractAlgorithmProcessPage
 		viewer.setInput(rows);
 
 		// add the Run workflow action as a button
-		ActionContributionItem aci = new ActionContributionItem(workflowRunView.getRunActions().get(MOML_DUMMY));
+		ActionContributionItem aci = (ActionContributionItem)algorithmViewPart.getViewSite().getActionBars().getToolBarManager().find(IAlgorithmProcessContext.RUN_ID_STUB+getTitle());
+		aci = new ActionContributionItem(aci.getAction());
 		aci.fill(mainRecapComp);
 		Button runWorkflowButton = (Button) aci.getWidget();
 		runWorkflowButton.setText("Run Workflow");
 		runWorkflowButton.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
 
-		detectorPlot.createPlotPart(leftSash, DETECT_TYPE, null, PlotType.IMAGE, workflowRunView.getSite().getPart());
+		detectorPlot.createPlotPart(leftSash, DETECT_TYPE, null, PlotType.IMAGE, algorithmViewPart.getSite().getPart());
 		detectorPlot.setTitle(DETECT_TITLE);
 
-		dataPlot.createPlotPart(middleSash, DATA_TYPE, null, PlotType.IMAGE, workflowRunView.getSite().getPart());
+		dataPlot.createPlotPart(middleSash, DATA_TYPE, null, PlotType.IMAGE, algorithmViewPart.getSite().getPart());
 		dataPlot.setTitle(DATA_TITLE);
 
-		backgroundPlot.createPlotPart(middleSash, BACKGD_TYPE, null, PlotType.IMAGE, workflowRunView.getSite().getPart());
+		backgroundPlot.createPlotPart(middleSash, BACKGD_TYPE, null, PlotType.IMAGE, algorithmViewPart.getSite().getPart());
 		backgroundPlot.setTitle(BACKGD_TITLE);
 
-		calibrationPlot.createPlotPart(rightSash, CALIB_TYPE, null, PlotType.IMAGE, workflowRunView.getSite().getPart());
+		calibrationPlot.createPlotPart(rightSash, CALIB_TYPE, null, PlotType.IMAGE, algorithmViewPart.getSite().getPart());
 		calibrationPlot.setTitle(CALIB_TITLE);
 
-		maskPlot.createPlotPart(rightSash, MASK_TYPE, null, PlotType.IMAGE, workflowRunView.getSite().getPart());
+		maskPlot.createPlotPart(rightSash, MASK_TYPE, null, PlotType.IMAGE, algorithmViewPart.getSite().getPart());
 		maskPlot.setTitle(MASK_TITLE);
 
-		workflowRunView.getSite().getWorkbenchWindow().getSelectionService().addSelectionListener(fileSelectionListener);
+		algorithmViewPart.getSite().getWorkbenchWindow().getSelectionService().addSelectionListener(fileSelectionListener);
 
 		return mainComposite;
 	}
@@ -367,10 +368,8 @@ public class DataReductionFileSelectionPage extends AbstractAlgorithmProcessPage
 	}
 
 	@Override
-	public Map<String, String> getTitles() {
-		Map<String, String> titles = new HashMap<String, String>();
-		titles.put(MOML_DUMMY, "Data Reduction");
-		return titles;
+	public String getTitle() {
+		return "Data Reduction";
 	}
 
 	@Override
@@ -386,7 +385,7 @@ public class DataReductionFileSelectionPage extends AbstractAlgorithmProcessPage
 		IWorkflowUpdater updater = WorkflowUpdaterCreator.createWorkflowUpdater(momlPath);
 		updater.updateInputActor(INPUT_ACTOR, "User Fields", dataFilePaths);
 		
-		final Job run = new Job("Execute "+getTitles().get(MOML_DUMMY)) {
+		final Job run = new Job("Execute Data Reduction") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
@@ -413,7 +412,7 @@ public class DataReductionFileSelectionPage extends AbstractAlgorithmProcessPage
 
 	@Override
 	public void dispose() {
-		workflowRunView.getSite().getWorkbenchWindow().getSelectionService().removeSelectionListener(fileSelectionListener);
+		algorithmViewPart.getSite().getWorkbenchWindow().getSelectionService().removeSelectionListener(fileSelectionListener);
 	}
 
 	/**
@@ -557,7 +556,8 @@ public class DataReductionFileSelectionPage extends AbstractAlgorithmProcessPage
 			switch (column){
 			case 0:
 				myImage.setLocked((Boolean)value);
-				workflowRunView.getRunActions().get(MOML_DUMMY).setEnabled(isRunWorkflowEnabled());
+				ActionContributionItem item = (ActionContributionItem)algorithmViewPart.getViewSite().getActionBars().getToolBarManager().find(IAlgorithmProcessContext.RUN_ID_STUB+getTitle());
+				item.getAction().setEnabled(isRunWorkflowEnabled());
 				break;
 			case 1:
 				myImage.setType((String)value);

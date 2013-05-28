@@ -14,10 +14,7 @@
    <extension point="org.dawnsci.algorithm.ui.processPage">
       <processPage
             class="org.dawnsci.algorithm.ui.datareduction.DataReductionFileSelectionPage"
-            runIcon1="icons/run_workflow.gif"
-            stopIcon1="icons/stop_workflow.gif"
-            viewId="org.dawnsci.algorithm.ui.dataReductionFileSelectionView"
-            workflowFile1="workflows/dummyFile.moml">
+            viewId="org.dawnsci.algorithm.ui.dataReductionFileSelectionView">
       </processPage>
    </extension>
    

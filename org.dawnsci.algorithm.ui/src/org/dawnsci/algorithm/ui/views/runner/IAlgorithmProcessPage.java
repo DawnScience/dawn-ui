@@ -1,9 +1,8 @@
 package org.dawnsci.algorithm.ui.views.runner;
 
-import java.util.Map;
-
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.ISourceProvider;
+import org.eclipse.ui.IViewPart;
 
 /**
  * Please ensure that your implementation has a no argument constructor.
@@ -11,14 +10,14 @@ import org.eclipse.ui.ISourceProvider;
  *
  */
 public interface IAlgorithmProcessPage {
-		
+			
     /**
      * 	
      * @return the title of your custom page. The user will not know what
      * a algorithm is so this should use the language of the custom technique they
      * would like to run.
      */
-	public Map<String, String> getTitles();
+	public String getTitle();
 
 	/**
 	 * Creates the custom UI which will configure algorithm configuration.
@@ -58,7 +57,7 @@ public interface IAlgorithmProcessPage {
 	 * 
 	 * @param view
 	 */
-	public void setAlgorithmView(AlgorithmView view);
+	public void setAlgorithmView(IViewPart view);
 
 	/**
 	 * Called when containing view is disposed.

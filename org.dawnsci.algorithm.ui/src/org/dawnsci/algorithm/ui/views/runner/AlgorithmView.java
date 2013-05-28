@@ -1,22 +1,18 @@
 package org.dawnsci.algorithm.ui.views.runner;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.net.URL;
 
+import org.dawnsci.algorithm.ui.Activator;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.ViewPart;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,18 +37,8 @@ public class AlgorithmView extends ViewPart {
 	private static final Logger logger = LoggerFactory.getLogger(AlgorithmView.class);
 	
 	private IAlgorithmProcessPage runner;
-	private Composite        component;
-//	private Action           runAction;
-//	private Action           stopAction;
-	private Map<String, Action> runActions = new HashMap<String, Action>();
-	private Map<String, Action> stopActions = new HashMap<String, Action>();
-	private Map<String, String> workflowFiles = new HashMap<String, String>();
-	private Map<String, String> runIcons = new HashMap<String, String>();
-	private Map<String, String> stopIcons = new HashMap<String, String>();
-	private int workflowFilesTotal = 2;
-	private String workflowFileAttrib = "workflowFile";
-	private String runIconAttrib = "runIcon";
-	private String stopIconAttrib = "stopIcon";
+	private Composite             component;
+	private IConfigurationElement configuration;
 	
 	/**
 	 *  Gets the IWorkflowRunConfiguration from the extension point.
@@ -68,19 +54,9 @@ public class AlgorithmView extends ViewPart {
 	        for (IConfigurationElement e : elements) {
 	        	final String id = e.getAttribute("viewId");
 	        	if (id.equals(site.getId())) {
-	        		// Retrieve moml files and run icons
-		        	for(int i = 0; i<workflowFilesTotal; i++){
-		        		final String workflowFile = e.getAttribute(workflowFileAttrib+(i+1));
-			        	final String runIcon = e.getAttribute(runIconAttrib+(i+1));
-			        	final String stopIcon = e.getAttribute(stopIconAttrib+(i+1));
-			        	if(workflowFile != null)
-			        		workflowFiles.put(workflowFile, workflowFile);
-			        	if(runIcon != null)
-			        		runIcons.put(workflowFile, runIcon);
-			        	if(stopIcon != null)
-			        		stopIcons.put(workflowFile, stopIcon);
-		        	}
 	        		runner = (IAlgorithmProcessPage)e.createExecutableExtension("class");
+	        		configuration = e;
+	        		
 	        		break;
 	        	}
 	        	
@@ -104,75 +80,82 @@ public class AlgorithmView extends ViewPart {
 
 	private IAlgorithmProcessContext context;
 	
-	/**
-	 * TODO Something to grey out actions when one is running.
-	 * TODO replace "reference:file:" regex by something more sensible
-	 */
 	private void createActions() {
-		Set<String> runIconList = runIcons.keySet();
-//		Set<String> stopIconList = stopIcons.keySet();
-		int i = 1;
-		for (Iterator<String> iterator = runIconList.iterator(); iterator.hasNext();) {
-			final String workflowFile = (String) iterator.next();
-			Bundle bundle = FrameworkUtil.getBundle(runner.getClass());
-			final String bundlePath = bundle.getLocation();
-			
-			ImageDescriptor runImageDescript = new ImageDescriptor() {
-				@Override
-				public ImageData getImageData() {
-					String path = bundlePath.replaceFirst("reference:file:", "");
-					ImageData id = new ImageData(path+runIcons.get(workflowFile));
-					return id;
+
+		IConfigurationElement[] elements = configuration.getChildren("connection");
+        if (elements!=null && elements.length>0) {
+        	
+        	for (IConfigurationElement e : elements) {
+        		
+            	final String title = e.getAttribute("title");
+            	 
+		    	final String   id     = e.getContributor().getName();
+		    	final Bundle   bundle = Platform.getBundle(id);
+		    	
+         		URL      entry = bundle.getEntry(e.getAttribute("algorithmFile"));
+        		final String filePath = entry.getFile();
+         
+        		entry = bundle.getEntry(e.getAttribute("stopIcon"));
+ 		    	final ImageDescriptor stopIcon = ImageDescriptor.createFromURL(entry);
+
+		    	entry = bundle.getEntry(e.getAttribute("runIcon"));
+		    	final ImageDescriptor runIcon = ImageDescriptor.createFromURL(entry);
+
+                createRunActions(title, filePath, runIcon, stopIcon);
+			}
+        	
+        } else {
+        	    	
+            createRunActions(runner.getTitle(), null, 
+            		         Activator.getImageDescriptor("icons/run_workflow.gif"), 
+            		         Activator.getImageDescriptor("icons/stop_workflow.gif"));
+
+        }
+		
+	}
+
+	private void createRunActions(final String          title,
+			                      final String          filePath,
+			                      final ImageDescriptor runIcon,
+			                      final ImageDescriptor stopIcon) {
+		
+		final Action stopAction = new Action("Stop "+title, stopIcon) {
+			public void run() {
+				try {
+					if (context!=null) context.stop();
+				} catch (Exception e) {
+					logger.error(e.getMessage(), e);
 				}
-			};
-			Action runAction = new Action("Run "+runner.getTitles().get(workflowFile), runImageDescript) {
-				@Override
-				public void run() {
-					try {
-						stopActions.get(workflowFile).setEnabled(true);
-						if (context!=null) context.stop();
-						context = new AlgorithmProcessContext(AlgorithmView.this, runner.getSourceProviders());
-						context.setFilePath(workflowFiles.get(workflowFile));
-						runner.run(context);
-						
-					} catch (Exception e) {
-						logger.error(e.getMessage(), e);
-					} finally {
-						if (context!=null && context.isRunning()) {
-							stopActions.get(workflowFile).setEnabled(false);
-						}
+			}
+		};
+		stopAction.setId(IAlgorithmProcessContext.STOP_ID_STUB+title);
+	
+		Action runAction = new Action("Run "+title, runIcon) {
+			@Override
+			public void run() {
+				try {
+					stopAction.setEnabled(true);
+					if (context!=null) context.stop();
+					context = new AlgorithmProcessContext(AlgorithmView.this, runner.getSourceProviders());
+					context.setFilePath(filePath);
+					context.setTitle(title);
+					runner.run(context);
+					
+				} catch (Exception e) {
+					logger.error(e.getMessage(), e);
+				} finally {
+					if (context!=null && context.isRunning()) {
+						stopAction.setEnabled(false);
 					}
 				}
-			};
-			runAction.setId("org.dawnsci.algorithm.ui.views.runner.runAction"+(i));
+			}
+		};
+		runAction.setId(IAlgorithmProcessContext.RUN_ID_STUB+title);
 
-			getViewSite().getActionBars().getToolBarManager().add(runAction);
-			runActions.put(workflowFile, runAction);
-
-			ImageDescriptor stopImageDescript = new ImageDescriptor() {
-				@Override
-				public ImageData getImageData() {
-					String path = bundlePath.replaceFirst("reference:file:", "");
-					ImageData id = new ImageData(path+stopIcons.get(workflowFile));
-					return id;
-				}
-			};
-			Action stopAction = new Action("Stop "+runner.getTitles().get(workflowFile), stopImageDescript) {
-				public void run() {
-					try {
-						if (context!=null) context.stop();
-					} catch (Exception e) {
-						logger.error(e.getMessage(), e);
-					}
-				}
-			};
-			stopAction.setId("org.dawnsci.algorithm.ui.views.runner.stopAction"+(i));
-
-			getViewSite().getActionBars().getToolBarManager().add(stopAction);
-			getViewSite().getActionBars().getToolBarManager().add(new Separator());
-			stopActions.put(workflowFile, stopAction);
-			i++;
-		}
+		
+		getViewSite().getActionBars().getToolBarManager().add(runAction);
+		getViewSite().getActionBars().getToolBarManager().add(stopAction);
+		getViewSite().getActionBars().getToolBarManager().add(new Separator());
 	}
 
 	@Override
@@ -184,14 +167,6 @@ public class AlgorithmView extends ViewPart {
 	public void dispose() {
 		super.dispose();
 		if (runner!=null) runner.dispose();
-	}
-
-	public Map<String, Action> getRunActions(){
-		return runActions;
-	}
-
-	public Map<String, Action> getStopActions(){
-		return stopActions;
 	}
 
 	public IAlgorithmProcessContext getContext(){

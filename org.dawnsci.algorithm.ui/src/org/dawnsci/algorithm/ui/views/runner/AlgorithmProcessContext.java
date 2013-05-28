@@ -1,10 +1,13 @@
 package org.dawnsci.algorithm.ui.views.runner;
 
+import java.util.Arrays;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.ui.ISourceProvider;
 
 import com.isencia.passerelle.workbench.model.editor.ui.editor.actions.ExecuteActionEvent;
@@ -18,6 +21,7 @@ class AlgorithmProcessContext implements IAlgorithmProcessContext {
 	private ISourceProvider[] providers;
 	private AlgorithmView   view;
 	private String workflowFilePath;
+	private String title;
 
 	AlgorithmProcessContext(AlgorithmView view, ISourceProvider[] providers) {
 		this.view      = view;
@@ -46,17 +50,22 @@ class AlgorithmProcessContext implements IAlgorithmProcessContext {
 			// Try to find IFile or throw exception.
 			IFile file = getResource(momlPath);
 			if (file==null) throw new Exception("The path '"+momlPath+"' is not a file in a project in the workspace. This is required for running in own VM (as JDT is used).");
+			
 			runAction.addExecuteActionListener(new ExecuteActionListener() {	
 				@Override
 				public void stopRequested(ExecuteActionEvent evt) {
-					view.getRunActions().get(momlPath).setEnabled(true);
-					view.getStopActions().get(momlPath).setEnabled(false);
+					ActionContributionItem run = (ActionContributionItem)view.getViewSite().getActionBars().getToolBarManager().find(IAlgorithmProcessContext.RUN_ID_STUB+getTitle());
+					run.getAction().setEnabled(true);
+					ActionContributionItem stop = (ActionContributionItem)view.getViewSite().getActionBars().getToolBarManager().find(IAlgorithmProcessContext.STOP_ID_STUB+getTitle());
+					stop.getAction().setEnabled(false);
 				}
 				
 				@Override
 				public void executionRequested(ExecuteActionEvent evt) {
-					view.getRunActions().get(momlPath).setEnabled(false);
-					view.getStopActions().get(momlPath).setEnabled(true);
+					ActionContributionItem run = (ActionContributionItem)view.getViewSite().getActionBars().getToolBarManager().find(IAlgorithmProcessContext.RUN_ID_STUB+getTitle());
+					run.getAction().setEnabled(false);
+					ActionContributionItem stop = (ActionContributionItem)view.getViewSite().getActionBars().getToolBarManager().find(IAlgorithmProcessContext.STOP_ID_STUB+getTitle());
+					stop.getAction().setEnabled(true);
 				}
 				
 				@Override
@@ -115,5 +124,62 @@ class AlgorithmProcessContext implements IAlgorithmProcessContext {
 	@Override
 	public String getFilePath(){
 		return workflowFilePath;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((modelRunner == null) ? 0 : modelRunner.hashCode());
+		result = prime * result + Arrays.hashCode(providers);
+		result = prime * result + ((title == null) ? 0 : title.hashCode());
+		result = prime * result + ((view == null) ? 0 : view.hashCode());
+		result = prime
+				* result
+				+ ((workflowFilePath == null) ? 0 : workflowFilePath.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		AlgorithmProcessContext other = (AlgorithmProcessContext) obj;
+		if (modelRunner == null) {
+			if (other.modelRunner != null)
+				return false;
+		} else if (!modelRunner.equals(other.modelRunner))
+			return false;
+		if (!Arrays.equals(providers, other.providers))
+			return false;
+		if (title == null) {
+			if (other.title != null)
+				return false;
+		} else if (!title.equals(other.title))
+			return false;
+		if (view == null) {
+			if (other.view != null)
+				return false;
+		} else if (!view.equals(other.view))
+			return false;
+		if (workflowFilePath == null) {
+			if (other.workflowFilePath != null)
+				return false;
+		} else if (!workflowFilePath.equals(other.workflowFilePath))
+			return false;
+		return true;
 	}
 }

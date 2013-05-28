@@ -1,13 +1,15 @@
 package org.dawnsci.algorithm.ui.views.runner;
 
+import org.eclipse.ui.IViewPart;
+
 
 public abstract class AbstractAlgorithmProcessPage implements IAlgorithmProcessPage {
 
-	protected AlgorithmView workflowRunView;
+	protected IViewPart algorithmViewPart;
 
 	@Override
-	public void setAlgorithmView(AlgorithmView view) {
-		workflowRunView = view;
+	public void setAlgorithmView(IViewPart view) {
+		algorithmViewPart = view;
 	}
 
 }
