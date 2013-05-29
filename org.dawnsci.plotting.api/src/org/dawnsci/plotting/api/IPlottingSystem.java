@@ -14,7 +14,6 @@ import java.util.List;
 import org.dawnsci.plotting.api.annotation.IAnnotationSystem;
 import org.dawnsci.plotting.api.axis.IAxisSystem;
 import org.dawnsci.plotting.api.region.IRegionSystem;
-import org.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
 import org.dawnsci.plotting.api.trace.ColorOption;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.api.trace.ITraceSystem;
@@ -357,4 +356,10 @@ public interface IPlottingSystem extends IAdaptable, ITraceSystem, IRegionSystem
 	 * @return rescale
 	 */
 	public boolean isRescale();
+
+	/**
+	 * Sets whether the the plot should rescale when replotted
+	 * @param rescale
+	 */
+	public void setRescale(boolean rescale);
 }
