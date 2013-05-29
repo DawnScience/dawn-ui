@@ -30,7 +30,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,9 +52,7 @@ public class ImageTraceComposite extends Composite {
 	private IImageTrace   imageTrace;
 	private NumberBox     maximum, minimum, minCut, maxCut, lo, hi;
 	private CCombo        downsampleChoice, histoChoice;
-	private Text          nameText;
     private ColorSelector minCutColor, maxCutColor, nanColor;
-	private IPlottingSystem plottingSystem;
 	/**
 	 * 
 	 * @param dialog
@@ -69,7 +66,6 @@ public class ImageTraceComposite extends Composite {
 		
 		super(parent, SWT.NONE);
 		this.imageTrace      = imageTrace;
-		this.plottingSystem  = plottingSystem;
 
 		setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		setLayout(new GridLayout(1, false));
@@ -80,13 +76,13 @@ public class ImageTraceComposite extends Composite {
 		top.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
 		top.setLayout(new GridLayout(2, false));
 		
-		label = new Label(top, SWT.NONE);
-		label.setText("Name");
-		label.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1));
+//		label = new Label(top, SWT.NONE);
+//		label.setText("Name");
+//		label.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1));
 		
-		nameText = new Text(top, SWT.BORDER | SWT.SINGLE);
-		nameText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));		
-        nameText.setText(imageTrace.getName());
+//		nameText = new Text(top, SWT.BORDER | SWT.SINGLE);
+//		nameText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));		
+//        nameText.setText(imageTrace.getName());
 		
 		final Group group = new Group(this, SWT.NONE);
 		group.setText("Histogramming");
@@ -386,11 +382,6 @@ public class ImageTraceComposite extends Composite {
 		try {
 			imageTrace.setImageUpdateActive(false);
 			imageTrace.setHistoType(HistoType.values()[histoChoice.getSelectionIndex()]); // Do first because overrides max and min
-			try {
-				plottingSystem.renameTrace(imageTrace, nameText.getText());
-			} catch (Exception e) {
-				logger.error("Cannot rename trace "+imageTrace, e);
-			}
 			
 			if (!Double.isNaN(minimum.getNumericValue())) imageTrace.setMin(minimum.getNumericValue());
 			if (!Double.isNaN(maximum.getNumericValue())) imageTrace.setMax(maximum.getNumericValue());
