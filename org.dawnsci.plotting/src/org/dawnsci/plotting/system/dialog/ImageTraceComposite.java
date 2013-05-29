@@ -55,6 +55,7 @@ public class ImageTraceComposite extends Composite {
 	private CCombo        downsampleChoice, histoChoice;
 	private Text          nameText;
     private ColorSelector minCutColor, maxCutColor, nanColor;
+	private IPlottingSystem plottingSystem;
 	/**
 	 * 
 	 * @param dialog
@@ -67,7 +68,8 @@ public class ImageTraceComposite extends Composite {
 			                   final IImageTrace     imageTrace) {
 		
 		super(parent, SWT.NONE);
-		this.imageTrace  = imageTrace;
+		this.imageTrace      = imageTrace;
+		this.plottingSystem  = plottingSystem;
 
 		setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		setLayout(new GridLayout(1, false));
@@ -384,7 +386,12 @@ public class ImageTraceComposite extends Composite {
 		try {
 			imageTrace.setImageUpdateActive(false);
 			imageTrace.setHistoType(HistoType.values()[histoChoice.getSelectionIndex()]); // Do first because overrides max and min
-			imageTrace.setName(nameText.getText());
+			try {
+				plottingSystem.renameTrace(imageTrace, nameText.getText());
+			} catch (Exception e) {
+				logger.error("Cannot rename trace "+imageTrace, e);
+			}
+			
 			if (!Double.isNaN(minimum.getNumericValue())) imageTrace.setMin(minimum.getNumericValue());
 			if (!Double.isNaN(maximum.getNumericValue())) imageTrace.setMax(maximum.getNumericValue());
 			
