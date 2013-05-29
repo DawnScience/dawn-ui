@@ -74,7 +74,6 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 
-
 /**
  * An implementation of IPlottingSystem, not designed to be public.
  * 
@@ -88,36 +87,35 @@ import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 public class PlottingSystemImpl extends AbstractPlottingSystem {
 
 	private Logger logger = LoggerFactory.getLogger(PlottingSystemImpl.class);
-	
+
 	private Composite      parent;
-	
+
 	private PlotActionsManagerImpl       actionBarManager;
 	private LightWeightPlotViewer        lightWeightViewer;
 	private JRealityPlotViewer           jrealityViewer;
 
 	private final String SHOW_LEGEND_ACTION_ID = "org.csstudio.swt.xygraph.toolbar.configureShow Legend";
-	
+
 	public PlottingSystemImpl() {
 		super();
 		this.actionBarManager     = (PlotActionsManagerImpl)super.actionBarManager;
 		this.lightWeightViewer    = new LightWeightPlotViewer();
 		this.jrealityViewer       = new JRealityPlotViewer();
 	}
-	
+
 	private boolean containerOverride = false;
-	
+
 	public void createPlotPart(final Composite      container,
 							   final String         plotName,
 							   final IActionBars    bars,
 							   final PlotType       hint,
 							   final IWorkbenchPart part) {
-
 		super.createPlotPart(container, plotName, bars, hint, part);
-		
+
 		if (container.getLayout() instanceof GridLayout) {
 			GridUtils.removeMargins(container);
 		}
-		
+
 		this.plottingMode = hint;
 		if (container.getLayout() instanceof PageBook.PageBookLayout) {
 			if (hint.is3D()) throw new RuntimeException("Cannot deal with "+PageBook.PageBookLayout.class.getName()+" and 3D at the moment!");
@@ -130,7 +128,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			this.parent.setLayout(layout);
 			parent.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		}
-		
+
 		// We ignore hint, we create a light weight plot as default because
 		// it looks nice. We swap this for a 3D one if required.
 		createLightWeightUI();
@@ -141,13 +139,12 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			container.layout();
 		}
 	}
-	
+
 	@Override
 	protected PlottingActionBarManager createActionBarManager() {
 		return new PlotActionsManagerImpl(this);
 	}
 
-	
 	@Override
 	public Composite getPlotComposite() {
 		if (containerOverride) return parent;
@@ -155,9 +152,8 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		if (lightWeightViewer.getControl()!=null)      return (Composite)lightWeightViewer.getControl();
 		return null;
 	}
-	
-	private void createLightWeightUI() {
 
+	private void createLightWeightUI() {
 		if (lightWeightViewer.getControl()!=null) return;
 		lightWeightViewer.init(this);
 		lightWeightViewer.createControl(parent);
@@ -172,12 +168,10 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		parent.layout();
 	}
 
-
 	public void setFocus() {
 		lightWeightViewer.setFocus();
 	}
 
-		
 	public void addTraceListener(final ITraceListener l) {
 		super.addTraceListener(l);
 		lightWeightViewer.addImageTraceListener(l);
@@ -186,15 +180,12 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		super.removeTraceListener(l);
 		lightWeightViewer.removeImageTraceListener(l);
 	}
-	
-	
+
 	public List<ITrace> updatePlot1D(IDataset             x, 
 						             final List<? extends IDataset> ys,
 						             final IProgressMonitor      monitor) {
-
-		final List<ITrace> updatedAndCreated = new ArrayList<ITrace>(3);		
+		final List<ITrace> updatedAndCreated = new ArrayList<ITrace>(3);
 		final List<IDataset> unfoundYs = new ArrayList<IDataset>(ys.size());
-		
 		for (final IDataset y : ys) {
 			
 			final ITrace trace = getTrace(y.getName());
@@ -218,13 +209,11 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			}
 			unfoundYs.add(y);
 		}
-		
 		if (!unfoundYs.isEmpty()) {
 			if (x==null) x = IntegerDataset.arange(unfoundYs.get(0).getSize(), IntegerDataset.INT32);
 			final Collection<ITrace> news = createPlot1D(x, unfoundYs, monitor);
 			updatedAndCreated.addAll(news);
 		}
-		
 		return updatedAndCreated;
 	}
 	
@@ -243,7 +232,6 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 					                 final List<? extends IDataset> ysIn,
 					                 final String                title,
 					                 final IProgressMonitor      monitor) {
-		
 		if (monitor!=null) monitor.worked(1);
 
 		// create index datasets if necessary
@@ -281,7 +269,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		return traces;
 		
 	}
-	
+
 	private Display getDisplay() {
 		return Display.getDefault();
 	}
@@ -322,11 +310,10 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			});
 		}
 	}
-	
+
 	public ITrace updatePlot2D(final IDataset       data, 
 							   final List<? extends IDataset> axes,
 							   final IProgressMonitor      monitor) {
-		
 		if (plottingMode.is1D()) {
 			if (getDisplay().getThread()==Thread.currentThread()) {
 				switchPlottingType(PlotType.IMAGE);
@@ -338,7 +325,6 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 				});
 			}
 		}
-		
 		final Collection<ITrace> traces = plottingMode.is3D() 
 				                        ? getTraces(ISurfaceTrace.class)
 				                        : getTraces(IImageTrace.class);
@@ -393,7 +379,6 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		}
 	}
 
-
 	/**
 	 * Must be called in UI thread. Creates and updates image.
 	 * NOTE removes previous traces if any plotted.
@@ -406,9 +391,8 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	public ITrace createPlot2D(final IDataset       data, 
 							   final List<? extends IDataset> axes,
 							   final IProgressMonitor      monitor) {
-  
 		final List<ITrace> traces = new ArrayList<ITrace>(7);
-		
+
 		if (getDisplay().getThread()==Thread.currentThread()) {
 			ITrace ts = createPlot2DInternal(data, axes, monitor);
 			if (ts!=null) traces.add(ts);
@@ -432,7 +416,6 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			if (plottingMode.is1D()) {
 				switchPlottingType(PlotType.IMAGE);
 			}
-
 			clearTraces(); // Only one image at a time!
             			
 			if (traceMap==null) traceMap = new LinkedHashMap<String, ITrace>(31);
@@ -454,7 +437,6 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 				traceMap.put(trace.getName(), trace);
 				fireTraceAdded(new TraceEvent(trace));
 			}
-
 			return trace;
             
 		} catch (Throwable e) {
@@ -463,15 +445,13 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		}
 	}
 
-
-
 	@Override
 	public IImageTrace createImageTrace(String traceName) {
 		IImageTrace trace = lightWeightViewer.createImageTrace(traceName);
 		fireTraceCreated(new TraceEvent(trace));
 		return trace;
 	}
-	
+
 	@Override
 	public IImageStackTrace createImageStackTrace(String traceName) {
 		IImageStackTrace trace = lightWeightViewer.createImageStackTrace(traceName);
@@ -486,8 +466,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	 * not, sometimes the dataset is unique but its name is not.
 	 */
 	private Map<Object, Color> colorMap; // Warning can be mem leak
-	
-	
+
 	/**
 	 * A map for recording traces to be used in the update method.
 	 * 
@@ -496,12 +475,10 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	 */
 	private Map<String, ITrace> traceMap; // Warning can be mem leak
 
-
 	private List<ITrace> createPlot1DInternal(final IDataset       xIn, 
 										      final List<? extends IDataset> ysIn,
 										      final String                title,
 										      final IProgressMonitor      monitor) {
-		
 		if (plottingMode.is1Dor2D()) {
 		    this.plottingMode = PlotType.XY;
 		} else {
@@ -538,7 +515,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		fireTracesPlotted(new TraceEvent(traces));
         return traces;
 	}
-	
+
 	@SuppressWarnings("unused")
 	private boolean isAllInts(List<AbstractDataset> ysIn) {
 		for (AbstractDataset a : ysIn) {
@@ -551,9 +528,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		return true;
 	}
 
-
 	public ILineTrace createLineTrace(String traceName) {
-
 		final Axis xAxis = (Axis)getSelectedXAxis();
 		final Axis yAxis = (Axis)getSelectedYAxis();
 
@@ -563,13 +538,10 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		fireTraceCreated(new TraceEvent(wrapper));
 		return wrapper;
 	}
-	
 
 	@Override
 	public ISurfaceTrace createSurfaceTrace(String traceName) {
-		
         ISurfaceTrace trace = jrealityViewer.createSurfaceTrace(traceName);
-		
         PaletteData palette = null;
 		if (trace.getPaletteData()==null) {
 			final Collection<ITrace> col = getTraces(IImageTrace.class);
@@ -586,16 +558,14 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			}
 			trace.setPaletteData(palette);
 		}
-
-		
 		return trace;
 	}
-	
+
 	@Override
 	public ILineStackTrace createLineStackTrace(String traceName) {	
 		return jrealityViewer.createStackTrace(traceName);
 	}
-	
+
 	protected void switchPlottingType( PlotType type ) {
 		
 		this.plottingMode=type;
@@ -617,7 +587,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			parent.layout();
 		}
 	}
-	
+
 	/**
 	 * Adds trace, makes visible
 	 * @param traceName
@@ -637,6 +607,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			fireTraceAdded(new TraceEvent(trace));
 		}
 	}
+
 	/**
 	 * Removes a trace.
 	 * @param traceName
@@ -661,7 +632,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		if (traceMap==null) traceMap = new LinkedHashMap<String, ITrace>(3);
 		traceMap.put(name, trace);
 	}
-	
+
 	public Collection<ITrace> getTraces() {
 		if (traceMap==null) return Collections.emptyList();
 		return traceMap.values();
@@ -677,20 +648,17 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 					                  Number           xValue,
 							    final Number           yValue,
 							    final IProgressMonitor monitor) {
-
-
 		final ITrace wrapper = traceMap.get(name);
 		if (wrapper==null) return;
-		
+
 		final Trace trace = ((LineTraceImpl)wrapper).getTrace();
-		
+
 		LightWeightDataProvider prov = (LightWeightDataProvider)trace.getDataProvider();
 		if (prov==null) return;
 
 		prov.append(xValue, yValue);
 	}
-	
-	
+
     /**
      * Thread safe method
      */
@@ -705,7 +673,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		
 		return getData(name, trace, true);
 	}
-	
+
 	/**
 	 * Thread safe method
 	 * @param name
@@ -735,6 +703,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			lightWeightViewer.setTitle(title);
 		}
 	}
+
 	public String getTitle() {
 		if (plottingMode.is3D()) {
 			return jrealityViewer.getTitle();
@@ -742,10 +711,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			return lightWeightViewer.getTitle();
 		}
 	}	
-	/**
-	 * Override this method to provide an implementation of show legend setting.
-	 * @param b
-	 */
+
 	@Override
 	public void setShowLegend(boolean b) {
 		IAction action = actionBarManager.findAction(SHOW_LEGEND_ACTION_ID);
@@ -796,20 +762,18 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 				}
 			});
 		}
-
 	}
+
 	private void resetInternal() {
-		
 		if (traceMap!=null) traceMap.clear();
 		if (colorMap!=null) colorMap.clear();
 		lightWeightViewer.reset();
 		jrealityViewer.reset();
 		fireTracesCleared(new TraceEvent(this));
 	}
-	
+
 	@Override
 	public void clear() {
-		
 		if (getDisplay().getThread()==Thread.currentThread()) {
 			clearInternal();
 		} else {
@@ -822,19 +786,17 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		}
 
 	}
-	private void clearInternal() {		
+
+	private void clearInternal() {
 		if (lightWeightViewer.getControl()!=null) {
 			try {
 				clearTraces();
-				if (colorMap!=null) colorMap.clear();	
-	
+				if (colorMap!=null) colorMap.clear();
 			} catch (Throwable e) {
 				logger.error("Cannot remove traces!", e);
 			}
 		}	
 	}
-
-
 
 	@Override
 	public void dispose() {
@@ -858,11 +820,11 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	public void repaint() {
 		repaint(isRescale());
 	}
-	
+
 	public void repaint(final boolean autoScale) {
 		lightWeightViewer.repaint(autoScale);
 	}
-	
+
 	/**
 	 * Creates an image of the same size as the Rectangle passed in.
 	 * @param size
@@ -872,7 +834,6 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	public Image getImage(Rectangle size) {
 		return lightWeightViewer.getImage(size);
 	}
-	
 
 	/**
 	 * Use this method to create axes other than the default y and x axes.
@@ -889,7 +850,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 					
 		return lightWeightViewer.createAxis(title, isYAxis, side);
 	}
-	
+
 	@Override
 	public IAxis removeAxis(final IAxis axis) {
 		
@@ -897,7 +858,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 					
 		return lightWeightViewer.removeAxis(axis);
 	}
-	
+
 	@Override
 	public List<IAxis> getAxes() {
 		
@@ -906,7 +867,6 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		return lightWeightViewer.getAxes();
 	}
 
-	
 	@Override
 	public IAxis getSelectedXAxis() {
 		return lightWeightViewer.getSelectedXAxis();
@@ -926,23 +886,22 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	public void setSelectedYAxis(IAxis selectedYAxis) {
 		lightWeightViewer.setSelectedYAxis(selectedYAxis);
 	}
-	
+
 	public boolean addRegionListener(final IRegionListener l) {
 		if (lightWeightViewer.getControl() == null) createLightWeightUI();
 		return lightWeightViewer.addRegionListener(l);
 	}
-	
+
 	public boolean removeRegionListener(final IRegionListener l) {
 		if (lightWeightViewer.getControl() == null) createLightWeightUI();
 		return lightWeightViewer.removeRegionListener(l);
 	}
-	
+
 	/**
 	 * Throws exception if region exists already.
 	 * @throws Exception 
 	 */
 	public IRegion createRegion(final String name, final RegionType regionType) throws Exception  {
-
 		if (lightWeightViewer.getControl() == null) createLightWeightUI();
 		return lightWeightViewer.createRegion(name, regionType);
 	}
@@ -1070,18 +1029,17 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	public void savePlotting(String filename, String filetype) throws Exception{
 		lightWeightViewer.savePlotting(filename, filetype);
 	}
-	
+
 	public void setXfirst(boolean xfirst) {
 		super.setXfirst(xfirst);
 		lightWeightViewer.setXFirst(xfirst);
 	}
-	
+
 	public void setRescale(boolean rescale) {
 		super.setRescale(rescale);
 		lightWeightViewer.setRescale(rescale);
 	}
-	
-	
+
 	/**
 	 * NOTE This listener is *not* notified once for each configuration setting made on 
 	 * the configuration but once whenever the form is applied by the user (and many things
@@ -1098,7 +1056,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		super.addPropertyChangeListener(listener);
 		lightWeightViewer.addPropertyChangeListener(listener);
 	}
-	
+
 	@Override
 	public void removePropertyChangeListener(IPropertyChangeListener listener) {
 		super.removePropertyChangeListener(listener);
@@ -1113,7 +1071,6 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		return lightWeightViewer.getXYRegionGraph();
 	}
 
-
 	public void setActionBars(IActionBars bars) {
 		this.bars = bars;
 	}
@@ -1124,7 +1081,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		if (cursorType == CROSS_CURSOR) cursor = Cursors.CROSS;
 		lightWeightViewer.setDefaultPlotCursor(cursor);
 	}
-	
+
 	/**
 	 * Set the cursor using a custom icon on the plot.
 	 * This may get cancelled if other tools are used!
@@ -1135,27 +1092,25 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		if (isDisposed() || lightWeightViewer==null || lightWeightViewer.getXYRegionGraph()==null) return;
 		lightWeightViewer.setSelectedCursor(cursor);
 	}
-	
+
 	@Override
 	public void setShiftPoint(Point point) {
 		if (isDisposed() || lightWeightViewer==null || lightWeightViewer.getXYRegionGraph()==null) return;
 		lightWeightViewer.setShiftPoint(point);
 	}
-	
+
 	@Override
 	public Point getShiftPoint() {
 		if (isDisposed() || lightWeightViewer==null || lightWeightViewer.getXYRegionGraph()==null) return null;
 		return lightWeightViewer.getShiftPoint();
 	}
-	
+
 	@Override
 	public Cursor getSelectedCursor() {
-		
 		if (isDisposed() || lightWeightViewer==null || lightWeightViewer.getXYRegionGraph()==null) return null;
 		return lightWeightViewer.getXYRegionGraph().getRegionArea().getSelectedCursor();
 	}
 
-	
 	@Override
 	public void addPositionListener(IPositionListener l) {
 		if (lightWeightViewer==null) return;
@@ -1173,19 +1128,19 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		if (isDisposed() || lightWeightViewer==null || lightWeightViewer.getXYRegionGraph()==null) return;
 		lightWeightViewer.getXYRegionGraph().getRegionArea().addAuxilliaryMotionListener(mml);
 	}
-	
+
 	@Override
 	public void addMouseClickListener(MouseListener mcl) {
 		if (isDisposed() || lightWeightViewer==null || lightWeightViewer.getXYRegionGraph()==null) return;
 		lightWeightViewer.getXYRegionGraph().getRegionArea().addAuxilliaryClickListener(mcl);
 	}
-	
+
 	@Override
 	public void removeMouseMotionListener(MouseMotionListener mml) {
 		if (isDisposed() || lightWeightViewer==null || lightWeightViewer.getXYRegionGraph()==null) return;
 		lightWeightViewer.getXYRegionGraph().getRegionArea().removeAuxilliaryMotionListener(mml);
 	}
-	
+
 	/**
 	 * Please override for draw2d listeners.
 	 * @deprecated draw2d Specific
@@ -1195,6 +1150,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		if (isDisposed() || lightWeightViewer==null || lightWeightViewer.getXYRegionGraph()==null) return;
 		lightWeightViewer.getXYRegionGraph().getRegionArea().removeAuxilliaryClickListener(mcl);
 	}
+
 	public void setKeepAspect(boolean checked){
 		lightWeightViewer.setKeepAspect(checked);
 	}
