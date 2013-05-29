@@ -491,4 +491,9 @@ public class ThreadSafePlottingSystem extends StandardMBean implements IPlotting
 		// TODO Auto-generated method stub
 		
 	}
+	@Override
+	public Object getAdapter(Class adapter) {
+		return call(getMethodName(Thread.currentThread().getStackTrace()), new Class[] { adapter }, adapter);
+	}
+
 }

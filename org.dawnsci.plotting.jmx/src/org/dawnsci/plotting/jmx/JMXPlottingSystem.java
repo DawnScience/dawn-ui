@@ -419,4 +419,9 @@ public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSyste
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public Object getAdapter(Class adapter) {
+		return call(getMethodName(Thread.currentThread().getStackTrace()), new Class[] { adapter }, adapter);
+	}
 }

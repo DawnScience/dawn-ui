@@ -16,6 +16,7 @@ import org.dawnsci.plotting.api.axis.IAxisSystem;
 import org.dawnsci.plotting.api.region.IRegionSystem;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.api.trace.ITraceSystem;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.widgets.Composite;
@@ -64,7 +65,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
  * @author gerring
  *
  */
-public interface IPlottingSystem extends ITraceSystem, IRegionSystem, IAxisSystem, IAnnotationSystem, IPrintablePlotting{
+public interface IPlottingSystem extends IAdaptable, ITraceSystem, IRegionSystem, IAxisSystem, IAnnotationSystem, IPrintablePlotting{
 
 	public final static String RESCALE_ID = "org.dawb.common.ui.plot.rescale";
 	
