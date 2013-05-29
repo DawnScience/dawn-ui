@@ -473,4 +473,22 @@ public class ThreadSafePlottingSystem extends StandardMBean implements IPlotting
 				)
 		};
 	}
+
+	@Override
+	public void setKeepAspect(boolean b) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setShowIntensity(boolean b) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setShowLegend(boolean b) {
+		// TODO Auto-generated method stub
+		
+	}
 }

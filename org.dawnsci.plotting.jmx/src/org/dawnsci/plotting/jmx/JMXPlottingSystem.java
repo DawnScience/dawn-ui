@@ -401,4 +401,22 @@ public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSyste
 	public void removePositionListener(IPositionListener l) {
 		call(getMethodName(Thread.currentThread().getStackTrace()), new Class[] { IPositionListener.class }, l);
 	}
+
+	@Override
+	public void setKeepAspect(boolean b) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setShowIntensity(boolean b) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setShowLegend(boolean b) {
+		// TODO Auto-generated method stub
+		
+	}
 }
