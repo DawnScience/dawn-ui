@@ -1,4 +1,4 @@
-package org.dawnsci.algorithm.ui.updater;
+package org.dawnsci.algorithm.ui.workflow;
 
 public class WorkflowUpdaterCreator {
 

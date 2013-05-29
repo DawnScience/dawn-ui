@@ -316,5 +316,25 @@ public interface IPlottingSystem extends ITraceSystem, IRegionSystem, IAxisSyste
 	 * NORMAL is the arrow, CROSS is a cross
 	 */
 	public void setDefaultCursor(int cursorType);
-	
+
+	/**
+	 * Set the plotting System aspect ratio on/off
+	 * @param b
+	 */
+	public void setKeepAspect(boolean b);
+
+	/**
+	 * Shows or not the intensity scale
+	 * The intensity scale is displayed (set to True) every time there is an image update
+	 * If you want to hide it (set to False), make sure this method is called after each update.
+	 * @param b
+	 */
+	public void setShowIntensity(boolean b);
+
+	/**
+	 * Sets the legends setting on/off
+	 * @param b
+	 */
+	void setShowLegend(boolean b);
+
 }

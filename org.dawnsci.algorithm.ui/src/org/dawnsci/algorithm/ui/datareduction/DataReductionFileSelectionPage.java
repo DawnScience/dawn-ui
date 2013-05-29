@@ -27,10 +27,10 @@ import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.PlottingFactory;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.algorithm.ui.Activator;
-import org.dawnsci.algorithm.ui.updater.IWorkflowUpdater;
-import org.dawnsci.algorithm.ui.updater.WorkflowUpdaterCreator;
 import org.dawnsci.algorithm.ui.views.runner.AbstractAlgorithmProcessPage;
 import org.dawnsci.algorithm.ui.views.runner.IAlgorithmProcessContext;
+import org.dawnsci.algorithm.ui.workflow.IWorkflowUpdater;
+import org.dawnsci.algorithm.ui.workflow.WorkflowUpdaterCreator;
 import org.dawnsci.plotting.api.PlotType;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -77,12 +77,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
-import uk.ac.diamond.scisoft.analysis.rcp.plotting.datareduction.DataReductionPlotter;
-//import org.dawb.common.ui.util.EclipseUtils;
-//import org.dawb.common.ui.wizard.persistence.datareduction.PersistenceSavingWizard;
-//import org.eclipse.jface.wizard.IWizard;
-//import org.eclipse.jface.wizard.WizardDialog;
-//import org.eclipse.swt.widgets.Display;
+import uk.ac.diamond.scisoft.analysis.rcp.plotting.utils.PlottingUtils;
 
 public class DataReductionFileSelectionPage extends AbstractAlgorithmProcessPage {
 
@@ -102,7 +97,6 @@ public class DataReductionFileSelectionPage extends AbstractAlgorithmProcessPage
 
 	private static final String MOML_FILE = "workflows/2D_DataReductionV2.moml";
 	// temporary used as a moml file until the one above is put in another plugin with this class
-	private static final String MOML_DUMMY = "workflows/dummyFile.moml";
 	private static final String INPUT_ACTOR = "Image to process";
 
 	private AbstractPlottingSystem dataPlot;
@@ -302,39 +296,39 @@ public class DataReductionFileSelectionPage extends AbstractAlgorithmProcessPage
 		public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 			if (selection instanceof IStructuredSelection) {
 				IStructuredSelection structSelection = (IStructuredSelection)selection;
-				image = DataReductionPlotter.loadData(structSelection);
+				image = PlottingUtils.loadData(structSelection);
 				if(image == null) return;
 				if (!((SelectedData)viewer.getElementAt(0)).isLocked()) {
-					DataReductionPlotter.plotData(dataPlot, DATA_TITLE, image);
+					PlottingUtils.plotData(dataPlot, DATA_TITLE, image);
 					((SelectedData)viewer.getElementAt(0)).setShape(image.getShape());
-					((SelectedData)viewer.getElementAt(0)).setFileName(DataReductionPlotter.getFileName(structSelection));
-					dataFilePaths.put("AFilename", DataReductionPlotter.getFullFilePath(structSelection));
+					((SelectedData)viewer.getElementAt(0)).setFileName(PlottingUtils.getFileName(structSelection));
+					dataFilePaths.put("AFilename", PlottingUtils.getFullFilePath(structSelection));
 				}
 				if (!((SelectedData)viewer.getElementAt(1)).isLocked()) {
-					DataReductionPlotter.plotData(calibrationPlot, CALIB_TITLE, image);
+					PlottingUtils.plotData(calibrationPlot, CALIB_TITLE, image);
 					((SelectedData)viewer.getElementAt(1)).setShape(image.getShape());
-					((SelectedData)viewer.getElementAt(1)).setFileName(DataReductionPlotter.getFileName(structSelection));
-					dataFilePaths.put("Calibration_file", DataReductionPlotter.getFullFilePath(structSelection));
+					((SelectedData)viewer.getElementAt(1)).setFileName(PlottingUtils.getFileName(structSelection));
+					dataFilePaths.put("Calibration_file", PlottingUtils.getFullFilePath(structSelection));
 				}
 				if (!((SelectedData)viewer.getElementAt(2)).isLocked()) {
-					DataReductionPlotter.plotData(detectorPlot, DETECT_TITLE, image);
+					PlottingUtils.plotData(detectorPlot, DETECT_TITLE, image);
 					((SelectedData)viewer.getElementAt(2)).setShape(image.getShape());
-					((SelectedData)viewer.getElementAt(2)).setFileName(DataReductionPlotter.getFileName(structSelection));
-					dataFilePaths.put("Detector_response_file", DataReductionPlotter.getFullFilePath(structSelection));
+					((SelectedData)viewer.getElementAt(2)).setFileName(PlottingUtils.getFileName(structSelection));
+					dataFilePaths.put("Detector_response_file", PlottingUtils.getFullFilePath(structSelection));
 
 				}
 				if (!((SelectedData)viewer.getElementAt(3)).isLocked()) {
-					DataReductionPlotter.plotData(backgroundPlot, BACKGD_TITLE, image);
+					PlottingUtils.plotData(backgroundPlot, BACKGD_TITLE, image);
 					((SelectedData)viewer.getElementAt(3)).setShape(image.getShape());
-					((SelectedData)viewer.getElementAt(3)).setFileName(DataReductionPlotter.getFileName(structSelection));
-					dataFilePaths.put("Background_file", DataReductionPlotter.getFullFilePath(structSelection));
+					((SelectedData)viewer.getElementAt(3)).setFileName(PlottingUtils.getFileName(structSelection));
+					dataFilePaths.put("Background_file", PlottingUtils.getFullFilePath(structSelection));
 
 				}
 				if (!((SelectedData)viewer.getElementAt(4)).isLocked()) {
-					DataReductionPlotter.plotData(maskPlot, MASK_TITLE, image);
+					PlottingUtils.plotData(maskPlot, MASK_TITLE, image);
 					((SelectedData)viewer.getElementAt(4)).setShape(image.getShape());
-					((SelectedData)viewer.getElementAt(4)).setFileName(DataReductionPlotter.getFileName(structSelection));
-					dataFilePaths.put("Mask_file", DataReductionPlotter.getFullFilePath(structSelection));
+					((SelectedData)viewer.getElementAt(4)).setFileName(PlottingUtils.getFileName(structSelection));
+					dataFilePaths.put("Mask_file", PlottingUtils.getFullFilePath(structSelection));
 
 				}
 				viewer.refresh();
