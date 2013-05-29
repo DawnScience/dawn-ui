@@ -28,6 +28,7 @@ import javax.vecmath.Vector3d;
 import org.dawb.common.services.ILoaderService;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.parts.PartUtils;
+import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.PlottingFactory;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.workbench.ui.Activator;
@@ -49,11 +50,14 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.CheckboxCellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.ILabelProviderListener;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
@@ -77,15 +81,19 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IPartListener2;
+import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationStandards;
 import uk.ac.diamond.scisoft.analysis.crystallography.HKL;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
 import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
 import uk.ac.diamond.scisoft.analysis.diffraction.PowderRingsUtils;
@@ -94,6 +102,7 @@ import uk.ac.diamond.scisoft.analysis.fitting.Fitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Polynomial;
 import uk.ac.diamond.scisoft.analysis.io.AbstractFileLoader;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
+import uk.ac.diamond.scisoft.analysis.rcp.plotting.utils.PlottingUtils;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
@@ -109,6 +118,8 @@ import uk.ac.diamond.scisoft.analysis.roi.IROI;
  */
 public class DiffractionCalibrationPlottingView extends ViewPart {
 
+	private static Logger logger = LoggerFactory.getLogger(DiffractionCalibrationPlottingView.class);
+
 	private IPlottingSystem currentSystem;
 	private MyData currentData;
 	private List<MyData> model = new ArrayList<MyData>();
@@ -121,6 +132,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 	private IPlottingSystem plottingSystem;
 	private Composite parent;
+
+	private ISelectionListener fileSelectionListener;
 
 	enum ManipulateMode {
 		LEFT, RIGHT, UP, DOWN, ENLARGE, SHRINK, ELONGATE, SQUASH, CLOCKWISE, ANTICLOCKWISE
@@ -189,7 +202,21 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		};
 		getSite().getPage().addPartListener(listener);
 
-		// main sashform whicih contains the left sash and the plotting system
+		// add a selection listener on an IStructuredSelection
+		fileSelectionListener = new ISelectionListener() {
+			@Override
+			public void selectionChanged(IWorkbenchPart part, ISelection selection) {
+				if (selection instanceof IStructuredSelection) {
+					IStructuredSelection structSelection = (IStructuredSelection)selection;
+					IDataset image = PlottingUtils.loadData(structSelection);
+					if(image == null) return;
+					PlottingUtils.plotData((AbstractPlottingSystem)plottingSystem, image.getName(), image);
+				}
+			}
+		};
+		getSite().getWorkbenchWindow().getSelectionService().addSelectionListener(fileSelectionListener);
+
+		// main sashform which contains the left sash and the plotting system
 		SashForm mainSash = new SashForm(parent, SWT.HORIZONTAL);
 		mainSash.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		mainSash.setLayout(new FillLayout());
@@ -452,14 +479,25 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		// end of Diffraction Calibration controls
 		
 		// start plotting system
+//		Composite plotComp = new Composite(mainSash, SWT.NONE);
+//		plotComp.setLayout(new GridLayout(1, false));
+//		plotComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		try {
+//			ActionBarWrapper actionBarWrapper = ActionBarWrapper.createActionBars(plotComp, null);
 			plottingSystem = PlottingFactory.createPlottingSystem();
-			plottingSystem.createPlotPart(mainSash, "", getViewSite().getActionBars(), PlotType.IMAGE, getViewSite().getPart());
+			plottingSystem.createPlotPart(mainSash, "", null, PlotType.IMAGE, getViewSite().getPart());
 			plottingSystem.setTitle("");
+			IContributionManager cm = getViewSite().getActionBars().getMenuManager();
+			plottingSystem.getPlotActionSystem().fillToolActions(cm, ToolPageRole.ROLE_2D);
+			plottingSystem.getPlotActionSystem().fillPrintActions(cm);
+			plottingSystem.getPlotActionSystem().fillRegionActions(cm);
+			plottingSystem.getPlotActionSystem().fillUndoActions(cm);
+			plottingSystem.getPlotActionSystem().fillZoomActions(cm);
+			plottingSystem.getPlotActionSystem().fillAnnotationActions(cm);
 		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			logger.error("Could not create plotting system:"+ e1);
 		}
+//		plotComp.layout();
 
 		// start diffraction tool 
 		Composite diffractionToolComp = new Composite(leftSash, SWT.BORDER);
@@ -470,10 +508,9 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			((IToolPageSystem)plottingSystem).setToolVisible("org.dawb.workbench.plotting.tools.diffraction.Diffraction", ToolPageRole.ROLE_2D, null);
 
 		} catch (Exception e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
+			logger.error("Could not open diffraction tool:"+ e2);
 		}
-		
+
 	}
 
 	protected void findRings() {
@@ -1137,6 +1174,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 	public void dispose() {
 		super.dispose();
 		getSite().getPage().removePartListener(listener);
+		getSite().getWorkbenchWindow().getSelectionService().addSelectionListener(fileSelectionListener);
 	}
 
 	@Override

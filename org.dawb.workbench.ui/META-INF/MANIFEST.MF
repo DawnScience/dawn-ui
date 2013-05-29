@@ -32,7 +32,8 @@ Import-Package: org.apache.commons.beanutils,
  org.eclipse.draw2d,
  org.eclipse.ui.ide,
  org.slf4j,
- uk.ac.diamond.scisoft.analysis.rcp.editors
+ uk.ac.diamond.scisoft.analysis.rcp.editors,
+ uk.ac.diamond.scisoft.analysis.rcp.plotting.utils
 Bundle-ClassPath: .
 Export-Package: org.dawb.workbench.ui.editors;
   uses:="org.eclipse.core.runtime,
