@@ -14,6 +14,8 @@ import org.dawnsci.plotting.api.axis.IPositionListener;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.region.IRegionListener;
+import org.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
+import org.dawnsci.plotting.api.trace.ColorOption;
 import org.dawnsci.plotting.api.trace.IImageStackTrace;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.ILineStackTrace;
@@ -404,24 +406,37 @@ public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSyste
 
 	@Override
 	public void setKeepAspect(boolean b) {
-		// TODO Auto-generated method stub
-		
+		call(getMethodName(Thread.currentThread().getStackTrace()), new Class[] { boolean.class }, b);
 	}
 
 	@Override
 	public void setShowIntensity(boolean b) {
-		// TODO Auto-generated method stub
-		
+		call(getMethodName(Thread.currentThread().getStackTrace()), new Class[] { boolean.class }, b);
 	}
 
 	@Override
 	public void setShowLegend(boolean b) {
-		// TODO Auto-generated method stub
-		
+		call(getMethodName(Thread.currentThread().getStackTrace()), new Class[] { boolean.class }, b);
 	}
 
 	@Override
 	public Object getAdapter(Class adapter) {
 		return call(getMethodName(Thread.currentThread().getStackTrace()), new Class[] { adapter }, adapter);
+	}
+
+
+	@Override
+	public boolean isDisposed() {
+		return (Boolean)call(getMethodName(Thread.currentThread().getStackTrace()));
+	}
+
+	@Override
+	public void setColorOption(ColorOption colorOption) {
+		call(getMethodName(Thread.currentThread().getStackTrace()), new Class[] { ColorOption.class }, colorOption);
+	}
+
+	@Override
+	public boolean isRescale() {
+		return (Boolean)call(getMethodName(Thread.currentThread().getStackTrace()));
 	}
 }
