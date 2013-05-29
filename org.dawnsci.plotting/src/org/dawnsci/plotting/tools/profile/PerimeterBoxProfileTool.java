@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.widgets.ROIWidget;
 import org.dawnsci.plotting.Activator;
@@ -65,9 +64,9 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 
 	private final static Logger logger = LoggerFactory.getLogger(PerimeterBoxProfileTool.class);
 	
-	private AbstractPlottingSystem zoomProfilePlottingSystem;
-	private AbstractPlottingSystem verticalProfilePlottingSystem;
-	private AbstractPlottingSystem horizontalProfilePlottingSystem;
+	private IPlottingSystem zoomProfilePlottingSystem;
+	private IPlottingSystem verticalProfilePlottingSystem;
+	private IPlottingSystem horizontalProfilePlottingSystem;
 	private IRegionListener        regionListener;
 	private Map<String,Collection<ITrace>> registeredTraces;
 
@@ -141,11 +140,12 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 		sashForm3.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		sashForm3.setBackground(new Color(parent.getDisplay(), 192, 192, 192));
 
+		IToolPageSystem tps = (IToolPageSystem)getPlottingSystem().getAdapter(IToolPageSystem.class);
 		try {
 			// we create the zool plot part
 			zoomProfile = (ProfileTool)ToolPageFactory.getToolPage("org.dawb.workbench.plotting.tools.zoomTool");
-			zoomProfile.setToolSystem((AbstractPlottingSystem)getPlottingSystem());
-			zoomProfile.setPlottingSystem((AbstractPlottingSystem)getPlottingSystem());
+			zoomProfile.setToolSystem(tps);
+			zoomProfile.setPlottingSystem(getPlottingSystem());
 			zoomProfile.setTitle("Zoom Profile");
 			zoomProfile.setToolId(String.valueOf(zoomProfile.hashCode()));
 			zoomProfile.createControl(sashForm2);
@@ -156,8 +156,8 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 			sideProfile1.setLineType(SWT.HORIZONTAL);
 			sideProfile1.setPlotEdgeProfile(true);
 			sideProfile1.setPlotAverageProfile(false);
-			sideProfile1.setToolSystem((AbstractPlottingSystem)getPlottingSystem());
-			sideProfile1.setPlottingSystem((AbstractPlottingSystem)getPlottingSystem());
+			sideProfile1.setToolSystem(tps);
+			sideProfile1.setPlottingSystem(getPlottingSystem());
 			sideProfile1.setTitle("Horizontal Perimeter Profile");
 			sideProfile1.setToolId(String.valueOf(sideProfile1.hashCode()));
 			sideProfile1.createControl(sashForm2);
@@ -167,20 +167,20 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 			sideProfile2.setLineType(SWT.VERTICAL);
 			sideProfile2.setPlotEdgeProfile(true);
 			sideProfile2.setPlotAverageProfile(false);
-			sideProfile2.setToolSystem((AbstractPlottingSystem)getPlottingSystem());
-			sideProfile2.setPlottingSystem((AbstractPlottingSystem)getPlottingSystem());
+			sideProfile2.setToolSystem(tps);
+			sideProfile2.setPlottingSystem(getPlottingSystem());
 			sideProfile2.setTitle("Vertical Perimeter Profile");
 			sideProfile2.setToolId(String.valueOf(sideProfile2.hashCode()));
 			sideProfile2.createControl(sashForm3);
 			sideProfile2.activate();
 
 			//profiles plotting systems
-			zoomProfilePlottingSystem = (AbstractPlottingSystem)zoomProfile.getToolPlottingSystem();
+			zoomProfilePlottingSystem = zoomProfile.getToolPlottingSystem();
 			zoomProfilePlottingSystem.setRescale(true);
 			zoomProfilePlottingSystem.setKeepAspect(false);
-			verticalProfilePlottingSystem = (AbstractPlottingSystem)sideProfile2.getToolPlottingSystem();
+			verticalProfilePlottingSystem = sideProfile2.getToolPlottingSystem();
 			verticalProfilePlottingSystem.setShowLegend(false);
-			horizontalProfilePlottingSystem = (AbstractPlottingSystem)sideProfile1.getToolPlottingSystem();
+			horizontalProfilePlottingSystem = sideProfile1.getToolPlottingSystem();
 			horizontalProfilePlottingSystem.setShowLegend(false);
 
 			//start: we create the ROI information composite
@@ -215,7 +215,7 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 			mainRegionComposite.setLayout(new GridLayout(1, false));
 			mainRegionComposite.setLayoutData(gridData);
 
-			myROIWidget = new ROIWidget(mainRegionComposite, (AbstractPlottingSystem) getPlottingSystem(), "Perimeter Box region editor");
+			myROIWidget = new ROIWidget(mainRegionComposite, getPlottingSystem(), "Perimeter Box region editor");
 			myROIWidget.createWidget();
 			myROIWidget.addSelectionChangedListener(new ISelectionChangedListener() {
 				@Override
@@ -235,8 +235,8 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 			regionSumGroup.setLayout(new GridLayout(1, false));
 			regionSumGroup.setLayoutData(gridData);
 			roiSumProfile = (RegionSumTool)ToolPageFactory.getToolPage("org.dawb.workbench.plotting.tools.regionSumTool");
-			roiSumProfile.setToolSystem((AbstractPlottingSystem) getPlottingSystem());
-			roiSumProfile.setPlottingSystem((AbstractPlottingSystem) getPlottingSystem());
+			roiSumProfile.setToolSystem(tps);
+			roiSumProfile.setPlottingSystem(getPlottingSystem());
 			roiSumProfile.setTitle("Region_Sum");
 			roiSumProfile.setToolId(String.valueOf(roiSumProfile.hashCode()));
 			roiSumProfile.createControl(regionSumGroup);
@@ -406,7 +406,7 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 		createNewRegion();
 
 		if(myROIWidget != null)
-			myROIWidget.addRegionListener((AbstractPlottingSystem)getPlottingSystem());
+			myROIWidget.addRegionListener(getPlottingSystem());
 		if(verticalProfileROIWidget != null)
 			verticalProfileROIWidget.addRegionListener(verticalProfilePlottingSystem);
 		if(horizontalProfileROIWidget != null)
