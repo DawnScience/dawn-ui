@@ -77,12 +77,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
-import uk.ac.diamond.scisoft.analysis.rcp.plotting.datareduction.DataReductionPlotter;
-//import org.dawb.common.ui.util.EclipseUtils;
-//import org.dawb.common.ui.wizard.persistence.datareduction.PersistenceSavingWizard;
-//import org.eclipse.jface.wizard.IWizard;
-//import org.eclipse.jface.wizard.WizardDialog;
-//import org.eclipse.swt.widgets.Display;
+import uk.ac.diamond.scisoft.analysis.rcp.plotting.utils.PlottingUtils;
 
 public class DataReductionFileSelectionPage extends AbstractAlgorithmProcessPage {
 
@@ -301,39 +296,39 @@ public class DataReductionFileSelectionPage extends AbstractAlgorithmProcessPage
 		public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 			if (selection instanceof IStructuredSelection) {
 				IStructuredSelection structSelection = (IStructuredSelection)selection;
-				image = DataReductionPlotter.loadData(structSelection);
+				image = PlottingUtils.loadData(structSelection);
 				if(image == null) return;
 				if (!((SelectedData)viewer.getElementAt(0)).isLocked()) {
-					DataReductionPlotter.plotData(dataPlot, DATA_TITLE, image);
+					PlottingUtils.plotData(dataPlot, DATA_TITLE, image);
 					((SelectedData)viewer.getElementAt(0)).setShape(image.getShape());
-					((SelectedData)viewer.getElementAt(0)).setFileName(DataReductionPlotter.getFileName(structSelection));
-					dataFilePaths.put("AFilename", DataReductionPlotter.getFullFilePath(structSelection));
+					((SelectedData)viewer.getElementAt(0)).setFileName(PlottingUtils.getFileName(structSelection));
+					dataFilePaths.put("AFilename", PlottingUtils.getFullFilePath(structSelection));
 				}
 				if (!((SelectedData)viewer.getElementAt(1)).isLocked()) {
-					DataReductionPlotter.plotData(calibrationPlot, CALIB_TITLE, image);
+					PlottingUtils.plotData(calibrationPlot, CALIB_TITLE, image);
 					((SelectedData)viewer.getElementAt(1)).setShape(image.getShape());
-					((SelectedData)viewer.getElementAt(1)).setFileName(DataReductionPlotter.getFileName(structSelection));
-					dataFilePaths.put("Calibration_file", DataReductionPlotter.getFullFilePath(structSelection));
+					((SelectedData)viewer.getElementAt(1)).setFileName(PlottingUtils.getFileName(structSelection));
+					dataFilePaths.put("Calibration_file", PlottingUtils.getFullFilePath(structSelection));
 				}
 				if (!((SelectedData)viewer.getElementAt(2)).isLocked()) {
-					DataReductionPlotter.plotData(detectorPlot, DETECT_TITLE, image);
+					PlottingUtils.plotData(detectorPlot, DETECT_TITLE, image);
 					((SelectedData)viewer.getElementAt(2)).setShape(image.getShape());
-					((SelectedData)viewer.getElementAt(2)).setFileName(DataReductionPlotter.getFileName(structSelection));
-					dataFilePaths.put("Detector_response_file", DataReductionPlotter.getFullFilePath(structSelection));
+					((SelectedData)viewer.getElementAt(2)).setFileName(PlottingUtils.getFileName(structSelection));
+					dataFilePaths.put("Detector_response_file", PlottingUtils.getFullFilePath(structSelection));
 
 				}
 				if (!((SelectedData)viewer.getElementAt(3)).isLocked()) {
-					DataReductionPlotter.plotData(backgroundPlot, BACKGD_TITLE, image);
+					PlottingUtils.plotData(backgroundPlot, BACKGD_TITLE, image);
 					((SelectedData)viewer.getElementAt(3)).setShape(image.getShape());
-					((SelectedData)viewer.getElementAt(3)).setFileName(DataReductionPlotter.getFileName(structSelection));
-					dataFilePaths.put("Background_file", DataReductionPlotter.getFullFilePath(structSelection));
+					((SelectedData)viewer.getElementAt(3)).setFileName(PlottingUtils.getFileName(structSelection));
+					dataFilePaths.put("Background_file", PlottingUtils.getFullFilePath(structSelection));
 
 				}
 				if (!((SelectedData)viewer.getElementAt(4)).isLocked()) {
-					DataReductionPlotter.plotData(maskPlot, MASK_TITLE, image);
+					PlottingUtils.plotData(maskPlot, MASK_TITLE, image);
 					((SelectedData)viewer.getElementAt(4)).setShape(image.getShape());
-					((SelectedData)viewer.getElementAt(4)).setFileName(DataReductionPlotter.getFileName(structSelection));
-					dataFilePaths.put("Mask_file", DataReductionPlotter.getFullFilePath(structSelection));
+					((SelectedData)viewer.getElementAt(4)).setFileName(PlottingUtils.getFileName(structSelection));
+					dataFilePaths.put("Mask_file", PlottingUtils.getFullFilePath(structSelection));
 
 				}
 				viewer.refresh();
