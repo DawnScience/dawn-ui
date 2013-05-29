@@ -491,4 +491,10 @@ public class ThreadSafePlottingSystem extends StandardMBean implements IPlotting
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public boolean isDisposed() {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

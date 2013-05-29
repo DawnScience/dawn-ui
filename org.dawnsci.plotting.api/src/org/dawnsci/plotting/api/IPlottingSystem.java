@@ -335,6 +335,12 @@ public interface IPlottingSystem extends ITraceSystem, IRegionSystem, IAxisSyste
 	 * Sets the legends setting on/off
 	 * @param b
 	 */
-	void setShowLegend(boolean b);
+	public void setShowLegend(boolean b);
+
+	/**
+	 * Returns whether the IPlottingSystem is disposed
+	 * @return
+	 */
+	public boolean isDisposed();
 
 }

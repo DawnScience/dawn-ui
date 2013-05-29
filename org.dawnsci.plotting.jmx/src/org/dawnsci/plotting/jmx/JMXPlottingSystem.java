@@ -419,4 +419,10 @@ public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSyste
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public boolean isDisposed() {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }
