@@ -4,7 +4,7 @@ Dependency-note: This plugin should be vanilla (eclipse / jdk dependencies)
 Bundle-ManifestVersion: 2
 Bundle-Name: Draw2d
 Bundle-SymbolicName: org.dawnsci.plotting.draw2d
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.2.0.qualifier
 Bundle-Activator: org.dawnsci.plotting.draw2d.Activator
 Bundle-Vendor: Diamond Light Source
 Require-Bundle: org.eclipse.ui;bundle-version="3.7.0",
