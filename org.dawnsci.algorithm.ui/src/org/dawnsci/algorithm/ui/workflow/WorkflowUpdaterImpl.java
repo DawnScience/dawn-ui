@@ -1,4 +1,4 @@
-package org.dawnsci.algorithm.ui.updater;
+package org.dawnsci.algorithm.ui.workflow;
 
 import java.io.File;
 import java.io.IOException;

@@ -27,10 +27,10 @@ import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.PlottingFactory;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.algorithm.ui.Activator;
-import org.dawnsci.algorithm.ui.updater.IWorkflowUpdater;
-import org.dawnsci.algorithm.ui.updater.WorkflowUpdaterCreator;
 import org.dawnsci.algorithm.ui.views.runner.AbstractAlgorithmProcessPage;
 import org.dawnsci.algorithm.ui.views.runner.IAlgorithmProcessContext;
+import org.dawnsci.algorithm.ui.workflow.IWorkflowUpdater;
+import org.dawnsci.algorithm.ui.workflow.WorkflowUpdaterCreator;
 import org.dawnsci.plotting.api.PlotType;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -102,7 +102,6 @@ public class DataReductionFileSelectionPage extends AbstractAlgorithmProcessPage
 
 	private static final String MOML_FILE = "workflows/2D_DataReductionV2.moml";
 	// temporary used as a moml file until the one above is put in another plugin with this class
-	private static final String MOML_DUMMY = "workflows/dummyFile.moml";
 	private static final String INPUT_ACTOR = "Image to process";
 
 	private AbstractPlottingSystem dataPlot;
