@@ -20,6 +20,8 @@ import org.dawnsci.plotting.api.axis.IPositionListener;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegionListener;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
+import org.dawnsci.plotting.api.trace.ColorOption;
 import org.dawnsci.plotting.api.trace.IImageStackTrace;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.ILineStackTrace;
@@ -494,6 +496,18 @@ public class ThreadSafePlottingSystem extends StandardMBean implements IPlotting
 
 	@Override
 	public boolean isDisposed() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void setColorOption(ColorOption colorOption) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean isRescale() {
 		// TODO Auto-generated method stub
 		return false;
 	}

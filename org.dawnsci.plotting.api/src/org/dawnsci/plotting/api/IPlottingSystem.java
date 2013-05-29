@@ -14,6 +14,8 @@ import java.util.List;
 import org.dawnsci.plotting.api.annotation.IAnnotationSystem;
 import org.dawnsci.plotting.api.axis.IAxisSystem;
 import org.dawnsci.plotting.api.region.IRegionSystem;
+import org.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
+import org.dawnsci.plotting.api.trace.ColorOption;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.api.trace.ITraceSystem;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -343,4 +345,15 @@ public interface IPlottingSystem extends ITraceSystem, IRegionSystem, IAxisSyste
 	 */
 	public boolean isDisposed();
 
+	/**
+	 * Sets the Colour option
+	 * @param colorOption
+	 */
+	public void setColorOption(ColorOption colorOption);
+
+	/**
+	 * Returns whether the plot should rescale when replotted.
+	 * @return rescale
+	 */
+	public boolean isRescale();
 }
