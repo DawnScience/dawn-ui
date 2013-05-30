@@ -26,6 +26,7 @@ import javax.vecmath.Vector3d;
 import org.dawb.common.services.ILoaderService;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.plot.PlottingFactory;
+import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawb.workbench.ui.Activator;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlotType;
@@ -64,6 +65,7 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
@@ -188,11 +190,13 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 		// main sashform which contains the left sash and the plotting system
 		SashForm mainSash = new SashForm(parent, SWT.HORIZONTAL);
+		mainSash.setBackground(new Color(parent.getDisplay(), 192, 192, 192));
 		mainSash.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		mainSash.setLayout(new FillLayout());
 
 		// left sasfhform which contains the diffraction calibration controls and the diffraction tool
-		SashForm leftSash = new SashForm(mainSash, SWT.VERTICAL | SWT.BORDER);
+		SashForm leftSash = new SashForm(mainSash, SWT.VERTICAL);
+		leftSash.setBackground(new Color(parent.getDisplay(), 192, 192, 192));
 		leftSash.setLayout(new GridLayout(1, false));
 		leftSash.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
@@ -472,14 +476,15 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		// end of Diffraction Calibration controls
 		
 		// start plotting system
-//		Composite plotComp = new Composite(mainSash, SWT.NONE);
-//		plotComp.setLayout(new GridLayout(1, false));
-//		plotComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		Composite plotComp = new Composite(mainSash, SWT.NONE);
+		plotComp.setLayout(new GridLayout(1, false));
+		plotComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		try {
-//			ActionBarWrapper actionBarWrapper = ActionBarWrapper.createActionBars(plotComp, null);
+			ActionBarWrapper actionBarWrapper = ActionBarWrapper.createActionBars(plotComp, null);
 			plottingSystem = PlottingFactory.createPlottingSystem();
-			plottingSystem.createPlotPart(mainSash, "", getViewSite().getActionBars(), PlotType.IMAGE, getViewSite().getPart());
+			plottingSystem.createPlotPart(plotComp, "", actionBarWrapper, PlotType.IMAGE, getViewSite().getPart());
 			plottingSystem.setTitle("");
+			plottingSystem.getPlotComposite().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 //			IContributionManager cm = getViewSite().getActionBars().getMenuManager();
 //			plottingSystem.getPlotActionSystem().fillToolActions(cm, ToolPageRole.ROLE_2D);
 //			plottingSystem.getPlotActionSystem().fillPrintActions(cm);
