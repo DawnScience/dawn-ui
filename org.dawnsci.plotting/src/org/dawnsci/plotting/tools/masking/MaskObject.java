@@ -62,10 +62,11 @@ public class MaskObject {
 
 	private MaskMode        maskMode;
     private int             lineWidth;
-    private boolean         squarePen = false;
-    /**
+    private boolean         squarePen           = false;
+    private boolean         ignoreAlreadyMasked = false;
+   /**
      * The booleans are false to mask and
-     * true to leave that way multiply will work.
+     * true to leave, that way multiply will work.
      */
     private BooleanDataset  maskDataset;
     private AbstractDataset imageDataset;
@@ -337,8 +338,14 @@ public class MaskObject {
 			double              hi  = maxNumber!=null ? maxNumber.doubleValue() : Double.NaN;
 			int i = 0;
 			while (ita.hasNext()) {
-				double x = imageDataset.getElementDoubleAbs(ita.index);
-				maskDataset.setAbs(i++, isValid(x, lo, hi));
+				try {
+					double x = imageDataset.getElementDoubleAbs(ita.index);
+					boolean isValid = isValid(x, lo, hi);
+					if (ignoreAlreadyMasked && isValid && !maskDataset.getAbs(i)) continue;
+					maskDataset.setAbs(i, isValid);
+				} finally {
+				    ++i;
+				}
 			}
 		}
 			
@@ -492,5 +499,13 @@ public class MaskObject {
 			}
 		}
 		
+	}
+
+	public boolean isIgnoreAlreadyMasked() {
+		return ignoreAlreadyMasked;
+	}
+
+	public void setIgnoreAlreadyMasked(boolean ignoreAlreadyMasked) {
+		this.ignoreAlreadyMasked = ignoreAlreadyMasked;
 	}
 }
