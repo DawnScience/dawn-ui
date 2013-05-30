@@ -192,19 +192,29 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		mainSash.setLayout(new FillLayout());
 
 		// left sasfhform which contains the diffraction calibration controls and the diffraction tool
-		SashForm leftSash = new SashForm(mainSash, SWT.VERTICAL);
-		leftSash.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		leftSash.setLayout(new FillLayout());
+		SashForm leftSash = new SashForm(mainSash, SWT.VERTICAL | SWT.BORDER);
+		leftSash.setLayout(new GridLayout(1, false));
+		leftSash.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+
+		Composite controlComp = new Composite(leftSash, SWT.NONE);
+		controlComp.setLayout(new GridLayout(1, false));
+		
+		Label instructionLabel = new Label(controlComp, SWT.WRAP);
+		instructionLabel.setText("Once a file/data is selected in the Project Explorer, choose a type of calibrant, " +
+								 "modify the rings using the controls below and tick the checkbox near to the corresponding " +
+								 "image before pressing the calibration buttons.");
+		instructionLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false));
 
 		// make a scrolled composite
-		scrollComposite = new ScrolledComposite(leftSash, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
-
+		scrollComposite = new ScrolledComposite(controlComp, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+		scrollComposite.setLayout(new GridLayout(1, false));
+		scrollComposite.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, true));
 		scrollHolder = new Composite(scrollComposite, SWT.NONE);
 //		RowLayout rl = new RowLayout(SWT.VERTICAL);
 //		rl.fill = true;
 		GridLayout gl = new GridLayout(1, false);
 		scrollHolder.setLayout(gl);
-		scrollHolder.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, true));
+		scrollHolder.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false));
 
 		// table of images and found rings
 		tableViewer = new TableViewer(scrollHolder, SWT.FULL_SELECTION | SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
@@ -400,9 +410,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		l = new Label(gHolder, SWT.NONE);
 		l = new Label(gHolder, SWT.NONE);
 		l = new Label(gHolder, SWT.NONE);
-
-//		gHolder.setSize(gHolder.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-//		gHolder.layout();
 
 		Composite calibrateComp = new Composite(calibrantHolder, SWT.NONE);
 		calibrateComp.setLayout(new GridLayout(1, false));
@@ -980,7 +987,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		tvc = new TableViewerColumn(tv, SWT.NONE);
 		tc = tvc.getColumn();
 		tc.setText("Image");
-		tc.setWidth(150);
+		tc.setWidth(200);
 		tvc.setEditingSupport(new MyEditingSupport(tv, 1));
 		
 		tvc = new TableViewerColumn(tv, SWT.NONE);
