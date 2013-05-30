@@ -236,69 +236,72 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		calibrantHolder.setLayout(new GridLayout(2, false));
 		calibrantHolder.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 
-		Group gHolder = new Group(calibrantHolder, SWT.BORDER);
-		gHolder.setText("Calibration controls");
-		gHolder.setLayout(new GridLayout(4, false));
-		gHolder.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+		Group controllerHolder = new Group(calibrantHolder, SWT.BORDER);
+		controllerHolder.setText("Alignement positioning");
+		controllerHolder.setLayout(new GridLayout(2, false));
+		controllerHolder.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		
+		Composite padComp = new Composite(controllerHolder, SWT.BORDER);
+		padComp.setLayout(new GridLayout(4, false));
+		padComp.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+
 		// create motion buttons cluster
-		Label l = new Label(gHolder, SWT.NONE);
-		l = new Label(gHolder, SWT.NONE);
-		Button b = new Button(gHolder, SWT.ARROW | SWT.UP);
-		b.setToolTipText("Move rings up");
-		b.addMouseListener(new RepeatingMouseAdapter(parent.getDisplay(), new SlowFastRunnable() {
+		Label l = new Label(padComp, SWT.NONE);
+		l = new Label(padComp, SWT.NONE);
+		Button upButton = new Button(padComp, SWT.ARROW | SWT.UP);
+		upButton.setToolTipText("Move rings up");
+		upButton.addMouseListener(new RepeatingMouseAdapter(parent.getDisplay(), new SlowFastRunnable() {
 			@Override
 			public void run() {
 				changeRings(ManipulateMode.UP, isFast());
 			}
 		}));
-		b.setLayoutData(new GridData(SWT.CENTER, SWT.BOTTOM, false, false));
-		l = new Label(gHolder, SWT.NONE);
+		upButton.setLayoutData(new GridData(SWT.CENTER, SWT.BOTTOM, false, false));
+		l = new Label(padComp, SWT.NONE);
 
-		l = new Label(gHolder, SWT.NONE);
-		b = new Button(gHolder, SWT.ARROW | SWT.LEFT);
-		b.setToolTipText("Shift rings left");
-		b.addMouseListener(new RepeatingMouseAdapter(parent.getDisplay(), new SlowFastRunnable() {
+		l = new Label(padComp, SWT.NONE);
+		Button leftButton = new Button(padComp, SWT.ARROW | SWT.LEFT);
+		leftButton.setToolTipText("Shift rings left");
+		leftButton.addMouseListener(new RepeatingMouseAdapter(parent.getDisplay(), new SlowFastRunnable() {
 			@Override
 			public void run() {
 				changeRings(ManipulateMode.LEFT, isFast());
 			}
 		}));
-		b.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-		l = new Label(gHolder, SWT.NONE);
-		b = new Button(gHolder, SWT.ARROW | SWT.RIGHT);
-		b.setToolTipText("Shift rings right");
-		b.addMouseListener(new RepeatingMouseAdapter(parent.getDisplay(), new SlowFastRunnable() {
+		leftButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		l = new Label(padComp, SWT.NONE);
+		Button rightButton = new Button(padComp, SWT.ARROW | SWT.RIGHT);
+		rightButton.setToolTipText("Shift rings right");
+		rightButton.addMouseListener(new RepeatingMouseAdapter(parent.getDisplay(), new SlowFastRunnable() {
 			@Override
 			public void run() {
 				changeRings(ManipulateMode.RIGHT, isFast());
 			}
 		}));
-		b.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+		rightButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 
-		l = new Label(gHolder, SWT.NONE);
-		l = new Label(gHolder, SWT.NONE);
-		b = new Button(gHolder, SWT.ARROW | SWT.DOWN);
-		b.setToolTipText("Move rings down");
-		b.addMouseListener(new RepeatingMouseAdapter(parent.getDisplay(), new SlowFastRunnable() {
+		l = new Label(padComp, SWT.NONE);
+		l = new Label(padComp, SWT.NONE);
+		Button downButton = new Button(padComp, SWT.ARROW | SWT.DOWN);
+		downButton.setToolTipText("Move rings down");
+		downButton.addMouseListener(new RepeatingMouseAdapter(parent.getDisplay(), new SlowFastRunnable() {
 			@Override
 			public void run() {
 				changeRings(ManipulateMode.DOWN, isFast());
 			}
 		}));
-		b.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));
-		l = new Label(gHolder, SWT.NONE);
+		downButton.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));
+		l = new Label(padComp, SWT.NONE);
 
-		l = new Label(gHolder, SWT.NONE);
-		l = new Label(gHolder, SWT.NONE);
-		l = new Label(gHolder, SWT.NONE);
-		l = new Label(gHolder, SWT.NONE);
+		Composite actionComp = new Composite(controllerHolder, SWT.BORDER);
+		actionComp.setLayout(new GridLayout(4, false));
+		actionComp.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 
-		l = new Label(gHolder, SWT.NONE);
-		b = new Button(gHolder, SWT.PUSH);
-		b.setText("-");
-		b.setToolTipText("Make rings smaller");
-		b.addMouseListener(new RepeatingMouseAdapter(parent.getDisplay(), new SlowFastRunnable() {
+		l = new Label(actionComp, SWT.NONE);
+		Button minusButton = new Button(actionComp, SWT.PUSH);
+		minusButton.setText("-");
+		minusButton.setToolTipText("Make rings smaller");
+		minusButton.addMouseListener(new RepeatingMouseAdapter(parent.getDisplay(), new SlowFastRunnable() {
 			@Override
 			public void run() {
 				changeRings(ManipulateMode.SHRINK, isFast());
@@ -309,12 +312,12 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				refreshTable();
 			}
 		}));
-		b.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
-		l = new Label(gHolder, SWT.NONE);
-		b = new Button(gHolder, SWT.PUSH);
-		b.setText("+");
-		b.setToolTipText("Make rings larger");
-		b.addMouseListener(new RepeatingMouseAdapter(parent.getDisplay(), new SlowFastRunnable() {
+		minusButton.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
+		l = new Label(actionComp, SWT.NONE);
+		Button plusButton = new Button(actionComp, SWT.PUSH);
+		plusButton.setText("+");
+		plusButton.setToolTipText("Make rings larger");
+		plusButton.addMouseListener(new RepeatingMouseAdapter(parent.getDisplay(), new SlowFastRunnable() {
 			@Override
 			public void run() {
 				changeRings(ManipulateMode.ENLARGE, isFast());
@@ -325,13 +328,13 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				refreshTable();
 			}
 		}));
-		b.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
+		plusButton.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
 
-		l = new Label(gHolder, SWT.NONE);
-		b = new Button(gHolder, SWT.PUSH);
-		b.setText("Squash");
-		b.setToolTipText("Make rings more circular");
-		b.addMouseListener(new RepeatingMouseAdapter(parent.getDisplay(), new SlowFastRunnable() {
+		l = new Label(actionComp, SWT.NONE);
+		Button squashButton = new Button(actionComp, SWT.PUSH);
+		squashButton.setText("Squash");
+		squashButton.setToolTipText("Make rings more circular");
+		squashButton.addMouseListener(new RepeatingMouseAdapter(parent.getDisplay(), new SlowFastRunnable() {
 			@Override
 			public void run() {
 				changeRings(ManipulateMode.SQUASH, isFast());
@@ -342,12 +345,12 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				refreshTable();
 			}
 		}));
-		b.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
-		l = new Label(gHolder, SWT.NONE);
-		b = new Button(gHolder, SWT.PUSH);
-		b.setText("Elongate");
-		b.setToolTipText("Make rings more elliptical");
-		b.addMouseListener(new RepeatingMouseAdapter(parent.getDisplay(), new SlowFastRunnable() {
+		squashButton.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
+		l = new Label(actionComp, SWT.NONE);
+		Button elongateButton = new Button(actionComp, SWT.PUSH);
+		elongateButton.setText("Elongate");
+		elongateButton.setToolTipText("Make rings more elliptical");
+		elongateButton.addMouseListener(new RepeatingMouseAdapter(parent.getDisplay(), new SlowFastRunnable() {
 			@Override
 			public void run() {
 				changeRings(ManipulateMode.ELONGATE, isFast());
@@ -358,13 +361,13 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				refreshTable();
 			}
 		}));
-		b.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
+		elongateButton.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
 
-		l = new Label(gHolder, SWT.NONE);
-		b = new Button(gHolder, SWT.PUSH);
-		b.setImage(Activator.getImage("icons/arrow_rotate_anticlockwise.png"));
-		b.setToolTipText("Rotate rings anti-clockwise");
-		b.addMouseListener(new RepeatingMouseAdapter(parent.getDisplay(), new SlowFastRunnable() {
+		l = new Label(actionComp, SWT.NONE);
+		Button antiClockButton = new Button(actionComp, SWT.PUSH);
+		antiClockButton.setImage(Activator.getImage("icons/arrow_rotate_anticlockwise.png"));
+		antiClockButton.setToolTipText("Rotate rings anti-clockwise");
+		antiClockButton.addMouseListener(new RepeatingMouseAdapter(parent.getDisplay(), new SlowFastRunnable() {
 			@Override
 			public void run() {
 				changeRings(ManipulateMode.ANTICLOCKWISE, isFast());
@@ -375,45 +378,22 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				refreshTable();
 			}
 		}));
-		b.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
-		l = new Label(gHolder, SWT.NONE);
-		b = new Button(gHolder, SWT.PUSH);
-		b.setImage(Activator.getImage("icons/arrow_rotate_clockwise.png"));
-		b.setToolTipText("Rotate rings clockwise");
-		b.addMouseListener(new RepeatingMouseAdapter(parent.getDisplay(), new SlowFastRunnable() {
+		antiClockButton.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
+		l = new Label(actionComp, SWT.NONE);
+		Button clockButton = new Button(actionComp, SWT.PUSH);
+		clockButton.setImage(Activator.getImage("icons/arrow_rotate_clockwise.png"));
+		clockButton.setToolTipText("Rotate rings clockwise");
+		clockButton.addMouseListener(new RepeatingMouseAdapter(parent.getDisplay(), new SlowFastRunnable() {
 			@Override
 			public void run() {
 				changeRings(ManipulateMode.CLOCKWISE, isFast());
 			}
-
 			@Override
 			public void stop() {
 				refreshTable();
 			}
 		}));
-		b.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
-
-		l = new Label(gHolder, SWT.NONE);
-		l = new Label(gHolder, SWT.NONE);
-		l = new Label(gHolder, SWT.NONE);
-		l = new Label(gHolder, SWT.NONE);
-
-		l = new Label(gHolder, SWT.NONE);
-		b = new Button(gHolder, SWT.PUSH);
-		b.setText("Find rings in image");
-		b.setToolTipText("Use pixel values to find rings in image near calibration rings");
-		b.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 3, 1));
-		b.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				findRings();
-			}
-		});
-
-		l = new Label(gHolder, SWT.NONE);
-		l = new Label(gHolder, SWT.NONE);
-		l = new Label(gHolder, SWT.NONE);
-		l = new Label(gHolder, SWT.NONE);
+		clockButton.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
 
 		Composite calibrateComp = new Composite(calibrantHolder, SWT.NONE);
 		calibrateComp.setLayout(new GridLayout(1, false));
@@ -441,6 +421,17 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		}
 //		calibrant.setText("Please select a calibrant..."); // won't work with read-only
 		calibrant.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+
+		Button findRingButton = new Button(calibrateComp, SWT.PUSH);
+		findRingButton.setText("Find rings in image");
+		findRingButton.setToolTipText("Use pixel values to find rings in image near calibration rings");
+		findRingButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 3, 1));
+		findRingButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				findRings();
+			}
+		});
 
 		calibrateImages = new Button(calibrateComp, SWT.PUSH);
 		calibrateImages.setText("Calibrate chosen images");
