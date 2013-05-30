@@ -119,9 +119,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	private IRegionListener     regionListener;
 	private IROIListener        regionBoundsListener;
 	private MaskMouseListener   clickListener;
-	private ColorSelector       colorSelector;
-
-	
+	private ColorSelector       colorSelector;	
 	
 	public MaskingTool() {
 		
@@ -365,7 +363,20 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			}
 		});
 		
+		final Button ignoreAlreadyMasked =  new Button(minMaxComp, SWT.CHECK);
+		ignoreAlreadyMasked.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 2,1));
+		ignoreAlreadyMasked.setText("Keep pixels aleady masked");
+		ignoreAlreadyMasked.setToolTipText("When using bounds, pixels already masked can be ignored and not checked for range.\nThis setting is ignored when removing the bounds mask.");
+
+		ignoreAlreadyMasked.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				maskObject.setIgnoreAlreadyMasked(ignoreAlreadyMasked.getSelection());
+			}
+		});
 		
+		label = new Label(minMaxComp, SWT.NONE);
+		label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2,1));
+
 		label = new Label(minMaxComp, SWT.NONE);
 		label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1,1));
 		label.setText("Mask Color");
@@ -1295,7 +1306,9 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 				
 				if (region!=null && !isRegionsEnabled) return Status.CANCEL_STATUS;
 				
-				if (resetMask)  maskObject.setMaskDataset(null, false);
+				if (resetMask && !maskObject.isIgnoreAlreadyMasked())  {
+					maskObject.setMaskDataset(null, false);
+				}
 				
 				if (maskObject.getMaskDataset()==null) {
 					// The mask must be maintained as a BooleanDataset so that there is the option
