@@ -482,4 +482,15 @@ public class MaskObject {
 			logger.error("Internal error - unable to redo!", e);
 		}
 	}
+
+	public void invert() {
+		if (maskDataset!=null) {
+			IndexIterator it1 = maskDataset.getIterator();
+			while (it1.hasNext()) {
+				boolean b = maskDataset.getAbs(it1.index);
+				maskDataset.setAbs(it1.index, !b);
+			}
+		}
+		
+	}
 }

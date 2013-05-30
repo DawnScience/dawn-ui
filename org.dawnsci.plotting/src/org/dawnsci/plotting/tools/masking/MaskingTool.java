@@ -800,6 +800,23 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 
 		
 		actionBars.getToolBarManager().add(new Separator());
+		
+		final Action invertMask = new Action("Invert mask", Activator.getImageDescriptor("icons/mask-invert.png")) {
+			public void run() {
+				try {
+					maskObject.invert();
+					final IImageTrace image = getImageTrace();
+					image.setMask(maskObject.getMaskDataset()); 
+
+				} catch (Exception e) {
+					logger.error("Problem opening import!", e);
+				}
+			}			
+		};
+		actionBars.getToolBarManager().add(invertMask);
+
+		actionBars.getToolBarManager().add(new Separator());
+
 
 		final Action undo = new Action("Undo mask operation", Activator.getImageDescriptor("icons/mask-undo.png")) {
 			public void run() {
