@@ -191,7 +191,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		// main sashform which contains the left sash and the plotting system
 		SashForm mainSash = new SashForm(parent, SWT.HORIZONTAL);
 		mainSash.setBackground(new Color(parent.getDisplay(), 192, 192, 192));
-		mainSash.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		mainSash.setLayout(new FillLayout());
 
 		// left sasfhform which contains the diffraction calibration controls and the diffraction tool
@@ -214,8 +213,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		scrollComposite.setLayout(new GridLayout(1, false));
 		scrollComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		scrollHolder = new Composite(scrollComposite, SWT.NONE);
-//		RowLayout rl = new RowLayout(SWT.VERTICAL);
-//		rl.fill = true;
+
 		GridLayout gl = new GridLayout(1, false);
 		scrollHolder.setLayout(gl);
 		scrollHolder.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false));
@@ -509,6 +507,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			logger.error("Could not open diffraction tool:"+ e2);
 		}
 
+		mainSash.setWeights(new int[] { 1, 2});
 	}
 
 	protected void findRings() {
