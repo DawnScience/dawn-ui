@@ -117,23 +117,22 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 	private MyData currentData;
 	private List<MyData> model = new ArrayList<MyData>();
-//	private Map<IPlottingSystem, Listener> listeners = new HashMap<IPlottingSystem, Listener>();
 	private ILoaderService service;
 	private TableViewer tableViewer;
 	private Button calibrateImages;
 	private Button calibrateWD;
 
 	private IPlottingSystem plottingSystem;
+	private ITraceListener traceListener;
+
 	private Composite parent;
 
 	private ISelectionListener fileSelectionListener;
 	private ISelectionChangedListener selectionChangeListener;
 
 	private ScrolledComposite scrollComposite;
-
 	private Composite scrollHolder;
 
-	private Listener traceListener;
 	private String fullPath;
 	private String fileName;
 
@@ -172,6 +171,51 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			}
 		};
 		getSite().getWorkbenchWindow().getSelectionService().addSelectionListener(fileSelectionListener);
+
+		traceListener = new ITraceListener.Stub(){
+			@Override
+			public void update(TraceEvent event){
+				MyData data = null;
+				if (fullPath != null) {
+					for (MyData d : model) {
+						if (fullPath.equals(d.path)) {
+							data = d;
+							break;
+						}
+					}
+				}
+				//if (data != null && data == currentData) return;
+				if (data == null)
+					return;
+
+				IImageTrace image = getImageTrace(plottingSystem);
+				if (image == null)
+					return;
+				if(data.image == null)
+					data.image = image.getData();
+
+				System.err.println("We have an image, Houston!");
+
+				DiffractionImageAugmenter aug = data.augmenter;
+				if (aug == null) {
+					aug = new DiffractionImageAugmenter(plottingSystem);
+					data.augmenter = aug;
+				}
+				aug.activate();
+				if (data.path == null && fullPath != null) {
+					String path = fullPath;
+					data.path = path;
+					data.name = path.substring(path.lastIndexOf(File.separatorChar) + 1);
+					data.md = DiffractionTool.getDiffractionMetadata(image.getData(), data.path, service, null);
+				}
+				if (data.md == null)
+					data.md = DiffractionTool.getDiffractionMetadata(image.getData(), data.path, service, null);
+
+				aug.setDiffractionMetadata(data.md);
+				refreshTable();
+				drawCalibrantRings();
+			}
+		};
 
 		// selection change listener for table viewer
 		selectionChangeListener = new ISelectionChangedListener() {
@@ -216,14 +260,14 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 		GridLayout gl = new GridLayout(1, false);
 		scrollHolder.setLayout(gl);
-		scrollHolder.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false));
+		scrollHolder.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, true));
 
 		// table of images and found rings
-		Composite tableComp = new Composite(scrollHolder, SWT.NONE);
-		tableComp.setLayout(new GridLayout(1, false));
-		tableComp.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, true, false));
+//		Composite tableComp = new Composite(scrollHolder, SWT.NONE);
+//		tableComp.setLayout(new GridLayout(1, false));
+//		tableComp.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, true, false));
 		
-		tableViewer = new TableViewer(tableComp, SWT.FULL_SELECTION | SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+		tableViewer = new TableViewer(scrollHolder, SWT.FULL_SELECTION | SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
 //		tableViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true, 5, 5));
 		createColumns(tableViewer);
 		tableViewer.getTable().setHeaderVisible(true);
@@ -231,6 +275,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		tableViewer.setContentProvider(new MyContentProvider());
 		tableViewer.setLabelProvider(new MyLabelProvider());
 		tableViewer.setInput(model);
+		tableViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		tableViewer.addSelectionChangedListener(selectionChangeListener);
 		tableViewer.refresh();
 		
@@ -478,22 +523,10 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			plottingSystem.createPlotPart(plotComp, "", actionBarWrapper, PlotType.IMAGE, getViewSite().getPart());
 			plottingSystem.setTitle("");
 			plottingSystem.getPlotComposite().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-//			IContributionManager cm = getViewSite().getActionBars().getMenuManager();
-//			plottingSystem.getPlotActionSystem().fillToolActions(cm, ToolPageRole.ROLE_2D);
-//			plottingSystem.getPlotActionSystem().fillPrintActions(cm);
-//			plottingSystem.getPlotActionSystem().fillRegionActions(cm);
-//			plottingSystem.getPlotActionSystem().fillUndoActions(cm);
-//			plottingSystem.getPlotActionSystem().fillZoomActions(cm);
-//			plottingSystem.getPlotActionSystem().fillAnnotationActions(cm);
-			MyData data = new MyData();
-			data.system = plottingSystem;
-			traceListener = new Listener(data);
 			plottingSystem.addTraceListener(traceListener);
-			
 		} catch (Exception e1) {
 			logger.error("Could not create plotting system:"+ e1);
 		}
-//		plotComp.layout();
 
 		// start diffraction tool 
 		Composite diffractionToolComp = new Composite(leftSash, SWT.BORDER);
@@ -778,64 +811,12 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		return null;
 	}
 
-	class Listener extends ITraceListener.Stub {
-		private MyData data;
-		
-		public Listener(MyData mydata) {
-			setData(mydata);
-		}
-
-		public void setData(MyData mydata) {
-			data = mydata;
-		}
-
-		@Override
-		public void traceRemoved(TraceEvent evt) {
-			data.path = null;
-		}
-
-		@Override
-		protected void update(TraceEvent evt) {
-			if (data == null || data.system == null)
-				return;
-
-			IImageTrace image = getImageTrace(data.system);
-			if (image == null)
-				return;
-			if(data.image == null)
-				data.image = image.getData();
-
-			System.err.println("We have an image, Houston!");
-
-			DiffractionImageAugmenter aug = data.augmenter;
-			if (aug == null) {
-				aug = new DiffractionImageAugmenter(data.system);
-				data.augmenter = aug;
-			}
-			aug.activate();
-			if (data.path == null && fullPath != null) {
-				String path = fullPath;
-				data.path = path;
-				data.name = path.substring(path.lastIndexOf(File.separatorChar) + 1);
-				data.md = DiffractionTool.getDiffractionMetadata(image.getData(), data.path, service, null);
-			}
-			if (data.md == null)
-				data.md = DiffractionTool.getDiffractionMetadata(image.getData(), data.path, service, null);
-
-			aug.setDiffractionMetadata(data.md);
-			refreshTable();
-			drawCalibrantRings();
-		}
-	}
-
 	class MyData {
-		IPlottingSystem system;
 		String path;
 		String name;
 		DiffractionImageAugmenter augmenter;
 		IDiffractionMetadata md;
 		IDataset image;
-		Listener listener;
 		List<IROI> rois;
 		QSpace q;
 		double ow = Double.NaN;
@@ -1034,14 +1015,12 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			}
 		}
 		currentData = data;
-		data.system = plottingSystem;
 		IImageTrace trace = getImageTrace(plottingSystem);
 		IDataset image = trace != null ? trace.getData() : null;
 		data.image = image;
 		
-		plottingSystem.removeTraceListener(traceListener);
-		traceListener = new Listener(data);
-		plottingSystem.addTraceListener(traceListener);
+//		plottingSystem.removeTraceListener(traceListener);
+		
 		
 		if (data.augmenter != null) {
 			data.augmenter.activate();
@@ -1174,8 +1153,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 		plottingSystem.removeTraceListener(traceListener);
 		for (MyData d : model) {
-			if(d.system == plottingSystem)
-				model.remove(d);
+			model.remove(d);
 //			if (d.system == plottingSystem) {
 //				d.system = null;
 //				d.augmenter = null;
