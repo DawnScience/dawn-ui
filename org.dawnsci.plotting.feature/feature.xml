@@ -227,10 +227,16 @@
          unpack="false"/>
 
    <plugin
-         id="org.dawnsci.doe"
+         id="org.dawnsci.common.widgets.gda"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
+
+   <plugin
+         id="org.dawnsci.doe"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
 
 </feature>

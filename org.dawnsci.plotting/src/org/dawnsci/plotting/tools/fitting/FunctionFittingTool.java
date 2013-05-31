@@ -5,12 +5,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.dawb.common.ui.plot.function.FunctionDialog;
 import org.dawb.common.ui.util.EclipseUtils;
-import org.dawb.common.ui.widgets.FunctionWidget;
 import org.dawb.common.ui.wizard.persistence.PersistenceExportWizard;
 import org.dawb.common.ui.wizard.persistence.PersistenceImportWizard;
 import org.dawb.workbench.jmx.UserPlotBean;
+import org.dawnsci.common.widgets.gda.function.FunctionDialog;
+import org.dawnsci.common.widgets.gda.function.FunctionWidget;
 import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.api.region.IROIListener;
 import org.dawnsci.plotting.api.region.IRegion;
