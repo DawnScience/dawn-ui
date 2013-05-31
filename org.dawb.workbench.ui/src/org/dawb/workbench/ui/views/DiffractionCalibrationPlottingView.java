@@ -239,16 +239,39 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		calibrantHolder.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false));
 
 		Group controllerHolder = new Group(calibrantHolder, SWT.BORDER);
-		controllerHolder.setText("Calibrant positioning");
+		controllerHolder.setText("Calibrant selection and positioning");
 		controllerHolder.setLayout(new GridLayout(2, false));
 		controllerHolder.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
-		
+
+		// create calibrant combo
+		Label l = new Label(controllerHolder, SWT.NONE);
+		l.setText("Calibrant:");
+		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		final Combo calibrant = new Combo(controllerHolder, SWT.READ_ONLY);
+		final CalibrationStandards standards = CalibrationFactory.getCalibrationStandards();
+		calibrant.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				standards.setSelectedCalibrant(calibrant.getItem(calibrant.getSelectionIndex()));
+				drawCalibrantRings();
+			}
+		});
+		for (String c : standards.getCalibrantList()) {
+			calibrant.add(c);
+		}
+		String s = standards.getSelectedCalibrant();
+		if (s != null) {
+			calibrant.setText(s);
+		}
+//		calibrant.setText("Please select a calibrant..."); // won't work with read-only
+		calibrant.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+
 		Composite padComp = new Composite(controllerHolder, SWT.BORDER);
 		padComp.setLayout(new GridLayout(4, false));
 		padComp.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 
 		// create motion buttons cluster
-		Label l = new Label(padComp, SWT.NONE);
+		l = new Label(padComp, SWT.NONE);
 		l = new Label(padComp, SWT.NONE);
 		Button upButton = new Button(padComp, SWT.ARROW | SWT.UP);
 		upButton.setToolTipText("Move rings up");
@@ -400,29 +423,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		Composite calibrateComp = new Composite(calibrantHolder, SWT.NONE);
 		calibrateComp.setLayout(new GridLayout(1, false));
 		calibrateComp.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
-
-		// create calibrant combo
-		l = new Label(calibrateComp, SWT.NONE);
-		l.setText("Calibrant:");
-		l.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
-		final Combo calibrant = new Combo(calibrateComp, SWT.READ_ONLY);
-		final CalibrationStandards standards = CalibrationFactory.getCalibrationStandards();
-		calibrant.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				standards.setSelectedCalibrant(calibrant.getItem(calibrant.getSelectionIndex()));
-				drawCalibrantRings();
-			}
-		});
-		for (String c : standards.getCalibrantList()) {
-			calibrant.add(c);
-		}
-		String s = standards.getSelectedCalibrant();
-		if (s != null) {
-			calibrant.setText(s);
-		}
-//		calibrant.setText("Please select a calibrant..."); // won't work with read-only
-		calibrant.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 
 		Button findRingButton = new Button(calibrateComp, SWT.PUSH);
 		findRingButton.setText("Find rings in image");
