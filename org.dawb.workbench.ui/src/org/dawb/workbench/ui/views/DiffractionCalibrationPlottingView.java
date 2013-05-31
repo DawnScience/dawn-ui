@@ -212,16 +212,20 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		// make a scrolled composite
 		scrollComposite = new ScrolledComposite(controlComp, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
 		scrollComposite.setLayout(new GridLayout(1, false));
-		scrollComposite.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, true));
+		scrollComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		scrollHolder = new Composite(scrollComposite, SWT.NONE);
 //		RowLayout rl = new RowLayout(SWT.VERTICAL);
 //		rl.fill = true;
 		GridLayout gl = new GridLayout(1, false);
 		scrollHolder.setLayout(gl);
-		scrollHolder.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false));
+		scrollHolder.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false));
 
 		// table of images and found rings
-		tableViewer = new TableViewer(scrollHolder, SWT.FULL_SELECTION | SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+		Composite tableComp = new Composite(scrollHolder, SWT.NONE);
+		tableComp.setLayout(new GridLayout(1, false));
+		tableComp.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, true, false));
+		
+		tableViewer = new TableViewer(tableComp, SWT.FULL_SELECTION | SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
 //		tableViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true, 5, 5));
 		createColumns(tableViewer);
 		tableViewer.getTable().setHeaderVisible(true);
@@ -234,10 +238,10 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		
 		Composite calibrantHolder = new Composite(scrollHolder, SWT.NONE);
 		calibrantHolder.setLayout(new GridLayout(2, false));
-		calibrantHolder.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+		calibrantHolder.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false));
 
 		Group controllerHolder = new Group(calibrantHolder, SWT.BORDER);
-		controllerHolder.setText("Alignement positioning");
+		controllerHolder.setText("Calibrant positioning");
 		controllerHolder.setLayout(new GridLayout(2, false));
 		controllerHolder.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		
@@ -486,10 +490,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			MyData data = new MyData();
 			data.system = plottingSystem;
 			traceListener = new Listener(data);
-//			addListener(new Listener(data));
 			plottingSystem.addTraceListener(traceListener);
-			//plottingSystem.addTraceListener(traceListener);
-			
 			
 		} catch (Exception e1) {
 			logger.error("Could not create plotting system:"+ e1);
@@ -1003,14 +1004,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		tc.setText("Wavelength");
 		tc.setWidth(70);
 		tvc.setEditingSupport(new MyEditingSupport(tv, 4));
-//		String[] headings = { "Image", "#rings", "Distance", "Wavelength" };
-//		for (String h : headings) {
-//			tvc = new TableViewerColumn(tv, SWT.NONE);
-//			tc = tvc.getColumn();
-//			tc.setText(h);
-//			tc.setWidth(60);
-//		}
-		
 	}
 
 	private void setData(String path) {
@@ -1182,11 +1175,14 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 		plottingSystem.removeTraceListener(traceListener);
 		for (MyData d : model) {
-			if (d.system == plottingSystem) {
-				d.system = null;
-				d.augmenter = null;
-			}
+			if(d.system == plottingSystem)
+				model.remove(d);
+//			if (d.system == plottingSystem) {
+//				d.system = null;
+//				d.augmenter = null;
+//			}
 		}
+		System.out.println("model emptied");
 		getSite().getWorkbenchWindow().getSelectionService().removeSelectionListener(fileSelectionListener);
 		tableViewer.removeSelectionChangedListener(selectionChangeListener);
 	}
