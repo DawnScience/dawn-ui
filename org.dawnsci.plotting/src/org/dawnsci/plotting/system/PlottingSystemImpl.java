@@ -1063,15 +1063,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		super.removePropertyChangeListener(listener);
 		lightWeightViewer.removePropertyChangeListener(listener);
 	}
-
-	/**
-	 * Internal use only do not use this method externally at any point!
-	 * @return
-	 */
-	public XYRegionGraph getLightWeightGraph() {
-		return lightWeightViewer.getXYRegionGraph();
-	}
-
+	
 	public void setActionBars(IActionBars bars) {
 		this.bars = bars;
 	}
@@ -1155,4 +1147,17 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	public void setKeepAspect(boolean checked){
 		lightWeightViewer.setKeepAspect(checked);
 	}
+	
+	public Object getAdapter(Class adapter) {
+		
+		if (adapter == XYRegionGraph.class) {
+			return lightWeightViewer!=null ? lightWeightViewer.getXYRegionGraph() : null;
+		} else if (adapter == LightWeightPlotViewer.class) {
+			return lightWeightViewer;
+		} else if (adapter == JRealityPlotViewer.class) {
+			return jrealityViewer;
+		}
+		return super.getAdapter(adapter);
+	}
+
 }

@@ -32,11 +32,11 @@ Require-Bundle: org.eclipse.ui,
  org.dawb.hdf5;bundle-version="1.2.0",
  ncsa.hdf;bundle-version="2.8.0",
  org.dawnsci.plotting.api;bundle-version="1.0.0",
- org.dawnsci.io;bundle-version="1.0.0"
+ org.dawnsci.io;bundle-version="1.0.0",
+ org.dawnsci.common.widgets.gda;bundle-version="1.2.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
-Export-Package: org.dawnsci.plotting.composites,
- org.dawnsci.plotting.preference,
+Export-Package: org.dawnsci.plotting.preference,
  org.dawnsci.plotting.system.dialog,
  org.dawnsci.plotting.tools,
  org.dawnsci.plotting.tools.diffraction,

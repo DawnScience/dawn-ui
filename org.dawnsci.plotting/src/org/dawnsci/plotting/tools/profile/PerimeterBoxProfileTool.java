@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.dawb.common.ui.util.GridUtils;
-import org.dawb.common.ui.widgets.ROIWidget;
+import org.dawnsci.common.widgets.gda.roi.ROIWidget;
 import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.region.IROIListener;

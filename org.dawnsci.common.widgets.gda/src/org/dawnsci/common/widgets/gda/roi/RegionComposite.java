@@ -1,4 +1,4 @@
-package org.dawnsci.plotting.system.dialog;
+package org.dawnsci.common.widgets.gda.roi;
 
 import java.util.HashMap;
 import java.util.List;
