@@ -128,7 +128,7 @@ public class BoxProfileTool extends ProfileTool {
 			if (!region.isVisible())    continue;
 			if (!region.isUserRegion()) continue;
 			
-			AbstractDataset[] box = ROIProfile.box(slice.getData(), (AbstractDataset)image.getMask(), (RectangularROI)region.getROI(), false);
+			AbstractDataset[] box = ROIProfile.box((AbstractDataset)slice.getData(), (AbstractDataset)image.getMask(), (RectangularROI)region.getROI(), false);
 			
 			final AbstractDataset x_intensity = box[0];
 			x_intensity.setName("X_"+region.getName().replace(' ', '_'));

@@ -73,7 +73,7 @@ public class AzimuthalProfileTool extends SectorProfileTool {
 			if (!region.isUserRegion()) continue;
 			
 			final SectorROI sroi = (SectorROI)region.getROI();
-			final AbstractDataset[] profile = ROIProfile.sector(slice.getData(), (AbstractDataset)image.getMask(), sroi, false, true, false);
+			final AbstractDataset[] profile = ROIProfile.sector((AbstractDataset)slice.getData(), (AbstractDataset)image.getMask(), sroi, false, true, false);
 		
 			AbstractDataset integral = profile[1];
 			integral.setName("azimuthal_"+region.getName().replace(' ', '_'));     

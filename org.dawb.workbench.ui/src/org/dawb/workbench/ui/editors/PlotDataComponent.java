@@ -1233,7 +1233,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		
 		try {
 			if (providerDeligate!=null) {
-				return providerDeligate.getDataset(name, monitor);
+				return (AbstractDataset)providerDeligate.getDataset(name, monitor);
 			}
 			if (this.filePath==null) return null;
 			

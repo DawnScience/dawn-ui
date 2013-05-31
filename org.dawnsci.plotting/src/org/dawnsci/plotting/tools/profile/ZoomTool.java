@@ -147,7 +147,7 @@ public class ZoomTool extends ProfileTool {
 			final int yInc = bounds.getPoint()[1]<bounds.getEndPoint()[1] ? 1 : -1;
 			final int xInc = bounds.getPoint()[0]<bounds.getEndPoint()[0] ? 1 : -1;
 			
-			final AbstractDataset slice = drslice.getData().getSlice(new int[] { (int) bounds.getPoint()[1],   (int) bounds.getPoint()[0]    },
+			final AbstractDataset slice = ((AbstractDataset)drslice.getData()).getSlice(new int[] { (int) bounds.getPoint()[1],   (int) bounds.getPoint()[0]    },
 											                       new int[] { (int) bounds.getEndPoint()[1],(int) bounds.getEndPoint()[0] },
 											                       new int[] {yInc, xInc});
 			slice.setName(region.getName().replace(' ','_'));
