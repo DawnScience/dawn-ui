@@ -328,7 +328,7 @@
          point="org.eclipse.ui.views">
       <view
             allowMultiple="false"
-            category="org.dawb.workbench"
+            category="org.dawb.workbench.ui.beta.views.category"
             class="org.dawb.workbench.ui.views.DiffractionCalibrationView"
             icon="icons/calibrant_rings.png"
             id="org.dawb.workbench.ui.views.DiffractionCalibrationView"
@@ -336,11 +336,15 @@
       </view>
       <view
             allowMultiple="false"
-            category="org.dawb.workbench"
+            category="org.dawb.workbench.ui.beta.views.category"
             class="org.dawb.workbench.ui.views.DiffractionCalibrationPlottingView"
             icon="icons/calibrant_rings.png"
             id="org.dawb.workbench.ui.views.DiffractionCalibrationPlottingView"
             name="Diffraction Calibration Plotting">
       </view>
+      <category
+            id="org.dawb.workbench.ui.beta.views.category"
+            name="Data Analysis - Beta views">
+      </category>
    </extension>
 </plugin>

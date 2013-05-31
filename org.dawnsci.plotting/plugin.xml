@@ -240,7 +240,7 @@
    <extension
          point="org.eclipse.ui.views">
       <view
-            category="org.dawb.workbench.application.data.analysis"
+            category="org.dawb.workbench.application.data.analysis.tools"
             class="org.dawnsci.plotting.views.ToolPageView"
             icon="icons/plot-tool-1d.png"
             id="org.dawb.workbench.plotting.views.toolPageView.1D"
@@ -248,7 +248,7 @@
             restorable="true">
       </view>
       <view
-            category="org.dawb.workbench.application.data.analysis"
+            category="org.dawb.workbench.application.data.analysis.tools"
             class="org.dawnsci.plotting.views.ToolPageView"
             icon="icons/plot-tool-2d.png"
             id="org.dawb.workbench.plotting.views.toolPageView.2D"
@@ -256,7 +256,7 @@
             restorable="true">
       </view>
       <view
-            category="org.dawb.workbench.application.data.analysis"
+            category="org.dawb.workbench.application.data.analysis.tools"
             class="org.dawnsci.plotting.views.ToolPageView"
             icon="icons/plot-tool-any.png"
             id="org.dawb.workbench.plotting.views.toolPageView.3D"
@@ -264,7 +264,7 @@
             restorable="true">
       </view>
       <view
-            category="org.dawb.workbench.application.data.analysis"
+            category="org.dawb.workbench.application.data.analysis.tools"
             class="org.dawnsci.plotting.views.ToolPageView"
             icon="icons/plot-tool-any.png"
             id="org.dawb.workbench.plotting.views.toolPageView.1D_and_2D"
@@ -273,7 +273,7 @@
       </view>
       <view
             allowMultiple="true"
-            category="org.dawb.workbench.application.data.analysis"
+            category="org.dawb.workbench.application.data.analysis.tools"
             class="org.dawnsci.plotting.views.ToolPageView"
             icon="icons/plot-tool-any.png"
             id="org.dawb.workbench.plotting.views.toolPageView.fixed"
@@ -282,7 +282,7 @@
       </view>
       <view
             allowMultiple="true"
-            category="uk.ac.diamond.scisoft.arpes"
+            category="org.dawb.workbench.application.data.analysis.tools"
             class="org.dawnsci.plotting.views.RegionSumView"
             icon="icons/sum.png"
             id="uk.ac.diamond.scisoft.arpes.regionSumView"
@@ -290,8 +290,8 @@
             restorable="true">
       </view>
       <category
-            id="org.dawb.workbench.application.data.analysis"
-            name="DAWN">
+            id="org.dawb.workbench.application.data.analysis.tools"
+            name="Data Analysis - Tools">
       </category>
    </extension>
    <extension

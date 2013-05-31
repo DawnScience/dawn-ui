@@ -5,6 +5,7 @@
    <extension
          point="org.eclipse.ui.views">
       <view
+            category="org.dawb.workbench.ui.beta.views.category"
             class="org.dawnsci.algorithm.ui.views.runner.AlgorithmView"
             id="org.dawnsci.algorithm.ui.dataReductionFileSelectionView"
             name="Data Reduction File Selector"
