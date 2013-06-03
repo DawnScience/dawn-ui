@@ -16,10 +16,10 @@ import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.dawnsci.plotting.api.region.IROIListener;
 import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.region.IRegionListener;
 import org.dawnsci.plotting.api.region.ROIEvent;
 import org.dawnsci.plotting.api.region.RegionEvent;
-import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
@@ -574,7 +574,7 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 	 * @param coords
 	 * @return
 	 */
-	public static double[] getAxisPoint(ICoordinateSystem coords, double... vals) {
+	public double[] getAxisPoint(ICoordinateSystem coords, double... vals) {
 		if (coords==null) return vals;
 		try {
 			return coords.getValueAxisLocation(vals);

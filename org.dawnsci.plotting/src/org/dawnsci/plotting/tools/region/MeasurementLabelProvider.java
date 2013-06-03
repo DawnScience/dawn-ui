@@ -64,14 +64,13 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 			if (element instanceof String) return "";
 			ICoordinateSystem coords = region.getCoordinateSystem();
 			
-			double[] startPoint = AbstractRegionTableTool.getAxisPoint(coords, roi.getPoint());
+			double[] startPoint = getAxisPoint(coords, roi.getPoint());
 			double[] endPoint = {0, 0};
 			if(roi instanceof RectangularROI){
-				endPoint = AbstractRegionTableTool.getAxisPoint(coords, ((RectangularROI)roi).getEndPoint());
+				endPoint = getAxisPoint(coords, ((RectangularROI)roi).getEndPoint());
 			} else if (roi instanceof LinearROI){
-				endPoint = AbstractRegionTableTool.getAxisPoint(coords, ((LinearROI)roi).getEndPoint());
+				endPoint = getAxisPoint(coords, ((LinearROI)roi).getEndPoint());
 			}
-			
 			switch(column) {
 			case ROINAME:
 				return region.getLabel();
@@ -104,8 +103,6 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 				} else if (roi instanceof RectangularROI) {
 					RectangularROI rroi = (RectangularROI) roi;
 					fobj = rroi.getEndPoint()[0] - rroi.getPointX();
-				} else {
-					
 				}
 				return fobj == null ? NA : String.valueOf(DoubleUtils.roundDouble((Double)fobj, precision));
 			case DY: // dy
@@ -115,8 +112,6 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 				} else if (roi instanceof RectangularROI) {
 					RectangularROI rroi = (RectangularROI) roi;
 					fobj = rroi.getEndPoint()[1] - rroi.getPointY();
-				} else {
-					
 				}
 				return fobj == null ? NA : String.valueOf(DoubleUtils.roundDouble((Double)fobj, precision));
 			case LENGTH: // length
@@ -127,8 +122,6 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 					RectangularROI rroi = (RectangularROI) roi;
 					double[] lens = rroi.getLengths();
 					fobj = Math.hypot(lens[0], lens[1]);
-				} else {
-					
 				}
 				return fobj == null ? NA : String.valueOf(DoubleUtils.roundDouble((Double)fobj, precision));
 			case INNERRAD: // in rad
@@ -168,5 +161,19 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 		super.dispose();
 		checkedIcon.dispose();
 		uncheckedIcon.dispose();
+	}
+
+	/**
+	 * get point in axis coords
+	 * @param coords
+	 * @return
+	 */
+	private double[] getAxisPoint(ICoordinateSystem coords, double... vals) {
+		if (coords==null) return vals;
+		try {
+			return coords.getValueAxisLocation(vals);
+		} catch (Exception e) {
+			return vals;
+		}
 	}
 }
