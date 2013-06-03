@@ -172,10 +172,9 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 				} catch (Exception e) {
 					logger.error("Problem opening import!", e);
 				}
-			}			
+			}
 		};
-		getSite().getActionBars().getToolBarManager().add(exportRegion);
-		
+
 		final Action importRegion = new Action("Import region from file", Activator.getImageDescriptor("icons/mask-import-wiz.png")) {
 			public void run() {
 				try {
@@ -189,16 +188,11 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 			}			
 		};
 
-		getSite().getActionBars().getToolBarManager().add(importRegion);
-		getSite().getActionBars().getToolBarManager().add(new Separator());
-
 		final Action reselect = new Action("Create new measurement.", getImageDescriptor()) {
 			public void run() {
 				createNewRegion();
 			}
 		};
-		getSite().getActionBars().getToolBarManager().add(reselect);
-		getSite().getActionBars().getToolBarManager().add(new Separator());
 
 		final Action copy = new Action("Copy region values to clipboard", Activator.getImageDescriptor("icons/plot-tool-measure-copy.png")) {
 			public void run() {
@@ -218,9 +212,6 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 			}
 		};
 		copy.setToolTipText("Copies the region values as text to clipboard which can then be pasted externally.");
-		
-		getSite().getActionBars().getToolBarManager().add(copy);
-		getSite().getActionBars().getMenuManager().add(copy);
 
 		final Action delete = new Action("Delete selected region", Activator.getImageDescriptor("icons/RegionDelete.png")) {
 			public void run() {
@@ -234,14 +225,7 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 			}
 		};
 		delete.setToolTipText("Delete selected region, if there is one.");
-		
-		getSite().getActionBars().getToolBarManager().add(delete);
-		getSite().getActionBars().getMenuManager().add(delete);
 
-		final Separator sep = new Separator(getClass().getName()+".separator1");
-		getSite().getActionBars().getToolBarManager().add(sep);
-		getSite().getActionBars().getMenuManager().add(sep);
-		
 		final Action show = new Action("Show all vertex values", Activator.getImageDescriptor("icons/plot-tool-measure-vertices.png")) {
 			public void run() {
 				if (!isActive()) return;
@@ -252,11 +236,7 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 			}
 		};
 		show.setToolTipText("Show vertices in all visible regions");
-		
-		getSite().getActionBars().getToolBarManager().add(show);
-		getSite().getActionBars().getMenuManager().add(show);
-		
-		
+
 		final Action clear = new Action("Show no vertex values", Activator.getImageDescriptor("icons/plot-tool-measure-clear.png")) {
 			public void run() {
 				if (!isActive()) return;
@@ -267,7 +247,21 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 			}
 		};
 		clear.setToolTipText("Clear all vertices shown in the plotting");
-		
+
+		getSite().getActionBars().getToolBarManager().add(importRegion);
+		getSite().getActionBars().getToolBarManager().add(exportRegion);
+		getSite().getActionBars().getToolBarManager().add(new Separator());
+		getSite().getActionBars().getToolBarManager().add(reselect);
+		getSite().getActionBars().getToolBarManager().add(new Separator());
+		getSite().getActionBars().getToolBarManager().add(copy);
+		getSite().getActionBars().getMenuManager().add(copy);
+		getSite().getActionBars().getToolBarManager().add(delete);
+		getSite().getActionBars().getMenuManager().add(delete);
+		final Separator sep = new Separator(getClass().getName()+".separator1");
+		getSite().getActionBars().getToolBarManager().add(sep);
+		getSite().getActionBars().getMenuManager().add(sep);
+		getSite().getActionBars().getToolBarManager().add(show);
+		getSite().getActionBars().getMenuManager().add(show);
 		getSite().getActionBars().getToolBarManager().add(clear);
 		getSite().getActionBars().getMenuManager().add(clear);
 
