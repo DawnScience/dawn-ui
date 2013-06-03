@@ -29,9 +29,7 @@
 
    <splash
       location="org.dawnsci.product.plugin"
-      startupProgressRect="0,0,200,15"
-      startupMessageRect="0,20,200,20"
-      startupForegroundColor="0000FF" />
+      startupProgressRect="5,240,590,15" />
    <launcher name="dawn">
       <solaris/>
       <win useIco="false">
