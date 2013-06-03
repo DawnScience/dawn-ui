@@ -155,7 +155,7 @@ public class RegionEditTool extends AbstractRegionTableTool {
 
 		@Override
 		protected boolean canEdit(Object element) {
-			if (column == 0 || column == 5 || column == 6) return false;
+			if (column == 5 || column == 6) return false;
 			else return true;
 		}
 
