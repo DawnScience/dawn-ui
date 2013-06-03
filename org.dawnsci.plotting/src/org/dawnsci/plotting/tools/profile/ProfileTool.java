@@ -196,7 +196,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		configurePlottingSystem(profilePlottingSystem);
 		
 		// Unused actions removed for tool
-		profilePlottingSystem.getPlotActionSystem().remove("org.dawb.workbench.plotting.rescale");
+		//profilePlottingSystem.getPlotActionSystem().remove("org.dawb.workbench.plotting.rescale");
 		profilePlottingSystem.getPlotActionSystem().remove("org.dawb.workbench.plotting.plotIndex");
 		profilePlottingSystem.getPlotActionSystem().remove("org.dawb.workbench.plotting.plotX");
 
