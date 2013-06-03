@@ -161,7 +161,6 @@ public class Sector extends Shape {
 		final int al = (int) (ang[1] - ang[0]);
 
 		Color orig = graphics.getBackgroundColor();
-		graphics.setBackgroundColor(ColorConstants.red);
 		graphics.fillArc((int) (cx - ro), (int) (cy - ro), dout, dout, ab, al);
 		int alpha = graphics.getAlpha();
 		graphics.setAlpha(40);

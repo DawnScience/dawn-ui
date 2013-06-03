@@ -24,6 +24,7 @@ import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.swt.graphics.Color;
 
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
@@ -46,6 +47,15 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 		setRegionColor(ColorConstants.red);
 		setAlpha(80);
 		setLineWidth(2);
+	}
+	
+	public void setRegionColor(Color regionColor) {
+
+		super.setRegionColor(regionColor);
+		if (sector!=null) {
+			sector.setForegroundColor(regionColor);
+			sector.setBackgroundColor(regionColor);
+		}
 	}
 
 	@Override
@@ -122,8 +132,10 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 			double ae = Math.toDegrees(Math.atan2(-rd.preciseHeight(), rd.preciseWidth()));
 			double[] a = calcAngles(as, ae);
 			Sector s = new Sector(cen.preciseX(), cen.preciseY(), ri,  ro, a[0], a[1]);
-			s.setLineStyle(Graphics.LINE_DOT);
+ 		    s.setLineStyle(Graphics.LINE_DOT);
 			s.setLineWidth(getLineWidth());
+			s.setForegroundColor(getRegionColor());
+			s.setBackgroundColor(getRegionColor());
 			s.paintFigure(g);
 		}
 	}
@@ -275,6 +287,7 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 					DecoratedSector.this.parent.repaint();
 				}
 			};
+			setBackgroundColor(getRegionColor());
 		}
 
 		public void dispose() {
