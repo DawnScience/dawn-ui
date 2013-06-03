@@ -49,6 +49,7 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.progress.UIJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -419,12 +420,34 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 	public void roiChanged(ROIEvent evt) {
 		if (!isActive()) return;
 		updateRegion(evt);
+		if((IRegion)evt.getSource() == null) return;
+		updateColorSelection((IRegion)evt.getSource());
 	}
 	@Override
 	public void roiSelected(ROIEvent evt) {
-		// TODO Auto-generated method stub
 
 	}
+
+	private void updateColorSelection(IRegion region){
+		Collection<IRegion> regions = getPlottingSystem().getRegions();
+		for (IRegion iRegion : regions) {
+			if(region.getName().equals(iRegion.getName())){
+				iRegion.setRegionColor(ColorConstants.red);
+			} else {
+				if(iRegion.isActive()) iRegion.setRegionColor(ColorConstants.green);
+				else if (!iRegion.isActive()) iRegion.setRegionColor(ColorConstants.gray);
+			}
+		}
+		TableItem[] regionItems = viewer.getTable().getItems();
+		for (TableItem tableItem : regionItems) {
+			IRegion myRegion = (IRegion)tableItem.getData();
+			if(region.getName().equals(myRegion.getName())){
+				viewer.getTable().setSelection(tableItem);
+				break;
+			}
+		}
+	}
+
 	private RegionBoundsUIJob updateJob;
 	/**
 	 * Uses cancellable UIJob
