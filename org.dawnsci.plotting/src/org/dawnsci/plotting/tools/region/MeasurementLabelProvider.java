@@ -1,7 +1,5 @@
 package org.dawnsci.plotting.tools.region;
 
-import java.text.DecimalFormat;
-
 import org.dawb.common.util.number.DoubleUtils;
 import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
@@ -29,7 +27,7 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 	private AbstractRegionTableTool tool;
 	private Image checkedIcon;
 	private Image uncheckedIcon;
-	private DecimalFormat format;
+	private int precision = 3;
 
 	public MeasurementLabelProvider(AbstractRegionTableTool tool, LabelType i) {
 		this.column = i;
@@ -38,7 +36,6 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 		checkedIcon   = id.createImage();
 		id = Activator.getImageDescriptor("icons/unticked.gif");
 		uncheckedIcon =  id.createImage();
-		this.format = new DecimalFormat("##0.00E0");
 	}
 
 	private static final String NA = "-";
@@ -66,39 +63,30 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 			Object fobj = null;
 			if (element instanceof String) return "";
 			ICoordinateSystem coords = region.getCoordinateSystem();
+			
+			double[] startPoint = AbstractRegionTableTool.getAxisPoint(coords, roi.getPoint());
+			double[] endPoint = {0, 0};
+			if(roi instanceof RectangularROI){
+				endPoint = AbstractRegionTableTool.getAxisPoint(coords, ((RectangularROI)roi).getEndPoint());
+			} else if (roi instanceof LinearROI){
+				endPoint = AbstractRegionTableTool.getAxisPoint(coords, ((LinearROI)roi).getEndPoint());
+			}
+			
 			switch(column) {
 			case ROINAME:
 				return region.getLabel();
 			case STARTX:
-				if(roi instanceof LinearROI)
-					fobj = AbstractRegionTableTool.getAxisPoint(coords, roi.getPoint())[0];
-				else if (roi instanceof RectangularROI)
-					fobj = AbstractRegionTableTool.getAxisPoint(coords, roi.getPoint())[0];
-				return fobj == null ? NA : DoubleUtils.formatDouble((Double)fobj, 0);
+				fobj = startPoint[0];
+				return fobj == null ? NA : String.valueOf(DoubleUtils.roundDouble((Double)fobj, precision));
 			case STARTY: // dx
-				if(roi instanceof LinearROI)
-					fobj = AbstractRegionTableTool.getAxisPoint(coords, roi.getPoint())[1];
-				else if (roi instanceof RectangularROI)
-					fobj = AbstractRegionTableTool.getAxisPoint(coords, roi.getPoint())[1];
-				else
-					;
-				return fobj == null ? NA : DoubleUtils.formatDouble((Double)fobj, 0);
+				fobj = startPoint[1];
+				return fobj == null ? NA : String.valueOf(DoubleUtils.roundDouble((Double)fobj, precision));
 			case ENDX: // dy
-				if(roi instanceof LinearROI)
-					fobj = AbstractRegionTableTool.getAxisPoint(coords, ((LinearROI)roi).getEndPoint())[0];
-				else if(roi instanceof RectangularROI)
-					fobj = AbstractRegionTableTool.getAxisPoint(coords, ((RectangularROI)roi).getEndPoint())[0];
-				else
-					;
-				return fobj == null ? NA : DoubleUtils.formatDouble((Double)fobj, 0);
+				fobj = endPoint[0];
+				return fobj == null ? NA : String.valueOf(DoubleUtils.roundDouble((Double)fobj, precision));
 			case ENDY: // length
-				if(roi instanceof LinearROI)
-					fobj = AbstractRegionTableTool.getAxisPoint(coords, ((LinearROI)roi).getEndPoint())[1];
-				else if(roi instanceof RectangularROI)
-					fobj = AbstractRegionTableTool.getAxisPoint(coords, ((RectangularROI)roi).getEndPoint())[1];
-				else
-					;
-				return fobj == null ? NA : DoubleUtils.formatDouble((Double)fobj, 0);
+				fobj = endPoint[1];
+				return fobj == null ? NA : String.valueOf(DoubleUtils.roundDouble((Double)fobj, precision));
 			case MAX: // max
 				final double max = tool.getMaxIntensity(region);
 			    if (Double.isNaN(max)) return NA;
@@ -119,7 +107,7 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 				} else {
 					
 				}
-				return fobj == null ? NA : format.format(fobj);
+				return fobj == null ? NA : String.valueOf(DoubleUtils.roundDouble((Double)fobj, precision));
 			case DY: // dy
 				if (roi instanceof LinearROI) {
 					LinearROI lroi = (LinearROI) roi;
@@ -130,7 +118,7 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 				} else {
 					
 				}
-				return fobj == null ? NA : format.format(fobj);
+				return fobj == null ? NA : String.valueOf(DoubleUtils.roundDouble((Double)fobj, precision));
 			case LENGTH: // length
 				if (roi instanceof LinearROI) {
 					LinearROI lroi = (LinearROI) roi;
@@ -142,19 +130,19 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 				} else {
 					
 				}
-				return fobj == null ? NA : format.format(fobj);
+				return fobj == null ? NA : String.valueOf(DoubleUtils.roundDouble((Double)fobj, precision));
 			case INNERRAD: // in rad
 				if (roi instanceof SectorROI) {
 					SectorROI sroi = (SectorROI) roi;
 					fobj = sroi.getRadius(0);
 				}
-				return fobj == null ? NA : format.format(fobj);
+				return fobj == null ? NA : String.valueOf(DoubleUtils.roundDouble((Double)fobj, precision));
 			case OUTERRAD: // out rad
 				if (roi instanceof SectorROI) {
 					SectorROI sroi = (SectorROI) roi;
 					fobj = sroi.getRadius(1);
 				}
-				return fobj == null ? NA : format.format(fobj);
+				return fobj == null ? NA : String.valueOf(DoubleUtils.roundDouble((Double)fobj, precision));
 			case ROISTRING: // region
 				return tool.getROI(region).toString();
 			default:

@@ -1,5 +1,6 @@
 package org.dawnsci.plotting.tools.region;
 
+import org.dawnsci.common.widgets.celleditor.FloatSpinnerCellEditor;
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.RegionUtils;
@@ -16,14 +17,11 @@ import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.widgets.Spinner;
+import org.eclipse.swt.widgets.Composite;
 
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
-import uk.ac.gda.richbeans.components.cell.FieldComponentCellEditor;
-import uk.ac.gda.richbeans.components.wrappers.FloatSpinnerWrapper;
-import uk.ac.gda.richbeans.components.wrappers.SpinnerWrapper;
 
 /**
  * 
@@ -32,6 +30,7 @@ import uk.ac.gda.richbeans.components.wrappers.SpinnerWrapper;
  */
 public class RegionEditTool extends AbstractRegionTableTool {
 
+	private int precision = 3;
 
 	@Override
 	public ToolPageRole getToolPageRole() {
@@ -125,38 +124,23 @@ public class RegionEditTool extends AbstractRegionTableTool {
 			CellEditor ed = null;
 			
 			if(column > 0 && column < 7){
-				try {
-					ed = new FieldComponentCellEditor(((TableViewer)getViewer()).getTable(), 
-							                     FloatSpinnerWrapper.class.getName(), SWT.RIGHT);
-				} catch (ClassNotFoundException e) {
-					logger.error("Cannot get FieldComponentCellEditor for "+SpinnerWrapper.class.getName(), e);
-					return null;
-				}
-				
-				final FloatSpinnerWrapper   rb = (FloatSpinnerWrapper)((FieldComponentCellEditor)ed).getFieldWidget();
-				if (rb.getPrecision() < 3)
-					rb.setFormat(rb.getWidth(), 0);
-				
-				rb.setMaximum(Double.MAX_VALUE);
-				rb.setMinimum(-Double.MAX_VALUE);
-
-				rb.setButtonVisible(false);
-				rb.setActive(true);
-				
-				((Spinner) rb.getControl())
-						.addSelectionListener(new SelectionAdapter() {
-							@Override
-							public void widgetSelected(SelectionEvent e) {
-								try {
-									setValue(element, rb.getValue(), false);
-								} catch (Exception e1) {
-									logger.debug("Error while setting table value");
-									e1.printStackTrace();
-								}
-								
-							}
-						});	
-				return ed;
+				final FloatSpinnerCellEditor fse = new FloatSpinnerCellEditor((Composite)getViewer().getControl(), SWT.RIGHT);
+				fse.setFormat(7, precision);
+				fse.setMaximum(Double.MAX_VALUE);
+				fse.setMinimum(-Double.MAX_VALUE);
+				fse.addSelectionListener(new SelectionAdapter() {
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						try {
+							setValue(element, fse.getValue(), false);
+						} catch (Exception e1) {
+							logger.debug("Error while setting table value");
+							e1.printStackTrace();
+						}
+						
+					}
+				});
+				return fse;
 			} else if(column == 0){
 				ed = new TextCellEditor(((TableViewer)getViewer()).getTable(), SWT.RIGHT);
 				
@@ -180,27 +164,24 @@ public class RegionEditTool extends AbstractRegionTableTool {
 			final IRegion region = (IRegion)element;
 			IROI roi = region.getROI();
 			ICoordinateSystem coords = region.getCoordinateSystem();
+			double[] startPoint = getAxisPoint(coords, roi.getPoint());
+			double[] endPoint = {0, 0};
+			if(roi instanceof RectangularROI){
+				endPoint = getAxisPoint(coords, ((RectangularROI)roi).getEndPoint());
+			} else if (roi instanceof LinearROI){
+				endPoint = getAxisPoint(coords, ((LinearROI)roi).getEndPoint());
+			}
 			switch (column){
 			case 0:
 				return region.getLabel();
 			case 1:
-				return getAxisPoint(coords, roi.getPoint())[0];
+				return startPoint[0];
 			case 2:
-				return getAxisPoint(coords, roi.getPoint())[1];
+				return startPoint[1];
 			case 3:
-				if(roi instanceof RectangularROI)
-					return getAxisPoint(coords, ((RectangularROI)roi).getEndPoint())[0];
-				else if(roi instanceof LinearROI)
-					return getAxisPoint(coords, ((LinearROI)roi).getEndPoint())[0];
-				else 
-					return null;
+				return endPoint[0];
 			case 4:
-				if(roi instanceof RectangularROI)
-					return getAxisPoint(coords, ((RectangularROI)roi).getEndPoint())[1];
-				else if(roi instanceof LinearROI)
-					return getAxisPoint(coords, ((LinearROI)roi).getEndPoint())[1];
-				else 
-					return null;
+				return endPoint[1];
 			case 5: //max intensity
 				return null;
 			case 6: //sum
@@ -229,6 +210,13 @@ public class RegionEditTool extends AbstractRegionTableTool {
 			final IRegion region = (IRegion) element;
 			IROI myRoi = region.getROI();
 			ICoordinateSystem coords = region.getCoordinateSystem();
+			double[] roiStartPoint = getAxisPoint(coords, myRoi.getPoint());
+			double[] roiEndPoint = {0, 0};
+			if(myRoi instanceof RectangularROI){
+				roiEndPoint = getAxisPoint(coords, ((RectangularROI)myRoi).getEndPoint());
+			} else if (myRoi instanceof LinearROI){
+				roiEndPoint = getAxisPoint(coords, ((LinearROI)myRoi).getEndPoint());
+			}
 			switch (column){
 			case 0:
 				// takes care of renaming the region (label and key value in hash table)
@@ -238,7 +226,7 @@ public class RegionEditTool extends AbstractRegionTableTool {
 				if(myRoi instanceof LinearROI){
 					LinearROI lroi = (LinearROI)myRoi;
 					double[] endPoint = lroi.getEndPoint();
-					double[] startPoint = getImagePoint(coords, new double[]{(Double)value, lroi.getPointY()});
+					double[] startPoint = getImagePoint(coords, new double[]{(Double)value, roiStartPoint[1]});
 					lroi.setPoint(startPoint);
 					lroi.setPoint((Double)value, lroi.getPointY());
 					lroi.setEndPoint(endPoint);
@@ -246,7 +234,7 @@ public class RegionEditTool extends AbstractRegionTableTool {
 				} else if(myRoi instanceof RectangularROI){
 					RectangularROI rroi = (RectangularROI)myRoi;
 					double[] endPoint = rroi.getEndPoint();
-					double[] startPoint = getImagePoint(coords, new double[]{(Double)value, rroi.getPointY()});
+					double[] startPoint = getImagePoint(coords, new double[]{(Double)value, roiStartPoint[1]});
 					rroi.setPoint(startPoint);
 					rroi.setLengths(endPoint[0] - startPoint[0], rroi.getLengths()[1]); //set new endpoint
 					myRoi = rroi;
@@ -256,14 +244,14 @@ public class RegionEditTool extends AbstractRegionTableTool {
 				if(myRoi instanceof LinearROI){
 					LinearROI lroi = (LinearROI)myRoi;
 					double[] endPoint = lroi.getEndPoint();
-					double[] startPoint = getImagePoint(coords, new double[]{lroi.getPointX(), (Double)value});
+					double[] startPoint = getImagePoint(coords, new double[]{roiStartPoint[0], (Double)value});
 					lroi.setPoint(startPoint);
 					lroi.setEndPoint(endPoint);
 					myRoi = lroi;
 				} else if(myRoi instanceof RectangularROI){
 					RectangularROI rroi = (RectangularROI)myRoi;
 					double[] endPoint = rroi.getEndPoint();
-					double[] startPoint = getImagePoint(coords, new double[]{rroi.getPointX(), (Double)value});
+					double[] startPoint = getImagePoint(coords, new double[]{roiStartPoint[0], (Double)value});
 					rroi.setPoint(startPoint);
 					rroi.setLengths(rroi.getLengths()[0], endPoint[1] - startPoint[1]); //set new endpoint
 					myRoi = rroi;
@@ -272,26 +260,25 @@ public class RegionEditTool extends AbstractRegionTableTool {
 			case 3:
 				if(myRoi instanceof LinearROI){
 					double[] endPoint = getImagePoint(coords, 
-							new double[]{(Double)value, ((LinearROI)myRoi).getEndPoint()[1]});
+							new double[]{(Double)value, roiEndPoint[1]});
 					((LinearROI)myRoi).setEndPoint(endPoint);
 				}
 				else if (myRoi instanceof RectangularROI){
 					double[] endPoint = getImagePoint(coords, 
-							new double[]{(Double)value, ((RectangularROI)myRoi).getEndPoint()[1]});
+							new double[]{(Double)value, roiEndPoint[1]});
 					((RectangularROI)myRoi).setEndPoint(endPoint);
 				}
 				break;
 			case 4:
 				if(myRoi instanceof LinearROI){
 					double[] endPoint = getImagePoint(coords, 
-							new double[]{((LinearROI)myRoi).getEndPoint()[0], (Double)value});
+							new double[]{roiEndPoint[0], (Double)value});
 					((LinearROI)myRoi).setEndPoint(endPoint);
 				}
 				else if (myRoi instanceof RectangularROI){
 					double[] endPoint = getImagePoint(coords, 
-							new double[]{((RectangularROI)myRoi).getEndPoint()[0], (Double)value});
+							new double[]{roiEndPoint[0], (Double)value});
 					((RectangularROI)myRoi).setEndPoint(endPoint);
-
 				}
 				break;
 			case 5: //intensity
