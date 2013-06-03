@@ -47,9 +47,9 @@ public class RegionArea extends PlotArea {
 
 	private static final Logger logger = LoggerFactory.getLogger(RegionArea.class);
 	
-	protected ISelectionProvider selectionProvider;
-	private final Map<String,AbstractSelectionRegion>     regions;
-	private final Map<String,ImageTrace> imageTraces;
+	protected ISelectionProvider                      selectionProvider;
+	private final Map<String,AbstractSelectionRegion> regions;
+	private final Map<String,ImageTrace>              imageTraces;
 	
 	private Collection<IRegionListener>     regionListeners;
 	private Collection<ITraceListener>      imageTraceListeners;
@@ -268,9 +268,9 @@ public class RegionArea extends PlotArea {
 			a.toFront();
 		}
 		// Move all regions to front again
-		if (getRegionMap()!=null) for (String name : getRegionMap().keySet()) {
+		if (regions!=null) for (String name : regions.keySet()) {
 			try {
-				getRegionMap().get(name).toFront();
+				regions.get(name).toFront();
 			} catch (Exception ne) {
 				continue;
 			}
@@ -329,8 +329,8 @@ public class RegionArea extends PlotArea {
 	 */
 	public AbstractSelectionRegion createRegion(String name, IAxis x, IAxis y, RegionType regionType, boolean startingWithMouseEvent) throws Exception {
 
-		if (getRegionMap()!=null) {
-			if (getRegionMap().containsKey(name)) throw new Exception("The region '"+name+"' already exists.");
+		if (regions!=null) {
+			if (regions.containsKey(name)) throw new Exception("The region '"+name+"' already exists.");
 		}
 		
 		ICoordinateSystem       coords  = new RegionCoordinateSystem(getImageTrace(), x, y);
@@ -523,11 +523,6 @@ public class RegionArea extends PlotArea {
 		if (imageTraceListeners==null) return;
 		for (ITraceListener l : imageTraceListeners) l.traceRemoved(evt);
 	}
-
-	
-	public Map<String, AbstractSelectionRegion> getRegionMap() {
-		return regions;
-	}
 	public List<AbstractSelectionRegion> getRegions() {
 		final Collection<AbstractSelectionRegion> vals = regions.values();
 		return new ArrayList<AbstractSelectionRegion>(vals);
@@ -619,9 +614,9 @@ public class RegionArea extends PlotArea {
 	 * @return
 	 */
 	public boolean hasUserRegions() {
-		if (getRegionMap()==null || getRegionMap().isEmpty()) return false;
-		for (String regionName : getRegionMap().keySet()) {
-			if (getRegionMap().get(regionName).isUserRegion()) return true;
+		if (regions==null || regions.isEmpty()) return false;
+		for (String regionName : regions.keySet()) {
+			if (regions.get(regionName).isUserRegion()) return true;
 		}
 		return false;
 	}
