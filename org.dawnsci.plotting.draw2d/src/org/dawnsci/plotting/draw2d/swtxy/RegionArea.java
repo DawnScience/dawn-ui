@@ -201,6 +201,7 @@ public class RegionArea extends PlotArea {
 	}
 	
 	public void renameRegion(final AbstractSelectionRegion region, String name) {
+		// TODO http://jira.diamond.ac.uk/browse/SCI-1056, order lost on rename.
 	    regions.remove(region.getName());
 	    region.setName(name);
 	    region.setLabel(name);
