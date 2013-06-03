@@ -420,12 +420,12 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 		final Separator sep = new Separator(getClass().getName()+".separator1");	
 		getSite().getActionBars().getToolBarManager().add(sep);
 		
-		final Action savePeak = new Action("Save peak.", IAction.AS_PUSH_BUTTON) {
+		final Action savePeak = new Action("Store peak.", IAction.AS_PUSH_BUTTON) {
 			public void run() {
 				try {
 					fittedFunctions.saveSelectedPeak(getPlottingSystem());
 				} catch (Exception e) {
-					logger.error("Cannot rename saved peak ", e);
+					logger.error("Cannot rename stored peak ", e);
 				}
 				viewer.refresh();
 			}

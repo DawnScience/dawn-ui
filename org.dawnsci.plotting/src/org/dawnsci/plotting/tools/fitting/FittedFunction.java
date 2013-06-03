@@ -64,10 +64,10 @@ public class FittedFunction  {
 		this.saved = saved;
 		
 		
-		sys.renameRegion(fwhm, RegionUtils.getUniqueName("Saved Area", sys, usedNames));
-		sys.renameRegion(center, RegionUtils.getUniqueName("Saved Line", sys, usedNames));	
-	    sys.renameTrace(trace, TraceUtils.getUniqueTrace("Saved Peak", sys, usedNames));
-	    sys.renameAnnotation(annotation, AnnotationUtils.getUniqueAnnotation("Saved Peak", sys, usedNames));
+		sys.renameRegion(fwhm, RegionUtils.getUniqueName("Stored Area", sys, usedNames));
+		sys.renameRegion(center, RegionUtils.getUniqueName("Stored Line", sys, usedNames));	
+	    sys.renameTrace(trace, TraceUtils.getUniqueTrace("Stored Peak", sys, usedNames));
+	    sys.renameAnnotation(annotation, AnnotationUtils.getUniqueAnnotation("Stored Peak", sys, usedNames));
 	    peakName = trace.getName();
 	}
 
