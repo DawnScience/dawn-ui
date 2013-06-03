@@ -220,7 +220,8 @@ public class RegionEditTool extends AbstractRegionTableTool {
 			switch (column){
 			case 0:
 				// takes care of renaming the region (label and key value in hash table)
-				getPlottingSystem().renameRegion(region, (String)value);
+				if(!region.getName().equals((String)value))
+					getPlottingSystem().renameRegion(region, (String)value);
 				break;
 			case 1:
 				if(myRoi instanceof LinearROI){
