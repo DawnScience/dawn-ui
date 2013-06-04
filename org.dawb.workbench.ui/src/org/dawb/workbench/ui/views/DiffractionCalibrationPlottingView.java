@@ -200,6 +200,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 					if(data.md != null)
 						aug.setDiffractionMetadata(data.md);
 					refreshTable();
+					hideFoundRings();
 					drawCalibrantRings();
 
 					setFocus();
@@ -245,6 +246,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 					if(selectedData.md != null)
 						aug.setDiffractionMetadata(selectedData.md);
 					refreshTable();
+					hideFoundRings();
 					drawCalibrantRings();
 					setFocus();
 				}
