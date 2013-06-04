@@ -934,9 +934,9 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		augmenter = new DiffractionImageAugmenter(getPlottingSystem());
 	    augmenter.addActions(dropdown);
 		
-	    toolMan.add(exportMeta);
 	    toolMan.add(importMeta);
-		toolMan.add(new Separator());
+	    toolMan.add(exportMeta);
+	    toolMan.add(new Separator());
 	    toolMan.add(lock);
 		toolMan.add(new Separator());
 	    toolMan.add(dropdown);
