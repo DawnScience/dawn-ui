@@ -171,17 +171,17 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 					}
 				
 					IDataset image = null;
-					if(data == null)
+					if(data == null){
 						image = PlottingUtils.loadData(structSelection);
-					else
+						int i = fullPath != null ? fullPath.lastIndexOf(System.getProperty("file.separator")) : -1;
+						fileName = i > 0 ? fullPath.substring(i + 1) : null;
+						image.setName(fileName+":"+image.getName());
+					}
+					else{
 						image = data.image;
-
+					}
 					if(image == null) return;
 					
-					int i = fullPath != null ? fullPath.lastIndexOf(System.getProperty("file.separator")) : -1;
-					fileName = i > 0 ? fullPath.substring(i + 1) : null;
-					
-					image.setName(fileName+":"+image.getName());
 					PlottingUtils.plotData(plottingSystem, image.getName(), image);
 
 					// set Ring data
