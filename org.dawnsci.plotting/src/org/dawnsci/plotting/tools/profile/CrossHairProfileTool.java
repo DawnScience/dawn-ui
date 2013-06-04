@@ -340,10 +340,11 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 			xUpdateJob.suspend(true);
 			yUpdateJob.suspend(true);
 	
-	        final Color   snapShotColor = RegionUtils.getUniqueColor(xHair.getRegionType(), getPlottingSystem(), ColorUtility.DEFAULT_SWT_COLORS);
+	        Color   snapShotColor = RegionUtils.getUniqueColor(xHair.getRegionType(), getPlottingSystem(), ColorUtility.DEFAULT_SWT_COLORS);
 	        final IRegion x = createStaticRegion(Y_PROFILE_PREFIX + " Static", xBounds, snapShotColor, xHair.getRegionType());
 	        profile(x, xBounds, true, snapShotColor, new NullProgressMonitor());
 	        
+	        snapShotColor = RegionUtils.getUniqueColor(xHair.getRegionType(), getPlottingSystem(), ColorUtility.DEFAULT_SWT_COLORS);
 	        final IRegion y = createStaticRegion(X_PROFILE_PREFIX + " Static", yBounds, snapShotColor, yHair.getRegionType());
 	        profile(y, yBounds, true, snapShotColor, new NullProgressMonitor());
 
