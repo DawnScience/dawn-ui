@@ -8,7 +8,7 @@ import java.util.Map.Entry;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.util.io.IOUtils;
-import org.dawnsci.plotting.api.axis.IAxis;
+import org.dawnsci.common.widgets.content.FileContentProposalProvider;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.ROIEvent;
 import org.dawnsci.plotting.api.trace.IImageTrace;
@@ -53,7 +53,6 @@ import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.optimize.ApachePolynomial;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
-import uk.ac.gda.ui.content.FileContentProposalProvider;
 
 /**
  * Tool to remap ARPES data

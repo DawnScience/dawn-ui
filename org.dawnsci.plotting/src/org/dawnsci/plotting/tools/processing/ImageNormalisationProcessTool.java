@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.util.io.IOUtils;
+import org.dawnsci.common.widgets.content.FileContentProposalProvider;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.core.resources.IResource;
@@ -48,7 +49,6 @@ import uk.ac.diamond.scisoft.analysis.optimize.ApachePolynomial;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROIProfile;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
-import uk.ac.gda.ui.content.FileContentProposalProvider;
 
 /**
  * Tool to normalize an image with given specific parameters
