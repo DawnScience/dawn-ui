@@ -200,6 +200,7 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 			public void selectionChanged(SelectionChangedEvent event) {
 				final StructuredSelection sel = (StructuredSelection)event.getSelection();
 				if (fittedFunctions!=null && sel!=null && sel.getFirstElement()!=null) {
+					if (sel.getFirstElement() instanceof NullFunction) return;
 					fittedFunctions.setSelectedFit((FittedFunction)sel.getFirstElement());
 					viewer.refresh();
 				}
