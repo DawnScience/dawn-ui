@@ -170,6 +170,7 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 
 			@Override
 			public void traceUpdated(TraceEvent evt) {
+				update();
 			}
 
 			@Override
@@ -514,6 +515,7 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 	}
 
 	private void updateFunctionPlot() {
+		getPlottingSystem().removeTraceListener(traceListener);
 		boolean firstTrace = true;
 		for (ITrace selectedTrace : getPlottingSystem().getTraces()) {
 			if (selectedTrace instanceof ILineTrace) {
@@ -565,6 +567,7 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 			}
 		}
 		if (viewer != null ) refreshViewer();
+		getPlottingSystem().addTraceListener(traceListener);
 	}
 
 	private void updateFittedPlot(final AbstractDataset x,
@@ -732,6 +735,7 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 				@Override
 				public void run() {
 
+					getPlottingSystem().removeTraceListener(traceListener);
 					setChiSquaredValue(resultFunction.residual(true, y, x)/x.count());
 					
 					fitTrace = (ILineTrace) getPlottingSystem().getTrace("Fit");
@@ -750,6 +754,7 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 
 					getPlottingSystem().repaint();
 					refreshViewer();
+					getPlottingSystem().addTraceListener(traceListener);
 				}
 			});
 
