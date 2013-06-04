@@ -1190,7 +1190,9 @@ public class HistogramToolPage extends AbstractToolPage {
 				blueTrace.setData(RGBX, B);
 				histogramPlot.getSelectedXAxis().setRange(scaleMin, scaleMax);
 				histogramPlot.getSelectedXAxis().setLog10(btnColourMapLog.getSelection());
+				histogramPlot.getSelectedXAxis().setTitle("Intensity");
 				histogramPlot.getSelectedYAxis().setRange(0, finalScale*256);
+				histogramPlot.getSelectedYAxis().setTitle("Log(Frequency)");
 				histogramPlot.repaint();
 			}
 		});
