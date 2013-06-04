@@ -156,9 +156,27 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 				if (selection instanceof IStructuredSelection) {
 					IStructuredSelection structSelection = (IStructuredSelection)selection;
-					IDataset image = PlottingUtils.loadData(structSelection);
-					if(image == null) return;
+					structSelection.getFirstElement();
+					
+					// Test if the selection has already been loaded and is in the model
+					MyData data = null;
 					fullPath = PlottingUtils.getFullFilePath(structSelection);
+					if(fullPath == null) return;
+
+					for (MyData d : model) {
+						if (fullPath.equals(d.path)) {
+							data = d;
+							break;
+						}
+					}
+				
+					IDataset image = null;
+					if(data == null)
+						image = PlottingUtils.loadData(structSelection);
+					else
+						image = data.image;
+
+					if(image == null) return;
 					
 					int i = fullPath != null ? fullPath.lastIndexOf(System.getProperty("file.separator")) : -1;
 					fileName = i > 0 ? fullPath.substring(i + 1) : null;
@@ -170,7 +188,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 					setData(fullPath, image);
 
 					// update PlottingSystem
-					MyData data = null;
+					data = null;
 					if (fullPath != null) {
 						for (MyData d : model) {
 							if (fullPath.equals(d.path)) {
