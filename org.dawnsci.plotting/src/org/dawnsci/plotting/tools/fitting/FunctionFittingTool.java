@@ -361,6 +361,8 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 						- getPlottingSystem().getSelectedXAxis().getLower(),
 						100, 0));
 				getPlottingSystem().addRegion(region);
+			} else {
+				region.setVisible(true);
 			}
 			region.addROIListener(roiListener);
 			updateFunctionPlot();
@@ -374,9 +376,9 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 	public void deactivate() {
 		if (region != null) {
 			region.removeROIListener(roiListener);
+			region.setVisible(false);
 		}
 		Collection<ITrace> traces = getPlottingSystem().getTraces();
-		if (traces.contains(region)) getPlottingSystem().removeRegion(region);
 		if (traces.contains(estimate)) getPlottingSystem().removeTrace(estimate);
 		if (traces.contains(fitTrace)) getPlottingSystem().removeTrace(fitTrace);
 		
