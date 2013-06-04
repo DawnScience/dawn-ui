@@ -65,6 +65,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Maths;
 import uk.ac.diamond.scisoft.analysis.dataset.function.Histogram;
@@ -112,6 +113,7 @@ public class HistogramToolPage extends AbstractToolPage {
 	private Composite composite;
 	private ScrolledComposite sc;
 	private ExpansionAdapter expansionAdapter;
+	private Label introLabel;
 
 	// COLOUR SCHEME GUI 
 	private ExpandableComposite colourSchemeExpander;
@@ -594,10 +596,13 @@ public class HistogramToolPage extends AbstractToolPage {
 	public void createControl(final Composite parent) {
 		// Set up the composite to hold all the information
 		sc = new ScrolledComposite(parent, SWT.V_SCROLL | SWT.H_SCROLL);
-		sc.setLayout(new FillLayout());
-
+		sc.setLayout(new GridLayout(1, false));	
+		
 		composite = new Composite(sc, SWT.NONE);
-		composite.setLayout(new GridLayout(1, false));		
+		composite.setLayout(new GridLayout(1, false));
+		
+		introLabel = new Label(composite, SWT.NONE);
+		introLabel.setText("Colour Mapping Tool");
 		
 		// Set up the Colour scheme part of the GUI
 		colourSchemeExpander = new ExpandableComposite(composite, SWT.NONE);
@@ -620,7 +625,7 @@ public class HistogramToolPage extends AbstractToolPage {
 		}
 
 		final ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
-        final String schemeName = store.getString("org.dawb.plotting.system.colourSchemeName");
+		final String schemeName = store.getString("org.dawb.plotting.system.colourSchemeName");
 		cmbColourMap.select(Arrays.asList(cmbColourMap.getItems()).indexOf(schemeName));
 
 		btnColourMapLog = new Button(colourSchemeComposite, SWT.CHECK);
@@ -921,7 +926,7 @@ public class HistogramToolPage extends AbstractToolPage {
 		if (getControl()==null) return; // We cannot plot unless its been created.
 
 		IPaletteTrace image = imageTrace==null ? getPaletteTrace() : imageTrace;
-
+		
 		if (image != null) {
 
 			// make sure that auto update is dissabled if needed
@@ -934,6 +939,13 @@ public class HistogramToolPage extends AbstractToolPage {
 			// get the image data
 			imageDataset = getImageData(image);
 
+			if (AbstractDataset.getDType(imageDataset) == AbstractDataset.RGB ) {
+				hide();
+				return;
+			}
+			
+			unhide();
+			
 			if (imageDataset.containsInvalidNumbers() ) {
 				logger.debug("imageDataset contains invalid numbers");
 			}
@@ -1289,6 +1301,28 @@ public class HistogramToolPage extends AbstractToolPage {
 	
 	public boolean isStaticTool() {
 		return true;
+	}
+	
+	private void hide() {
+		introLabel.setText("No Colour Map tools available for Colour Images");
+		colourSchemeExpander.setVisible(false);
+		perChannelExpander.setVisible(false);
+		bcExpander.setVisible(false);
+		rangeExpander.setVisible(false);
+		rangeOpalExpander.setVisible(false);
+		deadZingerExpander.setVisible(false);
+		histogramExpander.setVisible(false);
+	}
+	
+	private void unhide() {
+		introLabel.setText("Colour mapping Tool");
+		colourSchemeExpander.setVisible(true);
+		perChannelExpander.setVisible(true);
+		bcExpander.setVisible(true);
+		rangeExpander.setVisible(true);
+		rangeOpalExpander.setVisible(true);
+		deadZingerExpander.setVisible(true);
+		histogramExpander.setVisible(true);
 	}
 
 }
