@@ -519,14 +519,31 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		Composite diffractionToolComp = new Composite(leftSash, SWT.BORDER);
 		diffractionToolComp.setLayout(new FillLayout());
 		try {
+			final IToolPageSystem toolSystem = (IToolPageSystem)plottingSystem.getAdapter(IToolPageSystem.class);
 			// Show tools here, not on a page.
-			((IToolPageSystem)plottingSystem).setToolComposite(diffractionToolComp);
-			((IToolPageSystem)plottingSystem).setToolVisible("org.dawb.workbench.plotting.tools.diffraction.Diffraction", ToolPageRole.ROLE_2D, null);
+			toolSystem.setToolComposite(diffractionToolComp);
+			toolSystem.setToolVisible("org.dawb.workbench.plotting.tools.diffraction.Diffraction", ToolPageRole.ROLE_2D, null);
 		} catch (Exception e2) {
 			logger.error("Could not open diffraction tool:"+ e2);
 		}
 
 		mainSash.setWeights(new int[] { 1, 2});
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public Object getAdapter(Class key) {
+        if (key==IPlottingSystem.class) {
+        	return plottingSystem;
+        } else if (key==IToolPageSystem.class) {
+        	return plottingSystem.getAdapter(IToolPageSystem.class);
+        }
+        // Is needed?
+//           else {
+//		   final IToolPageSystem toolSystem = (IToolPageSystem)plottingSystem.getAdapter(IToolPageSystem.class);
+//		   return toolSystem.getActiveTool().getAdapter(key);
+//        }
+           
+		return super.getAdapter(key);
 	}
 
 	protected void findRings() {
