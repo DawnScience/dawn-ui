@@ -175,6 +175,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 						image = PlottingUtils.loadData(structSelection);
 						int i = fullPath != null ? fullPath.lastIndexOf(System.getProperty("file.separator")) : -1;
 						fileName = i > 0 ? fullPath.substring(i + 1) : null;
+						if (image == null) return;
 						image.setName(fileName+":"+image.getName());
 					}
 					else{
