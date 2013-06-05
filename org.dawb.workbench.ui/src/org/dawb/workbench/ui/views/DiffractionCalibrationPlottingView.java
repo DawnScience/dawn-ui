@@ -19,7 +19,9 @@ package org.dawb.workbench.ui.views;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.vecmath.Vector3d;
 
@@ -114,7 +116,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 	private static Logger logger = LoggerFactory.getLogger(DiffractionCalibrationPlottingView.class);
 
 	private MyData currentData;
-	private List<MyData> model = new ArrayList<MyData>();
+	private List<MyData> model = new CopyOnWriteArrayList<MyData>();
 	private ILoaderService service;
 	private TableViewer tableViewer;
 	private Button calibrateImages;
@@ -145,7 +147,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 	}
 
 	@Override
-	public void createPartControl(Composite parent) {
+	public void createPartControl(final Composite parent) {
 		parent.setLayout(new FillLayout());
 
 		this.parent = parent;
@@ -218,11 +220,10 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 						data.md = DiffractionTool.getDiffractionMetadata(data.image, data.path, service, statusString);
 					if(data.md != null)
 						aug.setDiffractionMetadata(data.md);
-					refreshTable();
-					hideFoundRings();
-					drawCalibrantRings();
 
-					setFocus();
+					drawCalibrantRings();
+					hideFoundRings();
+					refreshTable();
 				}
 			}
 		};
@@ -264,10 +265,9 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 						selectedData.md = DiffractionTool.getDiffractionMetadata(selectedData.image, selectedData.path, service, statusString);
 					if(selectedData.md != null)
 						aug.setDiffractionMetadata(selectedData.md);
-					refreshTable();
-					hideFoundRings();
+
 					drawCalibrantRings();
-					setFocus();
+					hideFoundRings();
 				}
 			}
 		};
@@ -555,7 +555,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		try {
 			ActionBarWrapper actionBarWrapper = ActionBarWrapper.createActionBars(plotComp, null);
 			plottingSystem = PlottingFactory.createPlottingSystem();
-			plottingSystem.createPlotPart(plotComp, "", actionBarWrapper, PlotType.IMAGE, getSite().getPart());
+			plottingSystem.createPlotPart(plotComp, "", actionBarWrapper, PlotType.IMAGE, this);
 			plottingSystem.setTitle("");
 			plottingSystem.getPlotComposite().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		} catch (Exception e1) {
@@ -578,18 +578,18 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 	}
 	
 	@SuppressWarnings("rawtypes")
+	@Override
 	public Object getAdapter(Class key) {
-        if (key==IPlottingSystem.class) {
-        	return plottingSystem;
-        } else if (key==IToolPageSystem.class) {
-        	return plottingSystem.getAdapter(IToolPageSystem.class);
-        }
-        // Is needed?
-//           else {
-//		   final IToolPageSystem toolSystem = (IToolPageSystem)plottingSystem.getAdapter(IToolPageSystem.class);
-//		   return toolSystem.getActiveTool().getAdapter(key);
-//        }
-           
+		if (key==IPlottingSystem.class) {
+			return plottingSystem;
+		} else if (key==IToolPageSystem.class) {
+			return plottingSystem.getAdapter(IToolPageSystem.class);
+		}
+		// Is needed?
+//		else {
+//			final IToolPageSystem toolSystem = (IToolPageSystem)plottingSystem.getAdapter(IToolPageSystem.class);
+//			return toolSystem.getActiveTool().getAdapter(key);
+//		}
 		return super.getAdapter(key);
 	}
 
@@ -1178,16 +1178,14 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 	}
 
 	private void removeListeners() {
-		for (MyData d : model) {
-			model.remove(d);
-//			if (d.system == plottingSystem) {
-//				d.system = null;
-//				d.augmenter = null;
-//			}
-		}
-		System.out.println("model emptied");
 		getSite().getWorkbenchWindow().getSelectionService().removeSelectionListener(fileSelectionListener);
 		tableViewer.removeSelectionChangedListener(selectionChangeListener);
+		Iterator<MyData> it = model.iterator();
+		while(it.hasNext()){
+			MyData d = it.next();
+			model.remove(d);
+		}
+		System.out.println("model emptied");
 	}
 
 	@Override
@@ -1199,16 +1197,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 	@Override
 	public void setFocus() {
-		Display.getDefault().asyncExec(new Runnable() {
-			@Override
-			public void run() {
-				while (Display.getDefault().readAndDispatch()) {
-					//wait for events to finish before continue
-				}
-				parent.setFocus();
-				tableViewer.refresh();
-				drawCalibrantRings();
-			}
-		});
+		if(parent != null && !parent.isDisposed())
+			parent.setFocus();
 	}
 }
