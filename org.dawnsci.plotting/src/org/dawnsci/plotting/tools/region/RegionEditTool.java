@@ -1,9 +1,14 @@
 package org.dawnsci.plotting.tools.region;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+
 import org.dawnsci.common.widgets.celleditor.FloatSpinnerCellEditor;
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.RegionUtils;
+import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.tools.region.MeasurementLabelProvider.LabelType;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.CheckboxCellEditor;
@@ -98,6 +103,20 @@ public class RegionEditTool extends AbstractRegionTableTool {
 		var.setEditingSupport(regionEditor);
 	}
 	
+	private final static Collection<RegionType> EDITABLE_REGIONS;
+	static {
+		Collection<RegionType> tmp = new HashSet<IRegion.RegionType>();
+		tmp.add(RegionType.BOX);
+		tmp.add(RegionType.LINE);
+		tmp.add(RegionType.GRID);
+		tmp.add(RegionType.XAXIS);
+		tmp.add(RegionType.XAXIS_LINE);
+		tmp.add(RegionType.YAXIS);
+		tmp.add(RegionType.YAXIS_LINE);
+		tmp.add(RegionType.PERIMETERBOX);
+		EDITABLE_REGIONS = Collections.unmodifiableCollection(tmp);
+	}
+	
 	
 	protected void createNewRegion() {
 		try {
@@ -155,6 +174,10 @@ public class RegionEditTool extends AbstractRegionTableTool {
 
 		@Override
 		protected boolean canEdit(Object element) {
+			
+			if (!(element instanceof IRegion)) return false;
+			final IRegion region = (IRegion)element;
+			if (!EDITABLE_REGIONS.contains(region.getRegionType())) return false;
 			if (column == 5 || column == 6) return false;
 			else return true;
 		}
