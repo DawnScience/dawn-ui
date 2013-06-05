@@ -1361,9 +1361,11 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		if (tool instanceof AbstractToolPage && sys instanceof IPlottingSystem) {
         	if (((AbstractToolPage)tool).isDedicatedView()) {
         		IPlottingSystem ps = (IPlottingSystem)sys;
-        		if (tool.getToolPageRole()==ToolPageRole.ROLE_2D && !ps.is2D()) {
+        		if (tool.getToolPageRole()==ToolPageRole.ROLE_2D && !ps.getPlotType().is2D()) {
         			return false;
-        		} else if (tool.getToolPageRole()==ToolPageRole.ROLE_1D && ps.is2D()) {
+        		} else if (tool.getToolPageRole()==ToolPageRole.ROLE_1D && !ps.getPlotType().is1D()) {
+        			return false;
+        		} else if (tool.getToolPageRole()==ToolPageRole.ROLE_3D && !ps.getPlotType().is3D()) {
         			return false;
         		}
         	}
