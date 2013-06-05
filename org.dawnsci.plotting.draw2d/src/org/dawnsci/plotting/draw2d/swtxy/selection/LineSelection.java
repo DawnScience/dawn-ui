@@ -110,7 +110,13 @@ class LineSelection extends AbstractSelectionRegion {
 					gc.setBackgroundColor(ColorConstants.white);
 					gc.setForegroundColor(ColorConstants.black);
 					gc.setFont(labelFont);
-					gc.fillText(label, startCenter.getTranslated(shape.getBounds().width, 0));
+					
+					Point cen = new Point((startCenter.x+endCenter.x)/2, (startCenter.y+endCenter.y)/2);
+					gc.fillText(label, cen);
+					
+					int labelWid    = label.length()*gc.getFontMetrics().getAverageCharWidth();
+					int labelHeight = gc.getFontMetrics().getHeight();
+					setBounds(getBounds().getUnion(new Rectangle(cen.x, cen.y, labelWid, labelHeight)));
 				}
 
 			}
