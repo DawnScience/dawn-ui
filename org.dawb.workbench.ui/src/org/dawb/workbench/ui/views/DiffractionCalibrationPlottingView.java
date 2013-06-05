@@ -156,20 +156,40 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 				if (selection instanceof IStructuredSelection) {
 					IStructuredSelection structSelection = (IStructuredSelection)selection;
-					IDataset image = PlottingUtils.loadData(structSelection);
-					if(image == null) return;
+					structSelection.getFirstElement();
+					
+					// Test if the selection has already been loaded and is in the model
+					MyData data = null;
 					fullPath = PlottingUtils.getFullFilePath(structSelection);
+					if(fullPath == null) return;
+
+					for (MyData d : model) {
+						if (fullPath.equals(d.path)) {
+							data = d;
+							break;
+						}
+					}
+				
+					IDataset image = null;
+					if(data == null){
+						image = PlottingUtils.loadData(structSelection);
+						int i = fullPath != null ? fullPath.lastIndexOf(System.getProperty("file.separator")) : -1;
+						fileName = i > 0 ? fullPath.substring(i + 1) : null;
+						if (image == null) return;
+						image.setName(fileName+":"+image.getName());
+					}
+					else{
+						image = data.image;
+					}
+					if(image == null) return;
 					
-					int i = fullPath != null ? fullPath.lastIndexOf(System.getProperty("file.separator")) : -1;
-					fileName = i > 0 ? fullPath.substring(i + 1) : null;
-					
-					image.setName(fileName+":"+image.getName());
 					PlottingUtils.plotData(plottingSystem, image.getName(), image);
+
 					// set Ring data
-					setData(fullPath);
+					setData(fullPath, image);
 
 					// update PlottingSystem
-					MyData data = null;
+					data = null;
 					if (fullPath != null) {
 						for (MyData d : model) {
 							if (fullPath.equals(d.path)) {
@@ -179,9 +199,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 						}
 					}
 					if (data == null) return;
-
-					if(data.image == null)
-						data.image = image;
 
 					System.err.println("We have an image, Houston!");
 
@@ -195,13 +212,14 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 						String path = fullPath;
 						data.path = path;
 						data.name = path.substring(path.lastIndexOf(File.separatorChar) + 1);
-						data.md = DiffractionTool.getDiffractionMetadata(image, data.path, service, statusString);
+						data.md = DiffractionTool.getDiffractionMetadata(data.image, data.path, service, statusString);
 					}
 					if (data.md == null)
-						data.md = DiffractionTool.getDiffractionMetadata(image, data.path, service, statusString);
+						data.md = DiffractionTool.getDiffractionMetadata(data.image, data.path, service, statusString);
 					if(data.md != null)
 						aug.setDiffractionMetadata(data.md);
 					refreshTable();
+					hideFoundRings();
 					drawCalibrantRings();
 
 					setFocus();
@@ -216,11 +234,40 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			public void selectionChanged(SelectionChangedEvent event) {
 				ISelection is = event.getSelection();
 				if(is instanceof StructuredSelection){
-//					StructuredSelection structSelection = (StructuredSelection)is;
-//					MyData data = (MyData)structSelection.getFirstElement();
-//					if(data.image != null)
-//					PlottingUtils.plotData(plottingSystem, data.name, data.image);
+					StructuredSelection structSelection = (StructuredSelection)is;
+					MyData selectedData = (MyData)structSelection.getFirstElement();
+					if(selectedData == null) return;
+					IImageTrace image = getImageTrace(plottingSystem);
+					if(image == null) return;
+					// do nothing if image already plotted
+					if(image.getData().equals(selectedData.image)) return;
 
+					if(selectedData.image != null)
+						PlottingUtils.plotData(plottingSystem, selectedData.name, selectedData.image);
+
+					// set Ring data
+					setData(selectedData.path, selectedData.image);
+
+					DiffractionImageAugmenter aug = selectedData.augmenter;
+					if (aug == null) {
+						aug = new DiffractionImageAugmenter(plottingSystem);
+						selectedData.augmenter = aug;
+					}
+					aug.activate();
+					if (selectedData.path == null && fullPath != null) {
+						String path = fullPath;
+						selectedData.path = path;
+						selectedData.name = path.substring(path.lastIndexOf(File.separatorChar) + 1);
+						selectedData.md = DiffractionTool.getDiffractionMetadata(selectedData.image, selectedData.path, service, statusString);
+					}
+					if (selectedData.md == null)
+						selectedData.md = DiffractionTool.getDiffractionMetadata(selectedData.image, selectedData.path, service, statusString);
+					if(selectedData.md != null)
+						aug.setDiffractionMetadata(selectedData.md);
+					refreshTable();
+					hideFoundRings();
+					drawCalibrantRings();
+					setFocus();
 				}
 			}
 		};
@@ -983,9 +1030,9 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		tvc.setEditingSupport(new MyEditingSupport(tv, 4));
 	}
 
-	private void setData(String path) {
+	private void setData(String path, IDataset image) {
 		if (path == null) return;
-
+		if(image == null) return;
 		MyData data = null;
 		if (path != null) {
 			for (MyData d : model) {
@@ -1006,23 +1053,19 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		if (data == null) {
 			data = new MyData();
 			model.add(data);
-			if (path != null && new File(path).canRead()) {
+			if (new File(path).canRead()) {
 				data.path = path;
 				data.name = path.substring(path.lastIndexOf(File.separatorChar) + 1);
+				data.image = image;
 			}
 		}
 		currentData = data;
-		IImageTrace trace = getImageTrace(plottingSystem);
-		IDataset image = trace != null ? trace.getData() : null;
-		data.image = image;
-		
+
 		if (data.augmenter != null) {
 			data.augmenter.activate();
 			drawCalibrantRings();
 		}
 		refreshTable();
-		// highlight current image
-		tableViewer.setSelection(new StructuredSelection(data), true);
 	}
 
 	private void refreshTable() {
