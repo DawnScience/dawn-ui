@@ -124,7 +124,7 @@ public class ImageTraceComposite extends Composite {
 		label.setText("Downsampling Type");
 		label.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1));
 		
-		this.downsampleChoice = new CCombo(group, SWT.READ_ONLY);
+		this.downsampleChoice = new CCombo(group, SWT.READ_ONLY|SWT.BORDER);
 		downsampleChoice.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		for (DownsampleType ds : DownsampleType.values()) {
 			downsampleChoice.add(ds.getLabel());
@@ -136,7 +136,7 @@ public class ImageTraceComposite extends Composite {
 		histolabel.setText("Histogram Type");
 		histolabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1));
 		
-		this.histoChoice = new CCombo(group, SWT.READ_ONLY);
+		this.histoChoice = new CCombo(group, SWT.READ_ONLY|SWT.BORDER);
 		histoChoice.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		for (HistoType ht : HistoType.values()) {
             histoChoice.add(ht.getLabel());
