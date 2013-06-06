@@ -67,9 +67,8 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 
 	@Override
 	public void setMobile(boolean mobile) {
-		getBean().setMobile(mobile);
-		if (sector != null)
-			sector.setMobile(mobile);
+		super.setMobile(mobile);
+		if (sector != null) sector.setMobile(mobile);
 	}
 
 	@Override
@@ -267,7 +266,7 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 
 	class DecoratedSector extends Sector implements IRegionContainer {
 		private List<IFigure> handles;
-		List<FigureTranslator> fTranslators;
+		private List<FigureTranslator> fTranslators;
 		private Figure parent;
 		private static final int SIDE = 8;
 		private SectorROIHandler roiHandler;
@@ -367,7 +366,7 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 		public void setVisible(boolean visible) {
 			super.setVisible(visible);
 			for (IFigure h : handles) {
-				h.setVisible(visible);
+				h.setVisible(visible&&isMobile());
 			}
 		}
 
@@ -379,6 +378,17 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 			for (FigureTranslator f : fTranslators) {
 				f.setActive(mobile);
 			}
+			
+			if (mobile) {
+				setOpaque(true);
+				setCursor(Draw2DUtils.getRoiMoveCursor());
+				addFigureListener(moveListener);
+			} else {
+				setOpaque(false);
+				setCursor(null);
+				removeFigureListener(moveListener);
+			}
+			parent.revalidate();
 		}
 
 		public TranslationListener createRegionNotifier() {

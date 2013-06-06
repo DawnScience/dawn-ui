@@ -38,6 +38,7 @@ public class Sector extends Shape {
 
 	public Sector() {
 		this(0, 0, 100, 200, 0, 360);
+		setOpaque(true);
 	}
 
 	/**
@@ -128,6 +129,7 @@ public class Sector extends Shape {
 
 	@Override
 	public boolean containsPoint(int x, int y) {
+		if (!isOpaque()) return false;
 		if (!super.containsPoint(x, y))
 			return false;
 		double px = x - centre.preciseX();

@@ -37,6 +37,8 @@ public class FigureTranslator implements MouseListener, MouseMotionListener {
 
 	private List<IFigure> translations;
 	private boolean active=true;
+
+	private IFigure listenerFigure;
  
 	public FigureTranslator(XYGraph xyGraph, IFigure figure) {
 		this(xyGraph, figure, figure, Arrays.asList(new IFigure[]{figure}));
@@ -44,6 +46,7 @@ public class FigureTranslator implements MouseListener, MouseMotionListener {
 
 	public FigureTranslator(XYGraph xyGraph, IFigure redrawFigure, IFigure listenerFigure, List<IFigure> moveFigures) {
 		this.redrawFigure = redrawFigure;
+		this.listenerFigure = listenerFigure;
 		listenerFigure.addMouseListener(this);
 		listenerFigure.addMouseMotionListener(this);
 		this.translations = moveFigures;
@@ -230,6 +233,13 @@ public class FigureTranslator implements MouseListener, MouseMotionListener {
 
 	public void setActive(boolean mobile) {
 		this.active = mobile;
+		if (active) {
+			listenerFigure.addMouseListener(this);
+			listenerFigure.addMouseMotionListener(this);
+		} else {
+			listenerFigure.removeMouseListener(this);
+			listenerFigure.removeMouseMotionListener(this);
+		}
 	}
 	
 	public boolean isActive() {

@@ -60,6 +60,11 @@ public abstract class SelectionHandle extends Figure implements IMobileFigure {
 		b.union(shape.getBounds());
         setBounds(b);
  	}
+	
+	public void setVisible(boolean visible) {
+		shape.setVisible(visible);
+		super.setVisible(visible);
+	}
 
 	/**
 	 * Create a handle shape (and set its own bounds and location)
