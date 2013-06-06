@@ -691,11 +691,8 @@ class LightWeightPlotActions {
 			
 			actionBarManager.registerToolBarGroup(plotIndex.getId()+".group");
 		    actionBarManager.registerAction(plotIndex.getId()+".group", plotIndex, ActionType.XY);
-		    
-			actionBarManager.registerToolBarGroup(plotX.getId()+".group");
-		    actionBarManager.registerAction(plotX.getId()+".group", plotX, ActionType.XY);
+		    actionBarManager.registerAction(plotIndex.getId()+".group", plotX,     ActionType.XY);
 			
-		
 			
 			if (rightClick!=null){
 				rightClick.add(new Separator(plotIndex.getId()+".group"));
