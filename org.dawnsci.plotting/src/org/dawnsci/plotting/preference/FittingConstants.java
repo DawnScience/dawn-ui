@@ -16,4 +16,6 @@ public class FittingConstants {
 	public static final String POLY_CHOICES            = "org.dawb.workbench.plotting.tools.polyChoices";
 	public static final String SHOW_POLY_TRACE         = "org.dawb.workbench.plotting.tools.showPolyTrace";
 	public static final String SHOW_POLY_RANGE    	   = "org.dawb.workbench.plotting.tools.showPolyRange";
+	public static final String INT_FORMAT              = "org.dawb.workbench.plotting.tools.fitting.intFormat";
+	public static final String REAL_FORMAT       	   = "org.dawb.workbench.plotting.tools.fitting.realFormat";
 }

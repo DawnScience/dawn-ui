@@ -26,6 +26,8 @@ public class FittingPreferenceInitializer extends AbstractPreferenceInitializer 
 		store.setDefault(FittingConstants.POLY_CHOICES,   7);
 		store.setDefault(FittingConstants.SHOW_POLY_TRACE,  true);
 		store.setDefault(FittingConstants.SHOW_POLY_RANGE,  true);
+		store.setDefault(FittingConstants.INT_FORMAT,   "###0");
+		store.setDefault(FittingConstants.REAL_FORMAT,  "##0.#####");
 	}
 
 }

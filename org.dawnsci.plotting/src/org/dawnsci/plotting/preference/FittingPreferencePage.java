@@ -16,6 +16,8 @@
 
 package org.dawnsci.plotting.preference;
 
+import java.text.DecimalFormat;
+
 import org.dawnsci.common.widgets.spinner.FloatSpinner;
 import org.dawnsci.plotting.Activator;
 import org.eclipse.jface.preference.PreferencePage;
@@ -30,6 +32,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
@@ -41,6 +44,7 @@ public class FittingPreferencePage extends PreferencePage implements IWorkbenchP
 	private FloatSpinner accuracy;
 	private Spinner smoothing;
 	private Spinner peakNumber;
+	private Text    realFormat;
 
 	public FittingPreferencePage() {
 
@@ -118,6 +122,24 @@ public class FittingPreferencePage extends PreferencePage implements IWorkbenchP
 				storePreferences();
 			}			
 		});
+		
+		Group formatGrp = new Group(comp, SWT.NONE);
+		formatGrp.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+		formatGrp.setLayout(new GridLayout(2, false));
+		formatGrp.setText("Peak Format");
+		
+		Label realFormatLab = new Label(formatGrp, SWT.NONE);
+		realFormatLab.setText("Real Format");
+		realFormatLab.setToolTipText("Format for real numbers shown in the peak fitting table.");
+
+		realFormat = new Text(formatGrp, SWT.NONE);
+		realFormat.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
+		realFormat.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				storePreferences();
+			}			
+		});
+		
 
 		
 		// initialize
@@ -129,12 +151,27 @@ public class FittingPreferencePage extends PreferencePage implements IWorkbenchP
 		accuracy.setDouble(getAccuracy());
 		smoothing.setSelection(getSmoothing());
 		peakNumber.setSelection(getPeakNumber());
+		realFormat.setText(getRealFormat());
 	}
+	
+	protected void checkState() {
+		try {
+			final DecimalFormat realForm = new DecimalFormat(realFormat.getText());
+			String ok = realForm.format(1.0);
+			if (ok==null || "".equals(ok)) throw new Exception();
+		} catch (Throwable ne) {
+			setErrorMessage("The real format is incorrect");
+			setValid(false);
+			return;
+		}
+		setErrorMessage(null);
+		setValid(true);
 
+	}
+	
 	@Override
 	public boolean performOk() {
-		storePreferences();
-		return true;
+		return storePreferences();
 	}
 
 	@Override
@@ -142,13 +179,35 @@ public class FittingPreferencePage extends PreferencePage implements IWorkbenchP
 		accuracy.setDouble(getDefaultAccuracy());
 		smoothing.setSelection(getDefaultSmoothing());
 		peakNumber.setSelection(getDefaultPeakNumber());
+		realFormat.setText(getDefaultRealFormat());
 	}
 
 
-	private void storePreferences() {
+	private boolean storePreferences() {
+		checkState();
+		if (!isValid()) return false;
 		setAccuracy(accuracy.getDouble());
 		setSmoothing(smoothing.getSelection());
 		setPeakNumber(peakNumber.getSelection());
+		setRealFormat(realFormat.getText());
+		
+		return true;
+	}
+
+	private String getDefaultIntFormat() {
+		return getPreferenceStore().getDefaultString(FittingConstants.INT_FORMAT);
+	}
+	
+	private String getDefaultRealFormat() {
+		return getPreferenceStore().getDefaultString(FittingConstants.REAL_FORMAT);
+	}
+	
+	private String getIntFormat() {
+		return getPreferenceStore().getString(FittingConstants.INT_FORMAT);
+	}
+	
+	private String getRealFormat() {
+		return getPreferenceStore().getString(FittingConstants.REAL_FORMAT);
 	}
 
 
@@ -178,6 +237,12 @@ public class FittingPreferencePage extends PreferencePage implements IWorkbenchP
 	}
 	public void setPeakNumber(int num) {
 		getPreferenceStore().setValue(FittingConstants.PEAK_NUMBER, num);
+	}
+	public void setIntFormat(String format) {
+		getPreferenceStore().setValue(FittingConstants.INT_FORMAT, format);
+	}
+	public void setRealFormat(String format) {
+		getPreferenceStore().setValue(FittingConstants.REAL_FORMAT, format);
 	}
 
 	public double getAccuracy() {

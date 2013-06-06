@@ -87,6 +87,10 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 								}
 							}
 						}
+					} else if (FittingConstants.INT_FORMAT.equals(event.getProperty())||
+							   FittingConstants.REAL_FORMAT.equals(event.getProperty())){
+
+						viewer.refresh();
 					}
 				}
  			}

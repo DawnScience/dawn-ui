@@ -3,7 +3,9 @@ package org.dawnsci.plotting.tools.fitting;
 import java.text.DecimalFormat;
 
 import org.dawnsci.plotting.Activator;
+import org.dawnsci.plotting.preference.FittingConstants;
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -26,14 +28,10 @@ public class PeakLabelProvider extends ColumnLabelProvider {
 
 	private int           column;
 	private ColumnViewer  viewer;
-	@SuppressWarnings("unused")
-	private DecimalFormat intFormat, format;
 	private Image         savedIcon;
 
 	public PeakLabelProvider(int i) {
 		this.column = i;
-		this.intFormat = new DecimalFormat("###0");
-		this.format = new DecimalFormat("##0.#####");
 		this.savedIcon = Activator.getImage("icons/plot-tool-peak-fit-savePeak.png");
 	}
 	
@@ -55,7 +53,9 @@ public class PeakLabelProvider extends ColumnLabelProvider {
 		if (peak.getPeak() instanceof NullFunction) return "";
 		final FittedFunctions bean = (FittedFunctions)viewer.getInput();
 		
-		
+		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
+		DecimalFormat format   = new DecimalFormat(store.getString(FittingConstants.REAL_FORMAT));
+
 		switch(column) {
 		case 0:
 			return peak.getDataTrace().getName();
