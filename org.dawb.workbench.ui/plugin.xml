@@ -79,14 +79,19 @@
             id="org.dawb.workbench.editor.H5Editor"
             name="HDF5 Editor">
       </editor>
-<!--      <editor
+      <!-- 
+           Peter Chang this editor is needed for some large tree files
+           please do not comment it out again! 
+           Fix to http://jira.diamond.ac.uk/browse/SCI-1200
+       -->
+      <editor
             class="org.dawb.hdf5.editor.H5Editor"
             default="false"
             extensions="h5, hd5, hdf5, nxs, nexus, hdf"
             icon="icons/h5_editor.png"
             id="org.dawb.hdf5.editor.raw.tree"
             name="HDF5 Tree Editor">
-      </editor> -->
+      </editor> 
    </extension>
    <extension
          point="org.eclipse.ui.editorActions">
