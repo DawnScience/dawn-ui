@@ -556,7 +556,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 				
 		extractingMetaData = true;
 		// Get the meta data in a thread to avoid things breaking
-		final Job getMeta = new Job("Extract Meta Data") {
+		final Job getMeta = new Job("Extract Metadata") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				final String    path = EclipseUtils.getFilePath(getEditorInput());
