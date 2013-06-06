@@ -121,7 +121,7 @@ public class RegionComposite extends Composite {
 		typeLabel.setText("Type");
 		typeLabel.setLayoutData(new GridData());
 
-		regionType = new CCombo(this, SWT.NONE);
+		regionType = new CCombo(this, SWT.BORDER |SWT.NONE);
 		regionType.setEditable(false);
 		regionType.setToolTipText("Region type");
 		regionType.setLayoutData(new GridData(SWT.FILL, 0, true, false));
@@ -238,7 +238,7 @@ public class RegionComposite extends Composite {
 		symmetryLabel.setToolTipText("Set the symmetry of the region.");
 		symmetryLabel.setLayoutData(new GridData(0, 0, false, false, 1, 1));
 		
-		this.symmetry = new CCombo(this, SWT.NONE);
+		this.symmetry = new CCombo(this, SWT.BORDER |SWT.NONE);
 		for (int index : SectorROI.getSymmetriesPossible().keySet()) {
 			symmetry.add(SectorROI.getSymmetryText(index));
 		}
@@ -267,7 +267,7 @@ public class RegionComposite extends Composite {
 		xAxisLabel.setText(label);
 		xAxisLabel.setLayoutData(new GridData());
 
-		CCombo combo = new CCombo(this, SWT.NONE);
+		CCombo combo = new CCombo(this, SWT.BORDER |SWT.NONE);
 		combo.setEditable(false);
 		combo.setToolTipText("Existing axis on the graph ");
 		combo.setLayoutData(new GridData(SWT.LEFT, 0, false, false));
