@@ -63,7 +63,7 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 			Object fobj = null;
 			if (element instanceof String) return "";
 			ICoordinateSystem coords = region.getCoordinateSystem();
-			
+			if(roi == null) return "";
 			double[] startPoint = getAxisPoint(coords, roi.getPoint());
 			double[] endPoint = {0, 0};
 			if(roi instanceof RectangularROI){
