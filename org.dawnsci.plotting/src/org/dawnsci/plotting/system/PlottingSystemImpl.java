@@ -715,7 +715,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 
 	@Override
 	public void setShowLegend(boolean b) {
-		IAction action = actionBarManager.findAction(SHOW_LEGEND_ACTION_ID);
+		IAction action = actionBarManager.findAction(getPlotName()+"/"+SHOW_LEGEND_ACTION_ID);
 		if(action == null) return;
 		action.setChecked(b);
 		if (lightWeightViewer!=null) {
