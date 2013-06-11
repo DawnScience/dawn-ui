@@ -269,7 +269,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 					if(selectedData.md != null)
 						aug.setDiffractionMetadata(selectedData.md);
 
-					//drawCalibrantRings();
 					hideFoundRings();
 
 					drawCalibrants(false);
@@ -309,7 +308,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 		// table of images and found rings
 		tableViewer = new TableViewer(scrollHolder, SWT.FULL_SELECTION | SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
-//		tableViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true, 5, 5));
 		createColumns(tableViewer);
 		tableViewer.getTable().setHeaderVisible(true);
 		tableViewer.getTable().setLinesVisible(true);
@@ -754,7 +752,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			}
 		};
 		job.setPriority(Job.SHORT);
-//		 job.setUser(true);
 		job.schedule();
 	}
 
@@ -1083,9 +1080,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 		if (data.augmenter != null) {
 			data.augmenter.activate();
-			drawCalibrantRings();
 		}
-		refreshTable();
 	}
 
 	private void refreshTable() {
