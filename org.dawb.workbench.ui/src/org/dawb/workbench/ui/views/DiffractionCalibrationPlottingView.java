@@ -137,6 +137,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 	
 	private String[] statusString = new String[1];
 
+	private Combo calibrant;
+
 
 	enum ManipulateMode {
 		LEFT, RIGHT, UP, DOWN, ENLARGE, SHRINK, ELONGATE, SQUASH, CLOCKWISE, ANTICLOCKWISE
@@ -221,9 +223,10 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 					if(data.md != null)
 						aug.setDiffractionMetadata(data.md);
 
-					drawCalibrantRings();
-					hideFoundRings();
 					refreshTable();
+					hideFoundRings();
+
+					drawCalibrants(true);
 				}
 			}
 		};
@@ -266,8 +269,10 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 					if(selectedData.md != null)
 						aug.setDiffractionMetadata(selectedData.md);
 
-					drawCalibrantRings();
+					//drawCalibrantRings();
 					hideFoundRings();
+
+					drawCalibrants(false);
 				}
 			}
 		};
@@ -328,7 +333,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		Label l = new Label(controllerHolder, SWT.NONE);
 		l.setText("Calibrant:");
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-		final Combo calibrant = new Combo(controllerHolder, SWT.READ_ONLY);
+		calibrant = new Combo(controllerHolder, SWT.READ_ONLY);
 		final CalibrationStandards standards = CalibrationFactory.getCalibrationStandards();
 		calibrant.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -344,7 +349,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		if (s != null) {
 			calibrant.setText(s);
 		}
-//		calibrant.setText("Please select a calibrant..."); // won't work with read-only
 		calibrant.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 
 		Composite padComp = new Composite(controllerHolder, SWT.BORDER);
@@ -574,9 +578,24 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			logger.error("Could not open diffraction tool:"+ e2);
 		}
 
-		mainSash.setWeights(new int[] { 1, 2});
+		//mainSash.setWeights(new int[] { 1, 2});
 	}
-	
+
+	private void drawCalibrants(final boolean focusControl){
+		Display.getDefault().asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				while (Display.getDefault().readAndDispatch()) {
+					//waiting for all display events to finish before initiating the focus event
+					//in order to avoid bug 371527: https://bugs.eclipse.org/bugs/show_bug.cgi?id=371527
+				}
+				if(focusControl)
+					setFocus();
+				drawCalibrantRings();
+			}
+		});
+	}
+
 	@SuppressWarnings("rawtypes")
 	@Override
 	public Object getAdapter(Class key) {
