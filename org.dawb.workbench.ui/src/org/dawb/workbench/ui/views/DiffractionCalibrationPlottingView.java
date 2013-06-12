@@ -46,6 +46,10 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.CheckboxCellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
@@ -138,6 +142,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 	private String[] statusString = new String[1];
 
 	private Combo calibrant;
+
+	private Action deleteAction;
 
 
 	enum ManipulateMode {
@@ -279,6 +285,28 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			}
 		};
 
+		deleteAction = new Action("Delete item", Activator.getImageDescriptor("icons/delete_obj.png")) {
+			@Override
+			public void run(){
+				StructuredSelection selection = (StructuredSelection)tableViewer.getSelection();
+				MyData selectedData = (MyData)selection.getFirstElement();
+				if(model.size()>1)
+					for (MyData data : model) {
+						if(data.name.equals(selectedData.name)){
+							model.remove(data);
+							tableViewer.refresh();
+							break;
+						}
+					}
+				if(!model.isEmpty()){
+					PlottingUtils.plotData(plottingSystem, model.get(0).name, model.get(0).image);
+					MyData newSelectedData = (MyData)tableViewer.getElementAt(0);
+					StructuredSelection newSelection = new StructuredSelection(newSelectedData);
+					tableViewer.setSelection(newSelection);
+				}
+			}
+		};
+
 		// main sashform which contains the left sash and the plotting system
 		SashForm mainSash = new SashForm(parent, SWT.HORIZONTAL);
 		mainSash.setBackground(new Color(parent.getDisplay(), 192, 192, 192));
@@ -320,7 +348,21 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		tableViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		tableViewer.addSelectionChangedListener(selectionChangeListener);
 		tableViewer.refresh();
-		
+		final MenuManager mgr = new MenuManager();
+		mgr.setRemoveAllWhenShown(true);
+		mgr.addMenuListener(new IMenuListener() {
+			@Override
+			public void menuAboutToShow(IMenuManager manager) {
+				IStructuredSelection selection = (IStructuredSelection) tableViewer.getSelection();
+				if (!selection.isEmpty()) {
+					deleteAction.setText("Delete "
+							+ ((MyData) selection.getFirstElement()).name);
+					mgr.add(deleteAction);
+				}
+			}
+		});
+		tableViewer.getControl().setMenu(mgr.createContextMenu(tableViewer.getControl()));
+
 		Composite calibrantHolder = new Composite(scrollHolder, SWT.NONE);
 		calibrantHolder.setLayout(new GridLayout(2, false));
 		calibrantHolder.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false));
