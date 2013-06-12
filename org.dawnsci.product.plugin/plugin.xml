@@ -46,28 +46,4 @@
             name="Release Notes">
       </page>
    </extension>
-   <extension
-         point="org.eclipse.ui.activities">
-      <activity
-            description="Activity to hide unwanted extension contributions to DAWN"
-            id="org.dawnsci.product.plugin.disableExtensions"
-            name="Hidden activities">
-      </activity>
-      <activityPatternBinding
-            activityId="org.dawnsci.product.plugin.disableExtensions"
-            isEqualityPattern="false"
-            pattern="org.eclipse.jdt.ui.*">
-      </activityPatternBinding>
-      <activityPatternBinding
-            activityId="org.dawnsci.product.plugin.disableExtensions"
-            isEqualityPattern="false"
-            pattern="org.eclipse.pde.ui.*">
-      </activityPatternBinding>
-      <activityPatternBinding
-            activityId="org.dawnsci.product.plugin.disableExtensions"
-            isEqualityPattern="false"
-            pattern="org.eclipse.ant.ui.*">
-      </activityPatternBinding>
-   </extension>
-
 </plugin>
