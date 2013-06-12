@@ -46,6 +46,10 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.CheckboxCellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
@@ -139,6 +143,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 	private Combo calibrant;
 
+	private Action deleteAction;
+
 
 	enum ManipulateMode {
 		LEFT, RIGHT, UP, DOWN, ENLARGE, SHRINK, ELONGATE, SQUASH, CLOCKWISE, ANTICLOCKWISE
@@ -178,8 +184,11 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 					if(data == null){
 						image = PlottingUtils.loadData(structSelection);
 						int i = fullPath != null ? fullPath.lastIndexOf(System.getProperty("file.separator")) : -1;
-						fileName = i > 0 ? fullPath.substring(i + 1) : null;
 						if (image == null) return;
+						if(fileName == null)
+							fileName = image.getName();
+						fileName = i > 0 ? fullPath.substring(i + 1) : null;
+						
 						image.setName(fileName+":"+image.getName());
 					}
 					else{
@@ -269,10 +278,31 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 					if(selectedData.md != null)
 						aug.setDiffractionMetadata(selectedData.md);
 
-					//drawCalibrantRings();
 					hideFoundRings();
 
 					drawCalibrants(false);
+				}
+			}
+		};
+
+		deleteAction = new Action("Delete item", Activator.getImageDescriptor("icons/delete_obj.png")) {
+			@Override
+			public void run(){
+				StructuredSelection selection = (StructuredSelection)tableViewer.getSelection();
+				MyData selectedData = (MyData)selection.getFirstElement();
+				if(model.size()>1)
+					for (MyData data : model) {
+						if(data.name.equals(selectedData.name)){
+							model.remove(data);
+							tableViewer.refresh();
+							break;
+						}
+					}
+				if(!model.isEmpty()){
+					PlottingUtils.plotData(plottingSystem, model.get(0).name, model.get(0).image);
+					MyData newSelectedData = (MyData)tableViewer.getElementAt(0);
+					StructuredSelection newSelection = new StructuredSelection(newSelectedData);
+					tableViewer.setSelection(newSelection);
 				}
 			}
 		};
@@ -309,7 +339,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 		// table of images and found rings
 		tableViewer = new TableViewer(scrollHolder, SWT.FULL_SELECTION | SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
-//		tableViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true, 5, 5));
 		createColumns(tableViewer);
 		tableViewer.getTable().setHeaderVisible(true);
 		tableViewer.getTable().setLinesVisible(true);
@@ -319,7 +348,21 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		tableViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		tableViewer.addSelectionChangedListener(selectionChangeListener);
 		tableViewer.refresh();
-		
+		final MenuManager mgr = new MenuManager();
+		mgr.setRemoveAllWhenShown(true);
+		mgr.addMenuListener(new IMenuListener() {
+			@Override
+			public void menuAboutToShow(IMenuManager manager) {
+				IStructuredSelection selection = (IStructuredSelection) tableViewer.getSelection();
+				if (!selection.isEmpty()) {
+					deleteAction.setText("Delete "
+							+ ((MyData) selection.getFirstElement()).name);
+					mgr.add(deleteAction);
+				}
+			}
+		});
+		tableViewer.getControl().setMenu(mgr.createContextMenu(tableViewer.getControl()));
+
 		Composite calibrantHolder = new Composite(scrollHolder, SWT.NONE);
 		calibrantHolder.setLayout(new GridLayout(2, false));
 		calibrantHolder.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false));
@@ -352,10 +395,10 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		calibrant.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 
 		Composite padComp = new Composite(controllerHolder, SWT.BORDER);
-		padComp.setLayout(new GridLayout(4, false));
+		padComp.setLayout(new GridLayout(5, false));
 		padComp.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+		padComp.setToolTipText("Move calibrant");
 
-		// create motion buttons cluster
 		l = new Label(padComp, SWT.NONE);
 		l = new Label(padComp, SWT.NONE);
 		Button upButton = new Button(padComp, SWT.ARROW | SWT.UP);
@@ -367,6 +410,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			}
 		}));
 		upButton.setLayoutData(new GridData(SWT.CENTER, SWT.BOTTOM, false, false));
+		l = new Label(padComp, SWT.NONE);
 		l = new Label(padComp, SWT.NONE);
 
 		l = new Label(padComp, SWT.NONE);
@@ -389,6 +433,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			}
 		}));
 		rightButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+		l = new Label(padComp, SWT.NONE);
 
 		l = new Label(padComp, SWT.NONE);
 		l = new Label(padComp, SWT.NONE);
@@ -402,29 +447,18 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		}));
 		downButton.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));
 		l = new Label(padComp, SWT.NONE);
+		l = new Label(padComp, SWT.NONE);
 
-		Composite actionComp = new Composite(controllerHolder, SWT.BORDER);
-		actionComp.setLayout(new GridLayout(4, false));
+		Composite actionComp = new Composite(controllerHolder, SWT.NONE);
+		actionComp.setLayout(new GridLayout(3, false));
 		actionComp.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 
-		l = new Label(actionComp, SWT.NONE);
-		Button minusButton = new Button(actionComp, SWT.PUSH);
-		minusButton.setText("-");
-		minusButton.setToolTipText("Make rings smaller");
-		minusButton.addMouseListener(new RepeatingMouseAdapter(parent.getDisplay(), new SlowFastRunnable() {
-			@Override
-			public void run() {
-				changeRings(ManipulateMode.SHRINK, isFast());
-			}
+		Composite sizeComp = new Composite(actionComp, SWT.BORDER);
+		sizeComp.setLayout(new GridLayout(1, false));
+		sizeComp.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+		sizeComp.setToolTipText("Change size");
 
-			@Override
-			public void stop() {
-				refreshTable();
-			}
-		}));
-		minusButton.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
-		l = new Label(actionComp, SWT.NONE);
-		Button plusButton = new Button(actionComp, SWT.PUSH);
+		Button plusButton = new Button(sizeComp, SWT.PUSH);
 		plusButton.setText("+");
 		plusButton.setToolTipText("Make rings larger");
 		plusButton.addMouseListener(new RepeatingMouseAdapter(parent.getDisplay(), new SlowFastRunnable() {
@@ -432,32 +466,33 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			public void run() {
 				changeRings(ManipulateMode.ENLARGE, isFast());
 			}
-
 			@Override
 			public void stop() {
 				refreshTable();
 			}
 		}));
-		plusButton.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
-
-		l = new Label(actionComp, SWT.NONE);
-		Button squashButton = new Button(actionComp, SWT.PUSH);
-		squashButton.setText("Squash");
-		squashButton.setToolTipText("Make rings more circular");
-		squashButton.addMouseListener(new RepeatingMouseAdapter(parent.getDisplay(), new SlowFastRunnable() {
+		plusButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
+		Button minusButton = new Button(sizeComp, SWT.PUSH);
+		minusButton.setText("-");
+		minusButton.setToolTipText("Make rings smaller");
+		minusButton.addMouseListener(new RepeatingMouseAdapter(parent.getDisplay(), new SlowFastRunnable() {
 			@Override
 			public void run() {
-				changeRings(ManipulateMode.SQUASH, isFast());
+				changeRings(ManipulateMode.SHRINK, isFast());
 			}
-
 			@Override
 			public void stop() {
 				refreshTable();
 			}
 		}));
-		squashButton.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
-		l = new Label(actionComp, SWT.NONE);
-		Button elongateButton = new Button(actionComp, SWT.PUSH);
+		minusButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
+
+		Composite shapeComp = new Composite(actionComp, SWT.BORDER);
+		shapeComp.setLayout(new GridLayout(1, false));
+		shapeComp.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+		shapeComp.setToolTipText("Change shape");
+
+		Button elongateButton = new Button(shapeComp, SWT.PUSH);
 		elongateButton.setText("Elongate");
 		elongateButton.setToolTipText("Make rings more elliptical");
 		elongateButton.addMouseListener(new RepeatingMouseAdapter(parent.getDisplay(), new SlowFastRunnable() {
@@ -465,32 +500,33 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			public void run() {
 				changeRings(ManipulateMode.ELONGATE, isFast());
 			}
-
 			@Override
 			public void stop() {
 				refreshTable();
 			}
 		}));
-		elongateButton.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
-
-		l = new Label(actionComp, SWT.NONE);
-		Button antiClockButton = new Button(actionComp, SWT.PUSH);
-		antiClockButton.setImage(Activator.getImage("icons/arrow_rotate_anticlockwise.png"));
-		antiClockButton.setToolTipText("Rotate rings anti-clockwise");
-		antiClockButton.addMouseListener(new RepeatingMouseAdapter(parent.getDisplay(), new SlowFastRunnable() {
+		elongateButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
+		Button squashButton = new Button(shapeComp, SWT.PUSH | SWT.FILL);
+		squashButton.setText("Squash");
+		squashButton.setToolTipText("Make rings more circular");
+		squashButton.addMouseListener(new RepeatingMouseAdapter(parent.getDisplay(), new SlowFastRunnable() {
 			@Override
 			public void run() {
-				changeRings(ManipulateMode.ANTICLOCKWISE, isFast());
+				changeRings(ManipulateMode.SQUASH, isFast());
 			}
-
 			@Override
 			public void stop() {
 				refreshTable();
 			}
 		}));
-		antiClockButton.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
-		l = new Label(actionComp, SWT.NONE);
-		Button clockButton = new Button(actionComp, SWT.PUSH);
+		squashButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
+
+		Composite rotateComp = new Composite(actionComp, SWT.BORDER);
+		rotateComp.setLayout(new GridLayout(1, false));
+		rotateComp.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+		rotateComp.setToolTipText("Change rotation");
+
+		Button clockButton = new Button(rotateComp, SWT.PUSH);
 		clockButton.setImage(Activator.getImage("icons/arrow_rotate_clockwise.png"));
 		clockButton.setToolTipText("Rotate rings clockwise");
 		clockButton.addMouseListener(new RepeatingMouseAdapter(parent.getDisplay(), new SlowFastRunnable() {
@@ -504,6 +540,20 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			}
 		}));
 		clockButton.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
+		Button antiClockButton = new Button(rotateComp, SWT.PUSH);
+		antiClockButton.setImage(Activator.getImage("icons/arrow_rotate_anticlockwise.png"));
+		antiClockButton.setToolTipText("Rotate rings anti-clockwise");
+		antiClockButton.addMouseListener(new RepeatingMouseAdapter(parent.getDisplay(), new SlowFastRunnable() {
+			@Override
+			public void run() {
+				changeRings(ManipulateMode.ANTICLOCKWISE, isFast());
+			}
+			@Override
+			public void stop() {
+				refreshTable();
+			}
+		}));
+		antiClockButton.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
 
 		Composite calibrateComp = new Composite(calibrantHolder, SWT.NONE);
 		calibrateComp.setLayout(new GridLayout(1, false));
@@ -753,7 +803,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			}
 		};
 		job.setPriority(Job.SHORT);
-//		 job.setUser(true);
 		job.schedule();
 	}
 
@@ -1082,9 +1131,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 		if (data.augmenter != null) {
 			data.augmenter.activate();
-			drawCalibrantRings();
 		}
-		refreshTable();
 	}
 
 	private void refreshTable() {

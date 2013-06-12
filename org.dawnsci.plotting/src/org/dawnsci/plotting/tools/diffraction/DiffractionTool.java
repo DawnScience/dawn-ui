@@ -79,6 +79,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
@@ -348,7 +349,19 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	private IDiffractionMetadata getDiffractionMetaData() {
 		IDataset image = getImageTrace() == null ? null : getImageTrace().getData();
 		IWorkbenchPart part = getPart();
-		String altPath = part instanceof IEditorPart ? EclipseUtils.getFilePath(((IEditorPart) part).getEditorInput()) : null;
+		String altPath = null;
+		if(part instanceof IEditorPart){
+			altPath = EclipseUtils.getFilePath(((IEditorPart) part).getEditorInput());
+		} else if (part instanceof IViewPart){
+			try {
+				if (image == null) return null;
+				IMetaData md = image.getMetadata();
+				if(md != null)
+					altPath = md.getFilePath();
+			} catch (Exception e) {
+				logger.debug("Exception getting the image metadata", e);
+			}
+		}
 		return getDiffractionMetadata(image, altPath, service, statusString);
 	}
 
