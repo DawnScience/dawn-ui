@@ -161,7 +161,7 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 		activate();
 	}
 
-	private void createActions() {
+	protected void createActions() {
 
 		final Action exportRegion = new Action("Export region to file", Activator.getImageDescriptor("icons/mask-export-wiz.png")) {
 			public void run() {
@@ -412,6 +412,7 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 	
 	@Override
 	public void roiDragged(ROIEvent evt) {
+		viewer.cancelEditing();
 		if (!isActive()) return;
 		updateRegion(evt);
 	}

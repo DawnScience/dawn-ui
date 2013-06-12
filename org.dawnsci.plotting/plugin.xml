@@ -42,6 +42,14 @@
             tooltip="A tool which shows values of regions selected in the plotting.">
       </plotting_tool_page>
       <plotting_tool_page
+            cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.measurement"
+            class="org.dawnsci.plotting.tools.region.MeasurementTool"
+            icon="icons/plot-tool-measure.png"
+            id="org.dawb.workbench.plotting.tools.measure.2d"
+            label="Measurement"
+            tooltip="A tool which shows values of regions selected in the plotting.">
+      </plotting_tool_page>
+      <plotting_tool_page
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.region.editor"
             class="org.dawnsci.plotting.tools.region.RegionEditTool"
             icon="icons/plot-tool-region-edit.png"

@@ -916,6 +916,14 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		this.axes  = (List<IDataset>) axes;
 		createAxisBounds();
 		
+		if (axes==null) {
+			getXAxis().setTitle("");
+			getYAxis().setTitle("");
+		} else if (axes.get(0)==null) {
+			getXAxis().setTitle("");
+		} else if (axes.get(1)==null) {
+			getYAxis().setTitle("");
+		}
 		if (performAuto) {
 	 		try {
 				setAxisRedrawActive(false);

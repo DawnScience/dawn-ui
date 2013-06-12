@@ -1,5 +1,6 @@
 package org.dawnsci.plotting.api.region;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -68,6 +69,20 @@ public class RegionUtils {
 			system.removeRegion(system.getRegion(name));
 		}
 		return system.createRegion(name, type);
+	}
+
+	public static String[] getRegionNames(IPlottingSystem system) {
+		return getRegionNames(system, null);
+	}
+	public static String[] getRegionNames(IPlottingSystem system, RegionType type) {
+		final Collection<IRegion> regions = system.getRegions();
+		if (regions==null || regions.size()<1) return null;
+		final List<String> names = new ArrayList<String>(7);
+		for (IRegion region : regions) {
+			if (type!=null && region.getRegionType()!=type) continue;
+			names.add(region.getName());
+		}
+		return names.toArray(new String[names.size()]);
 	}
 	
 	/**

@@ -104,7 +104,7 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 					RectangularROI rroi = (RectangularROI) roi;
 					fobj = rroi.getEndPoint()[0] - rroi.getPointX();
 				}
-				return fobj == null ? NA : String.valueOf(DoubleUtils.roundDouble((Double)fobj, precision));
+				return fobj == null ? NA : getCalibratedValue((Double)fobj);
 			case DY: // dy
 				if (roi instanceof LinearROI) {
 					LinearROI lroi = (LinearROI) roi;
@@ -113,17 +113,21 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 					RectangularROI rroi = (RectangularROI) roi;
 					fobj = rroi.getEndPoint()[1] - rroi.getPointY();
 				}
-				return fobj == null ? NA : String.valueOf(DoubleUtils.roundDouble((Double)fobj, precision));
+				return fobj == null ? NA : getCalibratedValue((Double)fobj);
 			case LENGTH: // length
+				
+				String unit="";
 				if (roi instanceof LinearROI) {
+					
 					LinearROI lroi = (LinearROI) roi;
 					fobj = lroi.getLength();
+		
 				} else if (roi instanceof RectangularROI) {
 					RectangularROI rroi = (RectangularROI) roi;
 					double[] lens = rroi.getLengths();
 					fobj = Math.hypot(lens[0], lens[1]);
 				}
-				return fobj == null ? NA : String.valueOf(DoubleUtils.roundDouble((Double)fobj, precision));
+				return fobj == null ? NA : getCalibratedValue((Double)fobj);
 			case INNERRAD: // in rad
 				if (roi instanceof SectorROI) {
 					SectorROI sroi = (SectorROI) roi;
@@ -150,6 +154,24 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 			logger.error("Cannot get value in info table", ne);
 			return "";
 		}
+	}
+
+	private String getCalibratedValue(double pixelLength) {
+		
+	    // TODO FIXME bodge for calibrated MeasurementTools to show length
+		// Using direct cast for now.
+		if (tool instanceof MeasurementTool) {
+			double xFactor = ((MeasurementTool)tool).getxCalibratedAxisFactor();
+			double yFactor = ((MeasurementTool)tool).getyCalibratedAxisFactor();
+	        if (xFactor==yFactor && !Double.isNaN(xFactor)) {
+	        	double value = pixelLength*xFactor;
+	        	String unit = ((MeasurementTool)tool).getUnitName();
+	        	return DoubleUtils.roundDouble(value, precision)+" "+unit;
+	        }
+		} 
+		
+		return String.valueOf(DoubleUtils.roundDouble(pixelLength, precision));
+
 	}
 
 	public String getToolTipText(Object element) {
