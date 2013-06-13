@@ -41,6 +41,7 @@ import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.tools.diffraction.DiffractionImageAugmenter;
 import org.dawnsci.plotting.tools.diffraction.DiffractionTool;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -51,6 +52,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.CheckboxCellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
@@ -64,6 +66,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -107,6 +110,7 @@ import uk.ac.diamond.scisoft.analysis.diffraction.PowderRingsUtils;
 import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
 import uk.ac.diamond.scisoft.analysis.fitting.Fitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Polynomial;
+import uk.ac.diamond.scisoft.analysis.hdf5.HDF5NodeLink;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.rcp.plotting.utils.PlottingUtils;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
@@ -218,78 +222,30 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				Object dropData = event.data;
 				if (dropData instanceof IResource[]) {
 					IResource[] res = (IResource[])dropData;
-					
 					for (int i = 0; i < res.length; i++) {
-						// Test if the selection has already been loaded and is in the model
-						MyData data = null;
-						fullPath = res[i].getRawLocation().toOSString();;
-						if(fullPath == null) return;
-
-						for (MyData d : model) {
-							if (fullPath.equals(d.path)) {
-								data = d;
-								break;
-							}
-						}
-					
-						IDataset image = null;
-						if(data == null){
-							image = PlottingUtils.loadData(fullPath, fullPath);
-							int j = fullPath.lastIndexOf(System.getProperty("file.separator"));
-							if (image == null) return;
-							if(fileName == null)
-								fileName = image.getName();
-							fileName = j > 0 ? fullPath.substring(j + 1) : null;
-							
-							image.setName(fileName+":"+image.getName());
-						}
-						else{
-							image = data.image;
-						}
-						if(image == null) return;
-						
-						PlottingUtils.plotData(plottingSystem, image.getName(), image);
-
-						// set Ring data
-						setData(fullPath, image);
-
-						// update PlottingSystem
-						data = null;
-						if (fullPath != null) {
-							for (MyData d : model) {
-								if (fullPath.equals(d.path)) {
-									data = d;
-									break;
-								}
-							}
-						}
-						if (data == null) return;
-
-						System.err.println("We have an image, Houston!");
-
-						DiffractionImageAugmenter aug = data.augmenter;
-						if (aug == null) {
-							aug = new DiffractionImageAugmenter(plottingSystem);
-							data.augmenter = aug;
-						}
-						aug.activate();
-						if (data.path == null && fullPath != null) {
-							String path = fullPath;
-							data.path = path;
-							data.name = path.substring(path.lastIndexOf(File.separatorChar) + 1);
-							data.md = DiffractionTool.getDiffractionMetadata(data.image, data.path, service, statusString);
-						}
-						if (data.md == null)
-							data.md = DiffractionTool.getDiffractionMetadata(data.image, data.path, service, statusString);
-						if(data.md != null)
-							aug.setDiffractionMetadata(data.md);
-
-						refreshTable();
-						hideFoundRings();
-
-						drawCalibrants(true);
+						loadDataAndDrawCalibrants(res[i].getRawLocation().toOSString(), null);
 					}
-					
+				}
+				if(dropData instanceof TreeSelection) {
+					TreeSelection selectedNode = (TreeSelection) dropData;
+					Object obj[] = selectedNode.toArray();
+					for (int i = 0; i < obj.length; i++) {
+						if(obj[i] instanceof HDF5NodeLink){
+							HDF5NodeLink node = (HDF5NodeLink) obj[i];
+							if (node == null) return;
+							loadDataAndDrawCalibrants(node.getFile().getFilename(), node.getFullName());
+
+						} else if (obj[i] instanceof IFile){
+							IFile file = (IFile) obj[i];
+							loadDataAndDrawCalibrants(file.getLocation().toOSString(), null);
+						}
+					}
+				}
+				if(dropData instanceof String[]){
+					String[] selectedData = (String[]) dropData;
+					for (int i = 0; i < selectedData.length; i++) {
+						loadDataAndDrawCalibrants(selectedData[i], null);
+					}
 				}
 			}
 		};
@@ -331,7 +287,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		controlComp.setLayout(new GridLayout(1, false));
 		
 		Label instructionLabel = new Label(controlComp, SWT.WRAP);
-		instructionLabel.setText("Drag/drop a file/data from the Project Explorer to the table below, choose a type of calibrant, " +
+		instructionLabel.setText("Drag/drop a file/data to the table below, choose a type of calibrant, " +
 								 "modify the rings using the controls below and tick the checkbox near to the corresponding " +
 								 "image before pressing the calibration buttons.");
 		instructionLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false));
@@ -351,6 +307,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		createColumns(tableViewer);
 		tableViewer.getTable().setHeaderVisible(true);
 		tableViewer.getTable().setLinesVisible(true);
+		tableViewer.getTable().setToolTipText("Drag/drop file(s)/data to this table");
 		tableViewer.setContentProvider(new MyContentProvider());
 		tableViewer.setLabelProvider(new MyLabelProvider());
 		tableViewer.setInput(model);
@@ -373,7 +330,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		tableViewer.getControl().setMenu(mgr.createContextMenu(tableViewer.getControl()));
 		//add drop support
 		DropTarget dt = new DropTarget(tableViewer.getControl(), DND.DROP_MOVE| DND.DROP_DEFAULT| DND.DROP_COPY);
-		dt.setTransfer(new Transfer[] { TextTransfer.getInstance (), FileTransfer.getInstance(), ResourceTransfer.getInstance()});
+		dt.setTransfer(new Transfer[] { TextTransfer.getInstance (), FileTransfer.getInstance(), 
+										ResourceTransfer.getInstance(), LocalSelectionTransfer.getTransfer()});
 		dt.addDropListener(dropListener);
 
 		Composite calibrantHolder = new Composite(scrollHolder, SWT.NONE);
@@ -642,6 +600,76 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		}
 
 		//mainSash.setWeights(new int[] { 1, 2});
+	}
+
+	private void loadDataAndDrawCalibrants(String filePath, String dataFullName) {
+		// Test if the selection has already been loaded and is in the model
+		MyData data = null;
+		this.fullPath = filePath;
+		if(fullPath == null) return;
+
+		for (MyData d : model) {
+			if (fullPath.equals(d.path)) {
+				data = d;
+				break;
+			}
+		}
+
+		IDataset image = null;
+		if(data == null){
+			image = PlottingUtils.loadData(filePath, dataFullName);
+			int j = fullPath.lastIndexOf(System.getProperty("file.separator"));
+			if (image == null) return;
+			if(fileName == null)
+				fileName = image.getName();
+			fileName = j > 0 ? fullPath.substring(j + 1) : null;
+			image.setName(fileName+":"+image.getName());
+		}
+		else{
+			image = data.image;
+		}
+		if(image == null) return;
+		
+		PlottingUtils.plotData(plottingSystem, image.getName(), image);
+
+		// set Ring data
+		setData(fullPath, image);
+
+		// update PlottingSystem
+		data = null;
+		if (fullPath != null) {
+			for (MyData d : model) {
+				if (fullPath.equals(d.path)) {
+					data = d;
+					break;
+				}
+			}
+		}
+		if (data == null) return;
+
+		System.err.println("We have an image, Houston!");
+
+		DiffractionImageAugmenter aug = data.augmenter;
+		if (aug == null) {
+			aug = new DiffractionImageAugmenter(plottingSystem);
+			data.augmenter = aug;
+		}
+		aug.activate();
+		if (data.path == null && fullPath != null) {
+			String path = fullPath;
+			data.path = path;
+			data.name = path.substring(path.lastIndexOf(File.separatorChar) + 1);
+			data.md = DiffractionTool.getDiffractionMetadata(data.image, data.path, service, statusString);
+		}
+		if (data.md == null)
+			data.md = DiffractionTool.getDiffractionMetadata(data.image, data.path, service, statusString);
+		if(data.md != null)
+			aug.setDiffractionMetadata(data.md);
+
+		refreshTable();
+		hideFoundRings();
+
+		drawCalibrants(true);
 	}
 
 	private void drawCalibrants(final boolean focusControl){
