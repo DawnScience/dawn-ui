@@ -136,7 +136,29 @@ public class SWTXYTraceTest {
 		System.out.println("Passed");
 	}
 
-	
+	@Test
+    public void testErrorBarsExponentialLogAxes() throws Throwable {
+		
+		final AbstractDataset da1 = Maths.square(DoubleDataset.arange(0, 100, 1));    
+		final AbstractDataset err = Maths.square(DoubleDataset.arange(0, 100, 1).imultiply(0.2d));
+		da1.setError(err);
+		
+		final Object[] oa = createSomethingPlotted(Arrays.asList(new IDataset[]{da1}));
+
+		final IPlottingSystem     sys    = (IPlottingSystem)oa[0];
+		sys.getSelectedYAxis().setLog10(true);
+		final List<ITrace>        traces = (List<ITrace>)oa[2];
+		
+		final ILineTrace lineTrace = (ILineTrace)traces.get(0);
+		double errorAt50 = ((IErrorDataset)lineTrace.getData()).getError(49);
+		if (Math.round(errorAt50)!=96) throw new Exception("Incorrect error, found "+errorAt50);
+		lineTrace.setErrorBarColor(ColorConstants.red);
+
+		sys.repaint();
+		EclipseUtils.delay(2000);
+		System.out.println("Passed");
+	}
+
 	@Test
     public void testXErrorBars() throws Throwable {
 		
