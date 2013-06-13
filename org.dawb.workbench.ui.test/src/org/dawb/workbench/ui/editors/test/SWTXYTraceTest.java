@@ -21,8 +21,10 @@ import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.workbench.ui.editors.AsciiEditor;
 import org.dawb.workbench.ui.editors.ImageEditor;
 import org.dawb.workbench.ui.editors.PlotDataEditor;
+import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.ILineTrace;
+import org.dawnsci.plotting.api.trace.ILineTrace.ErrorBarType;
 import org.dawnsci.plotting.api.trace.ILineTrace.PointStyle;
 import org.dawnsci.plotting.api.trace.ILineTrace.TraceType;
 import org.dawnsci.plotting.api.trace.ITrace;
@@ -39,7 +41,9 @@ import org.osgi.framework.Bundle;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IErrorDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.LongDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Maths;
 
 /**
  * 
@@ -89,6 +93,71 @@ public class SWTXYTraceTest {
 		EclipseUtils.delay(10000);
 		
 	}
+	
+	@Test
+    public void testErrorBarsSimple() throws Throwable {
+		
+		final DoubleDataset da1 = DoubleDataset.arange(0, 100, 1);
+        da1.setError(5d);
+        
+      
+		final Object[] oa = createSomethingPlotted(Arrays.asList(new IDataset[]{da1}));
+
+		final IPlottingSystem     sys    = (IPlottingSystem)oa[0];
+		final List<ITrace>        traces = (List<ITrace>)oa[2];
+		
+		final ILineTrace lineTrace = (ILineTrace)traces.get(0);
+		if (((IErrorDataset)lineTrace.getData()).getError(50)!=5d) throw new Exception("Unexpected error!");
+		
+		sys.repaint();
+		EclipseUtils.delay(2000);
+		System.out.println("Passed");
+	}
+	
+	@Test
+    public void testErrorBarsExponential() throws Throwable {
+		
+		final AbstractDataset da1 = Maths.square(DoubleDataset.arange(0, 100, 1));    
+		final AbstractDataset err = Maths.square(DoubleDataset.arange(0, 100, 1).imultiply(0.2d));
+		da1.setError(err);
+		
+		final Object[] oa = createSomethingPlotted(Arrays.asList(new IDataset[]{da1}));
+
+		final IPlottingSystem     sys    = (IPlottingSystem)oa[0];
+		final List<ITrace>        traces = (List<ITrace>)oa[2];
+		
+		final ILineTrace lineTrace = (ILineTrace)traces.get(0);
+		double errorAt50 = ((IErrorDataset)lineTrace.getData()).getError(49);
+		if (Math.round(errorAt50)!=96) throw new Exception("Incorrect error, found "+errorAt50);
+		lineTrace.setErrorBarColor(ColorConstants.red);
+
+		sys.repaint();
+		EclipseUtils.delay(2000);
+		System.out.println("Passed");
+	}
+
+	
+	@Test
+    public void testXErrorBars() throws Throwable {
+		
+		final DoubleDataset da1 = DoubleDataset.arange(0, 100, 1);     
+		final Object[] oa = createSomethingPlotted(Arrays.asList(new IDataset[]{da1}));
+
+		final IPlottingSystem     sys    = (IPlottingSystem)oa[0];
+		final List<ITrace>        traces = (List<ITrace>)oa[2];
+		
+		final ILineTrace lineTrace = (ILineTrace)traces.get(0);
+		if (((IErrorDataset)lineTrace.getData()).getError(50)!=0d) throw new Exception("Unexpected error!");
+		
+		IErrorDataset es = (IErrorDataset)lineTrace.getXData();
+		es.setError(4d);
+		lineTrace.setData(es, lineTrace.getYData());
+		
+		sys.repaint();
+		EclipseUtils.delay(2000);
+		System.out.println("Passed");
+	}
+
 
 	@Test
 	public void test1DNans() throws Throwable {

@@ -11,6 +11,7 @@ import org.eclipse.swt.graphics.Color;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IErrorDataset;
 
 /**
  * This class only wraps line traces, images have their own IImageTrace implementor.
@@ -20,14 +21,21 @@ import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
  */
 public class LineTraceImpl implements ILineTrace {
 
-	private LineTrace trace;
+	private LineTrace          trace;
 	private PlottingSystemImpl sys;
+	private boolean errorBarExplicitySet;
 
 	LineTraceImpl(PlottingSystemImpl sys, final LineTrace trace) {
 		this.sys   = sys;
 		this.trace = trace;
 		if (trace instanceof ITraceContainer) {
 			((ITraceContainer)trace).setTrace(this);
+		}
+		if (trace.getDataProvider() instanceof LightWeightDataProvider) {
+			LightWeightDataProvider prov = (LightWeightDataProvider)trace.getDataProvider();
+			if (prov.isError()) {
+				trace.setErrorBarEnabled(true);
+			}
 		}
 	}
 	
@@ -210,6 +218,7 @@ public class LineTraceImpl implements ILineTrace {
 
 	public void setErrorBarEnabled(boolean errorBarEnabled) {
 		trace.setErrorBarEnabled(errorBarEnabled);
+		errorBarExplicitySet = true;
 	}
 	
 	public ILineTrace.ErrorBarType getYErrorBarType() {
@@ -347,6 +356,17 @@ public class LineTraceImpl implements ILineTrace {
 		
 		prov.setData(xData,yData);
 		trace.setDataProvider(prov);
+		
+		if (xData instanceof IErrorDataset) {
+			if (((IErrorDataset)xData).isError() && !errorBarExplicitySet) {
+				trace.setErrorBarEnabled(true);
+			}
+		}
+		if (yData instanceof IErrorDataset) {
+			if (((IErrorDataset)yData).isError() && !errorBarExplicitySet) {
+				trace.setErrorBarEnabled(true);
+			}
+		}
 		
 		if (sys!=null) try {
 			if (sys.getTraces().contains(this)) {

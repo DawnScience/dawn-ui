@@ -13,6 +13,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IErrorDataset;
 
 /**
  * A IDataProvider which uses an AbstractDataset for its data.
@@ -20,7 +21,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
  * @author fcp94556
  *
  */
-public class LightWeightDataProvider implements IDataProvider {
+class LightWeightDataProvider implements IDataProvider {
 	
 	private AbstractDataset x;
 	private AbstractDataset y;
@@ -47,7 +48,16 @@ public class LightWeightDataProvider implements IDataProvider {
 		try {
 			final double xDat = x.getElementDoubleAbs(index);
 			final double yDat = y.getElementDoubleAbs(index);
-			return new Sample(xDat, yDat);
+			
+  		    final double xErr = x instanceof IErrorDataset && ((IErrorDataset)x).isError()
+				              ? ((IErrorDataset)x).getError(index)
+				              : 0d;
+			final double yErr = y instanceof IErrorDataset && ((IErrorDataset)y).isError()
+							  ? ((IErrorDataset)y).getError(index)
+							  : 0d;
+							      
+			return new Sample(xDat, yDat, yErr, yErr, xErr, xErr);
+			
 		} catch (Throwable ne) {
 			return null;
 		}
@@ -162,6 +172,12 @@ public class LightWeightDataProvider implements IDataProvider {
 	    this.y = new DoubleDataset(ya, ya.length);
 	    
 	    fireDataProviderListeners();
+	}
+	
+	public boolean isError() {
+		if (x instanceof IErrorDataset && ((IErrorDataset)x).isError()) return true;
+		if (y instanceof IErrorDataset && ((IErrorDataset)y).isError()) return true;
+		return false;
 	}
 
 }

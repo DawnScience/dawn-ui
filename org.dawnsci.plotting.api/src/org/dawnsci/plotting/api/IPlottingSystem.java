@@ -134,9 +134,9 @@ public interface IPlottingSystem extends IAdaptable, ITraceSystem, IRegionSystem
 	 *         plotting systems will wholly or partially support ILineTrace. If plotting mode is XY_STACKED_3D then 
 	 *         will return a list of size 1 with the trace of type IStackTrace.
 	 */
-	public List<ITrace> createPlot1D(IDataset       x, 
+	public List<ITrace> createPlot1D(IDataset                 x, 
 							         List<? extends IDataset> ys,
-							         IProgressMonitor      monitor);
+							         IProgressMonitor         monitor);
 	/**
 	 * @see createPlot1D(AbstractDataset, List<AbstractDataset>, IProgressMonitor)
 	 * @param x
@@ -145,9 +145,9 @@ public interface IPlottingSystem extends IAdaptable, ITraceSystem, IRegionSystem
 	 * @param monitor
 	 * @return
 	 */
-	public List<ITrace> createPlot1D(IDataset       x, 
+	public List<ITrace> createPlot1D(IDataset              x, 
 							         List<? extends IDataset> ys,
-							         String title,
+							         String                title,
 							         IProgressMonitor      monitor);
 
 	/**
@@ -166,9 +166,9 @@ public interface IPlottingSystem extends IAdaptable, ITraceSystem, IRegionSystem
 	 * @param monitor
 	 * @return
 	 */
-	public List<ITrace> updatePlot1D(IDataset       x, 
+	public List<ITrace> updatePlot1D(IDataset                 x, 
 							         List<? extends IDataset> ys,
-							         IProgressMonitor      monitor);
+							         IProgressMonitor         monitor);
 
 	/**
 	 * See also ITraceSystem for flexible trace manipulation.
@@ -189,9 +189,9 @@ public interface IPlottingSystem extends IAdaptable, ITraceSystem, IRegionSystem
 	 *         PlotType.IMAGE and and ISurfaceTrace for PlotType.SURFACE. You can
 	 *         use any image methods offered by these interface.
 	 */
-	public ITrace createPlot2D(IDataset       image, 
+	public ITrace createPlot2D(IDataset                 image, 
 							   List<? extends IDataset> axes,
-							   IProgressMonitor      monitor);
+							   IProgressMonitor         monitor);
 	
 	
 	/**
@@ -204,9 +204,9 @@ public interface IPlottingSystem extends IAdaptable, ITraceSystem, IRegionSystem
 	 * @param monitor
 	 * @return
 	 */
-	public ITrace updatePlot2D(IDataset       image, 
+	public ITrace updatePlot2D(IDataset                 image, 
 							   List<? extends IDataset> axes,
-							   IProgressMonitor      monitor);
+							   IProgressMonitor         monitor);
 	
 	/**
 	 * Set the plot type. For instance if requiring a 3D surface plot of an image
