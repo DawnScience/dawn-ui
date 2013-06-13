@@ -123,6 +123,9 @@ public interface IPlottingSystem extends IAdaptable, ITraceSystem, IRegionSystem
 	 * 
 	 * Each call to createPlot1D(...) adds to the plot and the current selected axes, use reset() to clear the plot.
 	 * 
+	 * If a IDataset passed into the ys array is an instance of IErrorDataset and the getError() is non-null, error
+	 * bars will be switched on automatically.
+	 * 
 	 * @param x - may be null
 	 * @param ys - may not be null or empty
 	 * @param mode
@@ -153,6 +156,11 @@ public interface IPlottingSystem extends IAdaptable, ITraceSystem, IRegionSystem
 	 * 
 	 * NOTE This will not update the title at the moment if the traces exist.
 	 * 
+	 * 	
+	 * If a IDataset passed into the ys array is an instance of IErrorDataset and the getError() is non-null, error
+	 * bars will be switched on automatically [UNLESS the trace exists and  setErrorBarEnabled(false) has been called
+	 * on the ILineTrace already].
+     *
 	 * @param x  - may be null, if null indices of y are used
 	 * @param ys -  must not be null
 	 * @param monitor

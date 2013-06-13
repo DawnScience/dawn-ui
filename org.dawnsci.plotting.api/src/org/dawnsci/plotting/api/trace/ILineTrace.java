@@ -253,6 +253,11 @@ public interface ILineTrace extends ITrace {
 	/**
 	 * Set the yData for the trace, replaces old yData
 	 * Repaint may be required as the system does not assume you want to repaint right away.
+	 * 
+	 * If the yData is an instance of IErrorDataset the method getError will be called.
+	 * If this is non-null then error bars will be switched on (unless they have been explicitly 
+	 * turned off with setErrorBarEnabled(false)) 
+	 * 
 	 * @param yData
 	 */
 	public void setData(IDataset xData, IDataset yData);
