@@ -41,6 +41,7 @@ import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.tools.diffraction.DiffractionImageAugmenter;
 import org.dawnsci.plotting.tools.diffraction.DiffractionTool;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -67,6 +68,13 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DropTarget;
+import org.eclipse.swt.dnd.DropTargetAdapter;
+import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.swt.dnd.FileTransfer;
+import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
@@ -82,9 +90,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.ui.ISelectionListener;
-import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -130,7 +137,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 	private Composite parent;
 
-	private ISelectionListener fileSelectionListener;
 	private ISelectionChangedListener selectionChangeListener;
 
 	private ScrolledComposite scrollComposite;
@@ -144,6 +150,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 	private Combo calibrant;
 
 	private Action deleteAction;
+
+	private DropTargetAdapter dropListener;
 
 
 	enum ManipulateMode {
@@ -159,87 +167,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		parent.setLayout(new FillLayout());
 
 		this.parent = parent;
-		// add a selection listener on an IStructuredSelection
-		fileSelectionListener = new ISelectionListener() {
-
-			@Override
-			public void selectionChanged(IWorkbenchPart part, ISelection selection) {
-				if (selection instanceof IStructuredSelection) {
-					IStructuredSelection structSelection = (IStructuredSelection)selection;
-					structSelection.getFirstElement();
-					
-					// Test if the selection has already been loaded and is in the model
-					MyData data = null;
-					fullPath = PlottingUtils.getFullFilePath(structSelection);
-					if(fullPath == null) return;
-
-					for (MyData d : model) {
-						if (fullPath.equals(d.path)) {
-							data = d;
-							break;
-						}
-					}
-				
-					IDataset image = null;
-					if(data == null){
-						image = PlottingUtils.loadData(structSelection);
-						int i = fullPath != null ? fullPath.lastIndexOf(System.getProperty("file.separator")) : -1;
-						if (image == null) return;
-						if(fileName == null)
-							fileName = image.getName();
-						fileName = i > 0 ? fullPath.substring(i + 1) : null;
-						
-						image.setName(fileName+":"+image.getName());
-					}
-					else{
-						image = data.image;
-					}
-					if(image == null) return;
-					
-					PlottingUtils.plotData(plottingSystem, image.getName(), image);
-
-					// set Ring data
-					setData(fullPath, image);
-
-					// update PlottingSystem
-					data = null;
-					if (fullPath != null) {
-						for (MyData d : model) {
-							if (fullPath.equals(d.path)) {
-								data = d;
-								break;
-							}
-						}
-					}
-					if (data == null) return;
-
-					System.err.println("We have an image, Houston!");
-
-					DiffractionImageAugmenter aug = data.augmenter;
-					if (aug == null) {
-						aug = new DiffractionImageAugmenter(plottingSystem);
-						data.augmenter = aug;
-					}
-					aug.activate();
-					if (data.path == null && fullPath != null) {
-						String path = fullPath;
-						data.path = path;
-						data.name = path.substring(path.lastIndexOf(File.separatorChar) + 1);
-						data.md = DiffractionTool.getDiffractionMetadata(data.image, data.path, service, statusString);
-					}
-					if (data.md == null)
-						data.md = DiffractionTool.getDiffractionMetadata(data.image, data.path, service, statusString);
-					if(data.md != null)
-						aug.setDiffractionMetadata(data.md);
-
-					refreshTable();
-					hideFoundRings();
-
-					drawCalibrants(true);
-				}
-			}
-		};
-		getSite().getWorkbenchWindow().getSelectionService().addSelectionListener(fileSelectionListener);
 
 		// selection change listener for table viewer
 		selectionChangeListener = new ISelectionChangedListener() {
@@ -285,6 +212,88 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			}
 		};
 
+		dropListener = new DropTargetAdapter() {
+			@Override
+			public void drop(DropTargetEvent event) {
+				Object dropData = event.data;
+				if (dropData instanceof IResource[]) {
+					IResource[] res = (IResource[])dropData;
+					
+					for (int i = 0; i < res.length; i++) {
+						// Test if the selection has already been loaded and is in the model
+						MyData data = null;
+						fullPath = res[i].getRawLocation().toOSString();;
+						if(fullPath == null) return;
+
+						for (MyData d : model) {
+							if (fullPath.equals(d.path)) {
+								data = d;
+								break;
+							}
+						}
+					
+						IDataset image = null;
+						if(data == null){
+							image = PlottingUtils.loadData(fullPath, fullPath);
+							int j = fullPath.lastIndexOf(System.getProperty("file.separator"));
+							if (image == null) return;
+							if(fileName == null)
+								fileName = image.getName();
+							fileName = j > 0 ? fullPath.substring(j + 1) : null;
+							
+							image.setName(fileName+":"+image.getName());
+						}
+						else{
+							image = data.image;
+						}
+						if(image == null) return;
+						
+						PlottingUtils.plotData(plottingSystem, image.getName(), image);
+
+						// set Ring data
+						setData(fullPath, image);
+
+						// update PlottingSystem
+						data = null;
+						if (fullPath != null) {
+							for (MyData d : model) {
+								if (fullPath.equals(d.path)) {
+									data = d;
+									break;
+								}
+							}
+						}
+						if (data == null) return;
+
+						System.err.println("We have an image, Houston!");
+
+						DiffractionImageAugmenter aug = data.augmenter;
+						if (aug == null) {
+							aug = new DiffractionImageAugmenter(plottingSystem);
+							data.augmenter = aug;
+						}
+						aug.activate();
+						if (data.path == null && fullPath != null) {
+							String path = fullPath;
+							data.path = path;
+							data.name = path.substring(path.lastIndexOf(File.separatorChar) + 1);
+							data.md = DiffractionTool.getDiffractionMetadata(data.image, data.path, service, statusString);
+						}
+						if (data.md == null)
+							data.md = DiffractionTool.getDiffractionMetadata(data.image, data.path, service, statusString);
+						if(data.md != null)
+							aug.setDiffractionMetadata(data.md);
+
+						refreshTable();
+						hideFoundRings();
+
+						drawCalibrants(true);
+					}
+					
+				}
+			}
+		};
+
 		deleteAction = new Action("Delete item", Activator.getImageDescriptor("icons/delete_obj.png")) {
 			@Override
 			public void run(){
@@ -322,7 +331,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		controlComp.setLayout(new GridLayout(1, false));
 		
 		Label instructionLabel = new Label(controlComp, SWT.WRAP);
-		instructionLabel.setText("Once a file/data is selected in the Project Explorer, choose a type of calibrant, " +
+		instructionLabel.setText("Drag/drop a file/data from the Project Explorer to the table below, choose a type of calibrant, " +
 								 "modify the rings using the controls below and tick the checkbox near to the corresponding " +
 								 "image before pressing the calibration buttons.");
 		instructionLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false));
@@ -362,6 +371,10 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			}
 		});
 		tableViewer.getControl().setMenu(mgr.createContextMenu(tableViewer.getControl()));
+		//add drop support
+		DropTarget dt = new DropTarget(tableViewer.getControl(), DND.DROP_MOVE| DND.DROP_DEFAULT| DND.DROP_COPY);
+		dt.setTransfer(new Transfer[] { TextTransfer.getInstance (), FileTransfer.getInstance(), ResourceTransfer.getInstance()});
+		dt.addDropListener(dropListener);
 
 		Composite calibrantHolder = new Composite(scrollHolder, SWT.NONE);
 		calibrantHolder.setLayout(new GridLayout(2, false));
@@ -1244,7 +1257,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 	}
 
 	private void removeListeners() {
-		getSite().getWorkbenchWindow().getSelectionService().removeSelectionListener(fileSelectionListener);
 		tableViewer.removeSelectionChangedListener(selectionChangeListener);
 		Iterator<MyData> it = model.iterator();
 		while(it.hasNext()){
