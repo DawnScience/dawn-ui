@@ -239,6 +239,10 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 		if (ellipse == null)
 			return;
 
+		if (roi instanceof PolylineROI && !(roi instanceof EllipticalFitROI)) {
+			roi = new EllipticalFitROI((PolylineROI)roi);
+		}
+		
 		if (roi instanceof EllipticalFitROI) {
 			ellipse.updateFromROI((EllipticalFitROI) roi);
 			updateConnectionBounds();
