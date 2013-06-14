@@ -79,7 +79,7 @@ public class MeasurementTool extends AbstractRegionTableTool {
 	protected void createActions() {
 
 		if (getToolPageRole()==ToolPageRole.ROLE_2D) {
-			final Action calibrate = new Action("Calibrate axes using a measurement and apply these axes to othe plots.\nThese axes can then be kept for future plots by keeping the measurement tool open.", IAction.AS_PUSH_BUTTON) {
+			final Action calibrate = new Action("Calibrate axes using a measurement and apply these axes to other plots.\nThese axes can then be applied to other plots by keeping the\nmeasurement tool open using 'open in a dedicated view'.", IAction.AS_PUSH_BUTTON) {
 				public void run() {
 					MeasurementCalibrationDialog dialog = new MeasurementCalibrationDialog(MeasurementTool.this);
 					dialog.open();
