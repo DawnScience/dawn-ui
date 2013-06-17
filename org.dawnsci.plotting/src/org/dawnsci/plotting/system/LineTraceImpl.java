@@ -33,7 +33,7 @@ public class LineTraceImpl implements ILineTrace {
 		}
 		if (trace.getDataProvider() instanceof LightWeightDataProvider) {
 			LightWeightDataProvider prov = (LightWeightDataProvider)trace.getDataProvider();
-			if (prov.isError()) {
+			if (prov.hasErrors()) {
 				trace.setErrorBarEnabled(true);
 			}
 		}
@@ -358,12 +358,12 @@ public class LineTraceImpl implements ILineTrace {
 		trace.setDataProvider(prov);
 		
 		if (xData instanceof IErrorDataset) {
-			if (((IErrorDataset)xData).isError() && !errorBarExplicitySet) {
+			if (((IErrorDataset)xData).hasErrors() && !errorBarExplicitySet) {
 				trace.setErrorBarEnabled(true);
 			}
 		}
 		if (yData instanceof IErrorDataset) {
-			if (((IErrorDataset)yData).isError() && !errorBarExplicitySet) {
+			if (((IErrorDataset)yData).hasErrors() && !errorBarExplicitySet) {
 				trace.setErrorBarEnabled(true);
 			}
 		}

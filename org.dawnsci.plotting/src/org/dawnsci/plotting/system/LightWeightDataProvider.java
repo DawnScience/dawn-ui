@@ -48,16 +48,13 @@ class LightWeightDataProvider implements IDataProvider {
 		try {
 			final double xDat = x.getElementDoubleAbs(index);
 			final double yDat = y.getElementDoubleAbs(index);
-			
-  		    final double xErr = x instanceof IErrorDataset && ((IErrorDataset)x).isError()
-				              ? ((IErrorDataset)x).getError(index)
-				              : 0d;
-			final double yErr = y instanceof IErrorDataset && ((IErrorDataset)y).isError()
-							  ? ((IErrorDataset)y).getError(index)
-							  : 0d;
-							      
+
+			final double xErr = x instanceof IErrorDataset && ((IErrorDataset) x).hasErrors() ? ((IErrorDataset) x)
+					.getError(index) : 0d;
+			final double yErr = y instanceof IErrorDataset && ((IErrorDataset) y).hasErrors() ? ((IErrorDataset) y)
+					.getError(index) : 0d;
+
 			return new Sample(xDat, yDat, yErr, yErr, xErr, xErr);
-			
 		} catch (Throwable ne) {
 			return null;
 		}
@@ -94,7 +91,7 @@ class LightWeightDataProvider implements IDataProvider {
 	private double getMax(AbstractDataset a) {
 		return a.max(true).doubleValue();
 	}
-	
+
 	@Override
 	public boolean isChronological() {
 		return false;
@@ -173,11 +170,12 @@ class LightWeightDataProvider implements IDataProvider {
 	    
 	    fireDataProviderListeners();
 	}
-	
-	public boolean isError() {
-		if (x instanceof IErrorDataset && ((IErrorDataset)x).isError()) return true;
-		if (y instanceof IErrorDataset && ((IErrorDataset)y).isError()) return true;
+
+	public boolean hasErrors() {
+		if (x instanceof IErrorDataset && ((IErrorDataset) x).hasErrors())
+			return true;
+		if (y instanceof IErrorDataset && ((IErrorDataset) y).hasErrors())
+			return true;
 		return false;
 	}
-
 }
