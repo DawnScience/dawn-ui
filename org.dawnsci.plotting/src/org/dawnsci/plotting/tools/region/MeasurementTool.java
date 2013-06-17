@@ -78,6 +78,9 @@ public class MeasurementTool extends AbstractRegionTableTool {
 		
 	protected void createActions() {
 
+		getSite().getActionBars().getToolBarManager().add(getReselectAction());
+		getSite().getActionBars().getToolBarManager().add(new Separator());
+
 		if (getToolPageRole()==ToolPageRole.ROLE_2D) {
 			final Action calibrate = new Action("Calibrate axes using a measurement and apply these axes to other plots.\nThese axes can then be applied to other plots by keeping the\nmeasurement tool open using 'open in a dedicated view'.", IAction.AS_PUSH_BUTTON) {
 				public void run() {
@@ -205,6 +208,7 @@ public class MeasurementTool extends AbstractRegionTableTool {
 		}
 		xCalibratedAxisFactor = axes[0];
 		yCalibratedAxisFactor = axes[1];
+		viewer.refresh();
 	}
 
 	public double getxCalibratedAxisFactor() {

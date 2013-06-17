@@ -246,11 +246,12 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 			if (getImageTrace()!=null) getImageTrace().addPaletteListener(paletteListener);
 		}
 		
-		createNewRegion();
+		if (!isDedicatedView()) createNewRegion();
 		
 	}
 	
 	protected final void createNewRegion() {
+		
 		// Start with a selection of the right type
 		try {
 			IRegion region = getPlottingSystem().createRegion(RegionUtils.getUniqueName(getRegionName(), getPlottingSystem()), getCreateRegionType());

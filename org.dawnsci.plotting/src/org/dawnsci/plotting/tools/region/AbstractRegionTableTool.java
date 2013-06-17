@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
@@ -101,8 +102,8 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 
 	protected static final Logger logger = LoggerFactory.getLogger(AbstractRegionTableTool.class);
 	
-	private Composite     composite;
-	private TableViewer   viewer;
+	private   Composite     composite;
+	protected TableViewer   viewer;
 
 	private RegionColorListener viewUpdateListener;
 	
@@ -160,6 +161,15 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 		
 		activate();
 	}
+	
+	protected IAction getReselectAction() {
+		final Action reselect = new Action("Create new measurement.", getImageDescriptor()) {
+			public void run() {
+				createNewRegion();
+			}
+		};
+        return reselect;
+	}
 
 	protected void createActions() {
 
@@ -187,12 +197,6 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 					logger.error("Problem opening import!", e);
 				}
 			}			
-		};
-
-		final Action reselect = new Action("Create new measurement.", getImageDescriptor()) {
-			public void run() {
-				createNewRegion();
-			}
 		};
 
 		final Action copy = new Action("Copy region values to clipboard", Activator.getImageDescriptor("icons/plot-tool-measure-copy.png")) {
@@ -251,8 +255,6 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 
 		getSite().getActionBars().getToolBarManager().add(importRegion);
 		getSite().getActionBars().getToolBarManager().add(exportRegion);
-		getSite().getActionBars().getToolBarManager().add(new Separator());
-		getSite().getActionBars().getToolBarManager().add(reselect);
 		getSite().getActionBars().getToolBarManager().add(new Separator());
 		getSite().getActionBars().getToolBarManager().add(copy);
 		getSite().getActionBars().getMenuManager().add(copy);
@@ -315,7 +317,9 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 				final Collection<IRegion> regions = getPlottingSystem().getRegions();
 				for (IRegion iRegion : regions) iRegion.addROIListener(this);
 				
-				createNewRegion();
+				if (!isDedicatedView()) {
+					createNewRegion();
+				}
 				
 			} catch (Exception e) {
 				logger.error("Cannot add region listeners!", e);

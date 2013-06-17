@@ -7,9 +7,10 @@ import java.util.HashSet;
 import org.dawnsci.common.widgets.celleditor.FloatSpinnerCellEditor;
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.dawnsci.plotting.api.region.IRegion;
-import org.dawnsci.plotting.api.region.RegionUtils;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.dawnsci.plotting.api.region.RegionUtils;
 import org.dawnsci.plotting.tools.region.MeasurementLabelProvider.LabelType;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.CheckboxCellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
@@ -117,7 +118,12 @@ public class RegionEditTool extends AbstractRegionTableTool {
 		EDITABLE_REGIONS = Collections.unmodifiableCollection(tmp);
 	}
 	
-	
+	protected void createActions() {
+		getSite().getActionBars().getToolBarManager().add(getReselectAction());
+		getSite().getActionBars().getToolBarManager().add(new Separator());
+		super.createActions();
+	}
+
 	protected void createNewRegion() {
 		try {
 			getPlottingSystem().createRegion(RegionUtils.getUniqueName("Region", getPlottingSystem()), IRegion.RegionType.BOX);
