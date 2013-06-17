@@ -230,6 +230,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			public void diffractionCrystalEnvironmentChanged(
 					DiffractionCrystalEnvironmentEvent evt) {
 				tableViewer.refresh();
+				drawCalibrants(true);
 			}
 		};
 
@@ -237,6 +238,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			@Override
 			public void detectorPropertiesChanged(DetectorPropertyEvent evt) {
 				tableViewer.refresh();
+				drawCalibrants(true);
 			}
 		};
 
