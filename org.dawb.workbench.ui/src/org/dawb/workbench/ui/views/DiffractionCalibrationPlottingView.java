@@ -105,7 +105,11 @@ import uk.ac.diamond.scisoft.analysis.crystallography.HKL;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
+import uk.ac.diamond.scisoft.analysis.diffraction.DetectorPropertyEvent;
 import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
+import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironmentEvent;
+import uk.ac.diamond.scisoft.analysis.diffraction.IDetectorPropertyListener;
+import uk.ac.diamond.scisoft.analysis.diffraction.IDiffractionCrystalEnvironmentListener;
 import uk.ac.diamond.scisoft.analysis.diffraction.PowderRingsUtils;
 import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
 import uk.ac.diamond.scisoft.analysis.fitting.Fitter;
@@ -157,6 +161,10 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 	private DropTargetAdapter dropListener;
 
+	private IDiffractionCrystalEnvironmentListener diffractionCrystEnvListener;
+
+	private IDetectorPropertyListener detectorPropertyListener;
+
 
 	enum ManipulateMode {
 		LEFT, RIGHT, UP, DOWN, ENLARGE, SHRINK, ELONGATE, SQUASH, CLOCKWISE, ANTICLOCKWISE
@@ -206,13 +214,29 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 					}
 					if (selectedData.md == null)
 						selectedData.md = DiffractionTool.getDiffractionMetadata(selectedData.image, selectedData.path, service, statusString);
-					if(selectedData.md != null)
+					if(selectedData.md != null){
 						aug.setDiffractionMetadata(selectedData.md);
+					}
 
 					hideFoundRings();
 
 					drawCalibrants(false);
 				}
+			}
+		};
+
+		diffractionCrystEnvListener = new IDiffractionCrystalEnvironmentListener() {
+			@Override
+			public void diffractionCrystalEnvironmentChanged(
+					DiffractionCrystalEnvironmentEvent evt) {
+				tableViewer.refresh();
+			}
+		};
+
+		detectorPropertyListener = new IDetectorPropertyListener() {
+			@Override
+			public void detectorPropertiesChanged(DetectorPropertyEvent evt) {
+				tableViewer.refresh();
 			}
 		};
 
@@ -259,6 +283,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 					for (MyData data : model) {
 						if(data.name.equals(selectedData.name)){
 							model.remove(data);
+							data.md.getDetector2DProperties().removeDetectorPropertyListener(detectorPropertyListener);
+							data.md.getDiffractionCrystalEnvironment().removeDiffractionCrystalEnvironmentListener(diffractionCrystEnvListener);
 							tableViewer.refresh();
 							break;
 						}
@@ -663,8 +689,11 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		}
 		if (data.md == null)
 			data.md = DiffractionTool.getDiffractionMetadata(data.image, data.path, service, statusString);
-		if(data.md != null)
+		if(data.md != null){
 			aug.setDiffractionMetadata(data.md);
+			data.md.getDetector2DProperties().addDetectorPropertyListener(detectorPropertyListener);
+			data.md.getDiffractionCrystalEnvironment().addDiffractionCrystalEnvironmentListener(diffractionCrystEnvListener);
+		}
 
 		refreshTable();
 		hideFoundRings();
@@ -1290,6 +1319,9 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		while(it.hasNext()){
 			MyData d = it.next();
 			model.remove(d);
+			d.md.getDetector2DProperties().removeDetectorPropertyListener(detectorPropertyListener);
+			d.md.getDiffractionCrystalEnvironment().removeDiffractionCrystalEnvironmentListener(diffractionCrystEnvListener);
+
 		}
 		System.out.println("model emptied");
 	}
