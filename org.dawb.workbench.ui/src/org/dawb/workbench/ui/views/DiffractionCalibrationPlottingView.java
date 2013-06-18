@@ -93,6 +93,10 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IViewSite;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
@@ -137,34 +141,30 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 	private MyData currentData;
 	private List<MyData> model = new CopyOnWriteArrayList<MyData>();
 	private ILoaderService service;
+
+	private Composite parent;
+	private ScrolledComposite scrollComposite;
+	private Composite scrollHolder;
 	private TableViewer tableViewer;
 	private Button calibrateImages;
 	private Button calibrateWD;
+	private Combo calibrant;
+	private Action deleteAction;
 
 	private IPlottingSystem plottingSystem;
-
-	private Composite parent;
-
-	private ISelectionChangedListener selectionChangeListener;
-
-	private ScrolledComposite scrollComposite;
-	private Composite scrollHolder;
 
 	private String fullPath;
 	private String fileName;
 	
 	private String[] statusString = new String[1];
 
-	private Combo calibrant;
-
-	private Action deleteAction;
-
+	private ISelectionChangedListener selectionChangeListener;
 	private DropTargetAdapter dropListener;
-
 	private IDiffractionCrystalEnvironmentListener diffractionCrystEnvListener;
-
 	private IDetectorPropertyListener detectorPropertyListener;
 
+	private int dataNumber = -1;
+	private List<String> pathsList = new ArrayList<String>();
 
 	enum ManipulateMode {
 		LEFT, RIGHT, UP, DOWN, ENLARGE, SHRINK, ELONGATE, SQUASH, CLOCKWISE, ANTICLOCKWISE
@@ -172,6 +172,33 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 	public DiffractionCalibrationPlottingView() {
 		service = (ILoaderService)PlatformUI.getWorkbench().getService(ILoaderService.class);
+	}
+
+	@Override
+	public void init(IViewSite site, IMemento memento) throws PartInitException {
+		init(site);
+		setSite(site);
+		setPartName("Diffraction Calibration View");
+
+		if (memento != null) {
+			dataNumber = memento.getInteger("DataNumber");
+			for(int i=0; i<dataNumber; i++){
+				pathsList.add(i, memento.getString("DataPath"+String.valueOf(i)));
+			}
+		}
+	}
+
+	@Override
+	public void saveState(IMemento memento) {
+		if (memento != null) {
+			int size = tableViewer.getTable().getItems().length;
+			memento.putInteger("DataNumber", size);
+			for(int i = 0; i < size; i++){
+				TableItem item = ((TableItem)tableViewer.getTable().getItem(i));
+				MyData data = (MyData)item.getData();
+				memento.putString("DataPath"+String.valueOf(i), data.path);
+			}
+		}
 	}
 
 	@Override
@@ -273,6 +300,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 						loadDataAndDrawCalibrants(selectedData[i], null);
 					}
 				}
+				tableViewer.getTable().deselectAll();
 			}
 		};
 
@@ -614,6 +642,14 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		} catch (Exception e1) {
 			logger.error("Could not create plotting system:"+ e1);
 		}
+
+		// try to load the previous data saved in the memento
+		for(int i = 0; i<dataNumber; i++){
+			if(!pathsList.get(i).endsWith(".nxs")){
+				loadDataAndDrawCalibrants(pathsList.get(i), null);
+			}
+		}
+		tableViewer.getTable().deselectAll();
 
 		// start diffraction tool 
 		Composite diffractionToolComp = new Composite(leftSash, SWT.BORDER);
@@ -980,7 +1016,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				}
 			}
 		});
-
 		return status[0] ? Status.OK_STATUS : Status.CANCEL_STATUS;
 	}
 
@@ -1323,7 +1358,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			model.remove(d);
 			d.md.getDetector2DProperties().removeDetectorPropertyListener(detectorPropertyListener);
 			d.md.getDiffractionCrystalEnvironment().removeDiffractionCrystalEnvironmentListener(diffractionCrystEnvListener);
-
 		}
 		System.out.println("model emptied");
 	}
