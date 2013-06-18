@@ -9,7 +9,6 @@ import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.api.IPlottingSystem;
-import org.dawnsci.plotting.api.region.ILockableRegion;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.region.RegionUtils;
@@ -133,7 +132,12 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 
 					if (getPlottingSystem()==null) return;
 					
-					setSectorsMobile(false);
+					IContributionItem item = profilePlottingSystem.getActionBars().getToolBarManager().find("org.dawb.workbench.plotting.tools.profile.lockSectorCenters");
+					
+					if (item != null && item instanceof ActionContributionItem) {
+						((ActionContributionItem)item).getAction().setChecked(true);
+						((ActionContributionItem)item).getAction().run();
+					}
 					
 					for (int i = 0; i < profileAxis.size(); ++i) {
 						IAction action = profileAxis.getAction(i);
@@ -151,7 +155,12 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 					setMessage(false);
 					pixelAction.run();
 					
-					setSectorsMobile(true);
+					IContributionItem item = profilePlottingSystem.getActionBars().getToolBarManager().find("org.dawb.workbench.plotting.tools.profile.lockSectorCenters");
+					
+					if (item != null && item instanceof ActionContributionItem) {
+						((ActionContributionItem)item).getAction().setChecked(false);
+						((ActionContributionItem)item).getAction().run();
+					}
 				}
 			}
 		};
@@ -201,15 +210,6 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 
 	}
 	
-	protected void setSectorsMobile(boolean b) {
-		final Collection<IRegion> regions = getPlottingSystem().getRegions();
-		if (regions!=null) for (IRegion iRegion : regions) {
-			if (iRegion.getRegionType()==RegionType.SECTOR) {
-				iRegion.setMobile(b);
-			}
-		}
-	}
-
 	public void activate () {
 		super.activate();
 		
