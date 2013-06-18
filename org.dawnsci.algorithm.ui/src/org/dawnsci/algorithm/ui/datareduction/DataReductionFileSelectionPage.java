@@ -76,7 +76,9 @@ import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Maths;
 import uk.ac.diamond.scisoft.analysis.rcp.plotting.utils.PlottingUtils;
 
 public class DataReductionFileSelectionPage extends AbstractAlgorithmProcessPage {
@@ -193,7 +195,7 @@ public class DataReductionFileSelectionPage extends AbstractAlgorithmProcessPage
 		aci = new ActionContributionItem(aci.getAction());
 		aci.fill(mainRecapComp);
 		Button runWorkflowButton = (Button) aci.getWidget();
-		runWorkflowButton.setText("Run Workflow");
+		runWorkflowButton.setText("Run Data Reduction Process");
 		runWorkflowButton.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
 
 		detectorPlot.createPlotPart(leftSash, DETECT_TYPE, null, PlotType.IMAGE, algorithmViewPart.getSite().getPart());
@@ -300,25 +302,61 @@ public class DataReductionFileSelectionPage extends AbstractAlgorithmProcessPage
 				if(image == null) return;
 				if (!((SelectedData)viewer.getElementAt(0)).isLocked()) {
 					PlottingUtils.plotData(dataPlot, DATA_TITLE, image);
+					((SelectedData)viewer.getElementAt(0)).setImage(image);
 					((SelectedData)viewer.getElementAt(0)).setShape(image.getShape());
 					((SelectedData)viewer.getElementAt(0)).setFileName(PlottingUtils.getFileName(structSelection));
 					dataFilePaths.put("AFilename", PlottingUtils.getFullFilePath(structSelection));
 				}
 				if (!((SelectedData)viewer.getElementAt(1)).isLocked()) {
 					PlottingUtils.plotData(calibrationPlot, CALIB_TITLE, image);
+					((SelectedData)viewer.getElementAt(1)).setImage(image);
 					((SelectedData)viewer.getElementAt(1)).setShape(image.getShape());
 					((SelectedData)viewer.getElementAt(1)).setFileName(PlottingUtils.getFileName(structSelection));
 					dataFilePaths.put("Calibration_file", PlottingUtils.getFullFilePath(structSelection));
 				}
 				if (!((SelectedData)viewer.getElementAt(2)).isLocked()) {
-					PlottingUtils.plotData(detectorPlot, DETECT_TITLE, image);
+					// if data is locked
+					if(((SelectedData)viewer.getElementAt(0)).isLocked()){
+						IDataset dataImage = ((SelectedData)viewer.getElementAt(0)).getImage();
+						final AbstractDataset aDataImage = (AbstractDataset)dataImage;
+						Job divide = new Job("Running Divide process") {
+							@Override
+							protected IStatus run(IProgressMonitor monitor) {
+								AbstractDataset divideResult = Maths.divide(aDataImage, (AbstractDataset)image);
+								PlottingUtils.plotData(detectorPlot, DETECT_TITLE, (IDataset)divideResult);
+								return Status.OK_STATUS;
+							}
+						};
+						divide.schedule();
+					} else {
+						PlottingUtils.plotData(detectorPlot, DETECT_TITLE, image);
+					}
+					
+					((SelectedData)viewer.getElementAt(2)).setImage(image);
 					((SelectedData)viewer.getElementAt(2)).setShape(image.getShape());
 					((SelectedData)viewer.getElementAt(2)).setFileName(PlottingUtils.getFileName(structSelection));
+					
 					dataFilePaths.put("Detector_response_file", PlottingUtils.getFullFilePath(structSelection));
 
 				}
 				if (!((SelectedData)viewer.getElementAt(3)).isLocked()) {
-					PlottingUtils.plotData(backgroundPlot, BACKGD_TITLE, image);
+					// if data is locked
+					if(((SelectedData)viewer.getElementAt(0)).isLocked()){
+						IDataset dataImage = ((SelectedData)viewer.getElementAt(0)).getImage();
+						final AbstractDataset aDataImage = (AbstractDataset)dataImage;
+						Job subtract = new Job("Running Subtract process") {
+							@Override
+							protected IStatus run(IProgressMonitor monitor) {
+								AbstractDataset subtractResult = Maths.subtract(aDataImage, (AbstractDataset)image);
+								PlottingUtils.plotData(backgroundPlot, BACKGD_TITLE, (IDataset)subtractResult);
+								return Status.OK_STATUS;
+							}
+						};
+						subtract.schedule();
+					} else {
+						PlottingUtils.plotData(backgroundPlot, BACKGD_TITLE, image);
+					}
+					((SelectedData)viewer.getElementAt(3)).setImage(image);
 					((SelectedData)viewer.getElementAt(3)).setShape(image.getShape());
 					((SelectedData)viewer.getElementAt(3)).setFileName(PlottingUtils.getFileName(structSelection));
 					dataFilePaths.put("Background_file", PlottingUtils.getFullFilePath(structSelection));
@@ -326,6 +364,7 @@ public class DataReductionFileSelectionPage extends AbstractAlgorithmProcessPage
 				}
 				if (!((SelectedData)viewer.getElementAt(4)).isLocked()) {
 					PlottingUtils.plotData(maskPlot, MASK_TITLE, image);
+					((SelectedData)viewer.getElementAt(4)).setImage(image);
 					((SelectedData)viewer.getElementAt(4)).setShape(image.getShape());
 					((SelectedData)viewer.getElementAt(4)).setFileName(PlottingUtils.getFileName(structSelection));
 					dataFilePaths.put("Mask_file", PlottingUtils.getFullFilePath(structSelection));
@@ -438,6 +477,7 @@ public class DataReductionFileSelectionPage extends AbstractAlgorithmProcessPage
 	 */
 	private class SelectedData {
 
+		private IDataset image;
 		private int[] shape;
 		private boolean isLocked;
 		private String fileName;
@@ -448,6 +488,14 @@ public class DataReductionFileSelectionPage extends AbstractAlgorithmProcessPage
 			this.shape = shape;
 			this.fileName = fileName;
 			this.isLocked = isLocked;
+		}
+
+		public void setImage(IDataset image){
+			this.image = image;
+		}
+
+		public IDataset getImage(){
+			return image;
 		}
 
 		public void setShape(int[] shape){
