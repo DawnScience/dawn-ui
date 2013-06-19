@@ -45,7 +45,9 @@ public class RegionFillFigure extends Figure implements IRegionContainer {
 		final Iterator<?> it = getListeners(MouseListener.class);
 		if (it!=null && it.hasNext()) {
 			MouseListener l = null;
-			while((l=(MouseListener)it.next()) !=null ) {
+			
+			while(it.hasNext()) {
+				l=(MouseListener)it.next();
 				if (l instanceof FigureTranslator) return (FigureTranslator)l;
 			}
 		}
