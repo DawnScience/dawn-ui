@@ -113,9 +113,12 @@ public class WindowTool extends AbstractToolPage implements SelectionListener {
 	private ITraceListener         traceListener;
 	private IPaletteListener       paletteListener;
 	private WindowJob              windowJob;
-	private Composite              sliceControl, blankComposite;
+	private Composite              sliceControl, windowControl, blankComposite;
 	private Composite              content;
 
+	// FIXME Too many unecessary member variables = bad design.
+	// Consider using anonymous classes with final variables when 
+	// these are created, then there is no need to have them all as members.
 	private Label lblStartX;
 	private Spinner spnStartX;
 	private Label lblStartY;
@@ -127,7 +130,6 @@ public class WindowTool extends AbstractToolPage implements SelectionListener {
 	private Spinner spnXAspect;
 	private Label lblDelimiter;
 	private Spinner spnYAspect;
-	private Composite windowControl;
 
 	public WindowTool() {
 		try {
@@ -582,6 +584,7 @@ public class WindowTool extends AbstractToolPage implements SelectionListener {
 			windowSystem.removeRegionListener(regionListener);
 		}
 		
+		// FIXME Code will likely never get run because super.dispose() already called.
 		if (!spnStartX.isDisposed())
 			spnStartX.removeSelectionListener(this);
 		if (!spnStartY.isDisposed())
@@ -630,6 +633,9 @@ public class WindowTool extends AbstractToolPage implements SelectionListener {
 
 	private final static int MAXDISPLAYDIM = 1024;
 
+	// FIXME replace with anonymous classes, one for each
+	// listener required. Avoids need for one method doing several 
+	// things = better design, cheaper to own code.
 	@Override
 	public void widgetSelected(SelectionEvent e) {
 		if (!e.getSource().equals(btnOverwriteAspect)) {
@@ -677,7 +683,7 @@ public class WindowTool extends AbstractToolPage implements SelectionListener {
 
 	@Override
 	public void widgetDefaultSelected(SelectionEvent e) {
-		widgetSelected(e);
+		widgetSelected(e); // FIXME Should do nothing as not required in this instance.
 	}
 
 	/**
@@ -687,7 +693,7 @@ public class WindowTool extends AbstractToolPage implements SelectionListener {
 	 * @param width
 	 * @param height
 	 */
-	public void setSpinnerValues(final int startX, 
+	protected void setSpinnerValues(final int startX, 
 								 final int startY, 
 								 final int width, 
 								 final int height) {

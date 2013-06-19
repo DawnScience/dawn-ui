@@ -105,6 +105,8 @@ import uk.ac.diamond.scisoft.analysis.diffraction.IDetectorPropertyListener;
 import uk.ac.diamond.scisoft.analysis.diffraction.IDiffractionCrystalEnvironmentListener;
 import uk.ac.diamond.scisoft.analysis.hdf5.HDF5NodeLink;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
+
+// FIXME This plugin is having scisoft.analysis.rcp dependencies phased out, avoid using if can.
 import uk.ac.diamond.scisoft.analysis.rcp.plotting.utils.PlottingUtils;
 
 /**
@@ -700,7 +702,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		IDataset image = null;
 		if(data == null){
 			image = PlottingUtils.loadData(filePath, dataFullName);
-			int j = fullPath.lastIndexOf(System.getProperty("file.separator"));
+			int j = fullPath.lastIndexOf(System.getProperty("file.separator")); // TODO File.separator
 			if (image == null) return;
 			if(fileName == null)
 				fileName = image.getName();

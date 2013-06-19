@@ -92,6 +92,8 @@ public class DiffractionCalibrationView extends ViewPart {
 	private ScrolledComposite sComp;
 	private IPlottingSystem currentSystem;
 	private DiffractionTableData currentData;
+	// FIXME Slightly better to clear these on dispose() for garbage collector to
+	// do better job.
 	private List<DiffractionTableData> model = new ArrayList<DiffractionTableData>();
 	private Map<IPlottingSystem, Listener> listeners = new HashMap<IPlottingSystem, Listener>();
 	private ILoaderService service;
@@ -101,6 +103,7 @@ public class DiffractionCalibrationView extends ViewPart {
 	private Button calibrateWD;
 
 	public DiffractionCalibrationView() {
+		// FIXME, service might not be there, can this view still work then?
 		service = (ILoaderService)PlatformUI.getWorkbench().getService(ILoaderService.class);
 	}
 
@@ -443,6 +446,8 @@ public class DiffractionCalibrationView extends ViewPart {
 		sComp.layout();
 	}
 
+	// FIXME Suggest name other than 'Listener' as does not describe what doing
+	// and is same as Listener in SWT.
 	class Listener extends ITraceListener.Stub {
 		private DiffractionTableData data;
 		
@@ -619,6 +624,7 @@ public class DiffractionCalibrationView extends ViewPart {
 		tc.setText("Use");
 		tc.setWidth(40);
 
+		// FIXME #rings is not clear, 'Ring Count' better?
 		String[] headings = { "Image", "#rings", "Distance", "Wavelength" };
 		for (String h : headings) {
 			tvc = new TableViewerColumn(tv, SWT.NONE);
@@ -701,6 +707,8 @@ public class DiffractionCalibrationView extends ViewPart {
 
 	private void refreshTable() {
 		tableViewer.refresh();
+		
+		// FIXME This pack and layout should not be necessary in theory.
 		for (TableColumn c : tableViewer.getTable().getColumns()) {
 			c.pack();
 		}
@@ -737,6 +745,7 @@ public class DiffractionCalibrationView extends ViewPart {
 	public void dispose() {
 		super.dispose();
 		getSite().getPage().removePartListener(listener);
+		// FIXME more to dispsoe.
 	}
 
 	@Override
