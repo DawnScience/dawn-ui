@@ -1016,10 +1016,11 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		while(it.hasNext()){
 			DiffractionTableData d = it.next();
 			model.remove(d);
+			if(d.augmenter != null) d.augmenter.deactivate();
 			d.md.getDetector2DProperties().removeDetectorPropertyListener(detectorPropertyListener);
 			d.md.getDiffractionCrystalEnvironment().removeDiffractionCrystalEnvironmentListener(diffractionCrystEnvListener);
 		}
-		System.out.println("model emptied");
+		logger.debug("model emptied");
 	}
 
 	@Override
