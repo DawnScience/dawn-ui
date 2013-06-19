@@ -35,6 +35,7 @@ import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
 import org.dawb.common.ui.slicing.DimsDataList;
 import org.dawb.common.ui.slicing.ISlicablePlottingPart;
+import org.dawb.common.ui.util.DialogUtils;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.util.io.FileUtils;
 import org.dawb.common.util.io.PropUtils;
@@ -55,8 +56,8 @@ import org.dawnsci.plotting.api.tool.IToolChangeListener;
 import org.dawnsci.plotting.api.tool.IToolPage;
 import org.dawnsci.plotting.api.tool.ToolChangeEvent;
 import org.dawnsci.plotting.api.trace.ITraceListener;
-import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.api.trace.ITraceListener.Stub;
+import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.tools.reduction.DataReductionWizard;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.resources.IFile;
@@ -470,15 +471,17 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 					} catch (Exception e) {
 						logger.error("Cannot open wizard "+DataReductionWizard.ID, e);
 					}
-					wiz.setSource(getIFile(true));
-					wiz.setSelections(getSelectionNames());
-					wiz.setTool((IDataReductionToolPage)getAbstractPlottingSystem().getActiveTool());
-					wiz.setSliceData(getSliceData());
-					wiz.setNexusAxes(getNexusAxes());
+					wiz.setData(getIFile(true),
+							    getSelectionNames().get(0),
+							    (IDataReductionToolPage)getAbstractPlottingSystem().getActiveTool());
+					wiz.setSlice(getSliceSet(), getSliceData());
 					
 					// TODO Should be non modal, it takes a while.
 					WizardDialog wd = new  WizardDialog(Display.getCurrent().getActiveShell(), wiz);
 					wd.setTitle(wiz.getWindowTitle());
+					wd.create();
+					wd.getShell().setSize(650, 800);
+					DialogUtils.centerDialog(Display.getCurrent().getActiveShell(), wd.getShell());
 					wd.open();
 				}
 			};
@@ -514,13 +517,12 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		return null;
 	}
 	
-	protected Map<Integer,String> getNexusAxes() {
+	protected ILazyDataset getSliceSet() {
 		if (providerDeligate instanceof ISlicablePlottingPart) {
-			return ((ISlicablePlottingPart)providerDeligate).getSliceComponent().getNexusAxes();
+			return ((ISlicablePlottingPart)providerDeligate).getSliceComponent().getLazyDataset();
 		}
 		return null;
 	}
-
 
 	public IFile getIFile(boolean createNewFile) {
 		IFile file = null;

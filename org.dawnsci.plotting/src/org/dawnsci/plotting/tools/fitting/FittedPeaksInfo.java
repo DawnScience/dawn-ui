@@ -6,10 +6,10 @@ import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.trace.ILineTrace;
 import org.dawnsci.plotting.preference.FittingConstants;
-import org.eclipse.core.runtime.IProgressMonitor;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
+import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 
 /**
  * A bean to hold information required to do a fit.
@@ -22,13 +22,13 @@ public class FittedPeaksInfo {
 	private List<IdentifiedPeak> identifiedPeaks;
 	private AbstractDataset  x; 
 	private AbstractDataset  y;
-	private IProgressMonitor monitor;
+	private IMonitor monitor;
 
 	private IPlottingSystem plottingSystem;
 	private ILineTrace selectedTrace;
 	private int numPeaks = -1;
 	
-	public FittedPeaksInfo(AbstractDataset x, AbstractDataset y, IProgressMonitor monitor) {
+	public FittedPeaksInfo(AbstractDataset x, AbstractDataset y, IMonitor monitor) {
 		this.x = x;
 		this.y = y;
 		this.monitor = monitor;
@@ -36,7 +36,7 @@ public class FittedPeaksInfo {
 
 	public FittedPeaksInfo(final AbstractDataset  x, 
 			final AbstractDataset  y,
-			final IProgressMonitor monitor,
+			final IMonitor monitor,
 			IPlottingSystem plottingSystem, 
 			ILineTrace selectedTrace){
 		this(x, y, monitor);
@@ -46,7 +46,7 @@ public class FittedPeaksInfo {
 
 	public FittedPeaksInfo(final AbstractDataset  x, 
 			final AbstractDataset  y,
-			final IProgressMonitor monitor,
+			final IMonitor monitor,
 			IPlottingSystem plottingSystem,
 			ILineTrace selectedTrace,
 			int numPeaks){
@@ -74,10 +74,10 @@ public class FittedPeaksInfo {
 	public void setY(AbstractDataset y) {
 		this.y = y;
 	}
-	public IProgressMonitor getMonitor() {
+	public IMonitor getMonitor() {
 		return monitor;
 	}
-	public void setMonitor(IProgressMonitor monitor) {
+	public void setMonitor(IMonitor monitor) {
 		this.monitor = monitor;
 	}
 	@Override

@@ -95,7 +95,7 @@ public class FittingUtils {
 			composites =  Generic1DFitter.fitPeakFunctions(info.getIdentifiedPeaks(), info.getX(), info.getY(), getPeakType(), optimizer, getSmoothing(), info.getNumPeaks(), 0.0, false, false, new IAnalysisMonitor() {
 				@Override
 				public boolean hasBeenCancelled() {
-					return info.getMonitor().isCanceled(); // We always use the monitor.isCancelled() the fitting can take a while
+					return info.getMonitor().isCancelled(); // We always use the monitor.isCancelled() the fitting can take a while
 					                             // and should always allow stopping.
 				}
 			});
@@ -107,7 +107,7 @@ public class FittingUtils {
 		for (CompositeFunction function : composites) {
 			
 			final IPeak peak = function.getPeak(0);
-			if (info.getMonitor().isCanceled()) return null;
+			if (info.getMonitor().isCancelled()) return null;
 			double w = peak.getFWHM();
 			final double position = peak.getPosition();
 			RectangularROI bounds = new RectangularROI(position - w/2, 0, w, 0, 0);
@@ -325,7 +325,7 @@ public class FittingUtils {
 
 		final FittedFunctions bean = new FittedFunctions();
 
-		if (info.getMonitor().isCanceled()) return null;
+		if (info.getMonitor().isCancelled()) return null;
 		
 		Double max = info.getX().max().doubleValue();
 		Double min = info.getX().min().doubleValue();

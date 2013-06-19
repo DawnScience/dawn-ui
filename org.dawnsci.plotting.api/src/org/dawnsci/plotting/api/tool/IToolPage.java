@@ -72,6 +72,19 @@ public interface IToolPage extends IPageBookViewPage, IAdaptable {
 		public boolean is3D() {
 			return !is1D()&&!is2D();
 		}
+		/**
+		 * Either 1,2 or 3. A tool cannot currently act on
+		 * more dimensions and will return -1 if 
+		 * it cannot determine rank.
+		 * 
+		 * @return
+		 */
+		public int getPreferredRank() {
+			if (is1D()) return 1;
+			if (is2D()) return 2;
+			if (is3D()) return 3;
+			return -1;
+		}
 
 		public String getId() {
 			return id;

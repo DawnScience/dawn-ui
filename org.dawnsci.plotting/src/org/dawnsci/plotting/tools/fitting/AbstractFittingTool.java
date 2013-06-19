@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Vector;
 
 import org.dawb.common.ui.menu.MenuAction;
+import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegionListener;
@@ -434,7 +435,7 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 				}
 	
 				try {
-					final FittedFunctions bean = getFittedFunctions(new FittedPeaksInfo(x, y, monitor, getPlottingSystem(), selectedTrace));
+					final FittedFunctions bean = getFittedFunctions(new FittedPeaksInfo(x, y, new ProgressMonitorWrapper(monitor), getPlottingSystem(), selectedTrace));
 					if (bean!=null) for (FittedFunction p : bean.getFunctionList()) {
 		    			p.setX((AbstractDataset)selectedTrace.getXData());
 		    			p.setY((AbstractDataset)selectedTrace.getYData());
