@@ -48,13 +48,14 @@ class ToolConversionVisitor implements IConversionVisitor {
 	@Override
 	public void visit(IConversionContext context, IDataset slice) throws Exception {
 		
+		if (context.getMonitor()!=null && context.getMonitor().isCancelled()) return;
+		
 		Group grp = createGroupIfRequired(context);
 		DataReductionSlice bean = new DataReductionSlice(output, grp, slice, object, context.getMonitor());
 		bean.setAxes(nexusAxes);
 		DataReductionInfo  info = tool.export(bean);
 		if (info.getStatus().isOK()) object = info.getUserData();
 
-		if (context.getMonitor().isCancelled()) return;
 		if (context.getMonitor()!=null) context.getMonitor().worked(1);
 	}
 	

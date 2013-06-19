@@ -1,7 +1,6 @@
 package org.dawnsci.plotting.tools.reduction;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
