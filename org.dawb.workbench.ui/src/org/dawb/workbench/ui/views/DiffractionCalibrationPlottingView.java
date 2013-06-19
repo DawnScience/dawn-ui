@@ -256,16 +256,26 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			@Override
 			public void diffractionCrystalEnvironmentChanged(
 					DiffractionCrystalEnvironmentEvent evt) {
-				tableViewer.refresh();
-				drawCalibrants(true);
+				Display.getDefault().asyncExec(new Runnable() {
+					@Override
+					public void run() {
+						tableViewer.refresh();
+						drawCalibrants(true);
+					}
+				});
 			}
 		};
 
 		detectorPropertyListener = new IDetectorPropertyListener() {
 			@Override
 			public void detectorPropertiesChanged(DetectorPropertyEvent evt) {
-				tableViewer.refresh();
-				drawCalibrants(true);
+				Display.getDefault().asyncExec(new Runnable() {
+					@Override
+					public void run() {
+						tableViewer.refresh();
+						drawCalibrants(true);
+					}
+				});
 			}
 		};
 
@@ -938,16 +948,21 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				Fitter.llsqFit(new AbstractDataset[] {AbstractDataset.createFromList(odist)}, AbstractDataset.createFromList(ndist), p);
 				System.err.println(p);
 
-				double f = p.getParameterValue(0);
-				for (MyData data : model) {
+				final double f = p.getParameterValue(0);
+				for (final MyData data : model) {
 					if (!data.use || data.nrois <= 0 || data.md == null) {
 						continue;
 					}
 
-					DiffractionCrystalEnvironment ce = data.md.getDiffractionCrystalEnvironment();
+					final DiffractionCrystalEnvironment ce = data.md.getDiffractionCrystalEnvironment();
 					if (ce != null) {
 						data.ow = ce.getWavelength();
-						ce.setWavelength(data.ow/f);
+						Display.getDefault().asyncExec(new Runnable() {
+							@Override
+							public void run() {
+								ce.setWavelength(data.ow/f);
+							}
+						});
 					}
 				}
 
