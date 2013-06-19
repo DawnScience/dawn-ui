@@ -102,6 +102,8 @@ public interface IPlottingSystem extends IAdaptable, ITraceSystem, IRegionSystem
 	public String getPlotName();
 	
 	/**
+	 * This method is Thread safe - so no need to call from UI thread!
+	 * 
 	 * See also ITraceSystem for flexible trace manipulation.
 	 * 
 	 * For 1D - x is the x axis, ys is the y traces. X may be null when plotting with indices.
@@ -138,6 +140,7 @@ public interface IPlottingSystem extends IAdaptable, ITraceSystem, IRegionSystem
 							         List<? extends IDataset> ys,
 							         IProgressMonitor         monitor);
 	/**
+	 * This method is Thread safe - so no need to call from UI thread!
 	 * @see createPlot1D(AbstractDataset, List<AbstractDataset>, IProgressMonitor)
 	 * @param x
 	 * @param ys
@@ -151,6 +154,8 @@ public interface IPlottingSystem extends IAdaptable, ITraceSystem, IRegionSystem
 							         IProgressMonitor      monitor);
 
 	/**
+	 * This method is Thread safe - so no need to call from UI thread!
+	 * 
 	 * Attempts to update any ILineTraces with the same name as the ys pass in, otherwise
 	 * will call createPlot1D(...)
 	 * 
@@ -171,6 +176,8 @@ public interface IPlottingSystem extends IAdaptable, ITraceSystem, IRegionSystem
 							         IProgressMonitor         monitor);
 
 	/**
+	 * This method is Thread safe - so no need to call from UI thread!
+	 * 
 	 * See also ITraceSystem for flexible trace manipulation.
      *
 	 * For 2D - x is the image dataset, ys is the axes. It will also plot in 3D
@@ -195,6 +202,8 @@ public interface IPlottingSystem extends IAdaptable, ITraceSystem, IRegionSystem
 	
 	
 	/**
+	 * This method is Thread safe - so no need to call from UI thread!
+	 * 
 	 * This method is similar to createPlot2D(...) however calling this method swaps the image data for
 	 * a plot - keeping zoom level intact. It can be used for a live update of an image plot for instance.
 	 * If there is no image to update, createPlot2D(...) will be called instead automatically.
