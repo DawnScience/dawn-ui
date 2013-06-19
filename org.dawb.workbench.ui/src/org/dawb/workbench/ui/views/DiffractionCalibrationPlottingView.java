@@ -124,6 +124,9 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 	private static Logger logger = LoggerFactory.getLogger(DiffractionCalibrationPlottingView.class);
 
 	private DiffractionTableData currentData;
+	
+	// FIXME do you really need a CopyOnWriteArrayList?, I would have thought a 
+	// Vector or a Collections.synchronizedCollection(new ArrayList()) would be enough.
 	private List<DiffractionTableData> model = new CopyOnWriteArrayList<DiffractionTableData>();
 	private ILoaderService service;
 
@@ -782,11 +785,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		} else if (key==IToolPageSystem.class) {
 			return plottingSystem.getAdapter(IToolPageSystem.class);
 		}
-		// Is needed?
-//		else {
-//			final IToolPageSystem toolSystem = (IToolPageSystem)plottingSystem.getAdapter(IToolPageSystem.class);
-//			return toolSystem.getActiveTool().getAdapter(key);
-//		}
 		return super.getAdapter(key);
 	}
 
@@ -1029,7 +1027,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 	public void dispose() {
 		super.dispose();
 		removeListeners();
-		
+		// FIXME Clear 
 	}
 
 	@Override
