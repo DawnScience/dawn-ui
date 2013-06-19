@@ -23,6 +23,7 @@ public class DataReductionWizardPage extends AbstractSliceConversionPage {
 	public DataReductionWizardPage(String pageName, String description, ImageDescriptor icon) {
 		super(pageName, description, icon);
 		setFileLabel("Output File");
+		setDirectory(false);
 	}
 
 	@Override
