@@ -78,6 +78,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
 import org.mihalis.opal.rangeSlider.RangeSlider;
@@ -613,12 +614,14 @@ public class WindowTool extends AbstractToolPage implements SelectionListener {
 		}
 
 		@Override
-		protected IStatus run(IProgressMonitor monitor) {
+		protected IStatus run(final IProgressMonitor monitor) {
 			
+			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 			final IWindowTrace windowTrace = getWindowTrace();
 			if (windowTrace!=null) {
-				DisplayUtils.runInDisplayThread(true, getControl(), new Runnable() {
+				Display.getDefault().syncExec(new Runnable() {
 					public void run() {
+						if (monitor.isCanceled()) return;
 						windowTrace.setWindow(window);
 					}
 				});
