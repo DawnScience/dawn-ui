@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
+import org.dawnsci.plotting.api.region.ILockableRegion;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegionContainer;
-import org.dawnsci.plotting.api.region.ILockableRegion;
 import org.dawnsci.plotting.api.region.ROIEvent;
 import org.dawnsci.plotting.draw2d.swtxy.translate.FigureTranslator;
 import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationEvent;
@@ -594,5 +594,15 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 			sector.getHandleTranslators().get(sector.getHandleTranslators().size()-1).setActive(false);
 			sector.getHandles().get(sector.getHandles().size()-1).setVisible(false);
 		}
+	}
+
+	@Override
+	public boolean isOuterMovable() {
+		throw new RuntimeException("Cannot call isOuterMovable on "+getClass().getName());
+	}
+
+	@Override
+	public void setOuterMovable(boolean isOuterMovable) {
+		throw new RuntimeException("Cannot call setOuterMovable on "+getClass().getName());
 	}
 }
