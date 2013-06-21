@@ -34,6 +34,8 @@ import org.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.tools.diffraction.DiffractionImageAugmenter;
 import org.dawnsci.plotting.tools.diffraction.DiffractionTool;
+import org.dawnsci.plotting.util.PlottingUtils;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
@@ -105,9 +107,6 @@ import uk.ac.diamond.scisoft.analysis.diffraction.IDetectorPropertyListener;
 import uk.ac.diamond.scisoft.analysis.diffraction.IDiffractionCrystalEnvironmentListener;
 import uk.ac.diamond.scisoft.analysis.hdf5.HDF5NodeLink;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
-
-// FIXME This plugin is having scisoft.analysis.rcp dependencies phased out, avoid using if can.
-import uk.ac.diamond.scisoft.analysis.rcp.plotting.utils.PlottingUtils;
 
 /**
  * This listens for a selected editor (of a diffraction image) and allows

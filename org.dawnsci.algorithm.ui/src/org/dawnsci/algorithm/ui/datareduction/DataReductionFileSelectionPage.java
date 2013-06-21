@@ -32,6 +32,7 @@ import org.dawnsci.algorithm.ui.views.runner.IAlgorithmProcessContext;
 import org.dawnsci.algorithm.ui.workflow.IWorkflowUpdater;
 import org.dawnsci.algorithm.ui.workflow.WorkflowUpdaterCreator;
 import org.dawnsci.plotting.api.PlotType;
+import org.dawnsci.plotting.util.PlottingUtils;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -79,7 +80,6 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Maths;
-import uk.ac.diamond.scisoft.analysis.rcp.plotting.utils.PlottingUtils;
 
 public class DataReductionFileSelectionPage extends AbstractAlgorithmProcessPage {
 
