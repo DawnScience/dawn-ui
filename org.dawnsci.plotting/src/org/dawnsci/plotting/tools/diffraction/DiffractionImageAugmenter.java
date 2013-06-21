@@ -15,6 +15,7 @@ import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.dawnsci.plotting.api.region.ILockableRegion;
 import org.dawnsci.plotting.api.region.RegionUtils;
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.eclipse.draw2d.ColorConstants;
@@ -310,7 +311,10 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		int nRings = ringList.size();
 		resROIs.clear();
 		for (int i = 0; i < nRings; i++) {
-			drawResolutionEllipse(i >= nExisting ? null : existing.get(i), ringList.get(i), typeName+i, marker);
+			if(i == 0)
+				drawResolutionEllipse(i >= nExisting ? null : existing.get(i), ringList.get(i), typeName+i, marker, true);
+			else
+				drawResolutionEllipse(i >= nExisting ? null : existing.get(i), ringList.get(i), typeName+i, marker, false);
 		}
 	}
 
@@ -336,7 +340,8 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 			                      Color labelColour,
 			                      String nameStub,
 			                      String labelText,
-			                      Object marker) {
+			                      Object marker,
+			                      boolean isMobile) {
 
 		if (!active) return; // We are likely off screen.
 		
@@ -352,7 +357,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		region.setROI(eroi);
 		region.setRegionColor(colour);
 		region.setAlpha(100);
-		region.setUserRegion(false);
+		region.setUserRegion(isMobile);
 
 		region.setLabel(labelText);
 		((AbstractSelectionRegion) region).setShowLabel(true);
@@ -361,9 +366,14 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		region.setShowPosition(false);
 		region.setVisible(true);
 		if (requireAdd) plottingSystem.addRegion(region);
-		region.setMobile(false);
+		region.setMobile(isMobile);
 		region.setUserObject(marker);
-
+		if(isMobile){
+			ILockableRegion lockable = region instanceof ILockableRegion ? (ILockableRegion)region : null;
+			if(lockable == null) return;
+			lockable.setCenterMovable(true);
+			lockable.setOuterMovable(false);
+		}
 	}
 
 	protected void drawIceRings(boolean isChecked) {
@@ -380,7 +390,8 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		}
 	}
 		
-	protected void drawResolutionEllipse(IRegion reused, ResolutionRing ring, String name, Object marker) {
+	protected void drawResolutionEllipse(IRegion reused, ResolutionRing ring, String name, Object marker, 
+											boolean isMobile) {
 		if (!active) return; // We are likely off screen.
 		if (detprop != null && diffenv != null) {
 			double[] beamCentre = detprop.getBeamCentreCoords(); // detConfig.pixelCoords(detConfig.getBeamPosition());
@@ -394,7 +405,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 			if (roi instanceof EllipticalROI) {
 				DecimalFormat df = new DecimalFormat("#.00");
 				drawEllipse(reused, beamCentre, (EllipticalROI) roi, ring.getColour(), ring.getColour(), name,
-						df.format(ring.getResolution()) + "Å", marker);
+						df.format(ring.getResolution()) + "Å", marker, isMobile);
 			}
 		}
 	}

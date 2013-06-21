@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.measure.quantity.Quantity;
@@ -80,6 +81,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
@@ -116,7 +118,7 @@ import uk.ac.diamond.scisoft.analysis.roi.PolylineROI;
 import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 
 
-public class DiffractionTool extends AbstractToolPage implements CalibrantSelectedListener, IResettableExpansion {
+public class DiffractionTool extends AbstractToolPage implements CalibrantSelectedListener, IResettableExpansion, IROIListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(DiffractionTool.class);
 	
@@ -1193,6 +1195,36 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 					}
 					((AbstractSelectionRegion) tmpRegion).setShowLabel(true);
 				}
+				if(evt.getRegion() != null)
+					evt.getRegion().addROIListener(DiffractionTool.this);
+			}
+
+			@Override
+			public void regionRemoved(RegionEvent evt) {
+				IRegion region = evt.getRegion();
+				if (region!=null) {
+					region.removeROIListener(DiffractionTool.this);
+				}
+			}
+
+			@Override
+			public void regionCreated(RegionEvent evt) {
+				IRegion region = evt.getRegion();
+				if (region!=null) {
+					region.addROIListener(DiffractionTool.this);
+				}
+			}
+
+			@Override
+			public void regionsRemoved(RegionEvent evt) {
+				IWorkbenchPage page =  PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+				if(page != null){
+					Iterator<IRegion> it = getPlottingSystem().getRegions().iterator();
+					while(it.hasNext()){
+						IRegion region = it.next();
+						region.removeROIListener(DiffractionTool.this);
+					}	
+				}
 			}
 		};
 
@@ -1228,4 +1260,24 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	public void calibrantSelectionChanged(CalibrantSelectionEvent evt) {
 		updateCalibrationActions((CalibrationStandards)evt.getSource());
 	}
+
+	@Override
+	public void roiDragged(ROIEvent evt) {
+		IROI roi = evt.getROI();
+		if(roi == null)return;
+		EllipticalROI eroi = roi instanceof EllipticalROI ? (EllipticalROI)roi : null;		
+		if(eroi == null) return;
+		double ptx = eroi.getPointX();
+		double pty = eroi.getPointY();
+		IDiffractionMetadata data = getDiffractionMetaData();
+		DetectorProperties detprop = data.getDetector2DProperties();
+		detprop.setBeamCentreCoords(new double[]{ptx, pty});
+	}
+
+	@Override
+	public void roiChanged(ROIEvent evt) {}
+
+	@Override
+	public void roiSelected(ROIEvent evt) {}
+
 }

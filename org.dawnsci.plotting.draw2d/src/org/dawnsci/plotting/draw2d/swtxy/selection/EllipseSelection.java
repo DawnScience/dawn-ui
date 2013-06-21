@@ -21,18 +21,21 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
+import org.dawnsci.plotting.api.region.ILockableRegion;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegionContainer;
 import org.dawnsci.plotting.api.region.ROIEvent;
 import org.dawnsci.plotting.draw2d.swtxy.translate.FigureTranslator;
 import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationEvent;
 import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationListener;
+import org.dawnsci.plotting.draw2d.swtxy.util.Draw2DUtils;
 import org.dawnsci.plotting.draw2d.swtxy.util.RotatableEllipse;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.FigureListener;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.MouseEvent;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
@@ -45,7 +48,7 @@ import org.eclipse.swt.widgets.Display;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
-class EllipseSelection extends AbstractSelectionRegion {
+class EllipseSelection extends AbstractSelectionRegion implements ILockableRegion {
 
 	DecoratedEllipse ellipse;
 
@@ -240,7 +243,12 @@ class EllipseSelection extends AbstractSelectionRegion {
 
 			// figure move
 			addFigureListener(moveListener);
-			FigureTranslator mover = new FigureTranslator(getXyGraph(), parent, this, handles);
+			FigureTranslator mover = new FigureTranslator(getXyGraph(), parent, this, handles){
+				public void mouseDragged(MouseEvent event) {
+					if (!isCenterMovable) return;
+					super.mouseDragged(event);
+				}
+			};
 			mover.setActive(isMobile());
 			mover.addTranslationListener(createRegionNotifier());
 			fTranslators.add(mover);
@@ -466,6 +474,59 @@ class EllipseSelection extends AbstractSelectionRegion {
 
 		@Override
 		public void setRegion(IRegion region) {
+		}
+
+		public List<FigureTranslator> getHandleTranslators() {
+			return fTranslators;
+		}
+		public List<IFigure> getHandles() {
+			return handles;
+		}
+	}
+
+	private boolean isCenterMovable=true;
+	private boolean isOuterMovable=true;
+
+	@Override
+	public boolean isCenterMovable() {
+		return isCenterMovable;
+	}
+
+	@Override
+	public void setCenterMovable(boolean isCenterMovable) {
+		this.isCenterMovable = isCenterMovable;
+		if (isCenterMovable)
+			ellipse.setCursor(Draw2DUtils.getRoiMoveCursor());
+		else
+			ellipse.setCursor(null);
+		ellipse.getHandleTranslators().get(ellipse.getHandleTranslators().size()-1).setActive(isCenterMovable);
+		ellipse.getHandles().get(ellipse.getHandles().size()-1).setVisible(isCenterMovable);
+	}
+
+	@Override
+	public boolean isOuterMovable() {
+		return isOuterMovable;
+	}
+
+	@Override
+	public void setOuterMovable(boolean isOuterMovable) {
+		this.isOuterMovable = isOuterMovable;
+		if(isOuterMovable)
+			ellipse.setCursor(Draw2DUtils.getRoiMoveCursor());
+		else
+			ellipse.setCursor(null);
+//		List<FigureTranslator> ft = ellipse.getHandleTranslators();
+//		for (int i = 0; i < ft.size(); i++) {
+//			if (i != ft.size() - 1) {
+//				ft.get(i).setActive(isOuterMovable);
+//			}
+//		}
+		List<IFigure> figs = ellipse.getHandles();
+		for (int i = 0; i < figs.size(); i++) {
+			if (i != figs.size() - 1) {
+				figs.get(i).setVisible(isOuterMovable);
+			}
+
 		}
 	}
 }
