@@ -16,6 +16,7 @@
 
 package org.dawnsci.algorithm.ui.datareduction;
 
+import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,7 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.PlottingFactory;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.algorithm.ui.Activator;
@@ -31,6 +31,7 @@ import org.dawnsci.algorithm.ui.views.runner.AbstractAlgorithmProcessPage;
 import org.dawnsci.algorithm.ui.views.runner.IAlgorithmProcessContext;
 import org.dawnsci.algorithm.ui.workflow.IWorkflowUpdater;
 import org.dawnsci.algorithm.ui.workflow.WorkflowUpdaterCreator;
+import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.util.PlottingUtils;
 import org.eclipse.core.runtime.FileLocator;
@@ -69,10 +70,13 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.ui.IMemento;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.ISourceProvider;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.PartInitException;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,27 +89,10 @@ public class DataReductionFileSelectionPage extends AbstractAlgorithmProcessPage
 
 	private static final Logger logger = LoggerFactory.getLogger(DataReductionFileSelectionPage.class);
 
-	private static final String DATA_TYPE = "Data";
-	private static final String CALIB_TYPE = "Calibration";
-	private static final String DETECT_TYPE = "Detector";
-	private static final String BACKGD_TYPE = "Background";
-	private static final String MASK_TYPE = "Mask";
-
-	private static final String DATA_TITLE = "Data";
-	private static final String CALIB_TITLE = "Detector Calibration";
-	private static final String DETECT_TITLE = "Detector Response (Divide)";
-	private static final String BACKGD_TITLE = "Background (Subtract)";
-	private static final String MASK_TITLE = "Mask";
-
 	private static final String MOML_FILE = "workflows/2D_DataReductionV2.moml";
 	// temporary used as a moml file until the one above is put in another plugin with this class
 	private static final String INPUT_ACTOR = "Image to process";
 
-	private AbstractPlottingSystem dataPlot;
-	private AbstractPlottingSystem calibrationPlot;
-	private AbstractPlottingSystem detectorPlot;
-	private AbstractPlottingSystem maskPlot;
-	private AbstractPlottingSystem backgroundPlot;
 	private Composite mainComposite;
 	private Composite recapComp;
 
@@ -115,22 +102,54 @@ public class DataReductionFileSelectionPage extends AbstractAlgorithmProcessPage
 
 	Map<String, String> dataFilePaths = new HashMap<String, String>(5);
 
+	private final String[] keys = new String[]{"AFilename", "Detector_response_file", "Calibration_file", "Background_file", "Mask_file"};
+	private final String[] titles = new String[] {"Data", "Detector Response (Divide)", "Detector Calibration", "Background (Subtract)", "Mask"};
+	private final String[] types = new String[] {"Data", "Detector", "Calibration", "Background", "Mask"};
+	private String[] filePaths = new String[5];
+	private boolean[] locks = new boolean[5];
+	private List<IPlottingSystem> plottingSystems = new ArrayList<IPlottingSystem>(); 
+
 	public DataReductionFileSelectionPage() {
 		try {
-			dataPlot = PlottingFactory.createPlottingSystem();
-			calibrationPlot = PlottingFactory.createPlottingSystem();
-			detectorPlot = PlottingFactory.createPlottingSystem();
-			backgroundPlot = PlottingFactory.createPlottingSystem();
-			maskPlot = PlottingFactory.createPlottingSystem();
-			
-			dataFilePaths.put("AFilename", "");
-			dataFilePaths.put("Detector_response_file", "");
-			dataFilePaths.put("Calibration_file", "");
-			dataFilePaths.put("Background_file", "");
-			dataFilePaths.put("Mask_file", "");
+			IPlottingSystem dataPlot = PlottingFactory.createPlottingSystem();
+			plottingSystems.add(dataPlot);
+			IPlottingSystem detectorPlot = PlottingFactory.createPlottingSystem();
+			plottingSystems.add(detectorPlot);
+			IPlottingSystem calibrationPlot = PlottingFactory.createPlottingSystem();
+			plottingSystems.add(calibrationPlot);
+			IPlottingSystem backgroundPlot = PlottingFactory.createPlottingSystem();
+			plottingSystems.add(backgroundPlot);
+			IPlottingSystem maskPlot = PlottingFactory.createPlottingSystem();
+			plottingSystems.add(maskPlot);
+
+			for (int i = 0; i < keys.length; i++) {
+				dataFilePaths.put(keys[i], "");
+			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			logger.error("TODO put description of error here", e);
+			logger.error("Error creating plottingSystems:", e);
+		}
+	}
+
+	@Override
+	public void init(IViewSite site, IMemento memento) throws PartInitException {
+		
+		if (memento != null) {
+			for(int i = 0; i< keys.length; i++){
+				filePaths[i] = memento.getString(keys[i]);
+				locks[i] = memento.getBoolean(keys[i]+"Lock");
+			}
+		}
+	}
+
+	@Override
+	public void saveState(IMemento memento) {
+		if (memento != null) {
+			for(int i=0; i < keys.length; i++){
+				TableItem item = ((TableItem)viewer.getTable().getItem(i));
+				SelectedData data = (SelectedData)item.getData();
+				memento.putString(keys[i], data.getPath());
+				memento.putBoolean(keys[i]+"Lock", data.isLocked());
+			}
 		}
 	}
 
@@ -198,24 +217,88 @@ public class DataReductionFileSelectionPage extends AbstractAlgorithmProcessPage
 		runWorkflowButton.setText("Run Data Reduction Process");
 		runWorkflowButton.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
 
-		detectorPlot.createPlotPart(leftSash, DETECT_TYPE, null, PlotType.IMAGE, algorithmViewPart.getSite().getPart());
-		detectorPlot.setTitle(DETECT_TITLE);
+		plottingSystems.get(1).createPlotPart(leftSash, types[1], null, PlotType.IMAGE, algorithmViewPart.getSite().getPart());
+		plottingSystems.get(1).setTitle(titles[1]);
 
-		dataPlot.createPlotPart(middleSash, DATA_TYPE, null, PlotType.IMAGE, algorithmViewPart.getSite().getPart());
-		dataPlot.setTitle(DATA_TITLE);
+		plottingSystems.get(0).createPlotPart(middleSash, types[0], null, PlotType.IMAGE, algorithmViewPart.getSite().getPart());
+		plottingSystems.get(0).setTitle(titles[0]);
 
-		backgroundPlot.createPlotPart(middleSash, BACKGD_TYPE, null, PlotType.IMAGE, algorithmViewPart.getSite().getPart());
-		backgroundPlot.setTitle(BACKGD_TITLE);
+		plottingSystems.get(3).createPlotPart(middleSash, types[3], null, PlotType.IMAGE, algorithmViewPart.getSite().getPart());
+		plottingSystems.get(3).setTitle(titles[3]);
 
-		calibrationPlot.createPlotPart(rightSash, CALIB_TYPE, null, PlotType.IMAGE, algorithmViewPart.getSite().getPart());
-		calibrationPlot.setTitle(CALIB_TITLE);
+		plottingSystems.get(2).createPlotPart(rightSash, types[2], null, PlotType.IMAGE, algorithmViewPart.getSite().getPart());
+		plottingSystems.get(2).setTitle(titles[2]);
 
-		maskPlot.createPlotPart(rightSash, MASK_TYPE, null, PlotType.IMAGE, algorithmViewPart.getSite().getPart());
-		maskPlot.setTitle(MASK_TITLE);
+		plottingSystems.get(4).createPlotPart(rightSash, types[4], null, PlotType.IMAGE, algorithmViewPart.getSite().getPart());
+		plottingSystems.get(4).setTitle(titles[4]);
 
 		algorithmViewPart.getSite().getWorkbenchWindow().getSelectionService().addSelectionListener(fileSelectionListener);
 
+		// try to load the previous data saved in the memento
+		for (int i = 0; i < keys.length; i++) {
+			if(filePaths[i] != null)
+				loadAndPlotData(plottingSystems.get(i), keys[i], filePaths[i], titles[i], true, locks[i], i);
+		}
+		
+		viewer.refresh();
+
 		return mainComposite;
+	}
+
+	private void loadAndPlotData(final IPlottingSystem plottingSystem, 
+								 String filePathKey,
+								 String filePath,
+								 final String fileTitle,
+								 boolean loadFromMemento,
+								 boolean isLocked,
+								 final int index){
+		
+			final IDataset image = PlottingUtils.loadData(filePath, null);
+			if(index == 1){
+				// if data is locked
+				if(((SelectedData)viewer.getElementAt(0)).isLocked()){
+					IDataset dataImage = ((SelectedData)viewer.getElementAt(0)).getImage();
+					final AbstractDataset aDataImage = (AbstractDataset)dataImage;
+					Job divide = new Job("Running Divide process") {
+						@Override
+						protected IStatus run(IProgressMonitor monitor) {
+							AbstractDataset divideResult = Maths.divide(aDataImage, (AbstractDataset)image);
+							PlottingUtils.plotData(plottingSystem, fileTitle, (IDataset)divideResult);
+							return Status.OK_STATUS;
+						}
+					};
+					divide.schedule();
+				} else {
+					PlottingUtils.plotData(plottingSystem, fileTitle, image);
+				}
+			} else if (index == 3){
+				// if data is locked
+				if(((SelectedData)viewer.getElementAt(0)).isLocked()){
+					IDataset dataImage = ((SelectedData)viewer.getElementAt(0)).getImage();
+					final AbstractDataset aDataImage = (AbstractDataset)dataImage;
+					Job subtract = new Job("Running Subtract process") {
+						@Override
+						protected IStatus run(IProgressMonitor monitor) {
+							AbstractDataset subtractResult = Maths.subtract(aDataImage, (AbstractDataset)image);
+							PlottingUtils.plotData(plottingSystem, fileTitle, (IDataset)subtractResult);
+							return Status.OK_STATUS;
+						}
+					};
+					subtract.schedule();
+				} else {
+					PlottingUtils.plotData(plottingSystem, fileTitle, image);
+				}
+			} else {
+				PlottingUtils.plotData(plottingSystem, fileTitle, image);
+			}
+			((SelectedData)viewer.getElementAt(index)).setImage(image);
+			((SelectedData)viewer.getElementAt(index)).setShape(image.getShape());
+			String filename = filePath.substring(filePath.lastIndexOf(File.separator));
+			((SelectedData)viewer.getElementAt(index)).setFileName(filename);
+			((SelectedData)viewer.getElementAt(index)).setPath(filePath);
+			if(loadFromMemento)
+				((SelectedData)viewer.getElementAt(index)).setLocked(isLocked);
+			dataFilePaths.put(filePathKey, filePath);
 	}
 
 	private void createPersistenceActions(IViewSite iViewSite) {
@@ -300,75 +383,12 @@ public class DataReductionFileSelectionPage extends AbstractAlgorithmProcessPage
 				IStructuredSelection structSelection = (IStructuredSelection)selection;
 				image = PlottingUtils.loadData(structSelection);
 				if(image == null) return;
-				if (!((SelectedData)viewer.getElementAt(0)).isLocked()) {
-					PlottingUtils.plotData(dataPlot, DATA_TITLE, image);
-					((SelectedData)viewer.getElementAt(0)).setImage(image);
-					((SelectedData)viewer.getElementAt(0)).setShape(image.getShape());
-					((SelectedData)viewer.getElementAt(0)).setFileName(PlottingUtils.getFileName(structSelection));
-					dataFilePaths.put("AFilename", PlottingUtils.getFullFilePath(structSelection));
-				}
-				if (!((SelectedData)viewer.getElementAt(1)).isLocked()) {
-					PlottingUtils.plotData(calibrationPlot, CALIB_TITLE, image);
-					((SelectedData)viewer.getElementAt(1)).setImage(image);
-					((SelectedData)viewer.getElementAt(1)).setShape(image.getShape());
-					((SelectedData)viewer.getElementAt(1)).setFileName(PlottingUtils.getFileName(structSelection));
-					dataFilePaths.put("Calibration_file", PlottingUtils.getFullFilePath(structSelection));
-				}
-				if (!((SelectedData)viewer.getElementAt(2)).isLocked()) {
-					// if data is locked
-					if(((SelectedData)viewer.getElementAt(0)).isLocked()){
-						IDataset dataImage = ((SelectedData)viewer.getElementAt(0)).getImage();
-						final AbstractDataset aDataImage = (AbstractDataset)dataImage;
-						Job divide = new Job("Running Divide process") {
-							@Override
-							protected IStatus run(IProgressMonitor monitor) {
-								AbstractDataset divideResult = Maths.divide(aDataImage, (AbstractDataset)image);
-								PlottingUtils.plotData(detectorPlot, DETECT_TITLE, (IDataset)divideResult);
-								return Status.OK_STATUS;
-							}
-						};
-						divide.schedule();
-					} else {
-						PlottingUtils.plotData(detectorPlot, DETECT_TITLE, image);
+
+				for(int i = 0; i< keys.length; i++){
+					if (!((SelectedData)viewer.getElementAt(i)).isLocked()){
+						String path = PlottingUtils.getFullFilePath(structSelection);
+						loadAndPlotData(plottingSystems.get(i), keys[i], path, titles[i], false, false, i);
 					}
-					
-					((SelectedData)viewer.getElementAt(2)).setImage(image);
-					((SelectedData)viewer.getElementAt(2)).setShape(image.getShape());
-					((SelectedData)viewer.getElementAt(2)).setFileName(PlottingUtils.getFileName(structSelection));
-					
-					dataFilePaths.put("Detector_response_file", PlottingUtils.getFullFilePath(structSelection));
-
-				}
-				if (!((SelectedData)viewer.getElementAt(3)).isLocked()) {
-					// if data is locked
-					if(((SelectedData)viewer.getElementAt(0)).isLocked()){
-						IDataset dataImage = ((SelectedData)viewer.getElementAt(0)).getImage();
-						final AbstractDataset aDataImage = (AbstractDataset)dataImage;
-						Job subtract = new Job("Running Subtract process") {
-							@Override
-							protected IStatus run(IProgressMonitor monitor) {
-								AbstractDataset subtractResult = Maths.subtract(aDataImage, (AbstractDataset)image);
-								PlottingUtils.plotData(backgroundPlot, BACKGD_TITLE, (IDataset)subtractResult);
-								return Status.OK_STATUS;
-							}
-						};
-						subtract.schedule();
-					} else {
-						PlottingUtils.plotData(backgroundPlot, BACKGD_TITLE, image);
-					}
-					((SelectedData)viewer.getElementAt(3)).setImage(image);
-					((SelectedData)viewer.getElementAt(3)).setShape(image.getShape());
-					((SelectedData)viewer.getElementAt(3)).setFileName(PlottingUtils.getFileName(structSelection));
-					dataFilePaths.put("Background_file", PlottingUtils.getFullFilePath(structSelection));
-
-				}
-				if (!((SelectedData)viewer.getElementAt(4)).isLocked()) {
-					PlottingUtils.plotData(maskPlot, MASK_TITLE, image);
-					((SelectedData)viewer.getElementAt(4)).setImage(image);
-					((SelectedData)viewer.getElementAt(4)).setShape(image.getShape());
-					((SelectedData)viewer.getElementAt(4)).setFileName(PlottingUtils.getFileName(structSelection));
-					dataFilePaths.put("Mask_file", PlottingUtils.getFullFilePath(structSelection));
-
 				}
 				viewer.refresh();
 			}
@@ -377,16 +397,10 @@ public class DataReductionFileSelectionPage extends AbstractAlgorithmProcessPage
 
 	private List<SelectedData> createSelectedDataRows(){
 		final List<SelectedData> selectedDataList = new ArrayList<SelectedData>(5);
-		SelectedData dataSelectedData = new SelectedData(DATA_TYPE, new int[]{0, 0}, "-", false);
-		SelectedData calibrationSelectedData = new SelectedData(CALIB_TYPE, new int[]{0, 0}, "-", false);
-		SelectedData detectorSelectedData = new SelectedData(DETECT_TYPE, new int[]{0, 0}, "-", false);
-		SelectedData backgroundSelectedData = new SelectedData(BACKGD_TYPE, new int[]{0, 0}, "-", false);
-		SelectedData maskSelectedData = new SelectedData(MASK_TYPE, new int[]{0, 0}, "-", false);
-		selectedDataList.add(dataSelectedData);
-		selectedDataList.add(calibrationSelectedData);
-		selectedDataList.add(detectorSelectedData);
-		selectedDataList.add(backgroundSelectedData);
-		selectedDataList.add(maskSelectedData);
+		for(int i = 0; i < types.length; i++){
+			SelectedData data = new SelectedData(types[i], new int[]{0, 0}, "-", false);
+			selectedDataList.add(data);
+		}
 		return selectedDataList;
 	}
 
@@ -481,6 +495,7 @@ public class DataReductionFileSelectionPage extends AbstractAlgorithmProcessPage
 		private int[] shape;
 		private boolean isLocked;
 		private String fileName;
+		private String path;
 		private String type;
 
 		public SelectedData(String type, int[] shape, String fileName, boolean isLocked) {
@@ -496,6 +511,14 @@ public class DataReductionFileSelectionPage extends AbstractAlgorithmProcessPage
 
 		public IDataset getImage(){
 			return image;
+		}
+
+		public void setPath(String path) {
+			this.path = path;
+		}
+
+		public String getPath(){
+			return path;
 		}
 
 		public void setShape(int[] shape){
@@ -680,3 +703,4 @@ public class DataReductionFileSelectionPage extends AbstractAlgorithmProcessPage
 	}
 
 }
+

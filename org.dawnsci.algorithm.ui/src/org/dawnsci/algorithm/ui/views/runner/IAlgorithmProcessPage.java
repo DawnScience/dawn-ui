@@ -1,8 +1,11 @@
 package org.dawnsci.algorithm.ui.views.runner;
 
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.IMemento;
 import org.eclipse.ui.ISourceProvider;
 import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IViewSite;
+import org.eclipse.ui.PartInitException;
 
 /**
  * Please ensure that your implementation has a no argument constructor.
@@ -10,7 +13,31 @@ import org.eclipse.ui.IViewPart;
  *
  */
 public interface IAlgorithmProcessPage {
-			
+
+    /**
+     * Initializes this view with the given view site.  A memento is passed to
+     * the view which contains a snapshot of the views state from a previous
+     * session.  Where possible, the view should try to recreate that state
+     * within the part controls.
+     * <p>
+     * This method is automatically called by the workbench shortly after the part 
+     * is instantiated.  It marks the start of the views's lifecycle. Clients must 
+     * not call this method.
+     * </p>
+     *
+     * @param site the view site
+     * @param memento the IViewPart state or null if there is no previous saved state
+     * @exception PartInitException if this view was not initialized successfully
+     */
+    public void init(IViewSite site, IMemento memento) throws PartInitException;
+
+    /**
+     * Saves the object state within a memento.
+     *
+     * @param memento a memento to receive the object state
+     */
+    public void saveState(IMemento memento);
+
     /**
      * 	
      * @return the title of your custom page. The user will not know what
