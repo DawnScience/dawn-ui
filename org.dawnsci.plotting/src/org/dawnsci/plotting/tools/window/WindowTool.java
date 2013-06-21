@@ -104,7 +104,7 @@ import uk.ac.gda.richbeans.event.ValueEvent;
  * @author fcp94556
  *
  */
-public class WindowTool extends AbstractToolPage implements SelectionListener {
+public class WindowTool extends AbstractToolPage {
 
 	private static final Logger logger = LoggerFactory.getLogger(WindowTool.class);
 	
@@ -113,6 +113,7 @@ public class WindowTool extends AbstractToolPage implements SelectionListener {
 	private IROIListener           roiListener;
 	private ITraceListener         traceListener;
 	private IPaletteListener       paletteListener;
+	private SelectionListener      selectionListener;
 	private WindowJob              windowJob;
 	private Composite              sliceControl, windowControl, blankComposite;
 	private Composite              content;
@@ -120,16 +121,12 @@ public class WindowTool extends AbstractToolPage implements SelectionListener {
 	// FIXME Too many unecessary member variables = bad design.
 	// Consider using anonymous classes with final variables when 
 	// these are created, then there is no need to have them all as members.
-	private Label lblStartX;
 	private Spinner spnStartX;
-	private Label lblStartY;
 	private Spinner spnStartY;
-	private Label lblEndX;
 	private Spinner spnWidth;
 	private Spinner spnHeight;
 	private Button btnOverwriteAspect;
 	private Spinner spnXAspect;
-	private Label lblDelimiter;
 	private Spinner spnYAspect;
 
 	public WindowTool() {
@@ -207,7 +204,58 @@ public class WindowTool extends AbstractToolPage implements SelectionListener {
 					evt.getRegion().removeROIListener(roiListener);
 				}			
 			};
-			
+
+			this.selectionListener = new SelectionListener() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					if (!e.getSource().equals(btnOverwriteAspect)) {
+						int startPosX = spnStartX.getSelection();
+						int startPosY = spnStartY.getSelection();
+						int width = spnWidth.getSelection();
+						int height = spnHeight.getSelection();
+						if (startPosX + width > spnWidth.getMaximum()) {
+							width = spnWidth.getMaximum() - startPosX;
+						}
+						if (startPosY + height > spnHeight.getMaximum()) {
+							height = spnHeight.getMaximum() - startPosY;
+						}
+						int endPtX = width + startPosX;
+						int endPtY = height + startPosY;
+						IRegion region = windowSystem.getRegion("Window");
+						RectangularROI rroi = new RectangularROI(startPosX, startPosY, width, height, 0);
+						if (region != null)
+							region.setROI(rroi);
+						if(btnOverwriteAspect.getSelection()){
+							int xSize = getTrace().getData().getShape()[1];
+							int ySize = getTrace().getData().getShape()[0];
+							int xSamplingRate = Math.max(1, xSize / MAXDISPLAYDIM);
+							int ySamplingRate = Math.max(1, ySize / MAXDISPLAYDIM);
+							SurfacePlotROI sroi = new SurfacePlotROI(startPosX * xSamplingRate, 
+													startPosY * ySamplingRate, 
+													endPtX * xSamplingRate, 
+													endPtY * ySamplingRate, 
+													0, 0, 
+													spnXAspect.getSelection(), 
+													spnYAspect.getSelection());
+							windowJob.schedule(sroi);
+						} else {
+							windowJob.schedule(rroi);
+						}
+					} else if (e.getSource().equals(btnOverwriteAspect)) {
+						spnXAspect.setEnabled(btnOverwriteAspect.getSelection());
+						spnYAspect.setEnabled(btnOverwriteAspect.getSelection());
+						if (btnOverwriteAspect.getSelection())
+							windowJob.schedule();
+						else
+							windowJob.schedule();
+					}
+				}
+				
+				@Override
+				public void widgetDefaultSelected(SelectionEvent e) {
+				}
+			};
+
 		} catch (Exception e) {
 			logger.error("Cannot create a plotting system, something bad happened!", e);
 		}
@@ -295,7 +343,7 @@ public class WindowTool extends AbstractToolPage implements SelectionListener {
 				lastUpper = upper;
 			}
 		});
-        
+
         upperControl.setMinimum(lowerControl);
         upperControl.setMaximum(25);
         lowerControl.setMinimum(0);
@@ -307,7 +355,6 @@ public class WindowTool extends AbstractToolPage implements SelectionListener {
 		errorLabel.setImage(Activator.getImage("icons/error.png"));
         
 		sliceSlider.addMouseMoveListener(new MouseMoveListener() {
-			
 			@Override
 			public void mouseMove(MouseEvent e) {
 				if ((e.button & SWT.BUTTON1)==0) {
@@ -326,7 +373,6 @@ public class WindowTool extends AbstractToolPage implements SelectionListener {
 				}
 			}
 		});
-		
 
 		return sliceControl;
 	}
@@ -334,7 +380,7 @@ public class WindowTool extends AbstractToolPage implements SelectionListener {
 	private Composite createWindowRegionControl(){
 		Composite windowComposite = new Composite(content, SWT.NONE);
 		windowComposite.setLayout(new FillLayout(SWT.VERTICAL));
-		
+
 		windowSystem.createPlotPart(windowComposite, getTitle(), getSite().getActionBars(), PlotType.IMAGE, this.getViewPart());
 		final ISurfaceTrace surface = getSurfaceTrace();
 		//create Region
@@ -363,32 +409,32 @@ public class WindowTool extends AbstractToolPage implements SelectionListener {
 		Composite spinnersComp = new Composite(bottomComposite, SWT.NONE);
 		spinnersComp.setLayout(new GridLayout(4, false));
 		spinnersComp.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
-		lblStartX = new Label(spinnersComp, SWT.RIGHT);
+		Label lblStartX = new Label(spinnersComp, SWT.RIGHT);
 		lblStartX.setText("Start X:");
 		
 		spnStartX = new Spinner(spinnersComp, SWT.BORDER);
 		spnStartX.setMinimum(0);
 		spnStartX.setMaximum(xSize);
 		spnStartX.setSize(62, 18);
-		spnStartX.addSelectionListener(this);
+		spnStartX.addSelectionListener(selectionListener);
 
-		lblStartY = new Label(spinnersComp, SWT.RIGHT);
+		Label lblStartY = new Label(spinnersComp, SWT.RIGHT);
 		lblStartY.setText("Start Y:");
 
 		spnStartY = new Spinner(spinnersComp, SWT.BORDER);
 		spnStartY.setMinimum(0);
 		spnStartY.setMaximum(ySize);
 		spnStartY.setSize(62, 18);
-		spnStartY.addSelectionListener(this);
+		spnStartY.addSelectionListener(selectionListener);
 
-		lblEndX = new Label(spinnersComp, SWT.RIGHT);
+		Label lblEndX = new Label(spinnersComp, SWT.RIGHT);
 		lblEndX.setText("Width:");
 
 		spnWidth = new Spinner(spinnersComp, SWT.BORDER);
 		spnWidth.setMinimum(0);
 		spnWidth.setMaximum(xSize);
 		spnWidth.setSize(62, 18);
-		spnWidth.addSelectionListener(this);
+		spnWidth.addSelectionListener(selectionListener);
 
 		Label lblEndY = new Label(spinnersComp, SWT.RIGHT);
 		lblEndY.setText("Height:");
@@ -397,7 +443,7 @@ public class WindowTool extends AbstractToolPage implements SelectionListener {
 		spnHeight.setSize(62, 18);
 		spnHeight.setMinimum(0);
 		spnHeight.setMaximum(ySize);
-		spnHeight.addSelectionListener(this);
+		spnHeight.addSelectionListener(selectionListener);
 
 		setSpinnerValues(xStartPt, yStartPt, width, height);
 
@@ -406,7 +452,7 @@ public class WindowTool extends AbstractToolPage implements SelectionListener {
 		aspectComp.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
 		btnOverwriteAspect = new Button(aspectComp,SWT.CHECK);
 		btnOverwriteAspect.setText("Override Aspect-Ratio");
-		btnOverwriteAspect.addSelectionListener(this);
+		btnOverwriteAspect.addSelectionListener(selectionListener);
 
 		spnXAspect = new Spinner(aspectComp,SWT.NONE);
 		spnXAspect.setEnabled(false);
@@ -414,9 +460,9 @@ public class WindowTool extends AbstractToolPage implements SelectionListener {
 		spnXAspect.setMaximum(10);
 		spnXAspect.setSelection(1);
 		spnXAspect.setIncrement(1);
-		spnXAspect.addSelectionListener(this);
+		spnXAspect.addSelectionListener(selectionListener);
 
-		lblDelimiter = new Label(aspectComp,SWT.NONE);
+		Label lblDelimiter = new Label(aspectComp,SWT.NONE);
 		lblDelimiter.setText(":");
 
 		spnYAspect = new Spinner(aspectComp,SWT.NONE);
@@ -425,7 +471,7 @@ public class WindowTool extends AbstractToolPage implements SelectionListener {
 		spnYAspect.setMaximum(10);
 		spnYAspect.setSelection(1);
 		spnYAspect.setIncrement(1);
-		spnYAspect.addSelectionListener(this);
+		spnYAspect.addSelectionListener(selectionListener);
 
 		return windowComposite;
 	}
@@ -439,7 +485,7 @@ public class WindowTool extends AbstractToolPage implements SelectionListener {
 		
 		GridUtils.setVisible(errorLabel, false);
 		errorLabel.getParent().layout();
-		
+
 		if (setValue) { // Send to UI
 			sliceSlider.setMaximum(max);
 			sliceSlider.setLowerValue(lower);
@@ -509,35 +555,38 @@ public class WindowTool extends AbstractToolPage implements SelectionListener {
 		content.layout();
 	}
 
-
 	@Override
 	public void activate() {
 		super.activate();
-		
+
 		if (getPlottingSystem()!=null) {
-			
 			getPlottingSystem().addTraceListener(traceListener);
-			
 		}
 		if (windowSystem!=null && windowSystem.getPlotComposite()!=null) {
-			
 			final ITrace trace = getTrace();
 			if (trace!=null) updateTrace(trace);
 
 			windowSystem.addRegionListener(regionListener);
-			
+
 			final Collection<IRegion> boxes = windowSystem.getRegions(RegionType.BOX);
 			if (boxes!=null) for (IRegion iRegion : boxes) iRegion.addROIListener(roiListener);
 			windowJob.schedule();
 		}
+		if (spnStartX != null && !spnStartX.isDisposed())
+			spnStartX.addSelectionListener(selectionListener);
+		if (spnStartY != null && !spnStartY.isDisposed())
+			spnStartY.addSelectionListener(selectionListener);
+		if (spnWidth != null && spnWidth.isDisposed())
+			spnWidth.addSelectionListener(selectionListener);
+		if (spnHeight != null && !spnHeight.isDisposed())
+			spnHeight.addSelectionListener(selectionListener);
 	}
-	
+
 	@Override
 	public void deactivate() {
 		super.deactivate();
-		
+
 		if (getPlottingSystem()!=null) {
-			
 			getPlottingSystem().removeTraceListener(traceListener);
 			
 		}
@@ -547,20 +596,26 @@ public class WindowTool extends AbstractToolPage implements SelectionListener {
 			final Collection<IRegion> boxes = windowSystem.getRegions(RegionType.BOX);
 			if (boxes!=null) for (IRegion iRegion : boxes) iRegion.removeROIListener(roiListener);
 		}
+		if (!spnStartX.isDisposed())
+			spnStartX.removeSelectionListener(selectionListener);
+		if (!spnStartY.isDisposed())
+			spnStartY.removeSelectionListener(selectionListener);
+		if (!spnWidth.isDisposed())
+			spnWidth.removeSelectionListener(selectionListener);
+		if (!spnHeight.isDisposed())
+			spnHeight.removeSelectionListener(selectionListener);
 	}
-
 
 	@Override
 	public ToolPageRole getToolPageRole() {
 		return ToolPageRole.ROLE_3D;
 	}
 
-
 	@Override
 	public Control getControl() {
 		return content;
 	}
-	
+
 	@Override
 	public Object getAdapter(@SuppressWarnings("rawtypes") Class clazz) {
 		if (clazz == IToolPageSystem.class) {
@@ -570,7 +625,6 @@ public class WindowTool extends AbstractToolPage implements SelectionListener {
 		}
 	}
 
-
 	@Override
 	public void setFocus() {
 		if (windowSystem!=null) windowSystem.setFocus();
@@ -579,23 +633,8 @@ public class WindowTool extends AbstractToolPage implements SelectionListener {
 	@Override
 	public void dispose() {
 		super.dispose();
-		if(getPlottingSystem() != null)
-			getPlottingSystem().removeTraceListener(traceListener);
-		if (windowSystem!=null && !windowSystem.isDisposed()) {
-			windowSystem.removeRegionListener(regionListener);
-		}
-		
-		// FIXME Code will likely never get run because super.dispose() already called.
-		if (!spnStartX.isDisposed())
-			spnStartX.removeSelectionListener(this);
-		if (!spnStartY.isDisposed())
-			spnStartY.removeSelectionListener(this);
-		if (!spnWidth.isDisposed())
-			spnWidth.removeSelectionListener(this);
-		if (!spnHeight.isDisposed())
-			spnHeight.removeSelectionListener(this);
 	}
-	
+
 	private class WindowJob extends Job {
 
 		private IROI window;
@@ -628,66 +667,12 @@ public class WindowTool extends AbstractToolPage implements SelectionListener {
 			} else {
 				return Status.CANCEL_STATUS;
 			}
-	
 			return Status.OK_STATUS;
 		}
 		
 	}
 
 	private final static int MAXDISPLAYDIM = 1024;
-
-	// FIXME replace with anonymous classes, one for each
-	// listener required. Avoids need for one method doing several 
-	// things = better design, cheaper to own code.
-	@Override
-	public void widgetSelected(SelectionEvent e) {
-		if (!e.getSource().equals(btnOverwriteAspect)) {
-			int startPosX = spnStartX.getSelection();
-			int startPosY = spnStartY.getSelection();
-			int width = spnWidth.getSelection();
-			int height = spnHeight.getSelection();
-			if (startPosX + width > spnWidth.getMaximum()) {
-				width = spnWidth.getMaximum() - startPosX;
-			}
-			if (startPosY + height > spnHeight.getMaximum()) {
-				height = spnHeight.getMaximum() - startPosY;
-			}
-			int endPtX = width + startPosX;
-			int endPtY = height + startPosY;
-			IRegion region = windowSystem.getRegion("Window");
-			RectangularROI rroi = new RectangularROI(startPosX, startPosY, width, height, 0);
-			if (region != null)
-				region.setROI(rroi);
-			if(btnOverwriteAspect.getSelection()){
-				int xSize = getTrace().getData().getShape()[1];
-				int ySize = getTrace().getData().getShape()[0];
-				int xSamplingRate = Math.max(1, xSize / MAXDISPLAYDIM);
-				int ySamplingRate = Math.max(1, ySize / MAXDISPLAYDIM);
-				SurfacePlotROI sroi = new SurfacePlotROI(startPosX * xSamplingRate, 
-										startPosY * ySamplingRate, 
-										endPtX * xSamplingRate, 
-										endPtY * ySamplingRate, 
-										0, 0, 
-										spnXAspect.getSelection(), 
-										spnYAspect.getSelection());
-				windowJob.schedule(sroi);
-			} else {
-				windowJob.schedule(rroi);
-			}
-		} else if (e.getSource().equals(btnOverwriteAspect)) {
-			spnXAspect.setEnabled(btnOverwriteAspect.getSelection());
-			spnYAspect.setEnabled(btnOverwriteAspect.getSelection());
-			if (btnOverwriteAspect.getSelection())
-				windowJob.schedule();
-			else
-				windowJob.schedule();
-		}
-	}
-
-	@Override
-	public void widgetDefaultSelected(SelectionEvent e) {
-		widgetSelected(e); // FIXME Should do nothing as not required in this instance.
-	}
 
 	/**
 	 * Set the spinner values
