@@ -704,7 +704,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		IDataset image = null;
 		if(data == null){
 			image = PlottingUtils.loadData(filePath, dataFullName);
-			int j = fullPath.lastIndexOf(System.getProperty("file.separator")); // TODO File.separator
+			int j = fullPath.lastIndexOf(File.separator);
 			if (image == null) return;
 			if(fileName == null)
 				fileName = image.getName();
@@ -916,7 +916,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		
 		tvc = new TableViewerColumn(tv, SWT.NONE);
 		tc = tvc.getColumn();
-		tc.setText("#rings");
+		tc.setText("# of rings");
 		tc.setWidth(70);
 		tvc.setEditingSupport(new MyEditingSupport(tv, 2));
 		
@@ -972,10 +972,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 	private void refreshTable() {
 		if(tableViewer == null) return;
 		tableViewer.refresh();
-		for (TableColumn c : tableViewer.getTable().getColumns()) {
-			c.pack();
-		}
-		tableViewer.getControl().getParent().layout();
 		// reset the scroll composite
 		Rectangle r = scrollHolder.getClientArea();
 		scrollComposite.setMinSize(scrollHolder.computeSize(r.width, SWT.DEFAULT));

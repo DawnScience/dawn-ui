@@ -19,6 +19,7 @@ package org.dawb.workbench.ui.views;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -78,6 +79,7 @@ import uk.ac.diamond.scisoft.analysis.io.AbstractFileLoader;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 
 /**
+ * This view is being replaced by {@link DiffractionCalibrationPlottingView }
  * This listens for a selected editor (of a diffraction image) and allows
  * 
  * 1) selection of calibrant
@@ -92,10 +94,8 @@ public class DiffractionCalibrationView extends ViewPart {
 	private ScrolledComposite sComp;
 	private IPlottingSystem currentSystem;
 	private DiffractionTableData currentData;
-	// FIXME Slightly better to clear these on dispose() for garbage collector to
-	// do better job.
 	private List<DiffractionTableData> model = new ArrayList<DiffractionTableData>();
-	private Map<IPlottingSystem, Listener> listeners = new HashMap<IPlottingSystem, Listener>();
+	private Map<IPlottingSystem, DiffractionTraceListener> listeners = new HashMap<IPlottingSystem, DiffractionTraceListener>();
 	private ILoaderService service;
 	private TableViewer tableViewer;
 	private IPartListener2 listener;
@@ -446,12 +446,10 @@ public class DiffractionCalibrationView extends ViewPart {
 		sComp.layout();
 	}
 
-	// FIXME Suggest name other than 'Listener' as does not describe what doing
-	// and is same as Listener in SWT.
-	class Listener extends ITraceListener.Stub {
+	class DiffractionTraceListener extends ITraceListener.Stub {
 		private DiffractionTableData data;
 		
-		public Listener(DiffractionTableData mydata) {
+		public DiffractionTraceListener(DiffractionTableData mydata) {
 			setData(mydata);
 		}
 
@@ -624,8 +622,7 @@ public class DiffractionCalibrationView extends ViewPart {
 		tc.setText("Use");
 		tc.setWidth(40);
 
-		// FIXME #rings is not clear, 'Ring Count' better?
-		String[] headings = { "Image", "#rings", "Distance", "Wavelength" };
+		String[] headings = { "Image", "# of rings", "Distance", "Wavelength" };
 		for (String h : headings) {
 			tvc = new TableViewerColumn(tv, SWT.NONE);
 			tc = tvc.getColumn();
@@ -683,11 +680,11 @@ public class DiffractionCalibrationView extends ViewPart {
 		currentData = data;
 		data.system = currentSystem;
 
-		Listener listener = data.listener;
+		DiffractionTraceListener listener = data.listener;
 		if (listener == null) {
 			listener = listeners.get(currentSystem);
 			if (listener == null) {
-				listener = new Listener(data);
+				listener = new DiffractionTraceListener(data);
 				data.listener = listener;
 				currentSystem.addTraceListener(listener);
 				listeners.put(currentSystem, listener);
@@ -708,11 +705,10 @@ public class DiffractionCalibrationView extends ViewPart {
 	private void refreshTable() {
 		tableViewer.refresh();
 		
-		// FIXME This pack and layout should not be necessary in theory.
-		for (TableColumn c : tableViewer.getTable().getColumns()) {
-			c.pack();
-		}
-		tableViewer.getControl().getParent().layout();
+//		for (TableColumn c : tableViewer.getTable().getColumns()) {
+//			c.pack();
+//		}
+//		tableViewer.getControl().getParent().layout();
 	}
 
 	private void setCalibrateButtons() {
@@ -728,7 +724,7 @@ public class DiffractionCalibrationView extends ViewPart {
 	}
 
 	private void removePlottingSystem(IPlottingSystem system) {
-		Listener listener = listeners.remove(system);
+		DiffractionTraceListener listener = listeners.remove(system);
 		if (listener != null)
 			system.removeTraceListener(listener);
 
@@ -745,7 +741,12 @@ public class DiffractionCalibrationView extends ViewPart {
 	public void dispose() {
 		super.dispose();
 		getSite().getPage().removePartListener(listener);
-		// FIXME more to dispsoe.
+		Iterator<DiffractionTableData> it = model.iterator();
+		while(it.hasNext()){
+			DiffractionTableData d = it.next();
+			model.remove(d);
+			if(d.augmenter != null) d.augmenter.deactivate();
+		}
 	}
 
 	@Override

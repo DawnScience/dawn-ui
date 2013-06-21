@@ -2,7 +2,7 @@ package org.dawb.workbench.ui.views;
 
 import java.util.List;
 
-import org.dawb.workbench.ui.views.DiffractionCalibrationView.Listener;
+import org.dawb.workbench.ui.views.DiffractionCalibrationView.DiffractionTraceListener;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.tools.diffraction.DiffractionImageAugmenter;
 
@@ -23,7 +23,7 @@ public class DiffractionTableData {
 	DiffractionImageAugmenter augmenter;
 	IDiffractionMetadata md;
 	IDataset image;
-	Listener listener;
+	DiffractionTraceListener listener;
 	List<IROI> rois;
 	QSpace q;
 	double ow = Double.NaN;
