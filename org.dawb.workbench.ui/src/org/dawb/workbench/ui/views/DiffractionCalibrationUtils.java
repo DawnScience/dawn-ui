@@ -134,7 +134,7 @@ public class DiffractionCalibrationUtils {
 							return;
 
 						hideFoundRings(plottingSystem);
-						drawCalibrantRings(currentData);
+						drawCalibrantRings(currentData.augmenter);
 					}
 				});
 				return stat;
@@ -174,11 +174,8 @@ public class DiffractionCalibrationUtils {
 	 * 
 	 * @param currentData
 	 */
-	public static void drawCalibrantRings(DiffractionTableData currentData) {
-		if (currentData == null)
-			return;
+	public static void drawCalibrantRings(DiffractionImageAugmenter aug) {
 
-		DiffractionImageAugmenter aug = currentData.augmenter;
 		if (aug == null)
 			return;
 
@@ -295,7 +292,7 @@ public class DiffractionCalibrationUtils {
 			detprop.setNormalAnglesInDegrees(angle[0], angle[1], angle[2]);
 			System.err.println("c: " + angle[2]);
 		}
-		drawCalibrantRings(currentData);
+		drawCalibrantRings(currentData.augmenter);
 	}
 
 	/**
@@ -349,7 +346,7 @@ public class DiffractionCalibrationUtils {
 				display.asyncExec(new Runnable() {
 					@Override
 					public void run() {
-						DiffractionCalibrationUtils.drawCalibrantRings(currentData);
+						DiffractionCalibrationUtils.drawCalibrantRings(currentData.augmenter);
 					}
 				});
 				return stat;

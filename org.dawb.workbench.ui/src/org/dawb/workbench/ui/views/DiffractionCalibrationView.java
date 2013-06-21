@@ -186,7 +186,7 @@ public class DiffractionCalibrationView extends ViewPart {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				standards.setSelectedCalibrant(calibrant.getItem(calibrant.getSelectionIndex()));
-				DiffractionCalibrationUtils.drawCalibrantRings(currentData);
+				DiffractionCalibrationUtils.drawCalibrantRings(currentData.augmenter);
 			}
 		});
 		for (String c : standards.getCalibrantList()) {
@@ -492,7 +492,7 @@ public class DiffractionCalibrationView extends ViewPart {
 
 			aug.setDiffractionMetadata(data.md);
 			refreshTable();
-			DiffractionCalibrationUtils.drawCalibrantRings(currentData);
+			DiffractionCalibrationUtils.drawCalibrantRings(currentData.augmenter);
 		}
 	}
 
@@ -698,7 +698,7 @@ public class DiffractionCalibrationView extends ViewPart {
 
 		if (data.augmenter != null) {
 			data.augmenter.activate();
-			DiffractionCalibrationUtils.drawCalibrantRings(currentData);
+			DiffractionCalibrationUtils.drawCalibrantRings(currentData.augmenter);
 		}
 		refreshTable();
 		// highlight current image
@@ -753,7 +753,7 @@ public class DiffractionCalibrationView extends ViewPart {
 		sComp.getContent().setFocus();
 		// this should be done with a listener...
 		tableViewer.refresh();
-		DiffractionCalibrationUtils.drawCalibrantRings(currentData);
+		DiffractionCalibrationUtils.drawCalibrantRings(currentData.augmenter);
 	}
 }
 

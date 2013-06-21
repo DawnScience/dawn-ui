@@ -125,8 +125,10 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 	private DiffractionTableData currentData;
 	
-	// FIXME do you really need a CopyOnWriteArrayList?, I would have thought a 
-	// Vector or a Collections.synchronizedCollection(new ArrayList()) would be enough.
+	// CopyOnWriteArrayList is necessary to avoid ConcurrentModificationExceptions
+	// See http://javarevisited.blogspot.co.uk/2010/10/what-is-difference-between-synchronized.html
+	// and
+	// http://docs.oracle.com/javase/1.5.0/docs/api/java/util/concurrent/CopyOnWriteArrayList.html
 	private List<DiffractionTableData> model = new CopyOnWriteArrayList<DiffractionTableData>();
 	private ILoaderService service;
 
@@ -231,7 +233,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 					DiffractionCalibrationUtils.hideFoundRings(plottingSystem);
 
-					drawCalibrants(false);
+					DiffractionCalibrationUtils.drawCalibrantRings(aug);
 				}
 			}
 		};
@@ -244,7 +246,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 					@Override
 					public void run() {
 						tableViewer.refresh();
-						drawCalibrants(true);
 					}
 				});
 			}
@@ -257,7 +258,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 					@Override
 					public void run() {
 						tableViewer.refresh();
-						drawCalibrants(true);
 					}
 				});
 			}
@@ -403,7 +403,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				standards.setSelectedCalibrant(calibrant.getItem(calibrant.getSelectionIndex()));
-				DiffractionCalibrationUtils.drawCalibrantRings(currentData);
+				DiffractionCalibrationUtils.drawCalibrantRings(currentData.augmenter);
 			}
 		});
 		for (String c : standards.getCalibrantList()) {
@@ -759,22 +759,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		refreshTable();
 		DiffractionCalibrationUtils.hideFoundRings(plottingSystem);
 
-		drawCalibrants(true);
-	}
-
-	private void drawCalibrants(final boolean focusControl){
-		Display.getDefault().asyncExec(new Runnable() {
-			@Override
-			public void run() {
-				while (Display.getDefault().readAndDispatch()) {
-					//waiting for all display events to finish before initiating the focus event
-					//in order to avoid bug 371527: https://bugs.eclipse.org/bugs/show_bug.cgi?id=371527
-				}
-				if(focusControl)
-					setFocus();
-				DiffractionCalibrationUtils.drawCalibrantRings(currentData);
-			}
-		});
+		DiffractionCalibrationUtils.drawCalibrantRings(currentData.augmenter);
 	}
 
 	@SuppressWarnings("rawtypes")
