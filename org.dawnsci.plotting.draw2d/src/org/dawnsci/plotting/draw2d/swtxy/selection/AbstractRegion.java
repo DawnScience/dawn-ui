@@ -77,7 +77,7 @@ public abstract class AbstractRegion extends Figure implements IRegion, IRegionC
 		if (!regionEventsActive) return;
 		
 		final ROIEvent evt = new ROIEvent(this, roi);
-		for (IROIListener l : roiListeners) {
+		for (IROIListener l : roiListeners.toArray(new IROIListener[0])) {
 			try {
 			    l.roiChanged(evt);
 			} catch (Throwable ne) {
