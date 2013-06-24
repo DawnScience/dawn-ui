@@ -18,6 +18,7 @@ package org.dawnsci.plotting.draw2d.swtxy.util;
 
 import java.util.Arrays;
 
+import org.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.dawnsci.plotting.draw2d.Activator;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
@@ -61,12 +62,24 @@ public class RotatableEllipse extends Shape implements PointFunction {
 		setAngleDegrees(angle);
 	}
 
+	private ICoordinateSystem cs;
+
+	@Override
+	public void setCoordinateSystem(ICoordinateSystem system) {
+		cs = system;
+	}
+
+	public ICoordinateSystem getCoordinateSystem() {
+		return cs;
+	}
+
 	/**
 	 * Set centre position
 	 * @param cx
 	 * @param cy
 	 */
 	public void setCentre(double cx, double cy) {
+		affine.setAspectRatio(cs.getAspectRatio());
 		Point oc = affine.getTransformed(centre);
 		affine.setTranslation(affine.getTranslationX() + cx - oc.preciseX(), affine.getTranslationY() + cy - oc.preciseY());
 		calcBox(true);
@@ -77,6 +90,7 @@ public class RotatableEllipse extends Shape implements PointFunction {
 	 * @param degrees
 	 */
 	public void setAngleDegrees(double degrees) {
+		affine.setAspectRatio(cs.getAspectRatio());
 		Point oc = affine.getTransformed(centre);
 		affine.setRotationDegrees(degrees);
 		Point nc = affine.getTransformed(centre);
@@ -159,6 +173,7 @@ public class RotatableEllipse extends Shape implements PointFunction {
 	 * @param minor
 	 */
 	public void setAxes(double major, double minor) {
+		affine.setAspectRatio(cs.getAspectRatio());
 		Point oc = affine.getTransformed(centre);
 		affine.setScale(major, minor);
 		Point nc = affine.getTransformed(centre);
@@ -174,7 +189,13 @@ public class RotatableEllipse extends Shape implements PointFunction {
 		affine.setAspectRatio(aspect);
 	}
 
+	@Override
+	public double getAspectRatio() {
+		return cs.getAspectRatio();
+	}
+
 	private void calcBox(boolean redraw) {
+		affine.setAspectRatio(cs.getAspectRatio());
 		box = affine.getBounds();
 		if (redraw)
 			setBounds(box.expand(2, 2));
@@ -208,15 +229,15 @@ public class RotatableEllipse extends Shape implements PointFunction {
 
 	@Override
 	protected void fillShape(Graphics graphics) {
-		
-        if (!isShapeFriendlySize()) return;
-		
+		if (!isShapeFriendlySize()) return;
+
 		graphics.pushState();
 		graphics.setAdvanced(true);
 		graphics.setAntialias(SWT.ON);
 		graphics.translate((int) affine.getTranslationX(), (int) affine.getTranslationY());
 		graphics.rotate((float) affine.getRotationDegrees());
 		// NB do not use Graphics#scale and unit shape as there are precision problems
+		calcBox(false);
 		graphics.fillOval(0, 0, (int) affine.getScaleX(), (int) affine.getScaleY());
 		graphics.popState();
 	}
@@ -251,7 +272,7 @@ public class RotatableEllipse extends Shape implements PointFunction {
 		// Fix to http://jira.diamond.ac.uk/browse/DAWNSCI-429
 		if (Activator.isLinuxOS()) {
 			Rectangle bnds = p.getBounds().getExpanded(500, 500); // This is a fudge, very elongated do still not show.
-			                                                                // Better than crashes however...
+																  // Better than crashes however...
 			if (ax>bnds.width && ay>bnds.height) return false;
 		}
 		return true;

@@ -78,7 +78,8 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 	@Override
 	public void createContents(Figure parent) {
 		ellipse = new DecoratedEllipse(parent);
-		//ellipse.setCursor(Draw2DUtils.getRoiMoveCursor());
+//		ellipse.setCursor(Draw2DUtils.getRoiMoveCursor());
+		ellipse.setCoordinateSystem(coords);
 
 		parent.add(ellipse);
 		sync(getBean());
@@ -220,11 +221,14 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 
 		public void setup(PointList corners) {
 			Rectangle r = new Rectangle(corners.getFirstPoint(), corners.getLastPoint());
-			if (r.preciseWidth() < r.preciseHeight()) {
-				setAxes(r.preciseHeight(), r.preciseWidth());
+			double ratio = getAspectRatio();
+			double w = r.preciseWidth();
+			double h = r.preciseHeight();
+			if (w*ratio < h) {
+				setAxes(h/ratio, w*ratio);
 				setAngleDegrees(90);
 			} else {
-				setAxes(r.preciseWidth(), r.preciseHeight());
+				setAxes(w, h);
 			}
 			Point c = r.getCenter();
 			setCentre(c.preciseX(), c.preciseY());
@@ -293,7 +297,7 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 		}
 
 		private void addHandle(Point p, boolean mobile, boolean visible) {
-			RectangularHandle h = new RectangularHandle(coords, getRegionColor(), this, SIDE,
+			RectangularHandle h = new RectangularHandle(getCoordinateSystem(), getRegionColor(), this, SIDE,
 					p.preciseX(), p.preciseY());
 			h.setVisible(visible);
 			parent.add(h);
@@ -307,7 +311,7 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 
 		private void addCentreHandle(boolean mobile, boolean visible) {
 			Point c = getCentre();
-			RectangularHandle h = new RectangularHandle(coords, getRegionColor(), this, SIDE, c.preciseX(), c.preciseY());
+			RectangularHandle h = new RectangularHandle(getCoordinateSystem(), getRegionColor(), this, SIDE, c.preciseX(), c.preciseY());
 			h.setVisible(visible);
 			parent.add(h);
 			FigureTranslator mover = new FigureTranslator(getXyGraph(), h, h, handles);
@@ -441,10 +445,10 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 		 */
 		public void updateFromROI(EllipticalROI eroi) {
 			final double[] xy = eroi.getPointRef();
-			int[] p1 = coords.getValuePosition(xy[0], xy[1]);
-			int[] p2 = coords.getValuePosition(2*eroi.getSemiAxis(0) + xy[0], 2*eroi.getSemiAxis(1) + xy[1]);
+			int[] p1 = getCoordinateSystem().getValuePosition(xy[0], xy[1]);
+			int[] p2 = getCoordinateSystem().getValuePosition(2*eroi.getSemiAxis(0) + xy[0], 2*eroi.getSemiAxis(1) + xy[1]);
 
-			setAxes(p2[0] - p1[0], p2[1] - p1[1]);
+			setAxes(p2[0] - p1[0], (p2[1] - p1[1])/getAspectRatio());
 
 			setCentre(p1[0], p1[1]);
 			setAngleDegrees(eroi.getAngleDegrees());

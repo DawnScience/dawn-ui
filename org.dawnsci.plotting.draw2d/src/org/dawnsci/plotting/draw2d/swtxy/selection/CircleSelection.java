@@ -72,6 +72,7 @@ public class CircleSelection extends AbstractSelectionRegion {
 	@Override
 	public void createContents(Figure parent) {
 		circle = new DecoratedCircle(parent);
+		circle.setCoordinateSystem(coords);
 		circle.setCursor(Draw2DUtils.getRoiMoveCursor());
 
 		parent.add(circle);
@@ -115,13 +116,14 @@ public class CircleSelection extends AbstractSelectionRegion {
 		g.setForegroundColor(getRegionColor());
 		g.setAlpha(getAlpha());
 		Rectangle r = new Rectangle(clicks.getFirstPoint(), clicks.getLastPoint());
-		if (r.width < r.height) {
-			r.width = r.height;
-		} else {
-			r.height = r.width;
-		}
 		double ratio = coords.getAspectRatio();
-		r.height /= ratio;
+		double w = r.preciseWidth();
+		double h = r.preciseHeight()/ratio;
+		if (w < h) {
+			r.width = (int) h;
+		} else {
+			r.height = (int) (r.width * ratio);
+		}
 		g.drawOval(r);
 	}
 
@@ -204,12 +206,27 @@ public class CircleSelection extends AbstractSelectionRegion {
 			};
 		}
 
+		private ICoordinateSystem cs;
+
+		@Override
+		public void setCoordinateSystem(ICoordinateSystem system) {
+			cs = system;
+		}
+
+		@Override
+		public double getAspectRatio() {
+			return cs.getAspectRatio();
+		}
+
 		public void setup(PointList corners) {
 			Rectangle r = new Rectangle(corners.getFirstPoint(), corners.getLastPoint());
-			if (r.width < r.height) {
-				r.width = r.height;
+			double ratio = getAspectRatio();
+			double w = r.preciseWidth();
+			double h = r.preciseHeight()/ratio;
+			if (w < h) {
+				r.width = (int) h;
 			} else {
-				r.height = r.width;
+				r.height = (int) (r.width * ratio);
 			}
 			setRadius(0.5*r.width);
 			
@@ -261,8 +278,7 @@ public class CircleSelection extends AbstractSelectionRegion {
 
 		private Point getPoint(double degrees) {
 			double angle = -Math.toRadians(degrees);
-			double ratio = coords.getAspectRatio();
-			return new PrecisionPoint(radius * Math.cos(angle) + cx, radius * Math.sin(angle) * ratio + cy);
+			return new PrecisionPoint(radius * Math.cos(angle) + cx, radius * Math.sin(angle) * getAspectRatio() + cy);
 		}
 
 		@Override
@@ -311,7 +327,7 @@ public class CircleSelection extends AbstractSelectionRegion {
 
 		// remove handles from parent and draw directly...
 		private void addHandle(Point p) {
-			RectangularHandle h = new RectangularHandle(coords, getRegionColor(), this, SIDE,
+			RectangularHandle h = new RectangularHandle(cs, getRegionColor(), this, SIDE,
 					p.preciseX(), p.preciseY());
 			h.setVisible(isVisible() && isMobile());
 			parent.add(h);
@@ -324,7 +340,7 @@ public class CircleSelection extends AbstractSelectionRegion {
 		}
 
 		private void addCentreHandle() {
-			RectangularHandle h = new RectangularHandle(coords, getRegionColor(), this, SIDE, cx, cy);
+			RectangularHandle h = new RectangularHandle(cs, getRegionColor(), this, SIDE, cx, cy);
 			h.setVisible(isVisible() && isMobile());
 			parent.add(h);
 			FigureTranslator mover = new FigureTranslator(getXyGraph(), h, h, handles);
@@ -348,8 +364,7 @@ public class CircleSelection extends AbstractSelectionRegion {
 
 		@Override
 		public boolean containsPoint(int x, int y) {
-			double ratio = coords.getAspectRatio(); 
-			double r = Math.hypot(x - cx, (y - cy)/ratio);
+			double r = Math.hypot(x - cx, (y - cy)/getAspectRatio());
 
 			if (outlineOnly) {
 				return Math.abs(r - radius) < tolerance; 
@@ -405,7 +420,7 @@ public class CircleSelection extends AbstractSelectionRegion {
 						if (ha != null) {
 							Point pa = new PrecisionPoint(ha.getSelectionPoint());
 							Dimension d = pa.getDifference(centre);
-							double r = major ? Math.abs(d.preciseWidth()) : Math.abs(d.preciseHeight());
+							double r = major ? Math.abs(d.preciseWidth()) : Math.abs(d.preciseHeight()/getAspectRatio());
 							setRadius(r);
 							updateHandlePositions();
 						}
@@ -478,8 +493,8 @@ public class CircleSelection extends AbstractSelectionRegion {
 		 */
 		public void updateFromROI(CircularROI croi) {
 			final double[] xy = croi.getPointRef();
-			int[] p1 = coords.getValuePosition(xy[0], xy[1]);
-			int[] p2 = coords.getValuePosition(croi.getRadius() + xy[0], croi.getRadius() + xy[1]);
+			int[] p1 = cs.getValuePosition(xy[0], xy[1]);
+			int[] p2 = cs.getValuePosition(croi.getRadius() + xy[0], croi.getRadius() + xy[1]);
 
 			setRadius(p2[0] - p1[0]);
 
