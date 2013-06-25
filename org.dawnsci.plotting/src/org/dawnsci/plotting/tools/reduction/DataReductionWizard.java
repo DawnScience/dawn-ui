@@ -92,6 +92,13 @@ public class DataReductionWizard extends Wizard implements IExportWizard {
 					try {	
 						((ToolConversionVisitor)visitor).setNexusAxes(sliceConfigurePage.getNexusAxes());
 						
+						try { // Delete if it exists because some tools can accidentally append.
+							final File output = new File(context.getOutputPath());
+							if (output.exists()) FileUtils.recursiveDelete(output);
+						} catch (Exception ne) {
+							logger.error("Cannot delete "+context.getOutputPath(), ne);
+						}
+						
 						IConversionContext context = sliceConfigurePage.getContext();
 						context.setMonitor(new ProgressMonitorWrapper(monitor));
 						

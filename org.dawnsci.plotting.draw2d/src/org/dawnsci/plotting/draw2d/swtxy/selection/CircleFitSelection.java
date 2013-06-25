@@ -89,6 +89,7 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 	@Override
 	public void createContents(Figure parent) {
 		circle = new DecoratedCircle(parent);
+		circle.setCoordinateSystem(coords);
 		circle.setCursor(Draw2DUtils.getRoiMoveCursor());
 
 		parent.add(circle);
@@ -162,6 +163,7 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 		if (clicks.size() >= MIN_POINTS) {
 			if (tempCircle == null) {
 				tempCircle = new DecoratedCircle();
+				tempCircle.setCoordinateSystem(coords);
 				tempCircle.setOutline(true);
 				tempCircle.setFill(false);
 			}
@@ -292,6 +294,18 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 			};
 		}
 
+		private ICoordinateSystem cs;
+
+		@Override
+		public void setCoordinateSystem(ICoordinateSystem system) {
+			cs = system;
+		}
+
+		@Override
+		public double getAspectRatio() {
+			return cs.getAspectRatio();
+		}
+
 		@Override
 		public void setVisible(boolean visible) {
 			super.setVisible(visible);
@@ -315,7 +329,7 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 		 * @param cy
 		 */
 		public void setCentre(double cx, double cy) {
-			affine.setAspectRatio(coords.getAspectRatio());
+			affine.setAspectRatio(getAspectRatio());
 			Point oc = affine.getTransformed(centre);
 			affine.setTranslation(affine.getTranslationX() + cx - oc.preciseX(), affine.getTranslationY() + cy - oc.preciseY());
 			calcBox(true);
@@ -358,7 +372,7 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 		 * @param radius
 		 */
 		public void setRadius(double radius) {
-			affine.setAspectRatio(coords.getAspectRatio());
+			affine.setAspectRatio(getAspectRatio());
 			Point oc = affine.getTransformed(centre);
 			affine.setScale(2*radius);
 			Point nc = affine.getTransformed(centre);
@@ -368,7 +382,7 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 
 		// do not set to prevent recursive repaint
 		private void calcBox(boolean redraw) {
-			affine.setAspectRatio(coords.getAspectRatio());
+			affine.setAspectRatio(getAspectRatio());
 			box = affine.getBounds();
 			if (redraw) {
 				setBounds(box.expand(2, 2));
@@ -405,9 +419,9 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 
 		@Override
 		protected void fillShape(Graphics graphics) {
-	        if (!isShapeFriendlySize()) return;
+			if (!isShapeFriendlySize()) return;
 
-	        graphics.pushState();
+			graphics.pushState();
 			graphics.setAdvanced(true);
 			graphics.setAntialias(SWT.ON);
 			graphics.translate((int) affine.getTranslationX(), (int) (affine.getTranslationY()));
@@ -419,7 +433,7 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 
 		@Override
 		protected void outlineShape(Graphics graphics) {
-	        graphics.pushState();
+			graphics.pushState();
 			graphics.setAdvanced(true);
 			graphics.setAntialias(SWT.ON);
 
@@ -431,11 +445,11 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 			graphics.popState();
 
 			if (label != null && isShowLabel()) {
-		        graphics.pushState();
-		        graphics.setLineStyle(SWT.LINE_DASH);
+				graphics.pushState();
+				graphics.setLineStyle(SWT.LINE_DASH);
 				Rectangle r = new Rectangle(getPoint(135), getCentre());
-		        graphics.drawLine(r.getTopLeft(), r.getBottomRight());
-		        graphics.setAlpha(192);
+				graphics.drawLine(r.getTopLeft(), r.getBottomRight());
+				graphics.setAlpha(192);
 				graphics.setBackgroundColor(ColorConstants.white);
 				graphics.setForegroundColor(labelColour);
 				graphics.setFont(labelFont);
@@ -457,7 +471,7 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 			// Fix to http://jira.diamond.ac.uk/browse/DAWNSCI-429
 			if (Activator.isLinuxOS()) {
 				Rectangle bnds = p.getBounds().getExpanded(500, 500); // This is a fudge, very elongated do still not show.
-				                                                                // Better than crashes however...
+																	  // Better than crashes however...
 				if (r>bnds.width && r>bnds.height) return false;
 			}
 			return true;

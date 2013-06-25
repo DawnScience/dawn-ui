@@ -84,6 +84,7 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 	@Override
 	public void createContents(Figure parent) {
 		ellipse = new DecoratedEllipse(parent);
+		ellipse.setCoordinateSystem(coords);
 		//ellipse.setCursor(Draw2DUtils.getRoiMoveCursor());
 
 		parent.add(ellipse);
@@ -153,8 +154,8 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 				pnt2 = coords.getValuePosition(parameters[3], parameters[4]);
 				ang = Math.toDegrees(parameters[2]);
 			}
-
-			ellipse.setAxes(pnt1[0] - pnt2[0], pnt1[1] - pnt2[1]);
+			double ratio = coords.getAspectRatio();
+			ellipse.setAxes(pnt1[0] - pnt2[0], (pnt1[1] - pnt2[1])/ratio);
 			ellipse.setCentre(pnt2[0], pnt2[1]);
 			ellipse.setAngleDegrees(ang);
 		} catch (IllegalArgumentException e) {
@@ -176,6 +177,7 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 		if (clicks.size() >= CIR_POINTS) {
 			if (tempEllipse == null) {
 				tempEllipse = new RotatableEllipse();
+				tempEllipse.setCoordinateSystem(coords);
 				tempEllipse.setOutline(true);
 				tempEllipse.setFill(false);
 			}
@@ -342,7 +344,7 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 		}
 
 		private void addHandle(Point p) {
-			RectangularHandle h = new RectangularHandle(coords, getRegionColor(), this, SIDE,
+			RectangularHandle h = new RectangularHandle(getCoordinateSystem(), getRegionColor(), this, SIDE,
 					p.preciseX() - HALF_SIDE, p.preciseY() - HALF_SIDE);
 			parent.add(h);
 			FigureTranslator mover = new FigureTranslator(getXyGraph(), h);
@@ -354,7 +356,7 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 
 		private void addCentreHandle() {
 			Point c = getCentre();
-			RectangularHandle h = new RectangularHandle(coords, getRegionColor(), this, SIDE,
+			RectangularHandle h = new RectangularHandle(getCoordinateSystem(), getRegionColor(), this, SIDE,
 					c.preciseX() - HALF_SIDE, c.preciseY() - HALF_SIDE);
 			parent.add(h);
 			FigureTranslator mover = new FigureTranslator(getXyGraph(), h, h, handles);
@@ -438,7 +440,7 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 					Point p = h.getSelectionPoint();
 					setCentre(p.preciseX(), p.preciseY());
 					double[] parameters = eFitter.getParameters();
-					double[] ps   = coords.getPositionValue(p.x(), p.y());
+					double[] ps   = getCoordinateSystem().getPositionValue(p.x(), p.y());
 					parameters[3] = ps[0];
 					parameters[4] = ps[1];
 				}
@@ -464,10 +466,10 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 		 */
 		public void updateFromROI(EllipticalFitROI eroi) {
 			final double[] xy = eroi.getPointRef();
-			int[] p1 = coords.getValuePosition(xy[0], xy[1]);
-			int[] p2 = coords.getValuePosition(2*eroi.getSemiAxis(0) + xy[0], 2*eroi.getSemiAxis(1) + xy[1]);
-						
-			setAxes(p2[0] - p1[0], p2[1] - p1[1]);
+			int[] p1 = getCoordinateSystem().getValuePosition(xy[0], xy[1]);
+			int[] p2 = getCoordinateSystem().getValuePosition(2*eroi.getSemiAxis(0) + xy[0], 2*eroi.getSemiAxis(1) + xy[1]);
+
+			setAxes(p2[0] - p1[0], (p2[1] - p1[1])/getAspectRatio());
 
 			setCentre(p1[0], p1[1]);
 			setAngleDegrees(eroi.getAngleDegrees());
@@ -483,7 +485,7 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 				imax = proi.getNumberOfPoints();
 				for (int i = 0; i < imax; i++) {
 					PointROI p = proi.getPoint(i);
-					int[] pos = coords.getValuePosition(p.getPoint());
+					int[] pos = getCoordinateSystem().getValuePosition(p.getPoint());
 					Point np = new Point(pos[0], pos[1]);
 					addHandle(np);
 				}
@@ -495,7 +497,7 @@ public class EllipseFitSelection extends AbstractSelectionRegion {
 			} else {
 				for (int i = 0; i < imax; i++) {
 					PointROI p = proi.getPoint(i);
-					int[] pos = coords.getValuePosition(p.getPoint());
+					int[] pos = getCoordinateSystem().getValuePosition(p.getPoint());
 					Point np = new Point(pos[0], pos[1]);
 					SelectionHandle h = (SelectionHandle) handles.get(i);
 					h.setSelectionPoint(np);

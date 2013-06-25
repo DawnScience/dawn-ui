@@ -9,6 +9,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.ViewPart;
@@ -46,6 +47,16 @@ public class AlgorithmView extends ViewPart {
     public void init(IViewSite site) throws PartInitException {
         super.init(site);
         createWorkflowRunPage(site);
+    }
+
+    public void init(IViewSite site, IMemento memento) throws PartInitException {
+    	super.init(site);
+    	createWorkflowRunPage(site);
+    	runner.init(site, memento);
+    }
+
+    public void saveState(IMemento memento){
+    	runner.saveState(memento);
     }
 
 	private void createWorkflowRunPage(IViewSite site) {
