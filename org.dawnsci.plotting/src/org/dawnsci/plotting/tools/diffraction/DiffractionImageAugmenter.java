@@ -400,6 +400,8 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 				roi = DSpacing.conicFromDSpacing(detprop, diffenv, ring.getResolution());
 			} catch (IllegalArgumentException e) {
 				return;
+			} catch (UnsupportedOperationException ex) {
+				return;
 			}
 			resROIs.add(roi);
 			if (roi instanceof EllipticalROI) {
