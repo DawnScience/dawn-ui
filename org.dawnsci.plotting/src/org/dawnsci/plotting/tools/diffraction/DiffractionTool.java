@@ -42,9 +42,6 @@ import org.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.ITraceListener;
 import org.dawnsci.plotting.api.trace.TraceEvent;
-import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
-import org.dawnsci.plotting.draw2d.swtxy.selection.CircleFitSelection;
-import org.dawnsci.plotting.draw2d.swtxy.selection.EllipseFitSelection;
 import org.dawnsci.plotting.preference.DiffractionDefaultsPreferencePage;
 import org.dawnsci.plotting.preference.detector.DiffractionDetectorPreferencePage;
 import org.dawnsci.plotting.preference.diffraction.DiffractionPreferencePage;
@@ -738,7 +735,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			public void run() {
 				final IPlottingSystem plotter = getPlottingSystem();
 				final IImageTrace t = getImageTrace();
-				if (tmpRegion instanceof EllipseFitSelection || tmpRegion instanceof CircleFitSelection) {
+				if (tmpRegion.getRegionType() == RegionType.ELLIPSEFIT || tmpRegion.getRegionType() == RegionType.CIRCLEFIT) {
 					final Display display = control.getDisplay();
 					if (t != null) {
 						Job job = new Job("Circle fit refinement") {
@@ -811,7 +808,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			public void run() {
 				logger.debug("Find outer rings clicked");
 
-				if (tmpRegion instanceof CircleFitSelection || tmpRegion instanceof EllipseFitSelection) {
+				if (tmpRegion.getRegionType() == RegionType.ELLIPSEFIT || tmpRegion.getRegionType() == RegionType.CIRCLEFIT) {
 					final IPlottingSystem plotter = getPlottingSystem();
 					final IImageTrace t = getImageTrace();
 					final Display display = control.getDisplay();
@@ -1193,7 +1190,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 					if (!augmenter.isShowingBeamCenter()) {
 						augmenter.drawBeamCentre(true);
 					}
-					((AbstractSelectionRegion) tmpRegion).setShowLabel(true);
+					tmpRegion.setShowLabel(true);
 				}
 				if(evt.getRegion() != null)
 					evt.getRegion().addROIListener(DiffractionTool.this);

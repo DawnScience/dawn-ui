@@ -472,5 +472,13 @@
          </service>
       </serviceFactory>
    </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            defaultHandler="org.dawnsci.plotting.command.ExportLineTraceCommand"
+            id="org.dawnsci.plotting.export.line.trace.command"
+            name="Export line trace">
+      </command>
+   </extension>
 
 </plugin>

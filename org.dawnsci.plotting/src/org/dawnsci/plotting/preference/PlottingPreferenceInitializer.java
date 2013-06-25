@@ -10,6 +10,7 @@
 
 package org.dawnsci.plotting.preference;
 
+import org.dawb.common.ui.plot.PlottingConstants;
 import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.api.histogram.HistogramBound;
 import org.dawnsci.plotting.api.histogram.ImageServiceBean.HistoType;

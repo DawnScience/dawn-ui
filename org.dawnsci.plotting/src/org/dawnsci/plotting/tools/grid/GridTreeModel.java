@@ -16,8 +16,9 @@ import org.dawnsci.common.widgets.tree.NumericNode;
 import org.dawnsci.common.widgets.tree.ObjectNode;
 import org.dawnsci.common.widgets.tree.ValueEvent;
 import org.dawnsci.common.widgets.tree.ValueListener;
+import org.dawnsci.plotting.api.region.IGridSelection;
 import org.dawnsci.plotting.api.region.IRegion;
-import org.dawnsci.plotting.draw2d.swtxy.selection.GridSelection;
+import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.swt.graphics.Color;
 import org.jscience.physics.amount.Amount;
@@ -80,10 +81,10 @@ public class GridTreeModel extends AbstractNodeModel {
 		spotColor.addValueListener(new ValueListener() {
 			public void valueChanged(ValueEvent evt) {
 				if (groi==null || region==null) return;
-				if (!(region instanceof GridSelection)) return;
+				if (region.getRegionType() != RegionType.GRID) return;
 				try {
 					adjustingValue = true;
-					GridSelection gl = (GridSelection)region;
+					IGridSelection gl = (IGridSelection)region;
 					gl.setPointColor((Color)evt.getValue());
 					region.repaint();	
 				} finally {
@@ -97,10 +98,10 @@ public class GridTreeModel extends AbstractNodeModel {
 		gridColor.addValueListener(new ValueListener() {
 			public void valueChanged(ValueEvent evt) {
 				if (groi==null || region==null) return;
-				if (!(region instanceof GridSelection)) return;
+				if (region.getRegionType() != RegionType.GRID) return;
 				try {
 					adjustingValue = true;
-					GridSelection gl = (GridSelection)region;
+					IGridSelection gl = (IGridSelection)region;
 					gl.setGridColor((Color)evt.getValue());
 					region.repaint();	
 				} finally {
@@ -423,12 +424,12 @@ public class GridTreeModel extends AbstractNodeModel {
 	 * @param groi
 	 */
 	public void setRegion(IRegion region, GridROI groi) {
-		if (!(region instanceof GridSelection)) return;
+		if (region.getRegionType() != RegionType.GRID) return;
 		if (region!=this.region) {
-			GridSelection grid = (GridSelection)region;
-			regionColor.setValue(grid.getRegionColor(), false);
+			regionColor.setValue(region.getRegionColor(), false);
 			viewer.update(regionColor, new String[]{"Value"});
 
+			IGridSelection grid = (IGridSelection)region;
 			spotColor.setValue(grid.getPointColor(),    false);
 			viewer.update(spotColor, new String[]{"Value"});
 

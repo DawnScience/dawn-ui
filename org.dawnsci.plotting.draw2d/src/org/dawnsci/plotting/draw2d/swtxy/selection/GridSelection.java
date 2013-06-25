@@ -1,6 +1,7 @@
 package org.dawnsci.plotting.draw2d.swtxy.selection;
 
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
+import org.dawnsci.plotting.api.region.IGridSelection;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
@@ -29,7 +30,7 @@ import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
  *     
  * @author fcp94556
  */
-public class GridSelection extends BoxSelection {
+public class GridSelection extends BoxSelection implements IGridSelection{
 		
 	private Color pointColor = ColorConstants.white;
 	private Color gridColor  = ColorConstants.lightGray;

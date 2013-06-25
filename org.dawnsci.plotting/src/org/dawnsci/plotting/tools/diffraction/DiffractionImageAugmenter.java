@@ -17,7 +17,6 @@ import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.region.ILockableRegion;
 import org.dawnsci.plotting.api.region.RegionUtils;
-import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IContributionManager;
@@ -244,7 +243,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 			crosshairs.setUserObject(RING_TYPE.BEAM_CENTRE);
 
 			crosshairs.setLabel(labelText);
-			((AbstractSelectionRegion) crosshairs).setShowLabel(true);
+			crosshairs.setShowLabel(true);
 
 			plottingSystem.addRegion(crosshairs);
 			crosshairs.setMobile(false); // NOTE: Must be done **AFTER** calling the
@@ -360,8 +359,8 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		region.setUserRegion(isMobile);
 
 		region.setLabel(labelText);
-		((AbstractSelectionRegion) region).setShowLabel(true);
-		((AbstractSelectionRegion) region).setForegroundColor(labelColour);
+		crosshairs.setShowLabel(true);
+		crosshairs.setRegionColor(labelColour);
 
 		region.setShowPosition(false);
 		region.setVisible(true);

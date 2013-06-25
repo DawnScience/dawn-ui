@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
+import org.dawnsci.plotting.api.region.IEllipseFitSelection;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegionContainer;
 import org.dawnsci.plotting.api.region.ROIEvent;
@@ -49,7 +50,7 @@ import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.PointROI;
 import uk.ac.diamond.scisoft.analysis.roi.PolylineROI;
 
-public class EllipseFitSelection extends AbstractSelectionRegion {
+class EllipseFitSelection extends AbstractSelectionRegion implements IEllipseFitSelection {
 	private final static Logger logger = LoggerFactory.getLogger(EllipseFitSelection.class);
 
 	private static final int CIR_POINTS = 3; // minimum number of points to define circle

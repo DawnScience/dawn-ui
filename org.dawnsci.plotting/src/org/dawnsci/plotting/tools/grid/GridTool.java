@@ -32,7 +32,6 @@ import org.dawnsci.plotting.api.region.RegionUtils;
 import org.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.dawnsci.plotting.api.trace.ITraceListener;
 import org.dawnsci.plotting.api.trace.TraceEvent;
-import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.action.Action;
@@ -490,7 +489,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		region.setUserObject(RING_TYPE.BEAM_CENTRE);
 		
 		region.setLabel(labelText);
-		((AbstractSelectionRegion)region).setShowLabel(false);
+		region.setShowLabel(false);
 		
 		getPlottingSystem().addRegion(region);
 		region.setMobile(false); // NOTE: Must be done **AFTER** calling the addRegion method.

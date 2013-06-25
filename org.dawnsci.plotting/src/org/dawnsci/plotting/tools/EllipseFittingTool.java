@@ -38,6 +38,7 @@ import java.util.List;
 import org.dawb.common.ui.plot.PlottingFactory;
 import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.api.IPlottingSystem;
+import org.dawnsci.plotting.api.region.IEllipseFitSelection;
 import org.dawnsci.plotting.api.region.IROIListener;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -48,7 +49,6 @@ import org.dawnsci.plotting.api.region.RegionUtils;
 import org.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.dawnsci.plotting.api.trace.ITraceListener;
 import org.dawnsci.plotting.api.trace.TraceEvent;
-import org.dawnsci.plotting.draw2d.swtxy.selection.EllipseFitSelection;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
@@ -88,7 +88,7 @@ public class EllipseFittingTool extends AbstractToolPage {
 	private TableViewer viewer;
 	private List<IRegion> ellipses;
 
-	private EllipseFitSelection cRegion;
+	private IEllipseFitSelection cRegion;
 
 	protected boolean circleOnly;
 
@@ -114,8 +114,8 @@ public class EllipseFittingTool extends AbstractToolPage {
 			@Override
 			public void regionCreated(RegionEvent evt) {
 				IRegion r = evt.getRegion();
-				if (r instanceof EllipseFitSelection) {
-					((EllipseFitSelection) r).setFitCircle(circleOnly);
+				if (r instanceof IEllipseFitSelection) {
+					((IEllipseFitSelection) r).setFitCircle(circleOnly);
 				}
 			}
 		};
@@ -158,7 +158,7 @@ public class EllipseFittingTool extends AbstractToolPage {
 			return;
 
 		region.addROIListener(ellipseROIListener);
-		cRegion = (EllipseFitSelection) region;
+		cRegion = (IEllipseFitSelection) region;
 		ellipses.add(region);
 		viewer.refresh();
 		viewer.setSelection(new StructuredSelection(region));
@@ -247,8 +247,8 @@ public class EllipseFittingTool extends AbstractToolPage {
 			public void selectionChanged(SelectionChangedEvent event) {
 				IStructuredSelection s = (IStructuredSelection) event.getSelection();
 				IRegion r = (IRegion) s.getFirstElement();
-				if (r instanceof EllipseFitSelection) {
-					cRegion = (EllipseFitSelection) r;
+				if (r instanceof IEllipseFitSelection) {
+					cRegion = (IEllipseFitSelection) r;
 					cRegion.setFitCircle(circleOnly);
 				}
 			}
@@ -403,7 +403,7 @@ public class EllipseFittingTool extends AbstractToolPage {
 
 		// Start with a selection of the right type
 		try {
-			cRegion = (EllipseFitSelection) plotter.createRegion(RegionUtils.getUniqueName("Ellipse fit", plotter), RegionType.ELLIPSEFIT);
+			cRegion = (IEllipseFitSelection) plotter.createRegion(RegionUtils.getUniqueName("Ellipse fit", plotter), RegionType.ELLIPSEFIT);
 		} catch (Exception e) {
 			logger.error("Cannot create region for ellipse fitting tool!");
 		}

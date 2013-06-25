@@ -349,4 +349,10 @@ public interface IRegion {
 	 * @return object
 	 */
 	public Object getUserObject();
+
+	/**
+	 * Sets wether the label should be shown or not.
+	 * @param b
+	 */
+	public void setShowLabel(boolean b);
 }

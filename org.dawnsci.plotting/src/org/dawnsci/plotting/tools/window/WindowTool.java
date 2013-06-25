@@ -58,7 +58,6 @@ import org.dawnsci.plotting.api.trace.ITraceListener;
 import org.dawnsci.plotting.api.trace.IWindowTrace;
 import org.dawnsci.plotting.api.trace.PaletteEvent;
 import org.dawnsci.plotting.api.trace.TraceEvent;
-import org.dawnsci.plotting.jreality.SurfaceTrace;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -504,7 +503,7 @@ public class WindowTool extends AbstractToolPage {
 		if (trace instanceof ISurfaceTrace) {
 		    setActionsEnabled(true);
 			updateWindowPlot((ISurfaceTrace)trace);
-			((SurfaceTrace)trace).addPaletteListener(paletteListener);
+			((ISurfaceTrace)trace).addPaletteListener(paletteListener);
 		} else if (trace instanceof ILineStackTrace) {
 		    setActionsEnabled(false);
 		    updateSlicePlot((ILineStackTrace)trace);
