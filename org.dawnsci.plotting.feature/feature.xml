@@ -239,4 +239,10 @@
          install-size="0"
          version="0.0.0"/>
 
+   <plugin
+         id="com.springsource.org.apache.commons.digester"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
 </feature>
