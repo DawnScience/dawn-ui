@@ -108,6 +108,9 @@ public abstract class AbstractRegion extends Figure implements IRegion, IRegionC
 
 	@Override
 	public void setROI(IROI roi) {
+		// Required fix after someone thought it would be a laugh to send
+		// null ROIs over.
+		if (roi == null) throw new NullPointerException("Cannot have a null region position!");
 		this.roi = roi;
 		updateROI();
 		fireROIChanged(this.roi);
