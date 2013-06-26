@@ -321,14 +321,16 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			}
 		};
 
+		final Display display = parent.getDisplay();
+
 		// main sashform which contains the left sash and the plotting system
 		SashForm mainSash = new SashForm(parent, SWT.HORIZONTAL);
-		mainSash.setBackground(new Color(parent.getDisplay(), 192, 192, 192));
+		mainSash.setBackground(new Color(display, 192, 192, 192));
 		mainSash.setLayout(new FillLayout());
 
 		// left sasfhform which contains the diffraction calibration controls and the diffraction tool
 		SashForm leftSash = new SashForm(mainSash, SWT.VERTICAL);
-		leftSash.setBackground(new Color(parent.getDisplay(), 192, 192, 192));
+		leftSash.setBackground(new Color(display, 192, 192, 192));
 		leftSash.setLayout(new GridLayout(1, false));
 		leftSash.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
@@ -423,7 +425,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		l = new Label(padComp, SWT.NONE);
 		Button upButton = new Button(padComp, SWT.ARROW | SWT.UP);
 		upButton.setToolTipText("Move rings up");
-		upButton.addMouseListener(new RepeatingMouseAdapter(parent.getDisplay(), new SlowFastRunnable() {
+		upButton.addMouseListener(new RepeatingMouseAdapter(display, new SlowFastRunnable() {
 			@Override
 			public void run() {
 				DiffractionCalibrationUtils.changeRings(currentData, ManipulateMode.UP, isFast());
@@ -436,7 +438,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		l = new Label(padComp, SWT.NONE);
 		Button leftButton = new Button(padComp, SWT.ARROW | SWT.LEFT);
 		leftButton.setToolTipText("Shift rings left");
-		leftButton.addMouseListener(new RepeatingMouseAdapter(parent.getDisplay(), new SlowFastRunnable() {
+		leftButton.addMouseListener(new RepeatingMouseAdapter(display, new SlowFastRunnable() {
 			@Override
 			public void run() {
 				DiffractionCalibrationUtils.changeRings(currentData, ManipulateMode.LEFT, isFast());
@@ -446,7 +448,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		l = new Label(padComp, SWT.NONE);
 		Button rightButton = new Button(padComp, SWT.ARROW | SWT.RIGHT);
 		rightButton.setToolTipText("Shift rings right");
-		rightButton.addMouseListener(new RepeatingMouseAdapter(parent.getDisplay(), new SlowFastRunnable() {
+		rightButton.addMouseListener(new RepeatingMouseAdapter(display, new SlowFastRunnable() {
 			@Override
 			public void run() {
 				DiffractionCalibrationUtils.changeRings(currentData, ManipulateMode.RIGHT, isFast());
@@ -459,7 +461,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		l = new Label(padComp, SWT.NONE);
 		Button downButton = new Button(padComp, SWT.ARROW | SWT.DOWN);
 		downButton.setToolTipText("Move rings down");
-		downButton.addMouseListener(new RepeatingMouseAdapter(parent.getDisplay(), new SlowFastRunnable() {
+		downButton.addMouseListener(new RepeatingMouseAdapter(display, new SlowFastRunnable() {
 			@Override
 			public void run() {
 				DiffractionCalibrationUtils.changeRings(currentData, ManipulateMode.DOWN, isFast());
@@ -481,7 +483,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		Button plusButton = new Button(sizeComp, SWT.PUSH);
 		plusButton.setText("+");
 		plusButton.setToolTipText("Make rings larger");
-		plusButton.addMouseListener(new RepeatingMouseAdapter(parent.getDisplay(), new SlowFastRunnable() {
+		plusButton.addMouseListener(new RepeatingMouseAdapter(display, new SlowFastRunnable() {
 			@Override
 			public void run() {
 				DiffractionCalibrationUtils.changeRings(currentData, ManipulateMode.ENLARGE, isFast());
@@ -495,7 +497,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		Button minusButton = new Button(sizeComp, SWT.PUSH);
 		minusButton.setText("-");
 		minusButton.setToolTipText("Make rings smaller");
-		minusButton.addMouseListener(new RepeatingMouseAdapter(parent.getDisplay(), new SlowFastRunnable() {
+		minusButton.addMouseListener(new RepeatingMouseAdapter(display, new SlowFastRunnable() {
 			@Override
 			public void run() {
 				DiffractionCalibrationUtils.changeRings(currentData, ManipulateMode.SHRINK, isFast());
@@ -515,7 +517,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		Button elongateButton = new Button(shapeComp, SWT.PUSH);
 		elongateButton.setText("Elongate");
 		elongateButton.setToolTipText("Make rings more elliptical");
-		elongateButton.addMouseListener(new RepeatingMouseAdapter(parent.getDisplay(), new SlowFastRunnable() {
+		elongateButton.addMouseListener(new RepeatingMouseAdapter(display, new SlowFastRunnable() {
 			@Override
 			public void run() {
 				DiffractionCalibrationUtils.changeRings(currentData, ManipulateMode.ELONGATE, isFast());
@@ -529,7 +531,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		Button squashButton = new Button(shapeComp, SWT.PUSH | SWT.FILL);
 		squashButton.setText("Squash");
 		squashButton.setToolTipText("Make rings more circular");
-		squashButton.addMouseListener(new RepeatingMouseAdapter(parent.getDisplay(), new SlowFastRunnable() {
+		squashButton.addMouseListener(new RepeatingMouseAdapter(display, new SlowFastRunnable() {
 			@Override
 			public void run() {
 				DiffractionCalibrationUtils.changeRings(currentData, ManipulateMode.SQUASH, isFast());
@@ -549,7 +551,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		Button clockButton = new Button(rotateComp, SWT.PUSH);
 		clockButton.setImage(Activator.getImage("icons/arrow_rotate_clockwise.png"));
 		clockButton.setToolTipText("Rotate rings clockwise");
-		clockButton.addMouseListener(new RepeatingMouseAdapter(parent.getDisplay(), new SlowFastRunnable() {
+		clockButton.addMouseListener(new RepeatingMouseAdapter(display, new SlowFastRunnable() {
 			@Override
 			public void run() {
 				DiffractionCalibrationUtils.changeRings(currentData, ManipulateMode.CLOCKWISE, isFast());
@@ -563,7 +565,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		Button antiClockButton = new Button(rotateComp, SWT.PUSH);
 		antiClockButton.setImage(Activator.getImage("icons/arrow_rotate_anticlockwise.png"));
 		antiClockButton.setToolTipText("Rotate rings anti-clockwise");
-		antiClockButton.addMouseListener(new RepeatingMouseAdapter(parent.getDisplay(), new SlowFastRunnable() {
+		antiClockButton.addMouseListener(new RepeatingMouseAdapter(display, new SlowFastRunnable() {
 			@Override
 			public void run() {
 				DiffractionCalibrationUtils.changeRings(currentData, ManipulateMode.ANTICLOCKWISE, isFast());
@@ -586,7 +588,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		findRingButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Job findRingsJob = DiffractionCalibrationUtils.findRings(parent, plottingSystem, currentData);
+				Job findRingsJob = DiffractionCalibrationUtils.findRings(display, plottingSystem, currentData);
 				if(findRingsJob == null) return;
 				findRingsJob.addJobChangeListener(new JobChangeAdapter(){
 					@Override
@@ -613,7 +615,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		calibrateImages.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				DiffractionCalibrationUtils.calibrateImages(parent, plottingSystem, model, currentData);
+				DiffractionCalibrationUtils.calibrateImages(display, plottingSystem, model, currentData);
 				Display.getDefault().asyncExec(new Runnable() {
 					@Override
 					public void run() {
@@ -632,7 +634,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		calibrateWD.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				DiffractionCalibrationUtils.calibrateWavelength(parent, model, currentData);
+				DiffractionCalibrationUtils.calibrateWavelength(display, model, currentData);
 				Display.getDefault().asyncExec(new Runnable() {
 					@Override
 					public void run() {

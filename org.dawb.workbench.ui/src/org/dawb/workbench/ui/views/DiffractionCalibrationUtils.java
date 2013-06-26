@@ -36,8 +36,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationStandards;
@@ -54,10 +55,11 @@ import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
 /**
  * Class containing static methods used in Diffraction calibration views
- * @author wqk87977
  *
  */
 public class DiffractionCalibrationUtils {
+
+	private static Logger logger = LoggerFactory.getLogger(DiffractionCalibrationUtils.class);
 
 	enum ManipulateMode {
 		LEFT, RIGHT, UP, DOWN, ENLARGE, SHRINK, ELONGATE, SQUASH, CLOCKWISE, ANTICLOCKWISE
@@ -67,16 +69,15 @@ public class DiffractionCalibrationUtils {
 
 	/**
 	 * Calibrate images 
-	 * @param parent
+	 * @param display
 	 * @param plottingSystem
 	 * @param model
 	 * @param currentData
 	 */
-	public static void calibrateImages(final Composite parent, 
+	public static void calibrateImages(final Display display,
 									   final IPlottingSystem plottingSystem,
 									   final List<DiffractionTableData> model,
 									   final DiffractionTableData currentData) {
-		final Display display = parent.getDisplay();
 		Job job = new Job("Calibrate detector") {
 			@Override
 			protected IStatus run(final IProgressMonitor monitor) {
@@ -100,12 +101,11 @@ public class DiffractionCalibrationUtils {
 					try {
 						data.q = PowderRingsUtils.fitAllEllipsesToQSpace(mon, dp, ce, data.rois, spacings, true);
 
-						System.err.println(data.q);
+						logger.debug("Q-space = {}", data.q);
 						data.od = dp.getDetectorDistance(); // store old values
 						data.ow = ce.getWavelength();
-
 					} catch (IllegalArgumentException e) {
-						System.err.println(e);
+						logger.debug("Problem in calibrating image, {}: {}", data.name, e);
 					}
 				}
 
@@ -268,7 +268,7 @@ public class DiffractionCalibrationUtils {
 			if (tilt > 90)
 				tilt = 90;
 			detprop.setNormalAnglesInDegrees(tilt, 0, angle[2]);
-			System.err.println("p: " + tilt);
+			logger.trace("p: {}", tilt);
 		} else if (mode == ManipulateMode.SQUASH) {
 			double tilt = Math.toDegrees(detprop.getTiltAngle());
 			double[] angle = detprop.getNormalAnglesInDegrees();
@@ -276,33 +276,32 @@ public class DiffractionCalibrationUtils {
 			if (tilt < 0)
 				tilt = 0;
 			detprop.setNormalAnglesInDegrees(tilt, 0, angle[2]);
-			System.err.println("o: " + tilt);
+			logger.trace("o: {}", tilt);
 		} else if (mode == ManipulateMode.ANTICLOCKWISE) {
 			double[] angle = detprop.getNormalAnglesInDegrees();
 			angle[2] -= fast ? 2 : 0.5;
 			if (angle[2] < 0)
 				angle[2] += 360;
 			detprop.setNormalAnglesInDegrees(angle[0], angle[1], angle[2]);
-			System.err.println("a: " + angle[2]);
+			logger.trace("a: {}", angle[2]);
 		} else if (mode == ManipulateMode.CLOCKWISE) {
 			double[] angle = detprop.getNormalAnglesInDegrees();
 			angle[2] += fast ? 2 : 0.5;
 			if (angle[2] > 360)
 				angle[2] = 360;
 			detprop.setNormalAnglesInDegrees(angle[0], angle[1], angle[2]);
-			System.err.println("c: " + angle[2]);
+			logger.trace("c: {}", angle[2]);
 		}
 		drawCalibrantRings(currentData.augmenter);
 	}
 
 	/**
 	 * 
-	 * @param parent
+	 * @param display
 	 * @param model
 	 * @param currentData
 	 */
-	public static void calibrateWavelength(final Composite parent, final List<DiffractionTableData> model, final DiffractionTableData currentData) {
-		final Display display = parent.getDisplay();
+	public static void calibrateWavelength(final Display display, final List<DiffractionTableData> model, final DiffractionTableData currentData) {
 		Job job = new Job("Calibrate wavelength") {
 			@Override
 			protected IStatus run(final IProgressMonitor monitor) {
@@ -323,7 +322,7 @@ public class DiffractionCalibrationUtils {
 				}
 				Polynomial p = new Polynomial(1);
 				Fitter.llsqFit(new AbstractDataset[] {AbstractDataset.createFromList(odist)}, AbstractDataset.createFromList(ndist), p);
-				System.err.println(p);
+				logger.debug("Straight line fit: {}", p);
 
 				final double f = p.getParameterValue(0);
 				for (final DiffractionTableData data : model) {
@@ -337,7 +336,7 @@ public class DiffractionCalibrationUtils {
 						Display.getDefault().asyncExec(new Runnable() {
 							@Override
 							public void run() {
-								ce.setWavelength(data.ow/f);
+								ce.setWavelength(data.ow*f);
 							}
 						});
 					}
@@ -358,12 +357,12 @@ public class DiffractionCalibrationUtils {
 
 	/**
 	 * 
-	 * @param parent
+	 * @param display TODO
 	 * @param plottingSystem
 	 * @param currentData
 	 * @return findRing job
 	 */
-	public static Job findRings(Composite parent, final IPlottingSystem plottingSystem, final DiffractionTableData currentData) {
+	public static Job findRings(final Display display, final IPlottingSystem plottingSystem, final DiffractionTableData currentData) {
 		if (currentData == null)
 			return null;
 
@@ -373,7 +372,6 @@ public class DiffractionCalibrationUtils {
 
 		final List<IROI> resROIs = aug.getResolutionROIs();
 		final IImageTrace image = DiffractionCalibrationUtils.getImageTrace(plottingSystem);
-		final Display display = parent.getDisplay();
 		if (currentData.rois == null) {
 			currentData.rois = new ArrayList<IROI>();
 		} else {
@@ -403,7 +401,7 @@ public class DiffractionCalibrationUtils {
 						double[] ec = e.getPointRef();
 						double[] c = roi.getPointRef();
 						if (Math.hypot(c[0] - ec[0], c[1] - ec[1]) > delta) {
-							System.err.println("Dropping as too far from centre: " + roi + " cf " + e);
+							logger.trace("Dropping as too far from centre: {} cf {}", roi, e);
 							currentData.rois.add(null); // null placeholder
 							continue;
 						}
@@ -415,7 +413,7 @@ public class DiffractionCalibrationUtils {
 							break;
 					} catch (IllegalArgumentException ex) {
 						currentData.rois.add(null); // null placeholder
-						System.err.println("Could not find " + r + ": " + ex);
+						logger.trace("Could not find ellipse with {}: {}", r, ex);
 					}
 				}
 				currentData.nrois = n;
