@@ -1,6 +1,7 @@
 package org.dawnsci.common.widgets.gda.roi;
 
 import org.dawb.common.ui.plot.roi.ROIType;
+import org.dawb.common.ui.roi.ROIEditTable;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
