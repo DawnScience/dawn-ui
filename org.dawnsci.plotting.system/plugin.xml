@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin
+>
+   <extension
+         point="org.dawb.common.ui.plottingClass">
+      <plottingSystem
+            class="org.dawnsci.plotting.system.PlottingSystemImpl"
+            id="org.dawb.workbench.editors.plotting.lightWeightPlottingSystem"
+            visible_type="Lightweight">
+      </plottingSystem>
+   </extension>
+</plugin>
