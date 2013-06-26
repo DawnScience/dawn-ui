@@ -13,7 +13,7 @@ import org.eclipse.swt.widgets.Text;
  * 
  * By simply changing the pattern it can become another decorator (e.g. a DateDecorator).
  */
-class RegexDecorator {
+public class RegexDecorator {
 
 	protected Text    text;
 	private   Pattern pattern;

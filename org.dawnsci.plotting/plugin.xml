@@ -8,14 +8,6 @@
       </initializer>
    </extension>
    <extension
-         point="org.dawb.common.ui.plottingClass">
-      <plottingSystem
-            class="org.dawnsci.plotting.system.PlottingSystemImpl"
-            id="org.dawb.workbench.editors.plotting.lightWeightPlottingSystem"
-            visible_type="Lightweight">
-      </plottingSystem>
-   </extension>
-   <extension
          point="org.dawb.common.ui.toolPage">
       <plotting_tool_page
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.peak"

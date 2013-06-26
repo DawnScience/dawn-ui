@@ -7,7 +7,7 @@ import org.eclipse.swt.widgets.Text;
 public class IntegerDecorator extends BoundsDecorator {
 
 	public IntegerDecorator(Text text) {
-		super(text, "[-0-9]+", DecimalFormat.getIntegerInstance());
+		super(text, "[-0-9∞]+", DecimalFormat.getIntegerInstance());
 	}
 
 }
