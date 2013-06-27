@@ -116,6 +116,9 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 				if (!(evt.getROI() instanceof GridROI)) return;
 				if (model!=null) {
 					GridROI roi = (GridROI)evt.getROI();
+					if (gridPreferences != null) {
+						roi.setGridPreferences(gridPreferences);
+					}
 					model.setRegion((IRegion)evt.getSource(), roi);
 				}
 			}
@@ -151,23 +154,10 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		
 	}
 
-
 	@Override
 	public ToolPageRole getToolPageRole() {
 		return ToolPageRole.ROLE_2D;
 	}
-	
-//  Example metadata object expected by the grid tool to correctly populate the grid preferences
-//	private IMetaData getGDAGridPreferences() {
-//
-//		Map<String,GridPreferences> gdaMap = new HashMap<String, GridPreferences>();
-//		
-//		GridPreferences gp = new GridPreferences(100000, 10000, Math.random()*1000, Math.random()*1000);
-//
-//		gdaMap.put(GDA_GRID_METADATA, gp);
-//
-//		return new Metadata(gdaMap);
-//	}
 
 	@Override
 	public void createControl(Composite parent) {
@@ -648,5 +638,4 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		
 		return new GridPreferences(xRes, yRes, xbeam, ybeam);
 	}
-
 }
