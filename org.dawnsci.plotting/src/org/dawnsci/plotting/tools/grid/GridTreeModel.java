@@ -119,7 +119,7 @@ public class GridTreeModel extends AbstractNodeModel {
 		xres.setUnits(SI.MICRO(SI.METRE), SI.MILLIMETRE);
 		xres.setEditable(true);
 		xres.setLowerBound(Amount.valueOf(0.01, SI.MICRO(SI.METRE)));
-		xres.setUpperBound(Amount.valueOf(100, SI.MILLIMETRE));
+		xres.setUpperBound(Amount.valueOf(2000, SI.MILLIMETRE));
 		xres.setIncrement(0.1);
 		xres.addAmountListener(new AmountListener<Length>() {		
 			@Override
@@ -144,7 +144,7 @@ public class GridTreeModel extends AbstractNodeModel {
 		yres.setUnits(SI.MICRO(SI.METRE), SI.MILLIMETRE);
 		yres.setEditable(true);
 		yres.setLowerBound(Amount.valueOf(0.01, SI.MICRO(SI.METRE)));
-		yres.setUpperBound(Amount.valueOf(100, SI.MILLIMETRE));
+		yres.setUpperBound(Amount.valueOf(2000, SI.MILLIMETRE));
 		yres.setIncrement(0.1);
 		yres.addAmountListener(new AmountListener<Length>() {		
 			@Override
