@@ -116,9 +116,6 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 				if (!(evt.getROI() instanceof GridROI)) return;
 				if (model!=null) {
 					GridROI roi = (GridROI)evt.getROI();
-					if (gridPreferences != null) {
-						roi.setGridPreferences(gridPreferences);
-					}
 					model.setRegion((IRegion)evt.getSource(), roi);
 				}
 			}
@@ -626,20 +623,19 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 	
 	private GridPreferences getGridPreferences() {
 		
-		GridPreferences gp = null;
-		
 		try {
 			IMetaData m = getImageTrace().getData().getMetadata();
 			if (m != null && m.getMetaNames().contains(GDA_GRID_METADATA)) {
 				Object ob = m.getMetaValue(GDA_GRID_METADATA);
 				if (ob instanceof GridPreferences) {
-					gp = (GridPreferences)ob;
+					return (GridPreferences)ob;
 				}
 			}
 		} catch (Exception e) {
-			return getGridFromStore();
+			logger.error("Exception on getting GDA grid preferences: " + e.getMessage());
 		}
-		return gp;
+		
+		return getGridFromStore();
 		
 	}
 	
