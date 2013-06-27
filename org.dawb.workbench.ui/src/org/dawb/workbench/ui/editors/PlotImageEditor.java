@@ -27,6 +27,7 @@ import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawb.common.util.io.FileUtils;
 import org.dawb.common.util.list.SortNatural;
 import org.dawb.workbench.ui.Activator;
+import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.dawnsci.plotting.api.trace.ColorOption;
@@ -335,11 +336,11 @@ public class PlotImageEditor extends EditorPart implements IEditorExtension, IRe
      	super.dispose();
     }
 
-    public Object getAdapter(final Class clazz) {
+    public Object getAdapter(@SuppressWarnings("rawtypes") final Class clazz) {
 		
 		if (clazz == Page.class) {
 			return new HeaderTablePage(EclipseUtils.getFilePath(getEditorInput()));
-		} else if (clazz == IToolPageSystem.class) {
+		} else if (clazz == IToolPageSystem.class || clazz == IPlottingSystem.class) {
 			return getPlottingSystem();
 		}
 		

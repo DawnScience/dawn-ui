@@ -18,6 +18,8 @@ import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.PlottingActionBarManager;
 import org.dawb.common.ui.plot.PlottingConstants;
+import org.dawb.common.ui.util.EclipseUtils;
+import org.dawb.common.ui.wizard.persistence.PersistenceExportWizard;
 import org.dawnsci.plotting.api.ActionType;
 import org.dawnsci.plotting.api.ManagerType;
 import org.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
@@ -30,7 +32,10 @@ import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.wizard.IWizard;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.graphics.PaletteData;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,6 +121,20 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 			}
 		};
 
+		final Action export = new Action("Export data to file", PlottingSystemActivator.getImageDescriptor("icons/mask-export-wiz.png")) {
+			public void run() {
+				try {
+					system.setFocus();
+					IWizard wiz = EclipseUtils.openWizard(PersistenceExportWizard.ID, false);
+					WizardDialog wd = new  WizardDialog(Display.getCurrent().getActiveShell(), wiz);
+					wd.setTitle(wiz.getWindowTitle());
+					wd.open();
+				} catch (Exception e) {
+					logger.error("Problem opening export!", e);
+				}
+			}			
+		};
+		
 		exportActionsDropDown.setImageDescriptor(PlottingSystemActivator.getImageDescriptor("icons/printer.png"));
 		exportActionsDropDown.setSelectedAction(printButton);
 		exportActionsDropDown.add(exportSaveButton);
@@ -123,6 +142,8 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 		exportActionsDropDown.addSeparator();
 		exportActionsDropDown.add(snapShotButton);
 		exportActionsDropDown.add(printButton);
+		exportActionsDropDown.addSeparator();
+		exportActionsDropDown.add(export);
 		return exportActionsDropDown;
 	}
 
