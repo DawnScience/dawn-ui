@@ -28,6 +28,8 @@ import org.dawnsci.plotting.api.trace.ILineTrace;
 import org.dawnsci.plotting.api.trace.ISurfaceTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.api.trace.ITraceListener;
+import org.dawnsci.plotting.api.trace.TraceEvent;
+import org.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.widgets.Composite;
@@ -251,6 +253,11 @@ public class ThreadSafePlottingSystem extends StandardMBean implements IPlotting
 	@Override
 	public void savePlotting(String filename, String filetype) throws Exception {
 		call(getMethodName(Thread.currentThread().getStackTrace()), filename, filetype);
+	}
+
+	@Override
+	public String getTitle() {
+		return (String)call(getMethodName(Thread.currentThread().getStackTrace()));
 	}
 
 	@Override
@@ -536,6 +543,22 @@ public class ThreadSafePlottingSystem extends StandardMBean implements IPlotting
 	 */
 	public void setXFirst(boolean xFirst) {
 		call(getMethodName(Thread.currentThread().getStackTrace()), new Class[]{boolean.class}, xFirst);
+	}
+	
+	public void fireWillPlot(final TraceWillPlotEvent evt) {
+		call(getMethodName(Thread.currentThread().getStackTrace()), evt);
+	}
+	
+	/**
+	 * May be used to force a trace to fire update listeners in the plotting system.
+	 * @param evt
+	 */
+	public void fireTraceUpdated(final TraceEvent evt) {
+		call(getMethodName(Thread.currentThread().getStackTrace()), evt);		
+	}
+
+	public void fireTraceAdded(final TraceEvent evt) {
+		call(getMethodName(Thread.currentThread().getStackTrace()), evt);		
 	}
 
 }

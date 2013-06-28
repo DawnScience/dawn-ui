@@ -35,4 +35,5 @@ Require-Bundle: org.eclipse.core.filesystem;bundle-version="1.3.1",
  org.dawnsci.plotting.api;bundle-version="1.0.0",
  org.dawb.common.ui;bundle-version="1.3.0",
  uk.ac.diamond.scisoft.analysis;bundle-version="1.3.0",
- uk.ac.diamond.scisoft.analysis.api;bundle-version="1.0.0"
+ uk.ac.diamond.scisoft.analysis.api;bundle-version="1.0.0",
+ org.dawnsci.plotting;bundle-version="1.2.0"

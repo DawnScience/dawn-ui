@@ -12,7 +12,6 @@ import javax.swing.BoxLayout;
 import javax.swing.JApplet;
 import javax.swing.JPanel;
 
-import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.roi.data.SurfacePlotROI;
 import org.dawb.common.ui.util.DisplayUtils;
 import org.dawnsci.plotting.api.IPlottingSystem;
@@ -150,10 +149,10 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	private Cursor defaultCursor;
 
 	private JRealityPlotActions plotActions;
-	private AbstractPlottingSystem     system;
+	private IPlottingSystem     system;
 	
 	public void init(IPlottingSystem system) {
-		this.system = (AbstractPlottingSystem)system;
+		this.system = system;
 	}
 
 	/**
@@ -186,7 +185,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	protected void addStackTrace(final ILineStackTrace trace) {
 		StackTrace stack = (StackTrace)trace;
 		try {
-			stack.setPlottingSystem((AbstractPlottingSystem)system);
+			stack.setPlottingSystem(system);
 			graph.setVisible(false);
 			plot(stack.createAxisValues(), stack.getWindow(), PlottingMode.ONED_THREED, stack.getStack());
 
@@ -259,7 +258,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	protected void addSurfaceTrace(final ISurfaceTrace trace) {	
 		SurfaceTrace surface = (SurfaceTrace)trace;
 		try {
-			surface.setPlottingSystem((AbstractPlottingSystem)system);
+			surface.setPlottingSystem(system);
 			graph.setVisible(false);
 			plot(surface.createAxisValues(), getWindow(surface.getWindow()), PlottingMode.SURF2D, surface.getData());
 			plotter.handleColourCast(surface.createImageData(), graph, surface.getData().min().doubleValue(), surface.getData().max().doubleValue());

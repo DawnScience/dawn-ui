@@ -32,7 +32,8 @@ Require-Bundle: org.eclipse.ui;bundle-version="3.8.0",
  org.dawnsci.common.widgets.gda;bundle-version="1.2.0",
  org.dawnsci.io;bundle-version="1.2.0",
  org.dawb.common.gpu;bundle-version="1.2.0",
- org.eclipse.ui.forms;bundle-version="3.5.200"
+ org.eclipse.ui.forms;bundle-version="3.5.200",
+ org.dawnsci.plotting;bundle-version="1.2.0"
 Bundle-ActivationPolicy: lazy
 Import-Package: javax.measure.quantity;version="4.3.1",
  javax.measure.unit;version="4.3.1",

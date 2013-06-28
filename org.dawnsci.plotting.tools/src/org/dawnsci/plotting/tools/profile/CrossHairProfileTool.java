@@ -3,10 +3,10 @@ package org.dawnsci.plotting.tools.profile;
 import java.util.Collection;
 import java.util.List;
 
-import org.dawb.common.ui.plot.PlottingFactory;
 import org.dawb.common.ui.util.ColorUtility;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlotType;
+import org.dawnsci.plotting.api.PlottingFactory;
 import org.dawnsci.plotting.api.axis.IAxis;
 import org.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
 import org.dawnsci.plotting.api.region.IROIListener;

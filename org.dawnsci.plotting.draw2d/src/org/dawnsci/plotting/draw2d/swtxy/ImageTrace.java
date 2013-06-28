@@ -14,7 +14,7 @@ import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.IAxisListener;
 import org.csstudio.swt.xygraph.linearscale.Range;
 import org.dawb.common.services.IPaletteService;
-import org.dawb.common.ui.plot.AbstractPlottingSystem;
+import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.histogram.HistogramBound;
 import org.dawnsci.plotting.api.histogram.IImageService;
 import org.dawnsci.plotting.api.histogram.ImageServiceBean;
@@ -83,7 +83,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	private List<IDataset>    axes;
 	private ImageServiceBean imageServiceBean;
 	private boolean          isMaximumZoom;
-	private AbstractPlottingSystem plottingSystem;
+	private IPlottingSystem plottingSystem;
 
 	private IImageService service;
 		
@@ -1344,11 +1344,11 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		}		
 	}
 
-	public AbstractPlottingSystem getPlottingSystem() {
+	public IPlottingSystem getPlottingSystem() {
 		return plottingSystem;
 	}
 
-	public void setPlottingSystem(AbstractPlottingSystem plottingSystem) {
+	public void setPlottingSystem(IPlottingSystem plottingSystem) {
 		this.plottingSystem = plottingSystem;
 	}
 	

@@ -130,5 +130,25 @@ public interface ITraceSystem {
 	 * @param xFirst
 	 */
 	public void setXFirst(boolean xFirst);
+
+	/**
+	 * Notify that the trace is about to plot. Internal use only.
+	 * @internal
+	 * @param evt
+	 */
+	public void fireWillPlot(final TraceWillPlotEvent evt);
 	
+	/**
+	 * May be used to force a trace to fire update listeners in the plotting system. Internal use only.
+	 * @internal
+	 * @param evt
+	 */
+	public void fireTraceUpdated(final TraceEvent evt);
+	
+	/**
+	 * Call to notify that a trace has been added. Internal use only.
+	 * @internal
+	 * @param evt
+	 */
+	public void fireTraceAdded(final TraceEvent evt);
 }

@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.dawb.common.ui.plot.PlottingFactory;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.algorithm.ui.Activator;
 import org.dawnsci.algorithm.ui.views.runner.AbstractAlgorithmProcessPage;
@@ -33,6 +32,7 @@ import org.dawnsci.algorithm.ui.workflow.IWorkflowUpdater;
 import org.dawnsci.algorithm.ui.workflow.WorkflowUpdaterCreator;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlotType;
+import org.dawnsci.plotting.api.PlottingFactory;
 import org.dawnsci.plotting.util.PlottingUtils;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;

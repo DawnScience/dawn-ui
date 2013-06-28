@@ -17,8 +17,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.dawb.common.ui.plot.EmptyTool;
-import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.tool.AbstractToolPage;
@@ -59,10 +57,13 @@ import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IURIEditorInput;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewSite;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.SubActionBars;
 import org.eclipse.ui.cheatsheets.OpenCheatSheetAction;
 import org.eclipse.ui.internal.WorkbenchPlugin;
@@ -1159,7 +1160,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		updatePartInfo(defaultPageRec.tool);
 		showPageRec(defaultPageRec);
 		
-		final ToolPageView view = (ToolPageView)EclipseUtils.getPage().showView("org.dawb.workbench.plotting.views.toolPageView.fixed",
+		final ToolPageView view = (ToolPageView)getPage().showView("org.dawb.workbench.plotting.views.toolPageView.fixed",
 																				tool.getToolId(),
 																				IWorkbenchPage.VIEW_ACTIVATE);
 		view.update(orig);
@@ -1175,7 +1176,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 				Display.getDefault().asyncExec(new Runnable() {
 					public void run() {
 						try {
-						    EclipseUtils.getActivePage().activate(finalOrig.getPart());
+						    getActivePage().activate(finalOrig.getPart());
 						} catch (Throwable ne) {
 							logger.error("Cannot activate part "+finalOrig, ne);
 						}
@@ -1193,6 +1194,28 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		return view.staticTool;
 	}
 	
+	private static IWorkbenchPage getActivePage() {
+		final IWorkbench bench = PlatformUI.getWorkbench();
+		if (bench==null) return null;
+		final IWorkbenchWindow window = bench.getActiveWorkbenchWindow();
+		if (window==null) return null;
+		return window.getActivePage();
+	}
+	private static IWorkbenchPage getPage() {
+		IWorkbenchPage activePage = getActivePage();
+		if (activePage!=null) return activePage;
+		return getDefaultWorkbenchPage();
+	}
+	private static IWorkbenchPage getDefaultWorkbenchPage() {
+		final IWorkbench bench = PlatformUI.getWorkbench();
+		if (bench==null) return null;
+		final IWorkbenchWindow[] windows = bench.getWorkbenchWindows();
+		if (windows==null) return null;
+		
+		return windows[0].getActivePage();
+	}
+
+	
 	protected void update(IToolPage orig) {
 		AbstractToolPage tp = (AbstractToolPage)orig;
 		if (tp!=null && tp.isLinkedToolPage()) {
@@ -1200,7 +1223,8 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 			partActivated(link.getViewPart());
 			
 		} else {
-		    partActivated(EclipseUtils.getActiveEditor());
+			final IWorkbenchPage page = getPage();
+		    partActivated(page.getActiveEditor());
 		}
 	}
 
@@ -1270,7 +1294,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		String toolId  = newPage!=null ? newPage.getToolId() : null;
 		if (toolId!=null) {
 			if (toolId.equals(getViewSite().getSecondaryId())) return true;
-		    if (EclipseUtils.getPage().findViewReference("org.dawb.workbench.plotting.views.toolPageView.fixed", toolId)!=null) {
+		    if (getPage().findViewReference("org.dawb.workbench.plotting.views.toolPageView.fixed", toolId)!=null) {
 		    	return false;
 		    }
 		}

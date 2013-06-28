@@ -7,10 +7,10 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.dawb.common.ui.image.ShapeType;
-import org.dawb.common.ui.plot.AbstractPlottingSystem;
-import org.dawb.common.ui.plot.PlottingConstants;
+import org.dawnsci.plotting.AbstractPlottingSystem;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.axis.IAxis;
+import org.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.tools.Activator;
 import org.eclipse.core.commands.ExecutionException;

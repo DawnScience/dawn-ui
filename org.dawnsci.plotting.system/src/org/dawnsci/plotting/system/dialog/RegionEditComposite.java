@@ -8,9 +8,9 @@ import java.util.regex.Pattern;
 
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.linearscale.Range;
-import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.roi.ROIEditTable;
 import org.dawb.common.ui.util.GridUtils;
+import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.region.IROIListener;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.region.ROIEvent;
@@ -73,7 +73,7 @@ public class RegionEditComposite extends Composite {
 	 * @param defaultRegion
 	 * @param isImplicit
 	 */
-	public RegionEditComposite(final Composite parent, final int style, final AbstractPlottingSystem sys, final RegionType defaultRegion, final boolean isImplicit) {
+	public RegionEditComposite(final Composite parent, final int style, final IPlottingSystem sys, final RegionType defaultRegion, final boolean isImplicit) {
      
 		this(parent,style, (XYRegionGraph)sys.getAdapter(XYRegionGraph.class), defaultRegion, isImplicit);
 	}

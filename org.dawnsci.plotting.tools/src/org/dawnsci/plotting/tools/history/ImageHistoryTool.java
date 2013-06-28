@@ -13,8 +13,7 @@ import org.dawb.common.gpu.OperationFactory;
 import org.dawb.common.gpu.Operator;
 import org.dawb.common.services.IExpressionObject;
 import org.dawb.common.ui.components.cell.ScaleCellEditor;
-import org.dawb.common.ui.plot.AbstractPlottingSystem;
-import org.dawb.common.ui.plot.PlottingConstants;
+import org.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.api.trace.ITraceListener;
@@ -189,7 +188,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 					
 					if (iTrace.getUserObject()==HistoryType.HISTORY_PLOT) continue;
 					final IImageTrace imageTrace = (IImageTrace)iTrace;
-					String plotName =  ((AbstractPlottingSystem)getPlottingSystem()).getTitle();
+					String plotName =  getPlottingSystem().getTitle();
 					if (plotName==null || "".equals(plotName)) {
 						plotName = imageTrace.getName();
 					}
@@ -433,7 +432,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 				try {
 					IImageTrace imageTrace = getImageTrace();
 					if (imageTrace==null) {
-						((AbstractPlottingSystem)getPlottingSystem()).setFocus();
+						getPlottingSystem().setFocus();
 						getPlottingSystem().reset();
 						imageTrace = getPlottingSystem().createImageTrace(plot.getName()!=null?plot.getName():"");
 						imageTrace.setData(plot, null, false);

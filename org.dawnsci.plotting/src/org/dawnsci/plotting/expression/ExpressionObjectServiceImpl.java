@@ -5,10 +5,12 @@ import java.util.List;
 import org.dawb.common.services.IExpressionObject;
 import org.dawb.common.services.IExpressionObjectService;
 import org.dawb.common.services.IVariableManager;
-import org.dawb.common.ui.util.EclipseUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.services.AbstractServiceFactory;
 import org.eclipse.ui.services.IServiceLocator;
 
@@ -67,7 +69,7 @@ public class ExpressionObjectServiceImpl extends AbstractServiceFactory implemen
 	@Override
 	public List<IExpressionObject> getActiveExpressions(String sourcePath) throws Exception {
 		
-	    final IWorkbenchPage page = EclipseUtils.getPage();
+	    final IWorkbenchPage page = getPage();
 	    final IViewPart dataPart  = page.findView("org.dawb.workbench.views.dataSetView");
 	    if (dataPart!=null) {
 	    	final IFile currentData = (IFile)dataPart.getAdapter(IFile.class);
@@ -84,6 +86,32 @@ public class ExpressionObjectServiceImpl extends AbstractServiceFactory implemen
 	    }
 	    
 	    return null;
+	}
+
+	public static IWorkbenchPage getPage() {
+		IWorkbenchPage activePage = getActivePage();
+		if (activePage!=null) return activePage;
+		return getDefaultPage();
+	}
+	
+	/**
+	 * @return IWorkbenchPage
+	 */
+	public static IWorkbenchPage getActivePage() {
+		final IWorkbench bench = PlatformUI.getWorkbench();
+		if (bench==null) return null;
+		final IWorkbenchWindow window = bench.getActiveWorkbenchWindow();
+		if (window==null) return null;
+		return window.getActivePage();
+	}
+	
+	public static IWorkbenchPage getDefaultPage() {
+		final IWorkbench bench = PlatformUI.getWorkbench();
+		if (bench==null) return null;
+		final IWorkbenchWindow[] windows = bench.getWorkbenchWindows();
+		if (windows==null) return null;
+		
+		return windows[0].getActivePage();
 	}
 
 }

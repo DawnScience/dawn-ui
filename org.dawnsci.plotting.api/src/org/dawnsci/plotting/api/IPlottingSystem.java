@@ -74,7 +74,14 @@ public interface IPlottingSystem extends IAdaptable, ITraceSystem, IRegionSystem
 	public static final int CROSS_CURSOR  = 1;
 
 	/**
-	 * Call to set the plot title.
+	 * Get the current title being used for the plot.
+	 * @return
+	 */
+	public String getTitle();
+	
+	/**
+	 * Call to set the plot title. NOTE The title may be used for keys used to determine
+	 * if traces are unique and should be set to a meaningful string, i.e. not "Plot".
 	 * @param title
 	 */
 	public void setTitle(final String title);

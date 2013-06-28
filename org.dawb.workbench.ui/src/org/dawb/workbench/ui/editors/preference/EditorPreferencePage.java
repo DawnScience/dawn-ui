@@ -12,9 +12,9 @@ package org.dawb.workbench.ui.editors.preference;
 
 import java.text.DecimalFormat;
 
-import org.dawb.common.ui.plot.PlottingFactory;
 import org.dawb.common.ui.widgets.LabelFieldEditor;
 import org.dawb.workbench.ui.Activator;
+import org.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.preference.BooleanFieldEditor;

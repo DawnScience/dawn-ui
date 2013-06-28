@@ -8,14 +8,14 @@
  * http://www.eclipse.org/legal/epl-v10.html
  */ 
 
-package org.dawnsci.plotting.tools.preference;
+package org.dawnsci.plotting.preference;
 
-import org.dawb.common.ui.plot.PlottingConstants;
+import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.api.histogram.HistogramBound;
 import org.dawnsci.plotting.api.histogram.ImageServiceBean.HistoType;
 import org.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
+import org.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.dawnsci.plotting.api.trace.IImageTrace.DownsampleType;
-import org.dawnsci.plotting.tools.Activator;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 
@@ -25,7 +25,7 @@ public class PlottingPreferenceInitializer extends AbstractPreferenceInitializer
 		
 	@Override
 	public void initializeDefaultPreferences() {
-		IPreferenceStore store = Activator.getPlottingPreferenceStore();
+		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
 		//store.setDefault(PlottingConstants.PLOTTING_SYSTEM_CHOICE, "org.dawb.workbench.editors.plotting.lightWeightPlottingSystem");
         store.setDefault(PlottingConstants.PLOT_X_DATASET,  true);
 		store.setDefault(PlottingConstants.XY_SHOWLEGEND,   true);

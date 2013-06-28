@@ -5,7 +5,7 @@ import java.util.HashSet;
 
 import org.dawb.common.services.ITransferService;
 import org.dawb.common.services.ServiceManager;
-import org.dawb.common.ui.plot.AbstractPlottingSystem;
+import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -114,7 +114,7 @@ public class SelectionRegionFactory {
 	public static IContributionManager fillActions(final IContributionManager    manager, 
 			                                       final IRegion                 region,
 			                                       final XYRegionGraph           xyGraph,
-			                                       final AbstractPlottingSystem  system) {
+			                                       final IPlottingSystem         system) {
 		
 		manager.add(new Separator("org.dawb.workbench.plotting.system.region.start"));
 

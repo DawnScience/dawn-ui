@@ -2,7 +2,6 @@ package org.dawnsci.plotting.system.dialog;
 
 import java.util.Arrays;
 
-import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.util.ColorUtility;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.common.widgets.decorator.BoundsDecorator;
@@ -14,6 +13,7 @@ import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.histogram.HistogramBound;
 import org.dawnsci.plotting.api.histogram.ImageServiceBean.HistoType;
 import org.dawnsci.plotting.api.preferences.BasePlottingConstants;
+import org.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.IImageTrace.DownsampleType;
@@ -249,9 +249,10 @@ public class ImageTraceComposite extends Composite {
 				public void widgetSelected(SelectionEvent e) {
 					dialog.close();
 					try {
-						((AbstractPlottingSystem)plottingSystem).setToolVisible("org.dawnsci.rcp.histogram.histogram_tool_page", 
-								                                                ToolPageRole.ROLE_2D, 
-								                                                "org.dawb.workbench.plotting.views.toolPageView.2D");
+						final IToolPageSystem system = (IToolPageSystem)plottingSystem.getAdapter(IToolPageSystem.class);
+						system.setToolVisible("org.dawnsci.rcp.histogram.histogram_tool_page", 
+								              ToolPageRole.ROLE_2D, 
+								              "org.dawb.workbench.plotting.views.toolPageView.2D");
 					} catch (Exception e1) {
 						logger.error("Cannot show histogram tool programatically!", e1);
 					}

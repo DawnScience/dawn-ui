@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
-import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.util.io.IOUtils;
 import org.dawnsci.common.widgets.content.FileContentProposalProvider;
 import org.dawnsci.plotting.api.IPlottingSystem;

@@ -34,13 +34,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.dawb.common.ui.plot.PlottingFactory;
 import org.dawb.common.ui.plot.roi.data.SurfacePlotROI;
 import org.dawb.common.ui.util.DisplayUtils;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlotType;
+import org.dawnsci.plotting.api.PlottingFactory;
 import org.dawnsci.plotting.api.region.IROIListener;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;

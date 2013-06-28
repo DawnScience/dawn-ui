@@ -6,7 +6,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.dawb.common.services.IExpressionObject;
-import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawnsci.plotting.api.trace.ILineTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.api.trace.ITraceListener;
@@ -253,7 +252,7 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 					}
 				}
 			}
-			((AbstractPlottingSystem)getPlottingSystem()).repaint();
+			getPlottingSystem().repaint();
 		} finally {
 			updatingAPlotAlready = false;
 		}

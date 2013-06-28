@@ -3,7 +3,7 @@ package org.dawnsci.plotting.jreality;
 import java.util.Arrays;
 import java.util.List;
 
-import org.dawb.common.ui.plot.AbstractPlottingSystem;
+import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.trace.TraceEvent;
 
 import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
@@ -18,7 +18,7 @@ class PlotterTrace {
 	protected List<String>           axesNames;
 	protected JRealityPlotViewer     plotter;
 	protected boolean                active;
-	protected AbstractPlottingSystem plottingSystem;
+	protected IPlottingSystem plottingSystem;
 	protected IROI                   window;
 
 	public void dispose() {
@@ -121,11 +121,11 @@ class PlotterTrace {
 		this.name = name;
 	}
 
-	public AbstractPlottingSystem getPlottingSystem() {
+	public IPlottingSystem getPlottingSystem() {
 		return plottingSystem;
 	}
 
-	public void setPlottingSystem(AbstractPlottingSystem plottingSystem) {
+	public void setPlottingSystem(IPlottingSystem plottingSystem) {
 		this.plottingSystem = plottingSystem;
 	}
 

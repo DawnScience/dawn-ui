@@ -5,7 +5,6 @@ import java.util.Collection;
 
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
-import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.widgets.FontExtenderWidget;
 import org.dawb.common.util.number.DoubleUtils;
 import org.dawnsci.plotting.api.region.IROIListener;
@@ -16,6 +15,7 @@ import org.dawnsci.plotting.api.region.ROIEvent;
 import org.dawnsci.plotting.api.region.RegionEvent;
 import org.dawnsci.plotting.api.region.RegionUtils;
 import org.dawnsci.plotting.api.tool.AbstractToolPage;
+import org.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.dawnsci.plotting.api.tool.ToolPageFactory;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.ITraceListener;
@@ -272,8 +272,10 @@ public class RegionSumTool extends AbstractToolPage implements IROIListener {
 							if(iViewReference.getId().equals("uk.ac.diamond.scisoft.arpes.regionSumView")) return;
 						}
 						RegionSumTool roiSumProfile = (RegionSumTool)ToolPageFactory.getToolPage("org.dawb.workbench.plotting.tools.regionSumTool");
-						roiSumProfile.setToolSystem((AbstractPlottingSystem)getPlottingSystem());
-						roiSumProfile.setPlottingSystem((AbstractPlottingSystem)getPlottingSystem());
+						
+						final IToolPageSystem sys = (IToolPageSystem)getPlottingSystem().getAdapter(IToolPageSystem.class);
+                        roiSumProfile.setToolSystem(sys);
+						roiSumProfile.setPlottingSystem(getPlottingSystem());
 						roiSumProfile.setTitle("Region_Sum_View");
 						roiSumProfile.setToolId(String.valueOf(roiSumProfile.hashCode()));
 						RegionSumView viewPart = (RegionSumView)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView("uk.ac.diamond.scisoft.arpes.regionSumView");
