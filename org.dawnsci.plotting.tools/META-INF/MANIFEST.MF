@@ -4,15 +4,10 @@ Bundle-Name: Plotting Tools
 Bundle-SymbolicName: org.dawnsci.plotting.tools;singleton:=true
 Bundle-Version: 1.2.0.qualifier
 Bundle-Activator: org.dawnsci.plotting.tools.Activator
+Bundle-Vendor: Diamond Light Source Ltd.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Export-Package: org.dawnsci.plotting.tools,
- org.dawnsci.plotting.tools.diffraction,
- org.dawnsci.plotting.tools.fitting,
- org.dawnsci.plotting.tools.masking,
- org.dawnsci.plotting.tools.profile,
- org.dawnsci.plotting.tools.reduction
-Require-Bundle: org.eclipse.ui;bundle-version="3.8.0",
- org.eclipse.core.runtime;bundle-version="3.8.0",
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
  org.eclipse.core.resources;bundle-version="3.8.1",
  org.dawb.common.services;bundle-version="1.2.0",
  org.dawb.common.ui;bundle-version="1.3.0",
@@ -33,14 +28,30 @@ Require-Bundle: org.eclipse.ui;bundle-version="3.8.0",
  org.dawnsci.io;bundle-version="1.2.0",
  org.dawb.common.gpu;bundle-version="1.2.0",
  org.eclipse.ui.forms;bundle-version="3.5.200",
- org.dawnsci.plotting;bundle-version="1.2.0"
+ org.dawnsci.plotting;bundle-version="1.2.0",
+ org.eclipse.ui.ide;bundle-version="3.8.1"
 Bundle-ActivationPolicy: lazy
 Import-Package: javax.measure.quantity;version="4.3.1",
  javax.measure.unit;version="4.3.1",
  javax.vecmath,
  org.eclipse.draw2d,
  org.eclipse.draw2d.geometry,
- org.eclipse.ui.part,
  org.jscience.physics.amount;version="4.3.1",
  org.mihalis.opal.rangeSlider,
  org.slf4j;version="1.5.6"
+Bundle-ClassPath: .
+Export-Package: org.dawnsci.plotting.tools,
+ org.dawnsci.plotting.tools.diffraction,
+ org.dawnsci.plotting.tools.expressions,
+ org.dawnsci.plotting.tools.fitting,
+ org.dawnsci.plotting.tools.grid,
+ org.dawnsci.plotting.tools.history,
+ org.dawnsci.plotting.tools.masking,
+ org.dawnsci.plotting.tools.preference,
+ org.dawnsci.plotting.tools.preference.detector,
+ org.dawnsci.plotting.tools.preference.diffraction,
+ org.dawnsci.plotting.tools.processing,
+ org.dawnsci.plotting.tools.profile,
+ org.dawnsci.plotting.tools.reduction,
+ org.dawnsci.plotting.tools.region,
+ org.dawnsci.plotting.tools.window
