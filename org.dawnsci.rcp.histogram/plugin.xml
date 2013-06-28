@@ -4,7 +4,7 @@
    <extension-point id="org.dawnsci.rcp.histogram.channelColourScheme" name="Single Channel Colour Scheme" schema="schema/channelColourScheme.exsd"/>
    <extension-point id="org.dawnsci.rcp.histogram.colourScheme" name="Colour Scheme" schema="schema/colourScheme.exsd"/>
    <extension
-         point="org.dawb.common.ui.toolPage">
+         point="org.dawnsci.plotting.api.toolPage">
       <plotting_tool_page
             class="org.dawnsci.rcp.histogram.HistogramToolPage"
             icon="icons/brightness_contrast.gif"

@@ -368,7 +368,7 @@ public abstract class AbstractToolPage extends Page implements IToolPage, IAdapt
 		
 		final ICommandService service = (ICommandService)PlatformUI.getWorkbench().getService(ICommandService.class);
 		
-		IConfigurationElement[] e = Platform.getExtensionRegistry().getConfigurationElementsFor("org.dawb.common.ui.toolPageAction");
+		IConfigurationElement[] e = Platform.getExtensionRegistry().getConfigurationElementsFor("org.dawnsci.plotting.api.toolPageAction");
 		if (e!=null) for (IConfigurationElement ie : e) {
 			
 			final String toolPageId = ie.getAttribute("tool_id");

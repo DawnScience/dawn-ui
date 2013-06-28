@@ -8,7 +8,7 @@
       </initializer>
    </extension>
    <extension
-         point="org.dawb.common.ui.toolPage">
+         point="org.dawnsci.plotting.api.toolPage">
       <plotting_tool_page
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.peak"
             class="org.dawnsci.plotting.tools.fitting.PeakFittingTool"

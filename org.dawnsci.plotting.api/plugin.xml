@@ -1,0 +1,6 @@
+<plugin>
+   <extension-point id="plottingClass" name="Plotting System" schema="schema/plottingClass.exsd"/>
+   <extension-point id="toolPage" name="Tool Page" schema="schema/toolPage.exsd"/>
+   <extension-point id="toolPageAction" name="Tool Page Action" schema="schema/toolPageAction.exsd"/>
+   
+</plugin>

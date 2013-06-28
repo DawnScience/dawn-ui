@@ -635,7 +635,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	private String getTitleForToolPage(String toolId) {
 		
 		if (toolTitleOverride!=null) return toolTitleOverride;
-		final IConfigurationElement[] configs = Platform.getExtensionRegistry().getConfigurationElementsFor("org.dawb.common.ui.toolPage");
+		final IConfigurationElement[] configs = Platform.getExtensionRegistry().getConfigurationElementsFor("org.dawnsci.plotting.api.toolPage");
 	    for (IConfigurationElement e : configs) {
 			
 	    	if (!toolId.equals(e.getAttribute("id"))) continue;
@@ -656,7 +656,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		}
 		
 		if (toolImageOverride!=null) return toolImageOverride;
-		final IConfigurationElement[] configs = Platform.getExtensionRegistry().getConfigurationElementsFor("org.dawb.common.ui.toolPage");
+		final IConfigurationElement[] configs = Platform.getExtensionRegistry().getConfigurationElementsFor("org.dawnsci.plotting.api.toolPage");
 	    for (IConfigurationElement e : configs) {
 			
 	    	if (!toolId.equals(e.getAttribute("id"))) continue;

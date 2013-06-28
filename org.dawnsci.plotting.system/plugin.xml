@@ -3,7 +3,7 @@
 <plugin
 >
    <extension
-         point="org.dawb.common.ui.plottingClass">
+         point="org.dawnsci.plotting.api.plottingClass">
       <plottingSystem
             class="org.dawnsci.plotting.system.PlottingSystemImpl"
             id="org.dawb.workbench.editors.plotting.lightWeightPlottingSystem"

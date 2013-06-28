@@ -3,7 +3,7 @@ Dependency-Note: Please do not add dependencies on draw2d here. The API is suppo
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Plotting API
-Bundle-SymbolicName: org.dawnsci.plotting.api
+Bundle-SymbolicName: org.dawnsci.plotting.api;singleton:=true
 Bundle-Version: 1.2.0.qualifier
 Bundle-Vendor: Diamond Light Source
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

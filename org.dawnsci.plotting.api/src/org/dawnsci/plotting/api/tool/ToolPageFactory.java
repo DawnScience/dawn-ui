@@ -16,7 +16,7 @@ public class ToolPageFactory {
 	 */
 	public static IToolPage getToolPage(final String id) throws Exception {
 		
-	    final IConfigurationElement[] configs = Platform.getExtensionRegistry().getConfigurationElementsFor("org.dawb.common.ui.toolPage");
+	    final IConfigurationElement[] configs = Platform.getExtensionRegistry().getConfigurationElementsFor("org.dawnsci.plotting.api.toolPage");
 	    for (final IConfigurationElement e : configs) {
 	    	if (id.equals(e.getAttribute("id"))) {
 	    		return (IToolPage)e.createExecutableExtension("class");
@@ -34,7 +34,7 @@ public class ToolPageFactory {
 	public static List<String> getToolPageIds() throws Exception {
 		
 		final List<String> ret = new ArrayList<String>(31);
-	    final IConfigurationElement[] configs = Platform.getExtensionRegistry().getConfigurationElementsFor("org.dawb.common.ui.toolPage");
+	    final IConfigurationElement[] configs = Platform.getExtensionRegistry().getConfigurationElementsFor("org.dawnsci.plotting.api.toolPage");
 	    for (final IConfigurationElement e : configs) {
             ret.add(e.getAttribute("id"));
 	    }
