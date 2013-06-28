@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
-<schema targetNamespace="org.dawb.common.ui" xmlns="http://www.w3.org/2001/XMLSchema">
+<schema targetNamespace="org.dawnsci.plotting.api" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appInfo>
-         <meta.schema plugin="org.dawb.common.ui" id="toolPageAction" name="Tool Page Action"/>
+         <meta.schema plugin="org.dawnsci.plotting.api" id="toolPageAction" name="Tool Page Action"/>
       </appInfo>
       <documentation>
          [Enter description of this extension point.]
@@ -67,7 +67,7 @@
                   Id of the tool page on which the action should appear.
                </documentation>
                <appInfo>
-                  <meta.attribute kind="identifier" basedOn="org.dawb.common.ui.toolPage/plotting_tool_page/@id"/>
+                  <meta.attribute kind="identifier" basedOn="org.dawnsci.plotting.api.toolPage/plotting_tool_page/@id"/>
                </appInfo>
             </annotation>
          </attribute>

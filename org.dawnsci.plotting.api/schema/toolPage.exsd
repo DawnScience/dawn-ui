@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
-<schema targetNamespace="org.dawb.common.ui" xmlns="http://www.w3.org/2001/XMLSchema">
+<schema targetNamespace="org.dawnsci.plotting.api" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appInfo>
-         <meta.schema plugin="org.dawb.common.ui" id="toolPage" name="Tool Page"/>
+         <meta.schema plugin="org.dawnsci.plotting.api" id="toolPage" name="Tool Page"/>
       </appInfo>
       <documentation>
          A tool page contributed to the plotting which is the current tool, fitting, derviative, profile etc.
