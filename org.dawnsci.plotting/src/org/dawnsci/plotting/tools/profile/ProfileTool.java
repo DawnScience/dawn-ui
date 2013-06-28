@@ -51,7 +51,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 
 	private final static Logger logger = LoggerFactory.getLogger(ProfileTool.class);
 	
-	protected AbstractPlottingSystem profilePlottingSystem;
+	protected IPlottingSystem        profilePlottingSystem;
 	private   ITraceListener         traceListener;
 	private   IRegionListener        regionListener;
 	private   IPaletteListener       paletteListener;
@@ -200,7 +200,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		profilePlottingSystem.getPlotActionSystem().remove("org.dawb.workbench.plotting.plotIndex");
 		profilePlottingSystem.getPlotActionSystem().remove("org.dawb.workbench.plotting.plotX");
 
-		profilePlottingSystem.setXfirst(true);
+		profilePlottingSystem.setXFirst(true);
 		profilePlottingSystem.setRescale(true);
 				
 	}
@@ -214,7 +214,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		}
 	}
 
-	protected abstract void configurePlottingSystem(AbstractPlottingSystem plotter);
+	protected abstract void configurePlottingSystem(IPlottingSystem plotter);
 	 
 	
 	@Override

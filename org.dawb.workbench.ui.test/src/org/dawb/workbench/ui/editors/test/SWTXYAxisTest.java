@@ -18,6 +18,7 @@ import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.workbench.ui.editors.AsciiEditor;
 import org.dawb.workbench.ui.editors.PlotDataEditor;
+import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
@@ -84,7 +85,7 @@ public class SWTXYAxisTest {
 		
 		final AsciiEditor editor       = (AsciiEditor)part;
 		final PlotDataEditor plotter   = (PlotDataEditor)editor.getActiveEditor();
-		final AbstractPlottingSystem sys = plotter.getPlottingSystem();
+		final IPlottingSystem sys = plotter.getPlottingSystem();
 		
 		//if (!(sys instanceof PlottingSystemImpl)) throw new Exception("This test is designed for "+PlottingSystemImpl.class.getName());
 		page.setPartState(EclipseUtils.getPage().getActivePartReference(), IWorkbenchPage.STATE_MAXIMIZED);
@@ -99,7 +100,7 @@ public class SWTXYAxisTest {
 			final IAxis alternateYaxis = sys.createAxis("Alternate", true, SWT.LEFT);
 			alternateYaxis.setForegroundColor(sys.getPlotComposite().getDisplay().getSystemColor(SWT.COLOR_DARK_CYAN));
 			alternateYaxis.setLog10(true);
-			sys.setXfirst(true);
+			sys.setXFirst(true);
 
 			sys.setSelectedYAxis(alternateYaxis);
 			sys.setSelectedYAxis(primaryY);
@@ -126,9 +127,9 @@ public class SWTXYAxisTest {
 				if (i%2==0) alternateYaxis.setLog10(true);
 				
 				sys.createPlot1D(indices, Arrays.asList(new IDataset[]{y}), null);
-				sys.setXfirst(true);
+				sys.setXFirst(true);
 				
-				final Color colour = sys.get1DPlotColor(y.getName());
+				final Color colour = ((AbstractPlottingSystem)sys).get1DPlotColor(y.getName());
 				if (colour!=null) alternateYaxis.setForegroundColor(colour);
 		    }
 		}

@@ -3,7 +3,7 @@ package org.dawnsci.plotting.tools.profile;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.dawb.common.ui.plot.AbstractPlottingSystem;
+import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.trace.IImageTrace;
@@ -22,7 +22,7 @@ import uk.ac.diamond.scisoft.analysis.roi.ROIProfile;
 public class LineProfileTool extends ProfileTool {
 
 	@Override
-	protected void configurePlottingSystem(AbstractPlottingSystem plotter) {
+	protected void configurePlottingSystem(IPlottingSystem plotter) {
 		plotter.getSelectedXAxis().setTitle("Pixel");
 		plotter.getSelectedYAxis().setTitle("Intensity");
 	}

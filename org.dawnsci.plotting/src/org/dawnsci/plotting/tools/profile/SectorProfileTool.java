@@ -6,8 +6,8 @@ import java.util.Collection;
 
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
-import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawnsci.plotting.Activator;
+import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.region.ILockableRegion;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -39,7 +39,7 @@ public abstract class SectorProfileTool extends ProfileTool {
 	private   IRegionListener sectorRegionListener;
 
 	@Override
-	protected void configurePlottingSystem(AbstractPlottingSystem plotter) {
+	protected void configurePlottingSystem(IPlottingSystem plotter) {
 
 		// We will add an action here for centring the sector.
 		this.center = new MenuAction("Centre selection");

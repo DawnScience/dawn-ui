@@ -18,8 +18,8 @@ import org.dawnsci.plotting.api.annotation.IAnnotation;
 import org.dawnsci.plotting.api.axis.IAxis;
 import org.dawnsci.plotting.api.axis.IPositionListener;
 import org.dawnsci.plotting.api.region.IRegion;
-import org.dawnsci.plotting.api.region.IRegionListener;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.dawnsci.plotting.api.region.IRegionListener;
 import org.dawnsci.plotting.api.trace.ColorOption;
 import org.dawnsci.plotting.api.trace.IImageStackTrace;
 import org.dawnsci.plotting.api.trace.IImageTrace;
@@ -331,6 +331,11 @@ public class ThreadSafePlottingSystem extends StandardMBean implements IPlotting
 	public void repaint() {
 		call(getMethodName(Thread.currentThread().getStackTrace()));
 	}
+	
+	@Override
+	public void repaint(boolean autoScale) {
+		call(getMethodName(Thread.currentThread().getStackTrace()), new Class[]{boolean.class}, autoScale);
+	}
 
 	@Override
 	public Composite getPlotComposite() {
@@ -515,4 +520,22 @@ public class ThreadSafePlottingSystem extends StandardMBean implements IPlotting
 	public void setRescale(boolean rescale) {
 		call(getMethodName(Thread.currentThread().getStackTrace()), new Class[] { boolean.class }, rescale);
 	}
+
+	@Override
+	public void setFocus() {
+		call(getMethodName(Thread.currentThread().getStackTrace()));
+	}
+	
+	public boolean isXFirst() {
+		return (Boolean)call(getMethodName(Thread.currentThread().getStackTrace()));
+	}
+
+	/**
+	 * Set if the first plot is the x-axis.
+	 * @param xFirst
+	 */
+	public void setXFirst(boolean xFirst) {
+		call(getMethodName(Thread.currentThread().getStackTrace()), new Class[]{boolean.class}, xFirst);
+	}
+
 }

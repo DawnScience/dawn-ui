@@ -652,7 +652,7 @@ class LightWeightPlotActions {
 			    public void run() {
 			    	PlottingSystemActivator.getPlottingPreferenceStore().setValue(PlottingConstants.PLOT_X_DATASET, false);
 			    	setChecked(true);
-			    	viewer.getSystem().setXfirst(false);
+			    	viewer.getSystem().setXFirst(false);
 			    	viewer.getSystem().fireTracesAltered(new TraceEvent(xyGraph));
 			    }
 			};
@@ -664,7 +664,7 @@ class LightWeightPlotActions {
 			    public void run() {
 			    	PlottingSystemActivator.getPlottingPreferenceStore().setValue(PlottingConstants.PLOT_X_DATASET, true);
 			    	setChecked(true);
-			    	viewer.getSystem().setXfirst(true);
+			    	viewer.getSystem().setXFirst(true);
 			    	viewer.getSystem().fireTracesAltered(new TraceEvent(xyGraph));
 			    }
 			};
@@ -675,10 +675,10 @@ class LightWeightPlotActions {
 			boolean xfirst = PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.PLOT_X_DATASET);
 			if (xfirst) {
 				plotX.setChecked(true);
-				viewer.getSystem().setXfirst(true);
+				viewer.getSystem().setXFirst(true);
 			} else {
 				plotIndex.setChecked(true);
-				viewer.getSystem().setXfirst(false);
+				viewer.getSystem().setXFirst(false);
 			}
 			
 			

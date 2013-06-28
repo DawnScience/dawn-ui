@@ -62,8 +62,8 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 	
 	private static Logger logger = LoggerFactory.getLogger(ImageProcessingTool.class);
 
-	protected AbstractPlottingSystem selectionPlottingSystem;
-	protected AbstractPlottingSystem reviewPlottingSystem;
+	protected IPlottingSystem selectionPlottingSystem;
+	protected IPlottingSystem reviewPlottingSystem;
 
 	private IRegionListener regionListener;
 	private Composite profileContentComposite;
@@ -180,7 +180,7 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 		selectionPlottingSystem.getPlotActionSystem().remove("org.dawb.workbench.plotting.rescale");
 		selectionPlottingSystem.getPlotActionSystem().remove("org.dawb.workbench.plotting.plotIndex");
 		selectionPlottingSystem.getPlotActionSystem().remove("org.dawb.workbench.plotting.plotX");
-		selectionPlottingSystem.setXfirst(true);
+		selectionPlottingSystem.setXFirst(true);
 		selectionPlottingSystem.setRescale(true);
 		selectionPlottingSystem.addRegionListener(regionListener);
 		createNewRegion();
@@ -475,13 +475,13 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 	 * 
 	 * @param plotter
 	 */
-	protected abstract void configureSelectionPlottingSystem(AbstractPlottingSystem plotter);
+	protected abstract void configureSelectionPlottingSystem(IPlottingSystem plotter);
 
 	/**
 	 * 
 	 * @param plotter
 	 */
-	protected abstract void configureReviewPlottingSystem(AbstractPlottingSystem plotter);
+	protected abstract void configureReviewPlottingSystem(IPlottingSystem plotter);
 
 	/**
 	 * Creates selection profile

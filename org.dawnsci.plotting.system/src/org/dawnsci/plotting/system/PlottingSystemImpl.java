@@ -1030,8 +1030,8 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		lightWeightViewer.savePlotting(filename, filetype);
 	}
 
-	public void setXfirst(boolean xfirst) {
-		super.setXfirst(xfirst);
+	public void setXFirst(boolean xfirst) {
+		super.setXFirst(xfirst);
 		lightWeightViewer.setXFirst(xfirst);
 	}
 

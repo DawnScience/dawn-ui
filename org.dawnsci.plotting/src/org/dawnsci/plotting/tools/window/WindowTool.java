@@ -34,12 +34,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.plot.PlottingFactory;
 import org.dawb.common.ui.plot.roi.data.SurfacePlotROI;
 import org.dawb.common.ui.util.DisplayUtils;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.plotting.Activator;
+import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.region.IROIListener;
 import org.dawnsci.plotting.api.region.IRegion;
@@ -107,7 +107,7 @@ public class WindowTool extends AbstractToolPage {
 
 	private static final Logger logger = LoggerFactory.getLogger(WindowTool.class);
 	
-	private AbstractPlottingSystem windowSystem;
+	private IPlottingSystem        windowSystem;
 	private IRegionListener        regionListener;
 	private IROIListener           roiListener;
 	private ITraceListener         traceListener;

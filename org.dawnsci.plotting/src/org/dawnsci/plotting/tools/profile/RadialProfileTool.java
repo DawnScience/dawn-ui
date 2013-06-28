@@ -6,7 +6,6 @@ import javax.vecmath.Vector3d;
 
 import org.dawb.common.services.ILoaderService;
 import org.dawb.common.ui.menu.MenuAction;
-import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.region.IRegion;
@@ -43,7 +42,7 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
     private Action metaLock;
 	
 	@Override
-	protected void configurePlottingSystem(AbstractPlottingSystem plotter) {
+	protected void configurePlottingSystem(IPlottingSystem plotter) {
 		
 		profileAxis = new MenuAction("Select X Axis");
 		profileAxis.setToolTipText("Select x axis values");

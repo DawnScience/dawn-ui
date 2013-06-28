@@ -3,7 +3,7 @@ package org.dawnsci.plotting.tools.profile;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.dawb.common.ui.plot.AbstractPlottingSystem;
+import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.axis.IAxis;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -27,7 +27,7 @@ public class BoxProfileTool extends ProfileTool {
 	private IAxis yPixelAxis;
 
 	@Override
-	protected void configurePlottingSystem(AbstractPlottingSystem plotter) {
+	protected void configurePlottingSystem(IPlottingSystem plotter) {
 		if (xPixelAxis==null) {
 			this.xPixelAxis = plotter.getSelectedXAxis();
 			xPixelAxis.setTitle("X Pixel");

@@ -118,4 +118,17 @@ public interface ITraceSystem {
 	public void renameTrace(ITrace trace, String name) throws Exception;
 
 	
+	
+	/**
+	 * For 1D plotting, if the first plot is the x-axis, returns true.
+	 * @return
+	 */
+	public boolean isXFirst();
+
+	/**
+	 * Set if the first plot is the x-axis.
+	 * @param xFirst
+	 */
+	public void setXFirst(boolean xFirst);
+	
 }

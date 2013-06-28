@@ -19,11 +19,11 @@ import org.dawb.common.services.IVariableManager;
 import org.dawb.common.ui.editors.ICheckableObject;
 import org.dawb.common.ui.editors.IDatasetEditor;
 import org.dawb.common.ui.editors.IPlotUpdateParticipant;
-import org.dawb.common.ui.plot.AbstractPlottingSystem;
 import org.dawb.common.ui.slicing.SliceComponent;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.workbench.ui.editors.CheckableObject;
 import org.dawb.workbench.ui.editors.PlotDataComponent;
+import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlotType;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -214,8 +214,7 @@ public class PlotDataPage extends Page implements IPlotUpdateParticipant, IAdapt
 	}
 
 	@Override
-	public void setSlicerData(ICheckableObject object, String filePath, int[] dims,
-			                  AbstractPlottingSystem plottingSystem) {
+	public void setSlicerData(ICheckableObject object, String filePath, int[] dims, IPlottingSystem plottingSystem) {
 		
 		if (object.isExpression()) {
 			final ILazyDataset lazy = object.getExpression().getLazyDataSet(object.getVariable(), new IMonitor.Stub());

@@ -86,7 +86,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 	private static Logger logger = LoggerFactory.getLogger(PlotDataEditor.class);
 	
 	// This view is a composite of two other views.
-	private AbstractPlottingSystem      plottingSystem;	
+	private IPlottingSystem      plottingSystem;	
 	private Collection<String>          dataNames;
 	private IMetaData                   metaData;
 	private PlotType                    defaultPlotType;
@@ -159,7 +159,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		plot.setLayout(new FillLayout());
 		plot.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         plottingSystem.createPlotPart(plot, plotName, wrapper, defaultPlotType, this);
-        plottingSystem.addPropertyChangeListener(new IPropertyChangeListener() {				
+        ((AbstractPlottingSystem)plottingSystem).addPropertyChangeListener(new IPropertyChangeListener() {				
 			@Override
 			public void propertyChange(PropertyChangeEvent event) {
 				if (IPlottingSystem.RESCALE_ID.equals(event.getProperty())) {
@@ -372,14 +372,14 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 			List<ICheckableObject> sels = new ArrayList<ICheckableObject>(Arrays.asList(selections));
 
 			final IDataset x;
-			if (plottingSystem.isXfirst() && sels.size()>1) {
+			if (plottingSystem.isXFirst() && sels.size()>1) {
 				x  = data;
 				sels.remove(0);
 			} else {
 				x = null;
 			}
 			
-			if (sels.isEmpty() || (!plottingSystem.isXfirst() && sels.size()==1)) {
+			if (sels.isEmpty() || (!plottingSystem.isXFirst() && sels.size()==1)) {
 				final List<ITrace> traces = plottingSystem.createPlot1D(x, Arrays.asList(data), getEditorInput().getName(), monitor);
 		        sync(sels,traces);
 				return;
@@ -620,7 +620,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 					
 					dataSetComponent.setMetaData(metaData);
 					dataSetComponent.refresh();
-					PlotDataEditor.this.plottingSystem.setRootName(dataSetComponent.getRootName());
+					((AbstractPlottingSystem)PlotDataEditor.this.plottingSystem).setRootName(dataSetComponent.getRootName());
 					return Status.OK_STATUS;
 				} catch (Exception ne) {
 					logger.error("Cannot open nexus", ne);
@@ -705,7 +705,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		return plottingSystem;
 	}
 
-	public AbstractPlottingSystem getPlottingSystem() {
+	public IPlottingSystem getPlottingSystem() {
 		return this.plottingSystem;
 	}
 	public PlotDataEditor getDataSetEditor() {

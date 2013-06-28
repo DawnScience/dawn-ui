@@ -896,7 +896,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		
 		if (selections.contains(sel)) selections.remove(sel);
 	    selections.add(0, sel);
-	    getAbstractPlottingSystem().setXfirst(true);
+	    getAbstractPlottingSystem().setXFirst(true);
 		updateSelection(true);
 		dataViewer.refresh();
 	}
@@ -1371,7 +1371,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 				}
 				return setName;
 			case 2:
-				return element.getAxis(selections, getPlottingSystem().is2D(), getAbstractPlottingSystem().isXfirst());
+				return element.getAxis(selections, getPlottingSystem().is2D(), getAbstractPlottingSystem().isXFirst());
 
 			case 3:
 				if (!element.isExpression()) {
@@ -1723,7 +1723,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 
 		@Override
 		protected Object getValue(Object element) {
-			return ((ICheckableObject)element).getAxisIndex(selections, getAbstractPlottingSystem().isXfirst());
+			return ((ICheckableObject)element).getAxisIndex(selections, getAbstractPlottingSystem().isXFirst());
 		}
 
 		@Override
@@ -1735,9 +1735,9 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 					setAsX(co);
 				} else {
 					
-					if (getAbstractPlottingSystem().isXfirst() && "X".equals(co.getAxis(selections, getPlottingSystem().is2D(), true))) {
+					if (getAbstractPlottingSystem().isXFirst() && "X".equals(co.getAxis(selections, getPlottingSystem().is2D(), true))) {
 						// We lost an x
-						getAbstractPlottingSystem().setXfirst(false);
+						getAbstractPlottingSystem().setXFirst(false);
 					}
 					co.setYaxis(isel);
 

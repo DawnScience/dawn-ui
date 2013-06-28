@@ -342,6 +342,11 @@ public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSyste
 	public void repaint() {
 		call(getMethodName(Thread.currentThread().getStackTrace()));
 	}
+	
+	@Override
+	public void repaint(boolean autoScale) {
+		call(getMethodName(Thread.currentThread().getStackTrace()), new Class[]{boolean.class}, autoScale);
+	}
 
 	@Override
 	public Composite getPlotComposite() {
@@ -443,4 +448,22 @@ public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSyste
 	public void setRescale(boolean rescale) {
 		call(getMethodName(Thread.currentThread().getStackTrace()), new Class[] { boolean.class }, rescale);
 	}
+
+	@Override
+	public void setFocus() {
+		call(getMethodName(Thread.currentThread().getStackTrace()));
+	}
+	
+	public boolean isXFirst() {
+		return (Boolean)call(getMethodName(Thread.currentThread().getStackTrace()));
+	}
+
+	/**
+	 * Set if the first plot is the x-axis.
+	 * @param xFirst
+	 */
+	public void setXFirst(boolean xFirst) {
+		call(getMethodName(Thread.currentThread().getStackTrace()), new Class[]{boolean.class}, xFirst);
+	}
+
 }

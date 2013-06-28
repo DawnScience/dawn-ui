@@ -276,9 +276,16 @@ public interface IPlottingSystem extends IAdaptable, ITraceSystem, IRegionSystem
 
 
 	/**
-	 * Redraws all the data
+	 * Redraws all the data. Calls repaint(isRescale())
 	 */
 	public void repaint();
+	
+	/**
+	 * Repaint with rescale of autoScale is true.
+	 * @param autoScale
+	 */
+	public void repaint(final boolean autoScale);
+
 	
     /**
      * The plot composite which plots are being drawn on.
@@ -379,4 +386,9 @@ public interface IPlottingSystem extends IAdaptable, ITraceSystem, IRegionSystem
 	 * @param rescale
 	 */
 	public void setRescale(boolean rescale);
+	
+	/**
+	 * May be called to ensure the widget doing the plotting has focus.
+	 */
+	public void setFocus();
 }
