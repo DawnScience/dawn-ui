@@ -3,6 +3,20 @@
 <plugin>
 
    <extension
+         point="org.eclipse.core.runtime.preferences">
+         
+      <initializer
+            class="org.dawnsci.plotting.tools.preference.FittingPreferenceInitializer">
+      </initializer>
+      <initializer
+            class="org.dawnsci.plotting.tools.preference.detector.DiffractionDetectorPreferenceInitializer">
+      </initializer>
+      <initializer
+            class="org.dawnsci.plotting.tools.preference.DiffractionToolPreferenceInitializer">
+      </initializer>
+   </extension>
+
+   <extension
          point="org.eclipse.ui.preferencePages">
       <page
             category="org.dawnsci.preferences.root"
@@ -34,6 +48,7 @@
             id="org.dawnsci.plotting.preference.detector"
             name="Diffraction Detectors">
       </page>
+     
    </extension>
 
    <extension
@@ -385,18 +400,6 @@
             id="org.dawb.workbench.plotting.preference.diffraction.addCalibrantWizard"
             name="Add Calibrant">
       </wizard>
-   </extension>
-   <extension
-         point="org.eclipse.core.runtime.preferences">
-      <initializer
-            class="org.dawnsci.plotting.tools.preference.detector.DiffractionDetectorPreferenceInitializer">
-      </initializer>
-      <initializer
-            class="org.dawnsci.plotting.tools.preference.FittingPreferenceInitializer">
-      </initializer>
-      <initializer
-            class="org.dawnsci.plotting.tools.preference.DiffractionToolPreferenceInitializer">
-      </initializer>
    </extension>
 
 </plugin>

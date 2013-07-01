@@ -1,5 +1,6 @@
 package org.dawnsci.plotting.tools;
 
+import org.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -17,6 +18,10 @@ public class Activator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
         staticActivator = this;
+        
+        // This line is required such that preference initializer extensions
+        // are processed for this plugin.
+        final int nfreds = this.getPreferenceStore().getInt("fred");
     }
 	
     public static ImageDescriptor getImageDescriptor(String path) {
