@@ -8,7 +8,6 @@ import java.util.regex.Pattern;
 
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.linearscale.Range;
-import org.dawb.common.ui.roi.ROIEditTable;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.region.IROIListener;
@@ -20,6 +19,7 @@ import org.dawnsci.plotting.draw2d.swtxy.RegionArea;
 import org.dawnsci.plotting.draw2d.swtxy.RegionCoordinateSystem;
 import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
+import org.dawnsci.plotting.roi.ROIEditTable;
 import org.eclipse.jface.preference.ColorSelector;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;

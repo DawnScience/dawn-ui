@@ -18,7 +18,8 @@ Require-Bundle: org.eclipse.ui,
  ncsa.hdf;bundle-version="2.8.0",
  org.dawnsci.plotting.api;bundle-version="1.0.0",
  uk.ac.diamond.scisoft.analysis;bundle-version="1.1.0",
- uk.ac.diamond.scisoft.analysis.api;bundle-version="1.0.0"
+ uk.ac.diamond.scisoft.analysis.api;bundle-version="1.0.0",
+ org.dawnsci.common.widgets;bundle-version="1.2.0"
 Bundle-ActivationPolicy: lazy
 Export-Package: org.dawnsci.plotting,
  org.dawnsci.plotting.roi,
