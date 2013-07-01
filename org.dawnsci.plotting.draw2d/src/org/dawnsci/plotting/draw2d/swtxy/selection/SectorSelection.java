@@ -1,3 +1,19 @@
+/*-
+ * Copyright 2012 Diamond Light Source Ltd.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.dawnsci.plotting.draw2d.swtxy.selection;
 
 import java.util.ArrayList;
@@ -34,9 +50,6 @@ import uk.ac.diamond.scisoft.analysis.roi.handler.SectorROIHandler;
 /**
  * You should not call this concrete class outside of the draw2d 
  * extensions unless absolutely required.
- * 
- * @author Peter Chang
- *
  */
 class SectorSelection extends AbstractSelectionRegion implements ILockableRegion{
 
@@ -579,11 +592,13 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 		}
 	}
 
-	public boolean isCenterMovable() {
+	@Override
+	public boolean isCentreMoveable() {
 		return isCenterMovable;
 	}
 
-	public void setCenterMovable(boolean isCenterMovable) {
+	@Override
+	public void setCentreMoveable(boolean isCenterMovable) {
 		this.isCenterMovable = isCenterMovable;
 		if (isCenterMovable) {
 			sector.setCursor(Draw2DUtils.getRoiMoveCursor());
@@ -597,12 +612,12 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 	}
 
 	@Override
-	public boolean isOuterMovable() {
-		throw new RuntimeException("Cannot call isOuterMovable on "+getClass().getName());
+	public boolean isOuterMoveable() {
+		throw new RuntimeException("Cannot call isOuterMoveable on "+getClass().getName());
 	}
 
 	@Override
-	public void setOuterMovable(boolean isOuterMovable) {
-		throw new RuntimeException("Cannot call setOuterMovable on "+getClass().getName());
+	public void setOuterMoveable(boolean isOuterMovable) {
+		throw new RuntimeException("Cannot call setOuterMoveable on "+getClass().getName());
 	}
 }
