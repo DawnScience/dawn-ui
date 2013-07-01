@@ -371,7 +371,7 @@ public class DiffractionCalibrationView extends ViewPart {
 				findRingsJob.addJobChangeListener(new JobChangeAdapter(){
 					@Override
 					public void done(IJobChangeEvent event){
-						Display.getDefault().asyncExec(new Runnable() {
+					display.asyncExec(new Runnable() {
 							@Override
 							public void run() {
 								if (currentData.nrois > 0) {
@@ -411,7 +411,7 @@ public class DiffractionCalibrationView extends ViewPart {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				DiffractionCalibrationUtils.calibrateImages(display, currentSystem, model, currentData);
-				Display.getDefault().asyncExec(new Runnable() {
+				display.asyncExec(new Runnable() {
 					@Override
 					public void run() {
 						refreshTable();
@@ -429,7 +429,7 @@ public class DiffractionCalibrationView extends ViewPart {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				DiffractionCalibrationUtils.calibrateWavelength(display, model, currentData);
-				Display.getDefault().asyncExec(new Runnable() {
+				display.asyncExec(new Runnable() {
 					@Override
 					public void run() {
 						refreshTable();

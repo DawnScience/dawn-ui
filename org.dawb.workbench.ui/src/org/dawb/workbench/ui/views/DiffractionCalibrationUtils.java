@@ -161,7 +161,7 @@ public class DiffractionCalibrationUtils {
 	 * 
 	 * @param plottingSystem
 	 */
-	public static void clearFoundRings(IPlottingSystem plottingSystem) {
+	private static void clearFoundRings(IPlottingSystem plottingSystem) {
 		for (IRegion r : plottingSystem.getRegions()) {
 			String n = r.getName();
 			if (n.startsWith(REGION_PREFIX)) {
@@ -345,7 +345,7 @@ public class DiffractionCalibrationUtils {
 				display.asyncExec(new Runnable() {
 					@Override
 					public void run() {
-						DiffractionCalibrationUtils.drawCalibrantRings(currentData.augmenter);
+						drawCalibrantRings(currentData.augmenter);
 					}
 				});
 				return stat;
@@ -371,13 +371,13 @@ public class DiffractionCalibrationUtils {
 			return null;
 
 		final List<IROI> resROIs = aug.getResolutionROIs();
-		final IImageTrace image = DiffractionCalibrationUtils.getImageTrace(plottingSystem);
+		final IImageTrace image = getImageTrace(plottingSystem);
 		if (currentData.rois == null) {
 			currentData.rois = new ArrayList<IROI>();
 		} else {
 			currentData.rois.clear();
 		}
-		DiffractionCalibrationUtils.clearFoundRings(plottingSystem);
+		clearFoundRings(plottingSystem);
 		Job job = new Job("Ellipse rings finding") {
 			@Override
 			protected IStatus run(final IProgressMonitor monitor) {
@@ -385,35 +385,37 @@ public class DiffractionCalibrationUtils {
 				double last = -1;
 				int n = 0;
 				for (final IROI r : resROIs) {
+					IROI roi = null;
 					try {
-						if (!(r instanceof EllipticalROI)) // cannot cope with other conic sections for now
+						if (!(r instanceof EllipticalROI)) { // cannot cope with other conic sections for now
 							continue;
+						}
 						EllipticalROI e = (EllipticalROI) r;
 						double major = e.getSemiAxis(0);
 						double delta = last < 0 ? 0.1*major : 0.2*(major - last);
 						if (delta > 50)
 							delta = 50;
 						last = major;
-						IROI roi = DiffractionTool.runEllipseFit(monitor, display, plottingSystem, image, e, e.isCircular(), delta);
-						if (roi == null)
+						roi = DiffractionTool.runEllipseFit(monitor, display, plottingSystem, image, e, e.isCircular(), delta);
+						if (roi == null) {
 							return Status.CANCEL_STATUS;
+						}
 
 						double[] ec = e.getPointRef();
 						double[] c = roi.getPointRef();
 						if (Math.hypot(c[0] - ec[0], c[1] - ec[1]) > delta) {
 							logger.trace("Dropping as too far from centre: {} cf {}", roi, e);
-							currentData.rois.add(null); // null placeholder
 							continue;
 						}
-						currentData.rois.add(roi);
 						n++;
 
 						stat = drawFoundRing(monitor, display, plottingSystem, roi, e.isCircular());
 						if (!stat.isOK())
 							break;
 					} catch (IllegalArgumentException ex) {
-						currentData.rois.add(null); // null placeholder
 						logger.trace("Could not find ellipse with {}: {}", r, ex);
+					} finally {
+						currentData.rois.add(roi); // can include null placeholder
 					}
 				}
 				currentData.nrois = n;

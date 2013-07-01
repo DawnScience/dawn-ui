@@ -204,6 +204,8 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		if (!active) return; // We are likely off screen.
 	
 		if (isChecked) {
+			if (!calibrantRings.isChecked()) // override setting
+				calibrantRings.setChecked(true);
 			List<ResolutionRing> calibrantRingsList = new ArrayList<ResolutionRing>(7);
 	
 			for (HKL hkl : spacing.getHKLs()) {
@@ -254,7 +256,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 			lroi.setMidPoint(beamCentre);
 			crosshairs.setRegionColor(colour);
 			crosshairs.setLabel(labelText);
-			crosshairs.setROI(lroi);
+//			crosshairs.setROI(lroi);
 		}
 	}
 
@@ -302,25 +304,22 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	}
 
 	protected void drawResolutionRings(List<ResolutionRing> ringList, String typeName, Object marker) {
-		
 		final List<IRegion> existing = getRegions(marker);
 		if (existing == null) return;
+
 		for (IRegion iRegion : existing) iRegion.setVisible(false);
 		int nExisting = existing.size();
 		int nRings = ringList.size();
 		resROIs.clear();
 		for (int i = 0; i < nRings; i++) {
-			if(i == 0)
-				drawResolutionEllipse(i >= nExisting ? null : existing.get(i), ringList.get(i), typeName+i, marker, true);
-			else
-				drawResolutionEllipse(i >= nExisting ? null : existing.get(i), ringList.get(i), typeName+i, marker, false);
+			drawResolutionEllipse(i >= nExisting ? null : existing.get(i), ringList.get(i), typeName+i, marker, i == 0);
 		}
 	}
 
 	private List<IRegion> getRegions(Object marker) {
-		
         final Collection<IRegion> ellipses = plottingSystem.getRegions(RegionType.ELLIPSE);
 		if (ellipses==null) return null;
+
 		final List<IRegion> ret = new ArrayList<IRegion>(ellipses.size());
 		for (IRegion iRegion : ellipses) {
 			if (iRegion.getUserObject()!=marker) continue;
@@ -366,7 +365,8 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 
 		region.setShowPosition(false);
 		region.setVisible(true);
-		if (requireAdd) plottingSystem.addRegion(region);
+		if (requireAdd)
+			plottingSystem.addRegion(region);
 		region.setMobile(isMobile);
 		region.setUserObject(marker);
 		if (isMobile) {
@@ -397,15 +397,16 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		if (!active) return; // We are likely off screen.
 		if (detprop != null && diffenv != null) {
 			double[] beamCentre = detprop.getBeamCentreCoords(); // detConfig.pixelCoords(detConfig.getBeamPosition());
-			IROI roi;
+			IROI roi = null;
 			try {
 				roi = DSpacing.conicFromDSpacing(detprop, diffenv, ring.getResolution());
 			} catch (IllegalArgumentException e) {
 				return;
 			} catch (UnsupportedOperationException ex) {
 				return;
+			} finally {
+				resROIs.add(roi);
 			}
-			resROIs.add(roi);
 			if (roi instanceof EllipticalROI) {
 				DecimalFormat df = new DecimalFormat("#.00");
 				drawEllipse(reused, beamCentre, (EllipticalROI) roi, ring.getColour(), ring.getColour(), name,
