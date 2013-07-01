@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.dawb.common.services.IPaletteService;
-import org.dawb.common.ui.plot.roi.data.SurfacePlotROI;
 import org.dawnsci.plotting.api.histogram.HistogramBound;
 import org.dawnsci.plotting.api.histogram.IImageService;
 import org.dawnsci.plotting.api.histogram.ImageServiceBean;
@@ -18,6 +17,7 @@ import org.dawnsci.plotting.api.trace.ISurfaceTrace;
 import org.dawnsci.plotting.api.trace.PaletteEvent;
 import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.jreality.data.ColourImageData;
+import org.dawnsci.plotting.roi.SurfacePlotROI;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.graphics.PaletteData;

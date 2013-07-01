@@ -21,6 +21,7 @@ Require-Bundle: org.eclipse.ui,
  uk.ac.diamond.scisoft.analysis.api;bundle-version="1.0.0"
 Bundle-ActivationPolicy: lazy
 Export-Package: org.dawnsci.plotting,
+ org.dawnsci.plotting.roi,
  org.dawnsci.plotting.util
 Import-Package: com.thoughtworks.xstream.core.util,
  org.dawb.workbench.jmx,

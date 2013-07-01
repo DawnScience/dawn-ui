@@ -20,7 +20,6 @@ import java.awt.Color;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.dawb.common.ui.plot.roi.data.SurfacePlotROI;
 import org.dawnsci.plotting.jreality.core.AxisMode;
 import org.dawnsci.plotting.jreality.core.IDataSet3DCorePlot;
 import org.dawnsci.plotting.jreality.core.ScaleType;
@@ -30,6 +29,7 @@ import org.dawnsci.plotting.jreality.tick.TickFactory;
 import org.dawnsci.plotting.jreality.tick.TickFormatting;
 import org.dawnsci.plotting.jreality.util.ArrayPoolUtility;
 import org.dawnsci.plotting.jreality.util.ScalingUtility;
+import org.dawnsci.plotting.roi.SurfacePlotROI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
