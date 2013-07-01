@@ -2,7 +2,6 @@ package org.dawnsci.plotting.system.dialog;
 
 import java.util.Arrays;
 
-import org.dawb.common.ui.util.ColorUtility;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.common.widgets.decorator.BoundsDecorator;
 import org.dawnsci.common.widgets.decorator.FloatDecorator;
@@ -18,6 +17,7 @@ import org.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.IImageTrace.DownsampleType;
 import org.dawnsci.plotting.system.PlottingSystemActivator;
+import org.dawnsci.plotting.util.ColorUtility;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.ColorSelector;

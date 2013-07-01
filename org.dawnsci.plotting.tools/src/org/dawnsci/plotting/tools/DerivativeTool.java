@@ -33,7 +33,6 @@ package org.dawnsci.plotting.tools;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.dawb.common.ui.util.ColorUtility;
 import org.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.dawnsci.plotting.api.tool.IToolPage;
 import org.dawnsci.plotting.api.trace.ILineTrace;
@@ -41,6 +40,7 @@ import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.api.trace.ITraceListener;
 import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.tools.history.AbstractHistoryTool;
+import org.dawnsci.plotting.util.ColorUtility;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
