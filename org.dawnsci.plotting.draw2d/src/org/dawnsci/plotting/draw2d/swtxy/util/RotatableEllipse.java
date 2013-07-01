@@ -250,7 +250,9 @@ public class RotatableEllipse extends Shape implements PointFunction {
 
 		calcBox(false);
 		PointList points = Draw2DUtils.generateCurve(this, 0, 360, 1, 3, Math.toRadians(1));
-		Draw2DUtils.drawClippedPolyline(graphics, points, box.expand(2, 2), true);
+		Rectangle bnd = new Rectangle();
+		graphics.getClip(bnd);
+		Draw2DUtils.drawClippedPolyline(graphics, points, bnd, true);
 
 		if (showMajorAxis) {
 			graphics.drawLine(points.getFirstPoint(), getPoint(180));
