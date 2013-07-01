@@ -24,7 +24,6 @@ import org.dawb.common.ui.printing.IPrintImageProvider;
 import org.dawb.common.ui.printing.PlotExportPrintUtil;
 import org.dawb.common.ui.printing.PlotPrintPreviewDialog;
 import org.dawb.common.ui.printing.PrintSettings;
-import org.dawb.common.ui.util.DisplayUtils;
 import org.dawnsci.plotting.AbstractPlottingSystem;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.IPrintablePlotting;
@@ -51,7 +50,6 @@ import org.dawnsci.plotting.api.trace.ILineTrace.TraceType;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.api.trace.ITraceContainer;
 import org.dawnsci.plotting.api.trace.ITraceListener;
-import org.dawnsci.plotting.api.trace.TraceUtils;
 import org.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.dawnsci.plotting.draw2d.swtxy.AspectAxis;
 import org.dawnsci.plotting.draw2d.swtxy.ImageStackTrace;
@@ -1095,7 +1093,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 	}
 
 	public void repaint(final boolean autoScale) {
-		DisplayUtils.runInDisplayThread(false, null, new Runnable() {
+		Display.getDefault().syncExec(new Runnable() {
 			public void run() {
 				if (xyCanvas!=null && xyGraph != null) {
 					if (autoScale)xyGraph.performAutoScale();
