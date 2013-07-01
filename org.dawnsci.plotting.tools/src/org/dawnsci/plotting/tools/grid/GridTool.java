@@ -115,6 +115,9 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 				if (!(evt.getROI() instanceof GridROI)) return;
 				if (model!=null) {
 					GridROI roi = (GridROI)evt.getROI();
+					if (gridPreferences != null) {
+						roi.setGridPreferences(gridPreferences);
+					}
 					model.setRegion((IRegion)evt.getSource(), roi);
 				}
 			}
@@ -306,12 +309,12 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		this.beamCenter = getBeamCenter();
 		@SuppressWarnings("unchecked")
 		final NumericNode<Length> x = (NumericNode<Length>)model.getNode("/Detector/Beam Centre/X");
-		x.setValue(Amount.valueOf(beamCenter[0], x.getUnit()));
+		x.setValueQuietly(Amount.valueOf(beamCenter[0], x.getUnit()));
 		viewer.update(x, new String[]{"Value"});
 		
 		@SuppressWarnings("unchecked")
 		final NumericNode<Length> y = (NumericNode<Length>)model.getNode("/Detector/Beam Centre/Y");
-		y.setValue(Amount.valueOf(beamCenter[1], y.getUnit()));
+		y.setValueQuietly(Amount.valueOf(beamCenter[1], y.getUnit()));
 		viewer.update(y, new String[]{"Value"});
 	}
 	
@@ -323,8 +326,8 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		@SuppressWarnings("unchecked")
 		final NumericNode<Length> x = (NumericNode<Length>)model.getNode("/Detector/Beam Centre/X");
 		x.setDefault(Amount.valueOf(beamCenter[0], x.getUnit()));
-		x.setLowerBound(0);
-		x.setUpperBound(getMaxX());
+		x.setLowerBound(-1*getMaxX());
+		x.setUpperBound(2*getMaxX());
 		x.addAmountListener(new AmountListener<Length>() {		
 			@Override
 			public void amountChanged(AmountEvent<Length> evt) {
@@ -336,8 +339,8 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		@SuppressWarnings("unchecked")
 		final NumericNode<Length> y = (NumericNode<Length>)model.getNode("/Detector/Beam Centre/Y");
 		y.setDefault(Amount.valueOf(beamCenter[1], y.getUnit()));
-		y.setLowerBound(0);
-		y.setUpperBound(getMaxY());
+		y.setLowerBound(-1*getMaxY());
+		y.setUpperBound(2*getMaxY());
 		y.addAmountListener(new AmountListener<Length>() {		
 			@Override
 			public void amountChanged(AmountEvent<Length> evt) {
