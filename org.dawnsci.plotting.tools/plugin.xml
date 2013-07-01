@@ -1,17 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
 <plugin>
 
-   <extension
-         point="org.eclipse.core.runtime.preferences">
-      <initializer
-            class="org.dawnsci.plotting.tools.preference.FittingPreferenceInitializer">
-      </initializer>
-      <initializer
-            class="org.dawnsci.plotting.tools.preference.DiffractionToolPreferenceInitializer">
-      </initializer>
-      <initializer
-            class="org.dawnsci.plotting.tools.preference.detector.DiffractionDetectorPreferenceInitializer">
-      </initializer>
-   </extension>
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
@@ -395,6 +385,18 @@
             id="org.dawb.workbench.plotting.preference.diffraction.addCalibrantWizard"
             name="Add Calibrant">
       </wizard>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="org.dawnsci.plotting.tools.preference.detector.DiffractionDetectorPreferenceInitializer">
+      </initializer>
+      <initializer
+            class="org.dawnsci.plotting.tools.preference.FittingPreferenceInitializer">
+      </initializer>
+      <initializer
+            class="org.dawnsci.plotting.tools.preference.DiffractionToolPreferenceInitializer">
+      </initializer>
    </extension>
 
 </plugin>

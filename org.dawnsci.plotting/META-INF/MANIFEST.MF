@@ -7,7 +7,8 @@ Bundle-Name: Plotting
 Bundle-SymbolicName: org.dawnsci.plotting;singleton:=true
 Bundle-Version: 1.2.0.qualifier
 Bundle-Activator: org.dawnsci.plotting.Activator
-Bundle-Vendor: Diamond Light Source
+Bundle-Vendor: Diamond Light Source Ltd.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.draw2d;bundle-version="3.7.1",
@@ -18,7 +19,6 @@ Require-Bundle: org.eclipse.ui,
  org.dawnsci.plotting.api;bundle-version="1.0.0",
  uk.ac.diamond.scisoft.analysis;bundle-version="1.1.0",
  uk.ac.diamond.scisoft.analysis.api;bundle-version="1.0.0"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: org.dawnsci.plotting,
  org.dawnsci.plotting.util
