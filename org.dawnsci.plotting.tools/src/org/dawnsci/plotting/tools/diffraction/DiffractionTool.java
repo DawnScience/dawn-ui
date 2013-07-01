@@ -1015,7 +1015,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		final ProgressMonitorWrapper mon = new ProgressMonitorWrapper(monitor);
 		monitor.beginTask("Refine " + shape + " fit", IProgressMonitor.UNKNOWN);
 		monitor.subTask("Find POIs near initial " + shape);
-		AbstractDataset image = (AbstractDataset)t.getData();
+		AbstractDataset image = (AbstractDataset) t.getData();
 		BooleanDataset mask = (BooleanDataset) t.getMask();
 		PolylineROI points;
 		EllipticalFitROI efroi;

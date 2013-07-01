@@ -236,6 +236,8 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 			createHandles(true);
 		}
 
+		private static final int CENTRE = 4;
+
 		private void createHandles(boolean createROI) {
 			boolean mobile = isMobile();
 			boolean visible = isVisible() && mobile;
@@ -243,7 +245,7 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 			for (int i = 0; i < 4; i++) {
 				addHandle(getPoint(i*90), mobile, visible);
 			}
-			addCentreHandle(mobile, visible);
+			addCentreHandle(mobile, visible); // centre should be fourth
 
 			// figure move
 			addFigureListener(moveListener);
@@ -293,6 +295,18 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 			}
 			for (FigureTranslator f : fTranslators) {
 				f.setActive(mobile);
+			}
+		}
+
+		public void setCentreMobile(boolean mobile) {
+			handles.get(CENTRE).setVisible(mobile);
+			fTranslators.get(CENTRE).setActive(mobile);
+		}
+
+		public void setOuterMobile(boolean mobile) {
+			for (int i = 0; i < CENTRE; i++) {
+				handles.get(i).setVisible(mobile);
+				fTranslators.get(i).setActive(mobile);
 			}
 		}
 
@@ -479,58 +493,39 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 		@Override
 		public void setRegion(IRegion region) {
 		}
-
-		public List<FigureTranslator> getHandleTranslators() {
-			return fTranslators;
-		}
-		public List<IFigure> getHandles() {
-			return handles;
-		}
 	}
 
 	private boolean isCenterMovable=true;
 	private boolean isOuterMovable=true;
 
 	@Override
-	public boolean isCenterMovable() {
+	public boolean isCentreMoveable() {
 		return isCenterMovable;
 	}
 
 	@Override
-	public void setCenterMovable(boolean isCenterMovable) {
+	public void setCentreMoveable(boolean isCenterMovable) {
 		this.isCenterMovable = isCenterMovable;
 		if (isCenterMovable)
 			ellipse.setCursor(Draw2DUtils.getRoiMoveCursor());
 		else
 			ellipse.setCursor(null);
-		ellipse.getHandleTranslators().get(ellipse.getHandleTranslators().size()-1).setActive(isCenterMovable);
-		ellipse.getHandles().get(ellipse.getHandles().size()-1).setVisible(isCenterMovable);
+		ellipse.setCentreMobile(isCenterMovable);
 	}
 
 	@Override
-	public boolean isOuterMovable() {
+	public boolean isOuterMoveable() {
 		return isOuterMovable;
 	}
 
 	@Override
-	public void setOuterMovable(boolean isOuterMovable) {
+	public void setOuterMoveable(boolean isOuterMovable) {
 		this.isOuterMovable = isOuterMovable;
 		if(isOuterMovable)
 			ellipse.setCursor(Draw2DUtils.getRoiMoveCursor());
 		else
 			ellipse.setCursor(null);
-//		List<FigureTranslator> ft = ellipse.getHandleTranslators();
-//		for (int i = 0; i < ft.size(); i++) {
-//			if (i != ft.size() - 1) {
-//				ft.get(i).setActive(isOuterMovable);
-//			}
-//		}
-		List<IFigure> figs = ellipse.getHandles();
-		for (int i = 0; i < figs.size(); i++) {
-			if (i != figs.size() - 1) {
-				figs.get(i).setVisible(isOuterMovable);
-			}
 
-		}
+		ellipse.setOuterMobile(isOuterMovable);
 	}
 }

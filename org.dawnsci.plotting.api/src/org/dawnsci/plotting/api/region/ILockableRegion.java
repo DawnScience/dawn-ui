@@ -18,26 +18,24 @@ public interface ILockableRegion extends IRegion {
 
 	/**
 	 * This may not be implemented depending on the region.
-	 * For instance Sector implements this but Ellipse does not.
-	 * @return
+	 * @return true if it is moveable
 	 */
-	public boolean isCenterMovable();
+	public boolean isCentreMoveable();
 
 	/**
 	 * This may not be implemented depending on the region.
-	 * For instance Sector implements this but Ellipse does not.
 	 * 
-	 * Set if the sector center should be locked or not.
-	 * @param isCenterMovable
+	 * Set if the sector centre should be locked or not.
+	 * @param isCenterMoveable
 	 */
-	public void setCenterMovable(boolean isCenterMovable);
+	public void setCentreMoveable(boolean isCenterMoveable);
 	
 	/**
 	 * This may not be implemented depending on the region.
-	 * For instance Sector implements this but Ellipse does not.
+	 * For instance Ellipse implements this but Sector does not.
 	 * @return
 	 */
-	public boolean isOuterMovable();
+	public boolean isOuterMoveable();
 
 	/**
 	 * This may not be implemented depending on the region.
@@ -46,6 +44,5 @@ public interface ILockableRegion extends IRegion {
 	 * Set if the ellipse outer handles should be locked or not.
 	 * @param isCenterMovable
 	 */
-	public void setOuterMovable(boolean isOuterMovable);
-
+	public void setOuterMoveable(boolean isOuterMoveable);
 }
