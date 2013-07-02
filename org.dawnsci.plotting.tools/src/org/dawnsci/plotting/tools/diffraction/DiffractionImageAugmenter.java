@@ -278,7 +278,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	}
 
 
-	protected void hideRings(Object marker) {
+	protected void hideRings(RING_TYPE marker) {
 		if (plottingSystem==null) return;
 		if (plottingSystem.getRegions()==null) return;
 		for (IRegion region : plottingSystem.getRegions()) {
@@ -290,7 +290,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 			}
 		}
 	}
-	protected void removeRings(Object marker) {
+	protected void removeRings(RING_TYPE marker) {
 		if (plottingSystem==null) return;
 		if (plottingSystem.getRegions()==null) return;
 		for (IRegion region : plottingSystem.getRegions()) {
@@ -303,7 +303,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		}
 	}
 
-	protected void drawResolutionRings(List<ResolutionRing> ringList, String typeName, Object marker) {
+	protected void drawResolutionRings(List<ResolutionRing> ringList, String typeName, RING_TYPE marker) {
 		final List<IRegion> existing = getRegions(marker);
 		if (existing == null) return;
 
@@ -316,7 +316,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		}
 	}
 
-	private List<IRegion> getRegions(Object marker) {
+	private List<IRegion> getRegions(RING_TYPE marker) {
         final Collection<IRegion> ellipses = plottingSystem.getRegions(RegionType.ELLIPSE);
 		if (ellipses==null) return null;
 
@@ -338,7 +338,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 			                      Color labelColour,
 			                      String nameStub,
 			                      String labelText,
-			                      Object marker,
+			                      RING_TYPE marker,
 			                      boolean isMobile) {
 
 		if (!active) return; // We are likely off screen.
@@ -392,7 +392,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		}
 	}
 		
-	protected void drawResolutionEllipse(IRegion reused, ResolutionRing ring, String name, Object marker, 
+	protected void drawResolutionEllipse(IRegion reused, ResolutionRing ring, String name, RING_TYPE marker, 
 											boolean isMobile) {
 		if (!active) return; // We are likely off screen.
 		if (detprop != null && diffenv != null) {
