@@ -593,12 +593,12 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 	}
 
 	@Override
-	public boolean isCentreMoveable() {
+	public boolean isCentreMovable() {
 		return isCenterMovable;
 	}
 
 	@Override
-	public void setCentreMoveable(boolean isCenterMovable) {
+	public void setCentreMovable(boolean isCenterMovable) {
 		this.isCenterMovable = isCenterMovable;
 		if (isCenterMovable) {
 			sector.setCursor(Draw2DUtils.getRoiMoveCursor());
@@ -612,12 +612,12 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 	}
 
 	@Override
-	public boolean isOuterMoveable() {
-		throw new RuntimeException("Cannot call isOuterMoveable on "+getClass().getName());
+	public boolean isOuterMovable() {
+		throw new RuntimeException("Cannot call isOuterMovable on "+getClass().getName());
 	}
 
 	@Override
-	public void setOuterMoveable(boolean isOuterMovable) {
-		throw new RuntimeException("Cannot call setOuterMoveable on "+getClass().getName());
+	public void setOuterMovable(boolean isOuterMovable) {
+		throw new RuntimeException("Cannot call setOuterMovable on "+getClass().getName());
 	}
 }

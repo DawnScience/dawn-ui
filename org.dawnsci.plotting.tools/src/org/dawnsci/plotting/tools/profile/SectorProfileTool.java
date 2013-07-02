@@ -178,7 +178,7 @@ public abstract class SectorProfileTool extends ProfileTool {
 				if (regions!=null) for (IRegion iRegion : regions) {
 					if (iRegion instanceof ILockableRegion) {
 						ILockableRegion lr = (ILockableRegion)iRegion;
-						lr.setCentreMoveable(centerMovable);
+						lr.setCentreMovable(centerMovable);
 					}
 				}
 			}

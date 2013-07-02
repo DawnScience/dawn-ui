@@ -495,33 +495,30 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 		}
 	}
 
-	private boolean isCenterMovable=true;
-	private boolean isOuterMovable=true;
+	private boolean isCenterMovable = true;
+	private boolean isOuterMovable = true;
 
 	@Override
-	public boolean isCentreMoveable() {
+	public boolean isCentreMovable() {
 		return isCenterMovable;
 	}
 
 	@Override
-	public void setCentreMoveable(boolean isCenterMovable) {
+	public void setCentreMovable(boolean isCenterMovable) {
 		this.isCenterMovable = isCenterMovable;
-		if (isCenterMovable)
-			ellipse.setCursor(Draw2DUtils.getRoiMoveCursor());
-		else
-			ellipse.setCursor(null);
+		ellipse.setCursor(isCenterMovable ? Draw2DUtils.getRoiMoveCursor() : null);
 		ellipse.setCentreMobile(isCenterMovable);
 	}
 
 	@Override
-	public boolean isOuterMoveable() {
+	public boolean isOuterMovable() {
 		return isOuterMovable;
 	}
 
 	@Override
-	public void setOuterMoveable(boolean isOuterMovable) {
+	public void setOuterMovable(boolean isOuterMovable) {
 		this.isOuterMovable = isOuterMovable;
-		if(isOuterMovable)
+		if (isOuterMovable)
 			ellipse.setCursor(Draw2DUtils.getRoiMoveCursor());
 		else
 			ellipse.setCursor(null);

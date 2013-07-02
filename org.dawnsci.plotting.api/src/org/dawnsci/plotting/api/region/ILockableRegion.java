@@ -9,7 +9,7 @@ package org.dawnsci.plotting.api.region;
  * 
  * If the method count here grows above 6, consider replacing ILockableRegion
  * with a more flexible and abstract API, like getting and setting handle
- * properties via abstract ids.
+ * properties via abstract IDs.
  * 
  * @author fcp94556
  *
@@ -18,31 +18,31 @@ public interface ILockableRegion extends IRegion {
 
 	/**
 	 * This may not be implemented depending on the region.
-	 * @return true if it is moveable
+	 * @return true if it is movable
 	 */
-	public boolean isCentreMoveable();
+	public boolean isCentreMovable();
 
 	/**
 	 * This may not be implemented depending on the region.
 	 * 
 	 * Set if the sector centre should be locked or not.
-	 * @param isCenterMoveable
+	 * @param isCentreMovable
 	 */
-	public void setCentreMoveable(boolean isCenterMoveable);
+	public void setCentreMovable(boolean isCentreMovable);
 	
 	/**
 	 * This may not be implemented depending on the region.
 	 * For instance Ellipse implements this but Sector does not.
-	 * @return
+	 * @return true if it is movable
 	 */
-	public boolean isOuterMoveable();
+	public boolean isOuterMovable();
 
 	/**
 	 * This may not be implemented depending on the region.
 	 * For instance Ellipse implements this but Sector does not.
 	 * 
 	 * Set if the ellipse outer handles should be locked or not.
-	 * @param isCenterMovable
+	 * @param isOuterMovable
 	 */
-	public void setOuterMoveable(boolean isOuterMoveable);
+	public void setOuterMovable(boolean isOuterMovable);
 }

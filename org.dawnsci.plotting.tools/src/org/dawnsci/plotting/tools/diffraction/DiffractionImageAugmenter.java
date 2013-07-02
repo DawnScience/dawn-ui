@@ -373,8 +373,8 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 			ILockableRegion lockable = region instanceof ILockableRegion ? (ILockableRegion) region : null;
 			if (lockable == null)
 				return;
-			lockable.setCentreMoveable(true);
-			lockable.setOuterMoveable(false);
+			lockable.setCentreMovable(true);
+			lockable.setOuterMovable(false);
 		}
 	}
 
