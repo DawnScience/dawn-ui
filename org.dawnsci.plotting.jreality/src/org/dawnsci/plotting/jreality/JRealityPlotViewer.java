@@ -65,6 +65,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.ScrollBar;
@@ -602,7 +603,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	 * @param async
 	 */
 	public void refresh(final boolean async) {
-		DisplayUtils.runInDisplayThread(false, null, new Runnable() {
+		Display.getDefault().syncExec(new Runnable() {
 			public void run() {
 				if (!exporting) {
 					if (viewerApp != null) {
