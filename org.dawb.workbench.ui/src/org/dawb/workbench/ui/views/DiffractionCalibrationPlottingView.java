@@ -139,11 +139,10 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 	private IDiffractionCrystalEnvironmentListener diffractionCrystEnvListener;
 	private IDetectorPropertyListener detectorPropertyListener;
 
-	private int dataNumber = -1;
 	private List<String> pathsList = new ArrayList<String>();
 
 	public DiffractionCalibrationPlottingView() {
-		service = (ILoaderService)PlatformUI.getWorkbench().getService(ILoaderService.class);
+		service = (ILoaderService) PlatformUI.getWorkbench().getService(ILoaderService.class);
 	}
 
 	private static final String DATA_PATH = "DataPath";
@@ -265,7 +264,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				if (currentData == null && good != null) {
 					tableViewer.getTable().deselectAll();
 					tableViewer.setSelection(new StructuredSelection(good));
-					
 				}
 			}
 		};
@@ -286,11 +284,9 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 					}
 				}
 				if (!model.isEmpty()) {
-					PlottingUtils.plotData(plottingSystem, model.get(0).name, model.get(0).image);
-					DiffractionTableData newSelectedData = (DiffractionTableData) tableViewer.getElementAt(0);
-					tableViewer.refresh();
-					drawSelectedData(newSelectedData);
+					drawSelectedData((DiffractionTableData) tableViewer.getElementAt(0));
 				} else {
+					currentData = null; // need to reset this
 					plottingSystem.clear();
 				}
 			}
@@ -642,16 +638,23 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 		// try to load the previous data saved in the memento
 		DiffractionTableData good = null;
-		for(int i = 0; i<dataNumber; i++){
-			if(!pathsList.get(i).endsWith(".nxs")){
-				DiffractionTableData d = createData(pathsList.get(i), null);
-				if (d != null)
+		for (String p : pathsList) {
+			if (!p.endsWith(".nxs")) {
+				DiffractionTableData d = createData(p, null);
+				if (good == null && d != null)
 					good = d;
 			}
+			
 		}
 		tableViewer.refresh();
 		if (good != null) {
-			drawSelectedData(good);
+			final DiffractionTableData g = good;
+			display.asyncExec(new Runnable() { // this is necessary to give the plotting system time to lay out itself
+				@Override
+				public void run() {
+					tableViewer.setSelection(new StructuredSelection(g));
+				}
+			});
 		}
 
 		// start diffraction tool 
@@ -694,6 +697,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			data.path = filePath;
 			data.name = fileName;
 			data.image = image;
+			String[] statusString = new String[1];
+			data.md = DiffractionTool.getDiffractionMetadata(image, filePath, service, statusString);
 			model.add(data);
 		}
 
@@ -726,16 +731,11 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			data.augmenter = aug;
 		}
 		aug.activate();
-		if (data.md == null) {
-			String[] statusString = new String[1];
-			data.md = DiffractionTool.getDiffractionMetadata(data.image, data.path, service, statusString);
-		}
 		if (data.md != null) {
 			aug.setDiffractionMetadata(data.md);
 		}
 	
 		DiffractionCalibrationUtils.hideFoundRings(plottingSystem);
-	
 		DiffractionCalibrationUtils.drawCalibrantRings(aug);
 	}
 
@@ -876,7 +876,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				setCalibrateButtons();
 			}
 		}
-		
 	}
 
 	private void createColumns(TableViewer tv) {
