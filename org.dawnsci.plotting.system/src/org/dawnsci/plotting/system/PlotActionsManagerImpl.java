@@ -17,6 +17,7 @@ import org.dawb.common.services.IPaletteService;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.util.EclipseUtils;
+import org.dawb.common.ui.wizard.PlotDataConversionWizard;
 import org.dawb.common.ui.wizard.persistence.PersistenceExportWizard;
 import org.dawnsci.plotting.PlottingActionBarManager;
 import org.dawnsci.plotting.api.ActionType;
@@ -86,7 +87,7 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 	private IAction getExportActions() {
 		
 		final MenuAction exportActionsDropDown = new MenuAction("Export/Print");
-
+		
 		Action exportSaveButton = new Action("Save plot screenshot as...", PlottingSystemActivator.getImageDescriptor("icons/picture_save.png")){
 			// Cache file name otherwise they have to keep
 			// choosing the folder.
@@ -121,7 +122,7 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 			}
 		};
 
-		final Action export = new Action("Export data to file", PlottingSystemActivator.getImageDescriptor("icons/mask-export-wiz.png")) {
+		final Action export = new Action("Export plot data to HDF5...", PlottingSystemActivator.getImageDescriptor("icons/mask-export-wiz.png")) {
 			public void run() {
 				try {
 					system.setFocus();
@@ -135,6 +136,20 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 			}			
 		};
 		
+		final Action convert = new Action("Convert plot data to tiff/dat...", PlottingSystemActivator.getImageDescriptor("icons/convert.png")) {
+			public void run() {
+				try {
+					IWizard wiz = EclipseUtils.openWizard(PlotDataConversionWizard.ID, false);
+					WizardDialog wd = new  WizardDialog(Display.getCurrent().getActiveShell(), wiz);
+					wd.setTitle(wiz.getWindowTitle());
+					if (wiz instanceof PlotDataConversionWizard) ((PlotDataConversionWizard)wiz).setPlottingSystem(system);
+					wd.open();
+				} catch (Exception e) {
+					logger.error("Problem opening convert!", e);
+				}
+			}			
+		};
+		
 		exportActionsDropDown.setImageDescriptor(PlottingSystemActivator.getImageDescriptor("icons/printer.png"));
 		exportActionsDropDown.setSelectedAction(printButton);
 		exportActionsDropDown.add(exportSaveButton);
@@ -144,6 +159,7 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 		exportActionsDropDown.add(printButton);
 		exportActionsDropDown.addSeparator();
 		exportActionsDropDown.add(export);
+		exportActionsDropDown.add(convert);
 		return exportActionsDropDown;
 	}
 
