@@ -311,7 +311,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 				int direction = e.count > 0 ? 1 : -1;
 
 
-				IFigure fig = getFigureAtCurrentMousePosition();
+				IFigure fig = getFigureAtCurrentMousePosition(null);
 				if (fig!=null && fig.getParent() instanceof Axis) {
 					Axis axis = (Axis)fig.getParent();
 					final double center = axis.getPositionValue(e.x, false);
@@ -375,7 +375,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
  					point.x+=1;
  					Display.getDefault().setCursorLocation(point);
  				} else if (e.keyCode==127) {//Delete
-					IFigure fig = getFigureAtCurrentMousePosition();
+					IFigure fig = getFigureAtCurrentMousePosition(IRegionContainer.class);
  					if (fig!=null && fig instanceof IRegionContainer) {
  						xyGraph.removeRegion((AbstractSelectionRegion)((IRegionContainer)fig).getRegion());
  					}
@@ -402,7 +402,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 			popupListener = new IMenuListener() {			
 				@Override
 				public void menuAboutToShow(IMenuManager manager) {
-					IFigure fig = getFigureAtCurrentMousePosition();
+					IFigure fig = getFigureAtCurrentMousePosition(IRegionContainer.class);
 					if (fig!=null) {
 					    if (fig instanceof IRegionContainer) {
 							final IRegion region = ((IRegionContainer)fig).getRegion();
@@ -438,14 +438,37 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		return popupListener;
 	}
 	
-	protected IFigure getFigureAtCurrentMousePosition() {
+	protected IFigure getFigureAtCurrentMousePosition(Class type) {
 		Point   pnt       = Display.getDefault().getCursorLocation();
 		Point   par       = xyCanvas.toDisplay(new Point(0,0));
 		final int xOffset = par.x+xyGraph.getLocation().x;
 		final int yOffset = par.y+xyGraph.getLocation().y;
 		
-		return xyGraph.findFigureAt(pnt.x-xOffset, pnt.y-yOffset);
+		IFigure fig = xyGraph.findFigureAt(pnt.x-xOffset, pnt.y-yOffset);
+        if (fig!=null && type==null)          return fig;
+        if (fig!=null && type.isInstance(fig)) return fig;
+		
+		// We loop +-5 around the click point to find what we want
+        for (int x = 1;x<=5; x++){
+        	fig = xyGraph.findFigureAt(pnt.x-xOffset+x, pnt.y-yOffset);
+            if (fig!=null && type==null)          return fig;
+        	if (fig!=null && type.isInstance(fig)) return fig;
+        	
+        	fig = xyGraph.findFigureAt(pnt.x-xOffset-x, pnt.y-yOffset);
+            if (fig!=null && type==null)          return fig;
+        	if (fig!=null && type.isInstance(fig)) return fig;
+        }
+        for (int y = 1;y<=5; y++){
+        	fig = xyGraph.findFigureAt(pnt.x-xOffset, pnt.y-yOffset+y);
+            if (fig!=null && type==null)          return fig;
+        	if (fig!=null && type.isInstance(fig)) return fig;
+        	
+        	fig = xyGraph.findFigureAt(pnt.x-xOffset, pnt.y-yOffset-y);
+            if (fig!=null && type==null)          return fig;
+        	if (fig!=null && type.isInstance(fig)) return fig;
+        }
 
+        return null;
 	}
 
 	protected void fillAnnotationConfigure(IMenuManager manager,
