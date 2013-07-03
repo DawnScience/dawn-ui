@@ -2,5 +2,14 @@
    <extension-point id="plottingClass" name="Plotting System" schema="schema/plottingClass.exsd"/>
    <extension-point id="toolPage" name="Tool Page" schema="schema/toolPage.exsd"/>
    <extension-point id="toolPageAction" name="Tool Page Action" schema="schema/toolPageAction.exsd"/>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            class="org.dawnsci.plotting.api.views.PlottingSystemsView"
+            icon="icons/axis.png"
+            id="org.dawnsci.plotting.api.views.PlottingSystemsView"
+            name="Plotting Systems">
+      </view>
+   </extension>
    
 </plugin>

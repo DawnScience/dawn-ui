@@ -286,4 +286,14 @@ public class PlottingFactory {
 		if (plottingSystems==null) return null;
 		return (IToolPageSystem)plottingSystems.get(plotName).getAdapter(IToolPageSystem.class);
 	}
+
+	/**
+	 * Get all the registered plotting systems.
+	 * @internal
+	 * @return
+	 */
+	public static IPlottingSystem[] getPlottingSystems() {
+		if (plottingSystems==null) return null;
+		return plottingSystems.values().toArray(new IPlottingSystem[plottingSystems.size()]);
+	}
 }

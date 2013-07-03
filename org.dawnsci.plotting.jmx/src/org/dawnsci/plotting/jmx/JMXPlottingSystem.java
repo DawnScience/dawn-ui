@@ -488,4 +488,9 @@ public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSyste
 		call(getMethodName(Thread.currentThread().getStackTrace()), evt);		
 	}
 
+	@Override
+	public IWorkbenchPart getPart() {
+		return (IWorkbenchPart)call(getMethodName(Thread.currentThread().getStackTrace()));
+	}
+
 }

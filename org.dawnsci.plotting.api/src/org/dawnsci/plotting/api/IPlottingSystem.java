@@ -398,4 +398,10 @@ public interface IPlottingSystem extends IAdaptable, ITraceSystem, IRegionSystem
 	 * May be called to ensure the widget doing the plotting has focus.
 	 */
 	public void setFocus();
+	
+	/**
+	 * The underlying IWorkbenchPart, if any
+	 * @return IWorkbenchPart, may be null
+	 */
+	public IWorkbenchPart getPart();
 }

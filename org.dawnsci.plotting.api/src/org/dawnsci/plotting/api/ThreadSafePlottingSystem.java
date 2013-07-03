@@ -561,4 +561,9 @@ public class ThreadSafePlottingSystem extends StandardMBean implements IPlotting
 		call(getMethodName(Thread.currentThread().getStackTrace()), evt);		
 	}
 
+	@Override
+	public IWorkbenchPart getPart() {
+		return (IWorkbenchPart)call(getMethodName(Thread.currentThread().getStackTrace()));
+	}
+
 }
