@@ -1,4 +1,4 @@
-RELEASE NOTES FOR DAWN 1.2 'Raptor' Release
+RELEASE NOTES FOR DAWN 1.3 'Kestrel' Release
 
 
 1. Use the '-data' switch to specify a different workspace if the disk access at your facility
