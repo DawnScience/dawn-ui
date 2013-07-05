@@ -109,7 +109,7 @@ public class DiffractionCalibrationUtils {
 					}
 				}
 
-				display.asyncExec(new Runnable() {
+				display.syncExec(new Runnable() {
 					@Override
 					public void run() {
 						for (DiffractionTableData data : model) {
@@ -357,7 +357,7 @@ public class DiffractionCalibrationUtils {
 
 	/**
 	 * 
-	 * @param display TODO
+	 * @param display
 	 * @param plottingSystem
 	 * @param currentData
 	 * @return findRing job
@@ -405,6 +405,7 @@ public class DiffractionCalibrationUtils {
 						double[] c = roi.getPointRef();
 						if (Math.hypot(c[0] - ec[0], c[1] - ec[1]) > delta) {
 							logger.trace("Dropping as too far from centre: {} cf {}", roi, e);
+							roi = null;
 							continue;
 						}
 						n++;
