@@ -16,6 +16,10 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.ViewPart;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 
 /**
  * This view shows a list of registered plotting systems
@@ -40,8 +44,10 @@ public class PlottingSystemsView extends ViewPart {
 	@Override
 	public void createPartControl(Composite parent) {
 		
+		parent.setLayout(new GridLayout(1, false));
 		
 		Composite container = new Composite(parent, SWT.NONE);
+		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		TableColumnLayout layout = new TableColumnLayout();
 		container.setLayout(layout);
@@ -66,6 +72,13 @@ public class PlottingSystemsView extends ViewPart {
 		});
 		viewer.setInput(new Object());
 
+		// Used by squish tests - do not change!
+		RefreshButton button = new RefreshButton(parent, SWT.NONE);
+		button.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				viewer.refresh();
+			}
+		});
 		
 		createActions();
 		initializeToolBar();
