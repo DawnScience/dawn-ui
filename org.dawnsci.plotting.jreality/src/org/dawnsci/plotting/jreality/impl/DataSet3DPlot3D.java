@@ -836,30 +836,36 @@ public class DataSet3DPlot3D implements IDataSet3DCorePlot {
 			
 			int dimWidth = Math.abs(windowEndPosX - windowStartPosX);
 			int dimHeight = Math.abs(windowEndPosY - windowStartPosY);
-			
+
+			int[] shape = currentData.getShape();
 			if (dimWidth < 2) {
-				if (windowEndPosX+2 >= currentData.getShape()[1])
+				if (windowEndPosX+2 >= shape[1])
 					windowStartPosX-=2;
 				else
 					windowEndPosX+=2;
 			}
 			
 			if (dimHeight < 2) {
-				if (windowEndPosY+2 >= currentData.getShape()[0])
+				if (windowEndPosY+2 >= shape[0])
 					windowStartPosY-=2;
 				else
 					windowEndPosY+=2;
 			}
-			
 			if (windowStartPosX == windowEndPosX)
 				windowEndPosX++;
 			if (windowStartPosY == windowEndPosY)
 				windowEndPosY++;
 			
+			if (windowEndPosX > shape[1]) {
+				windowEndPosX = shape[1];
+			}
+			if (windowEndPosY > shape[0]) {
+				windowEndPosY = shape[0];
+			}
 			int startP[] = {windowStartPosY,windowStartPosX};
 			int endP[] = {windowEndPosY,windowEndPosX};
-			int steps[] = {1,1};
-			displayData = currentData.getSlice(startP,endP,steps);
+			
+			displayData = currentData.getSlice(startP,endP, null);
 			if (roi.getXSamplingMode() > 0 ||
 				roi.getYSamplingMode() > 0) {
 				int xDim = Math.abs(windowEndPosX - windowStartPosX);
