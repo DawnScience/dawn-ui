@@ -558,10 +558,11 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				Job findRingsJob = DiffractionCalibrationUtils.findRings(display, plottingSystem, currentData);
-				if(findRingsJob == null) return;
-				findRingsJob.addJobChangeListener(new JobChangeAdapter(){
+				if (findRingsJob == null)
+					return;
+				findRingsJob.addJobChangeListener(new JobChangeAdapter() {
 					@Override
-					public void done(IJobChangeEvent event){
+					public void done(IJobChangeEvent event) {
 						display.asyncExec(new Runnable() {
 							@Override
 							public void run() {
@@ -831,7 +832,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				DiffractionCrystalEnvironment ce = md.getDiffractionCrystalEnvironment();
 				if (ce == null)
 					return null;
-				return String.format("%.3f", ce.getWavelength());
+				return String.format("%.4f", ce.getWavelength());
 			}
 			return null;
 		}
@@ -900,12 +901,14 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		tvc = new TableViewerColumn(tv, SWT.NONE);
 		tc = tvc.getColumn();
 		tc.setText("Distance");
+		tc.setToolTipText("in mm");
 		tc.setWidth(70);
 		tvc.setEditingSupport(new MyEditingSupport(tv, 3));
 		
 		tvc = new TableViewerColumn(tv, SWT.NONE);
 		tc = tvc.getColumn();
 		tc.setText("Wavelength");
+		tc.setToolTipText("in Angstrom");
 		tc.setWidth(70);
 		tvc.setEditingSupport(new MyEditingSupport(tv, 4));
 	}
