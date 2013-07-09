@@ -47,13 +47,20 @@ public class BoundsDecorator extends RegexDecorator {
 	}
 
 	private Number parseValue(String totalString) {
+		if ("".equals(totalString)) {
+			return Double.NaN;
+		}
 		Number val = null;
 		if ("∞".equals(totalString)) {
 			val = Double.POSITIVE_INFINITY;
 		} else if ("-∞".equals(totalString)) {
 			val = Double.NEGATIVE_INFINITY;
 		} else {
-		    val = Double.parseDouble(totalString);
+			try {
+		        val = Double.parseDouble(totalString);
+			} catch (Exception empty) {
+				val = Double.NaN;
+			}
 		}
 		return val;
 	}
