@@ -1,0 +1,167 @@
+package org.dawnsci.plotting.api.filter;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import org.dawnsci.plotting.api.IPlottingSystem;
+import org.dawnsci.plotting.api.trace.IImageTrace;
+import org.dawnsci.plotting.api.trace.ILineTrace;
+import org.dawnsci.plotting.api.trace.ITrace;
+import org.dawnsci.plotting.api.trace.TraceWillPlotEvent;
+
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+
+/**
+ * Please extend this class to define undoable filters.
+ * 
+ * @author fcp94556
+ *
+ */
+public abstract class AbstractPlottingFilter implements IPlottingFilter {
+	
+	private List<OriginalData> cache;
+	private boolean            active=true;
+	
+
+	AbstractPlottingFilter() {
+		this.cache = new ArrayList<OriginalData>(7);
+	}
+
+	@Override
+	public final void filter(IPlottingSystem system, TraceWillPlotEvent evt) {
+		final ITrace trace = (ITrace)evt.getSource();
+		if (trace.getRank()!=getRank()) {
+			if (getRank()>0) return;
+		}
+		cache.add(new OriginalData(evt));
+		
+		if (getRank()==1) {
+			IDataset[] filtered = filter(evt.getXData(), evt.getYData());
+			evt.setLineData(filtered[0]!=null?filtered[0]:evt.getXData(), filtered[1]);
+		} else {
+			Object[] filtered = filter(evt.getImage(), evt.getAxes());
+			evt.setImageData((IDataset)filtered[0], (List<IDataset>)filtered[1]);
+		}
+	}
+	
+	/**
+	 * Please implement for filtering 1D data
+	 * @param x
+	 * @param y
+	 * @return the new values (0=x, 1=y, x may be null)
+	 */
+	protected IDataset[] filter(IDataset x,    IDataset y) {
+		return null;
+	}
+	
+	/**
+	 * Please implement for filtering images and larger data.
+	 * @param data
+	 * @param axes
+	 * @return Object[]{0=newData, 1=List<IDataset> axes, may be null}
+	 */
+	protected Object[] filter(IDataset data, List<IDataset> axes) {
+		return null;
+	}
+
+	@Override
+	public final void reset() {
+		
+		final Collection<OriginalData> tmpCache = new ArrayList<OriginalData>(cache);
+		cache.clear();
+		for (OriginalData data : tmpCache) {
+			data.reset();
+		}
+	}
+
+	
+	private class OriginalData {
+		
+		private ITrace trace;
+		private String name;
+		
+		private IDataset       image=null;
+		private List<IDataset> axes=null;
+		
+		private IDataset xLineData=null, yLineData=null;
+
+
+		public OriginalData(TraceWillPlotEvent evt) {
+			this.trace = (ITrace)evt.getSource();
+			this.name  = trace.getName();
+			if (getRank()==1) {
+				xLineData = evt.getXData();
+				yLineData = evt.getYData();
+			} else if (getRank()==2) {
+				image     = evt.getImage();
+				axes      = evt.getAxes();
+			}
+		}
+		
+		/**
+		 * Sets the data of the trace to that which the trace
+		 * was before we did the filter.
+		 */
+		public void reset() {
+			if (getRank()==1) {
+				((ILineTrace)trace).setData(xLineData, yLineData);
+			} else if (getRank()==2) {
+				((IImageTrace)trace).setData(image, axes, true);
+			}
+		}
+
+
+		@Override
+		public int hashCode() {
+			return name.hashCode(); // Normally unique.
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			OriginalData other = (OriginalData) obj;
+			if (axes == null) {
+				if (other.axes != null)
+					return false;
+			} else if (!axes.equals(other.axes))
+				return false;
+			if (image == null) {
+				if (other.image != null)
+					return false;
+			} else if (!image.equals(other.image))
+				return false;
+			if (name == null) {
+				if (other.name != null)
+					return false;
+			} else if (!name.equals(other.name))
+				return false;
+			if (xLineData == null) {
+				if (other.xLineData != null)
+					return false;
+			} else if (!xLineData.equals(other.xLineData))
+				return false;
+			if (yLineData == null) {
+				if (other.yLineData != null)
+					return false;
+			} else if (!yLineData.equals(other.yLineData))
+				return false;
+			return true;
+		}
+		
+	}
+	
+	public boolean isActive() {
+		return active;
+	}
+
+	public void setActive(boolean active) {
+		this.active = active;
+	}
+
+}

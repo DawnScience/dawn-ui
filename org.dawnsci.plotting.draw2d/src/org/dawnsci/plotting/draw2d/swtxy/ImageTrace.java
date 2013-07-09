@@ -1369,5 +1369,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	public boolean is3DTrace() {
 		return false;
 	}
+
+	@Override
+	public int getRank() {
+		return 2;
+	}
 	
 }

@@ -332,4 +332,8 @@ public class SurfaceTrace extends PlotterTrace implements ISurfaceTrace{
 		final PaletteEvent evt = new PaletteEvent(this, getPaletteData());
 		for (IPaletteListener pl : paletteListeners) pl.nanBoundsChanged(evt);
 	}
+	@Override
+	public int getRank() {
+		return 2;
+	}
 }

@@ -87,6 +87,8 @@ public class StackTrace extends PlotterTrace implements ILineStackTrace {
 			// It's disposed anyway
 		}
 	}
-
-
+	@Override
+	public int getRank() {
+		return 1;
+	}
 }

@@ -426,5 +426,9 @@ public class LineTraceImpl implements ILineTrace {
 		if (trace!=null) trace.dispose();
 		sys=null;
 	}
+	@Override
+	public int getRank() {
+		return 1;
+	}
 
 }

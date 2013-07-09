@@ -83,4 +83,10 @@ public interface ITrace {
 	 * Called to release system resources.
 	 */
 	public void dispose();
+	
+	/**
+	 * The rank of data plotted, 1 for XY, 2 for Image and surfaces, 3 for volumes.
+	 * @return
+	 */
+	public int getRank();
 }

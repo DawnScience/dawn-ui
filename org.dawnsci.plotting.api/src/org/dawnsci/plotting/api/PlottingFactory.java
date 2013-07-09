@@ -23,6 +23,7 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 
+import org.dawnsci.plotting.api.filter.IFilterDecorator;
 import org.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -295,5 +296,14 @@ public class PlottingFactory {
 	public static IPlottingSystem[] getPlottingSystems() {
 		if (plottingSystems==null) return null;
 		return plottingSystems.values().toArray(new IPlottingSystem[plottingSystems.size()]);
+	}
+	
+	/**
+	 * 
+	 * @param system
+	 * @return a new decorator which will filter the data being plotting by the system.
+	 */
+	public static IFilterDecorator createFilterDecorator(IPlottingSystem system) {
+		return new FilterDecoratorImpl(system);
 	}
 }
