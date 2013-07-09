@@ -242,7 +242,7 @@ public class HistogramToolPage extends AbstractToolPage {
 		};
 
 
-		// get a palette update listener to deal with palatte updates
+		// get a palette update listener to deal with palette updates
 		paletteListener = new IPaletteListener.Stub(){
 
 			@Override
@@ -989,7 +989,7 @@ public class HistogramToolPage extends AbstractToolPage {
 			// update all based on slider positions
 			updateHistogramToolElements(image, null, repaintImage);
 
-			// finally tie in the listener to the paletedata changes
+			// finally tie in the listener to the palette data changes
 			image.addPaletteListener(paletteListener);
 		}				
 	}
@@ -1051,7 +1051,7 @@ public class HistogramToolPage extends AbstractToolPage {
 				new int[] {0},
 				new int[] {num_bins},
 				new int[] {1});
-		histogramX.setName("Intiesity");
+		histogramX.setName("Intensity");
 		histogramY = histogram_values.get(0);
 		histogramY = Maths.log10((Maths.add(histogramY, 1.0)));
 		histogramY.setName("Histogram");
