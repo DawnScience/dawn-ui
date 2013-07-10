@@ -97,7 +97,7 @@ public class InfoPixelLabelProvider extends ColumnLabelProvider {
 				} else {
 					xIndex = tool.getXValues()[0];
 					yIndex = tool.getYValues()[0];
-					final double[] dp = new double[]{tool.getXValues()[0], tool.getXValues()[0]};
+					final double[] dp = new double[]{xIndex, yIndex};
 					try {
 						if (trace!=null) trace.getPointInAxisCoordinates(dp);
 						xLabel = dp[0];
