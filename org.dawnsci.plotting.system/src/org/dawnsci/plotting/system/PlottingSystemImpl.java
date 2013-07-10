@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -636,7 +637,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 
 	public Collection<ITrace> getTraces() {
 		if (traceMap==null) return Collections.emptyList();
-		return traceMap.values();
+		return new HashSet<ITrace>(traceMap.values());
 	}
 
 	@Override

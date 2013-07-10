@@ -351,7 +351,6 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		
 
 		if (monitor.isCanceled()) return;
-		plottingSystem.clear();
 		
 		boolean requireFullRefresh = plottingSystem.getPlotType()!=participant.getPlotMode();
 		final IDataset data = getDataSet(selections[0], monitor);
@@ -366,6 +365,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		
 		if (participant.getPlotMode()==PlotType.IMAGE || data.getRank()==2) {
 			
+			plottingSystem.clear();
 		    plottingSystem.createPlot2D(data, null, monitor);
 		    
 		} else {
@@ -380,31 +380,28 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 			}
 			
 			if (sels.isEmpty() || (!plottingSystem.isXFirst() && sels.size()==1)) {
-				final List<ITrace> traces = plottingSystem.createPlot1D(x, Arrays.asList(data), getEditorInput().getName(), monitor);
+				final List<ITrace> traces = plottingSystem.updatePlot1D(x, Arrays.asList(data), monitor);
+				removeOldTraces(traces);
 		        sync(sels,traces);
 				return;
 			}
+			
 
-            final Map<Integer,List<AbstractDataset>> ys = sels.isEmpty()
+            final Map<Integer,List<IDataset>> ys = sels.isEmpty()
                                                        ? null
-                                		               : new HashMap<Integer,List<AbstractDataset>>(4);
+                                		               : new HashMap<Integer,List<IDataset>>(4);
 
            // Sort ys by axes (for 2D there is one y)
             if (!sels.isEmpty()) {
         	   for (int i = 1; i <= 4; i++) {
-        		   List<AbstractDataset> tmp = getYS(i, sels, monitor);
+        		   List<IDataset> tmp = getYS(i, sels, monitor);
         		   if (tmp!=null) {
         			   ys.put(i, tmp);
         		   }
         	   }
             }
 
-    		final List<ITrace> traces = new ArrayList<ITrace>();
-            Display.getDefault().syncExec(new Runnable() {
-            	public void run() {
-            		traces.addAll(createPlotSeparateAxes(x,ys,monitor));
-            	}
-            });
+    		final List<ITrace> traces = createPlotSeparateAxes(x,ys,monitor);
 	        sync(sels,traces);
 
 		}
@@ -433,35 +430,54 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 	}
 
 	protected List<ITrace> createPlotSeparateAxes(final IDataset                    x,
-			                              final Map<Integer,List<AbstractDataset>> ys,
-			                              final IProgressMonitor                   monitor) {
-		
-		List<ITrace> traces = new ArrayList<ITrace>();
-		try {
-			for (int i = 1; i <= 4; i++) {
-				final IAxis axis = axisMap.get(i);
-				if (axis==null) continue;
-				if (ys.get(i)==null) {
-					axis.setVisible(false);
-					continue;
-				}
-				axis.setVisible(true);
-				plottingSystem.setSelectedYAxis(axis);	
+			                                      final Map<Integer,List<IDataset>> ysMap,
+			                                      final IProgressMonitor            monitor) {
 
-				final List<AbstractDataset> ysAbs = ys.get(i);
-				final List<IDataset>       ysReal = new ArrayList<IDataset>();
-				if (ysAbs!=null) for (AbstractDataset a : ysAbs) ysReal.add(a);
-				traces.addAll(plottingSystem.createPlot1D(x, ysReal, getEditorInput().getName(), monitor));
-			} 
-			return traces;
-		} finally {
-			plottingSystem.setSelectedYAxis(axisMap.get(1));
-		}
+		final List<ITrace> traces = new ArrayList<ITrace>();
+		Display.getDefault().syncExec(new Runnable() {
+			public void run() {
+				try {
+					for (int i = 1; i <= 4; i++) {
+						final IAxis axis = axisMap.get(i);
+						if (axis==null) continue;
+						if (ysMap.get(i)==null) {
+							axis.setVisible(false);
+							continue;
+						}
+						axis.setVisible(true);
+						plottingSystem.setSelectedYAxis(axis);	
+
+						final List<IDataset> ys = ysMap.get(i);
+						traces.addAll(plottingSystem.updatePlot1D(x, ys, monitor));
+					}
+
+					// Remove traces in the plotting system that were not
+					// in this round of plotting.
+					removeOldTraces(traces);
+
+				} finally {
+					plottingSystem.setSelectedYAxis(axisMap.get(1));
+				}
+			}
+		});
+		
+		return traces;
+
 	}
 
-	private List<AbstractDataset> getYS(int iyaxis, List<ICheckableObject> selections, IProgressMonitor monitor) {
+	private void removeOldTraces(final List<ITrace> traces) {
+        Display.getDefault().syncExec(new Runnable() {
+        	public void run() {
+				final Collection<ITrace> existing = plottingSystem.getTraces();
+				existing.removeAll(traces);
+				for (ITrace iTrace : existing) plottingSystem.removeTrace(iTrace);
+        	}
+        });
+	}
+
+	private List<IDataset> getYS(int iyaxis, List<ICheckableObject> selections, IProgressMonitor monitor) {
 		
-		List<AbstractDataset> ys = new ArrayList<AbstractDataset>(3);
+		List<IDataset> ys = new ArrayList<IDataset>(3);
 		for (ICheckableObject co : selections) {
 			
 			if (co.getYaxis()!=iyaxis) continue;
