@@ -867,16 +867,14 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	public boolean setData(IDataset image, List<? extends IDataset> axes, boolean performAuto) {
 		
 		if (plottingSystem!=null) try {
-			if (plottingSystem.getTraces().contains(this)) {
-				final TraceWillPlotEvent evt = new TraceWillPlotEvent(this, false);
-				evt.setImageData(image, axes);
-				evt.setNewImageDataSet(false);
-				plottingSystem.fireWillPlot(evt);
-				if (!evt.doit) return false;
-				if (evt.isNewImageDataSet()) {
-					image = evt.getImage();
-					axes  = evt.getAxes();
-				}
+			final TraceWillPlotEvent evt = new TraceWillPlotEvent(this, false);
+			evt.setImageData(image, axes);
+			evt.setNewImageDataSet(false);
+			plottingSystem.fireWillPlot(evt);
+			if (!evt.doit) return false;
+			if (evt.isNewImageDataSet()) {
+				image = evt.getImage();
+				axes  = evt.getAxes();
 			}
 		} catch (Throwable ignored) {
 			// We allow things to proceed without a warning.
@@ -887,8 +885,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		// method, we allow for the fact that the dataset is in a different orientation to 
 		// what is plotted.
 		this.image = (AbstractDataset)image;
-		if (this.mipMap!=null) mipMap.clear();
-		
+		if (this.mipMap!=null)  mipMap.clear();
+		scaledImage = null;
+		imageData   = null;
 		
 		if (imageServiceBean==null) imageServiceBean = new ImageServiceBean();
 		imageServiceBean.setImage(image);
