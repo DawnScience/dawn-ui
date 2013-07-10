@@ -34,6 +34,7 @@ import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.ide.FileStoreEditorInput;
@@ -47,6 +48,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IErrorDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.LongDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Maths;
+import uk.ac.diamond.scisoft.analysis.dataset.Random;
 
 /**
  * 
@@ -59,9 +61,9 @@ public class SWTXYTraceTest {
 	
 	@Test
 	public void testImageNans() throws Throwable {
-		funnyImageTest(Double.NaN);
+		testImage(Double.NaN);
 	}
-	public void funnyImageTest(double value) throws Throwable {
+	public Object[] testImage(double value) throws Throwable {
 		
 		final Bundle bun  = Platform.getBundle("org.dawb.workbench.ui.test");
 
@@ -78,9 +80,9 @@ public class SWTXYTraceTest {
 		
 		final AbstractPlottingSystem sys = (AbstractPlottingSystem)PlottingFactory.getPlottingSystem(part.getTitle());
 
-		final Collection<ITrace>   traces= sys.getTraces(IImageTrace.class);
-		final IImageTrace            imt = (IImageTrace)traces.iterator().next();
-		IDataset       data = imt.getData();
+		final Collection<ITrace>   traces = sys.getTraces(IImageTrace.class);
+		IImageTrace                imt    = (IImageTrace)traces.iterator().next();
+		IDataset                   data   = imt.getData();
 		
 		// Create a short line of invalid values...
 		data = ((AbstractDataset)data).cast(AbstractDataset.FLOAT64);
@@ -91,9 +93,11 @@ public class SWTXYTraceTest {
 		System.out.println("Setting image data...");
 		sys.clear();
 		EclipseUtils.delay(1000);
-		sys.createPlot2D(data, null, null);
+		imt = (IImageTrace)sys.createPlot2D(data, null, null);
 		
-		EclipseUtils.delay(10000);
+		EclipseUtils.delay(1000);
+		
+		return new Object[]{sys,imt}; 
 		
 	}
 	
@@ -154,6 +158,82 @@ public class SWTXYTraceTest {
 	}
 	
 	@Test
+    public void testFilterDectoratorMultiple() throws Throwable {
+		
+		final IDataset y = DoubleDataset.arange(0, 100, 1);
+		final IDataset x = AbstractDataset.arange(0, y.getSize(), 1, AbstractDataset.INT32);
+     
+      
+		final Object[] oa = createSomethingPlotted(Arrays.asList(new IDataset[]{y}));
+		
+		final IPlottingSystem     sys    = (IPlottingSystem)oa[0];
+		final List<ITrace>        traces = (List<ITrace>)oa[2];
+		
+		// Add a decorator that squares the data.
+		final IFilterDecorator dec = PlottingFactory.createFilterDecorator(sys);	
+		final IPlottingFilter filter1 = new AbstractPlottingFilter() {
+			@Override
+			public int getRank() {
+				return 1;
+			}
+			protected IDataset[] filter(IDataset x,    IDataset y) {
+				return new IDataset[]{null, Maths.square((AbstractDataset)y)};
+			}
+		};
+		dec.addFilter(filter1);
+		final IPlottingFilter filter2 = new AbstractPlottingFilter() {
+			@Override
+			public int getRank() {
+				return 1;
+			}
+			protected IDataset[] filter(IDataset x,    IDataset y) {
+				return new IDataset[]{null, Maths.sqrt((AbstractDataset)y)};
+			}
+		};
+		dec.addFilter(filter2);
+		final IPlottingFilter filter3 = new AbstractPlottingFilter() {
+			@Override
+			public int getRank() {
+				return 1;
+			}
+			protected IDataset[] filter(IDataset x,    IDataset y) {
+				return new IDataset[]{null, Maths.add((AbstractDataset)y, 10)};
+			}
+		};
+		dec.addFilter(filter3);
+		
+		Display.getDefault().syncExec(new Runnable() {
+			public void run() {
+				((ILineTrace)traces.get(0)).setData(x, y);
+				sys.autoscaleAxes();
+			}
+		});
+		
+		IDataset ySquared = ((ILineTrace)traces.get(0)).getYData();
+		if (ySquared.getDouble(99)!=Math.pow(Math.pow(99, 2), 0.5)+10) {
+			throw new Exception("Data of plot not filtered! Value is "+ySquared.getDouble(99));
+		}
+		
+		EclipseUtils.delay(2000);
+		
+		Display.getDefault().syncExec(new Runnable() {
+			public void run() {
+				dec.reset();
+			}
+		});
+		
+		IDataset yReset = ((ILineTrace)traces.get(0)).getYData();
+		if (yReset.getDouble(99)!=99) {
+			throw new Exception("Data of plot not filtered! Value is "+yReset.getDouble(99));
+		}
+
+		
+		System.out.println("Passed");
+		
+	}
+
+	
+	@Test
     public void testFilterDectoratorDirect() throws Throwable {
 		
 		
@@ -197,7 +277,65 @@ public class SWTXYTraceTest {
 		
 	}
 
-	
+	@Test
+    public void testImageFilterDectorator() throws Throwable {
+		
+		final Object[] oa = testImage(0d);
+		
+		final IPlottingSystem     sys  = (IPlottingSystem)oa[0];
+		final IImageTrace       image  = (IImageTrace)oa[1];
+		
+		final IDataset orginalData = image.getData();
+		EclipseUtils.delay(2000);
+
+		final IFilterDecorator dec = PlottingFactory.createFilterDecorator(sys);	
+		final IPlottingFilter filter = new AbstractPlottingFilter() {
+			@Override
+			public int getRank() {
+				return 2;
+			}
+			protected Object[] filter(IDataset data, List<IDataset> axes) {
+				System.out.println("Processing image filter...");
+				// Lets make it really noisy
+				for (int i = 0; i < 10; i++) {
+					data = Maths.multiply((AbstractDataset)data, Random.rand(0, 100, data.getShape()));
+				}
+				return new Object[]{data, axes};
+			}
+		};
+		dec.addFilter(filter);
+
+		Display.getDefault().syncExec(new Runnable() {
+			public void run() {
+				image.setData(image.getData(), image.getAxes(), true);
+				image.repaint();				
+			}
+		});
+		
+		System.out.println("Plotted filter...");
+		
+		EclipseUtils.delay(2000);
+
+		IDataset data = image.getData();
+		if (orginalData.getDouble(500,500)==data.getByte(500,500)) {
+			throw new Exception("The processed data is the same as the original data!");
+		}
+		
+		Display.getDefault().syncExec(new Runnable() {
+			public void run() {
+		        dec.reset();
+			}
+		});
+		
+		data = image.getData();
+		if (orginalData.getDouble(500,500)!=data.getByte(500,500)) {
+			throw new Exception("The reset data is not the same as the original data!");
+		}
+
+		EclipseUtils.delay(2000);
+
+	}
+
 	@Test
     public void testErrorBarsExponential() throws Throwable {
 		
