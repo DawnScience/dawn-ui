@@ -38,6 +38,8 @@ import org.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.dawnsci.plotting.api.trace.ITraceListener;
 import org.dawnsci.plotting.api.trace.TraceEvent;
+import org.dawnsci.plotting.tools.preference.InfoPixelConstants;
+import org.dawnsci.plotting.tools.preference.InfoPixelPreferencePage;
 import org.dawnsci.plotting.tools.region.AbstractRegionTableTool.RegionColorListener;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -49,6 +51,9 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.preference.PreferenceDialog;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
@@ -62,6 +67,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -117,7 +123,26 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 		} catch (Exception e) {
 			logger.error("Cannot get plotting system!", e);
 		}
-		
+
+		Activator.getPlottingPreferenceStore().addPropertyChangeListener(new IPropertyChangeListener() {
+			
+			@Override
+			public void propertyChange(PropertyChangeEvent event) {
+				if (isActive()) {
+					if(isInterestedProperty(event))
+						viewer.refresh();
+				}
+ 			}
+
+			private boolean isInterestedProperty(PropertyChangeEvent event) {
+				final String propName = event.getProperty();
+				return InfoPixelConstants.PIXEL_POS_FORMAT.equals(propName) ||
+						InfoPixelConstants.DATA_FORMAT.equals(propName)     ||
+						InfoPixelConstants.Q_FORMAT.equals(propName)        ||
+						InfoPixelConstants.THETA_FORMAT.equals(propName)    ||
+						InfoPixelConstants.RESOLUTION_FORMAT.equals(propName);
+			}
+		});
 	}
 	
 
@@ -429,9 +454,18 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 		};
 		show.setToolTipText("Show vertices in all visible regions");
 		show.setImageDescriptor(Activator.getImageDescriptor("icons/plot-tool-measure-vertices.png"));
+		
+		final Action preferences = new Action("Preferences...") {
+			public void run() {
+				if (!isActive()) return;
+				PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), InfoPixelPreferencePage.ID, null, null);
+				if (pref != null) pref.open();
+			}
+		};
+		
 		getSite().getActionBars().getToolBarManager().add(show);
 		getSite().getActionBars().getMenuManager().add(show);
-
+		getSite().getActionBars().getMenuManager().add(preferences);
 		createRightClickMenu();
 	}
 
