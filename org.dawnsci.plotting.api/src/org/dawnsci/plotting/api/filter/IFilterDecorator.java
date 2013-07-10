@@ -68,6 +68,14 @@ public interface IFilterDecorator {
 	 * be used after dispose has been called.
 	 */
 	public void dispose();
+	
+	/**
+	 * Applies a new filter on existing data. By default when a filter is
+	 * created, all the data plotted is left alone and only new data plotted,
+	 * will have the filter applied. Calling this method applies the filter to 
+	 * existing plots as well.
+	 */
+	public void apply();
 
 	/**
 	 * Replaces the data of the plot with unfiltered data leaving all of the

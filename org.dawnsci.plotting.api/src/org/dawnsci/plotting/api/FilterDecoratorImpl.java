@@ -1,10 +1,13 @@
 package org.dawnsci.plotting.api;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.dawnsci.plotting.api.filter.IFilterDecorator;
 import org.dawnsci.plotting.api.filter.IPlottingFilter;
+import org.dawnsci.plotting.api.trace.IImageTrace;
+import org.dawnsci.plotting.api.trace.ILineTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.api.trace.ITraceListener;
 import org.dawnsci.plotting.api.trace.TraceWillPlotEvent;
@@ -101,6 +104,25 @@ class FilterDecoratorImpl implements IFilterDecorator {
 			processingAllowed = true;
 		}
 	}
+	
+
+	@Override
+	public void apply() {
+		final Collection<ITrace> traces = system.getTraces();
+		for (ITrace trace : traces) {
+			if (trace instanceof ILineTrace) {
+				ILineTrace lt = (ILineTrace)trace;
+				lt.setData(lt.getXData(), lt.getYData());
+				
+			} else if (trace instanceof IImageTrace) {
+				IImageTrace it = (IImageTrace)trace;
+				it.setData(it.getData(), it.getAxes(), false);
+			}
+		}
+		
+	}
+
+
 
 	@Override
 	public void dispose() {
@@ -108,6 +130,5 @@ class FilterDecoratorImpl implements IFilterDecorator {
 		clear();
 		system.removeTraceListener(listener);
 	}
-
 	
 }

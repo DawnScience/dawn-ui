@@ -161,6 +161,7 @@ public class SWTXYTraceTest {
     public void testFilterDectoratorMultiple() throws Throwable {
 		
 		final IDataset y = DoubleDataset.arange(0, 100, 1);
+		y.setName("Test Data");
 		final IDataset x = AbstractDataset.arange(0, y.getSize(), 1, AbstractDataset.INT32);
      
       
@@ -168,6 +169,7 @@ public class SWTXYTraceTest {
 		
 		final IPlottingSystem     sys    = (IPlottingSystem)oa[0];
 		final List<ITrace>        traces = (List<ITrace>)oa[2];
+		((ILineTrace)traces.get(0)).setData(x, y);
 		
 		// Add a decorator that squares the data.
 		final IFilterDecorator dec = PlottingFactory.createFilterDecorator(sys);	
@@ -177,7 +179,10 @@ public class SWTXYTraceTest {
 				return 1;
 			}
 			protected IDataset[] filter(IDataset x,    IDataset y) {
-				return new IDataset[]{null, Maths.square((AbstractDataset)y)};
+				y = Maths.square((AbstractDataset)y);
+				y.setName("Test Data");
+
+				return new IDataset[]{null, y};
 			}
 		};
 		dec.addFilter(filter1);
@@ -187,7 +192,9 @@ public class SWTXYTraceTest {
 				return 1;
 			}
 			protected IDataset[] filter(IDataset x,    IDataset y) {
-				return new IDataset[]{null, Maths.sqrt((AbstractDataset)y)};
+				y = Maths.sqrt((AbstractDataset)y);
+				y.setName("Test Data");
+				return new IDataset[]{null, y};
 			}
 		};
 		dec.addFilter(filter2);
@@ -197,14 +204,16 @@ public class SWTXYTraceTest {
 				return 1;
 			}
 			protected IDataset[] filter(IDataset x,    IDataset y) {
-				return new IDataset[]{null, Maths.add((AbstractDataset)y, 10)};
+				y = Maths.add((AbstractDataset)y, 10);
+				y.setName("Test Data");
+				return new IDataset[]{null, y};
 			}
 		};
 		dec.addFilter(filter3);
 		
 		Display.getDefault().syncExec(new Runnable() {
 			public void run() {
-				((ILineTrace)traces.get(0)).setData(x, y);
+				dec.apply();
 				sys.autoscaleAxes();
 			}
 		});
