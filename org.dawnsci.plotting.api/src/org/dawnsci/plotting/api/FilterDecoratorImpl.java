@@ -60,6 +60,7 @@ class FilterDecoratorImpl implements IFilterDecorator {
 	@Override
 	public void addFilter(IPlottingFilter filter) {
 		if (isDisposed) throw new RuntimeException("IFilterDecorator is disposed!");
+		if (filters.contains(filter))  throw new RuntimeException("The filter is already added!");
 		filters.add(filter);
 	}
 

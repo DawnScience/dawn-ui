@@ -158,6 +158,82 @@ public class SWTXYTraceTest {
 	}
 	
 	@Test
+    public void testFilterDectoratorMultiple() throws Throwable {
+		
+		final IDataset y = DoubleDataset.arange(0, 100, 1);
+		final IDataset x = AbstractDataset.arange(0, y.getSize(), 1, AbstractDataset.INT32);
+     
+      
+		final Object[] oa = createSomethingPlotted(Arrays.asList(new IDataset[]{y}));
+		
+		final IPlottingSystem     sys    = (IPlottingSystem)oa[0];
+		final List<ITrace>        traces = (List<ITrace>)oa[2];
+		
+		// Add a decorator that squares the data.
+		final IFilterDecorator dec = PlottingFactory.createFilterDecorator(sys);	
+		final IPlottingFilter filter1 = new AbstractPlottingFilter() {
+			@Override
+			public int getRank() {
+				return 1;
+			}
+			protected IDataset[] filter(IDataset x,    IDataset y) {
+				return new IDataset[]{null, Maths.square((AbstractDataset)y)};
+			}
+		};
+		dec.addFilter(filter1);
+		final IPlottingFilter filter2 = new AbstractPlottingFilter() {
+			@Override
+			public int getRank() {
+				return 1;
+			}
+			protected IDataset[] filter(IDataset x,    IDataset y) {
+				return new IDataset[]{null, Maths.sqrt((AbstractDataset)y)};
+			}
+		};
+		dec.addFilter(filter2);
+		final IPlottingFilter filter3 = new AbstractPlottingFilter() {
+			@Override
+			public int getRank() {
+				return 1;
+			}
+			protected IDataset[] filter(IDataset x,    IDataset y) {
+				return new IDataset[]{null, Maths.add((AbstractDataset)y, 10)};
+			}
+		};
+		dec.addFilter(filter3);
+		
+		Display.getDefault().syncExec(new Runnable() {
+			public void run() {
+				((ILineTrace)traces.get(0)).setData(x, y);
+				sys.autoscaleAxes();
+			}
+		});
+		
+		IDataset ySquared = ((ILineTrace)traces.get(0)).getYData();
+		if (ySquared.getDouble(99)!=Math.pow(Math.pow(99, 2), 0.5)+10) {
+			throw new Exception("Data of plot not filtered! Value is "+ySquared.getDouble(99));
+		}
+		
+		EclipseUtils.delay(2000);
+		
+		Display.getDefault().syncExec(new Runnable() {
+			public void run() {
+				dec.reset();
+			}
+		});
+		
+		IDataset yReset = ((ILineTrace)traces.get(0)).getYData();
+		if (yReset.getDouble(99)!=99) {
+			throw new Exception("Data of plot not filtered! Value is "+yReset.getDouble(99));
+		}
+
+		
+		System.out.println("Passed");
+		
+	}
+
+	
+	@Test
     public void testFilterDectoratorDirect() throws Throwable {
 		
 		
