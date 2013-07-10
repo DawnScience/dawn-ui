@@ -24,7 +24,7 @@ public abstract class AbstractPlottingFilter implements IPlottingFilter {
 	private boolean            active=true;
 	
 
-	AbstractPlottingFilter() {
+	public AbstractPlottingFilter() {
 		this.cache = new ArrayList<OriginalData>(7);
 	}
 

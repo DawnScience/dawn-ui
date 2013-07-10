@@ -16,8 +16,12 @@ public class LineTrace extends Trace implements ITraceContainer {
 	
 	protected String internalName; 
 	
-	public LineTrace(String name, Axis xAxis, Axis yAxis, IDataProvider dataProvider) {
-		super(name, xAxis, yAxis, dataProvider);
+	public LineTrace(String name) {
+		super(name);
+	}
+	
+	public void init(Axis xAxis, Axis yAxis, IDataProvider dataProvider) {
+		super.init(xAxis, yAxis, dataProvider);
 	}
 	
 

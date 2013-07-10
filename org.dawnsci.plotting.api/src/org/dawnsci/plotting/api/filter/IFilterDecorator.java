@@ -1,6 +1,7 @@
 package org.dawnsci.plotting.api.filter;
 
 
+
 /**
  * <code>
  * 
@@ -10,7 +11,7 @@ package org.dawnsci.plotting.api.filter;
  *         return 1;
  *     }
  *     protected IDataset[] filter(IDataset x,    IDataset y) {
- *         return new IDataset[]{null, DatasetMaths.square(y));
+ *         return new IDataset[]{null, Maths.square(y));
  *     }
  * }
  * 

@@ -533,7 +533,8 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		final Axis yAxis = (Axis)getSelectedYAxis();
 
 		LightWeightDataProvider traceDataProvider = new LightWeightDataProvider();
-		final LineTrace   trace    = new LineTrace(traceName, xAxis, yAxis, traceDataProvider);
+		final LineTrace   trace    = new LineTrace(traceName);
+		trace.init(xAxis, yAxis, traceDataProvider);
 		final LineTraceImpl wrapper = new LineTraceImpl(this, trace);
 		fireTraceCreated(new TraceEvent(wrapper));
 		return wrapper;

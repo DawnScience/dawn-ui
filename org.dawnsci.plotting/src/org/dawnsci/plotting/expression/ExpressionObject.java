@@ -302,6 +302,7 @@ class ExpressionObject implements IExpressionObject {
 
 	@Override
 	public Map<String, Object> getFunctions() {
+		if (engine==null) return null;
 		return engine.getFunctions();
 	}
 

@@ -28,8 +28,9 @@ Import-Package: org.eclipse.jface.action,
 Export-Package: org.dawnsci.plotting.api,
  org.dawnsci.plotting.api.annotation,
  org.dawnsci.plotting.api.axis,
+ org.dawnsci.plotting.api.filter,
  org.dawnsci.plotting.api.histogram,
+ org.dawnsci.plotting.api.preferences,
  org.dawnsci.plotting.api.region,
  org.dawnsci.plotting.api.tool,
- org.dawnsci.plotting.api.trace,
- org.dawnsci.plotting.api.preferences
+ org.dawnsci.plotting.api.trace

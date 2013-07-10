@@ -637,9 +637,15 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		if (data.getName()!=null) xyGraph.setTitle(data.getName());
 		xyGraph.clearTraces();
 
+		
 		final ImageTrace trace = xyGraph.createImageTrace(traceName, xAxis, yAxis, intensity);
 		trace.setPlottingSystem(system);
-		if (!trace.setData(data, axes, true)) return trace; // But not plotted
+		
+		final TraceWillPlotEvent evt = new TraceWillPlotEvent(trace, data, (List<IDataset>)axes);
+		system.fireWillPlot(evt);
+		if (!evt.doit) return null;
+
+		if (!trace.setData(evt.getImage(), evt.getAxes(), true)) return trace; // But not plotted
 		
 		addTrace(trace);
 		return trace;
@@ -705,16 +711,20 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		for (IDataset y : ys) {
 
 			if (y==null) continue;
-			LightWeightDataProvider traceDataProvider = new LightWeightDataProvider(x, y);
 			
-			//create the trace
-			final LineTrace trace = new LineTrace(getName(y,rootName), 
-					                      xAxis, 
-					                      yAxis,
-									      traceDataProvider);	
-			
+			final LineTrace trace = new LineTrace(getName(y,rootName));
 			LineTraceImpl wrapper = new LineTraceImpl(system, trace);
 			traces.add(wrapper);
+			
+			final TraceWillPlotEvent evt = new TraceWillPlotEvent(wrapper, x, y);
+			system.fireWillPlot(evt);
+			if (!evt.doit) continue;
+
+			LightWeightDataProvider traceDataProvider = new LightWeightDataProvider(evt.getXData(), evt.getYData());
+			
+			//create the trace
+			trace.init(xAxis, yAxis, traceDataProvider);	
+			
 			
 			if (y.getName()!=null && !"".equals(y.getName())) {
 				if (traceMap!=null) traceMap.put(y.getName(), wrapper);

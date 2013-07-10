@@ -56,6 +56,21 @@ public class TraceWillPlotEvent extends EventObject {
 
 	}
 
+	public TraceWillPlotEvent(Object source, IDataset x, IDataset y) {
+		super(source);
+		this.xLineData = x;
+		this.yLineData = y;
+		this.applyStraightAway = false;
+	}
+
+
+	public TraceWillPlotEvent(Object source, IDataset image, List<IDataset> axes) {
+		super(source);
+		this.image = image;
+		this.axes  = axes;
+		this.applyStraightAway = false;
+	}
+
 	public IDataset getImage() {
 		return image;
 	}

@@ -341,14 +341,12 @@ public class LineTraceImpl implements ILineTrace {
 		}
 		
 		if (sys!=null) try {
-			if (sys.getTraces().contains(this)) {
-				final TraceWillPlotEvent evt = new TraceWillPlotEvent(this, false);
-				sys.fireWillPlot(evt);
-				if (!evt.doit) return;
-				if (evt.isNewLineDataSet()) {
-					xData = evt.getXData();
-					yData = evt.getYData();
-				}
+			final TraceWillPlotEvent evt = new TraceWillPlotEvent(this, false);
+			sys.fireWillPlot(evt);
+			if (!evt.doit) return;
+			if (evt.isNewLineDataSet()) {
+				xData = evt.getXData();
+				yData = evt.getYData();
 			}
 		} catch (Throwable ignored) {
 			// We allow things to proceed without a warning.
