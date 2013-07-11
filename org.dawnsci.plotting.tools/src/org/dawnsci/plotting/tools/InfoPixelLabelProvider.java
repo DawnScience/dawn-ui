@@ -31,11 +31,16 @@
 
 package org.dawnsci.plotting.tools;
 
+import java.text.DecimalFormat;
+
+import org.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.TraceUtils;
+import org.dawnsci.plotting.tools.preference.InfoPixelConstants;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,11 +77,13 @@ public class InfoPixelLabelProvider extends ColumnLabelProvider {
 		double yLabel = Double.NaN;
 		
 		final IImageTrace trace = tool.getImageTrace();
+		ICoordinateSystem coords = null;
 		try {
 			if (element instanceof IRegion){
 				
 				final IRegion region = (IRegion)element;
-				
+				coords = region.getCoordinateSystem();
+
 				if (region.getRegionType()==RegionType.POINT) {
 					PointROI pr = (PointROI)tool.getBounds(region);
 					xIndex = pr.getPointX();
@@ -145,39 +152,68 @@ public class InfoPixelLabelProvider extends ColumnLabelProvider {
 			}
 							
 			final boolean isCustom = TraceUtils.isCustomAxes(trace)  || tool.getToolPageRole() == ToolPageRole.ROLE_1D;
-			
+			if (isCustom && (column == 1 || column == 2)) {
+				if (coords == null) return null;
+				double[] axisPt = new double[2];
+				try {
+					axisPt = coords.getValueAxisLocation(new double[]{xLabel, yLabel});
+					xLabel = axisPt[0];
+					yLabel = axisPt[1];
+				} catch (Exception e) {
+					logger.debug("error: "+e);
+				}
+			}
+
+			IPreferenceStore store = Activator.getPlottingPreferenceStore();
+
 			switch(column) {
 			case 0: // "Point Id"
 				return ( ( (IRegion)element).getRegionType() == RegionType.POINT) ? ((IRegion)element).getName(): "";
 			case 1: // "X position"
-				return isCustom ? String.format("% 4.4f", xLabel)
-						        : String.format("% 4d", (int)Math.floor(xLabel));
+				DecimalFormat pixelPosFormat   = new DecimalFormat(store.getString(InfoPixelConstants.PIXEL_POS_FORMAT));
+				return pixelPosFormat.format(xLabel);
+				//return isCustom ? String.format("% 1.1f", xLabel)
+				//		: String.format("% 1d", (int)Math.floor(xLabel));
 			case 2: // "Y position"
-				return isCustom ? String.format("% 4.4f", yLabel)
-			                    : String.format("% 4d", (int)Math.floor(yLabel));
+				pixelPosFormat   = new DecimalFormat(store.getString(InfoPixelConstants.PIXEL_POS_FORMAT));
+				return pixelPosFormat.format(yLabel);
+				//return isCustom ? String.format("% 1.1f", yLabel)
+				//		: String.format("% 1d", (int)Math.floor(yLabel));
 			case 3: // "Data value"
 				//if (set == null || vectorUtil==null || vectorUtil.getQMask(qSpace, x, y) == null) return "-";
 				if (set == null) return "-";
-				return String.format("% 4.4f", set.getDouble((int)Math.floor(yIndex), (int) Math.floor(xIndex)));
+				DecimalFormat dataFormat   = new DecimalFormat(store.getString(InfoPixelConstants.DATA_FORMAT));
+				return dataFormat.format(set.getDouble((int)Math.floor(yIndex), (int) Math.floor(xIndex)));
+//				return String.format("% 4.4f", set.getDouble((int)Math.floor(yIndex), (int) Math.floor(xIndex)));
 			case 4: // q X
 				//if (vectorUtil==null || vectorUtil.getQMask(qSpace, x, y) == null) return "-";
 				if (vectorUtil==null ) return "-";
-				return String.format("% 4.4f", vectorUtil.getQx());
+				DecimalFormat qFormat   = new DecimalFormat(store.getString(InfoPixelConstants.Q_FORMAT));
+				return qFormat.format(vectorUtil.getQx());
+//				return String.format("% 4.4f", vectorUtil.getQx());
 			case 5: // q Y
 				//if (vectorUtil==null ||vectorUtil.getQMask(qSpace, x, y) == null) return "-";
 				if (vectorUtil==null) return "-";
-				return String.format("% 4.4f", vectorUtil.getQy());
+				qFormat   = new DecimalFormat(store.getString(InfoPixelConstants.Q_FORMAT));
+				return qFormat.format(vectorUtil.getQy());
+//				return String.format("% 4.4f", vectorUtil.getQy());
 			case 6: // q Z
 				//if (vectorUtil==null ||vectorUtil.getQMask(qSpace, x, y) == null) return "-";
 				if (vectorUtil==null) return "-";
-				return String.format("% 4.4f", vectorUtil.getQz());
+				qFormat   = new DecimalFormat(store.getString(InfoPixelConstants.Q_FORMAT));
+				return qFormat.format(vectorUtil.getQz());
+//				return String.format("% 4.4f", vectorUtil.getQz());
 			case 7: // 20
 				if (vectorUtil==null || qSpace == null) return "-";
-				return String.format("% 3.3f", Math.toDegrees(vectorUtil.getQScatteringAngle(qSpace)));
+				DecimalFormat thetaFormat   = new DecimalFormat(store.getString(InfoPixelConstants.THETA_FORMAT));
+				return thetaFormat.format(Math.toDegrees(vectorUtil.getQScatteringAngle(qSpace)));
+//				return String.format("% 3.3f", Math.toDegrees(vectorUtil.getQScatteringAngle(qSpace)));
 			case 8: // resolution
 				//if (vectorUtil==null ||vectorUtil.getQMask(qSpace, x, y) == null) return "-";
 				if (vectorUtil==null ) return "-";
-				return String.format("% 4.4f", (2*Math.PI)/vectorUtil.getQlength());
+				DecimalFormat resolutionFormat   = new DecimalFormat(store.getString(InfoPixelConstants.RESOLUTION_FORMAT));
+				return resolutionFormat.format((2*Math.PI)/vectorUtil.getQlength());
+//				return String.format("% 4.4f", (2*Math.PI)/vectorUtil.getQlength());
 			case 9: // Dataset name
 				if (set == null) return "-";
 				return set.getName();

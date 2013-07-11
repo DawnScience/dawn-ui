@@ -9,6 +9,9 @@
             class="org.dawnsci.plotting.tools.preference.FittingPreferenceInitializer">
       </initializer>
       <initializer
+            class="org.dawnsci.plotting.tools.preference.InfoPixelPreferenceInitializer">
+      </initializer>
+      <initializer
             class="org.dawnsci.plotting.tools.preference.detector.DiffractionDetectorPreferenceInitializer">
       </initializer>
       <initializer
@@ -23,6 +26,12 @@
             class="org.dawnsci.plotting.tools.preference.FittingPreferencePage"
             id="org.dawb.workbench.plotting.fittingPreferencePage"
             name="Fitting Preferences">
+      </page>
+      <page
+            category="org.dawnsci.preferences.root"
+            class="org.dawnsci.plotting.tools.preference.InfoPixelPreferencePage"
+            id="org.dawb.workbench.plotting.infoPixelPreferencePage"
+            name="Pixel Information Preferences">
       </page>
       <page
             category="org.dawnsci.preferences.root"
