@@ -12,6 +12,9 @@
             class="org.dawnsci.plotting.tools.preference.InfoPixelPreferenceInitializer">
       </initializer>
       <initializer
+            class="org.dawnsci.plotting.tools.preference.RegionEditorPreferenceInitializer">
+      </initializer>
+      <initializer
             class="org.dawnsci.plotting.tools.preference.detector.DiffractionDetectorPreferenceInitializer">
       </initializer>
       <initializer
@@ -32,6 +35,12 @@
             class="org.dawnsci.plotting.tools.preference.InfoPixelPreferencePage"
             id="org.dawb.workbench.plotting.infoPixelPreferencePage"
             name="Pixel Information Preferences">
+      </page>
+      <page
+            category="org.dawnsci.preferences.root"
+            class="org.dawnsci.plotting.tools.preference.RegionEditorPreferencePage"
+            id="org.dawb.workbench.plotting.regionEditorPreferencePage"
+            name="Region Editor Preferences">
       </page>
       <page
             category="org.dawnsci.preferences.root"
