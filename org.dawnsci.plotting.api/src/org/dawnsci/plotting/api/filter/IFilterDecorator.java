@@ -74,6 +74,8 @@ public interface IFilterDecorator {
 	 * created, all the data plotted is left alone and only new data plotted,
 	 * will have the filter applied. Calling this method applies the filter to 
 	 * existing plots as well.
+	 * 
+	 * It does not refilter existing filtered traces, if any.
 	 */
 	public void apply();
 

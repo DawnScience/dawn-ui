@@ -1,6 +1,9 @@
 package org.dawnsci.plotting.api.filter;
 
+import java.util.List;
+
 import org.dawnsci.plotting.api.IPlottingSystem;
+import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 
 public interface IPlottingFilter {
@@ -45,5 +48,11 @@ public interface IPlottingFilter {
 	 * @param active
 	 */
 	public void setActive(boolean active);
+	
+	/**
+	 * 
+	 * @return a list of traces already processed by this filter.
+	 */
+	public List<ITrace> getFilteredTraces();
 
 }

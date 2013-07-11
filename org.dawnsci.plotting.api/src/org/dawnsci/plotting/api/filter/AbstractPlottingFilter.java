@@ -75,6 +75,14 @@ public abstract class AbstractPlottingFilter implements IPlottingFilter {
 		}
 	}
 
+	public List<ITrace> getFilteredTraces() {
+		if (cache==null || cache.isEmpty()) return null;
+		final List<ITrace> filtered = new ArrayList<ITrace>(cache.size());
+		for (OriginalData data : cache) {
+			filtered.add(data.getTrace());
+		}
+		return filtered;
+	}
 	
 	private class OriginalData {
 		
@@ -99,6 +107,10 @@ public abstract class AbstractPlottingFilter implements IPlottingFilter {
 			}
 		}
 		
+		public ITrace getTrace() {
+			return trace;
+		}
+
 		/**
 		 * Sets the data of the trace to that which the trace
 		 * was before we did the filter.

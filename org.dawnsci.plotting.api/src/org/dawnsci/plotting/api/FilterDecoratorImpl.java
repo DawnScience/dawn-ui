@@ -109,7 +109,10 @@ class FilterDecoratorImpl implements IFilterDecorator {
 	@Override
 	public void apply() {
 		final Collection<ITrace> traces = system.getTraces();
+		
+		final Collection<ITrace> existing = getExistingFilteredTraces();
 		for (ITrace trace : traces) {
+			if (existing!=null && existing.contains(trace)) continue; // TODO Check can use traces as keys, they may not have equals and hashcode.
 			if (trace instanceof ILineTrace) {
 				ILineTrace lt = (ILineTrace)trace;
 				lt.setData(lt.getXData(), lt.getYData());
@@ -123,6 +126,12 @@ class FilterDecoratorImpl implements IFilterDecorator {
 	}
 
 
+
+	private Collection<ITrace> getExistingFilteredTraces() {
+		if (filters.isEmpty()) return null;
+        final IPlottingFilter filter = filters.get(0);
+		return filter.getFilteredTraces();
+	}
 
 	@Override
 	public void dispose() {
