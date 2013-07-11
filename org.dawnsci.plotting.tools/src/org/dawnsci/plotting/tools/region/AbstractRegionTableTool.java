@@ -22,6 +22,9 @@ import org.dawnsci.plotting.api.region.RegionEvent;
 import org.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
+import org.dawnsci.plotting.api.trace.ITraceListener;
+import org.dawnsci.plotting.api.trace.TraceEvent;
+import org.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.preference.RegionEditorConstants;
 import org.dawnsci.plotting.tools.preference.RegionEditorPreferencePage;
@@ -120,6 +123,8 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 	 */
 	private Map<String,IROI> dragBounds;
 
+	private ITraceListener traceListener;
+
 	public AbstractRegionTableTool() {
 		super();
 		dragBounds = new HashMap<String,IROI>(7);
@@ -140,6 +145,45 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 						RegionEditorConstants.SUM_FORMAT.equals(propName);
 			}
 		});
+
+		traceListener = new ITraceListener() {
+			
+			@Override
+			public void tracesUpdated(TraceEvent evt) {
+			}
+			
+			@Override
+			public void tracesRemoved(TraceEvent evet) {
+			}
+			
+			@Override
+			public void tracesAdded(TraceEvent evt) {
+			}
+			
+			@Override
+			public void traceWillPlot(TraceWillPlotEvent evt) {
+			}
+			
+			@Override
+			public void traceUpdated(TraceEvent evt) {
+				viewer.refresh();
+			}
+			
+			@Override
+			public void traceRemoved(TraceEvent evt) {
+				viewer.refresh();
+			}
+			
+			@Override
+			public void traceCreated(TraceEvent evt) {
+				viewer.refresh();
+			}
+			
+			@Override
+			public void traceAdded(TraceEvent evt) {
+				viewer.refresh();
+			}
+		};
 	}
 
 	@Override
@@ -341,6 +385,8 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 		super.activate();
 		if (viewer!=null && viewer.getControl().isDisposed()) return;
 		
+		getPlottingSystem().addTraceListener(traceListener);
+
 		if (viewUpdateListener!=null) viewer.addSelectionChangedListener(viewUpdateListener);
 
 		
@@ -378,6 +424,7 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 		}
 		if (dragBounds!=null) dragBounds.clear();
 		if (getPlottingSystem()!=null) try {
+			getPlottingSystem().removeTraceListener(traceListener);
 			getPlottingSystem().removeRegionListener(this);
 			final Collection<IRegion> regions = getPlottingSystem().getRegions();
 			for (IRegion iRegion : regions) iRegion.removeROIListener(this);
