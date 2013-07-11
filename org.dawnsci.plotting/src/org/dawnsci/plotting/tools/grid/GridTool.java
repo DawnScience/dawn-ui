@@ -314,8 +314,8 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		@SuppressWarnings("unchecked")
 		final NumericNode<Length> x = (NumericNode<Length>)model.getNode("/Detector/Beam Centre/X");
 		x.setDefault(Amount.valueOf(beamCenter[0], x.getUnit()));
-		x.setLowerBound(-1*getMaxX());
-		x.setUpperBound(2*getMaxX());
+		x.setLowerBound(-1*Double.MAX_VALUE);
+		x.setUpperBound(Double.MAX_VALUE);
 		x.addAmountListener(new AmountListener<Length>() {		
 			@Override
 			public void amountChanged(AmountEvent<Length> evt) {
@@ -327,8 +327,8 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		@SuppressWarnings("unchecked")
 		final NumericNode<Length> y = (NumericNode<Length>)model.getNode("/Detector/Beam Centre/Y");
 		y.setDefault(Amount.valueOf(beamCenter[1], y.getUnit()));
-		y.setLowerBound(-1*getMaxY());
-		y.setUpperBound(2*getMaxY());
+		y.setLowerBound(-1*Double.MAX_VALUE);
+		y.setUpperBound(Double.MAX_VALUE);
 		y.addAmountListener(new AmountListener<Length>() {		
 			@Override
 			public void amountChanged(AmountEvent<Length> evt) {
