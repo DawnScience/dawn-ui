@@ -1,9 +1,13 @@
 package org.dawnsci.plotting.tools.region;
 
+import java.text.DecimalFormat;
+
 import org.dawb.common.util.number.DoubleUtils;
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.tools.Activator;
+import org.dawnsci.plotting.tools.preference.RegionEditorConstants;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.swt.graphics.Image;
@@ -71,29 +75,37 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 			} else if (roi instanceof LinearROI){
 				endPoint = getAxisPoint(coords, ((LinearROI)roi).getEndPoint());
 			}
+
+			IPreferenceStore store = Activator.getPlottingPreferenceStore();
+			DecimalFormat pointFormat = new DecimalFormat(store.getString(RegionEditorConstants.POINT_FORMAT));
+
 			switch(column) {
 			case ROINAME:
 				return region.getLabel();
 			case STARTX:
 				fobj = startPoint[0];
-				return fobj == null ? NA : String.valueOf(DoubleUtils.roundDouble((Double)fobj, precision));
+				return fobj == null ? NA : pointFormat.format((Double)fobj);
 			case STARTY: // dx
 				fobj = startPoint[1];
-				return fobj == null ? NA : String.valueOf(DoubleUtils.roundDouble((Double)fobj, precision));
+				return fobj == null ? NA : pointFormat.format((Double)fobj);
 			case ENDX: // dy
 				fobj = endPoint[0];
-				return fobj == null ? NA : String.valueOf(DoubleUtils.roundDouble((Double)fobj, precision));
+				return fobj == null ? NA : pointFormat.format((Double)fobj);
 			case ENDY: // length
 				fobj = endPoint[1];
-				return fobj == null ? NA : String.valueOf(DoubleUtils.roundDouble((Double)fobj, precision));
+				return fobj == null ? NA : pointFormat.format((Double)fobj);
 			case MAX: // max
 				final double max = tool.getMaxIntensity(region);
-			    if (Double.isNaN(max)) return NA;
-				return DoubleUtils.formatDouble(max, 5);
+				DecimalFormat intensityFormat = new DecimalFormat(store.getString(RegionEditorConstants.INTENSITY_FORMAT));
+				if (Double.isNaN(max)) return NA;
+				return intensityFormat.format(max);
+				//return DoubleUtils.formatDouble(max, 5);
 			case SUM: // sum
 				final double sum = tool.getSum(region);
+				DecimalFormat sumFormat = new DecimalFormat(store.getString(RegionEditorConstants.SUM_FORMAT));
 				if(Double.isNaN(sum)) return NA;
-				return DoubleUtils.formatDouble(sum, 5);
+				return sumFormat.format(sum);
+//				return DoubleUtils.formatDouble(sum, 5);
 			case ROITYPE: //ROI type
 				return region.getRegionType().getName();
 			case DX: // dx
@@ -116,7 +128,7 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 				return fobj == null ? NA : getCalibratedValue((Double)fobj);
 			case LENGTH: // length
 				
-				String unit="";
+				//String unit="";
 				if (roi instanceof LinearROI) {
 					
 					LinearROI lroi = (LinearROI) roi;

@@ -1,5 +1,6 @@
 package org.dawnsci.plotting.tools.region;
 
+import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -9,8 +10,11 @@ import org.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.region.RegionUtils;
+import org.dawnsci.plotting.tools.Activator;
+import org.dawnsci.plotting.tools.preference.RegionEditorConstants;
 import org.dawnsci.plotting.tools.region.MeasurementLabelProvider.LabelType;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.CheckboxCellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
@@ -36,7 +40,7 @@ import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
  */
 public class RegionEditTool extends AbstractRegionTableTool {
 
-	private int precision = 3;
+	//private int precision = 3;
 
 	@Override
 	public ToolPageRole getToolPageRole() {
@@ -149,8 +153,11 @@ public class RegionEditTool extends AbstractRegionTableTool {
 			CellEditor ed = null;
 			
 			if(column > 0 && column < 7){
+				IPreferenceStore store = Activator.getPlottingPreferenceStore();
+				DecimalFormat pointFormat = new DecimalFormat(store.getString(RegionEditorConstants.POINT_FORMAT));
+				
 				final FloatSpinnerCellEditor fse = new FloatSpinnerCellEditor((Composite)getViewer().getControl(), SWT.RIGHT);
-				fse.setFormat(7, precision);
+				fse.setFormat(pointFormat.getMaximumIntegerDigits(), pointFormat.getMaximumFractionDigits());
 				fse.setMaximum(Double.MAX_VALUE);
 				fse.setMinimum(-Double.MAX_VALUE);
 				fse.addSelectionListener(new SelectionAdapter() {
@@ -162,20 +169,17 @@ public class RegionEditTool extends AbstractRegionTableTool {
 							logger.debug("Error while setting table value");
 							e1.printStackTrace();
 						}
-						
 					}
 				});
 				return fse;
 			} else if(column == 0){
 				ed = new TextCellEditor(((TableViewer)getViewer()).getTable(), SWT.RIGHT);
-				
 				return ed;
 			} else if(column == 7){
 				ed = new CheckboxCellEditor(((TableViewer)getViewer()).getTable(), SWT.RIGHT);
 				return ed;
 			}
 			return null;
-			
 		}
 
 		@Override

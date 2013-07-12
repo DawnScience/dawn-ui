@@ -22,7 +22,12 @@ import org.dawnsci.plotting.api.region.RegionEvent;
 import org.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
+import org.dawnsci.plotting.api.trace.ITraceListener;
+import org.dawnsci.plotting.api.trace.TraceEvent;
+import org.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.dawnsci.plotting.tools.Activator;
+import org.dawnsci.plotting.tools.preference.RegionEditorConstants;
+import org.dawnsci.plotting.tools.preference.RegionEditorPreferencePage;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -32,6 +37,9 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.preference.PreferenceDialog;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
@@ -51,6 +59,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.progress.UIJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,9 +123,67 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 	 */
 	private Map<String,IROI> dragBounds;
 
+	private ITraceListener traceListener;
+
 	public AbstractRegionTableTool() {
 		super();
 		dragBounds = new HashMap<String,IROI>(7);
+
+		Activator.getPlottingPreferenceStore().addPropertyChangeListener(new IPropertyChangeListener() {
+			@Override
+			public void propertyChange(PropertyChangeEvent event) {
+				if (isActive()) {
+					if(isInterestedProperty(event))
+						viewer.refresh();
+				}
+ 			}
+
+			private boolean isInterestedProperty(PropertyChangeEvent event) {
+				final String propName = event.getProperty();
+				return RegionEditorConstants.POINT_FORMAT.equals(propName) ||
+						RegionEditorConstants.INTENSITY_FORMAT.equals(propName) ||
+						RegionEditorConstants.SUM_FORMAT.equals(propName);
+			}
+		});
+
+		traceListener = new ITraceListener() {
+			
+			@Override
+			public void tracesUpdated(TraceEvent evt) {
+			}
+			
+			@Override
+			public void tracesRemoved(TraceEvent evet) {
+			}
+			
+			@Override
+			public void tracesAdded(TraceEvent evt) {
+			}
+			
+			@Override
+			public void traceWillPlot(TraceWillPlotEvent evt) {
+			}
+			
+			@Override
+			public void traceUpdated(TraceEvent evt) {
+				viewer.refresh();
+			}
+			
+			@Override
+			public void traceRemoved(TraceEvent evt) {
+				viewer.refresh();
+			}
+			
+			@Override
+			public void traceCreated(TraceEvent evt) {
+				viewer.refresh();
+			}
+			
+			@Override
+			public void traceAdded(TraceEvent evt) {
+				viewer.refresh();
+			}
+		};
 	}
 
 	@Override
@@ -253,6 +321,15 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 		};
 		clear.setToolTipText("Clear all vertices shown in the plotting");
 
+		final Action preferences = new Action("Preferences...") {
+			public void run() {
+				if (!isActive()) return;
+				PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), RegionEditorPreferencePage.ID, null, null);
+				if (pref != null) pref.open();
+			}
+		};
+		preferences.setToolTipText("Open Region Editor preferences");
+
 		getSite().getActionBars().getToolBarManager().add(importRegion);
 		getSite().getActionBars().getToolBarManager().add(exportRegion);
 		getSite().getActionBars().getToolBarManager().add(new Separator());
@@ -267,7 +344,7 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 		getSite().getActionBars().getMenuManager().add(show);
 		getSite().getActionBars().getToolBarManager().add(clear);
 		getSite().getActionBars().getMenuManager().add(clear);
-
+		getSite().getActionBars().getMenuManager().add(preferences);
 		createRightClickMenu();
 	}
 	
@@ -308,6 +385,8 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 		super.activate();
 		if (viewer!=null && viewer.getControl().isDisposed()) return;
 		
+		getPlottingSystem().addTraceListener(traceListener);
+
 		if (viewUpdateListener!=null) viewer.addSelectionChangedListener(viewUpdateListener);
 
 		
@@ -345,6 +424,7 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 		}
 		if (dragBounds!=null) dragBounds.clear();
 		if (getPlottingSystem()!=null) try {
+			getPlottingSystem().removeTraceListener(traceListener);
 			getPlottingSystem().removeRegionListener(this);
 			final Collection<IRegion> regions = getPlottingSystem().getRegions();
 			for (IRegion iRegion : regions) iRegion.removeROIListener(this);
