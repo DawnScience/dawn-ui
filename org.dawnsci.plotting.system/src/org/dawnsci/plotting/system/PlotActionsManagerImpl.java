@@ -26,6 +26,7 @@ import org.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
 import org.dawnsci.plotting.api.trace.IPaletteTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
+import org.dawnsci.plotting.system.preference.ToolbarConfigurationConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
@@ -64,8 +65,8 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 
 	public void createExportActions() {
         final IAction exportActionDropDown = getExportActions();
-        registerToolBarGroup("lightweight.plotting.print.action.toolbar");
-        registerAction("lightweight.plotting.print.action.toolbar", exportActionDropDown, ActionType.XYANDIMAGE, ManagerType.TOOLBAR);
+        registerToolBarGroup(ToolbarConfigurationConstants.EXPORT.getId());
+        registerAction(ToolbarConfigurationConstants.EXPORT.getId(), exportActionDropDown, ActionType.XYANDIMAGE, ManagerType.TOOLBAR);
         
         registerMenuBarGroup("lightweight.plotting.print.action.menubar");
         registerAction("lightweight.plotting.print.action.menubar", exportActionDropDown, ActionType.XYANDIMAGE, ManagerType.MENUBAR);
@@ -269,7 +270,5 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 		registerMenuBarGroup(lutCombo.getId()+".group");
 		registerAction(lutCombo.getId()+".group", lutCombo, ActionType.ALL, ManagerType.MENUBAR);
 	}
-
-
 
 }

@@ -31,6 +31,9 @@ class ActionContainer {
 	public void setGroupId(String groupName) {
 		this.groupId = groupName;
 	}
+	public String getGroupId() {
+		return groupId;
+	}
 
 	public void insert(boolean force) {
 		if (!force && isActive()) return;

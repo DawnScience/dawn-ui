@@ -1,7 +1,9 @@
 package org.dawnsci.plotting.system;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.csstudio.swt.xygraph.figures.XYGraphFlags;
 import org.csstudio.swt.xygraph.toolbar.AddAnnotationDialog;
@@ -36,13 +38,17 @@ import org.dawnsci.plotting.system.dialog.RemoveAxisDialog;
 import org.dawnsci.plotting.system.dialog.RemoveRegionCommand;
 import org.dawnsci.plotting.system.dialog.RemoveRegionDialog;
 import org.dawnsci.plotting.system.dialog.XYRegionConfigDialog;
+import org.dawnsci.plotting.system.preference.ToolbarConfigurationConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.window.Window;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
@@ -58,6 +64,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IReusableEditor;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,6 +89,7 @@ class LightWeightPlotActions {
 	private Action                 plotIndex, plotX;
 	
 	private Shell fullScreenShell;
+	private IPropertyChangeListener propertyListener, switchListener;
 
 	public void init(final LightWeightPlotViewer viewer, XYRegionGraph xyGraph, PlotActionsManagerImpl actionBarManager) {
 		this.viewer  = viewer;
@@ -105,6 +114,51 @@ class LightWeightPlotActions {
  		createOriginActions(xyGraph);
  		createAdditionalActions(xyGraph, null);
  		createFullScreenActions(xyGraph);
+ 		
+ 		updateToolbarPreferences();
+ 		
+ 		this.propertyListener = new IPropertyChangeListener() {
+			
+			@Override
+			public void propertyChange(PropertyChangeEvent event) {
+				updateToolbarPreferences();
+			}
+		};
+ 		PlottingSystemActivator.getLocalPreferenceStore().addPropertyChangeListener(propertyListener);
+ 		
+ 		this.switchListener = new IPropertyChangeListener() {
+			
+			@Override
+			public void propertyChange(PropertyChangeEvent event) {
+				updateToolbarPreferences();
+			}
+		};
+		actionBarManager.addPropertyChangeListener(switchListener);
+		
+ 		createPreferencesAction(); // Must be last thing
+	}
+
+	private void createPreferencesAction() {
+		actionBarManager.registerMenuBarGroup("org.dawnsci.plotting.system.toolbar.preferences");		
+		final Action openPreferences = new Action("Toolbar Preferences...") {
+			public void run() {
+				PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "org.dawnsci.plotting.system.toolbarPreferencePage", null, null);
+				if (pref != null) pref.open();
+			}
+		};
+		actionBarManager.registerAction("org.dawnsci.plotting.system.toolbar.preferences", openPreferences, ActionType.ALL, ManagerType.MENUBAR);
+	}
+
+	private void updateToolbarPreferences() {
+		
+		final Map<String, Boolean> visMap = new HashMap<String,Boolean>(ToolbarConfigurationConstants.values().length);
+		
+		for (ToolbarConfigurationConstants constant : ToolbarConfigurationConstants.values()) {
+			final boolean isVisible = PlottingSystemActivator.getLocalPreferenceStore().getBoolean(constant.getId());
+			visMap.put(constant.getId(), isVisible);	
+		}
+		
+		actionBarManager.updateGroupVisibility(visMap);
 	}
 
 	private void createAxisActions() {
@@ -141,7 +195,7 @@ class LightWeightPlotActions {
 
 	public void createUndoRedoActions(final XYRegionGraph xyGraph) {
 		
-		actionBarManager.registerToolBarGroup("org.csstudio.swt.xygraph.toolbar.undoredo");		
+		actionBarManager.registerToolBarGroup(ToolbarConfigurationConstants.UNDO.getId());		
 		
 		//undo button		
 		final Action undoButton = new Action("Undo", PlottingSystemActivator.getImageDescriptor("icons/Undo.png")) {
@@ -150,7 +204,7 @@ class LightWeightPlotActions {
 			}
 		};
 		undoButton.setEnabled(false);
-		actionBarManager.registerAction("org.csstudio.swt.xygraph.toolbar.undoredo", undoButton, ActionType.XYANDIMAGE);		
+		actionBarManager.registerAction(ToolbarConfigurationConstants.UNDO.getId(), undoButton, ActionType.XYANDIMAGE);		
 	
 		xyGraph.getOperationsManager().addListener(new IOperationsManagerListener(){
 			public void operationsHistoryChanged(OperationsManager manager) {
@@ -173,7 +227,7 @@ class LightWeightPlotActions {
 			}
 		};
 		redoButton.setEnabled(false);
-		actionBarManager.registerAction("org.csstudio.swt.xygraph.toolbar.undoredo", redoButton, ActionType.XYANDIMAGE);		
+		actionBarManager.registerAction(ToolbarConfigurationConstants.UNDO.getId(), redoButton, ActionType.XYANDIMAGE);		
 
 		xyGraph.getOperationsManager().addListener(new IOperationsManagerListener(){
 			public void operationsHistoryChanged(OperationsManager manager) {
@@ -192,7 +246,7 @@ class LightWeightPlotActions {
 
 	public void createConfigActions(final XYRegionGraph xyGraph) {
 		
-		actionBarManager.registerToolBarGroup("org.csstudio.swt.xygraph.toolbar.configure");	
+		actionBarManager.registerToolBarGroup(ToolbarConfigurationConstants.CONFIG.getId());	
 		
 		final Action configButton = new Action("Configure Settings...", PlottingSystemActivator.getImageDescriptor("icons/Configure.png")) {
 			public void run() {
@@ -200,7 +254,7 @@ class LightWeightPlotActions {
 				dialog.open();
 			}
 		};
-		actionBarManager.registerAction("org.csstudio.swt.xygraph.toolbar.configure", configButton, ActionType.XYANDIMAGE);		
+		actionBarManager.registerAction(ToolbarConfigurationConstants.CONFIG.getId(), configButton, ActionType.XYANDIMAGE);		
 		
 		final Action showLegend = new Action("Show Legend", IAction.AS_CHECK_BOX) {
 			public void run() {
@@ -208,16 +262,15 @@ class LightWeightPlotActions {
 			}
 		};
 		showLegend.setImageDescriptor(PlottingSystemActivator.getImageDescriptor("icons/ShowLegend.png"));
-		actionBarManager.registerAction("org.csstudio.swt.xygraph.toolbar.configure", showLegend, ActionType.XY);		
+		actionBarManager.registerAction(ToolbarConfigurationConstants.CONFIG.getId(), showLegend, ActionType.XY);		
 		
 		showLegend.setChecked(xyGraph.isShowLegend());
-		
 		
 	}
 	
 	protected void createAnnotationActions(final XYRegionGraph xyGraph) {
 		
-		actionBarManager.registerMenuBarGroup("org.csstudio.swt.xygraph.toolbar.annotation");	
+		actionBarManager.registerMenuBarGroup(ToolbarConfigurationConstants.ANNOTATION.getId());	
 		
 		final Action addAnnotation = new Action("Add Annotation...", PlottingSystemActivator.getImageDescriptor("icons/Add_Annotation.png")) {
 			public void run() {
@@ -230,7 +283,7 @@ class LightWeightPlotActions {
 				
 			}
 		};
-		actionBarManager.registerAction("org.csstudio.swt.xygraph.toolbar.annotation", addAnnotation, ActionType.XYANDIMAGE, ManagerType.MENUBAR);		
+		actionBarManager.registerAction(ToolbarConfigurationConstants.ANNOTATION.getId(), addAnnotation, ActionType.XYANDIMAGE, ManagerType.MENUBAR);		
 	
 		
 		final Action delAnnotation = new Action("Remove Annotation...", PlottingSystemActivator.getImageDescriptor("icons/Del_Annotation.png")) {
@@ -244,15 +297,14 @@ class LightWeightPlotActions {
 				
 			}
 		};
-		actionBarManager.registerAction("org.csstudio.swt.xygraph.toolbar.annotation", delAnnotation, ActionType.XYANDIMAGE, ManagerType.MENUBAR);		
+		actionBarManager.registerAction(ToolbarConfigurationConstants.ANNOTATION.getId(), delAnnotation, ActionType.XYANDIMAGE, ManagerType.MENUBAR);		
 		
-		actionBarManager.registerToolBarGroup("org.csstudio.swt.xygraph.toolbar.extra");	
+		//actionBarManager.registerToolBarGroup("org.csstudio.swt.xygraph.toolbar.extra");	
 	}
 	
 	protected void createRegionActions(final XYRegionGraph xyGraph) {
 		
 		
-		actionBarManager.registerToolBarGroup("lightweight.graph.region.actions");
 		
         final MenuAction regionDropDown = new MenuAction("Selection region");
         regionDropDown.setId("org.dawb.workbench.ui.editors.plotting.swtxy.addRegions"); // Id used elsewhere...
@@ -310,7 +362,8 @@ class LightWeightPlotActions {
 		
 		removeRegionDropDown.add(removeAllRegions);
 
-		actionBarManager.registerAction("lightweight.graph.region.actions", removeRegionDropDown, ActionType.XYANDIMAGE);
+		actionBarManager.registerToolBarGroup(ToolbarConfigurationConstants.REGION.getId());
+		actionBarManager.registerAction(ToolbarConfigurationConstants.REGION.getId(), removeRegionDropDown, ActionType.XYANDIMAGE);
 		
 	}
 	
@@ -345,7 +398,7 @@ class LightWeightPlotActions {
 	
 	public void createZoomActions(final XYRegionGraph xyGraph, final int flags) {
 		
-		actionBarManager.registerToolBarGroup("org.csstudio.swt.xygraph.toolbar.zoom");		
+		actionBarManager.registerToolBarGroup(ToolbarConfigurationConstants.ZOOM.getId());		
 
         final Action autoScale = new Action("Perform Auto Scale", PlottingSystemActivator.getImageDescriptor("icons/AutoScale.png")) {
         	public void run() {
@@ -353,7 +406,7 @@ class LightWeightPlotActions {
         	}
         };
         autoScale.setId("org.csstudio.swt.xygraph.autoscale");
-        actionBarManager.registerAction("org.csstudio.swt.xygraph.toolbar.zoom", autoScale, ActionType.XYANDIMAGE);
+        actionBarManager.registerAction(ToolbarConfigurationConstants.ZOOM.getId(), autoScale, ActionType.XYANDIMAGE);
         
         final CheckableActionGroup zoomG = new CheckableActionGroup();
         Action none = null;
@@ -377,7 +430,7 @@ class LightWeightPlotActions {
 			
 			if (zoomType == ZoomType.NONE) none = zoomAction;
 			
-	        actionBarManager.registerAction("org.csstudio.swt.xygraph.toolbar.zoom", zoomAction, ActionType.XYANDIMAGE);
+	        actionBarManager.registerAction(ToolbarConfigurationConstants.ZOOM.getId(), zoomAction, ActionType.XYANDIMAGE);
 		}
 		none.setChecked(true);
 		
@@ -394,7 +447,7 @@ class LightWeightPlotActions {
 		actionBarManager.addXYAction(rescaleAction);
 		actionBarManager.addImageAction(rescaleAction);
 		
-        actionBarManager.registerAction("org.csstudio.swt.xygraph.toolbar.zoom", rescaleAction, ActionType.XYANDIMAGE);
+        actionBarManager.registerAction(ToolbarConfigurationConstants.ZOOM.getId(), rescaleAction, ActionType.XYANDIMAGE);
 	}
 
 	protected void createAspectHistoAction(final XYRegionGraph xyGraph) {
@@ -413,9 +466,9 @@ class LightWeightPlotActions {
 		histo.setChecked(PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.HISTO));
 		histo.setAccelerator(SWT.F5);
 		
-		actionBarManager.registerToolBarGroup("org.dawb.workbench.plotting.histo.group");
+		actionBarManager.registerToolBarGroup(ToolbarConfigurationConstants.HISTO.getId());
 		histo.setId("org.dawb.workbench.plotting.histo");
-		actionBarManager.registerAction("org.dawb.workbench.plotting.histo.group", histo, ActionType.IMAGE);	 
+		actionBarManager.registerAction(ToolbarConfigurationConstants.HISTO.getId(), histo, ActionType.IMAGE);	 
 		actionBarManager.addImageAction(histo);
 		
 		
@@ -495,8 +548,8 @@ class LightWeightPlotActions {
 		showStack.setChecked(PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.LOAD_IMAGE_STACKS));
 
 		
-		actionBarManager.registerToolBarGroup("org.dawb.workbench.plotting.aspect.group");
-	    actionBarManager.registerAction("org.dawb.workbench.plotting.aspect.group", aspect, ActionType.IMAGE);
+		actionBarManager.registerToolBarGroup(ToolbarConfigurationConstants.ASPECT.getId());
+	    actionBarManager.registerAction(ToolbarConfigurationConstants.ASPECT.getId(), aspect, ActionType.IMAGE);
 
 	    
 	    actionBarManager.addImageAction(aspect);
@@ -512,7 +565,7 @@ class LightWeightPlotActions {
 	
 	public void createFullScreenActions(final XYRegionGraph xyGraph) {
 		
-		actionBarManager.registerToolBarGroup("org.dawb.workbench.toolbar.fullscreen");
+		actionBarManager.registerToolBarGroup(ToolbarConfigurationConstants.FULLSCREEN.getId());
 		
 		final Action fullScreen = new Action("View plot in full screen (F11)", IAction.AS_CHECK_BOX) {
 			
@@ -595,7 +648,7 @@ class LightWeightPlotActions {
 		fullScreen.setImageDescriptor(PlottingSystemActivator.getImageDescriptor("icons/fullscreen.png"));
 		fullScreen.setId("org.dawb.workbench.fullscreen");
 		fullScreen.setAccelerator(SWT.F11);
-		actionBarManager.registerAction("org.dawb.workbench.toolbar.fullscreen", fullScreen, ActionType.XYANDIMAGE);
+		actionBarManager.registerAction(ToolbarConfigurationConstants.FULLSCREEN.getId(), fullScreen, ActionType.XYANDIMAGE);
 	}
 	
 	private void updateShellBackground(final Shell shell, final Rectangle rect, PlotType plotType) {
@@ -709,9 +762,9 @@ class LightWeightPlotActions {
 			actionBarManager.addXYSeparator();
 
 			
-			actionBarManager.registerToolBarGroup(plotIndex.getId()+".group");
-		    actionBarManager.registerAction(plotIndex.getId()+".group", plotIndex, ActionType.XY);
-		    actionBarManager.registerAction(plotIndex.getId()+".group", plotX,     ActionType.XY);
+			actionBarManager.registerToolBarGroup(ToolbarConfigurationConstants.XYPLOT.getId());
+		    actionBarManager.registerAction(ToolbarConfigurationConstants.XYPLOT.getId(), plotIndex, ActionType.XY);
+		    actionBarManager.registerAction(ToolbarConfigurationConstants.XYPLOT.getId(), plotX,     ActionType.XY);
 			
 			
 			if (rightClick!=null){
@@ -727,7 +780,8 @@ class LightWeightPlotActions {
 	}
 	
 	public void dispose() {
-		
+ 		PlottingSystemActivator.getLocalPreferenceStore().removePropertyChangeListener(propertyListener);
+		actionBarManager.removePropertyChangeListener(switchListener);
 	    plotIndex = null;
 	    plotX     = null;
 	}

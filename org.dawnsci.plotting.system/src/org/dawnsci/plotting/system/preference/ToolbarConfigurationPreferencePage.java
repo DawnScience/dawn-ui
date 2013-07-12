@@ -1,5 +1,6 @@
 package org.dawnsci.plotting.system.preference;
 
+import org.dawb.common.ui.widgets.LabelFieldEditor;
 import org.dawnsci.plotting.system.PlottingSystemActivator;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
@@ -11,12 +12,13 @@ public class ToolbarConfigurationPreferencePage extends FieldEditorPreferencePag
 	public ToolbarConfigurationPreferencePage() {
 		super(GRID);
 		setPreferenceStore(PlottingSystemActivator.getLocalPreferenceStore());
-		setDescription("Toolbar preferences");
+		setDescription("Show the following action groups:");
 	}
 
 	@Override
 	protected void createFieldEditors() {
 		
+		addField(new LabelFieldEditor("", getFieldEditorParent()));
 		for (ToolbarConfigurationConstants type : ToolbarConfigurationConstants.values()) {
 			addField(new BooleanFieldEditor(type.getId(), type.getLabel(), getFieldEditorParent()));
 		}	

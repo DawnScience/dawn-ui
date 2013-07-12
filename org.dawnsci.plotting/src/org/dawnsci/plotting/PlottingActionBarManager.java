@@ -2,6 +2,7 @@ package org.dawnsci.plotting;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -29,6 +30,8 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.layout.FillLayout;
@@ -36,7 +39,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWorkbench;
@@ -108,55 +110,104 @@ public class PlottingActionBarManager implements IPlotActionSystem {
 	public boolean switchActions(final PlotType type) {
 		
 		if (type == lastPlotTypeUpdate) return false;
-		lastPlotTypeUpdate = type;
-		
-		final IActionBars bars = system.getActionBars();
-    	if (bars==null) return false;
-    	
-    	imageMenu.setEnabled(type==PlotType.IMAGE);
-    	xyMenu.setEnabled(type.is1D());
+		try {
+			
+			final IActionBars bars = system.getActionBars();
+	    	if (bars==null) return false;
+	    	
+	    	imageMenu.setEnabled(type==PlotType.IMAGE);
+	    	xyMenu.setEnabled(type.is1D());
+	
+	    	for (ActionType actionType : ActionType.values()) {
+	    		
+	    		final List<ActionContainer> actions = actionMap.get(actionType);
+	        	if (actions!=null) for (ActionContainer ac : actions) {
+	        		if (actionType.isCompatible(type)) {
+	        			ac.insert(false);
+	        		} else {
+	        			ac.remove();
+	        		}
+	    		}
+	
+	    	}
+	      	
+	    	
+	    	// If we are 1D we must deactivate 2D tools. If we are 
+	    	// 2D we must deactivate 1D tools.
+	    	IAction action = null;
+	    	if (type.is1D()) {
+	    		clearTool(ToolPageRole.ROLE_2D);
+	    		clearTool(ToolPageRole.ROLE_3D);
+	    		action = findAction(ToolPageRole.ROLE_1D.getId());
+	    	} else if (type.is2D()) {
+	    		clearTool(ToolPageRole.ROLE_1D);
+	    		clearTool(ToolPageRole.ROLE_3D);
+	    		action = findAction(ToolPageRole.ROLE_2D.getId());
+	    	} else if (type.is3D()) {
+	    		clearTool(ToolPageRole.ROLE_1D);
+	    		clearTool(ToolPageRole.ROLE_2D);
+	    		action = findAction(ToolPageRole.ROLE_3D.getId());
+	    	}
+	    	
+	    	if (action instanceof MenuAction) {
+	    		((MenuAction)action).run();
+	    	}
+	    	
+	    	firePropertyChangeListeners(new PropertyChangeEvent(this, "PlotType", lastPlotTypeUpdate, type));
+	    	if (bars.getToolBarManager()!=null)    bars.getToolBarManager().update(true);
+	    	if (bars.getMenuManager()!=null)       bars.getMenuManager().update(true);
+	    	if (bars.getStatusLineManager()!=null) bars.getStatusLineManager().update(true);
+	    	bars.updateActionBars();
 
+	    	return true;
+		} finally {
+			lastPlotTypeUpdate = type;
+		}
+	}
+	
+
+	private Collection<IPropertyChangeListener> listeners;
+	public void addPropertyChangeListener(IPropertyChangeListener listener) {
+		if (listeners==null) listeners = new ArrayList<IPropertyChangeListener>(7);
+		listeners.add(listener);
+	}
+	public void removePropertyChangeListener(IPropertyChangeListener listener) {
+		if (listeners==null) return;
+		listeners.remove(listener);
+	}
+	protected void firePropertyChangeListeners(PropertyChangeEvent event) {
+		if (listeners==null) return;
+		for (IPropertyChangeListener l : listeners) {
+			l.propertyChange(event);
+		}
+	}
+
+	/**
+	 * Set groups of actions visible.
+	 * 
+	 * @param visMap groupId to Boolean, visible = true
+	 */
+	public void updateGroupVisibility(Map<String, Boolean> visMap) {
+			
+		final PlotType type = system.getPlotType();
+		
     	for (ActionType actionType : ActionType.values()) {
     		
     		final List<ActionContainer> actions = actionMap.get(actionType);
         	if (actions!=null) for (ActionContainer ac : actions) {
-        		if (actionType.isCompatible(type)) {
-        			ac.insert(false);
-        		} else {
-        			ac.remove();
-        		}
-    		}
-
+        		String groupId = ac.getGroupId().substring(ac.getGroupId().indexOf('/')+1);
+                if (visMap.containsKey(groupId)) {
+                	if (visMap.get(groupId) && actionType.isCompatible(type)) {
+                		ac.insert(false);
+            		} else {
+            			ac.remove();
+            		}
+                }
+        	}
     	}
-      	
-    	if (bars.getToolBarManager()!=null)    bars.getToolBarManager().update(true);
-    	if (bars.getMenuManager()!=null)       bars.getMenuManager().update(true);
-    	if (bars.getStatusLineManager()!=null) bars.getStatusLineManager().update(true);
-    	bars.updateActionBars();
-    	
-    	// If we are 1D we must deactivate 2D tools. If we are 
-    	// 2D we must deactivate 1D tools.
-    	IAction action = null;
-    	if (type.is1D()) {
-    		clearTool(ToolPageRole.ROLE_2D);
-    		clearTool(ToolPageRole.ROLE_3D);
-    		action = findAction(ToolPageRole.ROLE_1D.getId());
-    	} else if (type.is2D()) {
-    		clearTool(ToolPageRole.ROLE_1D);
-    		clearTool(ToolPageRole.ROLE_3D);
-    		action = findAction(ToolPageRole.ROLE_2D.getId());
-    	} else if (type.is3D()) {
-    		clearTool(ToolPageRole.ROLE_1D);
-    		clearTool(ToolPageRole.ROLE_2D);
-    		action = findAction(ToolPageRole.ROLE_3D.getId());
-    	}
-    	
-    	if (action instanceof MenuAction) {
-    		((MenuAction)action).run();
-    	}
-    	
-		return true;
+    	getActionBars().getToolBarManager().update(true);
 	}
+
 	
 	public IActionBars createEmptyActionBars() {
 		return new EmptyActionBars();
@@ -164,6 +215,7 @@ public class PlottingActionBarManager implements IPlotActionSystem {
 
 	public void dispose() {
 		
+		if (listeners!=null) listeners.clear();
 		if (toolPages!=null) toolPages.clear();
 		toolPages = null;
 		
@@ -187,17 +239,17 @@ public class PlottingActionBarManager implements IPlotActionSystem {
 				if (toolSet==null) return;
 
 				if (role.is1D()&&!role.is2D()) {
-					final String groupName=role.getId()+".group1D";
+					final String groupName=role.getId();
 					registerToolBarGroup(groupName);
 					registerAction(groupName, toolSet, ActionType.XY);
 				}
 				if (role.is2D()&&!role.is1D()) {
-					final String groupName=role.getId()+".group2D";
+					final String groupName=role.getId();
 					registerToolBarGroup(groupName);
 					registerAction(groupName, toolSet, ActionType.IMAGE);
 				}
 				if (role.is3D()) {
-					final String groupName=role.getId()+".group3D";
+					final String groupName=role.getId();
 					registerToolBarGroup(groupName);
 					registerAction(groupName, toolSet, ActionType.THREED);
 				}
