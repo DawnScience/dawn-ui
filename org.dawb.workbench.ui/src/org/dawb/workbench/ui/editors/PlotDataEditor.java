@@ -383,6 +383,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 				final List<ITrace> traces = plottingSystem.updatePlot1D(x, Arrays.asList(data), monitor);
 				removeOldTraces(traces);
 		        sync(sels,traces);
+		        if (plottingSystem.isRescale()) plottingSystem.repaint();
 				return;
 			}
 			
@@ -461,6 +462,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 			}
 		});
 		
+        if (plottingSystem.isRescale()) plottingSystem.repaint();
 		return traces;
 
 	}
