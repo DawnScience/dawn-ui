@@ -21,6 +21,7 @@ import org.dawnsci.plotting.api.histogram.ImageServiceBean;
 import org.dawnsci.plotting.api.histogram.ImageServiceBean.HistoType;
 import org.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
 import org.dawnsci.plotting.api.preferences.BasePlottingConstants;
+import org.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.dawnsci.plotting.api.trace.DownSampleEvent;
 import org.dawnsci.plotting.api.trace.IDownSampleListener;
 import org.dawnsci.plotting.api.trace.IImageTrace;
@@ -52,6 +53,10 @@ import uk.ac.diamond.scisoft.analysis.dataset.BooleanDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IndexIterator;
+import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.PositionIterator;
+import uk.ac.diamond.scisoft.analysis.dataset.RGBDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.function.Downsample;
 import uk.ac.diamond.scisoft.analysis.dataset.function.DownsampleMode;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
@@ -681,6 +686,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		this.service          = null;
 		this.intensityScale   = null;
 		this.image            = null;
+		this.rgbDataset       = null;
 	}
 	
 	public void dispose() {
@@ -699,6 +705,12 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	public IDataset getData() {
 		return image;
 	}
+	
+	@Override
+	public IDataset getRGBData() {
+		return rgbDataset;
+	}
+
 
 	/**
 	 * Create a slice of data from given ranges
@@ -863,9 +875,17 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		this.rescaleHistogram = rescaleHistogram;
 	}
 
+	private RGBDataset rgbDataset;
 	@Override
 	public boolean setData(IDataset image, List<? extends IDataset> axes, boolean performAuto) {
 		
+		if (getPreferenceStore().getBoolean(PlottingConstants.IGNORE_RGB) && image instanceof RGBDataset) {
+			RGBDataset rgb = (RGBDataset)image;
+			image = getSum(rgb);
+			rgbDataset = rgb;
+		} else {
+			rgbDataset = null;
+		}
 		if (plottingSystem!=null) try {
 			final TraceWillPlotEvent evt = new TraceWillPlotEvent(this, false);
 			evt.setImageData(image, axes);
@@ -912,6 +932,17 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		return true;
 	}
 	
+	private IDataset getSum(RGBDataset rgb) {
+		final PositionIterator  it  = rgb.getPositionIterator();
+		final IntegerDataset sum = new IntegerDataset(rgb.getShape());
+		int[] pos = it.getPos();
+		while(it.hasNext()) {
+			pos = it.getPos();
+			sum.set(rgb.getRed(pos)+rgb.getBlue(pos)+rgb.getGreen(pos), pos);
+		}
+		return sum;
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public void setAxes(List<? extends IDataset> axes, boolean performAuto) {

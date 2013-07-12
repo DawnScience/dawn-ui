@@ -1,5 +1,6 @@
 package org.dawnsci.plotting.system;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.csstudio.swt.xygraph.figures.XYGraphFlags;
@@ -25,6 +26,7 @@ import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.region.RegionUtils;
 import org.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
 import org.dawnsci.plotting.api.trace.IImageTrace;
+import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.api.trace.ITraceListener;
 import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
@@ -58,6 +60,8 @@ import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IReusableEditor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 /**
  * Delegating class for light-weight actions.
  * 
@@ -459,6 +463,22 @@ class LightWeightPlotActions {
 		};
 		lockHisto.setChecked(false);
 		
+		final Action ignoreRGB = new Action("Ignore RBG information", IAction.AS_CHECK_BOX) {
+			
+		    public void run() {		    	
+		    	PlottingSystemActivator.getPlottingPreferenceStore().setValue(PlottingConstants.IGNORE_RGB, isChecked());
+		    	Collection<ITrace> traces = viewer.getSystem().getTraces(IImageTrace.class);
+		    	if (traces==null || traces.isEmpty()) return;
+		    	IImageTrace image = (IImageTrace)traces.iterator().next();
+		    	IDataset data = image.getRGBData();
+		    	if (data == null) data = image.getData();
+		    	image.setData(data, image.getAxes(), false);
+		    	viewer.getSystem().repaint(false);
+		    }
+		};
+		ignoreRGB.setToolTipText("Ignores RGB information in the data file if it has been provided.");
+		ignoreRGB.setChecked(PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.IGNORE_RGB));
+
 		final Action showStack = new Action("Show other images in the same directory", IAction.AS_CHECK_BOX) {
 			
 		    public void run() {		    	
@@ -484,6 +504,7 @@ class LightWeightPlotActions {
 	    actionBarManager.addImageAction(hideAxes);
 	    actionBarManager.addImageAction(hideIntensity);
 	    actionBarManager.addImageAction(showStack);
+	    actionBarManager.addImageAction(ignoreRGB);
 	    actionBarManager.addImageAction(lockHisto);
 	    actionBarManager.addImageSeparator();
 

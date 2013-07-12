@@ -34,6 +34,7 @@ public class PlottingPreferenceInitializer extends AbstractPreferenceInitializer
 		store.setDefault(PlottingConstants.ASPECT,          true);
 		store.setDefault(PlottingConstants.SHOW_AXES,       true);
 		store.setDefault(PlottingConstants.SHOW_INTENSITY,  true);
+		store.setDefault(PlottingConstants.IGNORE_RGB,      false);
 		store.setDefault(PlottingConstants.HISTO ,          false);
 		store.setDefault(PlottingConstants.DOWNSAMPLE_PREF, DownsampleType.MEAN.getLabel());
 		store.setDefault(PlottingConstants.HISTO_PREF ,     HistoType.MEAN.getLabel());

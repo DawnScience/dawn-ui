@@ -74,6 +74,14 @@ public interface IImageTrace extends IPaletteTrace, IDownsampledTrace{
 			return null;
 		}
 	}
+	
+	/**
+	 * If the original data was RGB data, the trace may sum this and ignore
+	 * the RGB values. In this case the original RGB data as read from disk
+	 * is available by calling this method.
+	 * @return
+	 */
+	public IDataset getRGBData();
 
 	/**
 	 * Default is TOP_LEFT unlike normal plotting
