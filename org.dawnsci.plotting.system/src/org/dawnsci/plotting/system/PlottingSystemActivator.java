@@ -6,6 +6,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
+import org.osgi.framework.BundleContext;
 
 public class PlottingSystemActivator extends AbstractUIPlugin {
 	
@@ -22,5 +23,15 @@ public class PlottingSystemActivator extends AbstractUIPlugin {
 	public static IPreferenceStore getPlottingPreferenceStore() {
 		if (plottingPreferenceStore==null) plottingPreferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
 	    return plottingPreferenceStore;
+	}
+	
+	private static PlottingSystemActivator activator;
+	
+	public void start(BundleContext context) throws Exception {
+		super.start(context);
+		activator = this;
+	}
+	public static IPreferenceStore getLocalPreferenceStore() {
+		return activator.getPreferenceStore();
 	}
 }

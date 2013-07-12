@@ -10,4 +10,19 @@
             visible_type="Lightweight">
       </plottingSystem>
    </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="org.dawnsci.plotting.system.preference.ToolbarConfigurationInitializer">
+      </initializer>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            category="org.dawnsci.preferences.root"
+            class="org.dawnsci.plotting.system.preference.ToolbarConfigurationPreferencePage"
+            id="org.dawnsci.plotting.system.toolbarPreferencePage"
+            name="Plot Toolbar">
+      </page>
+   </extension>
 </plugin>
