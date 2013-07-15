@@ -404,22 +404,22 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 				public void menuAboutToShow(IMenuManager manager) {
 					IFigure fig = getFigureAtCurrentMousePosition(IRegionContainer.class);
 					if (fig!=null) {
-					    if (fig instanceof IRegionContainer) {
-							final IRegion region = ((IRegionContainer)fig).getRegion();
-							SelectionRegionFactory.fillActions(manager, region, xyGraph, getSystem());
-							
-							final Action configure = new Action("Configure '"+region.getName()+"'", PlottingSystemActivator.getImageDescriptor("icons/RegionProperties.png")) {
-								public void run() {
-									final XYRegionConfigDialog dialog = new XYRegionConfigDialog(Display.getCurrent().getActiveShell(), xyGraph, system.isRescale());
-									dialog.setSelectedRegion(region);
-									dialog.open();
-								}
-							};
-							manager.add(configure);
-							
-							manager.add(new Separator("org.dawb.workbench.plotting.system.region.end"));
+						final IRegion region = ((IRegionContainer)fig).getRegion();
+						SelectionRegionFactory.fillActions(manager, region, xyGraph, getSystem());
 
-					    }
+						final Action configure = new Action("Configure '"+region.getName()+"'", PlottingSystemActivator.getImageDescriptor("icons/RegionProperties.png")) {
+							public void run() {
+								final XYRegionConfigDialog dialog = new XYRegionConfigDialog(Display.getCurrent().getActiveShell(), xyGraph, system.isRescale());
+								dialog.setSelectedRegion(region);
+								dialog.open();
+							}
+						};
+						manager.add(configure);
+
+						manager.add(new Separator("org.dawb.workbench.plotting.system.region.end"));
+
+					} else {
+						fig = getFigureAtCurrentMousePosition(null);
 					    if (fig instanceof ITraceContainer) {
 							final ITrace trace = ((ITraceContainer)fig).getTrace();
 							fillTraceActions(manager, trace, system);
