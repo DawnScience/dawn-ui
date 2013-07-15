@@ -276,10 +276,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				if (model.size() > 0) {
 					if (model.remove(selectedData)) {
 						selectedData.augmenter.deactivate();
-						selectedData.md.getDetector2DProperties().removeDetectorPropertyListener(
-								detectorPropertyListener);
-						selectedData.md.getDiffractionCrystalEnvironment().removeDiffractionCrystalEnvironmentListener(
-								diffractionCrystEnvListener);
+						selectedData.md.getDetector2DProperties().removeDetectorPropertyListener(detectorPropertyListener);
+						selectedData.md.getDiffractionCrystalEnvironment().removeDiffractionCrystalEnvironmentListener(diffractionCrystEnvListener);
 						tableViewer.refresh();
 					}
 				}
@@ -734,6 +732,9 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		aug.activate();
 		if (data.md != null) {
 			aug.setDiffractionMetadata(data.md);
+			// Add listeners to monitor metadata changes in diffraction tool
+			data.md.getDetector2DProperties().addDetectorPropertyListener(detectorPropertyListener);
+			data.md.getDiffractionCrystalEnvironment().addDiffractionCrystalEnvironmentListener(diffractionCrystEnvListener);
 		}
 	
 		DiffractionCalibrationUtils.hideFoundRings(plottingSystem);
