@@ -184,7 +184,7 @@ public class GridSelection extends BoxSelection {
 			    groi.setMidPointOn(oldRoi.isMidPointOn());
 			    
 			}
-			
+			groi.setName(getName());
 			if (recordResult) roi = groi;
 			return groi;
 		}
