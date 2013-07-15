@@ -450,7 +450,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		sizeComp.setToolTipText("Change size");
 
 		Button plusButton = new Button(sizeComp, SWT.PUSH);
-		plusButton.setText("+");
+		plusButton.setImage(Activator.getImage("icons/arrow_out.png"));
 		plusButton.setToolTipText("Make rings larger");
 		plusButton.addMouseListener(new RepeatingMouseAdapter(display, new SlowFastRunnable() {
 			@Override
@@ -464,7 +464,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		}));
 		plusButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		Button minusButton = new Button(sizeComp, SWT.PUSH);
-		minusButton.setText("-");
+		minusButton.setImage(Activator.getImage("icons/arrow_in.png"));
 		minusButton.setToolTipText("Make rings smaller");
 		minusButton.addMouseListener(new RepeatingMouseAdapter(display, new SlowFastRunnable() {
 			@Override
