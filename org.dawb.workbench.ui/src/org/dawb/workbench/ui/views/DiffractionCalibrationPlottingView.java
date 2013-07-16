@@ -909,6 +909,16 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 					return null;
 				return String.format("%.2f", dp.getDetectorDistance());
 			} else if (columnIndex == 4) {
+				DetectorProperties dp = md.getDetector2DProperties();
+				if (dp == null)
+					return null;
+				return String.format("%.0f", dp.getBeamCentreCoords()[0]);
+			} else if (columnIndex == 5) {
+				DetectorProperties dp = md.getDetector2DProperties();
+				if (dp == null)
+					return null;
+				return String.format("%.0f", dp.getBeamCentreCoords()[1]);
+			} else if (columnIndex == 6) {
 				DiffractionCrystalEnvironment ce = md.getDiffractionCrystalEnvironment();
 				if (ce == null)
 					return null;
@@ -975,7 +985,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		tvc = new TableViewerColumn(tv, SWT.NONE);
 		tc = tvc.getColumn();
 		tc.setText("# of rings");
-		tc.setWidth(70);
+		tc.setWidth(75);
 		tvc.setEditingSupport(new MyEditingSupport(tv, 2));
 		
 		tvc = new TableViewerColumn(tv, SWT.NONE);
@@ -987,10 +997,24 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		
 		tvc = new TableViewerColumn(tv, SWT.NONE);
 		tc = tvc.getColumn();
+		tc.setText("X Position");
+		tc.setToolTipText("in Pixel");
+		tc.setWidth(80);
+		tvc.setEditingSupport(new MyEditingSupport(tv, 4));
+		
+		tvc = new TableViewerColumn(tv, SWT.NONE);
+		tc = tvc.getColumn();
+		tc.setText("Y Position");
+		tc.setToolTipText("in Pixel");
+		tc.setWidth(80);
+		tvc.setEditingSupport(new MyEditingSupport(tv, 5));
+		
+		tvc = new TableViewerColumn(tv, SWT.NONE);
+		tc = tvc.getColumn();
 		tc.setText("Wavelength");
 		tc.setToolTipText("in Angstrom");
 		tc.setWidth(70);
-		tvc.setEditingSupport(new MyEditingSupport(tv, 4));
+		tvc.setEditingSupport(new MyEditingSupport(tv, 6));
 	}
 
 	private void refreshTable() {
