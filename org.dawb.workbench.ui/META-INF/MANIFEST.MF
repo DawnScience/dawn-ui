@@ -28,6 +28,7 @@ Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: org.apache.commons.beanutils,
  org.dawb.common.services,
+ org.dawnsci.common.widgets.spinner,
  org.dawnsci.plotting.tools.reduction,
  org.eclipse.core.filesystem,
  org.eclipse.draw2d,

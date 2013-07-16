@@ -24,6 +24,7 @@ import org.dawb.common.services.ILoaderService;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawb.workbench.ui.Activator;
 import org.dawb.workbench.ui.views.DiffractionCalibrationUtils.ManipulateMode;
+import org.dawnsci.common.widgets.spinner.FloatSpinner;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.PlottingFactory;
@@ -34,6 +35,9 @@ import org.dawnsci.plotting.tools.diffraction.DiffractionTool;
 import org.dawnsci.plotting.util.PlottingUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
@@ -128,7 +132,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 	private Composite scrollHolder;
 	private TableViewer tableViewer;
 	private Button calibrateImages;
-	private Button calibrateWD;
+//	private Button calibrateWD;
 	private Combo calibrant;
 	private Action deleteAction;
 
@@ -140,6 +144,12 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 	private IDetectorPropertyListener detectorPropertyListener;
 
 	private List<String> pathsList = new ArrayList<String>();
+
+	private Button wavelengthButton;
+
+	private double wavelength;
+
+	private FloatSpinner wavelengthSpinner;
 
 	public DiffractionCalibrationPlottingView() {
 		service = (ILoaderService) PlatformUI.getWorkbench().getService(ILoaderService.class);
@@ -232,8 +242,10 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 					IResource[] res = (IResource[]) dropData;
 					for (int i = 0; i < res.length; i++) {
 						DiffractionTableData d = createData(res[i].getRawLocation().toOSString(), null);
-						if (d != null)
+						if (d != null){
 							good = d;
+							setWavelength(d);
+						}
 					}
 				} else if (dropData instanceof TreeSelection) {
 					TreeSelection selectedNode = (TreeSelection) dropData;
@@ -249,17 +261,22 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 							IFile file = (IFile) obj[i];
 							d = createData(file.getLocation().toOSString(), null);
 						}
-						if (d != null)
+						if (d != null){
 							good = d;
+							setWavelength(d);
+						}
 					}
 				} else if (dropData instanceof String[]) {
 					String[] selectedData = (String[]) dropData;
 					for (int i = 0; i < selectedData.length; i++) {
 						DiffractionTableData d = createData(selectedData[i], null);
-						if (d != null)
+						if (d != null){
 							good = d;
+							setWavelength(d);
+						}
 					}
 				}
+				
 				tableViewer.refresh();
 				if (currentData == null && good != null) {
 					tableViewer.getTable().deselectAll();
@@ -276,10 +293,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				if (model.size() > 0) {
 					if (model.remove(selectedData)) {
 						selectedData.augmenter.deactivate();
-						selectedData.md.getDetector2DProperties().removeDetectorPropertyListener(
-								detectorPropertyListener);
-						selectedData.md.getDiffractionCrystalEnvironment().removeDiffractionCrystalEnvironmentListener(
-								diffractionCrystEnvListener);
+						selectedData.md.getDetector2DProperties().removeDetectorPropertyListener(detectorPropertyListener);
+						selectedData.md.getDiffractionCrystalEnvironment().removeDiffractionCrystalEnvironmentListener(diffractionCrystEnvListener);
 						tableViewer.refresh();
 					}
 				}
@@ -550,6 +565,31 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		calibrateComp.setLayout(new GridLayout(1, false));
 		calibrateComp.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
 
+		wavelengthButton = new Button(calibrateComp, SWT.CHECK);
+		wavelengthButton.setText("Calibrate wavelength");
+		wavelengthButton.setToolTipText("Select to calibrate the wavelength at the end of the calibration process");
+		wavelengthButton.setEnabled(false);
+		Composite wavelengthComp = new Composite(calibrateComp, SWT.NONE);
+		wavelengthComp.setLayout(new GridLayout(2, false));
+		wavelengthComp.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+		Label wavelengthLabel = new Label(wavelengthComp, SWT.NONE);
+		wavelengthLabel.setText("Wavelength:");
+		wavelengthSpinner = new FloatSpinner(wavelengthComp, SWT.BORDER);
+		wavelengthSpinner.setMinimum(Double.MIN_VALUE);
+		wavelengthSpinner.setMaximum(Double.MAX_VALUE);
+		wavelengthSpinner.setDouble(0);
+		wavelengthSpinner.setFormat(7, 5);
+		wavelengthSpinner.setIncrement(0.00001);
+		wavelengthSpinner.setToolTipText("Set the wavelength, in Angstrom");
+		wavelengthSpinner.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				for(int i = 0; i < model.size(); i++){
+					model.get(i).md.getDiffractionCrystalEnvironment().setWavelength(wavelengthSpinner.getDouble());
+				}
+			}
+		});
+
 		Button findRingButton = new Button(calibrateComp, SWT.PUSH);
 		findRingButton.setText("Find rings in image");
 		findRingButton.setToolTipText("Use pixel values to find rings in image near calibration rings");
@@ -579,41 +619,66 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		});
 
 		calibrateImages = new Button(calibrateComp, SWT.PUSH);
-		calibrateImages.setText("Calibrate chosen images");
+		calibrateImages.setText("Run Calibration Process");
 		calibrateImages.setToolTipText("Calibrate detector in chosen images");
 		calibrateImages.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
 		calibrateImages.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				DiffractionCalibrationUtils.calibrateImages(display, plottingSystem, model, currentData);
-				display.asyncExec(new Runnable() {
+				Job calibrateJob = new Job("Calibrating") {
+					
 					@Override
-					public void run() {
-						refreshTable();
-						setCalibrateButtons();
+					protected IStatus run(IProgressMonitor monitor) {
+						DiffractionCalibrationUtils.calibrateImages(display, plottingSystem, model, currentData);
+						display.asyncExec(new Runnable() {
+							@Override
+							public void run() {
+								refreshTable();
+								setCalibrateButtons();
+							}
+						});
+						return Status.OK_STATUS;
+					}
+				};
+				calibrateJob.addJobChangeListener(new JobChangeAdapter(){
+					@Override
+					public void done(IJobChangeEvent event) {
+						// if the wavelength is selected
+						Display.getDefault().asyncExec(new Runnable() {
+							public void run() {
+								if(wavelengthButton.getSelection()) {
+									for(int i = 0; i < model.size(); i++){
+										if(model.get(i).use)
+											DiffractionCalibrationUtils.calibrateWavelength(display, model, model.get(i));
+									}
+								}
+								refreshTable();
+							}
+						});
 					}
 				});
+				calibrateJob.schedule();
 			}
 		});
 		calibrateImages.setEnabled(false);
 
-		calibrateWD = new Button(calibrateComp, SWT.PUSH);
-		calibrateWD.setText("Calibrate wavelength");
-		calibrateWD.setToolTipText("Calibrate wavelength from images chosen in table");
-		calibrateWD.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
-		calibrateWD.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				DiffractionCalibrationUtils.calibrateWavelength(display, model, currentData);
-				display.asyncExec(new Runnable() {
-					@Override
-					public void run() {
-						refreshTable();
-					}
-				});
-			}
-		});
-		calibrateWD.setEnabled(false);
+//		calibrateWD = new Button(calibrateComp, SWT.PUSH);
+//		calibrateWD.setText("Calibrate wavelength");
+//		calibrateWD.setToolTipText("Calibrate wavelength from images chosen in table");
+//		calibrateWD.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
+//		calibrateWD.addSelectionListener(new SelectionAdapter() {
+//			@Override
+//			public void widgetSelected(SelectionEvent e) {
+//				DiffractionCalibrationUtils.calibrateWavelength(display, model, currentData);
+//				display.asyncExec(new Runnable() {
+//					@Override
+//					public void run() {
+//						refreshTable();
+//					}
+//				});
+//			}
+//		});
+//		calibrateWD.setEnabled(false);
 
 		scrollHolder.layout();
 		scrollComposite.setContent(scrollHolder);
@@ -642,8 +707,10 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		for (String p : pathsList) {
 			if (!p.endsWith(".nxs")) {
 				DiffractionTableData d = createData(p, null);
-				if (good == null && d != null)
+				if (good == null && d != null) {
 					good = d;
+					setWavelength(d);
+				}
 			}
 			
 		}
@@ -671,6 +738,16 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		}
 
 		//mainSash.setWeights(new int[] { 1, 2});
+	}
+
+	private void setWavelength(DiffractionTableData data){
+		// set the wavelength
+		if(wavelengthSpinner.getDouble() == 0){
+			if(data != null){
+				wavelength = data.md.getOriginalDiffractionCrystalEnvironment().getWavelength();
+				wavelengthSpinner.setDouble(wavelength);
+			}
+		}
 	}
 
 	private DiffractionTableData createData(String filePath, String dataFullName) {
@@ -734,6 +811,9 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		aug.activate();
 		if (data.md != null) {
 			aug.setDiffractionMetadata(data.md);
+			// Add listeners to monitor metadata changes in diffraction tool
+			data.md.getDetector2DProperties().addDetectorPropertyListener(detectorPropertyListener);
+			data.md.getDiffractionCrystalEnvironment().addDiffractionCrystalEnvironmentListener(diffractionCrystEnvListener);
 		}
 	
 		DiffractionCalibrationUtils.hideFoundRings(plottingSystem);
@@ -932,7 +1012,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			}
 		}
 		calibrateImages.setEnabled(used > 0);
-		calibrateWD.setEnabled(used > 2);
+//		calibrateWD.setEnabled(used > 2);
+		wavelengthButton.setEnabled(used > 0);
 	}
 
 	private void removeListeners() {

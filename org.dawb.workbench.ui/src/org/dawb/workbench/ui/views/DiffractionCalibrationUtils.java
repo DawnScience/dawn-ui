@@ -99,7 +99,7 @@ public class DiffractionCalibrationUtils {
 						continue;
 					}
 					try {
-						data.q = PowderRingsUtils.fitAllEllipsesToQSpace(mon, dp, ce, data.rois, spacings, true);
+						data.q = PowderRingsUtils.fitAllEllipsesToQSpace(mon, dp, ce, data.rois, spacings, false);
 
 						logger.debug("Q-space = {}", data.q);
 						data.od = dp.getDetectorDistance(); // store old values
@@ -396,7 +396,7 @@ public class DiffractionCalibrationUtils {
 						if (delta > 50)
 							delta = 50;
 						last = major;
-						roi = DiffractionTool.runEllipseFit(monitor, display, plottingSystem, image, e, e.isCircular(), delta);
+						roi = DiffractionTool.runEllipseFit(monitor, display, plottingSystem, image, e, false, delta);
 						if (roi == null) {
 							return Status.CANCEL_STATUS;
 						}
@@ -410,7 +410,7 @@ public class DiffractionCalibrationUtils {
 						}
 						n++;
 
-						stat = drawFoundRing(monitor, display, plottingSystem, roi, e.isCircular());
+						stat = drawFoundRing(monitor, display, plottingSystem, roi, false);
 						if (!stat.isOK())
 							break;
 					} catch (IllegalArgumentException ex) {
