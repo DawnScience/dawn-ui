@@ -1,0 +1,3 @@
+instructions.configure=\
+  org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:http${#58}//opengda.org/DawnDiamond/master/updates/snapshot/,type:0,name:Dawn Diamond Snapshot,enabled:true); \
+  org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:http${#58}//opengda.org/DawnDiamond/master/updates/snapshot/,type:1,name:Dawn Diamond Snapshot,enabled:true);
