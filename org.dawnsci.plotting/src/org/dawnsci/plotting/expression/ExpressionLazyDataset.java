@@ -22,7 +22,7 @@ class ExpressionLazyDataset extends LazyDataset {
 		} catch (IllegalArgumentException e) {
 			size = Integer.MAX_VALUE; // this indicates that the entire dataset cannot be read in! 
 		}
-		
+		if (lazyErrorDeligate!=null) lazyErrorDeligate.setShape(shape);
 	}
 
 }

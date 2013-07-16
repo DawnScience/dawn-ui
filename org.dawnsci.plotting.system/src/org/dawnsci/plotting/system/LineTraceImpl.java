@@ -7,6 +7,7 @@ import org.dawnsci.plotting.api.trace.ITraceContainer;
 import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.dawnsci.plotting.draw2d.swtxy.LineTrace;
+import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.swt.graphics.Color;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
@@ -31,11 +32,10 @@ public class LineTraceImpl implements ILineTrace {
 		if (trace instanceof ITraceContainer) {
 			((ITraceContainer)trace).setTrace(this);
 		}
-		if (trace.getDataProvider() instanceof LightWeightDataProvider) {
-			LightWeightDataProvider prov = (LightWeightDataProvider)trace.getDataProvider();
-			if (prov.hasErrors()) {
-				trace.setErrorBarEnabled(true);
-			}
+		IDataProvider prov = trace.getDataProvider();
+		if (prov!=null && prov.hasErrors()) {
+			trace.setErrorBarEnabled(true);
+			trace.setErrorBarColor(ColorConstants.red);
 		}
 	}
 	
@@ -298,17 +298,17 @@ public class LineTraceImpl implements ILineTrace {
 	
 	
 	@Override
-	public AbstractDataset getData() {
+	public IDataset getData() {
 		return getYData();
 	}
 
 	@Override
-	public AbstractDataset getYData() {
+	public IDataset getYData() {
 		return sys.getData(getName(), trace, true);
 	}
 	
 	@Override
-	public AbstractDataset getXData() {
+	public IDataset getXData() {
 		return sys.getData(getName(), trace, false);
 	}
 

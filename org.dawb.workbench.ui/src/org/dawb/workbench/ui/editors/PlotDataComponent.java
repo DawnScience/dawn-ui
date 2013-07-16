@@ -55,6 +55,7 @@ import org.dawnsci.plotting.api.tool.IToolChangeListener;
 import org.dawnsci.plotting.api.tool.IToolPage;
 import org.dawnsci.plotting.api.tool.ToolChangeEvent;
 import org.dawnsci.plotting.api.trace.ILineTrace;
+import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.api.trace.ITraceListener;
 import org.dawnsci.plotting.api.trace.ITraceListener.Stub;
 import org.dawnsci.plotting.api.trace.TraceEvent;
@@ -523,53 +524,48 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 				
 				/**
 				 * What follows is adding some actions for setting errors on other plotted data sets.
-				 * The logic is a bit convoluted and the feature is only available for 1D at the moment.
+				 * The logic is a bit convoluted at the moment.
 				 */
-				if (getPlotMode()==null || getPlotMode().is1D()) {
-					final Object sel           = ((StructuredSelection)dataViewer.getSelection()).getFirstElement();
-					final ICheckableObject ob  = (ICheckableObject)sel;
-					final IDataset      currentSelecedData  = getVariableValue(ob.getVariable(), null);
-	
-					if (currentSelecedData!=null && currentSelecedData.getRank()==1) {
-						if (selections!=null && selections.size() > 0) {
-							menuManager.add(new Action("Set '"+ob.getName()+"' as error on other plotted data...") {
-								@Override
-								public void run() {
-			                        final PlotDataChooseDialog dialog = new PlotDataChooseDialog(Display.getDefault().getActiveShell());
-			                        dialog.init(selections, ob);
-			                        final ICheckableObject plotD = dialog.choose();
-			                        if (plotD!=null) {
-			                        	final IErrorDataset set = (IErrorDataset)getVariableValue(plotD.getVariable(), null);
-			                        	set.setError(currentSelecedData);
-			                        	
-			                        	final ILineTrace lineTrace = (ILineTrace)getPlottingSystem().getTrace(plotD.getName());
-			                        	if (lineTrace!=null) {
-				                        	lineTrace.setErrorBarEnabled(true);
-			                        		lineTrace.setData(lineTrace.getXData(), set);
-			                        	}
-			                        	
-			                        	getPlottingSystem().repaint();
-			                        }
+				final Object sel           = ((StructuredSelection)dataViewer.getSelection()).getFirstElement();
+				final ICheckableObject ob  = (ICheckableObject)sel;
+				final ILazyDataset currentSelecedData  = getLazyValue(ob.getVariable(), null);
+
+				if (currentSelecedData!=null) {
+					if (selections!=null && selections.size() > 0) {
+						menuManager.add(new Action("Set '"+ob.getName()+"' as error on other plotted data...") {
+							@Override
+							public void run() {
+								final PlotDataChooseDialog dialog = new PlotDataChooseDialog(Display.getDefault().getActiveShell());
+								dialog.init(selections, ob);
+								final ICheckableObject plotD = dialog.choose();
+								if (plotD!=null) {
+									ILazyDataset set = (ILazyDataset)getLazyValue(plotD.getVariable(), null);
+										
+									if (set instanceof IErrorDataset) { // Data was all read in already.
+										IErrorDataset errSet = (IErrorDataset)set;
+										// Read plotted data into memory, so can read error data too.
+										errSet.setError(getVariableValue(ob.getVariable(), null));
+										
+									} else { // Set errors lazily
+										set.setLazyErrors(currentSelecedData);
+									}
+									fireSelectionListeners(selections);
+
 								}
-							});
-						}
-						
-	                	final ILineTrace lineTrace = (ILineTrace)getPlottingSystem().getTrace(ob.getName());
-						if (currentSelecedData!=null && currentSelecedData instanceof IErrorDataset && lineTrace!=null && ((IErrorDataset)lineTrace.getYData()).hasErrors()) {
-							menuManager.add(new Action("Clear error on '"+currentSelecedData.getName()+"'") {
-								@Override
-								public void run() {
-									((IErrorDataset)currentSelecedData).clearError();
-									
-				                	final ILineTrace lineTrace = (ILineTrace)getPlottingSystem().getTrace(ob.getName());
-				                	((IErrorDataset)lineTrace.getYData()).clearError();
-				                	((IErrorDataset)lineTrace.getXData()).clearError();
-		                        	if (lineTrace!=null) lineTrace.setData(lineTrace.getXData(), lineTrace.getYData());
-		                        	lineTrace.setErrorBarEnabled(false);
-		                        	getPlottingSystem().repaint();
-								}
-							});
-						}
+							}
+						});
+					}
+
+					final boolean isDatasetError = currentSelecedData instanceof IErrorDataset && ((IErrorDataset)currentSelecedData).hasErrors();
+					final boolean isLazyError    = currentSelecedData.getLazyErrors()!=null;
+					if (isDatasetError || isLazyError) {
+						menuManager.add(new Action("Clear error on '"+currentSelecedData.getName()+"'") {
+							@Override
+							public void run() {
+								currentSelecedData.setLazyErrors(null);
+								fireSelectionListeners(selections);
+							}
+						});
 					}
 				}
 

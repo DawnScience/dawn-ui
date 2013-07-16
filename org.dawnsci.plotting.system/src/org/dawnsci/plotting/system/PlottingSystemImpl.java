@@ -198,9 +198,10 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 				final ILineTrace lineTrace = (ILineTrace)trace;
 				updatedAndCreated.add(lineTrace);
 				
-				if (((IErrorDataset)lineTrace.getYData()).hasErrors() && !((IErrorDataset)y).hasErrors()) {
-					final IDataset error = ((IErrorDataset)lineTrace.getYData()).getError();
-					((IErrorDataset)y).setError(error);
+				if (!((IErrorDataset)y).hasErrors()) {
+					lineTrace.setErrorBarEnabled(false);
+				} else if (((IErrorDataset)y).hasErrors()){
+					lineTrace.setErrorBarEnabled(true);
 				}
 				
 				if (getDisplay().getThread()==Thread.currentThread()) {

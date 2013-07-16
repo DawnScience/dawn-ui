@@ -5,6 +5,8 @@ import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.Trace;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.api.trace.ITraceContainer;
+import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.swt.graphics.Color;
 
 /**
  * Trace with drawPolyline(...) for faster rendering.
@@ -22,6 +24,13 @@ public class LineTrace extends Trace implements ITraceContainer {
 	
 	public void init(Axis xAxis, Axis yAxis, IDataProvider dataProvider) {
 		super.init(xAxis, yAxis, dataProvider);
+		
+		if (dataProvider != null) {
+			if (dataProvider.hasErrors()) {
+				setErrorBarEnabled(true);
+				setErrorBarColor(ColorConstants.red);
+			}
+		}
 	}
 	
 
