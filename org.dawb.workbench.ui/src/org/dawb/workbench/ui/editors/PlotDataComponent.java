@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.EventListener;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
@@ -55,6 +54,7 @@ import org.dawnsci.plotting.api.axis.IAxis;
 import org.dawnsci.plotting.api.tool.IToolChangeListener;
 import org.dawnsci.plotting.api.tool.IToolPage;
 import org.dawnsci.plotting.api.tool.ToolChangeEvent;
+import org.dawnsci.plotting.api.trace.ILineTrace;
 import org.dawnsci.plotting.api.trace.ITraceListener;
 import org.dawnsci.plotting.api.trace.ITraceListener.Stub;
 import org.dawnsci.plotting.api.trace.TraceEvent;
@@ -73,7 +73,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.action.IContributionManager;
+import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
@@ -102,6 +102,7 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
@@ -137,6 +138,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IErrorDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
 import uk.ac.diamond.scisoft.analysis.io.DataHolder;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
@@ -443,67 +446,153 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	}
 	
 	private void createRightClickMenu() {	
+		
+		
 	    final MenuManager menuManager = new MenuManager();
+	    menuManager.setRemoveAllWhenShown(true);
 	    dataViewer.getControl().setMenu (menuManager.createContextMenu(dataViewer.getControl()));
-		createDimensionalActions(menuManager, false);
-		menuManager.add(new Separator(getClass().getName()+"sep1"));
-		menuManager.add(new Action("Clear") {
+	    
+		final List<Object> rightClickActions = new ArrayList<Object>(11);
+	    createDimensionalActions(rightClickActions, false);
+
+	    PlotDataComponent.this.dataReduction = new Action("Data reduction...", Activator.getImageDescriptor("icons/data-reduction.png")) {
 			@Override
 			public void run() {
-				for (ICheckableObject co : data) {
-					co.setChecked(false);
+				DataReductionWizard wiz=null;
+				try {
+					wiz = (DataReductionWizard)EclipseUtils.openWizard(DataReductionWizard.ID, false);
+				} catch (Exception e) {
+					logger.error("Cannot open wizard "+DataReductionWizard.ID, e);
 				}
-				selections.clear();
-				dataViewer.refresh();
-				fireSelectionListeners(Collections.<ICheckableObject> emptyList());
+				wiz.setData(getIFile(true),
+						    getSelectionNames().get(0),
+						    (IDataReductionToolPage)getAbstractPlottingSystem().getActiveTool());
+				wiz.setSlice(getSliceSet(), getSliceData());
+				
+				// TODO Should be non modal, it takes a while.
+				WizardDialog wd = new  WizardDialog(Display.getCurrent().getActiveShell(), wiz);
+				wd.setTitle(wiz.getWindowTitle());
+				wd.create();
+				wd.getShell().setSize(650, 800);
+				DialogUtils.centerDialog(Display.getCurrent().getActiveShell(), wd.getShell());
+				wd.open();
 			}
-		});
+		};
+
 		
-		if (H5Loader.isH5(getFileName())) {
-			menuManager.add(new Separator(getClass().getName()+"sep2"));
-			
-			this.dataReduction = new Action("Data reduction...", Activator.getImageDescriptor("icons/data-reduction.png")) {
-				@Override
-				public void run() {
-					DataReductionWizard wiz=null;
-					try {
-						wiz = (DataReductionWizard)EclipseUtils.openWizard(DataReductionWizard.ID, false);
-					} catch (Exception e) {
-						logger.error("Cannot open wizard "+DataReductionWizard.ID, e);
-					}
-					wiz.setData(getIFile(true),
-							    getSelectionNames().get(0),
-							    (IDataReductionToolPage)getAbstractPlottingSystem().getActiveTool());
-					wiz.setSlice(getSliceSet(), getSliceData());
-					
-					// TODO Should be non modal, it takes a while.
-					WizardDialog wd = new  WizardDialog(Display.getCurrent().getActiveShell(), wiz);
-					wd.setTitle(wiz.getWindowTitle());
-					wd.create();
-					wd.getShell().setSize(650, 800);
-					DialogUtils.centerDialog(Display.getCurrent().getActiveShell(), wd.getShell());
-					wd.open();
-				}
-			};
-			dataReduction.setEnabled(false);
-			menuManager.add(dataReduction);
-		}
-		
-		menuManager.add(new Separator(getClass().getName()+"sep3"));
-		menuManager.add(new Action("Preferences...") {
-			@Override
-			public void run() {
-				PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "org.edna.workbench.editors.preferencePage", null, null);
-				if (pref != null) pref.open();
-			}
-		});
-		
-		menuManager.addMenuListener(new IMenuListener() {			
+		menuManager.addMenuListener(new IMenuListener() {
 			@Override
 			public void menuAboutToShow(IMenuManager manager) {
-				if (dataReduction!=null) dataReduction.setEnabled(isDataReductionToolActive());
+				
+				if (staggerSupported) {
+			        updatePlotDimenionsSelected((IAction)rightClickActions.get(1), 
+			        		                    (IAction)rightClickActions.get(2), 
+			        		                    (IAction)rightClickActions.get(3), 
+			        		                    getPlotMode());
+				}
+
+		        for (Object action : rightClickActions) {
+		        	if (action instanceof IAction) {
+					    menuManager.add((IAction)action);		
+		        	} else if (action instanceof IContributionItem) {
+				        menuManager.add((IContributionItem)action);
+		        	}
+				}
+			    
+				menuManager.add(new Separator(getClass().getName()+"sep1"));
+				menuManager.add(new Action("Clear") {
+					@Override
+					public void run() {
+						for (ICheckableObject co : data) {
+							co.setChecked(false);
+						}
+						selections.clear();
+						dataViewer.refresh();
+						fireSelectionListeners(Collections.<ICheckableObject> emptyList());
+					}
+				});
+				
+				if (H5Loader.isH5(getFileName())) {
+					menuManager.add(new Separator(getClass().getName()+"sep2"));
+					
+					dataReduction.setEnabled(false);
+					menuManager.add(dataReduction);
+				}
+				
+				menuManager.add(new Separator(getClass().getName()+".error"));
+				
+				/**
+				 * What follows is adding some actions for setting errors on other plotted data sets.
+				 * The logic is a bit convoluted and the feature is only available for 1D at the moment.
+				 */
+				if (getPlotMode()==null || getPlotMode().is1D()) {
+					final Object sel           = ((StructuredSelection)dataViewer.getSelection()).getFirstElement();
+					final ICheckableObject ob  = (ICheckableObject)sel;
+					final IDataset      currentSelecedData  = getVariableValue(ob.getVariable(), null);
+	
+					if (currentSelecedData!=null && currentSelecedData.getRank()==1) {
+						if (selections!=null && selections.size() > 0) {
+							menuManager.add(new Action("Set '"+ob.getName()+"' as error on other plotted data...") {
+								@Override
+								public void run() {
+			                        final PlotDataChooseDialog dialog = new PlotDataChooseDialog(Display.getDefault().getActiveShell());
+			                        dialog.init(selections, ob);
+			                        final ICheckableObject plotD = dialog.choose();
+			                        if (plotD!=null) {
+			                        	final IErrorDataset set = (IErrorDataset)getVariableValue(plotD.getVariable(), null);
+			                        	set.setError(currentSelecedData);
+			                        	
+			                        	final ILineTrace lineTrace = (ILineTrace)getPlottingSystem().getTrace(plotD.getName());
+			                        	if (lineTrace!=null) {
+				                        	lineTrace.setErrorBarEnabled(true);
+			                        		lineTrace.setData(lineTrace.getXData(), set);
+			                        	}
+			                        	
+			                        	getPlottingSystem().repaint();
+			                        }
+								}
+							});
+						}
+						
+	                	final ILineTrace lineTrace = (ILineTrace)getPlottingSystem().getTrace(ob.getName());
+						if (currentSelecedData!=null && currentSelecedData instanceof IErrorDataset && lineTrace!=null && ((IErrorDataset)lineTrace.getYData()).hasErrors()) {
+							menuManager.add(new Action("Clear error on '"+currentSelecedData.getName()+"'") {
+								@Override
+								public void run() {
+									((IErrorDataset)currentSelecedData).clearError();
+									
+				                	final ILineTrace lineTrace = (ILineTrace)getPlottingSystem().getTrace(ob.getName());
+				                	((IErrorDataset)lineTrace.getYData()).clearError();
+				                	((IErrorDataset)lineTrace.getXData()).clearError();
+		                        	if (lineTrace!=null) lineTrace.setData(lineTrace.getXData(), lineTrace.getYData());
+		                        	lineTrace.setErrorBarEnabled(false);
+		                        	getPlottingSystem().repaint();
+								}
+							});
+						}
+					}
+				}
+
+				
+				menuManager.add(new Separator(getClass().getName()+"sep3"));
+				menuManager.add(new Action("Preferences...") {
+					@Override
+					public void run() {
+						PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "org.edna.workbench.editors.preferencePage", null, null);
+						if (pref != null) pref.open();
+					}
+				});
+				
+				menuManager.addMenuListener(new IMenuListener() {			
+					@Override
+					public void menuAboutToShow(IMenuManager manager) {
+						if (dataReduction!=null) dataReduction.setEnabled(isDataReductionToolActive());
+					}
+				});
 			}
 		});
+
+		
 	}
 	
 	public IAction getDataReductionAction() {
@@ -749,7 +838,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 
 	}
 
-	private void createDimensionalActions(IContributionManager manager, boolean isToolbar) {
+	private void createDimensionalActions(List<Object> rightClickActions, boolean isToolbar) {
 				
 		this.dataComponentActions = new ArrayList<IAction>(11);
 		
@@ -793,12 +882,13 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 			xyzAction.setToolTipText("XYZ, X is the first chosen data and Z the last.");
 			dataComponentActions.add(xyzAction);
 	
-			manager.add(new Separator());
-			manager.add(xyAction);
-			manager.add(staggeredAction);
-			manager.add(xyzAction);
-			manager.add(new Separator());
+			rightClickActions.add(new Separator());
+			rightClickActions.add(xyAction);
+			rightClickActions.add(staggeredAction);
+			rightClickActions.add(xyzAction);
+			rightClickActions.add(new Separator());
 			
+			updatePlotDimenionsSelected(xyAction, staggeredAction, xyzAction, plotMode);
 
 			
 			// Removed when part disposed.
@@ -818,19 +908,6 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 						updatePlotDimenionsSelected(xyAction, staggeredAction, xyzAction, getPlotMode());
 					}
 				});
-			} else {
-				final MenuManager man = (MenuManager)manager;
-				man.addMenuListener(new IMenuListener() {
-					@Override
-					public void menuAboutToShow(IMenuManager manager) {
-						dis.asyncExec(new Runnable() {
-							@Override
-							public void run() {
-						        updatePlotDimenionsSelected(xyAction, staggeredAction, xyzAction, getPlotMode());
-							}
-						});
-					}
-				});
 			}
 		}
 		
@@ -846,8 +923,8 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		setX.setImageDescriptor(Activator.getImageDescriptor("/icons/to_x.png"));
 		setX.setToolTipText("Changes the plot to use selected data set as the x-axis.");
 		dataComponentActions.add(setX);
-		manager.add(setX);
-		manager.add(new Separator());
+		rightClickActions.add(setX);
+		rightClickActions.add(new Separator());
 
 		final Action addExpression = new Action("Add expression") {
 			public void run() {
@@ -863,7 +940,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		addExpression.setImageDescriptor(Activator.getImageDescriptor("/icons/add_expression.png"));
 		addExpression.setToolTipText("Adds an expression which can be plotted. Must be function of other data sets.");
 		dataComponentActions.add(addExpression);
-		manager.add(addExpression);
+		rightClickActions.add(addExpression);
 		
 		final Action deleteExpression = new Action("Delete expression") {
 			public void run() {
@@ -878,7 +955,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		deleteExpression.setImageDescriptor(Activator.getImageDescriptor("/icons/delete_expression.png"));
 		deleteExpression.setToolTipText("Deletes an expression.");
 		dataComponentActions.add(deleteExpression);
-		manager.add(deleteExpression);
+		rightClickActions.add(deleteExpression);
 
 		dataComponentActions.add(preferences);
 
@@ -907,8 +984,9 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		
 	}
 	
-	protected void updatePlotDimenionsSelected(Action xyAction, Action staggeredAction, Action xyzAction, PlotType plotMode) {
+	protected void updatePlotDimenionsSelected(IAction xyAction, IAction staggeredAction, IAction xyzAction, PlotType plotMode) {
 
+		if (staggerSupported) return;
 		xyAction.setChecked(PlotType.XY.equals(plotMode));
 		staggeredAction.setChecked(PlotType.XY_STACKED.equals(plotMode));
 		xyzAction.setChecked(PlotType.XY_STACKED_3D.equals(plotMode));

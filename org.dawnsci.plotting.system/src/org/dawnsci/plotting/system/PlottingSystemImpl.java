@@ -73,6 +73,7 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IErrorDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 
 /**
@@ -196,6 +197,11 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 				final IDataset finalX = x;
 				final ILineTrace lineTrace = (ILineTrace)trace;
 				updatedAndCreated.add(lineTrace);
+				
+				if (((IErrorDataset)lineTrace.getYData()).hasErrors() && !((IErrorDataset)y).hasErrors()) {
+					final IDataset error = ((IErrorDataset)lineTrace.getYData()).getError();
+					((IErrorDataset)y).setError(error);
+				}
 				
 				if (getDisplay().getThread()==Thread.currentThread()) {
 					lineTrace.setData(finalX, y);
