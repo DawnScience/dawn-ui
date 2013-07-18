@@ -129,7 +129,9 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 	private DiffractionTableData currentData;
 
 	private final String DIFFRACTION_ID = "org.dawb.workbench.plotting.tools.diffraction.Diffraction";
-	private final String WAVELENGTH_NODE_PATH = "/Experimental Information/Wavelength"; 
+	private final String WAVELENGTH_NODE_PATH = "/Experimental Information/Wavelength";
+	private final String BEAM_CENTRE_XPATH = "/Detector/Beam Centre/X";
+	private final String BEAM_CENTRE_YPATH = "/Detector/Beam Centre/Y";
 
 	private List<DiffractionTableData> model = new ArrayList<DiffractionTableData>();
 	private ILoaderService service;
@@ -225,7 +227,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 					@Override
 					public void run() {
 						tableViewer.refresh();
-						NumericNode<Length> node = getDiffractionTreeNode();
+						NumericNode<Length> node = getDiffractionTreeNode(WAVELENGTH_NODE_PATH);
 						wavelengthSpinner.setDouble(node.getValue().doubleValue(node.getUnit()));
 						unitLabel.setText("in "+ node.getUnit().toString());
 					}
@@ -432,6 +434,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 			@Override
 			public void stop() {
+				updateDiffToolTable();
 				refreshTable();
 			}
 		}));
@@ -450,6 +453,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 			@Override
 			public void stop() {
+				updateDiffToolTable();
 				refreshTable();
 			}
 		}));
@@ -465,6 +469,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 			@Override
 			public void stop() {
+				updateDiffToolTable();
 				refreshTable();
 			}
 		}));
@@ -483,6 +488,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 			@Override
 			public void stop() {
+				updateDiffToolTable();
 				refreshTable();
 			}
 		}));
@@ -632,7 +638,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				for(int i = 0; i < model.size(); i++){
-					NumericNode<Length> node = getDiffractionTreeNode();
+					NumericNode<Length> node = getDiffractionTreeNode(WAVELENGTH_NODE_PATH);
 					DiffractionTool diffTool = (DiffractionTool) toolSystem.getToolPage(DIFFRACTION_ID);
 					DiffractionTreeModel treeModel = diffTool.getModel();
 					node.setDoubleValue(wavelengthSpinner.getDouble());
@@ -782,8 +788,23 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		//mainSash.setWeights(new int[] { 1, 2});
 	}
 
+	private void updateDiffToolTable() {
+		DiffractionTool diffTool = (DiffractionTool) toolSystem.getToolPage(DIFFRACTION_ID);
+		DiffractionTreeModel treeModel = diffTool.getModel();
+		
+		NumericNode<Length> xNode = getDiffractionTreeNode(BEAM_CENTRE_XPATH);
+		xNode.setDoubleValue(currentData.md.getDetector2DProperties().getBeamCentreCoords()[0]);
+		treeModel.setNode(xNode, BEAM_CENTRE_XPATH);
+		
+		NumericNode<Length> yNode = getDiffractionTreeNode(BEAM_CENTRE_YPATH);
+		yNode.setDoubleValue(currentData.md.getDetector2DProperties().getBeamCentreCoords()[1]);
+		treeModel.setNode(yNode, BEAM_CENTRE_YPATH);
+		
+		diffTool.refresh();
+	}
+
 	@SuppressWarnings("unchecked")
-	private NumericNode<Length> getDiffractionTreeNode() {
+	private NumericNode<Length> getDiffractionTreeNode(String nodePath) {
 		NumericNode<Length> node = null;
 		if (toolSystem == null)
 			return node;
@@ -791,7 +812,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		DiffractionTreeModel treeModel = diffTool.getModel();
 		if(treeModel == null)
 			return node;
-		node = (NumericNode<Length>) treeModel.getNode(WAVELENGTH_NODE_PATH);
+		node = (NumericNode<Length>) treeModel.getNode(nodePath);
 		return node;
 	}
 
