@@ -106,7 +106,6 @@ import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationStandards;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorPropertyEvent;
-import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
 import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironmentEvent;
 import uk.ac.diamond.scisoft.analysis.diffraction.IDetectorPropertyListener;
 import uk.ac.diamond.scisoft.analysis.diffraction.IDiffractionCrystalEnvironmentListener;
@@ -939,13 +938,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				if (dp == null)
 					return null;
 				return String.format("%.0f", dp.getBeamCentreCoords()[1]);
-			} else if (columnIndex == 6) {
-				NumericNode<Length> node = getDiffractionTreeNode();
-				if (node == null) {
-					DiffractionCrystalEnvironment dce = md.getDiffractionCrystalEnvironment();
-					return String.format("%.4f", dce.getWavelength()); 
-				}
-				return node.getValue(true);
 			}
 			return null;
 		}
@@ -1031,13 +1023,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		tc.setToolTipText("in Pixel");
 		tc.setWidth(80);
 		tvc.setEditingSupport(new MyEditingSupport(tv, 5));
-		
-		tvc = new TableViewerColumn(tv, SWT.NONE);
-		tc = tvc.getColumn();
-		tc.setText("Wavelength");
-		tc.setToolTipText("in Angstrom");
-		tc.setWidth(70);
-		tvc.setEditingSupport(new MyEditingSupport(tv, 6));
 	}
 
 	private void refreshTable() {
