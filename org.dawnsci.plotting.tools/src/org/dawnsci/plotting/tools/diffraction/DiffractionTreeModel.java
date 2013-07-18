@@ -346,6 +346,8 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 					lambda.setUpperBound(100000);
 
 				}
+				if(dce != null)
+					updateUnit(dce);
 			}
 		});
 
@@ -499,6 +501,15 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 		try {
 			canUpdate = false;
 			dce.setWavelength(wave);
+		} finally {
+			canUpdate = true;
+		}
+	}
+
+	private void updateUnit(DiffractionCrystalEnvironment dce) {
+		try {
+			canUpdate = false;
+			dce.fireUnitChange();
 		} finally {
 			canUpdate = true;
 		}

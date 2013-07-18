@@ -39,7 +39,18 @@ public class AbstractNodeModel {
 	public TreeNode getNode(final String labelPath) {
 		return nodeMap.get(labelPath.toLowerCase());
 	}
-	
+
+	/**
+	 * Set any node from the tree, if the label path does not exist does nothing
+	 * @param node
+	 * @param labelPath
+	 */
+	public void setNode(TreeNode node, String labelPath) {
+		if (nodeMap.get(labelPath.toLowerCase()) == null)
+			return;
+		nodeMap.put(labelPath.toLowerCase(), node);
+	}
+
 	public void dispose() {
 		root.dispose();
 		nodeMap.clear();
