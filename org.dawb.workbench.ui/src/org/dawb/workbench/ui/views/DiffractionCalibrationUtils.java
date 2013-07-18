@@ -390,7 +390,7 @@ public class DiffractionCalibrationUtils {
 						Display.getDefault().asyncExec(new Runnable() {
 							@Override
 							public void run() {
-								ce.setWavelength(data.ow*f);
+								ce.setWavelength(data.ow/f);
 							}
 						});
 					}
