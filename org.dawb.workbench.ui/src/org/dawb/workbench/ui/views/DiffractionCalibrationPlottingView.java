@@ -256,6 +256,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 						DiffractionTableData d = createData(res[i].getRawLocation().toOSString(), null);
 						if (d != null){
 							good = d;
+							setWavelength(d);
 						}
 					}
 				} else if (dropData instanceof TreeSelection) {
@@ -274,6 +275,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 						}
 						if (d != null){
 							good = d;
+							setWavelength(d);
 						}
 					}
 				} else if (dropData instanceof String[]) {
@@ -282,6 +284,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 						DiffractionTableData d = createData(selectedData[i], null);
 						if (d != null){
 							good = d;
+							setWavelength(d);
 						}
 					}
 				}
