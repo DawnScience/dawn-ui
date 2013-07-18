@@ -40,8 +40,6 @@ import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
  */
 public class RegionEditTool extends AbstractRegionTableTool {
 
-	//private int precision = 3;
-
 	@Override
 	public ToolPageRole getToolPageRole() {
 		return ToolPageRole.ROLE_2D;

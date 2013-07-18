@@ -94,11 +94,19 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 			if (!(sel.getFirstElement() instanceof IRegion)) return;
 			final IRegion          region = (IRegion)sel.getFirstElement();
 			previousRegion = region;
-			if((region != null) && region.isActive()) region.setRegionColor(ColorConstants.green);
-			else if ((region != null) && !region.isActive()) region.setRegionColor(ColorConstants.gray);
+			if ((region != null) && region.isActive()) {
+				region.setRegionColor(ColorConstants.green);
+				region.setAlpha(51); // 20%
+			} else if ((region != null) && !region.isActive()){
+				region.setRegionColor(ColorConstants.gray);
+				region.setAlpha(51); // 20%
+			}
 			previousColor  = region!=null ? region.getRegionColor() : null;
 
-			if (region!=null) region.setRegionColor(ColorConstants.red);
+			if (region!=null) {
+				region.setRegionColor(ColorConstants.red);
+				region.setAlpha(51); // 20%
+			}
 		}
 
 		private void resetSelectionColor() {
@@ -461,8 +469,8 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 
 	@Override
 	public void regionCreated(RegionEvent evt) {
-		
-		
+		IRegion region = evt.getRegion();
+		region.setAlpha(51); // 20%
 	}
 	@Override
 	public void regionCancelled(RegionEvent evt) {
