@@ -132,6 +132,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 	private final String WAVELENGTH_NODE_PATH = "/Experimental Information/Wavelength";
 	private final String BEAM_CENTRE_XPATH = "/Detector/Beam Centre/X";
 	private final String BEAM_CENTRE_YPATH = "/Detector/Beam Centre/Y";
+	private final String DISTANCE_NODE_PATH = "/Experimental Information/Distance";
 
 	private List<DiffractionTableData> model = new ArrayList<DiffractionTableData>();
 	private ILoaderService service;
@@ -434,7 +435,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 			@Override
 			public void stop() {
-				updateDiffToolTable();
+				updateDiffTool(BEAM_CENTRE_YPATH, currentData.md.getDetector2DProperties().getBeamCentreCoords()[1]);
 				refreshTable();
 			}
 		}));
@@ -453,7 +454,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 			@Override
 			public void stop() {
-				updateDiffToolTable();
+				updateDiffTool(BEAM_CENTRE_XPATH, currentData.md.getDetector2DProperties().getBeamCentreCoords()[0]);
 				refreshTable();
 			}
 		}));
@@ -469,7 +470,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 			@Override
 			public void stop() {
-				updateDiffToolTable();
+				updateDiffTool(BEAM_CENTRE_XPATH, currentData.md.getDetector2DProperties().getBeamCentreCoords()[0]);
 				refreshTable();
 			}
 		}));
@@ -488,7 +489,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 			@Override
 			public void stop() {
-				updateDiffToolTable();
+				updateDiffTool(BEAM_CENTRE_YPATH, currentData.md.getDetector2DProperties().getBeamCentreCoords()[1]);
 				refreshTable();
 			}
 		}));
@@ -516,6 +517,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 			@Override
 			public void stop() {
+				updateDiffTool(DISTANCE_NODE_PATH, currentData.md.getDetector2DProperties().getBeamCentreDistance());
 				refreshTable();
 			}
 		}));
@@ -531,6 +533,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 			@Override
 			public void stop() {
+				updateDiffTool(DISTANCE_NODE_PATH, currentData.md.getDetector2DProperties().getBeamCentreDistance());
 				refreshTable();
 			}
 		}));
@@ -552,6 +555,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 			@Override
 			public void stop() {
+//				updateDiffTool(DISTANCE_NODE_PATH, currentData.md.getDetector2DProperties().getDetectorDistance());
 				refreshTable();
 			}
 		}));
@@ -567,6 +571,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 			@Override
 			public void stop() {
+//				updateDiffTool(DISTANCE_NODE_PATH, currentData.md.getDetector2DProperties().getDetectorDistance());
 				refreshTable();
 			}
 		}));
@@ -638,12 +643,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				for(int i = 0; i < model.size(); i++){
-					NumericNode<Length> node = getDiffractionTreeNode(WAVELENGTH_NODE_PATH);
-					DiffractionTool diffTool = (DiffractionTool) toolSystem.getToolPage(DIFFRACTION_ID);
-					DiffractionTreeModel treeModel = diffTool.getModel();
-					node.setDoubleValue(wavelengthSpinner.getDouble());
-					treeModel.setNode(node, WAVELENGTH_NODE_PATH);
-					diffTool.refresh();
+					// TODO update wavelength of other images in model
+					updateDiffTool(WAVELENGTH_NODE_PATH, wavelengthSpinner.getDouble());
 				}
 			}
 		});
@@ -788,18 +789,14 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		//mainSash.setWeights(new int[] { 1, 2});
 	}
 
-	private void updateDiffToolTable() {
+	private void updateDiffTool(String nodePath, double value) {
 		DiffractionTool diffTool = (DiffractionTool) toolSystem.getToolPage(DIFFRACTION_ID);
 		DiffractionTreeModel treeModel = diffTool.getModel();
-		
-		NumericNode<Length> xNode = getDiffractionTreeNode(BEAM_CENTRE_XPATH);
-		xNode.setDoubleValue(currentData.md.getDetector2DProperties().getBeamCentreCoords()[0]);
-		treeModel.setNode(xNode, BEAM_CENTRE_XPATH);
-		
-		NumericNode<Length> yNode = getDiffractionTreeNode(BEAM_CENTRE_YPATH);
-		yNode.setDoubleValue(currentData.md.getDetector2DProperties().getBeamCentreCoords()[1]);
-		treeModel.setNode(yNode, BEAM_CENTRE_YPATH);
-		
+
+		NumericNode<Length> distanceNode = getDiffractionTreeNode(nodePath);
+		distanceNode.setDoubleValue(value);
+		treeModel.setNode(distanceNode, nodePath);
+
 		diffTool.refresh();
 	}
 
