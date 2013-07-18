@@ -47,6 +47,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
 import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
 import uk.ac.diamond.scisoft.analysis.diffraction.PowderRingsUtils;
+import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
 import uk.ac.diamond.scisoft.analysis.fitting.Fitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Polynomial;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
@@ -73,11 +74,13 @@ public class DiffractionCalibrationUtils {
 	 * @param plottingSystem
 	 * @param model
 	 * @param currentData
+	 * @param useFixedWavelength if true then fit a global environment else local
+	 * @return 
 	 */
-	public static void calibrateImages(final Display display,
+	public static Job calibrateImages(final Display display,
 									   final IPlottingSystem plottingSystem,
 									   final List<DiffractionTableData> model,
-									   final DiffractionTableData currentData) {
+									   final DiffractionTableData currentData, final boolean useFixedWavelength) {
 		Job job = new Job("Calibrate detector") {
 			@Override
 			protected IStatus run(final IProgressMonitor monitor) {
@@ -85,27 +88,73 @@ public class DiffractionCalibrationUtils {
 				final ProgressMonitorWrapper mon = new ProgressMonitorWrapper(monitor);
 				monitor.beginTask("Calibrate detector", IProgressMonitor.UNKNOWN);
 				List<HKL> spacings = CalibrationFactory.getCalibrationStandards().getCalibrant().getHKLs();
-				for (DiffractionTableData data : model) {
-					IDiffractionMetadata md = data.md;
-					if (!data.use || data.nrois <= 0 || md == null) {
-						continue;
-					}
-					monitor.subTask("Fitting rings in " + data.name);
-					data.q = null;
+				if (useFixedWavelength) {
+					for (DiffractionTableData data : model) {
+						IDiffractionMetadata md = data.md;
+						if (!data.use || data.nrois <= 0 || md == null) {
+							continue;
+						}
+						monitor.subTask("Fitting rings in " + data.name);
+						data.q = null;
 
-					DetectorProperties dp = md.getDetector2DProperties();
-					DiffractionCrystalEnvironment ce = md.getDiffractionCrystalEnvironment();
-					if (dp == null || ce == null) {
-						continue;
+						DetectorProperties dp = md.getDetector2DProperties();
+						DiffractionCrystalEnvironment ce = md.getDiffractionCrystalEnvironment();
+						if (dp == null || ce == null) {
+							continue;
+						}
+						try {
+							data.q = PowderRingsUtils.fitAllEllipsesToQSpace(mon, dp, ce, data.rois, spacings, true);
+
+							logger.debug("Q-space = {}", data.q);
+							data.od = dp.getDetectorDistance(); // store old values
+							data.ow = ce.getWavelength();
+						} catch (IllegalArgumentException e) {
+							logger.debug("Problem in calibrating image, {}: {}", data.name, e);
+						}
 					}
+				} else {
+					List<List<? extends IROI>> lROIs = new ArrayList<List<? extends IROI>>();
+					List<DetectorProperties> dps = new ArrayList<DetectorProperties>();
+					DiffractionCrystalEnvironment env = null;
+					for (DiffractionTableData data : model) {
+						IDiffractionMetadata md = data.md;
+						if (!data.use || data.nrois <= 0 || md == null) {
+							continue;
+						}
+						if (env == null) {
+							env = md.getDiffractionCrystalEnvironment();
+						}
+						data.q = null;
+
+						DetectorProperties dp = md.getDetector2DProperties();
+						if (dp == null) {
+							continue;
+						}
+						dps.add(dp);
+						lROIs.add(data.rois);
+					}
+					monitor.subTask("Fitting all rings");
+					List<QSpace> qs = null;
 					try {
-						data.q = PowderRingsUtils.fitAllEllipsesToQSpace(mon, dp, ce, data.rois, spacings, false);
+						qs = PowderRingsUtils.fitAllEllipsesToAllQSpaces(mon, dps, env, lROIs, spacings);
+					} catch (IllegalArgumentException e) {
+						logger.debug("Problem in calibrating all image: {}", e);
+					}
+					int i = 0;
+					for (DiffractionTableData data : model) {
+						IDiffractionMetadata md = data.md;
+						if (!data.use || data.nrois <= 0 || md == null) {
+							continue;
+						}
 
+						DetectorProperties dp = md.getDetector2DProperties();
+						if (dp == null) {
+							continue;
+						}
+						data.q = qs.get(i++);
 						logger.debug("Q-space = {}", data.q);
 						data.od = dp.getDetectorDistance(); // store old values
-						data.ow = ce.getWavelength();
-					} catch (IllegalArgumentException e) {
-						logger.debug("Problem in calibrating image, {}: {}", data.name, e);
+						data.ow = env.getWavelength();
 					}
 				}
 
@@ -142,6 +191,7 @@ public class DiffractionCalibrationUtils {
 		};
 		job.setPriority(Job.SHORT);
 		job.schedule();
+		return job;
 	}
 
 	/**
@@ -320,6 +370,10 @@ public class DiffractionCalibrationUtils {
 					odist.add(data.od);
 					ndist.add(data.q.getDetectorProperties().getDetectorDistance());
 				}
+				if (odist.size() < 3) {
+					logger.warn("Need to use three or more images");
+					return Status.CANCEL_STATUS;
+				}
 				Polynomial p = new Polynomial(1);
 				Fitter.llsqFit(new AbstractDataset[] {AbstractDataset.createFromList(odist)}, AbstractDataset.createFromList(ndist), p);
 				logger.debug("Straight line fit: {}", p);
@@ -377,6 +431,8 @@ public class DiffractionCalibrationUtils {
 		} else {
 			currentData.rois.clear();
 		}
+		currentData.use = false;
+		currentData.nrois = 0;
 		clearFoundRings(plottingSystem);
 		Job job = new Job("Ellipse rings finding") {
 			@Override
@@ -396,9 +452,15 @@ public class DiffractionCalibrationUtils {
 						if (delta > 50)
 							delta = 50;
 						last = major;
-						roi = DiffractionTool.runEllipseFit(monitor, display, plottingSystem, image, e, false, delta);
+						try {
+							roi = DiffractionTool.runEllipseFit(monitor, display, plottingSystem, image, e, false, delta);
+						} catch (NullPointerException ex) {
+							stat = Status.CANCEL_STATUS;
+							n = -1; // indicate problem with getting image or other issues
+							return stat;
+						}
 						if (roi == null) {
-							return Status.CANCEL_STATUS;
+							stat = Status.CANCEL_STATUS;
 						}
 
 						double[] ec = e.getPointRef();
@@ -416,7 +478,11 @@ public class DiffractionCalibrationUtils {
 					} catch (IllegalArgumentException ex) {
 						logger.trace("Could not find ellipse with {}: {}", r, ex);
 					} finally {
-						currentData.rois.add(roi); // can include null placeholder
+						if (n >= 0) {
+							currentData.rois.add(roi); // can include null placeholder
+						} else {
+							currentData.rois.clear();
+						}
 					}
 				}
 				currentData.nrois = n;
@@ -428,7 +494,6 @@ public class DiffractionCalibrationUtils {
 		};
 		job.setPriority(Job.SHORT);
 		return job;
-		
 	}
 
 	/**

@@ -150,6 +150,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 	private FloatSpinner wavelengthSpinner;
 
+	protected boolean useFixedWavelength;
+
 	public DiffractionCalibrationPlottingView() {
 		service = (ILoaderService) PlatformUI.getWorkbench().getService(ILoaderService.class);
 	}
@@ -568,9 +570,15 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		calibrateComp.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
 
 		wavelengthButton = new Button(calibrateComp, SWT.CHECK);
-		wavelengthButton.setText("Calibrate wavelength");
-		wavelengthButton.setToolTipText("Select to calibrate the wavelength at the end of the calibration process");
+		wavelengthButton.setText("Fix wavelength");
+		wavelengthButton.setToolTipText("Select to fix wavelength first then fit at the end of the calibration process");
 		wavelengthButton.setEnabled(false);
+		wavelengthButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				useFixedWavelength = wavelengthButton.getSelection();
+			}
+		});
 		Composite wavelengthComp = new Composite(calibrateComp, SWT.NONE);
 		wavelengthComp.setLayout(new GridLayout(2, false));
 		wavelengthComp.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
@@ -632,7 +640,10 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 					
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
-						DiffractionCalibrationUtils.calibrateImages(display, plottingSystem, model, currentData);
+						if (model.size() <= 0)
+							return Status.CANCEL_STATUS;
+
+						DiffractionCalibrationUtils.calibrateImages(display, plottingSystem, model, currentData, useFixedWavelength);
 						display.asyncExec(new Runnable() {
 							@Override
 							public void run() {
@@ -646,18 +657,14 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				calibrateJob.addJobChangeListener(new JobChangeAdapter(){
 					@Override
 					public void done(IJobChangeEvent event) {
-						// if the wavelength is selected
-						Display.getDefault().asyncExec(new Runnable() {
-							public void run() {
-								if(wavelengthButton.getSelection()) {
-									for(int i = 0; i < model.size(); i++){
-										if(model.get(i).use)
-											DiffractionCalibrationUtils.calibrateWavelength(display, model, model.get(i));
-									}
+						if (useFixedWavelength) {
+							Display.getDefault().asyncExec(new Runnable() {
+								public void run() {
+									DiffractionCalibrationUtils.calibrateWavelength(display, model, currentData);
+									refreshTable();
 								}
-								refreshTable();
-							}
-						});
+							});
+						}
 					}
 				});
 				calibrateJob.schedule();
