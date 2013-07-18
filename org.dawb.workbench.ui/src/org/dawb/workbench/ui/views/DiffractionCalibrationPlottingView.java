@@ -429,6 +429,11 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			public void run() {
 				DiffractionCalibrationUtils.changeRings(currentData, ManipulateMode.UP, isFast());
 			}
+
+			@Override
+			public void stop() {
+				refreshTable();
+			}
 		}));
 		upButton.setLayoutData(new GridData(SWT.CENTER, SWT.BOTTOM, false, false));
 		l = new Label(padComp, SWT.NONE);
@@ -442,6 +447,11 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			public void run() {
 				DiffractionCalibrationUtils.changeRings(currentData, ManipulateMode.LEFT, isFast());
 			}
+
+			@Override
+			public void stop() {
+				refreshTable();
+			}
 		}));
 		leftButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		l = new Label(padComp, SWT.NONE);
@@ -451,6 +461,11 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			@Override
 			public void run() {
 				DiffractionCalibrationUtils.changeRings(currentData, ManipulateMode.RIGHT, isFast());
+			}
+
+			@Override
+			public void stop() {
+				refreshTable();
 			}
 		}));
 		rightButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
@@ -464,6 +479,11 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			@Override
 			public void run() {
 				DiffractionCalibrationUtils.changeRings(currentData, ManipulateMode.DOWN, isFast());
+			}
+
+			@Override
+			public void stop() {
+				refreshTable();
 			}
 		}));
 		downButton.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));
@@ -487,6 +507,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			public void run() {
 				DiffractionCalibrationUtils.changeRings(currentData, ManipulateMode.ENLARGE, isFast());
 			}
+
 			@Override
 			public void stop() {
 				refreshTable();
@@ -501,6 +522,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			public void run() {
 				DiffractionCalibrationUtils.changeRings(currentData, ManipulateMode.SHRINK, isFast());
 			}
+
 			@Override
 			public void stop() {
 				refreshTable();
@@ -521,6 +543,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			public void run() {
 				DiffractionCalibrationUtils.changeRings(currentData, ManipulateMode.ELONGATE, isFast());
 			}
+
 			@Override
 			public void stop() {
 				refreshTable();
@@ -535,6 +558,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			public void run() {
 				DiffractionCalibrationUtils.changeRings(currentData, ManipulateMode.SQUASH, isFast());
 			}
+
 			@Override
 			public void stop() {
 				refreshTable();
@@ -555,6 +579,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			public void run() {
 				DiffractionCalibrationUtils.changeRings(currentData, ManipulateMode.CLOCKWISE, isFast());
 			}
+
 			@Override
 			public void stop() {
 				refreshTable();
@@ -569,6 +594,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			public void run() {
 				DiffractionCalibrationUtils.changeRings(currentData, ManipulateMode.ANTICLOCKWISE, isFast());
 			}
+
 			@Override
 			public void stop() {
 				refreshTable();
@@ -661,14 +687,18 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 						if (model.size() <= 0)
 							return Status.CANCEL_STATUS;
 
-						DiffractionCalibrationUtils.calibrateImages(display, plottingSystem, model, currentData, useFixedWavelength);
-						display.asyncExec(new Runnable() {
-							@Override
-							public void run() {
-								refreshTable();
-								setCalibrateButtons();
-							}
-						});
+						Job j = DiffractionCalibrationUtils.calibrateImages(display, plottingSystem, model, currentData, useFixedWavelength);
+						try {
+							j.join();
+							display.asyncExec(new Runnable() {
+								@Override
+								public void run() {
+									refreshTable();
+									setCalibrateButtons();
+								}
+							});
+						} catch (InterruptedException e) {
+						}
 						return Status.OK_STATUS;
 					}
 				};
@@ -676,7 +706,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 					@Override
 					public void done(IJobChangeEvent event) {
 						if (useFixedWavelength) {
-							Display.getDefault().asyncExec(new Runnable() {
+							display.asyncExec(new Runnable() {
 								public void run() {
 									DiffractionCalibrationUtils.calibrateWavelength(display, model, currentData);
 									refreshTable();
@@ -941,6 +971,10 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				if (dp == null)
 					return null;
 				return String.format("%.0f", dp.getBeamCentreCoords()[1]);
+			} else if (columnIndex == 6) {
+				if (data.use && data.q != null) {
+					return String.format("%.2f", data.q.getResidual());
+				}
 			}
 			return null;
 		}
@@ -999,31 +1033,38 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		tc.setText("Image");
 		tc.setWidth(200);
 		tvc.setEditingSupport(new MyEditingSupport(tv, 1));
-		
+
 		tvc = new TableViewerColumn(tv, SWT.NONE);
 		tc = tvc.getColumn();
 		tc.setText("# of rings");
 		tc.setWidth(75);
 		tvc.setEditingSupport(new MyEditingSupport(tv, 2));
-		
+
 		tvc = new TableViewerColumn(tv, SWT.NONE);
 		tc = tvc.getColumn();
 		tc.setText("Distance");
 		tc.setToolTipText("in mm");
 		tc.setWidth(70);
 		tvc.setEditingSupport(new MyEditingSupport(tv, 3));
-		
+
 		tvc = new TableViewerColumn(tv, SWT.NONE);
 		tc = tvc.getColumn();
 		tc.setText("X Position");
 		tc.setToolTipText("in Pixel");
 		tc.setWidth(80);
 		tvc.setEditingSupport(new MyEditingSupport(tv, 4));
-		
+
 		tvc = new TableViewerColumn(tv, SWT.NONE);
 		tc = tvc.getColumn();
 		tc.setText("Y Position");
 		tc.setToolTipText("in Pixel");
+		tc.setWidth(80);
+		tvc.setEditingSupport(new MyEditingSupport(tv, 5));
+
+		tvc = new TableViewerColumn(tv, SWT.NONE);
+		tc = tvc.getColumn();
+		tc.setText("Residuals");
+		tc.setToolTipText("Mean of squared residuals from fit");
 		tc.setWidth(80);
 		tvc.setEditingSupport(new MyEditingSupport(tv, 5));
 	}
