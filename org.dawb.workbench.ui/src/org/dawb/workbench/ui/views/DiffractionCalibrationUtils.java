@@ -173,9 +173,7 @@ public class DiffractionCalibrationUtils {
 							}
 
 							DetectorProperties fp = data.q.getDetectorProperties();
-							double[] angs = fp.getNormalAnglesInDegrees();
-							dp.setNormalAnglesInDegrees(angs);
-							dp.setOrigin(fp.getOrigin());
+							dp.setGeometry(fp);
 							ce.setWavelength(data.q.getWavelength());
 						}
 
@@ -379,22 +377,22 @@ public class DiffractionCalibrationUtils {
 				logger.debug("Straight line fit: {}", p);
 
 				final double f = p.getParameterValue(0);
-				for (final DiffractionTableData data : model) {
-					if (!data.use || data.nrois <= 0 || data.md == null) {
-						continue;
-					}
-
-					final DiffractionCrystalEnvironment ce = data.md.getDiffractionCrystalEnvironment();
-					if (ce != null) {
-						data.ow = ce.getWavelength();
-						Display.getDefault().asyncExec(new Runnable() {
-							@Override
-							public void run() {
-								ce.setWavelength(data.ow/f);
+				display.asyncExec(new Runnable() {
+					@Override
+					public void run() {
+						for (final DiffractionTableData data : model) {
+							if (!data.use || data.nrois <= 0 || data.md == null) {
+								continue;
 							}
-						});
+
+							final DiffractionCrystalEnvironment ce = data.md.getDiffractionCrystalEnvironment();
+							if (ce != null) {
+								data.ow = ce.getWavelength();
+								ce.setWavelength(data.ow / f);
+							}
+						}
 					}
-				}
+				});
 
 				display.asyncExec(new Runnable() {
 					@Override
