@@ -973,7 +973,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				return String.format("%.0f", dp.getBeamCentreCoords()[1]);
 			} else if (columnIndex == 6) {
 				if (data.use && data.q != null) {
-					return String.format("%.2f", data.q.getResidual());
+					return String.format("%.2f", Math.sqrt(data.q.getResidual()));
 				}
 			}
 			return null;
@@ -1064,7 +1064,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		tvc = new TableViewerColumn(tv, SWT.NONE);
 		tc = tvc.getColumn();
 		tc.setText("Residuals");
-		tc.setToolTipText("Mean of squared residuals from fit");
+		tc.setToolTipText("Root mean of squared residuals from fit");
 		tc.setWidth(80);
 		tvc.setEditingSupport(new MyEditingSupport(tv, 5));
 	}
