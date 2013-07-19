@@ -22,6 +22,7 @@ import java.util.List;
 
 import javax.measure.quantity.Length;
 import javax.measure.unit.NonSI;
+import javax.measure.unit.SI;
 
 import org.dawb.common.services.ILoaderService;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
@@ -156,8 +157,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 	private Button wavelengthButton;
 	private double wavelength;
-	private FloatSpinner wavelengthSpinner;
-	private Label unitLabel;
+	private FloatSpinner wavelengthDistanceSpinner;
+	private FloatSpinner wavelengthEnergySpinner;
 
 	private IToolPageSystem toolSystem;
 
@@ -228,9 +229,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 					@Override
 					public void run() {
 						tableViewer.refresh();
-						NumericNode<Length> node = getDiffractionTreeNode(WAVELENGTH_NODE_PATH);
-						wavelengthSpinner.setDouble(node.getValue().doubleValue(node.getUnit()));
-						unitLabel.setText("in "+ node.getUnit().toString());
 					}
 				});
 			}
@@ -297,8 +295,10 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 					tableViewer.getTable().deselectAll();
 					tableViewer.setSelection(new StructuredSelection(good));
 				}
-				if (model.size() > 0)
-					wavelengthSpinner.setEnabled(true);
+				if (model.size() > 0) {
+					wavelengthDistanceSpinner.setEnabled(true);
+					wavelengthEnergySpinner.setEnabled(true);
+				}
 			}
 		};
 
@@ -320,7 +320,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				} else {
 					currentData = null; // need to reset this
 					plottingSystem.clear();
-					wavelengthSpinner.setEnabled(false);
+					wavelengthDistanceSpinner.setEnabled(false);
+					wavelengthEnergySpinner.setEnabled(false);
 				}
 			}
 		};
@@ -618,8 +619,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		calibrateComp.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 
 		wavelengthButton = new Button(calibrateComp, SWT.CHECK);
-		wavelengthButton.setText("Fix wavelength");
-		wavelengthButton.setToolTipText("Select to fix wavelength first then fit at the end of the calibration process");
+		wavelengthButton.setText("Refine wavelength");
+		wavelengthButton.setToolTipText("Select to refine wavelength first then fit at the end of the calibration process");
 		wavelengthButton.setEnabled(false);
 		wavelengthButton.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -627,30 +628,67 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				useFixedWavelength = wavelengthButton.getSelection();
 			}
 		});
-		Composite wavelengthComp = new Composite(calibrateComp, SWT.NONE);
-		wavelengthComp.setLayout(new GridLayout(3, false));
+		
+		Group wavelengthComp = new Group(calibrateComp, SWT.NONE);
+		wavelengthComp.setText("Wavelength");
+		wavelengthComp.setToolTipText("Set the wavelength distance/energy");
+		wavelengthComp.setLayout(new GridLayout(4, false));
 		wavelengthComp.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
-		Label wavelengthLabel = new Label(wavelengthComp, SWT.NONE);
-		wavelengthLabel.setText("Wavelength");
-		wavelengthSpinner = new FloatSpinner(wavelengthComp, SWT.BORDER);
-		wavelengthSpinner.setDouble(0);
-		wavelengthSpinner.setFormat(7, 5);
-		wavelengthSpinner.setMinimum(0);
-		wavelengthSpinner.setMaximum(Double.MAX_VALUE);
-		wavelengthSpinner.setIncrement(0.001);
-		wavelengthSpinner.setToolTipText("Set the wavelength");
-		wavelengthSpinner.addSelectionListener(new SelectionAdapter() {
+		
+		wavelengthDistanceSpinner = new FloatSpinner(wavelengthComp, SWT.BORDER);
+		wavelengthDistanceSpinner.setDouble(0);
+		wavelengthDistanceSpinner.setFormat(7, 5);
+		wavelengthDistanceSpinner.setMinimum(0);
+		wavelengthDistanceSpinner.setMaximum(Double.MAX_VALUE);
+		wavelengthDistanceSpinner.setIncrement(0.001);
+		wavelengthDistanceSpinner.setToolTipText("Set the wavelength in Angstrom");
+		wavelengthDistanceSpinner.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				for(int i = 0; i < model.size(); i++){
-					// TODO update wavelength of other images in model
-					updateDiffTool(WAVELENGTH_NODE_PATH, wavelengthSpinner.getDouble());
+				// TODO update wavelength of other images in model
+//				for(int i = 0; i < model.size(); i++){
+//				}
+				wavelengthEnergySpinner.setDouble(getWavelengthEnergy(wavelengthDistanceSpinner.getDouble()));
+				NumericNode<Length> node = getDiffractionTreeNode(WAVELENGTH_NODE_PATH);
+				if (node.getUnit().equals(NonSI.ANGSTROM)) {
+					updateDiffTool(WAVELENGTH_NODE_PATH, wavelengthDistanceSpinner.getDouble());
+				} else if (node.getUnit().equals(NonSI.ELECTRON_VOLT)) {
+					updateDiffTool(WAVELENGTH_NODE_PATH, getWavelengthEnergy(wavelengthDistanceSpinner.getDouble()) * 1000);
+				} else if (node.getUnit().equals(SI.KILO(NonSI.ELECTRON_VOLT))) {
+					updateDiffTool(WAVELENGTH_NODE_PATH, getWavelengthEnergy(wavelengthDistanceSpinner.getDouble()));
 				}
 			}
 		});
-		wavelengthSpinner.setEnabled(false);
-		unitLabel = new Label(wavelengthComp, SWT.NONE);
-		unitLabel.setText("in "+ NonSI.ANGSTROM.toString() + "    ");
+		wavelengthDistanceSpinner.setEnabled(false);
+		Label unitDistanceLabel = new Label(wavelengthComp, SWT.NONE);
+		unitDistanceLabel.setText(NonSI.ANGSTROM.toString());
+
+		wavelengthEnergySpinner = new FloatSpinner(wavelengthComp, SWT.BORDER);
+		wavelengthEnergySpinner.setDouble(0);
+		wavelengthEnergySpinner.setFormat(7, 5);
+		wavelengthEnergySpinner.setMinimum(0);
+		wavelengthEnergySpinner.setMaximum(Double.MAX_VALUE);
+		wavelengthEnergySpinner.setIncrement(0.001);
+		wavelengthEnergySpinner.setToolTipText("Set the wavelength in keV");
+		wavelengthEnergySpinner.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				wavelengthDistanceSpinner.setDouble(getWavelengthDistance(wavelengthEnergySpinner.getDouble()));
+				NumericNode<Length> node = getDiffractionTreeNode(WAVELENGTH_NODE_PATH);
+				if (node.getUnit().equals(NonSI.ANGSTROM)) {
+					updateDiffTool(WAVELENGTH_NODE_PATH, getWavelengthDistance(wavelengthEnergySpinner.getDouble()));
+				} else if (node.getUnit().equals(NonSI.ELECTRON_VOLT)) {
+					updateDiffTool(WAVELENGTH_NODE_PATH, wavelengthEnergySpinner.getDouble() * 1000);
+				} else if (node.getUnit().equals(SI.KILO(NonSI.ELECTRON_VOLT))) {
+					updateDiffTool(WAVELENGTH_NODE_PATH, wavelengthEnergySpinner.getDouble());
+				}
+//				for(int i = 0; i < model.size(); i++){
+//				}
+			}
+		});
+		wavelengthEnergySpinner.setEnabled(false);
+		Label unitEnergyLabel = new Label(wavelengthComp, SWT.NONE);
+		unitEnergyLabel.setText(SI.KILO(NonSI.ELECTRON_VOLT).toString());
 
 		Button findRingButton = new Button(calibrateComp, SWT.PUSH);
 		findRingButton.setText("Find rings in image");
@@ -771,8 +809,10 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				}
 			});
 		}
-		if (model.size() > 0)
-			wavelengthSpinner.setEnabled(true);
+		if (model.size() > 0) {
+			wavelengthDistanceSpinner.setEnabled(true);
+			wavelengthEnergySpinner.setEnabled(true);
+		}
 
 		// start diffraction tool 
 		Composite diffractionToolComp = new Composite(leftSash, SWT.BORDER);
@@ -815,12 +855,21 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 	private void setWavelength(DiffractionTableData data){
 		// set the wavelength
-		if(wavelengthSpinner.getDouble() == 0){
+		if(wavelengthDistanceSpinner.getDouble() == 0 && wavelengthEnergySpinner.getDouble() == 0){
 			if(data != null){
 				wavelength = data.md.getOriginalDiffractionCrystalEnvironment().getWavelength();
-				wavelengthSpinner.setDouble(wavelength);
+				wavelengthDistanceSpinner.setDouble(wavelength);
+				wavelengthEnergySpinner.setDouble(getWavelengthEnergy(wavelength));
 			}
 		}
+	}
+
+	private double getWavelengthEnergy(double angstrom) {
+		return 1./(0.0806554465 * angstrom); // constant from NIST CODATA 2006
+	}
+
+	private double getWavelengthDistance(double keV) {
+		return 1./(0.0806554465*keV); // constant from NIST CODATA 2006
 	}
 
 	private DiffractionTableData createData(String filePath, String dataFullName) {
