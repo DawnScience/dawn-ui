@@ -628,11 +628,11 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				useFixedWavelength = wavelengthButton.getSelection();
 			}
 		});
-		
+
 		Group wavelengthComp = new Group(calibrateComp, SWT.NONE);
 		wavelengthComp.setText("Wavelength");
 		wavelengthComp.setToolTipText("Set the wavelength distance/energy");
-		wavelengthComp.setLayout(new GridLayout(4, false));
+		wavelengthComp.setLayout(new GridLayout(2, false));
 		wavelengthComp.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		
 		wavelengthDistanceSpinner = new FloatSpinner(wavelengthComp, SWT.BORDER);
@@ -645,10 +645,13 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		wavelengthDistanceSpinner.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				// TODO update wavelength of other images in model
-//				for(int i = 0; i < model.size(); i++){
-//				}
+				// update wavelength of each image
+				for(int i = 0; i < model.size(); i++){
+					model.get(i).md.getDiffractionCrystalEnvironment().setWavelength(wavelengthDistanceSpinner.getDouble());
+				}
+				// update wavelength in keV
 				wavelengthEnergySpinner.setDouble(getWavelengthEnergy(wavelengthDistanceSpinner.getDouble()));
+				// update wavelength in diffraction tool tree viewer
 				NumericNode<Length> node = getDiffractionTreeNode(WAVELENGTH_NODE_PATH);
 				if (node.getUnit().equals(NonSI.ANGSTROM)) {
 					updateDiffTool(WAVELENGTH_NODE_PATH, wavelengthDistanceSpinner.getDouble());
@@ -673,7 +676,13 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		wavelengthEnergySpinner.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				// update wavelength of each image
+				for(int i = 0; i < model.size(); i++){
+					model.get(i).md.getDiffractionCrystalEnvironment().setWavelength(getWavelengthDistance(wavelengthEnergySpinner.getDouble()));
+				}
+				// update wavelength in Angstrom
 				wavelengthDistanceSpinner.setDouble(getWavelengthDistance(wavelengthEnergySpinner.getDouble()));
+				// update wavelength in Diffraction tool tree viewer
 				NumericNode<Length> node = getDiffractionTreeNode(WAVELENGTH_NODE_PATH);
 				if (node.getUnit().equals(NonSI.ANGSTROM)) {
 					updateDiffTool(WAVELENGTH_NODE_PATH, getWavelengthDistance(wavelengthEnergySpinner.getDouble()));
@@ -682,8 +691,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				} else if (node.getUnit().equals(SI.KILO(NonSI.ELECTRON_VOLT))) {
 					updateDiffTool(WAVELENGTH_NODE_PATH, wavelengthEnergySpinner.getDouble());
 				}
-//				for(int i = 0; i < model.size(); i++){
-//				}
 			}
 		});
 		wavelengthEnergySpinner.setEnabled(false);
