@@ -108,6 +108,7 @@ import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationStandards;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorPropertyEvent;
+import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
 import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironmentEvent;
 import uk.ac.diamond.scisoft.analysis.diffraction.IDetectorPropertyListener;
 import uk.ac.diamond.scisoft.analysis.diffraction.IDiffractionCrystalEnvironmentListener;
@@ -213,27 +214,32 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				if (model != null && model.size() > 0) {
 					tableViewer.setSelection(new StructuredSelection(model.get(model.size() - 1)));
 					for (int i = 0; i < model.size(); i++) {
-						model.get(i).md.getDetector2DProperties().restore(model.get(i).properties);
-						model.get(i).md.getDiffractionCrystalEnvironment().restore(model.get(i).crystalEnvironment);
-						updateDiffTool(BEAM_CENTRE_XPATH, model.get(i).md.getDetector2DProperties().getBeamCentreCoords()[0]);
-						updateDiffTool(BEAM_CENTRE_YPATH, model.get(i).md.getDetector2DProperties().getBeamCentreCoords()[1]);
-						updateDiffTool(DISTANCE_NODE_PATH, model.get(i).md.getDetector2DProperties().getBeamCentreDistance());
+						// Restore original metadata
+						DetectorProperties originalProps = model.get(i).md.getOriginalDetector2DProperties();
+						DiffractionCrystalEnvironment originalEnvironment = model.get(i).md.getOriginalDiffractionCrystalEnvironment();
+						model.get(i).md.getDetector2DProperties().restore(originalProps);
+						model.get(i).md.getDiffractionCrystalEnvironment().restore(originalEnvironment);
 						
-						// update wavelength
-						double wavelength = model.get(i).md.getDiffractionCrystalEnvironment().getWavelength();
-						wavelengthEnergySpinner.setDouble(getWavelengthEnergy(wavelength));
-						wavelengthDistanceSpinner.setDouble(wavelength);
-						// update wavelength in diffraction tool tree viewer
-						NumericNode<Length> node = getDiffractionTreeNode(WAVELENGTH_NODE_PATH);
-						if (node.getUnit().equals(NonSI.ANGSTROM)) {
-							updateDiffTool(WAVELENGTH_NODE_PATH, wavelength);
-						} else if (node.getUnit().equals(NonSI.ELECTRON_VOLT)) {
-							updateDiffTool(WAVELENGTH_NODE_PATH, getWavelengthEnergy(wavelength) * 1000);
-						} else if (node.getUnit().equals(SI.KILO(NonSI.ELECTRON_VOLT))) {
-							updateDiffTool(WAVELENGTH_NODE_PATH, getWavelengthEnergy(wavelength));
-						}
-						tableViewer.refresh();
 					}
+					// update diffraction tool viewer
+					updateDiffTool(BEAM_CENTRE_XPATH, currentData.md.getDetector2DProperties().getBeamCentreCoords()[0]);
+					updateDiffTool(BEAM_CENTRE_YPATH, currentData.md.getDetector2DProperties().getBeamCentreCoords()[1]);
+					updateDiffTool(DISTANCE_NODE_PATH, currentData.md.getDetector2DProperties().getBeamCentreDistance());
+					
+					// update wavelength
+					double wavelength = currentData.md.getDiffractionCrystalEnvironment().getWavelength();
+					wavelengthEnergySpinner.setDouble(getWavelengthEnergy(wavelength));
+					wavelengthDistanceSpinner.setDouble(wavelength);
+					// update wavelength in diffraction tool tree viewer
+					NumericNode<Length> node = getDiffractionTreeNode(WAVELENGTH_NODE_PATH);
+					if (node.getUnit().equals(NonSI.ANGSTROM)) {
+						updateDiffTool(WAVELENGTH_NODE_PATH, wavelength);
+					} else if (node.getUnit().equals(NonSI.ELECTRON_VOLT)) {
+						updateDiffTool(WAVELENGTH_NODE_PATH, getWavelengthEnergy(wavelength) * 1000);
+					} else if (node.getUnit().equals(SI.KILO(NonSI.ELECTRON_VOLT))) {
+						updateDiffTool(WAVELENGTH_NODE_PATH, getWavelengthEnergy(wavelength));
+					}
+					tableViewer.refresh();
 				}
 			}
 		};
@@ -296,8 +302,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 						if (d != null){
 							good = d;
 							setWavelength(d);
-							d.properties = d.md.getDetector2DProperties().clone();
-							d.crystalEnvironment = d.md.getDiffractionCrystalEnvironment().clone();
 						}
 					}
 				} else if (dropData instanceof TreeSelection) {
@@ -317,8 +321,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 						if (d != null){
 							good = d;
 							setWavelength(d);
-							d.properties = d.md.getDetector2DProperties().clone();
-							d.crystalEnvironment = d.md.getDiffractionCrystalEnvironment().clone();
 						}
 					}
 				} else if (dropData instanceof String[]) {
@@ -328,8 +330,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 						if (d != null){
 							good = d;
 							setWavelength(d);
-							d.properties = d.md.getDetector2DProperties().clone();
-							d.crystalEnvironment = d.md.getDiffractionCrystalEnvironment().clone();
 						}
 					}
 				}
@@ -847,12 +847,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 					good = d;
 					setWavelength(d);
 				}
-				if(d != null){
-					d.properties = d.md.getDetector2DProperties().clone();
-					d.crystalEnvironment = d.md.getDiffractionCrystalEnvironment().clone();
-				}
 			}
-			
 		}
 		tableViewer.refresh();
 		if (good != null) {
