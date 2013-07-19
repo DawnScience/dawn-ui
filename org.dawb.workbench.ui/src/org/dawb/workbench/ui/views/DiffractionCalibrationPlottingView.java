@@ -93,6 +93,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.PartInitException;
@@ -164,6 +165,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 	protected boolean useFixedWavelength;
 
+	private Action resetAction;
+
 	public DiffractionCalibrationPlottingView() {
 		service = (ILoaderService) PlatformUI.getWorkbench().getService(ILoaderService.class);
 	}
@@ -202,6 +205,41 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		parent.setLayout(new FillLayout());
 
 		this.parent = parent;
+
+		resetAction = new Action() {
+			@Override
+			public void run() {
+				// select last item in table
+				if (model != null && model.size() > 0) {
+					tableViewer.setSelection(new StructuredSelection(model.get(model.size() - 1)));
+					for (int i = 0; i < model.size(); i++) {
+						model.get(i).md.getDetector2DProperties().restore(model.get(i).properties);
+						model.get(i).md.getDiffractionCrystalEnvironment().restore(model.get(i).crystalEnvironment);
+						updateDiffTool(BEAM_CENTRE_XPATH, model.get(i).md.getDetector2DProperties().getBeamCentreCoords()[0]);
+						updateDiffTool(BEAM_CENTRE_YPATH, model.get(i).md.getDetector2DProperties().getBeamCentreCoords()[1]);
+						updateDiffTool(DISTANCE_NODE_PATH, model.get(i).md.getDetector2DProperties().getBeamCentreDistance());
+						
+						// update wavelength
+						double wavelength = model.get(i).md.getDiffractionCrystalEnvironment().getWavelength();
+						wavelengthEnergySpinner.setDouble(getWavelengthEnergy(wavelength));
+						wavelengthDistanceSpinner.setDouble(wavelength);
+						// update wavelength in diffraction tool tree viewer
+						NumericNode<Length> node = getDiffractionTreeNode(WAVELENGTH_NODE_PATH);
+						if (node.getUnit().equals(NonSI.ANGSTROM)) {
+							updateDiffTool(WAVELENGTH_NODE_PATH, wavelength);
+						} else if (node.getUnit().equals(NonSI.ELECTRON_VOLT)) {
+							updateDiffTool(WAVELENGTH_NODE_PATH, getWavelengthEnergy(wavelength) * 1000);
+						} else if (node.getUnit().equals(SI.KILO(NonSI.ELECTRON_VOLT))) {
+							updateDiffTool(WAVELENGTH_NODE_PATH, getWavelengthEnergy(wavelength));
+						}
+						tableViewer.refresh();
+					}
+				}
+			}
+		};
+		resetAction.setText("Reset");
+		resetAction.setToolTipText("Reset metadata");
+		resetAction.setImageDescriptor(Activator.getImageDescriptor("icons/table_delete.png"));
 
 		// selection change listener for table viewer
 		selectionChangeListener = new ISelectionChangedListener() {
@@ -258,6 +296,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 						if (d != null){
 							good = d;
 							setWavelength(d);
+							d.properties = d.md.getDetector2DProperties().clone();
+							d.crystalEnvironment = d.md.getDiffractionCrystalEnvironment().clone();
 						}
 					}
 				} else if (dropData instanceof TreeSelection) {
@@ -277,6 +317,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 						if (d != null){
 							good = d;
 							setWavelength(d);
+							d.properties = d.md.getDetector2DProperties().clone();
+							d.crystalEnvironment = d.md.getDiffractionCrystalEnvironment().clone();
 						}
 					}
 				} else if (dropData instanceof String[]) {
@@ -286,6 +328,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 						if (d != null){
 							good = d;
 							setWavelength(d);
+							d.properties = d.md.getDetector2DProperties().clone();
+							d.crystalEnvironment = d.md.getDiffractionCrystalEnvironment().clone();
 						}
 					}
 				}
@@ -803,6 +847,10 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 					good = d;
 					setWavelength(d);
 				}
+				if(d != null){
+					d.properties = d.md.getDetector2DProperties().clone();
+					d.crystalEnvironment = d.md.getDiffractionCrystalEnvironment().clone();
+				}
 			}
 			
 		}
@@ -833,6 +881,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			logger.error("Could not open diffraction tool:"+ e2);
 		}
 
+		IActionBars bars = getViewSite().getActionBars();
+		bars.getToolBarManager().add(resetAction);
 		//mainSash.setWeights(new int[] { 1, 2});
 	}
 

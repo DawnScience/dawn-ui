@@ -7,6 +7,8 @@ import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.tools.diffraction.DiffractionImageAugmenter;
 
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
+import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
 import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
@@ -23,6 +25,8 @@ public class DiffractionTableData {
 	DiffractionImageAugmenter augmenter;
 	IDiffractionMetadata md;
 	IDataset image;
+	DetectorProperties properties;
+	DiffractionCrystalEnvironment crystalEnvironment;
 	DiffractionTraceListener listener;
 	List<IROI> rois;
 	QSpace q;
