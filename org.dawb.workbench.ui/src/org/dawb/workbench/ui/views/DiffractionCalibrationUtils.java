@@ -163,12 +163,12 @@ public class DiffractionCalibrationUtils {
 					public void run() {
 						for (DiffractionTableData data : model) {
 							IDiffractionMetadata md = data.md;
-							if (!data.use || data.nrois <= 0 || md == null) {
+							if (data.q == null || !data.use || data.nrois <= 0 || md == null) {
 								continue;
 							}
 							DetectorProperties dp = md.getDetector2DProperties();
 							DiffractionCrystalEnvironment ce = md.getDiffractionCrystalEnvironment();
-							if (dp == null || ce == null || data.q == null) {
+							if (dp == null || ce == null) {
 								continue;
 							}
 
@@ -358,11 +358,11 @@ public class DiffractionCalibrationUtils {
 				List<Double> odist = new ArrayList<Double>();
 				List<Double> ndist = new ArrayList<Double>();
 				for (DiffractionTableData data : model) {
-					if (!data.use || data.nrois <= 0 || data.md == null) {
+					if (data.q == null || !data.use || data.nrois <= 0 || data.md == null) {
 						continue;
 					}
-					
-					if (data.q == null || Double.isNaN(data.od)) {
+
+					if (Double.isNaN(data.od)) {
 						continue;
 					}
 					odist.add(data.od);
@@ -373,7 +373,12 @@ public class DiffractionCalibrationUtils {
 					return Status.CANCEL_STATUS;
 				}
 				Polynomial p = new Polynomial(1);
-				Fitter.llsqFit(new AbstractDataset[] {AbstractDataset.createFromList(odist)}, AbstractDataset.createFromList(ndist), p);
+				try {
+					Fitter.polyFit(new AbstractDataset[] {AbstractDataset.createFromList(odist)}, AbstractDataset.createFromList(ndist), 1e-15, p);
+				} catch (Exception e) {
+					logger.error("Problem with fit", e);
+					return Status.CANCEL_STATUS;
+				}
 				logger.debug("Straight line fit: {}", p);
 
 				final double f = p.getParameterValue(0);
@@ -388,7 +393,7 @@ public class DiffractionCalibrationUtils {
 							final DiffractionCrystalEnvironment ce = data.md.getDiffractionCrystalEnvironment();
 							if (ce != null) {
 								data.ow = ce.getWavelength();
-								ce.setWavelength(data.ow / f);
+								ce.setWavelength(data.ow * f);
 							}
 						}
 					}
