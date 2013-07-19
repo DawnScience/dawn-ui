@@ -674,11 +674,14 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		});
 
 		Group wavelengthComp = new Group(calibrateComp, SWT.NONE);
-		wavelengthComp.setText("Wavelength");
-		wavelengthComp.setToolTipText("Set the wavelength distance/energy");
-		wavelengthComp.setLayout(new GridLayout(2, false));
+		wavelengthComp.setText("X-Rays");
+		wavelengthComp.setToolTipText("Set the wavelength / energy");
+		wavelengthComp.setLayout(new GridLayout(3, false));
 		wavelengthComp.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
-		
+
+		Label wavelengthLabel = new Label(wavelengthComp, SWT.NONE);
+		wavelengthLabel.setText("Wavelength");
+
 		wavelengthDistanceSpinner = new FloatSpinner(wavelengthComp, SWT.BORDER);
 		wavelengthDistanceSpinner.setDouble(0);
 		wavelengthDistanceSpinner.setFormat(7, 5);
@@ -709,6 +712,9 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		wavelengthDistanceSpinner.setEnabled(false);
 		Label unitDistanceLabel = new Label(wavelengthComp, SWT.NONE);
 		unitDistanceLabel.setText(NonSI.ANGSTROM.toString());
+
+		Label energyLabel = new Label(wavelengthComp, SWT.NONE);
+		energyLabel.setText("Energy");
 
 		wavelengthEnergySpinner = new FloatSpinner(wavelengthComp, SWT.BORDER);
 		wavelengthEnergySpinner.setDouble(0);
