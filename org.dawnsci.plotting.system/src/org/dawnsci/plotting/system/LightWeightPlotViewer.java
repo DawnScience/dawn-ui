@@ -438,7 +438,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		return popupListener;
 	}
 	
-	protected IFigure getFigureAtCurrentMousePosition(Class type) {
+	protected IFigure getFigureAtCurrentMousePosition(Class<?> type) {
 		Point   pnt       = Display.getDefault().getCursorLocation();
 		Point   par       = xyCanvas.toDisplay(new Point(0,0));
 		final int xOffset = par.x+xyGraph.getLocation().x;
@@ -641,6 +641,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		final ImageTrace trace = xyGraph.createImageTrace(traceName, xAxis, yAxis, intensity);
 		trace.setPlottingSystem(system);
 		
+		@SuppressWarnings("unchecked")
 		final TraceWillPlotEvent evt = new TraceWillPlotEvent(trace, data, (List<IDataset>)axes);
 		system.fireWillPlot(evt);
 		if (!evt.doit) return null;
@@ -702,7 +703,9 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		} else {
 			setTitle(title);
 		}
-		xAxis.setTitle(getName(x,rootName));
+		String n = getName(x,rootName);
+		if (n != null && n.trim().length() > 0) // only override if axis dataset has name
+			xAxis.setTitle(n);
 
 		//create a trace data provider, which will provide the data to the trace.
 		int iplot = 0;
