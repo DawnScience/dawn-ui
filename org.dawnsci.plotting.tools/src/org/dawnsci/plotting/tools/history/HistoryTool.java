@@ -1,11 +1,13 @@
 package org.dawnsci.plotting.tools.history;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.dawb.common.services.IExpressionObject;
+import org.dawb.common.ui.plot.tools.HistoryType;
 import org.dawnsci.plotting.api.trace.ILineTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.api.trace.ITraceListener;
@@ -56,7 +58,10 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
     protected Map<String, HistoryBean> getHistoryCache() {
     	return history;
     }
-		
+	@Override
+	public Serializable getToolData() {
+		return (Serializable) history;
+	}		
 	public HistoryTool() {
 		super(true);
 	}

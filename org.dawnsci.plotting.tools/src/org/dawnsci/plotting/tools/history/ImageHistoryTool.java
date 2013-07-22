@@ -1,5 +1,6 @@
 package org.dawnsci.plotting.tools.history;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -13,6 +14,7 @@ import org.dawb.common.gpu.OperationFactory;
 import org.dawb.common.gpu.Operator;
 import org.dawb.common.services.IExpressionObject;
 import org.dawb.common.ui.components.cell.ScaleCellEditor;
+import org.dawb.common.ui.plot.tools.HistoryType;
 import org.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
@@ -83,6 +85,15 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
     protected Map<String, HistoryBean> getHistoryCache() {
     	return imageHistory;
     }
+	@Override
+	public Serializable getToolData() {
+		if (imageHistory==null || imageHistory.isEmpty()) return null;
+		final Map<String, IDataset> data = new HashMap<String, IDataset>(imageHistory.size());
+		for (String key : imageHistory.keySet()) {
+			data.put(key, imageHistory.get(key).getData());
+		}
+		return (Serializable) data;
+	}
     
     /**
      * Assigned on the first activate and then kept to avoid

@@ -33,13 +33,13 @@ package org.dawnsci.plotting.tools;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.dawb.common.ui.plot.tools.HistoryType;
 import org.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.dawnsci.plotting.api.tool.IToolPage;
 import org.dawnsci.plotting.api.trace.ILineTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.api.trace.ITraceListener;
 import org.dawnsci.plotting.api.trace.TraceEvent;
-import org.dawnsci.plotting.tools.history.AbstractHistoryTool;
 import org.dawnsci.plotting.util.ColorUtility;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -149,7 +149,7 @@ public class DerivativeTool extends AbstractToolPage  {
 						List<ITrace> processableTraces = new ArrayList<ITrace>();
 						for (ITrace trace: eventSource) {
 							if (trace.isUserTrace() && 
-									trace.getUserObject() != AbstractHistoryTool.HistoryType.HISTORY_PLOT &&
+									trace.getUserObject() != HistoryType.HISTORY_PLOT &&
 									trace.getUserObject() != DerivativeTool.class) {
 								
 								processableTraces.add(trace);
@@ -248,7 +248,7 @@ public class DerivativeTool extends AbstractToolPage  {
 		// and remove them from the plot
 		if (eventTraceList.isEmpty()) {
 			for (ITrace trace : getPlottingSystem().getTraces(ILineTrace.class)) {
-				if (trace.isUserTrace() && trace.getUserObject() != AbstractHistoryTool.HistoryType.HISTORY_PLOT
+				if (trace.isUserTrace() && trace.getUserObject() != HistoryType.HISTORY_PLOT
 						&& trace.getUserObject() != DerivativeTool.class) {
 					eventTraceList.add(trace);
 					getPlottingSystem().removeTrace(trace);
@@ -355,7 +355,7 @@ public class DerivativeTool extends AbstractToolPage  {
 						dervs2Pair.clear();
 						if (eventTraceList.isEmpty()) return Status.OK_STATUS;
 						for (ITrace trace : eventTraceList) {
-								if (!trace.isUserTrace() || trace.getUserObject() == AbstractHistoryTool.HistoryType.HISTORY_PLOT)
+								if (!trace.isUserTrace() || trace.getUserObject() == HistoryType.HISTORY_PLOT)
 									continue;
 								dataTraces.add(trace);
 								dervsPair.add(processTrace(trace, Derivative.FIRST));
@@ -401,7 +401,7 @@ public class DerivativeTool extends AbstractToolPage  {
 		if (getPlottingSystem() == null) return;
 		
 		for (ITrace trace : getPlottingSystem().getTraces(ILineTrace.class)) {
-			if (trace.isUserTrace() && trace.getUserObject() != AbstractHistoryTool.HistoryType.HISTORY_PLOT) {
+			if (trace.isUserTrace() && trace.getUserObject() != HistoryType.HISTORY_PLOT) {
 				getPlottingSystem().removeTrace(trace);
 			}
 		}

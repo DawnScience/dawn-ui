@@ -66,11 +66,7 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 
 	protected final static Logger logger = LoggerFactory.getLogger(AbstractHistoryTool.class);
 	
-	public enum HistoryType {
-    	HISTORY_PLOT;
-    }
-
-    protected Composite      composite;
+	protected Composite      composite;
     protected TableViewer    viewer;
     protected ITraceListener traceListener;
 	
