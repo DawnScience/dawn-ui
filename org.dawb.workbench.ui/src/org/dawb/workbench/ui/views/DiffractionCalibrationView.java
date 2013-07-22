@@ -410,7 +410,7 @@ public class DiffractionCalibrationView extends ViewPart {
 		calibrateImages.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				DiffractionCalibrationUtils.calibrateImages(display, currentSystem, model, currentData);
+				DiffractionCalibrationUtils.calibrateImages(display, currentSystem, model, currentData, false);
 				display.asyncExec(new Runnable() {
 					@Override
 					public void run() {

@@ -41,7 +41,7 @@ import de.jreality.util.SystemProperties;
 public class JOGLChecker {
 
 	private static final String RENDER_SOFTWARE_PROPERTY_STRING = "uk.ac.diamond.analysis.rcp.plotting.useSoftware";
-	private static final String RENDER_HYBRID_PROPERTY_STRING = "uk.ac.diamond.analysis.rcp.plotting.useGL13";
+	public static final String RENDER_HYBRID_PROPERTY_STRING = "uk.ac.diamond.analysis.rcp.plotting.useGL13";
 
 	private static final Logger logger = LoggerFactory.getLogger(JOGLChecker.class);
 
@@ -95,6 +95,11 @@ public class JOGLChecker {
 				} else {
 					maxXdim = (maxXdim >> 1);
 					maxYdim = (maxYdim >> 1);
+				}
+				if (maxXdim == 0 || maxYdim == 0) {
+					logger.warn("Maximum texture size available is zero!");
+					hasJOGL = false;
+					break;
 				}
 			}
 			context.release();

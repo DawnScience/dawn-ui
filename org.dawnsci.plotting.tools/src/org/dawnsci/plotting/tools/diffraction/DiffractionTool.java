@@ -514,7 +514,15 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		var.setLabelProvider(new DelegatingProviderWithTooltip(new NodeLabelProvider(3)));
 		var.setEditingSupport(new UnitEditingSupport(viewer));
 	}
-	
+
+	/**
+	 * 
+	 * @return model
+	 */
+	public DiffractionTreeModel getModel() {
+		return model;
+	}
+
 	private TreeNode   copiedNode;
 	private MenuAction calibrantActions;
 	private Action     calPref;
@@ -1246,6 +1254,10 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	@Override
 	public Control getControl() {
 		return control;
+	}
+
+	public void refresh() {
+		viewer.refresh();
 	}
 
 	@Override

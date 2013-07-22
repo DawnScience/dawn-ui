@@ -332,7 +332,6 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	 * handle ring drawing, removal and clearing
 	 */
 	protected void drawEllipse(IRegion region,
-			                     double[] beamCentre, 
 			                      EllipticalROI eroi, 
 			                      Color colour,
 			                      Color labelColour,
@@ -396,7 +395,6 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 											boolean isMobile) {
 		if (!active) return; // We are likely off screen.
 		if (detprop != null && diffenv != null) {
-			double[] beamCentre = detprop.getBeamCentreCoords(); // detConfig.pixelCoords(detConfig.getBeamPosition());
 			IROI roi = null;
 			try {
 				roi = DSpacing.conicFromDSpacing(detprop, diffenv, ring.getResolution());
@@ -409,7 +407,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 			}
 			if (roi instanceof EllipticalROI) {
 				DecimalFormat df = new DecimalFormat("#.00");
-				drawEllipse(reused, beamCentre, (EllipticalROI) roi, ring.getColour(), ring.getColour(), name,
+				drawEllipse(reused, (EllipticalROI) roi, ring.getColour(), ring.getColour(), name,
 						df.format(ring.getResolution()) + "Å", marker, isMobile);
 			}
 		}
