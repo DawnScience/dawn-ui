@@ -106,8 +106,7 @@ public class DiffractionCalibrationUtils {
 							data.q = PowderRingsUtils.fitAllEllipsesToQSpace(mon, dp, ce, data.rois, spacings, true);
 
 							logger.debug("Q-space = {}", data.q);
-							data.od = dp.getDetectorDistance(); // store old values
-							data.ow = ce.getWavelength();
+							data.od = dp.getDetectorDistance(); // store old value
 						} catch (IllegalArgumentException e) {
 							logger.debug("Problem in calibrating image, {}: {}", data.name, e);
 						}
@@ -153,8 +152,6 @@ public class DiffractionCalibrationUtils {
 						}
 						data.q = qs.get(i++);
 						logger.debug("Q-space = {}", data.q);
-						data.od = dp.getDetectorDistance(); // store old values
-						data.ow = env.getWavelength();
 					}
 				}
 
@@ -392,8 +389,8 @@ public class DiffractionCalibrationUtils {
 
 							final DiffractionCrystalEnvironment ce = data.md.getDiffractionCrystalEnvironment();
 							if (ce != null) {
-								data.ow = ce.getWavelength();
-								ce.setWavelength(data.ow * f);
+								double ow = ce.getWavelength();
+								ce.setWavelength(ow * f);
 							}
 						}
 					}
