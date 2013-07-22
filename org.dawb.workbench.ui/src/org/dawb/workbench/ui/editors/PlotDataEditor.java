@@ -38,6 +38,7 @@ import org.dawnsci.plotting.api.PlottingFactory;
 import org.dawnsci.plotting.api.axis.IAxis;
 import org.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.dawnsci.plotting.api.trace.ITrace;
+import org.dawnsci.plotting.tools.history.AbstractHistoryTool.HistoryType;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -472,7 +473,10 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
         	public void run() {
 				final Collection<ITrace> existing = plottingSystem.getTraces();
 				existing.removeAll(traces);
-				for (ITrace iTrace : existing) plottingSystem.removeTrace(iTrace);
+				for (ITrace iTrace : existing) {
+					if (iTrace.getUserObject()==HistoryType.HISTORY_PLOT) continue;
+					plottingSystem.removeTrace(iTrace);
+				}
         	}
         });
 	}
