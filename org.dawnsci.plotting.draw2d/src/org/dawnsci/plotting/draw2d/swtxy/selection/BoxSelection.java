@@ -5,6 +5,7 @@ import java.util.Arrays;
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.ROIEvent;
+import org.dawnsci.plotting.draw2d.Activator;
 import org.dawnsci.plotting.draw2d.swtxy.translate.FigureTranslator;
 import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationEvent;
 import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationListener;
@@ -37,11 +38,17 @@ class BoxSelection extends AbstractSelectionRegion {
 	protected SelectionHandle p1, p2, p3, p4;
 
 	protected Figure connection;
+
+	private boolean outlineOnly;
 	
 	BoxSelection(String name, ICoordinateSystem coords) {
+		this(name, coords, Activator.getDefault().getPreferenceStore().getBoolean("org.dawnsci.plotting.draw2d.swtxy.selection.box.outlineonly"));
+	}
+	BoxSelection(String name, ICoordinateSystem coords, boolean outlineOnly) {
 		super(name, coords);
 		setRegionColor(IRegion.RegionType.BOX.getDefaultColor());	
 		setAlpha(80);
+		this.outlineOnly = outlineOnly;
 	}
 
 	@Override
@@ -108,6 +115,7 @@ class BoxSelection extends AbstractSelectionRegion {
 			@Override
 			public void paintFigure(Graphics gc) {
 				
+				gc.pushState();
 				/**
 				 * TODO Discuss with Peter about XOR mode
 				 */
@@ -115,12 +123,39 @@ class BoxSelection extends AbstractSelectionRegion {
 				final Rectangle size = getRectangleFromVertices();				
 				this.bounds = size;
 				gc.setAlpha(getAlpha());
-				gc.fillRectangle(size);
+				if (outlineOnly) {
+					gc.setLineWidth(5);
+					gc.drawRectangle(size);
+				} else {
+				    gc.fillRectangle(size);
+				}
 				
 				BoxSelection.this.drawLabel(gc, size);
+				
+				gc.popState();
+
 			}
 		};
 	}
+	
+	/**
+	 * 
+	 * @return true if the selection region only draws an outline.
+	 */
+	public boolean isOutlineOnly() {
+		return outlineOnly;
+	}
+	
+	/**
+	 * Set if the region should draw in outline only mode. If
+	 * outline only is not available for this selection region, this
+	 * method will throw a RuntimeException.
+	 */
+	public void setOutlineOnly(boolean outlineOnly) {
+		this.outlineOnly = outlineOnly;
+		repaint();
+	}
+
 
 	@Override
 	public boolean containsPoint(double x, double y) {

@@ -355,4 +355,17 @@ public interface IRegion {
 	 * @param b
 	 */
 	public void setShowLabel(boolean b);
+	
+	/**
+	 * 
+	 * @return true if the selection region only draws an outline.
+	 */
+	public boolean isOutlineOnly();
+	
+	/**
+	 * Set if the region should draw in outline only mode. If
+	 * outline only is not available for this selection region, this
+	 * method will throw a RuntimeException.
+	 */
+	public void setOutlineOnly(boolean outlineOnly);
 }

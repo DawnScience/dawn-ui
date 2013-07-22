@@ -270,5 +270,21 @@ public abstract class AbstractRegion extends Figure implements IRegion, IRegionC
 	public void removeMouseMotionListener(MouseMotionListener l){
 		super.removeMouseMotionListener(new MouseMotionAdapter(l));
 	}
+	/**
+	 * 
+	 * @return true if the selection region only draws an outline.
+	 */
+	public boolean isOutlineOnly() {
+		return false;
+	}
+	
+	/**
+	 * Set if the region should draw in outline only mode. If
+	 * outline only is not available for this selection region, this
+	 * method will throw a RuntimeException.
+	 */
+	public void setOutlineOnly(boolean outlineOnly) {
+		throw new RuntimeException("setOutlineOnly is not currently implemented by "+getClass().getSimpleName());
+	}
 
 }
