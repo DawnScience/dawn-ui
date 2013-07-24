@@ -10,11 +10,14 @@ Bundle-Activator: org.dawnsci.common.widgets.Activator
 Bundle-Vendor: Diamond Light Source
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources;bundle-version="3.8.1",
- org.eclipse.emf.common.ui;bundle-version="2.7.0"
+ org.eclipse.swt;bundle-version="3.8.1",
+ org.eclipse.jface;bundle-version="3.8.0",
+ org.eclipse.ui;bundle-version="3.8.2"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Import-Package: javax.measure.quantity;version="4.3.1",
  javax.measure.unit;version="4.3.1",
+ org.eclipse.emf.common.ui.dialogs,
  org.jscience.physics.amount;version="4.3.1",
  org.slf4j;version="1.5.6"
 Export-Package: org.dawnsci.common.widgets,
