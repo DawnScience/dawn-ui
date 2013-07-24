@@ -216,6 +216,7 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 		
 		final ComboNode detectorName = new ComboNode("Type", names.toArray(new String[names.size()]), detectorMeta);
 		detectorName.isEditable();
+		detectorName.setTooltip("Detector type determined from the detector preferences.");
 		detectorName.setValue(pos);
 		detectorName.addValueListener(new ValueListener() {
 			
