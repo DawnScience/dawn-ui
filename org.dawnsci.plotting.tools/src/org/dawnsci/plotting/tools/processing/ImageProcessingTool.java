@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map.Entry;
 
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
@@ -34,14 +33,10 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.slf4j.Logger;
@@ -218,62 +213,6 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 	 * @param parent
 	 */
 	protected abstract void createControlComposite(Composite parent);
-
-	/**
-	 * Create a set of Radio buttons given a list of Actions
-	 * @param parent
-	 * @param actions
-	 * @throws Exception
-	 */
-	protected void createRadioControls(Composite parent, List<Entry<String, Action>> actions) throws Exception{
-		if(actions == null) return;
-		int i = 0;
-		for (final Entry<String, Action> action : actions) {
-			final Button radioButton = new Button(parent, SWT.RADIO);
-			radioButton.setText(action.getKey());
-			radioButton.addSelectionListener(new SelectionListener() {
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					widgetDefaultSelected(e);
-				}
-				@Override
-				public void widgetDefaultSelected(SelectionEvent e) {
-					if(((Button)e.getSource()).getSelection())
-						action.getValue().run();
-				}
-			});
-			if(i == 0)
-				radioButton.setSelection(true);
-			i++;
-		}
-	}
-
-	/**
-	 * Create a set of action items in a Combo box given a list of actions
-	 * @param parent
-	 * @param actions
-	 * @throws Exception
-	 */
-	protected void createComboControls(Composite parent, final List<Entry<String, Action>> actions) throws Exception{
-		if(actions == null) return;
-		final Combo comboButton = new Combo(parent, SWT.BORDER);
-		for (final Entry<String, Action> action : actions) {
-			comboButton.add(action.getKey());
-		}
-		
-		comboButton.addSelectionListener(new SelectionListener() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				widgetDefaultSelected(e);
-			}
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				int index = ((Combo)e.getSource()).getSelectionIndex();
-				actions.get(index).getValue().run();
-			}
-		});
-		comboButton.select(0);
-	}
 
 	@Override
 	public Object getAdapter(@SuppressWarnings("rawtypes") Class clazz) {

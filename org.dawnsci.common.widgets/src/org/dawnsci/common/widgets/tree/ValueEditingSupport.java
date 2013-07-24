@@ -2,6 +2,7 @@ package org.dawnsci.common.widgets.tree;
 
 import javax.measure.quantity.Quantity;
 
+import org.dawnsci.common.widgets.celleditor.CComboCellEditor;
 import org.dawnsci.common.widgets.celleditor.FloatSpinnerCellEditor;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColorCellEditor;
@@ -34,6 +35,9 @@ public class ValueEditingSupport extends EditingSupport {
 		if (element instanceof ColorNode) {
 			return createColorEditor(element);
 		}
+		if (element instanceof ComboNode) {
+			return createComboEditor(element);
+		}
 		return null;
 	}
 	
@@ -65,6 +69,18 @@ public class ValueEditingSupport extends EditingSupport {
 		});
 		return fse;
 	}
+	
+	private CellEditor createComboEditor(final Object element) {
+		
+		ComboNode node = (ComboNode)element;
+		final CComboCellEditor cce = new CComboCellEditor((Composite)viewer.getControl(), node.getStringValues(), SWT.READ_ONLY);
+		cce.getCombo().addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				setValue(element, cce.getValue());
+			}
+		});
+		return cce;
+	}
 
 	@Override
 	protected boolean canEdit(Object element) {
@@ -81,6 +97,11 @@ public class ValueEditingSupport extends EditingSupport {
 		if (element instanceof ColorNode) {
 			ColorNode node = (ColorNode)element;
 			return node.getColor().getRGB();
+		}
+		
+		if (element instanceof ComboNode) {
+			ComboNode node = (ComboNode)element;
+			return node.getValue();
 		}
 		
 		return null;
@@ -102,6 +123,11 @@ public class ValueEditingSupport extends EditingSupport {
 				node.setColor((Color)value);
 			}
 			viewer.setSelection(null);
+		}
+		
+		if (element instanceof ComboNode) {
+			ComboNode node = (ComboNode)element;
+			node.setValue((Integer) value);
 		}
 		
 		viewer.refresh(element);

@@ -81,7 +81,8 @@ public class DiffractionCalibrationUtils {
 	public static Job calibrateImages(final Display display,
 									   final IPlottingSystem plottingSystem,
 									   final List<DiffractionTableData> model,
-									   final DiffractionTableData currentData, final boolean useFixedWavelength,
+									   final DiffractionTableData currentData,
+									   final boolean useFixedWavelength,
 									   final boolean postFixedWavelengthFit) {
 		Job job = new Job("Calibrate detector") {
 			@Override

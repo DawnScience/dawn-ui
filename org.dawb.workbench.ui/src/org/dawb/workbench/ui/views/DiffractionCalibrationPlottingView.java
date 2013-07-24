@@ -17,8 +17,10 @@
 package org.dawb.workbench.ui.views;
 
 import java.io.File;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 
 import javax.measure.quantity.Length;
 import javax.measure.unit.NonSI;
@@ -30,6 +32,7 @@ import org.dawb.workbench.ui.Activator;
 import org.dawb.workbench.ui.views.DiffractionCalibrationUtils.ManipulateMode;
 import org.dawnsci.common.widgets.spinner.FloatSpinner;
 import org.dawnsci.common.widgets.tree.NumericNode;
+import org.dawnsci.common.widgets.utils.RadioUtils;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.PlottingFactory;
@@ -154,16 +157,17 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 	private List<String> pathsList = new ArrayList<String>();
 
-	private Button wavelengthButton;
 	private double wavelength;
 	private FloatSpinner wavelengthDistanceSpinner;
 	private FloatSpinner wavelengthEnergySpinner;
 
 	private IToolPageSystem toolSystem;
 
-	protected boolean useFixedWavelength;
-
 	private Action resetAction;
+
+//	private boolean doNotRefineWavelength = true;
+	private boolean refineAfterDistance = false;
+	private boolean refineWithDistance = false;
 
 	public DiffractionCalibrationPlottingView() {
 		service = (ILoaderService) PlatformUI.getWorkbench().getService(ILoaderService.class);
@@ -430,10 +434,14 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		dt.addDropListener(dropListener);
 
 		Composite calibrantHolder = new Composite(scrollHolder, SWT.NONE);
-		calibrantHolder.setLayout(new GridLayout(2, false));
-		calibrantHolder.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false));
+		calibrantHolder.setLayout(new GridLayout(1, false));
+		calibrantHolder.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 
-		Group controllerHolder = new Group(calibrantHolder, SWT.BORDER);
+		Composite mainControlComp = new Composite(calibrantHolder, SWT.NONE);
+		mainControlComp.setLayout(new GridLayout(2, false));
+		mainControlComp.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+
+		Group controllerHolder = new Group(mainControlComp, SWT.BORDER);
 		controllerHolder.setText("Calibrant selection and positioning");
 		controllerHolder.setLayout(new GridLayout(2, false));
 		controllerHolder.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
@@ -447,6 +455,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		calibrant.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				if (currentData == null) return;
 				standards.setSelectedCalibrant(calibrant.getItem(calibrant.getSelectionIndex()));
 				DiffractionCalibrationUtils.drawCalibrantRings(currentData.augmenter);
 			}
@@ -477,6 +486,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 			@Override
 			public void stop() {
+				if (currentData == null) return;
 				updateDiffTool(BEAM_CENTRE_YPATH, currentData.md.getDetector2DProperties().getBeamCentreCoords()[1]);
 				refreshTable();
 			}
@@ -496,6 +506,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 			@Override
 			public void stop() {
+				if (currentData == null) return;
 				updateDiffTool(BEAM_CENTRE_XPATH, currentData.md.getDetector2DProperties().getBeamCentreCoords()[0]);
 				refreshTable();
 			}
@@ -512,6 +523,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 			@Override
 			public void stop() {
+				if (currentData == null) return;
 				updateDiffTool(BEAM_CENTRE_XPATH, currentData.md.getDetector2DProperties().getBeamCentreCoords()[0]);
 				refreshTable();
 			}
@@ -531,6 +543,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 			@Override
 			public void stop() {
+				if (currentData == null) return;
 				updateDiffTool(BEAM_CENTRE_YPATH, currentData.md.getDetector2DProperties().getBeamCentreCoords()[1]);
 				refreshTable();
 			}
@@ -559,6 +572,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 			@Override
 			public void stop() {
+				if (currentData == null) return;
 				updateDiffTool(DISTANCE_NODE_PATH, currentData.md.getDetector2DProperties().getBeamCentreDistance());
 				refreshTable();
 			}
@@ -575,6 +589,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 			@Override
 			public void stop() {
+				if (currentData == null) return;
 				updateDiffTool(DISTANCE_NODE_PATH, currentData.md.getDetector2DProperties().getBeamCentreDistance());
 				refreshTable();
 			}
@@ -655,20 +670,15 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		}));
 		antiClockButton.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
 
-		Composite calibrateComp = new Composite(calibrantHolder, SWT.NONE);
+		Composite calibrateComp = new Composite(mainControlComp, SWT.NONE);
 		calibrateComp.setLayout(new GridLayout(1, false));
 		calibrateComp.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 
-		wavelengthButton = new Button(calibrateComp, SWT.CHECK);
-		wavelengthButton.setText("Refine wavelength");
-		wavelengthButton.setToolTipText("Select to refine wavelength first then fit at the end of the calibration process");
-		wavelengthButton.setEnabled(false);
-		wavelengthButton.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				useFixedWavelength = wavelengthButton.getSelection();
-			}
-		});
+		try{
+			RadioUtils.createRadioControls(calibrateComp, createWavelengthRadioActions());
+		} catch (Exception e) {
+			logger.error("Could not create controls:"+e);
+		}
 
 		Group wavelengthComp = new Group(calibrateComp, SWT.NONE);
 		wavelengthComp.setText("X-Rays");
@@ -744,10 +754,14 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		Label unitEnergyLabel = new Label(wavelengthComp, SWT.NONE);
 		unitEnergyLabel.setText(SI.KILO(NonSI.ELECTRON_VOLT).toString());
 
-		Button findRingButton = new Button(calibrateComp, SWT.PUSH);
+		Composite processComp = new Composite(calibrantHolder, SWT.NONE);
+		processComp.setLayout(new GridLayout(2, false));
+		processComp.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+
+		Button findRingButton = new Button(processComp, SWT.PUSH);
 		findRingButton.setText("Find rings in image");
 		findRingButton.setToolTipText("Use pixel values to find rings in image near calibration rings");
-		findRingButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 3, 1));
+		findRingButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 		findRingButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -772,17 +786,19 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			}
 		});
 
-		calibrateImages = new Button(calibrateComp, SWT.PUSH);
+		calibrateImages = new Button(processComp, SWT.PUSH);
 		calibrateImages.setText("Run Calibration Process");
 		calibrateImages.setToolTipText("Calibrate detector in chosen images");
-		calibrateImages.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
+		calibrateImages.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 		calibrateImages.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (model.size() <= 0)
 					return;
 
-				Job calibrateJob = DiffractionCalibrationUtils.calibrateImages(display, plottingSystem, model, currentData, useFixedWavelength, false);
+				Job calibrateJob = DiffractionCalibrationUtils.calibrateImages(display, plottingSystem, model, currentData,
+						refineWithDistance || refineAfterDistance, 
+						refineAfterDistance);
 				if (calibrateJob == null)
 					return;
 				calibrateJob.addJobChangeListener(new JobChangeAdapter() {
@@ -864,6 +880,41 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		IActionBars bars = getViewSite().getActionBars();
 		bars.getToolBarManager().add(resetAction);
 		//mainSash.setWeights(new int[] { 1, 2});
+	}
+
+	private List<Entry<String, Action>> createWavelengthRadioActions(){
+		List<Entry<String, Action>> radioActions = new ArrayList<Entry<String, Action>>();
+		Entry<String, Action> noNormalisation = new AbstractMap.SimpleEntry<String, Action>("Do not refine wavelength",
+			new Action("NoRefine") {
+				@Override
+				public void run() {
+					refineAfterDistance = false;
+					refineWithDistance = false;
+				}
+			}
+		);
+		Entry<String, Action> roiNormalisation = new AbstractMap.SimpleEntry<String, Action>("Refine wavelength after distance",
+				new Action("AfterDistance") {
+					@Override
+					public void run() {
+						refineAfterDistance = true;
+						refineWithDistance = false;
+					}
+				}
+			);
+		Entry<String, Action> auxNormalisation = new AbstractMap.SimpleEntry<String, Action>("Refine wavelength with distance",
+				new Action("WithDistance") {
+					@Override
+					public void run() {
+						refineAfterDistance = false;
+						refineWithDistance = true;
+					}
+				}
+			);
+		radioActions.add(noNormalisation);
+		radioActions.add(roiNormalisation);
+		radioActions.add(auxNormalisation);
+		return radioActions;
 	}
 
 	private void updateDiffTool(String nodePath, double value) {
@@ -1192,7 +1243,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			}
 		}
 		calibrateImages.setEnabled(used > 0);
-		wavelengthButton.setEnabled(used > 0);
 	}
 
 	private void removeListeners() {
