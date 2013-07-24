@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 
 import org.dawb.common.util.io.IOUtils;
 import org.dawnsci.common.widgets.content.FileContentProposalProvider;
+import org.dawnsci.common.widgets.utils.RadioUtils;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.trace.IImageTrace;
@@ -95,7 +96,7 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 			radioGroupNorm.setLayout(new GridLayout(1, false));
 			radioGroupNorm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			radioGroupNorm.setText("Normalisation type");
-			createRadioControls(radioGroupNorm, createNormActions());
+			RadioUtils.createRadioControls(radioGroupNorm, createNormActions());
 
 			Composite auxComp = new Composite(radioGroupNorm, SWT.NONE);
 			auxComp.setLayout(new GridLayout(1, false));
