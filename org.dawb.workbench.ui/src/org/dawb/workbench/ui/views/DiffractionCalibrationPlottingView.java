@@ -455,6 +455,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		calibrant.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				if (currentData == null) return;
 				standards.setSelectedCalibrant(calibrant.getItem(calibrant.getSelectionIndex()));
 				DiffractionCalibrationUtils.drawCalibrantRings(currentData.augmenter);
 			}
@@ -485,6 +486,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 			@Override
 			public void stop() {
+				if (currentData == null) return;
 				updateDiffTool(BEAM_CENTRE_YPATH, currentData.md.getDetector2DProperties().getBeamCentreCoords()[1]);
 				refreshTable();
 			}
@@ -504,6 +506,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 			@Override
 			public void stop() {
+				if (currentData == null) return;
 				updateDiffTool(BEAM_CENTRE_XPATH, currentData.md.getDetector2DProperties().getBeamCentreCoords()[0]);
 				refreshTable();
 			}
@@ -520,6 +523,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 			@Override
 			public void stop() {
+				if (currentData == null) return;
 				updateDiffTool(BEAM_CENTRE_XPATH, currentData.md.getDetector2DProperties().getBeamCentreCoords()[0]);
 				refreshTable();
 			}
@@ -539,6 +543,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 			@Override
 			public void stop() {
+				if (currentData == null) return;
 				updateDiffTool(BEAM_CENTRE_YPATH, currentData.md.getDetector2DProperties().getBeamCentreCoords()[1]);
 				refreshTable();
 			}
@@ -567,6 +572,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 			@Override
 			public void stop() {
+				if (currentData == null) return;
 				updateDiffTool(DISTANCE_NODE_PATH, currentData.md.getDetector2DProperties().getBeamCentreDistance());
 				refreshTable();
 			}
@@ -583,6 +589,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 			@Override
 			public void stop() {
+				if (currentData == null) return;
 				updateDiffTool(DISTANCE_NODE_PATH, currentData.md.getDetector2DProperties().getBeamCentreDistance());
 				refreshTable();
 			}
