@@ -164,9 +164,11 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 	private IToolPageSystem toolSystem;
 
-	protected boolean useFixedWavelength;
-
 	private Action resetAction;
+
+	private boolean doNotRefineWavelength = true;
+	private boolean refineAfterDistance = false;
+	private boolean refineWithDistance = false;
 
 	public DiffractionCalibrationPlottingView() {
 		service = (ILoaderService) PlatformUI.getWorkbench().getService(ILoaderService.class);
@@ -662,17 +664,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		calibrateComp.setLayout(new GridLayout(1, false));
 		calibrateComp.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 
-		wavelengthButton = new Button(calibrateComp, SWT.CHECK);
-		wavelengthButton.setText("Refine wavelength");
-		wavelengthButton.setToolTipText("Select to refine wavelength first then fit at the end of the calibration process");
-		wavelengthButton.setEnabled(false);
-		wavelengthButton.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				useFixedWavelength = wavelengthButton.getSelection();
-			}
-		});
-
 		try{
 			RadioUtils.createRadioControls(calibrateComp, createWavelengthRadioActions());
 		} catch (Exception e) {
@@ -791,7 +782,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				if (model.size() <= 0)
 					return;
 
-				Job calibrateJob = DiffractionCalibrationUtils.calibrateImages(display, plottingSystem, model, currentData, useFixedWavelength, false);
+				Job calibrateJob = DiffractionCalibrationUtils.calibrateImages(display, plottingSystem, model, currentData, refineAfterDistance, refineWithDistance);
 				if (calibrateJob == null)
 					return;
 				calibrateJob.addJobChangeListener(new JobChangeAdapter() {
@@ -877,29 +868,33 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 	private List<Entry<String, Action>> createWavelengthRadioActions(){
 		List<Entry<String, Action>> radioActions = new ArrayList<Entry<String, Action>>();
-		Entry<String, Action> noNormalisation = new AbstractMap.SimpleEntry<String, Action>("Wavelength 1",
-			new Action("Wavelength 1") {
+		Entry<String, Action> noNormalisation = new AbstractMap.SimpleEntry<String, Action>("Do not refine wavelength",
+			new Action("NoRefine") {
 				@Override
 				public void run() {
-					System.out.println("wavelength 1");
+					doNotRefineWavelength = true;
+					refineAfterDistance = false;
+					refineWithDistance = false;
 				}
 			}
 		);
-		Entry<String, Action> roiNormalisation = new AbstractMap.SimpleEntry<String, Action>("Wavelength 2",
-				new Action("Wavelength 2") {
+		Entry<String, Action> roiNormalisation = new AbstractMap.SimpleEntry<String, Action>("Refine wavelength after distance",
+				new Action("AfterDistance") {
 					@Override
 					public void run() {
-						System.out.println("wavelength 2");
-
+						doNotRefineWavelength = false;
+						refineAfterDistance = true;
+						refineWithDistance = false;
 					}
 				}
 			);
-		Entry<String, Action> auxNormalisation = new AbstractMap.SimpleEntry<String, Action>("Wavelength 3",
-				new Action("Wavelength 3") {
+		Entry<String, Action> auxNormalisation = new AbstractMap.SimpleEntry<String, Action>("Refine wavelength with distance",
+				new Action("WithDistance") {
 					@Override
 					public void run() {
-						System.out.println("wavelength 3");
-
+						doNotRefineWavelength = false;
+						refineAfterDistance = false;
+						refineWithDistance = true;
 					}
 				}
 			);
