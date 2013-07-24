@@ -41,9 +41,6 @@ import org.dawnsci.plotting.tools.diffraction.DiffractionTreeModel;
 import org.dawnsci.plotting.util.PlottingUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
@@ -782,39 +779,21 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		calibrateImages.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Job calibrateJob = new Job("Calibrating") {
-					
-					@Override
-					protected IStatus run(IProgressMonitor monitor) {
-						if (model.size() <= 0)
-							return Status.CANCEL_STATUS;
+				if (model.size() <= 0)
+					return;
 
-						Job j = DiffractionCalibrationUtils.calibrateImages(display, plottingSystem, model, currentData, useFixedWavelength);
-						try {
-							j.join();
-							display.asyncExec(new Runnable() {
-								@Override
-								public void run() {
-									refreshTable();
-									setCalibrateButtons();
-								}
-							});
-						} catch (InterruptedException e) {
-						}
-						return Status.OK_STATUS;
-					}
-				};
-				calibrateJob.addJobChangeListener(new JobChangeAdapter(){
+				Job calibrateJob = DiffractionCalibrationUtils.calibrateImages(display, plottingSystem, model, currentData, useFixedWavelength, false);
+				if (calibrateJob == null)
+					return;
+				calibrateJob.addJobChangeListener(new JobChangeAdapter() {
 					@Override
 					public void done(IJobChangeEvent event) {
-						if (useFixedWavelength) {
-							display.asyncExec(new Runnable() {
-								public void run() {
-									DiffractionCalibrationUtils.calibrateWavelength(display, model, currentData);
-									refreshTable();
-								}
-							});
-						}
+						display.asyncExec(new Runnable() {
+							public void run() {
+								refreshTable();
+								setCalibrateButtons();
+							}
+						});
 					}
 				});
 				calibrateJob.schedule();
