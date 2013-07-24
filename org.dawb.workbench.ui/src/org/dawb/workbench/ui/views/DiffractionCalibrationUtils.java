@@ -74,16 +74,16 @@ public class DiffractionCalibrationUtils {
 	 * @param plottingSystem
 	 * @param model
 	 * @param currentData
-	 * @param postFixedWavelengthFit if true fit wavelength afterwards
-	 * @param withFixedWavelengthFit if true fit wavelength with distance
+	 * @param useFixedWavelength if true then fit a global environment else local
+	 * @param postFixedWavelengthFit if true and useFixedWavelength true then fit wavelength afterwards
 	 * @return job that needs to be scheduled
 	 */
 	public static Job calibrateImages(final Display display,
 									   final IPlottingSystem plottingSystem,
 									   final List<DiffractionTableData> model,
 									   final DiffractionTableData currentData,
-									   final boolean postFixedWavelengthFit,
-									   final boolean withFixedWavelengthFit) {
+									   final boolean useFixedWavelength,
+									   final boolean postFixedWavelengthFit) {
 		Job job = new Job("Calibrate detector") {
 			@Override
 			protected IStatus run(final IProgressMonitor monitor) {
@@ -112,7 +112,7 @@ public class DiffractionCalibrationUtils {
 					lROIs.add(data.rois);
 				}
 				List<QSpace> qs = null;
-				if (withFixedWavelengthFit) {
+				if (useFixedWavelength) {
 					monitor.subTask("Fitting all rings");
 					try {
 						qs = PowderRingsUtils.fitAllEllipsesToAllQSpacesAtFixedWavelength(mon, dps, env, lROIs, spacings, true);
