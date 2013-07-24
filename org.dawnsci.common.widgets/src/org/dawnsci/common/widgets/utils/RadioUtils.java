@@ -1,5 +1,6 @@
 package org.dawnsci.common.widgets.utils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -20,10 +21,12 @@ public class RadioUtils {
 	 * Create a set of Radio buttons given a list of Actions
 	 * @param parent
 	 * @param actions
+	 * @return radioButtonsList
 	 * @throws Exception
 	 */
-	public static void createRadioControls(Composite parent, List<Entry<String, Action>> actions) throws Exception{
-		if(actions == null) return;
+	public static List<Button> createRadioControls(Composite parent, List<Entry<String, Action>> actions) throws Exception{
+		List<Button> radioButtonsList = new ArrayList<Button>();
+		if(actions == null) return null;
 		int i = 0;
 		for (final Entry<String, Action> action : actions) {
 			final Button radioButton = new Button(parent, SWT.RADIO);
@@ -41,7 +44,9 @@ public class RadioUtils {
 			});
 			if(i == 0)
 				radioButton.setSelection(true);
+			radioButtonsList.add(radioButton);
 			i++;
 		}
+		return radioButtonsList;
 	}
 }

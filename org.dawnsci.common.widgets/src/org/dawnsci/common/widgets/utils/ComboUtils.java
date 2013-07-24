@@ -22,9 +22,10 @@ public class ComboUtils {
 	 * @param parent
 	 * @param actions
 	 * @throws Exception
+	 * @return comboButton
 	 */
-	public static void createComboControls(Composite parent, final List<Entry<String, Action>> actions) throws Exception{
-		if(actions == null) return;
+	public static Combo createComboControls(Composite parent, final List<Entry<String, Action>> actions) throws Exception{
+		if(actions == null) return null;
 		final Combo comboButton = new Combo(parent, SWT.BORDER);
 		for (final Entry<String, Action> action : actions) {
 			comboButton.add(action.getKey());
@@ -42,5 +43,6 @@ public class ComboUtils {
 			}
 		});
 		comboButton.select(0);
+		return comboButton;
 	}
 }
