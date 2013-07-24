@@ -157,7 +157,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 	private List<String> pathsList = new ArrayList<String>();
 
-	private Button wavelengthButton;
 	private double wavelength;
 	private FloatSpinner wavelengthDistanceSpinner;
 	private FloatSpinner wavelengthEnergySpinner;
@@ -1237,7 +1236,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			}
 		}
 		calibrateImages.setEnabled(used > 0);
-		wavelengthButton.setEnabled(used > 0);
 	}
 
 	private void removeListeners() {
