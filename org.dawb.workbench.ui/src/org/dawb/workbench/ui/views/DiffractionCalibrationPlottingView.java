@@ -166,7 +166,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 	private Action resetAction;
 
-	private boolean doNotRefineWavelength = true;
+//	private boolean doNotRefineWavelength = true;
 	private boolean refineAfterDistance = false;
 	private boolean refineWithDistance = false;
 
@@ -782,7 +782,9 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				if (model.size() <= 0)
 					return;
 
-				Job calibrateJob = DiffractionCalibrationUtils.calibrateImages(display, plottingSystem, model, currentData, refineAfterDistance, refineWithDistance);
+				Job calibrateJob = DiffractionCalibrationUtils.calibrateImages(display, plottingSystem, model, currentData,
+						refineWithDistance || refineAfterDistance, 
+						refineAfterDistance);
 				if (calibrateJob == null)
 					return;
 				calibrateJob.addJobChangeListener(new JobChangeAdapter() {
@@ -872,7 +874,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			new Action("NoRefine") {
 				@Override
 				public void run() {
-					doNotRefineWavelength = true;
 					refineAfterDistance = false;
 					refineWithDistance = false;
 				}
@@ -882,7 +883,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				new Action("AfterDistance") {
 					@Override
 					public void run() {
-						doNotRefineWavelength = false;
 						refineAfterDistance = true;
 						refineWithDistance = false;
 					}
@@ -892,7 +892,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				new Action("WithDistance") {
 					@Override
 					public void run() {
-						doNotRefineWavelength = false;
 						refineAfterDistance = false;
 						refineWithDistance = true;
 					}
