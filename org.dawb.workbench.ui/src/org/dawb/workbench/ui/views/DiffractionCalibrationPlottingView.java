@@ -17,8 +17,10 @@
 package org.dawb.workbench.ui.views;
 
 import java.io.File;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 
 import javax.measure.quantity.Length;
 import javax.measure.unit.NonSI;
@@ -30,6 +32,7 @@ import org.dawb.workbench.ui.Activator;
 import org.dawb.workbench.ui.views.DiffractionCalibrationUtils.ManipulateMode;
 import org.dawnsci.common.widgets.spinner.FloatSpinner;
 import org.dawnsci.common.widgets.tree.NumericNode;
+import org.dawnsci.common.widgets.utils.RadioUtils;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.PlottingFactory;
@@ -670,6 +673,12 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			}
 		});
 
+		try{
+			RadioUtils.createRadioControls(calibrateComp, createWavelengthRadioActions());
+		} catch (Exception e) {
+			logger.error("Could not create controls:"+e);
+		}
+
 		Group wavelengthComp = new Group(calibrateComp, SWT.NONE);
 		wavelengthComp.setText("X-Rays");
 		wavelengthComp.setToolTipText("Set the wavelength / energy");
@@ -864,6 +873,40 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		IActionBars bars = getViewSite().getActionBars();
 		bars.getToolBarManager().add(resetAction);
 		//mainSash.setWeights(new int[] { 1, 2});
+	}
+
+	private List<Entry<String, Action>> createWavelengthRadioActions(){
+		List<Entry<String, Action>> radioActions = new ArrayList<Entry<String, Action>>();
+		Entry<String, Action> noNormalisation = new AbstractMap.SimpleEntry<String, Action>("Wavelength 1",
+			new Action("Wavelength 1") {
+				@Override
+				public void run() {
+					System.out.println("wavelength 1");
+				}
+			}
+		);
+		Entry<String, Action> roiNormalisation = new AbstractMap.SimpleEntry<String, Action>("Wavelength 2",
+				new Action("Wavelength 2") {
+					@Override
+					public void run() {
+						System.out.println("wavelength 2");
+
+					}
+				}
+			);
+		Entry<String, Action> auxNormalisation = new AbstractMap.SimpleEntry<String, Action>("Wavelength 3",
+				new Action("Wavelength 3") {
+					@Override
+					public void run() {
+						System.out.println("wavelength 3");
+
+					}
+				}
+			);
+		radioActions.add(noNormalisation);
+		radioActions.add(roiNormalisation);
+		radioActions.add(auxNormalisation);
+		return radioActions;
 	}
 
 	private void updateDiffTool(String nodePath, double value) {
