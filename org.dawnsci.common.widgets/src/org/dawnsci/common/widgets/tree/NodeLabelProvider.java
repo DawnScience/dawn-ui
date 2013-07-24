@@ -31,6 +31,8 @@ public class NodeLabelProvider extends ColumnLabelProvider implements IStyledLab
 		if (element instanceof NumericNode) {
 			getStyledText(ret, (NumericNode<?>)element);
 			
+		} else if (element instanceof ComboNode){
+			getStyledText(ret, (ComboNode)element);
 		} else  if (element instanceof ObjectNode) {
 			final ObjectNode on = (ObjectNode)element;
 			if (on.isSubClass()) return ret;
@@ -53,6 +55,20 @@ public class NodeLabelProvider extends ColumnLabelProvider implements IStyledLab
 			//return ret.append("-", StyledString.QUALIFIER_STYLER);
 
 		}
+		return ret;
+	}
+	
+	private StyledString getStyledText(StyledString ret, ComboNode node) {
+		
+		if (icolumn == 2) {
+			if (node.isEditable()) {
+				ret.append(node.getStringValue());
+				ret.append(" *", StyledString.QUALIFIER_STYLER);
+			} else {
+				ret.append(node.getStringValue(), StyledString.DECORATIONS_STYLER);
+			}
+		}
+		
 		return ret;
 	}
 

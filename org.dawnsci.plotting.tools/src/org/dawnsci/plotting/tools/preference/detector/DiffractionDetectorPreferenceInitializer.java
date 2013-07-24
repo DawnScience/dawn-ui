@@ -23,8 +23,8 @@ public class DiffractionDetectorPreferenceInitializer extends AbstractPreference
 		dd.setDetectorName("Pilatus2m");
 		dd.setxPixelSize(Amount.valueOf(0.172, SI.MILLIMETRE));
 		dd.setyPixelSize(Amount.valueOf(0.172, SI.MILLIMETRE));
-		dd.setNumberOfPixelsX(1679);
-		dd.setNumberOfPixelsY(1475);
+		dd.setNumberOfPixelsX(1475);
+		dd.setNumberOfPixelsY(1679);
 		dds.addDiffractionDetector(dd);
 		dds.setDiffractionDetector(dd);
 		
@@ -33,8 +33,8 @@ public class DiffractionDetectorPreferenceInitializer extends AbstractPreference
 		dd2.setDetectorName("Pilatus6m");
 		dd2.setxPixelSize(Amount.valueOf(0.172, SI.MILLIMETRE));
 		dd2.setyPixelSize(Amount.valueOf(0.172, SI.MILLIMETRE));
-		dd2.setNumberOfPixelsX(2463);
-		dd2.setNumberOfPixelsY(2527);
+		dd2.setNumberOfPixelsX(2527);
+		dd2.setNumberOfPixelsY(2463);
 		dds.addDiffractionDetector(dd2);
 		
 		//Pilatus100k
@@ -51,8 +51,8 @@ public class DiffractionDetectorPreferenceInitializer extends AbstractPreference
 		dd4.setDetectorName("Pilatus300k");
 		dd4.setxPixelSize(Amount.valueOf(0.172, SI.MILLIMETRE));
 		dd4.setyPixelSize(Amount.valueOf(0.172, SI.MILLIMETRE));
-		dd4.setNumberOfPixelsX(487);
-		dd4.setNumberOfPixelsY(619);
+		dd4.setNumberOfPixelsX(619);
+		dd4.setNumberOfPixelsY(487);
 		dds.addDiffractionDetector(dd4);
 		
 		//Pixium RF4343

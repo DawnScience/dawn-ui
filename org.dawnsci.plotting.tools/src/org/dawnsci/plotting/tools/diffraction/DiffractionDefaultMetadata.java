@@ -1,9 +1,14 @@
 package org.dawnsci.plotting.tools.diffraction;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+
 import javax.vecmath.Vector3d;
 
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.preference.DiffractionToolConstants;
+import org.dawnsci.plotting.tools.preference.detector.DiffractionDetector;
 import org.dawnsci.plotting.tools.preference.detector.DiffractionDetectorHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,49 +31,9 @@ public class DiffractionDefaultMetadata {
 	 *            Used to produce the initial detector origin
 	 *            
 	 */
-	public static DetectorProperties getPersistedDetectorProperties(int[] shape) {
-		
-		int heightInPixels = shape[0];
-		int widthInPixels = shape[1];
-		
-		// Get the default values from the preference store
-		double pixelSizeX  = Activator.getPlottingPreferenceStore().getDouble(DiffractionToolConstants.PIXEL_SIZE_X);
-		double pixelSizeY  = Activator.getPlottingPreferenceStore().getDouble(DiffractionToolConstants.PIXEL_SIZE_Y);
-		double distance = Activator.getPlottingPreferenceStore().getDouble(DiffractionToolConstants.DISTANCE);
-		
-		//Guess pixel Size from the shape of the image
-		double[] pixelXY = DiffractionDetectorHelper.getXYPixelSizeMM(shape);
-		
-		if (pixelXY != null) {
-			pixelSizeX = pixelXY[0];
-			pixelSizeY = pixelXY[1];
-		}
-		
-		// Create the detector origin vector based on the above
-		double[] detectorOrigin = { (widthInPixels - widthInPixels/2d) * pixelSizeX, (heightInPixels - heightInPixels/2d) * pixelSizeY, distance };
-		
-		// The rotation of the detector relative to the reference frame - assume no rotation
-		double detectorRotationX = Activator.getPlottingPreferenceStore().getDouble(DiffractionToolConstants.DETECTOR_ROTATION_X);
-		double detectorRotationY = Activator.getPlottingPreferenceStore().getDouble(DiffractionToolConstants.DETECTOR_ROTATION_Y);
-		double detectorRotationZ = Activator.getPlottingPreferenceStore().getDouble(DiffractionToolConstants.DETECTOR_ROTATION_Z);
-		
-		DetectorProperties detprop =new DetectorProperties(new Vector3d(detectorOrigin), heightInPixels, widthInPixels, 
-				pixelSizeX, pixelSizeY, detectorRotationX, detectorRotationY, detectorRotationZ);
-		
-		double x = Activator.getPlottingPreferenceStore().getDouble(DiffractionToolConstants.BEAM_CENTRE_X);
-		double y = Activator.getPlottingPreferenceStore().getDouble(DiffractionToolConstants.BEAM_CENTRE_Y);
-		
-		double yaw = Activator.getPlottingPreferenceStore().getDouble(DiffractionToolConstants.DETECTOR_YAW);
-		double pitch = Activator.getPlottingPreferenceStore().getDouble(DiffractionToolConstants.DETECTOR_PITCH);
-		double roll = Activator.getPlottingPreferenceStore().getDouble(DiffractionToolConstants.DETECTOR_ROLL);
-		
-		detprop.setBeamCentreCoords(new double[] {x,y});
-		
-		detprop.setNormalAnglesInDegrees(yaw, pitch, roll);
-		
-		detprop.setBeamCentreDistance(distance);
-		
-		return detprop;
+	public static DetectorProperties getPersistedDetectorProperties(int[] shape) { 
+		DetectorBean bean = getPersistedDetectorPropertiesBean(shape);
+		return bean.getDetectorProperties();
 	}
 
 	/**
@@ -176,23 +141,96 @@ public class DiffractionDefaultMetadata {
 	 */
 	public static IDiffractionMetadata getDiffractionMetadata(String filePath, int[] shape) {
 		
-		final DetectorProperties detprop = getPersistedDetectorProperties(shape);
+		final DetectorBean detbean = getPersistedDetectorPropertiesBean(shape);
 		final DiffractionCrystalEnvironment diffenv = getPersistedDiffractionCrystalEnvironment();
 		
 		logger.debug("Meta read from preferences");
 		
-		return new DiffractionMetadata(filePath, detprop, diffenv);
+		DiffractionMetadata meta = new DiffractionMetadata(filePath, detbean.getDetectorProperties(), diffenv);
 		
+		Collection<Serializable> col = new ArrayList<Serializable>();
+		col.add(detbean.getDiffractionDetector());
+		meta.setUserObjects(col);
+		
+		return meta;
+		
+	}
+	
+	/**
+	 * Static method to produce a Detector properties object populated with persisted values
+	 * from the preferences store
+	 * 
+	 * @param shape
+	 *            shape from the AbstractDataset the detector properties are created for
+	 *            Used to produce the initial detector origin
+	 *            
+	 */
+	public static DetectorBean getPersistedDetectorPropertiesBean(int[] shape) {
+		
+		int heightInPixels = shape[0];
+		int widthInPixels = shape[1];
+		
+		// Get the default values from the preference store
+		double pixelSizeX  = Activator.getPlottingPreferenceStore().getDouble(DiffractionToolConstants.PIXEL_SIZE_X);
+		double pixelSizeY  = Activator.getPlottingPreferenceStore().getDouble(DiffractionToolConstants.PIXEL_SIZE_Y);
+		double distance = Activator.getPlottingPreferenceStore().getDouble(DiffractionToolConstants.DISTANCE);
+		
+		//Guess pixel Size from the shape of the image
+		DiffractionDetector det = DiffractionDetectorHelper.getMatchingDetector(shape);
+		
+		if (det != null) {
+			pixelSizeX = det.getXPixelMM();
+			pixelSizeY = det.getYPixelMM();
+		} else {
+			det = new DiffractionDetector();
+			det.setDetectorName("Default");
+			det.setNumberOfPixelsX(shape[0]);
+			det.setNumberOfPixelsY(shape[1]);
+			det.setXPixelMM(pixelSizeX);
+			det.setYPixelMM(pixelSizeY);
+		}
+		
+		// Create the detector origin vector based on the above
+		double[] detectorOrigin = { (widthInPixels - widthInPixels/2d) * pixelSizeX, (heightInPixels - heightInPixels/2d) * pixelSizeY, distance };
+		
+		// The rotation of the detector relative to the reference frame - assume no rotation
+		double detectorRotationX = Activator.getPlottingPreferenceStore().getDouble(DiffractionToolConstants.DETECTOR_ROTATION_X);
+		double detectorRotationY = Activator.getPlottingPreferenceStore().getDouble(DiffractionToolConstants.DETECTOR_ROTATION_Y);
+		double detectorRotationZ = Activator.getPlottingPreferenceStore().getDouble(DiffractionToolConstants.DETECTOR_ROTATION_Z);
+		
+		DetectorProperties detprop =new DetectorProperties(new Vector3d(detectorOrigin), heightInPixels, widthInPixels, 
+				pixelSizeX, pixelSizeY, detectorRotationX, detectorRotationY, detectorRotationZ);
+		
+		double x = Activator.getPlottingPreferenceStore().getDouble(DiffractionToolConstants.BEAM_CENTRE_X);
+		double y = Activator.getPlottingPreferenceStore().getDouble(DiffractionToolConstants.BEAM_CENTRE_Y);
+		
+		double yaw = Activator.getPlottingPreferenceStore().getDouble(DiffractionToolConstants.DETECTOR_YAW);
+		double pitch = Activator.getPlottingPreferenceStore().getDouble(DiffractionToolConstants.DETECTOR_PITCH);
+		double roll = Activator.getPlottingPreferenceStore().getDouble(DiffractionToolConstants.DETECTOR_ROLL);
+		
+		detprop.setBeamCentreCoords(new double[] {x,y});
+		
+		detprop.setNormalAnglesInDegrees(yaw, pitch, roll);
+		
+		detprop.setBeamCentreDistance(distance);
+		
+		return new DetectorBean(detprop, det);
 	}
 	
 	public static IDiffractionMetadata getDiffractionMetadata(int[] shape) {
 		
-		final DetectorProperties detprop = getPersistedDetectorProperties(shape);
+		final DetectorBean detbean = getPersistedDetectorPropertiesBean(shape);
 		final DiffractionCrystalEnvironment diffenv = getPersistedDiffractionCrystalEnvironment();
 		
 		logger.debug("Meta read from preferences");
 		
-		return new DiffractionMetadata(null, detprop, diffenv);
+		DiffractionMetadata meta = new DiffractionMetadata(null, detbean.getDetectorProperties(), diffenv);
+		
+		Collection<Serializable> col = new ArrayList<Serializable>();
+		col.add(detbean.getDiffractionDetector());
+		meta.setUserObjects(col);
+		
+		return meta;
 		
 	}
 }
