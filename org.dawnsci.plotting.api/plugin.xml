@@ -2,6 +2,7 @@
    <extension-point id="plottingClass" name="Plotting System" schema="schema/plottingClass.exsd"/>
    <extension-point id="toolPage" name="Tool Page" schema="schema/toolPage.exsd"/>
    <extension-point id="toolPageAction" name="Tool Page Action" schema="schema/toolPageAction.exsd"/>
+   <extension-point id="plottingAction" name="plottingAction" schema="schema/plottingAction.exsd"/>
    <extension
          point="org.eclipse.ui.views">
       <view
