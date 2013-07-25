@@ -31,6 +31,8 @@ public class RadioUtils {
 		for (final Entry<String, Action> action : actions) {
 			final Button radioButton = new Button(parent, SWT.RADIO);
 			radioButton.setText(action.getKey());
+			if (action.getValue().getToolTipText() != null)
+				radioButton.setToolTipText(action.getValue().getToolTipText());
 			radioButton.addSelectionListener(new SelectionListener() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
