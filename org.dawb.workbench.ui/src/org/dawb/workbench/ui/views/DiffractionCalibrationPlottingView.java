@@ -414,7 +414,11 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		mainControlComp.setLayout(new GridLayout(2, false));
 		mainControlComp.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 
-		Group controllerHolder = new Group(mainControlComp, SWT.BORDER);
+		Composite leftCalibComp = new Composite(mainControlComp, SWT.NONE);
+		leftCalibComp.setLayout(new GridLayout(1, false));
+		leftCalibComp.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, true));
+
+		Group controllerHolder = new Group(leftCalibComp, SWT.BORDER);
 		controllerHolder.setText("Calibrant selection and positioning");
 		controllerHolder.setLayout(new GridLayout(2, false));
 		controllerHolder.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
@@ -663,11 +667,11 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				}));
 		antiClockButton.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
 
-		Composite calibrateComp = new Composite(mainControlComp, SWT.NONE);
-		calibrateComp.setLayout(new GridLayout(1, false));
-		calibrateComp.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+		Composite rightCalibComp = new Composite(mainControlComp, SWT.NONE);
+		rightCalibComp.setLayout(new GridLayout(1, false));
+		rightCalibComp.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 
-		Group calibOptionGroup = new Group(calibrateComp, SWT.BORDER);
+		Group calibOptionGroup = new Group(rightCalibComp, SWT.BORDER);
 		calibOptionGroup.setLayout(new GridLayout(1, false));
 		calibOptionGroup.setText("Calibration options");
 		try {
@@ -676,7 +680,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			logger.error("Could not create controls:" + e);
 		}
 
-		Group wavelengthComp = new Group(calibrateComp, SWT.NONE);
+		Group wavelengthComp = new Group(rightCalibComp, SWT.NONE);
 		wavelengthComp.setText("X-Rays");
 		wavelengthComp.setToolTipText("Set the wavelength / energy");
 		wavelengthComp.setLayout(new GridLayout(3, false));
@@ -754,14 +758,14 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		Label unitEnergyLabel = new Label(wavelengthComp, SWT.NONE);
 		unitEnergyLabel.setText(SI.KILO(NonSI.ELECTRON_VOLT).toString());
 
-		Composite processComp = new Composite(calibrantHolder, SWT.NONE);
+		Composite processComp = new Composite(leftCalibComp, SWT.NONE);
 		processComp.setLayout(new GridLayout(2, false));
-		processComp.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+		processComp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
 		Button findRingButton = new Button(processComp, SWT.PUSH);
 		findRingButton.setText("Find rings in image");
 		findRingButton.setToolTipText("Use pixel values to find rings in image near calibration rings");
-		findRingButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+		findRingButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		findRingButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -789,7 +793,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		calibrateImages = new Button(processComp, SWT.PUSH);
 		calibrateImages.setText("Run Calibration Process");
 		calibrateImages.setToolTipText("Calibrate detector in chosen images");
-		calibrateImages.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+		calibrateImages.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		calibrateImages.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
