@@ -103,7 +103,8 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 
 	public double getDoubleValue() {
 		final Amount<E> val = getValue();
-		return val!=null? val.doubleValue(val.getUnit()) : Double.NaN;
+		double value =  val!=null? val.doubleValue(val.getUnit()) : Double.NaN;
+		return Double.parseDouble(format.format(value));
 	}
 	
 	public void setDoubleValue(double val) {

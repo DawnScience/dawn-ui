@@ -51,7 +51,7 @@ public class ValueEditingSupport extends EditingSupport {
 		
 		final NumericNode<? extends Quantity> node = (NumericNode<? extends Quantity>)element;
 		final FloatSpinnerCellEditor fse = new FloatSpinnerCellEditor((Composite)viewer.getControl(), SWT.NONE);
-		fse.setFormat(7, node.getDecimalPlaces()+1);
+		fse.setFormat(7, node.getDecimalPlaces());
 		fse.setIncrement(node.getIncrement());
 		fse.setMaximum(node.getUpperBoundDouble());
 		fse.setMinimum(node.getLowerBoundDouble());
