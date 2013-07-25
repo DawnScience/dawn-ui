@@ -25,4 +25,26 @@
             name="Plot Toolbar">
       </page>
    </extension>
+   
+   <!-- Example of how to add a custom action to the plotting toolbar.
+   
+   <extension
+         point="org.dawnsci.plotting.api.plottingAction">
+      <plotting_action
+            command_id="org.dawnsci.plotting.system.example.TestCommand"
+            icon="icons/error.png"
+            id="org.dawnsci.plotting.system.test1">
+      </plotting_action>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            defaultHandler="org.dawnsci.plotting.system.example.TestCommand"
+            id="org.dawnsci.plotting.system.example.TestCommand"
+            name="Test Command">
+      </command>
+   </extension>
+   
+   End example --> 
+   
 </plugin>

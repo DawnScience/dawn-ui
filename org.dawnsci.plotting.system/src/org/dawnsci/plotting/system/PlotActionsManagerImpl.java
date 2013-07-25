@@ -21,6 +21,7 @@ import org.dawb.common.ui.wizard.PlotDataConversionWizard;
 import org.dawb.common.ui.wizard.persistence.PersistenceExportWizard;
 import org.dawnsci.plotting.PlottingActionBarManager;
 import org.dawnsci.plotting.api.ActionType;
+import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.ManagerType;
 import org.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
@@ -60,6 +61,9 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 		this.system = system;
 	}
 	
+	public IPlottingSystem getSystem() {
+		return system;
+	}
 
 	private static String lastscreeshot_filename;
 

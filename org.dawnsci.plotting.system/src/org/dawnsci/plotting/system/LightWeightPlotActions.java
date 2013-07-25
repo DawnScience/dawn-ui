@@ -1,6 +1,8 @@
 package org.dawnsci.plotting.system;
 
+import java.net.URL;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +41,10 @@ import org.dawnsci.plotting.system.dialog.RemoveRegionCommand;
 import org.dawnsci.plotting.system.dialog.RemoveRegionDialog;
 import org.dawnsci.plotting.system.dialog.XYRegionConfigDialog;
 import org.dawnsci.plotting.system.preference.ToolbarConfigurationConstants;
+import org.eclipse.core.commands.Command;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionManager;
@@ -65,7 +71,9 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IReusableEditor;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.dialogs.PreferencesUtil;
+import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,6 +107,7 @@ class LightWeightPlotActions {
 
 	public void createLightWeightActions() {
 		
+		createActionsByExtensionPoint();
  		createConfigActions(xyGraph);
  		createAnnotationActions(xyGraph);
  		actionBarManager.createToolDimensionalActions(ToolPageRole.ROLE_1D, "org.dawb.workbench.plotting.views.toolPageView.1D");
@@ -136,6 +145,86 @@ class LightWeightPlotActions {
 		actionBarManager.addPropertyChangeListener(switchListener);
 		
  		createPreferencesAction(); // Must be last thing
+	}
+
+	/**
+	 * Reads any extended actions
+	 */
+	private void createActionsByExtensionPoint() {
+		
+		final ICommandService service = (ICommandService)PlatformUI.getWorkbench().getService(ICommandService.class);
+
+		final IConfigurationElement[] eles = Platform.getExtensionRegistry().getConfigurationElementsFor("org.dawnsci.plotting.api.plottingAction");
+	    if (eles==null) return;
+	    
+	    for (IConfigurationElement ie : eles) {
+	    	
+			final String name = ie.getAttribute("plot_name");
+			if (name!=null && !name.equals(actionBarManager.getSystem().getPlotName())) continue;
+			
+			final String commandId = ie.getAttribute("command_id");
+			final Command command = service.getCommand(commandId);
+			final String action_id = ie.getAttribute("id");
+			if (command==null) {
+				logger.error("Cannot find command '"+commandId+"' in plot action "+action_id);
+				continue;
+			}
+			
+			final String iconPath = ie.getAttribute("icon");
+			ImageDescriptor icon=null;
+	    	if (iconPath!=null) {
+		    	final String   id    = ie.getContributor().getName();
+		    	final Bundle   bundle= Platform.getBundle(id);
+		    	final URL      entry = bundle.getEntry(iconPath);
+		    	icon = ImageDescriptor.createFromURL(entry);
+	    	}
+	    	String label = ie.getAttribute("label");
+	    	if (label==null||"".equals(label)) {
+	    		try {
+	    			label = command.getName();
+	    		} catch (Throwable ne) {
+		    		try {
+	    			    label = command.getDescription();
+		    		} catch (Throwable neOther) {
+		    			label = "Unknown command";
+		    		}
+	    		}
+	    	}
+	    	
+			final Action action = new Action(label) {
+				public void run() {
+					final ExecutionEvent event = new ExecutionEvent(command, Collections.EMPTY_MAP, this, actionBarManager.getSystem());
+					try {
+						command.executeWithChecks(event);
+					} catch (Throwable e) {
+						logger.error("Cannot execute command '"+command.getId()+" from action "+action_id, e);
+					}
+				}
+			};
+			if (icon!=null) action.setImageDescriptor(icon);
+			
+	    	String type = ie.getAttribute("action_type");
+	    	ManagerType manType;
+            if (type!=null && !"".equals(type) && "MENUBAR".equals(type)) {
+            	manType = ManagerType.MENUBAR;
+            } else {
+            	manType = ManagerType.TOOLBAR;
+            }
+            
+            ActionType actionType = ActionType.ALL;
+            type = ie.getAttribute("plot_type");
+            if (type!=null) {
+            	for (ActionType at : ActionType.values()) {
+					if (at.toString().equals(type)) {
+						actionType = at;
+						break;
+					}
+				}
+            }
+			
+        	actionBarManager.registerAction(action, actionType, manType);
+
+		}
 	}
 
 	private void createPreferencesAction() {

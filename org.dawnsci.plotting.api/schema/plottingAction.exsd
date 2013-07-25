@@ -51,6 +51,8 @@
       <annotation>
          <documentation>
             A action that is registered to one tool page. This action will only appear on the page if the programmer of the page allows actions by extension point.
+
+NOTE: When you implement the command which is referenced by this action, the application context is the instance of IPlottingSystem which the action is active with. From the execute method you will get an ExecutionEvent, using ExecutionEvent.getApplicationContext() will provide the current IPlottingSystem.
          </documentation>
       </annotation>
       <complexType>
