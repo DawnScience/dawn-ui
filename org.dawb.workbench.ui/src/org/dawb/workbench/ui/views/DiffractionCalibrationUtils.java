@@ -115,7 +115,7 @@ public class DiffractionCalibrationUtils {
 				if (useFixedWavelength) {
 					monitor.subTask("Fitting all rings");
 					try {
-						qs = PowderRingsUtils.fitAllEllipsesToAllQSpacesAtFixedWavelength(mon, dps, env, lROIs, spacings, true);
+						qs = PowderRingsUtils.fitAllEllipsesToAllQSpacesAtFixedWavelength(mon, dps, env, lROIs, spacings, postFixedWavelengthFit);
 					} catch (IllegalArgumentException e) {
 						logger.debug("Problem in calibrating all image: {}", e);
 					}
