@@ -1315,6 +1315,11 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 	private void removeListeners() {
 		tableViewer.removeSelectionChangedListener(selectionChangeListener);
+		// deactivate the diffraction tool
+		DiffractionTool diffTool = (DiffractionTool) toolSystem.getToolPage(DIFFRACTION_ID);
+		if (diffTool != null)
+			diffTool.deactivate();
+		// deactivate each augmenter in loaded data
 		for (DiffractionTableData d : model) {
 			if (d.augmenter != null)
 				d.augmenter.deactivate();
