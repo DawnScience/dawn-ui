@@ -16,6 +16,8 @@
 
 package org.dawb.workbench.ui.views;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -498,4 +500,40 @@ public class DiffractionCalibrationUtils {
 		return null;
 	}
 
+	/**
+	 * Saves to a csv file a table of arrays
+	 * @param filename
+	 *           The filename to save the data to
+	 * @param names
+	 *           names of each column
+	 * @param values
+	 *           values for each columns and rows
+	 */
+	public static void saveToCsvFile(String filename, String[] names, Object[][] values) {
+		if (names.length != values[0].length) {
+			logger.error("The names and values arrays don't have the same size");
+			return;
+		}
+		try {
+			FileWriter writer = new FileWriter(filename);
+			// write names
+			for (int i = 0; i < names.length; i++) {
+				writer.append(names[i]);
+				writer.append(';');
+			}
+			writer.append('\n');
+			// write values
+			for (int i = 0; i < values[0].length; i++) {
+				for (int j = 0; j < values.length; j++) {
+					writer.append((String)values[i][j]);
+					writer.append(';');
+				}
+				writer.append('\n');
+			}
+			writer.flush();
+			writer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }

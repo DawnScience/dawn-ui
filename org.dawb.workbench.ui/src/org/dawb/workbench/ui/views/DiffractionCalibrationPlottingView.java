@@ -16,8 +16,6 @@
 
 package org.dawb.workbench.ui.views;
 
-import gda.analysis.io.ScanFileHolderException;
-
 import java.io.File;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -84,6 +82,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
@@ -118,8 +117,6 @@ import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironmentE
 import uk.ac.diamond.scisoft.analysis.diffraction.IDetectorPropertyListener;
 import uk.ac.diamond.scisoft.analysis.diffraction.IDiffractionCrystalEnvironmentListener;
 import uk.ac.diamond.scisoft.analysis.hdf5.HDF5NodeLink;
-import uk.ac.diamond.scisoft.analysis.io.ASCIIDataHolderSaver;
-import uk.ac.diamond.scisoft.analysis.io.DataHolder;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 
 /**
@@ -369,6 +366,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 						+ "modify the rings using the controls below and tick the checkbox near to the corresponding "
 						+ "image before pressing the calibration buttons.");
 		instructionLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false));
+		Point pt = instructionLabel.getSize(); pt.x +=4; pt.y += 4; instructionLabel.setSize(pt);
 
 		// make a scrolled composite
 		scrollComposite = new ScrolledComposite(controlComp, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
@@ -890,6 +888,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		// mainSash.setWeights(new int[] { 1, 2});
 	}
 
+	private String[] names = new String[]{ "Image", "Number of rings", "Distance", 
+			"X beam centre", "Y beam centre", "Wavelength", "Energy", "Residuals" };
 	private void createToolbarActions(Composite parent) {
 		ToolBar tb = new ToolBar(parent, SWT.NONE);
 		tb.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
@@ -920,21 +920,29 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				dialog.setFileName("metadata.csv");
 				String savedFilePath = dialog.open();
 				if (savedFilePath != null) {
-					DataHolder dh = new DataHolder();
+					String[][] values = new String[names.length][8];
 					for (int i = 0; i < model.size(); i++) {
-//						IMetaData md;
-//						dh.setMetadata(md);
-//						model.get(i).
+						DetectorProperties dp = model.get(i).md.getDetector2DProperties();
+						double wavelength = model.get(i).md.getDiffractionCrystalEnvironment().getWavelength();
+						// image
+						values[i][0] = model.get(i).name;
+						// number of rings
+						values[i][1] = String.valueOf(model.get(i).nrois);
+						// distance
+						values[i][2] = String.valueOf(dp.getDetectorDistance());
+						// X beam centre
+						values[i][3] = String.valueOf(dp.getBeamCentreCoords()[0]);
+						// Y beam centre
+						values[i][4] = String.valueOf(dp.getBeamCentreCoords()[1]);
+						// wavelength
+						values[i][5] = String.valueOf(wavelength);
+						// energy
+						values[i][6] = String.valueOf(getWavelengthEnergy(wavelength));
+						// residuals
+						values[i][7] = String.format("%.2f", Math.sqrt(model.get(i).q.getResidual()));
 					}
-					ASCIIDataHolderSaver saver = new ASCIIDataHolderSaver(savedFilePath);
-					try {
-						saver.saveFile(dh);
-					} catch (ScanFileHolderException e) {
-						e.printStackTrace();
-						logger.error("Error saving to XLS:"+e);
-					}
+					DiffractionCalibrationUtils.saveToCsvFile(savedFilePath, names, values);
 				}
-				System.out.println(savedFilePath);
 			}
 		});
 
