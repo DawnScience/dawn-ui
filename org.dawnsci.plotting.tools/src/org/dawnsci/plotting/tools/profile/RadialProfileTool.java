@@ -421,7 +421,7 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 			qSpace = new QSpace(detprops, diffexp);
 		}
 		
-		AbstractDataset[] profile = ROIProfile.sector(data, mask, sroi, true, false, isDrag, qSpace, axis);
+		AbstractDataset[] profile = ROIProfile.sector(data, mask, sroi, true, false, isDrag, qSpace, axis, false);
 		
         if (profile == null) {
         	return null;

@@ -160,7 +160,7 @@ public class BeamCenterRefinement implements MultivariateFunction {
 		    	qSpace = new QSpace(detprops, diffexp);
 	    	}
 		}
-		AbstractDataset[] intresult = ROIProfile.sector(dataset, mask, tmpRoi, true, false, false, qSpace, axis);
+		AbstractDataset[] intresult = ROIProfile.sector(dataset, mask, tmpRoi, true, false, false, qSpace, axis, false);
 		AbstractDataset axis = intresult[4];
 		double error = 0.0;
 		ArrayList<IPeak> peaks = new ArrayList<IPeak>(initPeaks.size());
