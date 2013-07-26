@@ -16,6 +16,8 @@
 
 package org.dawb.workbench.ui.views;
 
+import gda.analysis.io.ScanFileHolderException;
+
 import java.io.File;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -27,6 +29,7 @@ import javax.measure.unit.NonSI;
 import javax.measure.unit.SI;
 
 import org.dawb.common.services.ILoaderService;
+import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawb.workbench.ui.Activator;
 import org.dawb.workbench.ui.views.DiffractionCalibrationUtils.ManipulateMode;
@@ -89,11 +92,13 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
-import org.eclipse.ui.IActionBars;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.PartInitException;
@@ -113,6 +118,8 @@ import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironmentE
 import uk.ac.diamond.scisoft.analysis.diffraction.IDetectorPropertyListener;
 import uk.ac.diamond.scisoft.analysis.diffraction.IDiffractionCrystalEnvironmentListener;
 import uk.ac.diamond.scisoft.analysis.hdf5.HDF5NodeLink;
+import uk.ac.diamond.scisoft.analysis.io.ASCIIDataHolderSaver;
+import uk.ac.diamond.scisoft.analysis.io.DataHolder;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 
 /**
@@ -204,8 +211,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		parent.setLayout(new FillLayout());
 
 		this.parent = parent;
-
-		createToolbarActions();
 
 		// selection change listener for table viewer
 		selectionChangeListener = new ISelectionChangedListener() {
@@ -356,6 +361,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 		Composite controlComp = new Composite(leftSash, SWT.NONE);
 		controlComp.setLayout(new GridLayout(1, false));
+		GridUtils.removeMargins(controlComp);
+		createToolbarActions(controlComp);
 
 		Label instructionLabel = new Label(controlComp, SWT.WRAP);
 		instructionLabel.setText("Drag/drop a file/data to the table below, choose a type of calibrant, "
@@ -883,20 +890,57 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		// mainSash.setWeights(new int[] { 1, 2});
 	}
 
-	private void createToolbarActions() {
-		Action exportAction = new Action() {
-			@Override
-			public void run() {
+	private void createToolbarActions(Composite parent) {
+		ToolBar tb = new ToolBar(parent, SWT.NONE);
+		tb.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
 
+		Image exportImage = new Image(Display.getDefault(), Activator.getImageDescriptor("icons/page_white_excel.png").getImageData());
+		Image resetImage = new Image(Display.getDefault(), Activator.getImageDescriptor("icons/table_delete.png").getImageData());
+		ToolItem exportItem = new ToolItem(tb, SWT.PUSH);
+		ToolItem resetItem = new ToolItem(tb, SWT.PUSH);
+
+		Button exportButton = new Button(tb, SWT.PUSH);
+		exportItem.setToolTipText("Export metadata to XLS");
+		exportItem.setControl(exportButton);
+		exportItem.setImage(exportImage);
+
+		Button resetButton = new Button(tb, SWT.PUSH);
+		resetItem.setToolTipText("Reset metadata");
+		resetItem.setControl(resetButton);
+		resetItem.setImage(resetImage);
+
+		exportItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				FileDialog dialog = new FileDialog(Display.getDefault().getActiveShell(), SWT.SAVE);
+				dialog.setText("Save metadata to Comma Separated Value file");
+				dialog.setFilterNames(new String[] { "CSV Files", "All Files (*.*)" });
+				dialog.setFilterExtensions(new String[] { "*.csv", "*.*" });
+				//dialog.setFilterPath("c:\\"); // Windows path
+				dialog.setFileName("metadata.csv");
+				String savedFilePath = dialog.open();
+				if (savedFilePath != null) {
+					DataHolder dh = new DataHolder();
+					for (int i = 0; i < model.size(); i++) {
+//						IMetaData md;
+//						dh.setMetadata(md);
+//						model.get(i).
+					}
+					ASCIIDataHolderSaver saver = new ASCIIDataHolderSaver(savedFilePath);
+					try {
+						saver.saveFile(dh);
+					} catch (ScanFileHolderException e) {
+						e.printStackTrace();
+						logger.error("Error saving to XLS:"+e);
+					}
+				}
+				System.out.println(savedFilePath);
 			}
-		};
-		exportAction.setText("Export");
-		exportAction.setToolTipText("Export metadata to XLS");
-		exportAction.setImageDescriptor(Activator.getImageDescriptor("icons/page_white_excel.png"));
+		});
 
-		Action resetAction = new Action() {
+		resetItem.addSelectionListener(new SelectionAdapter() {
 			@Override
-			public void run() {
+			public void widgetSelected(SelectionEvent event) {
 				// select last item in table
 				if (model != null && model.size() > 0) {
 					tableViewer.setSelection(new StructuredSelection(model.get(model.size() - 1)));
@@ -928,29 +972,11 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 					tableViewer.refresh();
 				}
 			}
-		};
-		resetAction.setText("Reset");
-		resetAction.setToolTipText("Reset metadata");
-		resetAction.setImageDescriptor(Activator.getImageDescriptor("icons/table_delete.png"));
-
-		IActionBars bars = getViewSite().getActionBars();
-		bars.getToolBarManager().add(exportAction);
-		bars.getToolBarManager().add(resetAction);
+		});
 	}
 
 	private List<Entry<String, Action>> createWavelengthRadioActions() {
 		List<Entry<String, Action>> radioActions = new ArrayList<Entry<String, Action>>();
-
-		Action simultaneousFitAction = new Action() {
-			@Override
-			public void run() {
-				usedFixedWavelength = false;
-			}
-		};
-		simultaneousFitAction.setToolTipText("Fits all the parameters at once"); // TODO
-		Entry<String, Action> simultaneousFit = new AbstractMap.SimpleEntry<String, Action>(
-				"Simultaneous Fit",
-				simultaneousFitAction);
 
 		Action usedFixedWavelengthAction = new Action() {
 			@Override
@@ -964,6 +990,17 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				"Per Image Fit with fixed wavelength",
 				usedFixedWavelengthAction);
 
+		Action simultaneousFitAction = new Action() {
+			@Override
+			public void run() {
+				usedFixedWavelength = false;
+			}
+		};
+		simultaneousFitAction.setToolTipText("Fits all the parameters at once"); // TODO
+		Entry<String, Action> simultaneousFit = new AbstractMap.SimpleEntry<String, Action>(
+				"Fit wavelength and distance",
+				simultaneousFitAction);
+
 		Action postWavelengthAction = new Action() {
 			@Override
 			public void run() {
@@ -976,8 +1013,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				"Per Image Fit then refine wavelength",
 				postWavelengthAction);
 
-		radioActions.add(simultaneousFit);
 		radioActions.add(perImageFitWithFixedWavelength);
+		radioActions.add(simultaneousFit);
 		radioActions.add(perImageFitPostFixedWavelength);
 
 		return radioActions;
