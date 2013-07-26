@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            class="org.dawnsci.spectrum.ui.SpectrumPerspective"
+            id="org.dawnsci.spectrum.ui.perspective"
+            name="Spectrum">
+      </perspective>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            class="org.dawnsci.spectrum.ui.views.SpectrumView"
+            id="org.dawnsci.spectrum.ui.views.SpectrumView"
+            name="Spectrum View">
+      </view>
+      <view
+            class="uk.ac.diamond.scisoft.analysis.rcp.views.PlotView"
+            id="org.dawnsci.spectrum.ui.views.SpectrumPlot"
+            name="Spectrum Plot"
+            restorable="true">
+      </view>
+      <view
+            allowMultiple="false"
+            class="org.eclipse.ui.navigator.CommonNavigator"
+            id="org.dawnsci.spectrum.ui.views.SpectrumProject"
+            name="Specrum Project"
+            restorable="true">
+      </view>
+      <view
+            class="org.dawnsci.spectrum.ui.views.SpectrumDatasetView"
+            id="org.dawnsci.spectrum.ui.SpectrumDatasetView"
+            name="Datasets"
+            restorable="true">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.navigator.viewer">
+      <viewer
+            inheritBindingsFromViewer="org.dawnsci.spectrum.ui.SpectrumProject"
+            viewerId="org.dawnsci.spectrum.ui.SpectrumProject">
+      </viewer>
+      <viewerContentBinding
+            viewerId="org.dawnsci.spectrum.ui.views.SpectrumProject">
+         <includes>
+            <contentExtension
+                  pattern="org.eclipse.ui.navigator.resourceContent">
+            </contentExtension>
+         </includes>
+      </viewerContentBinding>
+      <viewerActionBinding
+            viewerId="org.dawnsci.spectrum.ui.views.SpectrumProject">
+         <includes>
+            <actionExtension
+                  pattern="org.dawnsci.spectrum.ui.actions.OpenProvider">
+            </actionExtension>
+         </includes>
+      </viewerActionBinding>
+   </extension>
+   <extension
+         point="org.eclipse.ui.navigator.navigatorContent">
+      <actionProvider
+            class="org.dawnsci.spectrum.ui.actions.SpectrumActionProvider"
+            id="org.dawnsci.spectrum.ui.actions.OpenProvider"
+            overrides="org.eclipse.ui.navigator.resources.OpenActions">
+         <enablement>
+            <and>
+               <instanceof
+                     value="org.eclipse.core.resources.IFile">
+               </instanceof>
+            </and>
+         </enablement>
+      </actionProvider>
+   </extension>
+
+</plugin>
