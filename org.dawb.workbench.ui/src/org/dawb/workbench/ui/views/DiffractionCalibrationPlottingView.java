@@ -1084,8 +1084,10 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		if (wavelengthDistanceSpinner.getDouble() == 0 && wavelengthEnergySpinner.getDouble() == 0) {
 			if (data != null) {
 				wavelength = data.md.getOriginalDiffractionCrystalEnvironment().getWavelength();
-				wavelengthDistanceSpinner.setDouble(wavelength);
-				wavelengthEnergySpinner.setDouble(getWavelengthEnergy(wavelength));
+				if (wavelength != Double.POSITIVE_INFINITY)
+					wavelengthDistanceSpinner.setDouble(wavelength);
+				if(getWavelengthEnergy(wavelength) != Double.POSITIVE_INFINITY)
+					wavelengthEnergySpinner.setDouble(getWavelengthEnergy(wavelength));
 			}
 		}
 	}
