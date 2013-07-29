@@ -523,8 +523,8 @@ public class DiffractionCalibrationUtils {
 			}
 			writer.append('\n');
 			// write values
-			for (int i = 0; i < values[0].length; i++) {
-				for (int j = 0; j < values.length; j++) {
+			for (int i = 0; i < values.length; i++) {
+				for (int j = 0; j < values[0].length; j++) {
 					writer.append((String)values[i][j]);
 					writer.append(';');
 				}
@@ -532,8 +532,10 @@ public class DiffractionCalibrationUtils {
 			}
 			writer.flush();
 			writer.close();
+			logger.debug("Metadata saved to file");
 		} catch (IOException e) {
 			e.printStackTrace();
+			logger.error("Error saving metadata:"+e);
 		}
 	}
 }
