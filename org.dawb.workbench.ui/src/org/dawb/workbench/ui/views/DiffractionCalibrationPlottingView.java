@@ -107,6 +107,8 @@ import org.eclipse.ui.part.ViewPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSelectedListener;
+import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSelectionEvent;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationStandards;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
@@ -148,8 +150,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 	private ScrolledComposite scrollComposite;
 	private Composite scrollHolder;
 	private TableViewer tableViewer;
-	private Button calibrateImages;
-	private Combo calibrant;
+	private Button calibrateImagesButton;
+	private Combo calibrantCombo;
 	private Action deleteAction;
 
 	private IPlottingSystem plottingSystem;
@@ -158,6 +160,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 	private DropTargetAdapter dropListener;
 	private IDiffractionCrystalEnvironmentListener diffractionCrystEnvListener;
 	private IDetectorPropertyListener detectorPropertyListener;
+	private CalibrantSelectedListener calibrantChangeListener;
 
 	private List<String> pathsList = new ArrayList<String>();
 
@@ -175,6 +178,9 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 	}
 
 	private static final String DATA_PATH = "DataPath";
+	private static final String CALIBRANT = "Calibrant";
+
+	private String calibrantName;
 
 	@Override
 	public void init(IViewSite site, IMemento memento) throws PartInitException {
@@ -188,6 +194,9 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 					int i = Integer.parseInt(k.substring(DATA_PATH.length()));
 					pathsList.add(i, memento.getString(k));
 				}
+				if (k.startsWith(CALIBRANT)) {
+					calibrantName = memento.getString(k);
+				}
 			}
 		}
 	}
@@ -200,6 +209,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				DiffractionTableData data = (DiffractionTableData) t.getData();
 				memento.putString(DATA_PATH + String.valueOf(i++), data.path);
 			}
+			memento.putString(CALIBRANT, calibrantCombo.getItem(calibrantCombo.getSelectionIndex()));
 		}
 	}
 
@@ -208,6 +218,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		parent.setLayout(new FillLayout());
 
 		this.parent = parent;
+		final Display display = parent.getDisplay();
 
 		// selection change listener for table viewer
 		selectionChangeListener = new ISelectionChangedListener() {
@@ -219,13 +230,10 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 					DiffractionTableData selectedData = (DiffractionTableData) structSelection.getFirstElement();
 					if (selectedData == null || selectedData == currentData)
 						return;
-
 					drawSelectedData(selectedData);
 				}
 			}
 		};
-
-		final Display display = parent.getDisplay();
 
 		diffractionCrystEnvListener = new IDiffractionCrystalEnvironmentListener() {
 			@Override
@@ -261,6 +269,13 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 						tableViewer.refresh();
 					}
 				});
+			}
+		};
+
+		calibrantChangeListener = new CalibrantSelectedListener() {
+			@Override
+			public void calibrantSelectionChanged(CalibrantSelectionEvent evt) {
+				calibrantCombo.select(calibrantCombo.indexOf(evt.getCalibrant()));
 			}
 		};
 
@@ -432,25 +447,27 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		Label l = new Label(controllerHolder, SWT.NONE);
 		l.setText("Calibrant:");
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-		calibrant = new Combo(controllerHolder, SWT.READ_ONLY);
+		calibrantCombo = new Combo(controllerHolder, SWT.READ_ONLY);
 		final CalibrationStandards standards = CalibrationFactory.getCalibrationStandards();
-		calibrant.addSelectionListener(new SelectionAdapter() {
+		calibrantCombo.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (currentData == null)
 					return;
-				standards.setSelectedCalibrant(calibrant.getItem(calibrant.getSelectionIndex()));
+				String calibrantName = calibrantCombo.getItem(calibrantCombo.getSelectionIndex());
+				// update the calibrant in diffraction tool
+				standards.setSelectedCalibrant(calibrantName, true);
 				DiffractionCalibrationUtils.drawCalibrantRings(currentData.augmenter);
 			}
 		});
 		for (String c : standards.getCalibrantList()) {
-			calibrant.add(c);
+			calibrantCombo.add(c);
 		}
 		String s = standards.getSelectedCalibrant();
 		if (s != null) {
-			calibrant.setText(s);
+			calibrantCombo.setText(s);
 		}
-		calibrant.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		calibrantCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 
 		Composite padComp = new Composite(controllerHolder, SWT.BORDER);
 		padComp.setLayout(new GridLayout(5, false));
@@ -795,11 +812,11 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			}
 		});
 
-		calibrateImages = new Button(processComp, SWT.PUSH);
-		calibrateImages.setText("Run Calibration Process");
-		calibrateImages.setToolTipText("Calibrate detector in chosen images");
-		calibrateImages.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		calibrateImages.addSelectionListener(new SelectionAdapter() {
+		calibrateImagesButton = new Button(processComp, SWT.PUSH);
+		calibrateImagesButton.setText("Run Calibration Process");
+		calibrateImagesButton.setToolTipText("Calibrate detector in chosen images");
+		calibrateImagesButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		calibrateImagesButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (model.size() <= 0)
@@ -823,7 +840,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				calibrateJob.schedule();
 			}
 		});
-		calibrateImages.setEnabled(false);
+		calibrateImagesButton.setEnabled(false);
 
 		scrollHolder.layout();
 		scrollComposite.setContent(scrollHolder);
@@ -855,6 +872,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				if (good == null && d != null) {
 					good = d;
 					setWavelength(d);
+					setCalibrant();
 				}
 			}
 		}
@@ -885,6 +903,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			logger.error("Could not open diffraction tool:" + e2);
 		}
 
+		CalibrationFactory.addCalibrantSelectionListener(calibrantChangeListener);
 		// mainSash.setWeights(new int[] { 1, 2});
 	}
 
@@ -1066,6 +1085,17 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				wavelengthDistanceSpinner.setDouble(wavelength);
 				wavelengthEnergySpinner.setDouble(getWavelengthEnergy(wavelength));
 			}
+		}
+	}
+
+	private void setCalibrant() {
+		// set the calibrant
+		CalibrationStandards standard = CalibrationFactory.getCalibrationStandards();
+		if (calibrantName != null) {
+			calibrantCombo.select(calibrantCombo.indexOf(calibrantName));
+			standard.setSelectedCalibrant(calibrantName, true);
+		} else {
+			calibrantCombo.select(calibrantCombo.indexOf(standard.getSelectedCalibrant()));
 		}
 	}
 
@@ -1361,11 +1391,12 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				used++;
 			}
 		}
-		calibrateImages.setEnabled(used > 0);
+		calibrateImagesButton.setEnabled(used > 0);
 	}
 
 	private void removeListeners() {
 		tableViewer.removeSelectionChangedListener(selectionChangeListener);
+		CalibrationFactory.removeCalibrantSelectionListener(calibrantChangeListener);
 		// deactivate the diffraction tool
 		DiffractionTool diffTool = (DiffractionTool) toolSystem.getToolPage(DIFFRACTION_ID);
 		if (diffTool != null)
