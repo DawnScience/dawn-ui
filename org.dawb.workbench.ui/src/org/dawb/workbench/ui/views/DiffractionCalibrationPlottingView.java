@@ -937,6 +937,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				dialog.setFilterExtensions(new String[] { "*.csv", "*.*" });
 				//dialog.setFilterPath("c:\\"); // Windows path
 				dialog.setFileName("metadata.csv");
+				dialog.setOverwrite(true);
 				String savedFilePath = dialog.open();
 				if (savedFilePath != null) {
 					String[][] values = new String[model.size()][names.length];
@@ -958,7 +959,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 						// energy
 						values[i][6] = String.valueOf(getWavelengthEnergy(wavelength));
 						// residuals
-						values[i][7] = String.format("%.2f", Math.sqrt(model.get(i).q.getResidual()));
+						if (model.get(i).q != null)
+							values[i][7] = String.format("%.2f", Math.sqrt(model.get(i).q.getResidual()));
 						// Orientation Yaw
 						values[i][8] = String.valueOf(dp.getNormalAnglesInDegrees()[0]);
 						// Orientation Pitch
