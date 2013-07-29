@@ -560,7 +560,12 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		l = new Label(padComp, SWT.NONE);
 		l = new Label(padComp, SWT.NONE);
 
-		Composite actionComp = new Composite(controllerHolder, SWT.NONE);
+		// Resize group actions
+		Composite mainActionComp = new Composite(controllerHolder, SWT.NONE);
+		mainActionComp.setLayout(new GridLayout(1, false));
+		mainActionComp.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, true));
+
+		Composite actionComp = new Composite(mainActionComp, SWT.NONE);
 		actionComp.setLayout(new GridLayout(3, false));
 		actionComp.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, true));
 
@@ -689,10 +694,39 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				}));
 		antiClockButton.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
 
+		Button findRingButton = new Button(mainActionComp, SWT.PUSH);
+		findRingButton.setText("Find rings in image");
+		findRingButton.setToolTipText("Use pixel values to find rings in image near calibration rings");
+		findRingButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		findRingButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Job findRingsJob = DiffractionCalibrationUtils.findRings(display, plottingSystem, currentData);
+				if (findRingsJob == null)
+					return;
+				findRingsJob.addJobChangeListener(new JobChangeAdapter() {
+					@Override
+					public void done(IJobChangeEvent event) {
+						display.asyncExec(new Runnable() {
+							@Override
+							public void run() {
+								if (currentData != null && currentData.nrois > 0) {
+									setCalibrateButtons();
+								}
+								refreshTable();
+							}
+						});
+					}
+				});
+				findRingsJob.schedule();
+			}
+		});
+
 		Composite rightCalibComp = new Composite(mainControlComp, SWT.NONE);
 		rightCalibComp.setLayout(new GridLayout(1, false));
 		rightCalibComp.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 
+		// Radio group
 		Group calibOptionGroup = new Group(rightCalibComp, SWT.BORDER);
 		calibOptionGroup.setLayout(new GridLayout(1, false));
 		calibOptionGroup.setText("Calibration options");
@@ -701,6 +735,35 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		} catch (Exception e) {
 			logger.error("Could not create controls:" + e);
 		}
+		calibrateImagesButton = new Button(calibOptionGroup, SWT.PUSH);
+		calibrateImagesButton.setText("Run Calibration Process");
+		calibrateImagesButton.setToolTipText("Calibrate detector in chosen images");
+		calibrateImagesButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		calibrateImagesButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (model.size() <= 0)
+					return;
+
+				Job calibrateJob = DiffractionCalibrationUtils.calibrateImages(display, plottingSystem, model, currentData,
+						usedFixedWavelength, postFitWavelength);
+				if (calibrateJob == null)
+					return;
+				calibrateJob.addJobChangeListener(new JobChangeAdapter() {
+					@Override
+					public void done(IJobChangeEvent event) {
+						display.asyncExec(new Runnable() {
+							public void run() {
+								refreshTable();
+								setCalibrateButtons();
+							}
+						});
+					}
+				});
+				calibrateJob.schedule();
+			}
+		});
+		calibrateImagesButton.setEnabled(false);
 
 		Group wavelengthComp = new Group(rightCalibComp, SWT.NONE);
 		wavelengthComp.setText("X-Rays");
@@ -780,68 +843,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		Label unitEnergyLabel = new Label(wavelengthComp, SWT.NONE);
 		unitEnergyLabel.setText(SI.KILO(NonSI.ELECTRON_VOLT).toString());
 
-		Composite processComp = new Composite(leftCalibComp, SWT.NONE);
-		processComp.setLayout(new GridLayout(2, false));
-		processComp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-
-		Button findRingButton = new Button(processComp, SWT.PUSH);
-		findRingButton.setText("Find rings in image");
-		findRingButton.setToolTipText("Use pixel values to find rings in image near calibration rings");
-		findRingButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		findRingButton.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				Job findRingsJob = DiffractionCalibrationUtils.findRings(display, plottingSystem, currentData);
-				if (findRingsJob == null)
-					return;
-				findRingsJob.addJobChangeListener(new JobChangeAdapter() {
-					@Override
-					public void done(IJobChangeEvent event) {
-						display.asyncExec(new Runnable() {
-							@Override
-							public void run() {
-								if (currentData != null && currentData.nrois > 0) {
-									setCalibrateButtons();
-								}
-								refreshTable();
-							}
-						});
-					}
-				});
-				findRingsJob.schedule();
-			}
-		});
-
-		calibrateImagesButton = new Button(processComp, SWT.PUSH);
-		calibrateImagesButton.setText("Run Calibration Process");
-		calibrateImagesButton.setToolTipText("Calibrate detector in chosen images");
-		calibrateImagesButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		calibrateImagesButton.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				if (model.size() <= 0)
-					return;
-
-				Job calibrateJob = DiffractionCalibrationUtils.calibrateImages(display, plottingSystem, model, currentData,
-						usedFixedWavelength, postFitWavelength);
-				if (calibrateJob == null)
-					return;
-				calibrateJob.addJobChangeListener(new JobChangeAdapter() {
-					@Override
-					public void done(IJobChangeEvent event) {
-						display.asyncExec(new Runnable() {
-							public void run() {
-								refreshTable();
-								setCalibrateButtons();
-							}
-						});
-					}
-				});
-				calibrateJob.schedule();
-			}
-		});
-		calibrateImagesButton.setEnabled(false);
-
 		scrollHolder.layout();
 		scrollComposite.setContent(scrollHolder);
 		scrollComposite.setExpandHorizontal(true);
@@ -909,6 +910,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 	private String[] names = new String[]{ "Image", "Number of rings", "Distance", 
 			"X beam centre", "Y beam centre", "Wavelength", "Energy", "Residuals", "Yaw", "Pitch", "Roll" };
+
 	private void createToolbarActions(Composite parent) {
 		ToolBar tb = new ToolBar(parent, SWT.NONE);
 		tb.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
