@@ -50,11 +50,11 @@ public class ThreadSafePlottingSystem extends StandardMBean implements IPlotting
 
 	private static final Logger logger = LoggerFactory.getLogger(ThreadSafePlottingSystem.class);
 	
-	private IPlottingSystem deligate;
+	private IPlottingSystem delegate;
 
-	public ThreadSafePlottingSystem(IPlottingSystem deligate) throws Exception {
+	public ThreadSafePlottingSystem(IPlottingSystem delegate) throws Exception {
 		super(IPlottingSystem.class);
-		this.deligate = deligate;
+		this.delegate = delegate;
 	}
 
 	@Override
@@ -94,27 +94,27 @@ public class ThreadSafePlottingSystem extends StandardMBean implements IPlotting
 
 	@Override
 	public ITrace getTrace(String name) {
-		return deligate.getTrace(name);
+		return delegate.getTrace(name);
 	}
 
 	@Override
 	public Collection<ITrace> getTraces() {
-		return deligate.getTraces();
+		return delegate.getTraces();
 	}
 
 	@Override
 	public Collection<ITrace> getTraces(Class<? extends ITrace> clazz) {
-		return deligate.getTraces(clazz);
+		return delegate.getTraces(clazz);
 	}
 
 	@Override
 	public void addTraceListener(ITraceListener l) {
-		deligate.addTraceListener(l);
+		delegate.addTraceListener(l);
 	}
 
 	@Override
 	public void removeTraceListener(ITraceListener l) {
-		deligate.removeTraceListener(l);
+		delegate.removeTraceListener(l);
 	}
 
 	@Override
@@ -139,22 +139,22 @@ public class ThreadSafePlottingSystem extends StandardMBean implements IPlotting
 
 	@Override
 	public IRegion getRegion(String name) {
-		return deligate.getRegion(name);
+		return delegate.getRegion(name);
 	}
 
 	@Override
 	public Collection<IRegion> getRegions(RegionType type) {
-        return deligate.getRegions(type);
+        return delegate.getRegions(type);
 	}
 
 	@Override
 	public boolean addRegionListener(IRegionListener l) {
-		return deligate.addRegionListener(l);
+		return delegate.addRegionListener(l);
 	}
 
 	@Override
 	public boolean removeRegionListener(IRegionListener l) {
-		return deligate.removeRegionListener(l);
+		return delegate.removeRegionListener(l);
 	}
 
 	@Override
@@ -164,7 +164,7 @@ public class ThreadSafePlottingSystem extends StandardMBean implements IPlotting
 
 	@Override
 	public Collection<IRegion> getRegions() {
-		return deligate.getRegions();
+		return delegate.getRegions();
 	}
 
 	@Override
@@ -181,7 +181,7 @@ public class ThreadSafePlottingSystem extends StandardMBean implements IPlotting
 
 	@Override
 	public IAxis getSelectedYAxis() {
-		return deligate.getSelectedYAxis();
+		return delegate.getSelectedYAxis();
 	}
 
 	@Override
@@ -191,7 +191,7 @@ public class ThreadSafePlottingSystem extends StandardMBean implements IPlotting
 
 	@Override
 	public IAxis getSelectedXAxis() {
-		return deligate.getSelectedXAxis();
+		return delegate.getSelectedXAxis();
 	}
 
 	@Override
@@ -221,7 +221,7 @@ public class ThreadSafePlottingSystem extends StandardMBean implements IPlotting
 
 	@Override
 	public IAnnotation getAnnotation(String name) {
-		return deligate.getAnnotation(name);
+		return delegate.getAnnotation(name);
 	}
 
 	@Override
@@ -277,36 +277,36 @@ public class ThreadSafePlottingSystem extends StandardMBean implements IPlotting
 
 	@Override
 	public String getPlotName() {
-		return deligate.getPlotName();
+		return delegate.getPlotName();
 	}
 
 	@Override
 	public List<ITrace> createPlot1D(IDataset x, List<? extends IDataset> ys, IProgressMonitor monitor) {
-		return deligate.createPlot1D(x, ys, monitor);
+		return delegate.createPlot1D(x, ys, monitor);
 	}
 
 	@Override
 	public List<ITrace> createPlot1D(IDataset x,
 			List<? extends IDataset> ys, String title, IProgressMonitor monitor) {
-		return deligate.createPlot1D(x, ys, title, monitor);
+		return delegate.createPlot1D(x, ys, title, monitor);
 	}
 
 	@Override
 	public List<ITrace> updatePlot1D(IDataset x,
 			List<? extends IDataset> ys, IProgressMonitor monitor) {
-		return deligate.updatePlot1D(x, ys, monitor);
+		return delegate.updatePlot1D(x, ys, monitor);
 	}
 
 	@Override
 	public ITrace createPlot2D(IDataset image,
 			List<? extends IDataset> axes, IProgressMonitor monitor) {
-		return deligate.createPlot2D(image, axes, monitor);
+		return delegate.createPlot2D(image, axes, monitor);
 	}
 
 	@Override
 	public ITrace updatePlot2D(IDataset image,
 			List<? extends IDataset> axes, IProgressMonitor monitor) {
-		return deligate.updatePlot2D(image, axes, monitor);
+		return delegate.updatePlot2D(image, axes, monitor);
 	}
 
 	@Override
@@ -316,17 +316,17 @@ public class ThreadSafePlottingSystem extends StandardMBean implements IPlotting
 
 	@Override
 	public void append(String dataSetName, Number xValue, Number yValue, IProgressMonitor monitor) throws Exception {
-		deligate.append(dataSetName, xValue, yValue, monitor);
+		delegate.append(dataSetName, xValue, yValue, monitor);
 	}
 
 	@Override
 	public void reset() {
-		deligate.reset();
+		delegate.reset();
 	}
 
 	@Override
 	public void clear() {
-		deligate.clear();
+		delegate.clear();
 	}
 
 	@Override
@@ -346,37 +346,37 @@ public class ThreadSafePlottingSystem extends StandardMBean implements IPlotting
 
 	@Override
 	public Composite getPlotComposite() {
-		return deligate.getPlotComposite();
+		return delegate.getPlotComposite();
 	}
 
 	@Override
 	public ISelectionProvider getSelectionProvider() {
-		return deligate.getSelectionProvider();
+		return delegate.getSelectionProvider();
 	}
 
 	@Override
 	public IDataset getData(String dataSetName) {
-		return deligate.getData(dataSetName);
+		return delegate.getData(dataSetName);
 	}
 
 	@Override
 	public PlotType getPlotType() {
-		return deligate.getPlotType();
+		return delegate.getPlotType();
 	}
 
 	@Override
 	public boolean is2D() {
-		return deligate.is2D();
+		return delegate.is2D();
 	}
 
 	@Override
 	public IActionBars getActionBars() {
-		return deligate.getActionBars();
+		return delegate.getActionBars();
 	}
 
 	@Override
 	public IPlotActionSystem getPlotActionSystem() {
-		return deligate.getPlotActionSystem();
+		return delegate.getPlotActionSystem();
 	}
 
 	@Override
@@ -410,8 +410,8 @@ public class ThreadSafePlottingSystem extends StandardMBean implements IPlotting
 		Display.getDefault().syncExec(new Runnable() {
 			public void run() {
 				try {
-				    Method method = deligate.getClass().getMethod(methodName, classes);
-				    Object val    = method.invoke(deligate, args);
+				    Method method = delegate.getClass().getMethod(methodName, classes);
+				    Object val    = method.invoke(delegate, args);
 				    ret.add(val);
 				} catch (Exception ne) {
 					logger.error("Cannot execute "+methodName+" with "+args, ne);
@@ -503,7 +503,7 @@ public class ThreadSafePlottingSystem extends StandardMBean implements IPlotting
 	}
 
 	@Override
-	public Object getAdapter(Class adapter) {
+	public Object getAdapter(@SuppressWarnings("rawtypes") Class adapter) {
 		return call(getMethodName(Thread.currentThread().getStackTrace()), new Class[] { adapter }, adapter);
 	}
 
