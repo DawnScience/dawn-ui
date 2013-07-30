@@ -912,6 +912,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			logger.error("Could not open diffraction tool:" + e2);
 		}
 
+		CalibrationFactory.addCalibrantSelectionListener(calibrantChangeListener);
 		// mainSash.setWeights(new int[] { 1, 2});
 	}
 
