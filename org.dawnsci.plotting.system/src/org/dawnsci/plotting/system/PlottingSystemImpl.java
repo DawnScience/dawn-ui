@@ -229,7 +229,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	public List<ITrace> createPlot1D(final IDataset       xIn, 
 					                 final List<? extends IDataset> ysIn,
 					                 final IProgressMonitor      monitor) {
-        return this.createPlot1D(xIn, ysIn, null, monitor);
+        return createPlot1D(xIn, ysIn, null, monitor);
 	}
 
 	/**
@@ -794,7 +794,6 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 				}
 			});
 		}
-
 	}
 
 	private void clearInternal() {
@@ -1157,8 +1156,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		lightWeightViewer.setKeepAspect(checked);
 	}
 	
-	public Object getAdapter(Class adapter) {
-		
+	public Object getAdapter(@SuppressWarnings("rawtypes") Class adapter) {
 		if (adapter == XYRegionGraph.class) {
 			return lightWeightViewer!=null ? lightWeightViewer.getXYRegionGraph() : null;
 		} else if (adapter == LightWeightPlotViewer.class) {
