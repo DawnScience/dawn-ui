@@ -42,12 +42,12 @@ public class XYRegionGraph extends XYGraph {
 		removeAxis(primaryXAxis);
 		removeAxis(primaryYAxis);
 		
-		primaryYAxis = new AspectAxis("Y-Axis", true);
+		primaryYAxis = new AspectAxis(Y_AXIS, true);
 		primaryYAxis.setTickLabelSide(LabelSide.Primary);
 		primaryYAxis.setAutoScaleThreshold(0.1);
 		addAxis(primaryYAxis);
 
-		primaryXAxis = new AspectAxis("X-Axis", false);
+		primaryXAxis = new AspectAxis(X_AXIS, false);
 		primaryXAxis.setTickLabelSide(LabelSide.Primary);
 		addAxis(primaryXAxis);
 
@@ -415,5 +415,16 @@ public class XYRegionGraph extends XYGraph {
 
 	public void setSelectedYAxis(IAxis selectedYAxis) {
 		this.selectedYAxis = selectedYAxis;
+	}
+
+	@Override
+	public boolean removeAxis(Axis axis) {
+		// need to be done to stop inconsistency(!)
+		if (axis == selectedXAxis) {
+			selectedXAxis = null;
+		} else if (axis == selectedYAxis) {
+			selectedYAxis = null;
+		}
+		return super.removeAxis(axis);
 	}
 }
