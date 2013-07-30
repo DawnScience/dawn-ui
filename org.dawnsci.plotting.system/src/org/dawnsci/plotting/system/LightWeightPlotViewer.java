@@ -16,6 +16,7 @@ import org.csstudio.swt.widgets.figureparts.ColorMapRamp;
 import org.csstudio.swt.widgets.figures.ScaledSliderFigure;
 import org.csstudio.swt.xygraph.figures.Annotation;
 import org.csstudio.swt.xygraph.figures.Axis;
+import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.swt.xygraph.linearscale.AbstractScale.LabelSide;
 import org.csstudio.swt.xygraph.undo.AddAnnotationCommand;
 import org.csstudio.swt.xygraph.undo.RemoveAnnotationCommand;
@@ -843,7 +844,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 				clearRegions();
 				clearAxes();
 				clearTraces();
-	
+				setTitle("");
 			} catch (Throwable e) {
 				throw new RuntimeException(e); // We cannot deal with it here.
 			}
@@ -851,19 +852,20 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 	}
 		
 	private void clearAxes() {
-		for (Axis axis : xyGraph.getAxisList()) {
-			axis.setRange(0,100);
-			axis.setTitle("");
-			if (axis!=getSelectedXAxis() && axis!=getSelectedYAxis()) {
-				axis.setVisible(false);
-			}
-		}
+		removeAdditionalAxes();
+		xyGraph.primaryXAxis.setRange(0, 100);
+		xyGraph.primaryXAxis.setTitle(XYGraph.X_AXIS);
+		xyGraph.primaryYAxis.setRange(0, 100);
+		xyGraph.primaryYAxis.setTitle(XYGraph.Y_AXIS);
 	}
 	
 	protected void removeAdditionalAxes() {
+		xyGraph.setSelectedXAxis((IAxis) xyGraph.primaryXAxis);
+		xyGraph.setSelectedYAxis((IAxis) xyGraph.primaryYAxis);
 		for (Axis axis : xyGraph.getAxisList()) {
 			if (axis!=getSelectedXAxis() && axis!=getSelectedYAxis()) {
 				axis.setVisible(false);
+				removeAxis((IAxis) axis);
 			}
 		}
 	}
