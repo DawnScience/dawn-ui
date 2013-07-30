@@ -526,7 +526,7 @@ public class DiffractionCalibrationUtils {
 			for (int i = 0; i < values.length; i++) {
 				for (int j = 0; j < values[0].length; j++) {
 					writer.append((String)values[i][j]);
-					writer.append(';');
+					writer.append(',');
 				}
 				writer.append('\n');
 			}
