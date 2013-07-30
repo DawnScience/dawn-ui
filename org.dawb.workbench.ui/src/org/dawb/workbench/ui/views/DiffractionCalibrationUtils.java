@@ -76,7 +76,7 @@ public class DiffractionCalibrationUtils {
 	 * @param plottingSystem
 	 * @param model
 	 * @param currentData
-	 * @param useFixedWavelength if true then fit a global environment else local
+	 * @param useFixedWavelength if true then fit using a fixed global wavelength
 	 * @param postFixedWavelengthFit if true and useFixedWavelength true then fit wavelength afterwards
 	 * @return job that needs to be scheduled
 	 */
