@@ -20,6 +20,7 @@ import java.io.File;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map.Entry;
 
 import javax.measure.quantity.Length;
@@ -31,7 +32,6 @@ import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawb.workbench.ui.Activator;
 import org.dawb.workbench.ui.views.DiffractionCalibrationUtils.ManipulateMode;
-import org.dawnsci.common.widgets.spinner.FloatSpinner;
 import org.dawnsci.common.widgets.tree.NumericNode;
 import org.dawnsci.common.widgets.utils.RadioUtils;
 import org.dawnsci.plotting.api.IPlottingSystem;
@@ -68,6 +68,8 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.nebula.widgets.formattedtext.FormattedText;
+import org.eclipse.nebula.widgets.formattedtext.NumberFormatter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -91,9 +93,11 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.ToolBar;
@@ -115,9 +119,9 @@ import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorPropertyEvent;
 import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
-import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironmentEvent;
+//import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironmentEvent;
 import uk.ac.diamond.scisoft.analysis.diffraction.IDetectorPropertyListener;
-import uk.ac.diamond.scisoft.analysis.diffraction.IDiffractionCrystalEnvironmentListener;
+//import uk.ac.diamond.scisoft.analysis.diffraction.IDiffractionCrystalEnvironmentListener;
 import uk.ac.diamond.scisoft.analysis.hdf5.HDF5NodeLink;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 
@@ -143,6 +147,9 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 	private final String BEAM_CENTRE_YPATH = "/Detector/Beam Centre/Y";
 	private final String DISTANCE_NODE_PATH = "/Experimental Information/Distance";
 
+	public static final String EDIT_MASK = "##,##0.0000";
+	public static final String DISPLAY_MASK = "##,##0.####";
+
 	private List<DiffractionTableData> model = new ArrayList<DiffractionTableData>();
 	private ILoaderService service;
 
@@ -152,21 +159,22 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 	private TableViewer tableViewer;
 	private Button calibrateImagesButton;
 	private Combo calibrantCombo;
+	private Group wavelengthComp;
+	private Group calibOptionGroup;
 	private Action deleteAction;
 
 	private IPlottingSystem plottingSystem;
 
 	private ISelectionChangedListener selectionChangeListener;
 	private DropTargetAdapter dropListener;
-	private IDiffractionCrystalEnvironmentListener diffractionCrystEnvListener;
+//	private IDiffractionCrystalEnvironmentListener diffractionCrystEnvListener;
 	private IDetectorPropertyListener detectorPropertyListener;
 	private CalibrantSelectedListener calibrantChangeListener;
 
 	private List<String> pathsList = new ArrayList<String>();
 
-	private double wavelength;
-	private FloatSpinner wavelengthDistanceSpinner;
-	private FloatSpinner wavelengthEnergySpinner;
+	private FormattedText wavelengthDistanceField;
+	private FormattedText wavelengthEnergyField;
 
 	private IToolPageSystem toolSystem;
 
@@ -235,30 +243,31 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			}
 		};
 
-		diffractionCrystEnvListener = new IDiffractionCrystalEnvironmentListener() {
-			@Override
-			public void diffractionCrystalEnvironmentChanged(
-					final DiffractionCrystalEnvironmentEvent evt) {
-				display.asyncExec(new Runnable() {
-					@Override
-					public void run() {
-						// update spinner value with data from diff tool
-						NumericNode<Length> node = getDiffractionTreeNode(WAVELENGTH_NODE_PATH);
-						if (node.getUnit().equals(NonSI.ANGSTROM)) {
-							wavelengthDistanceSpinner.setDouble(node.getDoubleValue());
-							wavelengthEnergySpinner.setDouble(getWavelengthEnergy(node.getDoubleValue()));
-						} else if (node.getUnit().equals(NonSI.ELECTRON_VOLT)) {
-							wavelengthDistanceSpinner.setDouble(getWavelengthEnergy(node.getDoubleValue() / 1000));
-							wavelengthEnergySpinner.setDouble(node.getDoubleValue() / 1000);
-						} else if (node.getUnit().equals(SI.KILO(NonSI.ELECTRON_VOLT))) {
-							wavelengthDistanceSpinner.setDouble(getWavelengthEnergy(node.getDoubleValue()));
-							wavelengthEnergySpinner.setDouble(node.getDoubleValue());
-						}
-						tableViewer.refresh();
-					}
-				});
-			}
-		};
+//		diffractionCrystEnvListener = new IDiffractionCrystalEnvironmentListener() {
+//			@Override
+//			public void diffractionCrystalEnvironmentChanged(
+//					final DiffractionCrystalEnvironmentEvent evt) {
+//				display.asyncExec(new Runnable() {
+//					@Override
+//					public void run() {
+//						// if the change is triggered by the text field update and not the diffraction tool
+//						// update spinner value with data from diff tool
+//						NumericNode<Length> node = getDiffractionTreeNode(WAVELENGTH_NODE_PATH);
+//						if (node.getUnit().equals(NonSI.ANGSTROM)) {
+//							wavelengthDistanceField.setValue(node.getDoubleValue());
+//							wavelengthEnergyField.setValue(getWavelengthEnergy(node.getDoubleValue()));
+//						} else if (node.getUnit().equals(NonSI.ELECTRON_VOLT)) {
+//							wavelengthDistanceField.setValue(getWavelengthEnergy(node.getDoubleValue() / 1000));
+//							wavelengthEnergyField.setValue(node.getDoubleValue() / 1000);
+//						} else if (node.getUnit().equals(SI.KILO(NonSI.ELECTRON_VOLT))) {
+//							wavelengthDistanceField.setValue(getWavelengthEnergy(node.getDoubleValue()));
+//							wavelengthEnergyField.setValue(node.getDoubleValue());
+//						}
+//						tableViewer.refresh();
+//					}
+//				});
+//			}
+//		};
 
 		detectorPropertyListener = new IDetectorPropertyListener() {
 			@Override
@@ -328,10 +337,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 					tableViewer.getTable().deselectAll();
 					tableViewer.setSelection(new StructuredSelection(good));
 				}
-				if (model.size() > 0) {
-					wavelengthDistanceSpinner.setEnabled(true);
-					wavelengthEnergySpinner.setEnabled(true);
-				}
+				if (model.size() > 0)
+					setXRaysModifiersEnabled(true);
 			}
 		};
 
@@ -344,7 +351,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 					if (model.remove(selectedData)) {
 						selectedData.augmenter.deactivate();
 						selectedData.md.getDetector2DProperties().removeDetectorPropertyListener(detectorPropertyListener);
-						selectedData.md.getDiffractionCrystalEnvironment().removeDiffractionCrystalEnvironmentListener(diffractionCrystEnvListener);
+//						selectedData.md.getDiffractionCrystalEnvironment().removeDiffractionCrystalEnvironmentListener(diffractionCrystEnvListener);
 						tableViewer.refresh();
 					}
 				}
@@ -353,8 +360,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				} else {
 					currentData = null; // need to reset this
 					plottingSystem.clear();
-					wavelengthDistanceSpinner.setEnabled(false);
-					wavelengthEnergySpinner.setEnabled(false);
+					setXRaysModifiersEnabled(false);
 				}
 			}
 		};
@@ -695,7 +701,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		antiClockButton.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
 
 		Button findRingButton = new Button(mainActionComp, SWT.PUSH);
-		findRingButton.setText("Find rings in image");
+		findRingButton.setText("Match rings to image");
 		findRingButton.setToolTipText("Use pixel values to find rings in image near calibration rings");
 		findRingButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		findRingButton.addSelectionListener(new SelectionAdapter() {
@@ -727,7 +733,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		rightCalibComp.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 
 		// Radio group
-		Group calibOptionGroup = new Group(rightCalibComp, SWT.BORDER);
+		calibOptionGroup = new Group(rightCalibComp, SWT.BORDER);
 		calibOptionGroup.setLayout(new GridLayout(1, false));
 		calibOptionGroup.setText("Calibration options");
 		try {
@@ -763,9 +769,9 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				calibrateJob.schedule();
 			}
 		});
-		calibrateImagesButton.setEnabled(false);
+		setCalibrateOptionsEnabled(false);
 
-		Group wavelengthComp = new Group(rightCalibComp, SWT.NONE);
+		wavelengthComp = new Group(rightCalibComp, SWT.NONE);
 		wavelengthComp.setText("X-Rays");
 		wavelengthComp.setToolTipText("Set the wavelength / energy");
 		wavelengthComp.setLayout(new GridLayout(3, false));
@@ -774,28 +780,29 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		Label wavelengthLabel = new Label(wavelengthComp, SWT.NONE);
 		wavelengthLabel.setText("Wavelength");
 
-		wavelengthDistanceSpinner = new FloatSpinner(wavelengthComp, SWT.BORDER);
-		wavelengthDistanceSpinner.setDouble(0);
-		wavelengthDistanceSpinner.setFormat(7, 5);
-		wavelengthDistanceSpinner.setMinimum(0);
-		wavelengthDistanceSpinner.setMaximum(Double.MAX_VALUE);
-		wavelengthDistanceSpinner.setIncrement(0.001);
-		wavelengthDistanceSpinner.setToolTipText("Set the wavelength in Angstrom");
-		wavelengthDistanceSpinner.addSelectionListener(new SelectionAdapter() {
+		wavelengthDistanceField = new FormattedText(wavelengthComp, SWT.SINGLE | SWT.BORDER);
+		wavelengthDistanceField.setFormatter(new NumberFormatter(EDIT_MASK, DISPLAY_MASK, Locale.UK));
+		wavelengthDistanceField.getControl().setToolTipText("Set the wavelength in Angstrom");
+		wavelengthDistanceField.getControl().addListener(SWT.KeyUp, new Listener() {
 			@Override
-			public void widgetSelected(SelectionEvent e) {
+			public void handleEvent(Event event) {
 				// update wavelength of each image
+				double distance = 0;
+				Object obj = wavelengthDistanceField.getValue();
+				if (obj instanceof Long)
+					distance = ((Long) obj).doubleValue();
+				else if (obj instanceof Double)
+					distance = (Double) obj;
 				for (int i = 0; i < model.size(); i++) {
-					model.get(i).md.getDiffractionCrystalEnvironment().setWavelength(wavelengthDistanceSpinner.getDouble());
+					model.get(i).md.getDiffractionCrystalEnvironment().setWavelength(distance);
 				}
 				// update wavelength in keV
-				double energy = getWavelengthEnergy(wavelengthDistanceSpinner.getDouble());
-				if (energy != Double.POSITIVE_INFINITY)
-					wavelengthEnergySpinner.setDouble(energy);
+				double energy = getWavelengthEnergy(distance);
+				wavelengthEnergyField.setValue(energy);
 				// update wavelength in diffraction tool tree viewer
 				NumericNode<Length> node = getDiffractionTreeNode(WAVELENGTH_NODE_PATH);
 				if (node.getUnit().equals(NonSI.ANGSTROM)) {
-					updateDiffTool(WAVELENGTH_NODE_PATH, wavelengthDistanceSpinner.getDouble());
+					updateDiffTool(WAVELENGTH_NODE_PATH, distance);
 				} else if (node.getUnit().equals(NonSI.ELECTRON_VOLT)) {
 					updateDiffTool(WAVELENGTH_NODE_PATH, energy * 1000);
 				} else if (node.getUnit().equals(SI.KILO(NonSI.ELECTRON_VOLT))) {
@@ -803,45 +810,48 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				}
 			}
 		});
-		wavelengthDistanceSpinner.setEnabled(false);
+		wavelengthDistanceField.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		Label unitDistanceLabel = new Label(wavelengthComp, SWT.NONE);
 		unitDistanceLabel.setText(NonSI.ANGSTROM.toString());
 
 		Label energyLabel = new Label(wavelengthComp, SWT.NONE);
 		energyLabel.setText("Energy");
 
-		wavelengthEnergySpinner = new FloatSpinner(wavelengthComp, SWT.BORDER);
-		wavelengthEnergySpinner.setDouble(0);
-		wavelengthEnergySpinner.setFormat(7, 5);
-		wavelengthEnergySpinner.setMinimum(0);
-		wavelengthEnergySpinner.setMaximum(Double.MAX_VALUE);
-		wavelengthEnergySpinner.setIncrement(0.001);
-		wavelengthEnergySpinner.setToolTipText("Set the wavelength in keV");
-		wavelengthEnergySpinner.addSelectionListener(new SelectionAdapter() {
+		wavelengthEnergyField = new FormattedText(wavelengthComp, SWT.SINGLE | SWT.BORDER);
+		wavelengthEnergyField.setFormatter(new NumberFormatter(EDIT_MASK, DISPLAY_MASK, Locale.UK));
+		wavelengthEnergyField.getControl().setToolTipText("Set the wavelength in keV");
+		wavelengthEnergyField.getControl().addListener(SWT.KeyUp, new Listener() {
 			@Override
-			public void widgetSelected(SelectionEvent e) {
+			public void handleEvent(Event event) {
 				// update wavelength of each image
+				double energy = 0;
+				Object obj = wavelengthEnergyField.getValue();
+				if (obj instanceof Long)
+					energy = ((Long) obj).doubleValue();
+				else if (obj instanceof Double)
+					energy = (Double) obj;
 				for (int i = 0; i < model.size(); i++) {
-					model.get(i).md.getDiffractionCrystalEnvironment().setWavelength(getWavelengthDistance(wavelengthEnergySpinner.getDouble()));
+					model.get(i).md.getDiffractionCrystalEnvironment().setWavelength(getWavelengthDistance(energy));
 				}
 				// update wavelength in Angstrom
-				double distance = getWavelengthDistance(wavelengthEnergySpinner.getDouble());
-				if (distance != Double.POSITIVE_INFINITY)
-					wavelengthDistanceSpinner.setDouble(distance);
+				double distance = getWavelengthDistance(energy);
+				wavelengthDistanceField.setValue(distance);
 				// update wavelength in Diffraction tool tree viewer
 				NumericNode<Length> node = getDiffractionTreeNode(WAVELENGTH_NODE_PATH);
 				if (node.getUnit().equals(NonSI.ANGSTROM)) {
 					updateDiffTool(WAVELENGTH_NODE_PATH, distance);
 				} else if (node.getUnit().equals(NonSI.ELECTRON_VOLT)) {
-					updateDiffTool(WAVELENGTH_NODE_PATH, wavelengthEnergySpinner.getDouble() * 1000);
+					updateDiffTool(WAVELENGTH_NODE_PATH, energy * 1000);
 				} else if (node.getUnit().equals(SI.KILO(NonSI.ELECTRON_VOLT))) {
-					updateDiffTool(WAVELENGTH_NODE_PATH, wavelengthEnergySpinner.getDouble());
+					updateDiffTool(WAVELENGTH_NODE_PATH, energy);
 				}
 			}
 		});
-		wavelengthEnergySpinner.setEnabled(false);
+		wavelengthEnergyField.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		Label unitEnergyLabel = new Label(wavelengthComp, SWT.NONE);
 		unitEnergyLabel.setText(SI.KILO(NonSI.ELECTRON_VOLT).toString());
+		// Enable/disable the modifiers
+		setXRaysModifiersEnabled(false);
 
 		scrollHolder.layout();
 		scrollComposite.setContent(scrollHolder);
@@ -887,10 +897,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				}
 			});
 		}
-		if (model.size() > 0) {
-			wavelengthDistanceSpinner.setEnabled(true);
-			wavelengthEnergySpinner.setEnabled(true);
-		}
+		if (model.size() > 0)
+			setXRaysModifiersEnabled(true);
 
 		// start diffraction tool
 		Composite diffractionToolComp = new Composite(leftSash, SWT.BORDER);
@@ -904,8 +912,18 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			logger.error("Could not open diffraction tool:" + e2);
 		}
 
-		CalibrationFactory.addCalibrantSelectionListener(calibrantChangeListener);
 		// mainSash.setWeights(new int[] { 1, 2});
+	}
+
+	private void setCalibrateOptionsEnabled(boolean b) {
+		calibOptionGroup.setEnabled(b);
+		calibrateImagesButton.setEnabled(b);
+	}
+
+	private void setXRaysModifiersEnabled(boolean b) {
+		wavelengthComp.setEnabled(b);
+		wavelengthDistanceField.getControl().setEnabled(b);
+		wavelengthEnergyField.getControl().setEnabled(b);
 	}
 
 	private String[] names = new String[]{ "Image", "Number of rings", "Distance", 
@@ -915,10 +933,17 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		ToolBar tb = new ToolBar(parent, SWT.NONE);
 		tb.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
 
+		Image resetRingsImage = new Image(Display.getDefault(), Activator.getImageDescriptor("icons/reset_rings.png").getImageData());
 		Image exportImage = new Image(Display.getDefault(), Activator.getImageDescriptor("icons/page_white_excel.png").getImageData());
 		Image resetImage = new Image(Display.getDefault(), Activator.getImageDescriptor("icons/table_delete.png").getImageData());
+		ToolItem resetRingsItem = new ToolItem(tb, SWT.PUSH);
 		ToolItem exportItem = new ToolItem(tb, SWT.PUSH);
 		ToolItem resetItem = new ToolItem(tb, SWT.PUSH);
+
+		Button resetRingsButton = new Button(tb, SWT.PUSH);
+		resetRingsItem.setToolTipText("Remove found rings");
+		resetRingsItem.setControl(resetRingsButton);
+		resetRingsItem.setImage(resetRingsImage);
 
 		Button exportButton = new Button(tb, SWT.PUSH);
 		exportItem.setToolTipText("Export metadata to XLS");
@@ -929,6 +954,13 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		resetItem.setToolTipText("Reset metadata");
 		resetItem.setControl(resetButton);
 		resetItem.setImage(resetImage);
+
+		resetRingsItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				DiffractionCalibrationUtils.hideFoundRings(plottingSystem);
+			}
+		});
 
 		exportItem.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -995,8 +1027,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 					// update wavelength
 					double wavelength = currentData.md.getDiffractionCrystalEnvironment().getWavelength();
-					wavelengthEnergySpinner.setDouble(getWavelengthEnergy(wavelength));
-					wavelengthDistanceSpinner.setDouble(wavelength);
+					wavelengthEnergyField.setValue(getWavelengthEnergy(wavelength));
+					wavelengthDistanceField.setValue(wavelength);
 					// update wavelength in diffraction tool tree viewer
 					NumericNode<Length> node = getDiffractionTreeNode(WAVELENGTH_NODE_PATH);
 					if (node.getUnit().equals(NonSI.ANGSTROM)) {
@@ -1083,14 +1115,10 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 	private void setWavelength(DiffractionTableData data) {
 		// set the wavelength
-		if (wavelengthDistanceSpinner.getDouble() == 0 && wavelengthEnergySpinner.getDouble() == 0) {
-			if (data != null) {
-				wavelength = data.md.getOriginalDiffractionCrystalEnvironment().getWavelength();
-				if (wavelength != Double.POSITIVE_INFINITY)
-					wavelengthDistanceSpinner.setDouble(wavelength);
-				if(getWavelengthEnergy(wavelength) != Double.POSITIVE_INFINITY)
-					wavelengthEnergySpinner.setDouble(getWavelengthEnergy(wavelength));
-			}
+		if (data != null) {
+			double wavelength = data.md.getOriginalDiffractionCrystalEnvironment().getWavelength();
+			wavelengthDistanceField.setValue(wavelength);
+			wavelengthEnergyField.setValue(getWavelengthEnergy(wavelength));
 		}
 	}
 
@@ -1176,7 +1204,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			aug.setDiffractionMetadata(data.md);
 			// Add listeners to monitor metadata changes in diffraction tool
 			data.md.getDetector2DProperties().addDetectorPropertyListener(detectorPropertyListener);
-			data.md.getDiffractionCrystalEnvironment().addDiffractionCrystalEnvironmentListener(diffractionCrystEnvListener);
+//			data.md.getDiffractionCrystalEnvironment().addDiffractionCrystalEnvironmentListener(diffractionCrystEnvListener);
 		}
 
 		DiffractionCalibrationUtils.hideFoundRings(plottingSystem);
@@ -1397,7 +1425,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				used++;
 			}
 		}
-		calibrateImagesButton.setEnabled(used > 0);
+		setCalibrateOptionsEnabled(used > 0);
 	}
 
 	private void removeListeners() {
@@ -1412,7 +1440,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			if (d.augmenter != null)
 				d.augmenter.deactivate();
 			d.md.getDetector2DProperties().removeDetectorPropertyListener(detectorPropertyListener);
-			d.md.getDiffractionCrystalEnvironment().removeDiffractionCrystalEnvironmentListener(diffractionCrystEnvListener);
+//			d.md.getDiffractionCrystalEnvironment().removeDiffractionCrystalEnvironmentListener(diffractionCrystEnvListener);
 		}
 		model.clear();
 		logger.debug("model emptied");
