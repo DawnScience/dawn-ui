@@ -525,6 +525,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		leftButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		l = new Label(padComp, SWT.NONE);
 		l.setImage(Activator.getImage("icons/centre.png"));
+		l.setToolTipText("Move calibrant");
 		l.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		Button rightButton = new Button(padComp, SWT.ARROW | SWT.RIGHT);
 		rightButton.setToolTipText("Shift rings right");
