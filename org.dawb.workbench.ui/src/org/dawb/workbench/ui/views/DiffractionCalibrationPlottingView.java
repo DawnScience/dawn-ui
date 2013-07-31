@@ -361,6 +361,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 					currentData = null; // need to reset this
 					plottingSystem.clear();
 					setXRaysModifiersEnabled(false);
+					setCalibrateOptionsEnabled(false);
 				}
 			}
 		};
@@ -1446,7 +1447,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		// enable/disable calibrate button according to use column
 		int used = 0;
 		for (DiffractionTableData d : model) {
-			if (d.use) {
+			if (d.use && d.nrois > 0) {
 				used++;
 			}
 		}
