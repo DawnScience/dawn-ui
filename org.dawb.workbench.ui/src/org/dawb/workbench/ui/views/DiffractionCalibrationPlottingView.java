@@ -147,8 +147,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 	private final String BEAM_CENTRE_YPATH = "/Detector/Beam Centre/Y";
 	private final String DISTANCE_NODE_PATH = "/Experimental Information/Distance";
 
-	public static final String EDIT_MASK = "##,##0.0000";
-	public static final String DISPLAY_MASK = "##,##0.####";
+	public static final String EDIT_MASK = "##,##0.##########";
+	public static final String DISPLAY_MASK = "##,##0.##########";
 
 	private List<DiffractionTableData> model = new ArrayList<DiffractionTableData>();
 	private ILoaderService service;
@@ -798,6 +798,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				}
 				// update wavelength in keV
 				double energy = getWavelengthEnergy(distance);
+				String newFormat = getFormatMask(distance);
+				wavelengthEnergyField.setFormatter(new NumberFormatter(EDIT_MASK, newFormat, Locale.UK));
 				wavelengthEnergyField.setValue(energy);
 				// update wavelength in diffraction tool tree viewer
 				NumericNode<Length> node = getDiffractionTreeNode(WAVELENGTH_NODE_PATH);
@@ -831,10 +833,12 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				else if (obj instanceof Double)
 					energy = (Double) obj;
 				for (int i = 0; i < model.size(); i++) {
-					model.get(i).md.getDiffractionCrystalEnvironment().setWavelength(getWavelengthDistance(energy));
+					model.get(i).md.getDiffractionCrystalEnvironment().setWavelength(getWavelengthEnergy(energy));
 				}
 				// update wavelength in Angstrom
-				double distance = getWavelengthDistance(energy);
+				double distance = getWavelengthEnergy(energy);
+				String newFormat = getFormatMask(energy);
+				wavelengthDistanceField.setFormatter(new NumberFormatter(EDIT_MASK, newFormat, Locale.UK));
 				wavelengthDistanceField.setValue(distance);
 				// update wavelength in Diffraction tool tree viewer
 				NumericNode<Length> node = getDiffractionTreeNode(WAVELENGTH_NODE_PATH);
@@ -914,6 +918,16 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 		CalibrationFactory.addCalibrantSelectionListener(calibrantChangeListener);
 		// mainSash.setWeights(new int[] { 1, 2});
+	}
+
+	protected String getFormatMask(double value) {
+		String str = String.valueOf(value);
+		String result = "";
+		String decimal = str.substring(str.indexOf('.') + 1);
+		for (int i = 0; i < decimal.length(); i ++) {
+			result += "#";
+		}
+		return "##,##0." + result;
 	}
 
 	private void setCalibrateOptionsEnabled(boolean b) {
@@ -1134,12 +1148,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		}
 	}
 
-	private double getWavelengthEnergy(double angstrom) {
-		return 1. / (0.0806554465 * angstrom); // constant from NIST CODATA 2006
-	}
-
-	private double getWavelengthDistance(double keV) {
-		return 1. / (0.0806554465 * keV); // constant from NIST CODATA 2006
+	private double getWavelengthEnergy(double value) {
+		return 1. / (0.0806554465 * value); // constant from NIST CODATA 2006
 	}
 
 	private DiffractionTableData createData(String filePath, String dataFullName) {
