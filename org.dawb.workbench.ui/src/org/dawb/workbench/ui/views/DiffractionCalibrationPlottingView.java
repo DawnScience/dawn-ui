@@ -384,9 +384,12 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		createToolbarActions(controlComp);
 
 		Label instructionLabel = new Label(controlComp, SWT.WRAP);
-		instructionLabel.setText("Drag/drop a file/data to the table below, choose a type of calibrant, "
-						+ "modify the rings using the positioning controls, modify the wavelength/energy with the wanted values "
-						+ "and select the calibration type before running the calibration process.");
+		instructionLabel.setText("Drag/drop a file/data to the table below, " +
+				"choose a type of calibrant, " +
+				"modify the rings using the positioning controls, " +
+				"modify the wavelength/energy with the wanted values, " +
+				"match rings to the image, " +
+				"and select the calibration type before running the calibration process.");
 		instructionLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false));
 		Point pt = instructionLabel.getSize(); pt.x +=4; pt.y += 4; instructionLabel.setSize(pt);
 
