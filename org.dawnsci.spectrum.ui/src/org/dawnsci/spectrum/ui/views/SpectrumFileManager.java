@@ -1,35 +1,42 @@
 package org.dawnsci.spectrum.ui.views;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.dawnsci.plotting.api.IPlottingSystem;
-import org.dawnsci.plotting.api.trace.ITrace;
+import org.dawnsci.spectrum.ui.Activator;
+import org.dawnsci.spectrum.ui.file.ISpectrumFile;
+import org.dawnsci.spectrum.ui.preferences.SpectrumConstants;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.preference.IPreferenceStore;
 
 public class SpectrumFileManager {
 	
 	private IPlottingSystem system;
-	private Map<String,SpectrumFile> spectrumFiles;
+	private Map<String,ISpectrumFile> spectrumFiles;
 	private HashSet<ISpectrumFileListener> listeners;
-	private String xdefault = "/entry1/counterTimer01/Energy";
-	private String ydefault = "/entry1/counterTimer01/lnI0It";
 	
 	public SpectrumFileManager(IPlottingSystem system) {
-		spectrumFiles = new LinkedHashMap<String,SpectrumFile>();
+		spectrumFiles = new LinkedHashMap<String,ISpectrumFile>();
 		listeners = new HashSet<ISpectrumFileListener>();
 		this.system = system;
+	}
+	//TODO make better
+	public void addFile(ISpectrumFile file) {
+		if (spectrumFiles.containsKey(file.getName())) return;
+		
+		spectrumFiles.put(file.getName(), file);
+		
+		file.plotAll();
+		fireFileListeners(new SpectrumFileOpenedEvent(this, file));
 	}
 	
 	public void addFile(String path) {
@@ -44,26 +51,15 @@ public class SpectrumFileManager {
 		return spectrumFiles.keySet();
 	}
 	
-	public Collection<SpectrumFile> getFiles() {
+	public Collection<ISpectrumFile> getFiles() {
 		return spectrumFiles.values();
 	}
 	
 	public void removeFile(String path) {
-		SpectrumFile file = spectrumFiles.get(path);
+		ISpectrumFile file = spectrumFiles.get(path);
 		spectrumFiles.remove(path);
-		removeFromPlot(file);
+		file.removeAllFromPlot();
 		fireFileListeners(new SpectrumFileOpenedEvent(this, file));
-	}
-	
-	private void pushToPlot(SpectrumFile file) {
-		if (system != null) system.updatePlot1D(file.getxDataset(), file.getyDatasets(), null);
-	}
-	
-	private void removeFromPlot(SpectrumFile file) {
-		for (String dataset : file.getyDatasetNames()) {
-			ITrace trace = system.getTrace(file.getPath() + " : " + dataset);
-			if (trace != null) system.removeTrace(trace);
-		}
 	}
 	
 	public void addFileListener(ISpectrumFileListener listener) {
@@ -78,6 +74,65 @@ public class SpectrumFileManager {
 		for (ISpectrumFileListener listener : listeners) listener.fileLoaded(event);
 	}
 	
+	private void setXandYdatasets(SpectrumFile file) {
+		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
+		String xdatasetNamesCombined = store.getDefaultString(SpectrumConstants.X_DATASETS);
+		String ydatasetNamesCombined = store.getDefaultString(SpectrumConstants.Y_DATASETS);
+		
+		xdatasetNamesCombined = xdatasetNamesCombined.replace("*", ".*");
+		ydatasetNamesCombined = ydatasetNamesCombined.replace("*", ".*");
+		
+		String[] foundx = findDatasets(file.getDataNames(), xdatasetNamesCombined);
+		String[] foundy = findDatasets(file.getDataNames(), ydatasetNamesCombined);
+		
+		for (String name : foundx) {
+			if (name != null) {
+				file.setxDatasetName(name);
+				break;
+			}
+		}
+		
+		for (String name : foundy) {
+			if (name != null) {
+				file.addyDatasetName(name);
+				break;
+			}
+		}
+	}
+	
+	private String[] findDatasets(Collection<String> datasetNames, String namesCombined) {
+		
+		String[] datasets = namesCombined.split(";");
+		
+		String[] found = new String[datasets.length];
+		
+		StringBuilder builder = new StringBuilder();
+		
+		for (String string : datasets) {
+			builder.append("(");
+			builder.append(string);
+			builder.append(")");
+			builder.append("|");
+		}
+		
+		builder.deleteCharAt(builder.length()-1);
+		
+		Pattern pattern = Pattern.compile(builder.toString());
+		
+		for (String dataset : datasetNames) {
+			Matcher matcher = pattern.matcher(dataset);
+			if (matcher.matches()) {
+				for (int i = 1; i < matcher.groupCount()+1; i++) {
+					if (matcher.group(i) != null && found[i-1] == null) {
+						found[i-1] = matcher.group(i);
+					}
+				}
+			}
+		}
+		
+		return found;
+	}
+	
 	private class SpectrumFileLoaderJob extends Job {
 
 		private final String path;
@@ -89,14 +144,13 @@ public class SpectrumFileManager {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			SpectrumFile file = SpectrumLoaderFactory.loadSpectrumFile(path);
+			SpectrumFile file = SpectrumLoaderFactory.loadSpectrumFile(path,system);
 			
-			if (file.contains(xdefault)) file.setxDatasetName(xdefault);
-			file.addyDatasetName(ydefault);
+			setXandYdatasets(file);
 			
 			spectrumFiles.put(file.getPath(), file);
 			
-			pushToPlot(file);
+			file.plotAll();
 			
 			fireFileListeners(new SpectrumFileOpenedEvent(this, file));
 			
