@@ -384,8 +384,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 		Label instructionLabel = new Label(controlComp, SWT.WRAP);
 		instructionLabel.setText("Drag/drop a file/data to the table below, choose a type of calibrant, "
-						+ "modify the rings using the controls below and tick the checkbox near to the corresponding "
-						+ "image before pressing the calibration buttons.");
+						+ "modify the rings using the positioning controls, modify the wavelength/energy with the wanted values "
+						+ "and select the calibration type before running the calibration process.");
 		instructionLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false));
 		Point pt = instructionLabel.getSize(); pt.x +=4; pt.y += 4; instructionLabel.setSize(pt);
 
@@ -474,9 +474,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			calibrantCombo.setText(s);
 		}
 		calibrantCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-
-//		Composite padControlComp = new Composite(controllerHolder, SWT.NONE);
-//		padControlComp.setLayout(new GridLayout(2, false));
 
 		// Pad composite
 		Composite padComp = new Composite(controllerHolder, SWT.BORDER);
@@ -573,10 +570,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		l = new Label(padComp, SWT.NONE);
 
 		// Resize group actions
-//		Composite mainActionComp = new Composite(padControlComp, SWT.NONE);
-//		mainActionComp.setLayout(new GridLayout(1, false));
-//		mainActionComp.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, true));
-
 		Composite actionComp = new Composite(controllerHolder, SWT.NONE);
 		actionComp.setLayout(new GridLayout(3, false));
 		actionComp.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, true));
@@ -968,34 +961,27 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		ToolBar tb = new ToolBar(parent, SWT.NONE);
 		tb.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
 
-		Image resetRingsImage = new Image(Display.getDefault(), Activator.getImageDescriptor("icons/reset_rings.png").getImageData());
 		Image exportImage = new Image(Display.getDefault(), Activator.getImageDescriptor("icons/page_white_excel.png").getImageData());
+		Image resetRingsImage = new Image(Display.getDefault(), Activator.getImageDescriptor("icons/reset_rings.png").getImageData());
 		Image resetImage = new Image(Display.getDefault(), Activator.getImageDescriptor("icons/table_delete.png").getImageData());
-		ToolItem resetRingsItem = new ToolItem(tb, SWT.PUSH);
 		ToolItem exportItem = new ToolItem(tb, SWT.PUSH);
+		ToolItem resetRingsItem = new ToolItem(tb, SWT.PUSH);
 		ToolItem resetItem = new ToolItem(tb, SWT.PUSH);
-
-		Button resetRingsButton = new Button(tb, SWT.PUSH);
-		resetRingsItem.setToolTipText("Remove found rings");
-		resetRingsItem.setControl(resetRingsButton);
-		resetRingsItem.setImage(resetRingsImage);
 
 		Button exportButton = new Button(tb, SWT.PUSH);
 		exportItem.setToolTipText("Export metadata to XLS");
 		exportItem.setControl(exportButton);
 		exportItem.setImage(exportImage);
 
+		Button resetRingsButton = new Button(tb, SWT.PUSH);
+		resetRingsItem.setToolTipText("Remove found rings");
+		resetRingsItem.setControl(resetRingsButton);
+		resetRingsItem.setImage(resetRingsImage);
+
 		Button resetButton = new Button(tb, SWT.PUSH);
 		resetItem.setToolTipText("Reset metadata");
 		resetItem.setControl(resetButton);
 		resetItem.setImage(resetImage);
-
-		resetRingsItem.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent event) {
-				DiffractionCalibrationUtils.hideFoundRings(plottingSystem);
-			}
-		});
 
 		exportItem.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -1039,6 +1025,13 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 					}
 					DiffractionCalibrationUtils.saveToCsvFile(savedFilePath, names, values);
 				}
+			}
+		});
+
+		resetRingsItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				DiffractionCalibrationUtils.hideFoundRings(plottingSystem);
 			}
 		});
 
@@ -1089,7 +1082,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				usedFixedWavelength = true;
 			}
 		};
-		usedFixedWavelengthAction.setToolTipText("Individual fit with fixed wavelength"); // TODO
+		usedFixedWavelengthAction.setToolTipText("Individual fit with fixed wavelength"); // TODO write a more detailed tool tip
 		Entry<String, Action> perImageFitWithFixedWavelength = new AbstractMap.SimpleEntry<String, Action>(
 				"Per Image Fit with fixed wavelength",
 				usedFixedWavelengthAction);
@@ -1100,7 +1093,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				usedFixedWavelength = false;
 			}
 		};
-		simultaneousFitAction.setToolTipText("Fits all the parameters at once"); // TODO
+		simultaneousFitAction.setToolTipText("Fits all the parameters at once"); // TODO write a more detailed tool tip
 		Entry<String, Action> simultaneousFit = new AbstractMap.SimpleEntry<String, Action>(
 				"Fit wavelength and distance",
 				simultaneousFitAction);
@@ -1112,7 +1105,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				usedFixedWavelength = true;
 			}
 		};
-		postWavelengthAction.setToolTipText("Per image fit, then refine wavelength"); // TODO
+		postWavelengthAction.setToolTipText("Per image fit, then refine wavelength"); // TODO write a more detailed tool tip
 		Entry<String, Action> perImageFitPostFixedWavelength = new AbstractMap.SimpleEntry<String, Action>(
 				"Per Image Fit then refine wavelength",
 				postWavelengthAction);
