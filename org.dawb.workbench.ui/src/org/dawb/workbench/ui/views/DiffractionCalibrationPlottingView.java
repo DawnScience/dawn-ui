@@ -475,9 +475,13 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		}
 		calibrantCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 
+//		Composite padControlComp = new Composite(controllerHolder, SWT.NONE);
+//		padControlComp.setLayout(new GridLayout(2, false));
+
+		// Pad composite
 		Composite padComp = new Composite(controllerHolder, SWT.BORDER);
 		padComp.setLayout(new GridLayout(5, false));
-		padComp.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+		padComp.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false));
 		padComp.setToolTipText("Move calibrant");
 
 		l = new Label(padComp, SWT.NONE);
@@ -523,6 +527,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				}));
 		leftButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		l = new Label(padComp, SWT.NONE);
+		l.setImage(Activator.getImage("icons/centre.png"));
+		l.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		Button rightButton = new Button(padComp, SWT.ARROW | SWT.RIGHT);
 		rightButton.setToolTipText("Shift rings right");
 		rightButton.addMouseListener(new RepeatingMouseAdapter(display,
@@ -567,17 +573,17 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		l = new Label(padComp, SWT.NONE);
 
 		// Resize group actions
-		Composite mainActionComp = new Composite(controllerHolder, SWT.NONE);
-		mainActionComp.setLayout(new GridLayout(1, false));
-		mainActionComp.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, true));
+//		Composite mainActionComp = new Composite(padControlComp, SWT.NONE);
+//		mainActionComp.setLayout(new GridLayout(1, false));
+//		mainActionComp.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, true));
 
-		Composite actionComp = new Composite(mainActionComp, SWT.NONE);
+		Composite actionComp = new Composite(controllerHolder, SWT.NONE);
 		actionComp.setLayout(new GridLayout(3, false));
 		actionComp.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, true));
 
 		Composite sizeComp = new Composite(actionComp, SWT.BORDER);
 		sizeComp.setLayout(new GridLayout(1, false));
-		sizeComp.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, true));
+		sizeComp.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, true));
 		sizeComp.setToolTipText("Change size");
 
 		Button plusButton = new Button(sizeComp, SWT.PUSH);
@@ -617,12 +623,11 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 						refreshTable();
 					}
 				}));
-		minusButton
-				.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
+		minusButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 
 		Composite shapeComp = new Composite(actionComp, SWT.BORDER);
 		shapeComp.setLayout(new GridLayout(1, false));
-		shapeComp.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, true));
+		shapeComp.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, true));
 		shapeComp.setToolTipText("Change shape");
 
 		Button elongateButton = new Button(shapeComp, SWT.PUSH);
@@ -664,7 +669,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 		Composite rotateComp = new Composite(actionComp, SWT.BORDER);
 		rotateComp.setLayout(new GridLayout(1, false));
-		rotateComp.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, true));
+		rotateComp.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, true));
 		rotateComp.setToolTipText("Change rotation");
 
 		Button clockButton = new Button(rotateComp, SWT.PUSH);
@@ -700,7 +705,22 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				}));
 		antiClockButton.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
 
-		Button findRingButton = new Button(mainActionComp, SWT.PUSH);
+		Button setBeamCentreButton = new Button(controllerHolder, SWT.PUSH);
+		setBeamCentreButton.setText("Apply beam centre");
+		setBeamCentreButton.setToolTipText("Apply current beam centre to all the images");
+		setBeamCentreButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		setBeamCentreButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				DetectorProperties properties = currentData.md.getDetector2DProperties();
+				double[] coords = properties.getBeamCentreCoords();
+				for (int i = 0; i < model.size(); i++) {
+					model.get(i).md.getDetector2DProperties().setBeamCentreCoords(coords);
+				}
+			}
+		});
+
+		Button findRingButton = new Button(controllerHolder, SWT.PUSH);
 		findRingButton.setText("Match rings to image");
 		findRingButton.setToolTipText("Use pixel values to find rings in image near calibration rings");
 		findRingButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
