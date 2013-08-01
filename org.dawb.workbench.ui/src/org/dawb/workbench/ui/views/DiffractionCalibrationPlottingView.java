@@ -17,6 +17,7 @@
 package org.dawb.workbench.ui.views;
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
@@ -818,7 +819,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				}
 				// update wavelength in keV
 				double energy = getWavelengthEnergy(distance);
-				String newFormat = getFormatMask(distance);
+				String newFormat = getFormatMask(distance, energy);
 				wavelengthEnergyField.setFormatter(new NumberFormatter(EDIT_MASK, newFormat, Locale.UK));
 				wavelengthEnergyField.setValue(energy);
 				// update wavelength in diffraction tool tree viewer
@@ -857,7 +858,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				}
 				// update wavelength in Angstrom
 				double distance = getWavelengthEnergy(energy);
-				String newFormat = getFormatMask(energy);
+				String newFormat = getFormatMask(energy, distance);
 				wavelengthDistanceField.setFormatter(new NumberFormatter(EDIT_MASK, newFormat, Locale.UK));
 				wavelengthDistanceField.setValue(distance);
 				// update wavelength in Diffraction tool tree viewer
@@ -940,12 +941,21 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		// mainSash.setWeights(new int[] { 1, 2});
 	}
 
-	protected String getFormatMask(double value) {
-		String str = String.valueOf(value);
+	protected String getFormatMask(double sourceValue, double resultValue) {
+		BigDecimal sourceBd = BigDecimal.valueOf(sourceValue);
+		int precisionNumber = sourceBd.precision();
+
 		String result = "";
-		String decimal = str.substring(str.indexOf('.') + 1);
-		for (int i = 0; i < decimal.length(); i ++) {
-			result += "#";
+		if (resultValue < 1) {
+			for (int i = 0; i < precisionNumber; i ++) {
+				result += "#";
+			}
+		} else {
+			int resultInt = BigDecimal.valueOf(resultValue).intValue();
+			int numberOfDigit = String.valueOf(resultInt).length();
+			for (int i = 0; i < precisionNumber - numberOfDigit; i ++) {
+				result += "#";
+			}
 		}
 		return "##,##0." + result;
 	}
@@ -1153,7 +1163,9 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		if (data != null) {
 			double wavelength = data.md.getOriginalDiffractionCrystalEnvironment().getWavelength();
 			wavelengthDistanceField.setValue(wavelength);
-			wavelengthEnergyField.setValue(getWavelengthEnergy(wavelength));
+			double energy = getWavelengthEnergy(wavelength);
+			wavelengthEnergyField.setFormatter(new NumberFormatter(EDIT_MASK, getFormatMask(wavelength, energy), Locale.UK));
+			wavelengthEnergyField.setValue(energy);
 		}
 	}
 
