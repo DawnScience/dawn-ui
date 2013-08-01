@@ -1,9 +1,14 @@
 package org.dawnsci.spectrum.ui.views;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.dawnsci.plotting.api.IPlottingSystem;
+import org.dawnsci.plotting.api.trace.ITrace;
+import org.dawnsci.spectrum.ui.file.ISpectrumFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,22 +16,28 @@ import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
-public class SpectrumFile {
+public class SpectrumFile implements ISpectrumFile {
 	
 	private String path;
 	private IMetaData meta;
 	private Collection<String> dataNames;
 	private String xDatasetName;
-	
+	private IPlottingSystem system;
 	private List<String> yDatasetNames;
 	
 	private static Logger logger = LoggerFactory.getLogger(SpectrumFile.class);
 	
-	public SpectrumFile(String path, IMetaData meta, Collection<String > dataNames) {
+	public SpectrumFile(String path, IMetaData meta, Collection<String > dataNames, IPlottingSystem system) {
 		this.path = path;
 		this.meta = meta;
 		this.dataNames = dataNames;
 		this.yDatasetNames = new ArrayList<String>();
+		this.system = system;
+	}
+	
+	public String getName() {
+		File file = new File(path);
+		return file.getName();
 	}
 	
 	public String getPath() {
@@ -60,18 +71,24 @@ public class SpectrumFile {
 	public void addyDatasetName(String name) {
 		//TODO check contains before adding removing
 		yDatasetNames.add(name);
+		addToPlot(name);
 	}
 	
 	public void removeyDatasetName(String name) {
 		//TODO check contains before adding removing
 		yDatasetNames.remove(name);
+		removeFromPlot(name);
 	}
 	
 	public IDataset getxDataset() {
+		return getDataset(xDatasetName);
+	}
+	
+	public IDataset getDataset(String name) {
 		try {
-			IDataset x =  LoaderFactory.getDataSet(path, xDatasetName, null);
+			IDataset x =  LoaderFactory.getDataSet(path, name, null);
 			if (x == null) return null;
-			x.setName(path + " : " + xDatasetName);
+			x.setName(path + " : " + name);
 			return x;
 		} catch (Exception e) {
 			return null;
@@ -96,5 +113,35 @@ public class SpectrumFile {
 		return sets;
 	}
 	
+	public void plotAll() {
+		system.updatePlot1D(getxDataset(), getyDatasets(), null);
+	}
+	
+	public void removeAllFromPlot() {
+		for (String dataset : getyDatasetNames()) {
+			ITrace trace = system.getTrace(getPath() + " : " + dataset);
+			if (trace != null) system.removeTrace(trace);
+		}
+	}
+	
+	private void addToPlot(String name) {
+		IDataset set = null;
+		try {
+			set = LoaderFactory.getDataSet(path, name, null);
+			if (set != null) {
+				set.setName(path + " : " + name);
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		}
+		
+		if (set != null) system.updatePlot1D(getxDataset(), Arrays.asList(new IDataset[] {set}), null);
+	}
+	
+	private void removeFromPlot(String name) {
+		ITrace trace = system.getTrace(getPath() + " : " + name);
+		if (trace != null) system.removeTrace(trace);
+		system.autoscaleAxes();
+	}
 }
 
