@@ -710,6 +710,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		setBeamCentreButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				if (currentData == null)
+					return;
 				DetectorProperties properties = currentData.md.getDetector2DProperties();
 				double[] coords = properties.getBeamCentreCoords();
 				for (int i = 0; i < model.size(); i++) {
