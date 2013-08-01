@@ -819,8 +819,10 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				}
 				// update wavelength in keV
 				double energy = getWavelengthEnergy(distance);
-				String newFormat = getFormatMask(distance, energy);
-				wavelengthEnergyField.setFormatter(new NumberFormatter(EDIT_MASK, newFormat, Locale.UK));
+				if (energy != Double.POSITIVE_INFINITY) {
+					String newFormat = getFormatMask(distance, energy);
+					wavelengthEnergyField.setFormatter(new NumberFormatter(EDIT_MASK, newFormat, Locale.UK));
+				}
 				wavelengthEnergyField.setValue(energy);
 				// update wavelength in diffraction tool tree viewer
 				NumericNode<Length> node = getDiffractionTreeNode(WAVELENGTH_NODE_PATH);
@@ -858,8 +860,10 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				}
 				// update wavelength in Angstrom
 				double distance = getWavelengthEnergy(energy);
-				String newFormat = getFormatMask(energy, distance);
-				wavelengthDistanceField.setFormatter(new NumberFormatter(EDIT_MASK, newFormat, Locale.UK));
+				if (distance != Double.POSITIVE_INFINITY) {
+					String newFormat = getFormatMask(energy, distance);
+					wavelengthDistanceField.setFormatter(new NumberFormatter(EDIT_MASK, newFormat, Locale.UK));
+				}
 				wavelengthDistanceField.setValue(distance);
 				// update wavelength in Diffraction tool tree viewer
 				NumericNode<Length> node = getDiffractionTreeNode(WAVELENGTH_NODE_PATH);
@@ -1164,7 +1168,9 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			double wavelength = data.md.getOriginalDiffractionCrystalEnvironment().getWavelength();
 			wavelengthDistanceField.setValue(wavelength);
 			double energy = getWavelengthEnergy(wavelength);
-			wavelengthEnergyField.setFormatter(new NumberFormatter(EDIT_MASK, getFormatMask(wavelength, energy), Locale.UK));
+			if (energy != Double.POSITIVE_INFINITY) {
+				wavelengthEnergyField.setFormatter(new NumberFormatter(EDIT_MASK, getFormatMask(wavelength, energy), Locale.UK));
+			}
 			wavelengthEnergyField.setValue(energy);
 		}
 	}
