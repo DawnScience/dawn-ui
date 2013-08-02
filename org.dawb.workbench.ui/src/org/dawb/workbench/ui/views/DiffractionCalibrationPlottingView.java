@@ -18,6 +18,7 @@ package org.dawb.workbench.ui.views;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
@@ -148,8 +149,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 	private final String BEAM_CENTRE_YPATH = "/Detector/Beam Centre/Y";
 	private final String DISTANCE_NODE_PATH = "/Experimental Information/Distance";
 
-	public static final String EDIT_MASK = "##,##0.##########";
-	public static final String DISPLAY_MASK = "##,##0.##########";
+	public static final String FORMAT_MASK = "##,##0.##########";
 
 	private List<DiffractionTableData> model = new ArrayList<DiffractionTableData>();
 	private ILoaderService service;
@@ -805,7 +805,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		wavelengthLabel.setText("Wavelength");
 
 		wavelengthDistanceField = new FormattedText(wavelengthComp, SWT.SINGLE | SWT.BORDER);
-		wavelengthDistanceField.setFormatter(new NumberFormatter(EDIT_MASK, DISPLAY_MASK, Locale.UK));
+		wavelengthDistanceField.setFormatter(new NumberFormatter(FORMAT_MASK, FORMAT_MASK, Locale.UK));
 		wavelengthDistanceField.getControl().setToolTipText("Set the wavelength in Angstrom");
 		wavelengthDistanceField.getControl().addListener(SWT.KeyUp, new Listener() {
 			@Override
@@ -824,7 +824,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				double energy = getWavelengthEnergy(distance);
 				if (energy != Double.POSITIVE_INFINITY) {
 					String newFormat = getFormatMask(distance, energy);
-					wavelengthEnergyField.setFormatter(new NumberFormatter(EDIT_MASK, newFormat, Locale.UK));
+					wavelengthEnergyField.setFormatter(new NumberFormatter(FORMAT_MASK, newFormat, Locale.UK));
 				}
 				wavelengthEnergyField.setValue(energy);
 				// update wavelength in diffraction tool tree viewer
@@ -846,7 +846,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		energyLabel.setText("Energy");
 
 		wavelengthEnergyField = new FormattedText(wavelengthComp, SWT.SINGLE | SWT.BORDER);
-		wavelengthEnergyField.setFormatter(new NumberFormatter(EDIT_MASK, DISPLAY_MASK, Locale.UK));
+		wavelengthEnergyField.setFormatter(new NumberFormatter(FORMAT_MASK, FORMAT_MASK, Locale.UK));
 		wavelengthEnergyField.getControl().setToolTipText("Set the wavelength in keV");
 		wavelengthEnergyField.getControl().addListener(SWT.KeyUp, new Listener() {
 			@Override
@@ -865,7 +865,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				double distance = getWavelengthEnergy(energy);
 				if (distance != Double.POSITIVE_INFINITY) {
 					String newFormat = getFormatMask(energy, distance);
-					wavelengthDistanceField.setFormatter(new NumberFormatter(EDIT_MASK, newFormat, Locale.UK));
+					wavelengthDistanceField.setFormatter(new NumberFormatter(FORMAT_MASK, newFormat, Locale.UK));
 				}
 				wavelengthDistanceField.setValue(distance);
 				// update wavelength in Diffraction tool tree viewer
@@ -948,7 +948,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		// mainSash.setWeights(new int[] { 1, 2});
 	}
 
-	protected String getFormatMask(double sourceValue, double resultValue) {
+	private String getFormatMask(double sourceValue, double resultValue) {
 		BigDecimal sourceBd = BigDecimal.valueOf(sourceValue);
 		int precisionNumber = sourceBd.precision();
 
@@ -1172,7 +1172,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			wavelengthDistanceField.setValue(wavelength);
 			double energy = getWavelengthEnergy(wavelength);
 			if (energy != Double.POSITIVE_INFINITY) {
-				wavelengthEnergyField.setFormatter(new NumberFormatter(EDIT_MASK, getFormatMask(wavelength, energy), Locale.UK));
+				wavelengthEnergyField.setFormatter(new NumberFormatter(FORMAT_MASK, getFormatMask(wavelength, energy), Locale.UK));
 			}
 			wavelengthEnergyField.setValue(energy);
 		}
@@ -1189,8 +1189,33 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		}
 	}
 
+	/**
+	 * 
+	 * @param value
+	 * @return a double value with the same precision number as the value entered as parameter
+	 */
 	private double getWavelengthEnergy(double value) {
-		return 1. / (0.0806554465 * value); // constant from NIST CODATA 2006
+		BigDecimal valueBd = BigDecimal.valueOf(value);
+		int precision = valueBd.precision();
+
+		double result = 1. / (0.0806554465 * value); // constant from NIST CODATA 2006
+
+		int decimal = 0;
+		if (result < 1) {
+			for (int i = 0; i < precision; i ++) {
+				decimal ++;
+			}
+		} else {
+			int resultInt = BigDecimal.valueOf(result).intValue();
+			int numberOfDigit = String.valueOf(resultInt).length();
+			for (int i = 0; i < precision - numberOfDigit; i ++) {
+				decimal ++;
+			}
+		}
+
+		BigDecimal bd = new BigDecimal(result).setScale(decimal, RoundingMode.HALF_EVEN);
+		result = bd.doubleValue();
+		return result; 
 	}
 
 	private DiffractionTableData createData(String filePath, String dataFullName) {
