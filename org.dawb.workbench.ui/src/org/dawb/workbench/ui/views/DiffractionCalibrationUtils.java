@@ -18,6 +18,8 @@ package org.dawb.workbench.ui.views;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -537,5 +539,45 @@ public class DiffractionCalibrationUtils {
 			e.printStackTrace();
 			logger.error("Error saving metadata:"+e);
 		}
+	}
+
+	/**
+	 * Returns the wavelength/energy given the energy/wavelength
+	 * with the same precision as the value entered
+	 * @param value
+	 * @return a double value with the same precision number as the value entered as parameter
+	 */
+	public static double getWavelengthEnergy(double value) {
+		BigDecimal valueBd = BigDecimal.valueOf(value);
+		int precision = valueBd.precision();
+
+		double result = 1. / (0.0806554465 * value); // constant from NIST CODATA 2006
+
+		return setPrecision(result, precision);
+	}
+
+	/**
+	 * Sets a double with the wanted precision
+	 * @param value
+	 * @param precision
+	 * @return a double value with the wanted precision
+	 */
+	public static double setPrecision(double value, int precision) {
+		int decimal = 0;
+		if (value < 1) {
+			for (int i = 0; i < precision; i ++) {
+				decimal ++;
+			}
+		} else {
+			int resultInt = BigDecimal.valueOf(value).intValue();
+			int numberOfDigit = String.valueOf(resultInt).length();
+			for (int i = 0; i < precision - numberOfDigit; i ++) {
+				decimal ++;
+			}
+		}
+
+		BigDecimal bd = new BigDecimal(value).setScale(decimal, RoundingMode.HALF_EVEN);
+		value = bd.doubleValue();
+		return value; 
 	}
 }

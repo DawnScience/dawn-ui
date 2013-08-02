@@ -18,7 +18,6 @@ package org.dawb.workbench.ui.views;
 
 import java.io.File;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
@@ -783,8 +782,10 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 							public void run() {
 								refreshTable();
 								double wavelength = currentData.md.getDiffractionCrystalEnvironment().getWavelength();
+								int previousPrecision = BigDecimal.valueOf((Double)wavelengthDistanceField.getValue()).precision();
+								wavelength = DiffractionCalibrationUtils.setPrecision(wavelength, previousPrecision);
 								wavelengthDistanceField.setValue(wavelength);
-								wavelengthEnergyField.setValue(getWavelengthEnergy(wavelength));
+								wavelengthEnergyField.setValue(DiffractionCalibrationUtils.getWavelengthEnergy(wavelength));
 								setCalibrateButtons();
 							}
 						});
@@ -821,7 +822,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 					model.get(i).md.getDiffractionCrystalEnvironment().setWavelength(distance);
 				}
 				// update wavelength in keV
-				double energy = getWavelengthEnergy(distance);
+				double energy = DiffractionCalibrationUtils.getWavelengthEnergy(distance);
 				if (energy != Double.POSITIVE_INFINITY) {
 					String newFormat = getFormatMask(distance, energy);
 					wavelengthEnergyField.setFormatter(new NumberFormatter(FORMAT_MASK, newFormat, Locale.UK));
@@ -859,10 +860,10 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				else if (obj instanceof Double)
 					energy = (Double) obj;
 				for (int i = 0; i < model.size(); i++) {
-					model.get(i).md.getDiffractionCrystalEnvironment().setWavelength(getWavelengthEnergy(energy));
+					model.get(i).md.getDiffractionCrystalEnvironment().setWavelength(DiffractionCalibrationUtils.getWavelengthEnergy(energy));
 				}
 				// update wavelength in Angstrom
-				double distance = getWavelengthEnergy(energy);
+				double distance = DiffractionCalibrationUtils.getWavelengthEnergy(energy);
 				if (distance != Double.POSITIVE_INFINITY) {
 					String newFormat = getFormatMask(energy, distance);
 					wavelengthDistanceField.setFormatter(new NumberFormatter(FORMAT_MASK, newFormat, Locale.UK));
@@ -1036,7 +1037,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 						// wavelength
 						values[i][5] = String.valueOf(wavelength);
 						// energy
-						values[i][6] = String.valueOf(getWavelengthEnergy(wavelength));
+						values[i][6] = String.valueOf(DiffractionCalibrationUtils.getWavelengthEnergy(wavelength));
 						// residuals
 						if (model.get(i).q != null)
 							values[i][7] = String.format("%.2f", Math.sqrt(model.get(i).q.getResidual()));
@@ -1079,16 +1080,16 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 					// update wavelength
 					double wavelength = currentData.md.getDiffractionCrystalEnvironment().getWavelength();
-					wavelengthEnergyField.setValue(getWavelengthEnergy(wavelength));
+					wavelengthEnergyField.setValue(DiffractionCalibrationUtils.getWavelengthEnergy(wavelength));
 					wavelengthDistanceField.setValue(wavelength);
 					// update wavelength in diffraction tool tree viewer
 					NumericNode<Length> node = getDiffractionTreeNode(WAVELENGTH_NODE_PATH);
 					if (node.getUnit().equals(NonSI.ANGSTROM)) {
 						updateDiffTool(WAVELENGTH_NODE_PATH, wavelength);
 					} else if (node.getUnit().equals(NonSI.ELECTRON_VOLT)) {
-						updateDiffTool(WAVELENGTH_NODE_PATH, getWavelengthEnergy(wavelength) * 1000);
+						updateDiffTool(WAVELENGTH_NODE_PATH, DiffractionCalibrationUtils.getWavelengthEnergy(wavelength) * 1000);
 					} else if (node.getUnit().equals(SI.KILO(NonSI.ELECTRON_VOLT))) {
-						updateDiffTool(WAVELENGTH_NODE_PATH, getWavelengthEnergy(wavelength));
+						updateDiffTool(WAVELENGTH_NODE_PATH, DiffractionCalibrationUtils.getWavelengthEnergy(wavelength));
 					}
 					tableViewer.refresh();
 				}
@@ -1170,7 +1171,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		if (data != null) {
 			double wavelength = data.md.getOriginalDiffractionCrystalEnvironment().getWavelength();
 			wavelengthDistanceField.setValue(wavelength);
-			double energy = getWavelengthEnergy(wavelength);
+			double energy = DiffractionCalibrationUtils.getWavelengthEnergy(wavelength);
 			if (energy != Double.POSITIVE_INFINITY) {
 				wavelengthEnergyField.setFormatter(new NumberFormatter(FORMAT_MASK, getFormatMask(wavelength, energy), Locale.UK));
 			}
@@ -1187,35 +1188,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		} else {
 			calibrantCombo.select(calibrantCombo.indexOf(standard.getSelectedCalibrant()));
 		}
-	}
-
-	/**
-	 * 
-	 * @param value
-	 * @return a double value with the same precision number as the value entered as parameter
-	 */
-	private double getWavelengthEnergy(double value) {
-		BigDecimal valueBd = BigDecimal.valueOf(value);
-		int precision = valueBd.precision();
-
-		double result = 1. / (0.0806554465 * value); // constant from NIST CODATA 2006
-
-		int decimal = 0;
-		if (result < 1) {
-			for (int i = 0; i < precision; i ++) {
-				decimal ++;
-			}
-		} else {
-			int resultInt = BigDecimal.valueOf(result).intValue();
-			int numberOfDigit = String.valueOf(resultInt).length();
-			for (int i = 0; i < precision - numberOfDigit; i ++) {
-				decimal ++;
-			}
-		}
-
-		BigDecimal bd = new BigDecimal(result).setScale(decimal, RoundingMode.HALF_EVEN);
-		result = bd.doubleValue();
-		return result; 
 	}
 
 	private DiffractionTableData createData(String filePath, String dataFullName) {
