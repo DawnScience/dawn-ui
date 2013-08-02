@@ -782,6 +782,9 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 						display.asyncExec(new Runnable() {
 							public void run() {
 								refreshTable();
+								double wavelength = currentData.md.getDiffractionCrystalEnvironment().getWavelength();
+								wavelengthDistanceField.setValue(wavelength);
+								wavelengthEnergyField.setValue(getWavelengthEnergy(wavelength));
 								setCalibrateButtons();
 							}
 						});
@@ -1255,7 +1258,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			data.md.getDetector2DProperties().addDetectorPropertyListener(detectorPropertyListener);
 //			data.md.getDiffractionCrystalEnvironment().addDiffractionCrystalEnvironmentListener(diffractionCrystEnvListener);
 		}
-
 		DiffractionCalibrationUtils.hideFoundRings(plottingSystem);
 		DiffractionCalibrationUtils.drawCalibrantRings(aug);
 	}
