@@ -507,7 +507,7 @@ public class DiffractionCalibrationUtils {
 	 */
 	public static final String[] NAMES = new String[]{ "Image", "Number of rings", 
 		"Distance", "X beam centre", "Y beam centre", "Wavelength", "Energy", 
-		"Original distance", "Original X bean centre", "Original Y beam centre", "Original wavelength", "Original energy",
+		"Original distance", "Original X beam centre", "Original Y beam centre", "Original wavelength", "Original energy",
 		"Residuals", "Yaw", "Pitch", "Roll" };
 
 	/**
