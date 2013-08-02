@@ -93,6 +93,7 @@ class FilterDecoratorImpl implements IFilterDecorator {
 	public void clear() {
 		reset();
 		filters.clear();
+		system.repaint();
 	}
 
 	@Override
@@ -112,7 +113,6 @@ class FilterDecoratorImpl implements IFilterDecorator {
 		
 		final Collection<ITrace> existing = getExistingFilteredTraces();
 		for (ITrace trace : traces) {
-			if (existing!=null && existing.contains(trace)) continue; // TODO Check can use traces as keys, they may not have equals and hashcode.
 			if (trace instanceof ILineTrace) {
 				ILineTrace lt = (ILineTrace)trace;
 				lt.setData(lt.getXData(), lt.getYData());
@@ -122,6 +122,8 @@ class FilterDecoratorImpl implements IFilterDecorator {
 				it.setData(it.getData(), it.getAxes(), false);
 			}
 		}
+		
+		system.repaint();
 		
 	}
 

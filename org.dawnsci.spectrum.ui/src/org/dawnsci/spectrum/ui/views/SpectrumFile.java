@@ -88,7 +88,7 @@ public class SpectrumFile implements ISpectrumFile {
 		try {
 			IDataset x =  LoaderFactory.getDataSet(path, name, null);
 			if (x == null) return null;
-			x.setName(path + " : " + name);
+			x.setName(name);
 			return x;
 		} catch (Exception e) {
 			return null;
@@ -102,7 +102,7 @@ public class SpectrumFile implements ISpectrumFile {
 			try {
 				IDataset set = LoaderFactory.getDataSet(path, name, null);
 				if (set != null) {
-					set.setName(path + " : " + name);
+					set.setName(name);
 					sets.add(set);
 				}
 			} catch (Exception e) {
@@ -114,7 +114,11 @@ public class SpectrumFile implements ISpectrumFile {
 	}
 	
 	public void plotAll() {
-		system.updatePlot1D(getxDataset(), getyDatasets(), null);
+		
+		List<IDataset> list = getyDatasets();
+		for (IDataset ds : list) ds.setName(path + " : " + ds.getName());
+		
+		system.updatePlot1D(getxDataset(), list, null);
 	}
 	
 	public void removeAllFromPlot() {

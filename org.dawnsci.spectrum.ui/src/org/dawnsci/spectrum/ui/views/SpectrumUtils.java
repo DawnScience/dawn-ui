@@ -71,11 +71,11 @@ public class SpectrumUtils {
 			MultivariateSummaryStatistics ms = mapmss.get(key);
 			
 			DoubleDataset dd = new DoubleDataset(ms.getMean(), x0.getShape());
-			dd.setName(key+ " : Average");
+			dd.setName(key);
 			sets.add(dd);
 		}
 
-		return new SpectrumInMemory("Average", x0, sets, system);
+		return new SpectrumInMemory("Average "+ sets.hashCode(), x0, sets, system);
 	}
 	
 	public static ISpectrumFile subtractSpectrumFiles(List<ISpectrumFile> files, IPlottingSystem system) {
@@ -98,7 +98,7 @@ public class SpectrumUtils {
 			sets.add(dif);
 		}
 		
-		return new SpectrumInMemory("Difference", x0, sets, system);
+		return new SpectrumInMemory("Difference"+ sets.hashCode(), x0, sets, system);
 		
 	}
 	
