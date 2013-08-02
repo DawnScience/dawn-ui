@@ -438,9 +438,9 @@ public class SpectrumView extends ViewPart {
 				return 1;
 			}
 
-			protected IDataset[] filter(IDataset x,    IDataset y) {
+			protected IDataset[] filter(IDataset x, IDataset y) {
 				Collection<ITrace>  traces = system.getTraces(ILineTrace.class);
-				IDataset newY = Maths.add(DatasetUtils.norm((AbstractDataset)y),(traces.size()*0.1));
+				IDataset newY = Maths.add(DatasetUtils.norm((AbstractDataset)y),(traces.size()*0.2));
 				newY.setName(y.getName());
 
 				return new IDataset[]{x, newY};

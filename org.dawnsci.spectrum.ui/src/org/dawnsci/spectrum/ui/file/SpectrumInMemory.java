@@ -108,7 +108,7 @@ public class SpectrumInMemory implements ISpectrumFile {
 	@Override
 	public void removeyDatasetName(String name) {
 		yDatasetNames.remove(name);
-		removeFromPlot(name);
+		removeFromPlot(this.name + " : " +name);
 		
 	}
 
@@ -120,6 +120,10 @@ public class SpectrumInMemory implements ISpectrumFile {
 	}
 	
 	public void plotAll() {
+		
+		List<IDataset> list = getyDatasets();
+		for (IDataset ds : list) ds.setName(this.name + " : " + ds.getName());
+		
 		system.updatePlot1D(getxDataset(), getyDatasets(), null);
 	}
 
@@ -131,13 +135,13 @@ public class SpectrumInMemory implements ISpectrumFile {
 	
 	private void addToPlot(String name) {
 		IDataset set = datasets.get(name);
-		
+		set.setName(this.name + " : " + set.getName());
 		if (set != null) system.updatePlot1D(getxDataset(), Arrays.asList(new IDataset[] {set}), null);
 	}
 	
 	public void removeAllFromPlot() {
 		for (String dataset : getyDatasetNames()) {
-			ITrace trace = system.getTrace(dataset);
+			ITrace trace = system.getTrace(this.name + " : " + dataset);
 			if (trace != null) system.removeTrace(trace);
 		}
 	}
