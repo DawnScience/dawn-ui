@@ -824,7 +824,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				// update wavelength in keV
 				double energy = DiffractionCalibrationUtils.getWavelengthEnergy(distance);
 				if (energy != Double.POSITIVE_INFINITY) {
-					String newFormat = getFormatMask(distance, energy);
+					String newFormat = DiffractionCalibrationUtils.getFormatMask(distance, energy);
 					wavelengthEnergyField.setFormatter(new NumberFormatter(FORMAT_MASK, newFormat, Locale.UK));
 				}
 				wavelengthEnergyField.setValue(energy);
@@ -865,7 +865,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				// update wavelength in Angstrom
 				double distance = DiffractionCalibrationUtils.getWavelengthEnergy(energy);
 				if (distance != Double.POSITIVE_INFINITY) {
-					String newFormat = getFormatMask(energy, distance);
+					String newFormat = DiffractionCalibrationUtils.getFormatMask(energy, distance);
 					wavelengthDistanceField.setFormatter(new NumberFormatter(FORMAT_MASK, newFormat, Locale.UK));
 				}
 				wavelengthDistanceField.setValue(distance);
@@ -947,25 +947,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 		CalibrationFactory.addCalibrantSelectionListener(calibrantChangeListener);
 		// mainSash.setWeights(new int[] { 1, 2});
-	}
-
-	private String getFormatMask(double sourceValue, double resultValue) {
-		BigDecimal sourceBd = BigDecimal.valueOf(sourceValue);
-		int precisionNumber = sourceBd.precision();
-
-		String result = "";
-		if (resultValue < 1) {
-			for (int i = 0; i < precisionNumber; i ++) {
-				result += "#";
-			}
-		} else {
-			int resultInt = BigDecimal.valueOf(resultValue).intValue();
-			int numberOfDigit = String.valueOf(resultInt).length();
-			for (int i = 0; i < precisionNumber - numberOfDigit; i ++) {
-				result += "#";
-			}
-		}
-		return "##,##0." + result;
 	}
 
 	private void setCalibrateOptionsEnabled(boolean b) {
@@ -1173,7 +1154,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			wavelengthDistanceField.setValue(wavelength);
 			double energy = DiffractionCalibrationUtils.getWavelengthEnergy(wavelength);
 			if (energy != Double.POSITIVE_INFINITY) {
-				wavelengthEnergyField.setFormatter(new NumberFormatter(FORMAT_MASK, getFormatMask(wavelength, energy), Locale.UK));
+				wavelengthEnergyField.setFormatter(new NumberFormatter(FORMAT_MASK, 
+						DiffractionCalibrationUtils.getFormatMask(wavelength, energy), Locale.UK));
 			}
 			wavelengthEnergyField.setValue(energy);
 		}

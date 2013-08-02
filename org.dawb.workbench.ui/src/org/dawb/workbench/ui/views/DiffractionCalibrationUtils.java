@@ -580,4 +580,31 @@ public class DiffractionCalibrationUtils {
 		value = bd.doubleValue();
 		return value; 
 	}
+
+	/**
+	 * Returns a with a specific precision number given a source value and a result value.<br>
+	 * The format returned would look like the following: 00,000.####<br>
+	 * Used for wavelength/energy
+	 * @param sourceValue
+	 * @param resultValue
+	 * @return a format mask
+	 */
+	public static String getFormatMask(double sourceValue, double resultValue) {
+		BigDecimal sourceBd = BigDecimal.valueOf(sourceValue);
+		int precisionNumber = sourceBd.precision();
+
+		String result = "";
+		if (resultValue < 1) {
+			for (int i = 0; i < precisionNumber; i ++) {
+				result += "#";
+			}
+		} else {
+			int resultInt = BigDecimal.valueOf(resultValue).intValue();
+			int numberOfDigit = String.valueOf(resultInt).length();
+			for (int i = 0; i < precisionNumber - numberOfDigit; i ++) {
+				result += "#";
+			}
+		}
+		return "##,##0." + result;
+	}
 }
