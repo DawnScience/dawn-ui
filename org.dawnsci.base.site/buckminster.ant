@@ -59,6 +59,12 @@ Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blo
                 <propertyref name="product.version.full" />
             </propertyset>
         </pathconvert>
+        <pathconvert property="product.version.major.minor" setonempty="true">
+            <regexpmapper from="(\d+\.\d+)\.\d+\.?(.+)?" to="\1"/>
+            <propertyset>
+                <propertyref name="product.version.full" />
+            </propertyset>
+        </pathconvert>
         <pathconvert property="product.version.qualifier" setonempty="true">
             <regexpmapper from="(\d+\.\d+\.\d+)\.?(.+)?" to="\2"/>
             <propertyset>
@@ -186,9 +192,6 @@ Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blo
             </patternset>
             <mapper type="glob" from="lib/${product.os}-${product.arch}/*" to="*"/>
         </unjar>
-        <concat destfile="${lib_root}/README">The contents of this directory are specified by the lib.copy.* entries in buckminster.properties file in the .site project for this product
-The actual copy operation is done by the buckminster.ant file in the .site project for this product
-</concat>
     </target>
 
     <!-- ======================================= -->
@@ -238,7 +241,7 @@ The actual copy operation is done by the buckminster.ant file in the .site proje
 
     <target name="_jre-copy.check.available" depends="_jre-copy.set.environment" if="jre.copy.requested">
         <!-- find the JRE (.tar or .zip) to expand into the product -->
-        <property name="jre.archive.loc" value="${jre.include.parent.loc}/${jre.include.release}" />
+        <property.expand property="jre.archive.loc" definition="${jre.include.parent.loc}/${jre.include.release}"/>
         <property name="jre.archive.pattern" value="jre-*-${jre.os}-${jre.arch}.${jre.archive.type}" />
         <path id="jre.include.loc.id">
             <fileset dir="${jre.archive.loc}" includes="${jre.archive.pattern}" />
