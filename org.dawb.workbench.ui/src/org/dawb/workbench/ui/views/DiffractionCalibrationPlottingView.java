@@ -960,9 +960,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		wavelengthEnergyField.getControl().setEnabled(b);
 	}
 
-	private String[] names = new String[]{ "Image", "Number of rings", "Distance", 
-			"X beam centre", "Y beam centre", "Wavelength", "Energy", "Residuals", "Yaw", "Pitch", "Roll" };
-
 	private void createToolbarActions(Composite parent) {
 		ToolBar tb = new ToolBar(parent, SWT.NONE);
 		tb.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
@@ -1001,35 +998,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				dialog.setOverwrite(true);
 				String savedFilePath = dialog.open();
 				if (savedFilePath != null) {
-					String[][] values = new String[model.size()][names.length];
-					for (int i = 0; i < model.size(); i++) {
-						DetectorProperties dp = model.get(i).md.getDetector2DProperties();
-						double wavelength = model.get(i).md.getDiffractionCrystalEnvironment().getWavelength();
-						// image
-						values[i][0] = model.get(i).name;
-						// number of rings
-						values[i][1] = String.valueOf(model.get(i).nrois);
-						// distance
-						values[i][2] = String.valueOf(dp.getDetectorDistance());
-						// X beam centre
-						values[i][3] = String.valueOf(dp.getBeamCentreCoords()[0]);
-						// Y beam centre
-						values[i][4] = String.valueOf(dp.getBeamCentreCoords()[1]);
-						// wavelength
-						values[i][5] = String.valueOf(wavelength);
-						// energy
-						values[i][6] = String.valueOf(DiffractionCalibrationUtils.getWavelengthEnergy(wavelength));
-						// residuals
-						if (model.get(i).q != null)
-							values[i][7] = String.format("%.2f", Math.sqrt(model.get(i).q.getResidual()));
-						// Orientation Yaw
-						values[i][8] = String.valueOf(dp.getNormalAnglesInDegrees()[0]);
-						// Orientation Pitch
-						values[i][9] = String.valueOf(dp.getNormalAnglesInDegrees()[1]);
-						// Orientation Roll
-						values[i][10] = String.valueOf(dp.getNormalAnglesInDegrees()[2]);
-					}
-					DiffractionCalibrationUtils.saveToCsvFile(savedFilePath, names, values);
+					DiffractionCalibrationUtils.saveModelToCSVFile(model, savedFilePath);
 				}
 			}
 		});
