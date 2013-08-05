@@ -30,7 +30,9 @@ import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.annotation.IAnnotation;
 import org.dawnsci.plotting.api.axis.IAxis;
 import org.dawnsci.plotting.api.axis.IPositionListener;
+import org.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.dawnsci.plotting.api.preferences.PlottingConstants;
+import org.dawnsci.plotting.api.preferences.ToolbarConfigurationConstants;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.region.IRegionListener;
@@ -46,7 +48,6 @@ import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.draw2d.swtxy.LineTrace;
 import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
 import org.dawnsci.plotting.jreality.JRealityPlotViewer;
-import org.dawnsci.plotting.system.preference.ToolbarConfigurationConstants;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.draw2d.Cursors;
 import org.eclipse.draw2d.MouseListener;
@@ -96,8 +97,6 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	private PlotActionsManagerImpl       actionBarManager;
 	private LightWeightPlotViewer        lightWeightViewer;
 	private JRealityPlotViewer           jrealityViewer;
-
-//	private final String SHOW_LEGEND_ACTION_ID = "org.csstudio.swt.xygraph.toolbar.configureShow Legend";
 
 	public PlottingSystemImpl() {
 		super();
@@ -724,7 +723,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 
 	@Override
 	public void setShowLegend(boolean b) {
-		String id = ToolbarConfigurationConstants.CONFIG.getId()+"Show Legend";
+		String id = ToolbarConfigurationConstants.CONFIG.getId() + BasePlottingConstants.XY_SHOWLEGEND;
 		IAction action = actionBarManager.findAction(getPlotName()+"/"+id);
 		if (action != null) {
 			action.setChecked(b);

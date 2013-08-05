@@ -25,7 +25,9 @@ import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.axis.AxisUtils;
 import org.dawnsci.plotting.api.axis.IAxis;
 import org.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
+import org.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.dawnsci.plotting.api.preferences.PlottingConstants;
+import org.dawnsci.plotting.api.preferences.ToolbarConfigurationConstants;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.region.RegionUtils;
 import org.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
@@ -40,7 +42,6 @@ import org.dawnsci.plotting.system.dialog.RemoveAxisDialog;
 import org.dawnsci.plotting.system.dialog.RemoveRegionCommand;
 import org.dawnsci.plotting.system.dialog.RemoveRegionDialog;
 import org.dawnsci.plotting.system.dialog.XYRegionConfigDialog;
-import org.dawnsci.plotting.system.preference.ToolbarConfigurationConstants;
 import org.eclipse.core.commands.Command;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -345,11 +346,12 @@ class LightWeightPlotActions {
 		};
 		actionBarManager.registerAction(ToolbarConfigurationConstants.CONFIG.getId(), configButton, ActionType.XYANDIMAGE);		
 		
-		final Action showLegend = new Action("Show Legend", IAction.AS_CHECK_BOX) {
+		final Action showLegend = new Action(BasePlottingConstants.XY_SHOWLEGEND, IAction.AS_CHECK_BOX) {
 			public void run() {
 				xyGraph.setShowLegend(!xyGraph.isShowLegend());
 			}
 		};
+		showLegend.setToolTipText("Show Legend");
 		showLegend.setImageDescriptor(PlottingSystemActivator.getImageDescriptor("icons/ShowLegend.png"));
 		actionBarManager.registerAction(ToolbarConfigurationConstants.CONFIG.getId(), showLegend, ActionType.XY);		
 		
