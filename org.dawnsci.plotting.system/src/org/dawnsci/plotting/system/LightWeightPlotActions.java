@@ -421,7 +421,7 @@ class LightWeightPlotActions {
 		actionBarManager.registerAction(regionDropDown, ActionType.XYANDIMAGE, ManagerType.MENUBAR);
 			
         final MenuAction removeRegionDropDown = new MenuAction("Delete selection region(s)");
-        removeRegionDropDown.setId("org.dawb.workbench.ui.editors.plotting.swtxy.removeRegions");
+        removeRegionDropDown.setId(BasePlottingConstants.REMOVE_REGION);
 
         final Action removeRegion = new Action("Remove Region...", PlottingSystemActivator.getImageDescriptor("icons/RegionDelete.png")) {
 			public void run() {
@@ -497,7 +497,7 @@ class LightWeightPlotActions {
 	            xyGraph.performAutoScale();
         	}
         };
-        autoScale.setId("org.csstudio.swt.xygraph.autoscale");
+        autoScale.setId(BasePlottingConstants.AUTO_SCALE);
         actionBarManager.registerAction(ToolbarConfigurationConstants.ZOOM.getId(), autoScale, ActionType.XYANDIMAGE);
         
         final CheckableActionGroup zoomG = new CheckableActionGroup();
@@ -535,7 +535,7 @@ class LightWeightPlotActions {
 		    }
 		};
 		rescaleAction.setChecked(viewer.getSystem().isRescale());
-		rescaleAction.setId("org.dawb.workbench.plotting.rescale");
+		rescaleAction.setId(BasePlottingConstants.RESCALE);
 		actionBarManager.addXYAction(rescaleAction);
 		actionBarManager.addImageAction(rescaleAction);
 		
@@ -823,7 +823,7 @@ class LightWeightPlotActions {
 			    }
 			};
 			plotIndex.setImageDescriptor(PlottingSystemActivator.getImageDescriptor("icons/plotindex.png"));
-			plotIndex.setId("org.dawb.workbench.plotting.plotIndex");
+			plotIndex.setId(BasePlottingConstants.PLOT_INDEX);
 			group.add(plotIndex);
 			
 			plotX = new Action("Plot using first data set as x-axis", IAction.AS_CHECK_BOX) {
@@ -835,7 +835,7 @@ class LightWeightPlotActions {
 			    }
 			};
 			plotX.setImageDescriptor(PlottingSystemActivator.getImageDescriptor("icons/plotxaxis.png"));
-			plotX.setId("org.dawb.workbench.plotting.plotX");
+			plotX.setId(BasePlottingConstants.PLOT_X_AXIS);
 			group.add(plotX);
 			
 			boolean xfirst = PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.PLOT_X_DATASET);
@@ -887,7 +887,7 @@ class LightWeightPlotActions {
 	}
 
 	public void setRescaleButton(boolean rescale) {
-		IAction action = actionBarManager.findAction("org.dawb.workbench.plotting.rescale");
+		IAction action = actionBarManager.findAction(BasePlottingConstants.RESCALE);
 		if (action==null) return; // they are allowed to remove it.
 		action.setChecked(rescale);
 	}

@@ -11,6 +11,7 @@ import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.PlottingFactory;
+import org.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.dawnsci.plotting.api.region.IROIListener;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -196,8 +197,8 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		
 		// Unused actions removed for tool
 		//profilePlottingSystem.getPlotActionSystem().remove("org.dawb.workbench.plotting.rescale");
-		profilePlottingSystem.getPlotActionSystem().remove("org.dawb.workbench.plotting.plotIndex");
-		profilePlottingSystem.getPlotActionSystem().remove("org.dawb.workbench.plotting.plotX");
+		profilePlottingSystem.getPlotActionSystem().remove(BasePlottingConstants.PLOT_INDEX);
+		profilePlottingSystem.getPlotActionSystem().remove(BasePlottingConstants.PLOT_X_AXIS);
 
 		profilePlottingSystem.setXFirst(true);
 		profilePlottingSystem.setRescale(true);

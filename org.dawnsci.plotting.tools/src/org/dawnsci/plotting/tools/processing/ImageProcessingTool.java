@@ -11,6 +11,7 @@ import org.dawb.workbench.jmx.UserPlotBean;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.PlottingFactory;
+import org.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.dawnsci.plotting.api.region.IROIListener;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -171,9 +172,9 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 				 null);
 		configureSelectionPlottingSystem(selectionPlottingSystem);
 		// Unused actions removed for tool
-		selectionPlottingSystem.getPlotActionSystem().remove("org.dawb.workbench.plotting.rescale");
-		selectionPlottingSystem.getPlotActionSystem().remove("org.dawb.workbench.plotting.plotIndex");
-		selectionPlottingSystem.getPlotActionSystem().remove("org.dawb.workbench.plotting.plotX");
+		selectionPlottingSystem.getPlotActionSystem().remove(BasePlottingConstants.RESCALE);
+		selectionPlottingSystem.getPlotActionSystem().remove(BasePlottingConstants.PLOT_INDEX);
+		selectionPlottingSystem.getPlotActionSystem().remove(BasePlottingConstants.PLOT_X_AXIS);
 		selectionPlottingSystem.setXFirst(true);
 		selectionPlottingSystem.setRescale(true);
 		selectionPlottingSystem.addRegionListener(regionListener);

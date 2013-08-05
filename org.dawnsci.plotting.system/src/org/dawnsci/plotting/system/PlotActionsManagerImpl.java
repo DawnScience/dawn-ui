@@ -23,6 +23,7 @@ import org.dawnsci.plotting.PlottingActionBarManager;
 import org.dawnsci.plotting.api.ActionType;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.ManagerType;
+import org.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.dawnsci.plotting.api.preferences.ToolbarConfigurationConstants;
 import org.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
@@ -171,7 +172,7 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 	@Override
 	public void fillZoomActions(IContributionManager man) {
 
-		IContributionItem action = system.getActionBars().getToolBarManager().find("org.csstudio.swt.xygraph.autoscale");
+		IContributionItem action = system.getActionBars().getToolBarManager().find(BasePlottingConstants.AUTO_SCALE);
 		if (action!=null) man.add(((ActionContributionItem)action).getAction());
 
 		for(final ZoomType zoomType : ZoomType.values()) {
@@ -187,7 +188,7 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 		IContributionItem action = system.getActionBars().getToolBarManager().find("org.dawb.workbench.ui.editors.plotting.swtxy.addRegions");
 		if (action!=null) man.add(((ActionContributionItem)action).getAction());
 		
-		action = system.getActionBars().getToolBarManager().find("org.dawb.workbench.ui.editors.plotting.swtxy.removeRegions");
+		action = system.getActionBars().getToolBarManager().find(BasePlottingConstants.REMOVE_REGION);
 		if (action!=null) man.add(((ActionContributionItem)action).getAction());
 	}
 

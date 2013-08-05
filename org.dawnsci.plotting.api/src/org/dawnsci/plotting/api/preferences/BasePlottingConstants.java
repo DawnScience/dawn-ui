@@ -72,4 +72,28 @@ public class BasePlottingConstants {
 	 */
 	public static final String CONFIG_SETTINGS = "org.dawnsci.plotting.config.settings";
 
+	/**
+	 * Used to identify the rescale action
+	 */
+	public static final String RESCALE = "org.dawb.workbench.plotting.rescale";
+
+	/**
+	 * Used to identify the action to plot data as separate plots
+	 */
+	public static final String PLOT_INDEX = "org.dawb.workbench.plotting.plotIndex";
+
+	/**
+	 * Used to identify the action: "Plot using first data set as x-axis"
+	 */
+	public static final String PLOT_X_AXIS = "org.dawb.workbench.plotting.plotX";
+
+	/**
+	 * Used to identify the remove region action
+	 */
+	public static final String REMOVE_REGION = "org.dawb.workbench.ui.editors.plotting.swtxy.removeRegions";
+
+	/**
+	 * Used to identify the autoscal action
+	 */
+	public static final String AUTO_SCALE = "org.csstudio.swt.xygraph.autoscale";
 }

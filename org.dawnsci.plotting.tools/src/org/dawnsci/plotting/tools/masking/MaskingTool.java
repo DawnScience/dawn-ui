@@ -17,6 +17,7 @@ import org.dawb.common.ui.wizard.persistence.PersistenceImportWizard;
 import org.dawnsci.plotting.AbstractPlottingSystem;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.histogram.HistogramBound;
+import org.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.dawnsci.plotting.api.region.IROIListener;
 import org.dawnsci.plotting.api.region.IRegion;
@@ -1130,7 +1131,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		widthChoice.setCheckedAction(wid-1, true);
 
 		man.add(new Separator());
-		menu  = (ActionContributionItem)getPlottingSystem().getActionBars().getToolBarManager().find("org.dawb.workbench.ui.editors.plotting.swtxy.removeRegions");
+		menu  = (ActionContributionItem)getPlottingSystem().getActionBars().getToolBarManager().find(BasePlottingConstants.REMOVE_REGION);
 		if (menu!=null) {
 			menuAction = (MenuAction)menu.getAction();	
 			man.add(menuAction);
