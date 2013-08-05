@@ -67,4 +67,9 @@ public class BasePlottingConstants {
 	public static final String MAX_CUT = "org.dawb.plotting.system.histogram.max.cut";
 	public static final String NAN_CUT = "org.dawb.plotting.system.histogram.nan.cut";
 
+	/**
+	 * Used to identify the config setting action in the toolbar
+	 */
+	public static final String CONFIG_SETTINGS = "org.dawnsci.plotting.config.settings";
+
 }
