@@ -46,6 +46,7 @@ import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.draw2d.swtxy.LineTrace;
 import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
 import org.dawnsci.plotting.jreality.JRealityPlotViewer;
+import org.dawnsci.plotting.system.preference.ToolbarConfigurationConstants;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.draw2d.Cursors;
 import org.eclipse.draw2d.MouseListener;
@@ -96,7 +97,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	private LightWeightPlotViewer        lightWeightViewer;
 	private JRealityPlotViewer           jrealityViewer;
 
-	private final String SHOW_LEGEND_ACTION_ID = "org.csstudio.swt.xygraph.toolbar.configureShow Legend";
+//	private final String SHOW_LEGEND_ACTION_ID = "org.csstudio.swt.xygraph.toolbar.configureShow Legend";
 
 	public PlottingSystemImpl() {
 		super();
@@ -723,7 +724,8 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 
 	@Override
 	public void setShowLegend(boolean b) {
-		IAction action = actionBarManager.findAction(getPlotName()+"/"+SHOW_LEGEND_ACTION_ID);
+		String id = ToolbarConfigurationConstants.CONFIG.getId()+"Show Legend";
+		IAction action = actionBarManager.findAction(getPlotName()+"/"+id);
 		if (action != null) {
 			action.setChecked(b);
 		}
