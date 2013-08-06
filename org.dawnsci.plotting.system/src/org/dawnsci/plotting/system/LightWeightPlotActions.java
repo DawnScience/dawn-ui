@@ -399,7 +399,7 @@ class LightWeightPlotActions {
 		
 		
         final MenuAction regionDropDown = new MenuAction("Selection region");
-        regionDropDown.setId("org.dawb.workbench.ui.editors.plotting.swtxy.addRegions"); // Id used elsewhere...
+        regionDropDown.setId(BasePlottingConstants.ADD_REGION); // Id used elsewhere...
  
 		regionDropDown.add(createRegionAction(xyGraph, RegionType.LINE,       regionDropDown, "Add line selection",     PlottingSystemActivator.getImageDescriptor("icons/ProfileLine.png")));
 		regionDropDown.add(createRegionAction(xyGraph, RegionType.POLYLINE,   regionDropDown, "Add polyline selection", PlottingSystemActivator.getImageDescriptor("icons/ProfilePolyline.png")));
@@ -575,7 +575,7 @@ class LightWeightPlotActions {
         
 		aspect.setImageDescriptor(PlottingSystemActivator.getImageDescriptor("icons/aspect.png"));
 		aspect.setChecked(PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.ASPECT));
-	    aspect.setId("org.dawb.workbench.plotting.aspect");
+	    aspect.setId(PlottingConstants.ASPECT);
 		
 		final Action hideAxes = new Action("Show image axes", IAction.AS_CHECK_BOX) {
 			

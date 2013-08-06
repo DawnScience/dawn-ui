@@ -88,6 +88,11 @@ public class BasePlottingConstants {
 	public static final String PLOT_X_AXIS = "org.dawb.workbench.plotting.plotX";
 
 	/**
+	 * Used to identify the add region action
+	 */
+	public static final String ADD_REGION = "org.dawb.workbench.ui.editors.plotting.swtxy.addRegions";
+
+	/**
 	 * Used to identify the remove region action
 	 */
 	public static final String REMOVE_REGION = "org.dawb.workbench.ui.editors.plotting.swtxy.removeRegions";

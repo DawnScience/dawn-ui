@@ -8,6 +8,7 @@ import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.PlottingFactory;
 import org.dawnsci.plotting.api.axis.IAxis;
 import org.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
+import org.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.dawnsci.plotting.api.region.IROIListener;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -216,19 +217,17 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 		}
 	}
 	
-	private static final String regionId = "org.dawb.workbench.ui.editors.plotting.swtxy.addRegions";
-	
 	private void setOtherRegionsEnabled(boolean isVisible) {
 		if (getPlottingSystem() == null)
 			return;
 
         final IActionBars bars = getPlottingSystem().getActionBars();
-        if (bars.getToolBarManager().find(regionId)!=null) {
-        	bars.getToolBarManager().find(regionId).setVisible(isVisible);
+        if (bars.getToolBarManager().find(BasePlottingConstants.ADD_REGION)!=null) {
+        	bars.getToolBarManager().find(BasePlottingConstants.ADD_REGION).setVisible(isVisible);
         	bars.getToolBarManager().update(true);
         }
-        if (bars.getMenuManager().find(regionId)!=null) {
-        	bars.getMenuManager().find(regionId).setVisible(isVisible);
+        if (bars.getMenuManager().find(BasePlottingConstants.ADD_REGION)!=null) {
+        	bars.getMenuManager().find(BasePlottingConstants.ADD_REGION).setVisible(isVisible);
         	bars.getMenuManager().update(true);
         }
 	}

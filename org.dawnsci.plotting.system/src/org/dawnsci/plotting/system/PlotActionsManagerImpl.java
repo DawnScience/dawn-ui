@@ -185,7 +185,7 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 	@Override
 	public void fillRegionActions(IContributionManager man) {
 			
-		IContributionItem action = system.getActionBars().getToolBarManager().find("org.dawb.workbench.ui.editors.plotting.swtxy.addRegions");
+		IContributionItem action = system.getActionBars().getToolBarManager().find(BasePlottingConstants.ADD_REGION);
 		if (action!=null) man.add(((ActionContributionItem)action).getAction());
 		
 		action = system.getActionBars().getToolBarManager().find(BasePlottingConstants.REMOVE_REGION);
