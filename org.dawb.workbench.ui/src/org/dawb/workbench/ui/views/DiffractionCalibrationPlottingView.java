@@ -179,7 +179,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 	private IToolPageSystem toolSystem;
 
 	private boolean postFitWavelength = false;
-	private boolean usedFixedWavelength = false;
+	private boolean usedFixedWavelength = true;
 
 	public DiffractionCalibrationPlottingView() {
 		service = (ILoaderService) PlatformUI.getWorkbench().getService(ILoaderService.class);
