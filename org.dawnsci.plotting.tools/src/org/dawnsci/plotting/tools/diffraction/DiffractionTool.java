@@ -1020,6 +1020,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			return null;
 
 		String shape = circle ? "circle" : "ellipse";
+		logger.debug("Attempting to fit {} from peaks in {}", shape, roi);
 		final ProgressMonitorWrapper mon = new ProgressMonitorWrapper(monitor);
 		monitor.beginTask("Refine " + shape + " fit", IProgressMonitor.UNKNOWN);
 		monitor.subTask("Find POIs near initial " + shape);
@@ -1036,6 +1037,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 
 		monitor.subTask("Trim POIs");
 		efroi = PowderRingsUtils.fitAndTrimOutliers(mon, points, 2, circle);
+		logger.debug("Found {}...", efroi);
 
 		int npts = efroi.getPoints().getNumberOfPoints();
 		int lpts;
@@ -1052,7 +1054,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 
 		final IROI froi = circle ? new CircularFitROI(efroi.getPoints()) : efroi;
 		monitor.worked(1);
-		logger.debug("{} from peaks: {}", shape, froi);
+		logger.debug("Fitted {} from peaks: {}", shape, froi);
 
 		return froi;
 	}
