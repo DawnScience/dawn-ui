@@ -38,9 +38,9 @@ public class DiffractionTableData {
 	IDiffractionMetadata md;
 	IDataset image;
 	DiffractionTraceListener listener;
-	List<IROI> rois;
+	List<IROI> rois; // can contain null entries as placeholders
 	QSpace q;
 	double od = Double.NaN;
-	int nrois = -1;
+	int nrois = -1; // number of actual ROIs found
 	boolean use = false;
 }
