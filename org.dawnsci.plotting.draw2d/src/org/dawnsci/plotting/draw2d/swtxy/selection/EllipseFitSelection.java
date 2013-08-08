@@ -45,6 +45,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.fitting.CircleFitter;
 import uk.ac.diamond.scisoft.analysis.fitting.EllipseFitter;
 import uk.ac.diamond.scisoft.analysis.fitting.IConicSectionFitter;
+import uk.ac.diamond.scisoft.analysis.roi.CircularFitROI;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalFitROI;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.PointROI;
@@ -242,12 +243,12 @@ class EllipseFitSelection extends AbstractSelectionRegion implements IEllipseFit
 		if (ellipse == null)
 			return;
 
-		if (roi instanceof PolylineROI && !(roi instanceof EllipticalFitROI)) {
+		if (roi instanceof PolylineROI) {
 			roi = new EllipticalFitROI((PolylineROI)roi);
 		}
 		
-		if (roi instanceof EllipticalFitROI) {
-			ellipse.updateFromROI((EllipticalFitROI) roi);
+		if (roi instanceof EllipticalFitROI || roi instanceof CircularFitROI) {
+			ellipse.updateFromROI(roi);
 			updateConnectionBounds();
 		}
 	}
@@ -465,18 +466,31 @@ class EllipseFitSelection extends AbstractSelectionRegion implements IEllipseFit
 		 * Update according to ROI
 		 * @param sroi
 		 */
-		public void updateFromROI(EllipticalFitROI eroi) {
-			final double[] xy = eroi.getPointRef();
+		public void updateFromROI(IROI roi) {
+			final double[] xy = roi.getPointRef();
 			int[] p1 = getCoordinateSystem().getValuePosition(xy[0], xy[1]);
-			int[] p2 = getCoordinateSystem().getValuePosition(2*eroi.getSemiAxis(0) + xy[0], 2*eroi.getSemiAxis(1) + xy[1]);
+			int[] p2;
+			PolylineROI proi;
+			if (roi instanceof CircularFitROI) {
+				CircularFitROI croi = (CircularFitROI) roi;
+				double d = 2 * croi.getRadius();
+				p2 = getCoordinateSystem().getValuePosition(d + xy[0], d + xy[1]);
+				proi = croi.getPoints();
+				setAngleDegrees(0);
+			} else if (roi instanceof EllipticalFitROI) {
+				EllipticalFitROI eroi = (EllipticalFitROI) roi;
+				p2 = getCoordinateSystem().getValuePosition(2*eroi.getSemiAxis(0) + xy[0], 2*eroi.getSemiAxis(1) + xy[1]);
+				proi = eroi.getPoints();
+				setAngleDegrees(eroi.getAngleDegrees());
+			} else {
+				return;
+			}
 
 			setAxes(p2[0] - p1[0], (p2[1] - p1[1])/getAspectRatio());
 
 			setCentre(p1[0], p1[1]);
-			setAngleDegrees(eroi.getAngleDegrees());
 
 			int imax = handles.size() - 1;
-			PolylineROI proi = eroi.getPoints();
 
 			if (imax != proi.getNumberOfPoints()) {
 				for (int i = imax; i >= 0; i--) {
