@@ -43,7 +43,6 @@ public class DiffractionDetectorHelper {
 	 * Pilatus detector are hardcoded and guessed from the pilatus module size
 	 */
 	public static DiffractionDetector getMatchingDetector(int[] imageSize) {
-		
 		DiffractionDetectors detectors = getDetectorsFromPreferences();
 		
 		if (detectors == null || detectors.getDiffractionDetectors().isEmpty()) return null;
@@ -70,7 +69,6 @@ public class DiffractionDetectorHelper {
 	 * If not it returns null
 	 */
 	public static DiffractionDetector checkForPilatusRegions(int[] imageSize) {
-		
 		DiffractionDetector pilatusPlate = new DiffractionDetector();
 		pilatusPlate.setDetectorName("PilatusPlate");
 		pilatusPlate.setNumberOfPixelsX(PILATUSMODULEX);
@@ -111,7 +109,6 @@ public class DiffractionDetectorHelper {
 	}
 	
 	public static List<Amount<Length>> getXYPixelSizeAmount(String name) {
-		
 		DiffractionDetectors detectors = getDetectorsFromPreferences();
 		for (DiffractionDetector dd : detectors.getDiffractionDetectors()) {
 			if (dd.getDetectorName().equals(name)) {
@@ -135,7 +132,6 @@ public class DiffractionDetectorHelper {
 	}
 	
 	private static DiffractionDetector checkForFullDetector(DiffractionDetectors detectors, int[] imageSize) {
-		
 		for (DiffractionDetector det: detectors.getDiffractionDetectors()) {
 			if (imageSize[0] == det.getNumberOfPixelsX() && imageSize[1] == det.getNumberOfPixelsY()) {
 				return det;
@@ -165,7 +161,6 @@ public class DiffractionDetectorHelper {
 	}
 	
 	private static DiffractionDetector rotateDetector(DiffractionDetector detector) {
-		
 		DiffractionDetector det = new DiffractionDetector();
 		det.setDetectorName(detector.getDetectorName() +" rotated");
 		det.setNumberOfPixelsX(detector.getNumberOfPixelsY());
@@ -175,9 +170,8 @@ public class DiffractionDetectorHelper {
 		
 		return det;
 	}
-	
-private static DiffractionDetector binDetector(DiffractionDetector detector, int binning) {
-		
+
+	private static DiffractionDetector binDetector(DiffractionDetector detector, int binning) {
 		DiffractionDetector det = new DiffractionDetector();
 		det.setDetectorName(detector.getDetectorName() +" binned");
 		det.setXPixelMM(detector.getXPixelMM()*binning);
