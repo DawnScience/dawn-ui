@@ -76,8 +76,8 @@ public class SpectrumFileManager {
 	
 	private void setXandYdatasets(SpectrumFile file) {
 		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
-		String xdatasetNamesCombined = store.getDefaultString(SpectrumConstants.X_DATASETS);
-		String ydatasetNamesCombined = store.getDefaultString(SpectrumConstants.Y_DATASETS);
+		String xdatasetNamesCombined = store.getString(SpectrumConstants.X_DATASETS);
+		String ydatasetNamesCombined = store.getString(SpectrumConstants.Y_DATASETS);
 		
 		xdatasetNamesCombined = xdatasetNamesCombined.replace("*", ".*");
 		ydatasetNamesCombined = ydatasetNamesCombined.replace("*", ".*");
@@ -150,7 +150,7 @@ public class SpectrumFileManager {
 			
 			spectrumFiles.put(file.getPath(), file);
 			
-			file.plotAll();
+			//file.plotAll();
 			
 			fireFileListeners(new SpectrumFileOpenedEvent(this, file));
 			

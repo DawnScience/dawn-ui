@@ -46,7 +46,8 @@ public class SpectrumDatasetView extends ViewPart {
 				List<ISpectrumFile> files = SpectrumUtils.getSpectrumFilesList((IStructuredSelection)selection);
 				
 				if (files.isEmpty()) {
-					viewer.getTable().clearAll();
+					//viewer.getTable().clearAll();
+					viewer.setInput(new ArrayList<String>());
 					combo.removeAll();
 					return;
 				}

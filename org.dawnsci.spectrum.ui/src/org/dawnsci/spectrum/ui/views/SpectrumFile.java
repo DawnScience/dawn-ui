@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.trace.ITrace;
@@ -24,6 +25,7 @@ public class SpectrumFile implements ISpectrumFile {
 	private String xDatasetName;
 	private IPlottingSystem system;
 	private List<String> yDatasetNames;
+	private boolean hasXAxis = false;
 	
 	private static Logger logger = LoggerFactory.getLogger(SpectrumFile.class);
 	
@@ -61,6 +63,7 @@ public class SpectrumFile implements ISpectrumFile {
 	}
 
 	public void setxDatasetName(String xDatasetName) {
+		hasXAxis = true;
 		this.xDatasetName = xDatasetName;
 	}
 	
@@ -113,6 +116,15 @@ public class SpectrumFile implements ISpectrumFile {
 		return sets;
 	}
 	
+	public boolean hasXAxis() {
+		return hasXAxis;
+	}
+	
+	public void useXAxis(boolean useX) {
+		if (xDatasetName != null && useX) hasXAxis = true;
+		else hasXAxis = false;
+	}
+	
 	public void plotAll() {
 		
 		List<IDataset> list = getyDatasets();
@@ -147,5 +159,6 @@ public class SpectrumFile implements ISpectrumFile {
 		if (trace != null) system.removeTrace(trace);
 		system.autoscaleAxes();
 	}
+	
 }
 

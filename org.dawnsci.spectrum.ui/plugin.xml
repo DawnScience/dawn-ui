@@ -58,6 +58,9 @@
             </actionExtension>
          </includes>
       </viewerActionBinding>
+      <viewerActionBinding
+            viewerId="org.eclipse.ui.navigator.resources.*">
+      </viewerActionBinding>
    </extension>
    <extension
          point="org.eclipse.ui.navigator.navigatorContent">
@@ -79,6 +82,15 @@
       <initializer
             class="org.dawnsci.spectrum.ui.preferences.SpectrumPreferenceInitializer">
       </initializer>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            category="org.dawnsci.preferences.root"
+            class="org.dawnsci.spectrum.ui.preferences.SpectrumPreferencePage"
+            id="org.dawnsci.spectrum.ui.preferences.page"
+            name="Spectrum Default Names">
+      </page>
    </extension>
 
 </plugin>

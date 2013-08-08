@@ -6,12 +6,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.dawb.common.ui.menu.MenuAction;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlottingFactory;
+import org.dawnsci.plotting.api.axis.IAxis;
 import org.dawnsci.plotting.api.filter.AbstractPlottingFilter;
 import org.dawnsci.plotting.api.filter.IFilterDecorator;
 import org.dawnsci.plotting.api.trace.ILineTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
+import org.dawnsci.spectrum.ui.Activator;
 import org.dawnsci.spectrum.ui.file.ISpectrumFile;
 import org.dawnsci.spectrum.ui.file.SpectrumInMemory;
 import org.eclipse.swt.widgets.Composite;
@@ -42,6 +45,7 @@ import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.Viewer;
@@ -88,11 +92,8 @@ public class SpectrumView extends ViewPart {
 	public static final String ID = "org.dawnsci.spectrum.ui.views.SpectrumView";
 
 	private TableViewer viewer;
-	private IAction action1;
-	private Action action2;
+	private Action removeAction;
 	private Action doubleClickAction;
-	private IPartListener2 listener;
-	private List<String> filenames = new ArrayList<String>();
 	private IPlottingSystem system;
 	private SpectrumFileManager manager;
 	private DropTargetAdapter dropListener;
@@ -142,8 +143,6 @@ public class SpectrumView extends ViewPart {
 					getSharedImages().getImage(ISharedImages.IMG_OBJ_ELEMENT);
 		}
 	}
-//	class NameSorter extends ViewerSorter {
-//	}
 
 	/**
 	 * The constructor.
@@ -157,87 +156,10 @@ public class SpectrumView extends ViewPart {
 	 */
 	public void createPartControl(Composite parent) {
 		
-		//viewer = new TreeViewer(parent);
 		
 		viewer = new TableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		viewer.setContentProvider(new ViewContentProvider());
 		viewer.setLabelProvider(new ViewLabelProvider());
-//		viewer.setSorter(new NameSorter());
-//		viewer.setInput(manager);
-		
-//		IActionBars bars = getViewSite().getActionBars();
-		//bars.setGlobalActionHandler(ICommonActionConstants.OPEN,new SpectrumOpenAction("Open"));
-		
-		// add part listener for relevant editors and views
-//				listener = new IPartListener2() {
-//					@Override
-//					public void partVisible(IWorkbenchPartReference partRef) {
-//						IWorkbenchPart part = partRef.getPart(false);
-//						System.err.println("part visible: " + part.getTitle());
-//						IPlottingSystem system = PartUtils.getPlottingSystem(part);
-//						if (system != null) {
-//							String altPath = part instanceof IEditorPart ? EclipseUtils.getFilePath(((IEditorPart) part).getEditorInput()) : null;
-//							
-//							if (altPath != null) {
-//								File file = new File(altPath);
-//								
-//								filenames.add(file.getName());
-//							}
-//							
-//							Display.getDefault().syncExec(new Runnable() {
-//								
-//								@Override
-//								public void run() {
-//									viewer.refresh();
-//									
-//								}
-//							});
-//						}
-//					}
-//					
-//					@Override
-//					public void partOpened(IWorkbenchPartReference partRef) {
-//						IWorkbenchPart part = partRef.getPart(false);
-//						System.err.println("part opened: " + part.getTitle());
-//					}
-//					
-//					@Override
-//					public void partInputChanged(IWorkbenchPartReference partRef) {
-//						IWorkbenchPart part = partRef.getPart(false);
-//						System.err.println("input changed: " + part.getTitle());
-//					}
-//					
-//					@Override
-//					public void partHidden(IWorkbenchPartReference partRef) {
-//					}
-//					
-//					@Override
-//					public void partDeactivated(IWorkbenchPartReference partRef) {
-//					}
-//					
-//					@Override
-//					public void partClosed(IWorkbenchPartReference partRef) {
-//						IWorkbenchPart part = partRef.getPart(false);
-//						IPlottingSystem system = PartUtils.getPlottingSystem(part);
-//						if (system != null) {
-//							//removePlottingSystem(system);
-//						}
-//					}
-//					
-//					@Override
-//					public void partBroughtToTop(IWorkbenchPartReference partRef) {
-//					}
-//					
-//					@Override
-//					public void partActivated(IWorkbenchPartReference partRef) {
-//						IWorkbenchPart part = partRef.getPart(false);
-//						System.err.println("part activated: " + part.getTitle());
-//					}
-//				};
-//				getSite().getPage().addPartListener(listener);
-
-		
-		
 		IWorkbenchPage page = getSite().getPage();
 		IViewPart view = page.findView("org.dawnsci.spectrum.ui.views.SpectrumPlot");
 		system = (IPlottingSystem)view.getAdapter(IPlottingSystem.class);
@@ -252,16 +174,19 @@ public class SpectrumView extends ViewPart {
 					
 					@Override
 					public void run() {
+//						viewer.refresh();
+//						Table tab = viewer.getTable();
+//						tab.setSelection(tab.getItemCount()-1);
+//						tab.showSelection();
 						viewer.refresh();
-						Table tab = viewer.getTable();
-						tab.setSelection(tab.getItemCount()-1);
+						viewer.setSelection(new StructuredSelection(event.getFile()),true);
+						
 					}
 				});
 			}
 		});
 		
 		getSite().setSelectionProvider(viewer);
-		
 		
 		//TODO make this nasty cut-paste code better
 		dropListener = new DropTargetAdapter() {
@@ -314,14 +239,11 @@ public class SpectrumView extends ViewPart {
 	}
 
 	private void fillLocalPullDown(IMenuManager manager) {
-		manager.add(action1);
-		manager.add(new Separator());
-		manager.add(action2);
+		manager.add(removeAction);
 	}
 
 	private void fillContextMenu(IMenuManager manager) {
-		manager.add(action1);
-		manager.add(action2);
+		manager.add(removeAction);
 		
 		manager.add(new Action("Average") {
 			public void run() {
@@ -359,30 +281,22 @@ public class SpectrumView extends ViewPart {
 	}
 	
 	private void fillLocalToolBar(IToolBarManager manager) {
-		manager.add(action1);
-		manager.add(action2);
+		
+		createXYFiltersActions(manager);
+		
+		manager.add(removeAction);
 	}
 
 	private void makeActions() {
 		
-		action1  = createXYFiltersActions();
-
-		action1.setText("Stack");
-		action1.setToolTipText("Stack spectra");
-		action1.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().
-			getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
-		
-		action2 = new Action() {
+		removeAction = new Action("Remove",Activator.imageDescriptorFromPlugin("org.dawnsci.spectrum.ui","icons/delete.gif")) {
 			public void run() {
 				ISelection selection = viewer.getSelection();
 				List<?> obj = ((IStructuredSelection)selection).toList();
 				for (Object ob : obj) manager.removeFile(((ISpectrumFile)ob).getPath());
 			}
 		};
-		action2.setText("Remove");
-		action2.setToolTipText("Action 2 tooltip");
-		action2.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().
-				getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
+		removeAction.setToolTipText("Remove selected files");
 		doubleClickAction = new Action() {
 			public void run() {
 				ISelection selection = viewer.getSelection();
@@ -409,7 +323,6 @@ public class SpectrumView extends ViewPart {
 	@Override
 	public void dispose() {
 		super.dispose();
-		getSite().getPage().removePartListener(listener);
 	}
 
 	/**
@@ -423,15 +336,11 @@ public class SpectrumView extends ViewPart {
 		
 		manager.addFile(filePath);
 		
-		File file = new File(filePath);
-		
-		filenames.add(file.getName());
-		
 	}
-	public IAction createXYFiltersActions() {
+	public void createXYFiltersActions(IToolBarManager manager) {
 
 		final IFilterDecorator dec = PlottingFactory.createFilterDecorator(system);
-		final AbstractPlottingFilter norm = new AbstractPlottingFilter() {
+		final AbstractPlottingFilter stack = new AbstractPlottingFilter() {
 
 			@Override
 			public int getRank() {
@@ -447,24 +356,83 @@ public class SpectrumView extends ViewPart {
 			}
 		};
 
-		IAction normal = new Action("Stack", IAction.AS_CHECK_BOX) {
-			public void run(){	
-				if (isChecked()) {
-					dec.addFilter(norm);
-					final Collection<ITrace> traces = system.getTraces(ILineTrace.class);
+		final AbstractPlottingFilter norm = new AbstractPlottingFilter() {
 
-					for (ITrace trace: traces) system.removeTrace(trace);
-					for (ITrace trace: traces) system.addTrace(trace);
-					system.autoscaleAxes();
+			@Override
+			public int getRank() {
+				return 1;
+			}
 
-				} else {
-//					dec.removeFilter(norm);
-//					dec.reset();
-					dec.clear();
-				}
+			protected IDataset[] filter(IDataset x, IDataset y) {
+				IDataset newY = DatasetUtils.norm((AbstractDataset)y);
+				return new IDataset[]{x, newY};
 			}
 		};
 		
-		return normal;
+		final AbstractPlottingFilter offset = new AbstractPlottingFilter() {
+
+			@Override
+			public int getRank() {
+				return 1;
+			}
+
+			protected IDataset[] filter(IDataset x, IDataset y) {
+				Collection<ITrace>  traces = system.getTraces(ILineTrace.class);
+				IDataset newY = Maths.add(DatasetUtils.norm((AbstractDataset)y),(traces.size()*1));
+				newY.setName(y.getName());
+
+				return new IDataset[]{x, newY};
+			}
+		};
+		
+		
+		IAction none = new Action("None", IAction.AS_RADIO_BUTTON) {
+			public void run(){	
+				dec.clear();
+				replot();
+			}
+
+		};
+		
+		IAction normalize = new Action("Min/Max", IAction.AS_RADIO_BUTTON) {
+			public void run(){	
+				dec.clear();
+				dec.addFilter(norm);
+				replot();
+
+			}
+		};
+		
+		IAction stackAc = new Action("Stack", IAction.AS_RADIO_BUTTON) {
+			public void run(){	
+				dec.clear();
+				dec.addFilter(stack);
+				replot();
+			}
+		};
+		
+		IAction offAc = new Action("Offset", IAction.AS_RADIO_BUTTON) {
+			public void run(){	
+				dec.clear();
+				dec.addFilter(offset);
+				replot();
+			}
+		};
+		
+		MenuAction m = new MenuAction("Display");
+		none.setChecked(true);
+		m.add(none);
+		m.add(normalize);
+		m.add(stackAc);
+		m.add(offAc);
+		
+		manager.add(m);
+	}
+	
+	private void replot(){
+		final Collection<ITrace> traces = system.getTraces(ILineTrace.class);
+		for (ITrace trace: traces) system.removeTrace(trace);
+		for (ITrace trace: traces) system.addTrace(trace);
+		system.autoscaleAxes();
 	}
 }
