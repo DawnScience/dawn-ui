@@ -55,6 +55,7 @@ import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
 import uk.ac.diamond.scisoft.analysis.fitting.Fitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Polynomial;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
+import uk.ac.diamond.scisoft.analysis.roi.CircularROI;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
@@ -399,6 +400,8 @@ public class DiffractionCalibrationUtils {
 		job.schedule();
 	}
 
+	private static final double ASPECT_DEV = 1./64; // deviation from circle allowed 
+
 	/**
 	 * 
 	 * @param display
@@ -428,7 +431,8 @@ public class DiffractionCalibrationUtils {
 			@Override
 			protected IStatus run(final IProgressMonitor monitor) {
 				IStatus stat = Status.OK_STATUS;
-				double last = -1;
+				double lastMajor = -1;
+				double lastAspect = -1;
 				int n = 0;
 				for (final IROI r : resROIs) {
 					IROI roi = null;
@@ -438,31 +442,55 @@ public class DiffractionCalibrationUtils {
 						}
 						EllipticalROI e = (EllipticalROI) r;
 						double major = e.getSemiAxis(0);
-						double delta = last < 0 ? 0.1*major : 0.2*(major - last);
+						double delta = lastMajor < 0 ? 0.1*major : 0.2*(major - lastMajor);
 						if (delta > 50)
 							delta = 50;
-						last = major;
+						lastMajor = major;
+
 						try {
 							roi = DiffractionTool.runEllipseFit(monitor, display, plottingSystem, image, e, false, delta);
 						} catch (NullPointerException ex) {
 							stat = Status.CANCEL_STATUS;
-							n = -1; // indicate problem with getting image or other issues
+							n = -1; // indicate, to finally clause, problem with getting image or other issues
 							return stat;
 						}
 						if (roi == null) {
 							stat = Status.CANCEL_STATUS;
+						} else if (roi instanceof EllipticalROI) {
+							double[] ec = e.getPointRef();
+							double[] c = roi.getPointRef();
+							if (Math.hypot(c[0] - ec[0], c[1] - ec[1]) > delta) {
+								logger.trace("Dropping as too far from centre: {} cf {}", roi, e);
+								roi = null;
+								// try a circle if last one was quite circular
+								if (lastAspect > 0 && Math.abs(lastAspect - 1) < ASPECT_DEV) {
+									logger.trace("Attempting circular fit");
+									try {
+										roi = DiffractionTool.runEllipseFit(monitor, display, plottingSystem, image, e, true, delta);
+									} catch (NullPointerException ex) {
+										stat = Status.CANCEL_STATUS;
+										n = -1; // indicate, to finally clause, problem with getting image or other issues
+										return stat;
+									}
+									if (roi instanceof CircularROI) {
+										c = roi.getPointRef();
+										if (Math.hypot(c[0] - ec[0], c[1] - ec[1]) > delta) {
+											logger.trace("Dropping as too far from centre: {} cf {}", roi, e);
+											roi = null;
+											continue;
+										}
+									}
+								} else {
+									continue;
+								}
+							}
+						}
+						if (roi != null) {
+							n++;
+							lastAspect = roi instanceof EllipticalROI ? ((EllipticalROI) roi).getAspectRatio() : 1.;
+							stat = drawFoundRing(monitor, display, plottingSystem, roi, false);
 						}
 
-						double[] ec = e.getPointRef();
-						double[] c = roi.getPointRef();
-						if (Math.hypot(c[0] - ec[0], c[1] - ec[1]) > delta) {
-							logger.trace("Dropping as too far from centre: {} cf {}", roi, e);
-							roi = null;
-							continue;
-						}
-						n++;
-
-						stat = drawFoundRing(monitor, display, plottingSystem, roi, false);
 						if (!stat.isOK())
 							break;
 					} catch (IllegalArgumentException ex) {
