@@ -398,9 +398,18 @@ public class WindowTool extends AbstractToolPage {
 			width = surface!=null ? ((SurfacePlotROI)surface.getWindow()).getEndX() : width;
 			height = surface!=null ? ((SurfacePlotROI)surface.getWindow()).getEndY() : height;
 		}
-		int xSize = getTrace()!=null ? getTrace().getData().getShape()[1] : 1000;
-		int ySize = getTrace()!=null ? getTrace().getData().getShape()[0] : 1000;
-		
+		ITrace trace = getTrace();
+		int xSize = 0, ySize = 0;
+		if (trace != null) {
+			if (trace instanceof ISurfaceTrace) {
+				xSize = getTrace().getData().getShape()[1];
+				ySize = getTrace().getData().getShape()[0];
+			}
+		} else {
+			xSize = 1000;
+			ySize = 1000;
+		}
+
 		Composite bottomComposite = new Composite(windowComposite,SWT.NONE | SWT.BORDER);
 		bottomComposite.setLayout(new GridLayout(1, false));
 		bottomComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
@@ -595,13 +604,13 @@ public class WindowTool extends AbstractToolPage {
 			final Collection<IRegion> boxes = windowSystem.getRegions(RegionType.BOX);
 			if (boxes!=null) for (IRegion iRegion : boxes) iRegion.removeROIListener(roiListener);
 		}
-		if (!spnStartX.isDisposed())
+		if (spnStartX != null && !spnStartX.isDisposed())
 			spnStartX.removeSelectionListener(selectionListener);
-		if (!spnStartY.isDisposed())
+		if (spnStartY != null && !spnStartY.isDisposed())
 			spnStartY.removeSelectionListener(selectionListener);
-		if (!spnWidth.isDisposed())
+		if (spnWidth != null && !spnWidth.isDisposed())
 			spnWidth.removeSelectionListener(selectionListener);
-		if (!spnHeight.isDisposed())
+		if (spnHeight != null && !spnHeight.isDisposed())
 			spnHeight.removeSelectionListener(selectionListener);
 	}
 
