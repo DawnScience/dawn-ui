@@ -142,11 +142,11 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 	private DiffractionTableData currentData;
 
-	private final String DIFFRACTION_ID = "org.dawb.workbench.plotting.tools.diffraction.Diffraction";
-	private final String WAVELENGTH_NODE_PATH = "/Experimental Information/Wavelength";
-	private final String BEAM_CENTRE_XPATH = "/Detector/Beam Centre/X";
-	private final String BEAM_CENTRE_YPATH = "/Detector/Beam Centre/Y";
-	private final String DISTANCE_NODE_PATH = "/Experimental Information/Distance";
+	private static final String DIFFRACTION_ID = "org.dawb.workbench.plotting.tools.diffraction.Diffraction";
+	private static final String WAVELENGTH_NODE_PATH = "/Experimental Information/Wavelength";
+	private static final String BEAM_CENTRE_XPATH = "/Detector/Beam Centre/X";
+	private static final String BEAM_CENTRE_YPATH = "/Detector/Beam Centre/Y";
+	private static final String DISTANCE_NODE_PATH = "/Experimental Information/Distance";
 
 	public static final String FORMAT_MASK = "##,##0.##########";
 
@@ -178,8 +178,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 	private IToolPageSystem toolSystem;
 
+	private boolean usedFixedWavelength = true; // these two flags should match the default calibration action
 	private boolean postFitWavelength = false;
-	private boolean usedFixedWavelength = true;
 
 	public DiffractionCalibrationPlottingView() {
 		service = (ILoaderService) PlatformUI.getWorkbench().getService(ILoaderService.class);
@@ -1053,8 +1053,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		Action usedFixedWavelengthAction = new Action() {
 			@Override
 			public void run() {
-				postFitWavelength = false;
 				usedFixedWavelength = true;
+				postFitWavelength = false;
 			}
 		};
 		usedFixedWavelengthAction.setToolTipText("Individual fit with fixed wavelength"); // TODO write a more detailed tool tip
@@ -1076,8 +1076,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		Action postWavelengthAction = new Action() {
 			@Override
 			public void run() {
-				postFitWavelength = true;
 				usedFixedWavelength = true;
+				postFitWavelength = true;
 			}
 		};
 		postWavelengthAction.setToolTipText("Per image fit, then refine wavelength"); // TODO write a more detailed tool tip
@@ -1302,12 +1302,12 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				DetectorProperties dp = md.getDetector2DProperties();
 				if (dp == null)
 					return null;
-				return String.format("%.0f", dp.getBeamCentreCoords()[0]);
+				return String.format("%.2f", dp.getBeamCentreCoords()[0]);
 			} else if (columnIndex == 5) {
 				DetectorProperties dp = md.getDetector2DProperties();
 				if (dp == null)
 					return null;
-				return String.format("%.0f", dp.getBeamCentreCoords()[1]);
+				return String.format("%.2f", dp.getBeamCentreCoords()[1]);
 			} else if (columnIndex == 6) {
 				if (data.use && data.q != null) {
 					return String.format("%.2f", Math.sqrt(data.q.getResidual()));
