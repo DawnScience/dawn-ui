@@ -39,7 +39,6 @@ public interface ITraceSystem {
 	 */
 	public ISurfaceTrace createSurfaceTrace(String traceName);
 
-	
 	/**
 	 * Creates a stack trace used for 3D plotting. This does not add the trace
 	 * or give it any data.
@@ -50,6 +49,19 @@ public interface ITraceSystem {
 	 * @return
 	 */
 	public ILineStackTrace createLineStackTrace(String traceName);
+
+	/**
+	 * Creates a stack trace used for 3D plotting. This does not add the trace
+	 * or give it any data.
+	 * 
+	 * A stack trace is a 3D set of lines.
+	 * 
+	 * @param traceName
+	 * @param stackplots
+	 *           Number of stack plots
+	 * @return
+	 */
+	public ILineStackTrace createLineStackTrace(String traceName, int stackplots);
 
 	/**
 	 * Creates a stack trace used for 2D plotting. This does not add the trace

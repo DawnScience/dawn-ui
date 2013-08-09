@@ -1226,6 +1226,10 @@ public class DataSet3DPlot1D implements IDataSet3DCorePlot, AreaSelectListener, 
 	}
 
 	protected SceneGraphComponent buildAdditionalGraphNode() {
+		return buildAdditionalGraphNode(numGraphs);
+	}
+
+	private SceneGraphComponent buildAdditionalGraphNode(int idx) {
 		SceneGraphComponent subGraph = SceneGraphUtility.createFullSceneGraphComponent(GRAPHNAMEPREFIX + numGraphs);
 		subGraphs.add(subGraph);
 		Appearance graphAppearance = new Appearance();
@@ -1236,7 +1240,7 @@ public class DataSet3DPlot1D implements IDataSet3DCorePlot, AreaSelectListener, 
 		graphAppearance.setAttribute(CommonAttributes.LIGHTING_ENABLED, false);
 		graphAppearance.setAttribute(CommonAttributes.ATTENUATE_POINT_SIZE, false);
 		DefaultLineShader dls = (DefaultLineShader) dgs.createLineShader("default");
-		Plot1DAppearance plotApp = graphColours.getLegendEntry(numGraphs);
+		Plot1DAppearance plotApp = graphColours.getLegendEntry(idx);
 		plotApp.updateGraph(dls, dgs);
 		graphLineShaders.add(dls);
 		graphShaders.add(dgs);
@@ -1519,7 +1523,7 @@ public class DataSet3DPlot1D implements IDataSet3DCorePlot, AreaSelectListener, 
 			// check first if we have enough nodes if not we might have to
 			// add a few more
 			for (int i = subGraphs.size(); i < sets.size(); i++)
-				buildAdditionalGraphNode();
+				buildAdditionalGraphNode(i);
 			Iterator<IDataset> iter = sets.iterator();
 			Iterator<SceneGraphComponent> graphIter = subGraphs.iterator();
 			Iterator<Double> offsetIter = offsets.iterator();

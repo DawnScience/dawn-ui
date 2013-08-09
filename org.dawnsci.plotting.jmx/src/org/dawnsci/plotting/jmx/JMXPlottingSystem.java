@@ -87,7 +87,12 @@ public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSyste
 	public ILineStackTrace createLineStackTrace(String traceName) {
 		return (ILineStackTrace)call(getMethodName(Thread.currentThread().getStackTrace()), traceName);
 	}
-	
+
+	@Override
+	public ILineStackTrace createLineStackTrace(String traceName, int stackplots) {
+		return (ILineStackTrace)call(getMethodName(Thread.currentThread().getStackTrace()), traceName, stackplots);
+	}
+
 	@Override
 	public IImageStackTrace createImageStackTrace(String traceName) {
 		return (IImageStackTrace)call(getMethodName(Thread.currentThread().getStackTrace()), traceName);
@@ -303,6 +308,12 @@ public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSyste
 	}
 
 	@Override
+	public List<ITrace> createPlot1D(IDataset x, List<? extends IDataset> ys,
+			String title, int stackplots, IProgressMonitor monitor) {
+		return (List<ITrace>)call(getMethodName(Thread.currentThread().getStackTrace()), x,ys, title, stackplots, monitor);
+	}
+
+	@Override
 	public List<ITrace> updatePlot1D(IDataset x,
 			List<? extends IDataset> ys, IProgressMonitor monitor) {
 		return (List<ITrace>)call(getMethodName(Thread.currentThread().getStackTrace()), x,ys,monitor);
@@ -430,6 +441,7 @@ public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSyste
 		call(getMethodName(Thread.currentThread().getStackTrace()), new Class[] { boolean.class }, b);
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public Object getAdapter(Class adapter) {
 		return call(getMethodName(Thread.currentThread().getStackTrace()), new Class[] { adapter }, adapter);
@@ -492,5 +504,4 @@ public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSyste
 	public IWorkbenchPart getPart() {
 		return (IWorkbenchPart)call(getMethodName(Thread.currentThread().getStackTrace()));
 	}
-
 }

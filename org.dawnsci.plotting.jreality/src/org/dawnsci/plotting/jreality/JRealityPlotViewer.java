@@ -174,14 +174,19 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	public Control getControl() {
 		return container;
 	}
-	
+
 	public ILineStackTrace createStackTrace(final String name) {
-		StackTrace stack = new StackTrace(this, name);
 		// No more than 25 in the stack.
-		stack.setWindow(new LinearROI(new double[]{0.0,0.0}, new double[]{25.0,0.0}));
+		return createStackTrace(name, 25);
+	}
+
+	public ILineStackTrace createStackTrace(final String name, int stackPlots) {
+		StackTrace stack = new StackTrace(this, name);
+		// No more than stackPlots number in the stack.
+		stack.setWindow(new LinearROI(new double[]{0.0,0.0}, new double[]{stackPlots,0.0}));
 		return stack;
 	}
-	
+
 	protected void addStackTrace(final ILineStackTrace trace) {
 		StackTrace stack = (StackTrace)trace;
 		try {
@@ -433,9 +438,11 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 			root.addChild(bbox);
 		}
 	}
-	
+
 	private void checkAndAddLegend(List<? extends IDataset> dataSets) {
 		if (currentMode == PlottingMode.ONED || currentMode == PlottingMode.SCATTER2D || currentMode==PlottingMode.ONED_THREED) {
+//			plotter.cleanUpGraphNode();
+			graphColourTable.clearLegend();
 			if (dataSets != null && dataSets.size() > graphColourTable.getLegendSize()) {
 				logger.info("# graphs > # of entries in the legend will auto add entries");
 				for (int i = graphColourTable.getLegendSize(); i < dataSets.size(); i++) {
@@ -448,7 +455,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 			}
 		}
 	}
-	
+
 	private void setXTickLabelFormat(TickFormatting newFormat) {
 		if (plotter != null) plotter.setXAxisLabelMode(newFormat);
 	}

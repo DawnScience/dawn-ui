@@ -76,7 +76,12 @@ public class ThreadSafePlottingSystem extends StandardMBean implements IPlotting
 	public ILineStackTrace createLineStackTrace(String traceName) {
 		return (ILineStackTrace)call(getMethodName(Thread.currentThread().getStackTrace()), traceName);
 	}
-	
+
+	@Override
+	public ILineStackTrace createLineStackTrace(String traceName, int stackplots) {
+		return (ILineStackTrace)call(getMethodName(Thread.currentThread().getStackTrace()), traceName, stackplots);
+	}
+
 	@Override
 	public IImageStackTrace createImageStackTrace(String traceName) {
 		return (IImageStackTrace)call(getMethodName(Thread.currentThread().getStackTrace()), traceName);
@@ -289,6 +294,12 @@ public class ThreadSafePlottingSystem extends StandardMBean implements IPlotting
 	public List<ITrace> createPlot1D(IDataset x,
 			List<? extends IDataset> ys, String title, IProgressMonitor monitor) {
 		return delegate.createPlot1D(x, ys, title, monitor);
+	}
+
+	@Override
+	public List<ITrace> createPlot1D(IDataset x, List<? extends IDataset> ys,
+			String title, int stackplots, IProgressMonitor monitor) {
+		return delegate.createPlot1D(x, ys, title, stackplots, monitor);
 	}
 
 	@Override
