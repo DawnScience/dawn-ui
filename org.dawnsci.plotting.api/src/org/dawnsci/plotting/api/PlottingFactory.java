@@ -79,7 +79,7 @@ public class PlottingFactory {
 				
 		final ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE,"org.dawb.workbench.ui");
 		String plotType = store.getString("org.dawb.plotting.system.choice");
-		if (plotType==null) plotType = System.getProperty("org.dawb.plotting.system.choice");// For Geoff et. al. can override.
+		if (plotType.isEmpty()) plotType = System.getProperty("org.dawb.plotting.system.choice");// For Geoff et. al. can override.
 		if (plotType==null) plotType = "org.dawb.workbench.editors.plotting.lightWeightPlottingSystem"; // That is usually around
 		
         IPlottingSystem system = createPlottingSystem(plotType);
