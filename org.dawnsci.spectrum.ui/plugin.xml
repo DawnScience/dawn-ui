@@ -26,8 +26,7 @@
             allowMultiple="false"
             class="org.eclipse.ui.navigator.CommonNavigator"
             id="org.dawnsci.spectrum.ui.views.SpectrumProject"
-            name="Specrum Project"
-            restorable="true">
+            name="Spectrum Project">
       </view>
       <view
             class="org.dawnsci.spectrum.ui.views.SpectrumDatasetView"
@@ -39,7 +38,6 @@
    <extension
          point="org.eclipse.ui.navigator.viewer">
       <viewer
-            inheritBindingsFromViewer="org.dawnsci.spectrum.ui.SpectrumProject"
             viewerId="org.dawnsci.spectrum.ui.SpectrumProject">
       </viewer>
       <viewerContentBinding
@@ -47,6 +45,9 @@
          <includes>
             <contentExtension
                   pattern="org.eclipse.ui.navigator.resourceContent">
+            </contentExtension>
+            <contentExtension
+                  pattern="org.eclipse.ui.navigator.resources.filters.*">
             </contentExtension>
          </includes>
       </viewerContentBinding>
@@ -56,10 +57,10 @@
             <actionExtension
                   pattern="org.dawnsci.spectrum.ui.actions.OpenProvider">
             </actionExtension>
+            <actionExtension
+                  pattern="org.eclipse.ui.navigator.resources.*">
+            </actionExtension>
          </includes>
-      </viewerActionBinding>
-      <viewerActionBinding
-            viewerId="org.eclipse.ui.navigator.resources.*">
       </viewerActionBinding>
    </extension>
    <extension
