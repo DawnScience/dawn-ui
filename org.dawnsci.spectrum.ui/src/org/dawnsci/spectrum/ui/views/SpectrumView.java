@@ -39,8 +39,6 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.util.LocalSelectionTransfer;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -94,7 +92,7 @@ public class SpectrumView extends ViewPart {
 
 	private TableViewer viewer;
 	private Action removeAction;
-	private Action doubleClickAction;
+//	private Action doubleClickAction;
 	private IPlottingSystem system;
 	private SpectrumFileManager manager;
 	private DropTargetAdapter dropListener;
@@ -203,6 +201,10 @@ public class SpectrumView extends ViewPart {
 							addFile(file.getRawLocation().toOSString());
 						}
 					}
+				} else if (dropData instanceof String[]) {
+					for (String path : (String[])dropData){
+						addFile(path);
+					}
 				}
 			}
 			};
@@ -216,7 +218,7 @@ public class SpectrumView extends ViewPart {
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(viewer.getControl(), "org.dawnsci.spectrum.viewer");
 			makeActions();
 			hookContextMenu();
-			hookDoubleClickAction();
+//			hookDoubleClickAction();
 			contributeToActionBars();
 			
 			viewer.getTable().addKeyListener(new KeyListener() {
@@ -334,22 +336,22 @@ public class SpectrumView extends ViewPart {
 			}
 		};
 		removeAction.setToolTipText("Remove selected files");
-		doubleClickAction = new Action() {
-			public void run() {
-				ISelection selection = viewer.getSelection();
-				Object obj = ((IStructuredSelection)selection).getFirstElement();
-				showMessage("Double-click detected on "+obj.toString());
-			}
-		};
+//		doubleClickAction = new Action() {
+//			public void run() {
+//				ISelection selection = viewer.getSelection();
+//				Object obj = ((IStructuredSelection)selection).getFirstElement();
+//				showMessage("Double-click detected on "+obj.toString());
+//			}
+//		};
 	}
 
-	private void hookDoubleClickAction() {
-		viewer.addDoubleClickListener(new IDoubleClickListener() {
-			public void doubleClick(DoubleClickEvent event) {
-				doubleClickAction.run();
-			}
-		});
-	}
+//	private void hookDoubleClickAction() {
+//		viewer.addDoubleClickListener(new IDoubleClickListener() {
+//			public void doubleClick(DoubleClickEvent event) {
+//				doubleClickAction.run();
+//			}
+//		});
+//	}
 	private void showMessage(String message) {
 		MessageDialog.openInformation(
 			viewer.getControl().getShell(),

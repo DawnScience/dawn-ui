@@ -17,12 +17,15 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SpectrumFileManager {
 	
 	private IPlottingSystem system;
 	private Map<String,ISpectrumFile> spectrumFiles;
 	private HashSet<ISpectrumFileListener> listeners;
+	private final static Logger logger = LoggerFactory.getLogger(SpectrumFileManager.class);
 	
 	public SpectrumFileManager(IPlottingSystem system) {
 		spectrumFiles = new LinkedHashMap<String,ISpectrumFile>();
@@ -145,6 +148,11 @@ public class SpectrumFileManager {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			SpectrumFile file = SpectrumFile.create(path,system);
+			
+			if (file == null) {
+				logger.error("Could not load file!");
+				return Status.CANCEL_STATUS;
+			}
 			
 			setXandYdatasets(file);
 			

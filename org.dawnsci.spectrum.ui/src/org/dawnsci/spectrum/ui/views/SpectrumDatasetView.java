@@ -43,12 +43,19 @@ public class SpectrumDatasetView extends ViewPart {
 		final Composite content = group.getContent();
 		final CCombo combo = new CCombo(content, SWT.READ_ONLY|SWT.BORDER);
 		combo.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		
+		group.setEnabled(false);
 		combo.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (currentFile == null) return;
-				currentFile.setxDatasetName(combo.getText());
+				String name = combo.getText();
+				if (currentFile.contains(name)) {
+					currentFile.setxDatasetName(name);
+					for (ISpectrumFile file : otherFiles) {
+						if (file.contains(name)) file.setxDatasetName(name);
+					}
+				}
+				updateViewer();
 			}
 		});
 		
@@ -67,6 +74,8 @@ public class SpectrumDatasetView extends ViewPart {
 						file.setUseAxis(true);
 					}
 				}
+				
+				updateViewer();
 			}
 
 		});
@@ -103,21 +112,7 @@ public class SpectrumDatasetView extends ViewPart {
 						i++;
 					}
 
-					if (currentFile.getxDataset() != null) {
-
-						int[] size = currentFile.getxDataset().getShape();
-						int max = 0;
-
-						for (int j : size)
-							if (j > max)
-								max = j;
-
-						viewer.setInput(currentFile.getMatchingDatasets(max));
-					} else {
-						viewer.setInput(currentFile.getDataNames());
-					}
-					viewer.setCheckedElements(currentFile.getyDatasetNames().toArray());
-					viewer.refresh();
+					updateViewer();
 
 					group.setEnabled(true);
 					if (currentFile.isUsingAxis()) {
@@ -160,6 +155,24 @@ public class SpectrumDatasetView extends ViewPart {
 	public void setFocus() {
 		viewer.getControl().setFocus();
 
+	}
+	
+	private void updateViewer() {
+		if (currentFile.getxDataset() != null && currentFile.isUsingAxis()) {
+
+			int[] size = currentFile.getxDataset().getShape();
+			int max = 0;
+
+			for (int j : size)
+				if (j > max)
+					max = j;
+
+			viewer.setInput(currentFile.getMatchingDatasets(max));
+		} else {
+			viewer.setInput(currentFile.getDataNames());
+		}
+		viewer.setCheckedElements(currentFile.getyDatasetNames().toArray());
+		viewer.refresh();
 	}
 	
 	class ViewContentProvider implements IStructuredContentProvider {
