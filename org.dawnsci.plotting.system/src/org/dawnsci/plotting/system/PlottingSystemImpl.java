@@ -232,19 +232,6 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
         return createPlot1D(xIn, ysIn, null, monitor);
 	}
 
-//	/**
-//	 * Does not have to be called in UI thread.
-//	 */
-//	@Override
-//	public List<ITrace> createPlot1D(final IDataset       xIn, 
-//					                 final List<? extends IDataset> ysIn,
-//					                 final String                title,
-//					                 final IProgressMonitor      monitor) {
-//		// defalut stack number is 25
-//		return createPlot1D(xIn, ysIn, title, 25, monitor);
-//		
-//	}
-
 	/**
 	 * Does not have to be called in UI thread.
 	 */
@@ -496,14 +483,6 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	 */
 	private Map<String, ITrace> traceMap; // Warning can be mem leak
 
-//	@SuppressWarnings("unused")
-//	private List<ITrace> createPlot1DInternal(final IDataset xIn,
-//											final List<? extends IDataset> ysIn,
-//											final String title,
-//											final IProgressMonitor monitor) {
-//		return createPlot1DInternal(xIn, ysIn, title, 25, monitor);
-//	}
-
 	private List<ITrace> createPlot1DInternal(final IDataset       xIn, 
 										      final List<? extends IDataset> ysIn,
 										      final String                title,
@@ -589,7 +568,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 					palette = pservice.getPaletteData(schemeName);
 				} catch (Exception e) {
 					palette = null;
-				}				
+				}
 			}
 			trace.setPaletteData(palette);
 		}
@@ -598,18 +577,12 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 
 	@Override
 	public ILineStackTrace createLineStackTrace(String traceName) {
-		return null;//jrealityViewer.createStackTrace(traceName);
+		return jrealityViewer.createStackTrace(traceName, 25);
 	}
 
 	@Override
 	public ILineStackTrace createLineStackTrace(String traceName, int stackplots) {	
-		try {
-			return jrealityViewer.createStackTrace(traceName, stackplots);
-		} catch (Exception e) {
-			e.printStackTrace();
-			logger.error("Error:" + e.getMessage());
-			return null;
-		}
+		return jrealityViewer.createStackTrace(traceName, stackplots);
 	}
 
 	protected void switchPlottingType( PlotType type ) {
