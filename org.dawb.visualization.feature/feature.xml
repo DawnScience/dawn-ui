@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.dawb.visualization.feature"
-      label="DAWB Visualization"
+      label="DAWN Visualization"
       version="1.2.0.qualifier"
       provider-name="Diamond Light Source">
 
@@ -398,6 +398,20 @@ This Agreement is governed by the laws of the State of New York and the intellec
 
    <plugin
          id="org.eclipse.nebula.widgets.formattedtext"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.nebula.jface"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.nebula.widgets"
          download-size="0"
          install-size="0"
          version="0.0.0"
