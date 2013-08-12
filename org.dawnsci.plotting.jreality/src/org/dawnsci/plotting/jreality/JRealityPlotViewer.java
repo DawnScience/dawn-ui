@@ -121,7 +121,10 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	private PlottingMode currentMode;
 	private boolean useLegend = false;
 	private CompositingControl cmpControl = null;
-	
+
+	// Save the previous number of items when 3D stack plot mode
+	private int previousSize = 0;
+
 	// Jreality
 	private AbstractViewerApp viewerApp;
 	private SceneGraphComponent root;
@@ -339,7 +342,6 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		return plot(axes, window, mode, data);
 	}
 
-	
 	/**
 	 * 
 	 * @param data, its name is used for the title
@@ -353,11 +355,10 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 			                   final PlottingMode        mode,
 			                   final IDataset...         rawData) {
 
-		
-		final boolean newMode = setMode(mode);
+		final boolean newMode = setMode(mode, rawData.length);
 
 		List<IDataset> data = Arrays.asList(rawData);
-		
+
 		if (window!=null && window instanceof LinearROI && data.size()>1) {
 			final int x1 = window.getIntPoint()[0];
 			final int x2 = (int)Math.round(((LinearROI)window).getEndPoint()[0]);
@@ -786,10 +787,14 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	 * 
 	 * @param newPlotMode
 	 *            the new plotting mode
+	 * @param dataSize
+	 *            Number of stack plots
 	 */
-	private boolean setMode(PlottingMode newPlotMode) {
-		
-		if (newPlotMode==currentMode) return false;
+	private boolean setMode(PlottingMode newPlotMode, int dataSize) {
+		if (dataSize == previousSize)
+			return false;
+		previousSize = dataSize;
+
 		removeOldSceneNodes();
 		currentMode = newPlotMode;
 		if (hasJOGL) plotArea.setFocus();
