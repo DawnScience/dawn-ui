@@ -297,12 +297,6 @@ public class ThreadSafePlottingSystem extends StandardMBean implements IPlotting
 	}
 
 	@Override
-	public List<ITrace> createPlot1D(IDataset x, List<? extends IDataset> ys,
-			String title, int stackplots, IProgressMonitor monitor) {
-		return delegate.createPlot1D(x, ys, title, stackplots, monitor);
-	}
-
-	@Override
 	public List<ITrace> updatePlot1D(IDataset x,
 			List<? extends IDataset> ys, IProgressMonitor monitor) {
 		return delegate.updatePlot1D(x, ys, monitor);

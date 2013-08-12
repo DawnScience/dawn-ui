@@ -146,6 +146,7 @@ public interface IPlottingSystem extends IAdaptable, ITraceSystem, IRegionSystem
 	public List<ITrace> createPlot1D(IDataset                 x, 
 							         List<? extends IDataset> ys,
 							         IProgressMonitor         monitor);
+
 	/**
 	 * This method is Thread safe - so no need to call from UI thread!
 	 * @see createPlot1D(AbstractDataset, List<AbstractDataset>, IProgressMonitor)
@@ -159,23 +160,6 @@ public interface IPlottingSystem extends IAdaptable, ITraceSystem, IRegionSystem
 							         List<? extends IDataset> ys,
 							         String                title,
 							         IProgressMonitor      monitor);
-
-	/**
-	 * This method is Thread safe - so no need to call from UI thread!
-	 * @see createPlot1D(AbstractDataset, List<AbstractDataset>, IProgressMonitor)
-	 * @param x
-	 * @param ys
-	 * @param title
-	 * @param stackplots
-	 *            Number of stack plots when plotting a ILineStackTrace
-	 * @param monitor
-	 * @return
-	 */
-	public List<ITrace> createPlot1D(IDataset              x,
-								     List<? extends IDataset> ys,
-								     String title,
-								     int stackplots, 
-								     IProgressMonitor monitor);
 
 	/**
 	 * This method is Thread safe - so no need to call from UI thread!
