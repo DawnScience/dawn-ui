@@ -22,8 +22,10 @@ public class SpectrumInMemory extends AbstractSpectrumFile implements ISpectrumF
 		this.name = name;
 		datasets = new HashMap<String, IDataset>();
 		yDatasetNames = new ArrayList<String>(yDatasets.size());
+		useAxisDataset = false;
 		
 		if (xDataset != null) {
+			useAxisDataset = true;
 			String dsName = xDataset.getName();
 			if (dsName == null) dsName = "xData";
 			datasets.put(dsName, xDataset);
@@ -97,24 +99,37 @@ public class SpectrumInMemory extends AbstractSpectrumFile implements ISpectrumF
 		if (useAxisDataset) x = getxDataset();
 		
 		List<IDataset> list = getyDatasets();
-		for (IDataset ds : list) {
-			if (ds.getRank() != 1) ds = reduceTo1D(x, ds);
-			ds.setName(this.name + " : " + ds.getName());
+		List<IDataset> copy = new ArrayList<IDataset>(list.size());
+		List<String> names = new ArrayList<String>(list.size());
+		
+		for (IDataset ds : list) copy.add(ds);
+		
+		for (int i= 0; i < copy.size(); i++) {
+			names.add( copy.get(i).getName());
+			if (copy.get(i).getRank() != 1) {
+				copy.set(i,reduceTo1D(x, copy.get(i)));
+			}
+			copy.get(i).setName(getTraceName(copy.get(i).getName()));
 		}
 		
-		
-		
 		system.updatePlot1D(x, getyDatasets(), null);
+		
+		for (int i= 0; i < copy.size(); i++) {
+			list.get(i).setName(names.get(i));
+		}
 	}
 	
 	protected void addToPlot(String name) {
 		IDataset x = null;
 		if (useAxisDataset) x = getxDataset();
 		IDataset set = datasets.get(name);
+		String oldName = set.getName();
 		if (set.getRank() != 1) set = reduceTo1D(x, set);
-		set.setName(this.name + " : " + set.getName());
+		set.setName(getTraceName(set.getName()));
 		
 		if (set != null) system.updatePlot1D(x, Arrays.asList(new IDataset[] {set}), null);
+		
+		set.setName(oldName);
 	}
 	
 	@Override
@@ -143,5 +158,11 @@ public class SpectrumInMemory extends AbstractSpectrumFile implements ISpectrumF
 		}
 		
 		return col;
+	}
+
+	@Override
+	protected String getTraceName(String name) {
+		// TODO Auto-generated method stub
+		return this.name + " : " + name;
 	}
 }

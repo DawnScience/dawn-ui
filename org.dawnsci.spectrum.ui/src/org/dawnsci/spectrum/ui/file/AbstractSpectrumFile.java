@@ -55,6 +55,8 @@ public abstract class AbstractSpectrumFile implements ISpectrumFile {
 	protected abstract void addToPlot(String name);
 	
 
+	protected abstract String getTraceName(String name);
+	
 	protected void removeFromPlot(String name) {
 		ITrace trace = system.getTrace(getPath() + " : " + name);
 		if (trace != null) system.removeTrace(trace);
@@ -84,7 +86,7 @@ public abstract class AbstractSpectrumFile implements ISpectrumFile {
 	
 	public void removeAllFromPlot() {
 		for (String dataset : getyDatasetNames()) {
-			ITrace trace = system.getTrace(getPath() + " : " + dataset);
+			ITrace trace = system.getTrace(getTraceName(dataset));
 			if (trace != null) system.removeTrace(trace);
 		}
 	}

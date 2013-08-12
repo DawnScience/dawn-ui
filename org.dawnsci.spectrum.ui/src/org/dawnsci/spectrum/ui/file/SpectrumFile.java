@@ -114,7 +114,7 @@ public class SpectrumFile extends AbstractSpectrumFile implements ISpectrumFile 
 					if (ds.getRank() != 1) {
 						ds = reduceTo1D(x, ds);
 					}
-					ds.setName(path + " : " + ds.getName());
+					ds.setName(getTraceName(ds.getName()));
 				}
 				
 				system.updatePlot1D(x, list, null);
@@ -140,7 +140,7 @@ public class SpectrumFile extends AbstractSpectrumFile implements ISpectrumFile 
 					set = LoaderFactory.getDataSet(path, name, null);
 					if (set != null) {
 						if (set.getRank() != 1) set = reduceTo1D(x, set);
-						set.setName(path + " : " + name);
+						set.setName(getTraceName(name));
 					}
 				} catch (Exception e) {
 					logger.error(e.getMessage());
@@ -165,6 +165,11 @@ public class SpectrumFile extends AbstractSpectrumFile implements ISpectrumFile 
 	@Override
 	public List<String> getPossibleAxisNames() {
 		return dsManager.getPossibleAxisDatasets();
+	}
+
+	@Override
+	protected String getTraceName(String name) {
+		return path + " : " + name;
 	}
 	
 	

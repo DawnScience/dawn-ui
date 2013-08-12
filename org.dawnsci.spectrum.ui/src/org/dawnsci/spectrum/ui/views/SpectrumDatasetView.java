@@ -58,8 +58,14 @@ public class SpectrumDatasetView extends ViewPart {
 				if (currentFile == null) return;
 				if (!group.isActivated()) {
 					currentFile.setUseAxis(false);
+					for (ISpectrumFile file : otherFiles) {
+						file.setUseAxis(false);
+					}
 				} else {
 					currentFile.setUseAxis(true);
+					for (ISpectrumFile file : otherFiles) {
+						file.setUseAxis(true);
+					}
 				}
 			}
 
@@ -81,6 +87,7 @@ public class SpectrumDatasetView extends ViewPart {
 					combo.removeAll();
 					currentFile = null;
 					group.deactivate();
+					group.setEnabled(false);
 					return;
 				} else {
 					currentFile = otherFiles.get(0);
@@ -112,6 +119,7 @@ public class SpectrumDatasetView extends ViewPart {
 					viewer.setCheckedElements(currentFile.getyDatasetNames().toArray());
 					viewer.refresh();
 
+					group.setEnabled(true);
 					if (currentFile.isUsingAxis()) {
 						group.activate();
 					} else {
