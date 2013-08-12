@@ -20,7 +20,7 @@
 -Dcom.isencia.require.file.source=true
 -Ddbconnect=config/dbconnect.ispyb.properties
 -Dentry=MyVisitsEntryPoint
--Dorg.dawb.editor.h5.use.default=true
+-Dorg.dawb.editor.h5.use.default=false
 -Dosgi.locking=none</vmArgs>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts</vmArgsMac>
    </launcherArgs>
