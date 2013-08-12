@@ -3,6 +3,7 @@ package org.dawnsci.spectrum.ui.views;
 import java.util.Collection;
 
 import org.dawnsci.plotting.api.IPlottingSystem;
+import org.dawnsci.spectrum.ui.file.SpectrumFile;
 
 import uk.ac.diamond.scisoft.analysis.io.DataHolder;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;

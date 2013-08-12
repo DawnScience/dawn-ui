@@ -1,4 +1,4 @@
-package org.dawnsci.spectrum.ui.views;
+package org.dawnsci.spectrum.ui.file;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -10,8 +10,9 @@ import java.util.regex.Pattern;
 
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.spectrum.ui.Activator;
-import org.dawnsci.spectrum.ui.file.ISpectrumFile;
 import org.dawnsci.spectrum.ui.preferences.SpectrumConstants;
+import org.dawnsci.spectrum.ui.views.ISpectrumFileListener;
+import org.dawnsci.spectrum.ui.views.SpectrumLoaderFactory;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;

@@ -1,4 +1,4 @@
-package org.dawnsci.spectrum.ui.views;
+package org.dawnsci.spectrum.ui.file;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -9,7 +9,6 @@ import java.util.Map;
 
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.trace.ITrace;
-import org.dawnsci.spectrum.ui.file.ISpectrumFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
