@@ -175,15 +175,10 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		return container;
 	}
 
-	public ILineStackTrace createStackTrace(final String name) {
-		// No more than 25 in the stack.
-		return createStackTrace(name, 25);
-	}
-
-	public ILineStackTrace createStackTrace(final String name, int stackPlots) {
+	public ILineStackTrace createStackTrace(final String name, int numberOfPlots) {
 		StackTrace stack = new StackTrace(this, name);
 		// No more than stackPlots number in the stack.
-		stack.setWindow(new LinearROI(new double[]{0.0,0.0}, new double[]{stackPlots,0.0}));
+		stack.setWindow(new LinearROI(new double[]{0.0,0.0}, new double[]{numberOfPlots,0.0}));
 		return stack;
 	}
 

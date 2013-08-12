@@ -232,18 +232,18 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
         return createPlot1D(xIn, ysIn, null, monitor);
 	}
 
-	/**
-	 * Does not have to be called in UI thread.
-	 */
-	@Override
-	public List<ITrace> createPlot1D(final IDataset       xIn, 
-					                 final List<? extends IDataset> ysIn,
-					                 final String                title,
-					                 final IProgressMonitor      monitor) {
-		// defalut stack number is 25
-		return createPlot1D(xIn, ysIn, title, 25, monitor);
-		
-	}
+//	/**
+//	 * Does not have to be called in UI thread.
+//	 */
+//	@Override
+//	public List<ITrace> createPlot1D(final IDataset       xIn, 
+//					                 final List<? extends IDataset> ysIn,
+//					                 final String                title,
+//					                 final IProgressMonitor      monitor) {
+//		// defalut stack number is 25
+//		return createPlot1D(xIn, ysIn, title, 25, monitor);
+//		
+//	}
 
 	/**
 	 * Does not have to be called in UI thread.
@@ -252,7 +252,6 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	public List<ITrace> createPlot1D(final IDataset       xIn, 
 					                 final List<? extends IDataset> ysIn,
 					                 final String                title,
-					                 final int stackNumber,
 					                 final IProgressMonitor      monitor) {
 		if (monitor!=null) monitor.worked(1);
 
@@ -275,13 +274,13 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		}
 
 		if (getDisplay().getThread()==Thread.currentThread()) {
-			List<ITrace> ts = createPlot1DInternal(x, ysIn, title, stackNumber, monitor);
+			List<ITrace> ts = createPlot1DInternal(x, ysIn, title, monitor);
 			if (ts!=null) traces.addAll(ts);
 		} else {
 			getDisplay().syncExec(new Runnable() {
 				@Override
 				public void run() {
-					List<ITrace> ts = createPlot1DInternal(x, ysIn, title, stackNumber, monitor);
+					List<ITrace> ts = createPlot1DInternal(x, ysIn, title, monitor);
 					if (ts!=null) traces.addAll(ts);
 				}
 			});
@@ -497,18 +496,17 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	 */
 	private Map<String, ITrace> traceMap; // Warning can be mem leak
 
-	@SuppressWarnings("unused")
-	private List<ITrace> createPlot1DInternal(final IDataset xIn,
-											final List<? extends IDataset> ysIn,
-											final String title,
-											final IProgressMonitor monitor) {
-		return createPlot1DInternal(xIn, ysIn, title, 25, monitor);
-	}
+//	@SuppressWarnings("unused")
+//	private List<ITrace> createPlot1DInternal(final IDataset xIn,
+//											final List<? extends IDataset> ysIn,
+//											final String title,
+//											final IProgressMonitor monitor) {
+//		return createPlot1DInternal(xIn, ysIn, title, 25, monitor);
+//	}
 
 	private List<ITrace> createPlot1DInternal(final IDataset       xIn, 
 										      final List<? extends IDataset> ysIn,
 										      final String                title,
-										      final int stackNumber,
 										      final IProgressMonitor      monitor) {
 		if (plottingMode.is1Dor2D()) {
 		    this.plottingMode = PlotType.XY;
@@ -533,7 +531,12 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			
 		} else {
 			traceMap.clear();
-			ILineStackTrace trace = jrealityViewer.createStackTrace(title, stackNumber);
+			ILineStackTrace trace = null;
+			// Limit the number of stack plots to 100
+			if (ysIn.size() > 100)
+				trace = jrealityViewer.createStackTrace(title, 25);
+			else
+				trace = jrealityViewer.createStackTrace(title, ysIn.size());
 			final IDataset x = xIn;
 			final AbstractDataset y = AbstractDataset.arange(getMaxSize(ysIn), AbstractDataset.INT32);
 			final AbstractDataset z = AbstractDataset.arange(ysIn.size(), AbstractDataset.INT32);
@@ -595,12 +598,18 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 
 	@Override
 	public ILineStackTrace createLineStackTrace(String traceName) {
-		return jrealityViewer.createStackTrace(traceName);
+		return null;//jrealityViewer.createStackTrace(traceName);
 	}
 
 	@Override
 	public ILineStackTrace createLineStackTrace(String traceName, int stackplots) {	
-		return jrealityViewer.createStackTrace(traceName, stackplots);
+		try {
+			return jrealityViewer.createStackTrace(traceName, stackplots);
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("Error:" + e.getMessage());
+			return null;
+		}
 	}
 
 	protected void switchPlottingType( PlotType type ) {
