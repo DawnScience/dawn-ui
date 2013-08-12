@@ -7,7 +7,6 @@ import org.dawnsci.plotting.api.trace.ITrace;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
-import uk.ac.diamond.scisoft.analysis.roi.ROISliceUtils;
 
 
 public abstract class AbstractSpectrumFile implements ISpectrumFile {
@@ -24,6 +23,8 @@ public abstract class AbstractSpectrumFile implements ISpectrumFile {
 		} else {
 			useAxisDataset = true;
 		}
+		
+		if (this.xDatasetName != null && this.xDatasetName.equals(xDatasetName)) return;
 
 		this.xDatasetName = xDatasetName;
 

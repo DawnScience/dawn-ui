@@ -17,7 +17,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -44,6 +43,28 @@ public class SpectrumDatasetView extends ViewPart {
 		final Composite content = group.getContent();
 		final CCombo combo = new CCombo(content, SWT.READ_ONLY|SWT.BORDER);
 		combo.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		combo.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (currentFile == null) return;
+				currentFile.setxDatasetName(combo.getText());
+			}
+		});
+		
+		group.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (currentFile == null) return;
+				if (!group.isActivated()) {
+					currentFile.setUseAxis(false);
+				} else {
+					currentFile.setUseAxis(true);
+				}
+			}
+
+		});
+		
 		viewer = CheckboxTableViewer.newCheckList(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		viewer.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
 		
@@ -58,6 +79,8 @@ public class SpectrumDatasetView extends ViewPart {
 					if (viewer == null || viewer.getTable().isDisposed()) return;
 					viewer.setInput(new ArrayList<String>());
 					combo.removeAll();
+					currentFile = null;
+					group.deactivate();
 					return;
 				}
 				
@@ -73,25 +96,6 @@ public class SpectrumDatasetView extends ViewPart {
 						}
 						i++;
 					}
-					
-					combo.addSelectionListener(new SelectionAdapter() {
-						@Override
-						public void widgetSelected(SelectionEvent e) {
-							currentFile.setxDatasetName(combo.getText());
-						}
-					});
-					
-					group.addSelectionListener(new SelectionAdapter() {
-						@Override
-						public void widgetSelected(SelectionEvent e) {
-							if (!group.isActivated()) {
-								currentFile.setUseAxis(false);
-							} else {
-								currentFile.setUseAxis(true);
-							}
-						}
-
-					});
 					
 					if (currentFile.getxDataset() != null) {
 

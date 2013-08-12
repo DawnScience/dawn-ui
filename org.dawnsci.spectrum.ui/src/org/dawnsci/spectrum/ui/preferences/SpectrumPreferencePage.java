@@ -1,8 +1,5 @@
 package org.dawnsci.spectrum.ui.preferences;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import org.dawnsci.spectrum.ui.Activator;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.widgets.Composite;

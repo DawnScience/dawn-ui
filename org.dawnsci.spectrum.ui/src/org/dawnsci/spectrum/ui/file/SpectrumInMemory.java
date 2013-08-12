@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.dawnsci.plotting.api.IPlottingSystem;
-import org.dawnsci.plotting.api.trace.ITrace;
 
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
