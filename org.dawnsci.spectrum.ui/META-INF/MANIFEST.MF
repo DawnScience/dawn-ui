@@ -20,4 +20,5 @@ Import-Package: org.eclipse.core.databinding.beans,
  org.eclipse.ui.actions,
  org.eclipse.ui.navigator,
  org.eclipse.ui.part,
+ org.mihalis.opal.checkBoxGroup,
  org.slf4j;version="1.5.6"

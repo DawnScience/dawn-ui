@@ -12,7 +12,6 @@ import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.spectrum.ui.Activator;
 import org.dawnsci.spectrum.ui.preferences.SpectrumConstants;
 import org.dawnsci.spectrum.ui.views.ISpectrumFileListener;
-import org.dawnsci.spectrum.ui.views.SpectrumLoaderFactory;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -145,7 +144,7 @@ public class SpectrumFileManager {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			SpectrumFile file = SpectrumLoaderFactory.loadSpectrumFile(path,system);
+			SpectrumFile file = SpectrumFile.create(path,system);
 			
 			setXandYdatasets(file);
 			

@@ -9,31 +9,39 @@ import java.util.Map;
 
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.trace.ITrace;
+import org.dawnsci.spectrum.ui.views.DatasetManager;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+import uk.ac.diamond.scisoft.analysis.io.DataHolder;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
-public class SpectrumFile implements ISpectrumFile {
+public class SpectrumFile extends AbstractSpectrumFile implements ISpectrumFile {
 	
 	private String path;
-	private IMetaData meta;
-	private Collection<String> dataNames;
-	private String xDatasetName;
-	private IPlottingSystem system;
-	private List<String> yDatasetNames;
-	private boolean hasXAxis = false;
+	private DatasetManager dsManager;
+	
 	
 	private static Logger logger = LoggerFactory.getLogger(SpectrumFile.class);
 	
-	public SpectrumFile(String path, IMetaData meta, Collection<String > dataNames, IPlottingSystem system) {
+	private SpectrumFile(String path, DatasetManager dsmanager, IPlottingSystem system) {
 		this.path = path;
-		this.meta = meta;
-		this.dataNames = dataNames;
+		this.dsManager = dsmanager;
 		this.yDatasetNames = new ArrayList<String>();
 		this.system = system;
+	}
+	
+	public static SpectrumFile create(String path, IPlottingSystem system) {
+		
+		DatasetManager dsManager = DatasetManager.create(path);
+		if (dsManager == null) return null;
+		return new SpectrumFile(path, dsManager,system);
 	}
 	
 	public String getName() {
@@ -46,11 +54,11 @@ public class SpectrumFile implements ISpectrumFile {
 	}
 	
 	public Collection<String> getDataNames() {
-		return dataNames;
+		return dsManager.getDatasetNames();
 	}
 	
 	public boolean contains(String datasetName) {
-		for (String name : dataNames) {
+		for (String name : dsManager.getDatasetNames()) {
 			if (datasetName.equals(name)) return true;
 		}
 		
@@ -59,27 +67,6 @@ public class SpectrumFile implements ISpectrumFile {
 	
 	public String getxDatasetName() {
 		return xDatasetName;
-	}
-
-	public void setxDatasetName(String xDatasetName) {
-		hasXAxis = true;
-		this.xDatasetName = xDatasetName;
-	}
-	
-	public List<String> getyDatasetNames() {
-		return yDatasetNames;
-	}
-	
-	public void addyDatasetName(String name) {
-		//TODO check contains before adding removing
-		yDatasetNames.add(name);
-		addToPlot(name);
-	}
-	
-	public void removeyDatasetName(String name) {
-		//TODO check contains before adding removing
-		yDatasetNames.remove(name);
-		removeFromPlot(name);
 	}
 	
 	public IDataset getxDataset() {
@@ -115,49 +102,75 @@ public class SpectrumFile implements ISpectrumFile {
 		return sets;
 	}
 	
-	public boolean hasXAxis() {
-		return hasXAxis;
-	}
-	
-	public void useXAxis(boolean useX) {
-		if (xDatasetName != null && useX) hasXAxis = true;
-		else hasXAxis = false;
-	}
-	
 	public void plotAll() {
 		
-		List<IDataset> list = getyDatasets();
-		for (IDataset ds : list) ds.setName(path + " : " + ds.getName());
-		
-		system.updatePlot1D(getxDataset(), list, null);
-	}
-	
-	public void removeAllFromPlot() {
-		for (String dataset : getyDatasetNames()) {
-			ITrace trace = system.getTrace(getPath() + " : " + dataset);
-			if (trace != null) system.removeTrace(trace);
-		}
-	}
-	
-	private void addToPlot(String name) {
-		IDataset set = null;
-		try {
-			set = LoaderFactory.getDataSet(path, name, null);
-			if (set != null) {
-				set.setName(path + " : " + name);
+		Job job = new Job("Plot all") {
+			
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				
+				IDataset x = null;
+				
+				if (useAxisDataset) x = getxDataset();
+				
+				List<IDataset> list = getyDatasets();
+				for (IDataset ds : list) {
+					if (ds.getRank() != 1) {
+						ds = reduceTo1D(x, ds);
+					}
+					ds.setName(path + " : " + ds.getName());
+				}
+				
+				system.updatePlot1D(x, list, null);
+				return Status.OK_STATUS;
 			}
-		} catch (Exception e) {
-			logger.error(e.getMessage());
-		}
+		};
 		
-		if (set != null) system.updatePlot1D(getxDataset(), Arrays.asList(new IDataset[] {set}), null);
+		job.schedule();
 	}
 	
-	private void removeFromPlot(String name) {
-		ITrace trace = system.getTrace(getPath() + " : " + name);
-		if (trace != null) system.removeTrace(trace);
-		system.autoscaleAxes();
+	protected void addToPlot(final String name) {
+		
+		Job job = new Job("Add to plot") {
+			
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				IDataset set = null;
+				
+				IDataset x = null;
+				if (useAxisDataset) x = getxDataset();
+				
+				try {
+					set = LoaderFactory.getDataSet(path, name, null);
+					if (set != null) {
+						if (set.getRank() != 1) set = reduceTo1D(x, set);
+						set.setName(path + " : " + name);
+					}
+				} catch (Exception e) {
+					logger.error(e.getMessage());
+					return Status.CANCEL_STATUS;
+				}
+				
+				
+				
+				if (set != null) system.updatePlot1D(x, Arrays.asList(new IDataset[] {set}), null);
+				return Status.OK_STATUS;
+			}
+		};
+		job.schedule();
+		
 	}
+
+	@Override
+	public List<String> getMatchingDatasets(int size) {
+		return dsManager.getAllowedDatasets(size);
+	}
+
+	@Override
+	public List<String> getPossibleAxisNames() {
+		return dsManager.getPossibleAxisDatasets();
+	}
+	
 	
 }
 

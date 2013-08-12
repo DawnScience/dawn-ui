@@ -11,6 +11,10 @@ public interface ISpectrumFile {
 	
 	public Collection<String> getDataNames();
 	
+	public List<String> getPossibleAxisNames();
+	
+	public List<String> getMatchingDatasets(int size);
+	
 	public IDataset getDataset(String name);
 	
 	public IDataset getxDataset();
@@ -20,6 +24,8 @@ public interface ISpectrumFile {
 	public List<String> getyDatasetNames();
 	
 	public String getxDatasetName();
+	
+	public void setxDatasetName(String name);
 	
 	public boolean contains(String datasetName);
 	
@@ -32,4 +38,8 @@ public interface ISpectrumFile {
 	public void removeAllFromPlot();
 	
 	public String getPath();
+	
+	public boolean isUsingAxis();
+	
+	public void setUseAxis(boolean useAxis);
 }

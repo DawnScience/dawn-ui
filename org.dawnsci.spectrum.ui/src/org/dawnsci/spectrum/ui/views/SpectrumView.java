@@ -29,6 +29,8 @@ import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.action.Action;
@@ -39,6 +41,7 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -60,6 +63,7 @@ import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
 
@@ -219,6 +223,23 @@ public class SpectrumView extends ViewPart {
 			hookContextMenu();
 			hookDoubleClickAction();
 			contributeToActionBars();
+			
+			viewer.getTable().addKeyListener(new KeyListener() {
+				
+				@Override
+				public void keyReleased(KeyEvent e) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public void keyPressed(KeyEvent e) {
+					// TODO Auto-generated method stub
+					if (e.keyCode == SWT.DEL) {
+						removeAction.run();
+					}
+				}
+			});
 		}
 
 	private void hookContextMenu() {
@@ -242,6 +263,16 @@ public class SpectrumView extends ViewPart {
 
 	private void fillLocalPullDown(IMenuManager manager) {
 		manager.add(removeAction);
+		
+		Action configDeafaults = new Action("Configure Dataset Names...") {
+			@Override
+			public void run() {
+				PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "org.dawnsci.spectrum.ui.preferences.page", null, null);
+				if (pref != null) pref.open();
+			}
+		};
+		
+		manager.add(configDeafaults);
 	}
 
 	private void fillContextMenu(IMenuManager manager) {
@@ -296,6 +327,15 @@ public class SpectrumView extends ViewPart {
 				ISelection selection = viewer.getSelection();
 				List<?> obj = ((IStructuredSelection)selection).toList();
 				for (Object ob : obj) manager.removeFile(((ISpectrumFile)ob).getPath());
+				//Todo change selection
+				
+				int i = viewer.getTable().getItemCount();
+				
+				if (i > 0) {
+					Object ob = viewer.getTable().getItem(i-1).getData();
+					viewer.setSelection(new StructuredSelection(ob),true);
+				}
+				
 			}
 		};
 		removeAction.setToolTipText("Remove selected files");

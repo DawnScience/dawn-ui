@@ -13,11 +13,8 @@ import org.dawnsci.plotting.api.trace.ITrace;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 
-public class SpectrumInMemory implements ISpectrumFile {
+public class SpectrumInMemory extends AbstractSpectrumFile implements ISpectrumFile {
 	
-	private String xDatasetName;
-	private IPlottingSystem system;
-	private List<String> yDatasetNames;
 	Map<String,IDataset> datasets;
 	private String name;
 	
@@ -56,13 +53,7 @@ public class SpectrumInMemory implements ISpectrumFile {
 	@Override
 	public Collection<String> getDataNames() {
 		
-		Collection<String> col = new ArrayList<String>(datasets.size());
-		
-		for (String key : datasets.keySet()) {
-			col.add(key);
-		}
-		
-		return col;
+		return getDatasetNames();
 	}
 	
 	@Override
@@ -84,10 +75,7 @@ public class SpectrumInMemory implements ISpectrumFile {
 		return sets;
 	}
 
-	@Override
-	public List<String> getyDatasetNames() {
-		return yDatasetNames;
-	}
+	
 
 	@Override
 	public String getxDatasetName() {
@@ -104,52 +92,57 @@ public class SpectrumInMemory implements ISpectrumFile {
 		return false;
 	}
 	
-
-	@Override
-	public void removeyDatasetName(String name) {
-		yDatasetNames.remove(name);
-		removeFromPlot(this.name + " : " +name);
-		
-	}
-
-	@Override
-	public void addyDatasetName(String name) {
-		//TODO check contains before adding removing
-		yDatasetNames.add(name);
-		addToPlot(name);
-	}
-	
 	public void plotAll() {
 		
-		List<IDataset> list = getyDatasets();
-		for (IDataset ds : list) ds.setName(this.name + " : " + ds.getName());
+		IDataset x = null;
+		if (useAxisDataset) x = getxDataset();
 		
-		system.updatePlot1D(getxDataset(), getyDatasets(), null);
-	}
-
-	private void removeFromPlot(String name) {
-		ITrace trace = system.getTrace(name);
-		if (trace != null) system.removeTrace(trace);
-		system.autoscaleAxes();
-	}
-	
-	private void addToPlot(String name) {
-		IDataset set = datasets.get(name);
-		set.setName(this.name + " : " + set.getName());
-		if (set != null) system.updatePlot1D(getxDataset(), Arrays.asList(new IDataset[] {set}), null);
-	}
-	
-	public void removeAllFromPlot() {
-		for (String dataset : getyDatasetNames()) {
-			ITrace trace = system.getTrace(this.name + " : " + dataset);
-			if (trace != null) system.removeTrace(trace);
+		List<IDataset> list = getyDatasets();
+		for (IDataset ds : list) {
+			if (ds.getRank() != 1) ds = reduceTo1D(x, ds);
+			ds.setName(this.name + " : " + ds.getName());
 		}
+		
+		
+		
+		system.updatePlot1D(x, getyDatasets(), null);
 	}
-
+	
+	protected void addToPlot(String name) {
+		IDataset x = null;
+		if (useAxisDataset) x = getxDataset();
+		IDataset set = datasets.get(name);
+		if (set.getRank() != 1) set = reduceTo1D(x, set);
+		set.setName(this.name + " : " + set.getName());
+		
+		if (set != null) system.updatePlot1D(x, Arrays.asList(new IDataset[] {set}), null);
+	}
+	
 	@Override
 	public String getPath() {
 		// TODO Auto-generated method stub
 		return name;
 	}
 
+	@Override
+	public List<String> getPossibleAxisNames() {
+		
+		return getDatasetNames();
+	}
+
+	@Override
+	public List<String> getMatchingDatasets(int size) {
+		// TODO Auto-generated method stub
+		return getDatasetNames();
+	}
+	
+	private List<String> getDatasetNames() {
+		List<String> col = new ArrayList<String>(datasets.size());
+		
+		for (String key : datasets.keySet()) {
+			col.add(key);
+		}
+		
+		return col;
+	}
 }
