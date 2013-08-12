@@ -29,6 +29,7 @@ public class SpectrumDatasetView extends ViewPart {
 
 	private CheckboxTableViewer viewer;
 	private ISpectrumFile currentFile;
+	private List<ISpectrumFile> otherFiles;
 	
 	@Override
 	public void createPartControl(Composite parent) {
@@ -39,7 +40,6 @@ public class SpectrumDatasetView extends ViewPart {
 		group.setLayout(new GridLayout(1, false));
 		group.setText("Use X-Axis");
 		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		//group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		final Composite content = group.getContent();
 		final CCombo combo = new CCombo(content, SWT.READ_ONLY|SWT.BORDER);
 		combo.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -69,23 +69,22 @@ public class SpectrumDatasetView extends ViewPart {
 		viewer.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
 		
 		getSite().getPage().addSelectionListener("org.dawnsci.spectrum.ui.views.SpectrumView", new ISelectionListener() {
-			
+
 			@Override
 			public void selectionChanged(IWorkbenchPart part, ISelection selection) {
-				
-				List<ISpectrumFile> files = SpectrumUtils.getSpectrumFilesList((IStructuredSelection)selection);
-				
-				if (files.isEmpty()) {
+
+				otherFiles = SpectrumUtils.getSpectrumFilesList((IStructuredSelection)selection);
+
+				if (otherFiles.isEmpty()) {
 					if (viewer == null || viewer.getTable().isDisposed()) return;
 					viewer.setInput(new ArrayList<String>());
 					combo.removeAll();
 					currentFile = null;
 					group.deactivate();
 					return;
-				}
-				
-				if (files.size() == 1) {
-					currentFile = ((ISpectrumFile)((IStructuredSelection)selection).getFirstElement());
+				} else {
+					currentFile = otherFiles.get(0);
+					otherFiles.remove(0);
 					List<String> names = currentFile.getPossibleAxisNames();
 					combo.setItems(names.toArray(new String[names.size()]));
 					int i = 0;
@@ -96,7 +95,7 @@ public class SpectrumDatasetView extends ViewPart {
 						}
 						i++;
 					}
-					
+
 					if (currentFile.getxDataset() != null) {
 
 						int[] size = currentFile.getxDataset().getShape();
@@ -112,44 +111,13 @@ public class SpectrumDatasetView extends ViewPart {
 					}
 					viewer.setCheckedElements(currentFile.getyDatasetNames().toArray());
 					viewer.refresh();
-					
+
 					if (currentFile.isUsingAxis()) {
 						group.activate();
 					} else {
 						group.deactivate();
 					}
 				}
-				
-				
-//				if (((IStructuredSelection)selection).getFirstElement() instanceof SpectrumFile && ((IStructuredSelection)selection).size() == 1) {
-//					currentFile = (SpectrumFile)((IStructuredSelection)selection).getFirstElement();
-//					
-//					combo.setItems(currentFile.getDataNames().toArray(new String[currentFile.getDataNames().size()]));
-//					
-//					int i = 0;
-//					for(String name : currentFile.getDataNames()) {
-//						if (name.equals(currentFile.getxDatasetName())) {
-//							combo.select(i);
-//						}
-//						i++;
-//					}
-//					
-//					viewer.setInput(currentFile);
-//					viewer.setCheckedElements(currentFile.getyDatasetNames().toArray());
-//					viewer.refresh();
-//				} else if (((IStructuredSelection)selection).getFirstElement() instanceof SpectrumFile){
-//					
-//					Iterator<?> seIt = ((IStructuredSelection)selection).iterator();
-//					
-//					while (seIt.hasNext()){
-//						
-//						
-//						
-//					}
-//					
-//				}
-				
-				
 			}
 		});
 		
@@ -160,14 +128,20 @@ public class SpectrumDatasetView extends ViewPart {
 			
 			@Override
 			public void checkStateChanged(CheckStateChangedEvent event) {
+				String name = event.getElement().toString();
 				if (event.getChecked()) {
-					event.getElement().toString();
-					if (currentFile.contains(event.getElement().toString())) {
-						currentFile.addyDatasetName(event.getElement().toString());
+					if (currentFile.contains(name)) {
+						currentFile.addyDatasetName(name);
+						for (ISpectrumFile file : otherFiles) {
+							if (file.contains(name)) file.addyDatasetName(name);
+						}
 					}
 				} else {
-					if (currentFile.contains(event.getElement().toString())) {
-						currentFile.removeyDatasetName(event.getElement().toString());
+					if (currentFile.contains(name)) {
+						currentFile.removeyDatasetName(name);
+						for (ISpectrumFile file : otherFiles) {
+							if (file.contains(name)) file.removeyDatasetName(name);
+						}
 					}
 				}
 			}
