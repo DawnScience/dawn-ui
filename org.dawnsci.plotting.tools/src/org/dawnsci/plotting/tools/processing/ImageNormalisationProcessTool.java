@@ -1,10 +1,8 @@
 package org.dawnsci.plotting.tools.processing;
 
 import java.io.File;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map.Entry;
 
 import org.dawb.common.util.io.IOUtils;
 import org.dawnsci.common.widgets.content.FileContentProposalProvider;
@@ -126,44 +124,48 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 		}
 	}
 
-	private List<Entry<String, Action>> createNormActions(){
-		List<Entry<String, Action>> radioActions = new ArrayList<Entry<String, Action>>();
-		Entry<String, Action> noNormalisation = new AbstractMap.SimpleEntry<String, Action>("None/Reset",
-			new Action("None") {
-				@Override
-				public void run() {
-					type = NormaliseType.NONE;
-					updateProfiles(true);
-					setInputFieldEnabled(false);
-				}
+	private List<Action> createNormActions(){
+		List<Action> radioActions = new ArrayList<Action>();
+
+		Action noNormalisationAction = new Action() {
+			@Override
+			public void run() {
+				type = NormaliseType.NONE;
+				updateProfiles(true);
+				setInputFieldEnabled(false);
 			}
-		);
-		Entry<String, Action> roiNormalisation = new AbstractMap.SimpleEntry<String, Action>("ROI normalisation",
-				new Action("ROI normalisation") {
-					@Override
-					public void run() {
-						type = NormaliseType.ROI;
-						selectionPlottingSystem.updatePlot2D(originalData, originalAxes, null);
-						updateProfiles(true);
-						setInputFieldEnabled(false);
-					}
-				}
-			);
-		Entry<String, Action> auxNormalisation = new AbstractMap.SimpleEntry<String, Action>("Auxiliary normalisation",
-				new Action("Auxiliary normalisation") {
-					@Override
-					public void run() {
-						type = NormaliseType.AUX;
-						if(auxiliaryData != null)
-							selectionPlottingSystem.updatePlot2D((IDataset)auxiliaryData.squeeze(), originalAxes, null);
-						updateProfiles(true);
-						setInputFieldEnabled(true);
-					}
-				}
-			);
-		radioActions.add(noNormalisation);
-		radioActions.add(roiNormalisation);
-		radioActions.add(auxNormalisation);
+		};
+		noNormalisationAction.setText("None");
+		noNormalisationAction.setToolTipText("None/Reset");
+
+		Action roiNormalisationAction = new Action() {
+			@Override
+			public void run() {
+				type = NormaliseType.ROI;
+				selectionPlottingSystem.updatePlot2D(originalData, originalAxes, null);
+				updateProfiles(true);
+				setInputFieldEnabled(false);
+			}
+		};
+		roiNormalisationAction.setText("ROI normalisation");
+		roiNormalisationAction.setToolTipText("ROI normalisation");
+
+		Action auxNormalisationAction = new Action() {
+			@Override
+			public void run() {
+				type = NormaliseType.AUX;
+				if(auxiliaryData != null)
+					selectionPlottingSystem.updatePlot2D((IDataset)auxiliaryData.squeeze(), originalAxes, null);
+				updateProfiles(true);
+				setInputFieldEnabled(true);
+			}
+		};
+		auxNormalisationAction.setText("Auxiliary normalisation");
+		auxNormalisationAction.setToolTipText("Auxiliary normalisation");
+
+		radioActions.add(noNormalisationAction);
+		radioActions.add(roiNormalisationAction);
+		radioActions.add(auxNormalisationAction);
 		return radioActions;
 	}
 

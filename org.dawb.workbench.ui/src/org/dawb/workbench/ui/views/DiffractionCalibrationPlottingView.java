@@ -18,11 +18,9 @@ package org.dawb.workbench.ui.views;
 
 import java.io.File;
 import java.math.BigDecimal;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map.Entry;
 
 import javax.measure.quantity.Length;
 import javax.measure.unit.NonSI;
@@ -1047,8 +1045,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		});
 	}
 
-	private List<Entry<String, Action>> createWavelengthRadioActions() {
-		List<Entry<String, Action>> radioActions = new ArrayList<Entry<String, Action>>();
+	private List<Action> createWavelengthRadioActions() {
+		List<Action> radioActions = new ArrayList<Action>();
 
 		Action usedFixedWavelengthAction = new Action() {
 			@Override
@@ -1057,10 +1055,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				postFitWavelength = false;
 			}
 		};
+		usedFixedWavelengthAction.setText("Per Image Fit with fixed wavelength");
 		usedFixedWavelengthAction.setToolTipText("Individual fit with fixed wavelength"); // TODO write a more detailed tool tip
-		Entry<String, Action> perImageFitWithFixedWavelength = new AbstractMap.SimpleEntry<String, Action>(
-				"Per Image Fit with fixed wavelength",
-				usedFixedWavelengthAction);
 
 		Action simultaneousFitAction = new Action() {
 			@Override
@@ -1068,10 +1064,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				usedFixedWavelength = false;
 			}
 		};
+		simultaneousFitAction.setText("Fit wavelength and distance");
 		simultaneousFitAction.setToolTipText("Fits all the parameters at once"); // TODO write a more detailed tool tip
-		Entry<String, Action> simultaneousFit = new AbstractMap.SimpleEntry<String, Action>(
-				"Fit wavelength and distance",
-				simultaneousFitAction);
 
 		Action postWavelengthAction = new Action() {
 			@Override
@@ -1080,14 +1074,12 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				postFitWavelength = true;
 			}
 		};
+		postWavelengthAction.setText("Per Image Fit then refine wavelength");
 		postWavelengthAction.setToolTipText("Per image fit, then refine wavelength"); // TODO write a more detailed tool tip
-		Entry<String, Action> perImageFitPostFixedWavelength = new AbstractMap.SimpleEntry<String, Action>(
-				"Per Image Fit then refine wavelength",
-				postWavelengthAction);
 
-		radioActions.add(perImageFitWithFixedWavelength);
-		radioActions.add(simultaneousFit);
-		radioActions.add(perImageFitPostFixedWavelength);
+		radioActions.add(usedFixedWavelengthAction);
+		radioActions.add(simultaneousFitAction);
+		radioActions.add(postWavelengthAction);
 
 		return radioActions;
 	}

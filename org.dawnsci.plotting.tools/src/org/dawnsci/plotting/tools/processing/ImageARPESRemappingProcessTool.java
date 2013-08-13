@@ -1,10 +1,8 @@
 package org.dawnsci.plotting.tools.processing;
 
 import java.io.File;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map.Entry;
 
 import org.dawb.common.util.io.IOUtils;
 import org.dawnsci.common.widgets.content.FileContentProposalProvider;
@@ -63,7 +61,6 @@ import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 
 	private final Logger logger = LoggerFactory.getLogger(ImageARPESRemappingProcessTool.class);
-	private AbstractDataset profile;
 
 	private Spinner smoothingSpinner;
 	private int smoothLevel = 1;
@@ -72,6 +69,7 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 		ROI, FERMI;
 	}
 
+	@SuppressWarnings("unused")
 	private NormaliseType type = NormaliseType.ROI;
 
 	private Text inputLocation;
@@ -158,30 +156,32 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 		updateProfiles(region, region.getROI(), false);
 	}
 	
-	private List<Entry<String, Action>> createNormActions(){
-		List<Entry<String, Action>> radioActions = new ArrayList<Entry<String, Action>>();
-		Entry<String, Action> roiOnly = new AbstractMap.SimpleEntry<String, Action>("ROI Only",
-			new Action("None") {
-				@Override
-				public void run() {
-					type = NormaliseType.ROI;
-					updateProfiles(true);
-					setInputFieldEnabled(false);
-				}
+	private List<Action> createNormActions(){
+		List<Action> radioActions = new ArrayList< Action>();
+		Action roiOnlyAction = new Action() {
+			@Override
+			public void run() {
+				type = NormaliseType.ROI;
+				updateProfiles(true);
+				setInputFieldEnabled(false);
 			}
-		);
-		Entry<String, Action> fermiRemap = new AbstractMap.SimpleEntry<String, Action>("ROI with Fermi Edge Compensation",
-				new Action("ROI normalisation") {
-					@Override
-					public void run() {
-						type = NormaliseType.FERMI;
-						updateProfiles(true);
-						setInputFieldEnabled(true);
-					}
-				}
-			);
-		radioActions.add(roiOnly);
-		radioActions.add(fermiRemap);
+		};
+		roiOnlyAction.setText("None");
+		roiOnlyAction.setToolTipText("ROI only");
+
+		Action fermiRemapAction = new Action() {
+			@Override
+			public void run() {
+				type = NormaliseType.FERMI;
+				updateProfiles(true);
+				setInputFieldEnabled(true);
+			}
+		};
+		fermiRemapAction.setText("ROI normalisation");
+		fermiRemapAction.setToolTipText("ROI with Fermi Edge Compensation");
+
+		radioActions.add(roiOnlyAction);
+		radioActions.add(fermiRemapAction);
 		return radioActions;
 	}
 
