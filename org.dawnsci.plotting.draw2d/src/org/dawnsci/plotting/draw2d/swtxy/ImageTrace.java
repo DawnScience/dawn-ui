@@ -53,7 +53,6 @@ import uk.ac.diamond.scisoft.analysis.dataset.BooleanDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
-import uk.ac.diamond.scisoft.analysis.dataset.IndexIterator;
 import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.PositionIterator;
 import uk.ac.diamond.scisoft.analysis.dataset.RGBDataset;
@@ -76,7 +75,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	
 	private static final Logger logger = LoggerFactory.getLogger(ImageTrace.class);
 	
-	private static final int MINIMUM_ZOOM_SIZE = 4;
+	private static final int MINIMUM_ZOOM_SIZE  = 4;
+	private static final int MINIMUM_LABEL_SIZE = 10;
 
 	private String           name;
 	private Axis             xAxis;
@@ -87,7 +87,19 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	private int              currentDownSampleBin=-1;
 	private List<IDataset>    axes;
 	private ImageServiceBean imageServiceBean;
+	/**
+	 * Used to define if the zoom is at its maximum possible extend
+	 */
 	private boolean          isMaximumZoom;
+	/**
+	 * Used to define if the zoom is at an extent large enough to show a 
+	 * label grid for the intensity.
+	 */
+	private boolean          isLabelZoom;
+	
+	/**
+	 * The parent plotting system for this image.
+	 */
 	private IPlottingSystem plottingSystem;
 
 	private IImageService service;
@@ -303,6 +315,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		try {
 			
 			isMaximumZoom = false;
+			isLabelZoom   = false;
 			if (imageData!=null && imageData.width==bounds.width && imageData.height==bounds.height) { 
 				// No slice, faster
 				if (monitor!=null && monitor.isCanceled()) return false;
@@ -361,14 +374,18 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				
 				// Force a minimum size on the system
 				if (fullWidth <= MINIMUM_ZOOM_SIZE) {
-					if (fullWidth > imageData.width)
-						fullWidth = MINIMUM_ZOOM_SIZE;
+					if (fullWidth > imageData.width) fullWidth = MINIMUM_ZOOM_SIZE;
 					isMaximumZoom = true;
 				}
 				if (fullHeight <= MINIMUM_ZOOM_SIZE) {
-					if (fullHeight > imageData.height)
-						fullHeight = MINIMUM_ZOOM_SIZE;
+					if (fullHeight > imageData.height) fullHeight = MINIMUM_ZOOM_SIZE;
 					isMaximumZoom = true;
+				}
+				if (fullWidth <= MINIMUM_LABEL_SIZE) {
+					isLabelZoom = true;
+				}
+				if (fullHeight <= MINIMUM_LABEL_SIZE) {
+					isLabelZoom = true;
 				}
 				
 				int scaleWidth = (int) (fullWidth*xScale);
@@ -460,6 +477,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				} else if (scaledImage==null) {
 					scaledImage = data!=null ? new Image(Display.getDefault(), data) : null;
 				}
+				
 			}
 
 			return true;
@@ -628,6 +646,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 
 	private boolean lastAspectRatio = true;
+	private IntensityLabelPainter intensityLabelPainter;
 	@Override
 	protected void paintFigure(Graphics graphics) {
 		
@@ -641,7 +660,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		 */
 		if (scaledImage==null || !isKeepAspectRatio() || lastAspectRatio!=isKeepAspectRatio()) {
 			boolean imageReady = createScaledImage(ImageScaleType.NO_REIMAGE, null);
-			if (!imageReady) return;
+			if (!imageReady) {
+				return;
+			}
 			lastAspectRatio = isKeepAspectRatio();
 		}
 
@@ -651,9 +672,15 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		
 		// Offsets and scaled image are calculated in the createScaledImage method.
 		graphics.drawImage(scaledImage, loc.x-((int)xOffset), loc.y-((int)yOffset));
-  	    
+		
+		if (isLabelZoom && scaledImage!=null) {
+			if (intensityLabelPainter==null) intensityLabelPainter = new IntensityLabelPainter(plottingSystem, this);
+			intensityLabelPainter.paintIntensityLabels(graphics);
+		}
+
 		graphics.popState();
 	}
+
 
 	private boolean isKeepAspectRatio() {
 		return getXAxis().isKeepAspect() && getYAxis().isKeepAspect();
