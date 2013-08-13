@@ -121,13 +121,14 @@ public class H5MultiEditor extends MultiPageEditorPart  implements ISlicablePlot
 			 * for H5 and a new PlotDataEditor which does not extract meta data
 			 * at all but loads sets as it sees them.
 			 */
-			this.dataSetEditor = new PlotDataEditor(PlotType.XY);
-			dataSetEditor.getPlottingSystem().setColorOption(ColorOption.BY_NAME);	
-			addPage(index, dataSetEditor, getEditorInput());
-			setPageText(index, "Plot");
-			index++;
 
 			if (!treeOnTop) {
+				this.dataSetEditor = new PlotDataEditor(PlotType.XY);
+				dataSetEditor.getPlottingSystem().setColorOption(ColorOption.BY_NAME);	
+				addPage(index, dataSetEditor, getEditorInput());
+				setPageText(index, "Plot");
+				index++;
+
 				this.treePage = useH5Editor ? new H5Editor() : new HDF5TreeEditor();
 				addPage(index, treePage,   getEditorInput());
 				setPageText(index, "Tree");
@@ -175,10 +176,12 @@ public class H5MultiEditor extends MultiPageEditorPart  implements ISlicablePlot
 	
 	@Override
 	public IVariableManager getDataSetComponent() {
+		if (dataSetEditor==null) return null;
 		return dataSetEditor.getDataSetComponent();
 	}
 	@Override
 	public SliceComponent getSliceComponent() {
+		if (dataSetEditor==null) return null;
 		return  dataSetEditor.getSliceComponent();
 	}	
 	@Override
@@ -192,6 +195,7 @@ public class H5MultiEditor extends MultiPageEditorPart  implements ISlicablePlot
 	}
 
 	public PlotDataEditor getDataSetEditor() {
+		if (dataSetEditor==null) return null;
 		return dataSetEditor;
 	}
 
