@@ -174,21 +174,29 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 			
 			@Override
 			public void traceUpdated(TraceEvent evt) {
+				if (viewer != null && viewer.getControl().isDisposed())
+					return;
 				viewer.refresh();
 			}
 			
 			@Override
 			public void traceRemoved(TraceEvent evt) {
+				if (viewer != null && viewer.getControl().isDisposed())
+					return;
 				viewer.refresh();
 			}
 			
 			@Override
 			public void traceCreated(TraceEvent evt) {
+				if (viewer != null && viewer.getControl().isDisposed())
+					return;
 				viewer.refresh();
 			}
 			
 			@Override
 			public void traceAdded(TraceEvent evt) {
+				if (viewer != null && viewer.getControl().isDisposed())
+					return;
 				viewer.refresh();
 			}
 		};
@@ -424,9 +432,8 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 	@Override
 	public void deactivate() {
 		super.deactivate();
-		if (viewer!=null && viewer.getControl().isDisposed()) return;
-		
-		if (viewUpdateListener!=null) {
+
+		if (viewer != null && !viewer.getControl().isDisposed() && viewUpdateListener!=null) {
 			viewer.removeSelectionChangedListener(viewUpdateListener);
 			viewUpdateListener.resetSelectionColor();
 		}
@@ -447,17 +454,6 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 	}
 	
 	public void dispose() {
-		if (getPlottingSystem()!=null) {
-			getPlottingSystem().removeRegionListener(this);
-		}
-		if (viewUpdateListener!=null) viewer.removeSelectionChangedListener(viewUpdateListener);
-		viewUpdateListener = null;
-		
-        if (viewer!=null) viewer.getControl().dispose();
-               
-		dragBounds.clear();
-		dragBounds = null;
-		
 		super.dispose();
 	}
 
