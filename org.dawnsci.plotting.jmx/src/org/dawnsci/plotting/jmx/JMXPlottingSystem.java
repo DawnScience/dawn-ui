@@ -341,6 +341,11 @@ public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSyste
 	}
 
 	@Override
+	public void resetAxes() {
+		call(getMethodName(Thread.currentThread().getStackTrace()));
+	}
+
+	@Override
 	public void clear() {
 		call(getMethodName(Thread.currentThread().getStackTrace()));
 	}

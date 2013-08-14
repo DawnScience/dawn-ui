@@ -842,7 +842,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 			try {
 				clearAnnotations();
 				clearRegions();
-				clearAxes();
+				resetAxes();
 				clearTraces();
 				setTitle("");
 			} catch (Throwable e) {
@@ -851,11 +851,11 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		}
 	}
 		
-	private void clearAxes() {
+	public void resetAxes() {
 		removeAdditionalAxes();
-		xyGraph.primaryXAxis.setRange(0, 100);
+//		xyGraph.primaryXAxis.setRange(0, 100);
 		xyGraph.primaryXAxis.setTitle(XYGraph.X_AXIS);
-		xyGraph.primaryYAxis.setRange(0, 100);
+//		xyGraph.primaryYAxis.setRange(0, 100);
 		xyGraph.primaryYAxis.setTitle(XYGraph.Y_AXIS);
 	}
 	

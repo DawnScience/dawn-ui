@@ -929,7 +929,21 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	public void clearRegions() {
 		lightWeightViewer.clearRegions();
 	}
-	
+
+	@Override
+	public void resetAxes() {
+		if (getDisplay().getThread()==Thread.currentThread()) {
+			lightWeightViewer.resetAxes();
+		} else {
+			getDisplay().syncExec(new Runnable() {
+				@Override
+				public void run() {
+					lightWeightViewer.resetAxes();
+				}
+			});
+		}
+	}
+
 	protected void clearRegionTool() {
 		if (lightWeightViewer.getControl() == null) return;
 		

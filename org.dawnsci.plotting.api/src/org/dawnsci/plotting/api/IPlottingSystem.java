@@ -271,6 +271,11 @@ public interface IPlottingSystem extends IAdaptable, ITraceSystem, IRegionSystem
 	public void reset();
 
 	/**
+	 * Call to tell the plot to reset axes. Thread safe.
+	 */
+	public void resetAxes();
+
+	/**
 	 * Call to tell the plot to remove data and leave axes unchanged. Thread safe.
 	 */
 	public void clear();
