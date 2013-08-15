@@ -330,6 +330,11 @@ public class ThreadSafePlottingSystem extends StandardMBean implements IPlotting
 	}
 
 	@Override
+	public void resetAxes() {
+		delegate.resetAxes();
+	}
+
+	@Override
 	public void clear() {
 		delegate.clear();
 	}
