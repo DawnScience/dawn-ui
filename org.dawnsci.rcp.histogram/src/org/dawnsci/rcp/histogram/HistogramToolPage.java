@@ -972,8 +972,12 @@ public class HistogramToolPage extends AbstractToolPage {
 				// this is the FULL implementation (a good default)
 				rangeMax = image.getImageServiceBean().getMaximumCutBound().getBound().doubleValue();
 				rangeMin = image.getImageServiceBean().getMinimumCutBound().getBound().doubleValue();
-				histoMax = image.getImageServiceBean().getMax().doubleValue();
-				histoMin = image.getImageServiceBean().getMin().doubleValue();
+				histoMax = image.getImageServiceBean().getMax()!=null
+						 ? image.getImageServiceBean().getMax().doubleValue()
+						 : 1;
+				histoMin = image.getImageServiceBean().getMin()!=null
+						 ? image.getImageServiceBean().getMin().doubleValue()
+						 : 0;
 				break;
 			}
 
@@ -995,12 +999,11 @@ public class HistogramToolPage extends AbstractToolPage {
 	}
 
 	private AbstractDataset getImageData(IPaletteTrace image) {
-		AbstractDataset imageDataset = (AbstractDataset)image.getImageServiceBean().getImage();
-//		if (image.getImageServiceBean().isLogColorScale()) {
-//			AbstractDataset result = Maths.subtract(imageDataset, image.getImageServiceBean().getLogOffset());
-//			imageDataset = Maths.log10(result);
-//		}
-		return imageDataset;
+		AbstractDataset im = (AbstractDataset)image.getImageServiceBean().getImage();
+		if (im==null) im = (AbstractDataset)image.getData();
+		if (im==null && imageDataset!=null) im = imageDataset;
+		if (im==null) im = new DoubleDataset(new double[]{0,1,2,3}, new int[]{2,2});
+ 		return im;
 	}
 
 	private void removeImagePaletteListener() {
