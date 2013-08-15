@@ -42,6 +42,8 @@ class IntensityLabelPainter {
 		
 		if (system==null)          return;
 		if (image.getAxes()!=null) return;
+		if (Boolean.getBoolean("org.dawnsci.plotting.draw2d.show.intensity.labels")) return;
+		
 		graphics.setFont(new Font(Display.getCurrent(), new FontData("Dialog", 10, SWT.NORMAL)));
 		
 		final IAxis xAxis = system.getSelectedXAxis();
