@@ -654,6 +654,8 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 					int yStop = (int) rroi.getEndPoint()[1];
 					int xInc = rroi.getPoint()[0]<rroi.getEndPoint()[0] ? 1 : -1;
 					int yInc = rroi.getPoint()[1]<rroi.getEndPoint()[1] ? 1 : -1;
+					if (dataRegion == null)
+						return result;
 					dataRegion = dataRegion.getSlice(
 							new int[] { yStart, xStart },
 							new int[] { yStop, xStop },

@@ -5,6 +5,7 @@
          point="org.eclipse.ui.perspectives">
       <perspective
             class="org.dawnsci.spectrum.ui.SpectrumPerspective"
+            icon="icons/spectrum.png"
             id="org.dawnsci.spectrum.ui.perspective"
             name="Spectrum">
       </perspective>
@@ -13,11 +14,13 @@
          point="org.eclipse.ui.views">
       <view
             class="org.dawnsci.spectrum.ui.views.SpectrumView"
+            icon="icons/spectrum.png"
             id="org.dawnsci.spectrum.ui.views.SpectrumView"
             name="Spectrum View">
       </view>
       <view
             class="uk.ac.diamond.scisoft.analysis.rcp.views.PlotView"
+            icon="icons/spectrumaxis.png"
             id="org.dawnsci.spectrum.ui.views.SpectrumPlot"
             name="Spectrum Plot"
             restorable="true">
@@ -25,11 +28,13 @@
       <view
             allowMultiple="false"
             class="org.eclipse.ui.navigator.CommonNavigator"
+            icon="icons/spectrumpe.png"
             id="org.dawnsci.spectrum.ui.views.SpectrumProject"
             name="Spectrum Project">
       </view>
       <view
             class="org.dawnsci.spectrum.ui.views.SpectrumDatasetView"
+            icon="icons/spectrumds.png"
             id="org.dawnsci.spectrum.ui.SpectrumDatasetView"
             name="Datasets"
             restorable="true">
