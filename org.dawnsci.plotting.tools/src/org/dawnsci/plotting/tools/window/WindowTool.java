@@ -385,13 +385,13 @@ public class WindowTool extends AbstractToolPage {
 		//create Region
 		try {
 			final IRegion region = windowSystem.createRegion("Window", RegionType.BOX);
-			region.setROI(surface!=null ? surface.getWindow() : new SurfacePlotROI(0,0,300,300, 0 ,0, 0, 0));
+			region.setROI(surface!=null && surface.getWindow() != null ? surface.getWindow() : new SurfacePlotROI(0,0,300,300, 0 ,0, 0, 0));
 			windowSystem.addRegion(region);
 		} catch (Exception e) {
 			logger.debug("Cannot create region for surface!", e);
 		}
-		int xStartPt = (int) (surface!=null ? surface.getWindow().getPoint()[0] : 0);
-		int yStartPt = (int) (surface!=null ? surface.getWindow().getPoint()[1] : 0);
+		int xStartPt = (int) (surface != null && surface.getWindow() != null ? surface.getWindow().getPoint()[0] : 0);
+		int yStartPt = (int) (surface!=null && surface.getWindow() != null ? surface.getWindow().getPoint()[1] : 0);
 		int width = 300;
 		int height = 300;
 		if(surface!=null && surface.getWindow() instanceof SurfacePlotROI){
