@@ -509,6 +509,8 @@ public class WindowTool extends AbstractToolPage {
 	}
 
 	protected void updateTrace(ITrace trace) {
+		if (content == null)
+			return;
 		if (trace instanceof ISurfaceTrace) {
 		    setActionsEnabled(true);
 			updateWindowPlot((ISurfaceTrace)trace);
@@ -525,6 +527,8 @@ public class WindowTool extends AbstractToolPage {
 	}
 
 	private void setActionsEnabled(boolean enabled) {
+		if (getSite() == null)
+			return;
 		IContributionManager[] mans = new IContributionManager[]{ 
 				                             getSite().getActionBars().getToolBarManager(),
 				                             getSite().getActionBars().getMenuManager()};
