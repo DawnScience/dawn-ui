@@ -103,6 +103,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	private IPlottingSystem plottingSystem;
 
 	private IImageService service;
+
+	private boolean xTicksAtEnd, yTicksAtEnd;
 		
 	public ImageTrace(final String name, 
 			          final Axis xAxis, 
@@ -136,7 +138,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		xAxis.addListener(this);
 		yAxis.addListener(this);
 
+		xTicksAtEnd = xAxis.hasTicksAtEnds();
 		xAxis.setTicksAtEnds(false);
+		yTicksAtEnd = yAxis.hasTicksAtEnds();
 		yAxis.setTicksAtEnds(false);
 		xAxis.setTicksIndexBased(true);
 		yAxis.setTicksIndexBased(true);
@@ -703,8 +707,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		if (getParent()!=null) getParent().remove(this);
 		xAxis.removeListener(this);
 		yAxis.removeListener(this);
-		xAxis.setTicksAtEnds(true);
-		yAxis.setTicksAtEnds(true);
+		xAxis.setTicksAtEnds(xTicksAtEnd);
+		yAxis.setTicksAtEnds(yTicksAtEnd);
 		xAxis.setTicksIndexBased(false);
 		yAxis.setTicksIndexBased(false);
 		axisRedrawActive = false;
