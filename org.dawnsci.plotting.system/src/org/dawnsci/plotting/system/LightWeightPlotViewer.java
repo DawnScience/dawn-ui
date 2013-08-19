@@ -815,8 +815,8 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 			xyGraph.addTrace(((LineTraceImpl)trace).getTrace(), xAxis, yAxis, true);
 			intensity.setVisible(false);
 		}
-		
-		xyCanvas.redraw();
+		if (xyCanvas != null & !xyCanvas.isDisposed())
+			xyCanvas.redraw();
 	
 	}
 
