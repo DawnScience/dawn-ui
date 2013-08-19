@@ -382,14 +382,7 @@ public class WindowTool extends AbstractToolPage {
 
 		windowSystem.createPlotPart(windowComposite, getTitle(), getSite().getActionBars(), PlotType.IMAGE, this.getViewPart());
 		final ISurfaceTrace surface = getSurfaceTrace();
-		//create Region
-		try {
-			final IRegion region = windowSystem.createRegion("Window", RegionType.BOX);
-			region.setROI(surface!=null && surface.getWindow() != null ? surface.getWindow() : new SurfacePlotROI(0,0,300,300, 0 ,0, 0, 0));
-			windowSystem.addRegion(region);
-		} catch (Exception e) {
-			logger.debug("Cannot create region for surface!", e);
-		}
+
 		int xStartPt = (int) (surface != null && surface.getWindow() != null ? surface.getWindow().getPoint()[0] : 0);
 		int yStartPt = (int) (surface!=null && surface.getWindow() != null ? surface.getWindow().getPoint()[1] : 0);
 		int width = 300;
@@ -542,17 +535,34 @@ public class WindowTool extends AbstractToolPage {
 	}
 
 	protected void updateWindowPlot(ISurfaceTrace trace) {
-		StackLayout stackLayout = (StackLayout)content.getLayout();
-		stackLayout.topControl = windowControl;
-
 		AbstractDataset data =  (AbstractDataset)trace.getData();
 		List<IDataset> axes = trace.getAxes();
 		if (axes!=null) axes = Arrays.asList(axes.get(0), axes.get(1));
-		windowSystem.updatePlot2D(data, axes, null);	
-		
+		windowSystem.updatePlot2D(data, axes, null);
+		createRegion();
+		// manage layout
+		if (content != null && content.isDisposed()) return;
+		StackLayout stackLayout = (StackLayout)content.getLayout();
+		stackLayout.topControl = windowControl;
 		content.layout();
 	}
-	
+
+	private void createRegion() {
+		IRegion region = windowSystem.getRegion("Window");
+		//create Region
+		try {
+			if (region == null) {
+				ISurfaceTrace surface = getSurfaceTrace();
+				IROI window = surface != null ? surface.getWindow() : null;
+				region = windowSystem.createRegion("Window", RegionType.BOX);
+				region.setROI(window != null ? window : new SurfacePlotROI(0,0,300,300, 0 ,0, 0, 0));
+				windowSystem.addRegion(region);
+			}
+		} catch (Exception e) {
+			logger.debug("Cannot create region for surface!", e);
+		}
+	}
+
 	protected void updateSlicePlot(ILineStackTrace trace) {
 		
 		StackLayout stackLayout = (StackLayout)content.getLayout();
