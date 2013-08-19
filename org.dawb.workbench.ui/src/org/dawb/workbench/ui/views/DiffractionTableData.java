@@ -18,7 +18,6 @@ package org.dawb.workbench.ui.views;
 
 import java.util.List;
 
-import org.dawb.workbench.ui.views.DiffractionCalibrationView.DiffractionTraceListener;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.tools.diffraction.DiffractionImageAugmenter;
 
@@ -37,7 +36,6 @@ public class DiffractionTableData {
 	DiffractionImageAugmenter augmenter;
 	IDiffractionMetadata md;
 	IDataset image;
-	DiffractionTraceListener listener;
 	List<IROI> rois; // can contain null entries as placeholders
 	QSpace q;
 	double od = Double.NaN;

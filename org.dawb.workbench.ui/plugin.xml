@@ -334,14 +334,6 @@
       <view
             allowMultiple="false"
             category="org.dawb.workbench.ui.beta.views.category"
-            class="org.dawb.workbench.ui.views.DiffractionCalibrationView"
-            icon="icons/calibrant_rings.png"
-            id="org.dawb.workbench.ui.views.DiffractionCalibrationView"
-            name="Diffraction Calibration">
-      </view>
-      <view
-            allowMultiple="false"
-            category="org.dawb.workbench.ui.beta.views.category"
             class="org.dawb.workbench.ui.views.DiffractionCalibrationPlottingView"
             icon="icons/calibrant_rings.png"
             id="org.dawb.workbench.ui.views.DiffractionCalibrationPlottingView"
