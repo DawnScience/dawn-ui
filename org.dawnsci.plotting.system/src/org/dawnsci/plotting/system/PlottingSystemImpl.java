@@ -600,7 +600,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			top = lightWeightViewer.getControl();
 			lightWeightViewer.updatePlottingRole(type);
 		}
-		if (parent.getLayout() instanceof StackLayout) {
+		if (parent != null && !parent.isDisposed() && parent.getLayout() instanceof StackLayout) {
 			final StackLayout layout = (StackLayout)parent.getLayout();
 			layout.topControl = top;
 			parent.layout();

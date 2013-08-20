@@ -48,6 +48,7 @@ public class SurfaceTrace extends PlotterTrace implements ISurfaceTrace{
 	private ImageServiceBean imageServiceBean;
 	private IImageService service;
 	private boolean          imageCreationAllowed = true;
+	private String paletteName;
 
 	public SurfaceTrace(JRealityPlotViewer plotter, String name) {
 		super(plotter, name);
@@ -77,6 +78,11 @@ public class SurfaceTrace extends PlotterTrace implements ISurfaceTrace{
 		return imageServiceBean.getPalette();
 	}
 
+	@Override
+	public String getPaletteName() {
+		return paletteName;
+	}
+
 	private IPreferenceStore store;
 
 	private IPreferenceStore getPreferenceStore() {
@@ -98,6 +104,12 @@ public class SurfaceTrace extends PlotterTrace implements ISurfaceTrace{
 			plotter.handleColourCast(imageData, getMin().doubleValue(), getMax().doubleValue());
 			firePaletteDataListeners(palette);
 		}
+	}
+
+	@Override
+	public void setPaletteData(String paletteName, PaletteData palette){
+		this.paletteName = paletteName;
+		setPaletteData(palette);
 	}
 
 	protected ColourImageData createImageData() {

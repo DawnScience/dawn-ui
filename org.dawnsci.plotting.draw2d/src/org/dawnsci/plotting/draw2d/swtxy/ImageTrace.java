@@ -79,6 +79,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	private static final int MINIMUM_LABEL_SIZE = 10;
 
 	private String           name;
+	private String           paletteName;
 	private Axis             xAxis;
 	private Axis             yAxis;
 	private ColorMapRamp     intensityScale;
@@ -206,6 +207,14 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		firePaletteDataListeners(paletteData);
 	}
 
+	public String getPaletteName() {
+		return paletteName;
+	}
+
+	public void setPaletteData(String paletteName, PaletteData paletteData) {
+		this.paletteName = paletteName;
+		setPaletteData(paletteData);
+	}
 
 	private enum ImageScaleType {
 		// Going up in order of work done

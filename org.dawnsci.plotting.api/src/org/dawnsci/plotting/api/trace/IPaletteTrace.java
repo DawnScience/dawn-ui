@@ -18,7 +18,20 @@ public interface IPaletteTrace extends IAxesTrace {
 	 * @param paletteData
 	 */
 	public void setPaletteData(PaletteData paletteData);
+
+	/**
+	 * PaletteName for creating the image/surface from the AbstractDataset
+	 * @return
+	 */
+	public String getPaletteName();
 	
+	/**
+	 * Setting palette data causes the image to redraw with the new palette.
+	 * @param paletteName
+	 * @param paletteData
+	 */
+	public void setPaletteData(String paletteName, PaletteData paletteData);
+
 	/**
 	 * Returns the last image service bean sent to the service for getting
 	 * the image.
