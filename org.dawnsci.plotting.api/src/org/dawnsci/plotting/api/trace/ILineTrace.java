@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.swt.graphics.Color;
 
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
@@ -267,5 +268,16 @@ public interface ILineTrace extends ITrace {
 	 * color, you may need to repaint the legend.
 	 */
 	public void repaint();
+	
+	/**
+	 * 
+	 * @return The x-axis which this trace is being drawn with
+	 */
+	public IAxis getXAxis();
+	/**
+	 * 
+	 * @return The y-axis which this trace is being drawn with
+	 */
+	public IAxis getYAxis();
 	
 }

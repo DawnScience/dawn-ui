@@ -1798,6 +1798,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 
 		@Override
 		protected void setValue(Object element, Object value) {
+			getViewer().cancelEditing();
 			CheckableObject co = (CheckableObject)element;
 			if (value instanceof Integer) {
 				int isel = ((Integer)value).intValue();
@@ -1810,7 +1811,8 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 						getAbstractPlottingSystem().setXFirst(false);
 					}
 					co.setYaxis(isel);
-
+                    
+					getPlottingSystem().clear();
 					fireSelectionListeners(selections);
 					getViewer().refresh();
 				}

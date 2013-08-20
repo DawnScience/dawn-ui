@@ -3,16 +3,20 @@ package org.dawnsci.plotting.tools.history;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.dawb.common.services.IExpressionObject;
 import org.dawb.common.ui.plot.tools.HistoryType;
+import org.dawnsci.plotting.api.axis.IAxis;
 import org.dawnsci.plotting.api.trace.ILineTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.api.trace.ITraceListener;
 import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.tools.Activator;
+import org.dawnsci.plotting.tools.history.HistoryBean.AxisType;
 import org.dawnsci.plotting.tools.profile.ProfileType;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -25,6 +29,7 @@ import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
+import org.eclipse.jface.viewers.ComboBoxCellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -32,7 +37,10 @@ import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.RGB;
@@ -42,6 +50,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 
 public class HistoryTool extends AbstractHistoryTool implements MouseListener {
@@ -133,6 +142,9 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 				addTraces(); // Adds anything it can.
 			}
 		};
+		
+		MenuManager ret = super.createActions(rightClick);
+		
 		if (autoAdd==null) autoAdd = new Action("Automatically add any new plots to history", IAction.AS_CHECK_BOX) {
 			public void run() {
 				toggleAutomaticallyAddTraces();
@@ -141,10 +153,11 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 		getSite().getActionBars().getToolBarManager().add(autoAdd);
 		
 		autoAdd.setImageDescriptor(Activator.getImageDescriptor("icons/autoadd.png"));
+		getSite().getActionBars().getToolBarManager().add(new Separator());
 		getSite().getActionBars().getToolBarManager().add(autoAdd);
 		getSite().getActionBars().getToolBarManager().add(new Separator());
-		
-		return super.createActions(rightClick);
+
+		return ret;
 	}
 	
 	protected void toggleAutomaticallyAddTraces() {
@@ -176,35 +189,97 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 		ColumnViewerToolTipSupport.enableFor(viewer,ToolTip.NO_RECREATE);
 		viewer.setColumnProperties(new String[] { "Selected", "Name", "Original Plot", "Color" });
 
-		TableViewerColumn var = new TableViewerColumn(viewer, SWT.LEFT, 0);
+		int count = 0;
+		TableViewerColumn var = new TableViewerColumn(viewer, SWT.LEFT, count);
 		var.getColumn().setText("Plot"); // Selected
 		var.getColumn().setWidth(50);
 		var.setLabelProvider(new HistoryLabelProvider());
 
-		var = new TableViewerColumn(viewer, SWT.CENTER, 1);
+		var = new TableViewerColumn(viewer, SWT.CENTER, ++count);
 		var.getColumn().setText("Name");
 		var.getColumn().setWidth(140);
 		var.setLabelProvider(new HistoryLabelProvider());
-		var.setEditingSupport(new HistoryEditingSupport(viewer));
+		var.setEditingSupport(new ExpressionEditingSupport(viewer));
 		
-		var = new TableViewerColumn(viewer, SWT.CENTER, 2);
+		var = new TableViewerColumn(viewer, SWT.CENTER,  ++count);
 		var.getColumn().setText("Original Plot");
 		var.getColumn().setWidth(140);
 		var.setLabelProvider(new HistoryLabelProvider());
 
-		var = new TableViewerColumn(viewer, SWT.CENTER, 3);
+		var   = new TableViewerColumn(viewer, SWT.LEFT,  ++count);
+		var.getColumn().setText(" ");
+		var.getColumn().setWidth(32);
+		var.setLabelProvider(new AxisLabelProvider());
+		var.setEditingSupport(new AxisEditingSupport(viewer));
+
+		var = new TableViewerColumn(viewer, SWT.CENTER,  ++count);
 		var.getColumn().setText("Shape");
 		var.getColumn().setWidth(80);
 		var.setLabelProvider(new HistoryLabelProvider());
 
-		var = new TableViewerColumn(viewer, SWT.CENTER, 4);
+		var = new TableViewerColumn(viewer, SWT.CENTER,  ++count);
 		var.getColumn().setText("Color");
 		var.getColumn().setWidth(70);
 		var.setLabelProvider(new HistoryLabelProvider());
 		
-		return 5;
-	}   
+		return count+1;
+	} 
 	
+	/**
+	 * Moves any axes that are X to Y1
+	 */
+	private void removeXAxis() {
+        for (HistoryBean bean : getHistoryCache().values()) {
+			if (AxisType.X==bean.getAxis() && bean.isSelected()) {
+				bean.setAxis(AxisType.Y1);
+			}
+		}
+	}
+
+	protected void updatePlots(boolean force) {
+		
+		if (!isActive()) return;
+		
+		super.updatePlots(force);
+		checkVisibleAxes();
+	}
+	protected HistoryBean toggleSelection() {
+		final HistoryBean bean = super.toggleSelection();
+		if (AxisType.X==bean.getAxis()) {
+			getPlottingSystem().clear();
+			updatePlots(true);
+			return bean;
+		}
+		if (bean!=null) checkVisibleAxes();
+		return bean;
+	}
+
+    /**
+     * Checks to see if all axes should still be visible.
+     */
+	private void checkVisibleAxes() {
+		if (updatingPlotsAlready) return;
+		// We now look for any unused axes and hide them.
+		// Not an ideal thing to do but the 'Data' page and other tools
+		// may be using the other axes so we cannot be sure to remove
+		// any that we are no longer using here.
+		final Collection<IAxis> usedAxes = new HashSet<IAxis>(3);
+		usedAxes.add(getPlottingSystem().getSelectedXAxis());
+		usedAxes.add(getPlottingSystem().getSelectedYAxis());
+		for (ITrace trace : getPlottingSystem().getTraces()) {
+			if (trace instanceof ILineTrace) {
+				ILineTrace ltrace = (ILineTrace)trace;
+				if (!ltrace.isVisible()) continue;
+				usedAxes.add(ltrace.getXAxis());
+				usedAxes.add(ltrace.getYAxis());
+			}
+		}
+		// Finally change the visibility to those actually used
+		final List<IAxis> allAxes = getPlottingSystem().getAxes();
+		for (IAxis iAxis : allAxes) {
+			iAxis.setVisible(usedAxes.contains(iAxis));
+		}
+	}
 	/**
 	 * Pushes history plot to and from the main plot depending on if it is selected.
 	 */
@@ -244,16 +319,35 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 					logger.warn("Cannot bring "+traceName+" from memory to plot in "+bean.getPlotName()+" as it already exists there!");
 					return;
 				} else {
-					final ILineTrace trace = getPlottingSystem().createLineTrace(traceName);
-					trace.setUserObject(HistoryType.HISTORY_PLOT);
-					trace.setData(bean.getXdata(), bean.getYdata());
-					if (!isColourOk(bean.getPlotColour())) {
-						getPlottingSystem().addTrace(trace);
-						bean.setPlotColour(trace.getTraceColor().getRGB());
-						if (viewer!=null) viewer.refresh(bean);
-					} else {
-						trace.setTraceColor(new Color(null, bean.getPlotColour()));
-						getPlottingSystem().addTrace(trace);
+					
+					IAxis selectedYAxis = getPlottingSystem().getSelectedYAxis();
+					try {
+						if (bean.getAxis()!=null) {
+							if (bean.getAxis()==AxisType.Y2) {
+								IAxis y2 = getPlottingSystem().getAxis("Y2");
+								if (y2==null) {
+									y2 = getPlottingSystem().createAxis("Y2", true,SWT.LEFT);
+									y2.setTitle("Y2");
+								}
+								y2.setVisible(true);
+								getPlottingSystem().setSelectedYAxis(y2);
+							} else if (bean.getAxis()==AxisType.X) {
+								return; // This is the X data which we will use.
+							}
+						}
+						final ILineTrace trace = getPlottingSystem().createLineTrace(traceName);
+						trace.setUserObject(HistoryType.HISTORY_PLOT);
+						trace.setData(getXData(bean), bean.getYdata());
+						if (!isColourOk(bean.getPlotColour())) {
+							getPlottingSystem().addTrace(trace);
+							bean.setPlotColour(trace.getTraceColor().getRGB());
+							if (viewer!=null) viewer.refresh(bean);
+						} else {
+							trace.setTraceColor(new Color(null, bean.getPlotColour()));
+							getPlottingSystem().addTrace(trace);
+						}
+					} finally {
+						getPlottingSystem().setSelectedYAxis(selectedYAxis);
 					}
 				}
 			}
@@ -263,6 +357,23 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 		}
 	}
 
+	/**
+	 * Checks if any bean is set to X, if it is and the X is the right size,
+	 * will return this x-data, otherwise returns the x-data of the bean.
+	 * @param bean
+	 * @return
+	 */
+	private IDataset getXData(HistoryBean bean) {
+		if (bean.getAxis()==AxisType.X) throw new RuntimeException(bean.getTraceName()+" is the X data and should not be plotted as Y anyway!");
+		final IDataset origX = bean.getXdata();
+		for (HistoryBean possibleX : history.values()) {
+			if (possibleX.isSelected() && AxisType.X==possibleX.getAxis()) {
+				final IDataset x = possibleX.getYdata();
+				if (x!=null && x.getSize()==origX.getSize()) return x;
+			}
+		}
+		return origX;
+	}
 	private boolean isColourOk(RGB plotColour) {
 		
 		if (plotColour==null) return false;
@@ -323,12 +434,12 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 			if (columnIndex==2) {
 				return bean.getPlotName();
 			}
-			if (columnIndex==3) {
+			if (columnIndex==4) {
 				AbstractDataset data = bean.getYdata();
 				if (data==null) return "-";
 				return Arrays.toString(bean.getYdata().getShape());
 			}
-			if (columnIndex==4) {
+			if (columnIndex==5) {
 				return "\u220E\u220E\u220E\u220E";
 			}
 			return "";
@@ -342,7 +453,7 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 		
 		private Color getColor(Object element) {
 			if (!(element instanceof HistoryBean)) return null;
-			if (columnIndex==4) {
+			if (columnIndex==5) {
 				final HistoryBean bean = (HistoryBean)element;
 				if (bean.getPlotColour()==null) return null;
 				return new Color(null, bean.getPlotColour());
@@ -365,9 +476,9 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 
 	}
 	
-	private class HistoryEditingSupport extends EditingSupport {
+	private class ExpressionEditingSupport extends EditingSupport {
 
-		public HistoryEditingSupport(ColumnViewer viewer) {
+		public ExpressionEditingSupport(ColumnViewer viewer) {
 			super(viewer);
 		}
 
@@ -393,6 +504,8 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 			final  IExpressionObject o = bean.getExpression();
             if (o!=null) {
             	o.setExpressionString((String)value);
+            	getPlottingSystem().clear();
+            	updatePlots(true);
             } else {
 			    ((HistoryBean)element).setTraceName((String)value);
             }
@@ -401,6 +514,59 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 
 	}
 
+	private class AxisLabelProvider extends ColumnLabelProvider {
+		
+		@Override
+		public String getText(Object ob) {
+            if (ob==null || !(ob instanceof HistoryBean)) return null;
+            return ((HistoryBean)ob).getAxis().name();
+		}
+	}
+	
+	private class AxisEditingSupport extends EditingSupport {
 
+		public AxisEditingSupport(ColumnViewer viewer) {
+			super(viewer);
+		}
+		
+		@Override
+		protected CellEditor getCellEditor(final Object element) {
+			// FIX to http://jira.diamond.ac.uk/browse/DAWNSCI-380 remove axes until they work
+			ComboBoxCellEditor ce = new ComboBoxCellEditor((Composite)getViewer().getControl(), new String[]{"X","Y1","Y2" /**,"Y3","Y4" **/} , SWT.READ_ONLY);
+			final CCombo ccombo = (CCombo)ce.getControl();
+			ccombo.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					setValue(element, ccombo.getItem(ccombo.getSelectionIndex()));
+				}
+			});
+			return ce;
+		}
 
+		@Override
+		protected boolean canEdit(Object ob) {
+			if (ob==null || !(ob instanceof HistoryBean)) return false;
+			return true;
+		}
+
+		@Override
+		protected Object getValue(Object element) {
+			return ((HistoryBean)element).getAxis().getIndex();
+		}
+
+		@Override
+		protected void setValue(Object element, Object value) {
+			viewer.cancelEditing();
+			HistoryBean hb = (HistoryBean)element;
+			if (value instanceof String) {
+				final AxisType type = AxisType.valueOf((String)value);
+				if (type == AxisType.X) removeXAxis(); // Move the other x if there is one to Y1
+
+				hb.setAxis(type);
+				getPlottingSystem().clear();
+				updatePlots(true);
+				viewer.refresh(); // Must be complete refresh, we changed other axes.
+			}
+		}
+		
+	}
 }

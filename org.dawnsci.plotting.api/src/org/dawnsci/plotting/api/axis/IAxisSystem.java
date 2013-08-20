@@ -35,6 +35,13 @@ public interface IAxisSystem {
 	 * @return
 	 */
 	public List<IAxis> getAxes();
+	
+	/**
+	 * Look up the axis from the list of axes by the name used when createAxis(...) was called.
+	 * @param name
+	 * @return
+	 */
+	public IAxis getAxis(String name);
 
 	/**
 	 * The current y axis to plot to. Intended for 1D plotting with multiple axes.

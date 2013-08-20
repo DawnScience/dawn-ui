@@ -21,6 +21,18 @@ class HistoryBean {
 	public enum FORCE_TYPE {
 		NONE, IFKEYNULL, FORCE;
 	}
+	public enum AxisType {
+		X(0), Y1(1), Y2(2);
+		
+		private int index;
+
+		AxisType(int index) {
+			this.index = index;
+		}
+		public int getIndex() {
+			return index;
+		}
+	}
 	
 	// Image compare
 	private AbstractDataset       data;
@@ -35,6 +47,7 @@ class HistoryBean {
 	// 1D history
 	private AbstractDataset xdata;
 	private RGB             plotColour;
+	private AxisType        axis=AxisType.Y1; 
 	
 	// Anyone
 	private String          plotName; // Often the file name
@@ -274,6 +287,11 @@ class HistoryBean {
 				return false;
 		} else if (!xdata.equals(other.xdata))
 			return false;
+		if (axis == null) {
+			if (other.axis != null)
+				return false;
+		} else if (!axis.equals(other.axis))
+			return false;
 		return true;
 	}
 	public List<IDataset> getAxes() {
@@ -360,6 +378,14 @@ class HistoryBean {
 
 	public boolean isExpression() {
 		return expression!=null;
+	}
+
+	public AxisType getAxis() {
+		return axis;
+	}
+
+	public void setAxis(AxisType axis) {
+		this.axis = axis;
 	}
 
 }

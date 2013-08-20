@@ -62,6 +62,12 @@ class JMXAxisSystem extends JMXSystemObject implements IAxisSystem{
 	public List<IAxis> getAxes() {
 		return (List<IAxis>)call(getMethodName(Thread.currentThread().getStackTrace()));	
 	}
+	
+	@Override
+	public IAxis getAxis(String name) {
+		return (IAxis)call(getMethodName(Thread.currentThread().getStackTrace()), name);	
+	}
+
 
 	@Override
 	public void addPositionListener(IPositionListener l) {

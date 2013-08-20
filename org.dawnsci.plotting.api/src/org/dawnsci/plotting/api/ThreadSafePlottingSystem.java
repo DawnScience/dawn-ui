@@ -460,6 +460,12 @@ public class ThreadSafePlottingSystem extends StandardMBean implements IPlotting
 	}
 	
 	@Override
+	public IAxis getAxis(String name) {
+		return (IAxis)call(getMethodName(Thread.currentThread().getStackTrace()), name);	
+	}
+
+	
+	@Override
 	public void addPositionListener(IPositionListener l) {
 		call(getMethodName(Thread.currentThread().getStackTrace()), new Class[]{IPositionListener.class}, l);
 	}

@@ -886,6 +886,14 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 					
 		return lightWeightViewer.getAxes();
 	}
+	
+	@Override
+	public IAxis getAxis(String name) {
+		
+		if (lightWeightViewer.getControl() == null) createLightWeightUI();
+					
+		return lightWeightViewer.getAxis(name);
+	}
 
 	@Override
 	public IAxis getSelectedXAxis() {

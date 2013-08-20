@@ -1077,6 +1077,16 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		return ret;
 	}
 
+	@Override
+	public IAxis getAxis(String title) {
+		
+		List<Axis> axes = xyGraph.getAxisList();
+		for (Axis axis : axes) {
+			if (!(axis instanceof IAxis)) continue;
+			if (axis.getTitle().equals(title)) return (IAxis)axis;
+		}
+		return null;
+	}
 
 	
 	@Override

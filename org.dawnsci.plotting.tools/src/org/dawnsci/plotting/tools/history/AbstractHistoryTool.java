@@ -322,6 +322,10 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 	 */
 	protected MenuManager createActions(final MenuManager rightClick) {
 		
+		final IAction addPlot = createAddAction();
+		getSite().getActionBars().getToolBarManager().add(addPlot);
+		rightClick.add(addPlot);
+
 		final Action exportHist = new Action("Export history", Activator.getImageDescriptor("icons/mask-export-wiz.png")) {
 			public void run() {
 				try {
@@ -336,9 +340,6 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 		};
 		getSite().getActionBars().getToolBarManager().add(exportHist);
 				
-		final IAction addPlot = createAddAction();
-		getSite().getActionBars().getToolBarManager().add(addPlot);
-		rightClick.add(addPlot);
 		
 		final Action deletePlot = new Action("Delete selected", Activator.getImageDescriptor("icons/delete.gif")) {
 			public void run() {

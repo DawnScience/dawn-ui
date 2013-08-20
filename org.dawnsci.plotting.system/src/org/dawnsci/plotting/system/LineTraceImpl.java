@@ -2,6 +2,7 @@ package org.dawnsci.plotting.system;
 
 import org.csstudio.swt.xygraph.dataprovider.IDataProvider;
 import org.csstudio.swt.xygraph.figures.Trace;
+import org.dawnsci.plotting.api.axis.IAxis;
 import org.dawnsci.plotting.api.trace.ILineTrace;
 import org.dawnsci.plotting.api.trace.ITraceContainer;
 import org.dawnsci.plotting.api.trace.TraceEvent;
@@ -10,7 +11,6 @@ import org.dawnsci.plotting.draw2d.swtxy.LineTrace;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.swt.graphics.Color;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IErrorDataset;
 
@@ -427,6 +427,16 @@ public class LineTraceImpl implements ILineTrace {
 	@Override
 	public int getRank() {
 		return 1;
+	}
+
+	@Override
+	public IAxis getXAxis() {
+		return (IAxis)trace.getXAxis();
+	}
+
+	@Override
+	public IAxis getYAxis() {
+		return (IAxis)trace.getYAxis();
 	}
 
 }
