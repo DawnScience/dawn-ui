@@ -496,11 +496,11 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 			final  IExpressionObject o = bean.getExpression();
             if (o!=null) {
             	o.setExpressionString((String)value);
-            	getPlottingSystem().clear();
-            	updatePlots(true);
             } else {
 			    ((HistoryBean)element).setTraceName((String)value);
             }
+        	getPlottingSystem().clear();
+        	updatePlots(true);
 			viewer.refresh(element);
 		}
 
