@@ -100,6 +100,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 						evt.getRegion().removeROIListener(ProfileTool.this);
 						clearTraces(evt.getRegion());
 					}
+					regionsRemoved(evt);
 				}
 				
 				@Override
@@ -109,6 +110,9 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 					if (regions == null || regions.isEmpty()) {
 						registeredTraces.clear();
 						profilePlottingSystem.clear();
+					} else {
+						IRegion other = regions.iterator().next();
+						ProfileTool.this.update(other, null, false);
 					}
 				}
 				

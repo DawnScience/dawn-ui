@@ -26,12 +26,14 @@ import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.region.IRegionListener;
 import org.dawnsci.plotting.api.region.RegionEvent;
 import org.dawnsci.plotting.api.trace.IImageTrace;
+import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.api.trace.ITraceListener;
 import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.dawnsci.plotting.draw2d.swtxy.selection.SelectionRegionFactory;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Graphics;
+import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.MouseEvent;
 import org.eclipse.draw2d.MouseMotionListener;
 import org.eclipse.draw2d.geometry.Point;
@@ -575,6 +577,18 @@ public class RegionArea extends PlotArea {
 
 			imageTraces.clear();
 
+		}
+		
+		// Catch all needed for fix to http://jira.diamond.ac.uk/browse/SCI-1318
+		try {
+			List<IFigure> children = getChildren();
+			for (IFigure iFigure : children) {
+				if (iFigure instanceof ITrace) {
+					remove(iFigure);
+				}
+			}
+		} catch (java.util.ConcurrentModificationException ignored) {
+			// Then we don't loop
 		}
 
 	}
