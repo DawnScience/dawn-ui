@@ -111,6 +111,7 @@ import uk.ac.diamond.scisoft.analysis.roi.CircularROI;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalFitROI;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
+import uk.ac.diamond.scisoft.analysis.roi.PointROI;
 import uk.ac.diamond.scisoft.analysis.roi.PolylineROI;
 import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 
@@ -1274,21 +1275,35 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 
 	@Override
 	public void roiDragged(ROIEvent evt) {
+		updateBeamCentre(evt);
+	}
+
+	@Override
+	public void roiChanged(ROIEvent evt) {
+		updateBeamCentre(evt);
+	}
+
+	@Override
+	public void roiSelected(ROIEvent evt) {}
+	
+	private void updateBeamCentre(ROIEvent evt) {
 		IROI roi = evt.getROI();
 		if(roi == null)return;
-		EllipticalROI eroi = roi instanceof EllipticalROI ? (EllipticalROI)roi : null;		
+		PointROI eroi = roi instanceof PointROI ? (PointROI)roi : null;		
 		if(eroi == null) return;
+		if (!(evt.getSource() instanceof IRegion)) return;
+		
+		IRegion point = (IRegion)evt.getSource();
+		Object ob = point.getUserObject();
+		if (ob == null) return;
+		
+		if (ob.toString() != "CALIBRANT") return;
+		
 		double ptx = eroi.getPointX();
 		double pty = eroi.getPointY();
 		IDiffractionMetadata data = getDiffractionMetaData();
 		DetectorProperties detprop = data.getDetector2DProperties();
 		detprop.setBeamCentreCoords(new double[]{ptx, pty});
 	}
-
-	@Override
-	public void roiChanged(ROIEvent evt) {}
-
-	@Override
-	public void roiSelected(ROIEvent evt) {}
 
 }

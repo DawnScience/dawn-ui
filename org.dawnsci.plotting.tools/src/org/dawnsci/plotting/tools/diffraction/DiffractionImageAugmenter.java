@@ -41,6 +41,7 @@ import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
+import uk.ac.diamond.scisoft.analysis.roi.PointROI;
 import uk.ac.diamond.sda.meta.page.DiffractionMetadataCompositeEvent;
 import uk.ac.diamond.sda.meta.page.IDiffractionMetadataCompositeListener;
 
@@ -104,6 +105,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	private DetectorProperties detprop;
 	private DiffractionCrystalEnvironment diffenv;
 	private IRegion crosshairs;
+	private IRegion beamPosition;
 
     private enum RING_TYPE {
     	ICE, STANDARD, CALIBRANT, BEAM_CENTRE;
@@ -149,8 +151,11 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 			plottingSystem.removeRegion(crosshairs);
 			crosshairs = null;
 		}
+		
 		for (RING_TYPE rt : RING_TYPE.values()) removeRings(rt);
 		registerListeners(false);
+		
+		beamPosition = null;
 	}
 
 	/**
@@ -217,8 +222,10 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 				}
 			}
 			drawResolutionRings(calibrantRingsList, "calibrant", RING_TYPE.CALIBRANT);
+			drawResolutionBeamPosition();
 		} else {
 			hideRings(RING_TYPE.CALIBRANT);
+			beamPosition = null;
 		}
 	}
 
@@ -312,7 +319,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		int nRings = ringList.size();
 		resROIs.clear();
 		for (int i = 0; i < nRings; i++) {
-			drawResolutionEllipse(i >= nExisting ? null : existing.get(i), ringList.get(i), typeName+i, marker, i == 0);
+			drawResolutionEllipse(i >= nExisting ? null : existing.get(i), ringList.get(i), typeName+i, marker, false);
 		}
 	}
 
@@ -442,6 +449,45 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		}
 	}
 
+	private void drawResolutionBeamPosition() {
+		if (!active) return; // We are likely off screen.
+		
+		if (detprop == null) return;
+
+		double[] beamCentrePC = detprop.getBeamCentreCoords();
+		if (beamCentrePC[0] == 0) // ensure there are no negative zeros
+			beamCentrePC[0] = 0;
+		if (beamCentrePC[1] == 0)
+			beamCentrePC[1] = 0;
+		
+
+		if (beamPosition == null) {
+			try {
+				final String regionName = RegionUtils.getUniqueName("Calibrant beam position", plottingSystem);
+				beamPosition = plottingSystem.createRegion(regionName, RegionType.POINT);
+			} catch (Exception e) {
+				logger.error("Can't create region", e);
+				return;
+			}
+
+			final PointROI proi = new PointROI(beamCentrePC);
+			beamPosition.setROI(proi);
+			beamPosition.setRegionColor(ColorConstants.red);
+			beamPosition.setAlpha(100);
+			beamPosition.setUserRegion(false);
+			beamPosition.setShowPosition(false);
+			beamPosition.setUserObject(RING_TYPE.CALIBRANT);
+
+			plottingSystem.addRegion(beamPosition);
+			beamPosition.setMobile(true); // NOTE: Must be done **AFTER** calling the
+										// addRegion method.
+		} else {
+			PointROI proi = (PointROI) beamPosition.getROI();
+			proi.setPoint(beamCentrePC);
+			beamPosition.setRegionColor(ColorConstants.red);
+		}
+	}
+	
 	public void dispose() {
 		deactivate();
 	}
