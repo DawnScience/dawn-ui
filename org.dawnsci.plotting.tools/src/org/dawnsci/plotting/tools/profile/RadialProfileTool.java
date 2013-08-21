@@ -5,6 +5,7 @@ import java.util.Collection;
 import javax.vecmath.Vector3d;
 
 import org.dawb.common.services.ILoaderService;
+import org.dawb.common.ui.image.IconUtils;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.region.IRegion;
@@ -47,7 +48,7 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 		profileAxis = new MenuAction("Select X Axis");
 		profileAxis.setToolTipText("Select x axis values");
 		
-		final Action pixelAxis = new Action("Px", IAction.AS_RADIO_BUTTON) {
+		final Action pixelAxis = new Action("Px",IconUtils.createIconDescriptor("Px")) {
 			@Override
 			public void run() {
 				axis = XAxis.PIXEL;
@@ -66,7 +67,7 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 		
 		pixelAxis.setId("org.dawb.workbench.plotting.tools.profile.pixelAxisAction");
 		
-		final Action resolutionAxis = new Action("d ", IAction.AS_RADIO_BUTTON) {
+		final Action resolutionAxis = new Action("d ",IconUtils.createIconDescriptor("d")) {
 			@Override
 			public void run() {
 				axis = XAxis.RESOLUTION;
@@ -83,7 +84,7 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 			}
 		};
 		
-		final Action angleAxis = new Action("2\u03b8", IAction.AS_RADIO_BUTTON) {
+		final Action angleAxis = new Action("2\u03b8",IconUtils.createIconDescriptor("2\u03b8")) {
 			@Override
 			public void run() {
 				axis = XAxis.ANGLE;
@@ -100,7 +101,7 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 			}
 		};
 		
-		final Action qAxis = new Action("q ", IAction.AS_RADIO_BUTTON) {
+		final Action qAxis = new Action("q ",IconUtils.createIconDescriptor("q")) {
 			@Override
 			public void run() {
 				axis = XAxis.Q;
