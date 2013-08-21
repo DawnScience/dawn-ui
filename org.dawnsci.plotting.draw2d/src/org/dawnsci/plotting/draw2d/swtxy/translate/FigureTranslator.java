@@ -68,20 +68,21 @@ public class FigureTranslator implements MouseListener, MouseMotionListener {
 	
 			Dimension offset = newLocation.getDifference(location);
 			if (offset.width == 0 && offset.height == 0) return;
-			location = newLocation;
+
 			UpdateManager updateMgr = redrawFigure.getUpdateManager();
 			LayoutManager layoutMgr = redrawFigure.getParent().getLayoutManager();
 			bounds = redrawFigure.getBounds();
 			updateMgr.addDirtyRegion(redrawFigure.getParent(), bounds);
 			
-			this.bounds = translate(bounds.getCopy(), offset.width, offset.height);
+			this.bounds = translate(bounds.getCopy(), offset.width, offset.height, newLocation);
 			if (layoutMgr!=null) layoutMgr.setConstraint(redrawFigure, bounds);
 			
 			for (int i = 0; i < translations.size(); i++) {
-				translate(((IFigure) translations.get(i)), offset.width, offset.height);
+				translate(((IFigure) translations.get(i)), offset.width, offset.height, newLocation);
 			}
 		
 			updateMgr.addDirtyRegion(redrawFigure.getParent(), bounds);
+			location = newLocation;
 			
 		} finally {
 			fireAfterTranslation(new TranslationEvent(this));
@@ -89,7 +90,7 @@ public class FigureTranslator implements MouseListener, MouseMotionListener {
 		}
 	}
 
-	private Rectangle translate(Object trans, int raw_width, int raw_height) {
+	private Rectangle translate(Object trans, int raw_width, int raw_height, Point location) {
 		
 		int width = 0; int height = 0;
 		if (lockedDirection == LockType.NONE) {
@@ -101,11 +102,8 @@ public class FigureTranslator implements MouseListener, MouseMotionListener {
 		}
 		if (trans instanceof Rectangle) {
 			return ((Rectangle)trans).translate(width, height);
-		}
-		if (trans instanceof SelectionHandle) {
-			Point l = ((SelectionHandle) trans).getLocation();
-			l.translate(width, height);
-			((SelectionHandle) trans).setLocation(l);
+		} else if (trans instanceof SelectionHandle) {
+			((SelectionHandle) trans).setLocation(location);
 		} else if (trans instanceof IFigure)  {
 			((IFigure)trans).translate(width, height);
 		}
@@ -152,10 +150,6 @@ public class FigureTranslator implements MouseListener, MouseMotionListener {
 	}
 	@Override
 	public void mouseDoubleClicked(MouseEvent me) {
-	}
-
-	public void startMoving(MouseEvent me) {
-		location = me.getLocation();
 	}
 
 	/**
