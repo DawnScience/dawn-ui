@@ -205,39 +205,11 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 					gc.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 					gc.fillGradientRectangle(0, rect.y, 500, rect.height, false);
 
-					final TableItem item = table.getItem(new Point(event.x, event.y));
-					// Draw the colour in the Value column
-					if (item!=null && item.getData() instanceof ColorNode) {
-						gc.setAlpha(255);
-						Rectangle col = item.getBounds(1);
-						ColorNode cn = (ColorNode)item.getData();
-						gc.setBackground(cn.getColor());
-						gc.fillRectangle(col);
-					}
-
 					// restore colors for subsequent drawing
 					gc.setForeground(foreground);
 					gc.setBackground(background);
 					event.detail &= ~SWT.SELECTED;
 					return;
-				}
-				
-				if ((event.detail & SWT.HOT) != 0) {
-					final TableItem item = table.getItem(new Point(event.x, event.y));
-					// Draw the colour in the Value column
-					if (item!=null && item.getData() instanceof LabelNode) {
-						LabelNode ln = (LabelNode)item.getData();
-						GC gc = event.gc;
-						Color foreground = gc.getForeground();
-						Color background = gc.getBackground();
-						gc.setAdvanced(true);
-						gc.setForeground(ColorConstants.black);
-						gc.drawText(ln.getLabel(), item.getBounds().x+2, item.getBounds().y+1);
-						event.doit = false;
-						event.detail &= ~SWT.HOT;
-						gc.setForeground(foreground);
-						gc.setBackground(background);
-					}
 				}
 			}
 		});

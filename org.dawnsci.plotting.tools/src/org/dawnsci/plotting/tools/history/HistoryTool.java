@@ -216,11 +216,6 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 		var.getColumn().setText("Shape");
 		var.getColumn().setWidth(80);
 		var.setLabelProvider(new HistoryLabelProvider());
-
-		var = new TableViewerColumn(viewer, SWT.CENTER,  ++count);
-		var.getColumn().setText("Color");
-		var.getColumn().setWidth(70);
-		var.setLabelProvider(new HistoryLabelProvider());
 		
 		return count+1;
 	} 
@@ -439,9 +434,6 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 				if (data==null) return "-";
 				return Arrays.toString(bean.getYdata().getShape());
 			}
-			if (columnIndex==5) {
-				return "\u220E\u220E\u220E\u220E";
-			}
 			return "";
 		}
 		
@@ -453,7 +445,7 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 		
 		private Color getColor(Object element) {
 			if (!(element instanceof HistoryBean)) return null;
-			if (columnIndex==5) {
+			if (columnIndex==1) { // The name
 				final HistoryBean bean = (HistoryBean)element;
 				if (bean.getPlotColour()==null) return null;
 				return new Color(null, bean.getPlotColour());

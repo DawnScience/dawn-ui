@@ -55,6 +55,7 @@ import org.dawnsci.plotting.api.tool.IToolChangeListener;
 import org.dawnsci.plotting.api.tool.IToolPage;
 import org.dawnsci.plotting.api.tool.ToolChangeEvent;
 import org.dawnsci.plotting.api.trace.ITraceListener;
+import org.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.dawnsci.plotting.api.trace.ITraceListener.Stub;
 import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.tools.reduction.DataReductionWizard;
@@ -114,15 +115,18 @@ import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.graphics.Region;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
@@ -220,6 +224,13 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		};
 		// If they change the ignore filters activity, recompute the available data sets.
 		Activator.getDefault().getPreferenceStore().addPropertyChangeListener(propListener);
+		
+		// Trace listener is used to refresh the table.
+		getPlottingSystem().addTraceListener(new ITraceListener.Stub() {
+			protected void update(TraceEvent evt) {
+				dataViewer.refresh();
+			}
+		});
 	}
 
 	public Composite getControl() {
@@ -345,7 +356,86 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		}catch (Exception ne) {
 			logger.error("Cannot add trace listener!", ne);
 		}
+		
+		// Allow the colours to be drawn nicely.
+		final Table table = dataViewer.getTable();
+		table.addListener(SWT.EraseItem, new Listener() {
+			public void handleEvent(Event event) {
+				
+				GC gc = event.gc;
+				Color foreground = gc.getForeground();
+				Color background = gc.getBackground();
+
+				try {
+					Rectangle area = table.getClientArea();
+					/*
+					 * If you wish to paint the selection beyond the end of last column,
+					 * you must change the clipping region.
+					 */
+					int columnCount = table.getColumnCount();
+					if (event.index == columnCount - 1 || columnCount == 0) {
+						int width = area.x + area.width - event.x;
+						if (width > 0) {
+							Region region = new Region();
+							gc.getClipping(region);
+							region.add(event.x, event.y, width, event.height);
+							gc.setClipping(region);
+							region.dispose();
+						}
+					}
+	
+					gc.setAdvanced(true);
+					if (gc.getAdvanced()) gc.setAlpha(50);
+	
+					if ((event.detail & SWT.SELECTED) != 0) {
+						gc.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_SELECTION));
+						gc.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+					}
+	
+					final TableItem item = table.getItem(new Point(event.x, event.y));
+					// Draw the colour in the Value column
+					if (item!=null && item.getData() instanceof CheckableObject) {
+						
+						Rectangle     nameArea = item.getBounds(1); // Name column
+						CheckableObject cn = (CheckableObject)item.getData();
+						
+						if (cn.isChecked() && !cn.isExpression() && nameArea.contains(event.x, event.y)) {
+							int origAlpha = gc.getAlpha();
+							gc.setAlpha(255);
+							final Color plotColor = get1DPlotColor(cn);
+							if (plotColor!=null) {
+								gc.setForeground(plotColor);									
+								gc.drawText(cn.getName(), item.getBounds().x+16, item.getBounds().y+1);
+								event.doit = false;
+							}
+							gc.setAlpha(origAlpha);
+						} 
+						
+						if ((event.detail & SWT.HOT) != 0) {
+							// Draw the colour in the Value column
+							gc.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_SELECTION));
+							Rectangle bounds = event.getBounds();
+						    gc.fillGradientRectangle(0, bounds.y, 500, bounds.height, false);
+						}
+					}
+						
+				} finally {
+					if ((event.detail & SWT.SELECTED) != 0) event.detail &= ~SWT.SELECTED;
+					if ((event.detail & SWT.HOT) != 0) 	    event.detail &= ~SWT.HOT;
+					// restore colors for subsequent drawing
+					gc.setForeground(foreground);
+					gc.setBackground(background);
+				}
+
+			}
+			
+			
+
+		});
+
 	}
+	
+
 	
 	private static final String LOG_PREF   = "org.dawb.workbench.ui.editors.log.axis-";
 	private static final String TIME_PREF  = "org.dawb.workbench.ui.editors.time.axis-";
@@ -1152,7 +1242,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 				// We only allow selection of one set not 1D
 				final int    dims = getActiveDimensions(check, true);
 				if (dims!=1) { // Nothing else gets selected
-					PlotDataComponent.this.setAllChecked(false);
+					setAllChecked(false);
 					check.setChecked(true);
 					this.selections.clear();
 				}
@@ -1180,8 +1270,8 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 			selections.clear();
 		}
 
-		updateSelection(fireListeners);
-		this.dataViewer.refresh();
+		updateSelection(fireListeners); // Results in job being done for the plotting.
+		// Trace listener is used to refresh the table, added in construnctor
 	}
 
 	private synchronized void updateSelection(boolean fireListeners) {
@@ -1399,6 +1489,17 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		final List<String> allNames = getStringSelections(data);
 		return allNames.contains(name);
 	}
+	
+	private Color get1DPlotColor(ICheckableObject element) {
+		final String axis = element.getAxis(selections, getPlottingSystem().is2D(), getAbstractPlottingSystem().isXFirst());
+		if ("X".equals(axis)) return PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_BLACK);
+		final String name = element.toString();
+		if (getPlottingSystem()!=null) {
+			final Color col = getAbstractPlottingSystem().get1DPlotColor(name);
+			return col;
+		}
+		return null;
+	}
 
 	private class DataSetColumnLabelProvider extends ColumnLabelProvider {
 		
@@ -1498,15 +1599,11 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	    		    	
 			switch (columnIndex) {
 			case 1:
-				if (!element.isExpression()) {
-					final String         name = element.toString();
-					if (getPlottingSystem()!=null) {
-						final Color col = getAbstractPlottingSystem().get1DPlotColor(name);
-						return col;
-					}
-				} else {
+				if (element.isExpression()) {
 					final IExpressionObject o = element.getExpression();
 					return o.isValid(new IMonitor.Stub()) ? BLUE : RED;
+				} else if (element.isChecked()) {
+					return get1DPlotColor(element);
 				}
 				return BLACK;
 			case 6:
