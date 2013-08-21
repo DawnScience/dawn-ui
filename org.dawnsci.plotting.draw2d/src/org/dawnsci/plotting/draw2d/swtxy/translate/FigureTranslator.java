@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.csstudio.swt.xygraph.figures.XYGraph;
+import org.dawnsci.plotting.api.region.IRegionContainer;
 import org.dawnsci.plotting.draw2d.swtxy.selection.SelectionHandle;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.LayoutManager;
@@ -103,7 +104,17 @@ public class FigureTranslator implements MouseListener, MouseMotionListener {
 		if (trans instanceof Rectangle) {
 			return ((Rectangle)trans).translate(width, height);
 		} else if (trans instanceof SelectionHandle) {
-			((SelectionHandle) trans).setLocation(location);
+			SelectionHandle handle = (SelectionHandle)trans;
+			if (handle.isPreciseLocation()) {
+				// Point handle (like beam center) can take full precision.
+			    ((SelectionHandle) trans).setLocation(location);
+			} else {
+				// Handles dispersed over the shape have to be relative
+				// and less accurate.
+				Point l = ((SelectionHandle) trans).getLocation();
+				l.translate(width, height);
+				((SelectionHandle) trans).setLocation(l);
+			}
 		} else if (trans instanceof IFigure)  {
 			((IFigure)trans).translate(width, height);
 		}

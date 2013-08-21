@@ -23,11 +23,18 @@ import org.eclipse.swt.graphics.Cursor;
  */
 public abstract class SelectionHandle extends Figure implements IMobileFigure {
 	
-	private Shape shape;
+	private Shape           shape;
 	private Figure          label;
 	protected ICoordinateSystem   coords;
 	private int             alpha=100;
-	protected Point location;
+	protected Point         location;
+	
+	/**
+	 * May be used for handles that always report/receive precise location
+	 * when their figure translates because they are exactly the same as the 
+	 * current mouse location. For instance a point selection handle.
+	 */
+	protected boolean       preciseLocation;
 
 	protected SelectionHandle(ICoordinateSystem coords, Color colour, Figure parent, int side, double... params) {
 		this.coords = coords;
@@ -174,5 +181,13 @@ public abstract class SelectionHandle extends Figure implements IMobileFigure {
 		while (it.hasNext()) {
 			removeListener(MouseMotionListener.class, it.next());
 		}
+	}
+
+	public boolean isPreciseLocation() {
+		return preciseLocation;
+	}
+
+	public void setPreciseLocation(boolean preciseLocation) {
+		this.preciseLocation = preciseLocation;
 	}
 }
