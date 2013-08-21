@@ -70,15 +70,14 @@ public class RegionComposite extends Composite {
 	 * Can be used to edit regions from outside if required.
 	 * 
 	 * @param parent
-	 * @param plottingSystem
 	 * @param style
 	 * @param sys
 	 * @param defaultRegion
 	 * @param isImplicit
 	 */
-	public RegionComposite(final Composite parent, final IPlottingSystem plottingSystem, final int style, final IPlottingSystem sys, final RegionType defaultRegion, final boolean isImplicit) {
+	public RegionComposite(final Composite parent, final int style, final IPlottingSystem sys, final RegionType defaultRegion, final boolean isImplicit) {
      
-		this(parent, plottingSystem, style, (XYRegionGraph)sys.getAdapter(XYRegionGraph.class), defaultRegion, isImplicit);
+		this(parent, sys, style, (XYRegionGraph)sys.getAdapter(XYRegionGraph.class), defaultRegion, isImplicit);
 	}
 	
 	/**
