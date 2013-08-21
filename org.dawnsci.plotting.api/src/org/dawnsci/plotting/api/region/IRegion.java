@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 
+import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.eclipse.swt.graphics.Color;
 
@@ -46,7 +47,17 @@ public interface IRegion {
 	 */
 	public void setLabel(String label);
 
-	
+	/**
+	 * @return the plot type in which the region is created
+	 */
+	public PlotType getPlotType();
+
+	/**
+	 * The plot type in which the region is created
+	 * @param type
+	 */
+	public void setPlotType(PlotType type);
+
 	/**
 	 * @return the colour of the region
 	 */

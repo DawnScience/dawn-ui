@@ -36,6 +36,7 @@ import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.api.trace.ITraceListener;
 import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
+import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.dawnsci.plotting.system.dialog.AddAxisDialog;
 import org.dawnsci.plotting.system.dialog.AddRegionDialog;
 import org.dawnsci.plotting.system.dialog.RemoveAxisDialog;
@@ -462,9 +463,11 @@ class LightWeightPlotActions {
 	protected void createRegion(final XYRegionGraph xyGraph, MenuAction regionDropDown, Action action, RegionType type) throws Exception {
 		
 		if (xyGraph.getXAxisList().size()==1 && xyGraph.getYAxisList().size()==1) {
-			xyGraph.createRegion(RegionUtils.getUniqueName(type.getName(), viewer.getSystem()), viewer.getSelectedXAxis(), viewer.getSelectedYAxis(), type, true);
+			AbstractSelectionRegion region = xyGraph.createRegion(RegionUtils.getUniqueName(type.getName(), viewer.getSystem()), viewer.getSelectedXAxis(), viewer.getSelectedYAxis(), type, true);
+			// Set the plottype to know which plot type the region was created with
+			region.setPlotType(viewer.getSystem().getPlotType());
 		} else {
-			AddRegionDialog dialog = new AddRegionDialog(Display.getCurrent().getActiveShell(), (XYRegionGraph)xyGraph, type);
+			AddRegionDialog dialog = new AddRegionDialog(viewer.getSystem(), Display.getCurrent().getActiveShell(), (XYRegionGraph)xyGraph, type);
 			if (dialog.open() != Window.OK){
 				return;
 			}

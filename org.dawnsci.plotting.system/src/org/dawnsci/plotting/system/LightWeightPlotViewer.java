@@ -950,7 +950,10 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		final IAxis xAxis = getSelectedXAxis();
 		final IAxis yAxis = getSelectedYAxis();
 
-		return xyGraph.createRegion(name, xAxis, yAxis, regionType, true);
+		IRegion region = xyGraph.createRegion(name, xAxis, yAxis, regionType, true);
+		// set the plot type in which the region was created
+		region.setPlotType(system.getPlotType());
+		return region;
 	}
 
 	
