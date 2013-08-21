@@ -5,6 +5,7 @@ import java.util.List;
 import org.csstudio.swt.xygraph.figures.Grid;
 import org.csstudio.swt.xygraph.figures.Trace;
 import org.csstudio.swt.xygraph.figures.XYGraph;
+import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.axis.CoordinateSystemEvent;
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.dawnsci.plotting.api.axis.ICoordinateSystemListener;
@@ -220,7 +221,12 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	public String getName() {
 		return bean.getName();
 	}
-	
+
+	@Override
+	public PlotType getPlotType() {
+		return bean.getPlotType();
+	}
+
 	/**
 	 * Remove from graph and remove all RegionBoundsListeners.
 	 * 
@@ -255,6 +261,10 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 			setLabel(name);
 	}
 
+	@Override
+	public void setPlotType(PlotType type) {
+		bean.setPlotType(type);
+	}
 
 	public XYGraph getXyGraph() {
 		return bean.getXyGraph();

@@ -136,6 +136,7 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 					WizardDialog wd = new  WizardDialog(Display.getCurrent().getActiveShell(), wiz);
 					wd.setTitle(wiz.getWindowTitle());
 					wd.open();
+					exportActionsDropDown.setSelectedAction(this);
 				} catch (Exception e) {
 					logger.error("Problem opening export!", e);
 				}
@@ -150,6 +151,7 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 					wd.setTitle(wiz.getWindowTitle());
 					if (wiz instanceof PlotDataConversionWizard) ((PlotDataConversionWizard)wiz).setPlottingSystem(system);
 					wd.open();
+					exportActionsDropDown.setSelectedAction(this);
 				} catch (Exception e) {
 					logger.error("Problem opening convert!", e);
 				}

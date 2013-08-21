@@ -111,6 +111,7 @@ import uk.ac.diamond.scisoft.analysis.roi.CircularROI;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalFitROI;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
+import uk.ac.diamond.scisoft.analysis.roi.PointROI;
 import uk.ac.diamond.scisoft.analysis.roi.PolylineROI;
 import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 
@@ -777,7 +778,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 					if (peaks==null) throw new Exception("Cannot find peaks!");
 					beamOffset.setInitPeaks(peaks);
 					
-					beamOffset.optimize(((IDiffractionMetadata) dataset.getMetadata()).getDetector2DProperties().getBeamCentreCoords());
+					beamOffset.optimize(getDiffractionMetaData().getDetector2DProperties().getBeamCentreCoords());
 				} catch (Throwable ne) {
 					
 					/**
@@ -792,11 +793,10 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 							"2. Open the 'Radial Profile' tool (from the plot containing the image).\n" +
 							"3. Select a sector which bisects the rings wanted.\n"+
 							"4. In the 'Radial Profile' tool press 'Lock to Metadata' button.\n"+
-							"5. In the 'Radial Profile' tool press 'Lock to Metadata' button.\n"+
-							"6. Select 'q' from the 'Select x axis values' list in the 'Radial Profile' toolbar.\n"+
-							"7. In the 'Radial Profile' tool select peak fitting.\n"+
-							"8. Set up a peak fit on all the rings which the redial profile found.\n"+
-							"9. Now run the refine action in the diffraction tool again.\n\n"+
+							"5. Select 'q' from the 'Select x axis values' list in the 'Radial Profile' toolbar.\n"+
+							"6. In the 'Radial Profile' tool select peak fitting.\n"+
+							"7. Set up a peak fit on all the rings which the redial profile found.\n"+
+							"8. Now run the refine action in the diffraction tool again.\n\n"+
 							"Please note that the algorithm may not converge. A job is run for the refinement which may be stopped.\n"+
 							"Please contact your support representative for more training/help with refinement.\n\n"+
 							"(NOTE This dialog can be kept open as a guide while doing the proceedure.)",
@@ -1274,21 +1274,35 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 
 	@Override
 	public void roiDragged(ROIEvent evt) {
+		updateBeamCentre(evt);
+	}
+
+	@Override
+	public void roiChanged(ROIEvent evt) {
+		updateBeamCentre(evt);
+	}
+
+	@Override
+	public void roiSelected(ROIEvent evt) {}
+	
+	private void updateBeamCentre(ROIEvent evt) {
 		IROI roi = evt.getROI();
 		if(roi == null)return;
-		EllipticalROI eroi = roi instanceof EllipticalROI ? (EllipticalROI)roi : null;		
+		PointROI eroi = roi instanceof PointROI ? (PointROI)roi : null;		
 		if(eroi == null) return;
+		if (!(evt.getSource() instanceof IRegion)) return;
+		
+		IRegion point = (IRegion)evt.getSource();
+		Object ob = point.getUserObject();
+		if (ob == null) return;
+		
+		if (ob.toString() != "CALIBRANT") return;
+		
 		double ptx = eroi.getPointX();
 		double pty = eroi.getPointY();
 		IDiffractionMetadata data = getDiffractionMetaData();
 		DetectorProperties detprop = data.getDetector2DProperties();
 		detprop.setBeamCentreCoords(new double[]{ptx, pty});
 	}
-
-	@Override
-	public void roiChanged(ROIEvent evt) {}
-
-	@Override
-	public void roiSelected(ROIEvent evt) {}
 
 }

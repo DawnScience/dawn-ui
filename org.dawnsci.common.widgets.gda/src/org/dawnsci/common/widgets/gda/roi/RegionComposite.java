@@ -62,6 +62,8 @@ public class RegionComposite extends Composite {
 
 	private boolean isImplicit;
 
+	private IPlottingSystem plottingSystem;
+
 	/**
 	 * Throws exception if not LightWeightPlottingSystem
 	 * 
@@ -75,24 +77,26 @@ public class RegionComposite extends Composite {
 	 */
 	public RegionComposite(final Composite parent, final int style, final IPlottingSystem sys, final RegionType defaultRegion, final boolean isImplicit) {
      
-		this(parent,style, (XYRegionGraph)sys.getAdapter(XYRegionGraph.class), defaultRegion, isImplicit);
+		this(parent, sys, style, (XYRegionGraph)sys.getAdapter(XYRegionGraph.class), defaultRegion, isImplicit);
 	}
 	
 	/**
 	 * Used internally
 	 * @param parent
+	 * @param plottingSystem
 	 * @param style
 	 * @param xyGraph
 	 * @param defaultRegion
 	 * @param isImplicit Flag to tell whether the RegionComposite is used in a specific window with an apply button or part of a view where the changes are implicit
 	 */
-	public RegionComposite(final Composite parent, final int style, final XYRegionGraph xyGraph, final RegionType defaultRegion, final boolean isImplicit) {
+	public RegionComposite(final Composite parent, final IPlottingSystem plottingSystem, final int style, final XYRegionGraph xyGraph, final RegionType defaultRegion, final boolean isImplicit) {
 		
 		super(parent, SWT.NONE);
 		
 		this.setImplicit(isImplicit);
 
 		this.xyGraph = xyGraph;
+		this.plottingSystem = plottingSystem;
 		
 		setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		setLayout(new org.eclipse.swt.layout.GridLayout(2, false));
@@ -307,7 +311,8 @@ public class RegionComposite extends Composite {
 		}
 		
 		region = xyGraph.createRegion(txt, xAxis, yAxis, RegionType.getRegion(regionType.getSelectionIndex()), true);
-		
+		// set the plot type in which the region was created
+		region.setPlotType(plottingSystem.getPlotType());
 		this.editingRegion = region;
 		getEditingRegion();
 		

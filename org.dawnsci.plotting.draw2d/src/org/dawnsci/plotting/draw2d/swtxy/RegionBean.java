@@ -3,6 +3,7 @@ package org.dawnsci.plotting.draw2d.swtxy;
 import java.io.Serializable;
 
 import org.csstudio.swt.xygraph.figures.XYGraph;
+import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.eclipse.swt.graphics.Color;
 
@@ -15,6 +16,7 @@ public class RegionBean implements Serializable {
 	protected ICoordinateSystem    coordinateSystem;
 	protected XYGraph xyGraph;
 	protected String  name;
+	protected PlotType plotType;
 	protected Color   regionColor;
 	protected boolean showPosition=false;
 	protected int     alpha=80;
@@ -23,6 +25,7 @@ public class RegionBean implements Serializable {
 	protected boolean showLabel=false;	
 	public void sync(RegionBean bean) {
 		setName(bean.getName());
+		setPlotType(bean.getPlotType());
 		setShowPosition(bean.isShowPosition());
 		setXyGraph(bean.getXyGraph());
 		setRegionColor(bean.getRegionColor());
@@ -46,6 +49,14 @@ public class RegionBean implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public PlotType getPlotType() {
+		return plotType;
+	}
+
+	public void setPlotType(PlotType type) {
+		this.plotType = type;
 	}
 
 	public XYGraph getXyGraph() {

@@ -1,5 +1,6 @@
 package org.dawnsci.plotting.system.dialog;
 
+import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
@@ -15,12 +16,14 @@ public class AddRegionDialog extends Dialog {
 	private XYRegionGraph xyGraph;
 	private RegionEditComposite regionComposite;
 	private RegionType type;
+	private IPlottingSystem plottingSystem;
 
-	public AddRegionDialog(final Shell parentShell, final XYRegionGraph xyGraph, RegionType type) {
+	public AddRegionDialog(final IPlottingSystem plottingSystem, final Shell parentShell, final XYRegionGraph xyGraph, RegionType type) {
 		super(parentShell);	
 		
         // Allow resize
         setShellStyle(getShellStyle() | SWT.RESIZE);
+        this.plottingSystem = plottingSystem;
         this.xyGraph = xyGraph;
         this.type = type;
 	}
@@ -34,7 +37,7 @@ public class AddRegionDialog extends Dialog {
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		final Composite parent_composite = (Composite) super.createDialogArea(parent);
-        this.regionComposite = new RegionEditComposite(parent_composite, SWT.NONE, xyGraph, type, false);
+        this.regionComposite = new RegionEditComposite(parent_composite, plottingSystem, SWT.NONE, xyGraph, type, false);
          
 		return parent_composite;
 	}
