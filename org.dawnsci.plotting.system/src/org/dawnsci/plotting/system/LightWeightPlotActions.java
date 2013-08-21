@@ -1,12 +1,14 @@
 package org.dawnsci.plotting.system;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.XYGraphFlags;
 import org.csstudio.swt.xygraph.toolbar.AddAnnotationDialog;
 import org.csstudio.swt.xygraph.toolbar.RemoveAnnotationDialog;
@@ -462,7 +464,11 @@ class LightWeightPlotActions {
 	
 	protected void createRegion(final XYRegionGraph xyGraph, MenuAction regionDropDown, Action action, RegionType type) throws Exception {
 		
-		if (xyGraph.getXAxisList().size()==1 && xyGraph.getYAxisList().size()==1) {
+		// There is just an x and y axis - VISIBLE - then we know which axes they intended.
+		// Otherwise we show the dialog
+		List<Axis> visX = getVisibleAxisList(xyGraph.getXAxisList());
+		List<Axis> visY = getVisibleAxisList(xyGraph.getYAxisList());
+		if (visX.size()==1 && visY.size()==1) {
 			AbstractSelectionRegion region = xyGraph.createRegion(RegionUtils.getUniqueName(type.getName(), viewer.getSystem()), viewer.getSelectedXAxis(), viewer.getSelectedYAxis(), type, true);
 			// Set the plottype to know which plot type the region was created with
 			region.setPlotType(viewer.getSystem().getPlotType());
@@ -476,6 +482,12 @@ class LightWeightPlotActions {
 		//regionDropDown.setChecked(true);
 	}
 	
+	private List<Axis> getVisibleAxisList(List<Axis> axisList) {
+		List<Axis> ret = new ArrayList<Axis>(3);
+		for (Axis iAxis : axisList) if (iAxis.isVisible()) ret.add(iAxis);
+		return ret;
+	}
+
 	private IAction createRegionAction(final XYRegionGraph xyGraph, final RegionType type, final MenuAction regionDropDown, final String label, final ImageDescriptor icon) {
 		final Action regionAction = new Action(label, icon) {
 			public void run() {				
