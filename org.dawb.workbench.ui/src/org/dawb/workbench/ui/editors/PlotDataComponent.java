@@ -55,8 +55,6 @@ import org.dawnsci.plotting.api.tool.IToolChangeListener;
 import org.dawnsci.plotting.api.tool.IToolPage;
 import org.dawnsci.plotting.api.tool.ToolChangeEvent;
 import org.dawnsci.plotting.api.trace.ITraceListener;
-import org.dawnsci.plotting.api.trace.TraceWillPlotEvent;
-import org.dawnsci.plotting.api.trace.ITraceListener.Stub;
 import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.tools.reduction.DataReductionWizard;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -177,9 +175,11 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	private DataFilter              dataFilter;
 
 	private IAction                  dataReduction;
-	private Stub                     traceListener;
+	private ITraceListener           traceListener;
+	private ITraceListener           dataViewRefreshListener;
 	private IToolChangeListener      toolListener;
 	private IExpressionObjectService service;
+
 	
 	public PlotDataComponent(final IDatasetEditor providerDeligate) {
 				
@@ -227,11 +227,13 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		Activator.getDefault().getPreferenceStore().addPropertyChangeListener(propListener);
 		
 		// Trace listener is used to refresh the table.
-		getPlottingSystem().addTraceListener(new ITraceListener.Stub() {
+		this.dataViewRefreshListener = new ITraceListener.Stub() {
 			protected void update(TraceEvent evt) {
+				if (dataViewer==null || dataViewer.getControl().isDisposed()) return;
 				dataViewer.refresh();
 			}
-		});
+		};
+		getPlottingSystem().addTraceListener(dataViewRefreshListener);
 	}
 
 	public Composite getControl() {
@@ -1625,6 +1627,10 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		if (getPlottingSystem()!=null&&traceListener!=null) {
 			getPlottingSystem().removeTraceListener(this.traceListener);
 		}
+		if (getPlottingSystem()!=null&&dataViewRefreshListener!=null) {
+			getPlottingSystem().removeTraceListener(this.dataViewRefreshListener);
+		}
+		
 		if (getPlottingSystem()!=null&&toolListener!=null) {
 			getAbstractPlottingSystem().removeToolChangeListener(this.toolListener);
 		}
