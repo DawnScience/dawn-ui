@@ -1,4 +1,4 @@
-/*
+/*-
  * Copyright (c) 2012 European Synchrotron Radiation Facility,
  *                    Diamond Light Source Ltd.
  *
@@ -10,11 +10,8 @@
 
 package org.dawnsci.plotting.api.preferences;
 
-
-
 public class PlottingConstants extends BasePlottingConstants {
 
-	
 	public static final String PLOTTING_SYSTEM_CHOICE = "org.dawb.plotting.system.choice";
 
 	public static final String PLOT_X_DATASET = "org.dawb.lightweight.plot.x.choice";
@@ -43,7 +40,7 @@ public class PlottingConstants extends BasePlottingConstants {
 	 * 
 	 */
 	public static final String MASK_REGIONS_ENABLED = "org.dawb.plotting.system.masking.regions.enabled";
-	
+
 	/**
 	 * 
 	 */
@@ -53,7 +50,7 @@ public class PlottingConstants extends BasePlottingConstants {
 	 * 
 	 */
 	public static final String MASK_PEN_SHAPE = "org.dawb.plotting.system.masking.pen.shape";
-	
+
 	/**
 	 * 
 	 */
@@ -68,7 +65,7 @@ public class PlottingConstants extends BasePlottingConstants {
 	 * Property to store if axes should be shown.
 	 */
 	public static final String SHOW_AXES           = "org.dawb.workbench.plotting.preference.showAxes";
-	
+
 	/**
 	 * Save if image history should include original plot or not.
 	 */
@@ -83,11 +80,15 @@ public class PlottingConstants extends BasePlottingConstants {
 	 * Stores if intensity scale should be shown.
 	 */
 	public static final String IGNORE_RGB = "org.dawb.workbench.plotting.preference.ignoreRGBInformation";
-	
 
 	/**
 	 * Tells the Image editor to attempt to load stacks.
 	 */
 	public static final String LOAD_IMAGE_STACKS = "org.dawb.workbench.plotting.preference.loadImageStacks";
+
+	/**
+	 * Image Explorer play back preference constants (also declared in uk.ac.diamond.scisoft.analysis.rcp)
+	 */
+	public static final String IMAGEEXPLORER_PLAYBACKVIEW = "imageExplorer.playbackView";
 
 }

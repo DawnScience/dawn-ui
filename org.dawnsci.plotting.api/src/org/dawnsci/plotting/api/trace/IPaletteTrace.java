@@ -26,11 +26,10 @@ public interface IPaletteTrace extends IAxesTrace {
 	public String getPaletteName();
 	
 	/**
-	 * Setting palette data causes the image to redraw with the new palette.
+	 * Setting palette name
 	 * @param paletteName
-	 * @param paletteData
 	 */
-	public void setPaletteData(String paletteName, PaletteData paletteData);
+	public void setPaletteName(String paletteName);
 
 	/**
 	 * Returns the last image service bean sent to the service for getting

@@ -107,9 +107,8 @@ public class SurfaceTrace extends PlotterTrace implements ISurfaceTrace{
 	}
 
 	@Override
-	public void setPaletteData(String paletteName, PaletteData palette){
+	public void setPaletteName(String paletteName){
 		this.paletteName = paletteName;
-		setPaletteData(palette);
 	}
 
 	protected ColourImageData createImageData() {

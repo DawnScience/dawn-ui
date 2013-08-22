@@ -1,4 +1,4 @@
-/*
+/*-
  * Copyright (c) 2012 European Synchrotron Radiation Facility,
  *                    Diamond Light Source Ltd.
  *
@@ -555,22 +555,24 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 
 	@Override
 	public ISurfaceTrace createSurfaceTrace(String traceName) {
-        ISurfaceTrace trace = jrealityViewer.createSurfaceTrace(traceName);
-        PaletteData palette = null;
+		ISurfaceTrace trace = jrealityViewer.createSurfaceTrace(traceName);
+		PaletteData palette = null;
 		if (trace.getPaletteData()==null) {
+			final String schemeName = PlottingSystemActivator.getPlottingPreferenceStore().getString(PlottingConstants.COLOUR_SCHEME);	
+
 			final Collection<ITrace> col = getTraces(IImageTrace.class);
 			if (col!=null && col.size()>0) {
 				palette = ((IImageTrace)col.iterator().next()).getPaletteData();
 			} else {
 				try {
 					final IPaletteService pservice = (IPaletteService)PlatformUI.getWorkbench().getService(IPaletteService.class);
-					final String schemeName = PlottingSystemActivator.getPlottingPreferenceStore().getString(PlottingConstants.COLOUR_SCHEME);	
 					palette = pservice.getPaletteData(schemeName);
 				} catch (Exception e) {
 					palette = null;
 				}
 			}
 			trace.setPaletteData(palette);
+			trace.setPaletteName(schemeName);
 		}
 		return trace;
 	}

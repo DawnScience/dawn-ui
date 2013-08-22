@@ -207,13 +207,14 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		firePaletteDataListeners(paletteData);
 	}
 
+	@Override
 	public String getPaletteName() {
 		return paletteName;
 	}
 
-	public void setPaletteData(String paletteName, PaletteData paletteData) {
+	@Override
+	public void setPaletteName(String paletteName) {
 		this.paletteName = paletteName;
-		setPaletteData(paletteData);
 	}
 
 	private enum ImageScaleType {

@@ -1,4 +1,4 @@
-/*
+/*-
  * Copyright (c) 2012 European Synchrotron Radiation Facility,
  *                    Diamond Light Source Ltd.
  *
@@ -30,6 +30,7 @@ public class PlottingPreferenceInitializer extends AbstractPreferenceInitializer
         store.setDefault(PlottingConstants.PLOT_X_DATASET,  true);
 		store.setDefault(PlottingConstants.XY_SHOWLEGEND,   true);
 		store.setDefault(PlottingConstants.COLOUR_SCHEME,   "Gray Scale");
+		store.setDefault(PlottingConstants.LIVEPLOT_COLOUR_SCHEME,   "Gray Scale");
 		store.setDefault(PlottingConstants.ORIGIN_PREF,     ImageOrigin.TOP_LEFT.getLabel());
 		store.setDefault(PlottingConstants.ASPECT,          true);
 		store.setDefault(PlottingConstants.SHOW_AXES,       true);

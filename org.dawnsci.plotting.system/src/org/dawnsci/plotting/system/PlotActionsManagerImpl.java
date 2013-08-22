@@ -27,6 +27,7 @@ import org.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.dawnsci.plotting.api.preferences.ToolbarConfigurationConstants;
 import org.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
+import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.IPaletteTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.jface.action.Action;
@@ -34,6 +35,7 @@ import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IContributionManager;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.wizard.IWizard;
@@ -53,15 +55,18 @@ import org.slf4j.LoggerFactory;
  */
 public class PlotActionsManagerImpl extends PlottingActionBarManager {
 
-
 	private static final Logger logger = LoggerFactory.getLogger(PlotActionsManagerImpl.class);
-	
+
 	private PlottingSystemImpl        system;
+
+	final IPreferenceStore plottingPreferenceStore = PlottingSystemActivator.getPlottingPreferenceStore();
+	final IPreferenceStore analysisPreferenceStore = PlottingSystemActivator.getAnalysisRCPPreferenceStore();
+
 	protected PlotActionsManagerImpl(PlottingSystemImpl system) {
 		super(system);
 		this.system = system;
 	}
-	
+
 	public IPlottingSystem getSystem() {
 		return system;
 	}
@@ -69,26 +74,22 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 	private static String lastscreeshot_filename;
 
 	public void createExportActions() {
-        final IAction exportActionDropDown = getExportActions();
-        registerToolBarGroup(ToolbarConfigurationConstants.EXPORT.getId());
-        registerAction(ToolbarConfigurationConstants.EXPORT.getId(), exportActionDropDown, ActionType.XYANDIMAGE, ManagerType.TOOLBAR);
-        
-        registerMenuBarGroup("lightweight.plotting.print.action.menubar");
-        registerAction("lightweight.plotting.print.action.menubar", exportActionDropDown, ActionType.XYANDIMAGE, ManagerType.MENUBAR);
-		
+		final IAction exportActionDropDown = getExportActions();
+		registerToolBarGroup(ToolbarConfigurationConstants.EXPORT.getId());
+		registerAction(ToolbarConfigurationConstants.EXPORT.getId(), exportActionDropDown, ActionType.XYANDIMAGE, ManagerType.TOOLBAR);
+
+		registerMenuBarGroup("lightweight.plotting.print.action.menubar");
+		registerAction("lightweight.plotting.print.action.menubar", exportActionDropDown, ActionType.XYANDIMAGE, ManagerType.MENUBAR);
 	}
 
 	/**
 	 *  Create export and print buttons in tool bar 
 	 */
 	protected void createExportActions(IContributionManager toolbarManager) {
-
 		if (toolbarManager==null) return;
-        final IAction exportActionDropDown = getExportActions();
+		final IAction exportActionDropDown = getExportActions();
 		toolbarManager.add(exportActionDropDown);
-
 	}
-	
 
 	private IAction getExportActions() {
 		
@@ -223,13 +224,24 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 	}
 	
 	private boolean updatingColorSchemeInternally = false;
-	protected void createPalleteActions() {
-		
-    	
-		final IPaletteService pservice = (IPaletteService)PlatformUI.getWorkbench().getService(IPaletteService.class);
-    	final Collection<String> names = pservice.getColorSchemes();
-		final String schemeName = PlottingSystemActivator.getPlottingPreferenceStore().getString(PlottingConstants.COLOUR_SCHEME);	
+	// used to store the current live plot (for the image explorer view)
+	private String livePlot;
 
+	protected void createPalleteActions() {
+
+		final IPaletteService pservice = (IPaletteService)PlatformUI.getWorkbench().getService(IPaletteService.class);
+		final Collection<String> names = pservice.getColorSchemes();
+
+		livePlot = analysisPreferenceStore.getString(PlottingConstants.IMAGEEXPLORER_PLAYBACKVIEW);
+
+		String schemeName = "";
+		// check colour scheme if image trace is in a live plot
+		if (!system.getPlotName().equals(livePlot)) {
+			schemeName = plottingPreferenceStore.getString(PlottingConstants.COLOUR_SCHEME);
+		} else {
+			schemeName = plottingPreferenceStore.getString(PlottingConstants.LIVEPLOT_COLOUR_SCHEME);
+		}
+		
 		final MenuAction lutCombo = new MenuAction("Color");
 		lutCombo.setId(getClass().getName()+lutCombo.getText());
 		
@@ -241,12 +253,18 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 				public void run() {
 					try {
 						updatingColorSchemeInternally = true;
-						PlottingSystemActivator.getPlottingPreferenceStore().setValue(PlottingConstants.COLOUR_SCHEME, paletteName);
+						if (system.getPlotName().equals(livePlot)) {
+							PlottingSystemActivator.getPlottingPreferenceStore().setValue(PlottingConstants.LIVEPLOT_COLOUR_SCHEME, paletteName);
+						} else {
+							PlottingSystemActivator.getPlottingPreferenceStore().setValue(PlottingConstants.COLOUR_SCHEME, paletteName);
+						}
 						final PaletteData data = pservice.getPaletteData(paletteName);
 						final Collection<ITrace> traces = system.getTraces();
 						if (traces!=null) for (ITrace trace: traces) {
 							if (trace instanceof IPaletteTrace) {
-								((IPaletteTrace)trace).setPaletteData(data);
+								IPaletteTrace paletteTrace = (IPaletteTrace) trace;
+								paletteTrace.setPaletteData(data);
+								paletteTrace.setPaletteName(paletteName);
 							}
 						}
 					} catch (Exception ne) {
@@ -262,14 +280,39 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 			action.setChecked(paletteName.equals(schemeName));
 		}
 		lutCombo.setToolTipText("Histogram");
-		
-		PlottingSystemActivator.getPlottingPreferenceStore().addPropertyChangeListener(new IPropertyChangeListener() {			
+
+		plottingPreferenceStore.addPropertyChangeListener(new IPropertyChangeListener() {
 			@Override
 			public void propertyChange(PropertyChangeEvent event) {
-				if (PlottingConstants.COLOUR_SCHEME.equals(event.getProperty())) {
-					if (updatingColorSchemeInternally) return;
-					final IAction action = lutCombo.findAction((String)event.getNewValue());
-					action.setChecked(true);
+				if (updatingColorSchemeInternally)
+					return;
+
+				// Do nothing if the plotting system is a live plot and the event is COLOURSCHEME or
+				// the plotting system is not a live plot and the event is LIVEPLOT_COLOURSCHEME
+				if ((event.getProperty().equals(PlottingConstants.COLOUR_SCHEME)
+						&& system.getPlotName().equals(livePlot))
+					|| (event.getProperty().equals(PlottingConstants.LIVEPLOT_COLOUR_SCHEME)
+							&& !system.getPlotName().equals(livePlot))) 
+					return;
+
+				// check that the trace colour map name is the same
+				Collection<ITrace> traces = system.getTraces();
+				for (ITrace trace : traces) {
+					if (trace instanceof IImageTrace) {
+						IImageTrace image = (IImageTrace) trace;
+						IAction action = lutCombo.findAction((String)event.getNewValue());
+						if (image.getPaletteName() == null) return;
+						if (image.getPaletteName().equals(action.getId()))
+							action.setChecked(true);
+					}
+				}
+			}
+		});
+		PlottingSystemActivator.getAnalysisRCPPreferenceStore().addPropertyChangeListener(new IPropertyChangeListener() {
+			@Override
+			public void propertyChange(PropertyChangeEvent event) {
+				if (event.getProperty().equals(PlottingConstants.IMAGEEXPLORER_PLAYBACKVIEW)) {
+					livePlot = analysisPreferenceStore.getString(event.getProperty());
 				}
 			}
 		});
