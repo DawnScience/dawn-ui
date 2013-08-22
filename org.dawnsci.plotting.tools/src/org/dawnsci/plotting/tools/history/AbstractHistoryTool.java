@@ -9,15 +9,12 @@ import org.dawb.common.services.IVariableManager;
 import org.dawb.common.services.ServiceManager;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.wizard.persistence.PersistenceExportWizard;
-import org.dawnsci.common.widgets.tree.ColorNode;
-import org.dawnsci.common.widgets.tree.LabelNode;
 import org.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.dawnsci.plotting.api.trace.ITraceListener;
 import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.tools.Activator;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.MenuManager;
@@ -61,6 +58,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
 import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
+import uk.ac.diamond.scisoft.analysis.utils.OSUtils;
 
 public abstract class AbstractHistoryTool extends AbstractToolPage implements MouseListener, KeyListener, IVariableManager {
 
@@ -176,7 +174,7 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 		
 		// Allow the colours to be drawn nicely.
 		final Table table = viewer.getTable();
-		table.addListener(SWT.EraseItem, new Listener() {
+		if (OSUtils.isWindowsOS()) table.addListener(SWT.EraseItem, new Listener() {
 			public void handleEvent(Event event) {
 				if ((event.detail & SWT.SELECTED) != 0) {
 					GC gc = event.gc;

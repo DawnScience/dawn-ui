@@ -146,6 +146,7 @@ import uk.ac.diamond.scisoft.analysis.io.DataHolder;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
+import uk.ac.diamond.scisoft.analysis.utils.OSUtils;
 
 /**
  * This view can view and plot any file. It is most efficient if the Loader that LoaderFactory
@@ -359,7 +360,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		
 		// Allow the colours to be drawn nicely.
 		final Table table = dataViewer.getTable();
-		table.addListener(SWT.EraseItem, new Listener() {
+		if (OSUtils.isWindowsOS()) table.addListener(SWT.EraseItem, new Listener() {
 			public void handleEvent(Event event) {
 				
 				GC gc = event.gc;
