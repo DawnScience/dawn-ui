@@ -10,6 +10,8 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.osgi.framework.BundleContext;
 
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+
 public class Activator extends AbstractUIPlugin {
 
     public static final String PLUGIN_ID = "org.dawnsci.plotting.tools";
@@ -41,5 +43,13 @@ public class Activator extends AbstractUIPlugin {
     		 
 	public static ILog getPluginLog() {
 		return staticActivator.getLog();
+	}
+
+	/**
+	 * Used for transient local properties that are not designed to be read outside.
+	 * @return
+	 */
+	public static IPreferenceStore getLocalPreferenceStore() {
+		return staticActivator.getPreferenceStore();
 	}
 }

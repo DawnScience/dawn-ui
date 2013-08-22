@@ -28,6 +28,7 @@ import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.api.trace.ITraceListener;
 import org.dawnsci.plotting.api.trace.PaletteEvent;
 import org.dawnsci.plotting.api.trace.TraceEvent;
+import org.dawnsci.plotting.tools.Activator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -206,7 +207,13 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 
 		profilePlottingSystem.setXFirst(true);
 		profilePlottingSystem.setRescale(true);
+		
+		// We get the saved logged axes, if any and log the axes.
+		boolean isLog10 = Activator.getLocalPreferenceStore().getBoolean(getToolId()+".xAxisLogged");
+		profilePlottingSystem.getSelectedXAxis().setLog10(isLog10);
 				
+		isLog10 = Activator.getLocalPreferenceStore().getBoolean(getToolId()+".yAxisLogged");
+		profilePlottingSystem.getSelectedYAxis().setLog10(isLog10);
 	}
 
 	@Override
@@ -287,11 +294,11 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
     
 	public void deactivate() {
 		super.deactivate();
+		saveAxesLogged();
 		if (getPlottingSystem()!=null) {
+
+	        getPlottingSystem().removeRegionListener(regionListener);
 			getPlottingSystem().removeTraceListener(traceListener);
-		}
-		if (getPlottingSystem()!=null) {
-			getPlottingSystem().removeRegionListener(regionListener);
 		}
 		setRegionsActive(false);
 		if (getPlottingSystem()!=null) {
@@ -370,7 +377,6 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 	
 	protected synchronized void update(IRegion r, IROI rb, boolean isDrag) {
 		if (!isActive()) return;
-		
 		if (r!=null) {
 			if(!isRegionTypeSupported(r.getRegionType())) return; // Nothing to do.
 			if (!r.isUserRegion()) return; // Likewise
@@ -379,6 +385,12 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		updateProfiles.profile(r, rb, isDrag);
 	}
 	
+	private void saveAxesLogged() {
+		if (profilePlottingSystem==null || profilePlottingSystem.getPlotComposite()==null || profilePlottingSystem.isDisposed()) return;
+		Activator.getLocalPreferenceStore().setValue(getToolId()+".xAxisLogged", profilePlottingSystem.getSelectedXAxis().isLog10());
+        Activator.getLocalPreferenceStore().setValue(getToolId()+".yAxisLogged", profilePlottingSystem.getSelectedYAxis().isLog10());
+ 	}
+
 	protected String getRegionName() {
 		return "Profile";
 	}
