@@ -1185,7 +1185,12 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		plottingSystem.setShowIntensity(false);
 
 		currentData = data;
-
+		
+		//Data has its own augmenters so disable the tool augmenter
+		DiffractionTool diffTool = (DiffractionTool) toolSystem.getToolPage(DIFFRACTION_ID);
+		DiffractionImageAugmenter toolAug = diffTool.getAugmenter();
+		if (toolAug != null) toolAug.deactivate();
+		
 		DiffractionImageAugmenter aug = data.augmenter;
 		if (aug == null) {
 			aug = new DiffractionImageAugmenter(plottingSystem);

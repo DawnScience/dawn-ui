@@ -257,12 +257,14 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 			plottingSystem.addRegion(crosshairs);
 			crosshairs.setMobile(false); // NOTE: Must be done **AFTER** calling the
 										// addRegion method.
+			crosshairs.toBack();
 		} else {
 			LinearROI lroi = (LinearROI) crosshairs.getROI();
 			lroi.setLength(length);
 			lroi.setMidPoint(beamCentre);
 			crosshairs.setRegionColor(colour);
 			crosshairs.setLabel(labelText);
+			crosshairs.toBack();
 //			crosshairs.setROI(lroi);
 		}
 	}

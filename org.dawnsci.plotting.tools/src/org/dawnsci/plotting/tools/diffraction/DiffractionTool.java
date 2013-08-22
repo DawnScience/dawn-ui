@@ -523,6 +523,14 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	public DiffractionTreeModel getModel() {
 		return model;
 	}
+	
+	/**
+	 * 
+	 * @return augmenter
+	 */
+	public DiffractionImageAugmenter getAugmenter() {
+		return augmenter;
+	}
 
 	private TreeNode   copiedNode;
 	private MenuAction calibrantActions;
