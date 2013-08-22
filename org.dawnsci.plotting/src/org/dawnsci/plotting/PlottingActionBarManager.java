@@ -319,6 +319,12 @@ public class PlottingActionBarManager implements IPlotActionSystem {
 	    			
 	    			toolActions.setSelectedAction(this);
 	    			
+	    			// Fix to http://jira.diamond.ac.uk/browse/SCI-600
+	    			if (!Boolean.getBoolean("org.dawnsci.plotting.no.tool.activation")) {
+		    			if (system.getPart()!=null) {
+		    				getPage().activate(system.getPart());
+		    			}
+	    			}
 	    		}
 	    	};
 	    	action.setId(e.getAttribute("id"));
