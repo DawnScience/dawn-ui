@@ -215,13 +215,11 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 
 	@Override
 	public void fillToolActions(IContributionManager man, ToolPageRole role) {
-
-        // Find the drop down action for the role.
+		// Find the drop down action for the role.
 		final IContributionItem action = system.getActionBars().getToolBarManager().find(role.getId());
 		if (action!=null) man.add(((ActionContributionItem)action).getAction());
 	}
-	
-	private boolean updatingColorSchemeInternally = false;
+
 	private IMenuListener paletteMenuListener;
 
 	protected void createPalleteActions() {
@@ -231,21 +229,18 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 
 
 		String schemeName = PlottingSystemActivator.getPlottingPreferenceStore().getString(PlottingConstants.COLOUR_SCHEME);
-		
+
 		final MenuAction lutCombo = new MenuAction("Color");
 		lutCombo.setId(getClass().getName()+lutCombo.getText());
-		
 		lutCombo.setImageDescriptor(PlottingSystemActivator.getImageDescriptor("icons/color_wheel.png"));
-		
+
 		final Map<String, IAction> paletteActions = new HashMap<String, IAction>(11);
 		CheckableActionGroup group      = new CheckableActionGroup();
 		for (final String paletteName : names) {
 			final Action action = new Action(paletteName, IAction.AS_CHECK_BOX) {
 				public void run() {
 					try {
-						updatingColorSchemeInternally = true;
 						PlottingSystemActivator.getPlottingPreferenceStore().setValue(PlottingConstants.COLOUR_SCHEME, paletteName);
-			
 						final PaletteData data = pservice.getPaletteData(paletteName);
 						final Collection<ITrace> traces = system.getTraces();
 						if (traces!=null) for (ITrace trace: traces) {
@@ -257,8 +252,6 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 						}
 					} catch (Exception ne) {
 						logger.error("Cannot create palette data!", ne);
-					} finally {
-						updatingColorSchemeInternally = false;
 					}
 				}
 			};
@@ -272,9 +265,8 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 
 		registerMenuBarGroup(lutCombo.getId()+".group");
 		registerAction(lutCombo.getId()+".group", lutCombo, ActionType.ALL, ManagerType.MENUBAR);
-		
+
 		this.paletteMenuListener = new IMenuListener() {
-			
 			@Override
 			public void menuAboutToShow(IMenuManager manager) {
 				IImageTrace trace = (IImageTrace)system.getTraces().iterator().next();
@@ -287,11 +279,11 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 		};
 		getActionBars().getMenuManager().addMenuListener(paletteMenuListener);
 	}
-	
+
 	public void dispose() {
 		if (paletteMenuListener!=null && getActionBars()!=null) {
-			getActionBars().getMenuManager().removeMenuListener(paletteMenuListener);			
+			getActionBars().getMenuManager().removeMenuListener(paletteMenuListener);
 		}
-        super.dispose();
+		super.dispose();
 	}
 }

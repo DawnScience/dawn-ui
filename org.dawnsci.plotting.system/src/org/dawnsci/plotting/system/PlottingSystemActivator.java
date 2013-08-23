@@ -14,8 +14,6 @@ public class PlottingSystemActivator extends AbstractUIPlugin {
 
 	private static IPreferenceStore plottingPreferenceStore;
 
-	private static IPreferenceStore analysisRCPPreferenceStore;
-
 	public static ImageDescriptor getImageDescriptor(String path) {
 		return imageDescriptorFromPlugin(ID, path);
 	}
@@ -39,11 +37,5 @@ public class PlottingSystemActivator extends AbstractUIPlugin {
 
 	public static IPreferenceStore getLocalPreferenceStore() {
 		return activator.getPreferenceStore();
-	}
-
-	public static IPreferenceStore getAnalysisRCPPreferenceStore() {
-		if (analysisRCPPreferenceStore == null)
-			analysisRCPPreferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, "uk.ac.diamond.scisoft.analysis.rcp");
-		return analysisRCPPreferenceStore;
 	}
 }

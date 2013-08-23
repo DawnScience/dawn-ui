@@ -86,9 +86,4 @@ public class PlottingConstants extends BasePlottingConstants {
 	 */
 	public static final String LOAD_IMAGE_STACKS = "org.dawb.workbench.plotting.preference.loadImageStacks";
 
-	/**
-	 * Image Explorer play back preference constants (also declared in uk.ac.diamond.scisoft.analysis.rcp)
-	 */
-	public static final String IMAGEEXPLORER_PLAYBACKVIEW = "imageExplorer.playbackView";
-
 }
