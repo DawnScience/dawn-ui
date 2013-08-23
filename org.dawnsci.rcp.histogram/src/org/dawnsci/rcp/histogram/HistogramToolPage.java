@@ -54,6 +54,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
@@ -788,10 +789,11 @@ public class HistogramToolPage extends AbstractToolPage {
 		histogramComposite.setLayout(new GridLayout(1, false));
 		
 		final IPageSite site = getSite();
-
+        IActionBars actionBars = (site != null) ? site.getActionBars() : null;
+        
 		histogramPlot.createPlotPart( histogramComposite, 
 				getTitle(), 
-				null, 
+				actionBars, 
 				PlotType.XY,
 				null);
 		histogramPlot.getPlotComposite().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
