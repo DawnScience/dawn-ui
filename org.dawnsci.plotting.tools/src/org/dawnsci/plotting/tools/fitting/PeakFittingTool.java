@@ -45,6 +45,9 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.slf4j.Logger;
@@ -109,6 +112,9 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 	@Override
 	protected List<TableViewerColumn> createColumns(final TableViewer viewer) {
 		
+		PeakColumnComparitor cc = new PeakColumnComparitor();
+		viewer.setComparator(cc);
+		
 		ColumnViewerToolTipSupport.enableFor(viewer,ToolTip.NO_RECREATE);
 
 		List<TableViewerColumn> ret = new ArrayList<TableViewerColumn>(9);
@@ -117,18 +123,21 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 		var.getColumn().setText("Trace");
 		var.getColumn().setWidth(80);
 		var.setLabelProvider(new PeakLabelProvider(0));
+		var.getColumn().addSelectionListener(getSelectionAdapter(var.getColumn(), 0, cc));
 		ret.add(var);
 
 		var   = new TableViewerColumn(viewer, SWT.LEFT, 1);
 		var.getColumn().setText("Name");
 		var.getColumn().setWidth(150);
 		var.setLabelProvider(new PeakLabelProvider(1));
+		var.getColumn().addSelectionListener(getSelectionAdapter(var.getColumn(), 1, cc));
 		ret.add(var);
 		
         var   = new TableViewerColumn(viewer, SWT.CENTER, 2);
 		var.getColumn().setText("Position");
 		var.getColumn().setWidth(100);
 		var.setLabelProvider(new PeakLabelProvider(2));
+		var.getColumn().addSelectionListener(getSelectionAdapter(var.getColumn(), 2, cc));
 		ret.add(var);
 		
         var   = new TableViewerColumn(viewer, SWT.CENTER, 3);
@@ -136,6 +145,7 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 		var.getColumn().setToolTipText("The nearest data value of the fitted peak.");
 		var.getColumn().setWidth(100);
 		var.setLabelProvider(new PeakLabelProvider(3));
+		var.getColumn().addSelectionListener(getSelectionAdapter(var.getColumn(), 3, cc));
 		ret.add(var);
 		
 		// Data Column not that useful, do not show unless property set.
@@ -149,36 +159,55 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 		var.getColumn().setToolTipText("The value of the fitted peak.");
 		var.getColumn().setWidth(100);
 		var.setLabelProvider(new PeakLabelProvider(4));
+		var.getColumn().addSelectionListener(getSelectionAdapter(var.getColumn(), 4, cc));
 		ret.add(var);
 
 		var   = new TableViewerColumn(viewer, SWT.CENTER, 5);
 		var.getColumn().setText("FWHM");
 		var.getColumn().setWidth(100);
 		var.setLabelProvider(new PeakLabelProvider(5));
+		var.getColumn().addSelectionListener(getSelectionAdapter(var.getColumn(), 5, cc));
 		ret.add(var);
 		
         var   = new TableViewerColumn(viewer, SWT.CENTER, 6);
 		var.getColumn().setText("Area");
 		var.getColumn().setWidth(100);
 		var.setLabelProvider(new PeakLabelProvider(6));
+		var.getColumn().addSelectionListener(getSelectionAdapter(var.getColumn(), 6, cc));
 		ret.add(var);
 
         var   = new TableViewerColumn(viewer, SWT.CENTER, 7);
 		var.getColumn().setText("Type");
 		var.getColumn().setWidth(100);
 		var.setLabelProvider(new PeakLabelProvider(7));
+		var.getColumn().addSelectionListener(getSelectionAdapter(var.getColumn(), 7, cc));
 		ret.add(var);
 		
         var   = new TableViewerColumn(viewer, SWT.CENTER, 8);
 		var.getColumn().setText("Algorithm");
 		var.getColumn().setWidth(100);
 		var.setLabelProvider(new PeakLabelProvider(8));
+		var.getColumn().addSelectionListener(getSelectionAdapter(var.getColumn(), 8, cc));
 		ret.add(var);
 		
 		return ret;
 
 	}
-	
+
+	private SelectionAdapter getSelectionAdapter(final TableColumn column, final int index, final PeakColumnComparitor comparator) {
+		SelectionAdapter selectionAdapter = new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				comparator.setColumn(index);
+				int dir = comparator.getDirection();
+				viewer.getTable().setSortDirection(dir);
+				viewer.getTable().setSortColumn(column);
+				viewer.refresh();
+			}
+		};
+		return selectionAdapter;
+	}
+
 	/**
 	 * 
 	 * @param fittedPeaksInfo
