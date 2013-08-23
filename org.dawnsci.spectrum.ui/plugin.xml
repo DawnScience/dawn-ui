@@ -13,12 +13,14 @@
    <extension
          point="org.eclipse.ui.views">
       <view
+            category="org.dawb.workbench.ui.beta.views.category"
             class="org.dawnsci.spectrum.ui.views.SpectrumView"
             icon="icons/spectrum.png"
             id="org.dawnsci.spectrum.ui.views.SpectrumView"
             name="Spectrum View">
       </view>
       <view
+            category="org.dawb.workbench.ui.beta.views.category"
             class="uk.ac.diamond.scisoft.analysis.rcp.views.PlotView"
             icon="icons/spectrumaxis.png"
             id="org.dawnsci.spectrum.ui.views.SpectrumPlot"
@@ -27,12 +29,14 @@
       </view>
       <view
             allowMultiple="false"
+            category="org.dawb.workbench.ui.beta.views.category"
             class="org.eclipse.ui.navigator.CommonNavigator"
             icon="icons/spectrumpe.png"
             id="org.dawnsci.spectrum.ui.views.SpectrumProject"
             name="Spectrum Project">
       </view>
       <view
+            category="org.dawb.workbench.ui.beta.views.category"
             class="org.dawnsci.spectrum.ui.views.SpectrumDatasetView"
             icon="icons/spectrumds.png"
             id="org.dawnsci.spectrum.ui.SpectrumDatasetView"
