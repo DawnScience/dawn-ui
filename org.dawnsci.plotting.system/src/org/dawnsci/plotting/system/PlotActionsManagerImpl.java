@@ -12,6 +12,7 @@ package org.dawnsci.plotting.system;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.csstudio.swt.xygraph.undo.ZoomType;
@@ -269,11 +270,17 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 		this.paletteMenuListener = new IMenuListener() {
 			@Override
 			public void menuAboutToShow(IMenuManager manager) {
-				IImageTrace trace = (IImageTrace)system.getTraces().iterator().next();
-				String colorSchemeName = trace.getPaletteName();
-				if (colorSchemeName!=null) {
-					IAction scheme = paletteActions.get(colorSchemeName);
-					if (scheme!=null) scheme.setChecked(true);
+				Collection<ITrace> traces = system.getTraces();
+				for (Iterator<ITrace> iterator = traces.iterator(); iterator.hasNext();) {
+					ITrace trace = (ITrace) iterator.next();
+					if (trace instanceof IImageTrace) {
+						IImageTrace image = (IImageTrace) trace;
+						String colorSchemeName = image.getPaletteName();
+						if (colorSchemeName!=null) {
+							IAction scheme = paletteActions.get(colorSchemeName);
+							if (scheme!=null) scheme.setChecked(true);
+						}
+					}
 				}
 			}
 		};
