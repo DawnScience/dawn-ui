@@ -11,6 +11,8 @@
 package org.dawnsci.plotting.system;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.csstudio.swt.xygraph.undo.ZoomType;
 import org.dawb.common.services.IPaletteService;
@@ -35,9 +37,8 @@ import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IContributionManager;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.graphics.PaletteData;
@@ -58,9 +59,6 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 	private static final Logger logger = LoggerFactory.getLogger(PlotActionsManagerImpl.class);
 
 	private PlottingSystemImpl        system;
-
-	final IPreferenceStore plottingPreferenceStore = PlottingSystemActivator.getPlottingPreferenceStore();
-	final IPreferenceStore analysisPreferenceStore = PlottingSystemActivator.getAnalysisRCPPreferenceStore();
 
 	protected PlotActionsManagerImpl(PlottingSystemImpl system) {
 		super(system);
@@ -224,40 +222,30 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 	}
 	
 	private boolean updatingColorSchemeInternally = false;
-	// used to store the current live plot (for the image explorer view)
-	private String livePlot;
+	private IMenuListener paletteMenuListener;
 
 	protected void createPalleteActions() {
 
 		final IPaletteService pservice = (IPaletteService)PlatformUI.getWorkbench().getService(IPaletteService.class);
 		final Collection<String> names = pservice.getColorSchemes();
 
-		livePlot = analysisPreferenceStore.getString(PlottingConstants.IMAGEEXPLORER_PLAYBACKVIEW);
 
-		String schemeName = "";
-		// check colour scheme if image trace is in a live plot
-		if (!system.getPlotName().equals(livePlot)) {
-			schemeName = plottingPreferenceStore.getString(PlottingConstants.COLOUR_SCHEME);
-		} else {
-			schemeName = plottingPreferenceStore.getString(PlottingConstants.LIVEPLOT_COLOUR_SCHEME);
-		}
+		String schemeName = PlottingSystemActivator.getPlottingPreferenceStore().getString(PlottingConstants.COLOUR_SCHEME);
 		
 		final MenuAction lutCombo = new MenuAction("Color");
 		lutCombo.setId(getClass().getName()+lutCombo.getText());
 		
 		lutCombo.setImageDescriptor(PlottingSystemActivator.getImageDescriptor("icons/color_wheel.png"));
 		
+		final Map<String, IAction> paletteActions = new HashMap<String, IAction>(11);
 		CheckableActionGroup group      = new CheckableActionGroup();
 		for (final String paletteName : names) {
 			final Action action = new Action(paletteName, IAction.AS_CHECK_BOX) {
 				public void run() {
 					try {
 						updatingColorSchemeInternally = true;
-						if (system.getPlotName().equals(livePlot)) {
-							PlottingSystemActivator.getPlottingPreferenceStore().setValue(PlottingConstants.LIVEPLOT_COLOUR_SCHEME, paletteName);
-						} else {
-							PlottingSystemActivator.getPlottingPreferenceStore().setValue(PlottingConstants.COLOUR_SCHEME, paletteName);
-						}
+						PlottingSystemActivator.getPlottingPreferenceStore().setValue(PlottingConstants.COLOUR_SCHEME, paletteName);
+			
 						final PaletteData data = pservice.getPaletteData(paletteName);
 						final Collection<ITrace> traces = system.getTraces();
 						if (traces!=null) for (ITrace trace: traces) {
@@ -278,47 +266,32 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 			group.add(action);
 			lutCombo.add(action);
 			action.setChecked(paletteName.equals(schemeName));
+			paletteActions.put(paletteName, action);
 		}
 		lutCombo.setToolTipText("Histogram");
 
-		plottingPreferenceStore.addPropertyChangeListener(new IPropertyChangeListener() {
-			@Override
-			public void propertyChange(PropertyChangeEvent event) {
-				if (updatingColorSchemeInternally)
-					return;
-
-				// Do nothing if the plotting system is a live plot and the event is COLOURSCHEME or
-				// the plotting system is not a live plot and the event is LIVEPLOT_COLOURSCHEME
-				if ((event.getProperty().equals(PlottingConstants.COLOUR_SCHEME)
-						&& system.getPlotName().equals(livePlot))
-					|| (event.getProperty().equals(PlottingConstants.LIVEPLOT_COLOUR_SCHEME)
-							&& !system.getPlotName().equals(livePlot))) 
-					return;
-
-				// check that the trace colour map name is the same
-				Collection<ITrace> traces = system.getTraces();
-				for (ITrace trace : traces) {
-					if (trace instanceof IImageTrace) {
-						IImageTrace image = (IImageTrace) trace;
-						IAction action = lutCombo.findAction((String)event.getNewValue());
-						if (image.getPaletteName() == null) return;
-						if (image.getPaletteName().equals(action.getId()))
-							action.setChecked(true);
-					}
-				}
-			}
-		});
-		PlottingSystemActivator.getAnalysisRCPPreferenceStore().addPropertyChangeListener(new IPropertyChangeListener() {
-			@Override
-			public void propertyChange(PropertyChangeEvent event) {
-				if (event.getProperty().equals(PlottingConstants.IMAGEEXPLORER_PLAYBACKVIEW)) {
-					livePlot = analysisPreferenceStore.getString(event.getProperty());
-				}
-			}
-		});
-
 		registerMenuBarGroup(lutCombo.getId()+".group");
 		registerAction(lutCombo.getId()+".group", lutCombo, ActionType.ALL, ManagerType.MENUBAR);
+		
+		this.paletteMenuListener = new IMenuListener() {
+			
+			@Override
+			public void menuAboutToShow(IMenuManager manager) {
+				IImageTrace trace = (IImageTrace)system.getTraces().iterator().next();
+				String colorSchemeName = trace.getPaletteName();
+				if (colorSchemeName!=null) {
+					IAction scheme = paletteActions.get(colorSchemeName);
+					if (scheme!=null) scheme.setChecked(true);
+				}
+			}
+		};
+		getActionBars().getMenuManager().addMenuListener(paletteMenuListener);
 	}
-
+	
+	public void dispose() {
+		if (paletteMenuListener!=null && getActionBars()!=null) {
+			getActionBars().getMenuManager().removeMenuListener(paletteMenuListener);			
+		}
+        super.dispose();
+	}
 }

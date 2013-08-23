@@ -121,7 +121,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		try {
 			final IPaletteService pservice = (IPaletteService)PlatformUI.getWorkbench().getService(IPaletteService.class);
 			final String scheme = getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME);
-			imageServiceBean.setPalette(pservice.getPaletteData(scheme));	
+			imageServiceBean.setPalette(pservice.getPaletteData(scheme));
+			setPaletteName(scheme);
 		} catch (Exception e) {
 			logger.error("Cannot create palette!", e);
 		}	
