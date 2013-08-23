@@ -24,11 +24,6 @@ public class BasePlottingConstants {
 	public static final String COLOUR_SCHEME = "org.dawb.plotting.system.colourSchemeName";
 
 	/**
-	 * Used to store live plot view palette preference
-	 */
-	public static final String LIVEPLOT_COLOUR_SCHEME = "org.dawb.plotting.system.livePlotColourSchemeName";
-
-	/**
 	 * Used to store origin preference, do not change string
 	 */
 	public static final String ORIGIN_PREF = "org.dawb.plotting.system.originChoice";
