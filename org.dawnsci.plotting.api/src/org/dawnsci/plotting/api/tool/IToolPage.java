@@ -44,6 +44,12 @@ public interface IToolPage extends IPageBookViewPage, IAdaptable {
 	public enum ToolPageRole {
 		ROLE_2D("org.dawb.common.ui.plot.tool.ROLE_2D", false, true, "icons/plot-tool-any.png", "Image tools", "Image tools used to profile and inspect images."),  // For instance LineProfile, Profile
 		ROLE_1D("org.dawb.common.ui.plot.tool.ROLE_1D", true, false, "icons/plot-tool-any.png", "XY plotting", "XY plotting tools"),  // 1D only
+		
+		/**
+		 * @Deprecated Workaround: Use two extension point declarations and in getToolPageRole() test toolid
+		 * to return the correct role.
+		 */
+		@Deprecated
 		ROLE_1D_AND_2D("org.dawb.common.ui.plot.tool.ROLE_1D_AND_2D", true, true, "icons/plot-tool-any.png", "Plotting tools", "Plotting tools (used both for images and XY plots)"), // Measure, derivative, peak fitting
 		ROLE_3D("org.dawb.common.ui.plot.tool.ROLE_3D", false, false, "icons/plot-tool-any.png", "3D tools", "3D plotting tools"); // SubSurface
 		
