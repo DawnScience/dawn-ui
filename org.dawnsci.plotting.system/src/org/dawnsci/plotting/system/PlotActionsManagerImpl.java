@@ -294,16 +294,18 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 					|| (event.getProperty().equals(PlottingConstants.LIVEPLOT_COLOUR_SCHEME)
 							&& !system.getPlotName().equals(livePlot))) 
 					return;
-
-				// check that the trace colour map name is the same
-				Collection<ITrace> traces = system.getTraces();
-				for (ITrace trace : traces) {
-					if (trace instanceof IImageTrace) {
-						IImageTrace image = (IImageTrace) trace;
-						IAction action = lutCombo.findAction((String)event.getNewValue());
-						if (image.getPaletteName() == null) return;
-						if (image.getPaletteName().equals(action.getId()))
-							action.setChecked(true);
+				if (event.getProperty().equals(PlottingConstants.COLOUR_SCHEME)
+						|| event.getProperty().equals(PlottingConstants.LIVEPLOT_COLOUR_SCHEME)) {
+					// check that the trace colour map name is the same
+					Collection<ITrace> traces = system.getTraces();
+					for (ITrace trace : traces) {
+						if (trace instanceof IImageTrace) {
+							IImageTrace image = (IImageTrace) trace;
+							IAction action = lutCombo.findAction((String)event.getNewValue());
+							if (image.getPaletteName() == null) return;
+							if (image.getPaletteName().equals(action.getId()))
+								action.setChecked(true);
+						}
 					}
 				}
 			}
