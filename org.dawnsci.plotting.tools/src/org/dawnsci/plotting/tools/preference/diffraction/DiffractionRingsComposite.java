@@ -63,7 +63,7 @@ public class DiffractionRingsComposite extends Composite {
 		Label lbl = new Label(this, SWT.NONE);
 		lbl.setText(label);
 
-		SpinnerWrapper rb = new SpinnerWrapper(this, SWT.NONE);
+		SpinnerWrapper rb = new SpinnerWrapper(this, SWT.BORDER);
 		rb.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		rb.setMinimum(lower);
 		rb.setMaximum(upper);
