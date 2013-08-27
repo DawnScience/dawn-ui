@@ -15,15 +15,17 @@
             id="org.edna.workbench.editors.preferencePage"
             name="Editors">
       </page>
-    </extension>
-   <extension
-         point="org.eclipse.ui.preferencePages">
       <page
-            class="org.eclipse.ui.internal.dialogs.EmptyPreferencePage"
+            class="org.dawb.workbench.ui.preference.DataAnalysisPreferencePage"
             id="org.dawnsci.preferences.root"
             name="Data Analysis">
       </page>
-   </extension>
+      <page
+            class="org.dawb.workbench.ui.preference.VisualizationPreferencePage"
+            id="org.dawb.workbench.ui.visualizationPreferences"
+            name="Visualization Preferences">
+      </page>
+    </extension>
    <extension
          point="org.eclipse.ui.commands">
       <command
