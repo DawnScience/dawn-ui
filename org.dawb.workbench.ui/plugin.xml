@@ -13,7 +13,7 @@
             category="org.dawnsci.preferences.root"
             class="org.dawb.workbench.ui.editors.preference.EditorPreferencePage"
             id="org.edna.workbench.editors.preferencePage"
-            name="Editors">
+            name="Editor Preferences">
       </page>
       <page
             class="org.dawb.workbench.ui.preference.DataAnalysisPreferencePage"
