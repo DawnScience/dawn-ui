@@ -10,7 +10,7 @@
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
-            category="org.dawnsci.preferences.root"
+            category="uk.ac.diamond.scisoft.analysis.rcp.preferences.root"
             class="org.dawb.workbench.ui.editors.preference.EditorPreferencePage"
             id="org.edna.workbench.editors.preferencePage"
             name="Editor Preferences">
