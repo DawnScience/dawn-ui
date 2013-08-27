@@ -162,6 +162,10 @@ class AxisSelection extends AbstractSelectionRegion {
     		 */
     		public void mouseExited(MouseEvent me) {
     			IFigure into = parent.findFigureAt(me.getLocation());
+    			
+    			// If the region found was not to our liking at this location we look
+    			// around the vicinity. This is needed because sometimes the location
+    			// crosses the region we are on in cross-hair mode.
     			REGION_TEST: if (into instanceof AxisSelection || into instanceof LineFigure){
     			    into = parent.findFigureAt(me.getLocation().x+2, me.getLocation().y+2);
     			    if (into instanceof AbstractRegion || into instanceof IRegionContainer &&
