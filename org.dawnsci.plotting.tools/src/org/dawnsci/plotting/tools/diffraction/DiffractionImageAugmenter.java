@@ -236,6 +236,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 			try {
 				final String regionName = RegionUtils.getUniqueName(nameStub, plottingSystem);
 				crosshairs = plottingSystem.createRegion(regionName, RegionType.LINE);
+				crosshairs.setUserRegion(false);
 			} catch (Exception e) {
 				logger.error("Can't create region", e);
 				return;
@@ -247,7 +248,6 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 			crosshairs.setROI(lroi);
 			crosshairs.setRegionColor(colour);
 			crosshairs.setAlpha(100);
-			crosshairs.setUserRegion(false);
 			crosshairs.setShowPosition(false);
 			crosshairs.setUserObject(RING_TYPE.BEAM_CENTRE);
 
