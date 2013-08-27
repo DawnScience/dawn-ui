@@ -265,7 +265,7 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 		lutCombo.setToolTipText("Histogram");
 
 		registerMenuBarGroup(lutCombo.getId()+".group");
-		registerAction(lutCombo.getId()+".group", lutCombo, ActionType.ALL, ManagerType.MENUBAR);
+		registerAction(lutCombo.getId()+".group", lutCombo, ActionType.IMAGE, ManagerType.MENUBAR);
 
 		this.paletteMenuListener = new IMenuListener() {
 			@Override
