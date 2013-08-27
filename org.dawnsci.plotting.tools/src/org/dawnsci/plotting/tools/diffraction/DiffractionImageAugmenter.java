@@ -366,6 +366,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		region.setUserRegion(false);
 
 		region.setLabel(labelText);
+		region.setShowLabel(true);
 		if (crosshairs != null) {
 			crosshairs.setShowLabel(true);
 			crosshairs.setRegionColor(labelColour);
