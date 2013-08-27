@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
+import org.dawnsci.plotting.api.region.IRegionContainer;
 import org.dawnsci.plotting.api.region.MouseListener;
 import org.dawnsci.plotting.api.region.MouseMotionListener;
 import org.dawnsci.plotting.api.region.ROIEvent;
@@ -160,15 +161,24 @@ class AxisSelection extends AbstractSelectionRegion {
     		 * @see org.eclipse.draw2d.MouseMotionListener#mouseExited(MouseEvent)
     		 */
     		public void mouseExited(MouseEvent me) {
+    			IFigure into = parent.findFigureAt(me.getLocation());
+    			REGION_TEST: if (into instanceof AxisSelection || into instanceof LineFigure){
+    			    into = parent.findFigureAt(me.getLocation().x+2, me.getLocation().y+2);
+    			    if (into instanceof AbstractRegion || into instanceof IRegionContainer &&
+    			        !(into instanceof AxisSelection) && !(into instanceof LineFigure)) break REGION_TEST;
+    			    
+    			    into = parent.findFigureAt(me.getLocation().x-2, me.getLocation().y-2);
+    			    if (into instanceof AbstractRegion || into instanceof IRegionContainer &&
+    			        !(into instanceof AxisSelection) && !(into instanceof LineFigure)) break REGION_TEST;
+    			}
     			
-    			final IFigure into = parent.findFigureAt(me.getLocation());
     			if (into==null) {
     				setVisible(false);
-    			} else if (into!=AxisSelection.this && (AxisSelection.this).line1!=into && into != parent){
+    			} else {
     				extraFigures.add(into);
     				into.addMouseMotionListener(this);
+        			fireROIChanged(getROI());
     			}
-    			fireROIChanged(getROI());
     		}
 
         };

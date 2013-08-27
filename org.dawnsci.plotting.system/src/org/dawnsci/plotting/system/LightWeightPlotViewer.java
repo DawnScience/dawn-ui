@@ -1270,6 +1270,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 	}
 
 	public void setDefaultPlotCursor(Cursor cursor) {
+		if (xyGraph==null || xyGraph.getRegionArea()==null) return;
 		xyGraph.getRegionArea().setCursor(cursor);
 		ZoomType.NONE.setCursor(cursor);
 	}
