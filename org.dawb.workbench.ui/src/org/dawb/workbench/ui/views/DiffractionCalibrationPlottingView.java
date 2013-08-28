@@ -347,7 +347,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				DiffractionTableData selectedData = (DiffractionTableData) selection.getFirstElement();
 				if (model.size() > 0) {
 					if (model.remove(selectedData)) {
-						selectedData.augmenter.deactivate();
+						selectedData.augmenter.deactivate(service.getLockedDiffractionMetaData()!=null);
 						selectedData.md.getDetector2DProperties().removeDetectorPropertyListener(detectorPropertyListener);
 //						selectedData.md.getDiffractionCrystalEnvironment().removeDiffractionCrystalEnvironmentListener(diffractionCrystEnvListener);
 						tableViewer.refresh();
@@ -1170,7 +1170,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		if (currentData != null) {
 			DiffractionImageAugmenter aug = currentData.augmenter;
 			if (aug != null)
-				aug.deactivate();
+				aug.deactivate(service.getLockedDiffractionMetaData()!=null);
 		}
 
 		if (data.image == null)
@@ -1189,7 +1189,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		//Data has its own augmenters so disable the tool augmenter
 		DiffractionTool diffTool = (DiffractionTool) toolSystem.getToolPage(DIFFRACTION_ID);
 		DiffractionImageAugmenter toolAug = diffTool.getAugmenter();
-		if (toolAug != null) toolAug.deactivate();
+		if (toolAug != null) toolAug.deactivate(service.getLockedDiffractionMetaData()!=null);
 		
 		DiffractionImageAugmenter aug = data.augmenter;
 		if (aug == null) {
@@ -1434,7 +1434,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		// deactivate each augmenter in loaded data
 		for (DiffractionTableData d : model) {
 			if (d.augmenter != null)
-				d.augmenter.deactivate();
+				d.augmenter.deactivate(service.getLockedDiffractionMetaData()!=null);
 			d.md.getDetector2DProperties().removeDetectorPropertyListener(detectorPropertyListener);
 //			d.md.getDiffractionCrystalEnvironment().removeDiffractionCrystalEnvironmentListener(diffractionCrystEnvListener);
 		}

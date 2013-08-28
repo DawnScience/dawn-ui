@@ -144,7 +144,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		//registerListeners(true);
 	}
 	
-	public void deactivate() {
+	public void deactivate(boolean leaveRings) {
 		if (activeAugmenter == this) activeAugmenter=null;
 		active = false;
 		if (crosshairs != null && plottingSystem != null) {
@@ -492,7 +492,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	}
 	
 	public void dispose() {
-		deactivate();
+		deactivate(false);
 	}
 
 	@Override

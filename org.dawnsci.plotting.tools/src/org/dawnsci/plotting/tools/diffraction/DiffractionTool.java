@@ -258,7 +258,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		}
 
 		CalibrationFactory.removeCalibrantSelectionListener(this);
-		if (augmenter!=null) augmenter.deactivate();
+		if (augmenter!=null) augmenter.deactivate(service.getLockedDiffractionMetaData()!=null);
 		if (activeDiffractionTool==this) activeDiffractionTool = null;
 		if (model!=null) model.deactivate();
 		
@@ -911,7 +911,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		calibrate.setToolTipText("Calibrate detector using rings - this is an experimental feature and does not work robustly");
 		calibrate.setEnabled(false);
 
-		if (lock==null) lock = new Action("Lock the diffraction data and apply it to newly opened files.",IAction.AS_CHECK_BOX) {
+		if (lock==null) lock = new Action("Lock the diffraction data and apply it to newly opened files.\nThis will also leave the rings on the image when the tool is deactivated.",IAction.AS_CHECK_BOX) {
 		    @Override
 			public void run() {
 		    	if (isChecked()) {
