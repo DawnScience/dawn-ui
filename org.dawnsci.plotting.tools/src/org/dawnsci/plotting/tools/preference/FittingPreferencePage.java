@@ -84,7 +84,7 @@ public class FittingPreferencePage extends PreferencePage implements IWorkbenchP
 		accuractlab.setToolTipText("This sets the accuracy of the optomisation. "
 				+ "The lower the number to more accurate the calculation");
 
-		accuracy = new FloatSpinner(algGroup, SWT.NONE, 6, 5);
+		accuracy = new FloatSpinner(algGroup, SWT.BORDER, 6, 5);
 		accuracy.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
 		accuracy.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -96,7 +96,7 @@ public class FittingPreferencePage extends PreferencePage implements IWorkbenchP
 		smoothingLab.setText("Smoothing");
 		smoothingLab.setToolTipText("Smoothing over that many data points will be applied by the peak searching algorithm");
 
-		smoothing = new Spinner(algGroup, SWT.NONE);
+		smoothing = new Spinner(algGroup, SWT.BORDER);
 		smoothing.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
 		smoothing.setDigits(0);
 		smoothing.setMinimum(0);
@@ -112,7 +112,7 @@ public class FittingPreferencePage extends PreferencePage implements IWorkbenchP
 		peaksLab.setText("Number of peaks");
 		peaksLab.setToolTipText("The peak number to fit");
 
-		peakNumber = new Spinner(algGroup, SWT.NONE);
+		peakNumber = new Spinner(algGroup, SWT.BORDER);
 		peakNumber.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
 		peakNumber.setDigits(0);
 		peakNumber.setMinimum(1);
@@ -132,7 +132,7 @@ public class FittingPreferencePage extends PreferencePage implements IWorkbenchP
 		realFormatLab.setText("Real Format");
 		realFormatLab.setToolTipText("Format for real numbers shown in the peak fitting table.");
 
-		realFormat = new Text(formatGrp, SWT.NONE);
+		realFormat = new Text(formatGrp, SWT.BORDER);
 		realFormat.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
 		realFormat.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -194,6 +194,7 @@ public class FittingPreferencePage extends PreferencePage implements IWorkbenchP
 		return true;
 	}
 
+	@SuppressWarnings("unused")
 	private String getDefaultIntFormat() {
 		return getPreferenceStore().getDefaultString(FittingConstants.INT_FORMAT);
 	}
@@ -202,6 +203,7 @@ public class FittingPreferencePage extends PreferencePage implements IWorkbenchP
 		return getPreferenceStore().getDefaultString(FittingConstants.REAL_FORMAT);
 	}
 	
+	@SuppressWarnings("unused")
 	private String getIntFormat() {
 		return getPreferenceStore().getString(FittingConstants.INT_FORMAT);
 	}
