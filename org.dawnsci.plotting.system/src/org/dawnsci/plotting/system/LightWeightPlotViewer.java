@@ -177,9 +177,6 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
  			bars = actionBarManager.createEmptyActionBars();
  			system.setActionBars(bars);
  		}
- 				
-// 		bars.getMenuManager().removeAll();
-// 		bars.getToolBarManager().removeAll();
 
  		actionBarManager.init(this);
  		this.plotActionsCreator = new LightWeightPlotActions();
