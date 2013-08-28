@@ -9,6 +9,7 @@ import java.util.List;
 import javax.measure.unit.NonSI;
 import javax.vecmath.Vector3d;
 
+import org.dawb.common.services.ILoaderService;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.roi.ResolutionRing;
 import org.dawnsci.plotting.api.IPlottingSystem;
@@ -21,6 +22,7 @@ import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -144,15 +146,18 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		//registerListeners(true);
 	}
 	
-	public void deactivate(boolean leaveRings) {
+	public void deactivate(boolean leaveRegions) {
 		if (activeAugmenter == this) activeAugmenter=null;
 		active = false;
-		if (crosshairs != null && plottingSystem != null) {
-			plottingSystem.removeRegion(crosshairs);
-			crosshairs = null;
-		}
 		
-		for (RING_TYPE rt : RING_TYPE.values()) removeRings(rt);
+		if (!leaveRegions) {
+			if (crosshairs != null && plottingSystem != null) {
+				plottingSystem.removeRegion(crosshairs);
+				crosshairs = null;
+			}
+			
+			for (RING_TYPE rt : RING_TYPE.values()) removeRings(rt);
+		}
 		registerListeners(false);
 		
 		beamPosition = null;
@@ -492,7 +497,8 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	}
 	
 	public void dispose() {
-		deactivate(false);
+		ILoaderService service = (ILoaderService)PlatformUI.getWorkbench().getService(ILoaderService.class);
+		deactivate(service.getLockedDiffractionMetaData()!=null);
 	}
 
 	@Override
