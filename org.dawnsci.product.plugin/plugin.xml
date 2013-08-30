@@ -36,6 +36,14 @@
                name="aboutImage"
                value="icons/Temp-3Col-Splash.png">
          </property>
+         <property
+               name="introBrandingImage"
+               value="product:icons/Temp-3Col-Splash.png">
+         </property>
+         <property
+               name="introTitle"
+               value="Welcome to DAWN">
+         </property>
       </product>
    </extension>
    <extension
