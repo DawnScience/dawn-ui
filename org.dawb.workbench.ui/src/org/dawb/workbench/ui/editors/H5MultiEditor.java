@@ -222,6 +222,7 @@ public class H5MultiEditor extends MultiPageEditorPart  implements ISlicablePlot
 
 	@Override
 	public void setAll1DSelected(boolean overide) {
+		if (getDataSetComponent()==null) return;
 		((IPlottingSystemSelection)getDataSetComponent()).setAll1DSelected(overide);
 	}
 
