@@ -233,7 +233,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 				dataViewer.refresh();
 			}
 		};
-		getPlottingSystem().addTraceListener(dataViewRefreshListener);
+		if (getPlottingSystem()!=null) getPlottingSystem().addTraceListener(dataViewRefreshListener);
 	}
 
 	public Composite getControl() {
