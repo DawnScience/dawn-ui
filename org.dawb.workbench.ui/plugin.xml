@@ -346,4 +346,11 @@
             name="Data Analysis - Beta views">
       </category>
    </extension>
+   <extension
+         point="org.eclipse.ui.intro.configExtension">
+      <configExtension
+            configId="org.dawnsci.intro.universalConfig"
+            content="intro/introContribution.xml">
+      </configExtension>
+   </extension>
 </plugin>
