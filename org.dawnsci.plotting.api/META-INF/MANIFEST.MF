@@ -1,6 +1,7 @@
 Dependency-Note: Please do not add dependencies on draw2d here. The API is supposed
  to be designed to allow swapping of other swt and javafx plotting.
 Manifest-Version: 1.0
+Eclipse-BuddyPolicy: global
 Bundle-ManifestVersion: 2
 Bundle-Name: Plotting API
 Bundle-SymbolicName: org.dawnsci.plotting.api;singleton:=true
