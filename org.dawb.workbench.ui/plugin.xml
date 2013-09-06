@@ -352,5 +352,9 @@
             configId="org.dawnsci.intro.universalConfig"
             content="intro/introContribution.xml">
       </configExtension>
+      <configExtension
+            configId="org.dawnsci.intro.universalConfig"
+            content="intro/data.xml">
+      </configExtension>
    </extension>
 </plugin>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<introContent>
+
+	<extensionContent id="uk.ac.diamond.scisoft.beamlineexplorer.rcp.beamlinedatawizard"
+		style="style.css" name="Beamline Data Project Wizard" path="samples/@">
+		<group style-id="content-group" id="samples-group">
+			<link label="Create a new data project"
+				url="http://org.eclipse.ui.intro/runAction?pluginId=org.dawb.workbench.ui&amp;class=org.dawb.workbench.ui.project.DataNewProjectWizardAction"
+				id="dpitem" style-id="content-link">
+				<text>The New Data Project Wizard creates a project with/without the example data.</text>
+			</link>
+
+		</group>
+	</extensionContent>
+
+</introContent>
