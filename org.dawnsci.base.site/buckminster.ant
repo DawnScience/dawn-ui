@@ -341,29 +341,50 @@ Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blo
             </and>
         </condition>
         <fail unless="zip.file.name.OK" message="Property zip.file.name was not set, but must be." />
-        <property name="zip.include.parent.directory" value="true"/>  <!-- default value -->
+        <condition property="zip.include.parent.directory.local" value="${zip.include.parent.directory-linux}">
+            <and>
+                <equals arg1="${product.os}" arg2="linux" />
+                <isset property="zip.include.parent.directory-linux" />
+            </and>
+        </condition>
+        <condition property="zip.include.parent.directory.local" value="${zip.include.parent.directory-windows}">
+            <and>
+                <equals arg1="${product.os}" arg2="win32" />
+                <isset property="zip.include.parent.directory-windows" />
+            </and>
+        </condition>
+        <condition property="zip.include.parent.directory.local" value="${zip.include.parent.directory-mac}">
+            <and>
+                <equals arg1="${product.os}" arg2="macosx" />
+                <isset property="zip.include.parent.directory-mac" />
+            </and>
+        </condition>
+        <condition property="zip.include.parent.directory.local" value="${zip.include.parent.directory}">  <!-- platform-independent value -->
+            <isset property="zip.include.parent.directory" />
+        </condition>
+        <property name="zip.include.parent.directory.local" value="true" />  <!-- default value -->
         <condition property="useNativeZipIncludeParentDirectory" value="true">
             <and>
                 <os family="unix" />
-                <istrue value="${zip.include.parent.directory}" />
+                <istrue value="${zip.include.parent.directory.local}" />
             </and>
         </condition>
         <condition property="useNativeZipExcludeParentDirectory" value="true">
             <and>
                 <os family="unix" />
-                <isfalse value="${zip.include.parent.directory}" />
+                <isfalse value="${zip.include.parent.directory.local}" />
             </and>
         </condition>
         <condition property="useAntZipIncludeParentDirectory" value="true">
             <and>
                 <istrue value="${productIsWindows}" />
-                <istrue value="${zip.include.parent.directory}" />
+                <istrue value="${zip.include.parent.directory.local}" />
             </and>
         </condition>
         <condition property="useAntZipExcludeParentDirectory" value="true">
             <and>
                 <istrue value="${productIsWindows}" />
-                <isfalse value="${zip.include.parent.directory}" />
+                <isfalse value="${zip.include.parent.directory.local}" />
             </and>
         </condition>
     </target>
