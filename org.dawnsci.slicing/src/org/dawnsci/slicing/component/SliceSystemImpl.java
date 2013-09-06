@@ -132,10 +132,10 @@ import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
  *  
  *
  */
-public class SliceComponent implements ISliceSystem {
+public class SliceSystemImpl implements ISliceSystem {
 	
 
-	private static final Logger logger = LoggerFactory.getLogger(SliceComponent.class);
+	private static final Logger logger = LoggerFactory.getLogger(SliceSystemImpl.class);
 
 	private static final List<String> COLUMN_PROPERTIES = Arrays.asList(new String[]{"Dimension","Axis","Slice","Axis Data"});
 	
@@ -172,7 +172,7 @@ public class SliceComponent implements ISliceSystem {
 
 	private ToolBarManager sliceToolbar;
 
-	public SliceComponent() {
+	public SliceSystemImpl() {
 		this.sliceJob        = new SliceJob();
 		this.dimensionNames  = new HashMap<Integer,List<String>>(5);
 		this.format          = DecimalFormat.getNumberInstance();

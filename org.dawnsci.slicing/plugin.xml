@@ -4,7 +4,7 @@
    <extension
          point="org.dawnsci.slicing.api.sliceComponent">
       <slice_component
-            class="org.dawnsci.slicing.component.SliceComponent"
+            class="org.dawnsci.slicing.component.SliceSystemImpl"
             id="org.dawnsci.slicing.sliceComponent"
             name="Simple Slicing">
       </slice_component>
