@@ -37,7 +37,7 @@ import org.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.slicing.api.data.ICheckableObject;
 import org.dawnsci.slicing.api.editor.IDatasetEditor;
-import org.dawnsci.slicing.api.plot.IPlotUpdateParticipant;
+import org.dawnsci.slicing.api.plot.ISlicePlotUpdateHandler;
 import org.dawnsci.slicing.api.system.ISliceSystem;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -261,7 +261,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 	 */
 	@Override
 	public void updatePlot(final ICheckableObject[]      selections, 
-			               final IPlotUpdateParticipant participant,
+			               final ISlicePlotUpdateHandler participant,
 			               final boolean                useTask) {
 		
 		if (doingUpdate) return;
@@ -329,10 +329,10 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		}
 
 		private ICheckableObject[] selections;
-		private IPlotUpdateParticipant participant;
+		private ISlicePlotUpdateHandler participant;
 
 		public void plot(ICheckableObject[] selections,
-				               IPlotUpdateParticipant participant) {
+				               ISlicePlotUpdateHandler participant) {
 			
 			cancel();
             this.selections  = selections;
@@ -348,7 +348,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		}
 	}
 	
-	private void createPlot(final ICheckableObject[] selections, final IPlotUpdateParticipant participant, final IProgressMonitor monitor) {
+	private void createPlot(final ICheckableObject[] selections, final ISlicePlotUpdateHandler participant, final IProgressMonitor monitor) {
 		
 
 		if (monitor.isCanceled()) return;

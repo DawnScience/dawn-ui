@@ -24,7 +24,7 @@ import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.slicing.api.SlicingFactory;
 import org.dawnsci.slicing.api.data.ICheckableObject;
 import org.dawnsci.slicing.api.editor.IDatasetEditor;
-import org.dawnsci.slicing.api.plot.IPlotUpdateParticipant;
+import org.dawnsci.slicing.api.plot.ISlicePlotUpdateHandler;
 import org.dawnsci.slicing.api.system.ISliceSystem;
 import org.dawnsci.slicing.api.system.SliceSource;
 import org.eclipse.core.resources.IFile;
@@ -57,7 +57,7 @@ import uk.ac.diamond.scisoft.analysis.io.DataHolder;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 
-public class PlotDataPage extends Page implements IPlotUpdateParticipant, IAdaptable {
+public class PlotDataPage extends Page implements ISlicePlotUpdateHandler, IAdaptable {
 
 	private final static Logger logger = LoggerFactory.getLogger(PlotDataPage.class);
 	

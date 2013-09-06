@@ -14,7 +14,7 @@ import java.util.Map;
 import org.dawb.common.services.IVariableManager;
 import org.dawnsci.plotting.api.IPlottingContainer;
 import org.dawnsci.slicing.api.data.ICheckableObject;
-import org.dawnsci.slicing.api.plot.IPlotUpdateParticipant;
+import org.dawnsci.slicing.api.plot.ISlicePlotUpdateHandler;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 
@@ -31,7 +31,7 @@ public interface IDatasetEditor extends IVariableManager, IEditorPart, IPlotting
 	 * @param useTask
 	 */
 	void updatePlot(final ICheckableObject[]      selections, 
-		            final IPlotUpdateParticipant participant,
+		            final ISlicePlotUpdateHandler participant,
 		            final boolean                useTask);
 
 	/**

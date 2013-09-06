@@ -13,7 +13,7 @@ import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.slicing.api.data.ICheckableObject;
 
-public interface IPlotUpdateParticipant {
+public interface ISlicePlotUpdateHandler {
 
 	/**
 	 * Set the slicer visible or invisible
