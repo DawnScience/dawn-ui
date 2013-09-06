@@ -3,7 +3,7 @@
 <schema targetNamespace="org.dawnsci.slicing.api" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appinfo>
-         <meta.schema plugin="org.dawnsci.slicing.api" id="sliceComponent" name="Slice Component"/>
+         <meta.schema plugin="org.dawnsci.slicing.api" id="slicingSystem" name="Slicing System"/>
       </appinfo>
       <documentation>
          A component which may be used to slice a lazy dataset.
@@ -18,7 +18,7 @@
       </annotation>
       <complexType>
          <sequence minOccurs="1" maxOccurs="unbounded">
-            <element ref="slice_component" minOccurs="1" maxOccurs="unbounded"/>
+            <element ref="slicing_system" minOccurs="1" maxOccurs="unbounded"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -47,7 +47,7 @@
       </complexType>
    </element>
 
-   <element name="slice_component">
+   <element name="slicing_system">
       <complexType>
          <attribute name="id" type="string" use="required">
             <annotation>

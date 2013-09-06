@@ -2,10 +2,10 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension
-         point="org.dawnsci.slicing.api.sliceComponent">
+         point="org.dawnsci.slicing.api.slicingSystem">
       <slice_component
             class="org.dawnsci.slicing.component.SliceSystemImpl"
-            id="org.dawnsci.slicing.sliceComponent"
+            id="org.dawnsci.slicing.sliceSystemBasic"
             name="Simple Slicing">
       </slice_component>
    </extension>

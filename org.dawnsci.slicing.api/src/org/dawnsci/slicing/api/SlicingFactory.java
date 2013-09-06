@@ -38,7 +38,7 @@ public class SlicingFactory {
 	 */
 	public static ISliceSystem createSliceSystem() throws Exception {
 		
-        IConfigurationElement[] systems = Platform.getExtensionRegistry().getConfigurationElementsFor("org.dawnsci.slicing.api.sliceComponent");
+        IConfigurationElement[] systems = Platform.getExtensionRegistry().getConfigurationElementsFor("org.dawnsci.slicing.api.slicingSystem");
         return (ISliceSystem)(systems[0].createExecutableExtension("class"));
 	}
 }
