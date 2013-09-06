@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.dawnsci.slicing.api.sliceComponent">
+      <slice_component
+            class="org.dawnsci.slicing.component.SliceComponent"
+            id="org.dawnsci.slicing.sliceComponent"
+            name="Simple Slicing">
+      </slice_component>
+   </extension>
+
+</plugin>

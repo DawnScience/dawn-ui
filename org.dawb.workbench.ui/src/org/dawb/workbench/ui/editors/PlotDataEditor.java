@@ -19,12 +19,8 @@ import java.util.Map;
 
 import org.dawb.common.services.IExpressionObject;
 import org.dawb.common.services.IVariableManager;
-import org.dawb.common.ui.editors.ICheckableObject;
-import org.dawb.common.ui.editors.IDatasetEditor;
-import org.dawb.common.ui.editors.IPlotUpdateParticipant;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.plot.tools.HistoryType;
-import org.dawb.common.ui.slicing.SliceComponent;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.views.PlotDataView;
@@ -39,6 +35,10 @@ import org.dawnsci.plotting.api.PlottingFactory;
 import org.dawnsci.plotting.api.axis.IAxis;
 import org.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.dawnsci.plotting.api.trace.ITrace;
+import org.dawnsci.slicing.api.data.ICheckableObject;
+import org.dawnsci.slicing.api.editor.IDatasetEditor;
+import org.dawnsci.slicing.api.plot.IPlotUpdateParticipant;
+import org.dawnsci.slicing.api.system.ISliceSystem;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -710,7 +710,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		if (!(page instanceof PlotDataPage)) return null;
 		return ((PlotDataPage)page).getDataSetComponent();
 	}
-	public SliceComponent getSliceComponent() {
+	public ISliceSystem getSliceComponent() {
 		
 		final IWorkbenchPage wb =EclipseUtils.getActivePage();
 		if (wb==null) return null;

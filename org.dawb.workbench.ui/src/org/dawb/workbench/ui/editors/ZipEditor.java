@@ -14,10 +14,7 @@ import java.io.File;
 import java.io.InputStream;
 
 import org.dawb.common.services.IVariableManager;
-import org.dawb.common.ui.slicing.ISlicablePlottingPart;
-import org.dawb.common.ui.slicing.SliceComponent;
 import org.dawb.common.ui.util.EclipseUtils;
-import org.dawb.common.util.io.FileUtils;
 import org.dawb.common.util.io.FileUtils;
 import org.dawb.workbench.ui.editors.zip.ZipUtils;
 import org.dawb.workbench.ui.views.PlotDataPage;
@@ -25,6 +22,7 @@ import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.IPlottingSystemSelection;
 import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.tool.IToolPageSystem;
+import org.dawnsci.slicing.api.system.ISliceSystem;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -42,7 +40,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 
 
-public class ZipEditor extends MultiPageEditorPart implements ISlicablePlottingPart /**, IReusableEditor TODO Fix this **/, IPlottingSystemSelection {
+public class ZipEditor extends MultiPageEditorPart implements  IPlottingSystemSelection {
 
 	public static final String ID = "org.dawb.workbench.editor.ZipEditor"; //$NON-NLS-1$
 
@@ -195,14 +193,6 @@ public class ZipEditor extends MultiPageEditorPart implements ISlicablePlottingP
 		return false;
 	}
 
-	@Override
-	public IVariableManager getDataSetComponent() {
-		return dataSetEditor.getDataSetComponent();
-	}
-	@Override
-	public SliceComponent getSliceComponent() {
-		return  dataSetEditor.getSliceComponent();
-	}
 	
 	@Override
 	public void setActivePage(final int ipage) {
@@ -233,6 +223,12 @@ public class ZipEditor extends MultiPageEditorPart implements ISlicablePlottingP
 				final Object ret = getEditor(i).getAdapter(clazz);
 				if (ret!=null && ret instanceof IToolPageSystem) return ret;
 			}
+		} else if (clazz == IPlottingSystem.class) {
+			if (dataSetEditor!=null) return dataSetEditor.getPlottingSystem();
+		} else if (clazz == IVariableManager.class) {
+			return dataSetEditor.getDataSetComponent();
+		} else if (clazz == ISliceSystem.class) {
+			return dataSetEditor.getSliceComponent();
 		}
 		
 		return super.getAdapter(clazz);
@@ -241,12 +237,17 @@ public class ZipEditor extends MultiPageEditorPart implements ISlicablePlottingP
 
 	@Override
 	public AbstractDataset setDatasetSelected(String name, boolean clearOthers) {
-		return (AbstractDataset)((IPlottingSystemSelection)getDataSetComponent()).setDatasetSelected(name, clearOthers);
+		IVariableManager man = (IVariableManager)getAdapter(IVariableManager.class);
+		if (man==null) return null;
+		return (AbstractDataset)((IPlottingSystemSelection)man).setDatasetSelected(name, clearOthers);
 	}
 
 	@Override
 	public void setAll1DSelected(boolean overide) {
-		((IPlottingSystemSelection)getDataSetComponent()).setAll1DSelected(overide);
+		IVariableManager man = (IVariableManager)getAdapter(IVariableManager.class);
+		if (man==null) return;
+		((IPlottingSystemSelection)man).setAll1DSelected(overide);
 	}
+
 
 }

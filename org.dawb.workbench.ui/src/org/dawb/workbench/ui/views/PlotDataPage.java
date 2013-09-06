@@ -16,15 +16,17 @@ import java.util.List;
 
 import org.dawb.common.services.IExpressionObject;
 import org.dawb.common.services.IVariableManager;
-import org.dawb.common.ui.editors.ICheckableObject;
-import org.dawb.common.ui.editors.IDatasetEditor;
-import org.dawb.common.ui.editors.IPlotUpdateParticipant;
-import org.dawb.common.ui.slicing.SliceComponent;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.workbench.ui.editors.CheckableObject;
 import org.dawb.workbench.ui.editors.PlotDataComponent;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlotType;
+import org.dawnsci.slicing.api.SlicingFactory;
+import org.dawnsci.slicing.api.data.ICheckableObject;
+import org.dawnsci.slicing.api.editor.IDatasetEditor;
+import org.dawnsci.slicing.api.plot.IPlotUpdateParticipant;
+import org.dawnsci.slicing.api.system.ISliceSystem;
+import org.dawnsci.slicing.api.system.SliceSource;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
@@ -62,7 +64,7 @@ public class PlotDataPage extends Page implements IPlotUpdateParticipant, IAdapt
 	private IDatasetEditor          editor;
 	private PlotDataComponent       dataSetComponent;
 	private IResourceChangeListener resourceListener;
-	private SliceComponent          sliceComponent;
+	private ISliceSystem            sliceComponent;
 	private Composite               content;
 	
 	private static final Collection<String> INACTIVE_PERSPECTIVES;
@@ -167,9 +169,9 @@ public class PlotDataPage extends Page implements IPlotUpdateParticipant, IAdapt
 			};
 			workspace.addResourceChangeListener(resourceListener);
 			
-			this.sliceComponent = new SliceComponent("org.dawb.workbench.views.h5GalleryView");
+			this.sliceComponent = SlicingFactory.createSliceSystem("org.dawb.workbench.views.h5GalleryView");
 			sliceComponent.setPlottingSystem(this.dataSetComponent.getPlottingSystem());
-			sliceComponent.setDataReductionAction(dataSetComponent.getDataReductionAction());
+			sliceComponent.addCustomAction(dataSetComponent.getDataReductionAction());
 			sliceComponent.createPartControl(form);
 			sliceComponent.setVisible(false);
 	
@@ -218,12 +220,12 @@ public class PlotDataPage extends Page implements IPlotUpdateParticipant, IAdapt
 		
 		if (object.isExpression()) {
 			final ILazyDataset lazy = object.getExpression().getLazyDataSet(object.getVariable(), new IMonitor.Stub());
-		    sliceComponent.setData(lazy, object.getName(), filePath, true);
+		    sliceComponent.setData(new SliceSource(lazy, object.getName(), filePath, true));
 		} else {
 			try {
 				final DataHolder holder = LoaderFactory.getData(filePath, new IMonitor.Stub());
 				final ILazyDataset lazy = holder.getLazyDataset(object.getName());
-			    sliceComponent.setData(lazy, object.getName(), filePath, false);
+			    sliceComponent.setData(new SliceSource(lazy, object.getName(), filePath, false));
 			} catch (Throwable e) {
 				logger.error("Cannot load lazy data!", e);
 			}
@@ -235,7 +237,7 @@ public class PlotDataPage extends Page implements IPlotUpdateParticipant, IAdapt
 		return dataSetComponent.getPlotMode();
 	}
 
-	public SliceComponent getSliceComponent() {
+	public ISliceSystem getSliceComponent() {
 		return sliceComponent;
 	}
 	
@@ -253,6 +255,10 @@ public class PlotDataPage extends Page implements IPlotUpdateParticipant, IAdapt
 			return exprs;
 		} else if (type == IFile.class) {
 			return dataSetComponent.getIFile(false);
+		}else if (type == ISliceSystem.class) {
+			return sliceComponent;
+		} else if (type == IVariableManager.class) {
+			return dataSetComponent;
 		}
 		return null;
 	}

@@ -10,14 +10,13 @@
 package org.dawb.workbench.ui.editors;
 
 import org.dawb.common.services.IVariableManager;
-import org.dawb.common.ui.slicing.ISlicablePlottingPart;
-import org.dawb.common.ui.slicing.SliceComponent;
 import org.dawb.workbench.ui.views.PlotDataPage;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.IPlottingSystemSelection;
 import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.dawnsci.plotting.api.trace.ColorOption;
+import org.dawnsci.slicing.api.system.ISliceSystem;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -33,7 +32,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.rcp.editors.TextDataEditor;
 
 
-public class AsciiEditor extends MultiPageEditorPart implements ISlicablePlottingPart, IPlottingSystemSelection {
+public class AsciiEditor extends MultiPageEditorPart implements IPlottingSystemSelection {
 
 	public static final String ID = "org.dawb.workbench.editors.AsciiEditor"; //$NON-NLS-1$
 
@@ -130,15 +129,6 @@ public class AsciiEditor extends MultiPageEditorPart implements ISlicablePlottin
 	public boolean isSaveAsAllowed() {
 		return false;
 	}
-
-	@Override
-	public IVariableManager getDataSetComponent() {
-		return dataSetEditor.getDataSetComponent();
-	}
-	@Override
-	public SliceComponent getSliceComponent() {
-		return  dataSetEditor.getSliceComponent();
-	}
 	
 	@Override
 	public void setActivePage(final int ipage) {
@@ -157,7 +147,7 @@ public class AsciiEditor extends MultiPageEditorPart implements ISlicablePlottin
 		return dataSetEditor;
 	}
 	
-    public Object getAdapter(final Class clazz) {
+	public Object getAdapter(final Class clazz) {
 		
     	// TODO FIXME for IContentProvider return a Page which shows the value
     	// of plotted data. Bascially the same as the CSVPage.
@@ -167,6 +157,12 @@ public class AsciiEditor extends MultiPageEditorPart implements ISlicablePlottin
 			return PlotDataPage.getPageFor(ed);
 		} else if (clazz == IToolPageSystem.class) {
 			if (dataSetEditor!=null) return dataSetEditor.getPlottingSystem();
+		} else if (clazz == IPlottingSystem.class) {
+			if (dataSetEditor!=null) return dataSetEditor.getPlottingSystem();
+		} else if (clazz == IVariableManager.class) {
+			return dataSetEditor.getDataSetComponent();
+		} else if (clazz == ISliceSystem.class) {
+			return dataSetEditor.getSliceComponent();
 		}
 		
 		return super.getAdapter(clazz);
@@ -174,12 +170,14 @@ public class AsciiEditor extends MultiPageEditorPart implements ISlicablePlottin
 
 	@Override
 	public AbstractDataset setDatasetSelected(String name, boolean clearOthers) {
-		return (AbstractDataset)((IPlottingSystemSelection)getDataSetComponent()).setDatasetSelected(name, clearOthers);
+		final IVariableManager man = (IVariableManager)getAdapter(IVariableManager.class);
+		return (AbstractDataset)((IPlottingSystemSelection)man).setDatasetSelected(name, clearOthers);
 	}
 
 	@Override
 	public void setAll1DSelected(boolean overide) {
-		((IPlottingSystemSelection)getDataSetComponent()).setAll1DSelected(overide);
+		final IVariableManager man = (IVariableManager)getAdapter(IVariableManager.class);
+		((IPlottingSystemSelection)man).setAll1DSelected(overide);
 	}
 
 	public String toString(){

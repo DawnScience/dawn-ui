@@ -11,7 +11,7 @@ package org.dawb.workbench.ui.editors;
 
 import java.util.Arrays;
 
-import org.dawb.common.ui.editors.ICheckableObject;
+import org.dawnsci.slicing.api.data.ICheckableObject;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 

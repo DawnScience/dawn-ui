@@ -27,12 +27,8 @@ import org.dawb.common.services.IExpressionObject;
 import org.dawb.common.services.IExpressionObjectService;
 import org.dawb.common.services.IVariableManager;
 import org.dawb.common.ui.DawbUtils;
-import org.dawb.common.ui.editors.ICheckableObject;
-import org.dawb.common.ui.editors.IDatasetEditor;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
-import org.dawb.common.ui.slicing.DimsDataList;
-import org.dawb.common.ui.slicing.ISlicablePlottingPart;
 import org.dawb.common.ui.util.DialogUtils;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.util.io.FileUtils;
@@ -57,6 +53,10 @@ import org.dawnsci.plotting.api.tool.ToolChangeEvent;
 import org.dawnsci.plotting.api.trace.ITraceListener;
 import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.tools.reduction.DataReductionWizard;
+import org.dawnsci.slicing.api.data.ICheckableObject;
+import org.dawnsci.slicing.api.editor.IDatasetEditor;
+import org.dawnsci.slicing.api.system.DimsDataList;
+import org.dawnsci.slicing.api.system.ISliceSystem;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -685,16 +685,16 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	}
 	
 	protected DimsDataList getSliceData() {
-		if (providerDeligate instanceof ISlicablePlottingPart) {
-			return ((ISlicablePlottingPart)providerDeligate).getSliceComponent().getDimsDataList();
-		}
+		final ISliceSystem system = (ISliceSystem)providerDeligate.getAdapter(ISliceSystem.class);
+		if (system!=null) return system.getDimsDataList();
+	
 		return null;
 	}
 	
 	protected ILazyDataset getSliceSet() {
-		if (providerDeligate instanceof ISlicablePlottingPart) {
-			return ((ISlicablePlottingPart)providerDeligate).getSliceComponent().getLazyDataset();
-		}
+		final ISliceSystem system = (ISliceSystem)providerDeligate.getAdapter(ISliceSystem.class);
+		if (system!=null) return system.getData().getLazySet();
+
 		return null;
 	}
 

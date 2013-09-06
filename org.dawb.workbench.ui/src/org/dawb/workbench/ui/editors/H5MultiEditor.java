@@ -14,17 +14,17 @@ import java.util.Collection;
 
 import org.dawb.common.services.IVariableManager;
 import org.dawb.common.ui.editors.EditorExtensionFactory;
-import org.dawb.common.ui.slicing.ISlicablePlottingPart;
-import org.dawb.common.ui.slicing.SliceComponent;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.hdf5.editor.H5Editor;
 import org.dawb.hdf5.editor.H5ValuePage;
 import org.dawb.hdf5.editor.IH5Editor;
 import org.dawb.workbench.ui.views.PlotDataPage;
+import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.IPlottingSystemSelection;
 import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.dawnsci.plotting.api.trace.ColorOption;
+import org.dawnsci.slicing.api.system.ISliceSystem;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.ui.IEditorInput;
@@ -43,7 +43,7 @@ import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.rcp.editors.HDF5TreeEditor;
 
 
-public class H5MultiEditor extends MultiPageEditorPart  implements ISlicablePlottingPart, IReusableEditor, IPlottingSystemSelection, IH5Editor {
+public class H5MultiEditor extends MultiPageEditorPart  implements IReusableEditor, IPlottingSystemSelection, IH5Editor {
 
 	// The property org.dawb.editor.h5.use.default is set by default in dawb / dawn vanilla
 	// The property org.dawb.editor.h5.use.default is not set in SDA.
@@ -175,16 +175,6 @@ public class H5MultiEditor extends MultiPageEditorPart  implements ISlicablePlot
 	}
 	
 	@Override
-	public IVariableManager getDataSetComponent() {
-		if (dataSetEditor==null) return null;
-		return dataSetEditor.getDataSetComponent();
-	}
-	@Override
-	public SliceComponent getSliceComponent() {
-		if (dataSetEditor==null) return null;
-		return  dataSetEditor.getSliceComponent();
-	}	
-	@Override
 	public void setActivePage(final int ipage) {
 		super.setActivePage(ipage);
 	}
@@ -209,6 +199,12 @@ public class H5MultiEditor extends MultiPageEditorPart  implements ISlicablePlot
 			return new H5ValuePage();
 		} else if (clazz == IToolPageSystem.class) {
 			if (dataSetEditor!=null) return dataSetEditor.getPlottingSystem();
+		} else if (clazz == IPlottingSystem.class) {
+			if (dataSetEditor!=null) return dataSetEditor.getPlottingSystem();
+		} else if (clazz == IVariableManager.class) {
+			return dataSetEditor.getDataSetComponent();
+		} else if (clazz == ISliceSystem.class) {
+			return dataSetEditor.getSliceComponent();
 		}
 		
 		return super.getAdapter(clazz);
@@ -217,13 +213,16 @@ public class H5MultiEditor extends MultiPageEditorPart  implements ISlicablePlot
 
 	@Override
 	public AbstractDataset setDatasetSelected(String name, boolean clearOthers) {
-		return (AbstractDataset)((IPlottingSystemSelection)getDataSetComponent()).setDatasetSelected(name, clearOthers);
+		IVariableManager man = (IVariableManager)getAdapter(IVariableManager.class);
+		if (man==null) return null;
+		return (AbstractDataset)((IPlottingSystemSelection)man).setDatasetSelected(name, clearOthers);
 	}
 
 	@Override
 	public void setAll1DSelected(boolean overide) {
-		if (getDataSetComponent()==null) return;
-		((IPlottingSystemSelection)getDataSetComponent()).setAll1DSelected(overide);
+		IVariableManager man = (IVariableManager)getAdapter(IVariableManager.class);
+		if (man==null) return;
+		((IPlottingSystemSelection)man).setAll1DSelected(overide);
 	}
 
 	@Override

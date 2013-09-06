@@ -15,12 +15,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.dawb.common.ui.editors.IDatasetEditor;
 import org.dawb.common.ui.util.CSVUtils;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.workbench.ui.Activator;
 import org.dawb.workbench.ui.editors.preference.EditorConstants;
+import org.dawnsci.slicing.api.editor.IDatasetEditor;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ContributionManager;

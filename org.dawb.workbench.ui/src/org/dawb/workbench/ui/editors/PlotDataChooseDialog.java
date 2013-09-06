@@ -3,7 +3,7 @@ package org.dawb.workbench.ui.editors;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.dawb.common.ui.editors.ICheckableObject;
+import org.dawnsci.slicing.api.data.ICheckableObject;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;

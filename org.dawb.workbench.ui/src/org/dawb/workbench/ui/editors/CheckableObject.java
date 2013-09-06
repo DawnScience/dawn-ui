@@ -14,8 +14,8 @@ import java.util.List;
 import org.dawb.common.services.IExpressionObject;
 import org.dawb.common.services.IExpressionObjectService;
 import org.dawb.common.services.IVariableManager;
-import org.dawb.common.ui.editors.ICheckableObject;
 import org.dawb.hdf5.editor.H5Path;
+import org.dawnsci.slicing.api.data.ICheckableObject;
 import org.eclipse.ui.PlatformUI;
 
 public class CheckableObject implements H5Path, ICheckableObject{

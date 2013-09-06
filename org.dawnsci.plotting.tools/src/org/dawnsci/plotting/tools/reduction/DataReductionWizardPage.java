@@ -6,13 +6,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.dawb.common.services.conversion.IConversionContext;
-import org.dawb.common.ui.slicing.DimensionalEvent;
-import org.dawb.common.ui.slicing.DimensionalListener;
-import org.dawb.common.ui.slicing.DimsData;
-import org.dawb.common.ui.slicing.DimsDataList;
-import org.dawb.common.ui.slicing.SliceUtils;
 import org.dawb.common.ui.wizard.AbstractSliceConversionPage;
 import org.dawnsci.plotting.api.tool.IToolPage;
+import org.dawnsci.slicing.api.system.DimensionalEvent;
+import org.dawnsci.slicing.api.system.DimensionalListener;
+import org.dawnsci.slicing.api.system.DimsData;
+import org.dawnsci.slicing.api.system.DimsDataList;
+import org.dawnsci.slicing.api.util.SliceUtils;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.widgets.Composite;
 
@@ -88,19 +88,27 @@ public class DataReductionWizardPage extends AbstractSliceConversionPage {
 	 * @return
 	 */
 	protected List<IDataset> getNexusAxes() throws Exception {
-		final Map<Integer, String> names = sliceComponent.getNexusAxes();
+		final Map<Integer, String> names = sliceComponent.getAxesNames();
 		final DimsDataList ddl = sliceComponent.getDimsDataList();
 		
 		IDataset x=null; IDataset y=null;
 		for (DimsData dd : ddl.getDimsData()) {
 			
-			if (dd.getAxis()==0) {
+			if (dd.getPlotAxis()==0) {
 				final String name = names.get(dd.getDimension()+1);
-				x = SliceUtils.getNexusAxis(sliceComponent.getCurrentSlice(), name, false, null);
+				try {
+					x = SliceUtils.getNexusAxis(sliceComponent.getCurrentSlice(), name, false, null);
+				} catch (Throwable e) {
+					return null;
+				}
 			}
-			if (dd.getAxis()==1) {
+			if (dd.getPlotAxis()==1) {
 				final String name = names.get(dd.getDimension()+1);
-				y = SliceUtils.getNexusAxis(sliceComponent.getCurrentSlice(), name, false, null);
+				try {
+					y = SliceUtils.getNexusAxis(sliceComponent.getCurrentSlice(), name, false, null);
+				} catch (Throwable e) {
+					return null;
+				}
 			}
 
 		}
