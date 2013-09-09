@@ -2,7 +2,7 @@
 <cheatsheet title="Simple Image Polling Example">
 	<intro>
 		<description>
-			This example will show you how to midify the colour mapping on an image to get the best out of your data.
+			This example will show you how to modify the colour mapping on an image to get the best out of your data.
 		</description>
 	</intro>
 	<item title="Go to the data browsing perspective">
@@ -22,7 +22,7 @@
 	</item>
 	<item title="Open the colour mapping tool">
 		<description>
-			At the top of the area where the image is now displated is a toolbar, in this you need to select the dropdown associated with the "Image tools" icon which is to the far right of the toolbar.  
+			At the top of the area where the image is now displayed is a toolbar, in this you need to select the dropdown associated with the "Image tools" icon which is to the far right of the toolbar.  
 			<br/><br/>In this dropdown select the <b>Colour Mapping</b> tool, this should open the colour mapping tool page.
 			<br/><br/>This tool page has many elements which we will deal with shortly, but the main point of interest is the <b>Histogram Plot</b> at the bottom which shows the histogram information of the plot which is currently showing.
 			
@@ -54,7 +54,7 @@
 	
 	<item title="Histogram Range">
 		<description>
-			This does exactly what the brightness and contrast do, but in a different way, by specifying the maximuma nd minimum values of the histogram plot, and colour mapping.
+			This does exactly what the brightness and contrast do, but in a different way, by specifying the maximum and minimum values of the histogram plot, and colour mapping.
 			<br/><br/>Expand the <b>Histogram Range</b> section which shows similar sliders to the Brightness Contrast page.
 			<br/><br/>When you move these sliders you will see the <b>Histogram Plot</b> and the <b>Brightness and Contrast Sliders</b> update, and the image change appropriately.
 			<br/><br/>Select the image window and press <b>h</b> again to reset the values 
@@ -63,11 +63,11 @@
 	
 	<item title="Dead Pixels and Zingers">
 		<description>
-			This tool sets teh maximum and minimum values you wisth the image to display, and entering values in here will effect all the other sliders and plots.
-			<br/><br/>Expand the <b>Dead pixel and Zinger Cutoffs</b> section to acess this tool, and it simply shows 2 boxes which specify these cutoffs, By default (and if you press the reset button) these are set to positive and negative infinity.
-			<br/><br/>For now set the <b>Dead Pixel Max Cuttof</b> to 100 and the <b>Zinger Min Value cutoff</b> to 500, pressing enter after typing in each value.
-			<br/><br/>Looking back at the image you should see latge parts of it are now blue(showing dead pixels) or red (showing zingers), you will also notice that the sliders now only have a range from 100-500.
-			<br/><br/>Press the reset button to go back to positiva and negative infinity.
+			This tool sets the maximum and minimum values you wish the image to display, and entering values in here will effect all the other sliders and plots.
+			<br/><br/>Expand the <b>Dead pixel and Zinger Cutoffs</b> section to access this tool, and it simply shows 2 boxes which specify these cutoffs, By default (and if you press the reset button) these are set to positive and negative infinity.
+			<br/><br/>For now set the <b>Dead Pixel Max Cutoff</b> to 100 and the <b>Zinger Min Value cutoff</b> to 500, pressing enter after typing in each value.
+			<br/><br/>Looking back at the image you should see large parts of it are now blue(showing dead pixels) or red (showing zingers), you will also notice that the sliders now only have a range from 100-500.
+			<br/><br/>Press the reset button to go back to positive and negative infinity.
 		</description>
 
 		<onCompletion>
