@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<introContent>
+	<extensionContent id="org.dawb.workbench.ui.cheatsheets" style="style.css" name="Basic Data Viewing Tutorials" path="tutorials/@">
+		<group label="Basic Data Viewing" style-id="content-group" id="basic-dataviewing-group">
+
+      		<link label="Basic Image File Viewing" url="http://org.eclipse.ui.intro/showStandby?partId=org.dawnsci.intro.cheatsheet&amp;input=org.dawb.workbench.ui.editors.imagesbasic" id="sheetitem">
+				<text>
+					This cheat sheet helps you to open any image file, shows you how to zoom and extract data from the image.
+				</text>
+			</link>
+			<link label="Using HDF5 and Nexus Files" url="http://org.eclipse.ui.intro/showStandby?partId=org.dawnsci.intro.cheatsheet&amp;input=org.dawb.workbench.ui.editors.nexus" id="sheetitem">
+				<text>
+					This cheat sheet helps you to open an example nexus file, plot data from it and navigate the tree of data.
+				</text>
+			</link>
+			<link label="Using Image Files (Fable Image Viewer)" url="http://org.eclipse.ui.intro/showStandby?partId=org.dawnsci.intro.cheatsheet&amp;input=org.dawb.workbench.ui.editors.images" id="sheetitem">
+				<text>
+					This cheat sheet helps you to open any image file, shows you how to zoom and extract data from the image.
+				</text>
+			</link>
+			<link label="X/Y Plots" url="http://org.eclipse.ui.intro/showStandby?partId=org.dawnsci.intro.cheatsheet&amp;input=org.dawb.workbench.ui.editors.1d" id="sheetitem">
+				<text>
+					This cheat sheet helps you to open an ascii file, and shows you how to plot different values against each other.
+				</text>
+			</link>
+       	</group>
+  	</extensionContent>
+</introContent>
