@@ -741,6 +741,8 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 			return PlotDataPage.getPageFor(ed);
 		} else if (clazz == IToolPageSystem.class || clazz == IPlottingSystem.class) {
 			return getPlottingSystem();
+		} else if (clazz == ISliceSystem.class) {
+			return getSliceComponent();
 		}
 		
 		return super.getAdapter(clazz);

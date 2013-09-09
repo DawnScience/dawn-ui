@@ -49,6 +49,7 @@ import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.axis.IAxis;
 import org.dawnsci.plotting.api.tool.IToolChangeListener;
 import org.dawnsci.plotting.api.tool.IToolPage;
+import org.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.dawnsci.plotting.api.tool.ToolChangeEvent;
 import org.dawnsci.plotting.api.trace.ITraceListener;
 import org.dawnsci.plotting.api.trace.TraceEvent;
@@ -753,7 +754,8 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	protected boolean isDataReductionToolActive() {
 		
 		if (H5Loader.isH5(getFileName())) {
-			IToolPage tool = getAbstractPlottingSystem().getActiveTool();
+			IToolPageSystem toolSystem = (IToolPageSystem)getPlottingSystem().getAdapter(IToolPageSystem.class);
+			IToolPage tool = toolSystem.getActiveTool();
 			return tool!=null && tool instanceof IDataReductionToolPage;
 		}
 		return false;
