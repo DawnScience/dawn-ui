@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <introContent>
 	<extensionContent id="plotting-tools-tutorials" style="style.css" name="Plotting Tools Tutorials" path="tutorials/@">
-		<group label="Plotting Tools" style-id="content-group" id="plotting-tools-group">
+		<group style-id="content-group" id="plotting-tools-group">
 
       		<link label="Azimuthal Profile" url="http://org.eclipse.ui.intro/showStandby?partId=org.dawnsci.intro.cheatsheet&amp;input=org.dawb.workbench.plotting.cheatsheet.aziprofile" id="sheetitem">
 				<text>
