@@ -54,6 +54,7 @@ import org.eclipse.draw2d.MouseListener;
 import org.eclipse.draw2d.MouseMotionListener;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
@@ -62,6 +63,7 @@ import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -93,6 +95,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	private Logger logger = LoggerFactory.getLogger(PlottingSystemImpl.class);
 
 	private Composite      parent;
+	private StackLayout    stackLayout;
 
 	private PlotActionsManagerImpl       actionBarManager;
 	private LightWeightPlotViewer        lightWeightViewer;
@@ -106,6 +109,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	}
 
 	private boolean containerOverride = false;
+
 
 	public void createPlotPart(final Composite      container,
 							   final String         plotName,
@@ -125,9 +129,9 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		    logger.debug("Cannot deal with "+PageBook.PageBookLayout.class.getName()+" and 3D at the moment!");
 		} else {
 		    this.containerOverride = true;
-			this.parent       = new Composite(container, SWT.NONE);
-			final StackLayout layout = new StackLayout();
-			this.parent.setLayout(layout);
+			this.parent            = new Composite(container, SWT.NONE);
+			this.stackLayout       = new StackLayout();
+			this.parent.setLayout(stackLayout);
 			parent.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		}
 
@@ -141,6 +145,28 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			container.layout();
 		}
 	}
+	
+	@Override
+	public Control setControl(Control alternative, boolean showPlotToolbar) {
+		
+		if (stackLayout==null) throw new IllegalArgumentException("The plotting system is not in StackLayout mode and cannot show alternative controls!");
+		Control previous = stackLayout.topControl;
+		stackLayout.topControl = alternative;
+        
+		Control toolBar = ((ToolBarManager)getActionBars().getToolBarManager()).getControl();
+		if (toolBar.getLayoutData() instanceof GridData) { // It is our toolbar
+			Control toolbarControl = toolBar.getParent();
+			if (toolbarControl.getLayoutData() instanceof GridData) {
+				GridUtils.setVisible(toolbarControl, showPlotToolbar);
+				toolbarControl.getParent().layout(new Control[]{toolbarControl});
+			}
+		}
+		
+		parent.layout();
+		
+		return previous;
+	}
+	
 
 	@Override
 	protected PlottingActionBarManager createActionBarManager() {

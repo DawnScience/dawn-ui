@@ -33,6 +33,16 @@
             id="org.dawnsci.slicing.tools.surfaceSlicingTool"
             tooltip="Slice as surface">
       </slicing_tool>
+      
+      <!--
+      <slicing_tool
+            class="org.dawnsci.slicing.tools.hyper.HyperSlicingTool"
+            icon="icons/cutter.png"
+            id="org.dawnsci.slicing.tools.hyperSlicingTool"
+            tooltip="Hyper 3D Slicing">
+      </slicing_tool>
+      -->
+      
    </extension>
    <extension
          point="org.eclipse.ui.views">

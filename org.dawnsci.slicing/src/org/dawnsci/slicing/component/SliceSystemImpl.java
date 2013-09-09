@@ -1244,7 +1244,7 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 
 		try {
 			SliceObject cs = SliceUtils.createSliceObject(dimsDataList, dataShape, sliceObject);
-			sliceJob.schedule(cs);
+			sliceJob.schedule(cs, force);
 		} catch (Exception e) {
 			logger.error("Cannot create a slice object!");
 		}
@@ -1300,6 +1300,7 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 	 * @param vis
 	 */
 	public void setVisible(final boolean vis) {
+		super.setVisible(vis);
 		area.setVisible(vis);
 		area.getParent().layout(new Control[]{area});
 		if (plottingSystem!=null && !vis) plottingSystem.setPlotType(PlotType.XY);
@@ -1344,14 +1345,16 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 				monitor.worked(1);
 				if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 			
-				// TODO FIXME Allow the current slice tool to dictate how to 
-				// process the slice?
-				SliceUtils.plotSlice(lazySet,
-						             slice, 
-						             dataShape, 
-						             (PlotType)sliceType, 
-						             plottingSystem, 
-						             monitor);
+				if (sliceType instanceof PlotType) {
+					// TODO FIXME Allow the current slice tool to dictate how to 
+					// process the slice?
+					SliceUtils.plotSlice(lazySet,
+							             slice, 
+							             dataShape, 
+							             (PlotType)sliceType, 
+							             plottingSystem, 
+							             monitor);
+				}
 			} catch (Exception e) {
 				logger.error("Cannot slice "+slice.getName(), e);
 				System.out.println(slice);
@@ -1362,8 +1365,8 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 			return Status.OK_STATUS;
 		}
 
-		public void schedule(SliceObject cs) {
-			if (slice!=null && slice.equals(cs)) return;
+		public void schedule(SliceObject cs, boolean force) {
+			if (force==false && slice!=null && slice.equals(cs)) return;
 			cancel();
 			this.slice = cs;
 			schedule();

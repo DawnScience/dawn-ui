@@ -274,7 +274,21 @@ public abstract class AbstractSliceSystem implements ISliceSystem {
 		return activeTool;
 	}
 
-	public void setActiveTool(ISlicingTool activeTool) {
-		this.activeTool = activeTool;
+	/**
+	 * Call this method if overriding.
+	 */
+	@Override
+	public void setVisible(final boolean vis) {
+		if (activeTool!=null) {
+			try {
+				if (vis) {
+					activeTool.militarize();
+				} else {
+					activeTool.demilitarize();
+				}
+			} catch (Throwable ne) {
+				logger.error("Cannot change militarized state of slice tool! "+activeTool.getToolId());
+			}
+		}
 	}
 }

@@ -54,6 +54,7 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.Page;
@@ -83,6 +84,7 @@ public class HyperComponent {
 	private IRegion windowRegion;
 	private Composite mainComposite;
 	private IWorkbenchPart part;
+	private SashForm sashForm;
 	private final static Logger logger = LoggerFactory.getLogger(HyperComponent.class);
 	
 	public HyperComponent(IWorkbenchPart part) {
@@ -90,13 +92,17 @@ public class HyperComponent {
 	}
 
 	public void createControl(Composite parent) {
-		parent.setLayout(new FillLayout());
-		SashForm sashForm = new SashForm(parent, SWT.HORIZONTAL);
+
+		this.sashForm = new SashForm(parent, SWT.HORIZONTAL);
 		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,2,1));
 		sashForm.setBackground(new Color(parent.getDisplay(), 192, 192, 192));
 		
 		createPlottingSystems(sashForm);
 	}
+	
+    public Control getControl() {
+    	return sashForm;
+    }
 	
 	public void setData(ILazyDataset lazy, List<AbstractDataset> daxes, Slice[] slices, int[] order) {
 		this.setData(lazy, daxes, slices, order, new TraceReducer(), new ImageTrapeziumBaselineReducer());

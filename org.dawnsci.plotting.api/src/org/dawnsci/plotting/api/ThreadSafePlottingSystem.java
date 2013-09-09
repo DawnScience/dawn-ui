@@ -33,6 +33,7 @@ import org.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchPart;
@@ -60,6 +61,10 @@ public class ThreadSafePlottingSystem extends StandardMBean implements IPlotting
 	@Override
 	public IImageTrace createImageTrace(String traceName) {
 		return (IImageTrace)call(getMethodName(Thread.currentThread().getStackTrace()), traceName);
+	}
+	
+	public Control setControl(Control alternative, boolean isToolbar) {
+		throw new RuntimeException("Expert method "+getMethodName(Thread.currentThread().getStackTrace())+" is not allowed in JMX mode!");
 	}
 
 	@Override

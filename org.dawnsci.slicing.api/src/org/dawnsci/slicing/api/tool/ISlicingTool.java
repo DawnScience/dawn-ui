@@ -1,6 +1,7 @@
 package org.dawnsci.slicing.api.tool;
 
 import org.dawnsci.slicing.api.system.ISliceSystem;
+import org.eclipse.core.runtime.IAdaptable;
 
 /**
  * A tool which integrates to the slicing system to 
@@ -11,7 +12,7 @@ import org.dawnsci.slicing.api.system.ISliceSystem;
  * @author fcp94556
  *
  */
-public interface ISlicingTool {
+public interface ISlicingTool extends IAdaptable {
 	
 	/**
 	 * Called when the tool changes the slicing and
