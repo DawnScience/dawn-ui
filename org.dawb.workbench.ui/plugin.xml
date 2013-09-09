@@ -356,5 +356,9 @@
             configId="org.dawnsci.intro.universalConfig"
             content="intro/data.xml">
       </configExtension>
+      <configExtension
+            configId="org.dawnsci.intro.universalConfig"
+            content="intro/tutorials.xml">
+      </configExtension>
    </extension>
 </plugin>
