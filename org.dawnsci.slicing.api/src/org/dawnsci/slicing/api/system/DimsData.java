@@ -31,6 +31,19 @@ public class DimsData implements Serializable {
 	 */
 	private static final long serialVersionUID = -6889488003603498855L;
 
+	/**
+	 * The slice index if this dimension is sliced.
+	 * 
+	 * Should not really be public:
+
+	 * THIS METHOD IS PUBLIC BECAUSE THE BEAN REFLECTION WAS NOT WORKING
+	 * AND SAVING THE SLICE IN JAVA7. BY MAKING IT PUBLIC THE GETTERS AND
+	 * SETTERS ARE NOT RELIED ON AND IT SETS VALUE DIRECTLY.
+	 * 
+	 */
+	public int       slice=0;
+
+
 	@DOEField(value=1, type=java.lang.Integer.class)
 	private String    sliceRange;
 
@@ -43,7 +56,6 @@ public class DimsData implements Serializable {
 	 * 0=x, 1=y, 2=z
 	 */
 	private int       plotAxis=-1;
-	private int       slice=0;
 
 	public DimsData() {
 		
