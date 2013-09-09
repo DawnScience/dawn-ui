@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -36,13 +35,11 @@ import org.dawb.common.ui.components.cell.ScaleCellEditor;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.preferences.ViewConstants;
-import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.hdf5.HierarchicalDataFactory;
 import org.dawb.hdf5.nexus.NexusUtils;
 import org.dawnsci.common.widgets.celleditor.CComboCellEditor;
 import org.dawnsci.common.widgets.celleditor.SpinnerCellEditorWithPlayButton;
-import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
 import org.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
@@ -53,12 +50,9 @@ import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.api.trace.ITraceListener;
 import org.dawnsci.plotting.api.trace.PaletteEvent;
 import org.dawnsci.plotting.api.trace.TraceEvent;
-import org.dawnsci.slicing.api.system.DimensionalEvent;
-import org.dawnsci.slicing.api.system.DimensionalListener;
+import org.dawnsci.slicing.api.AbstractSliceSystem;
 import org.dawnsci.slicing.api.system.DimsData;
 import org.dawnsci.slicing.api.system.DimsDataList;
-import org.dawnsci.slicing.api.system.ISliceGallery;
-import org.dawnsci.slicing.api.system.ISliceSystem;
 import org.dawnsci.slicing.api.system.SliceSource;
 import org.dawnsci.slicing.api.util.SliceUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -70,6 +64,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
+import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
@@ -112,12 +107,8 @@ import org.eclipse.swt.widgets.Scale;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
-import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
@@ -132,33 +123,24 @@ import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
  *  
  *
  */
-public class SliceSystemImpl implements ISliceSystem {
-	
-
-	private static final Logger logger = LoggerFactory.getLogger(SliceSystemImpl.class);
+public class SliceSystemImpl extends AbstractSliceSystem {
 
 	private static final List<String> COLUMN_PROPERTIES = Arrays.asList(new String[]{"Dimension","Axis","Slice","Axis Data"});
 	
 	private ILazyDataset    lazySet; // The dataset that we are slicing.
-	private SliceObject     sliceObject;
 	private int[]           dataShape;
-	private IPlottingSystem plottingSystem;
 
 	private TableViewer     viewer;
-	private DimsDataList    dimsDataList;
 
 	private CLabel          errorLabel, explain;
 	private Link            openWindowing;
 	private Composite       area;
 	private boolean         isErrorCondition=false;
     private SliceJob        sliceJob;
-    private String          sliceReceiverId;
      
-    private PlotType        plotType=PlotType.IMAGE;
     private Action          updateAutomatically;
 
 	private ITraceListener.Stub traceListener;
-	private List<IAction> customActions;
 	
 	/**
 	 * 1 is first dimension, map of names available for axis, including indices.
@@ -170,7 +152,7 @@ public class SliceSystemImpl implements ISliceSystem {
 	 */
 	private NumberFormat format;
 
-	private ToolBarManager sliceToolbar;
+	private IToolBarManager sliceToolbar;
 
 	public SliceSystemImpl() {
 		this.sliceJob        = new SliceJob();
@@ -178,10 +160,6 @@ public class SliceSystemImpl implements ISliceSystem {
 		this.format          = DecimalFormat.getNumberInstance();
 	}
 	
-	@Override
-	public void setSliceGalleryId(String id) {
-		this.sliceReceiverId = id;
-	}
 	
 	@Override
 	public String getSliceName() {
@@ -205,8 +183,8 @@ public class SliceSystemImpl implements ISliceSystem {
 		eData.heightHint=44;
 		explain.setLayoutData(eData);
 	
-		this.sliceToolbar = createSliceActions();
-		final ToolBar        tool    = sliceToolbar.createControl(area);
+		this.sliceToolbar = createSliceTools();
+		final ToolBar        tool    = ((ToolBarManager)sliceToolbar).createControl(area);
 		tool.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, false));
 		
 		final Composite tableComp = new Composite(area, SWT.NONE);
@@ -328,13 +306,9 @@ public class SliceSystemImpl implements ISliceSystem {
 		    viewer.getTable().getColumn(3).setMoveable(true);
 		}
 	}
-	private boolean rangesAllowed = false;
-	public void setRangesAllowed(boolean isVis) {
-		rangesAllowed = isVis;
-	}
 
 	public void setSliceActionsEnabled(boolean enabled) {
-		sliceToolbar.getControl().setEnabled(enabled);
+		((ToolBarManager)sliceToolbar).getControl().setEnabled(enabled);
 	}
 	/**
 	 * 
@@ -348,105 +322,15 @@ public class SliceSystemImpl implements ISliceSystem {
     	iaction.getAction().run();
 	}
 	
-	private Map<PlotType, Action> plotTypeActions;
 	private Action                reverse;
 	/**
 	 * Creates the actions for 
 	 * @return
 	 */
-	private ToolBarManager createSliceActions() {
+	protected IToolBarManager createSliceTools() {
 
-		plotTypeActions= new HashMap<PlotType, Action>();
+		IToolBarManager man = super.createSliceTools();
 		
-		final ToolBarManager man = new ToolBarManager(SWT.FLAT|SWT.RIGHT);
-		man.add(new Separator("group1"));
-		
-        final CheckableActionGroup grp = new CheckableActionGroup();
-        final Action xyPlot = new Action("Slice as line plots", IAction.AS_CHECK_BOX) {
-        	public void run() {
-        		saveSliceSettings();
-        		boolean wasImage = plotType==PlotType.IMAGE || plotType==PlotType.SURFACE;
-        		plotType = PlotType.XY;
-        		// Loop over DimsData to ensure 1X only.
-        		if (dimsDataList!=null) {
-        			if (wasImage&&dimsDataList.isXFirst()) {
-        				dimsDataList.setSingleAxisOnly(1, 0);   		
-        			} else {
-        				dimsDataList.setSingleAxisOnly(0, 0);
-        			}
-        		}
-        		updatePlottingType();
-        	}
-		};
-		xyPlot.setId(xyPlot.getText());
-		man.add(xyPlot);
-		xyPlot.setImageDescriptor(Activator.getImageDescriptor("icons/TraceLine.png"));
-		grp.add(xyPlot);
-		plotTypeActions.put(PlotType.XY, xyPlot);
-		
-		
-        final Action stackPlot = new Action("Slice as a stack of line plots", IAction.AS_CHECK_BOX) {
-        	public void run() {
-        		saveSliceSettings();
-        		setChecked(true);
-        		plotType = PlotType.XY_STACKED;
-         		// Loop over DimsData to ensure 1X only.
-        		if (dimsDataList!=null) dimsDataList.setTwoAxisOnly(0, 1);   		
-        		updatePlottingType();
-         	}
-		};
-		stackPlot.setId(stackPlot.getText());
-		stackPlot.setImageDescriptor(Activator.getImageDescriptor("icons/TraceLines.png"));
-		grp.add(stackPlot);
-		plotTypeActions.put(PlotType.XY_STACKED, stackPlot);
-		man.add(stackPlot);
-
-        final Action stackPlot3D = new Action("Slice as a stack of line plots in 3D", IAction.AS_CHECK_BOX) {
-        	public void run() {
-        		saveSliceSettings();
-        		setChecked(true);
-        		plotType = PlotType.XY_STACKED_3D;
-        		// Loop over DimsData to ensure 1X only.
-        		if (dimsDataList!=null) dimsDataList.setTwoAxisOnly(0, 1);   		
-        		updatePlottingType();
-        	}
-		};
-		stackPlot3D.setId(stackPlot3D.getText());
-		man.add(stackPlot3D);
-		stackPlot3D.setImageDescriptor(Activator.getImageDescriptor("icons/TraceLines3D.png"));
-		grp.add(stackPlot3D);
-		plotTypeActions.put(PlotType.XY_STACKED_3D, stackPlot3D);
-			
-        final Action imagePlot = new Action("Slice as image", IAction.AS_CHECK_BOX) {
-        	public void run() {
-        		saveSliceSettings();
-       		    plotType = PlotType.IMAGE;
-        		if (dimsDataList!=null) dimsDataList.setTwoAxisOnly(0, 1);   		
-        		viewer.refresh();
-        		updatePlottingType();
-        	}
-		};
-		imagePlot.setId(imagePlot.getText());
-		man.add(imagePlot);
-		imagePlot.setImageDescriptor(Activator.getImageDescriptor("icons/TraceImage.png"));
-		grp.add(imagePlot);
-		plotTypeActions.put(PlotType.IMAGE, imagePlot);
-		
-        final Action surfacePlot = new Action("Slice as surface", IAction.AS_CHECK_BOX) {
-        	public void run() {
-        		saveSliceSettings();
-        		plotType = PlotType.SURFACE;
-        		if (dimsDataList!=null) dimsDataList.setTwoAxisOnly(0, 1);   		
-        		viewer.refresh();
-        		updatePlottingType();
-        	}
-		};
-		surfacePlot.setId(surfacePlot.getText());
-		man.add(surfacePlot);
-		surfacePlot.setImageDescriptor(Activator.getImageDescriptor("icons/TraceSurface.png"));
-		grp.add(surfacePlot);
-		plotTypeActions.put(PlotType.SURFACE, surfacePlot);
-		//surfacePlot.setEnabled(false);
 		
 		man.add(new Separator("group2"));
 		
@@ -496,10 +380,7 @@ public class SliceSystemImpl implements ISliceSystem {
 		asSpinner.setChecked(Activator.getDefault().getPreferenceStore().getInt(ViewConstants.SLICE_EDITOR)==1);
 		editorMenu.add(asSpinner);
 		
-		if (customActions!=null) {
-			man.add(new Separator("group5"));
-			for (IAction action : customActions) man.add(action);
-		}
+		createCustomActions(man);
 
 		man.add(new Separator("group6"));
 		this.reverse = new Action("Reverse image axes", Activator.getImageDescriptor("icons/reverse_axes.png")) {
@@ -513,32 +394,35 @@ public class SliceSystemImpl implements ISliceSystem {
 		return man;
 	}
 	
-	private Map<PlotType, DimsDataList> sliceSettings;
-	private void saveSliceSettings() {
+	private Map<Enum, DimsDataList> sliceSettings;
+	
+	@Override
+	protected void saveSliceSettings() {
 		if (dimsDataList==null || dimsDataList.isEmpty()) return;
-		if (sliceSettings == null) sliceSettings = new HashMap<PlotType, DimsDataList>(3);
+		if (sliceSettings == null) sliceSettings = new HashMap<Enum, DimsDataList>(3);
 		final DimsDataList ddl = dimsDataList.clone();
-		sliceSettings.put(plotType, ddl);
+		sliceSettings.put(sliceType, ddl);
 	}
 
 	
-	private void updatePlottingType() {
+	@Override
+	public void update() {
 		
 		viewer.cancelEditing();
-		if (sliceSettings!=null && sliceSettings.containsKey(plotType) && !dimsDataList.isEmpty()) {
-			this.dimsDataList = sliceSettings.get(plotType);
+		if (sliceSettings!=null && sliceSettings.containsKey(sliceType) && !dimsDataList.isEmpty()) {
+			this.dimsDataList = sliceSettings.get(sliceType);
 		}
 		
 		final String[] items = getAxisItems();
 		typeEditor.setItems(items);
 		
 		viewer.refresh();
-		reverse.setEnabled(plotType==PlotType.IMAGE||plotType==PlotType.SURFACE);
-		GridUtils.setVisible(openWindowing, plotType.is3D() && plottingSystem!=null);
+		reverse.setEnabled(sliceType==PlotType.IMAGE||sliceType==PlotType.SURFACE);
+		GridUtils.setVisible(openWindowing, is3D() && plottingSystem!=null);
 		openWindowing.getParent().layout(new Control[]{openWindowing});
 
 		// Save preference
-		Activator.getDefault().getPreferenceStore().setValue(SliceConstants.PLOT_CHOICE, plotType.toString());
+		Activator.getDefault().getPreferenceStore().setValue(SliceConstants.PLOT_CHOICE, sliceType.toString());
    		boolean isOk = updateErrorLabel();
    		if (isOk) slice(true);
    	}
@@ -668,29 +552,6 @@ public class SliceSystemImpl implements ISliceSystem {
 		}
 	}
 	
-	protected void openGallery() {
-		
-		if (sliceReceiverId==null) return;
-		SliceObject cs;
-		try {
-			cs = SliceUtils.createSliceObject(dimsDataList, dataShape, sliceObject);
-		} catch (Exception e1) {
-			logger.error("Cannot create a slice!");
-			return;
-		}
-		
-		IViewPart view;
-		try {
-			view = EclipseUtils.getActivePage().showView(sliceReceiverId);
-		} catch (PartInitException e) {
-			logger.error("Cannot find view "+sliceReceiverId);
-			return;
-		}
-		if (view instanceof ISliceGallery) {
-			((ISliceGallery)view).updateSlice(lazySet, cs);
-		}
-		
-	}
 
 	private void createDimsData(boolean isExpression) {
 		
@@ -708,7 +569,7 @@ public class SliceSystemImpl implements ISliceSystem {
 					int from = 0;
 					Object firstObject = decoder.readObject();
 					try {
-						this.plotType = (PlotType)firstObject;
+						this.sliceType = (PlotType)firstObject;
 					} catch (Throwable ne) {
 						dimsDataList.add((DimsData)firstObject);
 						from = 1;
@@ -738,18 +599,18 @@ public class SliceSystemImpl implements ISliceSystem {
 		}
 		
 		if (dimsDataList!=null) {
-			if (plotType==null) {
+			if (sliceType==null) {
 				try {
-				    plotType = PlotType.valueOf(Activator.getDefault().getPreferenceStore().getString(SliceConstants.PLOT_CHOICE));
-				    if (dimsDataList.getAxisCount()<2) plotType = PlotType.XY;
+				    sliceType = PlotType.valueOf(Activator.getDefault().getPreferenceStore().getString(SliceConstants.PLOT_CHOICE));
+				    if (dimsDataList.getAxisCount()<2) sliceType = PlotType.XY;
 				} catch (Throwable ignored) {
 					// Ok then
 				}
 			}
 
-			if (plotType==null) plotType = dimsDataList.getAxisCount()>1 ? PlotType.IMAGE : PlotType.XY;
-			final Action action = plotTypeActions.get(plotType);
-			action.setChecked(true);
+			if (sliceType==null) sliceType = dimsDataList.getAxisCount()>1 ? PlotType.IMAGE : PlotType.XY;
+			final Action action = getActionByPlotType(sliceType);
+			if (action!=null) action.setChecked(true);
 			
 			// We make sure that the size is not outside
 			for (int i = 0; i < dims; i++) {
@@ -763,8 +624,8 @@ public class SliceSystemImpl implements ISliceSystem {
 
 		}
 
-		if (plotType==null) plotType = PlotType.XY;
-		reverse.setEnabled(plotType==PlotType.IMAGE||plotType==PlotType.SURFACE);
+		if (sliceType==null) sliceType = PlotType.XY;
+		reverse.setEnabled(sliceType==PlotType.IMAGE||sliceType==PlotType.SURFACE);
 		
 		// Parse if ranges allowed to try to assign at least one dims data to a range
 		if (rangesAllowed) {
@@ -820,7 +681,7 @@ public class SliceSystemImpl implements ISliceSystem {
 
 		String errorMessage = "";
 		boolean ok = false;
-		if (plotType==PlotType.XY) {
+		if (sliceType==PlotType.XY) {
 			ok = isX;
 			errorMessage = "Please set an X axis.";
 		} else {
@@ -855,9 +716,9 @@ public class SliceSystemImpl implements ISliceSystem {
 	@SuppressWarnings("unused")
 	protected String[] getAxisItems() {
 		String[] items = null;
-		if (plotType==PlotType.XY) {
+		if (sliceType==PlotType.XY) {
 			items = new String[]{"X"};
-		} else if (plotType==PlotType.XY_STACKED) {
+		} else if (sliceType==PlotType.XY_STACKED) {
 			items = new String[]{"X","Y (Many)"};
 		} else {
 			if (isReversedImage()) {
@@ -1029,13 +890,13 @@ public class SliceSystemImpl implements ISliceSystem {
 			scale.addMouseListener(new MouseAdapter() {			
 				@Override
 				public void mouseUp(MouseEvent e) {
-					if (!plotType.is3D()) return;
+					if (!is3D()) return;
 					updateSlice(true);
 				}
 			});
 			scaleEditor.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
-					updateSlice(!plotType.is3D());
+					updateSlice(!is3D());
 				}
 			});
 			
@@ -1203,7 +1064,7 @@ public class SliceSystemImpl implements ISliceSystem {
 			final DimsData data  = (DimsData)((IStructuredSelection)viewer.getSelection()).getFirstElement();
 			if (data==null) return;
 			int axis = (Integer)value;
-			if (plotType==PlotType.XY) axis = axis>-1 ? 0 : -1;
+			if (sliceType==PlotType.XY) axis = axis>-1 ? 0 : -1;
 			data.setPlotAxis(axis);
 			updateAxesChoices();
 			update(data);
@@ -1212,25 +1073,6 @@ public class SliceSystemImpl implements ISliceSystem {
 
 	}
 	
-	private Collection<DimensionalListener> dimensionalListeners;
-	public void addDimensionalListener(DimensionalListener l) {
-		if (dimensionalListeners==null) dimensionalListeners= new HashSet<DimensionalListener>(7);
-		dimensionalListeners.add(l);
-	}
-	
-	public void removeDimensionalListener(DimensionalListener l) {
-		if (dimensionalListeners==null) return;
-		dimensionalListeners.remove(l);
-	}
-	
-	protected void fireDimensionalListeners() {
-		if (dimensionalListeners==null) return;
-		final DimensionalEvent evt = new DimensionalEvent(this, dimsDataList);
-		for (DimensionalListener l : dimensionalListeners) {
-			l.dimensionsChanged(evt);
-		}
-	}
-
 	private void update(DimsData data) {
 		final boolean isValidData = synchronizeSliceData(data);
 		viewer.cancelEditing();
@@ -1359,10 +1201,10 @@ public class SliceSystemImpl implements ISliceSystem {
 
 		final int axis = data.getPlotAxis();
 		if (data.isRange()) return "(Range)";
-		if (plotType==PlotType.XY) {
+		if (sliceType==PlotType.XY) {
 			return axis>-1 ? "X" : "(Slice)";
 		}
-		if (plotType==PlotType.XY_STACKED) {
+		if (sliceType==PlotType.XY_STACKED) {
 			return axis==0 ? "X" : axis==1 ? "Y (Many)" : "(Slice)";
 		}
 		if (plottingSystem!=null) {
@@ -1412,8 +1254,7 @@ public class SliceSystemImpl implements ISliceSystem {
 		if (plottingSystem!=null && traceListener!=null) {
 			plottingSystem.removeTraceListener(traceListener);	
 		}
-		if (dimensionalListeners!=null) dimensionalListeners.clear();
-		dimensionalListeners = null;
+		super.dispose();
 		sliceJob.cancel();
 		saveSettings();
 	}
@@ -1429,7 +1270,7 @@ public class SliceSystemImpl implements ISliceSystem {
 		XMLEncoder encoder=null;
 		try {
 			encoder = new XMLEncoder(new FileOutputStream(lastSettings));
-			encoder.writeObject(this.plotType);
+			encoder.writeObject(this.sliceType);
 			if (dimsDataList!=null) {
 				for (int i = 0; i < dimsDataList.size(); i++) {
 					encoder.writeObject(dimsDataList.getDimsData(i));
@@ -1450,16 +1291,8 @@ public class SliceSystemImpl implements ISliceSystem {
 		this.sliceObject = sliceObject;
 	}
 
-	public void setDataShape(int[] shape) {
+	private void setDataShape(int[] shape) {
 		this.dataShape = shape;
-	}
-
-	/**
-	 * Normally call before createPartControl(...)
-	 * @param plotWindow
-	 */
-	public void setPlottingSystem(IPlottingSystem plotWindow) {
-		this.plottingSystem = plotWindow;
 	}
 
 	/**
@@ -1511,10 +1344,12 @@ public class SliceSystemImpl implements ISliceSystem {
 				monitor.worked(1);
 				if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 			
+				// TODO FIXME Allow the current slice tool to dictate how to 
+				// process the slice?
 				SliceUtils.plotSlice(lazySet,
 						             slice, 
 						             dataShape, 
-						             plotType, 
+						             (PlotType)sliceType, 
 						             plottingSystem, 
 						             monitor);
 			} catch (Exception e) {
@@ -1535,11 +1370,7 @@ public class SliceSystemImpl implements ISliceSystem {
 		}	
 	}
 
-	public void addCustomAction(IAction customAction) {
-		if (customActions == null)customActions = new ArrayList<IAction>();
-		customActions.add(customAction);
-	}
-
+    @Override
 	public void refresh() {
 		viewer.refresh();
 	}
@@ -1548,13 +1379,11 @@ public class SliceSystemImpl implements ISliceSystem {
 		return lazySet;
 	}
 
-	public SliceObject getCurrentSlice() {
-		return sliceObject;
-	}
 
 	@Override
-	public IPlottingSystem getPlottingSystem() {
-		return plottingSystem;
+	public void setSlicingEnabled(boolean enabled) {
+		viewer.getTable().setEnabled(enabled);
 	}
+
 
 }

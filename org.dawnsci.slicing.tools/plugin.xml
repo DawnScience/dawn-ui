@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.dawnsci.slicing.api.slicingTool">
+      <slicing_tool
+            class="org.dawnsci.slicing.tools.plot.LineSlicingTool"
+            icon="icons/TraceLine.png"
+            id="org.dawnsci.slicing.tools.lineSliceTool"
+            tooltip="Slice as line plots">
+      </slicing_tool>
+      <slicing_tool
+            class="org.dawnsci.slicing.tools.plot.StackSlicingTool"
+            icon="icons/TraceLines.png"
+            id="org.dawnsci.slicing.tools.stackSlicingTool"
+            tooltip="Slice as a stack of line plots">
+      </slicing_tool>
+      <slicing_tool
+            class="org.dawnsci.slicing.tools.plot.Stack3DSlicingTool"
+            icon="icons/TraceLines3D.png"
+            id="org.dawnsci.slicing.tools.stack3DSlicingTool"
+            tooltip="Slice as a stack of line plots in 3D">
+      </slicing_tool>
+      <slicing_tool
+            class="org.dawnsci.slicing.tools.plot.ImageSlicingTool"
+            icon="icons/TraceImage.png"
+            id="org.dawnsci.slicing.tools.imageSlicingTool"
+            tooltip="Slice as image">
+      </slicing_tool>
+      <slicing_tool
+            class="org.dawnsci.slicing.tools.plot.SurfaceSlicingTool"
+            icon="icons/TraceSurface.png"
+            id="org.dawnsci.slicing.tools.surfaceSlicingTool"
+            tooltip="Slice as surface">
+      </slicing_tool>
+   </extension>
+
+</plugin>

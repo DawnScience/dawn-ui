@@ -113,6 +113,19 @@ public interface ISliceSystem {
 	public void dispose();
 
 	/**
+	 * Call to reprocess a slice where the slice system
+	 * is slicing using a standard tool like line or image.
+	 */
+	public void update();
+
+	/**
+	 * Refresh the widget showing the slice setup.
+	 * Can be used after editing the dimensional data list
+	 * to define the slice.
+	 */
+	public void refresh();
+
+	/**
 	 * Set the id of the IViewPart which implements ISliceGallery to be used
 	 * as a gallery view of the dataset which is being sliced.
 	 * 
@@ -138,6 +151,13 @@ public interface ISliceSystem {
 	 * @param b
 	 */
 	public void setSliceActionsEnabled(boolean enabled);
+	
+	/**
+	 * Sets if slicing is allowed in the slice widget. If set to false
+	 * the slice widget (e.g. a table) will become deactivated.
+	 * @param enabled
+	 */
+	public void setSlicingEnabled(boolean enabled);
 
 	/**
 	 * Sets a string to be used as explaination text somewhere in the system depending
@@ -184,5 +204,17 @@ public interface ISliceSystem {
 	 * @return the slice object used to produce the current slice.
 	 */
 	public SliceObject getCurrentSlice();
+
+	/**
+	 * 
+	 * @return
+	 */
+	public Enum getSliceType();
+
+	/**
+	 * Normally one of the PlotType enums
+	 * @param plotType
+	 */
+	public void setSliceType(Enum type);
 
 }
