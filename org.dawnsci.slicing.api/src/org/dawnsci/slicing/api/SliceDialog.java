@@ -1,0 +1,113 @@
+/*
+ * Copyright (c) 2012 European Synchrotron Radiation Facility,
+ *                    Diamond Light Source Ltd.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */ 
+package org.dawnsci.slicing.api;
+
+import org.dawb.common.services.ILoaderService;
+import org.dawb.common.services.ServiceManager;
+import org.dawnsci.slicing.api.system.DimsDataList;
+import org.dawnsci.slicing.api.system.ISliceSystem;
+import org.dawnsci.slicing.api.system.SliceSource;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
+import uk.ac.diamond.scisoft.analysis.io.IDataHolder;
+
+/**
+ * A dialog for holding a component used to slice the data.
+ * 
+ * @author fcp94556
+ *
+ */
+public class SliceDialog extends Dialog {
+	
+	private static Logger logger = LoggerFactory.getLogger(SliceDialog.class);
+	
+	private DimsDataList   dimsDataList;
+	private ISliceSystem   sliceComponent;
+
+	private boolean showAxes;
+	
+	public SliceDialog(Shell parentShell, boolean showAxes) {
+		super(parentShell);
+		setShellStyle(SWT.RESIZE|SWT.DIALOG_TRIM);
+		this.showAxes = showAxes;
+	}
+	
+	public Control createDialogArea(Composite parent) {
+		
+		try {
+			this.sliceComponent = SlicingFactory.createSliceSystem("org.dawb.workbench.views.h5GalleryView");
+		} catch (Exception e) {
+			logger.error("Cannot create a slice system!", e);
+			return null;
+		}
+		sliceComponent.setAxesVisible(showAxes);
+		final Control slicer = sliceComponent.createPartControl(parent);
+		slicer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		sliceComponent.setAxesVisible(false);
+
+		sliceComponent.setVisible(true);
+		
+		return parent;
+	}
+
+	/**
+	 * Sets the data which the parameter should slice.
+	 * @param dataSetName
+	 * @param filePath
+	 * @throws Exception 
+	 */
+	public void setData(final String   dataSetName,
+			            final String   filePath,
+			            final IProgressMonitor monitor) throws Throwable {
+		
+		final ILoaderService service = (ILoaderService)ServiceManager.getService(ILoaderService.class);
+		final IDataHolder holder = service.getData(filePath, monitor);
+		final ILazyDataset lazy  = holder.getLazyDataset(dataSetName);
+		sliceComponent.setData(new SliceSource(lazy, dataSetName, filePath, false));        
+	}
+
+	public DimsDataList getDimsDataList() {
+		return dimsDataList;
+	}
+
+	/**
+	 * Examples "[0, X, Y]",   "[0, 0, X]",  "[1;10;1, 5, X]"
+	 * @param persistedString
+	 */
+	public void setDimsDataList(final DimsDataList dimsDataList) {
+		
+		if (dimsDataList==null)    return;
+		if (dimsDataList.size()<1) return;
+		try {
+			sliceComponent.setDimsDataList(dimsDataList);
+		} catch (Exception e) {
+			logger.error("Cannot set persisted string in slice component!", e);
+		}
+	}
+
+	protected void okPressed() {
+		try {
+			this.dimsDataList = sliceComponent.getDimsDataList();
+		} catch (Exception e) {
+			logger.error("Cannot get persisted string in slice component!", e);
+		}
+		super.okPressed();
+	}
+
+}
