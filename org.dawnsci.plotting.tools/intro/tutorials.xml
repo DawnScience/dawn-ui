@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<introContent>
+	<extensionContent id="plotting-tools-tutorials" style="style.css" name="Plotting Tools Tutorials" path="tutorials/@">
+		<group label="Plotting Tools" style-id="content-group" id="plotting-tools-group">
+
+      		<link label="Azimuthal Profile" url="http://org.eclipse.ui.intro/showStandby?partId=org.dawnsci.intro.cheatsheet&amp;input=org.dawb.workbench.plotting.cheatsheet.aziprofile" id="sheetitem">
+				<text>
+					This cheat sheet helps you to open an image, and shows you how to use the azimuthal profile tool with the file.
+				</text>
+			</link>
+			<link label="Box Profile" url="http://org.eclipse.ui.intro/showStandby?partId=org.dawnsci.intro.cheatsheet&amp;input=org.dawb.workbench.plotting.cheatsheet.boxprofile" id="sheetitem">
+				<text>
+					This cheat sheet helps you to open an image, and shows you how to use the box profile tool with the file.
+				</text>
+			</link>
+			<link label="Cross Hair Profile" url="http://org.eclipse.ui.intro/showStandby?partId=org.dawnsci.intro.cheatsheet&amp;input=org.dawb.workbench.plotting.cheatsheet.crosshairprofile" id="sheetitem">
+				<text>
+					This cheat sheet helps you to open an image, nnd shows you how to use the cross-hair profile tool with the file.
+				</text>
+			</link>
+			<link label="Derivative Tool" url="http://org.eclipse.ui.intro/showStandby?partId=org.dawnsci.intro.cheatsheet&amp;input=org.dawb.workbench.plotting.cheatsheet.derivative" id="sheetitem">
+				<text>
+					This cheat sheet helps you to open an ascii file, and shows you how to show the derivative of this data				
+				</text>
+			</link>
+			<link label="Ellipse Fitting" url="http://org.eclipse.ui.intro/showStandby?partId=org.dawnsci.intro.cheatsheet&amp;input=org.dawb.workbench.plotting.cheatsheet.ellipsefitting" id="sheetitem">
+				<text>
+					This cheat sheet helps you to open an image, and shows you how to use the circle/ellipse fitting tool with the file.
+				</text>
+			</link>
+			<link label="Line Profile" url="http://org.eclipse.ui.intro/showStandby?partId=org.dawnsci.intro.cheatsheet&amp;input=org.dawb.workbench.plotting.cheatsheet.lineprofile" id="sheetitem">
+				<text>
+					This cheat sheet helps you to open an image, and shows you how to use the line profile tool with the file.
+				</text>
+			</link>
+			<link label="Masking" url="http://org.eclipse.ui.intro/showStandby?partId=org.dawnsci.intro.cheatsheet&amp;input=org.dawb.workbench.plotting.cheatsheet.masking" id="sheetitem">
+				<text>
+					This cheat sheet helps you to open an image, and shows you how to use the masking tool with the file.
+				</text>
+			</link>
+			<link label="Measurement" url="http://org.eclipse.ui.intro/showStandby?partId=org.dawnsci.intro.cheatsheet&amp;input=org.dawb.workbench.plotting.cheatsheet.measurement" id="sheetitem">
+				<text>
+					This cheat sheet helps you to open an ascii file, and shows you how to use the measurement tool with the file.
+				</text>
+			</link>
+			<link label="Peak fitting" url="http://org.eclipse.ui.intro/showStandby?partId=org.dawnsci.intro.cheatsheet&amp;input=org.dawb.workbench.plotting.cheatsheet.peak" id="sheetitem">
+				<text>
+					This cheat sheet helps you to open an ascii file, and shows you how to fit peaks with the file.
+				</text>
+			</link>
+			<link label="Pixel information" url="http://org.eclipse.ui.intro/showStandby?partId=org.dawnsci.intro.cheatsheet&amp;input=org.dawb.workbench.plotting.cheatsheet.pixel" id="sheetitem">
+				<text>
+					This cheat sheet helps you to open an image, and shows you how to use the pixel information tool with the file.
+					The pixel information tool allows you to display information about the pixel pointed by the mouse.
+				</text>
+			</link>
+			<link label="Radial Profile" url="http://org.eclipse.ui.intro/showStandby?partId=org.dawnsci.intro.cheatsheet&amp;input=org.dawb.workbench.plotting.cheatsheet.radialprofile" id="sheetitem">
+				<text>
+					This cheat sheet helps you to open an image, and shows you how to use the radial profile tool with the file.
+				</text>
+			</link>
+       	</group>
+  	</extensionContent>
+</introContent>
