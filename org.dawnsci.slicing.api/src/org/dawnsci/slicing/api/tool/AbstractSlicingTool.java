@@ -16,23 +16,38 @@ public abstract class AbstractSlicingTool implements ISlicingTool {
 	/**
 	 * Does nothing unless overridden.
 	 */
+	@Override
 	public void dispose() {
 		
 	}
 
+	@Override
 	public String getToolId() {
 		return toolId;
 	}
 
+	@Override
 	public void setToolId(String toolId) {
 		this.toolId = toolId;
 	}
 
+	@Override
 	public ISliceSystem getSlicingSystem() {
 		return slicingSystem;
 	}
 
+	@Override
 	public void setSlicingSystem(ISliceSystem slicingSystem) {
 		this.slicingSystem = slicingSystem;
 	}
+	
+	
+	/**
+	 * Does nothing unless overridden.
+	 */
+	@Override
+	public void demilitarize() {
+		
+	}
+
 }

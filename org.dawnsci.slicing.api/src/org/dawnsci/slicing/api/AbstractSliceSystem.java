@@ -84,6 +84,7 @@ public abstract class AbstractSliceSystem implements ISliceSystem {
 	 */
 	protected abstract void saveSliceSettings();
 	
+	private ISlicingTool activeTool;
 
 	/**
 	 * Creates the slice tools by reading extension points
@@ -111,7 +112,9 @@ public abstract class AbstractSliceSystem implements ISliceSystem {
 	        final Action action = new Action(toolTip, IAction.AS_CHECK_BOX) {
 	        	public void run() {
 	        		saveSliceSettings();
+	        		if (activeTool!=null) activeTool.demilitarize();
 	        		slicingTool.militarize();
+	        		activeTool = slicingTool;
 	        	}
 	        };
 	        
@@ -265,5 +268,13 @@ public abstract class AbstractSliceSystem implements ISliceSystem {
 	 */
 	protected boolean is3D() {
 		return sliceType instanceof PlotType && ((PlotType)sliceType).is3D();
+	}
+
+	public ISlicingTool getActiveTool() {
+		return activeTool;
+	}
+
+	public void setActiveTool(ISlicingTool activeTool) {
+		this.activeTool = activeTool;
 	}
 }

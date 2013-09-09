@@ -34,5 +34,16 @@
             tooltip="Slice as surface">
       </slicing_tool>
    </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            category="uk.ac.diamond.scisoft.analysis.rcp"
+            class="org.dawnsci.slicing.tools.hyper.HyperView"
+            icon="icons/chart_curve.png"
+            id="org.dawnsci.slicing.tools.hyper.hyperView"
+            name="Hyper3D"
+            restorable="true">
+      </view>
+   </extension>
 
 </plugin>

@@ -20,6 +20,14 @@ public interface ISlicingTool {
 	 * that the UI is set up for this slicing methodology.
 	 */
 	public void militarize();
+	
+	
+	/**
+	 * Called on a militarized tool to demilitarize it and
+	 * remove it from active service.
+	 */
+	public void demilitarize();
+
 
 	
 	/**
