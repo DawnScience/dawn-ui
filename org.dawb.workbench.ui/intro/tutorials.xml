@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <introContent>
-	<extensionContent id="org.dawb.workbench.ui.cheatsheets" style="style.css" name="Basic Data Viewing Tutorials" path="tutorials/@">
-		<group label="Basic Data Viewing" style-id="content-group" id="basic-dataviewing-group">
+	<extensionContent id="basic-dataviewing-tutorials" style="style.css" name="Basic Data Viewing Tutorials" path="tutorials/@">
+		<group style-id="content-group" id="basic-dataviewing-group">
 
       		<link label="Basic Image File Viewing" url="http://org.eclipse.ui.intro/showStandby?partId=org.dawnsci.intro.cheatsheet&amp;input=org.dawb.workbench.ui.editors.imagesbasic" id="sheetitem">
 				<text>

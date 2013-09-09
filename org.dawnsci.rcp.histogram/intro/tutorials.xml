@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<introContent>
+	<extensionContent id="plotting-tools-tutorials" style="style.css" name="Plotting Tools Tutorials" path="tutorials/@">
+		<group label="Plotting Tools" style-id="content-group" id="plotting-tools-group">
+
+      		<link label="Colour Mapping Example" url="http://org.eclipse.ui.intro/showStandby?partId=org.dawnsci.intro.cheatsheet&amp;input=org.dawnsci.rcp.histogram.cheatsheet.colourmapping" id="sheetitem">
+				<text>
+					This example will show you how to modify the colour mapping on an image to get the best out of your data.
+				</text>
+			</link>
+       	</group>
+  	</extensionContent>
+</introContent>
