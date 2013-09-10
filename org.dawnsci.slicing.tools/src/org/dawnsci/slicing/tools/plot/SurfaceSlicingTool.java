@@ -20,7 +20,7 @@ public class SurfaceSlicingTool extends AbstractSlicingTool {
 		getSlicingSystem().setSliceType(getSliceType());
 		
 		final DimsDataList dimsDataList = getSlicingSystem().getDimsDataList();
-		if (dimsDataList!=null) dimsDataList.setTwoAxisOnly(0, 1);   
+		if (dimsDataList!=null) dimsDataList.setTwoAxesOnly(0, 1);   
 		getSlicingSystem().refresh();
 		getSlicingSystem().update();
 	}

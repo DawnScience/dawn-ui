@@ -12,7 +12,9 @@ package org.dawnsci.slicing.api.system;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.dawnsci.doe.DOEField;
@@ -126,6 +128,20 @@ public class DimsData implements Serializable {
 	 */	
 	public int getPlotAxis() {
 		return plotAxis;
+	}
+	
+	private static Map<Integer, String> LABELS;
+	static {
+		LABELS = new HashMap<Integer, String>(3);
+		LABELS.put(0, "X");
+		LABELS.put(1, "Y");
+		LABELS.put(2, "Z");
+	}
+	public String getPlotAxisLabel() {
+		final String label = LABELS.get(getPlotAxis());
+		if (label!=null) return label;
+		if (isRange()) return "(Range)";
+		return "(Slice)";
 	}
 
 	public void setPlotAxis(int axis) {

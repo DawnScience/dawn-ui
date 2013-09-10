@@ -1,14 +1,16 @@
 package org.dawnsci.slicing.api.tool;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.dawb.common.services.ServiceManager;
 import org.dawnsci.slicing.api.system.DimsData;
 import org.dawnsci.slicing.api.system.DimsDataList;
 import org.dawnsci.slicing.api.system.ISliceSystem;
 import org.dawnsci.slicing.api.util.SliceUtils;
 
+import uk.ac.diamond.scisoft.analysis.IAnalysisService;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 /**
@@ -23,11 +25,11 @@ public abstract class AbstractSlicingTool implements ISlicingTool {
 	protected String       toolId;
 
 	/**
-	 * Does nothing unless overridden.
+	 * Does nothing but demilitarize() unless overridden.
 	 */
 	@Override
 	public void dispose() {
-		
+		demilitarize();
 	}
 
 	@Override
@@ -66,39 +68,32 @@ public abstract class AbstractSlicingTool implements ISlicingTool {
 	
 	
 	/**
-	 * May be null
+	 * May be null. Returns the axes in dimensional order.
 	 * @return
 	 */
 	protected List<IDataset> getNexusAxes() throws Exception {
 		
 		final Map<Integer, String> names = getSlicingSystem().getAxesNames();
-		final DimsDataList         ddl   = getSlicingSystem().getDimsDataList();
+		final DimsDataList           ddl = getSlicingSystem().getDimsDataList();
+		final int[]            dataShape = getSlicingSystem().getData().getLazySet().getShape();
 		
-		IDataset x=null; IDataset y=null;
+		final List<IDataset>         ret = new ArrayList<IDataset>(3);
 		for (DimsData dd : ddl.getDimsData()) {
 			
-			if (dd.getPlotAxis()==0) {
+			IDataset axis = null;
+			try {
 				final String name = names.get(dd.getDimension()+1);
-				try {
-					x = SliceUtils.getNexusAxis(getSlicingSystem().getCurrentSlice(), name, false, null);
-				} catch (Throwable e) {
-					return null;
-				}
+				axis = SliceUtils.getNexusAxis(getSlicingSystem().getCurrentSlice(), name, false, null);
+			} catch (Throwable e) {
+				return null;
 			}
-			if (dd.getPlotAxis()==1) {
-				final String name = names.get(dd.getDimension()+1);
-				try {
-					y = SliceUtils.getNexusAxis(getSlicingSystem().getCurrentSlice(), name, false, null);
-				} catch (Throwable e) {
-					return null;
-				}
-			}
-
+            if (axis==null) {
+            	final IAnalysisService service = (IAnalysisService)ServiceManager.getService(IAnalysisService.class);
+            	axis = service.arange(dataShape[dd.getDimension()], IAnalysisService.INT);
+            }
+            ret.add(axis);
 		}
-		if (x==null && y==null) return null;
-		if (x!=null && y==null) return Arrays.asList(x);
-		if (x!=null && y!=null) return Arrays.asList(x,y);
-		return null;
+		return ret;
 	}
 
 }

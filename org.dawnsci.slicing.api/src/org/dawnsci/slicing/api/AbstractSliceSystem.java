@@ -10,6 +10,8 @@ import java.util.Map;
 
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlotType;
+import org.dawnsci.slicing.api.system.AxisChoiceEvent;
+import org.dawnsci.slicing.api.system.AxisChoiceListener;
 import org.dawnsci.slicing.api.system.DimensionalEvent;
 import org.dawnsci.slicing.api.system.DimensionalListener;
 import org.dawnsci.slicing.api.system.DimsDataList;
@@ -219,6 +221,9 @@ public abstract class AbstractSliceSystem implements ISliceSystem {
 	public void setRangesAllowed(boolean isVis) {
 		rangesAllowed = isVis;
 	}
+	public boolean isRangesAllowed() {
+		return rangesAllowed;
+	}
 
 	public void addCustomAction(IAction customAction) {
 		if (customActions == null)customActions = new ArrayList<IAction>();
@@ -234,11 +239,13 @@ public abstract class AbstractSliceSystem implements ISliceSystem {
 
 
 	private Collection<DimensionalListener> dimensionalListeners;
+	@Override
 	public void addDimensionalListener(DimensionalListener l) {
 		if (dimensionalListeners==null) dimensionalListeners= new HashSet<DimensionalListener>(7);
 		dimensionalListeners.add(l);
 	}
 	
+	@Override
 	public void removeDimensionalListener(DimensionalListener l) {
 		if (dimensionalListeners==null) return;
 		dimensionalListeners.remove(l);
@@ -251,6 +258,27 @@ public abstract class AbstractSliceSystem implements ISliceSystem {
 			l.dimensionsChanged(evt);
 		}
 	}
+	
+	private Collection<AxisChoiceListener> axisChoiceListeners;
+	@Override
+	public void addAxisChoiceListener(AxisChoiceListener l) {
+		if (axisChoiceListeners==null) axisChoiceListeners= new HashSet<AxisChoiceListener>(7);
+		axisChoiceListeners.add(l);
+	}
+	
+	@Override
+	public void removeAxisChoiceListener(AxisChoiceListener l) {
+		if (axisChoiceListeners==null) return;
+		axisChoiceListeners.remove(l);
+	}
+	
+	protected void fireAxisChoiceListeners(AxisChoiceEvent evt) {
+		if (axisChoiceListeners==null) return;
+		for (AxisChoiceListener l : axisChoiceListeners) {
+			l.axisChoicePerformed(evt);
+		}
+	}
+
 
 	@Override
 	public Enum getSliceType() {
@@ -266,7 +294,7 @@ public abstract class AbstractSliceSystem implements ISliceSystem {
 	 * 
 	 * @return true if the current slice type is a 3D one.
 	 */
-	protected boolean is3D() {
+	public boolean is3D() {
 		return sliceType instanceof PlotType && ((PlotType)sliceType).is3D();
 	}
 

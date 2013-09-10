@@ -190,6 +190,19 @@ public interface ISliceSystem {
 	 * @param l
 	 */
 	public void removeDimensionalListener(DimensionalListener l);
+	
+	/**
+	 * Add a listener to be notified when the dimensions change.
+	 * @param l
+	 */
+	public void addAxisChoiceListener(AxisChoiceListener l);
+	
+	/**
+	 * Remove a DimensionalListener
+	 * @param l
+	 */
+	public void removeAxisChoiceListener(AxisChoiceListener l);
+
 
 	/**
 	 * The names (nexus path to axis normally) of the axis by dimension

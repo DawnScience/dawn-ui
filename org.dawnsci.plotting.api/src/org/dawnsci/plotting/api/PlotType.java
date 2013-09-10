@@ -11,23 +11,29 @@ package org.dawnsci.plotting.api;
 
 public enum PlotType {
     
-	IMAGE(2), 
+	IMAGE(2, 2),        // dimensions=2 X and Y
     
-    SURFACE(3), 
+    SURFACE(3, 2),      // dimensions=2 X and Y
     
-    XY(1), 
+    XY(1, 1),           // dimensions=1 X
         
-    XY_STACKED(1),
+    XY_STACKED(1, 2),   // dimensions=2 X and Many Y
 
-    XY_STACKED_3D(3);
+    XY_STACKED_3D(3, 2);// dimensions=2 X and Many Y
     
-	
 	
 	
 	private final int rank;
+	private final int dimensions;
 
-	private PlotType(int rank) {
-    	this.rank = rank;
+	/**
+	 * 
+	 * @param rank
+	 * @param dimensions
+	 */
+	private PlotType(int rank, int dimensions) {
+	   	this.rank       = rank;
+	   	this.dimensions = dimensions;
 	}
 	
 	public static PlotType forSliceIndex(int type) {
@@ -51,5 +57,14 @@ public enum PlotType {
 	}
 	public boolean is1Dor2D() {
 		return is1D()||is2D();
+	}
+	
+	/**
+	 * This method is called by reflection to determine the 
+	 * number of non-slice dimensions in the ISliceSystem.
+	 * @return
+	 */
+	public int getDimensions() {
+		return dimensions;
 	}
 }

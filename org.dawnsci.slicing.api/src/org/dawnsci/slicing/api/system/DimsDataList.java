@@ -10,7 +10,10 @@
 package org.dawnsci.slicing.api.system;
 
 import java.io.Serializable;
+import java.lang.reflect.Array;
+import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -208,6 +211,8 @@ public class DimsDataList implements Serializable {
 
 	/**
 	 * Probably not best algorithm but we are dealing with very small arrays here.
+	 * This is simply trying to ensure that only one dimension is selected as an
+	 * axis because the plot has changed.
 	 * 
 	 * @param iaxisToFind
 	 */
@@ -241,7 +246,15 @@ public class DimsDataList implements Serializable {
 		}
 	}
 
-	public void setTwoAxisOnly(int firstAxis, int secondAxis) {
+	/**
+	 * Bit of a complex  method. It simply tries to leave the data with
+	 * two axes selected by finding the most likely two dimensions that
+	 * should be plot axes.
+	 * 
+	 * @param firstAxis
+	 * @param secondAxis
+	 */
+	public void setTwoAxesOnly(int firstAxis, int secondAxis) {
 		boolean foundFirst = false, foundSecond = false;
 		for (DimsData dd : getDimsData()) {
 			if (dd.getPlotAxis()==firstAxis)  foundFirst  = true;
@@ -257,42 +270,8 @@ public class DimsDataList implements Serializable {
 			return;
 		} else { // We have to decide which of the others is first and second
 			
-			if (!foundFirst) {
-				for (DimsData dd : getDimsData()) {
-					if (dd.getPlotAxis()>-1 && dd.getPlotAxis()!=secondAxis) {
-					    dd.setPlotAxis(firstAxis);
-					    foundFirst = true;
-					    break;
-					}
-				}	
-				if (!foundFirst) {
-					for (DimsData dd : getDimsData()) {
-						if (dd.getPlotAxis()!=secondAxis) {
-						    dd.setPlotAxis(firstAxis);
-						    foundFirst = true;
-						    break;
-						}
-					}						
-				}
-			}
-			if (!foundSecond) {
-				for (DimsData dd : getDimsData()) {
-					if (dd.getPlotAxis()>-1 && dd.getPlotAxis()!=firstAxis) {
-					    dd.setPlotAxis(secondAxis);
-					    foundSecond = true;
-					    break;
-					}
-				}	
-				if (!foundSecond) {
-					for (DimsData dd : getDimsData()) {
-						if (dd.getPlotAxis()!=firstAxis) {
-						    dd.setPlotAxis(secondAxis);
-						    foundSecond = true;
-						    break;
-						}
-					}	
-				}
-			}
+			if (!foundFirst)  foundFirst  = processAxis(firstAxis, secondAxis);
+			if (!foundSecond) foundSecond = processAxis(secondAxis, firstAxis);
 			
 			for (DimsData dd : getDimsData()) {
 				if (dd.getPlotAxis()==firstAxis)  continue;
@@ -304,6 +283,93 @@ public class DimsDataList implements Serializable {
 		}
 		
 	}
+	
+	/**
+	 * Bit of a complex  method. It simply tries to leave the data with
+	 * two axes selected by finding the most likely two dimensions that
+	 * should be plot axes.
+	 * 
+	 * @param firstAxis
+	 * @param secondAxis
+	 * @param thirdAxis
+	 */
+	public void setThreeAxesOnly(int firstAxis, int secondAxis, int thirdAxis) {
+
+		boolean foundFirst = false, foundSecond = false, foundThird = false;
+		for (DimsData dd : getDimsData()) {
+			if (dd.getPlotAxis()==firstAxis)  foundFirst  = true;
+			if (dd.getPlotAxis()==secondAxis) foundSecond = true;
+			if (dd.getPlotAxis()==thirdAxis)  foundThird  = true;
+		}
+		
+		if (foundFirst&&foundSecond&&foundThird) {
+			for (DimsData dd : getDimsData()) {
+				if (dd.getPlotAxis()==firstAxis)  continue;
+				if (dd.getPlotAxis()==secondAxis) continue;
+				if (dd.getPlotAxis()==thirdAxis)  continue;
+				dd.setPlotAxis(-1);
+			}
+			return;
+		} else { // We have to decide which of the others is first and second
+			
+			if (!foundFirst)  foundFirst  = processAxis(firstAxis,  secondAxis, thirdAxis);
+			if (!foundSecond) foundSecond = processAxis(secondAxis, firstAxis,  thirdAxis);
+			if (!foundThird)  foundThird  = processAxis(thirdAxis,  firstAxis,  secondAxis);
+			
+			for (DimsData dd : getDimsData()) {
+				if (dd.getPlotAxis()==firstAxis)  continue;
+				if (dd.getPlotAxis()==secondAxis) continue;
+				if (dd.getPlotAxis()==thirdAxis)  continue;
+				dd.setPlotAxis(-1);
+			}
+			return;
+				
+		}
+
+	}
+
+	
+	private final boolean processAxis(int axis, int... ignoredAxes) {
+		
+		final List ignored = asList(ignoredAxes);
+		for (DimsData dd : getDimsData()) {
+			if (dd.getPlotAxis()>-1 && !ignored.contains(dd.getPlotAxis())) {
+			    dd.setPlotAxis(axis);
+			    return true;
+			}
+		}	
+		
+		for (DimsData dd : getDimsData()) {
+			if (!ignored.contains(dd.getPlotAxis())) {
+				dd.setPlotAxis(axis);
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * Convert a primitive array to a list.
+	 * @param array - an array of peimitives
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+    private static final <T> List<T> asList(final Object array) {
+		
+        if (!array.getClass().isArray()) throw new IllegalArgumentException("Not an array");
+        return new AbstractList<T>() {
+            @Override
+            public T get(int index) {
+                return (T) Array.get(array, index);
+            }
+
+            @Override
+            public int size() {
+                return Array.getLength(array);
+            }
+        };
+    }
 
 	public boolean isXFirst() {
 		for (DimsData dd : getDimsData()) {
