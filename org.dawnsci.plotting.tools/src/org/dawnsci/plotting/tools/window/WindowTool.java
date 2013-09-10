@@ -158,8 +158,10 @@ public class WindowTool extends AbstractToolPage {
 				}
 			};
 			
-			this.roiListener = new IROIListener.Stub() {
-				public void update(ROIEvent evt) {
+			this.roiListener = new IROIListener() {
+
+				@Override
+				public void roiDragged(ROIEvent evt) {
 					IROI roi = evt.getROI();
 					if(roi!=null){
 						final int startX = (int)Math.round(roi.getPointX());
@@ -172,14 +174,59 @@ public class WindowTool extends AbstractToolPage {
 							int endY = (int)Math.round(rroi.getEndPoint()[1]);
 							setSpinnerValues(startX, startY, roiWidth, roiHeight);
 							if(btnOverwriteAspect.getSelection()){
-								int xSize = getTrace().getData().getShape()[1];
-								int ySize = getTrace().getData().getShape()[0];
-								int xSamplingRate = Math.max(1, xSize / MAXDISPLAYDIM);
-								int ySamplingRate = Math.max(1, ySize / MAXDISPLAYDIM);
-								SurfacePlotROI sroi = new SurfacePlotROI(startX * xSamplingRate, 
-																startY * ySamplingRate, 
-																endX * xSamplingRate, 
-																endY * ySamplingRate, 
+								// DownsampleMode.MEAN = 2
+								SurfacePlotROI sroi = new SurfacePlotROI(startX, 
+										startY, 
+										endX, 
+										endY, 
+										2, 2, 
+										spnXAspect.getSelection(), 
+										spnYAspect.getSelection());
+								// set the Bin shape
+								sroi.setXBinShape(3);
+								sroi.setYBinShape(3);
+								windowJob.schedule(sroi);
+							} else {
+								// size above 300x300
+								if (rroi.getLengths()[0] > 300 && rroi.getLengths()[1] > 300) {
+									// DownsampleMode.MEAN = 2
+									SurfacePlotROI sroi = new SurfacePlotROI(startX, 
+											startY, 
+											endX, 
+											endY, 
+											2, 2, 
+											0, 
+											0);
+									// set the Bin shape
+									sroi.setXBinShape(3);
+									sroi.setYBinShape(3);
+									windowJob.schedule(sroi);
+								} else {
+									windowJob.schedule(rroi);
+								}
+							}
+						}
+					}
+				}
+
+				@Override
+				public void roiChanged(ROIEvent evt) {
+					IROI roi = evt.getROI();
+					if(roi!=null){
+						final int startX = (int)Math.round(roi.getPointX());
+						final int startY = (int)Math.round(roi.getPointY());
+						if (roi instanceof RectangularROI){
+							RectangularROI rroi = (RectangularROI) roi;
+							int roiWidth = (int)Math.round(rroi.getLengths()[0]);
+							int roiHeight = (int)Math.round(rroi.getLengths()[1]);
+							int endX = (int)Math.round(rroi.getEndPoint()[0]);
+							int endY = (int)Math.round(rroi.getEndPoint()[1]);
+							setSpinnerValues(startX, startY, roiWidth, roiHeight);
+							if(btnOverwriteAspect.getSelection()){
+								SurfacePlotROI sroi = new SurfacePlotROI(startX, 
+																startY, 
+																endX, 
+																endY, 
 																0, 0, 
 																spnXAspect.getSelection(), 
 																spnYAspect.getSelection());
@@ -189,6 +236,12 @@ public class WindowTool extends AbstractToolPage {
 							}
 						}
 					}
+				}
+
+				@Override
+				public void roiSelected(ROIEvent evt) {
+					// TODO Auto-generated method stub
+					
 				}
 			};
 			
@@ -280,7 +333,12 @@ public class WindowTool extends AbstractToolPage {
 		this.blankComposite = new Composite(content, SWT.BORDER);
         
 	}
-	
+
+	@Override
+	public IPlottingSystem getToolPlottingSystem() {
+		return windowSystem;
+	}
+
 	private CLabel      errorLabel;
 	private RangeSlider sliceSlider;
 	private NumberBox   lowerControl, upperControl;
