@@ -37,6 +37,8 @@ public class SurfacePlotROI extends ROIBase {
 	private int ySamplingMode;
 	private int xAspect;
 	private int yAspect;
+	private int xBinShape = 1;
+	private int yBinShape = 1;
 	
 	public SurfacePlotROI(int startX, int startY,
 			              int endX, int endY,
@@ -89,5 +91,21 @@ public class SurfacePlotROI extends ROIBase {
 	
 	public int getYAspect() {
 		return yAspect;
+	}
+
+	public int getXBinShape() {
+		return xBinShape;
+	}
+	
+	public int getYBinShape() {
+		return yBinShape;
+	}
+
+	public void setXBinShape(int xBinShape) {
+		this.xBinShape = xBinShape;
+	}
+	
+	public void setYBinShape(int yBinShape) {
+		this.yBinShape = yBinShape;
 	}
 }

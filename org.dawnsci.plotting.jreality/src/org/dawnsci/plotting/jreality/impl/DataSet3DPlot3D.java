@@ -890,9 +890,17 @@ public class DataSet3DPlot3D implements IDataSet3DCorePlot {
 				}
 				int xSampleRate = (int)Math.ceil((double)xDim / (double)xSize);
 				int ySampleRate = (int)Math.round((double)yDim / (double)ySize);
-				Downsample sample = new Downsample(mode,
-												  (roi.getYSamplingMode() == roi.getXSamplingMode() ? ySampleRate : 1),
-												   xSampleRate);
+				Downsample sample = null;
+				// if bin is provided
+				if (roi.getXBinShape() != 1 && roi.getYBinShape() != 1)
+					sample = new Downsample(mode,
+							roi.getXBinShape(),
+							roi.getYBinShape());
+				else
+					sample = new Downsample(mode,
+							  (roi.getYSamplingMode() == roi.getXSamplingMode() ? ySampleRate : 1),
+							   xSampleRate);
+
 				displayData = sample.value(displayData).get(0);
 				if (roi.getYSamplingMode() != roi.getXSamplingMode() &&
 					roi.getYSamplingMode() != 0) {
