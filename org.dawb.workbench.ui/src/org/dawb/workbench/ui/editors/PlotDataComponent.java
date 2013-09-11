@@ -1737,7 +1737,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		
 		if (meta==null) return;
 		this.data.clear();
-		final Collection<String> names = meta.getDataNames();
+		final Collection<String> names = getPlottableData(meta);
 		for (String name : names) this.data.add(new CheckableObject(name));
 		
 		// Search names to see if they all have a common root, we do not show this.
@@ -1780,6 +1780,38 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		} catch (Throwable ne) {
 			logger.error("Cannot save data previously selected!", ne);
 		}
+	}
+
+	/**
+	 * Deals with loaders which provide data names of size 1
+	 * 
+	 * 
+	 * @param meta
+	 * @return
+	 */
+	private Collection<String> getPlottableData(IMetaData meta) {
+		Collection<String> names = meta.getDataNames();
+		if (names==null) return null;
+		Collection<String> ret   = new ArrayList<String>(names.size());
+		for (String name : names) {
+			int [] shape = meta.getDataShapes().get(name);
+			if (shape==null) {
+				ILazyDataset ls = getLazyDataSet(name, null);
+				shape = ls!=null ? ls.getShape() : null;
+			}
+			if (shape==null) continue;
+			
+			boolean foundDims = false;
+			for (int i = 0; i < shape.length; i++) {
+				if (shape[i]>1) {
+					foundDims = true;
+					break;
+				}
+			}
+			if (!foundDims) continue;
+			ret.add(name);
+		}
+		return ret;
 	}
 
 	public void refresh() {
