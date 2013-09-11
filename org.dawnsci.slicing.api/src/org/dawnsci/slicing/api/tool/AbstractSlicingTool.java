@@ -9,6 +9,7 @@ import org.dawnsci.slicing.api.system.DimsData;
 import org.dawnsci.slicing.api.system.DimsDataList;
 import org.dawnsci.slicing.api.system.ISliceSystem;
 import org.dawnsci.slicing.api.util.SliceUtils;
+import org.eclipse.jface.action.IAction;
 
 import uk.ac.diamond.scisoft.analysis.IAnalysisService;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
@@ -95,6 +96,15 @@ public abstract class AbstractSlicingTool implements ISlicingTool {
             ret.add(axis);
 		}
 		return ret;
+	}
+	
+	/**
+	 * The action to be used for the tool. In this case we return
+	 * null and an action is created from the extension point.
+	 * @return
+	 */
+	public IAction createAction() {
+		return null;
 	}
 
 }

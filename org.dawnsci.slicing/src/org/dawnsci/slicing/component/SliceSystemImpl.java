@@ -495,7 +495,7 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 			}
 
 			if (sliceType==null) sliceType = dimsDataList.getAxisCount()>1 ? PlotType.IMAGE : PlotType.XY;
-			final Action action = getActionByPlotType(sliceType);
+			final IAction action = getActionByPlotType(sliceType);
 			if (action!=null) action.setChecked(true);
 			
 			// We make sure that the size is not outside

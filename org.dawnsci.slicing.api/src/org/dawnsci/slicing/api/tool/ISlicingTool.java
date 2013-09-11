@@ -2,6 +2,7 @@ package org.dawnsci.slicing.api.tool;
 
 import org.dawnsci.slicing.api.system.ISliceSystem;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.jface.action.IAction;
 
 /**
  * A tool which integrates to the slicing system to 
@@ -71,5 +72,18 @@ public interface ISlicingTool extends IAdaptable {
 	 * Called to dispose of tool
 	 */
 	public void dispose();
+
+
+	/**
+	 * This method may be used to provide an alternative action for the
+	 * too. If used, the tool will not have the icon defined by the extension point
+	 * set and instead return a custom defined action by the tool.
+	 * 
+	 * This can be used where a slice tool has several modes which should be chosen from
+	 * the toolbar. For instance the hyper 3D tool which can several options for slicing.
+	 * 
+	 * @return the action to be used for this tool, may be null.
+	 */
+	public IAction createAction();
 	
 }

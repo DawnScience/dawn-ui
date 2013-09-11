@@ -101,37 +101,15 @@ public abstract class AbstractSliceSystem implements ISliceSystem {
 		
 		final IConfigurationElement[] eles = Platform.getExtensionRegistry().getConfigurationElementsFor("org.dawnsci.slicing.api.slicingTool");
 
-        final CheckableActionGroup grp = new CheckableActionGroup();
-		plotTypeActions= new HashMap<Enum, Action>();
+  		plotTypeActions= new HashMap<Enum, IAction>();
 
 		for (IConfigurationElement e : eles) {
 			
 			final ISlicingTool slicingTool = createSliceTool(e);
-			String toolTip = e.getAttribute("tooltip");
-			if (toolTip==null) toolTip = slicingTool.getToolId();
 			
-			
-	        final Action action = new Action(toolTip, IAction.AS_CHECK_BOX) {
-	        	public void run() {
-	        		saveSliceSettings();
-	        		if (activeTool!=null) activeTool.demilitarize();
-	        		slicingTool.militarize();
-	        		activeTool = slicingTool;
-	        	}
-	        };
-	        
-	    	final String   icon  = e.getAttribute("icon");
-	    	if (icon!=null) {
-		    	final String   id    = e.getContributor().getName();
-		    	final Bundle   bundle= Platform.getBundle(id);
-		    	final URL      entry = bundle.getEntry(icon);
-		    	final ImageDescriptor des = ImageDescriptor.createFromURL(entry);
-		    	action.setImageDescriptor(des);
-	    	}
-
-			action.setId(slicingTool.getToolId());
+			IAction action = slicingTool.createAction();
+			if (action==null) action = createSliceToolAction(e, slicingTool);
 			man.add(action);
-			grp.add(action);
 			plotTypeActions.put(slicingTool.getSliceType(), action);
 
 		}
@@ -139,8 +117,54 @@ public abstract class AbstractSliceSystem implements ISliceSystem {
 		return man;
 	}
 	
-	private  Map<Enum, Action> plotTypeActions;
-	protected Action getActionByPlotType(Object plotType) {
+	private IAction createSliceToolAction(IConfigurationElement e, final ISlicingTool slicingTool) {
+		
+		String toolTip = e.getAttribute("tooltip");
+		if (toolTip==null) toolTip = slicingTool.getToolId();
+
+		final Action action = new Action(toolTip, IAction.AS_CHECK_BOX) {
+        	public void run() {
+        		militarize(slicingTool);
+        	}
+        };
+        
+    	final String   icon  = e.getAttribute("icon");
+    	if (icon!=null) {
+	    	final String   id    = e.getContributor().getName();
+	    	final Bundle   bundle= Platform.getBundle(id);
+	    	final URL      entry = bundle.getEntry(icon);
+	    	final ImageDescriptor des = ImageDescriptor.createFromURL(entry);
+	    	action.setImageDescriptor(des);
+    	}
+
+		action.setId(slicingTool.getToolId());	
+	    return action;	
+	}
+	
+	/**
+	 * Demilitarizes the current tool (if different) and miliarizes this tool.
+	 * 
+	 * @param tool
+	 */
+	@Override
+	public void militarize(ISlicingTool slicingTool) {
+		saveSliceSettings();
+		if (activeTool!=null && slicingTool!=activeTool) {
+			activeTool.demilitarize();
+		}
+		slicingTool.militarize();
+		activeTool = slicingTool;
+		
+		// check the correct actions
+		for (Enum key : plotTypeActions.keySet()) {
+			final IAction action = plotTypeActions.get(key);
+			action.setChecked(key==sliceType);
+		}
+	}
+
+
+	private  Map<Enum, IAction> plotTypeActions;
+	protected IAction getActionByPlotType(Object plotType) {
 		if (plotTypeActions==null) return null;
 		return plotTypeActions.get(plotType);
 	}

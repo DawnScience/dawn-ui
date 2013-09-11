@@ -3,6 +3,8 @@ package org.dawnsci.slicing.tools.hyper;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.dawb.common.ui.menu.CheckableActionGroup;
+import org.dawb.common.ui.menu.MenuAction;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.slicing.api.system.AxisChoiceEvent;
 import org.dawnsci.slicing.api.system.AxisChoiceListener;
@@ -12,6 +14,9 @@ import org.dawnsci.slicing.api.system.DimsData;
 import org.dawnsci.slicing.api.system.DimsDataList;
 import org.dawnsci.slicing.api.system.SliceSource;
 import org.dawnsci.slicing.api.tool.AbstractSlicingTool;
+import org.dawnsci.slicing.tools.Activator;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.swt.widgets.Control;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -188,6 +193,32 @@ public class HyperSlicingTool extends AbstractSlicingTool {
 			ret.add((AbstractDataset)id);
 		}
 		return ret;
+	}
+	
+	public IAction createAction() {
+		
+		final MenuAction menuAction = new MenuAction("Hyper 3D slicing");
+		
+		final CheckableActionGroup grp = new CheckableActionGroup();
+		for (final HyperType type : HyperType.values()) {
+			final Action action = new Action(type.getLabel(), IAction.AS_CHECK_BOX) {
+				public void run() {
+	        		hyperType = type;
+                    getSlicingSystem().militarize(HyperSlicingTool.this);
+                    menuAction.setSelectedAction(this);
+				}
+			};
+			action.setImageDescriptor(Activator.getImageDescriptor(type.getIconPath()));
+			menuAction.add(action);
+			
+			if (type==hyperType) {
+				action.setChecked(true);
+				menuAction.setSelectedAction(action);
+			}
+			grp.add(action);
+		}
+		
+		return menuAction;
 	}
 	
 	@Override

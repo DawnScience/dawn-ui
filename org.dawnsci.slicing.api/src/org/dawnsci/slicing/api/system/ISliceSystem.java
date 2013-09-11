@@ -3,6 +3,7 @@ package org.dawnsci.slicing.api.system;
 import java.util.Map;
 
 import org.dawnsci.plotting.api.IPlottingSystem;
+import org.dawnsci.slicing.api.tool.ISlicingTool;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -229,5 +230,12 @@ public interface ISliceSystem {
 	 * @param plotType
 	 */
 	public void setSliceType(Enum type);
+	
+	/**
+	 * Demilitarizes the current tool (if different) and miliarizes this tool.
+	 * 
+	 * @param tool
+	 */
+	public void militarize(ISlicingTool tool);
 
 }
