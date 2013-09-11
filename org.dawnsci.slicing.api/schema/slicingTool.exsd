@@ -91,6 +91,14 @@
                </documentation>
             </annotation>
          </attribute>
+         <attribute name="separator" type="boolean">
+            <annotation>
+               <documentation>
+                  Sets if the tool action should have a separator before it (default is false).
+               </documentation>
+            </annotation>
+         </attribute>
+         
       </complexType>
    </element>
 

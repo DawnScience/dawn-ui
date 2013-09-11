@@ -38,6 +38,7 @@
             class="org.dawnsci.slicing.tools.hyper.HyperSlicingTool"
             icon="icons/cutter.png"
             id="org.dawnsci.slicing.tools.hyperSlicingTool"
+            separator="true"
             tooltip="Hyper 3D Slicing">
       </slicing_tool>
       

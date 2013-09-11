@@ -15,7 +15,6 @@ import java.beans.XMLEncoder;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -55,6 +54,7 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.layout.TableColumnLayout;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
@@ -99,7 +99,7 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 
 	private TableViewer     viewer;
 
-	private CLabel          errorLabel, explain;
+	private CLabel          errorLabel, explain, infoLabel;
 	private Link            openWindowing;
 	private Composite       area;
 	private boolean         isErrorCondition=false;
@@ -175,10 +175,14 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		viewer.setColumnProperties(COLUMN_PROPERTIES.toArray(new String[COLUMN_PROPERTIES.size()]));			
 		
 		this.errorLabel = new CLabel(area, SWT.WRAP);
-		errorLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+		errorLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		errorLabel.setImage(Activator.getImageDescriptor("icons/error.png").createImage());
 		GridUtils.setVisible(errorLabel,         false);
 		
+		this.infoLabel = new CLabel(area, SWT.NONE);
+		infoLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		GridUtils.setVisible(infoLabel,         false);
+
 		this.openWindowing = new Link(area, SWT.WRAP);
 		openWindowing.setText("Data is being viewed using a <a>window</a>");
 		openWindowing.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
@@ -252,6 +256,19 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		sliceToolbar.update(true);
     	
 		return area;
+	}
+	
+	@Override
+	public void setSliceTypeInfo(String label, ImageDescriptor icon) {
+		if (label==null && icon==null) {
+			GridUtils.setVisible(infoLabel,         false);
+		} else {
+		    GridUtils.setVisible(infoLabel,         true);
+		    infoLabel.setText(label);
+		    if (icon==null) icon = getActionByPlotType(sliceType).getImageDescriptor();
+		    infoLabel.setImage(icon.createImage(Display.getDefault()));
+		    infoLabel.setText(label);
+		}
 	}
 
 	private boolean axesVisible = true;
@@ -556,44 +573,8 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 	 */
 	private boolean updateErrorLabel() {
 				
-		boolean isX = false;
-		for (int i = 0; i < dimsDataList.size(); i++) {
-			if (dimsDataList.getDimsData(i).getPlotAxis()==0) isX = true;
-		}
-		boolean isY = false;
-		for (int i = 0; i < dimsDataList.size(); i++) {
-			if (dimsDataList.getDimsData(i).getPlotAxis()==1) isY = true;
-		}
-		boolean isZ = false;
-		for (int i = 0; i < dimsDataList.size(); i++) {
-			if (dimsDataList.getDimsData(i).getPlotAxis()==2) isZ = true;
-		}
-
-		String errorMessage = "";
-		boolean ok = false;
-		
-		Enum sliceType = getSliceType();
-		try {
-			final Method dimCountMethod = sliceType.getClass().getMethod("getDimensions");
-			final int dimCount = (Integer)dimCountMethod.invoke(sliceType);
-
-			if (dimCount==1) {
-				ok = isX;
-				errorMessage = "Please set an X axis.";
-			} else if (dimCount==2){
-				ok = isX&&isY;
-				errorMessage = "Please set an X and Y axis or switch to 'Slice as line plot'.";
-			} else if (dimCount==3){
-				ok = isX&&isY&&isZ;
-				errorMessage = "Please set an X, Y and Z axis or switch to 'Slice as image plot'.";
-			}
-			
-		} catch (Throwable ne) {
-			logger.error("Cannot find the getDimensions method in "+sliceType.getClass());
-			ok = false;
-			errorMessage="Invalid slice type: "+sliceType;
-		}
-		
+        final String errorMessage = checkErrors();
+		boolean ok = errorMessage==null;
 		if (!ok) {
 			errorLabel.setText(errorMessage);
 		}

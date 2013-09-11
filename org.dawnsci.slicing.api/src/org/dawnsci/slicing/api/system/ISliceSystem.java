@@ -5,6 +5,7 @@ import java.util.Map;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.slicing.api.tool.ISlicingTool;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
@@ -230,6 +231,19 @@ public interface ISliceSystem {
 	 * @param plotType
 	 */
 	public void setSliceType(Enum type);
+	
+	/**
+	 * Provide information as to the current slice methodology so that
+	 * the component can show which tool is currently active.
+	 * 
+	 * Optional to use this method
+	 * 
+	 * @param label
+	 * @param icon - may be null, if null and sliceType!=null the image descriptor
+	 *        of the action for this sliceType will be used.
+	 */
+	public void setSliceTypeInfo(String label, ImageDescriptor icon);
+
 	
 	/**
 	 * Demilitarizes the current tool (if different) and miliarizes this tool.

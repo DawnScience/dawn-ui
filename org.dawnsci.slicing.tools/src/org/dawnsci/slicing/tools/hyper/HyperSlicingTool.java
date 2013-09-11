@@ -68,6 +68,7 @@ public class HyperSlicingTool extends AbstractSlicingTool {
 	public void militarize() {
 		
 		getSlicingSystem().setSliceType(getSliceType());
+		getSlicingSystem().setSliceTypeInfo(hyperType.getLabel(), Activator.getImageDescriptor(hyperType.getIconPath()));
 
 		final IPlottingSystem plotSystem = getSlicingSystem().getPlottingSystem();
         if (hyperComponent==null) {

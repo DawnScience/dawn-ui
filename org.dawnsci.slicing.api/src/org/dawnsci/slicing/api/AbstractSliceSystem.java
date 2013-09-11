@@ -1,5 +1,6 @@
 package org.dawnsci.slicing.api;
 
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -107,6 +108,9 @@ public abstract class AbstractSliceSystem implements ISliceSystem {
 			
 			final ISlicingTool slicingTool = createSliceTool(e);
 			
+			final String requireSep = e.getAttribute("separator");
+			if ("true".equals(requireSep)) man.add(new Separator());
+			
 			IAction action = slicingTool.createAction();
 			if (action==null) action = createSliceToolAction(e, slicingTool);
 			man.add(action);
@@ -160,6 +164,53 @@ public abstract class AbstractSliceSystem implements ISliceSystem {
 			final IAction action = plotTypeActions.get(key);
 			action.setChecked(key==sliceType);
 		}
+	}
+	
+	/**
+	 * 
+	 * @return null if ok, error message if errors.
+	 */
+	protected String checkErrors() {
+		
+		boolean isX = false;
+		for (int i = 0; i < dimsDataList.size(); i++) {
+			if (dimsDataList.getDimsData(i).getPlotAxis()==0) isX = true;
+		}
+		boolean isY = false;
+		for (int i = 0; i < dimsDataList.size(); i++) {
+			if (dimsDataList.getDimsData(i).getPlotAxis()==1) isY = true;
+		}
+		boolean isZ = false;
+		for (int i = 0; i < dimsDataList.size(); i++) {
+			if (dimsDataList.getDimsData(i).getPlotAxis()==2) isZ = true;
+		}
+
+		String errorMessage = "";
+		boolean ok = false;
+		
+		Enum sliceType = getSliceType();
+		try {
+			final Method dimCountMethod = sliceType.getClass().getMethod("getDimensions");
+			final int dimCount = (Integer)dimCountMethod.invoke(sliceType);
+
+			if (dimCount==1) {
+				ok = isX;
+				errorMessage = "Please set an X axis.";
+			} else if (dimCount==2){
+				ok = isX&&isY;
+				errorMessage = "Please set an X and Y axis or switch to 'Slice as line plot'.";
+			} else if (dimCount==3){
+				ok = isX&&isY&&isZ;
+				errorMessage = "Please set an X, Y and Z axis or switch to 'Slice as image plot'.";
+			}
+			
+		} catch (Throwable ne) {
+			logger.error("Cannot find the getDimensions method in "+sliceType.getClass());
+			ok = false;
+			errorMessage="Invalid slice type: "+sliceType;
+		}
+		
+		return ok ? null : errorMessage;
 	}
 
 
@@ -312,6 +363,15 @@ public abstract class AbstractSliceSystem implements ISliceSystem {
 	@Override
 	public void setSliceType(Enum plotType) {
 		this.sliceType = plotType;
+		setSliceTypeInfo(null, null);
+	}
+	
+	/**
+	 * Does nothing by default.
+	 */
+	@Override
+	public void setSliceTypeInfo(String label, ImageDescriptor icon) {
+		
 	}
 	
 	/**
