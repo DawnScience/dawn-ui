@@ -250,10 +250,8 @@ public class SliceUtils {
 		final IDataset slice = getSlice(lazySet, currentSlice,monitor);
 		if (slice==null) return;
 		
-		// We sum the data in the dimensions that are not axes
-		if (monitor!=null) monitor.worked(1);		
-		if (monitor!=null&&monitor.isCanceled()) return;
-		
+		// DO NOT CANCEL the monitor now, we have done the hard part the slice.
+		// We may as well plot it or the plot will look very slow.
 		if (monitor!=null) monitor.worked(1);
 		
 		boolean requireScale = plottingSystem.isRescale()
@@ -313,7 +311,6 @@ public class SliceUtils {
 			plottingSystem.setPlotType(type);
 			IDataset y = getNexusAxis(currentSlice, slice.getShape()[0], currentSlice.getX()+1, true, monitor);
 			IDataset x = getNexusAxis(currentSlice, slice.getShape()[1], currentSlice.getY()+1, true, monitor);		
-			if (monitor!=null&&monitor.isCanceled()) return;
 			
 			// Nullify user objects because the ImageHistoryTool uses
 			// user objects to know if the image came from it. Since we
@@ -470,11 +467,15 @@ public class SliceUtils {
 
 
 	public static IDataset getSlice(final ILazyDataset      ld,
-			                               final SliceObject       currentSlice,
-			                               final IProgressMonitor  monitor) throws Exception {
+									final SliceObject       currentSlice,
+									final IProgressMonitor  monitor) throws Exception {
 		
 		final int[] dataShape = currentSlice.getFullShape();
 		
+		if (monitor!=null&&monitor.isCanceled()) return null;
+
+		// This is the bit that takes the time. 
+		// *DO NOT CANCEL MONITOR* if we get this far
 		IDataset slice = (IDataset)ld.getSlice(currentSlice.getSliceStart(), currentSlice.getSliceStop(), currentSlice.getSliceStep());
 		slice.setName("Slice of "+currentSlice.getName()+" "+currentSlice.getShapeMessage());
 		
@@ -485,16 +486,10 @@ public class SliceUtils {
 			final int       len    = dataShape.length;
 			for (int i = len-1; i >= 0; i--) {
 				if (!currentSlice.isAxis(i) && dataShape[i]>1) sum = service.sum(sum, i);
-				if (monitor!=null) monitor.worked(1);
-				if (monitor!=null&&monitor.isCanceled()) return null;
 			}
 
 			if (currentSlice.getX() > currentSlice.getY()) sum = service.transpose(sum);
-			if (monitor!=null) monitor.worked(1);
-			if (monitor!=null&&monitor.isCanceled()) return null;
 			sum.setName(slice.getName());
-			
-			if (monitor!=null&&monitor.isCanceled()) return null;
 			
 			sum = sum.squeeze();
 			slice = sum;

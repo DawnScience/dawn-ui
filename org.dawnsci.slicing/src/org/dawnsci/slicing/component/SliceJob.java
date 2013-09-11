@@ -24,6 +24,9 @@ class SliceJob extends Job {
 	public SliceJob(ISliceSystem system) {
 		super("Slice");
 		this.system = system;
+		setPriority(INTERACTIVE);
+		setUser(false);
+		setSystem(true);
 	}
 
 	@Override
@@ -58,7 +61,7 @@ class SliceJob extends Job {
 
 	public void schedule(Enum sliceType, SliceObject cs, boolean force) {
 		if (force==false && slice!=null && slice.equals(cs)) return;
-		cancel();
+		// DO NOT: cancel();
 		this.slice = cs;
 		this.sliceType = sliceType;
 		schedule();
