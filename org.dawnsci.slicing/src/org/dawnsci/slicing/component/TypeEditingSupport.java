@@ -146,7 +146,8 @@ class TypeEditingSupport extends EditingSupport {
 			ret.add("Z");
 		}
 
-		ret.add("(Slice)");
+		final int rank = (system.getLazyDataset()!=null) ? system.getLazyDataset().getRank() : Integer.MAX_VALUE;
+		if (rank>ret.size()) ret.add("(Slice)");
 		if (system.isRangesAllowed()) ret.add("(Range)");
 		return ret.toArray(new String[ret.size()]);
 	}

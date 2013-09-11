@@ -181,7 +181,10 @@ public class HyperSlicingTool extends AbstractSlicingTool {
 		final List<AbstractDataset> ret= new ArrayList<AbstractDataset>(ia.size());
 		for (int i = 0; i < ia.size(); i++) {
 			IDataset id = ia.get(i);
-			if (id == null) id = AbstractDataset.arange(dataShape[i], AbstractDataset.INT);
+			if (id == null) {
+				id = AbstractDataset.arange(dataShape[i], AbstractDataset.INT);
+				id.setName("indices");
+			}
 			ret.add((AbstractDataset)id);
 		}
 		return ret;

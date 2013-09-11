@@ -679,10 +679,10 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		setDataShape(lazySet.getShape());
 		
 		explain.setText("Create a slice of "+sliceObject.getName()+".\nIt has the shape "+Arrays.toString(dataShape));
-        sliceEditingSupport.setPlayButtonVisible(false);
+        if (sliceEditingSupport!=null) sliceEditingSupport.setPlayButtonVisible(false);
 		
 		createDimsData(source.isExpression());
-        axisEditingSupport.updateAxesChoices();
+        if (axisEditingSupport!=null) axisEditingSupport.updateAxesChoices();
 		viewer.refresh();
     	
 		synchronizeSliceData(null);
@@ -693,7 +693,7 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 			viewer.getTable().getColumns()[2].setText("Start Index or Slice Range");
 		}
 		
-		typeEditingSupport.updateChoices();
+		if (typeEditingSupport!=null) typeEditingSupport.updateChoices();
 
 	}
 	

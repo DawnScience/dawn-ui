@@ -85,7 +85,8 @@ public abstract class AbstractSlicingTool implements ISlicingTool {
 				final String name = names.get(dd.getDimension()+1);
 				axis = SliceUtils.getNexusAxis(getSlicingSystem().getCurrentSlice(), name, false, null);
 			} catch (Throwable e) {
-				return null;
+				ret.add(null);
+				continue;
 			}
             if (axis==null) {
             	final IAnalysisService service = (IAnalysisService)ServiceManager.getService(IAnalysisService.class);
