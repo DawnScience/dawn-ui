@@ -158,10 +158,8 @@ public class WindowTool extends AbstractToolPage {
 								xAspectRatio = regionControlWindow.getXAspectRatio();
 								yAspectRatio = regionControlWindow.getYAspectRatio();
 							}
-							// size above 300x300
-							if (rroi.getLengths()[0] > 300 && rroi.getLengths()[1] > 300) {
-								// apply dawnsampling with bin of 3
-								binShape = 3;
+							binShape = RegionControlWindow.getBinShape(rroi.getLengths()[0], rroi.getLengths()[1], true);
+							if (binShape != 1) {
 								// DownsampleMode.MEAN = 2
 								samplingMode = 2; 
 							}
@@ -192,18 +190,28 @@ public class WindowTool extends AbstractToolPage {
 							int endX = (int)Math.round(rroi.getEndPoint()[0]);
 							int endY = (int)Math.round(rroi.getEndPoint()[1]);
 							regionControlWindow.setSpinnerValues(startX, startY, roiWidth, roiHeight);
+
+							int xAspectRatio = 0, yAspectRatio = 0, binShape = 1, samplingMode = 0;
 							if (regionControlWindow.isOverwriteAspect()){
-								SurfacePlotROI sroi = new SurfacePlotROI(startX, 
-																startY, 
-																endX, 
-																endY, 
-																0, 0, 
-																regionControlWindow.getXAspectRatio(), 
-																regionControlWindow.getYAspectRatio());
-								windowJob.schedule(sroi);
-							} else {
-								windowJob.schedule(rroi);
+								xAspectRatio = regionControlWindow.getXAspectRatio();
+								yAspectRatio = regionControlWindow.getYAspectRatio();
 							}
+							binShape = RegionControlWindow.getBinShape(rroi.getLengths()[0], rroi.getLengths()[1], false);
+
+							if (binShape != 1) {
+								// DownsampleMode.MEAN = 2
+								samplingMode = 2; 
+							}
+							SurfacePlotROI sroi = new SurfacePlotROI(startX, 
+									startY, 
+									endX, 
+									endY, 
+									samplingMode, samplingMode,
+									xAspectRatio, 
+									yAspectRatio);
+							sroi.setXBinShape(binShape);
+							sroi.setYBinShape(binShape);
+							windowJob.schedule(sroi);
 						}
 					}
 				}
@@ -541,14 +549,16 @@ public class WindowTool extends AbstractToolPage {
 
 		@Override
 		protected IStatus run(final IProgressMonitor monitor) {
-			
 			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 			final IWindowTrace windowTrace = getWindowTrace();
 			if (windowTrace!=null) {
 				Display.getDefault().syncExec(new Runnable() {
 					public void run() {
 						if (monitor.isCanceled()) return;
+						// TODO correctly monitor the job?
+						monitor.beginTask("Sending data to plot", 100);
 						windowTrace.setWindow(window);
+						monitor.worked(100);
 					}
 				});
 			} else {

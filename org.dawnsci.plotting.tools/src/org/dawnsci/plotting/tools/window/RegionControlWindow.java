@@ -76,24 +76,18 @@ public class RegionControlWindow {
 				if (!e.getSource().equals(btnOverwriteAspect)) {
 					if (region != null)
 						region.setROI(rroi);
-					if (isOverwriteAspect()){
-						xAspectRatio = getXAspectRatio();
-						yAspectRatio = getYAspectRatio();
-					}
-					// size above 300x300
-					if (rroi.getLengths()[0] > 300 && rroi.getLengths()[1] > 300) {
-						// apply dawnsampling with bin of 3
-						binShape = 3;
-						// DownsampleMode.MEAN = 2
-						samplingMode = 2;
-					}
 				} else if (e.getSource().equals(btnOverwriteAspect)) {
-					if (isOverwriteAspect) {
-						xAspectRatio = getXAspectRatio();
-						yAspectRatio = getYAspectRatio();
-					}
 					spnXAspect.setEnabled(isOverwriteAspect);
 					spnYAspect.setEnabled(isOverwriteAspect);
+				}
+				if (isOverwriteAspect) {
+					xAspectRatio = getXAspectRatio();
+					yAspectRatio = getYAspectRatio();
+				}
+				binShape = getBinShape(rroi.getLengths()[0], rroi.getLengths()[1], true);
+				if (binShape != 1) {
+					// DownsampleMode.MEAN = 2
+					samplingMode = 2;
 				}
 				SurfacePlotROI sroi = new SurfacePlotROI(startPosX, 
 						startPosY, 
@@ -285,5 +279,45 @@ public class RegionControlWindow {
 			spnWidth.removeSelectionListener(selectionListener);
 		if (spnHeight != null && !spnHeight.isDisposed())
 			spnHeight.removeSelectionListener(selectionListener);
+	}
+
+	/**
+	 * Returns the bin shape given a ROI width and height
+	 * @param width
+	 * @param height
+	 * @param isDrag
+	 * @return binShape
+	 */
+	public static int getBinShape(double width, double height, boolean isDrag) {
+		int binShape = 1;
+
+		if (isDrag && 
+				((width > 300 && width < 900 && height > 300 && width < 900)// size above 300x300 and below 900x900
+				|| (width < 300 && height > 300)					// if width below 300 but height above
+				|| (width > 300 && height < 300))) {				// if width above 300 but height below
+			return (int)(((width + height) / 2) / 100) - 1;
+		} else if (!isDrag && 
+				((width > 300 && width < 900 && height > 300 && width < 900)
+						|| (width < 300 && height > 300)
+						|| (width > 300 && height < 300))) {
+			return (int)(((width + height) / 2) / 100) - 2;
+		}
+		// if size is below 300x300
+		if (width < 300 && height < 300) {
+			return 1;
+		}
+		// if size is bigger than 900x900
+		if (isDrag && 
+				((width > 900 && height > 900)
+				||(width > 900 && height < 900)
+				||(width < 900 && height > 900))) {
+			return (int)(((width + height) / 2) / 100);
+		} else if (!isDrag && 
+				((width > 900 && height > 900)
+				||(width > 900 && height < 900)
+				||(width < 900 && height > 900))) {
+			return (int)(((width + height) / 2) / 100) - 1;
+		}
+		return binShape;
 	}
 }
