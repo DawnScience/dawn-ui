@@ -12,6 +12,7 @@ import org.dawb.common.ui.plot.roi.data.RectangularROIData;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.wizard.persistence.PersistenceExportWizard;
 import org.dawb.common.ui.wizard.persistence.PersistenceImportWizard;
+import org.dawb.common.util.list.IdentityList;
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.dawnsci.plotting.api.region.IROIListener;
 import org.dawnsci.plotting.api.region.IRegion;
@@ -202,6 +203,7 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 		};
 	}
 
+	private List<IRegion> previous;
 	@Override
 	public void createControl(Composite parent) {
 		
@@ -230,12 +232,27 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 			}		
 			@Override
 			public Object[] getElements(Object inputElement) {
+				
 				final Collection<IRegion> regions = getPlottingSystem().getRegions();
 				if (regions==null || regions.isEmpty()) return new Object[]{"-"};
-				final List<IRegion> visible = new ArrayList<IRegion>(regions.size());
+				
+				final List<IRegion> visible = new IdentityList<IRegion>();
 				for (IRegion iRegion : regions) {
-					if (iRegion.isVisible() && iRegion.isUserRegion()) visible.add(iRegion);
+					if (isRegionOk(iRegion)) visible.add(iRegion);
 				}
+				
+				// We attempt to keep the same order on a rename or a region
+				// by using identity.
+				if (previous!=null) {
+					visible.removeAll(previous);
+					int pos = 0;
+					for (IRegion reg : previous) {
+						visible.add(pos, reg);
+						pos++;
+					}
+				}
+			
+				previous = visible;
 				return visible.toArray(new IRegion[visible.size()]);
 			}
 		});
@@ -246,6 +263,10 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 		activate();
 	}
 	
+	protected boolean isRegionOk(IRegion iRegion) {
+		return iRegion.isVisible() && iRegion.isUserRegion();
+	}
+
 	protected IAction getReselectAction() {
 		final Action reselect = new Action("Create new measurement.", getImageDescriptor()) {
 			public void run() {
@@ -455,6 +476,10 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 	
 	public void dispose() {
 		super.dispose();
+		if (previous!=null) {
+			previous.clear();
+			previous=null;
+		}
 	}
 
 
@@ -709,5 +734,13 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 		} catch (Exception e) {
 			return vals;
 		}
+	}
+
+	public IROI getRoi() {
+		return roi;
+	}
+
+	public void setRoi(IROI roi) {
+		this.roi = roi;
 	}
 }

@@ -22,7 +22,7 @@ import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 public class MeasurementLabelProvider extends ColumnLabelProvider {
 	
 	public enum LabelType {
-		ROINAME, STARTX, STARTY, ENDX, ENDY, MAX, SUM, ROITYPE, DX, DY, LENGTH, INNERRAD, OUTERRAD, ROISTRING, ACTIVE
+		ROINAME, STARTX, STARTY, ENDX, ENDY, MAX, SUM, ROITYPE, DX, DY, LENGTH, INNERRAD, OUTERRAD, ROISTRING, ACTIVE, VISIBLE;
 	}
 
 	private static final Logger logger = LoggerFactory.getLogger(MeasurementLabelProvider.class);
@@ -51,6 +51,9 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 		if (column==LabelType.ACTIVE){
 			final IRegion region = (IRegion)element;
 			return region.isActive() && tool.getControl().isEnabled() ? checkedIcon : uncheckedIcon;
+		}else if (column==LabelType.VISIBLE){
+			final IRegion region = (IRegion)element;
+			return region.isVisible() && tool.getControl().isEnabled() ? checkedIcon : uncheckedIcon;
 		}
 		return null;
 	}
