@@ -19,12 +19,14 @@ public class SpectrumPerspective implements IPerspectiveFactory {
 	 */
 	public void createInitialLayout(IPageLayout layout) {
 
+		String editorArea = layout.getEditorArea();
+		layout.setEditorAreaVisible(false);
+		
+		layout.setFixed(true);
+		
 		addFastViews(layout);
 		addViewShortcuts(layout);
 		addPerspectiveShortcuts(layout);
-		
-		String editorArea = layout.getEditorArea();
-		layout.setEditorAreaVisible(false);
 		
 		IFolderLayout navigatorFolder = layout.createFolder("navigator-folder", IPageLayout.LEFT, 0.15f, editorArea);
 		navigatorFolder.addView("org.dawnsci.spectrum.ui.views.SpectrumProject");
