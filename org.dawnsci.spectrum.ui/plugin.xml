@@ -102,5 +102,27 @@
             name="Spectrum Default Names">
       </page>
    </extension>
+   <extension
+         point="org.eclipse.ui.activities">
+      <activity
+            id="org.dawnsci.spectrum.perspective.removeunwantedaction"
+            name="Remove unwanted actions">
+         <enabledWhen>
+            <with
+                  variable="activeWorkbenchWindow.activePerspective">
+               <not>
+                  <equals
+                        value="org.dawnsci.spectrum.ui.perspective">
+                  </equals>
+               </not>
+            </with>
+         </enabledWhen>
+      </activity>
+      <activityPatternBinding
+            activityId="org.dawnsci.spectrum.perspective.removeunwantedaction"
+            isEqualityPattern="true"
+            pattern="org.eclipse.ui.edit.text.openLocalFile">
+      </activityPatternBinding>
+   </extension>
 
 </plugin>

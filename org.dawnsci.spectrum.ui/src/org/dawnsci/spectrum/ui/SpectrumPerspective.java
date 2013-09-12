@@ -13,7 +13,7 @@ public class SpectrumPerspective implements IPerspectiveFactory {
 	/**
 	 * Old id maintained to keep old workspaces happy.
 	 */
-	public static final String ID = "org.dawnsci.spectrum.perspective.SpectrumPerspective";
+	public static final String ID = "org.dawnsci.spectrum.ui.perspective";
 	/**
 	 * Creates the initial layout for a page.
 	 */
