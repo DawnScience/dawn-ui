@@ -422,6 +422,7 @@ public class SliceUtils {
 				
 				final ILoaderService service = (ILoaderService)ServiceManager.getService(ILoaderService.class);
 				axis = service.getDataset(currentSlice.getPath(), fullName, monitor);
+				if (axis == null) return null;
 				axis = axis.squeeze();
 				
 				final String unit = file.getAttributeValue(fullName+"@unit");
@@ -437,6 +438,7 @@ public class SliceUtils {
 			final String fullName = file.getParent().replace('\\','/')+"/"+axisName;
 			final ILoaderService service = (ILoaderService)ServiceManager.getService(ILoaderService.class);
 			axis = service.getDataset(currentSlice.getPath(), fullName, monitor);
+			if (axis == null) return null;
 			axis = axis.squeeze();
 		
 		}
@@ -457,6 +459,7 @@ public class SliceUtils {
 				}
 			}
 			axis = axis.getSlice(start, stop, step);
+			if (axis == null) return null;
 			axis = axis.squeeze();
 		}
 		

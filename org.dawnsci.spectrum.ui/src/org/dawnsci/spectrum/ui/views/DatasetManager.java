@@ -91,6 +91,17 @@ public class DatasetManager {
 			
 			int[] shape = shapeMap.get(name);
 			
+			if (shape == null) {
+				try {
+					DataHolder dh = LoaderFactory.getData(meta.getFilePath());
+					shape = dh.getLazyDataset(name).getShape();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					continue;
+				}
+			}
+			
 			if (shape == null) continue;
 			
 			updateDatasetMap(all,name,shape);

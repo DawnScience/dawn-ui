@@ -87,6 +87,8 @@ public class SpectrumDatasetView extends ViewPart {
 
 			@Override
 			public void selectionChanged(IWorkbenchPart part, ISelection selection) {
+				
+				if (combo.isDisposed()) return;
 
 				otherFiles = SpectrumUtils.getSpectrumFilesList((IStructuredSelection)selection);
 
