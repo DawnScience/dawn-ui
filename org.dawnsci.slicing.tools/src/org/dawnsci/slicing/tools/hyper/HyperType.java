@@ -33,4 +33,7 @@ public enum HyperType {
 		return iconPath;
 	}
 
+	public String toString() {
+		return label;
+	}
 }

@@ -37,6 +37,7 @@ import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.function.Downsample;
 import uk.ac.diamond.scisoft.analysis.dataset.function.DownsampleMode;
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import de.jreality.geometry.IndexedLineSetFactory;
 import de.jreality.geometry.PointSetFactory;
 import de.jreality.geometry.QuadMeshFactory;
@@ -151,6 +152,8 @@ public class DataSet3DPlot3D implements IDataSet3DCorePlot {
 	private String yAxisLabelStr;
 	private String zAxisLabelStr;
 	private SurfPlotStyles currentStyle = SurfPlotStyles.FILLED;
+
+	private SurfacePlotROI roi;
 	
 	/**
 	 * Constructor of a DataSet3DPlot3D
@@ -813,74 +816,107 @@ public class DataSet3DPlot3D implements IDataSet3DCorePlot {
 	 */
 	public void setDataWindow(SurfacePlotROI roi) {
 		
+		this.roi = roi;
 		if (roi==null) return; // TODO Should probably clear
-		//if (useWindow) {
-			windowStartPosX = roi.getStartX();
-			windowStartPosY = roi.getStartY();
-			windowEndPosX = roi.getEndX();
-			windowEndPosY = roi.getEndY();
-			int swap;
-			if (windowStartPosX > windowEndPosX)
-			{
-				swap = windowStartPosX;
-				windowStartPosX = windowEndPosX;
-				windowEndPosX = swap;				
-			}
-			
-			if (windowStartPosY > windowEndPosY)
-			{
-				swap = windowStartPosY;
-				windowStartPosY = windowEndPosY;
-				windowEndPosY = swap;				
-			}
-			
-			int dimWidth = Math.abs(windowEndPosX - windowStartPosX);
-			int dimHeight = Math.abs(windowEndPosY - windowStartPosY);
+		
+        updateDisplayData();
+		updateDisplay(roi.getXAspect(),roi.getYAspect());
+	}
+	
+	private void updateDisplayData() {
+		windowStartPosX = roi.getStartX();
+		windowStartPosY = roi.getStartY();
+		windowEndPosX = roi.getEndX();
+		windowEndPosY = roi.getEndY();
+		int swap;
+		if (windowStartPosX > windowEndPosX)
+		{
+			swap = windowStartPosX;
+			windowStartPosX = windowEndPosX;
+			windowEndPosX = swap;				
+		}
+		
+		if (windowStartPosY > windowEndPosY)
+		{
+			swap = windowStartPosY;
+			windowStartPosY = windowEndPosY;
+			windowEndPosY = swap;				
+		}
+		
+		int dimWidth = Math.abs(windowEndPosX - windowStartPosX);
+		int dimHeight = Math.abs(windowEndPosY - windowStartPosY);
 
-			int[] shape = currentData.getShape();
-			if (dimWidth < 2) {
-				if (windowEndPosX+2 >= shape[1])
-					windowStartPosX-=2;
-				else
-					windowEndPosX+=2;
+		int[] shape = currentData.getShape();
+		if (dimWidth < 2) {
+			if (windowEndPosX+2 >= shape[1])
+				windowStartPosX-=2;
+			else
+				windowEndPosX+=2;
+		}
+		
+		if (dimHeight < 2) {
+			if (windowEndPosY+2 >= shape[0])
+				windowStartPosY-=2;
+			else
+				windowEndPosY+=2;
+		}
+		if (windowStartPosX == windowEndPosX)
+			windowEndPosX++;
+		if (windowStartPosY == windowEndPosY)
+			windowEndPosY++;
+		
+		if (windowEndPosX > shape[1]) {
+			windowEndPosX = shape[1];
+		}
+		if (windowEndPosY > shape[0]) {
+			windowEndPosY = shape[0];
+		}
+		int startP[] = {windowStartPosY,windowStartPosX};
+		int endP[] = {windowEndPosY,windowEndPosX};
+		
+		displayData = currentData.getSlice(startP,endP, null);
+		if (roi.getXSamplingMode() > 0 ||
+			roi.getYSamplingMode() > 0) {
+			int xDim = Math.abs(windowEndPosX - windowStartPosX);
+			int yDim = Math.abs(windowEndPosY - windowStartPosY);
+		    float totalSubFactor = (float)MAXDIMSQR / (float)(xDim * yDim);
+		    float xRatio = (float)xDim / (float)(yDim+xDim);
+		    float yRatio = (float)yDim / (float)(yDim+xDim);
+		    float xSampleFactor = (1.0f - totalSubFactor) * (roi.getYSamplingMode() != 0 ? xRatio : 1.0f);
+		    float ySampleFactor = (1.0f - totalSubFactor) * (roi.getXSamplingMode() != 0 ? yRatio : 1.0f);
+		    xSampleFactor = (float)Math.sqrt(xSampleFactor);
+		    ySampleFactor = (float)Math.sqrt(ySampleFactor);
+			int xSize = (roi.getXSamplingMode() == 0 ? xDim : (int)Math.floor(xDim * (1.0f - xSampleFactor)));
+			int ySize = (roi.getYSamplingMode() == 0 ? yDim : (int)Math.floor(yDim * (1.0f - ySampleFactor)));
+			DownsampleMode mode = DownsampleMode.POINT;
+			switch(roi.getXSamplingMode()) {
+				case 2 : mode = DownsampleMode.MEAN;
+				break;
+				case 3 : mode = DownsampleMode.MAXIMUM;
+				break;
+				case 4: mode = DownsampleMode.MINIMUM;
+				break;
 			}
-			
-			if (dimHeight < 2) {
-				if (windowEndPosY+2 >= shape[0])
-					windowStartPosY-=2;
-				else
-					windowEndPosY+=2;
-			}
-			if (windowStartPosX == windowEndPosX)
-				windowEndPosX++;
-			if (windowStartPosY == windowEndPosY)
-				windowEndPosY++;
-			
-			if (windowEndPosX > shape[1]) {
-				windowEndPosX = shape[1];
-			}
-			if (windowEndPosY > shape[0]) {
-				windowEndPosY = shape[0];
-			}
-			int startP[] = {windowStartPosY,windowStartPosX};
-			int endP[] = {windowEndPosY,windowEndPosX};
-			
-			displayData = currentData.getSlice(startP,endP, null);
-			if (roi.getXSamplingMode() > 0 ||
-				roi.getYSamplingMode() > 0) {
-				int xDim = Math.abs(windowEndPosX - windowStartPosX);
-				int yDim = Math.abs(windowEndPosY - windowStartPosY);
-			    float totalSubFactor = (float)MAXDIMSQR / (float)(xDim * yDim);
-			    float xRatio = (float)xDim / (float)(yDim+xDim);
-			    float yRatio = (float)yDim / (float)(yDim+xDim);
-			    float xSampleFactor = (1.0f - totalSubFactor) * (roi.getYSamplingMode() != 0 ? xRatio : 1.0f);
-			    float ySampleFactor = (1.0f - totalSubFactor) * (roi.getXSamplingMode() != 0 ? yRatio : 1.0f);
-			    xSampleFactor = (float)Math.sqrt(xSampleFactor);
-			    ySampleFactor = (float)Math.sqrt(ySampleFactor);
-				int xSize = (roi.getXSamplingMode() == 0 ? xDim : (int)Math.floor(xDim * (1.0f - xSampleFactor)));
-				int ySize = (roi.getYSamplingMode() == 0 ? yDim : (int)Math.floor(yDim * (1.0f - ySampleFactor)));
-				DownsampleMode mode = DownsampleMode.POINT;
-				switch(roi.getXSamplingMode()) {
+			int xSampleRate = (int)Math.ceil((double)xDim / (double)xSize);
+			int ySampleRate = (int)Math.round((double)yDim / (double)ySize);
+			Downsample sample = null;
+			// if bin is provided
+			if (roi.getXBinShape() != 1 && roi.getYBinShape() != 1)
+				sample = new Downsample(mode,
+						roi.getXBinShape(),
+						roi.getYBinShape());
+			else
+				sample = new Downsample(mode,
+						  (roi.getYSamplingMode() == roi.getXSamplingMode() ? ySampleRate : 1),
+						   xSampleRate);
+
+			displayData = sample.value(displayData).get(0);
+			if (roi.getYSamplingMode() != roi.getXSamplingMode() &&
+				roi.getYSamplingMode() != 0) {
+
+				switch(roi.getYSamplingMode()) {
+					case 1: mode = DownsampleMode.POINT;
+					break;
 					case 2 : mode = DownsampleMode.MEAN;
 					break;
 					case 3 : mode = DownsampleMode.MAXIMUM;
@@ -888,41 +924,12 @@ public class DataSet3DPlot3D implements IDataSet3DCorePlot {
 					case 4: mode = DownsampleMode.MINIMUM;
 					break;
 				}
-				int xSampleRate = (int)Math.ceil((double)xDim / (double)xSize);
-				int ySampleRate = (int)Math.round((double)yDim / (double)ySize);
-				Downsample sample = null;
-				// if bin is provided
-				if (roi.getXBinShape() != 1 && roi.getYBinShape() != 1)
-					sample = new Downsample(mode,
-							roi.getXBinShape(),
-							roi.getYBinShape());
-				else
-					sample = new Downsample(mode,
-							  (roi.getYSamplingMode() == roi.getXSamplingMode() ? ySampleRate : 1),
-							   xSampleRate);
-
-				displayData = sample.value(displayData).get(0);
-				if (roi.getYSamplingMode() != roi.getXSamplingMode() &&
-					roi.getYSamplingMode() != 0) {
-
-					switch(roi.getYSamplingMode()) {
-						case 1: mode = DownsampleMode.POINT;
-						break;
-						case 2 : mode = DownsampleMode.MEAN;
-						break;
-						case 3 : mode = DownsampleMode.MAXIMUM;
-						break;
-						case 4: mode = DownsampleMode.MINIMUM;
-						break;
-					}
-					sample = new Downsample(mode,ySampleRate,1);
-					displayData = sample.value(displayData).get(0);					
-				}
+				sample = new Downsample(mode,ySampleRate,1);
+				displayData = sample.value(displayData).get(0);					
 			}
-			updateDisplay(roi.getXAspect(),roi.getYAspect());
-		//}
+		}		
 	}
-	
+
 	protected void buildOtherNodes() {
 		Camera sceneCamera = CameraUtility.getCamera(app.getCurrentViewer());
         sceneCamera.setFieldOfView(56.5f);
@@ -1446,8 +1453,12 @@ public class DataSet3DPlot3D implements IDataSet3DCorePlot {
 		{
 			currentData = newData;
 			buildDisplayDataSet();
-			updateDisplay(0,0);
-
+			if (roi!=null) {
+		        updateDisplayData();
+				updateDisplay(roi.getXAspect(),roi.getYAspect());
+			} else {
+                updateDisplay(0,0);
+			}
 		}
 	}
 
@@ -1533,6 +1544,10 @@ public class DataSet3DPlot3D implements IDataSet3DCorePlot {
 	public void toggleErrorBars(boolean xcoord, boolean ycoord, boolean zcoord) {
 		// TODO Auto-generated method stub	
 		// not yet implemented
+	}
+
+	public IROI getDataWindow() {
+		return this.roi;
 	}
 	
 }

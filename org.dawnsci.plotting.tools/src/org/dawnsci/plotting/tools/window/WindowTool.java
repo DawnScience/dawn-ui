@@ -118,7 +118,12 @@ public class WindowTool extends AbstractToolPage {
 				protected void update(TraceEvent evt) {
 					ITrace trace = getTrace();
 					if (trace!=null) {
-						updateTrace(trace);
+						// TODO FIXME This method breaks the
+						// surface plot by unnecessary continually
+						// rewindowing! Do not change the plot when
+						// it tells you its data is changing - that is
+						// silly.
+						// updateTrace(trace);
 					} else {
 						windowSystem.clear();
 					}

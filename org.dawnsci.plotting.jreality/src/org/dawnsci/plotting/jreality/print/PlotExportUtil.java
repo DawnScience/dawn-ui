@@ -292,9 +292,13 @@ public class PlotExportUtil {
 			}
 		}
 	}
+	
+	public static synchronized Image createImage(AbstractViewerApp viewerApp, 
+									            Display           display,
+									            Plot1DGraphTable  legendTable, 
+									            PrinterData       printerData, 
+									            int resolutionMultiplier) {
 
-	public static synchronized Image createImage(AbstractViewerApp viewerApp, Display display,
-			Plot1DGraphTable legendTable, PrinterData printerData, int resolutionMultiplier) {
 		File imageFile = null;
 		Image image = null;
 		try {
@@ -318,8 +322,11 @@ public class PlotExportUtil {
 			if (SWT.getPlatform().toLowerCase().equals("gtk"))
 				printScaleFactor = resolutionMultiplier;
 
-			ExportImage.exportImage(viewerApp.getCurrentViewer(), imageFile, viewerApp.getCurrentViewer().getViewingComponentSize().width*printScaleFactor, 
-					viewerApp.getCurrentViewer().getViewingComponentSize().height*printScaleFactor, oversampling);
+			final Dimension size = viewerApp.getCurrentViewer().getViewingComponentSize();
+			ExportImage.exportImage(viewerApp.getCurrentViewer(), imageFile, 
+					                size.width*printScaleFactor, 
+					                size.height*printScaleFactor,
+					                oversampling);
 
 			ImageLoader loader = new ImageLoader();
 			imageData = loader.load(imageFile.getAbsolutePath())[0];

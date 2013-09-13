@@ -248,6 +248,8 @@ public interface IPlottingSystem extends IAdaptable, ITraceSystem, IRegionSystem
 	 * 
 	 * Do not call before createPlotPart(...)
 	 * 
+	 * THREAD SAFE
+	 * 
 	 * @param plotType
 	 */
 	public void setPlotType(PlotType plotType);

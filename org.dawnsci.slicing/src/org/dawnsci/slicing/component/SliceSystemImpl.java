@@ -77,6 +77,8 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
+import org.eclipse.ui.internal.handlers.IActionCommandMappingService;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
@@ -288,7 +290,22 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 	}
 
 	public void setSliceActionsEnabled(boolean enabled) {
-		((ToolBarManager)sliceToolbar).getControl().setEnabled(enabled);
+		final IContributionItem[] items = sliceToolbar.getItems();
+		for (IContributionItem toolItem : items) {
+			if (toolItem instanceof ActionContributionItem) {
+				((ActionContributionItem)toolItem).getAction().setEnabled(enabled);
+			}
+		}
+		sliceToolbar.update(true);
+	}
+	
+	/**
+	 * Throws an NPE if the action is not there.
+	 */
+	public void setSliceActionEnabled(Enum type, boolean enabled) {
+		final IAction action = getActionByPlotType(type);
+		action.setEnabled(enabled);
+		sliceToolbar.update(true);
 	}
 	/**
 	 * 

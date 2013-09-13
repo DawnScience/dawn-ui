@@ -155,6 +155,14 @@ public interface ISliceSystem {
 	public void setSliceActionsEnabled(boolean enabled);
 	
 	/**
+	 * Set an action visiable by enum value.
+	 * @param xy
+	 * @param b
+	 */
+	public void setSliceActionEnabled(Enum sliceType, boolean b);
+
+	
+	/**
 	 * Sets if slicing is allowed in the slice widget. If set to false
 	 * the slice widget (e.g. a table) will become deactivated.
 	 * @param enabled
@@ -251,5 +259,6 @@ public interface ISliceSystem {
 	 * @param tool
 	 */
 	public void militarize(ISlicingTool tool);
+
 
 }

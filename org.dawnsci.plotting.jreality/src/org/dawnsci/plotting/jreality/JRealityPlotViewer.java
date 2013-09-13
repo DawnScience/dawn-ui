@@ -1,8 +1,14 @@
 package org.dawnsci.plotting.jreality;
 
 import java.awt.Component;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.image.BufferedImage;
+import java.awt.image.DirectColorModel;
+import java.awt.image.IndexColorModel;
+import java.awt.image.WritableRaster;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
@@ -58,6 +64,10 @@ import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.PaletteData;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
@@ -77,6 +87,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
+import de.jreality.jogl.ViewerSwt;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
@@ -392,17 +403,21 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 			plotter.setZAxisLabel(getName(zAxis.getName(), "Z-Axis"));
 			
 			setTickGridLines(xcoord, ycoord, zcoord);
+			setTitle(data.get(0).getName());
 
-			if (window instanceof SurfacePlotROI) {
+			if (window!=null && window instanceof SurfacePlotROI && !window.equals(getDataWindow())) {
 			    ((DataSet3DPlot3D) plotter).setDataWindow((SurfacePlotROI)window);
 			}
-			setTitle(data.get(0).getName());
 
 		} catch (Throwable e) {
 			throw new RuntimeException(e);
 		}
 
 		return true;
+	}
+	
+	protected IROI getDataWindow() {
+		 return ((DataSet3DPlot3D) plotter).getDataWindow();
 	}
 	
 	private String getName(String name, String defaultName) {
@@ -1173,4 +1188,87 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 			((DataSet3DPlot3D) plotter).setStyle(newStyle);
 		}
 	}
+
+	public Image getImage(Rectangle size) {
+		
+		AbstractViewerApp app = getViewer();
+		
+		ViewerSwt viewer = (ViewerSwt)app.getCurrentViewer();
+		
+		BufferedImage img = viewer.renderOffscreen(size.width, size.height);
+		
+		BufferedImage img2 = new BufferedImage(size.width, 
+												size.height,
+												BufferedImage.TYPE_INT_RGB);
+		Graphics2D g = (Graphics2D) img2.getGraphics();
+		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+		img2.getGraphics().drawImage(img.getScaledInstance(size.width,size.height,BufferedImage.SCALE_SMOOTH),
+									0,
+									0,
+									null);
+		return new Image(Display.getDefault(), convertToSWT(img2));
+	}
+	
+
+	/**
+	 * Call to make SWT Image data for SWT Image using swing BufferedImage
+	 * 
+	 * This allows one to use Java 2d to draw the primitive.
+	 * 
+	 * @param bufferedImage
+	 * @return
+	 */
+	private static ImageData convertToSWT(BufferedImage bufferedImage) {
+		if (bufferedImage.getColorModel() instanceof DirectColorModel) {
+			DirectColorModel colorModel = (DirectColorModel) bufferedImage
+					.getColorModel();
+			PaletteData palette = new PaletteData(colorModel.getRedMask(),
+					colorModel.getGreenMask(), colorModel.getBlueMask());
+			ImageData data = new ImageData(bufferedImage.getWidth(),
+					bufferedImage.getHeight(), colorModel.getPixelSize(),
+					palette);
+			WritableRaster raster = bufferedImage.getRaster();
+			int[] pixelArray = new int[3];
+			for (int y = 0; y < data.height; y++) {
+				for (int x = 0; x < data.width; x++) {
+					raster.getPixel(x, y, pixelArray);
+					int pixel = palette.getPixel(new RGB(pixelArray[0],
+							pixelArray[1], pixelArray[2]));
+					data.setPixel(x, y, pixel);
+				}
+			}
+			return data;
+		} else if (bufferedImage.getColorModel() instanceof IndexColorModel) {
+			IndexColorModel colorModel = (IndexColorModel) bufferedImage
+					.getColorModel();
+			int size = colorModel.getMapSize();
+			byte[] reds = new byte[size];
+			byte[] greens = new byte[size];
+			byte[] blues = new byte[size];
+			colorModel.getReds(reds);
+			colorModel.getGreens(greens);
+			colorModel.getBlues(blues);
+			RGB[] rgbs = new RGB[size];
+			for (int i = 0; i < rgbs.length; i++) {
+				rgbs[i] = new RGB(reds[i] & 0xFF, greens[i] & 0xFF,
+						blues[i] & 0xFF);
+			}
+			PaletteData palette = new PaletteData(rgbs);
+			ImageData data = new ImageData(bufferedImage.getWidth(),
+					bufferedImage.getHeight(), colorModel.getPixelSize(),
+					palette);
+			data.transparentPixel = colorModel.getTransparentPixel();
+			WritableRaster raster = bufferedImage.getRaster();
+			int[] pixelArray = new int[1];
+			for (int y = 0; y < data.height; y++) {
+				for (int x = 0; x < data.width; x++) {
+					raster.getPixel(x, y, pixelArray);
+					data.setPixel(x, y, pixelArray[0]);
+				}
+			}
+			return data;
+		}
+		return null;
+	}
+
 }

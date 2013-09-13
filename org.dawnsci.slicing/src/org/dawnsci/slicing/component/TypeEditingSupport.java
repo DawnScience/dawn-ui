@@ -93,7 +93,7 @@ class TypeEditingSupport extends EditingSupport {
 		if (data==null) return;
 		int axis = (Integer)value;
 		final Enum sliceType = system.getSliceType();
-		if (sliceType==PlotType.XY) axis = axis>-1 ? 0 : -1;
+		if (sliceType==PlotType.XY && axis!=102) axis = axis>-1 ? 0 : -1;
 		data.setPlotAxis(axis);
 		system.updateAxesChoices();
 		system.update(data);

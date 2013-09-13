@@ -875,12 +875,16 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 
 	/**
 	 * Creates an image of the same size as the Rectangle passed in.
-	 * @param size
+	 * @param size, ignored for 3D plots, instead the size of the widget it used.
 	 * @return
 	 */
 	@Override
 	public Image getImage(Rectangle size) {
-		return lightWeightViewer.getImage(size);
+		if (getPlotType().is3D()) {
+			return jrealityViewer.getImage(size);	
+		} else {
+		    return lightWeightViewer.getImage(size);
+		}
 	}
 
 	/**

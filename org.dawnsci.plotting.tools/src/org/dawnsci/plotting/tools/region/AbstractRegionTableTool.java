@@ -236,24 +236,12 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 				final Collection<IRegion> regions = getPlottingSystem().getRegions();
 				if (regions==null || regions.isEmpty()) return new Object[]{"-"};
 				
-				final List<IRegion> visible = new IdentityList<IRegion>();
+				final List<IRegion> okRegions = new ArrayList<IRegion>();
 				for (IRegion iRegion : regions) {
-					if (isRegionOk(iRegion)) visible.add(iRegion);
+					if (isRegionOk(iRegion)) okRegions.add(iRegion);
 				}
 				
-				// We attempt to keep the same order on a rename or a region
-				// by using identity.
-				if (previous!=null) {
-					visible.removeAll(previous);
-					int pos = 0;
-					for (IRegion reg : previous) {
-						visible.add(pos, reg);
-						pos++;
-					}
-				}
-			
-				previous = visible;
-				return visible.toArray(new IRegion[visible.size()]);
+				return okRegions.toArray(new IRegion[okRegions.size()]);
 			}
 		});
 		viewer.setInput(new Object());
