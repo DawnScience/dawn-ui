@@ -871,8 +871,8 @@ public class DataSet3DPlot3D implements IDataSet3DCorePlot {
 		if (windowEndPosY > shape[0]) {
 			windowEndPosY = shape[0];
 		}
-		int startP[] = {windowStartPosY,windowStartPosX};
-		int endP[] = {windowEndPosY,windowEndPosX};
+		int startP[] = normalize(new int[]{windowStartPosY,windowStartPosX}, currentData.getShape()[1], currentData.getShape()[0]);
+		int endP[]   = normalize(new int[]{windowEndPosY,windowEndPosX}, currentData.getShape()[1], currentData.getShape()[0]);;
 		
 		displayData = currentData.getSlice(startP,endP, null);
 		if (roi.getXSamplingMode() > 0 ||
@@ -929,6 +929,16 @@ public class DataSet3DPlot3D implements IDataSet3DCorePlot {
 			}
 		}		
 	}
+	
+	private int[] normalize(int[] point, int maxX, int maxY) {
+		if (point[0]<0) point[0]=0;
+		if (point[0]>=maxX) point[0]=maxX-1;
+		
+		if (point[1]<0) point[1]=0;
+		if (point[1]>=maxY) point[1]=maxY-1;
+		return point;
+	}
+
 
 	protected void buildOtherNodes() {
 		Camera sceneCamera = CameraUtility.getCamera(app.getCurrentViewer());

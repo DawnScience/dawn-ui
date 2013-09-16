@@ -265,6 +265,7 @@ public class DimsDataList implements Serializable {
 			for (DimsData dd : getDimsData()) {
 				if (dd.getPlotAxis()==firstAxis)  continue;
 				if (dd.getPlotAxis()==secondAxis) continue;
+				if (dd.getPlotAxis()==DimsData.RANGE) continue;
 				dd.setPlotAxis(-1);
 			}
 			return;
@@ -276,6 +277,7 @@ public class DimsDataList implements Serializable {
 			for (DimsData dd : getDimsData()) {
 				if (dd.getPlotAxis()==firstAxis)  continue;
 				if (dd.getPlotAxis()==secondAxis) continue;
+				if (dd.getPlotAxis()==DimsData.RANGE) continue;
 				dd.setPlotAxis(-1);
 			}
 			return;
@@ -307,6 +309,7 @@ public class DimsDataList implements Serializable {
 				if (dd.getPlotAxis()==firstAxis)  continue;
 				if (dd.getPlotAxis()==secondAxis) continue;
 				if (dd.getPlotAxis()==thirdAxis)  continue;
+				if (dd.getPlotAxis()==DimsData.RANGE) continue;
 				dd.setPlotAxis(-1);
 			}
 			return;
@@ -320,6 +323,7 @@ public class DimsDataList implements Serializable {
 				if (dd.getPlotAxis()==firstAxis)  continue;
 				if (dd.getPlotAxis()==secondAxis) continue;
 				if (dd.getPlotAxis()==thirdAxis)  continue;
+				if (dd.getPlotAxis()==DimsData.RANGE) continue;
 				dd.setPlotAxis(-1);
 			}
 			return;
