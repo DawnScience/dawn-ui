@@ -19,10 +19,9 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
-import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
 import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 
-public interface IDatasetEditor extends IVariableManager, IEditorPart, IPlottingContainer {
+public interface IDatasetEditor extends IVariableManager, IEditorPart, IPlottingContainer, IDatasetProvider {
 
 	/**
 	 * Update the plot with checkables selected by the user.
@@ -45,22 +44,6 @@ public interface IDatasetEditor extends IVariableManager, IEditorPart, IPlotting
 	 * @return a map of selected datasets
 	 */
 	Map<String, IDataset> getSelected();
-	
-	/**
-	 * A dataset which can be used without loading the data
-	 * @param name
-	 * @param monitor
-	 * @return lazy dataset
-	 */
-	public ILazyDataset getLazyDataset(String name, IMonitor monitor);
-
-	/**
-	 * Return dataset for name
-	 * @param name
-	 * @param monitor
-	 * @return dataset
-	 */
-	public IDataset getDataset(final String name, final IMonitor monitor);
 
 	/**
 	 * Test if editor contains dataset of given name

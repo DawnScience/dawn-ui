@@ -25,6 +25,7 @@ import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.dawnsci.plotting.api.trace.ColorOption;
 import org.dawnsci.slicing.api.system.ISliceSystem;
+import org.dawnsci.slicing.api.util.SliceUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.ui.IEditorInput;
@@ -80,19 +81,21 @@ public class H5MultiEditor extends MultiPageEditorPart  implements IReusableEdit
 			// Allowed to have no meta data at this point.
 		}
 		
-		boolean treeOnTop = false;
-		if (metaData!=null) {
-			if (metaData.getDataNames()==null || metaData.getDataNames().size()<1) {
-				treeOnTop = true;
-			} else {
-				if (getEditorSite().getPage().findViewReference("uk.ac.diamond.scisoft.analysis.rcp.views.DatasetInspectorView")!=null) {
+		try {
+			
+			boolean treeOnTop = false;
+			if (metaData!=null) {
+				final Collection<String> names = SliceUtils.getSlicableNames(LoaderFactory.getData(EclipseUtils.getFilePath(getEditorInput()), null));
+				if (names==null || names.size()<1) {
 					treeOnTop = true;
+				} else {
+					if (getEditorSite().getPage().findViewReference("uk.ac.diamond.scisoft.analysis.rcp.views.DatasetInspectorView")!=null) {
+						treeOnTop = true;
+					}
 				}
 			}
-		}
 
-		int index = 0;
-		try {
+			int index = 0;
 			String defaultEditorSetting = System.getProperty(ORG_DAWB_EDITOR_H5_USE_DEFAULT);
 			boolean useH5Editor = defaultEditorSetting == null || defaultEditorSetting.equals("true");
 			if (treeOnTop) {
@@ -134,7 +137,7 @@ public class H5MultiEditor extends MultiPageEditorPart  implements IReusableEdit
 				setPageText(index, "Tree");
 				index++;
 			}
-		} catch (PartInitException e) {
+		} catch (Exception e) {
 			logger.error("Cannot initiate "+getClass().getName()+"!", e);
 		}
 		
@@ -202,8 +205,10 @@ public class H5MultiEditor extends MultiPageEditorPart  implements IReusableEdit
 		} else if (clazz == IPlottingSystem.class) {
 			if (dataSetEditor!=null) return dataSetEditor.getPlottingSystem();
 		} else if (clazz == IVariableManager.class) {
+			if (dataSetEditor==null) return null;
 			return dataSetEditor.getDataSetComponent();
 		} else if (clazz == ISliceSystem.class) {
+			if (dataSetEditor==null) return null;
 			return dataSetEditor.getSliceComponent();
 		}
 		

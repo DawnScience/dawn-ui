@@ -56,8 +56,10 @@ import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.tools.reduction.DataReductionWizard;
 import org.dawnsci.slicing.api.data.ICheckableObject;
 import org.dawnsci.slicing.api.editor.IDatasetEditor;
+import org.dawnsci.slicing.api.editor.IDatasetProvider;
 import org.dawnsci.slicing.api.system.DimsDataList;
 import org.dawnsci.slicing.api.system.ISliceSystem;
+import org.dawnsci.slicing.api.util.SliceUtils;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -142,6 +144,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IErrorDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
 import uk.ac.diamond.scisoft.analysis.io.DataHolder;
+import uk.ac.diamond.scisoft.analysis.io.IDataHolder;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
@@ -151,7 +154,7 @@ import uk.ac.diamond.scisoft.analysis.utils.OSUtils;
  * This view can view and plot any file. It is most efficient if the Loader that LoaderFactory
  * uses for this file type is an IMetaLoader. 
  */
-public class PlotDataComponent implements IVariableManager, MouseListener, KeyListener, IPlottingSystemSelection, IAdaptable {
+public class PlotDataComponent implements IVariableManager, IDatasetProvider, MouseListener, KeyListener, IPlottingSystemSelection, IAdaptable {
 		
 	private static final Logger logger = LoggerFactory.getLogger(PlotDataComponent.class);
 
@@ -1396,7 +1399,8 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	}
 
 	
-	public AbstractDataset getDataSet(String name, final IMonitor monitor) {
+	@Override
+	public AbstractDataset getDataset(String name, final IMonitor monitor) {
 		
 		try {
 			if (providerDeligate!=null) {
@@ -1420,7 +1424,24 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		}
 	}
 	
-	public ILazyDataset getLazyDataSet(String name, final IMonitor monitor) {
+	private IDataHolder getDataHolder(IMonitor mon) {
+		
+		try {
+			if (providerDeligate!=null) {
+				return LoaderFactory.getData(EclipseUtils.getFilePath(providerDeligate.getEditorInput()), mon);
+			}
+			if (this.filePath==null) return null;
+
+			return LoaderFactory.getData(this.filePath, mon);
+		} catch (Exception e) {
+			logger.error("Cannot read data for file!", e);
+			return null;
+		}
+
+	}
+	
+	@Override
+	public ILazyDataset getLazyDataset(String name, final IMonitor monitor) {
 		
 		try {
 			if (providerDeligate!=null) {
@@ -1430,6 +1451,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 			
 			DataHolder holder = LoaderFactory.getData(filePath, monitor);
 			ILazyDataset set  = holder.getLazyDataset(name);
+			if (set!=null) set.setName(name);
 			return set;
 			
 		} catch (IllegalArgumentException ie) {
@@ -1446,7 +1468,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 
 		final ICheckableObject ob = getCheckableObjectByVariable(variableName);
 		if (!ob.isExpression()) {
-			return getDataSet(ob.getName(), monitor);
+			return getDataset(ob.getName(), monitor);
 		} else {
 			try {
 				return (AbstractDataset)ob.getExpression().getDataSet(null, new IMonitor.Stub());
@@ -1460,7 +1482,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	public ILazyDataset getLazyValue(String name, final IMonitor monitor) {
 		final ICheckableObject ob = getCheckableObjectByVariable(name);
 		if (!ob.isExpression()) {
-			return getLazyDataSet(ob.getName(), monitor);
+			return getLazyDataset(ob.getName(), monitor);
 		} else {
 			try {
 				return ob.getExpression().getLazyDataSet(name, new IMonitor.Stub());
@@ -1552,7 +1574,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 			case 3:
 				if (!element.isExpression()) {
 					if (metaData.getDataSizes()==null) {
-						final ILazyDataset set = getLazyDataSet(name, (IMonitor)null);
+						final ILazyDataset set = getLazyDataset(name, (IMonitor)null);
 						if (set!=null) {
 							return set.getSize()+"";
 						}
@@ -1572,7 +1594,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 			case 5:
 				if (!element.isExpression()) {
 					if (metaData.getDataShapes()==null || metaData.getDataShapes().get(name)==null) {
-						final ILazyDataset set = getLazyDataSet(name, null);
+						final ILazyDataset set = getLazyDataset(name, null);
 						if (set!=null) {
 							return Arrays.toString(set.getShape());
 						}
@@ -1655,7 +1677,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		
 		final String name = element.getName();
 		if (metaData.getDataShapes()==null || metaData.getDataShapes().get(name)==null) {
-			final ILazyDataset set = getLazyDataSet(name, (IMonitor)null);
+			final ILazyDataset set = getLazyDataset(name, (IMonitor)null);
 			// Assuming it has been squeezed already
 			if (set!=null) {
 				return set.getShape().length;
@@ -1737,7 +1759,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		
 		if (meta==null) return;
 		this.data.clear();
-		final Collection<String> names = getPlottableData(meta);
+		final Collection<String> names = SliceUtils.getSlicableNames(getDataHolder(null));
 		for (String name : names) this.data.add(new CheckableObject(name));
 		
 		// Search names to see if they all have a common root, we do not show this.
@@ -1782,37 +1804,6 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		}
 	}
 
-	/**
-	 * Deals with loaders which provide data names of size 1
-	 * 
-	 * 
-	 * @param meta
-	 * @return
-	 */
-	private Collection<String> getPlottableData(IMetaData meta) {
-		Collection<String> names = meta.getDataNames();
-		if (names==null) return null;
-		Collection<String> ret   = new ArrayList<String>(names.size());
-		for (String name : names) {
-			int [] shape = meta.getDataShapes().get(name);
-			if (shape==null) {
-				ILazyDataset ls = getLazyDataSet(name, null);
-				shape = ls!=null ? ls.getShape() : null;
-			}
-			if (shape==null) continue;
-			
-			boolean foundDims = false;
-			for (int i = 0; i < shape.length; i++) {
-				if (shape[i]>1) {
-					foundDims = true;
-					break;
-				}
-			}
-			if (!foundDims) continue;
-			ret.add(name);
-		}
-		return ret;
-	}
 
 	public void refresh() {
 		this.dataViewer.refresh();
@@ -1847,7 +1838,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 				final CheckableObject check = PlotDataComponent.this.getObjectByName(name);
 				check.setChecked(false);
 				PlotDataComponent.this.selectionChanged(check, true);
-				datasetSelection = PlotDataComponent.this.getDataSet(name, (IMonitor)null);
+				datasetSelection = PlotDataComponent.this.getDataset(name, (IMonitor)null);
 			}
 		});
 		

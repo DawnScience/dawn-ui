@@ -39,6 +39,8 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.IAnalysisService;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
+import uk.ac.diamond.scisoft.analysis.io.IDataHolder;
+import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.io.SliceObject;
 
 public class SliceUtils {
@@ -552,5 +554,46 @@ public class SliceUtils {
 			
 		}
 	}
+	
+	
+	/**
+	 * Deals with loaders which provide data names of size 1
+	 * 
+	 * 
+	 * @param meta
+	 * @return
+	 */
+	public static final Collection<String> getSlicableNames(IDataHolder holder) {
+		
+		final IMetaData meta = holder.getMetadata();
+		if (meta==null) return null;
+		
+		Collection<String> names = meta.getDataNames();
+		if (names==null)     return null;
+		if (names.isEmpty()) return names;
+		
+		
+		Collection<String> ret   = new ArrayList<String>(names.size());
+		for (String name : names) {
+			int [] shape = meta.getDataShapes().get(name);
+			if (shape==null) {
+				ILazyDataset ls = holder.getLazyDataset(name);
+				shape = ls!=null ? ls.getShape() : null;
+			}
+			if (shape==null) continue;
+			
+			boolean foundDims = false;
+			for (int i = 0; i < shape.length; i++) {
+				if (shape[i]>1) {
+					foundDims = true;
+					break;
+				}
+			}
+			if (!foundDims) continue;
+			ret.add(name);
+		}
+		return ret;
+	}
+
 
 }
