@@ -569,9 +569,8 @@ public class SliceUtils {
 		if (meta==null) return null;
 		
 		Collection<String> names = meta.getDataNames();
-		if (names==null)     return null;
-		if (names.isEmpty()) return names;
-		
+		if (names==null||names.isEmpty()) names = Arrays.asList(holder.getNames());
+		if (names==null||names.isEmpty()) return null;
 		
 		Collection<String> ret   = new ArrayList<String>(names.size());
 		for (String name : names) {

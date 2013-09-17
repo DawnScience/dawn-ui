@@ -77,8 +77,6 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.ToolBar;
-import org.eclipse.swt.widgets.ToolItem;
-import org.eclipse.ui.internal.handlers.IActionCommandMappingService;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
@@ -693,6 +691,7 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		
 		if (typeEditingSupport!=null) typeEditingSupport.updateChoices();
 
+		checkToolDimenionsOk();
 	}
 	
 	public void setLabel(final String text) {

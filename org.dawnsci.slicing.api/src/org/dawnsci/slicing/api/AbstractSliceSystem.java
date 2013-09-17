@@ -188,31 +188,34 @@ public abstract class AbstractSliceSystem implements ISliceSystem {
 		String errorMessage = "";
 		boolean ok = false;
 		
-		Enum sliceType = getSliceType();
-		try {
-			final Method dimCountMethod = sliceType.getClass().getMethod("getDimensions");
-			final int dimCount = (Integer)dimCountMethod.invoke(sliceType);
+		int dimCount = getDimensions(getSliceType());
 
-			if (dimCount==1) {
-				ok = isX;
-				errorMessage = "Please set an X axis.";
-			} else if (dimCount==2){
-				ok = isX&&isY;
-				errorMessage = "Please set an X and Y axis or switch to 'Slice as line plot'.";
-			} else if (dimCount==3){
-				ok = isX&&isY&&isZ;
-				errorMessage = "Please set an X, Y and Z axis or switch to 'Slice as image plot'.";
-			}
-			
-		} catch (Throwable ne) {
-			logger.error("Cannot find the getDimensions method in "+sliceType.getClass());
-			ok = false;
-			errorMessage="Invalid slice type: "+sliceType;
+		if (dimCount==1) {
+			ok = isX;
+			errorMessage = "Please set an X axis.";
+		} else if (dimCount==2){
+			ok = isX&&isY;
+			errorMessage = "Please set an X and Y axis or switch to 'Slice as line plot'.";
+		} else if (dimCount==3){
+			ok = isX&&isY&&isZ;
+			errorMessage = "Please set an X, Y and Z axis or switch to 'Slice as image plot'.";
 		}
-		
+
 		return ok ? null : errorMessage;
 	}
 
+
+	protected int getDimensions(Enum st)  {
+		
+		try {
+			final Method dimCountMethod = st.getClass().getMethod("getDimensions");
+			final int dimCount = (Integer)dimCountMethod.invoke(st);
+			return dimCount;
+		} catch (Exception ne) {
+			logger.error("Slice type "+st+" must define a method called 'getDimensions'!", ne);
+			return 0;
+		}
+	}
 
 	private  Map<Enum, IAction> plotTypeActions;
 	protected IAction getActionByPlotType(Object plotType) {
@@ -364,8 +367,25 @@ public abstract class AbstractSliceSystem implements ISliceSystem {
 	public void setSliceType(Enum plotType) {
 		this.sliceType = plotType;
 		setSliceTypeInfo(null, null);
+		checkToolDimenionsOk();
 	}
 	
+	/**
+	 * Checks the tools and disables any which require mre dimensions 
+	 * than we have
+	 */
+	protected void checkToolDimenionsOk() {
+		
+		final int rank = getData().getLazySet().getRank();
+        for (Enum type : plotTypeActions.keySet()) {
+        	
+        	int dims = getDimensions(type);
+        	if (rank<dims) {
+        		plotTypeActions.get(type).setEnabled(false);
+        	}
+        }
+	}
+
 	/**
 	 * Does nothing by default.
 	 */
