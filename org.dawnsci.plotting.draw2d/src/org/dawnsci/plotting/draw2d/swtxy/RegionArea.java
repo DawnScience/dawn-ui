@@ -8,6 +8,8 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.csstudio.swt.widgets.figureparts.ColorMapRamp;
 import org.csstudio.swt.xygraph.figures.Annotation;
@@ -201,11 +203,23 @@ public class RegionArea extends PlotArea {
 	}
 	
 	public void renameRegion(final AbstractSelectionRegion region, String name) {
-		// TODO http://jira.diamond.ac.uk/browse/SCI-1056, order lost on rename.
-	    regions.remove(region.getName());
-	    region.setName(name);
-	    region.setLabel(name);
-	    regions.put(name, region);
+		
+		// Fix http://jira.diamond.ac.uk/browse/SCI-1056, do not loose order on rename		
+		final Map<String, AbstractSelectionRegion> sameOrder = new LinkedHashMap<String, AbstractSelectionRegion>(regions.size());
+
+		final Set<Entry<String,AbstractSelectionRegion>> entries = regions.entrySet();
+		for (Entry<String, AbstractSelectionRegion> entry : entries) {
+			
+			if (entry.getKey().equals(region.getName())) {
+			    region.setName(name);
+			    region.setLabel(name);
+			    sameOrder.put(name, region);				
+			} else {
+				sameOrder.put(entry.getKey(), entry.getValue());
+			}
+		}
+		regions.clear();
+		regions.putAll(sameOrder);
 	}
 	
 	public void clearRegions() {
