@@ -203,7 +203,6 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 		};
 	}
 
-	private List<IRegion> previous;
 	@Override
 	public void createControl(Composite parent) {
 		
@@ -464,10 +463,6 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 	
 	public void dispose() {
 		super.dispose();
-		if (previous!=null) {
-			previous.clear();
-			previous=null;
-		}
 	}
 
 
