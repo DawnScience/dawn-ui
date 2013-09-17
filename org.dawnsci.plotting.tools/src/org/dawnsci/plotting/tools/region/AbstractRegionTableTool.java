@@ -239,19 +239,6 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 				for (IRegion iRegion : regions) {
 					if (isRegionOk(iRegion)) visible.add(iRegion);
 				}
-				
-				// We attempt to keep the same order on a rename or a region
-				// by using identity.
-				if (previous!=null) {
-					visible.removeAll(previous);
-					int pos = 0;
-					for (IRegion reg : previous) {
-						visible.add(pos, reg);
-						pos++;
-					}
-				}
-			
-				previous = visible;
 				return visible.toArray(new IRegion[visible.size()]);
 			}
 		});
