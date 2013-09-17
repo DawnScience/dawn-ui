@@ -1779,28 +1779,39 @@ public class PlotDataComponent implements IVariableManager, IDatasetProvider, Mo
 		}
 		
 		// Some of the meta data
-		if (Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SAVE_SEL_DATA)) try {
-			final String prop = Activator.getDefault().getPreferenceStore().getString(DATA_SEL);
-			if (prop!=null) {
-				final Collection<String> saveSelections = Arrays.asList(prop.split(","));
-				if (data!=null && !data.isEmpty()) {
-					boolean foundData = false;
-					for (CheckableObject checker : data) {
-						if (saveSelections.contains(checker.getName())) {
-							if (!foundData) selections.clear();
-							checker.setChecked(true);
-							this.selections.add(checker);
-							foundData = true;
+		if (Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SAVE_SEL_DATA)) {
+			try {
+
+				final String prop = Activator.getDefault().getPreferenceStore().getString(DATA_SEL);
+				if (prop!=null) {
+					final Collection<String> saveSelections = Arrays.asList(prop.split(","));
+					if (data!=null && !data.isEmpty()) {
+						boolean foundData = false;
+						for (CheckableObject checker : data) {
+							if (saveSelections.contains(checker.getName())) {
+								if (!foundData) selections.clear();
+								checker.setChecked(true);
+								this.selections.add(checker);
+								foundData = true;
+							}
+						}
+
+						if (foundData) {
+							fireSelectionListeners(selections);
 						}
 					}
-					
-					if (foundData) {
-						fireSelectionListeners(selections);
-					}
 				}
+			} catch (Throwable ne) {
+				logger.error("Cannot save data previously selected!", ne);
 			}
-		} catch (Throwable ne) {
-			logger.error("Cannot save data previously selected!", ne);
+		}
+		
+		// If we are an image, plot it.
+		if (names!=null && names.size()==1) {
+			CheckableObject check = data.get(0);
+			check.setChecked(false); // selectionChanged flips this
+			selectionChanged(check, true);
+			dataViewer.refresh();
 		}
 	}
 

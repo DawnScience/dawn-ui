@@ -224,7 +224,10 @@ public class PlotDataPage extends Page implements ISlicePlotUpdateHandler, IAdap
 		} else {
 			try {
 				final DataHolder holder = LoaderFactory.getData(filePath, new IMonitor.Stub());
-				final ILazyDataset lazy = holder.getLazyDataset(object.getName());
+				ILazyDataset lazy = holder.getLazyDataset(object.getName());
+				if (lazy==null) lazy = holder.getLazyDataset(0);
+				if (lazy==null) lazy = holder.getDataset(object.getName());
+				if (lazy==null) lazy = holder.getDataset(0);
 			    sliceComponent.setData(new SliceSource(lazy, object.getName(), filePath, false));
 			} catch (Throwable e) {
 				logger.error("Cannot load lazy data!", e);

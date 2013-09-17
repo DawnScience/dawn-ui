@@ -12,8 +12,8 @@ package org.dawb.workbench.ui.editors;
 import java.util.Collection;
 
 import org.dawb.common.ui.editors.EditorExtensionFactory;
-import org.dawb.common.ui.util.EclipseUtils;
-import org.dawb.common.ui.views.HeaderTablePage;
+import org.dawb.workbench.ui.views.PlotDataPage;
+import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.ui.IEditorInput;
@@ -34,7 +34,7 @@ public class ImageEditor extends MultiPageEditorPart implements IReusableEditor,
 
 	private static final Logger logger = LoggerFactory.getLogger(ImageEditor.class);
 
-	private PlotImageEditor plotImageEditor;
+	private PlotDataEditor plotDataEditor;
 
 
 	
@@ -94,8 +94,8 @@ public class ImageEditor extends MultiPageEditorPart implements IReusableEditor,
 
 			final String plotImageEditorDisabled = "org.dawb.workbench.ui.editors.plotimageeditor.disabled";
 			if(!dataFirst && System.getProperty(plotImageEditorDisabled) == null || "false".equals(System.getProperty(plotImageEditorDisabled)) ) {
-				this.plotImageEditor = new PlotImageEditor(this);
-				addPage(index, plotImageEditor,       getEditorInput());
+				this.plotDataEditor = new PlotDataEditor(PlotType.IMAGE);
+				addPage(index, plotDataEditor,       getEditorInput());
 				setPageText(index, "Image");
 				index++;
 			}
@@ -145,7 +145,7 @@ public class ImageEditor extends MultiPageEditorPart implements IReusableEditor,
     	// of plotted data. Bascially the same as the CSVPage.
     	
 		if (clazz == Page.class) {
-			return new HeaderTablePage(EclipseUtils.getFilePath(getEditorInput()));
+			return PlotDataPage.getPageFor(plotDataEditor);
 		} else if (clazz == IToolPageSystem.class) {
 			try {
 				Object toolSystem = getActiveEditor().getAdapter(clazz);
@@ -153,7 +153,7 @@ public class ImageEditor extends MultiPageEditorPart implements IReusableEditor,
 			} catch (Throwable ne) {
 				logger.error("Cannot get tool system for "+getActiveEditor(), ne);
 			}
-			return plotImageEditor.getPlottingSystem();
+			return plotDataEditor.getPlottingSystem();
 		}
 		
 		return super.getAdapter(clazz);

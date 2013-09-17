@@ -111,7 +111,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 	@Override
 	public void init(IEditorSite site, IEditorInput input) throws PartInitException {
 		setSite(site);
-		setInput(input);		
+		setInput(input, false);
 	}
 
 	@Override
@@ -569,9 +569,12 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
  		return getDataset((String)object, new ProgressMonitorWrapper(monitor));
 	}
 
-
 	@Override
 	public void setInput(final IEditorInput input) {
+		setInput(input, true);
+	}
+
+	private void setInput(final IEditorInput input, boolean createData) {
 		
 		super.setInput(input);
 		setPartName(input.getName());
@@ -603,7 +606,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		getMeta.setSystem(true);
 		getMeta.schedule();
 
-		createData(input);
+		if (createData) createData(input);
 	}
 	
     /**
