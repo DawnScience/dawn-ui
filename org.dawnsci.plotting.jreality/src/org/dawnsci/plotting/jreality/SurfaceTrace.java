@@ -112,10 +112,15 @@ public class SurfaceTrace extends PlotterTrace implements ISurfaceTrace{
 	}
 
 	protected ColourImageData createImageData() {
+		
+		PaletteData     pd        = getPaletteData();
 		ColourImageData imageData = new ColourImageData(256,1);
 		int lastValue=0;
 		for (int i = 0; i < imageData.getWidth(); i++){
-			int value =  ((255&0xff) << 24)+((getPaletteData().colors[i].red&0xff) << 16)+((getPaletteData().colors[i].green&0xff) << 8)+(getPaletteData().colors[i].blue&0xff);
+			int value =  ((255&0xff) << 24) +
+					     ((pd.colors[i].red&0xff)   << 16)+
+					     ((pd.colors[i].green&0xff) << 8)+
+					     (pd.colors[i].blue&0xff);
 			if(i==252)
 				lastValue = value;
 			else if(i==253||i==254||i==255)

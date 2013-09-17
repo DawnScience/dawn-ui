@@ -275,7 +275,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 			surface.setPlottingSystem(system);
 			graph.setVisible(false);
 			plot(surface.createAxisValues(), getWindow(surface.getWindow()), PlottingMode.SURF2D, surface.getData());
-			plotter.handleColourCast(surface.createImageData(), graph, surface.getData().min().doubleValue(), surface.getData().max().doubleValue());
+			plotter.handleColourCast(surface.createImageData(), graph, surface.getMin().doubleValue(), surface.getMax().doubleValue());
 		} finally {
 			graph.setVisible(true);
 			refresh(true);
@@ -319,7 +319,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	protected void setSurfaceWindow(IROI window) {
 		if (currentMode == PlottingMode.SURF2D) {
 			final SurfacePlotROI surfRoi = getWindow(window);
-			((DataSet3DPlot3D) plotter).setDataWindow(surfRoi);
+			((DataSet3DPlot3D) plotter).setDataWindow(null, surfRoi);
 			refresh(false);		
 		}
 	}
@@ -397,6 +397,9 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 
 		try {
 
+			if (window!=null && window instanceof SurfacePlotROI && !window.equals(getDataWindow())) {
+			    ((DataSet3DPlot3D) plotter).setDataWindow(data, (SurfacePlotROI)window);
+			}
 			update(newMode, data);
 			plotter.setXAxisLabel(getName(xAxis.getName(), "X-Axis"));
 			plotter.setYAxisLabel(getName(yAxis.getName(), "Y-Axis"));
@@ -405,9 +408,6 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 			setTickGridLines(xcoord, ycoord, zcoord);
 			setTitle(data.get(0).getName());
 
-			if (window!=null && window instanceof SurfacePlotROI && !window.equals(getDataWindow())) {
-			    ((DataSet3DPlot3D) plotter).setDataWindow((SurfacePlotROI)window);
-			}
 
 		} catch (Throwable e) {
 			throw new RuntimeException(e);

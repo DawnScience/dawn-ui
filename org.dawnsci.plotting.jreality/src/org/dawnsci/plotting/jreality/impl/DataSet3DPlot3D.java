@@ -711,19 +711,8 @@ public class DataSet3DPlot3D implements IDataSet3DCorePlot {
 		if (dimX * dimY > MAXDIMSQR)
 		{
 			if (useWindow) {
-				logger.info("DataSet is too large to visualize all at once using window");
-				samplingRate = 1;
-				float reduceFactor = (float)MAXDIMSQR / (float)(dimX * dimY);
-				float xAspect = (float)dimX / (float)(dimX+dimY);
-				float yAspect = (float)dimY / (float)(dimX+dimY);
-				float xReduce = 1.0f - (1.0f - reduceFactor) * xAspect;
-				float yReduce = 1.0f - (1.0f - reduceFactor) * yAspect;
-				currentXdim = (int)(dimX * xReduce * 0.75f);
-				currentYdim = (int)(dimY * yReduce * 0.75f);
-				windowStartPosX = 0;
-				windowStartPosY = 0;
-				windowEndPosX = currentXdim-1;
-				windowEndPosY = currentYdim-1;
+				updateDisplayData();
+				return;
 			} else {
 				logger.info("DataSet is too large to visualize all at once using subsampling");
 		        if (dimY > dimX) 
@@ -814,13 +803,13 @@ public class DataSet3DPlot3D implements IDataSet3DCorePlot {
 	 * @param roi SurfacePlot region of interest object contains all the necessary
 	 *            information to build a new displaying dataset
 	 */
-	public void setDataWindow(SurfacePlotROI roi) {
+	public void setDataWindow(List<IDataset> data, SurfacePlotROI roi) {
 		
 		this.roi = roi;
 		if (roi==null) return; // TODO Should probably clear
-		
+		if (data!=null) currentData = data.get(0);
         updateDisplayData();
-		updateDisplay(roi.getXAspect(),roi.getYAspect());
+		if (graph!=null) updateDisplay(roi.getXAspect(),roi.getYAspect());
 	}
 	
 	private void updateDisplayData() {
@@ -871,8 +860,9 @@ public class DataSet3DPlot3D implements IDataSet3DCorePlot {
 		if (windowEndPosY > shape[0]) {
 			windowEndPosY = shape[0];
 		}
-		int startP[] = normalize(new int[]{windowStartPosY,windowStartPosX}, currentData.getShape()[1], currentData.getShape()[0]);
-		int endP[]   = normalize(new int[]{windowEndPosY,windowEndPosX}, currentData.getShape()[1], currentData.getShape()[0]);;
+		// NOTE he did it y and then x.
+		int startP[] = normalize(new int[]{windowStartPosY,windowStartPosX}, currentData.getShape()[0], currentData.getShape()[1]);
+		int endP[]   = normalize(new int[]{windowEndPosY,windowEndPosX},     currentData.getShape()[0], currentData.getShape()[1]);;
 		
 		displayData = currentData.getSlice(startP,endP, null);
 		if (roi.getXSamplingMode() > 0 ||
@@ -984,8 +974,7 @@ public class DataSet3DPlot3D implements IDataSet3DCorePlot {
 	}
 	
 	@Override
-	public SceneGraphComponent buildGraph(List<IDataset> datasets,
-			SceneGraphComponent graph) {
+	public SceneGraphComponent buildGraph(List<IDataset> datasets, SceneGraphComponent graph) {
 		assert (datasets.size() > 0);
 		if (graph != null)
 		{
