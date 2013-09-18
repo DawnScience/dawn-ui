@@ -474,7 +474,12 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 	 */
 	protected abstract void createFittedFunctionUI(final FittedFunctions newBean);
 	
-	
+	/**
+	 * Used by the wizard to write the tools results to a file.
+	 * @param path
+	 * @return
+	 * @throws Exception
+	 */
 	abstract String exportFittedData(final String path) throws Exception;
 
 

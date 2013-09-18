@@ -78,7 +78,9 @@ public class SliceDialog extends Dialog {
 		
 		final ILoaderService service = (ILoaderService)ServiceManager.getService(ILoaderService.class);
 		final IDataHolder holder = service.getData(filePath, monitor);
-		final ILazyDataset lazy  = holder.getLazyDataset(dataSetName);
+		ILazyDataset lazy  = holder.getLazyDataset(dataSetName);
+		if (lazy==null) lazy = holder.getLazyDataset(0);
+		
 		sliceComponent.setData(new SliceSource(lazy, dataSetName, filePath, false));        
 	}
 
