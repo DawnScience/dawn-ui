@@ -80,6 +80,8 @@ public class FittingUtils {
 			IdentifiedPeak iniPeak = new IdentifiedPeak(((Number)info.getX().mean()).doubleValue(), info.getX().min().doubleValue(), info.getX().max().doubleValue(), info.getX().peakToPeak().doubleValue()*info.getY().max().doubleValue(), info.getY().max().doubleValue(), 0, info.getX().getSize()-1, Arrays.asList(new Double[] {info.getX().min().doubleValue()+fwhmApprox, info.getX().max().doubleValue()-fwhmApprox}));
 			iniPeak.setFWHM(fwhmApprox);
 			
+			info.setIdentifiedPeaks(Arrays.asList(new IdentifiedPeak[]{iniPeak}));
+			
 			Constructor<? extends APeak> ctor = getPeakType().getClass().getConstructor(IdentifiedPeak.class);
 			APeak localPeak = ctor.newInstance(iniPeak);
 			CompositeFunction comp = new CompositeFunction();
@@ -91,6 +93,9 @@ public class FittingUtils {
 			composites.add(comp);
 		
 		} else {
+			if (info.getIdentifiedPeaks()==null) {
+				info.setIdentifiedPeaks(Generic1DFitter.parseDataDerivative(info.getX(), info.getY(), getSmoothing()));
+			}
 			composites =  Generic1DFitter.fitPeakFunctions(info.getIdentifiedPeaks(), info.getX(), info.getY(), getPeakType(), optimizer, getSmoothing(), info.getNumPeaks(), 0.0, false, false, new IAnalysisMonitor() {
 				@Override
 				public boolean hasBeenCancelled() {
