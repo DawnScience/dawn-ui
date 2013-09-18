@@ -3,7 +3,6 @@ package org.dawnsci.plotting.tools.fitting;
 import java.text.DecimalFormat;
 
 import org.dawnsci.plotting.tools.Activator;
-import org.dawnsci.plotting.tools.preference.FittingConstants;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -12,6 +11,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ViewerColumn;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
+
+import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants;
 
 /**
  * A label provider with the ability to show:

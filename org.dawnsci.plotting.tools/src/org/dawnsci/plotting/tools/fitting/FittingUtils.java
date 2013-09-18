@@ -10,10 +10,9 @@ import java.util.Map;
 
 import javax.vecmath.Vector3d;
 
-import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
-import org.dawnsci.plotting.tools.preference.FittingConstants;
+import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.Vector3dutil;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.slf4j.Logger;
@@ -21,12 +20,12 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.IAnalysisMonitor;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
-import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
 import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
 import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
 import uk.ac.diamond.scisoft.analysis.fitting.Fitter;
+import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants;
 import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.APeak;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
@@ -271,37 +270,7 @@ public class FittingUtils {
 			Activator.getPlottingPreferenceStore().setValue(FittingConstants.PEAK_TYPE, Gaussian.class.getName());
 		    return new Gaussian(1, 1, 1, 1);
 		}
-	}
-
-	/**
-	 * Slices x and y using the x as the reference.
-	 * @param x
-	 * @param y - may be null
-	 * @param startValue
-	 * @param endValue
-	 * @return x and y sliced to the startValue and endValue
-	 */
-	public static AbstractDataset[] xintersection(AbstractDataset x,
-			                                      AbstractDataset y, 
-			                                      final double startValue, 
-			                                      final double endValue) {
-		
-		List<Double> cross = DatasetUtils.crossings(x, startValue);		
-		final int    start = cross==null || cross.isEmpty() 
-				           ? 0
-				           : (int)Math.floor(cross.get(0)); // Lower value
-		
-		cross = DatasetUtils.crossings(x, endValue);		
-		final int    stop  =  cross==null || cross.isEmpty() 
-				           ? x.getSize()-1
-				           : (int)Math.ceil(cross.get(cross.size()-1)); // Upper value
-		
-		x = x.getSlice(new int[] { start }, new int[] { stop }, null);
-		if (y!=null) y = y.getSlice(new int[] { start }, new int[] { stop }, null);		
-		
-		return (y!=null) ? new AbstractDataset[]{x,y} : new AbstractDataset[]{x};
-	}
-	
+	}	
 	
 	public static Map<String, APeak> getPeakOptions() {
 		final Map<String, APeak> opts = new LinkedHashMap<String, APeak>(4);

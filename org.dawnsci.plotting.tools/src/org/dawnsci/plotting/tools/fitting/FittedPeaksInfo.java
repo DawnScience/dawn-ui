@@ -5,9 +5,9 @@ import java.util.List;
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.trace.ILineTrace;
-import org.dawnsci.plotting.tools.preference.FittingConstants;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
 import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 

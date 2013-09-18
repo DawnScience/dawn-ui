@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +30,6 @@ import org.dawnsci.plotting.api.region.RegionUtils;
 import org.dawnsci.plotting.api.trace.ILineTrace;
 import org.dawnsci.plotting.api.trace.TraceUtils;
 import org.dawnsci.plotting.tools.Activator;
-import org.dawnsci.plotting.tools.preference.FittingConstants;
 import org.dawnsci.plotting.tools.preference.FittingPreferencePage;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.draw2d.ColorConstants;
@@ -55,7 +55,9 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
+import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants;
 import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.FunctionSquirts;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
@@ -65,6 +67,7 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 
 	private static final Logger logger = LoggerFactory.getLogger(PeakFittingTool.class);
 	private MenuAction numberPeaks;
+	private FittedPeaksInfo fittedPeaksInfo;
 
 	public PeakFittingTool() {
 		super();
@@ -215,8 +218,23 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 	 * @throws Exception 
 	 */
 	protected FittedFunctions getFittedFunctions(FittedPeaksInfo fittedPeaksInfo) throws Exception {
-	    return FittingUtils.getFittedPeaks(fittedPeaksInfo);
+		FittedFunctions functions = FittingUtils.getFittedPeaks(fittedPeaksInfo);
+		this.fittedPeaksInfo = fittedPeaksInfo;
+		return functions;
 	}
+	
+
+	@Override
+	public Serializable getToolData() {
+		
+		final FunctionSquirts fs = (FunctionSquirts)super.getToolData();
+		if (fittedPeaksInfo!=null) {
+			fs.setIdentifiedPeaks(fittedPeaksInfo.getIdentifiedPeaks());
+		}
+		fs.setFitBounds(getFitBounds());
+		return fs;
+	}
+
 	
 	/**
 	 * Thread safe
@@ -327,7 +345,7 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 				           ? (AbstractDataset)slice.getAxes().get(0)
 				           : IntegerDataset.arange(slice.getData().getSize(), AbstractDataset.INT32);
 
-		AbstractDataset[] a= FittingUtils.xintersection(x,(AbstractDataset)slice.getData(),p1[0],p2[0]);
+		AbstractDataset[] a= Generic1DFitter.xintersection(x,(AbstractDataset)slice.getData(),p1[0],p2[0]);
 		x = a[0]; AbstractDataset y=a[1];
 		
 		// If the IdentifiedPeaks are null, we make them.

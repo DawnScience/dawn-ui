@@ -51,6 +51,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.FunctionSquirts;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.FunctionSquirts.Squirt;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
@@ -428,7 +429,7 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 				AbstractDataset y  = (AbstractDataset)selectedTrace.getYData();
 	
 				try {
-					AbstractDataset[] a= FittingUtils.xintersection(x,y,p1[0],p2[0]);
+					AbstractDataset[] a= Generic1DFitter.xintersection(x,y,p1[0],p2[0]);
 					x = a[0]; y=a[1];
 				} catch (Throwable npe) {
 					continue;

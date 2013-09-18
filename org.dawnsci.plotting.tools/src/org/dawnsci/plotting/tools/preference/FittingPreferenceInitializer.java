@@ -4,6 +4,7 @@ import org.dawnsci.plotting.tools.Activator;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 
+import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Gaussian;
 
 public class FittingPreferenceInitializer extends AbstractPreferenceInitializer {

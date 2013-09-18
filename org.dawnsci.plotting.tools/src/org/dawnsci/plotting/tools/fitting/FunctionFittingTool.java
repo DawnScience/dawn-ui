@@ -64,6 +64,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.fitting.Fitter;
+import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
@@ -536,7 +537,7 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 					AbstractDataset y = (AbstractDataset)trace.getYData();
 
 					try {
-						AbstractDataset[] a = FittingUtils.xintersection(x, y,
+						AbstractDataset[] a = Generic1DFitter.xintersection(x, y,
 								p1[0], p2[0]);
 						x = a[0];
 						y = a[1];

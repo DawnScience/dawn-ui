@@ -36,6 +36,8 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
+import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants;
+
 
 public class FittingPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
