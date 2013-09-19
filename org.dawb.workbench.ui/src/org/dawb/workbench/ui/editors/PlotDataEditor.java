@@ -17,7 +17,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.dawb.common.services.IExpressionObject;
 import org.dawb.common.services.IVariableManager;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.plot.tools.HistoryType;
@@ -37,8 +36,8 @@ import org.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.slicing.api.data.ICheckableObject;
 import org.dawnsci.slicing.api.editor.IDatasetEditor;
-import org.dawnsci.slicing.api.plot.ISlicePlotUpdateHandler;
 import org.dawnsci.slicing.api.system.ISliceSystem;
+import org.dawnsci.slicing.api.system.SliceSource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -63,18 +62,14 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.part.IPage;
 import org.eclipse.ui.part.Page;
-import org.eclipse.ui.progress.UIJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
-import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
-import uk.ac.diamond.scisoft.analysis.io.DataHolder;
+import uk.ac.diamond.scisoft.analysis.io.IDataHolder;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
-import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 
 
 /**
@@ -87,9 +82,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 	private static Logger logger = LoggerFactory.getLogger(PlotDataEditor.class);
 	
 	// This view is a composite of two other views.
-	private IPlottingSystem      plottingSystem;	
-	private Collection<String>          dataNames;
-	private IMetaData                   metaData;
+	private IPlottingSystem             plottingSystem;	
 	private PlotType                    defaultPlotType;
 	private Map<Integer, IAxis>         axisMap;
 	private PlotJob                     plotJob;
@@ -122,8 +115,8 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		if (dataSetComponent==null) return ret;
 		
         final List<ICheckableObject> selectedNames = dataSetComponent.getSelections();
-        for (Object object : selectedNames) {
-        	final AbstractDataset set = getDataSet(object, null);
+        for (ICheckableObject object : selectedNames) {
+        	final IDataset set = object.getData(null);
         	if (set==null) continue;
          	ret.put(set.getName(), set);
         }
@@ -238,7 +231,8 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		final PlotDataComponent dataSetComponent = (PlotDataComponent)getDataSetComponent();
  		if (dataSetComponent!=null) {
 			for (ICheckableObject set : dataSetComponent.getData()) {
-				if (dataSetComponent.getActiveDimensions(set, true)==1)	{
+				final int[] shape = set.getShape(true);
+				if (shape.length==1)	{
 					is1D=true;
 					break;
 				}
@@ -251,23 +245,21 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 	}
 
 	
-	private boolean doingUpdate = false;
-	private boolean extractingMetaData;
-	
+	private boolean doingUpdate = false;	
 	/**
 	 * Must be called in UI thread
 	 * @param selections
 	 * @param useTask
 	 */
 	@Override
-	public void updatePlot(final ICheckableObject[]      selections, 
-			               final ISlicePlotUpdateHandler participant,
+	public void updatePlot(final ICheckableObject[]     selections, 
+			               final ISliceSystem           sliceSystem,
 			               final boolean                useTask) {
 		
 		if (doingUpdate) return;
 		
 		if (selections==null || selections.length<1) {
-			if (participant!=null) participant.setSlicerVisible(false);
+			if (sliceSystem!=null) sliceSystem.setVisible(false);
 		}
 		
 		try {
@@ -277,45 +269,26 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 				return;
 			}
 			
-			if (selections.length==1 && participant.getDimensionCount(selections[0])!=1) {
+			final int[] shape = selections[0].getShape(true);
+			if (selections.length==1 && shape.length!=1) {
 				
-				participant.setSlicerVisible(true);
-				participant.setSlicerData(selections[0],
-						                  EclipseUtils.getFilePath(getEditorInput()), 
-						                  getShape(selections[0]), 
-						                  plottingSystem);
+				ICheckableObject object = selections[0];
+				sliceSystem.setVisible(true);
+				final ILazyDataset lazy = selections[0].getLazyData(null);
+				sliceSystem.setData(new SliceSource(lazy, object.getName(), EclipseUtils.getFilePath(getEditorInput()), object.isExpression()));
 
 				return;
 			}
 			
-			participant.setSlicerVisible(false);
+			sliceSystem.setVisible(false);
 			
 			if (useTask) {
-				plotJob.plot(selections, participant); 
+				plotJob.plot(selections, sliceSystem); 
 			} else {
-				createPlot(selections, participant, new NullProgressMonitor());
+				createPlot(selections, sliceSystem, new NullProgressMonitor());
 			}
 		} finally {
 			doingUpdate = false;
-		}
-	}
-	
-	private int[] getShape(ICheckableObject ob) {
-		
-		if (ob.isExpression()) {
-			return null; 
-		} else {
-			String name = ob.getName();
-			int[] shape=null;
-			try {
-				shape = metaData.getDataShapes().get(name);
-			} catch (Exception allowed) {
-				// It's ok
-			}
-			if (shape==null) {
-				shape = getLazyDataset(name, null).getShape();
-			}
-			return shape;
 		}
 	}
 
@@ -329,32 +302,32 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		}
 
 		private ICheckableObject[] selections;
-		private ISlicePlotUpdateHandler participant;
+		private ISliceSystem system;
 
 		public void plot(ICheckableObject[] selections,
-				               ISlicePlotUpdateHandler participant) {
+				         ISliceSystem system) {
 			
 			cancel();
             this.selections  = selections;
-            this.participant = participant;
+            this.system = system;
             schedule();
 			
 		}
 		
 		public IStatus run(IProgressMonitor monitor) {
 			monitor.beginTask("Updating selected DataSets", 100);		
-			createPlot(selections, participant, monitor);
+			createPlot(selections, system, monitor);
 			return Status.OK_STATUS;
 		}
 	}
 	
-	private void createPlot(final ICheckableObject[] selections, final ISlicePlotUpdateHandler participant, final IProgressMonitor monitor) {
+	
+	private void createPlot(final ICheckableObject[] selections, final ISliceSystem system, final IProgressMonitor monitor) {
 		
 
 		if (monitor.isCanceled()) return;
 		
-		boolean requireFullRefresh = plottingSystem.getPlotType()!=participant.getPlotMode();
-		final IDataset data = getDataSet(selections[0], monitor);
+		final IDataset        data = selections[0].getData(new ProgressMonitorWrapper(monitor));
 		
 		if (data==null)             return;
 		try {
@@ -364,7 +337,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		}
 		if (data.getRank()>2)       return; // Cannot plot more that 2 dims!
 		
-		if (participant.getPlotMode()==PlotType.IMAGE || data.getRank()==2) {
+		if (data.getRank()==2) {
 			
 			plottingSystem.clear();
 		    plottingSystem.createPlot2D(data, null, monitor);
@@ -408,9 +381,8 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 
 		}
 		
-		if (requireFullRefresh) {
-			plottingSystem.repaint(true);
-		}
+	    plottingSystem.repaint();
+		
 		monitor.done();
 	}
 
@@ -487,86 +459,12 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		for (ICheckableObject co : selections) {
 			
 			if (co.getYaxis()!=iyaxis) continue;
-			ys.add(getDataSet(co, monitor));
+			final IDataset y = co.getData(new ProgressMonitorWrapper(monitor));
+			ys.add(y);
 			if (monitor.isCanceled()) return null;
 			monitor.worked(1);
 		}
 		return ys.isEmpty()?null:ys;
-	}
-
-	public AbstractDataset getDataset(String name, IMonitor monitor) {
-		try {
-			
-			AbstractDataset set = LoaderFactory.getDataSet(EclipseUtils.getFilePath(getEditorInput()), name, monitor);
-			try {
-			    set = set.squeeze();
-			} catch (Throwable ignored) {
-				// Leave set assigned as read
-			}
-
-			if (set!=null) set.setName(name);
-			return set;
-			
-		} catch (Exception e) {
-			logger.error("Cannot read "+name, e);
-			return null;
-		}
-	}
-	
-	public ILazyDataset getLazyDataset(String name, IMonitor monitor) {
-		try {
-			
-			DataHolder holder = LoaderFactory.getData(EclipseUtils.getFilePath(getEditorInput()), monitor);
-			ILazyDataset set  = holder.getLazyDataset(name);
-
-			if (set!=null) set.setName(name);
-			return set;
-			
-		} catch (Exception e) {
-			logger.error("Cannot read "+name, e);
-			return null;
-		}
-	}
-
-
-	@Override
-	public AbstractDataset getVariableValue(String name, final IMonitor monitor) {
-
-		throw new NullPointerException("Expressions are not supported by "+getClass().getName());
-	}
-	@Override
-	public AbstractDataset getLazyValue(String name, final IMonitor monitor) {
-
-		throw new NullPointerException("Expressions are not supported by "+getClass().getName());
-	}
-	
-	public boolean containsDatasetName(String name, IMonitor monitor) {
-		if (dataNames==null) return false;
-		return dataNames.contains(name);
-	}
-	
-	@Override	
-	public boolean isVariableName(String name, IMonitor monitor) {
-		throw new NullPointerException("Expressions are not supported by "+getClass().getName());
-	}
-	
-	private AbstractDataset getDataSet(final Object input, final IProgressMonitor monitor) {
-		
-	    Object object = input;	
-		if (input instanceof CheckableObject) {
-			ICheckableObject check = (ICheckableObject)input;
-			object = check.isExpression() ? check.getExpression() : check.getName();
-		}
-		if (object instanceof IExpressionObject) {
-			try {
-				return (AbstractDataset)((IExpressionObject)object).getDataSet(null, new ProgressMonitorWrapper(monitor));
-			} catch (Exception e) {
-				// valid, user can enter an invalid expression. In this case
-				// it colours red but does not stop them from using the view.
-				return new DoubleDataset();
-			}
-		}
- 		return getDataset((String)object, new ProgressMonitorWrapper(monitor));
 	}
 
 	@Override
@@ -578,33 +476,6 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		
 		super.setInput(input);
 		setPartName(input.getName());
-				
-		extractingMetaData = true;
-		// Get the meta data in a thread to avoid things breaking
-		final Job getMeta = new Job("Extract Metadata") {
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				final String    path = EclipseUtils.getFilePath(getEditorInput());
-				try {
-					PlotDataEditor.this.metaData = LoaderFactory.getMetaData(path, null);
-			        if (metaData==null || metaData.getDataNames()==null) {
-						DataHolder dh = LoaderFactory.getData(path, null);
-						if (dh==null) dh= new DataHolder();
-						PlotDataEditor.this.dataNames = dh.getMap().keySet();
-			        } else {
-			        	PlotDataEditor.this.dataNames = metaData.getDataNames();
-			        }
-				} catch (Exception ne) {
-					logger.error("Cannot generate meta data!", ne);
-					return Status.CANCEL_STATUS;
-				} finally {
-			        extractingMetaData = false;
-				}
-				return Status.OK_STATUS;
-			}
-		};
-		getMeta.setSystem(true);
-		getMeta.schedule();
 
 		if (createData) createData(input);
 	}
@@ -624,37 +495,37 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 	 */
 	private void createData(final IEditorInput input) {
 
-		final UIJob job = new UIJob("Update data") {
+		final Job job = new Job("Update data") {
 			
 			@Override
-			public IStatus runInUIThread(IProgressMonitor monitor) {
-				final PlotDataComponent dataSetComponent = (PlotDataComponent)getDataSetComponent();
-		 		if (dataSetComponent==null) return Status.CANCEL_STATUS;
-				try {
-					
-					// We wait while extracting meta data
-					int waited = 0;
-					while(extractingMetaData) {
-						Thread.sleep(100);
-						waited+=100;
-						if (waited>=240000) { // 4 mins
-							logger.error("Cannot extract meta data from "+EclipseUtils.getFilePath(getEditorInput()));
-						    return Status.CANCEL_STATUS;
+			public IStatus run(IProgressMonitor monitor) {
+				try {					
+					// Load data in Job
+					final String       path       = EclipseUtils.getFilePath(input);
+					final IMetaData    meta       = LoaderFactory.getMetaData(path, new ProgressMonitorWrapper(monitor));
+					final IDataHolder  dataHolder =  LoaderFactory.getData(path, true, true, null);
+
+					// Update UI
+					Display.getDefault().syncExec(new Runnable() {
+						public void run() {
+							final PlotDataComponent dataSetComponent = (PlotDataComponent)getDataSetComponent();
+					 		if (dataSetComponent==null) return;
+						    dataSetComponent.setData(dataHolder, meta);
+							dataSetComponent.refresh();
+							((AbstractPlottingSystem)getPlottingSystem()).setRootName(dataSetComponent.getRootName());
 						}
-					}
-					
-					dataSetComponent.setMetaData(metaData);
-					dataSetComponent.refresh();
-					((AbstractPlottingSystem)PlotDataEditor.this.plottingSystem).setRootName(dataSetComponent.getRootName());
-					return Status.OK_STATUS;
+					});
+ 					return Status.OK_STATUS;
 				} catch (Exception ne) {
 					logger.error("Cannot open nexus", ne);
 					return Status.CANCEL_STATUS;
 				}
 			}
 		};
-		job.setUser(false);
-		job.schedule(10);
+		job.setUser(true);
+		job.setSystem(true);
+		job.setPriority(Job.INTERACTIVE);
+		job.schedule();
 	}
 
 	
@@ -713,6 +584,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		if (!(page instanceof PlotDataPage)) return null;
 		return ((PlotDataPage)page).getDataSetComponent();
 	}
+	
 	public ISliceSystem getSliceComponent() {
 		
 		final IWorkbenchPage wb =EclipseUtils.getActivePage();
@@ -745,16 +617,6 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		}
 		
 		return super.getAdapter(clazz);
-	}
-
-	@Override
-	public void deleteExpression() {
-		getDataSetComponent().deleteExpression();
-	}
-
-	@Override
-	public void addExpression() {
-		getDataSetComponent().addExpression();
 	}
 
 	public String toString(){

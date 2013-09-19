@@ -19,7 +19,6 @@ Bundle-ActivationPolicy: lazy
 Export-Package: org.dawnsci.slicing.api,
  org.dawnsci.slicing.api.data,
  org.dawnsci.slicing.api.editor,
- org.dawnsci.slicing.api.plot,
  org.dawnsci.slicing.api.system,
  org.dawnsci.slicing.api.tool,
  org.dawnsci.slicing.api.util

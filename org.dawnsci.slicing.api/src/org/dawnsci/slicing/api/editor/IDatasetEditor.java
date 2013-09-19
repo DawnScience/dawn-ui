@@ -11,17 +11,15 @@ package org.dawnsci.slicing.api.editor;
 
 import java.util.Map;
 
-import org.dawb.common.services.IVariableManager;
 import org.dawnsci.plotting.api.IPlottingContainer;
 import org.dawnsci.slicing.api.data.ICheckableObject;
-import org.dawnsci.slicing.api.plot.ISlicePlotUpdateHandler;
+import org.dawnsci.slicing.api.system.ISliceSystem;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
-import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 
-public interface IDatasetEditor extends IVariableManager, IEditorPart, IPlottingContainer, IDatasetProvider {
+public interface IDatasetEditor extends IEditorPart, IPlottingContainer {
 
 	/**
 	 * Update the plot with checkables selected by the user.
@@ -30,8 +28,8 @@ public interface IDatasetEditor extends IVariableManager, IEditorPart, IPlotting
 	 * @param useTask
 	 */
 	void updatePlot(final ICheckableObject[]      selections, 
-		            final ISlicePlotUpdateHandler participant,
-		            final boolean                useTask);
+		            final ISliceSystem            sliceSystem,
+		            final boolean                 useTask);
 
 	/**
 	 * It is possible to update the editor input of an IDatasetEditor
@@ -45,11 +43,4 @@ public interface IDatasetEditor extends IVariableManager, IEditorPart, IPlotting
 	 */
 	Map<String, IDataset> getSelected();
 
-	/**
-	 * Test if editor contains dataset of given name
-	 * @param name
-	 * @param monitor
-	 * @return true if there is a dataset of given name
-	 */
-	public boolean containsDatasetName(String name, IMonitor monitor);
 }

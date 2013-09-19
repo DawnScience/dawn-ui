@@ -33,8 +33,6 @@ import org.dawb.common.ui.util.DialogUtils;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.util.io.FileUtils;
 import org.dawb.common.util.io.PropUtils;
-import org.dawb.common.util.io.SortingUtils;
-import org.dawb.common.util.list.SortNatural;
 import org.dawb.gda.extensions.util.DatasetTitleUtils;
 import org.dawb.workbench.ui.Activator;
 import org.dawb.workbench.ui.editors.preference.EditorConstants;
@@ -55,8 +53,6 @@ import org.dawnsci.plotting.api.trace.ITraceListener;
 import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.tools.reduction.DataReductionWizard;
 import org.dawnsci.slicing.api.data.ICheckableObject;
-import org.dawnsci.slicing.api.editor.IDatasetEditor;
-import org.dawnsci.slicing.api.editor.IDatasetProvider;
 import org.dawnsci.slicing.api.system.DimsDataList;
 import org.dawnsci.slicing.api.system.ISliceSystem;
 import org.dawnsci.slicing.api.util.SliceUtils;
@@ -140,10 +136,9 @@ import org.eclipse.ui.progress.IProgressService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IErrorDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
-import uk.ac.diamond.scisoft.analysis.io.DataHolder;
 import uk.ac.diamond.scisoft.analysis.io.IDataHolder;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
@@ -154,7 +149,7 @@ import uk.ac.diamond.scisoft.analysis.utils.OSUtils;
  * This view can view and plot any file. It is most efficient if the Loader that LoaderFactory
  * uses for this file type is an IMetaLoader. 
  */
-public class PlotDataComponent implements IVariableManager, IDatasetProvider, MouseListener, KeyListener, IPlottingSystemSelection, IAdaptable {
+public class PlotDataComponent implements IVariableManager, MouseListener, KeyListener, IPlottingSystemSelection, IAdaptable {
 		
 	private static final Logger logger = LoggerFactory.getLogger(PlotDataComponent.class);
 
@@ -171,12 +166,11 @@ public class PlotDataComponent implements IVariableManager, IDatasetProvider, Mo
 	private   String                rootName;
 	private   boolean               staggerSupported = false;
 
-	protected IMetaData             metaData;
-	protected final IDatasetEditor  providerDeligate;
-	private IPropertyChangeListener propListener;
-	private ArrayList<IAction>      dataComponentActions;
-	private Composite               container;
-	private DataFilter              dataFilter;
+	private IEditorPart              editor;
+	private IPropertyChangeListener  propListener;
+	private ArrayList<IAction>       dataComponentActions;
+	private Composite                container;
+	private DataFilter               dataFilter;
 
 	private IAction                  dataReduction;
 	private ITraceListener           traceListener;
@@ -184,11 +178,14 @@ public class PlotDataComponent implements IVariableManager, IDatasetProvider, Mo
 	private IToolChangeListener      toolListener;
 	private IExpressionObjectService service;
 
+    private IDataHolder dataHolder;
+	private IMetaData   metaData;
+
 	
-	public PlotDataComponent(final IDatasetEditor providerDeligate) {
+	public PlotDataComponent(final IEditorPart editor) {
 				
 		this.data = new ArrayList<CheckableObject>(7);
-		this.providerDeligate   = providerDeligate;
+		this.editor   = editor;
 		
 		this.service  = (IExpressionObjectService)PlatformUI.getWorkbench().getService(IExpressionObjectService.class);
 		this.propListener = new IPropertyChangeListener() {
@@ -205,7 +202,16 @@ public class PlotDataComponent implements IVariableManager, IDatasetProvider, Mo
 							@Override
 							public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 								try {
-									setFile(filePath, monitor);
+									final IMetaData  meta = LoaderFactory.getMetaData(filePath, new ProgressMonitorWrapper(monitor));
+									Display.getDefault().syncExec(new Runnable() {
+										public void run() {
+											try {
+												PlotDataComponent.this.setData(LoaderFactory.getData(filePath, true, true, null), meta);
+											} catch (Exception e) {
+												logger.error("Cannot change file path", e);
+											}
+										}
+									});
 								} catch (Exception e) {
 									throw new InvocationTargetException(e);
 								}
@@ -412,7 +418,7 @@ public class PlotDataComponent implements IVariableManager, IDatasetProvider, Mo
 							final Color plotColor = get1DPlotColor(cn);
 							if (plotColor!=null) {
 								gc.setForeground(plotColor);									
-								gc.drawText(cn.getName(), item.getBounds().x+16, item.getBounds().y+1);
+								gc.drawText(cn.getDisplayName(rootName), item.getBounds().x+16, item.getBounds().y+1);
 								event.doit = false;
 							}
 							gc.setAlpha(origAlpha);
@@ -473,12 +479,6 @@ public class PlotDataComponent implements IVariableManager, IDatasetProvider, Mo
 
 	private final String getExtension() {
 		try {
-			if (filePath==null) {
-				if (this.providerDeligate  instanceof IEditorPart) {
-					return FileUtils.getFileExtension(((IEditorPart)providerDeligate).getEditorInput().getName());
-				}
-			}
-
 			return FileUtils.getFileExtension(filePath);
 			
 		} catch (Throwable ne) {
@@ -512,7 +512,7 @@ public class PlotDataComponent implements IVariableManager, IDatasetProvider, Mo
 						if (o!=null) {
 							o.setVariable(CheckableObject.getVariable(memento));
 						} else {
-							o = new CheckableObject();
+							o = new CheckableObject(dataHolder, metaData);
 							o.createExpression(this, mementoKey, props.getProperty(mementoKey));
 							data.add(o);
 						}
@@ -582,7 +582,7 @@ public class PlotDataComponent implements IVariableManager, IDatasetProvider, Mo
 			        updatePlotDimenionsSelected((IAction)rightClickActions.get(1), 
 			        		                    (IAction)rightClickActions.get(2), 
 			        		                    (IAction)rightClickActions.get(3), 
-			        		                    getPlotMode());
+			        		                    getPlottingSystem().getPlotType());
 				}
 
 		        for (Object action : rightClickActions) {
@@ -689,14 +689,14 @@ public class PlotDataComponent implements IVariableManager, IDatasetProvider, Mo
 	}
 	
 	protected DimsDataList getSliceData() {
-		final ISliceSystem system = (ISliceSystem)providerDeligate.getAdapter(ISliceSystem.class);
+		final ISliceSystem system = (ISliceSystem)editor.getAdapter(ISliceSystem.class);
 		if (system!=null) return system.getDimsDataList();
 	
 		return null;
 	}
 	
 	protected ILazyDataset getSliceSet() {
-		final ISliceSystem system = (ISliceSystem)providerDeligate.getAdapter(ISliceSystem.class);
+		final ISliceSystem system = (ISliceSystem)editor.getAdapter(ISliceSystem.class);
 		if (system!=null) return system.getData().getLazySet();
 
 		return null;
@@ -704,10 +704,7 @@ public class PlotDataComponent implements IVariableManager, IDatasetProvider, Mo
 
 	public IFile getIFile(boolean createNewFile) {
 		IFile file = null;
-		IEditorInput input = (providerDeligate instanceof IEditorPart) 
-				           ? (IEditorInput)((IEditorPart)providerDeligate).getEditorInput()
-				           : null;
-				         
+		IEditorInput input = editor.getEditorInput();				         
 		try {
 			file = EclipseUtils.getIFile(input);
 		} catch (Throwable ne) {
@@ -978,7 +975,7 @@ public class PlotDataComponent implements IVariableManager, IDatasetProvider, Mo
 			rightClickActions.add(xyzAction);
 			rightClickActions.add(new Separator());
 			
-			updatePlotDimenionsSelected(xyAction, staggeredAction, xyzAction, plotMode);
+			updatePlotDimenionsSelected(xyAction, staggeredAction, xyzAction, getPlottingSystem().getPlotType());
 
 			
 			// Removed when part disposed.
@@ -995,7 +992,7 @@ public class PlotDataComponent implements IVariableManager, IDatasetProvider, Mo
 				dis.asyncExec(new Runnable() {
 					@Override
 					public void run() {
-						updatePlotDimenionsSelected(xyAction, staggeredAction, xyzAction, getPlotMode());
+						updatePlotDimenionsSelected(xyAction, staggeredAction, xyzAction, getPlottingSystem().getPlotType());
 					}
 				});
 			}
@@ -1058,7 +1055,9 @@ public class PlotDataComponent implements IVariableManager, IDatasetProvider, Mo
 	}
 
 	protected void setAsX(CheckableObject sel) {
-		if (getActiveDimensions(sel, true)!=1) return; 
+		
+		int [] shape = sel.getShape(true);
+		if (shape.length!=1) return; 
 		sel.setChecked(true);
 		
 		if (selections.contains(sel)) selections.remove(sel);
@@ -1082,54 +1081,6 @@ public class PlotDataComponent implements IVariableManager, IDatasetProvider, Mo
 		xyzAction.setChecked(PlotType.XY_STACKED_3D.equals(plotMode));
 	}
 	
-	/**
-	 * Call to load a data file and display it.
-	 * @param path
-	 */
-	public void setFile(final String path,final IProgressMonitor monitor) throws Exception {
-		
-		monitor.beginTask("Opening file " + path, 10);
-		monitor.worked(1);
-		if (monitor.isCanceled()) return;
-
-		final IMetaData          meta = LoaderFactory.getMetaData(path, new ProgressMonitorWrapper(monitor));
-		final List<String>       sets = new ArrayList<String>(meta.getDataNames()); // Will be small list			 
-		SortingUtils.removeIgnoredNames(sets, getIgnored());
-		Collections.sort(sets, new SortNatural<String>(true));
-		
-		this.metaData = meta;
-		if (dataFilter!=null) dataFilter.setMetaData(metaData);
-		if (monitor.isCanceled()) return;
-		
-		for (Iterator<CheckableObject> it = data.iterator(); it.hasNext();) {
-			final ICheckableObject ob = it.next();
-			if (!ob.isExpression()) {
-				it.remove();
-			} else {
-				ob.getExpression().clear();
-			}
-		}
-		
-		int pos = 0;
-		for (String name : sets) {
-			data.add(pos, new CheckableObject(name));
-			pos++;
-		}
-		this.filePath = path;
-		try {
-		    readExpressions();
-		} catch (Exception ne ) {
-			logger.error("Cannot read expressions for file.", ne);
-		}
-		
-		final Display dis = PlatformUI.getWorkbench().getDisplay();
-		dis.asyncExec(new Runnable() {
-			@Override
-			public void run() {
-				dataViewer.refresh();
-			}
-		});
-	}
 
 	private List<ICheckableObject> selections = new ArrayList<ICheckableObject>(7);
 		
@@ -1248,7 +1199,8 @@ public class PlotDataComponent implements IVariableManager, IDatasetProvider, Mo
 				selections.remove(check);
 			} else {
 				// We only allow selection of one set not 1D
-				final int    dims = getActiveDimensions(check, true);
+				final int[] shape = check.getShape(true);
+				final int    dims = shape.length;
 				if (dims!=1) { // Nothing else gets selected
 					setAllChecked(false);
 					check.setChecked(true);
@@ -1263,12 +1215,16 @@ public class PlotDataComponent implements IVariableManager, IDatasetProvider, Mo
 			// 1D takes precidence
 			boolean is1D = false;
 			// We check selections to ensure that only n*1D or 1*2D+ are selected
-			for (ICheckableObject set : selections) if (getActiveDimensions(set, true)==1)	is1D=true;
+			for (ICheckableObject set : selections) {
+				final int[] shape = set.getShape(true);
+				if (shape.length==1) is1D = true;
+			}
 
 			if (is1D) for (Iterator<ICheckableObject> it = selections.iterator(); it.hasNext();) {
 				ICheckableObject set = it.next();
+				final int[] shape = set.getShape(true);
 
-				if (getActiveDimensions(set, true)!=1) {
+				if (shape.length!=1) {
 					set.setChecked(false);
 					it.remove();
 				}
@@ -1311,7 +1267,8 @@ public class PlotDataComponent implements IVariableManager, IDatasetProvider, Mo
 		
 		selections.clear();
 		for (CheckableObject sel : data) {
-			if (getActiveDimensions(sel, true)==1) {
+			final int[] shape = sel.getShape(true);
+			if (shape.length==1) {
 				selections.add(sel);
 				sel.setChecked(true);
 			}
@@ -1355,17 +1312,10 @@ public class PlotDataComponent implements IVariableManager, IDatasetProvider, Mo
 		return rootName;
 	}
 
-	private PlotType plotMode = PlotType.XY;
-
-	public PlotType getPlotMode() {
-		return plotMode;
-	}
-
 	/**
 	 * @param pm The plotMode to set.
 	 */
 	public void setPlotMode(PlotType pm) {
-		plotMode = pm;
 		if (plotModeListeners!=null) {
 			for (PlotModeListener l : plotModeListeners) {
 				l.plotChangePerformed(pm);
@@ -1374,6 +1324,7 @@ public class PlotDataComponent implements IVariableManager, IDatasetProvider, Mo
 	}
 	
 	private List<PlotModeListener> plotModeListeners;
+
 
 	protected void addPlotModeListener(PlotModeListener l) {
 		if (plotModeListeners==null) plotModeListeners = new ArrayList<PlotModeListener>(7);
@@ -1400,78 +1351,14 @@ public class PlotDataComponent implements IVariableManager, IDatasetProvider, Mo
 
 	
 	@Override
-	public AbstractDataset getDataset(String name, final IMonitor monitor) {
-		
-		try {
-			if (providerDeligate!=null) {
-				return (AbstractDataset)providerDeligate.getDataset(name, monitor);
-			}
-			if (this.filePath==null) return null;
-			
-			AbstractDataset set = LoaderFactory.getDataSet(this.filePath, name, monitor);
-			try {
-			    set = set.squeeze();
-			} catch (Throwable ignored) {
-				// Leave set assigned as read
-			}
-			return set;
-			
-		} catch (IllegalArgumentException ie) {
-			return null;
-		} catch (Exception e) {
-			logger.error("Cannot get data set "+name+" from "+filePath+". Currently expressions can only contain existing Data Sets.", e);
-			return null;
-		}
-	}
-	
-	private IDataHolder getDataHolder(IMonitor mon) {
-		
-		try {
-			if (providerDeligate!=null) {
-				return LoaderFactory.getData(EclipseUtils.getFilePath(providerDeligate.getEditorInput()), mon);
-			}
-			if (this.filePath==null) return null;
-
-			return LoaderFactory.getData(this.filePath, mon);
-		} catch (Exception e) {
-			logger.error("Cannot read data for file!", e);
-			return null;
-		}
-
-	}
-	
-	@Override
-	public ILazyDataset getLazyDataset(String name, final IMonitor monitor) {
-		
-		try {
-			if (providerDeligate!=null) {
-				return providerDeligate.getLazyDataset(name, monitor);
-			}
-			if (this.filePath==null) return null;
-			
-			DataHolder holder = LoaderFactory.getData(filePath, monitor);
-			ILazyDataset set  = holder.getLazyDataset(name);
-			if (set!=null) set.setName(name);
-			return set;
-			
-		} catch (IllegalArgumentException ie) {
-			return null;
-		} catch (Exception e) {
-			logger.error("Cannot get data set "+name+" from "+filePath+". Currently expressions can only contain existing Data Sets.", e);
-			return null;
-		}
-	}
-
-	
-	@Override
-	public AbstractDataset getVariableValue(String variableName, final IMonitor monitor) {
+	public IDataset getVariableValue(String variableName, final IMonitor monitor) {
 
 		final ICheckableObject ob = getCheckableObjectByVariable(variableName);
 		if (!ob.isExpression()) {
-			return getDataset(ob.getName(), monitor);
+			return ob.getData(monitor);
 		} else {
 			try {
-				return (AbstractDataset)ob.getExpression().getDataSet(null, new IMonitor.Stub());
+				return ob.getExpression().getDataSet(null, new IMonitor.Stub());
 			} catch (Exception e) {
 				return null;
 			}
@@ -1481,15 +1368,7 @@ public class PlotDataComponent implements IVariableManager, IDatasetProvider, Mo
 	@Override
 	public ILazyDataset getLazyValue(String name, final IMonitor monitor) {
 		final ICheckableObject ob = getCheckableObjectByVariable(name);
-		if (!ob.isExpression()) {
-			return getLazyDataset(ob.getName(), monitor);
-		} else {
-			try {
-				return ob.getExpression().getLazyDataSet(name, new IMonitor.Stub());
-			} catch (Exception e) {
-				return null;
-			}
-		}		
+		return ob.getLazyData(monitor);
 	}
 
 	
@@ -1563,38 +1442,38 @@ public class PlotDataComponent implements IVariableManager, IDatasetProvider, Mo
 			case 0:
 				return null;
 			case 1:
-				String setName = element.toString();
-				if (!element.isExpression() && rootName!=null && setName.startsWith(rootName)) {
-					setName = setName.substring(rootName.length());
-				}
-				return setName;
+				return element.getDisplayName(rootName);
 			case 2:
 				return element.getAxis(selections, getPlottingSystem().is2D(), getAbstractPlottingSystem().isXFirst());
 
 			case 3:
 				if (!element.isExpression()) {
-					if (metaData.getDataSizes()==null) {
-						final ILazyDataset set = getLazyDataset(name, (IMonitor)null);
-						if (set!=null) {
-							return set.getSize()+"";
+					try {
+						if (metaData==null || metaData.getDataSizes()==null || !metaData.getDataSizes().containsKey(name)) {
+							final ILazyDataset set = element.getLazyData(new IMonitor.Stub());
+							if (set!=null) {
+								return set.getSize()+"";
+							}
+						    return "Unknown";
+							
 						}
-					    return "Unknown";
-						
+					} catch (IllegalArgumentException ne) {
+						return "large";
 					}
 					return metaData.getDataSizes().get(name)+"";
 				} else {
-					final ILazyDataset set = element.getExpression().getLazyDataSet(name, new IMonitor.Stub());
+					final ILazyDataset set = element.getLazyData(new IMonitor.Stub());
 					if (set!=null) {
 						return set.getSize()+"";
 					}
 				    return "Unknown";
 				}
 			case 4:
-				return getActiveDimensions(element, false)+"";
+				return element.getShape(false).length+"";
 			case 5:
 				if (!element.isExpression()) {
-					if (metaData.getDataShapes()==null || metaData.getDataShapes().get(name)==null) {
-						final ILazyDataset set = getLazyDataset(name, null);
+					if (metaData==null ||metaData.getDataShapes()==null || metaData.getDataShapes().get(name)==null) {
+						final ILazyDataset set = element.getLazyData(new IMonitor.Stub());
 						if (set!=null) {
 							return Arrays.toString(set.getShape());
 						}
@@ -1664,47 +1543,12 @@ public class PlotDataComponent implements IVariableManager, IDatasetProvider, Mo
 		}
 	}
 
-	public int getActiveDimensions(ICheckableObject element, boolean squeeze) {
-		
-		if (element.isExpression()) {
-		    try {
-				return element.getExpression().getLazyDataSet(element.getVariable(), new IMonitor.Stub()).getRank();
-			} catch (Exception e) {
-				logger.error("Could not get shape of "+element.getVariable());
-				return 1;
-			}
-		}
-		
-		final String name = element.getName();
-		if (metaData.getDataShapes()==null || metaData.getDataShapes().get(name)==null) {
-			final ILazyDataset set = getLazyDataset(name, (IMonitor)null);
-			// Assuming it has been squeezed already
-			if (set!=null) {
-				return set.getShape().length;
-			}
-			return 1;
-
-		}
-		if (metaData.getDataShapes().get(name)!=null) {
-			final int[] shape = metaData.getDataShapes().get(name);
-			if (squeeze) {
-				int count = 0;
-				for (int i : shape) if (i>1) ++count;
-				if (count<1) count=1;
-				return count;
-			} else {
-				return shape.length;
-			}
-		}
-		return 1;
-	}
-
 	public void addExpression() {
 		
 		if (!Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_VARNAME)) {
 		    Activator.getDefault().getPreferenceStore().setValue(EditorConstants.SHOW_VARNAME, true);
 		} 
-		final CheckableObject newItem = new CheckableObject(service.createExpressionObject(this, null, null));
+		final CheckableObject newItem = new CheckableObject(dataHolder, metaData, service.createExpressionObject(this, null, null));
 		data.add(newItem);
 		dataViewer.refresh();
 		try {
@@ -1716,7 +1560,7 @@ public class PlotDataComponent implements IVariableManager, IDatasetProvider, Mo
 	}
 
 	protected void addExpression(IExpressionObject expressionObject) {
-		data.add(new CheckableObject(expressionObject));
+		data.add(new CheckableObject(dataHolder, metaData, expressionObject));
 		dataViewer.refresh();
 	}
 
@@ -1754,23 +1598,24 @@ public class PlotDataComponent implements IVariableManager, IDatasetProvider, Mo
 	/**
 	 * Used when the view is being controlled from a Dialog.
 	 * @param meta
+	 * @throws Exception 
 	 */
-	public void setMetaData(final IMetaData meta) {
+	public void setData(final IDataHolder dh, IMetaData meta) {
 		
-		if (meta==null) return;
 		this.data.clear();
-		final Collection<String> names = SliceUtils.getSlicableNames(getDataHolder(null));
-		for (String name : names) this.data.add(new CheckableObject(name));
+		this.dataHolder=dh;
+		this.metaData = meta;
+		this.filePath = dh.getFilePath();
+		
+		if (metaData==null) metaData = dataHolder.getMetadata();
+		
+		final Collection<String> names = SliceUtils.getSlicableNames(dataHolder);
+		for (String name : names) this.data.add(new CheckableObject(dataHolder, metaData, name));
 		
 		// Search names to see if they all have a common root, we do not show this.
 		this.rootName = DatasetTitleUtils.getRootName(names);
 		
-		if (meta.getUserObjects()!=null) {
-			// TODO is this needed
-			//this.data.addAll(meta.getUserObjects());
-		}
-		this.metaData = meta;
-		if (dataFilter!=null) dataFilter.setMetaData(this.metaData);
+		if (dataFilter!=null) dataFilter.setMetaData(meta);
 
 		try {
 		    readExpressions();
@@ -1806,8 +1651,10 @@ public class PlotDataComponent implements IVariableManager, IDatasetProvider, Mo
 			}
 		}
 		
-		// If we are an image, plot it.
-		if (names!=null && names.size()==1) {
+		// If we are an image or a single data set, plot it.
+		final List<String> namesNoStack = new ArrayList<String>(names);
+		namesNoStack.remove("Image Stack");
+		if (namesNoStack!=null && namesNoStack.size()==1) {
 			CheckableObject check = data.get(0);
 			check.setChecked(false); // selectionChanged flips this
 			selectionChanged(check, true);
@@ -1830,12 +1677,12 @@ public class PlotDataComponent implements IVariableManager, IDatasetProvider, Mo
 		this.fileName = fileName;
 	}
 
-	private AbstractDataset datasetSelection = null;
+	private IDataset datasetSelection = null;
 	/**
 	 * Thread safe
 	 * @param name
 	 */
-	public AbstractDataset setDatasetSelected(final String name, final boolean clearOthers) {
+	public IDataset setDatasetSelected(final String name, final boolean clearOthers) {
 		
 		datasetSelection = null;
 		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
@@ -1849,7 +1696,7 @@ public class PlotDataComponent implements IVariableManager, IDatasetProvider, Mo
 				final CheckableObject check = PlotDataComponent.this.getObjectByName(name);
 				check.setChecked(false);
 				PlotDataComponent.this.selectionChanged(check, true);
-				datasetSelection = PlotDataComponent.this.getDataset(name, (IMonitor)null);
+				datasetSelection = check.getData((IMonitor)null);
 			}
 		});
 		
@@ -1874,12 +1721,9 @@ public class PlotDataComponent implements IVariableManager, IDatasetProvider, Mo
 		return null;
 	}
 
-	public IMetaData getMetaData() {
-		return metaData;
-	}
 
 	public IPlottingSystem getPlottingSystem() {
-		return providerDeligate!=null ? providerDeligate.getPlottingSystem() : null;
+		return (IPlottingSystem)editor.getAdapter(IPlottingSystem.class);
 	}
 
 	private AbstractPlottingSystem getAbstractPlottingSystem() {
@@ -1968,6 +1812,5 @@ public class PlotDataComponent implements IVariableManager, IDatasetProvider, Mo
 		}
 		return null;
 	}
-
 
 }

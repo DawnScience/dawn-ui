@@ -9,6 +9,7 @@
  */ 
 package org.dawb.workbench.ui.editors;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.dawb.common.services.IExpressionObject;
@@ -17,8 +18,22 @@ import org.dawb.common.services.IVariableManager;
 import org.dawb.hdf5.editor.H5Path;
 import org.dawnsci.slicing.api.data.ICheckableObject;
 import org.eclipse.ui.PlatformUI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
+import uk.ac.diamond.scisoft.analysis.io.IDataHolder;
+import uk.ac.diamond.scisoft.analysis.io.IMetaData;
+import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
+import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 
 public class CheckableObject implements H5Path, ICheckableObject{
+	
+	private static final Logger logger = LoggerFactory.getLogger(CheckableObject.class);
+
+	private final IDataHolder       holder;
+	private final IMetaData         metaData;
 
 	private boolean           checked;
 	private String            name;
@@ -26,28 +41,105 @@ public class CheckableObject implements H5Path, ICheckableObject{
 	private IExpressionObject expression;
 	private String            mementoKey;
 	private IExpressionObjectService service;
-
 	private static int expressionCount=0;
 
-	public CheckableObject() {
+	public CheckableObject(IDataHolder holder, IMetaData meta) {
+		this.holder   = holder;
+		this.metaData = meta;
 		expressionCount++;
 		this.variable   = "expr"+expressionCount;
 		this.service  = (IExpressionObjectService)PlatformUI.getWorkbench().getService(IExpressionObjectService.class);
 	}
 
-	public CheckableObject(final String name) {
+	public CheckableObject(IDataHolder holder, IMetaData meta, final String name) {
+		this.holder   = holder;
+		this.metaData = meta;
 		this.name     = name;
 		this.service  = (IExpressionObjectService)PlatformUI.getWorkbench().getService(IExpressionObjectService.class);
 		this.variable = service.getSafeName(name);
 	}
 
-	public CheckableObject(IExpressionObject expression2) {
+	public CheckableObject(IDataHolder holder, IMetaData meta, IExpressionObject expression2) {
+		this.holder     = holder;
+		this.metaData   = meta;
 		this.expression = expression2;
 		expressionCount++;
 		this.variable   = "expr"+expressionCount;
 		this.service  = (IExpressionObjectService)PlatformUI.getWorkbench().getService(IExpressionObjectService.class);
 		expression2.setExpressionName(variable);
 	}
+	
+
+	@Override
+	public IDataset getData(IMonitor monitor) {
+		if (!isExpression()) {
+			try {
+			    return holder.getDataset(getName());
+			} catch(IllegalArgumentException ie) {
+				try {
+					return LoaderFactory.getDataSet(holder.getFilePath(), getName(), monitor);
+				} catch (Exception e) {
+					return null;
+				}
+			}
+		} else {
+			try {
+				return getExpression().getDataSet(name, monitor);
+			} catch (Exception e) {
+				return null;
+			}
+		}		
+	}
+
+	@Override
+	public ILazyDataset getLazyData(IMonitor monitor) {
+		if (!isExpression()) {
+			return holder.getLazyDataset(getName());
+		} else {
+			try {
+				return getExpression().getLazyDataSet(name, monitor);
+			} catch (Exception e) {
+				return null;
+			}
+		}		
+	}
+
+	@Override
+	public int[] getShape(boolean squeeze) {
+		
+		if (isExpression()) {
+		    try {
+				return getExpression().getLazyDataSet(getVariable(), new IMonitor.Stub()).getShape();
+			} catch (Exception e) {
+				logger.error("Could not get shape of "+getVariable());
+				return new int[]{1};
+			}
+		}
+		
+		final String name = getName();
+		if (metaData==null || metaData.getDataShapes()==null || metaData.getDataShapes().get(name)==null) {
+			final ILazyDataset set = getLazyData(null);
+			// Assuming it has been squeezed already
+			if (set!=null) return set.getShape();
+			return new int[]{1};
+
+		} else if (metaData.getDataShapes().containsKey(name)) {
+			final int[] shape = metaData.getDataShapes().get(name);
+			if (squeeze) {
+				final List<Integer> ret = new ArrayList<Integer>(shape.length);
+				for (int i : shape) if (i>1) ret.add(i);
+				Integer[] ia = ret.toArray(new Integer[ret.size()]);
+				int[]     pa = new int[ia.length];
+				for (int i = 0; i < ia.length; i++) pa[i] = ia[i];
+				return pa;
+ 			} else {
+				return shape;
+			}
+		}
+		return new int[]{1};
+	}
+
+
 
 	public static boolean isMementoKey(final String key) {
 		if (key==null)      return false;
@@ -242,4 +334,12 @@ public class CheckableObject implements H5Path, ICheckableObject{
 		this.mementoKey = mementoKey;
 	}
 
+	@Override
+	public String getDisplayName(String rootName) {
+		String setName = toString();
+		if (!isExpression() && rootName!=null && setName.startsWith(rootName)) {
+			setName = setName.substring(rootName.length());
+		}
+		return setName;
+	}
  }

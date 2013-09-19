@@ -564,21 +564,14 @@ public class SliceUtils {
 	 * @return
 	 */
 	public static final Collection<String> getSlicableNames(IDataHolder holder) {
-		
-		final IMetaData meta = holder.getMetadata();
-		if (meta==null) return null;
-		
-		Collection<String> names = meta.getDataNames();
-		if (names==null||names.isEmpty()) names = Arrays.asList(holder.getNames());
+				
+		Collection<String> names = Arrays.asList(holder.getNames());
 		if (names==null||names.isEmpty()) return null;
 		
 		Collection<String> ret   = new ArrayList<String>(names.size());
 		for (String name : names) {
-			int [] shape = meta.getDataShapes().get(name);
-			if (shape==null) {
-				ILazyDataset ls = holder.getLazyDataset(name);
-				shape = ls!=null ? ls.getShape() : null;
-			}
+			ILazyDataset ls = holder.getLazyDataset(name);
+			int[] shape = ls!=null ? ls.getShape() : null;
 			if (shape==null) continue;
 			
 			boolean foundDims = false;

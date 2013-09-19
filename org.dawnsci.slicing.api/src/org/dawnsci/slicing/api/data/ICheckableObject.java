@@ -5,7 +5,17 @@ import java.util.List;
 import org.dawb.common.services.IExpressionObject;
 import org.dawb.common.services.IVariableManager;
 
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
+import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
+
 public interface ICheckableObject {
+	
+	public IDataset getData(IMonitor monitor);
+
+	public ILazyDataset getLazyData(IMonitor monitor);
+	
+	public int[] getShape(boolean squeeze);
 
 	public String getName();
 
@@ -56,5 +66,7 @@ public interface ICheckableObject {
 	 * @param mementoKey The mementoKey to set.
 	 */
 	public void setMementoKey(String mementoKey);
+
+	public String getDisplayName(String rootName);
 
 }

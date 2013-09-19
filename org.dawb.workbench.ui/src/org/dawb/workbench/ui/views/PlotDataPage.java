@@ -19,14 +19,10 @@ import org.dawb.common.services.IVariableManager;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.workbench.ui.editors.CheckableObject;
 import org.dawb.workbench.ui.editors.PlotDataComponent;
-import org.dawnsci.plotting.api.IPlottingSystem;
-import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.slicing.api.SlicingFactory;
 import org.dawnsci.slicing.api.data.ICheckableObject;
 import org.dawnsci.slicing.api.editor.IDatasetEditor;
-import org.dawnsci.slicing.api.plot.ISlicePlotUpdateHandler;
 import org.dawnsci.slicing.api.system.ISliceSystem;
-import org.dawnsci.slicing.api.system.SliceSource;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
@@ -52,12 +48,7 @@ import org.eclipse.ui.part.Page;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
-import uk.ac.diamond.scisoft.analysis.io.DataHolder;
-import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
-import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
-
-public class PlotDataPage extends Page implements ISlicePlotUpdateHandler, IAdaptable {
+public class PlotDataPage extends Page implements IAdaptable {
 
 	private final static Logger logger = LoggerFactory.getLogger(PlotDataPage.class);
 	
@@ -133,7 +124,7 @@ public class PlotDataPage extends Page implements ISlicePlotUpdateHandler, IAdap
 				
 				@SuppressWarnings("unchecked")
 				final List<CheckableObject> sels = ((StructuredSelection)event.getSelection()).toList();
-				if (sels!=null) editor.updatePlot(sels.toArray(new CheckableObject[sels.size()]), PlotDataPage.this, true);
+				if (sels!=null) editor.updatePlot(sels.toArray(new CheckableObject[sels.size()]), getSliceComponent(), true);
 
 			}
 		});
@@ -161,7 +152,7 @@ public class PlotDataPage extends Page implements ISlicePlotUpdateHandler, IAdap
 								}
 								editor.setInput(new FileEditorInput(content));
 								final List<ICheckableObject> sels = dataSetComponent.getSelections();
-								if (sels!=null) editor.updatePlot(sels.toArray(new ICheckableObject[sels.size()]), PlotDataPage.this, false);
+								if (sels!=null) editor.updatePlot(sels.toArray(new ICheckableObject[sels.size()]), (ISliceSystem)getAdapter(ISliceSystem.class), false);
 							}
 						});
 					}
@@ -203,41 +194,6 @@ public class PlotDataPage extends Page implements ISlicePlotUpdateHandler, IAdap
 
 	public IVariableManager getDataSetComponent() {
 		return dataSetComponent;
-	}
-
-	@Override
-	public void setSlicerVisible(boolean vis) {
-		sliceComponent.setVisible(vis);
-	}
-
-	@Override
-	public int getDimensionCount(ICheckableObject checkableObject) {
-		return dataSetComponent.getActiveDimensions(checkableObject, true);
-	}
-
-	@Override
-	public void setSlicerData(ICheckableObject object, String filePath, int[] dims, IPlottingSystem plottingSystem) {
-		
-		if (object.isExpression()) {
-			final ILazyDataset lazy = object.getExpression().getLazyDataSet(object.getVariable(), new IMonitor.Stub());
-		    sliceComponent.setData(new SliceSource(lazy, object.getName(), filePath, true));
-		} else {
-			try {
-				final DataHolder holder = LoaderFactory.getData(filePath, new IMonitor.Stub());
-				ILazyDataset lazy = holder.getLazyDataset(object.getName());
-				if (lazy==null) lazy = holder.getLazyDataset(0);
-				if (lazy==null) lazy = holder.getDataset(object.getName());
-				if (lazy==null) lazy = holder.getDataset(0);
-			    sliceComponent.setData(new SliceSource(lazy, object.getName(), filePath, false));
-			} catch (Throwable e) {
-				logger.error("Cannot load lazy data!", e);
-			}
-		}
-	}
-
-	@Override
-	public PlotType getPlotMode() {
-		return dataSetComponent.getPlotMode();
 	}
 
 	public ISliceSystem getSliceComponent() {
