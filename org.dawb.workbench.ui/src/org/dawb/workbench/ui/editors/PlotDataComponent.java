@@ -1524,6 +1524,11 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		
 		Activator.getDefault().getPreferenceStore().removePropertyChangeListener(propListener);
 		datasetSelection = null;
+		
+		this.metaData   = null;
+		this.dataHolder = null;
+		this.filePath   = null;
+		
 		if (listeners!=null) listeners.clear();
 		if (data != null)       this.data.clear();
 		if (plotModeListeners!=null) plotModeListeners.clear();
