@@ -160,7 +160,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	 * data is the objects for the table, either a String or an ExpressionObject
 	 * currently. Probably a better design possible with a single object type.
 	 */
-	protected List<CheckableObject> data;
+	protected List<ICheckableObject> data;
 	protected String                filePath;
 	protected String                fileName;
 	private   String                rootName;
@@ -184,7 +184,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	
 	public PlotDataComponent(final IEditorPart editor) {
 				
-		this.data = new ArrayList<CheckableObject>(7);
+		this.data = new ArrayList<ICheckableObject>(7);
 		this.editor   = editor;
 		
 		this.service  = (IExpressionObjectService)PlatformUI.getWorkbench().getService(IExpressionObjectService.class);
@@ -508,7 +508,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 					final String memento    = props.getProperty(mementoKey);
 					if (CheckableObject.isMementoKey(mementoKey)) {
 						final String possibleName = CheckableObject.getName(memento);
-						CheckableObject o = getCheckableObjectByName(possibleName);
+						ICheckableObject o = getCheckableObjectByName(possibleName);
 						if (o!=null) {
 							o.setVariable(CheckableObject.getVariable(memento));
 						} else {
@@ -538,6 +538,8 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 			logger.error("Cannot save expression", e);
 		}
 	}
+	
+	private static ICheckableObject currentCopiedData;
 	
 	private void createRightClickMenu() {	
 		
@@ -570,6 +572,33 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 				wd.getShell().setSize(650, 800);
 				DialogUtils.centerDialog(Display.getCurrent().getActiveShell(), wd.getShell());
 				wd.open();
+			}
+		};
+
+		final Action copy = new Action("Copy selected data (it can then be pasted to another data list.)", Activator.getImageDescriptor("icons/copy.gif")) {
+			public void run() {
+				final ICheckableObject sel = (ICheckableObject)((IStructuredSelection)dataViewer.getSelection()).getFirstElement();
+				if (sel==null) return;
+				currentCopiedData = sel;
+			}
+		};
+		
+		final Action paste = new Action("Paste", Activator.getImageDescriptor("icons/paste.gif")) {
+			public void run() {
+				data.add(currentCopiedData.clone());
+				currentCopiedData.setChecked(!currentCopiedData.isChecked());
+				selectionChanged(currentCopiedData, true);
+			}
+		};
+		
+		final Action delete = new Action("Delete", Activator.getImageDescriptor("icons/delete.gif")) {
+			public void run() {
+				final Object sel           = ((StructuredSelection)dataViewer.getSelection()).getFirstElement();
+				final ICheckableObject ob  = (ICheckableObject)sel;
+				if (ob!=null) {
+					data.remove(ob);
+				}
+				dataViewer.refresh();
 			}
 		};
 
@@ -606,6 +635,35 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 					}
 				});
 				
+				menuManager.add(new Separator(getClass().getName()+".copyPaste"));
+				
+				final Object sel           = ((StructuredSelection)dataViewer.getSelection()).getFirstElement();
+				final ICheckableObject ob  = (ICheckableObject)sel;
+				if (ob!=null) {
+				    copy.setText("Copy '"+ob.getName()+"' (can be paste to other data).");
+					copy.setEnabled(true);
+				} else {
+					copy.setEnabled(false);
+				}
+				menuManager.add(copy);
+				
+				if (currentCopiedData!=null) {
+				    paste.setText("Paste '"+currentCopiedData.getName()+"' (from file "+currentCopiedData.getFileName()+") into this data.");
+				    paste.setEnabled(true);
+				} else {
+					paste.setEnabled(false);
+				}
+				menuManager.add(paste);
+			
+				if (sel!=null && ob.isTransientData()) {
+				    delete.setText("Delete '"+ob.getName());
+				    delete.setEnabled(true);
+				} else {
+					delete.setText("Delete");
+					delete.setEnabled(false);
+				}
+				menuManager.add(delete);
+
 				if (H5Loader.isH5(getFileName())) {
 					menuManager.add(new Separator(getClass().getName()+"sep2"));
 					
@@ -619,9 +677,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 				 * What follows is adding some actions for setting errors on other plotted data sets.
 				 * The logic is a bit convoluted at the moment.
 				 */
-				final Object sel           = ((StructuredSelection)dataViewer.getSelection()).getFirstElement();
-				final ICheckableObject ob  = (ICheckableObject)sel;
-				final ILazyDataset currentSelecedData  = getLazyValue(ob.getVariable(), null);
+				final ILazyDataset currentSelecedData  = ob!=null ? getLazyValue(ob.getVariable(), null) : null;
 
 				if (currentSelecedData!=null) {
 					if (selections!=null && selections.size() > 0) {
@@ -1187,7 +1243,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		
 	}
 	
-	protected void selectionChanged(final CheckableObject check, boolean fireListeners) {
+	protected void selectionChanged(final ICheckableObject check, boolean fireListeners) {
 		
 		if (selections==null) selections = new ArrayList<ICheckableObject>(7);
 
@@ -1266,7 +1322,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
         }
 		
 		selections.clear();
-		for (CheckableObject sel : data) {
+		for (ICheckableObject sel : data) {
 			final int[] shape = sel.getShape(true);
 			if (shape.length==1) {
 				selections.add(sel);
@@ -1340,7 +1396,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		void plotChangePerformed(PlotType plotMode);
 	}
 
-	private List<String> getStringSelections(List<CheckableObject> selections) {
+	private List<String> getStringSelections(List<ICheckableObject> selections) {
 		
 		final List<String> ret = new ArrayList<String>(selections.size());
 		for (ICheckableObject sel : selections) {
@@ -1384,8 +1440,8 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		}
 		return null;
 	}
-	private CheckableObject getCheckableObjectByName(String name) {
-		for (CheckableObject ob : data) {
+	private ICheckableObject getCheckableObjectByName(String name) {
+		for (ICheckableObject ob : data) {
 			if (ob.getName().equals(name)) return ob;
 		}
 		return null;
@@ -1602,13 +1658,17 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	private static final String DATA_SEL = "org.dawb.workbench.ui.editors.plotdata.selected";
 	/**
 	 * Used when the view is being controlled from a Dialog.
+	 * 
+	 * We actually clone the data holder because the user can paste in datasets
+	 * from outside this file in order to do expressions on them.
+	 * 
 	 * @param meta
 	 * @throws Exception 
 	 */
 	public void setData(final IDataHolder dh, IMetaData meta) {
 		
 		this.data.clear();
-		this.dataHolder=dh;
+		this.dataHolder=dh.clone();
 		this.metaData = meta;
 		this.filePath = dh.getFilePath();
 		
@@ -1637,7 +1697,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 					final Collection<String> saveSelections = Arrays.asList(prop.split(","));
 					if (data!=null && !data.isEmpty()) {
 						boolean foundData = false;
-						for (CheckableObject checker : data) {
+						for (ICheckableObject checker : data) {
 							if (saveSelections.contains(checker.getName())) {
 								if (!foundData) selections.clear();
 								checker.setChecked(true);
@@ -1660,7 +1720,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		final List<String> namesNoStack = new ArrayList<String>(names);
 		namesNoStack.remove("Image Stack");
 		if (namesNoStack!=null && namesNoStack.size()==1) {
-			CheckableObject check = data.get(0);
+			ICheckableObject check = data.get(0);
 			check.setChecked(false); // selectionChanged flips this
 			selectionChanged(check, true);
 			dataViewer.refresh();
@@ -1698,7 +1758,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 					PlotDataComponent.this.selectionChanged(null, true);
 				}
 				
-				final CheckableObject check = PlotDataComponent.this.getObjectByName(name);
+				final ICheckableObject check = PlotDataComponent.this.getObjectByName(name);
 				check.setChecked(false);
 				PlotDataComponent.this.selectionChanged(check, true);
 				datasetSelection = check.getData((IMonitor)null);
@@ -1719,8 +1779,8 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	 * @param name
 	 * @return
 	 */
-	protected CheckableObject getObjectByName(final String name) {
-		for (CheckableObject check : data) {
+	protected ICheckableObject getObjectByName(final String name) {
+		for (ICheckableObject check : data) {
 			if (name.equals(check.getName())) return check;
 		}
 		return null;
@@ -1745,7 +1805,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	}
 
 
-	public List<CheckableObject> getData() {
+	public List<ICheckableObject> getData() {
 		return data;
 	}
 

@@ -15,6 +15,13 @@ public interface ICheckableObject {
 
 	public ILazyDataset getLazyData(IMonitor monitor);
 	
+	/**
+	 * The original file name that this data came from.
+	 * @return
+	 */
+	public String getFileName();
+
+	
 	public int[] getShape(boolean squeeze);
 
 	public String getName();
@@ -68,5 +75,17 @@ public interface ICheckableObject {
 	public void setMementoKey(String mementoKey);
 
 	public String getDisplayName(String rootName);
+
+	/**
+	 * Shallow copy of object.
+	 * @return
+	 */
+	public ICheckableObject clone();
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public boolean isTransientData();
 
 }

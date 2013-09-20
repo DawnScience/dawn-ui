@@ -9,6 +9,7 @@
  */ 
 package org.dawb.workbench.ui.editors;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,17 +33,43 @@ public class CheckableObject implements H5Path, ICheckableObject{
 	
 	private static final Logger logger = LoggerFactory.getLogger(CheckableObject.class);
 
-	private final IDataHolder       holder;
-	private final IMetaData         metaData;
+	private IDataHolder       holder;
+	private IMetaData         metaData;
 
 	private boolean           checked;
+	/**
+	 * If it is a transient data set it will have been copied from 
+	 * one data view to another and the user may want to delete it.
+	 */
+	private boolean           transientData=false;
 	private String            name;
 	private String            variable;
 	private IExpressionObject expression;
 	private String            mementoKey;
 	private IExpressionObjectService service;
 	private static int expressionCount=0;
+	
+	/**
+	 * Clones the object and sets the transientData flag to true.
+	 */
+	public ICheckableObject clone() {
+		CheckableObject ret = new CheckableObject();
+		ret.holder   = holder.clone();
+		ret.metaData = metaData.clone();
+		ret.checked  = checked;
+		ret.name     = name;
+		ret.variable = variable;
+		ret.expression= expression;
+		ret.mementoKey= mementoKey;
+		ret.service   = service;
+		ret.transientData=true;
+		return ret;
+	}
 
+	private CheckableObject() {
+		
+	}
+	
 	public CheckableObject(IDataHolder holder, IMetaData meta) {
 		this.holder   = holder;
 		this.metaData = meta;
@@ -358,5 +385,18 @@ public class CheckableObject implements H5Path, ICheckableObject{
 			setName = setName.substring(rootName.length());
 		}
 		return setName;
+	}
+
+	@Override
+	public String getFileName() {
+		return (new File(holder.getFilePath())).getName();
+	}
+
+	public boolean isTransientData() {
+		return transientData;
+	}
+
+	public void setTransientData(boolean transientData) {
+		this.transientData = transientData;
 	}
  }
