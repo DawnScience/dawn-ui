@@ -72,18 +72,20 @@ public class CheckableObject implements H5Path, ICheckableObject{
 
 	@Override
 	public IDataset getData(IMonitor monitor) {
+		
+		IDataset set = null;
 		if (!isExpression()) {
 			try {
-			    return holder.getDataset(getName());
+				set = holder.getDataset(getName());
 			} catch(IllegalArgumentException ie) {
 				try {
 					ILazyDataset lz = holder.getLazyDataset(name);
 					IDataset all = lz.getSlice();
 					if (all.getSize()<2) throw new Exception();
-					return all;
+					set =  all;
 				} catch (Exception e) {
 					try {
-						return LoaderFactory.getDataSet(holder.getFilePath(), getName(), monitor);
+						set =  LoaderFactory.getDataSet(holder.getFilePath(), getName(), monitor);
 					} catch (Exception e1) {
 						return null;
 					}
@@ -91,24 +93,30 @@ public class CheckableObject implements H5Path, ICheckableObject{
 			}
 		} else {
 			try {
-				return getExpression().getDataSet(name, monitor);
+				set =  getExpression().getDataSet(name, monitor);
 			} catch (Exception e) {
 				return null;
 			}
-		}		
+		}	
+		
+		if (set!=null) set.setName(getName());
+		return set;
 	}
 
 	@Override
 	public ILazyDataset getLazyData(IMonitor monitor) {
+		ILazyDataset set = null;
 		if (!isExpression()) {
-			return holder.getLazyDataset(getName());
+			set = holder.getLazyDataset(getName());
 		} else {
 			try {
-				return getExpression().getLazyDataSet(name, monitor);
+				set = getExpression().getLazyDataSet(name, monitor);
 			} catch (Exception e) {
 				return null;
 			}
 		}		
+		if (set!=null) set.setName(getName());
+		return set;
 	}
 
 	@Override
