@@ -77,9 +77,16 @@ public class CheckableObject implements H5Path, ICheckableObject{
 			    return holder.getDataset(getName());
 			} catch(IllegalArgumentException ie) {
 				try {
-					return LoaderFactory.getDataSet(holder.getFilePath(), getName(), monitor);
+					ILazyDataset lz = holder.getLazyDataset(name);
+					IDataset all = lz.getSlice();
+					if (all.getSize()<2) throw new Exception();
+					return all;
 				} catch (Exception e) {
-					return null;
+					try {
+						return LoaderFactory.getDataSet(holder.getFilePath(), getName(), monitor);
+					} catch (Exception e1) {
+						return null;
+					}
 				}
 			}
 		} else {
@@ -109,7 +116,9 @@ public class CheckableObject implements H5Path, ICheckableObject{
 		
 		if (isExpression()) {
 		    try {
-				return getExpression().getLazyDataSet(getVariable(), new IMonitor.Stub()).getShape();
+		    	final IExpressionObject expr = getExpression();
+				final ILazyDataset lz = expr.getLazyDataSet(getVariable(), new IMonitor.Stub());
+			    return lz.getShape();
 			} catch (Exception e) {
 				logger.error("Could not get shape of "+getVariable());
 				return new int[]{1};

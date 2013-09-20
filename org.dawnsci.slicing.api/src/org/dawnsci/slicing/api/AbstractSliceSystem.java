@@ -380,9 +380,7 @@ public abstract class AbstractSliceSystem implements ISliceSystem {
         for (Enum type : plotTypeActions.keySet()) {
         	
         	int dims = getDimensions(type);
-        	if (rank<dims) {
-        		plotTypeActions.get(type).setEnabled(false);
-        	}
+        	plotTypeActions.get(type).setEnabled(dims<=rank);
         }
 	}
 

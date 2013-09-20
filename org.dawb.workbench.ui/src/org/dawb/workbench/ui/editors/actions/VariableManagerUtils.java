@@ -34,6 +34,9 @@ public class VariableManagerUtils {
 		    final IWorkbenchPart part = EclipseUtils.getActivePage().getActivePart();
 		    if (part instanceof IVariableManager) return (IVariableManager)part;
 		    
+		    IVariableManager man = (IVariableManager)part.getAdapter(IVariableManager.class);
+		    if (man!=null) return man;
+		    
 		    if (part instanceof IToolContainer) {
 		    	IToolContainer  cont = (IToolContainer)part;
 		    	final IToolPage page = cont.getActiveTool(); 
