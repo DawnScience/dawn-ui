@@ -1738,7 +1738,19 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		final Object sel = ((IStructuredSelection)dataViewer.getSelection()).getFirstElement();
 		if (sel==null || !(sel instanceof TransferableDataObject)) return;
 		
-		if (!((ITransferableDataObject)sel).isExpression()) return;
+		ITransferableDataObject ob = (ITransferableDataObject)sel;
+		if (!ob.isExpression()) {
+			if (ob.isTransientData()) { // We delete it
+				boolean ok = data.remove(ob);
+				if (ok) ob.dispose();
+				dataViewer.refresh();
+				return;
+			} else { // We tell them that we cannot.
+				String name = ob.getName();
+				MessageDialog.openWarning(Display.getDefault().getActiveShell(), "Cannot delete", "The data '"+name+"' is not an expression.");
+				return;
+			}
+		}
 	    if (selections!=null) selections.remove(sel);
 		data.remove(sel);
 		clearExpressionCache();
