@@ -144,7 +144,7 @@ public class ImageEditor extends MultiPageEditorPart implements IReusableEditor,
     public Object getAdapter(final Class clazz) {
 		
     	// TODO FIXME for IContentProvider return a Page which shows the value
-    	// of plotted data. Bascially the same as the CSVPage.
+    	// of plotted data. Basically the same as the CSVPage.
     	
 		if (clazz == Page.class) {
 			if (plotDataEditor==null) {
