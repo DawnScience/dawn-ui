@@ -40,7 +40,6 @@ import uk.ac.diamond.scisoft.analysis.IAnalysisService;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
 import uk.ac.diamond.scisoft.analysis.io.IDataHolder;
-import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.io.SliceObject;
 
 public class SliceUtils {
@@ -249,7 +248,13 @@ public class SliceUtils {
 		if (monitor!=null&&monitor.isCanceled()) return;
 		
         currentSlice.setFullShape(dataShape);
-		final IDataset slice = getSlice(lazySet, currentSlice,monitor);
+        
+        final IDataset slice;
+        if (lazySet instanceof IDataset && Arrays.equals(dataShape, lazySet.getShape())) {
+        	slice = (IDataset)lazySet;
+        } else {
+        	slice = getSlice(lazySet, currentSlice,monitor);
+        }
 		if (slice==null) return;
 		
 		// DO NOT CANCEL the monitor now, we have done the hard part the slice.
