@@ -3,7 +3,7 @@ package org.dawb.workbench.ui.editors;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.dawnsci.slicing.api.data.ICheckableObject;
+import org.dawnsci.slicing.api.data.ITransferableDataObject;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
@@ -27,15 +27,15 @@ import org.eclipse.swt.widgets.Shell;
  */
 class PlotDataChooseDialog extends Dialog {
 
-	private List<ICheckableObject> plottedSelections;
-	private ICheckableObject error, selection;
+	private List<ITransferableDataObject> plottedSelections;
+	private ITransferableDataObject error, selection;
 
 	public PlotDataChooseDialog(Shell parentShell) {
 		super(parentShell);
 		setShellStyle(getShellStyle() | SWT.RESIZE);
 	}
 	
-	public void init(List<ICheckableObject> selections, ICheckableObject error) {
+	public void init(List<ITransferableDataObject> selections, ITransferableDataObject error) {
 		this.plottedSelections = selections;
 		this.error     = error;
 		this.selection = selections.get(0); // Throws index and NPE if selections empty or null.
@@ -77,8 +77,8 @@ class PlotDataChooseDialog extends Dialog {
 		return composite;
 	}
 	
-	protected ICheckableObject getSelectionByName(String name) {
-		for (ICheckableObject ob : plottedSelections) {
+	protected ITransferableDataObject getSelectionByName(String name) {
+		for (ITransferableDataObject ob : plottedSelections) {
 			if (name.equals(ob.getName())) return ob;
 		}
 		return null;
@@ -86,7 +86,7 @@ class PlotDataChooseDialog extends Dialog {
 
 	private String[] getSelectionNames() {
 		final List<String> names = new ArrayList<String>(plottedSelections.size());
-		for (ICheckableObject ob : plottedSelections) names.add(ob.getName());
+		for (ITransferableDataObject ob : plottedSelections) names.add(ob.getName());
 		return names.toArray(new String[names.size()]);
 	}
 
@@ -95,7 +95,7 @@ class PlotDataChooseDialog extends Dialog {
 	 * null if none was selected.
 	 * @return
 	 */
-	public ICheckableObject choose() {
+	public ITransferableDataObject choose() {
 		
 		final int ok = open();
 		if (ok == Dialog.OK) return selection;

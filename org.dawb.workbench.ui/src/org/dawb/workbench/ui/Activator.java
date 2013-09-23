@@ -9,6 +9,10 @@
  */ 
 package org.dawb.workbench.ui;
 
+import java.util.Hashtable;
+
+import org.dawb.workbench.ui.transferable.TransferableDataService;
+import org.dawnsci.slicing.api.data.ITransferableDataService;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
@@ -52,6 +56,10 @@ public class Activator extends AbstractUIPlugin {
 		} catch (Exception e) {
 			logger.error("Cannot override plot server in GDA!", e);
 		}
+		
+		Hashtable<String, String> props = new Hashtable<String, String>(1);
+		props.put("description", "A service used to encapsulate data in a transferable object which can be used anywhere in the user interface.");
+		context.registerService(ITransferableDataService.class, new TransferableDataService(), props);
 	}
 
 	/*

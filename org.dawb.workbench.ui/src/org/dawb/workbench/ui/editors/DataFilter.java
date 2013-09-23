@@ -11,7 +11,7 @@ package org.dawb.workbench.ui.editors;
 
 import java.util.Arrays;
 
-import org.dawnsci.slicing.api.data.ICheckableObject;
+import org.dawnsci.slicing.api.data.ITransferableDataObject;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
@@ -33,7 +33,7 @@ class DataFilter extends ViewerFilter {
 			return true;
 		}
 
-		final String dsName = ((ICheckableObject)element).getName();
+		final String dsName = ((ITransferableDataObject)element).getName();
 		final String name   = dsName.toLowerCase();
 
 		if (name==null || "".equals(name)) return true;

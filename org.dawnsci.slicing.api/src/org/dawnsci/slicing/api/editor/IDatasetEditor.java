@@ -12,7 +12,7 @@ package org.dawnsci.slicing.api.editor;
 import java.util.Map;
 
 import org.dawnsci.plotting.api.IPlottingContainer;
-import org.dawnsci.slicing.api.data.ICheckableObject;
+import org.dawnsci.slicing.api.data.ITransferableDataObject;
 import org.dawnsci.slicing.api.system.ISliceSystem;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -27,7 +27,7 @@ public interface IDatasetEditor extends IEditorPart, IPlottingContainer {
 	 * @param participant
 	 * @param useTask
 	 */
-	void updatePlot(final ICheckableObject[]      selections, 
+	void updatePlot(final ITransferableDataObject[]      selections, 
 		            final ISliceSystem            sliceSystem,
 		            final boolean                 useTask);
 

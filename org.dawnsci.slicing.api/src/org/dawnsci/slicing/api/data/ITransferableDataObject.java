@@ -9,7 +9,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
 import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 
-public interface ICheckableObject {
+public interface ITransferableDataObject {
 	
 	/**
 	 * Get the actual data, evaluating expressions where necessary.
@@ -99,9 +99,9 @@ public interface ICheckableObject {
 	 * @param selections
 	 * @return
 	 */
-	public String getAxis(List<ICheckableObject> selections, boolean is2D, boolean isXFirst);
+	public String getAxis(List<ITransferableDataObject> selections, boolean is2D, boolean isXFirst);
 
-	public int getAxisIndex(List<ICheckableObject> selections, boolean isXFirst);
+	public int getAxisIndex(List<ITransferableDataObject> selections, boolean isXFirst);
 
 	public int getYaxis();
 
@@ -156,7 +156,7 @@ public interface ICheckableObject {
 	 * Shallow copy of object.
 	 * @return
 	 */
-	public ICheckableObject clone();
+	public ITransferableDataObject clone();
 	
 	/**
 	 * 

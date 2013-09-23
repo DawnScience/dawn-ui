@@ -361,4 +361,13 @@
             content="intro/tutorials.xml">
       </configExtension>
    </extension>
+   <extension
+         point="org.eclipse.ui.services">
+      <serviceFactory
+            factoryClass="org.dawb.workbench.ui.transferable.TransferableDataService">
+         <service
+               serviceClass="org.dawnsci.slicing.api.data.ITransferableDataService">
+         </service>
+      </serviceFactory>
+   </extension>
 </plugin>

@@ -17,10 +17,10 @@ import java.util.List;
 import org.dawb.common.services.IExpressionObject;
 import org.dawb.common.services.IVariableManager;
 import org.dawb.common.ui.util.EclipseUtils;
-import org.dawb.workbench.ui.editors.CheckableObject;
 import org.dawb.workbench.ui.editors.PlotDataComponent;
+import org.dawb.workbench.ui.transferable.TransferableDataObject;
 import org.dawnsci.slicing.api.SlicingFactory;
-import org.dawnsci.slicing.api.data.ICheckableObject;
+import org.dawnsci.slicing.api.data.ITransferableDataObject;
 import org.dawnsci.slicing.api.editor.IDatasetEditor;
 import org.dawnsci.slicing.api.system.ISliceSystem;
 import org.eclipse.core.resources.IFile;
@@ -88,48 +88,47 @@ public class PlotDataPage extends Page implements IAdaptable {
 	@Override
 	public void createControl(Composite parent) {
 		
-		this.content = new Composite(parent, SWT.NONE);
-		content.setLayout(new GridLayout(1, true));
-		
-		final SashForm form = new SashForm(content, SWT.VERTICAL);
-		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-		this.dataSetComponent = new PlotDataComponent(editor);		
-		if (editor!=null && editor.getEditorInput()!=null && dataSetComponent!=null) {
-			dataSetComponent.setFileName(editor.getEditorInput().getName());
-		}
-		dataSetComponent.createPartControl(form, getSite().getActionBars());
-		
-		if (dataSetComponent.getDataReductionAction()!=null) {
-			getSite().getActionBars().getToolBarManager().add(dataSetComponent.getDataReductionAction());
-			getSite().getActionBars().getToolBarManager().add(new Separator("data.reduction.separator"));
-		}
-
-		final List<IAction> extras = new ArrayList<IAction>(7);
-		extras.addAll(dataSetComponent.getDimensionalActions());
-		for (IAction iAction : extras) {
-			getSite().getActionBars().getToolBarManager().add(iAction);
-			
-			// Stinky warning, we do not know which actions are menu bar stuff, so 
-			// we add any action with 'preference' in the text.
-			if (iAction.getText()!=null&&iAction.getText().toLowerCase().contains("preference")) {
-				getSite().getActionBars().getMenuManager().add(iAction);
-			}
-		}
-		getSite().setSelectionProvider(dataSetComponent.getViewer());
-				
-		dataSetComponent.addSelectionListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(final SelectionChangedEvent event) {
-				
-				@SuppressWarnings("unchecked")
-				final List<CheckableObject> sels = ((StructuredSelection)event.getSelection()).toList();
-				if (sels!=null) editor.updatePlot(sels.toArray(new CheckableObject[sels.size()]), getSliceComponent(), true);
-
-			}
-		});
-		
 		try {
+			this.content = new Composite(parent, SWT.NONE);
+			content.setLayout(new GridLayout(1, true));
+			
+			final SashForm form = new SashForm(content, SWT.VERTICAL);
+			form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			
+			this.dataSetComponent = new PlotDataComponent(editor);		
+			if (editor!=null && editor.getEditorInput()!=null && dataSetComponent!=null) {
+				dataSetComponent.setFileName(editor.getEditorInput().getName());
+			}
+			dataSetComponent.createPartControl(form, getSite().getActionBars());
+			
+			if (dataSetComponent.getDataReductionAction()!=null) {
+				getSite().getActionBars().getToolBarManager().add(dataSetComponent.getDataReductionAction());
+				getSite().getActionBars().getToolBarManager().add(new Separator("data.reduction.separator"));
+			}
+
+			final List<IAction> extras = new ArrayList<IAction>(7);
+			extras.addAll(dataSetComponent.getDimensionalActions());
+			for (IAction iAction : extras) {
+				getSite().getActionBars().getToolBarManager().add(iAction);
+				
+				// Stinky warning, we do not know which actions are menu bar stuff, so 
+				// we add any action with 'preference' in the text.
+				if (iAction.getText()!=null&&iAction.getText().toLowerCase().contains("preference")) {
+					getSite().getActionBars().getMenuManager().add(iAction);
+				}
+			}
+			getSite().setSelectionProvider(dataSetComponent.getViewer());
+					
+			dataSetComponent.addSelectionListener(new ISelectionChangedListener() {
+				@Override
+				public void selectionChanged(final SelectionChangedEvent event) {
+					
+					@SuppressWarnings("unchecked")
+					final List<TransferableDataObject> sels = ((StructuredSelection)event.getSelection()).toList();
+					if (sels!=null) editor.updatePlot(sels.toArray(new TransferableDataObject[sels.size()]), getSliceComponent(), true);
+
+				}
+			});
 			
 			
 			IWorkspace workspace = ResourcesPlugin.getWorkspace();
@@ -151,8 +150,8 @@ public class PlotDataPage extends Page implements IAdaptable {
 									logger.error("Cannot refresh "+content, e);
 								}
 								editor.setInput(new FileEditorInput(content));
-								final List<ICheckableObject> sels = dataSetComponent.getSelections();
-								if (sels!=null) editor.updatePlot(sels.toArray(new ICheckableObject[sels.size()]), (ISliceSystem)getAdapter(ISliceSystem.class), false);
+								final List<ITransferableDataObject> sels = dataSetComponent.getSelections();
+								if (sels!=null) editor.updatePlot(sels.toArray(new ITransferableDataObject[sels.size()]), (ISliceSystem)getAdapter(ISliceSystem.class), false);
 							}
 						});
 					}
@@ -206,7 +205,7 @@ public class PlotDataPage extends Page implements IAdaptable {
 			return "Data";
 		} else if (type == List.class) {
 			final List<IExpressionObject> exprs = new ArrayList<IExpressionObject>();
-			for (ICheckableObject ob : dataSetComponent.getData()) {
+			for (ITransferableDataObject ob : dataSetComponent.getData()) {
 				if (ob.getExpression()!=null) {
 					exprs.add(ob.getExpression());
 				}

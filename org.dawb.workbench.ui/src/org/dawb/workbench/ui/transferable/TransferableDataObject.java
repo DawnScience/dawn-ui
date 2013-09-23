@@ -7,7 +7,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */ 
-package org.dawb.workbench.ui.editors;
+package org.dawb.workbench.ui.transferable;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import org.dawb.common.services.IExpressionObject;
 import org.dawb.common.services.IExpressionObjectService;
 import org.dawb.common.services.IVariableManager;
 import org.dawb.hdf5.editor.H5Path;
-import org.dawnsci.slicing.api.data.ICheckableObject;
+import org.dawnsci.slicing.api.data.ITransferableDataObject;
 import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,9 +29,9 @@ import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 
-public class CheckableObject implements H5Path, ICheckableObject{
+public class TransferableDataObject implements H5Path, ITransferableDataObject{
 	
-	private static final Logger logger = LoggerFactory.getLogger(CheckableObject.class);
+	private static final Logger logger = LoggerFactory.getLogger(TransferableDataObject.class);
 
 	private IDataHolder       holder;
 	private IMetaData         metaData;
@@ -52,8 +52,8 @@ public class CheckableObject implements H5Path, ICheckableObject{
 	/**
 	 * Clones the object and sets the transientData flag to true.
 	 */
-	public ICheckableObject clone() {
-		CheckableObject ret = new CheckableObject();
+	public ITransferableDataObject clone() {
+		TransferableDataObject ret = new TransferableDataObject();
 		ret.holder   = holder.clone();
 		ret.metaData = metaData.clone();
 		ret.checked  = checked;
@@ -66,11 +66,11 @@ public class CheckableObject implements H5Path, ICheckableObject{
 		return ret;
 	}
 
-	private CheckableObject() {
+	private TransferableDataObject() {
 		
 	}
 	
-	public CheckableObject(IDataHolder holder, IMetaData meta) {
+	protected TransferableDataObject(IDataHolder holder, IMetaData meta) {
 		this.holder   = holder;
 		this.metaData = meta;
 		expressionCount++;
@@ -78,7 +78,7 @@ public class CheckableObject implements H5Path, ICheckableObject{
 		this.service  = (IExpressionObjectService)PlatformUI.getWorkbench().getService(IExpressionObjectService.class);
 	}
 
-	public CheckableObject(IDataHolder holder, IMetaData meta, final String name) {
+	protected TransferableDataObject(IDataHolder holder, IMetaData meta, final String name) {
 		this.holder   = holder;
 		this.metaData = meta;
 		this.name     = name;
@@ -86,7 +86,7 @@ public class CheckableObject implements H5Path, ICheckableObject{
 		this.variable = service.getSafeName(name);
 	}
 
-	public CheckableObject(IDataHolder holder, IMetaData meta, IExpressionObject expression2) {
+	protected TransferableDataObject(IDataHolder holder, IMetaData meta, IExpressionObject expression2) {
 		this.holder     = holder;
 		this.metaData   = meta;
 		this.expression = expression2;
@@ -227,7 +227,7 @@ public class CheckableObject implements H5Path, ICheckableObject{
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		CheckableObject other = (CheckableObject) obj;
+		TransferableDataObject other = (TransferableDataObject) obj;
 		if (checked != other.checked)
 			return false;
 		if (expression == null) {
@@ -305,7 +305,7 @@ public class CheckableObject implements H5Path, ICheckableObject{
 	}
 
 	@Override
-	public String getAxis(List<ICheckableObject> selections, boolean is2D, boolean isXFirst) {
+	public String getAxis(List<ITransferableDataObject> selections, boolean is2D, boolean isXFirst) {
 		
 		if (is2D) return isChecked() ? "-" : "";
 		int axis = getAxisIndex(selections, isXFirst);
@@ -317,7 +317,7 @@ public class CheckableObject implements H5Path, ICheckableObject{
 	}
 
 	@Override
-	public int getAxisIndex(List<ICheckableObject> selections, boolean isXFirst) {
+	public int getAxisIndex(List<ITransferableDataObject> selections, boolean isXFirst) {
 		if (selections!=null&&!selections.isEmpty()) {
 			if (selections.size()>1) {
 				if (selections.contains(this)) {

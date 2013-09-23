@@ -34,7 +34,7 @@ import org.dawnsci.plotting.api.PlottingFactory;
 import org.dawnsci.plotting.api.axis.IAxis;
 import org.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.dawnsci.plotting.api.trace.ITrace;
-import org.dawnsci.slicing.api.data.ICheckableObject;
+import org.dawnsci.slicing.api.data.ITransferableDataObject;
 import org.dawnsci.slicing.api.editor.IDatasetEditor;
 import org.dawnsci.slicing.api.system.ISliceSystem;
 import org.dawnsci.slicing.api.system.SliceSource;
@@ -114,8 +114,8 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
         final Map<String,IDataset> ret = new HashMap<String, IDataset>(3);
 		if (dataSetComponent==null) return ret;
 		
-        final List<ICheckableObject> selectedNames = dataSetComponent.getSelections();
-        for (ICheckableObject object : selectedNames) {
+        final List<ITransferableDataObject> selectedNames = dataSetComponent.getSelections();
+        for (ITransferableDataObject object : selectedNames) {
         	final IDataset set = object.getData(null);
         	if (set==null) continue;
          	ret.put(set.getName(), set);
@@ -230,7 +230,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		
 		final PlotDataComponent dataSetComponent = (PlotDataComponent)getDataSetComponent();
  		if (dataSetComponent!=null) {
-			for (ICheckableObject set : dataSetComponent.getData()) {
+			for (ITransferableDataObject set : dataSetComponent.getData()) {
 				final int[] shape = set.getShape(true);
 				if (shape.length==1)	{
 					is1D=true;
@@ -252,7 +252,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 	 * @param useTask
 	 */
 	@Override
-	public void updatePlot(final ICheckableObject[]     selections, 
+	public void updatePlot(final ITransferableDataObject[]     selections, 
 			               final ISliceSystem           sliceSystem,
 			               final boolean                useTask) {
 		
@@ -272,7 +272,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 			final int[] shape = selections[0].getShape(true);
 			if (selections.length==1 && shape.length!=1) {
 				
-				ICheckableObject object = selections[0];
+				ITransferableDataObject object = selections[0];
 				sliceSystem.setVisible(true);
 				final ILazyDataset lazy = selections[0].getLazyData(null);
 				sliceSystem.setData(new SliceSource(lazy, object.getName(), EclipseUtils.getFilePath(getEditorInput()), object.isExpression()));
@@ -301,10 +301,10 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 			setPriority(Job.INTERACTIVE);
 		}
 
-		private ICheckableObject[] selections;
+		private ITransferableDataObject[] selections;
 		private ISliceSystem system;
 
-		public void plot(ICheckableObject[] selections,
+		public void plot(ITransferableDataObject[] selections,
 				         ISliceSystem system) {
 			
 			cancel();
@@ -322,7 +322,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 	}
 	
 	
-	private void createPlot(final ICheckableObject[] selections, final ISliceSystem system, final IProgressMonitor monitor) {
+	private void createPlot(final ITransferableDataObject[] selections, final ISliceSystem system, final IProgressMonitor monitor) {
 		
 
 		if (monitor.isCanceled()) return;
@@ -343,7 +343,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		    plottingSystem.createPlot2D(data, null, monitor);
 		    
 		} else {
-			List<ICheckableObject> sels = new ArrayList<ICheckableObject>(Arrays.asList(selections));
+			List<ITransferableDataObject> sels = new ArrayList<ITransferableDataObject>(Arrays.asList(selections));
 
 			final IDataset x;
 			if (plottingSystem.isXFirst() && sels.size()>1) {
@@ -391,7 +391,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 	 * @param sels
 	 * @param traces
 	 */
-	private void sync(List<ICheckableObject> sels, List<ITrace> traces) {
+	private void sync(List<ITransferableDataObject> sels, List<ITrace> traces) {
 		if (sels==null || traces==null) return ;
 		if (sels.size() == traces.size()) {
 			for (int i = 0; i < sels.size(); i++) {
@@ -453,10 +453,10 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
         });
 	}
 
-	private List<IDataset> getYS(int iyaxis, List<ICheckableObject> selections, IProgressMonitor monitor) {
+	private List<IDataset> getYS(int iyaxis, List<ITransferableDataObject> selections, IProgressMonitor monitor) {
 		
 		List<IDataset> ys = new ArrayList<IDataset>(3);
-		for (ICheckableObject co : selections) {
+		for (ITransferableDataObject co : selections) {
 			
 			if (co.getYaxis()!=iyaxis) continue;
 			final IDataset y = co.getData(new ProgressMonitorWrapper(monitor));
