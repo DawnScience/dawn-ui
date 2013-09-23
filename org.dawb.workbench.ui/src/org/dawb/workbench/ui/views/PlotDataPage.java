@@ -98,7 +98,7 @@ public class PlotDataPage extends Page implements IAdaptable {
 		if (editor!=null && editor.getEditorInput()!=null && dataSetComponent!=null) {
 			dataSetComponent.setFileName(editor.getEditorInput().getName());
 		}
-		dataSetComponent.createPartControl(form);
+		dataSetComponent.createPartControl(form, getSite().getActionBars());
 		
 		if (dataSetComponent.getDataReductionAction()!=null) {
 			getSite().getActionBars().getToolBarManager().add(dataSetComponent.getDataReductionAction());

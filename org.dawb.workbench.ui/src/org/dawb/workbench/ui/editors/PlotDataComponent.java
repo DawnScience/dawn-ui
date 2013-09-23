@@ -130,6 +130,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
@@ -264,7 +265,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	 * Create contents of the view part.
 	 * @param parent
 	 */
-	public void createPartControl(final Composite parent) {
+	public void createPartControl(final Composite parent, IActionBars bars) {
 		
 		this.container = new Composite(parent, SWT.NONE);
 		if (parent.getLayout() instanceof GridLayout) container.setLayoutData(new GridData(GridData.FILL_BOTH));
@@ -313,7 +314,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
         //if (getSite()!=null) getSite().setSelectionProvider(dataViewer);
 		dataViewer.setInput(new String());
 				
-		createRightClickMenu();
+		createActions(bars);
 		
 		setColumnVisible(2, 36,  Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_XY_COLUMN));
 		setColumnVisible(3, 150, Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_DATA_SIZE));
@@ -545,7 +546,11 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	
 	private static ICheckableObject currentCopiedData;
 	
-	private void createRightClickMenu() {	
+	/**
+	 * Puts actions on right click menu and in action bar.
+	 * @param bars
+	 */
+	private void createActions(final IActionBars bars) {	
 		
 		
 	    final MenuManager menuManager = new MenuManager();
@@ -586,6 +591,8 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 				currentCopiedData = sel;
 			}
 		};
+		bars.getToolBarManager().add(copy);
+		copy.setEnabled(false);
 		
 		final Action paste = new Action("Paste", Activator.getImageDescriptor("icons/paste.gif")) {
 			public void run() {
@@ -597,7 +604,9 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 				dataViewer.refresh();
 			}
 		};
-		
+		bars.getToolBarManager().add(paste);
+		paste.setEnabled(false);
+	
 		final Action delete = new Action("Delete", Activator.getImageDescriptor("icons/delete.gif")) {
 			public void run() {
 				final Object sel           = ((StructuredSelection)dataViewer.getSelection()).getFirstElement();
@@ -609,7 +618,17 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 				dataViewer.refresh();
 			}
 		};
-
+		bars.getToolBarManager().add(delete);
+		delete.setEnabled(false);
+		
+		dataViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				final Object sel           = ((StructuredSelection)dataViewer.getSelection()).getFirstElement();
+				final ICheckableObject ob  = (ICheckableObject)sel;
+				updateActions(copy, paste, delete, ob, bars);
+			}
+		});
 		
 		menuManager.addMenuListener(new IMenuListener() {
 			@Override
@@ -654,23 +673,10 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 					copy.setEnabled(false);
 				}
 				menuManager.add(copy);
-				
-				if (currentCopiedData!=null) {
-				    paste.setText("Paste '"+currentCopiedData.getName()+"' (from file "+currentCopiedData.getFileName()+") into this data.");
-				    paste.setEnabled(true);
-				} else {
-					paste.setEnabled(false);
-				}
 				menuManager.add(paste);
-			
-				if (sel!=null && ob.isTransientData()) {
-				    delete.setText("Delete '"+ob.getName());
-				    delete.setEnabled(true);
-				} else {
-					delete.setText("Delete");
-					delete.setEnabled(false);
-				}
 				menuManager.add(delete);
+				updateActions(copy, paste, delete, ob, null);
+
 
 				if (H5Loader.isH5(getFileName())) {
 					menuManager.add(new Separator(getClass().getName()+"sep2"));
@@ -748,6 +754,37 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		
 	}
 	
+	protected void updateActions(Action copy, 
+			                     Action paste, 
+			                     Action delete, 
+			                     ICheckableObject ob,
+			                     IActionBars bars) {
+		
+		if (ob!=null) {
+		    copy.setText("Copy '"+ob.getName()+"' (can be paste to other data).");
+			copy.setEnabled(true);
+		} else {
+			copy.setEnabled(false);
+		}
+		if (currentCopiedData!=null) {
+		    paste.setText("Paste '"+currentCopiedData.getName()+"' (from file "+currentCopiedData.getFileName()+") into this data.");
+		    paste.setEnabled(true);
+		} else {
+			paste.setEnabled(false);
+		}			
+		if (ob!=null && ob.isTransientData()) {
+		    delete.setText("Delete '"+ob.getName());
+		    delete.setEnabled(true);
+		} else {
+			delete.setText("Delete");
+			delete.setEnabled(false);
+		}
+		if (bars!=null) {
+			bars.getToolBarManager().update(true);
+			bars.updateActionBars();
+		}
+	}
+
 	/**
 	 * Checks whether the object exists and if it does, asks the user for a new
 	 * name. If a new name is not provided or the user cancels, will return null.
