@@ -11,8 +11,19 @@ import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 
 public interface ICheckableObject {
 	
+	/**
+	 * Get the actual data, evaluating expressions where necessary.
+	 * @param monitor
+	 * @return
+	 */
 	public IDataset getData(IMonitor monitor);
 
+	/**
+	 * Get the lazy data if possible. Some image loaders always load the entire data
+	 * therefore the lazy data CANNOT be guaranteed to be lazy at the moment.
+	 * @param monitor
+	 * @return
+	 */
 	public ILazyDataset getLazyData(IMonitor monitor);
 	
 	/**
@@ -21,23 +32,63 @@ public interface ICheckableObject {
 	 */
 	public String getFileName();
 
-	
+	/**
+	 * The shape of the data. If the data is an image, will attempt to 
+	 * get the shape WITHOUT reading all the data as many image loaders do.
+	 * 
+	 * @param squeeze
+	 * @return
+	 */
 	public int[] getShape(boolean squeeze);
 
 	public String getName();
 
+	/**
+	 * This method should only be called once the object has been cloned.
+	 * This is because it puts a different record inside the IDataHolder for
+	 * this dataset.
+	 * 
+	 * If this is an expression an IllegalArgumentException is thrown.
+	 * 
+	 * @param name
+	 */
 	public void setName(String name);
 
+	/**
+	 * If this is an expression, returns a reference to the expression serivce
+	 * object used to evaluate the expression.
+	 * @return
+	 */
 	public IExpressionObject getExpression();
 
+	/**
+	 * Set this object as an expression.
+	 * @param expression
+	 */
 	public void setExpression(IExpressionObject expression);
 
+	/**
+	 * 
+	 * @return if is expression.
+	 */
 	public boolean isExpression();
 
+	/**
+	 * If the data is ticked for plotting
+	 * @return
+	 */
 	public boolean isChecked();
 
+	/**
+	 * 
+	 * @param checked
+	 */
 	public void setChecked(boolean checked);
 
+	/**
+	 * The file path of the original data.
+	 * @return
+	 */
 	public String getPath();
 
 	/**
@@ -56,12 +107,32 @@ public interface ICheckableObject {
 
 	public void setYaxis(int yaxis);
 
+	/**
+	 * The variable used to provide the value of this data
+	 * in expressions.
+	 * 
+	 * @return
+	 */
 	public String getVariable();
 
+	/**
+	 * The variable name used for expressions by expressions of data.
+	 * @param variable
+	 */
 	public void setVariable(String variable);
 
+	/**
+	 * Internally creates an expression of data with the user can interact with.
+	 * @param psData
+	 * @param mementoKey
+	 * @param memento
+	 */
 	public void createExpression(IVariableManager psData, String mementoKey, String memento);
 
+	/**
+	 * Memento to remember this data (primarily for expressions)
+	 * @return
+	 */
 	public String getMemento();
 
 	/**
@@ -74,6 +145,11 @@ public interface ICheckableObject {
 	 */
 	public void setMementoKey(String mementoKey);
 
+	/**
+	 * It is possible to have an alternative name displayed in the table of data.
+	 * @param rootName
+	 * @return
+	 */
 	public String getDisplayName(String rootName);
 
 	/**
@@ -84,8 +160,14 @@ public interface ICheckableObject {
 	
 	/**
 	 * 
-	 * @return
+	 * @return true if the data has been pasted in and therefore is
+	 * not currently remembered if the file in closed and reopened
+	 * (unlike expressions which are).
 	 */
 	public boolean isTransientData();
 
+	/**
+	 * Called to clean up any references to data which may be large.
+	 */
+	public void dispose();
 }

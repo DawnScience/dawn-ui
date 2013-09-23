@@ -256,9 +256,16 @@ public class CheckableObject implements H5Path, ICheckableObject{
 		return name;
 	}
 
+	/**
+	 * Data *must* have been cloned before doing this.
+	 * @param name
+	 */
 	@Override
 	public void setName(String name) {
+		if (isExpression()) throw new IllegalArgumentException("Cannot set the name of an expression object!");
+		ILazyDataset old = holder.getLazyDataset(getName());
 		this.name = name;
+		holder.addDataset(name, old);
 	}
 
 	@Override
@@ -398,5 +405,17 @@ public class CheckableObject implements H5Path, ICheckableObject{
 
 	public void setTransientData(boolean transientData) {
 		this.transientData = transientData;
+	}
+	
+	/**
+	 * Nullifies a few things to help the garbage collector
+	 * be more efficient.
+	 */
+	public void dispose() {
+		if (getExpression()!=null) getExpression().clear();
+		expression = null;
+		holder     = null;
+		metaData   = null;
+		expression = null;
 	}
  }

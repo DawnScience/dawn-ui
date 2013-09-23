@@ -12,6 +12,8 @@ package org.dawb.workbench.ui.editors;
 import java.util.Collection;
 
 import org.dawb.common.ui.editors.EditorExtensionFactory;
+import org.dawb.common.ui.util.EclipseUtils;
+import org.dawb.common.ui.views.HeaderTablePage;
 import org.dawb.workbench.ui.views.PlotDataPage;
 import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.tool.IToolPageSystem;
@@ -145,7 +147,11 @@ public class ImageEditor extends MultiPageEditorPart implements IReusableEditor,
     	// of plotted data. Bascially the same as the CSVPage.
     	
 		if (clazz == Page.class) {
-			return PlotDataPage.getPageFor(plotDataEditor);
+			if (plotDataEditor==null) {
+				return new HeaderTablePage(EclipseUtils.getFilePath(getEditorInput()));
+			} else {
+			    return PlotDataPage.getPageFor(plotDataEditor);
+			}
 		} else if (clazz == IToolPageSystem.class) {
 			try {
 				Object toolSystem = getActiveEditor().getAdapter(clazz);

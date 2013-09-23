@@ -76,6 +76,9 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.IInputValidator;
+import org.eclipse.jface.dialogs.InputDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.fieldassist.IContentProposalProvider;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -100,6 +103,7 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.ToolTip;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
@@ -314,7 +318,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		setColumnVisible(2, 36,  Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_XY_COLUMN));
 		setColumnVisible(3, 150, Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_DATA_SIZE));
 		setColumnVisible(4, 150, Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_DIMS));
-		setColumnVisible(5, 80, Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_SHAPE));
+		setColumnVisible(5, 150, Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_SHAPE));
 		setColumnVisible(6, 150, Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_VARNAME));
 	
 		try {
@@ -326,7 +330,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 					dataViewer.refresh();
 				}
 			};
-			getPlottingSystem().addTraceListener(traceListener);
+			if (getPlottingSystem()!=null) getPlottingSystem().addTraceListener(traceListener);
 			
 			if (dataReduction!=null) {
 				this.toolListener = new IToolChangeListener() {
@@ -585,9 +589,12 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		
 		final Action paste = new Action("Paste", Activator.getImageDescriptor("icons/paste.gif")) {
 			public void run() {
-				data.add(currentCopiedData.clone());
-				currentCopiedData.setChecked(!currentCopiedData.isChecked());
-				selectionChanged(currentCopiedData, true);
+				ICheckableObject checkedObject = getCheckedObject(currentCopiedData);
+				if (checkedObject==null) return;
+				data.add(checkedObject);
+				checkedObject.setChecked(!checkedObject.isChecked());
+				selectionChanged(checkedObject, true);
+				dataViewer.refresh();
 			}
 		};
 		
@@ -596,7 +603,8 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 				final Object sel           = ((StructuredSelection)dataViewer.getSelection()).getFirstElement();
 				final ICheckableObject ob  = (ICheckableObject)sel;
 				if (ob!=null) {
-					data.remove(ob);
+					boolean ok = data.remove(ob);
+					if (ok) ob.dispose();
 				}
 				dataViewer.refresh();
 			}
@@ -740,6 +748,61 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		
 	}
 	
+	/**
+	 * Checks whether the object exists and if it does, asks the user for a new
+	 * name. If a new name is not provided or the user cancels, will return null.
+	 * @param original
+	 * @return cloned object with unique name or null if no paste-able object can be determined.
+	 */
+	protected ICheckableObject getCheckedObject(final ICheckableObject original) {
+		
+		if (nameExists(original.getName())) {
+			if (original.isExpression()) {
+				MessageDialog.openWarning(Display.getDefault().getActiveShell(), 
+						"Cannot paste expression", 
+						"Cannot paste expression '"+original.getName()+"' as it already exists");
+				return null;
+				
+			} else {
+			
+				final IInputValidator validator = new IInputValidator() {
+					@Override
+					public String isValid(String newText) {
+						if (nameExists(newText)) {
+							return "'"+newText+"' already exists in this data.";
+						} else {
+							return null;
+						}
+					}
+				};
+				
+				InputDialog dialog = new InputDialog(Display.getCurrent().getActiveShell(), 
+						                            "'"+original.getName()+"' already exists",
+													"Please provide a new name for '"+original.getName()+"'", original.getName()+"_1",
+													validator);
+				int rc = dialog.open();
+				if (rc == Window.OK) {
+					ICheckableObject clone = original.clone();
+					clone.setName(dialog.getValue());
+					return clone;
+			    } else {
+			    	return null;
+			    }
+			}
+		}
+
+		return original.clone();
+	}
+	
+	private boolean nameExists(String original) {
+		for (ICheckableObject existing : data) {
+			if (existing.getName().equals(original)) {
+                return true;
+			}
+		}
+		return false;
+	} 
+
 	public IAction getDataReductionAction() {
 		return dataReduction;
 	}
@@ -859,7 +922,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		
 		final TableViewerColumn shape   = new TableViewerColumn(dataViewer, SWT.LEFT, 5);
 		shape.getColumn().setText("Shape");
-		shape.getColumn().setWidth(80);
+		shape.getColumn().setWidth(150);
 		shape.getColumn().setResizable(true);
 		shape.setLabelProvider(new DataSetColumnLabelProvider(5));
 
@@ -1586,7 +1649,10 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		this.filePath   = null;
 		
 		if (listeners!=null) listeners.clear();
-		if (data != null)       this.data.clear();
+		if (data != null){
+			for (ICheckableObject ob : data) ob.dispose();
+			this.data.clear();
+		}
 		if (plotModeListeners!=null) plotModeListeners.clear();
 		if (getPlottingSystem()!=null&&traceListener!=null) {
 			getPlottingSystem().removeTraceListener(this.traceListener);
@@ -1788,6 +1854,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 
 
 	public IPlottingSystem getPlottingSystem() {
+		if (editor==null) return null;
 		return (IPlottingSystem)editor.getAdapter(IPlottingSystem.class);
 	}
 
