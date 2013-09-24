@@ -250,7 +250,8 @@ public class SliceUtils {
         currentSlice.setFullShape(dataShape);
         
         final IDataset slice;
-        if (lazySet instanceof IDataset && Arrays.equals(dataShape, lazySet.getShape())) {
+        final int[] slicedShape = currentSlice.getSlicedShape();
+        if (lazySet instanceof IDataset && Arrays.equals(slicedShape, lazySet.getShape())) {
         	slice = (IDataset)lazySet;
         } else {
         	slice = getSlice(lazySet, currentSlice,monitor);
