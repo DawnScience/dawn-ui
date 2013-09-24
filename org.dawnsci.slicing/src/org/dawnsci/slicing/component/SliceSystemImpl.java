@@ -113,9 +113,6 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 	private SliceEditingSupport sliceEditingSupport;
 	private AxisEditingSupport  axisEditingSupport;
 	
-
-	private IToolBarManager sliceToolbar;
-
 	public SliceSystemImpl() {
 		this.sliceJob        = new SliceJob(this);
 	}
@@ -285,25 +282,6 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 	}
 	public boolean isAxesVisible() {
 		return axesVisible;
-	}
-
-	public void setSliceActionsEnabled(boolean enabled) {
-		final IContributionItem[] items = sliceToolbar.getItems();
-		for (IContributionItem toolItem : items) {
-			if (toolItem instanceof ActionContributionItem) {
-				((ActionContributionItem)toolItem).getAction().setEnabled(enabled);
-			}
-		}
-		sliceToolbar.update(true);
-	}
-	
-	/**
-	 * Throws an NPE if the action is not there.
-	 */
-	public void setSliceActionEnabled(Enum type, boolean enabled) {
-		final IAction action = getActionByPlotType(type);
-		action.setEnabled(enabled);
-		sliceToolbar.update(true);
 	}
 	/**
 	 * 
