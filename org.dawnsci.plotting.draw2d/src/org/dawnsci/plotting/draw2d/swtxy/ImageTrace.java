@@ -1391,9 +1391,19 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		
 		final AbstractDataset xl = (AbstractDataset)axes.get(0); // May be null
 		final AbstractDataset yl = (AbstractDataset)axes.get(1); // May be null
+		
 		final double[] ret = point.clone();
-		transform(xl,0,ret);
-		transform(yl,1,ret);
+		if (xl!=null && xl.getDtype()==AbstractDataset.INT && xl.getSize()==image.getShape()[1] && xl.getInt(0)==0) {
+			// Axis is index.
+		} else {
+			transform(xl,0,ret);
+		}
+		
+		if (yl!=null && yl.getDtype()==AbstractDataset.INT && yl.getSize()==image.getShape()[0] && yl.getInt(0)==0) {
+			// Axis is index.
+		} else {
+			transform(yl,1,ret);
+		}
         return ret;
 	}
 	
