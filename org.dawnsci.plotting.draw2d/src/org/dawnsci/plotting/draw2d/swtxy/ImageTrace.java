@@ -396,10 +396,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 					if (fullHeight > imageData.height) fullHeight = MINIMUM_ZOOM_SIZE;
 					isMaximumZoom = true;
 				}
-				if (fullWidth <= MINIMUM_LABEL_SIZE) {
-					isLabelZoom = true;
-				}
-				if (fullHeight <= MINIMUM_LABEL_SIZE) {
+				if (fullWidth <= MINIMUM_LABEL_SIZE && fullHeight <= MINIMUM_LABEL_SIZE) {
 					isLabelZoom = true;
 				}
 				
