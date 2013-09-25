@@ -830,6 +830,8 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 
 	private boolean enabled = true;
 	public void setEnabled(boolean enabled) {
+		
+		if (getPlottingSystem()==null) return;
 		this.enabled = enabled;
 		if (!enabled) {
 			viewer.getTable().setCursor(Display.getDefault().getSystemCursor(SWT.CURSOR_WAIT));
