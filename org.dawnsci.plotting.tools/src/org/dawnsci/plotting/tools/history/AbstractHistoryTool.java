@@ -266,7 +266,7 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 	}
 	public void clearExpressionCache(String... variableNames) {
 		for (HistoryBean bean : getHistoryCache().values()) {
-			if (bean.isExpression() && (variableNames==null || bean.getExpression().containsVariable(variableNames)))  {
+			if (bean.isExpression() && (variableNames==null || variableNames.length<1 || bean.getExpression().containsVariable(variableNames)))  {
 				bean.getExpression().clear();
 			}
 		}
@@ -561,6 +561,7 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 		
 		final Map<String, HistoryBean> history = getHistoryCache();
 		history.remove(bean.getTraceKey());
+		clearExpressionCache(bean.getVariable());
 		
 		viewer.refresh();
 	}

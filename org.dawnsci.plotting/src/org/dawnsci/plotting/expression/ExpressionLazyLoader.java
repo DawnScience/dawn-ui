@@ -84,6 +84,7 @@ class ExpressionLazyLoader implements ILazyLoader {
 	    		// medium of a stack for flat field images.
 	    		try {
 		    		IDataset set = manager.getVariableValue(name, mon);
+		    		if (set==null) continue;
 		    		context.put(name, set);
 	    		} catch (Throwable ignored2) { // Might get memory problems here.
 	    			continue;
@@ -96,8 +97,7 @@ class ExpressionLazyLoader implements ILazyLoader {
 			engine.setLoadedVariables(context);
 			output = engine.evaluate();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			return null;
 		}
 	    if (!(output instanceof AbstractDataset))return null;
 		AbstractDataset value = (AbstractDataset)output;

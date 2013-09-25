@@ -12,6 +12,7 @@ package org.dawnsci.plotting.expression;
 
 import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -134,6 +135,25 @@ class ExpressionObject implements IExpressionObject {
 			return false;
 		}
 	}
+	
+	public List<String> getInvalidVariables(IMonitor monitor) {
+		List<String> ret = new ArrayList<String>(1);
+		try {			
+			//if (engine==null) engine = JexlUtils.getDawnJexlEngine();
+			engine.createExpression(expressionString);
+			Set<List<String>> names = engine.getVariableNamesFromExpression();
+			
+		    for (List<String> entry : names) {
+		    	final String key = entry.get(0);
+		    	if (monitor.isCancelled()) return ret;
+		    	if (!provider.isVariableName(key, monitor)) ret.add(key);
+			}
+			return ret;
+		} catch (Exception ne) {
+			return null;
+		}
+	}
+
 		
 	public boolean containsVariable(String... variableNames) {
 		if (variableNames==null) return false;

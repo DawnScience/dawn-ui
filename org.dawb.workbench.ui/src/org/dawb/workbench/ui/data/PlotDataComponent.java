@@ -1097,7 +1097,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 
 	public void clearExpressionCache(String... variableNames) {
 		for (ITransferableDataObject ob : data) {
-			if (ob.isExpression() && (variableNames==null || ob.getExpression().containsVariable(variableNames)))  {
+			if (ob.isExpression() && (variableNames==null || variableNames.length<1 || ob.getExpression().containsVariable(variableNames)))  {
 				ob.getExpression().clear();
 			}
 		}
@@ -1239,7 +1239,9 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		if (selections==null) selections = new ArrayList<ITransferableDataObject>(7);
 
 		if (check!=null) {
-
+			
+			if (isInvalidExpression(check)) return;
+			
 			check.setChecked(!check.isChecked());
 
 			if (!check.isChecked()) {
@@ -1283,6 +1285,28 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 
 		updateSelection(fireListeners); // Results in job being done for the plotting.
 		// Trace listener is used to refresh the table, added in construnctor
+	}
+
+	private boolean isInvalidExpression(ITransferableDataObject check) {
+		
+		if (!check.isExpression()) return false;
+
+		boolean isExprOk = check.getExpression().isValid(new IMonitor.Stub());
+		if (!isExprOk) {
+			List<String> names = check.getExpression().getInvalidVariables(new IMonitor.Stub());
+			if (names!=null && names.size()>0) {
+				MessageDialog.openWarning(Display.getDefault().getActiveShell(), "Expression '"+check.getName()+"' is not valid.",
+						                      "Expression '"+check.getName()+"' is not valid.\n\n"+
+						                       names+" cannot be resolved.");
+			} else {
+				MessageDialog.openWarning(Display.getDefault().getActiveShell(), "Expression '"+check.getName()+"' is not valid.",
+	                      "Expression '"+check.getName()+"' is not valid.");
+			}
+			return true;
+		}
+		
+		return false;
+
 	}
 
 	private synchronized void updateSelection(boolean fireListeners) {
@@ -1400,6 +1424,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	public IDataset getVariableValue(String variableName, final IMonitor monitor) {
 
 		final ITransferableDataObject ob = getCheckableObjectByVariable(variableName);
+		if (ob==null) return null;
 		if (!ob.isExpression()) {
 			return ob.getData(monitor);
 		} else {
@@ -1619,6 +1644,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	}
 
 	public void deleteExpression() {
+		
 		final Object sel = ((IStructuredSelection)dataViewer.getSelection()).getFirstElement();
 		if (sel==null || !(sel instanceof TransferableDataObject)) return;
 		
@@ -1635,9 +1661,11 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 				return;
 			}
 		}
+		
+		// We have to process this in a job incase expressions now have to be reevaluated
 	    if (selections!=null) selections.remove(sel);
 		data.remove(sel);
-		clearExpressionCache();
+		clearExpressionCache(ob.getVariable());
 		dataViewer.refresh();
 		saveExpressions();
 		fireSelectionListeners(selections);
