@@ -2,11 +2,15 @@ package org.dawb.workbench.ui.expressions;
 
 import org.eclipse.jface.bindings.keys.KeyStroke;
 import org.eclipse.jface.fieldassist.ContentProposalAdapter;
+import org.eclipse.jface.fieldassist.IContentProposal;
+import org.eclipse.jface.fieldassist.IContentProposalListener;
 import org.eclipse.jface.fieldassist.IContentProposalListener2;
 import org.eclipse.jface.fieldassist.IContentProposalProvider;
+import org.eclipse.jface.fieldassist.IControlContentAdapter;
 import org.eclipse.jface.fieldassist.TextContentAdapter;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 
 public class TextCellEditorWithContentProposal extends TextCellEditor {
 	
@@ -24,6 +28,8 @@ public class TextCellEditorWithContentProposal extends TextCellEditor {
 			char[] autoActivationCharacters) {
 		contentProposalAdapter = new ContentProposalAdapter(text, new TextContentAdapter(),
 				contentProposalProvider, keyStroke, autoActivationCharacters);
+		
+		contentProposalAdapter.setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_IGNORE);
 
 		// Listen for popup open/close events to be able to handle focus events correctly
 		contentProposalAdapter.addContentProposalListener(new IContentProposalListener2() {
@@ -34,6 +40,54 @@ public class TextCellEditorWithContentProposal extends TextCellEditor {
 
 			public void proposalPopupOpened(ContentProposalAdapter adapter) {
 				popupOpen = true;
+			}
+		});
+		
+		contentProposalAdapter.addContentProposalListener(new IContentProposalListener() {
+			
+			@Override
+			public void proposalAccepted(IContentProposal proposal) {
+				IContentProposalProvider provider = contentProposalAdapter.getContentProposalProvider();
+
+				Control control = TextCellEditorWithContentProposal.this.getControl();
+
+				if (provider != null && provider instanceof ExpressionFunctionProposalProvider) {
+
+					int[] lastMatchBounds = ((ExpressionFunctionProposalProvider)provider).getLastMatchBounds();
+					int lastPosition = ((ExpressionFunctionProposalProvider)provider).getLastPosition();
+					IControlContentAdapter contentAdapter = contentProposalAdapter.getControlContentAdapter();
+					String text = contentAdapter.getControlContents(control);
+					
+					if (text.isEmpty()) {
+						contentAdapter.setControlContents(control, proposal.getContent(), proposal.getContent().length());
+						return;
+					}
+					
+					if (lastPosition > lastMatchBounds[1]) {
+						StringBuilder builder = new StringBuilder();
+						builder.append(text.substring(0,lastPosition));
+						builder.append(proposal.getContent());
+						contentAdapter.setControlContents(control, builder.toString(), lastPosition+proposal.getContent().length());
+						return;
+					}
+					
+					String match = text.substring(lastMatchBounds[0], lastMatchBounds[1]);
+
+					if (match.contains(":")) {
+						int index = match.lastIndexOf(":");
+						StringBuilder builder = new StringBuilder();
+						builder.append(text.substring(0,lastMatchBounds[0]+index+1));
+						builder.append(proposal.getContent());
+						builder.append(text.substring(lastMatchBounds[1]));
+						contentAdapter.setControlContents(control, builder.toString(), lastMatchBounds[0]+index+proposal.getContent().length()+1);
+					} else {
+						StringBuilder builder = new StringBuilder();
+						builder.append(text.substring(0,lastMatchBounds[0]));
+						builder.append(proposal.getContent());
+						builder.append(text.substring(lastMatchBounds[1]));
+						contentAdapter.setControlContents(control, builder.toString(), lastMatchBounds[0]+proposal.getContent().length());
+					}
+				}
 			}
 		});
 	}

@@ -78,6 +78,8 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.bindings.keys.KeyStroke;
+import org.eclipse.jface.bindings.keys.ParseException;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
@@ -988,9 +990,17 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 			
 			IExpressionObject exObj = expressionService.createExpressionObject(null,null,"");
 			
+			KeyStroke keystroke = null;
+			
+			try {
+				keystroke = KeyStroke.getInstance("Ctrl+Space");
+			} catch (ParseException e) {
+
+			}
+			
 			if (exObj != null) {
 				IContentProposalProvider contentProposalProvider = new ExpressionFunctionProposalProvider(exObj.getFunctions());
-				cellEditor = new TextCellEditorWithContentProposal((Composite)getViewer().getControl(), contentProposalProvider, null, new char[]{':'});
+				cellEditor = new TextCellEditorWithContentProposal((Composite)getViewer().getControl(), contentProposalProvider, keystroke, new char[]{':'});
 			} else {
 				cellEditor = new TextCellEditor((Composite)getViewer().getControl());
 				logger.error("Expression Object service returned null");
