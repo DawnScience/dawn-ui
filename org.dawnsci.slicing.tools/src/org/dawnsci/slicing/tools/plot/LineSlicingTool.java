@@ -30,7 +30,7 @@ public class LineSlicingTool extends AbstractSlicingTool {
 				dimsDataList.setSingleAxisOnly(0, 0);
 			}
 		}
-		getSlicingSystem().update();
+		getSlicingSystem().update(false);
 	}
 
 	@Override

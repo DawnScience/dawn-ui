@@ -113,9 +113,6 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 	private SliceEditingSupport sliceEditingSupport;
 	private AxisEditingSupport  axisEditingSupport;
 	
-
-	private IToolBarManager sliceToolbar;
-
 	public SliceSystemImpl() {
 		this.sliceJob        = new SliceJob(this);
 	}
@@ -286,25 +283,6 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 	public boolean isAxesVisible() {
 		return axesVisible;
 	}
-
-	public void setSliceActionsEnabled(boolean enabled) {
-		final IContributionItem[] items = sliceToolbar.getItems();
-		for (IContributionItem toolItem : items) {
-			if (toolItem instanceof ActionContributionItem) {
-				((ActionContributionItem)toolItem).getAction().setEnabled(enabled);
-			}
-		}
-		sliceToolbar.update(true);
-	}
-	
-	/**
-	 * Throws an NPE if the action is not there.
-	 */
-	public void setSliceActionEnabled(Enum type, boolean enabled) {
-		final IAction action = getActionByPlotType(type);
-		action.setEnabled(enabled);
-		sliceToolbar.update(true);
-	}
 	/**
 	 * 
 	 * @param actionId
@@ -401,7 +379,7 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 
 	
 	@Override
-	public void update() {
+	public void update(boolean disable) {
 		
 		viewer.cancelEditing();
 		if (sliceSettings!=null && sliceSettings.containsKey(sliceType) && !dimsDataList.isEmpty()) {
@@ -418,7 +396,10 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		// Save preference
 		Activator.getDefault().getPreferenceStore().setValue(SliceConstants.PLOT_CHOICE, sliceType.toString());
    		boolean isOk = updateErrorLabel();
-   		if (isOk) slice(true);
+   		if (isOk) {
+   			if (disable) setEnabled(false);
+   			slice(true);
+   		}
    	}
 
 	private void setImageOrientationText(final StyledText text) {
@@ -634,13 +615,20 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 	}	
 
 
-	
-	protected void update(DimsData data) {
+	/**
+	 * Update slice
+	 * @param data
+	 * @param enabled - can be set to false to grey out table during slice.
+	 */
+	protected void update(DimsData data, boolean enabled) {
 		final boolean isValidData = synchronizeSliceData(data);
 		viewer.cancelEditing();
 		viewer.refresh();
 		
-		if (isValidData) slice(false);
+		if (isValidData) {
+			setEnabled(enabled);
+			slice(false);
+		}
 	}
 
 	
@@ -718,11 +706,10 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 			}
 		}
 	}
-	
 	/**
 	 * Does slice in monitored job
 	 */
-	public void slice(final boolean force) {
+	protected void slice(final boolean force) {
 		if (plottingSystem==null) return;
 		if (!force) {
 		    if (updateAutomatically!=null && !updateAutomatically.isChecked()) return;
@@ -841,5 +828,24 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		if (axisEditingSupport!=null) axisEditingSupport.updateAxesChoices();
 	}
 
+	private boolean enabled = true;
+	public void setEnabled(boolean enabled) {
+		
+		if (getPlottingSystem()==null) return;
+		this.enabled = enabled;
+		if (!enabled) {
+			viewer.getTable().setCursor(Display.getDefault().getSystemCursor(SWT.CURSOR_WAIT));
+			viewer.getControl().getParent().setCursor(Display.getDefault().getSystemCursor(SWT.CURSOR_WAIT));
+		} else {
+			viewer.getTable().setCursor(null);
+			viewer.getControl().getParent().setCursor(null);
+		}
+		((ToolBarManager)sliceToolbar).getControl().setEnabled(enabled);
+		viewer.getTable().setEnabled(enabled);
+	}
+	
+	public boolean isEnabled() {
+		return enabled;
+	}
 
 }

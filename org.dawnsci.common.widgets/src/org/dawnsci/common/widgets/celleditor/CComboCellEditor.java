@@ -175,6 +175,15 @@ public class CComboCellEditor extends AppliableCellEditor {
 		});
 		return comboBox;
 	}
+	
+	public void activate() {
+		//comboBox.setListVisible(true);
+	}
+
+	public void setFocus() {
+		super.setFocus();
+		comboBox.setListVisible(true);
+	}
 
 	/**
 	 * The <code>ComboBoxCellEditor</code> implementation of this

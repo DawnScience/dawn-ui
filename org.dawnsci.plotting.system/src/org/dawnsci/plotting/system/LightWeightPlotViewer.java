@@ -1140,17 +1140,28 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		}
 	}
 
+	/**
+	 * Thread safe!
+	 * @param autoScale
+	 */
 	public void repaint(final boolean autoScale) {
-		Display.getDefault().syncExec(new Runnable() {
-			public void run() {
-				if (xyCanvas!=null && xyGraph != null) {
-					if (autoScale)xyGraph.performAutoScale();
-					xyCanvas.layout(xyCanvas.getChildren());
-					xyGraph.revalidate();
-					xyGraph.repaint();
+		if (Display.getDefault().getThread()==Thread.currentThread()) {
+			repaintInternal(autoScale);
+		} else {
+			Display.getDefault().syncExec(new Runnable() {
+				public void run() {
+					repaintInternal(autoScale);
 				}
-			}
-		});
+			});
+		}
+	}
+	private void repaintInternal(final boolean autoScale) {
+		if (xyCanvas!=null && xyGraph != null) {
+			if (autoScale)xyGraph.performAutoScale();
+			xyCanvas.layout(xyCanvas.getChildren());
+			xyGraph.revalidate();
+			xyGraph.repaint();
+		}
 	}
 
 	/**

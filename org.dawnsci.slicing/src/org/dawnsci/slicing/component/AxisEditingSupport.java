@@ -69,12 +69,14 @@ class AxisEditingSupport extends EditingSupport {
 					this.getCombo().select(isel);
 				}
 				super.activate();
+				
 			}
 		};
 		
 	}
 	@Override
 	protected CellEditor getCellEditor(Object element) {
+		
 		return axisDataEditor;
 	}
 
@@ -96,20 +98,22 @@ class AxisEditingSupport extends EditingSupport {
 	}
 
 	@Override
-	protected void setValue(Object element, Object value) {
+	protected void setValue(final Object element, final Object value) {
+		
 		final DimsData data = (DimsData)element;
 		final int idim  = data.getDimension()+1;
-		
+
 		String axisName = null;
 		if (value instanceof Integer) {
 			final List<String> names = dimensionNames.get(idim);
 			axisName = names.get(((Integer)value).intValue());
 		} else {
 			axisName = (String)value;
-	    }
+		}
 		system.getCurrentSlice().setNexusAxis(idim, axisName);
-		system.update(data);
+		system.update(data, true);
 		system.fireAxisChoiceListeners(new AxisChoiceEvent(system, data.getDimension(), axisName));
+
 	}
 
 	protected void updateAxesChoices() {

@@ -22,7 +22,7 @@ public class ImageSlicingTool extends AbstractSlicingTool {
 		final DimsDataList dimsDataList = getSlicingSystem().getDimsDataList();
 		if (dimsDataList!=null) dimsDataList.setTwoAxesOnly(0, 1);   		
 		getSlicingSystem().refresh();
-		getSlicingSystem().update();
+		getSlicingSystem().update(false);
 	}
 
 	@Override

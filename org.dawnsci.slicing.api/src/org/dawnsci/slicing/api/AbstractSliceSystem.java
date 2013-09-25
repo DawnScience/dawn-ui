@@ -23,7 +23,9 @@ import org.dawnsci.slicing.api.util.SliceUtils;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
@@ -58,6 +60,7 @@ public abstract class AbstractSliceSystem implements ISliceSystem {
 	protected SliceObject     sliceObject;
 	
 	protected Enum        sliceType=PlotType.IMAGE;
+	protected IToolBarManager sliceToolbar;
 	
 	@Override
 	public void setPlottingSystem(IPlottingSystem system) {
@@ -380,9 +383,46 @@ public abstract class AbstractSliceSystem implements ISliceSystem {
         for (Enum type : plotTypeActions.keySet()) {
         	
         	int dims = getDimensions(type);
-        	plotTypeActions.get(type).setEnabled(dims<=rank);
+        	
+        	boolean enabled = dims<=rank;
+        	if (enabled && sliceActionEnabledMap!=null && sliceActionEnabledMap.containsKey(type)) {
+        		if (!sliceActionEnabledMap.get(type)) enabled = false;
+        	}
+        	plotTypeActions.get(type).setEnabled(enabled);
         }
 	}
+	
+
+	public void setSliceActionsEnabled(boolean enabled) {
+		
+		if (sliceToolbar==null) return;
+		final IContributionItem[] items = sliceToolbar.getItems();
+		for (IContributionItem toolItem : items) {
+			if (toolItem instanceof ActionContributionItem) {
+				((ActionContributionItem)toolItem).getAction().setEnabled(enabled);
+			}
+		}
+		sliceToolbar.update(true);
+		
+		if (plotTypeActions!=null) {
+			if (sliceActionEnabledMap==null) sliceActionEnabledMap = new HashMap<Enum, Boolean>();
+			for (Enum type : plotTypeActions.keySet()) sliceActionEnabledMap.put(type, false);
+		}
+
+	}
+	
+	private Map<Enum, Boolean> sliceActionEnabledMap;
+	/**
+	 * Throws an NPE if the action is not there.
+	 */
+	public void setSliceActionEnabled(Enum type, boolean enabled) {
+		final IAction action = getActionByPlotType(type);
+		action.setEnabled(enabled);
+		if (sliceToolbar!=null) sliceToolbar.update(true);
+		if (sliceActionEnabledMap==null) sliceActionEnabledMap = new HashMap<Enum, Boolean>();
+		sliceActionEnabledMap.put(type, enabled);
+	}
+
 
 	/**
 	 * Does nothing by default.

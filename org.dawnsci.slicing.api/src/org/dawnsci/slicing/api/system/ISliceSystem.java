@@ -117,8 +117,9 @@ public interface ISliceSystem {
 	/**
 	 * Call to reprocess a slice where the slice system
 	 * is slicing using a standard tool like line or image.
+	 * @param disable - true to grey out the slicing while it changes mode.
 	 */
-	public void update();
+	public void update(boolean disable);
 
 	/**
 	 * Refresh the widget showing the slice setup.
@@ -259,6 +260,18 @@ public interface ISliceSystem {
 	 * @param tool
 	 */
 	public void militarize(ISlicingTool tool);
+
+	/**
+	 * Greys out the table and actions. Should normally be called within a try finally.
+	 * @param b
+	 */
+	public void setEnabled(boolean b);
+
+	/**
+	 * true if enabled
+	 * @return
+	 */
+	public boolean isEnabled();
 
 
 }
