@@ -249,11 +249,18 @@ public class SliceUtils {
 		
         currentSlice.setFullShape(dataShape);
         
-        final IDataset slice;
+        IDataset slice;
         final int[] slicedShape = currentSlice.getSlicedShape();
         if (lazySet instanceof IDataset && Arrays.equals(slicedShape, lazySet.getShape())) {
         	slice = (IDataset)lazySet;
-        } else {
+			if (currentSlice.getX() > currentSlice.getY() && slice.getShape().length==2) {
+				final IAnalysisService service = (IAnalysisService)ServiceManager.getService(IAnalysisService.class);
+				// transpose clobbers name
+				final String name = slice.getName();
+				slice = service.transpose(slice);
+				if (name!=null) slice.setName(name);
+			}
+       } else {
         	slice = getSlice(lazySet, currentSlice,monitor);
         }
 		if (slice==null) return;
