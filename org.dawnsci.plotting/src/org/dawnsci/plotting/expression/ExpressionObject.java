@@ -135,6 +135,21 @@ class ExpressionObject implements IExpressionObject {
 		}
 	}
 		
+	public boolean containsVariable(String... variableNames) {
+		if (variableNames==null) return false;
+		try {
+			Set<List<String>> names = engine.getVariableNamesFromExpression();
+			
+		    for (List<String> entry : names) {
+		    	for (String name : variableNames) {
+					if (entry.contains(name)) return true;
+				}
+			}
+			return false;
+		} catch (Exception ne) {
+			return false;
+		}
+	}
 	/**
 	 * Just gives a lazy the same size as one of the 
 	 */

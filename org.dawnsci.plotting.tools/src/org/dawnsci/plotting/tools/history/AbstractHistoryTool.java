@@ -250,7 +250,7 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 	    		if (bean.getVariable()!=null && value!=null && bean.getVariable().equals(((String)value).trim())) return;
 	            String variableName = service.validate(bean.getVariableManager(), (String)value);
 
-				clearExpressionCache();
+				clearExpressionCache(variableName, bean.getVariable());
 				bean.setVariable(variableName);
 				
 			} catch (Exception e) {
@@ -264,9 +264,11 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 		}
 
 	}
-	public void clearExpressionCache() {
+	public void clearExpressionCache(String... variableNames) {
 		for (HistoryBean bean : getHistoryCache().values()) {
-			if (bean.isExpression())  bean.getExpression().clear();
+			if (bean.isExpression() && (variableNames==null || bean.getExpression().containsVariable(variableNames)))  {
+				bean.getExpression().clear();
+			}
 		}
 	}
 	

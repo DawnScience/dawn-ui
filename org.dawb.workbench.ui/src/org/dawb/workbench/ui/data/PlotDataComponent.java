@@ -1095,9 +1095,11 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 
 	}
 
-	public void clearExpressionCache() {
+	public void clearExpressionCache(String... variableNames) {
 		for (ITransferableDataObject ob : data) {
-			if (ob.isExpression())  ob.getExpression().clear();
+			if (ob.isExpression() && (variableNames==null || ob.getExpression().containsVariable(variableNames)))  {
+				ob.getExpression().clear();
+			}
 		}
 	}
 
@@ -1150,11 +1152,9 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
             if (!rect1.contains(pnt) && !rect6.contains(pnt)) return;
 			try {
 				ITransferableDataObject data = (ITransferableDataObject)item.getData();
-				if (rect1.contains(pnt)) {
-					expressionEditor.setExpressionActive(true);
-				} else {
-					variableEditor.setVariableNameActive(true);
-				}
+				expressionEditor.setExpressionActive(true);
+				variableEditor.setVariableNameActive(true);
+				
 				dataViewer.editElement(data, rect1.contains(pnt)?1:6);
 			} finally {
 				expressionEditor.setExpressionActive(false);

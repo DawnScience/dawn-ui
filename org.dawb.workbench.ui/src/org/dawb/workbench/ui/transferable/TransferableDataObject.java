@@ -355,7 +355,6 @@ public class TransferableDataObject implements H5Path, ITransferableDataObject{
 	public void setVariable(String variable) {
 		this.variable = variable;
 		if (expression!=null) {
-			expression.clear();
 			expression.setExpressionName(variable);
 		}
 	}

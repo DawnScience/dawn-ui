@@ -49,7 +49,7 @@ class VariableNameEditingSupport extends EditingSupport {
     		if (data.getVariable()!=null && value!=null && data.getVariable().equals(((String)value).trim())) return;
             String variableName = service.validate(manager, (String)value);
 
-			manager.clearExpressionCache();
+			manager.clearExpressionCache(variableName, data.getVariable());
 			data.setVariable(variableName);
 			manager.saveExpressions();
 			
