@@ -830,8 +830,10 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		this.enabled = enabled;
 		if (!enabled) {
 			viewer.getTable().setCursor(Display.getDefault().getSystemCursor(SWT.CURSOR_WAIT));
+			viewer.getControl().getParent().setCursor(Display.getDefault().getSystemCursor(SWT.CURSOR_WAIT));
 		} else {
 			viewer.getTable().setCursor(null);
+			viewer.getControl().getParent().setCursor(null);
 		}
 		((ToolBarManager)sliceToolbar).getControl().setEnabled(enabled);
 		viewer.getTable().setEnabled(enabled);
