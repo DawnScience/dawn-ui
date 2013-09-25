@@ -1,5 +1,6 @@
 package org.dawb.workbench.ui.data;
 
+
 import org.dawb.common.services.IExpressionObject;
 import org.dawb.common.services.IExpressionObjectService;
 import org.dawb.common.services.IVariableManager;
@@ -13,6 +14,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.bindings.keys.KeyStroke;
+import org.eclipse.jface.bindings.keys.ParseException;
 import org.eclipse.jface.fieldassist.IContentProposalProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
@@ -39,9 +42,17 @@ class ExpressionEditingSupport extends EditingSupport {
 		IExpressionObjectService service  = (IExpressionObjectService)ServiceManager.getService(IExpressionObjectService.class);
 		IExpressionObject exObj = service.createExpressionObject(null,null,"");
 		
+		KeyStroke keystroke = null;
+		
+		try {
+			keystroke = KeyStroke.getInstance("Ctrl+Space");
+		} catch (ParseException e) {
+
+		}
+		
 		if (exObj != null) {
 			IContentProposalProvider contentProposalProvider = new ExpressionFunctionProposalProvider(exObj.getFunctions());
-			cellEditor = new TextCellEditorWithContentProposal((Composite)getViewer().getControl(), contentProposalProvider, null, new char[]{':'});
+			cellEditor = new TextCellEditorWithContentProposal((Composite)getViewer().getControl(), contentProposalProvider, keystroke, new char[]{':'});
 		} else {
 			cellEditor = new TextCellEditor((Composite)getViewer().getControl());
 			logger.error("Expression Object service returned null");
