@@ -49,6 +49,7 @@ class SliceJob extends Job {
 						             (PlotType)sliceType, 
 						             system.getPlottingSystem(), 
 						             monitor);
+				
 			}
 		} catch (Exception e) {
 			logger.error("Cannot slice "+slice.getName(), e);

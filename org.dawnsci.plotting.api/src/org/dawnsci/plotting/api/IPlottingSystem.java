@@ -309,11 +309,14 @@ public interface IPlottingSystem extends IAdaptable, ITraceSystem, IRegionSystem
 
 	/**
 	 * Redraws all the data. Calls repaint(isRescale())
+	 * Thread safe.
 	 */
 	public void repaint();
 	
 	/**
 	 * Repaint with rescale of autoScale is true.
+	 * Thread safe.
+	 * 
 	 * @param autoScale
 	 */
 	public void repaint(final boolean autoScale);

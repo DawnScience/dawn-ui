@@ -379,7 +379,7 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 
 	
 	@Override
-	public void update() {
+	public void update(boolean disable) {
 		
 		viewer.cancelEditing();
 		if (sliceSettings!=null && sliceSettings.containsKey(sliceType) && !dimsDataList.isEmpty()) {
@@ -396,7 +396,10 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		// Save preference
 		Activator.getDefault().getPreferenceStore().setValue(SliceConstants.PLOT_CHOICE, sliceType.toString());
    		boolean isOk = updateErrorLabel();
-   		if (isOk) slice(true);
+   		if (isOk) {
+   			if (disable) setEnabled(false);
+   			slice(true);
+   		}
    	}
 
 	private void setImageOrientationText(final StyledText text) {

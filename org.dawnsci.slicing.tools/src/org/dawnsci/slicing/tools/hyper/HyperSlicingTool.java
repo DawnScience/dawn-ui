@@ -82,7 +82,7 @@ public class HyperSlicingTool extends AbstractSlicingTool {
 		if (dimsDataList!=null) dimsDataList.setThreeAxesOnly(0, 1, 2);   		
 		
  		getSlicingSystem().refresh();
- 		getSlicingSystem().update();
+ 		getSlicingSystem().update(false);
  		
         update(); // Now that the axes are right we can do a hyper slice!
 
@@ -125,16 +125,22 @@ public class HyperSlicingTool extends AbstractSlicingTool {
 
 	public void setData(ILazyDataset lazy, List<AbstractDataset> daxes, Slice[] slices, int[] order, HyperType hyperType) {
 		
-		switch (hyperType) {
-		case Box_Axis:
-			hyperComponent.setData(lazy, daxes, slices, order);
-			break;
-		case Line_Line:
-			hyperComponent.setData(lazy, daxes, slices, order,new ArpesMainImageReducer(),new ArpesSideImageReducer());
-			break;
-		case Line_Axis:
-			hyperComponent.setData(lazy, daxes, slices, order,new TraceLineReducer(),new ImageTrapeziumBaselineReducer());
-			break;
+		try {
+			getSlicingSystem().setEnabled(false);
+			
+			switch (hyperType) {
+			case Box_Axis:
+				hyperComponent.setData(lazy, daxes, slices, order);
+				break;
+			case Line_Line:
+				hyperComponent.setData(lazy, daxes, slices, order,new ArpesMainImageReducer(),new ArpesSideImageReducer());
+				break;
+			case Line_Axis:
+				hyperComponent.setData(lazy, daxes, slices, order,new TraceLineReducer(),new ImageTrapeziumBaselineReducer());
+				break;
+			}
+		} finally {
+			getSlicingSystem().setEnabled(true);
 		}
 		
 	}

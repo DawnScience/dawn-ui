@@ -22,7 +22,7 @@ public class Stack3DSlicingTool extends AbstractSlicingTool {
 		final DimsDataList dimsDataList = getSlicingSystem().getDimsDataList();
 		if (dimsDataList!=null) dimsDataList.setTwoAxesOnly(0, 1);   		
 
-		getSlicingSystem().update();
+		getSlicingSystem().update(true);
 	}
 
 	@Override
