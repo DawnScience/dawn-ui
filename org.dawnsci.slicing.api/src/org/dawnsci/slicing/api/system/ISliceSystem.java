@@ -260,5 +260,17 @@ public interface ISliceSystem {
 	 */
 	public void militarize(ISlicingTool tool);
 
+	/**
+	 * Greys out the table and actions. Should normally be called within a try finally.
+	 * @param b
+	 */
+	public void setEnabled(boolean b);
+
+	/**
+	 * true if enabled
+	 * @return
+	 */
+	public boolean isEnabled();
+
 
 }

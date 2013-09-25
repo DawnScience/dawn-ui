@@ -612,13 +612,20 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 	}	
 
 
-	
-	protected void update(DimsData data) {
+	/**
+	 * Update slice
+	 * @param data
+	 * @param enabled - can be set to false to grey out table during slice.
+	 */
+	protected void update(DimsData data, boolean enabled) {
 		final boolean isValidData = synchronizeSliceData(data);
 		viewer.cancelEditing();
 		viewer.refresh();
 		
-		if (isValidData) slice(false);
+		if (isValidData) {
+			setEnabled(enabled);
+			slice(false);
+		}
 	}
 
 	
@@ -696,11 +703,10 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 			}
 		}
 	}
-	
 	/**
 	 * Does slice in monitored job
 	 */
-	public void slice(final boolean force) {
+	protected void slice(final boolean force) {
 		if (plottingSystem==null) return;
 		if (!force) {
 		    if (updateAutomatically!=null && !updateAutomatically.isChecked()) return;
@@ -819,5 +825,20 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		if (axisEditingSupport!=null) axisEditingSupport.updateAxesChoices();
 	}
 
+	private boolean enabled = true;
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+		if (!enabled) {
+			viewer.getTable().setCursor(Display.getDefault().getSystemCursor(SWT.CURSOR_WAIT));
+		} else {
+			viewer.getTable().setCursor(null);
+		}
+		((ToolBarManager)sliceToolbar).getControl().setEnabled(enabled);
+		viewer.getTable().setEnabled(enabled);
+	}
+	
+	public boolean isEnabled() {
+		return enabled;
+	}
 
 }

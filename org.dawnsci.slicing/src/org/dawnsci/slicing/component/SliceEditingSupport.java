@@ -204,7 +204,7 @@ class SliceEditingSupport extends EditingSupport {
 		} else {
 			data.setSliceRange((String)value);
 		}
-		system.update(data);
+		system.update(data, true);
 	}
 
 	void setPlayButtonVisible(boolean vis) {

@@ -8,6 +8,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,8 +26,7 @@ class SliceJob extends Job {
 		super("Slice");
 		this.system = system;
 		setPriority(INTERACTIVE);
-		setUser(false);
-		setSystem(true);
+		setUser(false); // Shows a job in the bottom right but not in a dialog.
 	}
 
 	@Override
@@ -35,6 +35,7 @@ class SliceJob extends Job {
 		if (slice==null) return Status.CANCEL_STATUS;
 		monitor.beginTask("Slice "+slice.getName(), 10);
 		try {
+			
 			monitor.worked(1);
 			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 		
@@ -53,6 +54,13 @@ class SliceJob extends Job {
 			logger.error("Cannot slice "+slice.getName(), e);
 			System.out.println(slice);
 		} finally {
+			
+			if (!system.isEnabled()) Display.getDefault().syncExec(new Runnable() {
+				public void run() {
+					system.setEnabled(true);
+				}
+			});
+
 			monitor.done();
 		}	
 		
@@ -62,8 +70,8 @@ class SliceJob extends Job {
 	public void schedule(Enum sliceType, SliceObject cs, boolean force) {
 		if (force==false && slice!=null && slice.equals(cs)) return;
 		// DO NOT: cancel();
-		this.slice = cs;
-		this.sliceType = sliceType;
+		this.slice          = cs;
+		this.sliceType      = sliceType;
 		schedule();
 	}	
 }
