@@ -124,12 +124,12 @@ class TypeEditingSupport extends EditingSupport {
 				break;
 			case 2:
 				final IPlottingSystem psystem = system.getPlottingSystem();
-				if (system.isReversedImage()) {
-					ret.add("Y");
-					ret.add("X");
-				} else if (psystem!=null && psystem.getPlotType().is1D()) {
+			    if (sliceType==PlotType.XY_STACKED) {
 					ret.add("X");
 					ret.add("Y (Many)");
+			    } else if (system.isReversedImage()) {
+					ret.add("Y");
+					ret.add("X");
 				} else {
 					ret.add("X");
 					ret.add("Y");
