@@ -1,4 +1,4 @@
-package org.dawb.workbench.ui.editors;
+package org.dawb.workbench.ui.data;
 
 import java.util.ArrayList;
 import java.util.List;

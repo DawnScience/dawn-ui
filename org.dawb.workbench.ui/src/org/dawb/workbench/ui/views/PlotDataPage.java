@@ -17,7 +17,7 @@ import java.util.List;
 import org.dawb.common.services.IExpressionObject;
 import org.dawb.common.services.IVariableManager;
 import org.dawb.common.ui.util.EclipseUtils;
-import org.dawb.workbench.ui.editors.PlotDataComponent;
+import org.dawb.workbench.ui.data.PlotDataComponent;
 import org.dawb.workbench.ui.transferable.TransferableDataObject;
 import org.dawnsci.slicing.api.SlicingFactory;
 import org.dawnsci.slicing.api.data.ITransferableDataObject;

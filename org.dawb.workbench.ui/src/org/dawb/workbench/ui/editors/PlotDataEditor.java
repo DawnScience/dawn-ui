@@ -25,6 +25,7 @@ import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.views.PlotDataView;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawb.workbench.ui.Activator;
+import org.dawb.workbench.ui.data.PlotDataComponent;
 import org.dawb.workbench.ui.editors.preference.EditorConstants;
 import org.dawb.workbench.ui.views.PlotDataPage;
 import org.dawnsci.plotting.AbstractPlottingSystem;

@@ -264,7 +264,7 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 		}
 
 	}
-	protected void clearExpressionCache() {
+	public void clearExpressionCache() {
 		for (HistoryBean bean : getHistoryCache().values()) {
 			if (bean.isExpression())  bean.getExpression().clear();
 		}
@@ -583,7 +583,11 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 		viewer.editElement(bean, 1);
 	}
 
+	@Override
+	public void saveExpressions() {
 
+	}
+	
 	@Override
 	public boolean isAlwaysSeparateView() {
 		return true;

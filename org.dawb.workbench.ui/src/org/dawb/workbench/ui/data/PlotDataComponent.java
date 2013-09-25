@@ -8,7 +8,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  */ 
 
-package org.dawb.workbench.ui.editors;
+package org.dawb.workbench.ui.data;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -38,8 +38,6 @@ import org.dawb.gda.extensions.util.DatasetTitleUtils;
 import org.dawb.workbench.ui.Activator;
 import org.dawb.workbench.ui.editors.preference.EditorConstants;
 import org.dawb.workbench.ui.editors.preference.EditorPreferencePage;
-import org.dawb.workbench.ui.expressions.ExpressionFunctionProposalProvider;
-import org.dawb.workbench.ui.expressions.TextCellEditorWithContentProposal;
 import org.dawb.workbench.ui.transferable.TransferableDataObject;
 import org.dawnsci.io.h5.H5Loader;
 import org.dawnsci.plotting.AbstractPlottingSystem;
@@ -70,7 +68,6 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
@@ -78,23 +75,17 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.fieldassist.IContentProposalProvider;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
-import org.eclipse.jface.viewers.ComboBoxCellEditor;
-import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
@@ -103,21 +94,17 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
-import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
@@ -271,7 +258,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	 * Create contents of the view part.
 	 * @param parent
 	 */
-	public void createPartControl(final Composite parent, IActionBars bars) {
+	public void createPartControl(final Composite parent, IActionBars bars) throws Exception {
 		
 		this.container = new Composite(parent, SWT.NONE);
 		if (parent.getLayout() instanceof GridLayout) container.setLayoutData(new GridData(GridData.FILL_BOTH));
@@ -535,7 +522,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		}
 	}
 	
-	private void saveExpressions() {
+	public void saveExpressions() {
 		try {
 			final Properties props = new Properties();
 			for (ITransferableDataObject check : data) {
@@ -923,7 +910,10 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		return false;
 	}
 	
-	private void createColumns() {
+	private ExpressionEditingSupport     expressionEditor;
+	private VariableNameEditingSupport   variableEditor;
+	
+	private void createColumns() throws Exception {
 		
 		ColumnViewerToolTipSupport.enableFor(dataViewer,ToolTip.NO_RECREATE);
 		
@@ -943,13 +933,15 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 			}
 		});
 		name.setLabelProvider(new DataSetColumnLabelProvider(1));
-		name.setEditingSupport(new ExpressionEditingSupport(dataViewer));
+		
+		expressionEditor = new ExpressionEditingSupport(dataViewer, this);
+		name.setEditingSupport(expressionEditor);
 		
 		final TableViewerColumn axis   = new TableViewerColumn(dataViewer, SWT.LEFT, 2);
 		axis.getColumn().setText(" ");
 		axis.getColumn().setWidth(32);
 		axis.setLabelProvider(new DataSetColumnLabelProvider(2));
-		axis.setEditingSupport(new AxisEditingSupport(dataViewer));
+		axis.setEditingSupport(new AxisEditingSupport(dataViewer, this));
 
 		final TableViewerColumn size   = new TableViewerColumn(dataViewer, SWT.LEFT, 3);
 		size.getColumn().setText("Size");
@@ -974,118 +966,11 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		varName.getColumn().setWidth(150);
 		varName.getColumn().setResizable(true);
 		varName.setLabelProvider(new DataSetColumnLabelProvider(6));
-		varName.setEditingSupport(new VariableNameEditingSupport(dataViewer));
-	}
-	
-	private boolean isExpressionActive   = false;
-	
-	private class ExpressionEditingSupport extends EditingSupport {
-
-		private TextCellEditor cellEditor;
 		
-		public ExpressionEditingSupport(ColumnViewer viewer) {
-			super(viewer);
-			
-			IExpressionObject exObj = expressionService.createExpressionObject(null,null,"");
-			
-			if (exObj != null) {
-				IContentProposalProvider contentProposalProvider = new ExpressionFunctionProposalProvider(exObj.getFunctions());
-				cellEditor = new TextCellEditorWithContentProposal((Composite)getViewer().getControl(), contentProposalProvider, null, new char[]{':'});
-			} else {
-				cellEditor = new TextCellEditor((Composite)getViewer().getControl());
-				logger.error("Expression Object service returned null");
-			}
-		}
-
-		@Override
-		protected CellEditor getCellEditor(Object element) {
-			return cellEditor;
-		}
-
-		@Override
-		protected boolean canEdit(Object element) {
-			if (!isExpressionActive) return false;
-			return (element instanceof TransferableDataObject) && ((ITransferableDataObject)element).isExpression();
-		}
-
-		@Override
-		protected Object getValue(Object element) {
-			ITransferableDataObject check = (ITransferableDataObject)element;
-			String text = check.getExpression().getExpressionString();
-			if (text==null) return "";
-			return text;
-		}
-
-		@Override
-		protected void setValue(Object element, Object value) {
-			final TransferableDataObject check = (TransferableDataObject)element;
-			try {
-				String         expression   = (String)value;
-				final IExpressionObject ob   = check.getExpression();
-				if (expression!=null) expression = expression.trim();
-				if (value==null || "".equals(expression))  return;
-				if (value.equals(ob.getExpressionString()))      return;
-				
-				ob.setExpressionString(expression);
-				check.setChecked(false); // selectionChanged(...) puts it to true
-				selectionChanged(check, true);
-				saveExpressions();
-
-			} catch (Exception e) {
-				logger.error("Cannot set expression "+check.getName(), e);
-
-			} 
-			getViewer().refresh();
-		}
-
+		variableEditor = new VariableNameEditingSupport(dataViewer, this);
+		varName.setEditingSupport(variableEditor);
 	}
-
 	
-	private boolean isVariableNameActive = false;
-	
-	private class VariableNameEditingSupport extends EditingSupport {
-
-		public VariableNameEditingSupport(ColumnViewer viewer) {
-			super(viewer);
-		}
-
-		@Override
-		protected CellEditor getCellEditor(Object element) {
-			return new TextCellEditor((Composite)getViewer().getControl());
-		}
-
-		@Override
-		protected boolean canEdit(Object element) {
-			return isVariableNameActive;
-		}
-
-		@Override
-		protected Object getValue(Object element) {
-			return ((ITransferableDataObject)element).getVariable();
-		}
-
-		@Override
-		protected void setValue(Object element, Object value) {
-			ITransferableDataObject data  = (ITransferableDataObject)element;
-			try {
-        		if (data.getVariable()!=null && data.getVariable().equals(value)) return;
-        		if (data.getVariable()!=null && value!=null && data.getVariable().equals(((String)value).trim())) return;
-                String variableName = expressionService.validate(PlotDataComponent.this, (String)value);
- 
-				clearExpressionCache();
-				data.setVariable(variableName);
-				saveExpressions();
-				
-			} catch (Exception e) {
-				final String message = "The name '"+value+"' is not valid.";
-				final Status status  = new Status(Status.WARNING, "org.dawb.workbench.ui", message, e);
-				ErrorDialog.openError(Display.getDefault().getActiveShell(), "Cannot rename data", message, status);
-			    return;
-			}
-			getViewer().refresh();
-		}
-
-	}
 
 	private void createDimensionalActions(List<Object> rightClickActions, boolean isToolbar) {
 				
@@ -1210,7 +1095,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 
 	}
 
-	private void clearExpressionCache() {
+	public void clearExpressionCache() {
 		for (ITransferableDataObject ob : data) {
 			if (ob.isExpression())  ob.getExpression().clear();
 		}
@@ -1266,14 +1151,14 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 			try {
 				ITransferableDataObject data = (ITransferableDataObject)item.getData();
 				if (rect1.contains(pnt)) {
-					isExpressionActive  = true;
+					expressionEditor.setExpressionActive(true);
 				} else {
-					isVariableNameActive= true;
+					variableEditor.setVariableNameActive(true);
 				}
 				dataViewer.editElement(data, rect1.contains(pnt)?1:6);
 			} finally {
-				isExpressionActive  = false;
-				isVariableNameActive= false;
+				expressionEditor.setExpressionActive(false);
+				variableEditor.setVariableNameActive(false);
 			}
           
 		}
@@ -1287,8 +1172,8 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	 */
 	public void mouseDown(MouseEvent e) {
 		
-		isVariableNameActive = false;
-		isExpressionActive   = false;
+		expressionEditor.setExpressionActive(false);
+		variableEditor.setVariableNameActive(false);
 		if (e.button==1) {
 			
 			final Point           pnt     = new Point(e.x, e.y);
@@ -1463,13 +1348,12 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		listeners.remove(l);
 	}
 	
-	private void fireSelectionListeners(List<ITransferableDataObject> selections) {
+	protected void fireSelectionListeners(List<ITransferableDataObject> selections) {
 		if (listeners==null) return;
 		final SelectionChangedEvent event = new SelectionChangedEvent(this.dataViewer, new StructuredSelection(selections));
 		for (ISelectionChangedListener l : listeners) l.selectionChanged(event);
 	}
 
-	
 	public String getRootName() {
 		return rootName;
 	}
@@ -1722,10 +1606,10 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		data.add(newItem);
 		dataViewer.refresh();
 		try {
-			isExpressionActive = true;
+			expressionEditor.setExpressionActive(true);
 			dataViewer.editElement(newItem, 1);	
 		} finally {
-			isExpressionActive = false;
+			expressionEditor.setExpressionActive(false);
 		}
 	}
 
@@ -1937,60 +1821,6 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	}
 	
 	
-	private class AxisEditingSupport extends EditingSupport {
-
-		public AxisEditingSupport(ColumnViewer viewer) {
-			super(viewer);
-		}
-		
-		@Override
-		protected CellEditor getCellEditor(final Object element) {
-			// FIX to http://jira.diamond.ac.uk/browse/DAWNSCI-380 remove axes until they work
-			ComboBoxCellEditor ce = new ComboBoxCellEditor((Composite)getViewer().getControl(), new String[]{"X","Y1","Y2" /**,"Y3","Y4" **/} , SWT.READ_ONLY);
-			final CCombo ccombo = (CCombo)ce.getControl();
-			ccombo.addSelectionListener(new SelectionAdapter() {
-				public void widgetSelected(SelectionEvent e) {
-					setValue(element, ccombo.getSelectionIndex());
-				}
-			});
-			return ce;
-		}
-
-		@Override
-		protected boolean canEdit(Object element) {
-			ITransferableDataObject co = (ITransferableDataObject)element;
-			return co.isChecked();
-		}
-
-		@Override
-		protected Object getValue(Object element) {
-			return ((ITransferableDataObject)element).getAxisIndex(selections, getAbstractPlottingSystem().isXFirst());
-		}
-
-		@Override
-		protected void setValue(Object element, Object value) {
-			getViewer().cancelEditing();
-			TransferableDataObject co = (TransferableDataObject)element;
-			if (value instanceof Integer) {
-				int isel = ((Integer)value).intValue();
-				if (isel==0) {
-					setAsX(co);
-				} else {
-					
-					if (getAbstractPlottingSystem().isXFirst() && "X".equals(co.getAxis(selections, getPlottingSystem().is2D(), true))) {
-						// We lost an x
-						getAbstractPlottingSystem().setXFirst(false);
-					}
-					co.setYaxis(isel);
-                    
-					getPlottingSystem().clear();
-					fireSelectionListeners(selections);
-					getViewer().refresh();
-				}
-			}
-		}
-		
-	}
 
 	@Override
 	public Object getAdapter(@SuppressWarnings("rawtypes") Class adapter) {
