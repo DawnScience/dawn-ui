@@ -21,6 +21,7 @@ import java.util.Map;
 import ncsa.hdf.object.Group;
 
 import org.dawb.common.services.ILoaderService;
+import org.dawb.common.services.IVariableManager;
 import org.dawb.common.services.ServiceManager;
 import org.dawb.hdf5.HierarchicalDataFactory;
 import org.dawb.hdf5.IHierarchicalDataFile;
@@ -31,6 +32,7 @@ import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.slicing.api.system.DimsData;
 import org.dawnsci.slicing.api.system.DimsDataList;
+import org.dawnsci.slicing.api.system.SliceSource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
@@ -61,10 +63,11 @@ public class SliceUtils {
      * @throws Exception 
      */
     public static SliceObject createSliceObject(final DimsDataList dimsDataHolder,
-    		                                    final int[]        dataShape,
-    		                                    final SliceObject  sliceObject) throws Exception  {
+    		                                    final SliceSource  data,
+     		                                    final SliceObject  sliceObject) throws Exception  {
 
-    	
+        final int[]        dataShape = data.getLazySet().getShape();
+
     	if (dimsDataHolder.size()!=dataShape.length) throw new RuntimeException("The dims data and the data shape are not equal!");
     	
     	final SliceObject currentSlice = sliceObject!=null ? sliceObject.clone() : new SliceObject();
@@ -87,10 +90,10 @@ public class SliceUtils {
     		step[i]  = getStep(dimsData);
 
     		if (dimsData.getPlotAxis()<0) {
-    			String nexusAxisName = getNexusAxisName(currentSlice, dimsData, " (Dim "+(dimsData.getDimension()+1)); 
+    			String nexusAxisName = getAxisName(currentSlice, dimsData, " (Dim "+(dimsData.getDimension()+1)); 
     			String formatValue   = String.valueOf(dimsData.getSlice());
     			try {
-    			    formatValue = format.format(getNexusAxisValue(sliceObject, dimsData, dimsData.getSlice(), null));
+    			    formatValue = format.format(getAxisValue(sliceObject, data.getVariableManager(), dimsData, dimsData.getSlice(), null));
     			} catch (Throwable ne) {
     				formatValue   = String.valueOf(dimsData.getSlice());
     			}
@@ -144,9 +147,9 @@ public class SliceUtils {
      * @return
      * @throws Exception
      */
-    public static String getNexusAxisName(SliceObject sliceObject, DimsData data) {
+    public static String getAxisName(SliceObject sliceObject, DimsData data) {
     	
-    	return getNexusAxisName(sliceObject, data, "indices");
+    	return getAxisName(sliceObject, data, "indices");
     }
     /**
      * 
@@ -155,7 +158,7 @@ public class SliceUtils {
      * @return
      * @throws Exception
      */
-    public static String getNexusAxisName(SliceObject sliceObject, DimsData data, String alternateName) {
+    public static String getAxisName(SliceObject sliceObject, DimsData data, String alternateName) {
     	
     	try {
 			Map<Integer,String> dims = sliceObject.getNexusAxes();
@@ -175,14 +178,8 @@ public class SliceUtils {
      * @return the nexus axis value or the index if no nexus axis can be found.
      * @throws Throwable 
      */
-	public static Number getNexusAxisValue(SliceObject sliceObject, DimsData data, int value, IProgressMonitor monitor) throws Throwable {
-        IDataset axis = null;
-        try {
-        	final String axisName = getNexusAxisName(sliceObject, data);
-            axis = SliceUtils.getNexusAxis(sliceObject, axisName, false, monitor);
-        } catch (Exception ne) {
-        	axis = null;
-        }
+	public static Number getAxisValue(SliceObject sliceObject, IVariableManager varMan, DimsData data, int value, IProgressMonitor monitor) throws Throwable {
+        IDataset axis = getAxis(sliceObject, varMan, data, monitor);
         
         try {
             return axis!=null ? axis.getDouble(value)  :  value;
@@ -192,7 +189,34 @@ public class SliceUtils {
 
 	}
 
-
+	/**
+	 * 
+	 * @param sliceObject
+	 * @param varMan
+	 * @param data
+	 * @param monitor
+	 * @return
+	 * @throws Throwable
+	 */
+	public static IDataset getAxis(SliceObject sliceObject,
+									IVariableManager varMan, 
+									DimsData data, 
+									IProgressMonitor monitor) throws Throwable {
+		
+		IDataset axis = null;
+        try {
+        	final String axisName = getAxisName(sliceObject, data);
+        	if (varMan!=null) {
+        		axis = varMan.getDataValue(axisName, null);
+        	}
+        	if (axis==null) {
+                axis = SliceUtils.getNexusAxis(sliceObject, axisName, false, monitor);
+        	}
+        } catch (Exception ne) {
+        	axis = null;
+        }
+        return axis;
+	}
 
 	private static int getStart(DimsData dimsData) {
 		if (dimsData.getPlotAxis()>-1) {
@@ -533,22 +557,23 @@ public class SliceUtils {
      * @return
      * @throws Exception 
      */
-	public static List<SliceObject> getExpandedSlices(final int[]  fullShape,
+	public static List<SliceObject> getExpandedSlices(final SliceSource data,
 			                                          final Object dimsDataList) throws Exception {	
 
 		final DimsDataList      ddl = (DimsDataList)dimsDataList;
 		final List<SliceObject> obs = new ArrayList<SliceObject>(89);
-		createExpandedSlices(fullShape, ddl, 0, new ArrayList<DimsData>(ddl.size()), obs);
+		createExpandedSlices(data, ddl, 0, new ArrayList<DimsData>(ddl.size()), obs);
 		return obs;
 	}
 
 
-	private static void createExpandedSlices(final int[]             fullShape,
+	private static void createExpandedSlices(final SliceSource       data,
 			                                 final DimsDataList      ddl,
 			                                 final int               index,
 			                                 final List<DimsData>    chunk,
 			                                 final List<SliceObject> obs) throws Exception {
 		
+		final int[]    fullShape = data.getLazySet().getShape();
 		final DimsData       dat = ddl.getDimsData(index);
 		final List<DimsData> exp = dat.expand(fullShape[index]);
 		
@@ -558,11 +583,11 @@ public class SliceUtils {
 			if (index==ddl.size()-1) { // Reached end
 				SliceObject ob = new SliceObject();
 				ob.setFullShape(fullShape);
-				ob = SliceUtils.createSliceObject(new DimsDataList(chunk), fullShape, ob);
+				ob = SliceUtils.createSliceObject(new DimsDataList(chunk), data, ob);
 				obs.add(ob);
 				chunk.clear();
 			} else {
-				createExpandedSlices(fullShape, ddl, index+1, chunk, obs);
+				createExpandedSlices(data, ddl, index+1, chunk, obs);
 			}
 			
 		}

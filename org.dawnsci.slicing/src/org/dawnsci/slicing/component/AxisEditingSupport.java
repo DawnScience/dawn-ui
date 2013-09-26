@@ -134,8 +134,14 @@ class AxisEditingSupport extends EditingSupport {
 			final DimsDataList ddl     = system.getDimsDataList();
 				
 			if (!ddl.isExpression() && !HierarchicalDataFactory.isHDF5(sliceObject.getPath())) {
-				sliceObject.setNexusAxis(idim, "indices");
-				dimensionNames.put(idim, Arrays.asList("indices"));
+				
+				// We add any datasets in the DataHolder which are the right size to be this
+				// axis.
+				final List<String> axes = getNonNexusDataAxes(idim);
+				axes.add("indices");
+				dimensionNames.put(idim, axes);
+				sliceObject.setNexusAxis(idim, axes.get(0));
+
 				return;
 			}
 
@@ -202,6 +208,28 @@ class AxisEditingSupport extends EditingSupport {
 			dimensionNames.put(idim, Arrays.asList("indices"));
 			
 		}
+	}
+	
+	/**
+	 * 
+	 * @param idim
+	 * @return empty list if none of right size or list of all the right size otherwise
+	 */
+	private List<String> getNonNexusDataAxes(int idim) {
+		
+		final List<String> ret = new ArrayList<String>(3);
+		if (system.getData().getVariableManager()==null) return ret;
+		
+		final int size = system.getData().getLazySet().getShape()[idim-1];
+
+        for (String dataName : system.getData().getVariableManager().getDataNames()) {
+			final ILazyDataset set = system.getData().getVariableManager().getDataValue(dataName, new IMonitor.Stub());
+			if (set!=null && set.getRank()==1 && set.getSize()==size) {
+				ret.add(dataName);
+			}
+		}
+		
+		return ret;
 	}
 	
 

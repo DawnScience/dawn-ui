@@ -133,8 +133,7 @@ class SliceEditingSupport extends EditingSupport {
         
         IDataset axis = null;
         if (system.isAxesVisible()) try {
-			final String axisName = SliceUtils.getNexusAxisName(system.getCurrentSlice(), data);
-            axis = SliceUtils.getNexusAxis(system.getCurrentSlice(), axisName, false, null);
+            axis = SliceUtils.getAxis(system.getCurrentSlice(), system.getData().getVariableManager(), data, null); 
         } catch (Throwable ne) {
         	axis = null;
         }

@@ -349,4 +349,7 @@ class ExpressionObject implements IExpressionObject {
 		this.expressionName = expressionName;
 	}
 	
+	public IVariableManager getVariableManager() {
+		return provider;
+	}
 }

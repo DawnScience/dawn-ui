@@ -81,7 +81,7 @@ public class SliceDialog extends Dialog {
 		ILazyDataset lazy  = holder.getLazyDataset(dataSetName);
 		if (lazy==null) lazy = holder.getLazyDataset(0);
 		
-		sliceComponent.setData(new SliceSource(lazy, dataSetName, filePath, false));        
+		sliceComponent.setData(new SliceSource(holder, lazy, dataSetName, filePath, false));        
 	}
 
 	public DimsDataList getDimsDataList() {
