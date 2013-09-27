@@ -51,7 +51,7 @@ class SliceColumnLabelProvider extends ColumnLabelProvider implements IStyledLab
 				String formatValue = String.valueOf(slice);
 				try {
 					if (system.isAxesVisible()) {
-						Number value = SliceUtils.getNexusAxisValue(system.getCurrentSlice(), data, slice, null);
+						Number value = SliceUtils.getAxisValue(system.getCurrentSlice(), system.getData().getVariableManager(), data, slice, null);
 						formatValue = format.format(value);
 					} else {
 						formatValue = String.valueOf(slice);
@@ -73,7 +73,7 @@ class SliceColumnLabelProvider extends ColumnLabelProvider implements IStyledLab
 			break;
 		case 3:
 			if (system.getCurrentSlice()!=null) {
-				final String axisName = SliceUtils.getNexusAxisName(system.getCurrentSlice(), data);
+				final String axisName = SliceUtils.getAxisName(system.getCurrentSlice(), data);
 				if (axisName!=null) ret.append(axisName);
 			}
 		default:

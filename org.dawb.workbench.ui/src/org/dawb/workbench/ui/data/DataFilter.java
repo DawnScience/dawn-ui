@@ -34,9 +34,10 @@ class DataFilter extends ViewerFilter {
 		}
 
 		final String dsName = ((ITransferableDataObject)element).getName();
+		if (dsName==null || "".equals(dsName)) return true;
+
 		final String name   = dsName.toLowerCase();
 
-		if (name==null || "".equals(name)) return true;
 
 		if (name.matches(searchString)) {
 			return true;

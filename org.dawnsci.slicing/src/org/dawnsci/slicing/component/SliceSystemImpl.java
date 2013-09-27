@@ -716,7 +716,7 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		}
 
 		try {
-			SliceObject cs = SliceUtils.createSliceObject(dimsDataList, dataShape, sliceObject);
+			SliceObject cs = SliceUtils.createSliceObject(dimsDataList, getData(), sliceObject);
 			sliceJob.schedule(sliceType, cs, force);
 		} catch (Exception e) {
 			logger.error("Cannot create a slice object!");

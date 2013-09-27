@@ -275,8 +275,10 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 				
 				ITransferableDataObject object = selections[0];
 				sliceSystem.setVisible(true);
-				final ILazyDataset lazy = selections[0].getLazyData(null);
-				sliceSystem.setData(new SliceSource(lazy, object.getName(), EclipseUtils.getFilePath(getEditorInput()), object.isExpression()));
+				
+				final IVariableManager man  = (IVariableManager)getAdapter(IVariableManager.class);
+				final ILazyDataset     lazy = selections[0].getLazyData(null);
+				sliceSystem.setData(new SliceSource(man, lazy, object.getName(), EclipseUtils.getFilePath(getEditorInput()), object.isExpression()));
 
 				return;
 			}
@@ -615,6 +617,8 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 			return getPlottingSystem();
 		} else if (clazz == ISliceSystem.class) {
 			return getSliceComponent();
+		}else if (clazz == IVariableManager.class) {
+			return getDataSetComponent();
 		}
 		
 		return super.getAdapter(clazz);

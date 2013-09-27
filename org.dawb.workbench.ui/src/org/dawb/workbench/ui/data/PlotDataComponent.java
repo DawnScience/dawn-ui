@@ -1437,10 +1437,45 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	}
 	
 	@Override
-	public ILazyDataset getLazyValue(String name, final IMonitor monitor) {
-		final ITransferableDataObject ob = getCheckableObjectByVariable(name);
+	public ILazyDataset getLazyValue(String variableName, final IMonitor monitor) {
+		final ITransferableDataObject ob = getCheckableObjectByVariable(variableName);
 		return ob.getLazyData(monitor);
 	}
+
+	/**
+	 * Tries to get the lazy dataset for the name
+	 * @param dataName
+	 * @param monitor
+	 * @return
+	 */
+	public IDataset getDataValue(String dataName, final IMonitor monitor) {
+		for (ITransferableDataObject ob : data) {
+			if (ob.getName().equals(dataName)) {
+				return ob.getData(monitor);
+			}
+		}
+        return null;
+	}
+
+
+	@Override
+	public List<String> getVariableNames() {
+		List<String> ret = new ArrayList<String>(data.size());
+		for (ITransferableDataObject ob : data) {
+			ret.add(ob.getVariable());
+		}
+		return ret;
+	}
+	
+	@Override
+	public List<String> getDataNames() {
+		List<String> ret = new ArrayList<String>(data.size());
+		for (ITransferableDataObject ob : data) {
+			ret.add(ob.getName());
+		}
+		return ret;
+	}
+
 
 	
 	@Override

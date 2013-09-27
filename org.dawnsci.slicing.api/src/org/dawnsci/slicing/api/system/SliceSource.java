@@ -1,6 +1,14 @@
 package org.dawnsci.slicing.api.system;
 
+import java.util.Arrays;
+import java.util.List;
+
+import org.dawb.common.services.IVariableManager;
+
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
+import uk.ac.diamond.scisoft.analysis.io.IDataHolder;
+import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 
 /**
  * This class represents information which configures a slice component
@@ -11,21 +19,64 @@ import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
  */
 public class SliceSource {
 
-	private ILazyDataset lazySet; 
-	private String       dataName; 
-	private String       filePath;
-	private boolean      isExpression;
+	private IVariableManager variableManager;
+	private ILazyDataset     lazySet; 
+	private String           dataName; 
+	private String           filePath;
+	private boolean          isExpression;
 	
 	public SliceSource() {
 		
 	}
-	public SliceSource(ILazyDataset l, String name, String path, boolean isExpr) {
+	public SliceSource(IVariableManager man, ILazyDataset l, String name, String path, boolean isExpr) {
+		setVariableManager(man);
+		setLazySet(l);
+		setDataName(name);
+		setFilePath(path);
+		setExpression(isExpr);
+	}
+	public SliceSource(IDataHolder man, ILazyDataset l, String name, String path, boolean isExpr) {
+		setVariableManager(createDataView(man));
 		setLazySet(l);
 		setDataName(name);
 		setFilePath(path);
 		setExpression(isExpr);
 	}
 	
+	private IVariableManager createDataView(final IDataHolder holder) {
+		return new IVariableManager.Stub() {
+
+			@Override
+			public List<String> getDataNames() {
+				return Arrays.asList(holder.getNames());
+			}
+
+			@Override
+			public List<String> getVariableNames() {
+				return Arrays.asList(holder.getNames());
+			}
+
+			@Override
+			public boolean isVariableName(String name, IMonitor monitor) {
+				return holder.contains(name);
+			}
+
+			@Override
+			public IDataset getVariableValue(String name, IMonitor monitor) {
+				return holder.getDataset(name);
+			}
+
+			@Override
+			public ILazyDataset getLazyValue(String name, IMonitor monitor) {
+				return holder.getLazyDataset(name);
+			}		
+			
+			@Override
+			public IDataset getDataValue(String name, IMonitor monitor) {
+				return holder.getDataset(name);
+			}			
+		};
+	}
 	public ILazyDataset getLazySet() {
 		return lazySet;
 	}
@@ -89,6 +140,12 @@ public class SliceSource {
 		} else if (!lazySet.equals(other.lazySet))
 			return false;
 		return true;
+	}
+	public IVariableManager getVariableManager() {
+		return variableManager;
+	}
+	public void setVariableManager(IVariableManager variableManager) {
+		this.variableManager = variableManager;
 	}
 	
 }

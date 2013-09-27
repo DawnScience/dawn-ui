@@ -1,6 +1,8 @@
 package org.dawnsci.plotting.tools.history;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.dawb.common.gpu.Operator;
@@ -56,6 +58,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
 import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 import uk.ac.diamond.scisoft.analysis.utils.OSUtils;
@@ -552,6 +555,14 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 		return null;
 	}	
 
+	@Override
+	public IDataset getDataValue(String name, IMonitor monitor) {
+		final Map<String, HistoryBean> history = getHistoryCache();
+		for (String key : history.keySet()) {
+			if (key.equals(name)) return history.get(key).getData();
+ 		}
+		return null;
+	}	
 
 	@Override
 	public void deleteExpression() {
@@ -594,6 +605,28 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 	@Override
 	public boolean isAlwaysSeparateView() {
 		return true;
+	}
+
+	
+
+	@Override
+	public List<String> getVariableNames() {
+		Map<String,HistoryBean> data = getHistoryCache();
+		List<String> ret = new ArrayList<String>(data.size());
+		for (String key : data.keySet()) {
+			ret.add(data.get(key).getVariable());
+		}
+		return ret;
+	}
+	
+	@Override
+	public List<String> getDataNames() {
+		Map<String,HistoryBean> data = getHistoryCache();
+		List<String> ret = new ArrayList<String>(data.size());
+		for (String key : data.keySet()) {
+			ret.add(data.get(key).getTraceName());
+		}
+		return ret;
 	}
 
 }

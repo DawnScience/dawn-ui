@@ -269,8 +269,7 @@ public abstract class AbstractSliceSystem implements ISliceSystem {
 		SliceObject cs;
 		try {
 			final SliceObject current = getCurrentSlice();
-			final int[] dataShape     = getData().getLazySet().getShape();
-			cs = SliceUtils.createSliceObject(dimsDataList, dataShape, current);
+			cs = SliceUtils.createSliceObject(dimsDataList, getData(), current);
 		} catch (Exception e1) {
 			logger.error("Cannot create a slice!");
 			return;
