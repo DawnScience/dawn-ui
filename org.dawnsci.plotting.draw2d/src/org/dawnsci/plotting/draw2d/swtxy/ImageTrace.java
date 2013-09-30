@@ -79,6 +79,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	private static final int MINIMUM_LABEL_SIZE = 10;
 
 	private String           name;
+	private String           dataName;
 	private String           paletteName;
 	private Axis             xAxis;
 	private Axis             yAxis;
@@ -1454,6 +1455,14 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	@Override
 	public int getRank() {
 		return 2;
+	}
+
+	public String getDataName() {
+		return dataName;
+	}
+
+	public void setDataName(String dataName) {
+		this.dataName = dataName;
 	}
 	
 }

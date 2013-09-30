@@ -625,7 +625,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		if (xyGraph!=null) xyGraph.clearTraces();
 	}
 
-	protected ITrace createLightWeightImage(String traceName, IDataset data, List<? extends IDataset> axes, IProgressMonitor monitor) {
+	protected ITrace createLightWeightImage(String traceName, IDataset data, List<? extends IDataset> axes, String dataName, IProgressMonitor monitor) {
 		
 		final Axis xAxis = ((AspectAxis)system.getSelectedXAxis());
 		final Axis yAxis = ((AspectAxis)system.getSelectedYAxis());
@@ -637,6 +637,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 
 		
 		final ImageTrace trace = xyGraph.createImageTrace(traceName, xAxis, yAxis, intensity);
+		trace.setDataName(dataName);
 		trace.setPlottingSystem(system);
 		
 		@SuppressWarnings("unchecked")
@@ -679,8 +680,9 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 	 * @return
 	 */
 	protected List<ITrace> createLineTraces(final String                title, 
-			                                    final IDataset       x, 
+			                                    final IDataset          x, 
 			                                    final List<? extends IDataset> ys,
+			                                    final List<String>          dataNames,
 			                                    final Map<String,ITrace>    traceMap,
 			                                    final Map<Object, Color>    colorMap,
 			                                    final IProgressMonitor      monitor) {
@@ -709,12 +711,15 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		int iplot = 0;
 		
 		final List<ITrace> traces = new ArrayList<ITrace>(ys.size());
-		for (IDataset y : ys) {
+		for (int i = 0; i < ys.size(); i++) {
 
+			IDataset y = ys.get(i);
 			if (y==null) continue;
+			final String   dataName = dataNames!=null ? dataNames.get(i) : null;
 			
 			final LineTrace trace = new LineTrace(getName(y,rootName));
 			LineTraceImpl wrapper = new LineTraceImpl(system, trace);
+			wrapper.setDataName(dataName);
 			traces.add(wrapper);
 			
 			final TraceWillPlotEvent evt = new TraceWillPlotEvent(wrapper, x, y);

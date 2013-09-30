@@ -49,6 +49,8 @@ public class TransferableDataObject implements H5Path, ITransferableDataObject{
 	private IExpressionObjectService service;
 	private static int expressionCount=0;
 	
+	private String filterFile;
+	
 	/**
 	 * Clones the object and sets the transientData flag to true.
 	 */
@@ -215,6 +217,8 @@ public class TransferableDataObject implements H5Path, ITransferableDataObject{
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result
 				+ ((variable == null) ? 0 : variable.hashCode());
+		result = prime * result
+				+ ((filterFile == null) ? 0 : filterFile.hashCode());
 		result = prime * result + yaxis;
 		return result;
 	}
@@ -244,6 +248,11 @@ public class TransferableDataObject implements H5Path, ITransferableDataObject{
 			if (other.variable != null)
 				return false;
 		} else if (!variable.equals(other.variable))
+			return false;
+		if (filterFile == null) {
+			if (other.filterFile != null)
+				return false;
+		} else if (!filterFile.equals(other.filterFile))
 			return false;
 		if (yaxis != other.yaxis)
 			return false;
@@ -416,5 +425,13 @@ public class TransferableDataObject implements H5Path, ITransferableDataObject{
 		holder     = null;
 		metaData   = null;
 		expression = null;
+	}
+
+	public String getFilterPath() {
+		return filterFile;
+	}
+
+	public void setFilterPath(String filterFile) {
+		this.filterFile = filterFile;
 	}
  }

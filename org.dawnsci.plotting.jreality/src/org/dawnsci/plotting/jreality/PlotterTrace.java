@@ -14,6 +14,7 @@ import uk.ac.diamond.scisoft.analysis.roi.IROI;
 class PlotterTrace {
 	
 	protected String                 name;
+	protected String                 dataName;
 	protected List<IDataset>         axes;
 	protected List<String>           axesNames;
 	protected JRealityPlotViewer     plotter;
@@ -131,6 +132,14 @@ class PlotterTrace {
 
     public IROI getWindow() {
 		return window;
+	}
+
+	public String getDataName() {
+		return dataName;
+	}
+
+	public void setDataName(String dataName) {
+		this.dataName = dataName;
 	}
 
 }

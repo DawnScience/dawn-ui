@@ -25,7 +25,17 @@ public interface ITrace {
 	 */
 	public void setName(String name);
 	
-	
+	/**
+	 * The name of the original data that this trace was plotted from or null
+	 * @return
+	 */
+	public String getDataName();
+	/**
+	 * The name of the original data that this trace was plotted from or null
+	 * @return data name
+	 */
+	public void setDataName(String name);
+
 	/**
 	 * Call this method to return a plotted data set by this trace.
 	 */

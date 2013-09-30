@@ -260,9 +260,8 @@ public class SliceUtils {
 	 * @param monitor
 	 * @throws Exception
 	 */
-	public static void plotSlice(final ILazyDataset      lazySet,
+	public static void plotSlice(final SliceSource       sliceSource,
 			                     final SliceObject       currentSlice,
-			                     final int[]             dataShape,
 			                     final PlotType          type,
 			                     final IPlottingSystem   plottingSystem,
 			                     final IProgressMonitor  monitor) throws Exception {
@@ -271,6 +270,8 @@ public class SliceUtils {
 		if (monitor!=null) monitor.worked(1);
 		if (monitor!=null&&monitor.isCanceled()) return;
 		
+		final ILazyDataset lazySet = sliceSource.getLazySet();
+		final int[]      dataShape = lazySet.getShape();
         currentSlice.setFullShape(dataShape);
         
         IDataset slice;
@@ -296,12 +297,15 @@ public class SliceUtils {
 		boolean requireScale = plottingSystem.isRescale()
 				               || type!=plottingSystem.getPlotType();
 		
+		final String dataName = sliceSource.getDataName();
+		// TODO Tell the trace its data name somehow.
+		
 		if (type==PlotType.XY) {
 			plottingSystem.clear();
 			final IDataset x = getNexusAxis(currentSlice, slice.getShape()[0], currentSlice.getX()+1, true, monitor);
 			plottingSystem.setXFirst(true);
 			plottingSystem.setPlotType(type);
-			plottingSystem.createPlot1D(x, Arrays.asList((IDataset)slice), slice.getName(), monitor);
+			plottingSystem.createPlot1D(x, Arrays.asList((IDataset)slice), Arrays.asList(sliceSource.getDataName()), slice.getName(), monitor);
 			Display.getDefault().syncExec(new Runnable() {
 				public void run() {
 					plottingSystem.getSelectedXAxis().setTitle(x.getName());
@@ -324,7 +328,8 @@ public class SliceUtils {
 					data[x] = slice.getDouble(x,y);
 				}
 			}
-			final List<IDataset> ys = new ArrayList<IDataset>(shape[1]);
+			final List<IDataset> ys    = new ArrayList<IDataset>(shape[1]);
+			final List<String>   names = new ArrayList<String>(shape[1]);
 			int index = 0;
 			
     		final IAnalysisService service = (IAnalysisService)ServiceManager.getService(IAnalysisService.class);
@@ -333,12 +338,13 @@ public class SliceUtils {
 				final IDataset dds = service.createDoubleDataset(da, da.length);
 				dds.setName(String.valueOf(index));
 				ys.add(dds);
+				names.add(sliceSource.getDataName()); // They are all the same data name.
 				++index;
 			}
 			plottingSystem.setXFirst(true);
 			plottingSystem.setPlotType(type);
-			plottingSystem.createPlot1D(xAxis, ys, monitor);
-			
+			plottingSystem.createPlot1D(xAxis, ys, names, null, monitor);
+		
 			Display.getDefault().syncExec(new Runnable() {
 				public void run() {
 					plottingSystem.getSelectedXAxis().setTitle(xAxis.getName());
@@ -355,9 +361,11 @@ public class SliceUtils {
 			// user objects to know if the image came from it. Since we
 			// use update here, we update (as its faster) but we also 
 			// nullify the user object.
-			final IImageTrace trace = getImageTrace(plottingSystem);
-			if (trace!=null) trace.setUserObject(null);
-			plottingSystem.updatePlot2D(slice, Arrays.asList(x,y), monitor); 			
+			ITrace trace = getImageTrace(plottingSystem);
+			if (trace!=null) {
+				trace.setUserObject(null);
+			}
+			plottingSystem.updatePlot2D(slice, Arrays.asList(x,y), sliceSource.getDataName(), monitor); 			
 		}
 
 		plottingSystem.repaint(requireScale);

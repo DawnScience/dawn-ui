@@ -66,8 +66,10 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
@@ -81,11 +83,10 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceDialog;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
@@ -107,7 +108,6 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.graphics.Region;
@@ -415,8 +415,9 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 							gc.setAlpha(255);
 							final Color plotColor = get1DPlotColor(cn);
 							if (plotColor!=null) {
-								gc.setForeground(plotColor);									
-								gc.drawText(cn.getDisplayName(rootName), item.getBounds().x+16, item.getBounds().y+1);
+								gc.setForeground(plotColor);
+								int offset = cn.getFilterPath()!=null ? 20 : 0;
+								gc.drawText(cn.getDisplayName(rootName), item.getBounds().x+16+offset, item.getBounds().y+1);
 								event.doit = false;
 							}
 							gc.setAlpha(origAlpha);
@@ -613,12 +614,36 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		bars.getToolBarManager().add(delete);
 		delete.setEnabled(false);
 		
+		bars.getToolBarManager().add(new Separator());
+		final Action createFilter = new Action("Create Filter", Activator.getImageDescriptor("icons/filter.png")) {
+			public void run() {
+				final Object sel           = ((StructuredSelection)dataViewer.getSelection()).getFirstElement();
+				final ITransferableDataObject ob  = (ITransferableDataObject)sel;
+				if (ob==null) return;
+				chooseFilterFile(ob);
+			}
+		};
+		bars.getToolBarManager().add(createFilter);
+		createFilter.setEnabled(false);
+		
+		final Action clearFilter = new Action("Clear filter", Activator.getImageDescriptor("icons/delete_filter.png")) {
+			public void run() {
+				final Object sel           = ((StructuredSelection)dataViewer.getSelection()).getFirstElement();
+				final ITransferableDataObject ob  = (ITransferableDataObject)sel;
+				if (ob==null) return;
+				deleteFilterFile(ob);
+			}
+		};
+		bars.getToolBarManager().add(clearFilter);
+		clearFilter.setEnabled(false);
+	
+		
 		dataViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				final Object sel           = ((StructuredSelection)dataViewer.getSelection()).getFirstElement();
 				final ITransferableDataObject ob  = (ITransferableDataObject)sel;
-				updateActions(copy, paste, delete, ob, bars);
+				updateActions(copy, paste, delete, createFilter, clearFilter, ob, bars);
 			}
 		});
 		
@@ -658,16 +683,14 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 				
 				final Object sel           = ((StructuredSelection)dataViewer.getSelection()).getFirstElement();
 				final ITransferableDataObject ob  = (ITransferableDataObject)sel;
-				if (ob!=null) {
-				    copy.setText("Copy '"+ob.getName()+"' (can be paste to other data).");
-					copy.setEnabled(true);
-				} else {
-					copy.setEnabled(false);
-				}
 				menuManager.add(copy);
 				menuManager.add(paste);
 				menuManager.add(delete);
-				updateActions(copy, paste, delete, ob, null);
+				menuManager.add(new Separator(getClass().getName()+".filter"));
+				menuManager.add(createFilter);
+				menuManager.add(clearFilter);
+				
+				updateActions(copy, paste, delete, createFilter, clearFilter, ob, null);
 
 
 				if (H5Loader.isH5(getFileName())) {
@@ -745,10 +768,70 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 
 		
 	}
+
+	private PlotDataFilterProvider filterProvider;
+	/**
+	 * Choose a jython file to be used as the filter or create a new one.
+	 * 
+	 * @param ob
+	 */
+	private void chooseFilterFile(ITransferableDataObject ob) {
+
+        if (ob==null) return;
+        
+//        ResourceSelectionDialog dialog = new ResourceSelectionDialog(Display.getDefault().getActiveShell(), EclipseUtils.getIFile(editor.getEditorInput()).getProject(), "Choose python script");
+//        int code = dialog.open();
+//        if (code!=Window.OK) return;
+//        
+//        final IPath  path       = (IPath)dialog.getResult()[0];
+        
+        // TODO validate script?
+        
+        final String filterPath = "/data_big/src/ysquared_example_1d_filter.py"; //TODO not hard coded!
+        
+        if (ob.getFilterPath()!=null) {
+        	boolean ok = MessageDialog.openConfirm(Display.getDefault().getActiveShell(), "Confirm Overwrite", 
+        			                  "Do you want to replace filter '"+ob.getFilterPath()+"' with '"+filterPath);
+        	if (!ok) return; 
+        }
+		
+        ob.setFilterPath(filterPath);
+        
+        saveExpressions(); // TODO save filters as well.
+        
+        // We now create a filter which calls the associated cpython interperter to filter the data.
+        if (filterProvider==null) filterProvider = new PlotDataFilterProvider(getPlottingSystem());
+        try {
+        	filterProvider.createFilter(ob, 1); // TODO Rank from dialog
+        } catch (Exception ne) {
+        	ob.setFilterPath(null);
+        	String message = ne.getMessage()!=null ? ne.getMessage() : "Filter '"+ob.getFilterPath()+"' is not a valid python script!";
+        	MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Cannot set filter", message);
+        	Activator.getDefault().getLog().log(new Status(IStatus.WARNING, Activator.PLUGIN_ID, message));
+        }
+
+        ob.setChecked(!ob.isChecked());
+        selectionChanged(ob, true);
+	}
 	
+	
+	protected void deleteFilterFile(ITransferableDataObject ob) {
+
+		if (ob==null) return;
+		ob.setFilterPath(null);
+		if (filterProvider!=null) filterProvider.deleteFilter(ob); 
+		
+        ob.setChecked(!ob.isChecked());
+        selectionChanged(ob, true);
+		
+	}
+
+
 	protected void updateActions(Action copy, 
-			                     Action paste, 
-			                     Action delete, 
+					             Action paste, 
+					             Action delete, 
+					             Action createFilter, 
+					             Action deleteFilter, 
 			                     ITransferableDataObject ob,
 			                     IActionBars bars) {
 		
@@ -758,13 +841,15 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		} else {
 			copy.setEnabled(false);
 		}
+		
 		ITransferableDataObject currentCopiedData = transferableService.getBuffer();
 		if (currentCopiedData!=null) {
 		    paste.setText("Paste '"+currentCopiedData.getName()+"' (from file "+currentCopiedData.getFileName()+") into this data.");
 		    paste.setEnabled(true);
 		} else {
 			paste.setEnabled(false);
-		}			
+		}	
+		
 		if (ob!=null && ob.isTransientData()) {
 		    delete.setText("Delete '"+ob.getName());
 		    delete.setEnabled(true);
@@ -772,6 +857,21 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 			delete.setText("Delete");
 			delete.setEnabled(false);
 		}
+		
+		if (ob!=null) {
+			createFilter.setText("Filter plot of '"+ob.getName()+"' using python");
+			createFilter.setEnabled(true);
+		} else {
+			createFilter.setEnabled(false);
+		}
+		
+		if (ob!=null && ob.getFilterPath()!=null) {
+			deleteFilter.setText("Clear filter of '"+ob.getName()+"'");
+			deleteFilter.setEnabled(true);
+		} else {
+			deleteFilter.setEnabled(false);
+		}
+
 		if (bars!=null) {
 			bars.getToolBarManager().update(true);
 			bars.updateActionBars();
@@ -921,7 +1021,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		final TableViewerColumn tick   = new TableViewerColumn(dataViewer, SWT.LEFT, 0);
 		tick.getColumn().setText(" ");
 		tick.getColumn().setWidth(30);
-		tick.setLabelProvider(new DataSetColumnLabelProvider(0));
+		tick.setLabelProvider(new DataSetColumnLabelProvider(0, this));
 	
 		final TableViewerColumn name   = new TableViewerColumn(dataViewer, SWT.LEFT, 1);
 		name.getColumn().setText("Name");
@@ -932,7 +1032,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 				Activator.getDefault().getPreferenceStore().setValue(EditorConstants.PLOT_DATA_NAME_WIDTH, name.getColumn().getWidth());
 			}
 		});
-		name.setLabelProvider(new DataSetColumnLabelProvider(1));
+		name.setLabelProvider(new DelegatingStyledCellLabelProvider(new DataSetColumnLabelProvider(1, this)));
 		
 		expressionEditor = new ExpressionEditingSupport(dataViewer, this);
 		name.setEditingSupport(expressionEditor);
@@ -940,32 +1040,32 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		final TableViewerColumn axis   = new TableViewerColumn(dataViewer, SWT.LEFT, 2);
 		axis.getColumn().setText(" ");
 		axis.getColumn().setWidth(32);
-		axis.setLabelProvider(new DataSetColumnLabelProvider(2));
+		axis.setLabelProvider(new DataSetColumnLabelProvider(2, this));
 		axis.setEditingSupport(new AxisEditingSupport(dataViewer, this));
 
 		final TableViewerColumn size   = new TableViewerColumn(dataViewer, SWT.LEFT, 3);
 		size.getColumn().setText("Size");
 		size.getColumn().setWidth(150);
 		size.getColumn().setResizable(true);
-		size.setLabelProvider(new DataSetColumnLabelProvider(3));
+		size.setLabelProvider(new DataSetColumnLabelProvider(3, this));
 			
 		final TableViewerColumn dims   = new TableViewerColumn(dataViewer, SWT.LEFT, 4);
 		dims.getColumn().setText("Dimensions");
 		dims.getColumn().setWidth(150);
 		dims.getColumn().setResizable(true);
-		dims.setLabelProvider(new DataSetColumnLabelProvider(4));
+		dims.setLabelProvider(new DataSetColumnLabelProvider(4, this));
 		
 		final TableViewerColumn shape   = new TableViewerColumn(dataViewer, SWT.LEFT, 5);
 		shape.getColumn().setText("Shape");
 		shape.getColumn().setWidth(150);
 		shape.getColumn().setResizable(true);
-		shape.setLabelProvider(new DataSetColumnLabelProvider(5));
+		shape.setLabelProvider(new DataSetColumnLabelProvider(5, this));
 
 		final TableViewerColumn varName   = new TableViewerColumn(dataViewer, SWT.LEFT, 6);
 		varName.getColumn().setText("Variable");
 		varName.getColumn().setWidth(150);
 		varName.getColumn().setResizable(true);
-		varName.setLabelProvider(new DataSetColumnLabelProvider(6));
+		varName.setLabelProvider(new DataSetColumnLabelProvider(6, this));
 		
 		variableEditor = new VariableNameEditingSupport(dataViewer, this);
 		varName.setEditingSupport(variableEditor);
@@ -1502,7 +1602,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		return allNames.contains(name);
 	}
 	
-	private Color get1DPlotColor(ITransferableDataObject element) {
+	Color get1DPlotColor(ITransferableDataObject element) {
 		final String axis = element.getAxis(selections, getPlottingSystem().is2D(), getAbstractPlottingSystem().isXFirst());
 		if ("X".equals(axis)) return PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_BLACK);
 		final String name = element.toString();
@@ -1513,118 +1613,6 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		return null;
 	}
 
-	private class DataSetColumnLabelProvider extends ColumnLabelProvider {
-		
-		private Color RED   = PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_RED);
-		private Color BLUE  = PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_BLUE);
-		private Color BLACK = PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_BLACK);
-		private Image checkedIcon;
-		private Image uncheckedIcon;
-		
-		private int columnIndex;
-		DataSetColumnLabelProvider(int columnIndex) {
-			this.columnIndex = columnIndex;
-			if (columnIndex == 0) {
-				ImageDescriptor id = Activator.getImageDescriptor("icons/ticked.png");
-				checkedIcon   = id.createImage();
-				id = Activator.getImageDescriptor("icons/unticked.gif");
-				uncheckedIcon =  id.createImage();
-			}
-		}
-		
-		public Image getImage(Object ob) {
-			
-			if (columnIndex!=0) return null;
-			final ITransferableDataObject element = (ITransferableDataObject)ob;
-			return element.isChecked() ? checkedIcon : uncheckedIcon;
-		}
-		@Override
-		public String getText(Object ob) {
-			
-			final ITransferableDataObject element = (ITransferableDataObject)ob;
-			final String          name    = element.toString();
-			
-			switch (columnIndex) {
-			case 0:
-				return null;
-			case 1:
-				return element.getDisplayName(rootName);
-			case 2:
-				return element.getAxis(selections, getPlottingSystem().is2D(), getAbstractPlottingSystem().isXFirst());
-
-			case 3:
-				if (!element.isExpression()) {
-					try {
-						if (metaData==null || metaData.getDataSizes()==null || !metaData.getDataSizes().containsKey(name)) {
-							final ILazyDataset set = element.getLazyData(new IMonitor.Stub());
-							if (set!=null) {
-								return set.getSize()+"";
-							}
-						    return "Unknown";
-							
-						}
-					} catch (IllegalArgumentException ne) {
-						return "large";
-					}
-					return metaData.getDataSizes().get(name)+"";
-				} else {
-					final ILazyDataset set = element.getLazyData(new IMonitor.Stub());
-					if (set!=null) {
-						return set.getSize()+"";
-					}
-				    return "Unknown";
-				}
-			case 4:
-				return element.getShape(false).length+"";
-			case 5:
-				if (!element.isExpression()) {
-					if (metaData==null ||metaData.getDataShapes()==null || metaData.getDataShapes().get(name)==null) {
-						final ILazyDataset set = element.getLazyData(new IMonitor.Stub());
-						if (set!=null) {
-							return Arrays.toString(set.getShape());
-						}
-					    return "Unknown";
-						
-					}
-					return Arrays.toString(metaData.getDataShapes().get(name));
-				}  else {
-					final ILazyDataset set = element.getExpression().getLazyDataSet(name, new IMonitor.Stub());
-					if (set!=null) {
-						return Arrays.toString(set.getShape());
-					}
-				    return "Unknown";
-				}
-
-			case 6:
-				return element.getVariable();
-			default:
-				return element.toString();
-			}
-		}
-	    
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
-		 */
-		public Color getForeground(Object ob) {
-			
-			final ITransferableDataObject element = (ITransferableDataObject)ob;
-	    		    	
-			switch (columnIndex) {
-			case 1:
-				if (element.isExpression()) {
-					final IExpressionObject o = element.getExpression();
-					return o.isValid(new IMonitor.Stub()) ? BLUE : RED;
-				} else if (element.isChecked()) {
-					return get1DPlotColor(element);
-				}
-				return BLACK;
-			case 6:
-				return BLUE;
-			default:
-				return BLACK;
-			}
-	    }
-	}
 	
 	public void dispose() {
 		
@@ -1891,6 +1879,10 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 			return getPlottingSystem();
 		}
 		return null;
+	}
+
+	IMetaData getMetaData() {
+		return metaData;
 	}
 
 }

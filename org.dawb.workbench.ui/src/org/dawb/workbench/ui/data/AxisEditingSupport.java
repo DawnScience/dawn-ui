@@ -28,7 +28,12 @@ class AxisEditingSupport extends EditingSupport {
 	@Override
 	protected CellEditor getCellEditor(final Object element) {
 		// FIX to http://jira.diamond.ac.uk/browse/DAWNSCI-380 remove axes until they work
-		ComboBoxCellEditor ce = new ComboBoxCellEditor((Composite)getViewer().getControl(), new String[]{"X","Y1","Y2" /**,"Y3","Y4" **/} , SWT.READ_ONLY);
+		ComboBoxCellEditor ce = new ComboBoxCellEditor((Composite)getViewer().getControl(), new String[]{"X","Y1","Y2" /**,"Y3","Y4" **/} , SWT.READ_ONLY) {
+			public void setFocus() {
+				super.setFocus();
+				((CCombo)getControl()).setListVisible(true);
+			}
+		};
 		final CCombo ccombo = (CCombo)ce.getControl();
 		ccombo.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {

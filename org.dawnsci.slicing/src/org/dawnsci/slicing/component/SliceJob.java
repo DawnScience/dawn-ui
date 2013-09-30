@@ -43,9 +43,8 @@ class SliceJob extends Job {
 				final SliceSource data = system.getData();
 				// TODO FIXME Allow the current slice tool to dictate how to 
 				// process the slice?
-				SliceUtils.plotSlice(data.getLazySet(),
+				SliceUtils.plotSlice(data,
 						             slice, 
-						             data.getLazySet().getShape(), 
 						             (PlotType)sliceType, 
 						             system.getPlottingSystem(), 
 						             monitor);

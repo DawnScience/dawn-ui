@@ -165,6 +165,8 @@ public interface IPlottingSystem extends IAdaptable, ITraceSystem, IRegionSystem
 							         IProgressMonitor         monitor);
 
 	/**
+	 * @see IPlottingSystem.createPlot1D(x, ys, monitor);
+	 * 
 	 * This method is Thread safe - so no need to call from UI thread!
 	 * @see createPlot1D(AbstractDataset, List<AbstractDataset>, IProgressMonitor)
 	 * @param x
@@ -175,6 +177,24 @@ public interface IPlottingSystem extends IAdaptable, ITraceSystem, IRegionSystem
 	 */
 	public List<ITrace> createPlot1D(IDataset              x, 
 							         List<? extends IDataset> ys,
+							         String                title,
+							         IProgressMonitor      monitor);
+
+	/**
+	 * @see IPlottingSystem.createPlot1D(x, ys, monitor);
+	 * 
+	 * This method is Thread safe - so no need to call from UI thread!
+	 * @see createPlot1D(AbstractDataset, List<AbstractDataset>, IProgressMonitor)
+	 * @param x
+	 * @param ys
+	 * @param dataNames - If the data plotted has names which will be used in Filters these can be set here.
+	 * @param title - specifies the title instead of creating one.
+	 * @param monitor
+	 * @return
+	 */
+	public List<ITrace> createPlot1D(IDataset              x, 
+							         List<? extends IDataset> ys,
+							         List<String>          dataNames,
 							         String                title,
 							         IProgressMonitor      monitor);
 
@@ -198,6 +218,20 @@ public interface IPlottingSystem extends IAdaptable, ITraceSystem, IRegionSystem
 	 */
 	public List<ITrace> updatePlot1D(IDataset                 x, 
 							         List<? extends IDataset> ys,
+							         IProgressMonitor         monitor);
+
+	/**
+	 * @see IPlottingSystem.updatePlot1D(x,ys,monitor);
+     *
+	 * @param x  - may be null, if null indices of y are used
+	 * @param ys -  must not be null
+	 * @param dataNames - If the data plotted has names which will be used in Filters these can be set here.
+	 * @param monitor
+	 * @return
+	 */
+	public List<ITrace> updatePlot1D(IDataset                 x, 
+							         List<? extends IDataset> ys,
+							         List<String>             dataNames,
 							         IProgressMonitor         monitor);
 
 	/**
@@ -225,7 +259,20 @@ public interface IPlottingSystem extends IAdaptable, ITraceSystem, IRegionSystem
 							   List<? extends IDataset> axes,
 							   IProgressMonitor         monitor);
 	
-	
+	/**
+	 * @see IPlottingSystem.createPlot2D(image, axes, monitor);
+	 * 
+	 * @param image
+	 * @param axes
+	 * @param dataName - If the data plotted has a name which will be used in Filters this can be set here.
+	 * @param monitor
+	 * @return
+	 */
+	public ITrace createPlot2D(IDataset                 image, 
+							   List<? extends IDataset> axes,
+							   String                   dataName,
+							   IProgressMonitor         monitor);
+
 	/**
 	 * This method is Thread safe - so no need to call from UI thread!
 	 * 
@@ -242,6 +289,20 @@ public interface IPlottingSystem extends IAdaptable, ITraceSystem, IRegionSystem
 							   List<? extends IDataset> axes,
 							   IProgressMonitor         monitor);
 	
+	/**
+	 * 	@see IPlottingSystem.updatePlot2D(image, axes, monitor);
+
+	 * @param image
+	 * @param axes
+	 * @param dataName - If the data plotted has a name which will be used in Filters this can be set here.
+	 * @param monitor
+	 * @return
+	 */
+	public ITrace updatePlot2D(IDataset                 image, 
+							   List<? extends IDataset> axes,
+							   String                   dataName,
+							   IProgressMonitor         monitor);
+
 	/**
 	 * Set the plot type. For instance if requiring a 3D surface plot of an image
 	 * Call setPlotType(PlotType.SURFACE) followed by createPlot2D(...)

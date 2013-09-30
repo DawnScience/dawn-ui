@@ -212,9 +212,24 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	public List<ITrace> updatePlot1D(IDataset             x, 
 						             final List<? extends IDataset> ys,
 						             final IProgressMonitor      monitor) {
+		
+		return updatePlot1D(x, ys, null, monitor);
+	}
+	
+	public List<ITrace> updatePlot1D(IDataset                      x, 
+									 final List<? extends IDataset> ys,
+									 final List<String>             dataNames,
+									 final IProgressMonitor         monitor) {
+
+		
 		final List<ITrace> updatedAndCreated = new ArrayList<ITrace>(3);
-		final List<IDataset> unfoundYs = new ArrayList<IDataset>(ys.size());
-		for (final IDataset y : ys) {
+		final List<IDataset> unfoundYs    = new ArrayList<IDataset>(ys.size());
+		final List<String>   unfoundNames = new ArrayList<String>(ys.size());
+		
+		for (int i = 0; i < ys.size(); i++) {
+			
+			final IDataset y        = ys.get(i);
+			final String   dataName = dataNames!=null ? dataNames.get(i) : null;
 			
 			final ITrace trace = getTrace(y.getName());
 			if (trace!=null && trace instanceof ILineTrace) {
@@ -242,10 +257,11 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 				continue;
 			}
 			unfoundYs.add(y);
+			unfoundNames.add(dataName);
 		}
 		if (!unfoundYs.isEmpty()) {
 			if (x==null) x = IntegerDataset.arange(unfoundYs.get(0).getSize(), IntegerDataset.INT32);
-			final Collection<ITrace> news = createPlot1D(x, unfoundYs, monitor);
+			final Collection<ITrace> news = createPlot1D(x, unfoundYs, unfoundNames, null, monitor);
 			updatedAndCreated.addAll(news);
 		}
 		return updatedAndCreated;
@@ -255,6 +271,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	public List<ITrace> createPlot1D(final IDataset       xIn, 
 					                 final List<? extends IDataset> ysIn,
 					                 final IProgressMonitor      monitor) {
+		
         return createPlot1D(xIn, ysIn, null, monitor);
 	}
 
@@ -266,6 +283,16 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 					                 final List<? extends IDataset> ysIn,
 					                 final String                title,
 					                 final IProgressMonitor      monitor) {
+		
+		return createPlot1D(xIn, ysIn, null, title, monitor);
+	}
+	@Override
+	public List<ITrace> createPlot1D(final IDataset             xIn, 
+									final List<? extends IDataset> ysIn,
+									final List<String>          dataNames,
+									final String                title,
+									final IProgressMonitor      monitor) {
+
 		if (monitor!=null) monitor.worked(1);
 
 		// create index datasets if necessary
@@ -287,13 +314,13 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		}
 
 		if (getDisplay().getThread()==Thread.currentThread()) {
-			List<ITrace> ts = createPlot1DInternal(x, ysIn, title, monitor);
+			List<ITrace> ts = createPlot1DInternal(x, ysIn, dataNames, title, monitor);
 			if (ts!=null) traces.addAll(ts);
 		} else {
 			getDisplay().syncExec(new Runnable() {
 				@Override
 				public void run() {
-					List<ITrace> ts = createPlot1DInternal(x, ysIn, title, monitor);
+					List<ITrace> ts = createPlot1DInternal(x, ysIn, dataNames, title, monitor);
 					if (ts!=null) traces.addAll(ts);
 				}
 			});
@@ -345,9 +372,18 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		}
 	}
 
+	@Override
 	public ITrace updatePlot2D(final IDataset       data, 
 							   final List<? extends IDataset> axes,
 							   final IProgressMonitor      monitor) {
+		return updatePlot2D(data, axes, null, monitor);
+	}
+	@Override
+	public ITrace updatePlot2D(final IDataset              data, 
+			 				   final List<? extends IDataset> axes,
+			 				   final String                dataName,
+				               final IProgressMonitor      monitor) {
+
 		if (plottingMode.is1D()) {
 			if (getDisplay().getThread()==Thread.currentThread()) {
 				switchPlottingType(PlotType.IMAGE);
@@ -370,14 +406,14 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			final int[]       shape = image.getData()!=null ? image.getData().getShape() : null;
 			if (shape!=null && Arrays.equals(shape, data.getShape())) {
 				if (getDisplay().getThread()==Thread.currentThread()) {
-					image = updatePlot2DInternal(image, data, axes, monitor);
+					image = updatePlot2DInternal(image, data, axes, dataName, monitor);
 				} else {
 					final List<ITrace> images = Arrays.asList(image);
 					Display.getDefault().syncExec(new Runnable() {
 						public void run() {
 							// This will keep the previous zoom level if there was one
 							// and will be faster than createPlot2D(...) which autoscales.
-			                ITrace im = updatePlot2DInternal(images.get(0), data, axes, monitor);
+			                ITrace im = updatePlot2DInternal(images.get(0), data, axes, dataName, monitor);
 			                images.set(0, im);
 						}
 					});
@@ -385,16 +421,17 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 				}
 				return image;
 			} else {
-				return createPlot2D(data, axes, monitor);
+				return createPlot2D(data, axes, dataName, monitor);
 			}
 		} else {
-		    return createPlot2D(data, axes, monitor);
+		    return createPlot2D(data, axes, dataName, monitor);
 		}
 	}
 
 	private ITrace updatePlot2DInternal(final ITrace image,
 			                          final IDataset       data, 
 								      final List<? extends IDataset> axes,
+								      final String dataName,
 								      final IProgressMonitor      monitor) {
 		
 		if (data.getName()!=null) lightWeightViewer.setTitle(data.getName());
@@ -425,16 +462,24 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	public ITrace createPlot2D(final IDataset       data, 
 							   final List<? extends IDataset> axes,
 							   final IProgressMonitor      monitor) {
+		return createPlot2D(data, axes, null, monitor);
+	}
+	@Override
+	public ITrace createPlot2D(final IDataset       data, 
+								final List<? extends IDataset> axes,
+								final String        dataName,
+								final IProgressMonitor      monitor) {
+
 		final List<ITrace> traces = new ArrayList<ITrace>(7);
 
 		if (getDisplay().getThread()==Thread.currentThread()) {
-			ITrace ts = createPlot2DInternal(data, axes, monitor);
+			ITrace ts = createPlot2DInternal(data, axes, dataName, monitor);
 			if (ts!=null) traces.add(ts);
 		} else {
 			getDisplay().syncExec(new Runnable() {
 				@Override
 				public void run() {
-					ITrace ts = createPlot2DInternal(data, axes, monitor);
+					ITrace ts = createPlot2DInternal(data, axes, dataName, monitor);
 					if (ts!=null) traces.add(ts);
 				}
 			});
@@ -443,8 +488,9 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		return traces.size()>0 ? traces.get(0) : null;
 	}
 
-	public ITrace createPlot2DInternal(final IDataset       data, 
-										List<? extends IDataset>       axes,
+	protected ITrace createPlot2DInternal(final IDataset            data, 
+										List<? extends IDataset>    axes,
+										String                      dataName,
 										final IProgressMonitor      monitor) {
 		try {
 			if (plottingMode.is1D()) {
@@ -464,10 +510,11 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			ITrace trace=null;
 			if (plottingMode.is3D()) {
 				trace = createSurfaceTrace(traceName);
+				trace.setDataName(dataName);
 				((ISurfaceTrace)trace).setData(data, axes);
 				addTrace(trace);
 			} else {
-				trace = lightWeightViewer.createLightWeightImage(traceName, data, axes, monitor);
+				trace = lightWeightViewer.createLightWeightImage(traceName, data, axes, dataName, monitor);
 				traceMap.put(trace.getName(), trace);
 				fireTraceAdded(new TraceEvent(trace));
 			}
@@ -511,6 +558,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 
 	private List<ITrace> createPlot1DInternal(final IDataset       xIn, 
 										      final List<? extends IDataset> ysIn,
+										      final List<String>   dataNames,
 										      final String                title,
 										      final IProgressMonitor      monitor) {
 		if (plottingMode.is1Dor2D()) {
@@ -532,7 +580,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		List<ITrace> traces=null;
 		if (plottingMode.is1D()) {
 			if (lightWeightViewer.getControl()==null) return null;	
-			traces = lightWeightViewer.createLineTraces(title, xIn, ysIn, traceMap, colorMap, monitor);
+			traces = lightWeightViewer.createLineTraces(title, xIn, ysIn, dataNames, traceMap, colorMap, monitor);
 			
 		} else {
 			traceMap.clear();
@@ -545,6 +593,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			final IDataset x = xIn;
 			final AbstractDataset y = AbstractDataset.arange(getMaxSize(ysIn), AbstractDataset.INT32);
 			final AbstractDataset z = AbstractDataset.arange(ysIn.size(), AbstractDataset.INT32);
+			if (dataNames!=null) trace.setDataName(dataNames.get(0));
 			trace.setData(Arrays.asList(x,y,z), ysIn.toArray(new AbstractDataset[ysIn.size()]));
 			jrealityViewer.addTrace(trace);
 			traceMap.put(trace.getName(), trace);

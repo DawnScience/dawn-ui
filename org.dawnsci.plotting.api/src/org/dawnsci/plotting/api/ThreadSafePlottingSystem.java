@@ -586,5 +586,27 @@ public class ThreadSafePlottingSystem extends StandardMBean implements IPlotting
 	public IWorkbenchPart getPart() {
 		return (IWorkbenchPart)call(getMethodName(Thread.currentThread().getStackTrace()));
 	}
+	@Override
+	public List<ITrace> createPlot1D(IDataset x, List<? extends IDataset> ys,
+			List<String> dataNames, String title, IProgressMonitor monitor) {
+		return (List<ITrace>)call(getMethodName(Thread.currentThread().getStackTrace()), x,ys,dataNames, title, monitor);
+	}
 
+	@Override
+	public List<ITrace> updatePlot1D(IDataset x, List<? extends IDataset> ys,
+			List<String> dataNames, IProgressMonitor monitor) {
+		return (List<ITrace>)call(getMethodName(Thread.currentThread().getStackTrace()), x,ys,dataNames, monitor);
+	}
+
+	@Override
+	public ITrace createPlot2D(IDataset image, List<? extends IDataset> axes,
+			String dataName, IProgressMonitor monitor) {
+		return (ITrace)call(getMethodName(Thread.currentThread().getStackTrace()), image, axes, dataName, monitor);
+	}
+
+	@Override
+	public ITrace updatePlot2D(IDataset image, List<? extends IDataset> axes,
+			String dataName, IProgressMonitor monitor) {
+		return (ITrace)call(getMethodName(Thread.currentThread().getStackTrace()), image, axes, dataName, monitor);
+	}
 }

@@ -330,7 +330,8 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 
 		if (monitor.isCanceled()) return;
 		
-		final IDataset        data = selections[0].getData(new ProgressMonitorWrapper(monitor));
+		final ITransferableDataObject first = selections[0];
+		final IDataset        data = first.getData(new ProgressMonitorWrapper(monitor));
 		
 		if (data==null)             return;
 		try {
@@ -343,7 +344,8 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		if (data.getRank()==2) {
 			
 			plottingSystem.clear();
-		    plottingSystem.createPlot2D(data, null, monitor);
+			// TODO Data Name
+		    plottingSystem.createPlot2D(data, null, first.getName(), monitor);
 		    
 		} else {
 			List<ITransferableDataObject> sels = new ArrayList<ITransferableDataObject>(Arrays.asList(selections));
@@ -357,7 +359,9 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 			}
 			
 			if (sels.isEmpty() || (!plottingSystem.isXFirst() && sels.size()==1)) {
-				final List<ITrace> traces = plottingSystem.updatePlot1D(x, Arrays.asList(data), monitor);
+				
+				// TODO Data Name
+				final List<ITrace> traces = plottingSystem.updatePlot1D(x, Arrays.asList(data), Arrays.asList(first.getName()), monitor);
 				removeOldTraces(traces);
 		        sync(sels,traces);
 		        if (plottingSystem.isRescale()) plottingSystem.repaint();
@@ -366,20 +370,21 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 			
 
             final Map<Integer,List<IDataset>> ys = sels.isEmpty()
-                                                       ? null
-                                		               : new HashMap<Integer,List<IDataset>>(4);
+                                                 ? null
+                                		         : new HashMap<Integer,List<IDataset>>(4);
 
-           // Sort ys by axes (for 2D there is one y)
+            final Map<Integer,List<String>> dataNames = sels.isEmpty()
+                                                 ? null
+   		                                         : new HashMap<Integer,List<String>>(4);
+
+            // Sort ys by axes (for 2D there is one y)
             if (!sels.isEmpty()) {
         	   for (int i = 1; i <= 4; i++) {
-        		   List<IDataset> tmp = getYS(i, sels, monitor);
-        		   if (tmp!=null) {
-        			   ys.put(i, tmp);
-        		   }
-        	   }
+        		   getYS(i, sels, monitor, ys, dataNames);
+         	   }
             }
 
-    		final List<ITrace> traces = createPlotSeparateAxes(x,ys,monitor);
+    		final List<ITrace> traces = createPlotSeparateAxes(x,ys,dataNames,monitor);
 	        sync(sels,traces);
 
 		}
@@ -407,7 +412,8 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 	}
 
 	protected List<ITrace> createPlotSeparateAxes(final IDataset                    x,
-			                                      final Map<Integer,List<IDataset>> ysMap,
+										          final Map<Integer,List<IDataset>> ysMap,
+										          final Map<Integer,List<String>>   dNameMap,
 			                                      final IProgressMonitor            monitor) {
 
 		final List<ITrace> traces = new ArrayList<ITrace>();
@@ -424,8 +430,12 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 						axis.setVisible(true);
 						plottingSystem.setSelectedYAxis(axis);	
 
-						final List<IDataset> ys = ysMap.get(i);
-						traces.addAll(plottingSystem.updatePlot1D(x, ys, monitor));
+						final List<IDataset>    ys = ysMap.get(i);
+						final List<String>      dn = dNameMap.get(i);
+						
+                        // Tell traces its data name.
+						final List<ITrace> plotted = plottingSystem.updatePlot1D(x, ys, dn, monitor);
+						traces.addAll(plotted);
 					}
 
 					// Remove traces in the plotting system that were not
@@ -456,18 +466,22 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
         });
 	}
 
-	private List<IDataset> getYS(int iyaxis, List<ITransferableDataObject> selections, IProgressMonitor monitor) {
+	private void getYS(int iyaxis, List<ITransferableDataObject> selections, IProgressMonitor monitor, 
+			           Map<Integer,List<IDataset>> yMap, Map<Integer,List<String>> dMap) {
 		
 		List<IDataset> ys = new ArrayList<IDataset>(3);
+		List<String>   dn = new ArrayList<String>(3);
 		for (ITransferableDataObject co : selections) {
 			
 			if (co.getYaxis()!=iyaxis) continue;
 			final IDataset y = co.getData(new ProgressMonitorWrapper(monitor));
 			ys.add(y);
-			if (monitor.isCanceled()) return null;
+			dn.add(co.getName());
+			if (monitor.isCanceled()) return;
 			monitor.worked(1);
 		}
-		return ys.isEmpty()?null:ys;
+		yMap.put(iyaxis, ys.isEmpty()?null:ys);
+		dMap.put(iyaxis, dn.isEmpty()?null:dn);
 	}
 
 	@Override

@@ -26,7 +26,11 @@ Require-Bundle: org.eclipse.ui,
  javax.vecmath;bundle-version="1.5.2",
  org.dawnsci.common.widgets,
  org.eclipse.ui.intro,
- org.dawnsci.slicing.api;bundle-version="1.0.0"
+ org.dawnsci.slicing.api;bundle-version="1.0.0",
+ org.python.pydev;bundle-version="2.6.0",
+ org.python.pydev.core;bundle-version="2.6.0",
+ org.dawb.common.python;bundle-version="1.2.0",
+ uk.ac.diamond.scisoft.analysis.xmlrpc;bundle-version="1.0.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: javax.measure.quantity;version="4.3.1",

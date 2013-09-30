@@ -20,8 +20,8 @@ import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
  */
 public abstract class AbstractPlottingFilter implements IPlottingFilter {
 	
-	private List<OriginalData> cache;
-	private boolean            active=true;
+	protected List<OriginalData> cache;
+	protected boolean            active=true;
 	
 
 	public AbstractPlottingFilter() {
@@ -29,7 +29,7 @@ public abstract class AbstractPlottingFilter implements IPlottingFilter {
 	}
 
 	@Override
-	public final void filter(IPlottingSystem system, TraceWillPlotEvent evt) {
+	public void filter(IPlottingSystem system, TraceWillPlotEvent evt) {
 		final ITrace trace = (ITrace)evt.getSource();
 		if (trace.getRank()!=getRank()) {
 			if (getRank()>0) return;
@@ -84,7 +84,7 @@ public abstract class AbstractPlottingFilter implements IPlottingFilter {
 		return filtered;
 	}
 	
-	private class OriginalData {
+	protected class OriginalData {
 		
 		private ITrace trace;
 		private String name;

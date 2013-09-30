@@ -23,6 +23,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.IErrorDataset;
 public class LineTraceImpl implements ILineTrace {
 
 	private LineTrace          trace;
+	private String             dataName;
 	private PlottingSystemImpl sys;
 	private boolean errorBarExplicitySet;
 
@@ -437,6 +438,14 @@ public class LineTraceImpl implements ILineTrace {
 	@Override
 	public IAxis getYAxis() {
 		return (IAxis)trace.getYAxis();
+	}
+
+	public String getDataName() {
+		return dataName;
+	}
+
+	public void setDataName(String dataName) {
+		this.dataName = dataName;
 	}
 
 }
