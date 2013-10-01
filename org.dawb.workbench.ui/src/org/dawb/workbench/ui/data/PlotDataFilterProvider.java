@@ -5,19 +5,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.dawb.common.python.PyDevUtils;
-import org.dawb.common.python.PyDevUtils.AvailableInterpreter;
-import org.dawb.common.python.rpc.PythonRunScriptService;
+import org.dawb.common.python.rpc.AnalysisRpcPythonPyDevService;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlottingFactory;
 import org.dawnsci.plotting.api.filter.IFilterDecorator;
 import org.dawnsci.plotting.api.filter.IPlottingFilter;
 import org.dawnsci.plotting.api.filter.NamedPlottingFilter;
 import org.dawnsci.slicing.api.data.ITransferableDataObject;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.python.pydev.plugin.nature.PythonNature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,14 +52,15 @@ final class PlotDataFilterProvider {
 		final IResource res = ResourcesPlugin.getWorkspace().getRoot().findMember(ob.getFilterPath());
 		if (res==null) throw new Exception("The script '"+ob.getFilterPath()+"' cannot be found!");
 				
-		final String interpreterName = getInterpreterName(ob, res);
+        // TODO use constructor with true which offers to configure a python interpreter if none exists.
+		final AnalysisRpcPythonPyDevService service = new AnalysisRpcPythonPyDevService(res.getProject());
+		service.addHandlers("execfile('''" + res.getLocation().toPortableString() + "''')", new String[]{"filter1D", "filter2D"});
 		
-		AvailableInterpreter info = PyDevUtils.getMatchingChoice(interpreterName, res.getProject());
-
-		// TODO Allow debug of filter script one day
-		final PythonRunScriptService pythonRunScriptService = PythonRunScriptService.getService(false/* TODO */, res.getProject(), info.info);
+		// TODO FIXME Service must be stopped when data is unplotting
 		
-		PythonPlottingFilter filter = new PythonPlottingFilter(ob.getName(), res, pythonRunScriptService, filterRank);
+		IPythonFilter newProxyInstance = service.getClient().newProxyInstance(IPythonFilter.class);
+		
+		PythonPlottingFilter filter = new PythonPlottingFilter(ob.getName(), res, newProxyInstance, filterRank);
 		filters.put(ob.getName(), filter);
 		decorator.addFilter(filter);
 		decorator.setActive(true);
@@ -77,36 +74,6 @@ final class PlotDataFilterProvider {
 		decorator.removeFilter(filter);
 	}
 
-
-	@SuppressWarnings("unused")
-	private String getInterpreterName(ITransferableDataObject ob, IResource res) throws Exception {
-		
-		final IProject project = res.getProject();
-		final String[] interpreters = PyDevUtils.getChoices(true, project);
-
-		if (project == null) throw new Exception("The script '"+ob.getFilterPath()+"' is not valid, because it has no project!");
-
-		try {
-		    PythonNature nature = (PythonNature)project.getNature(PythonNature.PYTHON_NATURE_ID);
-		    String name = nature.getProjectInterpreterName();
-		    if (name==null) throw new Exception();
-		    
-		    for (String interpreter : interpreters) {
-				if (interpreter.startsWith(name+" - ")) return interpreter;
-			}
-		    
-		    return name;
-		} catch (Exception ne) {
-			if (interpreters==null || interpreters.length<1) {
-				throw new Exception("A Pydev interpreter cannot be found to run '"+ob.getFilterPath()+"'.\nPlease define an intertpreter under 'Window->Preferences->Pydev Interpreter'.");
-			}
-			if (interpreters!=null) {
-				logger.error("Cannot determine interpreter to use for project "+project+". Using '"+interpreters[0]+"'.");
-				return interpreters[0];
-			}
-		}
-		throw new Exception("A Pydev interpreter cannot be found to run '"+ob.getFilterPath()+"'.\nPlease define an intertpreter under 'Window->Preferences->Pydev Interpreter'.");
-	}
 	
 	/**
 	 * A named filter able to deal with 1D and 2D data.
@@ -117,13 +84,13 @@ final class PlotDataFilterProvider {
 	public class PythonPlottingFilter extends NamedPlottingFilter {
 
 		private IResource               file;
-		private PythonRunScriptService  service;
+		private IPythonFilter  pythonProxy;
 		private int                     filterRank;
 
-		public PythonPlottingFilter(String name, IResource file, PythonRunScriptService pythonRunScriptService, int filterRank) {
+		public PythonPlottingFilter(String name, IResource file, IPythonFilter pythonProxy, int filterRank) {
 			super(name);
 			this.file       = file;
-			this.service    = pythonRunScriptService;
+			this.pythonProxy    = pythonProxy;
 			this.filterRank = filterRank;
 		}
 
@@ -134,43 +101,26 @@ final class PlotDataFilterProvider {
 		
 		@Override
 		protected IDataset[] filter(IDataset x,    IDataset y) {
-			
 			try {
-				final Map<String, IDataset> data = new HashMap<String, IDataset>(2);
-				data.put("x", x);
-				data.put("y", y);
-				
-				final Map<String, ? extends Object> result = service.runScript(file.getLocation().toOSString(), data);
-				
-				return new IDataset[]{(IDataset)result.get("x"), (IDataset)result.get("y")};
+				return pythonProxy.filter1D(x, y);
 			} catch (Exception ne) {
 				logger.debug("Cannot use "+file.getName()+" for 1D filter, wrong implementation of method.");
 				return new IDataset[]{x,y};
 			}
-
 		}
 		
 		@Override
 		protected Object[] filter(IDataset image,    List<IDataset> axes) {
-			
 			try {
-				final Map<String, IDataset> data = new HashMap<String, IDataset>(2);
-				data.put("image", image);
-				data.put("xaxis", axes!=null&&axes.size()==2 ? axes.get(0): null);
-				data.put("yaxis", axes!=null&&axes.size()==2 ? axes.get(1): null);
+				IDataset xaxis =  axes!=null&&axes.size()==2 ? axes.get(0): null;
+				IDataset yaxis =  axes!=null&&axes.size()==2 ? axes.get(1): null;
+				IDataset[] data = pythonProxy.filter2D(image, xaxis, yaxis);
 				
-				final Map<String, ? extends Object> result = service.runScript(file.getLocation().toOSString(), data);
-				
-				image = (IDataset)result.get("image");
-				IDataset xAxis = (IDataset)result.get("xaxis");
-				IDataset yAxis = (IDataset)result.get("yaxis");
-				return new Object[]{image,Arrays.asList(new IDataset[]{xAxis, yAxis})};
-				
+				return new Object[]{data[0], Arrays.asList(data[0], data[1])};
 			} catch (Exception ne) {
-				logger.debug("Cannot use "+file.getName()+" for 2D filter, wrong implementation of method.");
+				logger.debug("Cannot use "+file.getName()+" for 1D filter, wrong implementation of method.");
 				return new Object[]{image,axes};
 			}
-
 		}
 
 	}
