@@ -1,9 +1,9 @@
-a#workbench-browsing img { background-image : url(graphics/data_browsing_intro45.jpg); }
-a#workbench-browsing:hover img { background-image : url(graphics/data_browsing_intro52.jpg); }
+a#workbench-browsing img { background-image : url(graphics/data_browsing_intro45.png); }
+a#workbench-browsing:hover img { background-image : url(graphics/data_browsing_intro52.png); }
 
 a#dpitem img { background-image : url(graphics/folder48.png); }
 a#dpitem:hover img { background-image : url(graphics/folder52.png); }
 
-a#sheetitem img { background-image : url(graphics/text-readme48.png); }
-a#sheetitem:hover img { background-image : url(graphics/text-readme52.png); }
+a#sheetitem img { background-image : url(graphics/text_readme48.png); }
+a#sheetitem:hover img { background-image : url(graphics/text_readme52.png); }
 
