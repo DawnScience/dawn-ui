@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 
 import org.dawb.common.services.ISystemService;
@@ -42,6 +41,7 @@ import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.dawnsci.plotting.views.EmptyTool;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.draw2d.MouseListener;
 import org.eclipse.draw2d.MouseMotionListener;
 import org.eclipse.draw2d.geometry.Point;
@@ -249,7 +249,7 @@ public abstract class AbstractPlottingSystem implements IPlottingSystem, IToolPa
 		return null; // TODO
 	}
 
-	private List<ITraceListener> traceListeners;
+	private ListenerList traceListeners;
 	
 	/**
 	 * Call to be notified of events which require the plot
@@ -259,8 +259,8 @@ public abstract class AbstractPlottingSystem implements IPlottingSystem, IToolPa
 	 */
 	@Override
 	public void addTraceListener(final ITraceListener l) {
-		if (traceListeners==null) traceListeners = new ArrayList<ITraceListener>(7);
-		if (!traceListeners.contains(l)) traceListeners.add(l);
+		if (traceListeners==null) traceListeners = new ListenerList(ListenerList.IDENTITY);
+		traceListeners.add(l);
 	}
 	
 	/**
@@ -277,27 +277,27 @@ public abstract class AbstractPlottingSystem implements IPlottingSystem, IToolPa
 	
 	public void fireTracesAltered(final TraceEvent evt) {
 		if (traceListeners==null) return;
-		for (ITraceListener l : traceListeners) {
-			l.tracesUpdated(evt);
+		for (Object l : traceListeners.getListeners()) {
+			((ITraceListener)l).tracesUpdated(evt);
 		}
 	}
 	protected void fireTraceCreated(final TraceEvent evt) {
 		if (traceListeners==null) return;
-		for (ITraceListener l : traceListeners) {
-			l.traceCreated(evt);
+		for (Object l : traceListeners.getListeners()) {
+			((ITraceListener)l).traceCreated(evt);
 		}
 	}
 	public void fireTraceUpdated(final TraceEvent evt) {
 		if (traceListeners==null) return;
-		for (ITraceListener l : traceListeners) {
-			l.traceUpdated(evt);
+		for (Object l : traceListeners.getListeners()) {
+			((ITraceListener)l).traceUpdated(evt);
 		}
 	}
 	public void fireWillPlot(final TraceWillPlotEvent evt) {
 		if (traceListeners==null) return;
-		for (ITraceListener l : traceListeners) {
+		for (Object l : traceListeners.getListeners()) {
 			try {
-			    l.traceWillPlot(evt);
+				((ITraceListener)l).traceWillPlot(evt);
 			} catch (Throwable usuallyIgnored) {
 				// Does not stack trace when deployed in product.
 				logger.trace("Cannot call traceWillPlot!", usuallyIgnored);
@@ -306,28 +306,28 @@ public abstract class AbstractPlottingSystem implements IPlottingSystem, IToolPa
 	}
 	public void fireTraceAdded(final TraceEvent evt) {
 		if (traceListeners==null) return;
-		for (ITraceListener l : traceListeners) {
-			l.traceAdded(evt);
+		for (Object l : traceListeners.getListeners()) {
+			((ITraceListener)l).traceAdded(evt);
 		}
 	}
 	protected void fireTraceRemoved(final TraceEvent evt) {
 		if (traceListeners==null) return;
-		for (ITraceListener l : traceListeners) {
-			l.traceRemoved(evt);
+		for (Object l : traceListeners.getListeners()) {
+			((ITraceListener)l).traceRemoved(evt);
 		}
 	}
 
 	protected void fireTracesCleared(final TraceEvent evt) {
 		if (traceListeners==null) return;
-		for (ITraceListener l : traceListeners) {
-			l.tracesRemoved(evt);
+		for (Object l : traceListeners.getListeners()) {
+			((ITraceListener)l).tracesRemoved(evt);
 		}
 	}
 	
 	public void fireTracesPlotted(final TraceEvent evt) {
 		if (traceListeners==null) return;
-		for (ITraceListener l : traceListeners) {
-			l.tracesAdded(evt);
+		for (Object l : traceListeners.getListeners()) {
+			((ITraceListener)l).tracesAdded(evt);
 		}
 	}
 	

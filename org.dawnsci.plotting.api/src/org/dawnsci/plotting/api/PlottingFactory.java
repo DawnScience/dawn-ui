@@ -145,6 +145,10 @@ public class PlottingFactory {
 		} catch (Exception e) {
 			logger.error("Cannot unregister JMX plotting system!", e);
 		}
+		if (filterCache!=null && filterCache.containsKey(plotName)) {
+			final List<IFilterDecorator> decorators = filterCache.remove(plotName);
+			for (IFilterDecorator decorator : decorators) decorator.dispose();
+		}
 		if (plottingSystems==null) return null;
 		return plottingSystems.remove(plotName);
 	}
@@ -298,12 +302,21 @@ public class PlottingFactory {
 		return plottingSystems.values().toArray(new IPlottingSystem[plottingSystems.size()]);
 	}
 	
+	private static Map<String,List<IFilterDecorator>> filterCache;
 	/**
 	 * 
 	 * @param system
 	 * @return a new decorator which will filter the data being plotting by the system.
 	 */
 	public static IFilterDecorator createFilterDecorator(IPlottingSystem system) {
-		return new FilterDecoratorImpl(system);
+		if (filterCache==null) filterCache = new HashMap<String, List<IFilterDecorator>>();
+		List<IFilterDecorator> decorators = (List<IFilterDecorator>)filterCache.get(system.getPlotName());
+		if (decorators==null) {
+			decorators = new ArrayList<IFilterDecorator>();
+			filterCache.put(system.getPlotName(), decorators);
+		}
+		FilterDecoratorImpl dec = new FilterDecoratorImpl(system);
+		decorators.add(dec);
+		return dec;
 	}
 }

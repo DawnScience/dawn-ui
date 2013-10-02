@@ -54,5 +54,11 @@ public interface IPlottingFilter {
 	 * @return a list of traces already processed by this filter.
 	 */
 	public List<ITrace> getFilteredTraces();
+	
+	/**
+	 * Called when the plotting system is disposed and the filter is
+	 * no longer active.
+	 */
+	public void dispose();
 
 }

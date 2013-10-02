@@ -165,7 +165,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	private IPropertyChangeListener  propListener;
 	private ArrayList<IAction>       dataComponentActions;
 	private Composite                container;
-	private DataFilter               dataFilter;
+	private DataTableFilter               dataFilter;
 
 	private IAction                  dataReduction;
 	private ITraceListener           traceListener;
@@ -354,7 +354,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 			readAxisSettings(".xAxis", getPlottingSystem().getSelectedXAxis());
 			readAxisSettings(".yAxis", getPlottingSystem().getSelectedYAxis());
 			
-			this.dataFilter = new DataFilter();
+			this.dataFilter = new DataTableFilter();
 			dataViewer.addFilter(dataFilter);
 			searchText.addModifyListener(new ModifyListener() {		
 				@Override
@@ -631,7 +631,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 				final Object sel           = ((StructuredSelection)dataViewer.getSelection()).getFirstElement();
 				final ITransferableDataObject ob  = (ITransferableDataObject)sel;
 				if (ob==null) return;
-				deleteFilterFile(ob);
+				clearFilterFile(ob);
 			}
 		};
 		bars.getToolBarManager().add(clearFilter);
@@ -787,7 +787,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
         
         // TODO validate script?
         
-        final String filterPath = "/data_big/src/ysquared_example_1d_filter.py"; //TODO not hard coded!
+        final String filterPath = "/data/src/filter_example.py"; //TODO not hard coded!
         
         if (ob.getFilterPath()!=null) {
         	boolean ok = MessageDialog.openConfirm(Display.getDefault().getActiveShell(), "Confirm Overwrite", 
@@ -802,7 +802,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
         // We now create a filter which calls the associated cpython interperter to filter the data.
         if (filterProvider==null) filterProvider = new PlotDataFilterProvider(getPlottingSystem());
         try {
-        	filterProvider.createFilter(ob, 1); // TODO Rank from dialog
+        	filterProvider.createFilter(ob); // TODO Rank from dialog
         } catch (Exception ne) {
         	ob.setFilterPath(null);
         	String message = ne.getMessage()!=null ? ne.getMessage() : "Filter '"+ob.getFilterPath()+"' is not a valid python script!";
@@ -815,11 +815,11 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	}
 	
 	
-	protected void deleteFilterFile(ITransferableDataObject ob) {
+	protected void clearFilterFile(ITransferableDataObject ob) {
 
 		if (ob==null) return;
-		ob.setFilterPath(null);
 		if (filterProvider!=null) filterProvider.deleteFilter(ob); 
+		ob.setFilterPath(null);
 		
         ob.setChecked(!ob.isChecked());
         selectionChanged(ob, true);
@@ -1642,6 +1642,10 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		if (dataViewer!=null && !dataViewer.getControl().isDisposed()) {
 			dataViewer.getTable().removeMouseListener(this);
 			dataViewer.getTable().removeKeyListener(this);
+		}
+		if (filterProvider!=null) {
+			filterProvider.dispose();
+			filterProvider = null;
 		}
 	}
 

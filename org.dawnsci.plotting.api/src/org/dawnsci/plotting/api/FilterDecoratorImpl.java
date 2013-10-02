@@ -77,6 +77,7 @@ class FilterDecoratorImpl implements IFilterDecorator {
 			processingAllowed = true;
 		}
 		filters.remove(filter);
+		filter.dispose();
 	}
 
 	@Override
@@ -137,6 +138,7 @@ class FilterDecoratorImpl implements IFilterDecorator {
 
 	@Override
 	public void dispose() {
+		for (IPlottingFilter filter : filters) filter.dispose();
 		isDisposed = true;
 		clear();
 		system.removeTraceListener(listener);

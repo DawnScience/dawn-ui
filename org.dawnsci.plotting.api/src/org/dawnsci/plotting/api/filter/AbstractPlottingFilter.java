@@ -176,4 +176,8 @@ public abstract class AbstractPlottingFilter implements IPlottingFilter {
 		this.active = active;
 	}
 
+	@Override
+	public void dispose() {
+		
+	}
 }

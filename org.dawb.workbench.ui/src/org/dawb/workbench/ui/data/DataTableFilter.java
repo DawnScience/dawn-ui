@@ -17,7 +17,7 @@ import org.eclipse.jface.viewers.ViewerFilter;
 
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 
-class DataFilter extends ViewerFilter {
+class DataTableFilter extends ViewerFilter {
 
 	private String    searchString;
 	private IMetaData meta;

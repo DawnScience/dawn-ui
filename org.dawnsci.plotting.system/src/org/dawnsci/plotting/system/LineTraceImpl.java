@@ -343,6 +343,7 @@ public class LineTraceImpl implements ILineTrace {
 		
 		if (sys!=null) try {
 			final TraceWillPlotEvent evt = new TraceWillPlotEvent(this, false);
+			evt.setLineData(xData, yData);
 			sys.fireWillPlot(evt);
 			if (!evt.doit) return;
 			if (evt.isNewLineDataSet()) {

@@ -57,6 +57,15 @@ public class DataProjectUtils {
 	        if (dataDir.exists()) {
 	        	FileUtils.recursiveCopy(dataDir, new File(examples.getLocation().toOSString()));
 	        }
+	        
+	        final IFolder src = data.getFolder("src");
+	        src.create(true, true, mon);
+
+	        final File pythonDir     = new File(examplesDir, "python");
+	        if (pythonDir.exists()) {
+	        	FileUtils.recursiveCopy(pythonDir, new File(src.getLocation().toOSString()));
+	        }
+
 		}
 	        
         DataProjectUtils.addDataNature(data, mon);
