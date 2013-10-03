@@ -313,15 +313,6 @@
             name="Data Project"
             project="true">
       </wizard>
-   </extension>
-   <extension
-         point="org.eclipse.ui.startup">
-      <startup
-            class="org.dawb.workbench.ui.project.DataProjectCreator">
-      </startup>
-   </extension>
-   <extension
-         point="org.eclipse.ui.newWizards">
       <wizard
             category="org.edna.common.ui.project.DataCategory"
             class="org.dawb.hdf5.editor.H5Wizard"
@@ -330,6 +321,18 @@
             name="H5 File"
             project="false">
       </wizard>
+      <wizard
+            category="org.edna.common.ui.project.DataCategory"
+            class="org.dawb.workbench.ui.data.wizard.PythonFilterWizard"
+            id="org.dawb.workbench.ui.data.pythonFilterWizard"
+            name="Python Filter">
+      </wizard>
+   </extension>
+   <extension
+         point="org.eclipse.ui.startup">
+      <startup
+            class="org.dawb.workbench.ui.project.DataProjectCreator">
+      </startup>
    </extension>
    <extension
          point="org.eclipse.ui.views">

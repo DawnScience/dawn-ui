@@ -10,8 +10,10 @@
 
 package org.dawb.workbench.ui.data;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,6 +38,7 @@ import org.dawb.common.util.io.FileUtils;
 import org.dawb.common.util.io.PropUtils;
 import org.dawb.gda.extensions.util.DatasetTitleUtils;
 import org.dawb.workbench.ui.Activator;
+import org.dawb.workbench.ui.data.wizard.PythonFilterWizard;
 import org.dawb.workbench.ui.editors.preference.EditorConstants;
 import org.dawb.workbench.ui.editors.preference.EditorPreferencePage;
 import org.dawb.workbench.ui.transferable.TransferableDataObject;
@@ -779,16 +782,24 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 
         if (ob==null) return;
         
-//        ResourceSelectionDialog dialog = new ResourceSelectionDialog(Display.getDefault().getActiveShell(), EclipseUtils.getIFile(editor.getEditorInput()).getProject(), "Choose python script");
-//        int code = dialog.open();
-//        if (code!=Window.OK) return;
-//        
-//        final IPath  path       = (IPath)dialog.getResult()[0];
-        
-        // TODO validate script?
-        
-        final String filterPath = "/data/src/filter_example.py"; //TODO not hard coded!
-        
+		PythonFilterWizard wiz=null;
+		try {
+			wiz = (PythonFilterWizard)EclipseUtils.openWizard(PythonFilterWizard.ID, false);
+		} catch (Exception e) {
+			logger.error("Cannot open wizard "+PythonFilterWizard.ID, e);
+		}
+		
+		// TODO Should be non modal, it takes a while.
+		WizardDialog wd = new  WizardDialog(Display.getDefault().getActiveShell(), wiz);
+		wd.setTitle(wiz.getWindowTitle());
+		wd.create();
+		wd.getShell().setSize(650, 800);
+		DialogUtils.centerDialog(Display.getCurrent().getActiveShell(), wd.getShell());
+		wd.open();
+
+		final String filterPath =  wiz.getPythonPath();
+		if (filterPath==null) return;
+         
         if (ob.getFilterPath()!=null) {
         	boolean ok = MessageDialog.openConfirm(Display.getDefault().getActiveShell(), "Confirm Overwrite", 
         			                  "Do you want to replace filter '"+ob.getFilterPath()+"' with '"+filterPath);
