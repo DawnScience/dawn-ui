@@ -134,8 +134,9 @@ class AxisEditingSupport extends EditingSupport {
 			final DimsDataList ddl     = system.getDimsDataList();
 				
 			List<String> names = new ArrayList<String>(7);
-			// Nexus axes
-			if (HierarchicalDataFactory.isHDF5(sliceObject.getPath())) try {
+			
+			boolean isHDF5 = HierarchicalDataFactory.isHDF5(sliceObject.getPath());
+			if (isHDF5) try {
 				if (sliceObject.getPath()!=null && sliceObject.getName()!=null) {
 				    names.addAll(NexusUtils.getAxisNames(sliceObject.getPath(), sliceObject.getName(), idim));
 				}
@@ -147,7 +148,7 @@ class AxisEditingSupport extends EditingSupport {
 			if (!ddl.isExpression()) {				
 				// We add any datasets in the DataHolder which are the right size to be this
 				// axis.
-				names.addAll(getNonNexusDataAxes(idim));
+				names.addAll(getNonNexusDataAxes(idim, names));
 			}
 
 			
@@ -209,7 +210,7 @@ class AxisEditingSupport extends EditingSupport {
 	 * @param idim
 	 * @return empty list if none of right size or list of all the right size otherwise
 	 */
-	private List<String> getNonNexusDataAxes(int idim) {
+	private List<String> getNonNexusDataAxes(int idim, List<String> alreadyFound) {
 		
 		final List<String> ret = new ArrayList<String>(3);
 		if (system.getData().getVariableManager()==null) return ret;
@@ -217,6 +218,7 @@ class AxisEditingSupport extends EditingSupport {
 		final int size = system.getData().getLazySet().getShape()[idim-1];
 
         for (String dataName : system.getData().getVariableManager().getDataNames()) {
+        	if (alreadyFound.contains(dataName)) continue;
 			final ILazyDataset set = system.getData().getVariableManager().getDataValue(dataName, new IMonitor.Stub());
 			if (set!=null && set.getRank()==1 && set.getSize()==size) {
 				ret.add(dataName);

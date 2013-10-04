@@ -73,7 +73,7 @@ class SliceColumnLabelProvider extends ColumnLabelProvider implements IStyledLab
 			break;
 		case 3:
 			if (system.getCurrentSlice()!=null) {
-				final String axisName = SliceUtils.getAxisName(system.getCurrentSlice(), data);
+				final String axisName = SliceUtils.getAxisLabel(system.getCurrentSlice(), data);
 				if (axisName!=null) ret.append(axisName);
 			}
 		default:

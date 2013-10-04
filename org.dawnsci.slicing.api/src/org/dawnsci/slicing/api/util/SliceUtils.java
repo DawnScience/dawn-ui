@@ -147,10 +147,30 @@ public class SliceUtils {
      * @return
      * @throws Exception
      */
-    public static String getAxisName(SliceObject sliceObject, DimsData data) {
+    public static String getAxisLabel(SliceObject sliceObject, DimsData data) {
     	
-    	return getAxisName(sliceObject, data, "indices");
+    	final String axisName = getAxisName(sliceObject, data, "indices");
+    	return getAxisLabel(sliceObject, axisName);
     }
+    
+    /**
+     * 
+     * @param sliceObject
+     * @param axisName
+     * @return
+     */
+    private static String getAxisLabel(SliceObject sliceObject, String axisName) {
+
+    	final String dataName = sliceObject.getName();
+    	String axisLabel = axisName;
+    	try {
+    	   final String parentName = dataName.substring(0,dataName.lastIndexOf('/'));
+    	   if (axisLabel.startsWith(parentName)) return axisLabel.substring(parentName.length()+1);
+    	} catch (Throwable ne) {
+    		return axisLabel;
+    	}
+    	return axisLabel;
+   }
     /**
      * 
      * @param sliceObject
@@ -205,9 +225,10 @@ public class SliceUtils {
 		
 		IDataset axis = null;
         try {
-        	final String axisName = getAxisName(sliceObject, data);
+        	final String axisName = getAxisLabel(sliceObject, data);
         	if (varMan!=null) {
-        		axis = varMan.getDataValue(axisName, null);
+        		ILazyDataset la = varMan.getDataValue(axisName, null);
+        		axis = la instanceof IDataset ? (IDataset)la : la.getSlice();
         	}
         	if (axis==null) {
                 axis = SliceUtils.getAxis(sliceObject, varMan, axisName, false, monitor);
@@ -456,7 +477,10 @@ public class SliceUtils {
 		}
 		
     	if (varMan!=null && varMan.isDataName(axisName, null)) {
-    		return varMan.getDataValue(axisName, null);
+    		ILazyDataset la = varMan.getDataValue(axisName, null);
+    		IDataset da = la instanceof IDataset ? (IDataset)la : la.getSlice();
+            da.setName(getAxisLabel(currentSlice, origName));
+            return da;
     	}
 
 		IDataset axis = null;
@@ -518,7 +542,7 @@ public class SliceUtils {
 			axis = axis.squeeze();
 		}
 		
-		axis.setName(origName);
+		axis.setName(getAxisLabel(currentSlice, origName));
 	    return axis;
 
 	}
@@ -609,28 +633,48 @@ public class SliceUtils {
 		}
 	}
 	
+	/**
+	 * Deals with loaders which provide data names of size > 1
+	 * 
+	 * 
+	 * @param meta
+	 * @return
+	 */
+	public static final List<String> getSlicableNames(IDataHolder holder) {
+
+		return getSlicableNames(holder, 2, 9);
+	}
 	
 	/**
 	 * Deals with loaders which provide data names of size 1
 	 * 
 	 * 
 	 * @param meta
+	 * @param minSize - min size of any one dimension
+	 * @param the list of dTypes which are not slicable data or now required in the list of names.
 	 * @return
 	 */
-	public static final Collection<String> getSlicableNames(IDataHolder holder) {
+	public static final List<String> getSlicableNames(IDataHolder holder, int minSize, int... dTypeRestrictions) {
 				
+		if (minSize<=0) minSize = 2;
+		
 		Collection<String> names = Arrays.asList(holder.getNames());
 		if (names==null||names.isEmpty()) return null;
 		
-		Collection<String> ret   = new ArrayList<String>(names.size());
+		List<Integer> restrictions = new ArrayList<Integer>(10);
+		if (dTypeRestrictions!=null) for (Integer integer : dTypeRestrictions) restrictions.add(integer);
+		
+		List<String> ret   = new ArrayList<String>(names.size());
 		for (String name : names) {
 			ILazyDataset ls = holder.getLazyDataset(name);
+			final int dType = ls.getDtype();
+			if (restrictions.contains(dType)) continue;
 			int[] shape = ls!=null ? ls.getShape() : null;
 			if (shape==null) continue;
 			
 			boolean foundDims = false;
 			for (int i = 0; i < shape.length; i++) {
-				if (shape[i]>1) {
+				if (shape[i]>minSize) {
 					foundDims = true;
 					break;
 				}

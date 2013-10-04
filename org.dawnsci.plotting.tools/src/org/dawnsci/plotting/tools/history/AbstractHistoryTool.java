@@ -58,7 +58,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
-import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
 import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 import uk.ac.diamond.scisoft.analysis.utils.OSUtils;
@@ -562,7 +561,7 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 	}	
 
 	@Override
-	public IDataset getDataValue(String name, IMonitor monitor) {
+	public ILazyDataset getDataValue(String name, IMonitor monitor) {
 		final Map<String, HistoryBean> history = getHistoryCache();
 		for (String key : history.keySet()) {
 			if (key.equals(name)) return history.get(key).getData();
