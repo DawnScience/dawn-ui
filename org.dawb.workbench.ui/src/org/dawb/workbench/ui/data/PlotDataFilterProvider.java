@@ -8,12 +8,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.dawb.common.python.rpc.AnalysisRpcPythonPyDevService;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlottingFactory;
 import org.dawnsci.plotting.api.filter.IFilterDecorator;
 import org.dawnsci.plotting.api.filter.IPlottingFilter;
 import org.dawnsci.plotting.api.filter.UniqueNamedPlottingFilter;
+import org.dawnsci.python.rpc.AnalysisRpcPythonPyDevService;
 import org.dawnsci.slicing.api.data.ITransferableDataObject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
