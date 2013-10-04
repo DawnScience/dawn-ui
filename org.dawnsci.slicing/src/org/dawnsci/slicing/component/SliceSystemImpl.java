@@ -794,7 +794,7 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		return dimsDataList;
 	}
 	public Map<Integer,String> getAxesNames() {
-		return sliceObject.getNexusAxes();
+		return sliceObject.getAxisNames();
 	}
 
 	public void setDimsDataList(DimsDataList dimsDataList) {
@@ -806,6 +806,7 @@ public class SliceSystemImpl extends AbstractSliceSystem {
     @Override
 	public void refresh() {
 		viewer.refresh();
+		axisEditingSupport.updateAxesChoices();
 	}
 
 	public ILazyDataset getLazyDataset() {

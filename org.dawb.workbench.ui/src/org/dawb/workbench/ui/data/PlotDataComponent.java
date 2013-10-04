@@ -10,10 +10,8 @@
 
 package org.dawb.workbench.ui.data;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -598,6 +596,9 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 				checkedObject.setChecked(!checkedObject.isChecked());
 				selectionChanged(checkedObject, true);
 				dataViewer.refresh();
+				
+				final ISliceSystem system = (ISliceSystem)editor.getAdapter(ISliceSystem.class);
+				if (system!=null) system.refresh();
 			}
 		};
 		bars.getToolBarManager().add(paste);
@@ -1567,6 +1568,15 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		}
         return null;
 	}
+	@Override
+	public boolean isDataName(String dataName, IMonitor monitor) {
+		for (ITransferableDataObject ob : data) {
+			if (ob.getName().equals(dataName)) {
+				return true;
+			}
+		}
+        return false;
+	}	
 
 
 	@Override

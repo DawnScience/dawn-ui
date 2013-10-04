@@ -161,7 +161,7 @@ public class SliceUtils {
     public static String getAxisName(SliceObject sliceObject, DimsData data, String alternateName) {
     	
     	try {
-			Map<Integer,String> dims = sliceObject.getNexusAxes();
+			Map<Integer,String> dims = sliceObject.getAxisNames();
 			String axisName = dims.get(data.getDimension()+1); // The data used for this axis
 			if (axisName==null || "".equals(axisName)) return alternateName;
 			return axisName;
@@ -210,7 +210,7 @@ public class SliceUtils {
         		axis = varMan.getDataValue(axisName, null);
         	}
         	if (axis==null) {
-                axis = SliceUtils.getNexusAxis(sliceObject, axisName, false, monitor);
+                axis = SliceUtils.getAxis(sliceObject, varMan, axisName, false, monitor);
         	}
         } catch (Exception ne) {
         	axis = null;
@@ -297,12 +297,10 @@ public class SliceUtils {
 		boolean requireScale = plottingSystem.isRescale()
 				               || type!=plottingSystem.getPlotType();
 		
-		final String dataName = sliceSource.getDataName();
-		// TODO Tell the trace its data name somehow.
 		
 		if (type==PlotType.XY) {
 			plottingSystem.clear();
-			final IDataset x = getNexusAxis(currentSlice, slice.getShape()[0], currentSlice.getX()+1, true, monitor);
+			final IDataset x = getAxis(currentSlice, sliceSource.getVariableManager(), slice.getShape()[0], currentSlice.getX()+1, true, monitor);
 			plottingSystem.setXFirst(true);
 			plottingSystem.setPlotType(type);
 			plottingSystem.createPlot1D(x, Arrays.asList((IDataset)slice), Arrays.asList(sliceSource.getDataName()), slice.getName(), monitor);
@@ -315,7 +313,7 @@ public class SliceUtils {
 			
 		} else if (type==PlotType.XY_STACKED || type==PlotType.XY_STACKED_3D) {
 			
-			final IDataset xAxis = getNexusAxis(currentSlice, slice.getShape()[0], currentSlice.getX()+1, true, monitor);
+			final IDataset xAxis = getAxis(currentSlice, sliceSource.getVariableManager(), slice.getShape()[0], currentSlice.getX()+1, true, monitor);
 			plottingSystem.clear();
 			// We separate the 2D image into several 1d plots
 			final int[]         shape = slice.getShape();
@@ -354,8 +352,8 @@ public class SliceUtils {
 			
 		} else if (type==PlotType.IMAGE || type==PlotType.SURFACE){
 			plottingSystem.setPlotType(type);
-			IDataset y = getNexusAxis(currentSlice, slice.getShape()[0], currentSlice.getX()+1, true, monitor);
-			IDataset x = getNexusAxis(currentSlice, slice.getShape()[1], currentSlice.getY()+1, true, monitor);		
+			IDataset y = getAxis(currentSlice, sliceSource.getVariableManager(), slice.getShape()[0], currentSlice.getX()+1, true, monitor);
+			IDataset x = getAxis(currentSlice, sliceSource.getVariableManager(), slice.getShape()[1], currentSlice.getY()+1, true, monitor);		
 			
 			// Nullify user objects because the ImageHistoryTool uses
 			// user objects to know if the image came from it. Since we
@@ -391,16 +389,21 @@ public class SliceUtils {
 	 * 
 	 * @param currentSlice
 	 * @param length of axis
-	 * @param inexusAxis nexus dimension (starting with 1)
+	 * @param iAxis  dimension (starting with 1 as in nexus)
 	 * @param requireIndicesOnError
 	 * @param monitor
 	 * @return
 	 * @throws Exception
 	 */
-	public static IDataset getNexusAxis(SliceObject currentSlice, int length, int inexusAxis, boolean requireIndicesOnError, final IProgressMonitor  monitor) throws Exception {
+	private static IDataset getAxis(final SliceObject      currentSlice, 
+			                        final IVariableManager varMan, 
+			                        int                    length, 
+			                        int                    iAxis, 
+			                        boolean                requireIndicesOnError, 
+			                        final IProgressMonitor monitor) throws Exception {
 		
 		
-		String axisName = currentSlice.getNexusAxis(inexusAxis);
+		String axisName = currentSlice.getAxisName(iAxis);
 		final IAnalysisService service = (IAnalysisService)ServiceManager.getService(IAnalysisService.class);
 		if ("indices".equals(axisName) || axisName==null) {
 			IDataset indices = service.arange(length, IAnalysisService.INT); // Save time
@@ -414,7 +417,7 @@ public class SliceUtils {
 		}
 		
 		try {
-			return getNexusAxis(currentSlice, axisName, true, monitor);
+			return getAxis(currentSlice, varMan, axisName, true, monitor);
 			
 		} catch (Throwable ne) {
 			logger.error("Cannot get nexus axis during slice!", ne);
@@ -438,10 +441,11 @@ public class SliceUtils {
 	 * @param monitor
 	 * @return
 	 */
-	public static IDataset getNexusAxis(final SliceObject currentSlice, 
-										      String origName, 
-										final boolean requireUnit,
-										final IProgressMonitor  monitor) throws Throwable {
+	public static IDataset getAxis(final SliceObject currentSlice, 
+			                       final IVariableManager varMan,
+										 String      origName, 
+								   final boolean     requireUnit,
+								   final IProgressMonitor  monitor) throws Throwable {
 		
 		int dimension = -1;
 		String axisName = origName;
@@ -451,6 +455,10 @@ public class SliceUtils {
 			dimension = Integer.parseInt(sa[1])-1;
 		}
 		
+    	if (varMan!=null && varMan.isDataName(axisName, null)) {
+    		return varMan.getDataValue(axisName, null);
+    	}
+
 		IDataset axis = null;
 		
 		if (axisName.endsWith("[Expression]")) {

@@ -84,7 +84,7 @@ public abstract class AbstractSlicingTool implements ISlicingTool {
 			IDataset axis = null;
 			try {
 				final String name = names.get(dd.getDimension()+1);
-				axis = SliceUtils.getNexusAxis(getSlicingSystem().getCurrentSlice(), name, false, null);
+				axis = SliceUtils.getAxis(getSlicingSystem().getCurrentSlice(), getSlicingSystem().getData().getVariableManager(), name, false, null);
 			} catch (Throwable e) {
 				ret.add(null);
 				continue;

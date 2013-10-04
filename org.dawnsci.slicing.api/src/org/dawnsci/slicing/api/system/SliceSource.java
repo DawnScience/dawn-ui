@@ -74,6 +74,11 @@ public class SliceSource {
 			@Override
 			public IDataset getDataValue(String name, IMonitor monitor) {
 				return holder.getDataset(name);
+			}
+
+			@Override
+			public boolean isDataName(String dataName, IMonitor monitor) {
+			    return holder.contains(dataName);
 			}			
 		};
 	}

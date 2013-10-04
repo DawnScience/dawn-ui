@@ -556,6 +556,12 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 	}	
 
 	@Override
+	public boolean isDataName(String name, IMonitor monitor) {
+		final Map<String, HistoryBean> history = getHistoryCache();
+		return history.containsKey(name);
+	}	
+
+	@Override
 	public IDataset getDataValue(String name, IMonitor monitor) {
 		final Map<String, HistoryBean> history = getHistoryCache();
 		for (String key : history.keySet()) {

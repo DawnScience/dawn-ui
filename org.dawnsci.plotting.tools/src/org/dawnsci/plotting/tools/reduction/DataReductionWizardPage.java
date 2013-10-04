@@ -97,7 +97,7 @@ public class DataReductionWizardPage extends AbstractSliceConversionPage {
 			if (dd.getPlotAxis()==0) {
 				final String name = names.get(dd.getDimension()+1);
 				try {
-					x = SliceUtils.getNexusAxis(sliceComponent.getCurrentSlice(), name, false, null);
+					x = SliceUtils.getAxis(sliceComponent.getCurrentSlice(), sliceComponent.getData().getVariableManager(), name, false, null);
 				} catch (Throwable e) {
 					return null;
 				}
@@ -105,7 +105,7 @@ public class DataReductionWizardPage extends AbstractSliceConversionPage {
 			if (dd.getPlotAxis()==1) {
 				final String name = names.get(dd.getDimension()+1);
 				try {
-					y = SliceUtils.getNexusAxis(sliceComponent.getCurrentSlice(), name, false, null);
+					y = SliceUtils.getAxis(sliceComponent.getCurrentSlice(), sliceComponent.getData().getVariableManager(), name, false, null);
 				} catch (Throwable e) {
 					return null;
 				}

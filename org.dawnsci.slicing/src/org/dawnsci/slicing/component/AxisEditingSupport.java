@@ -64,7 +64,7 @@ class AxisEditingSupport extends EditingSupport {
 					this.getCombo().setItems(items);
 				}
 				
-				final int isel = names.indexOf(system.getCurrentSlice().getNexusAxis(idim));
+				final int isel = names.indexOf(system.getCurrentSlice().getAxisName(idim));
 				if (isel>-1 && getCombo().getSelectionIndex()!=isel) {
 					this.getCombo().select(isel);
 				}
@@ -91,7 +91,7 @@ class AxisEditingSupport extends EditingSupport {
 	protected Object getValue(Object element) {
 		final DimsData data = (DimsData)element;
 		final int idim  = data.getDimension()+1;
-		final String dimensionDataName = system.getCurrentSlice().getNexusAxis(idim);
+		final String dimensionDataName = system.getCurrentSlice().getAxisName(idim);
 		final List<String> names = dimensionNames.get(idim);
 		int selection = names.indexOf(dimensionDataName);
 		return selection>-1 ? selection : 0;
@@ -110,7 +110,7 @@ class AxisEditingSupport extends EditingSupport {
 		} else {
 			axisName = (String)value;
 		}
-		system.getCurrentSlice().setNexusAxis(idim, axisName);
+		system.getCurrentSlice().setAxisName(idim, axisName);
 		system.update(data, true);
 		system.fireAxisChoiceListeners(new AxisChoiceEvent(system, data.getDimension(), axisName));
 
@@ -133,29 +133,23 @@ class AxisEditingSupport extends EditingSupport {
 		try {    	
 			final DimsDataList ddl     = system.getDimsDataList();
 				
-			if (!ddl.isExpression() && !HierarchicalDataFactory.isHDF5(sliceObject.getPath())) {
-				
-				// We add any datasets in the DataHolder which are the right size to be this
-				// axis.
-				final List<String> axes = getNonNexusDataAxes(idim);
-				axes.add("indices");
-				dimensionNames.put(idim, axes);
-				sliceObject.setNexusAxis(idim, axes.get(0));
-
-				return;
-			}
-
-			List<String> names = null;
+			List<String> names = new ArrayList<String>(7);
 			// Nexus axes
-			try {
+			if (HierarchicalDataFactory.isHDF5(sliceObject.getPath())) try {
 				if (sliceObject.getPath()!=null && sliceObject.getName()!=null) {
-				    names = NexusUtils.getAxisNames(sliceObject.getPath(), sliceObject.getName(), idim);
+				    names.addAll(NexusUtils.getAxisNames(sliceObject.getPath(), sliceObject.getName(), idim));
 				}
 			} catch (Throwable ne) {
 				if (!ddl.isExpression()) throw ne; // Expressions, we don't care that
 				                                            // cannot read nexus
 			}
-			names = names!=null ? names : new ArrayList<String>(1);
+			
+			if (!ddl.isExpression()) {				
+				// We add any datasets in the DataHolder which are the right size to be this
+				// axis.
+				names.addAll(getNonNexusDataAxes(idim));
+			}
+
 			
 			// Add any expressions 
 	    	final IExpressionObjectService service = (IExpressionObjectService)PlatformUI.getWorkbench().getService(IExpressionObjectService.class);
@@ -180,22 +174,22 @@ class AxisEditingSupport extends EditingSupport {
 			names.add("indices");
 			dimensionNames.put(idim, names);
 			
-			final String dimensionName = sliceObject.getNexusAxis(idim);
+			final String dimensionName = sliceObject.getAxisName(idim);
 			if (!names.contains(dimensionName)) {
 				// We get an axis not used elsewhere for the default
-				final Map<Integer,String> others = new HashMap<Integer,String>(sliceObject.getNexusAxes());
+				final Map<Integer,String> others = new HashMap<Integer,String>(sliceObject.getAxisNames());
 				others.keySet().removeAll(Arrays.asList(idim));
 				boolean found = false;
 				Collection<String> values = others.values();
 				for (String n : names) {
 					if (!values.contains(n)) {
-						sliceObject.setNexusAxis(idim, n);
+						sliceObject.setAxisName(idim, n);
 						found = true;
 						break;
 					}
 				}
 				if (!found) {
-					sliceObject.setNexusAxis(idim, "indices");
+					sliceObject.setAxisName(idim, "indices");
 					//dimensionNames.put(idim, Arrays.asList("indices"));
 				}
 			}
@@ -204,7 +198,7 @@ class AxisEditingSupport extends EditingSupport {
 			
 		} catch (Throwable e) {
 			logger.info("Cannot assign axes!", e);
-			sliceObject.setNexusAxis(idim, "indices");
+			sliceObject.setAxisName(idim, "indices");
 			dimensionNames.put(idim, Arrays.asList("indices"));
 			
 		}
