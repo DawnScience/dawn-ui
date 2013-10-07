@@ -1,6 +1,7 @@
 package org.dawnsci.plotting.tools.processing;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,6 +72,7 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 	private Text inputLocation;
 	private String inputFile;
 	private Button inputBrowse;
+	private AbstractDataset correctionDataset;
 
 	public ImageNormalisationProcessTool() {
 	}
@@ -328,8 +330,8 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 
 			AbstractDataset ds = (AbstractDataset) originalData.clone();
 
-			AbstractDataset correction = DatasetUtils.tile(tile, ds.getShape()[1]);
-			ds.idivide(correction);
+			correctionDataset = DatasetUtils.tile(tile, ds.getShape()[1]);
+			ds.idivide(correctionDataset);
 
 			userPlotBean.addList("norm", ds.clone());
 			userPlotBean.addList("norm_profile", profile.clone());
@@ -352,5 +354,10 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 			logger.error("Could not load the auxiliary data:"+e);
 		}
 		return auxiliaryData;
+	}
+	
+	@Override
+	public Serializable getToolData() {
+		return correctionDataset;
 	}
 }
