@@ -72,7 +72,6 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 	private Text inputLocation;
 	private String inputFile;
 	private Button inputBrowse;
-	private AbstractDataset correctionDataset;
 
 	public ImageNormalisationProcessTool() {
 	}
@@ -330,11 +329,12 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 
 			AbstractDataset ds = (AbstractDataset) originalData.clone();
 
-			correctionDataset = DatasetUtils.tile(tile, ds.getShape()[1]);
+			AbstractDataset correctionDataset = DatasetUtils.tile(tile, ds.getShape()[1]);
 			ds.idivide(correctionDataset);
 
 			userPlotBean.addList("norm", ds.clone());
 			userPlotBean.addList("norm_profile", profile.clone());
+			userPlotBean.addList("norm_correction", correctionDataset.clone());
 			
 			getPlottingSystem().updatePlot2D(ds, originalAxes, monitor);
 		}
@@ -356,8 +356,4 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 		return auxiliaryData;
 	}
 	
-	@Override
-	public Serializable getToolData() {
-		return correctionDataset;
-	}
 }
