@@ -23,7 +23,6 @@ public class SpectrumPerspective implements IPerspectiveFactory {
 		layout.setEditorAreaVisible(false);
 		
 		layout.setFixed(true);
-		
 		addFastViews(layout);
 		addViewShortcuts(layout);
 		addPerspectiveShortcuts(layout);

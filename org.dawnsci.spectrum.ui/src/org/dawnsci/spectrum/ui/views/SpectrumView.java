@@ -426,7 +426,8 @@ public class SpectrumView extends ViewPart {
 		
 		
 		IAction none = new Action("None", IAction.AS_RADIO_BUTTON) {
-			public void run(){	
+			public void run(){
+				if (!isChecked()) return;
 				dec.clear();
 				replot();
 			}
@@ -434,7 +435,8 @@ public class SpectrumView extends ViewPart {
 		};
 		
 		IAction normalize = new Action("Min/Max", IAction.AS_RADIO_BUTTON) {
-			public void run(){	
+			public void run(){
+				if (!isChecked()) return;
 				dec.clear();
 				dec.addFilter(norm);
 				replot();
@@ -443,7 +445,8 @@ public class SpectrumView extends ViewPart {
 		};
 		
 		IAction stackAc = new Action("Stack", IAction.AS_RADIO_BUTTON) {
-			public void run(){	
+			public void run(){
+				if (!isChecked()) return;
 				dec.clear();
 				dec.addFilter(stack);
 				replot();
@@ -451,7 +454,8 @@ public class SpectrumView extends ViewPart {
 		};
 		
 		IAction offAc = new Action("Offset", IAction.AS_RADIO_BUTTON) {
-			public void run(){	
+			public void run(){
+				if (!isChecked()) return;
 				dec.clear();
 				dec.addFilter(offset);
 				replot();
@@ -469,9 +473,15 @@ public class SpectrumView extends ViewPart {
 	}
 	
 	private void replot(){
+		
 		final Collection<ITrace> traces = system.getTraces(ILineTrace.class);
 		for (ITrace trace: traces) system.removeTrace(trace);
-		for (ITrace trace: traces) system.addTrace(trace);
+		
+		Collection<ISpectrumFile> files = manager.getFiles();
+		for (ISpectrumFile file : files) file.plotAll();
+		//final Collection<ITrace> traces = system.getTraces(ILineTrace.class);
+//		for (ITrace trace: traces) system.removeTrace(trace);
+//		for (ITrace trace: traces) system.addTrace(trace);
 		system.autoscaleAxes();
 	}
 }

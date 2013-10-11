@@ -123,11 +123,6 @@
             isEqualityPattern="true"
             pattern="org.eclipse.ui.edit.text.openLocalFile">
       </activityPatternBinding>
-      <activityPatternBinding
-            activityId="org.dawnsci.spectrum.perspective.removeunwantedaction"
-            isEqualityPattern="false"
-            pattern="org.eclipse.search.*">
-      </activityPatternBinding>
    </extension>
    <extension
          point="org.eclipse.ui.perspectiveExtensions">
@@ -154,6 +149,9 @@
          <actionSet
                id="org.dawnsci.spectrum.ui.fileOpenActionSet">
          </actionSet>
+         <hiddenMenuItem
+               id="org.eclipse.search.menu">
+         </hiddenMenuItem>
       </perspectiveExtension>
    </extension>
    <extension
