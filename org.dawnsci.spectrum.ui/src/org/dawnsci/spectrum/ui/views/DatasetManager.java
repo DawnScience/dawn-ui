@@ -27,7 +27,12 @@ public class DatasetManager {
 	public static DatasetManager create(String path) {
 		
 		try {
-			IMetaData meta = LoaderFactory.getMetaData(path, null);
+			
+			//should work, doesn't
+			//IMetaData meta = LoaderFactory.getMetaData(path, null);
+			DataHolder dh = LoaderFactory.getData(path);
+			IMetaData meta =dh.getMetadata();
+
 			
 			if (meta != null) {
 				return getDatasetManager(meta);

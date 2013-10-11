@@ -123,6 +123,53 @@
             isEqualityPattern="true"
             pattern="org.eclipse.ui.edit.text.openLocalFile">
       </activityPatternBinding>
+      <activityPatternBinding
+            activityId="org.dawnsci.spectrum.perspective.removeunwantedaction"
+            isEqualityPattern="false"
+            pattern="org.eclipse.search.*">
+      </activityPatternBinding>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.dawnsci.spectrum.ui.perspective">
+         <hiddenMenuItem
+               id="org.eclipse.ui.run">
+         </hiddenMenuItem>
+         <hiddenMenuItem
+               id="navigate">
+         </hiddenMenuItem>
+         <hiddenMenuItem
+               id="project">
+         </hiddenMenuItem>
+         <hiddenToolBarItem
+               id="org.eclipse.ui.workbench.navigate">
+         </hiddenToolBarItem>
+         <hiddenToolBarItem
+               id="org.eclipse.debug.ui.launchActionSet">
+         </hiddenToolBarItem>
+         <hiddenToolBarItem
+               id="org.dawb.tango.extensions.shared.memory">
+         </hiddenToolBarItem>
+         <actionSet
+               id="org.dawnsci.spectrum.ui.fileOpenActionSet">
+         </actionSet>
+      </perspectiveExtension>
+   </extension>
+   <extension
+         point="org.eclipse.ui.actionSets">
+      <actionSet
+            id="org.dawnsci.spectrum.ui.fileOpenActionSet"
+            label="Open Spectrum File..."
+            visible="false">
+         <action
+               class="org.dawnsci.spectrum.ui.actions.OpenLocalFileAction"
+               id="org.dawnsci.spectrum.ui.action1"
+               label="Open Spectrum File..."
+               menubarPath="file/new"
+               style="push">
+         </action>
+      </actionSet>
    </extension>
 
 </plugin>

@@ -35,7 +35,7 @@ public class SpectrumActionProvider extends CommonActionProvider {
 	
 	public void fillContextMenu(IMenuManager menu) {
 		if (openAction.isEnabled()) {
-			menu.appendToGroup(ICommonActionConstants.OPEN, openAction);
+			//menu.appendToGroup(ICommonActionConstants.OPEN, openAction);
 		}
 	}
 
