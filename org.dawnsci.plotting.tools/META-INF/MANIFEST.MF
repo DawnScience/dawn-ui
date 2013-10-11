@@ -4,7 +4,7 @@ Bundle-Name: Plotting Tools
 Bundle-SymbolicName: org.dawnsci.plotting.tools;singleton:=true
 Bundle-Version: 1.2.0.qualifier
 Bundle-Activator: org.dawnsci.plotting.tools.Activator
-Bundle-Vendor: Diamond Light Source Ltd.
+Bundle-Vendor: Diamond Light Source
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.ide;bundle-version="3.8.1",

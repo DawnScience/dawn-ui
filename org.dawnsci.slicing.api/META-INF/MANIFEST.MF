@@ -4,7 +4,7 @@ Bundle-Name: Slicing API
 Bundle-SymbolicName: org.dawnsci.slicing.api;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.dawnsci.slicing.api.Activator
-Bundle-Vendor: DLS
+Bundle-Vendor: Diamond Light Source
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  uk.ac.diamond.scisoft.analysis.api;bundle-version="1.0.0",

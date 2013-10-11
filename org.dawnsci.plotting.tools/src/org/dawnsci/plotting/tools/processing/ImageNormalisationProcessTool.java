@@ -1,6 +1,7 @@
 package org.dawnsci.plotting.tools.processing;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -328,11 +329,12 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 
 			AbstractDataset ds = (AbstractDataset) originalData.clone();
 
-			AbstractDataset correction = DatasetUtils.tile(tile, ds.getShape()[1]);
-			ds.idivide(correction);
+			AbstractDataset correctionDataset = DatasetUtils.tile(tile, ds.getShape()[1]);
+			ds.idivide(correctionDataset);
 
 			userPlotBean.addList("norm", ds.clone());
 			userPlotBean.addList("norm_profile", profile.clone());
+			userPlotBean.addList("norm_correction", correctionDataset.clone());
 			
 			getPlottingSystem().updatePlot2D(ds, originalAxes, monitor);
 		}
@@ -353,4 +355,5 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 		}
 		return auxiliaryData;
 	}
+	
 }

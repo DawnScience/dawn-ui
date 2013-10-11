@@ -81,3 +81,4 @@ Export-Package: org.dawb.workbench.ui.editors;
    org.dawb.common.ui.slicing,
    org.eclipse.swt.widgets,
    org.dawb.workbench.ui.editors"
+Bundle-Vendor: Diamond Light Source

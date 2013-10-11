@@ -4,7 +4,7 @@ Bundle-Name: Tools
 Bundle-SymbolicName: org.dawnsci.slicing.tools;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.dawnsci.slicing.tools.Activator
-Bundle-Vendor: DLS
+Bundle-Vendor: Diamond Light Source
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.dawnsci.slicing.api;bundle-version="1.0.0",

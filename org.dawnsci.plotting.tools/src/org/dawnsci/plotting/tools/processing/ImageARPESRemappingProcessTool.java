@@ -471,6 +471,14 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 		userPlotBean.addList("remapped_energy", remappedAxes.get(0).clone());
 		userPlotBean.addList("remapped_k_parallel", remappedAxes.get(1).clone());
 		
+		// items which need to be saved for the batch processing
+		userPlotBean.addRoi("mapping_roi", roi.getROI());
+		userPlotBean.addList("kParallel", kParallel.clone());
+		userPlotBean.addList("kParaAxis", kParaAxis.clone());
+		if (auxiliaryData != null) {
+			userPlotBean.addList("auxiliaryData", auxiliaryData.clone());
+		}
+		
 		getPlottingSystem().updatePlot2D(remappedRegion, remappedAxes , null);
 		
 	}

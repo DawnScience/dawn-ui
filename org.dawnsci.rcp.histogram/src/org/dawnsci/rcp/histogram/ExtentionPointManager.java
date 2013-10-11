@@ -28,7 +28,7 @@ public class ExtentionPointManager {
 	}
 	
 	/**
-	 * Get all the extentions for a particular ID
+	 * Get all the extensions for a particular ID
 	 * @param extensionPointId The ID which is referenced
 	 * @return
 	 */
@@ -146,7 +146,7 @@ public class ExtentionPointManager {
 
 
 	/**
-	 * Get a transfer fucntion contribution by ID
+	 * Get a transfer function contribution by ID
 	 * @param ID the ID of the function
 	 * @return
 	 */
