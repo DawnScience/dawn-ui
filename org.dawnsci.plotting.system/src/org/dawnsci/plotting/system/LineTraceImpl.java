@@ -328,52 +328,59 @@ public class LineTraceImpl implements ILineTrace {
 		return trace;
 	}
 
+	private boolean settingLineData = false;
 	/**
 	 * You may need a repaint after calling this
 	 */
 	@Override
 	public void setData(IDataset xData, IDataset yData) {
 		
-		LightWeightDataProvider prov = (LightWeightDataProvider)trace.getDataProvider();
-		if (prov!=null) {
-			prov.removeDataProviderListener(trace);
-		} else {
-			prov = new LightWeightDataProvider();
-		}
-		
-		if (sys!=null) try {
-			final TraceWillPlotEvent evt = new TraceWillPlotEvent(this, false);
-			evt.setLineData(xData, yData);
-			sys.fireWillPlot(evt);
-			if (!evt.doit) return;
-			if (evt.isNewLineDataSet()) {
-				xData = evt.getXData();
-				yData = evt.getYData();
+		if (settingLineData) return;
+		try {
+			settingLineData = true;
+			LightWeightDataProvider prov = (LightWeightDataProvider)trace.getDataProvider();
+			if (prov!=null) {
+				prov.removeDataProviderListener(trace);
+			} else {
+				prov = new LightWeightDataProvider();
 			}
-		} catch (Throwable ignored) {
-			// We allow things to proceed without a warning.
-		}
-		
-		prov.setData(xData,yData);
-		trace.setDataProvider(prov);
-		
-		if (xData instanceof IErrorDataset) {
-			if (((IErrorDataset)xData).hasErrors() && !errorBarExplicitySet) {
-				trace.setErrorBarEnabled(true);
+			
+			if (sys!=null) try {
+				final TraceWillPlotEvent evt = new TraceWillPlotEvent(this, false);
+				evt.setLineData(xData, yData);
+				sys.fireWillPlot(evt);
+				if (!evt.doit) return;
+				if (evt.isNewLineDataSet()) {
+					xData = evt.getXData();
+					yData = evt.getYData();
+				}
+			} catch (Throwable ignored) {
+				// We allow things to proceed without a warning.
 			}
-		}
-		if (yData instanceof IErrorDataset) {
-			if (((IErrorDataset)yData).hasErrors() && !errorBarExplicitySet) {
-				trace.setErrorBarEnabled(true);
+			
+			prov.setData(xData,yData);
+			trace.setDataProvider(prov);
+			
+			if (xData instanceof IErrorDataset) {
+				if (((IErrorDataset)xData).hasErrors() && !errorBarExplicitySet) {
+					trace.setErrorBarEnabled(true);
+				}
 			}
-		}
-		
-		if (sys!=null) try {
-			if (sys.getTraces().contains(this)) {
-				sys.fireTraceUpdated(new TraceEvent(this));
+			if (yData instanceof IErrorDataset) {
+				if (((IErrorDataset)yData).hasErrors() && !errorBarExplicitySet) {
+					trace.setErrorBarEnabled(true);
+				}
 			}
-		} catch (Throwable ignored) {
-			// We allow things to proceed without a warning.
+			
+			if (sys!=null) try {
+				if (sys.getTraces().contains(this)) {
+					sys.fireTraceUpdated(new TraceEvent(this));
+				}
+			} catch (Throwable ignored) {
+				// We allow things to proceed without a warning.
+			}
+		} finally {
+			settingLineData = false;
 		}
 	}
 
