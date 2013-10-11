@@ -642,7 +642,7 @@ public class SliceUtils {
 	 */
 	public static final List<String> getSlicableNames(IDataHolder holder) {
 
-		return getSlicableNames(holder, 2, 9);
+		return getSlicableNames(holder, 2, String.class);
 	}
 	
 	/**
@@ -654,21 +654,20 @@ public class SliceUtils {
 	 * @param the list of dTypes which are not slicable data or now required in the list of names.
 	 * @return
 	 */
-	public static final List<String> getSlicableNames(IDataHolder holder, int minSize, int... dTypeRestrictions) {
+	public static final List<String> getSlicableNames(IDataHolder holder, int minSize, Class<?>... elementClasses) {
 				
 		if (minSize<=0) minSize = 2;
 		
 		Collection<String> names = Arrays.asList(holder.getNames());
 		if (names==null||names.isEmpty()) return null;
 		
-		List<Integer> restrictions = new ArrayList<Integer>(10);
-		if (dTypeRestrictions!=null) for (Integer integer : dTypeRestrictions) restrictions.add(integer);
+		List<Class<?>> restrictions = new ArrayList<Class<?>>(10);
+		if (elementClasses!=null) for (Class<?> clazz : elementClasses) restrictions.add(clazz);
 		
 		List<String> ret   = new ArrayList<String>(names.size());
 		for (String name : names) {
 			ILazyDataset ls = holder.getLazyDataset(name);
-			final int dType = ls.getDtype();
-			if (restrictions.contains(dType)) continue;
+			if (restrictions.contains(ls.elementClass())) continue;
 			int[] shape = ls!=null ? ls.getShape() : null;
 			if (shape==null) continue;
 			
