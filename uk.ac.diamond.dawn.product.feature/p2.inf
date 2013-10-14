@@ -1,0 +1,12 @@
+# The p2.inf touchpoints to define the "Available Software Sites" operate by writing to disk the first time that the RCP application is run.
+# If the application location is not user-writable, this will silently fail. Example are C:\Program Files on Windows 7+ machines.
+# For an alternative approach, see http://coopology.com/2012/08/eclipse-rcp-setting-p2-repositories-update-sites-programmatically-for-when-p2-inf-fails/
+
+instructions.configure= \
+  org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:http${#58}//opengda.org/DawnDiamond/master/updates/stable/,type:0,name:Dawn,enabled:true); \
+  org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:http${#58}//opengda.org/DawnDiamond/master/updates/stable/,type:1,name:Dawn,enabled:true); \
+  org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:http${#58}//opengda.org/DawnDiamond/master/updates/beta/,type:0,name:Dawn (beta version),enabled:false); \
+  org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:http${#58}//opengda.org/DawnDiamond/master/updates/beta/,type:1,name:Dawn (beta version),enabled:false); \
+  org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:http${#58}//opengda.org/DawnDiamond/master/updates/snapshot/,type:0,name:Dawn (snapshot version),enabled:false); \
+  org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:http${#58}//opengda.org/DawnDiamond/master/updates/snapshot/,type:1,name:Dawn (snapshot version),enabled:false);
+
