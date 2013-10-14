@@ -10,6 +10,7 @@ import org.dawb.common.ui.components.cell.ScaleCellEditor;
 import org.dawb.common.ui.preferences.ViewConstants;
 import org.dawnsci.common.widgets.celleditor.SpinnerCellEditorWithPlayButton;
 import org.dawnsci.slicing.api.system.DimsData;
+import org.dawnsci.slicing.api.system.AxisType;
 import org.dawnsci.slicing.api.util.SliceUtils;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.viewers.CellEditor;
@@ -165,8 +166,8 @@ class SliceEditingSupport extends EditingSupport {
 		
 		int[] dataShape = system.getLazyDataset().getShape();
 		final DimsData data = (DimsData)element;
-		if (data.isRange()) return rangeEditor;
-		if (Activator.getDefault().getPreferenceStore().getInt(ViewConstants.SLICE_EDITOR)==1) {
+		if (data.isTextRange()) return rangeEditor;
+		if (Activator.getDefault().getPreferenceStore().getInt(SliceConstants.SLICE_EDITOR)==1) {
             spinnerEditor.setMaximum(dataShape[data.getDimension()]-1);
 		    return spinnerEditor;
 		} else {
@@ -184,14 +185,14 @@ class SliceEditingSupport extends EditingSupport {
 		final DimsData data = (DimsData)element;
 		final int[] dataShape = system.getLazyDataset().getShape();
 		if (dataShape[data.getDimension()]<2) return false;
-		if (data.isRange()) return true;
-		return data.getPlotAxis()<0;
+		if (data.isTextRange()) return true;
+		return data.getPlotAxis()==AxisType.SLICE;
 	}
 
 	@Override
 	protected Object getValue(Object element) {
 		final DimsData data = (DimsData)element;
-		if (data.isRange()) return data.getSliceRange() != null ? data.getSliceRange() : "all";
+		if (data.isTextRange()) return data.getSliceRange() != null ? data.getSliceRange() : "all";
 		return data.getSlice();
 	}
 

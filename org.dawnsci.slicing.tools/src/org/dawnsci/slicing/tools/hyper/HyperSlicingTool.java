@@ -12,6 +12,7 @@ import org.dawnsci.slicing.api.system.DimensionalEvent;
 import org.dawnsci.slicing.api.system.DimensionalListener;
 import org.dawnsci.slicing.api.system.DimsData;
 import org.dawnsci.slicing.api.system.DimsDataList;
+import org.dawnsci.slicing.api.system.AxisType;
 import org.dawnsci.slicing.api.system.SliceSource;
 import org.dawnsci.slicing.api.tool.AbstractSlicingTool;
 import org.dawnsci.slicing.tools.Activator;
@@ -79,7 +80,7 @@ public class HyperSlicingTool extends AbstractSlicingTool {
         originalPlotControl = plotSystem.setControl(hyperComponent.getControl(), false);
         
  		final DimsDataList dimsDataList = getSlicingSystem().getDimsDataList();
-		if (dimsDataList!=null) dimsDataList.setThreeAxesOnly(0, 1, 2);   		
+		if (dimsDataList!=null) dimsDataList.setThreeAxesOnly(AxisType.X, AxisType.Y, AxisType.Z);   		
 		
  		getSlicingSystem().refresh();
  		getSlicingSystem().update(false);
@@ -153,7 +154,7 @@ public class HyperSlicingTool extends AbstractSlicingTool {
 		final int[] ret = new int[dims.size()];
 		int dimFound = 0;
 		for (DimsData dd : dims.getDimsData()) {
-			ret[dimFound] = dd.getPlotAxis();
+			ret[dimFound] = dd.getPlotAxis().getIndex();
 			dimFound++;
 		}
 		return ret;
@@ -193,7 +194,7 @@ public class HyperSlicingTool extends AbstractSlicingTool {
 		
 		final List<AbstractDataset> ret= new ArrayList<AbstractDataset>(ia.size());
 		for (DimsData dd : ddl.getDimsData()) {
-			int axis = dd.getPlotAxis();
+			int axis = dd.getPlotAxis().getIndex();
 			
 			if (axis > -1 && axis < 4) {
 				IDataset id = ia.get(axis);

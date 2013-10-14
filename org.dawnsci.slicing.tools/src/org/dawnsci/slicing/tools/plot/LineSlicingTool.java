@@ -2,6 +2,7 @@ package org.dawnsci.slicing.tools.plot;
 
 import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.slicing.api.system.DimsDataList;
+import org.dawnsci.slicing.api.system.AxisType;
 import org.dawnsci.slicing.api.tool.AbstractSlicingTool;
 
 /**
@@ -25,9 +26,9 @@ public class LineSlicingTool extends AbstractSlicingTool {
 		final DimsDataList dimsDataList = getSlicingSystem().getDimsDataList();
 		if (dimsDataList!=null) {
 			if (wasImage&&dimsDataList.isXFirst()) {
-				dimsDataList.setSingleAxisOnly(1, 0);   		
+				dimsDataList.setSingleAxisOnly(AxisType.Y, AxisType.X);   		
 			} else {
-				dimsDataList.setSingleAxisOnly(0, 0);
+				dimsDataList.setSingleAxisOnly(AxisType.X, AxisType.X);
 			}
 		}
 		getSlicingSystem().update(false);
