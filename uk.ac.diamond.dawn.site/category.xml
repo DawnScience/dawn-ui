@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature id="org.dawnsci.base.product.feature">
+      <category name="dawn.base.category"/>
+   </feature>
+   <feature id="uk.ac.diamond.dawn.product.feature">
+      <category name="dawn.diamond.category"/>
+   </feature>
+   <feature id="uk.ac.diamond.scisoft.peema.feature">
+      <category name="dawn.diamond.category"/>
+   </feature>
+   <category-def name="dawn.base.category" label="Dawn Scientific Software (base features)">
+      <description>
+         Base features for Dawn Scientific Software.
+      </description>
+   </category-def>
+   <category-def name="dawn.optional.category" label="Dawn Scientific Software (optional features)">
+      <description>
+         Optional features that can be installed into Dawn Scientific Software.
+      </description>
+   </category-def>
+   <category-def name="dawn.diamond.category" label="Dawn Scientific Software (Diamond Light Source features)">
+      <description>
+         These features are specific to the operating environment at Diamond Light Source.
+      </description>
+   </category-def>
+</site>
