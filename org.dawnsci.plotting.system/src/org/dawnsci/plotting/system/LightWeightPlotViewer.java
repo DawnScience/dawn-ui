@@ -849,6 +849,8 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 	}
 		
 	public void resetAxes() {
+		if (xyGraph == null)
+			return;
 		removeAdditionalAxes();
 //		xyGraph.primaryXAxis.setRange(0, 100);
 		xyGraph.primaryXAxis.setTitle(XYGraph.X_AXIS);
