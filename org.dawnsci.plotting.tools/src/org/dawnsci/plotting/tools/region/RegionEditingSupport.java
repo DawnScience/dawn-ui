@@ -101,7 +101,7 @@ class RegionEditingSupport extends EditingSupport {
 			if (!(element instanceof IRegion)) return false;
 			final IRegion region = (IRegion)element;
 			if (!EDITABLE_REGIONS.contains(region.getRegionType())) return false;
-			if (column == 5 || column == 6) return false;
+			if (column == 6 || column == 7) return false;
 			else return true;
 		}
 
