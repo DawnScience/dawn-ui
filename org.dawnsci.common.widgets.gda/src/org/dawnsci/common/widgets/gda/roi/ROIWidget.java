@@ -180,12 +180,14 @@ public class ROIWidget implements IROIListener {
 
 	@Override
 	public void roiDragged(ROIEvent evt) {
-		// if change occurs on the plot view
+		if (roiViewer == null)
+			return;
+		roiViewer.cancelEditing();
 		IRegion region = (IRegion) evt.getSource();
 		if (region == null)
 			return;
 		IROI roi = evt.getROI();
-		if(roi != null && roiViewer != null){
+		if(roi != null){
 			roiViewer.setTableValues(roi);
 			if(nameText != null && !nameText.isDisposed())
 				nameText.setText(region.getName());
