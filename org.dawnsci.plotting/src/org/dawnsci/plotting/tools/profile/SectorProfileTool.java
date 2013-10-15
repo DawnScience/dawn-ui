@@ -249,12 +249,15 @@ public abstract class SectorProfileTool extends ProfileTool {
         if (meta==null || !(meta instanceof IDiffractionMetadata)) {
         	return getImageCenter();
         }
-         	
+        
         IDiffractionMetadata dm = (IDiffractionMetadata)meta;
         
         if (dm.getDetector2DProperties()==null) return getImageCenter();
-        
-        return dm.getDetector2DProperties().getBeamCentreCoords();
+        try {
+        	return dm.getDetector2DProperties().getBeamCentreCoords();
+        } catch (NullPointerException npe) {
+        	return getImageCenter();
+        }
  	}
 
 	private double[] getImageCenter() {

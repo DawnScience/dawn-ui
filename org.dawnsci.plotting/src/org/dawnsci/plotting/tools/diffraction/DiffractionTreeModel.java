@@ -354,7 +354,7 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 		dist.setTooltip("Distance from sample to beam centre");
 		registerNode(dist);
 		if (detprop != null) {
-			dist.setDefault(odetprop.getBeamCentreDistance(), SI.MILLIMETRE);
+//			dist.setDefault(odetprop.getBeamCentreDistance(), SI.MILLIMETRE);
 			dist.setValue(detprop.getBeamCentreDistance(), SI.MILLIMETRE);
 			dist.addAmountListener(new AmountListener<Length>() {
 				@Override
