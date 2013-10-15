@@ -407,7 +407,7 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 	@Override
 	public Object getAdapter(@SuppressWarnings("rawtypes") Class clazz) {
 		if (clazz == IToolPageSystem.class) {
-			return profileContentComposite;
+			return null;
 		} else {
 			return super.getAdapter(clazz);
 		}
