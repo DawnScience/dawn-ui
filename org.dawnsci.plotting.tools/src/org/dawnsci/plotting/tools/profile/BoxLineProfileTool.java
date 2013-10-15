@@ -60,6 +60,7 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 
 	private boolean isAveragePlotted;
 	private boolean isEdgePlotted;
+	private boolean isXAxisROIVisible = true;
 	private String traceName1;
 	private String traceName2;
 	private String traceName3;
@@ -68,6 +69,7 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 	private ILineTrace av_trace;
 
 	private ProfileJob profileJob;
+	private IRegion xAxisROI;
 
 	public BoxLineProfileTool() {
 		this(SWT.HORIZONTAL);
@@ -118,6 +120,13 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 	@Override
 	public void setPlotEdgeProfile(boolean isEdgePlotted) {
 		this.isEdgePlotted = isEdgePlotted;
+	}
+	@Override
+	public void setXAxisROIVisible(boolean isXAxisROIVisible) {
+		this.isXAxisROIVisible = isXAxisROIVisible;
+		if (xAxisROI == null)
+			return;
+		xAxisROI.setVisible(isXAxisROIVisible);
 	}
 	public int getType(){
 		return type;
@@ -416,7 +425,7 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 
 			double max = axis.getDouble(axis.argMax());
 			xPixelAxis.setTitle(axis.getName());
-			createXAxisBoxRegion(profilePlottingSystem, new RectangularROI(min, 0, (max-min)/2, 100, 0), "X_Axis_box");
+			xAxisROI = createXAxisBoxRegion(profilePlottingSystem, new RectangularROI(min, 0, (max-min)/2, 100, 0), "X_Axis_box");
 		
 		} catch (ArrayIndexOutOfBoundsException ae) {
 			//do nothing
@@ -463,23 +472,29 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 		});
 	}
 
-	private void createXAxisBoxRegion(final IPlottingSystem plottingSystem, 
+	private IRegion createXAxisBoxRegion(final IPlottingSystem plottingSystem, 
 			final IROI roi, final String roiName){
 		try {
 			if(roi instanceof RectangularROI){
 				RectangularROI rroi = (RectangularROI)roi;
 				IRegion region = plottingSystem.getRegion(roiName);
 				//Test if the region is already there and update the currentRegion
-				if(region!=null&&region.isVisible()){
+				if(region!=null){
 					region.setROI(region.getROI());
+					region.setVisible(isXAxisROIVisible);
+					return region;
 				}else {
 					IRegion newRegion = plottingSystem.createRegion(roiName, RegionType.XAXIS);
 					newRegion.setROI(rroi);
+					newRegion.setVisible(isXAxisROIVisible);
 					plottingSystem.addRegion(newRegion);
+					return newRegion;
 				}
 			}
+			return null;
 		} catch (Exception e) {
 			logger.error("Couldn't create ROI", e);
+			return null;
 		}
 	}
 
