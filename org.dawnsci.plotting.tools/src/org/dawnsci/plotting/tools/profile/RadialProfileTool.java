@@ -124,7 +124,7 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 					IMetaData meta = getMetaData();
 					profileAxis.setEnabled(true);
 
-					if (meta != null && meta instanceof IDiffractionMetadata) {
+					if (isValidMetadata(meta)) {
 						updateSectorCenters(((IDiffractionMetadata)meta).getDetector2DProperties().getBeamCentreCoords());
 						registerMetadataListeners();
 						setMessage(true);
@@ -266,7 +266,7 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 		
 		if (!sroi.hasSeparateRegions())  {
 			
-			if (meta!=null && isValidMetadata(meta) && (meta instanceof IDiffractionMetadata)) {
+			if (isValidMetadata(meta)) {
 				setActionsEnabled(true);
 				return new AbstractDataset[]{pixelToValue(xi,(IDiffractionMetadata)meta)};
 			}
@@ -278,7 +278,7 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 			final AbstractDataset xii = DatasetUtils.linSpace(sroi.getRadius(0), sroi.getRadius(1), integrals[1].getSize(), AbstractDataset.FLOAT64);
 			xii.setName("Radius (pixel)");
 			
-			if (meta!=null && isValidMetadata(meta)) {
+			if (isValidMetadata(meta)) {
 				setActionsEnabled(true);
 				return new AbstractDataset[]{pixelToValue(xi,(IDiffractionMetadata)meta),pixelToValue(xii,(IDiffractionMetadata)meta)};
 			}
@@ -293,8 +293,12 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 	}
 	
 	private boolean isValidMetadata(IMetaData meta) {
-		
 		if (meta != null && (meta instanceof IDiffractionMetadata)) {
+			IDiffractionMetadata idm = (IDiffractionMetadata) meta;
+			if (idm.getDiffractionCrystalEnvironment() == null)
+				return false;
+			if (idm.getDetector2DProperties() == null || idm.getDetector2DProperties().getHPxSize() == 0 || idm.getDetector2DProperties().getVPxSize() == 0)
+				return false;
 			return true;
 		}
 		
@@ -344,50 +348,51 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 	
 	
 	private AbstractDataset pixelToValue(AbstractDataset dataset, IDiffractionMetadata metadata) {
-		
-		DetectorProperties detprops = metadata.getDetector2DProperties();
-    	DiffractionCrystalEnvironment diffexp = metadata.getDiffractionCrystalEnvironment();
-    	
-    	if (detprops == null && diffexp == null) return dataset;
-    		
-    	double[] beamCen = detprops.getBeamCentreCoords();
-    		
-    	QSpace qSpace = new QSpace(detprops, diffexp);
-    	
-    	switch (axis) {
-    	case PIXEL:
-    		return dataset;
-    	case RESOLUTION:
-    		for (int i = 0; i < dataset.getSize(); ++i) {
-        		double val = dataset.getDouble(i);
-        		Vector3d vect= qSpace.qFromPixelPosition(beamCen[0] + val, beamCen[1]);
-        		dataset.set((2*Math.PI)/vect.length(), i);
-        	}
-    		dataset.setName("d-spacing (\u00c5)");
-    		return dataset;
-    	case ANGLE:
-    		for (int i = 0; i < dataset.getSize(); ++i) {
-        		double val = dataset.getDouble(i);
-        		Vector3d vect= qSpace.qFromPixelPosition(beamCen[0] + val, beamCen[1]);
-        		dataset.set(Math.toDegrees(qSpace.scatteringAngle(vect)), i);
-        	}
-    		dataset.setName("2\u03b8 (\u00b0)");
-    		return dataset;
-    	case Q:
-    		for (int i = 0; i < dataset.getSize(); ++i) {
-        		double val = dataset.getDouble(i);
-        		Vector3d vect= qSpace.qFromPixelPosition(beamCen[0] + val, beamCen[1]);
-        		dataset.set(vect.length(), i);
-        	}
-    		dataset.setName("q (1/\u00c5)");
-    		return dataset;
-    	default:
-    		return dataset;
+		if (!isValidMetadata(metadata)) return dataset;
 
-    	}
-    	
-	}
+		try {
+			DetectorProperties detprops = metadata.getDetector2DProperties();
+	    	DiffractionCrystalEnvironment diffexp = metadata.getDiffractionCrystalEnvironment();
+	    	
+	    	double[] beamCen = detprops.getBeamCentreCoords();
+	    		
+	    	QSpace qSpace = new QSpace(detprops, diffexp);
+	    	
+	    	switch (axis) {
+	    	case PIXEL:
+	    		return dataset;
+	    	case RESOLUTION:
+	    		for (int i = 0; i < dataset.getSize(); ++i) {
+	        		double val = dataset.getDouble(i);
+	        		Vector3d vect= qSpace.qFromPixelPosition(beamCen[0] + val, beamCen[1]);
+	        		dataset.set((2*Math.PI)/vect.length(), i);
+	        	}
+	    		dataset.setName("d-spacing (\u00c5)");
+	    		return dataset;
+	    	case ANGLE:
+	    		for (int i = 0; i < dataset.getSize(); ++i) {
+	        		double val = dataset.getDouble(i);
+	        		Vector3d vect= qSpace.qFromPixelPosition(beamCen[0] + val, beamCen[1]);
+	        		dataset.set(Math.toDegrees(qSpace.scatteringAngle(vect)), i);
+	        	}
+	    		dataset.setName("2\u03b8 (\u00b0)");
+	    		return dataset;
+	    	case Q:
+	    		for (int i = 0; i < dataset.getSize(); ++i) {
+	        		double val = dataset.getDouble(i);
+	        		Vector3d vect= qSpace.qFromPixelPosition(beamCen[0] + val, beamCen[1]);
+	        		dataset.set(vect.length(), i);
+	        	}
+	    		dataset.setName("q (1/\u00c5)");
+	    		return dataset;
+	    	default:
+	    		return dataset;
 	
+	    	}
+		} catch (NullPointerException npe) {
+    		return dataset;
+		}
+	}
 
 	@Override
 	protected AbstractDataset[] getIntegral(AbstractDataset data,
@@ -402,7 +407,8 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 		IMetaData meta = getMetaData();
 		QSpace qSpace = null;
 		
-		if (meta != null && (meta instanceof IDiffractionMetadata)) {
+		try {
+		if (isValidMetadata(meta)) {
 			dm = (IDiffractionMetadata)meta;
 			DetectorProperties detprops = dm.getDetector2DProperties().clone();
 	    	DiffractionCrystalEnvironment diffexp = dm.getDiffractionCrystalEnvironment().clone();
@@ -420,6 +426,9 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 				detprops.setBeamCentreCoords(new double[] {beamCoords[0] / downsample, beamCoords[1] / downsample});
 			}
 			qSpace = new QSpace(detprops, diffexp);
+		}
+		} catch (NullPointerException npe) {
+			// continue as normal
 		}
 		
 		AbstractDataset[] profile = ROIProfile.sector(data, mask, sroi, true, false, isDrag, qSpace, axis, false);
