@@ -47,14 +47,6 @@ class TypeEditingSupport extends EditingSupport {
 				}
 				super.activate();
 			}
-			
-			/**
-			 * Do nothing, do not reapply any value.
-			 */
-			public void focusLost() {
-				//super.focusLost();
-			}
-
 		};
 		final CCombo combo = typeEditor.getCombo();
 		combo.addModifyListener(new ModifyListener() {
