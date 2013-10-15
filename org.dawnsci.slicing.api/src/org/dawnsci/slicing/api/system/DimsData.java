@@ -13,6 +13,8 @@ package org.dawnsci.slicing.api.system;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.dawnsci.doe.DOEField;
@@ -157,6 +159,7 @@ public class DimsData implements Serializable {
         return String.valueOf(slice);
 	}
 
+	@SuppressWarnings("unchecked")
 	public List<DimsData> expand(final int size) {
 		
 		final List<DimsData> ret = new ArrayList<DimsData>(7);
@@ -165,12 +168,29 @@ public class DimsData implements Serializable {
 			return ret;
 		}
 		if (sliceRange!=null) {
-			List<? extends Number> rs = DOEUtils.expand(sliceRange);
+			final Matcher matcher = Pattern.compile("(\\d+)\\:(\\d+)").matcher(sliceRange);
+			
+			List<Number> rs;
+			if ("all".equals(sliceRange)) {
+				rs = new ArrayList<Number>();
+				for (int i = 0; i < size; i++) rs.add(i);
+				
+			} else if (matcher.matches()) {
+				rs = new ArrayList<Number>();
+				int start = Integer.parseInt(matcher.group(1));
+				int end   = Integer.parseInt(matcher.group(2));
+				for (int i = start; i <= end; i++) rs.add(i);
+
+			} else {
+				rs = (List<Number>)DOEUtils.expand(sliceRange);
+			}
+			
 			for (Number number : rs) {
 				final DimsData val = new DimsData(this.dimension);
 				val.setSlice(number.intValue());
 				ret.add(val);
 			}
+
 			return ret;
 		}
 		

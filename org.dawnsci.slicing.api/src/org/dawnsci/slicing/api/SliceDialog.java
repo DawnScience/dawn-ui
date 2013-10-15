@@ -112,4 +112,8 @@ public class SliceDialog extends Dialog {
 		super.okPressed();
 	}
 
+	public void setRangesAllowed(boolean b) {
+		sliceComponent.setRangesAllowed(b);
+	}
+
 }
