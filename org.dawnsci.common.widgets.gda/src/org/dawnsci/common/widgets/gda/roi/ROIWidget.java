@@ -179,7 +179,21 @@ public class ROIWidget implements IROIListener {
 	}
 
 	@Override
-	public void roiDragged(ROIEvent evt) {}
+	public void roiDragged(ROIEvent evt) {
+		// if change occurs on the plot view
+		IRegion region = (IRegion) evt.getSource();
+		if (region == null)
+			return;
+		IROI roi = evt.getROI();
+		if(roi != null && roiViewer != null){
+			roiViewer.setTableValues(roi);
+			if(nameText != null && !nameText.isDisposed())
+				nameText.setText(region.getName());
+			regionName = region.getName();
+		}
+		roiChanged = true;
+		this.region = region;
+	}
 
 	@Override
 	public void roiSelected(ROIEvent evt) {}
