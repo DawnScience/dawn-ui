@@ -71,7 +71,23 @@
 
    <extension
          point="org.dawnsci.plotting.api.toolPage">
+      <plotting_tool_category
+            icon="icons/axis.png"
+            id="org.dawnsci.plotting.tools.category.Profile"
+            label="Profile">
+      </plotting_tool_category>
+      <plotting_tool_category
+            icon="icons/bullet_wrench.png"
+            id="org.dawnsci.plotting.tools.category.Science"
+            label="Science">
+      </plotting_tool_category>
+      <plotting_tool_category
+            icon="icons/expression.png"
+            id="org.dawnsci.plotting.tools.plotting_tool_category.fitting"
+            label="Maths and Fitting">
+      </plotting_tool_category>
       <plotting_tool_page
+            category="org.dawnsci.plotting.tools.plotting_tool_category.fitting"
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.peak"
             class="org.dawnsci.plotting.tools.fitting.PeakFittingTool"
             icon="icons/plot-tool-peak-fit.png"
@@ -80,6 +96,7 @@
             tooltip="A tool for fitting peaks on the data currently plotted.">
       </plotting_tool_page>
       <plotting_tool_page
+            category="org.dawnsci.plotting.tools.plotting_tool_category.fitting"
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.derivative"
             class="org.dawnsci.plotting.tools.DerivativeTool"
             icon="icons/plot-tool-derivative.png"
@@ -128,6 +145,7 @@
             tooltip="A tool for displaying information on the data currently plotted.">
       </plotting_tool_page>
       <plotting_tool_page
+            category="org.dawnsci.plotting.tools.category.Profile"
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.lineprofile"
             class="org.dawnsci.plotting.tools.profile.LineProfileTool"
             icon="icons/plot-tool-line-profile.png"
@@ -136,6 +154,7 @@
             tooltip="A tool for showing line profiles of images.">
       </plotting_tool_page>
       <plotting_tool_page
+            category="org.dawnsci.plotting.tools.category.Profile"
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.boxprofile"
             class="org.dawnsci.plotting.tools.profile.BoxProfileTool"
             icon="icons/plot-tool-box-profile.png"
@@ -144,6 +163,7 @@
             tooltip="A tool for showing box profiles of images.">
       </plotting_tool_page>
       <plotting_tool_page
+            category="org.dawnsci.plotting.tools.category.Profile"
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.boxprofile"
             class="org.dawnsci.plotting.tools.profile.BoxLineProfileTool"
             icon="icons/plot-tool-color-box.png"
@@ -153,6 +173,7 @@
             visible="false">
       </plotting_tool_page>
       <plotting_tool_page
+            category="org.dawnsci.plotting.tools.category.Profile"
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.boxprofile"
             class="org.dawnsci.plotting.tools.profile.PerimeterBoxProfileTool"
             icon="icons/plot-tool-color-box.png"
@@ -162,6 +183,7 @@
             visible="true">
       </plotting_tool_page>
       <plotting_tool_page
+            category="org.dawnsci.plotting.tools.category.Profile"
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.grid"
             class="org.dawnsci.plotting.tools.grid.GridTool"
             icon="icons/plot-tool-box-grid.png"
@@ -171,6 +193,7 @@
             visible="true">
       </plotting_tool_page>
       <plotting_tool_page
+            category="org.dawnsci.plotting.tools.category.Profile"
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.radialprofile"
             class="org.dawnsci.plotting.tools.profile.RadialProfileTool"
             icon="icons/plot-tool-radial-integral.png"
@@ -179,6 +202,7 @@
             tooltip="A tool for showing radial profiles in sectors of images.">
       </plotting_tool_page>
       <plotting_tool_page
+            category="org.dawnsci.plotting.tools.category.Profile"
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.aziprofile"
             class="org.dawnsci.plotting.tools.profile.AzimuthalProfileTool"
             icon="icons/plot-tool-azimuthal-integral.png"
@@ -187,12 +211,21 @@
             tooltip="A tool for showing azimuthal profiles in sectors of images.">
       </plotting_tool_page>
       <plotting_tool_page
+            category="org.dawnsci.plotting.tools.category.Profile"
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.crosshairprofile"
             class="org.dawnsci.plotting.tools.profile.CrossHairProfileTool"
             icon="icons/plot-tool-cross-hairs.png"
             id="org.dawb.workbench.plotting.tools.crossHairProfileTool"
             label="Cross Hair Profile"
             tooltip="A tool for showing a profile slice through x and y.">
+      </plotting_tool_page>
+      <plotting_tool_page
+            category="org.dawnsci.plotting.tools.category.Profile"
+            class="org.dawnsci.plotting.tools.profile.ZoomTool"
+            icon="icons/zoom_box.png"
+            id="org.dawb.workbench.plotting.tools.zoomTool"
+            label="Zoom Profile"
+            tooltip="A tool to zoom areas in a separate view.">
       </plotting_tool_page>
       <plotting_tool_page
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.masking"
@@ -203,12 +236,14 @@
             tooltip="Masking the image and leaving data modified.">
       </plotting_tool_page>
       <plotting_tool_page
+            category="org.dawnsci.plotting.tools.plotting_tool_category.fitting"
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.ellipsefitting"
             class="org.dawnsci.plotting.tools.EllipseFittingTool"
             icon="icons/plot-tool-ellipse.png"
             id="org.dawb.workbench.plotting.tools.ellipseFittingTool"
             label="Circle/Ellipse Fitting"
-            tooltip="A tool which shows the fitted ellipse parameters.">
+            tooltip="A tool which shows the fitted ellipse parameters."
+            visible="true">
       </plotting_tool_page>
       <plotting_tool_page
             class="org.dawnsci.plotting.tools.history.HistoryTool"
@@ -216,13 +251,6 @@
             id="org.dawb.workbench.plotting.tools.xyHistoryTool"
             label="History"
             tooltip="A tool to compare plots between data files.">
-      </plotting_tool_page>
-      <plotting_tool_page
-            class="org.dawnsci.plotting.tools.profile.ZoomTool"
-            icon="icons/zoom_box.png"
-            id="org.dawb.workbench.plotting.tools.zoomTool"
-            label="Zoom Profile"
-            tooltip="A tool to zoom areas in a separate view.">
       </plotting_tool_page>
       <!--
       <plotting_tool_page
@@ -241,12 +269,14 @@
             tooltip="A tool to compare images between files by building up a history.">
       </plotting_tool_page>
       <plotting_tool_page
+            category="org.dawnsci.plotting.tools.plotting_tool_category.fitting"
             class="org.dawnsci.plotting.tools.fitting.LineFittingTool"
             icon="icons/plot-tool-line-fit.png"
             id="org.dawb.workbench.plotting.plotting_tool_page4"
             label="Line Fitting">
       </plotting_tool_page>
       <plotting_tool_page
+            category="org.dawnsci.plotting.tools.category.Science"
             class="org.dawnsci.plotting.tools.diffraction.DiffractionTool"
             icon="icons/plot-tool-diffraction.png"
             id="org.dawb.workbench.plotting.tools.diffraction.Diffraction"
@@ -254,6 +284,7 @@
             tooltip="A tool to allow interpretation/modification of diffraction data">
       </plotting_tool_page>
       <plotting_tool_page
+            category="org.dawnsci.plotting.tools.plotting_tool_category.fitting"
             class="org.dawnsci.plotting.tools.fitting.FunctionFittingTool"
             icon="icons/plot-tool-line-fit.png"
             id="org.dawb.workbench.plotting.function_fitting_tool"
@@ -292,11 +323,12 @@
             visible="false">
       </plotting_tool_page>
       <plotting_tool_page
+            category="org.dawnsci.plotting.tools.plotting_tool_category.fitting"
             class="org.dawnsci.plotting.tools.expressions.ExpressionTool"
             icon="icons/add_expression.png"
             id="org.dawb.workbench.plotting.tools.expressionConsoleTool"
             label="Expression Console"
-            visible="false">
+            visible="true">
       </plotting_tool_page>
    </extension>
 

@@ -73,6 +73,14 @@ class MenuAction extends Action implements IMenuCreator {
 		actions.add(action);
 	}
 
+	public void add(int pos, MenuAction action) {
+		actions.add(pos, action);
+	}
+
+	public void remove(IAction action) {
+		actions.remove(action);
+	}
+
 	@Override
 	public Menu getMenu(Control parent) {
 		
@@ -190,4 +198,7 @@ class MenuAction extends Action implements IMenuCreator {
 	public boolean isEmpty() {
 		return actions==null || actions.isEmpty();
 	}
+
+
+
 }

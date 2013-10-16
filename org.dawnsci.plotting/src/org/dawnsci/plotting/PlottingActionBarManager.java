@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -286,11 +287,37 @@ public class PlottingActionBarManager implements IPlotActionSystem {
 		toolActions.setToolTipText(role.getTooltip());
 		toolActions.setImageDescriptor(Activator.getImageDescriptor(role.getImagePath()));
 		toolActions.setId(role.getId());
+		
+		final Map<String, MenuAction> subMenus = new LinkedHashMap<String, MenuAction>(3);
 	       	
 		// This list will not be large so we loop over it more than once for each ToolPageRole type
 	    final IConfigurationElement[] configs = Platform.getExtensionRegistry().getConfigurationElementsFor("org.dawnsci.plotting.api.toolPage");
+	    
+	    // Menus at top.
+	    for (final IConfigurationElement e : configs) {
+	    	
+	    	if (e.getName().equals("plotting_tool_category")) {
+	    		
+	    		final String id = e.getAttribute("id");
+	    		final MenuAction ma = new MenuAction(e.getAttribute("label"));
+		    	final String   icon  = e.getAttribute("icon");
+		    	if (icon!=null) {
+			    	final String   cont  = e.getContributor().getName();
+			    	final Bundle   bundle= Platform.getBundle(cont);
+			    	final URL      entry = bundle.getEntry(icon);
+			    	final ImageDescriptor des = ImageDescriptor.createFromURL(entry);
+			    	ma.setImageDescriptor(des);
+		    	}
+
+	    		ma.setId(id);
+	    		subMenus.put(id, ma);
+	    	}
+	    }
+	    
 	    boolean foundSomeActions = false;
 	    for (final IConfigurationElement e : configs) {
+	    	
+	    	if (!e.getName().equals("plotting_tool_page")) continue;
 	    	
 	    	foundSomeActions = true;
 	    	
@@ -341,7 +368,12 @@ public class PlottingActionBarManager implements IPlotActionSystem {
 	    	final String    tooltip = e.getAttribute("tooltip");
 	    	if (tooltip!=null) action.setToolTipText(tooltip);
 	    	
-	    	toolActions.add(action);
+	    	if (e.getAttribute("category")!=null) {
+	    		final String cat = e.getAttribute("category");
+	    		subMenus.get(cat).add(action);
+	    	} else {
+	    	    toolActions.add(action);
+	    	}
 		}
 	
 	    if (!foundSomeActions) return null;
@@ -358,6 +390,16 @@ public class PlottingActionBarManager implements IPlotActionSystem {
     	clear.setImageDescriptor(Activator.getImageDescriptor("icons/axis.png"));
     	clear.setToolTipText("Clear tool previously used if any.");
 	    toolActions.add(clear);
+	    
+	    // Remove empty categories.
+	    int pos = 0;
+	    for(String key : subMenus.keySet()) {
+			final MenuAction ps = subMenus.get(key);
+			if (ps.size()>0) {
+				toolActions.add(pos, ps);
+				++pos;
+			}
+		}
 
 	    return toolActions;
 	}
@@ -512,6 +554,7 @@ public class PlottingActionBarManager implements IPlotActionSystem {
 		if (page==null) {
 		    final IConfigurationElement[] configs = Platform.getExtensionRegistry().getConfigurationElementsFor("org.dawnsci.plotting.api.toolPage");
 		    for (final IConfigurationElement e : configs) {
+	        	if (!e.getName().equals("plotting_tool_page")) continue;
 		    	if (id.equals(e.getAttribute("id"))) {
 		    		page = createToolPage(e, null);
 		    		break;
@@ -545,6 +588,7 @@ public class PlottingActionBarManager implements IPlotActionSystem {
 		final IConfigurationElement[] configs = Platform.getExtensionRegistry().getConfigurationElementsFor("org.dawnsci.plotting.api.toolPage");
 	    for (IConfigurationElement e : configs) {
 			
+	    	if (!e.getName().equals("plotting_tool_page")) continue;
 	    	if (!toolId.equals(e.getAttribute("id"))) continue;
 	    	final IToolPage page  = (IToolPage)e.createExecutableExtension("class");
 	    	if (page.getToolPageRole()!=role) continue;

@@ -639,6 +639,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		final IConfigurationElement[] configs = Platform.getExtensionRegistry().getConfigurationElementsFor("org.dawnsci.plotting.api.toolPage");
 	    for (IConfigurationElement e : configs) {
 			
+	    	if (!e.getName().equals("plotting_tool_page")) continue;
 	    	if (!toolId.equals(e.getAttribute("id"))) continue;
 	    	toolTitleOverride = e.getAttribute("label");
 	    	return toolTitleOverride;
@@ -660,6 +661,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		final IConfigurationElement[] configs = Platform.getExtensionRegistry().getConfigurationElementsFor("org.dawnsci.plotting.api.toolPage");
 	    for (IConfigurationElement e : configs) {
 			
+	    	if (!e.getName().equals("plotting_tool_page")) continue;
 	    	if (!toolId.equals(e.getAttribute("id"))) continue;
 	    	final String icon =  e.getAttribute("icon");
 	    	try {
