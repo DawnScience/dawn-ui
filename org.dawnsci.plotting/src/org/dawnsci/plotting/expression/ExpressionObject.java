@@ -13,6 +13,7 @@ package org.dawnsci.plotting.expression;
 import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -123,10 +124,9 @@ class ExpressionObject implements IExpressionObject {
 			
 			//if (engine==null) engine = JexlUtils.getDawnJexlEngine();
 			engine.createExpression(expressionString);
-			Set<List<String>> names = engine.getVariableNamesFromExpression();
+			Collection<String> names = engine.getVariableNamesFromExpression();
 			
-		    for (List<String> entry : names) {
-		    	final String key = entry.get(0);
+		    for (final String key : names) {
 		    	if (monitor.isCancelled()) return false;
 		    	if (!provider.isVariableName(key, monitor)) return false;
 			}
@@ -141,10 +141,9 @@ class ExpressionObject implements IExpressionObject {
 		try {			
 			//if (engine==null) engine = JexlUtils.getDawnJexlEngine();
 			engine.createExpression(expressionString);
-			Set<List<String>> names = engine.getVariableNamesFromExpression();
+			Collection<String> names = engine.getVariableNamesFromExpression();
 			
-		    for (List<String> entry : names) {
-		    	final String key = entry.get(0);
+		    for (final String key : names) {
 		    	if (monitor.isCancelled()) return ret;
 		    	if (!provider.isVariableName(key, monitor)) ret.add(key);
 			}
@@ -158,12 +157,10 @@ class ExpressionObject implements IExpressionObject {
 	public boolean containsVariable(String... variableNames) {
 		if (variableNames==null) return false;
 		try {
-			Set<List<String>> names = engine.getVariableNamesFromExpression();
+			Collection<String> names = engine.getVariableNamesFromExpression();
 			
-		    for (List<String> entry : names) {
-		    	for (String name : variableNames) {
-					if (entry.contains(name)) return true;
-				}
+			for (String name : variableNames) {
+				if (names.contains(name)) return true;
 			}
 			return false;
 		} catch (Exception ne) {
@@ -184,7 +181,7 @@ class ExpressionObject implements IExpressionObject {
 		try {
 			engine.createExpression(expressionString);
 			
-			final Set<List<String>> variableNames = engine.getVariableNamesFromExpression();
+			final Collection<String> variableNames = engine.getVariableNamesFromExpression();
 			
 			/**
 			 * TODO FIXME this means you cannot do something like dat:mean(x,0) where 
@@ -200,8 +197,7 @@ class ExpressionObject implements IExpressionObject {
 				// Try for the largest rank.
 				int[] largestShape = null;
 				int   largestRank  = -1;
-			    for (List<String> entry : variableNames) {
-			    	final String variableName = entry.get(0);
+			    for (final String variableName : variableNames) {
 			    	if (monitor.isCancelled()) return null;
 			        final ILazyDataset ld = provider.getLazyValue(variableName, monitor);
 			        if (ld!=null) { // We are going to copy it's shape
@@ -269,15 +265,22 @@ class ExpressionObject implements IExpressionObject {
 		
 		//if (engine==null) engine = JexlUtils.getDawnJexlEngine();
 		engine.createExpression(expressionString);
-		final Set<List<String>> variableNames = engine.getVariableNamesFromExpression();
+		final Collection<String> variableNames = engine.getVariableNamesFromExpression();
+		final Collection<String> lazyNames     = engine.getLazyVariableNamesFromExpression();
 		
-	    for (List<String> entry : variableNames) {
-	    	final String variableName = entry.get(0);
+	    for (String variableName : variableNames) {
 	    	if (monitor.isCancelled()) return null;
-	    	final AbstractDataset set = provider!=null 
-	    			                  ? (AbstractDataset)provider.getVariableValue(variableName, monitor) 
-	    					          : null;
-	    	if (set!=null) refs.put(variableName, set);
+	    	
+	    	Object data = null;
+	    	if (provider!=null && lazyNames!=null && lazyNames.contains(variableName)) {
+	    		data = provider.getLazyValue(variableName, monitor);
+	    	}
+	    	
+	    	// TODO FIXME - Not always 
+	    	if (provider!=null  && data==null) {
+	    		data = provider.getVariableValue(variableName, monitor);
+	    	}
+	    	if (data!=null) refs.put(variableName, data);
 		}
 	    
 		if (refs.isEmpty()) throw new Exception("No variables recognized in expression.");

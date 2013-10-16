@@ -2,12 +2,11 @@ package org.dawnsci.plotting.tools.expressions;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
 
 import org.dawb.common.services.ServiceManager;
 import org.dawb.common.services.expressions.ExpressionEngineEvent;
@@ -143,14 +142,14 @@ public class ExpressionConsole {
 	}
 	
 	private void updateVariables() {
-		Set<List<String>> names = engine.getVariableNamesFromExpression();
+		Collection<String> names = engine.getVariableNamesFromExpression();
 		
-		Iterator<List<String>> iterator = names.iterator();
+		Iterator<String> iterator = names.iterator();
 		
 		List<String> namesList = new ArrayList<String>(names.size());
 		
 		while (iterator.hasNext()) {
-			namesList.add(iterator.next().get(0));
+			namesList.add(iterator.next());
 		}
 		
 		ExpressionVariableEvent event = new ExpressionVariableEvent(this, namesList);

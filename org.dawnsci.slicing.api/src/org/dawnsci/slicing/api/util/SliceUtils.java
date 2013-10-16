@@ -30,9 +30,10 @@ import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
+import org.dawnsci.slicing.api.system.AxisType;
 import org.dawnsci.slicing.api.system.DimsData;
 import org.dawnsci.slicing.api.system.DimsDataList;
-import org.dawnsci.slicing.api.system.AxisType;
+import org.dawnsci.slicing.api.system.ISliceRangeSubstituter;
 import org.dawnsci.slicing.api.system.SliceSource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Display;
@@ -599,24 +600,39 @@ public class SliceUtils {
      * @throws Exception 
      */
 	public static List<SliceObject> getExpandedSlices(final SliceSource data,
-			                                          final Object dimsDataList) throws Exception {	
+			                                          final DimsDataList ddl) throws Exception {	
 
-		final DimsDataList      ddl = (DimsDataList)dimsDataList;
-		final List<SliceObject> obs = new ArrayList<SliceObject>(89);
-		createExpandedSlices(data, ddl, 0, new ArrayList<DimsData>(ddl.size()), obs);
-		return obs;
+		return getExpandedSlices(data, ddl, null);
 	}
 
+    /**
+     * Transforms a SliceComponent defined slice into an expanded set
+     * of slice objects so that the data can be sliced out of the h5 file.
+     * 
+     * @param fullShape
+     * @param dimsDataList
+     * @return
+     * @throws Exception 
+     */
+	public static List<SliceObject> getExpandedSlices(final SliceSource data,
+			                                          final DimsDataList ddl,
+			                                          final ISliceRangeSubstituter substituter) throws Exception {	
+
+		final List<SliceObject> obs = new ArrayList<SliceObject>(89);
+		createExpandedSlices(data, ddl, 0, new ArrayList<DimsData>(ddl.size()), obs, substituter);
+		return obs;
+	}
 
 	private static void createExpandedSlices(final SliceSource       data,
 			                                 final DimsDataList      ddl,
 			                                 final int               index,
 			                                 final List<DimsData>    chunk,
-			                                 final List<SliceObject> obs) throws Exception {
+			                                 final List<SliceObject> obs,
+			                                 final ISliceRangeSubstituter substituter) throws Exception {
 		
 		final int[]    fullShape = data.getLazySet().getShape();
 		final DimsData       dat = ddl.getDimsData(index);
-		final List<DimsData> exp = dat.expand(fullShape[index]);
+		final List<DimsData> exp = dat.expand(fullShape[index], substituter);
 		
 		for (DimsData d : exp) {
 			
@@ -628,7 +644,7 @@ public class SliceUtils {
 				obs.add(ob);
 				chunk.clear();
 			} else {
-				createExpandedSlices(data, ddl, index+1, chunk, obs);
+				createExpandedSlices(data, ddl, index+1, chunk, obs, substituter);
 			}
 			
 		}

@@ -159,19 +159,28 @@ public class DimsData implements Serializable {
         return String.valueOf(slice);
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<DimsData> expand(final int size) {
+		return expand(size, null);
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<DimsData> expand(final int size, ISliceRangeSubstituter substituter) {
 		
 		final List<DimsData> ret = new ArrayList<DimsData>(7);
 		if (plotAxis!=AxisType.RANGE) {
 			ret.add(this);
 			return ret;
 		}
-		if (sliceRange!=null) {
-			final Matcher matcher = Pattern.compile("(\\d+)\\:(\\d+)").matcher(sliceRange);
+		
+		String sr = sliceRange;
+		if (sr!=null) {
+
+			if (substituter!=null) sr = substituter.substitute(sr);
+			
+			final Matcher matcher = Pattern.compile("(\\d+)\\:(\\d+)").matcher(sr);
 			
 			List<Number> rs;
-			if ("all".equals(sliceRange)) {
+			if ("all".equals(sr)) {
 				rs = new ArrayList<Number>();
 				for (int i = 0; i < size; i++) rs.add(i);
 				
@@ -182,7 +191,7 @@ public class DimsData implements Serializable {
 				for (int i = start; i <= end; i++) rs.add(i);
 
 			} else {
-				rs = (List<Number>)DOEUtils.expand(sliceRange);
+				rs = (List<Number>)DOEUtils.expand(sr);
 			}
 			
 			for (Number number : rs) {

@@ -2,10 +2,9 @@ package org.dawnsci.plotting.expression;
 
 import gda.analysis.io.ScanFileHolderException;
 
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.dawb.common.services.IVariableManager;
 import org.dawb.common.services.ServiceManager;
@@ -67,13 +66,12 @@ class ExpressionLazyLoader implements ILazyLoader {
 			e1.printStackTrace();
 			return null;
 		}
-		final Set<List<String>> names = engine.getVariableNamesFromExpression();
+		final Collection<String> names = engine.getVariableNamesFromExpression();
 		
 		Map<String,Object> context = new HashMap<String,Object>();
 		//JexlContext context = new MapContext();
 				
-	    for (List<String> entry : names) {
-	    	final String name = entry.get(0);
+	    for (final String name : names) {
 	    	try {
 	    		ILazyDataset set = manager.getLazyValue(name, mon);
 	    		context.put(name, set.getSlice(mon, start, stop, step));
