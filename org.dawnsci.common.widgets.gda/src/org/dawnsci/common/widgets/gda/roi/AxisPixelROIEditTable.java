@@ -1,15 +1,18 @@
 package org.dawnsci.common.widgets.gda.roi;
 
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.dawb.common.ui.databinding.AbstractModelObject;
 import org.dawb.common.util.number.DoubleUtils;
 import org.dawnsci.plotting.api.IPlottingSystem;
+import org.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
-import org.eclipse.core.databinding.beans.BeanProperties;
-import org.eclipse.core.databinding.observable.list.IObservableList;
-import org.eclipse.core.databinding.observable.list.WritableList;
-import org.eclipse.jface.databinding.viewers.ViewerSupport;
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -19,6 +22,7 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Spinner;
@@ -41,26 +45,23 @@ import uk.ac.gda.richbeans.components.wrappers.SpinnerWrapper;
  *
  */
 public class AxisPixelROIEditTable {
+	private Logger logger = LoggerFactory.getLogger(AxisPixelROIEditTable.class);
 
 	private Composite parent;
 	private TableViewer regionViewer;
 
 	private AxisPixelTableViewModel viewModel;
+	private AxisPixelProfileTableViewModel profileViewModel;
+	private List<AxisPixelRowDataModel> values;
 
 	private IPlottingSystem plottingSystem;
 
-	private Logger logger = LoggerFactory.getLogger(AxisPixelROIEditTable.class);
-
 	private IROI roi;
-
-	private IObservableList values;
 
 	private int axisPrecision = 5;
 	private int pixelPrecision = 0;
 
 	private boolean isProfile = false;
-
-	private AxisPixelProfileTableViewModel profileViewModel;
 
 	/**
 	 * 
@@ -81,32 +82,19 @@ public class AxisPixelROIEditTable {
 			this.viewModel = new AxisPixelTableViewModel();
 			final Table table = new Table(parent, SWT.FULL_SELECTION | SWT.SINGLE | SWT.V_SCROLL | SWT.BORDER);
 			regionViewer = buildAndLayoutTable(table);
-//			final Label clickToEdit = new Label(parent, SWT.WRAP);
-//			clickToEdit.setText("* Click to change");
-//			clickToEdit.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false, 2, 1));
-
-			// Data binding
-			// ViewerSupport.bind takes care of the TableViewer input, 
-			// the Label and Content providers and the databinding
-			ViewerSupport.bind(regionViewer, viewModel.getValues(),
-					BeanProperties.values(new String[] { "name", "start", "end", "diff" }));
-
+			regionViewer.setInput(viewModel.getValues());
 		}else{
 			this.profileViewModel = new AxisPixelProfileTableViewModel();
 			final Table table = new Table(parent, SWT.FULL_SELECTION | SWT.SINGLE | SWT.V_SCROLL | SWT.BORDER);
 			regionViewer = buildAndLayoutTable(table);
-//			final Label clickToEdit = new Label(parent, SWT.WRAP);
-//			clickToEdit.setText("* Click to change");
-//			clickToEdit.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false, 2, 1));
-
-			ViewerSupport.bind(regionViewer, profileViewModel.getValues(),
-					BeanProperties.values(new String[] { "name", "start", "end", "diff" }));
+			regionViewer.setInput(profileViewModel.getValues());
 		}
 	}
 
 	private TableViewer buildAndLayoutTable(final Table table) {
 
 		TableViewer tableViewer = new TableViewer(table);
+		tableViewer.setContentProvider(ArrayContentProvider.getInstance());
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
 		table.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false, 2, 2));
@@ -114,18 +102,21 @@ public class AxisPixelROIEditTable {
 		TableViewerColumn viewerColumn = new TableViewerColumn(tableViewer, SWT.NONE, 0); 
 		viewerColumn.getColumn().setText("Name");
 		viewerColumn.getColumn().setWidth(80);
+		viewerColumn.setLabelProvider(new AxisPixelLabelProvider(0));
 		RegionEditingSupport regionEditor = new RegionEditingSupport(tableViewer, 0);
 		viewerColumn.setEditingSupport(regionEditor);
 		
 		viewerColumn = new TableViewerColumn(tableViewer, SWT.NONE, 1); 
 		viewerColumn.getColumn().setText("Start");
 		viewerColumn.getColumn().setWidth(100);
+		viewerColumn.setLabelProvider(new AxisPixelLabelProvider(1));
 		regionEditor = new RegionEditingSupport(tableViewer, 1);
 		viewerColumn.setEditingSupport(regionEditor);
 
 		viewerColumn = new TableViewerColumn(tableViewer, SWT.NONE, 2); 
 		viewerColumn.getColumn().setText("End");
 		viewerColumn.getColumn().setWidth(100);
+		viewerColumn.setLabelProvider(new AxisPixelLabelProvider(2));
 		regionEditor = new RegionEditingSupport(tableViewer, 2);
 		viewerColumn.setEditingSupport(regionEditor);
 
@@ -135,12 +126,57 @@ public class AxisPixelROIEditTable {
 		else
 			viewerColumn.getColumn().setText("Width");
 		viewerColumn.getColumn().setWidth(100);
+		viewerColumn.setLabelProvider(new AxisPixelLabelProvider(3));
 		regionEditor = new RegionEditingSupport(tableViewer, 3);
 		viewerColumn.setEditingSupport(regionEditor);
 
 		return tableViewer;
 	}
 
+	/**
+	 * 
+	 *
+	 */
+	private class AxisPixelLabelProvider extends ColumnLabelProvider {
+
+		private int column;
+
+		public AxisPixelLabelProvider(int column) {
+			this.column = column;
+		}
+
+		@Override
+		public Image getImage(Object element){
+			return null;
+		}
+
+		@Override
+		public String getText(Object element) {
+			final AxisPixelRowDataModel model = (AxisPixelRowDataModel)element;
+			DecimalFormat pointFormat = new DecimalFormat("##0.###");
+			switch(column) {
+			case 0:
+				return model.getName();
+			case 1:
+				return pointFormat.format(model.getStart());
+			case 2:
+				return pointFormat.format(model.getEnd());
+			case 3:
+				return pointFormat.format(model.getDiff());
+			default:
+				return "";
+			}
+		}
+
+		public String getToolTipText(Object element) {
+			return "";
+		}
+
+		@Override
+		public void dispose(){
+			super.dispose();
+		}
+	}
 	/**
 	 * EditingSupport Class
 	 *
@@ -283,18 +319,21 @@ public class AxisPixelROIEditTable {
 	 * Method that creates a ROI using the input of the table viewer
 	 * @param rows
 	 * @return ROIBase
+	 * @throws Exception
 	 */
-	private IROI createRoi(IObservableList rows) {
+	private IROI createRoi(List<AxisPixelRowDataModel> rows) throws Exception{
 		
 		double ptx = 0, pty = 0, width = 0, height = 0, angle = 0;
-		IROI ret = null; 
+		IROI ret = null;
 		if (roi == null)
 			roi = plottingSystem.getRegions().iterator().next().getROI();
 		if (roi instanceof RectangularROI) {
 			if(!isProfile){
+//				AxisPixelRowDataModel xAxisRow = (AxisPixelRowDataModel) rows.get(0);
+//				AxisPixelRowDataModel yAxisRow = (AxisPixelRowDataModel) rows.get(0);
+//
 //				if(rows.get(0) instanceof AxisPixelRowDataModel){
 //					//Convert from Axis to Pixel values
-//					AxisPixelRowDataModel xAxisRow = (AxisPixelRowDataModel) rows.get(0);
 //					
 //					// We get the axes data to convert from the axis to pixel values
 //					Collection<ITrace> traces = plottingSystem.getTraces();
@@ -303,17 +342,22 @@ public class AxisPixelROIEditTable {
 //						ITrace trace = it.next();
 //						if(trace instanceof IImageTrace){
 //							IImageTrace image = (IImageTrace)trace;
-//							List<AbstractDataset> axes = image.getAxes();
 //							// x axis and width
-//							ptx = axes.get(0).getDouble((int)Math.round(xAxisRow.getStart()));
-//							double ptxEnd =axes.get(0).getDouble((int)Math.round(xAxisRow.getEnd()));
+//							ptx = xAxisRow.getStart();
+//							pty = yAxisRow.getStart();
+//							double ptxEnd =xAxisRow.getEnd();
 //							width = ptxEnd - ptx;
+//							
+//							double[] newPointX = image.getPointInImageCoordinates(new double[]{ptx, pty});
+//							ptx = newPointX[0];
+//							double ptyEnd = yAxisRow.getEnd(); 
+//							double[] newEndPointX = image.getPointInImageCoordinates(new double[]{ptxEnd, ptyEnd});
+//							ptxEnd = newEndPointX[1];
 //						}
 //					}
 //				}
 //				if(rows.get(1) instanceof AxisPixelRowDataModel){
 //					//Convert from Axis to Pixel values
-//					AxisPixelRowDataModel yAxisRow = (AxisPixelRowDataModel) rows.get(1);
 //					// We get the axes data to convert from the axis to pixel values
 //					Collection<ITrace> traces = plottingSystem.getTraces();
 //					Iterator<ITrace> it = traces.iterator();
@@ -321,11 +365,17 @@ public class AxisPixelROIEditTable {
 //						ITrace trace = it.next();
 //						if(trace instanceof IImageTrace){
 //							IImageTrace image = (IImageTrace)trace;
-//							List<AbstractDataset> axes = image.getAxes();
+//							List<IDataset> axes = image.getAxes();
 //							// x axis and width
 //							pty = axes.get(1).getDouble((int)Math.round(yAxisRow.getStart()));
 //							double ptyEnd =axes.get(1).getDouble((int)Math.round(yAxisRow.getEnd()));
 //							height = ptyEnd - pty;
+//							
+//							double[] newPointY = image.getPointInImageCoordinates(new double[]{ptx, pty});
+//							pty = newPointY[0];
+//							double ptxEnd = yAxisRow.getEnd(); 
+//							double[] newEndPointY = image.getPointInImageCoordinates(new double[]{ptxEnd, ptyEnd});
+//							ptyEnd = newEndPointY[1];
 //						}
 //					}
 //				}
@@ -354,6 +404,34 @@ public class AxisPixelROIEditTable {
 			ret = rr;
 		}
 		return ret;
+	}
+
+	/**
+	 * get point in axis coords
+	 * @param coords
+	 * @return
+	 */
+	public double[] getAxisPoint(ICoordinateSystem coords, double... vals) {
+		if (coords==null) return vals;
+		try {
+			return coords.getValueAxisLocation(vals);
+		} catch (Exception e) {
+			return vals;
+		}
+	}
+
+	/**
+	 * get point in image coords
+	 * @param coords
+	 * @return
+	 */
+	public double[] getImagePoint(ICoordinateSystem coords, double... vals) {
+		if (coords==null) return vals;
+		try {
+			return coords.getAxisLocationValue(vals);
+		} catch (Exception e) {
+			return vals;
+		}
 	}
 
 	public IStructuredSelection getSelection() {
@@ -439,6 +517,9 @@ public class AxisPixelROIEditTable {
 			xAxisRow.setEnd(DoubleUtils.roundDouble(xEnd, axisPrecision));
 			xAxisRow.setDiff(DoubleUtils.roundDouble(xEnd-xStart, axisPrecision));
 		}
+		if(regionViewer.isCellEditorActive())
+			return;
+		regionViewer.refresh();
 	}
 
 	/**
@@ -449,7 +530,7 @@ public class AxisPixelROIEditTable {
 		return roi;
 	}
 
-	public void setValues(IObservableList values) {
+	public void setValues(List<AxisPixelRowDataModel> values) {
 		this.values = values;
 	}
 
@@ -475,7 +556,7 @@ public class AxisPixelROIEditTable {
 	 */
 	private class AxisPixelTableViewModel {
 
-		private IObservableList rows = new WritableList();
+		private List<AxisPixelRowDataModel> rows = new ArrayList<AxisPixelRowDataModel>();
 
 		private AxisPixelRowDataModel xAxisRow;
 		private AxisPixelRowDataModel yAxisRow;
@@ -499,7 +580,7 @@ public class AxisPixelROIEditTable {
 			rows.add(yPixelRow);
 		}
 
-		public IObservableList getValues() {
+		public List<AxisPixelRowDataModel> getValues() {
 			return rows;
 		}
 	}
@@ -510,7 +591,7 @@ public class AxisPixelROIEditTable {
 	 */
 	private class AxisPixelProfileTableViewModel {
 
-		private IObservableList rows = new WritableList();
+		private List<AxisPixelRowDataModel> rows = new ArrayList<AxisPixelRowDataModel>();
 
 		final private String description = "X-Axis values"; 
 		private AxisPixelRowDataModel xAxisRow;
@@ -524,7 +605,7 @@ public class AxisPixelROIEditTable {
 //			rows.add(xPixelRow);
 		}
 
-		public IObservableList getValues() {
+		public List<AxisPixelRowDataModel> getValues() {
 			return rows;
 		}
 	}
