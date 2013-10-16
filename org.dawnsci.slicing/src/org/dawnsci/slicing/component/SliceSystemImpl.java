@@ -22,11 +22,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.dawb.common.ui.Activator;
 import org.dawb.common.ui.DawbUtils;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
-import org.dawb.common.ui.preferences.ViewConstants;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
@@ -38,10 +36,12 @@ import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.api.trace.ITraceListener;
 import org.dawnsci.plotting.api.trace.PaletteEvent;
 import org.dawnsci.plotting.api.trace.TraceEvent;
+import org.dawnsci.slicing.Activator;
 import org.dawnsci.slicing.api.AbstractSliceSystem;
 import org.dawnsci.slicing.api.system.AxisChoiceEvent;
 import org.dawnsci.slicing.api.system.DimsData;
 import org.dawnsci.slicing.api.system.DimsDataList;
+import org.dawnsci.slicing.api.system.AxisType;
 import org.dawnsci.slicing.api.system.SliceSource;
 import org.dawnsci.slicing.api.util.SliceUtils;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -328,30 +328,40 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		man.add(new Separator("group4"));
 
 		final CheckableActionGroup grp2 = new CheckableActionGroup();
-		final MenuAction editorMenu = new MenuAction("Edit the slice with different editors.");
-		man.add(editorMenu);
-		editorMenu.setImageDescriptor(Activator.getImageDescriptor("icons/spinner_buttons.png"));
 		
 		final Action asScale = new Action("Sliding scale", IAction.AS_CHECK_BOX) {
 			public void run () {
 				
 				viewer.cancelEditing();
-				Activator.getDefault().getPreferenceStore().setValue(ViewConstants.SLICE_EDITOR, 0);
+				Activator.getDefault().getPreferenceStore().setValue(SliceConstants.SLICE_EDITOR, 0);
 			}
 		};
 		grp2.add(asScale);
-		asScale.setChecked(Activator.getDefault().getPreferenceStore().getInt(ViewConstants.SLICE_EDITOR)==0);
-		editorMenu.add(asScale);
+		asScale.setChecked(Activator.getDefault().getPreferenceStore().getInt(SliceConstants.SLICE_EDITOR)==0);
 		
 		final Action asSpinner = new Action("Slice index (only)", IAction.AS_CHECK_BOX) {
 			public void run () {
 				viewer.cancelEditing();
-				Activator.getDefault().getPreferenceStore().setValue(ViewConstants.SLICE_EDITOR, 1);
+				Activator.getDefault().getPreferenceStore().setValue(SliceConstants.SLICE_EDITOR, 1);
 			}
 		};
 		grp2.add(asSpinner);
-		asSpinner.setChecked(Activator.getDefault().getPreferenceStore().getInt(ViewConstants.SLICE_EDITOR)==1);
+		asSpinner.setChecked(Activator.getDefault().getPreferenceStore().getInt(SliceConstants.SLICE_EDITOR)==1);
+				
+				
+		final MenuAction editorMenu = new MenuAction("Edit the slice with different editors.");
+		man.add(editorMenu);
+		editorMenu.setImageDescriptor(Activator.getImageDescriptor("icons/spinner_buttons.png"));
+		editorMenu.add(asScale);
 		editorMenu.add(asSpinner);
+		
+		final Action pref = new Action("Operation Preferences...", Activator.getImageDescriptor("icons/range_preference.png")) {
+			public void run () {
+				viewer.cancelEditing();
+				// TODO FIXME, Dialog: +- <Amount> in axis value or indices, Average, Median, Sum
+			}
+		};
+		man.add(pref);
 		
 		createCustomActions(man);
 
@@ -527,12 +537,12 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		reverse.setEnabled(sliceType==PlotType.IMAGE||sliceType==PlotType.SURFACE);
 		
 		// Parse if ranges allowed to try to assign at least one dims data to a range
-		if (rangesAllowed) {
+		if (isRangesAllowed()) {
 			final int[] shape = this.lazySet.getShape();
 			for (int dim = 0; dim < shape.length; dim++) {
 				DimsData dd = dimsDataList.getDimsData(dim);
 			    if (dd.isSlice() && shape[dim]>1) { // Slice found
-			    	dd.setPlotAxis(DimsData.RANGE);
+			    	dd.setPlotAxis(AxisType.RANGE);
 			    	break;
 			    }
 			}
@@ -547,12 +557,13 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 	 * @return true if no error
 	 */
 	protected boolean synchronizeSliceData(final DimsData data) {
-				
-		final int usedAxis = data!=null ? data.getPlotAxis() : -2;
 		
+		// SLICE is currently the only PlotAxis type which can be set on multiple
+		// different axes.
+		final AxisType usedAxis = data!=null ? data.getPlotAxis() : AxisType.NONE;		
 		for (int i = 0; i < dimsDataList.size(); i++) {
 			if (dimsDataList.getDimsData(i).equals(data)) continue;
-			if (dimsDataList.getDimsData(i).getPlotAxis()==usedAxis) dimsDataList.getDimsData(i).setPlotAxis(-1);
+			if (dimsDataList.getDimsData(i).getPlotAxis()==usedAxis) dimsDataList.getDimsData(i).setPlotAxis(AxisType.SLICE);
 		}
 		
 		Display.getCurrent().syncExec(new Runnable() {
@@ -574,7 +585,7 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		if (!ok) {
 			errorLabel.setText(errorMessage);
 		}
-		GridUtils.setVisible(errorLabel,         !(ok||rangesAllowed));
+		GridUtils.setVisible(errorLabel,         !(ok||isRangesAllowed()));
 		isErrorCondition = errorLabel.isVisible();
 		updateAutomatically.setEnabled(ok&&plottingSystem!=null);
 		errorLabel.getParent().layout(new Control[]{errorLabel});

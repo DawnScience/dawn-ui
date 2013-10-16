@@ -29,6 +29,12 @@ public interface IProfileToolPage extends IToolPage {
 	void setPlotEdgeProfile(boolean b);
 
 	/**
+	 * Set the XAxis ROI visible flag for BoxLineProfile
+	 * @param b
+	 */
+	void setXAxisROIVisible(boolean b);
+
+	/**
 	 * Update Profile given an IRegion
 	 * @param region
 	 */

@@ -32,6 +32,7 @@ import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.slicing.api.system.DimsData;
 import org.dawnsci.slicing.api.system.DimsDataList;
+import org.dawnsci.slicing.api.system.AxisType;
 import org.dawnsci.slicing.api.system.SliceSource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Display;
@@ -89,7 +90,7 @@ public class SliceUtils {
     		stop[i]  = getStop(dimsData,dataShape[i]);
     		step[i]  = getStep(dimsData);
 
-    		if (dimsData.getPlotAxis()<0) {
+    		if (!dimsData.getPlotAxis().hasValue()) {
     			String nexusAxisName = getAxisName(currentSlice, dimsData, " (Dim "+(dimsData.getDimension()+1)); 
     			String formatValue   = String.valueOf(dimsData.getSlice());
     			try {
@@ -101,19 +102,19 @@ public class SliceUtils {
     		}
 
     		final IAnalysisService service = (IAnalysisService)ServiceManager.getService(IAnalysisService.class);
-    		if (dimsData.getPlotAxis()==0) {
+    		if (dimsData.getPlotAxis()==AxisType.X) {
     			x = service.arange(dataShape[i], IAnalysisService.INT);
     			x.setName("Dimension "+(dimsData.getDimension()+1));
     			currentSlice.setX(dimsData.getDimension());
     			
     		}
-    		if (dimsData.getPlotAxis()==1) {
+    		if (dimsData.getPlotAxis()==AxisType.Y) {
        			y = service.arange(dataShape[i], IAnalysisService.INT);
     			y.setName("Dimension "+(dimsData.getDimension()+1));
     			currentSlice.setY(dimsData.getDimension());
     		}
     		
-        	if (dimsData.getSliceRange()!=null&&dimsData.getPlotAxis()<0) {
+        	if (dimsData.getSliceRange()!=null&&!dimsData.getPlotAxis().hasValue()) {
         		currentSlice.setRange(true);
         	}
 
@@ -240,7 +241,7 @@ public class SliceUtils {
 	}
 
 	private static int getStart(DimsData dimsData) {
-		if (dimsData.getPlotAxis()>-1) {
+		if (!dimsData.getPlotAxis().hasValue()) {
 			return 0;
 		} else  if (dimsData.getSliceRange()!=null) {
 			final double[] exp = DOEUtils.getRange(dimsData.getSliceRange(), null);
@@ -250,7 +251,7 @@ public class SliceUtils {
 	}
 	
 	private static int getStop(DimsData dimsData, final int size) {
-		if (dimsData.getPlotAxis()>-1) {
+		if (!dimsData.getPlotAxis().hasValue()) {
 			return size;
 		} else  if (dimsData.getSliceRange()!=null) {
 			final double[] exp = DOEUtils.getRange(dimsData.getSliceRange(), null);
@@ -261,7 +262,7 @@ public class SliceUtils {
 	}
 
 	private static int getStep(DimsData dimsData) {
-		if (dimsData.getPlotAxis()>-1) {
+		if (!dimsData.getPlotAxis().hasValue()) {
 			return 1;
 		} else  if (dimsData.getSliceRange()!=null) {
 			final double[] exp = DOEUtils.getRange(dimsData.getSliceRange(), null);

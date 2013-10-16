@@ -5,6 +5,7 @@ import java.text.NumberFormat;
 
 import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.slicing.api.system.DimsData;
+import org.dawnsci.slicing.api.system.AxisType;
 import org.dawnsci.slicing.api.util.SliceUtils;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewer;
@@ -44,7 +45,7 @@ class SliceColumnLabelProvider extends ColumnLabelProvider implements IStyledLab
 			ret.append( getAxisLabel(data) );
 			break;
 		case 2:
-			if (data.isRange()) {
+			if (data.isTextRange()) {
 				ret.append(data.getSliceRange()!=null? new StyledString(data.getSliceRange()) : new StyledString("all"));
 			} else {
 				final int slice = data.getSlice();
@@ -64,7 +65,7 @@ class SliceColumnLabelProvider extends ColumnLabelProvider implements IStyledLab
 			
 			try {
 				final int[] shape = system.getLazyDataset().getShape();
-				if ((data.isSlice() || data.isRange()) && !system.isErrorVisible() && shape[data.getDimension()]>1) {
+				if ((data.isSlice() || data.isTextRange()) && !system.isErrorVisible() && shape[data.getDimension()]>1) {
 					ret.append(new StyledString(" (click to change)", StyledString.QUALIFIER_STYLER));
 				}
 			} catch (Throwable largelyIgnored) {
@@ -98,29 +99,31 @@ class SliceColumnLabelProvider extends ColumnLabelProvider implements IStyledLab
 	 */
 	protected String getAxisLabel(DimsData data) {
 
-		final int axis = data.getPlotAxis();
+		final AxisType axis = data.getPlotAxis();
 		
 		Enum sliceType = system.getSliceType();
         if (PlotType.class!=sliceType.getClass()) {
-        	return data.getPlotAxisLabel();
+        	return axis.getLabel();
         }
 		
-		if (data.isRange()) return "(Range)";
+		if (data.isTextRange()) return AxisType.RANGE.getLabel();
 		
 		// Bit naughty but we test the kind of slice they have
 		// set to do in the labels that we show them here.
 		if (sliceType==PlotType.XY) {
-			return axis>-1 ? "X" : "(Slice)";
+			return axis.getIndex()>-1 ? AxisType.X.getLabel() : AxisType.SLICE.getLabel();
 		}
 		if (sliceType==PlotType.XY_STACKED) {
-			return axis==0 ? "X" : axis==1 ? "Y (Many)" : "(Slice)";
+			return axis==AxisType.X ? AxisType.X.getLabel() 
+					                : (axis==AxisType.Y || axis==AxisType.Y_MANY) ? AxisType.Y_MANY.getLabel()
+					                		                                      : AxisType.SLICE.getLabel();
 		}
 		if (sliceType instanceof PlotType && system.getPlottingSystem()!=null) {
 			if (system.isReversedImage()) {
-				return axis==0 ? "Y" : axis==1 ? "X" : "(Slice)";				
+				return axis==AxisType.X ? AxisType.Y.getLabel() : axis==AxisType.Y ? AxisType.X.getLabel() : AxisType.SLICE.getLabel();				
 			}
 		}
-		return axis==0 ? "X" : axis==1 ? "Y" : "(Slice)";
+		return axis==AxisType.X ? AxisType.X.getLabel() : axis==AxisType.Y ? AxisType.Y.getLabel() : AxisType.SLICE.getLabel();
 	}
 
 

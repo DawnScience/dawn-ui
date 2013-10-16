@@ -18,6 +18,7 @@ import org.dawnsci.slicing.api.system.DimensionalListener;
 import org.dawnsci.slicing.api.system.DimsDataList;
 import org.dawnsci.slicing.api.system.ISliceGallery;
 import org.dawnsci.slicing.api.system.ISliceSystem;
+import org.dawnsci.slicing.api.system.AxisType;
 import org.dawnsci.slicing.api.tool.ISlicingTool;
 import org.dawnsci.slicing.api.util.SliceUtils;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -177,15 +178,15 @@ public abstract class AbstractSliceSystem implements ISliceSystem {
 		
 		boolean isX = false;
 		for (int i = 0; i < dimsDataList.size(); i++) {
-			if (dimsDataList.getDimsData(i).getPlotAxis()==0) isX = true;
+			if (dimsDataList.getDimsData(i).getPlotAxis()==AxisType.X) isX = true;
 		}
 		boolean isY = false;
 		for (int i = 0; i < dimsDataList.size(); i++) {
-			if (dimsDataList.getDimsData(i).getPlotAxis()==1) isY = true;
+			if (dimsDataList.getDimsData(i).getPlotAxis()==AxisType.Y) isY = true;
 		}
 		boolean isZ = false;
 		for (int i = 0; i < dimsDataList.size(); i++) {
-			if (dimsDataList.getDimsData(i).getPlotAxis()==2) isZ = true;
+			if (dimsDataList.getDimsData(i).getPlotAxis()==AxisType.Z) isZ = true;
 		}
 
 		String errorMessage = "";
@@ -297,7 +298,7 @@ public abstract class AbstractSliceSystem implements ISliceSystem {
 		return window.getActivePage();
 	}
 
-	protected boolean rangesAllowed = false;
+	private boolean rangesAllowed = false;
 	public void setRangesAllowed(boolean isVis) {
 		rangesAllowed = isVis;
 	}

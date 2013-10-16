@@ -9,6 +9,7 @@ import org.dawnsci.common.widgets.celleditor.CComboCellEditor;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.slicing.api.system.DimsData;
+import org.dawnsci.slicing.api.system.AxisType;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.EditingSupport;
@@ -27,6 +28,7 @@ class TypeEditingSupport extends EditingSupport {
 	
 	private CComboCellEditor   typeEditor;
 	private SliceSystemImpl    system;
+	private boolean valueChangeAllowed = false;
 
 	public TypeEditingSupport(final SliceSystemImpl system, ColumnViewer viewer) {
 		
@@ -45,7 +47,6 @@ class TypeEditingSupport extends EditingSupport {
 				}
 				super.activate();
 			}
-
 		};
 		final CCombo combo = typeEditor.getCombo();
 		combo.addModifyListener(new ModifyListener() {
@@ -54,13 +55,24 @@ class TypeEditingSupport extends EditingSupport {
 				
 				if (!typeEditor.isActivated()) return;
 				final String   value = combo.getText();
-				if ("".equals(value) || "(Slice)".equals(value)) {
-					typeEditor.applyEditorValueAndDeactivate(-1);
+				
+				valueChangeAllowed = true;
+				
+				final DimsData data  = (DimsData)((IStructuredSelection)getViewer().getSelection()).getFirstElement();
+				if (value==null || "".equals(value) || AxisType.SLICE.getLabel().equals(value)) {
+					setPlotAxis(data, AxisType.SLICE);
 					return; // Bit of a bodge
 				}
-				if ("(Range)".equals(value)) {
-					typeEditor.applyEditorValueAndDeactivate(DimsData.RANGE);
+				if (AxisType.RANGE.getLabel().equals(value)) {
+					setPlotAxis(data, AxisType.RANGE);
 					return; // Bit of a bodge
+				}
+				
+				for (AxisType pa : AxisType.values()) {
+					if (value.equals(pa.getLabel())) {
+						setPlotAxis(data, pa);
+						return; // Bit of a bodge
+					}
 				}
 			}
 		});
@@ -79,27 +91,57 @@ class TypeEditingSupport extends EditingSupport {
 	@Override
 	protected Object getValue(Object element) {
 		final DimsData data = (DimsData)element;
-		int axis = data.getPlotAxis();
-		if (axis<0) {
-			final String[] items = typeEditor.getCombo().getItems();
-			axis = items.length-1; // (Slice)
+		
+		AxisType axis = data.getPlotAxis();
+		final Enum sliceType = system.getSliceType();
+		if (sliceType==PlotType.IMAGE && system.isReversedImage()) {
+			if (axis==AxisType.X) {
+				axis=AxisType.Y;
+			} else if (axis==AxisType.Y) {
+				axis=AxisType.X;
+			}
 		}
-		return axis;
+			
+		final String[] items = typeEditor.getCombo().getItems();
+        for (int i = 0; i < items.length; i++) {
+			if (items[i].equals(axis.getLabel())) return i;
+		}
+		
+		return -1;
 	}
-
+	
 	@Override
 	protected void setValue(Object element, Object value) {
-		final DimsData data  = (DimsData)((IStructuredSelection)getViewer().getSelection()).getFirstElement();
-		if (data==null) return;
-		int axis = (Integer)value;
-		final Enum sliceType = system.getSliceType();
-		if (sliceType==PlotType.XY && axis!=102) axis = axis>-1 ? 0 : -1;
-		if (axis==data.getPlotAxis()) return;
+        // Does nothing, we only deal with PlotType from modify listener.
+	}
+
+	protected void setPlotAxis(final DimsData data, final AxisType value) {
 		
-		data.setPlotAxis(axis);
-		system.updateAxesChoices();
-		system.update(data, false);
-		system.fireDimensionalListeners();
+		if (!valueChangeAllowed) return; // Stops focus lost doing a change.
+		try {
+			if (data==null) return;
+			AxisType axis = value;
+			final Enum sliceType = system.getSliceType();
+			if (sliceType==PlotType.XY && axis!=AxisType.RANGE) {
+				axis = axis.hasValue() ? AxisType.SLICE : AxisType.X;
+			}
+			if (sliceType==PlotType.IMAGE && system.isReversedImage()) {
+				if (axis==AxisType.X) {
+					axis=AxisType.Y;
+				} else if (axis==AxisType.Y) {
+					axis=AxisType.X;
+				}
+			}
+			if (axis==data.getPlotAxis()) return;
+			if (axis==AxisType.Y_MANY) axis = AxisType.Y; // Y_MANY does not currrently require different slice code.
+			
+			data.setPlotAxis(axis);
+			system.updateAxesChoices();
+			system.update(data, false);
+			system.fireDimensionalListeners();
+		} finally {
+			valueChangeAllowed = false;
+		}
 	}	
 	
 
@@ -120,37 +162,39 @@ class TypeEditingSupport extends EditingSupport {
 		
 			switch(dimCount) {
 			case 1:
-				ret.add("X");
+				ret.add(AxisType.X.getLabel());
 				break;
 			case 2:
 				final IPlottingSystem psystem = system.getPlottingSystem();
 			    if (sliceType==PlotType.XY_STACKED) {
-					ret.add("X");
-					ret.add("Y (Many)");
+					ret.add(AxisType.X.getLabel());
+					ret.add(AxisType.Y_MANY.getLabel());
 			    } else if (system.isReversedImage()) {
-					ret.add("Y");
-					ret.add("X");
+					ret.add(AxisType.Y.getLabel());
+					ret.add(AxisType.X.getLabel());
 				} else {
-					ret.add("X");
-					ret.add("Y");
+					ret.add(AxisType.X.getLabel());
+					ret.add(AxisType.Y.getLabel());
 				}
 				break;
 			case 3:
-				ret.add("X");
-				ret.add("Y");
-				ret.add("Z");
+				ret.add(AxisType.X.getLabel());
+				ret.add(AxisType.Y.getLabel());
+				ret.add(AxisType.Z.getLabel());
 				break;
 			}
 		} catch (Throwable ne) {
             logger.error("Cannot find the getDimensions method in "+sliceType.getClass());
-			ret.add("X");
-			ret.add("Y");
-			ret.add("Z");
+			ret.add(AxisType.X.getLabel());
+			ret.add(AxisType.Y.getLabel());
+			ret.add(AxisType.Z.getLabel());
 		}
 
 		final int rank = (system.getLazyDataset()!=null) ? system.getLazyDataset().getRank() : Integer.MAX_VALUE;
-		if (rank>ret.size()) ret.add("(Slice)");
-		if (system.isRangesAllowed()) ret.add("(Range)");
+		if (rank>ret.size()) {
+			if (system.isRangesAllowed()) ret.add(AxisType.RANGE.getLabel());
+			ret.add(AxisType.SLICE.getLabel());
+		}
 		return ret.toArray(new String[ret.size()]);
 	}
 

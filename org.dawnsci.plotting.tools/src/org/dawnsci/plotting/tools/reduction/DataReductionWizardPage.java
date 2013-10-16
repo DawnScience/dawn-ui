@@ -12,6 +12,7 @@ import org.dawnsci.slicing.api.system.DimensionalEvent;
 import org.dawnsci.slicing.api.system.DimensionalListener;
 import org.dawnsci.slicing.api.system.DimsData;
 import org.dawnsci.slicing.api.system.DimsDataList;
+import org.dawnsci.slicing.api.system.AxisType;
 import org.dawnsci.slicing.api.util.SliceUtils;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.widgets.Composite;
@@ -61,7 +62,7 @@ public class DataReductionWizardPage extends AbstractSliceConversionPage {
         int rank=0;
         final DimsDataList dl = sliceComponent.getDimsDataList();
         for (DimsData dd : dl.getDimsData()) {
-			if (dd.isRange()||dd.isSlice()) continue;
+			if (dd.isTextRange()||dd.isSlice()) continue;
 			rank++;
 		}
         
@@ -94,7 +95,7 @@ public class DataReductionWizardPage extends AbstractSliceConversionPage {
 		IDataset x=null; IDataset y=null;
 		for (DimsData dd : ddl.getDimsData()) {
 			
-			if (dd.getPlotAxis()==0) {
+			if (dd.getPlotAxis()==AxisType.X) {
 				final String name = names.get(dd.getDimension()+1);
 				try {
 					x = SliceUtils.getAxis(sliceComponent.getCurrentSlice(), sliceComponent.getData().getVariableManager(), name, false, null);
@@ -102,7 +103,7 @@ public class DataReductionWizardPage extends AbstractSliceConversionPage {
 					return null;
 				}
 			}
-			if (dd.getPlotAxis()==1) {
+			if (dd.getPlotAxis()==AxisType.Y) {
 				final String name = names.get(dd.getDimension()+1);
 				try {
 					y = SliceUtils.getAxis(sliceComponent.getCurrentSlice(), sliceComponent.getData().getVariableManager(), name, false, null);

@@ -601,4 +601,8 @@ public class AxisPixelROIEditTable {
 			firePropertyChange("diff", oldValue, this.diff);
 		}
 	}
+
+	public void cancelEditing() {
+		regionViewer.cancelEditing();
+	}
 }

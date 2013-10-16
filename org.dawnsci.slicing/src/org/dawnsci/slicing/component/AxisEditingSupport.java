@@ -17,6 +17,7 @@ import org.dawnsci.slicing.api.Activator;
 import org.dawnsci.slicing.api.system.AxisChoiceEvent;
 import org.dawnsci.slicing.api.system.DimsData;
 import org.dawnsci.slicing.api.system.DimsDataList;
+import org.dawnsci.slicing.api.system.AxisType;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.EditingSupport;
@@ -83,8 +84,8 @@ class AxisEditingSupport extends EditingSupport {
 	@Override
 	protected boolean canEdit(Object element) {
 		final DimsData data = (DimsData)element;
-	    boolean isSliceIndex = Activator.getDefault().getPreferenceStore().getInt(ViewConstants.SLICE_EDITOR)==1;
-		return isSliceIndex ? data.getPlotAxis()>-1 : true;
+	    boolean isSliceIndex = Activator.getDefault().getPreferenceStore().getInt(SliceConstants.SLICE_EDITOR)==1;
+		return isSliceIndex ? data.getPlotAxis()==AxisType.SLICE : true;
 	}
 
 	@Override

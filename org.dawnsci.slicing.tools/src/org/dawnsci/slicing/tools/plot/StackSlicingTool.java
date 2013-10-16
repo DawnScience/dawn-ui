@@ -2,6 +2,7 @@ package org.dawnsci.slicing.tools.plot;
 
 import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.slicing.api.system.DimsDataList;
+import org.dawnsci.slicing.api.system.AxisType;
 import org.dawnsci.slicing.api.tool.AbstractSlicingTool;
 
 /**
@@ -21,7 +22,7 @@ public class StackSlicingTool extends AbstractSlicingTool {
 		getSlicingSystem().setSliceType(getSliceType());
 		
 		final DimsDataList dimsDataList = getSlicingSystem().getDimsDataList();
-		if (dimsDataList!=null) dimsDataList.setTwoAxesOnly(0, 1);   		
+		if (dimsDataList!=null) dimsDataList.setTwoAxesOnly(AxisType.X, AxisType.Y);   		
 
 		getSlicingSystem().update(true);
 	}

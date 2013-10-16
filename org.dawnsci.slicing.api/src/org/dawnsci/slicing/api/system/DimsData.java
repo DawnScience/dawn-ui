@@ -12,9 +12,9 @@ package org.dawnsci.slicing.api.system;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.dawnsci.doe.DOEField;
@@ -25,8 +25,6 @@ import org.dawnsci.doe.DOEUtils;
  * Bean to hold slice data
  */
 public class DimsData implements Serializable {
-
-	public static final int RANGE = 102;
 	
 	/**
 	 * 
@@ -57,7 +55,7 @@ public class DimsData implements Serializable {
 	/**
 	 * 0=x, 1=y, 2=z
 	 */
-	private int       plotAxis=-1;
+	private AxisType       plotAxis=AxisType.SLICE;
 
 	public DimsData() {
 		
@@ -71,10 +69,12 @@ public class DimsData implements Serializable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + plotAxis;
 		result = prime * result + dimension;
+		result = prime * result
+				+ ((plotAxis == null) ? 0 : plotAxis.hashCode());
 		result = prime * result + slice;
-		result = prime * result + ((sliceRange == null) ? 0 : sliceRange.hashCode());
+		result = prime * result
+				+ ((sliceRange == null) ? 0 : sliceRange.hashCode());
 		return result;
 	}
 
@@ -87,9 +87,9 @@ public class DimsData implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		DimsData other = (DimsData) obj;
-		if (plotAxis != other.plotAxis)
-			return false;
 		if (dimension != other.dimension)
+			return false;
+		if (plotAxis != other.plotAxis)
 			return false;
 		if (slice != other.slice)
 			return false;
@@ -102,12 +102,12 @@ public class DimsData implements Serializable {
 	}
 
 	public String getSliceRange() {
-		if (plotAxis>-1&&plotAxis!=RANGE) return null;
+		if (!plotAxis.hasValue()) return null;
 		return sliceRange;
 	}
 
 	public void setSliceRange(String sliceRange) {
-		if (sliceRange!=null) setPlotAxis(RANGE);
+		if (sliceRange!=null) setPlotAxis(AxisType.RANGE);
 		this.sliceRange = sliceRange;
 	}
 
@@ -126,30 +126,16 @@ public class DimsData implements Serializable {
 	/**
 	 * -1=slice, 0=x, 1=y, 2=z, 102=range
 	 */	
-	public int getPlotAxis() {
+	public AxisType getPlotAxis() {
 		return plotAxis;
 	}
-	
-	private static Map<Integer, String> LABELS;
-	static {
-		LABELS = new HashMap<Integer, String>(3);
-		LABELS.put(0, "X");
-		LABELS.put(1, "Y");
-		LABELS.put(2, "Z");
-	}
-	public String getPlotAxisLabel() {
-		final String label = LABELS.get(getPlotAxis());
-		if (label!=null) return label;
-		if (isRange()) return "(Range)";
-		return "(Slice)";
-	}
 
-	public void setPlotAxis(int axis) {
+	public void setPlotAxis(AxisType axis) {
 		this.plotAxis = axis;
 	}
 
 	public int getSlice() {
-		if (plotAxis>-1) return -1;
+		if (plotAxis!=AxisType.SLICE) return -1;
 		return slice;
 	}
 
@@ -167,30 +153,44 @@ public class DimsData implements Serializable {
 	}
 	
 	public String getUserString(final int upperRange){ 
-		if (plotAxis>-1) {
-			if (plotAxis==0) return "X";
-			if (plotAxis==1) return "Y";
-			if (plotAxis==2) return "Z";
-		}
+		if (!plotAxis.hasValue()) return plotAxis.getLabel();
 		if (sliceRange!=null) return sliceRange;
 		if (upperRange>0) return slice+";"+(upperRange-1)+";1";
         return String.valueOf(slice);
 	}
 
+	@SuppressWarnings("unchecked")
 	public List<DimsData> expand(final int size) {
 		
 		final List<DimsData> ret = new ArrayList<DimsData>(7);
-		if (plotAxis>-1) {
+		if (plotAxis!=AxisType.RANGE) {
 			ret.add(this);
 			return ret;
 		}
 		if (sliceRange!=null) {
-			List<? extends Number> rs = DOEUtils.expand(sliceRange);
+			final Matcher matcher = Pattern.compile("(\\d+)\\:(\\d+)").matcher(sliceRange);
+			
+			List<Number> rs;
+			if ("all".equals(sliceRange)) {
+				rs = new ArrayList<Number>();
+				for (int i = 0; i < size; i++) rs.add(i);
+				
+			} else if (matcher.matches()) {
+				rs = new ArrayList<Number>();
+				int start = Integer.parseInt(matcher.group(1));
+				int end   = Integer.parseInt(matcher.group(2));
+				for (int i = start; i <= end; i++) rs.add(i);
+
+			} else {
+				rs = (List<Number>)DOEUtils.expand(sliceRange);
+			}
+			
 			for (Number number : rs) {
 				final DimsData val = new DimsData(this.dimension);
 				val.setSlice(number.intValue());
 				ret.add(val);
 			}
+
 			return ret;
 		}
 		
@@ -208,15 +208,15 @@ public class DimsData implements Serializable {
 		clone.sliceRange = this.sliceRange;
 
 		clone.dimension  = this.dimension;
-		clone.plotAxis       = this.plotAxis;
+		clone.plotAxis   = this.plotAxis;
 		clone.slice      = this.slice;
         return clone;
 	}
 
 	public boolean isSlice() {
-		return getPlotAxis()<0;
+		return getPlotAxis()==AxisType.SLICE;
 	}
-	public boolean isRange() {
-		return getPlotAxis()==RANGE;
+	public boolean isTextRange() {
+		return getPlotAxis()==AxisType.RANGE;
 	}
 }
