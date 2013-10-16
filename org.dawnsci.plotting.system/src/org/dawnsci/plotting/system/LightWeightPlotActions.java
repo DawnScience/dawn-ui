@@ -20,7 +20,6 @@ import org.csstudio.swt.xygraph.undo.RemoveAnnotationCommand;
 import org.csstudio.swt.xygraph.undo.ZoomType;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
-import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.plotting.api.ActionType;
 import org.dawnsci.plotting.api.ManagerType;
 import org.dawnsci.plotting.api.PlotType;
@@ -71,9 +70,6 @@ import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IEditorReference;
-import org.eclipse.ui.IReusableEditor;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.dialogs.PreferencesUtil;
@@ -638,21 +634,22 @@ class LightWeightPlotActions {
 		};
 		ignoreRGB.setToolTipText("Ignores RGB information in the data file if it has been provided.");
 		ignoreRGB.setChecked(PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.IGNORE_RGB));
-
-		final Action showStack = new Action("Show other images in the same directory", IAction.AS_CHECK_BOX) {
-			
-		    public void run() {		    	
-		    	PlottingSystemActivator.getPlottingPreferenceStore().setValue(PlottingConstants.LOAD_IMAGE_STACKS, isChecked());
-		    	IEditorReference[] refs = EclipseUtils.getActivePage().getEditorReferences();
-		    	for (IEditorReference iEditorReference : refs) {
-		    		IEditorPart part = iEditorReference.getEditor(false);
-		    		if (part instanceof IReusableEditor) {
-		    			((IReusableEditor)part).setInput(part.getEditorInput());
-		    		}
-				}
-		    }
-		};
-		showStack.setChecked(PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.LOAD_IMAGE_STACKS));
+		
+		PlottingSystemActivator.getPlottingPreferenceStore().setValue(PlottingConstants.LOAD_IMAGE_STACKS, false);
+//		final Action showStack = new Action("Show other images in the same directory", IAction.AS_CHECK_BOX) {
+//			
+//		    public void run() {		    	
+//		    	PlottingSystemActivator.getPlottingPreferenceStore().setValue(PlottingConstants.LOAD_IMAGE_STACKS, isChecked());
+//		    	IEditorReference[] refs = EclipseUtils.getActivePage().getEditorReferences();
+//		    	for (IEditorReference iEditorReference : refs) {
+//		    		IEditorPart part = iEditorReference.getEditor(false);
+//		    		if (part instanceof IReusableEditor) {
+//		    			((IReusableEditor)part).setInput(part.getEditorInput());
+//		    		}
+//				}
+//		    }
+//		};
+		//showStack.setChecked(PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.LOAD_IMAGE_STACKS));
 
 		
 		actionBarManager.registerToolBarGroup(ToolbarConfigurationConstants.ASPECT.getId());
@@ -663,7 +660,7 @@ class LightWeightPlotActions {
 	    actionBarManager.addImageSeparator();
 	    actionBarManager.addImageAction(hideAxes);
 	    actionBarManager.addImageAction(hideIntensity);
-	    actionBarManager.addImageAction(showStack);
+	    //actionBarManager.addImageAction(showStack);
 	    actionBarManager.addImageAction(ignoreRGB);
 	    actionBarManager.addImageAction(lockHisto);
 	    actionBarManager.addImageSeparator();
