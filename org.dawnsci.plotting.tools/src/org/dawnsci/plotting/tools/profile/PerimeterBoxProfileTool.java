@@ -152,6 +152,7 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 			zoomProfile.setTitle("Zoom Profile");
 			zoomProfile.setToolId(String.valueOf(zoomProfile.hashCode()));
 			zoomProfile.createControl(sashForm2);
+			zoomProfile.setIsUIJob(true);
 			zoomProfile.activate();
 
 			//horizontal profiles

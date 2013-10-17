@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.part.IPageSite;
+import org.eclipse.ui.progress.UIJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +58,9 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 	private   IRegionListener        regionListener;
 	private   IPaletteListener       paletteListener;
 	private   ProfileJob             updateProfiles;
+	private   ProfileUIJob           updateUIProfiles;
 	private   Map<String,Collection<ITrace>> registeredTraces;
+	private   boolean                isUIJob = false;
 
 	public ProfileTool() {
 		
@@ -65,7 +68,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		try {
 			profilePlottingSystem = PlottingFactory.createPlottingSystem();
 			updateProfiles = new ProfileJob();
-			
+			updateUIProfiles = new ProfileUIJob();
 			this.paletteListener = new IPaletteListener.Stub() {
 				@Override
 				public void maskChanged(PaletteEvent evt) {
@@ -139,7 +142,16 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 			logger.error("Cannot get plotting system!", e);
 		}
 	}
-	
+
+	/**
+	 * If set to true, the profile job will run in a UI job
+	 * Set to false by default
+	 * @param isUIJob
+	 */
+	public void setIsUIJob(boolean isUIJob) {
+		this.isUIJob = isUIJob;
+	}
+
 	protected void registerTraces(final IRegion region, final Collection<ITrace> traces) {
 		
 		final String name = region.getName();
@@ -381,8 +393,10 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 			if(!isRegionTypeSupported(r.getRegionType())) return; // Nothing to do.
 			if (!r.isUserRegion()) return; // Likewise
 		}
-         
-		updateProfiles.profile(r, rb, isDrag);
+		if (!isUIJob)
+			updateProfiles.profile(r, rb, isDrag);
+		else
+			updateUIProfiles.profile(r, rb, isDrag);
 	}
 	
 	private void saveAxesLogged() {
@@ -396,9 +410,8 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 	}
 	
 	private final class ProfileJob extends Job {
-		
 		private   IRegion                currentRegion;
-		private   IROI                currentROI;
+		private   IROI                   currentROI;
 		private   boolean                isDrag;
 
 		ProfileJob() {
@@ -417,72 +430,97 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 	        //for (Job job : Job.getJobManager().find(null))
 	        //    if (job.getClass()==getClass() && job.getState() != Job.RUNNING)
 	        //	    job.cancel();
-
 			this.currentRegion = r;
 			this.currentROI    = rb;
 			this.isDrag        = isDrag;
-	        
-          	schedule();		
+			schedule();
 		}
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-
-			try {
-				if (!isActive()) return Status.CANCEL_STATUS;
-	
-				final Collection<ITrace> traces= getPlottingSystem().getTraces(IImageTrace.class);	
-				IImageTrace image = traces!=null && traces.size()>0 ? (IImageTrace)traces.iterator().next() : null;
-	
-				if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
-				if (image==null) {
-					profilePlottingSystem.clear();
-					return Status.OK_STATUS;
-				}
-	
-				// if the current region is null try and update quickly (without creating 1D)
-				// if the trace is in the registered traces object
-				if (currentRegion==null) {
-					final Collection<IRegion> regions = getPlottingSystem().getRegions();
-					if (regions!=null) {
-						for (IRegion iRegion : regions) {
-							if (!iRegion.isUserRegion()) continue;
-							if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
-							if (registeredTraces.containsKey(iRegion.getName())) {
-								createProfile(image, iRegion, iRegion.getROI(), true, isDrag, monitor);
-							} else {
-								createProfile(image, iRegion, iRegion.getROI(), false, isDrag, monitor);
-							}
-						}
-					} else {
-						registeredTraces.clear();
-						profilePlottingSystem.clear();
-					}
-				} else {
-	
-					if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
-					createProfile(image, 
-							      currentRegion, 
-							      currentROI!=null?currentROI:currentRegion.getROI(), 
-								  true, 
-								  isDrag,
-								  monitor);
-	
-				}
-	
-				if (monitor.isCanceled()) return Status.CANCEL_STATUS;
-				profilePlottingSystem.repaint();
-	
-				return Status.OK_STATUS;
-				
-			} catch (Throwable ne) {
-				logger.error("Internal error processing profile! ", ne);
-				return Status.CANCEL_STATUS;
-			}
-		
+			return runProfile(currentRegion, currentROI, isDrag, monitor);
 		}
 	}
-	
+
+	private final class ProfileUIJob extends UIJob {
+		private   IRegion                currentRegion;
+		private   IROI                   currentROI;
+		private   boolean                isDrag;
+
+		ProfileUIJob() {
+			super(getRegionName()+" update");
+			setSystem(true);
+			setUser(false);
+			setPriority(Job.INTERACTIVE);
+		}
+
+		public void profile(IRegion r, IROI rb, boolean isDrag) {
+			this.currentRegion = r;
+			this.currentROI    = rb;
+			this.isDrag        = isDrag;
+			schedule();
+		}
+
+		@Override
+		public IStatus runInUIThread(IProgressMonitor monitor) {
+			return runProfile(currentRegion, currentROI, isDrag, monitor);
+		}
+	}
+
+	private IStatus runProfile(IRegion currentRegion, IROI currentROI, boolean isDrag, IProgressMonitor monitor){
+		try {
+			if (!isActive()) return Status.CANCEL_STATUS;
+
+			final Collection<ITrace> traces= getPlottingSystem().getTraces(IImageTrace.class);
+			IImageTrace image = traces!=null && traces.size()>0 ? (IImageTrace)traces.iterator().next() : null;
+
+			if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
+			if (image==null) {
+				profilePlottingSystem.clear();
+				return Status.OK_STATUS;
+			}
+
+			// if the current region is null try and update quickly (without creating 1D)
+			// if the trace is in the registered traces object
+			if (currentRegion==null) {
+				final Collection<IRegion> regions = getPlottingSystem().getRegions();
+				if (regions!=null) {
+					for (IRegion iRegion : regions) {
+						if (!iRegion.isUserRegion()) continue;
+						if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
+						if (registeredTraces.containsKey(iRegion.getName())) {
+							createProfile(image, iRegion, iRegion.getROI(), true, isDrag, monitor);
+						} else {
+							createProfile(image, iRegion, iRegion.getROI(), false, isDrag, monitor);
+						}
+					}
+				} else {
+					registeredTraces.clear();
+					profilePlottingSystem.clear();
+				}
+			} else {
+
+				if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
+				createProfile(image, 
+						      currentRegion, 
+						      currentROI!=null?currentROI:currentRegion.getROI(), 
+							  true, 
+							  isDrag,
+							  monitor);
+
+			}
+
+			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+			profilePlottingSystem.repaint();
+
+			return Status.OK_STATUS;
+			
+		} catch (Throwable ne) {
+			logger.error("Internal error processing profile! ", ne);
+			return Status.CANCEL_STATUS;
+		}
+	}
+
 	/**
 	 * Tries to get the meta from the editor part or uses the one in AbtractDataset of the image
 	 * @return IMetaData, may be null
