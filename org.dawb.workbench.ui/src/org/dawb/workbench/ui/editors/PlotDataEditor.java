@@ -331,9 +331,9 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		if (monitor.isCanceled()) return;
 		
 		final ITransferableDataObject first = selections[0];
-		final IDataset        data = first.getData(new ProgressMonitorWrapper(monitor));
-		
+		IDataset        data = first.getData(new ProgressMonitorWrapper(monitor));	
 		if (data==null)             return;
+		data = data.squeeze();
 		try {
 		    if (data.getSize()<0) return;
 		} catch (Exception ne) {
