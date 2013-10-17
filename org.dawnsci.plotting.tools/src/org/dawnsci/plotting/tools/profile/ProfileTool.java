@@ -40,7 +40,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.part.IPageSite;
-import org.eclipse.ui.progress.UIJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -396,7 +395,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		return "Profile";
 	}
 	
-	private final class ProfileJob extends UIJob {
+	private final class ProfileJob extends Job {
 		
 		private   IRegion                currentRegion;
 		private   IROI                currentROI;
@@ -427,7 +426,8 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		}
 
 		@Override
-		public IStatus runInUIThread(IProgressMonitor monitor) {
+		protected IStatus run(IProgressMonitor monitor) {
+
 			try {
 				if (!isActive()) return Status.CANCEL_STATUS;
 	
@@ -479,6 +479,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 				logger.error("Internal error processing profile! ", ne);
 				return Status.CANCEL_STATUS;
 			}
+		
 		}
 	}
 	
