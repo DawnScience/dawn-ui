@@ -2,12 +2,15 @@ package org.dawnsci.common.widgets.gda.roi;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import org.dawb.common.ui.databinding.AbstractModelObject;
 import org.dawb.common.util.number.DoubleUtils;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
+import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -134,7 +137,7 @@ public class AxisPixelROIEditTable {
 	}
 
 	/**
-	 * 
+	 * Table viewer label provider
 	 *
 	 */
 	private class AxisPixelLabelProvider extends ColumnLabelProvider {
@@ -302,104 +305,101 @@ public class AxisPixelROIEditTable {
 			default:
 				break;
 			}
-
 			if (tableRefresh) {
 				getViewer().refresh();
 			}
 			if(!isProfile)
-				roi = createRoi(viewModel.getValues());
+				roi = createRoi(viewModel.getValues(), row.getName());
 			else
-				roi = createRoi(profileViewModel.getValues());
+				roi = createProfileRoi(profileViewModel.getValues());
 			setTableValues(roi);
+			// set new region
+			IRegion region = plottingSystem.getRegions().iterator().next();
+			region.setROI(roi);
 		}
-
 	}
 
 	/**
 	 * Method that creates a ROI using the input of the table viewer
 	 * @param rows
-	 * @return ROIBase
+	 * @param rowName
+	 * @return IROI
 	 * @throws Exception
 	 */
-	private IROI createRoi(List<AxisPixelRowDataModel> rows) throws Exception{
-		
-		double ptx = 0, pty = 0, width = 0, height = 0, angle = 0;
+	private IROI createRoi(List<AxisPixelRowDataModel> rows, String rowName) throws Exception{
+
+		double ptx = 0, pty = 0, ptxEnd = 0, ptyEnd = 0, width = 0, height = 0, angle = 0,
+			pixelPtx = 0, pixelPty = 0, pixelEndPtx = 0, pixelEndPty = 0;
+
 		IROI ret = null;
 		if (roi == null)
 			roi = plottingSystem.getRegions().iterator().next().getROI();
 		if (roi instanceof RectangularROI) {
-			if(!isProfile){
-//				AxisPixelRowDataModel xAxisRow = (AxisPixelRowDataModel) rows.get(0);
-//				AxisPixelRowDataModel yAxisRow = (AxisPixelRowDataModel) rows.get(0);
-//
-//				if(rows.get(0) instanceof AxisPixelRowDataModel){
-//					//Convert from Axis to Pixel values
-//					
-//					// We get the axes data to convert from the axis to pixel values
-//					Collection<ITrace> traces = plottingSystem.getTraces();
-//					Iterator<ITrace> it = traces.iterator();
-//					while(it.hasNext()){
-//						ITrace trace = it.next();
-//						if(trace instanceof IImageTrace){
-//							IImageTrace image = (IImageTrace)trace;
-//							// x axis and width
-//							ptx = xAxisRow.getStart();
-//							pty = yAxisRow.getStart();
-//							double ptxEnd =xAxisRow.getEnd();
-//							width = ptxEnd - ptx;
-//							
-//							double[] newPointX = image.getPointInImageCoordinates(new double[]{ptx, pty});
-//							ptx = newPointX[0];
-//							double ptyEnd = yAxisRow.getEnd(); 
-//							double[] newEndPointX = image.getPointInImageCoordinates(new double[]{ptxEnd, ptyEnd});
-//							ptxEnd = newEndPointX[1];
-//						}
-//					}
-//				}
-//				if(rows.get(1) instanceof AxisPixelRowDataModel){
-//					//Convert from Axis to Pixel values
-//					// We get the axes data to convert from the axis to pixel values
-//					Collection<ITrace> traces = plottingSystem.getTraces();
-//					Iterator<ITrace> it = traces.iterator();
-//					while(it.hasNext()){
-//						ITrace trace = it.next();
-//						if(trace instanceof IImageTrace){
-//							IImageTrace image = (IImageTrace)trace;
-//							List<IDataset> axes = image.getAxes();
-//							// x axis and width
-//							pty = axes.get(1).getDouble((int)Math.round(yAxisRow.getStart()));
-//							double ptyEnd =axes.get(1).getDouble((int)Math.round(yAxisRow.getEnd()));
-//							height = ptyEnd - pty;
-//							
-//							double[] newPointY = image.getPointInImageCoordinates(new double[]{ptx, pty});
-//							pty = newPointY[0];
-//							double ptxEnd = yAxisRow.getEnd(); 
-//							double[] newEndPointY = image.getPointInImageCoordinates(new double[]{ptxEnd, ptyEnd});
-//							ptyEnd = newEndPointY[1];
-//						}
-//					}
-//				}
-				if(rows.get(2) instanceof AxisPixelRowDataModel){
-					AxisPixelRowDataModel xPixelRow = (AxisPixelRowDataModel) rows.get(2);
-					ptx = xPixelRow.getStart();
-					width = xPixelRow.getDiff();
+			// if axis rows are being modified
+			if (rowName.equals(RowName.XAXIS_ROW) || rowName.equals(RowName.YAXIS_ROW)) {
+				AxisPixelRowDataModel xAxisRow = (AxisPixelRowDataModel) rows.get(0);
+				AxisPixelRowDataModel yAxisRow = (AxisPixelRowDataModel) rows.get(1);
+				//Convert from Axis to Pixel values
+				// We get the axes data to convert from the axis to pixel values
+				Collection<ITrace> traces = plottingSystem.getTraces();
+				Iterator<ITrace> it = traces.iterator();
+				while(it.hasNext()){
+					ITrace trace = it.next();
+					if(trace instanceof IImageTrace){
+						IImageTrace image = (IImageTrace)trace;
+						// x axis and width
+						ptx = xAxisRow.getStart();
+						pty = yAxisRow.getStart();
+						ptxEnd =xAxisRow.getEnd();
+						ptyEnd = yAxisRow.getEnd(); 
+						double[] newStartPoint = image.getPointInImageCoordinates(new double[]{ptx, pty});
+						pixelPtx = newStartPoint[0];
+						pixelPty = newStartPoint[1];
+						double[] newEndPoint = image.getPointInImageCoordinates(new double[]{ptxEnd, ptyEnd});
+						pixelEndPtx = newEndPoint[0];
+						pixelEndPty = newEndPoint[1];
+						width = pixelEndPtx - pixelPtx;
+						height = pixelEndPty - pixelPty;
+						ret = new RectangularROI(pixelPtx, pixelPty, width, height, angle);
+					}
 				}
-				if(rows.get(3) instanceof AxisPixelRowDataModel){
-					AxisPixelRowDataModel yPixelRow = (AxisPixelRowDataModel) rows.get(3);
-					pty = yPixelRow.getStart();
-					height = yPixelRow.getDiff();
-				}
-			} else {
-				if(rows.get(0) instanceof AxisPixelRowDataModel){
-					//Convert from Axis to Pixel values
-					AxisPixelRowDataModel xAxisRow = (AxisPixelRowDataModel) rows.get(0);
-					ptx = xAxisRow.getStart();
-					double ptxEnd = xAxisRow.getEnd();
-					width = ptxEnd - ptx;
-				}
-				pty = roi.getPointY();
-				height = ((RectangularROI) roi).getEndPoint()[1] - pty;
 			}
+			// if Pixel rows are being modified
+			else if (rowName.equals(RowName.XPIXEL_ROW) || rowName.equals(RowName.YPIXEL_ROW)) {
+				AxisPixelRowDataModel xPixelRow = (AxisPixelRowDataModel) rows.get(2);
+				AxisPixelRowDataModel yPixelRow = (AxisPixelRowDataModel) rows.get(3);
+				// x axis and width
+				ptx = xPixelRow.getStart();
+				pty = yPixelRow.getStart();
+				ptxEnd =xPixelRow.getEnd();
+				ptyEnd = yPixelRow.getEnd(); 
+				width = ptxEnd - ptx;
+				height = ptyEnd - pty;
+				ret = new RectangularROI(ptx, pty, width, height, angle);
+			}
+		}
+		return ret;
+	}
+
+	/**
+	 * Method that creates a ROI using the x row a profile table viewer
+	 * @param rows
+	 * @return IROI
+	 * @throws Exception
+	 */
+	private IROI createProfileRoi(List<AxisPixelRowDataModel> rows) throws Exception{
+		double ptx = 0, pty = 0, ptxEnd = 0, width = 0, height = 0, angle = 0;
+		IROI ret = null;
+		if (roi == null)
+			roi = plottingSystem.getRegions().iterator().next().getROI();
+		if (roi instanceof RectangularROI) {
+			//Convert from Axis to Pixel values
+			AxisPixelRowDataModel xAxisRow = (AxisPixelRowDataModel) rows.get(0);
+			ptx = xAxisRow.getStart();
+			ptxEnd = xAxisRow.getEnd();
+			width = ptxEnd - ptx;
+			pty = roi.getPointY();
+			height = ((RectangularROI) roi).getEndPoint()[1] - pty;
 			RectangularROI rr = new RectangularROI(ptx, pty, width, height, angle);
 			ret = rr;
 		}
@@ -550,12 +550,17 @@ public class AxisPixelROIEditTable {
 		regionViewer.removeSelectionChangedListener(listener);
 	}
 
+	private class RowName {
+		public static final String XAXIS_ROW = "X Axis";
+		public static final String YAXIS_ROW = "Y Axis";
+		public static final String XPIXEL_ROW = "X Pixel";
+		public static final String YPIXEL_ROW = "Y Pixel";
+	}
 	/**
 	 * View Model of  AxisPixel Table: main one
 	 *
 	 */
 	private class AxisPixelTableViewModel {
-
 		private List<AxisPixelRowDataModel> rows = new ArrayList<AxisPixelRowDataModel>();
 
 		private AxisPixelRowDataModel xAxisRow;
@@ -569,10 +574,10 @@ public class AxisPixelROIEditTable {
 		final private String description3 = "X values as pixels (Editable)"; 
 
 		{
-			xAxisRow = new AxisPixelRowDataModel(new String("X Axis"), new Double(0), new Double(0), new Double(0), description0);
-			yAxisRow = new AxisPixelRowDataModel(new String("Y Axis"), new Double(0), new Double(0), new Double(0), description1); 
-			xPixelRow = new AxisPixelRowDataModel(new String("X Pixel"), new Double(0), new Double(0), new Double(0), description2); 
-			yPixelRow = new AxisPixelRowDataModel(new String("Y Pixel"), new Double(0), new Double(0), new Double(0), description3); 
+			xAxisRow = new AxisPixelRowDataModel(new String(RowName.XAXIS_ROW), new Double(0), new Double(0), new Double(0), description0);
+			yAxisRow = new AxisPixelRowDataModel(new String(RowName.YAXIS_ROW), new Double(0), new Double(0), new Double(0), description1); 
+			xPixelRow = new AxisPixelRowDataModel(new String(RowName.XPIXEL_ROW), new Double(0), new Double(0), new Double(0), description2); 
+			yPixelRow = new AxisPixelRowDataModel(new String(RowName.YPIXEL_ROW), new Double(0), new Double(0), new Double(0), description3); 
 
 			rows.add(xAxisRow);
 			rows.add(yAxisRow);
@@ -595,14 +600,10 @@ public class AxisPixelROIEditTable {
 
 		final private String description = "X-Axis values"; 
 		private AxisPixelRowDataModel xAxisRow;
-//		private AxisPixelRowDataModel xPixelRow;
 
 		{
-			xAxisRow = new AxisPixelRowDataModel(new String("X Axis"), new Double(0), new Double(0), new Double(0), description);
-//			xPixelRow = new AxisPixelRowDataModel(new String("X Pixel"), new Double(0), new Double(0), new Double(0)); 
-
+			xAxisRow = new AxisPixelRowDataModel(new String(RowName.XAXIS_ROW), new Double(0), new Double(0), new Double(0), description);
 			rows.add(xAxisRow);
-//			rows.add(xPixelRow);
 		}
 
 		public List<AxisPixelRowDataModel> getValues() {
