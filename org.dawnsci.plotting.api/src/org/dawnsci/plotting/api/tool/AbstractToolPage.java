@@ -52,7 +52,7 @@ Or by programmatically when opening a view by id.
  */
 public abstract class AbstractToolPage extends Page implements IToolPage, IAdaptable {
 
-	private static final Logger logger = LoggerFactory.getLogger(AbstractToolPage.class);
+	protected static final Logger logger = LoggerFactory.getLogger(AbstractToolPage.class);
 	
 	private IToolPageSystem toolSystem;
 	private IPlottingSystem plotSystem;
