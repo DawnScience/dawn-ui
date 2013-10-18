@@ -13,12 +13,12 @@ import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.slicing.api.system.AxisChoiceEvent;
 import org.dawnsci.slicing.api.system.AxisChoiceListener;
+import org.dawnsci.slicing.api.system.AxisType;
 import org.dawnsci.slicing.api.system.DimensionalEvent;
 import org.dawnsci.slicing.api.system.DimensionalListener;
 import org.dawnsci.slicing.api.system.DimsDataList;
 import org.dawnsci.slicing.api.system.ISliceGallery;
 import org.dawnsci.slicing.api.system.ISliceSystem;
-import org.dawnsci.slicing.api.system.AxisType;
 import org.dawnsci.slicing.api.tool.ISlicingTool;
 import org.dawnsci.slicing.api.util.SliceUtils;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -103,7 +103,17 @@ public abstract class AbstractSliceSystem implements ISliceSystem {
 				
 		final ToolBarManager man = new ToolBarManager(SWT.FLAT|SWT.RIGHT);
 		man.add(new Separator("sliceTools"));
-		
+		return createSliceTools(man);
+	}
+
+	/**
+	 * Creates the slice tools by reading extension points
+	 * for the slice tools.
+	 * 
+	 * @return
+	 */
+	protected IToolBarManager createSliceTools(final ToolBarManager man) {
+				
 		final IConfigurationElement[] eles = Platform.getExtensionRegistry().getConfigurationElementsFor("org.dawnsci.slicing.api.slicingTool");
 
   		plotTypeActions= new HashMap<Enum, IAction>();
@@ -460,5 +470,14 @@ public abstract class AbstractSliceSystem implements ISliceSystem {
 				logger.error("Cannot change militarized state of slice tool! "+activeTool.getToolId());
 			}
 		}
+	}
+	
+	private static final String ADVANCED = "org.dawb.workbench.slicing.component.advanced";
+
+	public boolean isAdvanced() {
+		return Activator.getDefault().getPreferenceStore().getBoolean(ADVANCED);
+	}
+	protected void setAdvanced(boolean advanced) {
+		Activator.getDefault().getPreferenceStore().setValue(ADVANCED, advanced);
 	}
 }

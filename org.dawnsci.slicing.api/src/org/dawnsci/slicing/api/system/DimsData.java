@@ -56,6 +56,12 @@ public class DimsData implements Serializable {
 	 * 0=x, 1=y, 2=z
 	 */
 	private AxisType       plotAxis=AxisType.SLICE;
+	
+	/**
+	 * The span if a chunk is being pulled using the slice
+	 * Usually the slice then becomes the start of the chunk.
+	 */
+	private int sliceSpan=5;
 
 	public DimsData() {
 		
@@ -75,6 +81,7 @@ public class DimsData implements Serializable {
 		result = prime * result + slice;
 		result = prime * result
 				+ ((sliceRange == null) ? 0 : sliceRange.hashCode());
+		result = prime * result + sliceSpan;
 		return result;
 	}
 
@@ -97,6 +104,8 @@ public class DimsData implements Serializable {
 			if (other.sliceRange != null)
 				return false;
 		} else if (!sliceRange.equals(other.sliceRange))
+			return false;
+		if (sliceSpan != other.sliceSpan)
 			return false;
 		return true;
 	}
@@ -135,7 +144,7 @@ public class DimsData implements Serializable {
 	}
 
 	public int getSlice() {
-		if (plotAxis!=AxisType.SLICE) return -1;
+		if (plotAxis!=AxisType.SLICE && !plotAxis.isAdvanced()) return -1;
 		return slice;
 	}
 
@@ -227,5 +236,13 @@ public class DimsData implements Serializable {
 	}
 	public boolean isTextRange() {
 		return getPlotAxis()==AxisType.RANGE;
+	}
+
+	public int getSliceSpan() {
+		return sliceSpan;
+	}
+
+	public void setSliceSpan(int sliceSpan) {
+		this.sliceSpan = sliceSpan;
 	}
 }

@@ -7,10 +7,9 @@ import java.util.regex.Pattern;
 
 import org.dawb.common.ui.Activator; // On purpose! Gets preference from expected place.
 import org.dawb.common.ui.components.cell.ScaleCellEditor;
-import org.dawb.common.ui.preferences.ViewConstants;
 import org.dawnsci.common.widgets.celleditor.SpinnerCellEditorWithPlayButton;
-import org.dawnsci.slicing.api.system.DimsData;
 import org.dawnsci.slicing.api.system.AxisType;
+import org.dawnsci.slicing.api.system.DimsData;
 import org.dawnsci.slicing.api.util.SliceUtils;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.viewers.CellEditor;
@@ -142,21 +141,37 @@ class SliceEditingSupport extends EditingSupport {
         String min = String.valueOf(minimum);
         String max = String.valueOf(maximum);
         String val = String.valueOf(value);
+        
+        int ispan = value+data.getSliceSpan();
+        if (ispan>=maximum) ispan = maximum;
+        String span= String.valueOf(value+data.getSliceSpan());
         try {
 	        if (axis!=null) {
 				min = format.format(axis.getDouble(minimum));
 				max = format.format(axis.getDouble(maximum));
 				val = format.format(axis.getDouble(value));
+				if (data.getPlotAxis().isAdvanced()) {
+					span = format.format(axis.getDouble(ispan));
+				}
 	        } 
         } catch (Throwable ignored) {
         	// Use indices
         }
     
-        buf.append(min);
-        buf.append(" <= ");
-        buf.append(val);
-        buf.append(" <= ");
-        buf.append(max);
+        if (data.getPlotAxis().isAdvanced()) {
+        	buf.append(data.getPlotAxis().getName());
+        	buf.append("(");
+        	buf.append(val);
+        	buf.append(":");
+        	buf.append(span);
+        	buf.append(")");
+        } else {
+            buf.append(min);
+            buf.append(" <= ");
+            buf.append(val);
+            buf.append(" <= ");
+            buf.append(max);
+        }
         return buf.toString();
 	}
 
@@ -186,7 +201,7 @@ class SliceEditingSupport extends EditingSupport {
 		final int[] dataShape = system.getLazyDataset().getShape();
 		if (dataShape[data.getDimension()]<2) return false;
 		if (data.isTextRange()) return true;
-		return data.getPlotAxis()==AxisType.SLICE;
+		return data.getPlotAxis()==AxisType.SLICE || data.getPlotAxis().isAdvanced();
 	}
 
 	@Override

@@ -63,17 +63,8 @@ class TypeEditingSupport extends EditingSupport {
 					setPlotAxis(data, AxisType.SLICE);
 					return; // Bit of a bodge
 				}
-				if (AxisType.RANGE.getLabel().equals(value)) {
-					setPlotAxis(data, AxisType.RANGE);
-					return; // Bit of a bodge
-				}
 				
-				for (AxisType pa : AxisType.values()) {
-					if (value.equals(pa.getLabel())) {
-						setPlotAxis(data, pa);
-						return; // Bit of a bodge
-					}
-				}
+				setPlotAxis(data, AxisType.forLabel(value));
 			}
 		});
 	}
@@ -120,9 +111,10 @@ class TypeEditingSupport extends EditingSupport {
 		if (!valueChangeAllowed) return; // Stops focus lost doing a change.
 		try {
 			if (data==null) return;
+			
 			AxisType axis = value;
 			final Enum sliceType = system.getSliceType();
-			if (sliceType==PlotType.XY && axis!=AxisType.RANGE) {
+			if (sliceType==PlotType.XY && axis!=AxisType.RANGE && !axis.isAdvanced()) {
 				axis = axis.hasValue() ? AxisType.SLICE : AxisType.X;
 			}
 			if (sliceType==PlotType.IMAGE && system.isReversedImage()) {
@@ -136,6 +128,7 @@ class TypeEditingSupport extends EditingSupport {
 			if (axis==AxisType.Y_MANY) axis = AxisType.Y; // Y_MANY does not currrently require different slice code.
 			
 			data.setPlotAxis(axis);
+			if (axis.isAdvanced()) system.setAdvancedColumnsVisible(true);
 			system.updateAxesChoices();
 			system.update(data, false);
 			system.fireDimensionalListeners();
@@ -194,6 +187,10 @@ class TypeEditingSupport extends EditingSupport {
 		if (rank>ret.size()) {
 			if (system.isRangesAllowed()) ret.add(AxisType.RANGE.getLabel());
 			ret.add(AxisType.SLICE.getLabel());
+			
+			if (!system.isRangesAllowed() && system.isAdvanced()) { // Allow mathematics
+				for (AxisType a : AxisType.getMathsTypes()) ret.add(a.getLabel());
+			}
 		}
 		return ret.toArray(new String[ret.size()]);
 	}

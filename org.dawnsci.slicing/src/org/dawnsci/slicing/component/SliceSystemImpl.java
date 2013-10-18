@@ -15,6 +15,7 @@ import java.beans.XMLEncoder;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -301,9 +302,23 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 	 * @return
 	 */
 	protected IToolBarManager createSliceTools() {
-
-		IToolBarManager man = super.createSliceTools();
 		
+		final ToolBarManager man = new ToolBarManager(SWT.FLAT|SWT.RIGHT);
+		man.add(new Separator("sliceTools"));
+
+		// Add action for Setting the tools into advanced mode.
+		final Action advanced = new Action("Advanced slicing.\nFor instance, shows extra options for 'Type' including mean and median.", IAction.AS_CHECK_BOX) {
+			public void run() {
+				setAdvanced(isChecked());
+				viewer.cancelEditing();
+			}
+		};
+		advanced.setImageDescriptor(Activator.getImageDescriptor("icons/graduation-hat.png"));
+		advanced.setChecked(isAdvanced());
+        man.add(advanced);		
+		man.add(new Separator("group0"));
+
+		super.createSliceTools(man);
 		
 		man.add(new Separator("group2"));
 		
@@ -593,6 +608,7 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		return ok;
 	}	
 
+	private List<TableViewerColumn> advancedColumns;
 
 	private void createColumns(final TableViewer viewer, TableColumnLayout layout) {
 		
@@ -623,7 +639,23 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 			this.axisEditingSupport = new AxisEditingSupport(this, viewer);
 			axis.setEditingSupport(axisEditingSupport);
 		}
-	}	
+		
+		advancedColumns = new ArrayList<TableViewerColumn>();
+		final TableViewerColumn span   = new TableViewerColumn(viewer, SWT.LEFT, 4);
+		span.getColumn().setText("Span");
+		layout.setColumnData(span.getColumn(), new ColumnWeightData(80));
+		span.setLabelProvider(new DelegatingStyledCellLabelProvider(new SliceColumnLabelProvider(this, viewer,4)));
+		advancedColumns.add(span);
+		
+		
+	}
+	
+	protected void setAdvancedColumnsVisible(boolean isVis) {
+		for (TableViewerColumn col : advancedColumns) {
+			col.getColumn().setWidth(isAdvanced()?80:0);
+			col.getColumn().setResizable(isAdvanced()?true:false);
+		}
+	}
 
 
 	/**
@@ -738,6 +770,7 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		if (plottingSystem!=null && traceListener!=null) {
 			plottingSystem.removeTraceListener(traceListener);	
 		}
+		advancedColumns.clear();
 		super.dispose();
 		sliceJob.cancel();
 		saveSettings();

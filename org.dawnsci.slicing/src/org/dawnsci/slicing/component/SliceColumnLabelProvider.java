@@ -51,11 +51,15 @@ class SliceColumnLabelProvider extends ColumnLabelProvider implements IStyledLab
 				final int slice = data.getSlice();
 				String formatValue = String.valueOf(slice);
 				try {
-					if (system.isAxesVisible()) {
-						Number value = SliceUtils.getAxisValue(system.getCurrentSlice(), system.getData().getVariableManager(), data, slice, null);
-						formatValue = format.format(value);
-					} else {
-						formatValue = String.valueOf(slice);
+					formatValue = getFormatValue(data, slice);
+					if (data.getPlotAxis().isAdvanced()) {
+						final StringBuilder buf = new StringBuilder();
+						buf.append("[ ");
+						buf.append(formatValue);
+						buf.append(" : ");
+						buf.append(getFormatValue(data, slice+data.getSliceSpan()));
+						buf.append(" ]");
+						formatValue = buf.toString();
 					}
 				} catch (Throwable ne) {
 					formatValue = String.valueOf(slice);
@@ -77,6 +81,12 @@ class SliceColumnLabelProvider extends ColumnLabelProvider implements IStyledLab
 				final String axisName = SliceUtils.getAxisLabel(system.getCurrentSlice(), data);
 				if (axisName!=null) ret.append(axisName);
 			}
+			break;
+		case 4:
+			if (data.getPlotAxis().isAdvanced()) {
+				ret.append(String.valueOf(data.getSliceSpan()));
+			}
+			break;
 		default:
 			ret.append( "" );
 			break;
@@ -86,6 +96,23 @@ class SliceColumnLabelProvider extends ColumnLabelProvider implements IStyledLab
 	}
 	
 	
+	private String getFormatValue(DimsData data, int index) {
+		
+		int max = system.getData().getLazySet().getShape()[data.getDimension()];
+		if (index>=max) index = max-1;
+		String formatValue = String.valueOf(index);
+		try {
+			if (system.isAxesVisible()) {
+				Number value = SliceUtils.getAxisValue(system.getCurrentSlice(), system.getData().getVariableManager(), data, index, null);
+				formatValue = format.format(value);
+			} else {
+				formatValue = String.valueOf(index);
+			}
+		} catch (Throwable ne) {
+			formatValue = String.valueOf(index);
+		}
+		return formatValue;
+	}
 	/**
 	 * This method attempts to get a label for the dimension 
 	 * given the DimsData and the current sliceType.
@@ -107,6 +134,7 @@ class SliceColumnLabelProvider extends ColumnLabelProvider implements IStyledLab
         }
 		
 		if (data.isTextRange()) return AxisType.RANGE.getLabel();
+		if (data.getPlotAxis().isAdvanced()) return data.getPlotAxis().getLabel();
 		
 		// Bit naughty but we test the kind of slice they have
 		// set to do in the labels that we show them here.

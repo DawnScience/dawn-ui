@@ -120,6 +120,7 @@ public class SliceUtils {
         	}
 
     	}
+    	currentSlice.setDimensionalData(dimsDataHolder);
 
     	if (x==null || x.getSize()<2) { // Nothing to plot
     		logger.debug("Cannot slice into an image because one of the dimensions is size of 1");
@@ -258,6 +259,10 @@ public class SliceUtils {
 			final double[] exp = DOEUtils.getRange(dimsData.getSliceRange(), null);
 			return (int)exp[1];
 			
+		}  else if (dimsData.getPlotAxis().isAdvanced()) {
+			int ispan = dimsData.getSlice()+dimsData.getSliceSpan();
+			if (ispan>size) ispan=size;
+			return ispan;
 		}
 		return dimsData.getSlice()+1;
 	}
@@ -563,6 +568,8 @@ public class SliceUtils {
 		IDataset slice = (IDataset)ld.getSlice(currentSlice.getSliceStart(), currentSlice.getSliceStop(), currentSlice.getSliceStep());
 		slice.setName("Slice of "+currentSlice.getName()+" "+currentSlice.getShapeMessage());
 		
+		final DimsDataList ddl = (DimsDataList)currentSlice.getDimensionalData();
+		
 		final IAnalysisService service = (IAnalysisService)ServiceManager.getService(IAnalysisService.class);
 		if (currentSlice.isRange()) {
 			// We sum the data in the dimensions that are not axes
@@ -577,8 +584,18 @@ public class SliceUtils {
 			
 			sum = sum.squeeze();
 			slice = sum;
+			
 		} else {
-
+			if (ddl!=null) {	
+				final int       len    = dataShape.length;
+				for (int i = len-1; i >= 0; i--) {
+					final DimsData dd = ddl.getDimsData(i);
+					if (dd.getPlotAxis().isAdvanced()) {
+						slice = dd.getPlotAxis().process(slice,i);
+					}
+				}
+			} 
+			
 			slice = slice.squeeze();		
 			if (currentSlice.getX() > currentSlice.getY() && slice.getShape().length==2) {
 				// transpose clobbers name
@@ -587,6 +604,7 @@ public class SliceUtils {
 				if (name!=null) slice.setName(name);
 			}
 		}
+		
 		return slice;
 	}
 

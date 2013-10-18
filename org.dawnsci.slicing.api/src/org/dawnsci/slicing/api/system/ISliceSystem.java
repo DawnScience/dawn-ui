@@ -162,6 +162,12 @@ public interface ISliceSystem {
 	 */
 	public void setSliceActionEnabled(Enum sliceType, boolean b);
 
+	/**
+	 * 
+	 * @return true if advanced slicing such as MEAN, MEDIAN and SUM are allowed
+	 */
+	public boolean isAdvanced();
+	
 	
 	/**
 	 * Sets if slicing is allowed in the slice widget. If set to false

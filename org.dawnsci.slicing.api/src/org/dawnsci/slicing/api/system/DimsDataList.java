@@ -408,5 +408,12 @@ public class DimsDataList implements Serializable {
 		return dimsData==null || dimsData.isEmpty();
 	}
 
+	public boolean isAdvanced() {
+		for (DimsData dd : getDimsData()) {
+            if (dd.getPlotAxis().isAdvanced()) return true;
+		}
+		return false;
+	}
+
 
 }
