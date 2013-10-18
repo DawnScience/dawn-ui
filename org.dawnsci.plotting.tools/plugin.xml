@@ -77,7 +77,7 @@
             label="Profile">
       </plotting_tool_category>
       <plotting_tool_category
-            icon="icons/bullet_wrench.png"
+            icon="icons/flask.png"
             id="org.dawnsci.plotting.tools.category.Science"
             label="Science">
       </plotting_tool_category>
