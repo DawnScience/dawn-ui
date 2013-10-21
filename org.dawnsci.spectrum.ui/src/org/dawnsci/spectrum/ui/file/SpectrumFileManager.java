@@ -11,7 +11,6 @@ import java.util.regex.Pattern;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.spectrum.ui.Activator;
 import org.dawnsci.spectrum.ui.preferences.SpectrumConstants;
-import org.dawnsci.spectrum.ui.views.ISpectrumFileListener;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;

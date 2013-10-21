@@ -1,8 +1,7 @@
-package org.dawnsci.spectrum.ui.views;
+package org.dawnsci.spectrum.ui.file;
 
 import java.util.EventListener;
 
-import org.dawnsci.spectrum.ui.file.SpectrumFileOpenedEvent;
 
 public interface ISpectrumFileListener extends EventListener {
 	

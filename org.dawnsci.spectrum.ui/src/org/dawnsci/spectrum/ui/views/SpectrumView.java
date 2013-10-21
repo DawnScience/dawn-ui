@@ -12,10 +12,13 @@ import org.dawnsci.plotting.api.filter.IFilterDecorator;
 import org.dawnsci.plotting.api.trace.ILineTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.spectrum.ui.Activator;
+import org.dawnsci.spectrum.ui.file.IContain1DData;
 import org.dawnsci.spectrum.ui.file.ISpectrumFile;
+import org.dawnsci.spectrum.ui.file.ISpectrumFileListener;
 import org.dawnsci.spectrum.ui.file.SpectrumFileManager;
 import org.dawnsci.spectrum.ui.file.SpectrumFileOpenedEvent;
 import org.dawnsci.spectrum.ui.file.SpectrumInMemory;
+import org.dawnsci.spectrum.ui.utils.SpectrumUtils;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.dnd.DND;
@@ -48,6 +51,8 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.wizard.IWizard;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.SWT;
 import org.eclipse.ui.IActionBars;
@@ -278,11 +283,11 @@ public class SpectrumView extends ViewPart {
 		manager.add(new Action("Average") {
 			public void run() {
 				ISelection selection = viewer.getSelection();
-				List<ISpectrumFile> list = SpectrumUtils.getSpectrumFilesList((IStructuredSelection)selection);
+				List<IContain1DData> list = SpectrumUtils.get1DDataList((IStructuredSelection)selection);
 				ISpectrumFile file = SpectrumUtils.averageSpectrumFiles(list,system);
 				
 				if (file == null) {
-					showMessage("Could not calculate average, need to do something smarter here!");
+					showMessage("Could not process dataset, operation not supported for this data!");
 				}
 				
 				SpectrumView.this.manager.addFile(file);
@@ -294,17 +299,31 @@ public class SpectrumView extends ViewPart {
 			manager.add(new Action("Subtract") {
 				public void run() {
 					ISelection selection = viewer.getSelection();
-					List<ISpectrumFile> list = SpectrumUtils.getSpectrumFilesList((IStructuredSelection)selection);
+					List<IContain1DData> list = SpectrumUtils.get1DDataList((IStructuredSelection)selection);
 					ISpectrumFile file = SpectrumUtils.subtractSpectrumFiles(list,system);
 
 					if (file == null) {
-						showMessage("Could not calculate average, need to do something smarter here!");
+						showMessage("Could not process dataset, operation not supported for this data!");
 					}
 
 					SpectrumView.this.manager.addFile(file);
 				}
 			});
 		}
+		
+//		manager.add(new Action("Open processing wizard") {
+//			@Override
+//			public void run(){
+////				SpectrumWizard wiz = new SpectrumWizard();
+////				
+////				ISelection selection = viewer.getSelection();
+////				List<ISpectrumFile> list = SpectrumUtils.getSpectrumFilesList((IStructuredSelection)selection);
+////				wiz.add1DDatas(list.get(0),list.get(1));
+////				
+////				WizardDialog wd = new  WizardDialog(Display.getCurrent().getActiveShell(), wiz);
+////				wd.open();
+//			}
+//		});
 
 		// Other plug-ins can contribute there actions here
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
