@@ -71,6 +71,9 @@ public class DimsData implements Serializable {
 		this.dimension = dim;
 	}
 
+	/**
+	 * IMPORTANT: DO not include sliceSpan! Or table does not refresh properly as it changes.
+	 */
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -81,10 +84,12 @@ public class DimsData implements Serializable {
 		result = prime * result + slice;
 		result = prime * result
 				+ ((sliceRange == null) ? 0 : sliceRange.hashCode());
-		result = prime * result + sliceSpan;
 		return result;
 	}
 
+	/**
+	 * IMPORTANT: DO not include sliceSpan! Or table does not refresh properly as it changes.
+	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -104,8 +109,6 @@ public class DimsData implements Serializable {
 			if (other.sliceRange != null)
 				return false;
 		} else if (!sliceRange.equals(other.sliceRange))
-			return false;
-		if (sliceSpan != other.sliceSpan)
 			return false;
 		return true;
 	}

@@ -40,9 +40,9 @@ import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.slicing.Activator;
 import org.dawnsci.slicing.api.AbstractSliceSystem;
 import org.dawnsci.slicing.api.system.AxisChoiceEvent;
+import org.dawnsci.slicing.api.system.AxisType;
 import org.dawnsci.slicing.api.system.DimsData;
 import org.dawnsci.slicing.api.system.DimsDataList;
-import org.dawnsci.slicing.api.system.AxisType;
 import org.dawnsci.slicing.api.system.SliceSource;
 import org.dawnsci.slicing.api.util.SliceUtils;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -93,7 +93,7 @@ import uk.ac.diamond.scisoft.analysis.io.SliceObject;
  */
 public class SliceSystemImpl extends AbstractSliceSystem {
 
-	private static final List<String> COLUMN_PROPERTIES = Arrays.asList(new String[]{"Dimension","Axis","Slice","Axis Data"});
+	private static final List<String> COLUMN_PROPERTIES = Arrays.asList(new String[]{"Dimension","Axis","Slice","Axis Data","Span"});
 	
 	private ILazyDataset    lazySet; // The dataset that we are slicing.
 	private int[]           dataShape;
@@ -252,7 +252,8 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		viewer.setInput(new Object());
 		
 		sliceToolbar.update(true);
-    	
+		setAdvancedColumnsVisible(isAdvanced());	
+   	
 		return area;
 	}
 	
@@ -638,25 +639,37 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 			axis.setLabelProvider(new DelegatingStyledCellLabelProvider(new SliceColumnLabelProvider(this, viewer,3)));
 			this.axisEditingSupport = new AxisEditingSupport(this, viewer);
 			axis.setEditingSupport(axisEditingSupport);
+		
+			advancedColumns = new ArrayList<TableViewerColumn>();
+			final TableViewerColumn span   = new TableViewerColumn(viewer, SWT.LEFT, 4);
+			span.getColumn().setText("Span");
+			layout.setColumnData(span.getColumn(), new ColumnWeightData(0, 0, false));
+			span.setLabelProvider(new DelegatingStyledCellLabelProvider(new SliceColumnLabelProvider(this, viewer,4)));
+			span.setEditingSupport(new SpanEditingSupport(this, viewer));
+			advancedColumns.add(span);
 		}
-		
-		advancedColumns = new ArrayList<TableViewerColumn>();
-		final TableViewerColumn span   = new TableViewerColumn(viewer, SWT.LEFT, 4);
-		span.getColumn().setText("Span");
-		layout.setColumnData(span.getColumn(), new ColumnWeightData(80));
-		span.setLabelProvider(new DelegatingStyledCellLabelProvider(new SliceColumnLabelProvider(this, viewer,4)));
-		advancedColumns.add(span);
-		
-		
 	}
 	
 	protected void setAdvancedColumnsVisible(boolean isVis) {
+		
+		final Composite parent = viewer.getTable().getParent();
+		final TableColumnLayout layout = (TableColumnLayout)parent.getLayout();
+		if (advancedColumns==null) return;
 		for (TableViewerColumn col : advancedColumns) {
-			col.getColumn().setWidth(isAdvanced()?80:0);
-			col.getColumn().setResizable(isAdvanced()?true:false);
+			col.getColumn().setWidth(isVis?80:0);
+			col.getColumn().setResizable(isVis?true:false);
+			if (isVis) {
+				layout.setColumnData(col.getColumn(), new ColumnWeightData(80, 20, true));
+			} else {
+				layout.setColumnData(col.getColumn(), new ColumnWeightData(0, 0, false));
+			}
 		}
 	}
 
+	protected void setAdvanced(boolean advanced) {
+		setAdvancedColumnsVisible(advanced);
+		super.setAdvanced(advanced);
+	}
 
 	/**
 	 * Update slice
