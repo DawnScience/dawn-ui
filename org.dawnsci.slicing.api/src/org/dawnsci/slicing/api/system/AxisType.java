@@ -19,7 +19,7 @@ public enum AxisType {
 	MEAN("Mean",           -1, true), 
 	MAX("Max",             -1, true), 
 	MIN("Min",             -1, true), 
-	MODE("Mode",           -1, true), 
+	//MODE("Mode",           -1, true), 
 	MEDIAN("Median",       -1, true), 
 	SUM("Sum",             -1, true), 
 	RANGE("Range",         -1);
@@ -101,8 +101,8 @@ public enum AxisType {
 			return service.min(slice, i);
 		} else if (this==MEDIAN) { // TODO The other types!
 			return service.median(slice, i);
-		} else if (this==MODE) { // TODO The other types!
-			return service.mode(slice, i);
+//		} else if (this==MODE) { // TODO The other types!
+//			return service.mode(slice, i);
 		} else if (this==SUM) { // TODO The other types!
 			return service.sum(slice, i);
 		}
