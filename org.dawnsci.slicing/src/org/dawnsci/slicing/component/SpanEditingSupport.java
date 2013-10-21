@@ -51,7 +51,8 @@ public class SpanEditingSupport extends EditingSupport {
 
 	@Override
 	protected boolean canEdit(Object element) {
-		return system.isAdvanced();
+		final DimsData data = (DimsData)element;
+		return system.isAdvanced() && data.getPlotAxis().isAdvanced();
 	}
 
 	@Override
