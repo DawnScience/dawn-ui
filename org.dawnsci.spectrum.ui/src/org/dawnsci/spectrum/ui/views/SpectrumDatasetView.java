@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.dawnsci.spectrum.ui.file.ISpectrumFile;
+import org.dawnsci.spectrum.ui.utils.SpectrumUtils;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ICheckStateListener;

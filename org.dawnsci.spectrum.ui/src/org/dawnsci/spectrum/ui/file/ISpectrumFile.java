@@ -5,7 +5,7 @@ import java.util.List;
 
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
-public interface ISpectrumFile {
+public interface ISpectrumFile extends IContain1DData {
 
 	public String getName();
 	

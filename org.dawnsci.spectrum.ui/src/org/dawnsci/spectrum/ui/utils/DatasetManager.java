@@ -1,4 +1,4 @@
-package org.dawnsci.spectrum.ui.views;
+package org.dawnsci.spectrum.ui.utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;

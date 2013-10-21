@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.dawnsci.plotting.api.IPlottingSystem;
-import org.dawnsci.spectrum.ui.views.DatasetManager;
+import org.dawnsci.spectrum.ui.utils.DatasetManager;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
