@@ -94,7 +94,8 @@ class FilterDecoratorImpl implements IFilterDecorator {
 	public void clear() {
 		reset();
 		filters.clear();
-		system.repaint();
+		
+		if (!system.isDisposed()) system.repaint();
 	}
 
 	@Override
