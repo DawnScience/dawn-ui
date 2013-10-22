@@ -1,6 +1,8 @@
 package org.dawnsci.spectrum.ui.file;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.trace.ITrace;
@@ -15,7 +17,12 @@ public abstract class AbstractSpectrumFile implements ISpectrumFile {
 	protected String xDatasetName;
 	protected IPlottingSystem system;
 	protected List<String> yDatasetNames;
+	protected Map<String,ITrace> traceMap;
 	
+	public AbstractSpectrumFile() {
+		this.traceMap = new HashMap<String, ITrace>(); 
+	}
+	 
 	public void setxDatasetName(String xDatasetName) {
 
 		if (xDatasetName == null) {
@@ -58,8 +65,11 @@ public abstract class AbstractSpectrumFile implements ISpectrumFile {
 	protected abstract String getTraceName(String name);
 	
 	protected void removeFromPlot(String name) {
-		ITrace trace = system.getTrace(getPath() + " : " + name);
+		//ITrace trace = system.getTrace(getPath() + " : " + name);
+		
+		ITrace trace = traceMap.get(name);
 		if (trace != null) system.removeTrace(trace);
+		traceMap.remove(name);
 		system.autoscaleAxes();
 	}
 
@@ -86,9 +96,12 @@ public abstract class AbstractSpectrumFile implements ISpectrumFile {
 	
 	public void removeAllFromPlot() {
 		for (String dataset : getyDatasetNames()) {
-			ITrace trace = system.getTrace(getTraceName(dataset));
+			ITrace trace = traceMap.get(dataset);
+			//ITrace trace = system.getTrace(getTraceName(dataset));
 			if (trace != null) system.removeTrace(trace);
+			traceMap.remove(dataset);
 		}
+		system.autoscaleAxes();
 	}
 	
 	protected IDataset reduceTo1D(IDataset axis, IDataset data) {

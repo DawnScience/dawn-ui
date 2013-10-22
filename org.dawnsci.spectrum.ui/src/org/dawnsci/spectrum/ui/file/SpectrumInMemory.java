@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.dawnsci.plotting.api.IPlottingSystem;
+import org.dawnsci.plotting.api.trace.ITrace;
 
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
@@ -112,8 +113,11 @@ public class SpectrumInMemory extends AbstractSpectrumFile implements ISpectrumF
 			copy.get(i).setName(getTraceName(copy.get(i).getName()));
 		}
 		
-		system.updatePlot1D(x, getyDatasets(), null);
+		List<ITrace> traces = system.updatePlot1D(x, getyDatasets(), null);
 		
+		for (int i = 0; i < traces.size();i++) {
+			traceMap.put(yDatasetNames.get(i), traces.get(i));
+		}
 		for (int i= 0; i < copy.size(); i++) {
 			list.get(i).setName(names.get(i));
 		}
@@ -127,7 +131,10 @@ public class SpectrumInMemory extends AbstractSpectrumFile implements ISpectrumF
 		if (set.getRank() != 1) set = reduceTo1D(x, set);
 		set.setName(getTraceName(set.getName()));
 		
-		if (set != null) system.updatePlot1D(x, Arrays.asList(new IDataset[] {set}), null);
+		if (set != null) {
+			List<ITrace> traces = system.updatePlot1D(x, Arrays.asList(new IDataset[] {set}), null);
+			traceMap.put(name, traces.get(0));
+		}
 		
 		set.setName(oldName);
 	}
