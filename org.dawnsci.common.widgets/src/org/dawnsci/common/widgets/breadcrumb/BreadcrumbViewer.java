@@ -833,4 +833,10 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 
 		super.handleDispose(event);
 	}
+
+	public void showMenu() {
+		
+		BreadcrumbItem current= fBreadcrumbItems.get(fBreadcrumbItems.size()-1);
+		current.openDropDownMenu();
+	}
 }

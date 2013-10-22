@@ -528,6 +528,7 @@ class BreadcrumbItemDropDown {
 
 		fShell.setVisible(true);
 		installCloser(fShell);
+		tree.setFocus();
 	}
 
 	private void openElement(Object data) {
