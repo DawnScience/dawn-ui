@@ -13,18 +13,18 @@ import uk.ac.diamond.scisoft.analysis.dataset.Slice;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROISliceUtils;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
-import uk.ac.diamond.scisoft.analysis.roi.YAxisLineBoxROI;
+import uk.ac.diamond.scisoft.analysis.roi.YAxisBoxROI;
 
 public class ArpesSideImageReducer implements IDatasetROIReducer {
 	
-	private final RegionType regionType = RegionType.YAXIS_LINE;
+	private final RegionType regionType = RegionType.YAXIS;
 	private List<IDataset> imageAxes;
 	
 	@Override
 	public IDataset reduce(ILazyDataset data, List<AbstractDataset> axes,
 			IROI roi, Slice[] slices, int[] order) {
 		if (roi instanceof RectangularROI) {
-			IDataset image = ROISliceUtils.getYAxisDataset2D(data, (RectangularROI)roi, slices, order[2]);
+			IDataset image = ROISliceUtils.getYAxisDataset2DAverage(data, (RectangularROI)roi, slices, order[2]);
 			
 			if (order[0] < order[1]) image = ((AbstractDataset)image).transpose();
 			
@@ -86,7 +86,7 @@ public class ArpesSideImageReducer implements IDatasetROIReducer {
 	public IROI getInitialROI(List<AbstractDataset> axes, int[] order) {
 		double len = axes.get(2).count();
 		
-		return new YAxisLineBoxROI(0,len/10,0,0, 0);
+		return new YAxisBoxROI(0,len/10,0,len/20, 0);
 	}
 }
 
