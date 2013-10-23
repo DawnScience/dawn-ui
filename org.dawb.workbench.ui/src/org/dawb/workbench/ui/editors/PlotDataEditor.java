@@ -28,6 +28,7 @@ import org.dawb.workbench.ui.Activator;
 import org.dawb.workbench.ui.data.PlotDataComponent;
 import org.dawb.workbench.ui.editors.preference.EditorConstants;
 import org.dawb.workbench.ui.views.PlotDataPage;
+import org.dawnsci.common.widgets.editor.ITitledEditor;
 import org.dawnsci.plotting.AbstractPlottingSystem;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlotType;
@@ -78,7 +79,7 @@ import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
  * 
  * 
  */
-public class PlotDataEditor extends EditorPart implements IReusableEditor, IDatasetEditor {
+public class PlotDataEditor extends EditorPart implements IReusableEditor, IDatasetEditor, ITitledEditor {
 	
 	private static Logger logger = LoggerFactory.getLogger(PlotDataEditor.class);
 	
@@ -641,6 +642,12 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 	public String toString(){
 		if (getEditorInput()!=null) return getEditorInput().getName();
 		return super.toString();
+	}
+
+	@Override
+	public void setPartTitle(String name) {
+		super.setPartName(name);
+		
 	}
 	
 }

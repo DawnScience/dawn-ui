@@ -19,6 +19,7 @@ import org.dawb.hdf5.editor.H5Editor;
 import org.dawb.hdf5.editor.H5ValuePage;
 import org.dawb.hdf5.editor.IH5Editor;
 import org.dawb.workbench.ui.views.PlotDataPage;
+import org.dawnsci.common.widgets.editor.ITitledEditor;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.IPlottingSystemSelection;
 import org.dawnsci.plotting.api.PlotType;
@@ -44,7 +45,7 @@ import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.rcp.editors.HDF5TreeEditor;
 
 
-public class H5MultiEditor extends MultiPageEditorPart  implements IReusableEditor, IPlottingSystemSelection, IH5Editor {
+public class H5MultiEditor extends MultiPageEditorPart  implements IReusableEditor, IPlottingSystemSelection, IH5Editor, ITitledEditor {
 
 	// The property org.dawb.editor.h5.use.default is set by default in dawb / dawn vanilla
 	// The property org.dawb.editor.h5.use.default is not set in SDA.
@@ -59,6 +60,10 @@ public class H5MultiEditor extends MultiPageEditorPart  implements IReusableEdit
         super.init(site, input);
 	    setPartName(input.getName());
     }
+	@Override
+	public void setPartTitle(String name) {
+		super.setPartName(name);	
+	}
 	
 	@Override
 	public void setInput(final IEditorInput input) {

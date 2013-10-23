@@ -11,6 +11,7 @@ package org.dawb.workbench.ui.editors;
 
 import org.dawb.common.services.IVariableManager;
 import org.dawb.workbench.ui.views.PlotDataPage;
+import org.dawnsci.common.widgets.editor.ITitledEditor;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.IPlottingSystemSelection;
 import org.dawnsci.plotting.api.PlotType;
@@ -32,7 +33,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.rcp.editors.TextDataEditor;
 
 
-public class AsciiEditor extends MultiPageEditorPart implements IPlottingSystemSelection {
+public class AsciiEditor extends MultiPageEditorPart implements IPlottingSystemSelection, ITitledEditor {
 
 	public static final String ID = "org.dawb.workbench.editors.AsciiEditor"; //$NON-NLS-1$
 
@@ -46,7 +47,11 @@ public class AsciiEditor extends MultiPageEditorPart implements IPlottingSystemS
         super.init(site, input);
 	    setPartName(input.getName());
     }
-	
+	@Override
+	public void setPartTitle(String name) {
+		super.setPartName(name);	
+	}
+		
 	/**
 	 * It might be necessary to show the tree editor on the first page.
 	 * A property can be introduced to change the page order if this is required.
