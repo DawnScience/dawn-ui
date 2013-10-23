@@ -33,9 +33,9 @@ public class SpectrumFileManager {
 	}
 	//TODO make better
 	public void addFile(ISpectrumFile file) {
-		if (spectrumFiles.containsKey(file.getName())) return;
+		if (spectrumFiles.containsKey(file.getLongName())) return;
 		
-		spectrumFiles.put(file.getName(), file);
+		spectrumFiles.put(file.getLongName(), file);
 		
 		file.plotAll();
 		fireFileListeners(new SpectrumFileOpenedEvent(this, file));

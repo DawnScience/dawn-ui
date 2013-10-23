@@ -10,10 +10,12 @@ public class Contain1DDataImpl implements IContain1DData {
 	
 	private IDataset x;
 	private List<IDataset> y;
+	private String name;
 	
-	public Contain1DDataImpl(IDataset x, List<IDataset> y) {
+	public Contain1DDataImpl(IDataset x, List<IDataset> y, String name) {
 		this.x = x;
 		this.y = y;
+		this.name = name;
 	}
 
 	@Override
@@ -24,6 +26,11 @@ public class Contain1DDataImpl implements IContain1DData {
 	@Override
 	public List<IDataset> getyDatasets() {
 		return y;
+	}
+	
+	@Override
+	public String getName() {
+		return name;
 	}
 
 }

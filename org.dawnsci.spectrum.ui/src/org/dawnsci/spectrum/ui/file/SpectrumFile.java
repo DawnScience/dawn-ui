@@ -46,6 +46,10 @@ public class SpectrumFile extends AbstractSpectrumFile implements ISpectrumFile 
 		return file.getName();
 	}
 	
+	public String getLongName() {
+		return path;
+	}
+	
 	public String getPath() {
 		return path;
 	}

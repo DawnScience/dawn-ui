@@ -40,17 +40,28 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.util.LocalSelectionTransfer;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
+import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.DecoratingStyledCellLabelProvider;
+import org.eclipse.jface.viewers.IDecorationContext;
+import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Menu;
@@ -122,14 +133,15 @@ public class SpectrumView extends ViewPart {
 		}
 	}
 	
-	class ViewLabelProvider extends LabelProvider implements ITableLabelProvider {
+	class ViewLabelProvider extends ColumnLabelProvider implements ITableLabelProvider {
+		@Override
 		public String getColumnText(Object obj, int index) {
 			return getText(obj);
 		}
 		public Image getColumnImage(Object obj, int index) {
 			return getImage(obj);
 		}
-		
+		@Override
 		public String getText(Object obj) {
 			if (obj instanceof ISpectrumFile) {
 				return ((ISpectrumFile)obj).getName();
@@ -137,7 +149,7 @@ public class SpectrumView extends ViewPart {
 			
 			return "";
 		}
-		
+		@Override
 		public Image getImage(Object obj) {
 			
 			if (obj instanceof SpectrumInMemory) return PlatformUI.getWorkbench().
@@ -145,6 +157,14 @@ public class SpectrumView extends ViewPart {
 			
 			return PlatformUI.getWorkbench().
 					getSharedImages().getImage(ISharedImages.IMG_OBJ_ELEMENT);
+		}
+		@Override
+		public String getToolTipText(Object obj) {
+			if (obj instanceof ISpectrumFile) {
+				return ((ISpectrumFile)obj).getLongName();
+			}
+			
+			return "";
 		}
 	}
 
@@ -159,8 +179,8 @@ public class SpectrumView extends ViewPart {
 	 * to create the viewer and initialize it.
 	 */
 	public void createPartControl(Composite parent) {
-		
-		
+
+
 		viewer = new TableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		viewer.setContentProvider(new ViewContentProvider());
 		viewer.setLabelProvider(new ViewLabelProvider());
@@ -168,30 +188,40 @@ public class SpectrumView extends ViewPart {
 		IViewPart view = page.findView("org.dawnsci.spectrum.ui.views.SpectrumPlot");
 		system = (IPlottingSystem)view.getAdapter(IPlottingSystem.class);
 		manager = new SpectrumFileManager(system);
-		viewer.setInput(manager);
 		
+		
+		TableViewerColumn viewerColumn = new TableViewerColumn(viewer, SWT.NONE);
+		viewerColumn.setLabelProvider(new ViewLabelProvider());
+	 
+		TableColumnLayout tableColumnLayout = new TableColumnLayout();
+		tableColumnLayout.setColumnData(viewerColumn.getColumn(),
+		        new ColumnWeightData(1));
+		parent.setLayout(tableColumnLayout);
+		viewer.setInput(manager);
+
+		ColumnViewerToolTipSupport.enableFor(viewer);
 		manager.addFileListener( new ISpectrumFileListener() {
-			
+
 			@Override
 			public void fileLoaded(final SpectrumFileOpenedEvent event) {
 				Display.getDefault().syncExec(new Runnable() {
-					
+
 					@Override
 					public void run() {
-//						viewer.refresh();
-//						Table tab = viewer.getTable();
-//						tab.setSelection(tab.getItemCount()-1);
-//						tab.showSelection();
+						//						viewer.refresh();
+						//						Table tab = viewer.getTable();
+						//						tab.setSelection(tab.getItemCount()-1);
+						//						tab.showSelection();
 						viewer.refresh();
 						viewer.setSelection(new StructuredSelection(event.getFile()),true);
-						
+
 					}
 				});
 			}
 		});
-		
+
 		getSite().setSelectionProvider(viewer);
-		
+
 		//TODO make this nasty cut-paste code better
 		dropListener = new DropTargetAdapter() {
 			@Override
@@ -212,37 +242,54 @@ public class SpectrumView extends ViewPart {
 					}
 				}
 			}
-			};
-			DropTarget dt = new DropTarget(viewer.getControl(), DND.DROP_MOVE | DND.DROP_DEFAULT | DND.DROP_COPY);
-			dt.setTransfer(new Transfer[] { TextTransfer.getInstance(),
-					FileTransfer.getInstance(), ResourceTransfer.getInstance(),
-					LocalSelectionTransfer.getTransfer() });
-			dt.addDropListener(dropListener);
-			
-			// Create the help context id for the viewer's control
-			PlatformUI.getWorkbench().getHelpSystem().setHelp(viewer.getControl(), "org.dawnsci.spectrum.viewer");
-			makeActions();
-			hookContextMenu();
-//			hookDoubleClickAction();
-			contributeToActionBars();
-			
-			viewer.getTable().addKeyListener(new KeyListener() {
-				
-				@Override
-				public void keyReleased(KeyEvent e) {
-					// TODO Auto-generated method stub
-					
+		};
+		DropTarget dt = new DropTarget(viewer.getControl(), DND.DROP_MOVE | DND.DROP_DEFAULT | DND.DROP_COPY);
+		dt.setTransfer(new Transfer[] { TextTransfer.getInstance(),
+				FileTransfer.getInstance(), ResourceTransfer.getInstance(),
+				LocalSelectionTransfer.getTransfer() });
+		dt.addDropListener(dropListener);
+
+		// Create the help context id for the viewer's control
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(viewer.getControl(), "org.dawnsci.spectrum.viewer");
+		makeActions();
+		hookContextMenu();
+		//			hookDoubleClickAction();
+		contributeToActionBars();
+
+		viewer.getTable().addKeyListener(new KeyListener() {
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				// TODO Auto-generated method stub
+				if (e.keyCode == SWT.DEL) {
+					removeAction.run();
 				}
-				
-				@Override
-				public void keyPressed(KeyEvent e) {
-					// TODO Auto-generated method stub
-					if (e.keyCode == SWT.DEL) {
-						removeAction.run();
-					}
+			}
+		});
+
+	viewer.addSelectionChangedListener(new ISelectionChangedListener() {
+		
+		@Override
+		public void selectionChanged(SelectionChangedEvent event) {
+			
+			List<ISpectrumFile> list = SpectrumUtils.getSpectrumFilesList((IStructuredSelection)event.getSelection());
+			
+			for (ISpectrumFile file : manager.getFiles()) {
+				if (list.contains(file)) {
+					file.setSelected(true);
+				} else {
+					file.setSelected(false);
 				}
-			});
+			}
 		}
+	});
+	}
 
 	private void hookContextMenu() {
 		MenuManager menuMgr = new MenuManager("#PopupMenu");
@@ -288,6 +335,7 @@ public class SpectrumView extends ViewPart {
 				
 				if (file == null) {
 					showMessage("Could not process dataset, operation not supported for this data!");
+					return;
 				}
 				
 				SpectrumView.this.manager.addFile(file);
@@ -300,13 +348,15 @@ public class SpectrumView extends ViewPart {
 				public void run() {
 					ISelection selection = viewer.getSelection();
 					List<IContain1DData> list = SpectrumUtils.get1DDataList((IStructuredSelection)selection);
-					ISpectrumFile file = SpectrumUtils.subtractSpectrumFiles(list,system);
+					ISpectrumFile[] files = SpectrumUtils.subtractSpectrumFiles(list,system);
 
-					if (file == null) {
+					if (files == null) {
 						showMessage("Could not process dataset, operation not supported for this data!");
+						return;
 					}
 
-					SpectrumView.this.manager.addFile(file);
+					SpectrumView.this.manager.addFile(files[0]);
+					SpectrumView.this.manager.addFile(files[1]);
 				}
 			});
 		}
@@ -342,7 +392,7 @@ public class SpectrumView extends ViewPart {
 			public void run() {
 				ISelection selection = viewer.getSelection();
 				List<?> obj = ((IStructuredSelection)selection).toList();
-				for (Object ob : obj) manager.removeFile(((ISpectrumFile)ob).getPath());
+				for (Object ob : obj) manager.removeFile(((ISpectrumFile)ob).getLongName());
 				//Todo change selection
 				
 				int i = viewer.getTable().getItemCount();

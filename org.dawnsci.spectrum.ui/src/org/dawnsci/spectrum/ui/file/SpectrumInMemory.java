@@ -17,10 +17,12 @@ public class SpectrumInMemory extends AbstractSpectrumFile implements ISpectrumF
 	
 	Map<String,IDataset> datasets;
 	private String name;
+	private String longName;
 	
-	public SpectrumInMemory(String name,IDataset xDataset ,Collection<IDataset> yDatasets, IPlottingSystem system) {
+	public SpectrumInMemory(String longName, String name,IDataset xDataset ,Collection<IDataset> yDatasets, IPlottingSystem system) {
 		this.system = system;
 		this.name = name;
+		this.longName = longName;
 		datasets = new HashMap<String, IDataset>();
 		yDatasetNames = new ArrayList<String>(yDatasets.size());
 		useAxisDataset = false;
@@ -49,8 +51,6 @@ public class SpectrumInMemory extends AbstractSpectrumFile implements ISpectrumF
 		// TODO Auto-generated method stub
 		return name;
 	}
-
-	
 	
 	@Override
 	public Collection<String> getDataNames() {
@@ -140,9 +140,8 @@ public class SpectrumInMemory extends AbstractSpectrumFile implements ISpectrumF
 	}
 	
 	@Override
-	public String getPath() {
-		// TODO Auto-generated method stub
-		return name;
+	public String getLongName() {
+		return longName;
 	}
 
 	@Override

@@ -37,9 +37,11 @@ public interface ISpectrumFile extends IContain1DData {
 	
 	public void removeAllFromPlot();
 	
-	public String getPath();
+	public String getLongName();
 	
 	public boolean isUsingAxis();
 	
 	public void setUseAxis(boolean useAxis);
+	
+	public void setSelected(boolean selected);
 }

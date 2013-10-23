@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.dawnsci.plotting.api.IPlottingSystem;
+import org.dawnsci.plotting.api.trace.ILineTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
@@ -159,6 +160,24 @@ public abstract class AbstractSpectrumFile implements ISpectrumFile {
 		}
 		
 		return max;
+	}
+	
+	public void setSelected(boolean selected) {
+		
+		if (selected) {
+			for (ITrace trace : traceMap.values()) {
+				if (trace instanceof ILineTrace) {
+					((ILineTrace)trace).setLineWidth(2);
+				}
+			}
+		} else {
+			for (ITrace trace : traceMap.values()) {
+				if (trace instanceof ILineTrace) {
+					((ILineTrace)trace).setLineWidth(1);
+				}
+			}
+		}
+		
 	}
 
 }
