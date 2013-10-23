@@ -14,6 +14,7 @@ import org.dawnsci.spectrum.ui.preferences.SpectrumConstants;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.slf4j.Logger;
@@ -25,6 +26,7 @@ public class SpectrumFileManager {
 	private Map<String,ISpectrumFile> spectrumFiles;
 	private HashSet<ISpectrumFileListener> listeners;
 	private final static Logger logger = LoggerFactory.getLogger(SpectrumFileManager.class);
+	private final ISchedulingRule mutex = new Mutex();
 	
 	public SpectrumFileManager(IPlottingSystem system) {
 		spectrumFiles = new LinkedHashMap<String,ISpectrumFile>();
@@ -46,6 +48,9 @@ public class SpectrumFileManager {
 		if (spectrumFiles.containsKey(path)) return;
 		
 		SpectrumFileLoaderJob job = new SpectrumFileLoaderJob("File loader job", path);
+		
+		job.setRule(mutex);
+		
 		job.schedule();
 	}
 	
@@ -162,6 +167,18 @@ public class SpectrumFileManager {
 			fireFileListeners(new SpectrumFileOpenedEvent(this, file));
 			
 			return Status.OK_STATUS;
+		}
+
+	}
+	
+	public class Mutex implements ISchedulingRule {
+
+		public boolean contains(ISchedulingRule rule) {
+			return (rule == this);
+		}
+
+		public boolean isConflicting(ISchedulingRule rule) {
+			return (rule == this);
 		}
 
 	}
