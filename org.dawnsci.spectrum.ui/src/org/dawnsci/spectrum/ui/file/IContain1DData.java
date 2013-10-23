@@ -9,5 +9,7 @@ public interface IContain1DData {
 	public IDataset getxDataset();
 	
 	public List<IDataset> getyDatasets();
+	
+	public String getName();
 
 }

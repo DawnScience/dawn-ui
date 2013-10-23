@@ -59,10 +59,18 @@ public class SpectrumUtils {
 		
 		IDataset x0 = files.get(0).getxDataset();
 		
+		StringBuilder sb = new StringBuilder();
+		sb.append("Average of: ");
+		sb.append("\n");
 		MultivariateSummaryStatistics ms = new MultivariateSummaryStatistics(x0.getSize(),false);
 		for (IContain1DData file : files) {
+			
+			sb.append(file.getName() +":");
+			
 			for (IDataset ds : file.getyDatasets()) {
-
+				
+				sb.append(ds.getName() +":");
+				
 				DoubleDataset dd;
 				if (ds instanceof DoubleDataset) dd = (DoubleDataset)ds;
 				else {
@@ -71,13 +79,20 @@ public class SpectrumUtils {
 				double[] raw = dd.getData();
 				ms.addValue(raw);
 			}
+			
+			sb.deleteCharAt(sb.length()-1);
+			sb.deleteCharAt(sb.length()-1);
+			sb.append("\n");
 		}
 		List<IDataset> sets = new ArrayList<IDataset>();
 		DoubleDataset dd = new DoubleDataset(ms.getMean(), ms.getDimension());
-		dd.setName("Mean: " + files.get(0).getyDatasets().get(0).getName());
+		
+		dd.setName("Average");
 		sets.add(dd);
-
-		return new SpectrumInMemory("Average "+ sets.hashCode(), x0, sets, system);
+		
+		String shortName = "Average: " + files.get(0).getName() + " to " + files.get(files.size()-1).getName();
+		
+		return new SpectrumInMemory(sb.toString()+"["+ sets.hashCode()+"]", shortName, x0, sets, system);
 	}
 	
 	private static int[] checkXaxisHasCommonRange(IDataset[] xaxis) {
@@ -98,7 +113,7 @@ public class SpectrumUtils {
 		return new double[] {min, max};
 	}
 	
-	public static ISpectrumFile subtractSpectrumFiles(List<IContain1DData> files, IPlottingSystem system) {
+	public static ISpectrumFile[] subtractSpectrumFiles(List<IContain1DData> files, IPlottingSystem system) {
 		
 		//TODO deal with single files
 		
@@ -112,19 +127,34 @@ public class SpectrumUtils {
 		
 		if (!x0.equals(x1)) return null;
 		
-		List<IDataset> sets = new ArrayList<IDataset>();
+		List<IDataset> sets1 = new ArrayList<IDataset>();
+		List<IDataset> sets2 = new ArrayList<IDataset>();
 		
 		IDataset ds0 = files.get(0).getyDatasets().get(0);
 		IDataset ds1 = files.get(1).getyDatasets().get(0);
 		IDataset dif = Maths.subtract(ds0,ds1);
 		IDataset dif1 = Maths.subtract(ds1,ds0);
 
-		dif.setName(ds0.getName() +" - " +ds1.getName());
-		dif1.setName(ds1.getName() +" - " +ds0.getName());
-		sets.add(dif);
-		sets.add(dif1);
+		dif.setName("Difference");
+		dif1.setName("Difference");
+		sets1.add(dif);
+		sets2.add(dif1);
 		
-		return new SpectrumInMemory("Difference"+ sets.hashCode(), x0, sets, system);
+		SpectrumInMemory[] out = new SpectrumInMemory[2];
+		
+		String first = "Difference: " + files.get(0).getName() +"-" + files.get(1).getName();
+		String second = "Difference: " + files.get(1).getName() +"-" + files.get(0).getName();
+		
+		String firstLong = "Difference: " + files.get(0).getName()+ ":" +files.get(0).getyDatasets().get(0).getName()
+				+"\n-" + files.get(1).getName()+ ":" +files.get(1).getyDatasets().get(0).getName() + "(" + sets1.hashCode() + ")";
+		String secondLong = "Difference: " + files.get(1).getName()+ ":" +files.get(1).getyDatasets().get(0).getName()
+				+"\n-" + files.get(0).getName()+ ":" +files.get(0).getyDatasets().get(0).getName() + "(" + sets1.hashCode() + ")";
+		
+		
+		out[0] = new SpectrumInMemory(firstLong,first, x0, sets1, system);
+		out[1] = new SpectrumInMemory(secondLong,second, x0, sets2, system);
+		
+		return out;
 		
 	}
 	
@@ -192,7 +222,7 @@ public class SpectrumUtils {
 			ynew.add(y.getSlice(new int[] {minpos},new int[]{maxpos},null));
 		}
 
-		output.add(new Contain1DDataImpl(xnew, ynew));
+		output.add(new Contain1DDataImpl(xnew, ynew,data.get(0).getName()));
 		
 		for (int i = 1; i < data.size(); i++) {
 			
@@ -204,7 +234,7 @@ public class SpectrumUtils {
 				ynew.add(PolynomialInterpolator1D.interpolate(x, y, xnew));
 			}
 			
-			output.add(new Contain1DDataImpl(xnew, ynew));
+			output.add(new Contain1DDataImpl(xnew, ynew,data.get(i).getName()));
 		}
 		
 		return output;

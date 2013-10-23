@@ -53,6 +53,7 @@ public class PolynomialInterpolator1D {
 		PolynomialSplineFunction poly = si.interpolate(sortedx,sortedy);
 		
 		IDataset newy = newx.clone();
+		newy.setName(oldy.getName()+"_interpolated");
 		
 		for (int i = 0; i < ((AbstractDataset)newx).count(); i++) {
 			newy.set(poly.value(newx.getDouble(i)),i);

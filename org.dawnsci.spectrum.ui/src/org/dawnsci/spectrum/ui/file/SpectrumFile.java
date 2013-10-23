@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.dawnsci.plotting.api.IPlottingSystem;
+import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.spectrum.ui.utils.DatasetManager;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -43,6 +44,10 @@ public class SpectrumFile extends AbstractSpectrumFile implements ISpectrumFile 
 	public String getName() {
 		File file = new File(path);
 		return file.getName();
+	}
+	
+	public String getLongName() {
+		return path;
 	}
 	
 	public String getPath() {
@@ -117,7 +122,12 @@ public class SpectrumFile extends AbstractSpectrumFile implements ISpectrumFile 
 					ds.setName(getTraceName(ds.getName()));
 				}
 				
-				system.updatePlot1D(x, list, null);
+				List<ITrace> traces = system.updatePlot1D(x, list, null);
+				
+				for (int i = 0; i < traces.size();i++) {
+					traceMap.put(yDatasetNames.get(i), traces.get(i));
+				}
+				
 				return Status.OK_STATUS;
 			}
 		};
@@ -149,7 +159,10 @@ public class SpectrumFile extends AbstractSpectrumFile implements ISpectrumFile 
 				
 				
 				
-				if (set != null) system.updatePlot1D(x, Arrays.asList(new IDataset[] {set}), null);
+				if (set != null) {
+					List<ITrace> traces = system.updatePlot1D(x, Arrays.asList(new IDataset[] {set}), null);
+					traceMap.put(name, traces.get(0));
+				}
 				return Status.OK_STATUS;
 			}
 		};
@@ -169,7 +182,8 @@ public class SpectrumFile extends AbstractSpectrumFile implements ISpectrumFile 
 
 	@Override
 	protected String getTraceName(String name) {
-		return path + " : " + name;
+		File file = new File(path);
+		return file.getName() + " : " + name;
 	}
 	
 	
