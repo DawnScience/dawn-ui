@@ -1234,8 +1234,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 	@Override
 	public String savePlotting(String filename) throws Exception {
 		FileDialog dialog = new FileDialog (Display.getDefault().getActiveShell(), SWT.SAVE);
-		String [] filterExtensions = new String [] {"*.png;*.PNG;*.jpg;*.JPG;*.jpeg;*.JPEG", "*.ps;*.eps"};
-		// TODO ,"*.svg;*.SVG"};
+		String [] filterExtensions = new String [] {"*.png;*.PNG;*.jpg;*.JPG;*.jpeg;*.JPEG", "*.ps;*.eps", "*.svg;*.SVG"};
 		if (filename!=null) {
 			dialog.setFilterPath((new File(filename)).getParent());
 		} else {
@@ -1257,7 +1256,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 				boolean yes = MessageDialog.openQuestion(Display.getDefault().getActiveShell(), "Confirm Overwrite", "The file '"+file.getName()+"' exists.\n\nWould you like to overwrite it?");
 			    if (!yes) return filename;
 			}
-			PlotExportPrintUtil.saveGraph(filename, PlotExportPrintUtil.FILE_TYPES[dialog.getFilterIndex()], xyGraph.getImage());
+			PlotExportPrintUtil.saveGraph(filename, PlotExportPrintUtil.FILE_TYPES[dialog.getFilterIndex()], xyGraph.getImage(), plotContents);
 			//logger.debug("Plot saved");
 		} catch (Exception e) {
 			throw e;
@@ -1270,7 +1269,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		if (filename == null)
 			return;
 		try {
-			PlotExportPrintUtil.saveGraph(filename, filetype, xyGraph.getImage());
+			PlotExportPrintUtil.saveGraph(filename, filetype, xyGraph.getImage(), xyGraph.getParent());
 			//logger.debug("Plotting saved");
 		} catch (Exception e) {
 			throw e;
@@ -1401,6 +1400,4 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 			return x.getName();
 		}
 	}
-
-
 }
