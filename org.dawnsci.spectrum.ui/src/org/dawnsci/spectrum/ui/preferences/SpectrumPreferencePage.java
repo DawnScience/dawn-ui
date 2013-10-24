@@ -2,8 +2,10 @@ package org.dawnsci.spectrum.ui.preferences;
 
 import org.dawnsci.spectrum.ui.Activator;
 import org.eclipse.jface.preference.PreferencePage;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
@@ -21,6 +23,12 @@ public class SpectrumPreferencePage extends PreferencePage implements
 
 	@Override
 	protected Control createContents(Composite parent) {
+		
+		Label instructions = new Label(parent, SWT.NONE);
+		instructions.setText("Set the default names of x and y datasets.\n" +
+				"Lists will be searched in order, taking the first matching name found.\n" +
+				"Use * for wildcard matching.");
+		
 		lx = new SpectrumNameListEditor(SpectrumConstants.X_DATASETS, "X-Dataset Name", parent);
 		//le.setPreferenceName(SpectrumConstants.X_DATASETS);
 		lx.setPreferenceStore(getPreferenceStore());

@@ -119,6 +119,8 @@ public class SpectrumUtils {
 		
 		if (files.size() != 2) return null;
 		
+		if (files.get(0).getyDatasets().isEmpty() || files.get(1).getyDatasets().isEmpty()) return null;
+		
 		files = getCompatibleDatasets(files);
 		if (files == null) return null;
 		
