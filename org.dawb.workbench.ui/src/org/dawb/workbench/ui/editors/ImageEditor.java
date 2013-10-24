@@ -15,6 +15,7 @@ import org.dawb.common.ui.editors.EditorExtensionFactory;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.views.HeaderTablePage;
 import org.dawb.workbench.ui.views.PlotDataPage;
+import org.dawnsci.common.widgets.editor.ITitledEditor;
 import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -30,7 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class ImageEditor extends MultiPageEditorPart implements IReusableEditor, IShowEditorInput  {
+public class ImageEditor extends MultiPageEditorPart implements IReusableEditor, IShowEditorInput, ITitledEditor  {
 
 	public static final String ID = "org.dawb.workbench.editors.ImageEditor"; //$NON-NLS-1$
 
@@ -45,7 +46,11 @@ public class ImageEditor extends MultiPageEditorPart implements IReusableEditor,
         super.init(site, input);
 	    setPartName(input.getName());
     }
-	
+	@Override
+	public void setPartTitle(String name) {
+		super.setPartName(name);	
+	}
+		
 	public void setInput(IEditorInput input) {
 		super.setInput(input);
 		for(int ied = 0; ied<getPageCount(); ++ied) {

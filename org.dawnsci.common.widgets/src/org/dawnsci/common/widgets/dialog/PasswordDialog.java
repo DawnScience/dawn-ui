@@ -47,6 +47,8 @@ public class PasswordDialog extends Dialog {
 			}
 		});
 		
+		pswd.setFocus();
+		
 		return content;
 	}
 
