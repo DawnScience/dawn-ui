@@ -7,6 +7,7 @@ import java.util.Map;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.trace.ILineTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
@@ -19,6 +20,7 @@ public abstract class AbstractSpectrumFile implements ISpectrumFile {
 	protected IPlottingSystem system;
 	protected List<String> yDatasetNames;
 	protected Map<String,ITrace> traceMap;
+	protected static final Mutex mutex = new Mutex();
 	
 	public AbstractSpectrumFile() {
 		this.traceMap = new HashMap<String, ITrace>(); 
@@ -178,6 +180,18 @@ public abstract class AbstractSpectrumFile implements ISpectrumFile {
 			}
 		}
 		
+	}
+	
+	public static class Mutex implements ISchedulingRule {
+
+		public boolean contains(ISchedulingRule rule) {
+			return (rule == this);
+		}
+
+		public boolean isConflicting(ISchedulingRule rule) {
+			return (rule == this);
+		}
+
 	}
 
 }

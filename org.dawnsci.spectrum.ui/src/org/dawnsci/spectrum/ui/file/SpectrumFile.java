@@ -131,7 +131,7 @@ public class SpectrumFile extends AbstractSpectrumFile implements ISpectrumFile 
 				return Status.OK_STATUS;
 			}
 		};
-		
+		job.setRule(mutex);
 		job.schedule();
 	}
 	
@@ -166,6 +166,7 @@ public class SpectrumFile extends AbstractSpectrumFile implements ISpectrumFile 
 				return Status.OK_STATUS;
 			}
 		};
+		job.setRule(mutex);
 		job.schedule();
 		
 	}
