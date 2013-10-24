@@ -9,8 +9,13 @@ import java.util.Map;
 
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 
 public class SpectrumInMemory extends AbstractSpectrumFile implements ISpectrumFile {
@@ -95,48 +100,71 @@ public class SpectrumInMemory extends AbstractSpectrumFile implements ISpectrumF
 	}
 	
 	public void plotAll() {
-		
-		IDataset x = null;
-		if (useAxisDataset) x = getxDataset();
-		
-		List<IDataset> list = getyDatasets();
-		List<IDataset> copy = new ArrayList<IDataset>(list.size());
-		List<String> names = new ArrayList<String>(list.size());
-		
-		for (IDataset ds : list) copy.add(ds);
-		
-		for (int i= 0; i < copy.size(); i++) {
-			names.add( copy.get(i).getName());
-			if (copy.get(i).getRank() != 1) {
-				copy.set(i,reduceTo1D(x, copy.get(i)));
+		//not slow, doesnt need to be a job but the mutex keeps the plotting order
+		Job job = new Job("Plot all") {
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+
+				IDataset x = null;
+				if (useAxisDataset) x = getxDataset();
+
+				List<IDataset> list = getyDatasets();
+				List<IDataset> copy = new ArrayList<IDataset>(list.size());
+				List<String> names = new ArrayList<String>(list.size());
+
+				for (IDataset ds : list) copy.add(ds);
+
+				for (int i= 0; i < copy.size(); i++) {
+					names.add( copy.get(i).getName());
+					if (copy.get(i).getRank() != 1) {
+						copy.set(i,reduceTo1D(x, copy.get(i)));
+					}
+					copy.get(i).setName(getTraceName(copy.get(i).getName()));
+				}
+
+				List<ITrace> traces = system.updatePlot1D(x, getyDatasets(), null);
+
+				for (int i = 0; i < traces.size();i++) {
+					traceMap.put(yDatasetNames.get(i), traces.get(i));
+				}
+				for (int i= 0; i < copy.size(); i++) {
+					list.get(i).setName(names.get(i));
+				}
+
+				return Status.OK_STATUS;
 			}
-			copy.get(i).setName(getTraceName(copy.get(i).getName()));
-		}
-		
-		List<ITrace> traces = system.updatePlot1D(x, getyDatasets(), null);
-		
-		for (int i = 0; i < traces.size();i++) {
-			traceMap.put(yDatasetNames.get(i), traces.get(i));
-		}
-		for (int i= 0; i < copy.size(); i++) {
-			list.get(i).setName(names.get(i));
-		}
+		};
+		job.setRule(mutex);
+		job.schedule();
+
 	}
 	
-	protected void addToPlot(String name) {
-		IDataset x = null;
-		if (useAxisDataset) x = getxDataset();
-		IDataset set = datasets.get(name);
-		String oldName = set.getName();
-		if (set.getRank() != 1) set = reduceTo1D(x, set);
-		set.setName(getTraceName(set.getName()));
-		
-		if (set != null) {
-			List<ITrace> traces = system.updatePlot1D(x, Arrays.asList(new IDataset[] {set}), null);
-			traceMap.put(name, traces.get(0));
-		}
-		
-		set.setName(oldName);
+	protected void addToPlot(final String name) {
+
+		Job job = new Job("Add to plot") {
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				IDataset x = null;
+				if (useAxisDataset) x = getxDataset();
+				IDataset set = datasets.get(name);
+				String oldName = set.getName();
+				if (set.getRank() != 1) set = reduceTo1D(x, set);
+				set.setName(getTraceName(set.getName()));
+
+				if (set != null) {
+					List<ITrace> traces = system.updatePlot1D(x, Arrays.asList(new IDataset[] {set}), null);
+					traceMap.put(name, traces.get(0));
+				}
+
+				set.setName(oldName);
+				return Status.OK_STATUS;
+			}
+		};
+		job.setRule(mutex);
+		job.schedule();
+
 	}
 	
 	@Override

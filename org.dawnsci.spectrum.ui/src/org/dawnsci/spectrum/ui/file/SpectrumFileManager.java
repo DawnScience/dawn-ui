@@ -29,7 +29,7 @@ public class SpectrumFileManager {
 	private Map<String,ISpectrumFile> spectrumFiles;
 	private HashSet<ISpectrumFileListener> listeners;
 	private final static Logger logger = LoggerFactory.getLogger(SpectrumFileManager.class);
-	private final ISchedulingRule mutex = new Mutex();
+	private final static ISchedulingRule mutex = new Mutex();
 	
 	public SpectrumFileManager(IPlottingSystem system) {
 		spectrumFiles = new LinkedHashMap<String,ISpectrumFile>();
@@ -144,7 +144,7 @@ public class SpectrumFileManager {
 	private class SpectrumFileLoaderJob extends Job {
 
 		private final String path;
-		
+
 		public SpectrumFileLoaderJob(String name, final String path) {
 			super(name);
 			this.path = path;
@@ -153,26 +153,26 @@ public class SpectrumFileManager {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			SpectrumFile file = SpectrumFile.create(path,system);
-			
+
 			if (file == null) {
 				logger.error("Could not load file!");
 				return Status.CANCEL_STATUS;
 			}
-			
+
 			setXandYdatasets(file);
-			
+
 			spectrumFiles.put(file.getPath(), file);
-			
+
 			//file.plotAll();
-			
+
 			fireFileListeners(new SpectrumFileOpenedEvent(this, file));
-			
+
 			return Status.OK_STATUS;
 		}
 
 	}
-	
-	public class Mutex implements ISchedulingRule {
+
+	public static class Mutex implements ISchedulingRule {
 
 		public boolean contains(ISchedulingRule rule) {
 			return (rule == this);
