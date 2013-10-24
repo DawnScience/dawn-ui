@@ -20,6 +20,9 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+* Manages the loading of files and the setting of the default x and y dataset names
+*/
 public class SpectrumFileManager {
 	
 	private IPlottingSystem system;
@@ -33,7 +36,7 @@ public class SpectrumFileManager {
 		listeners = new HashSet<ISpectrumFileListener>();
 		this.system = system;
 	}
-	//TODO make better
+
 	public void addFile(ISpectrumFile file) {
 		if (spectrumFiles.containsKey(file.getLongName())) return;
 		
@@ -48,9 +51,7 @@ public class SpectrumFileManager {
 		if (spectrumFiles.containsKey(path)) return;
 		
 		SpectrumFileLoaderJob job = new SpectrumFileLoaderJob("File loader job", path);
-		
 		job.setRule(mutex);
-		
 		job.schedule();
 	}
 	

@@ -15,6 +15,7 @@ import org.dawnsci.spectrum.ui.Activator;
 import org.dawnsci.spectrum.ui.file.IContain1DData;
 import org.dawnsci.spectrum.ui.file.ISpectrumFile;
 import org.dawnsci.spectrum.ui.file.ISpectrumFileListener;
+import org.dawnsci.spectrum.ui.file.SpectrumFile;
 import org.dawnsci.spectrum.ui.file.SpectrumFileManager;
 import org.dawnsci.spectrum.ui.file.SpectrumFileOpenedEvent;
 import org.dawnsci.spectrum.ui.file.SpectrumInMemory;
@@ -65,6 +66,7 @@ import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
@@ -73,25 +75,14 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Maths;
+import org.dawb.common.ui.util.EclipseUtils;
 
 /**
- * This sample class demonstrates how to plug-in a new
- * workbench view. The view shows data obtained from the
- * model. The sample creates a dummy model on the fly,
- * but a real implementation would connect to the model
- * available either in this or another plug-in (e.g. the workspace).
- * The view is connected to the model using a content provider.
- * <p>
- * The view uses a label provider to define how model
- * objects should be presented in the view. Each
- * view can present the same model objects using
- * different labels and icons, if needed. Alternatively,
- * a single label provider can be shared between views
- * in order to ensure that objects of the same type are
- * presented in the same way everywhere.
- * <p>
- */
-
+* Main view of the Spectrum Perspective. Contains a table which shows the list of active files and 
+* has actions for viewing and processing files in different ways.
+* <p>
+* Hold the SpectrumFileManager which takes care of loading and plotting files
+*/
 public class SpectrumView extends ViewPart {
 
 	/**
@@ -101,86 +92,17 @@ public class SpectrumView extends ViewPart {
 
 	private TableViewer viewer;
 	private Action removeAction;
+	private Action configDefaults;
 //	private Action doubleClickAction;
 	private IPlottingSystem system;
 	private SpectrumFileManager manager;
 	private DropTargetAdapter dropListener;
 
-	/*
-	 * The content provider class is responsible for
-	 * providing objects to the view. It can wrap
-	 * existing objects in adapters or simply return
-	 * objects as-is. These objects may be sensitive
-	 * to the current input of the view, or ignore
-	 * it and always show the same content 
-	 * (like Task List, for example).
-	 */
-	 
-	class ViewContentProvider implements IStructuredContentProvider {
-		public void inputChanged(Viewer v, Object oldInput, Object newInput) {
-		}
-		public void dispose() {
-		}
-		public Object[] getElements(Object parent) {
-			return manager.getFiles().toArray();
-		}
-	}
-	
-	class ViewLabelProvider extends ColumnLabelProvider implements ITableLabelProvider {
-		@Override
-		public String getColumnText(Object obj, int index) {
-			return getText(obj);
-		}
-		public Image getColumnImage(Object obj, int index) {
-			return getImage(obj);
-		}
-		@Override
-		public String getText(Object obj) {
-			if (obj instanceof ISpectrumFile) {
-				return ((ISpectrumFile)obj).getName();
-			}
-			
-			return "";
-		}
-		@Override
-		public Image getImage(Object obj) {
-			
-			if (obj instanceof SpectrumInMemory) return PlatformUI.getWorkbench().
-					getSharedImages().getImage(ISharedImages.IMG_DEF_VIEW);
-			
-			return PlatformUI.getWorkbench().
-					getSharedImages().getImage(ISharedImages.IMG_OBJ_ELEMENT);
-		}
-		@Override
-		public String getToolTipText(Object obj) {
-			if (obj instanceof ISpectrumFile) {
-				return ((ISpectrumFile)obj).getLongName();
-			}
-			
-			return "";
-		}
-	}
-
-	/**
-	 * The constructor.
-	 */
-	public SpectrumView() {
-	}
-
-	/**
-	 * This is a callback that will allow us
-	 * to create the viewer and initialize it.
-	 */
 	public void createPartControl(Composite parent) {
 
+		//Create table
 		viewer = new TableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		viewer.setContentProvider(new ViewContentProvider());
-		IWorkbenchPage page = getSite().getPage();
-		IViewPart view = page.findView("org.dawnsci.spectrum.ui.views.SpectrumPlot");
-		system = (IPlottingSystem)view.getAdapter(IPlottingSystem.class);
-		manager = new SpectrumFileManager(system);
-		
-		
 		TableViewerColumn viewerColumn = new TableViewerColumn(viewer, SWT.NONE);
 		viewerColumn.setLabelProvider(new ViewLabelProvider());
 	 
@@ -188,21 +110,24 @@ public class SpectrumView extends ViewPart {
 		tableColumnLayout.setColumnData(viewerColumn.getColumn(),
 		        new ColumnWeightData(1));
 		parent.setLayout(tableColumnLayout);
-		viewer.setInput(manager);
-
+		
 		ColumnViewerToolTipSupport.enableFor(viewer);
+		
+		//Get plotting system from PlotView, use it to create file manager
+		IWorkbenchPage page = getSite().getPage();
+		IViewPart view = page.findView("org.dawnsci.spectrum.ui.views.SpectrumPlot");
+		system = (IPlottingSystem)view.getAdapter(IPlottingSystem.class);
+		manager = new SpectrumFileManager(system);
+		
+		viewer.setInput(manager);
+		
 		manager.addFileListener( new ISpectrumFileListener() {
 
 			@Override
 			public void fileLoaded(final SpectrumFileOpenedEvent event) {
 				Display.getDefault().syncExec(new Runnable() {
-
 					@Override
 					public void run() {
-						//						viewer.refresh();
-						//						Table tab = viewer.getTable();
-						//						tab.setSelection(tab.getItemCount()-1);
-						//						tab.showSelection();
 						viewer.refresh();
 						viewer.setSelection(new StructuredSelection(event.getFile()),true);
 					}
@@ -211,8 +136,8 @@ public class SpectrumView extends ViewPart {
 		});
 
 		getSite().setSelectionProvider(viewer);
-
-		//TODO make this nasty cut-paste code better
+		
+		//Set up drag-drop
 		dropListener = new DropTargetAdapter() {
 			@Override
 			public void drop(DropTargetEvent event) {
@@ -233,6 +158,7 @@ public class SpectrumView extends ViewPart {
 				}
 			}
 		};
+		
 		DropTarget dt = new DropTarget(viewer.getControl(), DND.DROP_MOVE | DND.DROP_DEFAULT | DND.DROP_COPY);
 		dt.setTransfer(new Transfer[] { TextTransfer.getInstance(),
 				FileTransfer.getInstance(), ResourceTransfer.getInstance(),
@@ -243,42 +169,40 @@ public class SpectrumView extends ViewPart {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(viewer.getControl(), "org.dawnsci.spectrum.viewer");
 		makeActions();
 		hookContextMenu();
-		//			hookDoubleClickAction();
+		//hookDoubleClickAction();
 		contributeToActionBars();
 
+		//hook up delete key to remove from list
 		viewer.getTable().addKeyListener(new KeyListener() {
 
 			@Override
 			public void keyReleased(KeyEvent e) {
-				// TODO Auto-generated method stub
-
 			}
 
 			@Override
 			public void keyPressed(KeyEvent e) {
-				// TODO Auto-generated method stub
 				if (e.keyCode == SWT.DEL) {
 					removeAction.run();
 				}
 			}
 		});
 
-	viewer.addSelectionChangedListener(new ISelectionChangedListener() {
-		
-		@Override
-		public void selectionChanged(SelectionChangedEvent event) {
-			
-			List<ISpectrumFile> list = SpectrumUtils.getSpectrumFilesList((IStructuredSelection)event.getSelection());
-			
-			for (ISpectrumFile file : manager.getFiles()) {
-				if (list.contains(file)) {
-					file.setSelected(true);
-				} else {
-					file.setSelected(false);
+		//Highlight trace on selection
+		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
+
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+
+				List<ISpectrumFile> list = SpectrumUtils.getSpectrumFilesList((IStructuredSelection)event.getSelection());
+				for (ISpectrumFile file : manager.getFiles()) {
+					if (list.contains(file)) {
+						file.setSelected(true);
+					} else {
+						file.setSelected(false);
+					}
 				}
 			}
-		}
-	});
+		});
 	}
 
 	private void hookContextMenu() {
@@ -302,22 +226,16 @@ public class SpectrumView extends ViewPart {
 
 	private void fillLocalPullDown(IMenuManager manager) {
 		manager.add(removeAction);
-		
-		Action configDeafaults = new Action("Configure Dataset Names...") {
-			@Override
-			public void run() {
-				PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "org.dawnsci.spectrum.ui.preferences.page", null, null);
-				if (pref != null) pref.open();
-			}
-		};
-		
-		manager.add(configDeafaults);
+		manager.add(configDefaults);
 	}
 
 	private void fillContextMenu(IMenuManager manager) {
-		manager.add(removeAction);
 		
-		manager.add(new Action("Average") {
+		MenuManager menuProcess = new MenuManager("Process",
+				Activator.imageDescriptorFromPlugin("org.dawnsci.spectrum.ui","icons/function.png"),
+				"org.dawnsci.spectrum.ui.views.processingmenu");
+		
+		menuProcess.add(new Action("Average") {
 			public void run() {
 				ISelection selection = viewer.getSelection();
 				List<IContain1DData> list = SpectrumUtils.get1DDataList((IStructuredSelection)selection);
@@ -334,7 +252,7 @@ public class SpectrumView extends ViewPart {
 		
 		if (((IStructuredSelection)viewer.getSelection()).size() == 2) {
 
-			manager.add(new Action("Subtract") {
+			menuProcess.add(new Action("Subtract") {
 				public void run() {
 					ISelection selection = viewer.getSelection();
 					List<IContain1DData> list = SpectrumUtils.get1DDataList((IStructuredSelection)selection);
@@ -350,9 +268,15 @@ public class SpectrumView extends ViewPart {
 				}
 			});
 		}
+		manager.add(menuProcess);
+		manager.add(new Separator());
+		manager.add(removeAction);
 		
 //		if (((IStructuredSelection)viewer.getSelection()).size() == 1) {
-//			manager.add(new Action("Open in Data Browsing Perspective") {
+//			
+//			manager.add(new Separator());
+//			
+//			manager.add(new Action("Open in Data Browsing Perspective",Activator.imageDescriptorFromPlugin("org.dawnsci.spectrum.ui","icons/application_view_gallery.png")) {
 //
 //				@Override
 //				public void run() {
@@ -365,26 +289,19 @@ public class SpectrumView extends ViewPart {
 //							return;
 //						}
 //						
-//						//From OpenLocalFileAction
-//						//IDE.openEditorOnFileStore(page, fileStore);
+//						PlatformUI.getWorkbench().showPerspective("org.edna.workbench.application.perspective.DataPerspective",PlatformUI.getWorkbench().getActiveWorkbenchWindow());
+//						EclipseUtils.openExternalEditor(list.get(0).getLongName());
 //						
-////						IPath p = new Path(list.get(0).getLongName());
-////						IWorkspace workspace = ResourcesPlugin.getWorkspace();
-////						IWorkspaceRoot workspaceRoot = workspace.getRoot();
-////						IFile file = workspaceRoot.getFile(p);
-////						IWorkbenchPage page = SpectrumView.this.getSite().getPage();
-////						
-////						PlatformUI.getWorkbench().showPerspective("org.edna.workbench.application.perspective.DataPerspective",PlatformUI.getWorkbench().getActiveWorkbenchWindow());
-////						IEditorDescriptor desc = PlatformUI.getWorkbench().
-////								getEditorRegistry().getDefaultEditor(file.getName());
-////						page.openEditor(new FileEditorInput(file), desc.getId());
 //					} catch (WorkbenchException e) {
-//						// TODO Auto-generated catch block
+//						showMessage("Could not open perspective, operation not supported for this data! : " + e.getMessage());
 //						e.printStackTrace();
 //					} 
 //				}
 //			});
 //		}
+		
+		manager.add(new Separator());
+		manager.add(configDefaults);
 		
 //		manager.add(new Action("Open processing wizard") {
 //			@Override
@@ -428,8 +345,19 @@ public class SpectrumView extends ViewPart {
 				}
 				
 			}
+		
 		};
+		
 		removeAction.setToolTipText("Remove selected files from list");
+		
+		configDefaults = new Action("Configure Default Dataset Names...",Activator.imageDescriptorFromPlugin("org.dawnsci.spectrum.ui","icons/book-brown-setting.png")) {
+			@Override
+			public void run() {
+				PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "org.dawnsci.spectrum.ui.preferences.page", null, null);
+				if (pref != null) pref.open();
+			}
+		};
+		
 //		doubleClickAction = new Action() {
 //			public void run() {
 //				ISelection selection = viewer.getSelection();
@@ -577,5 +505,50 @@ public class SpectrumView extends ViewPart {
 //		for (ITrace trace: traces) system.removeTrace(trace);
 //		for (ITrace trace: traces) system.addTrace(trace);
 		system.autoscaleAxes();
+	}
+	
+	class ViewContentProvider implements IStructuredContentProvider {
+		public void inputChanged(Viewer v, Object oldInput, Object newInput) {
+		}
+		public void dispose() {
+		}
+		public Object[] getElements(Object parent) {
+			return manager.getFiles().toArray();
+		}
+	}
+	
+	class ViewLabelProvider extends ColumnLabelProvider implements ITableLabelProvider {
+		@Override
+		public String getColumnText(Object obj, int index) {
+			return getText(obj);
+		}
+		public Image getColumnImage(Object obj, int index) {
+			return getImage(obj);
+		}
+		@Override
+		public String getText(Object obj) {
+			if (obj instanceof ISpectrumFile) {
+				return ((ISpectrumFile)obj).getName();
+			}
+			
+			return "";
+		}
+		@Override
+		public Image getImage(Object obj) {
+			
+			if (obj instanceof SpectrumInMemory) return PlatformUI.getWorkbench().
+					getSharedImages().getImage(ISharedImages.IMG_DEF_VIEW);
+			
+			return PlatformUI.getWorkbench().
+					getSharedImages().getImage(ISharedImages.IMG_OBJ_ELEMENT);
+		}
+		@Override
+		public String getToolTipText(Object obj) {
+			if (obj instanceof ISpectrumFile) {
+				return ((ISpectrumFile)obj).getLongName();
+			}
+			
+			return "";
+		}
 	}
 }
