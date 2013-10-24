@@ -46,24 +46,17 @@ import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ColumnWeightData;
-import org.eclipse.jface.viewers.DecoratingStyledCellLabelProvider;
-import org.eclipse.jface.viewers.IDecorationContext;
-import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
-import org.eclipse.jface.wizard.IWizard;
-import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.SWT;
 import org.eclipse.ui.IActionBars;
@@ -180,10 +173,8 @@ public class SpectrumView extends ViewPart {
 	 */
 	public void createPartControl(Composite parent) {
 
-
 		viewer = new TableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		viewer.setContentProvider(new ViewContentProvider());
-		viewer.setLabelProvider(new ViewLabelProvider());
 		IWorkbenchPage page = getSite().getPage();
 		IViewPart view = page.findView("org.dawnsci.spectrum.ui.views.SpectrumPlot");
 		system = (IPlottingSystem)view.getAdapter(IPlottingSystem.class);
@@ -214,7 +205,6 @@ public class SpectrumView extends ViewPart {
 						//						tab.showSelection();
 						viewer.refresh();
 						viewer.setSelection(new StructuredSelection(event.getFile()),true);
-
 					}
 				});
 			}
@@ -361,6 +351,41 @@ public class SpectrumView extends ViewPart {
 			});
 		}
 		
+//		if (((IStructuredSelection)viewer.getSelection()).size() == 1) {
+//			manager.add(new Action("Open in Data Browsing Perspective") {
+//
+//				@Override
+//				public void run() {
+//					try {
+//						ISelection selection = viewer.getSelection();
+//						List<ISpectrumFile> list = SpectrumUtils.getSpectrumFilesList((IStructuredSelection)selection);
+//						if (list.isEmpty()) return;
+//						if (!(list.get(0) instanceof SpectrumFile)) {
+//							showMessage("Could not open perspective, operation not supported for this data!");
+//							return;
+//						}
+//						
+//						//From OpenLocalFileAction
+//						//IDE.openEditorOnFileStore(page, fileStore);
+//						
+////						IPath p = new Path(list.get(0).getLongName());
+////						IWorkspace workspace = ResourcesPlugin.getWorkspace();
+////						IWorkspaceRoot workspaceRoot = workspace.getRoot();
+////						IFile file = workspaceRoot.getFile(p);
+////						IWorkbenchPage page = SpectrumView.this.getSite().getPage();
+////						
+////						PlatformUI.getWorkbench().showPerspective("org.edna.workbench.application.perspective.DataPerspective",PlatformUI.getWorkbench().getActiveWorkbenchWindow());
+////						IEditorDescriptor desc = PlatformUI.getWorkbench().
+////								getEditorRegistry().getDefaultEditor(file.getName());
+////						page.openEditor(new FileEditorInput(file), desc.getId());
+//					} catch (WorkbenchException e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					} 
+//				}
+//			});
+//		}
+		
 //		manager.add(new Action("Open processing wizard") {
 //			@Override
 //			public void run(){
@@ -404,7 +429,7 @@ public class SpectrumView extends ViewPart {
 				
 			}
 		};
-		removeAction.setToolTipText("Remove selected files");
+		removeAction.setToolTipText("Remove selected files from list");
 //		doubleClickAction = new Action() {
 //			public void run() {
 //				ISelection selection = viewer.getSelection();
