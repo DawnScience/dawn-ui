@@ -141,7 +141,7 @@ public class ExtentionPointManager {
 				return colourScheme;
 			}
 		}
-		throw new IllegalArgumentException("Could not find an appropriate Colour Scheme");
+		throw new IllegalArgumentException("Could not find an appropriate Colour Scheme '" + name + "'");
 	}
 
 
