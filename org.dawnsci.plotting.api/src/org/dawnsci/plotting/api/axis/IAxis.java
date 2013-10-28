@@ -248,4 +248,14 @@ public interface IAxis {
 	 * @return scaling of axis in terms of pixels/unit
 	 */
 	public double getScaling();
+	
+	/**
+	 * @param set whether axis label is automatically formatted or set by the user
+	 */
+	public void setAutoFormat(boolean autoFormat);
+	
+	/**
+	 * @return true if axis format is done automatically, false if user format is to be used
+	 */
+	public boolean isAutoFormat();
 }
