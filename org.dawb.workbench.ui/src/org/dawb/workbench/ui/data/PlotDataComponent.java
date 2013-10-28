@@ -569,11 +569,11 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 				wiz.setSlice(getSliceSet(), getSliceData());
 				
 				// TODO Should be non modal, it takes a while.
-				WizardDialog wd = new  WizardDialog(Display.getCurrent().getActiveShell(), wiz);
+				WizardDialog wd = new  WizardDialog(Display.getDefault().getActiveShell(), wiz);
 				wd.setTitle(wiz.getWindowTitle());
 				wd.create();
 				wd.getShell().setSize(650, 800);
-				DialogUtils.centerDialog(Display.getCurrent().getActiveShell(), wd.getShell());
+				DialogUtils.centerDialog(Display.getDefault().getActiveShell(), wd.getShell());
 				wd.open();
 			}
 		};
