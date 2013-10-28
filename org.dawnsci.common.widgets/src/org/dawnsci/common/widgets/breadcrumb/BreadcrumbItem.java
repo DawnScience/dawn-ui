@@ -56,7 +56,7 @@ public class BreadcrumbItem extends Item {
 	 * @param viewer the items viewer
 	 * @param parent the container containing the item
 	 */
-	public BreadcrumbItem(BreadcrumbViewer viewer, Composite parent) {
+	public BreadcrumbItem(BreadcrumbViewer viewer, Composite parent, int treeSwitches) {
 		super(parent, SWT.NONE);
 
 		fParent= viewer;
@@ -72,7 +72,7 @@ public class BreadcrumbItem extends Item {
 
 		fDetailsBlock= new BreadcrumbItemDetails(this, fContainer);
 
-		fExpandBlock= new BreadcrumbItemDropDown(this, fContainer);
+		fExpandBlock= new BreadcrumbItemDropDown(this, fContainer, treeSwitches);
 	}
 
 	/**

@@ -196,7 +196,11 @@ class BreadcrumbItemDropDown {
 	private Shell fShell;
 	private boolean isResizingProgrammatically;
 
-	public BreadcrumbItemDropDown(BreadcrumbItem parent, Composite composite) {
+	private int treeSwitches;
+
+	public BreadcrumbItemDropDown(BreadcrumbItem parent, Composite composite, int treeSwitches) {
+		
+		this.treeSwitches = treeSwitches;
 		fParent= parent;
 		fParentComposite= composite;
 		fMenuIsShown= false;
@@ -305,6 +309,7 @@ class BreadcrumbItemDropDown {
 
 		return fDropDownViewer;
 	}
+	
 
 	/**
 	 * Opens the drop down menu.
@@ -334,7 +339,7 @@ class BreadcrumbItemDropDown {
 		gridLayout.marginWidth= 0;
 		composite.setLayout(gridLayout);
 
-		fDropDownViewer= new ProblemTreeViewer(composite, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL);
+		fDropDownViewer= new ProblemTreeViewer(composite, treeSwitches);
 		fDropDownViewer.setUseHashlookup(true);
 
 		final Tree tree= (Tree) fDropDownViewer.getControl();
