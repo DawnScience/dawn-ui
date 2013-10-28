@@ -94,7 +94,7 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 		
 		final MenuAction exportActionsDropDown = new MenuAction("Export/Print");
 		
-		Action exportSaveButton = new Action("Save plot screenshot as...", PlottingSystemActivator.getImageDescriptor("icons/picture_save.png")){
+		Action exportSaveButton = new Action("Save plot as...", PlottingSystemActivator.getImageDescriptor("icons/picture_save.png")){
 			// Cache file name otherwise they have to keep
 			// choosing the folder.
 			public void run(){
