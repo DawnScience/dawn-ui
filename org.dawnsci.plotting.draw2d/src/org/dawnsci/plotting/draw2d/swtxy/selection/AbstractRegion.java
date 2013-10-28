@@ -65,7 +65,7 @@ public abstract class AbstractRegion extends Figure implements IRegion, IRegionC
 			try {
 			    l.roiDragged(evt);
 			} catch (Throwable ne) {
-				logger.error("Unexpected exception in drawning!", ne);
+				logger.error("Unexpected exception in drawing!", ne);
 			}
 		}
 	}
