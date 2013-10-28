@@ -3,6 +3,14 @@ package org.dawnsci.plotting.tools.profile;
 import java.util.Arrays;
 import java.util.Collection;
 
+import ncsa.hdf.object.Dataset;
+import ncsa.hdf.object.Datatype;
+import ncsa.hdf.object.Group;
+import ncsa.hdf.object.h5.H5Datatype;
+
+import org.dawb.hdf5.IHierarchicalDataFile;
+import org.dawb.hdf5.Nexus;
+import org.dawb.hdf5.nexus.NexusUtils;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.axis.IAxis;
 import org.dawnsci.plotting.api.region.IRegion;
@@ -122,24 +130,68 @@ public class BoxProfileTool extends ProfileTool {
 
 		final IImageTrace   image   = getImageTrace();
 		final Collection<IRegion> regions = getPlottingSystem().getRegions();
-		
+
+		Group dataGroup = slice.getParent();
+		IHierarchicalDataFile file = slice.getFile();
+
 		for (IRegion region : regions) {
 			if (!isRegionTypeSupported(region.getRegionType())) continue;
 			if (!region.isVisible())    continue;
 			if (!region.isUserRegion()) continue;
-			
-			AbstractDataset[] box = ROIProfile.box((AbstractDataset)slice.getData(), (AbstractDataset)image.getMask(), (RectangularROI)region.getROI(), false);
-			
-			final AbstractDataset x_intensity = box[0];
-			x_intensity.setName("X_"+region.getName().replace(' ', '_'));
-			slice.appendData(x_intensity);
-			
-			final AbstractDataset y_intensity = box[1];
-			y_intensity.setName("Y_"+region.getName().replace(' ', '_'));
-			slice.appendData(y_intensity);
-		}
-		 
-        return new DataReductionInfo(Status.OK_STATUS);
-	}
 
+			RectangularROI bounds = (RectangularROI)region.getROI();
+			
+			//create roi name group
+			Group regionGroup = file.group(region.getName().replace(' ', '_'), dataGroup);
+			file.setNexusAttribute(regionGroup, Nexus.DATA);
+
+			//box profiles
+			Group profileGroup = file.group("profile", regionGroup);
+			file.setNexusAttribute(profileGroup, Nexus.DATA);
+			slice.setParent(profileGroup);
+
+			AbstractDataset[] box = ROIProfile.box((AbstractDataset)slice.getData(), (AbstractDataset)image.getMask(), (RectangularROI)region.getROI(), false);
+
+			final AbstractDataset x_intensity = box[0];
+			x_intensity.setName("X_Profile");
+			slice.appendData(x_intensity);
+
+			final AbstractDataset y_intensity = box[1];
+			y_intensity.setName("Y_Profile");
+			slice.appendData(y_intensity);
+
+			// Mean, Sum, Std deviation and region
+			int xInc = bounds.getPoint()[0]<bounds.getEndPoint()[0] ? 1 : -1;
+			int yInc = bounds.getPoint()[1]<bounds.getEndPoint()[1] ? 1 : -1;
+
+			AbstractDataset dataRegion = ((AbstractDataset)slice.getData()).getSlice(
+					new int[] { (int) bounds.getPoint()[1], (int) bounds.getPoint()[0] },
+					new int[] { (int) bounds.getEndPoint()[1],(int) bounds.getEndPoint()[0] },
+					new int[] {yInc, xInc});
+			//mean
+			H5Datatype dType = new H5Datatype(Datatype.CLASS_FLOAT, 64/8, Datatype.NATIVE, Datatype.NATIVE);
+			Object mean = dataRegion.mean();
+			Dataset s = file.appendDataset("Mean",  dType,  new long[]{1}, new double[]{(Double)mean}, regionGroup);
+			file.setNexusAttribute(s, Nexus.SDS);
+			file.setIntAttribute(s, NexusUtils.SIGNAL, 1);
+
+			//Sum
+			Object sum = dataRegion.sum();
+			s = file.appendDataset("Sum",  dType,  new long[]{1}, new double[]{(Double)sum}, regionGroup);
+			file.setNexusAttribute(s, Nexus.SDS);
+			file.setIntAttribute(s, NexusUtils.SIGNAL, 1);
+
+			//Standard deviation
+			Object std = dataRegion.stdDeviation();
+			s = file.appendDataset("Std_Deviation",  dType,  new long[]{1}, new double[]{(Double)std}, regionGroup);
+			file.setNexusAttribute(s, Nexus.SDS);
+			file.setIntAttribute(s, NexusUtils.SIGNAL, 1);
+
+			//region
+			slice.setParent(regionGroup);
+			dataRegion.setName("Region_Slice");
+			slice.appendData(dataRegion);
+		}
+		return new DataReductionInfo(Status.OK_STATUS);
+	}
 }
