@@ -7,7 +7,7 @@
             class="org.dawnsci.spectrum.ui.SpectrumPerspective"
             icon="icons/spectrum.png"
             id="org.dawnsci.spectrum.ui.perspective"
-            name="Spectrum">
+            name="Trace">
       </perspective>
    </extension>
    <extension
@@ -17,14 +17,14 @@
             class="org.dawnsci.spectrum.ui.views.SpectrumView"
             icon="icons/spectrum.png"
             id="org.dawnsci.spectrum.ui.views.SpectrumView"
-            name="Spectrum View">
+            name="Trace View">
       </view>
       <view
             category="org.dawb.workbench.ui.beta.views.category"
             class="uk.ac.diamond.scisoft.analysis.rcp.views.PlotView"
             icon="icons/spectrumaxis.png"
             id="org.dawnsci.spectrum.ui.views.SpectrumPlot"
-            name="Spectrum Plot"
+            name="Trace Plot"
             restorable="true">
       </view>
       <view
@@ -33,7 +33,7 @@
             class="org.eclipse.ui.navigator.CommonNavigator"
             icon="icons/spectrumpe.png"
             id="org.dawnsci.spectrum.ui.views.SpectrumProject"
-            name="Spectrum Project">
+            name="Trace Project">
       </view>
       <view
             category="org.dawb.workbench.ui.beta.views.category"
