@@ -67,24 +67,13 @@ public class SliceSource {
 			}
 
 			@Override
-			public ILazyDataset getLazyValue(String name, IMonitor monitor) {
-				return holder.getLazyDataset(name);
+			public ILazyDataset getLazyValue(String variableName, IMonitor monitor) {
+				return holder.getLazyDataset(variableName);
 			}		
 			
 			@Override
-			public IDataset getDataValue(String name, IMonitor monitor) {
-				try {
-					return holder.getDataset(name);
-				} catch(IllegalArgumentException ie) {
-					try {
-						ILazyDataset lz = holder.getLazyDataset(name);
-						IDataset all = lz.getSlice();
-						if (all.getSize()<2) throw new Exception();
-						return all;
-					} catch (Exception e) {
-						return null;
-					}
-				}			
+			public ILazyDataset getDataValue(String dataName, IMonitor monitor) {
+				return holder.getLazyDataset(dataName);
 			}
 
 			@Override

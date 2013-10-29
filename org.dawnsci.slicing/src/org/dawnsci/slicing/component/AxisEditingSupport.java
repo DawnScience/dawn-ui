@@ -220,7 +220,7 @@ class AxisEditingSupport extends EditingSupport {
 
         for (String dataName : system.getData().getVariableManager().getDataNames()) {
         	if (alreadyFound.contains(dataName)) continue;
-			final ILazyDataset set = system.getData().getVariableManager().getLazyValue(dataName, new IMonitor.Stub());
+			final ILazyDataset set = system.getData().getVariableManager().getDataValue(dataName, new IMonitor.Stub());
 			if (set!=null && set.getRank()==1 && set.getSize()==size) {
 				ret.add(dataName);
 			}
