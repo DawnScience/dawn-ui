@@ -32,6 +32,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 
+import uk.ac.diamond.scisoft.analysis.roi.CircularFitROI;
 import uk.ac.diamond.scisoft.analysis.roi.CircularROI;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalFitROI;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
@@ -328,22 +329,30 @@ public class ROIEditTable  {
 			}
 		} else if (roi instanceof CircularROI) {
 			final CircularROI cr = (CircularROI) roi;
-			ret.add(new RegionRow("Centre (x,y)", "pixel",  getAxis(coords, cr.getPoint())));
-			ret.add(new RegionRow("Radius",       "pixel",  cr.getRadius(), Double.NaN));
-			
+			ret.add(new RegionRow("Centre (x,y)", "pixel", getAxis(coords, cr.getPoint())));
+			ret.add(new RegionRow("Radius",       "pixel", cr.getRadius(), Double.NaN));
+
+			if (cr instanceof CircularFitROI) {
+				ret.get(0).setEnabled(false);
+				ret.get(1).setEnabled(false);
+				final PolylineROI pr = ((CircularFitROI) cr).getPoints();
+				for (int i = 0, imax = pr.getNumberOfPoints(); i < imax; i++) {
+					ret.add(new RegionRow("Point "+(i+1)+"  (x,y)", "pixel", getAxis(coords, pr.getPoint(i).getPoint())));
+				}
+			}
 		} else if (roi instanceof EllipticalROI) {
 			final EllipticalROI er = (EllipticalROI) roi;
-			ret.add(new RegionRow("Centre (x,y)",             "pixel", getAxis(coords,    er.getPoint())));
+			ret.add(new RegionRow("Centre (x,y)",             "pixel", getAxis(coords, er.getPoint())));
 			ret.add(new RegionRow("Semi-axes (major, minor)", "pixel", er.getSemiAxis(0), er.getSemiAxis(1)));
 			ret.add(new RegionRow("Rotation (°)",             "°",     er.getAngleDegrees(), Double.NaN));
-			
+
 			if (er instanceof EllipticalFitROI) {
 				ret.get(0).setEnabled(false);
 				ret.get(1).setEnabled(false);
 				ret.get(2).setEnabled(false);
 				final PolylineROI pr = ((EllipticalFitROI) er).getPoints();
 				for (int i = 0, imax = pr.getNumberOfPoints(); i < imax; i++) {
-					ret.add(new RegionRow("Point "+(i+1)+"  (x,y)", "pixel", getAxis(coords, pr.getPoint())));
+					ret.add(new RegionRow("Point "+(i+1)+"  (x,y)", "pixel", getAxis(coords, pr.getPoint(i).getPoint())));
 				}
 			}
 		} else if (roi != null) {
@@ -442,6 +451,13 @@ public class ROIEditTable  {
 			
 			ret = sr;
 			
+		} else if (roi instanceof CircularFitROI) {
+			PolylineROI pr = new PolylineROI();
+
+			for (int i = 2, imax = rows.size(); i < imax; i++) {
+				pr.insertPoint(getImage(coords, rows.get(i)));
+			}
+			ret = new CircularFitROI(pr);
 		} else if (roi instanceof CircularROI) {
 			
 			final double[] cent = getImage(coords, rows.get(0));
@@ -449,7 +465,6 @@ public class ROIEditTable  {
 
 			CircularROI cr = new CircularROI(Math.abs(rad), cent[0], cent[1]);
 			ret = cr;
-			
 		} else if (roi instanceof EllipticalFitROI) {
 			PolylineROI pr = new PolylineROI();
 

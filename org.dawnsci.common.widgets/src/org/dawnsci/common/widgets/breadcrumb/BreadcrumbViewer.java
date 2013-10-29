@@ -641,7 +641,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 	 * @return new instance of a breadcrumb item
 	 */
 	private BreadcrumbItem createItem() {
-		BreadcrumbItem result= new BreadcrumbItem(this, fContainer);
+		BreadcrumbItem result= new BreadcrumbItem(this, fContainer, treeSwitches);
 
 		result.setLabelProvider((ILabelProvider) getLabelProvider());
 		if (fToolTipLabelProvider != null) {
@@ -839,4 +839,16 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 		BreadcrumbItem current= fBreadcrumbItems.get(fBreadcrumbItems.size()-1);
 		current.openDropDownMenu();
 	}
+	
+	private int treeSwitches = SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL;
+	
+
+	public int getTreeSwitches() {
+		return treeSwitches;
+	}
+
+	public void setTreeSwitches(int treeSwitches) {
+		this.treeSwitches = treeSwitches;
+	}
+
 }
