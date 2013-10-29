@@ -2,7 +2,7 @@
 <feature
       id="org.dawnsci.plotting.feature"
       label="Feature"
-      version="1.2.0.qualifier"
+      version="1.4.0.qualifier"
       provider-name="Diamond Light Source">
 
    <description url="http://www.example.com/description">
