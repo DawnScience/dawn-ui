@@ -168,6 +168,29 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 	}
 
 	@Override
+	public double getXAxisRotationAngleDegrees() {
+		double angle = 0;
+
+		if (imageTrace != null) {
+			switch (imageTrace.getImageOrigin()) {
+			case TOP_RIGHT:
+				angle = 90;
+				break;
+			case BOTTOM_RIGHT:
+				angle = 180;
+				break;
+			case BOTTOM_LEFT:
+				angle = 270;
+				break;
+			case TOP_LEFT:
+			default:
+				break;
+			}
+		}
+		return angle;
+	}
+
+	@Override
 	public double[] getValueAxisLocation(double... values) throws Exception {
 		// No need to test for reversal here, the labels and the image do not get reversed.
 		if (imageTrace==null) return values;
