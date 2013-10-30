@@ -542,9 +542,11 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	 */
 	protected RectangularROI createROI(double ptx, double pty, double width, double height, double angle) {
 		RectangularROI tmp = new RectangularROI(ptx, pty, width, height, angle);
-		if (roi!=null) tmp.setPlot(roi.isPlot());
-		// set the Region isActive flag
-		this.setActive(this.isActive());
+		if (roi != null) {
+			tmp.setPlot(roi.isPlot());
+			// set the Region isActive flag
+			this.setActive(roi.isPlot());
+		}
 		return tmp;
 	}
 	

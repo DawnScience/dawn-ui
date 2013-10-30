@@ -196,9 +196,11 @@ public class GridSelection extends BoxSelection implements IGridSelection{
 	@Override
 	protected RectangularROI createROI(double ptx, double pty, double width, double height, double angle) {
 		GridROI groi = new GridROI(ptx, pty, width, height, angle);
-		if (roi!=null) groi.setPlot(roi.isPlot());
-		// set the Region isActive flag
-		this.setActive(this.isActive());
+		if (roi != null) {
+			groi.setPlot(roi.isPlot());
+			// set the Region isActive flag
+			this.setActive(roi.isPlot());
+		}
 		return groi;
 	}
 
