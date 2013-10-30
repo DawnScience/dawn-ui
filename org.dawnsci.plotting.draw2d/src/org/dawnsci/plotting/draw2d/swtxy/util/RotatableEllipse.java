@@ -109,7 +109,7 @@ public class RotatableEllipse extends Shape implements PointFunction {
 	 * @return centre of ellipse
 	 */
 	public Point getCentre() {
-		return affine.getTransformed(centre, false);
+		return affine.getTransformed(centre);
 	}
 
 	/**
