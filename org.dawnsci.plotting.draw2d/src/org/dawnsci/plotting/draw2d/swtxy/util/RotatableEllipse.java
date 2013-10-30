@@ -129,19 +129,7 @@ public class RotatableEllipse extends Shape implements PointFunction {
 		double c = Math.cos(angle);
 		double s = Math.sin(angle);
 		PrecisionPoint p = new PrecisionPoint(0.5*(c+1), 0.5*(s+1));
-		return affine.getTransformed(p, false);
-	}
-
-	/**
-	 * Get point on ellipse at given angle
-	 * @param degrees (positive for anti-clockwise)
-	 * @return
-	 */
-	public Point getRoundedPoint(double degrees) {
-		Point p = getPoint(degrees);
-		p.setX((int) Math.round(p.preciseX()));
-		p.setY((int) Math.round(p.preciseY()));
-		return p;
+		return affine.getTransformed(p);
 	}
 
 	@Override
