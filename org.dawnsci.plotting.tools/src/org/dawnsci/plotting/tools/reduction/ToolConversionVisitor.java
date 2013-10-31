@@ -71,22 +71,30 @@ class ToolConversionVisitor implements IConversionVisitor {
 		if (group!=null) group.close(groupId);
 		
 		final String h5Path = context.getSelectedH5Path();
-		final String[] rps  = 	h5Path.split("/");
-		group=(Group)output.getData(h5Path);
+		if (h5Path != null) {
+			final String[] rps  = 	h5Path.split("/");
+			group=(Group)output.getData(h5Path);
 
-		if (group==null) for (String stub : rps) {
-			if (stub==null || "".equals(stub)) continue;
-			if (group==null) {
-				group = output.group(stub);
-			} else {
-				group = output.group(stub, group);
+			if (group==null) for (String stub : rps) {
+				if (stub==null || "".equals(stub)) continue;
+				if (group==null) {
+					group = output.group(stub);
+				} else {
+					group = output.group(stub, group);
+				}
+				output.setNexusAttribute(group, Nexus.DATA);
 			}
-			output.setNexusAttribute(group, Nexus.DATA);
-		}
 
-		currentH5Path = context.getSelectedH5Path();
-		groupId       = group.open();
-		return group;
+			currentH5Path = context.getSelectedH5Path();
+			groupId       = group.open();
+			return group;
+		} else { // if not path, we create a default entry
+			Group entryGroup = output.group("entry");
+			output.setNexusAttribute(entryGroup, Nexus.DATA);
+			group = output.group("data", entryGroup);
+			output.setNexusAttribute(group, Nexus.DATA);
+			return group;
+		}
 	}
 
 	@Override

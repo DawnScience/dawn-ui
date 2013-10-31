@@ -491,9 +491,9 @@ public class SliceUtils {
     	}
 
 		IDataset axis = null;
-		
-		if (axisName.endsWith("[Expression]")) {
-			final IDataset set = currentSlice.getExpressionAxis(axisName);
+		final String dataPath = currentSlice.getName();
+		if (dataPath.endsWith("[Expression]")) {
+			final IDataset set = currentSlice.getExpressionAxis(dataPath);
 			final IAnalysisService service = (IAnalysisService)ServiceManager.getService(IAnalysisService.class);
 			return service.convertToAbstractDataset(set);
 		}
@@ -518,8 +518,6 @@ public class SliceUtils {
 				if (file!=null) file.close();
 			}
 		} else { // Faster
-			
-			final String dataPath = currentSlice.getName();
 			final File file = new File(dataPath);
 			final String fullName = file.getParent().replace('\\','/')+"/"+axisName;
 			final ILoaderService service = (ILoaderService)ServiceManager.getService(ILoaderService.class);

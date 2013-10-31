@@ -130,9 +130,9 @@ public class BoxProfileTool extends ProfileTool {
 
 		final IImageTrace   image   = getImageTrace();
 		final Collection<IRegion> regions = getPlottingSystem().getRegions();
+		IHierarchicalDataFile file = slice.getFile();
 
 		Group dataGroup = slice.getParent();
-		IHierarchicalDataFile file = slice.getFile();
 
 		for (IRegion region : regions) {
 			if (!isRegionTypeSupported(region.getRegionType())) continue;
