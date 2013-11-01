@@ -1033,6 +1033,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	private boolean isSelectionReducible() {
 		final Object sel = ((StructuredSelection)dataViewer.getSelection()).getFirstElement();
 		final ITransferableDataObject ob  = (ITransferableDataObject)sel;
+		if (ob==null) return false;
 		ILazyDataset lazy = ob.getLazyData(null);
 		if (lazy.getRank() >= 3)
 			return true;
