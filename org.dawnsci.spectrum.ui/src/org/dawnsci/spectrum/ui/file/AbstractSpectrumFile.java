@@ -16,6 +16,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 public abstract class AbstractSpectrumFile implements ISpectrumFile {
 	
 	protected boolean useAxisDataset = false;
+	protected boolean showPlot = true;
 	protected String xDatasetName;
 	protected IPlottingSystem system;
 	protected List<String> yDatasetNames;
@@ -48,7 +49,7 @@ public abstract class AbstractSpectrumFile implements ISpectrumFile {
 	public void addyDatasetName(String name) {
 		//TODO check contains before adding removing
 		yDatasetNames.add(name);
-		addToPlot(name);
+		if (showPlot) addToPlot(name);
 	}
 	
 	public void removeyDatasetName(String name) {
@@ -60,6 +61,15 @@ public abstract class AbstractSpectrumFile implements ISpectrumFile {
 	@Override
 	public List<String> getyDatasetNames() {
 		return yDatasetNames;
+	}
+	
+	public void setShowPlot(boolean showPlot) {
+		this.showPlot = showPlot;
+		updatePlot();
+	}
+	
+	public boolean isShowPlot() {
+		return showPlot;
 	}
 	
 	protected abstract void addToPlot(String name);
@@ -94,7 +104,7 @@ public abstract class AbstractSpectrumFile implements ISpectrumFile {
 	
 	private void updatePlot() {
 		removeAllFromPlot();
-		plotAll();
+		if (showPlot) plotAll();
 	}
 	
 	public void removeAllFromPlot() {

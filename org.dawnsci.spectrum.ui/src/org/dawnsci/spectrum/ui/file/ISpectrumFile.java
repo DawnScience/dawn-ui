@@ -44,4 +44,8 @@ public interface ISpectrumFile extends IContain1DData {
 	public void setUseAxis(boolean useAxis);
 	
 	public void setSelected(boolean selected);
+	
+	public void setShowPlot(boolean show);
+	
+	public boolean isShowPlot();
 }
