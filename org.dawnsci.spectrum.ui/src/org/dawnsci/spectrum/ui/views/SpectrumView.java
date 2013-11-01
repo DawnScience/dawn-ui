@@ -7,6 +7,7 @@ import java.util.List;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlottingFactory;
+import org.dawnsci.plotting.api.axis.IAxis;
 import org.dawnsci.plotting.api.filter.AbstractPlottingFilter;
 import org.dawnsci.plotting.api.filter.IFilterDecorator;
 import org.dawnsci.plotting.api.trace.ILineTrace;
@@ -221,6 +222,10 @@ public class SpectrumView extends ViewPart {
 				}
 			}
 		});
+		
+		//set axis as tight
+		List<IAxis> axes = system.getAxes();
+		for (IAxis axis : axes) axis.setAxisAutoscaleTight(true);
 	}
 
 	private void hookContextMenu() {
