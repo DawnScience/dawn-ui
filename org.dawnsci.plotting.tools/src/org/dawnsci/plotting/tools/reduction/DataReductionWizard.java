@@ -11,6 +11,7 @@ import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.util.io.FileUtils;
+import org.dawnsci.io.h5.H5Loader;
 import org.dawnsci.slicing.api.system.DimsData;
 import org.dawnsci.slicing.api.system.DimsDataList;
 import org.eclipse.core.resources.IFile;
@@ -136,7 +137,7 @@ public class DataReductionWizard extends Wizard implements IExportWizard {
 		return true;
 	}
 
-	public void setData(IFile file, String h5Path, IDataReductionToolPage tool) {
+	public void setData(IFile file, String h5Path, IDataReductionToolPage tool, ILazyDataset lazy) {
 		
 		this.context  = service.open(file.getLocation().toOSString());
 		this.visitor  = new ToolConversionVisitor(tool);;
@@ -144,7 +145,11 @@ public class DataReductionWizard extends Wizard implements IExportWizard {
 		final String sugFileName = FileUtils.getFileNameNoExtension(file.getName()).replace(' ',  '_')+"_"+tool.getTitle().replace(' ', '_')+".h5";
 		context.setOutputPath(file.getParent().getLocation().toOSString()+File.separator+sugFileName);
 		context.setConversionVisitor(visitor);
-		context.setDatasetName(h5Path);
+		// if a h5path and the file is an hdf5 format, other wise try with lazydataset
+		if (h5Path != null && H5Loader.isH5(file.getFullPath().toOSString()))
+			context.setDatasetName(h5Path);
+		else
+			context.setLazyDataset(lazy);
 		
 	}
 	

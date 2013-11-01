@@ -79,6 +79,12 @@ public interface ICoordinateSystem {
 	public boolean isYReversed();
 
 	/**
+	 * @return rotation angle of x axis in degrees (positive is clockwise,
+	 * 0 is when x is horizontal and left to right)
+	 */
+	public double getXAxisRotationAngleDegrees();
+
+	/**
 	 * Ratio of x axis to y axis scaling
 	 * @return
 	 */

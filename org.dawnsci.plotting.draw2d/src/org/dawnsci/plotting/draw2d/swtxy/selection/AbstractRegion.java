@@ -65,7 +65,7 @@ public abstract class AbstractRegion extends Figure implements IRegion, IRegionC
 			try {
 			    l.roiDragged(evt);
 			} catch (Throwable ne) {
-				logger.error("Unexpected exception in drawning!", ne);
+				logger.error("Unexpected exception in drawing!", ne);
 			}
 		}
 	}
@@ -232,7 +232,7 @@ public abstract class AbstractRegion extends Figure implements IRegion, IRegionC
 		return userObject;
 	}
 
-	private boolean isActive = false;
+	private boolean isActive;
 
 	/**
 	 * Returns whether the region is active or not

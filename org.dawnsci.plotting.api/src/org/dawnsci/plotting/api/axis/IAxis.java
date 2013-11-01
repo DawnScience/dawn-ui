@@ -233,12 +233,6 @@ public interface IAxis {
 	public void setMaximumRange(double lower, double upper);
 
 	/**
-	 * Set axis scale so that there are ticks on the start and end
-	 * @param ticksAtEnds if true then place ticks on scale ends
-	 */
-	public void setTicksAtEnds(boolean ticksAtEnds);
-
-	/**
 	 * 
 	 * @return the number (usually Double) formatted to the current format
 	 */
@@ -248,4 +242,24 @@ public interface IAxis {
 	 * @return scaling of axis in terms of pixels/unit
 	 */
 	public double getScaling();
+	
+	/**
+	 * @param set whether axis label is automatically formatted or set by the user
+	 */
+	public void setAutoFormat(boolean autoFormat);
+	
+	/**
+	 * @return true if axis format is done automatically, false if user format is to be used
+	 */
+	public boolean isAutoFormat();
+	
+	/**
+	 * @param set whether autoscale sets axis range tight to the data or the end of axis is set to the nearest tickmark
+	 */
+	public void setAxisAutoscaleTight(boolean axisTight);
+	
+	/**
+	 * @return true if autoscaling axis is tight to displayed data
+	 */
+	public boolean isAxisAutoscaleTight();
 }

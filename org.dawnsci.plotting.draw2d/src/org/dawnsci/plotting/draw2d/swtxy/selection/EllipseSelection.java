@@ -153,9 +153,11 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 		v[1] -= eroi.getPointY(); v[1] *= 0.5;
 		eroi.setSemiAxes(v);
 		eroi.setName(getName());
-		if (roi!=null) eroi.setPlot(roi.isPlot());
-		// set the Region isActive flag
-		this.setActive(this.isActive());
+		if (roi != null) {
+			eroi.setPlot(roi.isPlot());
+			// set the Region isActive flag
+			this.setActive(roi.isPlot());
+		}
 		if (recordResult) {
 			roi = eroi;
 		}

@@ -240,10 +240,11 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 		sroi.setName(getName());
 		sroi.setSymmetry(symmetry);
 		sroi.setCombineSymmetry(combine);
-		if (roi!=null) sroi.setPlot(roi.isPlot());
-		// set the Region isActive flag
-		this.setActive(this.isActive());
-		
+		if (roi != null) {
+			sroi.setPlot(roi.isPlot());
+			// set the Region isActive flag
+			this.setActive(roi.isPlot());
+		}
 		if (recordResult) {
 			roi = sroi;
 		}

@@ -7,6 +7,7 @@ import java.util.List;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlottingFactory;
+import org.dawnsci.plotting.api.axis.IAxis;
 import org.dawnsci.plotting.api.filter.AbstractPlottingFilter;
 import org.dawnsci.plotting.api.filter.IFilterDecorator;
 import org.dawnsci.plotting.api.trace.ILineTrace;
@@ -15,7 +16,6 @@ import org.dawnsci.spectrum.ui.Activator;
 import org.dawnsci.spectrum.ui.file.IContain1DData;
 import org.dawnsci.spectrum.ui.file.ISpectrumFile;
 import org.dawnsci.spectrum.ui.file.ISpectrumFileListener;
-import org.dawnsci.spectrum.ui.file.SpectrumFile;
 import org.dawnsci.spectrum.ui.file.SpectrumFileManager;
 import org.dawnsci.spectrum.ui.file.SpectrumFileOpenedEvent;
 import org.dawnsci.spectrum.ui.file.SpectrumInMemory;
@@ -44,9 +44,12 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.util.LocalSelectionTransfer;
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
+import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
@@ -54,7 +57,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.Viewer;
@@ -66,7 +68,6 @@ import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
@@ -75,7 +76,6 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Maths;
-import org.dawb.common.ui.util.EclipseUtils;
 
 /**
 * Main view of the Spectrum Perspective. Contains a table which shows the list of active files and 
@@ -84,13 +84,13 @@ import org.dawb.common.ui.util.EclipseUtils;
 * Hold the SpectrumFileManager which takes care of loading and plotting files
 */
 public class SpectrumView extends ViewPart {
-
+	//TODO OMG TIDY THIS CLASS!!!!
 	/**
 	 * The ID of the view as specified by the extension.
 	 */
 	public static final String ID = "org.dawnsci.spectrum.ui.views.SpectrumView";
 
-	private TableViewer viewer;
+	private CheckboxTableViewer viewer;
 	private Action removeAction;
 	private Action configDefaults;
 //	private Action doubleClickAction;
@@ -99,9 +99,9 @@ public class SpectrumView extends ViewPart {
 	private DropTargetAdapter dropListener;
 
 	public void createPartControl(Composite parent) {
-
+		
 		//Create table
-		viewer = new TableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+		viewer = CheckboxTableViewer.newCheckList(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		viewer.setContentProvider(new ViewContentProvider());
 		TableViewerColumn viewerColumn = new TableViewerColumn(viewer, SWT.NONE);
 		viewerColumn.setLabelProvider(new ViewLabelProvider());
@@ -117,6 +117,7 @@ public class SpectrumView extends ViewPart {
 		IWorkbenchPage page = getSite().getPage();
 		IViewPart view = page.findView("org.dawnsci.spectrum.ui.views.SpectrumPlot");
 		system = (IPlottingSystem)view.getAdapter(IPlottingSystem.class);
+		
 		manager = new SpectrumFileManager(system);
 		
 		viewer.setInput(manager);
@@ -130,6 +131,7 @@ public class SpectrumView extends ViewPart {
 					public void run() {
 						viewer.refresh();
 						viewer.setSelection(new StructuredSelection(event.getFile()),true);
+						viewer.setChecked(event.getFile(), true);
 					}
 				});
 			}
@@ -203,6 +205,27 @@ public class SpectrumView extends ViewPart {
 				}
 			}
 		});
+		
+		viewer.addCheckStateListener(new ICheckStateListener() {
+			
+			@Override
+			public void checkStateChanged(CheckStateChangedEvent event) {
+				// TODO Auto-generated method stub
+				Object ob = event.getElement();
+				
+				if (ob instanceof ISpectrumFile) {
+					if (event.getChecked()) {
+						((ISpectrumFile)ob).setShowPlot(true);
+					} else {
+						((ISpectrumFile)ob).setShowPlot(false);
+					}
+				}
+			}
+		});
+		
+		//set axis as tight
+		List<IAxis> axes = system.getAxes();
+		for (IAxis axis : axes) axis.setAxisAutoscaleTight(true);
 	}
 
 	private void hookContextMenu() {
@@ -300,9 +323,6 @@ public class SpectrumView extends ViewPart {
 //			});
 //		}
 		
-		manager.add(new Separator());
-		manager.add(configDefaults);
-		
 //		manager.add(new Action("Open processing wizard") {
 //			@Override
 //			public void run(){
@@ -318,6 +338,26 @@ public class SpectrumView extends ViewPart {
 //		});
 
 		// Other plug-ins can contribute there actions here
+		
+		manager.add(new Separator());
+		manager.add(new Action("Check Selected", Activator.imageDescriptorFromPlugin("org.dawnsci.spectrum.ui","icons/ticked.png")) {
+			@Override
+			public void run() {
+				setSelectionChecked(true);
+			}
+
+		});
+		
+		manager.add(new Action("Uncheck Selected", Activator.imageDescriptorFromPlugin("org.dawnsci.spectrum.ui","icons/unticked.gif")) {
+			@Override
+			public void run() {
+				setSelectionChecked(false);
+			}
+
+		});
+		
+		manager.add(new Separator());
+		manager.add(configDefaults);
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 	}
 	
@@ -327,10 +367,20 @@ public class SpectrumView extends ViewPart {
 		
 		manager.add(removeAction);
 	}
+	
+	private void setSelectionChecked(boolean checked) {
+		IStructuredSelection selection = (IStructuredSelection)viewer.getSelection();
+		List<ISpectrumFile> list = SpectrumUtils.getSpectrumFilesList(selection);
+		
+		for (ISpectrumFile file : list) {
+			file.setShowPlot(checked);
+			viewer.setChecked(file, checked);
+		}
+	}
 
 	private void makeActions() {
 		
-		removeAction = new Action("Remove",Activator.imageDescriptorFromPlugin("org.dawnsci.spectrum.ui","icons/delete.gif")) {
+		removeAction = new Action("Remove From List",Activator.imageDescriptorFromPlugin("org.dawnsci.spectrum.ui","icons/delete.gif")) {
 			public void run() {
 				ISelection selection = viewer.getSelection();
 				List<?> obj = ((IStructuredSelection)selection).toList();

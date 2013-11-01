@@ -255,7 +255,8 @@ public class RotatableEllipse extends Shape implements PointFunction {
 		Draw2DUtils.drawClippedPolyline(graphics, points, bnd, true);
 
 		if (showMajorAxis) {
-			graphics.drawLine(points.getFirstPoint(), getPoint(180));
+			double offset = cs.getXAxisRotationAngleDegrees();
+			graphics.drawLine(getPoint(offset), getPoint(offset + 180));
 		}
 		graphics.popState();
 	}

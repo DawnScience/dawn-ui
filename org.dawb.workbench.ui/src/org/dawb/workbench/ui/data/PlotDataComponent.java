@@ -565,7 +565,8 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 				}
 				wiz.setData(getIFile(true),
 						    getSelectionNames().get(0),
-						    (IDataReductionToolPage)getAbstractPlottingSystem().getActiveTool());
+						    (IDataReductionToolPage)getAbstractPlottingSystem().getActiveTool(),
+						    getSliceSet());
 				wiz.setSlice(getSliceSet(), getSliceData());
 				
 				// TODO Should be non modal, it takes a while.
@@ -1007,18 +1008,34 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	protected List<String> getSelectionNames() {
 		final List<String> names = new ArrayList<String>(3);
 		for (ITransferableDataObject ob : getSelections()) {
-			if (!ob.isExpression()) names.add(ob.getPath());
+			if (!ob.isExpression())
+				names.add(ob.getPath());
+			else {
+				names.add(ob.getExpression().getExpressionName());
+			}
 		}
 		return names;
 	}
 
 	protected boolean isDataReductionToolActive() {
 		
-		if (H5Loader.isH5(getFileName())) {
+		if (H5Loader.isH5(getFileName()) || isSelectionReducible()) {
 			IToolPageSystem toolSystem = (IToolPageSystem)getPlottingSystem().getAdapter(IToolPageSystem.class);
 			IToolPage tool = toolSystem.getActiveTool();
 			return tool!=null && tool instanceof IDataReductionToolPage;
 		}
+		return false;
+	}
+
+	/**
+	 * if the table selection is reducible
+	 */
+	private boolean isSelectionReducible() {
+		final Object sel = ((StructuredSelection)dataViewer.getSelection()).getFirstElement();
+		final ITransferableDataObject ob  = (ITransferableDataObject)sel;
+		ILazyDataset lazy = ob.getLazyData(null);
+		if (lazy.getRank() >= 3)
+			return true;
 		return false;
 	}
 	

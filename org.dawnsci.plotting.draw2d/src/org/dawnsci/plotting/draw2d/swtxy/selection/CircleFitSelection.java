@@ -209,9 +209,11 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 
 		try {
 			final CircularFitROI croi = new CircularFitROI(hroi);
-			if (roi!=null) croi.setPlot(roi.isPlot());
-			// set the Region isActive flag
-			this.setActive(this.isActive());
+			if (roi != null) {
+				croi.setPlot(roi.isPlot());
+				// set the Region isActive flag
+				this.setActive(roi.isPlot());
+			}
 			if (recordResult) {
 				roi = croi;
 			}
