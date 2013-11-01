@@ -9,11 +9,11 @@
  */ 
 package org.dawnsci.slicing.api;
 
-import org.dawb.common.services.ILoaderService;
 import org.dawb.common.services.ServiceManager;
 import org.dawnsci.slicing.api.system.DimsDataList;
 import org.dawnsci.slicing.api.system.ISliceSystem;
 import org.dawnsci.slicing.api.system.SliceSource;
+import org.dawnsci.slicing.api.util.ProgressMonitorWrapper;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
 import uk.ac.diamond.scisoft.analysis.io.IDataHolder;
+import uk.ac.diamond.scisoft.analysis.io.ILoaderService;
 
 /**
  * A dialog for holding a component used to slice the data.
@@ -77,7 +78,7 @@ public class SliceDialog extends Dialog {
 			            final IProgressMonitor monitor) throws Throwable {
 		
 		final ILoaderService service = (ILoaderService)ServiceManager.getService(ILoaderService.class);
-		final IDataHolder holder = service.getData(filePath, monitor);
+		final IDataHolder holder = service.getData(filePath, new ProgressMonitorWrapper(monitor));
 		ILazyDataset lazy  = holder.getLazyDataset(dataSetName);
 		if (lazy==null) lazy = holder.getLazyDataset(0);
 		

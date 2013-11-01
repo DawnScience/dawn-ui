@@ -20,7 +20,6 @@ import java.util.Map;
 
 import ncsa.hdf.object.Group;
 
-import org.dawb.common.services.ILoaderService;
 import org.dawb.common.services.IVariableManager;
 import org.dawb.common.services.ServiceManager;
 import org.dawb.hdf5.HierarchicalDataFactory;
@@ -44,6 +43,7 @@ import uk.ac.diamond.scisoft.analysis.IAnalysisService;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
 import uk.ac.diamond.scisoft.analysis.io.IDataHolder;
+import uk.ac.diamond.scisoft.analysis.io.ILoaderService;
 import uk.ac.diamond.scisoft.analysis.io.SliceObject;
 
 public class SliceUtils {
@@ -507,7 +507,7 @@ public class SliceUtils {
 				final String fullName = group.getFullName()+"/"+axisName;
 				
 				final ILoaderService service = (ILoaderService)ServiceManager.getService(ILoaderService.class);
-				axis = service.getDataset(currentSlice.getPath(), fullName, monitor);
+				axis = service.getDataset(currentSlice.getPath(), fullName, new ProgressMonitorWrapper(monitor));
 				if (axis == null) return null;
 				axis = axis.squeeze();
 				
@@ -523,7 +523,7 @@ public class SliceUtils {
 			final File file = new File(dataPath);
 			final String fullName = file.getParent().replace('\\','/')+"/"+axisName;
 			final ILoaderService service = (ILoaderService)ServiceManager.getService(ILoaderService.class);
-			axis = service.getDataset(currentSlice.getPath(), fullName, monitor);
+			axis = service.getDataset(currentSlice.getPath(), fullName, new ProgressMonitorWrapper(monitor));
 			if (axis == null) return null;
 			axis = axis.squeeze();
 		
