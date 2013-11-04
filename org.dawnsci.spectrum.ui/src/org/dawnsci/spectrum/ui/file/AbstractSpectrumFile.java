@@ -47,13 +47,13 @@ public abstract class AbstractSpectrumFile implements ISpectrumFile {
 	
 	@Override
 	public void addyDatasetName(String name) {
-		//TODO check contains before adding removing
+		if (yDatasetNames.contains(name)) return;
 		yDatasetNames.add(name);
 		if (showPlot) addToPlot(name);
 	}
 	
 	public void removeyDatasetName(String name) {
-		//TODO check contains before adding removing
+		if (!yDatasetNames.contains(name)) return;
 		yDatasetNames.remove(name);
 		removeFromPlot(name);
 	}

@@ -1,9 +1,11 @@
 package org.dawnsci.spectrum.ui.views;
 
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.dawb.common.services.IPaletteService;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlottingFactory;
@@ -18,7 +20,6 @@ import org.dawnsci.spectrum.ui.file.ISpectrumFile;
 import org.dawnsci.spectrum.ui.file.ISpectrumFileListener;
 import org.dawnsci.spectrum.ui.file.SpectrumFileManager;
 import org.dawnsci.spectrum.ui.file.SpectrumFileOpenedEvent;
-import org.dawnsci.spectrum.ui.file.SpectrumInMemory;
 import org.dawnsci.spectrum.ui.utils.SpectrumUtils;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -31,7 +32,10 @@ import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.PaletteData;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -63,7 +67,6 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.SWT;
 import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
@@ -97,6 +100,7 @@ public class SpectrumView extends ViewPart {
 	private IPlottingSystem system;
 	private SpectrumFileManager manager;
 	private DropTargetAdapter dropListener;
+	private List<Color> orderedColors;
 
 	public void createPartControl(Composite parent) {
 		
@@ -247,9 +251,44 @@ public class SpectrumView extends ViewPart {
 		fillLocalToolBar(bars.getToolBarManager());
 	}
 
-	private void fillLocalPullDown(IMenuManager manager) {
-		manager.add(removeAction);
-		manager.add(configDefaults);
+	private void fillLocalPullDown(IMenuManager menuManager) {
+		menuManager.add(removeAction);
+		
+		menuManager.add(new Separator());
+		
+		Action orderColors = new Action("Jet Color Plotted Traces", Activator.getImageDescriptor("icons/color.png")) {
+			public void run(){
+
+				if (orderedColors == null) {
+					final IPaletteService pservice = (IPaletteService)PlatformUI.getWorkbench().getService(IPaletteService.class);
+					PaletteData paletteData = pservice.getPaletteData("Jet (Blue-Cyan-Green-Yellow-Red)");
+					RGB[] rgbs = paletteData.getRGBs();
+					orderedColors = new ArrayList<Color>(256);
+					Display display = Display.getCurrent();
+					for(int i = 0; i < 256 ; i++) {
+						orderedColors.add(new Color(display, rgbs[i]));
+					}
+				}
+
+				Collection<ITrace> traces = system.getTraces(ILineTrace.class);
+				double count = 0;
+				for (ITrace trace : traces) if (trace.isUserTrace()) count++;
+				
+				double val = 255/(count-1);
+				int i = 0;
+				for (ITrace trace : traces) {
+					if (trace.isUserTrace()) {
+						((ILineTrace)trace).setTraceColor(orderedColors.get((int)val*i));
+						i++;
+					}
+					
+				}
+			}
+		};
+		
+		menuManager.add(orderColors);
+		menuManager.add(new Separator());
+		menuManager.add(configDefaults);
 	}
 
 	private void fillContextMenu(IMenuManager manager) {
@@ -395,7 +434,6 @@ public class SpectrumView extends ViewPart {
 				}
 				
 			}
-		
 		};
 		
 		removeAction.setToolTipText("Remove selected files from list");
@@ -433,6 +471,9 @@ public class SpectrumView extends ViewPart {
 	
 	@Override
 	public void dispose() {
+		
+		if (!system.isDisposed()) system.clear();
+		if (orderedColors != null) for (Color color : orderedColors) color.dispose();
 		super.dispose();
 	}
 
@@ -568,6 +609,16 @@ public class SpectrumView extends ViewPart {
 	}
 	
 	class ViewLabelProvider extends ColumnLabelProvider implements ITableLabelProvider {
+		
+		Image fileImage;
+		Image memoryImage;
+		
+		public ViewLabelProvider() {
+			fileImage = Activator.getImage("icons/Multiple.png");
+			memoryImage = Activator.getImage("icons/MultipleDisk.png");
+		}
+
+		
 		@Override
 		public String getColumnText(Object obj, int index) {
 			return getText(obj);
@@ -586,11 +637,15 @@ public class SpectrumView extends ViewPart {
 		@Override
 		public Image getImage(Object obj) {
 			
-			if (obj instanceof SpectrumInMemory) return PlatformUI.getWorkbench().
-					getSharedImages().getImage(ISharedImages.IMG_DEF_VIEW);
+			if (!(obj instanceof ISpectrumFile)) {
+				return null;
+			}
 			
-			return PlatformUI.getWorkbench().
-					getSharedImages().getImage(ISharedImages.IMG_OBJ_ELEMENT);
+			ISpectrumFile file = (ISpectrumFile)obj;
+			
+	
+			if (file.canBeSaved()) return memoryImage;
+			else return fileImage;
 		}
 		@Override
 		public String getToolTipText(Object obj) {
@@ -599,6 +654,14 @@ public class SpectrumView extends ViewPart {
 			}
 			
 			return "";
+		}
+	
+		@Override
+		public void dispose() {
+			super.dispose();
+			
+			memoryImage.dispose();
+			fileImage.dispose();
 		}
 	}
 }

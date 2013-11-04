@@ -116,6 +116,7 @@ public class SpectrumFile extends AbstractSpectrumFile implements ISpectrumFile 
 				
 				List<IDataset> list = getyDatasets();
 				for (IDataset ds : list) {
+					
 					if (ds.getRank() != 1) {
 						ds = reduceTo1D(x, ds);
 					}
@@ -136,6 +137,8 @@ public class SpectrumFile extends AbstractSpectrumFile implements ISpectrumFile 
 	}
 	
 	protected void addToPlot(final String name) {
+		
+		if (traceMap.containsKey(name)) return;
 		
 		Job job = new Job("Add to plot") {
 			
@@ -185,6 +188,11 @@ public class SpectrumFile extends AbstractSpectrumFile implements ISpectrumFile 
 	protected String getTraceName(String name) {
 		File file = new File(path);
 		return file.getName() + " : " + name;
+	}
+
+	@Override
+	public boolean canBeSaved() {
+		return false;
 	}
 	
 	
