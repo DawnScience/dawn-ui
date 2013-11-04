@@ -160,15 +160,25 @@ public class AffineTransform {
 	 * @return The transformed Point or PrecisionPoint (if input was a PrecisionPoint)
 	 */
 	public Point getTransformed(Point p) {
+		return getTransformed(p, p instanceof PrecisionPoint);
+	}
+
+	/**
+	 * Returns a new transformed Point of the input Point based on the
+	 * transformation values set.
+	 * 
+	 * @param p
+	 *            Point being transformed
+	 * @param precise if true, return point is a PrecisionPoint
+	 * @return The transformed Point
+	 */
+	public Point getTransformed(Point p, boolean precise) {
 		double x = p.preciseX() * scaleX;
 		double y = p.preciseY() * scaleY;
 		double temp = x * cos - y * sin;
-		y = y * cos + x * sin;
-		x = temp;
-		if (p instanceof PrecisionPoint) {
-			return new PrecisionPoint(x + dx, ratio * y + cdy);
-		}
-		return new Point((int) Math.round(x + dx), (int) Math.round(ratio * y + cdy));
+		y = (y * cos + x * sin) * ratio + cdy;
+		x = temp + dx;
+		return precise ? new PrecisionPoint(x, y) : new Point((int) Math.round(x), (int) Math.round(y));
 	}
 
 	/**
@@ -201,12 +211,12 @@ public class AffineTransform {
 	 */
 	public Rectangle getBounds() {
 		Rectangle r = new Rectangle();
-		Point p = getTransformed(new Point(0,0));
+		Point p = getTransformed(new Point(0,0), false);
 		r.setLocation(p);
 		r.union(p);
-		r.union(getTransformed(new Point(1,0)));
-		r.union(getTransformed(new Point(1,1)));
-		r.union(getTransformed(new Point(0,1)));
+		r.union(getTransformed(new Point(1,0), false));
+		r.union(getTransformed(new Point(1,1), false));
+		r.union(getTransformed(new Point(0,1), false));
 		return r;
 	}
 }
