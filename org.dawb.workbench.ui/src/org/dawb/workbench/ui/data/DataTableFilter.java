@@ -42,9 +42,6 @@ class DataTableFilter extends ViewerFilter {
 		if (name.matches(searchString)) {
 			return true;
 		}
-		if (name.matches(searchString)) {
-			return true;
-		}
 
 		// Check size so that we can filter on image size too
 		if (meta!=null) {
