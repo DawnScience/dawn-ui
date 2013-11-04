@@ -341,7 +341,7 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 		 * @return centre of circle
 		 */
 		public Point getCentre() {
-			return affine.getTransformed(centre);
+			return affine.getTransformed(centre, false);
 		}
 
 		/**
@@ -361,7 +361,7 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 			double c = Math.cos(angle);
 			double s = Math.sin(angle);
 			PrecisionPoint p = new PrecisionPoint(0.5*(c+1), 0.5*(s+1));
-			return affine.getTransformed(p);
+			return affine.getTransformed(p, false);
 		}
 
 		@Override

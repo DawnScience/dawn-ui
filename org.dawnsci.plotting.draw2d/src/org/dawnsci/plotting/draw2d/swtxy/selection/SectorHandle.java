@@ -43,7 +43,7 @@ public class SectorHandle extends SelectionHandle {
 		double c = Math.cos(angle);
 		double s = Math.sin(angle);
 		PrecisionPoint p = new PrecisionPoint(0.5*(c+1), 0.5*(s+1));
-		return affine.getTransformed(p);
+		return affine.getTransformed(p, false);
 	}
 
 	@Override
