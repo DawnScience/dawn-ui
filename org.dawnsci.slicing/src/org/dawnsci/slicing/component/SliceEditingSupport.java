@@ -5,7 +5,7 @@ import java.text.NumberFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.dawb.common.ui.Activator; // On purpose! Gets preference from expected place.
+import org.dawnsci.slicing.Activator; // On purpose! Gets preference from expected place.
 import org.dawb.common.ui.components.cell.ScaleCellEditor;
 import org.dawnsci.common.widgets.celleditor.SpinnerCellEditorWithPlayButton;
 import org.dawnsci.slicing.api.system.AxisType;
