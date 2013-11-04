@@ -852,22 +852,20 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 			}
 		}
 	}
-		
+
 	public void resetAxes() {
 		if (xyGraph == null)
 			return;
 		removeAdditionalAxes();
-//		xyGraph.primaryXAxis.setRange(0, 100);
 		xyGraph.primaryXAxis.setTitle(XYGraph.X_AXIS);
-//		xyGraph.primaryYAxis.setRange(0, 100);
 		xyGraph.primaryYAxis.setTitle(XYGraph.Y_AXIS);
 	}
-	
+
 	protected void removeAdditionalAxes() {
 		xyGraph.setSelectedXAxis((IAxis) xyGraph.primaryXAxis);
 		xyGraph.setSelectedYAxis((IAxis) xyGraph.primaryYAxis);
 		for (Axis axis : xyGraph.getAxisList()) {
-			if (axis!=getSelectedXAxis() && axis!=getSelectedYAxis()) {
+			if (axis!=xyGraph.primaryXAxis && axis!=xyGraph.primaryYAxis) {
 				axis.setVisible(false);
 				removeAxis((IAxis) axis);
 			}
@@ -1057,8 +1055,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		}
 		axis.setAutoScaleThreshold(0.1);
 		axis.setShowMajorGrid(true);
-		axis.setShowMinorGrid(true);		
-	
+		axis.setShowMinorGrid(true);	
 		xyGraph.addAxis(axis);
 		
 		return axis;
