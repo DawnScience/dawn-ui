@@ -152,7 +152,11 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
  	    	   tabFolder.setSelection(regionConfigTab);
  	    	   int index = ((RegionArea)regionGraph.getPlotArea()).getRegions().indexOf(selectedRegion);
  	   	       regionCombo.select(index);
- 	   	   	   stackLayout.topControl = regionList.get(index);
+ 	   	       try {
+ 	   	   	       stackLayout.topControl = regionList.get(index);
+ 	   	       } catch (IndexOutOfBoundsException nr) {
+ 	   	    	   nr.printStackTrace();
+ 	   	       }
    			   regionConfigComposite.layout(true, true);
 	       }
  	       
