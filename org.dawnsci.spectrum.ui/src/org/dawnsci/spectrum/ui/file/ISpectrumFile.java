@@ -48,4 +48,6 @@ public interface ISpectrumFile extends IContain1DData {
 	public void setShowPlot(boolean show);
 	
 	public boolean isShowPlot();
+	
+	public boolean canBeSaved();
 }

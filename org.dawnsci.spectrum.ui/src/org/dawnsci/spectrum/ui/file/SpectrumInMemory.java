@@ -141,7 +141,7 @@ public class SpectrumInMemory extends AbstractSpectrumFile implements ISpectrumF
 	}
 	
 	protected void addToPlot(final String name) {
-
+		if (traceMap.containsKey(name)) return;
 		Job job = new Job("Add to plot") {
 
 			@Override
@@ -198,5 +198,10 @@ public class SpectrumInMemory extends AbstractSpectrumFile implements ISpectrumF
 	protected String getTraceName(String name) {
 		// TODO Auto-generated method stub
 		return this.name + " : " + name;
+	}
+
+	@Override
+	public boolean canBeSaved() {
+		return true;
 	}
 }
