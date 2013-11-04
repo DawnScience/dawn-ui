@@ -124,7 +124,7 @@ public class Draw2DUtils {
 		cos *= cos;
 		boolean force = false;
 		double vc = lower + vd;
-		while (vc <= upper) {
+		while (vc < upper) {
 			pc = fn.calculatePoint(vc);
 			dc = pc.getDifference(pp);
 			double xc = dc.preciseWidth();
@@ -136,7 +136,7 @@ public class Draw2DUtils {
 					double yp = dp.preciseHeight();
 					double sp = xp * xp + yp * yp;
 					double cc = xc * xp + yc * yp;
-					if (cc * cc < sc * sp *cos) { // angle too wide
+					if (cc * cc < sc * sp * cos) { // angle too wide
 						vd *= 0.5;
 						vc = vc - vd;
 						force = true; // prevent bouncing
@@ -153,6 +153,7 @@ public class Draw2DUtils {
 			dp = dc;
 			force = false;
 		}
+		list.addPoint(fn.calculatePoint(upper));
 		return list;
 	}
 
@@ -188,10 +189,8 @@ public class Draw2DUtils {
 			t[1] = 1;
 			double x0 = p0.preciseX();
 			double y0 = p0.preciseY();
-			double x1 = p1.preciseX();
-			double y1 = p1.preciseY();
-			double dx = x1 - x0;
-			double dy = y1 - y0;
+			double dx = p1.preciseX() - x0;
+			double dy = p1.preciseY() - y0;
 
 			if (dx == 0 && dy == 0)
 				continue; // ignore null segment
@@ -200,28 +199,30 @@ public class Draw2DUtils {
 				if (clip(xl - x0, dx, t) && clip(x0 - xh, -dx, t)
 						&& clip(yl - y0, dy, t) && clip(y0 - yh, -dy, t)) {
 					if (t[0] > 0) {
-						p0 = new PrecisionPoint(Math.round(x0 + t[0] * dx), Math.round(y0 + t[0] * dy));
+						p0 = new Point((int) Math.round(x0 + t[0] * dx), (int) Math.round(y0 + t[0] * dy));
+					} else {
+						p0 = new Point((int) Math.round(x0), (int) Math.round(y0));
 					}
 					list.removeAllPoints();
 					list.addPoint(p0);
 					if (t[1] < 1) {
-						PrecisionPoint p = new PrecisionPoint(Math.round(x0 + t[1] * dx), Math.round(y0 + t[1] * dy));
+						Point p = new Point((int) Math.round(x0 + t[1] * dx), (int) Math.round(y0 + t[1] * dy));
 						list.addPoint(p);
 						g.drawPolygon(list);
 					} else {
 						first = false;
-						list.addPoint(p1);
+						list.addPoint(new Point((int) Math.round(p1.preciseX()), (int) Math.round(p1.preciseY())));
 					}
 				}
 			} else { // given that p0 is in bounds
 				if (clip2(xl - x0, dx, t) && clip2(x0 - xh, -dx, t) && clip2(yl - y0, dy, t) && clip2(y0 - yh, -dy, t)) {
 					if (t[1] < 1) {
 						first = true;
-						PrecisionPoint p = new PrecisionPoint(Math.round(x0 + t[1] * dx), Math.round(y0 + t[1] * dy));
+						Point p = new Point((int) Math.round(x0 + t[1] * dx), (int) Math.round(y0 + t[1] * dy));
 						list.addPoint(p);
 						g.drawPolyline(list);
 					} else {
-						list.addPoint(p1);
+						list.addPoint(new Point((int) Math.round(p1.preciseX()), (int) Math.round(p1.preciseY())));
 					}
 				}
 			}
