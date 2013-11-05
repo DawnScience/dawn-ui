@@ -69,7 +69,7 @@ public class ExpressionConsole {
 
     			@Override
     			public void documentChanged(DocumentEvent event) {
-    				if (event.getText().equals("\n")) {
+    				if (event.getText().equals("\n") || event.getText().equals("\r\n")) {
     					processText(console.getDocument().get());
     				}
     			}
