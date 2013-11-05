@@ -10,8 +10,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
+import uk.ac.diamond.scisoft.analysis.roi.PerimeterBoxROI;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
-
 
 /**
  *     A BoxSelection with coloured edges
@@ -119,25 +119,25 @@ public class PerimeterBoxSelection extends BoxSelection {
 	public IROI createROI(boolean recordResult) {
 		if (p1!=null) {
 			final Rectangle  rect = getRectangleFromVertices();			
-			final RectangularROI    rroi = (RectangularROI)getRoiFromRectangle(rect);
+			final PerimeterBoxROI    proi = (PerimeterBoxROI)getRoiFromRectangle(rect);
 			
-			if (recordResult) roi = rroi;
-			return rroi;
+			if (recordResult) roi = proi;
+			return proi;
 		}
 		return super.getROI();
 	}
 	
 	@Override
 	protected RectangularROI createROI(double ptx, double pty, double width, double height, double angle) {
-		return new RectangularROI(ptx, pty, width, height, angle);
+		return new PerimeterBoxROI(ptx, pty, width, height, angle);
 	}
 
 	@Override
 	protected void updateROI(IROI roi) {
-		if (roi instanceof RectangularROI) {
-			RectangularROI rroi = (RectangularROI) roi;
-			if (p1!=null) p1.setPosition(rroi.getPointRef());
-			if (p4!=null) p4.setPosition(rroi.getEndPoint());
+		if (roi instanceof PerimeterBoxROI) {
+			PerimeterBoxROI proi = (PerimeterBoxROI) roi;
+			if (p1!=null) p1.setPosition(proi.getPointRef());
+			if (p4!=null) p4.setPosition(proi.getEndPoint());
 			updateConnectionBounds();
 		}
 	}
@@ -177,9 +177,8 @@ public class PerimeterBoxSelection extends BoxSelection {
 	@Override
 	protected void updateConnectionBounds() {
 		if (connection==null) return;
-		final Rectangle size = getRectangleFromVertices();				
+		final Rectangle size = getRectangleFromVertices();
 		size.expand(5, 5);
 		connection.setBounds(size);
 	}
-	
 }
