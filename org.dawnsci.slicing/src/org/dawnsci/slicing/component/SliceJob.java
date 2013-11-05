@@ -33,10 +33,9 @@ class SliceJob extends Job {
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		
-		if (slice==null) return Status.CANCEL_STATUS;
-		monitor.beginTask("Slice "+slice.getName(), 10);
 		try {
-			
+			if (slice==null) return Status.CANCEL_STATUS;
+			monitor.beginTask("Slice "+slice.getName(), 10);
 			monitor.worked(1);
 			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 		

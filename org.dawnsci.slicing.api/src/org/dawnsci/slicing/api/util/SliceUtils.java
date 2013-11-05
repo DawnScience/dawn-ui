@@ -123,9 +123,8 @@ public class SliceUtils {
     	currentSlice.setDimensionalData(dimsDataHolder);
 
     	if (x==null || x.getSize()<2) { // Nothing to plot
-    		logger.debug("Cannot slice into an image because one of the dimensions is size of 1");
-    		return null;
-    	}
+    		throw new Exception("Cannot slice into image, one of the axes is size 1");
+     	}
     	
     	if (y!=null) {
     	    currentSlice.setSlicedShape(new int[]{x.getSize(),y.getSize()});

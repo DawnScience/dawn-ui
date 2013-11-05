@@ -590,13 +590,17 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		return !errorLabel.isVisible();
 	}
 	
+	private boolean updateErrorLabel() {
+        final String errorMessage = checkErrors();
+        return updateErrorLabel(errorMessage);
+	}
+		
 	/**
 	 * returns true if there is no error
 	 * @return
 	 */
-	private boolean updateErrorLabel() {
+	private boolean updateErrorLabel(String errorMessage) {
 				
-        final String errorMessage = checkErrors();
 		boolean ok = errorMessage==null;
 		if (!ok) {
 			errorLabel.setText(errorMessage);
@@ -775,7 +779,9 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 			SliceObject cs = SliceUtils.createSliceObject(dimsDataList, getData(), sliceObject);
 			sliceJob.schedule(sliceType, cs, force);
 		} catch (Exception e) {
-			logger.error("Cannot create a slice object!");
+			logger.error("Cannot create a slice object!", e);
+			updateErrorLabel(e.getMessage());
+			setEnabled(true);
 		}
 	}
 	
