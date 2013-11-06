@@ -16,18 +16,19 @@
 
 package org.dawnsci.plotting.draw2d.swtxy.util;
 
-import org.eclipse.draw2d.ColorConstants;
+import org.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.Shape;
 import org.eclipse.draw2d.geometry.Point;
+import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.draw2d.geometry.Rectangle;
-import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.SWT;
 
 /**
  * A Draw2D annular sector. Its location is the centre (not the top-left corner of its bounding box)
  */
-public class Sector extends Shape {
+public class Sector extends Shape implements PointFunction {
 	
 	private boolean drawSymmetry = false;
 	private Rectangle box; // bounding box of sector
@@ -35,6 +36,8 @@ public class Sector extends Shape {
 	private double[] radius;
 	private double[] angle; // degrees
 	private double[] symAngle; // degrees
+	private PointFunction innerFunction;
+	private PointFunction outerFunction;
 
 	public Sector() {
 		this(0, 0, 100, 200, 0, 360);
@@ -55,12 +58,78 @@ public class Sector extends Shape {
 		radius = new double[] { inner, outer };
 		angle = new double[] { start, end };
 		calcBox();
+		innerFunction = new PointFunction() {
+			
+			@Override
+			public void setCoordinateSystem(ICoordinateSystem system) {
+				Sector.this.setCoordinateSystem(system);
+			}
+			
+			@Override
+			public double getAspectRatio() {
+				return Sector.this.getAspectRatio();
+			}
+			
+			@Override
+			public Point calculatePoint(double... parameter) {
+				return Sector.this.getPoint(parameter[0], 0);
+			}
+		};
+
+		outerFunction = new PointFunction() {
+			
+			@Override
+			public void setCoordinateSystem(ICoordinateSystem system) {
+				Sector.this.setCoordinateSystem(system);
+			}
+			
+			@Override
+			public double getAspectRatio() {
+				return Sector.this.getAspectRatio();
+			}
+			
+			@Override
+			public Point calculatePoint(double... parameter) {
+				return Sector.this.getPoint(parameter[0], 1);
+			}
+		};
+	}
+
+	private ICoordinateSystem cs;
+
+	@Override
+	public void setCoordinateSystem(ICoordinateSystem system) {
+		cs = system;
+	}
+
+	public ICoordinateSystem getCoordinateSystem() {
+		return cs;
+	}
+
+	@Override
+	public double getAspectRatio() {
+		return cs.getAspectRatio();
+	}
+
+	public Point getPoint(double degrees, int i) {
+		double angle = -Math.toRadians(degrees);
+		double x = radius[i] * Math.cos(angle) + centre.preciseX();
+		double y = radius[i] * Math.sin(angle) * cs.getAspectRatio() + centre.preciseY();
+		return new Point((int) Math.round(x), (int) Math.round(y));
+	}
+
+	/**
+	 * This should not be called
+	 */
+	@Override
+	public Point calculatePoint(double... parameter) {
+		return null;
 	}
 
 	@Override
 	public void setLocation(Point p) {
 		centre.setPreciseX(p.preciseX() - radius[1]);
-		centre.setPreciseY(p.preciseY() - radius[1]);
+		centre.setPreciseY(p.preciseY() - radius[1] / cs.getAspectRatio());
 		calcBox();
 	}
 
@@ -122,8 +191,12 @@ public class Sector extends Shape {
 	}
 
 	private void calcBox() {
-		int l = (int) (2 * radius[1] +1);
-		box = new Rectangle((int) (centre.preciseX() - radius[1]), (int) (centre.preciseY() - radius[1]), l, l);
+		double rx = radius[1];
+		double ry = (cs == null ? 1 : cs.getAspectRatio()) * rx;
+		int lx = (int) Math.ceil(2 * rx + 1);
+		int ly = (int) Math.ceil(2 * ry + 1);
+		box = new Rectangle((int) Math.floor(centre.preciseX() - rx),
+				(int) Math.floor(centre.preciseY() - ry), lx, ly);
 		setBounds(box);
 	}
 
@@ -133,7 +206,7 @@ public class Sector extends Shape {
 		if (!super.containsPoint(x, y))
 			return false;
 		double px = x - centre.preciseX();
-		double py = centre.preciseY() - y;
+		double py = (centre.preciseY() - y) / cs.getAspectRatio();
 		double r = Math.hypot(px, py);
 		if (r < radius[0] || r > radius[1])
 			return false;
@@ -148,45 +221,43 @@ public class Sector extends Shape {
 
 	@Override
 	protected void fillShape(Graphics graphics) {
+		graphics.pushState();
+		graphics.setAdvanced(true);
+		graphics.setAntialias(SWT.ON);
+
 		fillSector(graphics, radius, angle);
 		
 		if (isDrawSymmetry() && symAngle!=null) fillSector(graphics, radius, symAngle);
+
+		graphics.popState();
 	}
 
 	private void fillSector(Graphics graphics, double[] rad, double[] ang) {
-		
-		final double ri = rad[0], ro = rad[1];
-		final int din = (int) (2*ri), dout = (int) (2*ro);
-		final double cx = centre.preciseX(), cy = centre.preciseY();
-
-		final int ab = (int) Math.round(ang[0]);
-		final int al = (int) (ang[1] - ang[0]);
-
-		Color orig = graphics.getBackgroundColor();
-		graphics.fillArc((int) (cx - ro), (int) (cy - ro), dout, dout, ab, al);
-		int alpha = graphics.getAlpha();
-		graphics.setAlpha(40);
-		graphics.setBackgroundColor(ColorConstants.black);
-		graphics.fillArc((int) (cx - ri), (int) (cy - ri), din, din, ab, al);
-		graphics.setAlpha(alpha);
-		graphics.setBackgroundColor(orig);	
+		PointList points = Draw2DUtils.generateCurve(innerFunction, angle[0], angle[1], 1, 3, Math.toRadians(1));
+		PointList oPoints = Draw2DUtils.generateCurve(outerFunction, angle[0], angle[1], 1, 3, Math.toRadians(1));
+		oPoints.reverse();
+		points.addAll(oPoints);
+		graphics.fillPolygon(points);
+//		Rectangle bnd = new Rectangle();
+//		graphics.getClip(bnd);
+//		Draw2DUtils.fillClippedPolygon(graphics, points, bnd);
 	}
 
 	@Override
 	protected void outlineShape(Graphics graphics) {
-		final double ri = radius[0], ro = radius[1];
-		final int din = (int) (2*ri), dout = (int) (2*ro);
-		final double as = Math.toRadians(angle[0]), ae = Math.toRadians(angle[1]);
-		final double cx = centre.preciseX(), cy = centre.preciseY();
+		graphics.pushState();
+		graphics.setAdvanced(true);
+		graphics.setAntialias(SWT.ON);
 
-		final int ab = (int) Math.round(angle[0]);
-		final int al = (int) (angle[1] - angle[0]);
-		graphics.drawArc((int) (cx - ri), (int) (cy - ri), din, din, ab, al);
-		graphics.drawArc((int) (cx - ro), (int) (cy - ro), dout, dout, ab, al);
-		graphics.drawLine((int) (cx + ri*Math.cos(as)), (int) (cy - ri*Math.sin(as)),
-				(int) (cx + ro*Math.cos(as)), (int) (cy - ro*Math.sin(as)));
-		graphics.drawLine((int) (cx + ri*Math.cos(ae)), (int) (cy - ri*Math.sin(ae)),
-				(int) (cx + ro*Math.cos(ae)), (int) (cy - ro*Math.sin(ae)));
+		PointList points = Draw2DUtils.generateCurve(innerFunction, angle[0], angle[1], 1, 3, Math.toRadians(1));
+		PointList oPoints = Draw2DUtils.generateCurve(outerFunction, angle[0], angle[1], 1, 3, Math.toRadians(1));
+		oPoints.reverse();
+		points.addAll(oPoints);
+		Rectangle bnd = new Rectangle();
+		graphics.getClip(bnd);
+		Draw2DUtils.drawClippedPolyline(graphics, points, bnd, true);
+
+		graphics.popState();
 	}
 
 	public boolean isDrawSymmetry() {
