@@ -362,6 +362,8 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 		}
 
 		private void configureHandles() {
+			boolean mobile = isMobile();
+			boolean visible = isVisible() && mobile;
 			// handles
 			FigureTranslator mover;
 			final int imax = roiHandler.size();
@@ -371,10 +373,10 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 				
 				int[] p = coords.getValuePosition(hpt);
 				RectangularHandle h = new RectangularHandle(coords, getRegionColor(), this, SIDE, p[0], p[1]);
-				h.setVisible(isVisible() && isMobile());
+				h.setVisible(visible);
 				parent.add(h);
 				mover = new FigureTranslator(getXyGraph(), h);
-				mover.setActive(isMobile());
+				mover.setActive(mobile);
 				mover.addTranslationListener(handleListener);
 				fTranslators.add(mover);
 				h.addFigureListener(moveListener);
@@ -388,7 +390,7 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 					super.mouseDragged(event);
 				}
 			};
-			mover.setActive(isMobile());
+			mover.setActive(mobile);
 			mover.addTranslationListener(createRegionNotifier());
 			fTranslators.add(mover);
 			setRegionObjects(this, handles);
@@ -493,7 +495,8 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 
 						final SelectionHandle handle = (SelectionHandle) translator.getRedrawFigure();
 						updateFromROI(croi, handle);
-						fireROIDragged(croi, ROIEvent.DRAG_TYPE.RESIZE);
+						fireROIDragged(croi, roiHandler.getStatus() == HandleStatus.RESIZE ?
+								ROIEvent.DRAG_TYPE.RESIZE : ROIEvent.DRAG_TYPE.TRANSLATE);
 					}
 				}
 
