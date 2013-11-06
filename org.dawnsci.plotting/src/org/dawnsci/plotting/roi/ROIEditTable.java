@@ -315,7 +315,7 @@ public class ROIEditTable  {
 		} else if (roi instanceof RectangularROI) {
 			final RectangularROI rr = (RectangularROI)roi;
 			ret.add(new RegionRow("Start Point (x,y)", "pixel", getAxis(coords, rr.getPoint())));
-			ret.add(new RegionRow("End Point (x,y)",   "pixel", getAxis(coords, rr.getEndPoint())));
+			ret.add(new RegionRow("Lengths (x,y)",     "pixel", getAxis(coords, rr.getLengths())));
 			ret.add(new RegionRow("Rotation (°)",      "°",     rr.getAngleDegrees(), Double.NaN));
 
 			
@@ -408,27 +408,26 @@ public class ROIEditTable  {
 		} else if (roi instanceof RectangularROI) {
 			
 			final double[] start = getImage(coords, rows.get(0));
-			final double[] end   = getImage(coords, rows.get(1));
+			final double[] length   = getImage(coords, rows.get(1));
 			
 			// TODO don't have to do it this way - reflection would solve all the tests with identical blocks.
 			if (roi instanceof PerimeterBoxROI) {
 				PerimeterBoxROI pr = new PerimeterBoxROI(start[0],         start[1],
-								                         end[0]-start[0],  end[1]-start[1], 
+								                         length[1],       length[1], 
 								                         Math.toRadians(rows.get(2).getxLikeVal()));
 				ret = pr;
 				
 			} else if (roi instanceof GridROI) {
 				GridROI gr = ((GridROI)roi).copy();
 				gr.setPoint(start);
-				gr.setLengths(end[0]-start[0],  end[1]-start[1]);
+				gr.setLengths(length[0],  length[1]);
 				gr.setAngle(Math.toRadians(rows.get(2).getxLikeVal()));
 				
 				ret = gr;
 
 			} else {
-				RectangularROI rr = new RectangularROI(start[0],          start[1],
-														end[0]-start[0],   end[1]-start[1], 
-														Math.toRadians(rows.get(2).getxLikeVal()));
+				RectangularROI rr = new RectangularROI(start[0], start[1], length[0], length[1],
+						Math.toRadians(rows.get(2).getxLikeVal()));
 				ret = rr;
 			}
 			

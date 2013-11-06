@@ -4,9 +4,7 @@ import org.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.dawnsci.plotting.api.region.IGridSelection;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
-import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 
@@ -24,7 +22,7 @@ import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
  *     p3------------p4
  *     
  *     This class is public so that it can be cast and the various
- *     color settings accessed.
+ *     colour settings accessed.
  *     
  *     Normally concrete class of IRegion should not be used
  *     
@@ -53,40 +51,6 @@ public class GridSelection extends BoxSelection implements IGridSelection{
 	@Override
 	public RegionType getRegionType() {
 		return RegionType.GRID;
-	}	
-	protected Figure createRegionFillFigure() {
-		return new RegionFillFigure(this) {
-			@Override
-			public void paintFigure(Graphics gc) {
-				
-				super.paintFigure(gc);
-				final Rectangle size = getRectangleFromVertices();				
-				this.bounds = size.getCopy().expand(5, 5);
-				gc.setAlpha(getAlpha());
-				gc.fillRectangle(size);
-				
-				GridSelection.this.drawLabel(gc, size);
-				
-				if (getROI()!=null && getROI() instanceof GridROI) {
-				    GridROI groi = (GridROI)createROI(false);
-					if (groi.isMidPointOn()) {
-						double[][] points = getGridPoints(groi);
-						if (points!=null) {
-							double[] xpoints = points[0];
-							double[] ypoints = points[1];
-	                        for (int i = 0; i < Math.min(xpoints.length, ypoints.length); i++) {
-	                        	drawMidPoint(xpoints[i], ypoints[i], gc);
-	 						}
-						}
-					}
-					
-					if (groi.isGridLineOn()) {
-						drawGridLines(groi, gc);
-					}
-
-				}
-			}
-		};
 	}
 
 	protected void drawMidPoint(double x, double y, Graphics gc) {
@@ -127,7 +91,29 @@ public class GridSelection extends BoxSelection implements IGridSelection{
 		}
 		return null;
 	}
-	
+
+	protected void drawRectangle(Graphics g) {
+		super.drawRectangle(g);
+
+		IROI croi = getROI();
+		if (croi != null && croi instanceof GridROI) {
+			GridROI groi = (GridROI)createROI(false);
+
+			if (groi.isMidPointOn()) {
+				double[][] points = getGridPoints(groi);
+				if (points != null) {
+					double[] xpoints = points[0];
+					double[] ypoints = points[1];
+					for (int i = 0; i < Math.min(xpoints.length, ypoints.length); i++) {
+						drawMidPoint(xpoints[i], ypoints[i], g);
+					}
+				}
+			}
+			if (groi.isGridLineOn())
+				drawGridLines(groi, g);
+		}
+	}
+
 	/**
 	 * 
 	 * @param groi
@@ -162,35 +148,36 @@ public class GridSelection extends BoxSelection implements IGridSelection{
 		}
 		
 		gc.popState();
-
 	}
 
 
 	@Override
 	public IROI createROI(boolean recordResult) {
-		if (p1!=null) {
-			final Rectangle  rect = getRectangleFromVertices();			
-			final GridROI    groi = (GridROI)getRoiFromRectangle(rect);
-			
-			if (getROI() != null && getROI() instanceof GridROI) {
-				GridROI oldRoi = (GridROI)getROI();
-				// Copy grid, preferences, etc from existing GridROI
-				// This maintains spacing etc. until it is changed in setROI(...)
-				// These things are determined externally by the user of the ROI
-				// and we passively draw them here. TODO Consider about how to edit
-				// these in the RegionComposite...
-				groi.setxySpacing(oldRoi.getxSpacing(), oldRoi.getySpacing());
-				groi.setGridPreferences(oldRoi.getGridPreferences());
-			    groi.setGridLineOn(oldRoi.isGridLineOn());
-			    groi.setMidPointOn(oldRoi.isMidPointOn());
-			    
-			}
+		IROI croi = super.createROI(recordResult);
+		if (croi == null)
+			return croi;
 
-			groi.setName(getName());
-			if (recordResult) roi = groi;
-			return groi;
+		RectangularROI rroi = (RectangularROI) croi;
+		final GridROI    groi = new GridROI(rroi.getPointX(), rroi.getPointY(), rroi.getLength(0), rroi.getLength(1), rroi.getAngle());
+			
+		if (getROI() != null && getROI() instanceof GridROI) {
+			GridROI oldRoi = (GridROI)getROI();
+			// Copy grid, preferences, etc from existing GridROI
+			// This maintains spacing etc. until it is changed in setROI(...)
+			// These things are determined externally by the user of the ROI
+			// and we passively draw them here. TODO Consider about how to edit
+			// these in the RegionComposite...
+			groi.setxySpacing(oldRoi.getxSpacing(), oldRoi.getySpacing());
+			groi.setGridPreferences(oldRoi.getGridPreferences());
+		    groi.setGridLineOn(oldRoi.isGridLineOn());
+		    groi.setMidPointOn(oldRoi.isMidPointOn());
+		    
 		}
-		return super.getROI();
+
+		groi.setName(getName());
+		if (recordResult) roi = groi;
+		return groi;
+//		return super.getROI();
 	}
 	
 	@Override
@@ -202,16 +189,6 @@ public class GridSelection extends BoxSelection implements IGridSelection{
 			this.setActive(roi.isPlot());
 		}
 		return groi;
-	}
-
-	@Override
-	protected void updateROI(IROI roi) {
-		if (roi instanceof RectangularROI) {
-			RectangularROI groi = (RectangularROI) roi;
-			if (p1!=null) p1.setPosition(groi.getPointRef());
-			if (p4!=null) p4.setPosition(groi.getEndPoint());
-			updateConnectionBounds();
-		}
 	}
 
 	public Color getPointColor() {
@@ -229,13 +206,4 @@ public class GridSelection extends BoxSelection implements IGridSelection{
 	public void setGridColor(Color gridColor) {
 		this.gridColor = gridColor;
 	}
-	
-	@Override
-	protected void updateConnectionBounds() {
-		if (connection==null) return;
-		final Rectangle size = getRectangleFromVertices();				
-		size.expand(5, 5);
-		connection.setBounds(size);
-	}
-	
 }

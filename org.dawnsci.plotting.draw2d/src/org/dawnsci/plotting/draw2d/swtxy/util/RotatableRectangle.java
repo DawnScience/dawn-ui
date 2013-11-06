@@ -88,6 +88,13 @@ public class RotatableRectangle extends RotatablePolygonShape {
 		ool.addPoint(inset1, y);
 	}
 
+	/**
+	 * @return list of point in outline rectangle
+	 */
+	public PointList getOutline() {
+		return nol;
+	}
+
 	@Override
 	protected void recalcPoints(PointList oldpl, PointList newpl, boolean setBounds) {
 		super.recalcPoints(ool, nol, false);
