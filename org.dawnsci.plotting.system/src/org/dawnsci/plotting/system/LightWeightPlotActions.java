@@ -454,7 +454,7 @@ class LightWeightPlotActions {
 		removeRegionDropDown.add(removeAllRegions);
 
 		actionBarManager.registerToolBarGroup(ToolbarConfigurationConstants.REGION.getId());
-		actionBarManager.registerAction(ToolbarConfigurationConstants.REGION.getId(), removeRegionDropDown, ActionType.ALL);
+		actionBarManager.registerAction(ToolbarConfigurationConstants.REGION.getId(), removeRegionDropDown, ActionType.XYANDIMAGE);
 		
 	}
 	
