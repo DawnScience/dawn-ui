@@ -199,7 +199,6 @@ class EllipseFitSelection extends AbstractSelectionRegion implements IEllipseFit
 			setRegionColor(getRegionColor());
 			setOpaque(false);
 			setAlpha(getAlpha());
-			updateConnectionBounds();
 			fireROIChanged(getROI());
 		}
 	}
@@ -252,7 +251,6 @@ class EllipseFitSelection extends AbstractSelectionRegion implements IEllipseFit
 		
 		if (roi instanceof EllipticalFitROI || roi instanceof CircularFitROI) {
 			ellipse.updateFromROI(roi);
-			updateConnectionBounds();
 		}
 	}
 

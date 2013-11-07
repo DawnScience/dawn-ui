@@ -117,7 +117,6 @@ public class PolygonSelection extends AbstractSelectionRegion {
 			setRegionColor(getRegionColor());
 			setOpaque(false);
 			setAlpha(getAlpha());
-			updateConnectionBounds();
 			createROI(true);
 			fireROIChanged(getROI());
 		}
@@ -154,8 +153,6 @@ public class PolygonSelection extends AbstractSelectionRegion {
 				return;
 
 			pline.updateFromROI((PolylineROI) roi);
-
-			updateConnectionBounds();
 		}
 	}
 

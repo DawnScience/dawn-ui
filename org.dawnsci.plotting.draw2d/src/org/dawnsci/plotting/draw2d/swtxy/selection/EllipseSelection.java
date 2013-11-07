@@ -131,7 +131,6 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 			setRegionColor(getRegionColor());
 			setOpaque(false);
 			setAlpha(getAlpha());
-			updateConnectionBounds();
 			fireROIChanged(getROI());
 		}
 	}
@@ -171,7 +170,6 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 
 		if (roi instanceof EllipticalROI) {
 			ellipse.updateFromROI((EllipticalROI) roi);
-			updateConnectionBounds();
 		}
 	}
 

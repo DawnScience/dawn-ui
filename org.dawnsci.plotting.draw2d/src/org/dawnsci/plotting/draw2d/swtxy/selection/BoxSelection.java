@@ -121,7 +121,6 @@ public class BoxSelection extends AbstractSelectionRegion {
 			setRegionColor(getRegionColor());
 			setOpaque(false);
 			setAlpha(getAlpha());
-			updateConnectionBounds();
 			createROI(true);
 			fireROIChanged(getROI());
 		}
@@ -169,8 +168,6 @@ public class BoxSelection extends AbstractSelectionRegion {
 				return;
 
 			rect.updateFromROI((RectangularROI) roi);
-
-			updateConnectionBounds();
 		}
 	}
 
