@@ -265,10 +265,7 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 
 	@Override
 	protected void updateROI(IROI roi) {
-		if (roi instanceof SectorROI) {
-			if (sector == null)
-				return;
-
+		if (roi instanceof SectorROI && sector != null) {
 			sector.updateFromROI((SectorROI) roi);
 			updateConnectionBounds();
 		}
@@ -428,7 +425,7 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 			parent.revalidate();
 		}
 
-		public TranslationListener createRegionNotifier() {
+		private TranslationListener createRegionNotifier() {
 			return new TranslationListener() {
 				@Override
 				public void translateBefore(TranslationEvent evt) {
@@ -437,7 +434,7 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 				@Override
 				public void translationAfter(TranslationEvent evt) {
 					updateConnectionBounds();
-					fireROIDragged(createROI(false), ROIEvent.DRAG_TYPE.RESIZE);
+					fireROIDragged(createROI(false), ROIEvent.DRAG_TYPE.TRANSLATE);
 				}
 
 				@Override
