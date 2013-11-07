@@ -222,7 +222,6 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 			setRegionColor(getRegionColor());
 			setOpaque(false);
 			setAlpha(getAlpha());
-			updateConnectionBounds();
 			fireROIChanged(getROI());
 		}
 	}
@@ -270,7 +269,6 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 				return;
 
 			sector.updateFromROI((SectorROI) roi);
-			updateConnectionBounds();
 		}
 	}
 

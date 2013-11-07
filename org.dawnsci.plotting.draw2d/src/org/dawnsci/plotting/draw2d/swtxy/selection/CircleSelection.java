@@ -134,7 +134,6 @@ public class CircleSelection extends AbstractSelectionRegion {
 			setRegionColor(getRegionColor());
 			setOpaque(false);
 			setAlpha(getAlpha());
-			updateConnectionBounds();
 			fireROIChanged(getROI());
 		}
 	}
@@ -171,7 +170,6 @@ public class CircleSelection extends AbstractSelectionRegion {
 
 		if (roi instanceof CircularROI) {
 			circle.updateFromROI((CircularROI) roi);
-			updateConnectionBounds();
 		}
 	}
 

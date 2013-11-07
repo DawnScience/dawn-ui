@@ -115,7 +115,6 @@ public class PolylineSelection extends AbstractSelectionRegion {
 			setRegionColor(getRegionColor());
 			setOpaque(false);
 			setAlpha(getAlpha());
-			updateConnectionBounds();
 			createROI(true);
 			fireROIChanged(getROI());
 		}
@@ -152,8 +151,6 @@ public class PolylineSelection extends AbstractSelectionRegion {
 				return;
 
 			pline.updateFromROI((PolylineROI) roi);
-
-			updateConnectionBounds();
 		}
 	}
 
