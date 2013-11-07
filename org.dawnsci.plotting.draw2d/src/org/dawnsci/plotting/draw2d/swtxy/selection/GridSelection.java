@@ -104,7 +104,7 @@ public class GridSelection extends BoxSelection implements IGridSelection{
 				if (points != null) {
 					double[] xpoints = points[0];
 					double[] ypoints = points[1];
-					for (int i = 0; i < Math.min(xpoints.length, ypoints.length); i++) {
+					for (int i = 0, imax = Math.min(xpoints.length, ypoints.length); i < imax; i++) {
 						drawMidPoint(xpoints[i], ypoints[i], g);
 					}
 				}
@@ -155,7 +155,7 @@ public class GridSelection extends BoxSelection implements IGridSelection{
 	public IROI createROI(boolean recordResult) {
 		IROI croi = super.createROI(recordResult);
 		if (croi == null)
-			return croi;
+			return super.getROI();
 
 		RectangularROI rroi = (RectangularROI) croi;
 		final GridROI    groi = new GridROI(rroi.getPointX(), rroi.getPointY(), rroi.getLength(0), rroi.getLength(1), rroi.getAngle());
@@ -177,7 +177,6 @@ public class GridSelection extends BoxSelection implements IGridSelection{
 		groi.setName(getName());
 		if (recordResult) roi = groi;
 		return groi;
-//		return super.getROI();
 	}
 	
 	@Override

@@ -17,6 +17,7 @@
 package org.dawnsci.plotting.draw2d.swtxy.util;
 
 import org.eclipse.draw2d.Graphics;
+import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 
@@ -26,8 +27,8 @@ import org.eclipse.draw2d.geometry.PointList;
  */
 public class RotatableRectangle extends RotatablePolygonShape {
 
-	private PointList ool; // outline points
-	private PointList nol; // transformed outline points
+	private final PointList ool; // outline points
+	private final PointList nol; // transformed outline points
 
 	/**
 	 * Constructor for rectangle
@@ -62,6 +63,23 @@ public class RotatableRectangle extends RotatablePolygonShape {
 		setAngle(0);
 	}
 
+	public void setLengths(int width, int height) {
+		opl.removeAllPoints();
+		opl.addPoint(0, 0);
+		opl.addPoint(width, 0);
+		opl.addPoint(width, height);
+		opl.addPoint(0, height);
+		npl.removeAllPoints();
+		npl.addAll(opl);
+		recalcOutline();
+		refresh();
+	}
+
+	public void setOrigin(int x, int y) {
+		affine.setTranslation(x, y);
+		refresh();
+	}
+
 	@Override
 	public void setLineWidth(int w) {
 		super.setLineWidth(w);
@@ -86,6 +104,25 @@ public class RotatableRectangle extends RotatablePolygonShape {
 		ool.addPoint(x, inset1);
 		ool.addPoint(x, y);
 		ool.addPoint(inset1, y);
+		nol.removeAllPoints();
+		nol.addAll(ool);
+	}
+
+	/**
+	 * @return centre point of rectangle
+	 */
+	public Point getCentre() {
+		return npl.getPoint(0).getTranslated(npl.getPoint(2)).scale(0.5);
+	}
+
+	/**
+	 * 
+	 * @param c
+	 */
+	public void setCentre(Point c) {
+		Dimension d = c.getDifference(getCentre());
+		affine.setTranslation(affine.getTranslationX() + d.preciseWidth(), affine.getTranslationY() + d.preciseHeight());
+		refresh();
 	}
 
 	/**
@@ -96,9 +133,9 @@ public class RotatableRectangle extends RotatablePolygonShape {
 	}
 
 	@Override
-	protected void recalcPoints(PointList oldpl, PointList newpl, boolean setBounds) {
-		super.recalcPoints(ool, nol, false);
-		super.recalcPoints(oldpl, newpl, true);
+	protected void refresh() {
+		recalcPoints(ool, nol, false);
+		recalcPoints(opl, npl, true);
 	}
 
 	@Override

@@ -63,7 +63,7 @@ public class RotatablePolygonShape extends AbstractPointListShape {
 	public void addPoint(Point pt) {
 		opl.addPoint(pt);
 		super.addPoint(pt);
-		recalcPoints(opl, npl, true);
+		refresh();
 	}
 
 	@Override
@@ -96,7 +96,7 @@ public class RotatablePolygonShape extends AbstractPointListShape {
 		opl.addAll(points);
 		super.setPoints(points);
 		npl = super.getPoints();
-		recalcPoints(opl, npl, true);
+		refresh();
 	}
 
 	/**
@@ -105,7 +105,7 @@ public class RotatablePolygonShape extends AbstractPointListShape {
 	 */
 	public void setAngle(double degrees) {
 		affine.setRotationDegrees(degrees);
-		recalcPoints(opl, npl, true);
+		refresh();
 	}
 
 	/**
@@ -118,10 +118,14 @@ public class RotatablePolygonShape extends AbstractPointListShape {
 	@Override
 	public void setLocation(Point p) {
 		affine.setTranslation(p.preciseX(), p.preciseY());
+		refresh();
+	}
+
+	protected void refresh() {
 		recalcPoints(opl, npl, true);
 	}
 
-	protected void recalcPoints(PointList oldpl, PointList newpl, boolean setBounds) {
+	protected final void recalcPoints(PointList oldpl, PointList newpl, boolean setBounds) {
 		final int n = newpl.size();
 		for (int i = 0; i < n; i++) {
 			newpl.setPoint(affine.getTransformed(oldpl.getPoint(i)), i);
