@@ -387,4 +387,17 @@ public interface IRegion {
 	 * method will throw a RuntimeException.
 	 */
 	public void setOutlineOnly(boolean outlineOnly);
+
+	/**
+	 * 
+	 * @return true if Region update is from server
+	 */
+	public boolean fromServer();
+
+	/**
+	 * Set if the Region is being updated from server or not
+	 * @param isFromServer
+	 *         set to false by default
+	 */
+	public void setFromServer(boolean isFromServer);
 }

@@ -87,6 +87,7 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 	@Override
 	public void createContents(Figure parent) {
 		sector = new DecoratedSector(parent);
+		sector.setCoordinateSystem(coords);
 		sector.setCursor(Draw2DUtils.getRoiMoveCursor());
 
 		parent.add(sector);
@@ -132,18 +133,26 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 		final Point cen = clicks.getFirstPoint();
 		Point inn = clicks.getPoint(1);
 		Dimension rd = inn.getDifference(cen);
-		final double ri = Math.hypot(rd.preciseWidth(), rd.preciseHeight());
+		double ratio = coords.getAspectRatio();
+		double h = -rd.preciseHeight() / ratio;
+		double w = rd.preciseWidth();
+		final double ri = Math.hypot(w, h);
 		if (clicks.size() == 2) {
 			g.setLineWidth(getLineWidth());
-			g.drawOval((int) (cen.preciseX() - ri), (int) (cen.preciseY() - ri), (int) (2*ri), (int) (2*ri));
+			g.drawOval((int) Math.round(cen.preciseX() - ri), (int) Math.round(cen.preciseY() - ri * ratio),
+					(int) Math.round(2*ri), (int) Math.round(2*ri*ratio));
 		} else {
-			double as = Math.toDegrees(Math.atan2(-rd.preciseHeight(), rd.preciseWidth()));
+			double as = Math.toDegrees(Math.atan2(h, w));
 			Point out = clicks.getPoint(2);
 			rd = out.getDifference(cen);
-			final double ro = Math.hypot(rd.preciseWidth(), rd.preciseHeight());
-			double ae = Math.toDegrees(Math.atan2(-rd.preciseHeight(), rd.preciseWidth()));
+			h = -rd.preciseHeight() / ratio;
+			w = rd.preciseWidth();
+			final double ro = Math.hypot(w, h);
+			double ae = Math.toDegrees(Math.atan2(h, w));
 			double[] a = calcAngles(as, ae);
+//			System.err.printf("Temp: c = %d, %d; r = %.2f, %.2f; a = %.1f, %.1f\n", cen.x(), cen.y(), ri, ro, a[0], a[1]);
 			Sector s = new Sector(cen.preciseX(), cen.preciseY(), ri,  ro, a[0], a[1]);
+			s.setCoordinateSystem(coords);
  		    s.setLineStyle(Graphics.LINE_DOT);
 			s.setLineWidth(getLineWidth());
 			s.setForegroundColor(getRegionColor());
@@ -226,17 +235,19 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 	@Override
 	protected IROI createROI(boolean recordResult) {
 		final Point c = sector.getCentre();
-		final double[] r = sector.getRadii();
 		final double[] a = sector.getAnglesDegrees();
-		final double[] p1 = coords.getPositionValue(c.x(),c.y());
-		final double[] p2 = coords.getPositionValue((int) (c.preciseX() + r[0]), (int) (c.preciseY() + r[1]));
-		
-		final int symmetry = roi!=null ? ((SectorROI)roi).getSymmetry() : 0;
-		final boolean combine = roi!=null ? ((SectorROI)roi).isCombineSymmetry() : false;
-		
-		final SectorROI sroi = new SectorROI(p1[0], p1[1], p2[0]-p1[0],
-				                             p2[1]-p1[1],
-				                             Math.toRadians(360 - a[1]), Math.toRadians(360 - a[0]));
+		double offset = coords.getXAxisRotationAngleDegrees();
+		final Point r0 = sector.getPoint(offset, 0);
+		final Point r1 = sector.getPoint(offset, 1);
+		final double[] pc = coords.getPositionValue(c.x(), c.y());
+		final double[] p0 = coords.getPositionValue(r0.x(), r0.y());
+		final double[] p1 = coords.getPositionValue(r1.x(), r1.y());
+
+		final int symmetry = roi != null ? ((SectorROI) roi).getSymmetry() : 0;
+		final boolean combine = roi != null ? ((SectorROI) roi).isCombineSymmetry() : false;
+		offset = 360 - offset;
+		final SectorROI sroi = new SectorROI(pc[0], pc[1], Math.abs(p0[0] - pc[0]), Math.abs(p1[0] - pc[0]),
+				Math.toRadians(offset - a[1]), Math.toRadians(offset - a[0]));
 		sroi.setName(getName());
 		sroi.setSymmetry(symmetry);
 		sroi.setCombineSymmetry(combine);
@@ -321,14 +332,24 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 			final Point cen = points.getFirstPoint();
 			Point inn = points.getPoint(1);
 			Dimension rd = inn.getDifference(cen);
-			final double ri = Math.hypot(rd.preciseWidth(), rd.preciseHeight());
+			double offset = coords.getXAxisRotationAngleDegrees();
+			double ratio = coords.getAspectRatio();
+			double h, w;
+			offset = 0;
+			h = -rd.preciseHeight() / ratio;
+			w = rd.preciseWidth();
+			double as = offset + Math.toDegrees(Math.atan2(h, w));
+			final double ri = Math.hypot(w, h);
 
-			double as = Math.toDegrees(Math.atan2(-rd.preciseHeight(), rd.preciseWidth()));
 			Point out = points.getPoint(2);
 			rd = out.getDifference(cen);
-			final double ro = Math.hypot(rd.preciseWidth(), rd.preciseHeight());
-			double ae = Math.toDegrees(Math.atan2(-rd.preciseHeight(), rd.preciseWidth()));
+			h = -rd.preciseHeight() / ratio;
+			w = rd.preciseWidth();
+
+			final double ro = Math.hypot(w, h);
+			double ae = offset + Math.toDegrees(Math.atan2(h, w));
 			double[] a = calcAngles(as, ae);
+//			System.err.printf("Perm: c = %d, %d; r = %.2f, %.2f; a = %.1f, %.1f\n", cen.x(), cen.y(), ri, ro, a[0], a[1]);
 			setCentre(cen.preciseX(), cen.preciseY());
 			if (ri < ro)
 				setRadii(ri,  ro);
@@ -341,6 +362,8 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 		}
 
 		private void configureHandles() {
+			boolean mobile = isMobile();
+			boolean visible = isVisible() && mobile;
 			// handles
 			FigureTranslator mover;
 			final int imax = roiHandler.size();
@@ -350,10 +373,10 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 				
 				int[] p = coords.getValuePosition(hpt);
 				RectangularHandle h = new RectangularHandle(coords, getRegionColor(), this, SIDE, p[0], p[1]);
-				h.setVisible(isVisible() && isMobile());
+				h.setVisible(visible);
 				parent.add(h);
 				mover = new FigureTranslator(getXyGraph(), h);
-				mover.setActive(isMobile());
+				mover.setActive(mobile);
 				mover.addTranslationListener(handleListener);
 				fTranslators.add(mover);
 				h.addFigureListener(moveListener);
@@ -367,7 +390,7 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 					super.mouseDragged(event);
 				}
 			};
-			mover.setActive(isMobile());
+			mover.setActive(mobile);
 			mover.addTranslationListener(createRegionNotifier());
 			fTranslators.add(mover);
 			setRegionObjects(this, handles);
@@ -472,7 +495,8 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 
 						final SelectionHandle handle = (SelectionHandle) translator.getRedrawFigure();
 						updateFromROI(croi, handle);
-						fireROIDragged(croi, ROIEvent.DRAG_TYPE.RESIZE);
+						fireROIDragged(croi, roiHandler.getStatus() == HandleStatus.RESIZE ?
+								ROIEvent.DRAG_TYPE.RESIZE : ROIEvent.DRAG_TYPE.TRANSLATE);
 					}
 				}
 
@@ -549,8 +573,17 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 			final int[] c  = coords.getValuePosition(x, y);
 			final int[] rd = coords.getValuePosition(x + r[0], y + r[1]);
 			setCentre(c[0], c[1]);
-			setRadii(rd[0] - c[0], rd[1] - c[1]);
-			setAnglesDegrees(360-a[1], 360-a[0]);
+			double ra = Math.abs(rd[0] - c[0]);
+			double rb = Math.abs(rd[1] - c[1]) / coords.getAspectRatio();
+			if (ra > rb)
+				setRadii(rb, ra);
+			else
+				setRadii(ra, rb);
+
+			double offset = 360 - coords.getXAxisRotationAngleDegrees();
+			a[0] = offset - a[0];
+			a[1] = offset - a[1];
+			setAnglesDegrees(a[1], a[0]);
 			
 			if (sroi.getSymmetry() == SectorROI.NONE) {
 				setDrawSymmetry(false);

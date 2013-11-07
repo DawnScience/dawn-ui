@@ -287,4 +287,16 @@ public abstract class AbstractRegion extends Figure implements IRegion, IRegionC
 		throw new RuntimeException("setOutlineOnly is not currently implemented by "+getClass().getSimpleName());
 	}
 
+	/**
+	 * Set to false by default
+	 */
+	private boolean isFromServer = false;
+
+	public boolean fromServer() {
+		return isFromServer;
+	}
+
+	public void setFromServer(boolean isFromServer) {
+		 this.isFromServer = isFromServer;
+	}
 }

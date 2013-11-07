@@ -583,7 +583,7 @@ public class SliceUtils {
 			slice = sum;
 			
 		} else {
-			if (ddl!=null) {	
+			if (ddl!=null && !ddl.isEmpty()) {	
 				final int       len    = dataShape.length;
 				for (int i = len-1; i >= 0; i--) {
 					final DimsData dd = ddl.getDimsData(i);

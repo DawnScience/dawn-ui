@@ -55,6 +55,13 @@ public class RotatableRectangle extends RotatablePolygonShape {
 		setAngle(angle);
 	}
 
+	public RotatableRectangle() {
+		super(0);
+		ool = new PointList(4);
+		nol = new PointList(4);
+		setAngle(0);
+	}
+
 	@Override
 	public void setLineWidth(int w) {
 		super.setLineWidth(w);
@@ -79,6 +86,13 @@ public class RotatableRectangle extends RotatablePolygonShape {
 		ool.addPoint(x, inset1);
 		ool.addPoint(x, y);
 		ool.addPoint(inset1, y);
+	}
+
+	/**
+	 * @return list of point in outline rectangle
+	 */
+	public PointList getOutline() {
+		return nol;
 	}
 
 	@Override

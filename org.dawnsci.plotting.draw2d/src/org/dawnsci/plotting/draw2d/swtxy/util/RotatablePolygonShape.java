@@ -43,7 +43,6 @@ public class RotatablePolygonShape extends AbstractPointListShape {
 	 */
 	public RotatablePolygonShape() {
 		this(0);
-		npl.removeAllPoints();
 		setAngle(0);
 	}
 

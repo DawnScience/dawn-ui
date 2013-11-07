@@ -3,15 +3,16 @@ package org.dawnsci.plotting.draw2d.swtxy.selection;
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
+import org.eclipse.draw2d.geometry.Point;
+import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
+import uk.ac.diamond.scisoft.analysis.roi.PerimeterBoxROI;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
-
 
 /**
  *     A BoxSelection with coloured edges
@@ -22,7 +23,7 @@ import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
  *     p3------------p4
  *     
  *     This class is public so that it can be cast and the various
- *     color settings accessed.
+ *     colour settings accessed.
  *     
  *     Normally concrete class of IRegion should not be used
  *     
@@ -52,21 +53,64 @@ public class PerimeterBoxSelection extends BoxSelection {
 	@Override
 	public RegionType getRegionType() {
 		return RegionType.PERIMETERBOX;
-	}	
-	protected Figure createRegionFillFigure() {
-		return new RegionFillFigure(this) {
-			@Override
-			public void paintFigure(Graphics gc) {
-				
-				super.paintFigure(gc);
-				final Rectangle size = getRectangleFromVertices();
-				this.bounds = size.getCopy().expand(5, 5);
-				gc.setAlpha(getAlpha());
-				gc.fillRectangle(size);
-				PerimeterBoxSelection.this.drawLabel(gc, size);
-				drawColoredEdges(gc, size);
-			}
-		};
+	}
+
+	protected void drawRectangle(Graphics g) {
+		super.drawRectangle(g);
+
+		PointList points = rect.getOutline();
+		drawColouredEdges(g, points);
+	}
+
+	/**
+	 * Draws the coloured edges
+	 * 
+	 *   start-------------
+	 *     |               |
+	 *     |               |
+	 *     |               |
+	 *      --------------end
+	 *      
+	 * @param g
+	 * @param rect
+	 */
+	protected void drawColouredEdges(Graphics g, PointList list) {
+		g.pushState();
+		g.setAlpha(255);
+		g.setLineWidth(2);
+		g.setLineStyle(SWT.LINE_SOLID);
+
+		Point p1, p2;
+		// draw top edge
+		p1 = list.getPoint(0);
+		p2 = list.getPoint(1);
+		g.setForegroundColor(topColor);
+		g.setBackgroundColor(topColor);
+		g.drawLine(p1.x(), p1.y(), p2.x(), p2.y());
+		
+		// draw right edge
+		p1 = p2;
+		p2 = list.getPoint(2);
+		g.setForegroundColor(rightColor);
+		g.setBackgroundColor(rightColor);
+		g.drawLine(p1.x(), p1.y(), p2.x(), p2.y());
+
+		// draw bottom edge
+		p1 = p2;
+		p2 = list.getPoint(3);
+		g.setForegroundColor(bottomColor);
+		g.setBackgroundColor(bottomColor);
+		g.drawLine(p1.x(), p1.y(), p2.x(), p2.y());
+		
+		
+		// draw left edge
+		p1 = p2;
+		p2 = list.getPoint(0);
+		g.setForegroundColor(leftColor);
+		g.setBackgroundColor(leftColor);
+		g.drawLine(p1.x(), p1.y(), p2.x(), p2.y());
+
+		g.popState();
 	}
 
 	/**
@@ -117,29 +161,21 @@ public class PerimeterBoxSelection extends BoxSelection {
 
 	@Override
 	public IROI createROI(boolean recordResult) {
-		if (p1!=null) {
-			final Rectangle  rect = getRectangleFromVertices();			
-			final RectangularROI    rroi = (RectangularROI)getRoiFromRectangle(rect);
-			
-			if (recordResult) roi = rroi;
-			return rroi;
-		}
-		return super.getROI();
+		IROI croi = super.createROI(recordResult);
+		if (croi == null)
+			return croi;
+
+		RectangularROI rroi = (RectangularROI) croi;
+		final PerimeterBoxROI proi = new PerimeterBoxROI(rroi.getPointX(), rroi.getPointY(), rroi.getLength(0), rroi.getLength(1), rroi.getAngle());
+
+		proi.setName(getName());
+		if (recordResult) roi = proi;
+		return proi;
 	}
 	
 	@Override
 	protected RectangularROI createROI(double ptx, double pty, double width, double height, double angle) {
-		return new RectangularROI(ptx, pty, width, height, angle);
-	}
-
-	@Override
-	protected void updateROI(IROI roi) {
-		if (roi instanceof RectangularROI) {
-			RectangularROI rroi = (RectangularROI) roi;
-			if (p1!=null) p1.setPosition(rroi.getPointRef());
-			if (p4!=null) p4.setPosition(rroi.getEndPoint());
-			updateConnectionBounds();
-		}
+		return new PerimeterBoxROI(ptx, pty, width, height, angle);
 	}
 
 	public Color getLeftColor() {
@@ -173,13 +209,4 @@ public class PerimeterBoxSelection extends BoxSelection {
 	public void setbottomColor(Color bottomColor) {
 		this.bottomColor = bottomColor;
 	}
-
-	@Override
-	protected void updateConnectionBounds() {
-		if (connection==null) return;
-		final Rectangle size = getRectangleFromVertices();				
-		size.expand(5, 5);
-		connection.setBounds(size);
-	}
-	
 }
