@@ -225,22 +225,20 @@ public class Sector extends Shape implements PointFunction {
 		graphics.setAdvanced(true);
 		graphics.setAntialias(SWT.ON);
 
-		fillSector(graphics, radius, angle);
-		
-		if (isDrawSymmetry() && symAngle!=null) fillSector(graphics, radius, symAngle);
+		fillSector(graphics, angle);
+
+		if (drawSymmetry && symAngle != null)
+			fillSector(graphics, symAngle);
 
 		graphics.popState();
 	}
 
-	private void fillSector(Graphics graphics, double[] rad, double[] ang) {
-		PointList points = Draw2DUtils.generateCurve(innerFunction, angle[0], angle[1], 1, 3, Math.toRadians(1));
-		PointList oPoints = Draw2DUtils.generateCurve(outerFunction, angle[0], angle[1], 1, 3, Math.toRadians(1));
+	private void fillSector(Graphics graphics, double[] ang) {
+		PointList points = Draw2DUtils.generateCurve(innerFunction, ang[0], ang[1], 1, 3, Math.toRadians(1));
+		PointList oPoints = Draw2DUtils.generateCurve(outerFunction, ang[0], ang[1], 1, 3, Math.toRadians(1));
 		oPoints.reverse();
 		points.addAll(oPoints);
 		graphics.fillPolygon(points);
-//		Rectangle bnd = new Rectangle();
-//		graphics.getClip(bnd);
-//		Draw2DUtils.fillClippedPolygon(graphics, points, bnd);
 	}
 
 	@Override
