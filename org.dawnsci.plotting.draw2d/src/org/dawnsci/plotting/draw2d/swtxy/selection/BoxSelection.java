@@ -17,7 +17,6 @@
 package org.dawnsci.plotting.draw2d.swtxy.selection;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
