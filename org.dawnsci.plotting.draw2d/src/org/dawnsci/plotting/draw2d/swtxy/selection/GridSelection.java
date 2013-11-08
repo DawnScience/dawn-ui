@@ -92,6 +92,7 @@ public class GridSelection extends BoxSelection implements IGridSelection{
 		return null;
 	}
 
+	@Override
 	protected void drawRectangle(Graphics g) {
 		super.drawRectangle(g);
 
@@ -176,17 +177,6 @@ public class GridSelection extends BoxSelection implements IGridSelection{
 
 		groi.setName(getName());
 		if (recordResult) roi = groi;
-		return groi;
-	}
-	
-	@Override
-	protected RectangularROI createROI(double ptx, double pty, double width, double height, double angle) {
-		GridROI groi = new GridROI(ptx, pty, width, height, angle);
-		if (roi != null) {
-			groi.setPlot(roi.isPlot());
-			// set the Region isActive flag
-			this.setActive(roi.isPlot());
-		}
 		return groi;
 	}
 

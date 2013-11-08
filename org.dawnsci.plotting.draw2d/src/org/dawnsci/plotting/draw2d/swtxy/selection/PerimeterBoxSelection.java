@@ -50,11 +50,13 @@ public class PerimeterBoxSelection extends BoxSelection {
 	protected String getCursorPath() {
 		return "icons/Cursor-colorbox.png";
 	}
+
 	@Override
 	public RegionType getRegionType() {
 		return RegionType.PERIMETERBOX;
 	}
 
+	@Override
 	protected void drawRectangle(Graphics g) {
 		super.drawRectangle(g);
 
@@ -164,7 +166,7 @@ public class PerimeterBoxSelection extends BoxSelection {
 	public IROI createROI(boolean recordResult) {
 		IROI croi = super.createROI(recordResult);
 		if (croi == null)
-			return croi;
+			return super.getROI();
 
 		RectangularROI rroi = (RectangularROI) croi;
 		final PerimeterBoxROI proi = new PerimeterBoxROI(rroi.getPointX(), rroi.getPointY(), rroi.getLength(0), rroi.getLength(1), rroi.getAngle());
@@ -172,11 +174,6 @@ public class PerimeterBoxSelection extends BoxSelection {
 		proi.setName(getName());
 		if (recordResult) roi = proi;
 		return proi;
-	}
-	
-	@Override
-	protected RectangularROI createROI(double ptx, double pty, double width, double height, double angle) {
-		return new PerimeterBoxROI(ptx, pty, width, height, angle);
 	}
 
 	public Color getLeftColor() {

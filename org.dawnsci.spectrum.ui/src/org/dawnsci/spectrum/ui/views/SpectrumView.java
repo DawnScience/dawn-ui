@@ -12,6 +12,7 @@ import org.dawnsci.plotting.api.PlottingFactory;
 import org.dawnsci.plotting.api.axis.IAxis;
 import org.dawnsci.plotting.api.filter.AbstractPlottingFilter;
 import org.dawnsci.plotting.api.filter.IFilterDecorator;
+import org.dawnsci.plotting.api.trace.ColorOption;
 import org.dawnsci.plotting.api.trace.ILineTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.spectrum.ui.Activator;
@@ -121,7 +122,6 @@ public class SpectrumView extends ViewPart {
 		IWorkbenchPage page = getSite().getPage();
 		IViewPart view = page.findView("org.dawnsci.spectrum.ui.views.SpectrumPlot");
 		system = (IPlottingSystem)view.getAdapter(IPlottingSystem.class);
-		
 		manager = new SpectrumFileManager(system);
 		
 		viewer.setInput(manager);
@@ -230,6 +230,7 @@ public class SpectrumView extends ViewPart {
 		//set axis as tight
 		List<IAxis> axes = system.getAxes();
 		for (IAxis axis : axes) axis.setAxisAutoscaleTight(true);
+		system.setColorOption(ColorOption.BY_NAME);
 	}
 
 	private void hookContextMenu() {

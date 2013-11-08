@@ -272,7 +272,12 @@ public class DerivativeTool extends AbstractToolPage  {
 
 	@Override
 	public void deactivate() {
+		
+		//remove trace listener
+		if (getPlottingSystem() != null) getPlottingSystem().removeTraceListener(traceListener);
+		
 		//Check not already deactivated to prevent double calls
+		
 		if (!isActive()) return;
 		if (isDisposed()) return;
 		super.deactivate();
