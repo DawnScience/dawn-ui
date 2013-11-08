@@ -472,7 +472,8 @@ public class HistogramToolPage extends AbstractToolPage {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
 				logger.trace("colourSchemeListener");
-
+                maxLast = minLast = 0;
+                palLast = null;
 				updateColourScheme();
 				buildPaletteData();
 				updateHistogramToolElements(event);;
@@ -559,6 +560,8 @@ public class HistogramToolPage extends AbstractToolPage {
 
 	}
 
+	private double      maxLast=0, minLast=0;
+	private PaletteData palLast=null;
 	/**
 	 * 
 	 * @param mon, may be null
@@ -569,6 +572,16 @@ public class HistogramToolPage extends AbstractToolPage {
 
 		IPaletteTrace image = eventsImage!=null ? eventsImage : getPaletteTrace();
 		if (image!=null) {
+			
+			if (maxLast == histoMax &&
+				minLast == histoMin &&
+				palLast!=null && paletteEquals(palLast, paletteData)) {
+				return false; // Nothing to do, faster not to do it.
+			}
+			maxLast = histoMax;
+			minLast = histoMin;
+			palLast = paletteData;
+			
 			image.setMax(histoMax);
 			if (mon!=null && mon.isCanceled()) return false;
 	
@@ -584,6 +597,15 @@ public class HistogramToolPage extends AbstractToolPage {
 		} else {
 			return false;
 		}
+	}
+
+	private boolean paletteEquals(PaletteData p1, PaletteData p2) {
+		for (int i = 0; i < 256; i++) {
+			RGB r1 = p1.getRGB(i);
+			RGB r2 = p2.getRGB(i);
+			if (!r1.equals(r2)) return false;
+		}
+		return true;
 	}
 
 	@Override
