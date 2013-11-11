@@ -171,8 +171,11 @@ class RegionEditingSupport extends EditingSupport {
 				break;
 			case 1:
 				// takes care of renaming the region (label and key value in hash table)
-				if(!region.getName().equals((String)value))
+				if(!region.getName().equals((String)value)) {
 					tool.getPlottingSystem().renameRegion(region, (String)value);
+					// Rename the roi
+					region.getROI().setName((String)value);
+				}
 				break;
 			case 2:
 				if(myRoi instanceof LinearROI){
