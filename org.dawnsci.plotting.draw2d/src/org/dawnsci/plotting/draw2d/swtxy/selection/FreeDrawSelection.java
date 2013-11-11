@@ -172,7 +172,7 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 		if (points == null) return getROI();
 		
 		final FreeDrawROI proi = new FreeDrawROI();
-		
+		proi.setName(getName());
 		for (int i = 0, imax = points.size(); i < imax; i++) {
 			final Point pnt = points.getPoint(i);
 			proi.insertPoint(i, coords.getPositionValue(pnt.x(),pnt.y()));
