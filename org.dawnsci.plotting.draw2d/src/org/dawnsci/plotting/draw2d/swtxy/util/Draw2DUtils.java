@@ -177,11 +177,10 @@ public class Draw2DUtils {
 		Point p0;
 		Point p1 = points.getPoint(0);
 		PointList list = new PointList();
-		int i = 1;
 		double[] t = new double[2];
 
 		boolean first = true;
-		for (; i < pts || (isPolygon && i == pts); i++) {
+		for (int i = 1; i < pts || (isPolygon && i == pts); i++) {
 			p0 = p1;
 			p1 = points.getPoint(i % pts);
 
