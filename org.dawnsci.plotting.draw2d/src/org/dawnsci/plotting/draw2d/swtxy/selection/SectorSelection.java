@@ -483,6 +483,7 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 						final FigureTranslator translator = (FigureTranslator) src;
 						Point end = translator.getEndLocation();
 						
+						if (end==null) return;
 						double[] c = coords.getPositionValue(end.x(), end.y());
 						int[] r = new int[]{(int)c[0], (int)c[1]};
 
