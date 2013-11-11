@@ -131,6 +131,7 @@ public class PolygonSelection extends AbstractSelectionRegion {
 	protected IROI createROI(boolean recordResult) {
 		final PointList pl = pline.getPoints();
 		final PolygonalROI proi = new PolygonalROI();
+		proi.setName(getName());
 		for (int i = 0, imax = pl.size(); i < imax; i++) {
 			Point p = pl.getPoint(i);
 			proi.insertPoint(i, coords.getPositionValue(p.x(),p.y()));

@@ -138,6 +138,7 @@ public class BoxSelection extends AbstractSelectionRegion {
 			return super.getROI();
 
 		final RectangularROI rroi = new RectangularROI();
+		rroi.setName(getName());
 		rroi.setAngle(Math.toRadians(rect.getAngleDegrees()));
 		Point p;
 		p = pl.getPoint(0);
