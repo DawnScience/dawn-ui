@@ -918,6 +918,8 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		    		IDiffractionMetadata data = activeDiffractionTool.getDiffractionMetaData().clone();
 		    		service.setLockedDiffractionMetaData(data);
 		    	} else {
+		    		// Also clears cached data because we may have
+		    		// changed the meta data.
 		    		service.setLockedDiffractionMetaData(null);
 		    	}
 		    	activeDiffractionTool.createDiffractionModel(true);
