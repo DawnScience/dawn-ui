@@ -42,6 +42,7 @@ import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.region.IRegionContainer;
 import org.dawnsci.plotting.api.region.IRegionListener;
 import org.dawnsci.plotting.api.region.IRegionSystem;
+import org.dawnsci.plotting.api.region.RegionUtils;
 import org.dawnsci.plotting.api.trace.ColorOption;
 import org.dawnsci.plotting.api.trace.IImageStackTrace;
 import org.dawnsci.plotting.api.trace.IImageTrace;
@@ -115,6 +116,8 @@ import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
@@ -129,6 +132,8 @@ import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
  */
 class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSystem, IPrintablePlotting, ITraceActionProvider {
 
+	private static final Logger logger = LoggerFactory.getLogger(LightWeightPlotViewer.class);
+	
 	// Controls
 	private Canvas                 xyCanvas;
 	private XYRegionGraph          xyGraph;
@@ -539,13 +544,24 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 						AbstractSelectionRegion region = null;
 						try {
 							region = (AbstractSelectionRegion)sys.createRegion(SelectionRegionFactory.getStaticBuffer().getName(), SelectionRegionFactory.getStaticBuffer().getRegionType());
+							region.sync(SelectionRegionFactory.getStaticBuffer().getBean());
 						} catch (Exception ne) {
-							MessageDialog.openError(Display.getDefault().getActiveShell(), "Cannot paste '"+SelectionRegionFactory.getStaticBuffer().getName()+"'",
-									                   "A region with the name '"+SelectionRegionFactory.getStaticBuffer().getName()+"' already exists.");
-							return;
+							final String name = RegionUtils.getUniqueName("Region", sys);
+							boolean ok = MessageDialog.openConfirm(Display.getDefault().getActiveShell(), "Cannot paste '"+SelectionRegionFactory.getStaticBuffer().getName()+"'",
+									                   "A region with the name '"+SelectionRegionFactory.getStaticBuffer().getName()+"' already exists.\n\nWould you like to name the region '"+name+"'?");
+							if (ok) {
+								try {
+									region = (AbstractSelectionRegion)sys.createRegion(name, SelectionRegionFactory.getStaticBuffer().getRegionType());
+								} catch (Exception e) {
+									logger.error("Cannot create new region.", e);
+									return;
+								}
+							} else {
+							
+								return;
+							}
 						}
 						
-						region.sync(SelectionRegionFactory.getStaticBuffer().getBean());
 						region.setROI(SelectionRegionFactory.getStaticBuffer().getROI());
 						sys.addRegion(region);
 					}

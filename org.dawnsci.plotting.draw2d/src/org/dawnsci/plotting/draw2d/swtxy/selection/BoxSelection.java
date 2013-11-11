@@ -327,6 +327,7 @@ public class BoxSelection extends AbstractSelectionRegion {
 						final FigureTranslator translator = (FigureTranslator) src;
 						Point end = translator.getEndLocation();
 						
+						if (end==null) return;
 						double[] c = coords.getPositionValue(end.x(), end.y());
 						int[] r = new int[] { (int) c[0], (int) c[1] };
 
