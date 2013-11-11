@@ -481,7 +481,6 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 	@Override
 	public void regionAdded(RegionEvent evt) {
 		if (!isActive()) return;
-		if (viewer!=null) viewer.refresh();
 		if (evt.getRegion()!=null) {
 			IRegion region = evt.getRegion();
 			region.addROIListener(this);
@@ -489,6 +488,7 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 			// set the Region isActive flag
 			region.setActive(true);
 		}
+		if (viewer!=null) viewer.refresh();
 	}
 
 	@Override
