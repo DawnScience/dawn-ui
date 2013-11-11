@@ -347,6 +347,7 @@ class AxisSelection extends AbstractSelectionRegion {
 		if (line1!=null) {
 			final Rectangle rect = getRectangleFromVertices();
 			final RectangularROI rroi = getRoiFromRectangle(rect);
+			rroi.setName(getName());
 			if (recordResult)
 				roi = rroi;
 			return rroi;
