@@ -3,13 +3,17 @@ package org.dawnsci.plotting.system;
 import org.csstudio.swt.xygraph.dataprovider.IDataProvider;
 import org.csstudio.swt.xygraph.figures.Trace;
 import org.dawnsci.plotting.api.axis.IAxis;
+import org.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.dawnsci.plotting.api.trace.ILineTrace;
 import org.dawnsci.plotting.api.trace.ITraceContainer;
 import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.dawnsci.plotting.draw2d.swtxy.LineTrace;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IErrorDataset;
@@ -35,10 +39,15 @@ public class LineTraceImpl implements ILineTrace {
 		}
 		IDataProvider prov = trace.getDataProvider();
 		if (prov!=null && prov.hasErrors()) {
-			trace.setErrorBarEnabled(true);
+			trace.setErrorBarEnabled(getPreferenceStore().getBoolean(PlottingConstants.GLOBAL_SHOW_ERROR_BARS));
 			trace.setErrorBarColor(ColorConstants.red);
 		}
 	}
+	
+	private IPreferenceStore getPreferenceStore() {
+		return new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
+	}
+
 	
 	public IDataProvider getDataProvider() {
 		return trace.getDataProvider();
@@ -363,12 +372,12 @@ public class LineTraceImpl implements ILineTrace {
 			
 			if (xData instanceof IErrorDataset) {
 				if (((IErrorDataset)xData).hasErrors() && !errorBarExplicitySet) {
-					trace.setErrorBarEnabled(true);
+					trace.setErrorBarEnabled(getPreferenceStore().getBoolean(PlottingConstants.GLOBAL_SHOW_ERROR_BARS));
 				}
 			}
 			if (yData instanceof IErrorDataset) {
 				if (((IErrorDataset)yData).hasErrors() && !errorBarExplicitySet) {
-					trace.setErrorBarEnabled(true);
+					trace.setErrorBarEnabled(getPreferenceStore().getBoolean(PlottingConstants.GLOBAL_SHOW_ERROR_BARS));
 				}
 			}
 			

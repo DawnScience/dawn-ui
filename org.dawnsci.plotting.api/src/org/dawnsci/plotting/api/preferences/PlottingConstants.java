@@ -85,4 +85,14 @@ public class PlottingConstants extends BasePlottingConstants {
 	 */
 	public static final String LOAD_IMAGE_STACKS = "org.dawb.workbench.plotting.preference.loadImageStacks";
 
+	/**
+	 * Globally set whether error bars should be drawn in the plotting.
+	 */
+	public static final String GLOBAL_SHOW_ERROR_BARS = "org.dawb.workbench.plotting.preference.showErrorBars";
+	
+	/**
+	 * If this amount or more are plotted in one go, the system will auto-hide error bars.
+	 */
+	public static final String AUTO_HIDE_ERROR_SIZE = "org.dawb.workbench.plotting.preference.autoHideErrorBars";
+
 }

@@ -49,12 +49,14 @@ import org.dawnsci.plotting.draw2d.swtxy.LineTrace;
 import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
 import org.dawnsci.plotting.jreality.JRealityPlotViewer;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.draw2d.Cursors;
 import org.eclipse.draw2d.MouseListener;
 import org.eclipse.draw2d.MouseMotionListener;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
@@ -72,6 +74,7 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.PageBook;
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -561,6 +564,22 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 										      final List<String>   dataNames,
 										      final String                title,
 										      final IProgressMonitor      monitor) {
+		
+		// Switch off error bars if very many plots.
+		IPreferenceStore store = getPreferenceStore();
+		if (ysIn.size() > store.getInt(PlottingConstants.AUTO_HIDE_ERROR_SIZE)) {
+			store.setValue(PlottingConstants.GLOBAL_SHOW_ERROR_BARS, false);
+			
+		} else { // If the total traces are low enough, turn error bars back on
+			int already = getTraces()!=null ? getTraces().size() : 0;
+			int nplots  = already+ysIn.size();
+			if (nplots > store.getInt(PlottingConstants.AUTO_HIDE_ERROR_SIZE)) {
+				store.setValue(PlottingConstants.GLOBAL_SHOW_ERROR_BARS, false);				
+			} else {
+				store.setValue(PlottingConstants.GLOBAL_SHOW_ERROR_BARS, true);
+			}
+		}
+		
 		if (plottingMode.is1Dor2D()) {
 		    this.plottingMode = PlotType.XY;
 		} else {
@@ -602,6 +621,13 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		  	
 		fireTracesPlotted(new TraceEvent(traces));
         return traces;
+	}
+
+	private IPreferenceStore store;
+	private IPreferenceStore getPreferenceStore() {
+		if (store!=null) return store;
+		store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
+		return store;
 	}
 
 	@SuppressWarnings("unused")
@@ -898,6 +924,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	@Override
 	public void dispose() {
 		super.dispose();
+		store = null;
 		if (colorMap!=null) {
 			colorMap.clear();
 			colorMap = null;
