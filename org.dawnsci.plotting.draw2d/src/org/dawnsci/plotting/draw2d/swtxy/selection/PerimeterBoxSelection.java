@@ -43,7 +43,7 @@ public class PerimeterBoxSelection extends BoxSelection {
 	PerimeterBoxSelection(String name, ICoordinateSystem coords) {
 		super(name, coords);
 		setRegionColor(IRegion.RegionType.PERIMETERBOX.getDefaultColor());	
-		setAlpha(80);
+		setAlpha(0);
 	}
 
 	@Override
