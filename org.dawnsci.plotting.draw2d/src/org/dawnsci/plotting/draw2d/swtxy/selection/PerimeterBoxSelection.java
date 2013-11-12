@@ -83,35 +83,27 @@ public class PerimeterBoxSelection extends BoxSelection {
 		g.setLineWidth(2);
 		g.setLineStyle(SWT.LINE_SOLID);
 
-		Point p1, p2;
+		Point p1 = list.getPoint(0), p2 = list.getPoint(1), 
+			  p3 = list.getPoint(2), p4 = list.getPoint(3);
 		// draw top edge
-		p1 = list.getPoint(0);
-		p2 = list.getPoint(1);
 		g.setForegroundColor(topColor);
 		g.setBackgroundColor(topColor);
 		g.drawLine(p1.x(), p1.y(), p2.x(), p2.y());
-		
-		// draw right edge
-		p1 = p2;
-		p2 = list.getPoint(2);
-		g.setForegroundColor(rightColor);
-		g.setBackgroundColor(rightColor);
-		g.drawLine(p1.x(), p1.y(), p2.x(), p2.y());
 
 		// draw bottom edge
-		p1 = p2;
-		p2 = list.getPoint(3);
 		g.setForegroundColor(bottomColor);
 		g.setBackgroundColor(bottomColor);
-		g.drawLine(p1.x(), p1.y(), p2.x(), p2.y());
-		
-		
+		g.drawLine(p4.x(), p4.y(), p3.x(), p3.y());
+
 		// draw left edge
-		p1 = p2;
-		p2 = list.getPoint(0);
 		g.setForegroundColor(leftColor);
 		g.setBackgroundColor(leftColor);
-		g.drawLine(p1.x(), p1.y(), p2.x(), p2.y());
+		g.drawLine(p1.x(), p1.y(), p4.x(), p4.y());
+
+		// draw right edge
+		g.setForegroundColor(rightColor);
+		g.setBackgroundColor(rightColor);
+		g.drawLine(p2.x(), p2.y(), p3.x(), p3.y());
 
 		g.popState();
 	}
