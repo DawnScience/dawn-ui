@@ -159,8 +159,14 @@ public abstract class SelectionHandle extends Figure implements IMobileFigure {
 	}
 
 	public void setAlpha(int alpha) {
-		this.alpha = alpha;
-		shape.setAlpha(alpha);
+		if (alpha < 50) {
+			// Minimum alpha is 50 for selection handlers
+			this.alpha = 50;
+			shape.setAlpha(50);
+		} else {
+			this.alpha = alpha;
+			shape.setAlpha(alpha);
+		}
 	}
 
 	@Override
