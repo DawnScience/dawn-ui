@@ -323,8 +323,10 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 
 					@Override
 					public void selectionChanged(SelectionChangedEvent event) {
-						compFunction.setFunction(selectedPosition,
-								functionWidget.getFunction());
+						if (compFunction==null)     return;
+						if (selectedPosition==null) return;
+						if (functionWidget==null)   return;
+						compFunction.setFunction(selectedPosition, functionWidget.getFunction());
 						viewer.refresh();
 						updateFunctionPlot();
 					}
