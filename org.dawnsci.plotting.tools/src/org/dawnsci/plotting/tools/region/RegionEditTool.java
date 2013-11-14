@@ -1,8 +1,15 @@
 package org.dawnsci.plotting.tools.region;
 
+import java.util.Collection;
+
 import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.RegionEvent;
 import org.dawnsci.plotting.api.region.RegionUtils;
+import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.region.MeasurementLabelProvider.LabelType;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.TableViewer;
@@ -104,14 +111,52 @@ public class RegionEditTool extends AbstractRegionTableTool {
 		return iRegion.isUserRegion();
 	}
 
+	private String MOBILE_REGION_SETTING = "org.dawnsci.plotting.tools.mobileRegionSetting";
+	
 	protected void createActions() {
-		getSite().getActionBars().getToolBarManager().add(getReselectAction());
-		getSite().getActionBars().getToolBarManager().add(new Separator());
+		IToolBarManager man = getSite().getActionBars().getToolBarManager();
+		final Action immobileWhenAdded = new Action("Allow regions to be moved graphically", IAction.AS_CHECK_BOX) {
+			public void run() {
+				Activator.getLocalPreferenceStore().setValue(MOBILE_REGION_SETTING, isChecked());
+				
+				// We also set all regions mobile or immobile
+				final Collection<IRegion> regions = getPlottingSystem().getRegions();
+				for (IRegion iRegion : regions) {
+					if (iRegion.isUserRegion() && iRegion.isVisible()) iRegion.setMobile(isChecked());
+				}
+			}
+		};
+		immobileWhenAdded.setImageDescriptor(Activator.getImageDescriptor("icons/traffic-light-green.png"));
+		immobileWhenAdded.setChecked(Activator.getLocalPreferenceStore().getBoolean(MOBILE_REGION_SETTING));
+		man.add(immobileWhenAdded);
+		man.add(new Separator());
+		man.add(getReselectAction());
+		man.add(new Separator());
 		super.createActions();
 	}
+	
+	@Override
+	public void regionAdded(RegionEvent evt) {
+		if (!isActive()) return;
+		super.regionAdded(evt);
+		
+		boolean isMobile = Activator.getLocalPreferenceStore().getBoolean(MOBILE_REGION_SETTING);
+		evt.getRegion().setMobile(isMobile);
+	}
 
-	protected void createNewRegion() {
+	protected void createNewRegion(boolean force) {
 		try {
+			if (!force) {
+				// We check to see if the region type preferred is already there
+				final Collection<IRegion> regions = getPlottingSystem().getRegions();
+				for (IRegion iRegion : regions) {
+					if (iRegion.isUserRegion() && iRegion.isVisible()) {
+						// We have one already, do not go into create mode :)
+						if (iRegion.getRegionType() == IRegion.RegionType.BOX) return;
+					}
+				}
+			}
+
 			getPlottingSystem().createRegion(RegionUtils.getUniqueName("Region", getPlottingSystem()), IRegion.RegionType.BOX);
 		} catch (Exception e) {
 			logger.error("Cannot create line region for selecting in measurement tool!", e);
