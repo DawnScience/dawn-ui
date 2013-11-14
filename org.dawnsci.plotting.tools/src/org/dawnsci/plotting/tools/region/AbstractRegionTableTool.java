@@ -117,7 +117,7 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 		}
 	}
 	
-	protected abstract void createNewRegion();
+	protected abstract void createNewRegion(boolean force);
 
 	protected static final Logger logger = LoggerFactory.getLogger(AbstractRegionTableTool.class);
 	
@@ -256,7 +256,7 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 	protected IAction getReselectAction() {
 		final Action reselect = new Action("Create new measurement.", getImageDescriptor()) {
 			public void run() {
-				createNewRegion();
+				createNewRegion(true);
 			}
 		};
         return reselect;
@@ -420,7 +420,7 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 				for (IRegion iRegion : regions) iRegion.addROIListener(this);
 				
 				if (!isDedicatedView()) {
-					createNewRegion();
+					createNewRegion(false);
 				}
 				
 			} catch (Exception e) {

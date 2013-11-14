@@ -1,6 +1,7 @@
 package org.dawnsci.plotting.tools.region;
 
 import java.util.Arrays;
+import java.util.Collection;
 
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.RegionUtils;
@@ -188,8 +189,18 @@ public class MeasurementTool extends AbstractRegionTableTool {
 		}		
 	}
 
-	protected void createNewRegion() {
+	protected void createNewRegion(boolean force) {
 		try {
+			if (!force) {
+				// We check to see if the region type preferred is already there
+				final Collection<IRegion> regions = getPlottingSystem().getRegions();
+				for (IRegion iRegion : regions) {
+					if (iRegion.isUserRegion() && iRegion.isVisible()) {
+						// We have one already, do not go into create mode :)
+						if (iRegion.getRegionType() == IRegion.RegionType.LINE) return;
+					}
+				}
+			}
 			getPlottingSystem().createRegion(RegionUtils.getUniqueName("Measurement", getPlottingSystem()), IRegion.RegionType.LINE);
 		} catch (Exception e) {
 			logger.error("Cannot create line region for selecting in measurement tool!", e);

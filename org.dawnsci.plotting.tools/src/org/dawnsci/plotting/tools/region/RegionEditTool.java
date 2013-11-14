@@ -1,37 +1,21 @@
 package org.dawnsci.plotting.tools.region;
 
-import java.text.DecimalFormat;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
 
-import org.dawnsci.common.widgets.celleditor.FloatSpinnerCellEditor;
-import org.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.dawnsci.plotting.api.region.IRegion;
-import org.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.dawnsci.plotting.api.region.RegionEvent;
 import org.dawnsci.plotting.api.region.RegionUtils;
 import org.dawnsci.plotting.tools.Activator;
-import org.dawnsci.plotting.tools.preference.RegionEditorConstants;
 import org.dawnsci.plotting.tools.region.MeasurementLabelProvider.LabelType;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.viewers.CellEditor;
-import org.eclipse.jface.viewers.CheckboxCellEditor;
-import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
-import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
-import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.widgets.Composite;
-
-import uk.ac.diamond.scisoft.analysis.roi.IROI;
-import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
-import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 /**
  * 
@@ -127,14 +111,53 @@ public class RegionEditTool extends AbstractRegionTableTool {
 		return iRegion.isUserRegion();
 	}
 
+	private String MOBILE_REGION_SETTING = "org.dawnsci.plotting.tools.mobileRegionSetting";
+	
 	protected void createActions() {
-		getSite().getActionBars().getToolBarManager().add(getReselectAction());
-		getSite().getActionBars().getToolBarManager().add(new Separator());
+		IToolBarManager man = getSite().getActionBars().getToolBarManager();
+		final Action immobileWhenAdded = new Action("Allow regions to be moved graphically", IAction.AS_CHECK_BOX) {
+			public void run() {
+				Activator.getPlottingPreferenceStore().setValue(MOBILE_REGION_SETTING, isChecked());
+				
+				// We also set all regions mobile or immobile
+				final Collection<IRegion> regions = getPlottingSystem().getRegions();
+				for (IRegion iRegion : regions) {
+					if (iRegion.isUserRegion() && iRegion.isVisible()) iRegion.setMobile(isChecked());
+				}
+			}
+		};
+		immobileWhenAdded.setImageDescriptor(Activator.getImageDescriptor("icons/traffic-light-green.png"));
+		immobileWhenAdded.setChecked(Activator.getPlottingPreferenceStore().getBoolean(MOBILE_REGION_SETTING));
+		man.add(immobileWhenAdded);
+		man.add(new Separator());
+		man.add(getReselectAction());
+		man.add(new Separator());
 		super.createActions();
 	}
 
-	protected void createNewRegion() {
+	
+	@Override
+	public void regionAdded(RegionEvent evt) {
+		if (!isActive()) return;
+		super.regionAdded(evt);
+		
+		boolean isMobile = Activator.getPlottingPreferenceStore().getBoolean(MOBILE_REGION_SETTING);
+		evt.getRegion().setMobile(isMobile);
+	}
+
+	protected void createNewRegion(boolean force) {
 		try {
+			if (!force) {
+				// We check to see if the region type preferred is already there
+				final Collection<IRegion> regions = getPlottingSystem().getRegions();
+				for (IRegion iRegion : regions) {
+					if (iRegion.isUserRegion() && iRegion.isVisible()) {
+						// We have one already, do not go into create mode :)
+						if (iRegion.getRegionType() == IRegion.RegionType.BOX) return;
+					}
+				}
+			}
+
 			getPlottingSystem().createRegion(RegionUtils.getUniqueName("Region", getPlottingSystem()), IRegion.RegionType.BOX);
 		} catch (Exception e) {
 			logger.error("Cannot create line region for selecting in measurement tool!", e);
