@@ -254,13 +254,15 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 	}
 
 	protected IAction getReselectAction() {
-		final Action reselect = new Action("Create new measurement.", getImageDescriptor()) {
+		final Action reselect = new Action("Create new "+getRegionTypeName(), getImageDescriptor()) {
 			public void run() {
 				createNewRegion(true);
 			}
 		};
         return reselect;
 	}
+
+	protected abstract String getRegionTypeName();
 
 	protected void createActions() {
 
