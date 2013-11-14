@@ -135,6 +135,10 @@ public class RegionEditTool extends AbstractRegionTableTool {
 		super.createActions();
 	}
 
+	@Override
+	protected String getRegionTypeName() {
+		return "region";
+	}
 	
 	@Override
 	public void regionAdded(RegionEvent evt) {

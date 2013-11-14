@@ -41,7 +41,11 @@ public class MeasurementTool extends AbstractRegionTableTool {
 		return getToolPageRole()==ToolPageRole.ROLE_2D;
 	}
 
-
+	@Override
+	protected String getRegionTypeName() {
+		return "measurement";
+	}
+	
 	protected void createColumns(final TableViewer viewer) {
 		
 		ColumnViewerToolTipSupport.enableFor(viewer,ToolTip.NO_RECREATE);
