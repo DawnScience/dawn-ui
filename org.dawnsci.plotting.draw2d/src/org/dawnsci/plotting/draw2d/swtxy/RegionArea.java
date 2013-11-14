@@ -539,8 +539,11 @@ public class RegionArea extends PlotArea {
 		for (ITraceListener l : imageTraceListeners) l.traceRemoved(evt);
 	}
 	public List<AbstractSelectionRegion> getRegions() {
-		final Collection<AbstractSelectionRegion> vals = regions.values();
-		return new ArrayList<AbstractSelectionRegion>(vals);
+		List<AbstractSelectionRegion> ret = new ArrayList<AbstractSelectionRegion>(regions.size());
+		for (String key : regions.keySet()) {
+			ret.add(regions.get(key));
+		}
+		return ret;
 	}
 
 	public Collection<String> getRegionNames() {
