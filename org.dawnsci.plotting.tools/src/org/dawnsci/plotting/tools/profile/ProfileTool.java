@@ -194,7 +194,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		
 		final Action reselect = new Action("Create new profile", getImageDescriptor()) {
 			public void run() {
-				createNewRegion();
+				createNewRegion(true);
 			}
 		};
 		if (actionbars != null){
@@ -269,14 +269,26 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 			if (getImageTrace()!=null) getImageTrace().addPaletteListener(paletteListener);
 		}
 		
-		if (!isDedicatedView()) createNewRegion();
+		if (!isDedicatedView()) createNewRegion(false);
 		
 	}
 	
-	protected final void createNewRegion() {
+	protected final void createNewRegion(boolean force) {
 		
 		// Start with a selection of the right type
 		try {
+			
+			if (!force) {
+				// We check to see if the region type preferred is already there
+				final Collection<IRegion> regions = getPlottingSystem().getRegions();
+				for (IRegion iRegion : regions) {
+					if (iRegion.isUserRegion() && iRegion.isVisible()) {
+						// We have one already, do not go into create mode :)
+						if (iRegion.getRegionType() == getCreateRegionType()) return;
+					}
+				}
+			}
+			
 			IRegion region = getPlottingSystem().createRegion(RegionUtils.getUniqueName(getRegionName(), getPlottingSystem()), getCreateRegionType());
 			region.setUserObject(getMarker());
 		} catch (Exception e) {
