@@ -1,6 +1,7 @@
 package org.dawnsci.slicing.tools.hyper;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.dawb.common.ui.menu.CheckableActionGroup;
@@ -151,12 +152,16 @@ public class HyperSlicingTool extends AbstractSlicingTool {
 	 */
 	private int[] getOrder() {
 		final DimsDataList dims = getSlicingSystem().getDimsDataList();
-		final int[] ret = new int[dims.size()];
-		int dimFound = 0;
-		for (DimsData dd : dims.getDimsData()) {
-			ret[dimFound] = dd.getPlotAxis().getIndex();
-			dimFound++;
+		final int[] ret = new int[3];
+		
+		for (int i = 0; i < dims.getDimsData().size(); i++) {
+			int axis = dims.getDimsData().get(i).getPlotAxis().getIndex();
+			
+			if (axis > -1 && axis < 3) {
+				ret[axis] = i;
+			}
 		}
+		
 		return ret;
 	}
 
@@ -192,21 +197,23 @@ public class HyperSlicingTool extends AbstractSlicingTool {
 		
 		final DimsDataList ddl = getSlicingSystem().getDimsDataList();
 		
-		final List<AbstractDataset> ret= new ArrayList<AbstractDataset>(ia.size());
-		for (DimsData dd : ddl.getDimsData()) {
-			int axis = dd.getPlotAxis().getIndex();
+		AbstractDataset[] ret = new AbstractDataset[3];
+		ret.toString();
+		for (int i = 0; i < ddl.getDimsData().size(); i++) {
+			int axis = ddl.getDimsData().get(i).getPlotAxis().getIndex();
 			
-			if (axis > -1 && axis < 4) {
-				IDataset id = ia.get(axis);
+			if (axis > -1 && axis < 3) {
+				IDataset id = ia.get(i);
 				if (id == null) {
-					id = AbstractDataset.arange(dataShape[axis], AbstractDataset.INT);
+					id = AbstractDataset.arange(dataShape[i], AbstractDataset.INT);
 					id.setName("indices");
 				}
-				ret.add((AbstractDataset)id);
+				ret[axis] = ((AbstractDataset)id);
 			}
+			
 		}
 		
-		return ret;
+		return Arrays.asList(ret);
 	}
 	
 	public IAction createAction() {
