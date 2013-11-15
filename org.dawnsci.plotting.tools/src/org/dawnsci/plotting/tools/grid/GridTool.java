@@ -176,7 +176,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		
 		final Action reselect = new Action("Create new grid.", getImageDescriptor()) {
 			public void run() {
-				createNewRegion();
+				createNewRegion(true);
 			}
 		};
 		
@@ -546,7 +546,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 			getPlottingSystem().addRegionListener(regionListener);
 			getPlottingSystem().addTraceListener(traceListener);
 		}
-		createNewRegion();
+		createNewRegion(false);
 	}
 	
 	@Override
@@ -564,11 +564,22 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		}
 	}
 	
-	private final void createNewRegion() {
+	protected void createNewRegion(boolean force) {
 		
 		if (getPlottingSystem()==null) return;
 		// Start with a selection of the right type
 		try {
+			if (!force) {
+				// We check to see if the region type preferred is already there
+				final Collection<IRegion> regions = getPlottingSystem().getRegions();
+				for (IRegion iRegion : regions) {
+					if (iRegion.isUserRegion() && iRegion.isVisible()) {
+						// We have one already, do not go into create mode :)
+						if (iRegion.getRegionType() == getCreateRegionType()) return;
+					}
+				}
+			}
+
 			IRegion region = getPlottingSystem().createRegion(RegionUtils.getUniqueName(getRegionName(), getPlottingSystem()), getCreateRegionType());
 			region.setUserObject(getMarker());
 						

@@ -355,6 +355,13 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 
 	private void createActions(IPageSite site) {
 
+		
+		final Action add = new Action("Create new perimeter box profile.", getImageDescriptor()) {
+			public void run() {
+				createNewRegion(true);
+			}
+		};
+
 		final Action plotAverage = new Action("Plot Average Box Profiles", IAction.AS_CHECK_BOX) {
 			@Override
 			public void run() {
@@ -398,6 +405,8 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 		if(site != null){
 			IToolBarManager toolMan = getSite().getActionBars().getToolBarManager();
 			MenuManager menuMan = new MenuManager();
+			toolMan.add(add);
+			menuMan.add(add);
 			toolMan.add(plotEdge);
 			menuMan.add(plotEdge);
 			toolMan.add(plotAverage);
@@ -434,7 +443,7 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 		}
 		setRegionsActive(true);
 
-		createNewRegion();
+		createNewRegion(false);
 
 		if(myROIWidget != null)
 			myROIWidget.addRegionListener(getPlottingSystem());
@@ -451,9 +460,20 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 		}
 	}
 	
-	private final void createNewRegion() {
+	private final void createNewRegion(boolean force) {
 		// Start with a selection of the right type
 		try {
+			if (!force) {
+				// We check to see if the region type preferred is already there
+				final Collection<IRegion> regions = getPlottingSystem().getRegions();
+				for (IRegion iRegion : regions) {
+					if (iRegion.isUserRegion() && iRegion.isVisible()) {
+						// We have one already, do not go into create mode :)
+						if (iRegion.getRegionType() == getCreateRegionType()) return;
+					}
+				}
+			}
+
 			IRegion region = getPlottingSystem().createRegion(RegionUtils.getUniqueName(getRegionName(), getPlottingSystem()), getCreateRegionType());
 			region.setUserObject(getMarker());
 		} catch (Exception e) {

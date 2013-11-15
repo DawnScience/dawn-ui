@@ -414,7 +414,7 @@ class LightWeightPlotActions {
 		regionDropDown.add(createRegionAction(xyGraph, RegionType.POINT,      regionDropDown, "Single point selection", PlottingSystemActivator.getImageDescriptor("icons/ProfilePoint.png")));
 		regionDropDown.add(createRegionAction(xyGraph, RegionType.CIRCLE,     regionDropDown, "Add circle selection",   PlottingSystemActivator.getImageDescriptor("icons/ProfileCircle.png")));
 		regionDropDown.add(createRegionAction(xyGraph, RegionType.CIRCLEFIT,  regionDropDown, "Circle fit selection",   PlottingSystemActivator.getImageDescriptor("icons/ProfileCircle.png")));
-		regionDropDown.add(createRegionAction(xyGraph, RegionType.ELLIPSE,    regionDropDown, "Add ellipse selection",  PlottingSystemActivator.getImageDescriptor("icons/ProfileEllipse.png")));
+		//regionDropDown.add(createRegionAction(xyGraph, RegionType.ELLIPSE,    regionDropDown, "Add ellipse selection",  PlottingSystemActivator.getImageDescriptor("icons/ProfileEllipse.png")));
 		regionDropDown.add(createRegionAction(xyGraph, RegionType.ELLIPSEFIT, regionDropDown, "Ellipse fit selection",  PlottingSystemActivator.getImageDescriptor("icons/ProfileEllipse.png")));
 		
 		actionBarManager.registerAction(regionDropDown, ActionType.XYANDIMAGE, ManagerType.MENUBAR);
