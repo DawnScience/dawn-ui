@@ -15,7 +15,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
-import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 
 public class SpectrumInMemory extends AbstractSpectrumFile implements ISpectrumFile {
@@ -101,6 +100,7 @@ public class SpectrumInMemory extends AbstractSpectrumFile implements ISpectrumF
 	
 	public void plotAll() {
 		//not slow, doesnt need to be a job but the mutex keeps the plotting order
+		if (!showPlot) return;
 		Job job = new Job("Plot all") {
 
 			@Override

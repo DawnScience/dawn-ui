@@ -104,6 +104,7 @@ public class SpectrumFile extends AbstractSpectrumFile implements ISpectrumFile 
 	}
 	
 	public void plotAll() {
+		if (!showPlot) return;
 		
 		Job job = new Job("Plot all") {
 			
