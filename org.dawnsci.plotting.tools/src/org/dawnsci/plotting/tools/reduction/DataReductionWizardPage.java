@@ -25,6 +25,8 @@ public class DataReductionWizardPage extends AbstractSliceConversionPage {
 		super(pageName, description, icon);
 		setFileLabel("Output File");
 		setDirectory(false);
+		setNewFile(true);
+		setPathEditable(true);
 	}
 
 	@Override
