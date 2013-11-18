@@ -1,14 +1,13 @@
 package org.dawnsci.plotting.tools.preference.detector;
 
+import org.dawnsci.common.richbeans.components.scalebox.NumberBox;
+import org.dawnsci.common.richbeans.components.scalebox.ScaleBox;
+import org.dawnsci.common.richbeans.components.wrappers.TextWrapper;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-
-import uk.ac.gda.richbeans.components.scalebox.NumberBox;
-import uk.ac.gda.richbeans.components.scalebox.ScaleBox;
-import uk.ac.gda.richbeans.components.wrappers.TextWrapper;
 
 public class DiffractionDetectorComposite extends Composite  {
 

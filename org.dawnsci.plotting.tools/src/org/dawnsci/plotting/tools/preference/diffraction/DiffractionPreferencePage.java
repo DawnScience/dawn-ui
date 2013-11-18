@@ -20,6 +20,8 @@ import java.util.List;
 
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.util.GridUtils;
+import org.dawnsci.common.richbeans.beans.BeanUI;
+import org.dawnsci.common.richbeans.components.selector.VerticalListEditor;
 import org.dawnsci.plotting.tools.Activator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.PreferencePage;
@@ -49,8 +51,6 @@ import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSpacing;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationStandards;
 import uk.ac.diamond.scisoft.analysis.crystallography.HKL;
-import uk.ac.gda.richbeans.beans.BeanUI;
-import uk.ac.gda.richbeans.components.selector.VerticalListEditor;
 
 /**
  * NOTE This class does not use preferences because the CalibrationFactory should

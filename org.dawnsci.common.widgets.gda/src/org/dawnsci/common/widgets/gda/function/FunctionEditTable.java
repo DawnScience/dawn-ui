@@ -5,6 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dawb.common.ui.plot.function.FunctionType;
+import org.dawnsci.common.richbeans.components.cell.FieldComponentCellEditor;
+import org.dawnsci.common.richbeans.components.wrappers.BooleanWrapper;
+import org.dawnsci.common.richbeans.components.wrappers.FloatSpinnerWrapper;
+import org.dawnsci.common.richbeans.components.wrappers.SpinnerWrapper;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewer;
@@ -33,10 +37,6 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.FunctionFactory;
-import uk.ac.gda.richbeans.components.cell.FieldComponentCellEditor;
-import uk.ac.gda.richbeans.components.wrappers.BooleanWrapper;
-import uk.ac.gda.richbeans.components.wrappers.FloatSpinnerWrapper;
-import uk.ac.gda.richbeans.components.wrappers.SpinnerWrapper;
 
 /**
  * A table widget for editing any Function

@@ -1,15 +1,10 @@
 /*
- * Copyright (c) 2012 European Synchrotron Radiation Facility,
- *                    Diamond Light Source Ltd.
+ * Copyright (c) 2013 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
- * NOTE There is a copy of this file in a GDA plugin with a GDA license
- * however this code was originally developed outside the GDA and should
- * not have a GDA licence.
  */ 
 package org.dawnsci.common.widgets.content;
 

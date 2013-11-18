@@ -8,6 +8,9 @@ import java.util.List;
 
 import org.dawb.common.ui.databinding.AbstractModelObject;
 import org.dawb.common.util.number.DoubleUtils;
+import org.dawnsci.common.richbeans.components.cell.FieldComponentCellEditor;
+import org.dawnsci.common.richbeans.components.wrappers.FloatSpinnerWrapper;
+import org.dawnsci.common.richbeans.components.wrappers.SpinnerWrapper;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.dawnsci.plotting.api.region.IRegion;
@@ -35,9 +38,6 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
-import uk.ac.gda.richbeans.components.cell.FieldComponentCellEditor;
-import uk.ac.gda.richbeans.components.wrappers.FloatSpinnerWrapper;
-import uk.ac.gda.richbeans.components.wrappers.SpinnerWrapper;
 
 /**
  * Class to create a TableViewer that shows ROI information<br> 

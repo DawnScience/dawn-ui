@@ -35,6 +35,10 @@ import java.util.Collection;
 import java.util.List;
 
 import org.dawb.common.ui.util.GridUtils;
+import org.dawnsci.common.richbeans.components.scalebox.IntegerBox;
+import org.dawnsci.common.richbeans.components.scalebox.NumberBox;
+import org.dawnsci.common.richbeans.event.ValueAdapter;
+import org.dawnsci.common.richbeans.event.ValueEvent;
 import org.dawnsci.plotting.roi.SurfacePlotROI;
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.api.IPlottingSystem;
@@ -82,10 +86,6 @@ import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
-import uk.ac.gda.richbeans.components.scalebox.IntegerBox;
-import uk.ac.gda.richbeans.components.scalebox.NumberBox;
-import uk.ac.gda.richbeans.event.ValueAdapter;
-import uk.ac.gda.richbeans.event.ValueEvent;
 
 /**
  * A tool which has one box region for configuring the region

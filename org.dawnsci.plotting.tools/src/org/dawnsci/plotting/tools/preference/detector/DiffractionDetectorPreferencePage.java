@@ -6,6 +6,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
 import org.dawb.common.ui.util.GridUtils;
+import org.dawnsci.common.richbeans.beans.BeanUI;
+import org.dawnsci.common.richbeans.components.selector.VerticalListEditor;
 import org.dawnsci.plotting.tools.Activator;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
@@ -15,9 +17,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
-
-import uk.ac.gda.richbeans.beans.BeanUI;
-import uk.ac.gda.richbeans.components.selector.VerticalListEditor;
 
 public class DiffractionDetectorPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 	
