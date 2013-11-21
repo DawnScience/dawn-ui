@@ -53,8 +53,6 @@ import uk.ac.diamond.scisoft.analysis.dataset.BooleanDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
-import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
-import uk.ac.diamond.scisoft.analysis.dataset.PositionIterator;
 import uk.ac.diamond.scisoft.analysis.dataset.RGBDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.function.Downsample;
 import uk.ac.diamond.scisoft.analysis.dataset.function.DownsampleMode;
@@ -1350,14 +1348,14 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		
 		if (!TraceUtils.isCustomAxes(this)) return roi;
 		
-		final AbstractDataset xl = (AbstractDataset)axes.get(0); // May be null
-		final AbstractDataset yl = (AbstractDataset)axes.get(1); // May be null
+		final IDataset xl = axes.get(0); // May be null
+		final IDataset yl = axes.get(1); // May be null
 		
 		if (roi instanceof LinearROI) {
 			double[] sp = ((LinearROI)roi).getPoint();
 			double[] ep = ((LinearROI)roi).getEndPoint();
-			transform(xl,0,sp,ep);
-			transform(yl,1,sp,ep);
+			TraceUtils.transform(xl,0,sp,ep);
+			TraceUtils.transform(yl,1,sp,ep);
 			return new LinearROI(sp, ep);
 			
 		} else if (roi instanceof PolylineROI) {
@@ -1365,23 +1363,23 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			final PolylineROI ret = (proi instanceof PolygonalROI) ? new PolygonalROI() : new PolylineROI();
 			for (PointROI pointROI : proi) {
 				double[] dp = pointROI.getPoint();
-				transform(xl,0,dp);
-				transform(yl,1,dp);
+				TraceUtils.transform(xl,0,dp);
+				TraceUtils.transform(yl,1,dp);
 				ret.insertPoint(dp);
 			}
 			
 		} else if (roi instanceof PointROI) {
 			double[] dp = ((PointROI)roi).getPoint();
-			transform(xl,0,dp);
-			transform(yl,1,dp);
+			TraceUtils.transform(xl,0,dp);
+			TraceUtils.transform(yl,1,dp);
 			return new PointROI(dp);
 			
 		} else if (roi instanceof RectangularROI) {
 			RectangularROI rroi = (RectangularROI)roi;
 			double[] sp=roi.getPoint();
 			double[] ep=rroi.getEndPoint();
-			transform(xl,0,sp,ep);
-			transform(yl,1,sp,ep);
+			TraceUtils.transform(xl,0,sp,ep);
+			TraceUtils.transform(yl,1,sp,ep);
 				
 			return new RectangularROI(sp[0], sp[1], ep[0]-sp[0], sp[1]-ep[1], rroi.getAngle());
 						
@@ -1403,13 +1401,13 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		if (xl!=null && xl.getDtype()==AbstractDataset.INT && xl.getSize()==image.getShape()[1] && xl.getInt(0)==0) {
 			// Axis is index.
 		} else {
-			transform(xl,0,ret);
+			TraceUtils.transform(xl,0,ret);
 		}
 		
 		if (yl!=null && yl.getDtype()==AbstractDataset.INT && yl.getSize()==image.getShape()[0] && yl.getInt(0)==0) {
 			// Axis is index.
 		} else {
-			transform(yl,1,ret);
+			TraceUtils.transform(yl,1,ret);
 		}
         return ret;
 	}
@@ -1427,15 +1425,6 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	                        ? Double.NaN
 	            		    : DatasetUtils.crossings(yl, axisLocation[1]).get(0);
         return new double[]{xIndex, yIndex};
-	}
-
-	private void transform(AbstractDataset label, int index, double[]... points) {
-		if (label!=null) {
-			for (double[] ds : points) {
-				int dataIndex = (int)ds[index];
-				ds[index] = label.getDouble(dataIndex);
-			}
-		}		
 	}
 
 	public IPlottingSystem getPlottingSystem() {

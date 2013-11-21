@@ -34,6 +34,7 @@ import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.dawnsci.plotting.draw2d.swtxy.selection.SelectionRegionFactory;
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.MouseEvent;
@@ -54,6 +55,7 @@ public class RegionArea extends PlotArea {
 	protected ISelectionProvider                      selectionProvider;
 	private final Map<String,AbstractSelectionRegion> regions;
 	private final Map<String,ImageTrace>              imageTraces;
+	private       Map<String,VectorTrace>             vectorTraces;
 	
 	private Collection<IRegionListener>     regionListeners;
 	private Collection<ITraceListener>      imageTraceListeners;
@@ -279,7 +281,7 @@ public class RegionArea extends PlotArea {
 		
 		fireImageTraceAdded(new TraceEvent(trace));
 	}
-	
+		
 	void toFront() {
 		for (Annotation a : getAnnotationList()) {
 			a.toFront();
@@ -303,6 +305,37 @@ public class RegionArea extends PlotArea {
 		}
 		return gone!=null;
 	}
+	
+	/**Add a trace to the plot area.
+	 * @param trace the trace to be added.
+	 */
+	public void addVectorTrace(final VectorTrace trace){
+		
+		if (vectorTraces==null) vectorTraces = new LinkedHashMap<String, VectorTrace>();
+		vectorTraces.put(trace.getName(), trace);
+		add(trace);
+		
+        toFront();		
+		revalidate();
+		
+		fireImageTraceAdded(new TraceEvent(trace));
+	}
+
+	/**Add a trace to the plot area.
+	 * @param trace the trace to be added.
+	 */
+	public void removeVectorTrace(final VectorTrace trace){
+		
+	    final VectorTrace gone = vectorTraces.remove(trace.getName());
+		if (gone!=null){
+			remove(trace);
+			
+	 		revalidate();
+			
+			fireImageTraceRemoved(new TraceEvent(trace));
+		}
+	}
+
 
 	public void clearImageTraces() {
 		if (imageTraces==null) return;
@@ -317,17 +350,23 @@ public class RegionArea extends PlotArea {
 	
 	@Override
 	protected void layout() {
+		setFigureBounds(imageTraces);		
+		setFigureBounds(vectorTraces);		
+        super.layout();
+	}
+		
+    private void setFigureBounds(Map<String, ? extends Figure> traces) {
+    	if (traces == null) return;
 	    final Rectangle clientArea = getClientArea();
-		for(ImageTrace trace : imageTraces.values()){
+    	for(Figure trace : traces.values()){
 			if(trace != null && trace.isVisible())
 				//Shrink will make the trace has no intersection with axes,
 				//which will make it only repaints the trace area.
 				trace.setBounds(clientArea);//.getCopy().shrink(1, 1));				
-		}		
-        super.layout();
-	}
-		
-    RegionMouseListener regionListener;
+		}
+    }
+
+	RegionMouseListener regionListener;
     
     /**
      * Has to be set when plotting system is created.

@@ -22,14 +22,16 @@ import org.dawb.workbench.ui.editors.PlotDataEditor;
 import org.dawnsci.plotting.AbstractPlottingSystem;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlottingFactory;
+import org.dawnsci.plotting.api.filter.AbstractPlottingFilter;
 import org.dawnsci.plotting.api.filter.IFilterDecorator;
 import org.dawnsci.plotting.api.filter.IPlottingFilter;
-import org.dawnsci.plotting.api.filter.AbstractPlottingFilter;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.ILineTrace;
 import org.dawnsci.plotting.api.trace.ILineTrace.PointStyle;
 import org.dawnsci.plotting.api.trace.ILineTrace.TraceType;
+import org.dawnsci.plotting.api.trace.IVectorTrace.VectorNormalizationType;
 import org.dawnsci.plotting.api.trace.ITrace;
+import org.dawnsci.plotting.api.trace.IVectorTrace;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.runtime.Platform;
@@ -41,8 +43,8 @@ import org.eclipse.ui.ide.FileStoreEditorInput;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 
+import uk.ac.diamond.scisoft.analysis.dataset.ADataset;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
-import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IErrorDataset;
@@ -59,6 +61,44 @@ import uk.ac.diamond.scisoft.analysis.dataset.Random;
  */
 public class SWTXYTraceTest {
 	
+	
+	@Test
+    public void testVectorSimple1D() throws Throwable {
+		
+		final AbstractDataset da1 = DoubleDataset.arange(0, 100, 1);    
+		
+		final Object[] oa = createSomethingPlotted(Arrays.asList(new IDataset[]{da1}));
+
+		final IPlottingSystem     sys    = (IPlottingSystem)oa[0];
+		
+		AbstractDataset vectors = AbstractDataset.zeros(new int[]{20, 20, 2}, ADataset.FLOAT32);
+		
+		for (int x = 0; x < 20; x++) {
+			for (int y = 0; y < 20; y++) {
+				vectors.set(x*100, x, y, 0); // This gets normalized later
+				vectors.set(2*Math.PI*((double)x/(20d)), x, y, 1);
+			}
+		}
+		
+		final IDataset xAxis = AbstractDataset.zeros(new int[]{20}, ADataset.FLOAT32);
+		final IDataset yAxis = AbstractDataset.zeros(new int[]{20}, ADataset.FLOAT32);
+		for (int i = 0; i < 20; i++) {
+			xAxis.set(i*5, i);
+			yAxis.set(i*5, i);
+		}
+		
+		final IVectorTrace vector = sys.createVectorTrace("vector1");
+		vector.setData(vectors, Arrays.asList(xAxis, yAxis));
+		vector.setArrowColor(200, 0, 0);
+		//vector.setVectorNormalizationType(VectorNormalizationType.LOGARITHMIC);
+		sys.addTrace(vector);
+		
+		sys.repaint();
+		
+		EclipseUtils.delay(200000);
+		System.out.println("Passed");
+	}
+
 	@Test
 	public void testImageNans() throws Throwable {
 		testImage(Double.NaN);

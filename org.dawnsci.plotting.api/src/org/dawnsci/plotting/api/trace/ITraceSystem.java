@@ -37,6 +37,15 @@ public interface ITraceSystem {
 	 */
 	public ILineTrace createLineTrace(String traceName);
 	
+	/**
+	 * Creates a vector trace which may be added to a 1D or 2D plot.
+	 * The Vector trace will draw arrows over the plot at various locations.
+	 * 
+	 * @param traceName
+	 * @return
+	 */
+	public IVectorTrace createVectorTrace(String traceName);
+	
 	
 	/**
 	 * Creates a surface trace used for 3D plotting. This does not add the trace

@@ -44,8 +44,10 @@ import org.dawnsci.plotting.api.trace.ILineTrace;
 import org.dawnsci.plotting.api.trace.ISurfaceTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.api.trace.ITraceListener;
+import org.dawnsci.plotting.api.trace.IVectorTrace;
 import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.draw2d.swtxy.LineTrace;
+import org.dawnsci.plotting.draw2d.swtxy.VectorTrace;
 import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
 import org.dawnsci.plotting.jreality.JRealityPlotViewer;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -653,6 +655,16 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		fireTraceCreated(new TraceEvent(wrapper));
 		return wrapper;
 	}
+	
+	public IVectorTrace createVectorTrace(String traceName) {
+		final Axis xAxis = (Axis)getSelectedXAxis();
+		final Axis yAxis = (Axis)getSelectedYAxis();
+
+		final VectorTrace trace    = new VectorTrace(traceName, xAxis, yAxis);
+		fireTraceCreated(new TraceEvent(trace));
+		return trace;
+	}
+
 
 	@Override
 	public ISurfaceTrace createSurfaceTrace(String traceName) {

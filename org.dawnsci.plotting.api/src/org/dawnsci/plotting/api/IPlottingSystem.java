@@ -100,21 +100,6 @@ public interface IPlottingSystem extends IAdaptable, ITraceSystem, IRegionSystem
 			                   PlotType       hint,
 			                   IWorkbenchPart part);
 	
-	/**
-	 * Expert use only: This method replaces the plotting system control, for
-	 * instance the light weight plot viewer with an alternative widget. It
-	 * returns the widget that was replaced in the plotting system. For instance
-	 * the light weight canvas if in light weight mode. This can then be called
-	 * using setControl(original) when the alternative UI for editing the plot
-	 * is finished with.
-	 * 
-	 * An example of doing this is replacing the plot with a custom slicing part 
-	 * like the Hyper3D slicing tool.
-	 * 
-	 * @param alternative
-	 * @return
-	 */
-	public Control setControl(Control alternative, boolean showPlotToolbar);
 
 	/**
 	 * The plot name corresponding to the name used in the PlottingFactory.
@@ -492,5 +477,22 @@ public interface IPlottingSystem extends IAdaptable, ITraceSystem, IRegionSystem
 	 * @return IWorkbenchPart, may be null
 	 */
 	public IWorkbenchPart getPart();
+
+	
+	/**
+	 * Expert use only: This method replaces the plotting system control, for
+	 * instance the light weight plot viewer with an alternative widget. It
+	 * returns the widget that was replaced in the plotting system. For instance
+	 * the light weight canvas if in light weight mode. This can then be called
+	 * using setControl(original) when the alternative UI for editing the plot
+	 * is finished with.
+	 * 
+	 * An example of doing this is replacing the plot with a custom slicing part 
+	 * like the Hyper3D slicing tool.
+	 * 
+	 * @param alternative
+	 * @return
+	 */
+	public Control setControl(Control alternative, boolean showPlotToolbar);
 
 }
