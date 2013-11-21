@@ -975,12 +975,21 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 	
 	private IDataset getSum(RGBDataset rgb) {
-		final PositionIterator  it  = rgb.getPositionIterator();
-		final IntegerDataset sum = new IntegerDataset(rgb.getShape());
-		int[] pos = it.getPos();
-		while(it.hasNext()) {
-			pos = it.getPos();
-			sum.set(rgb.getRed(pos)+rgb.getBlue(pos)+rgb.getGreen(pos), pos);
+		
+		final int[]       shape = rgb.getShape();
+		final DoubleDataset sum = new DoubleDataset(shape);
+		
+		// Important to test this algorithm use 
+		// \\dls-science\science\groups\das\ExampleData\large test files\Galaxy.tif
+		// Then switch on and off RGB rendering. Previously, position iterator was
+		// use but now only the absolute values seem to loop properly and give the
+		// correct image in the sum.
+		for (int i = 0; i < rgb.getSize(); i++) {
+			try {
+				sum.setAbs(i, rgb.getRedAbs(i)+rgb.getBlueAbs(i)+rgb.getGreenAbs(i));
+			} catch (ArrayIndexOutOfBoundsException ignored) {
+				break;
+			}
 		}
 		return sum;
 	}
