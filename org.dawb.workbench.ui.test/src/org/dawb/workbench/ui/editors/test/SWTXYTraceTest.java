@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.dawb.common.services.ServiceManager;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.workbench.ui.editors.AsciiEditor;
 import org.dawb.workbench.ui.editors.ImageEditor;
@@ -25,17 +26,20 @@ import org.dawnsci.plotting.api.PlottingFactory;
 import org.dawnsci.plotting.api.filter.AbstractPlottingFilter;
 import org.dawnsci.plotting.api.filter.IFilterDecorator;
 import org.dawnsci.plotting.api.filter.IPlottingFilter;
+import org.dawnsci.plotting.api.histogram.IPaletteService;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.ILineTrace;
 import org.dawnsci.plotting.api.trace.ILineTrace.PointStyle;
 import org.dawnsci.plotting.api.trace.ILineTrace.TraceType;
-import org.dawnsci.plotting.api.trace.IVectorTrace.VectorNormalizationType;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.api.trace.IVectorTrace;
+import org.dawnsci.plotting.api.trace.IVectorTrace.ArrowConfiguration;
+import org.dawnsci.plotting.api.trace.IVectorTrace.ArrowHistogram;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
@@ -60,7 +64,6 @@ import uk.ac.diamond.scisoft.analysis.dataset.Random;
  *
  */
 public class SWTXYTraceTest {
-	
 	
 	@Test
     public void testVectorSimple1D() throws Throwable {
@@ -90,7 +93,60 @@ public class SWTXYTraceTest {
 		final IVectorTrace vector = sys.createVectorTrace("vector1");
 		vector.setData(vectors, Arrays.asList(xAxis, yAxis));
 		vector.setArrowColor(200, 0, 0);
+		vector.setArrowConfiguration(ArrowConfiguration.TO_CENTER_WITH_CIRCLE);
+		vector.setCircleColor(0,200,0);
 		//vector.setVectorNormalizationType(VectorNormalizationType.LOGARITHMIC);
+		sys.addTrace(vector);
+		
+		sys.repaint();
+		
+		EclipseUtils.delay(2000);
+		System.out.println("Passed");
+	}
+	
+	@Test
+    public void testVectorSimple2D() throws Throwable {
+		
+		final Bundle bun  = Platform.getBundle("org.dawb.workbench.ui.test");
+
+		String path = (bun.getLocation()+"src/org/dawb/workbench/ui/editors/test/billeA.edf");
+		path = path.substring("reference:file:".length());
+		if (path.startsWith("/C:")) path = path.substring(1);
+
+		final IWorkbenchPage page      = EclipseUtils.getPage();		
+		final IFileStore  externalFile = EFS.getLocalFileSystem().fromLocalFile(new File(path));
+		final IEditorPart part         = page.openEditor(new FileStoreEditorInput(externalFile), ImageEditor.ID);
+		page.setPartState(EclipseUtils.getPage().getActivePartReference(), IWorkbenchPage.STATE_MAXIMIZED);
+
+		EclipseUtils.delay(2000);
+		
+		final AbstractPlottingSystem sys = (AbstractPlottingSystem)PlottingFactory.getPlottingSystem(part.getTitle());
+		
+		AbstractDataset vectors = AbstractDataset.zeros(new int[]{20, 20, 2}, ADataset.FLOAT32);
+		
+		for (int x = 0; x < 20; x++) {
+			for (int y = 0; y < 20; y++) {
+				vectors.set(y*100, x, y, 0); // This gets normalized later
+				vectors.set(2*Math.PI*((double)x/(20d)), x, y, 1);
+			}
+		}
+		
+		final IDataset xAxis = AbstractDataset.zeros(new int[]{20}, ADataset.FLOAT32);
+		final IDataset yAxis = AbstractDataset.zeros(new int[]{20}, ADataset.FLOAT32);
+		for (int i = 0; i < 20; i++) {
+			xAxis.set(i*100, i);
+			yAxis.set(i*100, i);
+		}
+		
+		final IVectorTrace vector = sys.createVectorTrace("vector1");
+		vector.setData(vectors, Arrays.asList(xAxis, yAxis));
+		vector.setArrowColor(200, 0, 0);
+		
+		IPaletteService service = (IPaletteService)ServiceManager.getService(IPaletteService.class);
+		final PaletteData   jet = service.getPaletteData("NCD");
+		vector.setArrowPalette(jet);
+		vector.setArrowHistogram(ArrowHistogram.COLOR_BY_ANGLE);
+		
 		sys.addTrace(vector);
 		
 		sys.repaint();
@@ -98,6 +154,7 @@ public class SWTXYTraceTest {
 		EclipseUtils.delay(200000);
 		System.out.println("Passed");
 	}
+
 
 	@Test
 	public void testImageNans() throws Throwable {

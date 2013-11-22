@@ -16,7 +16,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.csstudio.swt.xygraph.undo.ZoomType;
-import org.dawb.common.services.IPaletteService;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.util.EclipseUtils;
@@ -26,6 +25,7 @@ import org.dawnsci.plotting.PlottingActionBarManager;
 import org.dawnsci.plotting.api.ActionType;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.ManagerType;
+import org.dawnsci.plotting.api.histogram.IPaletteService;
 import org.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.dawnsci.plotting.api.preferences.ToolbarConfigurationConstants;

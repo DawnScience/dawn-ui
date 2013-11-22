@@ -10,6 +10,8 @@ package org.dawnsci.plotting.api.trace;
 
 import java.util.List;
 
+import org.eclipse.swt.graphics.PaletteData;
+
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 /**
@@ -24,24 +26,33 @@ import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
  */
 public interface IVectorTrace extends ITrace {
 	
-	public enum VectorNormalizationType {
+	public enum VectorNormalization {
 		LINEAR, 
 		LOGARITHMIC;
 	};
+		
+	public enum ArrowConfiguration {
+		THROUGH_CENTER, 
+		TO_CENTER,
+		TO_CENTER_WITH_CIRCLE;
+	};
 	
+	public enum ArrowHistogram {
+		FIXED_COLOR, 
+		COLOR_BY_MAGNITUDE,
+		COLOR_BY_ANGLE;
+	};
 	/**
-	 * Used when the values of the vectors are normalized to the maximum
-	 * arrow size.
-	 * @param type
+	 * Set the way the arrow pointing should be done.
+	 * @param arrowPosition
 	 */
-	public void setVectorNormalizationType(VectorNormalizationType type);
-	
+	public void setArrowConfiguration(ArrowConfiguration arrowPosition);
+
 	/**
-	 * Used when the values of the vectors are normalized to the maximum
-	 * arrow size.
-	 * @return VectorNormalizationType
+	 * Get the way the arrow pointing should be done.
+	 * @param arrowPosition
 	 */
-	public VectorNormalizationType getVectorNormalizationType();
+	public ArrowConfiguration getArrowConfiguration();
 	
 	/**
 	 * The maximum size of the arrow in screen pixels. Default is 20.
@@ -66,7 +77,35 @@ public interface IVectorTrace extends ITrace {
 	 * @param rgb
 	 */
 	public int[] getArrowColor();
+	
+    /**
+     * Instead of a fixed color the arrow may use a palette. If the palette is
+     * set the arrowColor is ignored providing the ArrowHistogram has been set
+     * to a non-fixed type.
+     * 
+     * @param jet
+     */
+	public void setArrowPalette(PaletteData jet);
 
+    /**
+     * Instead of a fixed color the arrow may use a palette. If the palette is
+     * set the arrowColor is ignored providing the ArrowHistogram has been set
+     * to a non-fixed type.
+     * 
+     */
+	public PaletteData getArrowPalette();
+
+	/**
+	 * Set the rgb values for the circle color. By default the circle is drawn black.
+	 * @param rgb
+	 */
+	public void setCircleColor(int... rgb);
+	
+	/**
+	 * Get the rgb values for the circle color. By default the circle is drawn black.
+	 * @param rgb
+	 */
+	public int[] getCircleColor();
 
 	/**
 	 * Call to set image data
@@ -89,4 +128,32 @@ public interface IVectorTrace extends ITrace {
 	 */
 	public void repaint();
 	
+	
+	/**
+	 * Used when the values of the vectors are normalized to the maximum
+	 * arrow size.
+	 * @param type
+	 */
+	public void setVectorNormalization(VectorNormalization type);
+	
+	/**
+	 * Used when the values of the vectors are normalized to the maximum
+	 * arrow size.
+	 * @return VectorNormalizationType
+	 */
+	public VectorNormalization getVectorNormalization();
+
+	/**
+	 * How to color the arrows
+	 * @return
+	 */
+	public ArrowHistogram getArrowHistogram();
+
+	/**
+	 * How to color the arrows
+	 * @return
+	 */
+	public void setArrowHistogram(ArrowHistogram arrowHistogram);
+	
+
 }

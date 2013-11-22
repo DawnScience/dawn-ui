@@ -39,4 +39,5 @@ Require-Bundle: org.eclipse.core.filesystem;bundle-version="1.3.1",
  org.dawnsci.plotting;bundle-version="1.2.0",
  org.dawnsci.slicing;bundle-version="1.0.0",
  org.dawnsci.slicing.api;bundle-version="1.0.0",
- org.dawnsci.common.widgets;bundle-version="1.2.0"
+ org.dawnsci.common.widgets;bundle-version="1.2.0",
+ org.dawnsci.rcp.histogram;bundle-version="1.1.0"

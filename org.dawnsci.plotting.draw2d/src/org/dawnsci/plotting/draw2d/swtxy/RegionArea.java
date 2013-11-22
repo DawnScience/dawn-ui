@@ -669,7 +669,11 @@ public class RegionArea extends PlotArea {
 		return null;
 	}
 
-
+	public void removeNotify() {
+       super.removeNotify();
+       dispose();
+	}
+	
 	public void dispose() {
 		
 		clearTraces();
@@ -678,6 +682,9 @@ public class RegionArea extends PlotArea {
 		if (imageTraceListeners!=null) imageTraceListeners.clear();
 		if (regions!=null)             regions.clear();
 		if (imageTraces!=null)         imageTraces.clear();
+		if (vectorTraces!=null)        {
+			vectorTraces.clear();
+		}
 	}
 
 	/**

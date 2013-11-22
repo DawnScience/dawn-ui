@@ -364,7 +364,7 @@
       <serviceFactory
             factoryClass="org.dawnsci.rcp.service.PaletteService">
          <service
-               serviceClass="org.dawb.common.services.IPaletteService">
+               serviceClass="org.dawnsci.plotting.api.histogram.IPaletteService">
          </service>
       </serviceFactory>
    </extension>
