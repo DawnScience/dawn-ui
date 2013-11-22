@@ -526,6 +526,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 					// Update UI
 					Display.getDefault().syncExec(new Runnable() {
 						public void run() {
+							setFocus();
 							final PlotDataComponent dataSetComponent = (PlotDataComponent)getDataSetComponent();
 					 		if (dataSetComponent==null) return;
 						    dataSetComponent.setData(dataHolder, meta);
