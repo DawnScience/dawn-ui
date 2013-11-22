@@ -18,8 +18,9 @@ public enum PlotType {
         
     XY_STACKED(1, 2),   // dimensions=2 X and Many Y
 
-    XY_STACKED_3D(3, 2);// dimensions=2 X and Many Y
-    
+    XY_STACKED_3D(3, 2),// dimensions=3 X and Many Y
+
+	XY_SCATTER_3D(3, 1);// dimensions=3 X and Y
 	
 	
 	private final int rank;
@@ -56,6 +57,12 @@ public enum PlotType {
 	}
 	public boolean is1Dor2D() {
 		return is1D()||is2D();
+	}
+	public boolean isStacked3D() {
+		return rank == 3 && dimensions == 2;
+	}
+	public boolean isScatter3D() {
+		return rank == 3 && dimensions == 1;
 	}
 	
 	/**

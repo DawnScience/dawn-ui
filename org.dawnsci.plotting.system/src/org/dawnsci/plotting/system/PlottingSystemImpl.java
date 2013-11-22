@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2012 European Synchrotron Radiation Facility,
+ * Copyright (c) 2013 European Synchrotron Radiation Facility,
  *                    Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.Trace;
+import org.dawb.common.services.IPaletteService;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.plotting.AbstractPlottingSystem;
 import org.dawnsci.plotting.PlottingActionBarManager;
@@ -29,7 +30,6 @@ import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.annotation.IAnnotation;
 import org.dawnsci.plotting.api.axis.IAxis;
 import org.dawnsci.plotting.api.axis.IPositionListener;
-import org.dawnsci.plotting.api.histogram.IPaletteService;
 import org.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.dawnsci.plotting.api.preferences.ToolbarConfigurationConstants;
@@ -41,6 +41,7 @@ import org.dawnsci.plotting.api.trace.IImageStackTrace;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.ILineStackTrace;
 import org.dawnsci.plotting.api.trace.ILineTrace;
+import org.dawnsci.plotting.api.trace.IScatter3DTrace;
 import org.dawnsci.plotting.api.trace.ISurfaceTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.api.trace.ITraceListener;
@@ -584,8 +585,10 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		
 		if (plottingMode.is1Dor2D()) {
 		    this.plottingMode = PlotType.XY;
-		} else {
+		} else if (plottingMode.isStacked3D()) {
 			this.plottingMode = PlotType.XY_STACKED_3D;
+		} else if (plottingMode.isScatter3D()) {
+			this.plottingMode = PlotType.XY_SCATTER_3D;
 		}
 		switchPlottingType(plottingMode);
 
@@ -603,7 +606,18 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			if (lightWeightViewer.getControl()==null) return null;	
 			traces = lightWeightViewer.createLineTraces(title, xIn, ysIn, dataNames, traceMap, colorMap, monitor);
 			
-		} else {
+		} else if (plottingMode.isScatter3D()) {
+			traceMap.clear();
+			IScatter3DTrace trace = jrealityViewer.createScatter3DTrace(title);
+			final IDataset x = xIn;
+			final AbstractDataset y = (AbstractDataset) ysIn.get(1);
+			final AbstractDataset z = (AbstractDataset) ysIn.get(2);
+			if (dataNames!=null) trace.setDataName(dataNames.get(0));
+			trace.setData(x, Arrays.asList(x,y,z));
+			jrealityViewer.addTrace(trace);
+			traceMap.put(trace.getName(), trace);
+			traces = Arrays.asList((ITrace)trace);
+		} else if (plottingMode.isStacked3D()) {
 			traceMap.clear();
 			ILineStackTrace trace = null;
 			// Limit the number of stack plots to 100
@@ -655,7 +669,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		fireTraceCreated(new TraceEvent(wrapper));
 		return wrapper;
 	}
-	
+
 	public IVectorTrace createVectorTrace(String traceName) {
 		final Axis xAxis = (Axis)getSelectedXAxis();
 		final Axis yAxis = (Axis)getSelectedYAxis();
@@ -664,7 +678,6 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		fireTraceCreated(new TraceEvent(trace));
 		return trace;
 	}
-
 
 	@Override
 	public ISurfaceTrace createSurfaceTrace(String traceName) {
@@ -698,6 +711,11 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	@Override
 	public ILineStackTrace createLineStackTrace(String traceName, int stackplots) {	
 		return jrealityViewer.createStackTrace(traceName, stackplots);
+	}
+
+	@Override
+	public IScatter3DTrace createScatter3DTrace(String traceName) {
+		return jrealityViewer.createScatter3DTrace(traceName);
 	}
 
 	protected void switchPlottingType( PlotType type ) {
@@ -1321,3 +1339,4 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	}
 
 }
+

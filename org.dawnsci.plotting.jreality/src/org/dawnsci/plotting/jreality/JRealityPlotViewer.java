@@ -21,6 +21,7 @@ import javax.swing.JPanel;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.trace.ILineStackTrace;
+import org.dawnsci.plotting.api.trace.IScatter3DTrace;
 import org.dawnsci.plotting.api.trace.ISurfaceTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.api.trace.TraceWillPlotEvent;
@@ -239,14 +240,17 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		surface.setWindow(new RectangularROI(0, 0, 300, 300, 0));
 		return surface;
 	}
-	
+
 	private ITrace currentTrace;
+
 	public void addTrace(ITrace trace) {
 		
 		if (trace instanceof ISurfaceTrace) {
 			system.setPlotType(PlotType.SURFACE);
 		} else if (trace instanceof ILineStackTrace) {
 			system.setPlotType(PlotType.XY_STACKED_3D);
+		} else if (trace instanceof IScatter3DTrace) {
+			system.setPlotType(PlotType.XY_SCATTER_3D);
 		}
 		TraceWillPlotEvent evt = new TraceWillPlotEvent(trace, true);
 		system.fireWillPlot(evt);
@@ -256,6 +260,8 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 			addSurfaceTrace((ISurfaceTrace)trace);
 		} else if (trace instanceof ILineStackTrace) {
 			addStackTrace((ILineStackTrace)trace);
+		} else if (trace instanceof IScatter3DTrace) {
+			addScatter3DTrace((IScatter3DTrace)trace);
 		}
  		currentTrace = trace;
 	}
@@ -297,7 +303,45 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		removeOldSceneNodes();
 		surface.setActive(false);
 	}
+
+	public IScatter3DTrace createScatter3DTrace(final String name) {
+		Scatter3DTrace scatter = new Scatter3DTrace(this, name);
+		// No more than stackPlots number in the stack.
+//		scatter.setWindow(new LinearROI(new double[]{0.0,0.0}, new double[]{numberOfPlots,0.0}));
+		return scatter;
+//		SurfaceTrace surface = new SurfaceTrace(this, name);
+//		surface.setWindow(new RectangularROI(0, 0, 300, 300, 0));
+//		return surface;
+	}
+
+	protected void addScatter3DTrace(final IScatter3DTrace trace) {
+		Scatter3DTrace scatter = (Scatter3DTrace)trace;
+		try {
+			scatter.setPlottingSystem(system);
+			graph.setVisible(false);
+			plot(scatter.createAxisValues(), getWindow(scatter.getWindow()), PlottingMode.SCATTER3D, scatter.getData());
+		} finally {
+			graph.setVisible(true);
+			refresh(true);
+		}
+		scatter.setActive(true);
+	}
 	
+	/**
+	 * Clear the 3D scatter plot from being plotted.
+	 * 
+	 * The 3D scatter plot will be deactivated after removal but may be added again later.
+	 * 
+	 * @param name
+	 * @return
+	 * @throws Exception 
+	 */
+	public void removeScatter3DTrace(final IScatter3DTrace trace) {
+		Scatter3DTrace scatter = (Scatter3DTrace)trace;
+		removeOldSceneNodes();
+		scatter.setActive(false);
+	}
+
 	//////////////////////////////////////////////////////////////////////////////////////////
 	
 	protected SurfacePlotROI getWindow(IROI roi) {
@@ -431,16 +475,15 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	}
 	
 	private void update(boolean newMode, List<IDataset> sets) throws Exception {
-		
-    	checkAndAddLegend(sets);		
+		checkAndAddLegend(sets);
 		sanityCheckDataSets(sets);
-		
+
 		if (newMode) {
 			graph = plotter.buildGraph(sets, graph);
 		} else {
 			plotter.updateGraph(sets);
 		}
-		
+
 		if (currentMode == PlottingMode.SURF2D     || 
 			currentMode == PlottingMode.SCATTER3D  ||
 			currentMode == PlottingMode.ONED_THREED) {
@@ -806,7 +849,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	 *            Number of stack plots
 	 */
 	private boolean setMode(PlottingMode newPlotMode, int dataSize) {
-		if (dataSize == previousSize)
+		if (dataSize == previousSize && currentMode.equals(newPlotMode))
 			return false;
 		previousSize = dataSize;
 
@@ -936,7 +979,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 			viewerApp.getSceneRoot().addTool(cameraZoomTool);
 			setPerspectiveCamera(true,false);
 			hBar.setVisible(false);
-			vBar.setVisible(false);						
+			vBar.setVisible(false);
 			break;
 		case BARCHART:
 			plotter = new HistogramChartPlot1D(viewerApp, graphColourTable, hasJOGL);
@@ -1132,7 +1175,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	protected void resetView() {
 		MatrixBuilder.euclidean().translate(0.0f, 0.0f, 0.0f).assignTo(toolNode);
 		MatrixBuilder.euclidean().translate(0.0f, 0.0f, 0.0f).assignTo(root);
-		if (currentMode == PlottingMode.ONED_THREED || currentMode == PlottingMode.SURF2D) {
+		if (currentMode == PlottingMode.ONED_THREED || currentMode == PlottingMode.SURF2D || currentMode == PlottingMode.SCATTER3D) {
 			Camera sceneCamera = CameraUtility.getCamera(viewerApp.getCurrentViewer());
 
 			if (sceneCamera.isPerspective()) {
@@ -1155,6 +1198,18 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		}
 		plotArea.redraw();
 		plotter.resetView();
+	}
+
+	/**
+	 * Set if point sizes should be of uniform size in 3D scatter plot
+	 * 
+	 * @param uniform
+	 *            true (use uniform size) false (do not use uniform size)
+	 */
+	public void useUniformSize(boolean uniform) {
+		if (currentMode == PlottingMode.SCATTER3D) {
+			((DataSetScatterPlot3D) plotter).setUniformSize(uniform);
+		}
 	}
 
 	protected boolean isExporting() {

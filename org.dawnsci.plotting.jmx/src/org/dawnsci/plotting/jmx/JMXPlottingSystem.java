@@ -19,6 +19,7 @@ import org.dawnsci.plotting.api.trace.IImageStackTrace;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.ILineStackTrace;
 import org.dawnsci.plotting.api.trace.ILineTrace;
+import org.dawnsci.plotting.api.trace.IScatter3DTrace;
 import org.dawnsci.plotting.api.trace.ISurfaceTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.api.trace.ITraceListener;
@@ -74,11 +75,12 @@ public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSyste
 	public IImageTrace createImageTrace(String traceName) {
 		return (IImageTrace)call(getMethodName(Thread.currentThread().getStackTrace()), traceName);
 	}
+
 	@Override
 	public IVectorTrace createVectorTrace(String traceName) {
 		return (IVectorTrace)call(getMethodName(Thread.currentThread().getStackTrace()), traceName);
 	}
-	
+
 	public Control setControl(Control alternative, boolean isToolbar) {
 		throw new RuntimeException("Expert method "+getMethodName(Thread.currentThread().getStackTrace())+" is not allowed in JMX mode!");
 	}
@@ -101,6 +103,11 @@ public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSyste
 	@Override
 	public ILineStackTrace createLineStackTrace(String traceName, int stackplots) {
 		return (ILineStackTrace)call(getMethodName(Thread.currentThread().getStackTrace()), traceName, stackplots);
+	}
+
+	@Override
+	public IScatter3DTrace createScatter3DTrace(String traceName) {
+		return (IScatter3DTrace)call(getMethodName(Thread.currentThread().getStackTrace()), traceName);
 	}
 
 	@Override

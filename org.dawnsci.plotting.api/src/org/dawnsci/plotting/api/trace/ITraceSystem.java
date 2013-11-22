@@ -1,4 +1,4 @@
-/*
+/*-
  * Copyright (c) 2013 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
@@ -36,7 +36,7 @@ public interface ITraceSystem {
 	 * @return
 	 */
 	public ILineTrace createLineTrace(String traceName);
-	
+
 	/**
 	 * Creates a vector trace which may be added to a 1D or 2D plot.
 	 * The Vector trace will draw arrows over the plot at various locations.
@@ -45,8 +45,7 @@ public interface ITraceSystem {
 	 * @return
 	 */
 	public IVectorTrace createVectorTrace(String traceName);
-	
-	
+
 	/**
 	 * Creates a surface trace used for 3D plotting. This does not add the trace
 	 * or give it any data.
@@ -79,6 +78,15 @@ public interface ITraceSystem {
 	 * @return
 	 */
 	public ILineStackTrace createLineStackTrace(String traceName, int stackplots);
+
+	/**
+	 * Creates a scatter 3D plot trace used for 3D plotting. This does not add the trace
+	 * or give it any data.
+	 * 
+	 * @param traceName
+	 * @return
+	 */
+	public IScatter3DTrace createScatter3DTrace(String traceName);
 
 	/**
 	 * Creates a stack trace used for 2D plotting. This does not add the trace
@@ -181,3 +189,4 @@ public interface ITraceSystem {
 	 */
 	public void fireTraceAdded(final TraceEvent evt);
 }
+
