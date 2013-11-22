@@ -22,7 +22,6 @@ import java.util.Map;
 
 import org.csstudio.swt.xygraph.figures.Axis;
 import org.csstudio.swt.xygraph.figures.Trace;
-import org.dawb.common.services.IPaletteService;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.plotting.AbstractPlottingSystem;
 import org.dawnsci.plotting.PlottingActionBarManager;
@@ -30,6 +29,7 @@ import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.annotation.IAnnotation;
 import org.dawnsci.plotting.api.axis.IAxis;
 import org.dawnsci.plotting.api.axis.IPositionListener;
+import org.dawnsci.plotting.api.histogram.IPaletteService;
 import org.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.dawnsci.plotting.api.preferences.ToolbarConfigurationConstants;
@@ -44,8 +44,10 @@ import org.dawnsci.plotting.api.trace.ILineTrace;
 import org.dawnsci.plotting.api.trace.ISurfaceTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.api.trace.ITraceListener;
+import org.dawnsci.plotting.api.trace.IVectorTrace;
 import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.draw2d.swtxy.LineTrace;
+import org.dawnsci.plotting.draw2d.swtxy.VectorTrace;
 import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
 import org.dawnsci.plotting.jreality.JRealityPlotViewer;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -653,6 +655,16 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		fireTraceCreated(new TraceEvent(wrapper));
 		return wrapper;
 	}
+	
+	public IVectorTrace createVectorTrace(String traceName) {
+		final Axis xAxis = (Axis)getSelectedXAxis();
+		final Axis yAxis = (Axis)getSelectedYAxis();
+
+		final VectorTrace trace    = new VectorTrace(traceName, xAxis, yAxis);
+		fireTraceCreated(new TraceEvent(trace));
+		return trace;
+	}
+
 
 	@Override
 	public ISurfaceTrace createSurfaceTrace(String traceName) {

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.dawb.common.services.IPaletteService;
+import org.dawnsci.plotting.api.histogram.IPaletteService;
 import org.dawnsci.rcp.functions.ColourSchemeContribution;
 import org.dawnsci.rcp.histogram.ExtentionPointManager;
 import org.eclipse.swt.graphics.PaletteData;

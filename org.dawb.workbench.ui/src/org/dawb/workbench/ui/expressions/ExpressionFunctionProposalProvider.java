@@ -128,6 +128,7 @@ public class ExpressionFunctionProposalProvider implements
 		List<String> combinedNames = new ArrayList<String>();
 		proposalMap = new HashMap<String, List<ContentProposal>>();
 		
+		if (functions==null) return;
 		for (String key : functions.keySet()) {
 			Object funcClass = functions.get(key);
 			Method[] methods = ((Class<?>)funcClass).getMethods();

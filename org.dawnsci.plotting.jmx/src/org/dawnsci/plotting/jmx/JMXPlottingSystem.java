@@ -22,6 +22,7 @@ import org.dawnsci.plotting.api.trace.ILineTrace;
 import org.dawnsci.plotting.api.trace.ISurfaceTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.api.trace.ITraceListener;
+import org.dawnsci.plotting.api.trace.IVectorTrace;
 import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -72,6 +73,10 @@ public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSyste
 	@Override
 	public IImageTrace createImageTrace(String traceName) {
 		return (IImageTrace)call(getMethodName(Thread.currentThread().getStackTrace()), traceName);
+	}
+	@Override
+	public IVectorTrace createVectorTrace(String traceName) {
+		return (IVectorTrace)call(getMethodName(Thread.currentThread().getStackTrace()), traceName);
 	}
 	
 	public Control setControl(Control alternative, boolean isToolbar) {

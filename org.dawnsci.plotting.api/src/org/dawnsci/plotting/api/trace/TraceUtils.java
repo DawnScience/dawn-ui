@@ -58,7 +58,7 @@ public class TraceUtils {
 	/**
 	 * Determine if IImageTrace has custom axes or not.
 	 */
-	public static boolean isCustomAxes(IImageTrace trace) {
+	public static boolean isCustomAxes(ICoordinateSystemTrace trace) {
 		
 		if (trace==null) return false;
 		List<IDataset> axes = trace.getAxes();
@@ -90,6 +90,16 @@ public class TraceUtils {
 		}
 		
 		return true;
+	}
+
+	
+	public static void transform(IDataset label, int index, double[]... points) {
+		if (label!=null) {
+			for (double[] ds : points) {
+				int dataIndex = (int)ds[index];
+				ds[index] = label.getDouble(dataIndex);
+			}
+		}		
 	}
 
 }

@@ -24,17 +24,21 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import javax.measure.quantity.Length;
 import javax.vecmath.Vector3d;
 
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
+import org.dawnsci.common.widgets.tree.NumericNode;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.region.RegionUtils;
+import org.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.tools.diffraction.DiffractionImageAugmenter;
 import org.dawnsci.plotting.tools.diffraction.DiffractionTool;
+import org.dawnsci.plotting.tools.diffraction.DiffractionTreeModel;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -691,5 +695,46 @@ public class DiffractionCalibrationUtils {
 			}
 		}
 		return "##,##0." + result;
+	}
+
+	/**
+	 * Updates the Diffraction tool
+	 * @param nodePath
+	 *         node to update
+	 * @param value
+	 *         new value of the node
+	 * @param toolSystem
+	 *         ToolPage system of the tool
+	 */
+	public static void updateDiffTool(String nodePath, double value, IToolPageSystem toolSystem) {
+		DiffractionTool diffTool = (DiffractionTool) toolSystem.getToolPage(DiffractionCalibrationConstants.DIFFRACTION_ID);
+		DiffractionTreeModel treeModel = diffTool.getModel();
+
+		NumericNode<Length> distanceNode = getDiffractionTreeNode(nodePath, toolSystem);
+		distanceNode.setDoubleValue(value);
+		treeModel.setNode(distanceNode, nodePath);
+
+		diffTool.refresh();
+	}
+
+	/**
+	 * Gets a Diffraction tree node
+	 * @param nodePath
+	 *         node to retrieve
+	 * @param toolSystem
+	 *         ToolPage system of the tool
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public static NumericNode<Length> getDiffractionTreeNode(String nodePath, IToolPageSystem toolSystem) {
+		NumericNode<Length> node = null;
+		if (toolSystem == null)
+			return node;
+		DiffractionTool diffTool = (DiffractionTool) toolSystem.getToolPage(DiffractionCalibrationConstants.DIFFRACTION_ID);
+		DiffractionTreeModel treeModel = diffTool.getModel();
+		if (treeModel == null)
+			return node;
+		node = (NumericNode<Length>) treeModel.getNode(nodePath);
+		return node;
 	}
 }

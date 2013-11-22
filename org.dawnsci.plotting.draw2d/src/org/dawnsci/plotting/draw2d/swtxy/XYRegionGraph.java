@@ -116,6 +116,12 @@ public class XYRegionGraph extends XYGraph {
 	public void removeImageTrace(final ImageTrace trace) {
 		getRegionArea().removeImageTrace(trace);
 	}
+	public void addVectorTrace(final VectorTrace trace) {
+		getRegionArea().addVectorTrace(trace);
+	}
+	public void removeVectorTrace(final VectorTrace trace) {
+		getRegionArea().removeVectorTrace(trace);
+	}
 
 	public boolean addRegionListener(IRegionListener l) {
 		return getRegionArea().addRegionListener(l);

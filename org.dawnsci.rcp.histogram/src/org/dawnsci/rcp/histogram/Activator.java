@@ -2,8 +2,8 @@ package org.dawnsci.rcp.histogram;
 
 import java.util.Hashtable;
 
-import org.dawb.common.services.IPaletteService;
 import org.dawb.common.services.conversion.IConversionService;
+import org.dawnsci.plotting.api.histogram.IPaletteService;
 import org.dawnsci.rcp.service.PaletteService;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;

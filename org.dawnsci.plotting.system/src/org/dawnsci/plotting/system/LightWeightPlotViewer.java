@@ -52,6 +52,7 @@ import org.dawnsci.plotting.api.trace.ILineTrace.TraceType;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.api.trace.ITraceContainer;
 import org.dawnsci.plotting.api.trace.ITraceListener;
+import org.dawnsci.plotting.api.trace.IVectorTrace;
 import org.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.dawnsci.plotting.draw2d.swtxy.AspectAxis;
 import org.dawnsci.plotting.draw2d.swtxy.ImageStackTrace;
@@ -59,6 +60,7 @@ import org.dawnsci.plotting.draw2d.swtxy.ImageTrace;
 import org.dawnsci.plotting.draw2d.swtxy.LineTrace;
 import org.dawnsci.plotting.draw2d.swtxy.RegionArea;
 import org.dawnsci.plotting.draw2d.swtxy.RegionCreationLayer;
+import org.dawnsci.plotting.draw2d.swtxy.VectorTrace;
 import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.dawnsci.plotting.draw2d.swtxy.selection.SelectionRegionFactory;
@@ -792,7 +794,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		
 		if (trace instanceof IImageTrace) {
 			system.setPlotType(PlotType.IMAGE); // Only one image allowed at a time
-		} else {
+		} else if (!(trace instanceof IVectorTrace)){
 			system.setPlotType(PlotType.XY);
 		}
 			
@@ -826,6 +828,13 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 				setFolderScaleVisible(false);
 			}
 
+		} else if (trace instanceof IVectorTrace) {
+			
+			final IVectorTrace vector = (IVectorTrace)trace;
+			xyGraph.addVectorTrace((VectorTrace)vector);
+			vector.setVisible(true);
+		
+			
 		} else {
 			
 			final AspectAxis xAxis = (AspectAxis)getSelectedXAxis();
