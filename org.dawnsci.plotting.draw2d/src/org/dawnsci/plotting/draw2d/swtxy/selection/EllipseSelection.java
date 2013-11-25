@@ -345,14 +345,12 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 			return new TranslationListener() {
 				SelectionHandle ha;
 				private boolean major;
-				private Point centre;
 
 				@Override
 				public void onActivate(TranslationEvent evt) {
 					Object src = evt.getSource();
 					if (src instanceof FigureTranslator) {
 						ha = (SelectionHandle) ((FigureTranslator) src).getRedrawFigure();
-						centre = getCentre();
 						int current = handles.indexOf(ha);
 						switch (current) {
 						case 0: case 2:
@@ -363,7 +361,6 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 							break;
 						default:
 							ha = null;
-							centre = null;
 							break;
 						}
 					}
@@ -380,8 +377,7 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 						if (ha != null) {
 							double[] axes = getAxes();
 							Point pa = getInverseTransformedPoint(new PrecisionPoint(ha.getSelectionPoint()));
-							Point pb = getInverseTransformedPoint(centre);
-							Dimension d = pa.getDifference(pb);
+							Dimension d = pa.getDifference(centre);
 							if (major) {
 								axes[0] *= 2. * Math.abs(d.preciseWidth());
 							} else {
@@ -402,7 +398,6 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 						fireROISelection();
 					}
 					ha = null;
-					centre = null;
 				}
 			};
 		}

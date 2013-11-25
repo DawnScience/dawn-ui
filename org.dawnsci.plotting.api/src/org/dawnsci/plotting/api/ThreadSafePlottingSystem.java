@@ -33,6 +33,7 @@ import org.dawnsci.plotting.api.trace.IImageStackTrace;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.ILineStackTrace;
 import org.dawnsci.plotting.api.trace.ILineTrace;
+import org.dawnsci.plotting.api.trace.IScatter3DTrace;
 import org.dawnsci.plotting.api.trace.ISurfaceTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.api.trace.ITraceListener;
@@ -99,6 +100,11 @@ public class ThreadSafePlottingSystem extends StandardMBean implements IPlotting
 	@Override
 	public ILineStackTrace createLineStackTrace(String traceName, int stackplots) {
 		return (ILineStackTrace)call(getMethodName(Thread.currentThread().getStackTrace()), traceName, stackplots);
+	}
+
+	@Override
+	public IScatter3DTrace createScatter3DTrace(String traceName) {
+		return (IScatter3DTrace)call(getMethodName(Thread.currentThread().getStackTrace()), traceName);
 	}
 
 	@Override
