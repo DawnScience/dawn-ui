@@ -11,7 +11,6 @@ package org.dawnsci.plotting.api.trace;
 import java.util.List;
 
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
-import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
 /**
  * 
@@ -29,24 +28,10 @@ public interface IScatter3DTrace extends IAxesTrace, IWindowTrace {
 	 * @throws Exception
 	 */
 	public void setData(final IDataset data, final List<? extends IDataset> axes);
-			
+
 	/**
 	 * 
 	 * @param axesNames
 	 */
 	public void setAxesNames(List<String> axesNames);
-		
-	/**
-	 * 
-	 * @return the region of the window, usually a SurfacePlotROI or a RectangularROI
-	 */
-	public IROI getWindow();
-	
-	/**
-	 * Set the window to be used as a SurfacePlotROI or RectangularROI
-	 * @param window
-	 */
-	public void setWindow(IROI window);
-
-
 }

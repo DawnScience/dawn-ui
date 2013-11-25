@@ -306,12 +306,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 
 	public IScatter3DTrace createScatter3DTrace(final String name) {
 		Scatter3DTrace scatter = new Scatter3DTrace(this, name);
-		// No more than stackPlots number in the stack.
-//		scatter.setWindow(new LinearROI(new double[]{0.0,0.0}, new double[]{numberOfPlots,0.0}));
 		return scatter;
-//		SurfaceTrace surface = new SurfaceTrace(this, name);
-//		surface.setWindow(new RectangularROI(0, 0, 300, 300, 0));
-//		return surface;
 	}
 
 	protected void addScatter3DTrace(final IScatter3DTrace trace) {
