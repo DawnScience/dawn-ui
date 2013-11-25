@@ -119,7 +119,7 @@ class LightWeightPlotActions {
  		createUndoRedoActions(xyGraph);
  		actionBarManager.createExportActions();
  		createAspectHistoAction(xyGraph);
- 		actionBarManager.createPalleteActions();
+ 		actionBarManager.createPaletteActions();
  		createOriginActions(xyGraph);
  		createAdditionalActions(xyGraph, null);
  		createFullScreenActions(xyGraph);
