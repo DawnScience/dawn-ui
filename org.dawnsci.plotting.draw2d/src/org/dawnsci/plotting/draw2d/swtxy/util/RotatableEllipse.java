@@ -34,7 +34,7 @@ import org.eclipse.swt.SWT;
  * (not the top-left corner of its bounding box)
  */
 public class RotatableEllipse extends Shape implements PointFunction {
-	private static PrecisionPoint centre = new PrecisionPoint(0.5, 0.5);
+	protected static PrecisionPoint centre = new PrecisionPoint(0.5, 0.5);
 	private AffineTransform affine; // transforms unit square (origin at top-left corner) to transformed rectangle
 	private Rectangle box; // bounding box of ellipse
 	private boolean outlineOnly = false;
