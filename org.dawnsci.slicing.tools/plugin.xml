@@ -33,7 +33,12 @@
             id="org.dawnsci.slicing.tools.surfaceSlicingTool"
             tooltip="Slice as surface">
       </slicing_tool>
-      
+      <slicing_tool
+            class="org.dawnsci.slicing.tools.plot.Scatter3DSlicingTool"
+            icon="icons/TraceScatter3D.png"
+            id="org.dawnsci.slicing.tools.scatter3DSlicingTool"
+            tooltip="Slice as 3D scatter plot">
+      </slicing_tool>
       <slicing_tool
             class="org.dawnsci.slicing.tools.hyper.HyperSlicingTool"
             icon="icons/cutter.png"
