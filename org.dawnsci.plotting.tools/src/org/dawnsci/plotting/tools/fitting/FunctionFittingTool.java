@@ -314,12 +314,10 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 		menuManager.add(updateAction);
 		menuManager.add(addFunctionAction);
 		menuManager.add(duplicateAction);
-		viewer.getControl().setMenu(
-				menuManager.createContextMenu(viewer.getControl()));
+		viewer.getControl().setMenu(	menuManager.createContextMenu(viewer.getControl()));
 
 		functionWidget = new FunctionWidget(composite);
-		functionWidget
-				.addSelectionChangedListener(new ISelectionChangedListener() {
+		functionWidget.addSelectionChangedListener(new ISelectionChangedListener() {
 
 					@Override
 					public void selectionChanged(SelectionChangedEvent event) {
@@ -372,7 +370,7 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 			updateFunctionPlot();
 
 		} catch (Exception e) {
-			logger.error("Failed to Activate Function fitting tool", e);
+			logger.error("Failed to activate function fitting tool", e);
 		}
 	}
 
@@ -397,7 +395,7 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 	
 	private void createActions() {
 		// export action
-		exportAction = new Action("Export Functions",
+		exportAction = new Action("Export functions",
 				Activator.getImageDescriptor("icons/mask-export-wiz.png")) {
 			public void run() {
 				try {
@@ -410,12 +408,11 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 				}
 			}
 		};
-		exportAction
-		.setToolTipText("Export function data from an H5 file");
+		exportAction.setToolTipText("Export function data from an H5 file");
 		getSite().getActionBars().getToolBarManager().add(exportAction);
 
 		// import action
-		importAction = new Action("Import Functions",
+		importAction = new Action("Import functions",
 				Activator.getImageDescriptor("icons/mask-import-wiz.png")) {
 			public void run() {
 				try {
@@ -428,12 +425,11 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 				}
 			}
 		};
-		importAction
-		.setToolTipText("Import function data from an H5 file");
+		importAction.setToolTipText("Import function data from an H5 file");
 		getSite().getActionBars().getToolBarManager().add(importAction);
 
 		// Add Function action
-		addFunctionAction = new Action("Add a new Function",
+		addFunctionAction = new Action("Add new function",
 				Activator.getImageDescriptor("icons/add.png")) {
 			public void run() {
 				compFunction.addFunction(showFunctionDialog(null));
@@ -442,15 +438,14 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 				updateFunctionWidget();
 			}
 		};
-		addFunctionAction.setToolTipText("Add a new function to be fitted");
+		addFunctionAction.setToolTipText("Add new function to be fitted");
 		getSite().getActionBars().getToolBarManager().add(addFunctionAction);
 
 		// Delete function action
 		deleteAction = new Action("Delete function selected",
 				Activator.getImageDescriptor("icons/delete.gif")) {
 			public void run() {
-				Integer index = (Integer) viewer.getTable().getSelection()[0]
-						.getData();
+				Integer index = (Integer) viewer.getTable().getSelection()[0].getData();
 				compFunction.removeFunction(index);
 				if (resultFunction != null) {
 					resultFunction.removeFunction(index);
@@ -460,12 +455,11 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 				updateFunctionWidget();
 			}
 		};
-		deleteAction
-				.setToolTipText("Delete the selected function from the list");
+		deleteAction.setToolTipText("Delete selected function from list");
 		getSite().getActionBars().getToolBarManager().add(deleteAction);
 		
 		// Duplicate a function
-		duplicateAction = new Action("Duplicate Selected Function",
+		duplicateAction = new Action("Duplicate selected function",
 				Activator.getImageDescriptor("icons/copy.gif")) {
 			public void run() {
 				Integer index = (Integer) viewer.getTable().getSelection()[0]
@@ -480,40 +474,35 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 				updateFunctionWidget();
 			}
 		};
-		duplicateAction
-		.setToolTipText("Duplicate the current function");
+		duplicateAction.setToolTipText("Duplicate current function");
 		getSite().getActionBars().getToolBarManager().add(duplicateAction);
 
 		// Update the parameters
-		updateAction = new Action("Update Single Parameters",
+		updateAction = new Action("Update single set of parameters",
 				Activator.getImageDescriptor("icons/copy.gif")) {
 			public void run() {
 				Integer index = (Integer) viewer.getTable().getSelection()[0]
 						.getData();
-				compFunction.getFunction(index).setParameterValues(
-						resultFunction.getFunction(index).getParameterValues());
+				compFunction.getFunction(index).setParameterValues(resultFunction.getFunction(index).getParameterValues());
 				viewer.refresh();
 				updateFunctionPlot();
 				updateFunctionWidget();
 			}
 		};
-		updateAction
-				.setToolTipText("Update the initial parameters to the fitted parameters for this Function");
+		updateAction.setToolTipText("Update initial parameters to fitted parameters for this function");
 		getSite().getActionBars().getToolBarManager().add(updateAction);
 
 		// Update all the parameters
-		updateAllAction = new Action("Update All Parameters",
+		updateAllAction = new Action("Update all parameters",
 				Activator.getImageDescriptor("icons/apply.gif")) {
 			public void run() {
-				compFunction.setParameterValues(resultFunction
-						.getParameterValues());
+				compFunction.setParameterValues(resultFunction.getParameterValues());
 				viewer.refresh();
 				updateFunctionPlot();
 				updateFunctionWidget();
 			}
 		};
-		updateAllAction
-				.setToolTipText("Update the initial parameters to the fitted parameters for All Functions");
+		updateAllAction.setToolTipText("Update initial parameters to fitted parameters for all functions");
 		getSite().getActionBars().getToolBarManager().add(updateAllAction);
 	}
 
@@ -666,8 +655,7 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 		@Override
 		public Object[] getElements(Object inputElement) {
 			if (inputElement instanceof CompositeFunction) {
-				Integer count = ((CompositeFunction) inputElement)
-						.getNoOfFunctions();
+				Integer count = ((CompositeFunction) inputElement).getNoOfFunctions();
 
 				Integer[] output = new Integer[count];
 				for (int i = 0; i < count; i++) {
@@ -712,18 +700,15 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 			});
 
 			try {
-				resultFunction = compFunction.duplicate();
-				logger.debug("Accurasy is set to {}",accuracy);
+				resultFunction = compFunction.copy();
+				logger.debug("Accuracy is set to {}", accuracy);
 				IOptimizer fitMethod = null;
 				switch (index) {
-				case 0:
+				default: case 0:
 					fitMethod = new ApacheNelderMead();
 					break;
 				case 1:
 					fitMethod = new GeneticAlg(accuracy);
-					break;
-				default:
-					fitMethod = new ApacheNelderMead();
 					break;
 				} 
 				
@@ -822,14 +807,14 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 		
 		if (compFunction != null) {
 			for (int i = 0; i < compFunction.getNoOfFunctions(); i++) {
-				String key = String.format("%03d_initial_%s", i,compFunction.getFunction(i).getName());
+				String key = String.format("%03d_initial_%s", i, compFunction.getFunction(i).getName());
 				functions.put(key, compFunction.getFunction(i));
 			}
 		}
 		
-		if(resultFunction != null) {
+		if (resultFunction != null) {
 			for (int i = 0; i < resultFunction.getNoOfFunctions(); i++) {
-				String key = String.format("%03d_result_%s", i,resultFunction.getFunction(i).getName());
+				String key = String.format("%03d_result_%s", i, resultFunction.getFunction(i).getName());
 				functions.put(key, resultFunction.getFunction(i));
 			}
 		}
@@ -843,14 +828,14 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 		compFunction = new CompositeFunction();
 		for (String key : functions.keySet()) {
 			if (key.contains("_initial_")) {
-				compFunction.addFunction((AFunction)functions.get(key));
+				compFunction.addFunction((AFunction) functions.get(key));
 			}
 		}
 		
 		resultFunction = new CompositeFunction();
 		for (String key : functions.keySet()) {
 			if (key.contains("_result_")) {
-				resultFunction.addFunction((AFunction)functions.get(key));
+				resultFunction.addFunction((AFunction) functions.get(key));
 			}
 		}
 		
