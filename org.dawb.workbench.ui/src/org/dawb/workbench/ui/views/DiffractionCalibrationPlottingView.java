@@ -439,8 +439,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		}
 		calibrantCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 
-		calibrantPositioning = new CalibrantPositioningWidget(leftCalibComp, 
-											plottingSystem, model);
+		calibrantPositioning = new CalibrantPositioningWidget(leftCalibComp, model);
 
 		Composite rightCalibComp = new Composite(mainControlComp, SWT.NONE);
 		rightCalibComp.setLayout(new GridLayout(1, false));
@@ -640,6 +639,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		}
 		// Set the various tools/controls for the calibrant positioning
 		calibrantPositioning.setToolSystem(toolSystem);
+		calibrantPositioning.setPlottingSystem(plottingSystem);
 		calibrantPositioning.setControlsToUpdate(calibOptionGroup, calibrateImagesButton);
 		calibrantPositioning.setTableViewerToUpdate(tableViewer);
 

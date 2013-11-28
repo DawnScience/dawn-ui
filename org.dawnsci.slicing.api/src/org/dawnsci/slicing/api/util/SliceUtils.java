@@ -299,12 +299,11 @@ public class SliceUtils {
 		
 		final ILazyDataset lazySet = sliceSource.getLazySet();
 		final int[]      dataShape = lazySet.getShape();
-        currentSlice.setFullShape(dataShape);
-        
-        IDataset slice;
-        final int[] slicedShape = currentSlice.getSlicedShape();
-        if (lazySet instanceof IDataset && Arrays.equals(slicedShape, lazySet.getShape())) {
-        	slice = (IDataset)lazySet;
+		currentSlice.setFullShape(dataShape);
+		IDataset slice;
+		final int[] slicedShape = currentSlice.getSlicedShape();
+		if (lazySet instanceof IDataset && Arrays.equals(slicedShape, lazySet.getShape())) {
+			slice = (IDataset)lazySet;
 			if (currentSlice.getX() > currentSlice.getY() && slice.getShape().length==2) {
 				final IAnalysisService service = (IAnalysisService)ServiceManager.getService(IAnalysisService.class);
 				// transpose clobbers name
@@ -312,19 +311,18 @@ public class SliceUtils {
 				slice = service.transpose(slice);
 				if (name!=null) slice.setName(name);
 			}
-       } else {
-        	slice = getSlice(lazySet, currentSlice,monitor);
-        }
+		} else {
+			slice = getSlice(lazySet, currentSlice,monitor);
+		}
 		if (slice==null) return;
 		
 		// DO NOT CANCEL the monitor now, we have done the hard part the slice.
 		// We may as well plot it or the plot will look very slow.
 		if (monitor!=null) monitor.worked(1);
-		
+
 		boolean requireScale = plottingSystem.isRescale()
 				               || type!=plottingSystem.getPlotType();
-		
-		
+
 		if (type==PlotType.XY) {
 			plottingSystem.clear();
 			final IDataset x = getAxis(currentSlice, sliceSource.getVariableManager(), slice.getShape()[0], currentSlice.getX()+1, true, monitor);
@@ -337,9 +335,7 @@ public class SliceUtils {
 					plottingSystem.getSelectedYAxis().setTitle("");
 				}
 			});
-			
-		} else if (type==PlotType.XY_STACKED || type==PlotType.XY_STACKED_3D) {
-			
+		} else if (type==PlotType.XY_STACKED || type==PlotType.XY_STACKED_3D || type == PlotType.XY_SCATTER_3D) {
 			final IDataset xAxis = getAxis(currentSlice, sliceSource.getVariableManager(), slice.getShape()[0], currentSlice.getX()+1, true, monitor);
 			plottingSystem.clear();
 			// We separate the 2D image into several 1d plots
@@ -356,8 +352,8 @@ public class SliceUtils {
 			final List<IDataset> ys    = new ArrayList<IDataset>(shape[1]);
 			final List<String>   names = new ArrayList<String>(shape[1]);
 			int index = 0;
-			
-    		final IAnalysisService service = (IAnalysisService)ServiceManager.getService(IAnalysisService.class);
+
+			final IAnalysisService service = (IAnalysisService)ServiceManager.getService(IAnalysisService.class);
 
 			for (double[] da : sets) {
 				final IDataset dds = service.createDoubleDataset(da, da.length);
@@ -369,19 +365,18 @@ public class SliceUtils {
 			plottingSystem.setXFirst(true);
 			plottingSystem.setPlotType(type);
 			plottingSystem.createPlot1D(xAxis, ys, names, null, monitor);
-		
+
 			Display.getDefault().syncExec(new Runnable() {
 				public void run() {
 					plottingSystem.getSelectedXAxis().setTitle(xAxis.getName());
 					plottingSystem.getSelectedYAxis().setTitle("");
 				}
 			});
-			
 		} else if (type==PlotType.IMAGE || type==PlotType.SURFACE){
 			plottingSystem.setPlotType(type);
 			IDataset y = getAxis(currentSlice, sliceSource.getVariableManager(), slice.getShape()[0], currentSlice.getX()+1, true, monitor);
 			IDataset x = getAxis(currentSlice, sliceSource.getVariableManager(), slice.getShape()[1], currentSlice.getY()+1, true, monitor);		
-			
+
 			// Nullify user objects because the ImageHistoryTool uses
 			// user objects to know if the image came from it. Since we
 			// use update here, we update (as its faster) but we also 
@@ -392,11 +387,9 @@ public class SliceUtils {
 			}
 			plottingSystem.updatePlot2D(slice, Arrays.asList(x,y), sliceSource.getDataName(), monitor); 			
 		}
-
 		plottingSystem.repaint(requireScale);
-
 	}
-	
+
 	/**
 	 * this method gives access to the image trace plotted in the
 	 * main plotter or null if one is not plotted.

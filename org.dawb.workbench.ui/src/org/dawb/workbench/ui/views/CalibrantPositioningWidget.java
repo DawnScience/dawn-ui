@@ -36,6 +36,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
 
@@ -45,24 +47,24 @@ import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
  *
  */
 public class CalibrantPositioningWidget {
+	private Logger logger = LoggerFactory.getLogger(CalibrantPositioningWidget.class);
+
 	private List<DiffractionTableData> model;
 	private Control[] controls;
 	private DiffractionTableData currentData;
 	private IToolPageSystem toolSystem;
 	private TableViewer tableViewer;
+	private IPlottingSystem plottingSystem;
 
 	/**
 	 * Creates a widget group with all the calibrant positioning widgets
 	 * used in a diffraction calibration view.
 	 * @param parent
 	 *         parent composite of the widget
-	 * @param plottingSystem
-	 *         main plotting system where to draw the calibrant
 	 * @param model
 	 *         List of all diffraction data present in the TableViewer (used to update beam centre)
 	 */
-	public CalibrantPositioningWidget(Composite parent,
-						final IPlottingSystem plottingSystem, final List<DiffractionTableData> model) {
+	public CalibrantPositioningWidget(Composite parent, final List<DiffractionTableData> model) {
 		this.model = model;
 		final Display display = Display.getDefault();
 
@@ -339,8 +341,13 @@ public class CalibrantPositioningWidget {
 		findRingButton.setToolTipText("Use pixel values to find rings in image near calibration rings");
 		findRingButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		findRingButton.addSelectionListener(new SelectionAdapter() {
+
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				if (plottingSystem == null) {
+					logger.error("The plotting system is null");
+					return;
+				}
 				Job findRingsJob = DiffractionCalibrationUtils.findRings(display, plottingSystem, currentData);
 				if (findRingsJob == null)
 					return;
@@ -413,5 +420,13 @@ public class CalibrantPositioningWidget {
 	 */
 	public void setTableViewerToUpdate (TableViewer tableViewer) {
 		this.tableViewer = tableViewer;
+	}
+
+	/**
+	 * Sets the plotting system on which to draw the calibrants
+	 * @param plottingSystem
+	 */
+	public void setPlottingSystem(IPlottingSystem plottingSystem) {
+		this.plottingSystem = plottingSystem;
 	}
 }

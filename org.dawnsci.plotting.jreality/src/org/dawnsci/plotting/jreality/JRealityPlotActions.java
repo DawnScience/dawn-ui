@@ -3,6 +3,7 @@ package org.dawnsci.plotting.jreality;
 import java.io.File;
 
 import org.dawb.common.ui.menu.CheckableActionGroup;
+import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.printing.PrintSettings;
 import org.dawnsci.plotting.api.ActionType;
 import org.dawnsci.plotting.api.IPlotActionSystem;
@@ -12,6 +13,7 @@ import org.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
 import org.dawnsci.plotting.jreality.impl.SurfPlotStyles;
 import org.dawnsci.plotting.jreality.print.JRealityPrintDialog;
 import org.dawnsci.plotting.jreality.print.PlotExportUtil;
+import org.dawnsci.plotting.jreality.tick.TickFormatting;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.Action;
@@ -42,23 +44,24 @@ public class JRealityPlotActions {
 	}
 
 	public void createActions() {
-				
 		// Tools
- 		actionMan.createToolDimensionalActions(ToolPageRole.ROLE_3D, "org.dawb.workbench.plotting.views.toolPageView.3D");
+		actionMan.createToolDimensionalActions(ToolPageRole.ROLE_3D, "org.dawb.workbench.plotting.views.toolPageView.3D");
 
 		// Configure
-        createGridLineActions();
+		createGridLineActions();
 
-        // Print/export
-        createExportActions();
- 		
- 		// Others
-        createSurfaceModeActions();
+		// Print/export
+		createExportActions();
+		
+		// Others
+		createSurfaceModeActions();
+		createScatter3DModeActions();
 	}
 
 	private void createSurfaceModeActions() {
 		CheckableActionGroup surfaceModeGroup = new CheckableActionGroup();
-		actionMan.registerGroup("jreality.plotting.surface.mode.actions", ManagerType.MENUBAR);
+		String surfaceActionsGroupName = "jreality.plotting.surface.mode.actions";
+		actionMan.registerGroup(surfaceActionsGroupName, ManagerType.MENUBAR);
 		Action displayFilled = new Action("Filled", IAction.AS_CHECK_BOX) {
 			@Override
 			public void run() {
@@ -72,7 +75,7 @@ public class JRealityPlotActions {
 		displayFilled.setImageDescriptor(Activator.getImageDescriptor("icons/save.gif"));
 		displayFilled.setChecked(true);
 		surfaceModeGroup.add(displayFilled);
-		actionMan.registerAction("jreality.plotting.surface.mode.actions", displayFilled, ActionType.SURFACE, ManagerType.MENUBAR);
+		actionMan.registerAction(surfaceActionsGroupName, displayFilled, ActionType.SURFACE, ManagerType.MENUBAR);
 
 		Action displayWireframe = new Action("Wireframe", IAction.AS_CHECK_BOX) {
 			@Override
@@ -86,7 +89,7 @@ public class JRealityPlotActions {
 		displayWireframe.setText("Wireframe mode");
 		displayWireframe.setDescription("Render the graph in wireframe mode");
 		surfaceModeGroup.add(displayWireframe);
-		actionMan.registerAction("jreality.plotting.surface.mode.actions", displayWireframe, ActionType.SURFACE, ManagerType.MENUBAR);
+		actionMan.registerAction(surfaceActionsGroupName, displayWireframe, ActionType.SURFACE, ManagerType.MENUBAR);
 
 		Action displayLinegraph = new Action("LineGraph", IAction.AS_CHECK_BOX) {
 			@Override
@@ -99,7 +102,7 @@ public class JRealityPlotActions {
 		displayLinegraph.setText("Linegraph mode");
 		displayLinegraph.setDescription("Render the graph in linegraph mode");
 		surfaceModeGroup.add(displayLinegraph);
-		actionMan.registerAction("jreality.plotting.surface.mode.actions", displayLinegraph, ActionType.SURFACE, ManagerType.MENUBAR);
+		actionMan.registerAction(surfaceActionsGroupName, displayLinegraph, ActionType.SURFACE, ManagerType.MENUBAR);
 
 		Action displayPoint = new Action("Point", IAction.AS_CHECK_BOX) {
 			@Override
@@ -112,7 +115,194 @@ public class JRealityPlotActions {
 		displayPoint.setText("Point mode");
 		displayPoint.setDescription("Render the graph in dot mode");
 		surfaceModeGroup.add(displayPoint);
-		actionMan.registerAction("jreality.plotting.surface.mode.actions", displayPoint, ActionType.SURFACE, ManagerType.MENUBAR);
+		actionMan.registerAction(surfaceActionsGroupName, displayPoint, ActionType.SURFACE, ManagerType.MENUBAR);
+	}
+
+	private Action useTransparency;
+	private Action renderEdgeOnly;
+	private Action uniformSize;
+
+	private void createScatter3DModeActions() {
+		String scatterActionsName = "jreality.plotting.scatter3d.mode.actions";
+		actionMan.registerGroup(scatterActionsName, ManagerType.MENUBAR);
+
+		useTransparency = new Action("", IAction.AS_CHECK_BOX) {
+			@Override
+			public void run() {
+				plotter.useTransparency(useTransparency.isChecked());
+				plotter.refresh(false);
+			}
+		};
+		useTransparency.setText("Use transparency");
+		useTransparency.setToolTipText("Switch on/off transparency");
+		actionMan.registerAction(scatterActionsName, useTransparency, ActionType.SCATTER3D, ManagerType.MENUBAR);
+
+		renderEdgeOnly = new Action("", IAction.AS_CHECK_BOX) {
+			@Override
+			public void run() {
+				if (renderEdgeOnly.isChecked())
+					plotter.useTransparency(true);
+				else
+					plotter.useTransparency(useTransparency.isChecked());
+				plotter.useDrawOutlinesOnly(renderEdgeOnly.isChecked());
+			}
+		};
+		renderEdgeOnly.setText("Draw outlines only");
+		renderEdgeOnly.setToolTipText("Switch on/off drawing outlines only");
+		actionMan.registerAction(scatterActionsName, renderEdgeOnly, ActionType.SCATTER3D, ManagerType.MENUBAR);
+
+		uniformSize = new Action("", IAction.AS_CHECK_BOX) {
+			@Override
+			public void run() {
+				plotter.useUniformSize(uniformSize.isChecked());
+				plotter.refresh(false);
+			}
+		};
+		uniformSize.setText("Uniform size");
+		uniformSize.setToolTipText("Switch on/off uniform point size");
+		actionMan.registerAction(scatterActionsName, uniformSize, ActionType.SCATTER3D, ManagerType.MENUBAR);
+
+		// XAxis menu
+		Action xLabelTypeRound = new Action("", IAction.AS_RADIO_BUTTON) {
+			@Override
+			public void run() {
+				plotter.setXTickLabelFormat(TickFormatting.roundAndChopMode);
+				plotter.refresh(false);
+			}
+		};
+		xLabelTypeRound.setText("X-Axis labels integer");
+		xLabelTypeRound.setToolTipText("Change the labelling on the x-axis to integer numbers");
+		xLabelTypeRound.setChecked(true);
+
+		Action xLabelTypeFloat = new Action("", IAction.AS_RADIO_BUTTON) {
+			@Override
+			public void run() {
+				plotter.setXTickLabelFormat(TickFormatting.plainMode);
+				plotter.refresh(false);
+			}
+		};
+		xLabelTypeFloat.setText("X-Axis labels real");
+		xLabelTypeFloat.setToolTipText("Change the labelling on the x-axis to real numbers");
+
+		Action xLabelTypeExponent = new Action("", IAction.AS_RADIO_BUTTON) {
+			@Override
+			public void run() {
+				plotter.setXTickLabelFormat(TickFormatting.useExponent);
+				plotter.refresh(false);
+			}
+		};
+		xLabelTypeExponent.setText("X-Axis labels exponents");
+		xLabelTypeExponent.setToolTipText("Change the labelling on the x-axis to using exponents");
+
+		Action xLabelTypeSI = new Action("", IAction.AS_RADIO_BUTTON) {
+			@Override
+			public void run() {
+				plotter.setXTickLabelFormat(TickFormatting.useSIunits);
+				plotter.refresh(false);
+			}
+		};
+		MenuAction xAxisMenu = new MenuAction("X-Axis");
+		xAxisMenu.add(xLabelTypeFloat);
+		xAxisMenu.add(xLabelTypeRound);
+		xAxisMenu.add(xLabelTypeExponent);
+		xAxisMenu.add(xLabelTypeSI);
+		actionMan.registerAction(scatterActionsName, xAxisMenu, ActionType.SCATTER3D, ManagerType.MENUBAR);
+
+		// YAxis menu
+		xLabelTypeSI.setText("X-Axis labels SI units");
+		xLabelTypeSI.setToolTipText("Change the labelling on the x-axis to using SI units");
+		Action yLabelTypeRound = new Action("", IAction.AS_RADIO_BUTTON) {
+			@Override
+			public void run() {
+				plotter.setYTickLabelFormat(TickFormatting.roundAndChopMode);
+				plotter.refresh(false);
+			}
+		};
+		yLabelTypeRound.setText("Y-Axis labels integer");
+		yLabelTypeRound.setToolTipText("Change the labelling on the y-axis to integer numbers");
+		yLabelTypeRound.setChecked(true);
+		Action yLabelTypeFloat = new Action("", IAction.AS_RADIO_BUTTON) {
+			@Override
+			public void run() {
+				plotter.setYTickLabelFormat(TickFormatting.plainMode);
+				plotter.refresh(false);
+			}
+		};
+		yLabelTypeFloat.setText("Y-Axis labels real");
+		yLabelTypeFloat.setToolTipText("Change the labelling on the y-axis to real numbers");
+
+		Action yLabelTypeExponent = new Action("", IAction.AS_RADIO_BUTTON) {
+			@Override
+			public void run() {
+				plotter.setYTickLabelFormat(TickFormatting.useExponent);
+				plotter.refresh(false);
+			}
+		};
+		yLabelTypeExponent.setText("Y-Axis labels exponents");
+		yLabelTypeExponent.setToolTipText("Change the labelling on the y-axis to using exponents");
+
+		Action yLabelTypeSI = new Action("", IAction.AS_RADIO_BUTTON) {
+			@Override
+			public void run() {
+				plotter.setYTickLabelFormat(TickFormatting.useSIunits);
+				plotter.refresh(false);
+			}
+		};
+		yLabelTypeSI.setText("Y-Axis labels SI units");
+		yLabelTypeSI.setToolTipText("Change the labelling on the y-axis to using SI units");
+		Action zLabelTypeRound = new Action("", IAction.AS_RADIO_BUTTON) {
+			@Override
+			public void run() {
+				plotter.setZTickLabelFormat(TickFormatting.roundAndChopMode);
+				plotter.refresh(false);
+			}
+		};
+		MenuAction yAxisMenu = new MenuAction("Y-Axis");
+		yAxisMenu.add(yLabelTypeFloat);
+		yAxisMenu.add(yLabelTypeRound);
+		yAxisMenu.add(yLabelTypeExponent);
+		yAxisMenu.add(yLabelTypeSI);
+		actionMan.registerAction(scatterActionsName, yAxisMenu, ActionType.SCATTER3D, ManagerType.MENUBAR);
+
+		// ZAxis menu
+		zLabelTypeRound.setText("Z-Axis labels integer");
+		zLabelTypeRound.setToolTipText("Change the labelling on the z-axis to integer numbers");
+		Action zLabelTypeFloat = new Action("", IAction.AS_RADIO_BUTTON) {
+			@Override
+			public void run() {
+				plotter.setXTickLabelFormat(TickFormatting.plainMode);
+				plotter.refresh(false);
+			}
+		};
+		zLabelTypeFloat.setText("Z-Axis labels real");
+		zLabelTypeFloat.setToolTipText("Change the labelling on the z-axis to real numbers");
+		zLabelTypeFloat.setChecked(true);
+
+		Action zLabelTypeExponent = new Action("", IAction.AS_RADIO_BUTTON) {
+			@Override
+			public void run() {
+				plotter.setXTickLabelFormat(TickFormatting.useExponent);
+				plotter.refresh(false);
+			}
+		};
+		zLabelTypeExponent.setText("Z-Axis labels exponents");
+		zLabelTypeExponent.setToolTipText("Change the labelling on the z-axis to using exponents");
+
+		Action zLabelTypeSI = new Action("", IAction.AS_RADIO_BUTTON) {
+			@Override
+			public void run() {
+				plotter.setZTickLabelFormat(TickFormatting.useSIunits);
+				plotter.refresh(false);
+			}
+		};
+		zLabelTypeSI.setText("Z-Axis labels SI units");
+		zLabelTypeSI.setToolTipText("Change the labelling on the z-axis to using SI units");
+		MenuAction zAxisMenu = new MenuAction("Z-Axis");
+		zAxisMenu.add(zLabelTypeFloat);
+		zAxisMenu.add(zLabelTypeRound);
+		zAxisMenu.add(zLabelTypeExponent);
+		zAxisMenu.add(zLabelTypeSI);
+		actionMan.registerAction(scatterActionsName, zAxisMenu, ActionType.SCATTER3D, ManagerType.MENUBAR);
 	}
 
 	private void createExportActions() {

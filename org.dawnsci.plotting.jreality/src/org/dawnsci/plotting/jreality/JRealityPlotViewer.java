@@ -176,7 +176,6 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	 * @param initialMode may be null
 	 */
 	public void createControl(final Composite parent) {
-		
 		init(parent);
 		createUI(parent);
 		plotActions = new JRealityPlotActions(this, system);
@@ -184,7 +183,6 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		system.getActionBars().getToolBarManager().update(true);
 		system.getActionBars().updateActionBars();
 	}
-	
 
 	public Control getControl() {
 		return container;
@@ -226,7 +224,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		removeOldSceneNodes();
 		surface.setActive(false);
 	}
-	
+
 	/**
 	 * Create a surface trace to be plotted in 3D.
 	 * 
@@ -244,7 +242,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	private ITrace currentTrace;
 
 	public void addTrace(ITrace trace) {
-		
+
 		if (trace instanceof ISurfaceTrace) {
 			system.setPlotType(PlotType.SURFACE);
 		} else if (trace instanceof ILineStackTrace) {
@@ -263,7 +261,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		} else if (trace instanceof IScatter3DTrace) {
 			addScatter3DTrace((IScatter3DTrace)trace);
 		}
- 		currentTrace = trace;
+		currentTrace = trace;
 	}
 
 	/**
@@ -337,8 +335,6 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		scatter.setActive(false);
 	}
 
-	//////////////////////////////////////////////////////////////////////////////////////////
-	
 	protected SurfacePlotROI getWindow(IROI roi) {
 		if (roi==null) return null;
 		SurfacePlotROI surfRoi = null;
@@ -354,12 +350,12 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		}
 		return surfRoi;
 	}
-	
+
 	protected void setSurfaceWindow(IROI window) {
 		if (currentMode == PlottingMode.SURF2D) {
 			final SurfacePlotROI surfRoi = getWindow(window);
 			((DataSet3DPlot3D) plotter).setDataWindow(null, surfRoi);
-			refresh(false);		
+			refresh(false);
 		}
 	}
 
@@ -373,10 +369,9 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 				graph.setVisible(true);
 				refresh(false);
 			}
-		}		
+		}
 	}
 
-	
 	/**
 	 * 
 	 * @param data, its name is used for the title
@@ -401,9 +396,9 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	 * @return true if something plotted
 	 */
 	private final boolean plot(final List<AxisValues>    axes, 
-			                   final IROI             window,
-			                   final PlottingMode        mode,
-			                   final IDataset...         rawData) {
+							   final IROI                window,
+							   final PlottingMode        mode,
+							   final IDataset...         rawData) {
 
 		final boolean newMode = setMode(mode, rawData.length);
 
@@ -435,30 +430,26 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		setYTickLabelFormat(TickFormatting.roundAndChopMode);
 
 		try {
-
 			if (window!=null && window instanceof SurfacePlotROI && !window.equals(getDataWindow())) {
-			    ((DataSet3DPlot3D) plotter).setDataWindow(data, (SurfacePlotROI)window);
+				((DataSet3DPlot3D) plotter).setDataWindow(data, (SurfacePlotROI)window);
 			}
 			update(newMode, data);
 			plotter.setXAxisLabel(getName(xAxis.getName(), "X-Axis"));
 			plotter.setYAxisLabel(getName(yAxis.getName(), "Y-Axis"));
 			plotter.setZAxisLabel(getName(zAxis.getName(), "Z-Axis"));
-			
+
 			setTickGridLines(xcoord, ycoord, zcoord);
 			setTitle(data.get(0).getName());
-
-
 		} catch (Throwable e) {
 			throw new RuntimeException(e);
 		}
-
 		return true;
 	}
-	
+
 	protected IROI getDataWindow() {
 		 return ((DataSet3DPlot3D) plotter).getDataWindow();
 	}
-	
+
 	private String getName(String name, String defaultName) {
 		if (name!=null && !"".equals(name)) return name;
 		return defaultName;
@@ -505,17 +496,6 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		}
 	}
 
-	private void setXTickLabelFormat(TickFormatting newFormat) {
-		if (plotter != null) plotter.setXAxisLabelMode(newFormat);
-	}
-	private void setYTickLabelFormat(TickFormatting newFormat) {
-		if (plotter != null) plotter.setYAxisLabelMode(newFormat);
-	}
-	@SuppressWarnings("unused")
-	private void setZTickLabelFormat(TickFormatting newFormat) {
-		if (plotter != null) plotter.setZAxisLabelMode(newFormat);
-	}
-
 	private void init(Composite parent) {
 		graphColourTable = new Plot1DGraphTable();
 		Secure.setProperty(SystemProperties.AUTO_RENDER, "false");
@@ -533,9 +513,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		root.addChild(graph);
 		// check if JOGL is available
 		hasJOGL = JOGLChecker.isHardwareEnabled(parent);
-		
 	}
-	
 
 	private static final String ERROR_MESG_NO_SHADERS = "System does not support OpenGL shaders falling back to compatibily mode. Some advanced features might not work";
 
@@ -718,8 +696,6 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		donotProcessEvent = false;
 	}
 
-
-
 	@Override
 	public void handleEvent(Event event) {
 		if (plotter != null) {
@@ -757,7 +733,6 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 			cameraNode.removeTool(rotateTool);
 			panTool = new PanningTool(toolNode);
 			panTool.addPanActionListener(new PanActionListener() {
-				
 				@Override
 				public synchronized void panPerformed(final double xTrans, final double yTrans) {
 					hBar.getDisplay().asyncExec(new Runnable() {
@@ -791,10 +766,8 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 													   toolNode, 
 													   (showScrollBars ? hBar : null), 
 													   (showScrollBars ? vBar : null));
-
 	}
 
-	
 	public void setUseLegend(final boolean useLeg) {
 		this.useLegend = useLeg;
 		if (useLegend) {
@@ -810,7 +783,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		}
 		if (legendTable != null)  legendTable.getParent().layout();
 	}
-	
+
 	private void setAxisModes(AxisMode xAxis, AxisMode yAxis, AxisMode zAxis) {
 		plotter.setAxisModes(xAxis, yAxis, zAxis);
 	}
@@ -834,7 +807,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	public String getTitle() {
 		return title;
 	}
-	
+
 	/**
 	 * Set the plotter to a new plotting mode
 	 * 
@@ -862,7 +835,6 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		viewerApp.getSceneRoot().removeTool(zoomTool);
 		viewerApp.getSceneRoot().removeTool(cameraZoomTool);
 
-		
 		switch (currentMode) {
 		case ONED:
 			MatrixBuilder.euclidean().translate(0.0, 0.0, 0.0).assignTo(toolNode);
@@ -874,7 +846,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 			container.layout();
 			setPerspectiveCamera(true,false);
 			hBar.setVisible(false);
-			vBar.setVisible(false);			
+			vBar.setVisible(false);
 			break;
 		case ONED_THREED:
 			if (coordAxes!=null) root.removeChild(coordAxes);
@@ -888,7 +860,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 			cameraNode.addTool(cameraRotateTool);
 			viewerApp.getSceneRoot().addTool(cameraZoomTool);
 			hBar.setVisible(false);
-			vBar.setVisible(false);			
+			vBar.setVisible(false);
 			break;
 		case SCATTER2D:
 			MatrixBuilder.euclidean().translate(0.0, 0.0, 0.0).assignTo(toolNode);
@@ -900,7 +872,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 			container.layout();
 			setPerspectiveCamera(true,false);
 			hBar.setVisible(false);
-			vBar.setVisible(false);						
+			vBar.setVisible(false);
 			break;
 		case TWOD:
 		{	
@@ -919,7 +891,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 				buildInfoBox();
 			container.layout();
 			root.getTransformation().addTransformationListener((DataSet3DPlot2D) plotter);
-			setPerspectiveCamera(true,false);			
+			setPerspectiveCamera(true,false);
 			break;
 		}
 		case MULTI2D:
@@ -937,7 +909,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 			buildCompositingControl();
 			container.layout();
 			root.getTransformation().addTransformationListener((DataSet3DPlot2D) plotter);
-			setPerspectiveCamera(true,false);			
+			setPerspectiveCamera(true,false);
 			break;
 		case SURF2D:
 			setUseLegend(false);
@@ -956,7 +928,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 			viewerApp.getSceneRoot().addTool(cameraZoomTool);
 			setPerspectiveCamera(true,false);
 			hBar.setVisible(false);
-			vBar.setVisible(false);	
+			vBar.setVisible(false);
 			break;
 		case SCATTER3D:
 			MatrixBuilder.euclidean().translate(0.0, 0.0, 0.0).assignTo(toolNode);
@@ -982,11 +954,11 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 			MatrixBuilder.euclidean().translate(0.0, 0.0, 0.0).assignTo(root);
 			setPerspectiveCamera(true,false);
 			hBar.setVisible(false);
-			vBar.setVisible(false);						
+			vBar.setVisible(false);
 			break;
 		case EMPTY:
 			Camera sceneCamera = CameraUtility.getCamera(viewerApp.getCurrentViewer());
-			sceneCamera.setPerspective(true);			
+			sceneCamera.setPerspective(true);
 			break;
 		}
 		coordXLabels.setVisible(true);
@@ -1005,7 +977,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 			gridData.heightHint = 55;
 			infoBox = new InfoBoxComponent(container, SWT.DOUBLE_BUFFERED);
 			infoBox.setLayoutData(gridData);
-			container.setWeights(new int[] {90, 10});		
+			container.setWeights(new int[] {90, 10});
 		}
 	}
 	private void buildCompositingControl() {
@@ -1015,9 +987,9 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 			gridData.grabExcessHorizontalSpace = true;
 			gridData.heightHint = 95;
 			cmpControl = new CompositingControl(container, SWT.DOUBLE_BUFFERED);
-			cmpControl.setLayoutData(gridData);		
+			cmpControl.setLayoutData(gridData);
 			cmpControl.addSelectionListener(this);
-			container.setWeights(new int[] {90, 10});					
+			container.setWeights(new int[] {90, 10});
 		}
 	}
 
@@ -1075,7 +1047,6 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		// System.gc();
 	}
 
-
 	private boolean checkForNan(IDataset data) {
 		if (data instanceof AbstractDataset)
 			return ((AbstractDataset) data).containsNans();
@@ -1097,6 +1068,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	}
 
 	private static final String ERROR_MESG = "DataSet contains either NaNs or Infs can not plot";
+
 	private void sanityCheckDataSets(Collection<? extends IDataset> datasets) throws PlotException {
 		Iterator<? extends IDataset> iter = datasets.iterator();
 		while (iter.hasNext()) {
@@ -1113,13 +1085,11 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		refresh(false);
 	}
 
-
 	public void reset() {
 		if (plotter!=null) {
 			removeOldSceneNodes();
 		}
 	}
-
 
 	public void dispose() {
 		reset();
@@ -1143,6 +1113,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	}
 
 	private boolean xcoord=true, ycoord=true, zcoord=true;
+
 	public void setTickGridLines(boolean xcoord, boolean ycoord, boolean zcoord) {
 		if (plotter!=null) {
 			this.xcoord = xcoord;
@@ -1152,10 +1123,9 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 			refresh(false);	
 		}
 	}
-	
+
 	public void updatePlottingRole(PlotType type) {
 		// TODO Tells us if surfaces or scatter etc.
-		
 	}
 
 	protected void setBoundingBoxEnabled(boolean checked) {
@@ -1196,6 +1166,30 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	}
 
 	/**
+	 * Set if transparency should be used on the 3D scatter plot
+	 * 
+	 * @param newTransp
+	 *            true (use transparency) false (do not use transparency)
+	 */
+	public void useTransparency(boolean newTransp) {
+		if (currentMode == PlottingMode.SCATTER3D) {
+			((DataSetScatterPlot3D) plotter).setTransparency(newTransp);
+		}
+	}
+
+	/**
+	 * Set if transparency should be used on the 3D scatter plot
+	 * 
+	 * @param newDraw
+	 *            true (use draw outlines only) false (do not use draw outlines only)
+	 */
+	public void useDrawOutlinesOnly(boolean newDraw) {
+		if (currentMode == PlottingMode.SCATTER3D) {
+			((DataSetScatterPlot3D) plotter).setDrawOutlinesOnly(newDraw);
+		}
+	}
+
+	/**
 	 * Set if point sizes should be of uniform size in 3D scatter plot
 	 * 
 	 * @param uniform
@@ -1205,6 +1199,36 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		if (currentMode == PlottingMode.SCATTER3D) {
 			((DataSetScatterPlot3D) plotter).setUniformSize(uniform);
 		}
+	}
+
+	/**
+	 * Set the x axis tick label format
+	 * 
+	 * @param newFormat
+	 */
+	public void setXTickLabelFormat(TickFormatting newFormat) {
+		if (plotter != null)
+			plotter.setXAxisLabelMode(newFormat);
+	}
+
+	/**
+	 * Set the y axis tick label format
+	 * 
+	 * @param newFormat
+	 */
+	public void setYTickLabelFormat(TickFormatting newFormat) {
+		if (plotter != null)
+			plotter.setYAxisLabelMode(newFormat);
+	}
+
+	/**
+	 * Set the z axis tick label format
+	 * 
+	 * @param newFormat
+	 */
+	public void setZTickLabelFormat(TickFormatting newFormat) {
+		if (plotter != null)
+			plotter.setZAxisLabelMode(newFormat);
 	}
 
 	protected boolean isExporting() {
@@ -1320,5 +1344,4 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		}
 		return null;
 	}
-
 }
