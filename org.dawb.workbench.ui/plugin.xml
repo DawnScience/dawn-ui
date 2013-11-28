@@ -99,7 +99,7 @@
          point="org.eclipse.ui.editorActions">
        <editorContribution
             id="org.edna.workbench.editors.asciiEditorContribution"
-            targetID="org.edna.workbench.editors.AsciiEditor">
+            targetID="org.dawb.workbench.editors.AsciiEditor">
          <action
                class="org.dawb.workbench.ui.editors.actions.DeleteExpressionHandler"
                definitionId="org.dawb.workbench.editors.deleteExpression"
@@ -123,7 +123,7 @@
       </editorContribution>
        <editorContribution
              id="org.edna.workbench.editors.h5EditorContribution"
-             targetID="fable.imageviewer.editor.H5Editor">
+             targetID="org.dawb.workbench.editor.H5Editor">
           <action
                 class="org.dawb.workbench.ui.editors.actions.DeleteExpressionHandler"
                 definitionId="org.dawb.workbench.editors.deleteExpression"
