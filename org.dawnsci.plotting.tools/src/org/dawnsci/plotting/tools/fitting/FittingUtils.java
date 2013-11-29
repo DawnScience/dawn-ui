@@ -18,7 +18,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.IAnalysisMonitor;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
@@ -96,13 +95,8 @@ public class FittingUtils {
 			if (info.getIdentifiedPeaks()==null) {
 				info.setIdentifiedPeaks(Generic1DFitter.parseDataDerivative(info.getX(), info.getY(), getSmoothing()));
 			}
-			composites =  Generic1DFitter.fitPeakFunctions(info.getIdentifiedPeaks(), info.getX(), info.getY(), getPeakType(), optimizer, getSmoothing(), info.getNumPeaks(), 0.0, false, false, new IAnalysisMonitor() {
-				@Override
-				public boolean hasBeenCancelled() {
-					return info.getMonitor().isCancelled(); // We always use the monitor.isCancelled() the fitting can take a while
-					                             // and should always allow stopping.
-				}
-			});
+			composites =  Generic1DFitter.fitPeakFunctions(info.getIdentifiedPeaks(), info.getX(), info.getY(), getPeakType(), optimizer, getSmoothing(), info.getNumPeaks(), 0.0, false, false,
+					info.getMonitor());
 		}
 		
 		if (composites==null || composites.isEmpty()) return null;

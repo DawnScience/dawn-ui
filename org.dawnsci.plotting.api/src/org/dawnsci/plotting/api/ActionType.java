@@ -1,4 +1,4 @@
-/*
+/*-
  * Copyright (c) 2013 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
@@ -10,28 +10,30 @@ package org.dawnsci.plotting.api;
 
 public enum ActionType {
 
-	XY, IMAGE, XYANDIMAGE, THREED, SURFACE, ALL;
+	XY, IMAGE, XYANDIMAGE, THREED, SURFACE, SCATTER3D, ALL;
 
 	public boolean isCompatible(PlotType type) {
-		
-		if (this==ALL) return true;
-		
-		if (type.is1D() && this==XY)    {
+
+		if (this == ALL)
+			return true;
+		if (type.is1D() && this == XY) {
 			return true;
 		}
-		if (type.is2D() && this==IMAGE) {
+		if (type.is2D() && this == IMAGE) {
 			return true;
 		}
-		if ((type.is2D()||type.is1D()) && this==XYANDIMAGE) {
+		if ((type.is2D() || type.is1D()) && this == XYANDIMAGE) {
 			return true;
 		}
-		if (type.is3D() && this==THREED) {
+		if (type.equals(PlotType.SURFACE) && this == SURFACE) {
 			return true;
 		}
-		if(type.equals(PlotType.SURFACE) && this==SURFACE){
+		if (type.equals(PlotType.XY_SCATTER_3D) && this == SCATTER3D) {
 			return true;
 		}
-		
+		if (type.is3D() && this == THREED) {
+			return true;
+		}
 		return false;
 	}
 }
