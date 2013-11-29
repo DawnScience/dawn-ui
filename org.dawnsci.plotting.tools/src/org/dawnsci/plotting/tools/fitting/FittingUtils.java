@@ -81,7 +81,7 @@ public class FittingUtils {
 			
 			info.setIdentifiedPeaks(Arrays.asList(new IdentifiedPeak[]{iniPeak}));
 			
-			Constructor<? extends APeak> ctor = getPeakType().getClass().getConstructor(IdentifiedPeak.class);
+			Constructor<? extends APeak> ctor = getPeakClass().getConstructor(IdentifiedPeak.class);
 			APeak localPeak = ctor.newInstance(iniPeak);
 			CompositeFunction comp = new CompositeFunction();
 			comp.addFunction(localPeak);
@@ -95,7 +95,7 @@ public class FittingUtils {
 			if (info.getIdentifiedPeaks()==null) {
 				info.setIdentifiedPeaks(Generic1DFitter.parseDataDerivative(info.getX(), info.getY(), getSmoothing()));
 			}
-			composites =  Generic1DFitter.fitPeakFunctions(info.getIdentifiedPeaks(), info.getX(), info.getY(), getPeakType(), optimizer, getSmoothing(), info.getNumPeaks(), 0.0, false, false,
+			composites =  Generic1DFitter.fitPeakFunctions(info.getIdentifiedPeaks(), info.getX(), info.getY(), getPeakClass(), optimizer, getSmoothing(), info.getNumPeaks(), 0.0, false, false,
 					info.getMonitor());
 		}
 		
@@ -254,7 +254,7 @@ public class FittingUtils {
 		return Activator.getPlottingPreferenceStore().getDouble(FittingConstants.QUALITY);
 	}
 
-	public static APeak getPeakType() {
+	public static Class<? extends APeak> getPeakClass() {
 		try {
 			
 			final String peakClass = Activator.getPlottingPreferenceStore().getString(FittingConstants.PEAK_TYPE);
@@ -267,16 +267,16 @@ public class FittingUtils {
 		} catch (Exception ne) {
 			logger.error("Cannot determine peak type required!", ne);
 			Activator.getPlottingPreferenceStore().setValue(FittingConstants.PEAK_TYPE, Gaussian.class.getName());
-		    return new Gaussian(1, 1, 1, 1);
+		    return Gaussian.class;
 		}
 	}	
 	
-	public static Map<String, APeak> getPeakOptions() {
-		final Map<String, APeak> opts = new LinkedHashMap<String, APeak>(4);
-		opts.put(Gaussian.class.getName(),    new Gaussian(1, 1, 1, 1));
-		opts.put(Lorentzian.class.getName(),  new Lorentzian(1, 1, 1, 1));
-		opts.put(PearsonVII.class.getName(),  new PearsonVII(1, 1, 1, 1));
-		opts.put(PseudoVoigt.class.getName(), new PseudoVoigt(1, 1, 1, 1));
+	public static Map<String, Class <? extends APeak>> getPeakOptions() {
+		final Map<String, Class <? extends APeak>> opts = new LinkedHashMap<String, Class <? extends APeak>>(4);
+		opts.put(Gaussian.class.getName(),    Gaussian.class);
+		opts.put(Lorentzian.class.getName(),  Lorentzian.class);
+		opts.put(PearsonVII.class.getName(),  PearsonVII.class);
+		opts.put(PseudoVoigt.class.getName(), PseudoVoigt.class);
 		return opts;
 	}
 	

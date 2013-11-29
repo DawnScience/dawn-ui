@@ -57,6 +57,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants;
 import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.APeak;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.FunctionSquirts;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
@@ -324,7 +325,7 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 		StringBuilder buf = new StringBuilder("Fit attempted: '");
 		buf.append(FittingUtils.getPeaksRequired());
 		buf.append("' ");
-		buf.append(FittingUtils.getPeakType().getClass().getSimpleName());
+		buf.append(FittingUtils.getPeakClass().getClass().getSimpleName());
 		buf.append("'s using ");
 		buf.append(FittingUtils.getOptimizer().getClass().getSimpleName());
 		buf.append(" with smoothing of '");
@@ -494,11 +495,11 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 		CheckableActionGroup group = new CheckableActionGroup();
 		
 		Action selectedPeakAction = null;
-		for (final IPeak peak : FittingUtils.getPeakOptions().values()) {
+		for (final Class<? extends APeak> peak : FittingUtils.getPeakOptions().values()) {
 			
-			final Action action = new Action(peak.getClass().getSimpleName(), IAction.AS_CHECK_BOX) {
+			final Action action = new Action(peak.getSimpleName(), IAction.AS_CHECK_BOX) {
 				public void run() {
-					Activator.getPlottingPreferenceStore().setValue(FittingConstants.PEAK_TYPE, peak.getClass().getName());
+					Activator.getPlottingPreferenceStore().setValue(FittingConstants.PEAK_TYPE, peak.getName());
 					setChecked(true);
 					if (fittingJob!=null&&isActive()) fittingJob.fit();
 					peakType.setSelectedAction(this);
@@ -506,7 +507,7 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 			};
 			peakType.add(action);
 			group.add(action);
-			if (peak.getClass().getName().equals(Activator.getPlottingPreferenceStore().getString(FittingConstants.PEAK_TYPE))) {
+			if (peak.getName().equals(Activator.getPlottingPreferenceStore().getString(FittingConstants.PEAK_TYPE))) {
 				selectedPeakAction = action;
 			}
 		}

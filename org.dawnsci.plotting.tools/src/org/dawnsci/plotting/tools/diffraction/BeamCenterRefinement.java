@@ -164,7 +164,7 @@ public class BeamCenterRefinement implements MultivariateFunction {
 		AbstractDataset axis = intresult[4];
 		double error = 0.0;
 		ArrayList<IPeak> peaks = new ArrayList<IPeak>(initPeaks.size());
-		List<CompositeFunction> fittedGaussian = Generic1DFitter.fitPeakFunctions(axis, intresult[0], new Gaussian(), new GeneticAlg(0.0001),
+		List<CompositeFunction> fittedGaussian = Generic1DFitter.fitPeakFunctions(axis, intresult[0], Gaussian.class, new GeneticAlg(0.0001),
 				10, initPeaks.size());
 		for (CompositeFunction peakFit : fittedGaussian) {
 			try {
