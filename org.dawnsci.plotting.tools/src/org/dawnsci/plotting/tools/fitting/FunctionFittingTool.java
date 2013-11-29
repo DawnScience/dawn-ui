@@ -332,8 +332,7 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 	}
 
 	private void updateFunctionWidget() {
-		functionWidget.setFunction(compFunction
-				.getFunction(selectedPosition));
+		functionWidget.setFunction(compFunction.getFunction(selectedPosition));
 	}
 	
 	@Override
@@ -577,7 +576,7 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 
 	}
 
-	private AFunction showFunctionDialog(AFunction function) {
+	private IFunction showFunctionDialog(AFunction function) {
 		final FunctionDialog dialog = new FunctionDialog(new Shell(
 				Display.getDefault()));
 		dialog.create();

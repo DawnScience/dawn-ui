@@ -19,6 +19,7 @@ import ptolemy.data.expr.StringParameter;
 import ptolemy.kernel.ComponentEntity;
 import ptolemy.kernel.util.Attribute;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
 import com.isencia.passerelle.model.Flow;
@@ -156,7 +157,7 @@ public class WorkflowUpdaterImpl implements IWorkflowUpdater{
 	 * @param function parameter
 	 */
 	@Override
-	public void updateFunctionActor(String actorName, AFunction function){
+	public void updateFunctionActor(String actorName, IFunction function){
 		File modelFile = new File(modelFilePath);
 
 		try {

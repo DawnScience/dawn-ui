@@ -9,6 +9,8 @@ import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 
 public class NullFunction implements IPeak {
 
+	private static final long serialVersionUID = IFunction.serialVersionUID;
+
 	@Override
 	public String getName() {
 		return null;
@@ -39,16 +41,6 @@ public class NullFunction implements IPeak {
 	}
 
 	@Override
-	public int getNoOfFunctions() {
-		return 0;
-	}
-
-	@Override
-	public IFunction getFunction(int index) {
-		return null;
-	}
-
-	@Override
 	public double getParameterValue(int index) {
 		return 0;
 	}
@@ -68,6 +60,11 @@ public class NullFunction implements IPeak {
 
 	@Override
 	public double partialDeriv(int Parameter, double... position) {
+		return 0;
+	}
+
+	@Override
+	public double partialDeriv(IParameter param, double... values) {
 		return 0;
 	}
 
@@ -126,5 +123,14 @@ public class NullFunction implements IPeak {
 	@Override
 	public IMonitor getMonitor() {
 		return null;
+	}
+
+	@Override
+	public IFunction copy() throws Exception {
+		return null;
+	}
+
+	@Override
+	public void setDirty(boolean isDirty) {
 	}
 }

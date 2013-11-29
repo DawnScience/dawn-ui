@@ -26,7 +26,7 @@ import org.eclipse.swt.widgets.Spinner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Polynomial;
 
 /**
@@ -69,7 +69,7 @@ public class FunctionDialog extends Dialog {
 		functionType.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				try {
-					AFunction myFunction = FunctionType.createNew(functionType.getSelectionIndex());
+					IFunction myFunction = FunctionType.createNew(functionType.getSelectionIndex());
 					functionEditor.setFunction(myFunction, null);
 					if(FunctionType.getType(functionType.getSelectionIndex())==FunctionType.POLYNOMIAL){
 						labelDegree.setVisible(true);
@@ -97,7 +97,7 @@ public class FunctionDialog extends Dialog {
 		polynomialDegree.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				try {
-					AFunction myFunction = FunctionType.createNew(FunctionType.POLYNOMIAL);
+					IFunction myFunction = FunctionType.createNew(FunctionType.POLYNOMIAL);
 					Polynomial polynom = (Polynomial)myFunction;
 					polynom.setDegree(polynomialDegree.getSelection()-1);
 					functionEditor.setFunction(myFunction, null);
@@ -113,13 +113,13 @@ public class FunctionDialog extends Dialog {
 		return main;
 	}
 	
-	public void setFunction(AFunction function) {
+	public void setFunction(IFunction function) {
 		final int index = FunctionType.getIndex(function.getClass());
 		functionType.select(index);
 		functionEditor.setFunction(function, null);
 	}
 	
-	public AFunction getFunction() {
+	public IFunction getFunction() {
 		return functionEditor.getFunction();
 	}
 }

@@ -35,8 +35,8 @@ import org.eclipse.swt.widgets.Spinner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.FunctionFactory;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
 
 /**
  * A table widget for editing any Function
@@ -48,8 +48,8 @@ public class FunctionEditTable {
 	private static final Logger logger = LoggerFactory.getLogger(FunctionEditTable.class);
 	
 	private TableViewer functionTable;
-	private AFunction     function;
-	private AFunction     originalFunction;
+	private IFunction     function;
+	private IFunction     originalFunction;
 	private FunctionType  functionType;
 	private List<FunctionRow> rows;
 
@@ -82,7 +82,7 @@ public class FunctionEditTable {
 	 * @param function
 	 * @param functionType - may be null
 	 */
-	public void setFunction(final AFunction function, final FunctionType functionType) {
+	public void setFunction(final IFunction function, final FunctionType functionType) {
 		
 		this.setFunctionType(functionType);
 		this.originalFunction = function!=null ? function : null;
@@ -332,7 +332,7 @@ public class FunctionEditTable {
 		}
 	}
 
-	private List<FunctionRow> createFunctionRows(AFunction function) {
+	private List<FunctionRow> createFunctionRows(IFunction function) {
 		
 		final List<FunctionRow> ret = new ArrayList<FunctionEditTable.FunctionRow>();
 		int numberParam = function.getNoOfParameters();
@@ -349,10 +349,10 @@ public class FunctionEditTable {
 		return ret;
 	}
 
-	public AFunction createFunction(List<FunctionRow> rows, FunctionRow changed) {
+	public IFunction createFunction(List<FunctionRow> rows, FunctionRow changed) {
 			
 		try {
-			AFunction ret = FunctionFactory.getFunction(function.getName()); 
+			IFunction ret = FunctionFactory.getFunction(function.getName()); 
 			
 			final int count  = function.getNoOfParameters();
 			for (int i = 0; i < count; i++) {
@@ -473,10 +473,10 @@ public class FunctionEditTable {
 		}
     }
 
-	public AFunction getOriginalFunction() {
+	public IFunction getOriginalFunction() {
 		return originalFunction;
 	}
-	public AFunction getFunction() {
+	public IFunction getFunction() {
 		return function;
 	}
 

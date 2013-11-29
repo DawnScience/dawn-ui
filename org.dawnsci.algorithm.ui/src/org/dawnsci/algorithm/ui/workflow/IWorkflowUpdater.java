@@ -2,7 +2,7 @@ package org.dawnsci.algorithm.ui.workflow;
 
 import java.util.Map;
 
-import uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
 /**
@@ -31,7 +31,7 @@ public interface IWorkflowUpdater {
 	 * @param actorName the unique actor's name
 	 * @param function parameter
 	 */
-	public void updateFunctionActor(String actorName, AFunction function);
+	public void updateFunctionActor(String actorName, IFunction function);
 
 	/**
 	 * Method that reads a scalar actor's parameter
@@ -46,7 +46,7 @@ public interface IWorkflowUpdater {
 	 * @param actorName the unique actor's name
 	 * @return function
 	 */
-	public AFunction getFunctionFromActor(String actorName);
+	public IFunction getFunctionFromActor(String actorName);
 
 	/**
 	 * Method that updates an actor's parameter with a given value
