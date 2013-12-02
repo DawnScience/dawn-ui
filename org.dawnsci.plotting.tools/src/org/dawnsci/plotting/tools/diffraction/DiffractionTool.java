@@ -206,6 +206,8 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		createDiffractionModel(false);
 		createActions();
 		createListeners();
+		
+		createToolPageActions();
 
 	}
 	
