@@ -30,15 +30,15 @@ import uk.ac.diamond.scisoft.analysis.roi.IROI;
  * Data item used in the table viewer of the Diffraction calibration views
  */
 public class DiffractionTableData {
-	IPlottingSystem system;
-	String path;
-	String name;
-	DiffractionImageAugmenter augmenter;
-	IDiffractionMetadata md;
-	IDataset image;
-	List<IROI> rois; // can contain null entries as placeholders
-	QSpace q;
-	double od = Double.NaN;
-	int nrois = -1; // number of actual ROIs found
-	boolean use = false;
+	public IPlottingSystem system;
+	public String path;
+	public String name;
+	public DiffractionImageAugmenter augmenter;
+	public IDiffractionMetadata md;
+	public IDataset image;
+	public List<IROI> rois; // can contain null entries as placeholders
+	public QSpace q;
+	public double od = Double.NaN;
+	public int nrois = -1; // number of actual ROIs found
+	public boolean use = false;
 }
