@@ -141,6 +141,7 @@ Export-Package: org.dawnsci.plotting.tools;
    org.eclipse.draw2d.geometry,
    org.dawnsci.plotting.api.tool,
    org.eclipse.swt.widgets",
+ org.dawnsci.plotting.tools.powdercheck,
  org.dawnsci.plotting.tools.preference;
   uses:="org.eclipse.jface.preference,
    org.eclipse.jface.resource,

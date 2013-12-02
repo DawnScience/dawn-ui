@@ -330,6 +330,14 @@
             label="Expression Console"
             visible="true">
       </plotting_tool_page>
+      <plotting_tool_page
+            category="org.dawnsci.plotting.tools.category.Science"
+            class="org.dawnsci.plotting.tools.powdercheck.PowderCheckTool"
+            icon="icons/CalibrationCheck.png"
+            id="org.dawnsci.plotting.tools.powdercheck"
+            label="Powder Calibration Check"
+            tooltip="Check calibration of a 2D powder diffraction image">
+      </plotting_tool_page>
    </extension>
 
   <extension
