@@ -108,15 +108,6 @@ public class NullFunction implements IPeak {
 	}
 
 	@Override
-	public String getParameterName(int index) {
-		return null;
-	}
-
-	@Override
-	public void setParameterName(String name, int index) {
-	}
-
-	@Override
 	public void setMonitor(IMonitor monitor) {
 	}
 
