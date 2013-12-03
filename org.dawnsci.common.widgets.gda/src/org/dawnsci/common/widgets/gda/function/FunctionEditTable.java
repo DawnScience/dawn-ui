@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.fitting.functions.FunctionFactory;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.IParameter;
 
 /**
  * A table widget for editing any Function
@@ -337,13 +338,9 @@ public class FunctionEditTable {
 		final List<FunctionRow> ret = new ArrayList<FunctionEditTable.FunctionRow>();
 		int numberParam = function.getNoOfParameters();
 		for(int i=0; i<numberParam; i++){
-			String paramName = function.getParameterName(i);
+			IParameter p = function.getParameter(i);
 			String functionDescription = function.getDescription();
-			boolean isfixed = function.getParameter(i).isFixed();
-			double value = function.getParameterValue(i);
-			double minValue = function.getParameter(i).getLowerLimit();
-			double maxValue = function.getParameter(i).getUpperLimit();
-			ret.add(new FunctionRow(paramName, functionDescription, isfixed, value, minValue, maxValue));
+			ret.add(new FunctionRow(p.getName(), functionDescription, p.isFixed(), p.getValue(), p.getLowerLimit(), p.getUpperLimit()));
 		}
 		
 		return ret;
