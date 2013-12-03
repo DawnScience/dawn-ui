@@ -24,6 +24,7 @@ import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.dawnsci.plotting.api.trace.IImageTrace;
+import org.dawnsci.plotting.api.trace.ILineTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -66,6 +67,8 @@ public class PowderCheckTool extends AbstractToolPage {
 	private static final int MAX_EVAL = 100000;
 	
 	IPlottingSystem system;
+	UpdatePlotJob updatePlotJob;
+	
 	private final static Logger logger = LoggerFactory.getLogger(PowderCheckTool.class);
 
 	@Override
@@ -92,7 +95,6 @@ public class PowderCheckTool extends AbstractToolPage {
 				 this.getViewPart());
 		
 		system.getSelectedYAxis().setAxisAutoscaleTight(true);
-		
 	}
 	
 	@Override
@@ -125,23 +127,28 @@ public class PowderCheckTool extends AbstractToolPage {
 			return;
 		}
 		
-		cleanPlottingSystem();
-
-		Job job = new Job("integrate") {
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				integrateQuadrants(ds,(IDiffractionMetadata)m);
-				return Status.OK_STATUS;
-			}
-		};
-		job.schedule();
+		if (updatePlotJob == null) {
+			updatePlotJob= new UpdatePlotJob();
+		}
+		
+		updatePlotJob.cancel();
+		updatePlotJob.setData(ds, (IDiffractionMetadata)m);
+		updatePlotJob.schedule();
 		
 	}
 	
 	private void cleanPlottingSystem(){
 		if (system != null) {
-			for (IRegion r : system.getRegions()) system.removeRegion(r);
-			system.clear();
+			
+			Display.getDefault().asyncExec(new Runnable() {
+				
+				@Override
+				public void run() {
+					for (IRegion r : system.getRegions()) system.removeRegion(r);
+					system.clear();
+					
+				}
+			});
 		}
 	}
 	
@@ -181,7 +188,7 @@ public class PowderCheckTool extends AbstractToolPage {
 		//fitPeaksToTrace(profile[4], profile[0]);
 	}
 	
-	private void integrateQuadrants(AbstractDataset data, IDiffractionMetadata md) {
+	private IStatus integrateQuadrants(AbstractDataset data, IDiffractionMetadata md, IProgressMonitor monitor) {
 		QSpace qSpace = new QSpace(md.getDetector2DProperties(), md.getDiffractionCrystalEnvironment());
 		double[] bc = md.getDetector2DProperties().getBeamCentreCoords();
 		int[] shape = data.getShape();
@@ -195,39 +202,40 @@ public class PowderCheckTool extends AbstractToolPage {
 		AbstractDataset[] profile = ROIProfile.sector(data, null, sroi, true, false, false, qSpace, XAxis.Q, false);
 		
 		ArrayList<IDataset> y = new ArrayList<IDataset> ();
-		profile[0].setName("Integration 45");
+		profile[0].setName("Top right");
 		y.add(profile[0]);
-		
-		system.updatePlot1D(profile[4], y, null);
+		List<ITrace> traces = system.updatePlot1D(profile[4], y, null);
+		//((ILineTrace)traces.get(0)).setTraceColor(ColorConstants.darkBlue);
+		y.remove(0);
 		
 		final AbstractDataset reflection = profile[2];
 		final AbstractDataset axref = profile[6];
-		reflection.setName("Symmetry 45" + profile[0].getName());
+		reflection.setName("Bottom left");
+		y.add(reflection);
+		traces = system.updatePlot1D(axref, y, null);
+		//((ILineTrace)traces.get(0)).setTraceColor(ColorConstants.lightBlue);
+		y.remove(0);
 		
-		ArrayList<IDataset> y1 = new ArrayList<IDataset> ();
-		y1.add(reflection);
-		
-		system.updatePlot1D(axref, y1, null);
+		if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 		
 		sroi = new SectorROI(bc[0], bc[1], 0, maxDistance, 3*Math.PI/4 - Math.PI/16, 3*Math.PI/4 + Math.PI/16 + Math.PI/8, 1, true, SectorROI.INVERT);
 		profile = ROIProfile.sector(data, null, sroi, true, false, false, qSpace, XAxis.Q, false);
 		
-		ArrayList<IDataset> y2 = new ArrayList<IDataset> ();
-		profile[0].setName("Integration 135");
-		y2.add(profile[0]);
-		
-		system.updatePlot1D(profile[4], y2, null);
+		profile[0].setName("Bottom right");
+		y.add(profile[0]);
+		traces = system.updatePlot1D(profile[4], y, null);
+		//((ILineTrace)traces.get(0)).setTraceColor(ColorConstants.darkGreen);
+		y.remove(0);
 		
 		final AbstractDataset reflection2 = profile[2];
 		final AbstractDataset axref2 = profile[6];
-		reflection.setName("Symmetry 135" + profile[0].getName());
-		
-		ArrayList<IDataset> y12 = new ArrayList<IDataset> ();
-		y1.add(reflection2);
-		
-		system.updatePlot1D(axref2, y12, null);
-		
+		reflection2.setName("Top left");
+		y.add(reflection2);
+		traces = system.updatePlot1D(axref2, y, null);
+		//((ILineTrace)traces.get(0)).setTraceColor(ColorConstants.lightGreen);
 		updateCalibrantLines();
+		
+		return Status.OK_STATUS;
 	}
 	
 
@@ -382,4 +390,28 @@ public class PowderCheckTool extends AbstractToolPage {
 
 	}
 
+	private class UpdatePlotJob extends Job {
+		
+		AbstractDataset dataset;
+		IDiffractionMetadata metadata;
+
+		public UpdatePlotJob() {
+			super("Integrate image and plot");
+			// TODO Auto-generated constructor stub
+		}
+		
+		public void setData(AbstractDataset ds, IDiffractionMetadata md) {
+			dataset = ds;
+			metadata = md;
+		}
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			cleanPlottingSystem();
+			return integrateQuadrants(dataset,metadata, monitor);
+
+		}
+		
+	}
+	
 }

@@ -100,6 +100,7 @@ import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironmentE
 import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionMetadataUtils;
 import uk.ac.diamond.scisoft.analysis.diffraction.IDetectorPropertyListener;
 import uk.ac.diamond.scisoft.analysis.diffraction.IDiffractionCrystalEnvironmentListener;
+import uk.ac.diamond.scisoft.analysis.diffraction.PeakFittingEllipseFinder;
 import uk.ac.diamond.scisoft.analysis.diffraction.PowderRingsUtils;
 import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
@@ -1069,6 +1070,34 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		logger.debug("Fitted {} from peaks: {}", shape, froi);
 
 		return froi;
+	}
+	
+	public static IROI runEllipsePeakFit(final IProgressMonitor monitor, Display display, final IPlottingSystem plotter, IImageTrace t, IROI roi, double innerRadius, double outerRadius) {
+		if (roi == null)
+			return null;
+
+		final ProgressMonitorWrapper mon = new ProgressMonitorWrapper(monitor);
+		monitor.subTask("Find POIs near initial ellipse");
+		AbstractDataset image = (AbstractDataset) t.getData();
+		BooleanDataset mask = (BooleanDataset) t.getMask();
+		PolylineROI points;
+		EllipticalFitROI efroi;
+		monitor.subTask("Fit POIs");
+		
+		points = PeakFittingEllipseFinder.findPointsOnEllipse(image, mask, (EllipticalROI) roi, innerRadius, outerRadius);
+		if (points.getNumberOfPoints() < 3) {
+			throw new IllegalArgumentException("Could not find enough points to trim");
+		}
+
+		monitor.subTask("Trim POIs");
+		efroi = PowderRingsUtils.fitAndTrimOutliers(mon, points, 2, false);
+		logger.debug("Found {}...", efroi);
+
+
+		if (monitor.isCanceled())
+			return null;
+
+		return efroi;
 	}
 
 	private IStatus drawRing(final IProgressMonitor monitor, Display display, final IPlottingSystem plotter, final IROI froi, final boolean circle) {
