@@ -58,13 +58,6 @@
          version="0.0.0"/>
 
    <plugin
-         id="org.dawnsci.intro"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="uk.ac.diamond.scisoft.mx.rcp"
          os="linux"
          download-size="0"
@@ -89,41 +82,7 @@
          unpack="false"/>
 
    <plugin
-         id="uk.ac.diamond.sda.navigator"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="uk.ac.diamond.sda.polling"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="uk.ac.diamond.scisoft.analysis.polling"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="uk.ac.diamond.sda.mxlive"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="uk.ac.diamond.scisoft.analysis"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="com.isencia.passerelle.workbench.starter"
          download-size="0"
          install-size="0"
          version="0.0.0"
