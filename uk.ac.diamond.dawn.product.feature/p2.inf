@@ -1,6 +1,9 @@
 # The p2.inf touchpoints to define the "Available Software Sites" operate by writing to disk the first time that the RCP application is run.
-# If the application location is not user-writable, this will silently fail. Example are C:\Program Files on Windows 7+ machines.
+# If the application location is not user-writable, this will silently fail. A common case is "C:\Program Files" on Windows 7+ machines.
 # For an alternative approach, see http://coopology.com/2012/08/eclipse-rcp-setting-p2-repositories-update-sites-programmatically-for-when-p2-inf-fails/
+
+# Note the RCP application (Window --> Preferences --> Install/Update --> Available Software Sites)
+# displays entries sorted in "name:" order, not the order in which they are defined here
 
 instructions.configure= \
   org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:http${#58}//opengda.org/DawnDiamond/master/updates/stable/,type:0,name:Dawn,enabled:true); \
@@ -8,5 +11,13 @@ instructions.configure= \
   org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:http${#58}//opengda.org/DawnDiamond/master/updates/beta/,type:0,name:Dawn (beta version),enabled:false); \
   org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:http${#58}//opengda.org/DawnDiamond/master/updates/beta/,type:1,name:Dawn (beta version),enabled:false); \
   org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:http${#58}//opengda.org/DawnDiamond/master/updates/snapshot/,type:0,name:Dawn (snapshot version),enabled:false); \
-  org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:http${#58}//opengda.org/DawnDiamond/master/updates/snapshot/,type:1,name:Dawn (snapshot version),enabled:false);
+  org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:http${#58}//opengda.org/DawnDiamond/master/updates/snapshot/,type:1,name:Dawn (snapshot version),enabled:false); \
+  org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:http${#58}//download.eclipse.org/egit/updates-3.0.3/,type:0,name:EGit/JGit 3.0.3,enabled:false); \
+  org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:http${#58}//download.eclipse.org/egit/updates-3.0.3/,type:1,name:EGit/JGit 3.0.3,enabled:false); \
+  org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:http${#58}//subclipse.tigris.org/update_1.6.x/,type:0,name:Subclipse  1.6.x Release (uses Subversion 1.6.x working copy format),enabled:false); \
+  org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:http${#58}//subclipse.tigris.org/update_1.6.x/,type:1,name:Subclipse  1.6.x Release (uses Subversion 1.6.x working copy format),enabled:false); \
+  org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:http${#58}//subclipse.tigris.org/update_1.8.x/,type:0,name:Subclipse  1.8.x Release (uses Subversion 1.7.x working copy format),enabled:false); \
+  org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:http${#58}//subclipse.tigris.org/update_1.8.x/,type:1,name:Subclipse  1.8.x Release (uses Subversion 1.7.x working copy format),enabled:false); \
+  org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:http${#58}//subclipse.tigris.org/update_1.10.x/,type:0,name:Subclipse 1.10.x Release (uses Subversion 1.8.x working copy format),enabled:false); \
+  org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:http${#58}//subclipse.tigris.org/update_1.10.x/,type:1,name:Subclipse 1.10.x Release (uses Subversion 1.8.x working copy format),enabled:false);
 
