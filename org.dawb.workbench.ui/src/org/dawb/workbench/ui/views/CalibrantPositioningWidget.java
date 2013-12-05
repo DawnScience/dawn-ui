@@ -348,7 +348,7 @@ public class CalibrantPositioningWidget {
 					logger.error("The plotting system is null");
 					return;
 				}
-				Job findRingsJob = DiffractionCalibrationUtils.findRings(display, plottingSystem, currentData);
+				Job findRingsJob = DiffractionCalibrationUtils.findRingsPeakFitting(display, plottingSystem, currentData);
 				if (findRingsJob == null)
 					return;
 				findRingsJob.addJobChangeListener(new JobChangeAdapter() {

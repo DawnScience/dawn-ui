@@ -198,7 +198,7 @@ public class PowderCheckTool extends AbstractToolPage {
 		if (centre[0] < shape[0]/2.0) farCorner[0] = shape[0];
 		if (centre[1] < shape[1]/2.0) farCorner[1] = shape[1];
 		double maxDistance = Math.sqrt(Math.pow(centre[0]-farCorner[0],2)+Math.pow(centre[1]-farCorner[1],2));
-		SectorROI sroi = new SectorROI(bc[0], bc[1], 0, maxDistance, Math.PI/4 - Math.PI/16, Math.PI/4 + Math.PI/16 + Math.PI/8, 1, true, SectorROI.INVERT);
+		SectorROI sroi = new SectorROI(bc[0], bc[1], 0, maxDistance, Math.PI/4 - Math.PI/8, Math.PI/4 + Math.PI/8, 1, true, SectorROI.INVERT);
 		AbstractDataset[] profile = ROIProfile.sector(data, null, sroi, true, false, false, qSpace, XAxis.Q, false);
 		
 		ArrayList<IDataset> y = new ArrayList<IDataset> ();
@@ -218,7 +218,7 @@ public class PowderCheckTool extends AbstractToolPage {
 		
 		if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 		
-		sroi = new SectorROI(bc[0], bc[1], 0, maxDistance, 3*Math.PI/4 - Math.PI/16, 3*Math.PI/4 + Math.PI/16 + Math.PI/8, 1, true, SectorROI.INVERT);
+		sroi = new SectorROI(bc[0], bc[1], 0, maxDistance, 3*Math.PI/4 - Math.PI/8, 3*Math.PI/4 + Math.PI/8, 1, true, SectorROI.INVERT);
 		profile = ROIProfile.sector(data, null, sroi, true, false, false, qSpace, XAxis.Q, false);
 		
 		profile[0].setName("Bottom right");

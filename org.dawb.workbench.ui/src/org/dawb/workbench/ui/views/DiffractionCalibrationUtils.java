@@ -518,6 +518,103 @@ public class DiffractionCalibrationUtils {
 		return job;
 	}
 
+	
+	/**
+	 * 
+	 * @param display
+	 * @param plottingSystem
+	 * @param currentData
+	 * @return findRing job
+	 */
+	public static Job findRingsPeakFitting(final Display display, final IPlottingSystem plottingSystem, final DiffractionTableData currentData) {
+		if (currentData == null)
+			return null;
+
+		DiffractionImageAugmenter aug = currentData.augmenter;
+		if (aug == null)
+			return null;
+
+		final List<IROI> resROIs = aug.getResolutionROIs();
+		final IImageTrace image = getImageTrace(plottingSystem);
+		if (currentData.rois == null) {
+			currentData.rois = new ArrayList<IROI>();
+		} else {
+			currentData.rois.clear();
+		}
+		currentData.use = false;
+		currentData.nrois = 0;
+		clearFoundRings(plottingSystem);
+		Job job = new Job("Ellipse rings finding") {
+			@Override
+			protected IStatus run(final IProgressMonitor monitor) {
+				IStatus stat = Status.OK_STATUS;
+				double lastMajor = -1;
+				double lastAspect = -1;
+				int n = 0;
+				for (int i = 0; i < resROIs.size(); i++) {
+					IROI r = resROIs.get(i);
+					IROI roi = null;
+					try {
+						if (!(r instanceof EllipticalROI)) { // cannot cope with other conic sections for now
+							continue;
+						}
+						EllipticalROI e = (EllipticalROI) r;
+						double major = e.getSemiAxis(0);
+//						double delta = lastMajor < 0 ? 0.2*major : 0.3*(major - lastMajor);
+//						if (delta > 50)
+//							delta = 50;
+//						lastMajor = major;
+						
+						double deltalow = major > 50 ? 50 : major;
+						double deltahigh = 50;
+						
+						if (i != 0) {
+							deltalow = 0.5*(major - ((EllipticalROI)resROIs.get(i-1)).getSemiAxis(0));
+						}
+						
+						if (i != resROIs.size()-1) {
+							deltahigh = 0.5*(((EllipticalROI)resROIs.get(i+1)).getSemiAxis(0) - major);
+						}
+						
+
+						try {
+							roi = DiffractionTool.runEllipsePeakFit(monitor, display, plottingSystem, image, e, deltalow, deltahigh);
+						} catch (NullPointerException ex) {
+							stat = Status.CANCEL_STATUS;
+							n = -1; // indicate, to finally clause, problem with getting image or other issues
+							return stat;
+						}
+						
+						if (roi != null) {
+							n++;
+							lastAspect = roi instanceof EllipticalROI ? ((EllipticalROI) roi).getAspectRatio() : 1.;
+							stat = drawFoundRing(monitor, display, plottingSystem, roi, false);
+						}
+
+						if (!stat.isOK())
+							break;
+					} catch (IllegalArgumentException ex) {
+						logger.trace("Could not find ellipse with {}: {}", r, ex);
+					} finally {
+						if (n >= 0) {
+							currentData.rois.add(roi); // can include null placeholder
+						} else {
+							currentData.rois.clear();
+						}
+					}
+				}
+				currentData.nrois = n;
+				if (currentData.nrois > 0) {
+					currentData.use = true;
+				}
+				return stat;
+			}
+		};
+		job.setPriority(Job.SHORT);
+		return job;
+	}
+	
+	
 	/**
 	 * 
 	 * @param system

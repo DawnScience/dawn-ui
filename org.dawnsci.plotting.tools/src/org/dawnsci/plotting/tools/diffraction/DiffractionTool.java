@@ -1085,6 +1085,9 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		monitor.subTask("Fit POIs");
 		
 		points = PeakFittingEllipseFinder.findPointsOnEllipse(image, mask, (EllipticalROI) roi, innerRadius, outerRadius);
+		
+		if (points == null) return null;
+		
 		if (points.getNumberOfPoints() < 3) {
 			throw new IllegalArgumentException("Could not find enough points to trim");
 		}
