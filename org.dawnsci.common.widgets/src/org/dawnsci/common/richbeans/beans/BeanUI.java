@@ -24,10 +24,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.beanutils.BeanMap;
 import org.apache.commons.beanutils.BeanUtils;
 import org.dawnsci.common.richbeans.event.ValueListener;
 
@@ -60,9 +58,8 @@ public class BeanUI {
 
 		BeanUI.notify(bean, uiObject, new BeanProcessor() {
 			@Override
-			public void process(Entry<Object, Object> prop, IFieldWidget box) throws Exception {
-				final Object value = prop.getValue();
-				box.setFieldName(prop.getKey().toString());
+			public void process(String name, Object value,  IFieldWidget box) throws Exception {
+				box.setFieldName(name);
 				if (value == null /*&& !box.isActivated()*/) {
 					return;
 				}
@@ -82,7 +79,7 @@ public class BeanUI {
 
 		BeanUI.notify(bean, uiObject, new BeanProcessor() {
 			@Override
-			public void process(Entry<Object, Object> prop, IFieldWidget box) throws Exception {
+			public void process(String name, Object value,  IFieldWidget box) throws Exception {
 				box.fireValueListeners();
 			}
 		});
@@ -99,7 +96,7 @@ public class BeanUI {
 
 		BeanUI.notify(bean, uiObject, new BeanProcessor() {
 			@Override
-			public void process(Entry<Object, Object> prop, IFieldWidget box) throws Exception {
+			public void process(String name, Object value,  IFieldWidget box) throws Exception {
 				box.fireBoundsUpdaters();
 			}
 		});
@@ -120,10 +117,10 @@ public class BeanUI {
 
 		BeanUI.notify(bean, uiObject, new BeanProcessor() {
 			@Override
-			public void process(Entry<Object, Object> prop, IFieldWidget box) throws Exception {
+			public void process(String name, Object value,  IFieldWidget box) throws Exception {
 				final Object ob = box.getValue();
 				if (ob != null && !isNaN(ob) && !isInfinity(ob)) {
-					prop.setValue(ob); // Throws IllegalArgumentException if method does not exist.
+					setValue(bean, name, ob);
 				}
 			}
 
@@ -187,7 +184,7 @@ public class BeanUI {
 
 		BeanUI.notify(bean, uiObject, new BeanProcessor() {
 			@Override
-			public void process(Entry<Object, Object> prop, IFieldWidget box) throws Exception {
+			public void process(String name, Object value,  IFieldWidget box) throws Exception {
 				box.addValueListener(listener);
 			}
 		});
@@ -205,7 +202,7 @@ public class BeanUI {
 			throws Exception {
 		BeanUI.notify(bean, uiObject, new BeanProcessor() {
 			@Override
-			public void process(Entry<Object, Object> prop, IFieldWidget box) throws Exception {
+			public void process(String name, Object value,  IFieldWidget box) throws Exception {
 				box.removeValueListener(listener);
 			}
 		});
@@ -238,8 +235,8 @@ public class BeanUI {
 
 		BeanUI.notify(bean, uiObject, new BeanProcessor() {
 			@Override
-			public void process(Entry<Object, Object> prop, IFieldWidget box) throws Exception {
-				addBeanField(bean.getClass(), prop.getKey().toString(), box);
+			public void process(String name, Object value,  IFieldWidget box) throws Exception {
+				addBeanField(bean.getClass(), name, box);
 			}
 		});
 	}
@@ -331,7 +328,7 @@ public class BeanUI {
 	public static void switchState(final Object bean, final Object uiObject, final boolean on) throws Exception {
 		BeanUI.notify(bean, uiObject, new BeanProcessor() {
 			@Override
-			public void process(Entry<Object, Object> prop, IFieldWidget box) {
+			public void process(String name, Object value,  IFieldWidget box) {
 				if (on) {
 					box.on();
 				} else {
@@ -374,7 +371,7 @@ public class BeanUI {
 	public static void setEnabled(final Object bean, final Object uiObject, final boolean isEnabled) throws Exception {
 		BeanUI.notify(bean, uiObject, new BeanProcessor() {
 			@Override
-			public void process(Entry<Object, Object> prop, IFieldWidget box) {
+			public void process(String name, Object value,  IFieldWidget box) {
 				box.setEnabled(isEnabled);
 			}
 		});
@@ -383,35 +380,62 @@ public class BeanUI {
 	public static void dispose(final Object bean, final Object uiObject) throws Exception {
 		BeanUI.notify(bean, uiObject, new BeanProcessor() {
 			@Override
-			public void process(Entry<Object, Object> prop, IFieldWidget box) {
+			public void process(String name, Object value,  IFieldWidget box) {
 				box.dispose();
 			}
 		});
 	}
 
 	@SuppressWarnings("unchecked")
-	public final static void notify(final Object bean, final Object uiObject, final BeanProcessor worker)
-			throws Exception {
+	public final static void notify(final Object bean, final Object uiObject, final BeanProcessor worker) throws Exception {
 
-		final BeanMap properties = new BeanMap(bean);
-		final Iterator<Entry<Object, Object>> it = properties.entryIterator();
-		Collection<String> names  = BeanUI.getEditingFields(bean, uiObject);
+		final Map<String,Object> properties = BeanUtils.describe(bean);
+		final Iterator<String>   it         = properties.keySet().iterator();
+		final Collection<String> names      = BeanUI.getEditingFields(bean, uiObject);
+		
 		while (it.hasNext()) {
-			final Entry<Object, Object> prop = it.next();
-				final String fieldName = prop.getKey().toString();
-				if (names.contains(fieldName)) {					
-					if (fieldName.equals("class"))
-						continue;
-					final IFieldWidget box = BeanUI.getFieldWiget(fieldName, uiObject);
-					// NOTE non-IFieldWidget fields will be ignored.
-					if (box != null)
-						worker.process(prop, box);
+			final String fieldName = it.next();
+			if (names.contains(fieldName)) {					
+				if (fieldName.equals("class")) continue;
+				final IFieldWidget box = BeanUI.getFieldWiget(fieldName, uiObject);
+				// NOTE non-IFieldWidget fields will be ignored.
+				if (box != null) {
+					final Object val = getValue(bean, fieldName);
+					worker.process(fieldName, val, box);
 				}
+			}
 		}
 	}
 
+	private static Object getValue(Object bean, String fieldName) throws Exception {
+		final String getter = BeansFactory.getGetterName(fieldName);
+		return bean.getClass().getMethod(getter).invoke(bean);
+	}
+	
+	protected static void setValue(Object bean, String fieldName, Object ob) throws Exception {
+		
+		final String setter = BeansFactory.getSetterName(fieldName);
+		
+		Method method = null;
+		try {
+			method = bean.getClass().getMethod(setter, ob.getClass());
+		} catch (java.lang.NoSuchMethodException ne) {
+			final Class[] interfacesImplemented = ob.getClass().getInterfaces();
+			for (Class clazz : interfacesImplemented) {
+				try {
+					method = bean.getClass().getMethod(setter, clazz);
+					break;
+				}catch (Exception neOther) {
+					continue;
+				}
+			}
+		}
+		
+		method.invoke(bean, ob);
+	}
+
 	public static interface BeanProcessor {
-		void process(Entry<Object, Object> prop, IFieldWidget box) throws Exception;
+		void process(String name, Object value, IFieldWidget box) throws Exception;
 	}
 
 	/**

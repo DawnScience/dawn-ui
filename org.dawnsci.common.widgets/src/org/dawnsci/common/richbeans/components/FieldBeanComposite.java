@@ -241,7 +241,7 @@ public class FieldBeanComposite extends FieldComposite implements IFieldCollecti
 			if (editorUI instanceof Widget && ((Widget)editorUI).isDisposed()) return;
 			BeanUI.notify(editorBean, editorUI, new BeanProcessor() {
 				@Override
-				public void process(Entry<Object, Object> prop, IFieldWidget box) throws Exception {
+				public void process(String name, Object val, IFieldWidget box) throws Exception {
 					if (box instanceof IExpressionWidget) {
 						final IExpressionWidget expressionBox = (IExpressionWidget)box;
 						expressionBox.setExpressionValue(value);

@@ -24,7 +24,6 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.commons.beanutils.BeanMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -182,7 +181,26 @@ public class BeansFactory {
 	 */
 	public static void setBeanValue(final Object bean, final String fieldName, final Object value) throws Exception {
 		final String setterName = getSetterName(fieldName);
+		
+		// Faster to deal with primitives within an exception
+		boolean tryDirectValue = true;
 		try {
+			if (value != null) {
+				if (value instanceof Number) {
+		
+					Number number = (Number)value;
+					final Method method = bean.getClass().getMethod(setterName, getPrimitiveClass(number));
+					method.invoke(bean, value); // auto-boxing should sort this
+					return;
+					
+				} if (value instanceof Boolean) {
+					final Method method = bean.getClass().getMethod(setterName, boolean.class);
+					method.invoke(bean, ((Boolean)value).booleanValue());
+					return;
+				}
+			}
+			
+			tryDirectValue = false;
 			final Method method;
 			if (value != null) {
 				method = bean.getClass().getMethod(setterName, value.getClass());
@@ -190,13 +208,51 @@ public class BeansFactory {
 				method = bean.getClass().getMethod(setterName, Object.class);
 			}
 			method.invoke(bean, value);
+
 		} catch (NoSuchMethodException ne) {
-			// Happens when UI and bean types are not the same, for instance Text editing a double field,
-			// or label showing a double field.
-			final BeanMap properties = new BeanMap(bean);
-			properties.put(fieldName, value);
+			
+			// Happens when they implemented with the object not the primitive value.
+			if (tryDirectValue) {
+				final Method method;
+				if (value != null) {
+					method = bean.getClass().getMethod(setterName, value.getClass());
+				} else {
+					method = bean.getClass().getMethod(setterName, Object.class);
+				}
+				method.invoke(bean, value);
+			}
 		}
 	}
+
+	/**
+	 * There is a better way to do this but cannot find it again
+	 *  // TODO Use factory method for getting primitive type
+	 * @param number
+	 * @return
+	 */
+	private static Class<?> getPrimitiveClass(Number number) {
+		if (number instanceof Double) {
+			return double.class;
+			
+		} else if (number instanceof Float) {
+			return float.class;
+
+		} else if (number instanceof Integer) {
+			return int.class;
+			
+		} else if (number instanceof Long) {
+			return long.class;
+			
+		} else if (number instanceof Short) {
+			return short.class;
+
+		} else if (number instanceof Byte) {
+			return byte.class;
+		}
+		
+		return null;
+	}
+
 
 	/**
 	 * Method gets value out of bean using reflection.
