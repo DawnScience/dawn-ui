@@ -162,7 +162,7 @@ public class ROIEditTable  {
 			ed.setIncrement(0.1d);
 			
 			if (element instanceof LinearROI || element instanceof PointROI || element instanceof PolylineROI
-			   || element instanceof RectangularROI) {
+			   || element instanceof RectangularROI || element instanceof PerimeterBoxROI) {
 				if (column==1) {
 		            if (!Double.isNaN(xLowerBound)) ed.setMinimum(xLowerBound);
 		            if (!Double.isNaN(xUpperBound)) ed.setMaximum(xUpperBound);
@@ -312,6 +312,12 @@ public class ROIEditTable  {
 			final PointROI pr = (PointROI)roi;
 			ret.add(new RegionRow("Point (x,y)", "pixel", getAxis(coords, pr.getPoint())));
 			
+		} else if (roi instanceof PerimeterBoxROI) {
+			final PerimeterBoxROI pr = (PerimeterBoxROI)roi;
+			ret.add(new RegionRow("Start Point (x,y)", "pixel", getAxis(coords, pr.getPoint())));
+			ret.add(new RegionRow("Lengths (x,y)",     "pixel", getAxis(coords, pr.getLengths())));
+			ret.add(new RegionRow("Rotation (°)",      "°",     pr.getAngleDegrees(), Double.NaN));
+			
 		} else if (roi instanceof RectangularROI) {
 			final RectangularROI rr = (RectangularROI)roi;
 			ret.add(new RegionRow("Start Point (x,y)", "pixel", getAxis(coords, rr.getPoint())));
@@ -413,7 +419,7 @@ public class ROIEditTable  {
 			// TODO don't have to do it this way - reflection would solve all the tests with identical blocks.
 			if (roi instanceof PerimeterBoxROI) {
 				PerimeterBoxROI pr = new PerimeterBoxROI(start[0],         start[1],
-								                         length[1],       length[1], 
+								                         length[0],       length[1], 
 								                         Math.toRadians(rows.get(2).getxLikeVal()));
 				ret = pr;
 				
@@ -436,19 +442,26 @@ public class ROIEditTable  {
 			final double[] cent  = getImage(coords, rows.get(0));
 			final double[] radii = rows.get(1).getPoint();
 
-			SectorROI sr = new SectorROI(cent[0],
-					                     cent[1],
-					                     radii[0],
-					                     radii[1],
-					                     Math.toRadians(rows.get(2).getxLikeVal()),
-					                     Math.toRadians(rows.get(2).getyLikeVal()),
-					                     orig.getDpp(),
-					                     orig.isClippingCompensation(),
-					                     orig.getSymmetry());
+			if (roi instanceof RingROI) {
+				RingROI rr = new RingROI(radii[0], radii[1]);
+
+				rr.setPoint(cent);
+				ret = rr;
+			} else {
+				SectorROI sr = new SectorROI(cent[0],
+											 cent[1],
+											 radii[0],
+											 radii[1],
+											 Math.toRadians(rows.get(2).getxLikeVal()),
+											 Math.toRadians(rows.get(2).getyLikeVal()),
+											 orig.getDpp(),
+											 orig.isClippingCompensation(),
+											 orig.getSymmetry());
+
+				sr.setCombineSymmetry(orig.isCombineSymmetry());
+				ret = sr;
+			}
 			
-			sr.setCombineSymmetry(orig.isCombineSymmetry());
-			
-			ret = sr;
 			
 		} else if (roi instanceof CircularFitROI) {
 			PolylineROI pr = new PolylineROI();
