@@ -959,9 +959,9 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	
 	protected ILazyDataset getSliceSet() {
 		final ISliceSystem system = (ISliceSystem)editor.getAdapter(ISliceSystem.class);
-		if (system!=null) return system.getData().getLazySet();
+		if (system!=null && system.getData()!=null) return system.getData().getLazySet();
 
-		return null;
+		return selections.get(0).getLazyData(new IMonitor.Stub());
 	}
 
 	public IFile getIFile(boolean createNewFile) {

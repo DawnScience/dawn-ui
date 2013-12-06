@@ -154,17 +154,19 @@ public class DataReductionWizard extends Wizard implements IExportWizard {
 	}
 	
 	public void setSlice(final ILazyDataset lazy, final DimsDataList dList) {
-		this.dimsList = dList.clone();
-		for (DimsData dd : dimsList.getDimsData()) {
-			if (dd.isSlice()) {
-				context.addSliceDimension(dd.getDimension(), String.valueOf(dd.getSlice()));
-				if (dd.getSlice()>0) {
-				    dd.setSliceRange(dd.getSlice()+":"+(lazy.getShape()[dd.getDimension()]-1));
-				} else {
-					dd.setSliceRange("all");
-				}
-			    break; // Only one range allowed.
-			} 
+		if (dList!=null) {
+			this.dimsList = dList.clone();
+			for (DimsData dd : dimsList.getDimsData()) {
+				if (dd.isSlice()) {
+					context.addSliceDimension(dd.getDimension(), String.valueOf(dd.getSlice()));
+					if (dd.getSlice()>0) {
+					    dd.setSliceRange(dd.getSlice()+":"+(lazy.getShape()[dd.getDimension()]-1));
+					} else {
+						dd.setSliceRange("all");
+					}
+				    break; // Only one range allowed.
+				} 
+			}
 		}
 	}
 
