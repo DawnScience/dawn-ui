@@ -425,13 +425,14 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 				final double[] p2 = bounds.getEndPoint();
 	
 				// We peak fit only the first of the data sets plotted for now.
-				AbstractDataset x  = (AbstractDataset)selectedTrace.getXData();
-				AbstractDataset y  = (AbstractDataset)selectedTrace.getYData();
+				AbstractDataset x  = (AbstractDataset)selectedTrace.getXData().squeeze();
+				AbstractDataset y  = (AbstractDataset)selectedTrace.getYData().squeeze();
 	
 				try {
 					AbstractDataset[] a= Generic1DFitter.xintersection(x,y,p1[0],p2[0]);
 					x = a[0]; y=a[1];
 				} catch (Throwable npe) {
+					logger.debug("Cannot fit!", npe);
 					continue;
 				}
 	
