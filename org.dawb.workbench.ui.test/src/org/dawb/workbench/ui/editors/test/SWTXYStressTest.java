@@ -24,6 +24,7 @@ import org.dawnsci.plotting.api.PlottingFactory;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.RegionUtils;
 import org.dawnsci.plotting.api.trace.IImageTrace;
+import org.dawnsci.plotting.api.trace.IImageTrace.DownsampleType;
 import org.dawnsci.plotting.api.trace.ILineTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.core.filesystem.EFS;
@@ -247,5 +248,86 @@ public class SWTXYStressTest {
 		
 	}
 
+
+	@Test
+	public void testMaximumSpeed2DUpdate() throws Throwable {
+		
+		final Bundle bun  = Platform.getBundle("org.dawb.workbench.ui.test");
+
+		String path = (bun.getLocation()+"src/org/dawb/workbench/ui/editors/test/billeA.edf");
+		path = path.substring("reference:file:".length());
+		if (path.startsWith("/C:")) path = path.substring(1);
+
+		final IWorkbenchPage page      = EclipseUtils.getPage();		
+		final IFileStore  externalFile = EFS.getLocalFileSystem().fromLocalFile(new File(path));
+		final IEditorPart part         = page.openEditor(new FileStoreEditorInput(externalFile), ImageEditor.ID);
+		page.setPartState(EclipseUtils.getPage().getActivePartReference(), IWorkbenchPage.STATE_MAXIMIZED);
+
+		EclipseUtils.delay(2000);
+		
+		final AbstractPlottingSystem sys = (AbstractPlottingSystem)PlottingFactory.getPlottingSystem(part.getTitle());
+
+		final Collection<ITrace>   traces= sys.getTraces(IImageTrace.class);
+		final IImageTrace          imt = (IImageTrace)traces.iterator().next();
+
+		// 10 random images
+    	final DoubleDataset[] data = new DoubleDataset[10];
+    	for (int i = 0; i < data.length; i++) {
+        	data[i] = new DoubleDataset(new int[]{2048, 2048});
+           	for (int j = 0; j < 2048*2048; j++) {
+           		data[i].getData()[j] =  Math.random();
+    		}
+		}
+ 
+    	// Plot something then fix histogram
+    	Display.getDefault().syncExec(new Runnable() {
+    		public void run() {
+            	imt.setData(data[0], null, false);
+    		}
+    	});
+
+    	imt.setDownsampleType(DownsampleType.POINT); // Fast!
+    	imt.setRescaleHistogram(false); // Fast!
+    	
+    	
+		long sizeStart = Runtime.getRuntime().freeMemory();
+
+		Display.getDefault().syncExec(new Runnable() {
+    		public void run() {
+    			// Long loop printing how long to plot.
+    			long start = System.currentTimeMillis();
+
+    			double average = Double.NaN;
+    			for (int i = 0; i < 1000; i++) {
+
+    				for (int j = 0; j < data.length; j++) {
+
+    					imt.setData(data[j], null, false);
+
+    					long end  = System.currentTimeMillis();
+    					long diff = end-start;
+    					System.out.println(diff);
+    					average = Double.isNaN(average) 
+    							? diff
+    						    : (average+diff)/2d;   // cumulative moving average I think http://en.wikipedia.org/wiki/Moving_average
+    					start = end;
+    					
+    					EclipseUtils.delay(1);
+    				}
+
+    			}
+
+    			System.out.println("Average time to plot a 2k image = "+average+" ms");
+    		}
+    	});
+    	
+    	LoaderFactory.clear();
+		System.gc();
+		EclipseUtils.delay(1000);
+		
+		long sizeEnd = Runtime.getRuntime().freeMemory();
+		if ((sizeStart-sizeEnd)>10000) throw new Exception("Unexpected memory leak - "+(sizeStart-sizeEnd));
+		
+	}
 
 }
