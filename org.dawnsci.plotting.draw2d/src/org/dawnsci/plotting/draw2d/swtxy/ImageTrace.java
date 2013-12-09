@@ -725,7 +725,6 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		yAxis.setTicksIndexBased(false);
 		axisRedrawActive = false;
 		if (imageServiceBean!=null) imageServiceBean.dispose();
-		if (this.scaledImage!=null && !scaledImage.isDisposed()) scaledImage.dispose();
 		
 		this.imageServiceBean = null;
 		this.service          = null;
@@ -951,6 +950,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		// what is plotted.
 		this.image = (AbstractDataset)image;
 		if (this.mipMap!=null)  mipMap.clear();
+		if (scaledImage!=null && !scaledImage.isDisposed()) scaledImage.dispose();
 		scaledImage = null;
 		imageData   = null;
 		
