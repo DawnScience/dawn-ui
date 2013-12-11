@@ -282,9 +282,7 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 			
 		};
 		process.setPriority(Job.SHORT);
-		
-		// TODO run something!
-		//process.schedule(2);
+		process.schedule(2);
 	}
 
 	@Override
