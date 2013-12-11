@@ -606,6 +606,12 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 	public void saveExpressions() {
 
 	}
+	
+	// Fix to http://jira.diamond.ac.uk/browse/SCI-1613
+    //	@Override
+    //	public boolean isAlwaysSeparateView() {
+    //		return true;
+    //	}
 
 	@Override
 	public List<String> getVariableNames() {
