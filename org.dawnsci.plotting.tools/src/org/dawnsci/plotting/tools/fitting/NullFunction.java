@@ -124,4 +124,19 @@ public class NullFunction implements IPeak {
 	@Override
 	public void setDirty(boolean isDirty) {
 	}
+
+	@Override
+	public IDataset calculateValues(IDataset... coords) {
+		return null;
+	}
+
+	@Override
+	public IDataset calculatePartialDerivativeValues(IParameter param, IDataset... coords) {
+		return null;
+	}
+
+	@Override
+	public double weightedResidual(boolean allValues, IDataset sigma, IDataset data, IDataset... values) {
+		return 0;
+	}
 }

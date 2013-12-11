@@ -545,7 +545,7 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 						getPlottingSystem().addTrace(estimate);
 					}
 
-					DoubleDataset functionData = compFunction.makeDataset(x);
+					DoubleDataset functionData = compFunction.calculateValues(x);
 					estimate.setData(x, functionData);
 
 					System.out.println(x);
@@ -735,7 +735,7 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 
 					System.out.println("Plotting");
 					System.out.println(resultFunction);
-					DoubleDataset resultData = resultFunction.makeDataset(x);
+					DoubleDataset resultData = resultFunction.calculateValues(x);
 					fitTrace.setData(x, resultData);
 					fitTrace.setVisible(true);
 

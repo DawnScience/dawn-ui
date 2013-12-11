@@ -230,7 +230,7 @@ public class FittingUtils {
 		final double step = (xmax-xmin)/(x.getSize()*factor);
 		x = AbstractDataset.arange(xmin, xmax, step, AbstractDataset.FLOAT64);
 
-		return new AbstractDataset[]{x,peak.makeDataset(x)};
+		return new AbstractDataset[]{x,peak.calculateValues(x)};
 		
 	}
 
