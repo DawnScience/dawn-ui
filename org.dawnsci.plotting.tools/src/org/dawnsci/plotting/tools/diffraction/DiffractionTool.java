@@ -1093,7 +1093,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		}
 
 		monitor.subTask("Trim POIs");
-		efroi = PowderRingsUtils.fitAndTrimOutliers(mon, points, 2, false);
+		efroi = PowderRingsUtils.fitAndTrimOutliers(mon, points, 5, false);
 		logger.debug("Found {}...", efroi);
 
 
