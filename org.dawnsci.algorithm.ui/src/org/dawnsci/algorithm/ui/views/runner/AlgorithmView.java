@@ -54,6 +54,17 @@ public class AlgorithmView extends ViewPart {
     	createWorkflowRunPage(site);
     	runner.init(site, memento);
     }
+    
+	@Override
+	public Object getAdapter(final Class clazz) {
+		if (runner!=null ) {
+			Object adapter = runner.getAdapter(clazz);
+			if (adapter!=null) return adapter;
+		}
+		if (clazz == IAlgorithmProcessPage.class) return runner; // breaks encapsulation but useful sometimes.
+		return super.getAdapter(clazz);
+	}
+
 
     public void saveState(IMemento memento){
     	runner.saveState(memento);

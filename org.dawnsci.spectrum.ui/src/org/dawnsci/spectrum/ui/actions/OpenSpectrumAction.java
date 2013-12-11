@@ -1,7 +1,7 @@
 package org.dawnsci.spectrum.ui.actions;
 
 
-import org.dawnsci.spectrum.ui.views.SpectrumView;
+import org.dawnsci.spectrum.ui.file.SpectrumFileManager;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelection;
@@ -62,9 +62,11 @@ public class OpenSpectrumAction extends Action {
 				
 				IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 				IViewPart view = page.findView("org.dawnsci.spectrum.ui.views.SpectrumView");
+				if (view==null) return;
 				
-				if (view != null && view instanceof SpectrumView) {
-					((SpectrumView)view).addFile(loc);
+				final SpectrumFileManager manager = (SpectrumFileManager)view.getAdapter(SpectrumFileManager.class);
+				if (manager != null) {
+					manager.addFile(loc);
 				}
 				
 			}

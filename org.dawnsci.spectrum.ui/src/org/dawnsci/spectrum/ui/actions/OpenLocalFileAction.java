@@ -2,7 +2,8 @@ package org.dawnsci.spectrum.ui.actions;
 
 import java.io.File;
 
-import org.dawnsci.spectrum.ui.views.SpectrumView;
+import org.dawnsci.spectrum.ui.file.SpectrumFileManager;
+import org.dawnsci.spectrum.ui.views.TraceProcessPage;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
@@ -32,10 +33,12 @@ public class OpenLocalFileAction extends Action implements IWorkbenchWindowActio
 		String[] names =  dialog.getFileNames();
 		IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 		IViewPart view = page.findView("org.dawnsci.spectrum.ui.views.SpectrumView");
+		if (view==null) return;
 		
-		if (view != null && view instanceof SpectrumView) {
+		final SpectrumFileManager manager = (SpectrumFileManager)view.getAdapter(SpectrumFileManager.class);
+		if (manager != null) {
 			for (String name : names) {
-				((SpectrumView)view).addFile(dialog.getFilterPath() + File.separator + name);
+				manager.addFile(dialog.getFilterPath() + File.separator + name);
 			}
 		}
 	}

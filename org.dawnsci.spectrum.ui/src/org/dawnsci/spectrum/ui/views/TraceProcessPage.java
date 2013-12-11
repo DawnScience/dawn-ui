@@ -1,11 +1,14 @@
 package org.dawnsci.spectrum.ui.views;
 
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import org.dawb.common.ui.menu.MenuAction;
+import org.dawnsci.algorithm.ui.views.runner.AbstractAlgorithmProcessPage;
+import org.dawnsci.algorithm.ui.views.runner.IAlgorithmProcessContext;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlottingFactory;
 import org.dawnsci.plotting.api.axis.IAxis;
@@ -22,22 +25,11 @@ import org.dawnsci.spectrum.ui.file.ISpectrumFileListener;
 import org.dawnsci.spectrum.ui.file.SpectrumFileManager;
 import org.dawnsci.spectrum.ui.file.SpectrumFileOpenedEvent;
 import org.dawnsci.spectrum.ui.utils.SpectrumUtils;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.dnd.DND;
-import org.eclipse.swt.dnd.DropTarget;
-import org.eclipse.swt.dnd.DropTargetAdapter;
-import org.eclipse.swt.dnd.DropTargetEvent;
-import org.eclipse.swt.dnd.FileTransfer;
-import org.eclipse.swt.dnd.TextTransfer;
-import org.eclipse.swt.dnd.Transfer;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.PaletteData;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
@@ -65,16 +57,33 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DropTarget;
+import org.eclipse.swt.dnd.DropTargetAdapter;
+import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.swt.dnd.FileTransfer;
+import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.PaletteData;
+import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.ISourceProvider;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.part.ResourceTransfer;
-import org.eclipse.ui.part.ViewPart;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
@@ -87,23 +96,20 @@ import uk.ac.diamond.scisoft.analysis.dataset.Maths;
 * <p>
 * Hold the SpectrumFileManager which takes care of loading and plotting files
 */
-public class SpectrumView extends ViewPart {
-	//TODO OMG TIDY THIS CLASS!!!!
-	/**
-	 * The ID of the view as specified by the extension.
-	 */
-	public static final String ID = "org.dawnsci.spectrum.ui.views.SpectrumView";
+public class TraceProcessPage extends AbstractAlgorithmProcessPage {
+	
+	// Jake start using this more please :)
+	private Logger logger = LoggerFactory.getLogger(TraceProcessPage.class);
 
+	private SpectrumFileManager manager;
+	private IPlottingSystem     system;
 	private CheckboxTableViewer viewer;
+	private List<Color>         orderedColors;
+
 	private Action removeAction;
 	private Action configDefaults;
-//	private Action doubleClickAction;
-	private IPlottingSystem system;
-	private SpectrumFileManager manager;
-	private DropTargetAdapter dropListener;
-	private List<Color> orderedColors;
 
-	public void createPartControl(Composite parent) {
+	public Composite createPartControl(Composite parent) {
 		
 		//Create table
 		viewer = CheckboxTableViewer.newCheckList(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
@@ -119,7 +125,7 @@ public class SpectrumView extends ViewPart {
 		ColumnViewerToolTipSupport.enableFor(viewer);
 		
 		//Get plotting system from PlotView, use it to create file manager
-		IWorkbenchPage page = getSite().getPage();
+		IWorkbenchPage page = getView().getSite().getPage();
 		IViewPart view = page.findView("org.dawnsci.spectrum.ui.views.SpectrumPlot");
 		system = (IPlottingSystem)view.getAdapter(IPlottingSystem.class);
 		manager = new SpectrumFileManager(system);
@@ -141,10 +147,10 @@ public class SpectrumView extends ViewPart {
 			}
 		});
 
-		getSite().setSelectionProvider(viewer);
+		getView().getSite().setSelectionProvider(viewer);
 		
 		//Set up drag-drop
-		dropListener = new DropTargetAdapter() {
+		DropTargetAdapter dropListener = new DropTargetAdapter() {
 			@Override
 			public void drop(DropTargetEvent event) {
 				Object dropData = event.data;
@@ -154,12 +160,12 @@ public class SpectrumView extends ViewPart {
 					for (int i = 0; i < obj.length; i++) {
 						if (obj[i] instanceof IFile) {
 							IFile file = (IFile) obj[i];
-							addFile(file.getRawLocation().toOSString());
+							manager.addFile(file.getRawLocation().toOSString());
 						}
 					}
 				} else if (dropData instanceof String[]) {
 					for (String path : (String[])dropData){
-						addFile(path);
+						manager.addFile(path);
 					}
 				}
 			}
@@ -231,6 +237,66 @@ public class SpectrumView extends ViewPart {
 		List<IAxis> axes = system.getAxes();
 		for (IAxis axis : axes) axis.setAxisAutoscaleTight(true);
 		system.setColorOption(ColorOption.BY_NAME);
+		
+		// Currently we do not want the run actions visible
+		final IToolBarManager man = getView().getViewSite().getActionBars().getToolBarManager();
+		if (man.find(IAlgorithmProcessContext.RUN_ID_STUB)!=null) man.find(IAlgorithmProcessContext.RUN_ID_STUB).setVisible(false);
+		if (man.find(IAlgorithmProcessContext.STOP_ID_STUB)!=null) man.find(IAlgorithmProcessContext.STOP_ID_STUB).setVisible(false);
+
+		return viewer.getTable();
+	}
+	
+
+	@Override
+	public String getTitle() {
+		return "Traces";
+	}
+
+	@Override
+	public void run(final IAlgorithmProcessContext context) throws Exception {
+		
+		if (manager.isEmpty()) {
+			MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Empty File List", "There are currently no files to process.\n\nPlease double click to add files from the 'Trace Project' view.");
+		    return;
+		}
+		
+		// We save the manager to file. This then is read by the file
+		// reader source and each file is processed.
+		final File exportFile = File.createTempFile("SpectrumFiles", ".csv");
+		manager.export(exportFile); // saves out file list with data sets so that pipeline can process.
+		
+		System.setProperty("import.file.path", exportFile.getAbsolutePath());
+		
+		final Job process = new Job(context.getTitle()) {
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				try {
+					context.execute(context.getFilePath(), true, monitor);
+					return Status.OK_STATUS;
+				} catch (Exception e) {
+					logger.error("Cannot process '"+context.getTitle()+"'");
+					return Status.CANCEL_STATUS;
+				}
+			}
+			
+		};
+		process.setPriority(Job.SHORT);
+		
+		// TODO run something!
+		//process.schedule(2);
+	}
+
+	@Override
+	public ISourceProvider[] getSourceProviders() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Object getAdapter(final Class clazz) {
+		if (clazz == SpectrumFileManager.class) return manager;
+		return null;
 	}
 
 	private void hookContextMenu() {
@@ -238,16 +304,16 @@ public class SpectrumView extends ViewPart {
 		menuMgr.setRemoveAllWhenShown(true);
 		menuMgr.addMenuListener(new IMenuListener() {
 			public void menuAboutToShow(IMenuManager manager) {
-				SpectrumView.this.fillContextMenu(manager);
+				TraceProcessPage.this.fillContextMenu(manager);
 			}
 		});
 		Menu menu = menuMgr.createContextMenu(viewer.getControl());
 		viewer.getControl().setMenu(menu);
-		getSite().registerContextMenu(menuMgr, viewer);
+		getView().getSite().registerContextMenu(menuMgr, viewer);
 	}
 
 	private void contributeToActionBars() {
-		IActionBars bars = getViewSite().getActionBars();
+		IActionBars bars = getView().getViewSite().getActionBars();
 		fillLocalPullDown(bars.getMenuManager());
 		fillLocalToolBar(bars.getToolBarManager());
 	}
@@ -265,7 +331,7 @@ public class SpectrumView extends ViewPart {
 					PaletteData paletteData = pservice.getPaletteData("Jet (Blue-Cyan-Green-Yellow-Red)");
 					RGB[] rgbs = paletteData.getRGBs();
 					orderedColors = new ArrayList<Color>(256);
-					Display display = Display.getCurrent();
+					Display display = Display.getDefault();
 					for(int i = 0; i < 256 ; i++) {
 						orderedColors.add(new Color(display, rgbs[i]));
 					}
@@ -309,7 +375,7 @@ public class SpectrumView extends ViewPart {
 					return;
 				}
 				
-				SpectrumView.this.manager.addFile(file);
+				TraceProcessPage.this.manager.addFile(file);
 			}
 		});
 		
@@ -326,56 +392,14 @@ public class SpectrumView extends ViewPart {
 						return;
 					}
 
-					SpectrumView.this.manager.addFile(files[0]);
-					SpectrumView.this.manager.addFile(files[1]);
+					TraceProcessPage.this.manager.addFile(files[0]);
+					TraceProcessPage.this.manager.addFile(files[1]);
 				}
 			});
 		}
 		manager.add(menuProcess);
 		manager.add(new Separator());
 		manager.add(removeAction);
-		
-//		if (((IStructuredSelection)viewer.getSelection()).size() == 1) {
-//			
-//			manager.add(new Separator());
-//			
-//			manager.add(new Action("Open in Data Browsing Perspective",Activator.imageDescriptorFromPlugin("org.dawnsci.spectrum.ui","icons/application_view_gallery.png")) {
-//
-//				@Override
-//				public void run() {
-//					try {
-//						ISelection selection = viewer.getSelection();
-//						List<ISpectrumFile> list = SpectrumUtils.getSpectrumFilesList((IStructuredSelection)selection);
-//						if (list.isEmpty()) return;
-//						if (!(list.get(0) instanceof SpectrumFile)) {
-//							showMessage("Could not open perspective, operation not supported for this data!");
-//							return;
-//						}
-//						
-//						PlatformUI.getWorkbench().showPerspective("org.edna.workbench.application.perspective.DataPerspective",PlatformUI.getWorkbench().getActiveWorkbenchWindow());
-//						EclipseUtils.openExternalEditor(list.get(0).getLongName());
-//						
-//					} catch (WorkbenchException e) {
-//						showMessage("Could not open perspective, operation not supported for this data! : " + e.getMessage());
-//						e.printStackTrace();
-//					} 
-//				}
-//			});
-//		}
-		
-//		manager.add(new Action("Open processing wizard") {
-//			@Override
-//			public void run(){
-////				SpectrumWizard wiz = new SpectrumWizard();
-////				
-////				ISelection selection = viewer.getSelection();
-////				List<ISpectrumFile> list = SpectrumUtils.getSpectrumFilesList((IStructuredSelection)selection);
-////				wiz.add1DDatas(list.get(0),list.get(1));
-////				
-////				WizardDialog wd = new  WizardDialog(Display.getCurrent().getActiveShell(), wiz);
-////				wd.open();
-//			}
-//		});
 
 		// Other plug-ins can contribute there actions here
 		
@@ -446,23 +470,8 @@ public class SpectrumView extends ViewPart {
 				if (pref != null) pref.open();
 			}
 		};
-		
-//		doubleClickAction = new Action() {
-//			public void run() {
-//				ISelection selection = viewer.getSelection();
-//				Object obj = ((IStructuredSelection)selection).getFirstElement();
-//				showMessage("Double-click detected on "+obj.toString());
-//			}
-//		};
-	}
+	}	
 
-//	private void hookDoubleClickAction() {
-//		viewer.addDoubleClickListener(new IDoubleClickListener() {
-//			public void doubleClick(DoubleClickEvent event) {
-//				doubleClickAction.run();
-//			}
-//		});
-//	}
 	private void showMessage(String message) {
 		MessageDialog.openInformation(
 			viewer.getControl().getShell(),
@@ -471,11 +480,10 @@ public class SpectrumView extends ViewPart {
 	}
 	
 	@Override
-	public void dispose() {
-		
-		if (!system.isDisposed()) system.clear();
+	public void dispose() {	
+		system.dispose();
+		manager.dispose();
 		if (orderedColors != null) for (Color color : orderedColors) color.dispose();
-		super.dispose();
 	}
 
 	/**
@@ -485,11 +493,6 @@ public class SpectrumView extends ViewPart {
 		viewer.getControl().setFocus();
 	}
 	
-	public void addFile(String filePath) {
-		
-		manager.addFile(filePath);
-		
-	}
 	public void createXYFiltersActions(IToolBarManager manager) {
 
 		final IFilterDecorator dec = PlottingFactory.createFilterDecorator(system);

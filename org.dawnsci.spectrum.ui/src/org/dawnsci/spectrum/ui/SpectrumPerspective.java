@@ -1,7 +1,7 @@
 package org.dawnsci.spectrum.ui;
 
 //import org.dawnsci.spectrum.views.SpectrumView;
-import org.dawnsci.spectrum.ui.views.SpectrumView;
+import org.dawnsci.spectrum.ui.views.TraceProcessPage;
 import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
@@ -37,8 +37,8 @@ public class SpectrumPerspective implements IPerspectiveFactory {
 		
 		{
 			IFolderLayout folderLayout = layout.createFolder("folder", IPageLayout.LEFT, 0.2f, IPageLayout.ID_EDITOR_AREA);
-			folderLayout.addView(SpectrumView.ID);
-			vLayout = layout.getViewLayout(SpectrumView.ID);
+			folderLayout.addView("org.dawnsci.spectrum.ui.views.SpectrumView");
+			vLayout = layout.getViewLayout("org.dawnsci.spectrum.ui.views.SpectrumView");
 			vLayout.setCloseable(false);
 			
 		}

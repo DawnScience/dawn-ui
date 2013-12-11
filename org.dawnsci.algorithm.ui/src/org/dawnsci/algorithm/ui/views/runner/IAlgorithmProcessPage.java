@@ -1,5 +1,6 @@
 package org.dawnsci.algorithm.ui.views.runner;
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.ISourceProvider;
@@ -12,7 +13,7 @@ import org.eclipse.ui.PartInitException;
  * @author fcp94556
  *
  */
-public interface IAlgorithmProcessPage {
+public interface IAlgorithmProcessPage extends IAdaptable {
 
     /**
      * Initializes this view with the given view site.  A memento is passed to

@@ -24,4 +24,11 @@ public abstract class AbstractAlgorithmProcessPage implements IAlgorithmProcessP
 		algorithmViewPart = view;
 	}
 
+	protected IViewPart getView() {
+		return algorithmViewPart;
+	}
+	
+	public Object getAdapter(Class adapter) {
+		return null;
+	}
 }

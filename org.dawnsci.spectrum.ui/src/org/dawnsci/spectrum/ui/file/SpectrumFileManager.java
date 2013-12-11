@@ -1,5 +1,8 @@
 package org.dawnsci.spectrum.ui.file;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -33,9 +36,16 @@ public class SpectrumFileManager {
 	
 	public SpectrumFileManager(IPlottingSystem system) {
 		spectrumFiles = new LinkedHashMap<String,ISpectrumFile>();
-		listeners = new HashSet<ISpectrumFileListener>();
-		this.system = system;
+		listeners     = new HashSet<ISpectrumFileListener>();
+		this.system   = system;
 	}
+	
+
+	public void dispose() {
+		spectrumFiles.clear();
+		listeners.clear();
+	}
+
 
 	public void addFile(ISpectrumFile file) {
 		if (spectrumFiles.containsKey(file.getLongName())) return;
@@ -182,6 +192,47 @@ public class SpectrumFileManager {
 			return (rule == this);
 		}
 
+	}
+
+	/**
+	 * Saves spectrum files in order to csv file.
+	 * @param exportFile
+	 */
+	public void export(File file) throws Exception {
+		
+		if (file.exists()) file.delete();
+		file.createNewFile();
+        final BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+        try {
+        	for (String path : spectrumFiles.keySet()) {
+				final File f = new File(path);
+				if (f.exists()) {
+					final StringBuilder buf = new StringBuilder();
+					buf.append(path);
+					buf.append(",");
+					
+					final ISpectrumFile sfile = spectrumFiles.get(path);
+					if (sfile.getxDatasetName()!=null) {
+						buf.append(sfile.getxDatasetName());
+						buf.append(",");
+					}
+					for (String name : sfile.getyDatasetNames()) {
+						buf.append(name);
+						buf.append(",");
+					}
+					
+					writer.write(buf.toString());
+					writer.newLine();
+				}
+			}
+        } finally {
+        	writer.close();
+        }
+	}
+
+
+	public boolean isEmpty() {
+		return spectrumFiles.isEmpty();
 	}
 
 }

@@ -14,10 +14,10 @@
          point="org.eclipse.ui.views">
       <view
             category="org.dawb.workbench.ui.beta.views.category"
-            class="org.dawnsci.spectrum.ui.views.SpectrumView"
+            class="org.dawnsci.algorithm.ui.views.runner.AlgorithmView"
             icon="icons/spectrum.png"
             id="org.dawnsci.spectrum.ui.views.SpectrumView"
-            name="Trace View">
+            name="Traces">
       </view>
       <view
             category="org.dawb.workbench.ui.beta.views.category"
@@ -168,6 +168,19 @@
                style="push">
          </action>
       </actionSet>
+   </extension>
+   <extension
+         point="org.dawnsci.algorithm.ui.processPage">
+      <processPage
+            class="org.dawnsci.spectrum.ui.views.TraceProcessPage"
+            viewId="org.dawnsci.spectrum.ui.views.SpectrumView">
+         <connection
+               algorithmFile="spectrum_process.moml"
+               runIcon="icons/run_workflow.gif"
+               stopIcon="icons/stop_workflow.gif"
+               title="spectrum pipline">
+         </connection>
+      </processPage>
    </extension>
 
 </plugin>
