@@ -578,13 +578,13 @@ public class PlottingActionBarManager implements IPlotActionSystem {
 	}
 	
 	/**
+	 * Creates and makes the tool visible
 	 * returns false if no tool was shown
 	 * @param toolId
 	 * @return
 	 * @throws Exception 
 	 */
 	public boolean setToolVisible(final String toolId, final ToolPageRole role, final String viewId) throws Exception {
-	    
 		final IConfigurationElement[] configs = Platform.getExtensionRegistry().getConfigurationElementsFor("org.dawnsci.plotting.api.toolPage");
 	    for (IConfigurationElement e : configs) {
 			
