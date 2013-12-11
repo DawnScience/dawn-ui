@@ -948,6 +948,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		// what is plotted.
 		this.image = (AbstractDataset)image;
 		if (this.mipMap!=null)  mipMap.clear();
+		if (scaledImage!=null &&!scaledImage.isDisposed()) scaledImage.dispose(); // IMPORTANT
 		scaledImage = null;
 		imageData   = null;
 		
