@@ -22,6 +22,7 @@ class AlgorithmProcessContext implements IAlgorithmProcessContext {
 	private AlgorithmView   view;
 	private String workflowFilePath;
 	private String title;
+	private String fullPath;
 
 	AlgorithmProcessContext(AlgorithmView view, ISourceProvider[] providers) {
 		this.view      = view;
@@ -152,6 +153,8 @@ class AlgorithmProcessContext implements IAlgorithmProcessContext {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result
+				+ ((fullPath == null) ? 0 : fullPath.hashCode());
+		result = prime * result
 				+ ((modelRunner == null) ? 0 : modelRunner.hashCode());
 		result = prime * result + Arrays.hashCode(providers);
 		result = prime * result + ((title == null) ? 0 : title.hashCode());
@@ -171,6 +174,11 @@ class AlgorithmProcessContext implements IAlgorithmProcessContext {
 		if (getClass() != obj.getClass())
 			return false;
 		AlgorithmProcessContext other = (AlgorithmProcessContext) obj;
+		if (fullPath == null) {
+			if (other.fullPath != null)
+				return false;
+		} else if (!fullPath.equals(other.fullPath))
+			return false;
 		if (modelRunner == null) {
 			if (other.modelRunner != null)
 				return false;
@@ -195,4 +203,14 @@ class AlgorithmProcessContext implements IAlgorithmProcessContext {
 			return false;
 		return true;
 	}
+	
+	
+	public String getFullPath() {
+		return fullPath;
+	}
+
+	public void setFullPath(String fullPath) {
+		this.fullPath = fullPath;
+	}
+
 }

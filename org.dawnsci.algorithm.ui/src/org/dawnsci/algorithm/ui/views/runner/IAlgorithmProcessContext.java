@@ -60,6 +60,19 @@ public interface IAlgorithmProcessContext {
 	 * @return workflowFileName
 	 */
 	public String getFilePath();
+
+	/**
+	 * Absolute path on disk of moml file.
+	 * @param fullPath
+	 */
+	public void setFullPath(String fullPath);
+	
+	/**
+	 * Absolute path on disk of moml file.
+	 * @param fullPath
+	 */
+	public String getFullPath();
+
 	
 	/**
 	 * The title of the algorithm being run
@@ -73,5 +86,6 @@ public interface IAlgorithmProcessContext {
 	 * @return
 	 */
 	public void setTitle(String title);
+
 
 }

@@ -117,9 +117,10 @@ public class AlgorithmView extends ViewPart {
 		    	final Bundle   bundle = Platform.getBundle(id);
 		    	
          		URL      entry = bundle.getEntry(e.getAttribute("algorithmFile"));
-        		String filePath=null;
+        		String filePath=entry.getFile();
+        		String fullPath=null;
 				try {
-					filePath = BundleUtils.getBundleLocation(bundle)+entry.getFile();
+					fullPath = BundleUtils.getBundleLocation(bundle)+filePath;
 				} catch (IOException e1) {
 					logger.error("Cannot get algorithm file!");
 				}
@@ -130,12 +131,12 @@ public class AlgorithmView extends ViewPart {
 		    	entry = bundle.getEntry(e.getAttribute("runIcon"));
 		    	final ImageDescriptor runIcon = ImageDescriptor.createFromURL(entry);
 
-                createRunActions(title, filePath, runIcon, stopIcon);
+                createRunActions(title, filePath, fullPath, runIcon, stopIcon);
 			}
         	
         } else {
         	    	
-            createRunActions(runner.getTitle(), null, 
+            createRunActions(runner.getTitle(), null, null, 
             		         Activator.getImageDescriptor("icons/run_workflow.gif"), 
             		         Activator.getImageDescriptor("icons/stop_workflow.gif"));
 
@@ -145,6 +146,7 @@ public class AlgorithmView extends ViewPart {
 
 	private void createRunActions(final String          title,
 			                      final String          filePath,
+			                      final String          fullPath,
 			                      final ImageDescriptor runIcon,
 			                      final ImageDescriptor stopIcon) {
 		
@@ -167,6 +169,7 @@ public class AlgorithmView extends ViewPart {
 					if (context!=null) context.stop();
 					context = new AlgorithmProcessContext(AlgorithmView.this, runner.getSourceProviders());
 					context.setFilePath(filePath);
+					context.setFullPath(fullPath);
 					context.setTitle(title);
 					runner.run(context);
 					

@@ -272,7 +272,7 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
-					context.execute(context.getFilePath(), true, monitor);
+					context.execute(context.getFullPath(), true, monitor);
 					return Status.OK_STATUS;
 				} catch (Exception e) {
 					logger.error("Cannot process '"+context.getTitle()+"'");
