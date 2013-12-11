@@ -1,7 +1,9 @@
 package org.dawnsci.algorithm.ui.views.runner;
 
+import java.io.IOException;
 import java.net.URL;
 
+import org.dawb.common.util.eclipse.BundleUtils;
 import org.dawnsci.algorithm.ui.Activator;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
@@ -115,7 +117,12 @@ public class AlgorithmView extends ViewPart {
 		    	final Bundle   bundle = Platform.getBundle(id);
 		    	
          		URL      entry = bundle.getEntry(e.getAttribute("algorithmFile"));
-        		final String filePath = entry.getFile();
+        		String filePath=null;
+				try {
+					filePath = BundleUtils.getBundleLocation(bundle)+entry.getFile();
+				} catch (IOException e1) {
+					logger.error("Cannot get algorithm file!");
+				}
          
         		entry = bundle.getEntry(e.getAttribute("stopIcon"));
  		    	final ImageDescriptor stopIcon = ImageDescriptor.createFromURL(entry);

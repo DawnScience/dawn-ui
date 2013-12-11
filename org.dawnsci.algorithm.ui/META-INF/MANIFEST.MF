@@ -29,7 +29,8 @@ Require-Bundle: org.eclipse.ui;bundle-version="3.8.0",
  com.isencia.passerelle.engine,
  uk.ac.diamond.scisoft.analysis;bundle-version="1.3.0",
  org.dawb.passerelle.common;bundle-version="1.0.0",
- org.dawb.common.ui
+ org.dawb.common.ui,
+ org.dawb.common.util;bundle-version="1.2.0"
 Bundle-ActivationPolicy: lazy
 Export-Package: org.dawnsci.algorithm.ui.views.runner,
  org.dawnsci.algorithm.ui.workflow
