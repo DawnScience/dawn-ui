@@ -39,6 +39,7 @@ public class DiffractionTableData {
 	public List<IROI> rois; // can contain null entries as placeholders
 	public QSpace q;
 	public double od = Double.NaN;
+	public double distance;
 	public int nrois = -1; // number of actual ROIs found
 	public boolean use = false;
 }
