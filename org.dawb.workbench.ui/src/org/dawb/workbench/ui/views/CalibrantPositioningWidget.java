@@ -68,10 +68,9 @@ public class CalibrantPositioningWidget {
 		this.model = model;
 		final Display display = Display.getDefault();
 
-		Group controllerHolder = new Group(parent, SWT.BORDER);
+		Group controllerHolder = new Group(parent, SWT.BORDER | SWT.FILL);
 		controllerHolder.setText("Calibrant positioning");
 		controllerHolder.setLayout(new GridLayout(2, false));
-		controllerHolder.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 
 		// Pad composite
 		Composite padComp = new Composite(controllerHolder, SWT.BORDER);
@@ -394,7 +393,8 @@ public class CalibrantPositioningWidget {
 		if (controls == null)
 			return;
 		for (int i = 0; i < controls.length; i++) {
-			controls[i].setEnabled(b);
+			if (controls[i] != null)
+				controls[i].setEnabled(b);
 		}
 	}
 
