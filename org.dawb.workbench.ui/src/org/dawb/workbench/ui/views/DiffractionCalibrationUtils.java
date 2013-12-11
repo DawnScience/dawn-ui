@@ -60,8 +60,11 @@ import uk.ac.diamond.scisoft.analysis.fitting.Fitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Polynomial;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.roi.CircularROI;
+import uk.ac.diamond.scisoft.analysis.roi.EllipticalFitROI;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
+import uk.ac.diamond.scisoft.analysis.roi.PointROI;
+import uk.ac.diamond.scisoft.analysis.roi.PolylineROI;
 
 /**
  * Class containing static methods used in Diffraction calibration views
@@ -226,12 +229,33 @@ public class DiffractionCalibrationUtils {
 
 	public static IStatus drawFoundRing(final IProgressMonitor monitor, Display display, final IPlottingSystem plotter, final IROI froi, final boolean circle) {
 		final boolean[] status = {true};
+		
+		IROI roi = null;
+		EllipticalFitROI ef = null;
+		if (froi instanceof EllipticalFitROI) {
+			EllipticalFitROI efroi = (EllipticalFitROI)froi;
+			ef = (EllipticalFitROI)froi.copy();
+			PolylineROI points = ef.getPoints();
+			for (int i = 0; i< points.getNumberOfPoints(); i++) {
+				PointROI proi = points.getPoint(i);
+				double[] point = proi.getPoint();
+				point[1] += 0.5;
+				point[0] += 0.5;
+				proi.setPoint(point);
+			}
+		}
+		
+		if (ef != null)  roi = ef;
+		else roi = froi;
+		
+		final IROI fr = roi;
+		
 		display.syncExec(new Runnable() {
 
 			public void run() {
 				try {
 					IRegion region = plotter.createRegion(RegionUtils.getUniqueName(REGION_PREFIX, plotter), circle ? RegionType.CIRCLEFIT : RegionType.ELLIPSEFIT);
-					region.setROI(froi);
+					region.setROI(fr);
 					region.setRegionColor(circle ? ColorConstants.cyan : ColorConstants.orange);
 					monitor.subTask("Add region");
 					region.setUserRegion(false);
@@ -578,7 +602,7 @@ public class DiffractionCalibrationUtils {
 						
 
 						try {
-							roi = DiffractionTool.runEllipsePeakFit(monitor, display, plottingSystem, image, e, deltalow, deltahigh);
+							roi = DiffractionTool.runEllipsePeakFit(monitor, display, plottingSystem, image, e, deltalow, deltahigh,256);
 						} catch (NullPointerException ex) {
 							stat = Status.CANCEL_STATUS;
 							n = -1; // indicate, to finally clause, problem with getting image or other issues
