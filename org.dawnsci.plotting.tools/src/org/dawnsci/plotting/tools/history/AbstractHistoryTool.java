@@ -606,13 +606,6 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 	public void saveExpressions() {
 
 	}
-	
-	@Override
-	public boolean isAlwaysSeparateView() {
-		return true;
-	}
-
-	
 
 	@Override
 	public List<String> getVariableNames() {
