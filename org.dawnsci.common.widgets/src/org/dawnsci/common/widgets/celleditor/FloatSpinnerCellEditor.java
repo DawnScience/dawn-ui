@@ -17,7 +17,6 @@ import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
-import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Rectangle;
@@ -224,10 +223,18 @@ public class FloatSpinnerCellEditor extends CellEditor {
 		if (spinner!=null) spinner.setIncrement(inc);
 	}
 
+	/**
+	 * Set the format and automatically set minimum and maximum allowed values
+	 * 
+	 * @param width
+	 *            of displayed value as total number of digits
+	 * @param precision
+	 *            of value in decimal places
+	 */
 	public void setFormat(int i, int j) {
 		if (spinner!=null) spinner.setFormat(i,j);
 	}
-	
+
 	public void setBounds(Rectangle bnds) {
 		if (spinner!=null) spinner.setBounds(bnds);
 	}
