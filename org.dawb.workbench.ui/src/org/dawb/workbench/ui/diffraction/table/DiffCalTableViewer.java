@@ -372,9 +372,11 @@ public class DiffCalTableViewer extends TableViewer {
 	 * Update the visibility of the Table columns and parent layout
 	 */
 	public void updateTableColumnsAndLayout() {
+		int tabIndex = 0;
 		if (tabFolder == null)
-			return;
-		int tabIndex = tabFolder.getSelectionIndex();
+			tabIndex = 1;
+		else
+			tabIndex = tabFolder.getSelectionIndex();
 		TableColumn[] columns = table.getColumns();
 		for (int i = 2; i < columns.length; i++) {
 			if (tabIndex == 0) {	// auto mode
