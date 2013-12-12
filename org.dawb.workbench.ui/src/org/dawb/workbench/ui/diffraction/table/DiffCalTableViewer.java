@@ -59,7 +59,7 @@ public class DiffCalTableViewer extends TableViewer {
 	private IDetectorPropertyListener detectorPropertyListener;
 	private ILoaderService service;
 	private DropTargetAdapter dropListener;
-	
+	private List<ImageDroppedListener> dropListeners;
 	private Table table;
 
 	/**
@@ -152,7 +152,6 @@ public class DiffCalTableViewer extends TableViewer {
 						DiffractionTableData d = createData(res[i].getRawLocation().toOSString(), null);
 						if (d != null) {
 							good = d;
-//							setWavelength(d);
 						}
 					}
 				} else if (dropData instanceof TreeSelection) {
@@ -171,7 +170,6 @@ public class DiffCalTableViewer extends TableViewer {
 						}
 						if (d != null) {
 							good = d;
-//							setWavelength(d);
 						}
 					}
 				} else if (dropData instanceof String[]) {
@@ -180,7 +178,6 @@ public class DiffCalTableViewer extends TableViewer {
 						DiffractionTableData d = createData(selectedData[i], null);
 						if (d != null) {
 							good = d;
-//							setWavelength(d);
 						}
 					}
 				}
@@ -192,8 +189,7 @@ public class DiffCalTableViewer extends TableViewer {
 					table.deselectAll();
 					setSelection(new StructuredSelection(good));
 				}
-//				if (model.size() > 0)
-//					setXRaysModifiersEnabled(true);
+				fireImageDroppedEvent(event);
 			}
 		};
 
@@ -260,7 +256,27 @@ public class DiffCalTableViewer extends TableViewer {
 		data.md.getDetector2DProperties().removeDetectorPropertyListener(detectorPropertyListener);
 	}
 
-	
+	public void addImageDroppedListener(ImageDroppedListener listener) {
+		if (dropListeners==null)
+			dropListeners = new ArrayList<ImageDroppedListener>();
+		dropListeners.add(listener);
+	}
+
+	public void removeImageDroppedListener(ImageDroppedListener listener) {
+		if (dropListeners == null)
+			return;
+		dropListeners.remove(listener);
+	}
+
+	protected void fireImageDroppedEvent(DropTargetEvent event) {
+		ImageDroppedEvent e = new ImageDroppedEvent(this, event.x, event.y);
+		int size = dropListeners.size();
+		for (int i = 0; i < size; i++) {
+			ImageDroppedListener listener = (ImageDroppedListener) dropListeners.get(i);
+			listener.imageDropped(e);
+		}
+	}
+
 	/**
 	 * Creates a {@link DiffractionTableData} object and updates the model in the table viewer
 	 * @param filePath
