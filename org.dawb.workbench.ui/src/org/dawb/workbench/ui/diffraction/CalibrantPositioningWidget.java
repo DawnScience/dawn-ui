@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.dawb.workbench.ui.Activator;
 import org.dawb.workbench.ui.diffraction.DiffractionCalibrationUtils.ManipulateMode;
+import org.dawb.workbench.ui.diffraction.table.DiffractionTableData;
 import org.dawb.workbench.ui.views.RepeatingMouseAdapter;
 import org.dawb.workbench.ui.views.SlowFastRunnable;
 import org.dawnsci.plotting.api.IPlottingSystem;

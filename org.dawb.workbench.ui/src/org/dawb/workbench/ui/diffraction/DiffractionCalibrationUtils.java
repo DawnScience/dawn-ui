@@ -28,6 +28,7 @@ import javax.measure.quantity.Length;
 import javax.vecmath.Vector3d;
 
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
+import org.dawb.workbench.ui.diffraction.table.DiffractionTableData;
 import org.dawnsci.common.widgets.tree.NumericNode;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.region.IRegion;

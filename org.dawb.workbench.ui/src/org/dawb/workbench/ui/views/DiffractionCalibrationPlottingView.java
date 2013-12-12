@@ -32,7 +32,7 @@ import org.dawb.workbench.ui.Activator;
 import org.dawb.workbench.ui.diffraction.CalibrantPositioningWidget;
 import org.dawb.workbench.ui.diffraction.DiffractionCalibrationConstants;
 import org.dawb.workbench.ui.diffraction.DiffractionCalibrationUtils;
-import org.dawb.workbench.ui.diffraction.DiffractionTableData;
+import org.dawb.workbench.ui.diffraction.table.DiffractionTableData;
 import org.dawnsci.common.widgets.tree.NumericNode;
 import org.dawnsci.common.widgets.utils.RadioUtils;
 import org.dawnsci.plotting.api.IPlottingSystem;
