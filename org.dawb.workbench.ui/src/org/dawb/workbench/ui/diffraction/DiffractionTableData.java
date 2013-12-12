@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.dawb.workbench.ui.views;
+package org.dawb.workbench.ui.diffraction;
 
 import java.util.List;
 

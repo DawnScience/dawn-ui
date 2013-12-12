@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.dawb.workbench.ui.views;
+package org.dawb.workbench.ui.diffraction;
 
 public class DiffractionCalibrationConstants {
 

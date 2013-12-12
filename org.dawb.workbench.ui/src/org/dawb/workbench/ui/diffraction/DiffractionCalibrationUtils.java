@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.dawb.workbench.ui.views;
+package org.dawb.workbench.ui.diffraction;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -233,7 +233,7 @@ public class DiffractionCalibrationUtils {
 		IROI roi = null;
 		EllipticalFitROI ef = null;
 		if (froi instanceof EllipticalFitROI) {
-			EllipticalFitROI efroi = (EllipticalFitROI)froi;
+//			EllipticalFitROI efroi = (EllipticalFitROI)froi;
 			ef = (EllipticalFitROI)froi.copy();
 			PolylineROI points = ef.getPoints();
 			for (int i = 0; i< points.getNumberOfPoints(); i++) {
@@ -572,8 +572,8 @@ public class DiffractionCalibrationUtils {
 			@Override
 			protected IStatus run(final IProgressMonitor monitor) {
 				IStatus stat = Status.OK_STATUS;
-				double lastMajor = -1;
-				double lastAspect = -1;
+//				double lastMajor = -1;
+//				double lastAspect = -1;
 				int n = 0;
 				for (int i = 0; i < resROIs.size(); i++) {
 					IROI r = resROIs.get(i);
@@ -611,7 +611,7 @@ public class DiffractionCalibrationUtils {
 						
 						if (roi != null) {
 							n++;
-							lastAspect = roi instanceof EllipticalROI ? ((EllipticalROI) roi).getAspectRatio() : 1.;
+//							lastAspect = roi instanceof EllipticalROI ? ((EllipticalROI) roi).getAspectRatio() : 1.;
 							stat = drawFoundRing(monitor, display, plottingSystem, roi, false);
 						}
 

@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.dawb.workbench.ui.views;
+package org.dawb.workbench.ui.diffraction;
 
 import java.util.List;
 
 import org.dawb.workbench.ui.Activator;
-import org.dawb.workbench.ui.views.DiffractionCalibrationUtils.ManipulateMode;
+import org.dawb.workbench.ui.diffraction.DiffractionCalibrationUtils.ManipulateMode;
+import org.dawb.workbench.ui.views.RepeatingMouseAdapter;
+import org.dawb.workbench.ui.views.SlowFastRunnable;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
