@@ -272,7 +272,11 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
-					context.execute(context.getFullPath(), true, monitor);
+					final IFile moml = SpectrumWorkflowCreator.createWorkflowFileIfRequired("trace", 
+							                                                                "trace_workflow.moml", 
+							                                                                context.getFullPath(), 
+							                                                                monitor);
+					context.execute(moml.getLocation().toOSString(), true, monitor);
 					return Status.OK_STATUS;
 				} catch (Exception e) {
 					logger.error("Cannot process '"+context.getTitle()+"'");
