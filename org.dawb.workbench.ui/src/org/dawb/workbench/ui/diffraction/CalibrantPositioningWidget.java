@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Spinner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,6 +59,7 @@ public class CalibrantPositioningWidget {
 	private IToolPageSystem toolSystem;
 	private TableViewer tableViewer;
 	private IPlottingSystem plottingSystem;
+	private Spinner ringNumberSpinner;
 
 	/**
 	 * Creates a widget group with all the calibrant positioning widgets
@@ -350,7 +352,12 @@ public class CalibrantPositioningWidget {
 					logger.error("The plotting system is null");
 					return;
 				}
-				Job findRingsJob = DiffractionCalibrationUtils.findRingsPeakFitting(display, plottingSystem, currentData);
+				
+				int nRings = -1;
+				
+				if (ringNumberSpinner != null) nRings = ringNumberSpinner.getSelection();
+				
+				Job findRingsJob = DiffractionCalibrationUtils.findRingsPeakFitting(display, plottingSystem, currentData,nRings);
 				if (findRingsJob == null)
 					return;
 				findRingsJob.addJobChangeListener(new JobChangeAdapter() {
@@ -431,5 +438,14 @@ public class CalibrantPositioningWidget {
 	 */
 	public void setPlottingSystem(IPlottingSystem plottingSystem) {
 		this.plottingSystem = plottingSystem;
+	}
+	
+	/**
+	 * Sets the spinner which has the number of rings to find
+	 * If not set uses full number
+	 * @param spinner
+	 */
+	public void setNumberOfRingsSpinner(Spinner spinner) {
+		this.ringNumberSpinner = spinner;
 	}
 }

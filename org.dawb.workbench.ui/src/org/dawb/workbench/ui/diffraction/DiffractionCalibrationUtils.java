@@ -551,7 +551,7 @@ public class DiffractionCalibrationUtils {
 	 * @param currentData
 	 * @return findRing job
 	 */
-	public static Job findRingsPeakFitting(final Display display, final IPlottingSystem plottingSystem, final DiffractionTableData currentData) {
+	public static Job findRingsPeakFitting(final Display display, final IPlottingSystem plottingSystem, final DiffractionTableData currentData, final int nRings) {
 		if (currentData == null)
 			return null;
 
@@ -573,8 +573,11 @@ public class DiffractionCalibrationUtils {
 			@Override
 			protected IStatus run(final IProgressMonitor monitor) {
 				IStatus stat = Status.OK_STATUS;
-//				double lastMajor = -1;
-//				double lastAspect = -1;
+				
+				int numberToFit = resROIs.size();
+				
+				if (nRings > 0 && nRings < resROIs.size()) numberToFit = nRings;
+				
 				int n = 0;
 				for (int i = 0; i < resROIs.size(); i++) {
 					IROI r = resROIs.get(i);
@@ -583,6 +586,9 @@ public class DiffractionCalibrationUtils {
 						if (!(r instanceof EllipticalROI)) { // cannot cope with other conic sections for now
 							continue;
 						}
+						
+						if (i >= numberToFit) continue;
+						
 						EllipticalROI e = (EllipticalROI) r;
 						double major = e.getSemiAxis(0);
 //						double delta = lastMajor < 0 ? 0.2*major : 0.3*(major - lastMajor);
