@@ -207,8 +207,9 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		createDiffractionModel(false);
 		createActions();
 		createListeners();
-		
-		createToolPageActions();
+		//false by default
+		if (!hide)
+			createToolPageActions();
 
 	}
 	
@@ -332,7 +333,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		viewer.setInput(model.getRoot());
 		model.activate();
 		
-        resetExpansion();
+		resetExpansion();
 		getSite().setSelectionProvider(viewer);
 
 	}
@@ -542,13 +543,12 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	private Action refine;
 	private Action findOuter;
 	private Action calibrate;
+
+	private boolean hide = false;
 	private static Action lock;
-	
+
 	private void createActions() {
-		
-		final IToolBarManager toolMan = getSite().getActionBars().getToolBarManager();
-		final MenuManager     menuMan = new MenuManager();
-		
+
 		final Action exportMeta = new Action("Export metadata to file", Activator.getImageDescriptor("icons/mask-export-wiz.png")) {
 			public void run() {
 				try {
@@ -965,34 +965,40 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	    dropdown.setImageDescriptor(Activator.getImageDescriptor("/icons/resolution_rings.png"));
 
 		augmenter = new DiffractionImageAugmenter(getPlottingSystem());
-	    augmenter.addActions(dropdown);
-		
-	    toolMan.add(importMeta);
-	    toolMan.add(exportMeta);
-	    toolMan.add(new Separator());
-	    toolMan.add(lock);
-		toolMan.add(new Separator());
-	    toolMan.add(dropdown);
-	    toolMan.add(calibrantActions);
-		toolMan.add(new Separator());
-		toolMan.add(centre);
-		toolMan.add(fitRing);
-		toolMan.add(refine);
-		toolMan.add(findOuter);
-		toolMan.add(calibrate);
-		toolMan.add(new Separator());
-		toolMan.add(reset);
-		toolMan.add(resetAll);
-		toolMan.add(new Separator());
-		toolMan.add(showDefault);
-		toolMan.add(new Separator());
+		augmenter.addActions(dropdown);
+
+		IToolBarManager toolMan = getSite().getActionBars().getToolBarManager();
+		final MenuManager     menuMan = new MenuManager();
+
+		// false by default
+		if (!hide) {
+			toolMan.add(importMeta);
+			toolMan.add(exportMeta);
+			toolMan.add(new Separator());
+			toolMan.add(lock);
+			toolMan.add(new Separator());
+			toolMan.add(dropdown);
+			toolMan.add(calibrantActions);
+			toolMan.add(new Separator());
+			toolMan.add(centre);
+			toolMan.add(fitRing);
+			toolMan.add(refine);
+			toolMan.add(findOuter);
+			toolMan.add(calibrate);
+			toolMan.add(new Separator());
+			toolMan.add(reset);
+			toolMan.add(resetAll);
+			toolMan.add(new Separator());
+			toolMan.add(showDefault);
+			toolMan.add(new Separator());
+		}
 		
 		menuMan.add(dropdown);
-	    menuMan.add(centre);
-	    menuMan.add(fitRing);
-	    menuMan.add(refine);
-	    menuMan.add(findOuter);
-	    menuMan.add(calibrate);
+		menuMan.add(centre);
+		menuMan.add(fitRing);
+		menuMan.add(refine);
+		menuMan.add(findOuter);
+		menuMan.add(calibrate);
 		menuMan.add(new Separator());
 		menuMan.add(reset);
 		menuMan.add(resetAll);
@@ -1003,15 +1009,21 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		menuMan.add(showDefault);
 		menuMan.add(new Separator());
 		menuMan.add(calPref);
-		
+
 		final Menu menu = menuMan.createContextMenu(viewer.getControl());
 		viewer.getControl().setMenu(menu);
 
-		getSite().getActionBars().getMenuManager().add(new Separator());
-		getSite().getActionBars().getMenuManager().add(calPref);
-		getSite().getActionBars().getMenuManager().add(configDetectors);
-		getSite().getActionBars().getMenuManager().add(configDefaultMeta);
-		getSite().getActionBars().getMenuManager().add(new Separator());
+		if (!hide) {
+			getSite().getActionBars().getMenuManager().add(new Separator());
+			getSite().getActionBars().getMenuManager().add(calPref);
+			getSite().getActionBars().getMenuManager().add(configDetectors);
+			getSite().getActionBars().getMenuManager().add(configDefaultMeta);
+			getSite().getActionBars().getMenuManager().add(new Separator());
+		}
+	}
+
+	public void hideToolBar(boolean hide) {
+		this.hide = hide;
 	}
 
 	private static final String RING_PREFIX = "Ring";
