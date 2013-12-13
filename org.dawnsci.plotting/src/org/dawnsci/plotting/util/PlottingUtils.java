@@ -152,7 +152,7 @@ public class PlottingUtils {
 		try {
 			DataHolder data = LoaderFactory.getData(fileName, null);
 			IMetaData md = data.getMetadata();
-			Map<String, ILazyDataset> map = data.getMap();
+			Map<String, ILazyDataset> map = data.toLazyMap();
 			ILazyDataset tmpvalue = map.get(dataPath);
 			if(tmpvalue == null) tmpvalue = map.get(data.getName(0));
 
