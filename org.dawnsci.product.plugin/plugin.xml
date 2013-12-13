@@ -13,14 +13,6 @@
                value="DAWN Science">
          </property>
          <property
-               name="startupForegroundColor"
-               value="FFFFFF">
-         </property>
-         <property
-               name="startupMessageRect"
-               value="5,220,590,20">
-         </property>
-         <property
                name="startupProgressRect"
                value="5,240,590,15">
          </property>
