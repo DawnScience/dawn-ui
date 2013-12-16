@@ -27,11 +27,4 @@
          os="linux,win32"
          arch="x86,x86_64"/>
 
-   <plugin
-         id="org.dawnsci.spectrum.ui"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
 </feature>
