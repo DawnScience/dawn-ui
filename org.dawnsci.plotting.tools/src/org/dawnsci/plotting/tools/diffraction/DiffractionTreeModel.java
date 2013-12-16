@@ -68,14 +68,17 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 	
 	private boolean isActive=false;
 	private NumericNode<Angle> yaw, pitch, roll;
-	
-	
+
 	public DiffractionTreeModel(IDiffractionMetadata metaData) throws Exception {
+		this(metaData, false);
+	}
+
+	public DiffractionTreeModel(IDiffractionMetadata metaData, boolean powderMode) throws Exception {
 		super();
 		this.metaData = metaData;
 		if (metaData.getDetector2DProperties()==null) throw new Exception("Must have detector properties!");
 		if (metaData.getDiffractionCrystalEnvironment()==null) throw new Exception("Must have crystal environment!");
-		createDiffractionModel(metaData);
+		createDiffractionModel(metaData, powderMode);
 	}
 	
 	public void activate() {
@@ -107,8 +110,7 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 		}
 	}
 
-	private void createDiffractionModel(IMetaData metaData) throws Exception {
-
+	private void createDiffractionModel(IMetaData metaData, boolean powderMode) throws Exception {
 		final DiffractionCrystalEnvironment  dce = getCrystalEnvironment();
 		final DiffractionCrystalEnvironment odce = getOriginalCrystalEnvironment();
 		final DetectorProperties         detprop = getDetectorProperties();
@@ -125,11 +127,11 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 	    		}
 	    	}
 	    }
-	    
-	    createExperimentalInfo(dce, odce, detprop, odetprop);
-	    
-        createIntensity();      
+
+	    createExperimentalInfo(dce, odce, detprop, odetprop, powderMode);
+
         createDetector(dce, odce, detprop, odetprop, det);
+        createIntensity();
         createRaw(metaData);
         
         createUnitsListeners(detprop, odetprop);
@@ -373,7 +375,9 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 
 	private void createExperimentalInfo(final DiffractionCrystalEnvironment dce,
 			                                 DiffractionCrystalEnvironment odce, 
-			                                 final DetectorProperties detprop, DetectorProperties odetprop) {
+			                                 final DetectorProperties detprop, 
+			                                 DetectorProperties odetprop,
+			                                 boolean powderMode) {
 	    // Experimental Info
         final LabelNode experimentalInfo = new LabelNode("Experimental Information", root);
         registerNode(experimentalInfo);
@@ -438,26 +442,28 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 		dist.setUpperBound(1000000);
 		dist.setUnits(SI.MILLIMETRE, SI.CENTIMETRE, SI.METRE);
 
-        NumericNode<Angle> start = new NumericNode<Angle>("Oscillation Start", experimentalInfo, NonSI.DEGREE_ANGLE);
-        registerNode(start);
-        if (dce!=null)  {
-        	start.setDefault(odce.getPhiStart(), NonSI.DEGREE_ANGLE);
-        	start.setValue(dce.getPhiStart(), NonSI.DEGREE_ANGLE);
-        }
-       
-        NumericNode<Angle> stop = new NumericNode<Angle>("Oscillation Stop", experimentalInfo, NonSI.DEGREE_ANGLE);
-        registerNode(stop);
-        if (dce!=null)  {
-        	stop.setDefault(odce.getPhiStart()+dce.getPhiRange(), NonSI.DEGREE_ANGLE);
-        	stop.setValue(dce.getPhiStart()+dce.getPhiRange(), NonSI.DEGREE_ANGLE);
-        }
+		// if in powder mode, do not show the oscillation nodes
+		if (!powderMode) {
+			NumericNode<Angle> start = new NumericNode<Angle>("Oscillation Start", experimentalInfo, NonSI.DEGREE_ANGLE);
+			registerNode(start);
+			if (dce!=null)  {
+				start.setDefault(odce.getPhiStart(), NonSI.DEGREE_ANGLE);
+				start.setValue(dce.getPhiStart(), NonSI.DEGREE_ANGLE);
+			}
+			NumericNode<Angle> stop = new NumericNode<Angle>("Oscillation Stop", experimentalInfo, NonSI.DEGREE_ANGLE);
+			registerNode(stop);
+			if (dce!=null)  {
+				stop.setDefault(odce.getPhiStart()+dce.getPhiRange(), NonSI.DEGREE_ANGLE);
+				stop.setValue(dce.getPhiStart()+dce.getPhiRange(), NonSI.DEGREE_ANGLE);
+			}
 
-        NumericNode<Angle> osci = new NumericNode<Angle>("Oscillation Range", experimentalInfo, NonSI.DEGREE_ANGLE);
-        registerNode(osci);
-        if (dce!=null)  {
-        	osci.setDefault(odce.getPhiRange(), NonSI.DEGREE_ANGLE);
-        	osci.setValue(dce.getPhiRange(), NonSI.DEGREE_ANGLE);
-        }
+			NumericNode<Angle> osci = new NumericNode<Angle>("Oscillation Range", experimentalInfo, NonSI.DEGREE_ANGLE);
+			registerNode(osci);
+			if (dce!=null)  {
+				osci.setDefault(odce.getPhiRange(), NonSI.DEGREE_ANGLE);
+				osci.setValue(dce.getPhiRange(), NonSI.DEGREE_ANGLE);
+			}
+		}
 	}
 
 	private NumericNode<Angle> createOrientationNode(String label, 

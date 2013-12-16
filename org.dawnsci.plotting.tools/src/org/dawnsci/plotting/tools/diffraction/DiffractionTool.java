@@ -140,7 +140,12 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	private IDiffractionCrystalEnvironmentListener difcrysListener;
 	
 	protected DiffractionImageAugmenter augmenter;
-	
+
+	/**
+	 * Boolean used for Powder diffraction view
+	 */
+	private boolean hide = false;
+
 	@Override
 	public ToolPageRole getToolPageRole() {
 		return ToolPageRole.ROLE_2D;
@@ -294,7 +299,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			if (data==null || data.getDetector2DProperties()==null || data.getDiffractionCrystalEnvironment()==null) {
 				return;
 			}
-			model = new DiffractionTreeModel(data);
+			model = new DiffractionTreeModel(data, hide);
 			model.setViewer(viewer);
 			model.activate();
 			if (augmenter != null) {
@@ -544,7 +549,6 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	private Action findOuter;
 	private Action calibrate;
 
-	private boolean hide = false;
 	private static Action lock;
 
 	private void createActions() {
