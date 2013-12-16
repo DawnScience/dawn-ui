@@ -603,7 +603,7 @@ public class DiffractionCalibrationUtils {
 							deltalow = 0.5*(major - ((EllipticalROI)resROIs.get(i-1)).getSemiAxis(0));
 						}
 						
-						if (i > resROIs.size()-1) {
+						if (i < resROIs.size()-1) {
 							deltahigh = 0.5*(((EllipticalROI)resROIs.get(i+1)).getSemiAxis(0) - major);
 						}
 						
