@@ -127,9 +127,9 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 	    }
 	    
 	    createExperimentalInfo(dce, odce, detprop, odetprop);
-	    
-        createIntensity();      
+
         createDetector(dce, odce, detprop, odetprop, det);
+        createIntensity();
         createRaw(metaData);
         
         createUnitsListeners(detprop, odetprop);
