@@ -72,14 +72,15 @@ public class FileBox extends FieldComposite implements IFieldWidget, IFilterExte
 		setLayout(new GridLayout(3, false));
 		this.eventDelegate = new EventManagerDelegate(this);
 
-		this.button = new Button(this, SWT.PUSH);
-		button.setText("..");
-		button.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 
 		final int textStyle = style==SWT.NONE?SWT.BORDER:style;
 		this.text = new Text(this, textStyle);
 		text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		mainControl = text;
+
+		this.button = new Button(this, SWT.PUSH);
+		button.setText("..");
+		button.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 
 		this.modifyListener = new ModifyListener() {
 			@Override
