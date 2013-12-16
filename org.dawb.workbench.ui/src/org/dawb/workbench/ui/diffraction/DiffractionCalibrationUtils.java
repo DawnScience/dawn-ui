@@ -665,10 +665,9 @@ public class DiffractionCalibrationUtils {
 	/**
 	 * List of names to save
 	 */
-	public static final String[] NAMES = new String[]{ "Image", "Number of rings", 
-		"Distance", "X beam centre", "Y beam centre", "Wavelength", "Energy", 
-		"Original distance", "Original X beam centre", "Original Y beam centre", "Original wavelength", "Original energy",
-		"Residuals", "Yaw", "Pitch", "Roll" };
+	public static final String[] NAMES = new String[]{ "Image", 
+		"Distance (mm)", "X beam centre (pixels)", "Y beam centre (pixels)", "Wavelength (Angstrom)",
+		"Energy (keV)", "Yaw (degrees)", "Pitch (degrees)", "Roll (degrees)"};
 
 	/**
 	 * 
@@ -679,42 +678,26 @@ public class DiffractionCalibrationUtils {
 		String[][] values = new String[model.size()][NAMES.length];
 		for (int i = 0; i < model.size(); i++) {
 			DetectorProperties dp = model.get(i).md.getDetector2DProperties();
-			DetectorProperties odp = model.get(i).md.getOriginalDetector2DProperties();
 			double wavelength = model.get(i).md.getDiffractionCrystalEnvironment().getWavelength();
-			double orignalWavelength = model.get(i).md.getOriginalDiffractionCrystalEnvironment().getWavelength();
+			wavelength = DiffractionCalibrationUtils.setPrecision(wavelength, 5);
 			// image
 			values[i][0] = model.get(i).name;
-			// number of rings
-			values[i][1] = String.valueOf(model.get(i).nrois);
 			// distance
-			values[i][2] = String.valueOf(dp.getDetectorDistance());
+			values[i][1] = String.format("%.2f",dp.getBeamCentreDistance());
 			// X beam centre
-			values[i][3] = String.valueOf(dp.getBeamCentreCoords()[0]);
+			values[i][2] = String.format("%.2f",dp.getBeamCentreCoords()[0]);
 			// Y beam centre
-			values[i][4] = String.valueOf(dp.getBeamCentreCoords()[1]);
+			values[i][3] = String.format("%.2f",dp.getBeamCentreCoords()[1]);
 			// wavelength
-			values[i][5] = String.valueOf(wavelength);
+			values[i][4] = String.valueOf(wavelength);
 			// energy
-			values[i][6] = String.valueOf(DiffractionCalibrationUtils.getWavelengthEnergy(wavelength));
-			// original distance
-			values[i][7] = String.valueOf(odp.getDetectorDistance());
-			// original x beam centre
-			values[i][8] = String.valueOf(odp.getBeamCentreCoords()[0]);
-			// original y beam centre
-			values[i][9] = String.valueOf(odp.getBeamCentreCoords()[1]);
-			// original wavelength
-			values[i][10] = String.valueOf(orignalWavelength);
-			// original energy
-			values[i][11] = String.valueOf(DiffractionCalibrationUtils.getWavelengthEnergy(orignalWavelength));
-			// residuals
-			if (model.get(i).q != null)
-				values[i][12] = String.format("%.2f", Math.sqrt(model.get(i).q.getResidual()));
+			values[i][5] = String.valueOf(DiffractionCalibrationUtils.getWavelengthEnergy(wavelength));
 			// Orientation Yaw
-			values[i][13] = String.valueOf(dp.getNormalAnglesInDegrees()[0]);
+			values[i][6] = String.format("%.2f",dp.getNormalAnglesInDegrees()[0]);
 			// Orientation Pitch
-			values[i][14] = String.valueOf(dp.getNormalAnglesInDegrees()[1]);
+			values[i][7] = String.format("%.2f",dp.getNormalAnglesInDegrees()[1]);
 			// Orientation Roll
-			values[i][15] = String.valueOf(dp.getNormalAnglesInDegrees()[2]);
+			values[i][8] = String.format("%.2f",dp.getNormalAnglesInDegrees()[2]);
 		}
 		saveToCsvFile(filepath, NAMES, values);
 	}
