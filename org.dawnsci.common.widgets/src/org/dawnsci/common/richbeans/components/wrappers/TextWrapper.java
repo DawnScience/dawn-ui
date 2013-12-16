@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.jexl2.JexlEngine;
 import org.dawnsci.common.richbeans.components.ButtonComposite;
 import org.dawnsci.common.richbeans.event.ValueEvent;
 import org.eclipse.swt.SWT;
@@ -48,7 +49,6 @@ public class TextWrapper extends ButtonComposite {
 		/**
 		 * Legal expressions
 		 */
-		@Deprecated
 		EXPRESSION,
 		/**
 		 * Legal Linux filenames
@@ -69,7 +69,6 @@ public class TextWrapper extends ButtonComposite {
 	 * @param textType The textType to set.
 	 */
 	public void setTextType(TEXT_TYPE textType) {
-		if (textType==TEXT_TYPE.EXPRESSION) throw new RuntimeException("Text type "+TEXT_TYPE.EXPRESSION+" is not supported in this version because it required JEP!");
 		this.textType = textType;
 	}
 
@@ -98,13 +97,24 @@ public class TextWrapper extends ButtonComposite {
 		mainControl = text;
 		
 		this.modifyListener = new ModifyListener() {
+			private JexlEngine jexl;
+
 			@Override
 			public void modifyText(ModifyEvent e) {
 				
 				final Object newValue = getValue();
 				
 				if (textType==TEXT_TYPE.EXPRESSION) {
-					// Do nothing
+					if (jexl == null) {
+						jexl = new JexlEngine();
+					}
+					try {
+						String expression = newValue.toString().trim();
+						jexl.createExpression(expression);
+						text.setForeground(BLUE);
+					} catch (Throwable ne) {
+						text.setForeground(RED);
+					}
 				} else if (textType == TEXT_TYPE.FILENAME) {
 					String testString = newValue.toString().trim();
 					if (testString.contains(" ") || testString.startsWith("-")

@@ -409,7 +409,12 @@ public class BeanUI {
 
 	private static Object getValue(Object bean, String fieldName) throws Exception {
 		final String getter = BeansFactory.getGetterName(fieldName);
-		return bean.getClass().getMethod(getter).invoke(bean);
+		try {
+		    return bean.getClass().getMethod(getter).invoke(bean);
+		} catch (java.lang.NoSuchMethodException ne) {
+			final String isser = BeansFactory.getIsserName(fieldName);
+		    return bean.getClass().getMethod(isser).invoke(bean);
+		}
 	}
 	
 	protected static void setValue(Object bean, String fieldName, Object ob) throws Exception {

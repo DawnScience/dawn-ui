@@ -301,6 +301,12 @@ public class BeansFactory {
 			return null;
 		return BeansFactory.getName("get", fieldName);
 	}
+	
+	public static String getIsserName(final String fieldName) {
+		if (fieldName == null)
+			return null;
+		return BeansFactory.getName("is", fieldName);
+	}
 
 	/**
 	 * Can be used to test if a given class is a class defined by the extension point.
