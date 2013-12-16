@@ -337,7 +337,7 @@ public class PowderCheckTool extends AbstractToolPage {
 //		system.updatePlot1D(x, Arrays.asList(new AbstractDataset[]{yfit}), null);
 	}
 	
-	private void updateCalibrantLines() {
+	public void updateCalibrantLines() {
 		List<HKL> spacings = CalibrationFactory.getCalibrationStandards().getCalibrant().getHKLs();
 		final double[] qVals = new double[spacings.size()];
 		
@@ -345,7 +345,7 @@ public class PowderCheckTool extends AbstractToolPage {
 			qVals[i] = (Math.PI*2)/(spacings.get(i).getDNano()*10);
 		}
 
-		Display.getDefault().asyncExec(new Runnable() {
+		Display.getDefault().syncExec(new Runnable() {
 
 			@Override
 			public void run() {
