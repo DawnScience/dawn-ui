@@ -125,7 +125,7 @@ public class DiffCalTableViewer extends TableViewer {
 		dt.addDropListener(dropListener);
 
 		Label infoEditableLabel = new Label(parent, SWT.NONE);
-		infoEditableLabel.setText("* Click to change");
+		infoEditableLabel.setText("* Click to change value");
 	}
 
 	private void initialize(){
