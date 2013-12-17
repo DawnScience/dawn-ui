@@ -49,7 +49,7 @@
       <editor
             class="org.dawb.workbench.ui.editors.AsciiEditor"
             default="true"
-            extensions="srs, dat, flt, gff, mca"
+            extensions="srs, dat, flt, gff, mca, csv"
             icon="icons/ascii_editor.png"
             id="org.dawb.workbench.editors.AsciiEditor"
             name="Ascii Data Editor">
