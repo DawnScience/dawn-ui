@@ -313,7 +313,7 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 		
 		if (auxiliaryData != null) {
 			
-			AbstractDataset tmpProfile = (AbstractDataset) auxiliaryData.clone().squeeze();
+			AbstractDataset tmpProfile = (AbstractDataset) auxiliaryData.clone();
 			
 			if(smoothLevel > 1){
 				try {
@@ -410,7 +410,7 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 	private IDataset loadDataset(final String path) {
 		try {
 			auxiliaryData = LoaderFactory.getDataSet(path,
-					"/entry/calibration/fittedMu/data", null);
+					"/entry/calibration/fittedMu/data", null).squeeze();
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Could not load the auxiliary data:"+e);
