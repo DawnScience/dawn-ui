@@ -33,8 +33,8 @@ import org.dawb.workbench.ui.diffraction.DiffractionCalibrationConstants;
 import org.dawb.workbench.ui.diffraction.DiffractionCalibrationUtils;
 import org.dawb.workbench.ui.diffraction.table.DiffCalTableViewer;
 import org.dawb.workbench.ui.diffraction.table.DiffractionTableData;
-import org.dawb.workbench.ui.diffraction.table.ImageDroppedEvent;
-import org.dawb.workbench.ui.diffraction.table.ImageDroppedListener;
+import org.dawb.workbench.ui.diffraction.table.TableChangedEvent;
+import org.dawb.workbench.ui.diffraction.table.TableChangedListener;
 import org.dawnsci.common.widgets.tree.NumericNode;
 import org.dawnsci.common.widgets.utils.RadioUtils;
 import org.dawnsci.plotting.api.IPlottingSystem;
@@ -130,7 +130,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 	private ISelectionChangedListener selectionChangeListener;
 	private IDetectorPropertyListener detectorPropertyListener;
 	private CalibrantSelectedListener calibrantChangeListener;
-	private ImageDroppedListener imageDroppedListener;
+	private TableChangedListener tableChangedListener;
 
 	private List<String> pathsList = new ArrayList<String>();
 
@@ -223,9 +223,9 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			}
 		};
 
-		imageDroppedListener = new ImageDroppedListener() {
+		tableChangedListener = new TableChangedListener() {
 			@Override
-			public void imageDropped(ImageDroppedEvent event) {
+			public void tableChanged(TableChangedEvent event) {
 				setWavelength(currentData);
 				if (model.size() > 0)
 					setXRaysModifiersEnabled(true);
@@ -272,7 +272,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		// table of images and found rings
 		diffractionTableViewer = new DiffCalTableViewer(scrollHolder, pathsList, service);
 		diffractionTableViewer.addSelectionChangedListener(selectionChangeListener);
-		diffractionTableViewer.addImageDroppedListener(imageDroppedListener);
+		diffractionTableViewer.addTableChangedListener(tableChangedListener);
 		model = diffractionTableViewer.getModel();
 
 		Composite calibrantHolder = new Composite(scrollHolder, SWT.NONE);
@@ -768,7 +768,7 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 	private void removeListeners() {
 		if(diffractionTableViewer != null) {
 			diffractionTableViewer.removeSelectionChangedListener(selectionChangeListener);
-			diffractionTableViewer.removeImageDroppedListener(imageDroppedListener);
+			diffractionTableViewer.removeTableChangedListener(tableChangedListener);
 		}
 		CalibrationFactory.removeCalibrantSelectionListener(calibrantChangeListener);
 		// deactivate the diffraction tool

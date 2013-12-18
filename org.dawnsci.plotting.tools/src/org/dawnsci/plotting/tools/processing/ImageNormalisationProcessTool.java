@@ -172,7 +172,7 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 
 	private void createInputField(Composite parent){
 		Label lb = new Label(parent, SWT.NONE);
-		lb.setText("Choose Auxiliary Data Input:");
+		lb.setText("Choose Gold Calibration:");
 
 		Composite comp = new Composite(parent, SWT.NONE);
 		comp.setLayout(new GridLayout(2, false));
@@ -349,11 +349,17 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 		try {
 			auxiliaryData = LoaderFactory.getDataSet(path,
 					"/entry1/analyser/data", null);
+		
+			if (auxiliaryData != null) return auxiliaryData;
+					
+			auxiliaryData = LoaderFactory.getDataSet(path,
+					"/entry/calibration/analyser/data", null);
+			return auxiliaryData;
+		
 		} catch (Exception e) {
-			e.printStackTrace();
-			logger.error("Could not load the auxiliary data:"+e);
+			logger.warn("Could not open file correctly");
 		}
-		return auxiliaryData;
+		return null;
 	}
 	
 }

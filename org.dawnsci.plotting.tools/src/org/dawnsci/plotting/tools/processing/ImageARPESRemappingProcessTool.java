@@ -330,7 +330,7 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 			
 			AbstractDataset newEnergyAxis = Maths.subtract(originalAxes.get(0), auxiliaryData.mean());
 			
-			correctedData = InterpolatorUtils.remapOneAxis((AbstractDataset) originalData, 1, (AbstractDataset) auxiliaryData, (AbstractDataset) originalAxes.get(0), newEnergyAxis);
+			correctedData = InterpolatorUtils.remapOneAxis((AbstractDataset) originalData, 1, (AbstractDataset) tmpProfile, (AbstractDataset) originalAxes.get(0), newEnergyAxis);
 			correctedAxes = new ArrayList<IDataset>();
 			correctedAxes.add(newEnergyAxis.clone());
 			correctedAxes.add(originalAxes.get(1).clone());
@@ -410,7 +410,7 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 	private IDataset loadDataset(final String path) {
 		try {
 			auxiliaryData = LoaderFactory.getDataSet(path,
-					"/entry/calibration/fittedMu/data", null);
+					"/entry/calibration/fittedMu/data", null).squeeze();
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Could not load the auxiliary data:"+e);

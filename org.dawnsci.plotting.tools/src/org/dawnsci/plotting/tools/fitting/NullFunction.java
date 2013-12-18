@@ -79,6 +79,11 @@ public class NullFunction implements IPeak {
 	}
 
 	@Override
+	public double residual(boolean allValues, IDataset data, IDataset weight, IDataset... values) {
+		return 0;
+	}
+
+	@Override
 	public double getPosition() {
 		return 0;
 	}
@@ -133,10 +138,5 @@ public class NullFunction implements IPeak {
 	@Override
 	public IDataset calculatePartialDerivativeValues(IParameter param, IDataset... coords) {
 		return null;
-	}
-
-	@Override
-	public double weightedResidual(boolean allValues, IDataset sigma, IDataset data, IDataset... values) {
-		return 0;
 	}
 }
