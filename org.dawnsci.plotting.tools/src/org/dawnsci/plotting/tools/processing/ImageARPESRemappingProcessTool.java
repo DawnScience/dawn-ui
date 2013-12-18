@@ -330,7 +330,24 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 			
 			AbstractDataset newEnergyAxis = Maths.subtract(originalAxes.get(0), auxiliaryData.mean());
 			
-			correctedData = InterpolatorUtils.remapOneAxis((AbstractDataset) originalData, 1, (AbstractDataset) tmpProfile, (AbstractDataset) originalAxes.get(0), newEnergyAxis);
+			AbstractDataset differences = Maths.subtract(auxiliaryData, auxiliaryData.mean());
+			
+			double meanSteps = (originalAxes.get(0).max().doubleValue()-originalAxes.get(0).min().doubleValue())/(float)originalAxes.get(0).getShape()[0];
+			
+			AbstractDataset differenceInts = Maths.floor(Maths.divide(differences, meanSteps));
+			
+			correctedData = new DoubleDataset(originalData.getShape());
+			for(int y = 0; y < correctedData.getShape()[0]; y++) {
+				int min = Math.max(differenceInts.getInt(y), 0);
+				int max = Math.min(correctedData.getShape()[1]+differenceInts.getInt(y), correctedData.getShape()[1]);
+				int ref = 0;
+				for(int xx = min; xx < max; xx++) {
+					correctedData.set(originalData.getObject(y,xx), y,ref);
+					ref++;
+				}
+			}
+			
+			//correctedData = InterpolatorUtils.remapOneAxis((AbstractDataset) originalData, 1, (AbstractDataset) tmpProfile, (AbstractDataset) originalAxes.get(0), newEnergyAxis);
 			correctedAxes = new ArrayList<IDataset>();
 			correctedAxes.add(newEnergyAxis.clone());
 			correctedAxes.add(originalAxes.get(1).clone());
