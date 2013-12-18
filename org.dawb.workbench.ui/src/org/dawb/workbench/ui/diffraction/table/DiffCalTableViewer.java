@@ -59,7 +59,7 @@ public class DiffCalTableViewer extends TableViewer {
 	private IDetectorPropertyListener detectorPropertyListener;
 	private ILoaderService service;
 	private DropTargetAdapter dropListener;
-	private List<ImageDroppedListener> dropListeners;
+	private List<TableChangedListener> changesListeners;
 	private Table table;
 
 	/**
@@ -125,7 +125,7 @@ public class DiffCalTableViewer extends TableViewer {
 		dt.addDropListener(dropListener);
 
 		Label infoEditableLabel = new Label(parent, SWT.NONE);
-		infoEditableLabel.setText("* Click to change");
+		infoEditableLabel.setText("* Click to change value");
 	}
 
 	private void initialize(){
@@ -189,7 +189,7 @@ public class DiffCalTableViewer extends TableViewer {
 					table.deselectAll();
 					setSelection(new StructuredSelection(good));
 				}
-				fireImageDroppedEvent(event);
+				fireTableChangedEvent();
 			}
 		};
 
@@ -217,7 +217,7 @@ public class DiffCalTableViewer extends TableViewer {
 //					setXRaysModifiersEnabled(false);
 //					calibrateImagesButton.setEnabled(false);
 //				}
-
+				fireTableChangedEvent();
 				updateTableColumnsAndLayout();
 				
 			}
@@ -256,24 +256,23 @@ public class DiffCalTableViewer extends TableViewer {
 		data.md.getDetector2DProperties().removeDetectorPropertyListener(detectorPropertyListener);
 	}
 
-	public void addImageDroppedListener(ImageDroppedListener listener) {
-		if (dropListeners==null)
-			dropListeners = new ArrayList<ImageDroppedListener>();
-		dropListeners.add(listener);
+	public void addTableChangedListener(TableChangedListener listener) {
+		if (changesListeners==null)
+			changesListeners = new ArrayList<TableChangedListener>();
+		changesListeners.add(listener);
 	}
 
-	public void removeImageDroppedListener(ImageDroppedListener listener) {
-		if (dropListeners == null)
+	public void removeTableChangedListener(TableChangedListener listener) {
+		if (changesListeners == null)
 			return;
-		dropListeners.remove(listener);
+		changesListeners.remove(listener);
 	}
 
-	protected void fireImageDroppedEvent(DropTargetEvent event) {
-		ImageDroppedEvent e = new ImageDroppedEvent(this, event.x, event.y);
-		int size = dropListeners.size();
+	protected void fireTableChangedEvent() {
+		int size = changesListeners.size();
 		for (int i = 0; i < size; i++) {
-			ImageDroppedListener listener = (ImageDroppedListener) dropListeners.get(i);
-			listener.imageDropped(e);
+			TableChangedListener listener = (TableChangedListener) changesListeners.get(i);
+			listener.tableChanged();
 		}
 	}
 
