@@ -136,7 +136,7 @@ public class NullFunction implements IPeak {
 	}
 
 	@Override
-	public double weightedResidual(boolean allValues, IDataset sigma, IDataset data, IDataset... values) {
+	public double residual(boolean allValues, IDataset data, IDataset weight, IDataset... values) {
 		return 0;
 	}
 }
