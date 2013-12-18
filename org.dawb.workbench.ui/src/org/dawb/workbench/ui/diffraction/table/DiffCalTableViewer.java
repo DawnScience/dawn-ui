@@ -59,7 +59,7 @@ public class DiffCalTableViewer extends TableViewer {
 	private IDetectorPropertyListener detectorPropertyListener;
 	private ILoaderService service;
 	private DropTargetAdapter dropListener;
-	private List<ImageDroppedListener> dropListeners;
+	private List<TableChangedListener> dropListeners;
 	private Table table;
 
 	/**
@@ -189,7 +189,7 @@ public class DiffCalTableViewer extends TableViewer {
 					table.deselectAll();
 					setSelection(new StructuredSelection(good));
 				}
-				fireImageDroppedEvent(event);
+				fireImageDroppedEvent();
 			}
 		};
 
@@ -217,7 +217,7 @@ public class DiffCalTableViewer extends TableViewer {
 //					setXRaysModifiersEnabled(false);
 //					calibrateImagesButton.setEnabled(false);
 //				}
-
+				fireImageDroppedEvent();
 				updateTableColumnsAndLayout();
 				
 			}
@@ -256,24 +256,23 @@ public class DiffCalTableViewer extends TableViewer {
 		data.md.getDetector2DProperties().removeDetectorPropertyListener(detectorPropertyListener);
 	}
 
-	public void addImageDroppedListener(ImageDroppedListener listener) {
+	public void addImageDroppedListener(TableChangedListener listener) {
 		if (dropListeners==null)
-			dropListeners = new ArrayList<ImageDroppedListener>();
+			dropListeners = new ArrayList<TableChangedListener>();
 		dropListeners.add(listener);
 	}
 
-	public void removeImageDroppedListener(ImageDroppedListener listener) {
+	public void removeImageDroppedListener(TableChangedListener listener) {
 		if (dropListeners == null)
 			return;
 		dropListeners.remove(listener);
 	}
 
-	protected void fireImageDroppedEvent(DropTargetEvent event) {
-		ImageDroppedEvent e = new ImageDroppedEvent(this, event.x, event.y);
+	protected void fireImageDroppedEvent() {
 		int size = dropListeners.size();
 		for (int i = 0; i < size; i++) {
-			ImageDroppedListener listener = (ImageDroppedListener) dropListeners.get(i);
-			listener.imageDropped(e);
+			TableChangedListener listener = (TableChangedListener) dropListeners.get(i);
+			listener.tableChanged();
 		}
 	}
 
