@@ -63,6 +63,7 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.fitting.Fitter;
 import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction;
@@ -723,8 +724,8 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 				public void run() {
 
 					getPlottingSystem().removeTraceListener(traceListener);
-					setChiSquaredValue(resultFunction.residual(true, y, x)/x.count());
-					
+					setChiSquaredValue(resultFunction.residual(true, y, null, new IDataset[] {x})/x.count());
+
 					fitTrace = (ILineTrace) getPlottingSystem().getTrace("Fit");
 					if (fitTrace == null) {
 						fitTrace = getPlottingSystem().createLineTrace("Fit");
