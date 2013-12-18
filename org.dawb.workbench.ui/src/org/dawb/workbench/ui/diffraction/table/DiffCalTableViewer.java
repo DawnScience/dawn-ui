@@ -59,7 +59,7 @@ public class DiffCalTableViewer extends TableViewer {
 	private IDetectorPropertyListener detectorPropertyListener;
 	private ILoaderService service;
 	private DropTargetAdapter dropListener;
-	private List<TableChangedListener> dropListeners;
+	private List<TableChangedListener> changesListeners;
 	private Table table;
 
 	/**
@@ -189,7 +189,7 @@ public class DiffCalTableViewer extends TableViewer {
 					table.deselectAll();
 					setSelection(new StructuredSelection(good));
 				}
-				fireImageDroppedEvent();
+				fireTableChangedEvent();
 			}
 		};
 
@@ -217,7 +217,7 @@ public class DiffCalTableViewer extends TableViewer {
 //					setXRaysModifiersEnabled(false);
 //					calibrateImagesButton.setEnabled(false);
 //				}
-				fireImageDroppedEvent();
+				fireTableChangedEvent();
 				updateTableColumnsAndLayout();
 				
 			}
@@ -256,22 +256,22 @@ public class DiffCalTableViewer extends TableViewer {
 		data.md.getDetector2DProperties().removeDetectorPropertyListener(detectorPropertyListener);
 	}
 
-	public void addImageDroppedListener(TableChangedListener listener) {
-		if (dropListeners==null)
-			dropListeners = new ArrayList<TableChangedListener>();
-		dropListeners.add(listener);
+	public void addTableChangedListener(TableChangedListener listener) {
+		if (changesListeners==null)
+			changesListeners = new ArrayList<TableChangedListener>();
+		changesListeners.add(listener);
 	}
 
-	public void removeImageDroppedListener(TableChangedListener listener) {
-		if (dropListeners == null)
+	public void removeTableChangedListener(TableChangedListener listener) {
+		if (changesListeners == null)
 			return;
-		dropListeners.remove(listener);
+		changesListeners.remove(listener);
 	}
 
-	protected void fireImageDroppedEvent() {
-		int size = dropListeners.size();
+	protected void fireTableChangedEvent() {
+		int size = changesListeners.size();
 		for (int i = 0; i < size; i++) {
-			TableChangedListener listener = (TableChangedListener) dropListeners.get(i);
+			TableChangedListener listener = (TableChangedListener) changesListeners.get(i);
 			listener.tableChanged();
 		}
 	}
