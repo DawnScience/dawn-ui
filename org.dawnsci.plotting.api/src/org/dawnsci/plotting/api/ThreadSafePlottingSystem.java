@@ -629,4 +629,14 @@ public class ThreadSafePlottingSystem extends StandardMBean implements IPlotting
 			String dataName, IProgressMonitor monitor) {
 		return (ITrace)call(getMethodName(Thread.currentThread().getStackTrace()), image, axes, dataName, monitor);
 	}
+
+	@Override
+	public void setEnabled(boolean enabled) {
+		call(getMethodName(Thread.currentThread().getStackTrace()), new Class[]{boolean.class}, enabled);		
+	}
+
+	@Override
+	public boolean isEnabled() {
+		return (Boolean)call(getMethodName(Thread.currentThread().getStackTrace()));
+	}
 }

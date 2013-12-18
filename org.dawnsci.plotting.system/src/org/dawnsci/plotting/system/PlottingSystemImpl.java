@@ -214,6 +214,28 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		super.removeTraceListener(l);
 		lightWeightViewer.removeImageTraceListener(l);
 	}
+	
+
+	@Override
+	public void setEnabled(final boolean enabled) {
+		if (lightWeightViewer==null) return;
+		if (getDisplay().getThread()==Thread.currentThread()) {
+			lightWeightViewer.setEnabled(enabled);
+		} else {
+		    getDisplay().syncExec(new Runnable() {
+		    	public void run() {
+		    		lightWeightViewer.setEnabled(enabled);
+		    	}
+		    });
+		}
+	}
+
+	@Override
+	public boolean isEnabled() {
+		if (lightWeightViewer==null) return true;
+		return lightWeightViewer.isEnabled();
+	}
+
 
 	public List<ITrace> updatePlot1D(IDataset             x, 
 						             final List<? extends IDataset> ys,

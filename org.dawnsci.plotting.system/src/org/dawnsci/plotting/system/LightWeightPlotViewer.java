@@ -1355,6 +1355,24 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		return xyGraph.getRegionArea().getShiftPoint();
 	}
 
+	public void setEnabled(boolean enabled) {
+		xyGraph.setEnabled(enabled);
+		if (enabled) {
+			xyGraph.setBackgroundColor(ColorConstants.white);
+			xyGraph.setCursor(null);
+			xyGraph.getRegionArea().setBackgroundColor(ColorConstants.white);
+			xyGraph.getRegionArea().setCursor(null);
+		} else {
+			xyGraph.setBackgroundColor(ColorConstants.lightGray);
+			xyGraph.setCursor(Display.getDefault().getSystemCursor(SWT.CURSOR_WAIT));
+			xyGraph.getRegionArea().setBackgroundColor(ColorConstants.lightGray);
+			xyGraph.getRegionArea().setCursor(Display.getDefault().getSystemCursor(SWT.CURSOR_WAIT));
+		}
+	}
+
+	public boolean isEnabled() {
+		return xyGraph.isEnabled();
+	}
 
 	public static String getTitle(final IDataset xIn, 
 			final List<IDataset> ysIn, 

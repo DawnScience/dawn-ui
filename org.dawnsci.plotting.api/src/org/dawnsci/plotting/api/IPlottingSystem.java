@@ -428,6 +428,19 @@ public interface IPlottingSystem extends IAdaptable, ITraceSystem, IRegionSystem
 	 * @param b
 	 */
 	public void setKeepAspect(boolean b);
+	
+	/**
+	 * Can be used to grey out plotting component during updates.
+	 * Thread safe, can be called from any thread.
+	 * @param enabled
+	 */
+	public void setEnabled(boolean enabled);
+	
+	/**
+	 * returns if the plotting system is 
+	 * @return
+	 */
+	public boolean isEnabled();
 
 	/**
 	 * Shows or not the intensity scale
