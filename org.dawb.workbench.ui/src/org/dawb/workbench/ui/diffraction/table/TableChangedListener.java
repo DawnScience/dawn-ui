@@ -13,6 +13,8 @@ public interface TableChangedListener extends EventListener {
 	/**
 	 * Method that is run every time a change in the table occurs.
 	 * Changes can be adding or removing image(s).
+	 * @param event
+	 *         ADDED or REMOVED
 	 */
-	public void tableChanged();
+	public void tableChanged(TableChangedEvent event);
 }

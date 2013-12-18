@@ -183,13 +183,11 @@ public class DiffCalTableViewer extends TableViewer {
 				}
 
 				updateTableColumnsAndLayout();
-				StructuredSelection select = (StructuredSelection)getSelection();
-				DiffractionTableData currentData = (DiffractionTableData) select.getFirstElement();
-				if (currentData == null && good != null) {
+				if (good != null) {
 					table.deselectAll();
 					setSelection(new StructuredSelection(good));
 				}
-				fireTableChangedEvent();
+				fireTableChangedEvent(TableChangedEvent.ADDED);
 			}
 		};
 
@@ -209,17 +207,12 @@ public class DiffCalTableViewer extends TableViewer {
 						}
 					}
 				}
-//				if (!model.isEmpty()) {
-//					drawSelectedData((DiffractionTableData) tableViewer.getElementAt(0));
-//				} else {
-//					currentData = null; // need to reset this
-//					plottingSystem.clear();
-//					setXRaysModifiersEnabled(false);
-//					calibrateImagesButton.setEnabled(false);
-//				}
-				fireTableChangedEvent();
+				if (!model.isEmpty()) {
+					setSelection(new StructuredSelection((DiffractionTableData) getElementAt(0)));
+				}
+
+				fireTableChangedEvent(TableChangedEvent.REMOVED);
 				updateTableColumnsAndLayout();
-				
 			}
 		};
 	}
@@ -268,11 +261,11 @@ public class DiffCalTableViewer extends TableViewer {
 		changesListeners.remove(listener);
 	}
 
-	protected void fireTableChangedEvent() {
+	protected void fireTableChangedEvent(TableChangedEvent event) {
 		int size = changesListeners.size();
 		for (int i = 0; i < size; i++) {
 			TableChangedListener listener = (TableChangedListener) changesListeners.get(i);
-			listener.tableChanged();
+			listener.tableChanged(event);
 		}
 	}
 
