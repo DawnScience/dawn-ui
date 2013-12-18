@@ -313,7 +313,7 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 		
 		if (auxiliaryData != null) {
 			
-			AbstractDataset tmpProfile = (AbstractDataset) auxiliaryData.clone();
+			AbstractDataset tmpProfile = (AbstractDataset) auxiliaryData.clone().squeeze();
 			
 			if(smoothLevel > 1){
 				try {
@@ -330,7 +330,7 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 			
 			AbstractDataset newEnergyAxis = Maths.subtract(originalAxes.get(0), auxiliaryData.mean());
 			
-			correctedData = InterpolatorUtils.remapOneAxis((AbstractDataset) originalData, 1, (AbstractDataset) auxiliaryData, (AbstractDataset) originalAxes.get(0), newEnergyAxis);
+			correctedData = InterpolatorUtils.remapOneAxis((AbstractDataset) originalData, 1, (AbstractDataset) tmpProfile, (AbstractDataset) originalAxes.get(0), newEnergyAxis);
 			correctedAxes = new ArrayList<IDataset>();
 			correctedAxes.add(newEnergyAxis.clone());
 			correctedAxes.add(originalAxes.get(1).clone());
