@@ -383,7 +383,9 @@ public class PowderCheckTool extends AbstractToolPage {
 	
 	@Override
 	public Control getControl() {
-		return system.getPlotComposite();
+		if (system != null)
+			return system.getPlotComposite();
+		return null;
 	}
 
 	@Override
