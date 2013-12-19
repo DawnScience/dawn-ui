@@ -204,6 +204,8 @@ public class PowderCheckTool extends AbstractToolPage {
 		ArrayList<IDataset> y = new ArrayList<IDataset> ();
 		profile[0].setName("Top right");
 		y.add(profile[0]);
+		if (system == null)
+			return Status.CANCEL_STATUS;
 		List<ITrace> traces = system.updatePlot1D(profile[4], y, null);
 		//((ILineTrace)traces.get(0)).setTraceColor(ColorConstants.darkBlue);
 		y.remove(0);
@@ -381,7 +383,9 @@ public class PowderCheckTool extends AbstractToolPage {
 	
 	@Override
 	public Control getControl() {
-		return system.getPlotComposite();
+		if (system != null)
+			return system.getPlotComposite();
+		return null;
 	}
 
 	@Override
