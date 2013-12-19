@@ -40,6 +40,7 @@ import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.tools.diffraction.DiffractionImageAugmenter;
 import org.dawnsci.plotting.tools.diffraction.DiffractionTool;
 import org.dawnsci.plotting.tools.diffraction.DiffractionTreeModel;
+import org.dawnsci.plotting.tools.diffraction.DiffractionUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -609,7 +610,7 @@ public class DiffractionCalibrationUtils {
 						
 
 						try {
-							roi = DiffractionTool.runEllipsePeakFit(monitor, display, plottingSystem, image, e, deltalow, deltahigh,256);
+							roi = DiffractionUtils.runEllipsePeakFit(monitor, display, plottingSystem, image, e, deltalow, deltahigh,256);
 						} catch (NullPointerException ex) {
 							stat = Status.CANCEL_STATUS;
 							n = -1; // indicate, to finally clause, problem with getting image or other issues

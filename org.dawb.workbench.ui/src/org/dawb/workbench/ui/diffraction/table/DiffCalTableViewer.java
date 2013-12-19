@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dawb.workbench.ui.Activator;
-import org.dawnsci.plotting.tools.diffraction.DiffractionTool;
+import org.dawnsci.plotting.tools.diffraction.DiffractionUtils;
 import org.dawnsci.plotting.util.PlottingUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -301,7 +301,7 @@ public class DiffCalTableViewer extends TableViewer {
 			data.name = fileName;
 			data.image = image;
 			String[] statusString = new String[1];
-			data.md = DiffractionTool.getDiffractionMetadata(image, filePath, service, statusString);
+			data.md = DiffractionUtils.getDiffractionMetadata(image, filePath, service, statusString);
 			model.add(data);
 		}
 
