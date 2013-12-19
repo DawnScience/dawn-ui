@@ -1006,6 +1006,11 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		if (part == null || part != getCurrentContributingPart()) {
 			return;
 		}
+		
+		if (activeRec!=null && activeRec.tool != null && part.getAdapter(IPlottingSystem.class) == activeRec.tool.getPlottingSystem()) {
+			return;
+		}
+
 		// if we've minimized the editor stack, that's no reason to
 		// drop our content
 		if (getSite().getPage().getPartState(
