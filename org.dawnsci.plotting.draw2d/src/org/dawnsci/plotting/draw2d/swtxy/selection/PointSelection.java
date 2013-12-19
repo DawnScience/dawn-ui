@@ -140,6 +140,7 @@ public class PointSelection extends AbstractSelectionRegion {
 		final Point last = clicks.getLastPoint();
 		point.setSelectionPoint(last);
 		roi = new PointROI(point.getPosition());
+		fireROIChanged(getROI());
 	}
 
 	@Override
