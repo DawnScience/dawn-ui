@@ -91,7 +91,7 @@ public class PowderCheckTool extends AbstractToolPage {
 		system.createPlotPart(parent, 
 				 getTitle(), 
 				 actionbars, 
-				 PlotType.IMAGE,
+				 PlotType.XY,
 				 this.getViewPart());
 		
 		system.getSelectedYAxis().setAxisAutoscaleTight(true);
@@ -159,6 +159,14 @@ public class PowderCheckTool extends AbstractToolPage {
 	}
 	
 	@Override
+	public void dispose() {
+		deactivate();
+		if (system!=null) system.dispose();
+		system = null;
+		super.dispose();
+	}
+	
+	@Override
 	public Object getAdapter(@SuppressWarnings("rawtypes") Class clazz) {
 		if (clazz == IToolPageSystem.class) {
 			return system;
@@ -204,8 +212,11 @@ public class PowderCheckTool extends AbstractToolPage {
 		ArrayList<IDataset> y = new ArrayList<IDataset> ();
 		profile[0].setName("Top right");
 		y.add(profile[0]);
-		if (system == null)
+		if (system == null) {
+			logger.error("Plotting system is null");
 			return Status.CANCEL_STATUS;
+		}
+			
 		List<ITrace> traces = system.updatePlot1D(profile[4], y, null);
 		//((ILineTrace)traces.get(0)).setTraceColor(ColorConstants.darkBlue);
 		y.remove(0);
