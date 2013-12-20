@@ -859,6 +859,14 @@ class LightWeightPlotActions {
 				viewer.getSystem().setXFirst(false);
 			}
 			
+			final Action autoHideRegions = new Action("Automatically hide regions", IAction.AS_CHECK_BOX) {
+				public void run() {
+					viewer.getSystem().setAutoHideRegions(isChecked());
+				}
+			};
+			autoHideRegions.setChecked(viewer.getSystem().isAutoHideRegions());
+			autoHideRegions.setToolTipText("Automatically hide regions when the plot dimensionality changes.");
+			actionBarManager.registerAction(autoHideRegions, ActionType.ALL, ManagerType.MENUBAR);
 			
 			actionBarManager.addXYSeparator();
 			actionBarManager.addXYAction(plotX);

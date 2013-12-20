@@ -81,10 +81,18 @@ import org.slf4j.LoggerFactory;
  * 
  * @author fcp94556
  *
+ *
+ * @Internal Usage of this class is discouraged in external API. Use IPlottingSystem instead please.
  */
 public abstract class AbstractPlottingSystem implements IPlottingSystem, IToolPageSystem {
 	
 	private static final Logger logger = LoggerFactory.getLogger(AbstractPlottingSystem.class);
+	
+	/**
+	 * Boolean to say if regions should be automatically hidden
+	 * when plot mode is changed.
+	 */
+	protected boolean isAutoHideRegions = true;
 
 	protected boolean rescale = true;
 
@@ -893,4 +901,14 @@ public abstract class AbstractPlottingSystem implements IPlottingSystem, IToolPa
 	public Point getShiftPoint() {
 		throw new UnsupportedOperationException();
 	}
+	
+
+	public boolean isAutoHideRegions() {
+		return isAutoHideRegions;
+	}
+
+	public void setAutoHideRegions(boolean isAutoHideRegions) {
+		this.isAutoHideRegions = isAutoHideRegions;
+	}
+
 }

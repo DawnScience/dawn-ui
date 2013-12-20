@@ -760,6 +760,14 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			layout.topControl = top;
 			parent.layout();
 		}
+		
+		if (isAutoHideRegions()) {
+			// We auto-hide regions that are different plot type.
+			final Collection<IRegion> regions = getRegions();
+			if (regions!=null) for (IRegion iRegion : regions) {
+				if (iRegion.isUserRegion()) iRegion.setVisible(iRegion.getPlotType()==null || iRegion.getPlotType()==type);
+			}
+		}
 	}
 
 	/**
