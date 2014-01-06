@@ -789,6 +789,8 @@ public abstract class AbstractPlottingSystem implements IPlottingSystem, IToolPa
 	 * IToolPageSystem system = (IToolPageSystem)iplottingSystem.getAdapter(IToolPageSystem.class);
 	 * </code>
 	 */
+	@SuppressWarnings("rawtypes")
+	@Override
 	public Object getAdapter(Class adapter) {
 		if (adapter==IToolPageSystem.class) {
 			return this;

@@ -66,6 +66,7 @@ public class ExpressionObjectServiceImpl extends AbstractServiceFactory implemen
 	 * @return
 	 * @throws Exception
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<IExpressionObject> getActiveExpressions(String sourcePath) throws Exception {
 		
