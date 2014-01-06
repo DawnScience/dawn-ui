@@ -392,7 +392,7 @@ public class PowderCheckTool extends AbstractToolPage {
 			AbstractDataset[] profile = ROIProfile.sector(data, null, sroi, true, false, false, qSpace, XAxis.Q, false);
 			
 			ArrayList<IDataset> y = new ArrayList<IDataset> ();
-			profile[0].setName("Top right");
+			profile[0].setName("Bottom right");
 			y.add(profile[0]);
 			if (system == null) {
 				logger.error("Plotting system is null");
@@ -405,7 +405,7 @@ public class PowderCheckTool extends AbstractToolPage {
 			
 			final AbstractDataset reflection = profile[2];
 			final AbstractDataset axref = profile[6];
-			reflection.setName("Bottom left");
+			reflection.setName("Top left");
 			y.add(reflection);
 			traces = system.updatePlot1D(axref, y, null);
 			//((ILineTrace)traces.get(0)).setTraceColor(ColorConstants.lightBlue);
@@ -416,7 +416,7 @@ public class PowderCheckTool extends AbstractToolPage {
 			sroi = new SectorROI(bc[0], bc[1], 0, maxDistance, 3*Math.PI/4 - Math.PI/8, 3*Math.PI/4 + Math.PI/8, 1, true, SectorROI.INVERT);
 			profile = ROIProfile.sector(data, null, sroi, true, false, false, qSpace, XAxis.Q, false);
 			
-			profile[0].setName("Bottom right");
+			profile[0].setName("Bottom left");
 			y.add(profile[0]);
 			traces = system.updatePlot1D(profile[4], y, null);
 			//((ILineTrace)traces.get(0)).setTraceColor(ColorConstants.darkGreen);
@@ -424,7 +424,7 @@ public class PowderCheckTool extends AbstractToolPage {
 			
 			final AbstractDataset reflection2 = profile[2];
 			final AbstractDataset axref2 = profile[6];
-			reflection2.setName("Top left");
+			reflection2.setName("Top right");
 			y.add(reflection2);
 			traces = system.updatePlot1D(axref2, y, null);
 			//((ILineTrace)traces.get(0)).setTraceColor(ColorConstants.lightGreen);
