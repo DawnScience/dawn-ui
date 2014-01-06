@@ -85,7 +85,7 @@ public class SpanEditingSupport extends EditingSupport {
 		double avail = max/sizeOneSlice;
 		if (avail<1) return 1;
 		
-		int maxAllowed = (int)Math.round(avail);
+		int maxAllowed = (int)Math.floor(avail);
         return maxAllowed;
 	}
 
