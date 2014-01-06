@@ -569,9 +569,9 @@ public class SliceUtils {
 			}
 
 			if (currentSlice.getX() > currentSlice.getY()) sum = service.transpose(sum);
-			sum.setName(slice.getName());
 			
 			sum = sum.squeeze();
+			sum.setName(slice.getName());
 			slice = sum;
 			
 		} else {
