@@ -371,13 +371,6 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		editorMenu.add(asScale);
 		editorMenu.add(asSpinner);
 		
-		final Action pref = new Action("Operation Preferences...", Activator.getImageDescriptor("icons/range_preference.png")) {
-			public void run () {
-				viewer.cancelEditing();
-				// TODO FIXME, Dialog: +- <Amount> in axis value or indices, Average, Median, Sum
-			}
-		};
-		man.add(pref);
 		
 		createCustomActions(man);
 
