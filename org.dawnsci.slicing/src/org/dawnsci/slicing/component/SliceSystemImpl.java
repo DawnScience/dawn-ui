@@ -81,6 +81,7 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.LazyDataset;
 import uk.ac.diamond.scisoft.analysis.io.SliceObject;
 
 
@@ -538,6 +539,10 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 						dd.setSlice(0);
 					}
 				}
+ 				if (sliceSource!=null && sliceSource.getLazySet()!=null) {
+ 					final int max = LazyDataset.getMaxSliceLength(sliceSource.getLazySet(), i);
+ 					dd.setSliceSpan(Math.min(dd.getSliceSpan(), max));
+ 				}
 			}
 
 		}
