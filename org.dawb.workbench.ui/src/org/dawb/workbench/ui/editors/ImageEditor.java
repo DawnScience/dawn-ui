@@ -11,11 +11,13 @@ package org.dawb.workbench.ui.editors;
 
 import java.util.Collection;
 
+import org.dawb.common.services.IVariableManager;
 import org.dawb.common.ui.editors.EditorExtensionFactory;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.views.HeaderTablePage;
 import org.dawb.workbench.ui.views.PlotDataPage;
 import org.dawnsci.common.widgets.editor.ITitledEditor;
+import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -157,14 +159,18 @@ public class ImageEditor extends MultiPageEditorPart implements IReusableEditor,
 			} else {
 			    return PlotDataPage.getPageFor(plotDataEditor);
 			}
-		} else if (clazz == IToolPageSystem.class) {
+		} else if (clazz == IToolPageSystem.class || clazz == IPlottingSystem.class) {
 			try {
-				Object toolSystem = getActiveEditor().getAdapter(clazz);
-				return toolSystem;
+				Object system = plotDataEditor.getAdapter(clazz);
+				return system;
 			} catch (Throwable ne) {
 				logger.error("Cannot get tool system for "+getActiveEditor(), ne);
 			}
 			return plotDataEditor.getPlottingSystem();
+			
+		} else if (clazz == IVariableManager.class) {
+			if (plotDataEditor==null) return null;
+			return plotDataEditor.getDataSetComponent();
 		}
 		
 		return super.getAdapter(clazz);

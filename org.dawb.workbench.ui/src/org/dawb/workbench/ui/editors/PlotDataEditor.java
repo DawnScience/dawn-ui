@@ -88,12 +88,14 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 	private PlotType                    defaultPlotType;
 	private Map<Integer, IAxis>         axisMap;
 	private PlotJob                     plotJob;
+	private InitJob                     initJob;
 	private ActionBarWrapper            wrapper;
 
 	public PlotDataEditor(final PlotType defaultPlotType) {
 		
 	    this.axisMap = new HashMap<Integer, IAxis>(4);
 	    this.plotJob = new PlotJob();
+	    this.initJob = new InitJob();
 		try {
 			this.defaultPlotType= defaultPlotType;
 	        this.plottingSystem = PlottingFactory.createPlottingSystem();
@@ -181,7 +183,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		
 		// Finally
 		if (wrapper!=null)  wrapper.update(true);
-	    createData(getEditorInput());	
+        initJob.schedule(getEditorInput());	
 	    
 		// We ensure that the view for choosing data sets is visible
 		if (EclipseUtils.getActivePage()!=null) {
@@ -495,7 +497,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		super.setInput(input);
 		setPartName(input.getName());
 
-		if (createData) createData(input);
+		if (createData) initJob.schedule(input);
 	}
 	
     /**
@@ -508,46 +510,52 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		dataSetComponent.setAll1DSelected(overide);
 	}
 
-	/**
-	 * Reads the data sets from the IEditorInput
-	 */
-	private void createData(final IEditorInput input) {
+	private class InitJob extends Job {
+		
+		private IEditorInput input;
+		InitJob() {
+			super("Update data");
+			setUser(true);
+			setSystem(true);
+			setPriority(Job.INTERACTIVE);
+		}
+		
+		public void schedule(IEditorInput i) {
+			cancel();
+			input = i;
+			schedule();
+		}
 
-		final Job job = new Job("Update data") {
-			
-			@Override
-			public IStatus run(IProgressMonitor monitor) {
-				try {					
-					// Load data in Job
-					final String       path       = EclipseUtils.getFilePath(input);
-					final IMetaData    meta       = LoaderFactory.getMetaData(path, new ProgressMonitorWrapper(monitor));
-					final IDataHolder  dataHolder = LoaderFactory.getData(path, true, true, null);
+		@Override
+		public IStatus run(final IProgressMonitor monitor) {
+			try {					
+				// Load data in Job
+				final String       path       = EclipseUtils.getFilePath(input);
+				final IMetaData    meta       = LoaderFactory.getMetaData(path, new ProgressMonitorWrapper(monitor));
+				final IDataHolder  dataHolder = LoaderFactory.getData(path, true, true, null);
+				if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 
-					// Update UI
-					Display.getDefault().syncExec(new Runnable() {
-						public void run() {
-							setFocus();
-							final PlotDataComponent dataSetComponent = (PlotDataComponent)getDataSetComponent();
-					 		if (dataSetComponent==null) return;
-						    dataSetComponent.setData(dataHolder, meta);
-							dataSetComponent.refresh();
-							((AbstractPlottingSystem)getPlottingSystem()).setRootName(dataSetComponent.getRootName());
-						}
-					});
- 					return Status.OK_STATUS;
-				} catch (Exception ne) {
-					logger.error("Cannot open nexus", ne);
-					return Status.CANCEL_STATUS;
-				}
+				// Update UI
+				Display.getDefault().syncExec(new Runnable() {
+					public void run() {
+						if (monitor.isCanceled()) return;
+						setFocus();
+						final PlotDataComponent dataSetComponent = (PlotDataComponent)getDataSetComponent();
+				 		if (dataSetComponent==null) return;
+					    dataSetComponent.setData(dataHolder, meta);
+						dataSetComponent.refresh();
+						((AbstractPlottingSystem)getPlottingSystem()).setRootName(dataSetComponent.getRootName());
+					}
+				});
+				return Status.OK_STATUS;
+				
+			} catch (Exception ne) {
+				logger.error("Cannot open nexus", ne);
+				return Status.CANCEL_STATUS;
 			}
-		};
-		job.setUser(true);
-		job.setSystem(true);
-		job.setPriority(Job.INTERACTIVE);
-		job.schedule();
+		}
 	}
 
-	
 
 	@Override
 	public void setFocus() {
@@ -556,15 +564,10 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 			plottingSystem.setFocus();
 		}
 		
-		Display.getDefault().asyncExec(new Runnable() {
-			@Override
-			public void run() {
-				final PlotDataComponent pc = (PlotDataComponent)getDataSetComponent();
-				if (pc!=null && (pc.getData()==null || pc.getData().isEmpty())) {
-					createData(getEditorInput());
-				}			
-			}
-		});
+		final PlotDataComponent pc = (PlotDataComponent)getDataSetComponent();
+		if (pc!=null && (pc.getData()==null || pc.getData().isEmpty())) {
+			initJob.schedule(getEditorInput());
+		}			
 	}
 
 	@Override

@@ -1891,6 +1891,10 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		return (IPlottingSystem)editor.getAdapter(IPlottingSystem.class);
 	}
 
+	/**
+	 * May return null! Editor does not have to be a plotting editor.
+	 * @return
+	 */
 	private AbstractPlottingSystem getAbstractPlottingSystem() {
 		return (AbstractPlottingSystem)getPlottingSystem();
 	}
