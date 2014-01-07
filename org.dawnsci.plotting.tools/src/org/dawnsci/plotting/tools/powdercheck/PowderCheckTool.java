@@ -109,6 +109,7 @@ public class PowderCheckTool extends AbstractToolPage {
 
 		IImageTrace im = getImageTrace();
 		if (im == null) {
+			cleanPlottingSystem();
 			logger.error("No trace in plotting system");
 			return;
 		}
@@ -135,7 +136,7 @@ public class PowderCheckTool extends AbstractToolPage {
 	}
 	
 	private void cleanPlottingSystem(){
-		if (system != null) {		
+		if (system != null) {
 			system.reset();
 		}
 	}

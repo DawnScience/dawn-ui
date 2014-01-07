@@ -42,4 +42,5 @@ public class DiffractionTableData {
 	public double distance;
 	public int nrois = -1; // number of actual ROIs found
 	public boolean use = false;
+	public double residual;
 }
