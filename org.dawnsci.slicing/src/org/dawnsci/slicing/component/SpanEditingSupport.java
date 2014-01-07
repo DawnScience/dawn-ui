@@ -32,7 +32,7 @@ public class SpanEditingSupport extends EditingSupport {
 			final DimsData data = (DimsData)element;
 			int dimension = data.getDimension();
 			ret.setMinimum(1);
-			final int max = (int)Math.round(LazyDataset.getMaxSliceLength(system.getData().getLazySet(), dimension)/4d);
+			final int max = (int)Math.round(LazyDataset.getMaxSliceLength(system.getData().getLazySet(), dimension));
 			ret.setMaximum(max);
 			ret.getSpinner().setToolTipText("The maximum value of a slice of dimension '"+(dimension+1)+"' is '"+max+"',\nbased on available memory.");
 			
