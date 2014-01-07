@@ -424,7 +424,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		directComp.setLayout(new GridLayout(1, false));
 		GridUtils.removeMargins(directComp);
 		
-		this.directToolbar = new ToolBarManager(SWT.FLAT|SWT.RIGHT);
+		this.directToolbar = new ToolBarManager(SWT.FLAT|SWT.RIGHT|SWT.WRAP);
 		createDirectToolbarActions(directToolbar);
 		Control          tb         = directToolbar.createControl(directComp);
 		tb.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, false));

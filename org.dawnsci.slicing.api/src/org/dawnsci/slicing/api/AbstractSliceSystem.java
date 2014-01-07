@@ -109,7 +109,7 @@ public abstract class AbstractSliceSystem implements ISliceSystem {
 	 */
 	protected IToolBarManager createSliceTools() {
 				
-		final ToolBarManager man = new ToolBarManager(SWT.FLAT|SWT.RIGHT);
+		final ToolBarManager man = new ToolBarManager(SWT.FLAT|SWT.RIGHT|SWT.WRAP);
 		man.add(new Separator("sliceTools"));
 		return createSliceTools(man);
 	}
