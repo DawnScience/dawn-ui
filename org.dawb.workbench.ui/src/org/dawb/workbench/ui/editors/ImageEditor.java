@@ -160,14 +160,17 @@ public class ImageEditor extends MultiPageEditorPart implements IReusableEditor,
 			    return PlotDataPage.getPageFor(plotDataEditor);
 			}
 		} else if (clazz == IToolPageSystem.class || clazz == IPlottingSystem.class) {
-			try {
-				Object system = plotDataEditor.getAdapter(clazz);
-				return system;
-			} catch (Throwable ne) {
-				logger.error("Cannot get tool system for "+getActiveEditor(), ne);
+			if (plotDataEditor != null) {
+				try {
+					Object system = plotDataEditor.getAdapter(clazz);
+					return system;
+				} catch (Throwable ne) {
+					logger.error("Cannot get tool system for "+getActiveEditor(), ne);
+				}
+				return plotDataEditor.getPlottingSystem();
+			} else {
+				return null;
 			}
-			return plotDataEditor.getPlottingSystem();
-			
 		} else if (clazz == IVariableManager.class) {
 			if (plotDataEditor==null) return null;
 			return plotDataEditor.getDataSetComponent();
