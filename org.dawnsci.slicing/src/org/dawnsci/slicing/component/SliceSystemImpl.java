@@ -305,7 +305,7 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 	 */
 	protected IToolBarManager createSliceTools() {
 		
-		final ToolBarManager man = new ToolBarManager(SWT.FLAT|SWT.RIGHT);
+		final ToolBarManager man = new ToolBarManager(SWT.FLAT|SWT.RIGHT|SWT.WRAP);
 		man.add(new Separator("sliceTools"));
 
 		// Add action for Setting the tools into advanced mode.
