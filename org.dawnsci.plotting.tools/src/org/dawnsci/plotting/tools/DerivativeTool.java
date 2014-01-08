@@ -401,58 +401,61 @@ public class DerivativeTool extends AbstractToolPage  {
 	}
 	
 	private synchronized void updateDerivatives() {
-		logger.debug("Updating Derivatives");
-		
-		if (getPlottingSystem() == null) return;
-		
-		for (ITrace trace : getPlottingSystem().getTraces(ILineTrace.class)) {
-			if (trace.isUserTrace() && trace.getUserObject() != HistoryType.HISTORY_PLOT) {
-				getPlottingSystem().removeTrace(trace);
+		try {
+			logger.debug("Updating Derivatives");
+			
+			if (getPlottingSystem() == null) return;
+			
+			for (ITrace trace : getPlottingSystem().getTraces(ILineTrace.class)) {
+				if (trace.isUserTrace() && trace.getUserObject() != HistoryType.HISTORY_PLOT) {
+					getPlottingSystem().removeTrace(trace);
+				}
 			}
-		}
-		
-		//plot all required data, original data from traces
-		// derivative data from AbstractDataset pairs
-		if (data) {
-			for (ITrace trace : dataTraces) {
-				getPlottingSystem().addTrace(trace);
+			
+			//plot all required data, original data from traces
+			// derivative data from AbstractDataset pairs
+			if (data) {
+				for (ITrace trace : dataTraces) {
+					getPlottingSystem().addTrace(trace);
+				}
 			}
-		}
-		if (deriv) {
-			int ic = dataTraces.size();
-			for (AbstractDatasetPair dataset : dervsPair) {
-				ILineTrace traceNew = getPlottingSystem().createLineTrace(dataset.y.getName());
-				traceNew.setUserObject(DerivativeTool.class);
-				traceNew.setUserTrace(true);
-				traceNew.setData(dataset.x, dataset.y);
-				traceNew.setTraceColor(ColorUtility.getSwtColour(ic));
-				ic++;
-				getPlottingSystem().addTrace(traceNew);
+			if (deriv) {
+				int ic = dataTraces.size();
+				for (AbstractDatasetPair dataset : dervsPair) {
+					ILineTrace traceNew = getPlottingSystem().createLineTrace(dataset.y.getName());
+					traceNew.setUserObject(DerivativeTool.class);
+					traceNew.setUserTrace(true);
+					traceNew.setData(dataset.x, dataset.y);
+					traceNew.setTraceColor(ColorUtility.getSwtColour(ic));
+					ic++;
+					getPlottingSystem().addTrace(traceNew);
+				}
 			}
-		}
-		if (deriv2) {
-			int ic = dataTraces.size()*2;
-			for (AbstractDatasetPair dataset : dervs2Pair) {
-				ILineTrace traceNew = getPlottingSystem().createLineTrace(dataset.y.getName());
-				traceNew.setUserObject(DerivativeTool.class);
-				traceNew.setUserTrace(true);
-				traceNew.setTraceColor(ColorUtility.getSwtColour(ic));
-				ic++;
-				traceNew.setData(dataset.x, dataset.y);
-				
-				getPlottingSystem().addTrace(traceNew);
+			if (deriv2) {
+				int ic = dataTraces.size()*2;
+				for (AbstractDatasetPair dataset : dervs2Pair) {
+					ILineTrace traceNew = getPlottingSystem().createLineTrace(dataset.y.getName());
+					traceNew.setUserObject(DerivativeTool.class);
+					traceNew.setUserTrace(true);
+					traceNew.setTraceColor(ColorUtility.getSwtColour(ic));
+					ic++;
+					traceNew.setData(dataset.x, dataset.y);
+					
+					getPlottingSystem().addTrace(traceNew);
+				}
 			}
+			
+	
+			//Call repaint so the plotting system obeys button for whether rescale
+			//should happen or not
+			getPlottingSystem().repaint();
+			if (isActive())
+				getPlottingSystem().addTraceListener(traceListener);
+			
+			logger.debug("Update Finished In updateDerivatives");
+		} catch (Throwable ne) {
+			logger.error("Internal error in derivative tool!", ne);
 		}
-		
-
-		//Call repaint so the plotting system obeys button for whether rescale
-		//should happen or not
-		getPlottingSystem().repaint();
-		if (isActive())
-			getPlottingSystem().addTraceListener(traceListener);
-		
-		logger.debug("Update Finished In updateDerivatives");
-		return;
 	}
 	
 	private AbstractDatasetPair processTrace(ITrace trace, Derivative type){

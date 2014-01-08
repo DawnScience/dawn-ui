@@ -117,17 +117,21 @@ public class RegionArea extends PlotArea {
 
 	@Override
 	protected void paintClientArea(final Graphics graphics) {
-		super.paintClientArea(graphics);
-		
-		if (shiftPoint!=null && toPoint!=null && shiftDown && getSelectedCursor()!=null) {
-			graphics.pushState();
-			graphics.setForegroundColor(ColorConstants.white);
-			graphics.setLineDash(new int[]{1,1});
-			graphics.drawLine(shiftPoint.x, shiftPoint.y, toPoint.x, toPoint.y);
-			graphics.setLineDash(new int[]{2,2});
-			graphics.setForegroundColor(ColorConstants.black);
-			graphics.drawLine(shiftPoint.x, shiftPoint.y, toPoint.x, toPoint.y);
-			graphics.popState();
+		try {
+			super.paintClientArea(graphics);
+			
+			if (shiftPoint!=null && toPoint!=null && shiftDown && getSelectedCursor()!=null) {
+				graphics.pushState();
+				graphics.setForegroundColor(ColorConstants.white);
+				graphics.setLineDash(new int[]{1,1});
+				graphics.drawLine(shiftPoint.x, shiftPoint.y, toPoint.x, toPoint.y);
+				graphics.setLineDash(new int[]{2,2});
+				graphics.setForegroundColor(ColorConstants.black);
+				graphics.drawLine(shiftPoint.x, shiftPoint.y, toPoint.x, toPoint.y);
+				graphics.popState();
+			}
+		} catch (Throwable ne) {
+			logger.error("Internal error in drawing plot. Please contact your support representative.", ne);
 		}
 	}
 
