@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.dawb.common.services.IVariableManager;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
@@ -90,12 +91,14 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 	private PlotJob                     plotJob;
 	private InitJob                     initJob;
 	private ActionBarWrapper            wrapper;
+	private ReentrantLock               lock;
 
 	public PlotDataEditor(final PlotType defaultPlotType) {
 		
 	    this.axisMap = new HashMap<Integer, IAxis>(4);
 	    this.plotJob = new PlotJob();
 	    this.initJob = new InitJob();
+	    this.lock    = new ReentrantLock();
 		try {
 			this.defaultPlotType= defaultPlotType;
 	        this.plottingSystem = PlottingFactory.createPlottingSystem();
@@ -515,7 +518,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		private IEditorInput input;
 		InitJob() {
 			super("Update data");
-			setUser(true);
+			setUser(false);
 			setSystem(true);
 			setPriority(Job.INTERACTIVE);
 		}
@@ -529,6 +532,8 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 		@Override
 		public IStatus run(final IProgressMonitor monitor) {
 			try {					
+				lock.lock();
+				
 				// Load data in Job
 				final String       path       = EclipseUtils.getFilePath(input);
 				final IMetaData    meta       = LoaderFactory.getMetaData(path, new ProgressMonitorWrapper(monitor));
@@ -552,6 +557,8 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 			} catch (Exception ne) {
 				logger.error("Cannot open nexus", ne);
 				return Status.CANCEL_STATUS;
+			} finally {
+				lock.unlock();
 			}
 		}
 	}
@@ -630,8 +637,14 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 	
     public Object getAdapter(@SuppressWarnings("rawtypes") final Class clazz) {
 		
+    	
 		if (clazz == Page.class) {
-			return PlotDataPage.getPageFor(this);
+			try {
+				lock.lock();
+				return PlotDataPage.getPageFor(this);
+			} finally {
+				lock.unlock();
+			}
 		} else if (clazz == IToolPageSystem.class || clazz == IPlottingSystem.class) {
 			return getPlottingSystem();
 		} else if (clazz == ISliceSystem.class) {
