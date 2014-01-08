@@ -230,18 +230,18 @@ public class RegionArea extends PlotArea {
 		regions.putAll(sameOrder);
 	}
 	
-	public void clearRegions() {
-		clearRegionsInternal();
+	public void clearRegions(boolean force) {
+		clearRegionsInternal(force);
 		revalidate();
 	}
 	
-    protected void clearRegionsInternal() {
+    protected void clearRegionsInternal(boolean force) {
 		clearRegionTool();
 		if (regions==null) return;
 		
 		final Collection<String> deleted = new HashSet<String>(5);
 		for (AbstractSelectionRegion region : regions.values()) {
-			if (!region.isUserRegion()) continue;
+			if (!region.isUserRegion() && !force) continue;
 			deleted.add(region.getName());
 			region.remove();
 		}
@@ -681,7 +681,7 @@ public class RegionArea extends PlotArea {
 	public void dispose() {
 		
 		clearTraces();
-		clearRegionsInternal();
+		clearRegionsInternal(true);
 		if (regionListeners!=null)     regionListeners.clear();
 		if (imageTraceListeners!=null) imageTraceListeners.clear();
 		if (regions!=null)             regions.clear();

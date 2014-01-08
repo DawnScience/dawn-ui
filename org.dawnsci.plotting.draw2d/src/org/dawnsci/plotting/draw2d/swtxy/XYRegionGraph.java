@@ -135,8 +135,8 @@ public class XYRegionGraph extends XYGraph {
 		return getRegionArea().getRegion(name);
 	}
 
-	public void clearRegions() {
-		getRegionArea().clearRegions();
+	public void clearRegions(boolean force) {
+		getRegionArea().clearRegions(force);
 	}
 	public List<AbstractSelectionRegion> getRegions() {
 		return getRegionArea().getRegions();

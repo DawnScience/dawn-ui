@@ -446,7 +446,7 @@ class LightWeightPlotActions {
 				if (yes){
 					xyGraph.getOperationsManager().addCommand(
 							new RemoveRegionCommand((XYRegionGraph)xyGraph, ((XYRegionGraph)xyGraph).getRegions()));					
-					((XYRegionGraph)xyGraph).clearRegions();
+					((XYRegionGraph)xyGraph).clearRegions(false);
 				}
 			}
 		};

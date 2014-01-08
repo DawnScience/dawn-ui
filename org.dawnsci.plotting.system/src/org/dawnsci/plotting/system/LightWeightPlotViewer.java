@@ -864,11 +864,11 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		}
 	}
 
-	public void reset() {
+	public void reset(boolean force) {
 		if (xyGraph!=null) {
 			try {
 				clearAnnotations();
-				clearRegions();
+				clearRegions(force);
 				resetAxes();
 				clearTraces();
 				setTitle("");
@@ -983,14 +983,17 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		return region;
 	}
 
+	public void clearRegions() {
+		clearRegions(false);
+	}
 	
 	/**
 	 * Thread safe
 	 */
-	public void clearRegions() {
+	public void clearRegions(boolean force) {
 		if (xyGraph==null) return;
 		
-		xyGraph.clearRegions();
+		xyGraph.clearRegions(force);
 	}		
 	
 	protected void clearRegionTool() {
