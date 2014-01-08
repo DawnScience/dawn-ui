@@ -481,7 +481,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, IData
 			
 			if (co.getYaxis()!=iyaxis) continue;
 			final IDataset y = co.getData(new ProgressMonitorWrapper(monitor));
-			ys.add(y);
+			ys.add(y.squeeze());
 			dn.add(co.getName());
 			if (monitor.isCanceled()) return;
 			monitor.worked(1);
