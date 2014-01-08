@@ -236,7 +236,7 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 		if (coords!=null) coords.dispose();
 		if (getParent()!=null) getParent().remove(this);
 		if (regionObjects!=null)for (IFigure ob : regionObjects) {
-			if (ob.getParent()!=null) {
+			if (ob!=null && ob.getParent()!=null) {
 				ob.getParent().remove(ob);
 				ob.removeMouseListener(selectionListener);
 			}

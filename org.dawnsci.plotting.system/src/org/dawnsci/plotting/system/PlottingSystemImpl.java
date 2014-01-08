@@ -742,6 +742,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 
 	protected void switchPlottingType( PlotType type ) {
 		
+		PlotType previous = plottingMode;
 		this.plottingMode=type;
 		this.actionBarManager.switchActions(plottingMode);
 		
@@ -761,7 +762,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			parent.layout();
 		}
 		
-		if (isAutoHideRegions()) {
+		if (isAutoHideRegions() && previous!=plottingMode) {
 			// We auto-hide regions that are different plot type.
 			final Collection<IRegion> regions = getRegions();
 			if (regions!=null) for (IRegion iRegion : regions) {
