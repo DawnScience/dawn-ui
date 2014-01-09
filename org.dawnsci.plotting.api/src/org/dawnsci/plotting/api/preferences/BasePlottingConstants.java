@@ -21,6 +21,11 @@ public class BasePlottingConstants {
 	 * Used to store palette preference
 	 */
 	public static final String COLOUR_SCHEME = "org.dawb.plotting.system.colourSchemeName";
+	/**
+	 *  This String is used to retrieve the plot view colour map preference which is in analysis.rcp
+	 *  Make sure to search for the string if modifying it
+	 */
+	public static final String PLOT_VIEW_PLOT2D_COLOURMAP = "plotView.plot2DcolourMap";
 
 	/**
 	 * Used to store origin preference, do not change string

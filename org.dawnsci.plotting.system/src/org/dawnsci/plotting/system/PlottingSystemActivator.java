@@ -12,7 +12,10 @@ public class PlottingSystemActivator extends AbstractUIPlugin {
 
 	private final static String ID = "org.dawnsci.plotting.system";
 
+	private static PlottingSystemActivator activator;
+
 	private static IPreferenceStore plottingPreferenceStore;
+	private static IPreferenceStore analysisRCPPreferenceStore;
 
 	public static ImageDescriptor getImageDescriptor(String path) {
 		return imageDescriptorFromPlugin(ID, path);
@@ -28,7 +31,11 @@ public class PlottingSystemActivator extends AbstractUIPlugin {
 		return plottingPreferenceStore;
 	}
 
-	private static PlottingSystemActivator activator;
+	public static IPreferenceStore getAnalysisRCPPreferenceStore() {
+		if (analysisRCPPreferenceStore == null)
+			analysisRCPPreferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, "uk.ac.diamond.scisoft.analysis.rcp");
+		return analysisRCPPreferenceStore;
+	}
 
 	public void start(BundleContext context) throws Exception {
 		super.start(context);

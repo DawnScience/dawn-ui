@@ -241,6 +241,9 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 			final Action action = new Action(paletteName, IAction.AS_CHECK_BOX) {
 				public void run() {
 					try {
+						// set the plotview colour map preference
+						PlottingSystemActivator.getAnalysisRCPPreferenceStore().setValue(PlottingConstants.PLOT_VIEW_PLOT2D_COLOURMAP, paletteName);
+						// set the main colour scheme preference used in the colour mapping tool
 						PlottingSystemActivator.getPlottingPreferenceStore().setValue(PlottingConstants.COLOUR_SCHEME, paletteName);
 						final PaletteData data = pservice.getPaletteData(paletteName);
 						final Collection<ITrace> traces = system.getTraces();
