@@ -668,7 +668,7 @@ public class DiffractionCalibrationUtils {
 	 */
 	public static final String[] NAMES = new String[]{ "Image", 
 		"Distance (mm)", "X beam centre (pixels)", "Y beam centre (pixels)", "Wavelength (Angstrom)",
-		"Energy (keV)", "Yaw (degrees)", "Pitch (degrees)", "Roll (degrees)"};
+		"Energy (keV)", "Yaw (degrees)", "Pitch (degrees)", "Roll (degrees)", "Residual"};
 
 	/**
 	 * 
@@ -681,6 +681,7 @@ public class DiffractionCalibrationUtils {
 			DetectorProperties dp = model.get(i).md.getDetector2DProperties();
 			double wavelength = model.get(i).md.getDiffractionCrystalEnvironment().getWavelength();
 			wavelength = DiffractionCalibrationUtils.setPrecision(wavelength, 5);
+			double residual = model.get(i).residual;
 			// image
 			values[i][0] = model.get(i).name;
 			// distance
@@ -699,6 +700,8 @@ public class DiffractionCalibrationUtils {
 			values[i][7] = String.format("%.2f",dp.getNormalAnglesInDegrees()[1]);
 			// Orientation Roll
 			values[i][8] = String.format("%.2f",dp.getNormalAnglesInDegrees()[2]);
+			// Orientation Roll
+			values[i][9] = String.valueOf(residual);
 		}
 		saveToCsvFile(filepath, NAMES, values);
 	}
