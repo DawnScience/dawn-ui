@@ -74,6 +74,13 @@ public class PowderCheckTool extends AbstractToolPage {
 				updateCalibrantLines();
 			}
 		};
+		
+		// TODO Listen to other things.
+		this.traceListener = new ITraceListener.Stub() {
+			protected void update(TraceEvent evt) {
+				PowderCheckTool.this.update();
+			}
+		};
 	}
 
 	@Override
@@ -95,12 +102,6 @@ public class PowderCheckTool extends AbstractToolPage {
 
 		system.getSelectedYAxis().setAxisAutoscaleTight(true);
 		
-		// TODO Listen to other things.
-		this.traceListener = new ITraceListener.Stub() {
-			protected void update(TraceEvent evt) {
-				PowderCheckTool.this.update();
-			}
-		};
 		getPlottingSystem().addTraceListener(traceListener);
 	}
 	
