@@ -228,7 +228,7 @@ public class HistogramToolPage extends AbstractToolPage {
 					it = (IPaletteTrace)evt.getSource();
 				}
 				updateImage(it, false);
-				updatePalette(it, null);
+				updatePalette(it, null, true);
 			}
 			@Override
 			public void tracesAdded(TraceEvent evt) {
@@ -488,7 +488,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			@Override
 			public IStatus runInUIThread(IProgressMonitor mon) {
-				if (!updatePalette(null, mon)) return Status.CANCEL_STATUS;
+				if (!updatePalette(null, mon, false)) return Status.CANCEL_STATUS;
 				return Status.OK_STATUS;
 			}
 		};
@@ -501,14 +501,15 @@ public class HistogramToolPage extends AbstractToolPage {
 	 * 
 	 * @param mon, may be null
 	 */
-	protected boolean updatePalette(IPaletteTrace eventsImage, IProgressMonitor mon) {
+	protected boolean updatePalette(IPaletteTrace eventsImage, IProgressMonitor mon, boolean force) {
 		logger.trace("imagerepaintJob running");
 		internalEvent++;
 
 		IPaletteTrace image = eventsImage!=null ? eventsImage : getPaletteTrace();
 		if (image!=null) {
 			
-			if (maxLast == histoMax &&
+			if (!force &&
+				maxLast == histoMax &&
 				minLast == histoMin &&
 				palLast!=null && paletteEquals(palLast, paletteData)) {
 				return false; // Nothing to do, faster not to do it.
