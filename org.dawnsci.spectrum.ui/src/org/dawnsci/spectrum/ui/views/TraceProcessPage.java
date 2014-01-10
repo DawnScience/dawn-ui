@@ -453,6 +453,7 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 				for (Object ob : obj) manager.removeFile(((ISpectrumFile)ob).getLongName());
 				//Todo change selection
 				
+				if (manager.isEmpty()) system.clear();
 				int i = viewer.getTable().getItemCount();
 				
 				if (i > 0) {
