@@ -50,10 +50,6 @@
          version="0.0.0"/>
 
    <includes
-         id="org.dawb.edna.feature"
-         version="0.0.0"/>
-
-   <includes
          id="org.dawb.visualization.feature"
          version="0.0.0"/>
 
