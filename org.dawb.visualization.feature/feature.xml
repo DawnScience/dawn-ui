@@ -118,6 +118,10 @@ This Agreement is governed by the laws of the State of New York and the intellec
          id="org.dawnsci.plotting.feature"
          version="0.0.0"/>
 
+   <includes
+         id="org.dawb.fable.feature"
+         version="0.0.0"/>
+
    <plugin
          id="org.dawb.workbench.ui"
          download-size="0"
@@ -134,55 +138,6 @@ This Agreement is governed by the laws of the State of New York and the intellec
 
    <plugin
          id="org.dawb.common.util"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.dawb.fable.extensions"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.dawb.fable.framework.navigator"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.dawb.fable.framework.toolbox"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.dawb.fable.framework.ui"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.dawb.fable.framework.ui.texteditor"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.dawb.fable.imageviewer"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.dawb.fable.python"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -231,13 +186,6 @@ This Agreement is governed by the laws of the State of New York and the intellec
          download-size="0"
          install-size="0"
          version="0.0.0"/>
-
-   <plugin
-         id="org.dawb.fabio"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
 
    <plugin
          id="org.dawb.common.services"
