@@ -5,8 +5,7 @@ Bundle-SymbolicName: org.dawb.workbench.ui.test
 Bundle-Version: 1.1.0.qualifier
 Bundle-Vendor: ESRF
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: fable.framework.toolbox,
- org.dawb.common.ui.image,
+Import-Package: org.dawb.common.ui.image,
  org.dawb.common.ui.util,
  org.dawb.common.util.eclipse,
  org.dawb.passerelle.common.utils,
