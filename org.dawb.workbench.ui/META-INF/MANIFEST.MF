@@ -11,7 +11,6 @@ Require-Bundle: org.eclipse.ui,
  uk.ac.diamond.scisoft.analysis,
  uk.ac.diamond.scisoft.analysis.api;bundle-version="1.0.0",
  org.dawb.hdf5.editor,
- org.dawb.gda.extensions,
  org.dawb.common.ui,
  org.dawb.common.util,
  org.eclipse.ui.cheatsheets,
@@ -25,7 +24,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.intro,
  org.dawnsci.slicing.api;bundle-version="1.0.0",
  uk.ac.diamond.scisoft.analysis.xmlrpc;bundle-version="1.0.0",
- org.dawnsci.python.rpc;bundle-version="1.0.0"
+ org.dawnsci.python.rpc;bundle-version="1.0.0",
+ org.dawnsci.plotting.services;bundle-version="1.0.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: javax.measure.quantity;version="4.3.1",
