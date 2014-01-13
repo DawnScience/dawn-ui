@@ -64,13 +64,6 @@
          unpack="false"/>
 
    <plugin
-         id="org.dawb.gda.extensions"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="org.dawb.common.services"
          download-size="0"
          install-size="0"
@@ -167,12 +160,6 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-
-   <plugin
-         id="org.dawnsci.rcp.histogram"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
 
    <plugin
          id="org.dawnsci.plotting"
@@ -479,5 +466,18 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
+
+   <plugin
+         id="org.dawnsci.plotting.histogram"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.dawnsci.plotting.services"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
 
 </feature>
