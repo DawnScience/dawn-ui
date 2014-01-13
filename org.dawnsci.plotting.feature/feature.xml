@@ -21,6 +21,14 @@
          id="org.dawb.eclipse.feature"
          version="0.0.0"/>
 
+   <includes
+         id="net.sf.py4j.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="net.sf.py4j.defaultserver.feature"
+         version="0.0.0"/>
+
    <plugin
          id="org.dawb.workbench.jmx"
          download-size="0"
