@@ -20,6 +20,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,8 +47,6 @@ public class DataProjectUtils {
 		data.open(mon);
 
 		if (createExamples) {
-	        final IFolder examples = data.getFolder("examples");
-			examples.create(true, true, mon);
 			
 			// We copy all the data from examples here.
 			// Use bundle as works even in debug mode.
@@ -55,7 +54,9 @@ public class DataProjectUtils {
 	        final File dataDir     = new File(examplesDir, "data");
 	        logger.debug("Using data folder "+dataDir.getAbsolutePath());
 	        if (dataDir.exists()) {
-	        	FileUtils.recursiveCopy(dataDir, new File(examples.getLocation().toOSString()));
+	        	
+		        final IFolder examples = data.getFolder("examples");
+		        examples.createLink(new Path(dataDir.getAbsolutePath()), IResource.REPLACE, mon);
 	        }
 	        
 	        final IFolder src = data.getFolder("src");
