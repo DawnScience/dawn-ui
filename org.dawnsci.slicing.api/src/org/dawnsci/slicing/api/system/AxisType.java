@@ -13,8 +13,8 @@ import java.util.List;
 
 import org.dawb.common.services.ServiceManager;
 
-import uk.ac.diamond.scisoft.analysis.IAnalysisService;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDatasetMathsService;
 
 public enum AxisType {
 
@@ -100,7 +100,7 @@ public enum AxisType {
 		
 		if (!isAdvanced()) throw new Exception("Cannot process non-advanced axes!");
 		
-		final IAnalysisService service = (IAnalysisService)ServiceManager.getService(IAnalysisService.class);
+		final IDatasetMathsService service = (IDatasetMathsService)ServiceManager.getService(IDatasetMathsService.class);
 		if (this==MEAN) { // TODO The other types!
 			return service.mean(slice, i);
 		} else if (this==MAX) { // TODO The other types!

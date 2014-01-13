@@ -38,8 +38,8 @@ import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.IAnalysisService;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDatasetMathsService;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
 import uk.ac.diamond.scisoft.analysis.io.IDataHolder;
 import uk.ac.diamond.scisoft.analysis.io.ILoaderService;
@@ -101,15 +101,15 @@ public class SliceUtils {
     			buf.append("("+nexusAxisName+" = "+(dimsData.getSliceRange()!=null?dimsData.getSliceRange():formatValue)+")");
     		}
 
-    		final IAnalysisService service = (IAnalysisService)ServiceManager.getService(IAnalysisService.class);
+    		final IDatasetMathsService service = (IDatasetMathsService)ServiceManager.getService(IDatasetMathsService.class);
     		if (dimsData.getPlotAxis()==AxisType.X) {
-    			x = service.arange(dataShape[i], IAnalysisService.INT);
+    			x = service.arange(dataShape[i], IDatasetMathsService.INT);
     			x.setName("Dimension "+(dimsData.getDimension()+1));
     			currentSlice.setX(dimsData.getDimension());
     			
     		}
     		if (dimsData.getPlotAxis()==AxisType.Y) {
-       			y = service.arange(dataShape[i], IAnalysisService.INT);
+       			y = service.arange(dataShape[i], IDatasetMathsService.INT);
     			y.setName("Dimension "+(dimsData.getDimension()+1));
     			currentSlice.setY(dimsData.getDimension());
     		}
@@ -304,7 +304,7 @@ public class SliceUtils {
 		if (lazySet instanceof IDataset && Arrays.equals(slicedShape, lazySet.getShape())) {
 			slice = (IDataset)lazySet;
 			if (currentSlice.getX() > currentSlice.getY() && slice.getShape().length==2) {
-				final IAnalysisService service = (IAnalysisService)ServiceManager.getService(IAnalysisService.class);
+				final IDatasetMathsService service = (IDatasetMathsService)ServiceManager.getService(IDatasetMathsService.class);
 				// transpose clobbers name
 				final String name = slice.getName();
 				slice = service.transpose(slice);
@@ -352,7 +352,7 @@ public class SliceUtils {
 			final List<String>   names = new ArrayList<String>(shape[1]);
 			int index = 0;
 
-			final IAnalysisService service = (IAnalysisService)ServiceManager.getService(IAnalysisService.class);
+			final IDatasetMathsService service = (IDatasetMathsService)ServiceManager.getService(IDatasetMathsService.class);
 
 			for (double[] da : sets) {
 				final IDataset dds = service.createDoubleDataset(da, da.length);
@@ -423,9 +423,9 @@ public class SliceUtils {
 		
 		
 		String axisName = currentSlice.getAxisName(iAxis);
-		final IAnalysisService service = (IAnalysisService)ServiceManager.getService(IAnalysisService.class);
+		final IDatasetMathsService service = (IDatasetMathsService)ServiceManager.getService(IDatasetMathsService.class);
 		if ("indices".equals(axisName) || axisName==null) {
-			IDataset indices = service.arange(length, IAnalysisService.INT); // Save time
+			IDataset indices = service.arange(length, IDatasetMathsService.INT); // Save time
 			indices.setName("");
 			return indices;
 		}
@@ -441,7 +441,7 @@ public class SliceUtils {
 		} catch (Throwable ne) {
 			logger.error("Cannot get nexus axis during slice!", ne);
 			if (requireIndicesOnError) {
-				IDataset indices = service.arange(length, IAnalysisService.INT); // Save time
+				IDataset indices = service.arange(length, IDatasetMathsService.INT); // Save time
 				indices.setName("");
 				return indices;
 
@@ -485,7 +485,7 @@ public class SliceUtils {
 		final String dataPath = currentSlice.getName();
 		if (dataPath.endsWith("[Expression]")) {
 			final IDataset set = currentSlice.getExpressionAxis(dataPath);
-			final IAnalysisService service = (IAnalysisService)ServiceManager.getService(IAnalysisService.class);
+			final IDatasetMathsService service = (IDatasetMathsService)ServiceManager.getService(IDatasetMathsService.class);
 			return service.convertToAbstractDataset(set);
 		}
 		
@@ -559,7 +559,7 @@ public class SliceUtils {
 		
 		final DimsDataList ddl = (DimsDataList)currentSlice.getDimensionalData();
 		
-		final IAnalysisService service = (IAnalysisService)ServiceManager.getService(IAnalysisService.class);
+		final IDatasetMathsService service = (IDatasetMathsService)ServiceManager.getService(IDatasetMathsService.class);
 		if (currentSlice.isRange()) {
 			// We sum the data in the dimensions that are not axes
 			IDataset sum    = slice;

@@ -19,8 +19,8 @@ import org.dawnsci.slicing.api.system.ISliceSystem;
 import org.dawnsci.slicing.api.util.SliceUtils;
 import org.eclipse.jface.action.IAction;
 
-import uk.ac.diamond.scisoft.analysis.IAnalysisService;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDatasetMathsService;
 
 /**
  * Convenience class for extending to provide a tool.
@@ -98,8 +98,8 @@ public abstract class AbstractSlicingTool implements ISlicingTool {
 				continue;
 			}
             if (axis==null) {
-            	final IAnalysisService service = (IAnalysisService)ServiceManager.getService(IAnalysisService.class);
-            	axis = service.arange(dataShape[dd.getDimension()], IAnalysisService.INT);
+            	final IDatasetMathsService service = (IDatasetMathsService)ServiceManager.getService(IDatasetMathsService.class);
+            	axis = service.arange(dataShape[dd.getDimension()], IDatasetMathsService.INT);
             }
             ret.add(axis);
 		}
