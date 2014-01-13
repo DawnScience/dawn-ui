@@ -17,7 +17,7 @@ import org.eclipse.swt.graphics.PaletteData;
  * A service for managing colour schemes.
  * 
  * The colour schemes are contributed by an extension point contributed by the
- * org.dawnsci.rcp.histogram plugin. This plugin also contribute  this service.
+ * org.dawnsci.plotting.histogram plugin. This plugin also contribute  this service.
  * The service provides the names of at the colour schemes and a way to get the scheme 
  * as a PaletteData object.
  */

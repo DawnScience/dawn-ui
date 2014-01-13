@@ -250,7 +250,7 @@ public class ImageTraceComposite extends Composite {
 					dialog.close();
 					try {
 						final IToolPageSystem system = (IToolPageSystem)plottingSystem.getAdapter(IToolPageSystem.class);
-						system.setToolVisible("org.dawnsci.rcp.histogram.histogram_tool_page", 
+						system.setToolVisible("org.dawnsci.plotting.histogram.histogram_tool_page", 
 								              ToolPageRole.ROLE_2D, 
 								              "org.dawb.workbench.plotting.views.toolPageView.2D");
 					} catch (Exception e1) {
