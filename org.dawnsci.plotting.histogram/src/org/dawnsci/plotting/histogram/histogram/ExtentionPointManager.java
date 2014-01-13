@@ -13,8 +13,8 @@ import org.eclipse.core.runtime.Platform;
 
 public class ExtentionPointManager {
 	
-	private static final String TRANSFER_FUNCTION_ID = "org.dawnsci.plotting.histogram.histogram.channelColourScheme";
-	private static final String COLOUR_SCHEME_ID = "org.dawnsci.plotting.histogram.histogram.colourScheme";
+	private static final String TRANSFER_FUNCTION_ID = "org.dawnsci.plotting.histogram.channelColourScheme";
+	private static final String COLOUR_SCHEME_ID = "org.dawnsci.plotting.histogram.colourScheme";
 	private List<TransferFunctionContribution> transferFunctions;
 	private List<ColourSchemeContribution> colourSchemes;
 	

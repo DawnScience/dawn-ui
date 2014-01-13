@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension-point id="org.dawnsci.rcp.histogram.channelColourScheme" name="Single Channel Colour Scheme" schema="schema/channelColourScheme.exsd"/>
-   <extension-point id="org.dawnsci.rcp.histogram.colourScheme" name="Colour Scheme" schema="schema/colourScheme.exsd"/>
+   <extension-point id="org.dawnsci.plotting.histogram.channelColourScheme" name="Single Channel Colour Scheme" schema="schema/channelColourScheme.exsd"/>
+   <extension-point id="org.dawnsci.plotting.histogram.colourScheme" name="Colour Scheme" schema="schema/colourScheme.exsd"/>
    <extension
          point="org.dawnsci.plotting.api.toolPage">
       <plotting_tool_page
@@ -21,332 +21,332 @@
       </plotting_tool_page>
    </extension>
    <extension
-         point="org.dawnsci.rcp.histogram.channelColourScheme">
+         point="org.dawnsci.plotting.histogram.channelColourScheme">
       <transfer_function
             array_provider_class="org.dawnsci.plotting.histogram.functions.classes.LinearTransferFunction"
-            id="org.dawnsci.rcp.histogram.linear"
+            id="org.dawnsci.plotting.histogram.linear"
             name="Linear (y=x)">
       </transfer_function>
       <transfer_function
             array_provider_class="org.dawnsci.plotting.histogram.functions.classes.SquaredTransferFunction"
-            id="org.dawnsci.rcp.histogram.squared"
+            id="org.dawnsci.plotting.histogram.squared"
             name="Squared (y = x**2)">
       </transfer_function>
       <transfer_function
             array_provider_class="org.dawnsci.plotting.histogram.functions.classes.ZeroTransferFunction"
-            id="org.dawnsci.rcp.histogram.zero"
+            id="org.dawnsci.plotting.histogram.zero"
             name="Zero (y=0)">
       </transfer_function>
       <transfer_function
             array_provider_class="org.dawnsci.plotting.histogram.functions.classes.HalfTransferFunction"
-            id="org.dawnsci.rcp.histogram.half"
+            id="org.dawnsci.plotting.histogram.half"
             name="Half (y=0.5)">
       </transfer_function>
       <transfer_function
             array_provider_class="org.dawnsci.plotting.histogram.functions.classes.FullTransferFunction"
-            id="org.dawnsci.rcp.histogram.full"
+            id="org.dawnsci.plotting.histogram.full"
             name="Full (y=1)">
       </transfer_function>
       <transfer_function
             array_provider_class="org.dawnsci.plotting.histogram.functions.classes.SqrtTransferFunction"
-            id="org.dawnsci.rcp.histogram.sqrt"
+            id="org.dawnsci.plotting.histogram.sqrt"
             name="Sqrt (y**2 = x)">
       </transfer_function>
       <transfer_function
             array_provider_class="org.dawnsci.plotting.histogram.functions.classes.CubedTransferFunction"
-            id="org.dawnsci.rcp.histogram.cubed"
+            id="org.dawnsci.plotting.histogram.cubed"
             name="Cubed (y = x**3)">
       </transfer_function>
       <transfer_function
             array_provider_class="org.dawnsci.plotting.histogram.functions.classes.Sin90TransferFunction"
-            id="org.dawnsci.rcp.histogram.sin90"
+            id="org.dawnsci.plotting.histogram.sin90"
             name="sin90 (y = sin(x*90)) ">
       </transfer_function>
       <transfer_function
             array_provider_class="org.dawnsci.plotting.histogram.functions.classes.Sin720TransferFunction"
-            id="org.dawnsci.rcp.histogram.sin720"
+            id="org.dawnsci.plotting.histogram.sin720"
             name="sin720 (y = sin(x*720)) ">
       </transfer_function>
       <transfer_function
             array_provider_class="org.dawnsci.plotting.histogram.functions.classes.Sin360TransferFunction"
-            id="org.dawnsci.rcp.histogram.sin360"
+            id="org.dawnsci.plotting.histogram.sin360"
             name="sin360 (y = sin(x*360)) ">
       </transfer_function>
       <transfer_function
             array_provider_class="org.dawnsci.plotting.histogram.functions.classes.Sin180TransferFunction"
-            id="org.dawnsci.rcp.histogram.sin180"
+            id="org.dawnsci.plotting.histogram.sin180"
             name="sin180 (y = sin(x*180)) ">
       </transfer_function>
       <transfer_function
             array_provider_class="org.dawnsci.plotting.histogram.functions.classes.Cos90TransferFunction"
-            id="org.dawnsci.rcp.histogram.cos90"
+            id="org.dawnsci.plotting.histogram.cos90"
             name="cos90 (y = cos(x*90)) ">
       </transfer_function>
       <transfer_function
             array_provider_class="org.dawnsci.plotting.histogram.functions.classes.Cos720TransferFunction"
-            id="org.dawnsci.rcp.histogram.cos720"
+            id="org.dawnsci.plotting.histogram.cos720"
             name="cos720 (y = cos(x*720)) ">
       </transfer_function>
       <transfer_function
             array_provider_class="org.dawnsci.plotting.histogram.functions.classes.Cos360TransferFunction"
-            id="org.dawnsci.rcp.histogram.cos360"
+            id="org.dawnsci.plotting.histogram.cos360"
             name="cos360 (y = cos(x*360)) ">
       </transfer_function>
       <transfer_function
             array_provider_class="org.dawnsci.plotting.histogram.functions.classes.Cos180TransferFunction"
-            id="org.dawnsci.rcp.histogram.cos180"
+            id="org.dawnsci.plotting.histogram.cos180"
             name="cos180 (y = cos(x*180)) ">
       </transfer_function>
       <transfer_function
             array_provider_class="org.dawnsci.plotting.histogram.functions.classes.NCDRedTransferFunction"
-            id="org.dawnsci.rcp.histogram.ncdred"
+            id="org.dawnsci.plotting.histogram.ncdred"
             name="NCD Red ">
       </transfer_function>
       <transfer_function
             array_provider_class="org.dawnsci.plotting.histogram.functions.classes.NCDBlueTransferFunction"
-            id="org.dawnsci.rcp.histogram.ncdblue"
+            id="org.dawnsci.plotting.histogram.ncdblue"
             name="NCD Blue ">
       </transfer_function>
       <transfer_function
             array_provider_class="org.dawnsci.plotting.histogram.functions.classes.NCDGreenTransferFunction"
-            id="org.dawnsci.rcp.histogram.ncdgreen"
+            id="org.dawnsci.plotting.histogram.ncdgreen"
             name="NCD Green">
       </transfer_function>
       <transfer_function
             array_provider_class="org.dawnsci.plotting.histogram.functions.classes.QuadTransferFunction"
-            id="org.dawnsci.rcp.histogram.quad"
+            id="org.dawnsci.plotting.histogram.quad"
             name="Quad (y = x**4)">
       </transfer_function>
       <transfer_function
             array_provider_class="org.dawnsci.plotting.histogram.functions.classes.LinearMinusHalfTransferFunction"
-            id="org.dawnsci.rcp.histogram.linearminushalf"
+            id="org.dawnsci.plotting.histogram.linearminushalf"
             name="Linear offset (y = |x-0.5|)">
       </transfer_function>
       <transfer_function
             array_provider_class="org.dawnsci.plotting.histogram.functions.classes.ThreeXTransferFunction"
-            id="org.dawnsci.rcp.histogram.threex"
+            id="org.dawnsci.plotting.histogram.threex"
             name="3X ( y = 3x )">
       </transfer_function>
       <transfer_function
             array_provider_class="org.dawnsci.plotting.histogram.functions.classes.ThreeXMinus1TransferFunction"
-            id="org.dawnsci.rcp.histogram.threexminus1"
+            id="org.dawnsci.plotting.histogram.threexminus1"
             name="3X-1 ( y = 3x - 1 )">
       </transfer_function>
       <transfer_function
             array_provider_class="org.dawnsci.plotting.histogram.functions.classes.ThreeXMinus2TransferFunction"
-            id="org.dawnsci.rcp.histogram.threexminus2"
+            id="org.dawnsci.plotting.histogram.threexminus2"
             name="3X-2 ( y = 3x - 2 )">
       </transfer_function>
       <transfer_function
             array_provider_class="org.dawnsci.plotting.histogram.functions.classes.AbsThreeXMinus1Over2TransferFunction"
-            id="org.dawnsci.rcp.histogram.threexminus1over2"
+            id="org.dawnsci.plotting.histogram.threexminus1over2"
             name="|3X-1|/2 ( y = |3x-1|/2 )">
       </transfer_function>
       <transfer_function
             array_provider_class="org.dawnsci.plotting.histogram.functions.classes.TwoXTransferFunction"
-            id="org.dawnsci.rcp.histogram.twox"
+            id="org.dawnsci.plotting.histogram.twox"
             name="2x ( y = 2x )">
       </transfer_function>
       <transfer_function
             array_provider_class="org.dawnsci.plotting.histogram.functions.classes.TwoXMinusHalfTransferFunction"
-            id="org.dawnsci.rcp.histogram.twoxminushalf"
+            id="org.dawnsci.plotting.histogram.twoxminushalf"
             name="2x-0.5 ( y = 2x - 0.5 )">
       </transfer_function>
       <transfer_function
             array_provider_class="org.dawnsci.plotting.histogram.functions.classes.TwoXMinusOneTransferFunction"
-            id="org.dawnsci.rcp.histogram.twoxminus1"
+            id="org.dawnsci.plotting.histogram.twoxminus1"
             name="2x-1 ( y = 2x - 1 )">
       </transfer_function>
       <transfer_function
             array_provider_class="org.dawnsci.plotting.histogram.functions.classes.AbsTwoXMinusHalfTransferFunction"
-            id="org.dawnsci.rcp.histogram.abstwoxminushalf"
+            id="org.dawnsci.plotting.histogram.abstwoxminushalf"
             name="|2x-0.5| ( y = |2x - 0.5| )">
       </transfer_function>
       <transfer_function
             array_provider_class="org.dawnsci.plotting.histogram.functions.classes.HighJetTransferFunction"
-            id="org.dawnsci.rcp.histogram.highJet"
+            id="org.dawnsci.plotting.histogram.highJet"
             name="High Jet">
       </transfer_function>
       <transfer_function
             array_provider_class="org.dawnsci.plotting.histogram.functions.classes.MidJetTransferFunction"
-            id="ororg.dawnsci.rcp.histogram.midJet"
+            id="ororg.dawnsci.plotting.histogram.midJet"
             name="Mid Jet">
       </transfer_function>
       <transfer_function
             array_provider_class="org.dawnsci.plotting.histogram.functions.classes.LowJetTransferFunction"
-            id="org.dawnsci.rcp.histogram.lowJet"
+            id="org.dawnsci.plotting.histogram.lowJet"
             name="Low Jet">
       </transfer_function>
    </extension>
    <extension
-         point="org.dawnsci.rcp.histogram.colourScheme">
+         point="org.dawnsci.plotting.histogram.colourScheme">
       <colour_scheme
       		alpha_inverted="false"
-            alpha_transfer_function="org.dawnsci.rcp.histogram.linear"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.linear"
             blue_inverted="false"
-            blue_transfer_function="org.dawnsci.rcp.histogram.linear"
+            blue_transfer_function="org.dawnsci.plotting.histogram.linear"
             green_inverted="false"
-            green_transfer_function="org.dawnsci.rcp.histogram.linear"
-            id="org.dawnsci.rcp.histogram.greyscale"
+            green_transfer_function="org.dawnsci.plotting.histogram.linear"
+            id="org.dawnsci.plotting.histogram.greyscale"
             name="Gray Scale"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.rcp.histogram.linear">
+            red_transfer_function="org.dawnsci.plotting.histogram.linear">
       </colour_scheme>
       <colour_scheme
             alpha_inverted="true"
-            alpha_transfer_function="org.dawnsci.rcp.histogram.linear"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.linear"
             blue_inverted="true"
-            blue_transfer_function="org.dawnsci.rcp.histogram.linear"
+            blue_transfer_function="org.dawnsci.plotting.histogram.linear"
             green_inverted="true"
-            green_transfer_function="org.dawnsci.rcp.histogram.linear"
-            id="org.dawnsci.rcp.histogram.filmNegative"
+            green_transfer_function="org.dawnsci.plotting.histogram.linear"
+            id="org.dawnsci.plotting.histogram.filmNegative"
             name="Film Negative"
             red_inverted="true"
-            red_transfer_function="org.dawnsci.rcp.histogram.linear">
+            red_transfer_function="org.dawnsci.plotting.histogram.linear">
       </colour_scheme>
       <colour_scheme
      		alpha_inverted="false"
-            alpha_transfer_function="org.dawnsci.rcp.histogram.squared"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.squared"
             blue_inverted="false"
-            blue_transfer_function="org.dawnsci.rcp.histogram.squared"
+            blue_transfer_function="org.dawnsci.plotting.histogram.squared"
             green_inverted="false"
-            green_transfer_function="org.dawnsci.rcp.histogram.squared"
-            id="org.dawnsci.rcp.histogram.squared"
+            green_transfer_function="org.dawnsci.plotting.histogram.squared"
+            id="org.dawnsci.plotting.histogram.squared"
             name="Squared Scale"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.rcp.histogram.squared">
+            red_transfer_function="org.dawnsci.plotting.histogram.squared">
       </colour_scheme>
       <colour_scheme
       		alpha_inverted="false"
-            alpha_transfer_function="org.dawnsci.rcp.histogram.sqrt"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.sqrt"
             blue_inverted="false"
-            blue_transfer_function="org.dawnsci.rcp.histogram.sqrt"
+            blue_transfer_function="org.dawnsci.plotting.histogram.sqrt"
             green_inverted="false"
-            green_transfer_function="org.dawnsci.rcp.histogram.sqrt"
-            id="org.dawnsci.rcp.histogram.scale.sqrt"
+            green_transfer_function="org.dawnsci.plotting.histogram.sqrt"
+            id="org.dawnsci.plotting.histogram.scale.sqrt"
             name="Sqrt Scale"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.rcp.histogram.sqrt">
+            red_transfer_function="org.dawnsci.plotting.histogram.sqrt">
       </colour_scheme>
       <colour_scheme
             alpha_inverted="true"
-            alpha_transfer_function="org.dawnsci.rcp.histogram.zero"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
             blue_inverted="true"
-            blue_transfer_function="org.dawnsci.rcp.histogram.squared"
+            blue_transfer_function="org.dawnsci.plotting.histogram.squared"
             green_inverted="true"
-            green_transfer_function="org.dawnsci.rcp.histogram.squared"
-            id="org.dawnsci.rcp.histogram.squaredfilmnegative"
+            green_transfer_function="org.dawnsci.plotting.histogram.squared"
+            id="org.dawnsci.plotting.histogram.squaredfilmnegative"
             name="Squared Film Negative"
             red_inverted="true"
-            red_transfer_function="org.dawnsci.rcp.histogram.squared">
+            red_transfer_function="org.dawnsci.plotting.histogram.squared">
       </colour_scheme>
       <colour_scheme
             alpha_inverted="true"
-            alpha_transfer_function="org.dawnsci.rcp.histogram.sqrt"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.sqrt"
             blue_inverted="true"
-            blue_transfer_function="org.dawnsci.rcp.histogram.sqrt"
+            blue_transfer_function="org.dawnsci.plotting.histogram.sqrt"
             green_inverted="true"
-            green_transfer_function="org.dawnsci.rcp.histogram.sqrt"
-            id="org.dawnsci.rcp.histogram.filmNegativeSqrt"
+            green_transfer_function="org.dawnsci.plotting.histogram.sqrt"
+            id="org.dawnsci.plotting.histogram.filmNegativeSqrt"
             name="Film Negative Sqrt"
             red_inverted="true"
-            red_transfer_function="org.dawnsci.rcp.histogram.sqrt">
+            red_transfer_function="org.dawnsci.plotting.histogram.sqrt">
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
-            alpha_transfer_function="org.dawnsci.rcp.histogram.sqrt"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.sqrt"
             blue_inverted="false"
-            blue_transfer_function="org.dawnsci.rcp.histogram.sin180"
+            blue_transfer_function="org.dawnsci.plotting.histogram.sin180"
             green_inverted="false"
-            green_transfer_function="org.dawnsci.rcp.histogram.cubed"
-            id="org.dawnsci.rcp.histogram.pm3d"
+            green_transfer_function="org.dawnsci.plotting.histogram.cubed"
+            id="org.dawnsci.plotting.histogram.pm3d"
             name="Traditional pm3d (black-blue-red-yellow)"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.rcp.histogram.sqrt">
+            red_transfer_function="org.dawnsci.plotting.histogram.sqrt">
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
-            alpha_transfer_function="org.dawnsci.rcp.histogram.zero"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
             blue_inverted="false"
-            blue_transfer_function="org.dawnsci.rcp.histogram.ncdblue"
+            blue_transfer_function="org.dawnsci.plotting.histogram.ncdblue"
             green_inverted="false"
-            green_transfer_function="org.dawnsci.rcp.histogram.ncdgreen"
-            id="org.dawnsci.rcp.histogram.ncd"
+            green_transfer_function="org.dawnsci.plotting.histogram.ncdgreen"
+            id="org.dawnsci.plotting.histogram.ncd"
             name="NCD"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.rcp.histogram.ncdred">
+            red_transfer_function="org.dawnsci.plotting.histogram.ncdred">
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
-            alpha_transfer_function="org.dawnsci.rcp.histogram.zero"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
             blue_inverted="false"
-            blue_transfer_function="org.dawnsci.rcp.histogram.quad"
+            blue_transfer_function="org.dawnsci.plotting.histogram.quad"
             green_inverted="false"
-            green_transfer_function="org.dawnsci.rcp.histogram.linearminushalf"
-            id="org.dawnsci.rcp.histogram.ncd"
+            green_transfer_function="org.dawnsci.plotting.histogram.linearminushalf"
+            id="org.dawnsci.plotting.histogram.ncd"
             name="Green-red-violet"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.rcp.histogram.linear">
+            red_transfer_function="org.dawnsci.plotting.histogram.linear">
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
-            alpha_transfer_function="org.dawnsci.rcp.histogram.zero"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
             blue_inverted="false"
-            blue_transfer_function="org.dawnsci.rcp.histogram.linear"
+            blue_transfer_function="org.dawnsci.plotting.histogram.linear"
             green_inverted="false"
-            green_transfer_function="org.dawnsci.rcp.histogram.threexminus1over2"
-            id="org.dawnsci.rcp.histogram.ocean"
+            green_transfer_function="org.dawnsci.plotting.histogram.threexminus1over2"
+            id="org.dawnsci.plotting.histogram.ocean"
             name="Ocean (green-blue-white)"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.rcp.histogram.threexminus2">
+            red_transfer_function="org.dawnsci.plotting.histogram.threexminus2">
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
-            alpha_transfer_function="org.dawnsci.rcp.histogram.zero"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
             blue_inverted="false"
-            blue_transfer_function="org.dawnsci.rcp.histogram.threexminus2"
+            blue_transfer_function="org.dawnsci.plotting.histogram.threexminus2"
             green_inverted="false"
-            green_transfer_function="org.dawnsci.rcp.histogram.threexminus1"
-            id="org.dawnsci.rcp.histogram.hot"
+            green_transfer_function="org.dawnsci.plotting.histogram.threexminus1"
+            id="org.dawnsci.plotting.histogram.hot"
             name="Hot (black-red-yellow-white)"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.rcp.histogram.threex">
+            red_transfer_function="org.dawnsci.plotting.histogram.threex">
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
-            alpha_transfer_function="org.dawnsci.rcp.histogram.zero"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
             blue_inverted="false"
-            blue_transfer_function="org.dawnsci.rcp.histogram.cos90"
+            blue_transfer_function="org.dawnsci.plotting.histogram.cos90"
             green_inverted="false"
-            green_transfer_function="org.dawnsci.rcp.histogram.sin180"
-            id="org.dawnsci.rcp.histogram.rainbow"
+            green_transfer_function="org.dawnsci.plotting.histogram.sin180"
+            id="org.dawnsci.plotting.histogram.rainbow"
             name="Rainbow (blue-green-yellow-red)"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.rcp.histogram.abstwoxminushalf">
+            red_transfer_function="org.dawnsci.plotting.histogram.abstwoxminushalf">
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
-            alpha_transfer_function="org.dawnsci.rcp.histogram.zero"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
             blue_inverted="false"
-            blue_transfer_function="org.dawnsci.rcp.histogram.twoxminus1"
+            blue_transfer_function="org.dawnsci.plotting.histogram.twoxminus1"
             green_inverted="false"
-            green_transfer_function="org.dawnsci.rcp.histogram.twoxminushalf"
-            id="org.dawnsci.rcp.histogram.afmhot"
+            green_transfer_function="org.dawnsci.plotting.histogram.twoxminushalf"
+            id="org.dawnsci.plotting.histogram.afmhot"
             name="AFM hot (black-red-yellow-white)"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.rcp.histogram.twox">
+            red_transfer_function="org.dawnsci.plotting.histogram.twox">
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
-            alpha_transfer_function="org.dawnsci.rcp.histogram.zero"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
             blue_inverted="false"
-            blue_transfer_function="org.dawnsci.rcp.histogram.lowJet"
+            blue_transfer_function="org.dawnsci.plotting.histogram.lowJet"
             green_inverted="false"
-            green_transfer_function="ororg.dawnsci.rcp.histogram.midJet"
-            id="org.dawnsci.rcp.histogram.jet"
+            green_transfer_function="ororg.dawnsci.plotting.histogram.midJet"
+            id="org.dawnsci.plotting.histogram.jet"
             name="Jet (Blue-Cyan-Green-Yellow-Red)"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.rcp.histogram.highJet">
+            red_transfer_function="org.dawnsci.plotting.histogram.highJet">
       </colour_scheme>
    </extension>
    <extension
@@ -355,7 +355,7 @@
             category="org.dawb.workbench.plotting.tools.category"
             composite="false"
             contentFile="cheat/ColourMappingExample.xml"
-            id="org.dawnsci.rcp.histogram.cheatsheet.colourmapping"
+            id="org.dawnsci.plotting.histogram.cheatsheet.colourmapping"
             name="Colour Mapping Example">
       </cheatsheet>
    </extension>
