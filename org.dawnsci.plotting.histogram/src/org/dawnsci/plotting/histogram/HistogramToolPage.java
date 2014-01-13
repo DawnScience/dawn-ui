@@ -1,4 +1,4 @@
-package org.dawnsci.plotting.histogram.histogram;
+package org.dawnsci.plotting.histogram;
 
 import java.util.Arrays;
 import java.util.EventObject;

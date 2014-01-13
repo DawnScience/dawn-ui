@@ -1,4 +1,4 @@
-package org.dawnsci.plotting.histogram.histogram;
+package org.dawnsci.plotting.histogram;
 
 /**
  * Histogram toolpage for 3D

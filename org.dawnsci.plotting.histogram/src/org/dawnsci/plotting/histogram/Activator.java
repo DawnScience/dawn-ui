@@ -1,8 +1,7 @@
-package org.dawnsci.plotting.histogram.histogram;
+package org.dawnsci.plotting.histogram;
 
 import java.util.Hashtable;
 
-import org.dawb.common.services.conversion.IConversionService;
 import org.dawnsci.plotting.api.histogram.IPaletteService;
 import org.dawnsci.plotting.histogram.service.PaletteService;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -15,7 +14,7 @@ import org.osgi.framework.BundleContext;
 public class Activator extends AbstractUIPlugin {
 
 	// The plug-in ID
-	public static final String PLUGIN_ID = "org.dawnsci.plotting.histogram.histogram"; //$NON-NLS-1$
+	public static final String PLUGIN_ID = "org.dawnsci.plotting.histogram"; //$NON-NLS-1$
 
 	// The shared instance
 	private static Activator plugin;

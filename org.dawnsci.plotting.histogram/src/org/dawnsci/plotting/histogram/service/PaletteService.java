@@ -5,8 +5,8 @@ import java.util.Collection;
 import java.util.List;
 
 import org.dawnsci.plotting.api.histogram.IPaletteService;
+import org.dawnsci.plotting.histogram.ExtentionPointManager;
 import org.dawnsci.plotting.histogram.functions.ColourSchemeContribution;
-import org.dawnsci.plotting.histogram.histogram.ExtentionPointManager;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.ui.services.AbstractServiceFactory;

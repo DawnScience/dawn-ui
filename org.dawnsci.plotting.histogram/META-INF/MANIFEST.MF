@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Histogram
 Bundle-SymbolicName: org.dawnsci.plotting.histogram;singleton:=true
 Bundle-Version: 1.1.0.qualifier
-Bundle-Activator: org.dawnsci.plotting.histogram.histogram.Activator
+Bundle-Activator: org.dawnsci.plotting.histogram.Activator
 Bundle-Vendor: Diamond Light Source
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,

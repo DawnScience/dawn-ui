@@ -1,7 +1,6 @@
-package org.dawnsci.plotting.histogram.histogram;
+package org.dawnsci.plotting.histogram;
 
 import java.util.ArrayList;
-import java.util.EventObject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,15 +13,15 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Scale;
+import org.eclipse.swt.widgets.Slider;
 
 /**
- * Simple Class which combines a spinner and a scale so that they have the same bounds etc.
+ * Simple Class which combines a spinner and a slider so that they have the same bounds etc.
  * With many of the same so that they look ok in a composite together
  * @author ssg37927
  *
  */
-public class SpinnerScaleSet {
+public class SpinnerSliderSet {
 
 	// Class Items
 	private Map<String, Double> maxs = new HashMap<String,Double>();
@@ -34,15 +33,13 @@ public class SpinnerScaleSet {
 
 	// GUI Components for the items
 	private Map<String,Label> labels = new HashMap<String,Label>();
-	private Map<String,Scale> scales = new HashMap<String,Scale>();
+	private Map<String,Slider> sliders = new HashMap<String,Slider>();
 	private Map<String,FloatSpinner> spinners = new HashMap<String,FloatSpinner>();
 	private Map<String,SelectionListener> listeners = new HashMap<String,SelectionListener>();
 
 	private List<SelectionListener> externalListeners = new ArrayList<SelectionListener>();
 
-	private boolean listenerOn = true;
-	
-	public SpinnerScaleSet(Composite parent, int sliderSteps, String... names) {
+	public SpinnerSliderSet(Composite parent, int sliderSteps, String... names) {
 
 		// Set up the composite
 		comp = new Composite(parent, SWT.NONE);
@@ -67,34 +64,27 @@ public class SpinnerScaleSet {
 			SelectionListener listener = new SelectionListener() {			
 				@Override
 				public void widgetSelected(SelectionEvent event) {
-					
-					if (!listenerOn) return;
-					try {
-						listenerOn = false;
-						if (event.getSource() instanceof Scale) {
-							for (String name : scales.keySet()) {
-								if(scales.get(name) == event.getSource()) {
-									updateSpinner(name);
-									continue;
-								}
+					if (event.getSource() instanceof Slider) {
+						for (String name : sliders.keySet()) {
+							if(sliders.get(name) == event.getSource()) {
+								updateSpinner(name);
+								continue;
 							}
 						}
-						if (event.getSource() instanceof FloatSpinner) {
-							for (String name : spinners.keySet()) {
-								if(spinners.get(name) == event.getSource()) {
-									updateScale(name);
-									continue;
-								}
-							}
-						}
-						updateListeners(event);
-					} finally {
-						listenerOn = true;
 					}
+					if (event.getSource() instanceof FloatSpinner) {
+						for (String name : spinners.keySet()) {
+							if(spinners.get(name) == event.getSource()) {
+								updateSlider(name);
+								continue;
+							}
+						}
+					}
+					updateListeners(event);
 				}
 				@Override
 				public void widgetDefaultSelected(SelectionEvent event) {
-					//widgetSelected(event);
+					widgetSelected(event);
 				}
 			};
 			
@@ -106,18 +96,18 @@ public class SpinnerScaleSet {
 			FloatSpinner spinner = new FloatSpinner(comp, SWT.BORDER);
 			spinner.setLayoutData(gridDataSpinner);
 			spinner.addSelectionListener(listener);
-			spinner.setFormat(12, 4);
+			
 			spinners.put(name, spinner);
 
-			GridData gridDataScale = new GridData(SWT.FILL, SWT.CENTER, true, false);
-			Scale scale = new Scale(comp, SWT.NONE);
-			scale.setLayoutData(gridDataScale);
-			scale.addSelectionListener(listener);
-			scale.setMinimum(0);
-			scale.setMaximum(steps);
-			scale.setIncrement(1);
-			//scale.setPageIncrement(1);
-			scales.put(name, scale);
+			GridData gridDataSlider = new GridData(SWT.FILL, SWT.CENTER, true, false);
+			Slider slider = new Slider(comp, SWT.BORDER);
+			slider.setLayoutData(gridDataSlider);
+			slider.addSelectionListener(listener);
+			slider.setMinimum(0);
+			slider.setMaximum(steps);
+			slider.setIncrement(1);
+			
+			sliders.put(name, slider);
 			
 			maxs.put(name, 100.0);
 			mins.put(name, -100.0);
@@ -149,7 +139,7 @@ public class SpinnerScaleSet {
 
 	public void setValue(String name, double value) {
 		spinners.get(name).setDouble(value);
-		updateScale(name);
+		updateSlider(name);
 	}
 	
 
@@ -168,24 +158,15 @@ public class SpinnerScaleSet {
 	}
 
 	private void updateSpinner(String name) {
-		int selection = scales.get(name).getSelection();
+		int selection = sliders.get(name).getSelection();
 		double a = ((double)selection/(double)steps);
 		double val = (a*(maxs.get(name)-mins.get(name)))+mins.get(name);
 		spinners.get(name).setDouble(val);
 	}
 
-	private void updateScale(String name) {
+	private void updateSlider(String name) {
 		double minval = spinners.get(name).getDouble();
-		scales.get(name).setSelection((int) (((minval-mins.get(name))/(maxs.get(name)-mins.get(name)))*steps));
-	}
-
-	public boolean isSpinner(String label, EventObject event) {
-		if (event==null) return false;
-		Object source = event.getSource();
-		if (this.spinners.get(label) instanceof FloatSpinner) {
-			return this.spinners.get(label).isSpinner(source);
-		}
-		return false;
+		sliders.get(name).setSelection((int) (((minval-mins.get(name))/(maxs.get(name)-mins.get(name)))*steps));
 	}
 
 
