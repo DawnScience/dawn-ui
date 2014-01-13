@@ -49,14 +49,6 @@ public class Activator extends AbstractUIPlugin {
 		super.start(context);
 		plugin = this;
 		
-		try {
-			final Bundle bundle = Platform.getBundle("org.dawb.gda.extensions");
-			if (bundle==null) throw new Exception("Cannot load bundle org.dawb.gda.extensions!");
-			bundle.start();
-		} catch (Exception e) {
-			logger.error("Cannot override plot server in GDA!", e);
-		}
-		
 		Hashtable<String, String> props = new Hashtable<String, String>(1);
 		props.put("description", "A service used to encapsulate data in a transferable object which can be used anywhere in the user interface.");
 		context.registerService(ITransferableDataService.class, new TransferableDataService(), props);

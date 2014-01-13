@@ -122,6 +122,10 @@ This Agreement is governed by the laws of the State of New York and the intellec
          id="org.dawb.fable.feature"
          version="0.0.0"/>
 
+   <includes
+         id="org.dawnsci.common.services.feature"
+         version="0.0.0"/>
+
    <plugin
          id="org.dawb.workbench.ui"
          download-size="0"
