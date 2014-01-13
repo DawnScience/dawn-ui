@@ -83,4 +83,11 @@ public interface IImageService {
 	 * @return
 	 */
 	public BufferedImage getBufferedImage(final ImageData data);
+	
+	/**
+	 * Reads the preferences for the histogram and creates an image service bean for these.
+	 * 
+	 * @return
+	 */
+	public ImageServiceBean createBeanFromPreferences();
 }

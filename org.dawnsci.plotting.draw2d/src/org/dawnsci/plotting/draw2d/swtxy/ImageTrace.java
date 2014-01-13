@@ -16,7 +16,6 @@ import org.csstudio.swt.xygraph.linearscale.Range;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.histogram.HistogramBound;
 import org.dawnsci.plotting.api.histogram.IImageService;
-import org.dawnsci.plotting.api.histogram.IPaletteService;
 import org.dawnsci.plotting.api.histogram.ImageServiceBean;
 import org.dawnsci.plotting.api.histogram.ImageServiceBean.HistoType;
 import org.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
@@ -116,24 +115,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		this.yAxis = yAxis;
 		this.intensityScale = intensityScale;
 
-		this.imageServiceBean = new ImageServiceBean();
-		try {
-			final IPaletteService pservice = (IPaletteService)PlatformUI.getWorkbench().getService(IPaletteService.class);
-			final String scheme = getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME);
-			imageServiceBean.setPalette(pservice.getPaletteData(scheme));
-			setPaletteName(scheme);
-		} catch (Exception e) {
-			logger.error("Cannot create palette!", e);
-		}	
-		imageServiceBean.setOrigin(ImageOrigin.forLabel(getPreferenceStore().getString(BasePlottingConstants.ORIGIN_PREF)));
-		imageServiceBean.setHistogramType(HistoType.forLabel(getPreferenceStore().getString(BasePlottingConstants.HISTO_PREF)));
-		imageServiceBean.setMinimumCutBound(HistogramBound.fromString(getPreferenceStore().getString(BasePlottingConstants.MIN_CUT)));
-		imageServiceBean.setMaximumCutBound(HistogramBound.fromString(getPreferenceStore().getString(BasePlottingConstants.MAX_CUT)));
-		imageServiceBean.setNanBound(HistogramBound.fromString(getPreferenceStore().getString(BasePlottingConstants.NAN_CUT)));
-		imageServiceBean.setLo(getPreferenceStore().getDouble(BasePlottingConstants.HISTO_LO));
-		imageServiceBean.setHi(getPreferenceStore().getDouble(BasePlottingConstants.HISTO_HI));		
-		
 		this.service = (IImageService)PlatformUI.getWorkbench().getService(IImageService.class);
+		this.imageServiceBean = service.createBeanFromPreferences();
+		setPaletteName(getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME));
+		
 		downsampleType = DownsampleType.forLabel(getPreferenceStore().getString(BasePlottingConstants.DOWNSAMPLE_PREF));
 
 		xAxis.addListener(this);
