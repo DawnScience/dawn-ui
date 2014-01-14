@@ -92,7 +92,6 @@ See the License for the specific language governing permissions and limitations 
       <plugin id="uk.ac.diamond.scisoft" autoStart="true" startLevel="1" />
       <plugin id="uk.ac.diamond.scisoft.analysis" autoStart="true" startLevel="2" />
       <plugin id="uk.ac.diamond.scisoft.analysis.osgi" autoStart="true" startLevel="2" />
-      <plugin id="uk.ac.diamond.scisoft.analysis.rcp" autoStart="true" startLevel="6" />
    </configurations>
 
 </product>
