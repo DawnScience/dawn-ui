@@ -32,8 +32,9 @@ public class ClassLoaderService extends AbstractServiceFactory implements IClass
 		if (active) {
 			originalLoader = Thread.currentThread().getContextClassLoader();
 			final CompositeClassLoader customLoader = new CompositeClassLoader();
+		    customLoader.add( uk.ac.diamond.scisoft.analysis.dataset.Activator.class.getClassLoader());
+		    customLoader.add( uk.ac.diamond.scisoft.analysis.Activator.class.getClassLoader());
 			customLoader.add(UserPlotBean.class.getClassLoader());
-			customLoader.add(AbstractDataset.class.getClassLoader());
 			customLoader.add(Vector3d.class.getClassLoader());
 			classLoader = customLoader;
 		} else {
