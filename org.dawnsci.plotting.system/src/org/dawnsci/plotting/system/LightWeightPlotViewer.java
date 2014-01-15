@@ -1295,7 +1295,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 			return;
 		try {
 			PlotExportPrintUtil.saveGraph(filename, filetype, xyGraph.getImage(), xyGraph.getParent());
-			//logger.debug("Plotting saved");
+			logger.debug("Plotting saved");
 		} catch (Exception e) {
 			throw e;
 		}
