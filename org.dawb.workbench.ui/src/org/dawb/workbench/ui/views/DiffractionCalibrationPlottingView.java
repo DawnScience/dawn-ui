@@ -519,7 +519,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		}
 		// Set the various tools/controls for the calibrant positioning
 		calibrantPositioning.setToolSystem(toolSystem);
-		calibrantPositioning.setPlottingSystem(plottingSystem);
 		calibrantPositioning.setControlsToUpdate(calibOptionGroup, calibrateImagesButton);
 		calibrantPositioning.setTableViewerToUpdate(diffractionTableViewer);
 
