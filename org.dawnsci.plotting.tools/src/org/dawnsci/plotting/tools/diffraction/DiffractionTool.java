@@ -97,10 +97,8 @@ import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorPropertyEvent;
 import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
 import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironmentEvent;
-import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionMetadataUtils;
 import uk.ac.diamond.scisoft.analysis.diffraction.IDetectorPropertyListener;
 import uk.ac.diamond.scisoft.analysis.diffraction.IDiffractionCrystalEnvironmentListener;
-import uk.ac.diamond.scisoft.analysis.diffraction.PeakFittingEllipseFinder;
 import uk.ac.diamond.scisoft.analysis.diffraction.PowderRingsUtils;
 import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
@@ -849,9 +847,11 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 
 		MenuAction dropdown = new MenuAction("Resolution rings");
 	    dropdown.setImageDescriptor(Activator.getImageDescriptor("/icons/resolution_rings.png"));
-
-		augmenter = new DiffractionImageAugmenter(getPlottingSystem());
-		augmenter.addActions(dropdown);
+	    
+	    if (!hide) {
+	    	augmenter = new DiffractionImageAugmenter(getPlottingSystem());
+	    	augmenter.addActions(dropdown);
+	    }
 
 		IToolBarManager toolMan = getSite().getActionBars().getToolBarManager();
 		final MenuManager     menuMan = new MenuManager();
@@ -1108,7 +1108,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 					IDiffractionMetadata data = getDiffractionMetaData();
 					DetectorProperties detprop = data.getDetector2DProperties();
 					detprop.setBeamCentreCoords(point);
-					if (!augmenter.isShowingBeamCenter()) {
+					if (augmenter != null && !augmenter.isShowingBeamCenter()) {
 						augmenter.drawBeamCentre(true);
 					}
 					tmpRegion.setShowLabel(true);
@@ -1156,7 +1156,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 					IDiffractionMetadata data = getDiffractionMetaData();
 					DetectorProperties detprop = data.getDetector2DProperties();
 					detprop.setBeamCentreCoords(point);
-					if (!augmenter.isShowingBeamCenter()) {
+					if (augmenter != null && !augmenter.isShowingBeamCenter()) {
 						augmenter.drawBeamCentre(true);
 					}
 				}

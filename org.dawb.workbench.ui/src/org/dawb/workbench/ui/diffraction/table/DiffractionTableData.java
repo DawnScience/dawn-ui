@@ -19,7 +19,6 @@ package org.dawb.workbench.ui.diffraction.table;
 import java.util.List;
 
 import org.dawnsci.plotting.api.IPlottingSystem;
-import org.dawnsci.plotting.tools.diffraction.DiffractionImageAugmenter;
 
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
@@ -33,7 +32,6 @@ public class DiffractionTableData {
 	public IPlottingSystem system;
 	public String path;
 	public String name;
-	public DiffractionImageAugmenter augmenter;
 	public IDiffractionMetadata md;
 	public IDataset image;
 	public List<IROI> rois; // can contain null entries as placeholders

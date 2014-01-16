@@ -200,8 +200,6 @@ public class DiffCalTableViewer extends TableViewer {
 					DiffractionTableData selectedData = (DiffractionTableData) selected[i];
 					if (model.size() > 0) {
 						if (model.remove(selectedData)) {
-							if (selectedData.augmenter != null && service != null)
-								selectedData.augmenter.deactivate(service.getLockedDiffractionMetaData()!=null);
 							if (selectedData.md != null)
 								selectedData.md.getDetector2DProperties().removeDetectorPropertyListener(detectorPropertyListener);
 						}

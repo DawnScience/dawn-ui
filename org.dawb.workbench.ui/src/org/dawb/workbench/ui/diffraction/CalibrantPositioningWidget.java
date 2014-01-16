@@ -22,8 +22,6 @@ import org.dawb.workbench.ui.diffraction.DiffractionCalibrationUtils.ManipulateM
 import org.dawb.workbench.ui.diffraction.table.DiffractionTableData;
 import org.dawb.workbench.ui.views.RepeatingMouseAdapter;
 import org.dawb.workbench.ui.views.SlowFastRunnable;
-import org.dawnsci.plotting.api.IPlottingSystem;
-import org.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
@@ -40,9 +38,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Spinner;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
 
@@ -52,14 +47,11 @@ import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
  *
  */
 public class CalibrantPositioningWidget {
-	private Logger logger = LoggerFactory.getLogger(CalibrantPositioningWidget.class);
 
 	private List<DiffractionTableData> model;
 	private Control[] controls;
 	private DiffractionTableData currentData;
-	private IToolPageSystem toolSystem;
 	private TableViewer tableViewer;
-	private Spinner ringNumberSpinner;
 	private Job ringFindJob;
 	private IJobChangeListener jobChangeListener;
 
@@ -114,14 +106,6 @@ public class CalibrantPositioningWidget {
 
 					@Override
 					public void stop() {
-						if (currentData == null)
-							return;
-						if (toolSystem != null)
-							DiffractionCalibrationUtils
-									.updateDiffTool(
-											DiffractionCalibrationConstants.BEAM_CENTRE_YPATH,
-											currentData.md.getDetector2DProperties().getBeamCentreCoords()[1],
-											toolSystem);
 						if (tableViewer != null)
 							tableViewer.refresh();
 					}
@@ -142,10 +126,6 @@ public class CalibrantPositioningWidget {
 
 					@Override
 					public void stop() {
-						if (currentData == null)
-							return;
-						if (toolSystem != null)
-							DiffractionCalibrationUtils.updateDiffTool(DiffractionCalibrationConstants.BEAM_CENTRE_XPATH, currentData.md.getDetector2DProperties().getBeamCentreCoords()[0], toolSystem);
 						if (tableViewer != null)
 							tableViewer.refresh();
 					}
@@ -166,10 +146,6 @@ public class CalibrantPositioningWidget {
 
 					@Override
 					public void stop() {
-						if (currentData == null)
-							return;
-						if (toolSystem != null)
-							DiffractionCalibrationUtils.updateDiffTool(DiffractionCalibrationConstants.BEAM_CENTRE_XPATH, currentData.md.getDetector2DProperties().getBeamCentreCoords()[0], toolSystem);
 						if (tableViewer != null)
 							tableViewer.refresh();
 					}
@@ -190,10 +166,6 @@ public class CalibrantPositioningWidget {
 
 					@Override
 					public void stop() {
-						if (currentData == null)
-							return;
-						if (toolSystem != null)
-							DiffractionCalibrationUtils.updateDiffTool(DiffractionCalibrationConstants.BEAM_CENTRE_YPATH, currentData.md.getDetector2DProperties().getBeamCentreCoords()[1], toolSystem);
 						if (tableViewer != null)
 							tableViewer.refresh();
 					}
@@ -224,10 +196,6 @@ public class CalibrantPositioningWidget {
 
 					@Override
 					public void stop() {
-						if (currentData == null)
-							return;
-						if (toolSystem != null)
-							DiffractionCalibrationUtils.updateDiffTool(DiffractionCalibrationConstants.DISTANCE_NODE_PATH, currentData.md.getDetector2DProperties().getBeamCentreDistance(), toolSystem);
 						if (tableViewer != null)
 							tableViewer.refresh();
 					}
@@ -245,10 +213,6 @@ public class CalibrantPositioningWidget {
 
 					@Override
 					public void stop() {
-						if (currentData == null)
-							return;
-						if (toolSystem != null)
-							DiffractionCalibrationUtils.updateDiffTool(DiffractionCalibrationConstants.DISTANCE_NODE_PATH, currentData.md.getDetector2DProperties().getBeamCentreDistance(), toolSystem);
 						if (tableViewer != null)
 							tableViewer.refresh();
 					}
@@ -272,8 +236,6 @@ public class CalibrantPositioningWidget {
 
 					@Override
 					public void stop() {
-						// updateDiffTool(DISTANCE_NODE_PATH,
-						// currentData.md.getDetector2DProperties().getDetectorDistance());
 						if (tableViewer != null)
 							tableViewer.refresh();
 					}
@@ -291,8 +253,6 @@ public class CalibrantPositioningWidget {
 
 					@Override
 					public void stop() {
-						// updateDiffTool(DISTANCE_NODE_PATH,
-						// currentData.md.getDetector2DProperties().getDetectorDistance());
 						if (tableViewer != null)
 							tableViewer.refresh();
 					}
@@ -400,14 +360,6 @@ public class CalibrantPositioningWidget {
 			if (controls[i] != null)
 				controls[i].setEnabled(b);
 		}
-	}
-
-	/**
-	 * Set the ToolPageSystem used to update the DiffractionTool
-	 * @param toolSystem
-	 */
-	public void setToolSystem(IToolPageSystem toolSystem) {
-		this.toolSystem = toolSystem;
 	}
 
 	/**

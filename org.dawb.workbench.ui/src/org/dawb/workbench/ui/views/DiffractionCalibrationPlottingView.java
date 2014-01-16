@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import javax.measure.quantity.Length;
 import javax.measure.unit.NonSI;
 import javax.measure.unit.SI;
 
@@ -35,7 +34,6 @@ import org.dawb.workbench.ui.diffraction.table.DiffCalTableViewer;
 import org.dawb.workbench.ui.diffraction.table.DiffractionTableData;
 import org.dawb.workbench.ui.diffraction.table.TableChangedEvent;
 import org.dawb.workbench.ui.diffraction.table.TableChangedListener;
-import org.dawnsci.common.widgets.tree.NumericNode;
 import org.dawnsci.common.widgets.utils.RadioUtils;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlotType;
@@ -306,8 +304,8 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 						.getSelectionIndex());
 				// update the calibrant in diffraction tool
 				standards.setSelectedCalibrant(calibrantName, true);
-				DiffractionCalibrationUtils
-						.drawCalibrantRings(currentData.augmenter);
+//				DiffractionCalibrationUtils
+//						.drawCalibrantRings(currentData.augmenter);
 			}
 		});
 		for (String c : standards.getCalibrantList()) {
@@ -402,14 +400,14 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				}
 				energyFormattedText.setValue(energy);
 				// update wavelength in diffraction tool tree viewer
-				NumericNode<Length> node = DiffractionCalibrationUtils.getDiffractionTreeNode(DiffractionCalibrationConstants.WAVELENGTH_NODE_PATH, toolSystem);
-				if (node.getUnit().equals(NonSI.ANGSTROM)) {
-					DiffractionCalibrationUtils.updateDiffTool(DiffractionCalibrationConstants.WAVELENGTH_NODE_PATH, distance, toolSystem);
-				} else if (node.getUnit().equals(NonSI.ELECTRON_VOLT)) {
-					DiffractionCalibrationUtils.updateDiffTool(DiffractionCalibrationConstants.WAVELENGTH_NODE_PATH, energy * 1000, toolSystem);
-				} else if (node.getUnit().equals(SI.KILO(NonSI.ELECTRON_VOLT))) {
-					DiffractionCalibrationUtils.updateDiffTool(DiffractionCalibrationConstants.WAVELENGTH_NODE_PATH, energy, toolSystem);
-				}
+//				NumericNode<Length> node = DiffractionCalibrationUtils.getDiffractionTreeNode(DiffractionCalibrationConstants.WAVELENGTH_NODE_PATH, toolSystem);
+//				if (node.getUnit().equals(NonSI.ANGSTROM)) {
+//					DiffractionCalibrationUtils.updateDiffTool(DiffractionCalibrationConstants.WAVELENGTH_NODE_PATH, distance, toolSystem);
+//				} else if (node.getUnit().equals(NonSI.ELECTRON_VOLT)) {
+//					DiffractionCalibrationUtils.updateDiffTool(DiffractionCalibrationConstants.WAVELENGTH_NODE_PATH, energy * 1000, toolSystem);
+//				} else if (node.getUnit().equals(SI.KILO(NonSI.ELECTRON_VOLT))) {
+//					DiffractionCalibrationUtils.updateDiffTool(DiffractionCalibrationConstants.WAVELENGTH_NODE_PATH, energy, toolSystem);
+//				}
 			}
 		});
 		wavelengthFormattedText.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
@@ -443,14 +441,14 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 				}
 				wavelengthFormattedText.setValue(distance);
 				// update wavelength in Diffraction tool tree viewer
-				NumericNode<Length> node = DiffractionCalibrationUtils.getDiffractionTreeNode(DiffractionCalibrationConstants.WAVELENGTH_NODE_PATH,toolSystem);
-				if (node.getUnit().equals(NonSI.ANGSTROM)) {
-					DiffractionCalibrationUtils.updateDiffTool(DiffractionCalibrationConstants.WAVELENGTH_NODE_PATH, distance, toolSystem);
-				} else if (node.getUnit().equals(NonSI.ELECTRON_VOLT)) {
-					DiffractionCalibrationUtils.updateDiffTool(DiffractionCalibrationConstants.WAVELENGTH_NODE_PATH, energy * 1000, toolSystem);
-				} else if (node.getUnit().equals(SI.KILO(NonSI.ELECTRON_VOLT))) {
-					DiffractionCalibrationUtils.updateDiffTool(DiffractionCalibrationConstants.WAVELENGTH_NODE_PATH, energy, toolSystem);
-				}
+//				NumericNode<Length> node = DiffractionCalibrationUtils.getDiffractionTreeNode(DiffractionCalibrationConstants.WAVELENGTH_NODE_PATH,toolSystem);
+//				if (node.getUnit().equals(NonSI.ANGSTROM)) {
+//					DiffractionCalibrationUtils.updateDiffTool(DiffractionCalibrationConstants.WAVELENGTH_NODE_PATH, distance, toolSystem);
+//				} else if (node.getUnit().equals(NonSI.ELECTRON_VOLT)) {
+//					DiffractionCalibrationUtils.updateDiffTool(DiffractionCalibrationConstants.WAVELENGTH_NODE_PATH, energy * 1000, toolSystem);
+//				} else if (node.getUnit().equals(SI.KILO(NonSI.ELECTRON_VOLT))) {
+//					DiffractionCalibrationUtils.updateDiffTool(DiffractionCalibrationConstants.WAVELENGTH_NODE_PATH, energy, toolSystem);
+//				}
 			}
 		});
 		energyFormattedText.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
@@ -518,7 +516,6 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 			logger.error("Could not open diffraction tool:" + e2);
 		}
 		// Set the various tools/controls for the calibrant positioning
-		calibrantPositioning.setToolSystem(toolSystem);
 		calibrantPositioning.setControlsToUpdate(calibOptionGroup, calibrateImagesButton);
 		calibrantPositioning.setTableViewerToUpdate(diffractionTableViewer);
 
@@ -601,23 +598,23 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 						model.get(i).md.getDiffractionCrystalEnvironment().restore(originalEnvironment);
 					}
 					// update diffraction tool viewer
-					DiffractionCalibrationUtils.updateDiffTool(DiffractionCalibrationConstants.BEAM_CENTRE_XPATH, currentData.md.getDetector2DProperties().getBeamCentreCoords()[0], toolSystem);
-					DiffractionCalibrationUtils.updateDiffTool(DiffractionCalibrationConstants.BEAM_CENTRE_YPATH, currentData.md.getDetector2DProperties().getBeamCentreCoords()[1], toolSystem);
-					DiffractionCalibrationUtils.updateDiffTool(DiffractionCalibrationConstants.DISTANCE_NODE_PATH, currentData.md.getDetector2DProperties().getBeamCentreDistance(), toolSystem);
+//					DiffractionCalibrationUtils.updateDiffTool(DiffractionCalibrationConstants.BEAM_CENTRE_XPATH, currentData.md.getDetector2DProperties().getBeamCentreCoords()[0], toolSystem);
+//					DiffractionCalibrationUtils.updateDiffTool(DiffractionCalibrationConstants.BEAM_CENTRE_YPATH, currentData.md.getDetector2DProperties().getBeamCentreCoords()[1], toolSystem);
+//					DiffractionCalibrationUtils.updateDiffTool(DiffractionCalibrationConstants.DISTANCE_NODE_PATH, currentData.md.getDetector2DProperties().getBeamCentreDistance(), toolSystem);
 
 					// update wavelength
 					double wavelength = currentData.md.getDiffractionCrystalEnvironment().getWavelength();
 					energyFormattedText.setValue(DiffractionCalibrationUtils.getWavelengthEnergy(wavelength));
 					wavelengthFormattedText.setValue(wavelength);
 					// update wavelength in diffraction tool tree viewer
-					NumericNode<Length> node = DiffractionCalibrationUtils.getDiffractionTreeNode(DiffractionCalibrationConstants.WAVELENGTH_NODE_PATH, toolSystem);
-					if (node.getUnit().equals(NonSI.ANGSTROM)) {
-						DiffractionCalibrationUtils.updateDiffTool(DiffractionCalibrationConstants.WAVELENGTH_NODE_PATH, wavelength, toolSystem);
-					} else if (node.getUnit().equals(NonSI.ELECTRON_VOLT)) {
-						DiffractionCalibrationUtils.updateDiffTool(DiffractionCalibrationConstants.WAVELENGTH_NODE_PATH, DiffractionCalibrationUtils.getWavelengthEnergy(wavelength) * 1000, toolSystem);
-					} else if (node.getUnit().equals(SI.KILO(NonSI.ELECTRON_VOLT))) {
-						DiffractionCalibrationUtils.updateDiffTool(DiffractionCalibrationConstants.WAVELENGTH_NODE_PATH, DiffractionCalibrationUtils.getWavelengthEnergy(wavelength), toolSystem);
-					}
+//					NumericNode<Length> node = DiffractionCalibrationUtils.getDiffractionTreeNode(DiffractionCalibrationConstants.WAVELENGTH_NODE_PATH, toolSystem);
+//					if (node.getUnit().equals(NonSI.ANGSTROM)) {
+//						DiffractionCalibrationUtils.updateDiffTool(DiffractionCalibrationConstants.WAVELENGTH_NODE_PATH, wavelength, toolSystem);
+//					} else if (node.getUnit().equals(NonSI.ELECTRON_VOLT)) {
+//						DiffractionCalibrationUtils.updateDiffTool(DiffractionCalibrationConstants.WAVELENGTH_NODE_PATH, DiffractionCalibrationUtils.getWavelengthEnergy(wavelength) * 1000, toolSystem);
+//					} else if (node.getUnit().equals(SI.KILO(NonSI.ELECTRON_VOLT))) {
+//						DiffractionCalibrationUtils.updateDiffTool(DiffractionCalibrationConstants.WAVELENGTH_NODE_PATH, DiffractionCalibrationUtils.getWavelengthEnergy(wavelength), toolSystem);
+//					}
 					diffractionTableViewer.refresh();
 				}
 			}
@@ -690,9 +687,9 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 
 	private void drawSelectedData(DiffractionTableData data) {
 		if (currentData != null) {
-			DiffractionImageAugmenter aug = currentData.augmenter;
-			if (aug != null)
-				aug.deactivate(service.getLockedDiffractionMetaData()!=null);
+//			DiffractionImageAugmenter aug = currentData.augmenter;
+//			if (aug != null)
+//				aug.deactivate(service.getLockedDiffractionMetaData()!=null);
 		}
 
 		if (data.image == null)
@@ -716,20 +713,20 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 		DiffractionImageAugmenter toolAug = diffTool.getAugmenter();
 		if (toolAug != null) toolAug.deactivate(service.getLockedDiffractionMetaData()!=null);
 		
-		DiffractionImageAugmenter aug = data.augmenter;
-		if (aug == null) {
-			aug = new DiffractionImageAugmenter(plottingSystem);
-			data.augmenter = aug;
-		}
-		aug.activate();
+//		DiffractionImageAugmenter aug = data.augmenter;
+//		if (aug == null) {
+//			aug = new DiffractionImageAugmenter(plottingSystem);
+//			data.augmenter = aug;
+//		}
+//		aug.activate();
 		if (data.md != null) {
-			aug.setDiffractionMetadata(data.md);
+//			aug.setDiffractionMetadata(data.md);
 			// Add listeners to monitor metadata changes in diffraction tool
 			data.md.getDetector2DProperties().addDetectorPropertyListener(detectorPropertyListener);
 //			data.md.getDiffractionCrystalEnvironment().addDiffractionCrystalEnvironmentListener(diffractionCrystEnvListener);
 		}
 		DiffractionCalibrationUtils.hideFoundRings(plottingSystem);
-		DiffractionCalibrationUtils.drawCalibrantRings(aug);
+//		DiffractionCalibrationUtils.drawCalibrantRings(aug);
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -765,25 +762,25 @@ public class DiffractionCalibrationPlottingView extends ViewPart {
 	}
 
 	private void removeListeners() {
-		if(diffractionTableViewer != null) {
-			diffractionTableViewer.removeSelectionChangedListener(selectionChangeListener);
-			diffractionTableViewer.removeTableChangedListener(tableChangedListener);
-		}
-		CalibrationFactory.removeCalibrantSelectionListener(calibrantChangeListener);
-		// deactivate the diffraction tool
-		DiffractionTool diffTool = (DiffractionTool) toolSystem.getToolPage(DiffractionCalibrationConstants.DIFFRACTION_ID);
-		if (diffTool != null)
-			diffTool.deactivate();
-		// deactivate each augmenter in loaded data
-		if (model != null) {
-			for (DiffractionTableData d : model) {
-				if (d.augmenter != null)
-					d.augmenter.deactivate(service.getLockedDiffractionMetaData()!=null);
-				diffractionTableViewer.removeDetectorPropertyListener(d);
-			}
-			model.clear();
-		}
-		logger.debug("model emptied");
+//		if(diffractionTableViewer != null) {
+//			diffractionTableViewer.removeSelectionChangedListener(selectionChangeListener);
+//			diffractionTableViewer.removeTableChangedListener(tableChangedListener);
+//		}
+//		CalibrationFactory.removeCalibrantSelectionListener(calibrantChangeListener);
+//		// deactivate the diffraction tool
+//		DiffractionTool diffTool = (DiffractionTool) toolSystem.getToolPage(DiffractionCalibrationConstants.DIFFRACTION_ID);
+//		if (diffTool != null)
+//			diffTool.deactivate();
+//		// deactivate each augmenter in loaded data
+//		if (model != null) {
+//			for (DiffractionTableData d : model) {
+//				if (d.augmenter != null)
+//					d.augmenter.deactivate(service.getLockedDiffractionMetaData()!=null);
+//				diffractionTableViewer.removeDetectorPropertyListener(d);
+//			}
+//			model.clear();
+//		}
+//		logger.debug("model emptied");
 	}
 
 	@Override

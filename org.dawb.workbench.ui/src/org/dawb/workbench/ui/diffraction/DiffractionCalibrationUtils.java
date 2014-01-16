@@ -24,23 +24,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.measure.quantity.Length;
 import javax.vecmath.Vector3d;
 
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.workbench.ui.diffraction.table.DiffractionTableData;
-import org.dawnsci.common.widgets.tree.NumericNode;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.region.RegionUtils;
-import org.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
-import org.dawnsci.plotting.tools.diffraction.DiffractionImageAugmenter;
-import org.dawnsci.plotting.tools.diffraction.DiffractionTool;
-import org.dawnsci.plotting.tools.diffraction.DiffractionTreeModel;
-import org.dawnsci.plotting.tools.diffraction.DiffractionUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -51,7 +44,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
-import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationStandards;
 import uk.ac.diamond.scisoft.analysis.crystallography.HKL;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
@@ -61,9 +53,7 @@ import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
 import uk.ac.diamond.scisoft.analysis.fitting.Fitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Polynomial;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
-import uk.ac.diamond.scisoft.analysis.roi.CircularROI;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalFitROI;
-import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.PointROI;
 import uk.ac.diamond.scisoft.analysis.roi.PolylineROI;
@@ -179,7 +169,7 @@ public class DiffractionCalibrationUtils {
 							return;
 
 						hideFoundRings(plottingSystem);
-						drawCalibrantRings(currentData.augmenter);
+						//drawCalibrantRings(currentData.augmenter);
 					}
 				});
 				return stat;
@@ -202,32 +192,6 @@ public class DiffractionCalibrationUtils {
 		}
 	}
 
-	/**
-	 * 
-	 * @param plottingSystem
-	 */
-	private static void clearFoundRings(IPlottingSystem plottingSystem) {
-		for (IRegion r : plottingSystem.getRegions()) {
-			String n = r.getName();
-			if (n.startsWith(REGION_PREFIX)) {
-				plottingSystem.removeRegion(r);
-			}
-		}
-	}
-
-	/**
-	 * 
-	 * @param currentData
-	 */
-	public static void drawCalibrantRings(DiffractionImageAugmenter aug) {
-
-		if (aug == null)
-			return;
-
-		CalibrationStandards standards = CalibrationFactory.getCalibrationStandards();
-		aug.drawCalibrantRings(true, standards.getCalibrant());
-		aug.drawBeamCentre(true);
-	}
 
 	public static IStatus drawFoundRing(final IProgressMonitor monitor, Display display, final IPlottingSystem plotter, final IROI froi, final boolean circle) {
 		final boolean[] status = {true};
@@ -291,30 +255,35 @@ public class DiffractionCalibrationUtils {
 			if (fast)
 				col.scale(10);
 			orig.add(col);
+			detprop.setOrigin(orig);
 		} else if (mode == ManipulateMode.DOWN) {
 			Vector3d orig = detprop.getOrigin();
 			Vector3d col = detprop.getPixelColumn();
 			if (fast)
 				col.scale(10);
 			orig.sub(col);
+			detprop.setOrigin(orig);
 		} else if (mode == ManipulateMode.LEFT) {
 			Vector3d orig = detprop.getOrigin();
 			Vector3d row = detprop.getPixelRow();
 			if (fast)
 				row.scale(10);
 			orig.add(row);
+			detprop.setOrigin(orig);
 		} else if (mode == ManipulateMode.RIGHT) {
 			Vector3d orig = detprop.getOrigin();
 			Vector3d row = detprop.getPixelRow();
 			if (fast)
 				row.scale(10);
 			orig.sub(row);
+			detprop.setOrigin(orig);
 		} else if (mode == ManipulateMode.ENLARGE) {
 			Vector3d norm = new Vector3d(detprop.getNormal());
 			norm.scale((fast ? 15 : 1)*detprop.getHPxSize());
 			double[] bc = detprop.getBeamCentreCoords();
 			Vector3d orig = detprop.getOrigin();
 			orig.sub(norm);
+			detprop.setOrigin(orig);
 			if (!Double.isNaN(bc[0])) { // fix on beam centre
 				detprop.setBeamCentreCoords(bc);
 			}
@@ -324,6 +293,7 @@ public class DiffractionCalibrationUtils {
 			double[] bc = detprop.getBeamCentreCoords();
 			Vector3d orig = detprop.getOrigin();
 			orig.add(norm);
+			detprop.setOrigin(orig);
 			if (!Double.isNaN(bc[0])) { // fix on beam centre
 				detprop.setBeamCentreCoords(bc);
 			}
@@ -358,7 +328,6 @@ public class DiffractionCalibrationUtils {
 			detprop.setNormalAnglesInDegrees(angle[0], angle[1], angle[2]);
 			logger.trace("c: {}", angle[2]);
 		}
-		drawCalibrantRings(currentData.augmenter);
 	}
 
 	/**
@@ -420,7 +389,7 @@ public class DiffractionCalibrationUtils {
 				display.asyncExec(new Runnable() {
 					@Override
 					public void run() {
-						drawCalibrantRings(currentData.augmenter);
+						//drawCalibrantRings(currentData.augmenter);
 					}
 				});
 				return stat;
@@ -429,121 +398,6 @@ public class DiffractionCalibrationUtils {
 		job.setPriority(Job.SHORT);
 		job.schedule();
 	}
-
-	private static final double ASPECT_DEV = 1./64; // deviation from circle allowed 
-
-	/**
-	 * 
-	 * @param display
-	 * @param plottingSystem
-	 * @param currentData
-	 * @return findRing job
-	 */
-	public static Job findRings(final Display display, final IPlottingSystem plottingSystem, final DiffractionTableData currentData) {
-		if (currentData == null)
-			return null;
-
-		DiffractionImageAugmenter aug = currentData.augmenter;
-		if (aug == null)
-			return null;
-
-		final List<IROI> resROIs = aug.getResolutionROIs();
-		final IImageTrace image = getImageTrace(plottingSystem);
-		if (currentData.rois == null) {
-			currentData.rois = new ArrayList<IROI>();
-		} else {
-			currentData.rois.clear();
-		}
-		currentData.use = false;
-		currentData.nrois = 0;
-		clearFoundRings(plottingSystem);
-		Job job = new Job("Ellipse rings finding") {
-			@Override
-			protected IStatus run(final IProgressMonitor monitor) {
-				IStatus stat = Status.OK_STATUS;
-				double lastMajor = -1;
-				double lastAspect = -1;
-				int n = 0;
-				for (final IROI r : resROIs) {
-					IROI roi = null;
-					try {
-						if (!(r instanceof EllipticalROI)) { // cannot cope with other conic sections for now
-							continue;
-						}
-						EllipticalROI e = (EllipticalROI) r;
-						double major = e.getSemiAxis(0);
-						double delta = lastMajor < 0 ? 0.1*major : 0.2*(major - lastMajor);
-						if (delta > 50)
-							delta = 50;
-						lastMajor = major;
-
-						try {
-							roi = DiffractionTool.runEllipseFit(monitor, display, plottingSystem, image, e, false, delta);
-						} catch (NullPointerException ex) {
-							stat = Status.CANCEL_STATUS;
-							n = -1; // indicate, to finally clause, problem with getting image or other issues
-							return stat;
-						}
-						if (roi == null) {
-							stat = Status.CANCEL_STATUS;
-						} else if (roi instanceof EllipticalROI) {
-							double[] ec = e.getPointRef();
-							double[] c = roi.getPointRef();
-							if (Math.hypot(c[0] - ec[0], c[1] - ec[1]) > delta) {
-								logger.trace("Dropping as too far from centre: {} cf {}", roi, e);
-								roi = null;
-								// try a circle if last one was quite circular
-								if (lastAspect > 0 && Math.abs(lastAspect - 1) < ASPECT_DEV) {
-									logger.trace("Attempting circular fit");
-									try {
-										roi = DiffractionTool.runEllipseFit(monitor, display, plottingSystem, image, e, true, delta);
-									} catch (NullPointerException ex) {
-										stat = Status.CANCEL_STATUS;
-										n = -1; // indicate, to finally clause, problem with getting image or other issues
-										return stat;
-									}
-									if (roi instanceof CircularROI) {
-										c = roi.getPointRef();
-										if (Math.hypot(c[0] - ec[0], c[1] - ec[1]) > delta) {
-											logger.trace("Dropping as too far from centre: {} cf {}", roi, e);
-											roi = null;
-											continue;
-										}
-									}
-								} else {
-									continue;
-								}
-							}
-						}
-						if (roi != null) {
-							n++;
-							lastAspect = roi instanceof EllipticalROI ? ((EllipticalROI) roi).getAspectRatio() : 1.;
-							stat = drawFoundRing(monitor, display, plottingSystem, roi, false);
-						}
-
-						if (!stat.isOK())
-							break;
-					} catch (IllegalArgumentException ex) {
-						logger.trace("Could not find ellipse with {}: {}", r, ex);
-					} finally {
-						if (n >= 0) {
-							currentData.rois.add(roi); // can include null placeholder
-						} else {
-							currentData.rois.clear();
-						}
-					}
-				}
-				currentData.nrois = n;
-				if (currentData.nrois > 0) {
-					currentData.use = true;
-				}
-				return stat;
-			}
-		};
-		job.setPriority(Job.SHORT);
-		return job;
-	}
-	
 	
 	/**
 	 * 
@@ -719,16 +573,16 @@ public class DiffractionCalibrationUtils {
 	 * @param toolSystem
 	 *         ToolPage system of the tool
 	 */
-	public static void updateDiffTool(String nodePath, double value, IToolPageSystem toolSystem) {
-		DiffractionTool diffTool = (DiffractionTool) toolSystem.getToolPage(DiffractionCalibrationConstants.DIFFRACTION_ID);
-		DiffractionTreeModel treeModel = diffTool.getModel();
-
-		NumericNode<Length> distanceNode = getDiffractionTreeNode(nodePath, toolSystem);
-		distanceNode.setDoubleValue(value);
-		treeModel.setNode(distanceNode, nodePath);
-
-		diffTool.refresh();
-	}
+//	public static void updateDiffTool(String nodePath, double value, IToolPageSystem toolSystem) {
+//		DiffractionTool diffTool = (DiffractionTool) toolSystem.getToolPage(DiffractionCalibrationConstants.DIFFRACTION_ID);
+//		DiffractionTreeModel treeModel = diffTool.getModel();
+//
+//		NumericNode<Length> distanceNode = getDiffractionTreeNode(nodePath, toolSystem);
+//		distanceNode.setDoubleValue(value);
+//		treeModel.setNode(distanceNode, nodePath);
+//
+//		diffTool.refresh();
+//	}
 
 	/**
 	 * Gets a Diffraction tree node
@@ -738,16 +592,16 @@ public class DiffractionCalibrationUtils {
 	 *         ToolPage system of the tool
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
-	public static NumericNode<Length> getDiffractionTreeNode(String nodePath, IToolPageSystem toolSystem) {
-		NumericNode<Length> node = null;
-		if (toolSystem == null)
-			return node;
-		DiffractionTool diffTool = (DiffractionTool) toolSystem.getToolPage(DiffractionCalibrationConstants.DIFFRACTION_ID);
-		DiffractionTreeModel treeModel = diffTool.getModel();
-		if (treeModel == null)
-			return node;
-		node = (NumericNode<Length>) treeModel.getNode(nodePath);
-		return node;
-	}
+//	@SuppressWarnings("unchecked")
+//	public static NumericNode<Length> getDiffractionTreeNode(String nodePath, IToolPageSystem toolSystem) {
+//		NumericNode<Length> node = null;
+//		if (toolSystem == null)
+//			return node;
+//		DiffractionTool diffTool = (DiffractionTool) toolSystem.getToolPage(DiffractionCalibrationConstants.DIFFRACTION_ID);
+//		DiffractionTreeModel treeModel = diffTool.getModel();
+//		if (treeModel == null)
+//			return node;
+//		node = (NumericNode<Length>) treeModel.getNode(nodePath);
+//		return node;
+//	}
 }
