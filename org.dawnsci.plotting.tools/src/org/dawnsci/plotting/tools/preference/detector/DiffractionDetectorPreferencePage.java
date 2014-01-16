@@ -98,6 +98,7 @@ public class DiffractionDetectorPreferencePage extends PreferencePage implements
 		getPreferenceStore().setValue(DiffractionDetectorConstants.DETECTOR, baos.toString());
 	}
 	
+	@SuppressWarnings("resource")
 	private void getDetectorsFromPreference() {
 		String xml = getPreferenceStore().getString(DiffractionDetectorConstants.DETECTOR);
 		XMLDecoder xmlDecoder =new XMLDecoder(new ByteArrayInputStream(xml.getBytes()));
@@ -106,6 +107,7 @@ public class DiffractionDetectorPreferencePage extends PreferencePage implements
 
 	}
 	
+	@SuppressWarnings("resource")
 	private void getDefaultDetectorsFromPreference() {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		XMLEncoder xmlEncoder = new XMLEncoder(baos);

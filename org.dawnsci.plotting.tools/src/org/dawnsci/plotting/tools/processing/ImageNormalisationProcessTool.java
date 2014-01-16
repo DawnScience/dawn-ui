@@ -1,7 +1,6 @@
 package org.dawnsci.plotting.tools.processing;
 
 import java.io.File;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
