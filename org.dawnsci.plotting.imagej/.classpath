@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry exported="true" kind="lib" path="lib/eventbus-1.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ij-1.47q.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ij-app-2.0.0-beta-7.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ij-commands-2.0.0-beta-7.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ij-core-2.0.0-beta-7.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ij-data-2.0.0-beta-7.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ij-io-2.0.0-beta-7.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ij-launcher-2.0.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ij-legacy-2.0.0-beta-7.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ij-minimaven-2.0.0-beta-7.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ij-options-2.0.0-beta-7.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ij-platforms-2.0.0-beta-7.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ij-scripting-beanshell-2.0.0-beta-7.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ij-scripting-java-2.0.0-beta-7.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ij-text-2.0.0-beta-7.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ij-tools-2.0.0-beta-7.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ij-ui-2.0.0-beta-7.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ij-ui-common-awt-2.0.0-beta-7.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ij-ui-swing-2.0.0-beta-7.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ij-ui-swing-commands-2.0.0-beta-7.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ij-ui-swing-script-editor-2.0.0-beta-7.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ij-ui-swing-tools-2.0.0-beta-7.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ij-ui-swing-updater-2.0.0-beta-7.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ij-updater-core-2.0.0-beta-7.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ij-updater-ssh-2.0.0-beta-7.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ij-updater-webdav-2.0.0-beta-7.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ij-util-awt-2.0.0-beta-7.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ij-util-swing-2.0.0-beta-7.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
