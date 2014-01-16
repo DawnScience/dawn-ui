@@ -333,7 +333,9 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 	}
 
 	private void updateFunctionWidget() {
-		functionWidget.setFunction(compFunction.getFunction(selectedPosition));
+		if (selectedPosition != null){
+			functionWidget.setFunction(compFunction.getFunction(selectedPosition));
+		}
 	}
 	
 	@Override
@@ -432,10 +434,14 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 		addFunctionAction = new Action("Add new function",
 				Activator.getImageDescriptor("icons/add.png")) {
 			public void run() {
-				compFunction.addFunction(showFunctionDialog(null));
-				viewer.refresh();
-				updateFunctionPlot();
-				updateFunctionWidget();
+				IFunction function = showFunctionDialog(null);
+				if (function != null){
+					compFunction.addFunction(function);
+					viewer.refresh();
+					updateFunctionPlot();
+					updateFunctionWidget();
+				}
+
 			}
 		};
 		addFunctionAction.setToolTipText("Add new function to be fitted");
@@ -626,10 +632,12 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 				break;
 			case 2:
 				try {
-					result = Double.toString(resultFunction.getFunction(index).getParameterValue(0));
-					for (int i = 1; i < resultFunction.getFunction(index).getNoOfParameters(); i++) {
-						result += System.getProperty("line.separator");
-						result += resultFunction.getFunction(index).getParameterValue(i);
+					if (resultFunction != null){
+						result = Double.toString(resultFunction.getFunction(index).getParameterValue(0));
+						for (int i = 1; i < resultFunction.getFunction(index).getNoOfParameters(); i++) {
+							result += System.getProperty("line.separator");
+							result += resultFunction.getFunction(index).getParameterValue(i);
+						}
 					}
 				} catch (Exception e) {
 					logger.debug("Some error occured in the label provider of the Function fitting view. Not Normally an Issue");
