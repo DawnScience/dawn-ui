@@ -25,6 +25,7 @@ import org.dawb.workbench.ui.views.SlowFastRunnable;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.viewers.TableViewer;
@@ -58,8 +59,9 @@ public class CalibrantPositioningWidget {
 	private DiffractionTableData currentData;
 	private IToolPageSystem toolSystem;
 	private TableViewer tableViewer;
-	private IPlottingSystem plottingSystem;
 	private Spinner ringNumberSpinner;
+	private Job ringFindJob;
+	private IJobChangeListener jobChangeListener;
 
 	/**
 	 * Creates a widget group with all the calibrant positioning widgets
@@ -71,6 +73,22 @@ public class CalibrantPositioningWidget {
 	 */
 	public CalibrantPositioningWidget(Composite parent, final List<DiffractionTableData> model) {
 		this.model = model;
+		this.jobChangeListener = new JobChangeAdapter() {
+			@Override
+			public void done(IJobChangeEvent event) {
+				Display.getDefault().asyncExec(new Runnable() {
+					@Override
+					public void run() {
+						if (currentData != null && currentData.nrois > 0) {
+							setCalibrateButtons();
+						}
+						if (tableViewer != null)
+							tableViewer.refresh();
+					}
+				});
+			}
+		}
+		;
 		final Display display = Display.getDefault();
 
 		Group controllerHolder = new Group(parent, SWT.BORDER | SWT.FILL);
@@ -348,34 +366,10 @@ public class CalibrantPositioningWidget {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (plottingSystem == null) {
-					logger.error("The plotting system is null");
-					return;
+				if (CalibrantPositioningWidget.this.ringFindJob != null) {
+					CalibrantPositioningWidget.this.ringFindJob.addJobChangeListener(jobChangeListener);
+					CalibrantPositioningWidget.this.ringFindJob.schedule();
 				}
-				
-				int nRings = -1;
-				
-				if (ringNumberSpinner != null) nRings = ringNumberSpinner.getSelection();
-				
-				Job findRingsJob = DiffractionCalibrationUtils.findRingsPeakFitting(display, plottingSystem, currentData,nRings);
-				if (findRingsJob == null)
-					return;
-				findRingsJob.addJobChangeListener(new JobChangeAdapter() {
-					@Override
-					public void done(IJobChangeEvent event) {
-						display.asyncExec(new Runnable() {
-							@Override
-							public void run() {
-								if (currentData != null && currentData.nrois > 0) {
-									setCalibrateButtons();
-								}
-								if (tableViewer != null)
-									tableViewer.refresh();
-							}
-						});
-					}
-				});
-				findRingsJob.schedule();
 			}
 		});
 	}
@@ -431,21 +425,8 @@ public class CalibrantPositioningWidget {
 	public void setTableViewerToUpdate (TableViewer tableViewer) {
 		this.tableViewer = tableViewer;
 	}
-
-	/**
-	 * Sets the plotting system on which to draw the calibrants
-	 * @param plottingSystem
-	 */
-	public void setPlottingSystem(IPlottingSystem plottingSystem) {
-		this.plottingSystem = plottingSystem;
-	}
 	
-	/**
-	 * Sets the spinner which has the number of rings to find
-	 * If not set uses full number
-	 * @param spinner
-	 */
-	public void setNumberOfRingsSpinner(Spinner spinner) {
-		this.ringNumberSpinner = spinner;
+	public void setRingFindingJob(Job ringFindJob) {
+		this.ringFindJob = ringFindJob;
 	}
 }

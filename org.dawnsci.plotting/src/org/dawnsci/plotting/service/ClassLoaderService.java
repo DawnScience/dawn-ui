@@ -10,7 +10,7 @@ import org.dawb.workbench.jmx.UserPlotBean;
 import org.eclipse.ui.services.AbstractServiceFactory;
 import org.eclipse.ui.services.IServiceLocator;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Slice;
 
 import com.thoughtworks.xstream.core.util.CompositeClassLoader;
 
@@ -31,12 +31,7 @@ public class ClassLoaderService extends AbstractServiceFactory implements IClass
 	    ClassLoader classLoader;
 		if (active) {
 			originalLoader = Thread.currentThread().getContextClassLoader();
-			final CompositeClassLoader customLoader = new CompositeClassLoader();
-		    customLoader.add( uk.ac.diamond.scisoft.analysis.dataset.Activator.class.getClassLoader());
-		    customLoader.add( uk.ac.diamond.scisoft.analysis.Activator.class.getClassLoader());
-			customLoader.add(UserPlotBean.class.getClassLoader());
-			customLoader.add(Vector3d.class.getClassLoader());
-			classLoader = customLoader;
+			classLoader = createClassLoader();
 		} else {
 			classLoader    = originalLoader;
 			originalLoader = null;
@@ -52,6 +47,16 @@ public class ClassLoaderService extends AbstractServiceFactory implements IClass
 			}
 		});
 
+	}
+
+	private ClassLoader createClassLoader() {
+		final CompositeClassLoader loader = new CompositeClassLoader();
+	    loader.add(uk.ac.diamond.scisoft.analysis.dataset.Activator.class.getClassLoader());
+	    loader.add(uk.ac.diamond.scisoft.analysis.Activator.class.getClassLoader());
+		loader.add(Slice.class.getClassLoader());           // analysis.api
+		loader.add(UserPlotBean.class.getClassLoader());    // workbench.jmx
+		loader.add(Vector3d.class.getClassLoader());        // vecmath
+		return loader;
 	}
 
 	@Override
