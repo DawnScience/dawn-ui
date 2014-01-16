@@ -6,6 +6,8 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -17,6 +19,7 @@ import org.eclipse.ui.IWorkbenchWizard;
 
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSpacing;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationStandards;
+import uk.ac.diamond.scisoft.analysis.crystallography.HKL;
 
 public class AddCalibrantWizard extends Wizard implements IWorkbenchWizard{
 
@@ -35,13 +38,19 @@ public class AddCalibrantWizard extends Wizard implements IWorkbenchWizard{
 		
 		final AddCalibrantPage page = (AddCalibrantPage)getPages()[0];
 		final CalibrantSpacing cs = page.isCopy ? calibrationStandards.getCalibrant().clone()
-				                                : new CalibrantSpacing();
+				                                : createEmpty();
 		cs.setName(page.name);
 		
 		calibrationStandards.addCalibrant(cs);
 		calibrationStandards.setSelectedCalibrant(cs.getName(), true);
 		
 	    return true;
+	}
+
+	private CalibrantSpacing createEmpty() {
+		CalibrantSpacing cs = new CalibrantSpacing();
+		cs.addHKL(new HKL());
+		return cs;
 	}
 
 	private final class AddCalibrantPage extends WizardPage {
@@ -82,6 +91,11 @@ public class AddCalibrantWizard extends Wizard implements IWorkbenchWizard{
 			copyButton.setSelection(true);
 			copyButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 			copyButton.setText("Copy '"+calibrationStandards.getSelectedCalibrant()+"' ");
+			copyButton.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					nameChanged();
+				}			
+			});
 
 			nameChanged();
 			setControl(container);
