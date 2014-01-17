@@ -51,7 +51,7 @@ public class CalibrantPositioningWidget {
 	private Control[] controls;
 	private DiffractionTableData currentData;
 	private TableViewer tableViewer;
-	private IRunnableWithProgress ringFindJob;
+	private IRunnableWithProgress ringFinder;
 
 	/**
 	 * Creates a widget group with all the calibrant positioning widgets
@@ -308,11 +308,11 @@ public class CalibrantPositioningWidget {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (CalibrantPositioningWidget.this.ringFindJob != null) {
+				if (CalibrantPositioningWidget.this.ringFinder != null) {
 					
 					ProgressMonitorDialog dia = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
 					try {
-						dia.run(true, true, CalibrantPositioningWidget.this.ringFindJob);
+						dia.run(true, true, CalibrantPositioningWidget.this.ringFinder);
 					} catch (InvocationTargetException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -370,8 +370,8 @@ public class CalibrantPositioningWidget {
 		this.tableViewer = tableViewer;
 	}
 	
-	public void setRingFindingJob(IRunnableWithProgress ringFindJob) {
-		this.ringFindJob = ringFindJob;
+	public void setRingFinder(IRunnableWithProgress ringFinder) {
+		this.ringFinder = ringFinder;
 	}
 	
 	private void updateAfterRingFinding(){
