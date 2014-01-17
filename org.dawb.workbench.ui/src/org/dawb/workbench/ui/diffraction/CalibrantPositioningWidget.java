@@ -15,6 +15,7 @@
  */
 package org.dawb.workbench.ui.diffraction;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import org.dawb.workbench.ui.Activator;
@@ -22,10 +23,8 @@ import org.dawb.workbench.ui.diffraction.DiffractionCalibrationUtils.ManipulateM
 import org.dawb.workbench.ui.diffraction.table.DiffractionTableData;
 import org.dawb.workbench.ui.views.RepeatingMouseAdapter;
 import org.dawb.workbench.ui.views.SlowFastRunnable;
-import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.IJobChangeListener;
-import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -52,8 +51,7 @@ public class CalibrantPositioningWidget {
 	private Control[] controls;
 	private DiffractionTableData currentData;
 	private TableViewer tableViewer;
-	private Job ringFindJob;
-	private IJobChangeListener jobChangeListener;
+	private IRunnableWithProgress ringFindJob;
 
 	/**
 	 * Creates a widget group with all the calibrant positioning widgets
@@ -65,22 +63,6 @@ public class CalibrantPositioningWidget {
 	 */
 	public CalibrantPositioningWidget(Composite parent, final List<DiffractionTableData> model) {
 		this.model = model;
-		this.jobChangeListener = new JobChangeAdapter() {
-			@Override
-			public void done(IJobChangeEvent event) {
-				Display.getDefault().asyncExec(new Runnable() {
-					@Override
-					public void run() {
-						if (currentData != null && currentData.nrois > 0) {
-							setCalibrateButtons();
-						}
-						if (tableViewer != null)
-							tableViewer.refresh();
-					}
-				});
-			}
-		}
-		;
 		final Display display = Display.getDefault();
 
 		Group controllerHolder = new Group(parent, SWT.BORDER | SWT.FILL);
@@ -327,8 +309,18 @@ public class CalibrantPositioningWidget {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (CalibrantPositioningWidget.this.ringFindJob != null) {
-					CalibrantPositioningWidget.this.ringFindJob.addJobChangeListener(jobChangeListener);
-					CalibrantPositioningWidget.this.ringFindJob.schedule();
+					
+					ProgressMonitorDialog dia = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
+					try {
+						dia.run(true, true, CalibrantPositioningWidget.this.ringFindJob);
+					} catch (InvocationTargetException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					updateAfterRingFinding();
 				}
 			}
 		});
@@ -378,7 +370,15 @@ public class CalibrantPositioningWidget {
 		this.tableViewer = tableViewer;
 	}
 	
-	public void setRingFindingJob(Job ringFindJob) {
+	public void setRingFindingJob(IRunnableWithProgress ringFindJob) {
 		this.ringFindJob = ringFindJob;
+	}
+	
+	private void updateAfterRingFinding(){
+		if (currentData != null && currentData.nrois > 0) {
+			setCalibrateButtons();
+		}
+		if (tableViewer != null)
+			tableViewer.refresh();
 	}
 }
