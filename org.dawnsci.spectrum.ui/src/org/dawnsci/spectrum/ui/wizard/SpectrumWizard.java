@@ -1,33 +1,34 @@
 package org.dawnsci.spectrum.ui.wizard;
 
+import java.util.List;
+
 import org.dawnsci.spectrum.ui.file.IContain1DData;
 import org.eclipse.jface.wizard.Wizard;
 
 public class SpectrumWizard extends Wizard {
 	
-	IContain1DData data1;
-	IContain1DData data2;
+	List<IContain1DData> dataList;
+	SaveFileWizardPage wp;
 	
-	public void add1DDatas(IContain1DData data1, IContain1DData data2){
-		this.data1 = data1;
-		this.data2 = data2;
-		
+	public SpectrumWizard() {
 	}
-
+	
+	public void add1DDatas(List<IContain1DData> dataList){
+		this.dataList = dataList;
+	}
 	
 	@Override
 	public void addPages(){
 		
-		SpectrumWizardPage wp = new SpectrumWizardPage();
+		wp = new SaveFileWizardPage(dataList);
 		
-		wp.add1DDatas(data1, data2);
-		
+		//SpectrumSubtractionWizardPage wp = new SpectrumSubtractionWizardPage(dataList);
 		addPage(wp);
 	}
 
 	@Override
 	public boolean performFinish() {
-		// TODO Auto-generated method stub
+		wp.finish();
 		return true;
 	}
 

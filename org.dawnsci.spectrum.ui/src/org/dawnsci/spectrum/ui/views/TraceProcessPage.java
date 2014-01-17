@@ -25,6 +25,7 @@ import org.dawnsci.spectrum.ui.file.ISpectrumFileListener;
 import org.dawnsci.spectrum.ui.file.SpectrumFileManager;
 import org.dawnsci.spectrum.ui.file.SpectrumFileOpenedEvent;
 import org.dawnsci.spectrum.ui.utils.SpectrumUtils;
+import org.dawnsci.spectrum.ui.wizard.SpectrumWizard;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -57,6 +58,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTarget;
@@ -378,6 +380,17 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 				}
 				
 				TraceProcessPage.this.manager.addFile(file);
+			}
+		});
+		
+		menuProcess.add(new Action("Wizard...") {
+			public void run() {
+				SpectrumWizard sw = new SpectrumWizard();
+				ISelection selection = viewer.getSelection();
+				List<IContain1DData> list = SpectrumUtils.get1DDataList((IStructuredSelection)selection);
+				sw.add1DDatas(list);
+				WizardDialog wd = new WizardDialog(Display.getDefault().getActiveShell(),sw);
+				wd.open();
 			}
 		});
 		
