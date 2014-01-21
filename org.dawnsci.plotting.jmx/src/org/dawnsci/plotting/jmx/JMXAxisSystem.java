@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.dawnsci.plotting.api.axis.IAxis;
 import org.dawnsci.plotting.api.axis.IAxisSystem;
+import org.dawnsci.plotting.api.axis.IClickListener;
 import org.dawnsci.plotting.api.axis.IPositionListener;
 
 /**
@@ -77,6 +78,17 @@ class JMXAxisSystem extends JMXSystemObject implements IAxisSystem{
 	@Override
 	public void removePositionListener(IPositionListener l) {
 		call(getMethodName(Thread.currentThread().getStackTrace()), new Class[]{IPositionListener.class}, l);
+	}
+
+
+	@Override
+	public void addClickListener(IClickListener l) {
+		call(getMethodName(Thread.currentThread().getStackTrace()), new Class[]{IClickListener.class}, l);
+	}
+
+	@Override
+	public void removeClickListener(IClickListener l) {
+		call(getMethodName(Thread.currentThread().getStackTrace()), new Class[]{IClickListener.class}, l);
 	}
 
 }

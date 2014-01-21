@@ -35,6 +35,7 @@ import org.dawnsci.plotting.api.annotation.IAnnotation;
 import org.dawnsci.plotting.api.annotation.IAnnotationSystem;
 import org.dawnsci.plotting.api.axis.IAxis;
 import org.dawnsci.plotting.api.axis.IAxisSystem;
+import org.dawnsci.plotting.api.axis.IClickListener;
 import org.dawnsci.plotting.api.axis.IPositionListener;
 import org.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.dawnsci.plotting.api.region.IRegion;
@@ -381,6 +382,10 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 				if (e.keyCode == 131072) { // SHIFT
 					xyGraph.getRegionArea().setShiftDown(true);
 				}
+		        if (e.keyCode == 262144) { // CONTROL
+		        	xyGraph.getRegionArea().setControlDown(true);
+		        }
+		        xyGraph.getRegionArea().setKeyEvent(e);
 			}
 			
 			@Override
@@ -388,6 +393,10 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 				if ((e.stateMask & SWT.SHIFT)==SWT.SHIFT) {
 					xyGraph.getRegionArea().setShiftDown(false);
 				}
+				if ((e.stateMask & SWT.CONTROL)==SWT.CONTROL) {
+		        	xyGraph.getRegionArea().setControlDown(false);
+		        }
+		        xyGraph.getRegionArea().setKeyEvent(null);
 			}
 		};
 		return keyListener;
@@ -1128,6 +1137,19 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		if (xyGraph==null || xyGraph.getRegionArea()==null) return;
 		xyGraph.getRegionArea().removePositionListener(l);
 	}
+	
+	@Override
+	public void addClickListener(IClickListener l) {
+		if (xyGraph==null || xyGraph.getRegionArea()==null) return;
+		xyGraph.getRegionArea().addClickListener(l);
+	}
+
+	@Override
+	public void removeClickListener(IClickListener l) {
+		if (xyGraph==null || xyGraph.getRegionArea()==null) return;
+		xyGraph.getRegionArea().removeClickListener(l);
+	}
+
 
 	public void dispose() {
 		if (plotActionsCreator!=null) {

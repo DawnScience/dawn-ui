@@ -24,6 +24,7 @@ import javax.management.StandardMBean;
 
 import org.dawnsci.plotting.api.annotation.IAnnotation;
 import org.dawnsci.plotting.api.axis.IAxis;
+import org.dawnsci.plotting.api.axis.IClickListener;
 import org.dawnsci.plotting.api.axis.IPositionListener;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -617,4 +618,16 @@ public class ThreadSafePlottingSystem extends StandardMBean implements IPlotting
 			String dataName, IProgressMonitor monitor) {
 		return (ITrace)call(getMethodName(Thread.currentThread().getStackTrace()), image, axes, dataName, monitor);
 	}
+	
+
+	@Override
+	public void addClickListener(IClickListener l) {
+		call(getMethodName(Thread.currentThread().getStackTrace()), new Class[]{IClickListener.class}, l);
+	}
+
+	@Override
+	public void removeClickListener(IClickListener l) {
+		call(getMethodName(Thread.currentThread().getStackTrace()), new Class[]{IClickListener.class}, l);
+	}
+
 }

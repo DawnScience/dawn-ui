@@ -29,6 +29,7 @@ import org.dawnsci.plotting.PlottingActionBarManager;
 import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.annotation.IAnnotation;
 import org.dawnsci.plotting.api.axis.IAxis;
+import org.dawnsci.plotting.api.axis.IClickListener;
 import org.dawnsci.plotting.api.axis.IPositionListener;
 import org.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.dawnsci.plotting.api.preferences.PlottingConstants;
@@ -1237,6 +1238,19 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		if (lightWeightViewer==null) return;
 		lightWeightViewer.removePositionListener(l);
 	}
+	
+	@Override
+	public void addClickListener(IClickListener l) {
+		if (lightWeightViewer==null) return;
+		lightWeightViewer.addClickListener(l);
+	}
+
+	@Override
+	public void removeClickListener(IClickListener l) {
+		if (lightWeightViewer==null) return;
+		lightWeightViewer.removeClickListener(l);
+	}
+
 
 	@Override
 	public void addMouseMotionListener(MouseMotionListener mml) {
