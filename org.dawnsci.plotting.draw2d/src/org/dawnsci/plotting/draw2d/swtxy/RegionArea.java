@@ -704,6 +704,8 @@ public class RegionArea extends PlotArea {
 		if (imageTraceListeners!=null) imageTraceListeners.clear();
 		if (regions!=null)             regions.clear();
 		if (imageTraces!=null)         imageTraces.clear();
+		if (positionListeners!=null)   positionListeners.clear();
+		if (clickListeners!=null)      clickListeners.clear();
 	}
 
 	/**
