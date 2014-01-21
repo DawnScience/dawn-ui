@@ -10,6 +10,7 @@ import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.annotation.IAnnotation;
 import org.dawnsci.plotting.api.axis.IAxis;
+import org.dawnsci.plotting.api.axis.IClickListener;
 import org.dawnsci.plotting.api.axis.IPositionListener;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -560,6 +561,17 @@ public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSyste
 	@Override
 	public boolean isEnabled() {
 		return (Boolean)call(getMethodName(Thread.currentThread().getStackTrace()));
+	}
+
+
+	@Override
+	public void addClickListener(IClickListener l) {
+		call(getMethodName(Thread.currentThread().getStackTrace()), new Class[]{IClickListener.class}, l);
+	}
+
+	@Override
+	public void removeClickListener(IClickListener l) {
+		call(getMethodName(Thread.currentThread().getStackTrace()), new Class[]{IClickListener.class}, l);
 	}
 
 }

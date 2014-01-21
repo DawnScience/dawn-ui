@@ -98,4 +98,18 @@ public interface IAxisSystem {
 	 * @param l
 	 */
 	public void removePositionListener(IPositionListener l);
+	
+	/**
+	 * A listener to be notified of mouse position.
+	 * @param l
+	 */
+	public void addClickListener(IClickListener l);
+	
+	
+	/**
+	 * A listener to stop being notified of mouse position.
+	 * @param l
+	 */
+	public void removeClickListener(IClickListener l);
+
 }

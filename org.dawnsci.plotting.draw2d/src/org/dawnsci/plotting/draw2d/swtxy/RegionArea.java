@@ -18,7 +18,9 @@ import org.csstudio.swt.xygraph.figures.PlotArea;
 import org.csstudio.swt.xygraph.figures.Trace;
 import org.csstudio.swt.xygraph.undo.ZoomType;
 import org.dawb.common.ui.image.CursorUtils;
+import org.dawnsci.plotting.api.axis.ClickEvent;
 import org.dawnsci.plotting.api.axis.IAxis;
+import org.dawnsci.plotting.api.axis.IClickListener;
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.dawnsci.plotting.api.axis.IPositionListener;
 import org.dawnsci.plotting.api.axis.PositionEvent;
@@ -38,11 +40,13 @@ import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.MouseEvent;
+import org.eclipse.draw2d.MouseListener;
 import org.eclipse.draw2d.MouseMotionListener;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.PaletteData;
 import org.slf4j.Logger;
@@ -91,7 +95,43 @@ public class RegionArea extends PlotArea {
 			}
 			
 		});
+		
+		addMouseListener(new MouseListener() {
 
+			@Override
+			public void mousePressed(MouseEvent me) {
+				ClickEvent evt = createClickEvent(me);
+				fireClickListeners(evt);
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent me) {
+			}
+
+			@Override
+			public void mouseDoubleClicked(MouseEvent me) {
+				ClickEvent evt = createClickEvent(me);
+				fireDoubleClickListeners(evt);
+			}
+			
+		});
+
+	}
+	
+	
+
+	protected ClickEvent createClickEvent(MouseEvent me) {
+		
+		final double xVal   = getRegionGraph().getSelectedXAxis().getPositionValue(me.x);
+		final double yVal   = getRegionGraph().getSelectedYAxis().getPositionValue(me.y);
+		final int keyCode   = keyEvent!=null ? keyEvent.keyCode   : -1;
+		final int stateMask = keyEvent!=null ? keyEvent.stateMask : -1;
+		final char character= keyEvent!=null ? keyEvent.character : '\0';
+		
+		return new ClickEvent(this, getRegionGraph().getSelectedXAxis(), getRegionGraph().getSelectedYAxis(),
+				             xVal, yVal, isShiftDown(), isControlDown(), 
+				             keyCode, stateMask, character);
+				              
 	}
 
 	protected void firePositionListeners(PositionEvent positionEvent) {
@@ -111,9 +151,34 @@ public class RegionArea extends PlotArea {
 		positionListeners.remove(l);
 	}
 	
+	private Collection<IClickListener> clickListeners;
+	public void addClickListener(IClickListener l) {
+		if (clickListeners==null) clickListeners = new HashSet<IClickListener>();
+		clickListeners.add(l);
+	}
+
+	public void removeClickListener(IClickListener l) {
+		if (clickListeners==null) return;
+		clickListeners.remove(l);
+	}
+
+	protected void fireClickListeners(ClickEvent evt) {
+		if (clickListeners==null) return;
+		for (IClickListener l : clickListeners) {
+			l.clickPerformed(evt);
+		}
+	}
+	protected void fireDoubleClickListeners(ClickEvent evt) {
+		if (clickListeners==null) return;
+		for (IClickListener l : clickListeners) {
+			l.doubleClickPerformed(evt);
+		}
+	}
+	
 	private Point   shiftPoint;
 	private Point   toPoint;
-    private boolean shiftDown;
+	private boolean shiftDown;
+	private boolean controlDown;
 
 	@Override
 	protected void paintClientArea(final Graphics graphics) {
@@ -756,4 +821,22 @@ public class RegionArea extends PlotArea {
 		repaint();
 	}
 
+	public boolean isControlDown() {
+		return controlDown;
+	}
+
+	public void setControlDown(boolean controlDown) {
+		this.controlDown = controlDown;
+	}
+
+	private KeyEvent keyEvent;
+
+	public KeyEvent getKeyEvent() {
+		return keyEvent;
+	}
+
+	public void setKeyEvent(KeyEvent keyEvent) {
+		this.keyEvent = keyEvent;
+	}
+	
 }
