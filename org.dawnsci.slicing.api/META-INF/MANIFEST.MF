@@ -10,7 +10,7 @@ Require-Bundle: org.eclipse.ui,
  uk.ac.diamond.scisoft.analysis.api;bundle-version="1.0.0",
  org.dawnsci.plotting.api;bundle-version="1.2.0",
  org.dawb.common.services;bundle-version="1.2.0",
- org.apache.commons.beanutils;bundle-version="[1.8.3,1.9.0)",
+ org.apache.commons.beanutils;bundle-version="[1.9.1,1.9.2)",
  ncsa.hdf;bundle-version="2.8.0",
  org.dawb.hdf5;bundle-version="1.2.0",
  org.dawnsci.doe;bundle-version="1.2.0"

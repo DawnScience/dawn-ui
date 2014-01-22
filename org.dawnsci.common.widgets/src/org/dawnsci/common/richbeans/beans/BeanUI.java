@@ -386,10 +386,9 @@ public class BeanUI {
 		});
 	}
 
-	@SuppressWarnings("unchecked")
 	public final static void notify(final Object bean, final Object uiObject, final BeanProcessor worker) throws Exception {
 
-		final Map<String,Object> properties = BeanUtils.describe(bean);
+		final Map<String, String> properties = BeanUtils.describe(bean);
 		final Iterator<String>   it         = properties.keySet().iterator();
 		final Collection<String> names      = BeanUI.getEditingFields(bean, uiObject);
 		
