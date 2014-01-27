@@ -61,11 +61,14 @@ public class PowderCheckJob extends Job {
 	IPlottingSystem system;
 	AbstractDataset dataset;
 	IDiffractionMetadata metadata;
+	List<PowderCheckResult> resultList;
+	
 	PowderCheckMode mode = PowderCheckMode.FullImage;
 
 	public PowderCheckJob(IPlottingSystem system) {
 		super("Checking calibration...");
 		this.system = system;
+		resultList = new ArrayList<PowderCheckResult>();
 	}
 
 	public void setData(AbstractDataset dataset, IDiffractionMetadata metadata) {
@@ -76,6 +79,13 @@ public class PowderCheckJob extends Job {
 	public void setCheckMode(PowderCheckMode mode) {
 		this.mode = mode;
 	}
+	
+	public List<PowderCheckResult> getResultsList() {
+		List<PowderCheckResult> out = new ArrayList<PowderCheckResult>(this.resultList.size());
+		out.addAll(this.resultList);
+		return out;
+	}
+	
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
@@ -199,13 +209,13 @@ public class PowderCheckJob extends Job {
 		
 		AbstractDataset baseline = rollingBallBaselineCorrection(out.get(1), 10);
 		
-		List<PeakResult> result = fitPeaksToTrace(out.get(0),Maths.subtract(out.get(1), baseline), baseline);
+		List<PowderCheckResult> result = fitPeaksToTrace(out.get(0),Maths.subtract(out.get(1), baseline), baseline);
 
 		double maxRatio = 0;
 
-		for (PeakResult r : result) {
-			double q = r.q;
-			double qExp = r.peak.getParameter(0).getValue();
+		for (PowderCheckResult r : result) {
+			double q = r.getCalibrantQValue();
+			double qExp = r.getPeak().getParameter(0).getValue();
 			double ratio = q/qExp;
 			if (ratio > 1) ratio = 1/ratio;
 
@@ -222,8 +232,10 @@ public class PowderCheckJob extends Job {
 
 	private static final int EDGE_PIXEL_NUMBER = 10;
 
-	private List<PeakResult> fitPeaksToTrace(final AbstractDataset xIn, final AbstractDataset yIn, AbstractDataset baselineIn) {
+	private List<PowderCheckResult> fitPeaksToTrace(final AbstractDataset xIn, final AbstractDataset yIn, AbstractDataset baselineIn) {
 
+		resultList.clear();
+		
 		List<HKL> spacings = CalibrationFactory.getCalibrationStandards().getCalibrant().getHKLs();
 		final double[] qVals = new double[spacings.size()];
 
@@ -259,11 +271,6 @@ public class PowderCheckJob extends Job {
 		final AbstractDataset y = yIn.getSlice(new int[] {minXidx}, new int[] {maxXidx}, null);
 		y.setName("Fit");
 		AbstractDataset baseline = baselineIn.getSlice(new int[] {minXidx}, new int[] {maxXidx}, null);
-
-
-		//DatasetUtils.f
-
-
 
 		List<APeak> peaks = Generic1DFitter.fitPeaks(x, y, Gaussian.class, count);
 
@@ -316,9 +323,6 @@ public class PowderCheckJob extends Job {
 				new ObjectiveFunction(fun), new MaxEval(MAX_EVAL),
 				new NelderMeadSimplex(initParam.length));	
 
-
-		List<PeakResult> resultList = new ArrayList<PeakResult>();
-
 		system.updatePlot1D(x, Arrays.asList(new IDataset[]{Maths.add(yfit, baseline)}), null);
 
 
@@ -328,7 +332,7 @@ public class PowderCheckJob extends Job {
 
 	}
 
-	private void findMatches(List<PeakResult> results, List<Double> qList, CompositeFunction cf) {
+	private void findMatches(List<PowderCheckResult> results, List<Double> qList, CompositeFunction cf) {
 
 		double minVal = Double.POSITIVE_INFINITY;
 		int minFuncIdx = 0;
@@ -346,7 +350,7 @@ public class PowderCheckJob extends Job {
 			}
 		}
 
-		results.add(new PeakResult(cf.getFunction(minFuncIdx), qList.get(minQIdx)));
+		results.add(new PowderCheckResult(cf.getFunction(minFuncIdx), qList.get(minQIdx)));
 		cf.removeFunction(minFuncIdx);
 		qList.remove(minQIdx);
 	}
@@ -429,16 +433,6 @@ public class PowderCheckJob extends Job {
 				}
 			}
 		});
-	}
-	
-	class PeakResult {
-		public IFunction peak;
-		public double q;
-
-		public PeakResult(IFunction peak, double q) {
-			this.peak = peak;
-			this.q = q;
-		}
 	}
 }
 
