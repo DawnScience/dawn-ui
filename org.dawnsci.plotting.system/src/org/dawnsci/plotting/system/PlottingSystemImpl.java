@@ -546,8 +546,8 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 				trace = lightWeightViewer.createLightWeightImage(traceName, data, axes, dataName, monitor);
 				traceMap.put(trace.getName(), trace);
 				// No need to fire trace listener, the LightWeightViewer should fire it from
-				// RegionAreas list of image trace listeners.
-				// fireTraceAdded(new TraceEvent(trace));
+				// RegionAreas list of image trace listeners - but this seems to break fixed tools in powder calibration perspective
+				fireTraceAdded(new TraceEvent(trace));
 			}
 			return trace;
             
