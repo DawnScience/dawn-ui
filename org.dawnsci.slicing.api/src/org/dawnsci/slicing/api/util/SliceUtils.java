@@ -90,15 +90,18 @@ public class SliceUtils {
     		stop[i]  = getStop(dimsData,dataShape[i]);
     		step[i]  = getStep(dimsData);
 
-    		if (!dimsData.getPlotAxis().hasValue()) {
+    		if (dimsData.getPlotAxis().hasValue()) {
     			String nexusAxisName = getAxisName(currentSlice, dimsData, " (Dim "+(dimsData.getDimension()+1)); 
-    			String formatValue   = String.valueOf(dimsData.getSlice());
-    			try {
-    			    formatValue = format.format(getAxisValue(sliceObject, data.getVariableManager(), dimsData, dimsData.getSlice(), null));
-    			} catch (Throwable ne) {
-    				formatValue   = String.valueOf(dimsData.getSlice());
+    			final int sliceIndex = dimsData.getSlice();
+    			if (sliceIndex>-1) {
+    				String formatValue   = String.valueOf(sliceIndex);
+        			try {
+        			    formatValue = format.format(getAxisValue(sliceObject, data.getVariableManager(), dimsData, dimsData.getSlice(), null));
+        			} catch (Throwable ne) {
+        				formatValue   = String.valueOf(dimsData.getSlice());
+        			}
+        			buf.append("("+nexusAxisName+" = "+(dimsData.getSliceRange()!=null?dimsData.getSliceRange():formatValue)+")");
     			}
-    			buf.append("("+nexusAxisName+" = "+(dimsData.getSliceRange()!=null?dimsData.getSliceRange():formatValue)+")");
     		}
 
     		final IAnalysisService service = (IAnalysisService)ServiceManager.getService(IAnalysisService.class);
