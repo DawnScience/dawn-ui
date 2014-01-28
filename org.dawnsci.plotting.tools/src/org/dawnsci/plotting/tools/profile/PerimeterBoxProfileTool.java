@@ -157,7 +157,7 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 
 			//horizontal profiles
 			sideProfile1 = (IProfileToolPage)ToolPageFactory.getToolPage("org.dawb.workbench.plotting.tools.boxLineProfileTool");
-			sideProfile1.setLineType(SWT.HORIZONTAL);
+			sideProfile1.setLineOrientation(false);
 			sideProfile1.setPlotEdgeProfile(true);
 			sideProfile1.setPlotAverageProfile(false);
 			sideProfile1.setToolSystem(tps);
@@ -168,7 +168,7 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 			sideProfile1.activate();
 			//vertical profiles
 			sideProfile2 = (IProfileToolPage)ToolPageFactory.getToolPage("org.dawb.workbench.plotting.tools.boxLineProfileTool");
-			sideProfile2.setLineType(SWT.VERTICAL);
+			sideProfile2.setLineOrientation(true);
 			sideProfile2.setPlotEdgeProfile(true);
 			sideProfile2.setPlotAverageProfile(false);
 			sideProfile2.setToolSystem(tps);

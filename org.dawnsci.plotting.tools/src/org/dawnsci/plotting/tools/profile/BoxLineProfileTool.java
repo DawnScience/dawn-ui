@@ -35,7 +35,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.swt.SWT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +55,7 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 	private static final Logger logger = LoggerFactory.getLogger(BoxLineProfileTool.class);
 	private IAxis xPixelAxis;
 	private IAxis yPixelAxis;
-	private int type;
+	private boolean isVertical;
 
 	private boolean isAveragePlotted;
 	private boolean isEdgePlotted;
@@ -72,15 +71,15 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 	private IRegion xAxisROI;
 
 	public BoxLineProfileTool() {
-		this(SWT.HORIZONTAL);
+		this(false);
 		this.profileJob = new ProfileJob();
 	}
 	/**
 	 * Constructor to this profile tool
-	 * @param type can be either VERTICAL or HORIZONTAL
+	 * @param isVertical
 	 */
-	public BoxLineProfileTool(int type){
-		this.type = type;
+	public BoxLineProfileTool(boolean isVertical){
+		this.isVertical = isVertical;
 	}
 
 	@Override
@@ -128,17 +127,16 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 			return;
 		xAxisROI.setVisible(isXAxisROIVisible);
 	}
-	public int getType(){
-		return type;
-	}
 
 	@Override
 	public DataReductionInfo export(DataReductionSlice bean) throws Exception {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	public void setLineType(int type) {
-		this.type = type;
+
+	@Override
+	public void setLineOrientation(boolean vertical) {
+		this.isVertical = vertical;
 	}
 
 	@Override
@@ -190,17 +188,14 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 			final IImageTrace image, final RectangularROI bounds,
 			IRegion region, boolean tryUpdate,
 			IProgressMonitor monitor) {
-		AbstractDataset[] boxLine = ROIProfile.boxLine((AbstractDataset)image.getData(), (AbstractDataset)image.getMask(), bounds, true, type);
+		AbstractDataset[] boxLine = ROIProfile.boxLine((AbstractDataset)image.getData(), (AbstractDataset)image.getMask(), bounds, true, isVertical);
 		AbstractDataset[] boxMean = ROIProfile.boxMean((AbstractDataset)image.getData(), (AbstractDataset)image.getMask(), bounds, true);
 
 		if (boxLine == null) return;
 		if (boxMean == null) return;
 
 		setTraceNames();
-		AbstractDataset line3 = null;
-
-		if (type == SWT.HORIZONTAL) line3 = boxMean[0];
-		else if (type == SWT.VERTICAL) line3 = boxMean[1];
+		AbstractDataset line3 = boxMean[isVertical ? 1 : 0];
 
 		AbstractDataset line1 = boxLine[0];
 		line1.setName(traceName1);
@@ -257,7 +252,7 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 			final IImageTrace image, final RectangularROI bounds,
 			IRegion region, boolean tryUpdate,
 			IProgressMonitor monitor) {
-		AbstractDataset[] boxLine = ROIProfile.boxLine((AbstractDataset)image.getData(), (AbstractDataset)image.getMask(), bounds, true, type);
+		AbstractDataset[] boxLine = ROIProfile.boxLine((AbstractDataset)image.getData(), (AbstractDataset)image.getMask(), bounds, true, isVertical);
 		if (boxLine == null) return;
 
 		setTraceNames();
@@ -313,9 +308,7 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 		if (boxMean==null) return;
 
 		setTraceNames();
-		AbstractDataset line3 = null;
-		if (type == SWT.HORIZONTAL) line3 = boxMean[0];
-		else if (type == SWT.VERTICAL) line3 = boxMean[1];
+		AbstractDataset line3 = boxMean[isVertical ? 1 : 0];
 
 		// Average profile
 		line3.setName(traceName3);
@@ -343,14 +336,14 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 	 * Set the trace names given the type of profile
 	 */
 	private void setTraceNames(){
-		if (type == SWT.HORIZONTAL) {
-			traceName1 = "Top Profile";
-			traceName2 = "Bottom Profile";
-			traceName3 = "Horizontal Average Profile";
-		} else if (type == SWT.VERTICAL) {
+		if (isVertical) {
 			traceName1 = "Left Profile";
 			traceName2 = "Right Profile";
 			traceName3 = "Vertical Average Profile";
+		} else {
+			traceName1 = "Top Profile";
+			traceName2 = "Bottom Profile";
+			traceName3 = "Horizontal Average Profile";
 		}
 	}
 
@@ -360,22 +353,22 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 			public void run() {
 				List<IDataset> axes = image.getAxes();
 				if (axes != null && axes.size() > 0) {
-					if (type == SWT.VERTICAL) {
+					if (isVertical) {
 						updateAxes(traces, lines, (AbstractDataset)axes.get(1), bounds.getPointY());
-					} else if (type == SWT.HORIZONTAL) {
+					} else {
 						updateAxes(traces, lines, (AbstractDataset)axes.get(0), bounds.getPointX());
 					}
 				} else { // if no axes we set them manually according to
 							// the data shape
 					int[] shapes = image.getData().getShape();
-					if (type == SWT.VERTICAL) {
+					if (isVertical) {
 						int[] verticalAxis = new int[shapes[1]];
 						for (int i = 0; i < verticalAxis.length; i++) {
 							verticalAxis[i] = i;
 						}
 						AbstractDataset vertical = new IntegerDataset(verticalAxis, shapes[1]);
 						updateAxes(traces, lines, vertical, bounds.getPointY());
-					} else if (type == SWT.HORIZONTAL) {
+					} else {
 						int[] horizontalAxis = new int[shapes[0]];
 						for (int i = 0; i < horizontalAxis.length; i++) {
 							horizontalAxis[i] = i;
@@ -442,12 +435,12 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 		setTraceNames();
 		x_trace = (ILineTrace)profilePlottingSystem.getTrace(traceName1);
 		y_trace = (ILineTrace)profilePlottingSystem.getTrace(traceName2);
-		if (type == SWT.VERTICAL) {
+		if (isVertical) {
 			if(x_trace != null && y_trace != null){
 				x_trace.setTraceColor(ColorConstants.red);
 				y_trace.setTraceColor(ColorConstants.darkGreen);
 			}
-		} else if (type == SWT.HORIZONTAL) {
+		} else {
 			if(x_trace != null && y_trace != null){
 				x_trace.setTraceColor(ColorConstants.blue);
 				y_trace.setTraceColor(ColorConstants.orange);

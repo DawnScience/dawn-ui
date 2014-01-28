@@ -20,9 +20,9 @@ public interface IProfileToolPage extends IToolPage {
 
 	/**
 	 * Line type for Box Line Profiles
-	 * @param lineType either SWT.VERTICAL, or SWT.HORIZONTAL
+	 * @param vertical true for vertical, else false for horizontal
 	 */
-	void setLineType(int lineType);
+	void setLineOrientation(boolean vertical);
 
 	/**
 	 * Set the plotAverageProfile flag for BoxLineProfile
