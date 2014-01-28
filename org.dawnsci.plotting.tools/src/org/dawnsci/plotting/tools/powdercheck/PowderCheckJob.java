@@ -31,8 +31,10 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
 import uk.ac.diamond.scisoft.analysis.crystallography.HKL;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Maths;
+import uk.ac.diamond.scisoft.analysis.dataset.Stats;
 import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
 import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.APeak;
@@ -272,18 +274,26 @@ public class PowderCheckJob extends Job {
 		y.setName("Fit");
 		AbstractDataset baseline = baselineIn.getSlice(new int[] {minXidx}, new int[] {maxXidx}, null);
 
-		List<APeak> peaks = Generic1DFitter.fitPeaks(x, y, Gaussian.class, count);
+		List<APeak> peaks = Generic1DFitter.fitPeaks(x, y, Gaussian.class, count+10);
 
-		final CompositeFunction cf = new CompositeFunction();
+		
+		List<PowderCheckResult> initResults = new ArrayList<PowderCheckResult>();
+		
+		CompositeFunction cf = new CompositeFunction();
 
 		for (APeak peak : peaks) cf.addFunction(peak);
-
-
-		double[] initParam = new double[cf.getFunctions().length*3];
+		
+		double limit = findMatchLimit(qList, cf);
+		
+		while (cf.getNoOfFunctions() != 0 && !qList.isEmpty()) findMatches(initResults, qList, cf, limit);
+		
+		final CompositeFunction cfFinal = compositeFunctionFromResults(initResults);
+		
+		double[] initParam = new double[cfFinal.getFunctions().length*3];
 
 		{
 			int i = 0;
-			for (IFunction func : cf.getFunctions()) {
+			for (IFunction func : cfFinal.getFunctions()) {
 				initParam[i++] = func.getParameter(0).getValue();
 				initParam[i++] = func.getParameter(1).getValue();
 				initParam[i++] = func.getParameter(2).getValue();
@@ -300,7 +310,7 @@ public class PowderCheckJob extends Job {
 			public double value(double[] arg0) {
 
 				int j = 0;
-				for (IFunction func : cf.getFunctions()) {
+				for (IFunction func : cfFinal.getFunctions()) {
 
 					double[] p = func.getParameterValues();
 					p[0] = arg0[j++];
@@ -310,7 +320,7 @@ public class PowderCheckJob extends Job {
 				}
 
 				for (int i = 0 ; i < yfit.getSize() ; i++) {
-					yfit.set(cf.val(x.getDouble(i)), i);
+					yfit.set(cfFinal.val(x.getDouble(i)), i);
 				}
 
 				double test = y.residual(yfit);
@@ -325,14 +335,54 @@ public class PowderCheckJob extends Job {
 
 		system.updatePlot1D(x, Arrays.asList(new IDataset[]{Maths.add(yfit, baseline)}), null);
 
-
-		while (cf.getNoOfFunctions() != 0 || !qList.isEmpty()) findMatches(resultList, qList, cf);
+		for (int i = 0; i < cfFinal.getNoOfFunctions(); i++) {
+			resultList.add(new PowderCheckResult(cfFinal.getFunction(i), initResults.get(i).getCalibrantQValue()));
+		}
+		
+		
+		//while (cf.getNoOfFunctions() != 0 || !qList.isEmpty()) findMatches(resultList, qList, cf);
 
 		return resultList;
 
 	}
+	
+	private CompositeFunction compositeFunctionFromResults(List<PowderCheckResult> initialResults) {
+		
+		CompositeFunction cf = new CompositeFunction();
+		
+		for (PowderCheckResult r : initialResults) {
+			cf.addFunction(r.getPeak());
+		}
+		
+		return cf;
+		
+	}
 
-	private void findMatches(List<PowderCheckResult> results, List<Double> qList, CompositeFunction cf) {
+	private double findMatchLimit(List<Double> qList, CompositeFunction cf) {
+		
+		double[] minDif = new double[cf.getNoOfFunctions()];
+		
+		for (int i = 0; i <  cf.getNoOfFunctions(); i++) {
+			double minVal = Double.POSITIVE_INFINITY;
+			for (int j = 0; j < qList.size(); j++) {
+				double a = Math.abs(qList.get(j) - cf.getFunction(i).getParameter(0).getValue());
+
+				if (a < minVal) {
+					minVal = a;
+					minDif[i] = a;
+				}
+			}
+		}
+		
+		DoubleDataset dd = new DoubleDataset(minDif, new int[]{minDif.length});
+		
+		double med = (Double)Stats.median(dd);
+		double mad = (Double)Stats.median(Maths.abs(Maths.subtract(dd, med)));
+		
+		return mad*10;
+	}
+	
+	private void findMatches(List<PowderCheckResult> results, List<Double> qList, CompositeFunction cf, double limit) {
 
 		double minVal = Double.POSITIVE_INFINITY;
 		int minFuncIdx = 0;
@@ -350,6 +400,11 @@ public class PowderCheckJob extends Job {
 			}
 		}
 
+		if (minVal > limit) {
+			qList.clear();
+			return;
+		}
+		
 		results.add(new PowderCheckResult(cf.getFunction(minFuncIdx), qList.get(minQIdx)));
 		cf.removeFunction(minFuncIdx);
 		qList.remove(minQIdx);
