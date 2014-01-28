@@ -30,7 +30,7 @@
       <view
             allowMultiple="false"
             category="org.dawb.workbench.ui.beta.views.category"
-            class="org.eclipse.ui.navigator.CommonNavigator"
+            class="org.eclipse.ui.navigator.resources.ProjectExplorer"
             icon="icons/spectrumpe.png"
             id="org.dawnsci.spectrum.ui.views.SpectrumProject"
             name="Trace Project">
@@ -77,13 +77,29 @@
       <actionProvider
             class="org.dawnsci.spectrum.ui.actions.SpectrumActionProvider"
             id="org.dawnsci.spectrum.ui.actions.OpenProvider"
-            overrides="org.eclipse.ui.navigator.resources.OpenActions">
+            overrides="org.eclipse.ui.navigator.resources.actions.EditActions"
+            priority="highest">
          <enablement>
-            <and>
-               <instanceof
-                     value="org.eclipse.core.resources.IFile">
-               </instanceof>
-            </and>
+            <with
+                  variable="activeWorkbenchWindow.activePerspective">
+               <equals
+                     value="org.dawnsci.spectrum.ui.perspective">
+               </equals>
+            </with>
+         </enablement>
+      </actionProvider>
+      <actionProvider
+            class="org.dawnsci.spectrum.ui.actions.SpectrumActionProvider"
+            id="org.dawnsci.spectrum.ui.actions.OpenProvider2"
+            overrides="org.eclipse.ui.navigator.resources.OpenActions"
+            priority="highest">
+         <enablement>
+            <with
+                  variable="activeWorkbenchWindow.activePerspective">
+               <equals
+                     value="org.dawnsci.spectrum.ui.perspective">
+               </equals>
+            </with>
          </enablement>
       </actionProvider>
    </extension>
@@ -181,6 +197,20 @@
                title="spectrum pipline">
          </connection>
       </processPage>
+   </extension>
+   <extension
+         point="org.eclipse.ui.navigator.viewer">
+      <viewer
+            viewerId="org.eclipse.ui.navigator.ProjectExplorer">
+      </viewer>
+      <viewerActionBinding
+            viewerId="org.eclipse.ui.navigator.ProjectExplorer">
+         <includes>
+            <actionExtension
+                  pattern="org.dawnsci.spectrum.ui.actions.*">
+            </actionExtension>
+         </includes>
+      </viewerActionBinding>
    </extension>
 
 </plugin>
