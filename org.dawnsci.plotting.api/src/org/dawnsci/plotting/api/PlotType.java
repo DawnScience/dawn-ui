@@ -20,7 +20,7 @@ public enum PlotType {
 
     XY_STACKED_3D(3, 2),// dimensions=3 X and Many Y
 
-	XY_SCATTER_3D(3, 1);// dimensions=3 X and Y
+	XY_SCATTER_3D(3, 1);// dimensions=1 X and Y
 	
 	
 	private final int rank;
