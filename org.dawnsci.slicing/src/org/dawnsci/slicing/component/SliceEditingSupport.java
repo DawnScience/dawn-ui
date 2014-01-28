@@ -5,9 +5,9 @@ import java.text.NumberFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.dawnsci.slicing.Activator; // On purpose! Gets preference from expected place.
 import org.dawb.common.ui.components.cell.ScaleCellEditor;
-import org.dawnsci.common.widgets.celleditor.SpinnerCellEditorWithPlayButton;
+import org.dawnsci.common.widgets.celleditor.PlayCellEditor;
+import org.dawnsci.slicing.Activator; // On purpose! Gets preference from expected place.
 import org.dawnsci.slicing.api.system.AxisType;
 import org.dawnsci.slicing.api.system.DimsData;
 import org.dawnsci.slicing.api.util.SliceUtils;
@@ -28,7 +28,6 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Scale;
-import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
@@ -43,7 +42,7 @@ class SliceEditingSupport extends EditingSupport {
 	private NumberFormat format;
 
 	private ScaleCellEditor                 scaleEditor;
-	private SpinnerCellEditorWithPlayButton spinnerEditor;
+	private PlayCellEditor spinnerEditor;
 	private TextCellEditor                  rangeEditor;
 	
 	private SliceSystemImpl                 system;
@@ -73,13 +72,13 @@ class SliceEditingSupport extends EditingSupport {
 		});
 		
 		final ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawb.workbench.ui");
-		spinnerEditor = new SpinnerCellEditorWithPlayButton((TableViewer)viewer, "Play through slices", store.getInt("data.format.slice.play.speed"));
+		spinnerEditor = new PlayCellEditor((TableViewer)viewer, "Play through slices", store.getInt("data.format.slice.play.speed"), 45);
 		spinnerEditor.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
-		spinnerEditor.addSelectionListener(new SelectionAdapter() {
+		spinnerEditor.addModifyListener(new ModifyListener() {
 			@Override
-			public void widgetSelected(SelectionEvent e) {
+			public void modifyText(ModifyEvent e) {
                 final DimsData data  = (DimsData)((IStructuredSelection)((TableViewer)getViewer()).getSelection()).getFirstElement();
-                final int value = ((Spinner)e.getSource()).getSelection();
+                final int value = ((Number)spinnerEditor.getValue()).intValue();
                 data.setSlice(value);
                 data.setSliceRange(null);
          		if (system.synchronizeSliceData(data)) system.slice(false);
@@ -117,9 +116,9 @@ class SliceEditingSupport extends EditingSupport {
 	}
 	
 	protected void updateSlice(boolean doSlice) {
-		final DimsData data  = (DimsData)((IStructuredSelection)getViewer().getSelection()).getFirstElement();
-		final Scale scale = (Scale)scaleEditor.getControl();
-		final int value = scale.getSelection();
+		final DimsData data = (DimsData)((IStructuredSelection)getViewer().getSelection()).getFirstElement();
+		final Scale   scale = (Scale)scaleEditor.getControl();
+		final int     value = scale.getSelection();
 		data.setSlice(value);
 		data.setSliceRange(null);
 		scale.setToolTipText(getScaleTooltip(data, scale.getMinimum(), scale.getMaximum()));		

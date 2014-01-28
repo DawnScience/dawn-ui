@@ -8,23 +8,30 @@
  */
 package org.dawnsci.common.widgets.celleditor;
 
+import org.dawnsci.common.richbeans.internal.GridUtils;
 import org.dawnsci.common.widgets.Activator;
+import org.dawnsci.common.widgets.decorator.IntegerDecorator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Spinner;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Text;
 
 
 /**
@@ -34,15 +41,24 @@ import org.eclipse.swt.widgets.Spinner;
  * </p>
  * @noextend This class is not intended to be subclassed by clients.
  */
-public class SpinnerCellEditorWithPlayButton extends AppliableCellEditor {
+public class PlayCellEditor extends AppliableCellEditor {
 
-	private final String      playJobName;
-	private final long        waitTime;
-	
+	private final String   playJobName;
+	private final long     waitTime;
+	private int            rowHeight;
 	private boolean        isPlaying = false;
+	
+	// UI
 	private Button         play;
-	private Spinner        spinner;
-	private Composite area;
+	private Text           text;
+	private Composite      area;
+	private IntegerDecorator boundsDecorator;
+
+	public PlayCellEditor(final TableViewer viewer, 
+						  final String      playJobName,
+						  final long        waitTime) {
+		this(viewer, playJobName, waitTime, -1);
+	}
 
 	/**
 	 * 
@@ -50,13 +66,15 @@ public class SpinnerCellEditorWithPlayButton extends AppliableCellEditor {
 	 * @param playJobName
 	 * @param waitTime - ms
 	 */
-	public SpinnerCellEditorWithPlayButton(final TableViewer viewer, 
+	public PlayCellEditor(final TableViewer viewer, 
 			                               final String      playJobName,
-			                               final long        waitTime) {
+			                               final long        waitTime,
+			                               final int         rowHeight) {
 		
 		super(viewer.getTable());		
 		this.playJobName = playJobName;
 		this.waitTime    = waitTime>0 ? waitTime : 1000;
+		this.rowHeight   = rowHeight;
 	}
 	
 
@@ -67,12 +85,39 @@ public class SpinnerCellEditorWithPlayButton extends AppliableCellEditor {
 		area.setLayout(new GridLayout(3, false));
 		removeMargins(area);
 		
-        this.spinner = new Spinner(area, SWT.NONE);
-        spinner.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
-       
+        this.text = new Text(area, SWT.NONE);
+        text.setText("0");
+        this.boundsDecorator = new IntegerDecorator(text);
+        boundsDecorator.setMinimum(0);
+        boundsDecorator.setAllowInvalidValues(false); // No coloring red, just do not allow at all.
+        text.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
+        text.addKeyListener(getKeyListener()); 
+        
+        final Composite buttons = new Composite(area, SWT.NONE);
+        buttons.setLayout(new GridLayout(1, false));
+        buttons.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
+        GridUtils.removeMargins(buttons);
+        buttons.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
+        
+        final Button up = new Button(buttons, SWT.ARROW | SWT.UP);
+        up.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        up.addSelectionListener(new SelectionAdapter() {
+        	public void widgetSelected(SelectionEvent e) {
+        		incrementValue(SWT.ARROW_UP);
+        	}			
+		});
+      
+        final Button down = new Button(buttons, SWT.ARROW | SWT.DOWN);
+        down.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        down.addSelectionListener(new SelectionAdapter() {
+        	public void widgetSelected(SelectionEvent e) {
+        		incrementValue(SWT.ARROW_DOWN);
+        	}			
+		});
+
         this.play = new Button(area, SWT.TOGGLE);
         play.setImage(Activator.getImage("icons/control_play_blue.png"));
-        final GridData playData = new GridData(SWT.CENTER, SWT.CENTER, false, false);
+        final GridData playData = new GridData(SWT.CENTER, SWT.FILL, false, true);
         playData.widthHint  = 24;
         playData.heightHint = 24;
         play.setLayoutData(playData);
@@ -95,6 +140,79 @@ public class SpinnerCellEditorWithPlayButton extends AppliableCellEditor {
         return area;
 	}
 	
+	
+	@Override
+	public void dispose() {
+		if (keyListener!=null)   text.removeKeyListener(keyListener);
+		super.dispose();
+	}
+
+
+	private KeyListener keyListener;
+	private KeyListener getKeyListener() {
+		if (keyListener!=null) return keyListener;
+		keyListener = new KeyListener() {		
+			@Override
+			public void keyReleased(KeyEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void keyPressed(KeyEvent e) {
+				incrementValue(e.keyCode);
+			}
+		};
+		return keyListener;
+	}
+
+	protected void incrementValue(int keyCode) {
+		try {
+			final int value = ((Number)doGetValue()).intValue();
+			String strValue = null;
+			if(keyCode==SWT.ARROW_UP) {  
+				strValue = String.valueOf(value+1);
+			} else if(keyCode==SWT.ARROW_DOWN) {  
+				strValue = String.valueOf(value-1);
+			} else if(keyCode==SWT.PAGE_UP) {  
+				strValue = String.valueOf(value+10);
+			} else if(keyCode==SWT.PAGE_DOWN) {  
+				strValue = String.valueOf(value-10);
+			}
+			
+			if (strValue!=null) {
+				text.setText(strValue);
+				final String finalValue = strValue;
+				text.getDisplay().asyncExec(new Runnable() {
+					public void run() {
+						text.setSelection(finalValue.length(), finalValue.length());
+					}
+				});
+			}
+		} catch (Throwable ne) {
+			return;
+		}
+	}
+
+	@Override
+	public LayoutData getLayoutData() {
+		LayoutData layoutData = super.getLayoutData();
+		if ((area == null) || area.isDisposed()) {
+			layoutData.minimumWidth = 60;
+		} else {
+			// make the comboBox 10 characters wide
+			GC gc = new GC(area);
+			layoutData.minimumWidth = (gc.getFontMetrics()
+					.getAverageCharWidth() * 10) + 10;
+			gc.dispose();
+		}
+		if (rowHeight>-1) {
+			layoutData.minimumHeight =  rowHeight;
+		}
+		return layoutData;
+	}
+
+	
 	private IProgressMonitor playMonitor;
 	/**
 	 * Plays or stops the playing
@@ -109,9 +227,9 @@ public class SpinnerCellEditorWithPlayButton extends AppliableCellEditor {
 			return;
 		}
 		
-		final int currentValue = spinner.getSelection();
-		final int max          = spinner.getMaximum();
-		final int min          = spinner.getMinimum();
+		final int currentValue = Integer.parseInt(text.getText());
+		final int max          = boundsDecorator.getMaximum().intValue();
+		final int min          = boundsDecorator.getMinimum().intValue();
 		
 		final Job job = new Job(playJobName) {
 			@Override
@@ -127,8 +245,8 @@ public class SpinnerCellEditorWithPlayButton extends AppliableCellEditor {
 					getControl().getDisplay().asyncExec(new Runnable() {
 						@Override
 						public void run() {
-							if (spinner.isDisposed()) return;
-							spinner.setSelection(newValue);
+							if (text.isDisposed()) return;
+							text.setText(String.valueOf(newValue));
 						}
 					});
 					
@@ -164,8 +282,12 @@ public class SpinnerCellEditorWithPlayButton extends AppliableCellEditor {
 
 	@Override
 	protected Object doGetValue() {
-		if (spinner!=null) {
-			return spinner.getSelection();
+		if (text!=null) {
+			try {
+			    return Integer.parseInt(text.getText());
+			} catch (Throwable ne) {
+				return boundsDecorator.getMinimum().intValue();
+			}
 		} 
 		return null;
 	}
@@ -173,19 +295,19 @@ public class SpinnerCellEditorWithPlayButton extends AppliableCellEditor {
 
 	@Override
 	protected void doSetFocus() {
-		if (spinner!=null) {
-			spinner.setFocus();
+		if (text!=null) {
+			text.setFocus();
 		} 
 	}
 
 
 	@Override
 	protected void doSetValue(Object value) {
-		if (spinner!=null) {
+		if (text!=null) {
 			try {
-				spinner.setSelection(Integer.parseInt(value.toString()));
+				text.setText(value.toString());
 			} catch (java.lang.NumberFormatException nfe) {
-				spinner.setSelection(0);
+				text.setSelection(0);
 			}
 		}
 	}
@@ -205,20 +327,20 @@ public class SpinnerCellEditorWithPlayButton extends AppliableCellEditor {
 	}
 
 	public void addSelectionListener(SelectionListener l) {
-		spinner.addSelectionListener(l);
+		text.addSelectionListener(l);
 	}
 
 	/**
 	 * @param i
 	 */
 	public void setMaximum(int i) {
-		if (spinner!=null) spinner.setMaximum(i);
+		if (boundsDecorator!=null) boundsDecorator.setMaximum(i);
 	}
 	/**
 	 * @param i
 	 */
 	public void setMinimum(int i) {
-		if (spinner!=null) spinner.setMinimum(i);
+		if (boundsDecorator!=null) boundsDecorator.setMinimum(i);
 	}
 
 
@@ -257,6 +379,10 @@ public class SpinnerCellEditorWithPlayButton extends AppliableCellEditor {
 			data.exclude = !isVisible;
 		}
 		widget.setVisible(isVisible);
+	}
+
+	public void addModifyListener(ModifyListener modifyListener) {
+		text.addModifyListener(modifyListener);
 	}
 
 }

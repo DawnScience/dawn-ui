@@ -721,7 +721,7 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		setDataShape(lazySet.getShape());
 		
 		explain.setText("Create a slice of "+sliceObject.getName()+".\nIt has the shape "+Arrays.toString(dataShape));
-        if (sliceEditingSupport!=null) sliceEditingSupport.setPlayButtonVisible(false);
+        //if (sliceEditingSupport!=null) sliceEditingSupport.setPlayButtonVisible(false);
 		
 		createDimsData(source.isExpression());
         if (axisEditingSupport!=null) axisEditingSupport.updateAxesChoices();

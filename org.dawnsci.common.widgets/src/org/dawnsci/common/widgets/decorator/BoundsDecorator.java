@@ -33,6 +33,7 @@ public class BoundsDecorator extends RegexDecorator {
     private Object       minimum;
     private NumberFormat numberFormat;
 	private boolean      isError=false;
+	private boolean      allowInvalidValues= true; // Invalid colors red
 
 	public BoundsDecorator(Text text, String stringPattern, NumberFormat numFormat) {
 		super(text, stringPattern);
@@ -41,6 +42,8 @@ public class BoundsDecorator extends RegexDecorator {
 	
 	@Override
 	protected boolean check(String totalString, String delta) {
+		
+		if ("".equals(totalString)) return true;
 		Number val = null;
 		try {
 			val = parseValue(totalString);
@@ -49,9 +52,9 @@ public class BoundsDecorator extends RegexDecorator {
 		}
 		if (val==null) return false;
 		
-		checkBounds(val, true); // Colors red not unacceptable value.
+		boolean ok = checkBounds(val, true); // Colors red not unacceptable value.
 		
-		return true;
+		return allowInvalidValues||ok;
 	}
 
 	private Number parseValue(String totalString) {
@@ -87,31 +90,35 @@ public class BoundsDecorator extends RegexDecorator {
 		}
 	}
 
-	private void checkBounds(final Number value, boolean fireListeners) {
-		checkBounds(value, getMinimum(), getMaximum(), fireListeners);
+	private boolean checkBounds(final Number value, boolean fireListeners) {
+		return checkBounds(value, getMinimum(), getMaximum(), fireListeners);
 	}
 	
-	private void checkBounds(final Number value, Number min, Number max, boolean fireListeners) {
+	private boolean checkBounds(final Number value, Number min, Number max, boolean fireListeners) {
 
+		boolean ok = true;
 		try {
 			if (Double.isInfinite(value.doubleValue())) {
 				setError(false, createToolTipTextFromBounds(value, getMinimum(), getMaximum()));
-				return;
+				ok = false;
+			} else if (!checkValue(value, min, BoundsType.MINIMUM)) {
+				setError(true, value+" is less than the minimum value of "+getMinimum());
+				ok = false;
+			} else if (!checkValue(value, max, BoundsType.MAXIMUM)) {
+				setError(true, value+" is greater than the maximum value of "+getMaximum());
+				ok = false;
+			} else {
+				setError(false, createToolTipTextFromBounds(value, getMinimum(), getMaximum()));
+				ok = true;
 			}
 			
-			if (!checkValue(value, min, BoundsType.MINIMUM)) {
-				setError(true, value+" is less than the minimum value of "+getMinimum());
-				return;
-			}
-			if (!checkValue(value, max, BoundsType.MAXIMUM)) {
-				setError(true, value+" is greater than the maximum value of "+getMaximum());
-				return;
-			}
-			setError(false, createToolTipTextFromBounds(value, getMinimum(), getMaximum()));
 		} finally {
 			// We let this current value take then fire a check later.
-			fireValueChangedListeners(new ValueChangeEvent(BoundsDecorator.this, value));
+			if (allowInvalidValues||ok) {
+				fireValueChangedListeners(new ValueChangeEvent(BoundsDecorator.this, value));
+			}
 		}
+		return ok;
 	}
 
 	private boolean checkValue(Number value, Number bound, BoundsType type) {
@@ -180,6 +187,11 @@ public class BoundsDecorator extends RegexDecorator {
 	}
 
 	private void setError(boolean isError, String toolTip) {
+		if (!allowInvalidValues) {
+			this.isError = false;
+			text.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_BLACK)); 
+			return;
+		}
 		this.isError = isError;
 		text.setToolTipText(toolTip);
 		if (isError) {
@@ -253,6 +265,20 @@ public class BoundsDecorator extends RegexDecorator {
 
 	public boolean isError() {
 		return isError;
+	}
+
+
+	public boolean isAllowInvalidValues() {
+		return allowInvalidValues;
+	}
+
+	/**
+	 * You can set the bounds checker not to accept invalid values or
+	 * to accept them and color them red. Coloring red is the default.
+	 * @param allowInvalidValues
+	 */
+	public void setAllowInvalidValues(boolean allowInvalidValues) {
+		this.allowInvalidValues = allowInvalidValues;
 	}
 
 }
