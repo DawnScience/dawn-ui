@@ -260,7 +260,7 @@ public class XYRegionGraph extends XYGraph {
 	/**
 	 * Zooms about the central point a factor (-ve for out) usually +-0.1
 	 */
-	public void setZoomLevel(MouseEvent evt, double delta) {
+	public void setZoomLevel(MouseEvent evt, double delta, boolean tryToUseWhitespace) {
 		
 		int primX = primaryXAxis.getTickLength();
 		int primY = primaryYAxis.getTickLength();
@@ -276,7 +276,7 @@ public class XYRegionGraph extends XYGraph {
 		}
 		
 		// Allow for available size
-		if (getRegionArea().getImageTrace()!=null && Boolean.getBoolean("org.dawb.workbench.plotting.system.do.zoom.fudging")) {
+		if (getRegionArea().getImageTrace()!=null && tryToUseWhitespace) {
 			
 			// Fudged scaling algorithm
 			// TODO make a less jerky one

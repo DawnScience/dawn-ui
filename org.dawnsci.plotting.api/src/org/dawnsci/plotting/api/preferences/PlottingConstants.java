@@ -95,4 +95,9 @@ public class PlottingConstants extends BasePlottingConstants {
 	 */
 	public static final String AUTO_HIDE_ERROR_SIZE = "org.dawb.workbench.plotting.preference.autoHideErrorBars";
 
+	/**
+	 * Records if the zooming should try to use any whitespace square.
+	 */
+	public static final String ZOOM_INTO_WHITESPACE = "org.dawnsci.plotting.zoom.whitespace.use";
+
 }

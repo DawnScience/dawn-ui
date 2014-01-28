@@ -20,6 +20,7 @@ import org.csstudio.swt.xygraph.undo.RemoveAnnotationCommand;
 import org.csstudio.swt.xygraph.undo.ZoomType;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
+import org.dawnsci.plotting.PlottingActionBarManager;
 import org.dawnsci.plotting.api.ActionType;
 import org.dawnsci.plotting.api.ManagerType;
 import org.dawnsci.plotting.api.PlotType;
@@ -551,6 +552,7 @@ class LightWeightPlotActions {
 		actionBarManager.addImageAction(rescaleAction);
 		
         actionBarManager.registerAction(ToolbarConfigurationConstants.ZOOM.getId(), rescaleAction, ActionType.XYANDIMAGE);
+	
 	}
 
 	protected void createAspectHistoAction(final XYRegionGraph xyGraph) {
@@ -619,6 +621,14 @@ class LightWeightPlotActions {
 		};
 		lockHisto.setChecked(false);
 		
+		final Action zoomWhitespace = new Action("Use whitespace when zooming with mouse wheel", IAction.AS_CHECK_BOX) {
+		    public void run() {
+		    	PlottingSystemActivator.getPlottingPreferenceStore().setValue(PlottingConstants.ZOOM_INTO_WHITESPACE, isChecked());
+		    }
+		};
+		zoomWhitespace.setChecked(PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.ZOOM_INTO_WHITESPACE));
+
+		
 		final Action ignoreRGB = new Action("Ignore RBG information", IAction.AS_CHECK_BOX) {
 			
 		    public void run() {		    	
@@ -663,6 +673,7 @@ class LightWeightPlotActions {
 	    //actionBarManager.addImageAction(showStack);
 	    actionBarManager.addImageAction(ignoreRGB);
 	    actionBarManager.addImageAction(lockHisto);
+		actionBarManager.addImageAction(zoomWhitespace);
 	    actionBarManager.addImageSeparator();
 
 	}

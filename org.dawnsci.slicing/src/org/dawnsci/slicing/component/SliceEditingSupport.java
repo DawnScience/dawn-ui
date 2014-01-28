@@ -41,11 +41,10 @@ class SliceEditingSupport extends EditingSupport {
 	 */
 	private NumberFormat format;
 
-	private ScaleCellEditor                 scaleEditor;
-	private PlayCellEditor spinnerEditor;
-	private TextCellEditor                  rangeEditor;
-	
-	private SliceSystemImpl                 system;
+	private ScaleCellEditor  scaleEditor;
+	private PlayCellEditor   spinnerEditor;
+	private TextCellEditor   rangeEditor;
+	private SliceSystemImpl  system;
 
 	public SliceEditingSupport(final SliceSystemImpl system, ColumnViewer viewer) {
 		

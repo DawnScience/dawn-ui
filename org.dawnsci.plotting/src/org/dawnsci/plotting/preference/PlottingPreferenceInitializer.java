@@ -53,6 +53,7 @@ public class PlottingPreferenceInitializer extends AbstractPreferenceInitializer
 		store.setDefault(PlottingConstants.RESET_ON_DEACTIVATE,  true);
 		store.setDefault(PlottingConstants.INCLUDE_ORIGINAL,     true);
 		store.setDefault(PlottingConstants.LOAD_IMAGE_STACKS,    false);
+		store.setDefault(PlottingConstants.ZOOM_INTO_WHITESPACE, false);
 		
 		if (store.getInt(PlottingConstants.AUTO_HIDE_ERROR_SIZE)<1) {
 			store.setValue(PlottingConstants.GLOBAL_SHOW_ERROR_BARS, true);

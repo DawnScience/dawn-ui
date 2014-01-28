@@ -330,7 +330,9 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 				if (e.count==0)    return;
 				String level  = System.getProperty("org.dawb.workbench.plotting.system.zoomLevel");
 				double factor = level!=null ? Double.parseDouble(level) :  0.1d;
-				xyGraph.setZoomLevel(e, direction*factor);
+				
+				boolean useWhite = PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.ZOOM_INTO_WHITESPACE);
+				xyGraph.setZoomLevel(e, direction*factor, useWhite);
 				xyCanvas.redraw();
 			}	
 		};
