@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2013 Diamond Light Source Ltd.
+ * Copyright (c) 2014 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -34,6 +34,7 @@ import org.dawnsci.plotting.api.trace.IImageStackTrace;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.ILineStackTrace;
 import org.dawnsci.plotting.api.trace.ILineTrace;
+import org.dawnsci.plotting.api.trace.IMulti2DTrace;
 import org.dawnsci.plotting.api.trace.IScatter3DTrace;
 import org.dawnsci.plotting.api.trace.ISurfaceTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
@@ -91,6 +92,11 @@ public class ThreadSafePlottingSystem extends StandardMBean implements IPlotting
 	@Override
 	public ISurfaceTrace createSurfaceTrace(String traceName) {
 		return (ISurfaceTrace)call(getMethodName(Thread.currentThread().getStackTrace()), traceName);
+	}
+
+	@Override
+	public IMulti2DTrace createMulti2DTrace(String traceName) {
+		return (IMulti2DTrace)call(getMethodName(Thread.currentThread().getStackTrace()), traceName);
 	}
 
 	@Override

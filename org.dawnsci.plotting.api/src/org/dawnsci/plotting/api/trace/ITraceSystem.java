@@ -56,6 +56,15 @@ public interface ITraceSystem {
 	public ISurfaceTrace createSurfaceTrace(String traceName);
 
 	/**
+	 * Creates a multi image trace. This does not add the trace
+	 * or give it any data.
+	 * 
+	 * @param traceName
+	 * @return
+	 */
+	public IMulti2DTrace createMulti2DTrace(String traceName);
+
+	/**
 	 * Creates a stack trace used for 3D plotting. This does not add the trace
 	 * or give it any data.
 	 * 

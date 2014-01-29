@@ -1,12 +1,11 @@
 /*-
- * Copyright (c) 2013 European Synchrotron Radiation Facility,
- *                    Diamond Light Source Ltd.
+ * Copyright (c) 2014 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- */ 
+ */
 package org.dawnsci.plotting.system;
 
 import java.util.ArrayList;
@@ -38,10 +37,12 @@ import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.region.IRegionListener;
 import org.dawnsci.plotting.api.trace.ColorOption;
+import org.dawnsci.plotting.api.trace.IImage3DTrace;
 import org.dawnsci.plotting.api.trace.IImageStackTrace;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.ILineStackTrace;
 import org.dawnsci.plotting.api.trace.ILineTrace;
+import org.dawnsci.plotting.api.trace.IMulti2DTrace;
 import org.dawnsci.plotting.api.trace.IScatter3DTrace;
 import org.dawnsci.plotting.api.trace.ISurfaceTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
@@ -526,7 +527,6 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 				switchPlottingType(PlotType.IMAGE);
 			}
 			clearTraces(); // Only one image at a time!
-            			
 			if (traceMap==null) traceMap = new LinkedHashMap<String, ITrace>(31);
 			traceMap.clear();
 			
@@ -550,7 +550,6 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 				fireTraceAdded(new TraceEvent(trace));
 			}
 			return trace;
-            
 		} catch (Throwable e) {
 			logger.error("Cannot load file "+data.getName(), e);
 			return null;
@@ -707,6 +706,16 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	@Override
 	public ISurfaceTrace createSurfaceTrace(String traceName) {
 		ISurfaceTrace trace = jrealityViewer.createSurfaceTrace(traceName);
+		return (ISurfaceTrace) setPaletteData(trace);
+	}
+
+	@Override
+	public IMulti2DTrace createMulti2DTrace(String traceName) {
+		IMulti2DTrace trace = jrealityViewer.createMulti2DTrace(traceName);
+		return (IMulti2DTrace) setPaletteData(trace);
+	}
+
+	private IImage3DTrace setPaletteData(IImage3DTrace trace) {
 		PaletteData palette = null;
 		if (trace.getPaletteData()==null) {
 			final String schemeName = PlottingSystemActivator.getPlottingPreferenceStore().getString(PlottingConstants.COLOUR_SCHEME);	
@@ -802,8 +811,14 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	public void removeTrace(ITrace trace) {
 		if (traceMap!=null) traceMap.remove(trace.getName());
 		
-		if (trace instanceof ISurfaceTrace) { // TODO FIXME Others?
+		if (trace instanceof ISurfaceTrace) {
 			jrealityViewer.removeSurfaceTrace((ISurfaceTrace)trace);
+		} else if (trace instanceof IMulti2DTrace) {
+			jrealityViewer.removeMulti2DTrace((IMulti2DTrace)trace);
+		} else if (trace instanceof ILineStackTrace) {
+			jrealityViewer.removeStackTrace((ILineStackTrace)trace);
+		} else if (trace instanceof IScatter3DTrace) {
+			jrealityViewer.removeScatter3DTrace((IScatter3DTrace)trace);
 		} else {
 			lightWeightViewer.removeTrace(trace);
 		}

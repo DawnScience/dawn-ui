@@ -20,6 +20,7 @@ import org.dawnsci.plotting.api.trace.IImageStackTrace;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.ILineStackTrace;
 import org.dawnsci.plotting.api.trace.ILineTrace;
+import org.dawnsci.plotting.api.trace.IMulti2DTrace;
 import org.dawnsci.plotting.api.trace.IScatter3DTrace;
 import org.dawnsci.plotting.api.trace.ISurfaceTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
@@ -94,6 +95,11 @@ public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSyste
 	@Override
 	public ISurfaceTrace createSurfaceTrace(String traceName) {
 		return (ISurfaceTrace)call(getMethodName(Thread.currentThread().getStackTrace()), traceName);
+	}
+
+	@Override
+	public IMulti2DTrace createMulti2DTrace(String traceName) {
+		return (IMulti2DTrace)call(getMethodName(Thread.currentThread().getStackTrace()), traceName);
 	}
 
 	@Override

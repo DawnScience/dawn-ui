@@ -9,6 +9,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DirectColorModel;
 import java.awt.image.IndexColorModel;
 import java.awt.image.WritableRaster;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
@@ -21,11 +22,13 @@ import javax.swing.JPanel;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.trace.ILineStackTrace;
+import org.dawnsci.plotting.api.trace.IMulti2DTrace;
 import org.dawnsci.plotting.api.trace.IScatter3DTrace;
 import org.dawnsci.plotting.api.trace.ISurfaceTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.dawnsci.plotting.jreality.compositing.CompositeEntry;
+import org.dawnsci.plotting.jreality.compositing.CompositeOp;
 import org.dawnsci.plotting.jreality.compositing.CompositingControl;
 import org.dawnsci.plotting.jreality.core.AxisMode;
 import org.dawnsci.plotting.jreality.core.IDataSet3DCorePlot;
@@ -226,6 +229,21 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	}
 
 	/**
+	 * Clear the surface from being plotted.
+	 * 
+	 * The multi 2d plot will be deactivated after removal but may be added again later.
+	 * 
+	 * @param name
+	 * @return
+	 * @throws Exception 
+	 */
+	public void removeMulti2DTrace(final IMulti2DTrace trace) {
+		Multi2DTrace multi = (Multi2DTrace)trace;
+		removeOldSceneNodes();
+		multi.setActive(false);
+	}
+
+	/**
 	 * Create a surface trace to be plotted in 3D.
 	 * 
 	 * As soon as you call this the plotting system will switch to surface mode.
@@ -239,6 +257,19 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		return surface;
 	}
 
+	/**
+	 * Create a multi image trace to be plotted in 3D.
+	 * 
+	 * As soon as you call this the plotting system will switch to Multi 2D mode.
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public IMulti2DTrace createMulti2DTrace(final String name) {
+		Multi2DTrace multi = new Multi2DTrace(this, name);
+		return multi;
+	}
+
 	private ITrace currentTrace;
 
 	public void addTrace(ITrace trace) {
@@ -249,6 +280,8 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 			system.setPlotType(PlotType.XY_STACKED_3D);
 		} else if (trace instanceof IScatter3DTrace) {
 			system.setPlotType(PlotType.XY_SCATTER_3D);
+		} else if (trace instanceof IMulti2DTrace) {
+			system.setPlotType(PlotType.MULTI_IMAGE);
 		}
 		TraceWillPlotEvent evt = new TraceWillPlotEvent(trace, true);
 		system.fireWillPlot(evt);
@@ -260,6 +293,8 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 			addStackTrace((ILineStackTrace)trace);
 		} else if (trace instanceof IScatter3DTrace) {
 			addScatter3DTrace((IScatter3DTrace)trace);
+		} else if (trace instanceof IMulti2DTrace) {
+			addMulti2DTrace((IMulti2DTrace)trace);
 		}
 		currentTrace = trace;
 	}
@@ -319,7 +354,21 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		}
 		scatter.setActive(true);
 	}
-	
+
+	protected void addMulti2DTrace(final IMulti2DTrace trace) {
+		Multi2DTrace multi = (Multi2DTrace)trace;
+		try {
+			multi.setPlottingSystem(system);
+			graph.setVisible(false);
+			plot(multi.createAxisValues(), getWindow(multi.getWindow()), PlottingMode.MULTI2D, multi.getMulti2D());
+			plotter.handleColourCast(multi.createImageData(), graph, multi.getMin().doubleValue(), multi.getMax().doubleValue());
+		} finally {
+			graph.setVisible(true);
+			refresh(true);
+		}
+		multi.setActive(true);
+	}
+
 	/**
 	 * Clear the 3D scatter plot from being plotted.
 	 * 
@@ -477,6 +526,25 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 			bbox = plotter.buildBoundingBox();
 			root.addChild(bbox);
 		}
+		// update multi2d table
+		if (currentMode == PlottingMode.MULTI2D)
+			updateMulti2DTable(sets);
+	}
+
+	private void updateMulti2DTable(List<IDataset> sets) {
+		List<CompositeEntry> table = new ArrayList<CompositeEntry>();
+		for (int i = 0; i < sets.size(); i++) {
+			String name = sets.get(i).getName();
+			float weight = 1.0f / sets.size();
+			if (name == null)
+				name = "";
+			CompositeEntry entry = 
+				new CompositeEntry(name, weight, CompositeOp.ADD,(byte)7);
+			table.add(entry);
+		}
+		if (cmpControl != null)
+			cmpControl.updateTable(table);
+		((DataSet3DPlot2DMulti)plotter).updateCompositingSettings(table);
 	}
 
 	private void checkAndAddLegend(List<? extends IDataset> dataSets) {
@@ -817,11 +885,13 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	 *            Number of stack plots
 	 */
 	private boolean setMode(PlottingMode newPlotMode, int dataSize) {
+		// clean old scene and widgets (table)
+		removeOldSceneNodes();
+		clearControls();
 		if (dataSize == previousSize && currentMode.equals(newPlotMode))
 			return false;
 		previousSize = dataSize;
 
-		removeOldSceneNodes();
 		currentMode = newPlotMode;
 		if (hasJOGL) plotArea.setFocus();
 
@@ -1001,7 +1071,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	 * @param persp
 	 *            should this be a perspective camera (true) otherwise false
 	 */
-	private void setPerspectiveCamera(boolean persp, boolean needToRender) {
+	public void setPerspectiveCamera(boolean persp, boolean needToRender) {
 		Camera sceneCamera = CameraUtility.getCamera(viewerApp.getCurrentViewer());
 		if (sceneCamera.isPerspective())
 			perspFOV = sceneCamera.getFieldOfView();
@@ -1096,6 +1166,10 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		if (plotActions!=null) {
 			plotActions.dispose();
 		}
+		clearControls();
+	}
+
+	private void clearControls() {
 		if (legendTable != null) {
 			legendTable.removeAllLegendChangeEventListener();
 			legendTable.dispose();
