@@ -27,16 +27,17 @@ public class PlottingSelectionProvider implements ISelectionProvider {
 	private ISelection currentSelection = new StructuredSelection();
 	private BlockingDeque<ISelection> selectionQueue;
 	private Thread                    selectionJob;
+	private boolean isDisposed;
 	
-	public PlottingSelectionProvider() {
+	public PlottingSelectionProvider(String plotSystemName) {
 		listeners      = new HashSet<ISelectionChangedListener>(11);
 		selectionQueue = new LinkedBlockingDeque<ISelection>(1);
 		
-		selectionJob   = new Thread("Plot selection thread") {		
+		selectionJob   = new Thread("Plot selection thread '"+plotSystemName+"'") {		
 			@Override
 			public void run() {
 				
-				while(listeners!=null&&selectionQueue!=null) {
+				while(!isDisposed && listeners!=null && selectionQueue!=null) {
 					try {
 						currentSelection = selectionQueue.take();
 						if (currentSelection instanceof DoneSelection) return;
@@ -96,5 +97,12 @@ public class PlottingSelectionProvider implements ISelectionProvider {
 	private final class DoneSelection extends StructuredSelection {
 		
 	}
+	
+
+	public void dispose() {
+		clear();
+		this.isDisposed = true;
+	}
+
 
 }

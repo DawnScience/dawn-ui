@@ -214,7 +214,9 @@ public abstract class AbstractPlottingSystem implements IPlottingSystem, IToolPa
 		traceListeners = null;
 		pointControls = null;
 		
-		if (selectionProvider!=null) selectionProvider.clear();
+		if (selectionProvider!=null) {
+			selectionProvider.dispose();
+		}
 		selectionProvider = null;
 		
 		if (currentToolIdMap!=null) currentToolIdMap.clear();
@@ -465,7 +467,7 @@ public abstract class AbstractPlottingSystem implements IPlottingSystem, IToolPa
 	protected PlottingSelectionProvider selectionProvider;
 
 	public ISelectionProvider getSelectionProvider() {
-		if (selectionProvider==null) selectionProvider = new PlottingSelectionProvider();
+		if (selectionProvider==null) selectionProvider = new PlottingSelectionProvider(getPlotName());
 		return selectionProvider;
 	}
 	

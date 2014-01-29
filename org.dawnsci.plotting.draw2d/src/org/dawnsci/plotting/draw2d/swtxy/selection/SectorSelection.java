@@ -487,7 +487,7 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 						double[] c = coords.getPositionValue(end.x(), end.y());
 						int[] r = new int[]{(int)c[0], (int)c[1]};
 
-						SectorROI croi = roiHandler.interpretMouseDragging(spt,r);
+						SectorROI croi = (SectorROI)roiHandler.interpretMouseDragging(spt,r);
 
 						intUpdateFromROI(croi);
 						fireROIDragged(croi, roiHandler.getStatus() == HandleStatus.RESIZE ?
@@ -505,7 +505,7 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 						double[] c = coords.getPositionValue(end.x(), end.y());
 						int[] r = new int[]{(int)c[0], (int)c[1]};
 
-						SectorROI croi = roiHandler.interpretMouseDragging(spt,r);
+						SectorROI croi = (SectorROI)roiHandler.interpretMouseDragging(spt,r);
 
 						updateFromROI(croi);
 						roiHandler.unconfigureDragging();
