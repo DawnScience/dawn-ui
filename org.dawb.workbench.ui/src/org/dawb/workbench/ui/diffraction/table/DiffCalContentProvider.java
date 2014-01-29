@@ -19,6 +19,11 @@ public class DiffCalContentProvider implements IStructuredContentProvider {
 		if (inputElement == null) {
 			return null;
 		}
-		return ((List<?>) inputElement).toArray();
+		
+		if (inputElement instanceof DiffractionDataManager) {
+			return ((DiffractionDataManager)inputElement).getModel().toArray();
+		}
+		
+		return null;
 	}
 }

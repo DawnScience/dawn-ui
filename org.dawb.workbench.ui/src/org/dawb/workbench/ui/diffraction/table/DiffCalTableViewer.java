@@ -1,12 +1,8 @@
 package org.dawb.workbench.ui.diffraction.table;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.dawb.workbench.ui.Activator;
-import org.dawnsci.plotting.tools.diffraction.DiffractionUtils;
-import org.dawnsci.plotting.util.PlottingUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.action.Action;
@@ -38,11 +34,9 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.part.ResourceTransfer;
 
-import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorPropertyEvent;
 import uk.ac.diamond.scisoft.analysis.diffraction.IDetectorPropertyListener;
 import uk.ac.diamond.scisoft.analysis.hdf5.HDF5NodeLink;
-import uk.ac.diamond.scisoft.analysis.io.ILoaderService;
 
 /**
  * 
@@ -52,14 +46,12 @@ import uk.ac.diamond.scisoft.analysis.io.ILoaderService;
 public class DiffCalTableViewer extends TableViewer {
 
 	private Action deleteAction;
-	private List<DiffractionTableData> model = new ArrayList<DiffractionTableData>();
-	private TabFolder tabFolder;
+	//private List<DiffractionTableData> model = new ArrayList<DiffractionTableData>();
+	private DiffractionDataManager manager;
 	private Composite parent;
 	private List<String> pathsList;
 	private IDetectorPropertyListener detectorPropertyListener;
-	private ILoaderService service;
 	private DropTargetAdapter dropListener;
-	private List<TableChangedListener> changesListeners;
 	private Table table;
 
 	/**
@@ -71,15 +63,14 @@ public class DiffCalTableViewer extends TableViewer {
 	 * @param service
 	 *           service loader, can be null
 	 */
-	public DiffCalTableViewer(Composite parent, List<String> pathsList, 
-						ILoaderService service) {
+	public DiffCalTableViewer(Composite parent, List<String> pathsList, DiffractionDataManager manager) {
 		super(parent, SWT.FULL_SELECTION
 				| SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
 		this.parent = parent;
 		this.pathsList = pathsList;
-		this.service = service;
 		this.table = getTable();
-
+		this.manager = manager;
+		
 		initialize();
 		createColumns(this);
 		table.setHeaderVisible(true);
@@ -89,7 +80,7 @@ public class DiffCalTableViewer extends TableViewer {
 		
 		setContentProvider(new DiffCalContentProvider());
 		setLabelProvider(new DiffCalLabelProvider());
-		setInput(model);
+		setInput(manager);
 		getControl().setLayoutData(
 				new GridData(SWT.FILL, SWT.FILL, true, true));
 		refresh();
@@ -149,10 +140,7 @@ public class DiffCalTableViewer extends TableViewer {
 				if (dropData instanceof IResource[]) {
 					IResource[] res = (IResource[]) dropData;
 					for (int i = 0; i < res.length; i++) {
-						DiffractionTableData d = createData(res[i].getRawLocation().toOSString(), null);
-						if (d != null) {
-							good = d;
-						}
+						manager.loadData(res[i].getRawLocation().toOSString(), null);
 					}
 				} else if (dropData instanceof TreeSelection) {
 					TreeSelection selectedNode = (TreeSelection) dropData;
@@ -163,31 +151,18 @@ public class DiffCalTableViewer extends TableViewer {
 							HDF5NodeLink node = (HDF5NodeLink) obj[i];
 							if (node == null)
 								return;
-							d = createData(node.getFile().getFilename(), node.getFullName());
+							manager.loadData(node.getFile().getFilename(), node.getFullName());
 						} else if (obj[i] instanceof IFile) {
 							IFile file = (IFile) obj[i];
-							d = createData(file.getLocation().toOSString(), null);
-						}
-						if (d != null) {
-							good = d;
+							manager.loadData(file.getLocation().toOSString(), null);
 						}
 					}
 				} else if (dropData instanceof String[]) {
 					String[] selectedData = (String[]) dropData;
 					for (int i = 0; i < selectedData.length; i++) {
-						DiffractionTableData d = createData(selectedData[i], null);
-						if (d != null) {
-							good = d;
-						}
+						manager.loadData(selectedData[i], null);
 					}
 				}
-
-				updateTableColumnsAndLayout();
-				if (good != null) {
-					table.deselectAll();
-					setSelection(new StructuredSelection(good));
-				}
-				fireTableChangedEvent(TableChangedEvent.ADDED);
 			}
 		};
 
@@ -198,38 +173,23 @@ public class DiffCalTableViewer extends TableViewer {
 				Object[] selected = selection.toArray();
 				for (int i = 0; i < selected.length; i++) {
 					DiffractionTableData selectedData = (DiffractionTableData) selected[i];
-					if (model.size() > 0) {
-						if (model.remove(selectedData)) {
+					if (manager.getModel().size() > 0) {
+						if (manager.getModel().remove(selectedData)) {
 							if (selectedData.md != null)
 								selectedData.md.getDetector2DProperties().removeDetectorPropertyListener(detectorPropertyListener);
 						}
 					}
 				}
-				if (!model.isEmpty()) {
+				if (!manager.getModel().isEmpty()) {
 					setSelection(new StructuredSelection((DiffractionTableData) getElementAt(0)));
+				} else {
+					setSelection(new StructuredSelection());
 				}
-
-				fireTableChangedEvent(TableChangedEvent.REMOVED);
-				updateTableColumnsAndLayout();
 			}
 		};
 	}
 
-	/**
-	 * Get the model of the DiffCalTableViewer
-	 * @return
-	 */
-	public List<DiffractionTableData> getModel() {
-		return model;
-	}
 
-	/**
-	 * 
-	 * @param tabFolder
-	 */
-	public void setTabFolder(TabFolder tabFolder) {
-		this.tabFolder = tabFolder;
-	}
 
 	/**
 	 * Add DetectorPropertyListener for the given DiffractionTableData
@@ -245,65 +205,6 @@ public class DiffCalTableViewer extends TableViewer {
 	 */
 	public void removeDetectorPropertyListener (DiffractionTableData data) {
 		data.md.getDetector2DProperties().removeDetectorPropertyListener(detectorPropertyListener);
-	}
-
-	public void addTableChangedListener(TableChangedListener listener) {
-		if (changesListeners==null)
-			changesListeners = new ArrayList<TableChangedListener>();
-		changesListeners.add(listener);
-	}
-
-	public void removeTableChangedListener(TableChangedListener listener) {
-		if (changesListeners == null)
-			return;
-		changesListeners.remove(listener);
-	}
-
-	protected void fireTableChangedEvent(TableChangedEvent event) {
-		int size = changesListeners.size();
-		for (int i = 0; i < size; i++) {
-			TableChangedListener listener = (TableChangedListener) changesListeners.get(i);
-			listener.tableChanged(event);
-		}
-	}
-
-	/**
-	 * Creates a {@link DiffractionTableData} object and updates the model in the table viewer
-	 * @param filePath
-	 * @param dataFullName
-	 * @return
-	 */
-	public DiffractionTableData createData(String filePath, String dataFullName) {
-		// Test if the selection has already been loaded and is in the model
-		DiffractionTableData data = null;
-		if (filePath == null)
-			return data;
-
-		for (DiffractionTableData d : model) {
-			if (filePath.equals(d.path)) {
-				data = d;
-				break;
-			}
-		}
-
-		if (data == null) {
-			IDataset image = PlottingUtils.loadData(filePath, dataFullName);
-			if (image == null)
-				return data;
-			int j = filePath.lastIndexOf(File.separator);
-			String fileName = j > 0 ? filePath.substring(j + 1) : null;
-			image.setName(fileName + ":" + image.getName());
-
-			data = new DiffractionTableData();
-			data.path = filePath;
-			data.name = fileName;
-			data.image = image;
-			String[] statusString = new String[1];
-			data.md = DiffractionUtils.getDiffractionMetadata(image, filePath, service, statusString);
-			model.add(data);
-		}
-
-		return data;
 	}
 
 	private void createColumns(TableViewer tv) {
@@ -361,24 +262,19 @@ public class DiffCalTableViewer extends TableViewer {
 	/**
 	 * Update the visibility of the Table columns and parent layout
 	 */
-	public void updateTableColumnsAndLayout() {
-		int tabIndex = 0;
-		if (tabFolder == null)
-			tabIndex = 1;
-		else
-			tabIndex = tabFolder.getSelectionIndex();
+	public void updateTableColumnsAndLayout(int tabIndex) {
 		TableColumn[] columns = table.getColumns();
 		for (int i = 2; i < columns.length; i++) {
 			if (tabIndex == 0) {	// auto mode
 				int width = 0;
 				// if more than one image and distance column index
-				if (model.size() > 1 && i == 3)
+				if (manager.getModel().size() > 1 && i == 3)
 					width = 80;
 				table.getColumns()[i].setWidth(width);
 			} else if (tabIndex == 1) {	// manual mode
 				int width = 80;
 				// if less than 2 images and column is distance
-				if (model.size() <= 1 && i == 3)
+				if (manager.getModel().size() <= 1 && i == 3)
 					width = 0;
 				table.getColumns()[i].setWidth(width);
 			}
@@ -392,4 +288,5 @@ public class DiffCalTableViewer extends TableViewer {
 			scrollHolder.layout();
 		}
 	}
+	
 }
