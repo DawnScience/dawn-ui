@@ -333,8 +333,7 @@ public class BoxSelection extends AbstractSelectionRegion {
 
 						RectangularROI croi = (RectangularROI) roiHandler.interpretMouseDragging(spt, r);
 
-						final SelectionHandle handle = (SelectionHandle) translator.getRedrawFigure();
-						updateFromROI(croi, handle);
+						intUpdateFromROI(croi);
 						fireROIDragged(croi, roiHandler.getStatus() == HandleStatus.RESIZE ?
 								ROIEvent.DRAG_TYPE.RESIZE : ROIEvent.DRAG_TYPE.TRANSLATE);
 					}
@@ -398,7 +397,7 @@ public class BoxSelection extends AbstractSelectionRegion {
 		 */
 		public void updateFromROI(RectangularROI rroi) {
 			roiHandler.setROI(rroi);
-			updateFromROI(rroi, null);
+			intUpdateFromROI(rroi);
 		}
 
 		/**
@@ -406,7 +405,7 @@ public class BoxSelection extends AbstractSelectionRegion {
 		 * @param rroi
 		 * @param omit selection handle to not move
 		 */
-		private void updateFromROI(RectangularROI rroi, SelectionHandle omit) {
+		private void intUpdateFromROI(RectangularROI rroi) {
 			int[] pta = coords.getValuePosition(0,0);
 			int[] ptb = coords.getValuePosition(rroi.getLengths());
 
@@ -427,10 +426,8 @@ public class BoxSelection extends AbstractSelectionRegion {
 				for (int i = 0; i < imax; i++) {
 					double[] hpt = handler.getAnchorPoint(i, SIDE);
 					SelectionHandle handle = (SelectionHandle) handles.get(i);
-					if (handle != omit) {
-						pta  = coords.getValuePosition(hpt);
-						handle.setSelectionPoint(new PrecisionPoint(pta[0], pta[1]));
-					}
+					pta  = coords.getValuePosition(hpt);
+					handle.setSelectionPoint(new PrecisionPoint(pta[0], pta[1]));
 				}
 			}
 		}

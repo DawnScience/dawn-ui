@@ -489,8 +489,7 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 
 						SectorROI croi = roiHandler.interpretMouseDragging(spt,r);
 
-						final SelectionHandle handle = (SelectionHandle) translator.getRedrawFigure();
-						updateFromROI(croi, handle);
+						intUpdateFromROI(croi);
 						fireROIDragged(croi, roiHandler.getStatus() == HandleStatus.RESIZE ?
 								ROIEvent.DRAG_TYPE.RESIZE : ROIEvent.DRAG_TYPE.TRANSLATE);
 					}
@@ -552,7 +551,7 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 		 */
 		public void updateFromROI(SectorROI sroi) {
 			roiHandler.setROI(sroi);
-			updateFromROI(sroi, null);
+			intUpdateFromROI(sroi);
 		}
 
 		/**
@@ -560,7 +559,7 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 		 * @param sroi
 		 * @param omit selection handle to not move
 		 */
-		private void updateFromROI(SectorROI sroi, SelectionHandle omit) {
+		private void intUpdateFromROI(SectorROI sroi) {
 			final double x = sroi.getPointX();
 			final double y = sroi.getPointY();
 			final double[] r = sroi.getRadii();
@@ -597,10 +596,8 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 				for (int i = 0; i < imax; i++) {
 					double[] hpt = handler.getAnchorPoint(i, SIDE);
 					SelectionHandle handle = (SelectionHandle) handles.get(i);
-					if (handle != omit) {
-						int[] pnt  = coords.getValuePosition(hpt);
-						handle.setSelectionPoint(new PrecisionPoint(pnt[0], pnt[1]));
-					}
+					int[] pnt  = coords.getValuePosition(hpt);
+					handle.setSelectionPoint(new PrecisionPoint(pnt[0], pnt[1]));
 				}
 			}
 		}
