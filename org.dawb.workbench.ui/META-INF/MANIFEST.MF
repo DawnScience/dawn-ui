@@ -38,7 +38,7 @@ Import-Package: javax.measure.quantity;version="4.3.1",
  org.eclipse.draw2d,
  org.eclipse.nebula.widgets.formattedtext,
  org.eclipse.ui.ide,
- org.python.pydev.core;bundle-version="[3.0.0,3.1.0)",
+ org.python.pydev.core;bundle-version="[3.3.3,3.4.0)",
  org.slf4j,
  uk.ac.diamond.scisoft.analysis.rcp.editors
 Bundle-ClassPath: .
