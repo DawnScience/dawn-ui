@@ -1696,10 +1696,8 @@ public class DataSet3DPlot2D implements IDataSet3DCorePlot,
 			useLogarithmic = (newScaling != ScaleType.LINEAR);
 	}
 
-	protected void createXAxisLabelGeom()
-	{
-		if (xAxisLabelStr != null)
-		{
+	protected void createXAxisLabelGeom() {
+		if (xAxisLabelStr != null) {
 			double[] sizes = determineXYsize();
 			PointSetFactory factory = new PointSetFactory();
 			factory.setVertexCount(1);
@@ -1710,11 +1708,13 @@ public class DataSet3DPlot2D implements IDataSet3DCorePlot,
 			coords[0][1] = -0.5;
 			coords[0][2] = 0;
 			factory.setVertexCoordinates(coords);
-			factory.setVertexLabels(edgeLabels);		
+			factory.setVertexLabels(edgeLabels);
 			factory.update();
-			xAxisLabel.setGeometry(factory.getPointSet());			
+			if (xAxisLabel != null)
+				xAxisLabel.setGeometry(factory.getPointSet());
 		}
 	}
+
 	@Override
 	public void setXAxisLabel(String label) {
 		if (xAxisLabelStr == null || !label.equals(xAxisLabelStr))
@@ -1736,10 +1736,8 @@ public class DataSet3DPlot2D implements IDataSet3DCorePlot,
 
 	}
 
-	protected void createYAxisLabelGeom() 
-	{
-		if (yAxisLabelStr != null)
-		{
+	protected void createYAxisLabelGeom() {
+		if (yAxisLabelStr != null) {
 			double[] sizes = determineXYsize();
 			PointSetFactory factory = new PointSetFactory();
 			factory.setVertexCount(1);
@@ -1750,9 +1748,10 @@ public class DataSet3DPlot2D implements IDataSet3DCorePlot,
 			coords[0][1] = sizes[1] * 0.5;
 			coords[0][2] = 0;
 			factory.setVertexCoordinates(coords);
-			factory.setVertexLabels(edgeLabels);		
+			factory.setVertexLabels(edgeLabels);
 			factory.update();
-			yAxisLabel.setGeometry(factory.getPointSet());			
+			if(yAxisLabel != null)
+				yAxisLabel.setGeometry(factory.getPointSet());
 		}
 	}
 	
