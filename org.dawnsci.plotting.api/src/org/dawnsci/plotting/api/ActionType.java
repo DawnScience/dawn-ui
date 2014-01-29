@@ -10,7 +10,7 @@ package org.dawnsci.plotting.api;
 
 public enum ActionType {
 
-	XY, IMAGE, XYANDIMAGE, THREED, SURFACE, SCATTER3D, ALL;
+	XY, IMAGE, XYANDIMAGE, THREED, SURFACE, SCATTER3D, MULTIIMAGE, ALL;
 
 	public boolean isCompatible(PlotType type) {
 
@@ -32,6 +32,9 @@ public enum ActionType {
 			return true;
 		}
 		if (type.is3D() && this == THREED) {
+			return true;
+		}
+		if (type.isMulti2D() && this == MULTIIMAGE) {
 			return true;
 		}
 		return false;

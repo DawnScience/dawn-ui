@@ -27,7 +27,6 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class JRealityPlotActions {
 	
 	private static final Logger logger = LoggerFactory.getLogger(JRealityPlotActions.class);
@@ -35,6 +34,12 @@ public class JRealityPlotActions {
 	private JRealityPlotViewer        plotter;
 	private IPlottingSystem           system;
 	private IPlotActionSystem         actionMan;
+
+	private Action useTransparency;
+	private Action renderEdgeOnly;
+	private Action uniformSize;
+
+	private Action orthographicProjAction, boundingBox, xCoordGrid, yCoordGrid, zCoordGrid;
 
 	public JRealityPlotActions(JRealityPlotViewer jRealityPlotViewer,
 			                   IPlottingSystem    system) {
@@ -47,12 +52,16 @@ public class JRealityPlotActions {
 		// Tools
 		actionMan.createToolDimensionalActions(ToolPageRole.ROLE_3D, "org.dawb.workbench.plotting.views.toolPageView.3D");
 
-		// Configure
 		createGridLineActions();
+
+		//create reset action for multiimage
+//		actionMan.registerAction("jreality.plotting.reset.multi2.actions", createResetAction(), 
+//				ActionType.MULTIIMAGE, ManagerType.TOOLBAR);
 
 		// Print/export
 		createExportActions();
-		
+		//axes actions
+		createAxesActions();
 		// Others
 		createSurfaceModeActions();
 		createScatter3DModeActions();
@@ -118,10 +127,6 @@ public class JRealityPlotActions {
 		actionMan.registerAction(surfaceActionsGroupName, displayPoint, ActionType.SURFACE, ManagerType.MENUBAR);
 	}
 
-	private Action useTransparency;
-	private Action renderEdgeOnly;
-	private Action uniformSize;
-
 	private void createScatter3DModeActions() {
 		String scatterActionsName = "jreality.plotting.scatter3d.mode.actions";
 		actionMan.registerGroup(scatterActionsName, ManagerType.MENUBAR);
@@ -162,6 +167,11 @@ public class JRealityPlotActions {
 		uniformSize.setToolTipText("Switch on/off uniform point size");
 		actionMan.registerAction(scatterActionsName, uniformSize, ActionType.SCATTER3D, ManagerType.MENUBAR);
 
+	}
+
+	private void createAxesActions() {
+		String axesActionsName = "jreality.plotting.axes.actions";
+		actionMan.registerGroup(axesActionsName, ManagerType.MENUBAR);
 		// XAxis menu
 		Action xLabelTypeRound = new Action("", IAction.AS_RADIO_BUTTON) {
 			@Override
@@ -206,7 +216,7 @@ public class JRealityPlotActions {
 		xAxisMenu.add(xLabelTypeRound);
 		xAxisMenu.add(xLabelTypeExponent);
 		xAxisMenu.add(xLabelTypeSI);
-		actionMan.registerAction(scatterActionsName, xAxisMenu, ActionType.SCATTER3D, ManagerType.MENUBAR);
+		actionMan.registerAction(axesActionsName, xAxisMenu, ActionType.THREED, ManagerType.MENUBAR);
 
 		// YAxis menu
 		xLabelTypeSI.setText("X-Axis labels SI units");
@@ -262,7 +272,7 @@ public class JRealityPlotActions {
 		yAxisMenu.add(yLabelTypeRound);
 		yAxisMenu.add(yLabelTypeExponent);
 		yAxisMenu.add(yLabelTypeSI);
-		actionMan.registerAction(scatterActionsName, yAxisMenu, ActionType.SCATTER3D, ManagerType.MENUBAR);
+		actionMan.registerAction(axesActionsName, yAxisMenu, ActionType.SCATTER3D, ManagerType.MENUBAR);
 
 		// ZAxis menu
 		zLabelTypeRound.setText("Z-Axis labels integer");
@@ -302,7 +312,7 @@ public class JRealityPlotActions {
 		zAxisMenu.add(zLabelTypeRound);
 		zAxisMenu.add(zLabelTypeExponent);
 		zAxisMenu.add(zLabelTypeSI);
-		actionMan.registerAction(scatterActionsName, zAxisMenu, ActionType.SCATTER3D, ManagerType.MENUBAR);
+		actionMan.registerAction(axesActionsName, zAxisMenu, ActionType.THREED, ManagerType.MENUBAR);
 	}
 
 	private void createExportActions() {
@@ -433,24 +443,22 @@ public class JRealityPlotActions {
 		}
 	}
 
-	private Action boundingBox, xCoordGrid, yCoordGrid, zCoordGrid;
-
 	private void createGridLineActions() {
-		
-		actionMan.registerGroup("jreality.plotting.grid.line.actions", ManagerType.TOOLBAR);
-		
-		
-		Action reset = new Action("Reset orientation and zoom",IAction.AS_PUSH_BUTTON) {
+		String gridLineGroupNameAction = "jreality.plotting.grid.line.actions";
+		actionMan.registerGroup(gridLineGroupNameAction, ManagerType.TOOLBAR);
+
+		orthographicProjAction = new Action ("Toggle orthographic projection", IAction.AS_CHECK_BOX) {
 			@Override
-			public void run()
-			{
-				plotter.resetView();
-				plotter.refresh(false);
+			public void run() {
+				plotter.setPerspectiveCamera(!orthographicProjAction.isChecked(), true);
 			}
 		};
+		orthographicProjAction.setChecked(false);
+		orthographicProjAction.setImageDescriptor(Activator.getImageDescriptor("icons/orthographic.png"));
+		actionMan.registerAction(gridLineGroupNameAction, orthographicProjAction, ActionType.THREED, ManagerType.TOOLBAR);
 
-		reset.setImageDescriptor(Activator.getImageDescriptor("icons/axis.png"));
-		actionMan.registerAction("jreality.plotting.grid.line.actions", reset, ActionType.THREED, ManagerType.TOOLBAR);
+		Action reset = createResetAction();
+		actionMan.registerAction(gridLineGroupNameAction, reset, ActionType.THREED, ManagerType.TOOLBAR);
 
 		boundingBox = new Action("Toggle bounding box",IAction.AS_CHECK_BOX) {
 			@Override
@@ -463,9 +471,8 @@ public class JRealityPlotActions {
 
 		boundingBox.setChecked(true);
 		boundingBox.setImageDescriptor(Activator.getImageDescriptor("icons/box.png"));
-		actionMan.registerAction("jreality.plotting.grid.line.actions", boundingBox, ActionType.THREED, ManagerType.TOOLBAR);
-	
-		
+		actionMan.registerAction(gridLineGroupNameAction, boundingBox, ActionType.THREED, ManagerType.TOOLBAR);
+
 		// Configure
 		xCoordGrid = new Action("",IAction.AS_CHECK_BOX)
 		{
@@ -479,7 +486,7 @@ public class JRealityPlotActions {
 		xCoordGrid.setText("X grid lines");
 		xCoordGrid.setToolTipText("Toggle x axis grid lines");
 		xCoordGrid.setImageDescriptor(Activator.getImageDescriptor("icons/xgrid.png"));
-		actionMan.registerAction("jreality.plotting.grid.line.actions", xCoordGrid, ActionType.THREED, ManagerType.TOOLBAR);
+		actionMan.registerAction(gridLineGroupNameAction, xCoordGrid, ActionType.THREED, ManagerType.TOOLBAR);
 		
 		yCoordGrid = new Action("",IAction.AS_CHECK_BOX)
 		{
@@ -493,7 +500,7 @@ public class JRealityPlotActions {
 		yCoordGrid.setText("Y grid lines");
 		yCoordGrid.setToolTipText("Toggle y axis grid line");
 		yCoordGrid.setImageDescriptor(Activator.getImageDescriptor("icons/ygrid.png"));		
-		actionMan.registerAction("jreality.plotting.grid.line.actions", yCoordGrid, ActionType.THREED, ManagerType.TOOLBAR);
+		actionMan.registerAction(gridLineGroupNameAction, yCoordGrid, ActionType.THREED, ManagerType.TOOLBAR);
 
 		zCoordGrid = new Action("",IAction.AS_CHECK_BOX)
 		{
@@ -508,8 +515,22 @@ public class JRealityPlotActions {
 		zCoordGrid.setText("Z grid lines");
 		zCoordGrid.setToolTipText("Toggle z axis grid lines");
 		zCoordGrid.setImageDescriptor(Activator.getImageDescriptor("icons/zgrid.png"));
-		actionMan.registerAction("jreality.plotting.grid.line.actions", zCoordGrid, ActionType.THREED, ManagerType.TOOLBAR);
+		actionMan.registerAction(gridLineGroupNameAction, zCoordGrid, ActionType.THREED, ManagerType.TOOLBAR);
 		
+	}
+
+	private Action createResetAction() {
+		Action reset = new Action("Reset orientation and zoom",IAction.AS_PUSH_BUTTON) {
+			@Override
+			public void run()
+			{
+				plotter.resetView();
+				plotter.refresh(false);
+			}
+		};
+
+		reset.setImageDescriptor(Activator.getImageDescriptor("icons/axis.png"));
+		return reset;
 	}
 
 	public void dispose() {
@@ -520,5 +541,4 @@ public class JRealityPlotActions {
 	public IPlottingSystem getPlottingSystem(){
 		return system;
 	}
-
 }
