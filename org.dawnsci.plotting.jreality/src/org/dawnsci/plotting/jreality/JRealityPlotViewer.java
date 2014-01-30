@@ -885,11 +885,11 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	 *            Number of stack plots
 	 */
 	private boolean setMode(PlottingMode newPlotMode, int dataSize) {
+		if (dataSize == previousSize && currentMode.equals(newPlotMode))
+			return false;
 		// clean old scene and widgets (table)
 		removeOldSceneNodes();
 		clearControls();
-		if (dataSize == previousSize && currentMode.equals(newPlotMode))
-			return false;
 		previousSize = dataSize;
 
 		currentMode = newPlotMode;
@@ -1194,7 +1194,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 			this.ycoord = ycoord;
 			this.zcoord = zcoord;
 			plotter.setTickGridLinesActive(xcoord, ycoord, zcoord);
-			refresh(false);	
+			refresh(true);	
 		}
 	}
 

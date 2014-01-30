@@ -33,6 +33,8 @@ abstract public class Image3DTrace extends PlotterTrace implements IImage3DTrace
 
 	private static Logger logger = LoggerFactory.getLogger(Image3DTrace.class);
 
+	private static final int WIDTH = 256;
+
 	protected boolean rescaleHistogram = true;
 	protected ImageServiceBean imageServiceBean;
 	protected IImageService service;
@@ -59,7 +61,6 @@ abstract public class Image3DTrace extends PlotterTrace implements IImage3DTrace
 		imageServiceBean.setHi(getPreferenceStore().getDouble(BasePlottingConstants.HISTO_HI));		
 
 		this.service = (IImageService)PlatformUI.getWorkbench().getService(IImageService.class);
-
 	}
 
 	@Override
@@ -104,9 +105,9 @@ abstract public class Image3DTrace extends PlotterTrace implements IImage3DTrace
 	protected ColourImageData createImageData() {
 
 		PaletteData     pd        = getPaletteData();
-		ColourImageData imageData = new ColourImageData(256,1);
+		ColourImageData imageData = new ColourImageData(WIDTH,1);
 		int lastValue=0;
-		for (int i = 0; i < imageData.getWidth(); i++){
+		for (int i = 0; i < WIDTH; i++){
 			int value =  ((255&0xff) << 24) +
 					     ((pd.colors[i].red&0xff)   << 16)+
 					     ((pd.colors[i].green&0xff) << 8)+
