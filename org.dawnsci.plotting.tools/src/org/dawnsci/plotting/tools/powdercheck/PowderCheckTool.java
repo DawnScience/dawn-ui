@@ -379,7 +379,7 @@ public class PowderCheckTool extends AbstractToolPage {
 		ret.add(var);
 
 		var   = new TableViewerColumn(viewer, SWT.CENTER, 3);
-		var.getColumn().setText("Ratio");
+		var.getColumn().setText("Relative Error");
 		//var.getColumn().setToolTipText("The nearest data value of the fitted peak.");
 		var.getColumn().setWidth(150);
 		var.setLabelProvider(new PowderLabelProvider(3));
@@ -404,9 +404,7 @@ public class PowderCheckTool extends AbstractToolPage {
 			
 			double q = result.getCalibrantQValue();
 			double qExp = result.getPeak().getParameter(0).getValue();
-			double ratio = q/qExp;
-			if (ratio > 1) ratio = 1/ratio;
-			ratio = 1-ratio;
+			double diff = 1-(qExp/q);
 			
 			switch(column) {
 			case 0:
@@ -416,7 +414,7 @@ public class PowderCheckTool extends AbstractToolPage {
 			case 2:
 				return String.format("%.4g",result.getPeak().getParameter(1).getValue());
 			case 3:
-				return String.format("%.3g",ratio);
+				return String.format("%.3g",diff);
 			default:
 				return "";
 			}

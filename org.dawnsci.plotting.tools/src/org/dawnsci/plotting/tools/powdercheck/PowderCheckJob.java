@@ -227,8 +227,6 @@ public class PowderCheckJob extends Job {
 
 		}
 
-		logger.debug("Max ratio = " + maxRatio);
-
 		return Status.OK_STATUS;
 	}
 

@@ -139,13 +139,11 @@ public class NonPixelSplittingIntegration implements DatasetToDatasetFunction {
 				final double sig = b.getElementDoubleAbs(iter.index);
 				if (val < lo && val > hi) {
 					continue;
-				} else if (val >= hi) {
-					h[nbins-1]++;
-					in[nbins-1] += sig;
 				} else {
-					if(((int) ((val-lo)/span))<h.length)
+					if(((int) ((val-lo)/span))<h.length){
 						h[(int) ((val-lo)/span)]++;
 						in[(int) ((val-lo)/span)] += sig;
+					}
 				}
 			}
 			
