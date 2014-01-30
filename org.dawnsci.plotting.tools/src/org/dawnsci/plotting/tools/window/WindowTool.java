@@ -148,76 +148,18 @@ public class WindowTool extends AbstractToolPage {
 				@Override
 				public void roiDragged(ROIEvent evt) {
 					IROI roi = evt.getROI();
-					if(roi!=null){
-						final int startX = (int)Math.round(roi.getPointX());
-						final int startY = (int)Math.round(roi.getPointY());
-						if (roi instanceof RectangularROI){
-							RectangularROI rroi = (RectangularROI) roi;
-							int roiWidth = (int)Math.round(rroi.getLengths()[0]);
-							int roiHeight = (int)Math.round(rroi.getLengths()[1]);
-							int endX = (int)Math.round(rroi.getEndPoint()[0]);
-							int endY = (int)Math.round(rroi.getEndPoint()[1]);
-							regionControlWindow.setSpinnerValues(startX, startY, roiWidth, roiHeight);
-							int xAspectRatio = 0, yAspectRatio = 0, binShape = 1, samplingMode = 0;
-							if (regionControlWindow.isOverwriteAspect()){
-								xAspectRatio = regionControlWindow.getXAspectRatio();
-								yAspectRatio = regionControlWindow.getYAspectRatio();
-							}
-							binShape = RegionControlWindow.getBinShape(rroi.getLengths()[0], rroi.getLengths()[1], true);
-							if (binShape != 1) {
-								// DownsampleMode.MEAN = 2
-								samplingMode = 2; 
-							}
-							SurfacePlotROI sroi = new SurfacePlotROI(startX, 
-									startY, 
-									endX, 
-									endY, 
-									samplingMode, samplingMode,
-									xAspectRatio, 
-									yAspectRatio);
-							sroi.setXBinShape(binShape);
-							sroi.setYBinShape(binShape);
-							windowJob.schedule(sroi);
-						}
+					if (roi!=null && roi instanceof RectangularROI){
+						SurfacePlotROI sroi = getSurfacePlotROI((RectangularROI)roi, true);
+						windowJob.schedule(sroi);
 					}
 				}
 
 				@Override
 				public void roiChanged(ROIEvent evt) {
 					IROI roi = evt.getROI();
-					if(roi!=null){
-						final int startX = (int)Math.round(roi.getPointX());
-						final int startY = (int)Math.round(roi.getPointY());
-						if (roi instanceof RectangularROI){
-							RectangularROI rroi = (RectangularROI) roi;
-							int roiWidth = (int)Math.round(rroi.getLengths()[0]);
-							int roiHeight = (int)Math.round(rroi.getLengths()[1]);
-							int endX = (int)Math.round(rroi.getEndPoint()[0]);
-							int endY = (int)Math.round(rroi.getEndPoint()[1]);
-							regionControlWindow.setSpinnerValues(startX, startY, roiWidth, roiHeight);
-
-							int xAspectRatio = 0, yAspectRatio = 0, binShape = 1, samplingMode = 0;
-							if (regionControlWindow.isOverwriteAspect()){
-								xAspectRatio = regionControlWindow.getXAspectRatio();
-								yAspectRatio = regionControlWindow.getYAspectRatio();
-							}
-							binShape = RegionControlWindow.getBinShape(rroi.getLengths()[0], rroi.getLengths()[1], false);
-
-							if (binShape != 1) {
-								// DownsampleMode.MEAN = 2
-								samplingMode = 2; 
-							}
-							SurfacePlotROI sroi = new SurfacePlotROI(startX, 
-									startY, 
-									endX, 
-									endY, 
-									samplingMode, samplingMode,
-									xAspectRatio, 
-									yAspectRatio);
-							sroi.setXBinShape(binShape);
-							sroi.setYBinShape(binShape);
-							windowJob.schedule(sroi);
-						}
+					if (roi != null && roi instanceof RectangularROI){
+						SurfacePlotROI sroi = getSurfacePlotROI((RectangularROI)roi, false);
+						windowJob.schedule(sroi);
 					}
 				}
 
@@ -242,6 +184,38 @@ public class WindowTool extends AbstractToolPage {
 		} catch (Exception e) {
 			logger.error("Cannot create a plotting system, something bad happened!", e);
 		}
+	}
+
+	private SurfacePlotROI getSurfacePlotROI(RectangularROI rroi, boolean isDrag) {
+		int startX = (int)Math.round(rroi.getPointX());
+		int startY = (int)Math.round(rroi.getPointY());
+		int roiWidth = (int)Math.round(rroi.getLengths()[0]);
+		int roiHeight = (int)Math.round(rroi.getLengths()[1]);
+		int endX = (int)Math.round(rroi.getEndPoint()[0]);
+		int endY = (int)Math.round(rroi.getEndPoint()[1]);
+		regionControlWindow.setSpinnerValues(startX, startY, roiWidth, roiHeight);
+
+		int xAspectRatio = 0, yAspectRatio = 0, binShape = 1, samplingMode = 0;
+		if (regionControlWindow.isOverwriteAspect()){
+			xAspectRatio = regionControlWindow.getXAspectRatio();
+			yAspectRatio = regionControlWindow.getYAspectRatio();
+		}
+		binShape = RegionControlWindow.getBinShape(rroi.getLengths()[0], rroi.getLengths()[1], isDrag);
+
+		if (binShape != 1) {
+			// DownsampleMode.MEAN = 2
+			samplingMode = 2; 
+		}
+		SurfacePlotROI sroi = new SurfacePlotROI(startX, 
+				startY, 
+				endX, 
+				endY, 
+				samplingMode, samplingMode,
+				xAspectRatio, 
+				yAspectRatio);
+		sroi.setXBinShape(binShape);
+		sroi.setYBinShape(binShape);
+		return sroi;
 	}
 
 	@Override
@@ -446,6 +420,7 @@ public class WindowTool extends AbstractToolPage {
 				IROI window = surface != null ? surface.getWindow() : null;
 				region = windowSystem.createRegion("Window", RegionType.BOX);
 				region.setROI(window != null ? window : new SurfacePlotROI(0,0,300,300, 0 ,0, 0, 0));
+//				region.setROI(window != null ? window : new RectangularROI(0,0,300,300, 0));
 				windowSystem.addRegion(region);
 			}
 		} catch (Exception e) {
