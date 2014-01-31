@@ -30,6 +30,9 @@ import org.dawnsci.plotting.jreality.tick.TickFormatting;
 import org.dawnsci.plotting.jreality.util.ArrayPoolUtility;
 import org.dawnsci.plotting.jreality.util.ScalingUtility;
 import org.dawnsci.plotting.roi.SurfacePlotROI;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -711,7 +714,7 @@ public class DataSet3DPlot3D implements IDataSet3DCorePlot {
 		if (dimX * dimY > MAXDIMSQR)
 		{
 			if (useWindow) {
-				updateDisplayData();
+				updateDisplayData(null);
 				return;
 			} else {
 				logger.info("DataSet is too large to visualize all at once using subsampling");
@@ -800,19 +803,24 @@ public class DataSet3DPlot3D implements IDataSet3DCorePlot {
 
 	/**
 	 * Set a new Data window position
+	 * @param data
 	 * @param roi SurfacePlot region of interest object contains all the necessary
 	 *            information to build a new displaying dataset
+	 * @param monitor
+	 * @return status
 	 */
-	public void setDataWindow(List<IDataset> data, SurfacePlotROI roi) {
-		
+	public IStatus setDataWindow(List<IDataset> data, SurfacePlotROI roi, IProgressMonitor monitor) {
 		this.roi = roi;
-		if (roi==null) return; // TODO Should probably clear
+		if (roi==null) return Status.CANCEL_STATUS; // TODO Should probably clear
 		if (data!=null) currentData = data.get(0);
-        updateDisplayData();
+		IStatus status = updateDisplayData(monitor);
+		if (status == Status.CANCEL_STATUS)
+			return status;
 		if (graph!=null) updateDisplay(roi.getXAspect(),roi.getYAspect());
+		return Status.OK_STATUS;
 	}
 	
-	private void updateDisplayData() {
+	private IStatus updateDisplayData(IProgressMonitor monitor) {
 		windowStartPosX = roi.getStartX();
 		windowStartPosY = roi.getStartY();
 		windowEndPosX = roi.getEndX();
@@ -863,7 +871,9 @@ public class DataSet3DPlot3D implements IDataSet3DCorePlot {
 		// NOTE he did it y and then x.
 		int startP[] = normalize(new int[]{windowStartPosY,windowStartPosX}, currentData.getShape()[0], currentData.getShape()[1]);
 		int endP[]   = normalize(new int[]{windowEndPosY,windowEndPosX},     currentData.getShape()[0], currentData.getShape()[1]);;
-		
+
+		if (monitor != null && monitor.isCanceled()) return Status.CANCEL_STATUS;
+
 		displayData = currentData.getSlice(startP,endP, null);
 		if (roi.getXSamplingMode() > 0 ||
 			roi.getYSamplingMode() > 0) {
@@ -917,7 +927,8 @@ public class DataSet3DPlot3D implements IDataSet3DCorePlot {
 				sample = new Downsample(mode,ySampleRate,1);
 				displayData = sample.value(displayData).get(0);					
 			}
-		}		
+		}
+		return Status.OK_STATUS;
 	}
 	
 	private int[] normalize(int[] point, int maxX, int maxY) {
@@ -1453,7 +1464,7 @@ public class DataSet3DPlot3D implements IDataSet3DCorePlot {
 			currentData = newData;
 			buildDisplayDataSet();
 			if (roi!=null) {
-		        updateDisplayData();
+		        updateDisplayData(null);
 				updateDisplay(roi.getXAspect(),roi.getYAspect());
 			} else {
                 updateDisplay(0,0);

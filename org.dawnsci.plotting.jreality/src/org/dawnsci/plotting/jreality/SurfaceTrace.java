@@ -8,6 +8,9 @@ import org.dawnsci.plotting.api.histogram.ImageServiceBean;
 import org.dawnsci.plotting.api.trace.ISurfaceTrace;
 import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.roi.SurfacePlotROI;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.PlatformUI;
 //import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;
@@ -37,9 +40,20 @@ public class SurfaceTrace extends Image3DTrace implements ISurfaceTrace{
 
 	/**
 	 * Also ignores data windows outside the data size.
+	 * @param window
+	 * @param monitor
+	 * @return status
 	 */
 	@Override
-	public void setWindow(IROI window) {
+	public IStatus setWindow(IROI window, IProgressMonitor monitor) {
+		// if a surface roi, we make sure there are no negative values
+		if (window instanceof SurfacePlotROI) {
+			int stXPt = (int) window.getPointX();
+			int stYPt = (int) window.getPointY();
+			stXPt = stXPt < 0 ? 0 : stXPt;
+			stYPt = stYPt < 0 ? 0 : stYPt;
+			((SurfacePlotROI)window).setPoint(stXPt, stYPt);
+		}
 		if (window instanceof RectangularROI && getData()!=null) {
 			RectangularROI rroi = (RectangularROI)window;
 			int[]       start = rroi.getIntPoint();
@@ -53,7 +67,18 @@ public class SurfaceTrace extends Image3DTrace implements ISurfaceTrace{
 		}
 		this.window = window;
 		if (plotter!=null && this.isActive())
-			plotter.setSurfaceWindow(this.window);
+			return plotter.setSurfaceWindow(this.window, monitor);
+		return Status.OK_STATUS;
+	}
+
+	@Override
+	public void setWindow(IROI window) {
+		setWindow(window, null);
+	}
+
+	@Override
+	public IROI getWindow() {
+		return window;
 	}
 
 	private int[] normalize(int[] point, int maxX, int maxY) {

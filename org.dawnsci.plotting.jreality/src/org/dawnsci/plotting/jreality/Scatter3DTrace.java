@@ -5,6 +5,9 @@ import java.util.List;
 
 import org.dawnsci.plotting.api.trace.IScatter3DTrace;
 import org.dawnsci.plotting.api.trace.TraceEvent;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
@@ -65,9 +68,10 @@ public class Scatter3DTrace extends PlotterTrace implements IScatter3DTrace {
 	}
 
 	@Override
-	public void setWindow(IROI roi) {
+	public IStatus setWindow(IROI roi, IProgressMonitor monitor) {
 		window=roi;
 		if (plotter!=null && this.isActive()) plotter.setStackWindow(window);
+		return Status.OK_STATUS;
 	}
 
 	public void dispose() {

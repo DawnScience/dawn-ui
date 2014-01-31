@@ -60,6 +60,9 @@ import org.dawnsci.plotting.jreality.tool.SceneDragTool;
 import org.dawnsci.plotting.jreality.util.JOGLChecker;
 import org.dawnsci.plotting.jreality.util.PlotColorUtility;
 import org.dawnsci.plotting.roi.SurfacePlotROI;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.awt.SWT_AWT;
 import org.eclipse.swt.custom.SashForm;
@@ -253,7 +256,6 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	 */
 	public ISurfaceTrace createSurfaceTrace(final String name) {
 		SurfaceTrace surface = new SurfaceTrace(this, name);
-		surface.setWindow(new RectangularROI(0, 0, 300, 300, 0));
 		return surface;
 	}
 
@@ -385,27 +387,37 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	}
 
 	protected SurfacePlotROI getWindow(IROI roi) {
-		if (roi==null) return null;
-		SurfacePlotROI surfRoi = null;
-		if (roi instanceof SurfacePlotROI) {
-			surfRoi = (SurfacePlotROI)roi;
-		} else if (roi instanceof RectangularROI) {
-			RectangularROI rroi = (RectangularROI)roi;
-			final int[] start = rroi.getIntPoint();
-			final int[] lens  = rroi.getIntLengths();
-			surfRoi = new SurfacePlotROI(start[0], start[1], start[0]+lens[0], start[1]+lens[1], 0,0,0,0);
+		if (currentMode == PlottingMode.SURF2D) {
+			SurfacePlotROI surfRoi = null;
+			if (roi instanceof SurfacePlotROI) {
+				surfRoi = (SurfacePlotROI)roi;
+			} else if (roi instanceof RectangularROI) {
+				RectangularROI rroi = (RectangularROI)roi;
+				final int[] start = rroi.getIntPoint();
+				final int[] lens  = rroi.getIntLengths();
+				surfRoi = new SurfacePlotROI(start[0], start[1], start[0]+lens[0], start[1]+lens[1], 0,0,0,0);
+			} else {
+				int y = currentTrace.getData().getShape()[0];
+				int x = currentTrace.getData().getShape()[1];
+				int width = x > 300 ? 300 : x;
+				int height = y > 300 ? 300 : y;
+				surfRoi = new SurfacePlotROI(0, 0, width, height, 0 , 0, 0, 0);
+			}
+			return surfRoi;
 		} else {
-			throw new RuntimeException("The region '"+roi+"' is not supported for windows! Only rectangles are!");
+			return null;
 		}
-		return surfRoi;
 	}
 
-	protected void setSurfaceWindow(IROI window) {
+	protected IStatus setSurfaceWindow(IROI window, IProgressMonitor monitor) {
 		if (currentMode == PlottingMode.SURF2D) {
 			final SurfacePlotROI surfRoi = getWindow(window);
-			((DataSet3DPlot3D) plotter).setDataWindow(null, surfRoi);
+			IStatus status = ((DataSet3DPlot3D) plotter).setDataWindow(null, surfRoi, monitor);
+			if (status == Status.CANCEL_STATUS)
+				return status;
 			refresh(false);
 		}
+		return Status.OK_STATUS;
 	}
 
 	public void setStackWindow(IROI window) {
@@ -480,7 +492,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 
 		try {
 			if (window!=null && window instanceof SurfacePlotROI && !window.equals(getDataWindow())) {
-				((DataSet3DPlot3D) plotter).setDataWindow(data, (SurfacePlotROI)window);
+				((DataSet3DPlot3D) plotter).setDataWindow(data, (SurfacePlotROI)window, null);
 			}
 			update(newMode, data);
 			plotter.setXAxisLabel(getName(xAxis.getName(), "X-Axis"));

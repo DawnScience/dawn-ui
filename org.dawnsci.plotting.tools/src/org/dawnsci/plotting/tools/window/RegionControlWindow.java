@@ -6,10 +6,14 @@ import org.dawb.common.ui.util.DisplayUtils;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.trace.ISurfaceTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.roi.SurfacePlotROI;
 import org.dawnsci.plotting.tools.window.WindowTool.WindowJob;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -22,7 +26,10 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.part.IPageSite;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 /**
@@ -31,6 +38,8 @@ import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
  *
  */
 public class RegionControlWindow {
+
+	private static final Logger logger = LoggerFactory.getLogger(RegionControlWindow.class);
 
 	private Composite parent;
 	private Spinner spnStartX;
@@ -136,20 +145,33 @@ public class RegionControlWindow {
 		return spnYAspect.getSelection();
 	}
 
-	public Composite createRegionControl(String title, IPageSite site, IViewPart viewPart) {
+	public Composite createRegionControl(String title, IPageSite site, IViewPart viewPart, ImageDescriptor imageDescriptor) {
 		Composite windowComposite = new Composite(parent, SWT.NONE);
 		windowComposite.setLayout(new FillLayout(SWT.VERTICAL));
 
-		windowSystem.createPlotPart(windowComposite, title, site.getActionBars(), PlotType.IMAGE, viewPart);
-		final ISurfaceTrace surface = getSurfaceTrace();
+		final Action reselect = new Action("Add ROI", imageDescriptor) {
+			public void run() {
+				createSurfaceRegion(windowSystem, "Window");
+			}
+		};
+		site.getActionBars().getToolBarManager().add(new Separator("org.dawb.workbench.plotting.tools.profile.newProfileGroup"));
+		site.getActionBars().getToolBarManager().insertAfter("org.dawb.workbench.plotting.tools.profile.newProfileGroup", reselect);
+		site.getActionBars().getToolBarManager().add(new Separator("org.dawb.workbench.plotting.tools.profile.newProfileGroupAfter"));
 
-		int xStartPt = (int) (surface != null && surface.getWindow() != null ? surface.getWindow().getPoint()[0] : 0);
-		int yStartPt = (int) (surface!=null && surface.getWindow() != null ? surface.getWindow().getPoint()[1] : 0);
-		int width = 300;
-		int height = 300;
-		if(surface!=null && surface.getWindow() instanceof SurfacePlotROI){
-			width = surface!=null ? ((SurfacePlotROI)surface.getWindow()).getEndX() : width;
-			height = surface!=null ? ((SurfacePlotROI)surface.getWindow()).getEndY() : height;
+		windowSystem.createPlotPart(windowComposite, title, site.getActionBars(), PlotType.IMAGE, viewPart);
+
+		int xStartPt = 0;
+		int yStartPt = 0;
+		int width, height;
+		final ISurfaceTrace surface = getSurfaceTrace();
+		if (surface != null) {
+			int x = surface.getData().getShape()[1];
+			int y = surface.getData().getShape()[0];
+			width = x > 300 ? 300 : x;
+			height = y > 300 ? 300 : y;
+		} else {
+			width = 300;
+			height = 300;
 		}
 		ITrace trace = getTrace();
 		int xSize = 0, ySize = 0;
@@ -237,6 +259,27 @@ public class RegionControlWindow {
 		return windowComposite;
 	}
 
+	public void createSurfaceRegion(IPlottingSystem plottingSystem, String regionName) {
+		IRegion region = plottingSystem.getRegion(regionName);
+		//create Region
+		try {
+			if (region == null) {
+				ISurfaceTrace surface = getSurfaceTrace();
+				IROI window = surface != null ? surface.getWindow() : null;
+				region = plottingSystem.createRegion(regionName, RegionType.BOX);
+				int y = surface.getData().getShape()[0];
+				int x = surface.getData().getShape()[1];
+				int width = x > 300 ? 300 : x;
+				int height = y > 300 ? 300 : y;
+//				region.setROI(window != null ? window : new SurfacePlotROI(0, 0, width, height, 0 , 0, 0, 0));
+				region.setROI(window != null ? window : new RectangularROI(0,0,width,height, 0));
+				plottingSystem.addRegion(region);
+			}
+		} catch (Exception e) {
+			logger.debug("Cannot create region for surface!", e);
+		}
+	}
+
 	/**
 	 * Set the spinner values
 	 * @param startX start position in x dimension
@@ -264,7 +307,7 @@ public class RegionControlWindow {
 			spnStartX.addSelectionListener(selectionListener);
 		if (spnStartY != null && !spnStartY.isDisposed())
 			spnStartY.addSelectionListener(selectionListener);
-		if (spnWidth != null && spnWidth.isDisposed())
+		if (spnWidth != null && !spnWidth.isDisposed())
 			spnWidth.addSelectionListener(selectionListener);
 		if (spnHeight != null && !spnHeight.isDisposed())
 			spnHeight.addSelectionListener(selectionListener);

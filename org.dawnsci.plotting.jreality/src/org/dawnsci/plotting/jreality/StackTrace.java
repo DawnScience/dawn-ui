@@ -5,6 +5,9 @@ import java.util.List;
 
 import org.dawnsci.plotting.api.trace.ILineStackTrace;
 import org.dawnsci.plotting.api.trace.TraceEvent;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
@@ -74,11 +77,17 @@ public class StackTrace extends PlotterTrace implements ILineStackTrace {
 	}
 
 	@Override
-    public void setWindow(IROI roi) {
+	public void setWindow(IROI window) {
+		setWindow(window, null);
+	}
+
+	@Override
+	public IStatus setWindow(IROI roi, IProgressMonitor monitor) {
 		window=roi;
 		if (plotter!=null && this.isActive()) plotter.setStackWindow(window);
+		return Status.OK_STATUS;
 	}
-    
+
 	public void dispose() {
 		try {
 			plotter.removeStackTrace(this);

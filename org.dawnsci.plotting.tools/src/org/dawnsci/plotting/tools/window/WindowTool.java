@@ -118,12 +118,8 @@ public class WindowTool extends AbstractToolPage {
 				protected void update(TraceEvent evt) {
 					ITrace trace = getTrace();
 					if (trace!=null) {
-						// TODO FIXME This method breaks the
-						// surface plot by unnecessary continually
-						// rewindowing! Do not change the plot when
-						// it tells you its data is changing - that is
-						// silly.
-						// updateTrace(trace);
+						if (trace instanceof ISurfaceTrace)
+							updateWindowPlot((ISurfaceTrace)trace);
 					} else {
 						windowSystem.clear();
 					}
@@ -186,38 +182,6 @@ public class WindowTool extends AbstractToolPage {
 		}
 	}
 
-	private SurfacePlotROI getSurfacePlotROI(RectangularROI rroi, boolean isDrag) {
-		int startX = (int)Math.round(rroi.getPointX());
-		int startY = (int)Math.round(rroi.getPointY());
-		int roiWidth = (int)Math.round(rroi.getLengths()[0]);
-		int roiHeight = (int)Math.round(rroi.getLengths()[1]);
-		int endX = (int)Math.round(rroi.getEndPoint()[0]);
-		int endY = (int)Math.round(rroi.getEndPoint()[1]);
-		regionControlWindow.setSpinnerValues(startX, startY, roiWidth, roiHeight);
-
-		int xAspectRatio = 0, yAspectRatio = 0, binShape = 1, samplingMode = 0;
-		if (regionControlWindow.isOverwriteAspect()){
-			xAspectRatio = regionControlWindow.getXAspectRatio();
-			yAspectRatio = regionControlWindow.getYAspectRatio();
-		}
-		binShape = RegionControlWindow.getBinShape(rroi.getLengths()[0], rroi.getLengths()[1], isDrag);
-
-		if (binShape != 1) {
-			// DownsampleMode.MEAN = 2
-			samplingMode = 2; 
-		}
-		SurfacePlotROI sroi = new SurfacePlotROI(startX, 
-				startY, 
-				endX, 
-				endY, 
-				samplingMode, samplingMode,
-				xAspectRatio, 
-				yAspectRatio);
-		sroi.setXBinShape(binShape);
-		sroi.setYBinShape(binShape);
-		return sroi;
-	}
-
 	@Override
 	public void createControl(Composite parent) {
 		
@@ -227,7 +191,7 @@ public class WindowTool extends AbstractToolPage {
 
 		this.regionControlWindow = new RegionControlWindow(content, getPlottingSystem(), windowSystem, windowJob);
 
-		this.windowControl = regionControlWindow.createRegionControl(getTitle(), getSite(), getViewPart());
+		this.windowControl = regionControlWindow.createRegionControl(getTitle(), getSite(), getViewPart(), getImageDescriptor());
         this.sliceControl = createSliceControl();
    
         final ITrace trace = getTrace();
@@ -398,34 +362,49 @@ public class WindowTool extends AbstractToolPage {
 		}
 	}
 
+	private SurfacePlotROI getSurfacePlotROI(RectangularROI rroi, boolean isDrag) {
+		int startX = (int)Math.round(rroi.getPointX());
+		int startY = (int)Math.round(rroi.getPointY());
+		int roiWidth = (int)Math.round(rroi.getLengths()[0]);
+		int roiHeight = (int)Math.round(rroi.getLengths()[1]);
+		int endX = (int)Math.round(rroi.getEndPoint()[0]);
+		int endY = (int)Math.round(rroi.getEndPoint()[1]);
+		regionControlWindow.setSpinnerValues(startX, startY, roiWidth, roiHeight);
+
+		int xAspectRatio = 0, yAspectRatio = 0, binShape = 1, samplingMode = 0;
+		if (regionControlWindow.isOverwriteAspect()){
+			xAspectRatio = regionControlWindow.getXAspectRatio();
+			yAspectRatio = regionControlWindow.getYAspectRatio();
+		}
+		binShape = RegionControlWindow.getBinShape(rroi.getLengths()[0], rroi.getLengths()[1], isDrag);
+
+		if (binShape != 1) {
+			// DownsampleMode.MEAN = 2
+			samplingMode = 2; 
+		}
+		SurfacePlotROI sroi = new SurfacePlotROI(startX, 
+				startY, 
+				endX, 
+				endY, 
+				samplingMode, samplingMode,
+				xAspectRatio, 
+				yAspectRatio);
+		sroi.setXBinShape(binShape);
+		sroi.setYBinShape(binShape);
+		return sroi;
+	}
+
 	protected void updateWindowPlot(ISurfaceTrace trace) {
 		AbstractDataset data =  (AbstractDataset)trace.getData();
 		List<IDataset> axes = trace.getAxes();
 		if (axes!=null) axes = Arrays.asList(axes.get(0), axes.get(1));
 		windowSystem.updatePlot2D(data, axes, null);
-		createRegion();
+		regionControlWindow.createSurfaceRegion(windowSystem, "Window");
 		// manage layout
 		if (content != null && content.isDisposed()) return;
 		StackLayout stackLayout = (StackLayout)content.getLayout();
 		stackLayout.topControl = windowControl;
 		content.layout();
-	}
-
-	private void createRegion() {
-		IRegion region = windowSystem.getRegion("Window");
-		//create Region
-		try {
-			if (region == null) {
-				ISurfaceTrace surface = getSurfaceTrace();
-				IROI window = surface != null ? surface.getWindow() : null;
-				region = windowSystem.createRegion("Window", RegionType.BOX);
-				region.setROI(window != null ? window : new SurfacePlotROI(0,0,300,300, 0 ,0, 0, 0));
-//				region.setROI(window != null ? window : new RectangularROI(0,0,300,300, 0));
-				windowSystem.addRegion(region);
-			}
-		} catch (Exception e) {
-			logger.debug("Cannot create region for surface!", e);
-		}
 	}
 
 	protected void updateSlicePlot(ILineStackTrace trace) {
@@ -535,9 +514,9 @@ public class WindowTool extends AbstractToolPage {
 				Display.getDefault().syncExec(new Runnable() {
 					public void run() {
 						if (monitor.isCanceled()) return;
-						// TODO correctly monitor the job?
 						monitor.beginTask("Sending data to plot", 100);
-						windowTrace.setWindow(window);
+						IStatus result = windowTrace.setWindow(window, monitor);
+						if (result == Status.CANCEL_STATUS) return;
 						monitor.worked(100);
 					}
 				});
