@@ -9,44 +9,37 @@ import org.dawb.common.services.IPersistentFile;
 import org.dawb.common.services.ServiceManager;
 import org.dawb.common.ui.wizard.ResourceChoosePage;
 import org.dawnsci.spectrum.ui.file.IContain1DData;
+import org.dawnsci.spectrum.ui.processing.SaveProcess;
 
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
-public class SaveFileWizardPage extends ResourceChoosePage {
+public class SaveFileWizardPage extends ResourceChoosePage implements ISpectrumWizardPage{
 	
-	List<IContain1DData> dataList;
+	SaveProcess process;
 	
-	public SaveFileWizardPage(List<IContain1DData> dataList) {
+	public SaveFileWizardPage() {
 		super("Save file wizard", "Save processed data to file", null);
-		this.dataList = dataList;
 		setDirectory(false);
 		setOverwriteVisible(false);
 		setNewFile(true);
 		setPathEditable(true);
     	setFileLabel("Output file");
+    	process = new SaveProcess();
 	}
 	
-	public void finish() {
-		
-		File                file=null;
-		IPersistentFile     pf=null;
-		
-		try {
-    		IPersistenceService service = (IPersistenceService)ServiceManager.getService(IPersistenceService.class);
-    		file = new File(getAbsoluteFilePath());
-    		pf = service.createPersistentFile(file.getAbsolutePath());
-		    
-    		for (IDataset ds : dataList.get(0).getyDatasets()) {
-		    	pf.setData(ds);
-		    }
-    		
-		    pf.setAxes(Arrays.asList(new IDataset[] {dataList.get(0).getxDataset(), null}));
-		        		    
-		} catch (Throwable ne) {
-			ne.printStackTrace();
-		} finally {
-			if (pf!=null) pf.close();
-		}
+	@Override
+	public void setDatasetList(List<IContain1DData> dataList) {
+		process.setDatasetList(dataList);
+	}
+	
+	public void process() {
+		process.setPath(getAbsoluteFilePath());
+		process.process();
+	}
+
+	@Override
+	public List<IContain1DData> getOutputDatasetList() {
+		return null;
 	}
 
 }

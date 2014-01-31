@@ -51,6 +51,10 @@ public class SubtractionProcess extends AbstractProcess{
 		this.scale = scale;
 	}
 	
+	public double getScale() {
+		return scale;
+	}
+	
 	public void setAminusB(boolean isAminusB) {
 		this.isAminusB = isAminusB;
 	}
