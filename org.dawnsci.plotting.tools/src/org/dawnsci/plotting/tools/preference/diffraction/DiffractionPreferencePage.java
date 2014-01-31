@@ -163,7 +163,7 @@ public class DiffractionPreferencePage extends PreferencePage implements IWorkbe
 		hkls.setAdditionalFields(new String[]{"dNano"});
 		hkls.setColumnWidths(200, 200);
 		hkls.setColumnNames("Name", "d");
-		hkls.setColumnFormat("##0.####");
+		hkls.setColumnFormat("##0.######");
 		hkls.setListHeight(150);
 		hkls.setAddButtonText("Add Position");
 		hkls.setRemoveButtonText("Remove Position");
