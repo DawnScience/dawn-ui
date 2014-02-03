@@ -638,7 +638,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 	 *
 	 * @return new instance of a breadcrumb item
 	 */
-	private BreadcrumbItem createItem() {
+	protected BreadcrumbItem createItem() {
 		BreadcrumbItem result= new BreadcrumbItem(this, fContainer, treeSwitches);
 
 		result.setLabelProvider((ILabelProvider) getLabelProvider());

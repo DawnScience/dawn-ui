@@ -33,11 +33,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * PlottingFactory is the preferred way to get an AbstractPlottingSystem. Also
- * consider just using the IPlottingSystem interface as this is more likely to 
- * be persistent when declaring the type in the calling code.
+ * PlottingFactory is a way to create an IPlottingSystem. 
  * 
- * 
+ * You can use the factory directly or conjure the service
+ * from the magic of OSGI.
  * 
  * @author fcp94556
  *
@@ -112,26 +111,7 @@ public class PlottingFactory {
 	}
 
 	
-	public static String[][] getPlottingPreferenceChoices() {
-		
-		final List<String[]> choices = new ArrayList<String[]>(7);
-        IConfigurationElement[] systems = Platform.getExtensionRegistry().getConfigurationElementsFor("org.dawnsci.plotting.api.plottingClass");
-        for (IConfigurationElement ia : systems) {
-        	choices.add(new String[]{ia.getAttribute("visible_type"), ia.getAttribute("id")});
-		}
-        
-        final String [][] ret = new String[choices.size()][];
-        for (int i = 0; i < choices.size(); i++) {
-        	ret[i] = choices.get(i);
-		}
-        return ret;
-	}
-
 	private static Map<String, IPlottingSystem> plottingSystems;
-	
-	public static void clear() {
-		if (plottingSystems!=null) plottingSystems.clear();
-	}
 	
 	/**
 	 * Removes a plot system from the registered names.

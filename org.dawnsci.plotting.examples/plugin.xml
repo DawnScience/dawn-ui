@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            category="org.dawnsci.plotting.examples.category"
+            class="org.dawnsci.plotting.examples.ImageExample"
+            id="org.dawnsci.plotting.examples.imageExample"
+            name="Image Example"
+            restorable="true">
+      </view>
+      <category
+            id="org.dawnsci.plotting.examples.category"
+            name="Examples">
+      </category>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            class="org.dawnsci.plotting.examples.perspective.ExamplePerspective"
+            id="org.dawnsci.plotting.examples.perspective.ExamplePerspective"
+            name="Examples">
+      </perspective>
+   </extension>
+
+</plugin>

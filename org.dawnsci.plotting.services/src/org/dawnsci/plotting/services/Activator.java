@@ -2,6 +2,7 @@ package org.dawnsci.plotting.services;
 
 import java.util.Hashtable;
 
+import org.dawnsci.plotting.api.IPlottingService;
 import org.dawnsci.plotting.api.histogram.IImageService;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -33,6 +34,10 @@ public class Activator extends AbstractUIPlugin {
 		Hashtable<String, String> props = new Hashtable<String, String>(1);
 		props.put("description", "A service used to get colouring information for drawing images of synchrotron data.");
 		context.registerService(IImageService.class, new ImageService(), props);
+		
+		props = new Hashtable<String, String>(1);
+		props.put("description", "A service used to create and get plotting systems.");
+		context.registerService(IPlottingService.class, new PlottingServiceImpl(), props);
 		plugin = this;
 	}
 

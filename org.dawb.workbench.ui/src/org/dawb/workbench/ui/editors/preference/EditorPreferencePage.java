@@ -11,6 +11,8 @@
 package org.dawb.workbench.ui.editors.preference;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.dawb.common.ui.widgets.LabelFieldEditor;
 import org.dawb.workbench.ui.Activator;
@@ -49,7 +51,7 @@ public class EditorPreferencePage extends FieldEditorPreferencePage implements I
 		
   
      	// Choice between diamond and light weight plotting
-		final String[][] namesAndValues = PlottingFactory.getPlottingPreferenceChoices();
+		final String[][] namesAndValues = getPlottingPreferenceChoices();
 		ComboFieldEditor plotChoice = new ComboFieldEditor(EditorConstants.PLOTTING_SYSTEM_CHOICE, "Plotting Technology*", namesAndValues, getFieldEditorParent());
 		addField(plotChoice);
 	   	new LabelFieldEditor("(* Please close and reopen the part after changing plotting preference.)\n\n", getFieldEditorParent());
@@ -122,6 +124,22 @@ public class EditorPreferencePage extends FieldEditorPreferencePage implements I
       	addField(saveFormatString);
 
 	}
+	
+	public static String[][] getPlottingPreferenceChoices() {
+		
+		final List<String[]> choices = new ArrayList<String[]>(7);
+        IConfigurationElement[] systems = Platform.getExtensionRegistry().getConfigurationElementsFor("org.dawnsci.plotting.api.plottingClass");
+        for (IConfigurationElement ia : systems) {
+        	choices.add(new String[]{ia.getAttribute("visible_type"), ia.getAttribute("id")});
+		}
+        
+        final String [][] ret = new String[choices.size()][];
+        for (int i = 0; i < choices.size(); i++) {
+        	ret[i] = choices.get(i);
+		}
+        return ret;
+	}
+
 
 	@Override
 	public void init(IWorkbench workbench) {
