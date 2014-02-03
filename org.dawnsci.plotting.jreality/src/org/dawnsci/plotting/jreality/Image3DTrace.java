@@ -48,7 +48,7 @@ abstract public class Image3DTrace extends PlotterTrace implements IImage3DTrace
 		try {
 			final IPaletteService pservice = (IPaletteService)PlatformUI.getWorkbench().getService(IPaletteService.class);
 			final String scheme = getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME);
-			imageServiceBean.setPalette(pservice.getPaletteData(scheme));	
+			imageServiceBean.setPalette(pservice.getDirectPaletteData(scheme));	
 		} catch (Exception e) {
 			logger.error("Cannot create palette!", e);
 		}	

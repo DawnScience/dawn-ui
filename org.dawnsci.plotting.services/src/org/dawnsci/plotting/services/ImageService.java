@@ -22,6 +22,7 @@ import org.dawnsci.plotting.api.histogram.IPaletteService;
 import org.dawnsci.plotting.api.histogram.ImageServiceBean;
 import org.dawnsci.plotting.api.histogram.ImageServiceBean.HistoType;
 import org.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
+import org.dawnsci.plotting.api.histogram.functions.FunctionContainer;
 import org.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.dawnsci.plotting.services.util.SWTImageUtils;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -171,7 +172,7 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 		}
 		
 		if (depth>8) { // Depth > 8 will not work properly at the moment.
-			throw new RuntimeException(getClass().getSimpleName()+" only supports 8-bit images unless we a FunctionContainer has been set!");
+			throw new RuntimeException(getClass().getSimpleName()+" only supports 8-bit images unless a FunctionContainer has been set!");
 			//if (depth == 16) palette = new PaletteData(0x7C00, 0x3E0, 0x1F);
 			//if (depth == 24) palette = new PaletteData(0xFF, 0xFF00, 0xFF0000);
 			//if (depth == 32) palette = new PaletteData(0xFF00, 0xFF0000, 0xFF000000);
@@ -325,7 +326,7 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 		if (bean.getPalette()==null) {
 			try {
 				final IPaletteService service = (IPaletteService)PlatformUI.getWorkbench().getService(IPaletteService.class);
-				bean.setPalette(service.getPaletteData("Gray Scale"));
+				bean.setPalette(service.getDirectPaletteData("Gray Scale"));
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
@@ -606,7 +607,23 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 			IPaletteService pservice = (IPaletteService)ServiceManager.getService(IPaletteService.class);
 			if (pservice !=null) {
 				final String scheme = store.getString(BasePlottingConstants.COLOUR_SCHEME);
-				imageServiceBean.setPalette(pservice.getPaletteData(scheme));
+				
+				
+				// FIXME, temporary, user should choose if they want 24-bit
+				// Should be preference for bit depth. 
+				if (false) {
+					FunctionContainer container = pservice.getFunctionContainer(scheme);
+					if (container!=null) {
+						imageServiceBean.setFunctionObject(container);
+					} else {
+						imageServiceBean.setPalette(pservice.getDirectPaletteData(scheme));
+					}
+				} else {
+					
+					// if 8-bit, set direct palette, otherwise set palette functions.
+					imageServiceBean.setPalette(pservice.getDirectPaletteData(scheme));
+				}
+
 			}
 		} catch (Exception e) {
 			// Ignored

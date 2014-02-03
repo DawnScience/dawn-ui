@@ -143,7 +143,7 @@ public class SWTXYTraceTest {
 		vector.setArrowColor(200, 0, 0);
 		
 		IPaletteService service = (IPaletteService)ServiceManager.getService(IPaletteService.class);
-		final PaletteData   jet = service.getPaletteData("NCD");
+		final PaletteData   jet = service.getDirectPaletteData("NCD");
 		vector.setArrowPalette(jet);
 		vector.setArrowHistogram(ArrowHistogram.COLOR_BY_ANGLE);
 		

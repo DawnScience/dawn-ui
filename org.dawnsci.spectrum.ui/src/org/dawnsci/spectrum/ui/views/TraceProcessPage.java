@@ -332,7 +332,7 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 
 				if (orderedColors == null) {
 					final IPaletteService pservice = (IPaletteService)PlatformUI.getWorkbench().getService(IPaletteService.class);
-					PaletteData paletteData = pservice.getPaletteData("Jet (Blue-Cyan-Green-Yellow-Red)");
+					PaletteData paletteData = pservice.getDirectPaletteData("Jet (Blue-Cyan-Green-Yellow-Red)");
 					RGB[] rgbs = paletteData.getRGBs();
 					orderedColors = new ArrayList<Color>(256);
 					Display display = Display.getDefault();

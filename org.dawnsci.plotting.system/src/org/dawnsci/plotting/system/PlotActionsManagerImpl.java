@@ -252,7 +252,7 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 						}
 						// set the main colour scheme preference used in the colour mapping tool
 						PlottingSystemActivator.getPlottingPreferenceStore().setValue(PlottingConstants.COLOUR_SCHEME, paletteName);
-						final PaletteData data = pservice.getPaletteData(paletteName);
+						final PaletteData data = pservice.getDirectPaletteData(paletteName);
 						final Collection<ITrace> traces = system.getTraces();
 						if (traces!=null) for (ITrace trace: traces) {
 							if (trace instanceof IPaletteTrace) {

@@ -726,7 +726,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			} else {
 				try {
 					final IPaletteService pservice = (IPaletteService)PlatformUI.getWorkbench().getService(IPaletteService.class);
-					palette = pservice.getPaletteData(schemeName);
+					palette = pservice.getDirectPaletteData(schemeName);
 				} catch (Exception e) {
 					palette = null;
 				}

@@ -1,9 +1,19 @@
 package org.dawnsci.plotting.histogram.functions.classes;
 
+import org.dawnsci.plotting.api.histogram.functions.AbstractMapFunction;
 import org.dawnsci.plotting.histogram.functions.ITransferFunctionArrayProvider;
 
 public abstract class AbstractTransferFunction implements ITransferFunctionArrayProvider {
 
+	
+	private final AbstractMapFunction function;
+
+	protected AbstractTransferFunction() {
+		this(null);
+	}
+	protected AbstractTransferFunction(AbstractMapFunction function) {
+		this.function = function;
+	}
 	/**
 	 * Method takes a point between 0 and 1 and returns a new mapping value between 0 and 1
 	 * @param value the value to map
@@ -18,6 +28,10 @@ public abstract class AbstractTransferFunction implements ITransferFunctionArray
 			result[i] = (int) (getPoint((double)i/256)*255);
 		}
 		return result;
+	}
+
+	public AbstractMapFunction getMapFunction() {
+		return function;
 	}
 
 }

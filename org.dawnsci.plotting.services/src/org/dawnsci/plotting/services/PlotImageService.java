@@ -37,8 +37,9 @@ import org.dawnsci.plotting.api.histogram.IImageService;
 import org.dawnsci.plotting.api.histogram.IPaletteService;
 import org.dawnsci.plotting.api.histogram.ImageServiceBean;
 import org.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
+import org.dawnsci.plotting.api.histogram.functions.AbstractMapFunction;
+import org.dawnsci.plotting.api.histogram.functions.GlobalColourMaps;
 import org.dawnsci.plotting.api.trace.ISurfaceTrace;
-import org.dawnsci.plotting.services.util.GlobalColourMaps;
 import org.dawnsci.plotting.services.util.SWTImageUtils;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -71,7 +72,6 @@ import uk.ac.diamond.scisoft.analysis.dataset.RGBDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Stats;
 import uk.ac.diamond.scisoft.analysis.dataset.function.Downsample;
 import uk.ac.diamond.scisoft.analysis.dataset.function.DownsampleMode;
-import uk.ac.diamond.scisoft.analysis.histogram.mapfunctions.AbstractMapFunction;
 import uk.ac.diamond.scisoft.analysis.io.ILoaderService;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
@@ -179,7 +179,7 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 		if (bean==null) {
 			bean = new ImageServiceBean();
 			final IPaletteService pservice = (IPaletteService)ServiceManager.getService(IPaletteService.class);
-			bean.setPalette(pservice.getPaletteData(store.getString("org.dawb.plotting.system.colourSchemeName")));	
+			bean.setPalette(pservice.getDirectPaletteData(store.getString("org.dawb.plotting.system.colourSchemeName")));	
 			bean.setOrigin(ImageOrigin.forLabel(store.getString("org.dawb.plotting.system.originChoice")));
 		}
 		bean.setImage(thumbnail);

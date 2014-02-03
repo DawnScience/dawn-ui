@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.dawnsci.plotting.services.util;
+package org.dawnsci.plotting.api.histogram.functions;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,27 +22,6 @@ import java.util.LinkedList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import uk.ac.diamond.scisoft.analysis.histogram.mapfunctions.AbstractMapFunction;
-import uk.ac.diamond.scisoft.analysis.histogram.mapfunctions.ConstMapFunction;
-import uk.ac.diamond.scisoft.analysis.histogram.mapfunctions.CosMapFunction;
-import uk.ac.diamond.scisoft.analysis.histogram.mapfunctions.CubicMapFunction;
-import uk.ac.diamond.scisoft.analysis.histogram.mapfunctions.CustomAPieceWiseLinearMapFunction;
-import uk.ac.diamond.scisoft.analysis.histogram.mapfunctions.FourthRootMapFunction;
-import uk.ac.diamond.scisoft.analysis.histogram.mapfunctions.GeoBlueMapFunction;
-import uk.ac.diamond.scisoft.analysis.histogram.mapfunctions.GeoGreenMapFunction;
-import uk.ac.diamond.scisoft.analysis.histogram.mapfunctions.GeoRedMapFunction;
-import uk.ac.diamond.scisoft.analysis.histogram.mapfunctions.LinearMapFunction;
-import uk.ac.diamond.scisoft.analysis.histogram.mapfunctions.NCDGamma2BlueFunction;
-import uk.ac.diamond.scisoft.analysis.histogram.mapfunctions.NCDGamma2GreenFunction;
-import uk.ac.diamond.scisoft.analysis.histogram.mapfunctions.NCDGamma2RedFunction;
-import uk.ac.diamond.scisoft.analysis.histogram.mapfunctions.QuarticMapFunction;
-import uk.ac.diamond.scisoft.analysis.histogram.mapfunctions.SinMapFunction;
-import uk.ac.diamond.scisoft.analysis.histogram.mapfunctions.SpecialExposureFunction;
-import uk.ac.diamond.scisoft.analysis.histogram.mapfunctions.SquareMapFunction;
-import uk.ac.diamond.scisoft.analysis.histogram.mapfunctions.SquareRootMapFunction;
-import uk.ac.diamond.scisoft.analysis.histogram.mapfunctions.SquareScaleOffsetMapFunction;
-import uk.ac.diamond.scisoft.analysis.histogram.mapfunctions.UserCustomFunction;
 
 /**
  *
@@ -93,7 +72,13 @@ public class GlobalColourMaps {
 		}
 		mappingFunctions.add(mappingFunction);
 		indexOfMappingFunctions.put(function, i);
-	}		
+	}	
+
+	public static AbstractMapFunction getFunction(String functionName) {
+		final int index = indexOfMappingFunctions.get(functionName);
+		if (index>-1) return mappingFunctions.get(index);
+		return null;
+	}
 
 	private static void addToColourMapBox(String red, boolean redInvert,
 										  String green, boolean greenInvert, 

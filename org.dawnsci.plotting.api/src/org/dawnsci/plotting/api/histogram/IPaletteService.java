@@ -11,6 +11,7 @@ package org.dawnsci.plotting.api.histogram;
 
 import java.util.Collection;
 
+import org.dawnsci.plotting.api.histogram.functions.FunctionContainer;
 import org.eclipse.swt.graphics.PaletteData;
 
 /**
@@ -35,5 +36,12 @@ public interface IPaletteService {
 	 * @param colourSchemeName
 	 * @return
 	 */
-	public PaletteData getPaletteData(final String colourSchemeName);
+	public PaletteData getDirectPaletteData(final String colourSchemeName);
+
+	/**
+	 * Functions from scheme for 16-bit palette data or more.
+	 * @param scheme
+	 * @return
+	 */
+	public FunctionContainer getFunctionContainer(String scheme);
 }

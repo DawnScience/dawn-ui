@@ -18,6 +18,7 @@ package org.dawnsci.plotting.services.util;
 
 import org.dawnsci.plotting.api.histogram.IImageService;
 import org.dawnsci.plotting.api.histogram.ImageServiceBean;
+import org.dawnsci.plotting.api.histogram.functions.AbstractMapFunction;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.RGB;
@@ -26,7 +27,6 @@ import org.eclipse.ui.PlatformUI;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IndexIterator;
 import uk.ac.diamond.scisoft.analysis.dataset.RGBDataset;
-import uk.ac.diamond.scisoft.analysis.histogram.mapfunctions.AbstractMapFunction;
 
 /**
  * Helper methods to convert to SWT images from datasets
@@ -94,8 +94,7 @@ public class SWTImageUtils {
 													AbstractMapFunction blueFunc,
 													boolean inverseRed,
 													boolean inverseGreen,
-													boolean inverseBlue) 
-	{
+													boolean inverseBlue)  {
 		final int[] shape = a.getShape();
 		final int height = shape[0];
 		final int width = shape.length == 1 ? 1 : shape[1]; // allow 1D datasets to be saved
