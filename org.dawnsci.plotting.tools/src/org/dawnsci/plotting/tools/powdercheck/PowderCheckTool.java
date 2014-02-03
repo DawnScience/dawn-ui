@@ -125,7 +125,7 @@ public class PowderCheckTool extends AbstractToolPage {
 		this.calListener = new CalibrantSelectedListener() {		
 			@Override
 			public void calibrantSelectionChanged(CalibrantSelectionEvent evt) {
-				updatePlotJob.updateCalibrantLines();
+				if (updatePlotJob != null)	updatePlotJob.updateCalibrantLines();
 			}
 		};
 		

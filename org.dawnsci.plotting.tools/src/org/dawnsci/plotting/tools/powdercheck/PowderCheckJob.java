@@ -377,7 +377,7 @@ public class PowderCheckJob extends Job {
 		double med = (Double)Stats.median(dd);
 		double mad = (Double)Stats.median(Maths.abs(Maths.subtract(dd, med)));
 		
-		return mad*10;
+		return mad*5;
 	}
 	
 	private void findMatches(List<PowderCheckResult> results, List<Double> qList, CompositeFunction cf, double limit) {
