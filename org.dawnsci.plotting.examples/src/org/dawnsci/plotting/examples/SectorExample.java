@@ -27,7 +27,9 @@ public class SectorExample extends ImageExample {
 		try {
 			final IRegion sector = system.createRegion("Sector 1", RegionType.SECTOR);
 			sector.setRegionColor(Display.getDefault().getSystemColor(SWT.COLOR_RED));
-			//sector.setROI(new SectorROI);
+			
+
+			// TODO Need way in API of creating regions
 			
 		} catch (Exception e) {
   		    e.printStackTrace(); // Or your favourite logging
@@ -36,5 +38,8 @@ public class SectorExample extends ImageExample {
 		
     }
 	
+	protected String getImageName() {
+		return "duke_football.jpg";
+	}
 
 }

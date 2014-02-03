@@ -49,7 +49,7 @@ public class ImageExample extends ViewPart {
 			system.createPlotPart(parent, "Image Example", getViewSite().getActionBars(), PlotType.IMAGE, this);
 
 			// We read an image
-			final File loc = new File(BundleUtils.getBundleLocation(Activator.PLUGIN_ID), "pow_M99S5_1_0001.cbf");
+			final File loc = new File(BundleUtils.getBundleLocation(Activator.PLUGIN_ID), getImageName());
 			final IDataset image = service.getDataset(loc.getAbsolutePath(), new IMonitor.Stub());
 			// NOTE IMonitor is an alternative to IProgressMonitor which cannot be seen in the data layer.
 			
@@ -61,6 +61,10 @@ public class ImageExample extends ViewPart {
 		}
     }
 	
+	protected String getImageName() {
+		return "pow_M99S5_1_0001.cbf";
+	}
+
 	@Override
 	public void dispose() {
 		super.dispose();

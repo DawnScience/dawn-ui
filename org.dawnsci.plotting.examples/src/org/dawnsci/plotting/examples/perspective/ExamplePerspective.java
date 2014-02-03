@@ -15,6 +15,7 @@ public class ExamplePerspective implements IPerspectiveFactory {
 		addViewShortcuts(layout);
 		addPerspectiveShortcuts(layout);
 		layout.addView("org.dawnsci.plotting.examples.imageExample", IPageLayout.TOP, 0.5f, IPageLayout.ID_EDITOR_AREA);
+		layout.addView("org.dawnsci.plotting.examples.sectorExample", IPageLayout.RIGHT, 0.5f, "org.dawnsci.plotting.examples.imageExample");
 	}
 
 	/**
