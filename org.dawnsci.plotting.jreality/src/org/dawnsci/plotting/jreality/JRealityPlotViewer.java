@@ -397,8 +397,8 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 				final int[] lens  = rroi.getIntLengths();
 				surfRoi = new SurfacePlotROI(start[0], start[1], start[0]+lens[0], start[1]+lens[1], 0,0,0,0);
 			} else {
-				int y = currentTrace.getData().getShape()[0];
-				int x = currentTrace.getData().getShape()[1];
+				int y = currentTrace != null ? currentTrace.getData().getShape()[0] : 300;
+				int x = currentTrace != null ? currentTrace.getData().getShape()[1] : 300;
 				int width = x > 300 ? 300 : x;
 				int height = y > 300 ? 300 : y;
 				surfRoi = new SurfacePlotROI(0, 0, width, height, 0 , 0, 0, 0);
