@@ -110,6 +110,8 @@ public class PowderCheckTool extends AbstractToolPage {
 	PowderCheckJob updatePlotJob;
 	SashForm sashForm;
 	TableViewer viewer;
+	Action fullImage;
+	//MenuAction modeSelect;
 
 	private ITraceListener            traceListener;
 	private CalibrantSelectedListener calListener;
@@ -187,7 +189,7 @@ public class PowderCheckTool extends AbstractToolPage {
 	
 	
 	private void update() {
-
+		
 		IImageTrace im = getImageTrace();
 		logger.debug("Update");
 		
@@ -224,9 +226,11 @@ public class PowderCheckTool extends AbstractToolPage {
 			});
 		}
 		
+		//modeSelect.setSelectedAction(fullImage);
 		updatePlotJob.cancel();
+		updatePlotJob.setCheckMode(PowderCheckMode.FullImage);
 		updatePlotJob.setData(ds, (IDiffractionMetadata)m);
-		updatePlotJob.schedule();
+		if (fullImage != null)	fullImage.run();
 		
 	}
 	
@@ -234,7 +238,7 @@ public class PowderCheckTool extends AbstractToolPage {
 		
 		final MenuAction modeSelect = new MenuAction("Select Check Mode");
 		
-		final Action fullImage = new Action("Full Image") {
+		fullImage = new Action("Full Image") {
 			@Override
 			public void run() {
 				modeSelect.setSelectedAction(this);
@@ -380,9 +384,16 @@ public class PowderCheckTool extends AbstractToolPage {
 
 		var   = new TableViewerColumn(viewer, SWT.CENTER, 3);
 		var.getColumn().setText("Relative Error");
-		//var.getColumn().setToolTipText("The nearest data value of the fitted peak.");
+		var.getColumn().setToolTipText("1 - calibrated value/standard value.");
 		var.getColumn().setWidth(150);
 		var.setLabelProvider(new PowderLabelProvider(3));
+		ret.add(var);
+		
+		var   = new TableViewerColumn(viewer, SWT.CENTER, 4);
+		var.getColumn().setText("Delta Q (1/\u00c5)");
+		var.getColumn().setToolTipText("Standard value minus calibrated value.");
+		var.getColumn().setWidth(150);
+		var.setLabelProvider(new PowderLabelProvider(4));
 		ret.add(var);
 
 	}
@@ -415,6 +426,8 @@ public class PowderCheckTool extends AbstractToolPage {
 				return String.format("%.4g",result.getPeak().getParameter(1).getValue());
 			case 3:
 				return String.format("%.3g",diff);
+			case 4:
+				return String.format("%.3g",q-qExp);
 			default:
 				return "";
 			}
