@@ -275,7 +275,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	private ITrace currentTrace;
 
 	public void addTrace(ITrace trace) {
-
+		currentTrace = trace;
 		if (trace instanceof ISurfaceTrace) {
 			system.setPlotType(PlotType.SURFACE);
 		} else if (trace instanceof ILineStackTrace) {
@@ -298,7 +298,6 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		} else if (trace instanceof IMulti2DTrace) {
 			addMulti2DTrace((IMulti2DTrace)trace);
 		}
-		currentTrace = trace;
 	}
 
 	/**
@@ -457,7 +456,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	 * @return true if something plotted
 	 */
 	private final boolean plot(final List<AxisValues>    axes, 
-							   final IROI                window,
+							   IROI                      window,
 							   final PlottingMode        mode,
 							   final IDataset...         rawData) {
 
@@ -491,7 +490,10 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		setYTickLabelFormat(TickFormatting.roundAndChopMode);
 
 		try {
-			if (window!=null && window instanceof SurfacePlotROI && !window.equals(getDataWindow())) {
+			if (window == null) {
+				window = new SurfacePlotROI(0, 0, 300, 300, 0, 0, 0, 0);
+			}
+			if (window instanceof SurfacePlotROI && !window.equals(getDataWindow())) {
 				((DataSet3DPlot3D) plotter).setDataWindow(data, (SurfacePlotROI)window, null);
 			}
 			update(newMode, data);
