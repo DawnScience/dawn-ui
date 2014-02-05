@@ -1,6 +1,9 @@
 package org.dawnsci.plotting.examples;
 
+import java.util.Arrays;
+
 import org.dawnsci.plotting.api.axis.IAxis;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
@@ -30,11 +33,15 @@ public class AxisExample extends XYExample {
 			
 			// Create a 1D dataset programmatically. Can also use 
 			final IDataset set = mservice.arange(0, 100000, 1000, IDatasetMathsService.INT);
+			set.setName("Different scale data");
 			
 			final IAxis otherX = system.createAxis("top", false, SWT.TOP);
 			final IAxis otherY = system.createAxis("right", true, SWT.RIGHT);
 		    
+			system.setSelectedXAxis(otherX);
+			system.setSelectedYAxis(otherY);
 			
+			system.createPlot1D(null, Arrays.asList(set), new NullProgressMonitor());
 			
 			system.setTitle("Axis Example");
 
