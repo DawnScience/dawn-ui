@@ -69,6 +69,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.part.IPageSite;
 import org.slf4j.Logger;
@@ -111,7 +112,8 @@ public class PowderCheckTool extends AbstractToolPage {
 	SashForm sashForm;
 	TableViewer viewer;
 	Action fullImage;
-	//MenuAction modeSelect;
+	ROIProfile.XAxis xAxis = XAxis.Q;
+
 
 	private ITraceListener            traceListener;
 	private CalibrantSelectedListener calListener;
@@ -219,15 +221,24 @@ public class PowderCheckTool extends AbstractToolPage {
 						
 						@Override
 						public void run() {
-							viewer.setInput(updatePlotJob.getResultsList());
+							List<PowderCheckResult> resultsList = updatePlotJob.getResultsList();
+							Collections.sort(resultsList, new Comparator<PowderCheckResult>() {
+
+								@Override
+								public int compare(PowderCheckResult o1,
+										PowderCheckResult o2) {
+									return (int) Math.signum(o1.getCalibrantQValue()-o2.getCalibrantQValue());
+								}
+							});
+							viewer.setInput(resultsList);
 						}
 					});
 				}
 			});
 		}
 		
-		//modeSelect.setSelectedAction(fullImage);
 		updatePlotJob.cancel();
+		updatePlotJob.setAxisMode(xAxis);
 		updatePlotJob.setCheckMode(PowderCheckMode.FullImage);
 		updatePlotJob.setData(ds, (IDiffractionMetadata)m);
 		if (fullImage != null)	fullImage.run();
@@ -268,7 +279,7 @@ public class PowderCheckTool extends AbstractToolPage {
 		
 		modeSelect.add(quad);
 		
-		final Action peakfit = new Action("Peak fit") {
+		final Action peakfit = new Action("Peak Fit") {
 			@Override
 			public void run() {
 				modeSelect.setSelectedAction(this);
@@ -277,13 +288,14 @@ public class PowderCheckTool extends AbstractToolPage {
 					
 					@Override
 					public void run() {
-						viewer.setInput(new ArrayList<PowderCheckResult>());
+						viewer.getTable().clearAll();
 					}
 				});
 				
 				sashForm.setMaximizedControl(null);
 				updatePlotJob.cancel();
 				updatePlotJob.setCheckMode(PowderCheckMode.PeakFit);
+				updatePlotJob.setAxisMode(xAxis);
 				updatePlotJob.schedule();
 				
 				
@@ -292,8 +304,37 @@ public class PowderCheckTool extends AbstractToolPage {
 		peakfit.setToolTipText("Integrate the entire image, peak fit, and compare with calibrant positions");
 		modeSelect.add(peakfit);
 		
+		final MenuAction axisSelect= new MenuAction("Select Axis");
+		
+		final Action qAction = new Action("Q") {
+			@Override
+			public void run() {
+				axisSelect.setSelectedAction(this);
+				xAxis = XAxis.Q;
+				updateAndRun();
+				
+			}
+		};
+		
+		
+		final Action tthAction = new Action("2\u03b8") {
+			@Override
+			public void run() {
+				axisSelect.setSelectedAction(this);
+				xAxis = XAxis.ANGLE;
+				updateAndRun();
+				
+			}
+		};
+		
+		axisSelect.add(qAction);
+		axisSelect.add(tthAction);
+		axisSelect.setSelectedAction(qAction);
+		
 		getSite().getActionBars().getToolBarManager().add(modeSelect);
+		getSite().getActionBars().getToolBarManager().add(axisSelect);
 		getSite().getActionBars().getMenuManager().add(modeSelect);
+		getSite().getActionBars().getMenuManager().add(axisSelect);
 		
 	}
 	
@@ -303,6 +344,20 @@ public class PowderCheckTool extends AbstractToolPage {
 		}
 	}
 	
+	private void updateAndRun() {
+		Display.getDefault().syncExec(new Runnable() {
+			
+			@Override
+			public void run() {
+				viewer.getTable().clearAll();
+				setColumnNames();
+			}
+		});
+		updatePlotJob.cancel();
+		updatePlotJob.setAxisMode(xAxis);
+		updatePlotJob.schedule();
+		
+	}
 	
 	@Override
 	public void activate() {
@@ -360,25 +415,45 @@ public class PowderCheckTool extends AbstractToolPage {
 
 	}
 	
+	private void setColumnNames() {
+		TableColumn[] columns = viewer.getTable().getColumns();
+		
+		String unit = null;
+		String name = null;
+		
+		if (xAxis == XAxis.Q) {
+			name = "Q ";
+			unit = "(1/\u00c5)";
+		} else if (xAxis == XAxis.ANGLE) {
+			name = "2\u03b8 ";
+			unit = "(degrees)";
+		}
+		
+		columns[0].setText("Calibrant " + name + unit);
+		columns[1].setText("Peak Position " + unit);
+		columns[2].setText("Peak Width " + unit);
+		columns[4].setText("Delta "  +name + unit);
+	}
+	
 	private void createColumns() {
 
 		List<TableViewerColumn> ret = new ArrayList<TableViewerColumn>(9);
 
 		TableViewerColumn var   = new TableViewerColumn(viewer, SWT.LEFT, 0);
-		var.getColumn().setText("Calibrant Q (1/\u00c5)");
+		var.getColumn().setText("Calibrant (1/\u00c5)");
 		var.getColumn().setWidth(150);
 		var.setLabelProvider(new PowderLabelProvider(0));
 		ret.add(var);
 
 		var   = new TableViewerColumn(viewer, SWT.CENTER, 1);
 		var.getColumn().setText("Peak Position (1/\u00c5)");
-		var.getColumn().setWidth(150);
+		var.getColumn().setWidth(170);
 		var.setLabelProvider(new PowderLabelProvider(1));
 		ret.add(var);
 
 		var   = new TableViewerColumn(viewer, SWT.CENTER, 2);
 		var.getColumn().setText("Peak Width (1/\u00c5)");
-		var.getColumn().setWidth(150);
+		var.getColumn().setWidth(170);
 		var.setLabelProvider(new PowderLabelProvider(2));
 		ret.add(var);
 
@@ -390,12 +465,13 @@ public class PowderCheckTool extends AbstractToolPage {
 		ret.add(var);
 		
 		var   = new TableViewerColumn(viewer, SWT.CENTER, 4);
-		var.getColumn().setText("Delta Q (1/\u00c5)");
+		var.getColumn().setText("Delta (1/\u00c5)");
 		var.getColumn().setToolTipText("Standard value minus calibrated value.");
 		var.getColumn().setWidth(150);
 		var.setLabelProvider(new PowderLabelProvider(4));
 		ret.add(var);
 
+		setColumnNames();
 	}
 	
 	public class PowderLabelProvider extends ColumnLabelProvider {
