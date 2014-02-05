@@ -15,8 +15,10 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
+import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IErrorDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 
 /**
  * This class only wraps line traces, images have their own IImageTrace implementor.
@@ -347,6 +349,11 @@ public class LineTraceImpl implements ILineTrace {
 		if (settingLineData) return;
 		try {
 			settingLineData = true;
+			
+			if (xData==null && yData!=null) {
+				xData = AbstractDataset.arange(yData.getSize(), AbstractDataset.INT);
+			}
+			
 			LightWeightDataProvider prov = (LightWeightDataProvider)trace.getDataProvider();
 			if (prov!=null) {
 				prov.removeDataProviderListener(trace);

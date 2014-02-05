@@ -31,6 +31,7 @@ public class SectorExample extends ImageExample {
 
 			// TODO Need way in API of creating regions
 			
+			system.setTitle("Sector Example");
 		} catch (Exception e) {
   		    e.printStackTrace(); // Or your favourite logging
 		}

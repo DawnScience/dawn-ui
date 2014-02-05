@@ -42,6 +42,13 @@
             name="Surface Example"
             restorable="true">
       </view>
+      <view
+            category="org.dawnsci.plotting.examples.category"
+            class="org.dawnsci.plotting.examples.BarExample"
+            id="org.dawnsci.plotting.examples.barExample"
+            name="Bar Example"
+            restorable="true">
+      </view>
    </extension>
    <extension
          point="org.eclipse.ui.perspectives">

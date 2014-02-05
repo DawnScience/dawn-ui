@@ -1,11 +1,11 @@
 package org.dawnsci.plotting.examples;
 
 import org.dawnsci.plotting.api.axis.IAxis;
-import org.dawnsci.plotting.api.region.IRegion;
-import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
+
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDatasetMathsService;
 
 /**
  * View which creates a sector selection region
@@ -26,13 +26,18 @@ public class AxisExample extends XYExample {
 		super.createPartControl(parent); // plots an image for us
 		
 		try {
+			final IDatasetMathsService mservice = (IDatasetMathsService)Activator.getService(IDatasetMathsService.class);
 			
+			// Create a 1D dataset programmatically. Can also use 
+			final IDataset set = mservice.arange(0, 100000, 1000, IDatasetMathsService.INT);
 			
 			final IAxis otherX = system.createAxis("top", false, SWT.TOP);
+			final IAxis otherY = system.createAxis("right", true, SWT.RIGHT);
+		    
 			
+			
+			system.setTitle("Axis Example");
 
-			// TODO Need way in API of creating regions
-			
 		} catch (Exception e) {
   		    e.printStackTrace(); // Or your favourite logging
 		}

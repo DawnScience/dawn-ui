@@ -21,6 +21,7 @@ public class ExamplePerspective implements IPerspectiveFactory {
 			folderLayout.addView("org.dawnsci.plotting.examples.sectorExample");
 		}
 		layout.addView("org.dawnsci.plotting.examples.surfaceExample", IPageLayout.RIGHT, 0.5f, "folder");
+		layout.addView("org.dawnsci.plotting.examples.barExample", IPageLayout.TOP, 0.5f, "org.dawnsci.plotting.examples.surfaceExample");
 		{
 			IFolderLayout folderLayout = layout.createFolder("folder_1", IPageLayout.TOP, 0.5f, "org.dawnsci.plotting.examples.sectorExample");
 			folderLayout.addView("org.dawnsci.plotting.examples.xyExample");
