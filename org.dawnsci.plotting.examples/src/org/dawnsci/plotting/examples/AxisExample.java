@@ -1,5 +1,6 @@
 package org.dawnsci.plotting.examples;
 
+import org.dawnsci.plotting.api.axis.IAxis;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.swt.SWT;
@@ -13,10 +14,10 @@ import org.eclipse.swt.widgets.Display;
  * @author fcp94556
  *
  */
-public class SectorExample extends ImageExample {
+public class AxisExample extends XYExample {
 	
 
-	public SectorExample() {
+	public AxisExample() {
 		super();			
 	}
 	
@@ -25,8 +26,9 @@ public class SectorExample extends ImageExample {
 		super.createPartControl(parent); // plots an image for us
 		
 		try {
-			final IRegion sector = system.createRegion("Sector 1", RegionType.SECTOR);
-			sector.setRegionColor(Display.getDefault().getSystemColor(SWT.COLOR_RED));
+			
+			
+			final IAxis otherX = system.createAxis("top", false, SWT.TOP);
 			
 
 			// TODO Need way in API of creating regions
@@ -38,7 +40,7 @@ public class SectorExample extends ImageExample {
 		
     }
 	
-	protected String getFileName() {
+	protected String getImageName() {
 		return "duke_football.jpg";
 	}
 

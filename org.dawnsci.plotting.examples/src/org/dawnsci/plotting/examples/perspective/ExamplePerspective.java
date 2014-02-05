@@ -2,6 +2,7 @@ package org.dawnsci.plotting.examples.perspective;
 
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
+import org.eclipse.ui.IFolderLayout;
 
 public class ExamplePerspective implements IPerspectiveFactory {
 
@@ -14,8 +15,17 @@ public class ExamplePerspective implements IPerspectiveFactory {
 		addFastViews(layout);
 		addViewShortcuts(layout);
 		addPerspectiveShortcuts(layout);
-		layout.addView("org.dawnsci.plotting.examples.imageExample", IPageLayout.TOP, 0.5f, IPageLayout.ID_EDITOR_AREA);
-		layout.addView("org.dawnsci.plotting.examples.sectorExample", IPageLayout.RIGHT, 0.5f, "org.dawnsci.plotting.examples.imageExample");
+		{
+			IFolderLayout folderLayout = layout.createFolder("folder", IPageLayout.TOP, 0.5f, IPageLayout.ID_EDITOR_AREA);
+			folderLayout.addView("org.dawnsci.plotting.examples.imageExample");
+			folderLayout.addView("org.dawnsci.plotting.examples.sectorExample");
+		}
+		layout.addView("org.dawnsci.plotting.examples.surfaceExample", IPageLayout.RIGHT, 0.5f, "folder");
+		{
+			IFolderLayout folderLayout = layout.createFolder("folder_1", IPageLayout.TOP, 0.5f, "org.dawnsci.plotting.examples.sectorExample");
+			folderLayout.addView("org.dawnsci.plotting.examples.xyExample");
+			folderLayout.addView("org.dawnsci.plotting.examples.axisExample");
+		}
 	}
 
 	/**
