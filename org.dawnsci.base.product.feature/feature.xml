@@ -117,20 +117,6 @@
          unpack="false"/>
 
    <plugin
-         id="com.springsource.slf4j.org.apache.commons.logging"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="com.springsource.slf4j.org.apache.log4j"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="org.dawnsci.intro"
          download-size="0"
          install-size="0"
