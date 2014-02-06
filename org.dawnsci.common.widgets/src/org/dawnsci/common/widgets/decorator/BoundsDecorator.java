@@ -85,6 +85,8 @@ public class BoundsDecorator extends RegexDecorator {
 		    text.setText("∞");	
 		} else if (value.doubleValue() == Double.NEGATIVE_INFINITY) {
 		    text.setText("-∞");	
+		} else if (Double.isInfinite(value.doubleValue()) || Double.isNaN(value.doubleValue())) {
+			text.setText("");
 		} else {
 		    text.setText(numberFormat.format(value));
 		}
@@ -208,6 +210,13 @@ public class BoundsDecorator extends RegexDecorator {
 	}
 
 	public void setMaximum(Object maximum) {
+		if (maximum instanceof Double) {
+			double dbl = ((Double)maximum).doubleValue();
+			if (Double.isNaN(dbl) || Double.isInfinite(dbl)) {
+				this.maximum = null;
+				return;
+			}
+		}
 		this.maximum = maximum;
 		registerBoundsChanger(maximum, BoundsType.MAXIMUM);
 		if (text.getText()==null || "".equals(text.getText())) return;
@@ -249,6 +258,13 @@ public class BoundsDecorator extends RegexDecorator {
 	}
 
 	public void setMinimum(Object minimum) {
+		if (minimum instanceof Double) {
+			double dbl = ((Double)minimum).doubleValue();
+			if (Double.isNaN(dbl) || Double.isInfinite(dbl)) {
+				this.minimum = null;
+				return;
+			}
+		}
 		this.minimum = minimum;
 		registerBoundsChanger(minimum, BoundsType.MINIMUM);
 		if (text.getText()==null || "".equals(text.getText())) return;

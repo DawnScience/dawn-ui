@@ -100,7 +100,6 @@ public class ImageTraceComposite extends Composite {
 		Text minimumBox = new Text(group, SWT.BORDER);
 		minimumBox.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		this.minimum = isInt ? new IntegerDecorator(minimumBox) : new FloatDecorator(minimumBox);
-		if (imageTrace.getMin()!=null) minimum.setValue(imageTrace.getMin().doubleValue());
 
 		label = new Label(group, SWT.NONE);
 		label.setText("Maximum Intensity");
@@ -109,13 +108,17 @@ public class ImageTraceComposite extends Composite {
 		Text maximumBox = new Text(group, SWT.BORDER);
 		maximumBox.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		this.maximum = isInt ? new IntegerDecorator(maximumBox) : new FloatDecorator(maximumBox);
-		if (imageTrace.getMax()!=null) maximum.setValue(imageTrace.getMax().doubleValue());
       		
 		maximum.setMaximum(imageTrace.getData().max().doubleValue());
 		maximum.setMinimum(minimum);
 	    minimum.setMaximum(maximum);
 		minimum.setMinimum(imageTrace.getData().min().doubleValue());
-	
+		
+		Number min = imageTrace.getMin();
+		Number max = imageTrace.getMax();
+		if (min!=null) minimum.setValue(min.doubleValue());
+		if (max!=null) maximum.setValue(max.doubleValue());
+
 		
 		label = new Label(group, SWT.NONE);
 		label.setText("Downsampling Type");
