@@ -31,5 +31,5 @@ Import-Package: com.thoughtworks.xstream.core.util,
  org.eclipse.ui,
  org.eclipse.ui.cheatsheets,
  org.eclipse.ui.part,
- org.slf4j;version="[1.7.5,1.7.6)"
+ org.slf4j;version="[1.7.6,1.7.7)"
 Bundle-ClassPath: .

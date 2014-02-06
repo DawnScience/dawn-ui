@@ -15,7 +15,7 @@ Import-Package: com.isencia.passerelle.model;version="8.3.0",
  org.dawnsci.plotting.api,
  org.dawnsci.plotting.util,
  org.osgi.framework;version="1.3.0",
- org.slf4j;version="[1.7.5,1.7.6)",
+ org.slf4j;version="[1.7.6,1.7.7)",
  ptolemy.data.expr;version="7.0.1",
  uk.ac.diamond.scisoft.analysis.roi
 Require-Bundle: org.eclipse.ui;bundle-version="3.8.0",
