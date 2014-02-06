@@ -386,7 +386,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	}
 
 	protected SurfacePlotROI getWindow(IROI roi) {
-		if (currentMode == PlottingMode.SURF2D) {
+		if (currentMode == PlottingMode.SURF2D && currentTrace instanceof SurfaceTrace) {
 			SurfacePlotROI surfRoi = null;
 			if (roi instanceof SurfacePlotROI) {
 				surfRoi = (SurfacePlotROI)roi;
@@ -490,10 +490,10 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		setYTickLabelFormat(TickFormatting.roundAndChopMode);
 
 		try {
-			if (window == null) {
+			if (window == null && mode == PlottingMode.SURF2D) {
 				window = new SurfacePlotROI(0, 0, 300, 300, 0, 0, 0, 0);
 			}
-			if (window instanceof SurfacePlotROI && !window.equals(getDataWindow())) {
+			if (mode == PlottingMode.SURF2D && window instanceof SurfacePlotROI && !window.equals(getDataWindow())) {
 				((DataSet3DPlot3D) plotter).setDataWindow(data, (SurfacePlotROI)window, null);
 			}
 			update(newMode, data);
