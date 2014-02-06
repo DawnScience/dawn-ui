@@ -34,7 +34,7 @@ public class DiffractionRingsComposite extends Composite {
 		ringName.setTextLimit(64);
 		
 		dNano = createRangeBox("d", 0, 1000, "nm");
-		dNano.setDecimalPlaces(4);
+		dNano.setDecimalPlaces(6);
 		dNano.setName("d");
 		
 		h = createSpinnerBox("h", 0, 10);		

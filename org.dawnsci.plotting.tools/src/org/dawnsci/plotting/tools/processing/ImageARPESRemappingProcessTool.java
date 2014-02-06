@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.dawb.common.util.io.IOUtils;
 import org.dawnsci.common.widgets.content.FileContentProposalProvider;
-import org.dawnsci.common.widgets.utils.RadioUtils;
+import org.dawnsci.common.widgets.radio.RadioGroupWidget;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.ROIEvent;
@@ -114,7 +114,8 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 			radioGroupNorm.setLayout(new GridLayout(1, false));
 			radioGroupNorm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			radioGroupNorm.setText("Normalisation type");
-			RadioUtils.createRadioControls(radioGroupNorm, createNormActions());
+			RadioGroupWidget normRadios = new RadioGroupWidget(radioGroupNorm);
+			normRadios.setActions(createNormActions());
 
 			Composite auxComp = new Composite(radioGroupNorm, SWT.NONE);
 			auxComp.setLayout(new GridLayout(1, false));

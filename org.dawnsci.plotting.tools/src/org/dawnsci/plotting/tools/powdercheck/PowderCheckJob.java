@@ -8,7 +8,6 @@ import java.util.List;
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.optim.InitialGuess;
 import org.apache.commons.math3.optim.MaxEval;
-import org.apache.commons.math3.optim.PointValuePair;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.MultivariateOptimizer;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
@@ -35,6 +34,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Maths;
 import uk.ac.diamond.scisoft.analysis.dataset.Stats;
+import uk.ac.diamond.scisoft.analysis.dataset.function.NonPixelSplittingIntegration;
 import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
 import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.APeak;
@@ -64,7 +64,7 @@ public class PowderCheckJob extends Job {
 	AbstractDataset dataset;
 	IDiffractionMetadata metadata;
 	List<PowderCheckResult> resultList;
-	
+	XAxis xAxis = XAxis.ANGLE;
 	PowderCheckMode mode = PowderCheckMode.FullImage;
 
 	public PowderCheckJob(IPlottingSystem system) {
@@ -82,6 +82,10 @@ public class PowderCheckJob extends Job {
 		this.mode = mode;
 	}
 	
+	public void setAxisMode(XAxis xAxis) {
+		this.xAxis = xAxis;
+	}
+	
 	public List<PowderCheckResult> getResultsList() {
 		List<PowderCheckResult> out = new ArrayList<PowderCheckResult>(this.resultList.size());
 		out.addAll(this.resultList);
@@ -93,7 +97,7 @@ public class PowderCheckJob extends Job {
 	protected IStatus run(IProgressMonitor monitor) {
 		if (system.getPlotComposite()==null) return Status.CANCEL_STATUS;
 		cleanPlottingSystem();
-		
+		system.setEnabled(false);
 		switch (mode) {
 		case FullImage:
 			integrateFullSectorAndShowLines(dataset, metadata, monitor);
@@ -107,7 +111,7 @@ public class PowderCheckJob extends Job {
 		default:
 			break;
 		}
-		
+		system.setEnabled(true);
 		return Status.OK_STATUS;
 	}
 
@@ -122,7 +126,7 @@ public class PowderCheckJob extends Job {
 		if (centre[1] < shape[1]/2.0) farCorner[1] = shape[1];
 		double maxDistance = Math.sqrt(Math.pow(centre[0]-farCorner[0],2)+Math.pow(centre[1]-farCorner[1],2));
 		SectorROI sroi = new SectorROI(bc[0], bc[1], 0, maxDistance, Math.PI/4 - Math.PI/8, Math.PI/4 + Math.PI/8, 1, true, SectorROI.INVERT);
-		AbstractDataset[] profile = ROIProfile.sector(data, null, sroi, true, false, false, qSpace, XAxis.Q, false);
+		AbstractDataset[] profile = ROIProfile.sector(data, null, sroi, true, false, false, qSpace, xAxis, false);
 
 		ArrayList<IDataset> y = new ArrayList<IDataset> ();
 		profile[0].setName("Bottom right");
@@ -147,7 +151,7 @@ public class PowderCheckJob extends Job {
 		if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 
 		sroi = new SectorROI(bc[0], bc[1], 0, maxDistance, 3*Math.PI/4 - Math.PI/8, 3*Math.PI/4 + Math.PI/8, 1, true, SectorROI.INVERT);
-		profile = ROIProfile.sector(data, null, sroi, true, false, false, qSpace, XAxis.Q, false);
+		profile = ROIProfile.sector(data, null, sroi, true, false, false, qSpace, xAxis, false);
 
 		profile[0].setName("Bottom left");
 		y.add(profile[0]);
@@ -161,6 +165,7 @@ public class PowderCheckJob extends Job {
 		y.add(reflection2);
 		traces = system.updatePlot1D(axref2, y, null);
 		//((ILineTrace)traces.get(0)).setTraceColor(ColorConstants.lightGreen);
+		setPlottingSystemAxes();
 		updateCalibrantLines();
 
 		return Status.OK_STATUS;
@@ -174,7 +179,6 @@ public class PowderCheckJob extends Job {
 	
 	private List<AbstractDataset> integrateFullSector(AbstractDataset data, IDiffractionMetadata md, IProgressMonitor monitor) {
 		QSpace qSpace = new QSpace(md.getDetector2DProperties(), md.getDiffractionCrystalEnvironment());
-		double[] bc = md.getDetector2DProperties().getBeamCentreCoords();
 		int[] shape = data.getShape();
 		double[] farCorner = new double[]{0,0};
 		double[] centre = md.getDetector2DProperties().getBeamCentreCoords();
@@ -183,29 +187,17 @@ public class PowderCheckJob extends Job {
 
 		int maxDistance = (int)Math.sqrt(Math.pow(centre[0]-farCorner[0],2)+Math.pow(centre[1]-farCorner[1],2));
 		NonPixelSplittingIntegration npsi = new NonPixelSplittingIntegration(qSpace, maxDistance);
+		npsi.setAxisType(xAxis);
 
 		List<AbstractDataset> out = npsi.value(data);
 
 		system.updatePlot1D(out.get(0), Arrays.asList(new IDataset[]{out.get(1)}), null);
+		setPlottingSystemAxes();
 		
 		return out;
 	}
 	
 	private IStatus integrateFullSectorPeakFit(AbstractDataset data, IDiffractionMetadata md, IProgressMonitor monitor) {
-//		QSpace qSpace = new QSpace(md.getDetector2DProperties(), md.getDiffractionCrystalEnvironment());
-//		double[] bc = md.getDetector2DProperties().getBeamCentreCoords();
-//		int[] shape = data.getShape();
-//		double[] farCorner = new double[]{0,0};
-//		double[] centre = md.getDetector2DProperties().getBeamCentreCoords();
-//		if (centre[0] < shape[0]/2.0) farCorner[0] = shape[0];
-//		if (centre[1] < shape[1]/2.0) farCorner[1] = shape[1];
-//
-//		int maxDistance = (int)Math.sqrt(Math.pow(centre[0]-farCorner[0],2)+Math.pow(centre[1]-farCorner[1],2));
-//		NonPixelSplittingIntegration npsi = new NonPixelSplittingIntegration(qSpace, maxDistance);
-//
-//		List<AbstractDataset> out = npsi.value(data);
-//
-//		system.updatePlot1D(out.get(0), Arrays.asList(new IDataset[]{out.get(1)}), null);
 		
 		List<AbstractDataset> out =  integrateFullSector(data, md, monitor);
 		
@@ -240,7 +232,8 @@ public class PowderCheckJob extends Job {
 		final double[] qVals = new double[spacings.size()];
 
 		for (int i = 0 ; i < spacings.size(); i++) {
-			qVals[i] = (Math.PI*2)/(spacings.get(i).getDNano()*10);
+			if (xAxis == XAxis.ANGLE) qVals[i] = 2*Math.toDegrees(Math.asin((metadata.getDiffractionCrystalEnvironment().getWavelength() / (2*spacings.get(i).getDNano()*10))));
+			else qVals[i] = (Math.PI*2)/(spacings.get(i).getDNano()*10);
 		}
 
 		double qMax = xIn.max().doubleValue();
@@ -321,24 +314,24 @@ public class PowderCheckJob extends Job {
 					yfit.set(cfFinal.val(x.getDouble(i)), i);
 				}
 
-				double test = y.residual(yfit);
-
 				return y.residual(yfit);
 			}
 		};
 
-		PointValuePair result = opt.optimize(new InitialGuess(initParam), GoalType.MINIMIZE,
+		opt.optimize(new InitialGuess(initParam), GoalType.MINIMIZE,
 				new ObjectiveFunction(fun), new MaxEval(MAX_EVAL),
 				new NelderMeadSimplex(initParam.length));	
 
-		system.updatePlot1D(x, Arrays.asList(new IDataset[]{Maths.add(yfit, baseline)}), null);
-
+		AbstractDataset fit = Maths.add(yfit, baseline);
+		fit.setName("Fit");
+		AbstractDataset residual = Maths.subtract(y,yfit);
+		residual.setName("Residual");
+		
+		system.updatePlot1D(x, Arrays.asList(new IDataset[]{fit,residual}) , null);
+		setPlottingSystemAxes();
 		for (int i = 0; i < cfFinal.getNoOfFunctions(); i++) {
 			resultList.add(new PowderCheckResult(cfFinal.getFunction(i), initResults.get(i).getCalibrantQValue()));
 		}
-		
-		
-		//while (cf.getNoOfFunctions() != 0 || !qList.isEmpty()) findMatches(resultList, qList, cf);
 
 		return resultList;
 
@@ -377,7 +370,7 @@ public class PowderCheckJob extends Job {
 		double med = (Double)Stats.median(dd);
 		double mad = (Double)Stats.median(Maths.abs(Maths.subtract(dd, med)));
 		
-		return mad*10;
+		return mad*5;
 	}
 	
 	private void findMatches(List<PowderCheckResult> results, List<Double> qList, CompositeFunction cf, double limit) {
@@ -443,13 +436,32 @@ public class PowderCheckJob extends Job {
 		}
 	}
 	
+	private void setPlottingSystemAxes(){
+		Display.getDefault().syncExec(new Runnable() {
+			
+			@Override
+			public void run() {
+				IAxis selectedYAxis = system.getSelectedYAxis();
+				selectedYAxis.setTitle("Intensity");
+				
+				IAxis selectedXAxis = system.getSelectedXAxis();
+				
+				if (xAxis == XAxis.Q) selectedXAxis.setTitle("Q");
+				else selectedXAxis.setTitle("2 Theta");
+			}
+		});
+	}
+	
 	public void updateCalibrantLines() {
 
 		List<HKL> spacings = CalibrationFactory.getCalibrationStandards().getCalibrant().getHKLs();
 		final double[] qVals = new double[spacings.size()];
 
 		for (int i = 0 ; i < spacings.size(); i++) {
-			qVals[i] = (Math.PI*2)/(spacings.get(i).getDNano()*10);
+			
+			
+			if (xAxis == XAxis.ANGLE) qVals[i] = 2*Math.toDegrees(Math.asin((metadata.getDiffractionCrystalEnvironment().getWavelength() / (2*spacings.get(i).getDNano()*10))));
+			else qVals[i] = (Math.PI*2)/(spacings.get(i).getDNano()*10);
 		}
 
 		Display.getDefault().syncExec(new Runnable() {

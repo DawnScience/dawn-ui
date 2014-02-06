@@ -275,7 +275,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	private ITrace currentTrace;
 
 	public void addTrace(ITrace trace) {
-
+		currentTrace = trace;
 		if (trace instanceof ISurfaceTrace) {
 			system.setPlotType(PlotType.SURFACE);
 		} else if (trace instanceof ILineStackTrace) {
@@ -298,7 +298,6 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		} else if (trace instanceof IMulti2DTrace) {
 			addMulti2DTrace((IMulti2DTrace)trace);
 		}
-		currentTrace = trace;
 	}
 
 	/**
@@ -397,8 +396,8 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 				final int[] lens  = rroi.getIntLengths();
 				surfRoi = new SurfacePlotROI(start[0], start[1], start[0]+lens[0], start[1]+lens[1], 0,0,0,0);
 			} else {
-				int y = currentTrace.getData().getShape()[0];
-				int x = currentTrace.getData().getShape()[1];
+				int y = currentTrace != null ? currentTrace.getData().getShape()[0] : 300;
+				int x = currentTrace != null ? currentTrace.getData().getShape()[1] : 300;
 				int width = x > 300 ? 300 : x;
 				int height = y > 300 ? 300 : y;
 				surfRoi = new SurfacePlotROI(0, 0, width, height, 0 , 0, 0, 0);
@@ -457,7 +456,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	 * @return true if something plotted
 	 */
 	private final boolean plot(final List<AxisValues>    axes, 
-							   final IROI                window,
+							   IROI                      window,
 							   final PlottingMode        mode,
 							   final IDataset...         rawData) {
 
@@ -491,7 +490,10 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		setYTickLabelFormat(TickFormatting.roundAndChopMode);
 
 		try {
-			if (window!=null && window instanceof SurfacePlotROI && !window.equals(getDataWindow())) {
+			if (window == null) {
+				window = new SurfacePlotROI(0, 0, 300, 300, 0, 0, 0, 0);
+			}
+			if (window instanceof SurfacePlotROI && !window.equals(getDataWindow())) {
 				((DataSet3DPlot3D) plotter).setDataWindow(data, (SurfacePlotROI)window, null);
 			}
 			update(newMode, data);

@@ -24,7 +24,10 @@ import org.dawnsci.spectrum.ui.file.ISpectrumFile;
 import org.dawnsci.spectrum.ui.file.ISpectrumFileListener;
 import org.dawnsci.spectrum.ui.file.SpectrumFileManager;
 import org.dawnsci.spectrum.ui.file.SpectrumFileOpenedEvent;
+import org.dawnsci.spectrum.ui.file.SpectrumInMemory;
+import org.dawnsci.spectrum.ui.processing.DerivativeProcess;
 import org.dawnsci.spectrum.ui.utils.SpectrumUtils;
+import org.dawnsci.spectrum.ui.wizard.SpectrumSubtractionWizardPage;
 import org.dawnsci.spectrum.ui.wizard.SpectrumWizard;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -368,31 +371,37 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 				Activator.imageDescriptorFromPlugin("org.dawnsci.spectrum.ui","icons/function.png"),
 				"org.dawnsci.spectrum.ui.views.processingmenu");
 		
-		menuProcess.add(new Action("Average") {
-			public void run() {
-				ISelection selection = viewer.getSelection();
-				List<IContain1DData> list = SpectrumUtils.get1DDataList((IStructuredSelection)selection);
-				ISpectrumFile file = SpectrumUtils.averageSpectrumFiles(list,system);
-				
-				if (file == null) {
-					showMessage("Could not process dataset, operation not supported for this data!");
-					return;
+		if (((IStructuredSelection)viewer.getSelection()).size() > 1) {
+			menuProcess.add(new Action("Average") {
+				public void run() {
+					ISelection selection = viewer.getSelection();
+					List<IContain1DData> list = SpectrumUtils.get1DDataList((IStructuredSelection)selection);
+					ISpectrumFile file = SpectrumUtils.averageSpectrumFiles(list,system);
+					
+					if (file == null) {
+						showMessage("Could not process dataset, operation not supported for this data!");
+						return;
+					}
+					
+					TraceProcessPage.this.manager.addFile(file);
 				}
-				
-				TraceProcessPage.this.manager.addFile(file);
-			}
-		});
+			});
+		}
 		
-		menuProcess.add(new Action("Wizard...") {
-			public void run() {
-				SpectrumWizard sw = new SpectrumWizard();
-				ISelection selection = viewer.getSelection();
-				List<IContain1DData> list = SpectrumUtils.get1DDataList((IStructuredSelection)selection);
-				sw.add1DDatas(list);
-				WizardDialog wd = new WizardDialog(Display.getDefault().getActiveShell(),sw);
-				wd.open();
-			}
-		});
+		if (((IStructuredSelection)viewer.getSelection()).size() == 2) {
+		
+			menuProcess.add(new Action("Subtraction wizard...") {
+				public void run() {
+					ISelection selection = viewer.getSelection();
+					SpectrumWizard sw = new SpectrumWizard();
+					List<IContain1DData> list = SpectrumUtils.get1DDataList((IStructuredSelection)selection);
+					sw.addPage(new SpectrumSubtractionWizardPage(list));
+					
+					WizardDialog wd = new WizardDialog(Display.getDefault().getActiveShell(),sw);
+					wd.open();
+				}
+			});
+		}
 		
 		if (((IStructuredSelection)viewer.getSelection()).size() == 2) {
 
@@ -412,8 +421,53 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 				}
 			});
 		}
+		
 		manager.add(menuProcess);
 		manager.add(new Separator());
+		
+		if (((IStructuredSelection)viewer.getSelection()).size() == 1) {
+
+			List<ISpectrumFile> file = SpectrumUtils.getSpectrumFilesList((IStructuredSelection)viewer.getSelection());
+
+			if (!file.isEmpty() && file.get(0) instanceof SpectrumInMemory) {
+				manager.add(new Action("Save...") {
+					public void run() {
+						SpectrumWizard sw = new SpectrumWizard();
+						ISelection selection = viewer.getSelection();
+						List<IContain1DData> list = SpectrumUtils.get1DDataList((IStructuredSelection)selection);
+						WizardDialog wd = new WizardDialog(Display.getDefault().getActiveShell(),sw);
+						wd.open();
+					}
+				});
+				
+				manager.add(new Separator());
+			}
+		}
+		
+		if (((IStructuredSelection)viewer.getSelection()).size() > 1) {
+			menuProcess.add(new Action("Derivative") {
+				public void run() {
+					ISelection selection = viewer.getSelection();
+					List<IContain1DData> list = SpectrumUtils.get1DDataList((IStructuredSelection)selection);
+					DerivativeProcess process = new DerivativeProcess();
+					process.setDatasetList(list);
+					List<IContain1DData> out = process.process();
+					
+					if (out == null) {
+						showMessage("Could not process dataset, operation not supported for this data!");
+						return;
+					}
+					
+					for(IContain1DData data : out) {
+						SpectrumInMemory mem = new SpectrumInMemory(data.getName(), data.getName(), data.getxDataset(), data.getyDatasets(), system);
+						TraceProcessPage.this.manager.addFile(mem);
+					}
+					
+					//TraceProcessPage.this.manager.addFile(file);
+				}
+			});
+		}
+		
 		manager.add(removeAction);
 
 		// Other plug-ins can contribute there actions here

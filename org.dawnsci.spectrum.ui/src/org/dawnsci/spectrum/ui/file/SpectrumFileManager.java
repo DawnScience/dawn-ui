@@ -173,8 +173,6 @@ public class SpectrumFileManager {
 
 			spectrumFiles.put(file.getPath(), file);
 
-			//file.plotAll();
-
 			fireFileListeners(new SpectrumFileOpenedEvent(this, file));
 
 			return Status.OK_STATUS;

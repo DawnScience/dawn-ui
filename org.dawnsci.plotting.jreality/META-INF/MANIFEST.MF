@@ -30,7 +30,7 @@ Bundle-ClassPath: jars/gluegen-rt.jar,
  .
 Import-Package: org.dawb.common.services,
  org.dawnsci.plotting.draw2d.swtxy,
- org.slf4j
+ org.slf4j;version="[1.7.5,1.7.6)"
 Export-Package: de.jreality.backends.label,
  de.jreality.backends.texture,
  de.jreality.geometry,
