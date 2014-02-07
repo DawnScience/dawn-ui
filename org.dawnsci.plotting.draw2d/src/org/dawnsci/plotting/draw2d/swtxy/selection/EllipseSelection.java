@@ -103,7 +103,7 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 	}
 
 	@Override
-	protected void updateConnectionBounds() {
+	protected void updateBounds() {
 		if (ellipse != null) {
 			ellipse.updateFromHandles();
 			Rectangle b = ellipse.getBounds();

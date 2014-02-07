@@ -241,7 +241,7 @@ class RingSelection extends AbstractSelectionRegion {
 				int innerRad = coords.getValuePosition(0,y+sroi.getRadius(0))[1]-cen[1];
 				int outerRad = coords.getValuePosition(0,y+sroi.getRadius(1))[1]-cen[1];
 				setControlPositions(innerRad, outerRad);
-				updateConnectionBounds();
+				updateBounds();
 			}
 		}
 	}
@@ -269,13 +269,13 @@ class RingSelection extends AbstractSelectionRegion {
 			setControlPositions(innerRad, outerRad);
 		}
 		
-		updateConnectionBounds();
+		updateBounds();
 		createROI(true);
 		fireROIChanged(getROI());
 	}
 
 	@Override
-	protected void updateConnectionBounds() {
+	protected void updateBounds() {
 		if (connection==null) return;
 		final Point     cen = center.getSelectionPoint();
 		final int outerRad  = outerControl.getSelectionPoint().y;

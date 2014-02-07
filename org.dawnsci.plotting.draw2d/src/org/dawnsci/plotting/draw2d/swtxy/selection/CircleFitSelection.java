@@ -113,7 +113,7 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	protected void updateConnectionBounds() {
+	protected void updateBounds() {
 		if (circle != null) {
 			circle.updateFromHandles();
 		}

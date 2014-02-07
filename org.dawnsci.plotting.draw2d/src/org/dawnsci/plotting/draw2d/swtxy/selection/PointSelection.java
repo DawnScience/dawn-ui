@@ -84,7 +84,7 @@ public class PointSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	protected void updateConnectionBounds() {
+	protected void updateBounds() {
 		
 	}
 	@Override
@@ -168,7 +168,7 @@ public class PointSelection extends AbstractSelectionRegion {
 			if (point==null) return;
 
 	        point.setPosition(roi.getPointRef());
-	        updateConnectionBounds();
+	        updateBounds();
 		}
     }
 
