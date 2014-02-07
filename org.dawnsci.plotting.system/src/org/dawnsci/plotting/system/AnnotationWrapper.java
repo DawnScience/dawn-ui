@@ -1,9 +1,9 @@
 package org.dawnsci.plotting.system;
 
-import org.csstudio.swt.xygraph.figures.Annotation;
-import org.csstudio.swt.xygraph.figures.Annotation.CursorLineStyle;
-import org.csstudio.swt.xygraph.figures.Axis;
 import org.dawnsci.plotting.api.annotation.IAnnotation;
+import org.eclipse.nebula.visualization.xygraph.figures.Annotation;
+import org.eclipse.nebula.visualization.xygraph.figures.Axis;
+import org.eclipse.nebula.visualization.xygraph.figures.Annotation.CursorLineStyle;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 

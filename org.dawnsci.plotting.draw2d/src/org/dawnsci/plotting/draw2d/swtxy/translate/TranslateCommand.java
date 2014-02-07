@@ -2,10 +2,10 @@ package org.dawnsci.plotting.draw2d.swtxy.translate;
 
 import java.util.List;
 
-import org.csstudio.swt.xygraph.undo.IUndoableCommand;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.UpdateManager;
 import org.eclipse.draw2d.geometry.Dimension;
+import org.eclipse.nebula.visualization.xygraph.undo.IUndoableCommand;
 
 public class TranslateCommand implements IUndoableCommand {
 

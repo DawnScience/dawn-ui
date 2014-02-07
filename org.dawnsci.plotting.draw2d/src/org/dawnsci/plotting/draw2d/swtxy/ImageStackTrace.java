@@ -3,8 +3,6 @@ package org.dawnsci.plotting.draw2d.swtxy;
 import java.util.Collection;
 import java.util.HashSet;
 
-import org.csstudio.swt.widgets.figureparts.ColorMapRamp;
-import org.csstudio.swt.xygraph.figures.Axis;
 import org.dawnsci.plotting.api.trace.IImageStackTrace;
 import org.dawnsci.plotting.api.trace.IStackPositionListener;
 import org.dawnsci.plotting.api.trace.StackPositionEvent;
@@ -12,6 +10,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.nebula.visualization.widgets.figureparts.ColorMapRamp;
+import org.eclipse.nebula.visualization.xygraph.figures.Axis;
 import org.eclipse.swt.widgets.Display;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;

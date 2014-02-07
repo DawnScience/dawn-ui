@@ -3,13 +3,13 @@ package org.dawnsci.plotting.system.dialog;
 import java.util.List;
 import java.util.Map;
 
-import org.csstudio.swt.xygraph.figures.XYGraph;
-import org.csstudio.swt.xygraph.undo.XYGraphConfigCommand;
-import org.csstudio.swt.xygraph.undo.XYGraphMemento;
 import org.dawnsci.plotting.draw2d.swtxy.RegionArea;
 import org.dawnsci.plotting.draw2d.swtxy.RegionBean;
 import org.dawnsci.plotting.draw2d.swtxy.XYRegionMemento;
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
+import org.eclipse.nebula.visualization.xygraph.figures.XYGraph;
+import org.eclipse.nebula.visualization.xygraph.undo.XYGraphConfigCommand;
+import org.eclipse.nebula.visualization.xygraph.undo.XYGraphMemento;
 
 public class XYRegionConfigCommand extends XYGraphConfigCommand {
 

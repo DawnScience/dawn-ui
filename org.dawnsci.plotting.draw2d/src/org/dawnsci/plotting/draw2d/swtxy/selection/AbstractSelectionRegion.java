@@ -2,9 +2,6 @@ package org.dawnsci.plotting.draw2d.swtxy.selection;
 
 import java.util.List;
 
-import org.csstudio.swt.xygraph.figures.Grid;
-import org.csstudio.swt.xygraph.figures.Trace;
-import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.axis.CoordinateSystemEvent;
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
@@ -27,6 +24,9 @@ import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.nebula.visualization.xygraph.figures.Grid;
+import org.eclipse.nebula.visualization.xygraph.figures.Trace;
+import org.eclipse.nebula.visualization.xygraph.figures.XYGraph;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Image;

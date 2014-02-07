@@ -11,16 +11,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.csstudio.swt.widgets.datadefinition.IManualValueChangeListener;
-import org.csstudio.swt.widgets.figureparts.ColorMapRamp;
-import org.csstudio.swt.widgets.figures.ScaledSliderFigure;
-import org.csstudio.swt.xygraph.figures.Annotation;
-import org.csstudio.swt.xygraph.figures.Axis;
-import org.csstudio.swt.xygraph.figures.XYGraph;
-import org.csstudio.swt.xygraph.linearscale.AbstractScale.LabelSide;
-import org.csstudio.swt.xygraph.undo.AddAnnotationCommand;
-import org.csstudio.swt.xygraph.undo.RemoveAnnotationCommand;
-import org.csstudio.swt.xygraph.undo.ZoomType;
 import org.dawb.common.ui.printing.IPrintImageProvider;
 import org.dawb.common.ui.printing.PlotExportPrintUtil;
 import org.dawb.common.ui.printing.PlotPrintPreviewDialog;
@@ -94,6 +84,16 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.nebula.visualization.widgets.datadefinition.IManualValueChangeListener;
+import org.eclipse.nebula.visualization.widgets.figureparts.ColorMapRamp;
+import org.eclipse.nebula.visualization.widgets.figures.ScaledSliderFigure;
+import org.eclipse.nebula.visualization.xygraph.figures.Annotation;
+import org.eclipse.nebula.visualization.xygraph.figures.Axis;
+import org.eclipse.nebula.visualization.xygraph.figures.XYGraph;
+import org.eclipse.nebula.visualization.xygraph.linearscale.AbstractScale.LabelSide;
+import org.eclipse.nebula.visualization.xygraph.undo.AddAnnotationCommand;
+import org.eclipse.nebula.visualization.xygraph.undo.RemoveAnnotationCommand;
+import org.eclipse.nebula.visualization.xygraph.undo.ZoomType;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
@@ -767,7 +767,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 			}
 			
 			//set trace property
-			trace.setPointStyle(org.csstudio.swt.xygraph.figures.Trace.PointStyle.NONE);
+			trace.setPointStyle(org.eclipse.nebula.visualization.xygraph.figures.Trace.PointStyle.NONE);
 			int index = system.getTraces().size()+iplot-1;
 			if (index<0) index=0;
 			final Color plotColor = ColorUtility.getSwtColour(colorMap!=null?colorMap.values():null, index);

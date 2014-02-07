@@ -3,9 +3,6 @@ package org.dawnsci.plotting.draw2d.swtxy;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.csstudio.swt.xygraph.figures.Axis;
-import org.csstudio.swt.xygraph.linearscale.LinearScaleTickMarks;
-import org.csstudio.swt.xygraph.linearscale.Range;
 import org.dawb.common.util.text.NumberUtils;
 import org.dawnsci.plotting.api.axis.AxisEvent;
 import org.dawnsci.plotting.api.axis.IAxis;
@@ -21,6 +18,9 @@ import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.nebula.visualization.xygraph.figures.Axis;
+import org.eclipse.nebula.visualization.xygraph.linearscale.LinearScaleTickMarks;
+import org.eclipse.nebula.visualization.xygraph.linearscale.Range;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;

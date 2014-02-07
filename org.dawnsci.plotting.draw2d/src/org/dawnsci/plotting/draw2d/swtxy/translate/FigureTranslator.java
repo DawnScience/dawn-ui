@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.dawnsci.plotting.api.region.IRegionContainer;
 import org.dawnsci.plotting.draw2d.swtxy.selection.SelectionHandle;
 import org.eclipse.draw2d.IFigure;
@@ -16,6 +15,7 @@ import org.eclipse.draw2d.UpdateManager;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.nebula.visualization.xygraph.figures.XYGraph;
 
 /**
  * Class from SWT examples which allows a draw2D figure to move.

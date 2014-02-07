@@ -3,9 +3,9 @@ package org.dawnsci.plotting.system.dialog;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.csstudio.swt.xygraph.undo.IUndoableCommand;
 import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
+import org.eclipse.nebula.visualization.xygraph.undo.IUndoableCommand;
 
 /**The undoable command to remove an annotation.
  * @author Xihui Chen

@@ -3,11 +3,11 @@ package org.dawnsci.plotting.system;
 import java.util.Collection;
 import java.util.HashSet;
 
-import org.csstudio.swt.xygraph.dataprovider.IDataProvider;
-import org.csstudio.swt.xygraph.dataprovider.IDataProviderListener;
-import org.csstudio.swt.xygraph.dataprovider.ISample;
-import org.csstudio.swt.xygraph.dataprovider.Sample;
-import org.csstudio.swt.xygraph.linearscale.Range;
+import org.eclipse.nebula.visualization.xygraph.dataprovider.IDataProvider;
+import org.eclipse.nebula.visualization.xygraph.dataprovider.IDataProviderListener;
+import org.eclipse.nebula.visualization.xygraph.dataprovider.ISample;
+import org.eclipse.nebula.visualization.xygraph.dataprovider.Sample;
+import org.eclipse.nebula.visualization.xygraph.linearscale.Range;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;

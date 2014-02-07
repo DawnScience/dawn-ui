@@ -1,8 +1,8 @@
 package org.dawnsci.plotting.draw2d.swtxy;
 
-import org.csstudio.swt.xygraph.undo.IUndoableCommand;
 import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
+import org.eclipse.nebula.visualization.xygraph.undo.IUndoableCommand;
 
 /**The undoable command to add an annotation.
  * @author Xihui Chen

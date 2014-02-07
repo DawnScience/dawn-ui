@@ -2,9 +2,9 @@ package org.dawnsci.plotting.draw2d.swtxy;
 
 import java.io.Serializable;
 
-import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
+import org.eclipse.nebula.visualization.xygraph.figures.XYGraph;
 import org.eclipse.swt.graphics.Color;
 
 public class RegionBean implements Serializable {

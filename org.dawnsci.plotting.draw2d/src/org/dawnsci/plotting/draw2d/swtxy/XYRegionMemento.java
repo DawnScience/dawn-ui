@@ -3,7 +3,7 @@ package org.dawnsci.plotting.draw2d.swtxy;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.csstudio.swt.xygraph.undo.XYGraphMemento;
+import org.eclipse.nebula.visualization.xygraph.undo.XYGraphMemento;
 
 public class XYRegionMemento extends XYGraphMemento {
 

@@ -1,7 +1,5 @@
 package org.dawnsci.plotting.system;
 
-import org.csstudio.swt.xygraph.dataprovider.IDataProvider;
-import org.csstudio.swt.xygraph.figures.Trace;
 import org.dawnsci.plotting.api.axis.IAxis;
 import org.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.dawnsci.plotting.api.trace.ILineTrace;
@@ -12,6 +10,8 @@ import org.dawnsci.plotting.draw2d.swtxy.LineTrace;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.nebula.visualization.xygraph.dataprovider.IDataProvider;
+import org.eclipse.nebula.visualization.xygraph.figures.Trace;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
@@ -57,7 +57,7 @@ public class LineTraceImpl implements ILineTrace {
 
 	public ILineTrace.TraceType getTraceType() {
 		
-		org.csstudio.swt.xygraph.figures.Trace.TraceType type = trace.getTraceType();
+		org.eclipse.nebula.visualization.xygraph.figures.Trace.TraceType type = trace.getTraceType();
 		switch(type) {
 		case SOLID_LINE:
 			return ILineTrace.TraceType.SOLID_LINE;
@@ -81,25 +81,25 @@ public class LineTraceImpl implements ILineTrace {
 		
 		switch(traceType) {
 		case SOLID_LINE:
-			trace.setTraceType(org.csstudio.swt.xygraph.figures.Trace.TraceType.SOLID_LINE);
+			trace.setTraceType(org.eclipse.nebula.visualization.xygraph.figures.Trace.TraceType.SOLID_LINE);
 			return;
 		case DASH_LINE:
-			trace.setTraceType(org.csstudio.swt.xygraph.figures.Trace.TraceType.DASH_LINE);
+			trace.setTraceType(org.eclipse.nebula.visualization.xygraph.figures.Trace.TraceType.DASH_LINE);
 			return;
 		case POINT:
-			trace.setTraceType(org.csstudio.swt.xygraph.figures.Trace.TraceType.POINT);
+			trace.setTraceType(org.eclipse.nebula.visualization.xygraph.figures.Trace.TraceType.POINT);
 			return;
 		case HISTO:
-			trace.setTraceType(org.csstudio.swt.xygraph.figures.Trace.TraceType.BAR);
+			trace.setTraceType(org.eclipse.nebula.visualization.xygraph.figures.Trace.TraceType.BAR);
 			return;
 		case AREA:
-			trace.setTraceType(org.csstudio.swt.xygraph.figures.Trace.TraceType.AREA);
+			trace.setTraceType(org.eclipse.nebula.visualization.xygraph.figures.Trace.TraceType.AREA);
 			return;
 		case STEP_VERTICALLY:
-			trace.setTraceType(org.csstudio.swt.xygraph.figures.Trace.TraceType.STEP_VERTICALLY);
+			trace.setTraceType(org.eclipse.nebula.visualization.xygraph.figures.Trace.TraceType.STEP_VERTICALLY);
 			return;
 		case STEP_HORIZONTALLY:
-			trace.setTraceType(org.csstudio.swt.xygraph.figures.Trace.TraceType.STEP_HORIZONTALLY);
+			trace.setTraceType(org.eclipse.nebula.visualization.xygraph.figures.Trace.TraceType.STEP_HORIZONTALLY);
 			return;
 		}
 	}
@@ -116,7 +116,7 @@ public class LineTraceImpl implements ILineTrace {
 	public ILineTrace.PointStyle getPointStyle() {
 		if (trace==null) return ILineTrace.PointStyle.NONE;
 		
-		org.csstudio.swt.xygraph.figures.Trace.PointStyle style = trace.getPointStyle();
+		org.eclipse.nebula.visualization.xygraph.figures.Trace.PointStyle style = trace.getPointStyle();
 		
 		switch(style) {
 		case NONE:
@@ -155,43 +155,43 @@ public class LineTraceImpl implements ILineTrace {
 		
 		switch(pointStyle) {
 		case NONE:
-			trace.setPointStyle(org.csstudio.swt.xygraph.figures.Trace.PointStyle.NONE);
+			trace.setPointStyle(org.eclipse.nebula.visualization.xygraph.figures.Trace.PointStyle.NONE);
 			return;
 		case POINT:
-			trace.setPointStyle(org.csstudio.swt.xygraph.figures.Trace.PointStyle.POINT);
+			trace.setPointStyle(org.eclipse.nebula.visualization.xygraph.figures.Trace.PointStyle.POINT);
 			return;
 		case CIRCLE:
-			trace.setPointStyle(org.csstudio.swt.xygraph.figures.Trace.PointStyle.CIRCLE);
+			trace.setPointStyle(org.eclipse.nebula.visualization.xygraph.figures.Trace.PointStyle.CIRCLE);
 			return;
 		case FILLED_CIRCLE:
-			trace.setPointStyle(org.csstudio.swt.xygraph.figures.Trace.PointStyle.FILLED_CIRCLE);
+			trace.setPointStyle(org.eclipse.nebula.visualization.xygraph.figures.Trace.PointStyle.FILLED_CIRCLE);
 			return;
 		case TRIANGLE:
-			trace.setPointStyle(org.csstudio.swt.xygraph.figures.Trace.PointStyle.TRIANGLE);
+			trace.setPointStyle(org.eclipse.nebula.visualization.xygraph.figures.Trace.PointStyle.TRIANGLE);
 			return;
 		case FILLED_TRIANGLE:
-			trace.setPointStyle(org.csstudio.swt.xygraph.figures.Trace.PointStyle.FILLED_TRIANGLE);
+			trace.setPointStyle(org.eclipse.nebula.visualization.xygraph.figures.Trace.PointStyle.FILLED_TRIANGLE);
 			return;
 		case SQUARE:
-			trace.setPointStyle(org.csstudio.swt.xygraph.figures.Trace.PointStyle.SQUARE);
+			trace.setPointStyle(org.eclipse.nebula.visualization.xygraph.figures.Trace.PointStyle.SQUARE);
 			return;
 		case FILLED_SQUARE:
-			trace.setPointStyle(org.csstudio.swt.xygraph.figures.Trace.PointStyle.FILLED_SQUARE);
+			trace.setPointStyle(org.eclipse.nebula.visualization.xygraph.figures.Trace.PointStyle.FILLED_SQUARE);
 			return;
 		case DIAMOND:
-			trace.setPointStyle(org.csstudio.swt.xygraph.figures.Trace.PointStyle.DIAMOND);
+			trace.setPointStyle(org.eclipse.nebula.visualization.xygraph.figures.Trace.PointStyle.DIAMOND);
 			return;
 		case FILLED_DIAMOND:
-			trace.setPointStyle(org.csstudio.swt.xygraph.figures.Trace.PointStyle.FILLED_DIAMOND);
+			trace.setPointStyle(org.eclipse.nebula.visualization.xygraph.figures.Trace.PointStyle.FILLED_DIAMOND);
 			return;
 		case XCROSS:
-			trace.setPointStyle(org.csstudio.swt.xygraph.figures.Trace.PointStyle.XCROSS);
+			trace.setPointStyle(org.eclipse.nebula.visualization.xygraph.figures.Trace.PointStyle.XCROSS);
 			return;
 		case CROSS:
-			trace.setPointStyle(org.csstudio.swt.xygraph.figures.Trace.PointStyle.CROSS);
+			trace.setPointStyle(org.eclipse.nebula.visualization.xygraph.figures.Trace.PointStyle.CROSS);
 			return;
 		case BAR:
-			trace.setPointStyle(org.csstudio.swt.xygraph.figures.Trace.PointStyle.BAR);
+			trace.setPointStyle(org.eclipse.nebula.visualization.xygraph.figures.Trace.PointStyle.BAR);
 			return;
 		}
 	}
@@ -246,7 +246,7 @@ public class LineTraceImpl implements ILineTrace {
 		trace.setYErrorBarType(getErrorType(errorBarType));
 	}
 
-	private ILineTrace.ErrorBarType getErrorType(org.csstudio.swt.xygraph.figures.Trace.ErrorBarType ebt) {
+	private ILineTrace.ErrorBarType getErrorType(org.eclipse.nebula.visualization.xygraph.figures.Trace.ErrorBarType ebt) {
 		switch(ebt) {
 		case NONE:
 			return ILineTrace.ErrorBarType.NONE;
@@ -259,18 +259,18 @@ public class LineTraceImpl implements ILineTrace {
 		}
 		return ILineTrace.ErrorBarType.NONE;
 	}
-	private org.csstudio.swt.xygraph.figures.Trace.ErrorBarType getErrorType(ILineTrace.ErrorBarType ebt) {
+	private org.eclipse.nebula.visualization.xygraph.figures.Trace.ErrorBarType getErrorType(ILineTrace.ErrorBarType ebt) {
 		switch(ebt) {
 		case NONE:
-			return org.csstudio.swt.xygraph.figures.Trace.ErrorBarType.NONE;
+			return org.eclipse.nebula.visualization.xygraph.figures.Trace.ErrorBarType.NONE;
 		case PLUS:
-			return org.csstudio.swt.xygraph.figures.Trace.ErrorBarType.PLUS;
+			return org.eclipse.nebula.visualization.xygraph.figures.Trace.ErrorBarType.PLUS;
 		case MINUS:
-			return org.csstudio.swt.xygraph.figures.Trace.ErrorBarType.MINUS;
+			return org.eclipse.nebula.visualization.xygraph.figures.Trace.ErrorBarType.MINUS;
 		case BOTH:
-			return org.csstudio.swt.xygraph.figures.Trace.ErrorBarType.BOTH;
+			return org.eclipse.nebula.visualization.xygraph.figures.Trace.ErrorBarType.BOTH;
 		}
-		return org.csstudio.swt.xygraph.figures.Trace.ErrorBarType.NONE;
+		return org.eclipse.nebula.visualization.xygraph.figures.Trace.ErrorBarType.NONE;
 	}
 
 	public void setXErrorBarType(ILineTrace.ErrorBarType errorBarType) {
