@@ -216,7 +216,7 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 	}
 
 	@Override
-	public void setLocalBounds(PointList clicks, Rectangle parentBounds) {
+	public void setupSelection(PointList clicks) {
 		if (sector != null) {
 			sector.setup(clicks);
 			setRegionColor(getRegionColor());

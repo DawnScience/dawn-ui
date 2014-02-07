@@ -135,7 +135,7 @@ class RegionMouseListener extends MouseMotionListener.Stub implements MouseListe
 		this.regionArea.addRegion(this.regionBeingAdded, false);
 		this.regionArea.getRegionGraph().getOperationsManager().addCommand(new AddRegionCommand(regionArea.getRegionGraph(), this.regionBeingAdded));
 
-		this.regionBeingAdded.setLocalBounds(this.regionPoints, this.regionArea.getBounds());
+		this.regionBeingAdded.setupSelection(this.regionPoints);
 
 		this.regionArea.fireRegionAdded(new RegionEvent(this.regionBeingAdded));
 

@@ -106,11 +106,10 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	public abstract void paintBeforeAdded(final Graphics g, PointList clicks, Rectangle parentBounds);
 
 	/**
-	 * Sets the local of the region in local coordinates not axis ones.
+	 * Setup selection using list of points clicked
 	 * @param clicks
-	 * @param parentBounds
 	 */
-	public abstract void setLocalBounds(PointList clicks, Rectangle parentBounds);
+	public abstract void setupSelection(PointList clicks);
 
 	/**
 	 * This method should be implemented to fire a StructuredSelection

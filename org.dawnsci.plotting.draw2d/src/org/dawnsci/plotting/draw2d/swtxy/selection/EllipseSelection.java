@@ -125,7 +125,7 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 	}
 
 	@Override
-	public void setLocalBounds(PointList clicks, Rectangle parentBounds) {
+	public void setupSelection(PointList clicks) {
 		if (ellipse != null) {
 			ellipse.setup(clicks);
 			setRegionColor(getRegionColor());

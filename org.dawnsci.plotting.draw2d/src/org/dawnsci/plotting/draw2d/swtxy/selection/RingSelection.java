@@ -257,7 +257,7 @@ class RingSelection extends AbstractSelectionRegion {
 	 * @param bounds
 	 */
 	@Override
-	public void setLocalBounds(PointList clicks, Rectangle parentBounds) {
+	public void setupSelection(PointList clicks) {
 		Point cen = clicks.getFirstPoint();
 
 		int diff = (int)Math.round(cen.getDistance(clicks.getLastPoint()));
