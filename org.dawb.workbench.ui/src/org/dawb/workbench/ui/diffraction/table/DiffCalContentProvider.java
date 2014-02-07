@@ -1,7 +1,5 @@
 package org.dawb.workbench.ui.diffraction.table;
 
-import java.util.List;
-
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
@@ -19,11 +17,11 @@ public class DiffCalContentProvider implements IStructuredContentProvider {
 		if (inputElement == null) {
 			return null;
 		}
-		
+
 		if (inputElement instanceof DiffractionDataManager) {
-			return ((DiffractionDataManager)inputElement).getModel().toArray();
+			return ((DiffractionDataManager) inputElement).getModel().toArray();
 		}
-		
+
 		return null;
 	}
 }

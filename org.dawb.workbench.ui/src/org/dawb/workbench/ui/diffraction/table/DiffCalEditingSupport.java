@@ -2,7 +2,6 @@ package org.dawb.workbench.ui.diffraction.table;
 
 import org.dawnsci.common.widgets.celleditor.FloatSpinnerCellEditor;
 import org.eclipse.jface.viewers.CellEditor;
-import org.eclipse.jface.viewers.CheckboxCellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
@@ -20,9 +19,7 @@ public class DiffCalEditingSupport extends EditingSupport {
 
 		@Override
 		protected CellEditor getCellEditor(Object element) {
-			if (column == 0) {
-				return new CheckboxCellEditor(((TableViewer)getViewer()).getTable(), SWT.CHECK);
-			} else if (column == 3) {
+			if (column == 2) { // distance column
 				final FloatSpinnerCellEditor fse = new FloatSpinnerCellEditor((Composite)getViewer().getControl(), SWT.RIGHT);
 				fse.setFormat(100, 2);
 				fse.setMaximum(Double.MAX_VALUE);
@@ -34,7 +31,7 @@ public class DiffCalEditingSupport extends EditingSupport {
 
 		@Override
 		protected boolean canEdit(Object element) {
-			if (column == 0 || column == 3)
+			if (column == 2) // distance
 				return true;
 			else
 				return false;
@@ -43,9 +40,7 @@ public class DiffCalEditingSupport extends EditingSupport {
 		@Override
 		protected Object getValue(Object element) {
 			DiffractionTableData data = (DiffractionTableData) element;
-			if (column == 0) {
-				return data.use;
-			} else if (column == 3) {
+			if (column == 2) {
 				return data.distance;
 			}
 			return null;
@@ -55,13 +50,7 @@ public class DiffCalEditingSupport extends EditingSupport {
 		protected void setValue(Object element, Object value) {
 			DiffractionTableData data = (DiffractionTableData) element;
 
-			if (column == 0) {
-				data.use = (Boolean) value;
-				tv.refresh();
-
-//				setCalibrateButtons();
-			}
-			if (column == 3) {
+			if (column == 2) {
 				data.distance = (Double) value;
 				tv.refresh();
 			}

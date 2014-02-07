@@ -29,7 +29,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.part.ResourceTransfer;
@@ -53,6 +52,7 @@ public class DiffCalTableViewer extends TableViewer {
 	private IDetectorPropertyListener detectorPropertyListener;
 	private DropTargetAdapter dropListener;
 	private Table table;
+	private int tabIndex = 0;
 
 	/**
 	 * 
@@ -81,8 +81,7 @@ public class DiffCalTableViewer extends TableViewer {
 		setContentProvider(new DiffCalContentProvider());
 		setLabelProvider(new DiffCalLabelProvider());
 		setInput(manager);
-		getControl().setLayoutData(
-				new GridData(SWT.FILL, SWT.FILL, true, true));
+		getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		refresh();
 		final MenuManager mgr = new MenuManager();
 		mgr.setRemoveAllWhenShown(true);
@@ -105,8 +104,7 @@ public class DiffCalTableViewer extends TableViewer {
 				}
 			}
 		});
-		getControl().setMenu(
-				mgr.createContextMenu(getControl()));
+		getControl().setMenu(mgr.createContextMenu(getControl()));
 		// add drop support
 		DropTarget dt = new DropTarget(getControl(), DND.DROP_MOVE
 				| DND.DROP_DEFAULT | DND.DROP_COPY);
@@ -136,7 +134,6 @@ public class DiffCalTableViewer extends TableViewer {
 			@Override
 			public void drop(DropTargetEvent event) {
 				Object dropData = event.data;
-				DiffractionTableData good = null;
 				if (dropData instanceof IResource[]) {
 					IResource[] res = (IResource[]) dropData;
 					for (int i = 0; i < res.length; i++) {
@@ -146,7 +143,6 @@ public class DiffCalTableViewer extends TableViewer {
 					TreeSelection selectedNode = (TreeSelection) dropData;
 					Object obj[] = selectedNode.toArray();
 					for (int i = 0; i < obj.length; i++) {
-						DiffractionTableData d = null;
 						if (obj[i] instanceof HDF5NodeLink) {
 							HDF5NodeLink node = (HDF5NodeLink) obj[i];
 							if (node == null)
@@ -185,6 +181,7 @@ public class DiffCalTableViewer extends TableViewer {
 				} else {
 					setSelection(new StructuredSelection());
 				}
+				updateTableColumnsAndLayout(tabIndex);
 			}
 		};
 	}
@@ -209,22 +206,16 @@ public class DiffCalTableViewer extends TableViewer {
 
 	private void createColumns(TableViewer tv) {
 		TableViewerColumn tvc = new TableViewerColumn(tv, SWT.NONE);
-		tvc.setEditingSupport(new DiffCalEditingSupport(tv, 0));
 		TableColumn tc = tvc.getColumn();
-		tc.setText("Use");
-		tc.setWidth(40);
-
-		tvc = new TableViewerColumn(tv, SWT.NONE);
-		tc = tvc.getColumn();
 		tc.setText("Image");
-		tc.setWidth(200);
-		tvc.setEditingSupport(new DiffCalEditingSupport(tv, 1));
+		tc.setWidth(100);
+		tvc.setEditingSupport(new DiffCalEditingSupport(tv, 0));
 
 		tvc = new TableViewerColumn(tv, SWT.NONE);
 		tc = tvc.getColumn();
 		tc.setText("# of rings");
 		tc.setWidth(0);
-		tvc.setEditingSupport(new DiffCalEditingSupport(tv, 2));
+		tvc.setEditingSupport(new DiffCalEditingSupport(tv, 1));
 
 		tvc = new TableViewerColumn(tv, SWT.NONE);
 		tc = tvc.getColumn();
@@ -234,47 +225,26 @@ public class DiffCalTableViewer extends TableViewer {
 			tc.setWidth(0);
 		else
 			tc.setWidth(80);
-		tvc.setEditingSupport(new DiffCalEditingSupport(tv, 3));
-
-		tvc = new TableViewerColumn(tv, SWT.NONE);
-		tc = tvc.getColumn();
-		tc.setText("X Position");
-		tc.setToolTipText("in Pixel");
-		tc.setWidth(0);
-		tvc.setEditingSupport(new DiffCalEditingSupport(tv, 4));
-
-		tvc = new TableViewerColumn(tv, SWT.NONE);
-		tc = tvc.getColumn();
-		tc.setText("Y Position");
-		tc.setToolTipText("in Pixel");
-		tc.setWidth(0);
-		tvc.setEditingSupport(new DiffCalEditingSupport(tv, 5));
-
-		tvc = new TableViewerColumn(tv, SWT.NONE);
-		tc = tvc.getColumn();
-		tc.setText("Residuals");
-		tc.setToolTipText("Root mean of squared residuals from fit");
-		tc.setWidth(0);
-		tvc.setEditingSupport(new DiffCalEditingSupport(tv, 5));
-
+		tvc.setEditingSupport(new DiffCalEditingSupport(tv, 2));
 	}
 
 	/**
 	 * Update the visibility of the Table columns and parent layout
 	 */
 	public void updateTableColumnsAndLayout(int tabIndex) {
+		this.tabIndex  = tabIndex;
 		TableColumn[] columns = table.getColumns();
-		for (int i = 2; i < columns.length; i++) {
+		for (int i = 1; i < columns.length; i++) {
 			if (tabIndex == 0) {	// auto mode
 				int width = 0;
 				// if more than one image and distance column index
-				if (manager.getModel().size() > 1 && i == 3)
+				if (manager.getModel().size() > 1 && i == 2)
 					width = 80;
 				table.getColumns()[i].setWidth(width);
 			} else if (tabIndex == 1) {	// manual mode
 				int width = 80;
 				// if less than 2 images and column is distance
-				if (manager.getModel().size() <= 1 && i == 3)
+				if (manager.getModel().size() <= 1 && i == 2)
 					width = 0;
 				table.getColumns()[i].setWidth(width);
 			}
