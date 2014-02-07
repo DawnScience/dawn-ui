@@ -237,12 +237,12 @@ class LineSelection extends AbstractSelectionRegion {
 			if (endBox2 != null)
 				endBox2.setPosition(lroi.getPerpendicularBisectorPoint(1.0));
 			
-			updateConnectionBounds();
+			updateBounds();
 		}
 	}
 	
 	@Override
-	protected void updateConnectionBounds() {
+	protected void updateBounds() {
 		if (connection==null) return;
 		final Rectangle bounds = getConnectionBounds();
 		
@@ -306,7 +306,7 @@ class LineSelection extends AbstractSelectionRegion {
 	public void setupSelection(PointList clicks) {
 		if (startBox!=null)   startBox.setSelectionPoint(clicks.getFirstPoint());
 		if (endBox!=null)     endBox.setSelectionPoint(clicks.getLastPoint());
-		updateConnectionBounds();
+		updateBounds();
 		createROI(true);
 		fireROIChanged(getROI());
 	}

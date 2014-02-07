@@ -40,7 +40,7 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 	@Override
 	public void createContents(Figure parent) {
 		parent.add(this);
-		updateConnectionBounds();
+		updateBounds();
 	}
 	@Override
 	public boolean containsPoint(double x, double y) {
@@ -58,7 +58,7 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 	@Override
 	public void setLineWidth(int width) {
 		super.setLineWidth(width);
-		updateConnectionBounds();
+		updateBounds();
 	}
 
 	@Override
@@ -67,7 +67,7 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	protected void updateConnectionBounds() {
+	protected void updateBounds() {
 		
 		if (points==null) return;
 		final Rectangle pntBounds = points.getBounds().getCopy();
@@ -142,7 +142,7 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 	public void setupSelection(PointList clicks) {
 		
 		points = removeContiguousDuplicates(points);
-		updateConnectionBounds();
+		updateBounds();
 		createROI(true);
 		fireROIChanged(getROI());
 	}
@@ -198,7 +198,7 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 	           	final int[] pix = coords.getValuePosition(p.getPoint());
 	           	points.addPoint(new Point(pix[0],pix[1]));
 			}
-	        updateConnectionBounds();
+	        updateBounds();
 		}
 
 	}

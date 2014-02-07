@@ -97,7 +97,7 @@ public class BoxSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	protected void updateConnectionBounds() {
+	protected void updateBounds() {
 		if (rect != null) {
 			Rectangle b = rect.updateFromHandles();
 			rect.setBounds(b);
@@ -280,7 +280,7 @@ public class BoxSelection extends AbstractSelectionRegion {
 
 				@Override
 				public void translationAfter(TranslationEvent evt) {
-					updateConnectionBounds();
+					updateBounds();
 					fireROIDragged(createROI(false), ROIEvent.DRAG_TYPE.TRANSLATE);
 				}
 
@@ -403,7 +403,6 @@ public class BoxSelection extends AbstractSelectionRegion {
 		/**
 		 * Update according to ROI
 		 * @param rroi
-		 * @param omit selection handle to not move
 		 */
 		private void intUpdateFromROI(RectangularROI rroi) {
 			int[] pta = coords.getValuePosition(0,0);

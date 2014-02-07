@@ -94,7 +94,7 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	 * If there is a fill figure, this method may be called to 
 	 * refill the fill - typically, this occurs after a translation event
 	 */
-	protected abstract void updateConnectionBounds();
+	protected abstract void updateBounds();
 
 	/**
 	 * Paint the regions before it is finished during the clicks and drag of the user.
@@ -400,7 +400,7 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 
 			@Override
 			public void translationAfter(TranslationEvent evt) {
-				updateConnectionBounds();
+				updateBounds();
 				fireROIDragged(createROI(false), ROIEvent.DRAG_TYPE.RESIZE);
 			}
 

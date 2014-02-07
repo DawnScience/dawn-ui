@@ -111,7 +111,7 @@ class EllipseFitSelection extends AbstractSelectionRegion implements IEllipseFit
 	}
 
 	@Override
-	protected void updateConnectionBounds() {
+	protected void updateBounds() {
 		if (ellipse != null) {
 			ellipse.updateFromHandles();
 			Rectangle b = ellipse.getBounds();

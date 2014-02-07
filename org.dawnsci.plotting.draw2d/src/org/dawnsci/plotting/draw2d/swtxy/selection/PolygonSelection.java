@@ -94,7 +94,7 @@ public class PolygonSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	protected void updateConnectionBounds() {
+	protected void updateBounds() {
 		if (pline != null) {
 			Rectangle b = pline.updateFromHandles();
 			pline.setBounds(b);

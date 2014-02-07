@@ -121,7 +121,7 @@ class AxisSelection extends AbstractSelectionRegion {
 			public void figureMoved(IFigure source) {
 				if (line1!=null) line1.updateBounds(source.getBounds());
 				if (line2!=null) line2.updateBounds(source.getBounds());
-				updateConnectionBounds();
+				updateBounds();
 			}
 		});
         
@@ -377,7 +377,7 @@ class AxisSelection extends AbstractSelectionRegion {
 
 		final Rectangle local = new Rectangle(new Point(p1[0], p1[1]), new Point(p2[0], p2[1]));
 		setLocalBounds(local, line1.getParent().getBounds());
-		updateConnectionBounds();
+		updateBounds();
 
 	}
 
@@ -406,12 +406,12 @@ class AxisSelection extends AbstractSelectionRegion {
 				if (line2!=null) line2.setLocation(new Point(bounds.getBottomLeft().x, bounds.getBottomLeft().y-getLineAreaWidth()));
 			}
 		}
-		updateConnectionBounds();
+		updateBounds();
 		
 	}
 
 	@Override
-	protected void updateConnectionBounds() {
+	protected void updateBounds() {
 		if (connection==null) return;
 		final Rectangle size = getRectangleFromVertices();				
 		connection.setBounds(size);

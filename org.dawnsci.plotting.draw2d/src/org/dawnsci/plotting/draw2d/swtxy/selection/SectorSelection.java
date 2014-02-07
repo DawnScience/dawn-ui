@@ -112,7 +112,7 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 	}
 
 	@Override
-	protected void updateConnectionBounds() { // called after a handle translation
+	protected void updateBounds() { // called after a handle translation
 		if (sector != null) {
 			sector.updateFromHandles();
 			Rectangle b = sector.getBounds();
@@ -431,7 +431,7 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 
 				@Override
 				public void translationAfter(TranslationEvent evt) {
-					updateConnectionBounds();
+					updateBounds();
 					fireROIDragged(createROI(false), ROIEvent.DRAG_TYPE.TRANSLATE);
 				}
 
@@ -557,7 +557,6 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 		/**
 		 * Update according to ROI
 		 * @param sroi
-		 * @param omit selection handle to not move
 		 */
 		private void intUpdateFromROI(SectorROI sroi) {
 			final double x = sroi.getPointX();
