@@ -109,7 +109,7 @@ public class PolylineSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	public void setLocalBounds(PointList clicks, Rectangle parentBounds) {
+	public void setupSelection(PointList clicks) {
 		if (pline != null) {
 			pline.setPoints(clicks);
 			setRegionColor(getRegionColor());

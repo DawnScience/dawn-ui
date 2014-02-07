@@ -386,9 +386,9 @@ class AxisSelection extends AbstractSelectionRegion {
 	 * @param bounds
 	 */
 	@Override
-	public void setLocalBounds(PointList clicks, Rectangle parentBounds) {
+	public void setupSelection(PointList clicks) {
 		if (line1!=null) {
-			setLocalBounds(new Rectangle(clicks.getFirstPoint(), clicks.getLastPoint()), parentBounds);
+			setLocalBounds(new Rectangle(clicks.getFirstPoint(), clicks.getLastPoint()), regionArea.getBounds());
 			createROI(true);
 			fireROIChanged(getROI());
 		}

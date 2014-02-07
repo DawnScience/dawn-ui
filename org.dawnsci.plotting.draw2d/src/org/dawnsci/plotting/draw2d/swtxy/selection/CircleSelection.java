@@ -128,7 +128,7 @@ public class CircleSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	public void setLocalBounds(PointList clicks, Rectangle parentBounds) {
+	public void setupSelection(PointList clicks) {
 		if (circle != null) {
 			circle.setup(clicks);
 			setRegionColor(getRegionColor());

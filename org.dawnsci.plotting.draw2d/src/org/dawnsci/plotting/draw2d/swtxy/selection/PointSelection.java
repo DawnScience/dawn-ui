@@ -135,7 +135,7 @@ public class PointSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	public void setLocalBounds(PointList clicks, Rectangle parentBounds) {
+	public void setupSelection(PointList clicks) {
 		if (clicks.size()<1) return;
 		final Point last = clicks.getLastPoint();
 		point.setSelectionPoint(last);

@@ -303,7 +303,7 @@ class LineSelection extends AbstractSelectionRegion {
 	 * @param bounds
 	 */
 	@Override
-	public void setLocalBounds(PointList clicks, Rectangle parentBounds) {
+	public void setupSelection(PointList clicks) {
 		if (startBox!=null)   startBox.setSelectionPoint(clicks.getFirstPoint());
 		if (endBox!=null)     endBox.setSelectionPoint(clicks.getLastPoint());
 		updateConnectionBounds();

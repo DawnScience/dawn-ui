@@ -115,7 +115,7 @@ public class BoxSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	public void setLocalBounds(PointList clicks, Rectangle parentBounds) {
+	public void setupSelection(PointList clicks) {
 		if (rect != null) {
 			rect.setup(clicks);
 			setRegionColor(getRegionColor());
