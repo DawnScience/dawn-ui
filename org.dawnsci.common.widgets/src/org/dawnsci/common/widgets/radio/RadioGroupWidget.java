@@ -100,4 +100,14 @@ public class RadioGroupWidget {
 	public List<? extends Widget> getRadiosList() {
 		return radiosList;
 	}
+
+	public void setEnabled(boolean b) {
+		for (Widget radio : radiosList) {
+			if (radio instanceof MenuItem) {
+				((MenuItem) radio).setEnabled(b);
+			} else if (radio instanceof Button) {
+				((Button) radio).setEnabled(b);
+			}
+		}
+	}
 }
