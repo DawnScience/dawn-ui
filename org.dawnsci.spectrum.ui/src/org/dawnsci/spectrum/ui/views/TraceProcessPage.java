@@ -281,10 +281,12 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 							                                                                "trace_workflow.moml", 
 							                                                                context.getFullPath(), 
 							                                                                monitor);
-					context.execute(moml.getLocation().toOSString(), true, monitor);
+					context.execute(moml.getLocation().toOSString(), false, monitor);
+					
 					return Status.OK_STATUS;
+				
 				} catch (Exception e) {
-					logger.error("Cannot process '"+context.getTitle()+"'");
+					logger.error("Cannot process '"+context.getTitle()+"'", e);
 					return Status.CANCEL_STATUS;
 				}
 			}

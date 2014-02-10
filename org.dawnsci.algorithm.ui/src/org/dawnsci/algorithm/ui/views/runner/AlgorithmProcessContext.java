@@ -2,6 +2,8 @@ package org.dawnsci.algorithm.ui.views.runner;
 
 import java.util.Arrays;
 
+import org.dawb.workbench.jmx.service.IWorkflowService;
+import org.dawb.workbench.jmx.service.WorkflowFactory;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -10,9 +12,6 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.ui.ISourceProvider;
 
-import com.isencia.passerelle.workbench.model.editor.ui.editor.actions.ExecuteActionEvent;
-import com.isencia.passerelle.workbench.model.editor.ui.editor.actions.ExecuteActionListener;
-import com.isencia.passerelle.workbench.model.editor.ui.editor.actions.RunAction;
 import com.isencia.passerelle.workbench.model.editor.ui.editor.actions.StopAction;
 import com.isencia.passerelle.workbench.model.launch.ModelRunner;
 
@@ -60,36 +59,18 @@ class AlgorithmProcessContext implements IAlgorithmProcessContext {
 			}
 			
 		} else {
-			RunAction runAction = new RunAction();		
 			// Try to find IFile or throw exception.
 			IFile file = getResource(momlPath);
 			if (file==null) throw new Exception("The path '"+momlPath+"' is not a file in a project in the workspace. This is required for running in own VM (as JDT is used).");
 			
-			runAction.addExecuteActionListener(new ExecuteActionListener() {	
-				@Override
-				public void stopRequested(ExecuteActionEvent evt) {
-					ActionContributionItem run = (ActionContributionItem)view.getViewSite().getActionBars().getToolBarManager().find(IAlgorithmProcessContext.RUN_ID_STUB+getTitle());
-					run.getAction().setEnabled(true);
-					ActionContributionItem stop = (ActionContributionItem)view.getViewSite().getActionBars().getToolBarManager().find(IAlgorithmProcessContext.STOP_ID_STUB+getTitle());
-					stop.getAction().setEnabled(false);
-				}
-				
-				@Override
-				public void executionRequested(ExecuteActionEvent evt) {
-					ActionContributionItem run = (ActionContributionItem)view.getViewSite().getActionBars().getToolBarManager().find(IAlgorithmProcessContext.RUN_ID_STUB+getTitle());
-					run.getAction().setEnabled(false);
-					ActionContributionItem stop = (ActionContributionItem)view.getViewSite().getActionBars().getToolBarManager().find(IAlgorithmProcessContext.STOP_ID_STUB+getTitle());
-					stop.getAction().setEnabled(true);
-				}
-				
-				@Override
-				public void buttonRefreshRequested(ExecuteActionEvent evt) {
-					view.getViewSite().getActionBars().getToolBarManager().update(false);
-				}
-			});
-			runAction.run(file, false);
+			final IWorkflowService service  = WorkflowFactory.createWorkflowService(new AlgorithmServiceProvider(file));
+			final Process          workflow = service.start();
+			
+			workflow.waitFor(); // Waits until it is finished.
+			
+			// Release any memory used by the object
+			service.clear();
 		}
-
 	}
 
 	private IFile getResource(String fullPath) {
