@@ -7,8 +7,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.Set;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -39,14 +39,14 @@ public class MaskOperation extends AbstractOperation {
 	/**
 	 * Can be large!
 	 */
-	private Set<MaskPoint>  vertexList;
+	private Collection<MaskPoint>  vertexList;
 	private byte[]          compressedVertices; // Used to reduce memory, works really well and fast.
 	private BooleanDataset  maskDataset;
 
 	public MaskOperation(BooleanDataset maskDataset, int maxExpectedSize) {
 		super("Mask operation");
 		this.maskDataset = maskDataset;
-		this.vertexList  = new HashSet<MaskPoint>(maxExpectedSize);
+		this.vertexList  = Collections.synchronizedSet(new HashSet<MaskPoint>(maxExpectedSize));
 		addContext(MASK_CONTEXT);
 	}
 	

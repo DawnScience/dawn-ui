@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.RecursiveAction;
 
 import org.dawb.common.ui.image.ShapeType;
 import org.dawnsci.plotting.AbstractPlottingSystem;
@@ -25,6 +27,8 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.BooleanDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IndexIterator;
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
+import uk.ac.diamond.scisoft.analysis.roi.IRectangularROI;
 
 /**
  * This class is taken directly out of the class of the same name in SDA
@@ -74,10 +78,12 @@ public class MaskObject {
      * Used for undoable masking operations.
      */
 	private DefaultOperationHistory operationManager;
+	private ForkJoinPool pool;
     
 	MaskObject() {
 		operationManager = new DefaultOperationHistory();
 		operationManager.setLimit(MaskOperation.MASK_CONTEXT, 20);	
+		pool = new ForkJoinPool();
 	}
 	
     /**
@@ -275,6 +281,9 @@ public class MaskObject {
 		if (operationManager!=null) {
 			operationManager.dispose(MaskOperation.MASK_CONTEXT, true, true, true);
 		}
+		if (pool!=null) {
+			pool.shutdownNow();
+		}
 	}
 
 	private int[] normalize(int[] is) {
@@ -350,32 +359,32 @@ public class MaskObject {
 			
 		if (validRegions!=null && !validRegions.isEmpty()){
 			
-	        final MaskOperation op = new MaskOperation(maskDataset, getMaskDataset().getSize()/16);
-			final int[] shape = imageDataset.getShape();
-		
-			Display.getDefault().syncExec(new Runnable() {
-				public void run() {
-					MAIN_LOOP: for (int y = 0; y<shape[0]; ++y) {
-						for (int x = 0; x<shape[1]; ++x) {
-							for (IRegion region : validRegions) {
-								monitor.worked(1);
-								try {
-									if (region.getCoordinateSystem().isDisposed()) break MAIN_LOOP;
-									if (region.containsPoint(x, y)) {
-										toggleMask(op, !region.isMaskRegion(), y, x);
-									}
-								} catch (Throwable ne) {
-									logger.trace("Cannot process point "+(new Point(x,y)), ne);
-									continue;
+	        final MaskOperation op  = new MaskOperation(maskDataset, getMaskDataset().getSize()/16);
+			final int[]      shape  = imageDataset.getShape();
+			
+			if (Boolean.getBoolean("org.dawnsci.plotting.tools.masking.no.thread.pool")) {
+				MAIN_LOOP: for (int y = 0; y<shape[0]; ++y) {
+					for (int x = 0; x<shape[1]; ++x) {
+						for (IRegion region : validRegions) {
+							monitor.worked(1);
+							try {
+								if (region.getCoordinateSystem().isDisposed()) break MAIN_LOOP;
+								if (region.getROI().containsPoint(x, y)) {
+									toggleMask(op, !region.isMaskRegion(), y, x);
 								}
+							} catch (Throwable ne) {
+								logger.trace("Cannot process point "+(new Point(x,y)), ne);
+								continue;
 							}
 						}
 					}
-
 				}
-			});
-			
-	        try {
+			} else {
+				// NORMALLY
+				pool.invoke(new MaskRegionsAction(op, shape, regions, monitor));
+			}
+
+			try {
 				if (op.getSize()>0) operationManager.execute(op, null, null);
 			} catch (ExecutionException e) {
 				logger.error("Internal error processing region mask.", e);
@@ -386,6 +395,143 @@ public class MaskObject {
 		return true;
 	}
 	
+	private static int INC = 100; // The amount of columns to do for each task.
+	
+		
+	private class MaskRegionsAction extends RecursiveAction {
+		
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -4810609286048487303L;
+
+		protected MaskOperation    op;
+		protected   int[]          shape;
+		protected IProgressMonitor monitor;
+		private final Collection<IRegion> regions;
+		
+		MaskRegionsAction(final MaskOperation op, final int[] shape, 
+			                final Collection<IRegion> regions, 
+			                final IProgressMonitor monitor) {
+		
+			this.op      = op;
+			this.shape   = shape;
+			this.regions = regions;
+			this.monitor = monitor;
+		}
+
+		@Override
+		protected void compute() {
+
+			final Collection<RegionAction> actions = new ArrayList<RegionAction>(regions.size());
+
+			for (IRegion region : regions) {
+
+				final IROI    roi       = region.getROI();
+				final boolean isMasking = region.isMaskRegion();
+				actions.add(new RegionAction(op, shape, roi, isMasking, monitor));
+			}
+			invokeAll(actions);
+		}		
+	}
+
+	private class RegionAction extends MaskRegionsAction {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -7438635693096574242L;
+		
+		protected boolean          isMasking;
+		protected IROI             roi;
+
+		public RegionAction(MaskOperation op, int[] shape, IROI roi,
+				            boolean isMasking, IProgressMonitor monitor) {
+			super(op, shape, null, monitor);
+			this.isMasking = isMasking;
+			this.roi = roi;
+		}
+
+		@Override
+		protected void compute() {
+			
+			
+			// We use the bounding box of the region.
+			final IRectangularROI bounds = roi.getBounds();
+			final double[] pnt  = bounds.getPoint();
+			final double[] span = bounds.getLengths();
+			
+			int xStart = Math.min((int)Math.round(pnt[0]), (int)Math.round(pnt[0]+span[0]));
+			int xEnd   = Math.max((int)Math.round(pnt[0]), (int)Math.round(pnt[0]+span[0]));
+			
+			int yStart = Math.min((int)Math.round(pnt[1]), (int)Math.round(pnt[1]+span[1]));
+			int yEnd   = Math.max((int)Math.round(pnt[1]), (int)Math.round(pnt[1]+span[1]));
+			
+			final Collection<RegionAction> actions = new ArrayList<RegionAction>(yEnd/INC);
+			// We loop all pixels here because looping bounds boxes of rois did not work yet.
+
+			for (int y=yStart; y<yEnd; y+=INC) { 
+				
+				final int yMax = Math.min(yStart+INC, yEnd);
+				actions.add(new PixelAction(op, xStart, xEnd, yStart, yMax, isMasking, roi, monitor));
+				yStart+=INC;
+				if (monitor.isCanceled()) return;
+			}
+			invokeAll(actions);
+		}
+	}
+	
+	/**
+	 * Each PixelAction does around 100,000 of the pixels.
+	 * 
+	 * @author fcp94556
+	 */
+	private class PixelAction extends RegionAction {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -6539202270251672297L;
+		
+		private int xStart, xEnd;
+		private int yStart, yEnd;
+
+		public PixelAction(MaskOperation op, 
+				          int xStart, int xEnd,
+				          int yStart, int yEnd,
+				          boolean isMasking, IROI roi, 
+				          IProgressMonitor monitor) {
+			
+			super(op, null, roi, isMasking, monitor);
+			this.xStart  = xStart;
+			this.xEnd    = xEnd;
+			this.yStart  = yStart;
+			this.yEnd    = yEnd;
+		}
+
+		@Override
+		protected void compute() {
+			for (int y = yStart; y<yEnd; ++y) {
+				if (monitor.isCanceled()) return;
+				monitor.worked(1);
+
+				for (int x = xStart; x<xEnd; ++x) {
+
+					if (maskDataset.getBoolean(y,x)!=isMasking) continue;
+					try {
+						if (roi.containsPoint(x, y)) {
+							toggleMask(op, !isMasking, y, x);
+						}
+					} catch (Throwable ne) {
+						logger.trace("Cannot process point "+(new Point(x,y)), ne);
+						return;
+					}
+				}
+			}
+
+		}
+	}
+
 	private void createMaskIfNeeded() {
 		if (maskDataset == null || !maskDataset.isCompatibleWith(imageDataset)) {
 			maskDataset = new BooleanDataset(imageDataset.getShape());
