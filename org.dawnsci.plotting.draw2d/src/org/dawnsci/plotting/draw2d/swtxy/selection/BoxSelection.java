@@ -189,6 +189,7 @@ public class BoxSelection extends AbstractSelectionRegion {
 		private RectangularROIHandler roiHandler;
 		private TranslationListener handleListener;
 		private FigureListener moveListener;
+		private boolean isMobile;
 
 		public DecoratedRectangle(Figure parent) {
 			super();
@@ -367,15 +368,20 @@ public class BoxSelection extends AbstractSelectionRegion {
 		@Override
 		public void setVisible(boolean visible) {
 			super.setVisible(visible);
-			boolean hVisible = visible && isMobile();
 			for (IFigure h : handles) {
-				h.setVisible(hVisible);
+				if (isMobile && visible && !h.isVisible())
+					h.setVisible(true);
 			}
 		}
 
 		public void setMobile(boolean mobile) {
+			if (mobile == isMobile)
+				return;
+			isMobile = mobile;
+
 			for (IFigure h : handles) {
-				h.setVisible(mobile);
+				if (h.isVisible() != mobile)
+					h.setVisible(mobile);
 			}
 			for (FigureTranslator f : fTranslators) {
 				f.setActive(mobile);

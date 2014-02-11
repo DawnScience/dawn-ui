@@ -73,15 +73,8 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	public void setVisible(boolean visible) {
-		if (circle != null)
-			circle.setVisible(visible);
-		getBean().setVisible(visible);
-	}
-
-	@Override
-	public void setMobile(final boolean mobile) {
-		getBean().setMobile(mobile);
+	public void setMobile(boolean mobile) {
+		super.setMobile(mobile);
 		if (circle != null)
 			circle.setMobile(mobile);
 	}
@@ -297,18 +290,7 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 			return cs.getAspectRatio();
 		}
 
-		@Override
-		public void setVisible(boolean visible) {
-			super.setVisible(visible);
-			for (IFigure h : handles) {
-				h.setVisible(visible);
-			}
-		}
-
 		public void setMobile(boolean mobile) {
-			for (IFigure h : handles) {
-				h.setVisible(mobile);
-			}
 			for (FigureTranslator f : fTranslators) {
 				f.setActive(mobile);
 			}

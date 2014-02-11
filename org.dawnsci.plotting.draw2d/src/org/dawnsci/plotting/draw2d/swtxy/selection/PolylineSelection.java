@@ -51,15 +51,8 @@ public class PolylineSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	public void setVisible(boolean visible) {
-		getBean().setVisible(visible);
-		if (pline != null)
-			pline.setVisible(visible);
-	}
-
-	@Override
-	public void setMobile(final boolean mobile) {
-		getBean().setMobile(mobile);
+	public void setMobile(boolean mobile) {
+		super.setMobile(mobile);
 		if (pline != null)
 			pline.setMobile(mobile);
 	}
@@ -224,19 +217,7 @@ public class PolylineSelection extends AbstractSelectionRegion {
 			return b;
 		}
 
-		@Override
-		public void setVisible(boolean visible) {
-			super.setVisible(visible);
-			boolean hVisible = visible && isMobile();
-			for (IFigure h : handles) {
-				h.setVisible(hVisible);
-			}
-		}
-
 		public void setMobile(boolean mobile) {
-			for (IFigure h : handles) {
-				h.setVisible(mobile);
-			}
 			for (FigureTranslator f : fTranslators) {
 				f.setActive(mobile);
 			}

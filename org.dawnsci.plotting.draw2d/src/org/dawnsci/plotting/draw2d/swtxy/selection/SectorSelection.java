@@ -72,6 +72,13 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 	}
 
 	@Override
+	public void setMobile(boolean mobile) {
+		super.setMobile(mobile);
+		if (sector != null)
+			sector.setMobile(mobile);
+	}
+
+	@Override
 	public void createContents(Figure parent) {
 		sector = new DecoratedSector(parent);
 		sector.setCoordinateSystem(coords);
