@@ -51,7 +51,7 @@ import uk.ac.diamond.scisoft.analysis.roi.handler.SectorROIHandler;
  * You should not call this concrete class outside of the draw2d 
  * extensions unless absolutely required.
  */
-class SectorSelection extends AbstractSelectionRegion implements ILockableRegion{
+class SectorSelection extends AbstractSelectionRegion implements ILockableRegion {
 
 	DecoratedSector sector;
 
@@ -275,7 +275,7 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 		}
 	}
 	
-	private boolean isCenterMovable=true;
+	private boolean isCentreMovable=true;
 
 	class DecoratedSector extends Sector implements IRegionContainer {
 		private List<IFigure> handles;
@@ -285,6 +285,7 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 		private SectorROIHandler roiHandler;
 		private TranslationListener handleListener;
 		private FigureListener moveListener;
+		private boolean isMobile;
 
 		public DecoratedSector(Figure parent) {
 			super();
@@ -374,7 +375,7 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 			addFigureListener(moveListener);
 			mover = new FigureTranslator(getXyGraph(), parent, this, handles) {
 				public void mouseDragged(MouseEvent event) {
-					if (!isCenterMovable) return;
+					if (!isCentreMovable) return;
 					super.mouseDragged(event);
 				}
 			};
@@ -396,6 +397,10 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 		}
 
 		public void setMobile(boolean mobile) {
+			if (isMobile == mobile)
+				return;
+
+			isMobile = mobile;
 			for (IFigure h : handles) {
 				h.setVisible(mobile);
 			}
@@ -613,13 +618,13 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 
 	@Override
 	public boolean isCentreMovable() {
-		return isCenterMovable;
+		return isCentreMovable;
 	}
 
 	@Override
-	public void setCentreMovable(boolean isCenterMovable) {
-		this.isCenterMovable = isCenterMovable;
-		if (isCenterMovable) {
+	public void setCentreMovable(boolean isCentreMovable) {
+		this.isCentreMovable = isCentreMovable;
+		if (isCentreMovable) {
 			sector.setCursor(Draw2DUtils.getRoiMoveCursor());
 			sector.getHandleTranslators().get(sector.getHandleTranslators().size()-1).setActive(true);
 			sector.getHandles().get(sector.getHandles().size()-1).setVisible(true);
