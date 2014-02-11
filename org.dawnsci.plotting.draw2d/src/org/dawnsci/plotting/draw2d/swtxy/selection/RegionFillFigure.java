@@ -41,6 +41,13 @@ public class RegionFillFigure extends Figure implements IRegionContainer {
 		}
 	}
 
+	public boolean isMobile() {
+		final FigureTranslator mover = getFigureMover();
+		if (mover==null) return false;
+		
+		return mover.isActive();
+	}
+
 	private FigureTranslator getFigureMover() {
 		final Iterator<?> it = getListeners(MouseListener.class);
 		if (it!=null && it.hasNext()) {

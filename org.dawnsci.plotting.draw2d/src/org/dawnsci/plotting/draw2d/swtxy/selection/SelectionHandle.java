@@ -66,8 +66,8 @@ public abstract class SelectionHandle extends Figure implements IMobileFigure {
 		Rectangle b = new Rectangle(location, new Point(location.x()+200, location.y()+20));
 		b.union(shape.getBounds());
         setBounds(b);
- 	}
-	
+	}
+
 	public void setVisible(boolean visible) {
 		shape.setVisible(visible);
 		super.setVisible(visible);
@@ -143,6 +143,10 @@ public abstract class SelectionHandle extends Figure implements IMobileFigure {
 		label.setVisible(showPosition);
 	}
 
+	public boolean getShowPosition() {
+		return label.isVisible();
+	}
+
 	public void setCoordinateSystem(ICoordinateSystem axes) {
 		this.coords = axes;
 		repaint();
@@ -167,6 +171,10 @@ public abstract class SelectionHandle extends Figure implements IMobileFigure {
 			this.alpha = alpha;
 			shape.setAlpha(alpha);
 		}
+	}
+
+	public int getAlpha() {
+		return alpha;
 	}
 
 	@Override
