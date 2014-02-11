@@ -204,7 +204,7 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 
 		public void setup(PointList corners) {
 			Rectangle r = new Rectangle(corners.getFirstPoint(), corners.getLastPoint());
-			double ratio = getAspectRatio();
+			double ratio = coords.getAspectRatio();
 			double w = r.preciseWidth();
 			double h = r.preciseHeight();
 			if (w*ratio < h) {
@@ -428,7 +428,7 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 			int[] p1 = getCoordinateSystem().getValuePosition(xy[0], xy[1]);
 			int[] p2 = getCoordinateSystem().getValuePosition(2*eroi.getSemiAxis(0) + xy[0], 2*eroi.getSemiAxis(1) + xy[1]);
 
-			setAxes(p2[0] - p1[0], (p2[1] - p1[1])/getAspectRatio());
+			setAxes(p2[0] - p1[0], (p2[1] - p1[1])/coords.getAspectRatio());
 
 			setCentre(p1[0], p1[1]);
 			setAngleDegrees(eroi.getAngleDegrees());

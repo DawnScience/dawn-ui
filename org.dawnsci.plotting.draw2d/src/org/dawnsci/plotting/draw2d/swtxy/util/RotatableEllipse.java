@@ -189,11 +189,6 @@ public class RotatableEllipse extends Shape implements PointFunction {
 		affine.setAspectRatio(aspect);
 	}
 
-	@Override
-	public double getAspectRatio() {
-		return cs.getAspectRatio();
-	}
-
 	private void calcBox(boolean redraw) {
 		affine.setAspectRatio(cs.getAspectRatio());
 		box = affine.getBounds();

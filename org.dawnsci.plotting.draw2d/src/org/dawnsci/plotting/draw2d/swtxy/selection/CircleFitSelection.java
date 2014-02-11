@@ -285,11 +285,6 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 			cs = system;
 		}
 
-		@Override
-		public double getAspectRatio() {
-			return cs.getAspectRatio();
-		}
-
 		public void setMobile(boolean mobile) {
 			for (FigureTranslator f : fTranslators) {
 				f.setActive(mobile);
@@ -302,7 +297,7 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 		 * @param cy
 		 */
 		public void setCentre(double cx, double cy) {
-			affine.setAspectRatio(getAspectRatio());
+			affine.setAspectRatio(cs.getAspectRatio());
 			Point oc = affine.getTransformed(centre);
 			affine.setTranslation(affine.getTranslationX() + cx - oc.preciseX(), affine.getTranslationY() + cy - oc.preciseY());
 			calcBox(true);
@@ -345,7 +340,7 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 		 * @param radius
 		 */
 		public void setRadius(double radius) {
-			affine.setAspectRatio(getAspectRatio());
+			affine.setAspectRatio(cs.getAspectRatio());
 			Point oc = affine.getTransformed(centre);
 			affine.setScale(2*radius);
 			Point nc = affine.getTransformed(centre);
@@ -355,7 +350,7 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 
 		// do not set to prevent recursive repaint
 		private void calcBox(boolean redraw) {
-			affine.setAspectRatio(getAspectRatio());
+			affine.setAspectRatio(cs.getAspectRatio());
 			box = affine.getBounds();
 			if (redraw) {
 				setBounds(box.expand(2, 2));

@@ -196,14 +196,9 @@ public class CircleSelection extends AbstractSelectionRegion {
 			cs = system;
 		}
 
-		@Override
-		public double getAspectRatio() {
-			return cs.getAspectRatio();
-		}
-
 		public void setup(PointList corners) {
 			Rectangle r = new Rectangle(corners.getFirstPoint(), corners.getLastPoint());
-			double ratio = getAspectRatio();
+			double ratio = cs.getAspectRatio();
 			double w = r.preciseWidth();
 			double h = r.preciseHeight()/ratio;
 			if (w < h) {
@@ -250,7 +245,7 @@ public class CircleSelection extends AbstractSelectionRegion {
 
 		private Point getPoint(double degrees) {
 			double angle = -Math.toRadians(degrees);
-			return new PrecisionPoint(radius * Math.cos(angle) + cx, radius * Math.sin(angle) * getAspectRatio() + cy);
+			return new PrecisionPoint(radius * Math.cos(angle) + cx, radius * Math.sin(angle) * cs.getAspectRatio() + cy);
 		}
 
 		@Override
@@ -336,7 +331,7 @@ public class CircleSelection extends AbstractSelectionRegion {
 
 		@Override
 		public boolean containsPoint(int x, int y) {
-			double r = Math.hypot(x - cx, (y - cy)/getAspectRatio());
+			double r = Math.hypot(x - cx, (y - cy)/cs.getAspectRatio());
 
 			if (outlineOnly) {
 				return Math.abs(r - radius) < tolerance; 
@@ -392,7 +387,7 @@ public class CircleSelection extends AbstractSelectionRegion {
 						if (ha != null) {
 							Point pa = new PrecisionPoint(ha.getSelectionPoint());
 							Dimension d = pa.getDifference(centre);
-							double r = major ? Math.abs(d.preciseWidth()) : Math.abs(d.preciseHeight()/getAspectRatio());
+							double r = major ? Math.abs(d.preciseWidth()) : Math.abs(d.preciseHeight()/cs.getAspectRatio());
 							setRadius(r);
 							updateHandlePositions();
 						}

@@ -462,7 +462,7 @@ class EllipseFitSelection extends AbstractSelectionRegion implements IEllipseFit
 				return;
 			}
 
-			setAxes(p2[0] - p1[0], (p2[1] - p1[1])/getAspectRatio());
+			setAxes(p2[0] - p1[0], (p2[1] - p1[1])/coords.getAspectRatio());
 
 			setCentre(p1[0], p1[1]);
 

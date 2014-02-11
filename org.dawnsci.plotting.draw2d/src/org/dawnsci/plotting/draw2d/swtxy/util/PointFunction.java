@@ -15,11 +15,6 @@ public interface PointFunction {
 	public void setCoordinateSystem(ICoordinateSystem system);
 
 	/**
-	 * @return aspect ratio of coordinate system
-	 */
-	public double getAspectRatio();
-
-	/**
 	 * Calculate a point from given parameter values
 	 * @param parameters
 	 * @return

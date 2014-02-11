@@ -59,17 +59,12 @@ public class Sector extends Shape implements PointFunction {
 		angle = new double[] { start, end };
 		calcBox();
 		innerFunction = new PointFunction() {
-			
+
 			@Override
 			public void setCoordinateSystem(ICoordinateSystem system) {
 				Sector.this.setCoordinateSystem(system);
 			}
-			
-			@Override
-			public double getAspectRatio() {
-				return Sector.this.getAspectRatio();
-			}
-			
+
 			@Override
 			public Point calculatePoint(double... parameter) {
 				return Sector.this.getPoint(parameter[0], 0);
@@ -77,17 +72,12 @@ public class Sector extends Shape implements PointFunction {
 		};
 
 		outerFunction = new PointFunction() {
-			
+
 			@Override
 			public void setCoordinateSystem(ICoordinateSystem system) {
 				Sector.this.setCoordinateSystem(system);
 			}
-			
-			@Override
-			public double getAspectRatio() {
-				return Sector.this.getAspectRatio();
-			}
-			
+
 			@Override
 			public Point calculatePoint(double... parameter) {
 				return Sector.this.getPoint(parameter[0], 1);
@@ -104,11 +94,6 @@ public class Sector extends Shape implements PointFunction {
 
 	public ICoordinateSystem getCoordinateSystem() {
 		return cs;
-	}
-
-	@Override
-	public double getAspectRatio() {
-		return cs.getAspectRatio();
 	}
 
 	public Point getPoint(double degrees, int i) {
