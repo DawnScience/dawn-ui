@@ -52,6 +52,11 @@ import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
  * events in the axis coordinates parent figure location will also need to be used. If using 1.,
  * the contents of the figure are directly added to the graph figure and therefore their location
  * can be used directly also there are no bounds of this figure to deal with.
+ * 
+ * Implementations of selection regions are constructed by a factory then {@link #createContents(Figure)}
+ * is called followed by either {@link #initialize(PointList)} or {@link #setROI(uk.ac.diamond.scisoft.analysis.roi.IROI)}.
+ * Programmatic modifications happen via {@link #setROI(uk.ac.diamond.scisoft.analysis.roi.IROI)}
+ * and GUI manipulations use {@link TranslationListener}s.
  */
 public abstract class AbstractSelectionRegion extends AbstractRegion implements ICoordinateSystemListener {
 
@@ -106,10 +111,10 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	public abstract void paintBeforeAdded(final Graphics g, PointList clicks, Rectangle parentBounds);
 
 	/**
-	 * Setup selection using list of points clicked
+	 * Initialize selection region using list of points clicked
 	 * @param clicks
 	 */
-	public abstract void setupSelection(PointList clicks);
+	public abstract void initialize(PointList clicks);
 
 	/**
 	 * This method should be implemented to fire a StructuredSelection
@@ -182,7 +187,12 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 
 	@Override
 	public void coordinatesChanged(CoordinateSystemEvent evt) {
-		updateROI();
+		try {
+			regionEventsActive = false;
+			updateRegion();
+		} finally {
+			regionEventsActive = true;
+		}
 	}
 
 	protected void setRegionObjects(IFigure... objects) {

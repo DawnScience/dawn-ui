@@ -112,9 +112,6 @@ class AxisSelection extends AbstractSelectionRegion {
      		setRegionObjects(line1);
      	}
 		sync(getBean());
-        updateROI();
-        if (roi ==null) createROI(true);
-
         
         parent.addFigureListener(new FigureListener() {
 			@Override
@@ -355,10 +352,10 @@ class AxisSelection extends AbstractSelectionRegion {
 		return super.getROI();
 	}
 	
-	protected void updateROI(IROI roi) {
+	protected void updateRegion() {
 		
-		if (line1 == null) return;
-		
+		if (line1 == null || roi == null) return;
+
 		double[] spt = null;
 		double[] ept = null;
 
@@ -386,7 +383,7 @@ class AxisSelection extends AbstractSelectionRegion {
 	 * @param bounds
 	 */
 	@Override
-	public void setupSelection(PointList clicks) {
+	public void initialize(PointList clicks) {
 		if (line1!=null) {
 			setLocalBounds(new Rectangle(clicks.getFirstPoint(), clicks.getLastPoint()), regionArea.getBounds());
 			createROI(true);

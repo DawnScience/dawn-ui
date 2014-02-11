@@ -77,14 +77,14 @@ public class PerimeterBoxSelection extends BoxSelection {
 	 * @param g
 	 * @param rect
 	 */
-	protected void drawColouredEdges(Graphics g, PointList list) {
+	protected void drawColouredEdges(Graphics g, PointList points) {
 		g.pushState();
 		g.setAlpha(255);
 		g.setLineWidth(2);
 		g.setLineStyle(SWT.LINE_SOLID);
 
-		Point p1 = list.getPoint(0), p2 = list.getPoint(1), 
-			  p3 = list.getPoint(2), p4 = list.getPoint(3);
+		Point p1 = points.getPoint(0), p2 = points.getPoint(1), 
+			  p3 = points.getPoint(2), p4 = points.getPoint(3);
 		// draw top edge
 		g.setForegroundColor(topColor);
 		g.setBackgroundColor(topColor);

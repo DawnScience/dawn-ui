@@ -68,7 +68,6 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 
 	@Override
 	protected void updateBounds() {
-		
 		if (points==null) return;
 		final Rectangle pntBounds = points.getBounds().getCopy();
 		pntBounds.x     -=getLineWidth(); 
@@ -139,8 +138,7 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	public void setupSelection(PointList clicks) {
-		
+	public void initialize(PointList clicks) {
 		points = removeContiguousDuplicates(points);
 		updateBounds();
 		createROI(true);
@@ -188,7 +186,7 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	protected void updateROI(IROI roi) {
+	protected void updateRegion() {
 		if (roi instanceof PolylineROI) {
 			final PolylineROI proi = (PolylineROI) roi;
 			if (points==null) points = new PointList();

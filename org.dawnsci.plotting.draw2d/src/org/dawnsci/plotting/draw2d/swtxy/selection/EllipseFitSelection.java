@@ -87,16 +87,11 @@ class EllipseFitSelection extends AbstractSelectionRegion implements IEllipseFit
 	public void createContents(Figure parent) {
 		ellipse = new DecoratedEllipse(parent);
 		ellipse.setCoordinateSystem(coords);
-		//ellipse.setCursor(Draw2DUtils.getRoiMoveCursor());
+//		ellipse.setCursor(Draw2DUtils.getRoiMoveCursor());
 
 		parent.add(ellipse);
 		sync(getBean());
-		ellipse.setForegroundColor(getRegionColor());
-		ellipse.setAlpha(getAlpha());
 		ellipse.setLineWidth(getLineWidth());
-		updateROI();
-		if (roi == null)
-			createROI(true);
 	}
 
 	@Override
@@ -193,12 +188,9 @@ class EllipseFitSelection extends AbstractSelectionRegion implements IEllipseFit
 	}
 
 	@Override
-	public void setupSelection(PointList clicks) {
+	public void initialize(PointList clicks) {
 		if (ellipse != null) {
 			ellipse.setup(clicks);
-			setRegionColor(getRegionColor());
-			setOpaque(false);
-			setAlpha(getAlpha());
 			fireROIChanged(getROI());
 		}
 	}
@@ -242,7 +234,7 @@ class EllipseFitSelection extends AbstractSelectionRegion implements IEllipseFit
 	}
 
 	@Override
-	protected void updateROI(IROI roi) {
+	protected void updateRegion() {
 		if (ellipse == null)
 			return;
 
@@ -252,6 +244,7 @@ class EllipseFitSelection extends AbstractSelectionRegion implements IEllipseFit
 		
 		if (roi instanceof EllipticalFitROI || roi instanceof CircularFitROI) {
 			ellipse.updateFromROI(roi);
+			sync(getBean());
 		}
 	}
 
@@ -274,7 +267,7 @@ class EllipseFitSelection extends AbstractSelectionRegion implements IEllipseFit
 		circleOnly = fitCircle;
 		if (renew && ellipse != null) {
 			createROI(true);
-			updateROI(roi);
+			updateRegion();
 			fireROIChanged(roi);
 		}
 	}

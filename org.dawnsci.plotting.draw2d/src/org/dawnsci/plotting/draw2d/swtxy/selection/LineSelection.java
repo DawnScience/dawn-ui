@@ -145,9 +145,6 @@ class LineSelection extends AbstractSelectionRegion {
 		mover.addTranslationListener(createRegionNotifier());
 		setRegionObjects(connection, startBox, endBox);
 		sync(getBean());
-		updateROI();
-		if (roi == null)
-			createROI(true);
 	}
 
 	@Override
@@ -201,7 +198,7 @@ class LineSelection extends AbstractSelectionRegion {
 	}
 	
 	@Override
-	protected void updateROI(IROI roi) {
+	protected void updateRegion() {
 		if (roi instanceof LinearROI) {
 			LinearROI lroi = (LinearROI) roi;
 			if (startBox != null)
@@ -238,6 +235,7 @@ class LineSelection extends AbstractSelectionRegion {
 				endBox2.setPosition(lroi.getPerpendicularBisectorPoint(1.0));
 			
 			updateBounds();
+			sync(getBean());
 		}
 	}
 	
@@ -303,12 +301,11 @@ class LineSelection extends AbstractSelectionRegion {
 	 * @param bounds
 	 */
 	@Override
-	public void setupSelection(PointList clicks) {
+	public void initialize(PointList clicks) {
 		if (startBox!=null)   startBox.setSelectionPoint(clicks.getFirstPoint());
 		if (endBox!=null)     endBox.setSelectionPoint(clicks.getLastPoint());
 		updateBounds();
-		createROI(true);
-		fireROIChanged(getROI());
+		fireROIChanged(createROI(true));
 	}
 
 	@Override

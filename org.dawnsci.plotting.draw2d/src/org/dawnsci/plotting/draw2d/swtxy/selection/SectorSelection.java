@@ -92,12 +92,7 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 
 		parent.add(sector);
 		sync(getBean());
-		sector.setForegroundColor(getRegionColor());
-		sector.setAlpha(getAlpha());
 		sector.setLineWidth(getLineWidth());
-		updateROI();
-		if (roi == null)
-			createROI(true);
 	}
 
 	@Override
@@ -216,12 +211,9 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 	}
 
 	@Override
-	public void setupSelection(PointList clicks) {
+	public void initialize(PointList clicks) {
 		if (sector != null) {
 			sector.setup(clicks);
-			setRegionColor(getRegionColor());
-			setOpaque(false);
-			setAlpha(getAlpha());
 			fireROIChanged(getROI());
 		}
 	}
@@ -263,9 +255,10 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 	}
 
 	@Override
-	protected void updateROI(IROI roi) {
-		if (roi instanceof SectorROI && sector != null) {
+	protected void updateRegion() {
+		if (sector != null && roi instanceof SectorROI) {
 			sector.updateFromROI((SectorROI) roi);
+			sync(getBean());
 		}
 	}
 

@@ -147,10 +147,6 @@ class RingSelection extends AbstractSelectionRegion {
 		
 		setRegionObjects(connection, center, innerControl, outerControl);
 		sync(getBean());
-		updateROI();
-		if (roi == null)
-			createROI(true);
-
 		outerControl.setForegroundColor(ColorConstants.blue);
 		innerControl.setForegroundColor(ColorConstants.red);
 	}
@@ -230,19 +226,18 @@ class RingSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	protected void updateROI(IROI roi) {
-		if (roi instanceof SectorROI) {
+	protected void updateRegion() {
+		if (center != null && roi instanceof SectorROI) {
 			SectorROI sroi = (SectorROI) roi;
-			if (center!=null) {
-				center.setPosition(sroi.getPointRef());
-				double y = sroi.getPointY();
-				int[] cen = coords.getValuePosition(sroi.getPoint());
-				
-				int innerRad = coords.getValuePosition(0,y+sroi.getRadius(0))[1]-cen[1];
-				int outerRad = coords.getValuePosition(0,y+sroi.getRadius(1))[1]-cen[1];
-				setControlPositions(innerRad, outerRad);
-				updateBounds();
-			}
+			center.setPosition(sroi.getPointRef());
+			double y = sroi.getPointY();
+			int[] cen = coords.getValuePosition(sroi.getPoint());
+			
+			int innerRad = coords.getValuePosition(0,y+sroi.getRadius(0))[1]-cen[1];
+			int outerRad = coords.getValuePosition(0,y+sroi.getRadius(1))[1]-cen[1];
+			setControlPositions(innerRad, outerRad);
+			updateBounds();
+			sync(getBean());
 		}
 	}
 
@@ -257,7 +252,7 @@ class RingSelection extends AbstractSelectionRegion {
 	 * @param bounds
 	 */
 	@Override
-	public void setupSelection(PointList clicks) {
+	public void initialize(PointList clicks) {
 		Point cen = clicks.getFirstPoint();
 
 		int diff = (int)Math.round(cen.getDistance(clicks.getLastPoint()));
@@ -270,8 +265,7 @@ class RingSelection extends AbstractSelectionRegion {
 		}
 		
 		updateBounds();
-		createROI(true);
-		fireROIChanged(getROI());
+		fireROIChanged(createROI(true));
 	}
 
 	@Override
