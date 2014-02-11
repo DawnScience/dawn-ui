@@ -292,8 +292,10 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	public void setRegionColor(Color regionColor) {
 		if (regionObjects!=null) for (IFigure ob : regionObjects) {
 			if (ob!=null) {
-				ob.setForegroundColor(regionColor);
-				ob.setBackgroundColor(regionColor);
+				if (!regionColor.equals(ob.getForegroundColor()))
+					ob.setForegroundColor(regionColor);
+				if (!regionColor.equals(ob.getBackgroundColor()))
+					ob.setBackgroundColor(regionColor);
 			}
 		}
 		bean.setRegionColor(regionColor);
@@ -308,7 +310,8 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	public void setShowPosition(boolean showPosition) {
 		if (regionObjects!=null) for (IFigure ob : regionObjects) {
 			if (ob instanceof SelectionHandle) {
-				((SelectionHandle)ob).setShowPosition(showPosition);
+				if (showPosition != ((SelectionHandle) ob).getShowPosition())
+					((SelectionHandle)ob).setShowPosition(showPosition);
 			}
 		}
 		bean.setShowPosition(showPosition);
@@ -317,13 +320,17 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	public void setAlpha(int alpha) {
 		if (regionObjects!=null) for (IFigure ob : regionObjects) {
 			if (ob instanceof SelectionHandle) {
-				((SelectionHandle)ob).setAlpha(alpha);
+				if (((SelectionHandle)ob).getAlpha() != alpha)
+					((SelectionHandle)ob).setAlpha(alpha);
 			} else if (ob instanceof Shape) {
-				((Shape)ob).setAlpha(alpha);
+				Integer a = ((Shape)ob).getAlpha();
+				if (a == null || a != alpha)
+					((Shape)ob).setAlpha(alpha);
 			}
 		}
 		bean.setAlpha(alpha);
 	}
+
 	public int getAlpha() {
 		return bean.getAlpha();
 	}
@@ -345,11 +352,18 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	}
 
 	public void setVisible(boolean visible) {
-		if (regionObjects!=null) for (IFigure ob : regionObjects) {
-			if (ob instanceof IMobileFigure) {
-				((IMobileFigure)ob).setVisible(visible&&(isMobile()||isTrackMouse()));
-			} else {
-			    if (ob!=null) ob.setVisible(visible);
+		if (regionObjects!=null) {
+			boolean mobileFlag = isMobile() || isTrackMouse();
+			for (IFigure ob : regionObjects) {
+				if (ob instanceof IMobileFigure) {
+					if (mobileFlag && visible && !ob.isVisible())
+						ob.setVisible(true);
+				} else {
+					if (ob != null) {
+						if (ob.isVisible() != visible)
+							ob.setVisible(visible);
+					}
+				}
 			}
 		}
 		bean.setVisible(visible);
@@ -361,16 +375,19 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 
 	@Override
 	public void setMobile(boolean mobile) {
-		if (regionObjects!=null) for (IFigure ob : regionObjects) {
-			if (ob instanceof IMobileFigure) {
-				((IMobileFigure)ob).setVisible(mobile);
-			} else if (ob instanceof RegionFillFigure) {
-				((RegionFillFigure)ob).setMobile(mobile);
+		if (regionObjects!=null) {
+			for (IFigure ob : regionObjects) {
+				if (ob instanceof IMobileFigure) {
+					if (mobile != ob.isVisible())
+						ob.setVisible(mobile);
+				} else if (ob instanceof RegionFillFigure) {
+					if (((RegionFillFigure) ob).isMobile() != mobile)
+						((RegionFillFigure) ob).setMobile(mobile);
+				}
 			}
 		}
 		bean.setMobile(mobile);
 	}
-
 
 	public void setHandlesVisible(boolean mobile) {
 		if (regionObjects!=null) for (IFigure ob : regionObjects) {

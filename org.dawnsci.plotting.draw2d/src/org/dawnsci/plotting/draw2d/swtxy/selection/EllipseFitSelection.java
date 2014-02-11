@@ -70,15 +70,8 @@ class EllipseFitSelection extends AbstractSelectionRegion implements IEllipseFit
 	}
 
 	@Override
-	public void setVisible(boolean visible) {
-		getBean().setVisible(visible);
-		if (ellipse != null)
-			ellipse.setVisible(visible);
-	}
-
-	@Override
-	public void setMobile(final boolean mobile) {
-		getBean().setMobile(mobile);
+	public void setMobile(boolean mobile) {
+		super.setMobile(mobile);
 		if (ellipse != null)
 			ellipse.setMobile(mobile);
 	}
@@ -298,19 +291,7 @@ class EllipseFitSelection extends AbstractSelectionRegion implements IEllipseFit
 			showMajorAxis(true);
 		}
 
-		@Override
-		public void setVisible(boolean visible) {
-			super.setVisible(visible);
-			boolean hVisible = visible && isMobile();
-			for (IFigure h : handles) {
-				h.setVisible(hVisible);
-			}
-		}
-
 		public void setMobile(boolean mobile) {
-			for (IFigure h : handles) {
-				h.setVisible(mobile);
-			}
 			for (FigureTranslator f : fTranslators) {
 				f.setActive(mobile);
 			}

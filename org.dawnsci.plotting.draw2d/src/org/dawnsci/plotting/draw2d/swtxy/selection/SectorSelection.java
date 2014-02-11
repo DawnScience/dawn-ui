@@ -51,7 +51,7 @@ import uk.ac.diamond.scisoft.analysis.roi.handler.SectorROIHandler;
  * You should not call this concrete class outside of the draw2d 
  * extensions unless absolutely required.
  */
-class SectorSelection extends AbstractSelectionRegion implements ILockableRegion{
+class SectorSelection extends AbstractSelectionRegion implements ILockableRegion {
 
 	DecoratedSector sector;
 
@@ -72,16 +72,10 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 	}
 
 	@Override
-	public void setVisible(boolean visible) {
-		getBean().setVisible(visible);
-		if (sector != null)
-			sector.setVisible(visible);
-	}
-
-	@Override
 	public void setMobile(boolean mobile) {
 		super.setMobile(mobile);
-		if (sector != null) sector.setMobile(mobile);
+		if (sector != null)
+			sector.setMobile(mobile);
 	}
 
 	@Override
@@ -275,7 +269,7 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 		}
 	}
 	
-	private boolean isCenterMovable=true;
+	private boolean isCentreMovable=true;
 
 	class DecoratedSector extends Sector implements IRegionContainer {
 		private List<IFigure> handles;
@@ -285,6 +279,7 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 		private SectorROIHandler roiHandler;
 		private TranslationListener handleListener;
 		private FigureListener moveListener;
+		private boolean isMobile;
 
 		public DecoratedSector(Figure parent) {
 			super();
@@ -374,7 +369,7 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 			addFigureListener(moveListener);
 			mover = new FigureTranslator(getXyGraph(), parent, this, handles) {
 				public void mouseDragged(MouseEvent event) {
-					if (!isCenterMovable) return;
+					if (!isCentreMovable) return;
 					super.mouseDragged(event);
 				}
 			};
@@ -387,18 +382,10 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 				setBounds(b);
 		}
 
-		@Override
-		public void setVisible(boolean visible) {
-			super.setVisible(visible);
-			for (IFigure h : handles) {
-				h.setVisible(visible&&isMobile());
-			}
-		}
-
 		public void setMobile(boolean mobile) {
-			for (IFigure h : handles) {
-				h.setVisible(mobile);
-			}
+			if (isMobile == mobile)
+				return;
+			isMobile = mobile;
 
 			for (FigureTranslator f : fTranslators) {
 				f.setActive(mobile);
@@ -613,13 +600,13 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 
 	@Override
 	public boolean isCentreMovable() {
-		return isCenterMovable;
+		return isCentreMovable;
 	}
 
 	@Override
-	public void setCentreMovable(boolean isCenterMovable) {
-		this.isCenterMovable = isCenterMovable;
-		if (isCenterMovable) {
+	public void setCentreMovable(boolean isCentreMovable) {
+		this.isCentreMovable = isCentreMovable;
+		if (isCentreMovable) {
 			sector.setCursor(Draw2DUtils.getRoiMoveCursor());
 			sector.getHandleTranslators().get(sector.getHandleTranslators().size()-1).setActive(true);
 			sector.getHandles().get(sector.getHandles().size()-1).setVisible(true);
