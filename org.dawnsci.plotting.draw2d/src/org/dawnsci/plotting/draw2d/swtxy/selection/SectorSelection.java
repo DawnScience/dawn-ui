@@ -391,8 +391,10 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 		@Override
 		public void setVisible(boolean visible) {
 			super.setVisible(visible);
+			boolean net = visible && isMobile;
 			for (IFigure h : handles) {
-				h.setVisible(visible&&isMobile());
+				if (h.isVisible() != net)
+					h.setVisible(net);
 			}
 		}
 
