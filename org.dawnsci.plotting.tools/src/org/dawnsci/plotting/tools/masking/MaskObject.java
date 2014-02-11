@@ -497,10 +497,10 @@ public class MaskObject {
 		private int yStart, yEnd;
 
 		public PixelAction(MaskOperation op, 
-				          int xStart, int xEnd,
-				          int yStart, int yEnd,
-				          boolean isMasking, IROI roi, 
-				          IProgressMonitor monitor) {
+				           int xStart, int xEnd,
+				           int yStart, int yEnd,
+				           boolean isMasking, IROI roi, 
+				           IProgressMonitor monitor) {
 			
 			super(op, null, roi, isMasking, monitor);
 			this.xStart  = xStart;
