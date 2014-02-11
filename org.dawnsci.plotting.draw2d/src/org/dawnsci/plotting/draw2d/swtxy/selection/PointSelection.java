@@ -135,12 +135,11 @@ public class PointSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	public void setupSelection(PointList clicks) {
+	public void initialize(PointList clicks) {
 		if (clicks.size()<1) return;
 		final Point last = clicks.getLastPoint();
 		point.setSelectionPoint(last);
-		roi = new PointROI(point.getPosition());
-		fireROIChanged(getROI());
+		fireROIChanged(createROI(true));
 	}
 
 	@Override
@@ -163,12 +162,11 @@ public class PointSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	protected void updateROI(IROI roi) {
-		if (roi instanceof PointROI) {
-			if (point==null) return;
-
+	protected void updateRegion() {
+		if (point != null && roi instanceof PointROI) {
 	        point.setPosition(roi.getPointRef());
 	        updateBounds();
+	        sync(getBean());
 		}
     }
 

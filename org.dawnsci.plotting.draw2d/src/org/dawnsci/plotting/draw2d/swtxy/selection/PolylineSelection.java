@@ -72,12 +72,6 @@ public class PolylineSelection extends AbstractSelectionRegion {
 		parent.add(pline);
 		sync(getBean());
 		setOpaque(false);
-		setAlpha(getAlpha());
-		pline.setForegroundColor(getRegionColor());
-		pline.setAlpha(getAlpha());
-		updateROI();
-		if (roi == null)
-			createROI(true);
 	}
 
 	@Override
@@ -109,14 +103,10 @@ public class PolylineSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	public void setupSelection(PointList clicks) {
+	public void initialize(PointList clicks) {
 		if (pline != null) {
 			pline.setPoints(clicks);
-			setRegionColor(getRegionColor());
-			setOpaque(false);
-			setAlpha(getAlpha());
-			createROI(true);
-			fireROIChanged(getROI());
+			fireROIChanged(createROI(true));
 		}
 	}
 
@@ -146,12 +136,10 @@ public class PolylineSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	protected void updateROI(IROI roi) {
-		if (roi instanceof PolylineROI) {
-			if (pline == null)
-				return;
-
+	protected void updateRegion() {
+		if (pline != null && roi instanceof PolylineROI) {
 			pline.updateFromROI((PolylineROI) roi);
+			sync(getBean());
 		}
 	}
 

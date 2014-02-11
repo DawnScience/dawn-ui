@@ -30,7 +30,7 @@ import uk.ac.diamond.scisoft.analysis.roi.IROI;
 public abstract class AbstractRegion extends Figure implements IRegion, IRegionContainer {
 
 	private Collection<IROIListener> roiListeners;
-	private boolean regionEventsActive = true;
+	protected boolean regionEventsActive = true;
 	private boolean maskRegion         = false;
 	protected String label = null;
 	protected Color labelColour = null;
@@ -112,7 +112,12 @@ public abstract class AbstractRegion extends Figure implements IRegion, IRegionC
 		// null ROIs over.
 		if (roi == null) throw new NullPointerException("Cannot have a null region position!");
 		this.roi = roi;
-		updateROI();
+		try {
+			regionEventsActive = false;
+			updateRegion();
+		} finally {
+			regionEventsActive = true;
+		}
 		fireROIChanged(this.roi);
 	}
 
@@ -123,26 +128,11 @@ public abstract class AbstractRegion extends Figure implements IRegion, IRegionC
 	protected abstract IROI createROI(boolean recordResult);
 
 	/**
+	 * Implement this method to redraw the figure to the axis coordinates (only).
 	 * Updates the region, usually called when items have been created and the position of the
 	 * region should be updated. Does not fire events.
 	 */
-	protected void updateROI() {
-		if (roi != null) {
-			try {
-				this.regionEventsActive = false;
-				updateROI(roi);
-			} finally {
-				this.regionEventsActive = true;
-			}
-		}
-	}
-	
-	/**
-	 * Implement this method to redraw the figure to the axis coordinates (only).
-	 * 
-	 * @param roi
-	 */
-	protected abstract void updateROI(IROI roi);
+	protected abstract void updateRegion();
 
 	public String toString() {
 		if (getName()!=null) return getName();

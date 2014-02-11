@@ -94,12 +94,7 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 
 		parent.add(circle);
 		sync(getBean());
-		circle.setForegroundColor(getRegionColor());
-		circle.setAlpha(getAlpha());
 		circle.setLineWidth(getLineWidth());
-		updateROI();
-		if (roi == null)
-			createROI(true);
 	}
 
 	@Override
@@ -177,12 +172,9 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	public void setupSelection(PointList clicks) {
+	public void initialize(PointList clicks) {
 		if (circle != null) {
 			circle.setup(clicks);
-			setRegionColor(getRegionColor());
-			setOpaque(false);
-			setAlpha(getAlpha());
 			fireROIChanged(getROI());
 		}
 	}
@@ -230,12 +222,10 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	protected void updateROI(IROI roi) {
-		if (circle == null)
-			return;
-
-		if (roi instanceof CircularFitROI) {
+	protected void updateRegion() {
+		if (circle != null && roi instanceof CircularFitROI) {
 			circle.updateFromROI((CircularFitROI) roi);
+			sync(getBean());
 			updateLabel((CircularROI) roi);
 		}
 	}

@@ -77,12 +77,6 @@ public class BoxSelection extends AbstractSelectionRegion {
 		parent.add(rect);
 		sync(getBean());
 		setOpaque(false);
-		setAlpha(getAlpha());
-		rect.setForegroundColor(getRegionColor());
-		rect.setAlpha(getAlpha());
-		updateROI();
-		if (roi == null)
-			createROI(true);
 	}
 
 	@Override
@@ -115,13 +109,9 @@ public class BoxSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	public void setupSelection(PointList clicks) {
+	public void initialize(PointList clicks) {
 		if (rect != null) {
 			rect.setup(clicks);
-			setRegionColor(getRegionColor());
-			setOpaque(false);
-			setAlpha(getAlpha());
-			createROI(true);
 			fireROIChanged(getROI());
 		}
 	}
@@ -163,9 +153,10 @@ public class BoxSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	protected void updateROI(IROI roi) {
-		if (roi instanceof RectangularROI && rect != null) {
+	protected void updateRegion() {
+		if (rect != null && roi instanceof RectangularROI) {
 			rect.updateFromROI((RectangularROI) roi);
+			sync(getBean());
 		}
 	}
 

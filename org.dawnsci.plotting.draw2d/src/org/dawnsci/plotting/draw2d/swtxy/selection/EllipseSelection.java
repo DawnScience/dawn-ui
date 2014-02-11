@@ -78,17 +78,12 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 	@Override
 	public void createContents(Figure parent) {
 		ellipse = new DecoratedEllipse(parent);
-//		ellipse.setCursor(Draw2DUtils.getRoiMoveCursor());
 		ellipse.setCoordinateSystem(coords);
+//		ellipse.setCursor(Draw2DUtils.getRoiMoveCursor());
 
 		parent.add(ellipse);
 		sync(getBean());
-		ellipse.setForegroundColor(getRegionColor());
-		ellipse.setAlpha(getAlpha());
 		ellipse.setLineWidth(getLineWidth());
-		updateROI();
-		if (roi == null)
-			createROI(true);
 	}
 
 	@Override
@@ -125,12 +120,9 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 	}
 
 	@Override
-	public void setupSelection(PointList clicks) {
+	public void initialize(PointList clicks) {
 		if (ellipse != null) {
 			ellipse.setup(clicks);
-			setRegionColor(getRegionColor());
-			setOpaque(false);
-			setAlpha(getAlpha());
 			fireROIChanged(getROI());
 		}
 	}
@@ -164,12 +156,10 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 	}
 
 	@Override
-	protected void updateROI(IROI roi) {
-		if (ellipse == null)
-			return;
-
-		if (roi instanceof EllipticalROI) {
+	protected void updateRegion() {
+		if (ellipse != null && roi instanceof EllipticalROI) {
 			ellipse.updateFromROI((EllipticalROI) roi);
+			sync(getBean());
 		}
 	}
 
