@@ -9,6 +9,7 @@ Require-Bundle: org.eclipse.ui;bundle-version="3.8.2",
  org.eclipse.ui.workbench,
  org.eclipse.core.runtime;bundle-version="3.8.0",
  org.dawnsci.plotting.api;bundle-version="1.2.0",
- uk.ac.diamond.scisoft.analysis.api;bundle-version="1.0.0"
+ uk.ac.diamond.scisoft.analysis.api;bundle-version="1.0.0",
+ uk.ac.diamond.scisoft.analysis.dataset;bundle-version="1.0.0"
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.dawnsci.plotting.examples.Activator
