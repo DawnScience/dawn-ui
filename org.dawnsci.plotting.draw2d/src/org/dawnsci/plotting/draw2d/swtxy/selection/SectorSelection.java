@@ -72,19 +72,6 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 	}
 
 	@Override
-	public void setVisible(boolean visible) {
-		getBean().setVisible(visible);
-		if (sector != null)
-			sector.setVisible(visible);
-	}
-
-	@Override
-	public void setMobile(boolean mobile) {
-		super.setMobile(mobile);
-		if (sector != null) sector.setMobile(mobile);
-	}
-
-	@Override
 	public void createContents(Figure parent) {
 		sector = new DecoratedSector(parent);
 		sector.setCoordinateSystem(coords);
@@ -388,24 +375,10 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 				setBounds(b);
 		}
 
-		@Override
-		public void setVisible(boolean visible) {
-			super.setVisible(visible);
-			boolean net = visible && isMobile;
-			for (IFigure h : handles) {
-				if (h.isVisible() != net)
-					h.setVisible(net);
-			}
-		}
-
 		public void setMobile(boolean mobile) {
 			if (isMobile == mobile)
 				return;
-
 			isMobile = mobile;
-			for (IFigure h : handles) {
-				h.setVisible(mobile);
-			}
 
 			for (FigureTranslator f : fTranslators) {
 				f.setActive(mobile);

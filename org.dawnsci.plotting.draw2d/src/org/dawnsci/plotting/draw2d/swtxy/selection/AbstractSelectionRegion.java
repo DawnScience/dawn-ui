@@ -356,8 +356,8 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 			boolean mobileFlag = isMobile() || isTrackMouse();
 			for (IFigure ob : regionObjects) {
 				if (ob instanceof IMobileFigure) {
-					if (ob.isVisible() != (visible && mobileFlag))
-						ob.setVisible(visible && mobileFlag);
+					if (mobileFlag && visible && !ob.isVisible())
+						ob.setVisible(true);
 				} else {
 					if (ob != null) {
 						if (ob.isVisible() != visible)
@@ -375,18 +375,19 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 
 	@Override
 	public void setMobile(boolean mobile) {
-		if (regionObjects!=null) for (IFigure ob : regionObjects) {
-			if (ob instanceof IMobileFigure) {
-				if (ob.isVisible() != mobile)
-					ob.setVisible(mobile);
-			} else if (ob instanceof RegionFillFigure) {
-				if (((RegionFillFigure)ob).isMobile() != mobile)
-					((RegionFillFigure)ob).setMobile(mobile);
+		if (regionObjects!=null) {
+			for (IFigure ob : regionObjects) {
+				if (ob instanceof IMobileFigure) {
+					if (mobile != ob.isVisible())
+						ob.setVisible(mobile);
+				} else if (ob instanceof RegionFillFigure) {
+					if (((RegionFillFigure) ob).isMobile() != mobile)
+						((RegionFillFigure) ob).setMobile(mobile);
+				}
 			}
 		}
 		bean.setMobile(mobile);
 	}
-
 
 	public void setHandlesVisible(boolean mobile) {
 		if (regionObjects!=null) for (IFigure ob : regionObjects) {
