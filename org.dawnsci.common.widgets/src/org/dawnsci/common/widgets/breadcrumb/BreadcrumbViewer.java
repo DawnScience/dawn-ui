@@ -32,14 +32,13 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Widget;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.ListenerList;
-
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.OpenEvent;
@@ -48,7 +47,6 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.ViewerCell;
-
 import org.eclipse.ui.forms.FormColors;
 
 
@@ -403,7 +401,11 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 			return Collections.EMPTY_LIST;
 
 		ArrayList<Object> result= new ArrayList<Object>();
-		result.add(fSelectedItem.getData());
+		if (!isEditable()) { // It is always the last item
+		    result.add(fBreadcrumbItems.get(fBreadcrumbItems.size()-1).getData());
+		} else {
+		    result.add(fSelectedItem.getData());
+		}
 		return result;
 	}
 
@@ -847,6 +849,18 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 
 	public void setTreeSwitches(int treeSwitches) {
 		this.treeSwitches = treeSwitches;
+	}
+
+	private boolean isEditable = true;
+	public void setEditable(boolean isEditable) {
+		this.isEditable = isEditable;
+		for (BreadcrumbItem item : fBreadcrumbItems) {
+			item.setEditable(isEditable);
+		}
+	}
+	
+	public boolean isEditable() {
+		return isEditable;
 	}
 
 }

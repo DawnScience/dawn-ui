@@ -288,4 +288,8 @@ public class BreadcrumbItem extends Item {
 		fDetailsBlock.setImage(image);
 	}
 
+	public void setEditable(boolean isEnabled) {
+		fExpandBlock.setEnabled(isEnabled);
+	}
+
 }
