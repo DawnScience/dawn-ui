@@ -214,9 +214,10 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 			} else {
 				max = Stats.quantile(thumbail, minimumThreshold);
 			}
-			int redSelect = GlobalColourMaps.colourSelectList.get(colourMapChoice * 4);
+			int redSelect   = GlobalColourMaps.colourSelectList.get(colourMapChoice * 4);
 			int greenSelect = GlobalColourMaps.colourSelectList.get(colourMapChoice * 4 + 1);
-			int blueSelect = GlobalColourMaps.colourSelectList.get(colourMapChoice * 4 + 2);
+			int blueSelect  = GlobalColourMaps.colourSelectList.get(colourMapChoice * 4 + 2);
+			
 			AbstractMapFunction redFunc = GlobalColourMaps.mappingFunctions.get(Math.abs(redSelect));
 			AbstractMapFunction greenFunc = GlobalColourMaps.mappingFunctions.get(Math.abs(greenSelect));
 			AbstractMapFunction blueFunc = GlobalColourMaps.mappingFunctions.get(Math.abs(blueSelect));

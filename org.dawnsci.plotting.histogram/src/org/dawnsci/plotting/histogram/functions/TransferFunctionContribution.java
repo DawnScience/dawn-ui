@@ -1,5 +1,7 @@
 package org.dawnsci.plotting.histogram.functions;
 
+import org.dawnsci.plotting.api.histogram.ITransferFunction;
+import org.dawnsci.plotting.histogram.functions.classes.AbstractTransferFunction;
 import org.eclipse.core.runtime.IConfigurationElement;
 
 /**
@@ -15,7 +17,7 @@ public class TransferFunctionContribution {
 	
 	private String name; 
 	private String id;
-	private ITransferFunctionArrayProvider function;
+	private AbstractTransferFunction function;
 		
 	public static TransferFunctionContribution getTransferFunctionContribution(
 			IConfigurationElement config) {
@@ -24,7 +26,7 @@ public class TransferFunctionContribution {
 		try {
 			transferFunctionContribution.name      = config.getAttribute(ATT_NAME);
 			transferFunctionContribution.id        = config.getAttribute(ATT_ID);
-			transferFunctionContribution.function  = (ITransferFunctionArrayProvider) config.createExecutableExtension(ATT_CLASS);
+			transferFunctionContribution.function  = (AbstractTransferFunction) config.createExecutableExtension(ATT_CLASS);
 		} catch (Exception e) {
 			throw new IllegalArgumentException("Cannot create TransferFunctionContribution contribution due to the following error",e);
 		}
@@ -40,7 +42,7 @@ public class TransferFunctionContribution {
 		return id;
 	}
 
-	public ITransferFunctionArrayProvider getFunction() {
+	public ITransferFunction getFunction() {
 		return function;
 	}
 	

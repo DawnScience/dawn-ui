@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.dawnsci.plotting.api.histogram.IPaletteService;
+import org.dawnsci.plotting.api.histogram.ITransferFunction;
 import org.dawnsci.plotting.api.histogram.functions.AbstractMapFunction;
 import org.dawnsci.plotting.api.histogram.functions.FunctionContainer;
 import org.dawnsci.plotting.histogram.ExtentionPointManager;
@@ -87,11 +88,11 @@ public class PaletteService extends AbstractServiceFactory implements IPaletteSe
 		}
 		ColourSchemeContribution csc = extensionManager.getColourSchemeContribution(colourSchemeName);
 		
-		AbstractMapFunction    red  = extensionManager.getTransferFunctionByID(csc.getRedID()).getFunction().getMapFunction();
-		AbstractMapFunction   blue  = extensionManager.getTransferFunctionByID(csc.getBlueID()).getFunction().getMapFunction();
-		AbstractMapFunction    grn  = extensionManager.getTransferFunctionByID(csc.getGreenID()).getFunction().getMapFunction();
-		AbstractMapFunction   alpha = extensionManager.getTransferFunctionByID(csc.getAlphaID()).getFunction().getMapFunction();
-		if (red==null || blue == null || grn == null || alpha == null) return null;
+		ITransferFunction    red  = extensionManager.getTransferFunctionByID(csc.getRedID()).getFunction();
+		ITransferFunction   blue  = extensionManager.getTransferFunctionByID(csc.getBlueID()).getFunction();
+		ITransferFunction    grn  = extensionManager.getTransferFunctionByID(csc.getGreenID()).getFunction();
+		ITransferFunction   alpha = extensionManager.getTransferFunctionByID(csc.getAlphaID()).getFunction();
+		if (red==null || blue == null || grn == null ) return null;
 		return new FunctionContainer(red, grn, blue, alpha, csc.getRedInverted(), csc.getGreenInverted(), csc.getBlueInverted(), csc.getAlphaInverted());
 	}
 

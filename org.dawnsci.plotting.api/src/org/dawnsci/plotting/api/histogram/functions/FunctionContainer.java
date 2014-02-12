@@ -1,5 +1,7 @@
 package org.dawnsci.plotting.api.histogram.functions;
 
+import org.dawnsci.plotting.api.histogram.ITransferFunction;
+
 
 /**
  * To be used as a function object in ImageServiceBean to override 
@@ -10,9 +12,18 @@ package org.dawnsci.plotting.api.histogram.functions;
  */
 public class FunctionContainer {
 	
-	public FunctionContainer(AbstractMapFunction redFunc,
-			AbstractMapFunction greenFunc, AbstractMapFunction blueFunc,
-			AbstractMapFunction alphaFunc, boolean inverseRed,
+	private ITransferFunction redFunc;
+	private ITransferFunction greenFunc;
+	private ITransferFunction blueFunc;
+	private ITransferFunction alphaFunc;
+	private boolean inverseRed;
+	private boolean inverseGreen;
+	private boolean inverseBlue;
+	private boolean inverseAlpha;
+
+	public FunctionContainer(ITransferFunction redFunc,
+			ITransferFunction greenFunc, ITransferFunction blueFunc,
+			ITransferFunction alphaFunc, boolean inverseRed,
 			boolean inverseGreen, boolean inverseBlue, boolean inverseAlpha) {
 		super();
 		this.redFunc = redFunc;
@@ -24,14 +35,6 @@ public class FunctionContainer {
 		this.inverseBlue = inverseBlue;
 		this.inverseAlpha = inverseAlpha;
 	}
-	private AbstractMapFunction redFunc;
-	private AbstractMapFunction greenFunc;
-	private AbstractMapFunction blueFunc;
-	private AbstractMapFunction alphaFunc;
-	private boolean inverseRed;
-	private boolean inverseGreen;
-	private boolean inverseBlue;
-	private boolean inverseAlpha;
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -88,10 +91,10 @@ public class FunctionContainer {
 			return false;
 		return true;
 	}
-	public AbstractMapFunction getAlphaFunc() {
+	public ITransferFunction getAlphaFunc() {
 		return alphaFunc;
 	}
-	public void setAlphaFunc(AbstractMapFunction alphaFunc) {
+	public void setAlphaFunc(ITransferFunction alphaFunc) {
 		this.alphaFunc = alphaFunc;
 	}
 	public boolean isInverseAlpha() {
@@ -100,22 +103,22 @@ public class FunctionContainer {
 	public void setInverseAlpha(boolean inverseAlpha) {
 		this.inverseAlpha = inverseAlpha;
 	}
-	public AbstractMapFunction getRedFunc() {
+	public ITransferFunction getRedFunc() {
 		return redFunc;
 	}
-	public void setRedFunc(AbstractMapFunction redFunc) {
+	public void setRedFunc(ITransferFunction redFunc) {
 		this.redFunc = redFunc;
 	}
-	public AbstractMapFunction getGreenFunc() {
+	public ITransferFunction getGreenFunc() {
 		return greenFunc;
 	}
-	public void setGreenFunc(AbstractMapFunction greenFunc) {
+	public void setGreenFunc(ITransferFunction greenFunc) {
 		this.greenFunc = greenFunc;
 	}
-	public AbstractMapFunction getBlueFunc() {
+	public ITransferFunction getBlueFunc() {
 		return blueFunc;
 	}
-	public void setBlueFunc(AbstractMapFunction blueFunc) {
+	public void setBlueFunc(ITransferFunction blueFunc) {
 		this.blueFunc = blueFunc;
 	}
 	public boolean isInverseRed() {

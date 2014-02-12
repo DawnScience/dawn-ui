@@ -1,6 +1,5 @@
-package org.dawnsci.plotting.histogram.functions;
+package org.dawnsci.plotting.api.histogram;
 
-import org.dawnsci.plotting.api.histogram.functions.AbstractMapFunction;
 
 /**
  * This interface is required for classes which wish to implement the Transfer Function 
@@ -9,7 +8,7 @@ import org.dawnsci.plotting.api.histogram.functions.AbstractMapFunction;
  * @author ssg37927
  *
  */
-public interface ITransferFunctionArrayProvider {
+public interface ITransferFunction {
 
 	/**
 	 * This method is called when creating a colourmap and the implementing class is being used to 
@@ -19,11 +18,18 @@ public interface ITransferFunctionArrayProvider {
 	 * a fixed length array at 256.
 	 */
 	public int[] getArray();	
-	
+
 	/**
-	 * This method returns the map function, used for 16-bit images and above.
+	 * Get a value between 0 and 1.
+	 * @param value
 	 * @return
 	 */
-	public AbstractMapFunction getMapFunction();
+	public double getPoint(double value);
 
+	/**
+	 * Maps the value to the palette color
+	 * @param input
+	 * @return
+	 */
+	public short mapToByte(double input);
 }

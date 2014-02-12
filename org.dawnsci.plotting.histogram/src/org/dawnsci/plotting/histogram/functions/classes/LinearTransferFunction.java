@@ -20,7 +20,7 @@ public class LinearTransferFunction extends AbstractTransferFunction {
 
 	@Override
 	public double getPoint(double value) {
-		return 0;
+		return value;
 	}
 
 }

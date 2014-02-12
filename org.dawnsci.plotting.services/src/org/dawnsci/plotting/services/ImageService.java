@@ -607,11 +607,8 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 			IPaletteService pservice = (IPaletteService)ServiceManager.getService(IPaletteService.class);
 			if (pservice !=null) {
 				final String scheme = store.getString(BasePlottingConstants.COLOUR_SCHEME);
-				
-				
-				// FIXME, temporary, user should choose if they want 24-bit
-				// Should be preference for bit depth. 
-				if (false) {
+					
+				if (store.getBoolean(BasePlottingConstants.USE_PALETTE_FUNCTIONS)) {
 					FunctionContainer container = pservice.getFunctionContainer(scheme);
 					if (container!=null) {
 						imageServiceBean.setFunctionObject(container);

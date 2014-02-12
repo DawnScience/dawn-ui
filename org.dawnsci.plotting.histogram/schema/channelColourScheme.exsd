@@ -69,7 +69,7 @@
                   The class provided here muct give the actual array associated with this channels colour cast.
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":org.dawnsci.plotting.histogram.histogram.ITransferFunctionArrayProvider"/>
+                  <meta.attribute kind="java" basedOn="org.dawnsci.plotting.histogram.functions.classes.AbstractTransferFunction:"/>
                </appinfo>
             </annotation>
          </attribute>
@@ -90,7 +90,7 @@
          <meta.section type="examples"/>
       </appinfo>
       <documentation>
-            &lt;extension
+         &lt;extension
          point=&quot;org.dawnsci.plotting.histogram.histogram.channelColourScheme&quot;&gt;
       &lt;transfer_function
             array_provider_class=&quot;org.dawnsci.plotting.histogram.functions.classes.LinearTransferFunction&quot;

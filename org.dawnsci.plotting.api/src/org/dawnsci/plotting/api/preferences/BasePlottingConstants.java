@@ -104,4 +104,9 @@ public class BasePlottingConstants {
 	 * Used to identify the autoscal action
 	 */
 	public static final String AUTO_SCALE = "org.csstudio.swt.xygraph.autoscale";
+
+	/**
+	 * Property to say if we use the functions with a 24 bit image or not.
+	 */
+	public static final String USE_PALETTE_FUNCTIONS = "org.dawnsci.plotting.use.paletteFunctions";
 }

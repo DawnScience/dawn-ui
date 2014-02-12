@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.dawb.common.services.ServiceManager;
 import org.dawb.common.ui.printing.IPrintImageProvider;
 import org.dawb.common.ui.printing.PlotExportPrintUtil;
 import org.dawb.common.ui.printing.PlotPrintPreviewDialog;
@@ -27,6 +28,9 @@ import org.dawnsci.plotting.api.axis.IAxis;
 import org.dawnsci.plotting.api.axis.IAxisSystem;
 import org.dawnsci.plotting.api.axis.IClickListener;
 import org.dawnsci.plotting.api.axis.IPositionListener;
+import org.dawnsci.plotting.api.histogram.IPaletteService;
+import org.dawnsci.plotting.api.histogram.functions.FunctionContainer;
+import org.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -349,13 +353,33 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 				if (e.keyCode==27) { // Esc
 					xyGraph.clearRegionTool();
 					
-				} if (e.keyCode==16777230 || e.character=='h') {
+				} else if (e.keyCode==16777230 || e.character=='h') {
 					final IContributionItem action = bars.getToolBarManager().find("org.dawb.workbench.plotting.histo");
 				    if (action!=null && action.isVisible() && action instanceof ActionContributionItem) {
 				    	ActionContributionItem iaction = (ActionContributionItem)action;
 				    	iaction.getAction().setChecked(!iaction.getAction().isChecked());
 				    	iaction.getAction().run();
 				    }
+				    
+				} else if (e.character=='f') {
+					final ImageTrace trace = xyGraph.getRegionArea().getImageTrace();
+					// Force functional creation of image rather than 8-bit
+					if (trace!=null) try {
+						IPaletteService pservice = (IPaletteService)ServiceManager.getService(IPaletteService.class);
+						if (pservice !=null) {
+							FunctionContainer container = pservice.getFunctionContainer(trace.getPaletteName());
+							if (container!=null) {
+								trace.getImageServiceBean().setFunctionObject(container);
+								trace.remask();
+								trace.getImageServiceBean().setFunctionObject(null);
+							}
+						}
+					} catch (Exception e1) {
+						logger.debug("Cannot apply custom palette function", e1);
+					}
+
+					
+					
 				} else if (e.keyCode== SWT.F11) {
 					final IContributionItem action = bars.getToolBarManager().find("org.dawb.workbench.fullscreen");
 				    if (action!=null && action.isVisible() && action instanceof ActionContributionItem) {

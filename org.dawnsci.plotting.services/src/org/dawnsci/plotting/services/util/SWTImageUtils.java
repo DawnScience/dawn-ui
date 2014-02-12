@@ -17,8 +17,8 @@
 package org.dawnsci.plotting.services.util;
 
 import org.dawnsci.plotting.api.histogram.IImageService;
+import org.dawnsci.plotting.api.histogram.ITransferFunction;
 import org.dawnsci.plotting.api.histogram.ImageServiceBean;
-import org.dawnsci.plotting.api.histogram.functions.AbstractMapFunction;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.RGB;
@@ -89,9 +89,9 @@ public class SWTImageUtils {
 	static private ImageData createImageFromDataset(AbstractDataset a,
 													double minv,
 													double maxv,
-													AbstractMapFunction redFunc,
-													AbstractMapFunction greenFunc,
-													AbstractMapFunction blueFunc,
+													ITransferFunction redFunc,
+													ITransferFunction greenFunc,
+													ITransferFunction blueFunc,
 													boolean inverseRed,
 													boolean inverseGreen,
 													boolean inverseBlue)  {
@@ -138,9 +138,9 @@ public class SWTImageUtils {
 	 * @return an ImageData object for SWT
 	 */
 	static public ImageData createImageData(AbstractDataset a, Number max,
-											AbstractMapFunction redFunc,
-											AbstractMapFunction greenFunc,
-											AbstractMapFunction blueFunc,
+											ITransferFunction redFunc,
+											ITransferFunction greenFunc,
+											ITransferFunction blueFunc,
 											boolean inverseRed,
 											boolean inverseGreen,
 											boolean inverseBlue) {
@@ -164,9 +164,9 @@ public class SWTImageUtils {
 	 * @return an ImageData object for SWT
 	 */
 	static public ImageData createImageData(AbstractDataset a, Number min, Number max,
-											AbstractMapFunction redFunc,
-											AbstractMapFunction greenFunc,
-											AbstractMapFunction blueFunc,
+			                                ITransferFunction redFunc,
+											ITransferFunction greenFunc,
+											ITransferFunction blueFunc,
 											boolean inverseRed,
 											boolean inverseGreen,
 											boolean inverseBlue) {

@@ -38,8 +38,10 @@ public class ImageServiceBean {
 	private Number          max;
 	private IProgressMonitor monitor;
 	private HistoType       histogramType = HistoType.MEAN;
-	private int             depth=8; // Either 8 or 16 usually. If function object !=null then 
-	                                 // this is assumed to override the depth
+	
+	/** Either 8 or 24 usually. If function object !=null then 
+        this is assumed to override the depth **/
+	private int             depth=8; 
 	private Object          functionObject;
 	private boolean         logColorScale=false; // Normally linear, can switch to log color scale.
 	private double          logOffset=0.0;

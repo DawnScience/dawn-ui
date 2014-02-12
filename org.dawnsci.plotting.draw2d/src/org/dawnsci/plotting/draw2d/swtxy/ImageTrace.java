@@ -1150,7 +1150,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		repaint();
 	}
 	
-	protected void remask() {
+	public void remask() {
 		if (imageServiceBean==null) return;
 		
 		createScaledImage(ImageScaleType.FORCE_REIMAGE, null);

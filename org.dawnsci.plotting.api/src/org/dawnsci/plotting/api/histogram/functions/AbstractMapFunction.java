@@ -16,17 +16,19 @@
 
 package org.dawnsci.plotting.api.histogram.functions;
 
+import org.dawnsci.plotting.api.histogram.ITransferFunction;
+
 /**
  * Abstract class for a general mapping function from one double to another one or a byte
  */
-public abstract class AbstractMapFunction {
+public abstract class AbstractMapFunction implements ITransferFunction {
 
 	/**
 	 * Clipped version of mapFunction
 	 * @param input original value to map
 	 * @return output double
 	 */
-	final public double clippedMapToDouble(double input) {
+	final public double getPoint(double input) {
 		double value = mapFunction(input);
 		if (value < 0.0) return 0.0;
 		else if (value > 1.0) return 1.0;
@@ -39,7 +41,7 @@ public abstract class AbstractMapFunction {
 	 *              mapped to -128..127 in Java we have to use short
 	 */
 	final public short mapToByte(double input) {
-		return (short)(255*clippedMapToDouble(input));
+		return (short)(255*getPoint(input));
 	}
 
 	/**
@@ -57,4 +59,15 @@ public abstract class AbstractMapFunction {
 	 * @return the output value (0 to 1)
 	 */
 	abstract public double mapFunction(double input);
+	
+	
+	@Override
+	public int[] getArray() {
+		int[] result = new int[256];
+		for (int i = 0; i < result.length; i++) {
+			result[i] = (int) (getPoint((double)i/256)*255);
+		}
+		return result;
+	}
+
 }
