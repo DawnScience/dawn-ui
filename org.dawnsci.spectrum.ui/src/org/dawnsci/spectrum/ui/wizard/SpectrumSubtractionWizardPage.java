@@ -34,19 +34,21 @@ import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Maths;
 
 
-public class SpectrumSubtractionWizardPage extends WizardPage {
+public class SpectrumSubtractionWizardPage extends WizardPage implements ISpectrumWizardPage {
 	
 	List<IContain1DData> dataList;
 	IDataset xdata, ydata1, ydata2;
 	IPlottingSystem system;
+	boolean isAMinusB = true;
+	double scale = 1;
 	
 	SubtractionProcess process;
 
-	public SpectrumSubtractionWizardPage(List<IContain1DData> dataList) {
+	public SpectrumSubtractionWizardPage(IContain1DData subtrahend,List<IContain1DData> dataList ) {
 		super("Processing Wizard page");
+		process = new SubtractionProcess(subtrahend);
 		this.dataList = dataList;
-		process = new SubtractionProcess();
-		process.setDatasetList(dataList);
+		
 	}
 	
 	@Override
@@ -73,8 +75,7 @@ public class SpectrumSubtractionWizardPage extends WizardPage {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Button aButton = (Button)e.getSource();
-				process.setAminusB(aButton.getSelection());
+				isAMinusB = true;
 				update();
 			}
 			
@@ -87,8 +88,7 @@ public class SpectrumSubtractionWizardPage extends WizardPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Button aButton = (Button)e.getSource();
-				process.setAminusB(!aButton.getSelection());
+				isAMinusB = false;
 				update();
 			}
 		});
@@ -108,9 +108,8 @@ public class SpectrumSubtractionWizardPage extends WizardPage {
 			public void widgetSelected(SelectionEvent e) {
 				int selection = ((Spinner)e.getSource()).getSelection();
 		        int digits = ((Spinner)e.getSource()).getDigits();
-		        double val = (selection / Math.pow(10, digits));
-		        process.setScale(val);
-				update();
+		        scale = (selection / Math.pow(10, digits));
+		        update();
 			}
 			
 		});
@@ -142,24 +141,28 @@ public class SpectrumSubtractionWizardPage extends WizardPage {
 	
 	
 	private void update() {
+		
+		process.setScale(scale);
+		
+        List<IContain1DData> out = process.process(dataList);
         
-        List<IContain1DData> out = process.process();
+//        List<IDataset> data = new ArrayList<IDataset>();
+//        List<IContain1DData> orig = process.getDatasetList();
         
-        List<IDataset> data = new ArrayList<IDataset>();
-        List<IContain1DData> orig = process.getDatasetList();
+//        if (process.isAminusB()) {
+//        	data.add(orig.get(0).getyDatasets().get(0));
+//        	data.add(Maths.multiply((AbstractDataset)orig.get(1).getyDatasets().get(0),process.getScale()));
+//        } else {
+//        	data.add(orig.get(1).getyDatasets().get(0));
+//        	data.add(Maths.multiply((AbstractDataset)orig.get(0).getyDatasets().get(0), process.getScale()));
+//        }
         
-        if (process.isAminusB()) {
-        	data.add(orig.get(0).getyDatasets().get(0));
-        	data.add(Maths.multiply((AbstractDataset)orig.get(1).getyDatasets().get(0),process.getScale()));
-        } else {
-        	data.add(orig.get(1).getyDatasets().get(0));
-        	data.add(Maths.multiply((AbstractDataset)orig.get(0).getyDatasets().get(0), process.getScale()));
-        }
-        
-        data.add(out.get(0).getyDatasets().get(0));
+//        data.add(out.get(0).getyDatasets().get(0));
         
 		system.clear();
-		system.createPlot1D(out.get(0).getxDataset(),data ,null);
+		system.createPlot1D(dataList.get(0).getxDataset(),dataList.get(0).getyDatasets() ,null);
+		system.createPlot1D(process.getSubtrahend().getxDataset(), process.getSubtrahend().getyDatasets(), null);
+		system.createPlot1D(out.get(0).getxDataset(),out.get(0).getyDatasets() ,null);
 		
 	}
 	
@@ -170,4 +173,9 @@ public class SpectrumSubtractionWizardPage extends WizardPage {
 		      system.setFocus();
 		   }
 		}
+
+	@Override
+	public List<IContain1DData> process(List<IContain1DData> dataList) {
+		return process.process(dataList);
+	}
 }

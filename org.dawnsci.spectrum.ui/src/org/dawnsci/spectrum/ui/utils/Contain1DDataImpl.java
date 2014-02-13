@@ -11,11 +11,13 @@ public class Contain1DDataImpl implements IContain1DData {
 	private IDataset x;
 	private List<IDataset> y;
 	private String name;
+	private String longName;
 	
-	public Contain1DDataImpl(IDataset x, List<IDataset> y, String name) {
+	public Contain1DDataImpl(IDataset x, List<IDataset> y, String name, String longName) {
 		this.x = x;
 		this.y = y;
 		this.name = name;
+		this.longName = longName;
 	}
 
 	@Override
@@ -31,6 +33,11 @@ public class Contain1DDataImpl implements IContain1DData {
 	@Override
 	public String getName() {
 		return name;
+	}
+
+	@Override
+	public String getLongName() {
+		return longName;
 	}
 
 }

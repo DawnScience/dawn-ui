@@ -9,6 +9,7 @@ import org.dawb.common.services.IPersistentFile;
 import org.dawb.common.services.ServiceManager;
 import org.dawnsci.spectrum.ui.file.IContain1DData;
 
+import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 public class SaveProcess extends AbstractProcess {
@@ -24,7 +25,7 @@ public class SaveProcess extends AbstractProcess {
 	}
 
 	@Override
-	public List<IContain1DData> process() {
+	public List<IContain1DData> process(List<IContain1DData> list) {
 		File                file=null;
 		IPersistentFile     pf=null;
 		
@@ -45,6 +46,17 @@ public class SaveProcess extends AbstractProcess {
 			if (pf!=null) pf.close();
 		}
 		return null;
+	}
+
+	@Override
+	protected AbstractDataset process(AbstractDataset x, AbstractDataset y) {
+		return null;
+	}
+
+	@Override
+	protected String getAppendingName() {
+		//Should never be called
+		return "_save";
 	}
 
 }

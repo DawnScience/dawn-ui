@@ -13,8 +13,13 @@ public class SpectrumWizard extends Wizard {
 	
 	String outputPath = null;
 	List<IContain1DData> outdata = null;
+	List<IContain1DData> data;
 	
 	public SpectrumWizard() {
+	}
+	
+	public void setData(List<IContain1DData> data) {
+		this.data = data;
 	}
 	
 	@Override
@@ -22,8 +27,7 @@ public class SpectrumWizard extends Wizard {
 		IWizardPage page = getPages()[0];
 		
 		if (page instanceof ISpectrumWizardPage) { 
-			((ISpectrumWizardPage)page).process();
-			outdata = ((ISpectrumWizardPage)page).getOutputDatasetList();
+			outdata = ((ISpectrumWizardPage)page).process(data);
 		}
 		
 		if (page instanceof SaveFileWizardPage) outputPath = ((SaveFileWizardPage)page).getAbsoluteFilePath();

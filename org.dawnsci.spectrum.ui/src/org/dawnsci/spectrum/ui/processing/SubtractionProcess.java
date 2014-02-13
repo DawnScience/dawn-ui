@@ -16,35 +16,22 @@ import uk.ac.diamond.scisoft.analysis.dataset.Maths;
 public class SubtractionProcess extends AbstractProcess{
 	
 	double scale = 1;
-	boolean isAminusB = true;
+	IContain1DData oSubtrahend;
+	IContain1DData subtrahend;
 	
-	public SubtractionProcess() {
-		makeCompatible = true;
+	public SubtractionProcess(IContain1DData subtrahend) {
+		this.oSubtrahend = subtrahend;
 	}
 	
-	public List<IContain1DData> process() {
+	public List<IContain1DData> process(List<IContain1DData> list) {
 		
-		AbstractDataset y1 = DatasetUtils.convertToAbstractDataset(list.get(1).getyDatasets().get(0));
-		AbstractDataset y0 = DatasetUtils.convertToAbstractDataset(list.get(0).getyDatasets().get(0));
+		list.add(oSubtrahend);
 		
-		Contain1DDataImpl out = null;
+		List<IContain1DData> listCom = SpectrumUtils.getCompatibleDatasets(list);
 		
-		if (isAminusB) {
-			AbstractDataset s = Maths.multiply(y1, scale);
-			
-			s = Maths.subtract(y0, s);
-			out = new Contain1DDataImpl(list.get(0).getxDataset(),
-					Arrays.asList(new IDataset[]{s}), s.getName());
-		} else {
-			AbstractDataset s = Maths.multiply(y0, scale);
-			
-			s = Maths.subtract(y1, s);
-			
-			out = new Contain1DDataImpl(list.get(0).getxDataset(),
-					Arrays.asList(new IDataset[]{s}), s.getName());
-		}
+		this.subtrahend = listCom.remove(listCom.size()-1);
 		
-		return Arrays.asList(new IContain1DData[]{out});
+		return super.process(listCom);
 	}
 	
 	public void setScale(double scale) {
@@ -55,12 +42,22 @@ public class SubtractionProcess extends AbstractProcess{
 		return scale;
 	}
 	
-	public void setAminusB(boolean isAminusB) {
-		this.isAminusB = isAminusB;
+
+	@Override
+	protected AbstractDataset process(final AbstractDataset x, final AbstractDataset y) {
+		AbstractDataset y1 = DatasetUtils.convertToAbstractDataset(subtrahend.getyDatasets().get(0));
+		AbstractDataset s = Maths.multiply(y1, scale);
+		s = Maths.subtract(y, s);
+		return s;
 	}
 	
-	public boolean isAminusB() {
-		return isAminusB;
+	public IContain1DData getSubtrahend() {
+		return subtrahend;
+	}
+
+	@Override
+	protected String getAppendingName() {
+		return "-"+subtrahend.getName();
 	}
 
 }
