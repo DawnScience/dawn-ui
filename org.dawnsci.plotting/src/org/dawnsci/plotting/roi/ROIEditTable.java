@@ -391,11 +391,11 @@ public class ROIEditTable  {
 		IROI ret = null; 
 		if (roi instanceof LinearROI) {
 			if (changed==rows.get(2)) {
-				LinearROI lr = new LinearROI(getImage(coords, rows.get(0)), getImage(coords, rows.get(1)));
+				LinearROI lr = new LinearROI(getPoint(coords, rows.get(0)), getPoint(coords, rows.get(1)));
 				lr.setAngle(Math.toRadians(rows.get(2).getxLikeVal()));
 				ret = lr;
 			} else {
-				LinearROI lr = new LinearROI(getImage(coords, rows.get(0)), getImage(coords, rows.get(1)));
+				LinearROI lr = new LinearROI(getPoint(coords, rows.get(0)), getPoint(coords, rows.get(1)));
 				if (changed==rows.get(1)) rows.get(2).setxLikeVal(0d);
 				ret = lr;
 			}
@@ -403,43 +403,44 @@ public class ROIEditTable  {
 		} else if (roi instanceof PolylineROI) {
 			PolylineROI pr = (roi instanceof PolygonalROI) ? new PolygonalROI() : new PolylineROI();
 			for (RegionRow regionRow : rows) {
-				pr.insertPoint(getImage(coords, regionRow));
+				pr.insertPoint(getPoint(coords, regionRow));
 			}
 			ret = pr;
 			
 		} else if (roi instanceof PointROI || roi==null) {
-			PointROI pr = new PointROI(getImage(coords, rows.get(0)));
+			PointROI pr = new PointROI(getPoint(coords, rows.get(0)));
 			ret = pr;
 			
 		} else if (roi instanceof RectangularROI) {
 			
-			final double[] start = getImage(coords, rows.get(0));
-			final double[] length   = getImage(coords, rows.get(1));
+			final double[] start = getPoint(coords, rows.get(0));
+			final double[] length   = getPoint(coords, rows.get(1));
+			final double angle = Math.toRadians(rows.get(2).getxLikeVal());
 			
 			// TODO don't have to do it this way - reflection would solve all the tests with identical blocks.
 			if (roi instanceof PerimeterBoxROI) {
 				PerimeterBoxROI pr = new PerimeterBoxROI(start[0],         start[1],
 								                         length[0],       length[1], 
-								                         Math.toRadians(rows.get(2).getxLikeVal()));
+								                         angle);
 				ret = pr;
 				
 			} else if (roi instanceof GridROI) {
 				GridROI gr = ((GridROI)roi).copy();
 				gr.setPoint(start);
 				gr.setLengths(length[0],  length[1]);
-				gr.setAngle(Math.toRadians(rows.get(2).getxLikeVal()));
+				gr.setAngle(angle);
 				
 				ret = gr;
 
 			} else {
 				RectangularROI rr = new RectangularROI(start[0], start[1], length[0], length[1],
-						Math.toRadians(rows.get(2).getxLikeVal()));
+						angle);
 				ret = rr;
 			}
 			
 		} else if (roi instanceof SectorROI) {
 			SectorROI orig = (SectorROI)roi;
-			final double[] cent  = getImage(coords, rows.get(0));
+			final double[] cent  = getPoint(coords, rows.get(0));
 			final double[] radii = rows.get(1).getPoint();
 
 			if (roi instanceof RingROI) {
@@ -467,12 +468,12 @@ public class ROIEditTable  {
 			PolylineROI pr = new PolylineROI();
 
 			for (int i = 2, imax = rows.size(); i < imax; i++) {
-				pr.insertPoint(getImage(coords, rows.get(i)));
+				pr.insertPoint(getPoint(coords, rows.get(i)));
 			}
 			ret = new CircularFitROI(pr);
 		} else if (roi instanceof CircularROI) {
 			
-			final double[] cent = getImage(coords, rows.get(0));
+			final double[] cent = getPoint(coords, rows.get(0));
 			final double   rad  = rows.get(1).getxLikeVal();
 
 			CircularROI cr = new CircularROI(Math.abs(rad), cent[0], cent[1]);
@@ -481,13 +482,13 @@ public class ROIEditTable  {
 			PolylineROI pr = new PolylineROI();
 
 			for (int i = 3, imax = rows.size(); i < imax; i++) {
-				pr.insertPoint(getImage(coords, rows.get(i)));
+				pr.insertPoint(getPoint(coords, rows.get(i)));
 			}
 			ret = new EllipticalFitROI(pr);
 			
 		} else if (roi instanceof EllipticalROI) {
 			
-			final double[] cent = getImage(coords, rows.get(0));
+			final double[] cent = getPoint(coords, rows.get(0));
 			final double[] maj  = rows.get(1).getPoint();
 			final double   ang  = rows.get(2).getxLikeVal();
 			
@@ -508,19 +509,16 @@ public class ROIEditTable  {
 	 * @param coords
 	 * @return
 	 */
-	private double[] getImage(ICoordinateSystem coords, RegionRow row) {
-		if (coords==null) return row.getPoint();
-		return getImage(coords, row.getPoint());
-	}
-	private double[] getImage(ICoordinateSystem coords, double... vals) {
+	private double[] getPoint(ICoordinateSystem coords, RegionRow row) {
+		double[] vals = row.getPoint();
 		if (coords==null) return vals;
+
 		try {
 			return coords.getAxisLocationValue(vals);
 		} catch (Exception e) {
 			return vals;
 		}
 	}
-
 
 	public void dispose() {
 		roi=null;
