@@ -716,6 +716,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		this.intensityScale   = null;
 		this.image            = null;
 		this.rgbDataset       = null;
+		this.fullMask         = null;
+		this.currentExternalMask=null;
 	}
 	
 	public void dispose() {
@@ -1265,11 +1267,19 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		return fullMask;
 	}
 	
+	private IDataset currentExternalMask;
 	/**
 	 * 
 	 * @param bd
 	 */
 	public void setMask(IDataset mask) {
+		
+		// Sometimes events accidentally send the mask
+        // from events that setting the mask generate.
+		if (mask==currentExternalMask) {
+			return; 
+		}
+		currentExternalMask = mask;
 		
 		if (mask!=null && image!=null && !image.isCompatibleWith(mask)) {
 			
@@ -1277,7 +1287,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			maskDataset.setName("mask");
 			maskDataset.fill(true);
 
-			final int[] shape = mask.getShape();
+			final int[] shape = maskDataset.getShape();
 			for (int y = 0; y<shape[0]; ++y) {
 				for (int x = 0; x<shape[1]; ++x) {
 			        try {
