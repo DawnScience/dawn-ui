@@ -224,7 +224,7 @@ public class SpectrumUtils {
 			ynew.add(y.getSlice(new int[] {minpos},new int[]{maxpos},null));
 		}
 
-		output.add(new Contain1DDataImpl(xnew, ynew,data.get(0).getName()));
+		output.add(new Contain1DDataImpl(xnew,ynew,data.get(0).getName(),data.get(0).getLongName()));
 		
 		for (int i = 1; i < data.size(); i++) {
 			
@@ -236,7 +236,7 @@ public class SpectrumUtils {
 				ynew.add(PolynomialInterpolator1D.interpolate(x, y, xnew));
 			}
 			
-			output.add(new Contain1DDataImpl(xnew, ynew,data.get(i).getName()));
+			output.add(new Contain1DDataImpl(xnew, ynew,data.get(i).getName(),data.get(0).getLongName()));
 		}
 		
 		return output;

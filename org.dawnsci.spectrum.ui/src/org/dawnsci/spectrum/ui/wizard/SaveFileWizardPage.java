@@ -27,19 +27,10 @@ public class SaveFileWizardPage extends ResourceChoosePage implements ISpectrumW
     	process = new SaveProcess();
 	}
 	
-	@Override
-	public void setDatasetList(List<IContain1DData> dataList) {
-		process.setDatasetList(dataList);
-	}
 	
-	public void process() {
+	public List<IContain1DData> process(List<IContain1DData> dataList) {
 		process.setPath(getAbsoluteFilePath());
-		process.process();
-	}
-
-	@Override
-	public List<IContain1DData> getOutputDatasetList() {
-		return null;
+		return process.process(dataList);
 	}
 
 }

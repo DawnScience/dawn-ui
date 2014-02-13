@@ -11,5 +11,7 @@ public interface IContain1DData {
 	public List<IDataset> getyDatasets();
 	
 	public String getName();
+	
+	public String getLongName();
 
 }

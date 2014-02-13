@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.dawb.common.ui.menu.MenuAction;
+import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.algorithm.ui.views.runner.AbstractAlgorithmProcessPage;
 import org.dawnsci.algorithm.ui.views.runner.IAlgorithmProcessContext;
 import org.dawnsci.plotting.api.IPlottingSystem;
@@ -22,9 +23,11 @@ import org.dawnsci.spectrum.ui.Activator;
 import org.dawnsci.spectrum.ui.file.IContain1DData;
 import org.dawnsci.spectrum.ui.file.ISpectrumFile;
 import org.dawnsci.spectrum.ui.file.ISpectrumFileListener;
+import org.dawnsci.spectrum.ui.file.SpectrumFile;
 import org.dawnsci.spectrum.ui.file.SpectrumFileManager;
 import org.dawnsci.spectrum.ui.file.SpectrumFileOpenedEvent;
 import org.dawnsci.spectrum.ui.file.SpectrumInMemory;
+import org.dawnsci.spectrum.ui.processing.AverageProcess;
 import org.dawnsci.spectrum.ui.processing.DerivativeProcess;
 import org.dawnsci.spectrum.ui.utils.SpectrumUtils;
 import org.dawnsci.spectrum.ui.wizard.SpectrumSubtractionWizardPage;
@@ -85,6 +88,7 @@ import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.slf4j.Logger;
@@ -376,16 +380,23 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 		if (((IStructuredSelection)viewer.getSelection()).size() > 1) {
 			menuProcess.add(new Action("Average") {
 				public void run() {
+//					ISelection selection = viewer.getSelection();
+//					List<IContain1DData> list = SpectrumUtils.get1DDataList((IStructuredSelection)selection);
+//					ISpectrumFile file = SpectrumUtils.averageSpectrumFiles(list,system);
 					ISelection selection = viewer.getSelection();
 					List<IContain1DData> list = SpectrumUtils.get1DDataList((IStructuredSelection)selection);
-					ISpectrumFile file = SpectrumUtils.averageSpectrumFiles(list,system);
+					AverageProcess process = new AverageProcess();
+					List<IContain1DData> out = process.process(list);
 					
-					if (file == null) {
+					if (out == null) {
 						showMessage("Could not process dataset, operation not supported for this data!");
 						return;
 					}
 					
-					TraceProcessPage.this.manager.addFile(file);
+					for(IContain1DData data : out) {
+						SpectrumInMemory mem = new SpectrumInMemory(data.getName(), data.getName(), data.getxDataset(), data.getyDatasets(), system);
+						TraceProcessPage.this.manager.addFile(mem);
+					}
 				}
 			});
 		}
@@ -397,7 +408,7 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 					ISelection selection = viewer.getSelection();
 					SpectrumWizard sw = new SpectrumWizard();
 					List<IContain1DData> list = SpectrumUtils.get1DDataList((IStructuredSelection)selection);
-					sw.addPage(new SpectrumSubtractionWizardPage(list));
+					sw.addPage(new SpectrumSubtractionWizardPage(list.remove(1),list));
 					
 					WizardDialog wd = new WizardDialog(Display.getDefault().getActiveShell(),sw);
 					wd.open();
@@ -452,8 +463,7 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 					ISelection selection = viewer.getSelection();
 					List<IContain1DData> list = SpectrumUtils.get1DDataList((IStructuredSelection)selection);
 					DerivativeProcess process = new DerivativeProcess();
-					process.setDatasetList(list);
-					List<IContain1DData> out = process.process();
+					List<IContain1DData> out = process.process(list);
 					
 					if (out == null) {
 						showMessage("Could not process dataset, operation not supported for this data!");
@@ -490,6 +500,33 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 			}
 
 		});
+		
+		if (((IStructuredSelection)viewer.getSelection()).size() == 1) {
+
+			manager.add(new Separator());
+
+			manager.add(new Action("Open in Data Browsing Perspective",Activator.imageDescriptorFromPlugin("org.dawnsci.spectrum.ui","icons/application_view_gallery.png")) {
+				@Override
+				public void run() {
+					try {
+						ISelection selection = viewer.getSelection();
+						List<ISpectrumFile> list = SpectrumUtils.getSpectrumFilesList((IStructuredSelection)selection);
+						if (list.isEmpty()) return;
+						if (!(list.get(0) instanceof SpectrumFile)) {
+							showMessage("Could not open perspective, operation not supported for this data!");
+							return;
+						}
+
+						PlatformUI.getWorkbench().showPerspective("org.edna.workbench.application.perspective.DataPerspective",PlatformUI.getWorkbench().getActiveWorkbenchWindow());
+						EclipseUtils.openExternalEditor(list.get(0).getLongName());
+
+					} catch (WorkbenchException e) {
+						showMessage("Could not open perspective, operation not supported for this data! : " + e.getMessage());
+						e.printStackTrace();
+					} 
+				}
+			});
+		}
 		
 		manager.add(new Separator());
 		manager.add(configDefaults);
