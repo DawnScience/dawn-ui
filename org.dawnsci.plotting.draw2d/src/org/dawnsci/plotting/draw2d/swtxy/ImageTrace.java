@@ -1274,7 +1274,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 */
 	public void setMask(IDataset mask) {
 		
-		// Sometimes events accidentally send the mask
+		// Sometimes external code accidentally sends the mask
         // from events that setting the mask generate.
 		if (mask==currentExternalMask) {
 			return; 
