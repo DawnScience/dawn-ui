@@ -497,7 +497,9 @@ public class ROIEditTable  {
 					                             cent[1]);
 			ret = er;
 		}
-		
+
+		if (ret != null)
+			ret.setName(roi.getName());
 		return ret;
 	}
 	
