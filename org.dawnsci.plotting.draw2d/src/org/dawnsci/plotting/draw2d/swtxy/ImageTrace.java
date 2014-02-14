@@ -1278,9 +1278,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			maskDataset.setName("mask");
 			maskDataset.fill(true);
 
-			final int[] shape = maskDataset.getShape();
-			for (int y = 0; y<shape[0]; ++y) {
-				for (int x = 0; x<shape[1]; ++x) {
+			final int yMin = Math.min(maskDataset.getShape()[0], mask.getShape()[0]);
+			final int xMin = Math.min(maskDataset.getShape()[1], mask.getShape()[1]);
+			for (int y = 0; y<yMin; ++y) {
+				for (int x = 0; x<xMin; ++x) {
 			        try {
 			        	// We only add the falses 
 			        	if (!mask.getBoolean(y,x)) {
