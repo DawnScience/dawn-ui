@@ -36,6 +36,7 @@ import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.util.ColorUtility;
 import org.eclipse.core.commands.operations.IOperationHistoryListener;
 import org.eclipse.core.commands.operations.OperationHistoryEvent;
+import org.eclipse.core.internal.resources.SaveContext;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -135,6 +136,8 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 					int[] ia = ((IImageTrace)evt.getSource()).getImageServiceBean().getNanBound().getColor();
 					updateIcons(ia);
 					colorSelector.setColorValue(ColorUtility.getRGB(ia));
+				} else {
+					saveMaskBuffer();
 				}
 			}
 			@Override
@@ -1245,6 +1248,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	public void deactivate() {
 		super.deactivate();
 		
+		if (savedMask==null) saveMaskBuffer();
 		currentMaskingTool = null;
 		if (getPlottingSystem()!=null) {
 			getPlottingSystem().removeTraceListener(traceListener);
@@ -1271,7 +1275,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	public void dispose() {
 		super.dispose();
 		if (scrollComp!=null) scrollComp.dispose();
-		if (maskObject!=null)maskObject.dispose();
+		if (maskObject!=null) maskObject.dispose();
 		scrollComp     = null;
 		traceListener  = null;
 		regionListener = null;
@@ -1298,6 +1302,9 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		protected IStatus run(final IProgressMonitor monitor) {
 				
 			try {
+				if (isDisposed()) {
+					return Status.CANCEL_STATUS;
+				}
 				
 				monitor.beginTask("Mask Process", 100);
 				final IImageTrace image = getImageTrace();
@@ -1377,12 +1384,15 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		}
 		
 		private void assign(boolean resetMask, IRegion region, org.eclipse.draw2d.geometry.Point loc) {
-			this.isRegionsEnabled = regionTable.getTable().isEnabled();
+			if (isDisposed()) {
+				return;
+			}
+			this.isRegionsEnabled = regionTable!=null ? regionTable.getTable().isEnabled() : false;
 			this.resetMask    = resetMask;
 			this.region       = region;
 			this.location     = loc;
-			min = (minimum.isEnabled()) ? minimum.getSelection() : null;
-		    max = (maximum.isEnabled()) ? maximum.getSelection() : null;			
+			min = (minimum!=null && minimum.isEnabled()) ? minimum.getSelection() : null;
+		    max = (maximum!=null && maximum.isEnabled()) ? maximum.getSelection() : null;			
 		}
 
 		/**
