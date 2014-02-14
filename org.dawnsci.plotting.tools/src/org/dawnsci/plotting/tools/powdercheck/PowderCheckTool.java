@@ -71,6 +71,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.part.IPageSite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -186,11 +188,16 @@ public class PowderCheckTool extends AbstractToolPage {
 		viewer.setContentProvider(createContentProvider());
 		sashForm.setWeights(new int[]{60,40});
 		sashForm.setMaximizedControl(system.getPlotComposite());
+		update();
 
 	}
 	
 	
 	private void update() {
+		
+		if (getViewPart()==null) return;
+		IWorkbenchPartSite site = getViewPart().getSite();
+		if (site == null || !site.getPage().isPartVisible(getViewPart())) return;
 		
 		IImageTrace im = getImageTrace();
 		logger.debug("Update");
@@ -326,6 +333,20 @@ public class PowderCheckTool extends AbstractToolPage {
 				
 			}
 		};
+		
+		final Action cake = new Action("Cake") {
+			@Override
+			public void run() {
+				modeSelect.setSelectedAction(this);
+				sashForm.setMaximizedControl(system.getPlotComposite());
+				updatePlotJob.cancel();
+				updatePlotJob.setCheckMode(PowderCheckMode.Cake);
+				updatePlotJob.schedule();
+			}
+		};
+		cake.setToolTipText("2D integration");
+		
+		modeSelect.add(cake);
 		
 		axisSelect.add(qAction);
 		axisSelect.add(tthAction);
