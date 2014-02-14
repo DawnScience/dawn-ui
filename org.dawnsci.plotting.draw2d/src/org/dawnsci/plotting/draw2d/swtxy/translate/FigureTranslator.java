@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.dawnsci.plotting.api.region.IRegionContainer;
 import org.dawnsci.plotting.draw2d.swtxy.selection.SelectionHandle;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.LayoutManager;
@@ -105,15 +104,15 @@ public class FigureTranslator implements MouseListener, MouseMotionListener {
 			return ((Rectangle)trans).translate(width, height);
 		} else if (trans instanceof SelectionHandle) {
 			SelectionHandle handle = (SelectionHandle)trans;
-			if (handle.isPreciseLocation()) {
-				// Point handle (like beam center) can take full precision.
-			    ((SelectionHandle) trans).setLocation(location);
+			if (handle.isLocationAbsolute()) {
+				// Point handle (like beam center) are absolute
+				handle.setLocation(location);
 			} else {
 				// Handles dispersed over the shape have to be relative
 				// and less accurate.
-				Point l = ((SelectionHandle) trans).getLocation();
+				Point l = handle.getLocation();
 				l.translate(width, height);
-				((SelectionHandle) trans).setLocation(l);
+				handle.setLocation(l);
 			}
 		} else if (trans instanceof IFigure)  {
 			((IFigure)trans).translate(width, height);
@@ -254,5 +253,4 @@ public class FigureTranslator implements MouseListener, MouseMotionListener {
 	public void setLockedDirection(LockType d) {
 		lockedDirection = d;
 	}
-
 }

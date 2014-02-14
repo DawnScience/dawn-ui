@@ -31,7 +31,7 @@ public class PointSelection extends AbstractSelectionRegion {
 												double e) {
 			
 			super(coords, regionColor, parent, lineWidth, d, e);
-			setPreciseLocation(true);
+			setLocationAbsolute(true);
 		}
 
 		@Override
