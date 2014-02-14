@@ -90,9 +90,8 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 	}
 
 	@Override
-	public boolean containsPoint(double x, double y) {
-		final int[] pix = coords.getValuePosition(x,y);
-		return sector.containsPoint(pix[0], pix[1]);
+	public boolean containsPoint(int x, int y) {
+		return sector.containsPoint(x, y);
 	}
 
 	@Override

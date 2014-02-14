@@ -42,12 +42,11 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 		parent.add(this);
 		updateBounds();
 	}
+
 	@Override
-	public boolean containsPoint(double x, double y) {
-		
-		final int[] pix = coords.getValuePosition(x,y);
-		if (!getBounds().contains(pix[0],pix[1])) return false;
-		return Geometry.polylineContainsPoint(points, pix[0], pix[1], (int)Math.round(getLineWidth()/2d));
+	public boolean containsPoint(int x, int y) {
+		if (!getBounds().contains(x, y)) return false;
+		return Geometry.polylineContainsPoint(points, x, y, (int)Math.round(getLineWidth()/2d));
 	}
 	
 	@Override

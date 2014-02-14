@@ -518,9 +518,9 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 			return false;
 		}
 
-		if (regionObjects!=null) {
+		if (regionObjects != null) {
 			for (IFigure ob : regionObjects) {
-				if (ob.containsPoint(x, y))
+				if (!(ob instanceof SelectionHandle) && ob.containsPoint(x, y))
 					return true;
 		    }
 		}

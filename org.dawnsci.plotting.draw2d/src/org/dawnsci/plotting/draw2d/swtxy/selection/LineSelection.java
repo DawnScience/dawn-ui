@@ -148,10 +148,8 @@ class LineSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	public boolean containsPoint(double x, double y) {
-		
-		final int[] pix = coords.getValuePosition(new double[]{x,y});
-		return connection.containsPoint(pix[0], pix[1]);
+	public boolean containsPoint(int x, int y) {
+		return connection.containsPoint(x, y);
 	}
 
 	@Override
