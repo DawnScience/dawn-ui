@@ -12,6 +12,7 @@ import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.PlottingFactory;
 import org.dawnsci.plotting.api.preferences.BasePlottingConstants;
+import org.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.dawnsci.plotting.api.region.IROIListener;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -61,6 +62,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 	private   ProfileUIJob           updateUIProfiles;
 	private   Map<String,Collection<ITrace>> registeredTraces;
 	private   boolean                isUIJob = false;
+	protected boolean                alwaysDownsample = false;
 
 	public ProfileTool() {
 		
@@ -138,6 +140,9 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 					ProfileTool.this.update(null, null, false);
 				}
 			};
+			
+			alwaysDownsample = Activator.getLocalPreferenceStore().getBoolean(PlottingConstants.ALWAYS_DOWNSAMPLE_PROFILES);
+			
 		} catch (Exception e) {
 			logger.error("Cannot get plotting system!", e);
 		}
@@ -439,9 +444,9 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		    // However Irakli has advised that it is needed in some circumstances.
 			// This causes the defect reported here however: http://jira.diamond.ac.uk/browse/DAWNSCI-214
 			// therefore we are currently not using the extra cancelling.
-	        //for (Job job : Job.getJobManager().find(null))
-	        //    if (job.getClass()==getClass() && job.getState() != Job.RUNNING)
-	        //	    job.cancel();
+//	        for (Job job : Job.getJobManager().find(null))
+//	            if (job.getClass()==getClass() && job.getState() != Job.RUNNING)
+//	        	    job.cancel();
 			this.currentRegion = r;
 			this.currentROI    = rb;
 			this.isDrag        = isDrag;
@@ -450,7 +455,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			return runProfile(currentRegion, currentROI, isDrag, monitor);
+			return runProfile(currentRegion, currentROI, isDrag||alwaysDownsample, monitor);
 		}
 	}
 
@@ -475,7 +480,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 
 		@Override
 		public IStatus runInUIThread(IProgressMonitor monitor) {
-			return runProfile(currentRegion, currentROI, isDrag, monitor);
+			return runProfile(currentRegion, currentROI, isDrag||alwaysDownsample, monitor);
 		}
 	}
 

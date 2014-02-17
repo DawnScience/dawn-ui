@@ -100,4 +100,9 @@ public class PlottingConstants extends BasePlottingConstants {
 	 */
 	public static final String ZOOM_INTO_WHITESPACE = "org.dawnsci.plotting.zoom.whitespace.use";
 
+	/**
+	 * String property for saving if user wants to downsample profile during live updates.
+	 */
+	public static final String ALWAYS_DOWNSAMPLE_PROFILES = "org.dawnsci.plotting.tools.profile.alwaysDownsample";
+
 }

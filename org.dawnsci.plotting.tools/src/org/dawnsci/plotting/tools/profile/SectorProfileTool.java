@@ -7,6 +7,7 @@ import java.util.Collection;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawnsci.plotting.api.IPlottingSystem;
+import org.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.dawnsci.plotting.api.region.ILockableRegion;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -40,6 +41,19 @@ public abstract class SectorProfileTool extends ProfileTool {
 
 	@Override
 	protected void configurePlottingSystem(IPlottingSystem plotter) {
+		
+		final Action downsample = new Action("Always downsample (useful for high update rates)", IAction.AS_CHECK_BOX) {
+			public void run() {
+				alwaysDownsample = isChecked();
+				Activator.getLocalPreferenceStore().setValue(PlottingConstants.ALWAYS_DOWNSAMPLE_PROFILES, alwaysDownsample);
+			}
+		};
+		downsample.setChecked(alwaysDownsample);
+		downsample.setImageDescriptor(Activator.getImageDescriptor("icons/navigation-270.png"));
+		getSite().getActionBars().getToolBarManager().add(downsample);
+		getSite().getActionBars().getMenuManager().add(downsample);
+		getSite().getActionBars().getToolBarManager().add(new Separator());
+	
 
 		// We will add an action here for centring the sector.
 		this.center = new MenuAction("Centre selection");
