@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<introContent>
+  	<extensionContent id="trace-perspective-extension" style="style.css" name="Trace" path="perspectives/@">
+		<group id="trace-perspective-group" style-id="content-group">
+       		<link label="Trace" url="http://org.eclipse.ui.intro/runAction?pluginId=org.dawnsci.intro&amp;class=org.dawnsci.intro.actions.OpenPerspectiveAction&amp;name=org.dawnsci.spectrum.ui.SpectrumPerspectiveLaunch" id="trace" style-id="content-link">
+          		<text>Designed for working with line traces from multiple files. Less suitable for images and multidimensional data</text>
+       		</link>
+       	</group>
+  	</extensionContent>
+</introContent>

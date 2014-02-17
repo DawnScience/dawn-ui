@@ -184,5 +184,22 @@
          </includes>
       </viewerActionBinding>
    </extension>
+   <extension
+         point="org.dawnsci.introRegister">
+      <introPageRegister
+            class="org.dawnsci.spectrum.ui.SpectrumPerspectiveLaunch"
+            description="Designed for viewing line graphs"
+            icon="icons/Trace400.png"
+            id="org.dawnsci.spectrum.ui.perspective"
+            name="Trace">
+      </introPageRegister>
+   </extension>
+   <extension
+         point="org.eclipse.ui.intro.configExtension">
+      <configExtension
+            configId="org.dawnsci.intro.universalConfig"
+            content="intro/introContribution.xml">
+      </configExtension>
+   </extension>
 
 </plugin>
