@@ -119,6 +119,7 @@ public abstract class AbstractToolPage extends Page implements IToolPage, IAdapt
 	/**
 	 * Does nothing by default - optionally override.
 	 */
+	@Override
 	public void activate() {
 		isActive = true;
 	}
@@ -126,6 +127,7 @@ public abstract class AbstractToolPage extends Page implements IToolPage, IAdapt
 	/**
 	 * Does nothing by default - optionally override.
 	 */
+	@Override
 	public void deactivate() {
 		isActive = false;
 	}
