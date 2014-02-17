@@ -458,15 +458,15 @@ public class MaskObject {
 			
 			// We use the bounding box of the region.
 			final IRectangularROI bounds = roi.getBounds();
-			final double[] pnt  = bounds.getPoint();
-			final double[] span = bounds.getLengths();
+			final double[] beg = bounds.getPoint();
+			final double[] end = bounds.getEndPoint();
 			
-			int xStart = Math.min((int)Math.round(pnt[0]), (int)Math.round(pnt[0]+span[0]));
-			int xEnd   = Math.max((int)Math.round(pnt[0]), (int)Math.round(pnt[0]+span[0]));
+			int xStart = Math.max(0, (int) Math.round(beg[0]));
+			int xEnd   = Math.min(shape[1] - 1, (int) Math.round(end[0]));
 			
-			int yStart = Math.min((int)Math.round(pnt[1]), (int)Math.round(pnt[1]+span[1]));
-			int yEnd   = Math.max((int)Math.round(pnt[1]), (int)Math.round(pnt[1]+span[1]));
-			
+			int yStart = Math.max(0, (int) Math.round(beg[1]));
+			int yEnd   = Math.min(shape[0] - 1, (int) Math.round(end[1]));
+
 			final Collection<RegionAction> actions = new ArrayList<RegionAction>(yEnd/INC);
 			// We loop all pixels here because looping bounds boxes of rois did not work yet.
 
@@ -517,7 +517,7 @@ public class MaskObject {
 
 				for (int x = xStart; x<xEnd; ++x) {
 
-					if (maskDataset.getBoolean(y,x)!=isMasking) continue;
+					if (maskDataset.getBoolean(y, x)!=isMasking) continue;
 					try {
 						if (roi.containsPoint(x, y)) {
 							toggleMask(op, !isMasking, y, x);
