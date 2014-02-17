@@ -70,9 +70,8 @@ public class PolygonSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	public boolean containsPoint(double x, double y) {
-		final int[] pix = coords.getValuePosition(x,y);
-		return pline.containsPoint(pix[0], pix[1]);
+	public boolean containsPoint(int x, int y) {
+		return pline.containsPoint(x, y);
 	}
 
 	@Override

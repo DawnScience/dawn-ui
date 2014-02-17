@@ -80,9 +80,8 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 	}
 
 	@Override
-	public boolean containsPoint(double x, double y) {
-		final int[] pix = coords.getValuePosition(x,y);
-		return ellipse.containsPoint(pix[0], pix[1]);
+	public boolean containsPoint(int x, int y) {
+		return ellipse.containsPoint(x, y);
 	}
 
 	@Override

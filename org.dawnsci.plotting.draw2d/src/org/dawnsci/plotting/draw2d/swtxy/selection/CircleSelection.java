@@ -74,9 +74,8 @@ public class CircleSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	public boolean containsPoint(double x, double y) {
-		final int[] pix = coords.getValuePosition(x, y);
-		return circle.containsPoint(pix[0], pix[1]);
+	public boolean containsPoint(int x, int y) {
+		return circle.containsPoint(x, y);
 	}
 
 	@Override

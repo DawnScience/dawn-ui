@@ -34,7 +34,7 @@ public abstract class SelectionHandle extends Figure implements IMobileFigure {
 	 * when their figure translates because they are exactly the same as the 
 	 * current mouse location. For instance a point selection handle.
 	 */
-	protected boolean       preciseLocation;
+	protected boolean       absoluteLocation;
 
 	protected SelectionHandle(ICoordinateSystem coords, Color colour, Figure parent, int side, double... params) {
 		this.coords = coords;
@@ -63,6 +63,10 @@ public abstract class SelectionHandle extends Figure implements IMobileFigure {
 		shape.setCursor(Draw2DUtils.getRoiControlPointCursor());
 		add(shape);
 
+		refresh();
+ 	}
+
+	private void refresh() {
 		Rectangle b = new Rectangle(location, new Point(location.x()+200, location.y()+20));
 		b.union(shape.getBounds());
         setBounds(b);
@@ -89,7 +93,7 @@ public abstract class SelectionHandle extends Figure implements IMobileFigure {
 	public double[] getPosition() {
 		if (coords != null) {
 			final Point p = getSelectionPoint();
-			double[] point = coords.getPositionValue(new int[] { p.x, p.y });
+			double[] point = coords.getPositionValue(p.x, p.y);
 			return point;
 		}
 	    return new double[]{Double.NaN, Double.NaN};
@@ -103,8 +107,7 @@ public abstract class SelectionHandle extends Figure implements IMobileFigure {
 	 */
 	public void setPosition(final double[] point) {
 		final int[] val = coords.getValuePosition(point);
-		final Point pnt = new Point(val[0], val[1]);
-		setSelectionPoint(pnt);
+		setSelectionPoint(new Point(val[0], val[1]));
 	}
 
 	private NumberFormat format = new DecimalFormat("######0.00");
@@ -121,15 +124,13 @@ public abstract class SelectionHandle extends Figure implements IMobileFigure {
 
 	public Point getSelectionPoint() {
 		final Point loc = getLocation();
-		final int pntWid = shape.getBounds().width;
-		final int pntHgt = shape.getBounds().height;
-		return new Point(loc.x+(pntWid/2), loc.y+(pntHgt/2));
+		final Rectangle bnds = shape.getBounds();
+		return new Point(loc.x + bnds.width()/2, loc.y + bnds.height()/2);
 	}
 
 	protected void setSelectionPoint(Point p) {
-		final int pntWid = shape.getBounds().width;
-		final int pntHgt = shape.getBounds().height;
-		final Point loc = new Point(p.x-(pntWid/2), p.y-(pntHgt/2));
+		final Rectangle bnds = shape.getBounds();
+		final Point loc = new Point(p.x - bnds.width()/2, p.y - bnds.height()/2);
 		setLocation(loc);
 	}
 
@@ -197,11 +198,11 @@ public abstract class SelectionHandle extends Figure implements IMobileFigure {
 		}
 	}
 
-	public boolean isPreciseLocation() {
-		return preciseLocation;
+	public boolean isLocationAbsolute() {
+		return absoluteLocation;
 	}
 
-	public void setPreciseLocation(boolean preciseLocation) {
-		this.preciseLocation = preciseLocation;
+	public void setLocationAbsolute(boolean absoluteLocation) {
+		this.absoluteLocation = absoluteLocation;
 	}
 }

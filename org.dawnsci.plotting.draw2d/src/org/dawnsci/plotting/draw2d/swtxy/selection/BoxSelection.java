@@ -80,9 +80,8 @@ public class BoxSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	public boolean containsPoint(double x, double y) {
-		final int[] pix = coords.getValuePosition(x,y);
-		return rect.containsPoint(pix[0], pix[1]);
+	public boolean containsPoint(int x, int y) {
+		return rect.containsPoint(x, y);
 	}
 
 	@Override

@@ -91,8 +91,8 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	public boolean containsPoint(double x, double y) {
-		return circle.containsPoint((int) x, (int) y);
+	public boolean containsPoint(int x, int y) {
+		return circle.containsPoint(x, y);
 	}
 
 	@Override

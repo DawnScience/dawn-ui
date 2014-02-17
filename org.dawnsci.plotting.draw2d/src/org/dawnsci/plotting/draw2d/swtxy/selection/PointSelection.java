@@ -31,7 +31,7 @@ public class PointSelection extends AbstractSelectionRegion {
 												double e) {
 			
 			super(coords, regionColor, parent, lineWidth, d, e);
-			setPreciseLocation(true);
+			setLocationAbsolute(true);
 		}
 
 		@Override
@@ -87,12 +87,11 @@ public class PointSelection extends AbstractSelectionRegion {
 	protected void updateBounds() {
 		
 	}
+
 	@Override
-	public boolean containsPoint(double x, double y) {
-		
-		final int[] pix = coords.getValuePosition(x,y);
+	public boolean containsPoint(int x, int y) {
 		final Point pnt = point.getSelectionPoint();
-		return pnt.x == pix[0] && pnt.y == pix[1];
+		return pnt.x == x && pnt.y == y;
 	}
 	
 	@Override
