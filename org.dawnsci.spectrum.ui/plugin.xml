@@ -103,6 +103,13 @@
                         value="org.dawnsci.spectrum.ui.perspective">
                   </equals>
                </not>
+               <or>
+                  <not>
+                     <equals
+                           value="uk.ac.diamond.scisoft.diffraction.powder.rcp.calibrationPerspective">
+                     </equals>
+                  </not>
+               </or>
             </with>
          </enabledWhen>
       </activity>
