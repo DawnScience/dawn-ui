@@ -124,6 +124,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
@@ -162,7 +163,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	private   String                rootName;
 	private   boolean               staggerSupported = false;
 
-	private IEditorPart              editor;
+	private IWorkbenchPart           editor;
 	private IPropertyChangeListener  propListener;
 	private ArrayList<IAction>       dataComponentActions;
 	private Composite                container;
@@ -179,7 +180,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	private ITransferableDataService transferableService;
 	private IExpressionObjectService expressionService;
 	
-	public PlotDataComponent(final IEditorPart editor) throws Exception {
+	public PlotDataComponent(final IWorkbenchPart editor) throws Exception {
 				
 		this.data = new ArrayList<ITransferableDataObject>(7);
 		this.editor   = editor;
@@ -965,16 +966,24 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	}
 
 	public IFile getIFile(boolean createNewFile) {
-		IFile file = null;
-		IEditorInput input = editor.getEditorInput();				         
-		try {
-			file = EclipseUtils.getIFile(input);
-		} catch (Throwable ne) {
-			file = null;
+		
+		IFile  file = null;
+		String name = null;
+		IEditorInput input = null;
+		if (editor instanceof IEditorPart) {
+			input = ((IEditorPart)editor).getEditorInput();				         
+			try {
+				file = EclipseUtils.getIFile(input);
+				name = input.getName();
+			} catch (Throwable ne) {
+				file = null;
+			}
+		} else {
+			file = (IFile)editor.getAdapter(IFile.class);
+			name = file!=null ? file.getName() : null;
 		}
 		
 		if (createNewFile && file==null) {// Might be external file
-			final String name = input.getName();
 			final IProject data = ResourcesPlugin.getWorkspace().getRoot().getProject("data");
 			if (!data.exists()) {
 				try {
@@ -994,7 +1003,8 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 			if (file.exists()) {
 				file = EclipseUtils.getUniqueFile(file, FileUtils.getFileExtension(name));
 			}
-			try {
+			
+			if (input!=null) try {
 				file.create(new FileInputStream(EclipseUtils.getFile(input)), IResource.FORCE, new NullProgressMonitor());
 				data.refreshLocal(IResource.DEPTH_ONE, new NullProgressMonitor());
 			} catch (Exception e) {

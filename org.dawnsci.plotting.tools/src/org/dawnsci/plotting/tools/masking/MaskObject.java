@@ -162,8 +162,8 @@ public class MaskObject {
 	        		span.add(new int[]{(int)xAxis.getPositionValue(loc.x),      (int)yAxis.getPositionValue(loc.y)});
 	        	}
 	        });
-	        int[]  start = normalize(span.get(0));
-	        int[]  end   = normalize(span.get(1));
+	        int[]  start = clip(span.get(0));
+	        int[]  end   = clip(span.get(1));
 	        int[]  cen   = span.get(2);
 	        int[]  b     = new int[]{cen[0], start[1]};
 	        int radius   = end[1]-cen[1];
@@ -286,7 +286,12 @@ public class MaskObject {
 		}
 	}
 
-	private int[] normalize(int[] is) {
+	/**
+	 * Clip to span of image dataset (not 1)
+	 * @param is
+	 * @return
+	 */
+	private int[] clip(int[] is) {
 		int maxX = imageDataset.getShape()[1]-1;
 		if (is[0]>maxX) is[0] = maxX;
 		if (is[0]<0)    is[0] = 0;
@@ -336,24 +341,21 @@ public class MaskObject {
 		}
 		
 
-        // Slightly wrong AbstractDataset loop, but it is faster...
-		if (minNumber!=null || maxNumber!=null) {
-			final IndexIterator ita = imageDataset.getIterator();
+ 		if (minNumber!=null || maxNumber!=null) {
 			final int           as  = imageDataset.getElementsPerItem();
 			if (as!=1) throw new RuntimeException("Cannot deal with mulitple elements in mask processing!");
 			
 			double              lo  = minNumber!=null ? minNumber.doubleValue() : Double.NaN;
 			double              hi  = maxNumber!=null ? maxNumber.doubleValue() : Double.NaN;
-			int i = 0;
-			while (ita.hasNext()) {
-				try {
-					double x = imageDataset.getElementDoubleAbs(ita.index);
-					boolean isValid = isValid(x, lo, hi);
-					if (ignoreAlreadyMasked && isValid && !maskDataset.getAbs(i)) continue;
-					maskDataset.setAbs(i, isValid);
-				} finally {
-				    ++i;
-				}
+			
+			final int size = imageDataset.getSize();
+			for (int i = 0; i < size; i++) {
+				
+				double x = imageDataset.getElementDoubleAbs(i);
+				boolean isValid = isValid(x, lo, hi);
+				if (ignoreAlreadyMasked && isValid && !maskDataset.getAbs(i)) continue;
+				maskDataset.setAbs(i, isValid);
+				
 			}
 		}
 			
