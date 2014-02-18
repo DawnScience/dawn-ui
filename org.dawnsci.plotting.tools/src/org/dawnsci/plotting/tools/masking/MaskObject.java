@@ -332,10 +332,8 @@ public class MaskObject {
 		createMaskIfNeeded();
 		monitor.worked(1);
 	
- 		if (minNumber!=null || maxNumber!=null) {
         // Slightly wrong AbstractDataset loop, but it is faster...
 		if (minNumber!=null || maxNumber!=null) {
-			final IndexIterator ita = imageDataset.getIterator();
 			final int           as  = imageDataset.getElementsPerItem();
 			if (as!=1) throw new RuntimeException("Cannot deal with mulitple elements in mask processing!");
 			
