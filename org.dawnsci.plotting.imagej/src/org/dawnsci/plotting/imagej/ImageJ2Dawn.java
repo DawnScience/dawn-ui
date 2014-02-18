@@ -41,7 +41,7 @@ public class ImageJ2Dawn {
 		if ((flags&PlugInFilter.NO_IMAGE_REQUIRED)!=0) throw new Exception("Filter "+className+" is a no data filter and is not applicable for "+data);
 		
 		Roi roi = rroi!=null 
-				? new Roi(rroi.getPoint()[0], rroi.getPoint()[1], rroi.getLength(0), rroi.getLength(1))
+				? new Roi(rroi.getPointX(), rroi.getPointY(), rroi.getLength(0), rroi.getLength(1))
 		        : null;
 
 		
