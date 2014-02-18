@@ -29,6 +29,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.BooleanDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IndexIterator;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.IRectangularROI;
+import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 
 /**
  * This class is taken directly out of the class of the same name in SDA
@@ -326,16 +327,6 @@ public class MaskObject {
 		createMaskIfNeeded();
 		monitor.worked(1);
 		
-		// Remove invalid regions first to make processing faster.
-		final List<IRegion> validRegions = regions!=null?new ArrayList<IRegion>(regions.size()):null;
-		if (validRegions!=null) for (IRegion region : regions) {
-			if (region == null)             continue;
-			if (!isSupportedRegion(region)) continue;
-			if (region.getUserObject()!=MaskRegionType.REGION_FROM_MASKING)     continue;
-			validRegions.add(region);
-		}
-		
-
         // Slightly wrong AbstractDataset loop, but it is faster...
 		if (minNumber!=null || maxNumber!=null) {
 			final IndexIterator ita = imageDataset.getIterator();
@@ -356,10 +347,21 @@ public class MaskObject {
 				}
 			}
 		}
-			
-		if (validRegions!=null && !validRegions.isEmpty()){
-			
-	        final MaskOperation op  = new MaskOperation(maskDataset, getMaskDataset().getSize()/16);
+
+		if (regions != null) {
+			// Remove invalid regions first to make processing faster.
+			final List<IRegion> validRegions = new ArrayList<IRegion>(regions.size());
+			for (IRegion region : regions) {
+				if (region == null)             continue;
+				if (!isSupportedRegion(region)) continue;
+				if (region.getUserObject()!=MaskRegionType.REGION_FROM_MASKING)     continue;
+				validRegions.add(region);
+			}
+
+			if (validRegions.isEmpty())
+				return true;
+
+			final MaskOperation op  = new MaskOperation(maskDataset, getMaskDataset().getSize()/16);
 			final int[]      shape  = imageDataset.getShape();
 			
 			if (Boolean.getBoolean("org.dawnsci.plotting.tools.masking.no.thread.pool")) {
@@ -458,7 +460,7 @@ public class MaskObject {
 			
 			// We use the bounding box of the region.
 			final IRectangularROI bounds = roi.getBounds();
-			final double[] beg = bounds.getPoint();
+			final double[] beg = bounds.getPointRef();
 			final double[] end = bounds.getEndPoint();
 			
 			int xStart = Math.max(0, (int) Math.round(beg[0]));
@@ -511,32 +513,55 @@ public class MaskObject {
 
 		@Override
 		protected void compute() {
-			for (int y = yStart; y<yEnd; ++y) {
-				if (monitor.isCanceled()) return;
-				monitor.worked(1);
-
-				for (int x = xStart; x<xEnd; ++x) {
-
-					if (maskDataset.getBoolean(y, x)!=isMasking) continue;
-					try {
-						if (roi.containsPoint(x, y)) {
-							toggleMask(op, !isMasking, y, x);
-						}
-					} catch (Throwable ne) {
-						logger.trace("Cannot process point "+(new Point(x,y)), ne);
+			if (roi instanceof LinearROI) {
+				double distance = Math.min(0.5, lineWidth/2.);
+				for (int y = yStart; y < yEnd; ++y) {
+					if (monitor.isCanceled())
 						return;
+					monitor.worked(1);
+
+					for (int x = xStart; x < xEnd; ++x) {
+
+						if (maskDataset.getBoolean(y, x) != isMasking)
+							continue;
+						try {
+							if (roi.isNearOutline(x, y, distance)) {
+								toggleMask(op, !isMasking, y, x);
+							}
+						} catch (Throwable ne) {
+							logger.trace("Cannot process point " + (new Point(x, y)), ne);
+							return;
+						}
+					}
+				}
+			} else {
+				for (int y = yStart; y < yEnd; ++y) {
+					if (monitor.isCanceled())
+						return;
+					monitor.worked(1);
+
+					for (int x = xStart; x < xEnd; ++x) {
+
+						if (maskDataset.getBoolean(y, x) != isMasking)
+							continue;
+						try {
+							if (roi.containsPoint(x, y)) {
+								toggleMask(op, !isMasking, y, x);
+							}
+						} catch (Throwable ne) {
+							logger.trace("Cannot process point " + (new Point(x, y)), ne);
+							return;
+						}
 					}
 				}
 			}
-
 		}
 	}
 
 	private void createMaskIfNeeded() {
 		if (maskDataset == null || !maskDataset.isCompatibleWith(imageDataset)) {
-			maskDataset = new BooleanDataset(imageDataset.getShape());
+			maskDataset = BooleanDataset.ones(imageDataset.getShape());
 			maskDataset.setName("mask");
-			maskDataset.fill(true);
 		}	
 		if (operationManager ==null)  {
 			operationManager = new DefaultOperationHistory();

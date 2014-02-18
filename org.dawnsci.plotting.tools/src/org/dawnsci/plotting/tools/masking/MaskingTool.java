@@ -36,7 +36,6 @@ import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.util.ColorUtility;
 import org.eclipse.core.commands.operations.IOperationHistoryListener;
 import org.eclipse.core.commands.operations.OperationHistoryEvent;
-import org.eclipse.core.internal.resources.SaveContext;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -1088,7 +1087,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		man.add(multipleRegion);
 		man.add(new Separator());
 		
-		final MenuAction widthChoice = new MenuAction("Line With");
+		final MenuAction widthChoice = new MenuAction("Line Width");
 		widthChoice.setToolTipText("Line width for free draw and line regions");
 		man.add(widthChoice);
 		
