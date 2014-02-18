@@ -3,7 +3,7 @@
   	<extensionContent id="databrowsing-perspective-extension" style="style.css" name="Data Browsing Perspective" path="perspectives/@">
 		<group id="databrowsing-perspective-group" style-id="content-group">
        		<link label="Data Browsing (Default)" url="http://org.eclipse.ui.intro/runAction?pluginId=org.dawnsci.intro&amp;class=org.dawnsci.intro.actions.OpenPerspectiveAction&amp;name=org.dawb.workbench.ui.perspective.DataBrowsingPerspectiveLaunch" id="workbench-browsing" style-id="content-link">
-          		<text>Opens the Data Browsing perspective</text>
+          		<text>The starting place for basic viewing of data. The Data Browsing perspective is suitable for viewing line traces, images and multidimensional data. Also contains more advanced features like applying a tool to a stack of images and mathematically processing data with expressions.</text>
        		</link>
        	</group>
   	</extensionContent>
