@@ -123,7 +123,7 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 				}
 			});
 		} catch (Exception e) {
-			logger.error("Could not create controls:"+e);
+			logger.error("Could not create controls", e);
 		}
 	}
 
@@ -332,11 +332,11 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 			reviewPlottingSystem.clear();
 			reviewPlottingSystem.updatePlot1D(originalAxes.get(1), data, monitor);
 
-			AbstractDataset tile = tmpProfile.reshape(tmpProfile.getShape()[0],1);
+			AbstractDataset tile = tmpProfile.reshape(tmpProfile.getShapeRef()[0],1);
 
 			AbstractDataset ds = (AbstractDataset) originalData.clone();
 
-			AbstractDataset correctionDataset = DatasetUtils.tile(tile, ds.getShape()[1]);
+			AbstractDataset correctionDataset = DatasetUtils.tile(tile, ds.getShapeRef()[1]);
 			ds.idivide(correctionDataset);
 
 			userPlotBean.addList("norm", ds.clone());
