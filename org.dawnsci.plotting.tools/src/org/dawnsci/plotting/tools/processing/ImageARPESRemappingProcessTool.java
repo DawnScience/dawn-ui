@@ -354,7 +354,7 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 			correctedAxes.add(originalAxes.get(1).clone());
 		}
 		
-		selectionPlottingSystem.updatePlot2D(correctedData, correctedAxes, null);
+		selectionPlottingSystem.createPlot2D(correctedData, correctedAxes, null);
 		
 		
 //		AbstractDataset data = (AbstractDataset)image.getData();
@@ -473,13 +473,22 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 				
 		// Finally calculate k parallel
 		AbstractDataset kParallel = Maths.multiply(k, Maths.sin(Maths.toRadians(angleRegion)));
-				
+		
+		// get the energy Axis
+		AbstractDataset energyAxis = energyRegion.getSlice(new int[] {0,0}, new int[] {1,energyRegion.getShape()[1]}, new int[] {1,1}).squeeze();
+		
+		int fermiSurfacePosition = Maths.square(energyAxis).minPos()[0];
+		
+		AbstractDataset kParaAxis = kParallel.getSlice(new int[] {0,fermiSurfacePosition}, new int[] {kParallel.getShape()[0],fermiSurfacePosition+1}, new int[] {1,1}).squeeze();
+		logger.error("Max and Min values are " + kParaAxis.min() + " and " +kParaAxis.max() );
+		
 		// make axis correction to regrid here
-		double KPStep = kParallel.peakToPeak().doubleValue()/(dataRegion.getShape()[0]-1);
-		AbstractDataset kParaAxis = AbstractDataset.arange(kParallel.min().doubleValue()+(KPStep), kParallel.max().doubleValue()-(KPStep), KPStep, AbstractDataset.FLOAT64);
+		//double KPStep = kParallel.peakToPeak().doubleValue()/(dataRegion.getShape()[0]-1);
+		//AbstractDataset kParaAxis = AbstractDataset.arange(kParallel.min().doubleValue()+(KPStep), kParallel.max().doubleValue()-(KPStep), KPStep, AbstractDataset.FLOAT64);
 				
 		// prepare the results
-		AbstractDataset remappedRegion = InterpolatorUtils.remapAxis(dataRegion, 0, kParallel, kParaAxis);
+		// AbstractDataset remappedRegion = InterpolatorUtils.remapAxis(dataRegion, 0, kParallel, kParaAxis);
+		AbstractDataset remappedRegion = dataRegion;
 		ArrayList<IDataset> remappedAxes = new ArrayList<IDataset>();
 		kParaAxis.setName("K Parallel");
 		remappedAxes.add(energyRegion.getSlice(new int[] {0,0}, new int[] {1,energyRegion.getShape()[1]}, new int[] {1,1}).squeeze());
@@ -497,7 +506,7 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 			userPlotBean.addList("auxiliaryData", auxiliaryData.clone());
 		}
 		
-		getPlottingSystem().updatePlot2D(remappedRegion, remappedAxes , null);
+		getPlottingSystem().createPlot2D(remappedRegion, remappedAxes , null);
 		
 	}
 }
