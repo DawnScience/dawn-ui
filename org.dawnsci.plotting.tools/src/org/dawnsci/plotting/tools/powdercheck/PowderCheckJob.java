@@ -30,11 +30,14 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
 import uk.ac.diamond.scisoft.analysis.crystallography.HKL;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.BooleanDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Maths;
 import uk.ac.diamond.scisoft.analysis.dataset.Stats;
+import uk.ac.diamond.scisoft.analysis.dataset.function.AbstractPixelIntegration;
 import uk.ac.diamond.scisoft.analysis.dataset.function.NonPixelSplittingIntegration;
+import uk.ac.diamond.scisoft.analysis.dataset.function.PixelSplittingIntegration;
 import uk.ac.diamond.scisoft.analysis.dataset.function.PixelSplittingIntegration2D;
 import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
 import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
@@ -205,16 +208,20 @@ public class PowderCheckJob extends Job {
 	private List<AbstractDataset> integrateFullSector(AbstractDataset data, IDiffractionMetadata md, IProgressMonitor monitor) {
 		QSpace qSpace = new QSpace(md.getDetector2DProperties(), md.getDiffractionCrystalEnvironment());
 		int[] shape = data.getShape();
-		double[] farCorner = new double[]{0,0};
 		double[] centre = md.getDetector2DProperties().getBeamCentreCoords();
-		if (centre[0] < shape[0]/2.0) farCorner[0] = shape[0];
-		if (centre[1] < shape[1]/2.0) farCorner[1] = shape[1];
 
-		int maxDistance = (int)Math.sqrt(Math.pow(centre[0]-farCorner[0],2)+Math.pow(centre[1]-farCorner[1],2));
+		int maxDistance = AbstractPixelIntegration.calculateNumberOfBins(centre, shape);
 		NonPixelSplittingIntegration npsi = new NonPixelSplittingIntegration(qSpace, maxDistance);
 		npsi.setAxisType(xAxis);
-
+		
 		List<AbstractDataset> out = npsi.value(data);
+		
+		double max = out.get(1).max().doubleValue();
+		int argmax = out.get(1).argMax();
+		double maxqAtVal = out.get(0).getDouble(argmax);
+		double min = out.get(1).min().doubleValue();
+		double maxq = out.get(0).max().doubleValue();
+		double minq = out.get(0).min().doubleValue();
 
 		system.updatePlot1D(out.get(0), Arrays.asList(new IDataset[]{out.get(1)}), null);
 		setPlottingSystemAxes();

@@ -706,6 +706,7 @@ public class RegionArea extends PlotArea {
 		
 		// Catch all needed for fix to http://jira.diamond.ac.uk/browse/SCI-1318
 		try {
+			@SuppressWarnings("unchecked")
 			List<IFigure> children = getChildren();
 			for (IFigure iFigure : children) {
 				if (iFigure instanceof ITrace) {
