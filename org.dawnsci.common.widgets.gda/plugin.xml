@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.core.runtime.adapters">
+      <factory
+            adaptableType="uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction"
+            class="org.dawnsci.common.widgets.gda.function.detail.DetailsPaneFactory">
+         <adapter
+               type="org.dawnsci.common.widgets.gda.function.detail.IFunctionDetailPane">
+         </adapter>
+      </factory>
+      <factory
+            adaptableType="uk.ac.diamond.scisoft.analysis.fitting.functions.Polynomial"
+            class="org.dawnsci.common.widgets.gda.function.detail.DetailsPaneFactory">
+         <adapter
+               type="org.dawnsci.common.widgets.gda.function.detail.IFunctionDetailPane">
+         </adapter>
+      </factory>
+      <factory
+            adaptableType="uk.ac.diamond.scisoft.analysis.fitting.functions.IParameter"
+            class="org.dawnsci.common.widgets.gda.function.detail.DetailsPaneFactory">
+         <adapter
+               type="org.dawnsci.common.widgets.gda.function.detail.IFunctionDetailPane">
+         </adapter>
+      </factory>
+      <factory
+            adaptableType="org.dawnsci.common.widgets.gda.function.detail.JexlExpressionFunctionDetailPane"
+            class="org.dawnsci.common.widgets.gda.function.detail.DetailsPaneFactory">
+         <adapter
+               type="org.dawnsci.common.widgets.gda.function.detail.IFunctionDetailPane">
+         </adapter>
+      </factory>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            description="Add a new function the the tree"
+            id="org.dawnsci.common.function.new"
+            name="New Function">
+      </command>
+      <category
+            description="Commands for operating on functions"
+            id="org.dawnsci.common.function"
+            name="function">
+      </category>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commandImages">
+      <image
+            commandId="org.dawnsci.common.function.new"
+            disabledIcon="IMG_OBJ_ADD_DISABLED"
+            icon="IMG_OBJ_ADD">
+      </image>
+   </extension>
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="org.dawnsci.common.function.new"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="INSERT">
+      </key>
+   </extension>
+
+</plugin>

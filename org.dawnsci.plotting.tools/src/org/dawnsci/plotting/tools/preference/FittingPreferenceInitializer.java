@@ -11,7 +11,7 @@ public class FittingPreferenceInitializer extends AbstractPreferenceInitializer 
 
 	@Override
 	public void initializeDefaultPreferences() {
-		
+
 		IPreferenceStore store = Activator.getPlottingPreferenceStore();
 		store.setDefault(FittingConstants.PEAK_NUMBER_CHOICES, 10);
 		store.setDefault(FittingConstants.PEAK_NUMBER,         1);
@@ -29,6 +29,9 @@ public class FittingPreferenceInitializer extends AbstractPreferenceInitializer 
 		store.setDefault(FittingConstants.SHOW_POLY_RANGE,  true);
 		store.setDefault(FittingConstants.INT_FORMAT,   "###0");
 		store.setDefault(FittingConstants.REAL_FORMAT,  "##0.#####");
+		store.setDefault(FittingConstants.FIT_QUALITY,  0.0001);
+		store.setDefault(FittingConstants.FIT_ALGORITHM,
+				FittingConstants.FIT_ALGORITHMS.APACHENELDERMEAD.ID);
 	}
 
 }

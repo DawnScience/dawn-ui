@@ -5,14 +5,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.util.GridUtils;
-import org.dawb.common.ui.wizard.persistence.PersistenceExportWizard;
-import org.dawb.common.ui.wizard.persistence.PersistenceImportWizard;
 import org.dawb.workbench.jmx.UserPlotBean;
-import org.dawnsci.common.widgets.gda.function.FunctionDialog;
-import org.dawnsci.common.widgets.gda.function.FunctionWidget;
-import org.dawnsci.plotting.tools.Activator;
+import org.dawnsci.common.widgets.gda.function.FunctionFittingWidget;
+import org.dawnsci.common.widgets.gda.function.IFittedFunctionInvalidatedEvent;
+import org.dawnsci.common.widgets.gda.function.ModelModifiedAdapter;
+import org.dawnsci.common.widgets.gda.function.descriptors.DefaultFunctionDescriptorProvider;
 import org.dawnsci.plotting.api.region.IROIListener;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -23,40 +21,30 @@ import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.api.trace.ITraceListener;
 import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.api.trace.TraceWillPlotEvent;
+import org.dawnsci.plotting.tools.Activator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.TableViewerColumn;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.wizard.IWizard;
-import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CCombo;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,135 +53,50 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.fitting.Fitter;
+import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants;
+import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants.FIT_ALGORITHMS;
 import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunctionService;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.StraightLine;
 import uk.ac.diamond.scisoft.analysis.optimize.ApacheNelderMead;
 import uk.ac.diamond.scisoft.analysis.optimize.GeneticAlg;
 import uk.ac.diamond.scisoft.analysis.optimize.IOptimizer;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
-public class FunctionFittingTool extends AbstractToolPage implements IFunctionService {
+public class FunctionFittingTool extends AbstractToolPage implements
+		IFunctionService {
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(FunctionFittingTool.class);
 
-	private Composite composite;
-	protected IROIListener roiListener;
+	private static final Image FIT = Activator
+			.getImage("icons/chart_curve_go.png");
+	private static final Image UPDATE = Activator
+			.getImage("icons/arrow_refresh_small.png");
+
+	private Control control;
+	private boolean autoRefit;
+
+	protected IROIListener roiListener = new FunctionFittingROIListener();
 	protected IRegion region = null;
 	private CompositeFunction compFunction = null;
 	protected ILineTrace estimate;
-	private TableViewer viewer;
 	private ILineTrace fitTrace;
 	private CompositeFunction resultFunction;
-	private FunctionWidget functionWidget;
-	private Integer selectedPosition;
-	private Action deleteAction;
-	private Action updateAction;
+
 	private UpdateFitPlotJob updateFittedPlotJob;
-	private Action updateAllAction;
-	private ITraceListener traceListener;
-	private Action addFunctionAction;
+	private ITraceListener traceListener = new FunctionFittingTraceListener();
 
-	private Composite infoComposite;
+	private Text chiSquaredValueText;
+	private FunctionFittingWidget functionWidget;
 
-	private Label chiSquaredInfoLabel;
+	private Button updateAllButton;
 
-	private Label chiSquaredValueLabel;
-	
-	private double accuracy = 0.0001;
+	private IPreferenceStore prefs = Activator.getPlottingPreferenceStore();
 
-	private Label accurasyInfoLabel;
-
-	private Text accurasyValueText;
-
-	private Button refitButton;
-
-	private Action duplicateAction;
-
-	private Action importAction;
-
-	private Action exportAction;
-
-	public FunctionFittingTool() {
-
-		roiListener = new IROIListener() {
-
-			@Override
-			public void roiSelected(ROIEvent evt) {
-				return;
-			}
-
-			@Override
-			public void roiDragged(ROIEvent evt) {
-				return;
-			}
-
-			@Override
-			public void roiChanged(ROIEvent evt) {
-				updateFunctionPlot();
-			}
-		};
-
-		traceListener = new ITraceListener() {
-
-			boolean updating = false;
-
-			private void update() {
-				if (!updating) {
-					try {
-						updating = true;
-						updateFunctionPlot();
-					} finally {
-						updating = false;
-					}
-				}
-			}
-
-			@Override
-			public void tracesUpdated(TraceEvent evt) {
-			}
-
-			@Override
-			public void tracesRemoved(TraceEvent evet) {
-			}
-
-			@Override
-			public void tracesAdded(TraceEvent evt) {
-				update();
-			}
-
-			@Override
-			public void traceWillPlot(TraceWillPlotEvent evt) {
-			}
-
-			@Override
-			public void traceUpdated(TraceEvent evt) {
-				update();
-			}
-
-			@Override
-			public void traceRemoved(TraceEvent evt) {
-			}
-
-			@Override
-			public void traceCreated(TraceEvent evt) {
-			}
-
-			@Override
-			public void traceAdded(TraceEvent evt) {
-				update();
-			}
-		};
-
-		// Initialise with a simple function.
-		compFunction = new CompositeFunction();
-		compFunction.addFunction(new StraightLine(new double[] { 0, 0 }));
-
-	}
+	private boolean connectLater;
 
 	@Override
 	public ToolPageRole getToolPageRole() {
@@ -202,155 +105,138 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 
 	@Override
 	public void createControl(Composite parent) {
-
-		createActions();
-
-		composite = new Composite(parent, SWT.NONE);
+		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout(1, false));
 		GridUtils.removeMargins(composite);
+		// composite is our top level control
+		control = composite;
 
-		infoComposite = new Composite(composite, SWT.NONE);
-		infoComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
-		infoComposite.setLayout(new GridLayout(2, false));
-		
-		chiSquaredInfoLabel = new Label(infoComposite, SWT.NONE);
-		chiSquaredInfoLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
-		chiSquaredInfoLabel.setText("Normalised goodness of fit");
-		
-		chiSquaredValueLabel = new Label(infoComposite, SWT.NONE);
-		chiSquaredValueLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		chiSquaredValueLabel.setText("Not Calculated"); 
-		
-		accurasyInfoLabel = new Label(infoComposite, SWT.NONE);
-		accurasyInfoLabel.setText("Accuracy of Fitting Routine");
-		
-		accurasyValueText = new Text(infoComposite, SWT.BORDER);
-		accurasyValueText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		accurasyValueText.setText(Double.toString(accuracy));
-		accurasyValueText.addModifyListener(new ModifyListener() {
-			
-			@Override
-			public void modifyText(ModifyEvent e) {
-				try {
-					accuracy = Double.parseDouble(accurasyValueText.getText());
-				} catch (Exception exception) {
-					logger.debug("Had a problem whilst passing the accurasy String",e);
-				}
-			}
-		});
-		
-		refitButton = new Button(infoComposite, SWT.TOGGLE);
-		refitButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
-		refitButton.setText("Auto Refit");
-		
-		refitButton.addMouseListener(new MouseListener() {
-			
+		Composite infoComposite = new Composite(composite, SWT.NONE);
+		infoComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false,
+				false, 1, 1));
+		infoComposite.setLayout(new GridLayout(2, true));
+
+		Composite actionComposite = new Composite(infoComposite, SWT.NONE);
+		actionComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true,
+				false, 1, 1));
+		actionComposite.setLayout(new GridLayout(2, true));
+
+		final Button autoRefitButton = new Button(actionComposite, SWT.TOGGLE);
+		autoRefitButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true,
+				false, 1, 1));
+		autoRefitButton.setText("Auto Refit");
+		autoRefitButton.setImage(FIT);
+		autoRefitButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent e) {
-				if(refitButton.getSelection()) {
-					updateFunctionPlot();
-				} else {
-					getPlottingSystem().removeTrace(fitTrace);
-				}
-			}
-			
-			@Override
-			public void mouseDown(MouseEvent e) {
-				return;
-			}
-			
-			@Override
-			public void mouseDoubleClick(MouseEvent e) {
-				return;
+				autoRefit = autoRefitButton.getSelection();
+				updateFunctionPlot(false);
 			}
 		});
-		
-		combo = new CCombo(infoComposite, SWT.BORDER);
-		combo.setEditable(false);
-		combo.setListVisible(true);
-		combo.setItems(new String[] {"Nelder Mead Fitting", "Genetic Algorithm"});
-		combo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
-		combo.select(0);
-		
-		viewer = new TableViewer(composite, SWT.FULL_SELECTION | SWT.SINGLE
-				| SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
 
-		TableViewerColumn tblCol1 = new TableViewerColumn(viewer, SWT.NONE);
-		tblCol1.getColumn().setText("Function Name");
-		tblCol1.getColumn().setWidth(120);
-
-		TableViewerColumn tblCol2 = new TableViewerColumn(viewer, SWT.NONE);
-		tblCol2.getColumn().setText("Initial Parameters");
-		tblCol2.getColumn().setWidth(150);
-
-		TableViewerColumn tblCol3 = new TableViewerColumn(viewer, SWT.NONE);
-		tblCol3.getColumn().setText("Fitted Parameters");
-		tblCol3.getColumn().setWidth(200);
-
-		viewer.getTable().setLinesVisible(true);
-		viewer.getTable().setHeaderVisible(true);
-		viewer.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
-
-		viewer.setLabelProvider(new TableLabelProvider());
-		viewer.setContentProvider(new ContentProvider());
-
-		viewer.setInput(compFunction);
-		viewer.getTable().addSelectionListener(new SelectionListener() {
-
+		updateAllButton = new Button(actionComposite, SWT.PUSH);
+		updateAllButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true,
+				false, 1, 1));
+		updateAllButton.setText("Update All");
+		updateAllButton.setImage(UPDATE);
+		updateAllButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				selectedPosition = (Integer) viewer.getTable().getSelection()[0]
-						.getData();
-				updateFunctionWidget();
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				widgetSelected(e);
+				updateAllParameters();
 			}
 		});
 
-		final MenuManager menuManager = new MenuManager();
-		menuManager.add(deleteAction);
-		menuManager.add(updateAction);
-		menuManager.add(addFunctionAction);
-		menuManager.add(duplicateAction);
-		viewer.getControl().setMenu(	menuManager.createContextMenu(viewer.getControl()));
+		fitOnceButton = new Button(actionComposite, SWT.PUSH);
+		fitOnceButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false,
+				false, 1, 1));
+		fitOnceButton.setText("Fit Once");
+		fitOnceButton.setEnabled(false);
+		fitOnceButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				updateFunctionPlot(true);
+			}
+		});
 
-		functionWidget = new FunctionWidget(composite);
-		functionWidget.addSelectionChangedListener(new ISelectionChangedListener() {
+		Composite resultsComposite = new Composite(infoComposite, SWT.BORDER);
+		resultsComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true,
+				false, 1, 1));
+		resultsComposite.setLayout(new GridLayout(1, false));
 
-					@Override
-					public void selectionChanged(SelectionChangedEvent event) {
-						if (compFunction==null)     return;
-						if (selectedPosition==null) return;
-						if (functionWidget==null)   return;
-						compFunction.setFunction(selectedPosition, functionWidget.getFunction());
-						viewer.refresh();
-						updateFunctionPlot();
-					}
-				});
-	}
+		Label chiSquaredInfoLabel = new Label(resultsComposite, SWT.NONE);
+		chiSquaredInfoLabel.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER,
+				true, false, 1, 1));
+		chiSquaredInfoLabel.setText("Normalised goodness of fit:");
 
-	private void updateFunctionWidget() {
-		if (selectedPosition != null){
-			functionWidget.setFunction(compFunction.getFunction(selectedPosition));
+		chiSquaredValueText = new Text(resultsComposite, SWT.READ_ONLY
+				| SWT.CENTER);
+		chiSquaredValueText.setBackground(resultsComposite.getBackground());
+		GridData gd = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
+		chiSquaredValueText.setLayoutData(gd);
+		chiSquaredValueText.setText("Not Calculated");
+
+		functionWidget = new FunctionFittingWidget(composite,
+				new DefaultFunctionDescriptorProvider(), getSite());
+		GridDataFactory.fillDefaults().grab(true, true).applyTo(functionWidget);
+
+		// Initialise with a simple function.
+		compFunction = new CompositeFunction();
+		functionWidget.setInput(compFunction);
+		functionWidget.addModelModifiedListener(new ModelModifiedAdapter() {
+			@Override
+			protected void modelModified() {
+				compFunctionModified();
+			}
+
+			@Override
+			public void fittedFunctionInvalidated(
+					IFittedFunctionInvalidatedEvent event) {
+				resultFunction = null;
+				chiSquaredValueText.setText("Not Calculated");
+				updateAllButton.setEnabled(false);
+				// TODO remove fitted trace
+			}
+		});
+
+		getSite().setSelectionProvider(functionWidget.getFunctionViewer());
+		fillActionBar(getSite().getActionBars());
+
+		if (connectLater) {
+			connectPlotSystemListeners();
 		}
+		compFunctionModified();
 	}
-	
+
 	@Override
 	public Control getControl() {
-		return composite;
+		return control;
 	}
 
 	@Override
 	public void setFocus() {
-		composite.setFocus();
+		functionWidget.setFocus();
 	}
 
 	@Override
 	public void activate() {
 		super.activate();
+		if (functionWidget != null) {
+			// XXX because activate can be called before the controls are
+			// created, defer connecting the listeners in that case.
+			connectPlotSystemListeners();
+		} else {
+			connectLater = true;
+		}
+	}
+
+	private void compFunctionModified() {
+		updateFunctionPlot(false);
+		fitOnceButton
+				.setEnabled(functionWidget.isValid() && compFunction != null
+						&& compFunction.getNoOfFunctions() != 0);
+	}
+
+	private void connectPlotSystemListeners() {
 		try {
 			getPlottingSystem().addTraceListener(traceListener);
 
@@ -369,7 +255,7 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 				region.setVisible(true);
 			}
 			region.addROIListener(roiListener);
-			updateFunctionPlot();
+			updateFunctionPlot(false);
 
 		} catch (Exception e) {
 			logger.error("Failed to activate function fitting tool", e);
@@ -383,143 +269,52 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 			region.setVisible(false);
 		}
 		Collection<ITrace> traces = getPlottingSystem().getTraces();
-		if (traces.contains(estimate)) getPlottingSystem().removeTrace(estimate);
-		if (traces.contains(fitTrace)) getPlottingSystem().removeTrace(fitTrace);
-		
+		if (traces.contains(estimate))
+			getPlottingSystem().removeTrace(estimate);
+		if (traces.contains(fitTrace))
+			getPlottingSystem().removeTrace(fitTrace);
+
 		getPlottingSystem().removeTraceListener(traceListener);
-		
+
 		super.deactivate();
 	}
 
 	private void setChiSquaredValue(double value) {
-		chiSquaredValueLabel.setText(Double.toString(value)); 
-	}
-	
-	private void createActions() {
-		// export action
-		exportAction = new Action("Export functions",
-				Activator.getImageDescriptor("icons/mask-export-wiz.png")) {
-			public void run() {
-				try {
-					IWizard wiz = EclipseUtils.openWizard(PersistenceExportWizard.ID, false);
-					WizardDialog wd = new  WizardDialog(Display.getCurrent().getActiveShell(), wiz);
-					wd.setTitle(wiz.getWindowTitle());
-					wd.open();
-				} catch (Exception e) {
-					logger.error("Problem opening import!", e);
-				}
-			}
-		};
-		exportAction.setToolTipText("Export function data from an H5 file");
-		getSite().getActionBars().getToolBarManager().add(exportAction);
-
-		// import action
-		importAction = new Action("Import functions",
-				Activator.getImageDescriptor("icons/mask-import-wiz.png")) {
-			public void run() {
-				try {
-					IWizard wiz = EclipseUtils.openWizard(PersistenceImportWizard.ID, false);
-					WizardDialog wd = new  WizardDialog(Display.getCurrent().getActiveShell(), wiz);
-					wd.setTitle(wiz.getWindowTitle());
-					wd.open();
-				} catch (Exception e) {
-					logger.error("Problem opening import!", e);
-				}
-			}
-		};
-		importAction.setToolTipText("Import function data from an H5 file");
-		getSite().getActionBars().getToolBarManager().add(importAction);
-
-		// Add Function action
-		addFunctionAction = new Action("Add new function",
-				Activator.getImageDescriptor("icons/add.png")) {
-			public void run() {
-				IFunction function = showFunctionDialog(null);
-				if (function != null){
-					compFunction.addFunction(function);
-					viewer.refresh();
-					updateFunctionPlot();
-					updateFunctionWidget();
-				}
-
-			}
-		};
-		addFunctionAction.setToolTipText("Add new function to be fitted");
-		getSite().getActionBars().getToolBarManager().add(addFunctionAction);
-
-		// Delete function action
-		deleteAction = new Action("Delete function selected",
-				Activator.getImageDescriptor("icons/delete.gif")) {
-			public void run() {
-				Integer index = (Integer) viewer.getTable().getSelection()[0].getData();
-				compFunction.removeFunction(index);
-				if (resultFunction != null) {
-					resultFunction.removeFunction(index);
-				}
-				viewer.refresh();
-				updateFunctionPlot();
-				updateFunctionWidget();
-			}
-		};
-		deleteAction.setToolTipText("Delete selected function from list");
-		getSite().getActionBars().getToolBarManager().add(deleteAction);
-		
-		// Duplicate a function
-		duplicateAction = new Action("Duplicate selected function",
-				Activator.getImageDescriptor("icons/copy.gif")) {
-			public void run() {
-				Integer index = (Integer) viewer.getTable().getSelection()[0]
-						.getData();
-				try {
-					compFunction.addFunction(compFunction.getFunction(index).copy());
-				} catch (Exception e) {
-					logger.error("Could not copy function",e);
-				}
-				viewer.refresh();
-				updateFunctionPlot();
-				updateFunctionWidget();
-			}
-		};
-		duplicateAction.setToolTipText("Duplicate current function");
-		getSite().getActionBars().getToolBarManager().add(duplicateAction);
-
-		// Update the parameters
-		updateAction = new Action("Update single set of parameters",
-				Activator.getImageDescriptor("icons/copy.gif")) {
-			public void run() {
-				Integer index = (Integer) viewer.getTable().getSelection()[0]
-						.getData();
-				compFunction.getFunction(index).setParameterValues(resultFunction.getFunction(index).getParameterValues());
-				viewer.refresh();
-				updateFunctionPlot();
-				updateFunctionWidget();
-			}
-		};
-		updateAction.setToolTipText("Update initial parameters to fitted parameters for this function");
-		getSite().getActionBars().getToolBarManager().add(updateAction);
-
-		// Update all the parameters
-		updateAllAction = new Action("Update all parameters",
-				Activator.getImageDescriptor("icons/apply.gif")) {
-			public void run() {
-				compFunction.setParameterValues(resultFunction.getParameterValues());
-				viewer.refresh();
-				updateFunctionPlot();
-				updateFunctionWidget();
-			}
-		};
-		updateAllAction.setToolTipText("Update initial parameters to fitted parameters for all functions");
-		getSite().getActionBars().getToolBarManager().add(updateAllAction);
+		chiSquaredValueText.setText(Double.toString(value));
 	}
 
-	private void updateFunctionPlot() {
+	private void fillActionBar(IActionBars actionBars) {
+		IToolBarManager manager = actionBars.getToolBarManager();
+		manager.add(new ExportFittingDataAction());
+		manager.add(new ImportFittingDataAction());
+
+		IMenuManager menuManager = actionBars.getMenuManager();
+		menuManager.add(new Separator());
+		menuManager.add(new OpenFittingToolPreferencesAction());
+		menuManager.add(new Separator());
+	}
+
+	private void updateAllParameters() {
+		if (resultFunction != null) {
+			double[] parameterValues = resultFunction.getParameterValues();
+			compFunction.setParameterValues(parameterValues);
+			functionWidget.refresh();
+			compFunctionModified();
+			updateFunctionPlot(false);
+		}
+	}
+
+	private void updateFunctionPlot(boolean force) {
+		if (!functionWidget.isValid()) {
+			return;
+		}
 		getPlottingSystem().removeTraceListener(traceListener);
 		boolean firstTrace = true;
 		for (ITrace selectedTrace : getPlottingSystem().getTraces()) {
 			if (selectedTrace instanceof ILineTrace) {
-				if (selectedTrace.isUserTrace() && firstTrace) {
+				ILineTrace trace = (ILineTrace) selectedTrace;
+				if (trace.isUserTrace() && firstTrace) {
 					firstTrace = false;
-					ILineTrace trace = (ILineTrace) selectedTrace;
 					// We chop x and y by the region bounds. We assume the
 					// plot is an XAXIS selection therefore the indices in
 					// y = indices chosen in x.
@@ -530,12 +325,12 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 
 					// We peak fit only the first of the data sets plotted
 					// for now.
-					AbstractDataset x = (AbstractDataset)trace.getXData();
-					AbstractDataset y = (AbstractDataset)trace.getYData();
+					AbstractDataset x = (AbstractDataset) trace.getXData();
+					AbstractDataset y = (AbstractDataset) trace.getYData();
 
 					try {
-						AbstractDataset[] a = Generic1DFitter.xintersection(x, y,
-								p1[0], p2[0]);
+						AbstractDataset[] a = Generic1DFitter.xintersection(x,
+								y, p1[0], p2[0]);
 						x = a[0];
 						y = a[1];
 					} catch (Throwable npe) {
@@ -552,27 +347,29 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 						getPlottingSystem().addTrace(estimate);
 					}
 
-					DoubleDataset functionData = compFunction.calculateValues(x);
-					estimate.setData(x, functionData);
+					if (compFunction != null) {
+						DoubleDataset functionData = compFunction
+								.calculateValues(x);
+						estimate.setData(x, functionData);
+					}
 
-					System.out.println(x);
-					System.out.println(y);
+					// System.out.println(x);
+					// System.out.println(y);
 
 					getPlottingSystem().repaint();
 
-					updateFittedPlot(x, y);
+					updateFittedPlot(force, x, y);
 				}
 			}
 		}
-		if (viewer != null ) refreshViewer();
+		refreshViewer();
 		getPlottingSystem().addTraceListener(traceListener);
 	}
 
-	private void updateFittedPlot(final AbstractDataset x,
+	private void updateFittedPlot(boolean force, final AbstractDataset x,
 			final AbstractDataset y) {
 
-		
-		if(refitButton != null && refitButton.getSelection()) {
+		if (force || autoRefit) {
 
 			if (updateFittedPlotJob == null) {
 				updateFittedPlotJob = new UpdateFitPlotJob("Update Fitted Plot");
@@ -583,100 +380,7 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 
 	}
 
-	private IFunction showFunctionDialog(AFunction function) {
-		final FunctionDialog dialog = new FunctionDialog(new Shell(
-				Display.getDefault()));
-		dialog.create();
-		dialog.getShell().setSize(650, 500);
-		dialog.getShell().setText("Edit Function");
-
-		if (function != null) {
-			dialog.setFunction(function);
-		}
-
-		dialog.open();
-		return dialog.getFunction();
-
-	}
-
-	private class TableLabelProvider extends LabelProvider implements
-			ITableLabelProvider {
-
-		@Override
-		public Image getColumnImage(Object element, int columnIndex) {
-			return null;
-		}
-
-		@Override
-		public String getColumnText(Object element, int columnIndex) {
-			Integer index = (Integer) element;
-			String result = "Not Defined";
-			switch (columnIndex) {
-			case 0:
-				try {
-					result = compFunction.getFunction(index).getName();
-				} catch (Exception e) {
-					logger.debug("Some error occured in the label provider of the Function fitting view.",e);
-				}
-				break;
-			case 1:
-				try {
-					result = Double.toString(compFunction.getFunction(index).getParameterValue(0));
-					for (int i = 1; i < compFunction.getFunction(index).getNoOfParameters(); i++) {
-						result += System.getProperty("line.separator");
-						result += compFunction.getFunction(index).getParameterValue(i);
-					}
-				} catch (Exception e) {
-					logger.debug("Some error occured in the label provider of the Function fitting view.",e);
-				}
-				break;
-			case 2:
-				try {
-					if (resultFunction != null){
-						result = Double.toString(resultFunction.getFunction(index).getParameterValue(0));
-						for (int i = 1; i < resultFunction.getFunction(index).getNoOfParameters(); i++) {
-							result += System.getProperty("line.separator");
-							result += resultFunction.getFunction(index).getParameterValue(i);
-						}
-					}
-				} catch (Exception e) {
-					logger.debug("Some error occured in the label provider of the Function fitting view. Not Normally an Issue");
-				}
-				break;
-			}
-			return result;
-		}
-	}
-
-	private class ContentProvider implements IStructuredContentProvider {
-
-		@Override
-		public void dispose() {
-		}
-
-		@Override
-		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-			return;
-
-		}
-
-		@Override
-		public Object[] getElements(Object inputElement) {
-			if (inputElement instanceof CompositeFunction) {
-				Integer count = ((CompositeFunction) inputElement).getNoOfFunctions();
-
-				Integer[] output = new Integer[count];
-				for (int i = 0; i < count; i++) {
-					output[i] = i;
-				}
-
-				return output;
-			}
-			return null;
-		}
-
-	}
-
+	// TODO this job is sometimes unstopped at shutdown, add to dispose
 	private class UpdateFitPlotJob extends Job {
 
 		public UpdateFitPlotJob(String name) {
@@ -685,7 +389,6 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 
 		private AbstractDataset x;
 		private AbstractDataset y;
-		private int index;
 
 		public void setData(AbstractDataset x, AbstractDataset y) {
 			this.x = x.clone();
@@ -694,34 +397,51 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-
-			
-			
 			PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-
 				@Override
 				public void run() {
-					fitTrace.setVisible(false);
+					if (fitTrace != null)
+						fitTrace.setVisible(false);
 					getPlottingSystem().repaint();
-					index = combo.getSelectionIndex();
 				}
 			});
 
 			try {
-				resultFunction = compFunction.copy();
+				double accuracy = prefs.getDouble(FittingConstants.FIT_QUALITY);
 				logger.debug("Accuracy is set to {}", accuracy);
+				int algoId = prefs.getInt(FittingConstants.FIT_ALGORITHM);
+				FIT_ALGORITHMS algorithm = FIT_ALGORITHMS.fromId(algoId);
+
 				IOptimizer fitMethod = null;
-				switch (index) {
-				default: case 0:
+				if (algorithm == null) {
 					fitMethod = new ApacheNelderMead();
-					break;
-				case 1:
-					fitMethod = new GeneticAlg(accuracy);
-					break;
-				} 
-				
-				resultFunction = Fitter.fit(x, y, fitMethod,
-						resultFunction.getFunctions());
+				} else {
+					switch (algorithm) {
+					default:
+					case APACHENELDERMEAD:
+						fitMethod = new ApacheNelderMead();
+						break;
+					case GENETIC:
+						fitMethod = new GeneticAlg(accuracy);
+						break;
+					}
+				}
+
+				// TODO (review race condition) this copy of compFunction
+				// appears to happen "late" if the job is not scheduled for a
+				// "while" then the compFunction can change (by GUI interaction)
+				// between when the estimate was plotted and the fit is started.
+				// TODO There is no way of cancelling this fit. If an errant fit
+				// is attempted (e.g. Add(Gaussian(0,0,0), Box(0,0,0,0,0))) the
+				// fitter appears to run forever. This is (one of?) the reasons
+				// that "Job found still running after platform shutdown. Jobs
+				// should be canceled by the plugin that scheduled them during
+				// shutdown:
+				// org.dawnsci.plotting.tools.fitting.FunctionFittingTool$UpdateFitPlotJob"
+				// error is observed.
+
+				resultFunction = Fitter.fit(x, y, fitMethod, compFunction
+						.copy().getFunctions());
 			} catch (Exception e) {
 				return Status.CANCEL_STATUS;
 			}
@@ -730,9 +450,9 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 
 				@Override
 				public void run() {
-
 					getPlottingSystem().removeTraceListener(traceListener);
-					setChiSquaredValue(resultFunction.residual(true, y, null, new IDataset[] {x})/x.count());
+					setChiSquaredValue(resultFunction.residual(true, y, null,
+							new IDataset[] { x }) / x.count());
 
 					fitTrace = (ILineTrace) getPlottingSystem().getTrace("Fit");
 					if (fitTrace == null) {
@@ -744,13 +464,17 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 
 					System.out.println("Plotting");
 					System.out.println(resultFunction);
-					DoubleDataset resultData = resultFunction.calculateValues(x);
+					DoubleDataset resultData = resultFunction
+							.calculateValues(x);
 					fitTrace.setData(x, resultData);
 					fitTrace.setVisible(true);
 
 					getPlottingSystem().repaint();
 					refreshViewer();
 					getPlottingSystem().addTraceListener(traceListener);
+
+					functionWidget.setFittedInput(resultFunction);
+					updateAllButton.setEnabled(true);
 				}
 			});
 
@@ -759,52 +483,11 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 
 	}
 
-	private Map<String, Serializable> functions=null;
-	private CCombo combo;
-	/**
-	 * Override to set the tool data to something specific
-	 * @param toolData
-	 */
-	@Override
-	public void setToolData(Serializable toolData) {
-		
-		final UserPlotBean bean = (UserPlotBean)toolData;
-		functions = bean.getFunctions();
-		
-		compFunction = new CompositeFunction();
-		for (String key : functions.keySet()) {
-			if (functions.get(key) instanceof AFunction) {
-				AFunction function = (AFunction) functions.get(key);
-				compFunction.addFunction(function);
-				
-			}
-		}
-
-	}
-
-	/**
-	 * @see IToolPage.getToolData()
-	 */
-	@Override
-	public Serializable getToolData() {
-		
-		UserPlotBean bean = new UserPlotBean();
-		
-		int count = 0;
-		for (String key : functions.keySet()) {
-			functions.put(key, compFunction.getFunction(count));
-			count++;
-		}
-		
-		bean.setFunctions(functions); // We only set functions because it does a replace merge.
-		
-		return bean;
-	}
-
 	@SuppressWarnings("rawtypes")
 	@Override
 	public Object getAdapter(Class key) {
-		if (key == IFunctionService.class) return this;
+		if (key == IFunctionService.class)
+			return this;
 		return super.getAdapter(key);
 	}
 
@@ -812,21 +495,23 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 	public Map<String, IFunction> getFunctions() {
 
 		HashMap<String, IFunction> functions = new HashMap<String, IFunction>();
-		
+
 		if (compFunction != null) {
 			for (int i = 0; i < compFunction.getNoOfFunctions(); i++) {
-				String key = String.format("%03d_initial_%s", i, compFunction.getFunction(i).getName());
+				String key = String.format("%03d_initial_%s", i, compFunction
+						.getFunction(i).getName());
 				functions.put(key, compFunction.getFunction(i));
 			}
 		}
-		
+
 		if (resultFunction != null) {
 			for (int i = 0; i < resultFunction.getNoOfFunctions(); i++) {
-				String key = String.format("%03d_result_%s", i, resultFunction.getFunction(i).getName());
+				String key = String.format("%03d_result_%s", i, resultFunction
+						.getFunction(i).getName());
 				functions.put(key, resultFunction.getFunction(i));
 			}
 		}
-		
+
 		return functions;
 	}
 
@@ -839,26 +524,161 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 				compFunction.addFunction((AFunction) functions.get(key));
 			}
 		}
-		
+
 		resultFunction = new CompositeFunction();
+		updateAllButton.setEnabled(true);
 		for (String key : functions.keySet()) {
 			if (key.contains("_result_")) {
 				resultFunction.addFunction((AFunction) functions.get(key));
 			}
 		}
-		
+
 		PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
 			@Override
 			public void run() {
+				functionWidget.setInput(compFunction);
+				functionWidget.setFittedInput(resultFunction);
+				compFunctionModified();
+
 				getPlottingSystem().repaint();
 				refreshViewer();
 			}
 		});
 	}
-	
-	private void refreshViewer() {
-		viewer.setInput(compFunction);
-		viewer.refresh();
+
+	/**
+	 * Set the list of functions available to the user to select from
+	 *
+	 * @param functions
+	 *            list of functions
+	 */
+	public void setFunctionList(IFunction[] functions) {
+
 	}
-	
+
+	private void refreshViewer() {
+		// TODO what is the condition that this can be null???
+		if (functionWidget != null)
+			functionWidget.refresh();
+	}
+
+	/*
+	 * Update function plot if region of interest changes
+	 */
+	private class FunctionFittingROIListener implements IROIListener {
+		@Override
+		public void roiDragged(ROIEvent evt) {
+			return;
+		}
+
+		@Override
+		public void roiChanged(ROIEvent evt) {
+			updateFunctionPlot(false);
+		}
+
+		@Override
+		public void roiSelected(ROIEvent evt) {
+		}
+	}
+
+	private class FunctionFittingTraceListener implements ITraceListener {
+		boolean updating = false;
+
+		private void update() {
+			if (!updating) {
+				try {
+					updating = true;
+					updateFunctionPlot(false);
+				} finally {
+					updating = false;
+				}
+			}
+		}
+
+		@Override
+		public void tracesUpdated(TraceEvent evt) {
+		}
+
+		@Override
+		public void tracesRemoved(TraceEvent evet) {
+		}
+
+		@Override
+		public void tracesAdded(TraceEvent evt) {
+			update();
+		}
+
+		@Override
+		public void traceWillPlot(TraceWillPlotEvent evt) {
+		}
+
+		@Override
+		public void traceUpdated(TraceEvent evt) {
+			update();
+		}
+
+		@Override
+		public void traceRemoved(TraceEvent evt) {
+		}
+
+		@Override
+		public void traceCreated(TraceEvent evt) {
+		}
+
+		@Override
+		public void traceAdded(TraceEvent evt) {
+			update();
+		}
+	}
+
+	/**
+	 * TODO review setToolData / setToolData here, it seems not possibly
+	 * correct. If getToolData is called before setToolData a NPE happens. Seems
+	 * illogical. Perhaps this is a remnant from an unimplemented or old
+	 * thing????
+	 */
+	private Map<String, Serializable> functions = null;
+
+	private Button fitOnceButton;
+
+	/**
+	 * Override to set the tool data to something specific
+	 *
+	 * @param toolData
+	 */
+	@Override
+	public void setToolData(Serializable toolData) {
+
+		final UserPlotBean bean = (UserPlotBean) toolData;
+		functions = bean.getFunctions();
+
+		compFunction = new CompositeFunction();
+		for (String key : functions.keySet()) {
+			if (functions.get(key) instanceof AFunction) {
+				AFunction function = (AFunction) functions.get(key);
+				compFunction.addFunction(function);
+
+			}
+		}
+		functionWidget.setInput(compFunction);
+		compFunctionModified();
+	}
+
+	@Override
+	public Serializable getToolData() {
+
+		UserPlotBean bean = new UserPlotBean();
+
+		int count = 0;
+		for (String key : functions.keySet()) {
+			functions.put(key, compFunction.getFunction(count));
+			count++;
+		}
+
+		bean.setFunctions(functions); // We only set functions because it does a
+										// replace merge.
+
+		return bean;
+	}
+
 }
