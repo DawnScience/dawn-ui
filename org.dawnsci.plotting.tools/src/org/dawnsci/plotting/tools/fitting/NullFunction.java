@@ -139,4 +139,9 @@ public class NullFunction implements IPeak {
 	public IDataset calculatePartialDerivativeValues(IParameter param, IDataset... coords) {
 		return null;
 	}
+
+	@Override
+	public boolean isValid() {
+		return true;
+	}
 }
