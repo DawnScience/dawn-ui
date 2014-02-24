@@ -352,13 +352,11 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	}
 
 	public void setVisible(boolean visible) {
-		if (regionObjects!=null) {
-			for (IFigure ob : regionObjects) {
-				if (ob != null) {
-					if (ob.isVisible() != visible) {
-						ob.setVisible(visible);
-					}
-				}
+		if (regionObjects!=null) for (IFigure ob : regionObjects) {
+			if (ob instanceof IMobileFigure) {
+				((IMobileFigure)ob).setVisible(visible&&(isMobile()||isTrackMouse()));
+			} else {
+			    if (ob!=null) ob.setVisible(visible);
 			}
 		}
 		bean.setVisible(visible);
