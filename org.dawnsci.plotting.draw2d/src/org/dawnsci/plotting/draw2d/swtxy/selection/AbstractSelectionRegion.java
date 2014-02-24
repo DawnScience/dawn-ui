@@ -353,15 +353,10 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 
 	public void setVisible(boolean visible) {
 		if (regionObjects!=null) {
-			boolean mobileFlag = isMobile() || isTrackMouse();
 			for (IFigure ob : regionObjects) {
-				if (ob instanceof IMobileFigure) {
-					if (mobileFlag && visible && !ob.isVisible())
-						ob.setVisible(true);
-				} else {
-					if (ob != null) {
-						if (ob.isVisible() != visible)
-							ob.setVisible(visible);
+				if (ob != null) {
+					if (ob.isVisible() != visible) {
+						ob.setVisible(visible);
 					}
 				}
 			}
