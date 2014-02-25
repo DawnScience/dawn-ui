@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="DAWN Science" uid="uk.ac.diamond.dawn.base.product" id="org.dawnsci.product.plugin.DAWN" application="org.eclipse.ui.ide.workbench" version="1.1.0" useFeatures="true" includeLaunchers="true">
+<product name="DAWN Science" uid="uk.ac.diamond.dawn.base.product" id="org.dawnsci.product.plugin.DAWN" application="org.eclipse.ui.ide.workbench" version="1.5.0" useFeatures="true" includeLaunchers="true">
 
    <aboutInfo>
       <image path="/org.dawnsci.product.plugin/icons/Temp-3Col-Splash.png"/>
@@ -56,8 +56,8 @@
 
    <configurations>
       <plugin id="com.isencia.passerelle.workbench.starter" autoStart="true" startLevel="5" />
-      <plugin id="org.dawnsci.persistence" autoStart="true" startLevel="1" />
       <plugin id="org.dawnsci.jexl" autoStart="true" startLevel="2" />
+      <plugin id="org.dawnsci.persistence" autoStart="true" startLevel="1" />
       <plugin id="uk.ac.diamond.scisoft" autoStart="true" startLevel="0" />
       <plugin id="uk.ac.diamond.scisoft.analysis" autoStart="true" startLevel="0" />
       <plugin id="uk.ac.diamond.scisoft.analysis.osgi" autoStart="true" startLevel="1" />
