@@ -131,9 +131,6 @@ public abstract class FunctionModelElement {
 			}
 		}
 
-		// See comment on updateParameters for why this is needed
-		modelRoot.getRootOperator().updateAllParameters();
-
 		FunctionModifiedEvent event = new FunctionModifiedEvent(
 				originalFunction, function, parent, index);
 		modelRoot.fireFunctionModified(event);
