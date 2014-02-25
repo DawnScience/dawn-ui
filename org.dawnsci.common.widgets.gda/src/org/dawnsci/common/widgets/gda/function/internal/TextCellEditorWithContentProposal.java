@@ -95,7 +95,10 @@ public class TextCellEditorWithContentProposal extends TextCellEditor {
 	@Override
 	protected void doSetFocus() {
 		super.doSetFocus();
-		this.openPopup();
+		//Prompt with completions only if the cell is empty
+		if (text!= null && text.getText().isEmpty()){
+			this.openPopup();
+		}
 	}
 
 	private void enableContentProposal(
