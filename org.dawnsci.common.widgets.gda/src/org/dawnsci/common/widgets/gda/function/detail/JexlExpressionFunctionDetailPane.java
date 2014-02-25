@@ -18,9 +18,11 @@ public class JexlExpressionFunctionDetailPane implements IFunctionDetailPane {
 
 	private final class IDocumentListenerImplementation implements
 			IDocumentListener {
+		@Override
 		public void documentAboutToBeChanged(DocumentEvent event) {
 		}
 
+		@Override
 		public void documentChanged(DocumentEvent event) {
 			String string = sourceViewer.getDocument().get();
 			try {

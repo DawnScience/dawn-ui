@@ -1,6 +1,5 @@
 package org.dawnsci.common.widgets.gda.function.internal;
 
-import org.dawnsci.common.widgets.gda.function.jexl.ExpressionFunctionProposalProvider;
 import org.dawnsci.common.widgets.gda.function.jexl.JexlProposal;
 import org.eclipse.jface.bindings.keys.KeyStroke;
 import org.eclipse.jface.fieldassist.ContentProposalAdapter;
@@ -122,11 +121,13 @@ public class TextCellEditorWithContentProposal extends TextCellEditor {
 		contentProposalAdapter
 				.addContentProposalListener(new IContentProposalListener2() {
 
+					@Override
 					public void proposalPopupClosed(
 							ContentProposalAdapter adapter) {
 						popupOpen = false;
 					}
 
+					@Override
 					public void proposalPopupOpened(
 							ContentProposalAdapter adapter) {
 						popupOpen = true;

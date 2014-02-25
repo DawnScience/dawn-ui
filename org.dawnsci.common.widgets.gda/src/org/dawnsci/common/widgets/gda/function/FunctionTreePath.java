@@ -80,6 +80,7 @@ public class FunctionTreePath {
 	 *
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
+	@Override
 	public boolean equals(Object other) {
 		if (!(other instanceof FunctionTreePath)) {
 			return false;
@@ -93,6 +94,7 @@ public class FunctionTreePath {
 	 *
 	 * @see java.lang.Object#hashCode()
 	 */
+	@Override
 	public int hashCode() {
 		return treePath.hashCode(comparer);
 	}

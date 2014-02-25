@@ -30,6 +30,7 @@ public class FunctionLabelProvider extends BaseLabelProvider implements
 	private static final Image BULLET_ORANGE = Activator
 			.getImage("bullet_orange.png");
 	public static final Styler ERROR_STYLER = new Styler() {
+		@Override
 		public void applyStyles(TextStyle textStyle) {
 			textStyle.foreground = JFaceResources.getColorRegistry().get(
 					JFacePreferences.ERROR_COLOR);

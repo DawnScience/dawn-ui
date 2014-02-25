@@ -103,6 +103,7 @@ public abstract class BaseHandler extends AbstractHandler {
 	 */
 	protected abstract boolean isSelectionValid(FunctionModelElement model);
 
+	@Override
 	public final boolean isHandled() {
 		if (requiresFocus) {
 			Control focusControl = Display.getCurrent().getFocusControl();
