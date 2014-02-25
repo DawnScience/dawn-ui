@@ -5,7 +5,7 @@ import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.Gaussian;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.PseudoVoigt;
 
 public class FittingPreferenceInitializer extends AbstractPreferenceInitializer {
 
@@ -20,7 +20,7 @@ public class FittingPreferenceInitializer extends AbstractPreferenceInitializer 
 		store.setDefault(FittingConstants.SHOW_PEAK_SELECTIONS,true);
 		store.setDefault(FittingConstants.SHOW_FITTING_TRACE,  true);
 		store.setDefault(FittingConstants.SHOW_ANNOTATION_AT_PEAK,  true);
-		store.setDefault(FittingConstants.PEAK_TYPE,  Gaussian.class.getName());
+		store.setDefault(FittingConstants.PEAK_TYPE,  PseudoVoigt.class.getName());
 		store.setDefault(FittingConstants.SMOOTHING, 1);
 		store.setDefault(FittingConstants.QUALITY,   0.01);
 		store.setDefault(FittingConstants.POLY_ORDER,   1);
