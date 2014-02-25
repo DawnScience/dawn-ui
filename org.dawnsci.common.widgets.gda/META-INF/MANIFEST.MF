@@ -1,29 +1,35 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Common ui extensions including GDA dependencies.
-Bundle-SymbolicName: org.dawnsci.common.widgets.gda
+Bundle-SymbolicName: org.dawnsci.common.widgets.gda;singleton:=true
 Bundle-Version: 1.2.0.qualifier
 Bundle-Activator: org.dawnsci.common.widgets.gda.Activator
 Bundle-Vendor: Diamond Light Source
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: org.osgi.framework;version="1.3.0",
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: org.apache.commons.lang.builder;version="2.6.0",
+ org.dawb.common.services,
+ org.dawb.common.services.expressions,
+ org.eclipse.jface.text,
+ org.eclipse.jface.text.source,
+ org.osgi.framework;version="1.3.0",
  org.slf4j;version="[1.7.6,1.7.7)"
-Require-Bundle: org.eclipse.jface;bundle-version="3.8.0",
- org.eclipse.jface.databinding;bundle-version="1.6.0",
- org.eclipse.core.runtime;bundle-version="3.8.0",
- org.eclipse.core.databinding;bundle-version="1.4.1",
- org.eclipse.core.databinding.beans;bundle-version="1.2.200",
- org.eclipse.core.databinding.property;bundle-version="1.4.100",
+Require-Bundle: org.eclipse.core.runtime;bundle-version="3.8.0",
  org.eclipse.ui;bundle-version="3.8.0",
  org.dawnsci.plotting.api;bundle-version="1.2.0",
  org.dawb.common.ui;bundle-version="1.3.0",
  org.dawb.common.util;bundle-version="1.2.0",
- uk.ac.diamond.scisoft.analysis.api;bundle-version="1.0.0",
  uk.ac.diamond.scisoft.analysis;bundle-version="1.3.0",
- org.dawnsci.plotting.draw2d;bundle-version="1.2.0",
  org.eclipse.draw2d;bundle-version="3.8.1",
  org.dawnsci.plotting;bundle-version="1.2.0",
  org.dawnsci.common.widgets;bundle-version="1.2.0"
 Export-Package: org.dawnsci.common.widgets.gda,
  org.dawnsci.common.widgets.gda.function,
+ org.dawnsci.common.widgets.gda.function.actions,
+ org.dawnsci.common.widgets.gda.function.descriptors,
+ org.dawnsci.common.widgets.gda.function.detail,
+ org.dawnsci.common.widgets.gda.function.handlers,
+ org.dawnsci.common.widgets.gda.function.internal;x-internal:=true,
+ org.dawnsci.common.widgets.gda.function.internal.model;x-internal:=true,
+ org.dawnsci.common.widgets.gda.function.jexl,
  org.dawnsci.common.widgets.gda.roi
+Bundle-ActivationPolicy: lazy
