@@ -6,9 +6,8 @@ import java.util.List;
 
 import org.dawnsci.plotting.api.histogram.IPaletteService;
 import org.dawnsci.plotting.api.histogram.ITransferFunction;
-import org.dawnsci.plotting.api.histogram.functions.AbstractMapFunction;
 import org.dawnsci.plotting.api.histogram.functions.FunctionContainer;
-import org.dawnsci.plotting.histogram.ExtentionPointManager;
+import org.dawnsci.plotting.histogram.ExtensionPointManager;
 import org.dawnsci.plotting.histogram.functions.ColourSchemeContribution;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.RGB;
@@ -17,9 +16,9 @@ import org.eclipse.ui.services.IServiceLocator;
 
 public class PaletteService extends AbstractServiceFactory implements IPaletteService {
 
-	private ExtentionPointManager extensionManager;
+	private ExtensionPointManager extensionManager;
 	public PaletteService() {
-		this.extensionManager = ExtentionPointManager.getManager();
+		this.extensionManager = ExtensionPointManager.getManager();
 	}
 	private Collection<String> colourSchemeNames;
 	@Override
