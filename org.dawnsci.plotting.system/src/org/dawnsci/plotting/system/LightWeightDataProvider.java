@@ -46,8 +46,8 @@ class LightWeightDataProvider implements IDataProvider {
 	public ISample getSample(int index) {
 		if (x==null||y==null) return null;
 		try {
-			final double xDat = x.getElementDoubleAbs(index);
-			final double yDat = y.getElementDoubleAbs(index);
+			final double xDat = x.getDouble(index);
+			final double yDat = y.getDouble(index);
 
 			final double xErr = x instanceof IErrorDataset && ((IErrorDataset) x).hasErrors() ? ((IErrorDataset) x)
 					.getError(index) : 0d;

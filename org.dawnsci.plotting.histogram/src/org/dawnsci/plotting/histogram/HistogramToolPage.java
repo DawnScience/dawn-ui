@@ -185,7 +185,7 @@ public class HistogramToolPage extends AbstractToolPage {
 	private ILineTrace blueTrace;
 
 	// HELPERS
-	private ExtentionPointManager extentionPointManager;
+	private ExtensionPointManager extensionPointManager;
 	private UIJob imagerepaintJob;
 	private PaletteData paletteData;
 	private int internalEvent = 0; // This is very likely to go wrong, suggest avoid
@@ -451,7 +451,7 @@ public class HistogramToolPage extends AbstractToolPage {
 		};
 
 		// Get all information from the extension points
-		extentionPointManager = ExtentionPointManager.getManager();
+		extensionPointManager = ExtensionPointManager.getManager();
 
 
 		histogramRegionListener = new IROIListener.Stub() {
@@ -577,7 +577,7 @@ public class HistogramToolPage extends AbstractToolPage {
 		cmbColourMap.addSelectionListener(colourSchemeListener);
 
 		// Populate the control
-		for (ColourSchemeContribution contribution : extentionPointManager.getColourSchemeContributions()) {
+		for (ColourSchemeContribution contribution : extensionPointManager.getColourSchemeContributions()) {
 			cmbColourMap.add(contribution.getName());
 		}
 
@@ -637,7 +637,7 @@ public class HistogramToolPage extends AbstractToolPage {
 		}		
 
 		// populate the control
-		for (TransferFunctionContribution contribution : extentionPointManager.getTransferFunctionContributions()) {
+		for (TransferFunctionContribution contribution : extensionPointManager.getTransferFunctionContributions()) {
 			cmbRedColour.add(contribution.getName());
 			cmbGreenColour.add(contribution.getName());
 			cmbBlueColour.add(contribution.getName());
@@ -830,11 +830,11 @@ public class HistogramToolPage extends AbstractToolPage {
 	 * Use the controls from the GUI to set the individual colour elements from the selected colour scheme
 	 */
 	protected void updateColourScheme() {
-		ColourSchemeContribution colourScheme = extentionPointManager.getColourSchemeContribution(cmbColourMap.getText());
-		String red = extentionPointManager.getTransferFunctionFromID(colourScheme.getRedID()).getName();
-		String green = extentionPointManager.getTransferFunctionFromID(colourScheme.getGreenID()).getName();
-		String blue = extentionPointManager.getTransferFunctionFromID(colourScheme.getBlueID()).getName();
-		String alpha = extentionPointManager.getTransferFunctionFromID(colourScheme.getAlphaID()).getName();
+		ColourSchemeContribution colourScheme = extensionPointManager.getColourSchemeContribution(cmbColourMap.getText());
+		String red = extensionPointManager.getTransferFunctionFromID(colourScheme.getRedID()).getName();
+		String green = extensionPointManager.getTransferFunctionFromID(colourScheme.getGreenID()).getName();
+		String blue = extensionPointManager.getTransferFunctionFromID(colourScheme.getBlueID()).getName();
+		String alpha = extensionPointManager.getTransferFunctionFromID(colourScheme.getAlphaID()).getName();
 
 		setComboByName(cmbRedColour, red);
 		setComboByName(cmbGreenColour, green);
@@ -1208,9 +1208,9 @@ public class HistogramToolPage extends AbstractToolPage {
 	private void buildPaletteData() {
 
 		// first get the appropriate bits from the extension points
-		int[] red = extentionPointManager.getTransferFunction(cmbRedColour.getText()).getFunction().getArray();
-		int[] green = extentionPointManager.getTransferFunction(cmbGreenColour.getText()).getFunction().getArray();
-		int[] blue = extentionPointManager.getTransferFunction(cmbBlueColour.getText()).getFunction().getArray();
+		int[] red = extensionPointManager.getTransferFunction(cmbRedColour.getText()).getFunction().getArray();
+		int[] green = extensionPointManager.getTransferFunction(cmbGreenColour.getText()).getFunction().getArray();
+		int[] blue = extensionPointManager.getTransferFunction(cmbBlueColour.getText()).getFunction().getArray();
 
 		if (btnRedInverse.getSelection()) {
 			red = invert(red);
