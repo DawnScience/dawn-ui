@@ -7,6 +7,9 @@ import org.dawnsci.common.widgets.gda.function.jexl.JexlExpressionFunction.JexlE
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IOperator;
 
+/**
+ * Common base element for all objects in the function model
+ */
 public abstract class FunctionModelElement {
 	protected FunctionModelRoot modelRoot;
 

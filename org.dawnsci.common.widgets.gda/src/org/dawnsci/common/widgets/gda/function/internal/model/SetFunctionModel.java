@@ -5,6 +5,12 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IOperator;
 
+/**
+ * Function domain model object that represents a placeholder
+ * for a new function or operator at a specific index. e.g.
+ * as a child of a subtract operation
+ *
+ */
 public class SetFunctionModel extends FunctionModelElement {
 
 	private OperatorModel parentModel;
