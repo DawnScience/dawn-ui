@@ -7,7 +7,6 @@ import java.awt.image.WritableRaster;
 
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
-import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
@@ -106,6 +105,18 @@ public class Draw2DUtils {
 	 * @param lower
 	 * @param upper
 	 * @param delta
+	 * @return a point list of curve
+	 */
+	public static PointList generateCurve(PointFunction fn, double lower, double upper, double delta) {
+		return generateCurve(fn, lower, upper, delta, 3, Math.toRadians(0.5));
+	}
+
+	/**
+	 * Generate a curve from a parametrised point function
+	 * @param fn
+	 * @param lower
+	 * @param upper
+	 * @param delta
 	 * @param minDistance
 	 * @param maxAngle (in radians)
 	 * @return a point list of curve
@@ -116,40 +127,45 @@ public class Draw2DUtils {
 		Point pp, pc;
 		pp = fn.calculatePoint(lower);
 		list.addPoint(pp);
-		Dimension dp, dc;
-		dp = null;
-		double ds = minDistance*minDistance;
 		double cos = Math.cos(maxAngle);
-		cos *= cos;
 		boolean force = false;
 		double vc = lower + vd;
+		double dxp = Double.NaN; // previous deltas
+		double dyp = 0;
+		double sp = 0;
 		while (vc < upper) {
 			pc = fn.calculatePoint(vc);
-			dc = pc.getDifference(pp);
-			double xc = dc.preciseWidth();
-			double yc = dc.preciseHeight();
-			double sc = xc * xc + yc * yc;
-			if (sc >= ds) {
-				if (dp != null) {
-					double xp = dp.preciseWidth();
-					double yp = dp.preciseHeight();
-					double sp = xp * xp + yp * yp;
-					double cc = xc * xp + yc * yp;
-					if (cc * cc < sc * sp * cos) { // angle too wide
+			double dxc = pc.x() - pp.x(); // current deltas
+			double dyc = pc.y() - pp.y();
+			double sc = Math.hypot(dxc, dyc);
+			if (sc >= minDistance) {
+				if (Double.isNaN(dxp)) {
+					vd *= 0.5;
+					vc -= vd;
+					force = true; // prevent bouncing
+					continue;
+				} else {
+					double cc = dxc * dxp + dyc * dyp;
+					if (cc * cc < sc * sp * cos) {
+						// angle too wide so halve step and backtrack
 						vd *= 0.5;
-						vc = vc - vd;
+						vc -= vd;
 						force = true; // prevent bouncing
 						continue;
 					}
 				}
-			} else if (!force) { // point too close
+			} else if (!force) {
+				// point too close so double step and skip forward
 				vd *= 2;
-				vc = vc + vd;
+				vc += vd;
 				continue;
 			}
 			list.addPoint(pc);
 			pp = pc;
-			dp = dc;
+			dxp = dxc;
+			dyp = dyc;
+			sp = sc;
+			vc += vd;
 			force = false;
 		}
 		list.addPoint(fn.calculatePoint(upper));
