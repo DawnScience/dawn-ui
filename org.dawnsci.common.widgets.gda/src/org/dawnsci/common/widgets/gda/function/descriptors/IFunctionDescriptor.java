@@ -5,10 +5,24 @@ import org.eclipse.jface.fieldassist.IContentProposalProvider;
 
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
 
+/**
+ * An interface for providing fitting functions by providing the name and
+ * the function itself when required
+ *
+ */
 public interface IFunctionDescriptor extends IAdaptable {
 
+	/**
+	 * Instantiate the function and return it
+	 * @return the function
+	 * @throws FunctionInstantiationFailedException
+	 */
 	IFunction getFunction() throws FunctionInstantiationFailedException;
 
+	/**
+	 * Provides the function name
+	 * @return String name
+	 */
 	String getName();
 
 	/**

@@ -1,6 +1,5 @@
 package org.dawnsci.common.widgets.gda.function.internal;
 
-import org.dawnsci.common.widgets.gda.function.jexl.ExpressionFunctionProposalProvider;
 import org.dawnsci.common.widgets.gda.function.jexl.JexlProposal;
 import org.eclipse.jface.bindings.keys.KeyStroke;
 import org.eclipse.jface.fieldassist.ContentProposalAdapter;
@@ -95,35 +94,36 @@ public class TextCellEditorWithContentProposal extends TextCellEditor {
 	@Override
 	protected void doSetFocus() {
 		super.doSetFocus();
-		this.openPopup();
+		//Prompt with completions only if the cell is empty
+		if (text!= null && text.getText().isEmpty()){
+			this.openPopup();
+		}
 	}
 
 	private void enableContentProposal(
 			IContentProposalProvider contentProposalProvider,
 			KeyStroke keyStroke, char[] autoActivationCharacters) {
 
-		// contentProposalAdapter = new ContentProposalAdapter(text,
-		// new TextContentAdapter(), contentProposalProvider,
-		// keyStroke, autoActivationCharacters);
-
 		contentProposalAdapter = new FunctionContentAssistCommandAdapter(text,
 				new TextContentAdapter(), contentProposalProvider, null,
-				new char[] { ':' }, true);
+				null, true);
 		contentProposalAdapter.setAutoActivationDelay(0);
 
 		// Listen for popup open/close events to be able to handle focus
 		// events correctly
-//		contentProposalAdapter.setLabelProvider(new FunctionLabelProvider());
+		contentProposalAdapter.setLabelProvider(new ContentProposalLabelProvider());
 		contentProposalAdapter
 				.setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_IGNORE);
 		contentProposalAdapter
 				.addContentProposalListener(new IContentProposalListener2() {
 
+					@Override
 					public void proposalPopupClosed(
 							ContentProposalAdapter adapter) {
 						popupOpen = false;
 					}
 
+					@Override
 					public void proposalPopupOpened(
 							ContentProposalAdapter adapter) {
 						popupOpen = true;

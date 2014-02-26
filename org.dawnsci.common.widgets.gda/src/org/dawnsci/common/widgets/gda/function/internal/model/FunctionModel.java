@@ -6,6 +6,12 @@ import org.dawnsci.common.widgets.gda.function.jexl.JexlExpressionFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IOperator;
 
+/**
+ *
+ * Function domain model object. Represents a function
+ * and fitted function pair.
+ *
+ */
 public class FunctionModel extends FunctionModelElement {
 
 	private OperatorModel parentModel;

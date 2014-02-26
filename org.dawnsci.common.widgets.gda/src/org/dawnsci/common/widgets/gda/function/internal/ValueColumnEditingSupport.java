@@ -18,6 +18,7 @@ public abstract class ValueColumnEditingSupport extends EditingSupport
 		tce = new TextCellEditor(viewer.getTreeViewer().getTree());
 	}
 
+	@Override
 	protected boolean canEdit(Object element) {
 		if (element instanceof ParameterModel) {
 			return true;
@@ -26,10 +27,12 @@ public abstract class ValueColumnEditingSupport extends EditingSupport
 		}
 	}
 
+	@Override
 	protected CellEditor getCellEditor(Object element) {
 		return tce;
 	}
 
+	@Override
 	protected Object getValue(Object element) {
 		if (element instanceof ParameterModel) {
 			ParameterModel param = (ParameterModel) element;
@@ -42,6 +45,7 @@ public abstract class ValueColumnEditingSupport extends EditingSupport
 		return element.toString();
 	}
 
+	@Override
 	protected void setValue(Object element, Object value) {
 		if (element instanceof ParameterModel && value instanceof String) {
 			ParameterModel parameterModel = (ParameterModel) element;
@@ -53,8 +57,9 @@ public abstract class ValueColumnEditingSupport extends EditingSupport
 	}
 
 	/**
-	 * @return the tce
+	 * @return the text cell editor
 	 */
+	@Override
 	public TextCellEditor getTextCellEditor() {
 		return tce;
 	}

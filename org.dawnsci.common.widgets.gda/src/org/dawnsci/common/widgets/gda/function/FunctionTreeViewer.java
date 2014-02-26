@@ -453,6 +453,7 @@ public class FunctionTreeViewer implements IFunctionViewer {
 		return 0;
 	}
 
+	@Override
 	public void addSelectionChangedListener(ISelectionChangedListener listener) {
 		if (selectionChangedListeners == null) {
 			selectionChangedListeners = new ListenerList();
@@ -460,6 +461,7 @@ public class FunctionTreeViewer implements IFunctionViewer {
 		selectionChangedListeners.add(listener);
 	}
 
+	@Override
 	public void removeSelectionChangedListener(
 			ISelectionChangedListener listener) {
 		if (selectionChangedListeners == null) {

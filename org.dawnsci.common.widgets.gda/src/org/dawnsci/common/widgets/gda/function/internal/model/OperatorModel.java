@@ -5,6 +5,10 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IOperator;
 
+/**
+ * Represents an operator in the function model
+ *
+ */
 public class OperatorModel extends FunctionModelElement {
 
 	private OperatorModel parentModel;

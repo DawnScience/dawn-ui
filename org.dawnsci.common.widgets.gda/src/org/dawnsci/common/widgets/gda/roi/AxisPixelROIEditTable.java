@@ -40,7 +40,7 @@ import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 /**
- * Class to create a TableViewer that shows ROI information<br> 
+ * Class to create a TableViewer that shows ROI information<br>
  * both with real (axis) and pixel values.<br>
  * This table uses JFace data binding to update its content.
  * TODO make it work with all ROIs (only working for RectangularROI currently)
@@ -67,7 +67,7 @@ public class AxisPixelROIEditTable {
 	private boolean isProfile = false;
 
 	/**
-	 * 
+	 *
 	 * @param parent
 	 * @param plottingSystem
 	 */
@@ -102,21 +102,21 @@ public class AxisPixelROIEditTable {
 		table.setLinesVisible(true);
 		table.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false, 2, 2));
 
-		TableViewerColumn viewerColumn = new TableViewerColumn(tableViewer, SWT.NONE, 0); 
+		TableViewerColumn viewerColumn = new TableViewerColumn(tableViewer, SWT.NONE, 0);
 		viewerColumn.getColumn().setText("Name");
 		viewerColumn.getColumn().setWidth(80);
 		viewerColumn.setLabelProvider(new AxisPixelLabelProvider(0));
 		RegionEditingSupport regionEditor = new RegionEditingSupport(tableViewer, 0);
 		viewerColumn.setEditingSupport(regionEditor);
-		
-		viewerColumn = new TableViewerColumn(tableViewer, SWT.NONE, 1); 
+
+		viewerColumn = new TableViewerColumn(tableViewer, SWT.NONE, 1);
 		viewerColumn.getColumn().setText("Start");
 		viewerColumn.getColumn().setWidth(100);
 		viewerColumn.setLabelProvider(new AxisPixelLabelProvider(1));
 		regionEditor = new RegionEditingSupport(tableViewer, 1);
 		viewerColumn.setEditingSupport(regionEditor);
 
-		viewerColumn = new TableViewerColumn(tableViewer, SWT.NONE, 2); 
+		viewerColumn = new TableViewerColumn(tableViewer, SWT.NONE, 2);
 		viewerColumn.getColumn().setText("End");
 		viewerColumn.getColumn().setWidth(100);
 		viewerColumn.setLabelProvider(new AxisPixelLabelProvider(2));
@@ -171,6 +171,7 @@ public class AxisPixelROIEditTable {
 			}
 		}
 
+		@Override
 		public String getToolTipText(Object element) {
 			return "";
 		}
@@ -197,31 +198,31 @@ public class AxisPixelROIEditTable {
 			AxisPixelRowDataModel model = (AxisPixelRowDataModel) element;
 			FieldComponentCellEditor ed = null;
 			try {
-				ed = new FieldComponentCellEditor(((TableViewer)getViewer()).getTable(), 
+				ed = new FieldComponentCellEditor(((TableViewer)getViewer()).getTable(),
 						                     FloatSpinnerWrapper.class.getName(), SWT.RIGHT);
 			} catch (ClassNotFoundException e) {
 				logger.error("Cannot get FieldComponentCellEditor for "+SpinnerWrapper.class.getName(), e);
 				return null;
 			}
-			
+
 			final FloatSpinnerWrapper   rb = (FloatSpinnerWrapper)ed.getFieldWidget();
 
 			if(model != null && model.name.endsWith("Pixel")){
 				if (rb.getPrecision() < 3)
 					rb.setFormat(rb.getWidth(), 0);
 			}
-			
+
 			if(model != null && model.name.endsWith("Axis")){
 				if (rb.getPrecision() < 3)
 					rb.setFormat(rb.getWidth(), 3);
 			}
-			
+
 			rb.setMaximum(Double.MAX_VALUE);
 			rb.setMinimum(-Double.MAX_VALUE);
 
 			rb.setButtonVisible(false);
 			rb.setActive(true);
-			
+
 			((Spinner) rb.getControl())
 					.addSelectionListener(new SelectionAdapter() {
 						@Override
@@ -233,7 +234,7 @@ public class AxisPixelROIEditTable {
 								e1.printStackTrace();
 							}
 						}
-					});	
+					});
 			return ed;
 		}
 
@@ -280,10 +281,10 @@ public class AxisPixelROIEditTable {
 				e.printStackTrace();
 			}
 		}
-		
+
 		private void setValue(Object element, Object value, boolean tableRefresh) throws Exception {
 			final AxisPixelRowDataModel row = (AxisPixelRowDataModel) element;
-			
+
 			switch (column){
 			case 0:
 				row.setName((String)value);
@@ -351,7 +352,7 @@ public class AxisPixelROIEditTable {
 						ptx = xAxisRow.getStart();
 						pty = yAxisRow.getStart();
 						ptxEnd =xAxisRow.getEnd();
-						ptyEnd = yAxisRow.getEnd(); 
+						ptyEnd = yAxisRow.getEnd();
 						double[] newStartPoint = image.getPointInImageCoordinates(new double[]{ptx, pty});
 						pixelPtx = newStartPoint[0];
 						pixelPty = newStartPoint[1];
@@ -372,7 +373,7 @@ public class AxisPixelROIEditTable {
 				ptx = xPixelRow.getStart();
 				pty = yPixelRow.getStart();
 				ptxEnd =xPixelRow.getEnd();
-				ptyEnd = yPixelRow.getEnd(); 
+				ptyEnd = yPixelRow.getEnd();
 				width = ptxEnd - ptx;
 				height = ptyEnd - pty;
 				ret = new RectangularROI(ptx, pty, width, height, angle);
@@ -455,7 +456,7 @@ public class AxisPixelROIEditTable {
 	 * to listen to the main plottingSystem or to a profile plottingSystems<br>
 	 * By default this class will create a table viewer used to listen to a<br>
 	 * main plottingSystem.
-	 * 
+	 *
 	 * @param isProfileTable
 	 */
 	public void setIsProfileTable(boolean isProfileTable){
@@ -569,15 +570,15 @@ public class AxisPixelROIEditTable {
 		private AxisPixelRowDataModel yPixelRow;
 
 		final private String description0 = "X-Axis values (Not yet editable)";
-		final private String description1 = "Y-Axis values (Not yet editable)"; 
-		final private String description2 = "X values as pixels (Editable)"; 
-		final private String description3 = "X values as pixels (Editable)"; 
+		final private String description1 = "Y-Axis values (Not yet editable)";
+		final private String description2 = "X values as pixels (Editable)";
+		final private String description3 = "X values as pixels (Editable)";
 
 		{
 			xAxisRow = new AxisPixelRowDataModel(new String(RowName.XAXIS_ROW), new Double(0), new Double(0), new Double(0), description0);
-			yAxisRow = new AxisPixelRowDataModel(new String(RowName.YAXIS_ROW), new Double(0), new Double(0), new Double(0), description1); 
-			xPixelRow = new AxisPixelRowDataModel(new String(RowName.XPIXEL_ROW), new Double(0), new Double(0), new Double(0), description2); 
-			yPixelRow = new AxisPixelRowDataModel(new String(RowName.YPIXEL_ROW), new Double(0), new Double(0), new Double(0), description3); 
+			yAxisRow = new AxisPixelRowDataModel(new String(RowName.YAXIS_ROW), new Double(0), new Double(0), new Double(0), description1);
+			xPixelRow = new AxisPixelRowDataModel(new String(RowName.XPIXEL_ROW), new Double(0), new Double(0), new Double(0), description2);
+			yPixelRow = new AxisPixelRowDataModel(new String(RowName.YPIXEL_ROW), new Double(0), new Double(0), new Double(0), description3);
 
 			rows.add(xAxisRow);
 			rows.add(yAxisRow);
@@ -598,7 +599,7 @@ public class AxisPixelROIEditTable {
 
 		private List<AxisPixelRowDataModel> rows = new ArrayList<AxisPixelRowDataModel>();
 
-		final private String description = "X-Axis values"; 
+		final private String description = "X-Axis values";
 		private AxisPixelRowDataModel xAxisRow;
 
 		{
@@ -652,7 +653,7 @@ public class AxisPixelROIEditTable {
 		 * TODO add a description in a tool tip<br>
 		 * but this can only be done by providing our own LabelProvider<br>
 		 * which is currently done by the ViewerSupport.bind mechanism.<br>
-		 * 
+		 *
 		 * @return string
 		 */
 		public String getDescription(){

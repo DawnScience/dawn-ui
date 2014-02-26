@@ -242,26 +242,32 @@ public class FunctionFittingWidget extends Composite implements IFunctionViewer 
 		return funcTree;
 	}
 
+	@Override
 	public void setInput(CompositeFunction compFunction) {
 		funcTree.setInput(compFunction);
 	}
 
+	@Override
 	public void refresh() {
 		funcTree.refresh();
 	}
 
+	@Override
 	public void setFittedInput(CompositeFunction resultFunction) {
 		funcTree.setFittedInput(resultFunction);
 	}
 
+	@Override
 	public boolean isValid() {
 		return funcTree.isValid();
 	}
 
+	@Override
 	public boolean isFittedValid() {
 		return funcTree.isValid();
 	}
 
+	@Override
 	public void addModelModifiedListener(IModelModifiedListener listener) {
 		if (modelModifiedListeners == null) {
 			modelModifiedListeners = new ListenerList();
@@ -289,6 +295,7 @@ public class FunctionFittingWidget extends Composite implements IFunctionViewer 
 		modelModifiedListeners.add(listener);
 	}
 
+	@Override
 	public void removeModelModifiedListener(IModelModifiedListener listener) {
 		if (modelModifiedListeners == null) {
 			return;

@@ -5,6 +5,11 @@ import org.eclipse.jface.fieldassist.IControlContentAdapter;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.fieldassist.ContentAssistCommandAdapter;
 
+/**
+ * An subclass of ContentAssistCommandAdapter that allows
+ * us to provide access to the openProposalPopup method
+ *
+ */
 public class FunctionContentAssistCommandAdapter extends
 		ContentAssistCommandAdapter {
 
