@@ -104,13 +104,9 @@ public class TextCellEditorWithContentProposal extends TextCellEditor {
 			IContentProposalProvider contentProposalProvider,
 			KeyStroke keyStroke, char[] autoActivationCharacters) {
 
-		// contentProposalAdapter = new ContentProposalAdapter(text,
-		// new TextContentAdapter(), contentProposalProvider,
-		// keyStroke, autoActivationCharacters);
-
 		contentProposalAdapter = new FunctionContentAssistCommandAdapter(text,
 				new TextContentAdapter(), contentProposalProvider, null,
-				new char[] { ':' }, true);
+				null, true);
 		contentProposalAdapter.setAutoActivationDelay(0);
 
 		// Listen for popup open/close events to be able to handle focus
