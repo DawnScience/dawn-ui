@@ -37,6 +37,7 @@ import org.eclipse.ui.part.IPageSite;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.io.ILoaderService;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
@@ -132,6 +133,11 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		
 //		final AbstractDataset ds = (AbstractDataset)im.getData();
 		
+		if (metadata != null) {
+			DetectorProperties d = metadata.getDetector2DProperties();
+			if(d.getPx() != ds.getShape()[0] || d.getPy() != ds.getShape()[1]) metadata = null;
+		}
+		
 		IDiffractionMetadata m = null;
 		
 		if (ds.getMetadata() != null && ds.getMetadata() instanceof IDiffractionMetadata) {
@@ -139,7 +145,14 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		}
 		
 		//read from preferences first time
-		if (m == null && metadata == null) m = getDiffractionMetaData();
+		if (m == null && metadata == null) m = getDiffractionMetaData(ds);
+		
+		if (m != null) {
+			DetectorProperties d = m.getDetector2DProperties();
+			if(d.getPx() != ds.getShape()[0] || d.getPy() != ds.getShape()[1]) m = null;
+		}
+		
+		if (m == null && metadata == null) return;
 		
 		if (metadata == null) {
 			metadata = m;
@@ -148,20 +161,24 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		else {
 			if (m != null && (!metadata.getDetector2DProperties().equals(m.getDetector2DProperties()) ||
 					!metadata.getDiffractionCrystalEnvironment().equals(m.getDiffractionCrystalEnvironment()))) {
+				metadata = m;
 				fullImageJob = new PowderIntegrationJob(metadata, system);
 			}
 		}
 		
 		if (fullImageJob == null) fullImageJob = new PowderIntegrationJob(metadata, system);
 		
+		AbstractDataset mask = null;
+		
+		if (im != null) mask = DatasetUtils.convertToAbstractDataset(im.getMask());
+		
 		fullImageJob.setData(DatasetUtils.convertToAbstractDataset(ds),
-				DatasetUtils.convertToAbstractDataset(im.getMask()), null);
+				mask, null);
 		
 		fullImageJob.schedule();
 	}
 	
-	private IDiffractionMetadata getDiffractionMetaData() {
-		IDataset image = getImageTrace() == null ? null : getImageTrace().getData();
+	private IDiffractionMetadata getDiffractionMetaData(IDataset image) {
 		IWorkbenchPart part = getPart();
 		String altPath = null;
 		if(part instanceof IEditorPart){
