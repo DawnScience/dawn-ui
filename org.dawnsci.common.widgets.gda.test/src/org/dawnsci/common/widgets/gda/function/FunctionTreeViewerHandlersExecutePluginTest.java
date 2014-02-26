@@ -55,7 +55,6 @@ public class FunctionTreeViewerHandlersExecutePluginTest extends
 		jexl = new JexlExpressionFunction("a+b+x");
 		subtract.addFunction(jexl);
 		actual.addFunction(subtract);
-		actual.updateAllParameters();
 
 		viewer.setInput(actual);
 

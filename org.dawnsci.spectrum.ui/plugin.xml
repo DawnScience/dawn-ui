@@ -43,6 +43,13 @@
             name="Datasets"
             restorable="true">
       </view>
+      <view
+            class="org.dawnsci.spectrum.ui.views.SpectrumFileView"
+            icon="icons/spectrumpe.png"
+            id="org.dawnsci.spectrum.ui.views.SpectrumFileView"
+            name="File Navigator"
+            restorable="true">
+      </view>
    </extension>
    <extension
          point="org.eclipse.ui.navigator.navigatorContent">

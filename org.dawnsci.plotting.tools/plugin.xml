@@ -338,6 +338,13 @@
             label="Powder Calibration Check"
             tooltip="Check calibration of a 2D powder diffraction image">
       </plotting_tool_page>
+      <plotting_tool_page
+            category="org.dawnsci.plotting.tools.category.Science"
+            class="org.dawnsci.plotting.tools.powderintegration.PowderIntegrationTool"
+            icon="icons/PowderIntegration.png"
+            id="org.dawnsci.plotting.tools.powderintegrationtool"
+            label="Powder Integration">
+      </plotting_tool_page>
    </extension>
 
   <extension

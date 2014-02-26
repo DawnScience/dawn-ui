@@ -879,7 +879,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	protected void showPageRec(PageRec pageRec) {
 		// If already showing do nothing
 		if (activeRec == pageRec) {
-			if (!activeRec.tool.isActive()) activeRec.tool.activate();
+			if (!activeRec.tool.isActive() && activeRec.tool.getControl()!=null) activeRec.tool.activate();
 			return;
 		}
 		if (staticTool!=null && activeRec!=null && activeRec.tool==staticTool) { // We never show owt else.
@@ -1087,7 +1087,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		        final PageRec existing = getPageRec(part);
 		        
 		        if (tool!=null && existing!=null&&existing.tool!=null && existing.tool.equals(tool)) {
-		        	if (!tool.isActive()) tool.activate();
+		        	if (!tool.isActive() && tool.getControl()!=null) tool.activate();
 		        	return existing;
 		        }
 
@@ -1445,7 +1445,9 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 					staticTool.setPlottingSystem((IPlottingSystem)sys);
 				}
 				staticTool.setPart(part);
-				staticTool.activate();
+				if (staticTool.getControl()!=null) {
+					staticTool.activate();
+				}
 				return true;
 			}
 			return false;

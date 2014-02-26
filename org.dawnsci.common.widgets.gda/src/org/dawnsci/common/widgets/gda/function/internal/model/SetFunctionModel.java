@@ -107,9 +107,6 @@ public class SetFunctionModel extends FunctionModelElement {
 	public void run(IFunction function) {
 		operator.setFunction(functionIndex, function);
 
-		// See comment on updateParameters for why this is needed
-		modelRoot.getRootOperator().updateAllParameters();
-
 		FunctionModifiedEvent event = new FunctionModifiedEvent(
 				null, function, operator, functionIndex);
 		modelRoot.fireFunctionModified(event);

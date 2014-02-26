@@ -407,7 +407,7 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 
 			calcBox(false);
 			// NB do not use Graphics#scale and unit shape as there are precision problems
-			PointList points = Draw2DUtils.generateCurve(DecoratedCircle.this, 0, 360, 1, 3, Math.toRadians(1));
+			PointList points = Draw2DUtils.generateCurve(DecoratedCircle.this, 0, 360, 1);
 			Draw2DUtils.drawClippedPolyline(graphics, points, box.expand(2, 2), true);
 
 			graphics.popState();

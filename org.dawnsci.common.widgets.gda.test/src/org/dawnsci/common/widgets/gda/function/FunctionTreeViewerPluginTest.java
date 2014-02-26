@@ -65,7 +65,6 @@ public class FunctionTreeViewerPluginTest extends
 		expected.addFunction(subtractExpected);
 		subtractExpected.addFunction(new Gaussian());
 		subtractExpected.addFunction(new Fermi());
-		expected.updateAllParameters();
 		assertEquals(expected, actual);
 	}
 

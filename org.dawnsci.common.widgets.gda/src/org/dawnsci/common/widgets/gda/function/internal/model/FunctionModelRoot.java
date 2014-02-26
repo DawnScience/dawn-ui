@@ -63,7 +63,6 @@ public class FunctionModelRoot {
 
 	public FunctionModelRoot(CompositeFunction compositeFunction,
 			IFunctionDescriptorProvider functionDescriptorProvider) {
-		compositeFunction.updateAllParameters();
 		this.root = compositeFunction;
 		this.functionDescriptorProvider = functionDescriptorProvider;
 		this.fittedRoot = null;

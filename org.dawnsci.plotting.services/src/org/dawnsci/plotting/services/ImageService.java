@@ -40,6 +40,7 @@ import org.eclipse.ui.services.IServiceLocator;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.BooleanDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
+import uk.ac.diamond.scisoft.analysis.dataset.IndexIterator;
 import uk.ac.diamond.scisoft.analysis.dataset.Maths;
 import uk.ac.diamond.scisoft.analysis.dataset.RGBDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Stats;
@@ -387,8 +388,6 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 	    if (val<=minCut) return MIN_PIX_BYTE;		
 		
 		if (Double.isNaN(val)) return NAN_PIX_BYTE;
-		//TODO is this necessary??
-		if (Float.isNaN((float)val)) return NAN_PIX_BYTE;
 	    
 		if (val>=maxCut) return MAX_PIX_BYTE;	
 		
@@ -462,16 +461,17 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 	                        : null;
 
 	    // Big loop warning:
-		for (int index = 0; index < image.getSize(); ++index) {
+	    IndexIterator it = image.getIterator();
+		for (int index = 0; it.hasNext(); ++index) {
 			
-			final double dv = image.getElementDoubleAbs(index);
+			final double dv = image.getElementDoubleAbs(it.index);
 			try {
 			    if (mask!=null && index<mask.getSize()) {
-			    	if (!mask.getElementBooleanAbs(index)) {
+			    	if (!mask.getElementBooleanAbs(index)) { // assumes mask is not a view
 			    		continue; // Masked!
 			    	}
 			    }
-			} catch(java.lang.ArrayIndexOutOfBoundsException ignored) {
+			} catch (java.lang.ArrayIndexOutOfBoundsException ignored) {
 				// Mask may be different size, continue if is.
 			}
 			

@@ -318,9 +318,10 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	}
 
 	protected void drawResolutionRings(List<ResolutionRing> ringList, String typeName, RING_TYPE marker) {
-		final List<IRegion> existing = getRegions(marker);
-		if (existing == null) return;
-
+		List<IRegion> existing = getRegions(marker);
+		
+		if (existing == null) existing = new ArrayList<IRegion>();
+	
 		for (IRegion iRegion : existing) iRegion.setVisible(false);
 		int nExisting = existing.size();
 		int nRings = ringList.size();
@@ -368,7 +369,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		region.setROI(eroi);
 		region.setRegionColor(colour);
 		region.setAlpha(100);
-		region.setUserRegion(false);
+		region.setUserRegion(true);
 
 		region.setLabel(labelText);
 		region.setShowLabel(true);
@@ -548,6 +549,10 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 
 	public IDiffractionMetadata getDiffractionMetadata() {
 		return dmd;
+	}
+	
+	public boolean isActive() {
+		return active;
 	}
 
 	private void registerListeners(boolean register) {

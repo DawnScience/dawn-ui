@@ -98,9 +98,6 @@ public class AddNewFunctionModel extends FunctionModelElement {
 	public void run(IFunction function) {
 		operator.addFunction(function);
 
-		// See comment on updateParameters for why this is needed
-		modelRoot.getRootOperator().updateAllParameters();
-
 		FunctionModifiedEvent event = new FunctionModifiedEvent(
 				null, function, operator, operator.getNoOfFunctions() - 1);
 		modelRoot.fireFunctionModified(event);

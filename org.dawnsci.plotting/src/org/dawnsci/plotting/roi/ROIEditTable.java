@@ -37,8 +37,10 @@ import uk.ac.diamond.scisoft.analysis.roi.CircularROI;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalFitROI;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
 import uk.ac.diamond.scisoft.analysis.roi.GridROI;
+import uk.ac.diamond.scisoft.analysis.roi.HyperbolicROI;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
+import uk.ac.diamond.scisoft.analysis.roi.ParabolicROI;
 import uk.ac.diamond.scisoft.analysis.roi.PerimeterBoxROI;
 import uk.ac.diamond.scisoft.analysis.roi.PointROI;
 import uk.ac.diamond.scisoft.analysis.roi.PolygonalROI;
@@ -361,6 +363,17 @@ public class ROIEditTable  {
 					ret.add(new RegionRow("Point "+(i+1)+"  (x,y)", "pixel", getAxis(coords, pr.getPoint(i).getPoint())));
 				}
 			}
+		} else if (roi instanceof ParabolicROI) {
+			final ParabolicROI pr = (ParabolicROI) roi;
+			ret.add(new RegionRow("Focus (x,y)",             "pixel", getAxis(coords, pr.getPointRef())));
+			ret.add(new RegionRow("Focal parameter",         "pixel", pr.getFocalParameter(), Double.NaN));
+			ret.add(new RegionRow("Rotation (°)",            "°",     pr.getAngleDegrees(), Double.NaN));
+		} else if (roi instanceof HyperbolicROI) {
+			final HyperbolicROI hr = (HyperbolicROI) roi;
+			ret.add(new RegionRow("Focus (x,y)",             "pixel", getAxis(coords, hr.getPointRef())));
+			ret.add(new RegionRow("Semi-latus rectum",       "pixel", hr.getSemilatusRectum(), Double.NaN));
+			ret.add(new RegionRow("Eccentricity",            "",      hr.getEccentricity(), Double.NaN));
+			ret.add(new RegionRow("Rotation (°)",            "°",     hr.getAngleDegrees(), Double.NaN));
 		} else if (roi != null) {
 			ret.add(new RegionRow("Unknown type (x,y)", "pixel", getAxis(coords, roi.getPoint())));
 			
@@ -485,7 +498,6 @@ public class ROIEditTable  {
 				pr.insertPoint(getPoint(coords, rows.get(i)));
 			}
 			ret = new EllipticalFitROI(pr);
-			
 		} else if (roi instanceof EllipticalROI) {
 			
 			final double[] cent = getPoint(coords, rows.get(0));
@@ -497,6 +509,21 @@ public class ROIEditTable  {
 					                             cent[0], 
 					                             cent[1]);
 			ret = er;
+		} else if (roi instanceof ParabolicROI) {
+			final double[] cent = getPoint(coords, rows.get(0));
+			final double   fpar  = rows.get(1).getxLikeVal();
+			final double   ang  = rows.get(2).getxLikeVal();
+
+			ParabolicROI pr = new ParabolicROI(fpar, Math.toRadians(ang), cent[0], cent[1]);
+			ret = pr;
+		} else if (roi instanceof HyperbolicROI) {
+			final double[] cent = getPoint(coords, rows.get(0));
+			final double   semi = rows.get(1).getxLikeVal();
+			final double   ecc  = rows.get(2).getxLikeVal();
+			final double   ang  = rows.get(3).getxLikeVal();
+
+			HyperbolicROI hr = new HyperbolicROI(semi, ecc, Math.toRadians(ang), cent[0], cent[1]);
+			ret = hr;
 		}
 
 		if (ret != null)
