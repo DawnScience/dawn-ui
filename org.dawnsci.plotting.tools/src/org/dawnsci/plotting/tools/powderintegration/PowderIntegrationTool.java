@@ -1,7 +1,19 @@
 package org.dawnsci.plotting.tools.powderintegration;
 
+import java.util.List;
+
+import ncsa.hdf.object.Dataset;
+import ncsa.hdf.object.Datatype;
+import ncsa.hdf.object.Group;
+import ncsa.hdf.object.HObject;
+import ncsa.hdf.object.h5.H5Datatype;
+
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
+import org.dawb.common.ui.plot.tools.IDataReductionToolPage.DataReductionInfo;
 import org.dawb.common.ui.util.EclipseUtils;
+import org.dawb.hdf5.IHierarchicalDataFile;
+import org.dawb.hdf5.Nexus;
+import org.dawb.hdf5.nexus.NexusUtils;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.PlottingFactory;
@@ -11,6 +23,7 @@ import org.dawnsci.plotting.api.trace.ITraceListener;
 import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.dawnsci.plotting.tools.diffraction.DiffractionUtils;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IActionBars;
@@ -51,21 +64,10 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			public void traceWillPlot(TraceWillPlotEvent evt) {
 				PowderIntegrationTool.this.update(evt.getImage());
 			}
-////			
-//			@Override
-//			public void traceAdded(TraceEvent evt) {
-//				PowderIntegrationTool.this.update();
-//			}
-//			
-//			@Override
-//			public void traceUpdated(TraceEvent evt) {
-//				PowderIntegrationTool.this.update();
-//			}
-//			
-//			@Override
-//			public void traceRemoved(TraceEvent evt) {
-//				PowderIntegrationTool.this.update();
-//			}
+			@Override
+			public void traceRemoved(TraceEvent evt) {
+				if (system!= null) system.clear();
+			}
 			
 		};
 		
@@ -81,9 +83,12 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 	public void activate() {
 		
 		if (isActive()) return;
-		getPlottingSystem().addTraceListener(traceListener);
-
 		super.activate();
+		getPlottingSystem().addTraceListener(traceListener);
+		
+		IImageTrace im = getImageTrace();
+		
+		if (im != null && im.getData() != null) update(im.getData()); 
 	}
 	
 	@Override
@@ -125,11 +130,6 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		IImageTrace im = getImageTrace();
 		logger.debug("Update");
 		
-		if (im == null) {
-			//cleanPlottingSystem();
-			return;
-		}
-		
 //		final AbstractDataset ds = (AbstractDataset)im.getData();
 		
 		IDiffractionMetadata m = null;
@@ -138,7 +138,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			m = (IDiffractionMetadata)ds.getMetadata();
 		}
 		
-		//read from preferences firs time
+		//read from preferences first time
 		if (m == null && metadata == null) m = getDiffractionMetaData();
 		
 		if (metadata == null) {
@@ -184,7 +184,47 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 	 */
 	@Override
 	public DataReductionInfo export(DataReductionSlice slice) throws Exception {
-		return null;
+		
+		IHierarchicalDataFile file = slice.getFile();
+		Group dataGroup = slice.getParent();
+		
+		List<AbstractDataset> out = fullImageJob.process(DatasetUtils.convertToAbstractDataset(slice.getData()));
+		
+		AbstractDataset axis = out.get(0);
+		
+		//Test if axis is made
+		boolean axisMade = false;
+		
+		for (HObject ob : dataGroup.getMemberList()) {
+			if (ob.getName().equals(axis.getName())) { 
+				axisMade = true;
+				break;
+			}
+		}
+		
+		if (!axisMade) {
+			H5Datatype dType = new H5Datatype(Datatype.CLASS_FLOAT, 64/8, Datatype.NATIVE, Datatype.NATIVE);
+			axis = axis.squeeze();
+			Dataset s = file.createDataset(axis.getName(),  dType,  new long[]{axis.getShape()[0]}, axis.getBuffer(), dataGroup);
+			file.setNexusAttribute(s, Nexus.SDS);
+			file.setIntAttribute(s, NexusUtils.AXIS, 2);
+			
+		}
+		
+		AbstractDataset signal = out.get(1);
+		signal.setName("Intensity");
+		slice.appendData(signal);
+		
+		if (!axisMade) {
+			for (HObject ob :dataGroup.getMemberList()) {
+				if (ob instanceof Dataset && ob.getName().equals(signal.getName())) {
+					Dataset ds = (Dataset)ob;
+					file.setIntAttribute(ds, NexusUtils.SIGNAL, 1);
+				}
+			}
+		}
+		
+		return new DataReductionInfo(Status.OK_STATUS);
 	}
 
 }
