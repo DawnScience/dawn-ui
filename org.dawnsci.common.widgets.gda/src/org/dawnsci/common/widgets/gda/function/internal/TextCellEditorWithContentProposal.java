@@ -115,7 +115,7 @@ public class TextCellEditorWithContentProposal extends TextCellEditor {
 
 		// Listen for popup open/close events to be able to handle focus
 		// events correctly
-//		contentProposalAdapter.setLabelProvider(new FunctionLabelProvider());
+		contentProposalAdapter.setLabelProvider(new ContentProposalLabelProvider());
 		contentProposalAdapter
 				.setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_IGNORE);
 		contentProposalAdapter
