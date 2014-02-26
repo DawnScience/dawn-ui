@@ -119,6 +119,9 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 	}
 	
 	private void update(IDataset ds) {
+		
+		if (ds == null) return;
+		
 		IImageTrace im = getImageTrace();
 		logger.debug("Update");
 		
@@ -128,19 +131,28 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		}
 		
 //		final AbstractDataset ds = (AbstractDataset)im.getData();
-		if (ds==null) return;
-			
-		IDiffractionMetadata m = getDiffractionMetaData();
+		
+		IDiffractionMetadata m = null;
+		
+		if (ds.getMetadata() != null && ds.getMetadata() instanceof IDiffractionMetadata) {
+			m = (IDiffractionMetadata)ds.getMetadata();
+		}
+		
+		//read from preferences firs time
+		if (m == null && metadata == null) m = getDiffractionMetaData();
 		
 		if (metadata == null) {
 			metadata = m;
 			fullImageJob = new PowderIntegrationJob(metadata, system);
 		}
 		else {
-			if (metadata != m) {
+			if (m != null && (!metadata.getDetector2DProperties().equals(m.getDetector2DProperties()) ||
+					!metadata.getDiffractionCrystalEnvironment().equals(m.getDiffractionCrystalEnvironment()))) {
 				fullImageJob = new PowderIntegrationJob(metadata, system);
 			}
 		}
+		
+		if (fullImageJob == null) fullImageJob = new PowderIntegrationJob(metadata, system);
 		
 		fullImageJob.setData(DatasetUtils.convertToAbstractDataset(ds),
 				DatasetUtils.convertToAbstractDataset(im.getMask()), null);
