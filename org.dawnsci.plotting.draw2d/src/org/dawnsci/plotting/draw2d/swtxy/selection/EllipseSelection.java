@@ -175,6 +175,7 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 		private TranslationListener handleListener;
 		private FigureListener moveListener;
 		private static final int SIDE = 8;
+
 		public DecoratedEllipse(Figure parent) {
 			super();
 			handles = new ArrayList<IFigure>();
@@ -233,7 +234,7 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 			addFigureListener(moveListener);
 			FigureTranslator mover = new FigureTranslator(getXyGraph(), parent, this, handles){
 				public void mouseDragged(MouseEvent event) {
-					if (!isCenterMovable) return;
+					if (!isCentreMovable) return;
 					super.mouseDragged(event);
 				}
 			};
@@ -460,17 +461,17 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 		}
 	}
 
-	private boolean isCenterMovable = true;
+	private boolean isCentreMovable = true;
 	private boolean isOuterMovable = true;
 
 	@Override
 	public boolean isCentreMovable() {
-		return isCenterMovable;
+		return isCentreMovable;
 	}
 
 	@Override
 	public void setCentreMovable(boolean isCenterMovable) {
-		this.isCenterMovable = isCenterMovable;
+		this.isCentreMovable = isCenterMovable;
 		ellipse.setCursor(isCenterMovable ? Draw2DUtils.getRoiMoveCursor() : null);
 		ellipse.setCentreMobile(isCenterMovable);
 	}
