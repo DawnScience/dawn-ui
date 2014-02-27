@@ -2,6 +2,7 @@ package org.dawnsci.plotting.tools.reduction;
 
 import java.util.List;
 
+import ncsa.hdf.hdf5lib.exceptions.HDF5FunctionArgumentException;
 import ncsa.hdf.object.Group;
 
 import org.dawb.common.services.conversion.IConversionContext;
@@ -68,7 +69,15 @@ class ToolConversionVisitor implements IConversionVisitor {
 			return group;
 		}
 		
-		if (group!=null) group.close(groupId);
+		try {
+		    if (group!=null) group.close(groupId);
+		} catch (Exception ne) {
+			if (ne instanceof HDF5FunctionArgumentException) {
+				// We carry on
+			} else {
+				throw ne;
+			}
+		}
 		
 		final String h5Path = context.getSelectedH5Path();
 		if (h5Path != null) {
