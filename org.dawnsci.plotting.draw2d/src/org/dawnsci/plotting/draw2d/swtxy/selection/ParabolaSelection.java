@@ -340,7 +340,7 @@ class ParabolaSelection extends AbstractSelectionRegion implements ILockableRegi
 				graphics.setForegroundColor(labelColour);
 				graphics.setBackgroundColor(ColorConstants.white);
 				graphics.setFont(labelFont);
-				graphics.fillString(label, getPoint(Math.PI/4));
+				graphics.fillString(label, getPoint(Math.PI * 0.75));
 			}
 		}
 

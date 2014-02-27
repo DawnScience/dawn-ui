@@ -259,7 +259,7 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 				graphics.setForegroundColor(labelColour);
 				graphics.setBackgroundColor(ColorConstants.white);
 				graphics.setFont(labelFont);
-				graphics.fillString(label, getPoint(45));
+				graphics.fillString(label, getPoint(135));
 			}
 		}
 

@@ -347,7 +347,7 @@ class HyperbolaSelection extends AbstractSelectionRegion implements ILockableReg
 				graphics.setForegroundColor(labelColour);
 				graphics.setBackgroundColor(ColorConstants.white);
 				graphics.setFont(labelFont);
-				graphics.fillString(label, getPoint(Math.PI/4));
+				graphics.fillString(label, getPoint(Math.PI * 0.75));
 			}
 		}
 
