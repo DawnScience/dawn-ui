@@ -46,6 +46,8 @@ public class SelectionRegionFactory {
 		SUPPORTED_REGIONS.add(RegionType.CIRCLEFIT);
 		SUPPORTED_REGIONS.add(RegionType.ELLIPSE);
 		SUPPORTED_REGIONS.add(RegionType.ELLIPSEFIT);
+		SUPPORTED_REGIONS.add(RegionType.PARABOLA);
+		SUPPORTED_REGIONS.add(RegionType.HYPERBOLA);
 		SUPPORTED_REGIONS.add(RegionType.POLYLINE);
 		SUPPORTED_REGIONS.add(RegionType.POLYGON);
 	}
@@ -90,6 +92,10 @@ public class SelectionRegionFactory {
 			region = new EllipseSelection(name, coords);
 		} else if (regionType==RegionType.ELLIPSEFIT) {
 			region = new EllipseFitSelection(name, coords);
+		} else if (regionType==RegionType.PARABOLA) {
+			region = new ParabolaSelection(name, coords);
+		} else if (regionType==RegionType.HYPERBOLA) {
+			region = new HyperbolaSelection(name, coords);
 		} else if (regionType==RegionType.POLYGON) {
 			region = new PolygonSelection(name, coords);
 		} else if (regionType==RegionType.POLYLINE) {
