@@ -184,16 +184,16 @@ public interface IRegion {
 	 *
 	 */
 	public enum RegionType {
+		POINT("Point",             darkMagenta),
 		LINE("Line",               ColorConstants.cyan),
+		BOX("Box",                 ColorConstants.green),
 		POLYLINE("Polyline",       ColorConstants.cyan),
 		POLYGON("Polygon",         ColorConstants.cyan),
-		BOX("Box",                 ColorConstants.green),
 		PERIMETERBOX("Perimeter box", ColorConstants.gray),
 		GRID("Grid",               ColorConstants.lightGray),
 		CIRCLE("Circle",           darkYellow),
 		CIRCLEFIT("Circle fit",    darkYellow),
 		SECTOR("Sector",           ColorConstants.red),
-		POINT("Point",             darkMagenta),
 		ELLIPSE("Ellipse",         ColorConstants.lightGreen),
 		ELLIPSEFIT("Ellipse fit",  ColorConstants.lightGreen),
 		PARABOLA("Parabola",       ColorConstants.orange),
