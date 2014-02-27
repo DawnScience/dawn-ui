@@ -6,6 +6,10 @@ import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IOperator;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IParameter;
 
+/**
+ * Represents a parameter in the function model
+ *
+ */
 public class ParameterModel extends FunctionModelElement {
 	private FunctionModelElement parentModel;
 	private IFunction function;

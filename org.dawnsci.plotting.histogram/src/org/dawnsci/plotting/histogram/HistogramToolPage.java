@@ -185,7 +185,7 @@ public class HistogramToolPage extends AbstractToolPage {
 	private ILineTrace blueTrace;
 
 	// HELPERS
-	private ExtentionPointManager extentionPointManager;
+	private ExtensionPointManager extensionPointManager;
 	private UIJob imagerepaintJob;
 	private PaletteData paletteData;
 	private int internalEvent = 0; // This is very likely to go wrong, suggest avoid
@@ -228,7 +228,7 @@ public class HistogramToolPage extends AbstractToolPage {
 					it = (IPaletteTrace)evt.getSource();
 				}
 				updateImage(it, false);
-				updatePalette(it, null, true);
+				if (it.isRescaleHistogram()) updatePalette(it, null, true);
 			}
 			@Override
 			public void tracesAdded(TraceEvent evt) {
@@ -251,7 +251,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			@Override
 			public void minChanged(PaletteEvent event) {
-				if (internalEvent > 0 || mode == FIXED) return;
+				if (internalEvent > 0) return;
 				logger.trace("paletteListener minChanged firing");
 				histoMin = ((IPaletteTrace)event.getSource()).getImageServiceBean().getMin().doubleValue();
 				updateHistogramToolElements(event.getTrace(), null, false);
@@ -259,7 +259,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			@Override
 			public void maxChanged(PaletteEvent event) {
-				if (internalEvent > 0 || mode == FIXED) return;
+				if (internalEvent > 0) return;
 				logger.trace("paletteListener maxChanged firing");
 				histoMax = ((IPaletteTrace)event.getSource()).getImageServiceBean().getMax().doubleValue();
 				updateHistogramToolElements(event.getTrace(), null, false);
@@ -267,7 +267,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			@Override
 			public void maxCutChanged(PaletteEvent evt) {
-				if (internalEvent > 0 || mode == FIXED) return;
+				if (internalEvent > 0) return;
 				logger.trace("paletteListener maxCutChanged firing");
 				rangeMax = ((IPaletteTrace)evt.getSource()).getImageServiceBean().getMaximumCutBound().getBound().doubleValue();
 				zingerText.setText(Double.toString(rangeMax));
@@ -278,7 +278,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			@Override
 			public void minCutChanged(PaletteEvent evt) {
-				if (internalEvent > 0 || mode == FIXED) return;
+				if (internalEvent > 0) return;
 				logger.trace("paletteListener minCutChanged firing");
 				rangeMin = ((IPaletteTrace)evt.getSource()).getImageServiceBean().getMinimumCutBound().getBound().doubleValue();
 				deadPixelText.setText(Double.toString(rangeMin));
@@ -451,12 +451,15 @@ public class HistogramToolPage extends AbstractToolPage {
 		};
 
 		// Get all information from the extension points
-		extentionPointManager = ExtentionPointManager.getManager();
+		extensionPointManager = ExtensionPointManager.getManager();
 
 
 		histogramRegionListener = new IROIListener.Stub() {
 			@Override
 			public void roiDragged(ROIEvent evt) {
+				regionDragging = true;
+				logger.debug("Dragging ROI");
+				//roiChanged(evt);
 //				if (evt.getROI() instanceof RectangularROI) {
 //					regionDragging = true;
 //					IRegion region = histogramPlot.getRegion("Histogram Region");
@@ -471,14 +474,14 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			@Override
 			public void roiChanged(ROIEvent evt) {
+				logger.debug("Stopped Dragging");
+				regionDragging = false;
 				if (evt.getROI() instanceof RectangularROI) {
-					regionDragging = true;
 					IRegion region = histogramPlot.getRegion("Histogram Region");
 					RectangularROI roi = (RectangularROI) region.getROI();
 					histoMin = roi.getPoint()[0];
 					histoMax = roi.getEndPoint()[0];
 					updateHistogramToolElements(null);
-					regionDragging=false;
 				}
 			}
 		};
@@ -504,34 +507,37 @@ public class HistogramToolPage extends AbstractToolPage {
 	protected boolean updatePalette(IPaletteTrace eventsImage, IProgressMonitor mon, boolean force) {
 		logger.trace("imagerepaintJob running");
 		internalEvent++;
-
-		IPaletteTrace image = eventsImage!=null ? eventsImage : getPaletteTrace();
-		if (image!=null) {
+		try {
+			IPaletteTrace image = eventsImage!=null ? eventsImage : getPaletteTrace();
 			
-			if (!force &&
-				maxLast == histoMax &&
-				minLast == histoMin &&
-				palLast!=null && paletteEquals(palLast, paletteData)) {
-				return false; // Nothing to do, faster not to do it.
+			if (image!=null) {
+				
+				if (!force &&
+					maxLast == histoMax &&
+					minLast == histoMin &&
+					palLast!=null && paletteEquals(palLast, paletteData)) {
+					return false; // Nothing to do, faster not to do it.
+				}
+				maxLast = histoMax;
+				minLast = histoMin;
+				palLast = paletteData;
+				
+				image.setMax(histoMax);
+				if (mon!=null && mon.isCanceled()) return false;
+	
+				image.setMin(histoMin);
+				if (mon!=null && mon.isCanceled()) return false;
+	
+				image.setPaletteData(paletteData);
+				logger.trace("Set palette data on image id = "+image.getName());
+				if (mon!=null && mon.isCanceled()) return false;
+	
+				return true;
+			} else {
+				return false;
 			}
-			maxLast = histoMax;
-			minLast = histoMin;
-			palLast = paletteData;
-			
-			image.setMax(histoMax);
-			if (mon!=null && mon.isCanceled()) return false;
-
-			image.setMin(histoMin);
-			if (mon!=null && mon.isCanceled()) return false;
-
-			image.setPaletteData(paletteData);
-			logger.trace("Set palette data on image id = "+image.getName());
-			if (mon!=null && mon.isCanceled()) return false;
-
-			internalEvent--;
-			return true;
-		} else {
-			return false;
+		}finally {
+			internalEvent--;			
 		}
 	}
 
@@ -577,7 +583,7 @@ public class HistogramToolPage extends AbstractToolPage {
 		cmbColourMap.addSelectionListener(colourSchemeListener);
 
 		// Populate the control
-		for (ColourSchemeContribution contribution : extentionPointManager.getColourSchemeContributions()) {
+		for (ColourSchemeContribution contribution : extensionPointManager.getColourSchemeContributions()) {
 			cmbColourMap.add(contribution.getName());
 		}
 
@@ -637,7 +643,7 @@ public class HistogramToolPage extends AbstractToolPage {
 		}		
 
 		// populate the control
-		for (TransferFunctionContribution contribution : extentionPointManager.getTransferFunctionContributions()) {
+		for (TransferFunctionContribution contribution : extensionPointManager.getTransferFunctionContributions()) {
 			cmbRedColour.add(contribution.getName());
 			cmbGreenColour.add(contribution.getName());
 			cmbBlueColour.add(contribution.getName());
@@ -750,6 +756,7 @@ public class HistogramToolPage extends AbstractToolPage {
 				PlotType.XY,
 				null);
 		histogramPlot.getPlotComposite().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		histogramPlot.setRescale(false);
 
 
 		histogramExpander.setClient(histogramComposite);
@@ -826,15 +833,16 @@ public class HistogramToolPage extends AbstractToolPage {
 	}
 
 	private boolean updatingColorSchemeInternally = false;
+
 	/**
 	 * Use the controls from the GUI to set the individual colour elements from the selected colour scheme
 	 */
 	protected void updateColourScheme() {
-		ColourSchemeContribution colourScheme = extentionPointManager.getColourSchemeContribution(cmbColourMap.getText());
-		String red = extentionPointManager.getTransferFunctionFromID(colourScheme.getRedID()).getName();
-		String green = extentionPointManager.getTransferFunctionFromID(colourScheme.getGreenID()).getName();
-		String blue = extentionPointManager.getTransferFunctionFromID(colourScheme.getBlueID()).getName();
-		String alpha = extentionPointManager.getTransferFunctionFromID(colourScheme.getAlphaID()).getName();
+		ColourSchemeContribution colourScheme = extensionPointManager.getColourSchemeContribution(cmbColourMap.getText());
+		String red = extensionPointManager.getTransferFunctionFromID(colourScheme.getRedID()).getName();
+		String green = extensionPointManager.getTransferFunctionFromID(colourScheme.getGreenID()).getName();
+		String blue = extensionPointManager.getTransferFunctionFromID(colourScheme.getBlueID()).getName();
+		String alpha = extensionPointManager.getTransferFunctionFromID(colourScheme.getAlphaID()).getName();
 
 		setComboByName(cmbRedColour, red);
 		setComboByName(cmbGreenColour, green);
@@ -1141,6 +1149,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 		// Now update all the trace data in a thread-safe way
 		final double finalScale = scale;
+		final boolean rescale = image.isRescaleHistogram();
 
 		getControl().getDisplay().syncExec(new Runnable() {
 
@@ -1151,17 +1160,18 @@ public class HistogramToolPage extends AbstractToolPage {
 					histogramDirty = false;
 				}
 				if(!regionDragging ) {
+					logger.debug("Repainting Histogram");
 					createRegion();
-				}
-				redTrace.setData(RGBX, R);
-				greenTrace.setData(RGBX, G);
-				blueTrace.setData(RGBX, B);
-				histogramPlot.getSelectedXAxis().setRange(scaleMin, scaleMax);
-				histogramPlot.getSelectedXAxis().setLog10(btnColourMapLog.getSelection());
-				histogramPlot.getSelectedXAxis().setTitle("Intensity");
-				histogramPlot.getSelectedYAxis().setRange(0, finalScale*256);
-				histogramPlot.getSelectedYAxis().setTitle("Log(Frequency)");
-				histogramPlot.repaint();
+					redTrace.setData(RGBX, R);
+					greenTrace.setData(RGBX, G);
+					blueTrace.setData(RGBX, B);
+					if (rescale) histogramPlot.getSelectedXAxis().setRange(scaleMin, scaleMax);
+					histogramPlot.getSelectedXAxis().setLog10(btnColourMapLog.getSelection());
+					histogramPlot.getSelectedXAxis().setTitle("Intensity");
+					histogramPlot.getSelectedYAxis().setRange(0, finalScale*256);
+					histogramPlot.getSelectedYAxis().setTitle("Log(Frequency)");
+					histogramPlot.repaint();
+				};
 			}
 		});
 	}
@@ -1208,9 +1218,9 @@ public class HistogramToolPage extends AbstractToolPage {
 	private void buildPaletteData() {
 
 		// first get the appropriate bits from the extension points
-		int[] red = extentionPointManager.getTransferFunction(cmbRedColour.getText()).getFunction().getArray();
-		int[] green = extentionPointManager.getTransferFunction(cmbGreenColour.getText()).getFunction().getArray();
-		int[] blue = extentionPointManager.getTransferFunction(cmbBlueColour.getText()).getFunction().getArray();
+		int[] red = extensionPointManager.getTransferFunction(cmbRedColour.getText()).getFunction().getArray();
+		int[] green = extensionPointManager.getTransferFunction(cmbGreenColour.getText()).getFunction().getArray();
+		int[] blue = extensionPointManager.getTransferFunction(cmbBlueColour.getText()).getFunction().getArray();
 
 		if (btnRedInverse.getSelection()) {
 			red = invert(red);
@@ -1237,21 +1247,29 @@ public class HistogramToolPage extends AbstractToolPage {
 		return result;
 	}
 
+	private boolean creatingRegion = false;
 
 	private void createRegion(){
+		if (creatingRegion) return;
+		creatingRegion = true;
 		try {
 			IRegion region = histogramPlot.getRegion("Histogram Region");
 			//Test if the region is already there and update the currentRegion
 			if (region == null || !region.isVisible()) {
 				region = histogramPlot.createRegion("Histogram Region", RegionType.XAXIS);
 				histogramPlot.addRegion(region);
+				region.addROIListener(histogramRegionListener);
 			}
 
-			RectangularROI rroi = new RectangularROI(histoMin, 0, histoMax-histoMin, 1, 0);
-			region.setROI(rroi);
-			region.addROIListener(histogramRegionListener);
+			//if (getImageTrace().isRescaleHistogram()) {
+				logger.debug("Hitting this");
+				RectangularROI rroi = new RectangularROI(histoMin, 0, histoMax-histoMin, 1, 0);
+				region.setROI(rroi);
+			//}
 		} catch (Exception e) {
 			logger.error("Couldn't open histogram view and create ROI", e);
+		} finally {
+			creatingRegion = false;
 		}
 	}
 	

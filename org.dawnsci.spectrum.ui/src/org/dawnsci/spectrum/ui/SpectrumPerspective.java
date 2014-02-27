@@ -29,11 +29,11 @@ public class SpectrumPerspective implements IPerspectiveFactory {
 		IFolderLayout navigatorFolder = layout.createFolder("navigator-folder", IPageLayout.LEFT, 0.15f, editorArea);
 		//navigatorFolder.addView("org.dawnsci.spectrum.ui.views.SpectrumProject");
 		navigatorFolder.addView("org.eclipse.ui.navigator.ProjectExplorer");
-		navigatorFolder.addView("uk.ac.diamond.sda.navigator.views.FileView");
+		navigatorFolder.addView("org.dawnsci.spectrum.ui.views.SpectrumFileView");
 		
-		IViewLayout vLayout = layout.getViewLayout("org.dawnsci.spectrum.ui.views.SpectrumProject");
+		IViewLayout vLayout = layout.getViewLayout("org.eclipse.ui.navigator.ProjectExplorer");
 		vLayout.setCloseable(false);
-		vLayout = layout.getViewLayout("uk.ac.diamond.sda.navigator.views.FileView");
+		vLayout = layout.getViewLayout("org.dawnsci.spectrum.ui.views.SpectrumFileView");
 		vLayout.setCloseable(false);
 		
 		{

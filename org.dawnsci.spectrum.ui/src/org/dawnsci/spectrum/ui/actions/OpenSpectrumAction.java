@@ -10,8 +10,14 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import uk.ac.diamond.sda.navigator.views.FileView;
 
 public class OpenSpectrumAction extends Action {
+	
+	private static final Logger logger = LoggerFactory.getLogger(OpenLocalFileAction.class);
 	
 	private ISelectionProvider provider;
 
@@ -58,7 +64,7 @@ public class OpenSpectrumAction extends Action {
 
 				IFile file = (IFile)sSelection.getFirstElement();
 				String loc = file.getRawLocation().toOSString();
-				System.err.println(loc);
+				logger.debug(loc);
 				
 				IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 				IViewPart view = page.findView("org.dawnsci.spectrum.ui.views.SpectrumView");

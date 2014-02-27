@@ -24,12 +24,15 @@ import uk.ac.diamond.scisoft.analysis.fitting.functions.IOperator;
 
 public class FunctionLabelProvider extends BaseLabelProvider implements
 		IStyledLabelProvider {
+
 	private static final Image CURVE = Activator.getImage("chart_curve.png");
+	private static final Image LINK = Activator.getImage("link.png");
 	private static final Image BULLET_BLUE = Activator
 			.getImage("bullet_blue.png");
 	private static final Image BULLET_ORANGE = Activator
 			.getImage("bullet_orange.png");
 	public static final Styler ERROR_STYLER = new Styler() {
+		@Override
 		public void applyStyles(TextStyle textStyle) {
 			textStyle.foreground = JFaceResources.getColorRegistry().get(
 					JFacePreferences.ERROR_COLOR);
@@ -43,8 +46,10 @@ public class FunctionLabelProvider extends BaseLabelProvider implements
 					.getImage(ISharedImages.IMG_OBJ_ADD);
 		} else if (element instanceof SetFunctionModel) {
 			return PlatformUI.getWorkbench().getSharedImages()
-					.getImage(ISharedImages.IMG_OBJ_ADD);// TODO change image
+					.getImage(ISharedImages.IMG_OBJ_ADD);
 		} else if (element instanceof FunctionModel) {
+			if (((FunctionModel)element).getFunction() instanceof JexlExpressionFunction)
+				return LINK;
 			return CURVE;
 		} else if (element instanceof OperatorModel) {
 			return BULLET_BLUE;

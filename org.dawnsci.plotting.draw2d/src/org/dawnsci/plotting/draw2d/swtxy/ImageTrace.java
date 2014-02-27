@@ -1284,8 +1284,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				for (int x = 0; x<xMin; ++x) {
 			        try {
 			        	// We only add the falses 
-			        	if (!mask.getBoolean(y,x)) {
-			        		maskDataset.set(Boolean.FALSE, y,x);
+			        	if (!mask.getBoolean(y, x)) {
+			        		maskDataset.set(Boolean.FALSE, y, x);
 			        	}
 			        } catch (Throwable ignored) {
 			        	continue;

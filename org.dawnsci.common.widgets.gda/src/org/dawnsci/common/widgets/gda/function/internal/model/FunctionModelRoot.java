@@ -33,6 +33,10 @@ import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IOperator;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IParameter;
 
+/**
+ * Root domain object for function model 
+ *  Wraps around a CompositeFunction
+ */
 public class FunctionModelRoot {
 
 	private CompositeFunction root;

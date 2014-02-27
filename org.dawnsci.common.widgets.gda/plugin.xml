@@ -62,5 +62,21 @@
             sequence="INSERT">
       </key>
    </extension>
-
+   <extension
+         point="org.eclipse.core.runtime.adapters">
+      <factory
+            adaptableType="org.dawnsci.common.widgets.gda.function.descriptors.FunctionDescriptor"
+            class="org.dawnsci.common.widgets.gda.function.internal.FunctionContentProposalAdapterFactory">
+         <adapter
+               type="org.eclipse.jface.fieldassist.IContentProposalProvider">
+         </adapter>
+      </factory>
+      <factory
+            adaptableType="org.dawnsci.common.widgets.gda.function.jexl.JexlExpressionFunctionDescriptor"
+            class="org.dawnsci.common.widgets.gda.function.internal.FunctionContentProposalAdapterFactory">
+         <adapter
+               type="org.eclipse.jface.fieldassist.IContentProposalProvider">
+         </adapter>
+      </factory>
+   </extension>
 </plugin>

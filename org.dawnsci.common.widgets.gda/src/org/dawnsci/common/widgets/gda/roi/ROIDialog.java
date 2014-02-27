@@ -26,35 +26,38 @@ import uk.ac.diamond.scisoft.analysis.roi.IROI;
 public class ROIDialog extends Dialog {
 
 	private static final Logger logger = LoggerFactory.getLogger(ROIDialog.class);
-	
+
 	private ROIEditTable roiEditor;
 	private CCombo roiType;
-	
+
 	public ROIDialog(Shell parentShell) {
 		super(parentShell);
 	}
-	
+
+	@Override
 	protected boolean isResizable() {
 		return true;
 	}
-	
+
+	@Override
 	public Control createDialogArea(Composite parent) {
-		
+
 		final Composite main = (Composite)super.createDialogArea(parent);
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
+
 		final Composite top= new Composite(main, SWT.NONE);
 		top.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		top.setLayout(new GridLayout(2, false));
-		
+
 		final Label label = new Label(top, SWT.NONE);
 		label.setText("Region type    ");
-		label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));	
-		
+		label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+
 		roiType = new CCombo(top, SWT.READ_ONLY|SWT.BORDER);
 		roiType.setItems(ROIType.getTypes());
 		roiType.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		roiType.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				try {
 					roiEditor.setRegion(ROIType.createNew(roiType.getSelectionIndex()), null, null);
@@ -64,19 +67,19 @@ public class ROIDialog extends Dialog {
 			}
 		});
 
-		
+
 		this.roiEditor = new ROIEditTable();
 		roiEditor.createPartControl(main);
-		
+
 		return main;
 	}
-	
+
 	public void setROI(IROI roi) {
 		final int index = ROIType.getIndex(roi.getClass());
 		roiType.select(index);
 		roiEditor.setRegion(roi, null, null);
 	}
-	
+
 	public IROI getROI() {
 		return roiEditor.getRoi();
 	}

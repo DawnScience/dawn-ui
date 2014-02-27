@@ -11,19 +11,19 @@ import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
 
-public class ExtentionPointManager {
+public class ExtensionPointManager {
 	
 	private static final String TRANSFER_FUNCTION_ID = "org.dawnsci.plotting.histogram.channelColourScheme";
 	private static final String COLOUR_SCHEME_ID = "org.dawnsci.plotting.histogram.colourScheme";
 	private List<TransferFunctionContribution> transferFunctions;
 	private List<ColourSchemeContribution> colourSchemes;
 	
-	private static ExtentionPointManager staticManager;
-	public static ExtentionPointManager getManager() {
-		if (staticManager==null) staticManager = new ExtentionPointManager();
+	private static ExtensionPointManager staticManager;
+	public static ExtensionPointManager getManager() {
+		if (staticManager==null) staticManager = new ExtensionPointManager();
 		return staticManager;
 	}
-	private ExtentionPointManager() {
+	private ExtensionPointManager() {
 		
 	}
 	

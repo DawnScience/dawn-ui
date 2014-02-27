@@ -180,7 +180,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(functionWidget);
 
 		// Initialise with a simple function.
-		compFunction = new CompositeFunction();
+		if (compFunction == null) compFunction = new CompositeFunction();
 		functionWidget.setInput(compFunction);
 		functionWidget.addModelModifiedListener(new ModelModifiedAdapter() {
 			@Override
@@ -203,8 +203,8 @@ public class FunctionFittingTool extends AbstractToolPage implements
 
 		if (connectLater) {
 			connectPlotSystemListeners();
+			compFunctionModified();
 		}
-		compFunctionModified();
 	}
 
 	@Override
@@ -660,8 +660,11 @@ public class FunctionFittingTool extends AbstractToolPage implements
 
 			}
 		}
-		functionWidget.setInput(compFunction);
-		compFunctionModified();
+		
+		if (functionWidget != null) {
+			functionWidget.setInput(compFunction);
+			compFunctionModified();
+		}
 	}
 
 	@Override

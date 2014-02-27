@@ -60,5 +60,18 @@ public class PowderIntegrationJob extends Job {
 		system.repaint();
 		return Status.OK_STATUS;
 	}
+	
+	public List<AbstractDataset> process(AbstractDataset data) {
+		
+		if (integrator == null) {
+			integrator = new NonPixelSplittingIntegration(qSpace, nBins);
+			integrator.setMask(mask);
+			integrator.setROI(roi);
+			integrator.setAxisType(XAxis.Q);
+		}
+	
+		return integrator.value(data);
+		
+	}
 
 }

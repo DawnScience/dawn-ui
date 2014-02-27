@@ -196,6 +196,8 @@ public interface IRegion {
 		POINT("Point",             darkMagenta),
 		ELLIPSE("Ellipse",         ColorConstants.lightGreen),
 		ELLIPSEFIT("Ellipse fit",  ColorConstants.lightGreen),
+		PARABOLA("Parabola",       ColorConstants.orange),
+		HYPERBOLA("Hyperbola",     ColorConstants.lightBlue),
 		RING("Ring",               darkYellow),
 		XAXIS("X-Axis",            ColorConstants.blue),
 		YAXIS("Y-Axis",            ColorConstants.blue),
