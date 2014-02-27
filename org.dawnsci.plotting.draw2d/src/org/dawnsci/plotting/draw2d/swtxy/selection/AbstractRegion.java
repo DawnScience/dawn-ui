@@ -118,6 +118,8 @@ public abstract class AbstractRegion extends Figure implements IRegion, IRegionC
 		String name = roi.getName();
 		if (name == null || name.isEmpty() || name.trim().isEmpty()) {
 			roi.setName(getName());
+		} else {
+			setName(name);
 		}
 		try {
 			regionEventsActive = false;
