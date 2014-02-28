@@ -9,7 +9,6 @@ import org.eclipse.swt.graphics.Image;
 
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IOperator;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IParameter;
 
 /**
  * Content proposals for simple functions (not jexl)
@@ -51,17 +50,7 @@ public class FunctionContentProposal implements IContentProposal, IAdaptable {
 	@Override
 	public String getDescription() {
 		try {
-			IFunction function2 = functionDescriptor.getFunction();
-			StringBuilder desc = new StringBuilder(function2.getDescription() + System.lineSeparator());
-
-			IParameter[] parameters = function2.getParameters();
-			if (parameters != null && parameters.length != 0){
-				desc.append(System.lineSeparator() + "Parameters:" + System.lineSeparator());
-				for (IParameter param : function2.getParameters()) {
-					desc.append("  " + param.getName() + System.lineSeparator());
-				}
-			}
-			return desc.toString();
+			return functionDescriptor.getFunction().getDescription();
 		} catch (FunctionInstantiationFailedException e) {
 		}
 		return null;
