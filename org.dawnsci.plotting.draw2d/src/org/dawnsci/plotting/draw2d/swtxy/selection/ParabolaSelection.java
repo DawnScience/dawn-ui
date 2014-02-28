@@ -17,44 +17,41 @@
 package org.dawnsci.plotting.draw2d.swtxy.selection;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.dawnsci.plotting.api.region.ILockableRegion;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegionContainer;
-import org.dawnsci.plotting.api.region.ROIEvent;
 import org.dawnsci.plotting.draw2d.swtxy.translate.FigureTranslator;
 import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationEvent;
 import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationListener;
 import org.dawnsci.plotting.draw2d.swtxy.util.Draw2DUtils;
-import org.dawnsci.plotting.draw2d.swtxy.util.RotatableEllipse;
+import org.dawnsci.plotting.draw2d.swtxy.util.PointFunction;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.FigureListener;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.MouseEvent;
-import org.eclipse.draw2d.geometry.Dimension;
+import org.eclipse.draw2d.Shape;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
-import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.widgets.Display;
 
-import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
+import uk.ac.diamond.scisoft.analysis.roi.ParabolicROI;
 
-class EllipseSelection extends AbstractSelectionRegion implements ILockableRegion {
+class ParabolaSelection extends AbstractSelectionRegion implements ILockableRegion {
 
-	DecoratedEllipse ellipse;
+	Parabola parabola;
 
-	EllipseSelection(String name, ICoordinateSystem coords) {
+	ParabolaSelection(String name, ICoordinateSystem coords) {
 		super(name, coords);
-		setRegionColor(ColorConstants.lightGreen);
+		setRegionColor(ColorConstants.orange);
 		setAlpha(80);
 		setLineWidth(2);
 		labelColour = ColorConstants.black;
@@ -64,38 +61,37 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 	@Override
 	public void setMobile(boolean mobile) {
 		super.setMobile(mobile);
-		if (ellipse != null)
-			ellipse.setMobile(mobile);
+		if (parabola != null)
+			parabola.setMobile(mobile);
 	}
 
 	@Override
 	public void createContents(Figure parent) {
-		ellipse = new DecoratedEllipse(parent);
-		ellipse.setCoordinateSystem(coords);
-//		ellipse.setCursor(Draw2DUtils.getRoiMoveCursor());
+		parabola = new Parabola(parent);
+		parabola.setCoordinateSystem(coords);
 
-		parent.add(ellipse);
+		parent.add(parabola);
 		sync(getBean());
-		ellipse.setLineWidth(getLineWidth());
+		parabola.setLineWidth(getLineWidth());
 	}
 
 	@Override
 	public boolean containsPoint(int x, int y) {
-		return ellipse.containsPoint(x, y);
+		return parabola.containsPoint(x, y);
 	}
 
 	@Override
 	public RegionType getRegionType() {
-		return RegionType.ELLIPSE;
+		return RegionType.PARABOLA;
 	}
 
 	@Override
 	protected void updateBounds() {
-		if (ellipse != null) {
-			ellipse.updateFromHandles();
-			Rectangle b = ellipse.getBounds();
+		if (parabola != null) {
+			parabola.updateFromHandles();
+			Rectangle b = parabola.getBounds();
 			if (b != null)
-				ellipse.setBounds(b);
+				parabola.setBounds(b);
 		}
 	}
 
@@ -104,6 +100,7 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 		if (clicks.size() <= 1)
 			return;
 
+		// FIXME
 		g.setLineStyle(SWT.LINE_DOT);
 		g.setLineWidth(2);
 		g.setForegroundColor(getRegionColor());
@@ -113,8 +110,8 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 
 	@Override
 	public void initialize(PointList clicks) {
-		if (ellipse != null) {
-			ellipse.setup(clicks);
+		if (parabola != null) {
+			parabola.setup(clicks);
 			fireROIChanged(getROI());
 		}
 	}
@@ -126,31 +123,22 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 
 	@Override
 	protected IROI createROI(boolean recordResult) {
-		final EllipticalROI eroi = new EllipticalROI();
-		Point p = ellipse.getCentre();
-		eroi.setPoint(coords.getPositionValue(p.x(), p.y()));
-		eroi.setAngleDegrees(ellipse.getAngleDegrees());
-		double[] axes = ellipse.getAxes();
-		double[] v = coords.getPositionValue((int) (p.preciseX() + axes[0]), (int) (p.preciseY() + axes[1]));
-		v[0] -= eroi.getPointX(); v[0] *= 0.5;
-		v[1] -= eroi.getPointY(); v[1] *= 0.5;
-		eroi.setSemiAxes(v);
-		eroi.setName(getName());
-		if (roi != null) {
-			eroi.setPlot(roi.isPlot());
-			// set the Region isActive flag
-			this.setActive(roi.isPlot());
-		}
+//		proi.setName(getName());
+//		if (roi != null) {
+//			proi.setPlot(roi.isPlot());
+//			// set the Region isActive flag
+//			this.setActive(roi.isPlot());
+//		}
 		if (recordResult) {
-			roi = eroi;
+			roi = parabola.croi;
 		}
-		return eroi;
+		return parabola.croi;
 	}
 
 	@Override
 	protected void updateRegion() {
-		if (ellipse != null && roi instanceof EllipticalROI) {
-			ellipse.updateFromROI((EllipticalROI) roi);
+		if (parabola != null && roi instanceof ParabolicROI) {
+			parabola.updateFromROI((ParabolicROI) roi);
 			sync(getBean());
 		}
 	}
@@ -163,20 +151,22 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 	@Override
 	public void dispose() {
 		super.dispose();
-		if (ellipse != null) {
-			ellipse.dispose();
+		if (parabola != null) {
+			parabola.dispose();
 		}
 	}
 
-	class DecoratedEllipse extends RotatableEllipse implements IRegionContainer {
+	class Parabola extends Shape implements IRegionContainer, PointFunction {
+		private boolean showMajorAxis;
 		List<IFigure> handles;
 		List<FigureTranslator> fTranslators;
 		private Figure parent;
 		private TranslationListener handleListener;
 		private FigureListener moveListener;
 		private static final int SIDE = 8;
+		private Rectangle box;
 
-		public DecoratedEllipse(Figure parent) {
+		public Parabola(Figure parent) {
 			super();
 			handles = new ArrayList<IFigure>();
 			fTranslators = new ArrayList<FigureTranslator>();
@@ -187,9 +177,76 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 			moveListener = new FigureListener() {
 				@Override
 				public void figureMoved(IFigure source) {
-					DecoratedEllipse.this.parent.repaint();
+					Parabola.this.parent.repaint();
 				}
 			};
+		}
+
+		private ICoordinateSystem cs;
+		private ParabolicROI croi;
+
+		@Override
+		public void setCoordinateSystem(ICoordinateSystem system) {
+			cs = system;
+		}
+
+		public ICoordinateSystem getCoordinateSystem() {
+			return cs;
+		}
+
+		/**
+		 * @param show if true, show major axis
+		 */
+		public void showMajorAxis(boolean show) {
+			showMajorAxis = show;
+		}
+
+		public Point getFocus() {
+			if (croi == null) {
+				return null;
+			}
+			int[] pt = cs.getValuePosition(croi.getPointRef());
+			return new Point(pt[0], pt[1]);
+		}
+
+		public void setFocus(int x, int y) {
+			if (croi == null) {
+				return;
+			}
+			double[] pt = cs.getPositionValue(x, y);
+			croi.setPoint(pt);
+		}
+
+		/**
+		 * Get point on ellipse at given angle
+		 * @param angle (positive for anti-clockwise)
+		 * @return
+		 */
+		public Point getPoint(double angle) {
+			if (croi == null) {
+				return null;
+			}
+			int[] pt = cs.getValuePosition(croi.getPoint(angle));
+			return new Point(pt[0], pt[1]);
+		}
+
+		@Override
+		public Point calculatePoint(double... parameter) {
+			return getPoint(parameter[0]);
+		}
+
+		public double getAngleDegrees() {
+			if (croi == null) {
+				return 0;
+			}
+			return croi.getAngleDegrees();
+		}
+
+		public double getFocalParameter() {
+			if (croi == null) {
+				return 0;
+			}
+			return croi.getFocalParameter();
 		}
 
 		public void dispose() {
@@ -203,32 +260,19 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 		}
 
 		public void setup(PointList corners) {
-			Rectangle r = new Rectangle(corners.getFirstPoint(), corners.getLastPoint());
-			double ratio = coords.getAspectRatio();
-			double w = r.preciseWidth();
-			double h = r.preciseHeight();
-			if (w*ratio < h) {
-				setAxes(h/ratio, w*ratio);
-				setAngleDegrees(90);
-			} else {
-				setAxes(w, h);
-			}
-			Point c = r.getCenter();
-			setCentre(c.preciseX(), c.preciseY());
-
-			createHandles(true);
+//			createHandles(true);
 		}
 
 		private static final int CENTRE = 4;
 
 		private void createHandles(boolean createROI) {
-			boolean mobile = isMobile();
-			boolean visible = isVisible() && mobile;
-			// handles
-			for (int i = 0; i < 4; i++) {
-				addHandle(getPoint(i*90), mobile, visible);
-			}
-			addCentreHandle(mobile, visible); // centre should be fourth
+//			boolean mobile = isMobile();
+//			boolean visible = isVisible() && mobile;
+//			// handles
+//			for (int i = 0; i < 4; i++) {
+//				addHandle(getPoint(i*90), mobile, visible);
+//			}
+//			addCentreHandle(mobile, visible); // centre should be fourth
 
 			// figure move
 			addFigureListener(moveListener);
@@ -246,20 +290,86 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 				createROI(true);
 
 			setRegionObjects(this, handles);
+			calcBox(false);
 			Rectangle b = getBounds();
 			if (b != null)
 				setBounds(b);
 		}
 
 		@Override
+		protected void fillShape(Graphics graphics) {
+//			if (!isShapeFriendlySize()) return;
+//
+//			graphics.pushState();
+//			graphics.setAdvanced(true);
+//			graphics.setAntialias(SWT.ON);
+//			graphics.translate((int) affine.getTranslationX(), (int) affine.getTranslationY());
+//			graphics.rotate((float) affine.getRotationDegrees());
+//			// NB do not use Graphics#scale and unit shape as there are precision problems
+//			calcBox(false);
+//			graphics.fillOval(0, 0, (int) affine.getScaleX(), (int) affine.getScaleY());
+//			graphics.popState();
+		}
+
+		@Override
 		protected void outlineShape(Graphics graphics) {
-			super.outlineShape(graphics);
+			graphics.pushState();
+			graphics.setAdvanced(true);
+			graphics.setAntialias(SWT.ON);
+
+			double max = getMaxRadius();
+			double start = croi.getStartAngle(max);
+			PointList points = Draw2DUtils.generateCurve(this, start, 2*Math.PI - start, Math.PI/100);
+			Rectangle bnd = new Rectangle();
+			graphics.getClip(bnd);
+			Draw2DUtils.drawClippedPolyline(graphics, points, bnd, false);
+
+			if (showMajorAxis) {
+				double offset = Math.toRadians(cs.getXAxisRotationAngleDegrees());
+				Point b = getPoint(Math.PI + offset);
+				Point f = getFocus();
+				Point e = b.getNegated().translate(f);
+				double l = b.getDistance(f);
+				e.scale((max + l)/l);
+				graphics.drawLine(b, e.getTranslated(b));
+			}
+			graphics.popState();
+
 			if (label != null && isShowLabel()) {
 				graphics.setAlpha(192);
 				graphics.setForegroundColor(labelColour);
 				graphics.setBackgroundColor(ColorConstants.white);
 				graphics.setFont(labelFont);
-				graphics.fillString(label, getPoint(135));
+				graphics.fillString(label, getPoint(Math.PI * 0.75));
+			}
+		}
+
+		public double getMaxRadius() {
+			Point p = box.getTopLeft();
+			double[] c = cs.getPositionValue(p.x(), p.y());
+			double[] f = croi.getPointRef();
+			double max = Math.hypot(c[0] - f[0], c[1] - f[1]);
+
+			p = box.getTopRight();
+			c = cs.getPositionValue(p.x(), p.y());
+			max = Math.max(max, Math.hypot(c[0] - f[0], c[1] - f[1]));
+
+			p = box.getBottomRight();
+			c = cs.getPositionValue(p.x(), p.y());
+			max = Math.max(max, Math.hypot(c[0] - f[0], c[1] - f[1]));
+
+			p = box.getBottomLeft();
+			c = cs.getPositionValue(p.x(), p.y());
+			max = Math.max(max, Math.hypot(c[0] - f[0], c[1] - f[1]));
+			return max;
+		}
+
+		private void calcBox(boolean redraw) {
+			if (parent == null)
+				return;
+			box = parent.getBounds(); // as conic is unbounded, use parent for bounds
+			if (redraw) {
+				setBounds(box);
 			}
 		}
 
@@ -294,8 +404,8 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 			handles.add(h);
 		}
 
-		private void addCentreHandle(boolean mobile, boolean visible) {
-			Point c = getCentre();
+		private void addFocusHandle(boolean mobile, boolean visible) {
+			Point c = getFocus();
 			RectangularHandle h = new RectangularHandle(getCoordinateSystem(), getRegionColor(), this, SIDE, c.preciseX(), c.preciseY());
 			h.setVisible(visible);
 			parent.add(h);
@@ -309,7 +419,7 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 
 		@Override
 		public String toString() {
-			return "EllSel: cen=" + getCentre() + ", axes=" + Arrays.toString(getAxes()) + ", ang=" + getAngleDegrees();
+			return "ParaSel: focus=" + getFocus() + ", focal=" + getFocalParameter() + ", ang=" + getAngleDegrees();
 		}
 
 		private TranslationListener createHandleNotifier() {
@@ -343,22 +453,22 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 
 				@Override
 				public void translationAfter(TranslationEvent evt) {
-					Object src = evt.getSource();
-					if (src instanceof FigureTranslator) {
-						if (ha != null) {
-							double[] axes = getAxes();
-							Point pa = getInverseTransformedPoint(new PrecisionPoint(ha.getSelectionPoint()));
-							Dimension d = pa.getDifference(centre);
-							if (major) {
-								axes[0] *= 2. * Math.abs(d.preciseWidth());
-							} else {
-								axes[1] *= 2. * Math.abs(d.preciseHeight());
-							}
-							setAxes(axes[0], axes[1]);
-							updateHandlePositions();
-						}
-						fireROIDragged(createROI(false), ROIEvent.DRAG_TYPE.RESIZE);
-					}
+//					Object src = evt.getSource();
+//					if (src instanceof FigureTranslator) {
+//						if (ha != null) {
+//							double[] axes = getAxes();
+//							Point pa = getInverseTransformedPoint(new PrecisionPoint(ha.getSelectionPoint()));
+//							Dimension d = pa.getDifference(centre);
+//							if (major) {
+//								axes[0] *= 2. * Math.abs(d.preciseWidth());
+//							} else {
+//								axes[1] *= 2. * Math.abs(d.preciseHeight());
+//							}
+//							setAxes(axes[0], axes[1]);
+//							updateHandlePositions();
+//						}
+//						fireROIDragged(createROI(false), ROIEvent.DRAG_TYPE.RESIZE);
+//					}
 				}
 
 				@Override
@@ -401,14 +511,14 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 				if (f instanceof SelectionHandle) {
 					SelectionHandle h = (SelectionHandle) f;
 					Point p = h.getSelectionPoint();
-					setCentre(p.preciseX(), p.preciseY());
+					setFocus(p.x(), p.y());
 				}
 			}
 		}
 
 		@Override
 		public Rectangle getBounds() {
-			Rectangle b = super.getBounds();
+			Rectangle b = box == null ? super.getBounds() : new Rectangle(box);
 			if (handles != null)
 				for (IFigure f : handles) {
 					if (f instanceof SelectionHandle) {
@@ -421,18 +531,10 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 
 		/**
 		 * Update according to ROI
-		 * @param sroi
+		 * @param proi
 		 */
-		public void updateFromROI(EllipticalROI eroi) {
-			final double[] xy = eroi.getPointRef();
-			int[] p1 = getCoordinateSystem().getValuePosition(xy[0], xy[1]);
-			int[] p2 = getCoordinateSystem().getValuePosition(2*eroi.getSemiAxis(0) + xy[0], 2*eroi.getSemiAxis(1) + xy[1]);
-
-			setAxes(p2[0] - p1[0], (p2[1] - p1[1])/coords.getAspectRatio());
-
-			setCentre(p1[0], p1[1]);
-			setAngleDegrees(eroi.getAngleDegrees());
-
+		public void updateFromROI(ParabolicROI proi) {
+			this.croi = proi;
 			updateHandlePositions();
 		}
 
@@ -445,7 +547,7 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 					h.setSelectionPoint(np);
 				}
 				SelectionHandle h = (SelectionHandle) handles.get(imax);
-				h.setSelectionPoint(getCentre());
+				h.setSelectionPoint(getFocus());
 			} else {
 				createHandles(false);
 			}
@@ -453,7 +555,7 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 
 		@Override
 		public IRegion getRegion() {
-			return EllipseSelection.this;
+			return ParabolaSelection.this;
 		}
 
 		@Override
@@ -472,8 +574,8 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 	@Override
 	public void setCentreMovable(boolean isCenterMovable) {
 		this.isCentreMovable = isCenterMovable;
-		ellipse.setCursor(isCenterMovable ? Draw2DUtils.getRoiMoveCursor() : null);
-		ellipse.setCentreMobile(isCenterMovable);
+		parabola.setCursor(isCenterMovable ? Draw2DUtils.getRoiMoveCursor() : null);
+		parabola.setCentreMobile(isCenterMovable);
 	}
 
 	@Override
@@ -485,10 +587,10 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 	public void setOuterMovable(boolean isOuterMovable) {
 		this.isOuterMovable = isOuterMovable;
 		if (isOuterMovable)
-			ellipse.setCursor(Draw2DUtils.getRoiMoveCursor());
+			parabola.setCursor(Draw2DUtils.getRoiMoveCursor());
 		else
-			ellipse.setCursor(null);
+			parabola.setCursor(null);
 
-		ellipse.setOuterMobile(isOuterMovable);
+		parabola.setOuterMobile(isOuterMovable);
 	}
 }

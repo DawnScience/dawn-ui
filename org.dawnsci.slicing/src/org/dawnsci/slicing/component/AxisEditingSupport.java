@@ -141,9 +141,12 @@ class AxisEditingSupport extends EditingSupport {
 				if (sliceObject.getPath()!=null && sliceObject.getName()!=null) {
 				    names.addAll(NexusUtils.getAxisNames(sliceObject.getPath(), sliceObject.getName(), idim));
 				}
+			} catch ( NullPointerException ignored) {
+				// Allowed not to have axes.
+				
 			} catch (Throwable ne) {
 				if (!ddl.isExpression()) throw ne; // Expressions, we don't care that
-				                                            // cannot read nexus
+                // cannot read nexus
 			}
 			
 			if (!ddl.isExpression()) {				
