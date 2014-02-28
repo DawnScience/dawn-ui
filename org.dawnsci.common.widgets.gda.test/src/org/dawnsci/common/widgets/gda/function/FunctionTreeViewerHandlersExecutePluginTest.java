@@ -1,6 +1,7 @@
 package org.dawnsci.common.widgets.gda.function;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -10,6 +11,7 @@ import org.dawnsci.common.widgets.gda.function.handlers.CopyHandler;
 import org.dawnsci.common.widgets.gda.function.handlers.DeleteHandler;
 import org.dawnsci.common.widgets.gda.function.handlers.NewFunctionHandler;
 import org.dawnsci.common.widgets.gda.function.handlers.PasteHandler;
+import org.dawnsci.common.widgets.gda.function.internal.model.AddNewFunctionModel;
 import org.dawnsci.common.widgets.gda.function.internal.model.FunctionModel;
 import org.dawnsci.common.widgets.gda.function.internal.model.FunctionModelElement;
 import org.dawnsci.common.widgets.gda.function.internal.model.FunctionModelRoot;
@@ -17,7 +19,6 @@ import org.dawnsci.common.widgets.gda.function.internal.model.ParameterModel;
 import org.dawnsci.common.widgets.gda.function.internal.model.SetFunctionModel;
 import org.dawnsci.common.widgets.gda.function.jexl.JexlExpressionFunction;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.junit.Before;
 import org.junit.Test;
@@ -108,23 +109,40 @@ public class FunctionTreeViewerHandlersExecutePluginTest extends
 	// the following test runs "New" on each node in the tree to ensure that the
 	// added function is in the correct place
 
-	private void executeNewFermi(NewFunctionHandler newHandler)
-			throws ExecutionException {
-		newHandler.execute(null);
-		type("Fermi");
-		// First CR to close the Auto-complete pop-up
-		type(SWT.CR);
-		// Second CR to complete the Edit
-		type(SWT.CR);
+	/**
+	 * Custom NewHandler that handles the actual edit of the model custom way. I
+	 * previously had the referenced tests doing "typing" but that was
+	 * unreliable and timing dependent.
+	 */
+	private static class NewFunctionHandlerWithHookedEdit extends
+			NewFunctionHandler {
+
+		private String editingValue;
+
+		public NewFunctionHandlerWithHookedEdit(IFunctionViewer viewer,
+				String editingValue) {
+			super(viewer);
+			this.editingValue = editingValue;
+		}
+
+		@Override
+		protected void editModel(FunctionModelElement functionModelElement) {
+			assertTrue(functionModelElement instanceof SetFunctionModel
+					|| functionModelElement instanceof AddNewFunctionModel);
+			assertTrue(functionModelElement.canEdit());
+			functionModelElement.setEditingValue(editingValue);
+			viewer.refresh(true);
+		}
+
 	}
 
 	@Test
 	public void testNewSelectionGaussian() throws ExecutionException {
-		NewFunctionHandler newHandler = new NewFunctionHandler(
-				viewer.getFunctionViewer());
+		NewFunctionHandler newHandler = new NewFunctionHandlerWithHookedEdit(
+				viewer.getFunctionViewer(), "Fermi");
 
 		setSelection(gaussian);
-		executeNewFermi(newHandler);
+		newHandler.execute(null);
 		assertTreeLooksLike(Node.GAUSSIAN,
 				Node.SUBTACT(Node.JEXL("a+b+x", "a", "b"), Node.SET_FUNCTION),
 				Node.FERMI, Node.ADD_NEW_FUNCTION);
@@ -132,11 +150,11 @@ public class FunctionTreeViewerHandlersExecutePluginTest extends
 
 	@Test
 	public void testNewSelectionGaussian0() throws ExecutionException {
-		NewFunctionHandler newHandler = new NewFunctionHandler(
-				viewer.getFunctionViewer());
+		NewFunctionHandler newHandler = new NewFunctionHandlerWithHookedEdit(
+				viewer.getFunctionViewer(), "Fermi");
 
 		setSelection(gaussian, 0);
-		executeNewFermi(newHandler);
+		newHandler.execute(null);
 		assertTreeLooksLike(Node.GAUSSIAN,
 				Node.SUBTACT(Node.JEXL("a+b+x", "a", "b"), Node.SET_FUNCTION),
 				Node.FERMI, Node.ADD_NEW_FUNCTION);
@@ -144,11 +162,11 @@ public class FunctionTreeViewerHandlersExecutePluginTest extends
 
 	@Test
 	public void testNewSelectionGaussian1() throws ExecutionException {
-		NewFunctionHandler newHandler = new NewFunctionHandler(
-				viewer.getFunctionViewer());
+		NewFunctionHandler newHandler = new NewFunctionHandlerWithHookedEdit(
+				viewer.getFunctionViewer(), "Fermi");
 
 		setSelection(gaussian, 1);
-		executeNewFermi(newHandler);
+		newHandler.execute(null);
 		assertTreeLooksLike(Node.GAUSSIAN,
 				Node.SUBTACT(Node.JEXL("a+b+x", "a", "b"), Node.SET_FUNCTION),
 				Node.FERMI, Node.ADD_NEW_FUNCTION);
@@ -156,11 +174,11 @@ public class FunctionTreeViewerHandlersExecutePluginTest extends
 
 	@Test
 	public void testNewSelectionGaussian2() throws ExecutionException {
-		NewFunctionHandler newHandler = new NewFunctionHandler(
-				viewer.getFunctionViewer());
+		NewFunctionHandler newHandler = new NewFunctionHandlerWithHookedEdit(
+				viewer.getFunctionViewer(), "Fermi");
 
 		setSelection(gaussian, 2);
-		executeNewFermi(newHandler);
+		newHandler.execute(null);
 		assertTreeLooksLike(Node.GAUSSIAN,
 				Node.SUBTACT(Node.JEXL("a+b+x", "a", "b"), Node.SET_FUNCTION),
 				Node.FERMI, Node.ADD_NEW_FUNCTION);
@@ -168,17 +186,17 @@ public class FunctionTreeViewerHandlersExecutePluginTest extends
 
 	@Test
 	public void testNewSelectionSubtract() throws ExecutionException {
-		NewFunctionHandler newHandler = new NewFunctionHandler(
-				viewer.getFunctionViewer());
+		NewFunctionHandler newHandler = new NewFunctionHandlerWithHookedEdit(
+				viewer.getFunctionViewer(), "Fermi");
 
 		setSelection(subtract);
-		executeNewFermi(newHandler);
+		newHandler.execute(null);
 		assertTreeLooksLike(Node.GAUSSIAN,
 				Node.SUBTACT(Node.JEXL("a+b+x", "a", "b"), Node.FERMI),
 				Node.ADD_NEW_FUNCTION);
 
 		setSelection(subtract);
-		executeNewFermi(newHandler);
+		newHandler.execute(null);
 		assertTreeLooksLike(Node.GAUSSIAN,
 				Node.SUBTACT(Node.JEXL("a+b+x", "a", "b"), Node.FERMI),
 				Node.FERMI, Node.ADD_NEW_FUNCTION);
@@ -186,17 +204,17 @@ public class FunctionTreeViewerHandlersExecutePluginTest extends
 
 	@Test
 	public void testNewSelectionJexl() throws ExecutionException {
-		NewFunctionHandler newHandler = new NewFunctionHandler(
-				viewer.getFunctionViewer());
+		NewFunctionHandler newHandler = new NewFunctionHandlerWithHookedEdit(
+				viewer.getFunctionViewer(), "Fermi");
 
 		setSelection(jexl);
-		executeNewFermi(newHandler);
+		newHandler.execute(null);
 		assertTreeLooksLike(Node.GAUSSIAN,
 				Node.SUBTACT(Node.JEXL("a+b+x", "a", "b"), Node.FERMI),
 				Node.ADD_NEW_FUNCTION);
 
 		setSelection(jexl);
-		executeNewFermi(newHandler);
+		newHandler.execute(null);
 		assertTreeLooksLike(Node.GAUSSIAN,
 				Node.SUBTACT(Node.JEXL("a+b+x", "a", "b"), Node.FERMI),
 				Node.FERMI, Node.ADD_NEW_FUNCTION);
@@ -204,17 +222,17 @@ public class FunctionTreeViewerHandlersExecutePluginTest extends
 
 	@Test
 	public void testNewSelectionJexl0() throws ExecutionException {
-		NewFunctionHandler newHandler = new NewFunctionHandler(
-				viewer.getFunctionViewer());
+		NewFunctionHandler newHandler = new NewFunctionHandlerWithHookedEdit(
+				viewer.getFunctionViewer(), "Fermi");
 
 		setSelection(jexl, 0);
-		executeNewFermi(newHandler);
+		newHandler.execute(null);
 		assertTreeLooksLike(Node.GAUSSIAN,
 				Node.SUBTACT(Node.JEXL("a+b+x", "a", "b"), Node.FERMI),
 				Node.ADD_NEW_FUNCTION);
 
 		setSelection(jexl, 0);
-		executeNewFermi(newHandler);
+		newHandler.execute(null);
 		assertTreeLooksLike(Node.GAUSSIAN,
 				Node.SUBTACT(Node.JEXL("a+b+x", "a", "b"), Node.FERMI),
 				Node.FERMI, Node.ADD_NEW_FUNCTION);
@@ -222,17 +240,17 @@ public class FunctionTreeViewerHandlersExecutePluginTest extends
 
 	@Test
 	public void testNewSelectionJexl1() throws ExecutionException {
-		NewFunctionHandler newHandler = new NewFunctionHandler(
-				viewer.getFunctionViewer());
+		NewFunctionHandler newHandler = new NewFunctionHandlerWithHookedEdit(
+				viewer.getFunctionViewer(), "Fermi");
 
 		setSelection(jexl, 1);
-		executeNewFermi(newHandler);
+		newHandler.execute(null);
 		assertTreeLooksLike(Node.GAUSSIAN,
 				Node.SUBTACT(Node.JEXL("a+b+x", "a", "b"), Node.FERMI),
 				Node.ADD_NEW_FUNCTION);
 
 		setSelection(jexl, 1);
-		executeNewFermi(newHandler);
+		newHandler.execute(null);
 		assertTreeLooksLike(Node.GAUSSIAN,
 				Node.SUBTACT(Node.JEXL("a+b+x", "a", "b"), Node.FERMI),
 				Node.FERMI, Node.ADD_NEW_FUNCTION);
@@ -240,11 +258,11 @@ public class FunctionTreeViewerHandlersExecutePluginTest extends
 
 	@Test
 	public void testNewSelectionSet() throws ExecutionException {
-		NewFunctionHandler newHandler = new NewFunctionHandler(
-				viewer.getFunctionViewer());
+		NewFunctionHandler newHandler = new NewFunctionHandlerWithHookedEdit(
+				viewer.getFunctionViewer(), "Fermi");
 
 		setSelectionToSet(subtract, 1);
-		executeNewFermi(newHandler);
+		newHandler.execute(null);
 		assertTreeLooksLike(Node.GAUSSIAN,
 				Node.SUBTACT(Node.JEXL("a+b+x", "a", "b"), Node.FERMI),
 				Node.ADD_NEW_FUNCTION);
@@ -252,11 +270,11 @@ public class FunctionTreeViewerHandlersExecutePluginTest extends
 
 	@Test
 	public void testNewSelectionAddNew() throws ExecutionException {
-		NewFunctionHandler newHandler = new NewFunctionHandler(
-				viewer.getFunctionViewer());
+		NewFunctionHandler newHandler = new NewFunctionHandlerWithHookedEdit(
+				viewer.getFunctionViewer(), "Fermi");
 
 		setSelectionToAddNew(actual);
-		executeNewFermi(newHandler);
+		newHandler.execute(null);
 		assertTreeLooksLike(Node.GAUSSIAN,
 				Node.SUBTACT(Node.JEXL("a+b+x", "a", "b"), Node.SET_FUNCTION),
 				Node.FERMI, Node.ADD_NEW_FUNCTION);
