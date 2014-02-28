@@ -57,11 +57,6 @@ public interface IFunctionViewer extends ISelectionProvider {
 	 */
 	void refresh();
 
-	/**
-	 * Expand all functions in the tree, starting with the root.
-	 */
-	public void expandAll();
-
 	IOperator getSelectedFunctionParent();
 
 	int getSelectedFunctionParentIndex();

@@ -483,12 +483,6 @@ public class FunctionTreeViewer implements IFunctionViewer {
 		return getTreeControl();
 	}
 
-
-	@Override
-	public void expandAll(){
-		treeViewer.expandAll();
-	}
-
 	/**
 	 * If function is an identity match to a function in the view, reveal and
 	 * fully expand it, otherwise expand all instances equal to function in the
