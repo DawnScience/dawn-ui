@@ -113,9 +113,6 @@ public class FunctionTreeViewerHandlersExecutePluginTest extends
 		newHandler.execute(null);
 		type("Fermi");
 		type(SWT.CR);
-		// because we are posting via the OS event loop, we need to process
-		// those events in the event loop
-		readAndDispatch();
 	}
 
 	@Test
