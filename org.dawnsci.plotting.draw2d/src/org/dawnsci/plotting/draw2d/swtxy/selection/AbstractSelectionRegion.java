@@ -173,6 +173,7 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 		if (cursor==null && getCursorPath()!=null)  {
 			Image image = Activator.getImage(getCursorPath());
 			cursor = new Cursor(Display.getDefault(), image.getImageData(), 8, 8);
+			image.dispose();
 		}
 		return cursor;
 	}
