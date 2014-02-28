@@ -58,6 +58,8 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 		setAlpha(80);
 		setLineWidth(2);
 		labelColour = ColorConstants.black;
+		if (labelFont != null)
+			labelFont.dispose();
 		labelFont = new Font(Display.getCurrent(), "Dialog", 10, SWT.BOLD);
 	}
 
@@ -232,7 +234,7 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 
 			// figure move
 			addFigureListener(moveListener);
-			FigureTranslator mover = new FigureTranslator(getXyGraph(), parent, this, handles){
+			FigureTranslator mover = new FigureTranslator(getXyGraph(), parent, this, handles) {
 				public void mouseDragged(MouseEvent event) {
 					if (!isCentreMovable) return;
 					super.mouseDragged(event);
