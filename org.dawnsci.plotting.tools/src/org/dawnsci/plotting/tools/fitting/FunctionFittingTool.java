@@ -182,6 +182,8 @@ public class FunctionFittingTool extends AbstractToolPage implements
 		// Initialise with a simple function.
 		if (compFunction == null) compFunction = new CompositeFunction();
 		functionWidget.setInput(compFunction);
+		functionWidget.expandAll();
+
 		functionWidget.addModelModifiedListener(new ModelModifiedAdapter() {
 			@Override
 			protected void modelModified() {
@@ -660,9 +662,10 @@ public class FunctionFittingTool extends AbstractToolPage implements
 
 			}
 		}
-		
+
 		if (functionWidget != null) {
 			functionWidget.setInput(compFunction);
+			functionWidget.expandAll();
 			compFunctionModified();
 		}
 	}
