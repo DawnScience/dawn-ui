@@ -112,6 +112,9 @@ public class FunctionTreeViewerHandlersExecutePluginTest extends
 			throws ExecutionException {
 		newHandler.execute(null);
 		type("Fermi");
+		// First CR to close the Auto-complete pop-up
+		type(SWT.CR);
+		// Second CR to complete the Edit
 		type(SWT.CR);
 	}
 
