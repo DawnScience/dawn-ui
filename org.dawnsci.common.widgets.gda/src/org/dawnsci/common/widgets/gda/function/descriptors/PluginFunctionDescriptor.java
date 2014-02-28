@@ -3,11 +3,11 @@ package org.dawnsci.common.widgets.gda.function.descriptors;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.dawnsci.common.widgets.gda.function.FunctionExtensionFactory;
 import org.eclipse.core.runtime.CoreException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.fitting.functions.FunctionExtensionFactory;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
 
 public final class PluginFunctionDescriptor extends FunctionDescriptor {

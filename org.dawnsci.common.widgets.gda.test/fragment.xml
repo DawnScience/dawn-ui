@@ -14,5 +14,13 @@
             name="FunctionTreeViewerPluginTestView">
       </view>
    </extension>
+   <extension
+         point="org.dawnsci.common.functions">
+      <function
+            class="uk.ac.diamond.scisoft.analysis.fitting.KichwaFunction"
+            id="uk.ac.diamond.scisoft.analysis.test.fitting.function1"
+            name="Kichwa Function">
+      </function>
+   </extension>
 
 </fragment>
