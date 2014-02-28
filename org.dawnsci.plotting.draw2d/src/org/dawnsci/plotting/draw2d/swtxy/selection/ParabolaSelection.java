@@ -55,6 +55,8 @@ class ParabolaSelection extends AbstractSelectionRegion implements ILockableRegi
 		setAlpha(80);
 		setLineWidth(2);
 		labelColour = ColorConstants.black;
+		if (labelFont != null)
+			labelFont.dispose();
 		labelFont = new Font(Display.getCurrent(), "Dialog", 10, SWT.BOLD);
 	}
 
