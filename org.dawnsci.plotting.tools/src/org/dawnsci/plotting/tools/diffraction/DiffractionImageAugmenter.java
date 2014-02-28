@@ -112,7 +112,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	private IRegion beamPosition;
 
     private enum RING_TYPE {
-    	ICE, STANDARD, CALIBRANT, BEAM_CENTRE;
+    	ICE, STANDARD, CALIBRANT, BEAM_CENTRE, BEAM_POSITION_HANDLE;
     }
 
 	private double[] imageCentrePC;
@@ -232,6 +232,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 			drawResolutionBeamPosition();
 		} else {
 			hideConics(RING_TYPE.CALIBRANT);
+			hideConics(RING_TYPE.BEAM_POSITION_HANDLE);
 			beamPosition = null;
 		}
 	}
@@ -469,7 +470,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 			beamPosition.setAlpha(100);
 			beamPosition.setUserRegion(false);
 			beamPosition.setShowPosition(false);
-			beamPosition.setUserObject(RING_TYPE.CALIBRANT);
+			beamPosition.setUserObject(RING_TYPE.BEAM_POSITION_HANDLE);
 
 			plottingSystem.addRegion(beamPosition);
 			beamPosition.setMobile(true); // NOTE: Must be done **AFTER** calling the

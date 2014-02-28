@@ -1207,7 +1207,8 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		Object ob = point.getUserObject();
 		if (ob == null) return;
 		
-		if (ob.toString() != "CALIBRANT") return;
+		String ringType = ob.toString(); // TODO this is hacky!
+		if (!"CALIBRANT".equals(ringType) && !"BEAM_POSITION_HANDLE".equals(ringType)) return;
 		
 		double ptx = eroi.getPointX();
 		double pty = eroi.getPointY();
