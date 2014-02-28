@@ -243,9 +243,7 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	 */
 	public void remove() {
 		clearListeners();
-		if (coords != null)
-			coords.dispose();
-		coords = null;
+		coords = null; // remove local reference (nb it is shared by many regions)
 		if (getParent() != null)
 			getParent().remove(this);
 		if (regionObjects != null) {
