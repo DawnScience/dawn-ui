@@ -243,6 +243,11 @@ public class FunctionFittingWidget extends Composite implements IFunctionViewer 
 	}
 
 	@Override
+	public void expandAll(){
+		funcTree.expandAll();
+	}
+
+	@Override
 	public void setInput(CompositeFunction compFunction) {
 		funcTree.setInput(compFunction);
 	}

@@ -193,11 +193,16 @@ public abstract class FunctionTreeViewerPluginTestBase extends PluginTestBase {
 
 	protected void assertTreeLooksLike(Node... nodes) {
 		Node[] treeLooksLike = getTreeLooksLike();
-		// System.out.println("expect: ");
-		// System.out.print(toString(nodes));
-		// System.out.println("actual: ");
-		// System.out.print(toString(treeLooksLike));
-		assertArrayEquals(nodes, treeLooksLike);
+		try {
+			assertArrayEquals(nodes, treeLooksLike);
+		} catch (Throwable e) {
+			// Only print on error
+			System.out.println("expect: ");
+			System.out.print(toString(nodes));
+			System.out.println("actual: ");
+			System.out.print(toString(treeLooksLike));
+			throw e;
+		}
 	}
 
 	protected void expandAll() {

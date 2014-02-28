@@ -26,6 +26,7 @@ public class FunctionTreeViewerPluginTestView extends ViewPart {
 	 * This is a callback that will allow us to create the viewer and initialize
 	 * it.
 	 */
+	@Override
 	public void createPartControl(Composite parent) {
 		IFunctionDescriptorProvider provider = new DefaultFunctionDescriptorProvider();
 		viewer = new FunctionFittingWidget(parent, provider, getSite());
@@ -36,11 +37,13 @@ public class FunctionTreeViewerPluginTestView extends ViewPart {
 		actual.addFunction(function);
 
 		viewer.setInput(actual);
+		viewer.expandAll();
 	}
 
 	/**
 	 * Passing the focus request to the viewer's control.
 	 */
+	@Override
 	public void setFocus() {
 		viewer.setFocus();
 	}
