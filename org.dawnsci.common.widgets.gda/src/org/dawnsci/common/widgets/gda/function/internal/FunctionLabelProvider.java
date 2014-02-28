@@ -14,6 +14,8 @@ import org.eclipse.jface.viewers.BaseLabelProvider;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.StyledString.Styler;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.TextStyle;
 import org.eclipse.ui.ISharedImages;
@@ -34,6 +36,10 @@ public class FunctionLabelProvider extends BaseLabelProvider implements
 	public static final Styler ERROR_STYLER = new Styler() {
 		@Override
 		public void applyStyles(TextStyle textStyle) {
+			Font boldFont = JFaceResources.getFontRegistry().getBold(JFaceResources.DEFAULT_FONT);
+			textStyle.font= boldFont;
+			textStyle.underline = true;
+			textStyle.underlineStyle = SWT.UNDERLINE_SQUIGGLE;
 			textStyle.foreground = JFaceResources.getColorRegistry().get(
 					JFacePreferences.ERROR_COLOR);
 		}
@@ -49,6 +55,7 @@ public class FunctionLabelProvider extends BaseLabelProvider implements
 					.getImage(ISharedImages.IMG_OBJ_ADD);
 		} else if (element instanceof FunctionModel) {
 			if (((FunctionModel)element).getFunction() instanceof JexlExpressionFunction)
+
 				return LINK;
 			return CURVE;
 		} else if (element instanceof OperatorModel) {
@@ -95,6 +102,7 @@ public class FunctionLabelProvider extends BaseLabelProvider implements
 		if (jexlExpressionFunction.getExpressionError() == JexlExpressionFunctionError.NO_ERROR) {
 			return new StyledString(expression);
 		} else {
+
 			return new StyledString(expression, ERROR_STYLER);
 		}
 	}
