@@ -55,6 +55,8 @@ class HyperbolaSelection extends AbstractSelectionRegion implements ILockableReg
 		setAlpha(80);
 		setLineWidth(2);
 		labelColour = ColorConstants.black;
+		if (labelFont != null)
+			labelFont.dispose();
 		labelFont = new Font(Display.getCurrent(), "Dialog", 10, SWT.BOLD);
 	}
 
@@ -347,7 +349,7 @@ class HyperbolaSelection extends AbstractSelectionRegion implements ILockableReg
 				graphics.setForegroundColor(labelColour);
 				graphics.setBackgroundColor(ColorConstants.white);
 				graphics.setFont(labelFont);
-				graphics.fillString(label, getPoint(Math.PI/4));
+				graphics.fillString(label, getPoint(Math.PI * 0.75));
 			}
 		}
 

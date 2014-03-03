@@ -188,18 +188,22 @@ public abstract class PluginTestBase {
 				event.type = SWT.KeyDown;
 				event.keyCode = SWT.SHIFT;
 				display.post(event);
+				readAndDispatch(100);
 			}
 			Event event = new Event();
 			event.type = SWT.KeyDown;
 			event.character = ch;
 			display.post(event);
+			readAndDispatch(100);
 			event.type = SWT.KeyUp;
 			display.post(event);
+			readAndDispatch(100);
 			if (shift) {
 				event = new Event();
 				event.type = SWT.KeyUp;
 				event.keyCode = SWT.SHIFT;
 				display.post(event);
+				readAndDispatch(100);
 			}
 		}
 	}
@@ -228,10 +232,12 @@ public abstract class PluginTestBase {
 			Thread.sleep(100);
 		} catch (InterruptedException e) {
 		}
+		readAndDispatch(100);
 		event = new Event();
 		event.type = SWT.KeyUp;
 		event.keyCode = keyCode;
 		display.post(event);
+		readAndDispatch(100);
 	}
 
 }

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+   <extension-point id="org.dawnsci.common.functions" name="Functions" schema="schema/functions.exsd"/>
    <extension
          point="org.eclipse.core.runtime.adapters">
       <factory
@@ -79,4 +80,89 @@
          </adapter>
       </factory>
    </extension>
+
+   <extension
+         point="org.dawnsci.common.functions">
+      <function
+            class="uk.ac.diamond.scisoft.analysis.fitting.functions.Box"
+            id="uk.ac.diamond.scisoft.analysis.box"
+            name="Box">
+      </function>
+      <function
+            class="uk.ac.diamond.scisoft.analysis.fitting.functions.Cubic"
+            id="uk.ac.diamond.scisoft.analysis.cubic"
+            name="Cubic">
+      </function>
+      <function
+            class="uk.ac.diamond.scisoft.analysis.fitting.functions.Fermi"
+            id="uk.ac.diamond.scisoft.analysis.fermi"
+            name="Fermi">
+      </function>
+      <function
+            class="uk.ac.diamond.scisoft.analysis.fitting.functions.FermiGauss"
+            id="uk.ac.diamond.scisoft.analysis.fermigauss"
+            name="Fermi * Gaussian">
+      </function>
+      <function
+            class="uk.ac.diamond.scisoft.analysis.fitting.functions.Gaussian"
+            id="uk.ac.diamond.scisoft.analysis.gaussian"
+            name="Gaussian">
+      </function>
+      <function
+            class="uk.ac.diamond.scisoft.analysis.fitting.functions.Lorentzian"
+            id="uk.ac.diamond.scisoft.analysis.lorentzian"
+            name="Lorentzian">
+      </function>
+      <function
+            class="uk.ac.diamond.scisoft.analysis.fitting.functions.PearsonVII"
+            id="uk.ac.diamond.scisoft.analysis.pearsonvii"
+            name="PearsonVII">
+      </function>
+      <function
+            class="uk.ac.diamond.scisoft.analysis.fitting.functions.Polynomial"
+            id="uk.ac.diamond.scisoft.analysis.polynomial"
+            name="Polynomial">
+      </function>
+      <function
+            class="uk.ac.diamond.scisoft.analysis.fitting.functions.PseudoVoigt"
+            id="uk.ac.diamond.scisoft.analysis.pseudovoigt"
+            name="PseudoVoigt">
+      </function>
+      <function
+            class="uk.ac.diamond.scisoft.analysis.fitting.functions.Box"
+            id="uk.ac.diamond.scisoft.analysis.box"
+            name="Box">
+      </function>
+      <function
+            class="uk.ac.diamond.scisoft.analysis.fitting.functions.StraightLine"
+            id="uk.ac.diamond.scisoft.analysis.linear"
+            name="Linear">
+      </function>
+      <function
+            class="uk.ac.diamond.scisoft.analysis.fitting.functions.Add"
+            id="uk.ac.diamond.scisoft.analysis.add"
+            name="Add">
+      </function>
+      <function
+            class="uk.ac.diamond.scisoft.analysis.fitting.functions.Divide"
+            id="uk.ac.diamond.scisoft.analysis.divide"
+            name="Divide">
+      </function>
+      <function
+            class="uk.ac.diamond.scisoft.analysis.fitting.functions.Multiply"
+            id="uk.ac.diamond.scisoft.analysis.multiply"
+            name="Multiply">
+      </function>
+      <function
+            class="uk.ac.diamond.scisoft.analysis.fitting.functions.Subtract"
+            id="uk.ac.diamond.scisoft.analysis.subtract"
+            name="Subtract">
+      </function>
+      <function
+            class="uk.ac.diamond.scisoft.analysis.fitting.functions.Convolve"
+            id="uk.ac.diamond.scisoft.analysis.convolve"
+            name="Convolve">
+      </function>
+   </extension>
+
 </plugin>

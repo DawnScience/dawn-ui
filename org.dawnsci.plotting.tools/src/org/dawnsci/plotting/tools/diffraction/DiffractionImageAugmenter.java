@@ -3,7 +3,6 @@ package org.dawnsci.plotting.tools.diffraction;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 import javax.measure.unit.NonSI;
@@ -21,6 +20,7 @@ import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,8 +41,10 @@ import uk.ac.diamond.scisoft.analysis.diffraction.IDiffractionCrystalEnvironment
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.io.ILoaderService;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
+import uk.ac.diamond.scisoft.analysis.roi.HyperbolicROI;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
+import uk.ac.diamond.scisoft.analysis.roi.ParabolicROI;
 import uk.ac.diamond.scisoft.analysis.roi.PointROI;
 import uk.ac.diamond.sda.meta.page.DiffractionMetadataCompositeEvent;
 import uk.ac.diamond.sda.meta.page.IDiffractionMetadataCompositeListener;
@@ -110,7 +112,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	private IRegion beamPosition;
 
     private enum RING_TYPE {
-    	ICE, STANDARD, CALIBRANT, BEAM_CENTRE;
+    	ICE, STANDARD, CALIBRANT, BEAM_CENTRE, BEAM_POSITION_HANDLE;
     }
 
 	private double[] imageCentrePC;
@@ -156,7 +158,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 				crosshairs = null;
 			}
 			
-			for (RING_TYPE rt : RING_TYPE.values()) removeRings(rt);
+			for (RING_TYPE rt : RING_TYPE.values()) removeConics(rt);
 		}
 		registerListeners(false);
 		
@@ -226,15 +228,16 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 					logger.warn("Could not parse item {} in standard distances", d);
 				}
 			}
-			drawResolutionRings(calibrantRingsList, "calibrant", RING_TYPE.CALIBRANT);
+			drawResolutionConics(calibrantRingsList, "calibrant", RING_TYPE.CALIBRANT);
 			drawResolutionBeamPosition();
 		} else {
-			hideRings(RING_TYPE.CALIBRANT);
+			hideConics(RING_TYPE.CALIBRANT);
+			hideConics(RING_TYPE.BEAM_POSITION_HANDLE);
 			beamPosition = null;
 		}
 	}
 
-	protected void drawCrosshairs(double[] beamCentre, double length, Color colour, Color labelColour, String nameStub, String labelText) {
+	private void drawCrosshairs(double[] beamCentre, double length, Color colour, Color labelColour, String nameStub, String labelText) {
 		if (!active) return; // We are likely off screen.
 
 		if (crosshairs == null) {
@@ -291,8 +294,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		man.add(beamCentre);
 	}
 
-
-	protected void hideRings(RING_TYPE marker) {
+	private void hideConics(RING_TYPE marker) {
 		if (plottingSystem==null) return;
 		if (plottingSystem.getRegions()==null) return;
 		for (IRegion region : plottingSystem.getRegions()) {
@@ -304,7 +306,8 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 			}
 		}
 	}
-	protected void removeRings(RING_TYPE marker) {
+
+	private void removeConics(RING_TYPE marker) {
 		if (plottingSystem==null) return;
 		if (plottingSystem.getRegions()==null) return;
 		for (IRegion region : plottingSystem.getRegions()) {
@@ -317,71 +320,65 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		}
 	}
 
-	protected void drawResolutionRings(List<ResolutionRing> ringList, String typeName, RING_TYPE marker) {
-		List<IRegion> existing = getRegions(marker);
-		
-		if (existing == null) existing = new ArrayList<IRegion>();
-	
-		for (IRegion iRegion : existing) iRegion.setVisible(false);
-		int nExisting = existing.size();
-		int nRings = ringList.size();
+	private void drawResolutionConics(List<ResolutionRing> conicList, String typeName, final RING_TYPE marker) {
+		Display.getDefault().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				removeConics(marker);
+			}
+		});
 		resROIs.clear();
+		if (!active) // We are likely to be off-screen
+			return;
+		if (detprop == null || diffenv == null)
+			return;
+
+		int nRings = conicList.size();
+		double[] alphas = new double[nRings];
 		for (int i = 0; i < nRings; i++) {
-			drawResolutionEllipse(i >= nExisting ? null : existing.get(i), ringList.get(i), typeName+i, marker, false);
+			alphas[i] = DSpacing.coneAngleFromDSpacing(diffenv, conicList.get(i).getResolution());
+		}
+		IROI[] rois = DSpacing.conicsFromAngles(detprop, alphas);
+
+		for (int i = 0; i < nRings; i++) {
+			IROI conic = rois[i];
+			resROIs.add(conic);
+			if (conic != null)
+				drawResolutionConic(conicList.get(i), conic, typeName+i, marker, false);
 		}
 	}
 
-	private List<IRegion> getRegions(RING_TYPE marker) {
-        final Collection<IRegion> ellipses = plottingSystem.getRegions(RegionType.ELLIPSE);
-		if (ellipses==null) return null;
-
-		final List<IRegion> ret = new ArrayList<IRegion>(ellipses.size());
-		for (IRegion iRegion : ellipses) {
-			if (iRegion.getUserObject()!=marker) continue;
-			ret.add(iRegion);
-		}
-		return ret;
-	}
-
-	/*
-	 * handle ring drawing, removal and clearing
-	 */
-	protected void drawEllipse(IRegion region,
-			                      EllipticalROI eroi, 
-			                      Color colour,
-			                      Color labelColour,
-			                      String nameStub,
-			                      String labelText,
-			                      RING_TYPE marker,
-			                      boolean isMobile) {
-
-		if (!active) return; // We are likely off screen.
-		
-		boolean requireAdd = false;
-		if (region==null) try {
-			final String regionName = RegionUtils.getUniqueName(nameStub, plottingSystem);
-			region = plottingSystem.createRegion(regionName, RegionType.ELLIPSE);
-			requireAdd = true;
+	private void drawResolutionConic(ResolutionRing ring, IROI roi, String name, RING_TYPE marker, 
+											boolean isMobile) {
+		RegionType type = getConicRegionType(roi);
+		if (type == null)
+			return;
+		final String regionName = RegionUtils.getUniqueName(name, plottingSystem);
+		IRegion region;
+		try {
+			region = plottingSystem.createRegion(regionName, type);
 		} catch (Exception e) {
-			logger.error("Can't create region", e);
+			logger.error("Could not create region", e);
 			return;
 		}
-		region.setROI(eroi);
+
+		Color colour = ring.getColour();
+		plottingSystem.addRegion(region);
+		region.setROI(roi);
 		region.setRegionColor(colour);
 		region.setAlpha(100);
 		region.setUserRegion(true);
 
-		region.setLabel(labelText);
+		DecimalFormat df = new DecimalFormat("#.00");
+		region.setLabel(df.format(ring.getResolution()) + "Å");
 		region.setShowLabel(true);
 		if (crosshairs != null) {
 			crosshairs.setShowLabel(true);
-			crosshairs.setRegionColor(labelColour);
+			crosshairs.setRegionColor(colour);
 		}
 
 		region.setShowPosition(false);
 		region.setVisible(true);
-		if (requireAdd)
-			plottingSystem.addRegion(region);
 		region.setMobile(isMobile);
 		region.setUserObject(marker);
 		if (isMobile) {
@@ -393,7 +390,19 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		}
 	}
 
-	protected void drawIceRings(boolean isChecked) {
+	private static RegionType getConicRegionType(IROI roi) {
+		RegionType type = null;
+		if (roi instanceof EllipticalROI) {
+			type = RegionType.ELLIPSE;
+		} else if (roi instanceof ParabolicROI) {
+			type = RegionType.PARABOLA;
+		} else if (roi instanceof HyperbolicROI) {
+			type = RegionType.HYPERBOLA;
+		}
+		return type;
+	}
+
+	private void drawIceRings(boolean isChecked) {
 		if (!active) return; // We are likely off screen.
 	    
 		if (isChecked) {
@@ -401,36 +410,13 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 			for (double res : iceResolution) {
 				iceRingsList.add(new ResolutionRing(res, true, ColorConstants.blue, true, false, false));
 			}
-			drawResolutionRings(iceRingsList, "ice", RING_TYPE.ICE);
+			drawResolutionConics(iceRingsList, "ice", RING_TYPE.ICE);
 		} else {
-			hideRings(RING_TYPE.ICE);
+			hideConics(RING_TYPE.ICE);
 		}
 	}
 		
-	protected void drawResolutionEllipse(IRegion reused, ResolutionRing ring, String name, RING_TYPE marker, 
-											boolean isMobile) {
-		if (!active) return; // We are likely off screen.
-		if (detprop != null && diffenv != null) {
-			IROI roi = null;
-			try {
-				roi = DSpacing.conicFromDSpacing(detprop, diffenv, ring.getResolution());
-			} catch (IllegalArgumentException e) {
-				return;
-			} catch (UnsupportedOperationException ex) {
-				return;
-			} finally {
-				resROIs.add(roi);
-			}
-			if (roi instanceof EllipticalROI) {
-				DecimalFormat df = new DecimalFormat("#.00");
-				drawEllipse(reused, (EllipticalROI) roi, ring.getColour(), ring.getColour(), name,
-						df.format(ring.getResolution()) + "Å", marker, isMobile);
-			}
-		}
-	}
-
-
-	protected void drawStandardRings(boolean isChecked) {
+	private void drawStandardRings(boolean isChecked) {
 		if (!active) return; // We are likely off screen.
 			
 		if (isChecked && diffenv!= null && detprop != null) {
@@ -452,9 +438,9 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 				d = lambda / Math.sin(twoThetaSpacing);
 				standardRingsList.add(new ResolutionRing(d, true, ColorConstants.yellow, false, true, true));
 			}
-			drawResolutionRings(standardRingsList, "standard", RING_TYPE.STANDARD);
+			drawResolutionConics(standardRingsList, "standard", RING_TYPE.STANDARD);
 		} else {
-			hideRings(RING_TYPE.STANDARD);
+			hideConics(RING_TYPE.STANDARD);
 		}
 	}
 
@@ -468,7 +454,6 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 			beamCentrePC[0] = 0;
 		if (beamCentrePC[1] == 0)
 			beamCentrePC[1] = 0;
-		
 
 		if (beamPosition == null) {
 			try {
@@ -485,7 +470,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 			beamPosition.setAlpha(100);
 			beamPosition.setUserRegion(false);
 			beamPosition.setShowPosition(false);
-			beamPosition.setUserObject(RING_TYPE.CALIBRANT);
+			beamPosition.setUserObject(RING_TYPE.BEAM_POSITION_HANDLE);
 
 			plottingSystem.addRegion(beamPosition);
 			beamPosition.setMobile(true); // NOTE: Must be done **AFTER** calling the

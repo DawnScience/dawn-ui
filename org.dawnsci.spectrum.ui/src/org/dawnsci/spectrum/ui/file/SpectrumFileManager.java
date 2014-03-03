@@ -33,7 +33,9 @@ public class SpectrumFileManager {
 	private HashSet<ISpectrumFileListener> listeners;
 	private final static Logger logger = LoggerFactory.getLogger(SpectrumFileManager.class);
 	private final static ISchedulingRule mutex = new Mutex();
-	
+	private IContain1DData cachedFile;
+
+
 	public SpectrumFileManager(IPlottingSystem system) {
 		spectrumFiles = new LinkedHashMap<String,ISpectrumFile>();
 		listeners     = new HashSet<ISpectrumFileListener>();
@@ -228,9 +230,16 @@ public class SpectrumFileManager {
         }
 	}
 
-
 	public boolean isEmpty() {
 		return spectrumFiles.isEmpty();
+	}
+	
+	public IContain1DData getCachedFile() {
+		return cachedFile;
+	}
+
+	public void setCachedFile(IContain1DData cachedFile) {
+		this.cachedFile = cachedFile;
 	}
 
 }

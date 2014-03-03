@@ -30,7 +30,8 @@ public class SelectionRegionFactory {
 
 	private static final Collection<RegionType> SUPPORTED_REGIONS;
 	static {
-		SUPPORTED_REGIONS= new HashSet<RegionType>();
+		SUPPORTED_REGIONS = new HashSet<RegionType>();
+		SUPPORTED_REGIONS.add(RegionType.POINT);
 		SUPPORTED_REGIONS.add(RegionType.LINE);
 		SUPPORTED_REGIONS.add(RegionType.BOX);
 		SUPPORTED_REGIONS.add(RegionType.PERIMETERBOX);
@@ -41,7 +42,6 @@ public class SelectionRegionFactory {
 		SUPPORTED_REGIONS.add(RegionType.XAXIS_LINE);
 		SUPPORTED_REGIONS.add(RegionType.YAXIS_LINE);
 		SUPPORTED_REGIONS.add(RegionType.FREE_DRAW);
-		SUPPORTED_REGIONS.add(RegionType.POINT);
 		SUPPORTED_REGIONS.add(RegionType.CIRCLE);
 		SUPPORTED_REGIONS.add(RegionType.CIRCLEFIT);
 		SUPPORTED_REGIONS.add(RegionType.ELLIPSE);
@@ -68,46 +68,68 @@ public class SelectionRegionFactory {
 			                                                    final RegionType        regionType) {
 
 		AbstractSelectionRegion region = null;
-		if (regionType==RegionType.LINE) {
-			region = new LineSelection(name, coords);
-		} else if (regionType==RegionType.BOX) {
+		switch (regionType) {
+		case BOX:
 			region = new BoxSelection(name, coords);
-		} else if (regionType==RegionType.PERIMETERBOX) {
-			region = new PerimeterBoxSelection(name, coords);
-		} else if (regionType==RegionType.GRID) {
-			region = new  GridSelection(name, coords);
-		} else if (regionType==RegionType.SECTOR) {
-			region = new SectorSelection(name, coords);
-		} else if (regionType==RegionType.RING) {
-			region = new RingSelection(name, coords);
-		} else if (regionType==RegionType.FREE_DRAW) {
-			region = new FreeDrawSelection(name, coords);
-		} else if (regionType==RegionType.POINT) {
-			region = new PointSelection(name, coords);
-		} else if (regionType==RegionType.CIRCLE) {
+			break;
+		case CIRCLE:
 			region = new CircleSelection(name, coords);
-		} else if (regionType==RegionType.CIRCLEFIT) {
+			break;
+		case CIRCLEFIT:
 			region = new CircleFitSelection(name, coords);
-		} else if (regionType==RegionType.ELLIPSE) {
+			break;
+		case ELLIPSE:
 			region = new EllipseSelection(name, coords);
-		} else if (regionType==RegionType.ELLIPSEFIT) {
+			break;
+		case ELLIPSEFIT:
 			region = new EllipseFitSelection(name, coords);
-		} else if (regionType==RegionType.PARABOLA) {
-			region = new ParabolaSelection(name, coords);
-		} else if (regionType==RegionType.HYPERBOLA) {
+			break;
+		case FREE_DRAW:
+			region = new FreeDrawSelection(name, coords);
+			break;
+		case GRID:
+			region = new GridSelection(name, coords);
+			break;
+		case HYPERBOLA:
 			region = new HyperbolaSelection(name, coords);
-		} else if (regionType==RegionType.POLYGON) {
+			break;
+		case LINE:
+			region = new LineSelection(name, coords);
+			break;
+		case PARABOLA:
+			region = new ParabolaSelection(name, coords);
+			break;
+		case PERIMETERBOX:
+			region = new PerimeterBoxSelection(name, coords);
+			break;
+		case POINT:
+			region = new PointSelection(name, coords);
+			break;
+		case POLYGON:
 			region = new PolygonSelection(name, coords);
-		} else if (regionType==RegionType.POLYLINE) {
+			break;
+		case POLYLINE:
 			region = new PolylineSelection(name, coords);
-		} else if (regionType==RegionType.XAXIS || regionType==RegionType.YAXIS || regionType==RegionType.XAXIS_LINE || regionType==RegionType.YAXIS_LINE) {
+			break;
+		case RING:
+			region = new RingSelection(name, coords);
+			break;
+		case SECTOR:
+			region = new SectorSelection(name, coords);
+			break;
+		case XAXIS:
+		case XAXIS_LINE:
+		case YAXIS:
+		case YAXIS_LINE:
 			region = new AxisSelection(name, coords, regionType);
-		} else {
+			break;
+		default:
 			throw new NullPointerException("Cannot deal with "+regionType+" regions yet - sorry!");
-		}	
+		}
+
 		return region;
 	}
-	
+
 	public static boolean isSupportedType(RegionType type) {
 		return SUPPORTED_REGIONS.contains(type);
 	}

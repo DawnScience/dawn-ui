@@ -58,7 +58,14 @@ public class NewFunctionHandler extends BaseHandler {
 		return null;
 	}
 
-	private void editModel(FunctionModelElement functionModelElement) {
+	/**
+	 * Perform the Edit on the model
+	 *
+	 * @param functionModelElement
+	 *            The AddNewFunctionModel or SetFunctionModel that is being
+	 *            triggered.
+	 */
+	protected void editModel(FunctionModelElement functionModelElement) {
 		viewer.getTreeViewer().editElement(functionModelElement,
 				FunctionTreeViewer.COLUMN.FUNCTION.COLUMN_INDEX);
 	}
