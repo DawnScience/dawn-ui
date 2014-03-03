@@ -490,7 +490,15 @@ public class MaskObject {
 			final IRectangularROI bounds = roi.getBounds();
 			final double[] beg = bounds.getPointRef();
 			final double[] end = bounds.getEndPoint();
-			
+
+			if (roi instanceof LinearROI) { // special case where isNearOutline is used for mask
+				double distance = Math.max(0.5, lineWidth/2.);
+				beg[0] -= distance;
+				beg[1] -= distance;
+				end[0] += distance;
+				end[1] += distance;
+			}
+
 			int xStart = Math.max(0, (int) Math.round(beg[0]));
 			int xEnd   = Math.min(shape[1] - 1, (int) Math.round(end[0]));
 			
