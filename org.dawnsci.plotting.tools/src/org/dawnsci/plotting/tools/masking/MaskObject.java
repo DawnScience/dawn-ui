@@ -65,7 +65,6 @@ public class MaskObject {
 	}
 
 	private MaskMode        maskMode;
-    private int             lineWidth;
     private boolean         squarePen           = false;
     private boolean         ignoreAlreadyMasked = false;
    /**
@@ -82,9 +81,9 @@ public class MaskObject {
 	private ForkJoinPool pool;
     
 	MaskObject() {
-		operationManager = new DefaultOperationHistory();
+		this.operationManager = new DefaultOperationHistory();
 		operationManager.setLimit(MaskOperation.MASK_CONTEXT, 20);	
-		pool = new ForkJoinPool();
+		this.pool = new ForkJoinPool();
 	}
 	
     /**
@@ -433,10 +432,26 @@ public class MaskObject {
 
 				final IROI    roi       = region.getROI();
 				final boolean isMasking = region.isMaskRegion();
-				actions.add(new RegionAction(op, shape, roi, isMasking, monitor));
+				actions.add(new RegionAction(op, shape, roi, getScreenPixelWidth(region), isMasking, monitor));
 			}
 			invokeAll(actions);
-		}		
+		}
+		
+        /**
+         * Get pixel width in data coordinates.
+         * @param region
+         * @return
+         */
+		public double getScreenPixelWidth(IRegion region) {
+			final int widPix = region.getLineWidth();
+			double[] s = region.getCoordinateSystem().getPositionValue(new int[]{0, 0});
+			double[] e = region.getCoordinateSystem().getPositionValue(new int[]{widPix, widPix});
+			//return Math.pow((Math.pow(e[0]-s[0], 2)+Math.pow(e[1]-s[1], 2)), 0.5);
+			// FIXME This is not right but works for many images that we have. 
+			// Those with significantly different axis scales, it will not.
+			return Math.min(e[0]-s[0], e[1]-s[1]);
+		}
+
 	}
 
 	private class RegionAction extends MaskRegionsAction {
@@ -448,12 +463,23 @@ public class MaskObject {
 		
 		protected boolean          isMasking;
 		protected IROI             roi;
+		protected double           lineWidth;
 
-		public RegionAction(MaskOperation op, int[] shape, IROI roi,
+		/**
+		 * 
+		 * @param op
+		 * @param shape
+		 * @param roi
+		 * @param lineWidth in data coordinates (ROI)
+		 * @param isMasking
+		 * @param monitor
+		 */
+		public RegionAction(MaskOperation op, int[] shape, IROI roi, double lineWidth,
 				            boolean isMasking, IProgressMonitor monitor) {
 			super(op, shape, null, monitor);
 			this.isMasking = isMasking;
 			this.roi = roi;
+			this.lineWidth = lineWidth;
 		}
 
 		@Override
@@ -477,7 +503,7 @@ public class MaskObject {
 			for (int y=yStart; y<yEnd; y+=INC) { 
 				
 				final int yMax = Math.min(yStart+INC, yEnd);
-				actions.add(new PixelAction(op, xStart, xEnd, yStart, yMax, isMasking, roi, monitor));
+				actions.add(new PixelAction(op, xStart, xEnd, yStart, yMax, isMasking, roi, lineWidth, monitor));
 				yStart+=INC;
 				if (monitor.isCanceled()) return;
 			}
@@ -503,10 +529,10 @@ public class MaskObject {
 		public PixelAction(MaskOperation op, 
 				           int xStart, int xEnd,
 				           int yStart, int yEnd,
-				           boolean isMasking, IROI roi, 
+				           boolean isMasking, IROI roi, double lineWidth, 
 				           IProgressMonitor monitor) {
 			
-			super(op, null, roi, isMasking, monitor);
+			super(op, null, roi, lineWidth, isMasking, monitor);
 			this.xStart  = xStart;
 			this.xEnd    = xEnd;
 			this.yStart  = yStart;
@@ -516,10 +542,9 @@ public class MaskObject {
 		@Override
 		protected void compute() {
 			if (roi instanceof LinearROI) {
-				double distance = Math.min(0.5, lineWidth/2.);
+				double distance = Math.max(0.5, lineWidth/2.);
 				for (int y = yStart; y < yEnd; ++y) {
-					if (monitor.isCanceled())
-						return;
+					if (monitor.isCanceled()) return;
 					monitor.worked(1);
 
 					for (int x = xStart; x < xEnd; ++x) {
@@ -598,15 +623,6 @@ public class MaskObject {
 	public void setMaskMode(MaskMode paintMode) {
 		this.maskMode = paintMode;
 	}
-
-	public int getLineWidth() {
-		return lineWidth;
-	}
-
-	public void setLineWidth(int penSize) {
-		this.lineWidth = penSize;
-	}
-
 	public boolean isSquarePen() {
 		return squarePen;
 	}
