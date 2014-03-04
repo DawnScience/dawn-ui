@@ -488,7 +488,7 @@ public class MaskObject {
 			
 			// We use the bounding box of the region.
 			final IRectangularROI bounds = roi.getBounds();
-			final double[] beg = bounds.getPointRef();
+			final double[] beg = bounds.getPoint();
 			final double[] end = bounds.getEndPoint();
 
 			if (roi instanceof LinearROI) { // special case where isNearOutline is used for mask
