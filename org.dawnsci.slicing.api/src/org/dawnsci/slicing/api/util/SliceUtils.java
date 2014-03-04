@@ -232,7 +232,8 @@ public class SliceUtils {
         	final String axisName = getAxisLabel(sliceObject, data);
         	if (varMan!=null) {
         		ILazyDataset la = varMan.getDataValue(axisName, null);
-        		axis = la instanceof IDataset ? (IDataset)la : la.getSlice();
+        		if (la != null)
+        			axis = la instanceof IDataset ? (IDataset)la : la.getSlice();
         	}
         	if (axis==null) {
                 axis = SliceUtils.getAxis(sliceObject, varMan, axisName, false, monitor);
