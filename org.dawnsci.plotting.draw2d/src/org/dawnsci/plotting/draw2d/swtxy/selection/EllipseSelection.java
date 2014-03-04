@@ -176,6 +176,7 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 		private Figure parent;
 		private TranslationListener handleListener;
 		private FigureListener moveListener;
+		private boolean showMajorAxis;
 		private static final int SIDE = 8;
 
 		public DecoratedEllipse(Figure parent) {
@@ -186,6 +187,7 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 			setFill(false);
 			handleListener = createHandleNotifier();
 			showMajorAxis(true);
+			showMajorAxis = true;
 			moveListener = new FigureListener() {
 				@Override
 				public void figureMoved(IFigure source) {
@@ -255,7 +257,19 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 
 		@Override
 		protected void outlineShape(Graphics graphics) {
-			super.outlineShape(graphics);
+			graphics.pushState();
+			graphics.setAdvanced(true);
+			graphics.setAntialias(SWT.ON);
+
+			Rectangle bnd = parent.getBounds();
+			Draw2DUtils.drawCurve(graphics, bnd, true, this, 0, 2*Math.PI, Math.PI/180);
+
+			if (showMajorAxis) {
+				double offset = coords.getXAxisRotationAngleDegrees();
+				graphics.drawLine(getPoint(offset), getPoint(offset + 180));
+			}
+			graphics.popState();
+
 			if (label != null && isShowLabel()) {
 				graphics.setAlpha(192);
 				graphics.setForegroundColor(labelColour);
@@ -404,6 +418,7 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 					SelectionHandle h = (SelectionHandle) f;
 					Point p = h.getSelectionPoint();
 					setCentre(p.preciseX(), p.preciseY());
+					createROI(true); // FIXME temporary hack while this is still based on RotatableEllipse
 				}
 			}
 		}

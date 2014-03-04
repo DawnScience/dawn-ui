@@ -328,10 +328,7 @@ class HyperbolaSelection extends AbstractSelectionRegion implements ILockableReg
 
 			double max = getMaxRadius();
 			double start = croi.getStartAngle(max);
-			PointList points = Draw2DUtils.generateCurve(this, start, 2*Math.PI - start, Math.PI/100);
-			Rectangle bnd = new Rectangle();
-			graphics.getClip(bnd);
-			Draw2DUtils.drawClippedPolyline(graphics, points, bnd, false);
+			Draw2DUtils.drawCurve(graphics, parent.getBounds(), false, this, start, 2*Math.PI - start, Math.PI/100);
 
 			if (showMajorAxis) {
 				double offset = Math.toRadians(cs.getXAxisRotationAngleDegrees());
