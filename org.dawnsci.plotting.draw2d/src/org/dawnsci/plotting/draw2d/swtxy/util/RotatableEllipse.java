@@ -280,4 +280,14 @@ public class RotatableEllipse extends Shape implements PointFunction {
 	public String toString() {
 		return "Axes " + Arrays.toString(getAxes()) + ", centre " + getCentre() + ", angle " + getAngleDegrees();
 	}
+
+	@Override
+	public double[] calculateXIntersectionParameters(int x) {
+		return null;
+	}
+
+	@Override
+	public double[] calculateYIntersectionParameters(int y) {
+		return null;
+	}
 }

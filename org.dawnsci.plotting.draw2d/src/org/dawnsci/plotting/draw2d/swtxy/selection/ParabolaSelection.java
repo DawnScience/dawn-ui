@@ -1,5 +1,5 @@
 /*-
- * Copyright 2012 Diamond Light Source Ltd.
+ * Copyright 2014 Diamond Light Source Ltd.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -321,10 +321,7 @@ class ParabolaSelection extends AbstractSelectionRegion implements ILockableRegi
 
 			double max = getMaxRadius();
 			double start = croi.getStartAngle(max);
-			PointList points = Draw2DUtils.generateCurve(this, start, 2*Math.PI - start, Math.PI/100);
-			Rectangle bnd = new Rectangle();
-			graphics.getClip(bnd);
-			Draw2DUtils.drawClippedPolyline(graphics, points, bnd, false);
+			Draw2DUtils.drawCurve(graphics, parent.getBounds(), false, this, start, 2*Math.PI - start, Math.PI/100);
 
 			if (showMajorAxis) {
 				double offset = Math.toRadians(cs.getXAxisRotationAngleDegrees());
@@ -562,6 +559,18 @@ class ParabolaSelection extends AbstractSelectionRegion implements ILockableRegi
 
 		@Override
 		public void setRegion(IRegion region) {
+		}
+
+		@Override
+		public double[] calculateXIntersectionParameters(int x) {
+			double dx = coords.getPositionValue(x, 0)[0];
+			return croi.getVerticalIntersectionAngles(dx);
+		}
+
+		@Override
+		public double[] calculateYIntersectionParameters(int y) {
+			double dy = coords.getPositionValue(0, y)[1];
+			return croi.getHorizontalIntersectionAngles(dy);
 		}
 	}
 

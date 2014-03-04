@@ -4,6 +4,9 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DirectColorModel;
 import java.awt.image.IndexColorModel;
 import java.awt.image.WritableRaster;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
@@ -170,6 +173,131 @@ public class Draw2DUtils {
 		}
 		list.addPoint(fn.calculatePoint(upper));
 		return list;
+	}
+
+	/**
+	 * Draw a curve from a parametrised point function
+	 * @param g
+	 * @param bounds (can be null for no check)
+	 * @param isPolygon if true, join last point to first
+	 * @param fn
+	 * @param lower
+	 * @param upper
+	 * @param delta
+	 */
+	public static void drawCurve(Graphics g, Rectangle bounds, boolean isPolygon, PointFunction fn, double lower, double upper, double delta) {
+		drawCurve(g, bounds, isPolygon, fn, lower, upper, delta, 3, Math.toRadians(0.5));
+	}
+
+	/**
+	 * Draw a curve from a parametrised point function
+	 * @param g
+	 * @param bounds (can be null for no check)
+	 * @param isPolygon if true, join last point to first
+	 * @param fn
+	 * @param lower
+	 * @param upper
+	 * @param delta
+	 * @param minDistance
+	 * @param maxAngle (in radians)
+	 */
+	public static void drawCurve(Graphics g, Rectangle bounds, boolean isPolygon, PointFunction fn, double lower, double upper, double delta, double minDistance, double maxAngle) {
+		List<Double> parameters = new ArrayList<Double>();
+		double[] angles;
+
+		// find all parameters that intersect edges of bounding box
+		Point ptl = bounds.getTopLeft();
+		Point pbr = bounds.getBottomRight();
+		bounds = bounds.getExpanded(1, 1); // need expanded bounds copy for checks
+		angles = fn.calculateXIntersectionParameters(ptl.x());
+		if (angles != null) {
+			for (double a : angles) {
+				if (bounds.contains(fn.calculatePoint(a)))
+					parameters.add(a);
+			}
+		}
+		angles = fn.calculateYIntersectionParameters(ptl.y());
+		if (angles != null) {
+			for (double a : angles) {
+				if (bounds.contains(fn.calculatePoint(a)))
+					parameters.add(a);
+			}
+		}
+		angles = fn.calculateXIntersectionParameters(pbr.x());
+		if (angles != null) {
+			for (double a : angles) {
+				if (bounds.contains(fn.calculatePoint(a)))
+					parameters.add(a);
+			}
+		}
+		angles = fn.calculateYIntersectionParameters(pbr.y());
+		if (angles != null) {
+			for (double a : angles) {
+				if (bounds.contains(fn.calculatePoint(a)))
+					parameters.add(a);
+			}
+		}
+
+		Collections.sort(parameters);
+		// select subset within given range
+		int size = parameters.size();
+		int beg = 0;
+		for (; beg < size; beg++) {
+			if (parameters.get(beg) > lower)
+				break;
+		}
+		int end = beg;
+		for (; end < size; end++) {
+			if (parameters.get(end) >= upper)
+				break;
+		}
+		List<Double> subset = parameters.subList(beg, end);
+
+		// check if end points are in bounds
+		Point upt = fn.calculatePoint(upper);
+		if (bounds.contains(upt)) {
+			subset.add(upper);
+		}
+		size = subset.size();
+		boolean inside = false; // is next segment inside bounds?
+		Point lpt = fn.calculatePoint(lower);
+		if (bounds.contains(lpt)) {
+			subset.add(0, lower);
+			size++;
+			inside = true;
+			if (size == 1) {
+				System.err.println("Only lower parameter is within bounds!!!");
+				return; // nothing to draw
+			}
+		} else {
+			if (size > 1) {
+				inside = bounds.contains(fn.calculatePoint(0.5*(subset.get(0) + subset.get(1))));
+			} else {
+				if (size == 1) {
+					System.err.println("Only one parameter is within bounds!!!");
+				} else {
+					System.err.println("Draw nothing!");
+				}
+				return; // nothing to draw
+			}
+		}
+
+		// now draw alternative segments of parameter
+		double b = subset.get(0);
+		for (int i = 1; i < size; i++) {
+			double e = subset.get(i);
+			if (inside) {
+				PointList list = generateCurve(fn, b, e, delta);
+				g.drawPolyline(list);
+			}
+			inside = !inside;
+			b = e;
+		}
+		if (isPolygon) {
+			if (bounds.contains(upt) && bounds.contains(lpt) && !upt.equals(lpt)) {
+				g.drawLine(upt, lpt);
+			}
+		}
 	}
 
 	/**

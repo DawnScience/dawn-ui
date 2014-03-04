@@ -642,5 +642,17 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 		@Override
 		public void setRegion(IRegion region) {
 		}
+
+		@Override
+		public double[] calculateXIntersectionParameters(int x) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public double[] calculateYIntersectionParameters(int y) {
+			// TODO Auto-generated method stub
+			return null;
+		}
 	}
 }
