@@ -514,7 +514,8 @@ public class SliceUtils {
 			}
 		} else { // Faster
 			final File file = new File(dataPath);
-			final String fullName = file.getParent().replace('\\','/')+"/"+axisName;
+			final String parent = file.getParent();
+			final String fullName = parent == null ? axisName : parent.replace('\\','/')+"/"+axisName;
 			final ILoaderService service = (ILoaderService)ServiceManager.getService(ILoaderService.class);
 			axis = service.getDataset(currentSlice.getPath(), fullName, new ProgressMonitorWrapper(monitor));
 			if (axis == null) return null;
