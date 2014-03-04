@@ -347,6 +347,8 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		
 		final IActionBars bars = system.getActionBars();
 		if (keyListener==null) keyListener = new KeyAdapter() {
+			private ZoomType previousTool;
+
 			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.keyCode==27) { // Esc
@@ -413,20 +415,33 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
  				}
 				if (e.keyCode == 131072) { // SHIFT
 					xyGraph.getRegionArea().setShiftDown(true);
+					previousTool = xyGraph.getZoomType();
+					xyGraph.setZoomType(ZoomType.NONE);
 				}
 		        if (e.keyCode == 262144) { // CONTROL
 		        	xyGraph.getRegionArea().setControlDown(true);
+					previousTool = xyGraph.getZoomType();
+					xyGraph.setZoomType(ZoomType.NONE);
 		        }
 		        xyGraph.getRegionArea().setKeyEvent(e);
 			}
 			
 			@Override
 			public void keyReleased(KeyEvent e) {
+				
 				if ((e.stateMask & SWT.SHIFT)==SWT.SHIFT) {
 					xyGraph.getRegionArea().setShiftDown(false);
+					if (previousTool!=null) {
+						xyGraph.setZoomType(previousTool);
+						previousTool = null;
+					}
 				}
 				if ((e.stateMask & SWT.CONTROL)==SWT.CONTROL) {
 		        	xyGraph.getRegionArea().setControlDown(false);
+					if (previousTool!=null) {
+						xyGraph.setZoomType(previousTool);
+						previousTool = null;
+					}
 		        }
 		        xyGraph.getRegionArea().setKeyEvent(null);
 			}
