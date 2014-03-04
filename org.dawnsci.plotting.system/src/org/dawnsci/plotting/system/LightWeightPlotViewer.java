@@ -335,9 +335,9 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		
 		final IActionBars bars = system.getActionBars();
 		if (keyListener==null) keyListener = new KeyAdapter() {
+			private ZoomType previousTool;
 			@Override
 			public void keyPressed(KeyEvent e) {
-				private ZoomType previousTool;
 				if (e.keyCode==27) { // Esc
 					xyGraph.clearRegionTool();
 					
