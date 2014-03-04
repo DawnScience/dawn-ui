@@ -461,6 +461,27 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 		@Override
 		public void setRegion(IRegion region) {
 		}
+
+		@Override
+		public Point calculatePoint(double... parameter) {
+			EllipticalROI eroi = (EllipticalROI) getROI();
+			int[] pt = coords.getValuePosition(eroi.getPoint(parameter[0]));
+			return new Point(pt[0], pt[1]);
+		}
+
+		@Override
+		public double[] calculateXIntersectionParameters(int x) {
+			EllipticalROI eroi = (EllipticalROI) getROI();
+			double dx = coords.getPositionValue(x, 0)[0];
+			return eroi.getVerticalIntersectionAngles(dx);
+		}
+
+		@Override
+		public double[] calculateYIntersectionParameters(int y) {
+			EllipticalROI eroi = (EllipticalROI) getROI();
+			double dy = coords.getPositionValue(0, y)[1];
+			return eroi.getHorizontalIntersectionAngles(dy);
+		}
 	}
 
 	private boolean isCentreMovable = true;

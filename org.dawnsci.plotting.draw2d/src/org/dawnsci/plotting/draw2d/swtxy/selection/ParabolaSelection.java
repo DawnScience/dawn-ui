@@ -563,6 +563,18 @@ class ParabolaSelection extends AbstractSelectionRegion implements ILockableRegi
 		@Override
 		public void setRegion(IRegion region) {
 		}
+
+		@Override
+		public double[] calculateXIntersectionParameters(int x) {
+			double dx = coords.getPositionValue(x, 0)[0];
+			return croi.getVerticalIntersectionAngles(dx);
+		}
+
+		@Override
+		public double[] calculateYIntersectionParameters(int y) {
+			double dy = coords.getPositionValue(0, y)[1];
+			return croi.getHorizontalIntersectionAngles(dy);
+		}
 	}
 
 	private boolean isCentreMovable = true;
