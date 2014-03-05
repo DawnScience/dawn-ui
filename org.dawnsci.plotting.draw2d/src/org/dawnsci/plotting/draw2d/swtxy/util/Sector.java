@@ -69,6 +69,18 @@ public class Sector extends Shape implements PointFunction {
 			public Point calculatePoint(double... parameter) {
 				return Sector.this.getPoint(parameter[0], 0);
 			}
+
+			@Override
+			public double[] calculateXIntersectionParameters(int x) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public double[] calculateYIntersectionParameters(int y) {
+				// TODO Auto-generated method stub
+				return null;
+			}
 		};
 
 		outerFunction = new PointFunction() {
@@ -81,6 +93,18 @@ public class Sector extends Shape implements PointFunction {
 			@Override
 			public Point calculatePoint(double... parameter) {
 				return Sector.this.getPoint(parameter[0], 1);
+			}
+
+			@Override
+			public double[] calculateXIntersectionParameters(int x) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public double[] calculateYIntersectionParameters(int y) {
+				// TODO Auto-generated method stub
+				return null;
 			}
 		};
 	}
@@ -249,5 +273,17 @@ public class Sector extends Shape implements PointFunction {
 
 	public void setDrawSymmetry(boolean drawSymmetry) {
 		this.drawSymmetry = drawSymmetry;
+	}
+
+	@Override
+	public double[] calculateXIntersectionParameters(int x) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public double[] calculateYIntersectionParameters(int y) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

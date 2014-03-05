@@ -149,7 +149,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		
 		if (m != null) {
 			DetectorProperties d = m.getDetector2DProperties();
-			if(d.getPx() != ds.getShape()[0] || d.getPy() != ds.getShape()[1]) m = null;
+			if(d.getPy() != ds.getShape()[0] || d.getPx() != ds.getShape()[1]) m = null;
 		}
 		
 		if (m == null && metadata == null) return;
@@ -205,6 +205,10 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		IHierarchicalDataFile file = slice.getFile();
 		Group dataGroup = slice.getParent();
 		
+		Group resultGroup = file.group("integration_result", dataGroup);
+		file.setNexusAttribute(resultGroup, Nexus.DATA);
+		slice.setParent(resultGroup);
+		
 		List<AbstractDataset> out = fullImageJob.process(DatasetUtils.convertToAbstractDataset(slice.getData()));
 		
 		AbstractDataset axis = out.get(0);
@@ -212,7 +216,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		//Test if axis is made
 		boolean axisMade = false;
 		
-		for (HObject ob : dataGroup.getMemberList()) {
+		for (HObject ob : resultGroup.getMemberList()) {
 			if (ob.getName().equals(axis.getName())) { 
 				axisMade = true;
 				break;
@@ -222,18 +226,18 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		if (!axisMade) {
 			H5Datatype dType = new H5Datatype(Datatype.CLASS_FLOAT, 64/8, Datatype.NATIVE, Datatype.NATIVE);
 			axis = axis.squeeze();
-			Dataset s = file.createDataset(axis.getName(),  dType,  new long[]{axis.getShape()[0]}, axis.getBuffer(), dataGroup);
+			Dataset s = file.createDataset(axis.getName(),  dType,  new long[]{axis.getShape()[0]}, axis.getBuffer(), resultGroup);
 			file.setNexusAttribute(s, Nexus.SDS);
 			file.setIntAttribute(s, NexusUtils.AXIS, 2);
 			
 		}
 		
 		AbstractDataset signal = out.get(1);
-		signal.setName("Intensity");
+		signal.setName("data");
 		slice.appendData(signal);
 		
 		if (!axisMade) {
-			for (HObject ob :dataGroup.getMemberList()) {
+			for (HObject ob :resultGroup.getMemberList()) {
 				if (ob instanceof Dataset && ob.getName().equals(signal.getName())) {
 					Dataset ds = (Dataset)ob;
 					file.setIntAttribute(ds, NexusUtils.SIGNAL, 1);

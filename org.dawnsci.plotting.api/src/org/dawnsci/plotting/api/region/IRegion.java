@@ -117,6 +117,18 @@ public interface IRegion {
 	public void setVisible(boolean visible);
 
 	/**
+	 * @return true if filled
+	 */
+	public boolean isFill();
+
+	/**
+	 * Fill body
+	 * 
+	 * @param fill
+	 */
+	public void setFill(boolean fill);
+
+	/**
 	 * @return true if moveable
 	 */
 	public boolean isMobile();

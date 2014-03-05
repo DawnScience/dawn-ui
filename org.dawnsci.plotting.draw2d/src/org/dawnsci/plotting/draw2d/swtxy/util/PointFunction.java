@@ -20,4 +20,18 @@ public interface PointFunction {
 	 * @return
 	 */
 	public Point calculatePoint(double... parameter);
+
+	/**
+	 * Calculate parameters which will make point intersect given vertical line of given x
+	 * @param x
+	 * @return an array of doubles (can null or contain one or two values)
+	 */
+	public double[] calculateXIntersectionParameters(int x);
+
+	/**
+	 * Calculate parameters which will make point intersect given horizontal line of given y
+	 * @param y
+	 * @return an array of doubles (can null or contain one or two values)
+	 */
+	public double[] calculateYIntersectionParameters(int y);
 }

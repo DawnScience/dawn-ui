@@ -289,6 +289,9 @@ class LineSelection extends AbstractSelectionRegion {
 		Rectangle r = new Rectangle(pos1, pos2);
 		bounds = bounds.union(r);
 		
+		// Allow for line thickness
+		bounds = bounds.getExpanded(getLineWidth(), getLineWidth());
+		
 		if (bounds.height<MIN_BOUNDS) bounds.height=MIN_BOUNDS;
 		if (bounds.width <MIN_BOUNDS) bounds.width=MIN_BOUNDS;
 		return bounds;

@@ -173,6 +173,7 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 		if (cursor==null && getCursorPath()!=null)  {
 			Image image = Activator.getImage(getCursorPath());
 			cursor = new Cursor(Display.getDefault(), image.getImageData(), 8, 8);
+			image.dispose();
 		}
 		return cursor;
 	}
@@ -242,16 +243,24 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 	 */
 	public void remove() {
 		clearListeners();
-		if (coords!=null) coords.dispose();
-		if (getParent()!=null) getParent().remove(this);
-		if (regionObjects!=null)for (IFigure ob : regionObjects) {
-			if (ob!=null && ob.getParent()!=null) {
-				ob.getParent().remove(ob);
-				ob.removeMouseListener(selectionListener);
+		coords = null; // remove local reference (nb it is shared by many regions)
+		if (getParent() != null)
+			getParent().remove(this);
+		if (regionObjects != null) {
+			for (IFigure ob : regionObjects) {
+				if (ob != null && ob.getParent() != null) {
+					ob.getParent().remove(ob);
+					ob.removeMouseListener(selectionListener);
+				}
 			}
+			regionObjects = null;
 		}
-		if (cursor!=null) cursor.dispose();
+		if (cursor != null)
+			cursor.dispose();
 		cursor = null;
+		if (labelFont != null)
+			labelFont.dispose();
+		labelFont = null;
 		//dispose();
 	}
 
@@ -315,6 +324,19 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 			}
 		}
 		bean.setShowPosition(showPosition);
+	}
+
+	public void setFill(boolean fill) {
+		if (regionObjects!=null) for (IFigure ob : regionObjects) {
+			if (ob instanceof Shape) {
+				((Shape)ob).setFill(fill);
+			}
+		}
+		bean.setFill(fill);
+	}
+
+	public boolean isFill() {
+		return bean.isFill();
 	}
 
 	public void setAlpha(int alpha) {

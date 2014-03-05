@@ -6,6 +6,7 @@ import org.dawnsci.spectrum.ui.file.IContain1DData;
 import org.dawnsci.spectrum.ui.file.ISpectrumFile;
 import org.dawnsci.spectrum.ui.file.SpectrumInMemory;
 import org.dawnsci.spectrum.ui.processing.AbstractProcess;
+import org.dawnsci.spectrum.ui.views.ProcessMenuManager;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 
@@ -39,11 +40,8 @@ public class SpectrumWizard extends Wizard {
 		return outputPath;
 	}
 	
-	public List<ISpectrumFile> getOutputFiles() {
-		for (IContain1DData data : outdata) {
-			//SpectrumInMemory sm = new SpectrumInMemory(longName, name, xDataset, yDatasets, system);
-		}
-		return null;
+	public List<IContain1DData> getOutputData() {
+		return outdata;
 	}
 	
 }
