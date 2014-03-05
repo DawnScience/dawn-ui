@@ -149,7 +149,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		
 		if (m != null) {
 			DetectorProperties d = m.getDetector2DProperties();
-			if(d.getPx() != ds.getShape()[0] || d.getPy() != ds.getShape()[1]) m = null;
+			if(d.getPy() != ds.getShape()[0] || d.getPx() != ds.getShape()[1]) m = null;
 		}
 		
 		if (m == null && metadata == null) return;
