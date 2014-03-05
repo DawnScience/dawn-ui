@@ -326,6 +326,19 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 		bean.setShowPosition(showPosition);
 	}
 
+	public void setFill(boolean fill) {
+		if (regionObjects!=null) for (IFigure ob : regionObjects) {
+			if (ob instanceof Shape) {
+				((Shape)ob).setFill(fill);
+			}
+		}
+		bean.setFill(fill);
+	}
+
+	public boolean isFill() {
+		return bean.isFill();
+	}
+
 	public void setAlpha(int alpha) {
 		if (regionObjects!=null) for (IFigure ob : regionObjects) {
 			if (ob instanceof SelectionHandle) {
