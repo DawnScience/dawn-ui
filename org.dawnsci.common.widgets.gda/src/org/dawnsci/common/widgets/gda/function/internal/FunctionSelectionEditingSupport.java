@@ -58,7 +58,6 @@ public class FunctionSelectionEditingSupport extends EditingSupport implements
 		FunctionModifiedEvent event = modelElement.setEditingValue(value.toString());
 
 		getViewer().refresh(true);
-//		functionTreeViewer.getTreeViewer().expandAll();
 		if (event != null) {
 			IFunction afterFunction = event.getAfterFunction();
 			functionTreeViewer.expandFunction(afterFunction);
