@@ -1,15 +1,10 @@
 package org.dawnsci.common.widgets.gda.function.internal;
 
 import org.dawnsci.common.widgets.gda.Activator;
-import org.dawnsci.common.widgets.gda.function.descriptors.FunctionInstantiationFailedException;
 import org.dawnsci.common.widgets.gda.function.descriptors.IFunctionDescriptor;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.fieldassist.IContentProposal;
 import org.eclipse.swt.graphics.Image;
-
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IOperator;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IParameter;
 
 /**
  * Content proposals for simple functions (not jexl)
@@ -17,14 +12,13 @@ import uk.ac.diamond.scisoft.analysis.fitting.functions.IParameter;
  */
 public class FunctionContentProposal implements IContentProposal, IAdaptable {
 	private static final Image CURVE = Activator.getImage("chart_curve.png");
-	private static final Image BULLET_BLUE = Activator.getImage("bullet_blue.png");
+	private static final Image BULLET_BLUE = Activator
+			.getImage("bullet_blue.png");
 
-	private IFunction function;
 	private IFunctionDescriptor functionDescriptor;
 
-	public FunctionContentProposal(IFunction function, IFunctionDescriptor functionDescriptor) {
+	public FunctionContentProposal(IFunctionDescriptor functionDescriptor) {
 		super();
-		this.function = function;
 		this.functionDescriptor = functionDescriptor;
 	}
 
@@ -50,21 +44,7 @@ public class FunctionContentProposal implements IContentProposal, IAdaptable {
 
 	@Override
 	public String getDescription() {
-		try {
-			IFunction function2 = functionDescriptor.getFunction();
-			StringBuilder desc = new StringBuilder(function2.getDescription() + System.lineSeparator());
-
-			IParameter[] parameters = function2.getParameters();
-			if (parameters != null && parameters.length != 0){
-				desc.append(System.lineSeparator() + "Parameters:" + System.lineSeparator());
-				for (IParameter param : function2.getParameters()) {
-					desc.append("  " + param.getName() + System.lineSeparator());
-				}
-			}
-			return desc.toString();
-		} catch (FunctionInstantiationFailedException e) {
-		}
-		return null;
+		return functionDescriptor.getLongDescription();
 	}
 
 	@Override
@@ -78,12 +58,10 @@ public class FunctionContentProposal implements IContentProposal, IAdaptable {
 	 * @return images for IOperators and IFunctions, else null
 	 */
 	public Image getImage() {
-		if (function instanceof IOperator) {
+		if (functionDescriptor.isOperator()) {
 			return BULLET_BLUE;
-		} else if (function instanceof IFunction) {
+		} else {
 			return CURVE;
 		}
-		return null;
 	}
-
 }
