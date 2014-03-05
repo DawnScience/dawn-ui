@@ -362,7 +362,7 @@ public class JexlExpressionFunction extends AFunction {
 		return function;
 	}
 
-	protected IExpressionEngine getEngine() {
+	public IExpressionEngine getEngine() {
 		return engine;
 	}
 
