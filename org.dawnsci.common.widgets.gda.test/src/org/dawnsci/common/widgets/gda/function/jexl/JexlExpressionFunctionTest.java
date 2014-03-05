@@ -17,6 +17,7 @@ import org.dawnsci.common.widgets.gda.function.jexl.JexlExpressionFunction.JexlE
 import org.dawnsci.jexl.internal.ExpressionServiceImpl;
 import org.junit.Test;
 
+import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Gaussian;
 
 @SuppressWarnings("restriction")
@@ -428,4 +429,21 @@ public class JexlExpressionFunctionTest {
 		f.setParameterValues(1.0, 2.0, 3.0);
 		assertEquals(new Gaussian(1.0, 2.0, 3.0).val(4.0), f.val(4.0), 0.0);
 	}
+
+	@Test
+	public void testUpdateParamtersChangingFunction()
+			throws JexlExpressionFunctionException {
+		CompositeFunction composite = new CompositeFunction();
+		JexlExpressionFunction jexlFunc = new JexlExpressionFunction(
+				new ExpressionServiceImpl(), "a+x");
+		composite.addFunction(jexlFunc);
+
+		assertEquals(1, jexlFunc.getParameters().length);
+		assertEquals(1, composite.getParameters().length);
+
+		jexlFunc.setExpression("a+b+x");
+		assertEquals(2, jexlFunc.getParameters().length);
+		assertEquals(2, composite.getParameters().length);
+	}
+
 }
