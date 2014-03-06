@@ -32,6 +32,7 @@ import org.dawnsci.plotting.tools.diffraction.DiffractionUtils;
 import org.dawnsci.plotting.tools.powderintegration.PowderIntegrationJob.IntegrationMode;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.preference.JFacePreferences;
 import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.jface.resource.JFaceResources;
@@ -72,6 +73,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 	Composite baseComposite;
 	XAxis xAxis = XAxis.Q;
 	IntegrationMode mode = IntegrationMode.NONSPLITTING;
+	boolean correctSolidAngle = false;
 	
 	public PowderIntegrationTool() {
 		try {
@@ -209,6 +211,18 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 
 		};
 		
+		final MenuAction corrections= new MenuAction("Corrections");
+		final Action solidAngle = new Action("Solid Angle",IAction.AS_CHECK_BOX) {
+			@Override
+			public void run() {
+				correctSolidAngle = isChecked();
+				PowderIntegrationTool.this.fullImageJob.setCorrectSolidAngle(correctSolidAngle);
+				update(null);
+			}
+
+		};
+		
+		
 		modeSelect.add(nonAction);
 		modeSelect.add(splitAction);
 		modeSelect.add(split2DAction);
@@ -218,11 +232,16 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		axisSelect.add(tthAction);
 		axisSelect.setSelectedAction(qAction);
 		
+		corrections.add(solidAngle);
+		
 		getSite().getActionBars().getToolBarManager().add(modeSelect);
 		getSite().getActionBars().getMenuManager().add(modeSelect);
 		
 		getSite().getActionBars().getToolBarManager().add(axisSelect);
 		getSite().getActionBars().getMenuManager().add(axisSelect);
+		
+		getSite().getActionBars().getToolBarManager().add(corrections);
+		getSite().getActionBars().getMenuManager().add(corrections);
 	}
 
 	@Override

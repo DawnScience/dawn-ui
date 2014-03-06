@@ -12,6 +12,7 @@ import org.eclipse.swt.widgets.Display;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Maths;
 import uk.ac.diamond.scisoft.analysis.dataset.function.AbstractPixelIntegration;
 import uk.ac.diamond.scisoft.analysis.dataset.function.NonPixelSplittingIntegration;
 import uk.ac.diamond.scisoft.analysis.dataset.function.PixelSplittingIntegration;
@@ -33,7 +34,8 @@ public class PowderIntegrationJob extends Job {
 	AbstractDataset mask;
 	IROI roi;
 	int nBins;
-	
+	boolean correctSolidAngle = false;
+
 	public enum IntegrationMode{NONSPLITTING,SPLITTING,SPLITTING2D}
 	
 	public PowderIntegrationJob(IDiffractionMetadata md, IPlottingSystem system) {
@@ -72,15 +74,21 @@ public class PowderIntegrationJob extends Job {
 	public IntegrationMode getIntegrationMode() {
 		return mode;
 	}
+	
+	public boolean isCorrectSolidAngle() {
+		return correctSolidAngle;
+	}
+
+	public void setCorrectSolidAngle(boolean correctSolidAngle) {
+		this.correctSolidAngle = correctSolidAngle;
+	}
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		if (integrator == null) {
 			updateIntegrator();
 		}
-		
-		
-		
+		integrator.setCorrectSolidAngle(correctSolidAngle);
 		integrator.setMask(mask);
 		integrator.setROI(roi);
 		integrator.setAxisType(xAxis);
@@ -116,6 +124,7 @@ public class PowderIntegrationJob extends Job {
 		
 		if (integrator == null) {
 			updateIntegrator();
+			integrator.setCorrectSolidAngle(correctSolidAngle);
 			integrator.setMask(mask);
 			integrator.setROI(roi);
 			integrator.setAxisType(xAxis);
