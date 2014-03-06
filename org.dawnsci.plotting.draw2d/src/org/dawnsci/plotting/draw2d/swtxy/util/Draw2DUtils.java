@@ -265,13 +265,15 @@ public class Draw2DUtils {
 		}
 		Point lpt = fn.calculatePoint(lower);
 		Point last = lpt;
-		for (int i = 0; i < subset.size(); i++) { // remove same or adjacent points
-			Point p = fn.calculatePoint(subset.get(i));
-			if (p.getDistance(last) < 2) {
-				subset.remove(i--);
-				logger.debug("Removed point {} at parameter {}", i, subset.get(i));
+		if (subset.size() > 1) {
+			for (int i = 0; i < subset.size(); i++) { // remove same or adjacent points
+				Point p = fn.calculatePoint(subset.get(i));
+				if (p.getDistance(last) < 2) {
+					logger.debug("Removed point {} at parameter {}", i, subset.get(i));
+					subset.remove(i--);
+				}
+				last = p;
 			}
-			last = p;
 		}
 		size = subset.size();
 		boolean inside = false; // is next segment inside bounds?
