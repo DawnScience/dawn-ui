@@ -263,9 +263,18 @@ public class Draw2DUtils {
 		if (bounds.contains(upt)) {
 			subset.add(upper);
 		}
+		Point lpt = fn.calculatePoint(lower);
+		Point last = lpt;
+		for (int i = 0; i < subset.size(); i++) { // remove same or adjacent points
+			Point p = fn.calculatePoint(subset.get(i));
+			if (p.getDistance(last) < 2) {
+				subset.remove(i--);
+				logger.debug("Removed point {} at parameter {}", i, subset.get(i));
+			}
+			last = p;
+		}
 		size = subset.size();
 		boolean inside = false; // is next segment inside bounds?
-		Point lpt = fn.calculatePoint(lower);
 		if (bounds.contains(lpt)) {
 			if (size == 0) {
 				logger.debug("Only lower parameter is within bounds!!!");
