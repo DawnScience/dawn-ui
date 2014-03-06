@@ -262,7 +262,10 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 			graphics.setAntialias(SWT.ON);
 
 			Rectangle bnd = parent.getBounds();
-			Draw2DUtils.drawCurve(graphics, bnd, true, this, 0, 2*Math.PI, Math.PI/180);
+			if (!Draw2DUtils.drawCurve(graphics, bnd, true, this, 0, 2*Math.PI, Math.PI/180)) {
+				graphics.popState();
+				return;
+			}
 
 			if (showMajorAxis) {
 				double offset = coords.getXAxisRotationAngleDegrees();
