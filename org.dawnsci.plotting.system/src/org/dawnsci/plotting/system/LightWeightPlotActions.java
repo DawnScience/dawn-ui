@@ -10,7 +10,6 @@ import java.util.Map;
 
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
-import org.dawnsci.plotting.PlottingActionBarManager;
 import org.dawnsci.plotting.api.ActionType;
 import org.dawnsci.plotting.api.ManagerType;
 import org.dawnsci.plotting.api.PlotType;

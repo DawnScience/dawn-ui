@@ -69,6 +69,18 @@ public class Sector extends Shape implements PointFunction {
 			public Point calculatePoint(double... parameter) {
 				return Sector.this.getPoint(parameter[0], 0);
 			}
+
+			@Override
+			public double[] calculateXIntersectionParameters(int x) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public double[] calculateYIntersectionParameters(int y) {
+				// TODO Auto-generated method stub
+				return null;
+			}
 		};
 
 		outerFunction = new PointFunction() {
@@ -81,6 +93,18 @@ public class Sector extends Shape implements PointFunction {
 			@Override
 			public Point calculatePoint(double... parameter) {
 				return Sector.this.getPoint(parameter[0], 1);
+			}
+
+			@Override
+			public double[] calculateXIntersectionParameters(int x) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public double[] calculateYIntersectionParameters(int y) {
+				// TODO Auto-generated method stub
+				return null;
 			}
 		};
 	}
@@ -219,8 +243,8 @@ public class Sector extends Shape implements PointFunction {
 	}
 
 	private void fillSector(Graphics graphics, double[] ang) {
-		PointList points = Draw2DUtils.generateCurve(innerFunction, ang[0], ang[1], 1, 3, Math.toRadians(1));
-		PointList oPoints = Draw2DUtils.generateCurve(outerFunction, ang[0], ang[1], 1, 3, Math.toRadians(1));
+		PointList points = Draw2DUtils.generateCurve(innerFunction, ang[0], ang[1], 1);
+		PointList oPoints = Draw2DUtils.generateCurve(outerFunction, ang[0], ang[1], 1);
 		oPoints.reverse();
 		points.addAll(oPoints);
 		graphics.fillPolygon(points);
@@ -232,8 +256,8 @@ public class Sector extends Shape implements PointFunction {
 		graphics.setAdvanced(true);
 		graphics.setAntialias(SWT.ON);
 
-		PointList points = Draw2DUtils.generateCurve(innerFunction, angle[0], angle[1], 1, 3, Math.toRadians(1));
-		PointList oPoints = Draw2DUtils.generateCurve(outerFunction, angle[0], angle[1], 1, 3, Math.toRadians(1));
+		PointList points = Draw2DUtils.generateCurve(innerFunction, angle[0], angle[1], 1);
+		PointList oPoints = Draw2DUtils.generateCurve(outerFunction, angle[0], angle[1], 1);
 		oPoints.reverse();
 		points.addAll(oPoints);
 		Rectangle bnd = new Rectangle();
@@ -249,5 +273,17 @@ public class Sector extends Shape implements PointFunction {
 
 	public void setDrawSymmetry(boolean drawSymmetry) {
 		this.drawSymmetry = drawSymmetry;
+	}
+
+	@Override
+	public double[] calculateXIntersectionParameters(int x) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public double[] calculateYIntersectionParameters(int y) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

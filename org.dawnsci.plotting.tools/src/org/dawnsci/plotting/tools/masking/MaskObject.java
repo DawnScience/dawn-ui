@@ -20,6 +20,7 @@ import org.eclipse.core.commands.operations.DefaultOperationHistory;
 import org.eclipse.core.commands.operations.IOperationHistory;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.draw2d.geometry.Point;
+import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +30,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.BooleanDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IndexIterator;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.IRectangularROI;
+import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 
 /**
  * This class is taken directly out of the class of the same name in SDA
@@ -64,7 +66,6 @@ public class MaskObject {
 	}
 
 	private MaskMode        maskMode;
-    private int             lineWidth;
     private boolean         squarePen           = false;
     private boolean         ignoreAlreadyMasked = false;
    /**
@@ -79,13 +80,22 @@ public class MaskObject {
      */
 	private DefaultOperationHistory operationManager;
 	private ForkJoinPool pool;
+	private PrecisionPoint brushThreshold;
     
 	MaskObject() {
-		operationManager = new DefaultOperationHistory();
+		this.operationManager = new DefaultOperationHistory();
 		operationManager.setLimit(MaskOperation.MASK_CONTEXT, 20);	
-		pool = new ForkJoinPool();
+		this.pool = new ForkJoinPool();
 	}
 	
+	/**
+	 * 
+	 * @param maskObject
+	 */
+	public void sync(MaskObject maskObject) {
+		this.maskDataset = (BooleanDataset)maskObject.maskDataset.clone();
+	}
+
     /**
      * Designed to copy data in an incoming mask onto this one as best as possible.
      * @param savedMask
@@ -162,8 +172,8 @@ public class MaskObject {
 	        		span.add(new int[]{(int)xAxis.getPositionValue(loc.x),      (int)yAxis.getPositionValue(loc.y)});
 	        	}
 	        });
-	        int[]  start = normalize(span.get(0));
-	        int[]  end   = normalize(span.get(1));
+	        int[]  start = clip(span.get(0));
+	        int[]  end   = clip(span.get(1));
 	        int[]  cen   = span.get(2);
 	        int[]  b     = new int[]{cen[0], start[1]};
 	        int radius   = end[1]-cen[1];
@@ -172,7 +182,16 @@ public class MaskObject {
 	        
 	        for (int y = start[1]; y<=end[1]; ++y) {
 	        	for (int x = start[0]; x<=end[0]; ++x) {
-	        		       		
+	        		     
+	        		if (brushThreshold!=null) {
+	        			final double intensity = imageDataset.getDouble(y,x);
+	        			if (intensity<brushThreshold.preciseX() ||
+	        			    intensity>brushThreshold.preciseY()) {
+	        				System.out.println("Ignored ("+x+", "+y+")");
+	        				continue;
+	        			}
+	        		}
+	        		
 	        		if (penShape==ShapeType.SQUARE) {
 	        			toggleMask(op, mv, y, x);
 	
@@ -286,7 +305,12 @@ public class MaskObject {
 		}
 	}
 
-	private int[] normalize(int[] is) {
+	/**
+	 * Clip to span of image dataset (not 1)
+	 * @param is
+	 * @return
+	 */
+	private int[] clip(int[] is) {
 		int maxX = imageDataset.getShape()[1]-1;
 		if (is[0]>maxX) is[0] = maxX;
 		if (is[0]<0)    is[0] = 0;
@@ -325,41 +349,39 @@ public class MaskObject {
 		
 		createMaskIfNeeded();
 		monitor.worked(1);
-		
-		// Remove invalid regions first to make processing faster.
-		final List<IRegion> validRegions = regions!=null?new ArrayList<IRegion>(regions.size()):null;
-		if (validRegions!=null) for (IRegion region : regions) {
-			if (region == null)             continue;
-			if (!isSupportedRegion(region)) continue;
-			if (region.getUserObject()!=MaskRegionType.REGION_FROM_MASKING)     continue;
-			validRegions.add(region);
-		}
-		
-
+	
         // Slightly wrong AbstractDataset loop, but it is faster...
 		if (minNumber!=null || maxNumber!=null) {
-			final IndexIterator ita = imageDataset.getIterator();
 			final int           as  = imageDataset.getElementsPerItem();
 			if (as!=1) throw new RuntimeException("Cannot deal with mulitple elements in mask processing!");
 			
 			double              lo  = minNumber!=null ? minNumber.doubleValue() : Double.NaN;
 			double              hi  = maxNumber!=null ? maxNumber.doubleValue() : Double.NaN;
-			int i = 0;
-			while (ita.hasNext()) {
-				try {
-					double x = imageDataset.getElementDoubleAbs(ita.index);
-					boolean isValid = isValid(x, lo, hi);
-					if (ignoreAlreadyMasked && isValid && !maskDataset.getAbs(i)) continue;
-					maskDataset.setAbs(i, isValid);
-				} finally {
-				    ++i;
-				}
+			
+			final int size = imageDataset.getSize();
+			for (int i = 0; i < size; i++) {
+				
+				double x = imageDataset.getElementDoubleAbs(i);
+				boolean isValid = isValid(x, lo, hi);
+				if (ignoreAlreadyMasked && isValid && !maskDataset.getAbs(i)) continue;
+				maskDataset.setAbs(i, isValid);
+				
 			}
 		}
-			
-		if (validRegions!=null && !validRegions.isEmpty()){
-			
-	        final MaskOperation op  = new MaskOperation(maskDataset, getMaskDataset().getSize()/16);
+
+		if (regions != null) {
+			// Remove invalid regions first to make processing faster.
+			final List<IRegion> validRegions = new ArrayList<IRegion>(regions.size());
+			for (IRegion region : regions) {
+				if (region == null)             continue;
+				if (!isSupportedRegion(region)) continue;
+				if (region.getUserObject()!=MaskRegionType.REGION_FROM_MASKING)     continue;
+				validRegions.add(region);
+			}
+
+			if (validRegions.isEmpty()) return true;
+
+			final MaskOperation op  = new MaskOperation(maskDataset, getMaskDataset().getSize()/16);
 			final int[]      shape  = imageDataset.getShape();
 			
 			if (Boolean.getBoolean("org.dawnsci.plotting.tools.masking.no.thread.pool")) {
@@ -429,10 +451,26 @@ public class MaskObject {
 
 				final IROI    roi       = region.getROI();
 				final boolean isMasking = region.isMaskRegion();
-				actions.add(new RegionAction(op, shape, roi, isMasking, monitor));
+				actions.add(new RegionAction(op, shape, roi, getScreenPixelWidth(region), isMasking, monitor));
 			}
 			invokeAll(actions);
-		}		
+		}
+		
+        /**
+         * Get pixel width in data coordinates.
+         * @param region
+         * @return
+         */
+		public double getScreenPixelWidth(IRegion region) {
+			final int widPix = region.getLineWidth();
+			double[] s = region.getCoordinateSystem().getPositionValue(new int[]{0, 0});
+			double[] e = region.getCoordinateSystem().getPositionValue(new int[]{widPix, widPix});
+			//return Math.pow((Math.pow(e[0]-s[0], 2)+Math.pow(e[1]-s[1], 2)), 0.5);
+			// FIXME This is not right but works for many images that we have. 
+			// Those with significantly different axis scales, it will not.
+			return Math.min(e[0]-s[0], e[1]-s[1]);
+		}
+
 	}
 
 	private class RegionAction extends MaskRegionsAction {
@@ -444,12 +482,23 @@ public class MaskObject {
 		
 		protected boolean          isMasking;
 		protected IROI             roi;
+		protected double           lineWidth;
 
-		public RegionAction(MaskOperation op, int[] shape, IROI roi,
+		/**
+		 * 
+		 * @param op
+		 * @param shape
+		 * @param roi
+		 * @param lineWidth in data coordinates (ROI)
+		 * @param isMasking
+		 * @param monitor
+		 */
+		public RegionAction(MaskOperation op, int[] shape, IROI roi, double lineWidth,
 				            boolean isMasking, IProgressMonitor monitor) {
 			super(op, shape, null, monitor);
 			this.isMasking = isMasking;
 			this.roi = roi;
+			this.lineWidth = lineWidth;
 		}
 
 		@Override
@@ -460,7 +509,15 @@ public class MaskObject {
 			final IRectangularROI bounds = roi.getBounds();
 			final double[] beg = bounds.getPoint();
 			final double[] end = bounds.getEndPoint();
-			
+
+			if (roi instanceof LinearROI) { // special case where isNearOutline is used for mask
+				double distance = Math.max(0.5, lineWidth/2.);
+				beg[0] -= distance;
+				beg[1] -= distance;
+				end[0] += distance;
+				end[1] += distance;
+			}
+
 			int xStart = Math.max(0, (int) Math.round(beg[0]));
 			int xEnd   = Math.min(shape[1] - 1, (int) Math.round(end[0]));
 			
@@ -473,7 +530,7 @@ public class MaskObject {
 			for (int y=yStart; y<yEnd; y+=INC) { 
 				
 				final int yMax = Math.min(yStart+INC, yEnd);
-				actions.add(new PixelAction(op, xStart, xEnd, yStart, yMax, isMasking, roi, monitor));
+				actions.add(new PixelAction(op, xStart, xEnd, yStart, yMax, isMasking, roi, lineWidth, monitor));
 				yStart+=INC;
 				if (monitor.isCanceled()) return;
 			}
@@ -499,10 +556,10 @@ public class MaskObject {
 		public PixelAction(MaskOperation op, 
 				           int xStart, int xEnd,
 				           int yStart, int yEnd,
-				           boolean isMasking, IROI roi, 
+				           boolean isMasking, IROI roi, double lineWidth, 
 				           IProgressMonitor monitor) {
 			
-			super(op, null, roi, isMasking, monitor);
+			super(op, null, roi, lineWidth, isMasking, monitor);
 			this.xStart  = xStart;
 			this.xEnd    = xEnd;
 			this.yStart  = yStart;
@@ -511,32 +568,54 @@ public class MaskObject {
 
 		@Override
 		protected void compute() {
-			for (int y = yStart; y<yEnd; ++y) {
-				if (monitor.isCanceled()) return;
-				monitor.worked(1);
+			if (roi instanceof LinearROI) {
+				double distance = Math.max(0.5, lineWidth/2.);
+				for (int y = yStart; y < yEnd; ++y) {
+					if (monitor.isCanceled()) return;
+					monitor.worked(1);
 
-				for (int x = xStart; x<xEnd; ++x) {
+					for (int x = xStart; x < xEnd; ++x) {
 
-					if (maskDataset.getBoolean(y, x)!=isMasking) continue;
-					try {
-						if (roi.containsPoint(x, y)) {
-							toggleMask(op, !isMasking, y, x);
+						if (maskDataset.getBoolean(y, x) != isMasking)
+							continue;
+						try {
+							if (roi.isNearOutline(x, y, distance)) {
+								toggleMask(op, !isMasking, y, x);
+							}
+						} catch (Throwable ne) {
+							logger.trace("Cannot process point " + (new Point(x, y)), ne);
+							return;
 						}
-					} catch (Throwable ne) {
-						logger.trace("Cannot process point "+(new Point(x,y)), ne);
+					}
+				}
+			} else {
+				for (int y = yStart; y < yEnd; ++y) {
+					if (monitor.isCanceled())
 						return;
+					monitor.worked(1);
+
+					for (int x = xStart; x < xEnd; ++x) {
+
+						if (maskDataset.getBoolean(y, x) != isMasking)
+							continue;
+						try {
+							if (roi.containsPoint(x, y)) {
+								toggleMask(op, !isMasking, y, x);
+							}
+						} catch (Throwable ne) {
+							logger.trace("Cannot process point " + (new Point(x, y)), ne);
+							return;
+						}
 					}
 				}
 			}
-
 		}
 	}
 
 	private void createMaskIfNeeded() {
 		if (maskDataset == null || !maskDataset.isCompatibleWith(imageDataset)) {
-			maskDataset = new BooleanDataset(imageDataset.getShape());
+			maskDataset = BooleanDataset.ones(imageDataset.getShape());
 			maskDataset.setName("mask");
-			maskDataset.fill(true);
 		}	
 		if (operationManager ==null)  {
 			operationManager = new DefaultOperationHistory();
@@ -571,15 +650,6 @@ public class MaskObject {
 	public void setMaskMode(MaskMode paintMode) {
 		this.maskMode = paintMode;
 	}
-
-	public int getLineWidth() {
-		return lineWidth;
-	}
-
-	public void setLineWidth(int penSize) {
-		this.lineWidth = penSize;
-	}
-
 	public boolean isSquarePen() {
 		return squarePen;
 	}
@@ -652,5 +722,9 @@ public class MaskObject {
 
 	public void setIgnoreAlreadyMasked(boolean ignoreAlreadyMasked) {
 		this.ignoreAlreadyMasked = ignoreAlreadyMasked;
+	}
+
+	public void setBrushThreshold(PrecisionPoint precisionPoint) {
+		this.brushThreshold = precisionPoint;
 	}
 }

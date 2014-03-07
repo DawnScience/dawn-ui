@@ -23,6 +23,7 @@ import org.dawb.workbench.ui.diffraction.DiffractionCalibrationUtils.ManipulateM
 import org.dawb.workbench.ui.diffraction.table.DiffractionTableData;
 import org.dawb.workbench.ui.views.RepeatingMouseAdapter;
 import org.dawb.workbench.ui.views.SlowFastRunnable;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.TableViewer;
@@ -38,6 +39,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 
+import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
 
 /**
@@ -315,7 +317,7 @@ public class CalibrantPositioningWidget {
 						dia.run(true, true, CalibrantPositioningWidget.this.ringFinder);
 					} catch (InvocationTargetException e1) {
 						// TODO Auto-generated catch block
-						e1.printStackTrace();
+						MessageDialog.openError(Display.getCurrent().getActiveShell(), "Calibration Error", "An error occured: " + e1.getTargetException().getMessage());
 					} catch (InterruptedException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -335,14 +337,16 @@ public class CalibrantPositioningWidget {
 	}
 
 	private void setCalibrateButtons() {
-		// enable/disable calibrate button according to use column
-		int used = 0;
-		for (DiffractionTableData d : model) {
-			if (d.use && d.nrois > 0) {
-				used++;
+
+			// enable calibrate button if all images have rings
+			for (DiffractionTableData d : model) {
+				if (d.nrois <= 0) {
+					setCalibrateOptionsEnabled(false);
+					return;
+				}
 			}
-		}
-		setCalibrateOptionsEnabled(used > 0);
+			setCalibrateOptionsEnabled(true);
+		
 	}
 
 	private void setCalibrateOptionsEnabled(boolean b) {

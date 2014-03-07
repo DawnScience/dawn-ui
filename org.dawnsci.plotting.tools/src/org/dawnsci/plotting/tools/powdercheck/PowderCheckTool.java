@@ -19,6 +19,7 @@ import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.NelderMeadSimplex;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.SimplexOptimizer;
 import org.dawb.common.ui.image.IconUtils;
+import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlotType;
@@ -39,6 +40,7 @@ import org.dawnsci.plotting.tools.fitting.NullFunction;
 import org.dawnsci.plotting.tools.fitting.PeakColumnComparitor;
 import org.dawnsci.plotting.tools.fitting.PeakLabelProvider;
 import org.dawnsci.plotting.tools.powdercheck.PowderCheckJob.PowderCheckMode;
+import org.dawnsci.plotting.tools.preference.diffraction.DiffractionPreferencePage;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -48,9 +50,11 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.IContentProvider;
@@ -73,6 +77,8 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPartSite;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.part.IPageSite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,6 +86,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSelectedListener;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSelectionEvent;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
+import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationStandards;
 import uk.ac.diamond.scisoft.analysis.crystallography.HKL;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
@@ -115,6 +122,8 @@ public class PowderCheckTool extends AbstractToolPage {
 	TableViewer viewer;
 	Action fullImage;
 	ROIProfile.XAxis xAxis = XAxis.Q;
+	private MenuAction calibrantActions;
+	private Action     calPref;
 
 
 	private ITraceListener            traceListener;
@@ -132,6 +141,7 @@ public class PowderCheckTool extends AbstractToolPage {
 			@Override
 			public void calibrantSelectionChanged(CalibrantSelectionEvent evt) {
 				if (updatePlotJob != null)	updatePlotJob.updateCalibrantLines();
+				updateCalibrationActions((CalibrationStandards)evt.getSource());
 			}
 		};
 		
@@ -344,6 +354,18 @@ public class PowderCheckTool extends AbstractToolPage {
 				updatePlotJob.schedule();
 			}
 		};
+		
+		this.calPref = new Action("Configure Calibrants...") {
+			@Override
+			public void run() {
+				PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), DiffractionPreferencePage.ID, null, null);
+				if (pref != null) pref.open();
+			}
+		};
+		
+		this.calibrantActions = new MenuAction("Calibrants");
+		updateCalibrationActions(CalibrationFactory.getCalibrationStandards());	
+		
 		cake.setToolTipText("2D integration");
 		
 		modeSelect.add(cake);
@@ -356,6 +378,7 @@ public class PowderCheckTool extends AbstractToolPage {
 		getSite().getActionBars().getToolBarManager().add(axisSelect);
 		getSite().getActionBars().getMenuManager().add(modeSelect);
 		getSite().getActionBars().getMenuManager().add(axisSelect);
+		getSite().getActionBars().getMenuManager().add(this.calibrantActions);
 		
 	}
 	
@@ -433,7 +456,26 @@ public class PowderCheckTool extends AbstractToolPage {
 	@Override
 	public void setFocus() {
 		if (system != null) system.setFocus();
-
+	}
+	
+	private void updateCalibrationActions(final CalibrationStandards standards) {
+		this.calibrantActions.clear();
+		final String selected = standards.getSelectedCalibrant();
+		final CheckableActionGroup grp = new CheckableActionGroup();
+		Action selectedAction=null;
+		for (final String calibrant : standards.getCalibrantList()) {
+			final Action calibrantAction = new Action(calibrant, IAction.AS_CHECK_BOX) {
+				public void run() {
+					standards.setSelectedCalibrant(calibrant, true);
+				}
+			};
+			grp.add(calibrantAction);
+			if (selected!=null&&selected.equals(calibrant)) selectedAction = calibrantAction;
+			calibrantActions.add(calibrantAction);
+		}
+		calibrantActions.addSeparator();
+		calibrantActions.add(calPref);
+		if (selected!=null) selectedAction.setChecked(true);
 	}
 	
 	private void setColumnNames() {

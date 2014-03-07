@@ -517,14 +517,16 @@ public class RegionArea extends PlotArea {
 	public void setCursor(Cursor cursor) {
 		
 		try {
-			if (cursor!=null&&cursor.isDisposed()) cursor = null;
-			if (cursor!=null && this.internalCursor == cursor) return;
-			if (specialCursor!=null && !specialCursor.isDisposed()) {
+			if (cursor != null && cursor.isDisposed()) {
+				cursor = null;
+			}
+			if (internalCursor == cursor) {
+				return;
+			}
+			if (specialCursor != null && !specialCursor.isDisposed()) {
 				cursor = specialCursor;
 			}
-
 			internalCursor = cursor;
-			if (cursor!=null&&cursor.isDisposed()) cursor = null;
 		    super.setCursor(cursor);
 		} catch (Throwable ignored) {
 			// Intentionally ignore bad cursors.
@@ -706,6 +708,7 @@ public class RegionArea extends PlotArea {
 		
 		// Catch all needed for fix to http://jira.diamond.ac.uk/browse/SCI-1318
 		try {
+			@SuppressWarnings("unchecked")
 			List<IFigure> children = getChildren();
 			for (IFigure iFigure : children) {
 				if (iFigure instanceof ITrace) {

@@ -4,13 +4,14 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DirectColorModel;
 import java.awt.image.IndexColorModel;
 import java.awt.image.WritableRaster;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
-import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
-import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Cursor;
@@ -18,8 +19,11 @@ import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Draw2DUtils {
+	private static Logger logger = LoggerFactory.getLogger(Draw2DUtils.class);
 
 	/**
 	 * Attempts to get the centre of a figure using its bounds.
@@ -107,6 +111,18 @@ public class Draw2DUtils {
 	 * @param lower
 	 * @param upper
 	 * @param delta
+	 * @return a point list of curve
+	 */
+	public static PointList generateCurve(PointFunction fn, double lower, double upper, double delta) {
+		return generateCurve(fn, lower, upper, delta, 3, Math.toRadians(0.5));
+	}
+
+	/**
+	 * Generate a curve from a parametrised point function
+	 * @param fn
+	 * @param lower
+	 * @param upper
+	 * @param delta
 	 * @param minDistance
 	 * @param maxAngle (in radians)
 	 * @return a point list of curve
@@ -117,44 +133,188 @@ public class Draw2DUtils {
 		Point pp, pc;
 		pp = fn.calculatePoint(lower);
 		list.addPoint(pp);
-		Dimension dp, dc;
-		dp = null;
-		double ds = minDistance*minDistance;
 		double cos = Math.cos(maxAngle);
-		cos *= cos;
 		boolean force = false;
 		double vc = lower + vd;
+		double dxp = Double.NaN; // previous deltas
+		double dyp = 0;
+		double sp = 0;
 		while (vc < upper) {
 			pc = fn.calculatePoint(vc);
-			dc = pc.getDifference(pp);
-			double xc = dc.preciseWidth();
-			double yc = dc.preciseHeight();
-			double sc = xc * xc + yc * yc;
-			if (sc >= ds) {
-				if (dp != null) {
-					double xp = dp.preciseWidth();
-					double yp = dp.preciseHeight();
-					double sp = xp * xp + yp * yp;
-					double cc = xc * xp + yc * yp;
-					if (cc * cc < sc * sp * cos) { // angle too wide
+			double dxc = pc.x() - pp.x(); // current deltas
+			double dyc = pc.y() - pp.y();
+			double sc = Math.hypot(dxc, dyc);
+			if (sc >= minDistance) {
+				if (Double.isNaN(dxp)) {
+					vd *= 0.5;
+					vc -= vd;
+					force = true; // prevent bouncing
+					continue;
+				} else {
+					double cc = dxc * dxp + dyc * dyp;
+					if (cc * cc < sc * sp * cos) {
+						// angle too wide so halve step and backtrack
 						vd *= 0.5;
-						vc = vc - vd;
+						vc -= vd;
 						force = true; // prevent bouncing
 						continue;
 					}
 				}
-			} else if (!force) { // point too close
+			} else if (!force) {
+				// point too close so double step and skip forward
 				vd *= 2;
-				vc = vc + vd;
+				vc += vd;
 				continue;
 			}
 			list.addPoint(pc);
 			pp = pc;
-			dp = dc;
+			dxp = dxc;
+			dyp = dyc;
+			sp = sc;
+			vc += vd;
 			force = false;
 		}
 		list.addPoint(fn.calculatePoint(upper));
 		return list;
+	}
+
+	/**
+	 * Draw a curve from a parametrised point function
+	 * @param g
+	 * @param bounds (can be null for no check)
+	 * @param isPolygon if true, join last point to first
+	 * @param fn
+	 * @param lower
+	 * @param upper
+	 * @param delta
+	 * @return true, if drawn
+	 */
+	public static boolean drawCurve(Graphics g, Rectangle bounds, boolean isPolygon, PointFunction fn, double lower, double upper, double delta) {
+		return drawCurve(g, bounds, isPolygon, fn, lower, upper, delta, 3, Math.toRadians(0.5));
+	}
+
+	/**
+	 * Draw a curve from a parametrised point function
+	 * @param g
+	 * @param bounds (can be null for no check)
+	 * @param isPolygon if true, join last point to first
+	 * @param fn
+	 * @param lower
+	 * @param upper
+	 * @param delta
+	 * @param minDistance
+	 * @param maxAngle (in radians)
+	 * @return true, if drawn
+	 */
+	public static boolean drawCurve(Graphics g, Rectangle bounds, boolean isPolygon, PointFunction fn, double lower, double upper, double delta, double minDistance, double maxAngle) {
+		List<Double> parameters = new ArrayList<Double>();
+		double[] angles;
+
+		// find all parameters that intersect edges of bounding box
+		Point ptl = bounds.getTopLeft();
+		Point pbr = bounds.getBottomRight();
+		bounds = bounds.getExpanded(1, 1); // need expanded bounds copy for checks
+		angles = fn.calculateXIntersectionParameters(ptl.x());
+		if (angles != null) {
+			for (double a : angles) {
+				if (bounds.contains(fn.calculatePoint(a)))
+					parameters.add(a);
+			}
+		}
+		angles = fn.calculateYIntersectionParameters(ptl.y());
+		if (angles != null) {
+			for (double a : angles) {
+				if (bounds.contains(fn.calculatePoint(a)))
+					parameters.add(a);
+			}
+		}
+		angles = fn.calculateXIntersectionParameters(pbr.x());
+		if (angles != null) {
+			for (double a : angles) {
+				if (bounds.contains(fn.calculatePoint(a)))
+					parameters.add(a);
+			}
+		}
+		angles = fn.calculateYIntersectionParameters(pbr.y());
+		if (angles != null) {
+			for (double a : angles) {
+				if (bounds.contains(fn.calculatePoint(a)))
+					parameters.add(a);
+			}
+		}
+
+		Collections.sort(parameters);
+		// select subset within given range
+		int size = parameters.size();
+		int beg = 0;
+		for (; beg < size; beg++) {
+			if (parameters.get(beg) > lower)
+				break;
+		}
+		int end = beg;
+		for (; end < size; end++) {
+			if (parameters.get(end) >= upper)
+				break;
+		}
+		List<Double> subset = parameters.subList(beg, end);
+
+		// check if end points are in bounds
+		Point upt = fn.calculatePoint(upper);
+		if (bounds.contains(upt)) {
+			subset.add(upper);
+		}
+		Point lpt = fn.calculatePoint(lower);
+		Point last = lpt;
+		if (subset.size() > 1) {
+			for (int i = 0; i < subset.size(); i++) { // remove same or adjacent points
+				Point p = fn.calculatePoint(subset.get(i));
+				if (p.getDistance(last) < 2) {
+					logger.debug("Removed point {} at parameter {}", i, subset.get(i));
+					subset.remove(i--);
+				}
+				last = p;
+			}
+		}
+		size = subset.size();
+		boolean inside = false; // is next segment inside bounds?
+		if (bounds.contains(lpt)) {
+			if (size == 0) {
+				logger.debug("Only lower parameter is within bounds!!!");
+				return false;
+			}
+			subset.add(0, lower);
+			size++;
+			inside = true;
+		} else {
+			if (size > 1) {
+				inside = bounds.contains(fn.calculatePoint(0.5*(subset.get(0) + subset.get(1))));
+			} else {
+				if (size == 1) {
+					logger.debug("Only lower parameter is within bounds!!!");
+				} else {
+					logger.debug("Draw nothing!");
+				}
+				return false;
+			}
+		}
+
+		// now draw alternative segments of parameter
+		double b = subset.get(0);
+		for (int i = 1; i < size; i++) {
+			double e = subset.get(i);
+			if (inside) {
+				PointList list = generateCurve(fn, b, e, delta, minDistance, maxAngle);
+				g.drawPolyline(list);
+			}
+			inside = !inside;
+			b = e;
+		}
+		if (isPolygon) {
+			if (bounds.contains(upt) && bounds.contains(lpt) && !upt.equals(lpt)) {
+				g.drawLine(upt, lpt);
+			}
+		}
+		return true;
 	}
 
 	/**

@@ -38,7 +38,8 @@ import org.dawnsci.plotting.api.axis.IAxis;
 import org.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.slicing.api.data.ITransferableDataObject;
-import org.dawnsci.slicing.api.editor.IDatasetEditor;
+import org.dawnsci.slicing.api.editor.ISelectedPlotting;
+import org.dawnsci.slicing.api.editor.ISlicablePlottingPart;
 import org.dawnsci.slicing.api.system.ISliceSystem;
 import org.dawnsci.slicing.api.system.SliceSource;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -80,7 +81,7 @@ import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
  * 
  * 
  */
-public class PlotDataEditor extends EditorPart implements IReusableEditor, IDatasetEditor, ITitledEditor {
+public class PlotDataEditor extends EditorPart implements IReusableEditor, ISlicablePlottingPart, ITitledEditor, ISelectedPlotting {
 	
 	private static Logger logger = LoggerFactory.getLogger(PlotDataEditor.class);
 	

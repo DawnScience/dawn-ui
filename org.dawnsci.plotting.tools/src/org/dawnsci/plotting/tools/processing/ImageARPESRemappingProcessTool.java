@@ -45,7 +45,6 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
-import uk.ac.diamond.scisoft.analysis.dataset.InterpolatorUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.Maths;
 import uk.ac.diamond.scisoft.analysis.dataset.function.MapToRotatedCartesian;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
@@ -141,7 +140,7 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 				}
 			});
 		} catch (Exception e) {
-			logger.error("Could not create controls:"+e);
+			logger.error("Could not create controls", e);
 		}
 	}
 
@@ -265,7 +264,7 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				FileDialog fChooser = new FileDialog(getSite().getShell());
-				fChooser.setText("Choose File to load from");
+				fChooser.setText("Choose file to load from");
 				fChooser.setFilterPath(inputFile);
 				final String path = fChooser.open();
 				loadAuxiliaryData(path);
@@ -307,7 +306,7 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 	@Override
 	protected void createSelectionProfile(IImageTrace image, IROI roi, IProgressMonitor monitor) {
 		
-		logger.debug("Calling the Energuy Remapping update");
+		logger.debug("Calling the energy remapping update");
 		
 		correctedData = (AbstractDataset) originalData.clone();
 		correctedAxes = originalAxes;
@@ -320,7 +319,7 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 				try {
 					tmpProfile = ApachePolynomial.getPolynomialSmoothed((AbstractDataset)originalAxes.get(1), tmpProfile, smoothLevel, 3);
 				} catch (Exception e) {
-					logger.error("Could not smooth the plot:"+e);
+					logger.error("Could not smooth the plot", e);
 				}
 			}
 			
@@ -336,11 +335,11 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 			double meanSteps = (originalAxes.get(0).max().doubleValue()-originalAxes.get(0).min().doubleValue())/(float)originalAxes.get(0).getShape()[0];
 			
 			AbstractDataset differenceInts = Maths.floor(Maths.divide(differences, meanSteps));
-			
-			correctedData = new DoubleDataset(originalData.getShape());
-			for(int y = 0; y < correctedData.getShape()[0]; y++) {
+			int[] shape = originalData.getShape();
+			correctedData = new DoubleDataset(shape);
+			for(int y = 0; y < shape[0]; y++) {
 				int min = Math.max(differenceInts.getInt(y), 0);
-				int max = Math.min(correctedData.getShape()[1]+differenceInts.getInt(y), correctedData.getShape()[1]);
+				int max = Math.min(shape[1]+differenceInts.getInt(y), shape[1]);
 				int ref = 0;
 				for(int xx = min; xx < max; xx++) {
 					correctedData.set(originalData.getObject(y,xx), y,ref);
@@ -354,7 +353,7 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 			correctedAxes.add(originalAxes.get(1).clone());
 		}
 		
-		selectionPlottingSystem.updatePlot2D(correctedData, correctedAxes, null);
+		selectionPlottingSystem.createPlot2D(correctedData, correctedAxes, null);
 		
 		
 //		AbstractDataset data = (AbstractDataset)image.getData();
@@ -394,7 +393,7 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 					photonEnergy = Double.parseDouble(photonEnergyText.getText());
 					workFunction = Double.parseDouble(workFunctionText.getText());
 				} catch (Exception e) {
-					logger.error("cannot parse offsests, work function or photon energy",e);
+					logger.error("Cannot parse offsets, work function or photon energy", e);
 				}
 			}
 		});
@@ -413,13 +412,13 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 		selectionPlottingSystem.updatePlot2D(correctedData, updatedAxes, monitor);
 		// Now create the full size maps
 		energyMap = (AbstractDataset) updatedAxes.get(0);
-		energyMap = energyMap.reshape(1,energyMap.getShape()[0]);
-		energyMap = DatasetUtils.tile(energyMap, correctedData.getShape()[0], 1);
+		energyMap = energyMap.reshape(1,energyMap.getSize());
+		energyMap = DatasetUtils.tile(energyMap, correctedData.getShapeRef()[0], 1);
 		
 		// need to calculate angleRegion here
 		angleMap = (AbstractDataset) updatedAxes.get(1);
-		angleMap = angleMap.reshape(angleMap.getShape()[0],1);
-		angleMap = DatasetUtils.tile(angleMap, correctedData.getShape()[1]);
+		angleMap = angleMap.reshape(angleMap.getShapeRef()[0],1);
+		angleMap = DatasetUtils.tile(angleMap, correctedData.getShapeRef()[1]);
 		
 		
 		createMomentumDatasets();
@@ -431,7 +430,7 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 					"/entry/calibration/fittedMu/data", null).squeeze();
 		} catch (Exception e) {
 			e.printStackTrace();
-			logger.error("Could not load the auxiliary data:"+e);
+			logger.error("Could not load the auxiliary data", e);
 		}
 		return auxiliaryData;
 	}
@@ -454,17 +453,17 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 		
 		// No calculate the energies
 		// TODO could be optimised
-		DoubleDataset photonEnergyDS = DoubleDataset.ones(dataRegion.getShape()).imultiply(photonEnergy);
-		DoubleDataset workFunctionDS = DoubleDataset.ones(dataRegion.getShape()).imultiply(workFunction);
+		DoubleDataset photonEnergyDS = DoubleDataset.ones(dataRegion.getShapeRef()).imultiply(photonEnergy);
+		DoubleDataset workFunctionDS = DoubleDataset.ones(dataRegion.getShapeRef()).imultiply(workFunction);
 				
-		DoubleDataset bindingEnergy = DoubleDataset.ones(energyRegion.getShape()).imultiply(0);
+		DoubleDataset bindingEnergy = DoubleDataset.ones(energyRegion.getShapeRef()).imultiply(0);
 		
 		bindingEnergy.iadd(photonEnergyDS);
 		bindingEnergy.isubtract(workFunctionDS);
 		bindingEnergy.isubtract(energyRegion);
 		
 		if (bindingEnergy.min().doubleValue() < 0.0) {
-			logger.error("Binding energy is less than Zero, Aborting");
+			logger.error("Binding energy is less than zero, aborting");
 			return;
 		}
 		
@@ -473,16 +472,25 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 				
 		// Finally calculate k parallel
 		AbstractDataset kParallel = Maths.multiply(k, Maths.sin(Maths.toRadians(angleRegion)));
-				
+		
+		// get the energy Axis
+		AbstractDataset energyAxis = energyRegion.getSlice(new int[] {0,0}, new int[] {1,energyRegion.getShape()[1]}, new int[] {1,1}).squeeze();
+		
+		int fermiSurfacePosition = Maths.square(energyAxis).minPos()[0];
+		
+		AbstractDataset kParaAxis = kParallel.getSlice(new int[] {0,fermiSurfacePosition}, new int[] {kParallel.getShape()[0],fermiSurfacePosition+1}, new int[] {1,1}).squeeze();
+		logger.error("Max and min values are {} and {}", kParaAxis.min(), kParaAxis.max());
+
 		// make axis correction to regrid here
-		double KPStep = kParallel.peakToPeak().doubleValue()/(dataRegion.getShape()[0]-1);
-		AbstractDataset kParaAxis = AbstractDataset.arange(kParallel.min().doubleValue()+(KPStep), kParallel.max().doubleValue()-(KPStep), KPStep, AbstractDataset.FLOAT64);
+		//double KPStep = kParallel.peakToPeak().doubleValue()/(dataRegion.getShape()[0]-1);
+		//AbstractDataset kParaAxis = AbstractDataset.arange(kParallel.min().doubleValue()+(KPStep), kParallel.max().doubleValue()-(KPStep), KPStep, AbstractDataset.FLOAT64);
 				
 		// prepare the results
-		AbstractDataset remappedRegion = InterpolatorUtils.remapAxis(dataRegion, 0, kParallel, kParaAxis);
+		// AbstractDataset remappedRegion = InterpolatorUtils.remapAxis(dataRegion, 0, kParallel, kParaAxis);
+		AbstractDataset remappedRegion = dataRegion;
 		ArrayList<IDataset> remappedAxes = new ArrayList<IDataset>();
 		kParaAxis.setName("K Parallel");
-		remappedAxes.add(energyRegion.getSlice(new int[] {0,0}, new int[] {1,energyRegion.getShape()[1]}, new int[] {1,1}).squeeze());
+		remappedAxes.add(energyRegion.getSlice(new int[] {0,0}, new int[] {1,energyRegion.getShapeRef()[1]}, new int[] {1,1}).squeeze());
 		remappedAxes.add(kParaAxis);
 		
 		userPlotBean.addList("remapped", remappedRegion.clone());
@@ -497,7 +505,7 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 			userPlotBean.addList("auxiliaryData", auxiliaryData.clone());
 		}
 		
-		getPlottingSystem().updatePlot2D(remappedRegion, remappedAxes , null);
+		getPlottingSystem().createPlot2D(remappedRegion, remappedAxes , null);
 		
 	}
 }

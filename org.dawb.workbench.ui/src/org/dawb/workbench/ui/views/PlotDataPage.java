@@ -21,7 +21,7 @@ import org.dawb.workbench.ui.data.PlotDataComponent;
 import org.dawb.workbench.ui.transferable.TransferableDataObject;
 import org.dawnsci.slicing.api.SlicingFactory;
 import org.dawnsci.slicing.api.data.ITransferableDataObject;
-import org.dawnsci.slicing.api.editor.IDatasetEditor;
+import org.dawnsci.slicing.api.editor.ISlicablePlottingPart;
 import org.dawnsci.slicing.api.system.ISliceSystem;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -43,6 +43,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.IReusableEditor;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.Page;
 import org.slf4j.Logger;
@@ -52,7 +53,7 @@ public class PlotDataPage extends Page implements IAdaptable {
 
 	private final static Logger logger = LoggerFactory.getLogger(PlotDataPage.class);
 	
-	private IDatasetEditor          editor;
+	private ISlicablePlottingPart          editor;
 	private PlotDataComponent       dataSetComponent;
 	private IResourceChangeListener resourceListener;
 	private ISliceSystem            sliceComponent;
@@ -69,7 +70,7 @@ public class PlotDataPage extends Page implements IAdaptable {
 	 * @param ed
 	 * @return
 	 */
-	public static PlotDataPage getPageFor(IDatasetEditor ed) {
+	public static PlotDataPage getPageFor(ISlicablePlottingPart ed) {
 		// Fix http://jira.diamond.ac.uk/browse/DAWNSCI-273
 		// for DExplore and NCD to not show 'Data' pages
 		try {
@@ -81,7 +82,7 @@ public class PlotDataPage extends Page implements IAdaptable {
 		return new PlotDataPage(ed);
 	}
 
-	private PlotDataPage(IDatasetEditor ed) {
+	private PlotDataPage(ISlicablePlottingPart ed) {
 		this.editor = ed;
 	}
 
@@ -96,8 +97,9 @@ public class PlotDataPage extends Page implements IAdaptable {
 			form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			
 			this.dataSetComponent = new PlotDataComponent(editor);		
-			if (editor!=null && editor.getEditorInput()!=null && dataSetComponent!=null) {
-				dataSetComponent.setFileName(editor.getEditorInput().getName());
+			if (editor!=null && dataSetComponent!=null) {
+				final IFile file = (IFile)editor.getAdapter(IFile.class);
+				if (file!=null) dataSetComponent.setFileName(file.getName());
 			}
 			dataSetComponent.createPartControl(form, getSite().getActionBars());
 			
@@ -137,7 +139,7 @@ public class PlotDataPage extends Page implements IAdaptable {
 					
 					if (event==null || event.getDelta()==null) return;
 					
-					final IFile content = EclipseUtils.getIFile(editor.getEditorInput());
+					final IFile content = (IFile)editor.getAdapter(IFile.class);
 					if (content==null) return;
 					
 					if (event.getDelta().findMember(content.getFullPath())!=null) {
@@ -149,7 +151,9 @@ public class PlotDataPage extends Page implements IAdaptable {
 								} catch (CoreException e) {
 									logger.error("Cannot refresh "+content, e);
 								}
-								editor.setInput(new FileEditorInput(content));
+								if (editor instanceof IReusableEditor) {
+								    ((IReusableEditor)editor).setInput(new FileEditorInput(content));
+								}
 								final List<ITransferableDataObject> sels = dataSetComponent.getSelections();
 								if (sels!=null) editor.updatePlot(sels.toArray(new ITransferableDataObject[sels.size()]), (ISliceSystem)getAdapter(ISliceSystem.class), false);
 							}

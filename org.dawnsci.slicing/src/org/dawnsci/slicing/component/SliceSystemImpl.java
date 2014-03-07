@@ -551,7 +551,7 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		reverse.setEnabled(sliceType==PlotType.IMAGE||sliceType==PlotType.SURFACE);
 		
 		// Parse if ranges allowed to try to assign at least one dims data to a range
-		if (isRangesAllowed()) {
+		if (isRangesAllowed() && lazySet!=null) {
 			final int[] shape = this.lazySet.getShape();
 			for (int dim = 0; dim < shape.length; dim++) {
 				DimsData dd = dimsDataList.getDimsData(dim);
@@ -718,10 +718,12 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		object.setPath(source.getFilePath());
 		object.setName(source.getDataName());
 		setSliceObject(object);
-		setDataShape(lazySet.getShape());
+		if (lazySet!=null) {
+			setDataShape(lazySet.getShape());
+			explain.setText("Create a slice of "+sliceObject.getName()+".\nIt has the shape "+Arrays.toString(dataShape));
+		}
 		
-		explain.setText("Create a slice of "+sliceObject.getName()+".\nIt has the shape "+Arrays.toString(dataShape));
-        //if (sliceEditingSupport!=null) sliceEditingSupport.setPlayButtonVisible(false);
+       //if (sliceEditingSupport!=null) sliceEditingSupport.setPlayButtonVisible(false);
 		
 		createDimsData(source.isExpression());
         if (axisEditingSupport!=null) axisEditingSupport.updateAxesChoices();

@@ -18,7 +18,6 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IErrorDataset;
-import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 
 /**
  * This class only wraps line traces, images have their own IImageTrace implementor.

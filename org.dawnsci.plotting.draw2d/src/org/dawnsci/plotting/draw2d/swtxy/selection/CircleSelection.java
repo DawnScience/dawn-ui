@@ -279,7 +279,7 @@ public class CircleSelection extends AbstractSelectionRegion {
 		
 		@Override
 		protected void outlineShape(Graphics graphics) {
-			PointList points = Draw2DUtils.generateCurve(DecoratedCircle.this, 0, 360, 1, 3, Math.toRadians(1));
+			PointList points = Draw2DUtils.generateCurve(DecoratedCircle.this, 0, 360, 1);
 			Draw2DUtils.drawClippedPolyline(graphics, points, getParent().getBounds(), true);
 
 			if (label != null && isShowLabel()) {
@@ -491,6 +491,18 @@ public class CircleSelection extends AbstractSelectionRegion {
 
 		@Override
 		public void setRegion(IRegion region) {
+		}
+
+		@Override
+		public double[] calculateXIntersectionParameters(int x) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public double[] calculateYIntersectionParameters(int y) {
+			// TODO Auto-generated method stub
+			return null;
 		}
 	}
 }

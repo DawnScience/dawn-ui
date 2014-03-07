@@ -117,6 +117,18 @@ public interface IRegion {
 	public void setVisible(boolean visible);
 
 	/**
+	 * @return true if filled
+	 */
+	public boolean isFill();
+
+	/**
+	 * Fill body
+	 * 
+	 * @param fill
+	 */
+	public void setFill(boolean fill);
+
+	/**
 	 * @return true if moveable
 	 */
 	public boolean isMobile();
@@ -184,18 +196,20 @@ public interface IRegion {
 	 *
 	 */
 	public enum RegionType {
+		POINT("Point",             darkMagenta),
 		LINE("Line",               ColorConstants.cyan),
+		BOX("Box",                 ColorConstants.green),
 		POLYLINE("Polyline",       ColorConstants.cyan),
 		POLYGON("Polygon",         ColorConstants.cyan),
-		BOX("Box",                 ColorConstants.green),
 		PERIMETERBOX("Perimeter box", ColorConstants.gray),
 		GRID("Grid",               ColorConstants.lightGray),
 		CIRCLE("Circle",           darkYellow),
 		CIRCLEFIT("Circle fit",    darkYellow),
 		SECTOR("Sector",           ColorConstants.red),
-		POINT("Point",             darkMagenta),
 		ELLIPSE("Ellipse",         ColorConstants.lightGreen),
 		ELLIPSEFIT("Ellipse fit",  ColorConstants.lightGreen),
+		PARABOLA("Parabola",       ColorConstants.orange),
+		HYPERBOLA("Hyperbola",     ColorConstants.lightBlue),
 		RING("Ring",               darkYellow),
 		XAXIS("X-Axis",            ColorConstants.blue),
 		YAXIS("Y-Axis",            ColorConstants.blue),

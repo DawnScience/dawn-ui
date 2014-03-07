@@ -232,7 +232,8 @@ public class SliceUtils {
         	final String axisName = getAxisLabel(sliceObject, data);
         	if (varMan!=null) {
         		ILazyDataset la = varMan.getDataValue(axisName, null);
-        		axis = la instanceof IDataset ? (IDataset)la : la.getSlice();
+        		if (la != null)
+        			axis = la instanceof IDataset ? (IDataset)la : la.getSlice();
         	}
         	if (axis==null) {
                 axis = SliceUtils.getAxis(sliceObject, varMan, axisName, false, monitor);
@@ -513,7 +514,8 @@ public class SliceUtils {
 			}
 		} else { // Faster
 			final File file = new File(dataPath);
-			final String fullName = file.getParent().replace('\\','/')+"/"+axisName;
+			final String parent = file.getParent();
+			final String fullName = parent == null ? axisName : parent.replace('\\','/')+"/"+axisName;
 			final ILoaderService service = (ILoaderService)ServiceManager.getService(ILoaderService.class);
 			axis = service.getDataset(currentSlice.getPath(), fullName, new ProgressMonitorWrapper(monitor));
 			if (axis == null) return null;

@@ -244,7 +244,7 @@ public class RotatableEllipse extends Shape implements PointFunction {
 		graphics.setAntialias(SWT.ON);
 
 		calcBox(false);
-		PointList points = Draw2DUtils.generateCurve(this, 0, 360, 1, 3, Math.toRadians(1));
+		PointList points = Draw2DUtils.generateCurve(this, 0, 360, 1);
 		Rectangle bnd = new Rectangle();
 		graphics.getClip(bnd);
 		Draw2DUtils.drawClippedPolyline(graphics, points, bnd, true);
@@ -279,5 +279,15 @@ public class RotatableEllipse extends Shape implements PointFunction {
 	@Override
 	public String toString() {
 		return "Axes " + Arrays.toString(getAxes()) + ", centre " + getCentre() + ", angle " + getAngleDegrees();
+	}
+
+	@Override
+	public double[] calculateXIntersectionParameters(int x) {
+		return null;
+	}
+
+	@Override
+	public double[] calculateYIntersectionParameters(int y) {
+		return null;
 	}
 }

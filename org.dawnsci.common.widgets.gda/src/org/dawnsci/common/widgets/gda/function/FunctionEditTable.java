@@ -41,13 +41,13 @@ import uk.ac.diamond.scisoft.analysis.fitting.functions.IParameter;
 
 /**
  * A table widget for editing any Function
- * 
+ *
  *
  */
 public class FunctionEditTable {
 
 	private static final Logger logger = LoggerFactory.getLogger(FunctionEditTable.class);
-	
+
 	private TableViewer functionTable;
 	private IFunction     function;
 	private IFunction     originalFunction;
@@ -55,25 +55,25 @@ public class FunctionEditTable {
 	private List<FunctionRow> rows;
 
 	public Control createPartControl(Composite parent) {
-		
+
 		this.functionTable = new TableViewer(parent, SWT.FULL_SELECTION | SWT.SINGLE | SWT.V_SCROLL | SWT.BORDER);
 		GridData tableData = new GridData(SWT.FILL, SWT.FILL, true, false, 4, 1);
 		tableData.heightHint=200;
 		functionTable.getTable().setLayoutData(tableData);
-		
+
 		createColumns(functionTable);
-		
+
 		final Label clickToEdit = new Label(parent, SWT.WRAP);
 		clickToEdit.setText("* Click to change");
 		clickToEdit.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false, 4, 1));
-		
+
 		return functionTable.getTable();
 	}
 
 	public void addSelectionChangedListener(ISelectionChangedListener listener){
 		functionTable.addSelectionChangedListener(listener);
 	}
-	
+
 	public void removeSelectionChangedListener(ISelectionChangedListener listener){
 		functionTable.removeSelectionChangedListener(listener);
 	}
@@ -84,64 +84,64 @@ public class FunctionEditTable {
 	 * @param functionType - may be null
 	 */
 	public void setFunction(final IFunction function, final FunctionType functionType) {
-		
+
 		this.setFunctionType(functionType);
 		this.originalFunction = function!=null ? function : null;
 		this.function         = function!=null ? function : null;
-				
+
 		this.rows = createFunctionRows(function);
-		
+
 		functionTable.setContentProvider(new IStructuredContentProvider() {
-			
+
 			@Override
 			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) { }
-			
+
 			@Override
 			public void dispose() { }
-			
+
 			@Override
 			public Object[] getElements(Object inputElement) {
 				return rows.toArray(new FunctionRow[rows.size()]);
-			}			
+			}
 		});
-		
+
 		functionTable.setInput(rows.get(0));
 	}
 
 	private void createColumns(TableViewer viewer) {
-		
+
 		ColumnViewerToolTipSupport.enableFor(viewer,ToolTip.NO_RECREATE);
 		viewer.getTable().setLinesVisible(true);
 		viewer.getTable().setHeaderVisible(true);
-		
+
 		viewer.setColumnProperties(new String[] { "Name", "value", "min", "max", "Fixed"});
-		
+
 		TableViewerColumn var = new TableViewerColumn(viewer, SWT.LEFT, 0);
 		var.getColumn().setText("Name");
 		var.getColumn().setWidth(100);
 		var.setLabelProvider(new FunctionLabelProvider(0));
-		
+
 		var = new TableViewerColumn(viewer, SWT.LEFT, 1);
 		var.getColumn().setText("value");
 		var.getColumn().setWidth(120);
 		FunctionEditingSupport functionEditor = new FunctionEditingSupport(viewer, 1);
 		var.setEditingSupport(functionEditor);
 		var.setLabelProvider(new DelegatingStyledCellLabelProvider(new FunctionLabelProvider(1, functionEditor)));
-		
+
 		var = new TableViewerColumn(viewer, SWT.LEFT, 2);
 		var.getColumn().setText("min");
 		var.getColumn().setWidth(120);
 		functionEditor = new FunctionEditingSupport(viewer, 2);
 		var.setEditingSupport(functionEditor);
 		var.setLabelProvider(new DelegatingStyledCellLabelProvider(new FunctionLabelProvider(2, functionEditor)));
-		
+
 		var = new TableViewerColumn(viewer, SWT.LEFT, 3);
 		var.getColumn().setText("max");
 		var.getColumn().setWidth(120);
 		functionEditor = new FunctionEditingSupport(viewer, 3);
 		var.setEditingSupport(functionEditor);
 		var.setLabelProvider(new DelegatingStyledCellLabelProvider(new FunctionLabelProvider(3, functionEditor)));
-		
+
 		// column 4 = checkbox
 		var = new TableViewerColumn(viewer, SWT.LEFT, 4);
 		var.getColumn().setText("Fixed");
@@ -153,33 +153,33 @@ public class FunctionEditTable {
 		//functionTable.getTable().setHeaderVisible(false);
 
 	}
-	
+
 	public void cancelEditing() {
 		this.functionTable.cancelEditing();
 	}
-	
+
 	public class FunctionEditingSupport extends EditingSupport {
 
 		private int column;
-		
+
 		public FunctionEditingSupport(ColumnViewer viewer,  int col) {
 			super(viewer);
 			this.column = col;
 		}
 		@Override
 		protected CellEditor getCellEditor(final Object element) {
-			
+
 			FieldComponentCellEditor ed = null;
-			
+
 			if(column<4){
 				try {
-					ed = new FieldComponentCellEditor(((TableViewer)getViewer()).getTable(), 
+					ed = new FieldComponentCellEditor(((TableViewer)getViewer()).getTable(),
 						                     FloatSpinnerWrapper.class.getName(), SWT.RIGHT);
 				} catch (ClassNotFoundException e) {
 					logger.error("Cannot get FieldComponentCellEditor for "+SpinnerWrapper.class.getName(), e);
 					return null;
 				}
-			
+
 				final FloatSpinnerWrapper rb = (FloatSpinnerWrapper)ed.getFieldWidget();
 				if (rb.getPrecision() < 5)
 					rb.setFormat(rb.getWidth(), 5);
@@ -214,7 +214,7 @@ public class FunctionEditTable {
 					}
 				});
 			}
-			
+
 			return ed;
 		}
 
@@ -223,7 +223,7 @@ public class FunctionEditTable {
 			final FunctionRow row = (FunctionRow)element;
 			if(column<4){
 				double val = 0;
-				
+
 				if (!row.isEnabled()) return false;
 				val = row.getParameter(column-1);
 				return !Double.isNaN(val);
@@ -240,48 +240,48 @@ public class FunctionEditTable {
 			}else{
 				return row.isFixed();
 			}
-			
+
 		}
 
 		@Override
 		protected void setValue(Object element, Object value) {
 			this.setValue(element, value, true);
 		}
-		
+
 		protected void setValue(Object element, Object value, boolean tableRefresh) {
 			final FunctionRow row = (FunctionRow)element;
 			if(column<4){
 				final Number    val = (Number)value;
-				
+
 				row.setParameter(val.doubleValue(), column-1);
-				
+
 				if (tableRefresh) {
 					getViewer().refresh();
 				}
-				
+
 				function = createFunction(rows, row);
 			}else{ // for the last column (checkbox)
 				final boolean    fixed = (Boolean)value;
-				
+
 				row.setIsFixed(fixed);
-				
+
 				if (tableRefresh) {
 					getViewer().refresh();
 				}
-				
+
 				function = createFunction(rows, row);
 			}
-			
+
 		}
 
 	}
 
 	public class FunctionLabelProvider extends ColumnLabelProvider implements IStyledLabelProvider {
-		
+
 		private int column;
 		private NumberFormat format;
 		private FunctionEditingSupport editor;
-		
+
 		public FunctionLabelProvider(int col) {
 			this(col, null);
 		}
@@ -290,9 +290,10 @@ public class FunctionEditTable {
 			this.format = NumberFormat.getNumberInstance();
 			this.editor = editor;
 		}
-		
+
+		@Override
 		public String getText(Object element) {
-			
+
 			final FunctionRow row = (FunctionRow)element;
 			switch (column) {
 				case 0:
@@ -300,11 +301,11 @@ public class FunctionEditTable {
 				case 1:
 					if (Double.isNaN(row.getParameter(0))) return "-";
 					return format.format(row.getParameter(0));
-				
+
 				case 2:
 					if (Double.isNaN(row.getParameter(1))) return "-";
 					return format.format(row.getParameter(1));
-				
+
 				case 3:
 					if (Double.isNaN(row.getParameter(2))) return "-";
 					return format.format(row.getParameter(2));
@@ -322,7 +323,7 @@ public class FunctionEditTable {
 			final FunctionRow row = (FunctionRow)element;
 			return row.getDescription();
 		}
-		
+
 		@Override
 		public StyledString getStyledText(Object element) {
 			final StyledString ret = new StyledString(getText(element));
@@ -334,7 +335,7 @@ public class FunctionEditTable {
 	}
 
 	private List<FunctionRow> createFunctionRows(IFunction function) {
-		
+
 		final List<FunctionRow> ret = new ArrayList<FunctionEditTable.FunctionRow>();
 		int numberParam = function.getNoOfParameters();
 		for(int i=0; i<numberParam; i++){
@@ -342,24 +343,24 @@ public class FunctionEditTable {
 			String functionDescription = function.getDescription();
 			ret.add(new FunctionRow(p.getName(), functionDescription, p.isFixed(), p.getValue(), p.getLowerLimit(), p.getUpperLimit()));
 		}
-		
+
 		return ret;
 	}
 
 	public IFunction createFunction(List<FunctionRow> rows, FunctionRow changed) {
-			
+
 		try {
-			IFunction ret = FunctionFactory.getFunction(function.getName()); 
-			
+			IFunction ret = FunctionFactory.getFunction(function.getName());
+
 			final int count  = function.getNoOfParameters();
 			for (int i = 0; i < count; i++) {
 				ret.getParameter(i).setValue(rows.get(i).getParameter(0));
 				ret.getParameter(i).setLowerLimit(rows.get(i).getParameter(1));
 				ret.getParameter(i).setUpperLimit(rows.get(i).getParameter(2));
 				ret.getParameter(i).setFixed(rows.get(i).isFixed());
-			}	
+			}
 			return ret;
-			
+
 		} catch (Exception ne) {
 			ne.printStackTrace();
 			//logger.error("Unable to create function "+function.getName(), ne);
@@ -375,7 +376,7 @@ public class FunctionEditTable {
 		rows.clear();
 		rows=null;
 	}
-	
+
 	private final static class FunctionRow {
 		private String name;
 		private String paramName;
@@ -383,7 +384,7 @@ public class FunctionEditTable {
 		private double[] params;
 		private boolean enabled=true;
 		private boolean fixed = false;
-		
+
 		public FunctionRow(String name, String description, boolean fixed, double... parameters) {
 			this.paramName     = name;
 			this.description     = description;
@@ -408,7 +409,7 @@ public class FunctionEditTable {
 		public boolean isFixed() {
 			return fixed;
 		}
-		
+
 		public void setIsFixed(boolean value) {
 			fixed = value;
 		}

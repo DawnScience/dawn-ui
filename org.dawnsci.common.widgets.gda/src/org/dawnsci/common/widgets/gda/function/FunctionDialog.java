@@ -6,7 +6,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- */ 
+ */
 
 package org.dawnsci.common.widgets.gda.function;
 
@@ -27,7 +27,6 @@ import org.eclipse.swt.widgets.Spinner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.fitting.functions.FunctionExtensionFactory;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Polynomial;
 
@@ -39,41 +38,44 @@ public class FunctionDialog extends Dialog {
 
 	private static final Logger logger = LoggerFactory.getLogger(FunctionDialog.class);
 	private static final String POLYNOMIAL = "Polynomial";
-	
+
 	private FunctionEditTable functionEditor;
 	private CCombo functionType;
 	private Spinner polynomialDegree;
 	private Label labelDegree;
-	
+
 	String[] fittingFunctionNames;
-	
-	public FunctionDialog(Shell parentShell) {	
+
+	public FunctionDialog(Shell parentShell) {
 		super(parentShell);
 	}
-	
+
+	@Override
 	protected boolean isResizable() {
 		return true;
 	}
-	
+
+	@Override
 	public Control createDialogArea(Composite parent) {
-		
+
 		final Composite main = (Composite)super.createDialogArea(parent);
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
+
 		final Composite top= new Composite(main, SWT.NONE);
 		top.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		top.setLayout(new GridLayout(2, false));
-		
+
 		final Label label = new Label(top, SWT.NONE);
 		label.setText("Function type    ");
-		label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));	
-		
+		label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+
 		functionType = new CCombo(top, SWT.READ_ONLY|SWT.BORDER);
-		
+
 		fittingFunctionNames = FunctionExtensionFactory.getFunctionExtensionFactory().getFittingFunctionNames();
 		functionType.setItems(fittingFunctionNames);
 		functionType.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		functionType.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				try {
 					//IFunction myFunction = FunctionType.createNew(functionType.getSelectionIndex());
@@ -91,18 +93,19 @@ public class FunctionDialog extends Dialog {
 				}
 			}
 		});
-		
+
 		labelDegree = new Label(top, SWT.NONE);
 		labelDegree.setText("Polynomial degree ");
 		labelDegree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		labelDegree.setVisible(false);
-		
+
 		polynomialDegree = new Spinner(top, SWT.NONE);
 		polynomialDegree.setToolTipText("Polynomial degree");
 		polynomialDegree.setMinimum(1);
 		polynomialDegree.setMaximum(100);
 		polynomialDegree.setVisible(false);
 		polynomialDegree.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				try {
 					IFunction myFunction = FunctionExtensionFactory.getFunctionExtensionFactory().getFittingFunction(POLYNOMIAL);
@@ -114,13 +117,13 @@ public class FunctionDialog extends Dialog {
 				}
 			}
 		});
-		
+
 		this.functionEditor = new FunctionEditTable();
 		functionEditor.createPartControl(main);
-		
+
 		return main;
 	}
-	
+
 	public void setFunction(IFunction function) {
 		String name = function.getName();
 		int index = -1;
@@ -133,7 +136,7 @@ public class FunctionDialog extends Dialog {
 		functionType.select(index);
 		functionEditor.setFunction(function, null);
 	}
-	
+
 	public IFunction getFunction() {
 		return functionEditor.getFunction();
 	}

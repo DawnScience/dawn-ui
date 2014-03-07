@@ -2,6 +2,8 @@ package org.dawnsci.plotting.draw2d.swtxy.selection;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.Map;
 
 import org.dawnsci.plotting.api.region.IROIListener;
 import org.dawnsci.plotting.api.region.IRegion;
@@ -51,8 +53,9 @@ public abstract class AbstractRegion extends Figure implements IRegion, IRegionC
 	}
 	
 	protected void clearListeners() {
-		if (roiListeners==null) return;
-		roiListeners.clear();
+		if (roiListeners!=null)             roiListeners.clear();	
+		if (mouseListenerCache!=null)       mouseListenerCache.clear();
+		if (mouseMotionListenerCache!=null) mouseMotionListenerCache.clear();
 	}
 	
 	protected void fireROIDragged(IROI roi, ROIEvent.DRAG_TYPE type) {
@@ -112,6 +115,12 @@ public abstract class AbstractRegion extends Figure implements IRegion, IRegionC
 		// null ROIs over.
 		if (roi == null) throw new NullPointerException("Cannot have a null region position!");
 		this.roi = roi;
+		String name = roi.getName();
+		if (name == null || name.isEmpty() || name.trim().isEmpty()) {
+			roi.setName(getName());
+		} else {
+			setName(name);
+		}
 		try {
 			regionEventsActive = false;
 			updateRegion();
@@ -241,24 +250,40 @@ public abstract class AbstractRegion extends Figure implements IRegion, IRegionC
 		this.isActive = b;
 	}
 	
+	// Record the listeners in a map so that they can be removed.
+	private Map<MouseListener, MouseListenerAdapter> mouseListenerCache;
+	
 	@Override
 	public void addMouseListener(MouseListener l) {
-		super.addMouseListener(new MouseListenerAdapter(l));
+		if (mouseListenerCache==null) mouseListenerCache = new IdentityHashMap<MouseListener, MouseListenerAdapter>();
+		final MouseListenerAdapter ad = new MouseListenerAdapter(l);
+		mouseListenerCache.put(l,  ad);
+		super.addMouseListener(ad);
 	}	
 	
 	@Override
 	public void removeMouseListener(MouseListener l){
-		super.removeMouseListener(new MouseListenerAdapter(l));
+		if (mouseListenerCache==null) return;
+		if (!mouseListenerCache.containsKey(l)) return;
+		super.removeMouseListener(mouseListenerCache.get(l));
 	}
+
+	// Record the listeners in a map so that they can be removed.
+	private Map<MouseMotionListener, MouseMotionAdapter> mouseMotionListenerCache;
 
 	@Override
 	public void addMouseMotionListener(MouseMotionListener l){
-		super.addMouseMotionListener(new MouseMotionAdapter(l));
+		if (mouseMotionListenerCache==null) mouseMotionListenerCache = new IdentityHashMap<MouseMotionListener, MouseMotionAdapter>();
+		final MouseMotionAdapter ad = new MouseMotionAdapter(l);
+		mouseMotionListenerCache.put(l,  ad);
+		super.addMouseMotionListener(ad);
 	}
 
 	@Override
 	public void removeMouseMotionListener(MouseMotionListener l){
-		super.removeMouseMotionListener(new MouseMotionAdapter(l));
+		if (mouseMotionListenerCache==null) return;
+		if (!mouseMotionListenerCache.containsKey(l)) return;
+		super.removeMouseMotionListener(mouseMotionListenerCache.get(l));
 	}
 	/**
 	 * 

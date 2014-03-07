@@ -175,11 +175,15 @@ public interface IToolPage extends IPageBookViewPage, IAdaptable {
 	
 	/**
 	 * Called if the tool is chosen when it already exists.
+	 * Please use this method to connection all your listeners on the plotting system
+	 * of the parent part.
 	 */
 	public void activate();
 	
 	/**
 	 * Called if the tool swapped for another but is not disposed.
+	 * Please use this method to disconnect all your listeners on the plotting system
+	 * of the parent part.
 	 */
 	public void deactivate();
 

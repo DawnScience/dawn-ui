@@ -20,7 +20,8 @@ import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.workbench.ui.Activator;
 import org.dawb.workbench.ui.editors.preference.EditorConstants;
-import org.dawnsci.slicing.api.editor.IDatasetEditor;
+import org.dawnsci.slicing.api.editor.ISelectedPlotting;
+import org.dawnsci.slicing.api.editor.ISlicablePlottingPart;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ContributionManager;
@@ -75,14 +76,14 @@ public class CSVDataEditor extends EditorPart implements IReusableEditor, IPageC
 	private CLabel      errorLabel;
 	private Composite   main;
 	private Map<String, IDataset> data;
-	private IDatasetEditor  dataProvider;
+	private ISlicablePlottingPart  dataProvider;
 	private IPropertyChangeListener propListener;
 	
 	public CSVDataEditor() {
 	    
 	}
 	
-	public void setDataProvider(final IDatasetEditor dataHolder) {
+	public void setDataProvider(final ISlicablePlottingPart dataHolder) {
 		this.dataProvider = dataHolder;
 	}
 
@@ -190,7 +191,9 @@ public class CSVDataEditor extends EditorPart implements IReusableEditor, IPageC
 			}
 		}
 		
-		this.data = dataProvider.getSelected();
+		this.data = dataProvider instanceof ISelectedPlotting 
+				  ? ((ISelectedPlotting)dataProvider).getSelected()
+				  : null;
 
 		if (data==null || data.isEmpty()) {
 			GridUtils.setVisible(errorLabel, true);

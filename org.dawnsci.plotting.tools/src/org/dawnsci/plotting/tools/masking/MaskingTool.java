@@ -14,6 +14,7 @@ import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.wizard.persistence.PersistenceExportWizard;
 import org.dawb.common.ui.wizard.persistence.PersistenceImportWizard;
+import org.dawnsci.common.widgets.spinner.FloatSpinner;
 import org.dawnsci.plotting.AbstractPlottingSystem;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.histogram.HistogramBound;
@@ -27,6 +28,7 @@ import org.dawnsci.plotting.api.region.ROIEvent;
 import org.dawnsci.plotting.api.region.RegionEvent;
 import org.dawnsci.plotting.api.region.RegionUtils;
 import org.dawnsci.plotting.api.tool.AbstractToolPage;
+import org.dawnsci.plotting.api.tool.IToolPage;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.IPaletteListener;
 import org.dawnsci.plotting.api.trace.ITraceListener;
@@ -36,13 +38,13 @@ import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.util.ColorUtility;
 import org.eclipse.core.commands.operations.IOperationHistoryListener;
 import org.eclipse.core.commands.operations.OperationHistoryEvent;
-import org.eclipse.core.internal.resources.SaveContext;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.draw2d.MouseMotionListener;
+import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
@@ -93,7 +95,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.IActionBars;
 import org.slf4j.Logger;
@@ -108,7 +109,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	private static final Logger logger = LoggerFactory.getLogger(MaskingTool.class);
 	
 	private ScrolledComposite scrollComp;
-	private Spinner         minimum, maximum;
+	private FloatSpinner         minimum, maximum;
 	private Button          autoApply;
 	private MaskObject      maskObject;
 	private MaskJob         maskJob;
@@ -293,12 +294,13 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		minEnabled.setText("Enable lower mask    ");
 		minEnabled.setToolTipText("Enable the lower bound mask, removing pixels with lower intensity.");
 		
-		this.minimum = new Spinner(minMaxComp, SWT.NONE);
+		this.minimum = new FloatSpinner(minMaxComp, SWT.NONE);
+		minimum.setIncrement(1d);
 		minimum.setEnabled(false);
 		minimum.setMinimum(Integer.MIN_VALUE);
 		minimum.setMaximum(Integer.MAX_VALUE);
 		minimum.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		if (image!=null) minimum.setSelection(getValue(image.getMin(), image.getMinCut(), 0));
+		if (image!=null) minimum.setDouble(getValue(image.getMin(), image.getMinCut(), 0));
 		minimum.setToolTipText("Press enter to apply a full update of the mask.");
 		minimum.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -346,12 +348,13 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			}
 		});
 		
-		this.maximum = new Spinner(minMaxComp, SWT.NONE);
+		this.maximum = new FloatSpinner(minMaxComp, SWT.NONE);
+		maximum.setIncrement(1d);
 		maximum.setEnabled(false);
 		maximum.setMinimum(Integer.MIN_VALUE);
 		maximum.setMaximum(Integer.MAX_VALUE);
 		maximum.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		if (image!=null) maximum.setSelection(getValue(image.getMax(), image.getMaxCut(), Integer.MAX_VALUE));
+		if (image!=null) maximum.setDouble(getValue(image.getMax(), image.getMaxCut(), Integer.MAX_VALUE));
 		maximum.setToolTipText("Press enter to apply a full update of the mask.");
 		maximum.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -436,7 +439,82 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		final Label shiftLabel = new Label(directComp, SWT.WRAP);
 		shiftLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, true, false));
 		shiftLabel.setText("(Hold down the 'shift' key to draw lines.)");
-     
+		
+		new Label(directComp, SWT.NONE);
+		new Label(directComp, SWT.NONE);
+		final Button useThresh = new Button(directComp, SWT.CHECK);
+		useThresh.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, false));
+		useThresh.setText("Use threshold on brush.");
+		
+		final Composite threshComp = new Composite(directComp, SWT.NONE);
+		threshComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		threshComp.setLayout(new GridLayout(2, false));
+		
+		final Label minThreshLabel = new Label(threshComp, SWT.NONE);
+		threshComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		minThreshLabel.setText("Minimum Threshold");
+		
+		final FloatSpinner minThresh = new FloatSpinner(threshComp, SWT.NONE);
+		minThresh.setIncrement(1d);
+		minThresh.setMinimum(Integer.MIN_VALUE);
+		minThresh.setMaximum(Integer.MAX_VALUE);
+		minThresh.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		if (image!=null) minThresh.setDouble(getValue(image.getMin(), image.getMinCut(), 0));
+		minThresh.setToolTipText("Press enter to set minimum threshold for brush.");
+
+		final Label maxThreshLabel = new Label(threshComp, SWT.NONE);
+		maxThreshLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		maxThreshLabel.setText("Maximum Threshold");
+
+		final FloatSpinner maxThresh = new FloatSpinner(threshComp, SWT.NONE);
+		maxThresh.setIncrement(1d);
+		maxThresh.setMinimum(Integer.MIN_VALUE);
+		maxThresh.setMaximum(Integer.MAX_VALUE);
+		maxThresh.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		if (image!=null) maxThresh.setDouble(getValue(image.getMax(), image.getMaxCut(), Integer.MAX_VALUE));
+		maxThresh.setToolTipText("Press enter to set maximum threshold for brush.");
+		
+		
+		minThresh.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				maskObject.setBrushThreshold(new PrecisionPoint(minThresh.getDouble(), maxThresh.getDouble()));
+			}
+		});
+		minThresh.addKeyListener(new KeyAdapter() {
+			public void keyPressed(KeyEvent e) {
+				if (e.character=='\n' || e.character=='\r') {
+					maskObject.setBrushThreshold(new PrecisionPoint(minThresh.getDouble(), maxThresh.getDouble()));
+				}
+			}
+		});
+		maxThresh.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				maskObject.setBrushThreshold(new PrecisionPoint(minThresh.getDouble(), maxThresh.getDouble()));
+			}
+		});
+		maxThresh.addKeyListener(new KeyAdapter() {
+			public void keyPressed(KeyEvent e) {
+				if (e.character=='\n' || e.character=='\r') {
+					maskObject.setBrushThreshold(new PrecisionPoint(minThresh.getDouble(), maxThresh.getDouble()));
+				}
+			}
+		});
+		
+		useThresh.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				
+				GridUtils.setVisible(threshComp, useThresh.getSelection());
+				PrecisionPoint thresh = useThresh.getSelection()
+						              ? new PrecisionPoint(minThresh.getDouble(), maxThresh.getDouble())
+				                      : null;
+				maskObject.setBrushThreshold(thresh);
+				
+				threshComp.getParent().layout();
+			}
+		});
+		GridUtils.setVisible(threshComp, false);
+
+
 		// Regions
 		final Composite        regionComp = new Composite(drawContent, SWT.NONE);
 		regionComp.setLayout(new GridLayout(1, false));
@@ -1088,7 +1166,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		man.add(multipleRegion);
 		man.add(new Separator());
 		
-		final MenuAction widthChoice = new MenuAction("Line With");
+		final MenuAction widthChoice = new MenuAction("Line Width");
 		widthChoice.setToolTipText("Line width for free draw and line regions");
 		man.add(widthChoice);
 		
@@ -1285,7 +1363,14 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		}
 	}
 
-	
+	@Override
+	public void sync(IToolPage with) {
+		if (with instanceof MaskingTool) {
+			MaskingTool sync = (MaskingTool)with;
+			maskObject.sync(sync.maskObject);
+		}
+	}
+
 	public class MaskJob extends Job {
 
 		public MaskJob() {
@@ -1295,14 +1380,14 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		private boolean resetMask         = false;
 		private boolean isRegionsEnabled  = false;
 		private IRegion region            = null;
-		private Integer min=null, max=null;
+		private Double min=null, max=null;
 		private org.eclipse.draw2d.geometry.Point location;
 		
 		@Override
 		protected IStatus run(final IProgressMonitor monitor) {
 				
 			try {
-				if (isDisposed()) {
+				if (isDisposed() || !isActive()) {
 					return Status.CANCEL_STATUS;
 				}
 				
@@ -1391,8 +1476,8 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			this.resetMask    = resetMask;
 			this.region       = region;
 			this.location     = loc;
-			min = (minimum!=null && minimum.isEnabled()) ? minimum.getSelection() : null;
-		    max = (maximum!=null && maximum.isEnabled()) ? maximum.getSelection() : null;			
+			min = (minimum!=null && minimum.isEnabled()) ? minimum.getDouble() : null;
+		    max = (maximum!=null && maximum.isEnabled()) ? maximum.getDouble() : null;			
 		}
 
 		/**

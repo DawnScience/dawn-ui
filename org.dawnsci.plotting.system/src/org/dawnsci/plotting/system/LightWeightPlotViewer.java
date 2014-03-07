@@ -30,7 +30,6 @@ import org.dawnsci.plotting.api.axis.IClickListener;
 import org.dawnsci.plotting.api.axis.IPositionListener;
 import org.dawnsci.plotting.api.histogram.IPaletteService;
 import org.dawnsci.plotting.api.histogram.functions.FunctionContainer;
-import org.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -348,6 +347,8 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		
 		final IActionBars bars = system.getActionBars();
 		if (keyListener==null) keyListener = new KeyAdapter() {
+			private ZoomType previousTool;
+
 			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.keyCode==27) { // Esc
@@ -417,17 +418,24 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 				}
 		        if (e.keyCode == 262144) { // CONTROL
 		        	xyGraph.getRegionArea().setControlDown(true);
+					previousTool = xyGraph.getZoomType();
+					xyGraph.setZoomType(ZoomType.NONE);
 		        }
 		        xyGraph.getRegionArea().setKeyEvent(e);
 			}
 			
 			@Override
 			public void keyReleased(KeyEvent e) {
+				
 				if ((e.stateMask & SWT.SHIFT)==SWT.SHIFT) {
 					xyGraph.getRegionArea().setShiftDown(false);
 				}
 				if ((e.stateMask & SWT.CONTROL)==SWT.CONTROL) {
 		        	xyGraph.getRegionArea().setControlDown(false);
+					if (previousTool!=null) {
+						xyGraph.setZoomType(previousTool);
+						previousTool = null;
+					}
 		        }
 		        xyGraph.getRegionArea().setKeyEvent(null);
 			}

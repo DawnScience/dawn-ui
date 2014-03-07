@@ -897,7 +897,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	protected void showPageRec(PageRec pageRec) {
 		// If already showing do nothing
 		if (activeRec == pageRec) {
-			if (!activeRec.tool.isActive()) activeRec.tool.activate();
+			if (!activeRec.tool.isActive() && activeRec.tool.getControl()!=null) activeRec.tool.activate();
 			return;
 		}
 		if (staticTool!=null && activeRec!=null && activeRec.tool==staticTool) { // We never show owt else.
@@ -1105,7 +1105,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		        final PageRec existing = getPageRec(part);
 		        
 		        if (tool!=null && existing!=null&&existing.tool!=null && existing.tool.equals(tool)) {
-		        	if (!tool.isActive()) tool.activate();
+		        	if (!tool.isActive() && tool.getControl()!=null) tool.activate();
 		        	return existing;
 		        }
 
@@ -1189,6 +1189,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 																				tool.getToolId(),
 																				IWorkbenchPage.VIEW_ACTIVATE);
 		view.update(orig);
+		
 		if (orig!=null && view.activeRec!=null && view.activeRec.tool!=null) {
 			try {
 			    view.activeRec.tool.sync(orig);
@@ -1248,8 +1249,14 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 			partActivated(link.getViewPart());
 			
 		} else {
-			final IWorkbenchPage page = getPage();
-		    partActivated(page.getActiveEditor());
+			// If we are a view, activate that, otherwise activate the editor
+			final IPlottingSystem sys = tp.getPlottingSystem();
+			if (sys!=null && sys.getPart()!=null) {
+				partActivated(sys.getPart());
+			} else {
+				final IWorkbenchPage page = getPage();
+			    partActivated(page.getActiveEditor());
+			}
 		}
 	}
 
@@ -1463,7 +1470,9 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 					staticTool.setPlottingSystem((IPlottingSystem)sys);
 				}
 				staticTool.setPart(part);
-				staticTool.activate();
+				if (staticTool.getControl()!=null) {
+					staticTool.activate();
+				}
 				return true;
 			}
 			return false;
