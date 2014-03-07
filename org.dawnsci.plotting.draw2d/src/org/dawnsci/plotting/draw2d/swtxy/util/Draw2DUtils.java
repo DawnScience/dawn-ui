@@ -19,8 +19,11 @@ import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Draw2DUtils {
+	private static Logger logger = LoggerFactory.getLogger(Draw2DUtils.class);
 
 	/**
 	 * Attempts to get the centre of a figure using its bounds.
@@ -184,9 +187,10 @@ public class Draw2DUtils {
 	 * @param lower
 	 * @param upper
 	 * @param delta
+	 * @return true, if drawn
 	 */
-	public static void drawCurve(Graphics g, Rectangle bounds, boolean isPolygon, PointFunction fn, double lower, double upper, double delta) {
-		drawCurve(g, bounds, isPolygon, fn, lower, upper, delta, 3, Math.toRadians(0.5));
+	public static boolean drawCurve(Graphics g, Rectangle bounds, boolean isPolygon, PointFunction fn, double lower, double upper, double delta) {
+		return drawCurve(g, bounds, isPolygon, fn, lower, upper, delta, 3, Math.toRadians(0.5));
 	}
 
 	/**
@@ -200,8 +204,9 @@ public class Draw2DUtils {
 	 * @param delta
 	 * @param minDistance
 	 * @param maxAngle (in radians)
+	 * @return true, if drawn
 	 */
-	public static void drawCurve(Graphics g, Rectangle bounds, boolean isPolygon, PointFunction fn, double lower, double upper, double delta, double minDistance, double maxAngle) {
+	public static boolean drawCurve(Graphics g, Rectangle bounds, boolean isPolygon, PointFunction fn, double lower, double upper, double delta, double minDistance, double maxAngle) {
 		List<Double> parameters = new ArrayList<Double>();
 		double[] angles;
 
@@ -258,27 +263,38 @@ public class Draw2DUtils {
 		if (bounds.contains(upt)) {
 			subset.add(upper);
 		}
+		Point lpt = fn.calculatePoint(lower);
+		Point last = lpt;
+		if (subset.size() > 1) {
+			for (int i = 0; i < subset.size(); i++) { // remove same or adjacent points
+				Point p = fn.calculatePoint(subset.get(i));
+				if (p.getDistance(last) < 2) {
+					logger.debug("Removed point {} at parameter {}", i, subset.get(i));
+					subset.remove(i--);
+				}
+				last = p;
+			}
+		}
 		size = subset.size();
 		boolean inside = false; // is next segment inside bounds?
-		Point lpt = fn.calculatePoint(lower);
 		if (bounds.contains(lpt)) {
+			if (size == 0) {
+				logger.debug("Only lower parameter is within bounds!!!");
+				return false;
+			}
 			subset.add(0, lower);
 			size++;
 			inside = true;
-			if (size == 1) {
-				System.err.println("Only lower parameter is within bounds!!!");
-				return; // nothing to draw
-			}
 		} else {
 			if (size > 1) {
 				inside = bounds.contains(fn.calculatePoint(0.5*(subset.get(0) + subset.get(1))));
 			} else {
 				if (size == 1) {
-					System.err.println("Only one parameter is within bounds!!!");
+					logger.debug("Only lower parameter is within bounds!!!");
 				} else {
-					System.err.println("Draw nothing!");
+					logger.debug("Draw nothing!");
 				}
-				return; // nothing to draw
+				return false;
 			}
 		}
 
@@ -287,7 +303,7 @@ public class Draw2DUtils {
 		for (int i = 1; i < size; i++) {
 			double e = subset.get(i);
 			if (inside) {
-				PointList list = generateCurve(fn, b, e, delta);
+				PointList list = generateCurve(fn, b, e, delta, minDistance, maxAngle);
 				g.drawPolyline(list);
 			}
 			inside = !inside;
@@ -298,6 +314,7 @@ public class Draw2DUtils {
 				g.drawLine(upt, lpt);
 			}
 		}
+		return true;
 	}
 
 	/**

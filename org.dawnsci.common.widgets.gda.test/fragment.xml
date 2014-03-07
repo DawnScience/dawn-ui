@@ -17,7 +17,7 @@
    <extension
          point="org.dawnsci.common.functions">
       <function
-            class="uk.ac.diamond.scisoft.analysis.fitting.KichwaFunction"
+            class="org.dawnsci.common.widgets.gda.function.KichwaFunction"
             id="uk.ac.diamond.scisoft.analysis.test.fitting.function1"
             name="Kichwa Function">
       </function>

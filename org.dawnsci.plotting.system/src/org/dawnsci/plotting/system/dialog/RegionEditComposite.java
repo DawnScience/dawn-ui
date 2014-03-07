@@ -53,6 +53,7 @@ public class RegionEditComposite extends Composite {
 	private Button mobile;
 	private Button visible;
 	private Button showLabel;
+	private Button fillRegion;
 
 	private ROIEditTable roiViewer;
 
@@ -237,7 +238,22 @@ public class RegionEditComposite extends Composite {
 				}
 			});
 		}
-		
+
+		this.fillRegion = new Button(this, SWT.CHECK);
+		fillRegion.setText("   Fill region");		
+		fillRegion.setToolTipText("Fill the body of an area region");
+		fillRegion.setLayoutData(new GridData(0, 0, false, false, 2, 1));
+		fillRegion.setSelection(true);
+		if(isImplicit()){
+			fillRegion.addSelectionListener(new SelectionAdapter(){
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					AbstractSelectionRegion region = getEditingRegion();
+					region.repaint();
+				}
+			});
+		}
+
 		this.symmetryLabel = new Label(this, SWT.NONE);
 		symmetryLabel.setText("Symmetry");		
 		symmetryLabel.setToolTipText("Set the symmetry of the region.");
@@ -358,6 +374,7 @@ public class RegionEditComposite extends Composite {
 		showPoints.setSelection(region.isShowPosition());
 		visible.setSelection(region.isVisible());
 		showLabel.setSelection(region.isShowLabel());
+		fillRegion.setSelection(region.isFill());
 		
 		if (region.getRegionType()!=RegionType.SECTOR) {
 			GridUtils.setVisible(this.symmetryLabel, false);
@@ -398,6 +415,7 @@ public class RegionEditComposite extends Composite {
 		editingRegion.setMobile(mobile.getSelection());
 		editingRegion.setVisible(visible.getSelection());
 		editingRegion.setShowLabel(showLabel.getSelection());
+		editingRegion.setFill(fillRegion.getSelection());
 		
 		if (editingRegion.getRegionType()==RegionType.SECTOR) {
 			SectorROI sroi = (SectorROI)editingRegion.getROI();

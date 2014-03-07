@@ -3,6 +3,8 @@ package org.dawnsci.common.widgets.gda.function.descriptors;
 import org.eclipse.core.runtime.PlatformObject;
 
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.IOperator;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.IParameter;
 
 public abstract class FunctionDescriptor extends PlatformObject implements
 		IFunctionDescriptor {
@@ -26,6 +28,33 @@ public abstract class FunctionDescriptor extends PlatformObject implements
 	@Override
 	public String getName() {
 		return describingFunction.getName();
+	}
+
+	@Override
+	public String getDescription() {
+		return describingFunction.getDescription();
+	}
+
+	@Override
+	public boolean isOperator() {
+		return describingFunction instanceof IOperator;
+	}
+
+	@Override
+	public String getLongDescription() {
+		StringBuilder desc = new StringBuilder(
+				describingFunction.getDescription() + System.lineSeparator());
+
+		IParameter[] parameters = describingFunction.getParameters();
+		if (parameters != null && parameters.length != 0) {
+			desc.append(System.lineSeparator() + "Parameters:"
+					+ System.lineSeparator());
+			for (IParameter param : describingFunction.getParameters()) {
+				desc.append("  " + param.getName() + System.lineSeparator());
+			}
+		}
+		return desc.toString();
+
 	}
 
 	public Class<? extends IFunction> getIFunctionClass() {

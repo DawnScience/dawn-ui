@@ -2,12 +2,17 @@ package org.dawnsci.plotting.tools.powderintegration;
 
 import java.util.List;
 
+import javax.measure.unit.NonSI;
+import javax.measure.unit.SI;
+import javax.measure.unit.UnitFormat;
+
 import ncsa.hdf.object.Dataset;
 import ncsa.hdf.object.Datatype;
 import ncsa.hdf.object.Group;
 import ncsa.hdf.object.HObject;
 import ncsa.hdf.object.h5.H5Datatype;
 
+import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage.DataReductionInfo;
 import org.dawb.common.ui.util.EclipseUtils;
@@ -18,14 +23,27 @@ import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.PlottingFactory;
 import org.dawnsci.plotting.api.tool.AbstractToolPage;
+import org.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.ITraceListener;
 import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.dawnsci.plotting.tools.diffraction.DiffractionUtils;
+import org.dawnsci.plotting.tools.powderintegration.PowderIntegrationJob.IntegrationMode;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.preference.JFacePreferences;
+import org.eclipse.jface.resource.ColorRegistry;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IViewPart;
@@ -41,6 +59,7 @@ import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.io.ILoaderService;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
+import uk.ac.diamond.scisoft.analysis.roi.ROIProfile.XAxis;
 
 public class PowderIntegrationTool extends AbstractToolPage implements IDataReductionToolPage {
 	
@@ -48,7 +67,13 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 	private ITraceListener traceListener;
 	private IDiffractionMetadata metadata;
 	private PowderIntegrationJob fullImageJob;
+	private Label statusMessage;
+	String[] statusString;
 	ILoaderService service;
+	Composite baseComposite;
+	XAxis xAxis = XAxis.Q;
+	IntegrationMode mode = IntegrationMode.NONSPLITTING;
+	boolean correctSolidAngle = false;
 	
 	public PowderIntegrationTool() {
 		try {
@@ -73,6 +98,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		};
 		
 		this.service = (ILoaderService)PlatformUI.getWorkbench().getService(ILoaderService.class);
+		statusString = new String[1];
 	}
 
 	@Override
@@ -100,23 +126,128 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 
 	@Override
 	public void createControl(Composite parent) {
+		
+		baseComposite = new Composite(parent, SWT.NONE);
+		baseComposite.setLayout(new GridLayout());
+		
+		createActions();
+		
 		final IPageSite site = getSite();
 		IActionBars actionbars = site!=null?site.getActionBars():null;
-
-		system.createPlotPart(parent, 
+		system.createPlotPart(baseComposite, 
 				getTitle(), 
 				actionbars, 
 				PlotType.XY,
 				this.getViewPart());
+		
+		system.getPlotComposite().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		system.getSelectedYAxis().setAxisAutoscaleTight(true);
+		
+		statusMessage = new Label(baseComposite, SWT.WRAP);
+		statusMessage.setText("Status...");
+		statusMessage.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false));
+		ColorRegistry colorRegistry = JFaceResources.getColorRegistry();
+		statusMessage.setForeground(new Color(statusMessage.getDisplay(), colorRegistry.getRGB(JFacePreferences.QUALIFIER_COLOR)));
+		statusMessage.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
+		
+		update(null);
+	}
+	
+	private void createActions() {
+		
+		final MenuAction modeSelect= new MenuAction("Select Mode");
+		
+		final Action nonAction = new Action("Non pixel splitting") {
+			@Override
+			public void run() {
+				PowderIntegrationTool.this.fullImageJob.setIntegrationMode(IntegrationMode.NONSPLITTING);
+				mode = IntegrationMode.NONSPLITTING;
+				modeSelect.setSelectedAction(this);
+				update(null);
+			}
+		};
+		
+		final Action splitAction = new Action("Pixel splitting") {
+			@Override
+			public void run() {
+				PowderIntegrationTool.this.fullImageJob.setIntegrationMode(IntegrationMode.SPLITTING);
+				mode = IntegrationMode.SPLITTING;
+				modeSelect.setSelectedAction(this);
+				update(null);
+			}
+		};
+		final Action split2DAction = new Action("Pixel splitting 2D") {
+			@Override
+			public void run() {
+				PowderIntegrationTool.this.fullImageJob.setIntegrationMode(IntegrationMode.SPLITTING2D);
+				mode = IntegrationMode.SPLITTING2D;
+				modeSelect.setSelectedAction(this);
+				update(null);
+			}
+		};
+		
+		
+		final MenuAction axisSelect= new MenuAction("Select Axis");
 
+		final Action qAction = new Action("Q") {
+			@Override
+			public void run() {
+				PowderIntegrationTool.this.fullImageJob.setAxisType(XAxis.Q);
+				xAxis = XAxis.Q;
+				axisSelect.setSelectedAction(this);
+				update(null);
+			}
+		};
+
+		final Action tthAction = new Action("2\u03b8") {
+			@Override
+			public void run() {
+				PowderIntegrationTool.this.fullImageJob.setAxisType(XAxis.ANGLE);
+				xAxis = XAxis.ANGLE;
+				axisSelect.setSelectedAction(this);
+				update(null);
+			}
+
+		};
+		
+		final MenuAction corrections= new MenuAction("Corrections");
+		final Action solidAngle = new Action("Solid Angle",IAction.AS_CHECK_BOX) {
+			@Override
+			public void run() {
+				correctSolidAngle = isChecked();
+				PowderIntegrationTool.this.fullImageJob.setCorrectSolidAngle(correctSolidAngle);
+				update(null);
+			}
+
+		};
+		
+		
+		modeSelect.add(nonAction);
+		modeSelect.add(splitAction);
+		modeSelect.add(split2DAction);
+		modeSelect.setSelectedAction(nonAction);
+		
+		axisSelect.add(qAction);
+		axisSelect.add(tthAction);
+		axisSelect.setSelectedAction(qAction);
+		
+		corrections.add(solidAngle);
+		
+		getSite().getActionBars().getToolBarManager().add(modeSelect);
+		getSite().getActionBars().getMenuManager().add(modeSelect);
+		
+		getSite().getActionBars().getToolBarManager().add(axisSelect);
+		getSite().getActionBars().getMenuManager().add(axisSelect);
+		
+		getSite().getActionBars().getToolBarManager().add(corrections);
+		getSite().getActionBars().getMenuManager().add(corrections);
 	}
 
 	@Override
 	public Control getControl() {
-		if (system != null) return system.getPlotComposite();
-		return null;
+		//if (system != null) return system.getPlotComposite();
+		return baseComposite;
 	}
 
 	@Override
@@ -126,30 +257,40 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 	
 	private void update(IDataset ds) {
 		
-		if (ds == null) return;
+		if (system == null) return; 
+		if (system.getPlotComposite() == null) return;
 		
 		IImageTrace im = getImageTrace();
-		logger.debug("Update");
+		if (ds == null && im == null) return;
+		if (ds == null && im != null) ds = im.getData();
 		
-//		final AbstractDataset ds = (AbstractDataset)im.getData();
+		logger.debug("Update");
 		
 		if (metadata != null) {
 			DetectorProperties d = metadata.getDetector2DProperties();
-			if(d.getPx() != ds.getShape()[0] || d.getPy() != ds.getShape()[1]) metadata = null;
+			if(d.getPx() != ds.getShape()[0] || d.getPy() != ds.getShape()[1])  {
+				metadata = null;
+				statusMessage.setText("Data shape not compatible with current metadata");
+			} else {
+				statusMessage.setText("Metadata OK");
+			}
 		}
 		
 		IDiffractionMetadata m = null;
 		
 		if (ds.getMetadata() != null && ds.getMetadata() instanceof IDiffractionMetadata) {
 			m = (IDiffractionMetadata)ds.getMetadata();
+			statusMessage.setText("Metadata from data set");
 		}
 		
 		//read from preferences first time
 		if (m == null && metadata == null) m = getDiffractionMetaData(ds);
 		
 		if (m != null) {
-			DetectorProperties d = m.getDetector2DProperties();
-			if(d.getPx() != ds.getShape()[0] || d.getPy() != ds.getShape()[1]) m = null;
+			if (statusString[0] != null) {
+				statusMessage.setText(statusString[0]);
+				statusString[0] = null;
+			}
 		}
 		
 		if (m == null && metadata == null) return;
@@ -163,6 +304,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 					!metadata.getDiffractionCrystalEnvironment().equals(m.getDiffractionCrystalEnvironment()))) {
 				metadata = m;
 				fullImageJob = new PowderIntegrationJob(metadata, system);
+				statusMessage.setText("Meta data updated");
 			}
 		}
 		
@@ -174,6 +316,9 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		
 		fullImageJob.setData(DatasetUtils.convertToAbstractDataset(ds),
 				mask, null);
+		
+		fullImageJob.setAxisType(xAxis);
+		fullImageJob.setIntegrationMode(mode);
 		
 		fullImageJob.schedule();
 	}
@@ -193,7 +338,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 				logger.debug("Exception getting the image metadata", e);
 			}
 		}
-		return DiffractionUtils.getDiffractionMetadata(image, altPath, service, null);
+		return DiffractionUtils.getDiffractionMetadata(image, altPath, service, statusString);
 	}
 	
 	/**
@@ -222,13 +367,40 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 				break;
 			}
 		}
-		
+
 		if (!axisMade) {
 			H5Datatype dType = new H5Datatype(Datatype.CLASS_FLOAT, 64/8, Datatype.NATIVE, Datatype.NATIVE);
 			axis = axis.squeeze();
 			Dataset s = file.createDataset(axis.getName(),  dType,  new long[]{axis.getShape()[0]}, axis.getBuffer(), resultGroup);
+			UnitFormat unitFormat = UnitFormat.getUCUMInstance();
+			
+			switch (xAxis) {
+			case Q:
+				String angstrom = unitFormat.format(NonSI.ANGSTROM.inverse());
+				file.setAttribute(s, "units", angstrom);
+				break;
+			case ANGLE:
+				String degrees = unitFormat.format(NonSI.DEGREE_ANGLE);
+				file.setAttribute(s, "units", degrees);
+				break;
+
+			default:
+				break;
+			}
+			
 			file.setNexusAttribute(s, Nexus.SDS);
-			file.setIntAttribute(s, NexusUtils.AXIS, 2);
+			
+			if (mode == IntegrationMode.SPLITTING2D) {
+				file.setIntAttribute(s, NexusUtils.AXIS, 3);
+				axis = out.get(2);
+				axis = axis.squeeze();
+				Dataset s2 = file.createDataset(axis.getName(),  dType,  new long[]{axis.getShape()[0]}, axis.getBuffer(), resultGroup);
+				file.setAttribute(s2, "units", unitFormat.format(NonSI.DEGREE_ANGLE));
+				file.setIntAttribute(s2, NexusUtils.AXIS, 2);
+				
+			} else {
+				file.setIntAttribute(s, NexusUtils.AXIS, 2);
+			}
 			
 		}
 		
@@ -246,6 +418,15 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		}
 		
 		return new DataReductionInfo(Status.OK_STATUS);
+	}
+	
+	@Override
+	public Object getAdapter(@SuppressWarnings("rawtypes") Class clazz) {
+		if (clazz == IToolPageSystem.class) {
+			return system;
+		} else {
+			return super.getAdapter(clazz);
+		}
 	}
 
 }

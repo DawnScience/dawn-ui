@@ -25,6 +25,21 @@ public class JexlExpressionFunctionDescriptor extends PlatformObject implements 
 		return "Jexl Expression";
 	}
 
+	@Override
+	public String getDescription() {
+		return "Jexl Expression";
+	}
+
+	@Override
+	public String getLongDescription() {
+		return getDescription();
+	}
+
+	@Override
+	public boolean isOperator() {
+		return false;
+	}
+
 	public Class<? extends IFunction> getIFunctionClass() {
 		return JexlExpressionFunction.class;
 	}

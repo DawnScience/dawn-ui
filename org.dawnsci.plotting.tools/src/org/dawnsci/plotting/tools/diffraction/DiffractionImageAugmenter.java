@@ -336,9 +336,15 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		int nRings = conicList.size();
 		double[] alphas = new double[nRings];
 		for (int i = 0; i < nRings; i++) {
-			alphas[i] = DSpacing.coneAngleFromDSpacing(diffenv, conicList.get(i).getResolution());
+			try {
+				alphas[i] = DSpacing.coneAngleFromDSpacing(diffenv, conicList.get(i).getResolution());
+			} catch (Exception e) {
+				alphas[i] = Double.NaN;
+			}
 		}
 		IROI[] rois = DSpacing.conicsFromAngles(detprop, alphas);
+		if (rois == null)
+			return;
 
 		for (int i = 0; i < nRings; i++) {
 			IROI conic = rois[i];

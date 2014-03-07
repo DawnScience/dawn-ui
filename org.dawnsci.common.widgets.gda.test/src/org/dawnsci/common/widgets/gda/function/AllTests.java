@@ -8,7 +8,8 @@ import org.junit.runners.Suite.SuiteClasses;
 @SuiteClasses({ ModelTest.class, FunctionTreeViewerJexlPluginTest.class,
 		FunctionTreeViewerPluginTest.class,
 		FunctionTreeViewerHandlersIsHandledPluginTest.class,
-		FunctionTreeViewerHandlersExecutePluginTest.class })
+		FunctionTreeViewerHandlersExecutePluginTest.class,
+		FunctionExtensionFactoryPluginTest.class })
 public class AllTests {
 
 }

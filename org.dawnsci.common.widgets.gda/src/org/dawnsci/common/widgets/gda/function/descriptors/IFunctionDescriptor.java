@@ -4,6 +4,7 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.fieldassist.IContentProposalProvider;
 
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.IOperator;
 
 /**
  * An interface for providing fitting functions by providing the name and
@@ -24,6 +25,30 @@ public interface IFunctionDescriptor extends IAdaptable {
 	 * @return String name
 	 */
 	String getName();
+
+	/**
+	 * Provides the description of the function
+	 *
+	 * @return String description of the function
+	 */
+	String getDescription();
+
+	/**
+	 * Provides the long description of the function, for example may include
+	 * parameter information
+	 *
+	 * @return String description of the function
+	 */
+	String getLongDescription();
+
+	/**
+	 * Return true if the described function is an operator. i.e.
+	 * {@link #getFunction()} returns something that implements
+	 * {@link IOperator}
+	 *
+	 * @return whether function is an operator
+	 */
+	boolean isOperator();
 
 	/**
 	 * Function Descriptors can choose to adapt to:

@@ -21,6 +21,7 @@ public class RegionBean implements Serializable {
 	protected boolean showPosition=false;
 	protected int     alpha=80;
 	protected boolean visible=true;
+	protected boolean fill=true;
 	protected boolean mobile=true;
 	protected boolean showLabel=false;	
 	public void sync(RegionBean bean) {
@@ -32,6 +33,7 @@ public class RegionBean implements Serializable {
 		setAlpha(bean.getAlpha());
 		setVisible(bean.isVisible());
 		setMobile(bean.isMobile());
+		setFill(bean.isFill());
 		setShowLabel(bean.isShowLabel());
 	}
 
@@ -103,6 +105,14 @@ public class RegionBean implements Serializable {
 		this.visible = visible;
 	}
 
+	public boolean isFill() {
+		return fill;
+	}
+
+	public void setFill(boolean fill) {
+		this.fill = fill;
+	}
+
 	public boolean isMobile() {
 		return mobile;
 	}
@@ -126,6 +136,7 @@ public class RegionBean implements Serializable {
 		result = prime * result + (showLabel ? 1231 : 1237);
 		result = prime * result + (showPosition ? 1231 : 1237);
 		result = prime * result + (visible ? 1231 : 1237);
+		result = prime * result + (fill ? 1231 : 1237);
 		result = prime * result + ((xyGraph == null) ? 0 : xyGraph.hashCode());
 		return result;
 	}
@@ -163,6 +174,8 @@ public class RegionBean implements Serializable {
 		if (showPosition != other.showPosition)
 			return false;
 		if (visible != other.visible)
+			return false;
+		if (fill != other.fill)
 			return false;
 		if (xyGraph == null) {
 			if (other.xyGraph != null)
