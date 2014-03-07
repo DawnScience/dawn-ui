@@ -83,17 +83,35 @@ import org.slf4j.LoggerFactory;
  * 
  * More than one instance of this view can be declared for different tool sets.
  * Tools are differentiated from one another by calling getToolPageRole() on the 
- * tool. Know ids of instances of this view are:
- * 
- * org.dawb.workbench.plotting.views.toolPageView.1D
- * org.dawb.workbench.plotting.views.toolPageView.2D
- * org.dawb.workbench.plotting.views.toolPageView.1D_and_2D
+ * tool. Known ids of instances of this view are (see the corresponding string
+ * in source code):
+ * <p>
+ * TOOLPAGE_1D_VIEW_ID<br/>
+ * TOOLPAGE_2D_VIEW_ID<br/>
+ * TOOLPAGE_1AND2D_VIEW_ID<br/>
+ * </p>
+ * @see ToolPageView#TOOLPAGE_1D_VIEW_ID
+ * @see ToolPageView#TOOLPAGE_2D_VIEW_ID
+ * @see ToolPageView#TOOLPAGE_1AND2D_VIEW_ID
  * 
  * 
  * @author fcp94556
  *
  */
 public class ToolPageView extends ViewPart implements IPartListener, IToolChangeListener, IToolContainer { // Important: whole part must be IToolChangeListener
+
+	/**
+	 * The id of 1d tool page view.
+	 */
+	public static final String TOOLPAGE_1D_VIEW_ID = "org.dawb.workbench.plotting.views.toolPageView.1D";
+	/**
+	 * The id of 2d tool page view.
+	 */
+	public static final String TOOLPAGE_2D_VIEW_ID = "org.dawb.workbench.plotting.views.toolPageView.2D";
+	/**
+	 * The id of 1d and 2d tool page view.
+	 */
+	public static final String TOOLPAGE_1AND2D_VIEW_ID = "org.dawb.workbench.plotting.views.toolPageView.1D_and_2D";
 
 	/**
 	 * The pagebook control, or <code>null</code> if not initialized.
