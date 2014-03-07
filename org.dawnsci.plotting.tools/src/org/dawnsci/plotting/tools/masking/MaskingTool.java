@@ -44,6 +44,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.draw2d.MouseMotionListener;
+import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
@@ -438,7 +439,82 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		final Label shiftLabel = new Label(directComp, SWT.WRAP);
 		shiftLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, true, false));
 		shiftLabel.setText("(Hold down the 'shift' key to draw lines.)");
-     
+		
+		new Label(directComp, SWT.NONE);
+		new Label(directComp, SWT.NONE);
+		final Button useThresh = new Button(directComp, SWT.CHECK);
+		useThresh.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, false));
+		useThresh.setText("Use threshold on brush.");
+		
+		final Composite threshComp = new Composite(directComp, SWT.NONE);
+		threshComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		threshComp.setLayout(new GridLayout(2, false));
+		
+		final Label minThreshLabel = new Label(threshComp, SWT.NONE);
+		threshComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		minThreshLabel.setText("Minimum Threshold");
+		
+		final FloatSpinner minThresh = new FloatSpinner(threshComp, SWT.NONE);
+		minThresh.setIncrement(1d);
+		minThresh.setMinimum(Integer.MIN_VALUE);
+		minThresh.setMaximum(Integer.MAX_VALUE);
+		minThresh.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		if (image!=null) minThresh.setDouble(getValue(image.getMin(), image.getMinCut(), 0));
+		minThresh.setToolTipText("Press enter to set minimum threshold for brush.");
+
+		final Label maxThreshLabel = new Label(threshComp, SWT.NONE);
+		maxThreshLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		maxThreshLabel.setText("Maximum Threshold");
+
+		final FloatSpinner maxThresh = new FloatSpinner(threshComp, SWT.NONE);
+		maxThresh.setIncrement(1d);
+		maxThresh.setMinimum(Integer.MIN_VALUE);
+		maxThresh.setMaximum(Integer.MAX_VALUE);
+		maxThresh.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		if (image!=null) maxThresh.setDouble(getValue(image.getMax(), image.getMaxCut(), Integer.MAX_VALUE));
+		maxThresh.setToolTipText("Press enter to set maximum threshold for brush.");
+		
+		
+		minThresh.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				maskObject.setBrushThreshold(new PrecisionPoint(minThresh.getDouble(), maxThresh.getDouble()));
+			}
+		});
+		minThresh.addKeyListener(new KeyAdapter() {
+			public void keyPressed(KeyEvent e) {
+				if (e.character=='\n' || e.character=='\r') {
+					maskObject.setBrushThreshold(new PrecisionPoint(minThresh.getDouble(), maxThresh.getDouble()));
+				}
+			}
+		});
+		maxThresh.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				maskObject.setBrushThreshold(new PrecisionPoint(minThresh.getDouble(), maxThresh.getDouble()));
+			}
+		});
+		maxThresh.addKeyListener(new KeyAdapter() {
+			public void keyPressed(KeyEvent e) {
+				if (e.character=='\n' || e.character=='\r') {
+					maskObject.setBrushThreshold(new PrecisionPoint(minThresh.getDouble(), maxThresh.getDouble()));
+				}
+			}
+		});
+		
+		useThresh.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				
+				GridUtils.setVisible(threshComp, useThresh.getSelection());
+				PrecisionPoint thresh = useThresh.getSelection()
+						              ? new PrecisionPoint(minThresh.getDouble(), maxThresh.getDouble())
+				                      : null;
+				maskObject.setBrushThreshold(thresh);
+				
+				threshComp.getParent().layout();
+			}
+		});
+		GridUtils.setVisible(threshComp, false);
+
+
 		// Regions
 		final Composite        regionComp = new Composite(drawContent, SWT.NONE);
 		regionComp.setLayout(new GridLayout(1, false));
@@ -1311,7 +1387,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		protected IStatus run(final IProgressMonitor monitor) {
 				
 			try {
-				if (isDisposed()) {
+				if (isDisposed() || !isActive()) {
 					return Status.CANCEL_STATUS;
 				}
 				

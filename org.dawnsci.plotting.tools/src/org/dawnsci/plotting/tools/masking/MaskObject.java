@@ -20,6 +20,7 @@ import org.eclipse.core.commands.operations.DefaultOperationHistory;
 import org.eclipse.core.commands.operations.IOperationHistory;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.draw2d.geometry.Point;
+import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,6 +80,7 @@ public class MaskObject {
      */
 	private DefaultOperationHistory operationManager;
 	private ForkJoinPool pool;
+	private PrecisionPoint brushThreshold;
     
 	MaskObject() {
 		this.operationManager = new DefaultOperationHistory();
@@ -180,7 +182,16 @@ public class MaskObject {
 	        
 	        for (int y = start[1]; y<=end[1]; ++y) {
 	        	for (int x = start[0]; x<=end[0]; ++x) {
-	        		       		
+	        		     
+	        		if (brushThreshold!=null) {
+	        			final double intensity = imageDataset.getDouble(y,x);
+	        			if (intensity<brushThreshold.preciseX() ||
+	        			    intensity>brushThreshold.preciseY()) {
+	        				System.out.println("Ignored ("+x+", "+y+")");
+	        				continue;
+	        			}
+	        		}
+	        		
 	        		if (penShape==ShapeType.SQUARE) {
 	        			toggleMask(op, mv, y, x);
 	
@@ -711,5 +722,9 @@ public class MaskObject {
 
 	public void setIgnoreAlreadyMasked(boolean ignoreAlreadyMasked) {
 		this.ignoreAlreadyMasked = ignoreAlreadyMasked;
+	}
+
+	public void setBrushThreshold(PrecisionPoint precisionPoint) {
+		this.brushThreshold = precisionPoint;
 	}
 }
