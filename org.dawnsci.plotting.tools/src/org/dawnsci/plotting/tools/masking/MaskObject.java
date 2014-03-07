@@ -86,6 +86,14 @@ public class MaskObject {
 		this.pool = new ForkJoinPool();
 	}
 	
+	/**
+	 * 
+	 * @param maskObject
+	 */
+	public void sync(MaskObject maskObject) {
+		this.maskDataset = (BooleanDataset)maskObject.maskDataset.clone();
+	}
+
     /**
      * Designed to copy data in an incoming mask onto this one as best as possible.
      * @param savedMask

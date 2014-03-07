@@ -1171,6 +1171,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 																				tool.getToolId(),
 																				IWorkbenchPage.VIEW_ACTIVATE);
 		view.update(orig);
+		
 		if (orig!=null && view.activeRec!=null && view.activeRec.tool!=null) {
 			try {
 			    view.activeRec.tool.sync(orig);
@@ -1230,8 +1231,14 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 			partActivated(link.getViewPart());
 			
 		} else {
-			final IWorkbenchPage page = getPage();
-		    partActivated(page.getActiveEditor());
+			// If we are a view, activate that, otherwise activate the editor
+			final IPlottingSystem sys = tp.getPlottingSystem();
+			if (sys!=null && sys.getPart()!=null) {
+				partActivated(sys.getPart());
+			} else {
+				final IWorkbenchPage page = getPage();
+			    partActivated(page.getActiveEditor());
+			}
 		}
 	}
 

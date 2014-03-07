@@ -28,6 +28,7 @@ import org.dawnsci.plotting.api.region.ROIEvent;
 import org.dawnsci.plotting.api.region.RegionEvent;
 import org.dawnsci.plotting.api.region.RegionUtils;
 import org.dawnsci.plotting.api.tool.AbstractToolPage;
+import org.dawnsci.plotting.api.tool.IToolPage;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.IPaletteListener;
 import org.dawnsci.plotting.api.trace.ITraceListener;
@@ -1286,7 +1287,14 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		}
 	}
 
-	
+	@Override
+	public void sync(IToolPage with) {
+		if (with instanceof MaskingTool) {
+			MaskingTool sync = (MaskingTool)with;
+			maskObject.sync(sync.maskObject);
+		}
+	}
+
 	public class MaskJob extends Job {
 
 		public MaskJob() {
