@@ -328,19 +328,24 @@ class HyperbolaSelection extends AbstractSelectionRegion implements ILockableReg
 
 			double max = getMaxRadius();
 			double start = croi.getStartAngle(max);
-			if (!Draw2DUtils.drawCurve(graphics, parent.getBounds(), false, this, start, 2*Math.PI - start, Math.PI/100)) {
+			Rectangle bnds = parent.getBounds();
+			if (!Draw2DUtils.drawCurve(graphics, bnds, false, this, start, 2*Math.PI - start, Math.PI/100)) {
 				graphics.popState();
 				return;
 			}
 
 			if (showMajorAxis) {
-				double offset = Math.toRadians(cs.getXAxisRotationAngleDegrees());
-				Point b = getPoint(Math.PI + offset);
-				Point f = getFocus();
-				Point e = b.getNegated().translate(f);
-				double l = b.getDistance(f);
-				e.scale((max + l)/l);
-				graphics.drawLine(b, e.getTranslated(b));
+				Point b = getPoint(Math.PI);
+				Point e;
+				double limit = croi.getAsymptoteAngle();
+
+				do { // by symmetry, use midpoint between max radius
+					e = getPoint(start);
+					e.translate(getPoint(2*Math.PI - start));
+					e.scale(0.5);
+					start -= Math.PI/100; // expand circle
+				} while (bnds.contains(e) && start > limit);
+				graphics.drawLine(b, e);
 			}
 			graphics.popState();
 
