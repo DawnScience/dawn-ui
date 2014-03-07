@@ -382,8 +382,6 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
  				}
 				if (e.keyCode == 131072) { // SHIFT
 					xyGraph.getRegionArea().setShiftDown(true);
-					previousTool = xyGraph.getZoomType();
-					xyGraph.setZoomType(ZoomType.NONE);
 				}
 		        if (e.keyCode == 262144) { // CONTROL
 		        	xyGraph.getRegionArea().setControlDown(true);
@@ -397,10 +395,6 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 			public void keyReleased(KeyEvent e) {
 				if ((e.stateMask & SWT.SHIFT)==SWT.SHIFT) {
 					xyGraph.getRegionArea().setShiftDown(false);
-					if (previousTool!=null) {
-						xyGraph.setZoomType(previousTool);
-						previousTool = null;
-					}
 				}
 				if ((e.stateMask & SWT.CONTROL)==SWT.CONTROL) {
 		        	xyGraph.getRegionArea().setControlDown(false);
