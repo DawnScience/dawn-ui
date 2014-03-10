@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.BooleanDataset;
-import uk.ac.diamond.scisoft.analysis.dataset.IndexIterator;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.IRectangularROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
@@ -706,14 +705,9 @@ public class MaskObject {
 	}
 
 	public void invert() {
-		if (maskDataset!=null) {
-			IndexIterator it1 = maskDataset.getIterator();
-			while (it1.hasNext()) {
-				boolean b = maskDataset.getAbs(it1.index);
-				maskDataset.setAbs(it1.index, !b);
-			}
+		if (maskDataset != null) {
+			maskDataset.invert();
 		}
-		
 	}
 
 	public boolean isIgnoreAlreadyMasked() {
