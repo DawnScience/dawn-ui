@@ -3,6 +3,7 @@ package org.dawnsci.plotting.tools.fitting;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.IOperator;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IParameter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
 import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
@@ -143,5 +144,14 @@ public class NullFunction implements IPeak {
 	@Override
 	public boolean isValid() {
 		return true;
+	}
+
+	@Override
+	public IOperator getParentOperator() {
+		return null;
+	}
+
+	@Override
+	public void setParentOperator(IOperator parent) {
 	}
 }

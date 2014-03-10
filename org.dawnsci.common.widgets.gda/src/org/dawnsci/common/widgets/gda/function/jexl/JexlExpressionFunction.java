@@ -266,6 +266,10 @@ public class JexlExpressionFunction extends AFunction {
 		}
 		parameters = newParamsList
 				.toArray(new IParameter[parameterNames.size() - 1]);
+
+		if (parent != null) {
+			parent.updateParameters();
+		}
 	}
 
 	private void calcCachedParameters() {

@@ -99,7 +99,7 @@ class ToolConversionVisitor implements IConversionVisitor {
 			return group;
 		} else { // if not path, we create a default entry
 			Group entryGroup = output.group("entry");
-			output.setNexusAttribute(entryGroup, Nexus.DATA);
+			output.setNexusAttribute(entryGroup, Nexus.ENTRY);
 			group = output.group("data", entryGroup);
 			output.setNexusAttribute(group, Nexus.DATA);
 			return group;
