@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.dawnsci.plotting.tools.diffraction.DiffractionUtils;
 import org.dawnsci.plotting.util.PlottingUtils;
@@ -12,10 +13,19 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.ListDialog;
+import org.eclipse.ui.dialogs.ListSelectionDialog;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.io.ILoaderService;
+import uk.ac.diamond.scisoft.analysis.io.IMetaData;
+import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 public class DiffractionDataManager {
 	
@@ -24,6 +34,9 @@ public class DiffractionDataManager {
 	private ILoaderService service;
 	
 	private final static ISchedulingRule mutex = new Mutex();
+	
+	// Logger
+	private final static Logger logger = LoggerFactory.getLogger(DiffractionDataManager.class);
 	
 	private HashSet<IDiffractionDataListener> listeners;
 	
@@ -101,6 +114,43 @@ public class DiffractionDataManager {
 		protected IStatus run(IProgressMonitor monitor) {
 			
 			IDataset image = PlottingUtils.loadData(path, fullName);
+			
+			final String[] outName = new String[1];
+			
+			if (image == null &&  fullName == null) {
+				try {
+					IMetaData metaData = LoaderFactory.getMetaData(path, null);
+					Map<String, int[]> dataShapes = metaData.getDataShapes();
+					final List<String> dataNames = new ArrayList<String>();
+					for (String name : dataShapes.keySet()) {
+						if (dataShapes.get(name).length > 1) {
+							dataNames.add(name);
+						}
+					}
+					
+					Display.getDefault().syncExec(new Runnable() {
+						
+						@Override
+						public void run() {
+							ListDialog dia = new ListDialog(Display.getDefault().getActiveShell());
+							dia.setTitle("Multiple dataset file!");
+							dia.setMessage("Select dataset to calibrate:");
+							dia.setContentProvider(new ArrayContentProvider());
+							dia.setLabelProvider(new LabelProvider());
+							dia.setInput(dataNames);
+							if (dia.open() == ListDialog.OK) {
+								outName[0] = dia.getResult()[0].toString();
+							}
+						}
+					});
+					
+				} catch (Exception e) {
+					logger.error(e.getMessage());
+				}
+			}
+			
+			if (outName[0] != null) image = PlottingUtils.loadData(path, outName[0]);
+			
 			if (image == null)
 				return Status.CANCEL_STATUS;
 			
