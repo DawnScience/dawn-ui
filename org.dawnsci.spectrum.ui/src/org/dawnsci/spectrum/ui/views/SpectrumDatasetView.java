@@ -74,8 +74,18 @@ public class SpectrumDatasetView extends ViewPart {
 					for (ISpectrumFile file : otherFiles) {
 						file.setUseAxis(true);
 					}
+					if (combo.getText().equals("")) {
+						combo.select(0);
+						String name = combo.getText();
+						if (currentFile.contains(name)) {
+							currentFile.setxDatasetName(name);
+							for (ISpectrumFile file : otherFiles) {
+								if (file.contains(name)) file.setxDatasetName(name);
+							}
+						}
+					}
+					
 				}
-				
 				updateViewer();
 			}
 
