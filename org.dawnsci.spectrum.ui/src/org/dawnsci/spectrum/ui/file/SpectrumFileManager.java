@@ -106,7 +106,7 @@ public class SpectrumFileManager {
 		String[] foundy = findDatasets(file.getDataNames(), ydatasetNamesCombined);
 		
 		for (String name : foundx) {
-			if (name != null) {
+			if (name != null && file.getPossibleAxisNames().contains(name)) {
 				file.setxDatasetName(name);
 				break;
 			}
