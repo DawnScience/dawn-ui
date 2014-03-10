@@ -1,10 +1,22 @@
 package org.dawnsci.slicing.tools.hyper;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import org.dawnsci.plotting.api.IPlottingSystem;
+import org.dawnsci.plotting.api.region.IROIListener;
 import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.IRegionListener;
+import org.dawnsci.plotting.api.region.RegionEvent;
+import org.dawnsci.plotting.api.region.RegionUtils;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.dawnsci.slicing.tools.Activator;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.ActionContributionItem;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IContributionItem;
+import org.eclipse.swt.SWT;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
@@ -14,7 +26,7 @@ import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROISliceUtils;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
-public class TraceReducer implements IDatasetROIReducer {
+public class TraceReducer implements IDatasetROIReducer, IProvideReducerActions {
 
 	private final RegionType regionType = RegionType.BOX;
 	private List<IDataset> traceAxes;
@@ -69,6 +81,44 @@ public class TraceReducer implements IDatasetROIReducer {
 	@Override
 	public List<IDataset> getAxes() {
 		return traceAxes;
+	}
+
+	@Override
+	public List<IAction> getActions(final IPlottingSystem system) {
+		final IAction newRegion = new Action("Create new profile", SWT.TOGGLE) {
+			@Override
+			public void run() {
+				if (isChecked()) {
+					createNewRegion(system);
+				} else {
+					IContributionItem item = system.getActionBars().getToolBarManager().find("org.csstudio.swt.xygraph.undo.ZoomType.NONE");
+					if (item != null && item instanceof ActionContributionItem) {
+						((ActionContributionItem)item).getAction().run();
+					}
+				}
+			}
+		};
+		
+		system.addRegionListener(new IRegionListener.Stub() {
+	
+			@Override
+			public void regionAdded(RegionEvent evt) {
+				newRegion.run();
+			}
+		});
+		
+		newRegion.setImageDescriptor(Activator.getImageDescriptor("icons/ProfileBox2.png"));
+		newRegion.setId("org.dawnsci.slicing.tools.hyper.TraceReducer.newRegion");
+		return Arrays.asList(new IAction[]{newRegion});
+	}
+	
+	protected final void createNewRegion(final IPlottingSystem system) {
+		// Start with a selection of the right type
+		try {
+			system.createRegion(RegionUtils.getUniqueName("Image Region", system),getSupportedRegionType().get(0));
+		} catch (Exception e) {
+			
+		}
 	}
 
 }

@@ -47,6 +47,8 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -57,6 +59,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.Page;
 import org.slf4j.Logger;
@@ -76,17 +79,24 @@ public class HyperComponent {
 	private IPlottingSystem mainSystem;
 	private IPlottingSystem sideSystem;
 	private IRegionListener regionListenerLeft;
+	private IRegionListener regionListenerRight;
 	private IROIListener roiListenerLeft;
 	private IROIListener roiListenerRight;
 	private HyperDeligateJob leftJob;
 	private HyperDeligateJob rightJob;
-	private IAction reselect;
-	private IAction baseline;
-	private IRegion windowRegion;
 	private Composite mainComposite;
 	private IWorkbenchPart part;
 	private SashForm sashForm;
 	private final static Logger logger = LoggerFactory.getLogger(HyperComponent.class);
+	private List<IAction> leftActions;
+	private List<IAction> rightActions;
+	
+	private static final String SS1 = "uk.ac.diamond.scisoft.analysis.rcp.views.HyperPlotView.reducerGroup1";
+	private static final String SS2 = "uk.ac.diamond.scisoft.analysis.rcp.views.HyperPlotView.reducerGroup2";
+	private static final String STARTGROUP = "/org.dawb.common.ui.plot.groupAll";
+	private static final String HYPERIMAGE = "HyperImage";
+	private static final String HYPERTRACE = "HyperTrace";
+	
 	
 	public HyperComponent(IWorkbenchPart part) {
 		this.part = part;
@@ -99,6 +109,9 @@ public class HyperComponent {
 		sashForm.setBackground(new Color(parent.getDisplay(), 192, 192, 192));
 		
 		createPlottingSystems(sashForm);
+		
+		leftActions = new ArrayList<IAction>();
+		rightActions = new ArrayList<IAction>();
 	}
 	
     public Control getControl() {
@@ -111,7 +124,7 @@ public class HyperComponent {
 	
 	public void setData(ILazyDataset lazy, List<AbstractDataset> daxes, Slice[] slices, int[] order,
 			IDatasetROIReducer mainReducer, IDatasetROIReducer sideReducer) {
-		
+		//FIXME needs to be made more generic
 		this.leftJob = new HyperDeligateJob("Left update",
 				sideSystem,
 				lazy,
@@ -125,28 +138,32 @@ public class HyperComponent {
 				slices,
 				order, sideReducer);
 		
-		if (sideReducer instanceof ImageTrapeziumBaselineReducer) {
-			((ImageTrapeziumBaselineReducer)rightJob.getReducer()).setSubtractBaseline(baseline.isChecked());
+		cleanUpActions(sideSystem,rightActions);
+		cleanUpActions(mainSystem, leftActions);
+		
+		if (rightJob.getReducer() instanceof IProvideReducerActions) {
+			createActions((IProvideReducerActions)rightJob.getReducer(), sideSystem, rightActions,roiListenerRight,HYPERTRACE);
+		}
+		if (leftJob.getReducer() instanceof IProvideReducerActions) {
+			createActions((IProvideReducerActions)leftJob.getReducer(), mainSystem, leftActions,roiListenerLeft,HYPERIMAGE);
 		}
 		
-		if (mainReducer.isOutput1D()) {
-			baseline.setEnabled(true);
-		} else {
-			baseline.setEnabled(false);
-		}
-		
-		if (mainReducer.supportsMultipleRegions()) {
-			reselect.setEnabled(true);
-		} else {
-			reselect.setEnabled(false);
-		}
+		IROI rroi = mainReducer.getInitialROI(daxes,order);
+		IROI broi = sideReducer.getInitialROI(daxes,order);
 		
 		mainSystem.clear();
 		mainSystem.getAxes().clear();
-		List<AbstractDataset> ax2d = new ArrayList<AbstractDataset>();
-		ax2d.add(daxes.get(0));
-		ax2d.add(daxes.get(1));
-		mainSystem.createPlot2D(AbstractDataset.zeros(new int[] {(int)daxes.get(0).count(), (int)daxes.get(1).count()}, AbstractDataset.INT16), ax2d, null);
+		
+		int axisCount = 0;
+		
+		if (mainReducer.isOutput1D()) {
+			axisCount++;
+		} else {
+			List<AbstractDataset> ax2d = new ArrayList<AbstractDataset>();
+			ax2d.add(daxes.get(axisCount++));
+			ax2d.add(daxes.get(axisCount++));
+			mainSystem.createPlot2D(AbstractDataset.zeros(new int[] {(int)ax2d.get(0).count(), (int)ax2d.get(1).count()}, AbstractDataset.INT16), ax2d, null);
+		}
 		
 		for (IRegion region : mainSystem.getRegions()) {
 			mainSystem.removeRegion(region);
@@ -157,12 +174,14 @@ public class HyperComponent {
 		
 		if (mainReducer.isOutput1D()) {
 			List<AbstractDataset> xd = new ArrayList<AbstractDataset>();
-			xd.add(AbstractDataset.zeros(new int[] {(int)daxes.get(2).count()},AbstractDataset.INT16));
-			sideSystem.createPlot1D(daxes.get(2),xd, null);
+			AbstractDataset axis = daxes.get(axisCount++);
+			xd.add(AbstractDataset.zeros(new int[] {(int)axis.count()},AbstractDataset.INT16));
+			
+			sideSystem.createPlot1D(axis,xd, null);
 		} else {
 			List<AbstractDataset> xd = new ArrayList<AbstractDataset>();
 			xd.add(AbstractDataset.arange(10, AbstractDataset.INT32));
-			xd.add(daxes.get(2));
+			xd.add(daxes.get(axisCount++));
 			sideSystem.createPlot2D(AbstractDataset.ones(new int[] {10,(int)xd.get(1).count()}, AbstractDataset.INT32), xd, null);
 		}
 		
@@ -174,15 +193,14 @@ public class HyperComponent {
 			IRegion region = mainSystem.createRegion("Image Region 1", mainReducer.getSupportedRegionType().get(0));
 			
 			mainSystem.addRegion(region);
-			IROI rroi = mainReducer.getInitialROI(daxes,order);
+			
 			region.setROI(rroi);
 			region.addROIListener(this.roiListenerLeft);
 			sideSystem.clear();
 			updateRight(region, rroi);
 			
-			windowRegion = sideSystem.createRegion("Trace Region 1", sideReducer.getSupportedRegionType().get(0));
+			IRegion windowRegion = sideSystem.createRegion("Trace Region 1", sideReducer.getSupportedRegionType().get(0));
 			
-			IROI broi = sideReducer.getInitialROI(daxes,order);
 			windowRegion.setROI(broi);
 			windowRegion.setUserRegion(false);
 			windowRegion.addROIListener(this.roiListenerRight);
@@ -218,31 +236,11 @@ public class HyperComponent {
 
 			ActionBarWrapper actionBarWrapper = ActionBarWrapper.createActionBars(mainComposite, null);
 
-			reselect = new Action("Create new profile", SWT.TOGGLE) {
-				@Override
-				public void run() {
-					if (reselect.isChecked()) {
-						createNewRegion();
-					} else {
-						IContributionItem item = mainSystem.getActionBars().getToolBarManager().find("org.csstudio.swt.xygraph.undo.ZoomType.NONE");
-						if (item != null && item instanceof ActionContributionItem) {
-							((ActionContributionItem)item).getAction().run();
-						}
-					}
-				}
-			};
-			
-			reselect.setImageDescriptor(Activator.getImageDescriptor("icons/ProfileBox2.png"));
-			
-			actionBarWrapper.getToolBarManager().add(new Separator("uk.ac.diamond.scisoft.analysis.rcp.views.HyperPlotView.newProfileGroup"));
-			actionBarWrapper.getToolBarManager().add(reselect);
-			actionBarWrapper.getToolBarManager().add(new Separator("uk.ac.diamond.scisoft.analysis.rcp.views.HyperPlotView.newProfileGroupAfter"));
-			
 			Composite displayPlotComp  = new Composite(mainComposite, SWT.BORDER);
 			displayPlotComp.setLayout(new FillLayout());
 			displayPlotComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			mainSystem.createPlotPart(displayPlotComp, 
-													 "HyperImage", 
+													HYPERIMAGE, 
 													 actionBarWrapper, 
 													 PlotType.IMAGE, 
 													 part);
@@ -258,33 +256,18 @@ public class HyperComponent {
 			Composite sidePlotComp  = new Composite(sideComp, SWT.BORDER);
 			sidePlotComp.setLayout(new FillLayout());
 			sidePlotComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			
-			baseline = new Action("Linear baseline", SWT.TOGGLE) {
-				@Override
-				public void run() {
-					if (rightJob != null && rightJob.getReducer() instanceof ImageTrapeziumBaselineReducer) {
-						ImageTrapeziumBaselineReducer reducer = (ImageTrapeziumBaselineReducer)rightJob.getReducer();
-						reducer.setSubtractBaseline(isChecked());
-					}
-					
-					IROI roi = windowRegion.getROI();
-					updateLeft(windowRegion,roi);
-				}
-			};
-			
-			baseline.setImageDescriptor(Activator.getImageDescriptor("icons/LinearBase.png"));
-			actionBarWrapper1.getToolBarManager().add(new Separator("uk.ac.diamond.scisoft.analysis.rcp.views.HyperPlotView.newBaselineGroup"));
-			actionBarWrapper1.getToolBarManager().add(baseline);
-			actionBarWrapper1.getToolBarManager().add(new Separator("uk.ac.diamond.scisoft.analysis.rcp.views.HyperPlotView.newBaselineGroup"));
-			
+
 			sideSystem.createPlotPart(sidePlotComp, 
-													 "HyperTrace", 
+													HYPERTRACE, 
 													 actionBarWrapper1, 
 													 PlotType.XY, 
 													 null);
 			
 			regionListenerLeft = getRegionListenerToLeft();
 			mainSystem.addRegionListener(regionListenerLeft);
+			regionListenerRight = getRegionListenerToRight();
+			sideSystem.addRegionListener(regionListenerRight);
+			
 			roiListenerLeft = getROIListenerToRight();
 			roiListenerRight = getROIListenerLeft();
 			
@@ -309,18 +292,50 @@ public class HyperComponent {
 		}
 		return null;
 	}
-
-	
-	protected final void createNewRegion() {
-		// Start with a selection of the right type
-		try {
-			IRegion region = mainSystem.createRegion(RegionUtils.getUniqueName("Image Region", mainSystem),leftJob.getReducer().getSupportedRegionType().get(0));
-			region.addROIListener(roiListenerLeft);
-		} catch (Exception e) {
-			logger.error("Error creating hyperview new region: " + e.getMessage());
+    
+    private void cleanUpActions(IPlottingSystem system, List<IAction> cached) {
+    	IActionBars actionBars = system.getActionBars();
+    	IToolBarManager toolBarManager = actionBars.getToolBarManager();
+		IMenuManager menuManager = actionBars.getMenuManager();
+		
+		
+		for (IAction action : cached) {
+			toolBarManager.remove(action.getId());
+			menuManager.remove(action.getId());
 		}
-	}
-	
+
+		toolBarManager.remove(SS1);
+		toolBarManager.remove(SS2);
+		menuManager.remove(SS1);
+		menuManager.remove(SS2);
+		cached.clear();
+		toolBarManager.update(true);
+    }
+    
+    private void createActions(IProvideReducerActions provider, IPlottingSystem system, List<IAction> cached, IROIListener listener, String barName) {
+    	
+    	IActionBars actionBars = system.getActionBars();
+    	IToolBarManager toolBarManager = actionBars.getToolBarManager();
+		IMenuManager menuManager = actionBars.getMenuManager();
+		List<IAction> actions = provider.getActions(system);
+		
+		IContributionItem s1 = new Separator(SS1);
+		
+		toolBarManager.insertBefore(barName+STARTGROUP,s1);
+		menuManager.add(s1);
+
+		for (IAction action : actions) {
+			toolBarManager.insertBefore(barName+STARTGROUP, action);
+			menuManager.add(action);
+			cached.add(action);
+		}
+		IContributionItem s2 = new Separator(SS2);
+		toolBarManager.insertBefore(barName+STARTGROUP,s2);
+		menuManager.add(s2);
+		toolBarManager.update(true);
+    }
+    
+
 	private IRegionListener getRegionListenerToLeft() {
 		return new IRegionListener.Stub() {
 			
@@ -351,11 +366,44 @@ public class HyperComponent {
 				if (evt.getRegion() != null) {
 					evt.getRegion().setUserRegion(true);
 					evt.getRegion().addROIListener(roiListenerLeft);
-					
-					if (reselect.isChecked()) {
-						createNewRegion();
+					updateRight((IRegion)evt.getSource(),((IRegion)evt.getSource()).getROI());
+				}
+				
+			}
+		};
+	}
+	
+	private IRegionListener getRegionListenerToRight() {
+		return new IRegionListener.Stub() {
+			
+			@Override
+			public void regionsRemoved(RegionEvent evt) {
+				
+				for(ITrace trace : mainSystem.getTraces(ILineTrace.class)) {
+					if (trace.getUserObject() instanceof IRegion) {
+						if (((IRegion)trace.getUserObject()).isUserRegion()) {
+							mainSystem.removeTrace(trace);
+						}
 					}
-					
+				}
+			}
+			
+			@Override
+			public void regionRemoved(RegionEvent evt) {
+				
+				for(ITrace trace : mainSystem.getTraces(ILineTrace.class)) {
+					if (trace.getUserObject() == evt.getSource()) {
+						mainSystem.removeTrace(trace);
+					}
+				}
+			}
+			
+			@Override
+			public void regionAdded(RegionEvent evt) {
+				if (evt.getRegion() != null) {
+					evt.getRegion().setUserRegion(true);
+					evt.getRegion().addROIListener(roiListenerRight);
+					updateLeft((IRegion)evt.getSource(),((IRegion)evt.getSource()).getROI());
 				}
 				
 			}
@@ -488,7 +536,7 @@ public class HyperComponent {
 			
 			out.setName("trace_" + i);
 			
-			datasets.add(out);
+			datasets.add(out.squeeze());
 		}
 		
 		return datasets;

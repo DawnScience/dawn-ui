@@ -1,10 +1,17 @@
 package org.dawnsci.slicing.tools.hyper;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import org.dawnsci.plotting.api.IPlottingSystem;
+import org.dawnsci.plotting.api.region.IROIListener;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.dawnsci.slicing.tools.Activator;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.swt.SWT;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
@@ -15,7 +22,7 @@ import uk.ac.diamond.scisoft.analysis.roi.ROISliceUtils;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 import uk.ac.diamond.scisoft.analysis.roi.XAxisBoxROI;
 
-public class ImageTrapeziumBaselineReducer implements IDatasetROIReducer {
+public class ImageTrapeziumBaselineReducer implements IDatasetROIReducer, IProvideReducerActions {
 
 	private final RegionType regionType = RegionType.XAXIS;
 	private List<IDataset> imageAxes;
@@ -78,6 +85,21 @@ public class ImageTrapeziumBaselineReducer implements IDatasetROIReducer {
 	@Override
 	public List<IDataset> getAxes() {
 		return imageAxes;
+	}
+
+	@Override
+	public List<IAction> getActions(IPlottingSystem system) {
+		IAction baseline = new Action("Linear baseline", SWT.TOGGLE) {
+			@Override
+			public void run() {
+				setSubtractBaseline(isChecked());
+			}
+		};
+		
+		baseline.setImageDescriptor(Activator.getImageDescriptor("icons/LinearBase.png"));
+		baseline.setId("org.dawnsci.slicing.tools.hyper.ImageTrapeziumBaselineReducer.baseline");
+		
+		return Arrays.asList(new IAction[]{baseline});
 	}
 
 }
