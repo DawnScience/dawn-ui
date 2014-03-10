@@ -12,6 +12,9 @@ import ncsa.hdf.object.Group;
 import ncsa.hdf.object.HObject;
 import ncsa.hdf.object.h5.H5Datatype;
 
+import org.dawb.common.services.IPersistenceService;
+import org.dawb.common.services.IPersistentFile;
+import org.dawb.common.services.ServiceManager;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage.DataReductionInfo;
@@ -402,6 +405,9 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 				file.setIntAttribute(s, NexusUtils.AXIS, 2);
 			}
 			
+			IPersistenceService service = (IPersistenceService)ServiceManager.getService(IPersistenceService.class);
+			IPersistentFile pf = service.createPersistentFile(file);
+			pf.setDiffractionMetadata(metadata);
 		}
 		
 		AbstractDataset signal = out.get(1);
