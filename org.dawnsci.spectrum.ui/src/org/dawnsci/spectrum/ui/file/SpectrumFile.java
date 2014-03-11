@@ -153,6 +153,7 @@ public class SpectrumFile extends AbstractSpectrumFile implements ISpectrumFile 
 				try {
 					set = LoaderFactory.getDataSet(path, name, null);
 					if (set != null) {
+						set.squeeze();
 						if (set.getRank() != 1) set = reduceTo1D(x, set);
 						set.setName(getTraceName(name));
 					}
