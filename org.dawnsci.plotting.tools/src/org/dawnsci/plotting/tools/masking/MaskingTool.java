@@ -1,6 +1,7 @@
 package org.dawnsci.plotting.tools.masking;
 
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -1557,4 +1558,12 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	private enum MaskMarker {
 		MASK_REGION;
 	}
+
+	public void setToolData(Serializable toolData) {
+		if (toolData instanceof BooleanDataset) {
+			maskObject.setMaskDataset((BooleanDataset) toolData, false);
+			processMask(true, false, null);
+		}
+	}
+
 }
