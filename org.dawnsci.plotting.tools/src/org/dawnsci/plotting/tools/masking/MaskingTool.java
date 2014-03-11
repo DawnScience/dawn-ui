@@ -23,6 +23,7 @@ import org.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.dawnsci.plotting.api.region.IROIListener;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.dawnsci.plotting.api.region.IRegionAction;
 import org.dawnsci.plotting.api.region.IRegionListener;
 import org.dawnsci.plotting.api.region.ROIEvent;
 import org.dawnsci.plotting.api.region.RegionEvent;
@@ -130,28 +131,32 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		this.traceListener = new ITraceListener.Stub() {
 			@Override
 			public void traceAdded(TraceEvent evt) {
-				if (evt.getSource() instanceof IImageTrace) {
+				try {
+					if (evt.getSource() instanceof IImageTrace) {
+	
+						((IImageTrace)evt.getSource()).setMask(maskObject.getMaskDataset());
+						((IImageTrace)evt.getSource()).addPaletteListener(paletteListener);
+						int[] ia = ((IImageTrace)evt.getSource()).getImageServiceBean().getNanBound().getColor();
+						updateIcons(ia);
+						colorSelector.setColorValue(ColorUtility.getRGB(ia));
 
-					((IImageTrace)evt.getSource()).setMask(maskObject.getMaskDataset());
-					((IImageTrace)evt.getSource()).addPaletteListener(paletteListener);
-					int[] ia = ((IImageTrace)evt.getSource()).getImageServiceBean().getNanBound().getColor();
-					updateIcons(ia);
-					colorSelector.setColorValue(ColorUtility.getRGB(ia));
-					
-					Display.getDefault().asyncExec(new Runnable() {
-						public void run() {
-							if (autoApplySavedMask && savedMask!=null) {
-								try {
-								    mergeSavedMask();
-								} catch (Throwable ne) {
-									logger.error("Problem loading saved mask!", ne);
+						if (autoApplySavedMask && savedMask!=null) {
+							Display.getDefault().asyncExec(new Runnable() {
+								public void run() {
+									try {
+										mergeSavedMask();
+									} catch (Throwable ne) {
+										logger.error("Problem loading saved mask!", ne);
+									}
 								}
-							}				
-						}
-					});
+							});
+						}				
 
-				} else {
-					saveMaskBuffer();
+					} else {
+						saveMaskBuffer();
+					}
+				} catch (Exception ne) {
+					logger.error("Cannot update trace!", ne);
 				}
 			}
 			@Override
@@ -177,15 +182,21 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			public void regionCreated(RegionEvent evt) {
 				// Those created while the tool is active are mask regions			
                 evt.getRegion().setMaskRegion(true);
-                evt.getRegion().setUserObject(MaskObject.MaskRegionType.REGION_FROM_MASKING);
-                int wid = Activator.getPlottingPreferenceStore().getInt(PlottingConstants.FREE_DRAW_WIDTH);
-                if (evt.getRegion().getRegionType()==RegionType.LINE) {
-                	evt.getRegion().setLineWidth(wid);
+                if (MaskMarker.MASK_REGION == evt.getRegion().getUserObject()) {
+                    int wid = Activator.getPlottingPreferenceStore().getInt(PlottingConstants.FREE_DRAW_WIDTH);
+                    evt.getRegion().setLineWidth(wid);
+                    evt.getRegion().setUserObject(MaskObject.MaskRegionType.REGION_FROM_MASKING);
                 }
-			}
+ 			}
 			@Override
 			public void regionAdded(final RegionEvent evt) {
-				setLastActionRange(false);
+                if (MaskMarker.MASK_REGION == evt.getRegion().getUserObject()) {
+                    int wid = Activator.getPlottingPreferenceStore().getInt(PlottingConstants.FREE_DRAW_WIDTH);
+                	evt.getRegion().setLineWidth(wid);
+                    evt.getRegion().setUserObject(MaskObject.MaskRegionType.REGION_FROM_MASKING);
+                }
+
+                setLastActionRange(false);
 				evt.getRegion().addROIListener(regionBoundsListener);
 				processMask(evt.getRegion());
 				regionTable.refresh();
@@ -1190,6 +1201,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		MenuAction        menuAction = (MenuAction)menu.getAction();	
 		IAction ld = null;
 		for (RegionType type : maskingTypes) {
+			
 			final IAction action = menuAction.findAction(type.getId());
 			if (action==null) continue;
 			man.add(action);
@@ -1197,6 +1209,10 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			if (type==RegionType.LINE) {
 				ld = action;
 				man.add(new Separator());
+			}
+			
+			if (action instanceof IRegionAction) {
+				((IRegionAction)action).setUserObject(MaskMarker.MASK_REGION);
 			}
 		}
 		
@@ -1259,7 +1275,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	 */
 	private void processMask(final boolean resetMask, boolean ignoreAuto, final IRegion region) {
 		
-		if (!ignoreAuto && !autoApply.getSelection()) return;
+		if (!ignoreAuto && (autoApply!=null && !autoApply.getSelection())) return;
 		
 		final IImageTrace image = getImageTrace();
 		if (image == null) return;
@@ -1538,4 +1554,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		
 	}
 
+	private enum MaskMarker {
+		MASK_REGION;
+	}
 }

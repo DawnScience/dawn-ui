@@ -20,6 +20,7 @@ import org.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.dawnsci.plotting.api.preferences.ToolbarConfigurationConstants;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.dawnsci.plotting.api.region.IRegionAction;
 import org.dawnsci.plotting.api.region.RegionUtils;
 import org.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
 import org.dawnsci.plotting.api.trace.IImageTrace;
@@ -458,7 +459,11 @@ class LightWeightPlotActions {
 		
 	}
 	
-	protected void createRegion(final XYRegionGraph xyGraph, MenuAction regionDropDown, Action action, RegionType type) throws Exception {
+	protected void createRegion(final XYRegionGraph xyGraph, 
+			                    MenuAction regionDropDown, 
+			                    Action action, 
+			                    RegionType type,
+			                    Object userObject) throws Exception {
 		
 		// There is just an x and y axis - VISIBLE - then we know which axes they intended.
 		// Otherwise we show the dialog
@@ -468,6 +473,8 @@ class LightWeightPlotActions {
 			AbstractSelectionRegion region = xyGraph.createRegion(RegionUtils.getUniqueName(type.getName(), viewer.getSystem()), viewer.getSelectedXAxis(), viewer.getSelectedYAxis(), type, true);
 			// Set the plottype to know which plot type the region was created with
 			region.setPlotType(viewer.getSystem().getPlotType());
+			if (userObject!=null) region.setUserObject(userObject);
+			
 		} else {
 			AddRegionDialog dialog = new AddRegionDialog(viewer.getSystem(), Display.getCurrent().getActiveShell(), (XYRegionGraph)xyGraph, type);
 			if (dialog.open() != Window.OK){
@@ -484,16 +491,13 @@ class LightWeightPlotActions {
 		return ret;
 	}
 
-	private IAction createRegionAction(final XYRegionGraph xyGraph, final RegionType type, final MenuAction regionDropDown, final String label, final ImageDescriptor icon) {
-		final Action regionAction = new Action(label, icon) {
-			public void run() {				
-				try {
-					createRegion(xyGraph, regionDropDown, this, type);
-				} catch (Exception e) {
-					logger.error("Cannot create region!", e);
-				}
-			}
-		};
+	private IRegionAction createRegionAction(final XYRegionGraph xyGraph, 
+			                                 final RegionType type, 
+			                                 final MenuAction regionDropDown, 
+			                                 final String label, 
+			                                 final ImageDescriptor icon) {
+		
+		final RegionAction regionAction = new RegionAction(this, xyGraph, type, regionDropDown, label, icon);
 		regionAction.setId(type.getId());
 		return regionAction;
 	}
