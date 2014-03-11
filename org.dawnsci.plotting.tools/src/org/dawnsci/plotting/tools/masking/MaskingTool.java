@@ -137,6 +137,19 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 					int[] ia = ((IImageTrace)evt.getSource()).getImageServiceBean().getNanBound().getColor();
 					updateIcons(ia);
 					colorSelector.setColorValue(ColorUtility.getRGB(ia));
+					
+					Display.getDefault().asyncExec(new Runnable() {
+						public void run() {
+							if (autoApplySavedMask && savedMask!=null) {
+								try {
+								    mergeSavedMask();
+								} catch (Throwable ne) {
+									logger.error("Problem loading saved mask!", ne);
+								}
+							}				
+						}
+					});
+
 				} else {
 					saveMaskBuffer();
 				}
@@ -166,7 +179,9 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
                 evt.getRegion().setMaskRegion(true);
                 evt.getRegion().setUserObject(MaskObject.MaskRegionType.REGION_FROM_MASKING);
                 int wid = Activator.getPlottingPreferenceStore().getInt(PlottingConstants.FREE_DRAW_WIDTH);
-                evt.getRegion().setLineWidth(wid);
+                if (evt.getRegion().getRegionType()==RegionType.LINE) {
+                	evt.getRegion().setLineWidth(wid);
+                }
 			}
 			@Override
 			public void regionAdded(final RegionEvent evt) {
@@ -1309,17 +1324,6 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 
 		if (loadMask!=null) loadMask.setEnabled(savedMask!=null);
 		
-		Display.getDefault().asyncExec(new Runnable() {
-			public void run() {
-				if (autoApplySavedMask && savedMask!=null) {
-					try {
-					    mergeSavedMask();
-					} catch (Throwable ne) {
-						logger.error("Problem loading saved mask!", ne);
-					}
-				}				
-			}
-		});
 	}
 	
 	@Override

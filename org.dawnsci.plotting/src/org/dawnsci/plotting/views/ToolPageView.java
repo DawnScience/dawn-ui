@@ -656,7 +656,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	protected void checkFixed() {
 		
 		if (activeRec.tool!=null) {
-			if (getViewSite().getId().startsWith(FIXED_VIEW_ID)) {
+			if (isFixedTool()) {
 				
 				getViewSite().getShell().getDisplay().asyncExec(new Runnable() {
 					public void run() {
@@ -1125,6 +1125,10 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		partActivated(part);
 	}
 	
+	protected boolean isFixedTool() {
+		return getViewSite().getId().startsWith(FIXED_VIEW_ID);
+	}
+	
 	protected synchronized PageRec doCreatePage(IWorkbenchPart part, IToolPage tool) {
 				
 		// If static tool is not null we can only show that tool on this page.		
@@ -1136,7 +1140,9 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 			if (getViewSite().getSecondaryId()==null) {
 				systems.add(new SoftReference<IToolPageSystem>(sys));
 				sys.addToolChangeListener(this);
-			} else {
+			} 
+			
+			if (isFixedTool()) {
 				try {
 					tool = sys.createToolPage(getViewSite().getSecondaryId());
 				} catch (Exception e) {
@@ -1374,7 +1380,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		String toolId  = newPage!=null ? newPage.getToolId() : null;
 		if (toolId!=null) {
 			if (toolId.equals(getViewSite().getSecondaryId())) return true;
-		    if (getPage().findViewReference("org.dawb.workbench.plotting.views.toolPageView.fixed", toolId)!=null) {
+		    if (getPage().findViewReference(FIXED_VIEW_ID, toolId)!=null) {
 		    	return false;
 		    }
 		}
