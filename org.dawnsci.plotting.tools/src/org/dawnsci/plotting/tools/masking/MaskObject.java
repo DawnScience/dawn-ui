@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.BooleanDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Comparisons;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.IRectangularROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
@@ -706,7 +707,7 @@ public class MaskObject {
 
 	public void invert() {
 		if (maskDataset != null) {
-			maskDataset.invert();
+			maskDataset = Comparisons.logicalNot(maskDataset);
 		}
 	}
 
