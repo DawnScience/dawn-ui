@@ -41,7 +41,7 @@ public class AzimuthalProfileTool extends SectorProfileTool {
 			                              int             downsample) {
 
 
-		final AbstractDataset[] profile = ROIProfile.sector(data, mask, sroi, false, true, isDrag);
+		final AbstractDataset[] profile = ROIProfile.sector(data, mask, sroi, false, true, false);
 		if (profile==null) return null;
 		
 		AbstractDataset integral = profile[1];
