@@ -19,6 +19,7 @@ import uk.ac.diamond.scisoft.analysis.io.ILoaderService;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalFitROI;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
+import uk.ac.diamond.scisoft.analysis.roi.IParametricROI;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.PolylineROI;
 
@@ -145,9 +146,9 @@ public class DiffractionUtils {
 		return (IDiffractionMetadata) mdImage;
 	}
 
-	public static IROI runEllipsePeakFit(final IProgressMonitor monitor, Display display,
-			final IPlottingSystem plotter, IImageTrace t, IROI roi, double innerRadius, double outerRadius, int nPoints) {
-		
+	public static IROI runConicPeakFit(final IProgressMonitor monitor, Display display,
+			final IPlottingSystem plotter, IImageTrace t, IParametricROI roi, IParametricROI[] innerOuter, int nPoints) {
+	
 		if (roi == null)
 			return null;
 
@@ -156,29 +157,62 @@ public class DiffractionUtils {
 		AbstractDataset image = (AbstractDataset) t.getData();
 		BooleanDataset mask = (BooleanDataset) t.getMask();
 		PolylineROI points;
-		EllipticalFitROI efroi;
 		monitor.subTask("Fit POIs");
 		
-		points = PeakFittingEllipseFinder.findPointsOnEllipse(image, mask, (EllipticalROI) roi, innerRadius, outerRadius,nPoints, mon);
+		points = PeakFittingEllipseFinder.findPointsOnConic(image, mask,roi, innerOuter,nPoints, mon);
 		
 		if (monitor.isCanceled())
 			return null;
 		
 		if (points == null) return null;
 		
-		if (points.getNumberOfPoints() < 3) {
-			throw new IllegalArgumentException("Could not find enough points to trim");
+		if (roi instanceof EllipticalROI) {
+			if (points.getNumberOfPoints() < 3) {
+				throw new IllegalArgumentException("Could not find enough points to trim");
+			}
+
+			monitor.subTask("Trim POIs");
+			EllipticalFitROI efroi = PowderRingsUtils.fitAndTrimOutliers(mon, points, 5, false);
+			logger.debug("Found {}...", efroi);
+			monitor.subTask("");
+			return efroi;
 		}
-
-		monitor.subTask("Trim POIs");
-		efroi = PowderRingsUtils.fitAndTrimOutliers(mon, points, 5, false);
-		logger.debug("Found {}...", efroi);
-		monitor.subTask("");
-
-		if (monitor.isCanceled())
-			return null;
-
-		return efroi;
+		
+		return points;
 	}
+	
+	
+//	public static IROI runEllipsePeakFit(final IProgressMonitor monitor, Display display,
+//			final IPlottingSystem plotter, IImageTrace t, IROI roi, double innerRadius, double outerRadius, int nPoints) {
+//		
+//		if (roi == null)
+//			return null;
+//
+//		final ProgressMonitorWrapper mon = new ProgressMonitorWrapper(monitor);
+//		monitor.subTask("Find POIs near initial ellipse");
+//		AbstractDataset image = (AbstractDataset) t.getData();
+//		BooleanDataset mask = (BooleanDataset) t.getMask();
+//		PolylineROI points;
+//		EllipticalFitROI efroi;
+//		monitor.subTask("Fit POIs");
+//		
+//		points = PeakFittingEllipseFinder.findPointsOnEllipse(image, mask, (EllipticalROI) roi, innerRadius, outerRadius,nPoints, mon);
+//		
+//		if (monitor.isCanceled())
+//			return null;
+//		
+//		if (points == null) return null;
+//		
+//		if (points.getNumberOfPoints() < 3) {
+//			throw new IllegalArgumentException("Could not find enough points to trim");
+//		}
+//
+//		monitor.subTask("Trim POIs");
+//		efroi = PowderRingsUtils.fitAndTrimOutliers(mon, points, 5, false);
+//		logger.debug("Found {}...", efroi);
+//		monitor.subTask("");
+//
+//		return efroi;
+//	}
 
 }
