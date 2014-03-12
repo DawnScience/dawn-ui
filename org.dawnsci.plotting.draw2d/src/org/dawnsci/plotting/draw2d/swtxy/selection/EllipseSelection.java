@@ -491,14 +491,14 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 		public double[] calculateXIntersectionParameters(int x) {
 			EllipticalROI eroi = (EllipticalROI) getROI();
 			double dx = coords.getPositionValue(x, 0)[0];
-			return eroi.getVerticalIntersectionAngles(dx);
+			return eroi.getVerticalIntersectionParameters(dx);
 		}
 
 		@Override
 		public double[] calculateYIntersectionParameters(int y) {
 			EllipticalROI eroi = (EllipticalROI) getROI();
 			double dy = coords.getPositionValue(0, y)[1];
-			return eroi.getHorizontalIntersectionAngles(dy);
+			return eroi.getHorizontalIntersectionParameters(dy);
 		}
 	}
 
