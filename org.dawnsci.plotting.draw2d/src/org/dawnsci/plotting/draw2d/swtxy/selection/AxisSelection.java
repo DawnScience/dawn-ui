@@ -410,7 +410,7 @@ class AxisSelection extends AbstractSelectionRegion {
 	@Override
 	protected void updateBounds() {
 		if (connection==null) return;
-		final Rectangle size = getRectangleFromVertices();				
+		final Rectangle size = getRectangleFromVertices();
 		connection.setBounds(size);
 	}
 	
@@ -454,35 +454,63 @@ class AxisSelection extends AbstractSelectionRegion {
 		}
 		return 1;
 	}
-	
+
 	@Override
-	public void addMouseListener(MouseListener l) {
-		if (line1!=null) line1.getParent().addMouseListener(new MouseListenerAdapter(l));
-	}	
-	
-	@Override
-	public void removeMouseListener(MouseListener l){
-		if (line1!=null) line1.getParent().removeMouseListener(new MouseListenerAdapter(l));
+	public void addMouseListener(final MouseListener l) {
+		if (line1!=null) {
+			try {
+				line1.getParent().addMouseListener(registerMouseListener(l));
+			} catch(final IllegalStateException e) {
+				System.out.println("DEBUG " + e.getLocalizedMessage());
+				e.printStackTrace();
+			}
+		}
 	}
 
 	@Override
-	public void addMouseMotionListener(MouseMotionListener l){
-		if (line1!=null) line1.getParent().addMouseMotionListener(new MouseMotionAdapter(l));
+	public void removeMouseListener(final MouseListener l){
+		if (line1!=null) {
+			try {
+				line1.getParent().removeMouseListener(unregisterMouseListener(l));
+			} catch(final IllegalStateException e) {
+				System.out.println("DEBUG " + e.getLocalizedMessage());
+				e.printStackTrace();
+			}
+		}
 	}
 
 	@Override
-	public void removeMouseMotionListener(MouseMotionListener l){
-		if (line1!=null) line1.getParent().removeMouseMotionListener(new MouseMotionAdapter(l));
+	public void addMouseMotionListener(final MouseMotionListener l){
+		if (line1!=null) {
+			try {
+				line1.getParent().addMouseMotionListener(registerMouseMotionListener(l));
+			} catch(final IllegalStateException e) {
+				System.out.println("DEBUG " + e.getLocalizedMessage());
+				e.printStackTrace();
+			}
+		}
+	}
+
+	@Override
+	public void removeMouseMotionListener(final MouseMotionListener l){
+		if (line1!=null) {
+			try {
+				line1.getParent().removeMouseMotionListener(unregisterMouseMotionListener(l));
+			} catch(final IllegalStateException e) {
+				System.out.println("DEBUG " + e.getLocalizedMessage());
+				e.printStackTrace();
+			}
+		}
 	}
 
 	@Override
 	public int getMaximumMousePresses() {
 		return 2;
 	}
-	
+
 	public final void remove() {
-        super.remove();
-        regionArea.setRequirePositionWithCursor(true);
-        regionArea = null;
+		super.remove();
+		regionArea.setRequirePositionWithCursor(true);
+		regionArea = null;
 	}
 }

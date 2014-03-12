@@ -53,9 +53,15 @@ public abstract class AbstractRegion extends Figure implements IRegion, IRegionC
 	}
 	
 	protected void clearListeners() {
-		if (roiListeners!=null)             roiListeners.clear();	
-		if (mouseListenerCache!=null)       mouseListenerCache.clear();
-		if (mouseMotionListenerCache!=null) mouseMotionListenerCache.clear();
+		if (roiListeners!=null)             roiListeners.clear();
+		if (mouseListenerRegister!=null && !mouseListenerRegister.isEmpty()) {
+			logger.debug("mouseListenerRegister should be empty here");
+			mouseListenerRegister.clear();
+		}
+		if (mouseMotionListenerRegister!=null && !mouseMotionListenerRegister.isEmpty()) {
+			logger.debug("mouseMotionListenerRegister should be empty here");
+			mouseMotionListenerRegister.clear();
+		}
 	}
 	
 	protected void fireROIDragged(IROI roi, ROIEvent.DRAG_TYPE type) {
@@ -249,42 +255,154 @@ public abstract class AbstractRegion extends Figure implements IRegion, IRegionC
 	public void setActive(boolean b){
 		this.isActive = b;
 	}
-	
-	// Record the listeners in a map so that they can be removed.
-	private Map<MouseListener, MouseListenerAdapter> mouseListenerCache;
-	
-	@Override
-	public void addMouseListener(MouseListener l) {
-		if (mouseListenerCache==null) mouseListenerCache = new IdentityHashMap<MouseListener, MouseListenerAdapter>();
-		final MouseListenerAdapter ad = new MouseListenerAdapter(l);
-		mouseListenerCache.put(l,  ad);
-		super.addMouseListener(ad);
-	}	
-	
-	@Override
-	public void removeMouseListener(MouseListener l){
-		if (mouseListenerCache==null) return;
-		if (!mouseListenerCache.containsKey(l)) return;
-		super.removeMouseListener(mouseListenerCache.get(l));
-	}
 
 	// Record the listeners in a map so that they can be removed.
-	private Map<MouseMotionListener, MouseMotionAdapter> mouseMotionListenerCache;
+	protected Map<MouseListener, MouseListenerAdapter> mouseListenerRegister;
 
-	@Override
-	public void addMouseMotionListener(MouseMotionListener l){
-		if (mouseMotionListenerCache==null) mouseMotionListenerCache = new IdentityHashMap<MouseMotionListener, MouseMotionAdapter>();
-		final MouseMotionAdapter ad = new MouseMotionAdapter(l);
-		mouseMotionListenerCache.put(l,  ad);
-		super.addMouseMotionListener(ad);
+	/**
+	 * Registers the given listener so it can be added only once, and also
+	 * removed. The same (equal by reference) MouseListener can be registered
+	 * only once.
+	 * 
+	 * @param listener
+	 *            The listener to register
+	 */
+	protected MouseListenerAdapter registerMouseListener(
+			final MouseListener listener) {
+		if (mouseListenerRegister == null)
+			mouseListenerRegister = new IdentityHashMap<MouseListener, MouseListenerAdapter>();
+		else if (mouseListenerRegister.containsKey(listener))
+			throw new IllegalStateException(
+					"Registering an existing (equal by reference) MouseListener more times is not allowed!");
+		final MouseListenerAdapter ad = new MouseListenerAdapter(listener);
+		mouseListenerRegister.put(listener, ad);
+		return ad;
 	}
 
+	/**
+	 * Registers the given listener as a MouseListener of this AbstractRegion.
+	 * The same (equal by reference) MouseListener can be added only once.
+	 * 
+	 * @param listener
+	 *            The listener to add
+	 */
 	@Override
-	public void removeMouseMotionListener(MouseMotionListener l){
-		if (mouseMotionListenerCache==null) return;
-		if (!mouseMotionListenerCache.containsKey(l)) return;
-		super.removeMouseMotionListener(mouseMotionListenerCache.get(l));
+	public void addMouseListener(final MouseListener listener) {
+		try {
+			super.addMouseListener(registerMouseListener(listener));
+		} catch (final IllegalStateException e) {
+			logger.debug(e.getLocalizedMessage());
+			e.printStackTrace();
+		}
 	}
+
+	/**
+	 * Unregisters the given listener.
+	 * 
+	 * @param listener
+	 *            The listener to cache
+	 */
+	protected MouseListenerAdapter unregisterMouseListener(
+			final MouseListener listener) {
+		final MouseListenerAdapter ad;
+		if (mouseListenerRegister == null
+				|| (ad = mouseListenerRegister.remove(listener)) == null)
+			throw new IllegalStateException(
+					"Unregistering a not existing MouseListener is not allowed!");
+		return ad;
+	}
+
+	/**
+	 * Unregisters the given listener, so that it will no longer receive
+	 * notification of mouse events.
+	 * 
+	 * @param listener
+	 *            The listener to remove
+	 */
+	@Override
+	public void removeMouseListener(final MouseListener listener) {
+		try {
+			super.removeMouseListener(unregisterMouseListener(listener));
+		} catch (final IllegalStateException e) {
+			logger.debug(e.getLocalizedMessage());
+			e.printStackTrace();
+		}
+	}
+
+	// Record the listeners in a map so that they can be removed.
+	protected Map<MouseMotionListener, MouseMotionAdapter> mouseMotionListenerRegister;
+
+	/**
+	 * Registers the given listener so it can be added only once, and also
+	 * removed. The same (equal by reference) MouseMotionListener can be
+	 * registered only once.
+	 * 
+	 * @param listener
+	 *            The listener to register
+	 */
+	protected MouseMotionAdapter registerMouseMotionListener(
+			final MouseMotionListener listener) {
+		if (mouseMotionListenerRegister == null)
+			mouseMotionListenerRegister = new IdentityHashMap<MouseMotionListener, MouseMotionAdapter>();
+		else if (mouseMotionListenerRegister.containsKey(listener))
+			throw new IllegalStateException(
+					"Registering an existing (equal by reference) MouseMotionListener more times is not allowed!");
+		final MouseMotionAdapter ad = new MouseMotionAdapter(listener);
+		mouseMotionListenerRegister.put(listener, ad);
+		return ad;
+	}
+
+	/**
+	 * Registers the given listener as a MouseMotionListener of this
+	 * AbstractRegion. The same (equal by reference) MouseMotionListener can be
+	 * added only once.
+	 * 
+	 * @param listener
+	 *            The listener to add
+	 */
+	@Override
+	public void addMouseMotionListener(final MouseMotionListener listener) {
+		try {
+			super.addMouseMotionListener(registerMouseMotionListener(listener));
+		} catch (final IllegalStateException e) {
+			logger.debug(e.getLocalizedMessage());
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Unregisters the given listener.
+	 * 
+	 * @param listener
+	 *            The listener to cache
+	 */
+	protected MouseMotionAdapter unregisterMouseMotionListener(
+			final MouseMotionListener listener) {
+		final MouseMotionAdapter ad;
+		if (mouseMotionListenerRegister == null
+				|| (ad = mouseMotionListenerRegister.remove(listener)) == null)
+			throw new IllegalStateException(
+					"Unregistering a not existing MouseMotionListener is not allowed!");
+		return ad;
+	}
+
+	/**
+	 * Unregisters the given listener, so that it will no longer receive
+	 * notification of mouse motion events.
+	 * 
+	 * @param listener
+	 *            The listener to remove
+	 */
+	@Override
+	public void removeMouseMotionListener(final MouseMotionListener listener) {
+		try {
+			super.removeMouseMotionListener(unregisterMouseMotionListener(listener));
+		} catch (final IllegalStateException e) {
+			logger.debug(e.getLocalizedMessage());
+			e.printStackTrace();
+		}
+	}
+
 	/**
 	 * 
 	 * @return true if the selection region only draws an outline.
