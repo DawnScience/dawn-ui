@@ -545,13 +545,17 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, ISlic
 				// Update UI
 				Display.getDefault().syncExec(new Runnable() {
 					public void run() {
-						if (monitor.isCanceled()) return;
-						setFocus();
-						final PlotDataComponent dataSetComponent = (PlotDataComponent)getDataSetComponent();
-				 		if (dataSetComponent==null) return;
-					    dataSetComponent.setData(dataHolder, meta);
-						dataSetComponent.refresh();
-						((AbstractPlottingSystem)getPlottingSystem()).setRootName(dataSetComponent.getRootName());
+						try {
+							if (monitor.isCanceled()) return;
+							setFocus();
+							final PlotDataComponent dataSetComponent = (PlotDataComponent)getDataSetComponent();
+					 		if (dataSetComponent==null) return;
+						    dataSetComponent.setData(dataHolder, meta);
+							dataSetComponent.refresh();
+							((AbstractPlottingSystem)getPlottingSystem()).setRootName(dataSetComponent.getRootName());
+						} catch (Throwable ignored) {
+							// Editor might not be valid but still open.
+						}
 					}
 				});
 				return Status.OK_STATUS;

@@ -582,18 +582,27 @@ public class SliceUtils {
 		} else {
 			if (ddl!=null && !ddl.isEmpty()) {	
 				final int       len    = dataShape.length;
+				String title = slice.getName();
 				for (int i = len-1; i >= 0; i--) {
 					final DimsData dd = ddl.getDimsData(i);
 					if (dd.getPlotAxis().isAdvanced()) {
 						slice = dd.getPlotAxis().process(slice,i);
+						try {
+						    title = dd.getPlotAxis().getName()+" of "+currentSlice.getName()+" range "+getRange(ld, currentSlice, dd);
+					
+						} catch (Throwable ne) {
+							logger.error("Cannot get title for operation "+dd.getPlotAxis(), ne);
+							title = slice.getName();
+						}
 					}
 				}
+				slice.setName(title);
 			} 
 			
+			final String name = slice.getName();
 			slice = slice.squeeze();		
 			if (currentSlice.getX() > currentSlice.getY() && slice.getShape().length==2) {
 				// transpose clobbers name
-				final String name = slice.getName();
 				slice = service.transpose(slice);
 				if (name!=null) slice.setName(name);
 			}
@@ -602,7 +611,34 @@ public class SliceUtils {
 		return slice;
 	}
 
-    /**
+	private static String getRange(ILazyDataset ld, 
+									SliceObject  currentSlice,
+									DimsData     data) {
+		
+		String from = getFormatValue(ld, currentSlice, data, data.getSlice());
+		String to   = getFormatValue(ld, currentSlice, data, data.getSlice()+data.getSliceSpan());
+		return from+":"+to;
+	}
+
+	private static String getFormatValue(ILazyDataset      ld, 
+			                             SliceObject       currentSlice,
+			                             DimsData          data, 
+			                             int               index) {
+		
+		int max = ld.getShape()[data.getDimension()];
+		if (index>=max) index = max-1;
+		String formatValue = String.valueOf(index);
+		try {
+			Number value = SliceUtils.getAxisValue(currentSlice, null, data, index, null);
+			formatValue = format.format(value);
+		} catch (Throwable ne) {
+			formatValue = String.valueOf(index);
+		}
+		return formatValue;
+	}
+
+
+	/**
      * Transforms a SliceComponent defined slice into an expanded set
      * of slice objects so that the data can be sliced out of the h5 file.
      * 
