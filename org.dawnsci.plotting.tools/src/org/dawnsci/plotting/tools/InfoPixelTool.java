@@ -255,38 +255,42 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 	}
 	
 	public void activate() {
-		
-		createRegions();
-		if (xHair!=null) {
-			if (!isActive()) xHair.addMouseListener(this);
-			xHair.setVisible(true);
-			xHair.addROIListener(this);
-		}
-		if (yHair!=null) {
-			yHair.setVisible(true);
-			yHair.addROIListener(this);
+		if (!isActive()) {
+			createRegions();
+			if (xHair!=null) {
+				if (!isActive()) xHair.addMouseListener(this);
+				xHair.setVisible(true);
+				xHair.addROIListener(this);
+			}
+			if (yHair!=null) {
+				yHair.setVisible(true);
+				yHair.addROIListener(this);
+			}
+
+			if (getPlottingSystem()!=null) {
+				getPlottingSystem().addTraceListener(traceListener);
+				getPlottingSystem().addRegionListener(this);
+				getPlottingSystem().setDefaultCursor(IPlottingSystem.CROSS_CURSOR);
+			}
+
+			// We stop the adding of other regions because this tool does
+			// not like it when other regions are added.
+			setOtherRegionsEnabled(false);
 		}
 
-		if (getPlottingSystem()!=null) {
-			getPlottingSystem().addTraceListener(traceListener);
-			getPlottingSystem().addRegionListener(this);
-			getPlottingSystem().setDefaultCursor(IPlottingSystem.CROSS_CURSOR);
-		}
-		
-		// We stop the adding of other regions because this tool does
-		// not like it when other regions are added.
-		setOtherRegionsEnabled(false);
-		
 		// Needed to refresh the table when activated as other tools may create points
 		// which should be in the table.
 		try {
-			viewer.getTable().clearAll();
-			viewer.refresh();
+			if (viewer != null) {
+				viewer.getTable().clearAll();
+				viewer.refresh();
+			}
 		} catch (Throwable ignored) {
 			// Not a failure if we cannot refresh.
 		}
-		
-		super.activate();	
+
+		if (!isActive())
+			super.activate();
 	}
 	
 	private void setOtherRegionsEnabled(boolean isVisible) {
@@ -303,32 +307,33 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 	}
 
 	public void deactivate() {
-		super.deactivate();
-		setOtherRegionsEnabled(true);
+		if (isActive()) {
+			super.deactivate();
+			setOtherRegionsEnabled(true);
 
-		if (xHair!=null) {
-			xHair.removeMouseListener(this);
-			xHair.setVisible(false);
-			xHair.removeROIListener(this);
-			getPlottingSystem().removeRegion(xHair);
-			xHair = null;
-			updateInfoPixelData = null;
-		}
-		if (yHair!=null) {
-			yHair.setVisible(false);
-			yHair.removeROIListener(this);
-			getPlottingSystem().removeRegion(yHair);
-			yHair = null;
-			getPlottingSystem().setDefaultCursor(IPlottingSystem.NORMAL_CURSOR);
-		}
-		
-		plotter.clear();
+			if (xHair!=null) {
+				xHair.removeMouseListener(this);
+				xHair.setVisible(false);
+				xHair.removeROIListener(this);
+				getPlottingSystem().removeRegion(xHair);
+				xHair = null;
+				updateInfoPixelData = null;
+			}
+			if (yHair!=null) {
+				yHair.setVisible(false);
+				yHair.removeROIListener(this);
+				getPlottingSystem().removeRegion(yHair);
+				yHair = null;
+				getPlottingSystem().setDefaultCursor(IPlottingSystem.NORMAL_CURSOR);
+			}
 
-		if (getPlottingSystem()!=null) {
-			getPlottingSystem().removeTraceListener(traceListener);
-			getPlottingSystem().removeRegionListener(this);
+			plotter.clear();
+
+			if (getPlottingSystem()!=null) {
+				getPlottingSystem().removeTraceListener(traceListener);
+				getPlottingSystem().removeRegionListener(this);
+			}
 		}
-		
 	}
 	
 	public void dispose() {
