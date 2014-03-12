@@ -579,13 +579,13 @@ class HyperbolaSelection extends AbstractSelectionRegion implements ILockableReg
 		@Override
 		public double[] calculateXIntersectionParameters(int x) {
 			double dx = coords.getPositionValue(x, 0)[0];
-			return croi.getVerticalIntersectionAngles(dx);
+			return croi.getVerticalIntersectionParameters(dx);
 		}
 
 		@Override
 		public double[] calculateYIntersectionParameters(int y) {
 			double dy = coords.getPositionValue(0, y)[1];
-			return croi.getHorizontalIntersectionAngles(dy);
+			return croi.getHorizontalIntersectionParameters(dy);
 		}
 	}
 
