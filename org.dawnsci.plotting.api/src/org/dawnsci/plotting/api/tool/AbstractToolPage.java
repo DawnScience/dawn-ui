@@ -313,7 +313,7 @@ public abstract class AbstractToolPage extends Page implements IToolPage, IAdapt
 			return true;
 
 		final String id = viewPart.getSite().getId();
-		return "org.dawb.workbench.plotting.views.toolPageView.fixed".equals(id);
+		return id.startsWith("org.dawb.workbench.plotting.views.toolPageView.fixed");
 	}
 
 	@Override

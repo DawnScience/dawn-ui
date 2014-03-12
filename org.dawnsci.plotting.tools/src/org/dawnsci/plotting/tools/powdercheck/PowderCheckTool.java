@@ -123,6 +123,7 @@ public class PowderCheckTool extends AbstractToolPage {
 	Action fullImage;
 	ROIProfile.XAxis xAxis = XAxis.Q;
 	private MenuAction calibrantActions;
+	private CheckableActionGroup calibrantGroup;
 	private Action     calPref;
 
 
@@ -364,6 +365,7 @@ public class PowderCheckTool extends AbstractToolPage {
 		};
 		
 		this.calibrantActions = new MenuAction("Calibrants");
+		this.calibrantGroup   = new CheckableActionGroup();
 		updateCalibrationActions(CalibrationFactory.getCalibrationStandards());	
 		
 		cake.setToolTipText("2D integration");
@@ -460,8 +462,8 @@ public class PowderCheckTool extends AbstractToolPage {
 	
 	private void updateCalibrationActions(final CalibrationStandards standards) {
 		this.calibrantActions.clear();
+		this.calibrantGroup.clear();
 		final String selected = standards.getSelectedCalibrant();
-		final CheckableActionGroup grp = new CheckableActionGroup();
 		Action selectedAction=null;
 		for (final String calibrant : standards.getCalibrantList()) {
 			final Action calibrantAction = new Action(calibrant, IAction.AS_CHECK_BOX) {
@@ -469,7 +471,7 @@ public class PowderCheckTool extends AbstractToolPage {
 					standards.setSelectedCalibrant(calibrant, true);
 				}
 			};
-			grp.add(calibrantAction);
+			calibrantGroup.add(calibrantAction);
 			if (selected!=null&&selected.equals(calibrant)) selectedAction = calibrantAction;
 			calibrantActions.add(calibrantAction);
 		}

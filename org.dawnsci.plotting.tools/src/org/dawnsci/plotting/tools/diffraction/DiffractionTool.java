@@ -423,11 +423,13 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 
 	private TreeNode   copiedNode;
 	private MenuAction calibrantActions;
+	private CheckableActionGroup calibrantGroup;
 	private Action     calPref;
 
 	private Action refine;
 	private Action findOuter;
 	private Action calibrate;
+
 
 	private static Action lock;
 
@@ -842,6 +844,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 
 		this.calibrantActions = new MenuAction("Calibrants");
 		calibrantActions.setImageDescriptor(Activator.getImageDescriptor("/icons/calibrant_rings.png"));
+		this.calibrantGroup = new CheckableActionGroup();
 		updateCalibrationActions(CalibrationFactory.getCalibrationStandards());		
 		
 
@@ -1074,8 +1077,8 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	
 	private void updateCalibrationActions(final CalibrationStandards standards) {
 		this.calibrantActions.clear();
+		this.calibrantGroup.clear();
 		final String selected = standards.getSelectedCalibrant();
-		final CheckableActionGroup grp = new CheckableActionGroup();
 		Action selectedAction=null;
 		for (final String calibrant : standards.getCalibrantList()) {
 			final Action calibrantAction = new Action(calibrant, IAction.AS_CHECK_BOX) {
@@ -1083,7 +1086,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 					standards.setSelectedCalibrant(calibrant, true);
 				}
 			};
-			grp.add(calibrantAction);
+			calibrantGroup.add(calibrantAction);
 			if (selected!=null&&selected.equals(calibrant)) selectedAction = calibrantAction;
 			calibrantActions.add(calibrantAction);
 		}

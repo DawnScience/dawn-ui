@@ -406,32 +406,32 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 		IDiffractionMetadata dm = null;
 		IMetaData meta = getMetaData();
 		QSpace qSpace = null;
-		
+
 		try {
-		if (isValidMetadata(meta)) {
-			dm = (IDiffractionMetadata)meta;
-			DetectorProperties detprops = dm.getDetector2DProperties().clone();
-	    	DiffractionCrystalEnvironment diffexp = dm.getDiffractionCrystalEnvironment().clone();
-	    	// Update metadata values for downsampled datasets
-			if (downsample != 1) {
-				double[] beamCoords = detprops.getBeamCentreCoords();
-				double hps = detprops.getHPxSize();
-				double vps = detprops.getVPxSize();
-				int px = detprops.getPx();
-				int py = detprops.getPy();
-				detprops.setHPxSize(hps * downsample);
-				detprops.setVPxSize(vps * downsample);
-				detprops.setPx(px / downsample);
-				detprops.setPy(py / downsample);
-				detprops.setBeamCentreCoords(new double[] {beamCoords[0] / downsample, beamCoords[1] / downsample});
+			if (isValidMetadata(meta)) {
+				dm = (IDiffractionMetadata)meta;
+				DetectorProperties detprops = dm.getDetector2DProperties().clone();
+				DiffractionCrystalEnvironment diffexp = dm.getDiffractionCrystalEnvironment().clone();
+				// Update metadata values for downsampled datasets
+				if (downsample != 1) {
+					double[] beamCoords = detprops.getBeamCentreCoords();
+					double hps = detprops.getHPxSize();
+					double vps = detprops.getVPxSize();
+					int px = detprops.getPx();
+					int py = detprops.getPy();
+					detprops.setHPxSize(hps * downsample);
+					detprops.setVPxSize(vps * downsample);
+					detprops.setPx(px / downsample);
+					detprops.setPy(py / downsample);
+					detprops.setBeamCentreCoords(new double[] {beamCoords[0] / downsample, beamCoords[1] / downsample});
+				}
+				qSpace = new QSpace(detprops, diffexp);
 			}
-			qSpace = new QSpace(detprops, diffexp);
-		}
 		} catch (NullPointerException npe) {
 			// continue as normal
 		}
-		
-		AbstractDataset[] profile = ROIProfile.sector(data, mask, sroi, true, false, isDrag, qSpace, axis, false);
+
+		AbstractDataset[] profile = ROIProfile.sector(data, mask, sroi, true, false, false, qSpace, axis, false);
 		
         if (profile == null) {
         	return null;

@@ -1,6 +1,7 @@
 package org.dawnsci.plotting.tools.masking;
 
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -23,6 +24,7 @@ import org.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.dawnsci.plotting.api.region.IROIListener;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.dawnsci.plotting.api.region.IRegionAction;
 import org.dawnsci.plotting.api.region.IRegionListener;
 import org.dawnsci.plotting.api.region.ROIEvent;
 import org.dawnsci.plotting.api.region.RegionEvent;
@@ -130,15 +132,32 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		this.traceListener = new ITraceListener.Stub() {
 			@Override
 			public void traceAdded(TraceEvent evt) {
-				if (evt.getSource() instanceof IImageTrace) {
+				try {
+					if (evt.getSource() instanceof IImageTrace) {
+	
+						((IImageTrace)evt.getSource()).setMask(maskObject.getMaskDataset());
+						((IImageTrace)evt.getSource()).addPaletteListener(paletteListener);
+						int[] ia = ((IImageTrace)evt.getSource()).getImageServiceBean().getNanBound().getColor();
+						updateIcons(ia);
+						colorSelector.setColorValue(ColorUtility.getRGB(ia));
 
-					((IImageTrace)evt.getSource()).setMask(maskObject.getMaskDataset());
-					((IImageTrace)evt.getSource()).addPaletteListener(paletteListener);
-					int[] ia = ((IImageTrace)evt.getSource()).getImageServiceBean().getNanBound().getColor();
-					updateIcons(ia);
-					colorSelector.setColorValue(ColorUtility.getRGB(ia));
-				} else {
-					saveMaskBuffer();
+						if (autoApplySavedMask && savedMask!=null) {
+							Display.getDefault().asyncExec(new Runnable() {
+								public void run() {
+									try {
+										mergeSavedMask();
+									} catch (Throwable ne) {
+										logger.error("Problem loading saved mask!", ne);
+									}
+								}
+							});
+						}				
+
+					} else {
+						saveMaskBuffer();
+					}
+				} catch (Exception ne) {
+					logger.error("Cannot update trace!", ne);
 				}
 			}
 			@Override
@@ -164,13 +183,21 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			public void regionCreated(RegionEvent evt) {
 				// Those created while the tool is active are mask regions			
                 evt.getRegion().setMaskRegion(true);
-                evt.getRegion().setUserObject(MaskObject.MaskRegionType.REGION_FROM_MASKING);
-                int wid = Activator.getPlottingPreferenceStore().getInt(PlottingConstants.FREE_DRAW_WIDTH);
-                evt.getRegion().setLineWidth(wid);
-			}
+                if (MaskMarker.MASK_REGION == evt.getRegion().getUserObject()) {
+                    int wid = Activator.getPlottingPreferenceStore().getInt(PlottingConstants.FREE_DRAW_WIDTH);
+                    evt.getRegion().setLineWidth(wid);
+                    evt.getRegion().setUserObject(MaskObject.MaskRegionType.REGION_FROM_MASKING);
+                }
+ 			}
 			@Override
 			public void regionAdded(final RegionEvent evt) {
-				setLastActionRange(false);
+                if (MaskMarker.MASK_REGION == evt.getRegion().getUserObject()) {
+                    int wid = Activator.getPlottingPreferenceStore().getInt(PlottingConstants.FREE_DRAW_WIDTH);
+                	evt.getRegion().setLineWidth(wid);
+                    evt.getRegion().setUserObject(MaskObject.MaskRegionType.REGION_FROM_MASKING);
+                }
+
+                setLastActionRange(false);
 				evt.getRegion().addROIListener(regionBoundsListener);
 				processMask(evt.getRegion());
 				regionTable.refresh();
@@ -281,7 +308,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		label.setText("Create a mask, the mask can be saved and available in other tools.");
 		
 		final CLabel warningMessage = new CLabel(minMaxComp, SWT.WRAP);
-		warningMessage.setText("Changing lower / upper can reset the mask as is not undoable.");
+		warningMessage.setText("Changing lower / upper can reset the mask and is not undoable.");
 		warningMessage.setToolTipText("The reset can occur because the algorithm which processes intensity values,\ndoes not know if the mask pixel should be unmasked or not.\nIt can only take into account intensity.\nTherefore it is best to define intensity masks first,\nbefore the custom masks using pen or region tools." );
 		warningMessage.setImage(Activator.getImage("icons/error.png"));
 		warningMessage.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2,1));
@@ -1175,6 +1202,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		MenuAction        menuAction = (MenuAction)menu.getAction();	
 		IAction ld = null;
 		for (RegionType type : maskingTypes) {
+			
 			final IAction action = menuAction.findAction(type.getId());
 			if (action==null) continue;
 			man.add(action);
@@ -1182,6 +1210,10 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			if (type==RegionType.LINE) {
 				ld = action;
 				man.add(new Separator());
+			}
+			
+			if (action instanceof IRegionAction) {
+				((IRegionAction)action).setUserObject(MaskMarker.MASK_REGION);
 			}
 		}
 		
@@ -1244,7 +1276,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	 */
 	private void processMask(final boolean resetMask, boolean ignoreAuto, final IRegion region) {
 		
-		if (!ignoreAuto && !autoApply.getSelection()) return;
+		if (!ignoreAuto && (autoApply!=null && !autoApply.getSelection())) return;
 		
 		final IImageTrace image = getImageTrace();
 		if (image == null) return;
@@ -1309,17 +1341,6 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 
 		if (loadMask!=null) loadMask.setEnabled(savedMask!=null);
 		
-		Display.getDefault().asyncExec(new Runnable() {
-			public void run() {
-				if (autoApplySavedMask && savedMask!=null) {
-					try {
-					    mergeSavedMask();
-					} catch (Throwable ne) {
-						logger.error("Problem loading saved mask!", ne);
-					}
-				}				
-			}
-		});
 	}
 	
 	@Override
@@ -1532,6 +1553,17 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	@Override
 	public void mouseUp(MouseEvent e) {
 		
+	}
+
+	private enum MaskMarker {
+		MASK_REGION;
+	}
+
+	public void setToolData(Serializable toolData) {
+		if (toolData instanceof BooleanDataset) {
+			maskObject.setMaskDataset((BooleanDataset) toolData, false);
+			processMask(true, false, null);
+		}
 	}
 
 }

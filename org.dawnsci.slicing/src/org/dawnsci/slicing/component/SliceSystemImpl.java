@@ -839,7 +839,7 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		super.setVisible(vis);
 		area.setVisible(vis);
 		area.getParent().layout(new Control[]{area});
-		if (plottingSystem!=null && !vis) plottingSystem.setPlotType(PlotType.XY);
+		//if (plottingSystem!=null && !vis) plottingSystem.setPlotType(PlotType.XY);
 		if (!vis) {
 			sliceJob.cancel();
 			saveSettings();

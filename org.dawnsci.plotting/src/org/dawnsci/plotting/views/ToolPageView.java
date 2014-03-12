@@ -52,8 +52,11 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IPageService;
 import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IPartListener2;
+import org.eclipse.ui.IPerspectiveDescriptor;
+import org.eclipse.ui.IPerspectiveListener;
 import org.eclipse.ui.IURIEditorInput;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewSite;
@@ -113,6 +116,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	 */
 	public static final String TOOLPAGE_1AND2D_VIEW_ID = "org.dawb.workbench.plotting.views.toolPageView.1D_and_2D";
 
+	private static final String FIXED_VIEW_ID = "org.dawb.workbench.plotting.views.toolPageView.fixed";
 	/**
 	 * The pagebook control, or <code>null</code> if not initialized.
 	 */
@@ -620,12 +624,55 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		return book;
 	}
 
+	private IPerspectiveListener perspectiveListener;
 	/*
 	 * (non-Javadoc) Method declared on IViewPart.
 	 */
 	public void init(IViewSite site) throws PartInitException {
 		site.setSelectionProvider(selectionProvider);
 		super.init(site);
+		
+		this.perspectiveListener = new IPerspectiveListener() {
+			
+			@Override
+			public void perspectiveChanged(IWorkbenchPage page, IPerspectiveDescriptor perspective, String changeId) {
+				
+			}
+			
+			@Override
+			public void perspectiveActivated(IWorkbenchPage page, IPerspectiveDescriptor perspective) {
+				checkFixed();
+			}
+		};
+		
+		IPageService service = (IPageService)site.getService(IPageService.class);
+		if (service!=null) service.addPerspectiveListener(perspectiveListener);
+	}
+
+	/**
+	 * If we are a fixed tool which does not exist in this perspective,
+	 * we may need to deactivate. 
+	 */
+	protected void checkFixed() {
+		
+		if (activeRec.tool!=null) {
+			if (isFixedTool()) {
+				
+				getViewSite().getShell().getDisplay().asyncExec(new Runnable() {
+					public void run() {
+						if (activeRec.tool==null) return;
+						IWorkbenchPage page = getActivePage();
+						if (!page.isPartVisible(ToolPageView.this)) { // We deactivate
+							activeRec.tool.deactivate();
+						} else {
+							if (activeRec.tool!=null && !activeRec.tool.isActive()) {
+								activeRec.tool.activate();
+							}
+						}
+					}
+				});
+			}
+		}
 	}
 
 	public String getPartName() {
@@ -1078,6 +1125,10 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		partActivated(part);
 	}
 	
+	protected boolean isFixedTool() {
+		return getViewSite().getId().startsWith(FIXED_VIEW_ID);
+	}
+	
 	protected synchronized PageRec doCreatePage(IWorkbenchPart part, IToolPage tool) {
 				
 		// If static tool is not null we can only show that tool on this page.		
@@ -1089,7 +1140,9 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 			if (getViewSite().getSecondaryId()==null) {
 				systems.add(new SoftReference<IToolPageSystem>(sys));
 				sys.addToolChangeListener(this);
-			} else {
+			} 
+			
+			if (isFixedTool()) {
 				try {
 					tool = sys.createToolPage(getViewSite().getSecondaryId());
 				} catch (Exception e) {
@@ -1180,14 +1233,15 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 			if (activeRec.subActionBars!=null) {
 				activeRec.subActionBars.deactivate();
 			}
+			activeRec.tool.deactivate();
 			activeRec = null;
 		}
 		updatePartInfo(defaultPageRec.tool);
 		showPageRec(defaultPageRec);
 		
-		final ToolPageView view = (ToolPageView)getPage().showView("org.dawb.workbench.plotting.views.toolPageView.fixed",
-																				tool.getToolId(),
-																				IWorkbenchPage.VIEW_ACTIVATE);
+		final ToolPageView view = (ToolPageView)getPage().showView(FIXED_VIEW_ID,
+																   tool.getToolId(),
+															   	   IWorkbenchPage.VIEW_ACTIVATE);
 		view.update(orig);
 		
 		if (orig!=null && view.activeRec!=null && view.activeRec.tool!=null) {
@@ -1326,7 +1380,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		String toolId  = newPage!=null ? newPage.getToolId() : null;
 		if (toolId!=null) {
 			if (toolId.equals(getViewSite().getSecondaryId())) return true;
-		    if (getPage().findViewReference("org.dawb.workbench.plotting.views.toolPageView.fixed", toolId)!=null) {
+		    if (getPage().findViewReference(FIXED_VIEW_ID, toolId)!=null) {
 		    	return false;
 		    }
 		}
@@ -1527,6 +1581,10 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 
 		// Run super.
 		super.dispose();
+		
+		IPageService service = (IPageService)getViewSite().getService(IPageService.class);
+		if (service!=null) service.removePerspectiveListener(perspectiveListener);
+
 
 		isDisposed = true;
 
