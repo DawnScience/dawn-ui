@@ -384,6 +384,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		}
 
 		region.setShowPosition(false);
+		region.setUserRegion(false);
 		region.setVisible(true);
 		region.setMobile(isMobile);
 		region.setUserObject(marker);
