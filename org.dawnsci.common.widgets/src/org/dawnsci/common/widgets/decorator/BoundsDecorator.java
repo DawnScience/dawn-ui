@@ -126,6 +126,7 @@ public class BoundsDecorator extends RegexDecorator {
 	private boolean checkValue(Number value, Number bound, BoundsType type) {
 		if (value == null) return false;
 		if (bound == null) return true;
+		if (Double.isNaN(bound.doubleValue())) return true;
 		
 		switch (type){
 		case MINIMUM:

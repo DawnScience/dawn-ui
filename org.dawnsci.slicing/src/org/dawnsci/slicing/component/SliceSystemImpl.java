@@ -189,13 +189,7 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		openWindowing.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				if (plottingSystem!=null) {
-					try {
-						final IToolPageSystem system = (IToolPageSystem)plottingSystem.getAdapter(IToolPageSystem.class);
-						system.setToolVisible("org.dawb.workbench.plotting.tools.windowTool", ToolPageRole.ROLE_3D, 
-								                      "org.dawb.workbench.plotting.views.toolPageView.3D");
-					} catch (Exception e1) {
-						logger.error("Cannot open window tool!", e1);
-					}
+					showWindowTool();
 				}
 			}
 		});
@@ -258,6 +252,17 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		return area;
 	}
 	
+	protected void showWindowTool() {
+		try {
+			final IToolPageSystem system = (IToolPageSystem)plottingSystem.getAdapter(IToolPageSystem.class);
+			system.setToolVisible("org.dawb.workbench.plotting.tools.windowTool", ToolPageRole.ROLE_3D, 
+					                      "org.dawb.workbench.plotting.views.toolPageView.3D");
+		} catch (Exception e1) {
+			logger.error("Cannot open window tool!", e1);
+		}
+	}
+
+
 	@Override
 	public void setSliceTypeInfo(String label, ImageDescriptor icon) {
 		if (label==null && icon==null) {
